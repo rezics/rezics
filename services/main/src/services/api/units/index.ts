@@ -1,11 +1,12 @@
 import { StatusCodes } from "http-status-codes";
-import Elysia, { t } from "elysia";
+import Elysia, { t, type Static } from "elysia";
 
 import session, { resolveIdentity } from "../../auth/session";
 import { contentRatingPolicyFromAllowlist } from "../../content-rating/policy";
 import { resolveRecommendationViewer } from "../../recommendations/context";
 import { decodeCursor, encodeCursor } from "../../pagination";
 import { listUnitStatusEvents } from "../../units/status";
+import { getPublicUnitSeoProjection } from "../../units/seo";
 import {
 	createUnit,
 	deleteUnitContentLanguage,
@@ -44,6 +45,9 @@ import {
 	ListUnitRealmPublicationsQuery,
 	UnitRealmPublicationListResponse,
 	UnitRealmPublicationParams,
+	PublicUnitSeoParams,
+	PublicUnitSeoQuery,
+	PublicUnitSeoResponse,
 } from "./schema";
 import {
 	toApiErrorResponse,
@@ -151,6 +155,29 @@ const UnitVariantConflictResponse = toApiErrorResponse([
 ]);
 export default new Elysia({ prefix: "/units" })
 	.use(session)
+	.get(
+		"/by-id/:unitId/seo",
+		async ({ params, query }) => {
+			const projection: Static<typeof PublicUnitSeoResponse> =
+				await getPublicUnitSeoProjection(params.unitId, query.localizationLanguages);
+			return projection;
+		},
+		{
+			params: PublicUnitSeoParams,
+			query: PublicUnitSeoQuery,
+			response: {
+				[StatusCodes.OK]: PublicUnitSeoResponse,
+				[StatusCodes.NOT_FOUND]: UnitReadFailureResponse,
+			},
+			detail: {
+				operationId: "getPublicUnitSeoProjection",
+				summary: "Get a sanitized public Unit SEO projection",
+				description:
+					"Returns bounded metadata for one publicly visitable Unit. Adult-rated Units return only a noindex decision and never expose authored titles, summaries, descriptions, or images.",
+				tags: ["Units"],
+			},
+		},
+	)
 	.post(
 		"/presentations",
 		async ({ body, request }) => {

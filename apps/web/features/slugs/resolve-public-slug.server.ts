@@ -110,14 +110,14 @@ export interface ZonePageAddress {
 	readonly slug: string | null;
 }
 
-export async function getZonePageAddressById(
+async function getZonePageAddressByIdUncached(
 	zoneId: string,
 	pageId: string,
 ): Promise<ZonePageAddress | null> {
 	if (!UuidPattern.test(zoneId) || !UuidPattern.test(pageId)) return null;
 	const response = await fetch(
 		new URL(
-			`/api/v1/zones/${encodeURIComponent(zoneId)}/pages/${encodeURIComponent(pageId)}`,
+			`/api/v1/zones/${encodeURIComponent(zoneId)}/page-addresses/by-id/${encodeURIComponent(pageId)}`,
 			apiOrigin(),
 		),
 		{ cache: "no-store" },
@@ -129,6 +129,7 @@ export async function getZonePageAddressById(
 		!isObject(value) ||
 		value.id !== pageId ||
 		value.zoneId !== zoneId ||
+		value.redirected !== false ||
 		!(
 			value.slug === null ||
 			(typeof value.slug === "string" && isAvailableZonePageSlug(value.slug))
@@ -138,7 +139,47 @@ export async function getZonePageAddressById(
 	return { id: pageId, zoneId, slug: value.slug };
 }
 
-export async function getPublicSlugHrefByUnitId(
+export const getZonePageAddressById = cache(getZonePageAddressByIdUncached);
+
+export interface ResolvedPublicZonePageSlug {
+	readonly id: string;
+	readonly slug: string;
+	readonly redirected: boolean;
+}
+
+async function resolvePublicZonePageSlugUncached(
+	zoneId: string,
+	slug: string,
+): Promise<ResolvedPublicZonePageSlug | null> {
+	if (!UuidPattern.test(zoneId) || !isAvailableZonePageSlug(slug)) return null;
+	const url = new URL(
+		`/api/v1/zones/${encodeURIComponent(zoneId)}/page-addresses/by-slug/${encodeURIComponent(slug)}`,
+		apiOrigin(),
+	);
+	const response = await fetch(url, { cache: "no-store" });
+	if (response.status === 404) return null;
+	if (!response.ok) throw new Error(`Zone Page slug API failed with status ${response.status}`);
+	const value = await readJson(response);
+	if (
+		!isObject(value) ||
+		typeof value.id !== "string" ||
+		!UuidPattern.test(value.id) ||
+		value.zoneId !== zoneId ||
+		typeof value.redirected !== "boolean" ||
+		typeof value.slug !== "string" ||
+		!isAvailableZonePageSlug(value.slug)
+	)
+		throw new Error("Zone Page slug API returned an invalid Unit identity");
+	return {
+		id: value.id,
+		slug: value.slug,
+		redirected: value.redirected || value.slug !== slug,
+	};
+}
+
+export const resolvePublicZonePageSlug = cache(resolvePublicZonePageSlugUncached);
+
+async function getPublicSlugHrefByUnitIdUncached(
 	kind: PublicSlugTargetKind,
 	unitId: string,
 ): Promise<string | null> {
@@ -153,6 +194,8 @@ export async function getPublicSlugHrefByUnitId(
 	if (!canonicalHref) return null;
 	return canonicalHref;
 }
+
+export const getPublicSlugHrefByUnitId = cache(getPublicSlugHrefByUnitIdUncached);
 
 export function isUuid(value: string): boolean {
 	return UuidPattern.test(value);

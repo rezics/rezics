@@ -13,6 +13,7 @@ import {
 	DateTime,
 	FractionalPosition,
 	ContentLanguage,
+	ContentRating,
 	LifecycleInput,
 	LocalizationLanguagePriority,
 	LocalizationLanguageQuery,
@@ -21,6 +22,7 @@ import {
 	WorkReleaseStatus,
 } from "../schema";
 import { InitialTagApplicationLimit } from "../../tags/initial-applications";
+import { PublicUnitSeoKinds } from "../../units/seo-contract";
 
 export const VariantUnitType = t.Union([
 	t.Literal("book"),
@@ -275,6 +277,79 @@ export const UnitDetailQuery = t.Object(LocalizationLanguageQuery, {
 	additionalProperties: false,
 });
 export type UnitDetailQuery = Static<typeof UnitDetailQuery>;
+
+export const PublicUnitSeoParams = t.Object({ unitId: Uuid });
+export const PublicUnitSeoQuery = UnitDetailQuery;
+const PublicUnitSeoContextResponse = t.Union([
+	t.Object(
+		{ kind: t.Literal("entity"), entityKind: t.String({ minLength: 1 }) },
+		{ additionalProperties: false },
+	),
+	t.Object(
+		{
+			kind: t.Literal("zone_page"),
+			zoneId: Uuid,
+			zoneTitle: t.Nullable(t.String()),
+		},
+		{ additionalProperties: false },
+	),
+	t.Object(
+		{ kind: t.Literal("post"), attributionTitle: t.Nullable(t.String()) },
+		{ additionalProperties: false },
+	),
+]);
+const PublicUnitSeoPresentationResponse = t.Object(
+	{
+		language: ContentLanguage,
+		title: t.String({ minLength: 1, maxLength: 500 }),
+		description: t.Nullable(t.String({ maxLength: 600 })),
+		image: t.Nullable(t.Object({ id: Uuid, url: t.String() })),
+		context: t.Nullable(PublicUnitSeoContextResponse),
+	},
+	{ additionalProperties: false },
+);
+const PublicUnitSeoIdentityResponse = {
+	id: Uuid,
+	kind: t.UnionEnum(PublicUnitSeoKinds),
+	contentRating: ContentRating,
+	publishedAt: t.Nullable(DateTime),
+	updatedAt: DateTime,
+} as const;
+export const PublicUnitSeoResponse = t.Union([
+	t.Object(
+		{
+			...PublicUnitSeoIdentityResponse,
+			indexing: t.Object({ state: t.Literal("index") }, { additionalProperties: false }),
+			presentation: PublicUnitSeoPresentationResponse,
+		},
+		{ additionalProperties: false },
+	),
+	t.Object(
+		{
+			...PublicUnitSeoIdentityResponse,
+			indexing: t.Object(
+				{ state: t.Literal("noindex"), reason: t.Literal("unlisted") },
+				{ additionalProperties: false },
+			),
+			presentation: PublicUnitSeoPresentationResponse,
+		},
+		{ additionalProperties: false },
+	),
+	t.Object(
+		{
+			...PublicUnitSeoIdentityResponse,
+			indexing: t.Object(
+				{
+					state: t.Literal("noindex"),
+					reason: t.Union([t.Literal("adult"), t.Literal("incomplete")]),
+				},
+				{ additionalProperties: false },
+			),
+			presentation: t.Null(),
+		},
+		{ additionalProperties: false },
+	),
+]);
 
 export const UnitUnitIdParams = t.Object({ type: ManageableUnitType, unitId: Uuid });
 export type UnitUnitIdParams = Static<typeof UnitUnitIdParams>;

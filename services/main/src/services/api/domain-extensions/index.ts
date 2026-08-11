@@ -81,10 +81,12 @@ import { getPublicCanonicalUnitSlugAddress } from "../../units/slug-address";
 import { replaceZoneSlugAddress } from "../../units/slug-address";
 import {
 	deleteZonePagePlacement,
+	getZonePageAddressById,
 	getZonePageStructureProjection,
 	getZonePageUnitById,
 	getZonePageUnitBySlug,
 	listZonePageUnits,
+	resolveZonePageAddressBySlug,
 	upsertZonePagePlacement,
 	upsertZonePageUnit,
 	type ZonePageProjection,
@@ -119,12 +121,14 @@ import {
 	ZoneNavigationReplaceBody,
 	ZoneNavigationRevisionBody,
 	ZoneDetailQuery,
+	ZonePageAddressResponse,
 	ZonePageBody,
 	ZonePageIdParams,
 	ZonePageListResponse,
 	ZonePagePlacementBody,
 	ZonePagePlacementDeleteBody,
 	ZonePageResponse,
+	ZonePageSlugParams,
 	ZoneParams,
 	ZoneResponse,
 	ZoneRenderQuery,
@@ -946,6 +950,70 @@ export default new Elysia()
 						[StatusCodes.NOT_FOUND]: UnitMutationNotFoundResponse,
 					},
 					detail: { summary: "Update Zone configuration", tags: ["Zones"] },
+				},
+			)
+			.get(
+				"/:zoneId/page-addresses/by-id/:pageId",
+				async ({ params, request }) => {
+					const authorization = (await resolveIdentity(request, "unit:read"))
+						.authorization;
+					await authorization.unit.ensureCanRead(
+						params.zoneId,
+						() => new UnitNotFound("Zone"),
+					);
+					await getZone(params.zoneId);
+					const address = await database.transaction((tx) =>
+						getZonePageAddressById(tx, params.zoneId, params.pageId),
+					);
+					if (!address) throw new ZonePageNotFound();
+					return address;
+				},
+				{
+					params: ZonePageIdParams,
+					response: {
+						[StatusCodes.OK]: ZonePageAddressResponse,
+						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
+							"UnitNotFound",
+							"ZonePageNotFound",
+						]),
+					},
+					detail: {
+						operationId: "getZonePageAddressById",
+						summary: "Get one bounded Zone Page address projection by Unit ID",
+						tags: ["Zones"],
+					},
+				},
+			)
+			.get(
+				"/:zoneId/page-addresses/by-slug/:slug",
+				async ({ params, request }) => {
+					const authorization = (await resolveIdentity(request, "unit:read"))
+						.authorization;
+					await authorization.unit.ensureCanRead(
+						params.zoneId,
+						() => new UnitNotFound("Zone"),
+					);
+					await getZone(params.zoneId);
+					const address = await database.transaction((tx) =>
+						resolveZonePageAddressBySlug(tx, params.zoneId, params.slug),
+					);
+					if (!address) throw new ZonePageNotFound();
+					return address;
+				},
+				{
+					params: ZonePageSlugParams,
+					response: {
+						[StatusCodes.OK]: ZonePageAddressResponse,
+						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
+							"UnitNotFound",
+							"ZonePageNotFound",
+						]),
+					},
+					detail: {
+						operationId: "resolveZonePageAddressBySlug",
+						summary: "Resolve one bounded Zone Page address by scoped slug",
+						tags: ["Zones"],
+					},
 				},
 			)
 			.get(

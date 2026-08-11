@@ -15,12 +15,10 @@ import { getTranslation } from "@/i18n/server";
 import { AppProviders } from "@/lib/app-providers";
 import { createQueryClient } from "@/lib/query-client";
 import { appTheme, appThemeCss } from "@/lib/theme";
+import { getFrontendOrigin } from "@/lib/frontend-origin.server";
 
 import "@/styles/global.css";
 
-const frontendOrigin =
-	process.env.FRONTEND_URL ??
-	process.env.BETTER_AUTH_TRUSTED_ORIGINS?.split(",").find((origin) => origin.trim());
 const notoSansTcStylesheet =
 	"https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700;800;900&display=swap";
 
@@ -54,7 +52,7 @@ function turnstileSiteKey(): string {
 export async function generateMetadata(): Promise<Metadata> {
 	const { t } = await getTranslation(["brand"]);
 	return {
-		metadataBase: new URL(frontendOrigin?.trim() || "http://localhost:3000"),
+		metadataBase: getFrontendOrigin(),
 		title: t.brand.name,
 		description: t.brand.description,
 		applicationName: t.brand.name,

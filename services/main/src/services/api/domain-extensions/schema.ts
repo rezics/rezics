@@ -20,7 +20,7 @@ import {
 	Uuid,
 } from "../schema";
 import { AvatarResponse, ImageAssetResponse } from "../schema/response";
-import { NullablePublicSlugAddressResponse } from "../slug-addresses/schema";
+import { NullablePublicSlugAddressResponse, SlugLabelInput } from "../slug-addresses/schema";
 
 // Exact models are registered by the Zone route plugin. References keep one
 // OpenAPI component and prevent recursive Block static types from expanding
@@ -111,6 +111,16 @@ export const ZoneRenderQuery = t.Object(
 	{ additionalProperties: false },
 );
 export const ZonePageIdParams = t.Object({ zoneId: Uuid, pageId: Uuid });
+export const ZonePageSlugParams = t.Object({ zoneId: Uuid, slug: SlugLabelInput });
+export const ZonePageAddressResponse = t.Object(
+	{
+		id: Uuid,
+		zoneId: Uuid,
+		slug: t.Nullable(SlugLabelInput),
+		redirected: t.Boolean(),
+	},
+	{ additionalProperties: false },
+);
 export const ZoneNavigationParams = t.Object({
 	zoneId: Uuid,
 	navigationId: Uuid,

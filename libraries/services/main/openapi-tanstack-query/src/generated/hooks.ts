@@ -608,6 +608,16 @@ import type {
 	GetZoneRenderProjectionStatus404,
 	GetZoneRenderProjectionStatus422,
 	GetZoneRenderProjectionStatus500,
+	GetZonePageAddressByIdOptions,
+	GetZonePageAddressByIdStatus200,
+	GetZonePageAddressByIdStatus404,
+	GetZonePageAddressByIdStatus422,
+	GetZonePageAddressByIdStatus500,
+	ResolveZonePageAddressBySlugOptions,
+	ResolveZonePageAddressBySlugStatus200,
+	ResolveZonePageAddressBySlugStatus404,
+	ResolveZonePageAddressBySlugStatus422,
+	ResolveZonePageAddressBySlugStatus500,
 	GetApiZonesByZoneIdPagesOptions,
 	GetApiZonesByZoneIdPagesStatus200,
 	GetApiZonesByZoneIdPagesStatus404,
@@ -1120,6 +1130,11 @@ import type {
 	ReleaseSlugRedirectWithPlatformAccessStatus404,
 	ReleaseSlugRedirectWithPlatformAccessStatus422,
 	ReleaseSlugRedirectWithPlatformAccessStatus500,
+	GetPublicUnitSeoProjectionOptions,
+	GetPublicUnitSeoProjectionStatus200,
+	GetPublicUnitSeoProjectionStatus404,
+	GetPublicUnitSeoProjectionStatus422,
+	GetPublicUnitSeoProjectionStatus500,
 	PostApiUnitsPresentationsOptions,
 	PostApiUnitsPresentationsStatus200,
 	PostApiUnitsPresentationsStatus400,
@@ -2609,6 +2624,8 @@ import {
 	getApiZonesByZoneId,
 	patchApiZonesByZoneId,
 	getZoneRenderProjection,
+	getZonePageAddressById,
+	resolveZonePageAddressBySlug,
 	getApiZonesByZoneIdPages,
 	postApiZonesByZoneIdPages,
 	getApiZonesByZoneIdPagesByPageId,
@@ -2683,6 +2700,7 @@ import {
 	replaceUnitSlugAddressWithPlatformAccess,
 	createSlugNamespaceWithPlatformAccess,
 	releaseSlugRedirectWithPlatformAccess,
+	getPublicUnitSeoProjection,
 	postApiUnitsPresentations,
 	getApiUnitsByIdByUnitIdRealmPublications,
 	postApiUnitsByIdByUnitIdRealmPublicationsByRealmId,
@@ -12228,6 +12246,193 @@ export function useGetZoneRenderProjection<
 	return queryResult;
 }
 
+export const getZonePageAddressByIdQueryKey = ({
+	path,
+}: Omit<GetZonePageAddressByIdOptions, "headers">) =>
+	[{ url: "/api/v1/zones/:zoneId/page-addresses/by-id/:pageId", params: path }] as const;
+
+type GetZonePageAddressByIdQueryKey = ReturnType<typeof getZonePageAddressByIdQueryKey>;
+
+export function getZonePageAddressByIdQueryOptions(
+	{ path }: GetZonePageAddressByIdOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = getZonePageAddressByIdQueryKey({ path });
+	return queryOptions<
+		GetZonePageAddressByIdStatus200,
+		ResponseErrorConfig<
+			| GetZonePageAddressByIdStatus404
+			| GetZonePageAddressByIdStatus422
+			| GetZonePageAddressByIdStatus500
+		>,
+		GetZonePageAddressByIdStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			const { data } = await getZonePageAddressById({
+				...config,
+				path,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Get one bounded Zone Page address projection by Unit ID
+ * {@link /api/v1/zones/:zoneId/page-addresses/by-id/:pageId}
+ */
+export function useGetZonePageAddressById<
+	TData = GetZonePageAddressByIdStatus200,
+	TQueryData = GetZonePageAddressByIdStatus200,
+	TQueryKey extends QueryKey = GetZonePageAddressByIdQueryKey,
+>(
+	{
+		path,
+	}: {
+		path: GetZonePageAddressByIdOptions["path"] | (() => GetZonePageAddressByIdOptions["path"]);
+	},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				GetZonePageAddressByIdStatus200,
+				ResponseErrorConfig<
+					| GetZonePageAddressByIdStatus404
+					| GetZonePageAddressByIdStatus422
+					| GetZonePageAddressByIdStatus500
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = { path: typeof path === "function" ? path() : path };
+	const queryKey = resolvedOptions?.queryKey ?? getZonePageAddressByIdQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...getZonePageAddressByIdQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			| GetZonePageAddressByIdStatus404
+			| GetZonePageAddressByIdStatus422
+			| GetZonePageAddressByIdStatus500
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const resolveZonePageAddressBySlugQueryKey = ({
+	path,
+}: Omit<ResolveZonePageAddressBySlugOptions, "headers">) =>
+	[{ url: "/api/v1/zones/:zoneId/page-addresses/by-slug/:slug", params: path }] as const;
+
+type ResolveZonePageAddressBySlugQueryKey = ReturnType<typeof resolveZonePageAddressBySlugQueryKey>;
+
+export function resolveZonePageAddressBySlugQueryOptions(
+	{ path }: ResolveZonePageAddressBySlugOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = resolveZonePageAddressBySlugQueryKey({ path });
+	return queryOptions<
+		ResolveZonePageAddressBySlugStatus200,
+		ResponseErrorConfig<
+			| ResolveZonePageAddressBySlugStatus404
+			| ResolveZonePageAddressBySlugStatus422
+			| ResolveZonePageAddressBySlugStatus500
+		>,
+		ResolveZonePageAddressBySlugStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			const { data } = await resolveZonePageAddressBySlug({
+				...config,
+				path,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Resolve one bounded Zone Page address by scoped slug
+ * {@link /api/v1/zones/:zoneId/page-addresses/by-slug/:slug}
+ */
+export function useResolveZonePageAddressBySlug<
+	TData = ResolveZonePageAddressBySlugStatus200,
+	TQueryData = ResolveZonePageAddressBySlugStatus200,
+	TQueryKey extends QueryKey = ResolveZonePageAddressBySlugQueryKey,
+>(
+	{
+		path,
+	}: {
+		path:
+			| ResolveZonePageAddressBySlugOptions["path"]
+			| (() => ResolveZonePageAddressBySlugOptions["path"]);
+	},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				ResolveZonePageAddressBySlugStatus200,
+				ResponseErrorConfig<
+					| ResolveZonePageAddressBySlugStatus404
+					| ResolveZonePageAddressBySlugStatus422
+					| ResolveZonePageAddressBySlugStatus500
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = { path: typeof path === "function" ? path() : path };
+	const queryKey =
+		resolvedOptions?.queryKey ?? resolveZonePageAddressBySlugQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...resolveZonePageAddressBySlugQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			| ResolveZonePageAddressBySlugStatus404
+			| ResolveZonePageAddressBySlugStatus422
+			| ResolveZonePageAddressBySlugStatus500
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
 export const getApiZonesByZoneIdPagesQueryKey = ({
 	path,
 }: Omit<GetApiZonesByZoneIdPagesOptions, "headers">) =>
@@ -19995,6 +20200,111 @@ export function useReleaseSlugRedirectWithPlatformAccess<TContext>(
 		ReleaseSlugRedirectWithPlatformAccessOptions,
 		TContext
 	>;
+}
+
+export const getPublicUnitSeoProjectionQueryKey = ({
+	path,
+	query,
+}: Omit<GetPublicUnitSeoProjectionOptions, "headers">) =>
+	[{ url: "/api/v1/units/by-id/:unitId/seo", params: path }, ...(query ? [query] : [])] as const;
+
+type GetPublicUnitSeoProjectionQueryKey = ReturnType<typeof getPublicUnitSeoProjectionQueryKey>;
+
+export function getPublicUnitSeoProjectionQueryOptions(
+	{ path, query }: GetPublicUnitSeoProjectionOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = getPublicUnitSeoProjectionQueryKey({ path, query });
+	return queryOptions<
+		GetPublicUnitSeoProjectionStatus200,
+		ResponseErrorConfig<
+			| GetPublicUnitSeoProjectionStatus404
+			| GetPublicUnitSeoProjectionStatus422
+			| GetPublicUnitSeoProjectionStatus500
+		>,
+		GetPublicUnitSeoProjectionStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			const { data } = await getPublicUnitSeoProjection({
+				...config,
+				path,
+				query,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @description Returns bounded metadata for one publicly visitable Unit. Adult-rated Units return only a noindex decision and never expose authored titles, summaries, descriptions, or images.
+ * @summary Get a sanitized public Unit SEO projection
+ * {@link /api/v1/units/by-id/:unitId/seo}
+ */
+export function useGetPublicUnitSeoProjection<
+	TData = GetPublicUnitSeoProjectionStatus200,
+	TQueryData = GetPublicUnitSeoProjectionStatus200,
+	TQueryKey extends QueryKey = GetPublicUnitSeoProjectionQueryKey,
+>(
+	{
+		path,
+		query,
+	}: {
+		path:
+			| GetPublicUnitSeoProjectionOptions["path"]
+			| (() => GetPublicUnitSeoProjectionOptions["path"]);
+		query?:
+			| GetPublicUnitSeoProjectionOptions["query"]
+			| (() => GetPublicUnitSeoProjectionOptions["query"]);
+	},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				GetPublicUnitSeoProjectionStatus200,
+				ResponseErrorConfig<
+					| GetPublicUnitSeoProjectionStatus404
+					| GetPublicUnitSeoProjectionStatus422
+					| GetPublicUnitSeoProjectionStatus500
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = {
+		path: typeof path === "function" ? path() : path,
+		query: typeof query === "function" ? query() : query,
+	};
+	const queryKey =
+		resolvedOptions?.queryKey ?? getPublicUnitSeoProjectionQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...getPublicUnitSeoProjectionQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			| GetPublicUnitSeoProjectionStatus404
+			| GetPublicUnitSeoProjectionStatus422
+			| GetPublicUnitSeoProjectionStatus500
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
 }
 
 export const postApiUnitsPresentationsMutationKey = () =>

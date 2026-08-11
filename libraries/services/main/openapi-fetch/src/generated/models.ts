@@ -40102,6 +40102,239 @@ export type GetZoneRenderProjectionResponse =
 /**
  * @type object
  */
+export type GetZonePageAddressByIdPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	zoneId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	pageId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetZonePageAddressByIdStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	id: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	zoneId: string;
+	slug: (string | null) | null;
+	/**
+	 * @type boolean
+	 */
+	redirected: boolean;
+};
+
+export const GetZonePageAddressByIdStatus404ErrorCodeEnum = {
+	UnitNotFound: "UnitNotFound",
+	ZonePageNotFound: "ZonePageNotFound",
+} as const;
+
+export type GetZonePageAddressByIdStatus404ErrorCodeEnum =
+	(typeof GetZonePageAddressByIdStatus404ErrorCodeEnum)[keyof typeof GetZonePageAddressByIdStatus404ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type GetZonePageAddressByIdStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: GetZonePageAddressByIdStatus404ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetZonePageAddressByIdStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type GetZonePageAddressByIdStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type GetZonePageAddressByIdOptions = {
+	body?: never;
+	path: GetZonePageAddressByIdPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type GetZonePageAddressByIdResponses = {
+	"200": GetZonePageAddressByIdStatus200;
+	"404": GetZonePageAddressByIdStatus404;
+	"422": GetZonePageAddressByIdStatus422;
+	"500": GetZonePageAddressByIdStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type GetZonePageAddressByIdResponse =
+	| GetZonePageAddressByIdStatus200
+	| GetZonePageAddressByIdStatus404
+	| GetZonePageAddressByIdStatus422
+	| GetZonePageAddressByIdStatus500;
+
+/**
+ * @type object
+ */
+export type ResolveZonePageAddressBySlugPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	zoneId: string;
+	/**
+	 * @minLength 1
+	 * @maxLength 63
+	 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+	 * @type string
+	 */
+	slug: string;
+};
+
+/**
+ * @type object
+ */
+export type ResolveZonePageAddressBySlugStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	id: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	zoneId: string;
+	slug: (string | null) | null;
+	/**
+	 * @type boolean
+	 */
+	redirected: boolean;
+};
+
+export const ResolveZonePageAddressBySlugStatus404ErrorCodeEnum = {
+	UnitNotFound: "UnitNotFound",
+	ZonePageNotFound: "ZonePageNotFound",
+} as const;
+
+export type ResolveZonePageAddressBySlugStatus404ErrorCodeEnum =
+	(typeof ResolveZonePageAddressBySlugStatus404ErrorCodeEnum)[keyof typeof ResolveZonePageAddressBySlugStatus404ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type ResolveZonePageAddressBySlugStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: ResolveZonePageAddressBySlugStatus404ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type ResolveZonePageAddressBySlugStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type ResolveZonePageAddressBySlugStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type ResolveZonePageAddressBySlugOptions = {
+	body?: never;
+	path: ResolveZonePageAddressBySlugPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type ResolveZonePageAddressBySlugResponses = {
+	"200": ResolveZonePageAddressBySlugStatus200;
+	"404": ResolveZonePageAddressBySlugStatus404;
+	"422": ResolveZonePageAddressBySlugStatus422;
+	"500": ResolveZonePageAddressBySlugStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type ResolveZonePageAddressBySlugResponse =
+	| ResolveZonePageAddressBySlugStatus200
+	| ResolveZonePageAddressBySlugStatus404
+	| ResolveZonePageAddressBySlugStatus422
+	| ResolveZonePageAddressBySlugStatus500;
+
+/**
+ * @type object
+ */
 export type GetApiZonesByZoneIdPagesPath = {
 	/**
 	 * @description
@@ -59242,6 +59475,399 @@ export type ReleaseSlugRedirectWithPlatformAccessResponse =
 	| ReleaseSlugRedirectWithPlatformAccessStatus404
 	| ReleaseSlugRedirectWithPlatformAccessStatus422
 	| ReleaseSlugRedirectWithPlatformAccessStatus500;
+
+/**
+ * @type object
+ */
+export type GetPublicUnitSeoProjectionPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+};
+
+export const GetPublicUnitSeoProjectionLocalizationLanguagesEnum = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetPublicUnitSeoProjectionLocalizationLanguagesEnum =
+	(typeof GetPublicUnitSeoProjectionLocalizationLanguagesEnum)[keyof typeof GetPublicUnitSeoProjectionLocalizationLanguagesEnum];
+
+/**
+ * @type object
+ */
+export type GetPublicUnitSeoProjectionQuery = {
+	/**
+	 * @type array | undefined
+	 */
+	localizationLanguages?: GetPublicUnitSeoProjectionLocalizationLanguagesEnum[];
+};
+
+export const GetPublicUnitSeoProjectionStatus200KindEnum = {
+	profile: "profile",
+	book: "book",
+	software: "software",
+	media: "media",
+	video: "video",
+	audio: "audio",
+	entity: "entity",
+	tag: "tag",
+	structure: "structure",
+	series: "series",
+	zone: "zone",
+	zone_page: "zone_page",
+	collection: "collection",
+	post: "post",
+	poll: "poll",
+	realm: "realm",
+} as const;
+
+export type GetPublicUnitSeoProjectionStatus200KindEnum =
+	(typeof GetPublicUnitSeoProjectionStatus200KindEnum)[keyof typeof GetPublicUnitSeoProjectionStatus200KindEnum];
+
+export const GetPublicUnitSeoProjectionStatus200ContentRatingEnum = {
+	general: "general",
+	r15: "r15",
+	r18: "r18",
+	r18g: "r18g",
+} as const;
+
+export type GetPublicUnitSeoProjectionStatus200ContentRatingEnum =
+	(typeof GetPublicUnitSeoProjectionStatus200ContentRatingEnum)[keyof typeof GetPublicUnitSeoProjectionStatus200ContentRatingEnum];
+
+export const GetPublicUnitSeoProjectionStatus200PresentationLanguageEnum = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetPublicUnitSeoProjectionStatus200PresentationLanguageEnum =
+	(typeof GetPublicUnitSeoProjectionStatus200PresentationLanguageEnum)[keyof typeof GetPublicUnitSeoProjectionStatus200PresentationLanguageEnum];
+
+export type GetPublicUnitSeoProjectionStatus200 =
+	| {
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			id: string;
+			/**
+			 * @default 'profile'
+			 * @type string
+			 */
+			kind: GetPublicUnitSeoProjectionStatus200KindEnum;
+			/**
+			 * @type string
+			 */
+			contentRating: GetPublicUnitSeoProjectionStatus200ContentRatingEnum;
+			publishedAt: (string | null) | null;
+			/**
+			 * @description
+			 * Format: `date-time`
+			 * @type string
+			 */
+			updatedAt: string;
+			/**
+			 * @type object
+			 */
+			indexing: {
+				/**
+				 * @type string
+				 */
+				state: "index";
+			};
+			/**
+			 * @type object
+			 */
+			presentation: {
+				/**
+				 * @type string
+				 */
+				language: GetPublicUnitSeoProjectionStatus200PresentationLanguageEnum;
+				/**
+				 * @minLength 1
+				 * @maxLength 500
+				 * @type string
+				 */
+				title: string;
+				description: (string | null) | null;
+				image:
+					| ({
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							id: string;
+							/**
+							 * @type string
+							 */
+							url: string;
+					  } | null)
+					| null;
+				context:
+					| (
+							| (
+									| {
+											/**
+											 * @type string
+											 */
+											kind: "entity";
+											/**
+											 * @minLength 1
+											 * @type string
+											 */
+											entityKind: string;
+									  }
+									| {
+											/**
+											 * @type string
+											 */
+											kind: "zone_page";
+											/**
+											 * @description
+											 * Format: `uuid`
+											 * @type string
+											 */
+											zoneId: string;
+											zoneTitle: (string | null) | null;
+									  }
+									| {
+											/**
+											 * @type string
+											 */
+											kind: "post";
+											attributionTitle: (string | null) | null;
+									  }
+							  )
+							| null
+					  )
+					| null;
+			};
+	  }
+	| {
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			id: string;
+			/**
+			 * @default 'profile'
+			 * @type string
+			 */
+			kind: GetPublicUnitSeoProjectionStatus200KindEnum;
+			/**
+			 * @type string
+			 */
+			contentRating: GetPublicUnitSeoProjectionStatus200ContentRatingEnum;
+			publishedAt: (string | null) | null;
+			/**
+			 * @description
+			 * Format: `date-time`
+			 * @type string
+			 */
+			updatedAt: string;
+			/**
+			 * @type object
+			 */
+			indexing: {
+				/**
+				 * @type string
+				 */
+				state: "noindex";
+				/**
+				 * @type string
+				 */
+				reason: "unlisted";
+			};
+			/**
+			 * @type object
+			 */
+			presentation: {
+				/**
+				 * @type string
+				 */
+				language: GetPublicUnitSeoProjectionStatus200PresentationLanguageEnum;
+				/**
+				 * @minLength 1
+				 * @maxLength 500
+				 * @type string
+				 */
+				title: string;
+				description: (string | null) | null;
+				image:
+					| ({
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							id: string;
+							/**
+							 * @type string
+							 */
+							url: string;
+					  } | null)
+					| null;
+				context:
+					| (
+							| (
+									| {
+											/**
+											 * @type string
+											 */
+											kind: "entity";
+											/**
+											 * @minLength 1
+											 * @type string
+											 */
+											entityKind: string;
+									  }
+									| {
+											/**
+											 * @type string
+											 */
+											kind: "zone_page";
+											/**
+											 * @description
+											 * Format: `uuid`
+											 * @type string
+											 */
+											zoneId: string;
+											zoneTitle: (string | null) | null;
+									  }
+									| {
+											/**
+											 * @type string
+											 */
+											kind: "post";
+											attributionTitle: (string | null) | null;
+									  }
+							  )
+							| null
+					  )
+					| null;
+			};
+	  }
+	| {
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			id: string;
+			/**
+			 * @default 'profile'
+			 * @type string
+			 */
+			kind: GetPublicUnitSeoProjectionStatus200KindEnum;
+			/**
+			 * @type string
+			 */
+			contentRating: GetPublicUnitSeoProjectionStatus200ContentRatingEnum;
+			publishedAt: (string | null) | null;
+			/**
+			 * @description
+			 * Format: `date-time`
+			 * @type string
+			 */
+			updatedAt: string;
+			/**
+			 * @type object
+			 */
+			indexing: {
+				/**
+				 * @type string
+				 */
+				state: "noindex";
+				reason: "adult" | "incomplete";
+			};
+			/**
+			 * @type null
+			 */
+			presentation: null;
+	  };
+
+/**
+ * @type object
+ */
+export type GetPublicUnitSeoProjectionStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: "UnitNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetPublicUnitSeoProjectionStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type GetPublicUnitSeoProjectionStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type GetPublicUnitSeoProjectionOptions = {
+	body?: never;
+	path: GetPublicUnitSeoProjectionPath;
+	query?: GetPublicUnitSeoProjectionQuery;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type GetPublicUnitSeoProjectionResponses = {
+	"200": GetPublicUnitSeoProjectionStatus200;
+	"404": GetPublicUnitSeoProjectionStatus404;
+	"422": GetPublicUnitSeoProjectionStatus422;
+	"500": GetPublicUnitSeoProjectionStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type GetPublicUnitSeoProjectionResponse =
+	| GetPublicUnitSeoProjectionStatus200
+	| GetPublicUnitSeoProjectionStatus404
+	| GetPublicUnitSeoProjectionStatus422
+	| GetPublicUnitSeoProjectionStatus500;
 
 export const PostApiUnitsPresentationsStatus200ItemsKindEnum = {
 	slug_namespace: "slug_namespace",

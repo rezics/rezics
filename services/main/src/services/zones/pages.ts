@@ -125,6 +125,80 @@ export interface ZonePageProjection {
 	readonly updatedAt: Date;
 }
 
+export interface ZonePageAddressProjection {
+	readonly id: string;
+	readonly zoneId: string;
+	readonly slug: string | null;
+	readonly redirected: boolean;
+}
+
+/**
+ * Loads one Page address through the Zone Page primary key and optional canonical-target index.
+ * The number of rows examined and returned is bounded independently of the number of Pages in the
+ * Zone and of the 500,000,000 / 3,000,000 Unit capacity targets.
+ */
+export async function getZonePageAddressById(
+	tx: DatabaseTransaction,
+	zoneId: string,
+	pageId: string,
+): Promise<ZonePageAddressProjection | null> {
+	const [address] = await tx
+		.select({
+			id: zonePage.id,
+			zoneId: zonePage.zoneId,
+			slug: unitSlugAddress.slug,
+		})
+		.from(zonePage)
+		.leftJoin(
+			unitSlugAddress,
+			and(
+				eq(unitSlugAddress.kind, "canonical"),
+				eq(unitSlugAddress.scopeUnitId, zoneId),
+				eq(unitSlugAddress.targetUnitId, zonePage.id),
+			),
+		)
+		.where(and(eq(zonePage.id, pageId), eq(zonePage.zoneId, zoneId)))
+		.limit(1);
+	return address ? { ...address, redirected: false } : null;
+}
+
+/** Resolves one canonical or retained Page label with two bounded indexed address reads. */
+export async function resolveZonePageAddressBySlug(
+	tx: DatabaseTransaction,
+	zoneId: string,
+	slug: string,
+): Promise<ZonePageAddressProjection | null> {
+	const [address] = await tx
+		.select({ id: zonePage.id, zoneId: zonePage.zoneId, addressKind: unitSlugAddress.kind })
+		.from(unitSlugAddress)
+		.innerJoin(
+			zonePage,
+			and(eq(zonePage.id, unitSlugAddress.targetUnitId), eq(zonePage.zoneId, zoneId)),
+		)
+		.where(and(eq(unitSlugAddress.scopeUnitId, zoneId), eq(unitSlugAddress.slug, slug)))
+		.limit(1);
+	if (!address) return null;
+
+	const [canonical] = await tx
+		.select({ slug: unitSlugAddress.slug })
+		.from(unitSlugAddress)
+		.where(
+			and(
+				eq(unitSlugAddress.kind, "canonical"),
+				eq(unitSlugAddress.scopeUnitId, zoneId),
+				eq(unitSlugAddress.targetUnitId, address.id),
+			),
+		)
+		.limit(1);
+	if (!canonical) return null;
+	return {
+		id: address.id,
+		zoneId: address.zoneId,
+		slug: canonical.slug,
+		redirected: address.addressKind === "redirect" || canonical.slug !== slug,
+	};
+}
+
 function parseLocalization(row: StoredZonePageLocalization) {
 	if (!row.title || !row.content || !row.contentStatus)
 		throw new ContentStructureInvalid("Zone Page Unit localization is incomplete");

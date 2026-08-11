@@ -189,6 +189,10 @@ import type {
 	PatchApiZonesByZoneIdResponses,
 	GetZoneRenderProjectionOptions,
 	GetZoneRenderProjectionResponses,
+	GetZonePageAddressByIdOptions,
+	GetZonePageAddressByIdResponses,
+	ResolveZonePageAddressBySlugOptions,
+	ResolveZonePageAddressBySlugResponses,
 	GetApiZonesByZoneIdPagesOptions,
 	GetApiZonesByZoneIdPagesResponses,
 	PostApiZonesByZoneIdPagesOptions,
@@ -337,6 +341,8 @@ import type {
 	CreateSlugNamespaceWithPlatformAccessResponses,
 	ReleaseSlugRedirectWithPlatformAccessOptions,
 	ReleaseSlugRedirectWithPlatformAccessResponses,
+	GetPublicUnitSeoProjectionOptions,
+	GetPublicUnitSeoProjectionResponses,
 	PostApiUnitsPresentationsOptions,
 	PostApiUnitsPresentationsResponses,
 	GetApiUnitsByIdByUnitIdRealmPublicationsOptions,
@@ -2505,6 +2511,38 @@ export function getZoneRenderProjection<ThrowOnError extends boolean = true>(
 }
 
 /**
+ * @summary Get one bounded Zone Page address projection by Unit ID
+ * {@link /api/v1/zones/:zoneId/page-addresses/by-id/:pageId}
+ */
+export function getZonePageAddressById<ThrowOnError extends boolean = true>(
+	options: Options<GetZonePageAddressByIdOptions, ThrowOnError>,
+): Promise<RequestResult<GetZonePageAddressByIdResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/v1/zones/{zoneId}/page-addresses/by-id/{pageId}",
+		...config,
+	}) as Promise<RequestResult<GetZonePageAddressByIdResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Resolve one bounded Zone Page address by scoped slug
+ * {@link /api/v1/zones/:zoneId/page-addresses/by-slug/:slug}
+ */
+export function resolveZonePageAddressBySlug<ThrowOnError extends boolean = true>(
+	options: Options<ResolveZonePageAddressBySlugOptions, ThrowOnError>,
+): Promise<RequestResult<ResolveZonePageAddressBySlugResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/v1/zones/{zoneId}/page-addresses/by-slug/{slug}",
+		...config,
+	}) as Promise<RequestResult<ResolveZonePageAddressBySlugResponses, ThrowOnError>>;
+}
+
+/**
  * @summary List Zone pages
  * {@link /api/v1/zones/:zoneId/pages}
  */
@@ -4002,6 +4040,23 @@ export function releaseSlugRedirectWithPlatformAccess<ThrowOnError extends boole
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<RequestResult<ReleaseSlugRedirectWithPlatformAccessResponses, ThrowOnError>>;
+}
+
+/**
+ * @description Returns bounded metadata for one publicly visitable Unit. Adult-rated Units return only a noindex decision and never expose authored titles, summaries, descriptions, or images.
+ * @summary Get a sanitized public Unit SEO projection
+ * {@link /api/v1/units/by-id/:unitId/seo}
+ */
+export function getPublicUnitSeoProjection<ThrowOnError extends boolean = true>(
+	options: Options<GetPublicUnitSeoProjectionOptions, ThrowOnError>,
+): Promise<RequestResult<GetPublicUnitSeoProjectionResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/v1/units/by-id/{unitId}/seo",
+		...config,
+	}) as Promise<RequestResult<GetPublicUnitSeoProjectionResponses, ThrowOnError>>;
 }
 
 /**
