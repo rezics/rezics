@@ -32,6 +32,7 @@ export const resources = defineResources({
 			locale: () => import("./languages/zh-Hant/locale").then((module) => module.default),
 			licenses: () => import("./languages/zh-Hant/licenses").then((module) => module.default),
 			media: () => import("./languages/zh-Hant/media").then((module) => module.default),
+			messages: () => import("./languages/zh-Hant/messages").then((module) => module.default),
 			nav: () => import("./languages/zh-Hant/nav").then((module) => module.default),
 			notifications: () =>
 				import("./languages/zh-Hant/notifications").then((module) => module.default),
@@ -78,6 +79,7 @@ export const resources = defineResources({
 			locale: () => import("./languages/zh-Hans/locale").then((module) => module.default),
 			licenses: () => import("./languages/zh-Hans/licenses").then((module) => module.default),
 			media: () => import("./languages/zh-Hans/media").then((module) => module.default),
+			messages: () => import("./languages/zh-Hans/messages").then((module) => module.default),
 			nav: () => import("./languages/zh-Hans/nav").then((module) => module.default),
 			notifications: () =>
 				import("./languages/zh-Hans/notifications").then((module) => module.default),
@@ -121,6 +123,7 @@ export const resources = defineResources({
 			locale: () => import("./languages/en/locale").then((module) => module.default),
 			licenses: () => import("./languages/en/licenses").then((module) => module.default),
 			media: () => import("./languages/en/media").then((module) => module.default),
+			messages: () => import("./languages/en/messages").then((module) => module.default),
 			nav: () => import("./languages/en/nav").then((module) => module.default),
 			notifications: () =>
 				import("./languages/en/notifications").then((module) => module.default),
@@ -164,6 +167,7 @@ export const resources = defineResources({
 			locale: () => import("./languages/ja/locale").then((module) => module.default),
 			licenses: () => import("./languages/ja/licenses").then((module) => module.default),
 			media: () => import("./languages/ja/media").then((module) => module.default),
+			messages: () => import("./languages/ja/messages").then((module) => module.default),
 			nav: () => import("./languages/ja/nav").then((module) => module.default),
 			notifications: () =>
 				import("./languages/ja/notifications").then((module) => module.default),
@@ -207,6 +211,7 @@ export const resources = defineResources({
 			locale: () => import("./languages/ko/locale").then((module) => module.default),
 			licenses: () => import("./languages/ko/licenses").then((module) => module.default),
 			media: () => import("./languages/ko/media").then((module) => module.default),
+			messages: () => import("./languages/ko/messages").then((module) => module.default),
 			nav: () => import("./languages/ko/nav").then((module) => module.default),
 			notifications: () =>
 				import("./languages/ko/notifications").then((module) => module.default),
@@ -250,6 +255,7 @@ export const resources = defineResources({
 			locale: () => import("./languages/de/locale").then((module) => module.default),
 			licenses: () => import("./languages/de/licenses").then((module) => module.default),
 			media: () => import("./languages/de/media").then((module) => module.default),
+			messages: () => import("./languages/de/messages").then((module) => module.default),
 			nav: () => import("./languages/de/nav").then((module) => module.default),
 			notifications: () =>
 				import("./languages/de/notifications").then((module) => module.default),
@@ -293,6 +299,7 @@ export const resources = defineResources({
 			locale: () => import("./languages/fr/locale").then((module) => module.default),
 			licenses: () => import("./languages/fr/licenses").then((module) => module.default),
 			media: () => import("./languages/fr/media").then((module) => module.default),
+			messages: () => import("./languages/fr/messages").then((module) => module.default),
 			nav: () => import("./languages/fr/nav").then((module) => module.default),
 			notifications: () =>
 				import("./languages/fr/notifications").then((module) => module.default),
@@ -336,6 +343,7 @@ export const resources = defineResources({
 			locale: () => import("./languages/es/locale").then((module) => module.default),
 			licenses: () => import("./languages/es/licenses").then((module) => module.default),
 			media: () => import("./languages/es/media").then((module) => module.default),
+			messages: () => import("./languages/es/messages").then((module) => module.default),
 			nav: () => import("./languages/es/nav").then((module) => module.default),
 			notifications: () =>
 				import("./languages/es/notifications").then((module) => module.default),

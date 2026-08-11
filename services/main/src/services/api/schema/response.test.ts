@@ -306,6 +306,7 @@ describe("API response values", () => {
 			"value",
 		]);
 		expect(ReviewDetailResponse.required).toContain("replyCount");
+		expect(ReviewDetailResponse.required).toContain("latestRevisionId");
 		expect(ReviewDetailResponse.properties.capabilities.required).toEqual([
 			"canEdit",
 			"canManageAttributions",

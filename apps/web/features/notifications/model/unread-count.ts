@@ -15,12 +15,7 @@ export function normalizeUnreadCount(value: UnreadCountResult | undefined): numb
 	return Number.isSafeInteger(count) && count > 0 ? count : 0;
 }
 
-export function isEstimatedUnreadCount(value: UnreadCountResult | undefined): boolean {
-	return typeof value === "object" && value !== null && value.kind === "estimate";
-}
-
 export function formatUnreadCount(value: UnreadCountResult | undefined): string {
 	const count = normalizeUnreadCount(value);
-	const formatted = count > 99 ? "99+" : String(count);
-	return isEstimatedUnreadCount(value) ? `≈${formatted}` : formatted;
+	return count > 99 ? "99+" : String(count);
 }

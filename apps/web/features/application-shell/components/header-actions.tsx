@@ -8,7 +8,6 @@ import { Bell, Plus } from "lucide-react";
 
 import {
 	formatUnreadCount,
-	isEstimatedUnreadCount,
 	normalizeUnreadCount,
 } from "@/features/notifications/model/unread-count";
 import { NotificationsHref } from "@/features/notifications/routing/notification-routes";
@@ -66,9 +65,7 @@ function NotificationAction() {
 	const count = normalizeUnreadCount(unreadCount);
 	const badge = formatUnreadCount(unreadCount);
 	const label = count
-		? isEstimatedUnreadCount(unreadCount)
-			? t.notifications.center.headerUnreadEstimateLabel({ count })
-			: t.notifications.center.headerUnreadLabel({ count })
+		? t.notifications.center.headerUnreadLabel({ count })
 		: t.notifications.center.headerLabel;
 
 	return (

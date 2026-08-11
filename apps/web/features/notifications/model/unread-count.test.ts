@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { formatUnreadCount, isEstimatedUnreadCount, normalizeUnreadCount } from "./unread-count";
+import { formatUnreadCount, normalizeUnreadCount } from "./unread-count";
 
 describe("notification unread count", () => {
 	it.each([
@@ -19,7 +19,7 @@ describe("notification unread count", () => {
 		expect(normalizeUnreadCount(Number.MAX_SAFE_INTEGER + 1)).toBe(0);
 	});
 
-	it("reads estimate values and preserves their approximate meaning", () => {
+	it("renders estimate values without exposing estimation metadata", () => {
 		const estimate = {
 			kind: "estimate" as const,
 			value: 128,
@@ -27,8 +27,7 @@ describe("notification unread count", () => {
 		};
 
 		expect(normalizeUnreadCount(estimate)).toBe(128);
-		expect(isEstimatedUnreadCount(estimate)).toBe(true);
-		expect(formatUnreadCount(estimate)).toBe("≈99+");
+		expect(formatUnreadCount(estimate)).toBe("99+");
 		expect(formatUnreadCount(6)).toBe("6");
 	});
 });

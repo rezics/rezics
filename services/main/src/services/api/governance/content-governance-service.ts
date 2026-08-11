@@ -73,7 +73,7 @@ export type ContentReviewCaseRecord = typeof contentReviewCase.$inferSelect;
 
 type ModerationTargetContext = {
 	recipientProfileIds: readonly string[];
-	subjectUnitId: string | undefined;
+	subjectUnitId: string;
 };
 
 function presentProfileIds(rows: readonly { profileId: string | null }[]): string[] {

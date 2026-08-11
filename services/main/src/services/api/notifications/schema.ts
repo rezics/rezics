@@ -6,7 +6,8 @@ import {
 	NotificationKindValues,
 } from "../../database/schema/contract-values";
 import { CountResultSchema } from "../../counts/contract";
-import { DateTime, Uuid } from "../schema";
+import { DateTime, UnitKind, Uuid } from "../schema";
+import { NullablePublicSlugAddressResponse } from "../slug-addresses/schema";
 
 export const NotificationCursorQuery = t.Object({
 	cursor: t.Optional(t.String({ maxLength: 512 })),
@@ -37,13 +38,30 @@ export const ReplaceNotificationPreferencesBody = t.Object({
 	),
 });
 
+const NotificationActorResponse = t.Object(
+	{
+		id: Uuid,
+		name: t.Nullable(t.String()),
+		slugAddress: NullablePublicSlugAddressResponse,
+	},
+	{ additionalProperties: false },
+);
+
+export const NotificationUnitResponse = t.Object(
+	{
+		id: Uuid,
+		kind: UnitKind,
+		slugAddress: NullablePublicSlugAddressResponse,
+	},
+	{ additionalProperties: false },
+);
+
 const NotificationItemBase = {
 	id: Uuid,
 	title: t.String(),
 	body: t.String(),
-	actorProfileId: t.Nullable(Uuid),
-	actorName: t.Nullable(t.String()),
-	subjectUnitId: t.Nullable(Uuid),
+	actor: t.Nullable(NotificationActorResponse),
+	subject: t.Nullable(NotificationUnitResponse),
 	readAt: t.Nullable(DateTime),
 	createdAt: DateTime,
 };
@@ -89,7 +107,13 @@ export const ModerationNotificationPayload = t.Union([
 ]);
 
 export const DirectMessageNotificationPayload = t.Object(
-	{ type: t.Literal("direct_message"), conversationId: Uuid },
+	{
+		type: t.Literal("direct_message"),
+		conversationId: Uuid,
+		// Pre-1.4 notification rows did not identify the exact message. Their
+		// conversation remains a safe semantic fallback during the cutover.
+		messageId: t.Optional(Uuid),
+	},
 	{ additionalProperties: false },
 );
 
@@ -98,37 +122,155 @@ export const RealmNotificationPayload = t.Object(
 	{ additionalProperties: false },
 );
 
-export const SystemNotificationPayload = t.Object(
+export const SystemNotificationPayload = t.Union([
+	t.Object(
+		{
+			type: t.Literal("system_event"),
+			event: t.Literal("unit_access_invitation"),
+			references: t.Object({ invitationId: Uuid }, { additionalProperties: false }),
+		},
+		{ additionalProperties: false },
+	),
+	t.Object(
+		{
+			type: t.Literal("system_event"),
+			event: t.Literal("unit_ownership_override"),
+			references: t.Object(
+				{
+					ownershipId: Uuid,
+					role: t.Union([t.Literal("owner"), t.Literal("previous_owner")]),
+				},
+				{ additionalProperties: false },
+			),
+		},
+		{ additionalProperties: false },
+	),
+	t.Object(
+		{
+			type: t.Literal("system_event"),
+			event: t.Literal("unit_ownership_claim_resolution"),
+			references: t.Object(
+				{
+					claimId: Uuid,
+					resolution: t.Union([
+						t.Literal("approved"),
+						t.Literal("rejected"),
+						t.Literal("superseded"),
+					]),
+				},
+				{ additionalProperties: false },
+			),
+		},
+		{ additionalProperties: false },
+	),
+]);
+
+const UnavailableNotificationContext = t.Object(
+	{ type: t.Literal("unavailable") },
+	{ additionalProperties: false },
+);
+const ReplyNotificationContext = t.Object(
+	{ type: t.Literal("reply") },
+	{ additionalProperties: false },
+);
+const NewFollowerNotificationContext = t.Object(
+	{ type: t.Literal("new_follower") },
+	{ additionalProperties: false },
+);
+
+const NotificationDetailsDestination = t.Object(
+	{ kind: t.Literal("notification_details"), notificationId: Uuid },
+	{ additionalProperties: false },
+);
+const PostDestination = t.Object(
+	{ kind: t.Literal("post"), postId: Uuid },
+	{ additionalProperties: false },
+);
+const ProfileDestination = t.Object(
 	{
-		type: t.Literal("system_event"),
-		event: t.String({ minLength: 1 }),
-		references: t.Optional(t.Record(t.String(), t.String())),
+		kind: t.Literal("profile"),
+		profile: t.Object(
+			{ id: Uuid, slugAddress: NullablePublicSlugAddressResponse },
+			{ additionalProperties: false },
+		),
 	},
+	{ additionalProperties: false },
+);
+const ConversationDestination = t.Object(
+	{
+		kind: t.Literal("conversation"),
+		conversationId: Uuid,
+		messageId: t.Optional(Uuid),
+	},
+	{ additionalProperties: false },
+);
+const ReportDestination = t.Object(
+	{ kind: t.Literal("report"), reportId: Uuid },
+	{ additionalProperties: false },
+);
+const RealmDestination = t.Object(
+	{
+		kind: t.Literal("realm"),
+		realm: t.Object(
+			{ id: Uuid, slugAddress: NullablePublicSlugAddressResponse },
+			{ additionalProperties: false },
+		),
+	},
+	{ additionalProperties: false },
+);
+const AccessInvitationDestination = t.Object(
+	{
+		kind: t.Literal("access_invitation"),
+		unitId: Uuid,
+		invitationId: Uuid,
+	},
+	{ additionalProperties: false },
+);
+const UnitDestination = t.Object(
+	{ kind: t.Literal("unit"), unit: NotificationUnitResponse },
 	{ additionalProperties: false },
 );
 
 export const NotificationItemResponse = t.Union([
-	t.Object({ ...NotificationItemBase, kind: t.Literal("reply"), payload: t.Null() }),
-	t.Object({ ...NotificationItemBase, kind: t.Literal("new_follower"), payload: t.Null() }),
+	t.Object({
+		...NotificationItemBase,
+		kind: t.Literal("reply"),
+		context: t.Union([ReplyNotificationContext, UnavailableNotificationContext]),
+		destination: t.Union([PostDestination, NotificationDetailsDestination]),
+	}),
+	t.Object({
+		...NotificationItemBase,
+		kind: t.Literal("new_follower"),
+		context: t.Union([NewFollowerNotificationContext, UnavailableNotificationContext]),
+		destination: t.Union([ProfileDestination, NotificationDetailsDestination]),
+	}),
 	t.Object({
 		...NotificationItemBase,
 		kind: t.Literal("direct_message"),
-		payload: DirectMessageNotificationPayload,
+		context: t.Union([DirectMessageNotificationPayload, UnavailableNotificationContext]),
+		destination: t.Union([ConversationDestination, NotificationDetailsDestination]),
 	}),
 	t.Object({
 		...NotificationItemBase,
 		kind: t.Literal("moderation"),
-		payload: ModerationNotificationPayload,
+		context: t.Union([ModerationNotificationPayload, UnavailableNotificationContext]),
+		destination: t.Union([ReportDestination, NotificationDetailsDestination]),
 	}),
 	t.Object({
 		...NotificationItemBase,
 		kind: t.Literal("realm"),
-		payload: RealmNotificationPayload,
+		context: t.Union([RealmNotificationPayload, UnavailableNotificationContext]),
+		destination: t.Union([RealmDestination, NotificationDetailsDestination]),
 	}),
 	t.Object({
 		...NotificationItemBase,
 		kind: t.Literal("system"),
-		payload: SystemNotificationPayload,
+		context: t.Union([SystemNotificationPayload, UnavailableNotificationContext]),
+		destination: t.Union([
+			AccessInvitationDestination,
+			UnitDestination,
+			NotificationDetailsDestination,
+		]),
 	}),
 ]);
 
@@ -141,6 +283,11 @@ export const NotificationListResponse = t.Object({
 
 export const NotificationPreferencesResponse = t.Object({
 	items: t.Array(t.Object({ kind: t.String(), inApp: t.Boolean(), email: t.Boolean() })),
+});
+
+export const ReadNotificationResponse = t.Object({
+	updated: t.Boolean(),
+	readAt: t.Nullable(DateTime),
 });
 
 export const UnreadCountResponse = t.Object({ count: CountResultSchema });

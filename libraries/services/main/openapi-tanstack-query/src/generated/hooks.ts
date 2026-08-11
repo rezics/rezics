@@ -117,6 +117,12 @@ import type {
 	GetApiNotificationsUnreadCountStatus200,
 	GetApiNotificationsUnreadCountStatus429,
 	GetApiNotificationsUnreadCountStatus500,
+	GetApiNotificationsByNotificationIdOptions,
+	GetApiNotificationsByNotificationIdStatus200,
+	GetApiNotificationsByNotificationIdStatus404,
+	GetApiNotificationsByNotificationIdStatus422,
+	GetApiNotificationsByNotificationIdStatus429,
+	GetApiNotificationsByNotificationIdStatus500,
 	PutApiNotificationsReadAllOptions,
 	PutApiNotificationsReadAllStatus200,
 	PutApiNotificationsReadAllStatus400,
@@ -2530,6 +2536,7 @@ import {
 	getApiReady,
 	getApiNotifications,
 	getApiNotificationsUnreadCount,
+	getApiNotificationsByNotificationId,
 	putApiNotificationsReadAll,
 	putApiNotificationsByNotificationIdRead,
 	getApiNotificationsPreferences,
@@ -4172,6 +4179,106 @@ export function useGetApiNotificationsUnreadCount<
 		TData,
 		ResponseErrorConfig<
 			GetApiNotificationsUnreadCountStatus429 | GetApiNotificationsUnreadCountStatus500
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const getApiNotificationsByNotificationIdQueryKey = ({
+	path,
+}: Omit<GetApiNotificationsByNotificationIdOptions, "headers">) =>
+	[{ url: "/api/v1/notifications/:notificationId", params: path }] as const;
+
+type GetApiNotificationsByNotificationIdQueryKey = ReturnType<
+	typeof getApiNotificationsByNotificationIdQueryKey
+>;
+
+export function getApiNotificationsByNotificationIdQueryOptions(
+	{ path }: GetApiNotificationsByNotificationIdOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = getApiNotificationsByNotificationIdQueryKey({ path });
+	return queryOptions<
+		GetApiNotificationsByNotificationIdStatus200,
+		ResponseErrorConfig<
+			| GetApiNotificationsByNotificationIdStatus404
+			| GetApiNotificationsByNotificationIdStatus422
+			| GetApiNotificationsByNotificationIdStatus429
+			| GetApiNotificationsByNotificationIdStatus500
+		>,
+		GetApiNotificationsByNotificationIdStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			const { data } = await getApiNotificationsByNotificationId({
+				...config,
+				path,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Get one notification
+ * {@link /api/v1/notifications/:notificationId}
+ */
+export function useGetApiNotificationsByNotificationId<
+	TData = GetApiNotificationsByNotificationIdStatus200,
+	TQueryData = GetApiNotificationsByNotificationIdStatus200,
+	TQueryKey extends QueryKey = GetApiNotificationsByNotificationIdQueryKey,
+>(
+	{
+		path,
+	}: {
+		path:
+			| GetApiNotificationsByNotificationIdOptions["path"]
+			| (() => GetApiNotificationsByNotificationIdOptions["path"]);
+	},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				GetApiNotificationsByNotificationIdStatus200,
+				ResponseErrorConfig<
+					| GetApiNotificationsByNotificationIdStatus404
+					| GetApiNotificationsByNotificationIdStatus422
+					| GetApiNotificationsByNotificationIdStatus429
+					| GetApiNotificationsByNotificationIdStatus500
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = { path: typeof path === "function" ? path() : path };
+	const queryKey =
+		resolvedOptions?.queryKey ?? getApiNotificationsByNotificationIdQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...getApiNotificationsByNotificationIdQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			| GetApiNotificationsByNotificationIdStatus404
+			| GetApiNotificationsByNotificationIdStatus422
+			| GetApiNotificationsByNotificationIdStatus429
+			| GetApiNotificationsByNotificationIdStatus500
 		>
 	> & { queryKey: TQueryKey };
 

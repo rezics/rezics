@@ -451,8 +451,15 @@ const advisoryChecks: readonly { name: string; query: SQL }[] = [
 				select profile.id as profile_id,
 					count(notification.id) filter (
 						where notification.in_app_visible and notification.read_at is null
+							and (read_state.read_through_created_at is null
+								or notification.created_at > read_state.read_through_created_at
+								or (notification.created_at = read_state.read_through_created_at
+									and notification.id > read_state.read_through_id))
 					) as unread_count
-				from profile left join notification on notification.recipient_profile_id = profile.id
+				from profile
+				left join notification_recipient_stat read_state
+					on read_state.profile_id = profile.id
+				left join notification on notification.recipient_profile_id = profile.id
 				group by profile.id
 			)
 			select count(*)::text as drift_count from expected

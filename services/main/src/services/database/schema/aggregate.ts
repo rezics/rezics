@@ -352,9 +352,30 @@ export const notificationRecipientStat = pgTable(
 			.primaryKey()
 			.references(() => profile.id, { onDelete: "cascade" }),
 		unreadCount: aggregateCount(),
+		readThroughCreatedAt: createTimestampMsColumn(),
+		readThroughId: uuid(),
+		readThroughAt: createTimestampMsColumn(),
 		updatedAt: createUpdatedAtColumn(),
 	},
-	(table) => [check("notification_recipient_stat_count_check", sql`${table.unreadCount} >= 0`)],
+	(table) => [
+		check("notification_recipient_stat_count_check", sql`${table.unreadCount} >= 0`),
+		check(
+			"notification_recipient_stat_read_through_shape_check",
+			sql`(
+				${table.readThroughCreatedAt} is null
+				and ${table.readThroughId} is null
+				and ${table.readThroughAt} is null
+			) or (
+				${table.readThroughCreatedAt} is not null
+				and ${table.readThroughId} is not null
+				and ${table.readThroughAt} is not null
+			)`,
+		),
+		check(
+			"notification_recipient_stat_read_through_time_check",
+			sql`${table.readThroughAt} is null or ${table.readThroughAt} >= ${table.readThroughCreatedAt}`,
+		),
+	],
 );
 
 /** Exact Chapter totals used to derive Book reading progress without an online scan. */

@@ -267,7 +267,7 @@ async function notifyClaimDecision(
 		readonly unitId: string;
 		readonly claimantProfileId: string;
 		readonly actorProfileId: string;
-		readonly resolution: UnitOwnershipClaimResolution;
+		readonly resolution: Exclude<UnitOwnershipClaimResolution, "withdrawn">;
 	},
 ) {
 	await createNotification(tx, {

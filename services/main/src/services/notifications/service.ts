@@ -11,21 +11,37 @@ type EnforcementKind = (typeof EnforcementKindValues)[number];
 
 type NotificationBase = {
 	recipientProfileId: string;
-	actorProfileId?: string | null;
-	subjectUnitId?: string | null;
 	dedupeKey?: string | null;
 };
 
 export type NotificationInput = NotificationBase &
 	(
-		| { kind: "reply"; payload?: never }
-		| { kind: "new_follower"; payload?: never }
+		| {
+				kind: "reply";
+				actorProfileId: string;
+				subjectUnitId: string;
+				payload?: never;
+		  }
+		| {
+				kind: "new_follower";
+				actorProfileId: string;
+				subjectUnitId?: never;
+				payload?: never;
+		  }
 		| {
 				kind: "direct_message";
-				payload: { type: "direct_message"; conversationId: string };
+				actorProfileId: string;
+				subjectUnitId?: never;
+				payload: {
+					type: "direct_message";
+					conversationId: string;
+					messageId: string;
+				};
 		  }
 		| {
 				kind: "moderation";
+				actorProfileId: string;
+				subjectUnitId: string;
 				payload:
 					| {
 							type: "content_governance_action";
@@ -52,15 +68,36 @@ export type NotificationInput = NotificationBase &
 		  }
 		| {
 				kind: "realm";
+				actorProfileId: string;
+				subjectUnitId: string;
 				payload: { type: "realm_event"; event: "membership_updated" };
 		  }
 		| {
 				kind: "system";
-				payload: {
-					type: "system_event";
-					event: string;
-					references?: Record<string, string>;
-				};
+				actorProfileId: string;
+				subjectUnitId: string;
+				payload:
+					| {
+							type: "system_event";
+							event: "unit_access_invitation";
+							references: { invitationId: string };
+					  }
+					| {
+							type: "system_event";
+							event: "unit_ownership_override";
+							references: {
+								ownershipId: string;
+								role: "owner" | "previous_owner";
+							};
+					  }
+					| {
+							type: "system_event";
+							event: "unit_ownership_claim_resolution";
+							references: {
+								claimId: string;
+								resolution: "approved" | "rejected" | "superseded";
+							};
+					  };
 		  }
 	);
 

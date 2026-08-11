@@ -30,6 +30,7 @@ import { type FormEvent, useState } from "react";
 
 import {
 	Badge,
+	cn,
 	EntityPicker,
 	PermissionMatrix,
 	type PermissionMatrixLabels,
@@ -49,6 +50,7 @@ import { useTranslation } from "@/i18n/client";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { RequestFailure } from "@/i18n/request-failure";
 import { UnitAccessManager } from "./components/unit-access-manager";
+import { accessInvitationAnchorId } from "@/features/notifications/routing/notification-routes";
 import {
 	type CreditAttributionRole,
 	CreditAttributionRoles,
@@ -288,7 +290,11 @@ export function AccessInvitationManager({ unitId }: { unitId: string }) {
 	);
 }
 
-export function ReceivedAccessInvitations() {
+export function ReceivedAccessInvitations({
+	selectedInvitationId,
+}: {
+	selectedInvitationId?: string;
+} = {}) {
 	const { t, locale } = useTranslation(["errors", "governance", "ui"]);
 	const queryClient = useQueryClient();
 	const queryOptions = { query: { includeResolved: true } } as const;
@@ -314,7 +320,14 @@ export function ReceivedAccessInvitations() {
 			</CardHeader>
 			<CardContent className="grid gap-3">
 				{invitations.data?.items.map((invitation) => (
-					<div className="rounded-lg border p-4 text-sm" key={invitation.id}>
+					<div
+						className={cn(
+							"scroll-mt-24 rounded-lg border p-4 text-sm",
+							invitation.id === selectedInvitationId && "ring-2 ring-primary/40",
+						)}
+						id={accessInvitationAnchorId(invitation.id)}
+						key={invitation.id}
+					>
 						<div className="grid gap-1">
 							<span className="font-medium">
 								{t.governance.unitId}: {invitation.unitId}

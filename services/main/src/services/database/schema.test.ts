@@ -34,6 +34,7 @@ import {
 	unitAlias,
 	unitDock,
 	conversationParticipantStat,
+	notificationRecipientStat,
 	realmTagVoteStat,
 	realmTagContext,
 	realmTagVote,
@@ -1017,6 +1018,20 @@ describe("database schema contracts", () => {
 		expect(recommendationMetricDaily.impressions.getSQLType()).toBe("bigint");
 		expect(recommendationSignalKind.enumValues).toEqual(
 			expect.arrayContaining(["score_high", "score_medium", "score_low"]),
+		);
+		const notificationState = getTableConfig(notificationRecipientStat);
+		expect(notificationState.columns.map((column) => column.name)).toEqual(
+			expect.arrayContaining([
+				"read_through_created_at",
+				"read_through_id",
+				"read_through_at",
+			]),
+		);
+		expect(notificationState.checks.map((constraint) => constraint.name)).toEqual(
+			expect.arrayContaining([
+				"notification_recipient_stat_read_through_shape_check",
+				"notification_recipient_stat_read_through_time_check",
+			]),
 		);
 	});
 });

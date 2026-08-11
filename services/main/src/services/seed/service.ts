@@ -2415,6 +2415,10 @@ async function seedCommunications(
 				);
 				const kind = itemAt(seededNotificationKinds, profileIndex + index);
 				const conversationId = itemAt(conversations, profileIndex * 7 + index).id;
+				const notificationMessageId = itemAt(
+					messagesByConversation.get(conversationId) ?? [],
+					profileIndex + index,
+				).id;
 				return {
 					recipientProfileId: recipient.id,
 					actorProfileId: actor.id,
@@ -2427,7 +2431,11 @@ async function seedCommunications(
 								: null,
 					payload:
 						kind === "direct_message"
-							? { type: "direct_message", conversationId }
+							? {
+									type: "direct_message",
+									conversationId,
+									messageId: notificationMessageId,
+								}
 							: null,
 					dedupeKey: `seed:${profileIndex}:${index}`,
 					inAppVisible: index % 9 !== 0,

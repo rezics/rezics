@@ -230,7 +230,7 @@ so schema reconciliation can compare the fully validated target.
 At 500 million rows, validation cost is one linear heap pass per selected
 constraint plus the predicate's bounded per-row CPU. At 3 billion rows, perform
 validation per physical partition/shard and schedule it against measured I/O
-headroom; do not launch all 23 scans together. A failed validation leaves the
+headroom; do not launch all 25 scans together. A failed validation leaves the
 constraint installed and protecting new writes, so repair can proceed forward.
 
 ## Review checklist

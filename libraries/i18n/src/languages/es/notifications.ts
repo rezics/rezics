@@ -13,9 +13,6 @@ export default {
 			"Revisa la actividad reciente y las actualizaciones del sistema que requieran tu atención.",
 		headerLabel: "Notificaciones",
 		headerUnreadLabel: insert("Notificaciones, {{count}} sin leer", { count: Number }),
-		headerUnreadEstimateLabel: insert("Notificaciones, aproximadamente {{count}} sin leer", {
-			count: Number,
-		}),
 		receivedInvitations: "Invitaciones de acceso recibidas",
 		invitationsDescription:
 			"Revisa y responde a las invitaciones de otras personas para acceder a una Unit.",
@@ -26,6 +23,12 @@ export default {
 		unread: "Sin leer",
 		emptyTitle: "Todavía no hay notificaciones",
 		emptyDescription: "La actividad nueva y las actualizaciones del sistema aparecerán aquí.",
+		detailsActorFallback: "Usuario relacionado",
+		detailsOpenSubject: "Abrir la Unit relacionada",
+		detailsOpenActor: insert("Abrir el perfil de {{name}}", { name: String }),
+		detailsOpenPublicNotice: "Abrir el aviso público",
+		detailsTargetUnavailable:
+			"El contenido relacionado ya no está disponible o no tienes acceso en este momento.",
 	},
 	followingSettings: {
 		triggerEnabled: `Abrir los ajustes de notificaciones del ${followTerms.gerund}; las notificaciones internas están activadas`,

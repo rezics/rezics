@@ -1,4 +1,4 @@
-h1:wom6KRwhWJBB2Mzn66zZk5xIWf+GpdyMbwdONVUioaM=
+h1:2FDkweZ/RJZfT4gQgpW+9knEOCnPVfutkocraFGxR0A=
 20260801000000_v1_baseline.sql h1:RkSyDwLRpFOPI7iqWg+WlFc5TAshnB4gsRkBpsTMjGY=
 20260807000000_search_ordered_candidates.sql h1:rPOS8iAdRmWOfc9lpyCNNsFWjduRV1e27Q1Mc1QpTFc=
 20260807000001_backfill_search_best_score.sql h1:lmLn+kpWiNWEPlk40W4QRIGsqpWezY//UsNaaZ8FToc=
@@ -11,3 +11,4 @@ h1:wom6KRwhWJBB2Mzn66zZk5xIWf+GpdyMbwdONVUioaM=
 20260809000001_vote_reference_indexes.sql h1:2wPVYb2+UOGSqL4GbSLpJs2giisKW2qHM90g0Kmha+c=
 20260809000002_integrity_boundaries.sql h1:f5FSGZcn+pL5206FAvorzyP1bY1NS2zB27tzVpLG6Fo=
 20260809000003_content_governance_rewrite.sql h1:cyp+OgOkQnekOIsqmpwg2Aus/F50WAsqa1oubEnXODI=
+20260811000000_notification_read_through_state.sql h1:q/3hrZU0HdleN/ss+iS5DYforypJ9pj8KTF8yBqklbM=

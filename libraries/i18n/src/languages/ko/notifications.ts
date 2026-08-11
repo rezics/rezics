@@ -12,7 +12,6 @@ export default {
 		description: "주의가 필요한 최근 활동 및 시스템 업데이트 검토.",
 		headerLabel: "알림",
 		headerUnreadLabel: insert("알림, {{count}} 읽지 않음", { count: Number }),
-		headerUnreadEstimateLabel: insert("알림, 약 {{count}}개 읽지 않음", { count: Number }),
 		receivedInvitations: "받은 접근 초대",
 		invitationsDescription: "다른 사람이 보낸 유닛 접근 초대 검토 및 응답.",
 		backToNotifications: "알림으로 돌아가기",
@@ -22,6 +21,12 @@ export default {
 		unread: "읽지 않음",
 		emptyTitle: "아직 알림 없음",
 		emptyDescription: "새로운 활동 및 시스템 업데이트가 여기에 나타납니다.",
+		detailsActorFallback: "관련 사용자",
+		detailsOpenSubject: "관련 유닛 열기",
+		detailsOpenActor: insert("{{name}}님의 프로필 열기", { name: String }),
+		detailsOpenPublicNotice: "공개 안내 열기",
+		detailsTargetUnavailable:
+			"관련 콘텐츠를 더 이상 사용할 수 없거나 현재 접근 권한이 없습니다.",
 	},
 	followingSettings: {
 		triggerEnabled: `${followTerms.actionLabel} 알림 설정 열기. 앱 내 알림 켜짐`,

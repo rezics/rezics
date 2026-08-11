@@ -1199,6 +1199,7 @@ export const ReviewDetailResponse = t.Object({
 	language: ContentLanguage,
 	body: t.Nullable(PortableTextDocument),
 	replyCount: t.Integer(),
+	latestRevisionId: t.Nullable(Uuid),
 	createdAt: DateTime,
 	updatedAt: DateTime,
 	subject: t.Nullable(t.Object(PostSubjectPresentationFields)),

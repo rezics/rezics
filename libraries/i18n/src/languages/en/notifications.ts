@@ -12,9 +12,6 @@ export default {
 		description: "Review recent activity and system updates that need your attention.",
 		headerLabel: "Notifications",
 		headerUnreadLabel: insert("Notifications, {{count}} unread", { count: Number }),
-		headerUnreadEstimateLabel: insert("Notifications, about {{count}} unread", {
-			count: Number,
-		}),
 		receivedInvitations: "Received access invitations",
 		invitationsDescription:
 			"Review and respond to Unit access invitations sent to you by other people.",
@@ -25,6 +22,12 @@ export default {
 		unread: "Unread",
 		emptyTitle: "No notifications yet",
 		emptyDescription: "New activity and system updates will appear here.",
+		detailsActorFallback: "Related user",
+		detailsOpenSubject: "Open related Unit",
+		detailsOpenActor: insert("Open {{name}}'s profile", { name: String }),
+		detailsOpenPublicNotice: "Open public notice",
+		detailsTargetUnavailable:
+			"The related content is no longer available or you do not currently have access.",
 	},
 	followingSettings: {
 		triggerEnabled: `Open ${followTerms.gerund} notification settings; in-app notifications are on`,

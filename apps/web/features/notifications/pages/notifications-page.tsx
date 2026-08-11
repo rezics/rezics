@@ -12,12 +12,21 @@ import { Button, PageHeading, QueryFailure, QueryPending } from "@rezics/ui";
 import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { Check, Mail } from "lucide-react";
 import { AppLink as Link } from "@/features/application-shell/components/app-link";
+import { useState } from "react";
 
 import { RequireSession } from "@/features/auth/require-session";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
 import { normalizeUnreadCount } from "../model/unread-count";
+import {
+	optimisticallyMarkAllNotificationsRead,
+	optimisticallyMarkNotificationRead,
+	restoreNotificationCache,
+	type NotificationCacheSnapshot,
+} from "../model/notification-read-cache";
 import { AccessInvitationsHref, notificationHref } from "../routing/notification-routes";
+
+const NotificationReadMutationScope = { id: "notification-read" } as const;
 
 function formatNotificationDate(value: string, locale: string): string {
 	const date = new Date(value);
@@ -40,6 +49,9 @@ export function NotificationsPage() {
 function NotificationsContent() {
 	const { t, locale } = useTranslation(["notifications"]);
 	const queryClient = useQueryClient();
+	const [pendingNotificationIds, setPendingNotificationIds] = useState<ReadonlySet<string>>(
+		new Set(),
+	);
 	const baseQuery = { limit: 30 } satisfies GetApiNotificationsQuery;
 	const notifications = useInfiniteQuery({
 		queryKey: getApiNotificationsQueryKey({ query: baseQuery }),
@@ -61,11 +73,40 @@ function NotificationsContent() {
 				queryKey: getApiNotificationsUnreadCountQueryKey(),
 			}),
 		]);
-	const markAllRead = usePutApiNotificationsReadAll({
-		mutation: { onSuccess: refresh },
+	const markAllRead = usePutApiNotificationsReadAll<NotificationCacheSnapshot>({
+		mutation: {
+			scope: NotificationReadMutationScope,
+			onMutate: () =>
+				optimisticallyMarkAllNotificationsRead(queryClient, new Date().toISOString()),
+			onError: (_error, _variables, snapshot) =>
+				restoreNotificationCache(queryClient, snapshot),
+			onSettled: refresh,
+		},
 	});
-	const markRead = usePutApiNotificationsByNotificationIdRead({
-		mutation: { onSuccess: refresh },
+	const markRead = usePutApiNotificationsByNotificationIdRead<NotificationCacheSnapshot>({
+		mutation: {
+			scope: NotificationReadMutationScope,
+			onMutate: (variables) => {
+				const notificationId = variables.path.notificationId;
+				setPendingNotificationIds((current) => new Set(current).add(notificationId));
+				return optimisticallyMarkNotificationRead(
+					queryClient,
+					notificationId,
+					new Date().toISOString(),
+				);
+			},
+			onError: (_error, _variables, snapshot) =>
+				restoreNotificationCache(queryClient, snapshot),
+			onSettled: (_data, _error, variables) => {
+				const notificationId = variables.path.notificationId;
+				setPendingNotificationIds((current) => {
+					const next = new Set(current);
+					next.delete(notificationId);
+					return next;
+				});
+				return refresh();
+			},
+		},
 	});
 
 	if (notifications.isPending) return <QueryPending />;
@@ -136,27 +177,26 @@ function NotificationsContent() {
 						);
 						return (
 							<article className="flex items-start gap-3 py-4" key={item.id}>
-								{href ? (
-									<Link
-										className="min-w-0 flex-1 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-										href={href}
-										onClick={() => {
-											if (item.readAt === null)
-												markRead.mutate({
-													path: { notificationId: item.id },
-												});
-										}}
-									>
-										{content}
-									</Link>
-								) : (
-									content
-								)}
+								<Link
+									className="min-w-0 flex-1 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+									href={href}
+									onClick={() => {
+										if (
+											item.readAt === null &&
+											!pendingNotificationIds.has(item.id)
+										)
+											markRead.mutate({
+												path: { notificationId: item.id },
+											});
+									}}
+								>
+									{content}
+								</Link>
 								{item.readAt === null ? (
 									<Button
 										aria-label={t.notifications.center.markRead}
 										className="shrink-0"
-										disabled={markRead.isPending}
+										disabled={pendingNotificationIds.has(item.id)}
 										onClick={() =>
 											markRead.mutate({ path: { notificationId: item.id } })
 										}

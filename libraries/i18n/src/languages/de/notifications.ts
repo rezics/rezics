@@ -13,9 +13,6 @@ export default {
 			"Prüfe aktuelle Aktivitäten und Systemmeldungen, die deine Aufmerksamkeit erfordern.",
 		headerLabel: "Benachrichtigungen",
 		headerUnreadLabel: insert("Benachrichtigungen, {{count}} ungelesen", { count: Number }),
-		headerUnreadEstimateLabel: insert("Benachrichtigungen, etwa {{count}} ungelesen", {
-			count: Number,
-		}),
 		receivedInvitations: "Erhaltene Zugriffseinladungen",
 		invitationsDescription:
 			"Prüfe und beantworte Einladungen anderer Personen zum Zugriff auf eine Unit.",
@@ -26,6 +23,12 @@ export default {
 		unread: "Ungelesen",
 		emptyTitle: "Noch keine Benachrichtigungen",
 		emptyDescription: "Neue Aktivitäten und Systemmeldungen erscheinen hier.",
+		detailsActorFallback: "Zugehörige Person",
+		detailsOpenSubject: "Zugehörige Unit öffnen",
+		detailsOpenActor: insert("Profil von {{name}} öffnen", { name: String }),
+		detailsOpenPublicNotice: "Öffentliche Mitteilung öffnen",
+		detailsTargetUnavailable:
+			"Der zugehörige Inhalt ist nicht mehr verfügbar oder du hast derzeit keinen Zugriff.",
 	},
 	followingSettings: {
 		triggerEnabled: `Benachrichtigungseinstellungen für ${followTerms.actionLabel} öffnen; In-App-Benachrichtigungen sind eingeschaltet`,

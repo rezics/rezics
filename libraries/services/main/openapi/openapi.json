@@ -13239,13 +13239,13 @@
 															"id",
 															"title",
 															"body",
-															"actorProfileId",
-															"actorName",
-															"subjectUnitId",
+															"actor",
+															"subject",
 															"readAt",
 															"createdAt",
 															"kind",
-															"payload"
+															"context",
+															"destination"
 														],
 														"properties": {
 															"id": {
@@ -13254,29 +13254,160 @@
 															},
 															"title": { "type": "string" },
 															"body": { "type": "string" },
-															"actorProfileId": {
+															"actor": {
 																"nullable": true,
 																"anyOf": [
 																	{
-																		"format": "uuid",
-																		"type": "string"
+																		"additionalProperties": false,
+																		"type": "object",
+																		"required": [
+																			"id",
+																			"name",
+																			"slugAddress"
+																		],
+																		"properties": {
+																			"id": {
+																				"format": "uuid",
+																				"type": "string"
+																			},
+																			"name": {
+																				"nullable": true,
+																				"anyOf": [
+																					{
+																						"type": "string"
+																					},
+																					{
+																						"type": "null"
+																					}
+																				]
+																			},
+																			"slugAddress": {
+																				"nullable": true,
+																				"anyOf": [
+																					{
+																						"additionalProperties": false,
+																						"type": "object",
+																						"required": [
+																							"slug",
+																							"scopeUnitId",
+																							"canonicalPath"
+																						],
+																						"properties": {
+																							"slug": {
+																								"minLength": 1,
+																								"maxLength": 63,
+																								"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																								"type": "string"
+																							},
+																							"scopeUnitId": {
+																								"format": "uuid",
+																								"type": "string"
+																							},
+																							"canonicalPath": {
+																								"minItems": 2,
+																								"maxItems": 3,
+																								"type": "array",
+																								"items": {
+																									"minLength": 1,
+																									"maxLength": 63,
+																									"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																									"type": "string"
+																								}
+																							}
+																						}
+																					},
+																					{
+																						"type": "null"
+																					}
+																				]
+																			}
+																		}
 																	},
 																	{ "type": "null" }
 																]
 															},
-															"actorName": {
-																"nullable": true,
-																"anyOf": [
-																	{ "type": "string" },
-																	{ "type": "null" }
-																]
-															},
-															"subjectUnitId": {
+															"subject": {
 																"nullable": true,
 																"anyOf": [
 																	{
-																		"format": "uuid",
-																		"type": "string"
+																		"additionalProperties": false,
+																		"type": "object",
+																		"required": [
+																			"id",
+																			"kind",
+																			"slugAddress"
+																		],
+																		"properties": {
+																			"id": {
+																				"format": "uuid",
+																				"type": "string"
+																			},
+																			"kind": {
+																				"type": "string",
+																				"enum": [
+																					"slug_namespace",
+																					"profile",
+																					"book",
+																					"software",
+																					"media",
+																					"video",
+																					"audio",
+																					"release",
+																					"entity",
+																					"label",
+																					"tag",
+																					"structure",
+																					"series",
+																					"zone",
+																					"zone_page",
+																					"collection",
+																					"post",
+																					"poll",
+																					"realm",
+																					"realm_rule"
+																				]
+																			},
+																			"slugAddress": {
+																				"nullable": true,
+																				"anyOf": [
+																					{
+																						"additionalProperties": false,
+																						"type": "object",
+																						"required": [
+																							"slug",
+																							"scopeUnitId",
+																							"canonicalPath"
+																						],
+																						"properties": {
+																							"slug": {
+																								"minLength": 1,
+																								"maxLength": 63,
+																								"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																								"type": "string"
+																							},
+																							"scopeUnitId": {
+																								"format": "uuid",
+																								"type": "string"
+																							},
+																							"canonicalPath": {
+																								"minItems": 2,
+																								"maxItems": 3,
+																								"type": "array",
+																								"items": {
+																									"minLength": 1,
+																									"maxLength": 63,
+																									"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																									"type": "string"
+																								}
+																							}
+																						}
+																					},
+																					{
+																						"type": "null"
+																					}
+																				]
+																			}
+																		}
 																	},
 																	{ "type": "null" }
 																]
@@ -13299,7 +13430,72 @@
 																"const": "reply",
 																"type": "string"
 															},
-															"payload": { "type": "null" }
+															"context": {
+																"anyOf": [
+																	{
+																		"additionalProperties": false,
+																		"type": "object",
+																		"required": ["type"],
+																		"properties": {
+																			"type": {
+																				"const": "reply",
+																				"type": "string"
+																			}
+																		}
+																	},
+																	{
+																		"additionalProperties": false,
+																		"type": "object",
+																		"required": ["type"],
+																		"properties": {
+																			"type": {
+																				"const": "unavailable",
+																				"type": "string"
+																			}
+																		}
+																	}
+																]
+															},
+															"destination": {
+																"anyOf": [
+																	{
+																		"additionalProperties": false,
+																		"type": "object",
+																		"required": [
+																			"kind",
+																			"postId"
+																		],
+																		"properties": {
+																			"kind": {
+																				"const": "post",
+																				"type": "string"
+																			},
+																			"postId": {
+																				"format": "uuid",
+																				"type": "string"
+																			}
+																		}
+																	},
+																	{
+																		"additionalProperties": false,
+																		"type": "object",
+																		"required": [
+																			"kind",
+																			"notificationId"
+																		],
+																		"properties": {
+																			"kind": {
+																				"const": "notification_details",
+																				"type": "string"
+																			},
+																			"notificationId": {
+																				"format": "uuid",
+																				"type": "string"
+																			}
+																		}
+																	}
+																]
+															}
 														}
 													},
 													{
@@ -13308,13 +13504,13 @@
 															"id",
 															"title",
 															"body",
-															"actorProfileId",
-															"actorName",
-															"subjectUnitId",
+															"actor",
+															"subject",
 															"readAt",
 															"createdAt",
 															"kind",
-															"payload"
+															"context",
+															"destination"
 														],
 														"properties": {
 															"id": {
@@ -13323,29 +13519,160 @@
 															},
 															"title": { "type": "string" },
 															"body": { "type": "string" },
-															"actorProfileId": {
+															"actor": {
 																"nullable": true,
 																"anyOf": [
 																	{
-																		"format": "uuid",
-																		"type": "string"
+																		"additionalProperties": false,
+																		"type": "object",
+																		"required": [
+																			"id",
+																			"name",
+																			"slugAddress"
+																		],
+																		"properties": {
+																			"id": {
+																				"format": "uuid",
+																				"type": "string"
+																			},
+																			"name": {
+																				"nullable": true,
+																				"anyOf": [
+																					{
+																						"type": "string"
+																					},
+																					{
+																						"type": "null"
+																					}
+																				]
+																			},
+																			"slugAddress": {
+																				"nullable": true,
+																				"anyOf": [
+																					{
+																						"additionalProperties": false,
+																						"type": "object",
+																						"required": [
+																							"slug",
+																							"scopeUnitId",
+																							"canonicalPath"
+																						],
+																						"properties": {
+																							"slug": {
+																								"minLength": 1,
+																								"maxLength": 63,
+																								"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																								"type": "string"
+																							},
+																							"scopeUnitId": {
+																								"format": "uuid",
+																								"type": "string"
+																							},
+																							"canonicalPath": {
+																								"minItems": 2,
+																								"maxItems": 3,
+																								"type": "array",
+																								"items": {
+																									"minLength": 1,
+																									"maxLength": 63,
+																									"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																									"type": "string"
+																								}
+																							}
+																						}
+																					},
+																					{
+																						"type": "null"
+																					}
+																				]
+																			}
+																		}
 																	},
 																	{ "type": "null" }
 																]
 															},
-															"actorName": {
-																"nullable": true,
-																"anyOf": [
-																	{ "type": "string" },
-																	{ "type": "null" }
-																]
-															},
-															"subjectUnitId": {
+															"subject": {
 																"nullable": true,
 																"anyOf": [
 																	{
-																		"format": "uuid",
-																		"type": "string"
+																		"additionalProperties": false,
+																		"type": "object",
+																		"required": [
+																			"id",
+																			"kind",
+																			"slugAddress"
+																		],
+																		"properties": {
+																			"id": {
+																				"format": "uuid",
+																				"type": "string"
+																			},
+																			"kind": {
+																				"type": "string",
+																				"enum": [
+																					"slug_namespace",
+																					"profile",
+																					"book",
+																					"software",
+																					"media",
+																					"video",
+																					"audio",
+																					"release",
+																					"entity",
+																					"label",
+																					"tag",
+																					"structure",
+																					"series",
+																					"zone",
+																					"zone_page",
+																					"collection",
+																					"post",
+																					"poll",
+																					"realm",
+																					"realm_rule"
+																				]
+																			},
+																			"slugAddress": {
+																				"nullable": true,
+																				"anyOf": [
+																					{
+																						"additionalProperties": false,
+																						"type": "object",
+																						"required": [
+																							"slug",
+																							"scopeUnitId",
+																							"canonicalPath"
+																						],
+																						"properties": {
+																							"slug": {
+																								"minLength": 1,
+																								"maxLength": 63,
+																								"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																								"type": "string"
+																							},
+																							"scopeUnitId": {
+																								"format": "uuid",
+																								"type": "string"
+																							},
+																							"canonicalPath": {
+																								"minItems": 2,
+																								"maxItems": 3,
+																								"type": "array",
+																								"items": {
+																									"minLength": 1,
+																									"maxLength": 63,
+																									"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																									"type": "string"
+																								}
+																							}
+																						}
+																					},
+																					{
+																						"type": "null"
+																					}
+																				]
+																			}
+																		}
 																	},
 																	{ "type": "null" }
 																]
@@ -13368,7 +13695,122 @@
 																"const": "new_follower",
 																"type": "string"
 															},
-															"payload": { "type": "null" }
+															"context": {
+																"anyOf": [
+																	{
+																		"additionalProperties": false,
+																		"type": "object",
+																		"required": ["type"],
+																		"properties": {
+																			"type": {
+																				"const": "new_follower",
+																				"type": "string"
+																			}
+																		}
+																	},
+																	{
+																		"additionalProperties": false,
+																		"type": "object",
+																		"required": ["type"],
+																		"properties": {
+																			"type": {
+																				"const": "unavailable",
+																				"type": "string"
+																			}
+																		}
+																	}
+																]
+															},
+															"destination": {
+																"anyOf": [
+																	{
+																		"additionalProperties": false,
+																		"type": "object",
+																		"required": [
+																			"kind",
+																			"profile"
+																		],
+																		"properties": {
+																			"kind": {
+																				"const": "profile",
+																				"type": "string"
+																			},
+																			"profile": {
+																				"additionalProperties": false,
+																				"type": "object",
+																				"required": [
+																					"id",
+																					"slugAddress"
+																				],
+																				"properties": {
+																					"id": {
+																						"format": "uuid",
+																						"type": "string"
+																					},
+																					"slugAddress": {
+																						"nullable": true,
+																						"anyOf": [
+																							{
+																								"additionalProperties": false,
+																								"type": "object",
+																								"required": [
+																									"slug",
+																									"scopeUnitId",
+																									"canonicalPath"
+																								],
+																								"properties": {
+																									"slug": {
+																										"minLength": 1,
+																										"maxLength": 63,
+																										"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																										"type": "string"
+																									},
+																									"scopeUnitId": {
+																										"format": "uuid",
+																										"type": "string"
+																									},
+																									"canonicalPath": {
+																										"minItems": 2,
+																										"maxItems": 3,
+																										"type": "array",
+																										"items": {
+																											"minLength": 1,
+																											"maxLength": 63,
+																											"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																											"type": "string"
+																										}
+																									}
+																								}
+																							},
+																							{
+																								"type": "null"
+																							}
+																						]
+																					}
+																				}
+																			}
+																		}
+																	},
+																	{
+																		"additionalProperties": false,
+																		"type": "object",
+																		"required": [
+																			"kind",
+																			"notificationId"
+																		],
+																		"properties": {
+																			"kind": {
+																				"const": "notification_details",
+																				"type": "string"
+																			},
+																			"notificationId": {
+																				"format": "uuid",
+																				"type": "string"
+																			}
+																		}
+																	}
+																]
+															}
 														}
 													},
 													{
@@ -13377,13 +13819,13 @@
 															"id",
 															"title",
 															"body",
-															"actorProfileId",
-															"actorName",
-															"subjectUnitId",
+															"actor",
+															"subject",
 															"readAt",
 															"createdAt",
 															"kind",
-															"payload"
+															"context",
+															"destination"
 														],
 														"properties": {
 															"id": {
@@ -13392,29 +13834,160 @@
 															},
 															"title": { "type": "string" },
 															"body": { "type": "string" },
-															"actorProfileId": {
+															"actor": {
 																"nullable": true,
 																"anyOf": [
 																	{
-																		"format": "uuid",
-																		"type": "string"
+																		"additionalProperties": false,
+																		"type": "object",
+																		"required": [
+																			"id",
+																			"name",
+																			"slugAddress"
+																		],
+																		"properties": {
+																			"id": {
+																				"format": "uuid",
+																				"type": "string"
+																			},
+																			"name": {
+																				"nullable": true,
+																				"anyOf": [
+																					{
+																						"type": "string"
+																					},
+																					{
+																						"type": "null"
+																					}
+																				]
+																			},
+																			"slugAddress": {
+																				"nullable": true,
+																				"anyOf": [
+																					{
+																						"additionalProperties": false,
+																						"type": "object",
+																						"required": [
+																							"slug",
+																							"scopeUnitId",
+																							"canonicalPath"
+																						],
+																						"properties": {
+																							"slug": {
+																								"minLength": 1,
+																								"maxLength": 63,
+																								"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																								"type": "string"
+																							},
+																							"scopeUnitId": {
+																								"format": "uuid",
+																								"type": "string"
+																							},
+																							"canonicalPath": {
+																								"minItems": 2,
+																								"maxItems": 3,
+																								"type": "array",
+																								"items": {
+																									"minLength": 1,
+																									"maxLength": 63,
+																									"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																									"type": "string"
+																								}
+																							}
+																						}
+																					},
+																					{
+																						"type": "null"
+																					}
+																				]
+																			}
+																		}
 																	},
 																	{ "type": "null" }
 																]
 															},
-															"actorName": {
-																"nullable": true,
-																"anyOf": [
-																	{ "type": "string" },
-																	{ "type": "null" }
-																]
-															},
-															"subjectUnitId": {
+															"subject": {
 																"nullable": true,
 																"anyOf": [
 																	{
-																		"format": "uuid",
-																		"type": "string"
+																		"additionalProperties": false,
+																		"type": "object",
+																		"required": [
+																			"id",
+																			"kind",
+																			"slugAddress"
+																		],
+																		"properties": {
+																			"id": {
+																				"format": "uuid",
+																				"type": "string"
+																			},
+																			"kind": {
+																				"type": "string",
+																				"enum": [
+																					"slug_namespace",
+																					"profile",
+																					"book",
+																					"software",
+																					"media",
+																					"video",
+																					"audio",
+																					"release",
+																					"entity",
+																					"label",
+																					"tag",
+																					"structure",
+																					"series",
+																					"zone",
+																					"zone_page",
+																					"collection",
+																					"post",
+																					"poll",
+																					"realm",
+																					"realm_rule"
+																				]
+																			},
+																			"slugAddress": {
+																				"nullable": true,
+																				"anyOf": [
+																					{
+																						"additionalProperties": false,
+																						"type": "object",
+																						"required": [
+																							"slug",
+																							"scopeUnitId",
+																							"canonicalPath"
+																						],
+																						"properties": {
+																							"slug": {
+																								"minLength": 1,
+																								"maxLength": 63,
+																								"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																								"type": "string"
+																							},
+																							"scopeUnitId": {
+																								"format": "uuid",
+																								"type": "string"
+																							},
+																							"canonicalPath": {
+																								"minItems": 2,
+																								"maxItems": 3,
+																								"type": "array",
+																								"items": {
+																									"minLength": 1,
+																									"maxLength": 63,
+																									"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																									"type": "string"
+																								}
+																							}
+																						}
+																					},
+																					{
+																						"type": "null"
+																					}
+																				]
+																			}
+																		}
 																	},
 																	{ "type": "null" }
 																]
@@ -13437,23 +14010,86 @@
 																"const": "direct_message",
 																"type": "string"
 															},
-															"payload": {
-																"additionalProperties": false,
-																"type": "object",
-																"required": [
-																	"type",
-																	"conversationId"
-																],
-																"properties": {
-																	"type": {
-																		"const": "direct_message",
-																		"type": "string"
+															"context": {
+																"anyOf": [
+																	{
+																		"additionalProperties": false,
+																		"type": "object",
+																		"required": [
+																			"type",
+																			"conversationId"
+																		],
+																		"properties": {
+																			"type": {
+																				"const": "direct_message",
+																				"type": "string"
+																			},
+																			"conversationId": {
+																				"format": "uuid",
+																				"type": "string"
+																			},
+																			"messageId": {
+																				"format": "uuid",
+																				"type": "string"
+																			}
+																		}
 																	},
-																	"conversationId": {
-																		"format": "uuid",
-																		"type": "string"
+																	{
+																		"additionalProperties": false,
+																		"type": "object",
+																		"required": ["type"],
+																		"properties": {
+																			"type": {
+																				"const": "unavailable",
+																				"type": "string"
+																			}
+																		}
 																	}
-																}
+																]
+															},
+															"destination": {
+																"anyOf": [
+																	{
+																		"additionalProperties": false,
+																		"type": "object",
+																		"required": [
+																			"kind",
+																			"conversationId"
+																		],
+																		"properties": {
+																			"kind": {
+																				"const": "conversation",
+																				"type": "string"
+																			},
+																			"conversationId": {
+																				"format": "uuid",
+																				"type": "string"
+																			},
+																			"messageId": {
+																				"format": "uuid",
+																				"type": "string"
+																			}
+																		}
+																	},
+																	{
+																		"additionalProperties": false,
+																		"type": "object",
+																		"required": [
+																			"kind",
+																			"notificationId"
+																		],
+																		"properties": {
+																			"kind": {
+																				"const": "notification_details",
+																				"type": "string"
+																			},
+																			"notificationId": {
+																				"format": "uuid",
+																				"type": "string"
+																			}
+																		}
+																	}
+																]
 															}
 														}
 													},
@@ -13463,13 +14099,13 @@
 															"id",
 															"title",
 															"body",
-															"actorProfileId",
-															"actorName",
-															"subjectUnitId",
+															"actor",
+															"subject",
 															"readAt",
 															"createdAt",
 															"kind",
-															"payload"
+															"context",
+															"destination"
 														],
 														"properties": {
 															"id": {
@@ -13478,29 +14114,160 @@
 															},
 															"title": { "type": "string" },
 															"body": { "type": "string" },
-															"actorProfileId": {
+															"actor": {
 																"nullable": true,
 																"anyOf": [
 																	{
-																		"format": "uuid",
-																		"type": "string"
+																		"additionalProperties": false,
+																		"type": "object",
+																		"required": [
+																			"id",
+																			"name",
+																			"slugAddress"
+																		],
+																		"properties": {
+																			"id": {
+																				"format": "uuid",
+																				"type": "string"
+																			},
+																			"name": {
+																				"nullable": true,
+																				"anyOf": [
+																					{
+																						"type": "string"
+																					},
+																					{
+																						"type": "null"
+																					}
+																				]
+																			},
+																			"slugAddress": {
+																				"nullable": true,
+																				"anyOf": [
+																					{
+																						"additionalProperties": false,
+																						"type": "object",
+																						"required": [
+																							"slug",
+																							"scopeUnitId",
+																							"canonicalPath"
+																						],
+																						"properties": {
+																							"slug": {
+																								"minLength": 1,
+																								"maxLength": 63,
+																								"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																								"type": "string"
+																							},
+																							"scopeUnitId": {
+																								"format": "uuid",
+																								"type": "string"
+																							},
+																							"canonicalPath": {
+																								"minItems": 2,
+																								"maxItems": 3,
+																								"type": "array",
+																								"items": {
+																									"minLength": 1,
+																									"maxLength": 63,
+																									"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																									"type": "string"
+																								}
+																							}
+																						}
+																					},
+																					{
+																						"type": "null"
+																					}
+																				]
+																			}
+																		}
 																	},
 																	{ "type": "null" }
 																]
 															},
-															"actorName": {
-																"nullable": true,
-																"anyOf": [
-																	{ "type": "string" },
-																	{ "type": "null" }
-																]
-															},
-															"subjectUnitId": {
+															"subject": {
 																"nullable": true,
 																"anyOf": [
 																	{
-																		"format": "uuid",
-																		"type": "string"
+																		"additionalProperties": false,
+																		"type": "object",
+																		"required": [
+																			"id",
+																			"kind",
+																			"slugAddress"
+																		],
+																		"properties": {
+																			"id": {
+																				"format": "uuid",
+																				"type": "string"
+																			},
+																			"kind": {
+																				"type": "string",
+																				"enum": [
+																					"slug_namespace",
+																					"profile",
+																					"book",
+																					"software",
+																					"media",
+																					"video",
+																					"audio",
+																					"release",
+																					"entity",
+																					"label",
+																					"tag",
+																					"structure",
+																					"series",
+																					"zone",
+																					"zone_page",
+																					"collection",
+																					"post",
+																					"poll",
+																					"realm",
+																					"realm_rule"
+																				]
+																			},
+																			"slugAddress": {
+																				"nullable": true,
+																				"anyOf": [
+																					{
+																						"additionalProperties": false,
+																						"type": "object",
+																						"required": [
+																							"slug",
+																							"scopeUnitId",
+																							"canonicalPath"
+																						],
+																						"properties": {
+																							"slug": {
+																								"minLength": 1,
+																								"maxLength": 63,
+																								"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																								"type": "string"
+																							},
+																							"scopeUnitId": {
+																								"format": "uuid",
+																								"type": "string"
+																							},
+																							"canonicalPath": {
+																								"minItems": 2,
+																								"maxItems": 3,
+																								"type": "array",
+																								"items": {
+																									"minLength": 1,
+																									"maxLength": 63,
+																									"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																									"type": "string"
+																								}
+																							}
+																						}
+																					},
+																					{
+																						"type": "null"
+																					}
+																				]
+																			}
+																		}
 																	},
 																	{ "type": "null" }
 																]
@@ -13523,91 +14290,175 @@
 																"const": "moderation",
 																"type": "string"
 															},
-															"payload": {
+															"context": {
+																"anyOf": [
+																	{
+																		"anyOf": [
+																			{
+																				"additionalProperties": false,
+																				"type": "object",
+																				"required": [
+																					"type",
+																					"actionId",
+																					"actionKind"
+																				],
+																				"properties": {
+																					"type": {
+																						"const": "content_governance_action",
+																						"type": "string"
+																					},
+																					"actionId": {
+																						"format": "uuid",
+																						"type": "string"
+																					},
+																					"actionKind": {
+																						"type": "string",
+																						"enum": [
+																							"approve",
+																							"hide",
+																							"remove",
+																							"restore",
+																							"lock_post_targeting",
+																							"unlock_post_targeting",
+																							"invalidate_content_license",
+																							"restore_content_license",
+																							"reverse"
+																						]
+																					},
+																					"publicNoticePostId": {
+																						"format": "uuid",
+																						"type": "string"
+																					}
+																				}
+																			},
+																			{
+																				"additionalProperties": false,
+																				"type": "object",
+																				"required": [
+																					"type",
+																					"reportId",
+																					"referralId"
+																				],
+																				"properties": {
+																					"type": {
+																						"const": "report_resolution",
+																						"type": "string"
+																					},
+																					"reportId": {
+																						"format": "uuid",
+																						"type": "string"
+																					},
+																					"referralId": {
+																						"format": "uuid",
+																						"type": "string"
+																					},
+																					"actionId": {
+																						"format": "uuid",
+																						"type": "string"
+																					},
+																					"actionKind": {
+																						"type": "string",
+																						"enum": [
+																							"approve",
+																							"hide",
+																							"remove",
+																							"restore",
+																							"lock_post_targeting",
+																							"unlock_post_targeting",
+																							"invalidate_content_license",
+																							"restore_content_license",
+																							"reverse"
+																						]
+																					},
+																					"resolution": {
+																						"const": "dismissed",
+																						"type": "string"
+																					},
+																					"publicNoticePostId": {
+																						"format": "uuid",
+																						"type": "string"
+																					}
+																				}
+																			},
+																			{
+																				"additionalProperties": false,
+																				"type": "object",
+																				"required": [
+																					"type",
+																					"actionId",
+																					"actionKind",
+																					"enforcementKind"
+																				],
+																				"properties": {
+																					"type": {
+																						"const": "account_enforcement_action",
+																						"type": "string"
+																					},
+																					"actionId": {
+																						"format": "uuid",
+																						"type": "string"
+																					},
+																					"actionKind": {
+																						"anyOf": [
+																							{
+																								"const": "issue",
+																								"type": "string"
+																							},
+																							{
+																								"const": "revoke",
+																								"type": "string"
+																							}
+																						]
+																					},
+																					"enforcementKind": {
+																						"type": "string",
+																						"enum": [
+																							"warning",
+																							"silence",
+																							"suspension",
+																							"ban",
+																							"rate_limit",
+																							"trust_restriction"
+																						]
+																					},
+																					"publicNoticePostId": {
+																						"format": "uuid",
+																						"type": "string"
+																					}
+																				}
+																			}
+																		]
+																	},
+																	{
+																		"additionalProperties": false,
+																		"type": "object",
+																		"required": ["type"],
+																		"properties": {
+																			"type": {
+																				"const": "unavailable",
+																				"type": "string"
+																			}
+																		}
+																	}
+																]
+															},
+															"destination": {
 																"anyOf": [
 																	{
 																		"additionalProperties": false,
 																		"type": "object",
 																		"required": [
-																			"type",
-																			"actionId",
-																			"actionKind"
+																			"kind",
+																			"reportId"
 																		],
 																		"properties": {
-																			"type": {
-																				"const": "content_governance_action",
-																				"type": "string"
-																			},
-																			"actionId": {
-																				"format": "uuid",
-																				"type": "string"
-																			},
-																			"actionKind": {
-																				"type": "string",
-																				"enum": [
-																					"approve",
-																					"hide",
-																					"remove",
-																					"restore",
-																					"lock_post_targeting",
-																					"unlock_post_targeting",
-																					"invalidate_content_license",
-																					"restore_content_license",
-																					"reverse"
-																				]
-																			},
-																			"publicNoticePostId": {
-																				"format": "uuid",
-																				"type": "string"
-																			}
-																		}
-																	},
-																	{
-																		"additionalProperties": false,
-																		"type": "object",
-																		"required": [
-																			"type",
-																			"reportId",
-																			"referralId"
-																		],
-																		"properties": {
-																			"type": {
-																				"const": "report_resolution",
+																			"kind": {
+																				"const": "report",
 																				"type": "string"
 																			},
 																			"reportId": {
 																				"format": "uuid",
 																				"type": "string"
-																			},
-																			"referralId": {
-																				"format": "uuid",
-																				"type": "string"
-																			},
-																			"actionId": {
-																				"format": "uuid",
-																				"type": "string"
-																			},
-																			"actionKind": {
-																				"type": "string",
-																				"enum": [
-																					"approve",
-																					"hide",
-																					"remove",
-																					"restore",
-																					"lock_post_targeting",
-																					"unlock_post_targeting",
-																					"invalidate_content_license",
-																					"restore_content_license",
-																					"reverse"
-																				]
-																			},
-																			"resolution": {
-																				"const": "dismissed",
-																				"type": "string"
-																			},
-																			"publicNoticePostId": {
-																				"format": "uuid",
-																				"type": "string"
 																			}
 																		}
 																	},
@@ -13615,44 +14466,15 @@
 																		"additionalProperties": false,
 																		"type": "object",
 																		"required": [
-																			"type",
-																			"actionId",
-																			"actionKind",
-																			"enforcementKind"
+																			"kind",
+																			"notificationId"
 																		],
 																		"properties": {
-																			"type": {
-																				"const": "account_enforcement_action",
+																			"kind": {
+																				"const": "notification_details",
 																				"type": "string"
 																			},
-																			"actionId": {
-																				"format": "uuid",
-																				"type": "string"
-																			},
-																			"actionKind": {
-																				"anyOf": [
-																					{
-																						"const": "issue",
-																						"type": "string"
-																					},
-																					{
-																						"const": "revoke",
-																						"type": "string"
-																					}
-																				]
-																			},
-																			"enforcementKind": {
-																				"type": "string",
-																				"enum": [
-																					"warning",
-																					"silence",
-																					"suspension",
-																					"ban",
-																					"rate_limit",
-																					"trust_restriction"
-																				]
-																			},
-																			"publicNoticePostId": {
+																			"notificationId": {
 																				"format": "uuid",
 																				"type": "string"
 																			}
@@ -13668,13 +14490,13 @@
 															"id",
 															"title",
 															"body",
-															"actorProfileId",
-															"actorName",
-															"subjectUnitId",
+															"actor",
+															"subject",
 															"readAt",
 															"createdAt",
 															"kind",
-															"payload"
+															"context",
+															"destination"
 														],
 														"properties": {
 															"id": {
@@ -13683,29 +14505,160 @@
 															},
 															"title": { "type": "string" },
 															"body": { "type": "string" },
-															"actorProfileId": {
+															"actor": {
 																"nullable": true,
 																"anyOf": [
 																	{
-																		"format": "uuid",
-																		"type": "string"
+																		"additionalProperties": false,
+																		"type": "object",
+																		"required": [
+																			"id",
+																			"name",
+																			"slugAddress"
+																		],
+																		"properties": {
+																			"id": {
+																				"format": "uuid",
+																				"type": "string"
+																			},
+																			"name": {
+																				"nullable": true,
+																				"anyOf": [
+																					{
+																						"type": "string"
+																					},
+																					{
+																						"type": "null"
+																					}
+																				]
+																			},
+																			"slugAddress": {
+																				"nullable": true,
+																				"anyOf": [
+																					{
+																						"additionalProperties": false,
+																						"type": "object",
+																						"required": [
+																							"slug",
+																							"scopeUnitId",
+																							"canonicalPath"
+																						],
+																						"properties": {
+																							"slug": {
+																								"minLength": 1,
+																								"maxLength": 63,
+																								"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																								"type": "string"
+																							},
+																							"scopeUnitId": {
+																								"format": "uuid",
+																								"type": "string"
+																							},
+																							"canonicalPath": {
+																								"minItems": 2,
+																								"maxItems": 3,
+																								"type": "array",
+																								"items": {
+																									"minLength": 1,
+																									"maxLength": 63,
+																									"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																									"type": "string"
+																								}
+																							}
+																						}
+																					},
+																					{
+																						"type": "null"
+																					}
+																				]
+																			}
+																		}
 																	},
 																	{ "type": "null" }
 																]
 															},
-															"actorName": {
-																"nullable": true,
-																"anyOf": [
-																	{ "type": "string" },
-																	{ "type": "null" }
-																]
-															},
-															"subjectUnitId": {
+															"subject": {
 																"nullable": true,
 																"anyOf": [
 																	{
-																		"format": "uuid",
-																		"type": "string"
+																		"additionalProperties": false,
+																		"type": "object",
+																		"required": [
+																			"id",
+																			"kind",
+																			"slugAddress"
+																		],
+																		"properties": {
+																			"id": {
+																				"format": "uuid",
+																				"type": "string"
+																			},
+																			"kind": {
+																				"type": "string",
+																				"enum": [
+																					"slug_namespace",
+																					"profile",
+																					"book",
+																					"software",
+																					"media",
+																					"video",
+																					"audio",
+																					"release",
+																					"entity",
+																					"label",
+																					"tag",
+																					"structure",
+																					"series",
+																					"zone",
+																					"zone_page",
+																					"collection",
+																					"post",
+																					"poll",
+																					"realm",
+																					"realm_rule"
+																				]
+																			},
+																			"slugAddress": {
+																				"nullable": true,
+																				"anyOf": [
+																					{
+																						"additionalProperties": false,
+																						"type": "object",
+																						"required": [
+																							"slug",
+																							"scopeUnitId",
+																							"canonicalPath"
+																						],
+																						"properties": {
+																							"slug": {
+																								"minLength": 1,
+																								"maxLength": 63,
+																								"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																								"type": "string"
+																							},
+																							"scopeUnitId": {
+																								"format": "uuid",
+																								"type": "string"
+																							},
+																							"canonicalPath": {
+																								"minItems": 2,
+																								"maxItems": 3,
+																								"type": "array",
+																								"items": {
+																									"minLength": 1,
+																									"maxLength": 63,
+																									"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																									"type": "string"
+																								}
+																							}
+																						}
+																					},
+																					{
+																						"type": "null"
+																					}
+																				]
+																			}
+																		}
 																	},
 																	{ "type": "null" }
 																]
@@ -13728,20 +14681,128 @@
 																"const": "realm",
 																"type": "string"
 															},
-															"payload": {
-																"additionalProperties": false,
-																"type": "object",
-																"required": ["type", "event"],
-																"properties": {
-																	"type": {
-																		"const": "realm_event",
-																		"type": "string"
+															"context": {
+																"anyOf": [
+																	{
+																		"additionalProperties": false,
+																		"type": "object",
+																		"required": [
+																			"type",
+																			"event"
+																		],
+																		"properties": {
+																			"type": {
+																				"const": "realm_event",
+																				"type": "string"
+																			},
+																			"event": {
+																				"const": "membership_updated",
+																				"type": "string"
+																			}
+																		}
 																	},
-																	"event": {
-																		"const": "membership_updated",
-																		"type": "string"
+																	{
+																		"additionalProperties": false,
+																		"type": "object",
+																		"required": ["type"],
+																		"properties": {
+																			"type": {
+																				"const": "unavailable",
+																				"type": "string"
+																			}
+																		}
 																	}
-																}
+																]
+															},
+															"destination": {
+																"anyOf": [
+																	{
+																		"additionalProperties": false,
+																		"type": "object",
+																		"required": [
+																			"kind",
+																			"realm"
+																		],
+																		"properties": {
+																			"kind": {
+																				"const": "realm",
+																				"type": "string"
+																			},
+																			"realm": {
+																				"additionalProperties": false,
+																				"type": "object",
+																				"required": [
+																					"id",
+																					"slugAddress"
+																				],
+																				"properties": {
+																					"id": {
+																						"format": "uuid",
+																						"type": "string"
+																					},
+																					"slugAddress": {
+																						"nullable": true,
+																						"anyOf": [
+																							{
+																								"additionalProperties": false,
+																								"type": "object",
+																								"required": [
+																									"slug",
+																									"scopeUnitId",
+																									"canonicalPath"
+																								],
+																								"properties": {
+																									"slug": {
+																										"minLength": 1,
+																										"maxLength": 63,
+																										"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																										"type": "string"
+																									},
+																									"scopeUnitId": {
+																										"format": "uuid",
+																										"type": "string"
+																									},
+																									"canonicalPath": {
+																										"minItems": 2,
+																										"maxItems": 3,
+																										"type": "array",
+																										"items": {
+																											"minLength": 1,
+																											"maxLength": 63,
+																											"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																											"type": "string"
+																										}
+																									}
+																								}
+																							},
+																							{
+																								"type": "null"
+																							}
+																						]
+																					}
+																				}
+																			}
+																		}
+																	},
+																	{
+																		"additionalProperties": false,
+																		"type": "object",
+																		"required": [
+																			"kind",
+																			"notificationId"
+																		],
+																		"properties": {
+																			"kind": {
+																				"const": "notification_details",
+																				"type": "string"
+																			},
+																			"notificationId": {
+																				"format": "uuid",
+																				"type": "string"
+																			}
+																		}
+																	}
+																]
 															}
 														}
 													},
@@ -13751,13 +14812,13 @@
 															"id",
 															"title",
 															"body",
-															"actorProfileId",
-															"actorName",
-															"subjectUnitId",
+															"actor",
+															"subject",
 															"readAt",
 															"createdAt",
 															"kind",
-															"payload"
+															"context",
+															"destination"
 														],
 														"properties": {
 															"id": {
@@ -13766,29 +14827,160 @@
 															},
 															"title": { "type": "string" },
 															"body": { "type": "string" },
-															"actorProfileId": {
+															"actor": {
 																"nullable": true,
 																"anyOf": [
 																	{
-																		"format": "uuid",
-																		"type": "string"
+																		"additionalProperties": false,
+																		"type": "object",
+																		"required": [
+																			"id",
+																			"name",
+																			"slugAddress"
+																		],
+																		"properties": {
+																			"id": {
+																				"format": "uuid",
+																				"type": "string"
+																			},
+																			"name": {
+																				"nullable": true,
+																				"anyOf": [
+																					{
+																						"type": "string"
+																					},
+																					{
+																						"type": "null"
+																					}
+																				]
+																			},
+																			"slugAddress": {
+																				"nullable": true,
+																				"anyOf": [
+																					{
+																						"additionalProperties": false,
+																						"type": "object",
+																						"required": [
+																							"slug",
+																							"scopeUnitId",
+																							"canonicalPath"
+																						],
+																						"properties": {
+																							"slug": {
+																								"minLength": 1,
+																								"maxLength": 63,
+																								"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																								"type": "string"
+																							},
+																							"scopeUnitId": {
+																								"format": "uuid",
+																								"type": "string"
+																							},
+																							"canonicalPath": {
+																								"minItems": 2,
+																								"maxItems": 3,
+																								"type": "array",
+																								"items": {
+																									"minLength": 1,
+																									"maxLength": 63,
+																									"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																									"type": "string"
+																								}
+																							}
+																						}
+																					},
+																					{
+																						"type": "null"
+																					}
+																				]
+																			}
+																		}
 																	},
 																	{ "type": "null" }
 																]
 															},
-															"actorName": {
-																"nullable": true,
-																"anyOf": [
-																	{ "type": "string" },
-																	{ "type": "null" }
-																]
-															},
-															"subjectUnitId": {
+															"subject": {
 																"nullable": true,
 																"anyOf": [
 																	{
-																		"format": "uuid",
-																		"type": "string"
+																		"additionalProperties": false,
+																		"type": "object",
+																		"required": [
+																			"id",
+																			"kind",
+																			"slugAddress"
+																		],
+																		"properties": {
+																			"id": {
+																				"format": "uuid",
+																				"type": "string"
+																			},
+																			"kind": {
+																				"type": "string",
+																				"enum": [
+																					"slug_namespace",
+																					"profile",
+																					"book",
+																					"software",
+																					"media",
+																					"video",
+																					"audio",
+																					"release",
+																					"entity",
+																					"label",
+																					"tag",
+																					"structure",
+																					"series",
+																					"zone",
+																					"zone_page",
+																					"collection",
+																					"post",
+																					"poll",
+																					"realm",
+																					"realm_rule"
+																				]
+																			},
+																			"slugAddress": {
+																				"nullable": true,
+																				"anyOf": [
+																					{
+																						"additionalProperties": false,
+																						"type": "object",
+																						"required": [
+																							"slug",
+																							"scopeUnitId",
+																							"canonicalPath"
+																						],
+																						"properties": {
+																							"slug": {
+																								"minLength": 1,
+																								"maxLength": 63,
+																								"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																								"type": "string"
+																							},
+																							"scopeUnitId": {
+																								"format": "uuid",
+																								"type": "string"
+																							},
+																							"canonicalPath": {
+																								"minItems": 2,
+																								"maxItems": 3,
+																								"type": "array",
+																								"items": {
+																									"minLength": 1,
+																									"maxLength": 63,
+																									"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																									"type": "string"
+																								}
+																							}
+																						}
+																					},
+																					{
+																						"type": "null"
+																					}
+																				]
+																			}
+																		}
 																	},
 																	{ "type": "null" }
 																]
@@ -13811,28 +15003,289 @@
 																"const": "system",
 																"type": "string"
 															},
-															"payload": {
-																"additionalProperties": false,
-																"type": "object",
-																"required": ["type", "event"],
-																"properties": {
-																	"type": {
-																		"const": "system_event",
-																		"type": "string"
+															"context": {
+																"anyOf": [
+																	{
+																		"anyOf": [
+																			{
+																				"additionalProperties": false,
+																				"type": "object",
+																				"required": [
+																					"type",
+																					"event",
+																					"references"
+																				],
+																				"properties": {
+																					"type": {
+																						"const": "system_event",
+																						"type": "string"
+																					},
+																					"event": {
+																						"const": "unit_access_invitation",
+																						"type": "string"
+																					},
+																					"references": {
+																						"additionalProperties": false,
+																						"type": "object",
+																						"required": [
+																							"invitationId"
+																						],
+																						"properties": {
+																							"invitationId": {
+																								"format": "uuid",
+																								"type": "string"
+																							}
+																						}
+																					}
+																				}
+																			},
+																			{
+																				"additionalProperties": false,
+																				"type": "object",
+																				"required": [
+																					"type",
+																					"event",
+																					"references"
+																				],
+																				"properties": {
+																					"type": {
+																						"const": "system_event",
+																						"type": "string"
+																					},
+																					"event": {
+																						"const": "unit_ownership_override",
+																						"type": "string"
+																					},
+																					"references": {
+																						"additionalProperties": false,
+																						"type": "object",
+																						"required": [
+																							"ownershipId",
+																							"role"
+																						],
+																						"properties": {
+																							"ownershipId": {
+																								"format": "uuid",
+																								"type": "string"
+																							},
+																							"role": {
+																								"anyOf": [
+																									{
+																										"const": "owner",
+																										"type": "string"
+																									},
+																									{
+																										"const": "previous_owner",
+																										"type": "string"
+																									}
+																								]
+																							}
+																						}
+																					}
+																				}
+																			},
+																			{
+																				"additionalProperties": false,
+																				"type": "object",
+																				"required": [
+																					"type",
+																					"event",
+																					"references"
+																				],
+																				"properties": {
+																					"type": {
+																						"const": "system_event",
+																						"type": "string"
+																					},
+																					"event": {
+																						"const": "unit_ownership_claim_resolution",
+																						"type": "string"
+																					},
+																					"references": {
+																						"additionalProperties": false,
+																						"type": "object",
+																						"required": [
+																							"claimId",
+																							"resolution"
+																						],
+																						"properties": {
+																							"claimId": {
+																								"format": "uuid",
+																								"type": "string"
+																							},
+																							"resolution": {
+																								"anyOf": [
+																									{
+																										"const": "approved",
+																										"type": "string"
+																									},
+																									{
+																										"const": "rejected",
+																										"type": "string"
+																									},
+																									{
+																										"const": "superseded",
+																										"type": "string"
+																									}
+																								]
+																							}
+																						}
+																					}
+																				}
+																			}
+																		]
 																	},
-																	"event": {
-																		"minLength": 1,
-																		"type": "string"
-																	},
-																	"references": {
+																	{
+																		"additionalProperties": false,
 																		"type": "object",
-																		"patternProperties": {
-																			"^(.*)$": {
+																		"required": ["type"],
+																		"properties": {
+																			"type": {
+																				"const": "unavailable",
 																				"type": "string"
 																			}
 																		}
 																	}
-																}
+																]
+															},
+															"destination": {
+																"anyOf": [
+																	{
+																		"additionalProperties": false,
+																		"type": "object",
+																		"required": [
+																			"kind",
+																			"unitId",
+																			"invitationId"
+																		],
+																		"properties": {
+																			"kind": {
+																				"const": "access_invitation",
+																				"type": "string"
+																			},
+																			"unitId": {
+																				"format": "uuid",
+																				"type": "string"
+																			},
+																			"invitationId": {
+																				"format": "uuid",
+																				"type": "string"
+																			}
+																		}
+																	},
+																	{
+																		"additionalProperties": false,
+																		"type": "object",
+																		"required": [
+																			"kind",
+																			"unit"
+																		],
+																		"properties": {
+																			"kind": {
+																				"const": "unit",
+																				"type": "string"
+																			},
+																			"unit": {
+																				"additionalProperties": false,
+																				"type": "object",
+																				"required": [
+																					"id",
+																					"kind",
+																					"slugAddress"
+																				],
+																				"properties": {
+																					"id": {
+																						"format": "uuid",
+																						"type": "string"
+																					},
+																					"kind": {
+																						"type": "string",
+																						"enum": [
+																							"slug_namespace",
+																							"profile",
+																							"book",
+																							"software",
+																							"media",
+																							"video",
+																							"audio",
+																							"release",
+																							"entity",
+																							"label",
+																							"tag",
+																							"structure",
+																							"series",
+																							"zone",
+																							"zone_page",
+																							"collection",
+																							"post",
+																							"poll",
+																							"realm",
+																							"realm_rule"
+																						]
+																					},
+																					"slugAddress": {
+																						"nullable": true,
+																						"anyOf": [
+																							{
+																								"additionalProperties": false,
+																								"type": "object",
+																								"required": [
+																									"slug",
+																									"scopeUnitId",
+																									"canonicalPath"
+																								],
+																								"properties": {
+																									"slug": {
+																										"minLength": 1,
+																										"maxLength": 63,
+																										"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																										"type": "string"
+																									},
+																									"scopeUnitId": {
+																										"format": "uuid",
+																										"type": "string"
+																									},
+																									"canonicalPath": {
+																										"minItems": 2,
+																										"maxItems": 3,
+																										"type": "array",
+																										"items": {
+																											"minLength": 1,
+																											"maxLength": 63,
+																											"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																											"type": "string"
+																										}
+																									}
+																								}
+																							},
+																							{
+																								"type": "null"
+																							}
+																						]
+																					}
+																				}
+																			}
+																		}
+																	},
+																	{
+																		"additionalProperties": false,
+																		"type": "object",
+																		"required": [
+																			"kind",
+																			"notificationId"
+																		],
+																		"properties": {
+																			"kind": {
+																				"const": "notification_details",
+																				"type": "string"
+																			},
+																			"notificationId": {
+																				"format": "uuid",
+																				"type": "string"
+																			}
+																		}
+																	}
+																]
 															}
 														}
 													}
@@ -14122,6 +15575,2030 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
+		"/api/v1/notifications/{notificationId}": {
+			"get": {
+				"summary": "Get one notification",
+				"tags": ["Notifications"],
+				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "notificationId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"type": "object",
+											"required": [
+												"id",
+												"title",
+												"body",
+												"actor",
+												"subject",
+												"readAt",
+												"createdAt",
+												"kind",
+												"context",
+												"destination"
+											],
+											"properties": {
+												"id": { "format": "uuid", "type": "string" },
+												"title": { "type": "string" },
+												"body": { "type": "string" },
+												"actor": {
+													"nullable": true,
+													"anyOf": [
+														{
+															"additionalProperties": false,
+															"type": "object",
+															"required": [
+																"id",
+																"name",
+																"slugAddress"
+															],
+															"properties": {
+																"id": {
+																	"format": "uuid",
+																	"type": "string"
+																},
+																"name": {
+																	"nullable": true,
+																	"anyOf": [
+																		{ "type": "string" },
+																		{ "type": "null" }
+																	]
+																},
+																"slugAddress": {
+																	"nullable": true,
+																	"anyOf": [
+																		{
+																			"additionalProperties": false,
+																			"type": "object",
+																			"required": [
+																				"slug",
+																				"scopeUnitId",
+																				"canonicalPath"
+																			],
+																			"properties": {
+																				"slug": {
+																					"minLength": 1,
+																					"maxLength": 63,
+																					"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																					"type": "string"
+																				},
+																				"scopeUnitId": {
+																					"format": "uuid",
+																					"type": "string"
+																				},
+																				"canonicalPath": {
+																					"minItems": 2,
+																					"maxItems": 3,
+																					"type": "array",
+																					"items": {
+																						"minLength": 1,
+																						"maxLength": 63,
+																						"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																						"type": "string"
+																					}
+																				}
+																			}
+																		},
+																		{ "type": "null" }
+																	]
+																}
+															}
+														},
+														{ "type": "null" }
+													]
+												},
+												"subject": {
+													"nullable": true,
+													"anyOf": [
+														{
+															"additionalProperties": false,
+															"type": "object",
+															"required": [
+																"id",
+																"kind",
+																"slugAddress"
+															],
+															"properties": {
+																"id": {
+																	"format": "uuid",
+																	"type": "string"
+																},
+																"kind": {
+																	"type": "string",
+																	"enum": [
+																		"slug_namespace",
+																		"profile",
+																		"book",
+																		"software",
+																		"media",
+																		"video",
+																		"audio",
+																		"release",
+																		"entity",
+																		"label",
+																		"tag",
+																		"structure",
+																		"series",
+																		"zone",
+																		"zone_page",
+																		"collection",
+																		"post",
+																		"poll",
+																		"realm",
+																		"realm_rule"
+																	]
+																},
+																"slugAddress": {
+																	"nullable": true,
+																	"anyOf": [
+																		{
+																			"additionalProperties": false,
+																			"type": "object",
+																			"required": [
+																				"slug",
+																				"scopeUnitId",
+																				"canonicalPath"
+																			],
+																			"properties": {
+																				"slug": {
+																					"minLength": 1,
+																					"maxLength": 63,
+																					"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																					"type": "string"
+																				},
+																				"scopeUnitId": {
+																					"format": "uuid",
+																					"type": "string"
+																				},
+																				"canonicalPath": {
+																					"minItems": 2,
+																					"maxItems": 3,
+																					"type": "array",
+																					"items": {
+																						"minLength": 1,
+																						"maxLength": 63,
+																						"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																						"type": "string"
+																					}
+																				}
+																			}
+																		},
+																		{ "type": "null" }
+																	]
+																}
+															}
+														},
+														{ "type": "null" }
+													]
+												},
+												"readAt": {
+													"nullable": true,
+													"anyOf": [
+														{ "format": "date-time", "type": "string" },
+														{ "type": "null" }
+													]
+												},
+												"createdAt": {
+													"format": "date-time",
+													"type": "string"
+												},
+												"kind": { "const": "reply", "type": "string" },
+												"context": {
+													"anyOf": [
+														{
+															"additionalProperties": false,
+															"type": "object",
+															"required": ["type"],
+															"properties": {
+																"type": {
+																	"const": "reply",
+																	"type": "string"
+																}
+															}
+														},
+														{
+															"additionalProperties": false,
+															"type": "object",
+															"required": ["type"],
+															"properties": {
+																"type": {
+																	"const": "unavailable",
+																	"type": "string"
+																}
+															}
+														}
+													]
+												},
+												"destination": {
+													"anyOf": [
+														{
+															"additionalProperties": false,
+															"type": "object",
+															"required": ["kind", "postId"],
+															"properties": {
+																"kind": {
+																	"const": "post",
+																	"type": "string"
+																},
+																"postId": {
+																	"format": "uuid",
+																	"type": "string"
+																}
+															}
+														},
+														{
+															"additionalProperties": false,
+															"type": "object",
+															"required": ["kind", "notificationId"],
+															"properties": {
+																"kind": {
+																	"const": "notification_details",
+																	"type": "string"
+																},
+																"notificationId": {
+																	"format": "uuid",
+																	"type": "string"
+																}
+															}
+														}
+													]
+												}
+											}
+										},
+										{
+											"type": "object",
+											"required": [
+												"id",
+												"title",
+												"body",
+												"actor",
+												"subject",
+												"readAt",
+												"createdAt",
+												"kind",
+												"context",
+												"destination"
+											],
+											"properties": {
+												"id": { "format": "uuid", "type": "string" },
+												"title": { "type": "string" },
+												"body": { "type": "string" },
+												"actor": {
+													"nullable": true,
+													"anyOf": [
+														{
+															"additionalProperties": false,
+															"type": "object",
+															"required": [
+																"id",
+																"name",
+																"slugAddress"
+															],
+															"properties": {
+																"id": {
+																	"format": "uuid",
+																	"type": "string"
+																},
+																"name": {
+																	"nullable": true,
+																	"anyOf": [
+																		{ "type": "string" },
+																		{ "type": "null" }
+																	]
+																},
+																"slugAddress": {
+																	"nullable": true,
+																	"anyOf": [
+																		{
+																			"additionalProperties": false,
+																			"type": "object",
+																			"required": [
+																				"slug",
+																				"scopeUnitId",
+																				"canonicalPath"
+																			],
+																			"properties": {
+																				"slug": {
+																					"minLength": 1,
+																					"maxLength": 63,
+																					"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																					"type": "string"
+																				},
+																				"scopeUnitId": {
+																					"format": "uuid",
+																					"type": "string"
+																				},
+																				"canonicalPath": {
+																					"minItems": 2,
+																					"maxItems": 3,
+																					"type": "array",
+																					"items": {
+																						"minLength": 1,
+																						"maxLength": 63,
+																						"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																						"type": "string"
+																					}
+																				}
+																			}
+																		},
+																		{ "type": "null" }
+																	]
+																}
+															}
+														},
+														{ "type": "null" }
+													]
+												},
+												"subject": {
+													"nullable": true,
+													"anyOf": [
+														{
+															"additionalProperties": false,
+															"type": "object",
+															"required": [
+																"id",
+																"kind",
+																"slugAddress"
+															],
+															"properties": {
+																"id": {
+																	"format": "uuid",
+																	"type": "string"
+																},
+																"kind": {
+																	"type": "string",
+																	"enum": [
+																		"slug_namespace",
+																		"profile",
+																		"book",
+																		"software",
+																		"media",
+																		"video",
+																		"audio",
+																		"release",
+																		"entity",
+																		"label",
+																		"tag",
+																		"structure",
+																		"series",
+																		"zone",
+																		"zone_page",
+																		"collection",
+																		"post",
+																		"poll",
+																		"realm",
+																		"realm_rule"
+																	]
+																},
+																"slugAddress": {
+																	"nullable": true,
+																	"anyOf": [
+																		{
+																			"additionalProperties": false,
+																			"type": "object",
+																			"required": [
+																				"slug",
+																				"scopeUnitId",
+																				"canonicalPath"
+																			],
+																			"properties": {
+																				"slug": {
+																					"minLength": 1,
+																					"maxLength": 63,
+																					"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																					"type": "string"
+																				},
+																				"scopeUnitId": {
+																					"format": "uuid",
+																					"type": "string"
+																				},
+																				"canonicalPath": {
+																					"minItems": 2,
+																					"maxItems": 3,
+																					"type": "array",
+																					"items": {
+																						"minLength": 1,
+																						"maxLength": 63,
+																						"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																						"type": "string"
+																					}
+																				}
+																			}
+																		},
+																		{ "type": "null" }
+																	]
+																}
+															}
+														},
+														{ "type": "null" }
+													]
+												},
+												"readAt": {
+													"nullable": true,
+													"anyOf": [
+														{ "format": "date-time", "type": "string" },
+														{ "type": "null" }
+													]
+												},
+												"createdAt": {
+													"format": "date-time",
+													"type": "string"
+												},
+												"kind": {
+													"const": "new_follower",
+													"type": "string"
+												},
+												"context": {
+													"anyOf": [
+														{
+															"additionalProperties": false,
+															"type": "object",
+															"required": ["type"],
+															"properties": {
+																"type": {
+																	"const": "new_follower",
+																	"type": "string"
+																}
+															}
+														},
+														{
+															"additionalProperties": false,
+															"type": "object",
+															"required": ["type"],
+															"properties": {
+																"type": {
+																	"const": "unavailable",
+																	"type": "string"
+																}
+															}
+														}
+													]
+												},
+												"destination": {
+													"anyOf": [
+														{
+															"additionalProperties": false,
+															"type": "object",
+															"required": ["kind", "profile"],
+															"properties": {
+																"kind": {
+																	"const": "profile",
+																	"type": "string"
+																},
+																"profile": {
+																	"additionalProperties": false,
+																	"type": "object",
+																	"required": [
+																		"id",
+																		"slugAddress"
+																	],
+																	"properties": {
+																		"id": {
+																			"format": "uuid",
+																			"type": "string"
+																		},
+																		"slugAddress": {
+																			"nullable": true,
+																			"anyOf": [
+																				{
+																					"additionalProperties": false,
+																					"type": "object",
+																					"required": [
+																						"slug",
+																						"scopeUnitId",
+																						"canonicalPath"
+																					],
+																					"properties": {
+																						"slug": {
+																							"minLength": 1,
+																							"maxLength": 63,
+																							"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																							"type": "string"
+																						},
+																						"scopeUnitId": {
+																							"format": "uuid",
+																							"type": "string"
+																						},
+																						"canonicalPath": {
+																							"minItems": 2,
+																							"maxItems": 3,
+																							"type": "array",
+																							"items": {
+																								"minLength": 1,
+																								"maxLength": 63,
+																								"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																								"type": "string"
+																							}
+																						}
+																					}
+																				},
+																				{ "type": "null" }
+																			]
+																		}
+																	}
+																}
+															}
+														},
+														{
+															"additionalProperties": false,
+															"type": "object",
+															"required": ["kind", "notificationId"],
+															"properties": {
+																"kind": {
+																	"const": "notification_details",
+																	"type": "string"
+																},
+																"notificationId": {
+																	"format": "uuid",
+																	"type": "string"
+																}
+															}
+														}
+													]
+												}
+											}
+										},
+										{
+											"type": "object",
+											"required": [
+												"id",
+												"title",
+												"body",
+												"actor",
+												"subject",
+												"readAt",
+												"createdAt",
+												"kind",
+												"context",
+												"destination"
+											],
+											"properties": {
+												"id": { "format": "uuid", "type": "string" },
+												"title": { "type": "string" },
+												"body": { "type": "string" },
+												"actor": {
+													"nullable": true,
+													"anyOf": [
+														{
+															"additionalProperties": false,
+															"type": "object",
+															"required": [
+																"id",
+																"name",
+																"slugAddress"
+															],
+															"properties": {
+																"id": {
+																	"format": "uuid",
+																	"type": "string"
+																},
+																"name": {
+																	"nullable": true,
+																	"anyOf": [
+																		{ "type": "string" },
+																		{ "type": "null" }
+																	]
+																},
+																"slugAddress": {
+																	"nullable": true,
+																	"anyOf": [
+																		{
+																			"additionalProperties": false,
+																			"type": "object",
+																			"required": [
+																				"slug",
+																				"scopeUnitId",
+																				"canonicalPath"
+																			],
+																			"properties": {
+																				"slug": {
+																					"minLength": 1,
+																					"maxLength": 63,
+																					"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																					"type": "string"
+																				},
+																				"scopeUnitId": {
+																					"format": "uuid",
+																					"type": "string"
+																				},
+																				"canonicalPath": {
+																					"minItems": 2,
+																					"maxItems": 3,
+																					"type": "array",
+																					"items": {
+																						"minLength": 1,
+																						"maxLength": 63,
+																						"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																						"type": "string"
+																					}
+																				}
+																			}
+																		},
+																		{ "type": "null" }
+																	]
+																}
+															}
+														},
+														{ "type": "null" }
+													]
+												},
+												"subject": {
+													"nullable": true,
+													"anyOf": [
+														{
+															"additionalProperties": false,
+															"type": "object",
+															"required": [
+																"id",
+																"kind",
+																"slugAddress"
+															],
+															"properties": {
+																"id": {
+																	"format": "uuid",
+																	"type": "string"
+																},
+																"kind": {
+																	"type": "string",
+																	"enum": [
+																		"slug_namespace",
+																		"profile",
+																		"book",
+																		"software",
+																		"media",
+																		"video",
+																		"audio",
+																		"release",
+																		"entity",
+																		"label",
+																		"tag",
+																		"structure",
+																		"series",
+																		"zone",
+																		"zone_page",
+																		"collection",
+																		"post",
+																		"poll",
+																		"realm",
+																		"realm_rule"
+																	]
+																},
+																"slugAddress": {
+																	"nullable": true,
+																	"anyOf": [
+																		{
+																			"additionalProperties": false,
+																			"type": "object",
+																			"required": [
+																				"slug",
+																				"scopeUnitId",
+																				"canonicalPath"
+																			],
+																			"properties": {
+																				"slug": {
+																					"minLength": 1,
+																					"maxLength": 63,
+																					"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																					"type": "string"
+																				},
+																				"scopeUnitId": {
+																					"format": "uuid",
+																					"type": "string"
+																				},
+																				"canonicalPath": {
+																					"minItems": 2,
+																					"maxItems": 3,
+																					"type": "array",
+																					"items": {
+																						"minLength": 1,
+																						"maxLength": 63,
+																						"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																						"type": "string"
+																					}
+																				}
+																			}
+																		},
+																		{ "type": "null" }
+																	]
+																}
+															}
+														},
+														{ "type": "null" }
+													]
+												},
+												"readAt": {
+													"nullable": true,
+													"anyOf": [
+														{ "format": "date-time", "type": "string" },
+														{ "type": "null" }
+													]
+												},
+												"createdAt": {
+													"format": "date-time",
+													"type": "string"
+												},
+												"kind": {
+													"const": "direct_message",
+													"type": "string"
+												},
+												"context": {
+													"anyOf": [
+														{
+															"additionalProperties": false,
+															"type": "object",
+															"required": ["type", "conversationId"],
+															"properties": {
+																"type": {
+																	"const": "direct_message",
+																	"type": "string"
+																},
+																"conversationId": {
+																	"format": "uuid",
+																	"type": "string"
+																},
+																"messageId": {
+																	"format": "uuid",
+																	"type": "string"
+																}
+															}
+														},
+														{
+															"additionalProperties": false,
+															"type": "object",
+															"required": ["type"],
+															"properties": {
+																"type": {
+																	"const": "unavailable",
+																	"type": "string"
+																}
+															}
+														}
+													]
+												},
+												"destination": {
+													"anyOf": [
+														{
+															"additionalProperties": false,
+															"type": "object",
+															"required": ["kind", "conversationId"],
+															"properties": {
+																"kind": {
+																	"const": "conversation",
+																	"type": "string"
+																},
+																"conversationId": {
+																	"format": "uuid",
+																	"type": "string"
+																},
+																"messageId": {
+																	"format": "uuid",
+																	"type": "string"
+																}
+															}
+														},
+														{
+															"additionalProperties": false,
+															"type": "object",
+															"required": ["kind", "notificationId"],
+															"properties": {
+																"kind": {
+																	"const": "notification_details",
+																	"type": "string"
+																},
+																"notificationId": {
+																	"format": "uuid",
+																	"type": "string"
+																}
+															}
+														}
+													]
+												}
+											}
+										},
+										{
+											"type": "object",
+											"required": [
+												"id",
+												"title",
+												"body",
+												"actor",
+												"subject",
+												"readAt",
+												"createdAt",
+												"kind",
+												"context",
+												"destination"
+											],
+											"properties": {
+												"id": { "format": "uuid", "type": "string" },
+												"title": { "type": "string" },
+												"body": { "type": "string" },
+												"actor": {
+													"nullable": true,
+													"anyOf": [
+														{
+															"additionalProperties": false,
+															"type": "object",
+															"required": [
+																"id",
+																"name",
+																"slugAddress"
+															],
+															"properties": {
+																"id": {
+																	"format": "uuid",
+																	"type": "string"
+																},
+																"name": {
+																	"nullable": true,
+																	"anyOf": [
+																		{ "type": "string" },
+																		{ "type": "null" }
+																	]
+																},
+																"slugAddress": {
+																	"nullable": true,
+																	"anyOf": [
+																		{
+																			"additionalProperties": false,
+																			"type": "object",
+																			"required": [
+																				"slug",
+																				"scopeUnitId",
+																				"canonicalPath"
+																			],
+																			"properties": {
+																				"slug": {
+																					"minLength": 1,
+																					"maxLength": 63,
+																					"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																					"type": "string"
+																				},
+																				"scopeUnitId": {
+																					"format": "uuid",
+																					"type": "string"
+																				},
+																				"canonicalPath": {
+																					"minItems": 2,
+																					"maxItems": 3,
+																					"type": "array",
+																					"items": {
+																						"minLength": 1,
+																						"maxLength": 63,
+																						"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																						"type": "string"
+																					}
+																				}
+																			}
+																		},
+																		{ "type": "null" }
+																	]
+																}
+															}
+														},
+														{ "type": "null" }
+													]
+												},
+												"subject": {
+													"nullable": true,
+													"anyOf": [
+														{
+															"additionalProperties": false,
+															"type": "object",
+															"required": [
+																"id",
+																"kind",
+																"slugAddress"
+															],
+															"properties": {
+																"id": {
+																	"format": "uuid",
+																	"type": "string"
+																},
+																"kind": {
+																	"type": "string",
+																	"enum": [
+																		"slug_namespace",
+																		"profile",
+																		"book",
+																		"software",
+																		"media",
+																		"video",
+																		"audio",
+																		"release",
+																		"entity",
+																		"label",
+																		"tag",
+																		"structure",
+																		"series",
+																		"zone",
+																		"zone_page",
+																		"collection",
+																		"post",
+																		"poll",
+																		"realm",
+																		"realm_rule"
+																	]
+																},
+																"slugAddress": {
+																	"nullable": true,
+																	"anyOf": [
+																		{
+																			"additionalProperties": false,
+																			"type": "object",
+																			"required": [
+																				"slug",
+																				"scopeUnitId",
+																				"canonicalPath"
+																			],
+																			"properties": {
+																				"slug": {
+																					"minLength": 1,
+																					"maxLength": 63,
+																					"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																					"type": "string"
+																				},
+																				"scopeUnitId": {
+																					"format": "uuid",
+																					"type": "string"
+																				},
+																				"canonicalPath": {
+																					"minItems": 2,
+																					"maxItems": 3,
+																					"type": "array",
+																					"items": {
+																						"minLength": 1,
+																						"maxLength": 63,
+																						"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																						"type": "string"
+																					}
+																				}
+																			}
+																		},
+																		{ "type": "null" }
+																	]
+																}
+															}
+														},
+														{ "type": "null" }
+													]
+												},
+												"readAt": {
+													"nullable": true,
+													"anyOf": [
+														{ "format": "date-time", "type": "string" },
+														{ "type": "null" }
+													]
+												},
+												"createdAt": {
+													"format": "date-time",
+													"type": "string"
+												},
+												"kind": { "const": "moderation", "type": "string" },
+												"context": {
+													"anyOf": [
+														{
+															"anyOf": [
+																{
+																	"additionalProperties": false,
+																	"type": "object",
+																	"required": [
+																		"type",
+																		"actionId",
+																		"actionKind"
+																	],
+																	"properties": {
+																		"type": {
+																			"const": "content_governance_action",
+																			"type": "string"
+																		},
+																		"actionId": {
+																			"format": "uuid",
+																			"type": "string"
+																		},
+																		"actionKind": {
+																			"type": "string",
+																			"enum": [
+																				"approve",
+																				"hide",
+																				"remove",
+																				"restore",
+																				"lock_post_targeting",
+																				"unlock_post_targeting",
+																				"invalidate_content_license",
+																				"restore_content_license",
+																				"reverse"
+																			]
+																		},
+																		"publicNoticePostId": {
+																			"format": "uuid",
+																			"type": "string"
+																		}
+																	}
+																},
+																{
+																	"additionalProperties": false,
+																	"type": "object",
+																	"required": [
+																		"type",
+																		"reportId",
+																		"referralId"
+																	],
+																	"properties": {
+																		"type": {
+																			"const": "report_resolution",
+																			"type": "string"
+																		},
+																		"reportId": {
+																			"format": "uuid",
+																			"type": "string"
+																		},
+																		"referralId": {
+																			"format": "uuid",
+																			"type": "string"
+																		},
+																		"actionId": {
+																			"format": "uuid",
+																			"type": "string"
+																		},
+																		"actionKind": {
+																			"type": "string",
+																			"enum": [
+																				"approve",
+																				"hide",
+																				"remove",
+																				"restore",
+																				"lock_post_targeting",
+																				"unlock_post_targeting",
+																				"invalidate_content_license",
+																				"restore_content_license",
+																				"reverse"
+																			]
+																		},
+																		"resolution": {
+																			"const": "dismissed",
+																			"type": "string"
+																		},
+																		"publicNoticePostId": {
+																			"format": "uuid",
+																			"type": "string"
+																		}
+																	}
+																},
+																{
+																	"additionalProperties": false,
+																	"type": "object",
+																	"required": [
+																		"type",
+																		"actionId",
+																		"actionKind",
+																		"enforcementKind"
+																	],
+																	"properties": {
+																		"type": {
+																			"const": "account_enforcement_action",
+																			"type": "string"
+																		},
+																		"actionId": {
+																			"format": "uuid",
+																			"type": "string"
+																		},
+																		"actionKind": {
+																			"anyOf": [
+																				{
+																					"const": "issue",
+																					"type": "string"
+																				},
+																				{
+																					"const": "revoke",
+																					"type": "string"
+																				}
+																			]
+																		},
+																		"enforcementKind": {
+																			"type": "string",
+																			"enum": [
+																				"warning",
+																				"silence",
+																				"suspension",
+																				"ban",
+																				"rate_limit",
+																				"trust_restriction"
+																			]
+																		},
+																		"publicNoticePostId": {
+																			"format": "uuid",
+																			"type": "string"
+																		}
+																	}
+																}
+															]
+														},
+														{
+															"additionalProperties": false,
+															"type": "object",
+															"required": ["type"],
+															"properties": {
+																"type": {
+																	"const": "unavailable",
+																	"type": "string"
+																}
+															}
+														}
+													]
+												},
+												"destination": {
+													"anyOf": [
+														{
+															"additionalProperties": false,
+															"type": "object",
+															"required": ["kind", "reportId"],
+															"properties": {
+																"kind": {
+																	"const": "report",
+																	"type": "string"
+																},
+																"reportId": {
+																	"format": "uuid",
+																	"type": "string"
+																}
+															}
+														},
+														{
+															"additionalProperties": false,
+															"type": "object",
+															"required": ["kind", "notificationId"],
+															"properties": {
+																"kind": {
+																	"const": "notification_details",
+																	"type": "string"
+																},
+																"notificationId": {
+																	"format": "uuid",
+																	"type": "string"
+																}
+															}
+														}
+													]
+												}
+											}
+										},
+										{
+											"type": "object",
+											"required": [
+												"id",
+												"title",
+												"body",
+												"actor",
+												"subject",
+												"readAt",
+												"createdAt",
+												"kind",
+												"context",
+												"destination"
+											],
+											"properties": {
+												"id": { "format": "uuid", "type": "string" },
+												"title": { "type": "string" },
+												"body": { "type": "string" },
+												"actor": {
+													"nullable": true,
+													"anyOf": [
+														{
+															"additionalProperties": false,
+															"type": "object",
+															"required": [
+																"id",
+																"name",
+																"slugAddress"
+															],
+															"properties": {
+																"id": {
+																	"format": "uuid",
+																	"type": "string"
+																},
+																"name": {
+																	"nullable": true,
+																	"anyOf": [
+																		{ "type": "string" },
+																		{ "type": "null" }
+																	]
+																},
+																"slugAddress": {
+																	"nullable": true,
+																	"anyOf": [
+																		{
+																			"additionalProperties": false,
+																			"type": "object",
+																			"required": [
+																				"slug",
+																				"scopeUnitId",
+																				"canonicalPath"
+																			],
+																			"properties": {
+																				"slug": {
+																					"minLength": 1,
+																					"maxLength": 63,
+																					"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																					"type": "string"
+																				},
+																				"scopeUnitId": {
+																					"format": "uuid",
+																					"type": "string"
+																				},
+																				"canonicalPath": {
+																					"minItems": 2,
+																					"maxItems": 3,
+																					"type": "array",
+																					"items": {
+																						"minLength": 1,
+																						"maxLength": 63,
+																						"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																						"type": "string"
+																					}
+																				}
+																			}
+																		},
+																		{ "type": "null" }
+																	]
+																}
+															}
+														},
+														{ "type": "null" }
+													]
+												},
+												"subject": {
+													"nullable": true,
+													"anyOf": [
+														{
+															"additionalProperties": false,
+															"type": "object",
+															"required": [
+																"id",
+																"kind",
+																"slugAddress"
+															],
+															"properties": {
+																"id": {
+																	"format": "uuid",
+																	"type": "string"
+																},
+																"kind": {
+																	"type": "string",
+																	"enum": [
+																		"slug_namespace",
+																		"profile",
+																		"book",
+																		"software",
+																		"media",
+																		"video",
+																		"audio",
+																		"release",
+																		"entity",
+																		"label",
+																		"tag",
+																		"structure",
+																		"series",
+																		"zone",
+																		"zone_page",
+																		"collection",
+																		"post",
+																		"poll",
+																		"realm",
+																		"realm_rule"
+																	]
+																},
+																"slugAddress": {
+																	"nullable": true,
+																	"anyOf": [
+																		{
+																			"additionalProperties": false,
+																			"type": "object",
+																			"required": [
+																				"slug",
+																				"scopeUnitId",
+																				"canonicalPath"
+																			],
+																			"properties": {
+																				"slug": {
+																					"minLength": 1,
+																					"maxLength": 63,
+																					"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																					"type": "string"
+																				},
+																				"scopeUnitId": {
+																					"format": "uuid",
+																					"type": "string"
+																				},
+																				"canonicalPath": {
+																					"minItems": 2,
+																					"maxItems": 3,
+																					"type": "array",
+																					"items": {
+																						"minLength": 1,
+																						"maxLength": 63,
+																						"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																						"type": "string"
+																					}
+																				}
+																			}
+																		},
+																		{ "type": "null" }
+																	]
+																}
+															}
+														},
+														{ "type": "null" }
+													]
+												},
+												"readAt": {
+													"nullable": true,
+													"anyOf": [
+														{ "format": "date-time", "type": "string" },
+														{ "type": "null" }
+													]
+												},
+												"createdAt": {
+													"format": "date-time",
+													"type": "string"
+												},
+												"kind": { "const": "realm", "type": "string" },
+												"context": {
+													"anyOf": [
+														{
+															"additionalProperties": false,
+															"type": "object",
+															"required": ["type", "event"],
+															"properties": {
+																"type": {
+																	"const": "realm_event",
+																	"type": "string"
+																},
+																"event": {
+																	"const": "membership_updated",
+																	"type": "string"
+																}
+															}
+														},
+														{
+															"additionalProperties": false,
+															"type": "object",
+															"required": ["type"],
+															"properties": {
+																"type": {
+																	"const": "unavailable",
+																	"type": "string"
+																}
+															}
+														}
+													]
+												},
+												"destination": {
+													"anyOf": [
+														{
+															"additionalProperties": false,
+															"type": "object",
+															"required": ["kind", "realm"],
+															"properties": {
+																"kind": {
+																	"const": "realm",
+																	"type": "string"
+																},
+																"realm": {
+																	"additionalProperties": false,
+																	"type": "object",
+																	"required": [
+																		"id",
+																		"slugAddress"
+																	],
+																	"properties": {
+																		"id": {
+																			"format": "uuid",
+																			"type": "string"
+																		},
+																		"slugAddress": {
+																			"nullable": true,
+																			"anyOf": [
+																				{
+																					"additionalProperties": false,
+																					"type": "object",
+																					"required": [
+																						"slug",
+																						"scopeUnitId",
+																						"canonicalPath"
+																					],
+																					"properties": {
+																						"slug": {
+																							"minLength": 1,
+																							"maxLength": 63,
+																							"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																							"type": "string"
+																						},
+																						"scopeUnitId": {
+																							"format": "uuid",
+																							"type": "string"
+																						},
+																						"canonicalPath": {
+																							"minItems": 2,
+																							"maxItems": 3,
+																							"type": "array",
+																							"items": {
+																								"minLength": 1,
+																								"maxLength": 63,
+																								"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																								"type": "string"
+																							}
+																						}
+																					}
+																				},
+																				{ "type": "null" }
+																			]
+																		}
+																	}
+																}
+															}
+														},
+														{
+															"additionalProperties": false,
+															"type": "object",
+															"required": ["kind", "notificationId"],
+															"properties": {
+																"kind": {
+																	"const": "notification_details",
+																	"type": "string"
+																},
+																"notificationId": {
+																	"format": "uuid",
+																	"type": "string"
+																}
+															}
+														}
+													]
+												}
+											}
+										},
+										{
+											"type": "object",
+											"required": [
+												"id",
+												"title",
+												"body",
+												"actor",
+												"subject",
+												"readAt",
+												"createdAt",
+												"kind",
+												"context",
+												"destination"
+											],
+											"properties": {
+												"id": { "format": "uuid", "type": "string" },
+												"title": { "type": "string" },
+												"body": { "type": "string" },
+												"actor": {
+													"nullable": true,
+													"anyOf": [
+														{
+															"additionalProperties": false,
+															"type": "object",
+															"required": [
+																"id",
+																"name",
+																"slugAddress"
+															],
+															"properties": {
+																"id": {
+																	"format": "uuid",
+																	"type": "string"
+																},
+																"name": {
+																	"nullable": true,
+																	"anyOf": [
+																		{ "type": "string" },
+																		{ "type": "null" }
+																	]
+																},
+																"slugAddress": {
+																	"nullable": true,
+																	"anyOf": [
+																		{
+																			"additionalProperties": false,
+																			"type": "object",
+																			"required": [
+																				"slug",
+																				"scopeUnitId",
+																				"canonicalPath"
+																			],
+																			"properties": {
+																				"slug": {
+																					"minLength": 1,
+																					"maxLength": 63,
+																					"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																					"type": "string"
+																				},
+																				"scopeUnitId": {
+																					"format": "uuid",
+																					"type": "string"
+																				},
+																				"canonicalPath": {
+																					"minItems": 2,
+																					"maxItems": 3,
+																					"type": "array",
+																					"items": {
+																						"minLength": 1,
+																						"maxLength": 63,
+																						"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																						"type": "string"
+																					}
+																				}
+																			}
+																		},
+																		{ "type": "null" }
+																	]
+																}
+															}
+														},
+														{ "type": "null" }
+													]
+												},
+												"subject": {
+													"nullable": true,
+													"anyOf": [
+														{
+															"additionalProperties": false,
+															"type": "object",
+															"required": [
+																"id",
+																"kind",
+																"slugAddress"
+															],
+															"properties": {
+																"id": {
+																	"format": "uuid",
+																	"type": "string"
+																},
+																"kind": {
+																	"type": "string",
+																	"enum": [
+																		"slug_namespace",
+																		"profile",
+																		"book",
+																		"software",
+																		"media",
+																		"video",
+																		"audio",
+																		"release",
+																		"entity",
+																		"label",
+																		"tag",
+																		"structure",
+																		"series",
+																		"zone",
+																		"zone_page",
+																		"collection",
+																		"post",
+																		"poll",
+																		"realm",
+																		"realm_rule"
+																	]
+																},
+																"slugAddress": {
+																	"nullable": true,
+																	"anyOf": [
+																		{
+																			"additionalProperties": false,
+																			"type": "object",
+																			"required": [
+																				"slug",
+																				"scopeUnitId",
+																				"canonicalPath"
+																			],
+																			"properties": {
+																				"slug": {
+																					"minLength": 1,
+																					"maxLength": 63,
+																					"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																					"type": "string"
+																				},
+																				"scopeUnitId": {
+																					"format": "uuid",
+																					"type": "string"
+																				},
+																				"canonicalPath": {
+																					"minItems": 2,
+																					"maxItems": 3,
+																					"type": "array",
+																					"items": {
+																						"minLength": 1,
+																						"maxLength": 63,
+																						"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																						"type": "string"
+																					}
+																				}
+																			}
+																		},
+																		{ "type": "null" }
+																	]
+																}
+															}
+														},
+														{ "type": "null" }
+													]
+												},
+												"readAt": {
+													"nullable": true,
+													"anyOf": [
+														{ "format": "date-time", "type": "string" },
+														{ "type": "null" }
+													]
+												},
+												"createdAt": {
+													"format": "date-time",
+													"type": "string"
+												},
+												"kind": { "const": "system", "type": "string" },
+												"context": {
+													"anyOf": [
+														{
+															"anyOf": [
+																{
+																	"additionalProperties": false,
+																	"type": "object",
+																	"required": [
+																		"type",
+																		"event",
+																		"references"
+																	],
+																	"properties": {
+																		"type": {
+																			"const": "system_event",
+																			"type": "string"
+																		},
+																		"event": {
+																			"const": "unit_access_invitation",
+																			"type": "string"
+																		},
+																		"references": {
+																			"additionalProperties": false,
+																			"type": "object",
+																			"required": [
+																				"invitationId"
+																			],
+																			"properties": {
+																				"invitationId": {
+																					"format": "uuid",
+																					"type": "string"
+																				}
+																			}
+																		}
+																	}
+																},
+																{
+																	"additionalProperties": false,
+																	"type": "object",
+																	"required": [
+																		"type",
+																		"event",
+																		"references"
+																	],
+																	"properties": {
+																		"type": {
+																			"const": "system_event",
+																			"type": "string"
+																		},
+																		"event": {
+																			"const": "unit_ownership_override",
+																			"type": "string"
+																		},
+																		"references": {
+																			"additionalProperties": false,
+																			"type": "object",
+																			"required": [
+																				"ownershipId",
+																				"role"
+																			],
+																			"properties": {
+																				"ownershipId": {
+																					"format": "uuid",
+																					"type": "string"
+																				},
+																				"role": {
+																					"anyOf": [
+																						{
+																							"const": "owner",
+																							"type": "string"
+																						},
+																						{
+																							"const": "previous_owner",
+																							"type": "string"
+																						}
+																					]
+																				}
+																			}
+																		}
+																	}
+																},
+																{
+																	"additionalProperties": false,
+																	"type": "object",
+																	"required": [
+																		"type",
+																		"event",
+																		"references"
+																	],
+																	"properties": {
+																		"type": {
+																			"const": "system_event",
+																			"type": "string"
+																		},
+																		"event": {
+																			"const": "unit_ownership_claim_resolution",
+																			"type": "string"
+																		},
+																		"references": {
+																			"additionalProperties": false,
+																			"type": "object",
+																			"required": [
+																				"claimId",
+																				"resolution"
+																			],
+																			"properties": {
+																				"claimId": {
+																					"format": "uuid",
+																					"type": "string"
+																				},
+																				"resolution": {
+																					"anyOf": [
+																						{
+																							"const": "approved",
+																							"type": "string"
+																						},
+																						{
+																							"const": "rejected",
+																							"type": "string"
+																						},
+																						{
+																							"const": "superseded",
+																							"type": "string"
+																						}
+																					]
+																				}
+																			}
+																		}
+																	}
+																}
+															]
+														},
+														{
+															"additionalProperties": false,
+															"type": "object",
+															"required": ["type"],
+															"properties": {
+																"type": {
+																	"const": "unavailable",
+																	"type": "string"
+																}
+															}
+														}
+													]
+												},
+												"destination": {
+													"anyOf": [
+														{
+															"additionalProperties": false,
+															"type": "object",
+															"required": [
+																"kind",
+																"unitId",
+																"invitationId"
+															],
+															"properties": {
+																"kind": {
+																	"const": "access_invitation",
+																	"type": "string"
+																},
+																"unitId": {
+																	"format": "uuid",
+																	"type": "string"
+																},
+																"invitationId": {
+																	"format": "uuid",
+																	"type": "string"
+																}
+															}
+														},
+														{
+															"additionalProperties": false,
+															"type": "object",
+															"required": ["kind", "unit"],
+															"properties": {
+																"kind": {
+																	"const": "unit",
+																	"type": "string"
+																},
+																"unit": {
+																	"additionalProperties": false,
+																	"type": "object",
+																	"required": [
+																		"id",
+																		"kind",
+																		"slugAddress"
+																	],
+																	"properties": {
+																		"id": {
+																			"format": "uuid",
+																			"type": "string"
+																		},
+																		"kind": {
+																			"type": "string",
+																			"enum": [
+																				"slug_namespace",
+																				"profile",
+																				"book",
+																				"software",
+																				"media",
+																				"video",
+																				"audio",
+																				"release",
+																				"entity",
+																				"label",
+																				"tag",
+																				"structure",
+																				"series",
+																				"zone",
+																				"zone_page",
+																				"collection",
+																				"post",
+																				"poll",
+																				"realm",
+																				"realm_rule"
+																			]
+																		},
+																		"slugAddress": {
+																			"nullable": true,
+																			"anyOf": [
+																				{
+																					"additionalProperties": false,
+																					"type": "object",
+																					"required": [
+																						"slug",
+																						"scopeUnitId",
+																						"canonicalPath"
+																					],
+																					"properties": {
+																						"slug": {
+																							"minLength": 1,
+																							"maxLength": 63,
+																							"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																							"type": "string"
+																						},
+																						"scopeUnitId": {
+																							"format": "uuid",
+																							"type": "string"
+																						},
+																						"canonicalPath": {
+																							"minItems": 2,
+																							"maxItems": 3,
+																							"type": "array",
+																							"items": {
+																								"minLength": 1,
+																								"maxLength": 63,
+																								"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																								"type": "string"
+																							}
+																						}
+																					}
+																				},
+																				{ "type": "null" }
+																			]
+																		}
+																	}
+																}
+															}
+														},
+														{
+															"additionalProperties": false,
+															"type": "object",
+															"required": ["kind", "notificationId"],
+															"properties": {
+																"kind": {
+																	"const": "notification_details",
+																	"type": "string"
+																},
+																"notificationId": {
+																	"format": "uuid",
+																	"type": "string"
+																}
+															}
+														}
+													]
+												}
+											}
+										}
+									]
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "NotificationNotFound",
+													"type": "string",
+													"enum": ["NotificationNotFound"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"429": {
+						"description": "API quota exceeded",
+						"headers": {
+							"Retry-After": {
+								"description": "Seconds until the limiting window or concurrency lease can be retried",
+								"schema": { "type": "integer", "minimum": 1 }
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"type": "string",
+													"enum": [
+														"ApiQuotaExceeded",
+														"ApiTokenRateLimitExceeded"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {
+													"$ref": "#/components/schemas/JsonValue"
+												}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "getApiNotificationsByNotificationId",
+				"x-rezics-quota-route-operation-id": "getApiNotificationsByNotificationId",
+				"x-rezics-quota-operation-id": "*",
+				"x-rezics-quota-cost-units": 1
+			}
+		},
 		"/api/v1/notifications/read-all": {
 			"put": {
 				"summary": "Mark notifications read",
@@ -14145,8 +17622,17 @@
 							"application/json": {
 								"schema": {
 									"type": "object",
-									"required": ["updated"],
-									"properties": { "updated": { "type": "boolean" } }
+									"required": ["updated", "readAt"],
+									"properties": {
+										"updated": { "type": "boolean" },
+										"readAt": {
+											"nullable": true,
+											"anyOf": [
+												{ "format": "date-time", "type": "string" },
+												{ "type": "null" }
+											]
+										}
+									}
 								}
 							}
 						}
@@ -14263,8 +17749,17 @@
 							"application/json": {
 								"schema": {
 									"type": "object",
-									"required": ["updated"],
-									"properties": { "updated": { "type": "boolean" } }
+									"required": ["updated", "readAt"],
+									"properties": {
+										"updated": { "type": "boolean" },
+										"readAt": {
+											"nullable": true,
+											"anyOf": [
+												{ "format": "date-time", "type": "string" },
+												{ "type": "null" }
+											]
+										}
+									}
 								}
 							}
 						}
@@ -143306,6 +146801,7 @@
 										"language",
 										"body",
 										"replyCount",
+										"latestRevisionId",
 										"createdAt",
 										"updatedAt",
 										"subject",
@@ -143876,6 +147372,13 @@
 													"type": "string"
 												},
 												{ "type": "integer" }
+											]
+										},
+										"latestRevisionId": {
+											"nullable": true,
+											"anyOf": [
+												{ "format": "uuid", "type": "string" },
+												{ "type": "null" }
 											]
 										},
 										"createdAt": { "format": "date-time", "type": "string" },
@@ -151337,6 +154840,7 @@
 												"language",
 												"body",
 												"replyCount",
+												"latestRevisionId",
 												"createdAt",
 												"updatedAt",
 												"subject",
@@ -151940,6 +155444,13 @@
 															"type": "string"
 														},
 														{ "type": "integer" }
+													]
+												},
+												"latestRevisionId": {
+													"nullable": true,
+													"anyOf": [
+														{ "format": "uuid", "type": "string" },
+														{ "type": "null" }
 													]
 												},
 												"createdAt": {

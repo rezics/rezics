@@ -43,6 +43,14 @@ export const IntegrityConstraints = [
 	{ table: "post_score", name: "post_score_position_byte_length_check" },
 	{ table: "credit_attribution", name: "credit_attribution_position_byte_length_check" },
 	{ table: "subject_association", name: "subject_association_position_byte_length_check" },
+	{
+		table: "notification_recipient_stat",
+		name: "notification_recipient_stat_read_through_shape_check",
+	},
+	{
+		table: "notification_recipient_stat",
+		name: "notification_recipient_stat_read_through_time_check",
+	},
 ] as const;
 
 export type IntegrityConstraint = (typeof IntegrityConstraints)[number];

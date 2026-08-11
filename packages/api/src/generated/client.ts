@@ -43,6 +43,8 @@ import type {
 	GetApiNotificationsResponses,
 	GetApiNotificationsUnreadCountOptions,
 	GetApiNotificationsUnreadCountResponses,
+	GetApiNotificationsByNotificationIdOptions,
+	GetApiNotificationsByNotificationIdResponses,
 	PutApiNotificationsReadAllOptions,
 	PutApiNotificationsReadAllResponses,
 	PutApiNotificationsByNotificationIdReadOptions,
@@ -996,6 +998,26 @@ export function getApiNotificationsUnreadCount<ThrowOnError extends boolean = tr
 		],
 		...config,
 	}) as Promise<RequestResult<GetApiNotificationsUnreadCountResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Get one notification
+ * {@link /api/v1/notifications/:notificationId}
+ */
+export function getApiNotificationsByNotificationId<ThrowOnError extends boolean = true>(
+	options: Options<GetApiNotificationsByNotificationIdOptions, ThrowOnError>,
+): Promise<RequestResult<GetApiNotificationsByNotificationIdResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/v1/notifications/{notificationId}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<GetApiNotificationsByNotificationIdResponses, ThrowOnError>>;
 }
 
 /**

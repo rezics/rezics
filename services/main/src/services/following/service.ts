@@ -28,6 +28,7 @@ import { presentAvatar } from "../units/avatar";
 import { presentImageAsset } from "../units/service";
 import { getPublicCanonicalUnitSlugAddresses } from "../units/slug-address";
 import { acknowledgeCurrentRealmRulesOnFollow } from "../realms/service";
+import { createNotification } from "../notifications/service";
 import {
 	decodeFollowingCursor,
 	encodeFollowingCursor,
@@ -189,10 +190,18 @@ export async function followUnit(input: {
 			if (blocked) throw new UserFollowBlocked();
 		}
 
-		await tx
+		const [created] = await tx
 			.insert(unitFollow)
 			.values({ followerProfileId: input.followerProfileId, unitId: target.id })
-			.onConflictDoNothing();
+			.onConflictDoNothing()
+			.returning({ unitId: unitFollow.unitId });
+		if (created && target.kind === "profile")
+			await createNotification(tx, {
+				kind: "new_follower",
+				recipientProfileId: target.id,
+				actorProfileId: input.followerProfileId,
+				dedupeKey: `new-follower:${input.followerProfileId}:${target.id}`,
+			});
 		if (target.kind === "realm")
 			await acknowledgeCurrentRealmRulesOnFollow(tx, target.id, input.followerProfileId);
 	});

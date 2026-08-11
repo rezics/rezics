@@ -9,7 +9,7 @@ import { ReceivedAccessInvitations } from "@/features/governance/unit-workflows"
 import { useTranslation } from "@/i18n/client";
 import { NotificationsHref } from "../routing/notification-routes";
 
-export function AccessInvitationsPage() {
+export function AccessInvitationsPage({ selectedInvitationId }: { selectedInvitationId?: string }) {
 	const { t } = useTranslation(["notifications"]);
 	return (
 		<RequireSession>
@@ -24,7 +24,7 @@ export function AccessInvitationsPage() {
 					description={t.notifications.center.invitationsDescription}
 					title={t.notifications.center.receivedInvitations}
 				/>
-				<ReceivedAccessInvitations />
+				<ReceivedAccessInvitations selectedInvitationId={selectedInvitationId} />
 			</main>
 		</RequireSession>
 	);

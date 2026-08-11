@@ -612,6 +612,7 @@ export default new Elysia()
 								row.body === null
 									? null
 									: toPortableTextResponse(row.body, "post.body"),
+							latestRevisionId: row.latestRevisionId,
 							progressEntry: progressEntries[0]
 								? {
 										unitId: progressEntries[0].unitId,

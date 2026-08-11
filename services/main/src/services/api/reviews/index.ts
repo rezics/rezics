@@ -21,6 +21,7 @@ import {
 	unit,
 	unitOwnership,
 	unitLocalization,
+	unitRevisionHead,
 	unitProgressEntry,
 	ContentRatingValues,
 } from "../../database/schema";
@@ -516,12 +517,14 @@ export default new Elysia()
 							summary: unitLocalization.summary,
 							body: unitLocalization.content,
 							replyCount: sql<unknown>`coalesce(${postReplyStat.undeletedDescendantCount}, 0)`,
+							latestRevisionId: unitRevisionHead.revisionId,
 							createdAt: unit.createdAt,
 							updatedAt: unit.updatedAt,
 						})
 						.from(post)
 						.innerJoin(unit, eq(unit.id, post.id))
 						.leftJoin(postReplyStat, eq(postReplyStat.postId, post.id))
+						.leftJoin(unitRevisionHead, eq(unitRevisionHead.unitId, post.id))
 						.innerJoin(
 							unitLocalization,
 							and(

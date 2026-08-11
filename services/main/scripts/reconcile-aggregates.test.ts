@@ -25,4 +25,15 @@ describe("aggregate reconciliation queries", () => {
 		expect(source).toContain("full join book_chapter_stat");
 		expect(source).toContain("full join book_chapter_progress_stat");
 	});
+
+	it("excludes notifications covered by the recipient read-through watermark", async () => {
+		const source = await readFile(
+			new URL("./reconcile-aggregates.ts", import.meta.url),
+			"utf8",
+		);
+
+		expect(source).toContain("notification_recipient_stat read_state");
+		expect(source).toContain("notification.created_at > read_state.read_through_created_at");
+		expect(source).toContain("notification.id > read_state.read_through_id");
+	});
 });

@@ -8313,7 +8313,33 @@ export type GetApiNotificationsQuery = {
 	limit?: string | number;
 };
 
-export const GetApiNotificationsStatus200ItemsPayloadActionKindEnum = {
+export const GetApiNotificationsStatus200ItemsSubjectKindEnum = {
+	slug_namespace: "slug_namespace",
+	profile: "profile",
+	book: "book",
+	software: "software",
+	media: "media",
+	video: "video",
+	audio: "audio",
+	release: "release",
+	entity: "entity",
+	label: "label",
+	tag: "tag",
+	structure: "structure",
+	series: "series",
+	zone: "zone",
+	zone_page: "zone_page",
+	collection: "collection",
+	post: "post",
+	poll: "poll",
+	realm: "realm",
+	realm_rule: "realm_rule",
+} as const;
+
+export type GetApiNotificationsStatus200ItemsSubjectKindEnum =
+	(typeof GetApiNotificationsStatus200ItemsSubjectKindEnum)[keyof typeof GetApiNotificationsStatus200ItemsSubjectKindEnum];
+
+export const GetApiNotificationsStatus200ItemsContextActionKindEnum = {
 	approve: "approve",
 	hide: "hide",
 	remove: "remove",
@@ -8325,10 +8351,10 @@ export const GetApiNotificationsStatus200ItemsPayloadActionKindEnum = {
 	reverse: "reverse",
 } as const;
 
-export type GetApiNotificationsStatus200ItemsPayloadActionKindEnum =
-	(typeof GetApiNotificationsStatus200ItemsPayloadActionKindEnum)[keyof typeof GetApiNotificationsStatus200ItemsPayloadActionKindEnum];
+export type GetApiNotificationsStatus200ItemsContextActionKindEnum =
+	(typeof GetApiNotificationsStatus200ItemsContextActionKindEnum)[keyof typeof GetApiNotificationsStatus200ItemsContextActionKindEnum];
 
-export const GetApiNotificationsStatus200ItemsPayloadEnforcementKindEnum = {
+export const GetApiNotificationsStatus200ItemsContextEnforcementKindEnum = {
 	warning: "warning",
 	silence: "silence",
 	suspension: "suspension",
@@ -8337,8 +8363,34 @@ export const GetApiNotificationsStatus200ItemsPayloadEnforcementKindEnum = {
 	trust_restriction: "trust_restriction",
 } as const;
 
-export type GetApiNotificationsStatus200ItemsPayloadEnforcementKindEnum =
-	(typeof GetApiNotificationsStatus200ItemsPayloadEnforcementKindEnum)[keyof typeof GetApiNotificationsStatus200ItemsPayloadEnforcementKindEnum];
+export type GetApiNotificationsStatus200ItemsContextEnforcementKindEnum =
+	(typeof GetApiNotificationsStatus200ItemsContextEnforcementKindEnum)[keyof typeof GetApiNotificationsStatus200ItemsContextEnforcementKindEnum];
+
+export const GetApiNotificationsStatus200ItemsDestinationUnitKindEnum = {
+	slug_namespace: "slug_namespace",
+	profile: "profile",
+	book: "book",
+	software: "software",
+	media: "media",
+	video: "video",
+	audio: "audio",
+	release: "release",
+	entity: "entity",
+	label: "label",
+	tag: "tag",
+	structure: "structure",
+	series: "series",
+	zone: "zone",
+	zone_page: "zone_page",
+	collection: "collection",
+	post: "post",
+	poll: "poll",
+	realm: "realm",
+	realm_rule: "realm_rule",
+} as const;
+
+export type GetApiNotificationsStatus200ItemsDestinationUnitKindEnum =
+	(typeof GetApiNotificationsStatus200ItemsDestinationUnitKindEnum)[keyof typeof GetApiNotificationsStatus200ItemsDestinationUnitKindEnum];
 
 /**
  * @type object
@@ -8363,9 +8415,73 @@ export type GetApiNotificationsStatus200 = {
 				 * @type string
 				 */
 				body: string;
-				actorProfileId: (string | null) | null;
-				actorName: (string | null) | null;
-				subjectUnitId: (string | null) | null;
+				actor:
+					| ({
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							id: string;
+							name: (string | null) | null;
+							slugAddress:
+								| ({
+										/**
+										 * @minLength 1
+										 * @maxLength 63
+										 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+										 * @type string
+										 */
+										slug: string;
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										scopeUnitId: string;
+										/**
+										 * @type array
+										 */
+										canonicalPath: string[];
+								  } | null)
+								| null;
+					  } | null)
+					| null;
+				subject:
+					| ({
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							id: string;
+							/**
+							 * @type string
+							 */
+							kind: GetApiNotificationsStatus200ItemsSubjectKindEnum;
+							slugAddress:
+								| ({
+										/**
+										 * @minLength 1
+										 * @maxLength 63
+										 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+										 * @type string
+										 */
+										slug: string;
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										scopeUnitId: string;
+										/**
+										 * @type array
+										 */
+										canonicalPath: string[];
+								  } | null)
+								| null;
+					  } | null)
+					| null;
 				readAt: (string | null) | null;
 				/**
 				 * @description
@@ -8377,202 +8493,43 @@ export type GetApiNotificationsStatus200 = {
 				 * @type string
 				 */
 				kind: "reply";
-				/**
-				 * @type null
-				 */
-				payload: null;
-		  }
-		| {
-				/**
-				 * @description
-				 * Format: `uuid`
-				 * @type string
-				 */
-				id: string;
-				/**
-				 * @type string
-				 */
-				title: string;
-				/**
-				 * @type string
-				 */
-				body: string;
-				actorProfileId: (string | null) | null;
-				actorName: (string | null) | null;
-				subjectUnitId: (string | null) | null;
-				readAt: (string | null) | null;
-				/**
-				 * @description
-				 * Format: `date-time`
-				 * @type string
-				 */
-				createdAt: string;
-				/**
-				 * @type string
-				 */
-				kind: "new_follower";
-				/**
-				 * @type null
-				 */
-				payload: null;
-		  }
-		| {
-				/**
-				 * @description
-				 * Format: `uuid`
-				 * @type string
-				 */
-				id: string;
-				/**
-				 * @type string
-				 */
-				title: string;
-				/**
-				 * @type string
-				 */
-				body: string;
-				actorProfileId: (string | null) | null;
-				actorName: (string | null) | null;
-				subjectUnitId: (string | null) | null;
-				readAt: (string | null) | null;
-				/**
-				 * @description
-				 * Format: `date-time`
-				 * @type string
-				 */
-				createdAt: string;
-				/**
-				 * @type string
-				 */
-				kind: "direct_message";
-				/**
-				 * @type object
-				 */
-				payload: {
-					/**
-					 * @type string
-					 */
-					type: "direct_message";
-					/**
-					 * @description
-					 * Format: `uuid`
-					 * @type string
-					 */
-					conversationId: string;
-				};
-		  }
-		| {
-				/**
-				 * @description
-				 * Format: `uuid`
-				 * @type string
-				 */
-				id: string;
-				/**
-				 * @type string
-				 */
-				title: string;
-				/**
-				 * @type string
-				 */
-				body: string;
-				actorProfileId: (string | null) | null;
-				actorName: (string | null) | null;
-				subjectUnitId: (string | null) | null;
-				readAt: (string | null) | null;
-				/**
-				 * @description
-				 * Format: `date-time`
-				 * @type string
-				 */
-				createdAt: string;
-				/**
-				 * @type string
-				 */
-				kind: "moderation";
-				payload:
+				context:
 					| {
 							/**
 							 * @type string
 							 */
-							type: "content_governance_action";
-							/**
-							 * @description
-							 * Format: `uuid`
-							 * @type string
-							 */
-							actionId: string;
-							/**
-							 * @type string
-							 */
-							actionKind: GetApiNotificationsStatus200ItemsPayloadActionKindEnum;
-							/**
-							 * @description
-							 * Format: `uuid`
-							 * @type string | undefined
-							 */
-							publicNoticePostId?: string;
+							type: "reply";
 					  }
 					| {
 							/**
 							 * @type string
 							 */
-							type: "report_resolution";
+							type: "unavailable";
+					  };
+				destination:
+					| {
+							/**
+							 * @type string
+							 */
+							kind: "post";
 							/**
 							 * @description
 							 * Format: `uuid`
 							 * @type string
 							 */
-							reportId: string;
-							/**
-							 * @description
-							 * Format: `uuid`
-							 * @type string
-							 */
-							referralId: string;
-							/**
-							 * @description
-							 * Format: `uuid`
-							 * @type string | undefined
-							 */
-							actionId?: string;
-							/**
-							 * @type string | undefined
-							 */
-							actionKind?: GetApiNotificationsStatus200ItemsPayloadActionKindEnum;
-							/**
-							 * @type string | undefined
-							 */
-							resolution?: "dismissed";
-							/**
-							 * @description
-							 * Format: `uuid`
-							 * @type string | undefined
-							 */
-							publicNoticePostId?: string;
+							postId: string;
 					  }
 					| {
 							/**
 							 * @type string
 							 */
-							type: "account_enforcement_action";
+							kind: "notification_details";
 							/**
 							 * @description
 							 * Format: `uuid`
 							 * @type string
 							 */
-							actionId: string;
-							actionKind: "issue" | "revoke";
-							/**
-							 * @type string
-							 */
-							enforcementKind: GetApiNotificationsStatus200ItemsPayloadEnforcementKindEnum;
-							/**
-							 * @description
-							 * Format: `uuid`
-							 * @type string | undefined
-							 */
-							publicNoticePostId?: string;
+							notificationId: string;
 					  };
 		  }
 		| {
@@ -8590,9 +8547,73 @@ export type GetApiNotificationsStatus200 = {
 				 * @type string
 				 */
 				body: string;
-				actorProfileId: (string | null) | null;
-				actorName: (string | null) | null;
-				subjectUnitId: (string | null) | null;
+				actor:
+					| ({
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							id: string;
+							name: (string | null) | null;
+							slugAddress:
+								| ({
+										/**
+										 * @minLength 1
+										 * @maxLength 63
+										 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+										 * @type string
+										 */
+										slug: string;
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										scopeUnitId: string;
+										/**
+										 * @type array
+										 */
+										canonicalPath: string[];
+								  } | null)
+								| null;
+					  } | null)
+					| null;
+				subject:
+					| ({
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							id: string;
+							/**
+							 * @type string
+							 */
+							kind: GetApiNotificationsStatus200ItemsSubjectKindEnum;
+							slugAddress:
+								| ({
+										/**
+										 * @minLength 1
+										 * @maxLength 63
+										 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+										 * @type string
+										 */
+										slug: string;
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										scopeUnitId: string;
+										/**
+										 * @type array
+										 */
+										canonicalPath: string[];
+								  } | null)
+								| null;
+					  } | null)
+					| null;
 				readAt: (string | null) | null;
 				/**
 				 * @description
@@ -8603,20 +8624,71 @@ export type GetApiNotificationsStatus200 = {
 				/**
 				 * @type string
 				 */
-				kind: "realm";
-				/**
-				 * @type object
-				 */
-				payload: {
-					/**
-					 * @type string
-					 */
-					type: "realm_event";
-					/**
-					 * @type string
-					 */
-					event: "membership_updated";
-				};
+				kind: "new_follower";
+				context:
+					| {
+							/**
+							 * @type string
+							 */
+							type: "new_follower";
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							type: "unavailable";
+					  };
+				destination:
+					| {
+							/**
+							 * @type string
+							 */
+							kind: "profile";
+							/**
+							 * @type object
+							 */
+							profile: {
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								id: string;
+								slugAddress:
+									| ({
+											/**
+											 * @minLength 1
+											 * @maxLength 63
+											 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+											 * @type string
+											 */
+											slug: string;
+											/**
+											 * @description
+											 * Format: `uuid`
+											 * @type string
+											 */
+											scopeUnitId: string;
+											/**
+											 * @type array
+											 */
+											canonicalPath: string[];
+									  } | null)
+									| null;
+							};
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							kind: "notification_details";
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							notificationId: string;
+					  };
 		  }
 		| {
 				/**
@@ -8633,9 +8705,596 @@ export type GetApiNotificationsStatus200 = {
 				 * @type string
 				 */
 				body: string;
-				actorProfileId: (string | null) | null;
-				actorName: (string | null) | null;
-				subjectUnitId: (string | null) | null;
+				actor:
+					| ({
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							id: string;
+							name: (string | null) | null;
+							slugAddress:
+								| ({
+										/**
+										 * @minLength 1
+										 * @maxLength 63
+										 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+										 * @type string
+										 */
+										slug: string;
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										scopeUnitId: string;
+										/**
+										 * @type array
+										 */
+										canonicalPath: string[];
+								  } | null)
+								| null;
+					  } | null)
+					| null;
+				subject:
+					| ({
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							id: string;
+							/**
+							 * @type string
+							 */
+							kind: GetApiNotificationsStatus200ItemsSubjectKindEnum;
+							slugAddress:
+								| ({
+										/**
+										 * @minLength 1
+										 * @maxLength 63
+										 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+										 * @type string
+										 */
+										slug: string;
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										scopeUnitId: string;
+										/**
+										 * @type array
+										 */
+										canonicalPath: string[];
+								  } | null)
+								| null;
+					  } | null)
+					| null;
+				readAt: (string | null) | null;
+				/**
+				 * @description
+				 * Format: `date-time`
+				 * @type string
+				 */
+				createdAt: string;
+				/**
+				 * @type string
+				 */
+				kind: "direct_message";
+				context:
+					| {
+							/**
+							 * @type string
+							 */
+							type: "direct_message";
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							conversationId: string;
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string | undefined
+							 */
+							messageId?: string;
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							type: "unavailable";
+					  };
+				destination:
+					| {
+							/**
+							 * @type string
+							 */
+							kind: "conversation";
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							conversationId: string;
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string | undefined
+							 */
+							messageId?: string;
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							kind: "notification_details";
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							notificationId: string;
+					  };
+		  }
+		| {
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				id: string;
+				/**
+				 * @type string
+				 */
+				title: string;
+				/**
+				 * @type string
+				 */
+				body: string;
+				actor:
+					| ({
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							id: string;
+							name: (string | null) | null;
+							slugAddress:
+								| ({
+										/**
+										 * @minLength 1
+										 * @maxLength 63
+										 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+										 * @type string
+										 */
+										slug: string;
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										scopeUnitId: string;
+										/**
+										 * @type array
+										 */
+										canonicalPath: string[];
+								  } | null)
+								| null;
+					  } | null)
+					| null;
+				subject:
+					| ({
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							id: string;
+							/**
+							 * @type string
+							 */
+							kind: GetApiNotificationsStatus200ItemsSubjectKindEnum;
+							slugAddress:
+								| ({
+										/**
+										 * @minLength 1
+										 * @maxLength 63
+										 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+										 * @type string
+										 */
+										slug: string;
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										scopeUnitId: string;
+										/**
+										 * @type array
+										 */
+										canonicalPath: string[];
+								  } | null)
+								| null;
+					  } | null)
+					| null;
+				readAt: (string | null) | null;
+				/**
+				 * @description
+				 * Format: `date-time`
+				 * @type string
+				 */
+				createdAt: string;
+				/**
+				 * @type string
+				 */
+				kind: "moderation";
+				context:
+					| (
+							| {
+									/**
+									 * @type string
+									 */
+									type: "content_governance_action";
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									actionId: string;
+									/**
+									 * @type string
+									 */
+									actionKind: GetApiNotificationsStatus200ItemsContextActionKindEnum;
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string | undefined
+									 */
+									publicNoticePostId?: string;
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "report_resolution";
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									reportId: string;
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									referralId: string;
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string | undefined
+									 */
+									actionId?: string;
+									/**
+									 * @type string | undefined
+									 */
+									actionKind?: GetApiNotificationsStatus200ItemsContextActionKindEnum;
+									/**
+									 * @type string | undefined
+									 */
+									resolution?: "dismissed";
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string | undefined
+									 */
+									publicNoticePostId?: string;
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "account_enforcement_action";
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									actionId: string;
+									actionKind: "issue" | "revoke";
+									/**
+									 * @type string
+									 */
+									enforcementKind: GetApiNotificationsStatus200ItemsContextEnforcementKindEnum;
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string | undefined
+									 */
+									publicNoticePostId?: string;
+							  }
+					  )
+					| {
+							/**
+							 * @type string
+							 */
+							type: "unavailable";
+					  };
+				destination:
+					| {
+							/**
+							 * @type string
+							 */
+							kind: "report";
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							reportId: string;
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							kind: "notification_details";
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							notificationId: string;
+					  };
+		  }
+		| {
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				id: string;
+				/**
+				 * @type string
+				 */
+				title: string;
+				/**
+				 * @type string
+				 */
+				body: string;
+				actor:
+					| ({
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							id: string;
+							name: (string | null) | null;
+							slugAddress:
+								| ({
+										/**
+										 * @minLength 1
+										 * @maxLength 63
+										 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+										 * @type string
+										 */
+										slug: string;
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										scopeUnitId: string;
+										/**
+										 * @type array
+										 */
+										canonicalPath: string[];
+								  } | null)
+								| null;
+					  } | null)
+					| null;
+				subject:
+					| ({
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							id: string;
+							/**
+							 * @type string
+							 */
+							kind: GetApiNotificationsStatus200ItemsSubjectKindEnum;
+							slugAddress:
+								| ({
+										/**
+										 * @minLength 1
+										 * @maxLength 63
+										 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+										 * @type string
+										 */
+										slug: string;
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										scopeUnitId: string;
+										/**
+										 * @type array
+										 */
+										canonicalPath: string[];
+								  } | null)
+								| null;
+					  } | null)
+					| null;
+				readAt: (string | null) | null;
+				/**
+				 * @description
+				 * Format: `date-time`
+				 * @type string
+				 */
+				createdAt: string;
+				/**
+				 * @type string
+				 */
+				kind: "realm";
+				context:
+					| {
+							/**
+							 * @type string
+							 */
+							type: "realm_event";
+							/**
+							 * @type string
+							 */
+							event: "membership_updated";
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							type: "unavailable";
+					  };
+				destination:
+					| {
+							/**
+							 * @type string
+							 */
+							kind: "realm";
+							/**
+							 * @type object
+							 */
+							realm: {
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								id: string;
+								slugAddress:
+									| ({
+											/**
+											 * @minLength 1
+											 * @maxLength 63
+											 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+											 * @type string
+											 */
+											slug: string;
+											/**
+											 * @description
+											 * Format: `uuid`
+											 * @type string
+											 */
+											scopeUnitId: string;
+											/**
+											 * @type array
+											 */
+											canonicalPath: string[];
+									  } | null)
+									| null;
+							};
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							kind: "notification_details";
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							notificationId: string;
+					  };
+		  }
+		| {
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				id: string;
+				/**
+				 * @type string
+				 */
+				title: string;
+				/**
+				 * @type string
+				 */
+				body: string;
+				actor:
+					| ({
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							id: string;
+							name: (string | null) | null;
+							slugAddress:
+								| ({
+										/**
+										 * @minLength 1
+										 * @maxLength 63
+										 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+										 * @type string
+										 */
+										slug: string;
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										scopeUnitId: string;
+										/**
+										 * @type array
+										 */
+										canonicalPath: string[];
+								  } | null)
+								| null;
+					  } | null)
+					| null;
+				subject:
+					| ({
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							id: string;
+							/**
+							 * @type string
+							 */
+							kind: GetApiNotificationsStatus200ItemsSubjectKindEnum;
+							slugAddress:
+								| ({
+										/**
+										 * @minLength 1
+										 * @maxLength 63
+										 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+										 * @type string
+										 */
+										slug: string;
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										scopeUnitId: string;
+										/**
+										 * @type array
+										 */
+										canonicalPath: string[];
+								  } | null)
+								| null;
+					  } | null)
+					| null;
 				readAt: (string | null) | null;
 				/**
 				 * @description
@@ -8647,26 +9306,153 @@ export type GetApiNotificationsStatus200 = {
 				 * @type string
 				 */
 				kind: "system";
-				/**
-				 * @type object
-				 */
-				payload: {
-					/**
-					 * @type string
-					 */
-					type: "system_event";
-					/**
-					 * @minLength 1
-					 * @type string
-					 */
-					event: string;
-					/**
-					 * @type object | undefined
-					 */
-					references?: {
-						[key: string]: string;
-					};
-				};
+				context:
+					| (
+							| {
+									/**
+									 * @type string
+									 */
+									type: "system_event";
+									/**
+									 * @type string
+									 */
+									event: "unit_access_invitation";
+									/**
+									 * @type object
+									 */
+									references: {
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										invitationId: string;
+									};
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "system_event";
+									/**
+									 * @type string
+									 */
+									event: "unit_ownership_override";
+									/**
+									 * @type object
+									 */
+									references: {
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										ownershipId: string;
+										role: "owner" | "previous_owner";
+									};
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "system_event";
+									/**
+									 * @type string
+									 */
+									event: "unit_ownership_claim_resolution";
+									/**
+									 * @type object
+									 */
+									references: {
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										claimId: string;
+										resolution: "approved" | "rejected" | "superseded";
+									};
+							  }
+					  )
+					| {
+							/**
+							 * @type string
+							 */
+							type: "unavailable";
+					  };
+				destination:
+					| {
+							/**
+							 * @type string
+							 */
+							kind: "access_invitation";
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							unitId: string;
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							invitationId: string;
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							kind: "unit";
+							/**
+							 * @type object
+							 */
+							unit: {
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								id: string;
+								/**
+								 * @type string
+								 */
+								kind: GetApiNotificationsStatus200ItemsDestinationUnitKindEnum;
+								slugAddress:
+									| ({
+											/**
+											 * @minLength 1
+											 * @maxLength 63
+											 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+											 * @type string
+											 */
+											slug: string;
+											/**
+											 * @description
+											 * Format: `uuid`
+											 * @type string
+											 */
+											scopeUnitId: string;
+											/**
+											 * @type array
+											 */
+											canonicalPath: string[];
+									  } | null)
+									| null;
+							};
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							kind: "notification_details";
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							notificationId: string;
+					  };
 		  }
 	)[];
 	nextCursor: (string | null) | null;
@@ -8945,11 +9731,1260 @@ export type GetApiNotificationsUnreadCountResponse =
 /**
  * @type object
  */
+export type GetApiNotificationsByNotificationIdPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	notificationId: string;
+};
+
+export const GetApiNotificationsByNotificationIdStatus200SubjectKindEnum = {
+	slug_namespace: "slug_namespace",
+	profile: "profile",
+	book: "book",
+	software: "software",
+	media: "media",
+	video: "video",
+	audio: "audio",
+	release: "release",
+	entity: "entity",
+	label: "label",
+	tag: "tag",
+	structure: "structure",
+	series: "series",
+	zone: "zone",
+	zone_page: "zone_page",
+	collection: "collection",
+	post: "post",
+	poll: "poll",
+	realm: "realm",
+	realm_rule: "realm_rule",
+} as const;
+
+export type GetApiNotificationsByNotificationIdStatus200SubjectKindEnum =
+	(typeof GetApiNotificationsByNotificationIdStatus200SubjectKindEnum)[keyof typeof GetApiNotificationsByNotificationIdStatus200SubjectKindEnum];
+
+export const GetApiNotificationsByNotificationIdStatus200ContextActionKindEnum = {
+	approve: "approve",
+	hide: "hide",
+	remove: "remove",
+	restore: "restore",
+	lock_post_targeting: "lock_post_targeting",
+	unlock_post_targeting: "unlock_post_targeting",
+	invalidate_content_license: "invalidate_content_license",
+	restore_content_license: "restore_content_license",
+	reverse: "reverse",
+} as const;
+
+export type GetApiNotificationsByNotificationIdStatus200ContextActionKindEnum =
+	(typeof GetApiNotificationsByNotificationIdStatus200ContextActionKindEnum)[keyof typeof GetApiNotificationsByNotificationIdStatus200ContextActionKindEnum];
+
+export const GetApiNotificationsByNotificationIdStatus200ContextEnforcementKindEnum = {
+	warning: "warning",
+	silence: "silence",
+	suspension: "suspension",
+	ban: "ban",
+	rate_limit: "rate_limit",
+	trust_restriction: "trust_restriction",
+} as const;
+
+export type GetApiNotificationsByNotificationIdStatus200ContextEnforcementKindEnum =
+	(typeof GetApiNotificationsByNotificationIdStatus200ContextEnforcementKindEnum)[keyof typeof GetApiNotificationsByNotificationIdStatus200ContextEnforcementKindEnum];
+
+export const GetApiNotificationsByNotificationIdStatus200DestinationUnitKindEnum = {
+	slug_namespace: "slug_namespace",
+	profile: "profile",
+	book: "book",
+	software: "software",
+	media: "media",
+	video: "video",
+	audio: "audio",
+	release: "release",
+	entity: "entity",
+	label: "label",
+	tag: "tag",
+	structure: "structure",
+	series: "series",
+	zone: "zone",
+	zone_page: "zone_page",
+	collection: "collection",
+	post: "post",
+	poll: "poll",
+	realm: "realm",
+	realm_rule: "realm_rule",
+} as const;
+
+export type GetApiNotificationsByNotificationIdStatus200DestinationUnitKindEnum =
+	(typeof GetApiNotificationsByNotificationIdStatus200DestinationUnitKindEnum)[keyof typeof GetApiNotificationsByNotificationIdStatus200DestinationUnitKindEnum];
+
+export type GetApiNotificationsByNotificationIdStatus200 =
+	| {
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			id: string;
+			/**
+			 * @type string
+			 */
+			title: string;
+			/**
+			 * @type string
+			 */
+			body: string;
+			actor:
+				| ({
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						id: string;
+						name: (string | null) | null;
+						slugAddress:
+							| ({
+									/**
+									 * @minLength 1
+									 * @maxLength 63
+									 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+									 * @type string
+									 */
+									slug: string;
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									scopeUnitId: string;
+									/**
+									 * @type array
+									 */
+									canonicalPath: string[];
+							  } | null)
+							| null;
+				  } | null)
+				| null;
+			subject:
+				| ({
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						id: string;
+						/**
+						 * @type string
+						 */
+						kind: GetApiNotificationsByNotificationIdStatus200SubjectKindEnum;
+						slugAddress:
+							| ({
+									/**
+									 * @minLength 1
+									 * @maxLength 63
+									 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+									 * @type string
+									 */
+									slug: string;
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									scopeUnitId: string;
+									/**
+									 * @type array
+									 */
+									canonicalPath: string[];
+							  } | null)
+							| null;
+				  } | null)
+				| null;
+			readAt: (string | null) | null;
+			/**
+			 * @description
+			 * Format: `date-time`
+			 * @type string
+			 */
+			createdAt: string;
+			/**
+			 * @type string
+			 */
+			kind: "reply";
+			context:
+				| {
+						/**
+						 * @type string
+						 */
+						type: "reply";
+				  }
+				| {
+						/**
+						 * @type string
+						 */
+						type: "unavailable";
+				  };
+			destination:
+				| {
+						/**
+						 * @type string
+						 */
+						kind: "post";
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						postId: string;
+				  }
+				| {
+						/**
+						 * @type string
+						 */
+						kind: "notification_details";
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						notificationId: string;
+				  };
+	  }
+	| {
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			id: string;
+			/**
+			 * @type string
+			 */
+			title: string;
+			/**
+			 * @type string
+			 */
+			body: string;
+			actor:
+				| ({
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						id: string;
+						name: (string | null) | null;
+						slugAddress:
+							| ({
+									/**
+									 * @minLength 1
+									 * @maxLength 63
+									 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+									 * @type string
+									 */
+									slug: string;
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									scopeUnitId: string;
+									/**
+									 * @type array
+									 */
+									canonicalPath: string[];
+							  } | null)
+							| null;
+				  } | null)
+				| null;
+			subject:
+				| ({
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						id: string;
+						/**
+						 * @type string
+						 */
+						kind: GetApiNotificationsByNotificationIdStatus200SubjectKindEnum;
+						slugAddress:
+							| ({
+									/**
+									 * @minLength 1
+									 * @maxLength 63
+									 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+									 * @type string
+									 */
+									slug: string;
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									scopeUnitId: string;
+									/**
+									 * @type array
+									 */
+									canonicalPath: string[];
+							  } | null)
+							| null;
+				  } | null)
+				| null;
+			readAt: (string | null) | null;
+			/**
+			 * @description
+			 * Format: `date-time`
+			 * @type string
+			 */
+			createdAt: string;
+			/**
+			 * @type string
+			 */
+			kind: "new_follower";
+			context:
+				| {
+						/**
+						 * @type string
+						 */
+						type: "new_follower";
+				  }
+				| {
+						/**
+						 * @type string
+						 */
+						type: "unavailable";
+				  };
+			destination:
+				| {
+						/**
+						 * @type string
+						 */
+						kind: "profile";
+						/**
+						 * @type object
+						 */
+						profile: {
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							id: string;
+							slugAddress:
+								| ({
+										/**
+										 * @minLength 1
+										 * @maxLength 63
+										 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+										 * @type string
+										 */
+										slug: string;
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										scopeUnitId: string;
+										/**
+										 * @type array
+										 */
+										canonicalPath: string[];
+								  } | null)
+								| null;
+						};
+				  }
+				| {
+						/**
+						 * @type string
+						 */
+						kind: "notification_details";
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						notificationId: string;
+				  };
+	  }
+	| {
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			id: string;
+			/**
+			 * @type string
+			 */
+			title: string;
+			/**
+			 * @type string
+			 */
+			body: string;
+			actor:
+				| ({
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						id: string;
+						name: (string | null) | null;
+						slugAddress:
+							| ({
+									/**
+									 * @minLength 1
+									 * @maxLength 63
+									 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+									 * @type string
+									 */
+									slug: string;
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									scopeUnitId: string;
+									/**
+									 * @type array
+									 */
+									canonicalPath: string[];
+							  } | null)
+							| null;
+				  } | null)
+				| null;
+			subject:
+				| ({
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						id: string;
+						/**
+						 * @type string
+						 */
+						kind: GetApiNotificationsByNotificationIdStatus200SubjectKindEnum;
+						slugAddress:
+							| ({
+									/**
+									 * @minLength 1
+									 * @maxLength 63
+									 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+									 * @type string
+									 */
+									slug: string;
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									scopeUnitId: string;
+									/**
+									 * @type array
+									 */
+									canonicalPath: string[];
+							  } | null)
+							| null;
+				  } | null)
+				| null;
+			readAt: (string | null) | null;
+			/**
+			 * @description
+			 * Format: `date-time`
+			 * @type string
+			 */
+			createdAt: string;
+			/**
+			 * @type string
+			 */
+			kind: "direct_message";
+			context:
+				| {
+						/**
+						 * @type string
+						 */
+						type: "direct_message";
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						conversationId: string;
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string | undefined
+						 */
+						messageId?: string;
+				  }
+				| {
+						/**
+						 * @type string
+						 */
+						type: "unavailable";
+				  };
+			destination:
+				| {
+						/**
+						 * @type string
+						 */
+						kind: "conversation";
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						conversationId: string;
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string | undefined
+						 */
+						messageId?: string;
+				  }
+				| {
+						/**
+						 * @type string
+						 */
+						kind: "notification_details";
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						notificationId: string;
+				  };
+	  }
+	| {
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			id: string;
+			/**
+			 * @type string
+			 */
+			title: string;
+			/**
+			 * @type string
+			 */
+			body: string;
+			actor:
+				| ({
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						id: string;
+						name: (string | null) | null;
+						slugAddress:
+							| ({
+									/**
+									 * @minLength 1
+									 * @maxLength 63
+									 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+									 * @type string
+									 */
+									slug: string;
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									scopeUnitId: string;
+									/**
+									 * @type array
+									 */
+									canonicalPath: string[];
+							  } | null)
+							| null;
+				  } | null)
+				| null;
+			subject:
+				| ({
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						id: string;
+						/**
+						 * @type string
+						 */
+						kind: GetApiNotificationsByNotificationIdStatus200SubjectKindEnum;
+						slugAddress:
+							| ({
+									/**
+									 * @minLength 1
+									 * @maxLength 63
+									 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+									 * @type string
+									 */
+									slug: string;
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									scopeUnitId: string;
+									/**
+									 * @type array
+									 */
+									canonicalPath: string[];
+							  } | null)
+							| null;
+				  } | null)
+				| null;
+			readAt: (string | null) | null;
+			/**
+			 * @description
+			 * Format: `date-time`
+			 * @type string
+			 */
+			createdAt: string;
+			/**
+			 * @type string
+			 */
+			kind: "moderation";
+			context:
+				| (
+						| {
+								/**
+								 * @type string
+								 */
+								type: "content_governance_action";
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								actionId: string;
+								/**
+								 * @type string
+								 */
+								actionKind: GetApiNotificationsByNotificationIdStatus200ContextActionKindEnum;
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string | undefined
+								 */
+								publicNoticePostId?: string;
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								type: "report_resolution";
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								reportId: string;
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								referralId: string;
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string | undefined
+								 */
+								actionId?: string;
+								/**
+								 * @type string | undefined
+								 */
+								actionKind?: GetApiNotificationsByNotificationIdStatus200ContextActionKindEnum;
+								/**
+								 * @type string | undefined
+								 */
+								resolution?: "dismissed";
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string | undefined
+								 */
+								publicNoticePostId?: string;
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								type: "account_enforcement_action";
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								actionId: string;
+								actionKind: "issue" | "revoke";
+								/**
+								 * @type string
+								 */
+								enforcementKind: GetApiNotificationsByNotificationIdStatus200ContextEnforcementKindEnum;
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string | undefined
+								 */
+								publicNoticePostId?: string;
+						  }
+				  )
+				| {
+						/**
+						 * @type string
+						 */
+						type: "unavailable";
+				  };
+			destination:
+				| {
+						/**
+						 * @type string
+						 */
+						kind: "report";
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						reportId: string;
+				  }
+				| {
+						/**
+						 * @type string
+						 */
+						kind: "notification_details";
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						notificationId: string;
+				  };
+	  }
+	| {
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			id: string;
+			/**
+			 * @type string
+			 */
+			title: string;
+			/**
+			 * @type string
+			 */
+			body: string;
+			actor:
+				| ({
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						id: string;
+						name: (string | null) | null;
+						slugAddress:
+							| ({
+									/**
+									 * @minLength 1
+									 * @maxLength 63
+									 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+									 * @type string
+									 */
+									slug: string;
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									scopeUnitId: string;
+									/**
+									 * @type array
+									 */
+									canonicalPath: string[];
+							  } | null)
+							| null;
+				  } | null)
+				| null;
+			subject:
+				| ({
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						id: string;
+						/**
+						 * @type string
+						 */
+						kind: GetApiNotificationsByNotificationIdStatus200SubjectKindEnum;
+						slugAddress:
+							| ({
+									/**
+									 * @minLength 1
+									 * @maxLength 63
+									 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+									 * @type string
+									 */
+									slug: string;
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									scopeUnitId: string;
+									/**
+									 * @type array
+									 */
+									canonicalPath: string[];
+							  } | null)
+							| null;
+				  } | null)
+				| null;
+			readAt: (string | null) | null;
+			/**
+			 * @description
+			 * Format: `date-time`
+			 * @type string
+			 */
+			createdAt: string;
+			/**
+			 * @type string
+			 */
+			kind: "realm";
+			context:
+				| {
+						/**
+						 * @type string
+						 */
+						type: "realm_event";
+						/**
+						 * @type string
+						 */
+						event: "membership_updated";
+				  }
+				| {
+						/**
+						 * @type string
+						 */
+						type: "unavailable";
+				  };
+			destination:
+				| {
+						/**
+						 * @type string
+						 */
+						kind: "realm";
+						/**
+						 * @type object
+						 */
+						realm: {
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							id: string;
+							slugAddress:
+								| ({
+										/**
+										 * @minLength 1
+										 * @maxLength 63
+										 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+										 * @type string
+										 */
+										slug: string;
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										scopeUnitId: string;
+										/**
+										 * @type array
+										 */
+										canonicalPath: string[];
+								  } | null)
+								| null;
+						};
+				  }
+				| {
+						/**
+						 * @type string
+						 */
+						kind: "notification_details";
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						notificationId: string;
+				  };
+	  }
+	| {
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			id: string;
+			/**
+			 * @type string
+			 */
+			title: string;
+			/**
+			 * @type string
+			 */
+			body: string;
+			actor:
+				| ({
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						id: string;
+						name: (string | null) | null;
+						slugAddress:
+							| ({
+									/**
+									 * @minLength 1
+									 * @maxLength 63
+									 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+									 * @type string
+									 */
+									slug: string;
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									scopeUnitId: string;
+									/**
+									 * @type array
+									 */
+									canonicalPath: string[];
+							  } | null)
+							| null;
+				  } | null)
+				| null;
+			subject:
+				| ({
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						id: string;
+						/**
+						 * @type string
+						 */
+						kind: GetApiNotificationsByNotificationIdStatus200SubjectKindEnum;
+						slugAddress:
+							| ({
+									/**
+									 * @minLength 1
+									 * @maxLength 63
+									 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+									 * @type string
+									 */
+									slug: string;
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									scopeUnitId: string;
+									/**
+									 * @type array
+									 */
+									canonicalPath: string[];
+							  } | null)
+							| null;
+				  } | null)
+				| null;
+			readAt: (string | null) | null;
+			/**
+			 * @description
+			 * Format: `date-time`
+			 * @type string
+			 */
+			createdAt: string;
+			/**
+			 * @type string
+			 */
+			kind: "system";
+			context:
+				| (
+						| {
+								/**
+								 * @type string
+								 */
+								type: "system_event";
+								/**
+								 * @type string
+								 */
+								event: "unit_access_invitation";
+								/**
+								 * @type object
+								 */
+								references: {
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									invitationId: string;
+								};
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								type: "system_event";
+								/**
+								 * @type string
+								 */
+								event: "unit_ownership_override";
+								/**
+								 * @type object
+								 */
+								references: {
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									ownershipId: string;
+									role: "owner" | "previous_owner";
+								};
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								type: "system_event";
+								/**
+								 * @type string
+								 */
+								event: "unit_ownership_claim_resolution";
+								/**
+								 * @type object
+								 */
+								references: {
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									claimId: string;
+									resolution: "approved" | "rejected" | "superseded";
+								};
+						  }
+				  )
+				| {
+						/**
+						 * @type string
+						 */
+						type: "unavailable";
+				  };
+			destination:
+				| {
+						/**
+						 * @type string
+						 */
+						kind: "access_invitation";
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						unitId: string;
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						invitationId: string;
+				  }
+				| {
+						/**
+						 * @type string
+						 */
+						kind: "unit";
+						/**
+						 * @type object
+						 */
+						unit: {
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							id: string;
+							/**
+							 * @type string
+							 */
+							kind: GetApiNotificationsByNotificationIdStatus200DestinationUnitKindEnum;
+							slugAddress:
+								| ({
+										/**
+										 * @minLength 1
+										 * @maxLength 63
+										 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+										 * @type string
+										 */
+										slug: string;
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										scopeUnitId: string;
+										/**
+										 * @type array
+										 */
+										canonicalPath: string[];
+								  } | null)
+								| null;
+						};
+				  }
+				| {
+						/**
+						 * @type string
+						 */
+						kind: "notification_details";
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						notificationId: string;
+				  };
+	  };
+
+/**
+ * @type object
+ */
+export type GetApiNotificationsByNotificationIdStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'NotificationNotFound'
+		 * @type string
+		 */
+		code: "NotificationNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiNotificationsByNotificationIdStatus422 = ValidationError;
+
+export const GetApiNotificationsByNotificationIdStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type GetApiNotificationsByNotificationIdStatus429ErrorCodeEnum =
+	(typeof GetApiNotificationsByNotificationIdStatus429ErrorCodeEnum)[keyof typeof GetApiNotificationsByNotificationIdStatus429ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type GetApiNotificationsByNotificationIdStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: GetApiNotificationsByNotificationIdStatus429ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiNotificationsByNotificationIdStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type GetApiNotificationsByNotificationIdOptions = {
+	body?: never;
+	path: GetApiNotificationsByNotificationIdPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type GetApiNotificationsByNotificationIdResponses = {
+	"200": GetApiNotificationsByNotificationIdStatus200;
+	"404": GetApiNotificationsByNotificationIdStatus404;
+	"422": GetApiNotificationsByNotificationIdStatus422;
+	"429": GetApiNotificationsByNotificationIdStatus429;
+	"500": GetApiNotificationsByNotificationIdStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type GetApiNotificationsByNotificationIdResponse =
+	| GetApiNotificationsByNotificationIdStatus200
+	| GetApiNotificationsByNotificationIdStatus404
+	| GetApiNotificationsByNotificationIdStatus422
+	| GetApiNotificationsByNotificationIdStatus429
+	| GetApiNotificationsByNotificationIdStatus500;
+
+/**
+ * @type object
+ */
 export type PutApiNotificationsReadAllStatus200 = {
 	/**
 	 * @type boolean
 	 */
 	updated: boolean;
+	readAt: (string | null) | null;
 };
 
 export type PutApiNotificationsReadAllStatus400 =
@@ -9083,6 +11118,7 @@ export type PutApiNotificationsByNotificationIdReadStatus200 = {
 	 * @type boolean
 	 */
 	updated: boolean;
+	readAt: (string | null) | null;
 };
 
 /**
@@ -102086,6 +104122,7 @@ export type GetApiReviewsByReviewIdStatus200 = {
 		  } | null)
 		| null;
 	replyCount: string | number;
+	latestRevisionId: (string | null) | null;
 	/**
 	 * @description
 	 * Format: `date-time`
@@ -108160,6 +110197,7 @@ export type GetApiPostsByPostIdStatus200 =
 				  } | null)
 				| null;
 			replyCount: string | number;
+			latestRevisionId: (string | null) | null;
 			/**
 			 * @description
 			 * Format: `date-time`

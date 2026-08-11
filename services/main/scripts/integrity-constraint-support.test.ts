@@ -7,7 +7,7 @@ import {
 
 describe("integrity constraint operations", () => {
 	it("owns a unique allowlist for every staged constraint", () => {
-		expect(IntegrityConstraints).toHaveLength(23);
+		expect(IntegrityConstraints).toHaveLength(25);
 		expect(new Set(IntegrityConstraints.map(({ name }) => name)).size).toBe(
 			IntegrityConstraints.length,
 		);

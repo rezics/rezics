@@ -395,6 +395,7 @@ export default new Elysia({ prefix: "/messages" })
 					payload: {
 						type: "direct_message",
 						conversationId: params.conversationId,
+						messageId: created.id,
 					},
 				});
 				return created;
