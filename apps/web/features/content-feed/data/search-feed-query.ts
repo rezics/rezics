@@ -10,6 +10,7 @@ import {
 	postApiSearchFilterFeed,
 	postApiSearchZonesByZoneIdFilterFeed,
 } from "@rezics/openapi-tanstack-query";
+import { getNextItemPageParam } from "@/lib/infinite-query";
 import type { SearchFeedContinuationToken } from "../model/search-feed-continuation-token";
 
 export type SearchFeedState = Omit<SearchFeatureState, "cursor"> & Readonly<{ cursor?: never }>;
@@ -27,6 +28,24 @@ export type SearchFeedSource =
 export function withoutSearchFeedCursor(state: SearchFeatureState): SearchFeedState {
 	const { cursor: _cursor, ...cursorFreeState } = state;
 	return cursorFreeState;
+}
+
+function normalizeSearchFeedPage<
+	Page extends Readonly<{
+		items: readonly unknown[];
+		nextCursor?: string;
+	}>,
+>(page: Page, currentCursor?: SearchFeedContinuationToken) {
+	const nextCursor = getNextItemPageParam(
+		{
+			...page,
+			// A successful route response is the proof for this route-specific brand.
+			nextCursor: page.nextCursor as SearchFeedContinuationToken | undefined,
+		},
+		[],
+		currentCursor,
+	);
+	return { ...page, nextCursor: nextCursor ?? null };
 }
 
 export async function fetchSearchFeedPage({
@@ -60,11 +79,7 @@ export async function fetchSearchFeedPage({
 			},
 			signal,
 		});
-		return {
-			...data,
-			// The successful Feed endpoint response is the proof for this route-specific brand.
-			nextCursor: (data.nextCursor as SearchFeedContinuationToken | undefined) ?? null,
-		};
+		return normalizeSearchFeedPage(data, cursor);
 	}
 	const { data } = await postApiSearchZonesByZoneIdFilterFeed({
 		path: { zoneId: source.zoneId },
@@ -76,9 +91,5 @@ export async function fetchSearchFeedPage({
 		},
 		signal,
 	});
-	return {
-		...data,
-		// The successful Feed endpoint response is the proof for this route-specific brand.
-		nextCursor: (data.nextCursor as SearchFeedContinuationToken | undefined) ?? null,
-	};
+	return normalizeSearchFeedPage(data, cursor);
 }

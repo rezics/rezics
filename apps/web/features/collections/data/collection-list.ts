@@ -9,6 +9,7 @@ import {
 import { useInfiniteQuery } from "@tanstack/react-query";
 
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
+import { getNextItemPageParam } from "@/lib/infinite-query";
 
 export type CollectionListItem = GetApiCollectionsStatus200["items"][number];
 
@@ -51,7 +52,7 @@ export function useCollectionList({
 		},
 		enabled,
 		initialPageParam: "",
-		getNextPageParam: (page) => page.nextCursor ?? undefined,
+		getNextPageParam: getNextItemPageParam,
 	});
 }
 

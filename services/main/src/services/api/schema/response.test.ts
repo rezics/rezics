@@ -1,5 +1,6 @@
 import { Check, Decode, Encode } from "@sinclair/typebox/value";
 import { getActiveObservability } from "@rezics/observability";
+import { SearchContinuationToken } from "@rezics/filter";
 import { describe, expect, it, vi } from "vitest";
 
 import { DateTime, DateTimeString } from ".";
@@ -18,7 +19,6 @@ import {
 	OrdinaryPostDetailResponse,
 	PostDetailResponse,
 	ReviewDetailResponse,
-	SearchFeedResponse,
 	SearchResponse,
 	UnitDetailResponse,
 	UnitDetailAttributionSummaryResponse,
@@ -38,21 +38,8 @@ describe("API response values", () => {
 				nextCursor: "s1_grouped-token",
 			}),
 		).toBe(true);
-		expect(
-			Check(SearchFeedResponse, {
-				items: [],
-				facets: [],
-				total: { kind: "lower-bound", value: 21 },
-				nextCursor: "s2_global-token",
-			}),
-		).toBe(true);
-		expect(
-			Check(SearchFeedResponse, {
-				items: [],
-				total: { kind: "exact", value: 0 },
-				nextCursor: "",
-			}),
-		).toBe(false);
+		expect(Check(SearchContinuationToken, "s2_global-token")).toBe(true);
+		expect(Check(SearchContinuationToken, "")).toBe(false);
 	});
 
 	it("keeps Date values in code and ISO timestamps on the wire", () => {

@@ -9,6 +9,7 @@ import type { ContentLanguage } from "@rezics/i18n";
 
 import { collectUniqueFeedItems } from "@/features/content-feed/model/feed-items";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
+import { getNextItemPageParam } from "@/lib/infinite-query";
 
 export type CollectionContentItem = GetApiCollectionsByCollectionIdItemsStatus200["items"][number];
 
@@ -46,7 +47,7 @@ export function useCollectionContent(collectionId: string, enabled = true) {
 			}),
 		enabled,
 		initialPageParam: "",
-		getNextPageParam: (page) => page.nextCursor ?? undefined,
+		getNextPageParam: getNextItemPageParam,
 	});
 }
 

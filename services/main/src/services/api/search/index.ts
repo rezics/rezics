@@ -56,6 +56,7 @@ import { getZonePageUnitById } from "../../zones/pages";
 import { ZonePageNotFound } from "../domain-extensions/errors";
 import { DockNotFound } from "../docks/errors";
 import { hydrateFeedItems } from "../feed";
+import { resolveFeedPageContinuation } from "../feed/continuation";
 import { FeedContentKindValues } from "../feed/schema";
 import { DateTime, LocalizationLanguagePriority, Uuid } from "../schema";
 import { findFeedBlock, findSearchFeatureSource } from "./block-source";
@@ -283,9 +284,10 @@ async function presentSearchResultAsFeed(
 		new Date(),
 		{ kind: "contextual" },
 	);
+	const continuation = resolveFeedPageContinuation(items, result.nextCursor);
 	return {
 		items,
-		nextCursor: result.nextCursor,
+		...(continuation.status === "available" ? { nextCursor: continuation.cursor } : {}),
 		facets: result.facets,
 		total: result.total,
 	};

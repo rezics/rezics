@@ -28,7 +28,7 @@ describe("Search Feed page requests", () => {
 	it("retains contexts for a Filter Feed and adds the continuation cursor", async () => {
 		api.postApiSearchFilterFeed
 			.mockResolvedValueOnce({
-				data: { items: [], total: 1, nextCursor: "s2_server-issued" },
+				data: { items: [{ id: "visible" }], total: 1, nextCursor: "s2_server-issued" },
 			})
 			.mockResolvedValueOnce({ data: { items: [], total: 1 } });
 		const signal = new AbortController().signal;
@@ -104,6 +104,21 @@ describe("Search Feed page requests", () => {
 				surface: "search",
 			}),
 		).resolves.toMatchObject({ nextCursor: null });
+	});
+
+	it("treats an empty page as terminal when the server still sends a cursor", async () => {
+		api.postApiSearchFilterFeed.mockResolvedValue({
+			data: { items: [], total: 0, nextCursor: "s2_internal-search-position" },
+		});
+
+		await expect(
+			fetchSearchFeedPage({
+				localizationLanguages: ["en"],
+				request,
+				source: { kind: "filter", filterDocument: {} },
+				surface: "search",
+			}),
+		).resolves.toMatchObject({ items: [], nextCursor: null });
 	});
 
 	it("removes transport cursors before a request becomes a stable Feed identity", () => {

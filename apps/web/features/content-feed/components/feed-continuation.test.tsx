@@ -51,6 +51,14 @@ afterEach(() => {
 });
 
 describe("FeedContinuation", () => {
+	it("does not render or observe a load control after pagination is exhausted", () => {
+		const view = render(<FeedContinuation mode="infinite" state={{ status: "exhausted" }} />);
+
+		expect(view.container.childElementCount).toBe(0);
+		expect(screen.queryByRole("button", { name: "Load more" })).toBeNull();
+		expect(observe).not.toHaveBeenCalled();
+	});
+
 	it("loads an infinite feed once per ready state when its sentinel enters the viewport", () => {
 		const loadNext = vi.fn();
 		const view = render(<FeedContinuation mode="infinite" state={{ status: "ready", loadNext }} />);

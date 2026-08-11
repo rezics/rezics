@@ -108,6 +108,13 @@ A bounded scan may legitimately return zero hits while still advancing over orde
 Its cursor therefore carries both a zero returned-hit count and a non-empty keyset position; the
 position proves forward progress and prevents rescanning or an invalid empty-page cursor.
 
+That cursor is part of the explicit Search execution contract. Feed presentation is deliberately
+stricter: after hydration, a page with zero presented items is terminal and does not expose the
+internal Search cursor. Otherwise one visible infinite-scroll sentinel could turn separately
+bounded 4,096-candidate requests into an unbounded request chain. A non-empty Feed page retains
+the cursor, so normal keyset pagination remains `O(log N + S * filterCost)` per user action while
+empty-result work stays bounded to one request at both 500 million and 3 billion corpus rows.
+
 `task services-main:search:capacity -- --yes --rows 1000000` is an explicitly destructive,
 manual capacity qualification against disposable `rezics_atlas`. It is intentionally not a CI
 job: deterministic tests enforce cursor, budget, and physical-source contracts, while this task

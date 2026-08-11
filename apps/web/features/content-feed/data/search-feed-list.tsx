@@ -6,6 +6,7 @@ import { useMemo, useState } from "react";
 import type { SearchFeatureSurface } from "@rezics/filter";
 import { useTranslation } from "@/i18n/client";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
+import { getNextItemPageParam } from "@/lib/infinite-query";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
 import { FeedItemCard } from "../components/feed-item-card";
 import { FeedList } from "../components/feed-list";
@@ -54,7 +55,7 @@ export function useSearchFeedQuery({
 				surface,
 			}),
 		initialPageParam: InitialSearchFeedContinuationToken,
-		getNextPageParam: (page) => page.nextCursor,
+		getNextPageParam: getNextItemPageParam,
 	});
 }
 

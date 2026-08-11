@@ -88,6 +88,7 @@ import {
 	toPortableTextResponse,
 	type FeedItemResponseValue,
 } from "../schema/response";
+import { resolveFeedPageContinuation } from "./continuation";
 import { InvalidFeedCursor, InvalidFeedFilter } from "./errors";
 import {
 	DefaultFeedContentKindValues,
@@ -1531,6 +1532,28 @@ export default new Elysia({ prefix: "/feed" }).model(FilterSchemaModels).post(
 			positionOffset,
 			policyVersion: snapshotContext.policyVersion,
 		});
+		const encodedNextCursor = searchSelection.nextPosition
+			? Buffer.from(
+					JSON.stringify({
+						v: 11,
+						sort,
+						filterHash: body.filter
+							? createHash("sha256").update(canonicalUnitFilter(body.filter)).digest("hex")
+							: null,
+						filterLanguages,
+						localizationLanguages,
+						contentRatings: [...viewer.contentRatings],
+						personalized: viewer.personalized,
+						snapshotId: snapshotContext.id,
+						policyVersion: snapshotContext.policyVersion,
+						limit,
+						asOf: asOf.toISOString(),
+						searchPosition: toFeedSearchPosition(searchSelection.nextPosition),
+						positionOffset: positionOffset + page.length,
+					}),
+				).toString("base64url")
+			: null;
+		const continuation = resolveFeedPageContinuation(items, encodedNextCursor);
 		return {
 			items,
 			total: createFeedTotal({
@@ -1539,27 +1562,7 @@ export default new Elysia({ prefix: "/feed" }).model(FilterSchemaModels).post(
 				searchKind: searchSelection.kind,
 				positionOffset,
 			}),
-			nextCursor: searchSelection.nextPosition
-				? Buffer.from(
-						JSON.stringify({
-							v: 11,
-							sort,
-							filterHash: body.filter
-								? createHash("sha256").update(canonicalUnitFilter(body.filter)).digest("hex")
-								: null,
-							filterLanguages,
-							localizationLanguages,
-							contentRatings: [...viewer.contentRatings],
-							personalized: viewer.personalized,
-							snapshotId: snapshotContext.id,
-							policyVersion: snapshotContext.policyVersion,
-							limit,
-							asOf: asOf.toISOString(),
-							searchPosition: toFeedSearchPosition(searchSelection.nextPosition),
-							positionOffset: positionOffset + page.length,
-						}),
-					).toString("base64url")
-				: null,
+			nextCursor: continuation.cursor,
 		};
 	},
 	{

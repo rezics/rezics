@@ -72,6 +72,7 @@ import { SearchFeature, type SearchFeatureRequest } from "@/features/search/sear
 import { zonePageHref } from "@/features/slugs/unit-route";
 import { useTranslation } from "@/i18n/client";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
+import { getNextItemPageParam } from "@/lib/infinite-query";
 import { workZoneFeedContentKinds } from "../model/work-zone-feed";
 import type { ZoneRenderNavigation, ZoneRenderProjection } from "../model/zone-render";
 
@@ -679,12 +680,16 @@ function toSearchPage(value: SearchExecutionResponse): SearchPage {
 	};
 }
 
-function toZoneFeedPage(value: ZoneFeedExecutionResponse): ZoneFeedPage {
+function toZoneFeedPage(
+	value: ZoneFeedExecutionResponse,
+	currentCursor?: SearchFeedContinuationToken,
+): ZoneFeedPage {
+	const nextCursor = getNextItemPageParam(value, [], currentCursor);
 	return {
 		facets: value.facets,
 		items: value.items,
 		// The successful Feed endpoint response is the proof for this route-specific brand.
-		nextCursor: value.nextCursor as SearchFeedContinuationToken | undefined,
+		nextCursor: nextCursor as SearchFeedContinuationToken | undefined,
 		total: {
 			kind: value.total.kind,
 			value: Number(value.total.value),
@@ -772,9 +777,11 @@ function ZoneFeedBlock({
 		void execute(withContentKindFilter(nextRequest, nextContentKinds), controller.signal).then(
 			(result) => {
 				if (sequence !== executionSequence.current) return;
-				setPage((current) =>
-					append ? appendZoneFeedPage(current, toZoneFeedPage(result)) : toZoneFeedPage(result),
+				const nextPage = toZoneFeedPage(
+					result,
+					nextRequest.state.cursor as SearchFeedContinuationToken | undefined,
 				);
+				setPage((current) => (append ? appendZoneFeedPage(current, nextPage) : nextPage));
 			},
 			() => undefined,
 		);

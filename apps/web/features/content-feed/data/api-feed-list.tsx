@@ -12,6 +12,7 @@ import { usePresentationPreferences } from "@/features/preferences/data/use-pres
 import { useTranslation } from "@/i18n/client";
 import { useLocalizationLanguageState } from "@/i18n/use-localization-languages";
 import { toNonNegativeApiInteger } from "@/lib/api-number";
+import { getNextItemPageParam } from "@/lib/infinite-query";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
 import { FeedContentSelector } from "../components/feed-content-selector";
 import { FeedFiltersDialog } from "../components/feed-filters-dialog";
@@ -151,7 +152,7 @@ export function ApiFeedList({
 		},
 		enabled: localizationState.status === "ready",
 		initialPageParam: "",
-		getNextPageParam: (page) => page.nextCursor ?? undefined,
+		getNextPageParam: getNextItemPageParam,
 	});
 	const pageItems = useMemo(
 		() => collectUniqueFeedItems(query.data?.pages ?? [], (item) => item.id),
