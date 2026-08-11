@@ -102,11 +102,11 @@ CREATE TABLE public.unit_merge_request (
     failed_at timestamp(3) with time zone,
     created_at timestamp(3) with time zone DEFAULT now() NOT NULL,
     updated_at timestamp(3) with time zone DEFAULT now() NOT NULL,
-    CONSTRAINT unit_merge_request_source_fkey FOREIGN KEY (source_unit_id)
+    CONSTRAINT unit_merge_request_source_unit_id_unit_id_fkey FOREIGN KEY (source_unit_id)
         REFERENCES public.unit (id) ON DELETE RESTRICT,
-    CONSTRAINT unit_merge_request_target_fkey FOREIGN KEY (target_unit_id)
+    CONSTRAINT unit_merge_request_target_unit_id_unit_id_fkey FOREIGN KEY (target_unit_id)
         REFERENCES public.unit (id) ON DELETE RESTRICT,
-    CONSTRAINT unit_merge_request_proposer_fkey FOREIGN KEY (proposer_profile_id)
+    CONSTRAINT unit_merge_request_proposer_profile_id_profile_id_fkey FOREIGN KEY (proposer_profile_id)
         REFERENCES public.profile (id) ON DELETE RESTRICT,
     CONSTRAINT unit_merge_request_override_of_fkey FOREIGN KEY (override_of_request_id)
         REFERENCES public.unit_merge_request (id) ON DELETE RESTRICT,
@@ -144,13 +144,25 @@ CREATE TABLE public.unit_merge_request (
 );
 
 CREATE INDEX unit_merge_request_state_id_idx
-    ON public.unit_merge_request (state, id DESC);
+    ON public.unit_merge_request (state, id DESC NULLS LAST);
 CREATE INDEX unit_merge_request_source_created_idx
-    ON public.unit_merge_request (source_unit_id, created_at DESC, id DESC);
+    ON public.unit_merge_request (
+        source_unit_id,
+        created_at DESC NULLS LAST,
+        id DESC NULLS LAST
+    );
 CREATE INDEX unit_merge_request_target_created_idx
-    ON public.unit_merge_request (target_unit_id, created_at DESC, id DESC);
+    ON public.unit_merge_request (
+        target_unit_id,
+        created_at DESC NULLS LAST,
+        id DESC NULLS LAST
+    );
 CREATE INDEX unit_merge_request_proposer_created_idx
-    ON public.unit_merge_request (proposer_profile_id, created_at DESC, id DESC);
+    ON public.unit_merge_request (
+        proposer_profile_id,
+        created_at DESC NULLS LAST,
+        id DESC NULLS LAST
+    );
 ALTER TABLE public.unit_merge_request
     ADD CONSTRAINT unit_merge_request_proposer_idempotency_key
     UNIQUE (proposer_profile_id, idempotency_key);
@@ -177,9 +189,9 @@ CREATE TABLE public.unit_merge_review (
     request_fingerprint text NOT NULL,
     created_at timestamp(3) with time zone DEFAULT now() NOT NULL,
     CONSTRAINT unit_merge_review_pkey PRIMARY KEY (request_id, reviewer_profile_id),
-    CONSTRAINT unit_merge_review_request_fkey FOREIGN KEY (request_id)
+    CONSTRAINT unit_merge_review_request_id_unit_merge_request_id_fkey FOREIGN KEY (request_id)
         REFERENCES public.unit_merge_request (id) ON DELETE RESTRICT,
-    CONSTRAINT unit_merge_review_reviewer_fkey FOREIGN KEY (reviewer_profile_id)
+    CONSTRAINT unit_merge_review_reviewer_profile_id_profile_id_fkey FOREIGN KEY (reviewer_profile_id)
         REFERENCES public.profile (id) ON DELETE RESTRICT,
     CONSTRAINT unit_merge_review_note_check CHECK (note IS NULL OR btrim(note) <> ''),
     CONSTRAINT unit_merge_review_fingerprint_check
@@ -189,7 +201,11 @@ CREATE TABLE public.unit_merge_review (
 CREATE INDEX unit_merge_review_request_decision_idx
     ON public.unit_merge_review (request_id, decision, created_at, reviewer_profile_id);
 CREATE INDEX unit_merge_review_reviewer_created_idx
-    ON public.unit_merge_review (reviewer_profile_id, created_at DESC, request_id);
+    ON public.unit_merge_review (
+        reviewer_profile_id,
+        created_at DESC NULLS LAST,
+        request_id
+    );
 
 CREATE TABLE public.unit_merge_redirect (
     source_unit_id uuid PRIMARY KEY,
@@ -197,11 +213,11 @@ CREATE TABLE public.unit_merge_redirect (
     max_depth smallint DEFAULT 1 NOT NULL,
     request_id uuid NOT NULL,
     created_at timestamp(3) with time zone DEFAULT now() NOT NULL,
-    CONSTRAINT unit_merge_redirect_source_fkey FOREIGN KEY (source_unit_id)
+    CONSTRAINT unit_merge_redirect_source_unit_id_unit_id_fkey FOREIGN KEY (source_unit_id)
         REFERENCES public.unit (id) ON DELETE RESTRICT,
-    CONSTRAINT unit_merge_redirect_target_fkey FOREIGN KEY (target_unit_id)
+    CONSTRAINT unit_merge_redirect_target_unit_id_unit_id_fkey FOREIGN KEY (target_unit_id)
         REFERENCES public.unit (id) ON DELETE RESTRICT,
-    CONSTRAINT unit_merge_redirect_request_fkey FOREIGN KEY (request_id)
+    CONSTRAINT unit_merge_redirect_request_id_unit_merge_request_id_fkey FOREIGN KEY (request_id)
         REFERENCES public.unit_merge_request (id) ON DELETE RESTRICT,
     CONSTRAINT unit_merge_redirect_request_key UNIQUE (request_id),
     CONSTRAINT unit_merge_redirect_not_self_check CHECK (source_unit_id <> target_unit_id),
@@ -209,13 +225,17 @@ CREATE TABLE public.unit_merge_redirect (
 );
 
 CREATE INDEX unit_merge_redirect_target_depth_idx
-    ON public.unit_merge_redirect (target_unit_id, max_depth DESC, source_unit_id);
+    ON public.unit_merge_redirect (
+        target_unit_id,
+        max_depth DESC NULLS LAST,
+        source_unit_id
+    );
 
 CREATE TABLE public.unit_merge_graph_guard (
     unit_id uuid PRIMARY KEY,
     revision bigint DEFAULT 0 NOT NULL,
     updated_at timestamp(3) with time zone DEFAULT now() NOT NULL,
-    CONSTRAINT unit_merge_graph_guard_unit_fkey FOREIGN KEY (unit_id)
+    CONSTRAINT unit_merge_graph_guard_unit_id_unit_id_fkey FOREIGN KEY (unit_id)
         REFERENCES public.unit (id) ON DELETE CASCADE,
     CONSTRAINT unit_merge_graph_guard_revision_check CHECK (revision >= 0)
 );
@@ -238,11 +258,11 @@ CREATE TABLE public.unit_merge_operation (
     completed_at timestamp(3) with time zone,
     created_at timestamp(3) with time zone DEFAULT now() NOT NULL,
     updated_at timestamp(3) with time zone DEFAULT now() NOT NULL,
-    CONSTRAINT unit_merge_operation_request_fkey FOREIGN KEY (request_id)
+    CONSTRAINT unit_merge_operation_request_id_unit_merge_request_id_fkey FOREIGN KEY (request_id)
         REFERENCES public.unit_merge_request (id) ON DELETE RESTRICT,
-    CONSTRAINT unit_merge_operation_source_fkey FOREIGN KEY (source_unit_id)
+    CONSTRAINT unit_merge_operation_source_unit_id_unit_id_fkey FOREIGN KEY (source_unit_id)
         REFERENCES public.unit (id) ON DELETE RESTRICT,
-    CONSTRAINT unit_merge_operation_target_fkey FOREIGN KEY (target_unit_id)
+    CONSTRAINT unit_merge_operation_target_unit_id_unit_id_fkey FOREIGN KEY (target_unit_id)
         REFERENCES public.unit (id) ON DELETE RESTRICT,
     CONSTRAINT unit_merge_operation_request_key UNIQUE (request_id),
     CONSTRAINT unit_merge_operation_source_key UNIQUE (source_unit_id),
@@ -274,9 +294,9 @@ CREATE TABLE public.unit_merge_graph_lock (
     unit_id uuid PRIMARY KEY,
     operation_id uuid NOT NULL,
     created_at timestamp(3) with time zone DEFAULT now() NOT NULL,
-    CONSTRAINT unit_merge_graph_lock_unit_fkey FOREIGN KEY (unit_id)
+    CONSTRAINT unit_merge_graph_lock_unit_id_unit_id_fkey FOREIGN KEY (unit_id)
         REFERENCES public.unit (id) ON DELETE RESTRICT,
-    CONSTRAINT unit_merge_graph_lock_operation_fkey FOREIGN KEY (operation_id)
+    CONSTRAINT unit_merge_graph_lock_operation_id_unit_merge_operation_id_fkey FOREIGN KEY (operation_id)
         REFERENCES public.unit_merge_operation (id) ON DELETE RESTRICT
 );
 

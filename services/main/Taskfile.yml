@@ -132,12 +132,16 @@ tasks:
             - task: db:replay:up
 
     db:generate:
-        desc: Generate an Atlas migration from the Drizzle schema.
+        desc: Replay migrations into a shadow database and diff it against the Drizzle schema.
         cmds:
             - test -n "{{.CLI_ARGS}}"
+            - task: db:validate
             - defer: { task: db:replay:down }
-            - task: db:replay:up
-            - yarn exec atlas migrate diff --env main {{.CLI_ARGS}}
+            - task: db:replay:reset
+            - >-
+                yarn exec atlas migrate apply --env main
+                --url "postgres://postgres:postgres@localhost:${POSTGRES_MIGRATION_LOCAL_PORT:-5433}/rezics_atlas?search_path=public&sslmode=disable"
+            - bash scripts/generate-database-migration.sh {{.CLI_ARGS}}
 
     db:hash:
         desc: Recompute the Atlas migration directory checksum.
@@ -164,6 +168,14 @@ tasks:
             - >-
                 yarn exec atlas migrate apply --env main
                 --url "postgres://postgres:postgres@localhost:${POSTGRES_MIGRATION_LOCAL_PORT:-5433}/rezics_atlas?search_path=public&sslmode=disable"
+                --to-version 20260809000003
+            - >-
+                REZICS_DISPOSABLE_MIGRATION_FIXTURE=1
+                DATABASE_ADMIN_URL="postgres://postgres:postgres@localhost:${POSTGRES_MIGRATION_LOCAL_PORT:-5433}/rezics_atlas?sslmode=disable"
+                yarn exec tsx scripts/check-studio-workspace-cutover.ts seed
+            - >-
+                yarn exec atlas migrate apply --env main
+                --url "postgres://postgres:postgres@localhost:${POSTGRES_MIGRATION_LOCAL_PORT:-5433}/rezics_atlas?search_path=public&sslmode=disable"
                 --to-version 20260811000002
             - >-
                 REZICS_DISPOSABLE_MIGRATION_FIXTURE=1
@@ -181,6 +193,10 @@ tasks:
             - >-
                 DATABASE_ADMIN_URL="postgres://postgres:postgres@localhost:${POSTGRES_MIGRATION_LOCAL_PORT:-5433}/rezics_atlas?sslmode=disable"
                 yarn exec tsx scripts/migrate-filter-documents.ts --yes --batch-size 2
+            - >-
+                REZICS_DISPOSABLE_MIGRATION_FIXTURE=1
+                DATABASE_ADMIN_URL="postgres://postgres:postgres@localhost:${POSTGRES_MIGRATION_LOCAL_PORT:-5433}/rezics_atlas?sslmode=disable"
+                yarn exec tsx scripts/check-studio-workspace-cutover.ts verify-and-clean
             - >-
                 REZICS_DISPOSABLE_MIGRATION_FIXTURE=1
                 DATABASE_ADMIN_URL="postgres://postgres:postgres@localhost:${POSTGRES_MIGRATION_LOCAL_PORT:-5433}/rezics_atlas?sslmode=disable"

@@ -19,6 +19,20 @@ their own RomVer release lines, so `@rezics/api@1.6.0` is valid independently of
 the platform version. A breaking release must include an explicit migration or
 cutover plan, even though it remains within Project 1.
 
+Root `vMAJOR.MINOR.PATCH` tags are the server and database release boundary.
+Every SQL migration present in the preceding root release is append-only:
+do not edit, delete, or rename it after release. Repair a released database
+contract with a new forward migration whose filename sorts after the released
+history. Prefixed product tags such as `web/v*`, `about/v*`, and `api/v*` do not
+advance the database migration boundary.
+
+Generate database migrations with `task services-main:db:generate -- <name>`.
+The task replays the versioned directory with production-equivalent file
+transactions into the disposable shadow database, then runs `atlas schema diff`
+against the typed Drizzle exporter. Do not replace this workflow with
+`atlas migrate diff`: released data migrations contain transaction-scoped
+temporary relations that Atlas's migration-directory state reader cannot replay.
+
 ## Advisory GitHub checks
 
 The GitHub `Check` workflow is advisory. Its result does not block merging,

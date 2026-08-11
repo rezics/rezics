@@ -25,6 +25,11 @@ jobs:
         steps:
             - name: Checkout release metadata
               uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+              with:
+                  fetch-depth: 0
+
+            - name: Verify released migration history
+              run: bash deploy/scripts/check-released-migration-history.sh
 
             - name: Dispatch immutable tag
               shell: bash

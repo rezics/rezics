@@ -20,6 +20,7 @@ trap cleanup EXIT INT TERM
 cd "${repository_root}"
 export COMPOSE_PROJECT_NAME="${compose_project}"
 
+bash deploy/scripts/check-released-migration-history.sh
 yarn install --immutable
 task apps-web:offline:check
 task apps-web:cloudflare:typegen:check
