@@ -14,6 +14,9 @@ includes:
     apps-about:
         taskfile: ./apps/about/Taskfile.yml
         dir: ./apps/about
+    apps-markdown:
+        taskfile: ./apps/markdown/Taskfile.yml
+        dir: ./apps/markdown
     libraries:
         taskfile: ./libraries/Taskfile.yml
         dir: ./libraries
@@ -23,6 +26,9 @@ includes:
     packages-api:
         taskfile: ./packages/api/Taskfile.yml
         dir: ./packages/api
+    packages-editor:
+        taskfile: ./packages/editor/Taskfile.yml
+        dir: ./packages/editor
 
 tasks:
     format:
@@ -46,6 +52,7 @@ tasks:
             - >-
                 scc --no-gen
                 --exclude-dir dist
+                --exclude-dir target
                 --exclude-dir generated
                 --exclude-dir migrations
                 --exclude-file next-env.d.ts
@@ -60,6 +67,8 @@ tasks:
             - task: apps-about:check
             - task: libraries:typecheck
             - task: packages-api:typecheck
+            - task: packages-editor:typecheck
+            - task: apps-markdown:check
 
     test:
         desc: Run behavior tests for every application and service workspace.
@@ -75,6 +84,8 @@ tasks:
             - task: apps-web:test
             - task: apps-about:test
             - task: packages-api:test
+            - task: packages-editor:test
+            - task: apps-markdown:test
 
     test:coverage:
         desc: Generate a local behavior-test coverage report without enforcing thresholds.

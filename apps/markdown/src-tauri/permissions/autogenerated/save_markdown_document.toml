@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-save-markdown-document"
+description = "Enables the save_markdown_document command without any pre-configured scope."
+commands.allow = ["save_markdown_document"]
+
+[[permission]]
+identifier = "deny-save-markdown-document"
+description = "Denies the save_markdown_document command without any pre-configured scope."
+commands.deny = ["save_markdown_document"]

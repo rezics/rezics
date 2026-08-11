@@ -206,19 +206,36 @@ export const verbatimTerms = {
 		value: "Portable Text",
 		category: "format",
 		rationale: "Structured rich-text specification name used by the REZICS editor.",
-		scope: "about",
 	},
 	markdown: {
 		value: "Markdown",
 		category: "format",
 		rationale: "Plain-text markup format name.",
-		scope: "about",
+	},
+	html: {
+		value: "HTML",
+		category: "format",
+		rationale: "Hypertext markup format initialism.",
+	},
+	utf8: {
+		value: "UTF-8",
+		category: "format",
+		rationale: "Interoperable Unicode encoding identifier.",
+	},
+	mdFileExtension: {
+		value: ".md",
+		category: "identifier",
+		rationale: "Canonical short REZICS Markdown file extension.",
+	},
+	markdownFileExtension: {
+		value: ".markdown",
+		category: "identifier",
+		rationale: "Canonical long REZICS Markdown file extension.",
 	},
 	codeMirror6: {
 		value: "CodeMirror 6",
 		category: "brand",
 		rationale: "Editor framework name used in the documented editing roadmap.",
-		scope: "about",
 	},
 	jsonLd: {
 		value: "JSON-LD",

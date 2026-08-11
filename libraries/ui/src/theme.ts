@@ -147,13 +147,17 @@ export const appTheme = {
 		chart4: "#00C61C",
 		chart5: "#D8A100",
 	},
-} as const satisfies Record<"light" | "dark", AppThemeColors>;
+} as const satisfies Readonly<Record<"light" | "dark", AppThemeColors>>;
 
-function toCssVariable(name: string) {
+function toCssVariable(name: string): string {
 	return `--${name.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`)}`;
 }
 
-function createCssRule(selector: string, colorScheme: "light" | "dark", colors: AppThemeColors) {
+function createCssRule(
+	selector: string,
+	colorScheme: "light" | "dark",
+	colors: AppThemeColors,
+): string {
 	const declarations = Object.entries(colors)
 		.map(([name, value]) => `${toCssVariable(name)}:${value}`)
 		.join(";");

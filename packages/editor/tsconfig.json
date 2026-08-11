@@ -1,0 +1,14 @@
+{
+	"extends": "../../tsconfig.base.json",
+	"compilerOptions": {
+		"declaration": true,
+		"declarationMap": true,
+		"emitDeclarationOnly": true,
+		"jsx": "react-jsx",
+		"outDir": "dist/types",
+		"rootDir": "src",
+		"rewriteRelativeImportExtensions": true,
+		"types": ["node"]
+	},
+	"include": ["src"]
+}

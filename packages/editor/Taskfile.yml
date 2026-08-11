@@ -1,0 +1,17 @@
+version: "3"
+
+tasks:
+    typecheck:
+        desc: Type-check the public editor capability package.
+        cmds:
+            - yarn run typecheck
+
+    test:
+        desc: Run editor capability behavior tests.
+        cmds:
+            - yarn run test
+
+    build:
+        desc: Build the publishable editor capability package.
+        cmds:
+            - yarn run build

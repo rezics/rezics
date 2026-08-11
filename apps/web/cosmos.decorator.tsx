@@ -2,6 +2,7 @@ import { resources } from "@rezics/i18n/resources";
 import { UiLocaleValues, type UiLocale } from "@rezics/i18n";
 import { FixtureProvider } from "@rezics/fixture-client";
 import { FixtureContentLanguages, type FixtureContentLanguage } from "@rezics/fixture-data";
+import { appThemeCss } from "@rezics/ui/theme";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { create } from "native-i18n";
 import { useFixtureSelect } from "react-cosmos/client";
@@ -10,7 +11,6 @@ import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { TranslatedUiProvider } from "@/features/application-shell/components/ui-provider";
 import { TranslationProvider } from "@/i18n/client";
 import { RootTranslationNamespaces } from "@/i18n/namespaces";
-import { appThemeCss } from "@/lib/theme";
 
 const CosmosTranslationNamespaces = [
 	...RootTranslationNamespaces,

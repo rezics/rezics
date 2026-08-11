@@ -1,8 +1,7 @@
 import type { ManifestOptions } from "vite-plugin-pwa";
 import type { UiLocale } from "@rezics/i18n";
 import { LocalizedAppName, LocalizedPwaDescription } from "@rezics/i18n/manifest";
-
-import { appTheme } from "./lib/theme";
+import { appTheme } from "@rezics/ui/theme";
 
 type LocalizedText = Readonly<Record<UiLocale, string>>;
 type LocalizedManifestOptions = Partial<ManifestOptions> & {

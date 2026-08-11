@@ -1,8 +1,7 @@
 import { readFileSync } from "node:fs";
 
 import { describe, expect, it } from "vitest";
-
-import { appTheme, appThemeCss, type AppThemeColors } from "./theme";
+import { appTheme, appThemeCss, type AppThemeColors } from "@rezics/ui/theme";
 
 const foregroundPairs = [
 	["brand", "brandForeground"],

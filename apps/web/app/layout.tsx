@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { dehydrate } from "@tanstack/react-query";
 import socialCard from "@rezics/brand/social-card.png?url&no-inline";
 import { FontAwesomeVersion, isFontAwesomeLicense, type FontAwesomeLicense } from "@rezics/avatar";
+import { appTheme, appThemeCss } from "@rezics/ui/theme";
 
 import { getInitialAuthSession } from "@/features/auth/server/initial-session.server";
 import {
@@ -14,7 +15,6 @@ import { RootTranslationNamespaces } from "@/i18n/namespaces";
 import { getTranslation } from "@/i18n/server";
 import { AppProviders } from "@/lib/app-providers";
 import { createQueryClient } from "@/lib/query-client";
-import { appTheme, appThemeCss } from "@/lib/theme";
 import { getFrontendOrigin } from "@/lib/frontend-origin.server";
 
 import "@/styles/global.css";

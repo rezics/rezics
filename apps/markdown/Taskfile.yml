@@ -1,0 +1,39 @@
+version: "3"
+
+tasks:
+    dev:
+        desc: Run the local REZICS Markdown desktop application.
+        cmds:
+            - yarn run dev
+
+    dev:web:
+        desc: Run the independently accessible Web editor service.
+        cmds:
+            - yarn run dev:web
+
+    typecheck:
+        desc: Type-check the Markdown application packages.
+        cmds:
+            - yarn run typecheck
+
+    test:
+        desc: Run Markdown application behavior tests.
+        cmds:
+            - yarn run test
+            - yarn run rust:test
+
+    check:
+        desc: Check TypeScript and Rust desktop boundaries.
+        cmds:
+            - yarn run typecheck
+            - yarn run rust:check
+
+    build:web:
+        desc: Build the standalone Web editor service.
+        cmds:
+            - yarn run build:web
+
+    build:
+        desc: Build the Tauri desktop application bundle.
+        cmds:
+            - yarn run build

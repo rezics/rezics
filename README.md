@@ -18,7 +18,8 @@ social layers to work across content types and languages.
 ```text
 apps/
 ├─ web/                              # Main Vinext/React application
-└─ about/                            # Static multilingual Astro site
+├─ about/                            # Static multilingual Astro site
+└─ markdown/                         # Local-first Tauri/Web Markdown editor
 
 services/
 └─ main/                             # Elysia/srvx API and background worker
@@ -34,7 +35,9 @@ libraries/
    └─ openapi-tanstack-query/        # Generated TanStack Query client
 
 packages/
-└─ brand/                            # Public @rezics/brand package
+├─ api/                              # Public @rezics/api client
+├─ brand/                            # Public @rezics/brand package
+└─ editor/                           # Public editor and REZICS Markdown capabilities
 ```
 
 `apps/` and `services/` contain deployable units. `libraries/` contains private
@@ -76,8 +79,10 @@ plane and does not generate or replace the production Nomad deployment.
 
 Use `task infra:status` for persistent infrastructure,
 `task aspire:doctor` for prerequisite diagnostics, and `task aspire:describe`
-for machine-readable application state. The static `apps/about` site remains
-independent from the AppHost.
+for machine-readable application state. The static `apps/about` site and the
+local-first `apps/markdown` desktop/Web editor remain independent from the
+AppHost; run the latter explicitly with `task apps-markdown:dev` or
+`task apps-markdown:dev:web`.
 
 The API exposes startup at `GET /api/v1/startup`, dependency-free liveness at
 `GET/HEAD /api/v1/health`, and traffic readiness at `GET /api/v1/ready`. PostgreSQL is
@@ -113,6 +118,10 @@ task test
 task apps-web:build
 task apps-about:build
 task apps-about:test:dist
+task packages-editor:build
+task apps-markdown:check
+task apps-markdown:build:web
+task apps-markdown:build
 ```
 
 OpenAPI documents and generated clients are updated through

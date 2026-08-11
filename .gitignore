@@ -26,6 +26,8 @@ devenv.local.yaml
 .astro/
 dist/
 out/
+target/
+/apps/markdown/src-tauri/gen/schemas/
 coverage/
 storybook-static/
 *.tsbuildinfo
