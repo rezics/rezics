@@ -537,7 +537,10 @@ export default {
 		saveOrder: "Enregistrer l’ordre",
 		cancel: "Annuler",
 		noMoreLanguages: "Toutes les langues prises en charge ont déjà été ajoutées.",
-		unsavedConfirm: "Abandonner les modifications non enregistrées pour cette langue ?",
+		draftConflictTitle: "Le contenu du serveur a changé",
+		draftConflictDescription:
+			"Ce brouillon non enregistré a été conservé, mais il repose sur une ancienne version. Vérifiez-le avant de l’enregistrer ou supprimez-le pour charger le contenu actuel du serveur.",
+		discardDraft: "Supprimer le brouillon",
 		instructions:
 			"Appuyez sur la barre d’espacement pour saisir une langue. Utilisez les touches fléchées pour la déplacer, puis appuyez de nouveau sur la barre d’espacement pour la déposer.",
 		moved: insert("{{language}} déplacée à la position {{position}} sur {{count}}.", {

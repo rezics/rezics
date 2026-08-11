@@ -518,7 +518,10 @@ export default {
 		saveOrder: "並び順を保存",
 		cancel: "キャンセル",
 		noMoreLanguages: "すべての対応言語はすでに追加されています。",
-		unsavedConfirm: "この言語の保存されていない変更を破棄しますか？",
+		draftConflictTitle: "サーバー上の内容が変更されました",
+		draftConflictDescription:
+			"未保存の下書きは保持されていますが、古い版を基にしています。保存前に確認するか、下書きを破棄してサーバー上の最新内容を読み込んでください。",
+		discardDraft: "下書きを破棄",
 		instructions:
 			"スペースキーを押して言語を選択します。矢印キーで移動し、再度スペースキーを押してドロップします。",
 		moved: insert("{{language}} を {{count}} の位置 {{position}} に移動しました。", {

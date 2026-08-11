@@ -344,6 +344,20 @@ export default {
 	ruleContent: "ルールの内容",
 	removeRule: "ルールを削除",
 	addRule: "ルールを追加",
+	ruleNumber: insert("ルール {{position}}", { position: Number }),
+	ruleTranslationCount: insert("翻訳：{{count}}", { count: Number }),
+	moveRuleUp: insert("ルール {{position}} を上へ移動", { position: Number }),
+	moveRuleDown: insert("ルール {{position}} を下へ移動", { position: Number }),
+	ruleMoved: insert("ルールを {{count}} 件中 {{position}} 番目へ移動しました。", {
+		position: Number,
+		count: Number,
+	}),
+	addRuleTranslation: "翻訳を追加",
+	removeRuleTranslation: "翻訳を削除",
+	ruleTranslationMissing: insert("{{language}}の翻訳はまだ追加されていません。", {
+		language: String,
+	}),
+	ruleTranslationsIncomplete: "追加したすべてのルール翻訳にタイトルを入力してください。",
 	pinTarget: "固定するコンテンツ",
 	pinKind: "固定の種類",
 	pinKinds: {

@@ -15,7 +15,17 @@ import {
 	spoilerPortableTextEditorCapabilities,
 } from "@/features/editor/portable-text-editor";
 import { ContentLanguageControl } from "@/features/content-languages/components/content-language-control";
-import { useContentLanguageEditor } from "@/features/content-languages/hooks/use-content-language-editor";
+import { LocalizedDraftGate } from "@/features/content-languages/components/localized-draft-gate";
+import {
+	useContentLanguageEditor,
+	useLocalizedDraft,
+	type LocalizedDraftCodec,
+} from "@/features/content-languages/hooks/use-content-language-editor";
+import {
+	decodeDraftPortableText,
+	decodeDraftString,
+	isDraftRecord,
+} from "@/features/content-languages/model/localized-draft-codec";
 import { PostManagementSectionHeader } from "@/features/posts/components/post-management-section-header";
 import { useReviewManagement } from "@/features/posts/components/post-management-workspace";
 import { nullablePostLocalizationText } from "@/features/posts/model/post-localization-input";
@@ -25,6 +35,20 @@ import { RequestFailure } from "@/i18n/request-failure";
 import { readPortableText, writePortableText } from "@/lib/block";
 import { ReviewScoreAssociationManager } from "../components/review-score-association-manager";
 import { invalidateReviews } from "../data/review-cache";
+
+type ReviewLocalizationDraft = { title: string; summary: string; body: PortableTextValue };
+const ReviewLocalizationDraftCodec: LocalizedDraftCodec<ReviewLocalizationDraft> = {
+	version: 1,
+	decode(value) {
+		if (!isDraftRecord(value)) return;
+		const title = decodeDraftString(value.title);
+		const summary = decodeDraftString(value.summary);
+		const body = decodeDraftPortableText(value.body);
+		return title === undefined || summary === undefined || !body
+			? undefined
+			: { title, summary, body };
+	},
+};
 
 export function ReviewEditPage() {
 	const { t } = useTranslation(["engagement", "errors", "posts"]);
@@ -61,16 +85,24 @@ function ReviewEditForm({
 	const queryClient = useQueryClient();
 	const router = useApplicationRouter();
 	const { t } = useTranslation(["errors", "posts", "ui"]);
-	const { selectedLanguage, selectedLanguageIsPending, setDirty, languagesChanged } =
+	const { selectedLanguage, selectedLanguageIsPending, languagesChanged } =
 		useContentLanguageEditor();
-	const [body, setBody] = useState<PortableTextValue>(() =>
-		readPortableText(selectedLanguageIsPending ? null : review.body),
-	);
+	const draft = useLocalizedDraft<ReviewLocalizationDraft>({
+		scope: "review-localization",
+		baseVersion: review.updatedAt,
+		codec: ReviewLocalizationDraftCodec,
+		createInitialValue: () => ({
+			title: selectedLanguageIsPending ? "" : (review.title ?? ""),
+			summary: selectedLanguageIsPending ? "" : (review.summary ?? ""),
+			body: readPortableText(selectedLanguageIsPending ? null : review.body),
+		}),
+	});
+	const { value } = draft;
 	const [invalid, setInvalid] = useState(false);
 
 	async function submit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
-		if (!body.length) {
+		if (!value.body.length) {
 			setInvalid(true);
 			return;
 		}
@@ -84,18 +116,18 @@ function ReviewEditForm({
 					title: nullablePostLocalizationText(form, "title"),
 					summary: nullablePostLocalizationText(form, "summary"),
 					body: writePortableText(
-						body,
+						value.body,
 						selectedLanguageIsPending ? undefined : review.body,
 					),
 				},
 			});
+			draft.commit();
 			await invalidateReviews(
 				queryClient,
 				review.id,
 				review.targetId,
 				review.scores[0]?.realmId,
 			);
-			setDirty(false);
 			await languagesChanged();
 			router.push(postDetailHref(review.id));
 		} catch {
@@ -104,48 +136,60 @@ function ReviewEditForm({
 	}
 
 	return (
-		<form
-			className="flex flex-col gap-6"
-			onChange={() => setDirty(true)}
-			onSubmit={(event) => void submit(event)}
+		<LocalizedDraftGate
+			hydrated={draft.hydrated}
+			onDiscard={draft.discard}
+			serverChanged={draft.serverChanged}
 		>
-			<FieldGroup>
-				<Field>
-					<FieldLabel>{t.posts.titleOptional}</FieldLabel>
-					<Input
-						defaultValue={selectedLanguageIsPending ? "" : (review.title ?? "")}
-						maxLength={500}
-						name="title"
+			<form className="flex flex-col gap-6" onSubmit={(event) => void submit(event)}>
+				<FieldGroup>
+					<Field>
+						<FieldLabel>{t.posts.titleOptional}</FieldLabel>
+						<Input
+							maxLength={500}
+							name="title"
+							onChange={(event) => {
+								const title = event.currentTarget.value;
+								draft.setValue((current) => ({ ...current, title }));
+							}}
+							value={value.title}
+						/>
+					</Field>
+					<Field>
+						<FieldLabel>{t.posts.summaryOptional}</FieldLabel>
+						<Textarea
+							maxLength={2_000}
+							name="summary"
+							onChange={(event) => {
+								const summary = event.currentTarget.value;
+								draft.setValue((current) => ({ ...current, summary }));
+							}}
+							value={value.summary}
+						/>
+					</Field>
+					<PortableTextEditor
+						capabilities={spoilerPortableTextEditorCapabilities}
+						label={t.ui.body}
+						onChange={(body) => draft.setValue((current) => ({ ...current, body }))}
+						required
+						value={value.body}
 					/>
-				</Field>
-				<Field>
-					<FieldLabel>{t.posts.summaryOptional}</FieldLabel>
-					<Textarea
-						defaultValue={selectedLanguageIsPending ? "" : (review.summary ?? "")}
-						maxLength={2_000}
-						name="summary"
-					/>
-				</Field>
-				<PortableTextEditor
-					capabilities={spoilerPortableTextEditorCapabilities}
-					label={t.ui.body}
-					onChange={(value) => {
-						setBody(value);
-						setDirty(true);
-					}}
-					required
-					value={body}
-				/>
-			</FieldGroup>
-			{invalid ? (
-				<p className="text-sm text-destructive" role="alert">
-					{t.errors.invalid}
-				</p>
-			) : null}
-			<RequestFailure error={update.error} fallback={t.ui.retryLater} />
-			<Button className="w-fit" isLoading={update.isPending} type="submit" variant="solid">
-				{t.ui.save}
-			</Button>
-		</form>
+				</FieldGroup>
+				{invalid ? (
+					<p className="text-sm text-destructive" role="alert">
+						{t.errors.invalid}
+					</p>
+				) : null}
+				<RequestFailure error={update.error} fallback={t.ui.retryLater} />
+				<Button
+					className="w-fit"
+					isLoading={update.isPending}
+					type="submit"
+					variant="solid"
+				>
+					{t.ui.save}
+				</Button>
+			</form>
+		</LocalizedDraftGate>
 	);
 }

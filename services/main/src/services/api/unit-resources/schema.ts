@@ -14,7 +14,7 @@ import {
 	FractionalPositionInput,
 	ContentLanguage,
 	LocalizationLanguageQuery,
-	LocalizationInput,
+	UnitLocalizationInput,
 	Uuid,
 } from "../schema";
 import { UnitOwnershipMode, WorkUnitType } from "../units/schema";
@@ -22,7 +22,7 @@ import { UnitOwnershipMode, WorkUnitType } from "../units/schema";
 export const CreateUnitResourceBody = t.Object(
 	{
 		kind: t.Optional(t.String({ minLength: 1, maxLength: 64 })),
-		localization: LocalizationInput,
+		localization: UnitLocalizationInput,
 	},
 	{ additionalProperties: false },
 );
@@ -32,7 +32,7 @@ export const CreateEntityBody = t.Object(
 	{
 		ownershipMode: UnitOwnershipMode,
 		kind: t.Optional(t.UnionEnum(EntityKindValues, { default: undefined })),
-		localization: LocalizationInput,
+		localization: UnitLocalizationInput,
 	},
 	{ additionalProperties: false },
 );

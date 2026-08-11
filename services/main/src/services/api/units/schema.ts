@@ -16,7 +16,7 @@ import {
 	LifecycleInput,
 	LocalizationLanguagePriority,
 	LocalizationLanguageQuery,
-	LocalizationInput,
+	UnitLocalizationInput,
 	Uuid,
 	WorkReleaseStatus,
 } from "../schema";
@@ -158,7 +158,6 @@ export const UnitSeriesMembershipListResponse = t.Object({
 	),
 });
 
-const UnitLocalizationInput = LocalizationInput;
 const UnitContentLicenseGrantInput = t.Object(
 	{ referenceLicenseSlug: t.UnionEnum(UnitContentLicenseSlugs) },
 	{

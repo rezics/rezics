@@ -1,6 +1,6 @@
 {
 	"openapi": "3.2.0",
-	"info": { "title": "REZICS API", "version": "1.4.0" },
+	"info": { "title": "REZICS API", "version": "1.5.0" },
 	"components": {
 		"schemas": {
 			"JsonValue": {
@@ -160666,12 +160666,20 @@
 								"additionalProperties": false,
 								"type": "object",
 								"required": [
+									"baseRevisionId",
 									"acknowledgementMode",
 									"requireOnJoin",
 									"requireOnPost",
 									"rules"
 								],
 								"properties": {
+									"baseRevisionId": {
+										"nullable": true,
+										"anyOf": [
+											{ "format": "uuid", "type": "string" },
+											{ "type": "null" }
+										]
+									},
 									"acknowledgementMode": {
 										"default": "explicit",
 										"type": "string",
@@ -160684,154 +160692,66 @@
 										"maxItems": 100,
 										"type": "array",
 										"items": {
+											"additionalProperties": false,
 											"type": "object",
-											"required": ["language", "title", "content"],
+											"required": ["localizations"],
 											"properties": {
-												"language": {
-													"type": "string",
-													"enum": [
-														"zh",
-														"en",
-														"ja",
-														"ko",
-														"de",
-														"fr",
-														"es"
-													]
-												},
-												"title": {
-													"minLength": 1,
-													"maxLength": 500,
-													"type": "string"
-												},
-												"content": {
-													"additionalProperties": false,
-													"$id": "PortableTextDocument",
-													"type": "object",
-													"required": ["_type", "_key", "content"],
-													"properties": {
-														"_type": {
-															"const": "portable-text",
-															"type": "string"
-														},
-														"_key": {
-															"pattern": "^[0-9a-f]{12}$",
-															"$id": "BlockKey",
-															"type": "string"
-														},
-														"content": {
-															"$id": "PortableText",
-															"type": "array",
-															"items": {
-																"$id": "PortableTextBlock",
-																"anyOf": [
-																	{
-																		"additionalProperties": {
-																			"$id": "#/components/schemas/JsonValue",
+												"localizations": {
+													"minItems": 1,
+													"maxItems": 7,
+													"type": "array",
+													"items": {
+														"additionalProperties": false,
+														"type": "object",
+														"required": [
+															"language",
+															"title",
+															"content"
+														],
+														"properties": {
+															"language": {
+																"type": "string",
+																"enum": [
+																	"zh",
+																	"en",
+																	"ja",
+																	"ko",
+																	"de",
+																	"fr",
+																	"es"
+																]
+															},
+															"title": {
+																"minLength": 1,
+																"maxLength": 500,
+																"type": "string"
+															},
+															"content": {
+																"additionalProperties": false,
+																"$id": "PortableTextDocument",
+																"type": "object",
+																"required": [
+																	"_type",
+																	"_key",
+																	"content"
+																],
+																"properties": {
+																	"_type": {
+																		"const": "portable-text",
+																		"type": "string"
+																	},
+																	"_key": {
+																		"pattern": "^[0-9a-f]{12}$",
+																		"$id": "BlockKey",
+																		"type": "string"
+																	},
+																	"content": {
+																		"$id": "PortableText",
+																		"type": "array",
+																		"items": {
+																			"$id": "PortableTextBlock",
 																			"anyOf": [
-																				{ "type": "null" },
 																				{
-																					"type": "boolean"
-																				},
-																				{
-																					"type": "number"
-																				},
-																				{
-																					"type": "string"
-																				},
-																				{
-																					"type": "array",
-																					"items": {
-																						"$ref": "#/components/schemas/JsonValue"
-																					}
-																				},
-																				{
-																					"type": "object",
-																					"patternProperties": {
-																						"^(.*)$": {
-																							"$ref": "#/components/schemas/JsonValue"
-																						}
-																					}
-																				}
-																			]
-																		},
-																		"$id": "PortableTextTextBlock",
-																		"type": "object",
-																		"required": [
-																			"_key",
-																			"_type",
-																			"children"
-																		],
-																		"properties": {
-																			"_key": {
-																				"type": "string"
-																			},
-																			"_type": {
-																				"const": "block",
-																				"type": "string"
-																			},
-																			"children": {
-																				"type": "array",
-																				"items": {
-																					"$id": "PortableTextChild",
-																					"anyOf": [
-																						{
-																							"additionalProperties": false,
-																							"$id": "PortableTextSpan",
-																							"type": "object",
-																							"required": [
-																								"_key",
-																								"_type",
-																								"text"
-																							],
-																							"properties": {
-																								"_key": {
-																									"type": "string"
-																								},
-																								"_type": {
-																									"const": "span",
-																									"type": "string"
-																								},
-																								"text": {
-																									"type": "string"
-																								},
-																								"marks": {
-																									"type": "array",
-																									"items": {
-																										"type": "string"
-																									}
-																								}
-																							}
-																						},
-																						{
-																							"additionalProperties": false,
-																							"$id": "PortableTextUnitMention",
-																							"type": "object",
-																							"required": [
-																								"_key",
-																								"_type",
-																								"unitId"
-																							],
-																							"properties": {
-																								"_key": {
-																									"type": "string"
-																								},
-																								"_type": {
-																									"const": "unit-mention",
-																									"type": "string"
-																								},
-																								"unitId": {
-																									"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
-																									"type": "string"
-																								}
-																							}
-																						}
-																					]
-																				}
-																			},
-																			"markDefs": {
-																				"type": "array",
-																				"items": {
 																					"additionalProperties": {
 																						"$id": "#/components/schemas/JsonValue",
 																						"anyOf": [
@@ -160863,7 +160783,203 @@
 																							}
 																						]
 																					},
-																					"$id": "PortableTextObject",
+																					"$id": "PortableTextTextBlock",
+																					"type": "object",
+																					"required": [
+																						"_key",
+																						"_type",
+																						"children"
+																					],
+																					"properties": {
+																						"_key": {
+																							"type": "string"
+																						},
+																						"_type": {
+																							"const": "block",
+																							"type": "string"
+																						},
+																						"children": {
+																							"type": "array",
+																							"items": {
+																								"$id": "PortableTextChild",
+																								"anyOf": [
+																									{
+																										"additionalProperties": false,
+																										"$id": "PortableTextSpan",
+																										"type": "object",
+																										"required": [
+																											"_key",
+																											"_type",
+																											"text"
+																										],
+																										"properties": {
+																											"_key": {
+																												"type": "string"
+																											},
+																											"_type": {
+																												"const": "span",
+																												"type": "string"
+																											},
+																											"text": {
+																												"type": "string"
+																											},
+																											"marks": {
+																												"type": "array",
+																												"items": {
+																													"type": "string"
+																												}
+																											}
+																										}
+																									},
+																									{
+																										"additionalProperties": false,
+																										"$id": "PortableTextUnitMention",
+																										"type": "object",
+																										"required": [
+																											"_key",
+																											"_type",
+																											"unitId"
+																										],
+																										"properties": {
+																											"_key": {
+																												"type": "string"
+																											},
+																											"_type": {
+																												"const": "unit-mention",
+																												"type": "string"
+																											},
+																											"unitId": {
+																												"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																												"type": "string"
+																											}
+																										}
+																									}
+																								]
+																							}
+																						},
+																						"markDefs": {
+																							"type": "array",
+																							"items": {
+																								"additionalProperties": {
+																									"$id": "#/components/schemas/JsonValue",
+																									"anyOf": [
+																										{
+																											"type": "null"
+																										},
+																										{
+																											"type": "boolean"
+																										},
+																										{
+																											"type": "number"
+																										},
+																										{
+																											"type": "string"
+																										},
+																										{
+																											"type": "array",
+																											"items": {
+																												"$ref": "#/components/schemas/JsonValue"
+																											}
+																										},
+																										{
+																											"type": "object",
+																											"patternProperties": {
+																												"^(.*)$": {
+																													"$ref": "#/components/schemas/JsonValue"
+																												}
+																											}
+																										}
+																									]
+																								},
+																								"$id": "PortableTextObject",
+																								"type": "object",
+																								"required": [
+																									"_key",
+																									"_type"
+																								],
+																								"properties": {
+																									"_key": {
+																										"type": "string"
+																									},
+																									"_type": {
+																										"type": "string"
+																									}
+																								}
+																							}
+																						},
+																						"listItem": {
+																							"type": "string"
+																						},
+																						"style": {
+																							"type": "string"
+																						},
+																						"level": {
+																							"minimum": 1,
+																							"type": "integer"
+																						}
+																					}
+																				},
+																				{
+																					"additionalProperties": false,
+																					"$id": "PortableTextImage",
+																					"type": "object",
+																					"required": [
+																						"_key",
+																						"_type",
+																						"assetId"
+																					],
+																					"properties": {
+																						"_key": {
+																							"type": "string"
+																						},
+																						"_type": {
+																							"const": "image",
+																							"type": "string"
+																						},
+																						"assetId": {
+																							"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																							"type": "string"
+																						},
+																						"alt": {
+																							"type": "string"
+																						},
+																						"caption": {
+																							"type": "string"
+																						}
+																					}
+																				},
+																				{
+																					"additionalProperties": {
+																						"$id": "#/components/schemas/JsonValue",
+																						"anyOf": [
+																							{
+																								"type": "null"
+																							},
+																							{
+																								"type": "boolean"
+																							},
+																							{
+																								"type": "number"
+																							},
+																							{
+																								"type": "string"
+																							},
+																							{
+																								"type": "array",
+																								"items": {
+																									"$ref": "#/components/schemas/JsonValue"
+																								}
+																							},
+																							{
+																								"type": "object",
+																								"patternProperties": {
+																									"^(.*)$": {
+																										"$ref": "#/components/schemas/JsonValue"
+																									}
+																								}
+																							}
+																						]
+																					},
 																					"type": "object",
 																					"required": [
 																						"_key",
@@ -160874,98 +160990,15 @@
 																							"type": "string"
 																						},
 																						"_type": {
+																							"pattern": "^(?!(?:block|image)$).+",
 																							"type": "string"
 																						}
 																					}
 																				}
-																			},
-																			"listItem": {
-																				"type": "string"
-																			},
-																			"style": {
-																				"type": "string"
-																			},
-																			"level": {
-																				"minimum": 1,
-																				"type": "integer"
-																			}
-																		}
-																	},
-																	{
-																		"additionalProperties": false,
-																		"$id": "PortableTextImage",
-																		"type": "object",
-																		"required": [
-																			"_key",
-																			"_type",
-																			"assetId"
-																		],
-																		"properties": {
-																			"_key": {
-																				"type": "string"
-																			},
-																			"_type": {
-																				"const": "image",
-																				"type": "string"
-																			},
-																			"assetId": {
-																				"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
-																				"type": "string"
-																			},
-																			"alt": {
-																				"type": "string"
-																			},
-																			"caption": {
-																				"type": "string"
-																			}
-																		}
-																	},
-																	{
-																		"additionalProperties": {
-																			"$id": "#/components/schemas/JsonValue",
-																			"anyOf": [
-																				{ "type": "null" },
-																				{
-																					"type": "boolean"
-																				},
-																				{
-																					"type": "number"
-																				},
-																				{
-																					"type": "string"
-																				},
-																				{
-																					"type": "array",
-																					"items": {
-																						"$ref": "#/components/schemas/JsonValue"
-																					}
-																				},
-																				{
-																					"type": "object",
-																					"patternProperties": {
-																						"^(.*)$": {
-																							"$ref": "#/components/schemas/JsonValue"
-																						}
-																					}
-																				}
 																			]
-																		},
-																		"type": "object",
-																		"required": [
-																			"_key",
-																			"_type"
-																		],
-																		"properties": {
-																			"_key": {
-																				"type": "string"
-																			},
-																			"_type": {
-																				"pattern": "^(?!(?:block|image)$).+",
-																				"type": "string"
-																			}
 																		}
 																	}
-																]
+																}
 															}
 														}
 													}
@@ -161039,11 +161072,62 @@
 							}
 						}
 					},
-					"422": {
-						"description": "Request validation failed",
+					"409": {
+						"description": "Response for status 409",
 						"content": {
 							"application/json": {
-								"schema": { "$ref": "#/components/schemas/ValidationError" }
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "RealmRuleRevisionChanged",
+													"type": "string",
+													"enum": ["RealmRuleRevisionChanged"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Response for status 422",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"type": "object",
+											"required": ["error", "requestId"],
+											"properties": {
+												"error": {
+													"type": "object",
+													"required": ["code", "message"],
+													"properties": {
+														"code": {
+															"default": "ValidationError",
+															"type": "string",
+															"enum": ["ValidationError"]
+														},
+														"message": { "type": "string" },
+														"details": {}
+													}
+												},
+												"requestId": { "type": "string" }
+											}
+										},
+										{ "$ref": "#/components/schemas/ValidationError" }
+									]
+								}
 							}
 						}
 					},
@@ -161531,6 +161615,480 @@
 				},
 				"operationId": "getApiRealmsByRealmIdRules",
 				"x-rezics-quota-route-operation-id": "getApiRealmsByRealmIdRules",
+				"x-rezics-quota-operation-id": "*",
+				"x-rezics-quota-cost-units": 1
+			}
+		},
+		"/api/v1/realms/{realmId}/rules/authoring": {
+			"get": {
+				"summary": "Get Realm rules for authoring",
+				"tags": ["Realms"],
+				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "realmId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": [
+										"revisionId",
+										"version",
+										"acknowledgementMode",
+										"requireOnJoin",
+										"requireOnPost",
+										"items"
+									],
+									"properties": {
+										"revisionId": {
+											"nullable": true,
+											"anyOf": [
+												{ "format": "uuid", "type": "string" },
+												{ "type": "null" }
+											]
+										},
+										"version": {
+											"nullable": true,
+											"anyOf": [
+												{
+													"anyOf": [
+														{
+															"format": "integer",
+															"default": 0,
+															"type": "string"
+														},
+														{ "type": "integer" }
+													]
+												},
+												{ "type": "null" }
+											]
+										},
+										"acknowledgementMode": {
+											"default": "explicit",
+											"type": "string",
+											"enum": ["explicit", "implicit_on_follow"]
+										},
+										"requireOnJoin": { "type": "boolean" },
+										"requireOnPost": { "type": "boolean" },
+										"items": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"required": ["id", "position", "localizations"],
+												"properties": {
+													"id": { "format": "uuid", "type": "string" },
+													"position": {
+														"minimum": 0,
+														"anyOf": [
+															{
+																"format": "integer",
+																"default": 0,
+																"type": "string"
+															},
+															{ "minimum": 0, "type": "integer" }
+														]
+													},
+													"localizations": {
+														"minItems": 1,
+														"maxItems": 7,
+														"type": "array",
+														"items": {
+															"type": "object",
+															"required": [
+																"language",
+																"title",
+																"content"
+															],
+															"properties": {
+																"language": {
+																	"type": "string",
+																	"enum": [
+																		"zh",
+																		"en",
+																		"ja",
+																		"ko",
+																		"de",
+																		"fr",
+																		"es"
+																	]
+																},
+																"title": { "type": "string" },
+																"content": {
+																	"additionalProperties": false,
+																	"$id": "PortableTextDocument",
+																	"type": "object",
+																	"required": [
+																		"_type",
+																		"_key",
+																		"content"
+																	],
+																	"properties": {
+																		"_type": {
+																			"const": "portable-text",
+																			"type": "string"
+																		},
+																		"_key": {
+																			"pattern": "^[0-9a-f]{12}$",
+																			"$id": "BlockKey",
+																			"type": "string"
+																		},
+																		"content": {
+																			"$id": "PortableText",
+																			"type": "array",
+																			"items": {
+																				"$id": "PortableTextBlock",
+																				"anyOf": [
+																					{
+																						"additionalProperties": {
+																							"$id": "#/components/schemas/JsonValue",
+																							"anyOf": [
+																								{
+																									"type": "null"
+																								},
+																								{
+																									"type": "boolean"
+																								},
+																								{
+																									"type": "number"
+																								},
+																								{
+																									"type": "string"
+																								},
+																								{
+																									"type": "array",
+																									"items": {
+																										"$ref": "#/components/schemas/JsonValue"
+																									}
+																								},
+																								{
+																									"type": "object",
+																									"patternProperties": {
+																										"^(.*)$": {
+																											"$ref": "#/components/schemas/JsonValue"
+																										}
+																									}
+																								}
+																							]
+																						},
+																						"$id": "PortableTextTextBlock",
+																						"type": "object",
+																						"required": [
+																							"_key",
+																							"_type",
+																							"children"
+																						],
+																						"properties": {
+																							"_key": {
+																								"type": "string"
+																							},
+																							"_type": {
+																								"const": "block",
+																								"type": "string"
+																							},
+																							"children": {
+																								"type": "array",
+																								"items": {
+																									"$id": "PortableTextChild",
+																									"anyOf": [
+																										{
+																											"additionalProperties": false,
+																											"$id": "PortableTextSpan",
+																											"type": "object",
+																											"required": [
+																												"_key",
+																												"_type",
+																												"text"
+																											],
+																											"properties": {
+																												"_key": {
+																													"type": "string"
+																												},
+																												"_type": {
+																													"const": "span",
+																													"type": "string"
+																												},
+																												"text": {
+																													"type": "string"
+																												},
+																												"marks": {
+																													"type": "array",
+																													"items": {
+																														"type": "string"
+																													}
+																												}
+																											}
+																										},
+																										{
+																											"additionalProperties": false,
+																											"$id": "PortableTextUnitMention",
+																											"type": "object",
+																											"required": [
+																												"_key",
+																												"_type",
+																												"unitId"
+																											],
+																											"properties": {
+																												"_key": {
+																													"type": "string"
+																												},
+																												"_type": {
+																													"const": "unit-mention",
+																													"type": "string"
+																												},
+																												"unitId": {
+																													"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																													"type": "string"
+																												}
+																											}
+																										}
+																									]
+																								}
+																							},
+																							"markDefs": {
+																								"type": "array",
+																								"items": {
+																									"additionalProperties": {
+																										"$id": "#/components/schemas/JsonValue",
+																										"anyOf": [
+																											{
+																												"type": "null"
+																											},
+																											{
+																												"type": "boolean"
+																											},
+																											{
+																												"type": "number"
+																											},
+																											{
+																												"type": "string"
+																											},
+																											{
+																												"type": "array",
+																												"items": {
+																													"$ref": "#/components/schemas/JsonValue"
+																												}
+																											},
+																											{
+																												"type": "object",
+																												"patternProperties": {
+																													"^(.*)$": {
+																														"$ref": "#/components/schemas/JsonValue"
+																													}
+																												}
+																											}
+																										]
+																									},
+																									"$id": "PortableTextObject",
+																									"type": "object",
+																									"required": [
+																										"_key",
+																										"_type"
+																									],
+																									"properties": {
+																										"_key": {
+																											"type": "string"
+																										},
+																										"_type": {
+																											"type": "string"
+																										}
+																									}
+																								}
+																							},
+																							"listItem": {
+																								"type": "string"
+																							},
+																							"style": {
+																								"type": "string"
+																							},
+																							"level": {
+																								"minimum": 1,
+																								"type": "integer"
+																							}
+																						}
+																					},
+																					{
+																						"additionalProperties": false,
+																						"$id": "PortableTextImage",
+																						"type": "object",
+																						"required": [
+																							"_key",
+																							"_type",
+																							"assetId"
+																						],
+																						"properties": {
+																							"_key": {
+																								"type": "string"
+																							},
+																							"_type": {
+																								"const": "image",
+																								"type": "string"
+																							},
+																							"assetId": {
+																								"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																								"type": "string"
+																							},
+																							"alt": {
+																								"type": "string"
+																							},
+																							"caption": {
+																								"type": "string"
+																							}
+																						}
+																					},
+																					{
+																						"additionalProperties": {
+																							"$id": "#/components/schemas/JsonValue",
+																							"anyOf": [
+																								{
+																									"type": "null"
+																								},
+																								{
+																									"type": "boolean"
+																								},
+																								{
+																									"type": "number"
+																								},
+																								{
+																									"type": "string"
+																								},
+																								{
+																									"type": "array",
+																									"items": {
+																										"$ref": "#/components/schemas/JsonValue"
+																									}
+																								},
+																								{
+																									"type": "object",
+																									"patternProperties": {
+																										"^(.*)$": {
+																											"$ref": "#/components/schemas/JsonValue"
+																										}
+																									}
+																								}
+																							]
+																						},
+																						"type": "object",
+																						"required": [
+																							"_key",
+																							"_type"
+																						],
+																						"properties": {
+																							"_key": {
+																								"type": "string"
+																							},
+																							"_type": {
+																								"pattern": "^(?!(?:block|image)$).+",
+																								"type": "string"
+																							}
+																						}
+																					}
+																				]
+																			}
+																		}
+																	}
+																}
+															}
+														}
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "RealmCapabilityRequired",
+													"type": "string",
+													"enum": ["RealmCapabilityRequired"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"429": {
+						"description": "API quota exceeded",
+						"headers": {
+							"Retry-After": {
+								"description": "Seconds until the limiting window or concurrency lease can be retried",
+								"schema": { "type": "integer", "minimum": 1 }
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"type": "string",
+													"enum": [
+														"ApiQuotaExceeded",
+														"ApiTokenRateLimitExceeded"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {
+													"$ref": "#/components/schemas/JsonValue"
+												}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "getApiRealmsByRealmIdRulesAuthoring",
+				"x-rezics-quota-route-operation-id": "getApiRealmsByRealmIdRulesAuthoring",
 				"x-rezics-quota-operation-id": "*",
 				"x-rezics-quota-cost-units": 1
 			}

@@ -58,7 +58,7 @@ export default {
 	RealmCapabilityRequired: `必要な ${realmTerms.label} 権限を持っていません。`,
 	RealmRulesAcceptanceRequired: `続行するには、現在の ${realmTerms.label} ルールを受け入れてください。`,
 	RealmRuleRevisionChanged:
-		"ルールが変更されました。同意する前に最新のリビジョンを確認してください。",
+		"サーバー上のルールが変更されました。最新のリビジョンを確認して、もう一度お試しください。",
 	PlatformCapabilityRequired: "この操作にはプラットフォームの権限が必要です。",
 	PlatformAccessManagerRequired:
 		"プラットフォームは、少なくとも1つの期限切れでないアクセスマネージャーを保持する必要があります。",

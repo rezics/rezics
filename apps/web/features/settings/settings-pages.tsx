@@ -67,7 +67,18 @@ import { setPresentationPreferencesQueryData } from "@/features/preferences/data
 import { ContentRatingPreferenceField } from "./components/content-rating-preference-field";
 import { ContentLanguageControl } from "@/features/content-languages/components/content-language-control";
 import { ContentLanguageEditorBoundary } from "@/features/content-languages/components/content-language-editor-boundary";
-import { useContentLanguageEditor } from "@/features/content-languages/hooks/use-content-language-editor";
+import { LocalizedDraftGate } from "@/features/content-languages/components/localized-draft-gate";
+import {
+	useContentLanguageEditor,
+	useLocalizedDraft,
+	type LocalizedDraftCodec,
+} from "@/features/content-languages/hooks/use-content-language-editor";
+import {
+	decodeDraftAvatar,
+	decodeDraftImageAsset,
+	decodeDraftString,
+	isDraftRecord,
+} from "@/features/content-languages/model/localized-draft-codec";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
 
@@ -99,6 +110,30 @@ interface PickedRealm {
 	readonly id: string;
 	readonly label: string;
 }
+
+type ProfileLocalizationDraft = {
+	readonly name: string;
+	readonly summary: string;
+	readonly avatar: AvatarFieldValue | null;
+	readonly banner: LocalizationImageAssetValue | null;
+};
+
+const ProfileLocalizationDraftCodec: LocalizedDraftCodec<ProfileLocalizationDraft> = {
+	version: 1,
+	decode(value) {
+		if (!isDraftRecord(value)) return;
+		const name = decodeDraftString(value.name);
+		const summary = decodeDraftString(value.summary);
+		const avatar = decodeDraftAvatar(value.avatar);
+		const banner = decodeDraftImageAsset(value.banner);
+		return name === undefined ||
+			summary === undefined ||
+			avatar === undefined ||
+			banner === undefined
+			? undefined
+			: { name, summary, avatar, banner };
+	},
+};
 
 export function ProfileSettings() {
 	const searchParams = useSearchParams();
@@ -145,7 +180,7 @@ function ProfileSettingsForm({ current }: { current: GetApiUsersMeStatus200 }) {
 		"ui",
 	]);
 	const queryClient = useQueryClient();
-	const { selectedLanguage, selectedLanguageIsPending, setDirty, languagesChanged } =
+	const { selectedLanguage, selectedLanguageIsPending, languagesChanged } =
 		useContentLanguageEditor();
 	const localization = current.localizations.find((entry) => entry.language === selectedLanguage);
 	const avatarOptions: AvatarFieldOption[] = current.localizations.flatMap((entry) =>
@@ -183,17 +218,22 @@ function ProfileSettingsForm({ current }: { current: GetApiUsersMeStatus200 }) {
 		},
 	});
 	const [saved, setSaved] = useState(false);
-	const [avatar, setAvatar] = useState<AvatarFieldValue | null>(
-		selectedLanguageIsPending ? null : (localization?.avatar ?? null),
-	);
-	const [banner, setBanner] = useState<LocalizationImageAssetValue | null>(
-		selectedLanguageIsPending ? null : (localization?.banner ?? null),
-	);
+	const draft = useLocalizedDraft<ProfileLocalizationDraft>({
+		scope: "profile-localization",
+		baseVersion: localization?.updatedAt ?? null,
+		codec: ProfileLocalizationDraftCodec,
+		createInitialValue: () => ({
+			name: selectedLanguageIsPending ? "" : (localization?.title ?? ""),
+			summary: selectedLanguageIsPending ? "" : (localization?.summary ?? ""),
+			avatar: selectedLanguageIsPending ? null : (localization?.avatar ?? null),
+			banner: selectedLanguageIsPending ? null : (localization?.banner ?? null),
+		}),
+	});
+	const { value } = draft;
 	async function submit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
 		setSaved(false);
-		const data = new FormData(event.currentTarget);
-		const name = String(data.get("name") ?? "").trim();
+		const name = value.name.trim();
 		if (!name) return;
 		try {
 			await update.mutateAsync({
@@ -201,12 +241,12 @@ function ProfileSettingsForm({ current }: { current: GetApiUsersMeStatus200 }) {
 					updatedAt: current.updatedAt,
 					language: selectedLanguage,
 					name,
-					summary: String(data.get("summary") ?? "").trim(),
-					avatar: avatarPresentationToInput(avatar),
-					bannerAssetId: banner?.id ?? null,
+					summary: value.summary.trim(),
+					avatar: avatarPresentationToInput(value.avatar),
+					bannerAssetId: value.banner?.id ?? null,
 				},
 			});
-			setDirty(false);
+			draft.commit();
 			await languagesChanged();
 			setSaved(true);
 		} catch {
@@ -216,59 +256,67 @@ function ProfileSettingsForm({ current }: { current: GetApiUsersMeStatus200 }) {
 	return (
 		<SettingsFrame action={<ContentLanguageControl />} title={t.settings.profile}>
 			<LocalizationMediaFallbackNotice />
-			<form onChange={() => setDirty(true)} onSubmit={submit}>
-				<FieldGroup>
-					<Field>
-						<FieldLabel>{t.media.roles.avatar.title}</FieldLabel>
-						<AvatarField
-							fallback={avatarOptions[0] ?? null}
-							onChange={(value) => {
-								setAvatar(value);
-								setDirty(true);
-							}}
-							options={avatarOptions}
-							value={avatar}
-						/>
-					</Field>
-					<Field>
-						<FieldLabel>{t.media.roles.banner.title}</FieldLabel>
-						<LocalizationImageUploadField
-							fallback={bannerOptions[0] ?? null}
-							onChange={(value) => {
-								setBanner(value);
-								setDirty(true);
-							}}
-							options={bannerOptions}
-							role="banner"
-							value={banner}
-						/>
-					</Field>
-					<Field required>
-						<FieldLabel>{t.ui.displayName}</FieldLabel>
-						<Input
-							defaultValue={
-								selectedLanguageIsPending ? "" : (localization?.title ?? "")
-							}
-							maxLength={120}
-							name="name"
-							required
-						/>
-					</Field>
-					<Field>
-						<FieldLabel>{t.ui.introduction}</FieldLabel>
-						<Textarea
-							name="summary"
-							defaultValue={
-								selectedLanguageIsPending ? "" : (localization?.summary ?? "")
-							}
-						/>
-					</Field>
-					{saved && <p className="text-success-foreground text-sm">{t.ui.saved}</p>}
-					<Button variant="solid" type="submit" isLoading={update.isPending}>
-						{t.ui.save}
-					</Button>
-				</FieldGroup>
-			</form>
+			<LocalizedDraftGate
+				hydrated={draft.hydrated}
+				onDiscard={draft.discard}
+				serverChanged={draft.serverChanged}
+			>
+				<form onSubmit={submit}>
+					<FieldGroup>
+						<Field>
+							<FieldLabel>{t.media.roles.avatar.title}</FieldLabel>
+							<AvatarField
+								fallback={avatarOptions[0] ?? null}
+								onChange={(avatar) =>
+									draft.setValue((current) => ({ ...current, avatar }))
+								}
+								options={avatarOptions}
+								value={value.avatar}
+							/>
+						</Field>
+						<Field>
+							<FieldLabel>{t.media.roles.banner.title}</FieldLabel>
+							<LocalizationImageUploadField
+								fallback={bannerOptions[0] ?? null}
+								onChange={(banner) =>
+									draft.setValue((current) => ({ ...current, banner }))
+								}
+								options={bannerOptions}
+								role="banner"
+								value={value.banner}
+							/>
+						</Field>
+						<Field required>
+							<FieldLabel>{t.ui.displayName}</FieldLabel>
+							<Input
+								maxLength={120}
+								name="name"
+								onChange={(event) => {
+									const name = event.currentTarget.value;
+									draft.setValue((current) => ({ ...current, name }));
+								}}
+								required
+								value={value.name}
+							/>
+						</Field>
+						<Field>
+							<FieldLabel>{t.ui.introduction}</FieldLabel>
+							<Textarea
+								name="summary"
+								onChange={(event) => {
+									const summary = event.currentTarget.value;
+									draft.setValue((current) => ({ ...current, summary }));
+								}}
+								value={value.summary}
+							/>
+						</Field>
+						{saved && <p className="text-success-foreground text-sm">{t.ui.saved}</p>}
+						<Button variant="solid" type="submit" isLoading={update.isPending}>
+							{t.ui.save}
+						</Button>
+					</FieldGroup>
+				</form>
+			</LocalizedDraftGate>
 			<Card>
 				<CardContent className="p-5">
 					<SlugAddressForm

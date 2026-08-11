@@ -1,7 +1,7 @@
 "use client";
 
 import { ChoiceSelect, Field, FieldGroup, FieldLabel, Input, Textarea } from "@rezics/ui";
-import { useState } from "react";
+import { useState, type ChangeEvent } from "react";
 
 import {
 	LocalizationImageUploadField,
@@ -9,32 +9,63 @@ import {
 } from "@/features/media/components/localization-image-upload-field";
 import { useTranslation } from "@/i18n/client";
 
-export function CollectionLocalizationFields({
-	cover,
-	initial,
-	onCoverChange,
-}: {
+type CollectionLocalizationFieldsProps = {
 	readonly cover: LocalizationImageAssetValue | null;
-	readonly initial?: {
-		readonly title?: string | null;
-		readonly summary?: string | null;
-	};
 	readonly onCoverChange: (value: LocalizationImageAssetValue | null) => void;
-}) {
+} & (
+	| {
+			readonly value: { readonly title: string; readonly summary: string };
+			readonly onValueChange: (value: {
+				readonly title: string;
+				readonly summary: string;
+			}) => void;
+			readonly initial?: never;
+	  }
+	| {
+			readonly initial?: {
+				readonly title?: string | null;
+				readonly summary?: string | null;
+			};
+			readonly value?: never;
+			readonly onValueChange?: never;
+	  }
+);
+
+export function CollectionLocalizationFields(props: CollectionLocalizationFieldsProps) {
 	const { t } = useTranslation(["collections"]);
+	const titleControl =
+		props.value && props.onValueChange
+			? {
+					onChange: (event: ChangeEvent<HTMLInputElement>) =>
+						props.onValueChange({ ...props.value, title: event.currentTarget.value }),
+					value: props.value.title,
+				}
+			: { defaultValue: props.initial?.title ?? "" };
+	const summaryControl =
+		props.value && props.onValueChange
+			? {
+					onChange: (event: ChangeEvent<HTMLTextAreaElement>) =>
+						props.onValueChange({ ...props.value, summary: event.currentTarget.value }),
+					value: props.value.summary,
+				}
+			: { defaultValue: props.initial?.summary ?? "" };
 	return (
 		<FieldGroup>
 			<Field>
 				<FieldLabel>{t.collections.form.cover}</FieldLabel>
-				<LocalizationImageUploadField onChange={onCoverChange} role="cover" value={cover} />
+				<LocalizationImageUploadField
+					onChange={props.onCoverChange}
+					role="cover"
+					value={props.cover}
+				/>
 			</Field>
 			<Field required>
 				<FieldLabel>{t.collections.form.title}</FieldLabel>
-				<Input defaultValue={initial?.title ?? ""} maxLength={500} name="title" required />
+				<Input {...titleControl} maxLength={500} name="title" required />
 			</Field>
 			<Field>
 				<FieldLabel>{t.collections.form.summary}</FieldLabel>
-				<Textarea defaultValue={initial?.summary ?? ""} maxLength={2_000} name="summary" />
+				<Textarea {...summaryControl} maxLength={2_000} name="summary" />
 			</Field>
 		</FieldGroup>
 	);

@@ -2,7 +2,7 @@ import { type Static, t } from "elysia";
 import {
 	DateTime,
 	LifecycleInput,
-	LocalizationInput,
+	UnitLocalizationInput,
 	LocalizationLanguageQuery,
 	Uuid,
 } from "../schema";
@@ -25,7 +25,7 @@ export const ListCollectionsQuery = t.Object(
 export type ListCollectionsQuery = Static<typeof ListCollectionsQuery>;
 
 export const CreateCollectionBody = t.Object({
-	localization: LocalizationInput,
+	localization: UnitLocalizationInput,
 	visibility: LifecycleInput.visibility,
 });
 export type CreateCollectionBody = Static<typeof CreateCollectionBody>;
@@ -52,7 +52,7 @@ export const UpdateCollectionBody = t.Object(
 		baseRevisionId: Uuid,
 		status: LifecycleInput.status,
 		visibility: LifecycleInput.visibility,
-		localization: t.Optional(LocalizationInput),
+		localization: t.Optional(UnitLocalizationInput),
 	},
 	{ additionalProperties: false },
 );

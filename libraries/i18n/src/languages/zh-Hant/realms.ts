@@ -318,6 +318,18 @@ export default {
 	ruleContent: "規則內容",
 	removeRule: "移除規則",
 	addRule: "新增規則",
+	ruleNumber: insert("第 {{position}} 條規則", { position: Number }),
+	ruleTranslationCount: insert("翻譯：{{count}}", { count: Number }),
+	moveRuleUp: insert("將第 {{position}} 條規則上移", { position: Number }),
+	moveRuleDown: insert("將第 {{position}} 條規則下移", { position: Number }),
+	ruleMoved: insert("已將規則移至第 {{position}} 個位置，共 {{count}} 條。", {
+		position: Number,
+		count: Number,
+	}),
+	addRuleTranslation: "新增翻譯",
+	removeRuleTranslation: "移除翻譯",
+	ruleTranslationMissing: insert("尚未新增{{language}}翻譯。", { language: String }),
+	ruleTranslationsIncomplete: "每個已新增的規則翻譯都必須填寫標題，才能儲存。",
 	pinTarget: "要置頂的內容",
 	pinKind: "置頂分類",
 	pinKinds: {

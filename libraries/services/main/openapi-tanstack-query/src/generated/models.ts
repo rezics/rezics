@@ -115735,7 +115735,57 @@ export type PutApiRealmsByRealmIdRulesStatus403 = {
 /**
  * @type object
  */
-export type PutApiRealmsByRealmIdRulesStatus422 = ValidationError;
+export type PutApiRealmsByRealmIdRulesStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'RealmRuleRevisionChanged'
+		 * @type string
+		 */
+		code: "RealmRuleRevisionChanged";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export type PutApiRealmsByRealmIdRulesStatus422 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'ValidationError'
+				 * @type string
+				 */
+				code: "ValidationError";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| ValidationError;
 
 export const PutApiRealmsByRealmIdRulesStatus429ErrorCodeEnum = {
 	ApiQuotaExceeded: "ApiQuotaExceeded",
@@ -115782,7 +115832,7 @@ export const PutApiRealmsByRealmIdRulesRequestAcknowledgementModeEnum = {
 export type PutApiRealmsByRealmIdRulesRequestAcknowledgementModeEnum =
 	(typeof PutApiRealmsByRealmIdRulesRequestAcknowledgementModeEnum)[keyof typeof PutApiRealmsByRealmIdRulesRequestAcknowledgementModeEnum];
 
-export const PutApiRealmsByRealmIdRulesRequestRulesLanguageEnum = {
+export const PutApiRealmsByRealmIdRulesRequestRulesLocalizationsLanguageEnum = {
 	zh: "zh",
 	en: "en",
 	ja: "ja",
@@ -115792,13 +115842,14 @@ export const PutApiRealmsByRealmIdRulesRequestRulesLanguageEnum = {
 	es: "es",
 } as const;
 
-export type PutApiRealmsByRealmIdRulesRequestRulesLanguageEnum =
-	(typeof PutApiRealmsByRealmIdRulesRequestRulesLanguageEnum)[keyof typeof PutApiRealmsByRealmIdRulesRequestRulesLanguageEnum];
+export type PutApiRealmsByRealmIdRulesRequestRulesLocalizationsLanguageEnum =
+	(typeof PutApiRealmsByRealmIdRulesRequestRulesLocalizationsLanguageEnum)[keyof typeof PutApiRealmsByRealmIdRulesRequestRulesLocalizationsLanguageEnum];
 
 /**
  * @type object
  */
 export type PutApiRealmsByRealmIdRulesBody = {
+	baseRevisionId: (string | null) | null;
 	/**
 	 * @default 'explicit'
 	 * @type string
@@ -115817,83 +115868,37 @@ export type PutApiRealmsByRealmIdRulesBody = {
 	 */
 	rules: {
 		/**
-		 * @type string
+		 * @type array
 		 */
-		language: PutApiRealmsByRealmIdRulesRequestRulesLanguageEnum;
-		/**
-		 * @minLength 1
-		 * @maxLength 500
-		 * @type string
-		 */
-		title: string;
-		/**
-		 * @type object
-		 */
-		content: {
+		localizations: {
 			/**
 			 * @type string
 			 */
-			_type: "portable-text";
+			language: PutApiRealmsByRealmIdRulesRequestRulesLocalizationsLanguageEnum;
 			/**
-			 * @pattern ^[0-9a-f]{12}$
+			 * @minLength 1
+			 * @maxLength 500
 			 * @type string
 			 */
-			_key: string;
+			title: string;
 			/**
-			 * @type array
+			 * @type object
 			 */
-			content: (
-				| {
-						/**
-						 * @type string
-						 */
-						_key: string;
-						/**
-						 * @type string
-						 */
-						_type: "block";
-						/**
-						 * @type array
-						 */
-						children: (
-							| {
-									/**
-									 * @type string
-									 */
-									_key: string;
-									/**
-									 * @type string
-									 */
-									_type: "span";
-									/**
-									 * @type string
-									 */
-									text: string;
-									/**
-									 * @type array | undefined
-									 */
-									marks?: string[];
-							  }
-							| {
-									/**
-									 * @type string
-									 */
-									_key: string;
-									/**
-									 * @type string
-									 */
-									_type: "unit-mention";
-									/**
-									 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
-									 * @type string
-									 */
-									unitId: string;
-							  }
-						)[];
-						/**
-						 * @type array | undefined
-						 */
-						markDefs?: {
+			content: {
+				/**
+				 * @type string
+				 */
+				_type: "portable-text";
+				/**
+				 * @pattern ^[0-9a-f]{12}$
+				 * @type string
+				 */
+				_key: string;
+				/**
+				 * @type array
+				 */
+				content: (
+					| {
 							/**
 							 * @type string
 							 */
@@ -115901,61 +115906,112 @@ export type PutApiRealmsByRealmIdRulesBody = {
 							/**
 							 * @type string
 							 */
+							_type: "block";
+							/**
+							 * @type array
+							 */
+							children: (
+								| {
+										/**
+										 * @type string
+										 */
+										_key: string;
+										/**
+										 * @type string
+										 */
+										_type: "span";
+										/**
+										 * @type string
+										 */
+										text: string;
+										/**
+										 * @type array | undefined
+										 */
+										marks?: string[];
+								  }
+								| {
+										/**
+										 * @type string
+										 */
+										_key: string;
+										/**
+										 * @type string
+										 */
+										_type: "unit-mention";
+										/**
+										 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+										 * @type string
+										 */
+										unitId: string;
+								  }
+							)[];
+							/**
+							 * @type array | undefined
+							 */
+							markDefs?: {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @type string
+								 */
+								_type: string;
+								[key: string]: unknown;
+							}[];
+							/**
+							 * @type string | undefined
+							 */
+							listItem?: string;
+							/**
+							 * @type string | undefined
+							 */
+							style?: string;
+							/**
+							 * @minLength 1
+							 * @type integer | undefined
+							 */
+							level?: number;
+							[key: string]: unknown;
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							_key: string;
+							/**
+							 * @type string
+							 */
+							_type: "image";
+							/**
+							 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+							 * @type string
+							 */
+							assetId: string;
+							/**
+							 * @type string | undefined
+							 */
+							alt?: string;
+							/**
+							 * @type string | undefined
+							 */
+							caption?: string;
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							_key: string;
+							/**
+							 * @pattern ^(?!(?:block|image)$).+
+							 * @type string
+							 */
 							_type: string;
 							[key: string]: unknown;
-						}[];
-						/**
-						 * @type string | undefined
-						 */
-						listItem?: string;
-						/**
-						 * @type string | undefined
-						 */
-						style?: string;
-						/**
-						 * @minLength 1
-						 * @type integer | undefined
-						 */
-						level?: number;
-						[key: string]: unknown;
-				  }
-				| {
-						/**
-						 * @type string
-						 */
-						_key: string;
-						/**
-						 * @type string
-						 */
-						_type: "image";
-						/**
-						 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
-						 * @type string
-						 */
-						assetId: string;
-						/**
-						 * @type string | undefined
-						 */
-						alt?: string;
-						/**
-						 * @type string | undefined
-						 */
-						caption?: string;
-				  }
-				| {
-						/**
-						 * @type string
-						 */
-						_key: string;
-						/**
-						 * @pattern ^(?!(?:block|image)$).+
-						 * @type string
-						 */
-						_type: string;
-						[key: string]: unknown;
-				  }
-			)[];
-		};
+					  }
+				)[];
+			};
+		}[];
 	}[];
 };
 
@@ -115976,6 +116032,7 @@ export type PutApiRealmsByRealmIdRulesResponses = {
 	"200": PutApiRealmsByRealmIdRulesStatus200;
 	"400": PutApiRealmsByRealmIdRulesStatus400;
 	"403": PutApiRealmsByRealmIdRulesStatus403;
+	"409": PutApiRealmsByRealmIdRulesStatus409;
 	"422": PutApiRealmsByRealmIdRulesStatus422;
 	"429": PutApiRealmsByRealmIdRulesStatus429;
 	"500": PutApiRealmsByRealmIdRulesStatus500;
@@ -115988,6 +116045,7 @@ export type PutApiRealmsByRealmIdRulesResponse =
 	| PutApiRealmsByRealmIdRulesStatus200
 	| PutApiRealmsByRealmIdRulesStatus400
 	| PutApiRealmsByRealmIdRulesStatus403
+	| PutApiRealmsByRealmIdRulesStatus409
 	| PutApiRealmsByRealmIdRulesStatus422
 	| PutApiRealmsByRealmIdRulesStatus429
 	| PutApiRealmsByRealmIdRulesStatus500;
@@ -116285,6 +116343,316 @@ export type GetApiRealmsByRealmIdRulesResponse =
 	| GetApiRealmsByRealmIdRulesStatus404
 	| GetApiRealmsByRealmIdRulesStatus422
 	| GetApiRealmsByRealmIdRulesStatus500;
+
+/**
+ * @type object
+ */
+export type GetApiRealmsByRealmIdRulesAuthoringPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	realmId: string;
+};
+
+export const GetApiRealmsByRealmIdRulesAuthoringStatus200AcknowledgementModeEnum = {
+	explicit: "explicit",
+	implicit_on_follow: "implicit_on_follow",
+} as const;
+
+export type GetApiRealmsByRealmIdRulesAuthoringStatus200AcknowledgementModeEnum =
+	(typeof GetApiRealmsByRealmIdRulesAuthoringStatus200AcknowledgementModeEnum)[keyof typeof GetApiRealmsByRealmIdRulesAuthoringStatus200AcknowledgementModeEnum];
+
+export const GetApiRealmsByRealmIdRulesAuthoringStatus200ItemsLocalizationsLanguageEnum = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetApiRealmsByRealmIdRulesAuthoringStatus200ItemsLocalizationsLanguageEnum =
+	(typeof GetApiRealmsByRealmIdRulesAuthoringStatus200ItemsLocalizationsLanguageEnum)[keyof typeof GetApiRealmsByRealmIdRulesAuthoringStatus200ItemsLocalizationsLanguageEnum];
+
+/**
+ * @type object
+ */
+export type GetApiRealmsByRealmIdRulesAuthoringStatus200 = {
+	revisionId: (string | null) | null;
+	version: ((string | number) | null) | null;
+	/**
+	 * @default 'explicit'
+	 * @type string
+	 */
+	acknowledgementMode: GetApiRealmsByRealmIdRulesAuthoringStatus200AcknowledgementModeEnum;
+	/**
+	 * @type boolean
+	 */
+	requireOnJoin: boolean;
+	/**
+	 * @type boolean
+	 */
+	requireOnPost: boolean;
+	/**
+	 * @type array
+	 */
+	items: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		id: string;
+		position: string | number;
+		/**
+		 * @type array
+		 */
+		localizations: {
+			/**
+			 * @type string
+			 */
+			language: GetApiRealmsByRealmIdRulesAuthoringStatus200ItemsLocalizationsLanguageEnum;
+			/**
+			 * @type string
+			 */
+			title: string;
+			/**
+			 * @type object
+			 */
+			content: {
+				/**
+				 * @type string
+				 */
+				_type: "portable-text";
+				/**
+				 * @pattern ^[0-9a-f]{12}$
+				 * @type string
+				 */
+				_key: string;
+				/**
+				 * @type array
+				 */
+				content: (
+					| {
+							/**
+							 * @type string
+							 */
+							_key: string;
+							/**
+							 * @type string
+							 */
+							_type: "block";
+							/**
+							 * @type array
+							 */
+							children: (
+								| {
+										/**
+										 * @type string
+										 */
+										_key: string;
+										/**
+										 * @type string
+										 */
+										_type: "span";
+										/**
+										 * @type string
+										 */
+										text: string;
+										/**
+										 * @type array | undefined
+										 */
+										marks?: string[];
+								  }
+								| {
+										/**
+										 * @type string
+										 */
+										_key: string;
+										/**
+										 * @type string
+										 */
+										_type: "unit-mention";
+										/**
+										 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+										 * @type string
+										 */
+										unitId: string;
+								  }
+							)[];
+							/**
+							 * @type array | undefined
+							 */
+							markDefs?: {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @type string
+								 */
+								_type: string;
+								[key: string]: unknown;
+							}[];
+							/**
+							 * @type string | undefined
+							 */
+							listItem?: string;
+							/**
+							 * @type string | undefined
+							 */
+							style?: string;
+							/**
+							 * @minLength 1
+							 * @type integer | undefined
+							 */
+							level?: number;
+							[key: string]: unknown;
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							_key: string;
+							/**
+							 * @type string
+							 */
+							_type: "image";
+							/**
+							 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+							 * @type string
+							 */
+							assetId: string;
+							/**
+							 * @type string | undefined
+							 */
+							alt?: string;
+							/**
+							 * @type string | undefined
+							 */
+							caption?: string;
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							_key: string;
+							/**
+							 * @pattern ^(?!(?:block|image)$).+
+							 * @type string
+							 */
+							_type: string;
+							[key: string]: unknown;
+					  }
+				)[];
+			};
+		}[];
+	}[];
+};
+
+/**
+ * @type object
+ */
+export type GetApiRealmsByRealmIdRulesAuthoringStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'RealmCapabilityRequired'
+		 * @type string
+		 */
+		code: "RealmCapabilityRequired";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiRealmsByRealmIdRulesAuthoringStatus422 = ValidationError;
+
+export const GetApiRealmsByRealmIdRulesAuthoringStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type GetApiRealmsByRealmIdRulesAuthoringStatus429ErrorCodeEnum =
+	(typeof GetApiRealmsByRealmIdRulesAuthoringStatus429ErrorCodeEnum)[keyof typeof GetApiRealmsByRealmIdRulesAuthoringStatus429ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type GetApiRealmsByRealmIdRulesAuthoringStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: GetApiRealmsByRealmIdRulesAuthoringStatus429ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiRealmsByRealmIdRulesAuthoringStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type GetApiRealmsByRealmIdRulesAuthoringOptions = {
+	body?: never;
+	path: GetApiRealmsByRealmIdRulesAuthoringPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type GetApiRealmsByRealmIdRulesAuthoringResponses = {
+	"200": GetApiRealmsByRealmIdRulesAuthoringStatus200;
+	"403": GetApiRealmsByRealmIdRulesAuthoringStatus403;
+	"422": GetApiRealmsByRealmIdRulesAuthoringStatus422;
+	"429": GetApiRealmsByRealmIdRulesAuthoringStatus429;
+	"500": GetApiRealmsByRealmIdRulesAuthoringStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type GetApiRealmsByRealmIdRulesAuthoringResponse =
+	| GetApiRealmsByRealmIdRulesAuthoringStatus200
+	| GetApiRealmsByRealmIdRulesAuthoringStatus403
+	| GetApiRealmsByRealmIdRulesAuthoringStatus422
+	| GetApiRealmsByRealmIdRulesAuthoringStatus429
+	| GetApiRealmsByRealmIdRulesAuthoringStatus500;
 
 /**
  * @type object

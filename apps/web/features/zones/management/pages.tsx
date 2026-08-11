@@ -3,6 +3,7 @@
 import {
 	UnitReferencedBlockDocument,
 	createUnitReferencedBlockDocument,
+	isDocument,
 	parseDocument,
 	type UnitReferencedBlockDocument as UnitReferencedBlockDocumentValue,
 } from "@rezics/block";
@@ -49,7 +50,17 @@ import { useMemo, useState, type FormEvent } from "react";
 import { BlockDocumentEditor } from "@/features/blocks/block-document-editor";
 import { ContentLanguageControl } from "@/features/content-languages/components/content-language-control";
 import { ContentLanguageEditorBoundary } from "@/features/content-languages/components/content-language-editor-boundary";
-import { useContentLanguageEditor } from "@/features/content-languages/hooks/use-content-language-editor";
+import { LocalizedDraftGate } from "@/features/content-languages/components/localized-draft-gate";
+import {
+	useContentLanguageEditor,
+	useLocalizedDraft,
+	type LocalizedDraftCodec,
+} from "@/features/content-languages/hooks/use-content-language-editor";
+import {
+	decodeDraftBoolean,
+	decodeDraftString,
+	isDraftRecord,
+} from "@/features/content-languages/model/localized-draft-codec";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
 import { zoneManagementHref } from "./model";
@@ -58,6 +69,45 @@ import { useZoneManagement } from "./workspace";
 type Page = GetApiZonesByZoneIdPagesStatus200["items"][number];
 type Placement = NonNullable<Page["placement"]>;
 type PlacedPage = Page & { readonly placement: Placement };
+
+type ZonePageLocalizationDraft = {
+	readonly title: string;
+	readonly document: UnitReferencedBlockDocumentValue;
+};
+
+type ZonePageSharedDraft = {
+	readonly slug: string;
+	readonly parentPageId: string;
+	readonly home: boolean;
+	readonly indexed: boolean;
+};
+
+const ZonePageLocalizationDraftCodec: LocalizedDraftCodec<ZonePageLocalizationDraft> = {
+	version: 1,
+	decode(value) {
+		if (!isDraftRecord(value)) return;
+		const title = decodeDraftString(value.title);
+		if (title === undefined || !isDocument(UnitReferencedBlockDocument, value.document)) return;
+		return { title, document: value.document };
+	},
+};
+
+const ZonePageSharedDraftCodec: LocalizedDraftCodec<ZonePageSharedDraft> = {
+	version: 1,
+	decode(value) {
+		if (!isDraftRecord(value)) return;
+		const slug = decodeDraftString(value.slug);
+		const parentPageId = decodeDraftString(value.parentPageId);
+		const home = decodeDraftBoolean(value.home);
+		const indexed = decodeDraftBoolean(value.indexed);
+		return slug === undefined ||
+			parentPageId === undefined ||
+			home === undefined ||
+			indexed === undefined
+			? undefined
+			: { slug, parentPageId, home, indexed };
+	},
+};
 
 interface PageTreeNode extends TreeNodeType {
 	readonly page: PlacedPage | null;
@@ -418,7 +468,7 @@ function PageEditor({
 	readonly onSaved: (pageId: string) => void;
 }) {
 	const { t } = useTranslation(["errors", "locale", "ui", "zones"]);
-	const { selectedLanguage, selectedLanguageIsPending, setDirty, languagesChanged } =
+	const { selectedLanguage, selectedLanguageIsPending, languagesChanged } =
 		useContentLanguageEditor();
 	const queryClient = useQueryClient();
 	const invalidate = () =>
@@ -435,33 +485,52 @@ function PageEditor({
 	const removePlacement = useDeleteApiZonesByZoneIdPagesByPageIdPlacement({
 		mutation: { onSuccess: invalidate },
 	});
-	const [slug, setSlug] = useState(page?.home ? "" : (page?.slug ?? ""));
 	const initialLocalization = page?.localizations.find(
 		(entry) => entry.language === selectedLanguage,
 	);
-	const [title, setTitle] = useState(
-		selectedLanguageIsPending ? "" : (initialLocalization?.title ?? ""),
-	);
-	const [document, setDocument] = useState<UnitReferencedBlockDocumentValue>(() =>
-		initialLocalization && !selectedLanguageIsPending
-			? parseDocument(UnitReferencedBlockDocument, initialLocalization.document)
-			: createUnitReferencedBlockDocument(),
-	);
-	const [parentPageId, setParentPageId] = useState(page?.placement?.parentPageId ?? "");
-	const [home, setHome] = useState(page?.home ?? !pages.some((candidate) => candidate.home));
-	const [indexed, setIndexed] = useState(Boolean(page?.placement));
+	const pageDraftScope = `zone-page:${page?.id ?? "new"}`;
+	const localizationDraft = useLocalizedDraft<ZonePageLocalizationDraft>({
+		scope: `${pageDraftScope}:localization`,
+		baseVersion: page?.latestUnitRevisionId ?? null,
+		codec: ZonePageLocalizationDraftCodec,
+		createInitialValue: () => ({
+			title: selectedLanguageIsPending ? "" : (initialLocalization?.title ?? ""),
+			document:
+				initialLocalization && !selectedLanguageIsPending
+					? parseDocument(UnitReferencedBlockDocument, initialLocalization.document)
+					: createUnitReferencedBlockDocument(),
+		}),
+	});
+	const sharedDraft = useLocalizedDraft<ZonePageSharedDraft>({
+		scope: `${pageDraftScope}:shared`,
+		partition: "shared",
+		baseVersion: `${page?.latestUnitRevisionId ?? "new"}:${page?.placement?.latestStructureRevisionId ?? pageStructureRevisionId ?? "none"}`,
+		codec: ZonePageSharedDraftCodec,
+		createInitialValue: () => ({
+			slug: page?.home ? "" : (page?.slug ?? ""),
+			parentPageId: page?.placement?.parentPageId ?? "",
+			home: page?.home ?? !pages.some((candidate) => candidate.home),
+			indexed: Boolean(page?.placement),
+		}),
+	});
+	const localization = localizationDraft.value;
+	const shared = sharedDraft.value;
 	const excludedParents = page ? descendantPageIds(placedPages, page.id) : new Set<string>();
 
 	async function submit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
-		const normalizedSlug = home ? ZoneHomePageSlug : slug || null;
+		const normalizedSlug = shared.home ? ZoneHomePageSlug : shared.slug || null;
 		try {
 			const saved = page
 				? await updatePage.mutateAsync({
 						path: { zoneId, pageId: page.id },
 						body: {
 							slug: normalizedSlug,
-							localization: { language: selectedLanguage, title, document },
+							localization: {
+								language: selectedLanguage,
+								title: localization.title,
+								document: localization.document,
+							},
 							baseUnitRevisionId: page.latestUnitRevisionId,
 						},
 					})
@@ -469,12 +538,16 @@ function PageEditor({
 						path: { zoneId },
 						body: {
 							slug: normalizedSlug,
-							localization: { language: selectedLanguage, title, document },
+							localization: {
+								language: selectedLanguage,
+								title: localization.title,
+								document: localization.document,
+							},
 						},
 					});
 
-			if (indexed) {
-				const targetParentId = parentPageId || null;
+			if (shared.indexed) {
+				const targetParentId = shared.parentPageId || null;
 				const position =
 					page?.placement?.parentPageId === targetParentId
 						? page.placement.position
@@ -501,7 +574,8 @@ function PageEditor({
 					},
 				});
 			}
-			setDirty(false);
+			localizationDraft.commit();
+			sharedDraft.commit();
 			if (page) await languagesChanged();
 			onSaved(saved.id);
 		} catch {
@@ -521,89 +595,125 @@ function PageEditor({
 		<Card appearance="outlined">
 			<CardContent className="grid gap-6 p-6">
 				{page ? <ContentLanguageControl /> : null}
-				<form className="grid gap-6" onChange={() => setDirty(true)} onSubmit={submit}>
-					<h2 className="font-semibold text-xl">
-						{page
-							? t.zones.management.pages.editPage
-							: t.zones.management.pages.newPage}
-					</h2>
-					<FieldGroup className="grid gap-4 sm:grid-cols-2">
-						<Field>
-							<FieldLabel>{t.zones.management.pages.slugOptional}</FieldLabel>
-							<Input
-								disabled={home}
-								maxLength={100}
-								onChange={(event) => setSlug(event.currentTarget.value)}
-								pattern="[a-z0-9]+(?:-[a-z0-9]+)*"
-								value={home ? ZoneHomePageSlug : slug}
-							/>
-						</Field>
-						<Field required>
-							<FieldLabel>{t.zones.management.pages.title}</FieldLabel>
-							<Input
-								maxLength={500}
-								onChange={(event) => setTitle(event.currentTarget.value)}
-								required
-								value={title}
-							/>
-						</Field>
-						<Field>
-							<FieldLabel>{t.zones.management.pages.parent}</FieldLabel>
-							<NativeSelect
-								disabled={!indexed}
-								onChange={(event) => setParentPageId(event.currentTarget.value)}
-								value={parentPageId}
-							>
-								<NativeSelectOption value="">
-									{t.zones.management.pages.noParent}
-								</NativeSelectOption>
-								{placedPages
-									.filter(
-										(candidate) =>
-											candidate.id !== page?.id &&
-											!excludedParents.has(candidate.id),
-									)
-									.map((candidate) => (
-										<NativeSelectOption key={candidate.id} value={candidate.id}>
-											{candidate.title}
-										</NativeSelectOption>
-									))}
-							</NativeSelect>
-						</Field>
-						<label className="flex items-center gap-2 text-sm">
-							<Checkbox
-								checked={home}
-								onCheckedChange={(details) => setHome(details.checked === true)}
-							/>
-							{t.zones.management.pages.home}
-						</label>
-						<label className="flex items-center gap-2 text-sm">
-							<Checkbox
-								checked={indexed}
-								onCheckedChange={(details) => setIndexed(details.checked === true)}
-							/>
-							{t.zones.management.pages.indexed}
-						</label>
-					</FieldGroup>
-					<BlockDocumentEditor
-						document={document}
-						labels={t.zones.management.blocks}
-						onChange={(next) => {
-							setDocument(parseDocument(UnitReferencedBlockDocument, next));
-							setDirty(true);
-						}}
-						pickerPlaceholders={{
-							post: t.ui.pickerPlaceholders.post,
-							unit: t.ui.pickerPlaceholders.unit,
-						}}
-					/>
-					<div className="flex flex-wrap gap-3">
-						<Button isLoading={pending} type="submit">
-							{t.zones.management.pages.save}
-						</Button>
-					</div>
-					<RequestFailure error={error} fallback={t.ui.retryLater} />
-				</form>
+				<LocalizedDraftGate
+					hydrated={localizationDraft.hydrated && sharedDraft.hydrated}
+					onDiscard={() => {
+						localizationDraft.discard();
+						sharedDraft.discard();
+					}}
+					serverChanged={localizationDraft.serverChanged || sharedDraft.serverChanged}
+				>
+					<form className="grid gap-6" onSubmit={submit}>
+						<h2 className="font-semibold text-xl">
+							{page
+								? t.zones.management.pages.editPage
+								: t.zones.management.pages.newPage}
+						</h2>
+						<FieldGroup className="grid gap-4 sm:grid-cols-2">
+							<Field>
+								<FieldLabel>{t.zones.management.pages.slugOptional}</FieldLabel>
+								<Input
+									disabled={shared.home}
+									maxLength={100}
+									onChange={(event) => {
+										const slug = event.currentTarget.value;
+										sharedDraft.setValue((current) => ({ ...current, slug }));
+									}}
+									pattern="[a-z0-9]+(?:-[a-z0-9]+)*"
+									value={shared.home ? ZoneHomePageSlug : shared.slug}
+								/>
+							</Field>
+							<Field required>
+								<FieldLabel>{t.zones.management.pages.title}</FieldLabel>
+								<Input
+									maxLength={500}
+									onChange={(event) => {
+										const title = event.currentTarget.value;
+										localizationDraft.setValue((current) => ({
+											...current,
+											title,
+										}));
+									}}
+									required
+									value={localization.title}
+								/>
+							</Field>
+							<Field>
+								<FieldLabel>{t.zones.management.pages.parent}</FieldLabel>
+								<NativeSelect
+									disabled={!shared.indexed}
+									onChange={(event) => {
+										const parentPageId = event.currentTarget.value;
+										sharedDraft.setValue((current) => ({
+											...current,
+											parentPageId,
+										}));
+									}}
+									value={shared.parentPageId}
+								>
+									<NativeSelectOption value="">
+										{t.zones.management.pages.noParent}
+									</NativeSelectOption>
+									{placedPages
+										.filter(
+											(candidate) =>
+												candidate.id !== page?.id &&
+												!excludedParents.has(candidate.id),
+										)
+										.map((candidate) => (
+											<NativeSelectOption
+												key={candidate.id}
+												value={candidate.id}
+											>
+												{candidate.title}
+											</NativeSelectOption>
+										))}
+								</NativeSelect>
+							</Field>
+							<label className="flex items-center gap-2 text-sm">
+								<Checkbox
+									checked={shared.home}
+									onCheckedChange={(details) => {
+										const home = details.checked === true;
+										sharedDraft.setValue((current) => ({ ...current, home }));
+									}}
+								/>
+								{t.zones.management.pages.home}
+							</label>
+							<label className="flex items-center gap-2 text-sm">
+								<Checkbox
+									checked={shared.indexed}
+									onCheckedChange={(details) => {
+										const indexed = details.checked === true;
+										sharedDraft.setValue((current) => ({
+											...current,
+											indexed,
+										}));
+									}}
+								/>
+								{t.zones.management.pages.indexed}
+							</label>
+						</FieldGroup>
+						<BlockDocumentEditor
+							document={localization.document}
+							labels={t.zones.management.blocks}
+							onChange={(next) => {
+								const document = parseDocument(UnitReferencedBlockDocument, next);
+								localizationDraft.setValue((current) => ({ ...current, document }));
+							}}
+							pickerPlaceholders={{
+								post: t.ui.pickerPlaceholders.post,
+								unit: t.ui.pickerPlaceholders.unit,
+							}}
+						/>
+						<div className="flex flex-wrap gap-3">
+							<Button isLoading={pending} type="submit">
+								{t.zones.management.pages.save}
+							</Button>
+						</div>
+						<RequestFailure error={error} fallback={t.ui.retryLater} />
+					</form>
+				</LocalizedDraftGate>
 			</CardContent>
 		</Card>
 	);

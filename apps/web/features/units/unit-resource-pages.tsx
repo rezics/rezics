@@ -41,7 +41,18 @@ import { useFormDraftContentLanguage } from "@/features/content-languages/hooks/
 import { useChineseContentText } from "@/features/content-language-display/chinese-content-display-context";
 import { ContentLanguageControl } from "@/features/content-languages/components/content-language-control";
 import { ContentLanguageEditorProvider } from "@/features/content-languages/hooks/use-content-language-editor";
-import { useContentLanguageEditor } from "@/features/content-languages/hooks/use-content-language-editor";
+import { LocalizedDraftGate } from "@/features/content-languages/components/localized-draft-gate";
+import {
+	useContentLanguageEditor,
+	useLocalizedDraft,
+	type LocalizedDraftCodec,
+} from "@/features/content-languages/hooks/use-content-language-editor";
+import {
+	decodeDraftAvatar,
+	decodeDraftImageAsset,
+	decodeDraftString,
+	isDraftRecord,
+} from "@/features/content-languages/model/localized-draft-codec";
 import { StudioTagCreateHref } from "@/features/create/model/studio-section";
 import {
 	LocalizationImageUploadField,
@@ -58,6 +69,30 @@ import { LocalizationMediaFallbackNotice } from "@/features/media/components/loc
 import { RequestFailure } from "@/i18n/request-failure";
 import { useTranslation } from "@/i18n/client";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
+
+type EntityLocalizationDraft = {
+	readonly title: string;
+	readonly summary: string;
+	readonly avatar: AvatarFieldValue | null;
+	readonly banner: LocalizationImageAssetValue | null;
+};
+
+const EntityLocalizationDraftCodec: LocalizedDraftCodec<EntityLocalizationDraft> = {
+	version: 1,
+	decode(value) {
+		if (!isDraftRecord(value)) return;
+		const title = decodeDraftString(value.title);
+		const summary = decodeDraftString(value.summary);
+		const avatar = decodeDraftAvatar(value.avatar);
+		const banner = decodeDraftImageAsset(value.banner);
+		return title === undefined ||
+			summary === undefined ||
+			avatar === undefined ||
+			banner === undefined
+			? undefined
+			: { title, summary, avatar, banner };
+	},
+};
 
 function UnitFrame({
 	title,
@@ -248,7 +283,7 @@ function EntityLocalizationForm({ entity }: { entity: GetApiEntitiesByUnitIdStat
 		"media",
 		"ui",
 	]);
-	const { selectedLanguage, setDirty, languagesChanged } = useContentLanguageEditor();
+	const { selectedLanguage, languagesChanged } = useContentLanguageEditor();
 	const router = useApplicationRouter();
 	const queryClient = useQueryClient();
 	const localizationLanguages = useLocalizationLanguages();
@@ -263,26 +298,33 @@ function EntityLocalizationForm({ entity }: { entity: GetApiEntitiesByUnitIdStat
 			? [{ ...entry.banner, label: t.locale.contentLanguages[entry.language] }]
 			: [],
 	);
-	const [avatar, setAvatar] = useState<AvatarFieldValue | null>(localization?.avatar ?? null);
-	const [banner, setBanner] = useState<LocalizationImageAssetValue | null>(
-		localization?.banner ?? null,
-	);
+	const draft = useLocalizedDraft<EntityLocalizationDraft>({
+		scope: "entity-localization",
+		baseVersion: entity.updatedAt,
+		codec: EntityLocalizationDraftCodec,
+		createInitialValue: () => ({
+			title: localization?.title ?? "",
+			summary: localization?.summary ?? "",
+			avatar: localization?.avatar ?? null,
+			banner: localization?.banner ?? null,
+		}),
+	});
+	const { value } = draft;
 	const update = usePutApiEntitiesByUnitIdLocalizationsByLanguage();
 
 	async function submit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
-		const form = new FormData(event.currentTarget);
 		try {
 			await update.mutateAsync({
 				path: { unitId: entity.id, language: selectedLanguage },
 				body: {
-					title: String(form.get("title") ?? "").trim(),
-					summary: String(form.get("summary") ?? "").trim(),
-					avatar: avatarPresentationToInput(avatar),
-					bannerAssetId: banner?.id ?? null,
+					title: value.title.trim(),
+					summary: value.summary.trim(),
+					avatar: avatarPresentationToInput(value.avatar),
+					bannerAssetId: value.banner?.id ?? null,
 				},
 			});
-			setDirty(false);
+			draft.commit();
 			await languagesChanged();
 			await queryClient.invalidateQueries({
 				queryKey: getApiEntitiesByUnitIdQueryKey({
@@ -299,61 +341,73 @@ function EntityLocalizationForm({ entity }: { entity: GetApiEntitiesByUnitIdStat
 	return (
 		<CreateFrame action={<ContentLanguageControl />} title={t.entities.entities}>
 			<LocalizationMediaFallbackNotice />
-			<form onChange={() => setDirty(true)} onSubmit={submit}>
-				<FieldGroup>
-					<Field required>
-						<FieldLabel>{t.ui.title}</FieldLabel>
-						<Input
-							defaultValue={localization?.title ?? ""}
-							maxLength={500}
-							name="title"
-							required
-						/>
-					</Field>
-					<Field>
-						<FieldLabel>{t.ui.summary}</FieldLabel>
-						<Textarea
-							defaultValue={localization?.summary ?? ""}
-							maxLength={2000}
-							name="summary"
-						/>
-					</Field>
-					<Field>
-						<FieldLabel>{t.media.roles.avatar.title}</FieldLabel>
-						<AvatarField
-							fallback={avatarOptions[0] ?? null}
-							onChange={(value) => {
-								setAvatar(value);
-								setDirty(true);
-							}}
-							options={avatarOptions}
-							value={avatar}
-						/>
-					</Field>
-					<Field>
-						<FieldLabel>{t.media.roles.banner.title}</FieldLabel>
-						<LocalizationImageUploadField
-							fallback={bannerOptions[0] ?? null}
-							onChange={(value) => {
-								setBanner(value);
-								setDirty(true);
-							}}
-							options={bannerOptions}
-							role="banner"
-							value={banner}
-						/>
-					</Field>
-					<RequestFailure error={update.error} />
-					<Button
-						variant="solid"
-						className="w-fit"
-						isLoading={update.isPending}
-						type="submit"
-					>
-						{t.ui.save}
-					</Button>
-				</FieldGroup>
-			</form>
+			<LocalizedDraftGate
+				hydrated={draft.hydrated}
+				onDiscard={draft.discard}
+				serverChanged={draft.serverChanged}
+			>
+				<form onSubmit={submit}>
+					<FieldGroup>
+						<Field required>
+							<FieldLabel>{t.ui.title}</FieldLabel>
+							<Input
+								maxLength={500}
+								name="title"
+								onChange={(event) => {
+									const title = event.currentTarget.value;
+									draft.setValue((current) => ({ ...current, title }));
+								}}
+								required
+								value={value.title}
+							/>
+						</Field>
+						<Field>
+							<FieldLabel>{t.ui.summary}</FieldLabel>
+							<Textarea
+								maxLength={2000}
+								name="summary"
+								onChange={(event) => {
+									const summary = event.currentTarget.value;
+									draft.setValue((current) => ({ ...current, summary }));
+								}}
+								value={value.summary}
+							/>
+						</Field>
+						<Field>
+							<FieldLabel>{t.media.roles.avatar.title}</FieldLabel>
+							<AvatarField
+								fallback={avatarOptions[0] ?? null}
+								onChange={(avatar) =>
+									draft.setValue((current) => ({ ...current, avatar }))
+								}
+								options={avatarOptions}
+								value={value.avatar}
+							/>
+						</Field>
+						<Field>
+							<FieldLabel>{t.media.roles.banner.title}</FieldLabel>
+							<LocalizationImageUploadField
+								fallback={bannerOptions[0] ?? null}
+								onChange={(banner) =>
+									draft.setValue((current) => ({ ...current, banner }))
+								}
+								options={bannerOptions}
+								role="banner"
+								value={value.banner}
+							/>
+						</Field>
+						<RequestFailure error={update.error} />
+						<Button
+							variant="solid"
+							className="w-fit"
+							isLoading={update.isPending}
+							type="submit"
+						>
+							{t.ui.save}
+						</Button>
+					</FieldGroup>
+				</form>
+			</LocalizedDraftGate>
 		</CreateFrame>
 	);
 }

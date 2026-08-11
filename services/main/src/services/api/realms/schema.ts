@@ -21,9 +21,11 @@ import {
 	FractionalPosition,
 	FractionalPositionInput,
 	ContentLanguage,
+	LocalizationLanguageField,
 	LocalizationLanguagePriority,
 	LocalizationLanguageQuery,
-	LocalizationInput,
+	localizationSet,
+	UnitLocalizationInput,
 	Uuid,
 } from "../schema";
 import { InitialTagApplicationLimit } from "../../tags/initial-applications";
@@ -57,7 +59,7 @@ export const CreateRealmBody = t.Object({
 	initialTagIds: t.Optional(
 		t.Array(Uuid, { maxItems: InitialTagApplicationLimit, uniqueItems: true, default: [] }),
 	),
-	localization: LocalizationInput,
+	localization: UnitLocalizationInput,
 	visibility: RealmVisibility,
 	joinPolicy: RealmJoinPolicy,
 });
@@ -151,7 +153,7 @@ export const UpdateRealmBody = t.Object(
 		joinPolicy: t.Optional(RealmJoinPolicy),
 		visibility: t.Optional(RealmVisibility),
 		status: t.Optional(RealmStatus),
-		localization: t.Optional(LocalizationInput),
+		localization: t.Optional(UnitLocalizationInput),
 	},
 	{ additionalProperties: false },
 );
@@ -210,17 +212,27 @@ export const UpdateRealmMemberBody = t.Object(
 );
 export type UpdateRealmMemberBody = Static<typeof UpdateRealmMemberBody>;
 
+export const RealmRuleLocalizationInput = t.Object(
+	{
+		...LocalizationLanguageField,
+		title: t.String({ minLength: 1, maxLength: 500 }),
+		content: PortableTextDocument,
+	},
+	{ additionalProperties: false },
+);
+export type RealmRuleLocalizationInput = Static<typeof RealmRuleLocalizationInput>;
+
 export const UpdateRealmRulesBody = t.Object(
 	{
+		baseRevisionId: t.Nullable(Uuid),
 		acknowledgementMode: t.UnionEnum(RealmRuleAcknowledgementModeValues),
 		requireOnJoin: t.Boolean(),
 		requireOnPost: t.Boolean(),
 		rules: t.Array(
-			t.Object({
-				language: ContentLanguage,
-				title: t.String({ minLength: 1, maxLength: 500 }),
-				content: PortableTextDocument,
-			}),
+			t.Object(
+				{ localizations: localizationSet(RealmRuleLocalizationInput) },
+				{ additionalProperties: false },
+			),
 			{ minItems: 1, maxItems: 100 },
 		),
 	},

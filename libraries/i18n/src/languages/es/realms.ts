@@ -352,6 +352,21 @@ export default {
 	ruleContent: "Contenido de la regla",
 	removeRule: "Quitar regla",
 	addRule: "Añadir regla",
+	ruleNumber: insert("Regla {{position}}", { position: Number }),
+	ruleTranslationCount: insert("Traducciones: {{count}}", { count: Number }),
+	moveRuleUp: insert("Subir la regla {{position}}", { position: Number }),
+	moveRuleDown: insert("Bajar la regla {{position}}", { position: Number }),
+	ruleMoved: insert("Regla movida a la posición {{position}} de {{count}}.", {
+		position: Number,
+		count: Number,
+	}),
+	addRuleTranslation: "Añadir traducción",
+	removeRuleTranslation: "Quitar traducción",
+	ruleTranslationMissing: insert("Aún no se ha añadido la traducción en {{language}}.", {
+		language: String,
+	}),
+	ruleTranslationsIncomplete:
+		"Cada traducción de regla añadida necesita un título antes de guardar.",
 	pinTarget: "Contenido que se va a fijar",
 	pinKind: "Tipo de fijación",
 	pinKinds: {

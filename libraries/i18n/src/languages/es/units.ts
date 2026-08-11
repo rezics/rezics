@@ -532,7 +532,10 @@ export default {
 		saveOrder: "Guardar orden",
 		cancel: "Cancelar",
 		noMoreLanguages: "Ya se han añadido todos los idiomas compatibles.",
-		unsavedConfirm: "¿Descartar los cambios sin guardar de este idioma?",
+		draftConflictTitle: "El contenido del servidor ha cambiado",
+		draftConflictDescription:
+			"Se conservó este borrador sin guardar, pero se basa en una versión anterior. Revísalo antes de guardar o descártalo para cargar el contenido actual del servidor.",
+		discardDraft: "Descartar borrador",
 		instructions:
 			"Pulsa Espacio para coger un idioma. Usa las teclas de flecha para moverlo y vuelve a pulsar Espacio para soltarlo.",
 		moved: insert("{{language}} se ha movido a la posición {{position}} de {{count}}.", {

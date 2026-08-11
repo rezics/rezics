@@ -60,7 +60,7 @@ export default {
 	RealmCapabilityRequired: `Dir fehlt die erforderliche Berechtigung für den ${realmTerms.inline}.`,
 	RealmRulesAcceptanceRequired: `Akzeptiere die aktuellen Regeln des ${realmTerms.inline}s, um fortzufahren.`,
 	RealmRuleRevisionChanged:
-		"Die Regeln wurden geändert. Prüfe die neueste Version, bevor du zustimmst.",
+		"Die Regeln auf dem Server wurden geändert. Prüfe die neueste Version und versuche es erneut.",
 	PlatformCapabilityRequired: "Für diese Aktion ist eine Plattformberechtigung erforderlich.",
 	PlatformAccessManagerRequired:
 		"Die Plattform muss mindestens eine nicht ablaufende Verwaltung des Plattformzugriffs behalten.",

@@ -46,7 +46,17 @@ import { cn } from "@rezics/ui";
 import { RequireSession } from "@/features/auth/require-session";
 import { ContentLanguageControl } from "@/features/content-languages/components/content-language-control";
 import { ContentLanguageEditorBoundary } from "@/features/content-languages/components/content-language-editor-boundary";
-import { useContentLanguageEditor } from "@/features/content-languages/hooks/use-content-language-editor";
+import { LocalizedDraftGate } from "@/features/content-languages/components/localized-draft-gate";
+import {
+	useContentLanguageEditor,
+	useLocalizedDraft,
+	type LocalizedDraftCodec,
+} from "@/features/content-languages/hooks/use-content-language-editor";
+import {
+	decodeDraftPortableText,
+	decodeDraftString,
+	isDraftRecord,
+} from "@/features/content-languages/model/localized-draft-codec";
 import { PortableTextEditor } from "@/features/editor/portable-text-editor";
 import { ChapterReadingProgress } from "@/features/progress/components/chapter-reading-progress";
 import { ReplyPostThread } from "@/features/posts/reply-thread";
@@ -72,6 +82,32 @@ import {
 import { unitDetailHref } from "./routing/unit-detail-routes";
 import { invalidateChapterContent } from "./unit-cache";
 import { chapterHistoryHref, unitManagementSectionHref } from "./routing/unit-management-routes";
+
+type ChapterLocalizationDraft = {
+	readonly title: string;
+	readonly status: "draft" | "published" | "archived";
+	readonly content: PortableTextValue;
+};
+
+function decodeChapterStatus(value: string): ChapterLocalizationDraft["status"] {
+	if (value === "draft" || value === "published" || value === "archived") return value;
+	throw new Error(`Unexpected Chapter status: ${value}`);
+}
+
+const ChapterLocalizationDraftCodec: LocalizedDraftCodec<ChapterLocalizationDraft> = {
+	version: 1,
+	decode(value) {
+		if (!isDraftRecord(value)) return;
+		const title = decodeDraftString(value.title);
+		const content = decodeDraftPortableText(value.content);
+		const status = value.status;
+		return title === undefined ||
+			!content ||
+			(status !== "draft" && status !== "published" && status !== "archived")
+			? undefined
+			: { title, content, status };
+	},
+};
 
 const ReaderOutlineRowHeight = 36;
 const NestedMenuPositioning = { placement: "right-start", gutter: -2 } as const;
@@ -723,13 +759,21 @@ function ChapterLocalizationForm({
 }) {
 	const { t } = useTranslation(["actions", "errors", "state", "ui", "units"]);
 	const queryClient = useQueryClient();
-	const { setDirty, languagesChanged } = useContentLanguageEditor();
-	const [content, setContent] = useState<PortableTextValue>(() =>
-		readPortableText(chapter?.content),
-	);
+	const { languagesChanged } = useContentLanguageEditor();
+	const draft = useLocalizedDraft<ChapterLocalizationDraft>({
+		scope: "chapter-localization",
+		baseVersion: chapter?.updatedAt ?? null,
+		codec: ChapterLocalizationDraftCodec,
+		createInitialValue: () => ({
+			title: chapter?.title ?? "",
+			status: chapter?.status ? decodeChapterStatus(chapter.status) : "draft",
+			content: readPortableText(chapter?.content),
+		}),
+	});
+	const { value } = draft;
 	const contentMetrics = useMemo(
-		() => measurePortableText(content, language),
-		[content, language],
+		() => measurePortableText(value.content, language),
+		[value.content, language],
 	);
 	const update = usePutApiChaptersByChapterIdLocalizationsByLanguageContent({
 		mutation: {
@@ -738,74 +782,101 @@ function ChapterLocalizationForm({
 	});
 	async function submit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
-		const form = new FormData(event.currentTarget);
 		try {
 			await update.mutateAsync({
 				path: { chapterId, language },
 				body: {
-					title: String(form.get("title") ?? "").trim(),
-					content: writePortableText(content, chapter?.content),
-					status:
-						form.get("status") === "published"
-							? "published"
-							: form.get("status") === "archived"
-								? "archived"
-								: "draft",
+					title: value.title.trim(),
+					content: writePortableText(value.content, chapter?.content),
+					status: value.status,
 				},
 			});
-			setDirty(false);
+			draft.commit();
 			await languagesChanged();
 		} catch {
 			// The typed mutation state supplies the visible API error.
 		}
 	}
 	return (
-		<form onChange={() => setDirty(true)} onSubmit={submit}>
-			<FieldGroup>
-				<Field required>
-					<FieldLabel>{t.ui.title}</FieldLabel>
-					<Input
-						defaultValue={chapter?.title ?? ""}
-						maxLength={500}
-						name="title"
+		<LocalizedDraftGate
+			hydrated={draft.hydrated}
+			onDiscard={draft.discard}
+			serverChanged={draft.serverChanged}
+		>
+			<form onSubmit={submit}>
+				<FieldGroup>
+					<Field required>
+						<FieldLabel>{t.ui.title}</FieldLabel>
+						<Input
+							maxLength={500}
+							name="title"
+							onChange={(event) => {
+								const title = event.currentTarget.value;
+								draft.setValue((current) => ({ ...current, title }));
+							}}
+							required
+							value={value.title}
+						/>
+					</Field>
+					<Field>
+						<FieldLabel>{t.ui.status}</FieldLabel>
+						<NativeSelect
+							name="status"
+							onChange={(event) => {
+								const status = event.currentTarget.value;
+								if (
+									status === "draft" ||
+									status === "published" ||
+									status === "archived"
+								)
+									draft.setValue((current) => ({ ...current, status }));
+							}}
+							value={value.status}
+						>
+							<NativeSelectOption value="draft">{t.ui.draft}</NativeSelectOption>
+							<NativeSelectOption value="published">
+								{t.ui.published}
+							</NativeSelectOption>
+							<NativeSelectOption value="archived">
+								{t.ui.archived}
+							</NativeSelectOption>
+						</NativeSelect>
+					</Field>
+					<PortableTextEditor
+						label={t.ui.body}
+						onChange={(content) =>
+							draft.setValue((current) => ({ ...current, content }))
+						}
 						required
+						value={value.content}
+						variant="document"
 					/>
-				</Field>
-				<Field>
-					<FieldLabel>{t.ui.status}</FieldLabel>
-					<NativeSelect defaultValue={chapter?.status ?? "draft"} name="status">
-						<NativeSelectOption value="draft">{t.ui.draft}</NativeSelectOption>
-						<NativeSelectOption value="published">{t.ui.published}</NativeSelectOption>
-						<NativeSelectOption value="archived">{t.ui.archived}</NativeSelectOption>
-					</NativeSelect>
-				</Field>
-				<PortableTextEditor
-					label={t.ui.body}
-					onChange={(value) => {
-						setContent(value);
-						setDirty(true);
-					}}
-					required
-					value={content}
-					variant="document"
-				/>
-				<p aria-live="polite" className="text-muted-foreground text-sm">
-					{language === "zh" || language === "ja"
-						? t.units.chapter.characterCount({ count: contentMetrics.characterCount })
-						: t.units.chapter.wordCount({ count: contentMetrics.wordCount })}
-				</p>
-				<div className="flex flex-wrap gap-2">
-					<Button variant="solid" isLoading={update.isPending} type="submit">
-						{t.units.chapter.save}
-					</Button>
-					<RequestFailure error={update.error} fallback={t.ui.retryLater} />
-					<Button asChild type="button" variant="outline">
-						<Link href={unitManagementSectionHref("book", bookId, "content-structure")}>
-							{t.units.chapter.backToStructure}
-						</Link>
-					</Button>
-				</div>
-			</FieldGroup>
-		</form>
+					<p aria-live="polite" className="text-muted-foreground text-sm">
+						{language === "zh" || language === "ja"
+							? t.units.chapter.characterCount({
+									count: contentMetrics.characterCount,
+								})
+							: t.units.chapter.wordCount({ count: contentMetrics.wordCount })}
+					</p>
+					<div className="flex flex-wrap gap-2">
+						<Button variant="solid" isLoading={update.isPending} type="submit">
+							{t.units.chapter.save}
+						</Button>
+						<RequestFailure error={update.error} fallback={t.ui.retryLater} />
+						<Button asChild type="button" variant="outline">
+							<Link
+								href={unitManagementSectionHref(
+									"book",
+									bookId,
+									"content-structure",
+								)}
+							>
+								{t.units.chapter.backToStructure}
+							</Link>
+						</Button>
+					</div>
+				</FieldGroup>
+			</form>
+		</LocalizedDraftGate>
 	);
 }

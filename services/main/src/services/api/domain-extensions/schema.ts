@@ -16,7 +16,7 @@ import {
 	FractionalPositionInput,
 	ContentLanguage,
 	LocalizationLanguageQuery,
-	LocalizationInput,
+	UnitLocalizationInput,
 	Uuid,
 } from "../schema";
 import { AvatarResponse, ImageAssetResponse } from "../schema/response";
@@ -49,7 +49,7 @@ const NavigationInputDocument = Type.Unsafe<Static<typeof NavigationDocument>>(
 export const CreateSeriesBody = t.Object(
 	{
 		kind: t.String({ minLength: 1, maxLength: 64 }),
-		localization: LocalizationInput,
+		localization: UnitLocalizationInput,
 	},
 	{ additionalProperties: false },
 );
@@ -87,7 +87,7 @@ const SystemRequirementHardwareResponse = Type.Unsafe<Record<string, JsonValueTy
 
 export const CreateZoneBody = t.Object(
 	{
-		localization: LocalizationInput,
+		localization: UnitLocalizationInput,
 		boundaryDocument: ZoneBoundaryInputDocument,
 		themeDocument: ZoneThemeInputDocument,
 		startsAt: t.Optional(t.Nullable(t.String({ format: "date-time" }))),
@@ -117,7 +117,7 @@ export const ZoneNavigationParams = t.Object({
 });
 export const UpdateZoneBody = t.Object(
 	{
-		localization: t.Optional(LocalizationInput),
+		localization: t.Optional(UnitLocalizationInput),
 		boundaryDocument: t.Optional(ZoneBoundaryInputDocument),
 		themeDocument: t.Optional(ZoneThemeInputDocument),
 		startsAt: t.Optional(t.Nullable(t.String({ format: "date-time" }))),

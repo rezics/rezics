@@ -339,6 +339,20 @@ export default {
 	ruleContent: "규칙 내용",
 	removeRule: "규칙 제거",
 	addRule: "규칙 추가",
+	ruleNumber: insert("규칙 {{position}}", { position: Number }),
+	ruleTranslationCount: insert("번역: {{count}}", { count: Number }),
+	moveRuleUp: insert("규칙 {{position}} 위로 이동", { position: Number }),
+	moveRuleDown: insert("규칙 {{position}} 아래로 이동", { position: Number }),
+	ruleMoved: insert("규칙을 {{count}}개 중 {{position}}번째 위치로 이동했습니다.", {
+		position: Number,
+		count: Number,
+	}),
+	addRuleTranslation: "번역 추가",
+	removeRuleTranslation: "번역 제거",
+	ruleTranslationMissing: insert("{{language}} 번역이 아직 추가되지 않았습니다.", {
+		language: String,
+	}),
+	ruleTranslationsIncomplete: "추가된 모든 규칙 번역에 제목을 입력해야 저장할 수 있습니다.",
 	pinTarget: "고정할 콘텐츠",
 	pinKind: "고정 유형",
 	pinKinds: {

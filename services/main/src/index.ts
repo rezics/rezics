@@ -10,6 +10,9 @@ const observability = initializeObservability({
 	},
 });
 
+// Match Bun's native ceiling explicitly so every srvx runtime has the same bounded input cost.
+const MaximumRequestBodyBytes = 128 * 1024 * 1024;
+
 const [{ serve }, { default: api }, { env }, { database }] = await Promise.all([
 	import("srvx"),
 	import("./services/api"),
@@ -18,6 +21,7 @@ const [{ serve }, { default: api }, { env }, { database }] = await Promise.all([
 ]);
 
 const server = serve({
+	maxRequestBodySize: MaximumRequestBodyBytes,
 	async fetch(request) {
 		const response = await api.fetch(request);
 		const headers = new Headers(response.headers);

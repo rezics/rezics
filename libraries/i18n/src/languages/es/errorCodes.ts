@@ -63,7 +63,7 @@ export default {
 	RealmCapabilityRequired: `No tienes el permiso necesario para el ${realmTerms.inline}.`,
 	RealmRulesAcceptanceRequired: `Acepta las reglas actuales del ${realmTerms.inline} para continuar.`,
 	RealmRuleRevisionChanged:
-		"Las reglas han cambiado. Revisa la última versión antes de aceptarlas.",
+		"Las reglas cambiaron en el servidor. Revisa la última versión e inténtalo de nuevo.",
 	PlatformCapabilityRequired: "Esta acción requiere un permiso de plataforma.",
 	PlatformAccessManagerRequired:
 		"La plataforma debe conservar al menos un administrador de acceso sin vencimiento.",

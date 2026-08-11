@@ -57,7 +57,8 @@ export default {
 	SearchUnavailable: "Search is temporarily unavailable. Try again later.",
 	RealmCapabilityRequired: `You do not have the required ${realmTerms.label} permission.`,
 	RealmRulesAcceptanceRequired: `Accept the current ${realmTerms.label} rules to continue.`,
-	RealmRuleRevisionChanged: "The rules have changed. Review the latest revision before agreeing.",
+	RealmRuleRevisionChanged:
+		"The rules changed on the server. Review the latest revision and try again.",
 	PlatformCapabilityRequired: "A platform permission is required for this action.",
 	PlatformAccessManagerRequired:
 		"The platform must retain at least one non-expiring access manager.",

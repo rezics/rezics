@@ -56,7 +56,8 @@ export default {
 	SearchUnavailable: "현재 검색을 일시적으로 사용할 수 없습니다. 나중에 다시 시도하세요.",
 	RealmCapabilityRequired: `필요한 ${realmTerms.label} 권한이 없습니다.`,
 	RealmRulesAcceptanceRequired: `계속하려면 현재 ${realmTerms.label} 규칙을 수락하세요.`,
-	RealmRuleRevisionChanged: "규칙이 변경되었습니다. 동의하기 전에 최신 개정을 검토하세요.",
+	RealmRuleRevisionChanged:
+		"서버의 규칙이 변경되었습니다. 최신 개정을 확인한 후 다시 시도하세요.",
 	PlatformCapabilityRequired: "이 작업에는 플랫폼 권한이 필요합니다.",
 	PlatformAccessManagerRequired:
 		"플랫폼은 만료되지 않는 액세스 관리자를 최소한 하나 이상 유지해야 합니다.",

@@ -2141,6 +2141,7 @@ import type {
 	PutApiRealmsByRealmIdRulesStatus200,
 	PutApiRealmsByRealmIdRulesStatus400,
 	PutApiRealmsByRealmIdRulesStatus403,
+	PutApiRealmsByRealmIdRulesStatus409,
 	PutApiRealmsByRealmIdRulesStatus422,
 	PutApiRealmsByRealmIdRulesStatus429,
 	PutApiRealmsByRealmIdRulesStatus500,
@@ -2149,6 +2150,12 @@ import type {
 	GetApiRealmsByRealmIdRulesStatus404,
 	GetApiRealmsByRealmIdRulesStatus422,
 	GetApiRealmsByRealmIdRulesStatus500,
+	GetApiRealmsByRealmIdRulesAuthoringOptions,
+	GetApiRealmsByRealmIdRulesAuthoringStatus200,
+	GetApiRealmsByRealmIdRulesAuthoringStatus403,
+	GetApiRealmsByRealmIdRulesAuthoringStatus422,
+	GetApiRealmsByRealmIdRulesAuthoringStatus429,
+	GetApiRealmsByRealmIdRulesAuthoringStatus500,
 	PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementOptions,
 	PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus204,
 	PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementStatus400,
@@ -2817,6 +2824,7 @@ import {
 	patchApiRealmsByRealmIdMembersByProfileId,
 	putApiRealmsByRealmIdRules,
 	getApiRealmsByRealmIdRules,
+	getApiRealmsByRealmIdRulesAuthoring,
 	putApiRealmsByRealmIdRulesByRevisionIdAcknowledgement,
 	getApiRealmsByRealmIdPins,
 	postApiRealmsByRealmIdPinsMove,
@@ -35318,6 +35326,7 @@ export function putApiRealmsByRealmIdRulesMutationOptions<TContext = unknown>(
 		ResponseErrorConfig<
 			| PutApiRealmsByRealmIdRulesStatus400
 			| PutApiRealmsByRealmIdRulesStatus403
+			| PutApiRealmsByRealmIdRulesStatus409
 			| PutApiRealmsByRealmIdRulesStatus422
 			| PutApiRealmsByRealmIdRulesStatus429
 			| PutApiRealmsByRealmIdRulesStatus500
@@ -35349,6 +35358,7 @@ export function usePutApiRealmsByRealmIdRules<TContext>(
 			ResponseErrorConfig<
 				| PutApiRealmsByRealmIdRulesStatus400
 				| PutApiRealmsByRealmIdRulesStatus403
+				| PutApiRealmsByRealmIdRulesStatus409
 				| PutApiRealmsByRealmIdRulesStatus422
 				| PutApiRealmsByRealmIdRulesStatus429
 				| PutApiRealmsByRealmIdRulesStatus500
@@ -35368,6 +35378,7 @@ export function usePutApiRealmsByRealmIdRules<TContext>(
 		ResponseErrorConfig<
 			| PutApiRealmsByRealmIdRulesStatus400
 			| PutApiRealmsByRealmIdRulesStatus403
+			| PutApiRealmsByRealmIdRulesStatus409
 			| PutApiRealmsByRealmIdRulesStatus422
 			| PutApiRealmsByRealmIdRulesStatus429
 			| PutApiRealmsByRealmIdRulesStatus500
@@ -35381,6 +35392,7 @@ export function usePutApiRealmsByRealmIdRules<TContext>(
 		ResponseErrorConfig<
 			| PutApiRealmsByRealmIdRulesStatus400
 			| PutApiRealmsByRealmIdRulesStatus403
+			| PutApiRealmsByRealmIdRulesStatus409
 			| PutApiRealmsByRealmIdRulesStatus422
 			| PutApiRealmsByRealmIdRulesStatus429
 			| PutApiRealmsByRealmIdRulesStatus500
@@ -35399,6 +35411,7 @@ export function usePutApiRealmsByRealmIdRules<TContext>(
 		ResponseErrorConfig<
 			| PutApiRealmsByRealmIdRulesStatus400
 			| PutApiRealmsByRealmIdRulesStatus403
+			| PutApiRealmsByRealmIdRulesStatus409
 			| PutApiRealmsByRealmIdRulesStatus422
 			| PutApiRealmsByRealmIdRulesStatus429
 			| PutApiRealmsByRealmIdRulesStatus500
@@ -35504,6 +35517,106 @@ export function useGetApiRealmsByRealmIdRules<
 			| GetApiRealmsByRealmIdRulesStatus404
 			| GetApiRealmsByRealmIdRulesStatus422
 			| GetApiRealmsByRealmIdRulesStatus500
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const getApiRealmsByRealmIdRulesAuthoringQueryKey = ({
+	path,
+}: Omit<GetApiRealmsByRealmIdRulesAuthoringOptions, "headers">) =>
+	[{ url: "/api/v1/realms/:realmId/rules/authoring", params: path }] as const;
+
+type GetApiRealmsByRealmIdRulesAuthoringQueryKey = ReturnType<
+	typeof getApiRealmsByRealmIdRulesAuthoringQueryKey
+>;
+
+export function getApiRealmsByRealmIdRulesAuthoringQueryOptions(
+	{ path }: GetApiRealmsByRealmIdRulesAuthoringOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = getApiRealmsByRealmIdRulesAuthoringQueryKey({ path });
+	return queryOptions<
+		GetApiRealmsByRealmIdRulesAuthoringStatus200,
+		ResponseErrorConfig<
+			| GetApiRealmsByRealmIdRulesAuthoringStatus403
+			| GetApiRealmsByRealmIdRulesAuthoringStatus422
+			| GetApiRealmsByRealmIdRulesAuthoringStatus429
+			| GetApiRealmsByRealmIdRulesAuthoringStatus500
+		>,
+		GetApiRealmsByRealmIdRulesAuthoringStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			const { data } = await getApiRealmsByRealmIdRulesAuthoring({
+				...config,
+				path,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Get Realm rules for authoring
+ * {@link /api/v1/realms/:realmId/rules/authoring}
+ */
+export function useGetApiRealmsByRealmIdRulesAuthoring<
+	TData = GetApiRealmsByRealmIdRulesAuthoringStatus200,
+	TQueryData = GetApiRealmsByRealmIdRulesAuthoringStatus200,
+	TQueryKey extends QueryKey = GetApiRealmsByRealmIdRulesAuthoringQueryKey,
+>(
+	{
+		path,
+	}: {
+		path:
+			| GetApiRealmsByRealmIdRulesAuthoringOptions["path"]
+			| (() => GetApiRealmsByRealmIdRulesAuthoringOptions["path"]);
+	},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				GetApiRealmsByRealmIdRulesAuthoringStatus200,
+				ResponseErrorConfig<
+					| GetApiRealmsByRealmIdRulesAuthoringStatus403
+					| GetApiRealmsByRealmIdRulesAuthoringStatus422
+					| GetApiRealmsByRealmIdRulesAuthoringStatus429
+					| GetApiRealmsByRealmIdRulesAuthoringStatus500
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = { path: typeof path === "function" ? path() : path };
+	const queryKey =
+		resolvedOptions?.queryKey ?? getApiRealmsByRealmIdRulesAuthoringQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...getApiRealmsByRealmIdRulesAuthoringQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			| GetApiRealmsByRealmIdRulesAuthoringStatus403
+			| GetApiRealmsByRealmIdRulesAuthoringStatus422
+			| GetApiRealmsByRealmIdRulesAuthoringStatus429
+			| GetApiRealmsByRealmIdRulesAuthoringStatus500
 		>
 	> & { queryKey: TQueryKey };
 

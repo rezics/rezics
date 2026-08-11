@@ -629,6 +629,8 @@ import type {
 	PutApiRealmsByRealmIdRulesResponses,
 	GetApiRealmsByRealmIdRulesOptions,
 	GetApiRealmsByRealmIdRulesResponses,
+	GetApiRealmsByRealmIdRulesAuthoringOptions,
+	GetApiRealmsByRealmIdRulesAuthoringResponses,
 	PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementOptions,
 	PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementResponses,
 	GetApiRealmsByRealmIdPinsOptions,
@@ -7005,6 +7007,26 @@ export function getApiRealmsByRealmIdRules<ThrowOnError extends boolean = true>(
 	return request({ method: "GET", url: "/api/v1/realms/{realmId}/rules", ...config }) as Promise<
 		RequestResult<GetApiRealmsByRealmIdRulesResponses, ThrowOnError>
 	>;
+}
+
+/**
+ * @summary Get Realm rules for authoring
+ * {@link /api/v1/realms/:realmId/rules/authoring}
+ */
+export function getApiRealmsByRealmIdRulesAuthoring<ThrowOnError extends boolean = true>(
+	options: Options<GetApiRealmsByRealmIdRulesAuthoringOptions, ThrowOnError>,
+): Promise<RequestResult<GetApiRealmsByRealmIdRulesAuthoringResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/v1/realms/{realmId}/rules/authoring",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<GetApiRealmsByRealmIdRulesAuthoringResponses, ThrowOnError>>;
 }
 
 /**

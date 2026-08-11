@@ -55,7 +55,7 @@ export default {
 	SearchUnavailable: "搜索服务暂时无法使用，请稍后再试。",
 	RealmCapabilityRequired: `你没有所需的${realmTerms.inline}权限。`,
 	RealmRulesAcceptanceRequired: `请先同意当前的${realmTerms.inline}规则。`,
-	RealmRuleRevisionChanged: "规则已更新，请重新阅读最新版本后再同意。",
+	RealmRuleRevisionChanged: "服务器上的规则已更改，请检查最新版本后重试。",
 	PlatformCapabilityRequired: "此操作需要平台权限。",
 	PlatformAccessManagerRequired: "平台必须保留至少一位无期限的访问权管理者。",
 	PlatformAccessRevisionConflict: "平台权限已由其他变更更新，请重新加载后再试一次。",

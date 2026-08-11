@@ -352,6 +352,21 @@ export default {
 	ruleContent: "Regelinhalt",
 	removeRule: "Regel entfernen",
 	addRule: "Regel hinzufügen",
+	ruleNumber: insert("Regel {{position}}", { position: Number }),
+	ruleTranslationCount: insert("Übersetzungen: {{count}}", { count: Number }),
+	moveRuleUp: insert("Regel {{position}} nach oben verschieben", { position: Number }),
+	moveRuleDown: insert("Regel {{position}} nach unten verschieben", { position: Number }),
+	ruleMoved: insert("Regel an Position {{position}} von {{count}} verschoben.", {
+		position: Number,
+		count: Number,
+	}),
+	addRuleTranslation: "Übersetzung hinzufügen",
+	removeRuleTranslation: "Übersetzung entfernen",
+	ruleTranslationMissing: insert("Die Übersetzung auf {{language}} wurde nicht hinzugefügt.", {
+		language: String,
+	}),
+	ruleTranslationsIncomplete:
+		"Jede hinzugefügte Regelübersetzung benötigt vor dem Speichern einen Titel.",
 	pinTarget: "Zu fixierender Inhalt",
 	pinKind: "Fixierungsart",
 	pinKinds: {

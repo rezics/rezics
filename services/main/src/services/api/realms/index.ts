@@ -1,7 +1,7 @@
 import { DevelopmentPreviewCapability, RealmUnitCreatePermissionValues } from "@rezics/access";
 import type { ContentLanguage } from "@rezics/i18n";
 import { StatusCodes } from "http-status-codes";
-import { and, desc, eq, gt, inArray, isNull, lt, max, or, sql } from "drizzle-orm";
+import { and, desc, eq, gt, inArray, isNull, lt, or, sql } from "drizzle-orm";
 import Elysia, { t } from "elysia";
 
 import { recordAuditEvent as appendAuditEvent } from "../../audit";
@@ -19,7 +19,7 @@ import { toSafeInteger } from "../../database/integer";
 import { ContentStructureSnapshotSchema } from "../../content-structure/contracts";
 import { createContentStructureHistory } from "../../content-structure/history";
 import { saveRealmTaxonomyDraft } from "../../content-structure/realm-taxonomy-draft";
-import { fractionalPositionBetween } from "../../ordering/position";
+import { fractionalPositionAt, fractionalPositionBetween } from "../../ordering/position";
 import { decodeCursor, encodeCursor } from "../../pagination";
 import {
 	avatarReferenceFromColumns,
@@ -94,10 +94,12 @@ import {
 	RealmPinListResponse,
 	RealmPinResponse,
 	RealmRuleRevisionResponse,
+	RealmRulesAuthoringResponse,
 	RealmRulesResponse,
 	SavedResponse,
 	ScoreContextResponse,
 } from "../schema/action-response";
+import { hasUniqueLocalizationLanguages } from "../schema";
 import {
 	toApiErrorResponse,
 	RealmDetailResponse,
@@ -178,6 +180,7 @@ import {
 	RealmMembershipNotFound,
 	RealmNotFound,
 	RealmOwnerLeaveForbidden,
+	RealmRuleRevisionChanged,
 	RealmScoreContextPostKindInvalid,
 	RealmScoreContextPostNotMounted,
 	RealmTagContextNotFound,
@@ -1621,19 +1624,27 @@ export default new Elysia({ prefix: "/realms" })
 			await ensureRealmFieldsAuthorized(authorization, params.realmId, "realm.rules.update", [
 				"rules",
 			]);
+			const duplicateLocalizationRuleIndex = body.rules.findIndex(
+				(rule) => !hasUniqueLocalizationLanguages(rule.localizations),
+			);
+			if (duplicateLocalizationRuleIndex !== -1)
+				throw new ValidationError({
+					path: `rules.${duplicateLocalizationRuleIndex}.localizations`,
+					reason: "duplicate_language",
+				});
 			const revision = await database.transaction(async (tx) => {
 				await tx.execute(
 					sql`select pg_advisory_xact_lock(hashtextextended(${params.realmId}::text, 0))`,
 				);
-				const [latest] = await tx
-					.select({ version: max(realmRuleRevision.version) })
-					.from(realmRuleRevision)
-					.where(eq(realmRuleRevision.realmId, params.realmId));
+				const latest = await getCurrentRealmRules(params.realmId, tx);
+				const currentRevisionId = latest?.revisionId ?? null;
+				if (body.baseRevisionId !== currentRevisionId)
+					throw new RealmRuleRevisionChanged({ currentRevisionId });
 				const [created] = await tx
 					.insert(realmRuleRevision)
 					.values({
 						realmId: params.realmId,
-						version: Number(latest?.version ?? 0) + 1,
+						version: (latest?.version ?? 0) + 1,
 						acknowledgementMode: body.acknowledgementMode,
 						requireOnJoin: body.requireOnJoin,
 						requireOnPost: body.requireOnPost,
@@ -1649,13 +1660,16 @@ export default new Elysia({ prefix: "/realms" })
 						publishedAt: new Date(),
 						statusActor: { kind: "profile", profileId: profile.unitId },
 					});
-					await tx.insert(unitLocalization).values({
-						unitId: ruleUnit.id,
-						language: rule.language,
-						title: rule.title,
-						content: rule.content,
-						contentStatus: "published",
-					});
+					await tx.insert(unitLocalization).values(
+						rule.localizations.map((localization, localizationIndex) => ({
+							unitId: ruleUnit.id,
+							language: localization.language,
+							position: fractionalPositionAt(localizationIndex),
+							title: localization.title,
+							content: localization.content,
+							contentStatus: "published" as const,
+						})),
+					);
 					await tx.insert(unitOwnership).values({
 						unitId: ruleUnit.id,
 						profileId: profile.unitId,
@@ -1684,8 +1698,83 @@ export default new Elysia({ prefix: "/realms" })
 			response: {
 				[StatusCodes.OK]: RealmRuleRevisionResponse,
 				[StatusCodes.FORBIDDEN]: RealmMutationForbiddenResponse,
+				[StatusCodes.CONFLICT]: toApiErrorResponse(["RealmRuleRevisionChanged"]),
+				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["ValidationError"]),
 			},
 			detail: { summary: "Update Realm rules", tags: ["Realms"] },
+		},
+	)
+	.get(
+		"/:realmId/rules/authoring",
+		async ({ params, authorization }) => {
+			await ensureRealmFieldsAuthorized(authorization, params.realmId, "realm.rules.update", [
+				"rules",
+			]);
+			const current = await getCurrentRealmRules(params.realmId);
+			if (!current)
+				return {
+					revisionId: null,
+					version: null,
+					acknowledgementMode: "explicit",
+					requireOnJoin: false,
+					requireOnPost: false,
+					items: [],
+				};
+			const rows = await database
+				.select({
+					id: realmRule.id,
+					position: realmRule.position,
+					language: unitLocalization.language,
+					title: unitLocalization.title,
+					content: unitLocalization.content,
+				})
+				.from(realmRule)
+				.innerJoin(unitLocalization, eq(unitLocalization.unitId, realmRule.id))
+				.where(eq(realmRule.revisionId, current.revisionId))
+				.orderBy(
+					realmRule.position,
+					realmRule.id,
+					unitLocalization.position,
+					unitLocalization.language,
+				);
+			const itemsById = new Map<
+				string,
+				{
+					id: string;
+					position: number;
+					localizations: Array<{
+						language: ContentLanguage;
+						title: string;
+						content: ReturnType<typeof toPortableTextResponse>;
+					}>;
+				}
+			>();
+			for (const row of rows) {
+				if (!row.title) throw new Error(`Realm rule ${row.id} has no localized title`);
+				const localization = {
+					language: row.language,
+					title: row.title,
+					content: toPortableTextResponse(row.content, "unit_localization.content"),
+				};
+				const item = itemsById.get(row.id);
+				if (item) item.localizations.push(localization);
+				else
+					itemsById.set(row.id, {
+						id: row.id,
+						position: row.position,
+						localizations: [localization],
+					});
+			}
+			return { ...current, items: [...itemsById.values()] };
+		},
+		{
+			access: "write:realm:manage",
+			params: RealmParams,
+			response: {
+				[StatusCodes.OK]: RealmRulesAuthoringResponse,
+				[StatusCodes.FORBIDDEN]: RealmMutationForbiddenResponse,
+			},
+			detail: { summary: "Get Realm rules for authoring", tags: ["Realms"] },
 		},
 	)
 	.get(

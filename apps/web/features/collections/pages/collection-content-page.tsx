@@ -8,18 +8,46 @@ import {
 import { Button, ManagementWorkspaceSectionHeader } from "@rezics/ui";
 import { useQueryClient } from "@tanstack/react-query";
 import { AppLink as Link } from "@/features/application-shell/components/app-link";
-import { useState, type FormEvent } from "react";
+import { type FormEvent } from "react";
 
 import type { LocalizationImageAssetValue } from "@/features/media/components/localization-image-upload-field";
 import { LocalizationMediaFallbackNotice } from "@/features/media/components/localization-media-fallback-notice";
 import { ContentLanguageControl } from "@/features/content-languages/components/content-language-control";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
-import { useContentLanguageEditor } from "@/features/content-languages/hooks/use-content-language-editor";
+import { LocalizedDraftGate } from "@/features/content-languages/components/localized-draft-gate";
+import {
+	useContentLanguageEditor,
+	useLocalizedDraft,
+	type LocalizedDraftCodec,
+} from "@/features/content-languages/hooks/use-content-language-editor";
+import {
+	decodeDraftImageAsset,
+	decodeDraftString,
+	isDraftRecord,
+} from "@/features/content-languages/model/localized-draft-codec";
 import { CollectionLocalizationFields } from "../components/collection-localization-fields";
 import { useCollectionManagement } from "../components/collection-management-workspace";
 import { invalidateCollections } from "../data/collection-cache";
 import { collectionManagementHref } from "../routing/collection-management-routes";
+
+type CollectionLocalizationDraft = {
+	title: string;
+	summary: string;
+	cover: LocalizationImageAssetValue | null;
+};
+const CollectionLocalizationDraftCodec: LocalizedDraftCodec<CollectionLocalizationDraft> = {
+	version: 1,
+	decode(value) {
+		if (!isDraftRecord(value)) return;
+		const title = decodeDraftString(value.title);
+		const summary = decodeDraftString(value.summary);
+		const cover = decodeDraftImageAsset(value.cover);
+		return title === undefined || summary === undefined || cover === undefined
+			? undefined
+			: { title, summary, cover };
+	},
+};
 
 export function CollectionContentPage() {
 	const { collection } = useCollectionManagement();
@@ -60,14 +88,23 @@ function CollectionLocalizationEditor({
 }) {
 	const { t } = useTranslation(["collections", "ui"]);
 	const queryClient = useQueryClient();
-	const { setDirty, languagesChanged } = useContentLanguageEditor();
+	const { languagesChanged } = useContentLanguageEditor();
 	const update = usePatchApiCollectionsByCollectionId();
-	const [cover, setCover] = useState<LocalizationImageAssetValue | null>(initial?.cover ?? null);
+	const draft = useLocalizedDraft<CollectionLocalizationDraft>({
+		scope: "collection-localization",
+		baseVersion: collection.latestRevisionId,
+		codec: CollectionLocalizationDraftCodec,
+		createInitialValue: () => ({
+			title: initial?.title ?? "",
+			summary: initial?.summary ?? "",
+			cover: initial?.cover ?? null,
+		}),
+	});
+	const { value } = draft;
 
 	async function submit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
-		const form = new FormData(event.currentTarget);
-		const title = String(form.get("title") ?? "").trim();
+		const title = value.title.trim();
 		if (!title) return;
 		try {
 			await update.mutateAsync({
@@ -77,13 +114,13 @@ function CollectionLocalizationEditor({
 					localization: {
 						language,
 						title,
-						summary: String(form.get("summary") ?? "").trim(),
-						coverAssetId: cover?.id ?? null,
+						summary: value.summary.trim(),
+						coverAssetId: value.cover?.id ?? null,
 					},
 				},
 			});
+			draft.commit();
 			await invalidateCollections(queryClient, collection.id);
-			setDirty(false);
 			await languagesChanged();
 		} catch {
 			// The typed mutation state supplies the visible API error.
@@ -91,23 +128,30 @@ function CollectionLocalizationEditor({
 	}
 
 	return (
-		<form
-			className="grid max-w-xl gap-6"
-			onChange={() => setDirty(true)}
-			onSubmit={(event) => void submit(event)}
+		<LocalizedDraftGate
+			hydrated={draft.hydrated}
+			onDiscard={draft.discard}
+			serverChanged={draft.serverChanged}
 		>
-			<CollectionLocalizationFields
-				cover={cover}
-				initial={initial}
-				onCoverChange={(value) => {
-					setCover(value);
-					setDirty(true);
-				}}
-			/>
-			<RequestFailure error={update.error} fallback={t.ui.retryLater} />
-			<Button className="w-fit" isLoading={update.isPending} type="submit" variant="solid">
-				{t.collections.form.save}
-			</Button>
-		</form>
+			<form className="grid max-w-xl gap-6" onSubmit={(event) => void submit(event)}>
+				<CollectionLocalizationFields
+					cover={value.cover}
+					onCoverChange={(cover) => draft.setValue((current) => ({ ...current, cover }))}
+					onValueChange={(fields) =>
+						draft.setValue((current) => ({ ...current, ...fields }))
+					}
+					value={value}
+				/>
+				<RequestFailure error={update.error} fallback={t.ui.retryLater} />
+				<Button
+					className="w-fit"
+					isLoading={update.isPending}
+					type="submit"
+					variant="solid"
+				>
+					{t.collections.form.save}
+				</Button>
+			</form>
+		</LocalizedDraftGate>
 	);
 }

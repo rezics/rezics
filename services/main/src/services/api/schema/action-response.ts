@@ -5,11 +5,13 @@ import {
 	ContentLanguage,
 	DateTime,
 	FractionalPosition,
+	LocalizationLanguageField,
 	NonRealmUnitKind,
 	OrdinalPosition,
 	ResourceVisibility,
 	UnitKind,
 	Uuid,
+	localizationSet,
 } from ".";
 import {
 	RealmMemberStateValues,
@@ -179,6 +181,26 @@ export const RealmRulesResponse = t.Object({
 			language: ContentLanguage,
 			title: t.String(),
 			content: PortableTextDocument,
+		}),
+	),
+});
+export const RealmRulesAuthoringResponse = t.Object({
+	revisionId: NullableUuid,
+	version: t.Nullable(t.Integer()),
+	acknowledgementMode: t.UnionEnum(RealmRuleAcknowledgementModeValues),
+	requireOnJoin: t.Boolean(),
+	requireOnPost: t.Boolean(),
+	items: t.Array(
+		t.Object({
+			id: Uuid,
+			position: OrdinalPosition,
+			localizations: localizationSet(
+				t.Object({
+					...LocalizationLanguageField,
+					title: t.String(),
+					content: PortableTextDocument,
+				}),
+			),
 		}),
 	),
 });

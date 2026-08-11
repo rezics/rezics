@@ -1,5 +1,6 @@
 import { type Static, t } from "elysia";
 import { FormatRegistry } from "@sinclair/typebox";
+import type { TSchema } from "@sinclair/typebox";
 import {
 	FontAwesomeIconNamePatternSource,
 	FontAwesomeIconPrefixValues,
@@ -60,6 +61,18 @@ export type LocalizationLanguagePriority = Static<typeof LocalizationLanguagePri
 export const LocalizationLanguageQuery = {
 	localizationLanguages: t.Optional(LocalizationLanguagePriority),
 };
+
+/** The common identity field carried by every localization contract. */
+export const LocalizationLanguageField = { language: ContentLanguage } as const;
+
+/** A non-empty, bounded localization sequence; its order is the fallback order. */
+export const localizationSet = <Schema extends TSchema>(schema: Schema) =>
+	t.Array(schema, { minItems: 1, maxItems: ContentLanguageValues.length });
+
+/** JSON Schema cannot express uniqueness by one object property, so prove it at the boundary. */
+export const hasUniqueLocalizationLanguages = (
+	localizations: readonly { readonly language: ContentLanguage }[],
+): boolean => new Set(localizations.map(({ language }) => language)).size === localizations.length;
 
 /** A canonical BCP 47 UI locale value persisted in profile preferences. */
 export const StoredUiLocale = t.UnionEnum(StoredUiLocaleValues, { default: undefined });
@@ -161,9 +174,9 @@ export const DisplayPosition = t.Integer({ minimum: 0, maximum: 999 });
 export const UnitIdParams = t.Object({ unitId: Uuid });
 export type UnitIdParams = Static<typeof UnitIdParams>;
 
-export const LocalizationInput = t.Object(
+export const UnitLocalizationInput = t.Object(
 	{
-		language: ContentLanguage,
+		...LocalizationLanguageField,
 		title: t.String({ minLength: 1, maxLength: 500 }),
 		summary: t.Optional(t.String({ maxLength: 2_000 })),
 		description: t.Optional(PortableTextDocument),
@@ -171,7 +184,7 @@ export const LocalizationInput = t.Object(
 	},
 	{ additionalProperties: false },
 );
-export type LocalizationInput = Static<typeof LocalizationInput>;
+export type UnitLocalizationInput = Static<typeof UnitLocalizationInput>;
 
 export const LifecycleInput = {
 	status: t.Optional(t.Union(UnitStatusValues.map((value) => t.Literal(value)))),

@@ -2,6 +2,7 @@ import { createPortableTextDocument } from "@rezics/block";
 import { Check } from "@sinclair/typebox/value";
 import { describe, expect, it } from "vitest";
 
+import { hasUniqueLocalizationLanguages } from "../schema";
 import {
 	AcknowledgeRealmRulesBody,
 	CreateRealmBody,
@@ -101,14 +102,24 @@ describe("Realm member API contract", () => {
 		(acknowledgementMode) => {
 			expect(
 				Check(UpdateRealmRulesBody, {
+					baseRevisionId: null,
 					acknowledgementMode,
 					requireOnJoin: true,
 					requireOnPost: true,
 					rules: [
 						{
-							language: "en",
-							title: "Community rules",
-							content: createPortableTextDocument([], "0123456789ab"),
+							localizations: [
+								{
+									language: "en",
+									title: "Community rules",
+									content: createPortableTextDocument([], "0123456789ab"),
+								},
+								{
+									language: "zh",
+									title: "社群規則",
+									content: createPortableTextDocument([], "0123456789ac"),
+								},
+							],
 						},
 					],
 				}),
@@ -119,14 +130,19 @@ describe("Realm member API contract", () => {
 	it("rejects an undeclared rule acknowledgement mode", () => {
 		expect(
 			Check(UpdateRealmRulesBody, {
+				baseRevisionId: null,
 				acknowledgementMode: "silent",
 				requireOnJoin: false,
 				requireOnPost: false,
 				rules: [
 					{
-						language: "en",
-						title: "Community rules",
-						content: createPortableTextDocument([], "0123456789ab"),
+						localizations: [
+							{
+								language: "en",
+								title: "Community rules",
+								content: createPortableTextDocument([], "0123456789ab"),
+							},
+						],
 					},
 				],
 			}),
@@ -136,19 +152,55 @@ describe("Realm member API contract", () => {
 	it("rejects the removed update acknowledgement trigger", () => {
 		expect(
 			Check(UpdateRealmRulesBody, {
+				baseRevisionId: null,
 				acknowledgementMode: "explicit",
 				requireOnJoin: true,
 				requireOnPost: true,
 				requireOnUpdate: true,
 				rules: [
 					{
-						language: "en",
-						title: "Community rules",
-						content: createPortableTextDocument([], "0123456789ab"),
+						localizations: [
+							{
+								language: "en",
+								title: "Community rules",
+								content: createPortableTextDocument([], "0123456789ab"),
+							},
+						],
 					},
 				],
 			}),
 		).toBe(false);
+	});
+
+	it("requires a base revision and at least one localization per rule", () => {
+		const rule = {
+			localizations: [
+				{
+					language: "en",
+					title: "Community rules",
+					content: createPortableTextDocument([], "0123456789ab"),
+				},
+			],
+		} as const;
+		const body = {
+			baseRevisionId: null,
+			acknowledgementMode: "explicit",
+			requireOnJoin: false,
+			requireOnPost: false,
+			rules: [rule],
+		} as const;
+		expect(Check(UpdateRealmRulesBody, body)).toBe(true);
+		expect(Check(UpdateRealmRulesBody, { ...body, baseRevisionId: undefined })).toBe(false);
+		expect(Check(UpdateRealmRulesBody, { ...body, rules: [{ localizations: [] }] })).toBe(
+			false,
+		);
+	});
+
+	it("rejects duplicate localization languages at the API boundary", () => {
+		expect(hasUniqueLocalizationLanguages([{ language: "en" }, { language: "zh" }])).toBe(true);
+		expect(hasUniqueLocalizationLanguages([{ language: "en" }, { language: "en" }])).toBe(
+			false,
+		);
 	});
 
 	it("requires a concrete rule revision and acknowledgement language", () => {

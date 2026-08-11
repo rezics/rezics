@@ -489,7 +489,10 @@ export default {
 		saveOrder: "保存顺序",
 		cancel: "取消",
 		noMoreLanguages: "所有支持的语言都已加入。",
-		unsavedConfirm: "要舍弃这个语言尚未保存的变更吗？",
+		draftConflictTitle: "服务器内容已更改",
+		draftConflictDescription:
+			"未保存的草稿已保留，但它基于较早的版本。请在保存前检查，或放弃草稿以载入服务器上的最新内容。",
+		discardDraft: "放弃草稿",
 		instructions: "按空白键拿起语言，使用方向键移动，再按一次空白键放下。",
 		moved: insert("已将{{language}}移到第 {{position}} 位，共 {{count}} 位。", {
 			language: String,

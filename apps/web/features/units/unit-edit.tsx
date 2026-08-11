@@ -14,7 +14,7 @@ import {
 } from "@rezics/openapi-tanstack-query";
 import type { PortableTextValue } from "@rezics/portable-text";
 import { useQueryClient } from "@tanstack/react-query";
-import { useDeferredValue, useState, type FormEvent } from "react";
+import { useDeferredValue, type FormEvent } from "react";
 
 import { Badge } from "@rezics/ui";
 import { Button } from "@rezics/ui";
@@ -25,7 +25,18 @@ import { NativeSelect, NativeSelectOption } from "@rezics/ui";
 import { Textarea } from "@rezics/ui";
 import { PortableTextEditor } from "@/features/editor/portable-text-editor";
 import { ContentLanguageControl } from "@/features/content-languages/components/content-language-control";
-import { useContentLanguageEditor } from "@/features/content-languages/hooks/use-content-language-editor";
+import { LocalizedDraftGate } from "@/features/content-languages/components/localized-draft-gate";
+import {
+	useContentLanguageEditor,
+	useLocalizedDraft,
+	type LocalizedDraftCodec,
+} from "@/features/content-languages/hooks/use-content-language-editor";
+import {
+	decodeDraftImageAsset,
+	decodeDraftPortableText,
+	decodeDraftString,
+	isDraftRecord,
+} from "@/features/content-languages/model/localized-draft-codec";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
 import { readPortableText, writePortableText } from "@/lib/block";
@@ -45,6 +56,25 @@ import { isWorkReleaseStatus } from "./model/work-release-status";
 
 export type EditableUnit = GetApiUnitsByTypeByUnitIdStatus200;
 type Unit = EditableUnit;
+type UnitLocalizationDraft = {
+	title: string;
+	summary: string;
+	description: PortableTextValue;
+	cover: LocalizationImageAssetValue | null;
+};
+const UnitLocalizationDraftCodec: LocalizedDraftCodec<UnitLocalizationDraft> = {
+	version: 1,
+	decode(value) {
+		if (!isDraftRecord(value)) return;
+		const title = decodeDraftString(value.title);
+		const summary = decodeDraftString(value.summary);
+		const description = decodeDraftPortableText(value.description);
+		const cover = decodeDraftImageAsset(value.cover);
+		return title === undefined || summary === undefined || !description || cover === undefined
+			? undefined
+			: { title, summary, description, cover };
+	},
+};
 
 function readPositiveInteger(form: FormData, name: string): number | null | undefined {
 	const raw = String(form.get(name) ?? "").trim();
@@ -442,17 +472,21 @@ function UnitLocalizationForm({
 }) {
 	const { t } = useTranslation(["cover", "editor", "errors", "feed", "locale", "ui", "units"]);
 	const queryClient = useQueryClient();
-	const { dirty, setDirty, languagesChanged } = useContentLanguageEditor();
-	const [title, setTitle] = useState(localization?.title ?? "");
-	const [summary, setSummary] = useState(localization?.summary ?? "");
-	const [description, setDescription] = useState<PortableTextValue>(() =>
-		readPortableText(localization?.description),
-	);
-	const [cover, setCover] = useState<LocalizationImageAssetValue | null>(
-		localization?.cover ?? null,
-	);
-	const deferredTitle = useDeferredValue(title);
-	const deferredSummary = useDeferredValue(summary);
+	const { languagesChanged } = useContentLanguageEditor();
+	const draft = useLocalizedDraft<UnitLocalizationDraft>({
+		scope: "unit-localization",
+		baseVersion: localization?.updatedAt ?? null,
+		codec: UnitLocalizationDraftCodec,
+		createInitialValue: () => ({
+			title: localization?.title ?? "",
+			summary: localization?.summary ?? "",
+			description: readPortableText(localization?.description),
+			cover: localization?.cover ?? null,
+		}),
+	});
+	const { value } = draft;
+	const deferredTitle = useDeferredValue(value.title);
+	const deferredSummary = useDeferredValue(value.summary);
 	const coverOptions: LocalizationImageAssetOption[] = unit.localizations.flatMap((entry) =>
 		entry.language !== language && entry.cover
 			? [{ ...entry.cover, label: t.locale.contentLanguages[entry.language] }]
@@ -470,13 +504,13 @@ function UnitLocalizationForm({
 			await update.mutateAsync({
 				path: { type, unitId: unit.id, language },
 				body: {
-					title: title.trim(),
-					summary: summary.trim(),
-					description: writePortableText(description, localization?.description),
-					coverAssetId: cover?.id ?? null,
+					title: value.title.trim(),
+					summary: value.summary.trim(),
+					description: writePortableText(value.description, localization?.description),
+					coverAssetId: value.cover?.id ?? null,
 				},
 			});
-			setDirty(false);
+			draft.commit();
 			await languagesChanged();
 		} catch {
 			// The typed mutation state supplies the visible API error.
@@ -486,89 +520,93 @@ function UnitLocalizationForm({
 		? t.feed.content.kinds[`unit:${type}`]
 		: t.units.types[type];
 	return (
-		<form
-			className="grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,24rem)]"
-			onSubmit={submit}
+		<LocalizedDraftGate
+			hydrated={draft.hydrated}
+			onDiscard={draft.discard}
+			serverChanged={draft.serverChanged}
 		>
-			<div className="min-w-0">
-				<FieldGroup>
-					<Field required>
-						<FieldLabel>{t.ui.title}</FieldLabel>
-						<Input
-							maxLength={500}
-							name="title"
-							onChange={(event) => {
-								setTitle(event.target.value);
-								setDirty(true);
-							}}
-							required
-							value={title}
+			<form
+				className="grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,24rem)]"
+				onSubmit={submit}
+			>
+				<div className="min-w-0">
+					<FieldGroup>
+						<Field required>
+							<FieldLabel>{t.ui.title}</FieldLabel>
+							<Input
+								maxLength={500}
+								name="title"
+								onChange={(event) => {
+									const title = event.currentTarget.value;
+									draft.setValue((current) => ({ ...current, title }));
+								}}
+								required
+								value={value.title}
+							/>
+						</Field>
+						<Field>
+							<FieldLabel>{t.ui.summary}</FieldLabel>
+							<Textarea
+								maxLength={2000}
+								name="summary"
+								onChange={(event) => {
+									const summary = event.currentTarget.value;
+									draft.setValue((current) => ({ ...current, summary }));
+								}}
+								value={value.summary}
+							/>
+						</Field>
+						<PortableTextEditor
+							label={t.ui.description}
+							onChange={(description) =>
+								draft.setValue((current) => ({ ...current, description }))
+							}
+							value={value.description}
 						/>
-					</Field>
-					<Field>
-						<FieldLabel>{t.ui.summary}</FieldLabel>
-						<Textarea
-							maxLength={2000}
-							name="summary"
-							onChange={(event) => {
-								setSummary(event.target.value);
-								setDirty(true);
-							}}
-							value={summary}
+						<Field>
+							<FieldLabel>{t.cover.title}</FieldLabel>
+							<LocalizationImageUploadField
+								fallback={fallbackCover}
+								onChange={(cover) =>
+									draft.setValue((current) => ({ ...current, cover }))
+								}
+								options={coverOptions}
+								role="cover"
+								value={value.cover}
+							/>
+						</Field>
+						<div className="flex flex-wrap items-center gap-3">
+							<Button
+								disabled={!draft.dirty || !value.title.trim()}
+								isLoading={update.isPending}
+								type="submit"
+								variant="solid"
+							>
+								{t.ui.save}
+							</Button>
+							{draft.dirty ? (
+								<Badge variant="secondary">{t.units.content.unsavedDraft}</Badge>
+							) : null}
+						</div>
+						<RequestFailure error={update.error} fallback={t.ui.retryLater} />
+					</FieldGroup>
+				</div>
+				<aside className="grid gap-3 lg:sticky lg:top-6">
+					<h3 className="font-heading font-bold text-sm">{t.editor.preview}</h3>
+					<FeedCard aria-label={t.editor.preview}>
+						<FeedUnitContent
+							coverUrl={value.cover?.url ?? fallbackCover?.url}
+							headingId={`unit-content-preview-${unit.id}-${language}`}
+							headingLevel={3}
+							kind={type}
+							kindLabel={previewKindLabel}
+							standalone
+							summary={deferredSummary.trim()}
+							title={deferredTitle.trim() || t.ui.unnamed}
 						/>
-					</Field>
-					<PortableTextEditor
-						label={t.ui.description}
-						onChange={(value) => {
-							setDescription(value);
-							setDirty(true);
-						}}
-						value={description}
-					/>
-					<Field>
-						<FieldLabel>{t.cover.title}</FieldLabel>
-						<LocalizationImageUploadField
-							fallback={fallbackCover}
-							onChange={(value) => {
-								setCover(value);
-								setDirty(true);
-							}}
-							options={coverOptions}
-							role="cover"
-							value={cover}
-						/>
-					</Field>
-					<div className="flex flex-wrap items-center gap-3">
-						<Button
-							disabled={!dirty || !title.trim()}
-							isLoading={update.isPending}
-							type="submit"
-							variant="solid"
-						>
-							{t.ui.save}
-						</Button>
-						{dirty ? (
-							<Badge variant="secondary">{t.units.content.unsavedDraft}</Badge>
-						) : null}
-					</div>
-					<RequestFailure error={update.error} fallback={t.ui.retryLater} />
-				</FieldGroup>
-			</div>
-			<aside className="grid gap-3 lg:sticky lg:top-6">
-				<h3 className="font-heading font-bold text-sm">{t.editor.preview}</h3>
-				<FeedCard aria-label={t.editor.preview}>
-					<FeedUnitContent
-						coverUrl={cover?.url ?? fallbackCover?.url}
-						headingId={`unit-content-preview-${unit.id}-${language}`}
-						headingLevel={3}
-						kind={type}
-						kindLabel={previewKindLabel}
-						standalone
-						summary={deferredSummary.trim()}
-						title={deferredTitle.trim() || t.ui.unnamed}
-					/>
-				</FeedCard>
-			</aside>
-		</form>
+					</FeedCard>
+				</aside>
+			</form>
+		</LocalizedDraftGate>
 	);
 }

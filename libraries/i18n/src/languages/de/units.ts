@@ -541,7 +541,10 @@ export default {
 		saveOrder: "Reihenfolge speichern",
 		cancel: "Abbrechen",
 		noMoreLanguages: "Alle unterstützten Sprachen wurden bereits hinzugefügt.",
-		unsavedConfirm: "Nicht gespeicherte Änderungen für diese Sprache verwerfen?",
+		draftConflictTitle: "Der Inhalt auf dem Server wurde geändert",
+		draftConflictDescription:
+			"Dieser nicht gespeicherte Entwurf wurde beibehalten, basiert aber auf einer älteren Version. Prüfe ihn vor dem Speichern oder verwirf ihn, um den aktuellen Serverinhalt zu laden.",
+		discardDraft: "Entwurf verwerfen",
 		instructions:
 			"Drücke die Leertaste, um eine Sprache aufzunehmen. Verschiebe sie mit den Pfeiltasten und drücke erneut die Leertaste, um sie abzulegen.",
 		moved: insert("{{language}} an Position {{position}} von {{count}} verschoben.", {

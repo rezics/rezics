@@ -9,20 +9,19 @@ import {
 import { publicSlugHref } from "@rezics/slug";
 
 import {
+	getApiRealmsByRealmIdRulesAuthoringQueryKey,
 	getApiRealmsByRealmIdRulesQueryKey,
-	getApiRealmsByRealmIdRulesQueryOptions,
 	usePatchApiRealmsByRealmId,
-	useGetApiUnitsByIdByUnitIdLocalizationOrder,
 	usePutApiRealmsByRealmIdRules,
 	useReplaceRealmSlugAddress,
-	type GetApiRealmsByRealmIdRulesStatus200,
+	type GetApiRealmsByRealmIdRulesAuthoringStatus200,
 	type GetApiRealmsByRealmIdStatus200,
 } from "@rezics/openapi-tanstack-query";
-import type { PortableTextDocument } from "@rezics/block";
 import type { PortableTextValue } from "@rezics/portable-text";
 import { useQueryClient } from "@tanstack/react-query";
 import { useApplicationRouter } from "@/features/application-shell/hooks/use-application-router";
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import { ArrowDown, ArrowUp } from "lucide-react";
+import { useState, type FormEvent } from "react";
 
 import { Button } from "@rezics/ui";
 import { Card, CardContent } from "@rezics/ui";
@@ -31,8 +30,8 @@ import { Field, FieldGroup, FieldLabel } from "@rezics/ui";
 import { Input } from "@rezics/ui";
 import { NativeSelect, NativeSelectOption } from "@rezics/ui";
 import { Skeleton } from "@rezics/ui";
-import { Spinner } from "@rezics/ui";
 import { Textarea } from "@rezics/ui";
+import { LocalizedDraftGate } from "@/features/content-languages/components/localized-draft-gate";
 import {
 	LocalizationImageUploadField,
 	type LocalizationImageAssetOption,
@@ -47,8 +46,21 @@ import {
 } from "@/features/media/components/avatar-field";
 import { LocalizationMediaFallbackNotice } from "@/features/media/components/localization-media-fallback-notice";
 import { PortableTextEditor } from "@/features/editor/portable-text-editor";
-import { useContentLanguageEditor } from "@/features/content-languages/hooks/use-content-language-editor";
+import {
+	useContentLanguageEditor,
+	useLocalizedDraft,
+	type LocalizedDraftCodec,
+} from "@/features/content-languages/hooks/use-content-language-editor";
+import {
+	decodeDraftAvatar,
+	decodeDraftBoolean,
+	decodeDraftImageAsset,
+	decodeDraftPortableText,
+	decodeDraftString,
+	isDraftRecord,
+} from "@/features/content-languages/model/localized-draft-codec";
 import { useTranslation } from "@/i18n/client";
+import { hasErrorCode } from "@/i18n/errors";
 import { SlugAddressForm } from "@/features/slugs/slug-address-form";
 import { DevelopmentPreviewBoundary } from "@/features/preview-access/components/development-preview-boundary";
 import { RequestFailure } from "@/i18n/request-failure";
@@ -57,21 +69,143 @@ import { invalidateRealmDetails } from "./query";
 
 type RuleDraft = {
 	draftId: string;
-	source: { kind: "persisted"; unitId: string } | { kind: "new" };
-	language: ContentLanguage;
+	localizationOrder: ContentLanguage[];
+	localizations: Partial<Record<ContentLanguage, RuleLocalizationDraft>>;
+};
+type RuleLocalizationDraft = {
 	title: string;
 	content: PortableTextValue;
-	document?: PortableTextDocument;
-	languageRequest:
-		| { status: "idle" }
-		| { status: "pending"; language: ContentLanguage }
-		| { status: "error"; error: unknown };
 };
 type RuleAcknowledgementMode = "explicit" | "implicit_on_follow";
+type RealmRulesDraft = {
+	acknowledgementMode: RuleAcknowledgementMode;
+	requireOnJoin: boolean;
+	requireOnPost: boolean;
+	rules: RuleDraft[];
+};
+type RealmProfileLocalizationDraft = {
+	title: string;
+	summary: string;
+	avatar: AvatarFieldValue | null;
+	banner: LocalizationImageAssetValue | null;
+};
+type RealmProfileSharedDraft = {
+	status: "draft" | "published" | "archived";
+	visibility: "public" | "unlisted" | "private";
+	joinPolicy: "open" | "approval";
+};
+
+function decodeRealmProfileStatus(value: string): RealmProfileSharedDraft["status"] {
+	if (value === "draft" || value === "published" || value === "archived") return value;
+	throw new Error(`Unexpected Realm status: ${value}`);
+}
+
+function decodeRealmProfileVisibility(value: string): RealmProfileSharedDraft["visibility"] {
+	if (value === "public" || value === "unlisted" || value === "private") return value;
+	throw new Error(`Unexpected Realm visibility: ${value}`);
+}
+
+function decodeRealmJoinPolicy(value: string): RealmProfileSharedDraft["joinPolicy"] {
+	if (value === "open" || value === "approval") return value;
+	throw new Error(`Unexpected Realm join policy: ${value}`);
+}
 
 function createRuleDraftId(): string {
 	return crypto.randomUUID();
 }
+
+function decodeRuleDraft(value: unknown): RuleDraft | undefined {
+	if (
+		!isDraftRecord(value) ||
+		typeof value.draftId !== "string" ||
+		!Array.isArray(value.localizationOrder) ||
+		!isDraftRecord(value.localizations)
+	)
+		return;
+	const localizationOrder: ContentLanguage[] = [];
+	const localizations: Partial<Record<ContentLanguage, RuleLocalizationDraft>> = {};
+	for (const language of value.localizationOrder) {
+		if (
+			typeof language !== "string" ||
+			!isContentLanguage(language) ||
+			localizationOrder.includes(language)
+		)
+			return;
+		const candidate = value.localizations[language];
+		if (!isDraftRecord(candidate)) return;
+		const title = decodeDraftString(candidate.title);
+		const content = decodeDraftPortableText(candidate.content);
+		if (title === undefined || !content) return;
+		localizationOrder.push(language);
+		localizations[language] = { title, content };
+	}
+	return localizationOrder.length && localizationOrder.length <= ContentLanguageValues.length
+		? { draftId: value.draftId, localizationOrder, localizations }
+		: undefined;
+}
+
+const RealmRulesDraftCodec: LocalizedDraftCodec<RealmRulesDraft> = {
+	version: 1,
+	decode(value) {
+		if (!isDraftRecord(value) || !Array.isArray(value.rules)) return;
+		const acknowledgementMode = value.acknowledgementMode;
+		const requireOnJoin = decodeDraftBoolean(value.requireOnJoin);
+		const requireOnPost = decodeDraftBoolean(value.requireOnPost);
+		if (
+			(acknowledgementMode !== "explicit" && acknowledgementMode !== "implicit_on_follow") ||
+			requireOnJoin === undefined ||
+			requireOnPost === undefined ||
+			value.rules.length < 1 ||
+			value.rules.length > 100
+		)
+			return;
+		const rules = value.rules.map(decodeRuleDraft);
+		if (rules.some((rule) => !rule)) return;
+		const decodedRules = rules.filter((rule): rule is RuleDraft => Boolean(rule));
+		if (new Set(decodedRules.map(({ draftId }) => draftId)).size !== decodedRules.length)
+			return;
+		return {
+			acknowledgementMode,
+			requireOnJoin,
+			requireOnPost,
+			rules: decodedRules,
+		};
+	},
+};
+
+const RealmProfileLocalizationDraftCodec: LocalizedDraftCodec<RealmProfileLocalizationDraft> = {
+	version: 1,
+	decode(value) {
+		if (!isDraftRecord(value)) return;
+		const title = decodeDraftString(value.title);
+		const summary = decodeDraftString(value.summary);
+		const avatar = decodeDraftAvatar(value.avatar);
+		const banner = decodeDraftImageAsset(value.banner);
+		if (
+			title === undefined ||
+			summary === undefined ||
+			avatar === undefined ||
+			banner === undefined
+		)
+			return;
+		return { title, summary, avatar, banner };
+	},
+};
+
+const RealmProfileSharedDraftCodec: LocalizedDraftCodec<RealmProfileSharedDraft> = {
+	version: 1,
+	decode(value) {
+		if (!isDraftRecord(value)) return;
+		const { status, visibility, joinPolicy } = value;
+		if (
+			(status !== "draft" && status !== "published" && status !== "archived") ||
+			(visibility !== "public" && visibility !== "unlisted" && visibility !== "private") ||
+			(joinPolicy !== "open" && joinPolicy !== "approval")
+		)
+			return;
+		return { status, visibility, joinPolicy };
+	},
+};
 
 export function RealmProfileSettings({
 	realm,
@@ -81,7 +215,7 @@ export function RealmProfileSettings({
 	embedded?: boolean;
 }) {
 	const { t } = useTranslation(["errors", "locale", "media", "realms", "state", "ui"]);
-	const { selectedLanguage, selectedLanguageIsPending, setDirty, languagesChanged } =
+	const { selectedLanguage, selectedLanguageIsPending, languagesChanged } =
 		useContentLanguageEditor();
 	const router = useApplicationRouter();
 	const queryClient = useQueryClient();
@@ -108,46 +242,56 @@ export function RealmProfileSettings({
 			? [{ ...entry.banner, label: t.locale.contentLanguages[entry.language] }]
 			: [],
 	);
-	const [avatar, setAvatar] = useState<AvatarFieldValue | null>(localization?.avatar ?? null);
-	const [banner, setBanner] = useState<LocalizationImageAssetValue | null>(
-		localization?.banner ?? null,
-	);
+	const localizationDraft = useLocalizedDraft<RealmProfileLocalizationDraft>({
+		scope: "realm-profile-localization",
+		baseVersion: realm.updatedAt,
+		codec: RealmProfileLocalizationDraftCodec,
+		createInitialValue: () => ({
+			title: selectedLanguageIsPending ? "" : (localization?.title ?? ""),
+			summary: selectedLanguageIsPending ? "" : (localization?.summary ?? ""),
+			avatar: selectedLanguageIsPending ? null : (localization?.avatar ?? null),
+			banner: selectedLanguageIsPending ? null : (localization?.banner ?? null),
+		}),
+	});
+	const sharedDraft = useLocalizedDraft<RealmProfileSharedDraft>({
+		scope: "realm-profile-shared",
+		partition: "shared",
+		baseVersion: realm.updatedAt,
+		codec: RealmProfileSharedDraftCodec,
+		createInitialValue: () => ({
+			status: decodeRealmProfileStatus(realm.status),
+			visibility: decodeRealmProfileVisibility(realm.visibility),
+			joinPolicy: decodeRealmJoinPolicy(realm.joinPolicy),
+		}),
+	});
+	const localizationValue = localizationDraft.value;
+	const sharedValue = sharedDraft.value;
 
 	function submit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
-		const data = new FormData(event.currentTarget);
-		const title = String(data.get("title") ?? "").trim();
-		const summary = String(data.get("summary") ?? "").trim();
+		const title = localizationValue.title.trim();
+		const summary = localizationValue.summary.trim();
 		if (!title) return;
-		const submittedStatus = data.get("status");
-		const submittedVisibility = data.get("visibility");
-		const status =
-			submittedStatus === "published" || submittedStatus === "archived"
-				? submittedStatus
-				: "draft";
-		const visibility =
-			submittedVisibility === "unlisted" || submittedVisibility === "private"
-				? submittedVisibility
-				: "public";
 		update.mutate(
 			{
 				path: { realmId: realm.id },
 				body: {
-					status,
-					visibility,
-					joinPolicy: data.get("joinPolicy") === "approval" ? "approval" : "open",
+					status: sharedValue.status,
+					visibility: sharedValue.visibility,
+					joinPolicy: sharedValue.joinPolicy,
 					localization: {
 						language: selectedLanguage,
 						title,
 						...(summary ? { summary } : {}),
-						avatar: avatarPresentationToInput(avatar),
-						bannerAssetId: banner?.id ?? null,
+						avatar: avatarPresentationToInput(localizationValue.avatar),
+						bannerAssetId: localizationValue.banner?.id ?? null,
 					},
 				},
 			},
 			{
 				onSuccess: async () => {
-					setDirty(false);
+					localizationDraft.commit();
+					sharedDraft.commit();
 					await invalidateRealmDetails(queryClient, realm.id);
 					await languagesChanged();
 				},
@@ -164,108 +308,173 @@ export function RealmProfileSettings({
 				<CardContent className="grid gap-6 p-5">
 					<ContentLanguageControl />
 					<LocalizationMediaFallbackNotice />
-					<form className="grid gap-6" onChange={() => setDirty(true)} onSubmit={submit}>
-						<FieldGroup>
-							<Field required>
-								<FieldLabel>{t.ui.title}</FieldLabel>
-								<Input
-									name="title"
-									required
-									maxLength={500}
-									defaultValue={
-										selectedLanguageIsPending ? "" : (localization?.title ?? "")
-									}
-								/>
-							</Field>
-							<Field>
-								<FieldLabel>{t.ui.summary}</FieldLabel>
-								<Textarea
-									name="summary"
-									maxLength={2000}
-									defaultValue={
-										selectedLanguageIsPending
-											? ""
-											: (localization?.summary ?? "")
-									}
-								/>
-							</Field>
-							<Field>
-								<FieldLabel>{t.media.roles.avatar.title}</FieldLabel>
-								<AvatarField
-									fallback={avatarOptions[0] ?? null}
-									onChange={(value) => {
-										setAvatar(value);
-										setDirty(true);
-									}}
-									options={avatarOptions}
-									value={avatar}
-								/>
-							</Field>
-							<Field>
-								<FieldLabel>{t.media.roles.banner.title}</FieldLabel>
-								<LocalizationImageUploadField
-									fallback={bannerOptions[0] ?? null}
-									onChange={(value) => {
-										setBanner(value);
-										setDirty(true);
-									}}
-									options={bannerOptions}
-									role="banner"
-									value={banner}
-								/>
-							</Field>
-							<div className="grid gap-4 sm:grid-cols-3">
-								<Field>
-									<FieldLabel>{t.ui.status}</FieldLabel>
-									<NativeSelect name="status" defaultValue={realm.status}>
-										<NativeSelectOption value="draft">
-											{t.ui.draft}
-										</NativeSelectOption>
-										<NativeSelectOption value="published">
-											{t.ui.published}
-										</NativeSelectOption>
-										<NativeSelectOption value="archived">
-											{t.ui.archived}
-										</NativeSelectOption>
-									</NativeSelect>
+					<LocalizedDraftGate
+						hydrated={localizationDraft.hydrated && sharedDraft.hydrated}
+						onDiscard={() => {
+							localizationDraft.discard();
+							sharedDraft.discard();
+						}}
+						serverChanged={localizationDraft.serverChanged || sharedDraft.serverChanged}
+					>
+						<form className="grid gap-6" onSubmit={submit}>
+							<FieldGroup>
+								<Field required>
+									<FieldLabel>{t.ui.title}</FieldLabel>
+									<Input
+										name="title"
+										required
+										maxLength={500}
+										onChange={(event) => {
+											const title = event.currentTarget.value;
+											localizationDraft.setValue((current) => ({
+												...current,
+												title,
+											}));
+										}}
+										value={localizationValue.title}
+									/>
 								</Field>
 								<Field>
-									<FieldLabel>{t.ui.visibility}</FieldLabel>
-									<NativeSelect name="visibility" defaultValue={realm.visibility}>
-										<NativeSelectOption value="public">
-											{t.ui.public}
-										</NativeSelectOption>
-										<NativeSelectOption value="unlisted">
-											{t.ui.unlisted}
-										</NativeSelectOption>
-										<NativeSelectOption value="private">
-											{t.ui.private}
-										</NativeSelectOption>
-									</NativeSelect>
+									<FieldLabel>{t.ui.summary}</FieldLabel>
+									<Textarea
+										name="summary"
+										maxLength={2000}
+										onChange={(event) => {
+											const summary = event.currentTarget.value;
+											localizationDraft.setValue((current) => ({
+												...current,
+												summary,
+											}));
+										}}
+										value={localizationValue.summary}
+									/>
 								</Field>
 								<Field>
-									<FieldLabel>{t.realms.joinPolicy}</FieldLabel>
-									<NativeSelect name="joinPolicy" defaultValue={realm.joinPolicy}>
-										<NativeSelectOption value="open">
-											{t.realms.open}
-										</NativeSelectOption>
-										<NativeSelectOption value="approval">
-											{t.realms.approval}
-										</NativeSelectOption>
-									</NativeSelect>
+									<FieldLabel>{t.media.roles.avatar.title}</FieldLabel>
+									<AvatarField
+										fallback={avatarOptions[0] ?? null}
+										onChange={(avatar) =>
+											localizationDraft.setValue((current) => ({
+												...current,
+												avatar,
+											}))
+										}
+										options={avatarOptions}
+										value={localizationValue.avatar}
+									/>
 								</Field>
-							</div>
-							<RequestFailure error={update.error} />
-							<Button
-								variant="solid"
-								type="submit"
-								className="w-fit"
-								isLoading={update.isPending}
-							>
-								{t.ui.save}
-							</Button>
-						</FieldGroup>
-					</form>
+								<Field>
+									<FieldLabel>{t.media.roles.banner.title}</FieldLabel>
+									<LocalizationImageUploadField
+										fallback={bannerOptions[0] ?? null}
+										onChange={(banner) =>
+											localizationDraft.setValue((current) => ({
+												...current,
+												banner,
+											}))
+										}
+										options={bannerOptions}
+										role="banner"
+										value={localizationValue.banner}
+									/>
+								</Field>
+								<div className="grid gap-4 sm:grid-cols-3">
+									<Field>
+										<FieldLabel>{t.ui.status}</FieldLabel>
+										<NativeSelect
+											name="status"
+											value={sharedValue.status}
+											onChange={(event) => {
+												const status = event.currentTarget.value;
+												if (
+													status === "draft" ||
+													status === "published" ||
+													status === "archived"
+												)
+													sharedDraft.setValue((current) => ({
+														...current,
+														status,
+													}));
+											}}
+										>
+											<NativeSelectOption value="draft">
+												{t.ui.draft}
+											</NativeSelectOption>
+											<NativeSelectOption value="published">
+												{t.ui.published}
+											</NativeSelectOption>
+											<NativeSelectOption value="archived">
+												{t.ui.archived}
+											</NativeSelectOption>
+										</NativeSelect>
+									</Field>
+									<Field>
+										<FieldLabel>{t.ui.visibility}</FieldLabel>
+										<NativeSelect
+											name="visibility"
+											value={sharedValue.visibility}
+											onChange={(event) => {
+												const visibility = event.currentTarget.value;
+												if (
+													visibility === "public" ||
+													visibility === "unlisted" ||
+													visibility === "private"
+												)
+													sharedDraft.setValue((current) => ({
+														...current,
+														visibility,
+													}));
+											}}
+										>
+											<NativeSelectOption value="public">
+												{t.ui.public}
+											</NativeSelectOption>
+											<NativeSelectOption value="unlisted">
+												{t.ui.unlisted}
+											</NativeSelectOption>
+											<NativeSelectOption value="private">
+												{t.ui.private}
+											</NativeSelectOption>
+										</NativeSelect>
+									</Field>
+									<Field>
+										<FieldLabel>{t.realms.joinPolicy}</FieldLabel>
+										<NativeSelect
+											name="joinPolicy"
+											value={sharedValue.joinPolicy}
+											onChange={(event) => {
+												const joinPolicy = event.currentTarget.value;
+												if (
+													joinPolicy === "open" ||
+													joinPolicy === "approval"
+												)
+													sharedDraft.setValue((current) => ({
+														...current,
+														joinPolicy,
+													}));
+											}}
+										>
+											<NativeSelectOption value="open">
+												{t.realms.open}
+											</NativeSelectOption>
+											<NativeSelectOption value="approval">
+												{t.realms.approval}
+											</NativeSelectOption>
+										</NativeSelect>
+									</Field>
+								</div>
+								<RequestFailure error={update.error} />
+								<Button
+									variant="solid"
+									type="submit"
+									className="w-fit"
+									isLoading={update.isPending}
+								>
+									{t.ui.save}
+								</Button>
+							</FieldGroup>
+						</form>
+					</LocalizedDraftGate>
 				</CardContent>
 			</Card>
 			<Card>
@@ -297,170 +506,202 @@ export function RealmRules({
 	embedded = false,
 }: {
 	realmId: string;
-	data: GetApiRealmsByRealmIdRulesStatus200 | undefined;
+	data: GetApiRealmsByRealmIdRulesAuthoringStatus200 | undefined;
 	pending: boolean;
 	error: Parameters<typeof RequestFailure>[0]["error"];
 	embedded?: boolean;
 }) {
-	const { t, locale } = useTranslation(["errors", "locale", "media", "realms", "state", "ui"]);
-	const queryClient = useQueryClient();
-	const save = usePutApiRealmsByRealmIdRules();
-	const [drafts, setDrafts] = useState<RuleDraft[]>();
-	const initializedRevision = useRef<string | undefined>(undefined);
-	const [acknowledgementMode, setAcknowledgementMode] =
-		useState<RuleAcknowledgementMode>("explicit");
-	const [requireOnJoin, setRequireOnJoin] = useState(false);
-	const [requireOnPost, setRequireOnPost] = useState(false);
-	const defaultLanguage = toContentLanguage(locale.target);
-
-	useEffect(() => {
-		if (!data) return;
-		const revisionKey = `${realmId}:${data.revisionId ?? "empty"}`;
-		if (initializedRevision.current === revisionKey) return;
-		initializedRevision.current = revisionKey;
-		setDrafts(
-			data.items.length
-				? data.items.map((rule) => ({
-						draftId: rule.id,
-						source: { kind: "persisted" as const, unitId: rule.id },
-						language: rule.language,
-						title: rule.title,
-						content: readPortableText(rule.content),
-						document: rule.content,
-						languageRequest: { status: "idle" as const },
-					}))
-				: [
-						{
-							draftId: createRuleDraftId(),
-							source: { kind: "new" as const },
-							language: defaultLanguage,
-							title: "",
-							content: [],
-							languageRequest: { status: "idle" as const },
-						},
-					],
-		);
-		setAcknowledgementMode(data.acknowledgementMode);
-		setRequireOnJoin(Boolean(data.requireOnJoin));
-		setRequireOnPost(Boolean(data.requireOnPost));
-	}, [data, defaultLanguage, realmId]);
-
 	if (error)
 		return (
 			<section>
 				<RequestFailure error={error} />
 			</section>
 		);
-	if (pending || !drafts)
+	if (pending || !data)
 		return (
 			<section>
 				<Skeleton className="h-64 rounded-xl" />
 			</section>
 		);
-	const currentDrafts = drafts;
-	const languageChangePending = currentDrafts.some(
-		(rule) => rule.languageRequest.status === "pending",
+	return (
+		<RealmRulesEditor
+			key={`${realmId}:${data.revisionId ?? "empty"}`}
+			data={data}
+			embedded={embedded}
+			realmId={realmId}
+		/>
 	);
+}
 
-	async function changeRuleLanguage(rule: RuleDraft, language: ContentLanguage) {
-		if (language === rule.language) {
-			setDrafts((current) =>
-				current?.map((item) =>
-					item.draftId === rule.draftId
-						? { ...item, languageRequest: { status: "idle" } }
-						: item,
-				),
-			);
-			return;
-		}
+function RealmRulesEditor({
+	realmId,
+	data,
+	embedded,
+}: {
+	realmId: string;
+	data: GetApiRealmsByRealmIdRulesAuthoringStatus200;
+	embedded: boolean;
+}) {
+	const { t, locale } = useTranslation(["locale", "realms", "ui"]);
+	const queryClient = useQueryClient();
+	const save = usePutApiRealmsByRealmIdRules();
+	const [moveAnnouncement, setMoveAnnouncement] = useState("");
+	const defaultLanguage = toContentLanguage(locale.target);
+	const firstPersistedLanguage = data.items[0]?.localizations[0]?.language;
+	const initialLanguage = data.items.some((rule) =>
+		rule.localizations.some(({ language }) => language === defaultLanguage),
+	)
+		? defaultLanguage
+		: (firstPersistedLanguage ?? defaultLanguage);
+	const [activeLanguage, setActiveLanguage] = useState(initialLanguage);
+	const draft = useLocalizedDraft<RealmRulesDraft>({
+		scope: "realm-rules",
+		partition: "shared",
+		baseVersion: data.revisionId,
+		codec: RealmRulesDraftCodec,
+		createInitialValue: () => ({
+			acknowledgementMode: data.acknowledgementMode,
+			requireOnJoin: data.requireOnJoin,
+			requireOnPost: data.requireOnPost,
+			rules: data.items.length
+				? data.items.map((rule) => {
+						const localizations: Partial<
+							Record<ContentLanguage, RuleLocalizationDraft>
+						> = {};
+						const localizationOrder: ContentLanguage[] = [];
+						for (const localization of rule.localizations) {
+							localizationOrder.push(localization.language);
+							localizations[localization.language] = {
+								title: localization.title,
+								content: readPortableText(localization.content),
+							};
+						}
+						return { draftId: rule.id, localizationOrder, localizations };
+					})
+				: [
+						{
+							draftId: createRuleDraftId(),
+							localizationOrder: [initialLanguage],
+							localizations: { [initialLanguage]: { title: "", content: [] } },
+						},
+					],
+		}),
+	});
+	const { value } = draft;
 
-		if (rule.source.kind === "new") {
-			setDrafts((current) =>
-				current?.map((item) =>
-					item.draftId === rule.draftId
-						? { ...item, language, languageRequest: { status: "idle" } }
-						: item,
-				),
-			);
-			return;
-		}
-		const ruleUnitId = rule.source.unitId;
-
-		setDrafts((current) =>
-			current?.map((item) =>
-				item.draftId === rule.draftId
-					? { ...item, languageRequest: { status: "pending", language } }
-					: item,
-			),
-		);
-
-		try {
-			const localizedRules = await queryClient.fetchQuery(
-				getApiRealmsByRealmIdRulesQueryOptions({
-					path: { realmId },
-					query: { localizationLanguages: [language] },
-				}),
-			);
-			const localizedRule = localizedRules.items.find((item) => item.id === ruleUnitId);
-			if (!localizedRule || localizedRule.language !== language)
-				throw new Error("Requested Realm rule localization is unavailable");
-
-			setDrafts((current) =>
-				current?.map((item) =>
-					item.draftId === rule.draftId &&
-					item.languageRequest.status === "pending" &&
-					item.languageRequest.language === language
-						? {
-								...item,
-								language,
-								title: localizedRule.title,
-								content: readPortableText(localizedRule.content),
-								document: localizedRule.content,
-								languageRequest: { status: "idle" },
-							}
-						: item,
-				),
-			);
-		} catch (languageError) {
-			setDrafts((current) =>
-				current?.map((item) =>
-					item.draftId === rule.draftId &&
-					item.languageRequest.status === "pending" &&
-					item.languageRequest.language === language
-						? {
-								...item,
-								languageRequest: { status: "error", error: languageError },
-							}
-						: item,
-				),
-			);
-		}
+	function updateRule(draftId: string, update: (current: RuleDraft) => RuleDraft): void {
+		draft.setValue((current) => ({
+			...current,
+			rules: current.rules.map((rule) => (rule.draftId === draftId ? update(rule) : rule)),
+		}));
 	}
+	function addLocalization(rule: RuleDraft): void {
+		const language = activeLanguage;
+		if (rule.localizations[language]) return;
+		updateRule(rule.draftId, (current) => ({
+			...current,
+			localizationOrder: [...current.localizationOrder, language],
+			localizations: { ...current.localizations, [language]: { title: "", content: [] } },
+		}));
+	}
+	function removeLocalization(rule: RuleDraft): void {
+		const language = activeLanguage;
+		if (rule.localizationOrder.length === 1 || !rule.localizations[language]) return;
+		updateRule(rule.draftId, (current) => {
+			const localizations = { ...current.localizations };
+			delete localizations[language];
+			return {
+				...current,
+				localizationOrder: current.localizationOrder.filter(
+					(candidate) => candidate !== language,
+				),
+				localizations,
+			};
+		});
+	}
+	function updateLocalization(
+		rule: RuleDraft,
+		update: (current: RuleLocalizationDraft) => RuleLocalizationDraft,
+	): void {
+		const language = activeLanguage;
+		const currentLocalization = rule.localizations[language];
+		if (!currentLocalization) return;
+		updateRule(rule.draftId, (current) => ({
+			...current,
+			localizations: { ...current.localizations, [language]: update(currentLocalization) },
+		}));
+	}
+	function moveRule(draftId: string, direction: -1 | 1): void {
+		const index = value.rules.findIndex((rule) => rule.draftId === draftId);
+		const destination = index + direction;
+		if (index < 0 || destination < 0 || destination >= value.rules.length) return;
+		draft.setValue((current) => {
+			const source = current.rules.findIndex((rule) => rule.draftId === draftId);
+			const target = source + direction;
+			if (source < 0 || target < 0 || target >= current.rules.length) return current;
+			const rules = [...current.rules];
+			const [moved] = rules.splice(source, 1);
+			if (!moved) return current;
+			rules.splice(target, 0, moved);
+			return { ...current, rules };
+		});
+		setMoveAnnouncement(
+			t.realms.ruleMoved({ position: destination + 1, count: value.rules.length }),
+		);
+	}
+	const incomplete = value.rules.some((rule) =>
+		rule.localizationOrder.some((language) => !rule.localizations[language]?.title.trim()),
+	);
 
 	function submit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
-		if (languageChangePending) return;
-		const rules = currentDrafts.filter((rule) => rule.title.trim());
-		if (!rules.length) return;
+		if (incomplete) return;
 		save.mutate(
 			{
 				path: { realmId },
 				body: {
-					acknowledgementMode,
-					requireOnJoin,
-					requireOnPost,
-					rules: rules.map((rule) => ({
-						language: rule.language,
-						title: rule.title.trim(),
-						content: writePortableText(rule.content, rule.document),
+					baseRevisionId: data.revisionId,
+					acknowledgementMode: value.acknowledgementMode,
+					requireOnJoin: value.requireOnJoin,
+					requireOnPost: value.requireOnPost,
+					rules: value.rules.map((rule) => ({
+						localizations: rule.localizationOrder.map((language) => {
+							const localization = rule.localizations[language];
+							if (!localization)
+								throw new Error(
+									"Realm rule draft localization order is inconsistent",
+								);
+							return {
+								language,
+								title: localization.title.trim(),
+								content: writePortableText(localization.content),
+							};
+						}),
 					})),
 				},
 			},
 			{
-				onSuccess: () =>
-					queryClient.invalidateQueries({
-						queryKey: getApiRealmsByRealmIdRulesQueryKey({ path: { realmId } }),
-					}),
+				onError: async (error) => {
+					if (!hasErrorCode(error, "RealmRuleRevisionChanged")) return;
+					await queryClient.invalidateQueries({
+						queryKey: getApiRealmsByRealmIdRulesAuthoringQueryKey({
+							path: { realmId },
+						}),
+					});
+				},
+				onSuccess: async () => {
+					draft.commit();
+					await Promise.all([
+						queryClient.invalidateQueries({
+							queryKey: getApiRealmsByRealmIdRulesAuthoringQueryKey({
+								path: { realmId },
+							}),
+						}),
+						queryClient.invalidateQueries({
+							queryKey: getApiRealmsByRealmIdRulesQueryKey({ path: { realmId } }),
+						}),
+					]);
+				},
 			},
 		);
 	}
@@ -468,263 +709,244 @@ export function RealmRules({
 	return (
 		<section className="grid gap-3">
 			{embedded ? null : <h2 className="font-heading text-xl font-bold">{t.realms.rules}</h2>}
-			<Card>
-				<CardContent className="p-5">
-					<form className="grid gap-5" onSubmit={submit}>
-						<Field>
-							<FieldLabel>{t.realms.ruleAcknowledgementMode}</FieldLabel>
-							<NativeSelect
-								value={acknowledgementMode}
-								onChange={(event) => {
-									const mode = event.currentTarget.value;
-									if (mode === "explicit" || mode === "implicit_on_follow")
-										setAcknowledgementMode(mode);
-								}}
-							>
-								<NativeSelectOption value="explicit">
-									{t.realms.ruleAcknowledgementModes.explicit}
-								</NativeSelectOption>
-								<NativeSelectOption value="implicit_on_follow">
-									{t.realms.ruleAcknowledgementModes.implicitOnFollow}
-								</NativeSelectOption>
-							</NativeSelect>
-						</Field>
-						<div className="grid gap-2">
-							<div className="flex flex-wrap gap-x-5 gap-y-2 text-sm">
-								<RuleRequirement
-									checked={requireOnJoin}
-									onChange={setRequireOnJoin}
-								>
-									{t.realms.requireOnJoin}
-								</RuleRequirement>
-								<RuleRequirement
-									checked={requireOnPost}
-									onChange={setRequireOnPost}
-								>
-									{t.realms.requireOnPost}
-								</RuleRequirement>
-							</div>
-							<p className="text-muted-foreground text-sm">
-								{t.realms.ruleAcknowledgementHint}
-							</p>
-						</div>
-						{drafts.map((rule) => {
-							const languagePending = rule.languageRequest.status === "pending";
-							return (
-								<div
-									key={rule.draftId}
-									aria-busy={languagePending || undefined}
-									className="grid gap-3 border-t pt-5"
-								>
-									<div className="grid gap-3 sm:grid-cols-[10rem_1fr_auto] sm:items-end">
-										<RuleLanguageField
-											draft={rule}
-											onChange={(language) =>
-												void changeRuleLanguage(rule, language)
-											}
-										/>
-										<Field required>
-											<FieldLabel>{t.realms.ruleTitle}</FieldLabel>
-											{languagePending ? (
-												<Skeleton className="h-9 rounded-md" />
-											) : (
-												<Input
-													required
-													maxLength={500}
-													value={rule.title}
-													onChange={(event) => {
-														const title = event.currentTarget.value;
-														setDrafts((current) =>
-															current?.map((item) =>
-																item.draftId === rule.draftId
-																	? { ...item, title }
-																	: item,
-															),
-														);
-													}}
-												/>
-											)}
-										</Field>
-										<Button
-											type="button"
-											size="sm"
-											variant="quiet"
-											disabled={drafts.length === 1 || languagePending}
-											onClick={() =>
-												setDrafts((current) =>
-													current?.filter(
-														(item) => item.draftId !== rule.draftId,
-													),
-												)
-											}
-										>
-											{t.realms.removeRule}
-										</Button>
-									</div>
-									{languagePending ? (
-										<div
-											className="flex min-h-48 items-center justify-center gap-2 rounded-xl border bg-muted/20 text-muted-foreground"
-											role="status"
-										>
-											<Spinner aria-hidden className="size-5" />
-											<span className="text-sm">{t.state.loading}</span>
-										</div>
-									) : (
-										<PortableTextEditor
-											key={`${rule.draftId}:${rule.language}`}
-											label={t.realms.ruleContent}
-											value={rule.content}
-											onChange={(content) =>
-												setDrafts((current) =>
-													current?.map((item) =>
-														item.draftId === rule.draftId
-															? { ...item, content }
-															: item,
-													),
-												)
-											}
-										/>
-									)}
-									<RequestFailure
-										error={
-											rule.languageRequest.status === "error"
-												? rule.languageRequest.error
-												: undefined
-										}
-									/>
-								</div>
-							);
-						})}
-						<div className="flex flex-wrap gap-2">
-							<Button
-								type="button"
-								variant="outline"
-								onClick={() =>
-									setDrafts((current) => [
-										...(current ?? []),
-										{
-											draftId: createRuleDraftId(),
-											source: { kind: "new" },
-											language: toContentLanguage(locale.target),
-											title: "",
-											content: [],
-											languageRequest: { status: "idle" },
-										},
-									])
-								}
-							>
-								{t.realms.addRule}
-							</Button>
-							<Button
-								variant="solid"
-								type="submit"
-								disabled={languageChangePending}
-								isLoading={save.isPending}
-							>
-								{t.ui.save}
-							</Button>
-						</div>
-						<RequestFailure error={save.error} />
-					</form>
-				</CardContent>
-			</Card>
-		</section>
-	);
-}
-
-function RuleLanguageField({
-	draft,
-	onChange,
-}: {
-	draft: RuleDraft;
-	onChange: (language: ContentLanguage) => void;
-}) {
-	if (draft.source.kind === "new")
-		return (
-			<RuleLanguageSelect
-				disabled={false}
-				draft={draft}
-				languages={ContentLanguageValues}
-				onChange={onChange}
-			/>
-		);
-	return (
-		<PersistedRuleLanguageField
-			draft={draft}
-			onChange={onChange}
-			unitId={draft.source.unitId}
-		/>
-	);
-}
-
-function PersistedRuleLanguageField({
-	draft,
-	unitId,
-	onChange,
-}: {
-	draft: RuleDraft;
-	unitId: string;
-	onChange: (language: ContentLanguage) => void;
-}) {
-	const query = useGetApiUnitsByIdByUnitIdLocalizationOrder({ path: { unitId } });
-	const selectedLanguage =
-		draft.languageRequest.status === "pending"
-			? draft.languageRequest.language
-			: draft.language;
-	const supportedLanguages = query.data?.languages ?? [];
-	const languages = supportedLanguages.includes(selectedLanguage)
-		? supportedLanguages
-		: [selectedLanguage, ...supportedLanguages];
-
-	return (
-		<div className="grid gap-1">
-			<RuleLanguageSelect
-				disabled={query.isPending || query.isError}
-				draft={draft}
-				languages={languages}
-				onChange={onChange}
-			/>
-			<RequestFailure error={query.error} />
-		</div>
-	);
-}
-
-function RuleLanguageSelect({
-	disabled,
-	draft,
-	languages,
-	onChange,
-}: {
-	disabled: boolean;
-	draft: RuleDraft;
-	languages: readonly ContentLanguage[];
-	onChange: (language: ContentLanguage) => void;
-}) {
-	const { t } = useTranslation(["locale", "realms"]);
-	const pending = draft.languageRequest.status === "pending";
-	const selectedLanguage =
-		draft.languageRequest.status === "pending"
-			? draft.languageRequest.language
-			: draft.language;
-
-	return (
-		<Field>
-			<FieldLabel>{t.realms.ruleLanguage}</FieldLabel>
-			<NativeSelect
-				disabled={disabled || pending}
-				value={selectedLanguage}
-				onChange={(event) => {
-					const language = event.currentTarget.value;
-					if (isContentLanguage(language)) onChange(language);
-				}}
+			<LocalizedDraftGate
+				hydrated={draft.hydrated}
+				onDiscard={draft.discard}
+				serverChanged={draft.serverChanged}
 			>
-				{languages.map((language) => (
-					<NativeSelectOption key={language} value={language}>
-						{t.locale.contentLanguages[language]}
-					</NativeSelectOption>
-				))}
-			</NativeSelect>
-		</Field>
+				<Card>
+					<CardContent className="p-5">
+						<form className="grid gap-5" onSubmit={submit}>
+							<Field>
+								<FieldLabel>{t.realms.ruleAcknowledgementMode}</FieldLabel>
+								<NativeSelect
+									value={value.acknowledgementMode}
+									onChange={(event) => {
+										const mode = event.currentTarget.value;
+										if (mode === "explicit" || mode === "implicit_on_follow")
+											draft.setValue((current) => ({
+												...current,
+												acknowledgementMode: mode,
+											}));
+									}}
+								>
+									<NativeSelectOption value="explicit">
+										{t.realms.ruleAcknowledgementModes.explicit}
+									</NativeSelectOption>
+									<NativeSelectOption value="implicit_on_follow">
+										{t.realms.ruleAcknowledgementModes.implicitOnFollow}
+									</NativeSelectOption>
+								</NativeSelect>
+							</Field>
+							<Field>
+								<FieldLabel>{t.realms.ruleLanguage}</FieldLabel>
+								<NativeSelect
+									value={activeLanguage}
+									onChange={(event) => {
+										const language = event.currentTarget.value;
+										if (isContentLanguage(language))
+											setActiveLanguage(language);
+									}}
+								>
+									{ContentLanguageValues.map((language) => (
+										<NativeSelectOption key={language} value={language}>
+											{t.locale.contentLanguages[language]}
+										</NativeSelectOption>
+									))}
+								</NativeSelect>
+							</Field>
+							<div className="grid gap-2">
+								<div className="flex flex-wrap gap-x-5 gap-y-2 text-sm">
+									<RuleRequirement
+										checked={value.requireOnJoin}
+										onChange={(requireOnJoin) =>
+											draft.setValue((current) => ({
+												...current,
+												requireOnJoin,
+											}))
+										}
+									>
+										{t.realms.requireOnJoin}
+									</RuleRequirement>
+									<RuleRequirement
+										checked={value.requireOnPost}
+										onChange={(requireOnPost) =>
+											draft.setValue((current) => ({
+												...current,
+												requireOnPost,
+											}))
+										}
+									>
+										{t.realms.requireOnPost}
+									</RuleRequirement>
+								</div>
+								<p className="text-muted-foreground text-sm">
+									{t.realms.ruleAcknowledgementHint}
+								</p>
+							</div>
+							<div aria-live="polite" className="sr-only" role="status">
+								{moveAnnouncement}
+							</div>
+							{value.rules.map((rule, index) => {
+								const localization = rule.localizations[activeLanguage];
+								return (
+									<div key={rule.draftId} className="grid gap-4 border-t pt-5">
+										<div className="flex flex-wrap items-center gap-2">
+											<h3 className="me-auto font-medium">
+												{t.realms.ruleNumber({ position: index + 1 })}
+											</h3>
+											<span className="text-xs text-muted-foreground">
+												{t.realms.ruleTranslationCount({
+													count: rule.localizationOrder.length,
+												})}
+											</span>
+											<Button
+												aria-label={t.realms.moveRuleUp({
+													position: index + 1,
+												})}
+												disabled={index === 0}
+												onClick={() => moveRule(rule.draftId, -1)}
+												size="icon-sm"
+												type="button"
+												variant="outline"
+											>
+												<ArrowUp aria-hidden />
+											</Button>
+											<Button
+												aria-label={t.realms.moveRuleDown({
+													position: index + 1,
+												})}
+												disabled={index === value.rules.length - 1}
+												onClick={() => moveRule(rule.draftId, 1)}
+												size="icon-sm"
+												type="button"
+												variant="outline"
+											>
+												<ArrowDown aria-hidden />
+											</Button>
+											<Button
+												disabled={value.rules.length === 1}
+												onClick={() =>
+													draft.setValue((current) => ({
+														...current,
+														rules: current.rules.filter(
+															(item) => item.draftId !== rule.draftId,
+														),
+													}))
+												}
+												size="sm"
+												type="button"
+												variant="quiet"
+											>
+												{t.realms.removeRule}
+											</Button>
+										</div>
+										{localization ? (
+											<>
+												<Field required>
+													<FieldLabel>{t.realms.ruleTitle}</FieldLabel>
+													<Input
+														maxLength={500}
+														onChange={(event) => {
+															const title = event.currentTarget.value;
+															updateLocalization(rule, (current) => ({
+																...current,
+																title,
+															}));
+														}}
+														required
+														value={localization.title}
+													/>
+												</Field>
+												<PortableTextEditor
+													key={`${rule.draftId}:${activeLanguage}`}
+													label={t.realms.ruleContent}
+													onChange={(content) =>
+														updateLocalization(rule, (current) => ({
+															...current,
+															content,
+														}))
+													}
+													value={localization.content}
+												/>
+												<Button
+													disabled={rule.localizationOrder.length === 1}
+													onClick={() => removeLocalization(rule)}
+													size="sm"
+													type="button"
+													variant="quiet"
+												>
+													{t.realms.removeRuleTranslation}
+												</Button>
+											</>
+										) : (
+											<div className="grid justify-items-start gap-3 rounded-xl border border-dashed p-5">
+												<p className="text-sm text-muted-foreground">
+													{t.realms.ruleTranslationMissing({
+														language:
+															t.locale.contentLanguages[
+																activeLanguage
+															],
+													})}
+												</p>
+												<Button
+													onClick={() => addLocalization(rule)}
+													type="button"
+													variant="outline"
+												>
+													{t.realms.addRuleTranslation}
+												</Button>
+											</div>
+										)}
+									</div>
+								);
+							})}
+							<div className="flex flex-wrap gap-2">
+								<Button
+									disabled={value.rules.length >= 100}
+									type="button"
+									variant="outline"
+									onClick={() =>
+										draft.setValue((current) => ({
+											...current,
+											rules: [
+												...current.rules,
+												{
+													draftId: createRuleDraftId(),
+													localizationOrder: [activeLanguage],
+													localizations: {
+														[activeLanguage]: {
+															title: "",
+															content: [],
+														},
+													},
+												},
+											],
+										}))
+									}
+								>
+									{t.realms.addRule}
+								</Button>
+								<Button
+									variant="solid"
+									type="submit"
+									disabled={incomplete || !draft.dirty}
+									isLoading={save.isPending}
+								>
+									{t.ui.save}
+								</Button>
+							</div>
+							{incomplete ? (
+								<p className="text-sm text-destructive">
+									{t.realms.ruleTranslationsIncomplete}
+								</p>
+							) : null}
+							<RequestFailure error={save.error} />
+						</form>
+					</CardContent>
+				</Card>
+			</LocalizedDraftGate>
+		</section>
 	);
 }
 

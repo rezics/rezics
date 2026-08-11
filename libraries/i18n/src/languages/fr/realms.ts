@@ -352,6 +352,21 @@ export default {
 	ruleContent: "Contenu de la règle",
 	removeRule: "Supprimer la règle",
 	addRule: "Ajouter une règle",
+	ruleNumber: insert("Règle {{position}}", { position: Number }),
+	ruleTranslationCount: insert("Traductions : {{count}}", { count: Number }),
+	moveRuleUp: insert("Monter la règle {{position}}", { position: Number }),
+	moveRuleDown: insert("Descendre la règle {{position}}", { position: Number }),
+	ruleMoved: insert("Règle déplacée à la position {{position}} sur {{count}}.", {
+		position: Number,
+		count: Number,
+	}),
+	addRuleTranslation: "Ajouter une traduction",
+	removeRuleTranslation: "Supprimer la traduction",
+	ruleTranslationMissing: insert("La traduction en {{language}} n’a pas été ajoutée.", {
+		language: String,
+	}),
+	ruleTranslationsIncomplete:
+		"Chaque traduction de règle ajoutée doit avoir un titre avant l’enregistrement.",
 	pinTarget: "Contenu à épingler",
 	pinKind: "Type d’épingle",
 	pinKinds: {

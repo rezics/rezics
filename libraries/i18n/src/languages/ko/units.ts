@@ -513,7 +513,10 @@ export default {
 		saveOrder: "순서 저장",
 		cancel: "취소",
 		noMoreLanguages: "모든 지원되는 언어가 이미 추가되었습니다.",
-		unsavedConfirm: "이 언어에 대한 저장되지 않은 변경 사항을 버리시겠습니까?",
+		draftConflictTitle: "서버의 콘텐츠가 변경되었습니다",
+		draftConflictDescription:
+			"저장하지 않은 초안은 유지했지만 이전 버전을 기준으로 작성되었습니다. 저장하기 전에 검토하거나 초안을 버리고 서버의 최신 콘텐츠를 불러오세요.",
+		discardDraft: "초안 버리기",
 		instructions:
 			"스페이스바를 눌러 언어를 선택하세요. 화살표 키를 사용하여 이동한 후 다시 스페이스바를 눌러 놓습니다.",
 		moved: insert("{{language}}를 {{count}}의 {{position}} 위치로 이동했습니다.", {

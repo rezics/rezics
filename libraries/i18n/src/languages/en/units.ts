@@ -522,7 +522,10 @@ export default {
 		saveOrder: "Save order",
 		cancel: "Cancel",
 		noMoreLanguages: "All supported languages have already been added.",
-		unsavedConfirm: "Discard the unsaved changes for this language?",
+		draftConflictTitle: "The server content changed",
+		draftConflictDescription:
+			"This unsaved draft was kept, but it was based on an older version. Review it before saving, or discard it to load the current server content.",
+		discardDraft: "Discard draft",
 		instructions:
 			"Press Space to pick up a language. Use the arrow keys to move it, then press Space again to drop it.",
 		moved: insert("Moved {{language}} to position {{position}} of {{count}}.", {

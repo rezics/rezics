@@ -4,7 +4,7 @@ import {
 	useGetApiRealmsByRealmId,
 	useGetApiRealmsByRealmIdMembers,
 	useGetApiRealmsByRealmIdPins,
-	useGetApiRealmsByRealmIdRules,
+	useGetApiRealmsByRealmIdRulesAuthoring,
 } from "@rezics/openapi-tanstack-query";
 import type { ManagementWorkspaceSection } from "@rezics/ui";
 import {
@@ -399,10 +399,8 @@ function RealmMembersSection({
 }
 
 function RealmRulesSection({ baseHref, realmId }: { baseHref: string; realmId: string }) {
-	const localizationLanguages = useLocalizationLanguages();
-	const query = useGetApiRealmsByRealmIdRules({
+	const query = useGetApiRealmsByRealmIdRulesAuthoring({
 		path: { realmId },
-		query: { localizationLanguages },
 	});
 	return (
 		<RealmSettingsSection baseHref={baseHref} section="rules">

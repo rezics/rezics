@@ -345,6 +345,20 @@ export default {
 	ruleContent: "Rule content",
 	removeRule: "Remove rule",
 	addRule: "Add rule",
+	ruleNumber: insert("Rule {{position}}", { position: Number }),
+	ruleTranslationCount: insert("Translations: {{count}}", { count: Number }),
+	moveRuleUp: insert("Move rule {{position}} up", { position: Number }),
+	moveRuleDown: insert("Move rule {{position}} down", { position: Number }),
+	ruleMoved: insert("Moved rule to position {{position}} of {{count}}.", {
+		position: Number,
+		count: Number,
+	}),
+	addRuleTranslation: "Add translation",
+	removeRuleTranslation: "Remove translation",
+	ruleTranslationMissing: insert("The {{language}} translation has not been added.", {
+		language: String,
+	}),
+	ruleTranslationsIncomplete: "Every added rule translation needs a title before you can save.",
 	pinTarget: "Content to pin",
 	pinKind: "Pin kind",
 	pinKinds: {
