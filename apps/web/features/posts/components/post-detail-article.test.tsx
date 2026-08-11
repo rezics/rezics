@@ -112,4 +112,29 @@ describe("PostDetailArticle", () => {
 		expect(screen.queryByText("不應顯示的作者署名")).toBeNull();
 		expect(container.querySelector('[data-slot="card"]')).toBeNull();
 	});
+
+	it("omits the heading when a Post has no authored title", () => {
+		render(
+			<TranslationProvider initial={translation.snapshot}>
+				<PostDetailArticle
+					post={{
+						id: "019f9872-bd49-7bb4-a6b7-ec621fca2052",
+						postKind: "post",
+						attributions: [],
+						realmId: null,
+						language: "zh",
+						title: null,
+						titleLanguage: null,
+						summary: "沒有標題也要保留的摘要",
+						body: null,
+						createdAt: "2026-07-25T04:00:00.000Z",
+					}}
+					variant="thread"
+				/>
+			</TranslationProvider>,
+		);
+
+		expect(screen.queryByRole("heading", { level: 1 })).toBeNull();
+		expect(screen.getByText("沒有標題也要保留的摘要")).toBeTruthy();
+	});
 });

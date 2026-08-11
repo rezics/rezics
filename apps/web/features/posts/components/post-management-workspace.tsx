@@ -177,14 +177,13 @@ function LoadedPostManagementWorkspace({
 	const currentSectionId = parsePostManagementSection(pathname, postId);
 	const requestedSection = allSections.find(({ id }) => id === currentSectionId);
 	const sectionAllowed = currentSectionId !== undefined && visibleSectionIds.has(currentSectionId);
-	const title = resolvePostPresentationTitle(resource.item, {
-		postBy: t.posts.postFallbackTitle,
-		reviewOf: t.posts.reviewFallbackTitle,
-		reply: t.posts.replyPost,
-		unknownAttribution: t.posts.unknownAttribution,
-		unnamedSubject: t.ui.unnamed,
-		untitled: t.posts.untitled,
-	}).value;
+	const title =
+		resolvePostPresentationTitle(resource.item, {
+			reviewOf: t.posts.reviewFallbackTitle,
+			reply: t.posts.replyPost,
+			unknownAttribution: t.posts.unknownAttribution,
+			unnamedSubject: t.ui.unnamed,
+		})?.value ?? t.posts.untitled;
 	const navigation = (
 		<ManagementWorkspaceNavigation
 			ariaLabel={t.posts.workspace.navigation}

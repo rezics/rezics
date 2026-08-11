@@ -13,7 +13,6 @@ export default {
 	untitled: `제목 없는 ${postTerms.inline}`,
 	titleOptional: "제목(선택 사항)",
 	summaryOptional: "요약(선택 사항)",
-	postFallbackTitle: insert(`{{author}}님의 ${postTerms.inline}`, { author: String }),
 	reviewFallbackTitle: insert("{{author}}님의 {{subject}} 리뷰", {
 		author: String,
 		subject: String,

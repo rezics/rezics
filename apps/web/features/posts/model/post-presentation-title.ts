@@ -18,12 +18,10 @@ interface PostPresentationTitleInput {
 }
 
 interface PostPresentationTitleMessages {
-	readonly postBy: (input: { author: string }) => string;
 	readonly reviewOf: (input: { author: string; subject: string }) => string;
 	readonly reply: string;
 	readonly unknownAttribution: string;
 	readonly unnamedSubject: string;
-	readonly untitled: string;
 }
 
 export interface ResolvedPostPresentationTitle {
@@ -40,9 +38,17 @@ function presentationAuthor(
 }
 
 export function resolvePostPresentationTitle(
+	post: PostPresentationTitleInput & { readonly postKind: "reply" | "review" },
+	messages: PostPresentationTitleMessages,
+): ResolvedPostPresentationTitle;
+export function resolvePostPresentationTitle(
 	post: PostPresentationTitleInput,
 	messages: PostPresentationTitleMessages,
-): ResolvedPostPresentationTitle {
+): ResolvedPostPresentationTitle | null;
+export function resolvePostPresentationTitle(
+	post: PostPresentationTitleInput,
+	messages: PostPresentationTitleMessages,
+): ResolvedPostPresentationTitle | null {
 	const authoredTitle = post.title?.trim();
 	if (authoredTitle)
 		return {
@@ -52,7 +58,6 @@ export function resolvePostPresentationTitle(
 	if (post.postKind === "reply") return { value: messages.reply };
 
 	const author = presentationAuthor(post.attributions, messages.unknownAttribution);
-	if (post.postKind === "post") return { value: messages.postBy({ author }) };
 	if (post.postKind === "review")
 		return {
 			value: messages.reviewOf({
@@ -60,5 +65,5 @@ export function resolvePostPresentationTitle(
 				subject: post.subject?.title?.trim() || messages.unnamedSubject,
 			}),
 		};
-	return { value: messages.untitled };
+	return null;
 }

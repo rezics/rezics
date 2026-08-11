@@ -13,7 +13,6 @@ export default {
 	untitled: `未命名${postTerms.label}`,
 	titleOptional: "标题（选填）",
 	summaryOptional: "摘要（选填）",
-	postFallbackTitle: insert(`{{author}}的${postTerms.label}`, { author: String }),
 	reviewFallbackTitle: insert("{{author}}对《{{subject}}》的评论", {
 		author: String,
 		subject: String,

@@ -3,13 +3,11 @@ import { describe, expect, it } from "vitest";
 import { resolvePostPresentationTitle } from "./post-presentation-title";
 
 const messages = {
-	postBy: ({ author }: { author: string }) => `Post by ${author}`,
 	reviewOf: ({ author, subject }: { author: string; subject: string }) =>
 		`${author}'s review of ${subject}`,
 	reply: "Reply",
 	unknownAttribution: "Unknown",
 	unnamedSubject: "Unnamed subject",
-	untitled: "Untitled",
 };
 
 describe("Post presentation title", () => {
@@ -27,7 +25,7 @@ describe("Post presentation title", () => {
 		).toEqual({ value: "Authored title", language: "en" });
 	});
 
-	it("derives a titleless Post from its Publisher attribution", () => {
+	it("does not invent a presentation title for a titleless Post", () => {
 		expect(
 			resolvePostPresentationTitle(
 				{
@@ -40,7 +38,7 @@ describe("Post presentation title", () => {
 				},
 				messages,
 			),
-		).toEqual({ value: "Post by Publisher" });
+		).toBeNull();
 	});
 
 	it("derives a titleless Review from its attribution and subject", () => {

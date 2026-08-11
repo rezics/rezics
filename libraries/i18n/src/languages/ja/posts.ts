@@ -13,7 +13,6 @@ export default {
 	untitled: `タイトル未設定の ${postTerms.inline}`,
 	titleOptional: "タイトル（任意）",
 	summaryOptional: "概要（任意）",
-	postFallbackTitle: insert(`{{author}}の${postTerms.inline}`, { author: String }),
 	reviewFallbackTitle: insert("{{author}}による「{{subject}}」のレビュー", {
 		author: String,
 		subject: String,

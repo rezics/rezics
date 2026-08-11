@@ -17,12 +17,10 @@ type ReviewPost = Extract<GetApiPostsByPostIdStatus200, { postKind: "review" }>;
 export function ReviewPostDetail({ review }: { readonly review: ReviewPost }) {
 	const { t } = useTranslation(["engagement", "posts", "ui"]);
 	const title = resolvePostPresentationTitle(review, {
-		postBy: t.posts.postFallbackTitle,
 		reviewOf: t.posts.reviewFallbackTitle,
 		reply: t.posts.replyPost,
 		unknownAttribution: t.posts.unknownAttribution,
 		unnamedSubject: t.ui.unnamed,
-		untitled: t.posts.untitled,
 	});
 	const managementSectionId = getPostManagementSectionIds(review)[0];
 	const editHref = managementSectionId

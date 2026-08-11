@@ -230,12 +230,10 @@ export function PostDetailPage({
 			</main>
 		);
 	const title = resolvePostPresentationTitle(post, {
-		postBy: t.posts.postFallbackTitle,
 		reviewOf: t.posts.reviewFallbackTitle,
 		reply: t.posts.replyPost,
 		unknownAttribution: t.posts.unknownAttribution,
 		unnamedSubject: t.ui.unnamed,
-		untitled: t.posts.untitled,
 	});
 	const managementSectionId = getPostManagementSectionIds(post)[0];
 
@@ -286,8 +284,8 @@ export function PostDetailPage({
 							attributions: post.attributions,
 							realmId: realmId ?? null,
 							language: post.language,
-							title: title.value,
-							titleLanguage: title.language ?? null,
+							title: title?.value ?? null,
+							titleLanguage: title?.language ?? null,
 							summary: post.summary,
 							body: post.body,
 							createdAt: post.createdAt,

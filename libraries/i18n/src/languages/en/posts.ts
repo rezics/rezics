@@ -13,7 +13,6 @@ export default {
 	untitled: `Untitled ${postTerms.inline}`,
 	titleOptional: "Title (optional)",
 	summaryOptional: "Summary (optional)",
-	postFallbackTitle: insert(`${postTerms.label} by {{author}}`, { author: String }),
 	reviewFallbackTitle: insert("Review of {{subject}} by {{author}}", {
 		author: String,
 		subject: String,

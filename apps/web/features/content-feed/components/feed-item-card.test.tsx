@@ -210,6 +210,7 @@ describe("FeedPostCard", () => {
 
 		expect(screen.getByText("手寫摘要")).toBeTruthy();
 		expect(screen.queryByText("We are all stories in the end.")).toBeNull();
+		expect(screen.queryByRole("heading", { level: 2 })).toBeNull();
 	});
 
 	it("renders an Excerpt source as an internal Unit link without a duplicate target card", () => {

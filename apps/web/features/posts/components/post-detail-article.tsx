@@ -35,7 +35,7 @@ export interface PostDetailArticleValue {
 	readonly attributions: readonly AttributionSummary[];
 	readonly realmId: string | null;
 	readonly language: ContentLanguage;
-	readonly title: string;
+	readonly title: string | null;
 	readonly titleLanguage: ContentLanguage | null;
 	readonly summary?: string | null;
 	readonly body: PortableTextDocument | null;
@@ -60,19 +60,21 @@ export function PostDetailArticle({
 	readonly variant?: "card" | "thread";
 }) {
 	const { locale, t } = useTranslation(["feed", "posts"]);
-	const displayedTitle = useChineseContentText(post.title, post.titleLanguage);
+	const displayedTitle = useChineseContentText(post.title ?? "", post.titleLanguage);
 	const displayedSummary = useChineseContentText(post.summary ?? "", post.language);
 	const content = (
 		<>
 			<p className="font-semibold text-brand text-xs">
 				{t.feed.content.kinds[`post:${post.postKind}`]}
 			</p>
-			<h1
-				className="mt-2 font-heading font-black text-2xl leading-tight sm:text-3xl"
-				id={`post-detail-${post.id}`}
-			>
-				{displayedTitle}
-			</h1>
+			{post.title ? (
+				<h1
+					className="mt-2 font-heading font-black text-2xl leading-tight sm:text-3xl"
+					id={`post-detail-${post.id}`}
+				>
+					{displayedTitle}
+				</h1>
+			) : null}
 			{post.summary ? (
 				<p className="mt-4 text-muted-foreground text-lg leading-7">{displayedSummary}</p>
 			) : null}
@@ -102,7 +104,10 @@ export function PostDetailArticle({
 
 	if (variant === "thread")
 		return (
-			<article aria-labelledby={`post-detail-${post.id}`} className="min-w-0">
+			<article
+				aria-labelledby={post.title ? `post-detail-${post.id}` : undefined}
+				className="min-w-0"
+			>
 				<header className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3">
 					<div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 text-muted-foreground">
 						<PublisherAttributionLinks
@@ -123,7 +128,7 @@ export function PostDetailArticle({
 
 	return (
 		<Card asChild className="gap-0 overflow-hidden py-0">
-			<article aria-labelledby={`post-detail-${post.id}`}>
+			<article aria-labelledby={post.title ? `post-detail-${post.id}` : undefined}>
 				<CardHeader className="grid grid-cols-[minmax(0,1fr)_auto] gap-3 border-border-weak border-b px-4 py-4 sm:px-6">
 					<div className="min-w-0 text-muted-foreground text-sm">
 						<AttributionLinks

@@ -149,15 +149,22 @@ export function FeedPostCard({
 				}
 			: undefined;
 	const titleMessages = {
-		postBy: t.posts.postFallbackTitle,
 		reviewOf: t.posts.reviewFallbackTitle,
 		reply: t.posts.replyPost,
 		unknownAttribution: t.posts.unknownAttribution,
 		unnamedSubject: t.ui.unnamed,
-		untitled: t.posts.untitled,
 	};
 	const title = resolvePostPresentationTitle(post, titleMessages);
-	const displayedTitle = useChineseContentText(title.value, title.language);
+	const displayedTitle = useChineseContentText(title?.value ?? "", title?.language);
+	const replyContextTitle = post.replyContext
+		? resolvePostPresentationTitle(
+				{
+					...post.replyContext,
+					postKind: "post",
+				},
+				titleMessages,
+			)
+		: null;
 	const displayedSummary = useChineseContentText(post.summary ?? "", post.language);
 	const attributions = toFeedAttributionContexts(post.attributions, t.posts.unknownAttribution);
 	const realms = toFeedRealmContexts(post.realms, t.ui.unnamed);
@@ -189,7 +196,7 @@ export function FeedPostCard({
 
 	return (
 		<FeedCard
-			aria-labelledby={`feed-item-${post.id}`}
+			aria-labelledby={title ? `feed-item-${post.id}` : undefined}
 			aria-posinset={position}
 			aria-setsize={setSize}
 			ref={elementRef}
@@ -209,30 +216,23 @@ export function FeedPostCard({
 						<FeedCardRating className="mt-0" rating={attachedRating} />
 					) : null}
 				</div>
-				{post.replyContext ? (
+				{post.replyContext && replyContextTitle ? (
 					<Link
 						className="flex min-h-6 items-center truncate border-s-2 ps-2 text-muted-foreground text-xs hover:text-foreground"
 						href={postHref(post.replyContext.rootPostId, context)}
 					>
-						{t.feed.replyingIn}{" "}
-						{
-							resolvePostPresentationTitle(
-								{
-									...post.replyContext,
-									postKind: "post",
-								},
-								titleMessages,
-							).value
-						}
+						{t.feed.replyingIn} {replyContextTitle.value}
 					</Link>
 				) : null}
 				<FeedItemMain href={href} onOpen={trackOpen}>
-					<h2
-						className="font-heading font-black text-[1.05rem] leading-snug"
-						id={`feed-item-${post.id}`}
-					>
-						{displayedTitle}
-					</h2>
+					{title ? (
+						<h2
+							className="font-heading font-black text-[1.05rem] leading-snug"
+							id={`feed-item-${post.id}`}
+						>
+							{displayedTitle}
+						</h2>
+					) : null}
 					{post.summary ? (
 						<p className="mt-2 text-muted-foreground text-sm leading-6">{displayedSummary}</p>
 					) : post.body ? (
