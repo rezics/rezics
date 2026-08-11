@@ -1,14 +1,11 @@
 import { type Static, t } from "elysia";
-import {
-	GovernanceReasonCodeValues,
-	ResourceVisibilityValues,
-	UnitStatusValues,
-} from "../../database/schema/contract-values";
+import { ResourceVisibilityValues, UnitStatusValues } from "../../database/schema/contract-values";
 import { RevisionHiddenFieldValues } from "../../history/visibility";
 import { UnitRevisionChangeTags } from "../../units/history";
 import { ResourceSectionValues } from "../../units/resource-section";
 import { ContentLanguage, DateTime, LocalizationLanguageQuery, Uuid } from "../schema";
 import { NullablePublicSlugAddressResponse } from "../slug-addresses/schema";
+import { GovernanceRuleReferences } from "../governance/schema";
 
 export const UnitHistoryParams = t.Object({ unitId: Uuid });
 export const UnitRevisionParams = t.Object({ revisionId: Uuid });
@@ -104,7 +101,7 @@ export const RevisionVisibility = t.Union([
 export const RevisionVisibilityBody = t.Object(
 	{
 		visibility: RevisionVisibility,
-		reasonCode: t.UnionEnum(GovernanceReasonCodeValues, { default: undefined }),
+		rules: GovernanceRuleReferences,
 	},
 	{ additionalProperties: false },
 );

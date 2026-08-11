@@ -2,7 +2,6 @@
 
 import {
 	GetApiPlatformUsersState,
-	PutApiPlatformUsersByUserIdAccountStateRequestReasonEnum,
 	getApiPlatformAccessProfilesByProfileIdQueryKey,
 	getApiPlatformUsers,
 	getApiPlatformUsersByUserIdQueryKey,
@@ -19,7 +18,6 @@ import {
 	type GetApiPlatformUsersState as PlatformUserState,
 	type GetApiPlatformUsersStatus200,
 	type PutApiPlatformUsersByUserIdAccountStateBody,
-	type PutApiPlatformUsersByUserIdAccountStateRequestReasonEnum as AccountStateReason,
 } from "@rezics/openapi-tanstack-query";
 import {
 	Badge,
@@ -51,6 +49,8 @@ import { useDeferredValue, useEffect, useMemo, useRef, useState, type FormEvent 
 
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
+import { GovernanceRulePicker } from "@/features/governance/components/governance-rule-picker";
+import type { GovernanceRuleReference } from "@/features/governance/model/governance-rule-selection";
 import { PlatformAccessEditor } from "../components/platform-access-editor";
 import { AccountApiQuotaEditor } from "../components/account-api-quota-editor";
 import { TokenApiQuotaManager } from "../components/token-api-quota-manager";
@@ -60,7 +60,6 @@ type PlatformUser = GetApiPlatformUsersStatus200["items"][number];
 type EmailVerificationFilter = "all" | "verified" | "unverified";
 const InspectorTabs = ["overview", "access", "apiQuota", "sessions", "activity"] as const;
 type InspectorTab = (typeof InspectorTabs)[number];
-const AccountStateReasons = Object.values(PutApiPlatformUsersByUserIdAccountStateRequestReasonEnum);
 
 function isInspectorTab(value: string): value is InspectorTab {
 	return InspectorTabs.some((tab) => tab === value);
@@ -75,31 +74,31 @@ function accountStateBadge(state: PlatformUser["accountState"]["state"]) {
 function buildStateCommand(input: {
 	readonly expectedRevision: number;
 	readonly state: PlatformUserState;
-	readonly reason: AccountStateReason;
+	readonly rules: GovernanceRuleReference[];
 	readonly note: string;
 	readonly expiresAt: string;
 }): PutApiPlatformUsersByUserIdAccountStateBody {
 	if (input.state === "active")
-		return { expectedRevision: input.expectedRevision, state: "active" };
+		return { expectedRevision: input.expectedRevision, state: "active", rules: input.rules };
 	const note = input.note.trim() || undefined;
 	if (input.state === "closed")
 		return {
 			expectedRevision: input.expectedRevision,
 			state: "closed",
-			reason: input.reason,
+			rules: input.rules,
 			...(note ? { note } : {}),
 		};
 	return {
 		expectedRevision: input.expectedRevision,
 		state: "suspended",
-		reason: input.reason,
+		rules: input.rules,
 		...(note ? { note } : {}),
 		...(input.expiresAt ? { expiresAt: new Date(input.expiresAt).toISOString() } : {}),
 	};
 }
 
 export function ConsoleUsersPage({ selectedUserId }: { readonly selectedUserId: string | null }) {
-	const { t } = useTranslation(["console"]);
+	const { t } = useTranslation(["console", "governance"]);
 	const { canReadUsers } = useConsoleWorkspace();
 	const [search, setSearch] = useState("");
 	const deferredSearch = useDeferredValue(search.trim());
@@ -393,7 +392,7 @@ function UserOverview({
 	const { canManageUserStatus } = useConsoleWorkspace();
 	const queryClient = useQueryClient();
 	const [state, setState] = useState<PlatformUserState>(user.accountState.state);
-	const [reason, setReason] = useState<AccountStateReason>(user.accountState.reason ?? "security");
+	const [rules, setRules] = useState<GovernanceRuleReference[]>([]);
 	const [note, setNote] = useState(user.accountState.note ?? "");
 	const [expiresAt, setExpiresAt] = useState("");
 	const mutation = usePutApiPlatformUsersByUserIdAccountState({
@@ -419,24 +418,21 @@ function UserOverview({
 	});
 	useEffect(() => {
 		setState(user.accountState.state);
-		setReason(user.accountState.reason ?? "security");
+		setRules([]);
 		setNote(user.accountState.note ?? "");
 		setExpiresAt("");
-	}, [
-		user.accountState.note,
-		user.accountState.reason,
-		user.accountState.revision,
-		user.accountState.state,
-	]);
+	}, [user.accountState.note, user.accountState.revision, user.accountState.state]);
+	const accountStateChangeHasNoEffect = state === "active" && user.accountState.state === "active";
 
 	const submit = (event: FormEvent) => {
 		event.preventDefault();
+		if (!rules.length || accountStateChangeHasNoEffect) return;
 		mutation.mutate({
 			path: { userId },
 			body: buildStateCommand({
 				expectedRevision: Number(user.accountState.revision),
 				state,
-				reason,
+				rules,
 				note,
 				expiresAt,
 			}),
@@ -503,23 +499,13 @@ function UserOverview({
 									))}
 								</NativeSelect>
 							</Field>
+							<GovernanceRulePicker
+								authority={{ kind: "platform" }}
+								onValueChange={setRules}
+								value={rules}
+							/>
 							{state !== "active" ? (
 								<>
-									<Field>
-										<FieldLabel>{t.console.users.reason}</FieldLabel>
-										<NativeSelect
-											onChange={(event) =>
-												setReason(event.currentTarget.value as AccountStateReason)
-											}
-											value={reason}
-										>
-											{AccountStateReasons.map((value) => (
-												<NativeSelectOption key={value} value={value}>
-													{t.console.users.reasons[value]}
-												</NativeSelectOption>
-											))}
-										</NativeSelect>
-									</Field>
 									{state === "suspended" ? (
 										<Field>
 											<FieldLabel>{t.console.users.suspensionExpiry}</FieldLabel>
@@ -544,6 +530,7 @@ function UserOverview({
 							) : null}
 							<RequestFailure error={mutation.error} fallback={t.console.users.updateFailed} />
 							<Button
+								disabled={!rules.length || accountStateChangeHasNoEffect}
 								isLoading={mutation.isPending}
 								type="submit"
 								variant={state === "closed" ? "destructive" : "solid"}

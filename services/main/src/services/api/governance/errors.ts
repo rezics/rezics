@@ -81,18 +81,27 @@ export class GovernanceNoteRoleDuplicate extends Data.TaggedError("GovernanceNot
 	readonly message = "A governance operation can create at most one note for each role";
 }
 
-export class ContentGovernanceRuleSourceForbidden extends Data.TaggedError(
-	"ContentGovernanceRuleSourceForbidden",
+export class GovernanceRuleSourceForbidden extends Data.TaggedError(
+	"GovernanceRuleSourceForbidden",
 ) {
 	static readonly status = StatusCodes.BAD_REQUEST as const;
-	readonly status = ContentGovernanceRuleSourceForbidden.status;
-	readonly message = "The selected rule source is outside this content authority";
+	readonly status = GovernanceRuleSourceForbidden.status;
+	readonly message = "The selected Rule source is outside this governance authority";
 }
 
-export class ContentGovernanceRuleChanged extends Data.TaggedError("ContentGovernanceRuleChanged") {
+export class GovernanceRuleChanged extends Data.TaggedError("GovernanceRuleChanged") {
 	static readonly status = StatusCodes.CONFLICT as const;
-	readonly status = ContentGovernanceRuleChanged.status;
+	readonly status = GovernanceRuleChanged.status;
 	readonly message = "A selected rule is no longer part of the current rule revision";
+}
+
+export class GovernanceReversalUnavailable extends Data.TaggedError(
+	"GovernanceReversalUnavailable",
+) {
+	static readonly status = StatusCodes.CONFLICT as const;
+	readonly status = GovernanceReversalUnavailable.status;
+	readonly message =
+		"The governance decision has already been reversed or does not match the target";
 }
 
 export class EnforcementExpiryInvalid extends Data.TaggedError("EnforcementExpiryInvalid") {
@@ -334,8 +343,9 @@ export const GovernanceErrors = [
 	ContentGovernanceReversalUnavailable,
 	ContentGovernanceIdempotencyConflict,
 	GovernanceNoteRoleDuplicate,
-	ContentGovernanceRuleSourceForbidden,
-	ContentGovernanceRuleChanged,
+	GovernanceRuleSourceForbidden,
+	GovernanceRuleChanged,
+	GovernanceReversalUnavailable,
 	EnforcementExpiryInvalid,
 	EnforcementNotFound,
 	EnforcementAlreadyRevoked,

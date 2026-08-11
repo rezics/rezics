@@ -6,13 +6,14 @@ import { replaceUnitOwnership } from "../authorization/unit/ownership";
 import type { PlatformAuthorization } from "../authorization/platform/authorization";
 import { database, type DatabaseTransaction } from "../database";
 import { profile, unit, unitOwnership, unitSlugAddress } from "../database/schema";
-import { GovernanceReasonCodeValues } from "../database/schema/contract-values";
+import {
+	createGovernanceDecision,
+	type GovernanceRuleReference,
+} from "../governance/decision-service";
 import { createNotification } from "../notifications/service";
 import { UnitOwnershipChanged, UnitOwnershipTargetIneligible } from "../api/governance/errors";
 import { UnitNotFound } from "./errors";
 import { firstUnitLocalizationTitle } from "./localization";
-
-type GovernanceReasonCode = (typeof GovernanceReasonCodeValues)[number];
 
 function canonicalProfileSlug(profileId: typeof profile.id) {
 	return sql<string | null>`(
@@ -118,7 +119,7 @@ export async function overridePlatformUnitOwnership(
 		readonly actorProfileId: string;
 		readonly expectedOwnerProfileId: string | null;
 		readonly targetProfileId: string;
-		readonly reasonCode: GovernanceReasonCode;
+		readonly rules: readonly GovernanceRuleReference[];
 		readonly note?: string;
 	},
 ) {
@@ -128,6 +129,14 @@ export async function overridePlatformUnitOwnership(
 		await lockUnit(tx, input.unitId);
 		const target = await eligibleTarget(tx, input.targetProfileId);
 		if (!target) throw new UnitOwnershipTargetIneligible();
+		const decision = await createGovernanceDecision(tx, {
+			action: "unit.ownership.override",
+			actorProfileId: input.actorProfileId,
+			authority: { kind: "platform" },
+			targetUnitId: input.unitId,
+			subject: { kind: "unit_ownership", id: input.unitId },
+			basis: { kind: "rules", rules: input.rules },
+		});
 
 		const replaced = await replaceUnitOwnership(tx, {
 			unitId: input.unitId,
@@ -147,7 +156,7 @@ export async function overridePlatformUnitOwnership(
 			actor: { kind: "profile", profileId: input.actorProfileId },
 			authority: { kind: "platform" },
 			action: "unit.ownership.override",
-			reasonCode: input.reasonCode,
+			governanceDecisionId: decision.id,
 			target: { kind: "unit", id: input.unitId },
 			details: {
 				previousOwnerProfileId: replaced.previousOwnerProfileId,

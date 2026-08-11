@@ -4,20 +4,13 @@ import { check, foreignKey, index, integer, pgEnum, text, uuid } from "drizzle-o
 import { pgTable } from "./base";
 import { users } from "./auth";
 import { createCreatedAtColumn, createTimestampMsColumn, createUpdatedAtColumn } from "./columns";
-import {
-	UserAccountStateReasonValues,
-	UserAccountStateValues,
-	toEnumValues,
-} from "./contract-values";
+import { UserAccountStateValues, toEnumValues } from "./contract-values";
 import { profile } from "./profile";
+import { governanceDecision } from "./governance";
 
 export const userAccountStateValue = pgEnum(
 	"user_account_state_value",
 	toEnumValues(UserAccountStateValues),
-);
-export const userAccountStateReason = pgEnum(
-	"user_account_state_reason",
-	toEnumValues(UserAccountStateReasonValues),
 );
 
 /**
@@ -32,7 +25,9 @@ export const userAccountState = pgTable(
 	{
 		userId: uuid().primaryKey(),
 		state: userAccountStateValue().default("active").notNull(),
-		reason: userAccountStateReason(),
+		decisionId: uuid()
+			.notNull()
+			.references(() => governanceDecision.id, { onDelete: "restrict" }),
 		note: text(),
 		expiresAt: createTimestampMsColumn(),
 		updatedByProfileId: uuid().notNull(),
@@ -53,20 +48,18 @@ export const userAccountState = pgTable(
 		}).onDelete("restrict"),
 		index("user_account_state_state_expiry_idx").on(table.state, table.expiresAt),
 		index("user_account_state_updated_by_idx").on(table.updatedByProfileId),
+		index("user_account_state_decision_idx").on(table.decisionId),
 		check("user_account_state_revision_check", sql`${table.revision} > 0`),
 		check(
 			"user_account_state_shape_check",
 			sql`(
 				${table.state} = 'active'::user_account_state_value
-				and ${table.reason} is null
 				and ${table.note} is null
 				and ${table.expiresAt} is null
 			) or (
 				${table.state} = 'suspended'::user_account_state_value
-				and ${table.reason} is not null
 			) or (
 				${table.state} = 'closed'::user_account_state_value
-				and ${table.reason} is not null
 				and ${table.expiresAt} is null
 			)`,
 		),

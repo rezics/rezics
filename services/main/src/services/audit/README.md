@@ -36,7 +36,8 @@ Every record separates:
 - `authority`: platform, Realm, or Unit boundary that authorized the operation;
 - `action`: stable domain operation identifier;
 - `target`: affected record, which may differ from the authority boundary;
-- `reasonCode`: a machine-readable decision reason when one exists;
+- `outcomeCode`: a machine-readable execution outcome when one exists;
+- `governanceDecisionId`: the immutable Rule-backed human policy decision, when applicable;
 - `details`: action-specific structured context, never secrets or full content documents;
 - request and trace identifiers for correlation.
 

@@ -40,6 +40,10 @@ export default {
 	searchFailed: "Die Suche ist vorübergehend nicht verfügbar. Bitte versuche es später erneut.",
 	untitledResult: "Inhalt ohne Titel",
 	contentList: "Inhaltsliste",
+	ruleRealm: {
+		label: `Lokaler Regel-${realmTerms.label}`,
+		description: `Wähle einen ${realmTerms.label}, dessen aktuelle Regeln dieser ${zoneTerms.inline} für die lokale Governance verwenden darf. Offizielle Plattformregeln bleiben immer verfügbar.`,
+	},
 	create: {
 		title: `${zoneTerms.label} erstellen`,
 		description: `Wähle den Inhaltsbereich und die anfängliche Darstellung für diesen ${zoneTerms.inline}. Seiten und Navigation kannst du nach dem Erstellen konfigurieren.`,

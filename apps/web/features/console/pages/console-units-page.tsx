@@ -2,8 +2,6 @@
 
 import {
 	GetApiGovernancePlatformUnitsState,
-	PostApiGovernancePlatformUnitsByUnitIdOwnershipOverrideRequestReasonCodeEnum,
-	PostApiGovernancePlatformUnitsByUnitIdDeleteRequestReasonCodeEnum,
 	getApiGovernancePlatformUnits,
 	getApiGovernancePlatformUnitsQueryKey,
 	getApiGovernancePlatformUnitsByUnitIdOwnershipCandidates,
@@ -11,8 +9,6 @@ import {
 	type GetApiGovernancePlatformUnitsByUnitIdOwnershipCandidatesStatus200,
 	type GetApiGovernancePlatformUnitsState as UnitListState,
 	type GetApiGovernancePlatformUnitsStatus200,
-	type PostApiGovernancePlatformUnitsByUnitIdOwnershipOverrideRequestReasonCodeEnum as OwnershipGovernanceReasonCode,
-	type PostApiGovernancePlatformUnitsByUnitIdDeleteRequestReasonCodeEnum as GovernanceReasonCode,
 	usePostApiGovernancePlatformUnitsByUnitIdDelete,
 	usePostApiGovernancePlatformUnitsByUnitIdOwnershipOverride,
 	usePostApiGovernancePlatformUnitsByUnitIdRestore,
@@ -44,6 +40,8 @@ import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
 import { AppLink as Link } from "@/features/application-shell/components/app-link";
+import { GovernanceRulePicker } from "@/features/governance/components/governance-rule-picker";
+import type { GovernanceRuleReference } from "@/features/governance/model/governance-rule-selection";
 import { useConsoleWorkspace } from "../components/console-workspace";
 
 type PlatformUnit = GetApiGovernancePlatformUnitsStatus200["items"][number];
@@ -52,16 +50,10 @@ type OwnershipCandidate =
 type LifecycleCommand = "delete" | "restore";
 
 const UnitListStates = Object.values(GetApiGovernancePlatformUnitsState);
-const GovernanceReasonCodes = Object.values(
-	PostApiGovernancePlatformUnitsByUnitIdDeleteRequestReasonCodeEnum,
-);
-const OwnershipGovernanceReasonCodes = Object.values(
-	PostApiGovernancePlatformUnitsByUnitIdOwnershipOverrideRequestReasonCodeEnum,
-);
 
 export function ConsoleUnitsPage() {
 	const searchParams = useSearchParams();
-	const { locale, t } = useTranslation(["console", "errors", "realms"]);
+	const { locale, t } = useTranslation(["console", "errors", "governance"]);
 	const {
 		canReadUnits,
 		canDeleteUnits,
@@ -75,7 +67,7 @@ export function ConsoleUnitsPage() {
 	const [state, setState] = useState<UnitListState>("active");
 	const [selectedUnitId, setSelectedUnitId] = useState("");
 	const [command, setCommand] = useState<LifecycleCommand | null>(null);
-	const [reasonCode, setReasonCode] = useState<GovernanceReasonCode>("administrative");
+	const [rules, setRules] = useState<GovernanceRuleReference[]>([]);
 	const [note, setNote] = useState("");
 	const [confirmationUnitId, setConfirmationUnitId] = useState("");
 	const baseQuery = useMemo(
@@ -137,22 +129,35 @@ export function ConsoleUnitsPage() {
 
 	function openCommand(nextCommand: LifecycleCommand) {
 		setCommand(nextCommand);
-		setReasonCode("administrative");
+		setRules([]);
 		setNote("");
 		setConfirmationUnitId("");
 	}
 
 	async function applyCommand() {
 		if (!selected || !command || confirmationUnitId !== selected.id || pending) return;
-		const body = {
-			expectedUpdatedAt: selected.updatedAt,
-			confirmationUnitId,
-			reasonCode,
-			...(note.trim() ? { note: note.trim() } : {}),
-		};
 		try {
-			if (command === "delete") await remove.mutateAsync({ path: { unitId: selected.id }, body });
-			else await restore.mutateAsync({ path: { unitId: selected.id }, body });
+			if (command === "delete") {
+				if (!rules.length) return;
+				await remove.mutateAsync({
+					path: { unitId: selected.id },
+					body: {
+						expectedUpdatedAt: selected.updatedAt,
+						confirmationUnitId,
+						rules,
+						...(note.trim() ? { note: note.trim() } : {}),
+					},
+				});
+			} else {
+				await restore.mutateAsync({
+					path: { unitId: selected.id },
+					body: {
+						expectedUpdatedAt: selected.updatedAt,
+						confirmationUnitId,
+						...(note.trim() ? { note: note.trim() } : {}),
+					},
+				});
+			}
 			await queryClient.invalidateQueries({
 				queryKey: getApiGovernancePlatformUnitsQueryKey({ query: baseQuery }),
 			});
@@ -369,22 +374,22 @@ export function ConsoleUnitsPage() {
 				onCommandChange={setCommand}
 				onConfirmationUnitIdChange={setConfirmationUnitId}
 				onNoteChange={setNote}
-				onReasonCodeChange={setReasonCode}
 				pending={pending}
-				reasonCode={reasonCode}
+				rules={rules}
+				onRulesChange={setRules}
 			/>
 		</section>
 	);
 }
 
 function OwnershipOverrideControl({ item }: { readonly item: PlatformUnit }) {
-	const { t } = useTranslation(["console", "realms"]);
+	const { t } = useTranslation(["console", "governance"]);
 	const queryClient = useQueryClient();
 	const [step, setStep] = useState<"picker" | "confirmation" | null>(null);
 	const [search, setSearch] = useState("");
 	const deferredSearch = useDeferredValue(search.trim());
 	const [candidate, setCandidate] = useState<OwnershipCandidate | null>(null);
-	const [reasonCode, setReasonCode] = useState<OwnershipGovernanceReasonCode>("administrative");
+	const [rules, setRules] = useState<GovernanceRuleReference[]>([]);
 	const [note, setNote] = useState("");
 	const [confirmationUnitId, setConfirmationUnitId] = useState("");
 	const candidateQuery = useMemo(
@@ -444,12 +449,13 @@ function OwnershipOverrideControl({ item }: { readonly item: PlatformUnit }) {
 	const currentOwner = item.owner?.label ?? item.owner?.profileId ?? t.console.units.noOwner;
 	const candidateName =
 		candidate?.label ?? candidate?.slug ?? candidate?.profileId ?? t.console.units.unnamedProfile;
-	const confirmationValid = confirmationUnitId === item.id && candidate !== null;
+	const confirmationValid =
+		confirmationUnitId === item.id && candidate !== null && rules.length > 0;
 
 	function openPicker() {
 		setSearch("");
 		setCandidate(null);
-		setReasonCode("administrative");
+		setRules([]);
 		setNote("");
 		setConfirmationUnitId("");
 		overrideOwnership.reset();
@@ -470,7 +476,7 @@ function OwnershipOverrideControl({ item }: { readonly item: PlatformUnit }) {
 					expectedOwnerProfileId: item.owner?.profileId ?? null,
 					targetProfileId: candidate.profileId,
 					confirmationUnitId,
-					reasonCode,
+					rules,
 					...(note.trim() ? { note: note.trim() } : {}),
 				},
 			});
@@ -599,24 +605,12 @@ function OwnershipOverrideControl({ item }: { readonly item: PlatformUnit }) {
 								<dd className="mt-1 break-all font-medium">{candidateName}</dd>
 							</div>
 						</dl>
-						<Field required>
-							<FieldLabel>{t.console.units.reason}</FieldLabel>
-							<NativeSelect
-								onChange={(event) => {
-									const next = OwnershipGovernanceReasonCodes.find(
-										(value) => value === event.currentTarget.value,
-									);
-									if (next) setReasonCode(next);
-								}}
-								value={reasonCode}
-							>
-								{OwnershipGovernanceReasonCodes.map((value) => (
-									<NativeSelectOption key={value} value={value}>
-										{t.realms.governanceReasons[value]}
-									</NativeSelectOption>
-								))}
-							</NativeSelect>
-						</Field>
+						<GovernanceRulePicker
+							authority={{ kind: "platform" }}
+							enabled={step === "confirmation"}
+							onValueChange={setRules}
+							value={rules}
+						/>
 						<Field>
 							<FieldLabel>{t.console.units.internalNote}</FieldLabel>
 							<Textarea
@@ -668,32 +662,34 @@ function OwnershipOverrideControl({ item }: { readonly item: PlatformUnit }) {
 function LifecycleCommandDialog({
 	command,
 	item,
-	reasonCode,
+	rules,
 	note,
 	confirmationUnitId,
 	pending,
 	mutationError,
 	onCommandChange,
-	onReasonCodeChange,
+	onRulesChange,
 	onNoteChange,
 	onConfirmationUnitIdChange,
 	onApply,
 }: {
 	readonly command: LifecycleCommand | null;
 	readonly item: PlatformUnit | undefined;
-	readonly reasonCode: GovernanceReasonCode;
+	readonly rules: readonly GovernanceRuleReference[];
 	readonly note: string;
 	readonly confirmationUnitId: string;
 	readonly pending: boolean;
 	readonly mutationError: unknown;
 	readonly onCommandChange: (command: LifecycleCommand | null) => void;
-	readonly onReasonCodeChange: (reasonCode: GovernanceReasonCode) => void;
+	readonly onRulesChange: (rules: GovernanceRuleReference[]) => void;
 	readonly onNoteChange: (note: string) => void;
 	readonly onConfirmationUnitIdChange: (unitId: string) => void;
 	readonly onApply: () => void;
 }) {
-	const { t } = useTranslation(["console", "realms"]);
-	const valid = Boolean(item && confirmationUnitId === item.id);
+	const { t } = useTranslation(["console", "governance"]);
+	const valid = Boolean(
+		item && confirmationUnitId === item.id && (command === "restore" || rules.length > 0),
+	);
 	return (
 		<Dialog
 			onOpenChange={({ open }) => {
@@ -713,24 +709,14 @@ function LifecycleCommandDialog({
 					}
 				/>
 				<DialogBody className="grid gap-5">
-					<Field required>
-						<FieldLabel>{t.console.units.reason}</FieldLabel>
-						<NativeSelect
-							onChange={(event) => {
-								const next = GovernanceReasonCodes.find(
-									(candidate) => candidate === event.currentTarget.value,
-								);
-								if (next) onReasonCodeChange(next);
-							}}
-							value={reasonCode}
-						>
-							{GovernanceReasonCodes.map((value) => (
-								<NativeSelectOption key={value} value={value}>
-									{t.realms.governanceReasons[value]}
-								</NativeSelectOption>
-							))}
-						</NativeSelect>
-					</Field>
+					{command === "delete" ? (
+						<GovernanceRulePicker
+							authority={{ kind: "platform" }}
+							enabled={command === "delete"}
+							onValueChange={onRulesChange}
+							value={rules}
+						/>
+					) : null}
 					<Field>
 						<FieldLabel>{t.console.units.internalNote}</FieldLabel>
 						<Textarea

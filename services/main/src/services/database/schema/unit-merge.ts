@@ -38,7 +38,7 @@ import {
 	createUpdatedAtColumn,
 	createUuidv7PrimaryKey,
 } from "./columns";
-import { governanceReasonCode } from "./governance";
+import { governanceDecision } from "./governance";
 import { profile } from "./profile";
 import { unit } from "./unit";
 
@@ -92,7 +92,9 @@ export const unitMergeRequest = pgTable(
 			.references(() => profile.id, { onDelete: "restrict" }),
 		idempotencyKey: text().notNull(),
 		overrideOfRequestId: uuid(),
-		reasonCode: governanceReasonCode().notNull(),
+		decisionId: uuid()
+			.notNull()
+			.references(() => governanceDecision.id, { onDelete: "restrict" }),
 		note: text(),
 		policyVersion: smallint().notNull(),
 		requiredApprovals: smallint().notNull(),
@@ -140,6 +142,7 @@ export const unitMergeRequest = pgTable(
 			table.proposerProfileId,
 			table.idempotencyKey,
 		),
+		unique("unit_merge_request_decision_key").on(table.decisionId),
 		index("unit_merge_request_pending_expiry_idx")
 			.on(table.expiresAt, table.id)
 			.where(sql`${table.state} = 'pending_review'::unit_merge_request_state`),

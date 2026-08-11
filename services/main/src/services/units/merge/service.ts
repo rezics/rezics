@@ -17,6 +17,7 @@ import { database, type DatabaseExecutor, type DatabaseTransaction } from "../..
 import { databaseConstraintName } from "../../database/constraint";
 import {
 	unit,
+	governanceDecisionRule,
 	unitMergeGraphLock,
 	unitMergeOperation,
 	unitMergeRedirect,
@@ -30,7 +31,12 @@ import {
 	type UnitMergeRequestState,
 	type UnitMergeReviewDecision,
 } from "../../database/schema";
-import { GovernanceReasonCodeValues } from "../../database/schema/contract-values";
+import {
+	createGovernanceDecision,
+	listGovernanceDecisionRules,
+	validateGovernanceRuleReferences,
+	type GovernanceRuleReference,
+} from "../../governance/decision-service";
 import { firstUnitLocalizationTitle } from "../localization";
 import { UnitNotFound } from "../errors";
 import {
@@ -39,8 +45,6 @@ import {
 	type UnitMergeManifestV1,
 } from "./manifest";
 import { UnitMergePolicyV1, unitMergeRequestExpiry } from "./policy";
-
-type GovernanceReasonCode = (typeof GovernanceReasonCodeValues)[number];
 
 export type UnitMergeReviewView = {
 	readonly reviewerProfileId: string;
@@ -59,7 +63,7 @@ export type UnitMergeRequestView = {
 	readonly state: UnitMergeRequestState;
 	readonly proposer: { readonly profileId: string; readonly label: string | null };
 	readonly overrideOfRequestId: string | null;
-	readonly reasonCode: GovernanceReasonCode;
+	readonly rules: GovernanceRuleReference[];
 	readonly note: string | null;
 	readonly policy: {
 		readonly version: number;
@@ -113,7 +117,7 @@ const requestSelection = {
 	proposerProfileId: unitMergeRequest.proposerProfileId,
 	proposerLabel: firstUnitLocalizationTitle(unitMergeRequest.proposerProfileId),
 	overrideOfRequestId: unitMergeRequest.overrideOfRequestId,
-	reasonCode: unitMergeRequest.reasonCode,
+	decisionId: unitMergeRequest.decisionId,
 	note: unitMergeRequest.note,
 	policyVersion: unitMergeRequest.policyVersion,
 	requiredApprovals: unitMergeRequest.requiredApprovals,
@@ -199,6 +203,33 @@ async function presentRequests(
 		});
 		byRequest.set(review.requestId, items);
 	}
+	const decisionIds = [...new Set(rows.map((row) => row.decisionId))];
+	const ruleRows = decisionIds.length
+		? await executor
+				.select({
+					decisionId: governanceDecisionRule.decisionId,
+					sourceRealmId: governanceDecisionRule.ruleSourceRealmId,
+					revisionId: governanceDecisionRule.ruleRevisionId,
+					ruleId: governanceDecisionRule.ruleId,
+				})
+				.from(governanceDecisionRule)
+				.where(inArray(governanceDecisionRule.decisionId, decisionIds))
+				.orderBy(
+					governanceDecisionRule.decisionId,
+					governanceDecisionRule.ruleSourceRealmId,
+					governanceDecisionRule.ruleId,
+				)
+		: [];
+	const rulesByDecision = new Map<string, GovernanceRuleReference[]>();
+	for (const rule of ruleRows) {
+		const items = rulesByDecision.get(rule.decisionId) ?? [];
+		items.push({
+			sourceRealmId: rule.sourceRealmId,
+			revisionId: rule.revisionId,
+			ruleId: rule.ruleId,
+		});
+		rulesByDecision.set(rule.decisionId, items);
+	}
 	return rows.map((row) => {
 		const requestReviews = byRequest.get(row.id) ?? [];
 		return {
@@ -210,7 +241,7 @@ async function presentRequests(
 			state: row.state,
 			proposer: { profileId: row.proposerProfileId, label: row.proposerLabel },
 			overrideOfRequestId: row.overrideOfRequestId,
-			reasonCode: row.reasonCode,
+			rules: rulesByDecision.get(row.decisionId) ?? [],
 			note: row.note,
 			policy: {
 				version: row.policyVersion,
@@ -334,18 +365,22 @@ type CreateMergeInput = {
 	readonly expectedTargetUpdatedAt: Date;
 	readonly proposerProfileId: string;
 	readonly idempotencyKey: string;
-	readonly reasonCode: GovernanceReasonCode;
+	readonly rules: readonly GovernanceRuleReference[];
 	readonly note?: string;
 };
 
 function requestInsertValues(
 	manifest: UnitMergeManifestV1,
 	input: CreateMergeInput,
+	requestId: string,
+	decisionId: string,
 	mode: UnitMergeRequestMode,
 	state: UnitMergeRequestState,
 	now: Date,
 ) {
 	return {
+		id: requestId,
+		decisionId,
 		sourceUnitId: manifest.sourceUnitId,
 		targetUnitId: manifest.targetUnitId,
 		unitKind: manifest.unitKind,
@@ -353,7 +388,6 @@ function requestInsertValues(
 		state,
 		proposerProfileId: input.proposerProfileId,
 		idempotencyKey: input.idempotencyKey,
-		reasonCode: input.reasonCode,
 		note: input.note,
 		policyVersion: UnitMergePolicyV1.version,
 		requiredApprovals: UnitMergePolicyV1.requiredApprovals,
@@ -372,18 +406,25 @@ function requestInsertValues(
 	};
 }
 
-function existingCommandMatches(
+function canonicalRuleKeys(rules: readonly GovernanceRuleReference[]): string[] {
+	return rules.map((rule) => `${rule.sourceRealmId}:${rule.revisionId}:${rule.ruleId}`).sort();
+}
+
+async function existingCommandMatches(
+	executor: DatabaseExecutor,
 	row: typeof unitMergeRequest.$inferSelect,
 	input: CreateMergeInput & { readonly overrideOfRequestId?: string },
 	mode: UnitMergeRequestMode,
-): boolean {
+): Promise<boolean> {
+	const existingRules = await listGovernanceDecisionRules(executor, row.decisionId);
 	return (
 		row.mode === mode &&
 		row.sourceUnitId === input.sourceUnitId &&
 		row.targetUnitId === input.targetUnitId &&
 		row.sourceUpdatedAt.getTime() === input.expectedSourceUpdatedAt.getTime() &&
 		row.targetUpdatedAt.getTime() === input.expectedTargetUpdatedAt.getTime() &&
-		row.reasonCode === input.reasonCode &&
+		JSON.stringify(canonicalRuleKeys(existingRules)) ===
+			JSON.stringify(canonicalRuleKeys(input.rules)) &&
 		row.note === (input.note ?? null) &&
 		row.overrideOfRequestId === (input.overrideOfRequestId ?? null)
 	);
@@ -405,7 +446,8 @@ async function existingIdempotentRequest(
 		)
 		.limit(1);
 	if (!existing) return null;
-	if (!existingCommandMatches(existing, input, mode)) throw new UnitMergeIdempotencyConflict();
+	if (!(await existingCommandMatches(executor, existing, input, mode)))
+		throw new UnitMergeIdempotencyConflict();
 	return existing.id;
 }
 
@@ -434,7 +476,7 @@ async function auditMerge(
 		readonly requestId: string;
 		readonly sourceUnitId: string;
 		readonly targetUnitId: string;
-		readonly reasonCode?: string;
+		readonly governanceDecisionId?: string;
 		readonly details?: Record<string, unknown>;
 	},
 ): Promise<void> {
@@ -444,7 +486,7 @@ async function auditMerge(
 		actor: { kind: "profile", profileId: input.actorProfileId },
 		authority: { kind: "platform" },
 		action: input.action,
-		reasonCode: input.reasonCode,
+		governanceDecisionId: input.governanceDecisionId,
 		target: { kind: "unit_merge_request", id: input.requestId },
 		details: {
 			sourceUnitId: input.sourceUnitId,
@@ -480,11 +522,16 @@ async function acceptUnitMerge(
 		readonly targetUnitId: string;
 		readonly graphPlan: UnitMergeGraphPlanV1;
 		readonly actorProfileId: string;
-		readonly reasonCode: GovernanceReasonCode;
+		readonly governanceDecisionId: string;
 		readonly mode: UnitMergeRequestMode;
 		readonly now: Date;
 	},
 ): Promise<string> {
+	const rules = await listGovernanceDecisionRules(tx, input.governanceDecisionId);
+	await validateGovernanceRuleReferences(tx, {
+		authority: { kind: "platform" },
+		rules,
+	});
 	const [operation] = await tx
 		.insert(unitMergeOperation)
 		.values({
@@ -536,10 +583,18 @@ async function acceptUnitMerge(
 		requestId: input.requestId,
 		sourceUnitId: input.sourceUnitId,
 		targetUnitId: input.targetUnitId,
-		reasonCode: input.reasonCode,
+		governanceDecisionId: input.governanceDecisionId,
 		details: { operationId: operation.id, graphPlan: input.graphPlan },
 	});
 	return operation.id;
+}
+
+async function generateUuidv7(tx: DatabaseTransaction): Promise<string> {
+	type GeneratedUuidRow = { readonly id: string };
+	const generated = await tx.execute<GeneratedUuidRow>(sql`select uuidv7() as id`);
+	const id = generated.rows[0]?.id;
+	if (!id) throw new Error("UUIDv7 generation returned no id");
+	return id;
 }
 
 function mapCreateConstraint(error: unknown): never {
@@ -566,9 +621,28 @@ export async function createReviewedUnitMerge(input: CreateMergeInput) {
 			if (existing) return existing;
 			const manifest = await buildUnitMergeManifest(tx, input);
 			const now = new Date();
+			const newRequestId = await generateUuidv7(tx);
+			const decision = await createGovernanceDecision(tx, {
+				action: "unit.merge.propose",
+				actorProfileId: input.proposerProfileId,
+				authority: { kind: "platform" },
+				targetUnitId: manifest.sourceUnitId,
+				subject: { kind: "unit_merge_request", id: newRequestId },
+				basis: { kind: "rules", rules: input.rules },
+			});
 			const [created] = await tx
 				.insert(unitMergeRequest)
-				.values(requestInsertValues(manifest, input, "reviewed", "pending_review", now))
+				.values(
+					requestInsertValues(
+						manifest,
+						input,
+						newRequestId,
+						decision.id,
+						"reviewed",
+						"pending_review",
+						now,
+					),
+				)
 				.returning({ id: unitMergeRequest.id });
 			if (!created) throw new Error("Unit merge proposal insertion returned no row");
 			await auditMerge(tx, {
@@ -577,7 +651,7 @@ export async function createReviewedUnitMerge(input: CreateMergeInput) {
 				requestId: created.id,
 				sourceUnitId: manifest.sourceUnitId,
 				targetUnitId: manifest.targetUnitId,
-				reasonCode: input.reasonCode,
+				governanceDecisionId: decision.id,
 				details: {
 					policyVersion: UnitMergePolicyV1.version,
 					requiredApprovals: UnitMergePolicyV1.requiredApprovals,
@@ -626,10 +700,27 @@ export async function createDirectUnitMerge(
 					throw new UnitMergeRequestConflict();
 			}
 			const now = new Date();
+			const newRequestId = await generateUuidv7(tx);
+			const decision = await createGovernanceDecision(tx, {
+				action: "unit.merge.direct",
+				actorProfileId: input.proposerProfileId,
+				authority: { kind: "platform" },
+				targetUnitId: manifest.sourceUnitId,
+				subject: { kind: "unit_merge_request", id: newRequestId },
+				basis: { kind: "rules", rules: input.rules },
+			});
 			const [created] = await tx
 				.insert(unitMergeRequest)
 				.values({
-					...requestInsertValues(manifest, input, "privileged_direct", "accepted", now),
+					...requestInsertValues(
+						manifest,
+						input,
+						newRequestId,
+						decision.id,
+						"privileged_direct",
+						"accepted",
+						now,
+					),
 					overrideOfRequestId: input.overrideOfRequestId,
 				})
 				.returning({ id: unitMergeRequest.id });
@@ -640,7 +731,7 @@ export async function createDirectUnitMerge(
 				targetUnitId: manifest.targetUnitId,
 				graphPlan: manifest.graphPlan,
 				actorProfileId: input.proposerProfileId,
-				reasonCode: input.reasonCode,
+				governanceDecisionId: decision.id,
 				mode: "privileged_direct",
 				now,
 			});
@@ -734,6 +825,7 @@ export async function reviewUnitMerge(input: {
 				requestId: request.id,
 				sourceUnitId: request.sourceUnitId,
 				targetUnitId: request.targetUnitId,
+				governanceDecisionId: request.decisionId,
 				details: { requestFingerprint: input.requestFingerprint, note: input.note },
 			});
 			if (input.decision === "reject" && request.vetoEnabled) {
@@ -757,7 +849,7 @@ export async function reviewUnitMerge(input: {
 					targetUnitId: request.targetUnitId,
 					graphPlan: manifest.graphPlan,
 					actorProfileId: input.reviewerProfileId,
-					reasonCode: request.reasonCode,
+					governanceDecisionId: request.decisionId,
 					mode: "reviewed",
 					now,
 				});

@@ -558,6 +558,12 @@ import type {
 	PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionStatus409,
 	PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionStatus422,
 	PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionStatus500,
+	GetApiGovernanceRuleSourcesOptions,
+	GetApiGovernanceRuleSourcesStatus200,
+	GetApiGovernanceRuleSourcesStatus400,
+	GetApiGovernanceRuleSourcesStatus404,
+	GetApiGovernanceRuleSourcesStatus422,
+	GetApiGovernanceRuleSourcesStatus500,
 	GetApiGovernanceNotesByPostIdOptions,
 	GetApiGovernanceNotesByPostIdStatus200,
 	GetApiGovernanceNotesByPostIdStatus404,
@@ -603,6 +609,7 @@ import type {
 	PostApiGovernanceAccountEnforcementsStatus400,
 	PostApiGovernanceAccountEnforcementsStatus403,
 	PostApiGovernanceAccountEnforcementsStatus404,
+	PostApiGovernanceAccountEnforcementsStatus409,
 	PostApiGovernanceAccountEnforcementsStatus422,
 	PostApiGovernanceAccountEnforcementsStatus500,
 	PostApiGovernanceAccountEnforcementsByEnforcementIdRevokeOptions,
@@ -1178,6 +1185,7 @@ import type {
 	ReleaseSlugRedirectWithPlatformAccessStatus401,
 	ReleaseSlugRedirectWithPlatformAccessStatus403,
 	ReleaseSlugRedirectWithPlatformAccessStatus404,
+	ReleaseSlugRedirectWithPlatformAccessStatus409,
 	ReleaseSlugRedirectWithPlatformAccessStatus422,
 	ReleaseSlugRedirectWithPlatformAccessStatus500,
 	GetPublicUnitSeoProjectionOptions,
@@ -2652,6 +2660,7 @@ import {
 	postApiGovernancePlatformUnitMergesByRequestIdRetry,
 	getApiGovernancePlatformOwnershipClaims,
 	postApiGovernancePlatformOwnershipClaimsByClaimIdDecision,
+	getApiGovernanceRuleSources,
 	getApiGovernanceNotesByPostId,
 	patchApiGovernanceNotesByPostId,
 	getApiGovernanceContentReviewCases,
@@ -4901,13 +4910,13 @@ export function usePostApiOwnershipClaimsByClaimIdWithdraw<TContext>(
 
 export const getApiRecommendationsUnitsQueryKey = ({
 	query,
-}: Omit<GetApiRecommendationsUnitsOptions, "headers">) =>
+}: Omit<GetApiRecommendationsUnitsOptions, "headers"> = {}) =>
 	[{ url: "/api/v1/recommendations/units" }, ...(query ? [query] : [])] as const;
 
 type GetApiRecommendationsUnitsQueryKey = ReturnType<typeof getApiRecommendationsUnitsQueryKey>;
 
 export function getApiRecommendationsUnitsQueryOptions(
-	{ query }: GetApiRecommendationsUnitsOptions,
+	{ query }: GetApiRecommendationsUnitsOptions = {},
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
 ) {
 	const queryKey = getApiRecommendationsUnitsQueryKey({ query });
@@ -11426,6 +11435,103 @@ export function usePostApiGovernancePlatformOwnershipClaimsByClaimIdDecision<TCo
 	>;
 }
 
+export const getApiGovernanceRuleSourcesQueryKey = ({
+	query,
+}: Omit<GetApiGovernanceRuleSourcesOptions, "headers">) =>
+	[{ url: "/api/v1/governance/rule-sources" }, ...(query ? [query] : [])] as const;
+
+type GetApiGovernanceRuleSourcesQueryKey = ReturnType<typeof getApiGovernanceRuleSourcesQueryKey>;
+
+export function getApiGovernanceRuleSourcesQueryOptions(
+	{ query }: GetApiGovernanceRuleSourcesOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = getApiGovernanceRuleSourcesQueryKey({ query });
+	return queryOptions<
+		GetApiGovernanceRuleSourcesStatus200,
+		ResponseErrorConfig<
+			| GetApiGovernanceRuleSourcesStatus400
+			| GetApiGovernanceRuleSourcesStatus404
+			| GetApiGovernanceRuleSourcesStatus422
+			| GetApiGovernanceRuleSourcesStatus500
+		>,
+		GetApiGovernanceRuleSourcesStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			const { data } = await getApiGovernanceRuleSources({
+				...config,
+				query,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary List current Rule sources for a governance authority
+ * {@link /api/v1/governance/rule-sources}
+ */
+export function useGetApiGovernanceRuleSources<
+	TData = GetApiGovernanceRuleSourcesStatus200,
+	TQueryData = GetApiGovernanceRuleSourcesStatus200,
+	TQueryKey extends QueryKey = GetApiGovernanceRuleSourcesQueryKey,
+>(
+	{
+		query,
+	}: {
+		query:
+			| GetApiGovernanceRuleSourcesOptions["query"]
+			| (() => GetApiGovernanceRuleSourcesOptions["query"]);
+	},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				GetApiGovernanceRuleSourcesStatus200,
+				ResponseErrorConfig<
+					| GetApiGovernanceRuleSourcesStatus400
+					| GetApiGovernanceRuleSourcesStatus404
+					| GetApiGovernanceRuleSourcesStatus422
+					| GetApiGovernanceRuleSourcesStatus500
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = { query: typeof query === "function" ? query() : query };
+	const queryKey = resolvedOptions?.queryKey ?? getApiGovernanceRuleSourcesQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...getApiGovernanceRuleSourcesQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			| GetApiGovernanceRuleSourcesStatus400
+			| GetApiGovernanceRuleSourcesStatus404
+			| GetApiGovernanceRuleSourcesStatus422
+			| GetApiGovernanceRuleSourcesStatus500
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
 export const getApiGovernanceNotesByPostIdQueryKey = ({
 	path,
 }: Omit<GetApiGovernanceNotesByPostIdOptions, "headers">) =>
@@ -12059,6 +12165,7 @@ export function postApiGovernanceAccountEnforcementsMutationOptions<TContext = u
 			| PostApiGovernanceAccountEnforcementsStatus400
 			| PostApiGovernanceAccountEnforcementsStatus403
 			| PostApiGovernanceAccountEnforcementsStatus404
+			| PostApiGovernanceAccountEnforcementsStatus409
 			| PostApiGovernanceAccountEnforcementsStatus422
 			| PostApiGovernanceAccountEnforcementsStatus500
 		>,
@@ -12089,6 +12196,7 @@ export function usePostApiGovernanceAccountEnforcements<TContext>(
 				| PostApiGovernanceAccountEnforcementsStatus400
 				| PostApiGovernanceAccountEnforcementsStatus403
 				| PostApiGovernanceAccountEnforcementsStatus404
+				| PostApiGovernanceAccountEnforcementsStatus409
 				| PostApiGovernanceAccountEnforcementsStatus422
 				| PostApiGovernanceAccountEnforcementsStatus500
 			>,
@@ -12111,6 +12219,7 @@ export function usePostApiGovernanceAccountEnforcements<TContext>(
 			| PostApiGovernanceAccountEnforcementsStatus400
 			| PostApiGovernanceAccountEnforcementsStatus403
 			| PostApiGovernanceAccountEnforcementsStatus404
+			| PostApiGovernanceAccountEnforcementsStatus409
 			| PostApiGovernanceAccountEnforcementsStatus422
 			| PostApiGovernanceAccountEnforcementsStatus500
 		>,
@@ -12124,6 +12233,7 @@ export function usePostApiGovernanceAccountEnforcements<TContext>(
 			| PostApiGovernanceAccountEnforcementsStatus400
 			| PostApiGovernanceAccountEnforcementsStatus403
 			| PostApiGovernanceAccountEnforcementsStatus404
+			| PostApiGovernanceAccountEnforcementsStatus409
 			| PostApiGovernanceAccountEnforcementsStatus422
 			| PostApiGovernanceAccountEnforcementsStatus500
 		>,
@@ -12142,6 +12252,7 @@ export function usePostApiGovernanceAccountEnforcements<TContext>(
 			| PostApiGovernanceAccountEnforcementsStatus400
 			| PostApiGovernanceAccountEnforcementsStatus403
 			| PostApiGovernanceAccountEnforcementsStatus404
+			| PostApiGovernanceAccountEnforcementsStatus409
 			| PostApiGovernanceAccountEnforcementsStatus422
 			| PostApiGovernanceAccountEnforcementsStatus500
 		>,
@@ -20767,6 +20878,7 @@ export function releaseSlugRedirectWithPlatformAccessMutationOptions<TContext = 
 			| ReleaseSlugRedirectWithPlatformAccessStatus401
 			| ReleaseSlugRedirectWithPlatformAccessStatus403
 			| ReleaseSlugRedirectWithPlatformAccessStatus404
+			| ReleaseSlugRedirectWithPlatformAccessStatus409
 			| ReleaseSlugRedirectWithPlatformAccessStatus422
 			| ReleaseSlugRedirectWithPlatformAccessStatus500
 		>,
@@ -20800,6 +20912,7 @@ export function useReleaseSlugRedirectWithPlatformAccess<TContext>(
 				| ReleaseSlugRedirectWithPlatformAccessStatus401
 				| ReleaseSlugRedirectWithPlatformAccessStatus403
 				| ReleaseSlugRedirectWithPlatformAccessStatus404
+				| ReleaseSlugRedirectWithPlatformAccessStatus409
 				| ReleaseSlugRedirectWithPlatformAccessStatus422
 				| ReleaseSlugRedirectWithPlatformAccessStatus500
 			>,
@@ -20823,6 +20936,7 @@ export function useReleaseSlugRedirectWithPlatformAccess<TContext>(
 			| ReleaseSlugRedirectWithPlatformAccessStatus401
 			| ReleaseSlugRedirectWithPlatformAccessStatus403
 			| ReleaseSlugRedirectWithPlatformAccessStatus404
+			| ReleaseSlugRedirectWithPlatformAccessStatus409
 			| ReleaseSlugRedirectWithPlatformAccessStatus422
 			| ReleaseSlugRedirectWithPlatformAccessStatus500
 		>,
@@ -20837,6 +20951,7 @@ export function useReleaseSlugRedirectWithPlatformAccess<TContext>(
 			| ReleaseSlugRedirectWithPlatformAccessStatus401
 			| ReleaseSlugRedirectWithPlatformAccessStatus403
 			| ReleaseSlugRedirectWithPlatformAccessStatus404
+			| ReleaseSlugRedirectWithPlatformAccessStatus409
 			| ReleaseSlugRedirectWithPlatformAccessStatus422
 			| ReleaseSlugRedirectWithPlatformAccessStatus500
 		>,
@@ -20856,6 +20971,7 @@ export function useReleaseSlugRedirectWithPlatformAccess<TContext>(
 			| ReleaseSlugRedirectWithPlatformAccessStatus401
 			| ReleaseSlugRedirectWithPlatformAccessStatus403
 			| ReleaseSlugRedirectWithPlatformAccessStatus404
+			| ReleaseSlugRedirectWithPlatformAccessStatus409
 			| ReleaseSlugRedirectWithPlatformAccessStatus422
 			| ReleaseSlugRedirectWithPlatformAccessStatus500
 		>,

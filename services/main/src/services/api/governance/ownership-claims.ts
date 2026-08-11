@@ -57,7 +57,7 @@ export default new Elysia({ prefix: "/platform/ownership-claims" })
 				claimId: params.claimId,
 				actorProfileId: profile.unitId,
 				decision: body.decision,
-				reasonCode: body.reasonCode,
+				rules: body.rules,
 				note: body.note?.trim() || undefined,
 			});
 		},
@@ -67,14 +67,20 @@ export default new Elysia({ prefix: "/platform/ownership-claims" })
 			body: DecideUnitOwnershipClaimBody,
 			response: {
 				[StatusCodes.OK]: UnitOwnershipClaimDecisionResponse,
-				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["UnitOwnershipClaimConfirmationInvalid"]),
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
+					"UnitOwnershipClaimConfirmationInvalid",
+					"GovernanceRuleSourceForbidden",
+				]),
 				[StatusCodes.FORBIDDEN]: toApiErrorResponse([
 					"PlatformCapabilityRequired",
 					"FreshSessionRequired",
 					"UnitOwnershipClaimSelfDecisionForbidden",
 				]),
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitOwnershipClaimNotFound", "UnitNotFound"]),
-				[StatusCodes.CONFLICT]: toApiErrorResponse(["UnitOwnershipClaimChanged"]),
+				[StatusCodes.CONFLICT]: toApiErrorResponse([
+					"UnitOwnershipClaimChanged",
+					"GovernanceRuleChanged",
+				]),
 			},
 			detail: { summary: "Resolve a Unit ownership claim", tags: ["Governance"] },
 		},

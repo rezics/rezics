@@ -6,7 +6,7 @@ import {
 } from "./errors";
 import {
 	ActiveContentReviewCaseStateValues,
-	ContentGovernanceRuleRequiredActionKindValues,
+	ContentGovernanceRuleBackedActionKindValues,
 	type ContentReviewAuthorityValues,
 	type ContentReviewCaseStateValues,
 	type PlatformUnitModerationCommandValues,
@@ -36,7 +36,7 @@ export function isContentLicenseModerationCommand(
 export function contentGovernanceActionRequiresRules(
 	action: ContentGovernanceActionCommand,
 ): boolean {
-	return ContentGovernanceRuleRequiredActionKindValues.some((candidate) => candidate === action);
+	return ContentGovernanceRuleBackedActionKindValues.some((candidate) => candidate === action);
 }
 
 export function isActiveContentReviewCaseState(state: ContentReviewCaseState): boolean {

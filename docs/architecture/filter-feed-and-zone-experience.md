@@ -126,6 +126,16 @@ document. The hosting Zone remains an enforced scope in every case. The
 standard Zone Feed Block uses the Zone-owned document. Its content-type
 selector emits a `UnitPredicate` and is rendered in the same Filter toolbar as
 sort and the remaining Filter controls.
+
+A Zone may also select one `local_rule_realm_id`. The referenced Realm remains
+the owner of its immutable Rule revisions; the Zone is only a policy context
+and never becomes a second Rule container. Zone-local governance may cite that
+Realm and the official Rule Realm. A missing local source means official Rules
+only. Platform-global actions on a Zone Unit still use official Rules because a
+global Unit mutation cannot be scoped to one presentation context. Zone create
+and update reject a selected Realm unless its Unit is non-deleted and its
+current immutable revision has at least one Rule; decision creation revalidates
+the source and revision under the shared Rule-publication lock.
 The shared toolbar keeps its product-wide order fixed as sort, schema-selected
 quick filters, then the remaining Filter action. Schema controls capabilities,
 option order, and defaults; it does not duplicate this invariant layout in

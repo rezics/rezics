@@ -2,13 +2,11 @@
 
 import {
 	GetApiGovernancePlatformUnitMergesState,
-	PostApiGovernancePlatformUnitMergesRequestReasonCodeEnum,
 	getApiGovernancePlatformUnitMerges,
 	getApiGovernancePlatformUnitMergesQueryKey,
 	type GetApiGovernancePlatformUnitMergesState as UnitMergeState,
 	type GetApiGovernancePlatformUnitMergesStatus200,
 	type PostApiGovernancePlatformUnitMergesPreflightStatus200,
-	type PostApiGovernancePlatformUnitMergesRequestReasonCodeEnum as GovernanceReasonCode,
 	usePostApiGovernancePlatformUnitMerges,
 	usePostApiGovernancePlatformUnitMergesByRequestIdRetry,
 	usePostApiGovernancePlatformUnitMergesByRequestIdReviews,
@@ -39,6 +37,8 @@ import { useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
 
 import { AppLink as Link } from "@/features/application-shell/components/app-link";
+import { GovernanceRulePicker } from "@/features/governance/components/governance-rule-picker";
+import type { GovernanceRuleReference } from "@/features/governance/model/governance-rule-selection";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
 import { useConsoleWorkspace } from "../components/console-workspace";
@@ -48,10 +48,6 @@ type StateFilter = "all" | UnitMergeState;
 type ReviewDecision = "approve" | "reject";
 
 const UnitMergeStates = Object.values(GetApiGovernancePlatformUnitMergesState);
-const GovernanceReasonCodes = Object.values(
-	PostApiGovernancePlatformUnitMergesRequestReasonCodeEnum,
-);
-
 function isStateFilter(value: string): value is StateFilter {
 	return value === "all" || UnitMergeStates.some((candidate) => candidate === value);
 }
@@ -74,7 +70,7 @@ function stateBadgeVariant(state: UnitMergeRequest["state"]) {
 export function ConsoleUnitMergesPage() {
 	const searchParams = useSearchParams();
 	const initialSourceUnitId = searchParams.get("source")?.trim() ?? "";
-	const { locale, t } = useTranslation(["console", "errors", "realms"]);
+	const { locale, t } = useTranslation(["console", "errors", "governance"]);
 	const {
 		canReadUnitMerges,
 		canProposeUnitMerges,
@@ -115,7 +111,7 @@ export function ConsoleUnitMergesPage() {
 	const [sourceUnitId, setSourceUnitId] = useState(initialSourceUnitId);
 	const [targetUnitId, setTargetUnitId] = useState("");
 	const [idempotencyKey, setIdempotencyKey] = useState(createIdempotencyKey);
-	const [reasonCode, setReasonCode] = useState<GovernanceReasonCode>("administrative");
+	const [rules, setRules] = useState<GovernanceRuleReference[]>([]);
 	const [note, setNote] = useState("");
 	const [confirmationSourceUnitId, setConfirmationSourceUnitId] = useState("");
 	const [confirmationTargetUnitId, setConfirmationTargetUnitId] = useState("");
@@ -147,7 +143,7 @@ export function ConsoleUnitMergesPage() {
 		setSourceUnitId("");
 		setTargetUnitId("");
 		setIdempotencyKey(createIdempotencyKey());
-		setReasonCode("administrative");
+		setRules([]);
 		setNote("");
 		setOverrideOfRequestId(undefined);
 		resetPreflight();
@@ -158,7 +154,7 @@ export function ConsoleUnitMergesPage() {
 		setSourceUnitId(request.sourceUnit.id);
 		setTargetUnitId(request.targetUnit.id);
 		setIdempotencyKey(createIdempotencyKey());
-		setReasonCode(request.reasonCode);
+		setRules([]);
 		setNote("");
 		setOverrideOfRequestId(request.id);
 		resetPreflight();
@@ -178,6 +174,7 @@ export function ConsoleUnitMergesPage() {
 		const manifest = preflight.data?.manifest;
 		if (
 			!manifest ||
+			!rules.length ||
 			confirmationSourceUnitId !== sourceUnitId ||
 			confirmationTargetUnitId !== targetUnitId
 		)
@@ -190,7 +187,7 @@ export function ConsoleUnitMergesPage() {
 			expectedSourceUpdatedAt: manifest.sourceUpdatedAt,
 			expectedTargetUpdatedAt: manifest.targetUpdatedAt,
 			idempotencyKey,
-			reasonCode,
+			rules,
 			...(note.trim() ? { note: note.trim() } : {}),
 			...(mode === "privileged_direct" && overrideOfRequestId ? { overrideOfRequestId } : {}),
 		};
@@ -257,7 +254,9 @@ export function ConsoleUnitMergesPage() {
 		| PostApiGovernancePlatformUnitMergesPreflightStatus200
 		| undefined;
 	const confirmationValid =
-		confirmationSourceUnitId === sourceUnitId && confirmationTargetUnitId === targetUnitId;
+		confirmationSourceUnitId === sourceUnitId &&
+		confirmationTargetUnitId === targetUnitId &&
+		rules.length > 0;
 	const canReviewSelected =
 		selected?.state === "pending_review" &&
 		selected.proposer.profileId !== currentProfileId &&
@@ -580,24 +579,12 @@ export function ConsoleUnitMergesPage() {
 									<ShieldAlert className="mt-0.5 size-4 shrink-0" aria-hidden />
 									<p>{t.console.unitMerges.irreversibleWarning}</p>
 								</div>
-								<Field required>
-									<FieldLabel>{t.console.unitMerges.reason}</FieldLabel>
-									<NativeSelect
-										onChange={(event) => {
-											const next = GovernanceReasonCodes.find(
-												(value) => value === event.currentTarget.value,
-											);
-											if (next) setReasonCode(next);
-										}}
-										value={reasonCode}
-									>
-										{GovernanceReasonCodes.map((value) => (
-											<NativeSelectOption key={value} value={value}>
-												{t.realms.governanceReasons[value]}
-											</NativeSelectOption>
-										))}
-									</NativeSelect>
-								</Field>
+								<GovernanceRulePicker
+									authority={{ kind: "platform" }}
+									enabled={createOpen && Boolean(preflightResult)}
+									onValueChange={setRules}
+									value={rules}
+								/>
 								<Field>
 									<FieldLabel>{t.console.unitMerges.internalNote}</FieldLabel>
 									<Textarea

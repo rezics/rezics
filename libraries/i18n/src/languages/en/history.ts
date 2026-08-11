@@ -46,8 +46,6 @@ export default {
 		},
 		currentRevisionContent:
 			"The current revision content cannot be hidden. Publish a clean revision first, then protect the older revision.",
-		reasonLabel: "Reason",
-		selectReason: "Select a reason",
 		atLeastOneField: "Select at least one item to protect.",
 		cancel: "Cancel",
 		save: "Save visibility",

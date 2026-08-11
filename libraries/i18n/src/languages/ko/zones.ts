@@ -40,6 +40,10 @@ export default {
 	searchFailed: "검색을 일시적으로 사용할 수 없습니다. 나중에 다시 시도해주세요.",
 	untitledResult: "제목 없는 콘텐츠",
 	contentList: "콘텐츠 목록",
+	ruleRealm: {
+		label: `로컬 규칙 ${realmTerms.label}`,
+		description: `이 존의 로컬 거버넌스에 현재 규칙을 사용할 ${realmTerms.label}을 선택하세요. 플랫폼 공식 규칙은 항상 사용할 수 있습니다.`,
+	},
 	create: {
 		title: `${zoneTerms.label} 만들기`,
 		description: `이 ${zoneTerms.inline}의 콘텐츠 범위와 초기 표시를 선택하세요. 생성 후 페이지와 내비게이션을 구성할 수 있습니다.`,

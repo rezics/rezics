@@ -1,15 +1,24 @@
 /** @vitest-environment jsdom */
 
-import type { GetApiReportsUnitsByUnitIdDestinationsStatus200 } from "@rezics/openapi-tanstack-query";
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+import type { GovernanceRuleSource } from "../model/governance-rule-selection";
+
 import {
-	ContentRuleMultiSelect,
-	ContentRuleSourceSelect,
-	type ContentRuleMultiSelectLabels,
-	type ContentRuleSourceSelectLabels,
-} from "./content-rule-picker";
+	GovernanceRuleMultiSelect,
+	GovernanceRuleSourceSelect,
+	type GovernanceRuleMultiSelectLabels,
+	type GovernanceRuleSourceSelectLabels,
+} from "./governance-rule-picker";
+
+vi.mock("@/i18n/client", () => ({ useTranslation: vi.fn() }));
+vi.mock("@/i18n/use-localization-languages", () => ({
+	useLocalizationLanguages: vi.fn(),
+}));
+vi.mock("@rezics/openapi-tanstack-query", () => ({
+	useGetApiGovernanceRuleSources: vi.fn(),
+}));
 
 vi.stubGlobal(
 	"ResizeObserver",
@@ -32,36 +41,34 @@ const sourceLabels = {
 		platform: "平台",
 		realm: "治理範圍",
 	},
-} satisfies ContentRuleSourceSelectLabels;
+} satisfies GovernanceRuleSourceSelectLabels;
 
 const ruleLabels = {
 	ariaLabel: "適用規則",
 	choose: "選擇規則",
 	clear: "清除已選規則",
 	selectedCount: ({ count }: { readonly count: number }) => `已選 ${count} / 32 條規則`,
-} satisfies ContentRuleMultiSelectLabels;
+} satisfies GovernanceRuleMultiSelectLabels;
 
-const destinations = [
+const sources = [
 	{
 		id: "realm-destination",
 		scope: "realm",
-		language: "zh",
 		title: "社群規則",
 		revisionId: "realm-revision",
 		rules: [
-			{ id: "rule-spam", language: "zh", title: "禁止垃圾內容" },
-			{ id: "rule-abuse", language: "zh", title: "禁止騷擾行為" },
+			{ id: "rule-spam", title: "禁止垃圾內容" },
+			{ id: "rule-abuse", title: "禁止騷擾行為" },
 		],
 	},
 	{
 		id: "official-destination",
 		scope: "platform",
-		language: "zh",
 		title: "官方規則",
 		revisionId: "official-revision",
-		rules: [{ id: "rule-safety", language: "zh", title: "危害安全的內容" }],
+		rules: [{ id: "rule-safety", title: "危害安全的內容" }],
 	},
-] satisfies GetApiReportsUnitsByUnitIdDestinationsStatus200["items"];
+] satisfies readonly GovernanceRuleSource[];
 
 function ruleKey(destinationId: string, revisionId: string, ruleId: string): string {
 	return `${destinationId}:${revisionId}:${ruleId}`;
@@ -69,11 +76,11 @@ function ruleKey(destinationId: string, revisionId: string, ruleId: string): str
 
 function renderRuleSelector(
 	selectedKeys: readonly string[] = [],
-	options: GetApiReportsUnitsByUnitIdDestinationsStatus200["items"] = destinations,
+	options: readonly GovernanceRuleSource[] = sources,
 ) {
 	return render(
-		<ContentRuleMultiSelect
-			destination={options[0]}
+		<GovernanceRuleMultiSelect
+			source={options[0]}
 			labels={ruleLabels}
 			onClear={vi.fn()}
 			onRuleCheckedChange={vi.fn()}
@@ -85,13 +92,13 @@ function renderRuleSelector(
 
 afterEach(cleanup);
 
-describe("ContentRuleSourceSelect", () => {
+describe("GovernanceRuleSourceSelect", () => {
 	it("selects one rule source independently from the rule picker", async () => {
 		const onValueChange = vi.fn();
 
 		render(
-			<ContentRuleSourceSelect
-				destinations={destinations}
+			<GovernanceRuleSourceSelect
+				sources={sources}
 				labels={sourceLabels}
 				onValueChange={onValueChange}
 				value="realm-destination"
@@ -113,7 +120,7 @@ describe("ContentRuleSourceSelect", () => {
 	});
 });
 
-describe("ContentRuleMultiSelect", () => {
+describe("GovernanceRuleMultiSelect", () => {
 	it("keeps rules inside a multi-select dropdown", async () => {
 		renderRuleSelector();
 
@@ -132,8 +139,8 @@ describe("ContentRuleMultiSelect", () => {
 		const onRuleCheckedChange = vi.fn();
 		const selected = ruleKey("realm-destination", "realm-revision", "rule-spam");
 		const view = render(
-			<ContentRuleMultiSelect
-				destination={destinations[0]}
+			<GovernanceRuleMultiSelect
+				source={sources[0]}
 				labels={ruleLabels}
 				onClear={onClear}
 				onRuleCheckedChange={onRuleCheckedChange}
@@ -151,8 +158,8 @@ describe("ContentRuleMultiSelect", () => {
 		expect(screen.getByRole("menu")).toBeTruthy();
 
 		view.rerender(
-			<ContentRuleMultiSelect
-				destination={destinations[0]}
+			<GovernanceRuleMultiSelect
+				source={sources[0]}
 				labels={ruleLabels}
 				onClear={onClear}
 				onRuleCheckedChange={onRuleCheckedChange}
@@ -166,9 +173,7 @@ describe("ContentRuleMultiSelect", () => {
 		expect(clear.hasAttribute("data-disabled")).toBe(false);
 		fireEvent.pointerMove(clear, { pointerType: "mouse" });
 		await waitFor(() =>
-			expect(menu.getAttribute("aria-activedescendant")).toContain(
-				"clear-content-governance-rules",
-			),
+			expect(menu.getAttribute("aria-activedescendant")).toContain("clear-governance-rules"),
 		);
 		fireEvent.click(clear);
 		await waitFor(() => expect(onClear).toHaveBeenCalledOnce());
@@ -177,19 +182,17 @@ describe("ContentRuleMultiSelect", () => {
 	it("enforces the 32-rule limit without disabling selected rules", async () => {
 		const rules = Array.from({ length: 33 }, (_, index) => ({
 			id: `rule-${index}`,
-			language: "zh" as const,
 			title: `規則 ${index + 1}`,
 		}));
 		const options = [
 			{
 				id: "many-rules",
 				scope: "realm" as const,
-				language: "zh" as const,
 				title: "大量規則",
 				revisionId: "many-rules-revision",
 				rules,
 			},
-		] satisfies GetApiReportsUnitsByUnitIdDestinationsStatus200["items"];
+		] satisfies readonly GovernanceRuleSource[];
 		const selectedKeys = rules
 			.slice(0, 32)
 			.map((rule) => ruleKey("many-rules", "many-rules-revision", rule.id));

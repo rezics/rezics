@@ -4,6 +4,13 @@ import { describe, expect, it } from "vitest";
 import { CreateUnitOwnershipClaimBody, DecideUnitOwnershipClaimBody } from "./schema";
 
 const unitId = "019b76da-a800-7300-8000-000000000001";
+const rules = [
+	{
+		sourceRealmId: "019b76da-a800-7300-8000-000000000002",
+		revisionId: "019b76da-a800-7300-8000-000000000003",
+		ruleId: "019b76da-a800-7300-8000-000000000004",
+	},
+];
 
 describe("Unit ownership claim API contracts", () => {
 	it("requires a nonblank ownership basis", () => {
@@ -22,20 +29,20 @@ describe("Unit ownership claim API contracts", () => {
 			Check(DecideUnitOwnershipClaimBody, {
 				decision: "approved",
 				confirmationClaimId: unitId,
-				reasonCode: "administrative",
+				rules,
 			}),
 		).toBe(true);
 		expect(
 			Check(DecideUnitOwnershipClaimBody, {
 				decision: "approved",
-				reasonCode: "administrative",
+				rules,
 			}),
 		).toBe(false);
 		expect(
 			Check(DecideUnitOwnershipClaimBody, {
 				decision: "superseded",
 				confirmationClaimId: unitId,
-				reasonCode: "administrative",
+				rules,
 			}),
 		).toBe(false);
 	});

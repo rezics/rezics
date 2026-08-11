@@ -39,6 +39,10 @@ export default {
 	searchFailed: "搜索暂时无法使用，请稍后再试。",
 	untitledResult: "未命名内容",
 	contentList: "内容列表",
+	ruleRealm: {
+		label: `本地规则${realmTerms.label}`,
+		description: `选择一个${realmTerms.label}，使其当前规则成为此${zoneTerms.inline}可采用的本地治理规则；平台官方规则会始终保留。`,
+	},
 	create: {
 		title: `创建${zoneTerms.label}`,
 		description: `设置此${zoneTerms.inline}涵盖的内容类别与初始外观；创建后可继续设置页面及导航。`,

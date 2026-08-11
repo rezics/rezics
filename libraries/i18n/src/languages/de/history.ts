@@ -47,8 +47,6 @@ export default {
 		},
 		currentRevisionContent:
 			"Der Inhalt der aktuellen Version kann nicht ausgeblendet werden. Veröffentliche zuerst eine bereinigte Version und schütze dann die ältere.",
-		reasonLabel: "Grund",
-		selectReason: "Grund auswählen",
 		atLeastOneField: "Wähle mindestens einen zu schützenden Eintrag aus.",
 		cancel: "Abbrechen",
 		save: "Sichtbarkeit speichern",

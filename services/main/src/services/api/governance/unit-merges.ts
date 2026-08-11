@@ -32,6 +32,13 @@ const MergeConflictResponse = toApiErrorResponse([
 	"UnitMergeIdempotencyConflict",
 	"UnitMergeManifestStale",
 ]);
+const MergeRuleConflictResponse = toApiErrorResponse([
+	"UnitMergeKindMismatch",
+	"UnitMergeRequestConflict",
+	"UnitMergeIdempotencyConflict",
+	"UnitMergeManifestStale",
+	"GovernanceRuleChanged",
+]);
 
 function presentMergeRequest(
 	request: Awaited<ReturnType<typeof getUnitMergeRequest>>,
@@ -124,7 +131,7 @@ export default new Elysia({ prefix: "/platform/unit-merges" })
 					expectedTargetUpdatedAt: new Date(body.expectedTargetUpdatedAt),
 					proposerProfileId: profile.unitId,
 					idempotencyKey: body.idempotencyKey,
-					reasonCode: body.reasonCode,
+					rules: body.rules,
 					note: body.note?.trim() || undefined,
 				}),
 			);
@@ -134,13 +141,16 @@ export default new Elysia({ prefix: "/platform/unit-merges" })
 			body: CreateReviewedUnitMergeBody,
 			response: {
 				[StatusCodes.OK]: UnitMergeRequestResponse,
-				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["UnitMergeConfirmationInvalid"]),
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
+					"UnitMergeConfirmationInvalid",
+					"GovernanceRuleSourceForbidden",
+				]),
 				[StatusCodes.FORBIDDEN]: toApiErrorResponse([
 					"PlatformCapabilityRequired",
 					"FreshSessionRequired",
 				]),
 				[StatusCodes.NOT_FOUND]: MergeNotFoundResponse,
-				[StatusCodes.CONFLICT]: MergeConflictResponse,
+				[StatusCodes.CONFLICT]: MergeRuleConflictResponse,
 				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["UnitMergeKindIneligible"]),
 			},
 			detail: { summary: "Propose a reviewed Unit identity merge", tags: ["Governance"] },
@@ -159,7 +169,7 @@ export default new Elysia({ prefix: "/platform/unit-merges" })
 					expectedTargetUpdatedAt: new Date(body.expectedTargetUpdatedAt),
 					proposerProfileId: profile.unitId,
 					idempotencyKey: body.idempotencyKey,
-					reasonCode: body.reasonCode,
+					rules: body.rules,
 					note: body.note?.trim() || undefined,
 					overrideOfRequestId: body.overrideOfRequestId,
 				}),
@@ -170,13 +180,16 @@ export default new Elysia({ prefix: "/platform/unit-merges" })
 			body: CreateDirectUnitMergeBody,
 			response: {
 				[StatusCodes.OK]: UnitMergeRequestResponse,
-				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["UnitMergeConfirmationInvalid"]),
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
+					"UnitMergeConfirmationInvalid",
+					"GovernanceRuleSourceForbidden",
+				]),
 				[StatusCodes.FORBIDDEN]: toApiErrorResponse([
 					"PlatformCapabilityRequired",
 					"FreshSessionRequired",
 				]),
 				[StatusCodes.NOT_FOUND]: MergeNotFoundResponse,
-				[StatusCodes.CONFLICT]: MergeConflictResponse,
+				[StatusCodes.CONFLICT]: MergeRuleConflictResponse,
 				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["UnitMergeKindIneligible"]),
 			},
 			detail: {
@@ -218,6 +231,7 @@ export default new Elysia({ prefix: "/platform/unit-merges" })
 					"UnitMergeReviewFingerprintMismatch",
 					"UnitMergeRequestNotPending",
 					"UnitMergeRequestExpired",
+					"GovernanceRuleChanged",
 				]),
 			},
 			detail: { summary: "Approve or reject a Unit merge request", tags: ["Governance"] },
@@ -244,7 +258,10 @@ export default new Elysia({ prefix: "/platform/unit-merges" })
 					"FreshSessionRequired",
 				]),
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitMergeNotFound"]),
-				[StatusCodes.CONFLICT]: toApiErrorResponse(["UnitMergeRetryUnavailable"]),
+				[StatusCodes.CONFLICT]: toApiErrorResponse([
+					"UnitMergeRetryUnavailable",
+					"GovernanceRuleChanged",
+				]),
 			},
 			detail: { summary: "Retry a failed Unit merge operation", tags: ["Governance"] },
 		},

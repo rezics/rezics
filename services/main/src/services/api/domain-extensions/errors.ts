@@ -52,6 +52,12 @@ export class ZoneTimeRangeInvalid extends Data.TaggedError("ZoneTimeRangeInvalid
 	readonly message = "Zone endsAt must be later than startsAt";
 }
 
+export class ZoneRuleRealmInvalid extends Data.TaggedError("ZoneRuleRealmInvalid") {
+	static readonly status = StatusCodes.BAD_REQUEST as const;
+	readonly status = ZoneRuleRealmInvalid.status;
+	readonly message = "Zone local Rule Realm must have a current revision with at least one Rule";
+}
+
 export class SoftwareNotFound extends Data.TaggedError("SoftwareNotFound") {
 	static readonly status = StatusCodes.NOT_FOUND as const;
 	readonly status = SoftwareNotFound.status;
@@ -73,6 +79,7 @@ export const DomainExtensionErrors = [
 	ZoneNavigationInUse,
 	ZoneDocumentInvalid,
 	ZoneTimeRangeInvalid,
+	ZoneRuleRealmInvalid,
 	SoftwareNotFound,
 	SystemRequirementNotFound,
 ] as const;

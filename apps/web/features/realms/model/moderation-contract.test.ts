@@ -14,11 +14,14 @@ describe("Realm moderation UI contract", () => {
 		expect(toRealmModerationStatus("not_a_status")).toBe("all");
 	});
 
-	it("requires one or more rule references only for adverse content actions", () => {
+	it("requires Rule references for every policy action but not workflow notes", () => {
+		expect(realmGovernanceActionRequiresRules("approve")).toBe(true);
 		expect(realmGovernanceActionRequiresRules("hide")).toBe(true);
 		expect(realmGovernanceActionRequiresRules("remove")).toBe(true);
+		expect(realmGovernanceActionRequiresRules("restore")).toBe(true);
 		expect(realmGovernanceActionRequiresRules("lock_post_targeting")).toBe(true);
-		expect(realmGovernanceActionRequiresRules("approve")).toBe(false);
+		expect(realmGovernanceActionRequiresRules("unlock_post_targeting")).toBe(true);
+		expect(realmGovernanceActionRequiresRules("dismiss")).toBe(false);
 		expect(realmGovernanceActionRequiresRules("note")).toBe(false);
 	});
 

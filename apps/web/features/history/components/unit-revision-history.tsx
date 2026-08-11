@@ -177,6 +177,7 @@ export function UnitRevisionHistory({ unitId, compareHref, onChanged }: UnitRevi
 										capabilities={capabilities}
 										onChanged={refresh}
 										revision={revision}
+										unitId={unitId}
 									/>
 								) : null}
 							</CardContent>

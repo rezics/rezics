@@ -83,6 +83,7 @@ export default {
 	ZoneNavigationInUse: `This ${zoneTerms.inline} navigation is still used by a block document.`,
 	ZoneDocumentInvalid: `The ${zoneTerms.inline} block or navigation document is invalid.`,
 	ZoneTimeRangeInvalid: `The ${zoneTerms.inline} end time must be later than its start time.`,
+	ZoneRuleRealmInvalid: `The selected ${realmTerms.label} has no current Rule revision with at least one Rule.`,
 	SoftwareNotFound: "This software could not be found.",
 	SystemRequirementNotFound: "This system requirement could not be found.",
 	PollOptionsDuplicated: "Poll options must be unique.",
@@ -113,10 +114,11 @@ export default {
 	ReportRuleUnavailable: "The selected governance scope has no current rules.",
 	ReportRuleChanged: "The selected rule has changed. Choose a rule again before submitting.",
 	ReportRuleSourceForbidden: `Reports may only cite the current ${realmTerms.inline} and official rules.`,
-	ContentGovernanceRuleSourceForbidden:
-		"The selected rule is outside this content-governance authority.",
-	ContentGovernanceRuleChanged:
+	GovernanceRuleSourceForbidden: `The selected Rule ${realmTerms.label} is outside this governance authority.`,
+	GovernanceRuleChanged:
 		"A selected rule is no longer in the current rule revision. Select it again.",
+	GovernanceReversalUnavailable:
+		"This governance decision has already been reversed or does not match the current target.",
 	EnforcementExpiryInvalid: "The enforcement expiry must be in the future.",
 	EnforcementNotFound: "This enforcement could not be found.",
 	EnforcementAlreadyRevoked: "This enforcement has already been revoked.",

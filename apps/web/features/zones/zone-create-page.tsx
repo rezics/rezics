@@ -14,6 +14,7 @@ import {
 	NativeSelectOption,
 	PageHeading,
 	Textarea,
+	UnitPicker,
 } from "@rezics/ui";
 import { useApplicationRouter } from "@/features/application-shell/hooks/use-application-router";
 import { type FormEvent, useState } from "react";
@@ -27,7 +28,7 @@ import { RequestFailure } from "@/i18n/request-failure";
 import { toApiDateTime } from "./model/zone-form";
 
 function ZoneCreateContent() {
-	const { t } = useTranslation(["search", "zones"]);
+	const { t } = useTranslation(["search", "ui", "zones"]);
 	const router = useApplicationRouter();
 	const create = usePostApiZones();
 	const [categories, setCategories] = useState<readonly SearchCategory[]>([]);
@@ -36,6 +37,7 @@ function ZoneCreateContent() {
 	const [density, setDensity] = useState<"comfortable" | "compact">("comfortable");
 	const [startsAt, setStartsAt] = useState("");
 	const [endsAt, setEndsAt] = useState("");
+	const [localRuleRealmId, setLocalRuleRealmId] = useState("");
 	const language = useFormDraftContentLanguage(["title", "summary"]);
 
 	async function submit(event: FormEvent<HTMLFormElement>) {
@@ -64,6 +66,7 @@ function ZoneCreateContent() {
 					}),
 					startsAt: toApiDateTime(startsAt),
 					endsAt: toApiDateTime(endsAt),
+					localRuleRealmId: localRuleRealmId || null,
 				},
 			},
 			{
@@ -109,6 +112,18 @@ function ZoneCreateContent() {
 								placeholder={t.zones.create.categoriesPlaceholder}
 								value={categories}
 							/>
+						</Field>
+						<Field>
+							<FieldLabel>{t.zones.ruleRealm.label}</FieldLabel>
+							<UnitPicker
+								ariaLabel={t.zones.ruleRealm.label}
+								index="realms"
+								kinds={["realm"]}
+								onValueChange={(value) => setLocalRuleRealmId(value ?? "")}
+								placeholder={t.ui.pickerPlaceholders.realm}
+								value={localRuleRealmId}
+							/>
+							<p className="text-muted-foreground text-sm">{t.zones.ruleRealm.description}</p>
 						</Field>
 						<Field>
 							<FieldLabel>{t.zones.create.accent}</FieldLabel>

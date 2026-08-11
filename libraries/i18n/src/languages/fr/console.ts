@@ -6,6 +6,7 @@ import units from "./units";
 
 const { forms: entityTerms } = frTerminology.entity;
 const { forms: realmTerms } = frTerminology.realm;
+const { forms: zoneTerms } = frTerminology.zone;
 const { forms: postTerms } = frTerminology.post;
 
 export default {
@@ -116,7 +117,6 @@ export default {
 		softDeleteTitle: "Supprimer provisoirement cette Unit ?",
 		softDeleteDescription:
 			"La Unit et son historique resteront stockés, mais disparaîtront immédiatement des requêtes et opérations ordinaires.",
-		reason: "Motif de gouvernance",
 		internalNote: "Note interne (facultative)",
 		notePlaceholder:
 			"Consignez le fondement de l’opération ; il sera conservé dans le journal d’audit de sécurité.",
@@ -200,7 +200,6 @@ export default {
 		preflight: "Lancer le contrôle préalable",
 		irreversibleWarning:
 			"L’acceptation est irréversible. La source devient une redirection permanente et toutes les références actives convergent vers la cible.",
-		reason: "Motif de gouvernance",
 		internalNote: "Note interne (facultative)",
 		notePlaceholder:
 			"Consignez les preuves de doublon, les sources vérifiées et le choix de cette cible canonique.",
@@ -252,7 +251,6 @@ export default {
 		rejectTitle: "Rejeter cette revendication de propriété ?",
 		rejectDescription:
 			"La revendication est close sans transfert de propriété, puis le demandeur reçoit la décision.",
-		reason: "Motif de gouvernance",
 		internalNote: "Note interne (facultative)",
 		notePlaceholder:
 			"Consignez les sources de vérification et le fondement de la décision. La note rejoint le journal d’audit de sécurité.",
@@ -273,14 +271,6 @@ export default {
 		verified: "Vérifiée",
 		unverified: "Non vérifiée",
 		states: { active: "Actif", suspended: "Suspendu", closed: "Fermé" },
-		reasons: {
-			security: "Risque de sécurité",
-			policy_violation: "Violation des règles de la plateforme",
-			compromised: "Compromission du compte suspectée",
-			user_request: "Demande de l’utilisateur",
-			legal: "Exigence légale ou de conformité",
-			other: "Autre motif",
-		},
 		empty: "Aucun utilisateur ne correspond aux filtres actuels.",
 		loadingMore: "Chargement d’autres utilisateurs…",
 		selectUser: "Sélectionner un utilisateur",
@@ -449,7 +439,6 @@ export default {
 		untitled: "Unité sans titre",
 		reports: "Signalements de ce dossier",
 		action: "Action de gouvernance",
-		reason: "Motif de gouvernance",
 		internalNote: "Note interne (facultatif)",
 		notePlaceholder: "Consignez la justification ; obligatoire pour ajouter une note.",
 		submit: "Appliquer l’action",
@@ -500,6 +489,7 @@ export default {
 		authorities: {
 			platform: "Plateforme",
 			realm: realmTerms.label,
+			zone: zoneTerms.label,
 			unit: "Unit",
 		},
 		empty: "Aucun événement d’audit ne correspond aux filtres actuels.",
@@ -519,7 +509,8 @@ export default {
 		scopedAuthority: insert("{{kind}} ({{id}})", { kind: String, id: String }),
 		target: "Cible",
 		noTarget: "Aucune cible précise",
-		reasonCode: "Code de motif",
+		outcomeCode: "Code de résultat",
+		governanceDecisionId: `${verbatimTerms.id.value} de décision de gouvernance`,
 		requestId: `${verbatimTerms.id.value} de la requête`,
 		traceId: `${verbatimTerms.id.value} de trace`,
 		rawDetails: "Détails structurés",

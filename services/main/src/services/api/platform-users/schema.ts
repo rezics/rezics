@@ -1,8 +1,9 @@
 import { t } from "elysia";
 
-import { UserAccountStateReasonValues, UserAccountStateValues } from "../../database/schema";
+import { UserAccountStateValues } from "../../database/schema";
 import { CountResultSchema } from "../../counts/contract";
 import { DateTime, Uuid } from "../schema";
+import { GovernanceRuleReferences } from "../governance/schema";
 
 export const PlatformUsersQuery = t.Object(
 	{
@@ -20,7 +21,7 @@ export const PlatformUserSessionParams = t.Object({ userId: Uuid, sessionId: Uui
 
 export const PlatformUserAccountStateResponse = t.Object({
 	state: t.UnionEnum(UserAccountStateValues),
-	reason: t.Nullable(t.UnionEnum(UserAccountStateReasonValues)),
+	governanceDecisionId: t.Nullable(Uuid),
 	note: t.Nullable(t.String()),
 	expiresAt: t.Nullable(DateTime),
 	revision: t.Integer({ minimum: 0 }),
@@ -47,6 +48,7 @@ export const PlatformUserListResponse = t.Object({
 
 const AccountStateCommandBase = {
 	expectedRevision: t.Integer({ minimum: 0 }),
+	rules: GovernanceRuleReferences,
 } as const;
 
 export const ReplacePlatformUserAccountStateBody = t.Union([
@@ -61,7 +63,6 @@ export const ReplacePlatformUserAccountStateBody = t.Union([
 		{
 			...AccountStateCommandBase,
 			state: t.Literal("suspended"),
-			reason: t.UnionEnum(UserAccountStateReasonValues),
 			note: t.Optional(t.String({ minLength: 1, maxLength: 2_000 })),
 			expiresAt: t.Optional(DateTime),
 		},
@@ -71,7 +72,6 @@ export const ReplacePlatformUserAccountStateBody = t.Union([
 		{
 			...AccountStateCommandBase,
 			state: t.Literal("closed"),
-			reason: t.UnionEnum(UserAccountStateReasonValues),
 			note: t.Optional(t.String({ minLength: 1, maxLength: 2_000 })),
 		},
 		{ additionalProperties: false },

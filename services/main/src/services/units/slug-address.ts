@@ -8,14 +8,11 @@ import {
 import { recordAuditEvent } from "../audit";
 import type { Authorization } from "../authorization";
 import { database, type DatabaseTransaction } from "../database";
+import { profile, unit, unitSlugAddress, zonePage, type UnitKind } from "../database/schema";
 import {
-	profile,
-	unit,
-	unitSlugAddress,
-	zonePage,
-	type GovernanceReasonCodeValues,
-	type UnitKind,
-} from "../database/schema";
+	createGovernanceDecision,
+	type GovernanceRuleReference,
+} from "../governance/decision-service";
 import {
 	InvalidSlug,
 	SlugDepthExceeded,
@@ -38,8 +35,6 @@ import {
 	TopLevelSlugNamespaceUnitIds,
 } from "./slug-system";
 import { parseSlugLabel, SlugAddressMaximumDepth, type SlugLabel } from "./slug";
-
-type GovernanceReasonCode = (typeof GovernanceReasonCodeValues)[number];
 
 export interface UnitSlugAddressValue {
 	readonly scopeUnitId: string | null;
@@ -896,7 +891,7 @@ export async function replaceUnitSlugAddressWithPlatformAccess(
 		readonly unitId: string;
 		readonly scopeUnitId: string | null;
 		readonly slug: string;
-		readonly reasonCode: GovernanceReasonCode;
+		readonly rules: readonly GovernanceRuleReference[];
 	},
 ): Promise<UnitAddressMutationResult> {
 	await authorization.platform.ensureCapability("unit.slug.manage");
@@ -924,18 +919,27 @@ export async function replaceUnitSlugAddressWithPlatformAccess(
 		if (target.kind === "slug_namespace" || input.scopeUnitId === null)
 			await authorization.platform.ensureCapability("unit.slug.namespace.manage");
 		const result = await replaceCanonicalAddress(tx, { ...input, slug });
-		if (result.changed)
+		if (result.changed) {
+			const action = !result.before
+				? "unit.slug.assign"
+				: result.before.scopeUnitId === result.after.scopeUnitId
+					? "unit.slug.rename"
+					: "unit.slug.move";
+			const decision = await createGovernanceDecision(tx, {
+				action,
+				actorProfileId: authorization.profileId,
+				authority: { kind: "platform" },
+				targetUnitId: input.unitId,
+				subject: { kind: "unit_slug_address", id: result.addressId },
+				basis: { kind: "rules", rules: input.rules },
+			});
 			await recordAuditEvent(tx, {
 				category: "admin_activity",
 				outcome: "succeeded",
 				actor: { kind: "profile", profileId: authorization.profileId },
 				authority: { kind: "platform" },
-				action: !result.before
-					? "unit.slug.assign"
-					: result.before.scopeUnitId === result.after.scopeUnitId
-						? "unit.slug.rename"
-						: "unit.slug.move",
-				reasonCode: input.reasonCode,
+				action,
+				governanceDecisionId: decision.id,
 				target: { kind: "unit", id: input.unitId },
 				details: {
 					before: result.before,
@@ -943,6 +947,7 @@ export async function replaceUnitSlugAddressWithPlatformAccess(
 					redirectAddressId: result.redirectAddressId,
 				},
 			});
+		}
 		return result;
 	});
 	return {
@@ -961,7 +966,7 @@ export async function createSlugNamespace(
 	input: {
 		readonly scopeUnitId: string | null;
 		readonly slug: string;
-		readonly reasonCode: GovernanceReasonCode;
+		readonly rules: readonly GovernanceRuleReference[];
 	},
 ): Promise<UnitAddressMutationResult> {
 	await authorization.platform.ensureCapability("unit.slug.namespace.manage");
@@ -979,13 +984,21 @@ export async function createSlugNamespace(
 			scopeUnitId: input.scopeUnitId,
 			slug,
 		});
+		const decision = await createGovernanceDecision(tx, {
+			action: "unit.slug_namespace.create",
+			actorProfileId: authorization.profileId,
+			authority: { kind: "platform" },
+			targetUnitId: created.id,
+			subject: { kind: "unit_slug_address", id: mutation.addressId },
+			basis: { kind: "rules", rules: input.rules },
+		});
 		await recordAuditEvent(tx, {
 			category: "admin_activity",
 			outcome: "succeeded",
 			actor: { kind: "profile", profileId: authorization.profileId },
 			authority: { kind: "platform" },
 			action: "unit.slug_namespace.create",
-			reasonCode: input.reasonCode,
+			governanceDecisionId: decision.id,
 			target: { kind: "unit", id: created.id },
 			details: { after: mutation.after, addressId: mutation.addressId },
 		});
@@ -1011,7 +1024,7 @@ export async function releaseSlugRedirect(
 	authorization: Authorization<string>,
 	input: {
 		readonly redirectAddressId: string;
-		readonly reasonCode: GovernanceReasonCode;
+		readonly rules: readonly GovernanceRuleReference[];
 	},
 ): Promise<void> {
 	await authorization.platform.ensureCapability("unit.slug.redirect.release");
@@ -1032,6 +1045,14 @@ export async function releaseSlugRedirect(
 		if (!redirect) throw new SlugRedirectNotFound();
 		if (redirect.scopeUnitId === null)
 			await authorization.platform.ensureCapability("unit.slug.namespace.manage");
+		const decision = await createGovernanceDecision(tx, {
+			action: "unit.slug_redirect.release",
+			actorProfileId: authorization.profileId,
+			authority: { kind: "platform" },
+			targetUnitId: redirect.targetUnitId,
+			subject: { kind: "unit_slug_address", id: redirect.id },
+			basis: { kind: "rules", rules: input.rules },
+		});
 		await tx.delete(unitSlugAddress).where(eq(unitSlugAddress.id, redirect.id));
 		await recordAuditEvent(tx, {
 			category: "admin_activity",
@@ -1039,7 +1060,7 @@ export async function releaseSlugRedirect(
 			actor: { kind: "profile", profileId: authorization.profileId },
 			authority: { kind: "platform" },
 			action: "unit.slug_redirect.release",
-			reasonCode: input.reasonCode,
+			governanceDecisionId: decision.id,
 			target: { kind: "unit", id: redirect.targetUnitId },
 			details: {
 				redirectAddressId: redirect.id,

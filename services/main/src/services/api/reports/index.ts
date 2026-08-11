@@ -8,7 +8,7 @@ import { getUnitReadCondition } from "../../authorization/unit/query";
 import { database } from "../../database";
 import {
 	ActiveContentReviewCaseStateValues,
-	ContentGovernanceMaxRuleSources,
+	GovernanceMaxRuleSources,
 	ContentReviewReportCounterBuckets,
 	type ContentLanguage,
 	type ContentReviewCaseStateValues,
@@ -703,8 +703,7 @@ export default new Elysia().use(session).group("", (app) =>
 			"/reports/units/:unitId",
 			async ({ params, body, query, profile, authorization }) => {
 				const sourceRealmIds = [...new Set(body.rules.map((rule) => rule.sourceRealmId))].sort();
-				if (sourceRealmIds.length > ContentGovernanceMaxRuleSources)
-					throw new ReportRuleSourceForbidden();
+				if (sourceRealmIds.length > GovernanceMaxRuleSources) throw new ReportRuleSourceForbidden();
 				const allowedSourceRealmIds = new Set([
 					OfficialRealmUnitIds.rule,
 					...(body.contextRealmId ? [body.contextRealmId] : []),

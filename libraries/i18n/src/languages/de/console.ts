@@ -6,6 +6,7 @@ import units from "./units";
 
 const { forms: entityTerms } = deTerminology.entity;
 const { forms: realmTerms } = deTerminology.realm;
+const { forms: zoneTerms } = deTerminology.zone;
 const { forms: postTerms } = deTerminology.post;
 
 export default {
@@ -114,7 +115,6 @@ export default {
 		softDeleteTitle: "Diese Unit vorläufig löschen?",
 		softDeleteDescription:
 			"Die Unit und ihr Verlauf bleiben gespeichert, werden aber sofort aus regulären Produktabfragen und Vorgängen ausgeblendet.",
-		reason: "Verwaltungsgrund",
 		internalNote: "Interne Notiz (optional)",
 		notePlaceholder:
 			"Grundlage des Vorgangs festhalten; sie wird im Sicherheitsprotokoll gespeichert.",
@@ -198,7 +198,6 @@ export default {
 		preflight: "Vorprüfung ausführen",
 		irreversibleWarning:
 			"Die Annahme ist unumkehrbar. Die Quelle wird zu einer dauerhaften Weiterleitung und alle aktiven Referenzen werden auf das Ziel umgestellt.",
-		reason: "Verwaltungsgrund",
 		internalNote: "Interne Notiz (optional)",
 		notePlaceholder:
 			"Belege für das Duplikat, Prüfquellen und die Wahl des kanonischen Ziels festhalten.",
@@ -249,7 +248,6 @@ export default {
 		rejectTitle: "Diesen Eigentumsantrag ablehnen?",
 		rejectDescription:
 			"Der Antrag wird ohne Eigentumsübertragung geschlossen und die antragstellende Person erhält die Entscheidung.",
-		reason: "Verwaltungsgrund",
 		internalNote: "Interne Notiz (optional)",
 		notePlaceholder:
 			"Prüfquellen und Entscheidungsgrundlage dokumentieren. Die Notiz wird im Sicherheitsprotokoll gespeichert.",
@@ -270,14 +268,6 @@ export default {
 		verified: "Bestätigt",
 		unverified: "Nicht bestätigt",
 		states: { active: "Aktiv", suspended: "Gesperrt", closed: "Geschlossen" },
-		reasons: {
-			security: "Sicherheitsrisiko",
-			policy_violation: "Verstoß gegen Plattformrichtlinien",
-			compromised: "Verdacht auf Kontokompromittierung",
-			user_request: "Anfrage des Benutzers",
-			legal: "Rechtliche oder regulatorische Anforderung",
-			other: "Anderer Grund",
-		},
 		empty: "Keine Benutzer entsprechen den aktuellen Filtern.",
 		loadingMore: "Weitere Benutzer werden geladen…",
 		selectUser: "Benutzer auswählen",
@@ -448,7 +438,6 @@ export default {
 		untitled: "Unbenannte Unit",
 		reports: "Meldungen in diesem Fall",
 		action: "Moderationsaktion",
-		reason: "Moderationsgrund",
 		internalNote: "Interne Notiz (optional)",
 		notePlaceholder: "Begründung festhalten; beim Hinzufügen einer Notiz erforderlich.",
 		submit: "Moderationsaktion anwenden",
@@ -498,6 +487,7 @@ export default {
 		authorities: {
 			platform: "Plattform",
 			realm: realmTerms.label,
+			zone: zoneTerms.label,
 			unit: "Unit",
 		},
 		empty: "Keine Protokollereignisse entsprechen den aktuellen Filtern.",
@@ -517,7 +507,8 @@ export default {
 		scopedAuthority: insert("{{kind}} ({{id}})", { kind: String, id: String }),
 		target: "Ziel",
 		noTarget: "Kein bestimmtes Ziel",
-		reasonCode: "Ursachencode",
+		outcomeCode: "Ergebniscode",
+		governanceDecisionId: `Governance-Entscheidungs-${verbatimTerms.id.value}`,
 		requestId: `Anfrage-${verbatimTerms.id.value}`,
 		traceId: `Trace-${verbatimTerms.id.value}`,
 		rawDetails: "Strukturierte Details",

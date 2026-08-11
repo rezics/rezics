@@ -51,17 +51,17 @@ import { useRef, useState, type FormEvent } from "react";
 import { LocalizedPortableTextContent } from "@/features/content-language-display/localized-portable-text-content";
 import { PortableTextEditor } from "@/features/editor/portable-text-editor";
 import {
-	contentRuleSelectionKey,
-	getContentRuleDestination,
-	getContentRuleKeys,
-	getContentRuleReferences,
-	retainAvailableContentRuleSelection,
-	updateContentRuleSelection,
-} from "@/features/governance/model/content-rule-selection";
+	governanceRuleSelectionKey,
+	getGovernanceRuleSource,
+	getGovernanceRuleKeys,
+	getGovernanceRuleReferences,
+	retainAvailableGovernanceRuleSelection,
+	updateGovernanceRuleSelection,
+} from "@/features/governance/model/governance-rule-selection";
 import {
-	ContentRuleMultiSelect,
-	ContentRuleSourceSelect,
-} from "@/features/governance/components/content-rule-picker";
+	GovernanceRuleMultiSelect,
+	GovernanceRuleSourceSelect,
+} from "@/features/governance/components/governance-rule-picker";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
@@ -157,15 +157,17 @@ export function RealmModerationSheet({
 	const command = toRealmModerationCommand(commandSelection, unit.allowedCommands);
 	const rulesRequired = realmGovernanceActionRequiresRules(command);
 	const destinationItems = destinations.data?.items ?? [];
-	const currentSelectedRuleKeys = retainAvailableContentRuleSelection(
+	const currentSelectedRuleKeys = retainAvailableGovernanceRuleSelection(
 		selectedRuleKeys,
 		destinationItems,
 	);
-	const activeDestination = getContentRuleDestination(destinationItems, ruleSourceId);
+	const activeDestination = getGovernanceRuleSource(destinationItems, ruleSourceId);
 	const activeSelectedRuleKeys = activeDestination
-		? getContentRuleKeys(activeDestination).filter((key) => currentSelectedRuleKeys.includes(key))
+		? getGovernanceRuleKeys(activeDestination).filter((key) =>
+				currentSelectedRuleKeys.includes(key),
+			)
 		: [];
-	const selectedRules = getContentRuleReferences(destinationItems, currentSelectedRuleKeys);
+	const selectedRules = getGovernanceRuleReferences(destinationItems, currentSelectedRuleKeys);
 	const annotationRequested = command === "note" || includeAnnotation;
 	const annotationValid = !annotationRequested || hasAuthoredAnnotation(annotation);
 	const rulesValid = !rulesRequired || selectedRules.length > 0;
@@ -178,7 +180,7 @@ export function RealmModerationSheet({
 			destination.rules.map(
 				(rule) =>
 					[
-						contentRuleSelectionKey(destination.id, destination.revisionId, rule.id),
+						governanceRuleSelectionKey(destination.id, destination.revisionId, rule.id),
 						rule.title,
 					] as const,
 			),
@@ -192,12 +194,12 @@ export function RealmModerationSheet({
 
 	function updateRuleCheckedState(key: string, checked: boolean) {
 		const availableRuleKeys = new Set(
-			destinationItems.flatMap((destination) => getContentRuleKeys(destination)),
+			destinationItems.flatMap((destination) => getGovernanceRuleKeys(destination)),
 		);
 		if (!availableRuleKeys.has(key)) return;
 		setSelectedRuleKeys((current) =>
-			updateContentRuleSelection(
-				retainAvailableContentRuleSelection(current, destinationItems),
+			updateGovernanceRuleSelection(
+				retainAvailableGovernanceRuleSelection(current, destinationItems),
 				key,
 				checked,
 			),
@@ -234,9 +236,7 @@ export function RealmModerationSheet({
 			if (!selectedRules.length) return undefined;
 			return { type: "action", body: { ...common, command, rules: selectedRules } };
 		}
-		if (command !== "approve" && command !== "restore" && command !== "unlock_post_targeting")
-			return undefined;
-		return { type: "action", body: { ...common, command } };
+		return undefined;
 	}
 
 	async function applyGovernance() {
@@ -328,8 +328,8 @@ export function RealmModerationSheet({
 									{destinationItems.length > 1 ? (
 										<Field>
 											<FieldLabel>{t.reports.realm}</FieldLabel>
-											<ContentRuleSourceSelect
-												destinations={destinationItems}
+											<GovernanceRuleSourceSelect
+												sources={destinationItems}
 												labels={{
 													ariaLabel: t.reports.realm,
 													choose: t.reports.chooseRealm,
@@ -344,8 +344,8 @@ export function RealmModerationSheet({
 										<FieldLabel>{t.reports.rule}</FieldLabel>
 										{destinations.isPending ? <Skeleton className="h-28 rounded-xl" /> : null}
 										{destinations.error ? <RequestFailure error={destinations.error} /> : null}
-										<ContentRuleMultiSelect
-											destination={activeDestination}
+										<GovernanceRuleMultiSelect
+											source={activeDestination}
 											labels={{
 												ariaLabel: t.reports.rule,
 												choose: t.reports.chooseRule,
@@ -590,7 +590,7 @@ function RealmModerationHistoryItem({
 							.map(
 								(rule) =>
 									ruleTitles.get(
-										contentRuleSelectionKey(rule.sourceRealmId, rule.revisionId, rule.ruleId),
+										governanceRuleSelectionKey(rule.sourceRealmId, rule.revisionId, rule.ruleId),
 									) ?? rule.ruleId,
 							)
 							.join(" · ")}

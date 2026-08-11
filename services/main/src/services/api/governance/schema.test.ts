@@ -35,7 +35,7 @@ describe("adjacent governance API contracts", () => {
 			expectedSourceUpdatedAt: "2026-08-11T00:00:00.000Z",
 			expectedTargetUpdatedAt: "2026-08-11T00:00:00.000Z",
 			idempotencyKey: "merge-command-1",
-			reasonCode: "duplicate",
+			rules: [rule],
 		};
 		expect(Check(CreateReviewedUnitMergeBody, command)).toBe(true);
 		expect(
@@ -61,7 +61,7 @@ describe("adjacent governance API contracts", () => {
 		expect(Check(UpdateContentReviewCaseBody, { safeSummary: "copied summary" })).toBe(false);
 	});
 
-	it("requires rules for adverse actions and an exact restoration reference", () => {
+	it("requires Rules for policy decisions and an exact restoration reference", () => {
 		expect(
 			Check(CreateContentGovernanceActionBody, {
 				caseId: profileId,
@@ -73,6 +73,19 @@ describe("adjacent governance API contracts", () => {
 			Check(CreateContentGovernanceActionBody, {
 				caseId: profileId,
 				kind: "invalidate_content_license",
+			}),
+		).toBe(false);
+		expect(
+			Check(CreateContentGovernanceActionBody, {
+				caseId: profileId,
+				kind: "approve",
+				rules: [rule],
+			}),
+		).toBe(true);
+		expect(
+			Check(CreateContentGovernanceActionBody, {
+				caseId: profileId,
+				kind: "approve",
 			}),
 		).toBe(false);
 		expect(
@@ -105,6 +118,7 @@ describe("adjacent governance API contracts", () => {
 				grants: ["realm.tag-contexts.manage"],
 				restrictions: [],
 				scope: [],
+				rules: [rule],
 			}),
 		).toBe(true);
 		expect(
@@ -129,7 +143,7 @@ describe("adjacent governance API contracts", () => {
 				grants: ["unit.read"],
 				restrictions: ["unit.update"],
 				scope: [],
-				reasonCode: "account_security",
+				rules: [rule],
 			}),
 		).toBe(true);
 		expect(
@@ -181,7 +195,7 @@ describe("adjacent governance API contracts", () => {
 				expectedOwnerProfileId: null,
 				targetProfileId: secondProfileId,
 				confirmationUnitId: profileId,
-				reasonCode: "administrative",
+				rules: [rule],
 				note: "Recover an ownerless Unit.",
 			}),
 		).toBe(true);
@@ -189,7 +203,7 @@ describe("adjacent governance API contracts", () => {
 			Check(OverrideUnitOwnershipBody, {
 				expectedOwnerProfileId: profileId,
 				targetProfileId: secondProfileId,
-				reasonCode: "administrative",
+				rules: [rule],
 			}),
 		).toBe(false);
 	});
@@ -226,6 +240,7 @@ describe("adjacent governance API contracts", () => {
 			Check(CreateAccountEnforcementBody, {
 				profileId,
 				kind: "warning",
+				rules: [rule],
 				notes: [{ role: "public_notice", language: "en", content }],
 			}),
 		).toBe(true);

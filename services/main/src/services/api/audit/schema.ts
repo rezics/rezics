@@ -41,7 +41,8 @@ export const AuditEventResponse = t.Object({
 		id: t.Nullable(Uuid),
 	}),
 	action: t.String(),
-	reasonCode: t.Nullable(t.String()),
+	outcomeCode: t.Nullable(t.String()),
+	governanceDecisionId: t.Nullable(Uuid),
 	requestId: t.Nullable(t.String()),
 	traceId: t.Nullable(t.String()),
 	target: t.Nullable(

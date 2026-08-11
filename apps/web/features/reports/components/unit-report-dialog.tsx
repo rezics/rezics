@@ -30,16 +30,16 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useAuthPortal } from "@/features/auth/auth-portal-context";
 import { useApplicationRouter } from "@/features/application-shell/hooks/use-application-router";
 import {
-	getContentRuleDestination,
-	getContentRuleKeys,
-	getContentRuleReferences,
-	retainAvailableContentRuleSelection,
-	updateContentRuleSelection,
-} from "@/features/governance/model/content-rule-selection";
+	getGovernanceRuleSource,
+	getGovernanceRuleKeys,
+	getGovernanceRuleReferences,
+	retainAvailableGovernanceRuleSelection,
+	updateGovernanceRuleSelection,
+} from "@/features/governance/model/governance-rule-selection";
 import {
-	ContentRuleMultiSelect,
-	ContentRuleSourceSelect,
-} from "@/features/governance/components/content-rule-picker";
+	GovernanceRuleMultiSelect,
+	GovernanceRuleSourceSelect,
+} from "@/features/governance/components/governance-rule-picker";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
@@ -84,15 +84,18 @@ export function UnitReportDialog({
 	);
 	const destinationItems = destinations.data?.items ?? [];
 	const selectedKeys = ruleSelection.contextKey === selectionContextKey ? ruleSelection.keys : [];
-	const currentSelectedKeys = retainAvailableContentRuleSelection(selectedKeys, destinationItems);
-	const activeDestination = getContentRuleDestination(
+	const currentSelectedKeys = retainAvailableGovernanceRuleSelection(
+		selectedKeys,
+		destinationItems,
+	);
+	const activeDestination = getGovernanceRuleSource(
 		destinationItems,
 		ruleSelection.contextKey === selectionContextKey ? ruleSelection.sourceId : undefined,
 	);
 	const activeSelectedKeys = activeDestination
-		? getContentRuleKeys(activeDestination).filter((key) => currentSelectedKeys.includes(key))
+		? getGovernanceRuleKeys(activeDestination).filter((key) => currentSelectedKeys.includes(key))
 		: [];
-	const selectedRules = getContentRuleReferences(destinationItems, currentSelectedKeys);
+	const selectedRules = getGovernanceRuleReferences(destinationItems, currentSelectedKeys);
 	const submitReport = usePostApiReportsUnitsByUnitId();
 	const canSubmit = selectedRules.length > 0 && !submitReport.isPending;
 
@@ -103,7 +106,7 @@ export function UnitReportDialog({
 			sourceId,
 			keys:
 				current.contextKey === selectionContextKey
-					? retainAvailableContentRuleSelection(current.keys, destinationItems)
+					? retainAvailableGovernanceRuleSelection(current.keys, destinationItems)
 					: [],
 		}));
 	}
@@ -111,12 +114,12 @@ export function UnitReportDialog({
 	function updateRuleCheckedState(key: string, checked: boolean) {
 		setRuleSelection((current) => {
 			const availableRuleKeys = new Set(
-				destinationItems.flatMap((destination) => getContentRuleKeys(destination)),
+				destinationItems.flatMap((destination) => getGovernanceRuleKeys(destination)),
 			);
 			if (!availableRuleKeys.has(key)) return current;
 			const keys =
 				current.contextKey === selectionContextKey
-					? retainAvailableContentRuleSelection(current.keys, destinationItems)
+					? retainAvailableGovernanceRuleSelection(current.keys, destinationItems)
 					: [];
 			return {
 				contextKey: selectionContextKey,
@@ -124,7 +127,7 @@ export function UnitReportDialog({
 					current.contextKey === selectionContextKey
 						? current.sourceId
 						: (activeDestination?.id ?? ""),
-				keys: updateContentRuleSelection(keys, key, checked),
+				keys: updateGovernanceRuleSelection(keys, key, checked),
 			};
 		});
 	}
@@ -175,8 +178,8 @@ export function UnitReportDialog({
 						{destinationItems.length > 1 ? (
 							<Field>
 								<FieldLabel>{t.reports.realm}</FieldLabel>
-								<ContentRuleSourceSelect
-									destinations={destinationItems}
+								<GovernanceRuleSourceSelect
+									sources={destinationItems}
 									labels={{
 										ariaLabel: t.reports.realm,
 										choose: t.reports.chooseRealm,
@@ -189,8 +192,8 @@ export function UnitReportDialog({
 						) : null}
 						<Field required>
 							<FieldLabel>{t.reports.rule}</FieldLabel>
-							<ContentRuleMultiSelect
-								destination={activeDestination}
+							<GovernanceRuleMultiSelect
+								source={activeDestination}
 								labels={{
 									ariaLabel: t.reports.rule,
 									choose: t.reports.chooseRule,

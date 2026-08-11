@@ -40,7 +40,7 @@ import {
 	contentStructureNode,
 	ActiveContentReviewCaseStateValues,
 	contentGovernanceAction,
-	contentGovernanceActionRule,
+	governanceDecisionRule,
 	contentReport,
 	contentReportReferral,
 	contentReviewCase,
@@ -2788,6 +2788,7 @@ export default new Elysia({ prefix: "/realms" })
 			const actions = await database
 				.select({
 					id: contentGovernanceAction.id,
+					decisionId: contentGovernanceAction.decisionId,
 					caseId: contentGovernanceAction.caseId,
 					kind: contentGovernanceAction.kind,
 					actorProfileId: contentGovernanceAction.actorProfileId,
@@ -2812,6 +2813,8 @@ export default new Elysia({ prefix: "/realms" })
 				.orderBy(desc(contentGovernanceAction.createdAt), desc(contentGovernanceAction.id))
 				.limit(query.limit ?? 50);
 			const actionIds = actions.map((action) => action.id);
+			const actionIdByDecisionId = new Map(actions.map((action) => [action.decisionId, action.id]));
+			const decisionIds = [...actionIdByDecisionId.keys()];
 			const [notes, ruleRows] = actionIds.length
 				? await Promise.all([
 						database.transaction((tx) =>
@@ -2823,17 +2826,17 @@ export default new Elysia({ prefix: "/realms" })
 						),
 						database
 							.select({
-								actionId: contentGovernanceActionRule.actionId,
-								sourceRealmId: contentGovernanceActionRule.ruleSourceRealmId,
-								revisionId: contentGovernanceActionRule.ruleRevisionId,
-								ruleId: contentGovernanceActionRule.ruleId,
+								decisionId: governanceDecisionRule.decisionId,
+								sourceRealmId: governanceDecisionRule.ruleSourceRealmId,
+								revisionId: governanceDecisionRule.ruleRevisionId,
+								ruleId: governanceDecisionRule.ruleId,
 							})
-							.from(contentGovernanceActionRule)
-							.where(inArray(contentGovernanceActionRule.actionId, actionIds))
+							.from(governanceDecisionRule)
+							.where(inArray(governanceDecisionRule.decisionId, decisionIds))
 							.orderBy(
-								contentGovernanceActionRule.actionId,
-								contentGovernanceActionRule.ruleSourceRealmId,
-								contentGovernanceActionRule.ruleId,
+								governanceDecisionRule.decisionId,
+								governanceDecisionRule.ruleSourceRealmId,
+								governanceDecisionRule.ruleId,
 							),
 					])
 				: [[], []];
@@ -2842,9 +2845,15 @@ export default new Elysia({ prefix: "/realms" })
 				Array<{ sourceRealmId: string; revisionId: string; ruleId: string }>
 			>();
 			for (const rule of ruleRows) {
-				const items = rulesByAction.get(rule.actionId) ?? [];
-				items.push(rule);
-				rulesByAction.set(rule.actionId, items);
+				const actionId = actionIdByDecisionId.get(rule.decisionId);
+				if (!actionId) continue;
+				const items = rulesByAction.get(actionId) ?? [];
+				items.push({
+					sourceRealmId: rule.sourceRealmId,
+					revisionId: rule.revisionId,
+					ruleId: rule.ruleId,
+				});
+				rulesByAction.set(actionId, items);
 			}
 			const notesByAction = new Map<
 				string,
@@ -2873,7 +2882,7 @@ export default new Elysia({ prefix: "/realms" })
 				notesByAction.set(note.subjectId, items);
 			}
 			return {
-				items: actions.map((action) => ({
+				items: actions.map(({ decisionId: _decisionId, ...action }) => ({
 					...action,
 					previousState: presentRealmUnitStatus(action.previousState),
 					resultingState: presentRealmUnitStatus(action.resultingState),
@@ -2967,10 +2976,11 @@ export default new Elysia({ prefix: "/realms" })
 					idempotencyKey: body.idempotencyKey,
 					...(body.annotation ? { notes: [body.annotation] } : {}),
 				};
-				const actionBody: CreateContentGovernanceActionBody =
-					"rules" in body
-						? { ...common, kind: body.command, rules: body.rules }
-						: { ...common, kind: body.command };
+				const actionBody: CreateContentGovernanceActionBody = {
+					...common,
+					kind: body.command,
+					rules: body.rules,
+				};
 				const executed = await executeAuthorizedContentGovernanceAction(tx, {
 					caseRow,
 					actorProfileId: profile.unitId,
@@ -3021,7 +3031,7 @@ export default new Elysia({ prefix: "/realms" })
 				[StatusCodes.OK]: RealmUnitModerationActionResponse,
 				[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
 					"ContentGovernanceActionIncompatible",
-					"ContentGovernanceRuleSourceForbidden",
+					"GovernanceRuleSourceForbidden",
 				]),
 				[StatusCodes.FORBIDDEN]: toApiErrorResponse(["RealmCapabilityRequired"]),
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["RealmUnitNotFound"]),
@@ -3029,7 +3039,7 @@ export default new Elysia({ prefix: "/realms" })
 					"ContentGovernanceTransitionInvalid",
 					"ContentGovernanceActionNoEffect",
 					"ContentGovernanceIdempotencyConflict",
-					"ContentGovernanceRuleChanged",
+					"GovernanceRuleChanged",
 					"PostTargetingLocked",
 				]),
 			},

@@ -90,6 +90,7 @@ export const CreateZoneBody = t.Object(
 		themeDocument: ZoneThemeInputDocument,
 		startsAt: t.Optional(t.Nullable(t.String({ format: "date-time" }))),
 		endsAt: t.Optional(t.Nullable(t.String({ format: "date-time" }))),
+		localRuleRealmId: t.Optional(t.Nullable(Uuid)),
 	},
 	{ additionalProperties: false },
 );
@@ -130,6 +131,7 @@ export const UpdateZoneBody = t.Object(
 		themeDocument: t.Optional(ZoneThemeInputDocument),
 		startsAt: t.Optional(t.Nullable(t.String({ format: "date-time" }))),
 		endsAt: t.Optional(t.Nullable(t.String({ format: "date-time" }))),
+		localRuleRealmId: t.Optional(t.Nullable(Uuid)),
 	},
 	{ minProperties: 1, additionalProperties: false },
 );
@@ -246,6 +248,7 @@ export const ZoneResponse = t.Object({
 	themeDocument: ZoneThemeResponseDocument,
 	startsAt: t.Nullable(DateTime),
 	endsAt: t.Nullable(DateTime),
+	localRuleRealmId: t.Nullable(Uuid),
 	capabilities: t.Object({ canManage: t.Boolean() }),
 	createdAt: DateTime,
 	updatedAt: DateTime,

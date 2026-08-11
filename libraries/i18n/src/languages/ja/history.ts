@@ -46,8 +46,6 @@ export default {
 		},
 		currentRevisionContent:
 			"現在の改訂内容は非表示にできません。問題のない新しい改訂を先に公開してから、古い改訂を保護してください。",
-		reasonLabel: "理由",
-		selectReason: "理由を選択",
 		atLeastOneField: "保護する項目を1つ以上選択してください。",
 		cancel: "キャンセル",
 		save: "表示範囲を保存",

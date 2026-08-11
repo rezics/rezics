@@ -25,6 +25,7 @@ import {
 	NativeSelect,
 	NativeSelectOption,
 	Textarea,
+	UnitPicker,
 } from "@rezics/ui";
 import { useQueryClient } from "@tanstack/react-query";
 import { AppLink as Link } from "@/features/application-shell/components/app-link";
@@ -62,6 +63,7 @@ type ZoneLocalizationDraft = {
 
 type ZoneSharedDraft = {
 	readonly slug: string;
+	readonly localRuleRealmId: string;
 	readonly startsAt: string;
 	readonly endsAt: string;
 	readonly theme: ZoneTheme;
@@ -81,20 +83,22 @@ const ZoneLocalizationDraftCodec: LocalizedDraftCodec<ZoneLocalizationDraft> = {
 };
 
 const ZoneSharedDraftCodec: LocalizedDraftCodec<ZoneSharedDraft> = {
-	version: 1,
+	version: 2,
 	decode(value) {
 		if (!isDraftRecord(value)) return;
 		const slug = decodeDraftString(value.slug);
+		const localRuleRealmId = decodeDraftString(value.localRuleRealmId);
 		const startsAt = decodeDraftString(value.startsAt);
 		const endsAt = decodeDraftString(value.endsAt);
 		if (
 			slug === undefined ||
+			localRuleRealmId === undefined ||
 			startsAt === undefined ||
 			endsAt === undefined ||
 			!isDocument(ZoneThemeDocument, value.theme)
 		)
 			return;
-		return { slug, startsAt, endsAt, theme: value.theme };
+		return { slug, localRuleRealmId, startsAt, endsAt, theme: value.theme };
 	},
 };
 
@@ -139,6 +143,7 @@ function ZoneManagementOverviewForLanguage() {
 		codec: ZoneSharedDraftCodec,
 		createInitialValue: () => ({
 			slug: zone.slugAddress?.slug ?? "",
+			localRuleRealmId: zone.localRuleRealmId ?? "",
 			startsAt: toLocalDateTime(zone.startsAt),
 			endsAt: toLocalDateTime(zone.endsAt),
 			theme: initialTheme,
@@ -160,6 +165,7 @@ function ZoneManagementOverviewForLanguage() {
 						avatar: avatarPresentationToInput(localization.avatar),
 					},
 					themeDocument: shared.theme,
+					localRuleRealmId: shared.localRuleRealmId || null,
 					startsAt: toApiDateTime(shared.startsAt),
 					endsAt: toApiDateTime(shared.endsAt),
 				},
@@ -252,6 +258,23 @@ function ZoneManagementOverviewForLanguage() {
 										required={Boolean(zone.slugAddress)}
 										value={shared.slug}
 									/>
+								</Field>
+								<Field>
+									<FieldLabel>{t.zones.ruleRealm.label}</FieldLabel>
+									<UnitPicker
+										ariaLabel={t.zones.ruleRealm.label}
+										index="realms"
+										kinds={["realm"]}
+										onValueChange={(localRuleRealmId) =>
+											sharedDraft.setValue((current) => ({
+												...current,
+												localRuleRealmId: localRuleRealmId ?? "",
+											}))
+										}
+										placeholder={t.ui.pickerPlaceholders.realm}
+										value={shared.localRuleRealmId}
+									/>
+									<p className="text-muted-foreground text-sm">{t.zones.ruleRealm.description}</p>
 								</Field>
 								<Field>
 									<FieldLabel>{t.zones.management.profile.accent}</FieldLabel>

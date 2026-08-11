@@ -23,18 +23,11 @@ import {
 	PlatformUnitLifecycleResponse,
 	PlatformUnitListResponse,
 	UnitGovernanceParams,
-	UnitLifecycleCommandBody,
+	DeleteUnitLifecycleCommandBody,
+	RestoreUnitLifecycleCommandBody,
 	UnitOwnershipCandidateListResponse,
 	UnitOwnershipResponse,
 } from "./schema";
-
-const LifecycleConflictResponse = toApiErrorResponse([
-	"UnitLifecycleChanged",
-	"UnitLifecycleProtected",
-	"UnitAlreadyDeleted",
-	"UnitNotDeleted",
-	"UnitMergeRequestConflict",
-]);
 
 export default new Elysia({ prefix: "/platform/units" })
 	.use(session)
@@ -98,7 +91,7 @@ export default new Elysia({ prefix: "/platform/units" })
 				actorProfileId: profile.unitId,
 				expectedOwnerProfileId: body.expectedOwnerProfileId,
 				targetProfileId: body.targetProfileId,
-				reasonCode: body.reasonCode,
+				rules: body.rules,
 				note: body.note?.trim() || undefined,
 			});
 		},
@@ -108,7 +101,10 @@ export default new Elysia({ prefix: "/platform/units" })
 			body: OverrideUnitOwnershipBody,
 			response: {
 				[StatusCodes.OK]: UnitOwnershipResponse,
-				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["UnitOwnershipOverrideConfirmationInvalid"]),
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
+					"UnitOwnershipOverrideConfirmationInvalid",
+					"GovernanceRuleSourceForbidden",
+				]),
 				[StatusCodes.FORBIDDEN]: toApiErrorResponse([
 					"PlatformCapabilityRequired",
 					"FreshSessionRequired",
@@ -117,6 +113,7 @@ export default new Elysia({ prefix: "/platform/units" })
 				[StatusCodes.CONFLICT]: toApiErrorResponse([
 					"UnitOwnershipChanged",
 					"UnitOwnershipTargetIneligible",
+					"GovernanceRuleChanged",
 				]),
 			},
 			detail: {
@@ -134,23 +131,33 @@ export default new Elysia({ prefix: "/platform/units" })
 				unitId: params.unitId,
 				actorProfileId: profile.unitId,
 				expectedUpdatedAt: new Date(body.expectedUpdatedAt),
-				reasonCode: body.reasonCode,
+				rules: body.rules,
 				note: body.note?.trim() || undefined,
 			});
 		},
 		{
 			access: "fresh-session-only",
 			params: UnitGovernanceParams,
-			body: UnitLifecycleCommandBody,
+			body: DeleteUnitLifecycleCommandBody,
 			response: {
 				[StatusCodes.OK]: PlatformUnitLifecycleResponse,
-				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["UnitLifecycleConfirmationInvalid"]),
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
+					"UnitLifecycleConfirmationInvalid",
+					"GovernanceRuleSourceForbidden",
+				]),
 				[StatusCodes.FORBIDDEN]: toApiErrorResponse([
 					"PlatformCapabilityRequired",
 					"FreshSessionRequired",
 				]),
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
-				[StatusCodes.CONFLICT]: LifecycleConflictResponse,
+				[StatusCodes.CONFLICT]: toApiErrorResponse([
+					"UnitLifecycleChanged",
+					"UnitLifecycleProtected",
+					"UnitAlreadyDeleted",
+					"UnitNotDeleted",
+					"UnitMergeRequestConflict",
+					"GovernanceRuleChanged",
+				]),
 			},
 			detail: {
 				summary: "Soft-delete a Unit from the platform Console",
@@ -167,14 +174,13 @@ export default new Elysia({ prefix: "/platform/units" })
 				unitId: params.unitId,
 				actorProfileId: profile.unitId,
 				expectedUpdatedAt: new Date(body.expectedUpdatedAt),
-				reasonCode: body.reasonCode,
 				note: body.note?.trim() || undefined,
 			});
 		},
 		{
 			access: "fresh-session-only",
 			params: UnitGovernanceParams,
-			body: UnitLifecycleCommandBody,
+			body: RestoreUnitLifecycleCommandBody,
 			response: {
 				[StatusCodes.OK]: PlatformUnitLifecycleResponse,
 				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["UnitLifecycleConfirmationInvalid"]),
@@ -183,7 +189,14 @@ export default new Elysia({ prefix: "/platform/units" })
 					"FreshSessionRequired",
 				]),
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
-				[StatusCodes.CONFLICT]: LifecycleConflictResponse,
+				[StatusCodes.CONFLICT]: toApiErrorResponse([
+					"UnitLifecycleChanged",
+					"UnitLifecycleProtected",
+					"UnitAlreadyDeleted",
+					"UnitNotDeleted",
+					"UnitMergeRequestConflict",
+					"GovernanceReversalUnavailable",
+				]),
 			},
 			detail: {
 				summary: "Restore a soft-deleted Unit from the platform Console",

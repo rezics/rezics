@@ -43,17 +43,17 @@ Realm identity; Realm cases carry exactly one Realm identity. Partial unique
 indexes allow at most one active case for each `(authority, Realm, Unit)` while
 allowing later cases after a prior case reaches a terminal state.
 
-`content_governance_action` is the immutable decision ledger. Adverse actions
-store their rule basis in `content_governance_action_rule`; restorative actions
-refer to the action they reverse when an exact reversal identity is required.
+`governance_decision` is the cross-domain immutable decision ledger.
+`content_governance_action` retains content-specific transition facts and has a
+one-to-one link to that ledger. Adverse actions store their basis in
+`governance_decision_rule`; restorative actions point to the decision they
+reverse.
 Free-form internal notes and public notices are revisioned Posts bound to the
 case or action. Reporter allegations, reviewer notes, and decision rules are
 separate facts and are never copied into a generic reason column.
 
-Account enforcement is deliberately separate. Existing account enforcement
-identities are re-homed into `account_enforcement_action` during cutover because
-they remain live security state; old content moderation history and its reason
-values are not preserved.
+Account enforcement retains a separate operational action, but its authority,
+Rule basis, and reversal are recorded in the same governance decision ledger.
 
 ## Concurrency and bounded work
 
@@ -107,7 +107,7 @@ The resulting central estimates are:
 | `content_report_referral` | 575M | 3.45B |
 | `content_review_case` | 28.75M | 172.5M |
 | `content_governance_action` | 46M | 276M |
-| `content_governance_action_rule` | about 83M | about 497M |
+| `governance_decision_rule` for content actions | about 83M | about 497M |
 
 Approximate PostgreSQL heap-plus-index footprints are 0.35 KiB per report,
 0.25 KiB per report-rule row, and 0.38 KiB per referral. Those estimates put

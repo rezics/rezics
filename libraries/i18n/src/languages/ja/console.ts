@@ -6,6 +6,7 @@ import units from "./units";
 
 const { forms: entityTerms } = jaTerminology.entity;
 const { forms: realmTerms } = jaTerminology.realm;
+const { forms: zoneTerms } = jaTerminology.zone;
 const { forms: postTerms } = jaTerminology.post;
 
 export default {
@@ -113,7 +114,6 @@ export default {
 		softDeleteTitle: "このユニットを論理削除しますか？",
 		softDeleteDescription:
 			"ユニットと履歴は保持されますが、通常の製品検索と操作からは直ちに非表示になります。",
-		reason: "ガバナンス上の理由",
 		internalNote: "内部メモ（任意）",
 		notePlaceholder: "操作の根拠を記録します。セキュリティ監査ログに保存されます。",
 		confirmationLabel: `確認のためユニット ${verbatimTerms.id.value} を入力`,
@@ -191,7 +191,6 @@ export default {
 		preflight: "事前検証を実行",
 		irreversibleWarning:
 			"承認後は元に戻せません。統合元は恒久的なリダイレクトとなり、すべての有効な参照が統合先へ収束します。",
-		reason: "ガバナンス上の理由",
 		internalNote: "内部メモ（任意）",
 		notePlaceholder: "重複の根拠、確認した情報源、この統合先を正規とする理由を記録します。",
 		confirmSource: `統合元ユニットの ${verbatimTerms.id.value} を再入力`,
@@ -240,7 +239,6 @@ export default {
 			"ユニットは直ちにコミュニティから申請者へ移され、個人管理の作品になります。既存の公開共同編集権限は維持され、他の審査中申請は終了します。",
 		rejectTitle: "この所有権申請を却下しますか？",
 		rejectDescription: "ユニットの所有権を移さずに申請を終了し、申請者へ審査結果を通知します。",
-		reason: "ガバナンス上の理由",
 		internalNote: "内部メモ（任意）",
 		notePlaceholder:
 			"確認に用いた情報源と判断根拠を記録します。セキュリティ監査記録に保存されます。",
@@ -261,14 +259,6 @@ export default {
 		verified: "確認済み",
 		unverified: "未確認",
 		states: { active: "有効", suspended: "停止中", closed: "閉鎖済み" },
-		reasons: {
-			security: "セキュリティ上のリスク",
-			policy_violation: "プラットフォームポリシー違反",
-			compromised: "アカウント侵害の疑い",
-			user_request: "利用者からの依頼",
-			legal: "法令またはコンプライアンス上の要請",
-			other: "その他",
-		},
 		empty: "現在の条件に一致する利用者はいません。",
 		loadingMore: "利用者をさらに読み込んでいます…",
 		selectUser: "利用者を選択",
@@ -429,7 +419,6 @@ export default {
 		untitled: "無題のユニット",
 		reports: "このケースの報告",
 		action: "ガバナンス操作",
-		reason: "ガバナンス理由",
 		internalNote: "内部メモ（任意）",
 		notePlaceholder: "判断理由を記録します。メモを追加する場合は必須です。",
 		submit: "ガバナンス操作を実行",
@@ -480,6 +469,7 @@ export default {
 		authorities: {
 			platform: "プラットフォーム",
 			realm: realmTerms.label,
+			zone: zoneTerms.label,
 			unit: "ユニット",
 		},
 		empty: "現在のフィルターに一致する監査イベントはありません。",
@@ -499,7 +489,8 @@ export default {
 		scopedAuthority: insert("{{kind}} ({{id}})", { kind: String, id: String }),
 		target: "対象",
 		noTarget: "特定の対象なし",
-		reasonCode: "理由コード",
+		outcomeCode: "結果コード",
+		governanceDecisionId: `ガバナンス決定 ${verbatimTerms.id.value}`,
 		requestId: `リクエスト ${verbatimTerms.id.value}`,
 		traceId: `トレース ${verbatimTerms.id.value}`,
 		rawDetails: "構造化された詳細",

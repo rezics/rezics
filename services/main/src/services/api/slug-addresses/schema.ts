@@ -1,8 +1,8 @@
 import { type Static, t } from "elysia";
 import { SlugAddressMaximumDepth, SlugLabelPatternSource } from "@rezics/slug";
 
-import { GovernanceReasonCodeValues } from "../../database/schema/contract-values";
 import { UnitKind, Uuid } from "../schema";
+import { GovernanceRuleReferences } from "../governance/schema";
 
 export const SlugLabelInput = t.String({
 	minLength: 1,
@@ -67,7 +67,7 @@ export const UnitSlugAddressParams = t.Object({ unitId: Uuid });
 const PlatformSlugAddressInput = {
 	scopeUnitId: t.Nullable(Uuid),
 	slug: SlugLabelInput,
-	reasonCode: t.UnionEnum(GovernanceReasonCodeValues, { default: undefined }),
+	rules: GovernanceRuleReferences,
 };
 
 export const ReplaceUnitSlugAddressBody = t.Object(PlatformSlugAddressInput, {
@@ -101,7 +101,7 @@ export const SlugRedirectAddressParams = t.Object({ redirectAddressId: Uuid });
 
 export const ReleaseSlugRedirectBody = t.Object(
 	{
-		reasonCode: t.UnionEnum(GovernanceReasonCodeValues, { default: undefined }),
+		rules: GovernanceRuleReferences,
 	},
 	{ additionalProperties: false },
 );

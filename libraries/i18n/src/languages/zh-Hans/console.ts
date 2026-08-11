@@ -6,6 +6,7 @@ import units from "./units";
 
 const { forms: entityTerms } = zhHansTerminology.entity;
 const { forms: realmTerms } = zhHansTerminology.realm;
+const { forms: zoneTerms } = zhHansTerminology.zone;
 const { forms: postTerms } = zhHansTerminology.post;
 
 export default {
@@ -107,7 +108,6 @@ export default {
 			"条目会重新出现在常规查询中。如果删除前为已发布状态，还原后会先转为已归档，避免未经重新检查就公开。",
 		softDeleteTitle: "软删除这个条目？",
 		softDeleteDescription: "条目与历史数据会保留，但常规产品查询与操作会立即看不到它。",
-		reason: "治理原因",
 		internalNote: "内部备注（可选）",
 		notePlaceholder: "记录操作依据；内容会写入安全审计记录。",
 		confirmationLabel: `输入条目 ${verbatimTerms.id.value} 以确认`,
@@ -182,7 +182,6 @@ export default {
 		targetId: `目标条目 ${verbatimTerms.id.value}`,
 		preflight: "执行预检",
 		irreversibleWarning: "接受后无法还原。来源会成为永久重定向，所有实时引用将收敛至目标。",
-		reason: "治理原因",
 		internalNote: "内部备注（可选）",
 		notePlaceholder: "记录重复内容证据、核验来源，以及选择此正式目标的理由。",
 		confirmSource: `再次输入来源条目 ${verbatimTerms.id.value}`,
@@ -229,7 +228,6 @@ export default {
 			"条目会立即由社区转移给申请者并改为个人管理作品；原有的公共协作授权会保留，其他待审核认领会自动结束。",
 		rejectTitle: "拒绝这项所有权认领？",
 		rejectDescription: "认领会结束但不会转移条目所有权；申请者会收到审核结果通知。",
-		reason: "治理原因",
 		internalNote: "内部注释（可选）",
 		notePlaceholder: "记录核实来源与决策依据；内容会写入安全审计记录。",
 		confirmationLabel: `输入认领 ${verbatimTerms.id.value} 以确认`,
@@ -249,14 +247,6 @@ export default {
 		verified: "已验证",
 		unverified: "未验证",
 		states: { active: "使用中", suspended: "已停用", closed: "已关闭" },
-		reasons: {
-			security: "安全风险",
-			policy_violation: "违反平台策略",
-			compromised: "账户疑似被入侵",
-			user_request: "用户请求",
-			legal: "法律或合规要求",
-			other: "其他原因",
-		},
 		empty: "没有符合当前筛选条件的用户。",
 		loadingMore: "正在加载更多用户……",
 		selectUser: "选择一位用户",
@@ -411,7 +401,6 @@ export default {
 		untitled: "未命名条目",
 		reports: "案件中的举报",
 		action: "治理操作",
-		reason: "治理原因",
 		internalNote: "内部注解（选填）",
 		notePlaceholder: "记录判断依据；选择添加注解时必填。",
 		submit: "提交治理操作",
@@ -461,6 +450,7 @@ export default {
 		authorities: {
 			platform: "平台",
 			realm: realmTerms.label,
+			zone: zoneTerms.label,
 			unit: "条目",
 		},
 		empty: "没有符合当前筛选条件的审计事件。",
@@ -480,7 +470,8 @@ export default {
 		scopedAuthority: insert("{{kind}}（{{id}}）", { kind: String, id: String }),
 		target: "目标",
 		noTarget: "没有特定目标",
-		reasonCode: "原因代码",
+		outcomeCode: "结果代码",
+		governanceDecisionId: `治理决定 ${verbatimTerms.id.value}`,
 		requestId: `请求 ${verbatimTerms.id.value}`,
 		traceId: `分布式追查 ${verbatimTerms.id.value}`,
 		rawDetails: "结构化内容",

@@ -40,6 +40,10 @@ export default {
 	searchFailed: "La búsqueda no está disponible temporalmente. Inténtalo de nuevo más tarde.",
 	untitledResult: "Contenido sin título",
 	contentList: "Lista de contenido",
+	ruleRealm: {
+		label: `${realmTerms.label} de reglas locales`,
+		description: `Selecciona un ${realmTerms.label} cuyas reglas vigentes pueda usar esta ${zoneTerms.inline} para la gobernanza local. Las reglas oficiales de la plataforma siempre estarán disponibles.`,
+	},
 	create: {
 		title: `Crear ${zoneTerms.inline}`,
 		description: `Elige el alcance del contenido y la apariencia inicial de esta ${zoneTerms.inline}. Podrás configurar sus páginas y navegación después de crearla.`,

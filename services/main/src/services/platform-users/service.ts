@@ -13,7 +13,11 @@ import {
 	userAccountState,
 	users,
 } from "../database/schema";
-import type { UserAccountState, UserAccountStateReason } from "../database/schema/contract-values";
+import type { UserAccountState } from "../database/schema/contract-values";
+import {
+	createGovernanceDecision,
+	type GovernanceRuleReference,
+} from "../governance/decision-service";
 import { InvalidPaginationCursor } from "../pagination/errors";
 import {
 	PlatformUserManagerRequired,
@@ -34,18 +38,22 @@ export interface ListPlatformUsersInput {
 }
 
 export type ReplaceAccountStateInput =
-	| { readonly expectedRevision: number; readonly state: "active" }
+	| {
+			readonly expectedRevision: number;
+			readonly state: "active";
+			readonly rules: readonly GovernanceRuleReference[];
+	  }
 	| {
 			readonly expectedRevision: number;
 			readonly state: "suspended";
-			readonly reason: UserAccountStateReason;
+			readonly rules: readonly GovernanceRuleReference[];
 			readonly note?: string;
 			readonly expiresAt?: Date;
 	  }
 	| {
 			readonly expectedRevision: number;
 			readonly state: "closed";
-			readonly reason: UserAccountStateReason;
+			readonly rules: readonly GovernanceRuleReference[];
 			readonly note?: string;
 	  };
 
@@ -74,7 +82,7 @@ const userSelection = {
 	email: users.email,
 	emailVerified: users.emailVerified,
 	state: userAccountState.state,
-	reason: userAccountState.reason,
+	governanceDecisionId: userAccountState.decisionId,
 	note: userAccountState.note,
 	expiresAt: userAccountState.expiresAt,
 	revision: userAccountState.revision,
@@ -100,7 +108,7 @@ type SelectedUser = {
 	readonly email: string;
 	readonly emailVerified: boolean;
 	readonly state: UserAccountState | null;
-	readonly reason: UserAccountStateReason | null;
+	readonly governanceDecisionId: string | null;
 	readonly note: string | null;
 	readonly expiresAt: Date | null;
 	readonly revision: number | null;
@@ -116,7 +124,7 @@ function presentUser(row: SelectedUser) {
 		row.state
 			? {
 					state: row.state,
-					reason: row.reason,
+					governanceDecisionId: row.governanceDecisionId,
 					note: row.note,
 					expiresAt: row.expiresAt,
 					revision: row.revision ?? 0,
@@ -259,7 +267,7 @@ export async function replacePlatformUserAccountState(input: {
 		const [stored] = await tx
 			.select({
 				state: userAccountState.state,
-				reason: userAccountState.reason,
+				governanceDecisionId: userAccountState.decisionId,
 				note: userAccountState.note,
 				expiresAt: userAccountState.expiresAt,
 				revision: userAccountState.revision,
@@ -273,6 +281,7 @@ export async function replacePlatformUserAccountState(input: {
 		const before = effectiveAccountState(stored as AccountStateRecord | undefined);
 		if (before.revision !== input.command.expectedRevision)
 			throw new UserAccountStateRevisionConflict();
+		if (before.state === "active" && input.command.state === "active") return before;
 		if (input.actorUserId === input.targetUserId && input.command.state !== "active")
 			throw new UserSelfStatusChangeForbidden();
 		if (
@@ -284,17 +293,24 @@ export async function replacePlatformUserAccountState(input: {
 		await ensureManagerContinuity(tx, target.profileId, input.command.state);
 
 		const now = new Date();
-		const reason = input.command.state === "active" ? null : input.command.reason;
 		const note = input.command.state === "active" ? null : (input.command.note?.trim() ?? null);
 		const expiresAt =
 			input.command.state === "suspended" ? (input.command.expiresAt ?? null) : null;
 		const revision = before.revision + 1;
+		const decision = await createGovernanceDecision(tx, {
+			action: `platform_user.account_state.${input.command.state}`,
+			actorProfileId: input.actorProfileId,
+			authority: { kind: "platform" },
+			targetUserId: input.targetUserId,
+			subject: { kind: "platform_user", id: input.targetUserId },
+			basis: { kind: "rules", rules: input.command.rules },
+		});
 		await tx
 			.insert(userAccountState)
 			.values({
 				userId: input.targetUserId,
 				state: input.command.state,
-				reason,
+				decisionId: decision.id,
 				note,
 				expiresAt,
 				updatedByProfileId: input.actorProfileId,
@@ -305,7 +321,7 @@ export async function replacePlatformUserAccountState(input: {
 				target: userAccountState.userId,
 				set: {
 					state: input.command.state,
-					reason,
+					decisionId: decision.id,
 					note,
 					expiresAt,
 					updatedByProfileId: input.actorProfileId,
@@ -321,7 +337,7 @@ export async function replacePlatformUserAccountState(input: {
 			actor: { kind: "profile", profileId: input.actorProfileId },
 			authority: { kind: "platform" },
 			action: "platform_user.account_state.replace",
-			reasonCode: reason ?? undefined,
+			governanceDecisionId: decision.id,
 			target: { kind: "platform_user", id: input.targetUserId },
 			details: {
 				before: { state: before.state, revision: before.revision },
@@ -335,7 +351,7 @@ export async function replacePlatformUserAccountState(input: {
 		});
 		return {
 			state: input.command.state,
-			reason,
+			governanceDecisionId: decision.id,
 			note,
 			expiresAt,
 			revision,

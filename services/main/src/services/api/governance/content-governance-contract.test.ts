@@ -30,7 +30,8 @@ describe("content governance contracts", () => {
 		expect(isContentLicenseModerationCommand("restore_content_license")).toBe(true);
 		expect(isContentLicenseModerationCommand("restore")).toBe(false);
 		expect(contentGovernanceActionRequiresRules("remove")).toBe(true);
-		expect(contentGovernanceActionRequiresRules("restore")).toBe(false);
+		expect(contentGovernanceActionRequiresRules("restore")).toBe(true);
+		expect(contentGovernanceActionRequiresRules("restore_content_license")).toBe(false);
 	});
 
 	it("derives strict Realm Unit transitions", () => {

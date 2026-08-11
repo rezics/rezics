@@ -12,6 +12,23 @@ export default {
 	title: "Gouvernance de la Unit",
 	open: "Ouvrir les réglages de gouvernance",
 	platformOpen: "Ouvrir la gouvernance de la plateforme",
+	ruleBasis: {
+		label: "Règles applicables",
+		description: `Sélectionnez au moins une règle parmi les ${realmTerms.plural} de règles autorisés pour cette gouvernance. La sélection devient le fondement immuable de la décision.`,
+		sourceAriaLabel: `${realmTerms.label} de règles`,
+		chooseSource: `Choisir un ${realmTerms.inline} de règles`,
+		sources: {
+			platform: "Règles officielles de la plateforme",
+			realm: `Règles du ${realmTerms.label}`,
+			local: "Règles locales",
+		},
+		rulesAriaLabel: "Règles applicables",
+		chooseRules: "Choisir des règles",
+		clear: "Effacer les règles sélectionnées",
+		selectedCount: insert("{{count}} règles sélectionnées", { count: Number }),
+		loading: "Chargement des règles…",
+		loadError: "Impossible de charger les règles disponibles. Réessayez plus tard.",
+	},
 	accessInvitations: "Invitations d’accès",
 	receivedInvitations: "Invitations d’accès reçues",
 	accessInvitationDescription:

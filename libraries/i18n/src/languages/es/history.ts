@@ -48,8 +48,6 @@ export default {
 		},
 		currentRevisionContent:
 			"No se puede ocultar el contenido de la revisión actual. Publica primero una revisión limpia y protege después la anterior.",
-		reasonLabel: "Motivo",
-		selectReason: "Selecciona un motivo",
 		atLeastOneField: "Selecciona al menos un dato que proteger.",
 		cancel: "Cancelar",
 		save: "Guardar visibilidad",

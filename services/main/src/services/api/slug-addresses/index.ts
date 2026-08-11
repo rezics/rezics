@@ -39,6 +39,7 @@ const SlugMutationConflictResponse = toApiErrorResponse([
 	"SlugTaken",
 	"SlugScopeUnavailable",
 	"SlugScopeCycle",
+	"GovernanceRuleChanged",
 ]);
 const SlugMutationNotFoundResponse = toApiErrorResponse(["UnitNotFound", "SlugScopeNotFound"]);
 
@@ -159,7 +160,10 @@ export default new Elysia({ prefix: "/slug-addresses" })
 			body: ReplaceUnitSlugAddressBody,
 			response: {
 				[StatusCodes.OK]: SlugAddressMutationResponse,
-				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["InvalidSlug"]),
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
+					"InvalidSlug",
+					"GovernanceRuleSourceForbidden",
+				]),
 				[StatusCodes.UNAUTHORIZED]: AuthenticationRequiredResponse,
 				[StatusCodes.FORBIDDEN]: SlugMutationForbiddenResponse,
 				[StatusCodes.NOT_FOUND]: SlugMutationNotFoundResponse,
@@ -189,7 +193,10 @@ export default new Elysia({ prefix: "/slug-addresses" })
 			body: CreateSlugNamespaceBody,
 			response: {
 				[StatusCodes.CREATED]: SlugAddressMutationResponse,
-				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["InvalidSlug"]),
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
+					"InvalidSlug",
+					"GovernanceRuleSourceForbidden",
+				]),
 				[StatusCodes.UNAUTHORIZED]: AuthenticationRequiredResponse,
 				[StatusCodes.FORBIDDEN]: SlugMutationForbiddenResponse,
 				[StatusCodes.NOT_FOUND]: SlugMutationNotFoundResponse,
@@ -211,7 +218,7 @@ export default new Elysia({ prefix: "/slug-addresses" })
 			await authorization.platform.ensureCapability(DevelopmentPreviewCapability);
 			await releaseSlugRedirect(authorization, {
 				redirectAddressId: params.redirectAddressId,
-				reasonCode: body.reasonCode,
+				rules: body.rules,
 			});
 			return status(StatusCodes.NO_CONTENT, undefined);
 		},
@@ -221,9 +228,11 @@ export default new Elysia({ prefix: "/slug-addresses" })
 			body: ReleaseSlugRedirectBody,
 			response: {
 				[StatusCodes.NO_CONTENT]: t.Void(),
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["GovernanceRuleSourceForbidden"]),
 				[StatusCodes.UNAUTHORIZED]: AuthenticationRequiredResponse,
 				[StatusCodes.FORBIDDEN]: SlugMutationForbiddenResponse,
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["SlugRedirectNotFound"]),
+				[StatusCodes.CONFLICT]: toApiErrorResponse(["GovernanceRuleChanged"]),
 			},
 			detail: {
 				operationId: "releaseSlugRedirectWithPlatformAccess",

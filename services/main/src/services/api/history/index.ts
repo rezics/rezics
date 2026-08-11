@@ -16,6 +16,7 @@ import {
 	unitRevisionSlot,
 	unitRevisionTag,
 } from "../../database/schema";
+import { createGovernanceDecision } from "../../governance/decision-service";
 import { parseJsonCursor } from "../../pagination";
 import { getUnitReadCondition } from "../../authorization/unit/query";
 import {
@@ -497,6 +498,17 @@ export default new Elysia({ prefix: "/history" })
 					tx,
 				);
 				if (revisionVisibilitiesEqual(currentVisibility, requestedVisibility)) return;
+				const decision = await createGovernanceDecision(tx, {
+					action:
+						body.visibility.kind === "visible"
+							? "revision.visibility.restore"
+							: "revision.visibility.restrict",
+					actorProfileId: profile.unitId,
+					authority: { kind: "unit", unitId: current.unitId },
+					targetUnitId: current.unitId,
+					subject: { kind: "unit_revision", id: current.id },
+					basis: { kind: "rules", rules: body.rules },
+				});
 				await tx
 					.update(unitRevision)
 					.set(storedVisibility)
@@ -507,7 +519,7 @@ export default new Elysia({ prefix: "/history" })
 					actor: { kind: "profile", profileId: profile.unitId },
 					authority: { kind: "unit", id: current.unitId },
 					action: "revision.visibility.update",
-					reasonCode: body.reasonCode,
+					governanceDecisionId: decision.id,
 					target: { kind: "unit_revision", id: params.revisionId },
 					details: {
 						previousVisibility: currentVisibility,
@@ -523,7 +535,11 @@ export default new Elysia({ prefix: "/history" })
 			body: RevisionVisibilityBody,
 			response: {
 				[StatusCodes.NO_CONTENT]: t.Void(),
-				[StatusCodes.CONFLICT]: toApiErrorResponse(["CurrentRevisionContentVisibilityForbidden"]),
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["GovernanceRuleSourceForbidden"]),
+				[StatusCodes.CONFLICT]: toApiErrorResponse([
+					"CurrentRevisionContentVisibilityForbidden",
+					"GovernanceRuleChanged",
+				]),
 				[StatusCodes.FORBIDDEN]: toApiErrorResponse(["PlatformCapabilityRequired"]),
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitRevisionNotFound"]),
 			},

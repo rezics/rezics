@@ -83,6 +83,7 @@ export default {
 	ZoneNavigationInUse: `この${zoneTerms.inline}ナビゲーションは、ブロックドキュメントでまだ使用されています。`,
 	ZoneDocumentInvalid: `${zoneTerms.inline}ブロックまたはナビゲーションドキュメントが無効です。`,
 	ZoneTimeRangeInvalid: `${zoneTerms.inline}の終了時刻は開始時刻より後でなければなりません。`,
+	ZoneRuleRealmInvalid: `選択した${realmTerms.label}には、1件以上のルールを含む現在のルール改訂がありません。`,
 	SoftwareNotFound: "このソフトウェアが見つかりませんでした。",
 	SystemRequirementNotFound: "このシステム要件が見つかりませんでした。",
 	PollOptionsDuplicated: "投票オプションは一意である必要があります。",
@@ -111,10 +112,11 @@ export default {
 	ReportRuleUnavailable: "選択したガバナンスの範囲には現在のルールがありません。",
 	ReportRuleChanged: "選択したルールが更新されました。再度選択してから送信してください。",
 	ReportRuleSourceForbidden: `報告で参照できるのは、現在の${realmTerms.label}と公式ルールのみです。`,
-	ContentGovernanceRuleSourceForbidden:
-		"選択したルールは、このコンテンツガバナンスの権限範囲外です。",
-	ContentGovernanceRuleChanged:
+	GovernanceRuleSourceForbidden: `選択したルール${realmTerms.label}は、このガバナンス権限の範囲外です。`,
+	GovernanceRuleChanged:
 		"選択したルールは現在のルール改訂に含まれていません。再度選択してください。",
+	GovernanceReversalUnavailable:
+		"このガバナンス決定はすでに取り消されているか、現在の対象と一致しません。",
 	EnforcementExpiryInvalid: "執行の有効期限は未来でなければなりません。",
 	EnforcementNotFound: "この執行は見つかりませんでした。",
 	EnforcementAlreadyRevoked: "この執行はすでに取り消されています。",

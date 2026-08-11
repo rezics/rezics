@@ -1,6 +1,7 @@
 import { StatusCodes } from "http-status-codes";
 import { and, desc, eq, isNull, sql } from "drizzle-orm";
 import Elysia from "elysia";
+import { OfficialRealmUnitIds } from "@rezics/slug";
 
 import session from "../../auth/session";
 import { recordAuditEvent as appendAuditEvent } from "../../audit";
@@ -11,8 +12,17 @@ import {
 	accountEnforcementAction,
 	contentReviewCase,
 	profile as profileTable,
+	realm,
+	realmRule,
+	realmRuleRevision,
+	unit,
 	unitLocalization,
 } from "../../database/schema";
+import {
+	createGovernanceDecision,
+	resolveGovernanceRuleSourceRealmIds,
+	type GovernanceAuthority,
+} from "../../governance/decision-service";
 import {
 	createGovernanceNotePost,
 	getGovernanceNote,
@@ -21,7 +31,12 @@ import {
 import { createNotification } from "../../notifications/service";
 import type { DatabaseTransaction } from "../../database";
 import { recordUnitRevision } from "../../units/history";
+import {
+	resolvedUnitLocalizationLanguage,
+	resolvedUnitLocalizationTitle,
+} from "../../units/localization";
 import { toApiErrorResponse } from "../schema/response";
+import { ValidationError } from "../errors";
 import { ProfileNotFound } from "../users/errors";
 import {
 	AccountEnforcementParams,
@@ -34,6 +49,8 @@ import {
 	EnforcementResponse,
 	GovernanceNoteParams,
 	GovernanceNoteResponse,
+	GovernanceRuleSourcesQuery,
+	GovernanceRuleSourcesResponse,
 	ListContentReviewCasesQuery,
 	RevokeAccountEnforcementBody,
 	UpdateContentReviewCaseBody,
@@ -89,6 +106,67 @@ const enforcementSelection = {
 	updatedAt: accountEnforcement.updatedAt,
 };
 
+type LocalizationLanguages = Parameters<typeof resolvedUnitLocalizationLanguage>[1];
+
+async function loadGovernanceRuleSource(
+	tx: DatabaseTransaction,
+	realmId: string,
+	scope: "platform" | "realm" | "local",
+	localizationLanguages: LocalizationLanguages,
+) {
+	const [[source], [revision]] = await Promise.all([
+		tx
+			.select({
+				id: realm.id,
+				language: resolvedUnitLocalizationLanguage(realm.id, localizationLanguages),
+				title: resolvedUnitLocalizationTitle(realm.id, localizationLanguages),
+			})
+			.from(realm)
+			.innerJoin(unit, and(eq(unit.id, realm.id), eq(unit.kind, "realm"), isNull(unit.deletedAt)))
+			.where(eq(realm.id, realmId))
+			.limit(1),
+		tx
+			.select({ id: realmRuleRevision.id })
+			.from(realmRuleRevision)
+			.where(eq(realmRuleRevision.realmId, realmId))
+			.orderBy(desc(realmRuleRevision.version))
+			.limit(1),
+	]);
+	if (!source?.language || !revision) return undefined;
+	const rows = await tx
+		.select({
+			id: realmRule.id,
+			language: resolvedUnitLocalizationLanguage(realmRule.id, localizationLanguages),
+			title: resolvedUnitLocalizationTitle(realmRule.id, localizationLanguages),
+		})
+		.from(realmRule)
+		.where(eq(realmRule.revisionId, revision.id))
+		.orderBy(realmRule.position, realmRule.id)
+		.limit(100);
+	const rules = rows.map((rule) => {
+		if (!rule.language || !rule.title)
+			throw new Error(`Governance Rule ${rule.id} has no localization`);
+		return { id: rule.id, language: rule.language, title: rule.title };
+	});
+	if (!rules.length) return undefined;
+	return { ...source, language: source.language, scope, revisionId: revision.id, rules };
+}
+
+function governanceRuleSourceAuthority(
+	query: typeof GovernanceRuleSourcesQuery.static,
+): GovernanceAuthority {
+	if (query.authorityKind === "platform") {
+		if (query.authorityId !== undefined)
+			throw new ValidationError({ authorityId: "must be omitted for platform authority" });
+		return { kind: "platform" };
+	}
+	if (!query.authorityId)
+		throw new ValidationError({ authorityId: "is required for non-platform authority" });
+	if (query.authorityKind === "realm") return { kind: "realm", realmId: query.authorityId };
+	if (query.authorityKind === "zone") return { kind: "zone", zoneId: query.authorityId };
+	return { kind: "unit", unitId: query.authorityId };
+}
+
 type CaseRecord = typeof contentReviewCase.$inferSelect;
 type PresentableCase = Pick<CaseRecord, "id" | "targetUnitId">;
 
@@ -131,6 +209,7 @@ async function recordAuditEvent(
 		subjectId?: string;
 		subjectPath?: string | null;
 		authorityRealmId?: string;
+		governanceDecisionId?: string;
 		metadata?: Record<string, unknown>;
 	},
 ) {
@@ -142,7 +221,8 @@ async function recordAuditEvent(
 			? { kind: "realm", id: input.authorityRealmId }
 			: { kind: "platform" },
 		action: input.action,
-		reasonCode:
+		governanceDecisionId: input.governanceDecisionId,
+		outcomeCode:
 			input.decisionCode && input.decisionCode !== "allowed" ? input.decisionCode : undefined,
 		target: input.subjectKind
 			? {
@@ -162,6 +242,57 @@ export default new Elysia({ prefix: "/governance" })
 	.use(unitLifecycleRoutes)
 	.use(unitMergeRoutes)
 	.use(ownershipClaimRoutes)
+	.get(
+		"/rule-sources",
+		async ({ authorization, query }) => {
+			const authority = governanceRuleSourceAuthority(query);
+			if (authority.kind !== "platform") {
+				const authorityId =
+					authority.kind === "realm"
+						? authority.realmId
+						: authority.kind === "zone"
+							? authority.zoneId
+							: authority.unitId;
+				await authorization.unit.ensureCanRead(authorityId);
+			}
+			return database.transaction(async (tx) => {
+				const sourceIds = await resolveGovernanceRuleSourceRealmIds(tx, authority);
+				const items = (
+					await Promise.all(
+						sourceIds.map((sourceId) =>
+							loadGovernanceRuleSource(
+								tx,
+								sourceId,
+								sourceId === OfficialRealmUnitIds.rule
+									? "platform"
+									: authority.kind === "realm"
+										? "realm"
+										: "local",
+								query.localizationLanguages,
+							),
+						),
+					)
+				).filter((item) => item !== undefined);
+				if (!items.some((item) => item.scope === "platform"))
+					throw new Error("REZICS Rule bootstrap Realm is unavailable");
+				return { items };
+			});
+		},
+		{
+			access: "session-only",
+			query: GovernanceRuleSourcesQuery,
+			response: {
+				[StatusCodes.OK]: GovernanceRuleSourcesResponse,
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["GovernanceRuleSourceForbidden"]),
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
+				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["ValidationError"]),
+			},
+			detail: {
+				summary: "List current Rule sources for a governance authority",
+				tags: ["Governance"],
+			},
+		},
+	)
 	.get(
 		"/notes/:postId",
 		async ({ params, authorization }) => {
@@ -374,7 +505,7 @@ export default new Elysia({ prefix: "/governance" })
 					"ContentGovernanceActionIncompatible",
 					"GovernanceNoteRoleDuplicate",
 					"ContentReviewRealmMissing",
-					"ContentGovernanceRuleSourceForbidden",
+					"GovernanceRuleSourceForbidden",
 				]),
 				[StatusCodes.FORBIDDEN]: CapabilityForbiddenResponse,
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse([
@@ -385,8 +516,9 @@ export default new Elysia({ prefix: "/governance" })
 					"ContentGovernanceTransitionInvalid",
 					"ContentGovernanceActionNoEffect",
 					"ContentGovernanceReversalUnavailable",
+					"GovernanceReversalUnavailable",
 					"ContentGovernanceIdempotencyConflict",
-					"ContentGovernanceRuleChanged",
+					"GovernanceRuleChanged",
 					"PostTargetingLocked",
 				]),
 			},
@@ -408,9 +540,18 @@ export default new Elysia({ prefix: "/governance" })
 					.where(eq(profileTable.id, body.profileId))
 					.limit(1);
 				if (!target) throw new ProfileNotFound();
+				const decision = await createGovernanceDecision(tx, {
+					action: "account.enforcement.create",
+					actorProfileId: profile.unitId,
+					authority: { kind: "platform" },
+					targetUnitId: target.id,
+					subject: { kind: "profile", id: target.id },
+					basis: { kind: "rules", rules: body.rules },
+				});
 				const [action] = await tx
 					.insert(accountEnforcementAction)
 					.values({
+						decisionId: decision.id,
 						actorProfileId: profile.unitId,
 						targetProfileId: target.id,
 						kind: "issue",
@@ -460,6 +601,7 @@ export default new Elysia({ prefix: "/governance" })
 					action: "account.enforcement.create",
 					subjectKind: "profile",
 					subjectId: target.id,
+					governanceDecisionId: decision.id,
 					metadata: { enforcementId: created.id, kind: body.kind, notePostIds },
 				});
 				return created;
@@ -474,9 +616,11 @@ export default new Elysia({ prefix: "/governance" })
 				[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
 					"EnforcementExpiryInvalid",
 					"GovernanceNoteRoleDuplicate",
+					"GovernanceRuleSourceForbidden",
 				]),
 				[StatusCodes.FORBIDDEN]: CapabilityForbiddenResponse,
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["ProfileNotFound"]),
+				[StatusCodes.CONFLICT]: toApiErrorResponse(["GovernanceRuleChanged"]),
 			},
 			detail: { summary: "Create account enforcement", tags: ["Governance"] },
 		},
@@ -494,16 +638,30 @@ export default new Elysia({ prefix: "/governance" })
 						profileId: accountEnforcement.profileId,
 						kind: accountEnforcement.kind,
 						decisionActionId: accountEnforcement.decisionActionId,
+						decisionId: accountEnforcementAction.decisionId,
 						revocationActionId: accountEnforcement.revocationActionId,
 					})
 					.from(accountEnforcement)
+					.innerJoin(
+						accountEnforcementAction,
+						eq(accountEnforcementAction.id, accountEnforcement.decisionActionId),
+					)
 					.where(eq(accountEnforcement.id, params.enforcementId))
 					.limit(1);
 				if (!current) throw new EnforcementNotFound();
 				if (current.revocationActionId) throw new EnforcementAlreadyRevoked();
+				const decision = await createGovernanceDecision(tx, {
+					action: "account.enforcement.revoke",
+					actorProfileId: profile.unitId,
+					authority: { kind: "platform" },
+					targetUnitId: current.profileId,
+					subject: { kind: "profile", id: current.profileId },
+					basis: { kind: "reversal", reversesDecisionId: current.decisionId },
+				});
 				const [action] = await tx
 					.insert(accountEnforcementAction)
 					.values({
+						decisionId: decision.id,
 						actorProfileId: profile.unitId,
 						targetProfileId: current.profileId,
 						kind: "revoke",
@@ -542,6 +700,7 @@ export default new Elysia({ prefix: "/governance" })
 					action: "account.enforcement.revoke",
 					subjectKind: "profile",
 					subjectId: current.profileId,
+					governanceDecisionId: decision.id,
 					metadata: { enforcementId: current.id, notePostIds },
 				});
 				await createNotification(tx, {
@@ -573,6 +732,7 @@ export default new Elysia({ prefix: "/governance" })
 				[StatusCodes.CONFLICT]: toApiErrorResponse([
 					"EnforcementAlreadyRevoked",
 					"EnforcementChanged",
+					"GovernanceReversalUnavailable",
 				]),
 			},
 			detail: { summary: "Revoke account enforcement", tags: ["Governance"] },

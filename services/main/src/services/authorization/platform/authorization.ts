@@ -137,7 +137,7 @@ export class PlatformAuthorization<ProfileId extends string | undefined> {
 			actor: { kind: "profile", profileId: this.profileId },
 			authority: { kind: "platform" },
 			action: "platform.authorization.denied",
-			reasonCode: decision.reason,
+			outcomeCode: decision.reason,
 			details: { requiredCapability: capability },
 		});
 		throw new PlatformCapabilityRequired();

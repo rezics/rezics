@@ -275,7 +275,6 @@ export async function updateTagStructureDefinition(input: {
 			actor: { kind: "profile", profileId: input.actorProfileId },
 			authority: { kind: "unit", id: input.structureId },
 			action: "unit.structure.definition.update",
-			reasonCode: "administrative",
 			target: { kind: "unit", id: input.structureId },
 			details: {
 				beforeMemberUnitIds: current.memberUnitIds,

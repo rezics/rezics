@@ -6,7 +6,7 @@ describe("effective account state", () => {
 	it("treats an absent control row as active at revision zero", () => {
 		expect(effectiveAccountState(undefined)).toEqual({
 			state: "active",
-			reason: null,
+			governanceDecisionId: null,
 			note: null,
 			expiresAt: null,
 			revision: 0,
@@ -21,7 +21,7 @@ describe("effective account state", () => {
 			effectiveAccountState(
 				{
 					state: "suspended",
-					reason: "security",
+					governanceDecisionId: "01900000-0000-7000-8000-000000000002",
 					note: "review",
 					expiresAt,
 					revision: 2,
@@ -37,7 +37,7 @@ describe("effective account state", () => {
 		const state = effectiveAccountState(
 			{
 				state: "suspended",
-				reason: "security",
+				governanceDecisionId: "01900000-0000-7000-8000-000000000002",
 				note: "review",
 				expiresAt: new Date("2026-07-28T00:00:00.000Z"),
 				revision: 3,
@@ -48,7 +48,7 @@ describe("effective account state", () => {
 		);
 		expect(state).toMatchObject({
 			state: "active",
-			reason: null,
+			governanceDecisionId: "01900000-0000-7000-8000-000000000002",
 			note: null,
 			expiresAt: null,
 			revision: 3,

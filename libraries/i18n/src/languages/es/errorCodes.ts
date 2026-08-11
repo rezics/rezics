@@ -87,6 +87,7 @@ export default {
 	ZoneNavigationInUse: `Esta navegación de ${zoneTerms.inline} todavía se usa en un documento de bloques.`,
 	ZoneDocumentInvalid: `El documento de bloques o navegación de la ${zoneTerms.inline} no es válido.`,
 	ZoneTimeRangeInvalid: `La hora de finalización de la ${zoneTerms.inline} debe ser posterior a la de inicio.`,
+	ZoneRuleRealmInvalid: `El ${realmTerms.inline} seleccionado no tiene una revisión de reglas vigente con al menos una regla.`,
 	SoftwareNotFound: "No se ha encontrado este software.",
 	SystemRequirementNotFound: "No se ha encontrado este requisito del sistema.",
 	PollOptionsDuplicated: "Las opciones de la encuesta deben ser únicas.",
@@ -118,10 +119,11 @@ export default {
 	ReportRuleChanged:
 		"La regla seleccionada ha cambiado. Vuelve a elegir una regla antes de enviar.",
 	ReportRuleSourceForbidden: `Las denuncias solo pueden citar las reglas del ${realmTerms.inline} actual y las reglas oficiales.`,
-	ContentGovernanceRuleSourceForbidden:
-		"La regla seleccionada está fuera de esta autoridad de gobernanza de contenido.",
-	ContentGovernanceRuleChanged:
+	GovernanceRuleSourceForbidden: `El ${realmTerms.inline} de reglas seleccionado no pertenece a esta autoridad de gobernanza.`,
+	GovernanceRuleChanged:
 		"Una regla seleccionada ya no pertenece a la revisión vigente. Vuelve a seleccionarla.",
+	GovernanceReversalUnavailable:
+		"Esta decisión de gobernanza ya se revirtió o no coincide con el objetivo actual.",
 	EnforcementExpiryInvalid: "El vencimiento de la medida debe estar en el futuro.",
 	EnforcementNotFound: "No se ha encontrado esta medida.",
 	EnforcementAlreadyRevoked: "Esta medida ya se ha revocado.",

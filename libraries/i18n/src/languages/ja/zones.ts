@@ -40,6 +40,10 @@ export default {
 	searchFailed: "検索は一時的に利用できません。後でもう一度お試しください。",
 	untitledResult: "タイトルなしコンテンツ",
 	contentList: "コンテンツ一覧",
+	ruleRealm: {
+		label: `ローカルルールの${realmTerms.label}`,
+		description: `この${zoneTerms.inline}のローカルガバナンスで現在のルールを使用する${realmTerms.label}を選択します。プラットフォームの公式ルールは常に利用できます。`,
+	},
 	create: {
 		title: `${zoneTerms.label} を作成`,
 		description: `この ${zoneTerms.inline} のコンテンツ範囲と初期表示を選択します。作成後にページやナビゲーションを設定できます`,

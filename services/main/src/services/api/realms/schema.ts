@@ -3,7 +3,7 @@ import { PortableTextDocument } from "@rezics/block";
 
 import {
 	ContentGovernanceActionKindValues,
-	ContentGovernanceMaxRuleReferences,
+	GovernanceMaxRuleReferences,
 	RealmModerationCommandValues,
 	RealmJoinPolicyValues,
 	RealmMemberStateValues,
@@ -28,10 +28,7 @@ import {
 	Uuid,
 } from "../schema";
 import { InitialTagApplicationLimit } from "../../tags/initial-applications";
-import {
-	ContentGovernanceActionResponse,
-	ContentGovernanceRuleReference,
-} from "../governance/schema";
+import { ContentGovernanceActionResponse, GovernanceRuleReference } from "../governance/schema";
 
 const RealmVisibility = t.Union(ResourceVisibilityValues.map((value) => t.Literal(value)));
 
@@ -455,24 +452,19 @@ export const ModerateRealmUnitBody = t.Union([
 	t.Object(
 		{
 			...RealmGovernanceCommon,
-			command: t.Union([t.Literal("hide"), t.Literal("remove"), t.Literal("lock_post_targeting")]),
-			rules: t.Array(ContentGovernanceRuleReference, {
-				minItems: 1,
-				maxItems: ContentGovernanceMaxRuleReferences,
-				uniqueItems: true,
-			}),
-			annotation: t.Optional(RealmModerationAnnotation),
-		},
-		{ additionalProperties: false },
-	),
-	t.Object(
-		{
-			...RealmGovernanceCommon,
 			command: t.Union([
 				t.Literal("approve"),
+				t.Literal("hide"),
+				t.Literal("remove"),
 				t.Literal("restore"),
+				t.Literal("lock_post_targeting"),
 				t.Literal("unlock_post_targeting"),
 			]),
+			rules: t.Array(GovernanceRuleReference, {
+				minItems: 1,
+				maxItems: GovernanceMaxRuleReferences,
+				uniqueItems: true,
+			}),
 			annotation: t.Optional(RealmModerationAnnotation),
 		},
 		{ additionalProperties: false },
@@ -572,8 +564,8 @@ export const RealmUnitModerationHistoryResponse = t.Object({
 			resultingState: t.Nullable(RealmUnitStatus),
 			previousPostTargetingLocked: t.Nullable(t.Boolean()),
 			resultingPostTargetingLocked: t.Nullable(t.Boolean()),
-			rules: t.Array(ContentGovernanceRuleReference, {
-				maxItems: ContentGovernanceMaxRuleReferences,
+			rules: t.Array(GovernanceRuleReference, {
+				maxItems: GovernanceMaxRuleReferences,
 			}),
 			reversesActionId: t.Nullable(Uuid),
 			notes: t.Array(RealmModerationNoteResponse),

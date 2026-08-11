@@ -417,15 +417,6 @@ export const RealmUnitStatusValues = ["pending", "visible", "hidden", "removed"]
 export const RealmUnitPublicationStateValues = ["active", "withdrawn"] as const;
 export const UserAccountStateValues = ["active", "suspended", "closed"] as const;
 export type UserAccountState = (typeof UserAccountStateValues)[number];
-export const UserAccountStateReasonValues = [
-	"security",
-	"policy_violation",
-	"compromised",
-	"user_request",
-	"legal",
-	"other",
-] as const;
-export type UserAccountStateReason = (typeof UserAccountStateReasonValues)[number];
 export const RealmUnitMutationCommandValues = [
 	"approve",
 	"hide",
@@ -480,31 +471,28 @@ export const ContentGovernanceActionKindValues = [
 	"restore_content_license",
 	"reverse",
 ] as const;
-export const ContentGovernanceRuleRequiredActionKindValues = [
+
+export const ContentGovernanceRuleBackedActionKindValues = [
+	"approve",
 	"hide",
 	"remove",
+	"restore",
 	"lock_post_targeting",
+	"unlock_post_targeting",
 	"invalidate_content_license",
 ] as const satisfies readonly (typeof ContentGovernanceActionKindValues)[number][];
-export const ContentGovernanceMaxRuleSources = 2;
-export const ContentGovernanceMaxRuleReferences = 32;
 export const ContentReviewReportCounterBuckets = 256;
 export const AccountEnforcementActionKindValues = ["issue", "revoke"] as const;
-export const GovernanceReasonCodeValues = [
-	"content_policy",
-	"copyright",
-	"realm_rules",
-	"spam",
-	"harassment",
-	"unsafe_content",
-	"off_topic",
-	"duplicate",
-	"account_security",
-	"user_request",
-	"appeal",
-	"administrative",
-	"other",
-] as const;
+/** The authority whose policy decision is being recorded. */
+export const GovernanceAuthorityKindValues = ["platform", "realm", "zone", "unit"] as const;
+/**
+ * Every governance decision either cites immutable Rule records or reverses one
+ * earlier decision. Workflow events that are not policy decisions stay outside
+ * this ledger.
+ */
+export const GovernanceDecisionBasisKindValues = ["rules", "reversal"] as const;
+export const GovernanceMaxRuleSources = 2;
+export const GovernanceMaxRuleReferences = 32;
 export const GovernanceNoteRoleValues = ["evidence", "internal_note", "public_notice"] as const;
 export const GovernanceNoteSubjectKindValues = [
 	"content_review_case",

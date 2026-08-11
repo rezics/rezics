@@ -36,6 +36,16 @@ export function toRealmModerationCommand(
 
 export function realmGovernanceActionRequiresRules(
 	command: RealmModerationCommand,
-): command is Extract<RealmModerationCommand, "hide" | "remove" | "lock_post_targeting"> {
-	return command === "hide" || command === "remove" || command === "lock_post_targeting";
+): command is Extract<
+	RealmModerationCommand,
+	"approve" | "hide" | "remove" | "restore" | "lock_post_targeting" | "unlock_post_targeting"
+> {
+	return (
+		command === "approve" ||
+		command === "hide" ||
+		command === "remove" ||
+		command === "restore" ||
+		command === "lock_post_targeting" ||
+		command === "unlock_post_targeting"
+	);
 }

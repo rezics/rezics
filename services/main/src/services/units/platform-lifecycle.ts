@@ -1,21 +1,22 @@
-import { and, eq, gt, inArray, isNotNull, isNull, or, sql } from "drizzle-orm";
+import { and, desc, eq, gt, inArray, isNotNull, isNull, or, sql } from "drizzle-orm";
 
 import { recordAuditEvent } from "../audit";
 import { BootstrapUnitIds } from "../bootstrap/manifest";
 import { database, type DatabaseExecutor, type DatabaseTransaction } from "../database";
 import {
 	profile,
+	governanceDecision,
 	unit,
 	unitMergeGraphLock,
 	unitMergeRedirect,
 	unitOwnership,
 	unitSlugAddress,
 } from "../database/schema";
+import { type UnitKind, UnitStatusValues } from "../database/schema/contract-values";
 import {
-	GovernanceReasonCodeValues,
-	type UnitKind,
-	UnitStatusValues,
-} from "../database/schema/contract-values";
+	createGovernanceDecision,
+	type GovernanceRuleReference,
+} from "../governance/decision-service";
 import {
 	UnitAlreadyDeleted,
 	UnitLifecycleChanged,
@@ -30,7 +31,6 @@ import { transitionUnitStatus } from "./status";
 import { ensureUnitVariantLifecycle } from "./variant-policy";
 
 const ProtectedUnitIds: ReadonlySet<string> = new Set(BootstrapUnitIds);
-type GovernanceReasonCode = (typeof GovernanceReasonCodeValues)[number];
 type UnitStatus = (typeof UnitStatusValues)[number];
 
 export type PlatformUnitLifecycleState = "active" | "deleted" | "all";
@@ -180,7 +180,7 @@ async function recordLifecycleAudit(
 		readonly actorProfileId: string;
 		readonly action: "unit.delete" | "unit.restore";
 		readonly unitId: string;
-		readonly reasonCode: GovernanceReasonCode;
+		readonly governanceDecisionId: string;
 		readonly note?: string;
 		readonly previousStatus: UnitStatus;
 		readonly resultingStatus: UnitStatus;
@@ -192,7 +192,7 @@ async function recordLifecycleAudit(
 		actor: { kind: "profile", profileId: input.actorProfileId },
 		authority: { kind: "platform" },
 		action: input.action,
-		reasonCode: input.reasonCode,
+		governanceDecisionId: input.governanceDecisionId,
 		target: { kind: "unit", id: input.unitId },
 		details: {
 			previousStatus: input.previousStatus,
@@ -221,7 +221,7 @@ export async function softDeletePlatformUnit(input: {
 	readonly unitId: string;
 	readonly actorProfileId: string;
 	readonly expectedUpdatedAt: Date;
-	readonly reasonCode: GovernanceReasonCode;
+	readonly rules: readonly GovernanceRuleReference[];
 	readonly note?: string;
 }): Promise<PlatformUnitLifecycleItem> {
 	return database.transaction(async (tx) => {
@@ -231,6 +231,14 @@ export async function softDeletePlatformUnit(input: {
 		ensureDeletable(current.id, input.actorProfileId);
 		ensureExpectedUpdatedAt(current.updatedAt, input.expectedUpdatedAt);
 		if (current.deletedAt) throw new UnitAlreadyDeleted();
+		const decision = await createGovernanceDecision(tx, {
+			action: "unit.delete",
+			actorProfileId: input.actorProfileId,
+			authority: { kind: "platform" },
+			targetUnitId: current.id,
+			subject: { kind: "unit", id: current.id },
+			basis: { kind: "rules", rules: input.rules },
+		});
 
 		const now = new Date();
 		await tx
@@ -248,7 +256,7 @@ export async function softDeletePlatformUnit(input: {
 			actorProfileId: input.actorProfileId,
 			action: "unit.delete",
 			unitId: current.id,
-			reasonCode: input.reasonCode,
+			governanceDecisionId: decision.id,
 			note: input.note,
 			previousStatus: current.status,
 			resultingStatus: current.status,
@@ -264,7 +272,6 @@ export async function restorePlatformUnit(input: {
 	readonly unitId: string;
 	readonly actorProfileId: string;
 	readonly expectedUpdatedAt: Date;
-	readonly reasonCode: GovernanceReasonCode;
 	readonly note?: string;
 }): Promise<PlatformUnitLifecycleItem> {
 	return database.transaction(async (tx) => {
@@ -279,6 +286,27 @@ export async function restorePlatformUnit(input: {
 			.where(eq(unitMergeRedirect.sourceUnitId, current.id))
 			.limit(1);
 		if (redirect) throw new UnitMergeRequestConflict();
+		const [deletedBy] = await tx
+			.select({ id: governanceDecision.id })
+			.from(governanceDecision)
+			.where(
+				and(
+					eq(governanceDecision.action, "unit.delete"),
+					eq(governanceDecision.subjectKind, "unit"),
+					eq(governanceDecision.subjectId, current.id),
+				),
+			)
+			.orderBy(desc(governanceDecision.createdAt), desc(governanceDecision.id))
+			.limit(1);
+		if (!deletedBy) throw new UnitNotDeleted();
+		const decision = await createGovernanceDecision(tx, {
+			action: "unit.restore",
+			actorProfileId: input.actorProfileId,
+			authority: { kind: "platform" },
+			targetUnitId: current.id,
+			subject: { kind: "unit", id: current.id },
+			basis: { kind: "reversal", reversesDecisionId: deletedBy.id },
+		});
 
 		const now = new Date();
 		await tx
@@ -305,7 +333,7 @@ export async function restorePlatformUnit(input: {
 			actorProfileId: input.actorProfileId,
 			action: "unit.restore",
 			unitId: current.id,
-			reasonCode: input.reasonCode,
+			governanceDecisionId: decision.id,
 			note: input.note,
 			previousStatus: current.status,
 			resultingStatus,

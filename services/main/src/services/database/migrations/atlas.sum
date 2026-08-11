@@ -1,4 +1,4 @@
-h1:45bJ1VxGixDvJI4YZCXB3r/gN9I4MH2o1aTfV+bUNuY=
+h1:6qVJGUQZO/OMzg0taXX57fP4JSQKuQdew5jcxTnu8Uw=
 20260801000000_v1_baseline.sql h1:RkSyDwLRpFOPI7iqWg+WlFc5TAshnB4gsRkBpsTMjGY=
 20260807000000_search_ordered_candidates.sql h1:rPOS8iAdRmWOfc9lpyCNNsFWjduRV1e27Q1Mc1QpTFc=
 20260807000001_backfill_search_best_score.sql h1:lmLn+kpWiNWEPlk40W4QRIGsqpWezY//UsNaaZ8FToc=
@@ -18,3 +18,4 @@ h1:45bJ1VxGixDvJI4YZCXB3r/gN9I4MH2o1aTfV+bUNuY=
 20260811000004_filter_document_cutover.sql h1:mLbNiXxWC0CpL2k7LKEbKoOJM22BYofqIPxstMDuF9E=
 20260811101537_bootstrap_unit_merge_access.sql h1:dVUKlCpnWcdsfKgoqWwm7BEIOAOu4HAEGFFnzziT18Y=
 20260811190000_official_realm_avatar.sql h1:EkJYsHifW8iV1qa9QZmDQwUuxl/Noslc1gBVlHyeWwk=
+20260811190001_governance_rule_decisions.sql h1:I8EFyP2MWh5JWzW+remGmHwqk2zPUN5BGFMihA1/SE0=

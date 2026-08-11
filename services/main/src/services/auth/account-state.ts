@@ -2,12 +2,12 @@ import { eq } from "drizzle-orm";
 
 import { database, type DatabaseExecutor } from "../database";
 import { userAccountState } from "../database/schema";
-import type { UserAccountState, UserAccountStateReason } from "../database/schema/contract-values";
+import type { UserAccountState } from "../database/schema/contract-values";
 import { AccountClosed, AccountSuspended } from "./errors";
 
 export interface AccountStateRecord {
 	readonly state: UserAccountState;
-	readonly reason: UserAccountStateReason | null;
+	readonly governanceDecisionId: string | null;
 	readonly note: string | null;
 	readonly expiresAt: Date | null;
 	readonly revision: number;
@@ -26,7 +26,7 @@ export function effectiveAccountState(
 	if (!record)
 		return {
 			state: "active",
-			reason: null,
+			governanceDecisionId: null,
 			note: null,
 			expiresAt: null,
 			revision: 0,
@@ -41,7 +41,6 @@ export function effectiveAccountState(
 		return {
 			...record,
 			state: "active",
-			reason: null,
 			note: null,
 			expiresAt: null,
 		};
@@ -55,7 +54,7 @@ export async function loadEffectiveAccountState(
 	const [record] = await executor
 		.select({
 			state: userAccountState.state,
-			reason: userAccountState.reason,
+			governanceDecisionId: userAccountState.decisionId,
 			note: userAccountState.note,
 			expiresAt: userAccountState.expiresAt,
 			revision: userAccountState.revision,

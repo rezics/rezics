@@ -399,12 +399,12 @@ export const RezicsRuleRealmManifest = {
 		{
 			language: "zh",
 			title: `${RezicsBrandName} Rule`,
-			summary: `${RezicsBrandName} 的全域內容檢舉規則來源。`,
+			summary: `${RezicsBrandName} 的全域內容與治理規則來源。`,
 		},
 		{
 			language: "en",
 			title: `${RezicsBrandName} Rule`,
-			summary: `The rule source for platform-wide content reports on ${RezicsBrandName}.`,
+			summary: `The rule source for platform-wide content and governance decisions on ${RezicsBrandName}.`,
 		},
 	],
 	ownerProfileId: OfficialProfileIds.community,
@@ -433,8 +433,8 @@ export const RezicsRuleRealmManifest = {
 		},
 	] as const,
 	rules: {
-		revisionId: "019b76da-a800-7350-8000-000000000001",
-		version: 1,
+		revisionId: "019b76da-a800-7350-8000-000000000002",
+		version: 2,
 		acknowledgementMode: "explicit",
 		requireOnJoin: false,
 		requireOnPost: false,
@@ -561,6 +561,111 @@ export const RezicsRuleRealmManifest = {
 						content: bootstrapRuleContent(
 							"Report an entry claimed or held by a user who is not entitled to represent the person, organization, brand, or work it describes, including impersonation of an identity, rightsholder, or official capacity. In the additional details, identify the proper representative or rights relationship and provide publicly verifiable sources.",
 							["b00759060004", "b00759060005", "b00759060006"],
+						),
+					},
+				],
+			},
+			{
+				id: "019b76da-a800-7360-8000-000000000007",
+				localizations: [
+					{
+						language: "zh",
+						title: "條目生命週期與核實移除",
+						content: bootstrapRuleContent(
+							"當條目已無合法保留目的、危及平台完整性，或經核實必須停止一般存取時，可進行軟刪除。操作必須保留歷史，且還原必須明確撤銷原決定。",
+							["b00759070001", "b00759070002", "b00759070003"],
+						),
+					},
+					{
+						language: "en",
+						title: "Entry lifecycle and verified removal",
+						content: bootstrapRuleContent(
+							"A Unit may be soft-deleted when it has no legitimate retention purpose, threatens platform integrity, or has been verified as requiring removal from ordinary access. History must remain, and restoration must explicitly reverse the original decision.",
+							["b00759070004", "b00759070005", "b00759070006"],
+						),
+					},
+				],
+			},
+			{
+				id: "019b76da-a800-7360-8000-000000000008",
+				localizations: [
+					{
+						language: "zh",
+						title: "條目身分與合併完整性",
+						content: bootstrapRuleContent(
+							"只有在兩個條目代表同一不可變身分，且合併計畫不會錯接內容、關係或歷史時，才可合併。來源條目必須保留可追溯的重新導向。",
+							["b00759080001", "b00759080002", "b00759080003"],
+						),
+					},
+					{
+						language: "en",
+						title: "Unit identity and merge integrity",
+						content: bootstrapRuleContent(
+							"Merge Units only when they represent the same immutable identity and the merge plan will not misattribute content, relationships, or history. The source must retain a traceable redirect.",
+							["b00759080004", "b00759080005", "b00759080006"],
+						),
+					},
+				],
+			},
+			{
+				id: "019b76da-a800-7360-8000-000000000009",
+				localizations: [
+					{
+						language: "zh",
+						title: "存取與帳戶安全",
+						content: bootstrapRuleContent(
+							"為防止未經授權的存取、濫用、規避處置或可信的安全風險，可對帳戶或條目權限施加範圍明確且可稽核的限制。",
+							["b00759090001", "b00759090002", "b00759090003"],
+						),
+					},
+					{
+						language: "en",
+						title: "Access and account security",
+						content: bootstrapRuleContent(
+							"Apply scoped, auditable account or Unit-access restrictions to prevent unauthorized access, abuse, enforcement evasion, or a credible security risk.",
+							["b00759090004", "b00759090005", "b00759090006"],
+						),
+					},
+				],
+			},
+			{
+				id: "019b76da-a800-7360-8000-000000000010",
+				localizations: [
+					{
+						language: "zh",
+						title: "版本、隱私與法律限制",
+						content: bootstrapRuleContent(
+							"版本包含依法或依隱私、安全要求不得一般公開的內容時，可隱藏必要欄位或抑制整個版本；限制範圍不得超過已核實的需要。",
+							["b00759100001", "b00759100002", "b00759100003"],
+						),
+					},
+					{
+						language: "en",
+						title: "Revision, privacy, and legal restriction",
+						content: bootstrapRuleContent(
+							"Hide necessary fields or suppress a revision when it contains material that cannot remain ordinarily public for verified legal, privacy, or safety reasons. Restrict no more than the verified need.",
+							["b00759100004", "b00759100005", "b00759100006"],
+						),
+					},
+				],
+			},
+			{
+				id: "019b76da-a800-7360-8000-000000000011",
+				localizations: [
+					{
+						language: "zh",
+						title: "網址與命名空間完整性",
+						content: bootstrapRuleContent(
+							"平台可為避免冒用、衝突、誤導或失效重新導向而指派、移動或釋放網址；所有變更都必須維持可追溯性與最小影響。",
+							["b00759110001", "b00759110002", "b00759110003"],
+						),
+					},
+					{
+						language: "en",
+						title: "Address and namespace integrity",
+						content: bootstrapRuleContent(
+							"The platform may assign, move, or release addresses to prevent impersonation, conflicts, deception, or stale redirects. Every change must remain traceable and minimize impact.",
+							["b00759110004", "b00759110005", "b00759110006"],
 						),
 					},
 				],

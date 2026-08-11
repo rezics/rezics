@@ -8,6 +8,7 @@ import {
 	createTimestampMsColumn,
 	createUpdatedAtColumn,
 } from "./columns";
+import { realm } from "./realm";
 import { unit } from "./unit";
 
 export const zone = pgTable(
@@ -22,6 +23,8 @@ export const zone = pgTable(
 		themeDocument: createJsonDocumentColumn().notNull(),
 		startsAt: createTimestampMsColumn(),
 		endsAt: createTimestampMsColumn(),
+		/** Optional Zone-local policy source; the official Rule Realm is always also available. */
+		localRuleRealmId: uuid().references(() => realm.id, { onDelete: "restrict" }),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),
 	},
@@ -30,6 +33,7 @@ export const zone = pgTable(
 			"zone_time_range_check",
 			sql`${table.endsAt} is null or ${table.startsAt} is null or ${table.endsAt} > ${table.startsAt}`,
 		),
+		index("zone_local_rule_realm_idx").on(table.localRuleRealmId, table.id),
 	],
 );
 

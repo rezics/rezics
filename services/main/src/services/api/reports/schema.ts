@@ -1,20 +1,14 @@
 import { type Static, t } from "elysia";
 
 import {
-	ContentGovernanceMaxRuleReferences,
+	GovernanceMaxRuleReferences,
 	ContentReviewCaseStateValues,
 } from "../../database/schema/contract-values";
 import { ContentLanguage, DateTime, LocalizationLanguageQuery, UnitKind, Uuid } from "../schema";
+import { GovernanceRuleReference } from "../governance/schema";
 import { NullablePublicSlugAddressResponse } from "../slug-addresses/schema";
 
-export const ReportRuleReferenceInput = t.Object(
-	{
-		sourceRealmId: Uuid,
-		revisionId: Uuid,
-		ruleId: Uuid,
-	},
-	{ additionalProperties: false },
-);
+export const ReportRuleReferenceInput = GovernanceRuleReference;
 export type ReportRuleReferenceInput = Static<typeof ReportRuleReferenceInput>;
 
 export const CreateReportBody = t.Object(
@@ -22,7 +16,7 @@ export const CreateReportBody = t.Object(
 		contextRealmId: t.Optional(Uuid),
 		rules: t.Array(ReportRuleReferenceInput, {
 			minItems: 1,
-			maxItems: ContentGovernanceMaxRuleReferences,
+			maxItems: GovernanceMaxRuleReferences,
 			uniqueItems: true,
 		}),
 		details: t.Optional(t.String({ minLength: 1, maxLength: 2_000 })),
@@ -130,7 +124,7 @@ export const ReportResponse = t.Object(
 		contextRealmId: t.Nullable(Uuid),
 		rules: t.Array(ReportRuleResponse, {
 			minItems: 1,
-			maxItems: ContentGovernanceMaxRuleReferences,
+			maxItems: GovernanceMaxRuleReferences,
 		}),
 		referrals: t.Array(ReportReferralResponse, { minItems: 1, maxItems: 2 }),
 		details: t.Nullable(t.String()),
@@ -197,7 +191,7 @@ export const MyReportResponse = t.Object(
 		target: MyReportTargetResponse,
 		rules: t.Array(ReportRuleResponse, {
 			minItems: 1,
-			maxItems: ContentGovernanceMaxRuleReferences,
+			maxItems: GovernanceMaxRuleReferences,
 		}),
 		referrals: t.Array(MyReportReferralResponse, { minItems: 1, maxItems: 2 }),
 		details: t.Nullable(t.String()),

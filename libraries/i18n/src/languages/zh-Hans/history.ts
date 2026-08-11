@@ -43,8 +43,6 @@ export default {
 			actor: "编辑者身份",
 		},
 		currentRevisionContent: "当前修订的内容不能隐藏。请先发布不含侵权内容的新修订，再保护旧修订。",
-		reasonLabel: "原因",
-		selectReason: "选择原因",
 		atLeastOneField: "请至少选择一项要保护的资料。",
 		cancel: "取消",
 		save: "保存可见性",

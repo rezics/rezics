@@ -2,13 +2,11 @@
 
 import {
 	GetApiGovernancePlatformOwnershipClaimsState,
-	PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionRequestReasonCodeEnum,
 	getApiGovernancePlatformOwnershipClaims,
 	getApiGovernancePlatformOwnershipClaimsQueryKey,
 	type GetApiGovernancePlatformOwnershipClaimsState as OwnershipClaimState,
 	type GetApiGovernancePlatformOwnershipClaimsStatus200,
 	type PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionRequestDecisionEnum as OwnershipClaimDecision,
-	type PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionRequestReasonCodeEnum as GovernanceReasonCode,
 	usePostApiGovernancePlatformOwnershipClaimsByClaimIdDecision,
 } from "@rezics/openapi-tanstack-query";
 import {
@@ -34,6 +32,8 @@ import { Check, ExternalLink, X } from "lucide-react";
 import { useMemo, useState } from "react";
 
 import { AppLink as Link } from "@/features/application-shell/components/app-link";
+import { GovernanceRulePicker } from "@/features/governance/components/governance-rule-picker";
+import type { GovernanceRuleReference } from "@/features/governance/model/governance-rule-selection";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
 import { useConsoleWorkspace } from "../components/console-workspace";
@@ -42,10 +42,6 @@ type OwnershipClaim = GetApiGovernancePlatformOwnershipClaimsStatus200["items"][
 type StateFilter = "all" | OwnershipClaimState;
 
 const ClaimStates = Object.values(GetApiGovernancePlatformOwnershipClaimsState);
-const GovernanceReasonCodes = Object.values(
-	PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionRequestReasonCodeEnum,
-);
-
 function isStateFilter(value: string): value is StateFilter {
 	return value === "all" || ClaimStates.some((candidate) => candidate === value);
 }
@@ -58,13 +54,13 @@ function ownershipClaimUnitHref(claim: OwnershipClaim): string | null {
 }
 
 export function ConsoleOwnershipClaimsPage() {
-	const { locale, t } = useTranslation(["console", "errors", "realms"]);
+	const { locale, t } = useTranslation(["console", "errors", "governance"]);
 	const { canReadOwnershipClaims, canDecideOwnershipClaims } = useConsoleWorkspace();
 	const queryClient = useQueryClient();
 	const [state, setState] = useState<StateFilter>("pending");
 	const [selectedClaimId, setSelectedClaimId] = useState("");
 	const [decision, setDecision] = useState<OwnershipClaimDecision | null>(null);
-	const [reasonCode, setReasonCode] = useState<GovernanceReasonCode>("administrative");
+	const [rules, setRules] = useState<GovernanceRuleReference[]>([]);
 	const [note, setNote] = useState("");
 	const [confirmationClaimId, setConfirmationClaimId] = useState("");
 	const baseQuery = useMemo(() => ({ limit: 50, ...(state === "all" ? {} : { state }) }), [state]);
@@ -103,20 +99,27 @@ export function ConsoleOwnershipClaimsPage() {
 
 	function openDecision(nextDecision: OwnershipClaimDecision) {
 		setDecision(nextDecision);
-		setReasonCode("administrative");
+		setRules([]);
 		setNote("");
 		setConfirmationClaimId("");
 	}
 
 	async function applyDecision() {
-		if (!selected || !decision || confirmationClaimId !== selected.id || decide.isPending) return;
+		if (
+			!selected ||
+			!decision ||
+			confirmationClaimId !== selected.id ||
+			!rules.length ||
+			decide.isPending
+		)
+			return;
 		try {
 			await decide.mutateAsync({
 				path: { claimId: selected.id },
 				body: {
 					decision,
 					confirmationClaimId,
-					reasonCode,
+					rules,
 					...(note.trim() ? { note: note.trim() } : {}),
 				},
 			});
@@ -320,24 +323,12 @@ export function ConsoleOwnershipClaimsPage() {
 						}
 					/>
 					<DialogBody className="grid gap-4">
-						<Field required>
-							<FieldLabel>{t.console.ownershipClaims.reason}</FieldLabel>
-							<NativeSelect
-								onChange={(event) => {
-									const next = GovernanceReasonCodes.find(
-										(value) => value === event.currentTarget.value,
-									);
-									if (next) setReasonCode(next);
-								}}
-								value={reasonCode}
-							>
-								{GovernanceReasonCodes.map((value) => (
-									<NativeSelectOption key={value} value={value}>
-										{t.realms.governanceReasons[value]}
-									</NativeSelectOption>
-								))}
-							</NativeSelect>
-						</Field>
+						<GovernanceRulePicker
+							authority={{ kind: "platform" }}
+							enabled={decision !== null}
+							onValueChange={setRules}
+							value={rules}
+						/>
 						<Field>
 							<FieldLabel>{t.console.ownershipClaims.internalNote}</FieldLabel>
 							<Textarea
@@ -370,7 +361,7 @@ export function ConsoleOwnershipClaimsPage() {
 							{t.console.cancel}
 						</Button>
 						<Button
-							disabled={!selected || confirmationClaimId !== selected.id}
+							disabled={!selected || confirmationClaimId !== selected.id || !rules.length}
 							isLoading={decide.isPending}
 							onClick={() => void applyDecision()}
 							variant={decision === "rejected" ? "destructive" : "solid"}

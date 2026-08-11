@@ -2,10 +2,10 @@ import { type Static, t } from "elysia";
 
 import {
 	UnitOwnershipModeValues,
-	GovernanceReasonCodeValues,
 	UnitOwnershipClaimResolutionValues,
 } from "../database/schema/contract-values";
 import { DateTime, UnitKind, Uuid } from "../api/schema";
+import { GovernanceRuleReferences } from "../api/governance/schema";
 
 export const UnitOwnershipClaimStateValues = [
 	"pending",
@@ -83,7 +83,7 @@ export const DecideUnitOwnershipClaimBody = t.Object(
 	{
 		decision: t.Union([t.Literal("approved"), t.Literal("rejected")]),
 		confirmationClaimId: Uuid,
-		reasonCode: t.UnionEnum(GovernanceReasonCodeValues),
+		rules: GovernanceRuleReferences,
 		note: t.Optional(t.String({ minLength: 1, maxLength: 2_000 })),
 	},
 	{ additionalProperties: false },

@@ -85,6 +85,7 @@ export default {
 	ZoneNavigationInUse: `Diese Navigation des ${zoneTerms.inline}s wird noch von einem Blockdokument verwendet.`,
 	ZoneDocumentInvalid: `Das Block- oder Navigationsdokument des ${zoneTerms.inline}s ist ungültig.`,
 	ZoneTimeRangeInvalid: `Die Endzeit des ${zoneTerms.inline}s muss nach seiner Startzeit liegen.`,
+	ZoneRuleRealmInvalid: `Der ausgewählte ${realmTerms.inline} hat keine aktuelle Regelversion mit mindestens einer Regel.`,
 	SoftwareNotFound: "Diese Software wurde nicht gefunden.",
 	SystemRequirementNotFound: "Diese Systemanforderung wurde nicht gefunden.",
 	PollOptionsDuplicated: "Die Antwortmöglichkeiten der Umfrage müssen eindeutig sein.",
@@ -116,10 +117,12 @@ export default {
 	ReportRuleUnavailable: "Für den gewählten Zuständigkeitsbereich gibt es keine aktuellen Regeln.",
 	ReportRuleChanged: "Die gewählte Regel wurde geändert. Wähle sie vor dem Senden erneut aus.",
 	ReportRuleSourceForbidden: `Meldungen dürfen nur Regeln des aktuellen ${realmTerms.label} und offizielle Regeln anführen.`,
-	ContentGovernanceRuleSourceForbidden:
-		"Die gewählte Regel liegt außerhalb dieser Zuständigkeit für Inhalts-Governance.",
-	ContentGovernanceRuleChanged:
+	GovernanceRuleSourceForbidden:
+		"Der gewählte Regelbereich liegt außerhalb dieser Governance-Zuständigkeit.",
+	GovernanceRuleChanged:
 		"Eine gewählte Regel gehört nicht mehr zur aktuellen Regelversion. Wähle sie erneut aus.",
+	GovernanceReversalUnavailable:
+		"Diese Governance-Entscheidung wurde bereits aufgehoben oder passt nicht zum aktuellen Ziel.",
 	EnforcementExpiryInvalid: "Der Ablauf der Maßnahme muss in der Zukunft liegen.",
 	EnforcementNotFound: "Diese Maßnahme wurde nicht gefunden.",
 	EnforcementAlreadyRevoked: "Diese Maßnahme wurde bereits aufgehoben.",

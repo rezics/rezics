@@ -13896,6 +13896,7 @@ export const ApiErrorCode = {
 	ZoneNavigationInUse: "ZoneNavigationInUse",
 	ZoneDocumentInvalid: "ZoneDocumentInvalid",
 	ZoneTimeRangeInvalid: "ZoneTimeRangeInvalid",
+	ZoneRuleRealmInvalid: "ZoneRuleRealmInvalid",
 	SoftwareNotFound: "SoftwareNotFound",
 	SystemRequirementNotFound: "SystemRequirementNotFound",
 	DockNotFound: "DockNotFound",
@@ -13929,8 +13930,9 @@ export const ApiErrorCode = {
 	ContentGovernanceReversalUnavailable: "ContentGovernanceReversalUnavailable",
 	ContentGovernanceIdempotencyConflict: "ContentGovernanceIdempotencyConflict",
 	GovernanceNoteRoleDuplicate: "GovernanceNoteRoleDuplicate",
-	ContentGovernanceRuleSourceForbidden: "ContentGovernanceRuleSourceForbidden",
-	ContentGovernanceRuleChanged: "ContentGovernanceRuleChanged",
+	GovernanceRuleSourceForbidden: "GovernanceRuleSourceForbidden",
+	GovernanceRuleChanged: "GovernanceRuleChanged",
+	GovernanceReversalUnavailable: "GovernanceReversalUnavailable",
 	EnforcementExpiryInvalid: "EnforcementExpiryInvalid",
 	EnforcementNotFound: "EnforcementNotFound",
 	EnforcementAlreadyRevoked: "EnforcementAlreadyRevoked",
@@ -36958,6 +36960,7 @@ export type PutApiGovernanceUnitByUnitIdAccessStatus200 = {
 export const PutApiGovernanceUnitByUnitIdAccessStatus400ErrorCodeEnum = {
 	UnitAccessExpiryInvalid: "UnitAccessExpiryInvalid",
 	UnitAccessConfigurationInvalid: "UnitAccessConfigurationInvalid",
+	GovernanceRuleSourceForbidden: "GovernanceRuleSourceForbidden",
 } as const;
 
 export type PutApiGovernanceUnitByUnitIdAccessStatus400ErrorCodeEnum =
@@ -37064,6 +37067,14 @@ export type PutApiGovernanceUnitByUnitIdAccessStatus404 = {
 	requestId: string;
 };
 
+export const PutApiGovernanceUnitByUnitIdAccessStatus409ErrorCodeEnum = {
+	UnitOwnerRestrictionForbidden: "UnitOwnerRestrictionForbidden",
+	GovernanceRuleChanged: "GovernanceRuleChanged",
+} as const;
+
+export type PutApiGovernanceUnitByUnitIdAccessStatus409ErrorCodeEnum =
+	(typeof PutApiGovernanceUnitByUnitIdAccessStatus409ErrorCodeEnum)[keyof typeof PutApiGovernanceUnitByUnitIdAccessStatus409ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -37076,7 +37087,7 @@ export type PutApiGovernanceUnitByUnitIdAccessStatus409 = {
 		 * @default 'UnitOwnerRestrictionForbidden'
 		 * @type string
 		 */
-		code: "UnitOwnerRestrictionForbidden";
+		code: PutApiGovernanceUnitByUnitIdAccessStatus409ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -37172,88 +37183,165 @@ export const PutApiGovernanceUnitByUnitIdAccessRequestRestrictionsEnum = {
 export type PutApiGovernanceUnitByUnitIdAccessRequestRestrictionsEnum =
 	(typeof PutApiGovernanceUnitByUnitIdAccessRequestRestrictionsEnum)[keyof typeof PutApiGovernanceUnitByUnitIdAccessRequestRestrictionsEnum];
 
-export const PutApiGovernanceUnitByUnitIdAccessRequestReasonCodeEnum = {
-	content_policy: "content_policy",
-	copyright: "copyright",
-	realm_rules: "realm_rules",
-	spam: "spam",
-	harassment: "harassment",
-	unsafe_content: "unsafe_content",
-	off_topic: "off_topic",
-	duplicate: "duplicate",
-	account_security: "account_security",
-	user_request: "user_request",
-	appeal: "appeal",
-	administrative: "administrative",
-	other: "other",
-} as const;
-
-export type PutApiGovernanceUnitByUnitIdAccessRequestReasonCodeEnum =
-	(typeof PutApiGovernanceUnitByUnitIdAccessRequestReasonCodeEnum)[keyof typeof PutApiGovernanceUnitByUnitIdAccessRequestReasonCodeEnum];
-
-/**
- * @type object
- */
-export type PutApiGovernanceUnitByUnitIdAccessBody = {
-	subject:
-		| {
-				/**
-				 * @type string
-				 */
-				kind: "profile";
+export type PutApiGovernanceUnitByUnitIdAccessBody =
+	| {
+			subject:
+				| {
+						/**
+						 * @type string
+						 */
+						kind: "profile";
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						profileId: string;
+				  }
+				| {
+						/**
+						 * @type string
+						 */
+						kind: "realm";
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						realmId: string;
+						/**
+						 * @default 'member'
+						 * @type string
+						 */
+						relation: PutApiGovernanceUnitByUnitIdAccessRequestSubjectRelationEnum;
+				  }
+				| {
+						/**
+						 * @type string
+						 */
+						kind: "authenticated";
+				  };
+			/**
+			 * @type array
+			 */
+			grants: PutApiGovernanceUnitByUnitIdAccessRequestGrantsEnum[];
+			/**
+			 * @type array
+			 */
+			scope: string[];
+			/**
+			 * @description
+			 * Format: `date-time`
+			 * @type string | undefined
+			 */
+			expiresAt?: string;
+			/**
+			 * @type array
+			 */
+			restrictions: PutApiGovernanceUnitByUnitIdAccessRequestRestrictionsEnum[];
+			/**
+			 * @type array
+			 */
+			rules: {
 				/**
 				 * @description
 				 * Format: `uuid`
 				 * @type string
 				 */
-				profileId: string;
-		  }
-		| {
-				/**
-				 * @type string
-				 */
-				kind: "realm";
+				sourceRealmId: string;
 				/**
 				 * @description
 				 * Format: `uuid`
 				 * @type string
 				 */
-				realmId: string;
+				revisionId: string;
 				/**
-				 * @default 'member'
+				 * @description
+				 * Format: `uuid`
 				 * @type string
 				 */
-				relation: PutApiGovernanceUnitByUnitIdAccessRequestSubjectRelationEnum;
-		  }
-		| {
+				ruleId: string;
+			}[];
+	  }
+	| {
+			subject:
+				| {
+						/**
+						 * @type string
+						 */
+						kind: "profile";
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						profileId: string;
+				  }
+				| {
+						/**
+						 * @type string
+						 */
+						kind: "realm";
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						realmId: string;
+						/**
+						 * @default 'member'
+						 * @type string
+						 */
+						relation: PutApiGovernanceUnitByUnitIdAccessRequestSubjectRelationEnum;
+				  }
+				| {
+						/**
+						 * @type string
+						 */
+						kind: "authenticated";
+				  };
+			/**
+			 * @type array
+			 */
+			grants: PutApiGovernanceUnitByUnitIdAccessRequestGrantsEnum[];
+			/**
+			 * @type array
+			 */
+			scope: string[];
+			/**
+			 * @description
+			 * Format: `date-time`
+			 * @type string | undefined
+			 */
+			expiresAt?: string;
+			/**
+			 * @type array
+			 */
+			restrictions: PutApiGovernanceUnitByUnitIdAccessRequestRestrictionsEnum[];
+			/**
+			 * @type array | undefined
+			 */
+			rules?: {
 				/**
+				 * @description
+				 * Format: `uuid`
 				 * @type string
 				 */
-				kind: "authenticated";
-		  };
-	/**
-	 * @type array
-	 */
-	grants: PutApiGovernanceUnitByUnitIdAccessRequestGrantsEnum[];
-	/**
-	 * @type array
-	 */
-	restrictions: PutApiGovernanceUnitByUnitIdAccessRequestRestrictionsEnum[];
-	/**
-	 * @type array
-	 */
-	scope: string[];
-	/**
-	 * @type string | undefined
-	 */
-	reasonCode?: PutApiGovernanceUnitByUnitIdAccessRequestReasonCodeEnum;
-	/**
-	 * @description
-	 * Format: `date-time`
-	 * @type string | undefined
-	 */
-	expiresAt?: string;
-};
+				sourceRealmId: string;
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				revisionId: string;
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				ruleId: string;
+			}[];
+	  };
 
 /**
  * @type object
@@ -39983,6 +40071,14 @@ export type PostApiGovernancePlatformUnitsByUnitIdOwnershipOverrideStatus200 = {
 	};
 };
 
+export const PostApiGovernancePlatformUnitsByUnitIdOwnershipOverrideStatus400ErrorCodeEnum = {
+	UnitOwnershipOverrideConfirmationInvalid: "UnitOwnershipOverrideConfirmationInvalid",
+	GovernanceRuleSourceForbidden: "GovernanceRuleSourceForbidden",
+} as const;
+
+export type PostApiGovernancePlatformUnitsByUnitIdOwnershipOverrideStatus400ErrorCodeEnum =
+	(typeof PostApiGovernancePlatformUnitsByUnitIdOwnershipOverrideStatus400ErrorCodeEnum)[keyof typeof PostApiGovernancePlatformUnitsByUnitIdOwnershipOverrideStatus400ErrorCodeEnum];
+
 export type PostApiGovernancePlatformUnitsByUnitIdOwnershipOverrideStatus400 =
 	| {
 			/**
@@ -39993,7 +40089,7 @@ export type PostApiGovernancePlatformUnitsByUnitIdOwnershipOverrideStatus400 =
 				 * @default 'UnitOwnershipOverrideConfirmationInvalid'
 				 * @type string
 				 */
-				code: "UnitOwnershipOverrideConfirmationInvalid";
+				code: PostApiGovernancePlatformUnitsByUnitIdOwnershipOverrideStatus400ErrorCodeEnum;
 				/**
 				 * @type string
 				 */
@@ -40077,6 +40173,7 @@ export type PostApiGovernancePlatformUnitsByUnitIdOwnershipOverrideStatus404 = {
 export const PostApiGovernancePlatformUnitsByUnitIdOwnershipOverrideStatus409ErrorCodeEnum = {
 	UnitOwnershipChanged: "UnitOwnershipChanged",
 	UnitOwnershipTargetIneligible: "UnitOwnershipTargetIneligible",
+	GovernanceRuleChanged: "GovernanceRuleChanged",
 } as const;
 
 export type PostApiGovernancePlatformUnitsByUnitIdOwnershipOverrideStatus409ErrorCodeEnum =
@@ -40120,25 +40217,6 @@ export type PostApiGovernancePlatformUnitsByUnitIdOwnershipOverrideStatus422 = V
  */
 export type PostApiGovernancePlatformUnitsByUnitIdOwnershipOverrideStatus500 = InternalError;
 
-export const PostApiGovernancePlatformUnitsByUnitIdOwnershipOverrideRequestReasonCodeEnum = {
-	content_policy: "content_policy",
-	copyright: "copyright",
-	realm_rules: "realm_rules",
-	spam: "spam",
-	harassment: "harassment",
-	unsafe_content: "unsafe_content",
-	off_topic: "off_topic",
-	duplicate: "duplicate",
-	account_security: "account_security",
-	user_request: "user_request",
-	appeal: "appeal",
-	administrative: "administrative",
-	other: "other",
-} as const;
-
-export type PostApiGovernancePlatformUnitsByUnitIdOwnershipOverrideRequestReasonCodeEnum =
-	(typeof PostApiGovernancePlatformUnitsByUnitIdOwnershipOverrideRequestReasonCodeEnum)[keyof typeof PostApiGovernancePlatformUnitsByUnitIdOwnershipOverrideRequestReasonCodeEnum];
-
 /**
  * @type object
  */
@@ -40157,9 +40235,28 @@ export type PostApiGovernancePlatformUnitsByUnitIdOwnershipOverrideBody = {
 	 */
 	confirmationUnitId: string;
 	/**
-	 * @type string
+	 * @type array
 	 */
-	reasonCode: PostApiGovernancePlatformUnitsByUnitIdOwnershipOverrideRequestReasonCodeEnum;
+	rules: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		sourceRealmId: string;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		revisionId: string;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		ruleId: string;
+	}[];
 	/**
 	 * @minLength 1
 	 * @maxLength 2000
@@ -40295,6 +40392,14 @@ export type PostApiGovernancePlatformUnitsByUnitIdDeleteStatus200 = {
 	protected: boolean;
 };
 
+export const PostApiGovernancePlatformUnitsByUnitIdDeleteStatus400ErrorCodeEnum = {
+	UnitLifecycleConfirmationInvalid: "UnitLifecycleConfirmationInvalid",
+	GovernanceRuleSourceForbidden: "GovernanceRuleSourceForbidden",
+} as const;
+
+export type PostApiGovernancePlatformUnitsByUnitIdDeleteStatus400ErrorCodeEnum =
+	(typeof PostApiGovernancePlatformUnitsByUnitIdDeleteStatus400ErrorCodeEnum)[keyof typeof PostApiGovernancePlatformUnitsByUnitIdDeleteStatus400ErrorCodeEnum];
+
 export type PostApiGovernancePlatformUnitsByUnitIdDeleteStatus400 =
 	| {
 			/**
@@ -40305,7 +40410,7 @@ export type PostApiGovernancePlatformUnitsByUnitIdDeleteStatus400 =
 				 * @default 'UnitLifecycleConfirmationInvalid'
 				 * @type string
 				 */
-				code: "UnitLifecycleConfirmationInvalid";
+				code: PostApiGovernancePlatformUnitsByUnitIdDeleteStatus400ErrorCodeEnum;
 				/**
 				 * @type string
 				 */
@@ -40392,6 +40497,7 @@ export const PostApiGovernancePlatformUnitsByUnitIdDeleteStatus409ErrorCodeEnum 
 	UnitAlreadyDeleted: "UnitAlreadyDeleted",
 	UnitNotDeleted: "UnitNotDeleted",
 	UnitMergeRequestConflict: "UnitMergeRequestConflict",
+	GovernanceRuleChanged: "GovernanceRuleChanged",
 } as const;
 
 export type PostApiGovernancePlatformUnitsByUnitIdDeleteStatus409ErrorCodeEnum =
@@ -40435,25 +40541,6 @@ export type PostApiGovernancePlatformUnitsByUnitIdDeleteStatus422 = ValidationEr
  */
 export type PostApiGovernancePlatformUnitsByUnitIdDeleteStatus500 = InternalError;
 
-export const PostApiGovernancePlatformUnitsByUnitIdDeleteRequestReasonCodeEnum = {
-	content_policy: "content_policy",
-	copyright: "copyright",
-	realm_rules: "realm_rules",
-	spam: "spam",
-	harassment: "harassment",
-	unsafe_content: "unsafe_content",
-	off_topic: "off_topic",
-	duplicate: "duplicate",
-	account_security: "account_security",
-	user_request: "user_request",
-	appeal: "appeal",
-	administrative: "administrative",
-	other: "other",
-} as const;
-
-export type PostApiGovernancePlatformUnitsByUnitIdDeleteRequestReasonCodeEnum =
-	(typeof PostApiGovernancePlatformUnitsByUnitIdDeleteRequestReasonCodeEnum)[keyof typeof PostApiGovernancePlatformUnitsByUnitIdDeleteRequestReasonCodeEnum];
-
 /**
  * @type object
  */
@@ -40471,9 +40558,28 @@ export type PostApiGovernancePlatformUnitsByUnitIdDeleteBody = {
 	 */
 	confirmationUnitId: string;
 	/**
-	 * @type string
+	 * @type array
 	 */
-	reasonCode: PostApiGovernancePlatformUnitsByUnitIdDeleteRequestReasonCodeEnum;
+	rules: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		sourceRealmId: string;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		revisionId: string;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		ruleId: string;
+	}[];
 	/**
 	 * @minLength 1
 	 * @maxLength 2000
@@ -40706,6 +40812,7 @@ export const PostApiGovernancePlatformUnitsByUnitIdRestoreStatus409ErrorCodeEnum
 	UnitAlreadyDeleted: "UnitAlreadyDeleted",
 	UnitNotDeleted: "UnitNotDeleted",
 	UnitMergeRequestConflict: "UnitMergeRequestConflict",
+	GovernanceReversalUnavailable: "GovernanceReversalUnavailable",
 } as const;
 
 export type PostApiGovernancePlatformUnitsByUnitIdRestoreStatus409ErrorCodeEnum =
@@ -40749,25 +40856,6 @@ export type PostApiGovernancePlatformUnitsByUnitIdRestoreStatus422 = ValidationE
  */
 export type PostApiGovernancePlatformUnitsByUnitIdRestoreStatus500 = InternalError;
 
-export const PostApiGovernancePlatformUnitsByUnitIdRestoreRequestReasonCodeEnum = {
-	content_policy: "content_policy",
-	copyright: "copyright",
-	realm_rules: "realm_rules",
-	spam: "spam",
-	harassment: "harassment",
-	unsafe_content: "unsafe_content",
-	off_topic: "off_topic",
-	duplicate: "duplicate",
-	account_security: "account_security",
-	user_request: "user_request",
-	appeal: "appeal",
-	administrative: "administrative",
-	other: "other",
-} as const;
-
-export type PostApiGovernancePlatformUnitsByUnitIdRestoreRequestReasonCodeEnum =
-	(typeof PostApiGovernancePlatformUnitsByUnitIdRestoreRequestReasonCodeEnum)[keyof typeof PostApiGovernancePlatformUnitsByUnitIdRestoreRequestReasonCodeEnum];
-
 /**
  * @type object
  */
@@ -40784,10 +40872,6 @@ export type PostApiGovernancePlatformUnitsByUnitIdRestoreBody = {
 	 * @type string
 	 */
 	confirmationUnitId: string;
-	/**
-	 * @type string
-	 */
-	reasonCode: PostApiGovernancePlatformUnitsByUnitIdRestoreRequestReasonCodeEnum;
 	/**
 	 * @minLength 1
 	 * @maxLength 2000
@@ -40896,25 +40980,6 @@ export const GetApiGovernancePlatformUnitMergesStatus200ItemsStateEnum = {
 
 export type GetApiGovernancePlatformUnitMergesStatus200ItemsStateEnum =
 	(typeof GetApiGovernancePlatformUnitMergesStatus200ItemsStateEnum)[keyof typeof GetApiGovernancePlatformUnitMergesStatus200ItemsStateEnum];
-
-export const GetApiGovernancePlatformUnitMergesStatus200ItemsReasonCodeEnum = {
-	content_policy: "content_policy",
-	copyright: "copyright",
-	realm_rules: "realm_rules",
-	spam: "spam",
-	harassment: "harassment",
-	unsafe_content: "unsafe_content",
-	off_topic: "off_topic",
-	duplicate: "duplicate",
-	account_security: "account_security",
-	user_request: "user_request",
-	appeal: "appeal",
-	administrative: "administrative",
-	other: "other",
-} as const;
-
-export type GetApiGovernancePlatformUnitMergesStatus200ItemsReasonCodeEnum =
-	(typeof GetApiGovernancePlatformUnitMergesStatus200ItemsReasonCodeEnum)[keyof typeof GetApiGovernancePlatformUnitMergesStatus200ItemsReasonCodeEnum];
 
 export const GetApiGovernancePlatformUnitMergesStatus200ItemsManifestGraphPlanSourceRoleEnum = {
 	standalone: "standalone",
@@ -41077,9 +41142,28 @@ export type GetApiGovernancePlatformUnitMergesStatus200 = {
 		};
 		overrideOfRequestId: (string | null) | null;
 		/**
-		 * @type string
+		 * @type array
 		 */
-		reasonCode: GetApiGovernancePlatformUnitMergesStatus200ItemsReasonCodeEnum;
+		rules: {
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			sourceRealmId: string;
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			revisionId: string;
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			ruleId: string;
+		}[];
 		note: (string | null) | null;
 		/**
 		 * @type object
@@ -41335,25 +41419,6 @@ export const PostApiGovernancePlatformUnitMergesStatus200StateEnum = {
 export type PostApiGovernancePlatformUnitMergesStatus200StateEnum =
 	(typeof PostApiGovernancePlatformUnitMergesStatus200StateEnum)[keyof typeof PostApiGovernancePlatformUnitMergesStatus200StateEnum];
 
-export const PostApiGovernancePlatformUnitMergesStatus200ReasonCodeEnum = {
-	content_policy: "content_policy",
-	copyright: "copyright",
-	realm_rules: "realm_rules",
-	spam: "spam",
-	harassment: "harassment",
-	unsafe_content: "unsafe_content",
-	off_topic: "off_topic",
-	duplicate: "duplicate",
-	account_security: "account_security",
-	user_request: "user_request",
-	appeal: "appeal",
-	administrative: "administrative",
-	other: "other",
-} as const;
-
-export type PostApiGovernancePlatformUnitMergesStatus200ReasonCodeEnum =
-	(typeof PostApiGovernancePlatformUnitMergesStatus200ReasonCodeEnum)[keyof typeof PostApiGovernancePlatformUnitMergesStatus200ReasonCodeEnum];
-
 export const PostApiGovernancePlatformUnitMergesStatus200ManifestGraphPlanSourceRoleEnum = {
 	standalone: "standalone",
 	variant: "variant",
@@ -41511,9 +41576,28 @@ export type PostApiGovernancePlatformUnitMergesStatus200 = {
 	};
 	overrideOfRequestId: (string | null) | null;
 	/**
-	 * @type string
+	 * @type array
 	 */
-	reasonCode: PostApiGovernancePlatformUnitMergesStatus200ReasonCodeEnum;
+	rules: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		sourceRealmId: string;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		revisionId: string;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		ruleId: string;
+	}[];
 	note: (string | null) | null;
 	/**
 	 * @type object
@@ -41668,6 +41752,14 @@ export type PostApiGovernancePlatformUnitMergesStatus200 = {
 	updatedAt: string;
 };
 
+export const PostApiGovernancePlatformUnitMergesStatus400ErrorCodeEnum = {
+	UnitMergeConfirmationInvalid: "UnitMergeConfirmationInvalid",
+	GovernanceRuleSourceForbidden: "GovernanceRuleSourceForbidden",
+} as const;
+
+export type PostApiGovernancePlatformUnitMergesStatus400ErrorCodeEnum =
+	(typeof PostApiGovernancePlatformUnitMergesStatus400ErrorCodeEnum)[keyof typeof PostApiGovernancePlatformUnitMergesStatus400ErrorCodeEnum];
+
 export type PostApiGovernancePlatformUnitMergesStatus400 =
 	| {
 			/**
@@ -41678,7 +41770,7 @@ export type PostApiGovernancePlatformUnitMergesStatus400 =
 				 * @default 'UnitMergeConfirmationInvalid'
 				 * @type string
 				 */
-				code: "UnitMergeConfirmationInvalid";
+				code: PostApiGovernancePlatformUnitMergesStatus400ErrorCodeEnum;
 				/**
 				 * @type string
 				 */
@@ -41772,6 +41864,7 @@ export const PostApiGovernancePlatformUnitMergesStatus409ErrorCodeEnum = {
 	UnitMergeRequestConflict: "UnitMergeRequestConflict",
 	UnitMergeIdempotencyConflict: "UnitMergeIdempotencyConflict",
 	UnitMergeManifestStale: "UnitMergeManifestStale",
+	GovernanceRuleChanged: "GovernanceRuleChanged",
 } as const;
 
 export type PostApiGovernancePlatformUnitMergesStatus409ErrorCodeEnum =
@@ -41837,25 +41930,6 @@ export type PostApiGovernancePlatformUnitMergesStatus422 =
  */
 export type PostApiGovernancePlatformUnitMergesStatus500 = InternalError;
 
-export const PostApiGovernancePlatformUnitMergesRequestReasonCodeEnum = {
-	content_policy: "content_policy",
-	copyright: "copyright",
-	realm_rules: "realm_rules",
-	spam: "spam",
-	harassment: "harassment",
-	unsafe_content: "unsafe_content",
-	off_topic: "off_topic",
-	duplicate: "duplicate",
-	account_security: "account_security",
-	user_request: "user_request",
-	appeal: "appeal",
-	administrative: "administrative",
-	other: "other",
-} as const;
-
-export type PostApiGovernancePlatformUnitMergesRequestReasonCodeEnum =
-	(typeof PostApiGovernancePlatformUnitMergesRequestReasonCodeEnum)[keyof typeof PostApiGovernancePlatformUnitMergesRequestReasonCodeEnum];
-
 /**
  * @type object
  */
@@ -41903,9 +41977,28 @@ export type PostApiGovernancePlatformUnitMergesBody = {
 	 */
 	idempotencyKey: string;
 	/**
-	 * @type string
+	 * @type array
 	 */
-	reasonCode: PostApiGovernancePlatformUnitMergesRequestReasonCodeEnum;
+	rules: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		sourceRealmId: string;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		revisionId: string;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		ruleId: string;
+	}[];
 	/**
 	 * @minLength 1
 	 * @maxLength 2000
@@ -41992,25 +42085,6 @@ export const GetApiGovernancePlatformUnitMergesByRequestIdStatus200StateEnum = {
 
 export type GetApiGovernancePlatformUnitMergesByRequestIdStatus200StateEnum =
 	(typeof GetApiGovernancePlatformUnitMergesByRequestIdStatus200StateEnum)[keyof typeof GetApiGovernancePlatformUnitMergesByRequestIdStatus200StateEnum];
-
-export const GetApiGovernancePlatformUnitMergesByRequestIdStatus200ReasonCodeEnum = {
-	content_policy: "content_policy",
-	copyright: "copyright",
-	realm_rules: "realm_rules",
-	spam: "spam",
-	harassment: "harassment",
-	unsafe_content: "unsafe_content",
-	off_topic: "off_topic",
-	duplicate: "duplicate",
-	account_security: "account_security",
-	user_request: "user_request",
-	appeal: "appeal",
-	administrative: "administrative",
-	other: "other",
-} as const;
-
-export type GetApiGovernancePlatformUnitMergesByRequestIdStatus200ReasonCodeEnum =
-	(typeof GetApiGovernancePlatformUnitMergesByRequestIdStatus200ReasonCodeEnum)[keyof typeof GetApiGovernancePlatformUnitMergesByRequestIdStatus200ReasonCodeEnum];
 
 export const GetApiGovernancePlatformUnitMergesByRequestIdStatus200ManifestGraphPlanSourceRoleEnum =
 	{
@@ -42171,9 +42245,28 @@ export type GetApiGovernancePlatformUnitMergesByRequestIdStatus200 = {
 	};
 	overrideOfRequestId: (string | null) | null;
 	/**
-	 * @type string
+	 * @type array
 	 */
-	reasonCode: GetApiGovernancePlatformUnitMergesByRequestIdStatus200ReasonCodeEnum;
+	rules: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		sourceRealmId: string;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		revisionId: string;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		ruleId: string;
+	}[];
 	note: (string | null) | null;
 	/**
 	 * @type object
@@ -42795,25 +42888,6 @@ export const PostApiGovernancePlatformUnitMergesDirectStatus200StateEnum = {
 export type PostApiGovernancePlatformUnitMergesDirectStatus200StateEnum =
 	(typeof PostApiGovernancePlatformUnitMergesDirectStatus200StateEnum)[keyof typeof PostApiGovernancePlatformUnitMergesDirectStatus200StateEnum];
 
-export const PostApiGovernancePlatformUnitMergesDirectStatus200ReasonCodeEnum = {
-	content_policy: "content_policy",
-	copyright: "copyright",
-	realm_rules: "realm_rules",
-	spam: "spam",
-	harassment: "harassment",
-	unsafe_content: "unsafe_content",
-	off_topic: "off_topic",
-	duplicate: "duplicate",
-	account_security: "account_security",
-	user_request: "user_request",
-	appeal: "appeal",
-	administrative: "administrative",
-	other: "other",
-} as const;
-
-export type PostApiGovernancePlatformUnitMergesDirectStatus200ReasonCodeEnum =
-	(typeof PostApiGovernancePlatformUnitMergesDirectStatus200ReasonCodeEnum)[keyof typeof PostApiGovernancePlatformUnitMergesDirectStatus200ReasonCodeEnum];
-
 export const PostApiGovernancePlatformUnitMergesDirectStatus200ManifestGraphPlanSourceRoleEnum = {
 	standalone: "standalone",
 	variant: "variant",
@@ -42971,9 +43045,28 @@ export type PostApiGovernancePlatformUnitMergesDirectStatus200 = {
 	};
 	overrideOfRequestId: (string | null) | null;
 	/**
-	 * @type string
+	 * @type array
 	 */
-	reasonCode: PostApiGovernancePlatformUnitMergesDirectStatus200ReasonCodeEnum;
+	rules: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		sourceRealmId: string;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		revisionId: string;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		ruleId: string;
+	}[];
 	note: (string | null) | null;
 	/**
 	 * @type object
@@ -43128,6 +43221,14 @@ export type PostApiGovernancePlatformUnitMergesDirectStatus200 = {
 	updatedAt: string;
 };
 
+export const PostApiGovernancePlatformUnitMergesDirectStatus400ErrorCodeEnum = {
+	UnitMergeConfirmationInvalid: "UnitMergeConfirmationInvalid",
+	GovernanceRuleSourceForbidden: "GovernanceRuleSourceForbidden",
+} as const;
+
+export type PostApiGovernancePlatformUnitMergesDirectStatus400ErrorCodeEnum =
+	(typeof PostApiGovernancePlatformUnitMergesDirectStatus400ErrorCodeEnum)[keyof typeof PostApiGovernancePlatformUnitMergesDirectStatus400ErrorCodeEnum];
+
 export type PostApiGovernancePlatformUnitMergesDirectStatus400 =
 	| {
 			/**
@@ -43138,7 +43239,7 @@ export type PostApiGovernancePlatformUnitMergesDirectStatus400 =
 				 * @default 'UnitMergeConfirmationInvalid'
 				 * @type string
 				 */
-				code: "UnitMergeConfirmationInvalid";
+				code: PostApiGovernancePlatformUnitMergesDirectStatus400ErrorCodeEnum;
 				/**
 				 * @type string
 				 */
@@ -43232,6 +43333,7 @@ export const PostApiGovernancePlatformUnitMergesDirectStatus409ErrorCodeEnum = {
 	UnitMergeRequestConflict: "UnitMergeRequestConflict",
 	UnitMergeIdempotencyConflict: "UnitMergeIdempotencyConflict",
 	UnitMergeManifestStale: "UnitMergeManifestStale",
+	GovernanceRuleChanged: "GovernanceRuleChanged",
 } as const;
 
 export type PostApiGovernancePlatformUnitMergesDirectStatus409ErrorCodeEnum =
@@ -43297,25 +43399,6 @@ export type PostApiGovernancePlatformUnitMergesDirectStatus422 =
  */
 export type PostApiGovernancePlatformUnitMergesDirectStatus500 = InternalError;
 
-export const PostApiGovernancePlatformUnitMergesDirectRequestReasonCodeEnum = {
-	content_policy: "content_policy",
-	copyright: "copyright",
-	realm_rules: "realm_rules",
-	spam: "spam",
-	harassment: "harassment",
-	unsafe_content: "unsafe_content",
-	off_topic: "off_topic",
-	duplicate: "duplicate",
-	account_security: "account_security",
-	user_request: "user_request",
-	appeal: "appeal",
-	administrative: "administrative",
-	other: "other",
-} as const;
-
-export type PostApiGovernancePlatformUnitMergesDirectRequestReasonCodeEnum =
-	(typeof PostApiGovernancePlatformUnitMergesDirectRequestReasonCodeEnum)[keyof typeof PostApiGovernancePlatformUnitMergesDirectRequestReasonCodeEnum];
-
 /**
  * @type object
  */
@@ -43363,9 +43446,28 @@ export type PostApiGovernancePlatformUnitMergesDirectBody = {
 	 */
 	idempotencyKey: string;
 	/**
-	 * @type string
+	 * @type array
 	 */
-	reasonCode: PostApiGovernancePlatformUnitMergesDirectRequestReasonCodeEnum;
+	rules: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		sourceRealmId: string;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		revisionId: string;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		ruleId: string;
+	}[];
 	/**
 	 * @minLength 1
 	 * @maxLength 2000
@@ -43458,25 +43560,6 @@ export const PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus200State
 
 export type PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus200StateEnum =
 	(typeof PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus200StateEnum)[keyof typeof PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus200StateEnum];
-
-export const PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus200ReasonCodeEnum = {
-	content_policy: "content_policy",
-	copyright: "copyright",
-	realm_rules: "realm_rules",
-	spam: "spam",
-	harassment: "harassment",
-	unsafe_content: "unsafe_content",
-	off_topic: "off_topic",
-	duplicate: "duplicate",
-	account_security: "account_security",
-	user_request: "user_request",
-	appeal: "appeal",
-	administrative: "administrative",
-	other: "other",
-} as const;
-
-export type PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus200ReasonCodeEnum =
-	(typeof PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus200ReasonCodeEnum)[keyof typeof PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus200ReasonCodeEnum];
 
 export const PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus200ManifestGraphPlanSourceRoleEnum =
 	{
@@ -43638,9 +43721,28 @@ export type PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus200 = {
 	};
 	overrideOfRequestId: (string | null) | null;
 	/**
-	 * @type string
+	 * @type array
 	 */
-	reasonCode: PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus200ReasonCodeEnum;
+	rules: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		sourceRealmId: string;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		revisionId: string;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		ruleId: string;
+	}[];
 	note: (string | null) | null;
 	/**
 	 * @type object
@@ -43872,6 +43974,7 @@ export const PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus409Error
 	UnitMergeReviewFingerprintMismatch: "UnitMergeReviewFingerprintMismatch",
 	UnitMergeRequestNotPending: "UnitMergeRequestNotPending",
 	UnitMergeRequestExpired: "UnitMergeRequestExpired",
+	GovernanceRuleChanged: "GovernanceRuleChanged",
 } as const;
 
 export type PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus409ErrorCodeEnum =
@@ -44023,25 +44126,6 @@ export const PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus200StateEn
 
 export type PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus200StateEnum =
 	(typeof PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus200StateEnum)[keyof typeof PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus200StateEnum];
-
-export const PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus200ReasonCodeEnum = {
-	content_policy: "content_policy",
-	copyright: "copyright",
-	realm_rules: "realm_rules",
-	spam: "spam",
-	harassment: "harassment",
-	unsafe_content: "unsafe_content",
-	off_topic: "off_topic",
-	duplicate: "duplicate",
-	account_security: "account_security",
-	user_request: "user_request",
-	appeal: "appeal",
-	administrative: "administrative",
-	other: "other",
-} as const;
-
-export type PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus200ReasonCodeEnum =
-	(typeof PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus200ReasonCodeEnum)[keyof typeof PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus200ReasonCodeEnum];
 
 export const PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus200ManifestGraphPlanSourceRoleEnum =
 	{
@@ -44203,9 +44287,28 @@ export type PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus200 = {
 	};
 	overrideOfRequestId: (string | null) | null;
 	/**
-	 * @type string
+	 * @type array
 	 */
-	reasonCode: PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus200ReasonCodeEnum;
+	rules: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		sourceRealmId: string;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		revisionId: string;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		ruleId: string;
+	}[];
 	note: (string | null) | null;
 	/**
 	 * @type object
@@ -44424,6 +44527,14 @@ export type PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus404 = {
 	requestId: string;
 };
 
+export const PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus409ErrorCodeEnum = {
+	UnitMergeRetryUnavailable: "UnitMergeRetryUnavailable",
+	GovernanceRuleChanged: "GovernanceRuleChanged",
+} as const;
+
+export type PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus409ErrorCodeEnum =
+	(typeof PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus409ErrorCodeEnum)[keyof typeof PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus409ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -44436,7 +44547,7 @@ export type PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus409 = {
 		 * @default 'UnitMergeRetryUnavailable'
 		 * @type string
 		 */
-		code: "UnitMergeRetryUnavailable";
+		code: PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus409ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -44784,6 +44895,14 @@ export type PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionStatus200 =
 			ownershipId: null;
 	  };
 
+export const PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionStatus400ErrorCodeEnum = {
+	UnitOwnershipClaimConfirmationInvalid: "UnitOwnershipClaimConfirmationInvalid",
+	GovernanceRuleSourceForbidden: "GovernanceRuleSourceForbidden",
+} as const;
+
+export type PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionStatus400ErrorCodeEnum =
+	(typeof PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionStatus400ErrorCodeEnum)[keyof typeof PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionStatus400ErrorCodeEnum];
+
 export type PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionStatus400 =
 	| {
 			/**
@@ -44794,7 +44913,7 @@ export type PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionStatus400 =
 				 * @default 'UnitOwnershipClaimConfirmationInvalid'
 				 * @type string
 				 */
-				code: "UnitOwnershipClaimConfirmationInvalid";
+				code: PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionStatus400ErrorCodeEnum;
 				/**
 				 * @type string
 				 */
@@ -44884,6 +45003,14 @@ export type PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionStatus404 =
 	requestId: string;
 };
 
+export const PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionStatus409ErrorCodeEnum = {
+	UnitOwnershipClaimChanged: "UnitOwnershipClaimChanged",
+	GovernanceRuleChanged: "GovernanceRuleChanged",
+} as const;
+
+export type PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionStatus409ErrorCodeEnum =
+	(typeof PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionStatus409ErrorCodeEnum)[keyof typeof PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionStatus409ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -44896,7 +45023,7 @@ export type PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionStatus409 =
 		 * @default 'UnitOwnershipClaimChanged'
 		 * @type string
 		 */
-		code: "UnitOwnershipClaimChanged";
+		code: PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionStatus409ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -44930,25 +45057,6 @@ export const PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionRequestDec
 export type PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionRequestDecisionEnum =
 	(typeof PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionRequestDecisionEnum)[keyof typeof PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionRequestDecisionEnum];
 
-export const PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionRequestReasonCodeEnum = {
-	content_policy: "content_policy",
-	copyright: "copyright",
-	realm_rules: "realm_rules",
-	spam: "spam",
-	harassment: "harassment",
-	unsafe_content: "unsafe_content",
-	off_topic: "off_topic",
-	duplicate: "duplicate",
-	account_security: "account_security",
-	user_request: "user_request",
-	appeal: "appeal",
-	administrative: "administrative",
-	other: "other",
-} as const;
-
-export type PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionRequestReasonCodeEnum =
-	(typeof PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionRequestReasonCodeEnum)[keyof typeof PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionRequestReasonCodeEnum];
-
 /**
  * @type object
  */
@@ -44964,10 +45072,28 @@ export type PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionBody = {
 	 */
 	confirmationClaimId: string;
 	/**
-	 * @default 'content_policy'
-	 * @type string
+	 * @type array
 	 */
-	reasonCode: PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionRequestReasonCodeEnum;
+	rules: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		sourceRealmId: string;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		revisionId: string;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		ruleId: string;
+	}[];
 	/**
 	 * @minLength 1
 	 * @maxLength 2000
@@ -45010,6 +45136,254 @@ export type PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionResponse =
 	| PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionStatus409
 	| PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionStatus422
 	| PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionStatus500;
+
+export const GetApiGovernanceRuleSourcesLocalizationLanguagesEnum = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetApiGovernanceRuleSourcesLocalizationLanguagesEnum =
+	(typeof GetApiGovernanceRuleSourcesLocalizationLanguagesEnum)[keyof typeof GetApiGovernanceRuleSourcesLocalizationLanguagesEnum];
+
+export const GetApiGovernanceRuleSourcesAuthorityKind = {
+	platform: "platform",
+	realm: "realm",
+	zone: "zone",
+	unit: "unit",
+} as const;
+
+export type GetApiGovernanceRuleSourcesAuthorityKind =
+	(typeof GetApiGovernanceRuleSourcesAuthorityKind)[keyof typeof GetApiGovernanceRuleSourcesAuthorityKind];
+
+/**
+ * @type object
+ */
+export type GetApiGovernanceRuleSourcesQuery = {
+	/**
+	 * @type array | undefined
+	 */
+	localizationLanguages?: GetApiGovernanceRuleSourcesLocalizationLanguagesEnum[];
+	/**
+	 * @type string
+	 */
+	authorityKind: GetApiGovernanceRuleSourcesAuthorityKind;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string | undefined
+	 */
+	authorityId?: string;
+};
+
+export const GetApiGovernanceRuleSourcesStatus200ItemsScopeEnum = {
+	platform: "platform",
+	realm: "realm",
+	local: "local",
+} as const;
+
+export type GetApiGovernanceRuleSourcesStatus200ItemsScopeEnum =
+	(typeof GetApiGovernanceRuleSourcesStatus200ItemsScopeEnum)[keyof typeof GetApiGovernanceRuleSourcesStatus200ItemsScopeEnum];
+
+export const GetApiGovernanceRuleSourcesStatus200ItemsLanguageEnum = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetApiGovernanceRuleSourcesStatus200ItemsLanguageEnum =
+	(typeof GetApiGovernanceRuleSourcesStatus200ItemsLanguageEnum)[keyof typeof GetApiGovernanceRuleSourcesStatus200ItemsLanguageEnum];
+
+export const GetApiGovernanceRuleSourcesStatus200ItemsRulesLanguageEnum = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetApiGovernanceRuleSourcesStatus200ItemsRulesLanguageEnum =
+	(typeof GetApiGovernanceRuleSourcesStatus200ItemsRulesLanguageEnum)[keyof typeof GetApiGovernanceRuleSourcesStatus200ItemsRulesLanguageEnum];
+
+/**
+ * @type object
+ */
+export type GetApiGovernanceRuleSourcesStatus200 = {
+	/**
+	 * @type array
+	 */
+	items: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		id: string;
+		/**
+		 * @type string
+		 */
+		scope: GetApiGovernanceRuleSourcesStatus200ItemsScopeEnum;
+		/**
+		 * @type string
+		 */
+		language: GetApiGovernanceRuleSourcesStatus200ItemsLanguageEnum;
+		title: (string | null) | null;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		revisionId: string;
+		/**
+		 * @type array
+		 */
+		rules: {
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			id: string;
+			/**
+			 * @type string
+			 */
+			language: GetApiGovernanceRuleSourcesStatus200ItemsRulesLanguageEnum;
+			/**
+			 * @type string
+			 */
+			title: string;
+		}[];
+	}[];
+};
+
+/**
+ * @type object
+ */
+export type GetApiGovernanceRuleSourcesStatus400 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'GovernanceRuleSourceForbidden'
+		 * @type string
+		 */
+		code: "GovernanceRuleSourceForbidden";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiGovernanceRuleSourcesStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: "UnitNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export type GetApiGovernanceRuleSourcesStatus422 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'ValidationError'
+				 * @type string
+				 */
+				code: "ValidationError";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| ValidationError;
+
+/**
+ * @type object
+ */
+export type GetApiGovernanceRuleSourcesStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type GetApiGovernanceRuleSourcesOptions = {
+	body?: never;
+	path?: never;
+	query: GetApiGovernanceRuleSourcesQuery;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type GetApiGovernanceRuleSourcesResponses = {
+	"200": GetApiGovernanceRuleSourcesStatus200;
+	"400": GetApiGovernanceRuleSourcesStatus400;
+	"404": GetApiGovernanceRuleSourcesStatus404;
+	"422": GetApiGovernanceRuleSourcesStatus422;
+	"500": GetApiGovernanceRuleSourcesStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type GetApiGovernanceRuleSourcesResponse =
+	| GetApiGovernanceRuleSourcesStatus200
+	| GetApiGovernanceRuleSourcesStatus400
+	| GetApiGovernanceRuleSourcesStatus404
+	| GetApiGovernanceRuleSourcesStatus422
+	| GetApiGovernanceRuleSourcesStatus500;
 
 /**
  * @type object
@@ -47205,7 +47579,7 @@ export const PostApiGovernanceContentGovernanceActionsStatus400ErrorCodeEnum = {
 	ContentGovernanceActionIncompatible: "ContentGovernanceActionIncompatible",
 	GovernanceNoteRoleDuplicate: "GovernanceNoteRoleDuplicate",
 	ContentReviewRealmMissing: "ContentReviewRealmMissing",
-	ContentGovernanceRuleSourceForbidden: "ContentGovernanceRuleSourceForbidden",
+	GovernanceRuleSourceForbidden: "GovernanceRuleSourceForbidden",
 } as const;
 
 export type PostApiGovernanceContentGovernanceActionsStatus400ErrorCodeEnum =
@@ -47314,8 +47688,9 @@ export const PostApiGovernanceContentGovernanceActionsStatus409ErrorCodeEnum = {
 	ContentGovernanceTransitionInvalid: "ContentGovernanceTransitionInvalid",
 	ContentGovernanceActionNoEffect: "ContentGovernanceActionNoEffect",
 	ContentGovernanceReversalUnavailable: "ContentGovernanceReversalUnavailable",
+	GovernanceReversalUnavailable: "GovernanceReversalUnavailable",
 	ContentGovernanceIdempotencyConflict: "ContentGovernanceIdempotencyConflict",
-	ContentGovernanceRuleChanged: "ContentGovernanceRuleChanged",
+	GovernanceRuleChanged: "GovernanceRuleChanged",
 	PostTargetingLocked: "PostTargetingLocked",
 } as const;
 
@@ -47527,7 +47902,14 @@ export type PostApiGovernanceContentGovernanceActionsBody =
 			 * @type string | undefined
 			 */
 			idempotencyKey?: string;
-			kind: "hide" | "remove" | "lock_post_targeting" | "invalidate_content_license";
+			kind:
+				| "approve"
+				| "hide"
+				| "remove"
+				| "restore"
+				| "lock_post_targeting"
+				| "unlock_post_targeting"
+				| "invalidate_content_license";
 			/**
 			 * @type array
 			 */
@@ -47551,161 +47933,6 @@ export type PostApiGovernanceContentGovernanceActionsBody =
 				 */
 				ruleId: string;
 			}[];
-	  }
-	| {
-			/**
-			 * @description
-			 * Format: `uuid`
-			 * @type string
-			 */
-			caseId: string;
-			/**
-			 * @type array | undefined
-			 */
-			notes?: {
-				role: "internal_note" | "public_notice";
-				/**
-				 * @type string
-				 */
-				language: PostApiGovernanceContentGovernanceActionsRequestNotesLanguageEnum;
-				/**
-				 * @type object
-				 */
-				content: {
-					/**
-					 * @type string
-					 */
-					_type: "portable-text";
-					/**
-					 * @pattern ^[0-9a-f]{12}$
-					 * @type string
-					 */
-					_key: string;
-					/**
-					 * @type array
-					 */
-					content: (
-						| {
-								/**
-								 * @type string
-								 */
-								_key: string;
-								/**
-								 * @type string
-								 */
-								_type: "block";
-								/**
-								 * @type array
-								 */
-								children: (
-									| {
-											/**
-											 * @type string
-											 */
-											_key: string;
-											/**
-											 * @type string
-											 */
-											_type: "span";
-											/**
-											 * @type string
-											 */
-											text: string;
-											/**
-											 * @type array | undefined
-											 */
-											marks?: string[];
-									  }
-									| {
-											/**
-											 * @type string
-											 */
-											_key: string;
-											/**
-											 * @type string
-											 */
-											_type: "unit-mention";
-											/**
-											 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
-											 * @type string
-											 */
-											unitId: string;
-									  }
-								)[];
-								/**
-								 * @type array | undefined
-								 */
-								markDefs?: {
-									/**
-									 * @type string
-									 */
-									_key: string;
-									/**
-									 * @type string
-									 */
-									_type: string;
-									[key: string]: unknown;
-								}[];
-								/**
-								 * @type string | undefined
-								 */
-								listItem?: string;
-								/**
-								 * @type string | undefined
-								 */
-								style?: string;
-								/**
-								 * @minLength 1
-								 * @type integer | undefined
-								 */
-								level?: number;
-								[key: string]: unknown;
-						  }
-						| {
-								/**
-								 * @type string
-								 */
-								_key: string;
-								/**
-								 * @type string
-								 */
-								_type: "image";
-								/**
-								 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
-								 * @type string
-								 */
-								assetId: string;
-								/**
-								 * @type string | undefined
-								 */
-								alt?: string;
-								/**
-								 * @type string | undefined
-								 */
-								caption?: string;
-						  }
-						| {
-								/**
-								 * @type string
-								 */
-								_key: string;
-								/**
-								 * @pattern ^(?!(?:block|image)$).+
-								 * @type string
-								 */
-								_type: string;
-								[key: string]: unknown;
-						  }
-					)[];
-				};
-			}[];
-			/**
-			 * @minLength 1
-			 * @maxLength 256
-			 * @type string | undefined
-			 */
-			idempotencyKey?: string;
-			kind: "approve" | "restore" | "unlock_post_targeting";
 	  }
 	| {
 			/**
@@ -48126,6 +48353,7 @@ export type PostApiGovernanceAccountEnforcementsStatus200 = {
 export const PostApiGovernanceAccountEnforcementsStatus400ErrorCodeEnum = {
 	EnforcementExpiryInvalid: "EnforcementExpiryInvalid",
 	GovernanceNoteRoleDuplicate: "GovernanceNoteRoleDuplicate",
+	GovernanceRuleSourceForbidden: "GovernanceRuleSourceForbidden",
 } as const;
 
 export type PostApiGovernanceAccountEnforcementsStatus400ErrorCodeEnum =
@@ -48225,6 +48453,34 @@ export type PostApiGovernanceAccountEnforcementsStatus404 = {
 /**
  * @type object
  */
+export type PostApiGovernanceAccountEnforcementsStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'GovernanceRuleChanged'
+		 * @type string
+		 */
+		code: "GovernanceRuleChanged";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type PostApiGovernanceAccountEnforcementsStatus422 = ValidationError;
 
 /**
@@ -48279,6 +48535,29 @@ export type PostApiGovernanceAccountEnforcementsBody = {
 	 * @type string
 	 */
 	kind: PostApiGovernanceAccountEnforcementsRequestKindEnum;
+	/**
+	 * @type array
+	 */
+	rules: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		sourceRealmId: string;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		revisionId: string;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		ruleId: string;
+	}[];
 	/**
 	 * @type array | undefined
 	 */
@@ -48448,6 +48727,7 @@ export type PostApiGovernanceAccountEnforcementsResponses = {
 	"400": PostApiGovernanceAccountEnforcementsStatus400;
 	"403": PostApiGovernanceAccountEnforcementsStatus403;
 	"404": PostApiGovernanceAccountEnforcementsStatus404;
+	"409": PostApiGovernanceAccountEnforcementsStatus409;
 	"422": PostApiGovernanceAccountEnforcementsStatus422;
 	"500": PostApiGovernanceAccountEnforcementsStatus500;
 };
@@ -48460,6 +48740,7 @@ export type PostApiGovernanceAccountEnforcementsResponse =
 	| PostApiGovernanceAccountEnforcementsStatus400
 	| PostApiGovernanceAccountEnforcementsStatus403
 	| PostApiGovernanceAccountEnforcementsStatus404
+	| PostApiGovernanceAccountEnforcementsStatus409
 	| PostApiGovernanceAccountEnforcementsStatus422
 	| PostApiGovernanceAccountEnforcementsStatus500;
 
@@ -48621,6 +48902,7 @@ export type PostApiGovernanceAccountEnforcementsByEnforcementIdRevokeStatus404 =
 export const PostApiGovernanceAccountEnforcementsByEnforcementIdRevokeStatus409ErrorCodeEnum = {
 	EnforcementAlreadyRevoked: "EnforcementAlreadyRevoked",
 	EnforcementChanged: "EnforcementChanged",
+	GovernanceReversalUnavailable: "GovernanceReversalUnavailable",
 } as const;
 
 export type PostApiGovernanceAccountEnforcementsByEnforcementIdRevokeStatus409ErrorCodeEnum =
@@ -48890,6 +49172,7 @@ export type GetApiAuditEventsOutcome =
 export const GetApiAuditEventsAuthorityKind = {
 	platform: "platform",
 	realm: "realm",
+	zone: "zone",
 	unit: "unit",
 } as const;
 
@@ -48990,6 +49273,7 @@ export type GetApiAuditEventsStatus200ItemsActorCredentialKindEnum =
 export const GetApiAuditEventsStatus200ItemsAuthorityKindEnum = {
 	platform: "platform",
 	realm: "realm",
+	zone: "zone",
 	unit: "unit",
 } as const;
 
@@ -49013,7 +49297,7 @@ export type GetApiAuditEventsStatus200 = {
 		/**
 		 * @type number
 		 */
-		schemaVersion: 1;
+		schemaVersion: 2;
 		/**
 		 * @default 'admin_activity'
 		 * @type string
@@ -49057,7 +49341,8 @@ export type GetApiAuditEventsStatus200 = {
 		 * @type string
 		 */
 		action: string;
-		reasonCode: (string | null) | null;
+		outcomeCode: (string | null) | null;
+		governanceDecisionId: (string | null) | null;
 		requestId: (string | null) | null;
 		traceId: (string | null) | null;
 		target:
@@ -50340,6 +50625,7 @@ export type GetApiZonesByZoneIdStatus200 = {
 	themeDocument: ZoneThemeDocument;
 	startsAt: (string | null) | null;
 	endsAt: (string | null) | null;
+	localRuleRealmId: (string | null) | null;
 	/**
 	 * @type object
 	 */
@@ -50721,6 +51007,7 @@ export type PatchApiZonesByZoneIdStatus200 = {
 	themeDocument: ZoneThemeDocument;
 	startsAt: (string | null) | null;
 	endsAt: (string | null) | null;
+	localRuleRealmId: (string | null) | null;
 	/**
 	 * @type object
 	 */
@@ -50746,6 +51033,7 @@ export type PatchApiZonesByZoneIdStatus200 = {
 
 export const PatchApiZonesByZoneIdStatus400ErrorCodeEnum = {
 	ZoneDocumentInvalid: "ZoneDocumentInvalid",
+	ZoneRuleRealmInvalid: "ZoneRuleRealmInvalid",
 	ZoneTimeRangeInvalid: "ZoneTimeRangeInvalid",
 } as const;
 
@@ -51134,6 +51422,7 @@ export type PatchApiZonesByZoneIdBody = {
 	themeDocument?: ZoneThemeDocument;
 	startsAt?: (string | null) | null;
 	endsAt?: (string | null) | null;
+	localRuleRealmId?: (string | null) | null;
 };
 
 /**
@@ -51585,6 +51874,7 @@ export type GetZoneRenderProjectionStatus200 = {
 		themeDocument: ZoneThemeDocument;
 		startsAt: (string | null) | null;
 		endsAt: (string | null) | null;
+		localRuleRealmId: (string | null) | null;
 		/**
 		 * @type object
 		 */
@@ -55598,6 +55888,7 @@ export type PostApiZonesStatus200 = {
 
 export const PostApiZonesStatus400ErrorCodeEnum = {
 	ZoneDocumentInvalid: "ZoneDocumentInvalid",
+	ZoneRuleRealmInvalid: "ZoneRuleRealmInvalid",
 	ZoneTimeRangeInvalid: "ZoneTimeRangeInvalid",
 } as const;
 
@@ -55631,6 +55922,14 @@ export type PostApiZonesStatus400 =
 	  }
 	| MalformedRequestBody;
 
+export const PostApiZonesStatus403ErrorCodeEnum = {
+	PlatformCapabilityRequired: "PlatformCapabilityRequired",
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+} as const;
+
+export type PostApiZonesStatus403ErrorCodeEnum =
+	(typeof PostApiZonesStatus403ErrorCodeEnum)[keyof typeof PostApiZonesStatus403ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -55643,7 +55942,7 @@ export type PostApiZonesStatus403 = {
 		 * @default 'PlatformCapabilityRequired'
 		 * @type string
 		 */
-		code: "PlatformCapabilityRequired";
+		code: PostApiZonesStatus403ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -55659,6 +55958,14 @@ export type PostApiZonesStatus403 = {
 	requestId: string;
 };
 
+export const PostApiZonesStatus404ErrorCodeEnum = {
+	UnitNotFound: "UnitNotFound",
+	ImageAssetNotFound: "ImageAssetNotFound",
+} as const;
+
+export type PostApiZonesStatus404ErrorCodeEnum =
+	(typeof PostApiZonesStatus404ErrorCodeEnum)[keyof typeof PostApiZonesStatus404ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -55668,10 +55975,10 @@ export type PostApiZonesStatus404 = {
 	 */
 	error: {
 		/**
-		 * @default 'ImageAssetNotFound'
+		 * @default 'UnitNotFound'
 		 * @type string
 		 */
-		code: "ImageAssetNotFound";
+		code: PostApiZonesStatus404ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -55978,6 +56285,7 @@ export type PostApiZonesBody = {
 	themeDocument: ZoneThemeDocument;
 	startsAt?: (string | null) | null;
 	endsAt?: (string | null) | null;
+	localRuleRealmId?: (string | null) | null;
 };
 
 /**
@@ -64880,18 +65188,6 @@ export const GetApiPlatformUsersStatus200ItemsAccountStateStateEnum = {
 export type GetApiPlatformUsersStatus200ItemsAccountStateStateEnum =
 	(typeof GetApiPlatformUsersStatus200ItemsAccountStateStateEnum)[keyof typeof GetApiPlatformUsersStatus200ItemsAccountStateStateEnum];
 
-export const GetApiPlatformUsersStatus200ItemsAccountStateReason = {
-	security: "security",
-	policy_violation: "policy_violation",
-	compromised: "compromised",
-	user_request: "user_request",
-	legal: "legal",
-	other: "other",
-} as const;
-
-export type GetApiPlatformUsersStatus200ItemsAccountStateReason =
-	(typeof GetApiPlatformUsersStatus200ItemsAccountStateReason)[keyof typeof GetApiPlatformUsersStatus200ItemsAccountStateReason];
-
 /**
  * @type object
  */
@@ -64928,7 +65224,7 @@ export type GetApiPlatformUsersStatus200 = {
 			 * @type string
 			 */
 			state: GetApiPlatformUsersStatus200ItemsAccountStateStateEnum;
-			reason: (GetApiPlatformUsersStatus200ItemsAccountStateReason | null) | null;
+			governanceDecisionId: (string | null) | null;
 			note: (string | null) | null;
 			expiresAt: (string | null) | null;
 			revision: string | number;
@@ -65165,18 +65461,6 @@ export const GetApiPlatformUsersByUserIdStatus200AccountStateStateEnum = {
 export type GetApiPlatformUsersByUserIdStatus200AccountStateStateEnum =
 	(typeof GetApiPlatformUsersByUserIdStatus200AccountStateStateEnum)[keyof typeof GetApiPlatformUsersByUserIdStatus200AccountStateStateEnum];
 
-export const GetApiPlatformUsersByUserIdStatus200AccountStateReason = {
-	security: "security",
-	policy_violation: "policy_violation",
-	compromised: "compromised",
-	user_request: "user_request",
-	legal: "legal",
-	other: "other",
-} as const;
-
-export type GetApiPlatformUsersByUserIdStatus200AccountStateReason =
-	(typeof GetApiPlatformUsersByUserIdStatus200AccountStateReason)[keyof typeof GetApiPlatformUsersByUserIdStatus200AccountStateReason];
-
 /**
  * @type object
  */
@@ -65209,7 +65493,7 @@ export type GetApiPlatformUsersByUserIdStatus200 = {
 		 * @type string
 		 */
 		state: GetApiPlatformUsersByUserIdStatus200AccountStateStateEnum;
-		reason: (GetApiPlatformUsersByUserIdStatus200AccountStateReason | null) | null;
+		governanceDecisionId: (string | null) | null;
 		note: (string | null) | null;
 		expiresAt: (string | null) | null;
 		revision: string | number;
@@ -65444,18 +65728,6 @@ export const PutApiPlatformUsersByUserIdAccountStateStatus200StateEnum = {
 export type PutApiPlatformUsersByUserIdAccountStateStatus200StateEnum =
 	(typeof PutApiPlatformUsersByUserIdAccountStateStatus200StateEnum)[keyof typeof PutApiPlatformUsersByUserIdAccountStateStatus200StateEnum];
 
-export const PutApiPlatformUsersByUserIdAccountStateStatus200Reason = {
-	security: "security",
-	policy_violation: "policy_violation",
-	compromised: "compromised",
-	user_request: "user_request",
-	legal: "legal",
-	other: "other",
-} as const;
-
-export type PutApiPlatformUsersByUserIdAccountStateStatus200Reason =
-	(typeof PutApiPlatformUsersByUserIdAccountStateStatus200Reason)[keyof typeof PutApiPlatformUsersByUserIdAccountStateStatus200Reason];
-
 /**
  * @type object
  */
@@ -65465,7 +65737,7 @@ export type PutApiPlatformUsersByUserIdAccountStateStatus200 = {
 	 * @type string
 	 */
 	state: PutApiPlatformUsersByUserIdAccountStateStatus200StateEnum;
-	reason: (PutApiPlatformUsersByUserIdAccountStateStatus200Reason | null) | null;
+	governanceDecisionId: (string | null) | null;
 	note: (string | null) | null;
 	expiresAt: (string | null) | null;
 	revision: string | number;
@@ -65473,10 +65745,32 @@ export type PutApiPlatformUsersByUserIdAccountStateStatus200 = {
 	updatedByProfileId: (string | null) | null;
 };
 
-/**
- * @type object
- */
-export type PutApiPlatformUsersByUserIdAccountStateStatus400 = MalformedRequestBody;
+export type PutApiPlatformUsersByUserIdAccountStateStatus400 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'GovernanceRuleSourceForbidden'
+				 * @type string
+				 */
+				code: "GovernanceRuleSourceForbidden";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| MalformedRequestBody;
 
 export const PutApiPlatformUsersByUserIdAccountStateStatus401ErrorCodeEnum = {
 	AuthenticationRequired: "AuthenticationRequired",
@@ -65584,6 +65878,7 @@ export const PutApiPlatformUsersByUserIdAccountStateStatus409ErrorCodeEnum = {
 	UserAccountStateRevisionConflict: "UserAccountStateRevisionConflict",
 	UserSelfStatusChangeForbidden: "UserSelfStatusChangeForbidden",
 	PlatformUserManagerRequired: "PlatformUserManagerRequired",
+	GovernanceRuleChanged: "GovernanceRuleChanged",
 } as const;
 
 export type PutApiPlatformUsersByUserIdAccountStateStatus409ErrorCodeEnum =
@@ -65649,21 +65944,32 @@ export type PutApiPlatformUsersByUserIdAccountStateStatus422 =
  */
 export type PutApiPlatformUsersByUserIdAccountStateStatus500 = InternalError;
 
-export const PutApiPlatformUsersByUserIdAccountStateRequestReasonEnum = {
-	security: "security",
-	policy_violation: "policy_violation",
-	compromised: "compromised",
-	user_request: "user_request",
-	legal: "legal",
-	other: "other",
-} as const;
-
-export type PutApiPlatformUsersByUserIdAccountStateRequestReasonEnum =
-	(typeof PutApiPlatformUsersByUserIdAccountStateRequestReasonEnum)[keyof typeof PutApiPlatformUsersByUserIdAccountStateRequestReasonEnum];
-
 export type PutApiPlatformUsersByUserIdAccountStateBody =
 	| {
 			expectedRevision: string | number;
+			/**
+			 * @type array
+			 */
+			rules: {
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				sourceRealmId: string;
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				revisionId: string;
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				ruleId: string;
+			}[];
 			/**
 			 * @type string
 			 */
@@ -65672,14 +65978,32 @@ export type PutApiPlatformUsersByUserIdAccountStateBody =
 	| {
 			expectedRevision: string | number;
 			/**
+			 * @type array
+			 */
+			rules: {
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				sourceRealmId: string;
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				revisionId: string;
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				ruleId: string;
+			}[];
+			/**
 			 * @type string
 			 */
 			state: "suspended";
-			/**
-			 * @default 'security'
-			 * @type string
-			 */
-			reason: PutApiPlatformUsersByUserIdAccountStateRequestReasonEnum;
 			/**
 			 * @minLength 1
 			 * @maxLength 2000
@@ -65696,14 +66020,32 @@ export type PutApiPlatformUsersByUserIdAccountStateBody =
 	| {
 			expectedRevision: string | number;
 			/**
+			 * @type array
+			 */
+			rules: {
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				sourceRealmId: string;
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				revisionId: string;
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				ruleId: string;
+			}[];
+			/**
 			 * @type string
 			 */
 			state: "closed";
-			/**
-			 * @default 'security'
-			 * @type string
-			 */
-			reason: PutApiPlatformUsersByUserIdAccountStateRequestReasonEnum;
 			/**
 			 * @minLength 1
 			 * @maxLength 2000
@@ -70660,6 +71002,14 @@ export type ReplaceUnitSlugAddressWithPlatformAccessStatus200 = {
 	canonicalPath: string[];
 };
 
+export const ReplaceUnitSlugAddressWithPlatformAccessStatus400ErrorCodeEnum = {
+	InvalidSlug: "InvalidSlug",
+	GovernanceRuleSourceForbidden: "GovernanceRuleSourceForbidden",
+} as const;
+
+export type ReplaceUnitSlugAddressWithPlatformAccessStatus400ErrorCodeEnum =
+	(typeof ReplaceUnitSlugAddressWithPlatformAccessStatus400ErrorCodeEnum)[keyof typeof ReplaceUnitSlugAddressWithPlatformAccessStatus400ErrorCodeEnum];
+
 export type ReplaceUnitSlugAddressWithPlatformAccessStatus400 =
 	| {
 			/**
@@ -70670,7 +71020,7 @@ export type ReplaceUnitSlugAddressWithPlatformAccessStatus400 =
 				 * @default 'InvalidSlug'
 				 * @type string
 				 */
-				code: "InvalidSlug";
+				code: ReplaceUnitSlugAddressWithPlatformAccessStatus400ErrorCodeEnum;
 				/**
 				 * @type string
 				 */
@@ -70791,6 +71141,7 @@ export const ReplaceUnitSlugAddressWithPlatformAccessStatus409ErrorCodeEnum = {
 	SlugTaken: "SlugTaken",
 	SlugScopeUnavailable: "SlugScopeUnavailable",
 	SlugScopeCycle: "SlugScopeCycle",
+	GovernanceRuleChanged: "GovernanceRuleChanged",
 } as const;
 
 export type ReplaceUnitSlugAddressWithPlatformAccessStatus409ErrorCodeEnum =
@@ -70856,25 +71207,6 @@ export type ReplaceUnitSlugAddressWithPlatformAccessStatus422 =
  */
 export type ReplaceUnitSlugAddressWithPlatformAccessStatus500 = InternalError;
 
-export const ReplaceUnitSlugAddressWithPlatformAccessRequestReasonCodeEnum = {
-	content_policy: "content_policy",
-	copyright: "copyright",
-	realm_rules: "realm_rules",
-	spam: "spam",
-	harassment: "harassment",
-	unsafe_content: "unsafe_content",
-	off_topic: "off_topic",
-	duplicate: "duplicate",
-	account_security: "account_security",
-	user_request: "user_request",
-	appeal: "appeal",
-	administrative: "administrative",
-	other: "other",
-} as const;
-
-export type ReplaceUnitSlugAddressWithPlatformAccessRequestReasonCodeEnum =
-	(typeof ReplaceUnitSlugAddressWithPlatformAccessRequestReasonCodeEnum)[keyof typeof ReplaceUnitSlugAddressWithPlatformAccessRequestReasonCodeEnum];
-
 /**
  * @type object
  */
@@ -70888,9 +71220,28 @@ export type ReplaceUnitSlugAddressWithPlatformAccessBody = {
 	 */
 	slug: string;
 	/**
-	 * @type string
+	 * @type array
 	 */
-	reasonCode: ReplaceUnitSlugAddressWithPlatformAccessRequestReasonCodeEnum;
+	rules: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		sourceRealmId: string;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		revisionId: string;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		ruleId: string;
+	}[];
 };
 
 /**
@@ -70961,6 +71312,14 @@ export type CreateSlugNamespaceWithPlatformAccessStatus201 = {
 	canonicalPath: string[];
 };
 
+export const CreateSlugNamespaceWithPlatformAccessStatus400ErrorCodeEnum = {
+	InvalidSlug: "InvalidSlug",
+	GovernanceRuleSourceForbidden: "GovernanceRuleSourceForbidden",
+} as const;
+
+export type CreateSlugNamespaceWithPlatformAccessStatus400ErrorCodeEnum =
+	(typeof CreateSlugNamespaceWithPlatformAccessStatus400ErrorCodeEnum)[keyof typeof CreateSlugNamespaceWithPlatformAccessStatus400ErrorCodeEnum];
+
 export type CreateSlugNamespaceWithPlatformAccessStatus400 =
 	| {
 			/**
@@ -70971,7 +71330,7 @@ export type CreateSlugNamespaceWithPlatformAccessStatus400 =
 				 * @default 'InvalidSlug'
 				 * @type string
 				 */
-				code: "InvalidSlug";
+				code: CreateSlugNamespaceWithPlatformAccessStatus400ErrorCodeEnum;
 				/**
 				 * @type string
 				 */
@@ -71092,6 +71451,7 @@ export const CreateSlugNamespaceWithPlatformAccessStatus409ErrorCodeEnum = {
 	SlugTaken: "SlugTaken",
 	SlugScopeUnavailable: "SlugScopeUnavailable",
 	SlugScopeCycle: "SlugScopeCycle",
+	GovernanceRuleChanged: "GovernanceRuleChanged",
 } as const;
 
 export type CreateSlugNamespaceWithPlatformAccessStatus409ErrorCodeEnum =
@@ -71157,25 +71517,6 @@ export type CreateSlugNamespaceWithPlatformAccessStatus422 =
  */
 export type CreateSlugNamespaceWithPlatformAccessStatus500 = InternalError;
 
-export const CreateSlugNamespaceWithPlatformAccessRequestReasonCodeEnum = {
-	content_policy: "content_policy",
-	copyright: "copyright",
-	realm_rules: "realm_rules",
-	spam: "spam",
-	harassment: "harassment",
-	unsafe_content: "unsafe_content",
-	off_topic: "off_topic",
-	duplicate: "duplicate",
-	account_security: "account_security",
-	user_request: "user_request",
-	appeal: "appeal",
-	administrative: "administrative",
-	other: "other",
-} as const;
-
-export type CreateSlugNamespaceWithPlatformAccessRequestReasonCodeEnum =
-	(typeof CreateSlugNamespaceWithPlatformAccessRequestReasonCodeEnum)[keyof typeof CreateSlugNamespaceWithPlatformAccessRequestReasonCodeEnum];
-
 /**
  * @type object
  */
@@ -71189,9 +71530,28 @@ export type CreateSlugNamespaceWithPlatformAccessBody = {
 	 */
 	slug: string;
 	/**
-	 * @type string
+	 * @type array
 	 */
-	reasonCode: CreateSlugNamespaceWithPlatformAccessRequestReasonCodeEnum;
+	rules: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		sourceRealmId: string;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		revisionId: string;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		ruleId: string;
+	}[];
 };
 
 /**
@@ -71248,10 +71608,32 @@ export type ReleaseSlugRedirectWithPlatformAccessPath = {
  */
 export type ReleaseSlugRedirectWithPlatformAccessStatus204 = void;
 
-/**
- * @type object
- */
-export type ReleaseSlugRedirectWithPlatformAccessStatus400 = MalformedRequestBody;
+export type ReleaseSlugRedirectWithPlatformAccessStatus400 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'GovernanceRuleSourceForbidden'
+				 * @type string
+				 */
+				code: "GovernanceRuleSourceForbidden";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| MalformedRequestBody;
 
 /**
  * @type object
@@ -71348,6 +71730,34 @@ export type ReleaseSlugRedirectWithPlatformAccessStatus404 = {
 /**
  * @type object
  */
+export type ReleaseSlugRedirectWithPlatformAccessStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'GovernanceRuleChanged'
+		 * @type string
+		 */
+		code: "GovernanceRuleChanged";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type ReleaseSlugRedirectWithPlatformAccessStatus422 = ValidationError;
 
 /**
@@ -71355,33 +71765,33 @@ export type ReleaseSlugRedirectWithPlatformAccessStatus422 = ValidationError;
  */
 export type ReleaseSlugRedirectWithPlatformAccessStatus500 = InternalError;
 
-export const ReleaseSlugRedirectWithPlatformAccessRequestReasonCodeEnum = {
-	content_policy: "content_policy",
-	copyright: "copyright",
-	realm_rules: "realm_rules",
-	spam: "spam",
-	harassment: "harassment",
-	unsafe_content: "unsafe_content",
-	off_topic: "off_topic",
-	duplicate: "duplicate",
-	account_security: "account_security",
-	user_request: "user_request",
-	appeal: "appeal",
-	administrative: "administrative",
-	other: "other",
-} as const;
-
-export type ReleaseSlugRedirectWithPlatformAccessRequestReasonCodeEnum =
-	(typeof ReleaseSlugRedirectWithPlatformAccessRequestReasonCodeEnum)[keyof typeof ReleaseSlugRedirectWithPlatformAccessRequestReasonCodeEnum];
-
 /**
  * @type object
  */
 export type ReleaseSlugRedirectWithPlatformAccessBody = {
 	/**
-	 * @type string
+	 * @type array
 	 */
-	reasonCode: ReleaseSlugRedirectWithPlatformAccessRequestReasonCodeEnum;
+	rules: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		sourceRealmId: string;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		revisionId: string;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		ruleId: string;
+	}[];
 };
 
 /**
@@ -71403,6 +71813,7 @@ export type ReleaseSlugRedirectWithPlatformAccessResponses = {
 	"401": ReleaseSlugRedirectWithPlatformAccessStatus401;
 	"403": ReleaseSlugRedirectWithPlatformAccessStatus403;
 	"404": ReleaseSlugRedirectWithPlatformAccessStatus404;
+	"409": ReleaseSlugRedirectWithPlatformAccessStatus409;
 	"422": ReleaseSlugRedirectWithPlatformAccessStatus422;
 	"500": ReleaseSlugRedirectWithPlatformAccessStatus500;
 };
@@ -71416,6 +71827,7 @@ export type ReleaseSlugRedirectWithPlatformAccessResponse =
 	| ReleaseSlugRedirectWithPlatformAccessStatus401
 	| ReleaseSlugRedirectWithPlatformAccessStatus403
 	| ReleaseSlugRedirectWithPlatformAccessStatus404
+	| ReleaseSlugRedirectWithPlatformAccessStatus409
 	| ReleaseSlugRedirectWithPlatformAccessStatus422
 	| ReleaseSlugRedirectWithPlatformAccessStatus500;
 
@@ -87747,10 +88159,32 @@ export type PatchApiHistoryUnitRevisionsByRevisionIdVisibilityPath = {
  */
 export type PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus204 = void;
 
-/**
- * @type object
- */
-export type PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus400 = MalformedRequestBody;
+export type PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus400 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'GovernanceRuleSourceForbidden'
+				 * @type string
+				 */
+				code: "GovernanceRuleSourceForbidden";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| MalformedRequestBody;
 
 /**
  * @type object
@@ -87808,6 +88242,14 @@ export type PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus404 = {
 	requestId: string;
 };
 
+export const PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus409ErrorCodeEnum = {
+	CurrentRevisionContentVisibilityForbidden: "CurrentRevisionContentVisibilityForbidden",
+	GovernanceRuleChanged: "GovernanceRuleChanged",
+} as const;
+
+export type PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus409ErrorCodeEnum =
+	(typeof PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus409ErrorCodeEnum)[keyof typeof PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus409ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -87820,7 +88262,7 @@ export type PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus409 = {
 		 * @default 'CurrentRevisionContentVisibilityForbidden'
 		 * @type string
 		 */
-		code: "CurrentRevisionContentVisibilityForbidden";
+		code: PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus409ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -87887,25 +88329,6 @@ export const PatchApiHistoryUnitRevisionsByRevisionIdVisibilityRequestVisibility
 export type PatchApiHistoryUnitRevisionsByRevisionIdVisibilityRequestVisibilityHiddenFieldsEnum =
 	(typeof PatchApiHistoryUnitRevisionsByRevisionIdVisibilityRequestVisibilityHiddenFieldsEnum)[keyof typeof PatchApiHistoryUnitRevisionsByRevisionIdVisibilityRequestVisibilityHiddenFieldsEnum];
 
-export const PatchApiHistoryUnitRevisionsByRevisionIdVisibilityRequestReasonCodeEnum = {
-	content_policy: "content_policy",
-	copyright: "copyright",
-	realm_rules: "realm_rules",
-	spam: "spam",
-	harassment: "harassment",
-	unsafe_content: "unsafe_content",
-	off_topic: "off_topic",
-	duplicate: "duplicate",
-	account_security: "account_security",
-	user_request: "user_request",
-	appeal: "appeal",
-	administrative: "administrative",
-	other: "other",
-} as const;
-
-export type PatchApiHistoryUnitRevisionsByRevisionIdVisibilityRequestReasonCodeEnum =
-	(typeof PatchApiHistoryUnitRevisionsByRevisionIdVisibilityRequestReasonCodeEnum)[keyof typeof PatchApiHistoryUnitRevisionsByRevisionIdVisibilityRequestReasonCodeEnum];
-
 /**
  * @type object
  */
@@ -87938,9 +88361,28 @@ export type PatchApiHistoryUnitRevisionsByRevisionIdVisibilityBody = {
 				hiddenFields: PatchApiHistoryUnitRevisionsByRevisionIdVisibilityRequestVisibilityHiddenFieldsEnum[];
 		  };
 	/**
-	 * @type string
+	 * @type array
 	 */
-	reasonCode: PatchApiHistoryUnitRevisionsByRevisionIdVisibilityRequestReasonCodeEnum;
+	rules: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		sourceRealmId: string;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		revisionId: string;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		ruleId: string;
+	}[];
 };
 
 /**
@@ -141495,7 +141937,7 @@ export type PatchApiRealmsByRealmIdUnitsByUnitIdStatus200 = {
 
 export const PatchApiRealmsByRealmIdUnitsByUnitIdStatus400ErrorCodeEnum = {
 	ContentGovernanceActionIncompatible: "ContentGovernanceActionIncompatible",
-	ContentGovernanceRuleSourceForbidden: "ContentGovernanceRuleSourceForbidden",
+	GovernanceRuleSourceForbidden: "GovernanceRuleSourceForbidden",
 } as const;
 
 export type PatchApiRealmsByRealmIdUnitsByUnitIdStatus400ErrorCodeEnum =
@@ -141588,7 +142030,7 @@ export const PatchApiRealmsByRealmIdUnitsByUnitIdStatus409ErrorCodeEnum = {
 	ContentGovernanceTransitionInvalid: "ContentGovernanceTransitionInvalid",
 	ContentGovernanceActionNoEffect: "ContentGovernanceActionNoEffect",
 	ContentGovernanceIdempotencyConflict: "ContentGovernanceIdempotencyConflict",
-	ContentGovernanceRuleChanged: "ContentGovernanceRuleChanged",
+	GovernanceRuleChanged: "GovernanceRuleChanged",
 	PostTargetingLocked: "PostTargetingLocked",
 } as const;
 
@@ -141665,6 +142107,26 @@ export type PatchApiRealmsByRealmIdUnitsByUnitIdStatus429 = {
  */
 export type PatchApiRealmsByRealmIdUnitsByUnitIdStatus500 = InternalError;
 
+export const PatchApiRealmsByRealmIdUnitsByUnitIdRequestCommandEnum = {
+	approve: "approve",
+	hide: "hide",
+	remove: "remove",
+	restore: "restore",
+	lock_post_targeting: "lock_post_targeting",
+	unlock_post_targeting: "unlock_post_targeting",
+} as const;
+
+export type PatchApiRealmsByRealmIdUnitsByUnitIdRequestCommandEnum =
+	(typeof PatchApiRealmsByRealmIdUnitsByUnitIdRequestCommandEnum)[keyof typeof PatchApiRealmsByRealmIdUnitsByUnitIdRequestCommandEnum];
+
+export const PatchApiRealmsByRealmIdUnitsByUnitIdRequestAnnotationRoleEnum = {
+	internal_note: "internal_note",
+	public_notice: "public_notice",
+} as const;
+
+export type PatchApiRealmsByRealmIdUnitsByUnitIdRequestAnnotationRoleEnum =
+	(typeof PatchApiRealmsByRealmIdUnitsByUnitIdRequestAnnotationRoleEnum)[keyof typeof PatchApiRealmsByRealmIdUnitsByUnitIdRequestAnnotationRoleEnum];
+
 export const PatchApiRealmsByRealmIdUnitsByUnitIdRequestAnnotationLanguageEnum = {
 	zh: "zh",
 	en: "en",
@@ -141678,115 +142140,86 @@ export const PatchApiRealmsByRealmIdUnitsByUnitIdRequestAnnotationLanguageEnum =
 export type PatchApiRealmsByRealmIdUnitsByUnitIdRequestAnnotationLanguageEnum =
 	(typeof PatchApiRealmsByRealmIdUnitsByUnitIdRequestAnnotationLanguageEnum)[keyof typeof PatchApiRealmsByRealmIdUnitsByUnitIdRequestAnnotationLanguageEnum];
 
-export type PatchApiRealmsByRealmIdUnitsByUnitIdBody =
-	| {
+/**
+ * @type object
+ */
+export type PatchApiRealmsByRealmIdUnitsByUnitIdBody = {
+	/**
+	 * @minLength 1
+	 * @maxLength 256
+	 * @type string | undefined
+	 */
+	idempotencyKey?: string;
+	/**
+	 * @type string
+	 */
+	command: PatchApiRealmsByRealmIdUnitsByUnitIdRequestCommandEnum;
+	/**
+	 * @type array
+	 */
+	rules: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		sourceRealmId: string;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		revisionId: string;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		ruleId: string;
+	}[];
+	/**
+	 * @type object | undefined
+	 */
+	annotation?: {
+		/**
+		 * @type string
+		 */
+		role: PatchApiRealmsByRealmIdUnitsByUnitIdRequestAnnotationRoleEnum;
+		/**
+		 * @type string
+		 */
+		language: PatchApiRealmsByRealmIdUnitsByUnitIdRequestAnnotationLanguageEnum;
+		/**
+		 * @type object
+		 */
+		content: {
 			/**
-			 * @minLength 1
-			 * @maxLength 256
-			 * @type string | undefined
+			 * @type string
 			 */
-			idempotencyKey?: string;
-			command: "hide" | "remove" | "lock_post_targeting";
+			_type: "portable-text";
+			/**
+			 * @pattern ^[0-9a-f]{12}$
+			 * @type string
+			 */
+			_key: string;
 			/**
 			 * @type array
 			 */
-			rules: {
-				/**
-				 * @description
-				 * Format: `uuid`
-				 * @type string
-				 */
-				sourceRealmId: string;
-				/**
-				 * @description
-				 * Format: `uuid`
-				 * @type string
-				 */
-				revisionId: string;
-				/**
-				 * @description
-				 * Format: `uuid`
-				 * @type string
-				 */
-				ruleId: string;
-			}[];
-			/**
-			 * @type object | undefined
-			 */
-			annotation?: {
-				role: "internal_note" | "public_notice";
-				/**
-				 * @type string
-				 */
-				language: PatchApiRealmsByRealmIdUnitsByUnitIdRequestAnnotationLanguageEnum;
-				/**
-				 * @type object
-				 */
-				content: {
-					/**
-					 * @type string
-					 */
-					_type: "portable-text";
-					/**
-					 * @pattern ^[0-9a-f]{12}$
-					 * @type string
-					 */
-					_key: string;
-					/**
-					 * @type array
-					 */
-					content: (
-						| {
-								/**
-								 * @type string
-								 */
-								_key: string;
-								/**
-								 * @type string
-								 */
-								_type: "block";
-								/**
-								 * @type array
-								 */
-								children: (
-									| {
-											/**
-											 * @type string
-											 */
-											_key: string;
-											/**
-											 * @type string
-											 */
-											_type: "span";
-											/**
-											 * @type string
-											 */
-											text: string;
-											/**
-											 * @type array | undefined
-											 */
-											marks?: string[];
-									  }
-									| {
-											/**
-											 * @type string
-											 */
-											_key: string;
-											/**
-											 * @type string
-											 */
-											_type: "unit-mention";
-											/**
-											 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
-											 * @type string
-											 */
-											unitId: string;
-									  }
-								)[];
-								/**
-								 * @type array | undefined
-								 */
-								markDefs?: {
+			content: (
+				| {
+						/**
+						 * @type string
+						 */
+						_key: string;
+						/**
+						 * @type string
+						 */
+						_type: "block";
+						/**
+						 * @type array
+						 */
+						children: (
+							| {
 									/**
 									 * @type string
 									 */
@@ -141794,148 +142227,17 @@ export type PatchApiRealmsByRealmIdUnitsByUnitIdBody =
 									/**
 									 * @type string
 									 */
-									_type: string;
-									[key: string]: unknown;
-								}[];
-								/**
-								 * @type string | undefined
-								 */
-								listItem?: string;
-								/**
-								 * @type string | undefined
-								 */
-								style?: string;
-								/**
-								 * @minLength 1
-								 * @type integer | undefined
-								 */
-								level?: number;
-								[key: string]: unknown;
-						  }
-						| {
-								/**
-								 * @type string
-								 */
-								_key: string;
-								/**
-								 * @type string
-								 */
-								_type: "image";
-								/**
-								 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
-								 * @type string
-								 */
-								assetId: string;
-								/**
-								 * @type string | undefined
-								 */
-								alt?: string;
-								/**
-								 * @type string | undefined
-								 */
-								caption?: string;
-						  }
-						| {
-								/**
-								 * @type string
-								 */
-								_key: string;
-								/**
-								 * @pattern ^(?!(?:block|image)$).+
-								 * @type string
-								 */
-								_type: string;
-								[key: string]: unknown;
-						  }
-					)[];
-				};
-			};
-	  }
-	| {
-			/**
-			 * @minLength 1
-			 * @maxLength 256
-			 * @type string | undefined
-			 */
-			idempotencyKey?: string;
-			command: "approve" | "restore" | "unlock_post_targeting";
-			/**
-			 * @type object | undefined
-			 */
-			annotation?: {
-				role: "internal_note" | "public_notice";
-				/**
-				 * @type string
-				 */
-				language: PatchApiRealmsByRealmIdUnitsByUnitIdRequestAnnotationLanguageEnum;
-				/**
-				 * @type object
-				 */
-				content: {
-					/**
-					 * @type string
-					 */
-					_type: "portable-text";
-					/**
-					 * @pattern ^[0-9a-f]{12}$
-					 * @type string
-					 */
-					_key: string;
-					/**
-					 * @type array
-					 */
-					content: (
-						| {
-								/**
-								 * @type string
-								 */
-								_key: string;
-								/**
-								 * @type string
-								 */
-								_type: "block";
-								/**
-								 * @type array
-								 */
-								children: (
-									| {
-											/**
-											 * @type string
-											 */
-											_key: string;
-											/**
-											 * @type string
-											 */
-											_type: "span";
-											/**
-											 * @type string
-											 */
-											text: string;
-											/**
-											 * @type array | undefined
-											 */
-											marks?: string[];
-									  }
-									| {
-											/**
-											 * @type string
-											 */
-											_key: string;
-											/**
-											 * @type string
-											 */
-											_type: "unit-mention";
-											/**
-											 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
-											 * @type string
-											 */
-											unitId: string;
-									  }
-								)[];
-								/**
-								 * @type array | undefined
-								 */
-								markDefs?: {
+									_type: "span";
+									/**
+									 * @type string
+									 */
+									text: string;
+									/**
+									 * @type array | undefined
+									 */
+									marks?: string[];
+							  }
+							| {
 									/**
 									 * @type string
 									 */
@@ -141943,63 +142245,82 @@ export type PatchApiRealmsByRealmIdUnitsByUnitIdBody =
 									/**
 									 * @type string
 									 */
-									_type: string;
-									[key: string]: unknown;
-								}[];
-								/**
-								 * @type string | undefined
-								 */
-								listItem?: string;
-								/**
-								 * @type string | undefined
-								 */
-								style?: string;
-								/**
-								 * @minLength 1
-								 * @type integer | undefined
-								 */
-								level?: number;
-								[key: string]: unknown;
-						  }
-						| {
-								/**
-								 * @type string
-								 */
-								_key: string;
-								/**
-								 * @type string
-								 */
-								_type: "image";
-								/**
-								 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
-								 * @type string
-								 */
-								assetId: string;
-								/**
-								 * @type string | undefined
-								 */
-								alt?: string;
-								/**
-								 * @type string | undefined
-								 */
-								caption?: string;
-						  }
-						| {
-								/**
-								 * @type string
-								 */
-								_key: string;
-								/**
-								 * @pattern ^(?!(?:block|image)$).+
-								 * @type string
-								 */
-								_type: string;
-								[key: string]: unknown;
-						  }
-					)[];
-				};
-			};
-	  };
+									_type: "unit-mention";
+									/**
+									 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+									 * @type string
+									 */
+									unitId: string;
+							  }
+						)[];
+						/**
+						 * @type array | undefined
+						 */
+						markDefs?: {
+							/**
+							 * @type string
+							 */
+							_key: string;
+							/**
+							 * @type string
+							 */
+							_type: string;
+							[key: string]: unknown;
+						}[];
+						/**
+						 * @type string | undefined
+						 */
+						listItem?: string;
+						/**
+						 * @type string | undefined
+						 */
+						style?: string;
+						/**
+						 * @minLength 1
+						 * @type integer | undefined
+						 */
+						level?: number;
+						[key: string]: unknown;
+				  }
+				| {
+						/**
+						 * @type string
+						 */
+						_key: string;
+						/**
+						 * @type string
+						 */
+						_type: "image";
+						/**
+						 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+						 * @type string
+						 */
+						assetId: string;
+						/**
+						 * @type string | undefined
+						 */
+						alt?: string;
+						/**
+						 * @type string | undefined
+						 */
+						caption?: string;
+				  }
+				| {
+						/**
+						 * @type string
+						 */
+						_key: string;
+						/**
+						 * @pattern ^(?!(?:block|image)$).+
+						 * @type string
+						 */
+						_type: string;
+						[key: string]: unknown;
+				  }
+			)[];
+		};
+	};
+};
 
 /**
  * @type object

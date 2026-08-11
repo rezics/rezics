@@ -6,6 +6,7 @@ import units from "./units";
 
 const { forms: entityTerms } = zhHantTerminology.entity;
 const { forms: realmTerms } = zhHantTerminology.realm;
+const { forms: zoneTerms } = zhHantTerminology.zone;
 const { forms: postTerms } = zhHantTerminology.post;
 
 export default {
@@ -107,7 +108,6 @@ export default {
 			"條目會重新出現在一般查詢中。若刪除前為已發布狀態，還原後會先轉為已封存，避免未經重新檢查就公開。",
 		softDeleteTitle: "軟刪除這個條目？",
 		softDeleteDescription: "條目與其歷史資料會保留，但一般產品查詢與操作會立即看不到它。",
-		reason: "治理原因",
 		internalNote: "內部註解（選填）",
 		notePlaceholder: "記錄操作依據；內容會寫入安全稽核紀錄。",
 		confirmationLabel: `輸入條目 ${verbatimTerms.id.value} 以確認`,
@@ -182,7 +182,6 @@ export default {
 		targetId: `目標條目 ${verbatimTerms.id.value}`,
 		preflight: "執行預檢",
 		irreversibleWarning: "接受後無法還原。來源會成為永久重新導向，所有即時參照將收斂至目標。",
-		reason: "治理原因",
 		internalNote: "內部備註（選填）",
 		notePlaceholder: "記錄重複內容證據、查核來源，以及選擇此正式目標的理由。",
 		confirmSource: `再次輸入來源條目 ${verbatimTerms.id.value}`,
@@ -229,7 +228,6 @@ export default {
 			"條目會立即由社群移轉給申請者並改為個人管理作品；原有的公共協作授權會保留，其他待審核認領會自動結束。",
 		rejectTitle: "拒絕這項所有權認領？",
 		rejectDescription: "認領會結束但不會移轉條目所有權；申請者會收到審核結果通知。",
-		reason: "治理原因",
 		internalNote: "內部註解（選填）",
 		notePlaceholder: "記錄核實來源與決策依據；內容會寫入安全稽核紀錄。",
 		confirmationLabel: `輸入認領 ${verbatimTerms.id.value} 以確認`,
@@ -252,14 +250,6 @@ export default {
 			active: "使用中",
 			suspended: "已停權",
 			closed: "已關閉",
-		},
-		reasons: {
-			security: "安全風險",
-			policy_violation: "違反平台政策",
-			compromised: "帳號疑似遭入侵",
-			user_request: "使用者要求",
-			legal: "法律或合規要求",
-			other: "其他原因",
 		},
 		empty: "找不到符合目前篩選條件的使用者。",
 		loadingMore: "正在載入更多使用者……",
@@ -422,7 +412,6 @@ export default {
 		untitled: "未命名條目",
 		reports: "案件中的檢舉",
 		action: "治理動作",
-		reason: "治理原因",
 		internalNote: "內部註解（選填）",
 		notePlaceholder: "記錄判斷依據；選擇新增註解時必填。",
 		submit: "提交治理動作",
@@ -472,6 +461,7 @@ export default {
 		authorities: {
 			platform: "平台",
 			realm: realmTerms.label,
+			zone: zoneTerms.label,
 			unit: "條目",
 		},
 		empty: "沒有符合目前篩選條件的稽核事件。",
@@ -491,7 +481,8 @@ export default {
 		scopedAuthority: insert("{{kind}}（{{id}}）", { kind: String, id: String }),
 		target: "目標",
 		noTarget: "沒有特定目標",
-		reasonCode: "原因代碼",
+		outcomeCode: "結果代碼",
+		governanceDecisionId: `治理決策 ${verbatimTerms.id.value}`,
 		requestId: `請求 ${verbatimTerms.id.value}`,
 		traceId: `分散式追查 ${verbatimTerms.id.value}`,
 		rawDetails: "結構化內容",

@@ -21,7 +21,10 @@ import { createNotification } from "../notifications/service";
 import { recordUnitRevision } from "../units/history";
 import { firstUnitLocalizationTitle } from "../units/localization";
 import { UnitNotFound } from "../units/errors";
-import type { GovernanceReasonCodeValues } from "../database/schema/contract-values";
+import {
+	createGovernanceDecision,
+	type GovernanceRuleReference,
+} from "../governance/decision-service";
 import {
 	UnitOwnershipClaimAlreadyPending,
 	UnitOwnershipClaimChanged,
@@ -30,7 +33,6 @@ import {
 	UnitOwnershipClaimUnavailable,
 } from "./errors";
 
-type GovernanceReasonCode = (typeof GovernanceReasonCodeValues)[number];
 type ClaimRecord = typeof unitOwnershipClaim.$inferSelect;
 export type UnitOwnershipClaimState = "pending" | UnitOwnershipClaimResolution;
 export type UnitOwnershipClaimDecision = "approved" | "rejected";
@@ -293,7 +295,7 @@ export async function decidePlatformUnitOwnershipClaim(
 		readonly claimId: string;
 		readonly actorProfileId: string;
 		readonly decision: UnitOwnershipClaimDecision;
-		readonly reasonCode: GovernanceReasonCode;
+		readonly rules: readonly GovernanceRuleReference[];
 		readonly note?: string;
 	},
 ) {
@@ -317,6 +319,14 @@ export async function decidePlatformUnitOwnershipClaim(
 		if (claim.resolution !== null) throw new UnitOwnershipClaimChanged();
 		if (claim.claimantProfileId === input.actorProfileId)
 			throw new UnitOwnershipClaimSelfDecisionForbidden();
+		const decision = await createGovernanceDecision(tx, {
+			action: `unit.ownership_claim.${input.decision === "approved" ? "approve" : "reject"}`,
+			actorProfileId: input.actorProfileId,
+			authority: { kind: "platform" },
+			targetUnitId: claim.unitId,
+			subject: { kind: "unit_ownership_claim", id: claim.id },
+			basis: { kind: "rules", rules: input.rules },
+		});
 
 		const now = new Date();
 		if (input.decision === "rejected") {
@@ -337,7 +347,7 @@ export async function decidePlatformUnitOwnershipClaim(
 				actor: { kind: "profile", profileId: input.actorProfileId },
 				authority: { kind: "platform" },
 				action: "unit.ownership_claim.reject",
-				reasonCode: input.reasonCode,
+				governanceDecisionId: decision.id,
 				target: {
 					kind: "unit_ownership_claim",
 					id: claim.id,
@@ -435,7 +445,7 @@ export async function decidePlatformUnitOwnershipClaim(
 			actor: { kind: "profile", profileId: input.actorProfileId },
 			authority: { kind: "platform" },
 			action: "unit.ownership_claim.approve",
-			reasonCode: input.reasonCode,
+			governanceDecisionId: decision.id,
 			target: {
 				kind: "unit_ownership_claim",
 				id: claim.id,

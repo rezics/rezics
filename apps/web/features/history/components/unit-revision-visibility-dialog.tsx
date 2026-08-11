@@ -1,9 +1,6 @@
 "use client";
 
-import {
-	PatchApiHistoryUnitRevisionsByRevisionIdVisibilityRequestReasonCodeEnum,
-	usePatchApiHistoryUnitRevisionsByRevisionIdVisibility,
-} from "@rezics/openapi-tanstack-query";
+import { usePatchApiHistoryUnitRevisionsByRevisionIdVisibility } from "@rezics/openapi-tanstack-query";
 import {
 	Button,
 	Checkbox,
@@ -22,6 +19,8 @@ import { useState } from "react";
 
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
+import { GovernanceRulePicker } from "@/features/governance/components/governance-rule-picker";
+import type { GovernanceRuleReference } from "@/features/governance/model/governance-rule-selection";
 import {
 	buildRevisionVisibility,
 	canSetRevisionVisibility,
@@ -35,28 +34,25 @@ import {
 	type UnitRevisionVisibilityKind,
 } from "../model/revision-visibility";
 
-const GovernanceReasonCodes = Object.values(
-	PatchApiHistoryUnitRevisionsByRevisionIdVisibilityRequestReasonCodeEnum,
-);
-type GovernanceReasonCode = (typeof GovernanceReasonCodes)[number];
-
 export function UnitRevisionVisibilityDialog({
 	capabilities,
 	onChanged,
 	revision,
+	unitId,
 }: {
 	readonly capabilities: UnitRevisionVisibilityCapabilities;
 	readonly onChanged: () => Promise<unknown>;
 	readonly revision: UnitRevision;
+	readonly unitId: string;
 }) {
-	const { t } = useTranslation(["history", "realms"]);
+	const { t } = useTranslation(["history", "governance"]);
 	const mutation = usePatchApiHistoryUnitRevisionsByRevisionIdVisibility();
 	const [open, setOpen] = useState(false);
 	const [kind, setKind] = useState<UnitRevisionVisibilityKind>(revision.visibility.kind);
 	const [hiddenFields, setHiddenFields] = useState<UnitRevisionHiddenField[]>(() =>
 		revisionHiddenFields(revision.visibility),
 	);
-	const [reasonCode, setReasonCode] = useState<GovernanceReasonCode | "">("");
+	const [rules, setRules] = useState<GovernanceRuleReference[]>([]);
 	const visibility = buildRevisionVisibility(kind, hiddenFields);
 	const currentContentSelected =
 		revision.isCurrent && kind !== "visible" && hiddenFields.includes("content");
@@ -64,7 +60,7 @@ export function UnitRevisionVisibilityDialog({
 		visibility !== null &&
 		!mutation.isPending &&
 		!currentContentSelected &&
-		reasonCode !== "" &&
+		rules.length > 0 &&
 		canSetRevisionVisibility(revision.visibility.kind, kind, capabilities) &&
 		!revisionVisibilitiesEqual(revision.visibility, visibility);
 
@@ -72,7 +68,7 @@ export function UnitRevisionVisibilityDialog({
 		mutation.reset();
 		setKind(revision.visibility.kind);
 		setHiddenFields(revisionHiddenFields(revision.visibility));
-		setReasonCode("");
+		setRules([]);
 		setOpen(true);
 	};
 
@@ -95,17 +91,14 @@ export function UnitRevisionVisibilityDialog({
 	const applyCopyrightProtection = () => {
 		setKind("suppressed");
 		setHiddenFields(["content", "summary"]);
-		setReasonCode(
-			PatchApiHistoryUnitRevisionsByRevisionIdVisibilityRequestReasonCodeEnum.copyright,
-		);
 	};
 
 	const save = () => {
-		if (!visibility || !reasonCode || !canSave) return;
+		if (!visibility || !canSave) return;
 		mutation.mutate(
 			{
 				path: { revisionId: revision.id },
-				body: { visibility, reasonCode },
+				body: { visibility, rules },
 			},
 			{
 				onSuccess: async () => {
@@ -205,27 +198,12 @@ export function UnitRevisionVisibilityDialog({
 							) : null}
 						</fieldset>
 
-						<Field required>
-							<FieldLabel>{t.history.visibility.reasonLabel}</FieldLabel>
-							<NativeSelect
-								onChange={(event) => {
-									const next = GovernanceReasonCodes.find(
-										(candidate) => candidate === event.currentTarget.value,
-									);
-									if (next) setReasonCode(next);
-								}}
-								value={reasonCode}
-							>
-								<NativeSelectOption disabled value="">
-									{t.history.visibility.selectReason}
-								</NativeSelectOption>
-								{GovernanceReasonCodes.map((value) => (
-									<NativeSelectOption key={value} value={value}>
-										{t.realms.governanceReasons[value]}
-									</NativeSelectOption>
-								))}
-							</NativeSelect>
-						</Field>
+						<GovernanceRulePicker
+							authority={{ kind: "unit", id: unitId }}
+							enabled={open}
+							onValueChange={setRules}
+							value={rules}
+						/>
 						<RequestFailure error={mutation.error} />
 					</DialogBody>
 					<DialogFooter>

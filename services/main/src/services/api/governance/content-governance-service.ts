@@ -1,19 +1,14 @@
 import { createHash } from "node:crypto";
 
-import { and, desc, eq, inArray, isNull } from "drizzle-orm";
-import { OfficialRealmUnitIds } from "@rezics/slug";
+import { and, eq, isNull } from "drizzle-orm";
 
 import { recordAuditEvent } from "../../audit";
 import type { DatabaseTransaction } from "../../database";
 import {
 	contentGovernanceAction,
-	contentGovernanceActionRule,
 	contentReport,
 	contentReportReferral,
 	contentReviewCase,
-	ContentGovernanceMaxRuleSources,
-	realmRule,
-	realmRuleRevision,
 	realmUnit,
 	realmUnitStatusEvent,
 	unit,
@@ -21,8 +16,12 @@ import {
 	unitOwnership,
 } from "../../database/schema";
 import { createGovernanceNotePost, listGovernanceNotes } from "../../governance/note-service";
+import {
+	createGovernanceDecision,
+	listGovernanceDecisionRules,
+	type GovernanceAuthority,
+} from "../../governance/decision-service";
 import { createNotification } from "../../notifications/service";
-import { currentRealmRuleRevisionReadLock } from "../../realms/rule-revision-lock";
 import {
 	ContentGovernanceActionIncompatible as ModerationActionIncompatible,
 	ContentGovernanceActionNoEffect as ModerationActionNoEffect,
@@ -33,8 +32,6 @@ import {
 	ContentGovernanceTransitionInvalid as ModerationTransitionInvalid,
 	ContentReviewRealmMissing as ModerationRealmMissing,
 	GovernanceNoteRoleDuplicate as ModerationNoteRoleDuplicate,
-	ContentGovernanceRuleChanged,
-	ContentGovernanceRuleSourceForbidden,
 } from "./errors";
 import {
 	assertContentGovernanceActionCompatible,
@@ -47,11 +44,7 @@ import {
 	type UnitContentLicenseStatus,
 	type UnitModerationStatus,
 } from "./content-governance-contract";
-import type {
-	CreateContentGovernanceActionBody,
-	ContentGovernanceActionResponse,
-	ContentGovernanceRuleReference,
-} from "./schema";
+import type { CreateContentGovernanceActionBody, ContentGovernanceActionResponse } from "./schema";
 
 export const contentGovernanceActionSelection = {
 	id: contentGovernanceAction.id,
@@ -68,6 +61,12 @@ export const contentGovernanceActionSelection = {
 	reversesActionId: contentGovernanceAction.reversesActionId,
 	createdAt: contentGovernanceAction.createdAt,
 };
+
+function contentGovernanceAuthority(row: ContentReviewCaseRecord): GovernanceAuthority {
+	return row.authority === "realm" && row.realmId
+		? { kind: "realm", realmId: row.realmId }
+		: { kind: "platform" };
+}
 
 export type ContentReviewCaseRecord = typeof contentReviewCase.$inferSelect;
 
@@ -504,70 +503,6 @@ async function loadReversalPlan(
 	throw new ModerationReversalUnavailable();
 }
 
-function getRequestedRuleReferences(
-	body: CreateContentGovernanceActionBody,
-): readonly ContentGovernanceRuleReference[] {
-	return "rules" in body ? body.rules : [];
-}
-
-async function validateContentGovernanceRules(
-	tx: DatabaseTransaction,
-	row: ContentReviewCaseRecord,
-	body: CreateContentGovernanceActionBody,
-): Promise<ContentGovernanceRuleReference[]> {
-	const references = [...getRequestedRuleReferences(body)].sort((left, right) =>
-		left.sourceRealmId === right.sourceRealmId
-			? left.ruleId.localeCompare(right.ruleId)
-			: left.sourceRealmId.localeCompare(right.sourceRealmId),
-	);
-	if (new Set(references.map((reference) => reference.ruleId)).size !== references.length)
-		throw new ContentGovernanceRuleChanged();
-	const sourceRealmIds = [...new Set(references.map((reference) => reference.sourceRealmId))];
-	if (sourceRealmIds.length > ContentGovernanceMaxRuleSources)
-		throw new ContentGovernanceRuleSourceForbidden();
-	const allowedSourceRealmIds = new Set(
-		row.authority === "platform"
-			? [OfficialRealmUnitIds.rule]
-			: [OfficialRealmUnitIds.rule, ...(row.realmId ? [row.realmId] : [])],
-	);
-	if (sourceRealmIds.some((sourceRealmId) => !allowedSourceRealmIds.has(sourceRealmId)))
-		throw new ContentGovernanceRuleSourceForbidden();
-
-	for (const sourceRealmId of sourceRealmIds)
-		await tx.execute(currentRealmRuleRevisionReadLock(sourceRealmId));
-
-	for (const sourceRealmId of sourceRealmIds) {
-		const sourceReferences = references.filter(
-			(reference) => reference.sourceRealmId === sourceRealmId,
-		);
-		const [currentRevision] = await tx
-			.select({ id: realmRuleRevision.id })
-			.from(realmRuleRevision)
-			.where(eq(realmRuleRevision.realmId, sourceRealmId))
-			.orderBy(desc(realmRuleRevision.version))
-			.limit(1);
-		if (
-			!currentRevision ||
-			sourceReferences.some((reference) => reference.revisionId !== currentRevision.id)
-		)
-			throw new ContentGovernanceRuleChanged();
-		const selectedRules = await tx
-			.select({ id: realmRule.id })
-			.from(realmRule)
-			.where(
-				and(
-					eq(realmRule.revisionId, currentRevision.id),
-					inArray(
-						realmRule.id,
-						sourceReferences.map((reference) => reference.ruleId),
-					),
-				),
-			);
-		if (selectedRules.length !== sourceReferences.length) throw new ContentGovernanceRuleChanged();
-	}
-	return references;
-}
-
 async function deriveActionPlan(
 	tx: DatabaseTransaction,
 	row: ContentReviewCaseRecord,
@@ -691,6 +626,7 @@ export async function executeAuthorizedContentGovernanceAction(
 		const [existing] = await tx
 			.select({
 				...contentGovernanceActionSelection,
+				decisionId: contentGovernanceAction.decisionId,
 				requestFingerprint: contentGovernanceAction.requestFingerprint,
 			})
 			.from(contentGovernanceAction)
@@ -704,22 +640,14 @@ export async function executeAuthorizedContentGovernanceAction(
 			.limit(1);
 		if (existing) {
 			if (existing.requestFingerprint !== fingerprint) throw new ModerationIdempotencyConflict();
-			const { requestFingerprint: _requestFingerprint, ...created } = existing;
+			const { requestFingerprint: _requestFingerprint, decisionId, ...created } = existing;
 			const notes = (
 				await listGovernanceNotes(tx, {
 					subjectKind: "content_governance_action",
 					subjectIds: [created.id],
 				})
 			).map(({ postId, role }) => ({ postId, role }));
-			const rules = await tx
-				.select({
-					sourceRealmId: contentGovernanceActionRule.ruleSourceRealmId,
-					revisionId: contentGovernanceActionRule.ruleRevisionId,
-					ruleId: contentGovernanceActionRule.ruleId,
-				})
-				.from(contentGovernanceActionRule)
-				.where(eq(contentGovernanceActionRule.actionId, created.id))
-				.orderBy(contentGovernanceActionRule.ruleSourceRealmId, contentGovernanceActionRule.ruleId);
+			const rules = await listGovernanceDecisionRules(tx, decisionId);
 			const response = { ...created, rules, notes } satisfies ContentGovernanceActionResponse;
 			return { created: response, replayed: true };
 		}
@@ -727,7 +655,6 @@ export async function executeAuthorizedContentGovernanceAction(
 
 	const noteRoles = new Set(input.body.notes?.map((note) => note.role));
 	if (noteRoles.size !== (input.body.notes?.length ?? 0)) throw new ModerationNoteRoleDuplicate();
-	const rules = await validateContentGovernanceRules(tx, input.caseRow, input.body);
 	const target = await getModerationTargetContext(tx, input.caseRow);
 	const caseReports = await tx
 		.select({
@@ -762,9 +689,37 @@ export async function executeAuthorizedContentGovernanceAction(
 	const resultingContentLicenseStatus = isContentLicensePlan
 		? plan.resultingContentLicenseStatus
 		: null;
+	let reversedDecisionId: string | undefined;
+	if (input.body.kind === "reverse" || input.body.kind === "restore_content_license") {
+		const [reversedAction] = await tx
+			.select({ decisionId: contentGovernanceAction.decisionId })
+			.from(contentGovernanceAction)
+			.where(
+				and(
+					eq(contentGovernanceAction.id, input.body.reversesActionId),
+					eq(contentGovernanceAction.caseId, input.caseRow.id),
+				),
+			)
+			.limit(1);
+		if (!reversedAction) throw new ModerationReversedActionInvalid();
+		reversedDecisionId = reversedAction.decisionId;
+	}
+	const decision = await createGovernanceDecision(tx, {
+		action: `content_governance.${input.body.kind}`,
+		actorProfileId: input.actorProfileId,
+		authority: contentGovernanceAuthority(input.caseRow),
+		targetUnitId: input.caseRow.targetUnitId,
+		subject: { kind: "content_review_case", id: input.caseRow.id },
+		basis:
+			input.body.kind === "reverse" || input.body.kind === "restore_content_license"
+				? { kind: "reversal", reversesDecisionId: reversedDecisionId! }
+				: { kind: "rules", rules: input.body.rules },
+	});
+	const rules = decision.rules;
 	const [created] = await tx
 		.insert(contentGovernanceAction)
 		.values({
+			decisionId: decision.id,
 			caseId: input.caseRow.id,
 			actorProfileId: input.actorProfileId,
 			kind: input.body.kind,
@@ -784,15 +739,6 @@ export async function executeAuthorizedContentGovernanceAction(
 		})
 		.returning(contentGovernanceActionSelection);
 	if (!created) throw new Error("Content governance action insertion did not return a row");
-	if (rules.length)
-		await tx.insert(contentGovernanceActionRule).values(
-			rules.map((rule) => ({
-				actionId: created.id,
-				ruleSourceRealmId: rule.sourceRealmId,
-				ruleRevisionId: rule.revisionId,
-				ruleId: rule.ruleId,
-			})),
-		);
 	const noteBindings: Array<{
 		postId: string;
 		role: "internal_note" | "public_notice";
@@ -869,6 +815,7 @@ export async function executeAuthorizedContentGovernanceAction(
 				? { kind: "realm", id: input.caseRow.realmId }
 				: { kind: "platform" },
 		action: `content_governance.${input.body.kind}`,
+		governanceDecisionId: decision.id,
 		target: {
 			kind: input.caseRow.authority === "realm" ? "realm_unit" : "unit",
 			id: input.caseRow.targetUnitId,

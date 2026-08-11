@@ -6,6 +6,7 @@ import units from "./units";
 
 const { forms: entityTerms } = esTerminology.entity;
 const { forms: realmTerms } = esTerminology.realm;
+const { forms: zoneTerms } = esTerminology.zone;
 const { forms: postTerms } = esTerminology.post;
 
 export default {
@@ -116,7 +117,6 @@ export default {
 		softDeleteTitle: "¿Eliminar provisionalmente esta Unit?",
 		softDeleteDescription:
 			"La Unit y su historial se conservarán, pero dejarán de aparecer de inmediato en las consultas y operaciones normales.",
-		reason: "Motivo de gobernanza",
 		internalNote: "Nota interna (opcional)",
 		notePlaceholder:
 			"Registra el fundamento de la operación; se guardará en el registro de auditoría de seguridad.",
@@ -200,7 +200,6 @@ export default {
 		preflight: "Ejecutar comprobación previa",
 		irreversibleWarning:
 			"La aceptación es irreversible. El origen se convierte en una redirección permanente y todas las referencias activas convergen en el destino.",
-		reason: "Motivo de gobernanza",
 		internalNote: "Nota interna (opcional)",
 		notePlaceholder:
 			"Registra las pruebas de duplicidad, las fuentes verificadas y por qué este destino es canónico.",
@@ -252,7 +251,6 @@ export default {
 		rejectTitle: "¿Rechazar esta reclamación de titularidad?",
 		rejectDescription:
 			"La reclamación se cierra sin transferir la titularidad y se notifica la decisión al solicitante.",
-		reason: "Motivo de gobernanza",
 		internalNote: "Nota interna (opcional)",
 		notePlaceholder:
 			"Registra las fuentes de verificación y el fundamento de la decisión. Se guardará en la auditoría de seguridad.",
@@ -273,14 +271,6 @@ export default {
 		verified: "Verificado",
 		unverified: "Sin verificar",
 		states: { active: "Activa", suspended: "Suspendida", closed: "Cerrada" },
-		reasons: {
-			security: "Riesgo de seguridad",
-			policy_violation: "Incumplimiento de las políticas de la plataforma",
-			compromised: "Posible vulneración de la cuenta",
-			user_request: "Solicitud del usuario",
-			legal: "Requisito legal o normativo",
-			other: "Otro motivo",
-		},
 		empty: "Ningún usuario coincide con los filtros actuales.",
 		loadingMore: "Cargando más usuarios…",
 		selectUser: "Selecciona un usuario",
@@ -447,7 +437,6 @@ export default {
 		untitled: "Unidad sin título",
 		reports: "Denuncias de este caso",
 		action: "Acción de gobernanza",
-		reason: "Motivo de gobernanza",
 		internalNote: "Nota interna (opcional)",
 		notePlaceholder: "Registra la justificación; es obligatorio al añadir una nota.",
 		submit: "Aplicar la acción",
@@ -497,6 +486,7 @@ export default {
 		authorities: {
 			platform: "Plataforma",
 			realm: realmTerms.label,
+			zone: zoneTerms.label,
 			unit: "Unit",
 		},
 		empty: "Ningún evento de auditoría coincide con los filtros actuales.",
@@ -516,7 +506,8 @@ export default {
 		scopedAuthority: insert("{{kind}} ({{id}})", { kind: String, id: String }),
 		target: "Destino",
 		noTarget: "Sin destino específico",
-		reasonCode: "Código del motivo",
+		outcomeCode: "Código de resultado",
+		governanceDecisionId: `${verbatimTerms.id.value} de decisión de gobernanza`,
 		requestId: `${verbatimTerms.id.value} de solicitud`,
 		traceId: `${verbatimTerms.id.value} de rastreo`,
 		rawDetails: "Detalles estructurados",

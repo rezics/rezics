@@ -173,6 +173,8 @@ import type {
 	GetApiGovernancePlatformOwnershipClaimsResponses,
 	PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionOptions,
 	PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionResponses,
+	GetApiGovernanceRuleSourcesOptions,
+	GetApiGovernanceRuleSourcesResponses,
 	GetApiGovernanceNotesByPostIdOptions,
 	GetApiGovernanceNotesByPostIdResponses,
 	PatchApiGovernanceNotesByPostIdOptions,
@@ -1147,7 +1149,7 @@ export function postApiOwnershipClaimsByClaimIdWithdraw<ThrowOnError extends boo
  * {@link /api/v1/recommendations/units}
  */
 export function getApiRecommendationsUnits<ThrowOnError extends boolean = true>(
-	options: Options<GetApiRecommendationsUnitsOptions, ThrowOnError>,
+	options: Options<GetApiRecommendationsUnitsOptions, ThrowOnError> = {},
 ): Promise<RequestResult<GetApiRecommendationsUnitsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
@@ -2341,6 +2343,23 @@ export function postApiGovernancePlatformOwnershipClaimsByClaimIdDecision<
 	}) as Promise<
 		RequestResult<PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionResponses, ThrowOnError>
 	>;
+}
+
+/**
+ * @summary List current Rule sources for a governance authority
+ * {@link /api/v1/governance/rule-sources}
+ */
+export function getApiGovernanceRuleSources<ThrowOnError extends boolean = true>(
+	options: Options<GetApiGovernanceRuleSourcesOptions, ThrowOnError>,
+): Promise<RequestResult<GetApiGovernanceRuleSourcesResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/v1/governance/rule-sources",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<RequestResult<GetApiGovernanceRuleSourcesResponses, ThrowOnError>>;
 }
 
 /**

@@ -30,7 +30,8 @@ import {
 	ContentReviewAuthorityValues,
 	ContentReviewCaseStateValues,
 	EnforcementKindValues,
-	GovernanceReasonCodeValues,
+	GovernanceAuthorityKindValues,
+	GovernanceDecisionBasisKindValues,
 	GovernanceNoteRoleValues,
 	GovernanceNoteSubjectKindValues,
 	toEnumValues,
@@ -48,10 +49,16 @@ import { unit } from "./unit";
 import { unitContentLicense, unitContentLicenseStatus } from "./unit";
 import { unitRevision } from "./history";
 import { post } from "./post";
+import { zone } from "./zone";
+import { users } from "./auth";
 
-export const governanceReasonCode = pgEnum(
-	"governance_reason_code",
-	toEnumValues(GovernanceReasonCodeValues),
+export const governanceAuthorityKind = pgEnum(
+	"governance_authority_kind",
+	toEnumValues(GovernanceAuthorityKindValues),
+);
+export const governanceDecisionBasisKind = pgEnum(
+	"governance_decision_basis_kind",
+	toEnumValues(GovernanceDecisionBasisKindValues),
 );
 export const contentReviewAuthority = pgEnum(
 	"content_review_authority",
@@ -91,8 +98,157 @@ export const auditCredentialKind = pgEnum("audit_credential_kind", [
 	"bootstrap",
 	"system",
 ]);
-export const auditAuthorityKind = pgEnum("audit_authority_kind", ["platform", "realm", "unit"]);
-export const AuditEventSchemaVersion = 1 as const;
+export const auditAuthorityKind = pgEnum("audit_authority_kind", [
+	"platform",
+	"realm",
+	"zone",
+	"unit",
+]);
+export const AuditEventSchemaVersion = 2 as const;
+
+/**
+ * Immutable, cross-domain governance decision ledger.
+ *
+ * Domain action tables retain their operational state, while this relation is
+ * the single source of truth for authority, policy basis, and reversals.
+ */
+export const governanceDecision = pgTable(
+	"governance_decision",
+	{
+		id: createUuidv7PrimaryKey(),
+		action: text().notNull(),
+		basisKind: governanceDecisionBasisKind().notNull(),
+		actorProfileId: uuid()
+			.notNull()
+			.references(() => profile.id, { onDelete: "restrict" }),
+		authorityKind: governanceAuthorityKind().notNull(),
+		authorityRealmId: uuid().references(() => realm.id, { onDelete: "restrict" }),
+		authorityZoneId: uuid().references(() => zone.id, { onDelete: "restrict" }),
+		authorityUnitId: uuid().references(() => unit.id, { onDelete: "restrict" }),
+		targetUnitId: uuid().references(() => unit.id, { onDelete: "restrict" }),
+		targetUserId: uuid().references(() => users.id, { onDelete: "restrict" }),
+		subjectKind: text().notNull(),
+		subjectId: uuid().notNull(),
+		reversesDecisionId: uuid(),
+		requestId: text(),
+		finalized: boolean().notNull().default(false),
+		createdAt: createCreatedAtColumn(),
+	},
+	(table) => [
+		foreignKey({
+			columns: [table.reversesDecisionId],
+			foreignColumns: [table.id],
+			name: "governance_decision_reverses_fkey",
+		}).onDelete("restrict"),
+		uniqueIndex("governance_decision_reverses_key")
+			.on(table.reversesDecisionId)
+			.where(sql`${table.reversesDecisionId} is not null`),
+		index("governance_decision_target_created_idx")
+			.on(table.targetUnitId, table.createdAt.desc(), table.id.desc())
+			.where(sql`${table.targetUnitId} is not null`),
+		index("governance_decision_target_user_created_idx")
+			.on(table.targetUserId, table.createdAt.desc(), table.id.desc())
+			.where(sql`${table.targetUserId} is not null`),
+		index("governance_decision_subject_created_idx").on(
+			table.subjectKind,
+			table.subjectId,
+			table.createdAt.desc(),
+			table.id.desc(),
+		),
+		index("governance_decision_actor_created_idx").on(
+			table.actorProfileId,
+			table.createdAt.desc(),
+			table.id.desc(),
+		),
+		index("governance_decision_realm_created_idx")
+			.on(table.authorityRealmId, table.createdAt.desc(), table.id.desc())
+			.where(sql`${table.authorityRealmId} is not null`),
+		index("governance_decision_zone_created_idx")
+			.on(table.authorityZoneId, table.createdAt.desc(), table.id.desc())
+			.where(sql`${table.authorityZoneId} is not null`),
+		check(
+			"governance_decision_target_check",
+			sql`num_nonnulls(${table.targetUnitId}, ${table.targetUserId}) = 1`,
+		),
+		check(
+			"governance_decision_action_check",
+			sql`btrim(${table.action}) <> '' and octet_length(${table.action}) <= 128`,
+		),
+		check(
+			"governance_decision_subject_kind_check",
+			sql`btrim(${table.subjectKind}) <> '' and octet_length(${table.subjectKind}) <= 64`,
+		),
+		check(
+			"governance_decision_request_id_check",
+			sql`${table.requestId} is null or (btrim(${table.requestId}) <> '' and octet_length(${table.requestId}) <= 200)`,
+		),
+		check(
+			"governance_decision_authority_check",
+			sql`(
+				${table.authorityKind} = 'platform'::governance_authority_kind
+				and num_nonnulls(${table.authorityRealmId}, ${table.authorityZoneId}, ${table.authorityUnitId}) = 0
+			) or (
+				${table.authorityKind} = 'realm'::governance_authority_kind
+				and ${table.authorityRealmId} is not null
+				and num_nonnulls(${table.authorityZoneId}, ${table.authorityUnitId}) = 0
+			) or (
+				${table.authorityKind} = 'zone'::governance_authority_kind
+				and ${table.authorityZoneId} is not null
+				and num_nonnulls(${table.authorityRealmId}, ${table.authorityUnitId}) = 0
+			) or (
+				${table.authorityKind} = 'unit'::governance_authority_kind
+				and ${table.authorityUnitId} is not null
+				and num_nonnulls(${table.authorityRealmId}, ${table.authorityZoneId}) = 0
+			)`,
+		),
+		check(
+			"governance_decision_basis_check",
+			sql`(${table.basisKind} = 'reversal'::governance_decision_basis_kind) = (${table.reversesDecisionId} is not null)`,
+		),
+		check(
+			"governance_decision_not_self_reverse",
+			sql`${table.reversesDecisionId} is null or ${table.reversesDecisionId} <> ${table.id}`,
+		),
+	],
+);
+
+export const governanceDecisionRule = pgTable(
+	"governance_decision_rule",
+	{
+		decisionId: uuid()
+			.notNull()
+			.references(() => governanceDecision.id, { onDelete: "cascade" }),
+		ruleSourceRealmId: uuid()
+			.notNull()
+			.references(() => realm.id, { onDelete: "restrict" }),
+		ruleRevisionId: uuid().notNull(),
+		ruleId: uuid()
+			.notNull()
+			.references(() => realmRule.id, { onDelete: "restrict" }),
+		createdAt: createCreatedAtColumn(),
+	},
+	(table) => [
+		foreignKey({
+			columns: [table.ruleSourceRealmId, table.ruleRevisionId],
+			foreignColumns: [realmRuleRevision.realmId, realmRuleRevision.id],
+			name: "governance_decision_rule_revision_realm_fkey",
+		}).onDelete("restrict"),
+		foreignKey({
+			columns: [table.ruleId, table.ruleRevisionId],
+			foreignColumns: [realmRule.id, realmRule.revisionId],
+			name: "governance_decision_rule_revision_fkey",
+		}).onDelete("restrict"),
+		primaryKey({
+			columns: [table.decisionId, table.ruleId],
+			name: "governance_decision_rule_pkey",
+		}),
+		index("governance_decision_rule_source_decision_idx").on(
+			table.ruleSourceRealmId,
+			table.decisionId,
+		),
+		index("governance_decision_rule_rule_decision_idx").on(table.ruleId, table.decisionId),
+	],
+);
 
 export const contentReviewCase = pgTable(
 	"content_review_case",
@@ -329,6 +485,9 @@ export const contentGovernanceAction = pgTable(
 	"content_governance_action",
 	{
 		id: createUuidv7PrimaryKey(),
+		decisionId: uuid()
+			.notNull()
+			.references(() => governanceDecision.id, { onDelete: "restrict" }),
 		caseId: uuid()
 			.notNull()
 			.references(() => contentReviewCase.id, { onDelete: "restrict" }),
@@ -363,6 +522,7 @@ export const contentGovernanceAction = pgTable(
 		uniqueIndex("content_governance_action_actor_case_idempotency_key")
 			.on(table.actorProfileId, table.caseId, table.idempotencyKey)
 			.where(sql`${table.idempotencyKey} is not null`),
+		unique("content_governance_action_decision_key").on(table.decisionId),
 		index("content_governance_action_case_created_idx").on(
 			table.caseId,
 			table.createdAt.desc(),
@@ -454,44 +614,6 @@ export const contentGovernanceAction = pgTable(
 			"content_governance_action_reversal_check",
 			sql`(${table.kind} in ('reverse', 'restore_content_license')) = (${table.reversesActionId} is not null)`,
 		),
-	],
-);
-
-export const contentGovernanceActionRule = pgTable(
-	"content_governance_action_rule",
-	{
-		actionId: uuid()
-			.notNull()
-			.references(() => contentGovernanceAction.id, { onDelete: "cascade" }),
-		ruleSourceRealmId: uuid()
-			.notNull()
-			.references(() => realm.id, { onDelete: "restrict" }),
-		ruleRevisionId: uuid().notNull(),
-		ruleId: uuid()
-			.notNull()
-			.references(() => realmRule.id, { onDelete: "restrict" }),
-		createdAt: createCreatedAtColumn(),
-	},
-	(table) => [
-		foreignKey({
-			columns: [table.ruleSourceRealmId, table.ruleRevisionId],
-			foreignColumns: [realmRuleRevision.realmId, realmRuleRevision.id],
-			name: "content_governance_action_rule_revision_realm_fkey",
-		}).onDelete("restrict"),
-		foreignKey({
-			columns: [table.ruleId, table.ruleRevisionId],
-			foreignColumns: [realmRule.id, realmRule.revisionId],
-			name: "content_governance_action_rule_revision_fkey",
-		}).onDelete("restrict"),
-		primaryKey({
-			columns: [table.actionId, table.ruleId],
-			name: "content_governance_action_rule_pkey",
-		}),
-		index("content_governance_action_rule_source_action_idx").on(
-			table.ruleSourceRealmId,
-			table.actionId,
-		),
-		index("content_governance_action_rule_rule_action_idx").on(table.ruleId, table.actionId),
 	],
 );
 
@@ -600,6 +722,9 @@ export const accountEnforcementAction = pgTable(
 	"account_enforcement_action",
 	{
 		id: createUuidv7PrimaryKey(),
+		decisionId: uuid()
+			.notNull()
+			.references(() => governanceDecision.id, { onDelete: "restrict" }),
 		actorProfileId: uuid()
 			.notNull()
 			.references(() => profile.id, { onDelete: "restrict" }),
@@ -621,6 +746,7 @@ export const accountEnforcementAction = pgTable(
 		uniqueIndex("account_enforcement_action_reverses_key")
 			.on(table.reversesActionId)
 			.where(sql`${table.reversesActionId} is not null`),
+		unique("account_enforcement_action_decision_key").on(table.decisionId),
 		index("account_enforcement_action_target_created_idx").on(
 			table.targetProfileId,
 			table.createdAt.desc(),
@@ -696,7 +822,10 @@ export const auditEvent = pgTable(
 		authorityKind: auditAuthorityKind().notNull(),
 		authorityId: uuid(),
 		action: text().notNull(),
-		reasonCode: text(),
+		outcomeCode: text(),
+		governanceDecisionId: uuid().references(() => governanceDecision.id, {
+			onDelete: "restrict",
+		}),
 		requestId: text(),
 		traceId: text(),
 		targetKind: text(),
@@ -727,6 +856,7 @@ export const auditEvent = pgTable(
 			table.createdAt.desc(),
 		),
 		index("audit_event_target_idx").on(table.targetKind, table.targetId),
+		index("audit_event_governance_decision_idx").on(table.governanceDecisionId),
 		index("audit_event_request_idx").on(table.requestId),
 		index("audit_event_trace_idx").on(table.traceId),
 		check(
@@ -734,6 +864,10 @@ export const auditEvent = pgTable(
 			sql`${table.schemaVersion} = ${AuditEventSchemaVersion}`,
 		),
 		check("audit_event_action_check", sql`btrim(${table.action}) <> ''`),
+		check(
+			"audit_event_outcome_code_check",
+			sql`${table.outcomeCode} is null or (btrim(${table.outcomeCode}) <> '' and octet_length(${table.outcomeCode}) <= 128)`,
+		),
 		check(
 			"audit_event_actor_check",
 			sql`(${table.actorKind} = 'profile'::audit_actor_kind) = (${table.actorProfileId} is not null)`,

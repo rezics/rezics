@@ -67,4 +67,26 @@ describe("security audit writer", () => {
 		});
 		expect(rows[1]?.actorCredentialId).toBeUndefined();
 	});
+
+	it("preserves a Zone governance authority", async () => {
+		const rows: Record<string, unknown>[] = [];
+		await recordAuditEvent(capturingExecutor(rows), {
+			category: "admin_activity",
+			outcome: "succeeded",
+			actor: {
+				kind: "profile",
+				profileId: "01900000-0000-7000-8000-000000000001",
+			},
+			authority: {
+				kind: "zone",
+				id: "01900000-0000-7000-8000-000000000002",
+			},
+			action: "zone.governance.apply",
+		});
+
+		expect(rows[0]).toMatchObject({
+			authorityKind: "zone",
+			authorityId: "01900000-0000-7000-8000-000000000002",
+		});
+	});
 });

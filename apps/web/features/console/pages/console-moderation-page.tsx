@@ -49,13 +49,13 @@ import { AppLink as Link } from "@/features/application-shell/components/app-lin
 import { DraftContentLanguageField } from "@/features/content-languages/components/draft-content-language-field";
 import { useDraftContentLanguage } from "@/features/content-languages/hooks/use-draft-content-language";
 import {
-	getContentRuleDestination,
-	getContentRuleKeys,
-	getContentRuleReferences,
-	retainAvailableContentRuleSelection,
-	updateContentRuleSelection,
-} from "@/features/governance/model/content-rule-selection";
-import { ContentRuleMultiSelect } from "@/features/governance/components/content-rule-picker";
+	getGovernanceRuleSource,
+	getGovernanceRuleKeys,
+	getGovernanceRuleReferences,
+	retainAvailableGovernanceRuleSelection,
+	updateGovernanceRuleSelection,
+} from "@/features/governance/model/governance-rule-selection";
+import { GovernanceRuleMultiSelect } from "@/features/governance/components/governance-rule-picker";
 import { publicUnitHref } from "@/features/units/routing/public-unit-route";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
@@ -76,11 +76,26 @@ type PlatformCommand =
 type ConfirmedCommand = Extract<PlatformCommand, "remove" | "invalidate_content_license">;
 
 const CaseStates = Object.values(GetApiReportsPlatformCasesState);
-const AdverseCommands = new Set<PlatformCommand>([
-	"remove",
-	"lock_post_targeting",
-	"invalidate_content_license",
-]);
+function platformGovernanceActionRequiresRules(
+	command: PlatformCommand,
+): command is Extract<
+	PlatformCommand,
+	| "approve"
+	| "remove"
+	| "restore"
+	| "lock_post_targeting"
+	| "unlock_post_targeting"
+	| "invalidate_content_license"
+> {
+	return (
+		command === "approve" ||
+		command === "remove" ||
+		command === "restore" ||
+		command === "lock_post_targeting" ||
+		command === "unlock_post_targeting" ||
+		command === "invalidate_content_license"
+	);
+}
 
 function isPlatformCommand(value: string): value is PlatformCommand {
 	return [
@@ -203,28 +218,30 @@ export function ConsoleModerationPage() {
 	const selectedRuleKeys =
 		selected && ruleSelection.caseId === selected.caseId ? ruleSelection.keys : [];
 	const destinationItems = destinations.data?.items ?? [];
-	const currentSelectedRuleKeys = retainAvailableContentRuleSelection(
+	const currentSelectedRuleKeys = retainAvailableGovernanceRuleSelection(
 		selectedRuleKeys,
 		destinationItems,
 	);
-	const activeDestination = getContentRuleDestination(destinationItems);
+	const activeDestination = getGovernanceRuleSource(destinationItems);
 	const activeSelectedRuleKeys = activeDestination
-		? getContentRuleKeys(activeDestination).filter((key) => currentSelectedRuleKeys.includes(key))
+		? getGovernanceRuleKeys(activeDestination).filter((key) =>
+				currentSelectedRuleKeys.includes(key),
+			)
 		: [];
-	const selectedRules = getContentRuleReferences(destinationItems, currentSelectedRuleKeys);
+	const selectedRules = getGovernanceRuleReferences(destinationItems, currentSelectedRuleKeys);
 	const noteRequired = command === "note";
 	const noteValid = !noteRequired || note.trim().length > 0;
-	const rulesValid = !AdverseCommands.has(command) || selectedRules.length > 0;
+	const rulesValid = !platformGovernanceActionRequiresRules(command) || selectedRules.length > 0;
 
 	function updateRuleCheckedState(key: string, checked: boolean) {
 		const availableRuleKeys = new Set(
-			destinationItems.flatMap((destination) => getContentRuleKeys(destination)),
+			destinationItems.flatMap((destination) => getGovernanceRuleKeys(destination)),
 		);
 		if (!availableRuleKeys.has(key) || !selected) return;
 		setRuleSelection((current) => ({
 			caseId: selected.caseId,
-			keys: updateContentRuleSelection(
-				retainAvailableContentRuleSelection(
+			keys: updateGovernanceRuleSelection(
+				retainAvailableGovernanceRuleSelection(
 					current.caseId === selected.caseId ? current.keys : [],
 					destinationItems,
 				),
@@ -277,13 +294,7 @@ export function ConsoleModerationPage() {
 					...(notes ? { notes } : {}),
 				};
 				let body: PostApiGovernanceContentGovernanceActionsBody;
-				if (AdverseCommands.has(command)) {
-					if (
-						command !== "remove" &&
-						command !== "lock_post_targeting" &&
-						command !== "invalidate_content_license"
-					)
-						return;
+				if (platformGovernanceActionRequiresRules(command)) {
 					body = { ...common, kind: command, rules: selectedRules };
 				} else if (command === "restore_content_license") {
 					if (selected.contentLicense?.status !== "invalidated") return;
@@ -292,11 +303,7 @@ export function ConsoleModerationPage() {
 						kind: "restore_content_license",
 						reversesActionId: selected.contentLicense.invalidationActionId,
 					};
-				} else {
-					if (command !== "approve" && command !== "restore" && command !== "unlock_post_targeting")
-						return;
-					body = { ...common, kind: command };
-				}
+				} else return;
 				await actionMutation.mutateAsync({ body });
 			}
 			setNote("");
@@ -430,12 +437,12 @@ export function ConsoleModerationPage() {
 										))}
 									</NativeSelect>
 								</Field>
-								{AdverseCommands.has(command) ? (
+								{platformGovernanceActionRequiresRules(command) ? (
 									<Field required>
 										<FieldLabel>{t.reports.rule}</FieldLabel>
 										<div className="grid gap-3">
-											<ContentRuleMultiSelect
-												destination={activeDestination}
+											<GovernanceRuleMultiSelect
+												source={activeDestination}
 												labels={{
 													ariaLabel: t.reports.rule,
 													choose: t.reports.chooseRule,

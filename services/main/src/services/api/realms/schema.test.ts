@@ -304,7 +304,7 @@ describe("Realm moderation API contract", () => {
 		).toBe(true);
 	});
 
-	it("requires rule references for adverse actions and rejects the removed reason field", () => {
+	it("requires Rule references for every policy action and rejects the removed reason field", () => {
 		expect(
 			Check(ModerateRealmUnitBody, {
 				command: "hide",
@@ -322,6 +322,11 @@ describe("Realm moderation API contract", () => {
 			Check(ModerateRealmUnitBody, {
 				command: "hide",
 				reasonCode: "realm_rules",
+			}),
+		).toBe(false);
+		expect(
+			Check(ModerateRealmUnitBody, {
+				command: "approve",
 			}),
 		).toBe(false);
 	});
@@ -360,7 +365,13 @@ describe("Realm moderation API contract", () => {
 				resultingContentLicenseStatus: null,
 				resultingPostTargetingLocked: null,
 				reversesActionId: null,
-				rules: [],
+				rules: [
+					{
+						sourceRealmId: "019fa3ab-72a9-7792-b2e3-43aa8a9c7562",
+						revisionId: "019fa3ab-72a9-7792-b2e3-43aa8a9c7563",
+						ruleId: "019fa3ab-72a9-7792-b2e3-43aa8a9c7564",
+					},
+				],
 				notes: [],
 				createdAt: "2026-07-27T12:30:00.000Z",
 				target: {

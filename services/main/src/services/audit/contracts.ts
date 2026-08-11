@@ -11,7 +11,7 @@ export type AuditEventOutcome = (typeof AuditEventOutcomeValues)[number];
 export const AuditCredentialKindValues = ["session", "api_token", "bootstrap", "system"] as const;
 export type AuditCredentialKind = (typeof AuditCredentialKindValues)[number];
 
-export const AuditAuthorityKindValues = ["platform", "realm", "unit"] as const;
+export const AuditAuthorityKindValues = ["platform", "realm", "zone", "unit"] as const;
 export type AuditAuthorityKind = (typeof AuditAuthorityKindValues)[number];
 
 export type AuditActor =
@@ -29,7 +29,7 @@ export type AuditActor =
 
 export type AuditAuthority =
 	| { readonly kind: "platform" }
-	| { readonly kind: "realm" | "unit"; readonly id: string };
+	| { readonly kind: "realm" | "zone" | "unit"; readonly id: string };
 
 export interface AuditTarget {
 	readonly kind: string;
@@ -43,7 +43,9 @@ export interface AuditRecord {
 	readonly actor: AuditActor;
 	readonly authority: AuditAuthority;
 	readonly action: string;
-	readonly reasonCode?: string;
+	/** Machine outcome only; human policy basis belongs to governanceDecisionId. */
+	readonly outcomeCode?: string;
+	readonly governanceDecisionId?: string;
 	readonly requestId?: string;
 	readonly traceId?: string;
 	readonly target?: AuditTarget;

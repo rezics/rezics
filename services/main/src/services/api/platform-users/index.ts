@@ -40,11 +40,6 @@ const UserMutationForbiddenResponse = toApiErrorResponse([
 	"PlatformCapabilityRequired",
 ]);
 const UserNotFoundResponse = toApiErrorResponse(["UserNotFound"]);
-const UserMutationConflictResponse = toApiErrorResponse([
-	"UserAccountStateRevisionConflict",
-	"UserSelfStatusChangeForbidden",
-	"PlatformUserManagerRequired",
-]);
 
 export default new Elysia({ prefix: "/platform-users" })
 	.use(sessionContext)
@@ -107,10 +102,16 @@ export default new Elysia({ prefix: "/platform-users" })
 			body: ReplacePlatformUserAccountStateBody,
 			response: {
 				[StatusCodes.OK]: PlatformUserAccountStateResponse,
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["GovernanceRuleSourceForbidden"]),
 				[StatusCodes.UNAUTHORIZED]: AuthenticationResponse,
 				[StatusCodes.FORBIDDEN]: UserMutationForbiddenResponse,
 				[StatusCodes.NOT_FOUND]: UserNotFoundResponse,
-				[StatusCodes.CONFLICT]: UserMutationConflictResponse,
+				[StatusCodes.CONFLICT]: toApiErrorResponse([
+					"UserAccountStateRevisionConflict",
+					"UserSelfStatusChangeForbidden",
+					"PlatformUserManagerRequired",
+					"GovernanceRuleChanged",
+				]),
 				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["UserAccountStateExpiryInvalid"]),
 			},
 			detail: { summary: "Replace a platform user account state", tags: ["Platform Users"] },

@@ -259,8 +259,13 @@ function AuditEventDetails({ event }: { readonly event?: AuditEvent }) {
 							? (event.target.name ?? event.target.id ?? event.target.path ?? event.target.kind)
 							: t.console.audit.noTarget}
 					</Detail>
-					{event.reasonCode ? (
-						<Detail label={t.console.audit.reasonCode}>{event.reasonCode}</Detail>
+					{event.outcomeCode ? (
+						<Detail label={t.console.audit.outcomeCode}>{event.outcomeCode}</Detail>
+					) : null}
+					{event.governanceDecisionId ? (
+						<Detail label={t.console.audit.governanceDecisionId}>
+							{event.governanceDecisionId}
+						</Detail>
 					) : null}
 					{event.requestId ? (
 						<Detail label={t.console.audit.requestId}>{event.requestId}</Detail>

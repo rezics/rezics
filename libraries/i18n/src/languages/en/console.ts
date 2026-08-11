@@ -6,6 +6,7 @@ import units from "./units";
 
 const { forms: entityTerms } = enTerminology.entity;
 const { forms: realmTerms } = enTerminology.realm;
+const { forms: zoneTerms } = enTerminology.zone;
 const { forms: postTerms } = enTerminology.post;
 
 export default {
@@ -115,7 +116,6 @@ export default {
 		softDeleteTitle: "Soft-delete this Unit?",
 		softDeleteDescription:
 			"The Unit and its history remain stored, but ordinary product queries and operations will stop exposing it immediately.",
-		reason: "Governance reason",
 		internalNote: "Internal note (optional)",
 		notePlaceholder:
 			"Record the basis for this operation; it will be stored in the security audit log.",
@@ -198,7 +198,6 @@ export default {
 		preflight: "Run preflight",
 		irreversibleWarning:
 			"Acceptance is irreversible. The source becomes a permanent redirect and all live references converge on the target.",
-		reason: "Governance reason",
 		internalNote: "Internal note (optional)",
 		notePlaceholder:
 			"Record duplicate evidence, verification sources, and why this target is canonical.",
@@ -249,7 +248,6 @@ export default {
 		rejectTitle: "Reject this ownership claim?",
 		rejectDescription:
 			"The claim closes without transferring Unit ownership, and the claimant receives a decision notification.",
-		reason: "Governance reason",
 		internalNote: "Internal note (optional)",
 		notePlaceholder:
 			"Record verification sources and the decision basis. This is written to the security audit log.",
@@ -273,14 +271,6 @@ export default {
 			active: "Active",
 			suspended: "Suspended",
 			closed: "Closed",
-		},
-		reasons: {
-			security: "Security risk",
-			policy_violation: "Platform policy violation",
-			compromised: "Suspected account compromise",
-			user_request: "User request",
-			legal: "Legal or compliance requirement",
-			other: "Other reason",
 		},
 		empty: "No users match the current filters.",
 		loadingMore: "Loading more users…",
@@ -451,7 +441,6 @@ export default {
 		untitled: "Untitled Unit",
 		reports: "Reports in this case",
 		action: "Governance action",
-		reason: "Governance reason",
 		internalNote: "Internal note (optional)",
 		notePlaceholder: "Record the rationale; required when adding a note.",
 		submit: "Apply governance action",
@@ -501,6 +490,7 @@ export default {
 		authorities: {
 			platform: "Platform",
 			realm: realmTerms.label,
+			zone: zoneTerms.label,
 			unit: "Unit",
 		},
 		empty: "No audit events match the current filters.",
@@ -520,7 +510,8 @@ export default {
 		scopedAuthority: insert("{{kind}} ({{id}})", { kind: String, id: String }),
 		target: "Target",
 		noTarget: "No specific target",
-		reasonCode: "Reason code",
+		outcomeCode: "Outcome code",
+		governanceDecisionId: `Governance decision ${verbatimTerms.id.value}`,
 		requestId: `Request ${verbatimTerms.id.value}`,
 		traceId: `Trace ${verbatimTerms.id.value}`,
 		rawDetails: "Structured details",

@@ -11,7 +11,7 @@ import {
 import { createFilterDocument } from "@rezics/filter";
 import { defaultKeyHasher } from "@better-auth/api-key";
 import { hashPassword } from "better-auth/crypto";
-import { and, eq, inArray, isNull, notInArray, sql } from "drizzle-orm";
+import { and, desc, eq, inArray, isNull, notInArray, sql } from "drizzle-orm";
 import { OfficialRealmUnitIds, ZoneHomePageSlug } from "@rezics/slug";
 import { PlatformCapabilityValues } from "@rezics/access";
 import { CurrentUnitContentLicenseSlug } from "@rezics/license";
@@ -55,7 +55,6 @@ import {
 	media,
 	message,
 	contentGovernanceAction,
-	contentGovernanceActionRule,
 	contentReport,
 	contentReportReferral,
 	contentReportRule,
@@ -123,6 +122,7 @@ import {
 	zone,
 	zonePage,
 } from "../database/schema";
+import { createGovernanceDecision } from "../governance/decision-service";
 import { createNavigationStructure } from "../content-structure/navigation";
 import { createContentStructure, insertContentStructureNode } from "../content-structure/service";
 import {
@@ -2594,9 +2594,35 @@ async function seedGovernance(
 					: "visible"
 				: "removed"
 			: null;
+		const sourceRealmId = caseRow.realmId ?? OfficialRealmUnitIds.rule;
+		const ruleRevisionId = currentRuleRevisionByRealm.get(sourceRealmId);
+		if (!ruleRevisionId)
+			throw new Error(`Seed governance action source ${sourceRealmId} has no revision`);
+		const actionCreatedAt = latestDate(data.pastDate(120), caseRow.createdAt, actor.createdAt);
+		const decision = await createGovernanceDecision(tx, {
+			action: `content_governance.${kind}`,
+			actorProfileId: actor.id,
+			authority:
+				caseRow.authority === "realm" && caseRow.realmId
+					? { kind: "realm", realmId: caseRow.realmId }
+					: { kind: "platform" },
+			targetUnitId: caseRow.targetUnitId,
+			subject: { kind: "content_review_case", id: caseRow.id },
+			basis: {
+				kind: "rules",
+				rules: [
+					{
+						sourceRealmId,
+						revisionId: ruleRevisionId,
+						ruleId: itemAt(rulesByRevision.get(ruleRevisionId) ?? [], index),
+					},
+				],
+			},
+		});
 		const [createdAction] = await tx
 			.insert(contentGovernanceAction)
 			.values({
+				decisionId: decision.id,
 				caseId: caseRow.id,
 				actorProfileId: actor.id,
 				kind,
@@ -2608,47 +2634,49 @@ async function seedGovernance(
 					kind === "lock_post_targeting" ? true : kind === "unlock_post_targeting" ? false : null,
 				requestId: `seed-content-governance-request-${position(index)}`,
 				idempotencyKey: `seed-content-governance-action-${position(index)}`,
-				createdAt: latestDate(data.pastDate(120), caseRow.createdAt, actor.createdAt),
+				createdAt: actionCreatedAt,
 			})
 			.returning();
 		if (!createdAction) throw new Error("Seed content governance Action insertion returned no row");
 		normalActions.push(createdAction);
-		if (kind === "remove" || kind === "lock_post_targeting") {
-			const sourceRealmId = caseRow.realmId ?? OfficialRealmUnitIds.rule;
-			const ruleRevisionId = currentRuleRevisionByRealm.get(sourceRealmId);
-			if (!ruleRevisionId)
-				throw new Error(`Seed governance action source ${sourceRealmId} has no revision`);
-			await tx.insert(contentGovernanceActionRule).values({
-				actionId: createdAction.id,
-				ruleSourceRealmId: sourceRealmId,
-				ruleRevisionId,
-				ruleId: itemAt(rulesByRevision.get(ruleRevisionId) ?? [], index),
-				createdAt: createdAction.createdAt,
-			});
-		}
 	}
-	const reverseActions = await tx
-		.insert(contentGovernanceAction)
-		.values(
-			Array.from({ length: 10 }, (_, index) => {
-				const reversed = itemAt(normalActions, index);
-				const actor = itemAt(profiles, index * 11 + 2);
-				return {
-					caseId: reversed.caseId,
-					actorProfileId: actor.id,
-					kind: "reverse" as const,
-					reversesActionId: reversed.id,
-					previousState: reversed.resultingState,
-					resultingState: reversed.previousState,
-					previousPostTargetingLocked: reversed.resultingPostTargetingLocked,
-					resultingPostTargetingLocked: reversed.previousPostTargetingLocked,
-					requestId: `seed-content-governance-reverse-request-${position(index)}`,
-					idempotencyKey: `seed-content-governance-reverse-${position(index)}`,
-					createdAt: latestDate(data.pastDate(30), reversed.createdAt, actor.createdAt),
-				};
-			}),
-		)
-		.returning();
+	const reverseActions: (typeof contentGovernanceAction.$inferSelect)[] = [];
+	for (let index = 0; index < 10; index += 1) {
+		const reversed = itemAt(normalActions, index);
+		const actor = itemAt(profiles, index * 11 + 2);
+		const caseRow = cases.find((candidate) => candidate.id === reversed.caseId);
+		if (!caseRow) throw new Error("Seed reversed action has no review case");
+		const decision = await createGovernanceDecision(tx, {
+			action: "content_governance.reverse",
+			actorProfileId: actor.id,
+			authority:
+				caseRow.authority === "realm" && caseRow.realmId
+					? { kind: "realm", realmId: caseRow.realmId }
+					: { kind: "platform" },
+			targetUnitId: caseRow.targetUnitId,
+			subject: { kind: "content_review_case", id: caseRow.id },
+			basis: { kind: "reversal", reversesDecisionId: reversed.decisionId },
+		});
+		const [created] = await tx
+			.insert(contentGovernanceAction)
+			.values({
+				decisionId: decision.id,
+				caseId: reversed.caseId,
+				actorProfileId: actor.id,
+				kind: "reverse",
+				reversesActionId: reversed.id,
+				previousState: reversed.resultingState,
+				resultingState: reversed.previousState,
+				previousPostTargetingLocked: reversed.resultingPostTargetingLocked,
+				resultingPostTargetingLocked: reversed.previousPostTargetingLocked,
+				requestId: `seed-content-governance-reverse-request-${position(index)}`,
+				idempotencyKey: `seed-content-governance-reverse-${position(index)}`,
+				createdAt: latestDate(data.pastDate(30), reversed.createdAt, actor.createdAt),
+			})
+			.returning();
+		if (!created) throw new Error("Seed reverse governance Action insertion returned no row");
+		reverseActions.push(created);
+	}
 	const enforcementPlans = Array.from({ length: SeedPlan.accountEnforcements }, (_, index) => {
 		const targetProfile = itemAt(profiles, index * 13);
 		const actor = itemAt(profiles, index * 7 + 1);
@@ -2663,10 +2691,32 @@ async function seedGovernance(
 		});
 	});
 	const enforcementActions: (typeof accountEnforcementAction.$inferSelect)[] = [];
-	for (const batch of chunks(enforcementPlans.map((value) => value.action))) {
-		enforcementActions.push(
-			...(await tx.insert(accountEnforcementAction).values(batch).returning()),
-		);
+	const officialRuleRevisionId = currentRuleRevisionByRealm.get(OfficialRealmUnitIds.rule);
+	if (!officialRuleRevisionId) throw new Error("Seed official governance Rule revision is missing");
+	for (const [index, plan] of enforcementPlans.entries()) {
+		const decision = await createGovernanceDecision(tx, {
+			action: "account.enforcement.create",
+			actorProfileId: plan.action.actorProfileId,
+			authority: { kind: "platform" },
+			targetUnitId: plan.action.targetProfileId,
+			subject: { kind: "profile", id: plan.action.targetProfileId },
+			basis: {
+				kind: "rules",
+				rules: [
+					{
+						sourceRealmId: OfficialRealmUnitIds.rule,
+						revisionId: officialRuleRevisionId,
+						ruleId: itemAt(rulesByRevision.get(officialRuleRevisionId) ?? [], index),
+					},
+				],
+			},
+		});
+		const [created] = await tx
+			.insert(accountEnforcementAction)
+			.values({ ...plan.action, decisionId: decision.id })
+			.returning();
+		if (!created) throw new Error("Seed account enforcement Action insertion returned no row");
+		enforcementActions.push(created);
 	}
 	const enforcementActionIdByRequest = new Map<string, string>();
 	for (const action of enforcementActions) {
@@ -2694,7 +2744,8 @@ async function seedGovernance(
 			authorityKind: "unit" as const,
 			authorityId: itemAt(governanceTargets, index * 17).id,
 			action: itemAt(["unit.update", "moderation.decide", "realm.manage", "profile.login"], index),
-			reasonCode: index % 13 === 0 ? "policy_denied" : null,
+			outcomeCode: index % 13 === 0 ? "policy_denied" : null,
+			governanceDecisionId: itemAt(actions, index).decisionId,
 			requestId: `seed-audit-${position(index)}`,
 			targetKind: "unit",
 			targetId: itemAt(governanceTargets, index * 17).id,
@@ -2872,13 +2923,41 @@ async function seedCoverageContracts(
 		createdAt,
 		updatedAt: createdAt,
 	});
+	const [officialRule] = await tx
+		.select({
+			revisionId: realmRuleRevision.id,
+			ruleId: realmRule.id,
+		})
+		.from(realmRuleRevision)
+		.innerJoin(realmRule, eq(realmRule.revisionId, realmRuleRevision.id))
+		.where(eq(realmRuleRevision.realmId, OfficialRealmUnitIds.rule))
+		.orderBy(desc(realmRuleRevision.version), realmRule.position, realmRule.id)
+		.limit(1);
+	if (!officialRule) throw new Error("Seed Unit access restriction has no official Rule");
+	const accessDecision = await createGovernanceDecision(tx, {
+		action: "unit.access.restrict",
+		actorProfileId: actor.id,
+		authority: { kind: "unit", unitId: itemAt(unitFixtures.works, 2).id },
+		targetUnitId: itemAt(unitFixtures.works, 2).id,
+		subject: { kind: "unit_access_configuration", id: itemAt(unitFixtures.works, 2).id },
+		basis: {
+			kind: "rules",
+			rules: [
+				{
+					sourceRealmId: OfficialRealmUnitIds.rule,
+					revisionId: officialRule.revisionId,
+					ruleId: officialRule.ruleId,
+				},
+			],
+		},
+	});
 	await tx.insert(unitAccessRestriction).values({
 		unitId: itemAt(unitFixtures.works, 2).id,
 		subjectKind: "profile",
 		profileId: collaborator.id,
 		permission: "unit.update",
 		scope: [],
-		reasonCode: "administrative",
+		decisionId: accessDecision.id,
 		createdByProfileId: actor.id,
 		expiresAt,
 		createdAt,

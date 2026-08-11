@@ -1,6 +1,6 @@
 import { DevelopmentPreviewCapability } from "@rezics/access";
 import { StatusCodes } from "http-status-codes";
-import { and, eq, inArray, isNull, sql } from "drizzle-orm";
+import { and, desc, eq, inArray, isNull, sql } from "drizzle-orm";
 import Elysia, { t } from "elysia";
 import type { AvatarReference } from "@rezics/avatar";
 import {
@@ -54,6 +54,8 @@ import {
 	unitExternalLink,
 	unitLocalization,
 	zone,
+	realmRule,
+	realmRuleRevision,
 	unitDock,
 	imageAsset,
 } from "../../database/schema";
@@ -72,6 +74,7 @@ import {
 } from "../../content-structure/navigation";
 import { getContentStructureRevision } from "../../content-structure/service";
 import { ContentStructureInvalid, ContentStructureNotFound } from "../../content-structure/errors";
+import { currentRealmRuleRevisionReadLock } from "../../realms/rule-revision-lock";
 import { insertUnit } from "../../units/create";
 import {
 	avatarReferenceFromColumns,
@@ -152,6 +155,7 @@ import {
 	ZoneNavigationNotFound,
 	ZonePageNotFound,
 	ZonePageInUse,
+	ZoneRuleRealmInvalid,
 	ZoneTimeRangeInvalid,
 } from "./errors";
 
@@ -244,6 +248,28 @@ async function getZone(zoneId: string) {
 	const [record] = await database.select().from(zone).where(eq(zone.id, zoneId)).limit(1);
 	if (!record) throw new UnitNotFound("Zone");
 	return record;
+}
+
+async function ensureZoneRuleRealm(tx: DatabaseTransaction, realmId: string): Promise<void> {
+	await tx.execute(currentRealmRuleRevisionReadLock(realmId));
+	const [revision] = await tx
+		.select({ id: realmRuleRevision.id })
+		.from(realmRuleRevision)
+		.innerJoin(
+			unit,
+			and(eq(unit.id, realmRuleRevision.realmId), eq(unit.kind, "realm"), isNull(unit.deletedAt)),
+		)
+		.where(eq(realmRuleRevision.realmId, realmId))
+		.orderBy(desc(realmRuleRevision.version))
+		.limit(1)
+		.for("share");
+	if (!revision) throw new ZoneRuleRealmInvalid();
+	const [rule] = await tx
+		.select({ id: realmRule.id })
+		.from(realmRule)
+		.where(eq(realmRule.revisionId, revision.id))
+		.limit(1);
+	if (!rule) throw new ZoneRuleRealmInvalid();
 }
 
 async function toZoneResponse(
@@ -897,8 +923,10 @@ export default new Elysia()
 					if (body.themeDocument) scopes.push(["zone", "theme"]);
 					if (body.startsAt !== undefined || body.endsAt !== undefined)
 						scopes.push(["zone", "settings"]);
+					if (body.localRuleRealmId !== undefined) scopes.push(["zone", "settings"]);
 					for (const scope of scopes)
 						await ensureUnitMutationAuthorized(authorization.unit, params.zoneId, scope);
+					if (body.localRuleRealmId) await authorization.unit.ensureCanRead(body.localRuleRealmId);
 					const current = await getZone(params.zoneId);
 					const startsAt =
 						body.startsAt === undefined
@@ -918,6 +946,7 @@ export default new Elysia()
 							sql`select pg_advisory_xact_lock(hashtextextended(${`zone-graph:${params.zoneId}`}::text, 0))`,
 						);
 						if (body.filterDocument) await ensureZoneFilterReferences(tx, body.filterDocument);
+						if (body.localRuleRealmId) await ensureZoneRuleRealm(tx, body.localRuleRealmId);
 						if (body.localization) {
 							const storedLocalization = toUnitLocalizationStorage(body.localization);
 							await ensureImageAssetsAttachable(
@@ -937,7 +966,8 @@ export default new Elysia()
 							body.filterDocument ||
 							body.themeDocument ||
 							body.startsAt !== undefined ||
-							body.endsAt !== undefined
+							body.endsAt !== undefined ||
+							body.localRuleRealmId !== undefined
 						)
 							await tx
 								.update(zone)
@@ -946,6 +976,9 @@ export default new Elysia()
 									...(body.themeDocument ? { themeDocument: body.themeDocument } : {}),
 									...(body.startsAt !== undefined ? { startsAt } : {}),
 									...(body.endsAt !== undefined ? { endsAt } : {}),
+									...(body.localRuleRealmId !== undefined
+										? { localRuleRealmId: body.localRuleRealmId }
+										: {}),
 								})
 								.where(eq(zone.id, params.zoneId));
 						await recordUnitRevision(tx, {
@@ -968,6 +1001,7 @@ export default new Elysia()
 						[StatusCodes.OK]: ZoneResponse,
 						[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
 							"ZoneDocumentInvalid",
+							"ZoneRuleRealmInvalid",
 							"ZoneTimeRangeInvalid",
 						]),
 						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
@@ -1551,11 +1585,13 @@ export default new Elysia()
 			"",
 			async ({ profile, authorization, body }) => {
 				await authorization.platform.ensureCapability(DevelopmentPreviewCapability);
+				if (body.localRuleRealmId) await authorization.unit.ensureCanRead(body.localRuleRealmId);
 				ensureZoneFilterDocument(body.filterDocument);
 				const startsAt = body.startsAt ? new Date(body.startsAt) : null;
 				const endsAt = body.endsAt ? new Date(body.endsAt) : null;
 				if (startsAt && endsAt && endsAt <= startsAt) throw new ZoneTimeRangeInvalid();
 				const id = await database.transaction(async (tx) => {
+					if (body.localRuleRealmId) await ensureZoneRuleRealm(tx, body.localRuleRealmId);
 					const unitId = await createBaseUnit(tx, {
 						kind: "zone",
 						localization: body.localization,
@@ -1568,6 +1604,7 @@ export default new Elysia()
 						themeDocument: body.themeDocument,
 						startsAt,
 						endsAt,
+						localRuleRealmId: body.localRuleRealmId ?? null,
 					});
 					await recordUnitRevision(tx, {
 						unitId,
@@ -1591,10 +1628,14 @@ export default new Elysia()
 					[StatusCodes.OK]: IdResponse,
 					[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
 						"ZoneDocumentInvalid",
+						"ZoneRuleRealmInvalid",
 						"ZoneTimeRangeInvalid",
 					]),
-					[StatusCodes.FORBIDDEN]: toApiErrorResponse(["PlatformCapabilityRequired"]),
-					[StatusCodes.NOT_FOUND]: ImageAssetNotFoundResponse,
+					[StatusCodes.FORBIDDEN]: toApiErrorResponse([
+						"PlatformCapabilityRequired",
+						"UnitPermissionForbidden",
+					]),
+					[StatusCodes.NOT_FOUND]: UnitMutationNotFoundResponse,
 				},
 				detail: { summary: "Create Zone", tags: ["Zones"] },
 			},

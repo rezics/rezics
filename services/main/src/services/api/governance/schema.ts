@@ -10,11 +10,10 @@ import { type Static, t } from "elysia";
 
 import {
 	ContentGovernanceActionKindValues,
-	ContentGovernanceMaxRuleReferences,
-	ContentGovernanceRuleRequiredActionKindValues,
+	ContentGovernanceRuleBackedActionKindValues,
 	ContentReviewCaseStateValues,
 	EnforcementKindValues,
-	GovernanceReasonCodeValues,
+	GovernanceMaxRuleReferences,
 	UnitMergeEligibleKindValues,
 	UnitMergeGraphActionValues,
 	UnitMergeGraphRoleValues,
@@ -26,7 +25,7 @@ import {
 	UnitKindValues,
 	UnitStatusValues,
 } from "../../database/schema/contract-values";
-import { DateTime, ContentLanguage, Uuid } from "../schema";
+import { DateTime, ContentLanguage, LocalizationLanguageQuery, Uuid } from "../schema";
 
 const NullableUuid = t.Nullable(Uuid);
 
@@ -34,7 +33,6 @@ const ContentReviewCaseState = t.UnionEnum(ContentReviewCaseStateValues, {
 	default: undefined,
 });
 
-const GovernanceReasonCode = t.UnionEnum(GovernanceReasonCodeValues, { default: undefined });
 export const GovernanceInternalNote = t.Object(
 	{
 		language: ContentLanguage,
@@ -72,7 +70,7 @@ export const UpdateGovernanceNoteBody = t.Object(
 	{ additionalProperties: false },
 );
 const GovernanceNoteBindingResponse = t.Pick(GovernanceNoteResponse, ["postId", "role"]);
-export const ContentGovernanceRuleReference = t.Object(
+export const GovernanceRuleReference = t.Object(
 	{
 		sourceRealmId: Uuid,
 		revisionId: Uuid,
@@ -80,7 +78,7 @@ export const ContentGovernanceRuleReference = t.Object(
 	},
 	{ additionalProperties: false },
 );
-export type ContentGovernanceRuleReference = Static<typeof ContentGovernanceRuleReference>;
+export type GovernanceRuleReference = Static<typeof GovernanceRuleReference>;
 const ContentGovernanceActionCommon = {
 	caseId: Uuid,
 	notes: t.Optional(GovernanceActionNotes),
@@ -108,31 +106,57 @@ const UnitScope = t.Array(
 	{ maxItems: 8 },
 );
 
-const RuleReferences = t.Array(ContentGovernanceRuleReference, {
+export const GovernanceRuleReferences = t.Array(GovernanceRuleReference, {
 	minItems: 1,
-	maxItems: ContentGovernanceMaxRuleReferences,
+	maxItems: GovernanceMaxRuleReferences,
 	uniqueItems: true,
 });
-const AdverseContentGovernanceActionKind = t.Union(
-	ContentGovernanceRuleRequiredActionKindValues.map((kind) => t.Literal(kind)),
+
+export const GovernanceRuleSourcesQuery = t.Object(
+	{
+		...LocalizationLanguageQuery,
+		authorityKind: t.Union([
+			t.Literal("platform"),
+			t.Literal("realm"),
+			t.Literal("zone"),
+			t.Literal("unit"),
+		]),
+		authorityId: t.Optional(Uuid),
+	},
+	{ additionalProperties: false },
 );
-const NonAdverseContentGovernanceActionKind = t.Union(
-	(["approve", "restore", "unlock_post_targeting"] as const).map((kind) => t.Literal(kind)),
+export const GovernanceRuleSourcesResponse = t.Object({
+	items: t.Array(
+		t.Object(
+			{
+				id: Uuid,
+				scope: t.Union([t.Literal("platform"), t.Literal("realm"), t.Literal("local")]),
+				language: ContentLanguage,
+				title: t.Nullable(t.String()),
+				revisionId: Uuid,
+				rules: t.Array(
+					t.Object(
+						{ id: Uuid, language: ContentLanguage, title: t.String() },
+						{ additionalProperties: false },
+					),
+					{ minItems: 1, maxItems: 100 },
+				),
+			},
+			{ additionalProperties: false },
+		),
+		{ minItems: 1, maxItems: 2 },
+	),
+});
+const RuleBackedContentGovernanceActionKind = t.Union(
+	ContentGovernanceRuleBackedActionKindValues.map((kind) => t.Literal(kind)),
 );
 
 export const CreateContentGovernanceActionBody = t.Union([
 	t.Object(
 		{
 			...ContentGovernanceActionCommon,
-			kind: AdverseContentGovernanceActionKind,
-			rules: RuleReferences,
-		},
-		{ additionalProperties: false },
-	),
-	t.Object(
-		{
-			...ContentGovernanceActionCommon,
-			kind: NonAdverseContentGovernanceActionKind,
+			kind: RuleBackedContentGovernanceActionKind,
+			rules: GovernanceRuleReferences,
 		},
 		{ additionalProperties: false },
 	),
@@ -160,6 +184,7 @@ export const CreateAccountEnforcementBody = t.Object(
 	{
 		profileId: Uuid,
 		kind: AccountEnforcementKind,
+		rules: GovernanceRuleReferences,
 		notes: t.Optional(GovernanceActionNotes),
 		expiresAt: t.Optional(t.String({ format: "date-time" })),
 	},
@@ -208,23 +233,37 @@ const UnitAccessSubject = t.Union([
 	t.Object({ kind: t.Literal("authenticated") }, { additionalProperties: false }),
 ]);
 const DelegableUnitPermission = t.UnionEnum(DelegableUnitPermissionValues);
-export const ReplaceUnitSubjectAccessBody = t.Object(
-	{
-		subject: UnitAccessSubject,
-		grants: t.Array(DelegableUnitPermission, {
-			maxItems: DelegableUnitPermissionValues.length,
-			uniqueItems: true,
-		}),
-		restrictions: t.Array(DelegableUnitPermission, {
-			maxItems: DelegableUnitPermissionValues.length,
-			uniqueItems: true,
-		}),
-		scope: UnitScope,
-		reasonCode: t.Optional(GovernanceReasonCode),
-		expiresAt: t.Optional(t.String({ format: "date-time" })),
-	},
-	{ additionalProperties: false },
-);
+const UnitSubjectAccessCommon = {
+	subject: UnitAccessSubject,
+	grants: t.Array(DelegableUnitPermission, {
+		maxItems: DelegableUnitPermissionValues.length,
+		uniqueItems: true,
+	}),
+	scope: UnitScope,
+	expiresAt: t.Optional(t.String({ format: "date-time" })),
+};
+export const ReplaceUnitSubjectAccessBody = t.Union([
+	t.Object(
+		{
+			...UnitSubjectAccessCommon,
+			restrictions: t.Array(DelegableUnitPermission, {
+				minItems: 1,
+				maxItems: DelegableUnitPermissionValues.length,
+				uniqueItems: true,
+			}),
+			rules: GovernanceRuleReferences,
+		},
+		{ additionalProperties: false },
+	),
+	t.Object(
+		{
+			...UnitSubjectAccessCommon,
+			restrictions: t.Array(DelegableUnitPermission, { maxItems: 0 }),
+			rules: t.Optional(GovernanceRuleReferences),
+		},
+		{ additionalProperties: false },
+	),
+]);
 export const CreateUnitAccessInvitationBody = t.Object(
 	{
 		invitedProfileId: Uuid,
@@ -255,7 +294,7 @@ export const OverrideUnitOwnershipBody = t.Object(
 		expectedOwnerProfileId: NullableUuid,
 		targetProfileId: Uuid,
 		confirmationUnitId: Uuid,
-		reasonCode: GovernanceReasonCode,
+		rules: GovernanceRuleReferences,
 		note: t.Optional(t.String({ minLength: 1, maxLength: 2_000 })),
 	},
 	{ additionalProperties: false },
@@ -285,11 +324,19 @@ export const ListPlatformUnitsQuery = t.Object(
 	},
 	{ additionalProperties: false },
 );
-export const UnitLifecycleCommandBody = t.Object(
+export const DeleteUnitLifecycleCommandBody = t.Object(
 	{
 		expectedUpdatedAt: DateTime,
 		confirmationUnitId: Uuid,
-		reasonCode: GovernanceReasonCode,
+		rules: GovernanceRuleReferences,
+		note: t.Optional(t.String({ minLength: 1, maxLength: 2_000 })),
+	},
+	{ additionalProperties: false },
+);
+export const RestoreUnitLifecycleCommandBody = t.Object(
+	{
+		expectedUpdatedAt: DateTime,
+		confirmationUnitId: Uuid,
 		note: t.Optional(t.String({ minLength: 1, maxLength: 2_000 })),
 	},
 	{ additionalProperties: false },
@@ -377,7 +424,7 @@ const UnitMergeCommandFields = {
 	expectedSourceUpdatedAt: DateTime,
 	expectedTargetUpdatedAt: DateTime,
 	idempotencyKey: t.String({ minLength: 1, maxLength: 200 }),
-	reasonCode: GovernanceReasonCode,
+	rules: GovernanceRuleReferences,
 	note: t.Optional(t.String({ minLength: 1, maxLength: 2_000 })),
 } as const;
 export const CreateReviewedUnitMergeBody = t.Object(UnitMergeCommandFields, {
@@ -448,7 +495,7 @@ export const UnitMergeRequestResponse = t.Object(
 			{ additionalProperties: false },
 		),
 		overrideOfRequestId: t.Nullable(Uuid),
-		reasonCode: GovernanceReasonCode,
+		rules: GovernanceRuleReferences,
 		note: t.Nullable(t.String()),
 		policy: UnitMergePolicyResponse,
 		manifest: UnitMergeManifestResponse,
@@ -524,17 +571,7 @@ export const ContentGovernanceActionResponse = t.Object({
 	),
 	resultingPostTargetingLocked: t.Nullable(t.Boolean()),
 	reversesActionId: t.Nullable(Uuid),
-	rules: t.Array(
-		t.Object(
-			{
-				sourceRealmId: Uuid,
-				revisionId: Uuid,
-				ruleId: Uuid,
-			},
-			{ additionalProperties: false },
-		),
-		{ maxItems: ContentGovernanceMaxRuleReferences },
-	),
+	rules: t.Array(GovernanceRuleReference, { maxItems: GovernanceMaxRuleReferences }),
 	notes: t.Array(GovernanceNoteBindingResponse),
 	createdAt: DateTime,
 });

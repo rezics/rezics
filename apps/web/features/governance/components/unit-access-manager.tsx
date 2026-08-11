@@ -63,6 +63,8 @@ import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
+import { GovernanceRulePicker } from "./governance-rule-picker";
+import type { GovernanceRuleReference } from "../model/governance-rule-selection";
 
 type AccessSnapshot = GetApiGovernanceUnitByUnitIdAccessStatus200;
 type AccessSubject = AccessSnapshot["subjects"][number];
@@ -907,6 +909,7 @@ function SubjectAccessSheet({
 	const { t } = useTranslation(["governance"]);
 	const queryClient = useQueryClient();
 	const [value, setValue] = useState<ReadonlySet<MatrixValue>>(() => accessValues(subject));
+	const [rules, setRules] = useState<GovernanceRuleReference[]>([]);
 	const mutation = usePutApiGovernanceUnitByUnitIdAccess();
 	const isAuthenticated = subject.subject.kind === "authenticated";
 	const editablePermissions = isAuthenticated ? authenticatedPermissions : permissions;
@@ -925,23 +928,33 @@ function SubjectAccessSheet({
 		},
 		target,
 	);
+	const grants = editablePermissions.filter((permission) =>
+		value.has(matrixValue(permission, "grant")),
+	);
+	const restrictions = isAuthenticated
+		? []
+		: editablePermissions.filter((permission) => value.has(matrixValue(permission, "restrict")));
+	const restrictionPolicyTouched = restrictions.length > 0 || subject.restrictions.length > 0;
 
 	async function save() {
+		if (restrictionPolicyTouched && rules.length === 0) return;
 		try {
 			const snapshot = await mutation.mutateAsync({
 				path: { unitId },
-				body: {
-					subject: subject.subject,
-					grants: editablePermissions.filter((permission) =>
-						value.has(matrixValue(permission, "grant")),
-					),
-					restrictions: isAuthenticated
-						? []
-						: editablePermissions.filter((permission) =>
-								value.has(matrixValue(permission, "restrict")),
-							),
-					scope: [...scope],
-				},
+				body: restrictionPolicyTouched
+					? {
+							subject: subject.subject,
+							grants,
+							restrictions,
+							rules,
+							scope: [...scope],
+						}
+					: {
+							subject: subject.subject,
+							grants,
+							restrictions,
+							scope: [...scope],
+						},
 			});
 			queryClient.setQueryData(
 				getApiGovernanceUnitByUnitIdAccessQueryKey({
@@ -971,13 +984,24 @@ function SubjectAccessSheet({
 						singlePerResource
 						value={value}
 					/>
+					{restrictionPolicyTouched ? (
+						<GovernanceRulePicker
+							authority={{ kind: "unit", id: unitId }}
+							onValueChange={setRules}
+							value={rules}
+						/>
+					) : null}
 					<RequestFailure error={mutation.error} />
 				</SheetBody>
 				<SheetFooter>
 					<Button onClick={() => onOpenChange(false)} type="button" variant="outline">
 						{t.governance.access.cancel}
 					</Button>
-					<Button disabled={mutation.isPending} onClick={() => void save()} type="button">
+					<Button
+						disabled={mutation.isPending || (restrictionPolicyTouched && rules.length === 0)}
+						onClick={() => void save()}
+						type="button"
+					>
 						{mutation.isPending ? t.governance.access.saving : t.governance.access.save}
 					</Button>
 				</SheetFooter>

@@ -30,7 +30,7 @@ import {
 } from "./columns";
 import { profile } from "./profile";
 import { unit } from "./unit";
-import { governanceReasonCode } from "./governance";
+import { governanceDecision } from "./governance";
 import { realm } from "./realm";
 
 export const unitAccessSubjectKind = pgEnum(
@@ -289,7 +289,9 @@ export const unitAccessRestriction = pgTable(
 		realmRelation: realmAccessSubjectRelation().$type<RealmAccessSubjectRelation>(),
 		permission: unitPermission().$type<DelegableUnitPermission>().notNull(),
 		scope: text().array().default(sql`array[]::text[]`).notNull(),
-		reasonCode: governanceReasonCode().notNull(),
+		decisionId: uuid()
+			.notNull()
+			.references(() => governanceDecision.id, { onDelete: "restrict" }),
 		createdByProfileId: uuid()
 			.notNull()
 			.references(() => profile.id, { onDelete: "restrict" }),
@@ -313,6 +315,7 @@ export const unitAccessRestriction = pgTable(
 			.on(table.realmId, table.unitId, table.permission)
 			.where(sql`${table.revokedAt} is null and ${table.subjectKind} = 'realm'`),
 		index("unit_access_restriction_created_by_idx").on(table.createdByProfileId),
+		index("unit_access_restriction_decision_idx").on(table.decisionId),
 		check(
 			"unit_access_restriction_subject_shape_check",
 			sql`(

@@ -49,8 +49,6 @@ export default {
 		},
 		currentRevisionContent:
 			"Le contenu de la révision actuelle ne peut pas être masqué. Publiez d’abord une révision assainie, puis protégez l’ancienne.",
-		reasonLabel: "Motif",
-		selectReason: "Sélectionner un motif",
 		atLeastOneField: "Sélectionnez au moins un élément à protéger.",
 		cancel: "Annuler",
 		save: "Enregistrer la visibilité",

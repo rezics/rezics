@@ -86,6 +86,7 @@ export default {
 	ZoneNavigationInUse: `Cette navigation d’${zoneTerms.inline} est encore utilisée par un document de blocs.`,
 	ZoneDocumentInvalid: `Le document de blocs ou de navigation de l’${zoneTerms.inline} n’est pas valide.`,
 	ZoneTimeRangeInvalid: `L’heure de fin de l’${zoneTerms.inline} doit être postérieure à son heure de début.`,
+	ZoneRuleRealmInvalid: `Le ${realmTerms.inline} sélectionné n’a aucune révision de règles actuelle contenant au moins une règle.`,
 	SoftwareNotFound: "Ce logiciel est introuvable.",
 	SystemRequirementNotFound: "Cette configuration requise est introuvable.",
 	PollOptionsDuplicated: "Les choix du sondage doivent être uniques.",
@@ -117,10 +118,11 @@ export default {
 		"Le périmètre de gouvernance sélectionné ne comporte aucune règle en vigueur.",
 	ReportRuleChanged: "La règle sélectionnée a changé. Sélectionnez-en une à nouveau avant l’envoi.",
 	ReportRuleSourceForbidden: `Les signalements ne peuvent citer que les règles du ${realmTerms.inline} actuel et les règles officielles.`,
-	ContentGovernanceRuleSourceForbidden:
-		"La règle sélectionnée ne relève pas de cette autorité de gouvernance des contenus.",
-	ContentGovernanceRuleChanged:
+	GovernanceRuleSourceForbidden: `Le ${realmTerms.inline} de règles sélectionné ne relève pas de cette autorité de gouvernance.`,
+	GovernanceRuleChanged:
 		"Une règle sélectionnée ne figure plus dans la version actuelle. Sélectionnez-la à nouveau.",
+	GovernanceReversalUnavailable:
+		"Cette décision de gouvernance a déjà été annulée ou ne correspond pas à la cible actuelle.",
 	EnforcementExpiryInvalid: "L’expiration de la mesure doit se situer dans le futur.",
 	EnforcementNotFound: "Cette mesure est introuvable.",
 	EnforcementAlreadyRevoked: "Cette mesure a déjà été révoquée.",

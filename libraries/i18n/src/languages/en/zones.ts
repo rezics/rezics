@@ -40,6 +40,10 @@ export default {
 	searchFailed: "Search is temporarily unavailable. Please try again later.",
 	untitledResult: "Untitled content",
 	contentList: "Content list",
+	ruleRealm: {
+		label: `Local Rule ${realmTerms.label}`,
+		description: `Select a ${realmTerms.label} whose current rules this ${zoneTerms.inline} may use for local governance. Official platform rules always remain available.`,
+	},
 	create: {
 		title: `Create ${zoneTerms.label}`,
 		description: `Choose the content scope and initial appearance for this ${zoneTerms.inline}. You can configure its pages and navigation after creation.`,

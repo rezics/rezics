@@ -6,6 +6,7 @@ import units from "./units";
 
 const { forms: entityTerms } = koTerminology.entity;
 const { forms: realmTerms } = koTerminology.realm;
+const { forms: zoneTerms } = koTerminology.zone;
 const { forms: postTerms } = koTerminology.post;
 
 export default {
@@ -110,7 +111,6 @@ export default {
 			"유닛이 일반 조회에 다시 표시됩니다. 삭제 전에 게시된 유닛은 검토 없이 다시 공개되지 않도록 보관 상태로 복원됩니다.",
 		softDeleteTitle: "이 유닛을 소프트 삭제할까요?",
 		softDeleteDescription: "유닛과 기록은 보존되지만 일반 제품 조회와 작업에서는 즉시 숨겨집니다.",
-		reason: "거버넌스 사유",
 		internalNote: "내부 메모(선택 사항)",
 		notePlaceholder: "작업 근거를 기록하세요. 보안 감사 로그에 저장됩니다.",
 		confirmationLabel: `확인을 위해 유닛 ${verbatimTerms.id.value} 입력`,
@@ -188,7 +188,6 @@ export default {
 		preflight: "사전 검사 실행",
 		irreversibleWarning:
 			"수락 후에는 되돌릴 수 없습니다. 원본은 영구 리디렉션이 되며 모든 활성 참조가 대상으로 수렴합니다.",
-		reason: "관리 사유",
 		internalNote: "내부 메모(선택 사항)",
 		notePlaceholder: "중복 근거, 확인한 출처, 이 대상을 정식 항목으로 선택한 이유를 기록하세요.",
 		confirmSource: `원본 유닛 ${verbatimTerms.id.value} 다시 입력`,
@@ -238,7 +237,6 @@ export default {
 		rejectTitle: "이 소유권 요청을 거부할까요?",
 		rejectDescription:
 			"유닛 소유권을 이전하지 않고 요청을 종료하며 요청자에게 검토 결과를 알립니다.",
-		reason: "거버넌스 사유",
 		internalNote: "내부 메모(선택 사항)",
 		notePlaceholder: "확인 자료와 판단 근거를 기록합니다. 보안 감사 기록에 저장됩니다.",
 		confirmationLabel: `확인하려면 요청 ${verbatimTerms.id.value} 입력`,
@@ -258,14 +256,6 @@ export default {
 		verified: "인증됨",
 		unverified: "인증되지 않음",
 		states: { active: "활성", suspended: "정지됨", closed: "폐쇄됨" },
-		reasons: {
-			security: "보안 위험",
-			policy_violation: "플랫폼 정책 위반",
-			compromised: "계정 침해 의심",
-			user_request: "사용자 요청",
-			legal: "법률 또는 규정 준수 요청",
-			other: "기타 사유",
-		},
 		empty: "현재 필터와 일치하는 사용자가 없습니다.",
 		loadingMore: "사용자를 더 불러오는 중…",
 		selectUser: "사용자 선택",
@@ -424,7 +414,6 @@ export default {
 		untitled: "제목 없는 유닛",
 		reports: "이 사건의 신고",
 		action: "거버넌스 작업",
-		reason: "거버넌스 사유",
 		internalNote: "내부 메모(선택)",
 		notePlaceholder: "판단 근거를 기록하세요. 메모 추가 작업에서는 필수입니다.",
 		submit: "거버넌스 작업 적용",
@@ -474,6 +463,7 @@ export default {
 		authorities: {
 			platform: "플랫폼",
 			realm: realmTerms.label,
+			zone: zoneTerms.label,
 			unit: "유닛",
 		},
 		empty: "현재 필터에 일치하는 감사 이벤트가 없습니다.",
@@ -493,7 +483,8 @@ export default {
 		scopedAuthority: insert("{{kind}} ({{id}})", { kind: String, id: String }),
 		target: "대상",
 		noTarget: "특정 대상 없음",
-		reasonCode: "사유 코드",
+		outcomeCode: "결과 코드",
+		governanceDecisionId: `거버넌스 결정 ${verbatimTerms.id.value}`,
 		requestId: `요청 ${verbatimTerms.id.value}`,
 		traceId: `추적 ${verbatimTerms.id.value}`,
 		rawDetails: "구조화된 세부 정보",

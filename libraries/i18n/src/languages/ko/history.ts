@@ -46,8 +46,6 @@ export default {
 		},
 		currentRevisionContent:
 			"현재 수정본의 내용은 숨길 수 없습니다. 문제가 없는 새 수정본을 먼저 게시한 뒤 이전 수정본을 보호하세요.",
-		reasonLabel: "사유",
-		selectReason: "사유 선택",
 		atLeastOneField: "보호할 항목을 하나 이상 선택하세요.",
 		cancel: "취소",
 		save: "공개 범위 저장",

@@ -24,7 +24,8 @@ import {
 	subjectAssociation,
 	accountEnforcementAction,
 	contentGovernanceAction,
-	contentGovernanceActionRule,
+	governanceDecision,
+	governanceDecisionRule,
 	contentReport,
 	contentReportReferral,
 	contentReportRule,
@@ -45,9 +46,9 @@ import {
 	recommendationMetricDaily,
 	recommendationSignalKind,
 	governancePostBinding,
-	governanceReasonCode,
+	GovernanceAuthorityKindValues,
+	GovernanceDecisionBasisKindValues,
 	GovernanceNoteRoleValues,
-	GovernanceReasonCodeValues,
 	CommunityOwnedUnitKindValues,
 	CreditAttributionRoleValues,
 	isCreditAttributionRoleForUnitKind,
@@ -560,9 +561,8 @@ describe("database schema contracts", () => {
 		expect(ContentGovernanceActionKindValues).not.toEqual(
 			expect.arrayContaining(["note", "warning", "revoke_enforcement"]),
 		);
-		expect(GovernanceReasonCodeValues).toEqual(
-			expect.arrayContaining(["content_policy", "realm_rules", "administrative"]),
-		);
+		expect(GovernanceAuthorityKindValues).toEqual(["platform", "realm", "zone", "unit"]);
+		expect(GovernanceDecisionBasisKindValues).toEqual(["rules", "reversal"]);
 		expect(GovernanceNoteRoleValues).toEqual(["evidence", "internal_note", "public_notice"]);
 		expect(GovernanceNoteSubjectKindValues).toEqual(
 			expect.arrayContaining([
@@ -608,8 +608,10 @@ describe("database schema contracts", () => {
 		);
 
 		const action = getTableConfig(contentGovernanceAction);
-		expect(governanceReasonCode.enumValues).toEqual(GovernanceReasonCodeValues);
-		expect(unitAccessRestriction.reasonCode.enumValues).toEqual(GovernanceReasonCodeValues);
+		expect(action.columns.map((column) => column.name)).toContain("decision_id");
+		expect(getTableConfig(unitAccessRestriction).columns.map(({ name }) => name)).toContain(
+			"decision_id",
+		);
 		expect(action.indexes.map((index) => index.config.name)).toContain(
 			"content_governance_action_actor_case_idempotency_key",
 		);
@@ -696,11 +698,36 @@ describe("database schema contracts", () => {
 				"content_review_case_report_counter_count_check",
 			]),
 		);
-		expect(getTableConfig(contentGovernanceActionRule).primaryKeys).toHaveLength(1);
+		const decision = getTableConfig(governanceDecision);
+		expect(decision.columns.map(({ name }) => name)).toEqual(
+			expect.arrayContaining([
+				"basis_kind",
+				"authority_kind",
+				"target_unit_id",
+				"reverses_decision_id",
+				"finalized",
+			]),
+		);
+		expect(decision.checks.map(({ name }) => name)).toEqual(
+			expect.arrayContaining([
+				"governance_decision_authority_check",
+				"governance_decision_basis_check",
+				"governance_decision_request_id_check",
+			]),
+		);
+		expect(getTableConfig(governanceDecisionRule).primaryKeys).toHaveLength(1);
 		expect(getTableConfig(accountEnforcementAction).columns.map(({ name }) => name)).toEqual(
 			expect.arrayContaining(["target_profile_id", "kind", "enforcement_kind"]),
 		);
-		expect(getTableConfig(auditEvent).columns.map((column) => column.name)).not.toContain("reason");
+		expect(getTableConfig(auditEvent).columns.map((column) => column.name)).toEqual(
+			expect.arrayContaining(["outcome_code", "governance_decision_id"]),
+		);
+		expect(getTableConfig(auditEvent).columns.map((column) => column.name)).not.toContain(
+			"reason_code",
+		);
+		expect(getTableConfig(auditEvent).checks.map(({ name }) => name)).toContain(
+			"audit_event_outcome_code_check",
+		);
 	});
 
 	it("requires Excerpt Posts to identify their source Unit", () => {

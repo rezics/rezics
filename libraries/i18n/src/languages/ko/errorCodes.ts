@@ -80,6 +80,7 @@ export default {
 	ZoneNavigationInUse: `이 ${zoneTerms.inline} 탐색은 여전히 블록 문서에서 사용 중입니다.`,
 	ZoneDocumentInvalid: `${zoneTerms.inline} 블록 또는 내비게이션 문서가 유효하지 않습니다.`,
 	ZoneTimeRangeInvalid: `${zoneTerms.inline} 종료 시간은 시작 시간 이후여야 합니다.`,
+	ZoneRuleRealmInvalid: `선택한 ${realmTerms.label}에 규칙이 하나 이상 포함된 현재 규칙 개정본이 없습니다.`,
 	SoftwareNotFound: "이 소프트웨어를 찾을 수 없습니다.",
 	SystemRequirementNotFound: "이 시스템 요구 사항을 찾을 수 없습니다.",
 	PollOptionsDuplicated: "투표 옵션은 고유해야 합니다.",
@@ -108,9 +109,10 @@ export default {
 	ReportRuleUnavailable: "선택한 거버넌스 범위에 현재 적용 가능한 규칙이 없습니다.",
 	ReportRuleChanged: "선택한 규칙이 변경되었습니다. 규칙을 다시 선택한 뒤 제출하세요.",
 	ReportRuleSourceForbidden: `신고에는 현재 ${realmTerms.label}과 공식 규칙만 인용할 수 있습니다.`,
-	ContentGovernanceRuleSourceForbidden:
-		"선택한 규칙은 이 콘텐츠 거버넌스 권한 범위에 속하지 않습니다.",
-	ContentGovernanceRuleChanged: "선택한 규칙이 현재 규칙 개정본에 없습니다. 다시 선택해 주세요.",
+	GovernanceRuleSourceForbidden: `선택한 규칙 ${realmTerms.label}은 이 거버넌스 권한 범위에 속하지 않습니다.`,
+	GovernanceRuleChanged: "선택한 규칙이 현재 규칙 개정본에 없습니다. 다시 선택해 주세요.",
+	GovernanceReversalUnavailable:
+		"이 거버넌스 결정은 이미 취소되었거나 현재 대상과 일치하지 않습니다.",
 	EnforcementExpiryInvalid: "집행 만료일은 미래여야 합니다.",
 	EnforcementNotFound: "이 집행을 찾을 수 없습니다.",
 	EnforcementAlreadyRevoked: "이 집행은 이미 취소되었습니다.",

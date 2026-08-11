@@ -31,6 +31,7 @@ import {
 	unitSlugAddress,
 } from "../../database/schema";
 import { firstUnitLocalizationTitle } from "../../units/localization";
+import { createGovernanceDecision } from "../../governance/decision-service";
 import { UnitNotFound } from "../../units/errors";
 import { toApiErrorResponse } from "../schema/response";
 import { RealmNotFound } from "../realms/errors";
@@ -181,6 +182,7 @@ async function recordAccessAudit(
 		readonly actorProfileId: string;
 		readonly action: string;
 		readonly unitId: string;
+		readonly governanceDecisionId?: string;
 		readonly metadata?: Record<string, unknown>;
 	},
 ) {
@@ -190,6 +192,7 @@ async function recordAccessAudit(
 		actor: { kind: "profile", profileId: input.actorProfileId },
 		authority: { kind: "unit", id: input.unitId },
 		action: input.action,
+		governanceDecisionId: input.governanceDecisionId,
 		target: { kind: "unit", id: input.unitId },
 		details: input.metadata,
 	});
@@ -522,6 +525,46 @@ export default new Elysia({ prefix: "/unit" })
 				const grantSet = new Set(requestedGrants);
 				if (requestedRestrictions.some((permission) => grantSet.has(permission)))
 					throw new UnitAccessConfigurationInvalid();
+				const [currentRestriction] =
+					body.subject.kind === "authenticated"
+						? []
+						: await tx
+								.select({ id: unitAccessRestriction.id })
+								.from(unitAccessRestriction)
+								.where(
+									and(
+										eq(unitAccessRestriction.unitId, params.unitId),
+										subjectRestrictionCondition(body.subject, body.scope),
+										isNull(unitAccessRestriction.revokedAt),
+										or(
+											isNull(unitAccessRestriction.expiresAt),
+											sql`${unitAccessRestriction.expiresAt} > now()`,
+										),
+									),
+								)
+								.limit(1);
+				const restrictionPolicyTouched = Boolean(
+					requestedRestrictions.length || currentRestriction,
+				);
+				const decision = restrictionPolicyTouched
+					? await createGovernanceDecision(tx, {
+							action: currentRestriction
+								? requestedRestrictions.length
+									? "unit.access.replace_restrictions"
+									: "unit.access.clear_restrictions"
+								: "unit.access.restrict",
+							actorProfileId: profile.unitId,
+							authority: { kind: "unit", unitId: params.unitId },
+							targetUnitId: params.unitId,
+							subject:
+								body.subject.kind === "profile"
+									? { kind: "unit_access_profile", id: body.subject.profileId }
+									: body.subject.kind === "realm"
+										? { kind: "unit_access_realm", id: body.subject.realmId }
+										: { kind: "unit_access_authenticated", id: params.unitId },
+							basis: { kind: "rules", rules: "rules" in body ? (body.rules ?? []) : [] },
+						})
+					: undefined;
 
 				if (body.subject.kind === "profile") {
 					const [ownership] = await tx
@@ -594,7 +637,7 @@ export default new Elysia({ prefix: "/unit" })
 								realmRelation: body.subject.kind === "realm" ? body.subject.relation : null,
 								permission,
 								scope: body.scope,
-								reasonCode: body.reasonCode ?? "administrative",
+								decisionId: decision!.id,
 								createdByProfileId: profile.unitId,
 								expiresAt,
 							})),
@@ -605,6 +648,7 @@ export default new Elysia({ prefix: "/unit" })
 					actorProfileId: profile.unitId,
 					action: "unit.access.replace",
 					unitId: params.unitId,
+					governanceDecisionId: decision?.id,
 					metadata: {
 						subject: body.subject,
 						grants: requestedGrants,
@@ -625,6 +669,7 @@ export default new Elysia({ prefix: "/unit" })
 				[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
 					"UnitAccessExpiryInvalid",
 					"UnitAccessConfigurationInvalid",
+					"GovernanceRuleSourceForbidden",
 				]),
 				[StatusCodes.FORBIDDEN]: toApiErrorResponse([
 					"UnitPermissionForbidden",
@@ -636,7 +681,10 @@ export default new Elysia({ prefix: "/unit" })
 					"ProfileNotFound",
 					"RealmNotFound",
 				]),
-				[StatusCodes.CONFLICT]: toApiErrorResponse(["UnitOwnerRestrictionForbidden"]),
+				[StatusCodes.CONFLICT]: toApiErrorResponse([
+					"UnitOwnerRestrictionForbidden",
+					"GovernanceRuleChanged",
+				]),
 			},
 			detail: { summary: "Replace Unit subject access", tags: ["Governance"] },
 		},
