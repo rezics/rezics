@@ -32,14 +32,16 @@ includes:
 
 tasks:
     format:
-        desc: Format supported source files with Biome.
+        desc: Format source files with their owning formatters.
         cmds:
             - yarn exec biome format --write .
+            - task: apps-markdown:rust:format
 
     format:check:
-        desc: Check supported source formatting with Biome.
+        desc: Check source formatting with each owning formatter.
         cmds:
             - yarn exec biome format .
+            - task: apps-markdown:rust:format:check
 
     counts:check:
         desc: Verify the online exact-count policy.

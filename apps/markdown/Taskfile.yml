@@ -28,6 +28,16 @@ tasks:
             - yarn run typecheck
             - yarn run rust:check
 
+    rust:format:
+        desc: Format the Markdown desktop Rust sources with rustfmt.
+        cmds:
+            - yarn run rust:format
+
+    rust:format:check:
+        desc: Check the Markdown desktop Rust sources with rustfmt.
+        cmds:
+            - yarn run rust:format:check
+
     build:web:
         desc: Build the standalone Web editor service.
         cmds:

@@ -15,6 +15,8 @@
 		"typecheck": "yarn workspace @rezics/markdown-editor-app typecheck && yarn workspace @rezics/markdown-editor-web typecheck",
 		"test": "yarn workspace @rezics/markdown-editor-app test && yarn workspace @rezics/markdown-editor-web test",
 		"rust:check": "cargo check --manifest-path src-tauri/Cargo.toml",
+		"rust:format": "cargo fmt --manifest-path src-tauri/Cargo.toml --all",
+		"rust:format:check": "cargo fmt --manifest-path src-tauri/Cargo.toml --all -- --check",
 		"rust:test": "cargo test --manifest-path src-tauri/Cargo.toml"
 	},
 	"dependencies": {

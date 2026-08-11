@@ -23,7 +23,6 @@
 		"enabled": true,
 		"formatWithErrors": false,
 		"indentStyle": "tab",
-		"indentWidth": 4,
 		"lineEnding": "lf",
 		"lineWidth": 100
 	},
