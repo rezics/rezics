@@ -5,11 +5,12 @@ import { DomainSearchBody, GroupedSearchBody } from "./schema";
 
 describe("Search presentation localization", () => {
 	it.each([DomainSearchBody, GroupedSearchBody])(
-		"requires a non-empty localization priority",
+		"accepts omitted or empty localization hints",
 		(schema) => {
 			expect(Check(schema, { localizationLanguages: ["zh", "en"] })).toBe(true);
-			expect(Check(schema, {})).toBe(false);
-			expect(Check(schema, { localizationLanguages: [] })).toBe(false);
+			expect(Check(schema, {})).toBe(true);
+			expect(Check(schema, { localizationLanguages: [] })).toBe(true);
+			expect(Check(schema, { localizationLanguages: ["en", "en"] })).toBe(false);
 		},
 	);
 

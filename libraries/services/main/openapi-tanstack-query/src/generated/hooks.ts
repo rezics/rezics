@@ -4947,10 +4947,10 @@ export function useGetApiRecommendationsUnits<
 	{
 		query,
 	}: {
-		query:
+		query?:
 			| GetApiRecommendationsUnitsOptions["query"]
 			| (() => GetApiRecommendationsUnitsOptions["query"]);
-	},
+	} = {},
 	options: {
 		query?: Partial<
 			QueryObserverOptions<
@@ -5055,7 +5055,7 @@ export function useGetApiRecommendationsPostsByPostId<
 		path:
 			| GetApiRecommendationsPostsByPostIdOptions["path"]
 			| (() => GetApiRecommendationsPostsByPostIdOptions["path"]);
-		query:
+		query?:
 			| GetApiRecommendationsPostsByPostIdOptions["query"]
 			| (() => GetApiRecommendationsPostsByPostIdOptions["query"]);
 	},
@@ -21116,7 +21116,7 @@ export function useGetApiUnitsByIdByUnitIdRealmPublications<
 		path:
 			| GetApiUnitsByIdByUnitIdRealmPublicationsOptions["path"]
 			| (() => GetApiUnitsByIdByUnitIdRealmPublicationsOptions["path"]);
-		query:
+		query?:
 			| GetApiUnitsByIdByUnitIdRealmPublicationsOptions["query"]
 			| (() => GetApiUnitsByIdByUnitIdRealmPublicationsOptions["query"]);
 	},
@@ -21560,7 +21560,7 @@ export function useGetApiUnitsByIdByUnitIdSeriesMemberships<
 		path:
 			| GetApiUnitsByIdByUnitIdSeriesMembershipsOptions["path"]
 			| (() => GetApiUnitsByIdByUnitIdSeriesMembershipsOptions["path"]);
-		query:
+		query?:
 			| GetApiUnitsByIdByUnitIdSeriesMembershipsOptions["query"]
 			| (() => GetApiUnitsByIdByUnitIdSeriesMembershipsOptions["query"]);
 	},
@@ -36895,7 +36895,7 @@ export function useGetApiRealmsByRealmIdPins<
 		path:
 			| GetApiRealmsByRealmIdPinsOptions["path"]
 			| (() => GetApiRealmsByRealmIdPinsOptions["path"]);
-		query:
+		query?:
 			| GetApiRealmsByRealmIdPinsOptions["query"]
 			| (() => GetApiRealmsByRealmIdPinsOptions["query"]);
 	},

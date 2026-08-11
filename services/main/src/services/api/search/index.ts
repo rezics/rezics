@@ -58,7 +58,7 @@ import { DockNotFound } from "../docks/errors";
 import { hydrateFeedItems } from "../feed";
 import { resolveFeedPageContinuation } from "../feed/continuation";
 import { FeedContentKindValues } from "../feed/schema";
-import { DateTime, LocalizationLanguagePriority, Uuid } from "../schema";
+import { DateTime, LocalizationLanguageHints, Uuid } from "../schema";
 import { findFeedBlock, findSearchFeatureSource } from "./block-source";
 import { DomainSearchBody, DomainSearchParams, GroupedSearchBody } from "./schema";
 import {
@@ -98,7 +98,7 @@ const SearchFeatureExecutionBody = t.Object(
 	{
 		...SearchFeatureInput.properties,
 		filterDocument: Type.Ref("FilterDocument"),
-		localizationLanguages: LocalizationLanguagePriority,
+		localizationLanguages: t.Optional(LocalizationLanguageHints),
 	},
 	{ additionalProperties: false },
 );
@@ -113,7 +113,7 @@ const ZoneFilterParams = t.Object({ zoneId: Uuid });
 const ZoneFilterExecutionBody = t.Object(
 	{
 		...t.Pick(SearchFeatureInput, ["injections", "state"]).properties,
-		localizationLanguages: LocalizationLanguagePriority,
+		localizationLanguages: t.Optional(LocalizationLanguageHints),
 	},
 	{ additionalProperties: false },
 );
@@ -201,6 +201,7 @@ async function resolveZoneBlockExecution(input: ZoneBlockExecutionInput) {
 			injections: request.injections,
 			state: request.state,
 		},
+		localizationLanguages: request.localizationLanguages ?? [],
 		request,
 	};
 }
@@ -214,7 +215,7 @@ async function executeZoneBlock(
 	return executeSearchFeatureInput(
 		resolved.featureInput,
 		input.execution,
-		resolved.request.localizationLanguages,
+		resolved.localizationLanguages,
 		input.profileId,
 		input.hasDevelopmentPreviewAccess,
 	);
@@ -236,13 +237,13 @@ async function executeZoneFeedBlock(input: {
 	const result = await executeSearchFeatureFeedInput(
 		resolved.featureInput,
 		{ sortProfile: "feed", pageBudget: "global" },
-		resolved.request.localizationLanguages,
+		resolved.localizationLanguages,
 		input.profileId,
 		input.hasDevelopmentPreviewAccess,
 	);
 	return presentSearchResultAsFeed(
 		result,
-		resolved.request.localizationLanguages,
+		resolved.localizationLanguages,
 		resolved.request.state,
 		input.profileId,
 	);
@@ -339,7 +340,8 @@ export default new Elysia({ prefix: "/search" })
 				const hasDevelopmentPreviewAccess = await identity.authorization.platform.hasCapability(
 					DevelopmentPreviewCapability,
 				);
-				const { localizationLanguages, ...featureInput } = body;
+				const { localizationLanguages: requestedLanguages, ...featureInput } = body;
+				const localizationLanguages = requestedLanguages ?? [];
 				return await executeSearchFeatureInput(
 					featureInput,
 					{ sortProfile: "search", pageBudget: "per-category" },
@@ -371,7 +373,8 @@ export default new Elysia({ prefix: "/search" })
 				const hasDevelopmentPreviewAccess = await identity.authorization.platform.hasCapability(
 					DevelopmentPreviewCapability,
 				);
-				const { surface, localizationLanguages, ...featureInput } = body;
+				const { surface, localizationLanguages: requestedLanguages, ...featureInput } = body;
+				const localizationLanguages = requestedLanguages ?? [];
 				const result = await executeSearchFeatureFeedInput(
 					featureInput,
 					{ sortProfile: surface, pageBudget: "global" },
@@ -450,7 +453,7 @@ export default new Elysia({ prefix: "/search" })
 					state: body.state,
 				},
 				{ sortProfile: "search", pageBudget: "per-category" },
-				body.localizationLanguages,
+				body.localizationLanguages ?? [],
 				identity.authorization.profileId,
 				hasDevelopmentPreviewAccess,
 			);
@@ -479,6 +482,7 @@ export default new Elysia({ prefix: "/search" })
 				const hasDevelopmentPreviewAccess = await identity.authorization.platform.hasCapability(
 					DevelopmentPreviewCapability,
 				);
+				const localizationLanguages = body.localizationLanguages ?? [];
 				const result = await executeSearchFeatureFeedInput(
 					{
 						filterDocument: await getZoneFilterDocument(params.zoneId),
@@ -487,13 +491,13 @@ export default new Elysia({ prefix: "/search" })
 						state: body.state,
 					},
 					{ sortProfile: body.surface, pageBudget: "global" },
-					body.localizationLanguages,
+					localizationLanguages,
 					identity.authorization.profileId,
 					hasDevelopmentPreviewAccess,
 				);
 				return presentSearchResultAsFeed(
 					result,
-					body.localizationLanguages,
+					localizationLanguages,
 					body.state,
 					identity.authorization.profileId,
 				);
@@ -727,6 +731,7 @@ export default new Elysia({ prefix: "/search" })
 					profileId: identity.authorization.profileId,
 					contentRatingPolicy: contentRatingPolicyFromAllowlist(viewer.contentRatings),
 					indexes,
+					localizationLanguages: body.localizationLanguages ?? [],
 				});
 			} catch (error) {
 				if (error instanceof InvalidSearch || error instanceof SearchUnavailable) throw error;

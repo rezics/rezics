@@ -144,10 +144,10 @@ describe("collection update schema", () => {
 });
 
 describe("collection localization query", () => {
-	it("accepts a unique, non-empty ordered language list", () => {
+	it("accepts omitted, empty, or unique ordered language hints", () => {
 		expect(Check(CollectionDetailQuery, {})).toBe(true);
 		expect(Check(CollectionDetailQuery, { localizationLanguages: ["en", "zh"] })).toBe(true);
-		expect(Check(CollectionDetailQuery, { localizationLanguages: [] })).toBe(false);
+		expect(Check(CollectionDetailQuery, { localizationLanguages: [] })).toBe(true);
 		expect(Check(CollectionDetailQuery, { localizationLanguages: ["zh", "zh"] })).toBe(false);
 		expect(Check(CollectionDetailQuery, { unknown: true })).toBe(false);
 	});

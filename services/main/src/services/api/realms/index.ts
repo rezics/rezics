@@ -1841,7 +1841,7 @@ export default new Elysia({ prefix: "/realms" })
 				viewer,
 				{
 					content: FeedContentKindValues,
-					localizationLanguages: query.localizationLanguages,
+					localizationLanguages: query.localizationLanguages ?? [],
 				},
 				new Date(),
 				{ kind: "contextual" },

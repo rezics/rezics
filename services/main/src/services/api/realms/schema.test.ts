@@ -60,13 +60,13 @@ describe("Realm member API contract", () => {
 
 	it("uses the shared localization fallback query for Realm rules", () => {
 		expect(Check(RealmRulesQuery, { localizationLanguages: ["en", "zh"] })).toBe(true);
-		expect(Check(RealmRulesQuery, { localizationLanguages: [] })).toBe(false);
+		expect(Check(RealmRulesQuery, { localizationLanguages: [] })).toBe(true);
 	});
 
-	it("requires localization priority when presenting Realm pins", () => {
+	it("allows Realm pins to use Unit-order fallback", () => {
 		expect(Check(RealmPinsQuery, { localizationLanguages: ["zh", "en"] })).toBe(true);
-		expect(Check(RealmPinsQuery, {})).toBe(false);
-		expect(Check(RealmPinsQuery, { localizationLanguages: [] })).toBe(false);
+		expect(Check(RealmPinsQuery, {})).toBe(true);
+		expect(Check(RealmPinsQuery, { localizationLanguages: [] })).toBe(true);
 	});
 
 	it("keeps fractional Realm pin positions out of the public mutation contract", () => {

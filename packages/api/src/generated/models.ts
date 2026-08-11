@@ -20101,9 +20101,9 @@ export type GetApiRecommendationsUnitsQuery = {
 	 */
 	limit?: string | number;
 	/**
-	 * @type array
+	 * @type array | undefined
 	 */
-	localizationLanguages: GetApiRecommendationsUnitsLocalizationLanguagesEnum[];
+	localizationLanguages?: GetApiRecommendationsUnitsLocalizationLanguagesEnum[];
 };
 
 export const GetApiRecommendationsUnitsStatus200ItemsTypeEnum = {
@@ -20310,7 +20310,7 @@ export type GetApiRecommendationsUnitsStatus500 = InternalError;
 export type GetApiRecommendationsUnitsOptions = {
 	body?: never;
 	path?: never;
-	query: GetApiRecommendationsUnitsQuery;
+	query?: GetApiRecommendationsUnitsQuery;
 	headers?: never;
 };
 
@@ -20378,9 +20378,9 @@ export type GetApiRecommendationsPostsByPostIdQuery = {
 	 */
 	limit?: string | number;
 	/**
-	 * @type array
+	 * @type array | undefined
 	 */
-	localizationLanguages: GetApiRecommendationsPostsByPostIdLocalizationLanguagesEnum[];
+	localizationLanguages?: GetApiRecommendationsPostsByPostIdLocalizationLanguagesEnum[];
 };
 
 export const GetApiRecommendationsPostsByPostIdStatus200ItemsLanguage = {
@@ -22851,7 +22851,7 @@ export type GetApiRecommendationsPostsByPostIdStatus500 = InternalError;
 export type GetApiRecommendationsPostsByPostIdOptions = {
 	body?: never;
 	path: GetApiRecommendationsPostsByPostIdPath;
-	query: GetApiRecommendationsPostsByPostIdQuery;
+	query?: GetApiRecommendationsPostsByPostIdQuery;
 	headers?: never;
 };
 
@@ -71758,9 +71758,9 @@ export type PostApiUnitsPresentationsBody = {
 	 */
 	ids: string[];
 	/**
-	 * @type array
+	 * @type array | undefined
 	 */
-	localizationLanguages: PostApiUnitsPresentationsRequestLocalizationLanguagesEnum[];
+	localizationLanguages?: PostApiUnitsPresentationsRequestLocalizationLanguagesEnum[];
 };
 
 /**
@@ -71853,9 +71853,9 @@ export type GetApiUnitsByIdByUnitIdRealmPublicationsQuery = {
 	 */
 	realmStatus?: GetApiUnitsByIdByUnitIdRealmPublicationsRealmStatus;
 	/**
-	 * @type array
+	 * @type array | undefined
 	 */
-	localizationLanguages: GetApiUnitsByIdByUnitIdRealmPublicationsLocalizationLanguagesEnum[];
+	localizationLanguages?: GetApiUnitsByIdByUnitIdRealmPublicationsLocalizationLanguagesEnum[];
 	/**
 	 * @minLength 1
 	 * @maxLength 1024
@@ -72133,7 +72133,7 @@ export type GetApiUnitsByIdByUnitIdRealmPublicationsStatus500 = InternalError;
 export type GetApiUnitsByIdByUnitIdRealmPublicationsOptions = {
 	body?: never;
 	path: GetApiUnitsByIdByUnitIdRealmPublicationsPath;
-	query: GetApiUnitsByIdByUnitIdRealmPublicationsQuery;
+	query?: GetApiUnitsByIdByUnitIdRealmPublicationsQuery;
 	headers?: never;
 };
 
@@ -72823,9 +72823,9 @@ export type GetApiUnitsByIdByUnitIdSeriesMembershipsLocalizationLanguagesEnum =
  */
 export type GetApiUnitsByIdByUnitIdSeriesMembershipsQuery = {
 	/**
-	 * @type array
+	 * @type array | undefined
 	 */
-	localizationLanguages: GetApiUnitsByIdByUnitIdSeriesMembershipsLocalizationLanguagesEnum[];
+	localizationLanguages?: GetApiUnitsByIdByUnitIdSeriesMembershipsLocalizationLanguagesEnum[];
 };
 
 export const GetApiUnitsByIdByUnitIdSeriesMembershipsStatus200ItemsSeriesLanguageEnum = {
@@ -72954,7 +72954,7 @@ export type GetApiUnitsByIdByUnitIdSeriesMembershipsStatus500 = InternalError;
 export type GetApiUnitsByIdByUnitIdSeriesMembershipsOptions = {
 	body?: never;
 	path: GetApiUnitsByIdByUnitIdSeriesMembershipsPath;
-	query: GetApiUnitsByIdByUnitIdSeriesMembershipsQuery;
+	query?: GetApiUnitsByIdByUnitIdSeriesMembershipsQuery;
 	headers?: never;
 };
 
@@ -134268,9 +134268,9 @@ export type GetApiRealmsByRealmIdPinsLocalizationLanguagesEnum =
  */
 export type GetApiRealmsByRealmIdPinsQuery = {
 	/**
-	 * @type array
+	 * @type array | undefined
 	 */
-	localizationLanguages: GetApiRealmsByRealmIdPinsLocalizationLanguagesEnum[];
+	localizationLanguages?: GetApiRealmsByRealmIdPinsLocalizationLanguagesEnum[];
 };
 
 export const GetApiRealmsByRealmIdPinsStatus200ItemsKindEnum = {
@@ -137286,7 +137286,7 @@ export type GetApiRealmsByRealmIdPinsStatus500 = InternalError;
 export type GetApiRealmsByRealmIdPinsOptions = {
 	body?: never;
 	path: GetApiRealmsByRealmIdPinsPath;
-	query: GetApiRealmsByRealmIdPinsQuery;
+	query?: GetApiRealmsByRealmIdPinsQuery;
 	headers?: never;
 };
 
@@ -145396,9 +145396,9 @@ export type PostApiSearchFilterExecuteBody = {
 			  };
 	};
 	/**
-	 * @type array
+	 * @type array | undefined
 	 */
-	localizationLanguages: PostApiSearchFilterExecuteRequestLocalizationLanguagesEnum[];
+	localizationLanguages?: PostApiSearchFilterExecuteRequestLocalizationLanguagesEnum[];
 };
 
 /**
@@ -149404,9 +149404,9 @@ export type PostApiSearchFilterFeedBody = {
 			  };
 	};
 	/**
-	 * @type array
+	 * @type array | undefined
 	 */
-	localizationLanguages: PostApiSearchFilterFeedRequestLocalizationLanguagesEnum[];
+	localizationLanguages?: PostApiSearchFilterFeedRequestLocalizationLanguagesEnum[];
 	/**
 	 * @type string
 	 */
@@ -150829,9 +150829,9 @@ export type PostApiSearchZonesByZoneIdFilterExecuteBody = {
 			  };
 	};
 	/**
-	 * @type array
+	 * @type array | undefined
 	 */
-	localizationLanguages: PostApiSearchZonesByZoneIdFilterExecuteRequestLocalizationLanguagesEnum[];
+	localizationLanguages?: PostApiSearchZonesByZoneIdFilterExecuteRequestLocalizationLanguagesEnum[];
 };
 
 /**
@@ -154826,9 +154826,9 @@ export type PostApiSearchZonesByZoneIdFilterFeedBody = {
 			  };
 	};
 	/**
-	 * @type array
+	 * @type array | undefined
 	 */
-	localizationLanguages: PostApiSearchZonesByZoneIdFilterFeedRequestLocalizationLanguagesEnum[];
+	localizationLanguages?: PostApiSearchZonesByZoneIdFilterFeedRequestLocalizationLanguagesEnum[];
 	/**
 	 * @type string
 	 */
@@ -156197,9 +156197,9 @@ export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteBody = {
 			  };
 	};
 	/**
-	 * @type array
+	 * @type array | undefined
 	 */
-	localizationLanguages: PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteRequestLocalizationLanguagesEnum[];
+	localizationLanguages?: PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteRequestLocalizationLanguagesEnum[];
 };
 
 /**
@@ -157576,9 +157576,9 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteBody =
 			  };
 	};
 	/**
-	 * @type array
+	 * @type array | undefined
 	 */
-	localizationLanguages: PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteRequestLocalizationLanguagesEnum[];
+	localizationLanguages?: PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteRequestLocalizationLanguagesEnum[];
 };
 
 /**
@@ -161633,9 +161633,9 @@ export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteBody = {
 			  };
 	};
 	/**
-	 * @type array
+	 * @type array | undefined
 	 */
-	localizationLanguages: PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteRequestLocalizationLanguagesEnum[];
+	localizationLanguages?: PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteRequestLocalizationLanguagesEnum[];
 	surface:
 		| {
 				/**
@@ -162169,9 +162169,9 @@ export type PostApiSearchBody = {
 	 */
 	indexes?: PostApiSearchRequestIndexesEnum[];
 	/**
-	 * @type array
+	 * @type array | undefined
 	 */
-	localizationLanguages: PostApiSearchRequestLocalizationLanguagesEnum[];
+	localizationLanguages?: PostApiSearchRequestLocalizationLanguagesEnum[];
 	/**
 	 * @type array | undefined
 	 */
@@ -171232,9 +171232,9 @@ export type PostApiSearchByIndexBody = {
 	 */
 	limit?: string | number;
 	/**
-	 * @type array
+	 * @type array | undefined
 	 */
-	localizationLanguages: PostApiSearchByIndexRequestLocalizationLanguagesEnum[];
+	localizationLanguages?: PostApiSearchByIndexRequestLocalizationLanguagesEnum[];
 	/**
 	 * @type array | undefined
 	 */

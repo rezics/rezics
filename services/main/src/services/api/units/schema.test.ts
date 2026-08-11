@@ -37,7 +37,7 @@ const ownedMainUnit = {
 } as const;
 
 describe("Unit presentation localization", () => {
-	it("requires an ordered, non-empty localization priority", () => {
+	it("accepts omitted or empty localization hints", () => {
 		const id = "019b0000-0000-7000-8000-000000000001";
 		expect(
 			Check(ResolveUnitPresentationsBody, {
@@ -45,22 +45,29 @@ describe("Unit presentation localization", () => {
 				localizationLanguages: ["zh", "en"],
 			}),
 		).toBe(true);
-		expect(Check(ResolveUnitPresentationsBody, { ids: [id] })).toBe(false);
+		expect(Check(ResolveUnitPresentationsBody, { ids: [id] })).toBe(true);
 		expect(
 			Check(ResolveUnitPresentationsBody, {
 				ids: [id],
 				localizationLanguages: [],
 			}),
+		).toBe(true);
+		expect(
+			Check(ResolveUnitPresentationsBody, {
+				ids: [id],
+				localizationLanguages: ["en", "en"],
+			}),
 		).toBe(false);
 	});
 
-	it("requires localization priority for Series membership cards", () => {
+	it("allows Series membership cards to use Unit-order fallback", () => {
 		expect(
 			Check(UnitSeriesMembershipQuery, {
 				localizationLanguages: ["zh", "en"],
 			}),
 		).toBe(true);
-		expect(Check(UnitSeriesMembershipQuery, {})).toBe(false);
+		expect(Check(UnitSeriesMembershipQuery, {})).toBe(true);
+		expect(Check(UnitSeriesMembershipQuery, { localizationLanguages: [] })).toBe(true);
 	});
 });
 

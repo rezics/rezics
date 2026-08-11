@@ -4,7 +4,7 @@ import { PublicationLicenseIds } from "@rezics/license";
 
 import { SearchCategories, SearchSorts } from "../../search/schema";
 import { ContentRatingValues } from "../../database/schema/contract-values";
-import { ContentLanguage, LocalizationLanguagePriority, Uuid } from "../schema";
+import { ContentLanguage, LocalizationLanguageHints, Uuid } from "../schema";
 
 const SearchCategory = t.Union(SearchCategories.map((category) => t.Literal(category)));
 
@@ -23,7 +23,7 @@ export const DomainSearchBody = t.Object(
 		query: t.Optional(t.String({ maxLength: 500, default: "" })),
 		cursor: t.Optional(SearchContinuationToken),
 		limit: t.Optional(t.Integer({ minimum: 1, maximum: 50, default: 20 })),
-		localizationLanguages: LocalizationLanguagePriority,
+		localizationLanguages: t.Optional(LocalizationLanguageHints),
 		Languages: t.Optional(SearchLanguageList),
 		kinds: t.Optional(SearchStringList),
 		contentRatings: t.Optional(SearchContentRatingList),
@@ -52,7 +52,7 @@ export const GroupedSearchBody = t.Object(
 	{
 		query: t.Optional(t.String({ maxLength: 500, default: "" })),
 		indexes: t.Optional(t.Array(SearchCategory, { minItems: 1, maxItems: 10 })),
-		localizationLanguages: LocalizationLanguagePriority,
+		localizationLanguages: t.Optional(LocalizationLanguageHints),
 		Languages: t.Optional(SearchLanguageList),
 		limitPerIndex: t.Optional(t.Integer({ minimum: 1, maximum: 20, default: 5 })),
 	},

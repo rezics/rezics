@@ -32844,9 +32844,8 @@
 					{
 						"name": "localizationLanguages",
 						"in": "query",
-						"required": true,
+						"required": false,
 						"schema": {
-							"minItems": 1,
 							"maxItems": 7,
 							"uniqueItems": true,
 							"type": "array",
@@ -33117,9 +33116,8 @@
 					{
 						"name": "localizationLanguages",
 						"in": "query",
-						"required": true,
+						"required": false,
 						"schema": {
-							"minItems": 1,
 							"maxItems": 7,
 							"uniqueItems": true,
 							"type": "array",
@@ -52277,7 +52275,6 @@
 										]
 									},
 									"localizationLanguages": {
-										"minItems": 1,
 										"maxItems": 7,
 										"uniqueItems": true,
 										"type": "array",
@@ -91367,7 +91364,7 @@
 							"schema": {
 								"additionalProperties": false,
 								"type": "object",
-								"required": ["ids", "localizationLanguages"],
+								"required": ["ids"],
 								"properties": {
 									"ids": {
 										"minItems": 1,
@@ -91377,7 +91374,6 @@
 										"items": { "format": "uuid", "type": "string" }
 									},
 									"localizationLanguages": {
-										"minItems": 1,
 										"maxItems": 7,
 										"uniqueItems": true,
 										"type": "array",
@@ -91573,9 +91569,8 @@
 					{
 						"name": "localizationLanguages",
 						"in": "query",
-						"required": true,
+						"required": false,
 						"schema": {
-							"minItems": 1,
 							"maxItems": 7,
 							"uniqueItems": true,
 							"type": "array",
@@ -92338,9 +92333,8 @@
 					{
 						"name": "localizationLanguages",
 						"in": "query",
-						"required": true,
+						"required": false,
 						"schema": {
-							"minItems": 1,
 							"maxItems": 7,
 							"uniqueItems": true,
 							"type": "array",
@@ -127397,7 +127391,6 @@
 										}
 									},
 									"localizationLanguages": {
-										"minItems": 1,
 										"maxItems": 7,
 										"uniqueItems": true,
 										"type": "array",
@@ -155688,9 +155681,8 @@
 					{
 						"name": "localizationLanguages",
 						"in": "query",
-						"required": true,
+						"required": false,
 						"schema": {
-							"minItems": 1,
 							"maxItems": 7,
 							"uniqueItems": true,
 							"type": "array",
@@ -166353,13 +166345,7 @@
 							"schema": {
 								"additionalProperties": false,
 								"type": "object",
-								"required": [
-									"filterDocument",
-									"contexts",
-									"injections",
-									"state",
-									"localizationLanguages"
-								],
+								"required": ["filterDocument", "contexts", "injections", "state"],
 								"properties": {
 									"filterDocument": { "$ref": "#/components/schemas/FilterDocument" },
 									"contexts": {
@@ -167474,7 +167460,6 @@
 										}
 									},
 									"localizationLanguages": {
-										"minItems": 1,
 										"maxItems": 7,
 										"uniqueItems": true,
 										"type": "array",
@@ -167876,14 +167861,7 @@
 							"schema": {
 								"additionalProperties": false,
 								"type": "object",
-								"required": [
-									"filterDocument",
-									"contexts",
-									"injections",
-									"state",
-									"localizationLanguages",
-									"surface"
-								],
+								"required": ["filterDocument", "contexts", "injections", "state", "surface"],
 								"properties": {
 									"filterDocument": { "$ref": "#/components/schemas/FilterDocument" },
 									"contexts": {
@@ -168998,7 +168976,6 @@
 										}
 									},
 									"localizationLanguages": {
-										"minItems": 1,
 										"maxItems": 7,
 										"uniqueItems": true,
 										"type": "array",
@@ -173731,7 +173708,7 @@
 							"schema": {
 								"additionalProperties": false,
 								"type": "object",
-								"required": ["injections", "state", "localizationLanguages"],
+								"required": ["injections", "state"],
 								"properties": {
 									"injections": {
 										"maxItems": 50,
@@ -174787,7 +174764,6 @@
 										}
 									},
 									"localizationLanguages": {
-										"minItems": 1,
 										"maxItems": 7,
 										"uniqueItems": true,
 										"type": "array",
@@ -175224,7 +175200,7 @@
 							"schema": {
 								"additionalProperties": false,
 								"type": "object",
-								"required": ["injections", "state", "localizationLanguages", "surface"],
+								"required": ["injections", "state", "surface"],
 								"properties": {
 									"injections": {
 										"maxItems": 50,
@@ -176280,7 +176256,6 @@
 										}
 									},
 									"localizationLanguages": {
-										"minItems": 1,
 										"maxItems": 7,
 										"uniqueItems": true,
 										"type": "array",
@@ -180953,7 +180928,7 @@
 							"schema": {
 								"additionalProperties": false,
 								"type": "object",
-								"required": ["injections", "state", "localizationLanguages"],
+								"required": ["injections", "state"],
 								"properties": {
 									"injections": {
 										"maxItems": 50,
@@ -182009,7 +181984,6 @@
 										}
 									},
 									"localizationLanguages": {
-										"minItems": 1,
 										"maxItems": 7,
 										"uniqueItems": true,
 										"type": "array",
@@ -182491,7 +182465,7 @@
 							"schema": {
 								"additionalProperties": false,
 								"type": "object",
-								"required": ["injections", "state", "localizationLanguages"],
+								"required": ["injections", "state"],
 								"properties": {
 									"injections": {
 										"maxItems": 50,
@@ -183547,7 +183521,6 @@
 										}
 									},
 									"localizationLanguages": {
-										"minItems": 1,
 										"maxItems": 7,
 										"uniqueItems": true,
 										"type": "array",
@@ -184023,7 +183996,7 @@
 							"schema": {
 								"additionalProperties": false,
 								"type": "object",
-								"required": ["injections", "state", "localizationLanguages", "surface"],
+								"required": ["injections", "state", "surface"],
 								"properties": {
 									"injections": {
 										"maxItems": 50,
@@ -185079,7 +185052,6 @@
 										}
 									},
 									"localizationLanguages": {
-										"minItems": 1,
 										"maxItems": 7,
 										"uniqueItems": true,
 										"type": "array",
@@ -189789,7 +189761,6 @@
 							"schema": {
 								"additionalProperties": false,
 								"type": "object",
-								"required": ["localizationLanguages"],
 								"properties": {
 									"query": { "maxLength": 500, "default": "", "type": "string" },
 									"indexes": {
@@ -189813,7 +189784,6 @@
 										}
 									},
 									"localizationLanguages": {
-										"minItems": 1,
 										"maxItems": 7,
 										"uniqueItems": true,
 										"type": "array",
@@ -205472,7 +205442,6 @@
 							"schema": {
 								"additionalProperties": false,
 								"type": "object",
-								"required": ["localizationLanguages"],
 								"properties": {
 									"query": { "maxLength": 500, "default": "", "type": "string" },
 									"cursor": {
@@ -205491,7 +205460,6 @@
 										]
 									},
 									"localizationLanguages": {
-										"minItems": 1,
 										"maxItems": 7,
 										"uniqueItems": true,
 										"type": "array",

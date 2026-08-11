@@ -22,7 +22,6 @@ import {
 	FractionalPositionInput,
 	ContentLanguage,
 	LocalizationLanguageField,
-	LocalizationLanguagePriority,
 	LocalizationLanguageQuery,
 	localizationSet,
 	UnitLocalizationInput,
@@ -67,10 +66,7 @@ export type CreateRealmBody = Static<typeof CreateRealmBody>;
 
 export const RealmParams = t.Object({ realmId: Uuid });
 export type RealmParams = Static<typeof RealmParams>;
-export const RealmPinsQuery = t.Object(
-	{ localizationLanguages: LocalizationLanguagePriority },
-	{ additionalProperties: false },
-);
+export const RealmPinsQuery = t.Object(LocalizationLanguageQuery, { additionalProperties: false });
 export type RealmPinsQuery = Static<typeof RealmPinsQuery>;
 
 export const SetRealmScoreContextBody = t.Object(

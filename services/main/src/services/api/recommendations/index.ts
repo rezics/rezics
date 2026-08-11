@@ -207,7 +207,7 @@ export default new Elysia({ prefix: "/recommendations" })
 				...(inheritedSeedUnitId ? { inheritedSeedUnitId } : {}),
 				asOf,
 				pageSize: query.limit ?? 20,
-				localizationLanguages: query.localizationLanguages,
+				localizationLanguages: query.localizationLanguages ?? [],
 				...(cursor ? { afterId: cursor.lastId } : {}),
 				requestId: crypto.randomUUID(),
 			});
@@ -292,7 +292,7 @@ export default new Elysia({ prefix: "/recommendations" })
 				seed,
 				asOf,
 				pageSize: query.limit ?? 20,
-				localizationLanguages: query.localizationLanguages,
+				localizationLanguages: query.localizationLanguages ?? [],
 				...(cursor ? { afterId: cursor.lastId } : {}),
 				requestId: crypto.randomUUID(),
 			});

@@ -48,18 +48,17 @@ export type ContentRating = Static<typeof ContentRating>;
 /**
  * Ordered localization lookup hints supplied by an API consumer.
  *
- * These are presentation preferences, not a collection filter. A lookup
- * always falls back to the Unit's own localization order when none match.
+ * These are presentation preferences, not a collection filter. An omitted or
+ * empty sequence delegates presentation to the Unit's own localization order.
  */
-export const LocalizationLanguagePriority = t.Array(ContentLanguage, {
-	minItems: 1,
+export const LocalizationLanguageHints = t.Array(ContentLanguage, {
 	maxItems: ContentLanguageValues.length,
 	uniqueItems: true,
 });
-export type LocalizationLanguagePriority = Static<typeof LocalizationLanguagePriority>;
+export type LocalizationLanguageHints = Static<typeof LocalizationLanguageHints>;
 
 export const LocalizationLanguageQuery = {
-	localizationLanguages: t.Optional(LocalizationLanguagePriority),
+	localizationLanguages: t.Optional(LocalizationLanguageHints),
 };
 
 /** The common identity field carried by every localization contract. */

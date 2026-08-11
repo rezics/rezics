@@ -186,7 +186,7 @@ export default new Elysia({ prefix: "/units" })
 			const identity = await resolveIdentity(request, "unit:read");
 			const presentations = await getReadableUnitPresentationsByIds({
 				unitIds: body.ids,
-				localizationLanguages: body.localizationLanguages,
+				localizationLanguages: body.localizationLanguages ?? [],
 				profileId: identity.authorization.profileId,
 			});
 			return {
@@ -210,7 +210,7 @@ export default new Elysia({ prefix: "/units" })
 			const rows = await listUnitRealmPublications({
 				unitId: params.unitId,
 				authorization,
-				localizationLanguages: query.localizationLanguages,
+				localizationLanguages: query.localizationLanguages ?? [],
 				publicationState: query.publicationState ?? "active",
 				status: query.realmStatus ?? "current",
 				cursor: cursor ? [new Date(cursor[0]), cursor[1]] : undefined,
@@ -327,7 +327,7 @@ export default new Elysia({ prefix: "/units" })
 				items: await getUnitSeriesMemberships(
 					params.unitId,
 					authorization.profileId,
-					query.localizationLanguages,
+					query.localizationLanguages ?? [],
 				),
 			};
 		},

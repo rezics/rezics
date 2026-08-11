@@ -7,10 +7,10 @@ import { PollDetailResponse } from "../schema/response";
 const targetUnitId = "019b0000-0000-7000-8000-000000000001";
 
 describe("Poll API contract", () => {
-	it("accepts ordered fallback priorities only", () => {
+	it("accepts omitted, empty, or ordered fallback hints", () => {
 		expect(Check(PollDetailQuery, {})).toBe(true);
 		expect(Check(PollDetailQuery, { localizationLanguages: ["zh", "en"] })).toBe(true);
-		expect(Check(PollDetailQuery, { localizationLanguages: [] })).toBe(false);
+		expect(Check(PollDetailQuery, { localizationLanguages: [] })).toBe(true);
 		expect(Check(PollDetailQuery, { unknown: true })).toBe(false);
 	});
 

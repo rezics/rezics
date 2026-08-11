@@ -23,11 +23,12 @@ describe("recommendation tracking schema", () => {
 
 describe("recommendation presentation localization", () => {
 	it.each([UnitRecommendationQuery, RelatedPostQuery])(
-		"requires a non-empty localization priority",
+		"accepts omitted or empty localization hints",
 		(schema) => {
 			expect(Check(schema, { localizationLanguages: ["zh", "en"] })).toBe(true);
-			expect(Check(schema, {})).toBe(false);
-			expect(Check(schema, { localizationLanguages: [] })).toBe(false);
+			expect(Check(schema, {})).toBe(true);
+			expect(Check(schema, { localizationLanguages: [] })).toBe(true);
+			expect(Check(schema, { localizationLanguages: ["en", "en"] })).toBe(false);
 		},
 	);
 });

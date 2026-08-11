@@ -117,7 +117,7 @@ describe("public profile localization query", () => {
 	it("accepts one ordered content-language list only", () => {
 		expect(Check(PublicProfileQuery, {})).toBe(true);
 		expect(Check(PublicProfileQuery, { localizationLanguages: ["zh", "en"] })).toBe(true);
-		expect(Check(PublicProfileQuery, { localizationLanguages: [] })).toBe(false);
+		expect(Check(PublicProfileQuery, { localizationLanguages: [] })).toBe(true);
 		expect(Check(PublicProfileQuery, { localizationLanguages: ["en", "en"] })).toBe(false);
 		expect(Check(PublicProfileQuery, { language: "en" })).toBe(false);
 	});

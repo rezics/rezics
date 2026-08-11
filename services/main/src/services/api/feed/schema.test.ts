@@ -47,6 +47,12 @@ describe("Feed API contract", () => {
 		).toBe(true);
 	});
 
+	it("accepts empty localization hints for Unit-order fallback", () => {
+		expect(checkFeedRequest({ localizationLanguages: [] })).toBe(true);
+		expect(checkFeedRequest({ localizationLanguages: ["zh", "en"] })).toBe(true);
+		expect(checkFeedRequest({ localizationLanguages: ["en", "en"] })).toBe(false);
+	});
+
 	it("rejects malformed and duplicate Filter sets", () => {
 		expect(checkFeedRequest({ filter: { where: { kind: { in: [] } } } })).toBe(false);
 		expect(checkFeedRequest({ filter: { where: { kind: { in: ["book", "book"] } } } })).toBe(false);

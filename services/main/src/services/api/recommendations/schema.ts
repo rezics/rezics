@@ -5,7 +5,7 @@ import {
 	RecommendationReasonValues,
 	RecommendationSurfaceValues,
 } from "../../database/schema/contract-values";
-import { DateTime, DisplayPosition, LocalizationLanguagePriority, Uuid } from "../schema";
+import { DateTime, DisplayPosition, LocalizationLanguageHints, Uuid } from "../schema";
 import { VariantUnitType } from "../units/schema";
 
 export const RecommendationSurfaceSchema = t.UnionEnum(RecommendationSurfaceValues);
@@ -75,7 +75,7 @@ export const UnitRecommendationQuery = t.Object({
 	personalized: t.Optional(t.Boolean()),
 	cursor: t.Optional(t.String({ maxLength: 1_024 })),
 	limit: t.Optional(t.Integer({ minimum: 1, maximum: 50, default: 20 })),
-	localizationLanguages: LocalizationLanguagePriority,
+	localizationLanguages: t.Optional(LocalizationLanguageHints),
 });
 export type UnitRecommendationQuery = Static<typeof UnitRecommendationQuery>;
 
@@ -86,7 +86,7 @@ export const RelatedPostQuery = t.Object({
 	personalized: t.Optional(t.Boolean()),
 	cursor: t.Optional(t.String({ maxLength: 1_024 })),
 	limit: t.Optional(t.Integer({ minimum: 1, maximum: 50, default: 20 })),
-	localizationLanguages: LocalizationLanguagePriority,
+	localizationLanguages: t.Optional(LocalizationLanguageHints),
 });
 export type RelatedPostQuery = Static<typeof RelatedPostQuery>;
 

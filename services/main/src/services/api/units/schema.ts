@@ -15,7 +15,6 @@ import {
 	ContentLanguage,
 	ContentRating,
 	LifecycleInput,
-	LocalizationLanguagePriority,
 	LocalizationLanguageQuery,
 	UnitLocalizationInput,
 	Uuid,
@@ -77,7 +76,7 @@ export const ListUnitRealmPublicationsQuery = t.Object(
 				default: "current",
 			}),
 		),
-		localizationLanguages: LocalizationLanguagePriority,
+		...LocalizationLanguageQuery,
 		cursor: t.Optional(t.String({ minLength: 1, maxLength: 1024 })),
 		limit: t.Optional(t.Integer({ minimum: 1, maximum: 100, default: 50 })),
 	},
@@ -107,14 +106,13 @@ export const UnitRealmPublicationListResponse = t.Object({
 	),
 	nextCursor: t.Nullable(t.String()),
 });
-export const UnitSeriesMembershipQuery = t.Object(
-	{ localizationLanguages: LocalizationLanguagePriority },
-	{ additionalProperties: false },
-);
+export const UnitSeriesMembershipQuery = t.Object(LocalizationLanguageQuery, {
+	additionalProperties: false,
+});
 export const ResolveUnitPresentationsBody = t.Object(
 	{
 		ids: t.Array(Uuid, { minItems: 1, maxItems: 100, uniqueItems: true }),
-		localizationLanguages: LocalizationLanguagePriority,
+		...LocalizationLanguageQuery,
 	},
 	{ additionalProperties: false },
 );

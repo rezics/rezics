@@ -7,7 +7,7 @@ import {
 	FractionalPosition,
 	FractionalPositionInput,
 	ContentLanguage,
-	LocalizationLanguagePriority,
+	LocalizationLanguageHints,
 	OrdinalPosition,
 } from ".";
 import {
@@ -83,13 +83,13 @@ describe("ContentLanguage", () => {
 	});
 });
 
-describe("LocalizationLanguagePriority", () => {
-	it("accepts a non-empty, unique, ordered list of supported languages", () => {
-		const check = TypeCompiler.Compile(LocalizationLanguagePriority);
+describe("LocalizationLanguageHints", () => {
+	it("accepts an empty or unique ordered list of supported languages", () => {
+		const check = TypeCompiler.Compile(LocalizationLanguageHints);
 
 		expect(check.Check(["zh", "en"])).toBe(true);
 		expect(check.Check(["en"])).toBe(true);
-		expect(check.Check([])).toBe(false);
+		expect(check.Check([])).toBe(true);
 		expect(check.Check(["en", "en"])).toBe(false);
 		expect(check.Check(["ja"])).toBe(true);
 		expect(check.Check(["zh-Hans"])).toBe(false);

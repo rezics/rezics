@@ -152,7 +152,7 @@ describe("review localization query", () => {
 	it("uses the shared fallback list", () => {
 		expect(Check(GetReviewQuery, {})).toBe(true);
 		expect(Check(GetReviewQuery, { localizationLanguages: ["zh", "en"] })).toBe(true);
-		expect(Check(GetReviewQuery, { localizationLanguages: [] })).toBe(false);
+		expect(Check(GetReviewQuery, { localizationLanguages: [] })).toBe(true);
 		expect(Check(GetReviewQuery, { unknown: true })).toBe(false);
 	});
 });

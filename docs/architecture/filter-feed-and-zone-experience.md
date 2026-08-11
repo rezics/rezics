@@ -30,9 +30,11 @@ relevance.
 
 Language selection has two independent inputs. `localizationLanguages` is the
 ordered presentation preference and may fall back through the Unit's own
-localization order. A positive language predicate in the list Filter is an
-eligibility and presentation boundary. For available Unit languages `A`,
-ordered preferences `P`, and a selected language set `F`:
+localization order. An omitted or empty preference sequence means that the
+consumer supplies no presentation hint, so fallback starts with the Unit's
+stored localization order. A positive language predicate in the list Filter
+is an eligibility and presentation boundary. For available Unit languages
+`A`, ordered preferences `P`, and a selected language set `F`:
 
 - automatic presentation chooses the first member of `P ∩ A`, then the first
   member of `A` in Unit order;
