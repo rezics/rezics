@@ -188,6 +188,10 @@ tasks:
                 DATABASE_ADMIN_URL="postgres://postgres:postgres@localhost:${POSTGRES_MIGRATION_LOCAL_PORT:-5433}/rezics_atlas?sslmode=disable"
                 yarn exec tsx scripts/migrate-filter-documents.ts --yes --batch-size 2
             - >-
+                REZICS_DISPOSABLE_MIGRATION_FIXTURE=1
+                DATABASE_ADMIN_URL="postgres://postgres:postgres@localhost:${POSTGRES_MIGRATION_LOCAL_PORT:-5433}/rezics_atlas?sslmode=disable"
+                yarn exec tsx scripts/check-bootstrap-unit-merge-access-cutover.ts seed
+            - >-
                 yarn exec atlas migrate apply --env main
                 --url "postgres://postgres:postgres@localhost:${POSTGRES_MIGRATION_LOCAL_PORT:-5433}/rezics_atlas?search_path=public&sslmode=disable"
             - >-
@@ -201,6 +205,10 @@ tasks:
                 REZICS_DISPOSABLE_MIGRATION_FIXTURE=1
                 DATABASE_ADMIN_URL="postgres://postgres:postgres@localhost:${POSTGRES_MIGRATION_LOCAL_PORT:-5433}/rezics_atlas?sslmode=disable"
                 yarn exec tsx scripts/check-filter-document-cutover.ts verify-and-clean
+            - >-
+                REZICS_DISPOSABLE_MIGRATION_FIXTURE=1
+                DATABASE_ADMIN_URL="postgres://postgres:postgres@localhost:${POSTGRES_MIGRATION_LOCAL_PORT:-5433}/rezics_atlas?sslmode=disable"
+                yarn exec tsx scripts/check-bootstrap-unit-merge-access-cutover.ts verify-and-clean
             - >-
                 DATABASE_ADMIN_URL="postgres://postgres:postgres@localhost:${POSTGRES_MIGRATION_LOCAL_PORT:-5433}/rezics_atlas?sslmode=disable"
                 yarn exec tsx scripts/validate-integrity-constraints.ts validate-disposable

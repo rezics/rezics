@@ -1,4 +1,4 @@
-h1:jELse9inMFUQdz4enebgLWNDkH2uLuzXGiz6sap6cH0=
+h1:tyn/y5ZAgviatCuPf9UaOb1lMZNesfkYMsY3Ox3scwQ=
 20260801000000_v1_baseline.sql h1:RkSyDwLRpFOPI7iqWg+WlFc5TAshnB4gsRkBpsTMjGY=
 20260807000000_search_ordered_candidates.sql h1:rPOS8iAdRmWOfc9lpyCNNsFWjduRV1e27Q1Mc1QpTFc=
 20260807000001_backfill_search_best_score.sql h1:lmLn+kpWiNWEPlk40W4QRIGsqpWezY//UsNaaZ8FToc=
@@ -16,3 +16,4 @@ h1:jELse9inMFUQdz4enebgLWNDkH2uLuzXGiz6sap6cH0=
 20260811000002_unit_merge_reference_indexes.sql h1:BFB1/XkFUc5JSNRqmUhZmbDULZE3n3s+0aoCDbWo1AA=
 20260811000003_studio_workspace_contributions.sql h1:4226AJiuNYSThGGi5EwJsVMvnWIEoPmb+xUvJrBWUsg=
 20260811000004_filter_document_cutover.sql h1:mLbNiXxWC0CpL2k7LKEbKoOJM22BYofqIPxstMDuF9E=
+20260811101537_bootstrap_unit_merge_access.sql h1:dVUKlCpnWcdsfKgoqWwm7BEIOAOu4HAEGFFnzziT18Y=
