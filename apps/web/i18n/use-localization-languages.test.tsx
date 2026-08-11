@@ -61,12 +61,12 @@ beforeEach(() => {
 });
 
 describe("localization language state", () => {
-	it("uses the interface language immediately for anonymous viewers", () => {
+	it("delegates anonymous fallback to Unit localization order", () => {
 		const { result } = renderHook(useLocalizationLanguageState);
 
 		expect(result.current).toEqual({
 			status: "ready",
-			languages: ["zh"],
+			languages: [],
 			source: "anonymous",
 		});
 	});
@@ -75,7 +75,7 @@ describe("localization language state", () => {
 		mocks.requestedLanguage = "ja";
 		const { result } = renderHook(useLocalizationLanguages);
 
-		expect(result.current).toEqual(["ja", "zh"]);
+		expect(result.current).toEqual(["ja"]);
 	});
 
 	it("preserves the authenticated preference order before the interface fallback", () => {

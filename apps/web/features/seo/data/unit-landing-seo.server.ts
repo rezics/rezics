@@ -1,10 +1,12 @@
-import { toContentLanguage } from "@rezics/i18n";
+import { toContentLanguage, type ContentLanguage } from "@rezics/i18n";
 import {
 	getPublicUnitSeoProjection,
 	type GetPublicUnitSeoProjectionStatus200,
 } from "@rezics/openapi-tanstack-query";
 import { cache } from "react";
+import { headers } from "next/headers";
 
+import { getInitialPresentationPreferences } from "@/features/preferences/server/initial-presentation-preferences.server";
 import { getTranslation } from "@/i18n/server";
 import { getBackendOrigin } from "@/lib/backend-origin.server";
 import { getFrontendOrigin } from "@/lib/frontend-origin.server";
@@ -13,17 +15,31 @@ import {
 	type UnitLandingSeoDocument,
 	type UnitLandingSeoRoute,
 } from "../model/unit-landing-seo";
+import { buildUnitLandingLocalizationLanguages } from "../model/unit-landing-language-order";
+
+const getUnitLandingProfileLanguagePreferences = cache(async () => {
+	const preferences = await getInitialPresentationPreferences(await headers());
+	return preferences.status === "resolved"
+		? {
+				preferredLanguages: preferences.data.preferredLanguages,
+				interfaceLanguage: toContentLanguage(preferences.data.interfaceLocale),
+			}
+		: undefined;
+});
 
 const fetchPublicUnitSeoProjection = cache(
 	async (
 		unitId: string,
-		language: ReturnType<typeof toContentLanguage>,
+		localizationLanguages: readonly ContentLanguage[],
 	): Promise<GetPublicUnitSeoProjectionStatus200 | null> => {
 		try {
+			const query = localizationLanguages.length
+				? { localizationLanguages: [...localizationLanguages] }
+				: {};
 			const result = await getPublicUnitSeoProjection({
 				baseURL: getBackendOrigin().origin,
 				path: { unitId },
-				query: { localizationLanguages: [language] },
+				query,
 				throwOnError: false,
 				options: { cache: "no-store" },
 			});
@@ -40,10 +56,15 @@ const getCachedUnitLandingSeoDocument = cache(
 		expectedKind: UnitLandingSeoRoute["expectedKind"],
 		canonicalPath: string,
 		parentCanonicalPath: string | undefined,
+		requestedLanguage: UnitLandingSeoRoute["requestedLanguage"],
 	): Promise<UnitLandingSeoDocument> => {
 		const translation = await getTranslation(["brand", "seo"]);
-		const language = toContentLanguage(translation.locale.target);
-		const projection = await fetchPublicUnitSeoProjection(unitId, language);
+		const profile = await getUnitLandingProfileLanguagePreferences();
+		const localizationLanguages = buildUnitLandingLocalizationLanguages({
+			requestedLanguage,
+			profile,
+		});
+		const projection = await fetchPublicUnitSeoProjection(unitId, localizationLanguages);
 		return buildUnitLandingSeoDocument({
 			unitId,
 			expectedKind,
@@ -64,5 +85,6 @@ export function getUnitLandingSeoDocument(
 		route.expectedKind,
 		route.canonicalPath,
 		route.parentCanonicalPath,
+		route.requestedLanguage,
 	);
 }

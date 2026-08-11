@@ -1,4 +1,4 @@
-import type { Translation } from "@rezics/i18n";
+import type { ContentLanguage, Translation } from "@rezics/i18n";
 import type { GetPublicUnitSeoProjectionStatus200 } from "@rezics/openapi-tanstack-query";
 import type { Metadata } from "next";
 
@@ -13,6 +13,7 @@ export interface UnitLandingSeoRoute {
 	readonly expectedKind: PublicUnitSeoKind;
 	readonly canonicalPath: string;
 	readonly parentCanonicalPath?: string;
+	readonly requestedLanguage?: ContentLanguage;
 }
 
 export interface UnitLandingSeoDocument {

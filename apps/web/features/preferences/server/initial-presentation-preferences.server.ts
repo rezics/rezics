@@ -1,4 +1,5 @@
 import type { QueryClient } from "@tanstack/react-query";
+import { cache } from "react";
 
 import type { InitialAuthSession } from "@/features/auth/server/initial-session.server";
 import { getBackendOrigin } from "@/lib/backend-origin.server";
@@ -38,26 +39,39 @@ export function seedInitialPresentationPreferences(
 	);
 }
 
-export async function getInitialPresentationPreferences(
+const loadInitialPresentationPreferences = cache(
+	async (
+		cookie: string | null,
+		acceptLanguage: string | null,
+	): Promise<InitialPresentationPreferences> => {
+		if (!cookie) return { status: "unavailable" };
+		const headers = new Headers({ accept: "application/json", cookie });
+		if (acceptLanguage) headers.set("accept-language", acceptLanguage);
+
+		try {
+			const response = await fetch(
+				new URL("/api/v1/users/me/preferences", getBackendOrigin()),
+				{
+					cache: "no-store",
+					headers,
+					signal: AbortSignal.timeout(PresentationPreferencesBootstrapTimeoutMs),
+				},
+			);
+			if (!response.ok) return { status: "unavailable" };
+
+			const data = parsePresentationPreferences(await response.json());
+			return data ? { status: "resolved", data } : { status: "unavailable" };
+		} catch {
+			return { status: "unavailable" };
+		}
+	},
+);
+
+export function getInitialPresentationPreferences(
 	requestHeaders: Headers,
 ): Promise<InitialPresentationPreferences> {
-	const cookie = requestHeaders.get("cookie");
-	if (!cookie) return { status: "unavailable" };
-	const headers = new Headers({ accept: "application/json", cookie });
-	const acceptLanguage = requestHeaders.get("accept-language");
-	if (acceptLanguage) headers.set("accept-language", acceptLanguage);
-
-	try {
-		const response = await fetch(new URL("/api/v1/users/me/preferences", getBackendOrigin()), {
-			cache: "no-store",
-			headers,
-			signal: AbortSignal.timeout(PresentationPreferencesBootstrapTimeoutMs),
-		});
-		if (!response.ok) return { status: "unavailable" };
-
-		const data = parsePresentationPreferences(await response.json());
-		return data ? { status: "resolved", data } : { status: "unavailable" };
-	} catch {
-		return { status: "unavailable" };
-	}
+	return loadInitialPresentationPreferences(
+		requestHeaders.get("cookie"),
+		requestHeaders.get("accept-language"),
+	);
 }

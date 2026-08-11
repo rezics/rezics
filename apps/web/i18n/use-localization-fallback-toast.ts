@@ -27,7 +27,8 @@ export function useLocalizationFallbackToast(input: {
 		input.actualLanguage !== null &&
 		(requestedLanguage
 			? input.actualLanguage !== requestedLanguage
-			: !input.localizationLanguages.includes(input.actualLanguage));
+			: input.localizationLanguages.length > 0 &&
+				!input.localizationLanguages.includes(input.actualLanguage));
 
 	useEffect(() => {
 		if (!preferencesReady || !fallback || !input.actualLanguage) return;

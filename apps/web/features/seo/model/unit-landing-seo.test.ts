@@ -66,6 +66,31 @@ describe("Unit landing SEO metadata", () => {
 		expect(document.structuredData).not.toBeNull();
 	});
 
+	it("keeps an explicit presentation language out of the canonical identity", () => {
+		const document = buildUnitLandingSeoDocument({
+			unitId: UnitId,
+			expectedKind: "book",
+			canonicalPath: `/units/book/${UnitId}`,
+			requestedLanguage: "ja",
+			projection: projection({
+				presentation: {
+					language: "ja",
+					title: "型と証明",
+					description: null,
+					image: null,
+					context: null,
+				},
+			}),
+			frontendOrigin: new URL("https://www.rezics.com"),
+			t: translation.t,
+		});
+
+		expect(document.metadata.alternates).toEqual({
+			canonical: `/units/book/${UnitId}`,
+		});
+		expect(document.metadata.title).toBe("型と証明 (Book) | REZICS");
+	});
+
 	it.each(["r18", "r18g"] as const)("does not leak authored metadata for %s", (contentRating) => {
 		const adult: GetPublicUnitSeoProjectionStatus200 = {
 			id: UnitId,

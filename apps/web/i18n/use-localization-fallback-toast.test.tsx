@@ -59,6 +59,14 @@ beforeEach(() => {
 });
 
 describe("localization fallback toast", () => {
+	it("does not report Unit-order resolution as a missing anonymous preference", async () => {
+		renderHook(() => useLocalizationFallbackToast({ ...Input, localizationLanguages: [] }));
+
+		await act(async () => {});
+
+		expect(mocks.createToast).not.toHaveBeenCalled();
+	});
+
 	it("defers the toast beyond the React lifecycle and deduplicates Strict Mode effects", async () => {
 		renderHook(() => useLocalizationFallbackToast(Input), { wrapper: StrictModeWrapper });
 
