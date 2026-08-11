@@ -153,9 +153,9 @@ function useNavigationPresentations(
 		[nodes],
 	);
 	const idsKey = ids.join("\u0000");
-	const [presentations, setPresentations] = useState<
-		ReadonlyMap<string, UnitMentionPresentation>
-	>(new Map());
+	const [presentations, setPresentations] = useState<ReadonlyMap<string, UnitMentionPresentation>>(
+		new Map(),
+	);
 	useEffect(() => {
 		if (!idsKey || !resolve) {
 			setPresentations(new Map());
@@ -231,9 +231,7 @@ function WikiNavigationSettingsLoaded({
 				<Card appearance="outlined">
 					<CardContent className="grid content-start gap-2 p-4">
 						<div className="flex items-center justify-between gap-2">
-							<h3 className="font-semibold">
-								{t.realms.wikiNavigationSettings.resources}
-							</h3>
+							<h3 className="font-semibold">{t.realms.wikiNavigationSettings.resources}</h3>
 							<Button
 								aria-label={t.realms.wikiNavigationSettings.new}
 								onClick={() => setSelectedId("new")}
@@ -324,9 +322,7 @@ function WikiNavigationTreeEditor({
 		() =>
 			editableTreeSearchVisibility(document.draft, query, (node) => {
 				const label = presentations.get(node.labelUnitId)?.label ?? "";
-				const target = node.targetUnitId
-					? (presentations.get(node.targetUnitId)?.label ?? "")
-					: "";
+				const target = node.targetUnitId ? (presentations.get(node.targetUnitId)?.label ?? "") : "";
 				return `${label} ${target} ${node.labelUnitId} ${node.targetUnitId ?? ""}`;
 			}),
 		[document.draft, presentations, query],
@@ -376,9 +372,7 @@ function WikiNavigationTreeEditor({
 			const start = visibleIds.indexOf(lastSelectedId);
 			const end = visibleIds.indexOf(nodeId);
 			if (start >= 0 && end >= 0) {
-				setSelectedIds(
-					new Set(visibleIds.slice(Math.min(start, end), Math.max(start, end) + 1)),
-				);
+				setSelectedIds(new Set(visibleIds.slice(Math.min(start, end), Math.max(start, end) + 1)));
 				return;
 			}
 		}
@@ -536,14 +530,10 @@ function WikiNavigationTreeEditor({
 						<div className="mt-1 flex items-center gap-2 text-muted-foreground text-sm">
 							<span>{t.realms.wikiNavigationSettings.draftHint}</span>
 							{dirty ? (
-								<Badge variant="warning">
-									{t.realms.wikiNavigationSettings.unsavedDraft}
-								</Badge>
+								<Badge variant="warning">{t.realms.wikiNavigationSettings.unsavedDraft}</Badge>
 							) : null}
 							{dirty && !valid ? (
-								<Badge variant="destructive">
-									{t.realms.wikiNavigationSettings.invalidDraft}
-								</Badge>
+								<Badge variant="destructive">{t.realms.wikiNavigationSettings.invalidDraft}</Badge>
 							) : null}
 						</div>
 					</div>
@@ -611,9 +601,7 @@ function WikiNavigationTreeEditor({
 					{selectedIds.size ? (
 						<Button
 							onClick={() => {
-								changeDraft((nodes) =>
-									removeEditableTreeNodes(nodes, selectedIds, "subtree"),
-								);
+								changeDraft((nodes) => removeEditableTreeNodes(nodes, selectedIds, "subtree"));
 								setSelectedIds(EmptyIds);
 							}}
 							type="button"
@@ -646,22 +634,16 @@ function WikiNavigationTreeEditor({
 									return (
 										<TreeEditorRowFrame
 											activePlacement={
-												dropTarget?.nodeId === node.id
-													? dropTarget.placement
-													: undefined
+												dropTarget?.nodeId === node.id ? dropTarget.placement : undefined
 											}
-											aria-expanded={
-												node.kind === "group" ? expanded : undefined
-											}
+											aria-expanded={node.kind === "group" ? expanded : undefined}
 											aria-level={depth + 1}
 											aria-posinset={positionInSet}
 											aria-selected={selected}
 											aria-setsize={setSize}
 											depth={depth}
 											dragging={draggingIds.has(node.id)}
-											onClick={(event: MouseEvent<HTMLDivElement>) =>
-												activateNode(node.id, event)
-											}
+											onClick={(event: MouseEvent<HTMLDivElement>) => activateNode(node.id, event)}
 											onDragOver={(event) => handleDragOver(event, node)}
 											onDrop={(event) => {
 												event.preventDefault();
@@ -691,11 +673,7 @@ function WikiNavigationTreeEditor({
 												type="button"
 												variant="quiet"
 											>
-												{selected ? (
-													<SquareCheckBig aria-hidden />
-												) : (
-													<Square aria-hidden />
-												)}
+												{selected ? <SquareCheckBig aria-hidden /> : <Square aria-hidden />}
 											</Button>
 											<button
 												aria-label={t.realms.wikiNavigationSettings.move}
@@ -708,9 +686,7 @@ function WikiNavigationTreeEditor({
 												}}
 												onDragStart={(event) => {
 													event.dataTransfer.effectAllowed = "move";
-													const selection = selected
-														? selectedIds
-														: new Set([node.id]);
+													const selection = selected ? selectedIds : new Set([node.id]);
 													setSelectedIds(selection);
 													setDraggingIds(selection);
 												}}
@@ -722,16 +698,14 @@ function WikiNavigationTreeEditor({
 												<Button
 													aria-label={
 														expanded
-															? t.realms.wikiNavigationSettings
-																	.collapse
+															? t.realms.wikiNavigationSettings.collapse
 															: t.realms.wikiNavigationSettings.expand
 													}
 													onClick={(event) => {
 														event.stopPropagation();
 														setExpandedIds((current) => {
 															const next = new Set(current);
-															if (next.has(node.id))
-																next.delete(node.id);
+															if (next.has(node.id)) next.delete(node.id);
 															else next.add(node.id);
 															return next;
 														});
@@ -742,10 +716,7 @@ function WikiNavigationTreeEditor({
 												>
 													<ChevronRight
 														aria-hidden
-														className={cn(
-															"transition-transform",
-															expanded && "rotate-90",
-														)}
+														className={cn("transition-transform", expanded && "rotate-90")}
 													/>
 												</Button>
 											) : (
@@ -753,21 +724,14 @@ function WikiNavigationTreeEditor({
 											)}
 											<div className="min-w-0 flex-1">
 												<div className="flex min-w-0 items-center gap-2">
-													<span className="truncate font-semibold">
-														{label}
-													</span>
+													<span className="truncate font-semibold">{label}</span>
 													<Badge variant="outline">
-														{
-															t.realms.wikiNavigationSettings
-																.itemKinds[node.kind]
-														}
+														{t.realms.wikiNavigationSettings.itemKinds[node.kind]}
 													</Badge>
 												</div>
 												{node.kind === "link" ? (
 													<p className="mt-1 truncate text-muted-foreground text-xs">
-														{target ||
-															t.realms.wikiNavigationSettings
-																.unsetTarget}
+														{target || t.realms.wikiNavigationSettings.unsetTarget}
 													</p>
 												) : null}
 											</div>
@@ -804,10 +768,7 @@ function WikiNavigationTreeEditor({
 						) : (
 							<div className="grid min-h-64 place-items-center p-8 text-center">
 								<div>
-									<ListTree
-										aria-hidden
-										className="mx-auto size-8 text-muted-foreground"
-									/>
+									<ListTree aria-hidden className="mx-auto size-8 text-muted-foreground" />
 									<p className="mt-3 text-muted-foreground text-sm">
 										{document.draft.length
 											? t.realms.wikiNavigationSettings.emptySearch
@@ -819,9 +780,7 @@ function WikiNavigationTreeEditor({
 					</div>
 					<Card appearance="outlined">
 						<CardContent className="grid content-start gap-4 p-4">
-							<h4 className="font-semibold">
-								{t.realms.wikiNavigationSettings.itemSettings}
-							</h4>
+							<h4 className="font-semibold">{t.realms.wikiNavigationSettings.itemSettings}</h4>
 							{selectedNode ? (
 								<>
 									<div className="grid gap-2">
@@ -834,11 +793,9 @@ function WikiNavigationTreeEditor({
 											kinds={["label"]}
 											onValueChange={(value) =>
 												changeDraft((nodes) =>
-													updateWikiNavigationDraftNode(
-														nodes,
-														selectedNode.id,
-														{ labelUnitId: value ?? "" },
-													),
+													updateWikiNavigationDraftNode(nodes, selectedNode.id, {
+														labelUnitId: value ?? "",
+													}),
 												)
 											}
 											placeholder={t.ui.pickerPlaceholders.unit}
@@ -859,11 +816,9 @@ function WikiNavigationTreeEditor({
 												kinds={["post"]}
 												onValueChange={(value) =>
 													changeDraft((nodes) =>
-														updateWikiNavigationDraftNode(
-															nodes,
-															selectedNode.id,
-															{ targetUnitId: value ?? "" },
-														),
+														updateWikiNavigationDraftNode(nodes, selectedNode.id, {
+															targetUnitId: value ?? "",
+														}),
 													)
 												}
 												placeholder={t.ui.pickerPlaceholders.post}

@@ -385,10 +385,9 @@ export default new Elysia({ prefix: "/search" })
 		async ({ params, body, request }) => {
 			try {
 				const identity = await resolveIdentity(request, "unit:read", "search.execute");
-				const hasDevelopmentPreviewAccess =
-					await identity.authorization.platform.hasCapability(
-						DevelopmentPreviewCapability,
-					);
+				const hasDevelopmentPreviewAccess = await identity.authorization.platform.hasCapability(
+					DevelopmentPreviewCapability,
+				);
 				const { localizationLanguages, ...featureInput } = body;
 				return await executeSearchFeatureInput(
 					{
@@ -401,8 +400,7 @@ export default new Elysia({ prefix: "/search" })
 					hasDevelopmentPreviewAccess,
 				);
 			} catch (cause) {
-				if (cause instanceof InvalidSearch || cause instanceof SearchUnavailable)
-					throw cause;
+				if (cause instanceof InvalidSearch || cause instanceof SearchUnavailable) throw cause;
 				logSearchFailure("Search Feature execution failed", "search.feature.failed", cause);
 				throw new SearchUnavailable(cause);
 			}
@@ -423,10 +421,9 @@ export default new Elysia({ prefix: "/search" })
 		async ({ params, body, request }) => {
 			try {
 				const identity = await resolveIdentity(request, "unit:read", "search.execute");
-				const hasDevelopmentPreviewAccess =
-					await identity.authorization.platform.hasCapability(
-						DevelopmentPreviewCapability,
-					);
+				const hasDevelopmentPreviewAccess = await identity.authorization.platform.hasCapability(
+					DevelopmentPreviewCapability,
+				);
 				const result = await executeSearchFeatureFeedInput(
 					{
 						document: createDefaultSearchDocument(params.template),
@@ -446,8 +443,7 @@ export default new Elysia({ prefix: "/search" })
 					identity.authorization.profileId,
 				);
 			} catch (cause) {
-				if (cause instanceof InvalidSearch || cause instanceof SearchUnavailable)
-					throw cause;
+				if (cause instanceof InvalidSearch || cause instanceof SearchUnavailable) throw cause;
 				logSearchFailure(
 					"Search Feature Feed presentation failed",
 					"search.feature_feed.failed",
@@ -475,9 +471,7 @@ export default new Elysia({ prefix: "/search" })
 				params.zoneId,
 				() => new UnitNotFound("Zone"),
 			);
-			const feature = await database.transaction((tx) =>
-				getZoneSearchFeature(tx, params.zoneId),
-			);
+			const feature = await database.transaction((tx) => getZoneSearchFeature(tx, params.zoneId));
 			if (!feature) throw new ZoneSearchFeatureNotFound();
 			const hasDevelopmentPreviewAccess = await identity.authorization.platform.hasCapability(
 				DevelopmentPreviewCapability,
@@ -489,10 +483,7 @@ export default new Elysia({ prefix: "/search" })
 			response: {
 				[StatusCodes.OK]: ZoneSearchFeatureResponse,
 				[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse([
-					"UnitNotFound",
-					"ZoneSearchFeatureNotFound",
-				]),
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "ZoneSearchFeatureNotFound"]),
 			},
 			detail: { summary: "Get a Zone Search Feature", tags: ["Search", "Zones"] },
 		},
@@ -540,9 +531,7 @@ export default new Elysia({ prefix: "/search" })
 				params.zoneId,
 				() => new UnitNotFound("Zone"),
 			);
-			const feature = await database.transaction((tx) =>
-				getZoneSearchFeature(tx, params.zoneId),
-			);
+			const feature = await database.transaction((tx) => getZoneSearchFeature(tx, params.zoneId));
 			if (!feature || !feature.enabled) throw new ZoneSearchFeatureNotFound();
 			const hasDevelopmentPreviewAccess = await identity.authorization.platform.hasCapability(
 				DevelopmentPreviewCapability,
@@ -565,10 +554,7 @@ export default new Elysia({ prefix: "/search" })
 			body: ZoneSearchFeatureExecutionBody,
 			response: {
 				[StatusCodes.OK]: SearchResponse,
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse([
-					"UnitNotFound",
-					"ZoneSearchFeatureNotFound",
-				]),
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "ZoneSearchFeatureNotFound"]),
 				[StatusCodes.UNPROCESSABLE_ENTITY]: InvalidSearchResponse,
 				[StatusCodes.SERVICE_UNAVAILABLE]: SearchUnavailableResponse,
 			},
@@ -584,14 +570,11 @@ export default new Elysia({ prefix: "/search" })
 					params.zoneId,
 					() => new UnitNotFound("Zone"),
 				);
-				const feature = await database.transaction((tx) =>
-					getZoneSearchFeature(tx, params.zoneId),
-				);
+				const feature = await database.transaction((tx) => getZoneSearchFeature(tx, params.zoneId));
 				if (!feature || !feature.enabled) throw new ZoneSearchFeatureNotFound();
-				const hasDevelopmentPreviewAccess =
-					await identity.authorization.platform.hasCapability(
-						DevelopmentPreviewCapability,
-					);
+				const hasDevelopmentPreviewAccess = await identity.authorization.platform.hasCapability(
+					DevelopmentPreviewCapability,
+				);
 				const result = await executeSearchFeatureFeedInput(
 					{
 						document: feature.document,
@@ -631,10 +614,7 @@ export default new Elysia({ prefix: "/search" })
 			body: ZoneSearchFeatureFeedPresentationBody,
 			response: {
 				[StatusCodes.OK]: SearchFeedResponse,
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse([
-					"UnitNotFound",
-					"ZoneSearchFeatureNotFound",
-				]),
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "ZoneSearchFeatureNotFound"]),
 				[StatusCodes.UNPROCESSABLE_ENTITY]: InvalidSearchResponse,
 				[StatusCodes.SERVICE_UNAVAILABLE]: SearchUnavailableResponse,
 			},
@@ -660,10 +640,7 @@ export default new Elysia({ prefix: "/search" })
 			response: {
 				[StatusCodes.OK]: ZoneSearchFeatureRevisionListResponse,
 				[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse([
-					"UnitNotFound",
-					"ZoneSearchFeatureNotFound",
-				]),
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "ZoneSearchFeatureNotFound"]),
 			},
 			detail: { summary: "List Zone Search Feature revisions", tags: ["Search", "Zones"] },
 		},
@@ -695,10 +672,7 @@ export default new Elysia({ prefix: "/search" })
 			response: {
 				[StatusCodes.OK]: ZoneSearchFeatureResponse,
 				[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse([
-					"UnitNotFound",
-					"ZoneSearchFeatureNotFound",
-				]),
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "ZoneSearchFeatureNotFound"]),
 				[StatusCodes.UNPROCESSABLE_ENTITY]: InvalidSearchResponse,
 				[StatusCodes.CONFLICT]: toApiErrorResponse(["SearchDocumentRevisionConflict"]),
 			},
@@ -729,10 +703,9 @@ export default new Elysia({ prefix: "/search" })
 				.limit(1);
 			if (!record) throw new DockNotFound();
 			try {
-				const hasDevelopmentPreviewAccess =
-					await identity.authorization.platform.hasCapability(
-						DevelopmentPreviewCapability,
-					);
+				const hasDevelopmentPreviewAccess = await identity.authorization.platform.hasCapability(
+					DevelopmentPreviewCapability,
+				);
 				return await executeZoneBlock({
 					...params,
 					document: parseDocument(DockDocument, record.document),
@@ -787,10 +760,9 @@ export default new Elysia({ prefix: "/search" })
 			);
 			if (!record) throw new ZonePageNotFound();
 			try {
-				const hasDevelopmentPreviewAccess =
-					await identity.authorization.platform.hasCapability(
-						DevelopmentPreviewCapability,
-					);
+				const hasDevelopmentPreviewAccess = await identity.authorization.platform.hasCapability(
+					DevelopmentPreviewCapability,
+				);
 				return await executeZoneBlock({
 					...params,
 					document: record.document,
@@ -860,18 +832,13 @@ export default new Elysia({ prefix: "/search" })
 								return parseDocument(DockDocument, record.document);
 							})()
 						: await database.transaction(async (tx) => {
-								const record = await getZonePageUnitById(
-									tx,
-									params.zoneId,
-									surface.pageId,
-								);
+								const record = await getZonePageUnitById(tx, params.zoneId, surface.pageId);
 								if (!record) throw new ZonePageNotFound();
 								return record.document;
 							});
-				const hasDevelopmentPreviewAccess =
-					await identity.authorization.platform.hasCapability(
-						DevelopmentPreviewCapability,
-					);
+				const hasDevelopmentPreviewAccess = await identity.authorization.platform.hasCapability(
+					DevelopmentPreviewCapability,
+				);
 				return await executeZoneFeedBlock({
 					...params,
 					document,
@@ -889,11 +856,7 @@ export default new Elysia({ prefix: "/search" })
 					cause instanceof ZoneSearchFeatureNotFound
 				)
 					throw cause;
-				logSearchFailure(
-					"Zone Feed Block execution failed",
-					"search.zone_feed.failed",
-					cause,
-				);
+				logSearchFailure("Zone Feed Block execution failed", "search.zone_feed.failed", cause);
 				throw new SearchUnavailable(cause);
 			}
 		},
@@ -919,17 +882,13 @@ export default new Elysia({ prefix: "/search" })
 		async ({ body, request }) => {
 			try {
 				const identity = await resolveIdentity(request, "unit:read", "search.execute");
-				const hasDevelopmentPreviewAccess =
-					await identity.authorization.platform.hasCapability(
-						DevelopmentPreviewCapability,
-					);
+				const hasDevelopmentPreviewAccess = await identity.authorization.platform.hasCapability(
+					DevelopmentPreviewCapability,
+				);
 				const indexes = (body.indexes ?? [...SearchCategories]).filter(
 					(index) => hasDevelopmentPreviewAccess || index !== "tag-structures",
 				);
-				const viewer = await resolveRecommendationViewer(
-					identity.authorization.profileId,
-					false,
-				);
+				const viewer = await resolveRecommendationViewer(identity.authorization.profileId, false);
 				return await searchGrouped({
 					...body,
 					profileId: identity.authorization.profileId,
@@ -937,8 +896,7 @@ export default new Elysia({ prefix: "/search" })
 					indexes,
 				});
 			} catch (error) {
-				if (error instanceof InvalidSearch || error instanceof SearchUnavailable)
-					throw error;
+				if (error instanceof InvalidSearch || error instanceof SearchUnavailable) throw error;
 				logSearchFailure("Grouped search failed", "search.grouped.failed", error);
 				throw new SearchUnavailable(error);
 			}
@@ -999,15 +957,10 @@ export default new Elysia({ prefix: "/search" })
 			const identity = await resolveIdentity(request, "unit:read", "search.execute");
 			if (params.index === "tag-structures") {
 				if (!identity.profile) throw new AuthenticationRequired();
-				await identity.authorization.platform.ensureCapability(
-					DevelopmentPreviewCapability,
-				);
+				await identity.authorization.platform.ensureCapability(DevelopmentPreviewCapability);
 			}
 			try {
-				const viewer = await resolveRecommendationViewer(
-					identity.authorization.profileId,
-					false,
-				);
+				const viewer = await resolveRecommendationViewer(identity.authorization.profileId, false);
 				return await searchDomain(params.index, {
 					...body,
 					profileId: identity.authorization.profileId,
@@ -1017,8 +970,7 @@ export default new Elysia({ prefix: "/search" })
 					),
 				});
 			} catch (cause) {
-				if (cause instanceof InvalidSearch || cause instanceof SearchUnavailable)
-					throw cause;
+				if (cause instanceof InvalidSearch || cause instanceof SearchUnavailable) throw cause;
 				logSearchFailure("Domain search failed", "search.domain.failed", cause);
 				throw new SearchUnavailable(cause);
 			}

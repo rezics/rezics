@@ -45,10 +45,7 @@ describe("database integrity boundaries", () => {
 			[unitFollow, "unit_follow_position_byte_length_check"],
 			[contentStructureNode, "content_structure_node_position_byte_length_check"],
 			[unitTag, "unit_tag_position_byte_length_check"],
-			[
-				profileRealmTagSubscription,
-				"profile_realm_tag_subscription_position_byte_length_check",
-			],
+			[profileRealmTagSubscription, "profile_realm_tag_subscription_position_byte_length_check"],
 			[realmUnitTag, "realm_unit_tag_position_byte_length_check"],
 			[profileUnitTag, "profile_unit_tag_position_byte_length_check"],
 			[postProgressEntry, "post_progress_entry_position_byte_length_check"],
@@ -68,11 +65,7 @@ describe("database integrity boundaries", () => {
 	});
 
 	it.each([
-		[
-			imageObject,
-			"image_object_metadata_shape_check",
-			'"image_object"."media_type" is not null',
-		],
+		[imageObject, "image_object_metadata_shape_check", '"image_object"."media_type" is not null'],
 		[
 			contentStructureNode,
 			"content_structure_node_target_shape_check",

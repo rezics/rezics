@@ -576,10 +576,7 @@ async function getApplicationVoteSummary(
 			unitStructureApplicationVoteStat,
 			and(
 				eq(unitStructureApplicationVoteStat.unitId, unitStructureApplication.unitId),
-				eq(
-					unitStructureApplicationVoteStat.structureId,
-					unitStructureApplication.structureId,
-				),
+				eq(unitStructureApplicationVoteStat.structureId, unitStructureApplication.structureId),
 			),
 		)
 		.where(
@@ -658,10 +655,7 @@ export async function listVisibleUnitTagStructures(input: {
 			unitStructureApplicationVoteStat,
 			and(
 				eq(unitStructureApplicationVoteStat.unitId, unitStructureApplication.unitId),
-				eq(
-					unitStructureApplicationVoteStat.structureId,
-					unitStructureApplication.structureId,
-				),
+				eq(unitStructureApplicationVoteStat.structureId, unitStructureApplication.structureId),
 			),
 		)
 		.innerJoin(unitStructureVoteStat, eq(unitStructureVoteStat.structureId, unitStructure.id))
@@ -718,10 +712,7 @@ export async function listVisibleUnitTagStructures(input: {
 		voteCount: toSafeInteger(row.voteCount, "Tag structure application vote count"),
 		viewerVote: presentVote(row.viewerVote),
 		definitionScore: toSafeInteger(row.definitionScore ?? 0n, "Tag structure score"),
-		definitionVoteCount: toSafeInteger(
-			row.definitionVoteCount ?? 0n,
-			"Tag structure vote count",
-		),
+		definitionVoteCount: toSafeInteger(row.definitionVoteCount ?? 0n, "Tag structure vote count"),
 		members: members.get(row.structureId) ?? [],
 	}));
 }

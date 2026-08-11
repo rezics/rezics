@@ -167,12 +167,7 @@ export default new Elysia({ prefix: "/reactions" })
 		async ({ params, profile }) => {
 			await database
 				.delete(unitShare)
-				.where(
-					and(
-						eq(unitShare.profileId, profile.unitId),
-						eq(unitShare.unitId, params.unitId),
-					),
-				);
+				.where(and(eq(unitShare.profileId, profile.unitId), eq(unitShare.unitId, params.unitId)));
 			return { shared: false };
 		},
 		{

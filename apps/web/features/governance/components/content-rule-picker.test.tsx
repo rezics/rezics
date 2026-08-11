@@ -145,9 +145,7 @@ describe("ContentRuleMultiSelect", () => {
 		fireEvent.click(screen.getByRole("button", { name: "適用規則" }));
 		const menu = await screen.findByRole("menu");
 		fireEvent.keyDown(menu, { key: "ArrowDown" });
-		await waitFor(() =>
-			expect(menu.getAttribute("aria-activedescendant")).toContain("rule-spam"),
-		);
+		await waitFor(() => expect(menu.getAttribute("aria-activedescendant")).toContain("rule-spam"));
 		fireEvent.keyDown(menu, { key: " " });
 		await waitFor(() => expect(onRuleCheckedChange).toHaveBeenCalledWith(selected, true));
 		expect(screen.getByRole("menu")).toBeTruthy();
@@ -163,9 +161,7 @@ describe("ContentRuleMultiSelect", () => {
 			/>,
 		);
 
-		expect(screen.getByRole("button", { name: "適用規則" }).textContent).toContain(
-			"禁止垃圾內容",
-		);
+		expect(screen.getByRole("button", { name: "適用規則" }).textContent).toContain("禁止垃圾內容");
 		const clear = screen.getByRole("menuitem", { name: "清除已選規則" });
 		expect(clear.hasAttribute("data-disabled")).toBe(false);
 		fireEvent.pointerMove(clear, { pointerType: "mouse" });

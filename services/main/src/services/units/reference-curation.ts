@@ -54,10 +54,7 @@ async function lockCurationHead(
 		.select()
 		.from(unitReferenceCurationHead)
 		.where(
-			and(
-				eq(unitReferenceCurationHead.unitId, unitId),
-				eq(unitReferenceCurationHead.kind, kind),
-			),
+			and(eq(unitReferenceCurationHead.unitId, unitId), eq(unitReferenceCurationHead.kind, kind)),
 		)
 		.limit(1)
 		.for("update");
@@ -141,10 +138,7 @@ export async function ensureUnitReferenceCanBeCreated(
 					.select({ id: unitExternalLink.id })
 					.from(unitExternalLink)
 					.where(
-						and(
-							eq(unitExternalLink.unitId, input.unitId),
-							isNull(unitExternalLink.withdrawnAt),
-						),
+						and(eq(unitExternalLink.unitId, input.unitId), isNull(unitExternalLink.withdrawnAt)),
 					)
 					.limit(UnitReferenceActiveLimit);
 	if (active.length >= UnitReferenceActiveLimit)

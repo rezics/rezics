@@ -19,9 +19,7 @@ function loadProductDocuments(): Promise<readonly ProductDocument[]> {
 		for (const document of documents) {
 			const [directoryLocale, directoryName] = document.id.split("/");
 			if (directoryLocale !== document.data.locale || directoryName !== "products") {
-				throw new Error(
-					`Product locale mismatch: ${document.id} declares ${document.data.locale}`,
-				);
+				throw new Error(`Product locale mismatch: ${document.id} declares ${document.data.locale}`);
 			}
 
 			const key = `${document.data.locale}/${document.data.productId}`;

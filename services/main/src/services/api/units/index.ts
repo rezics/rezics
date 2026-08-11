@@ -158,8 +158,10 @@ export default new Elysia({ prefix: "/units" })
 	.get(
 		"/by-id/:unitId/seo",
 		async ({ params, query }) => {
-			const projection: Static<typeof PublicUnitSeoResponse> =
-				await getPublicUnitSeoProjection(params.unitId, query.localizationLanguages);
+			const projection: Static<typeof PublicUnitSeoResponse> = await getPublicUnitSeoProjection(
+				params.unitId,
+				query.localizationLanguages,
+			);
 			return projection;
 		},
 		{
@@ -435,10 +437,7 @@ export default new Elysia({ prefix: "/units" })
 			const limit = query.limit ?? 20;
 			const cursor = decodeCursor(query.cursor);
 			const identity = await resolveIdentity(request, "unit:read");
-			const viewer = await resolveRecommendationViewer(
-				identity.authorization.profileId,
-				false,
-			);
+			const viewer = await resolveRecommendationViewer(identity.authorization.profileId, false);
 			const rows = await listUnits(
 				params.type,
 				cursor,

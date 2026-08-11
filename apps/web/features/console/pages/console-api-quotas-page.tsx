@@ -177,9 +177,7 @@ function PolicyManagement() {
 						<button
 							className={cn(
 								"flex w-full items-center justify-between gap-3 rounded-lg px-3 py-2 text-start text-sm",
-								policy.key === selected?.key
-									? "bg-primary/10 text-primary"
-									: "hover:bg-accent",
+								policy.key === selected?.key ? "bg-primary/10 text-primary" : "hover:bg-accent",
 							)}
 							key={policy.id}
 							onClick={() => {
@@ -198,9 +196,7 @@ function PolicyManagement() {
 								</span>
 							</span>
 							<Badge variant={policy.enabled ? "success" : "outline"}>
-								{policy.enabled
-									? t.console.apiQuotas.enabled
-									: t.console.apiQuotas.disabled}
+								{policy.enabled ? t.console.apiQuotas.enabled : t.console.apiQuotas.disabled}
 							</Badge>
 						</button>
 					))}
@@ -215,10 +211,7 @@ function PolicyManagement() {
 					}}
 				/>
 			) : selected ? (
-				<ApiQuotaPolicyEditor
-					key={`${selected.key}:${selected.revision}`}
-					policy={selected}
-				/>
+				<ApiQuotaPolicyEditor key={`${selected.key}:${selected.revision}`} policy={selected} />
 			) : (
 				<p className="rounded-lg border border-border p-6 text-center text-muted-foreground text-sm">
 					{t.console.apiQuotas.empty}
@@ -276,20 +269,14 @@ function QuotaAssignments() {
 							<button
 								className={cn(
 									"rounded-lg px-3 py-2 text-start",
-									selectedUserId === user.userId
-										? "bg-primary/10 text-primary"
-										: "hover:bg-accent",
+									selectedUserId === user.userId ? "bg-primary/10 text-primary" : "hover:bg-accent",
 								)}
 								key={user.userId}
 								onClick={() => setSelectedUserId(user.userId)}
 								type="button"
 							>
-								<span className="block truncate font-medium text-sm">
-									{user.name}
-								</span>
-								<span className="block truncate text-muted-foreground text-xs">
-									{user.email}
-								</span>
+								<span className="block truncate font-medium text-sm">{user.name}</span>
+								<span className="block truncate text-muted-foreground text-xs">{user.email}</span>
 							</button>
 						))}
 					</div>
@@ -301,9 +288,7 @@ function QuotaAssignments() {
 						<h2 className="font-semibold">{selected.name}</h2>
 						<p className="text-muted-foreground text-sm">{selected.email}</p>
 					</header>
-					{canReadAccountApiQuotas ? (
-						<AccountApiQuotaEditor userId={selected.userId} />
-					) : null}
+					{canReadAccountApiQuotas ? <AccountApiQuotaEditor userId={selected.userId} /> : null}
 					<TokenApiQuotaManager userId={selected.userId} />
 				</div>
 			) : (
@@ -332,8 +317,7 @@ function ApiQuotaPolicyCreateForm({
 	const [key, setKey] = useState("");
 	const [subjectKind, setSubjectKind] =
 		useState<PostApiApiQuotaPoliciesBody["subjectKind"]>("account");
-	const [policyClass, setPolicyClass] =
-		useState<PostApiApiQuotaPoliciesBody["class"]>("standard");
+	const [policyClass, setPolicyClass] = useState<PostApiApiQuotaPoliciesBody["class"]>("standard");
 	const [requestsPerMinute, setRequestsPerMinute] = useState(60);
 	const [burstCapacity, setBurstCapacity] = useState(10);
 	const [maxConcurrentRequests, setMaxConcurrentRequests] = useState(2);
@@ -418,8 +402,7 @@ function ApiQuotaPolicyCreateForm({
 							<NativeSelect
 								onChange={(event) => {
 									const value = event.currentTarget.value;
-									if (value === "account" || value === "token")
-										setSubjectKind(value);
+									if (value === "account" || value === "token") setSubjectKind(value);
 								}}
 								value={subjectKind}
 							>
@@ -436,8 +419,7 @@ function ApiQuotaPolicyCreateForm({
 							<NativeSelect
 								onChange={(event) => {
 									const value = event.currentTarget.value;
-									if (value === "standard" || value === "privileged")
-										setPolicyClass(value);
+									if (value === "standard" || value === "privileged") setPolicyClass(value);
 								}}
 								value={policyClass}
 							>
@@ -513,10 +495,7 @@ function ApiQuotaPolicyCreateForm({
 							value={reason}
 						/>
 					</Field>
-					<RequestFailure
-						error={mutation.error}
-						fallback={t.console.apiQuotas.createFailed}
-					/>
+					<RequestFailure error={mutation.error} fallback={t.console.apiQuotas.createFailed} />
 					<div className="flex justify-end gap-2">
 						<Button
 							disabled={mutation.isPending}
@@ -554,9 +533,7 @@ function ApiQuotaPolicyEditor({ policy }: { readonly policy: Policy }) {
 	);
 	const isAccountPolicy = policy.subjectKind === "account";
 	const [maxActiveTokens, setMaxActiveTokens] = useState(() =>
-		"maxActiveTokens" in policy.configuration
-			? Number(policy.configuration.maxActiveTokens)
-			: 1,
+		"maxActiveTokens" in policy.configuration ? Number(policy.configuration.maxActiveTokens) : 1,
 	);
 	const [operationsText, setOperationsText] = useState(() =>
 		JSON.stringify(policy.configuration.operations, null, 2),
@@ -617,9 +594,8 @@ function ApiQuotaPolicyEditor({ policy }: { readonly policy: Policy }) {
 					<div>
 						<CardTitle>{policy.key}</CardTitle>
 						<CardDescription>
-							{t.console.apiQuotas.subjects[policy.subjectKind]} ·{" "}
-							{t.console.apiQuotas.policyClass}:{" "}
-							{t.console.apiQuotas.classes[policy.class]}
+							{t.console.apiQuotas.subjects[policy.subjectKind]} · {t.console.apiQuotas.policyClass}
+							: {t.console.apiQuotas.classes[policy.class]}
 						</CardDescription>
 					</div>
 					<Badge variant="secondary">
@@ -696,10 +672,7 @@ function ApiQuotaPolicyEditor({ policy }: { readonly policy: Policy }) {
 							value={reason}
 						/>
 					</Field>
-					<RequestFailure
-						error={mutation.error}
-						fallback={t.console.apiQuotas.updateFailed}
-					/>
+					<RequestFailure error={mutation.error} fallback={t.console.apiQuotas.updateFailed} />
 					{canUpdateApiQuotaPolicies ? (
 						<div className="flex justify-end">
 							<Button isLoading={mutation.isPending} type="submit" variant="solid">
@@ -707,9 +680,7 @@ function ApiQuotaPolicyEditor({ policy }: { readonly policy: Policy }) {
 							</Button>
 						</div>
 					) : (
-						<p className="text-muted-foreground text-sm">
-							{t.console.apiQuotas.readOnly}
-						</p>
+						<p className="text-muted-foreground text-sm">{t.console.apiQuotas.readOnly}</p>
 					)}
 				</form>
 			</CardContent>

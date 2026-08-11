@@ -206,8 +206,7 @@ export default {
 			reason: "Motivo de la asignación",
 			reasonPlaceholder:
 				"Registra la justificación operativa; se guardará en el registro de seguridad.",
-			invalid:
-				"Revisa los límites, las sobrescrituras por operación y la caducidad privilegiada.",
+			invalid: "Revisa los límites, las sobrescrituras por operación y la caducidad privilegiada.",
 			updateFailed: "No se pudo actualizar la cuota. Recarga la página e inténtalo de nuevo.",
 			reset: "Restablecer al estándar",
 			save: "Guardar cuota de la cuenta",
@@ -353,10 +352,9 @@ export default {
 		submit: "Aplicar la acción",
 		succeeded: "Acción de gobernanza global completada",
 		confirmRemovalTitle: "¿Retirar este contenido de la plataforma?",
-		confirmRemovalDescription: insert(
-			"{{title}} se marcará como retirado en toda la plataforma.",
-			{ title: String },
-		),
+		confirmRemovalDescription: insert("{{title}} se marcará como retirado en toda la plataforma.", {
+			title: String,
+		}),
 		confirmRemoval: "Retirar contenido",
 		confirmLicenseInvalidationTitle: "¿Invalidar esta licencia de contenido?",
 		confirmLicenseInvalidationDescription: insert(

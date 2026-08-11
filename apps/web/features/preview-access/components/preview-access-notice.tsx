@@ -20,9 +20,7 @@ export function PreviewAccessNotice() {
 						<h2 className="font-heading text-2xl font-semibold tracking-tight">
 							{t.previewAccess.title}
 						</h2>
-						<p className="text-sm leading-6 text-muted-foreground">
-							{t.previewAccess.description}
-						</p>
+						<p className="text-sm leading-6 text-muted-foreground">{t.previewAccess.description}</p>
 					</div>
 					<p className="text-sm leading-6 text-muted-foreground">
 						{t.previewAccess.openSourcePrefix}{" "}

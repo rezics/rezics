@@ -33,9 +33,7 @@ export function RealmInfoCard({ realm }: { realm: RealmInfoCardData }) {
 				<div className="min-w-0">
 					<p className="truncate font-heading font-bold text-base">{name}</p>
 					{realm.slug ? (
-						<p className="truncate font-mono text-muted-foreground text-xs">
-							/{realm.slug}
-						</p>
+						<p className="truncate font-mono text-muted-foreground text-xs">/{realm.slug}</p>
 					) : null}
 				</div>
 			</div>

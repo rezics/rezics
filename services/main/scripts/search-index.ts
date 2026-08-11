@@ -70,9 +70,7 @@ async function check(client: Client): Promise<void> {
 		throw new Error(
 			`PGroonga reports lagged indexes: ${lagged.rows.map(({ index }) => index).join(", ")}`,
 		);
-	console.info(
-		"PGroonga 4.0.8, approx_count 1.0, and all canonical indexes are ready and healthy",
-	);
+	console.info("PGroonga 4.0.8, approx_count 1.0, and all canonical indexes are ready and healthy");
 }
 
 async function main(): Promise<void> {
@@ -86,9 +84,7 @@ async function main(): Promise<void> {
 		}
 		const concurrently = options.action === "reindex-concurrently" ? " CONCURRENTLY" : "";
 		for (const index of selectCanonicalPgroongaIndexes(options.index)) {
-			await client.query(
-				`REINDEX INDEX${concurrently} ${quoteCanonicalPgroongaIndex(index)}`,
-			);
+			await client.query(`REINDEX INDEX${concurrently} ${quoteCanonicalPgroongaIndex(index)}`);
 			console.info(`Reindexed ${index}${concurrently ? " concurrently" : ""}`);
 		}
 		await check(client);

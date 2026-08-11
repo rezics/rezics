@@ -107,9 +107,7 @@ export function WikiCreatePage({ defaultRealmId }: { defaultRealmId?: string }) 
 								}
 								value={accessMode}
 							>
-								<NativeSelectOption value="restricted">
-									{t.posts.wikiRestricted}
-								</NativeSelectOption>
+								<NativeSelectOption value="restricted">{t.posts.wikiRestricted}</NativeSelectOption>
 								<NativeSelectOption value="community_owned">
 									{t.posts.wikiCommunityUnit}
 								</NativeSelectOption>
@@ -169,10 +167,7 @@ export function WikiCreatePage({ defaultRealmId }: { defaultRealmId?: string }) 
 						/>
 					</FieldGroup>
 				</form>
-				<RealmRulesAcknowledgementPrompt
-					controller={rulesAcknowledgement}
-					intent="publish"
-				/>
+				<RealmRulesAcknowledgementPrompt controller={rulesAcknowledgement} intent="publish" />
 			</main>
 		</RequireSession>
 	);

@@ -137,18 +137,11 @@ function CollectionLocalizationEditor({
 				<CollectionLocalizationFields
 					cover={value.cover}
 					onCoverChange={(cover) => draft.setValue((current) => ({ ...current, cover }))}
-					onValueChange={(fields) =>
-						draft.setValue((current) => ({ ...current, ...fields }))
-					}
+					onValueChange={(fields) => draft.setValue((current) => ({ ...current, ...fields }))}
 					value={value}
 				/>
 				<RequestFailure error={update.error} fallback={t.ui.retryLater} />
-				<Button
-					className="w-fit"
-					isLoading={update.isPending}
-					type="submit"
-					variant="solid"
-				>
+				<Button className="w-fit" isLoading={update.isPending} type="submit" variant="solid">
 					{t.collections.form.save}
 				</Button>
 			</form>

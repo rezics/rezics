@@ -50,8 +50,7 @@ export function PollsPage() {
 	});
 	const { t } = useTranslation(["actions", "engagement", "errors", "ui"]);
 	if (query.isPending) return <QueryPending />;
-	if (query.isError)
-		return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
+	if (query.isError) return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
 	return (
 		<main className="mx-auto flex w-full max-w-5xl flex-col gap-8 px-4 py-10 sm:px-6">
 			<PageHeading
@@ -182,9 +181,7 @@ export function PollCreate() {
 											variant="quiet"
 											onClick={() =>
 												setOptions((current) =>
-													current.filter(
-														(candidate) => candidate.key !== option.key,
-													),
+													current.filter((candidate) => candidate.key !== option.key),
 												)
 											}
 										>
@@ -198,10 +195,7 @@ export function PollCreate() {
 									type="button"
 									variant="outline"
 									onClick={() =>
-										setOptions((current) => [
-											...current,
-											{ key: crypto.randomUUID(), label: "" },
-										])
+										setOptions((current) => [...current, { key: crypto.randomUUID(), label: "" }])
 									}
 								>
 									{t.engagement.addOption}
@@ -211,9 +205,7 @@ export function PollCreate() {
 						<Field>
 							<FieldLabel>{t.engagement.polls}</FieldLabel>
 							<NativeSelect defaultValue="single" name="voteMode">
-								<NativeSelectOption value="single">
-									{t.engagement.singleChoice}
-								</NativeSelectOption>
+								<NativeSelectOption value="single">{t.engagement.singleChoice}</NativeSelectOption>
 								<NativeSelectOption value="multiple">
 									{t.engagement.multipleChoice}
 								</NativeSelectOption>
@@ -222,9 +214,7 @@ export function PollCreate() {
 						<Field>
 							<FieldLabel>{t.engagement.resultVisibility}</FieldLabel>
 							<NativeSelect defaultValue="live" name="resultsVisibility">
-								<NativeSelectOption value="live">
-									{t.engagement.resultsLive}
-								</NativeSelectOption>
+								<NativeSelectOption value="live">{t.engagement.resultsLive}</NativeSelectOption>
 								<NativeSelectOption value="after_close">
 									{t.engagement.resultsAfterClose}
 								</NativeSelectOption>
@@ -236,9 +226,7 @@ export function PollCreate() {
 						</Field>
 						<Field orientation="horizontal">
 							<Checkbox name="anonymous" />
-							<FieldLabel className="font-normal">
-								{t.engagement.anonymous}
-							</FieldLabel>
+							<FieldLabel className="font-normal">{t.engagement.anonymous}</FieldLabel>
 						</Field>
 					</FieldGroup>
 					{invalid && <p className="text-destructive text-sm">{t.errors.invalid}</p>}
@@ -316,11 +304,7 @@ export function PollDetail({ id }: { id: string }) {
 							>
 								{currentPoll.options.map((option) => (
 									<PollOption
-										count={
-											option.voteCount === null
-												? null
-												: Number(option.voteCount)
-										}
+										count={option.voteCount === null ? null : Number(option.voteCount)}
 										key={option.id}
 										option={option}
 										variant="radio"
@@ -336,11 +320,7 @@ export function PollDetail({ id }: { id: string }) {
 							>
 								{currentPoll.options.map((option) => (
 									<PollOption
-										count={
-											option.voteCount === null
-												? null
-												: Number(option.voteCount)
-										}
+										count={option.voteCount === null ? null : Number(option.voteCount)}
 										key={option.id}
 										option={option}
 										variant="checkbox"
@@ -349,14 +329,10 @@ export function PollDetail({ id }: { id: string }) {
 							</CheckboxGroup>
 						)}
 						{currentPoll.options.some((option) => option.voteCount === null) && (
-							<p className="text-muted-foreground text-sm">
-								{t.engagement.resultsHidden}
-							</p>
+							<p className="text-muted-foreground text-sm">{t.engagement.resultsHidden}</p>
 						)}
 						{currentPoll.closed ? (
-							<p className="text-muted-foreground text-sm">
-								{t.engagement.pollClosed}
-							</p>
+							<p className="text-muted-foreground text-sm">{t.engagement.pollClosed}</p>
 						) : session ? (
 							<div className="flex flex-wrap gap-2">
 								<Button
@@ -378,15 +354,10 @@ export function PollDetail({ id }: { id: string }) {
 								)}
 							</div>
 						) : (
-							<SignInButton destination={`/polls/${id}`}>
-								{t.actions.login}
-							</SignInButton>
+							<SignInButton destination={`/polls/${id}`}>{t.actions.login}</SignInButton>
 						)}
 					</form>
-					<RequestFailure
-						error={vote.error ?? retract.error}
-						fallback={t.ui.retryLater}
-					/>
+					<RequestFailure error={vote.error ?? retract.error} fallback={t.ui.retryLater} />
 				</CardContent>
 			</Card>
 		</main>
@@ -411,14 +382,10 @@ function PollOption({
 			) : (
 				<>
 					<Checkbox value={option.id} />
-					<FieldLabel className="min-w-0 flex-1 truncate font-normal">
-						{option.label}
-					</FieldLabel>
+					<FieldLabel className="min-w-0 flex-1 truncate font-normal">{option.label}</FieldLabel>
 				</>
 			)}
-			{count !== null && (
-				<span className="shrink-0 text-muted-foreground text-sm">{count}</span>
-			)}
+			{count !== null && <span className="shrink-0 text-muted-foreground text-sm">{count}</span>}
 		</Field>
 	);
 }

@@ -74,9 +74,7 @@ export function UnitExternalLinkBadge({
 							size="sm"
 						/>
 						<span className="min-w-0 truncate">{title}</span>
-						<span className="shrink-0 tabular-nums text-[0.6875rem] opacity-75">
-							{score}
-						</span>
+						<span className="shrink-0 tabular-nums text-[0.6875rem] opacity-75">{score}</span>
 					</button>
 				</PopoverTrigger>
 				<PopoverContent className="grid w-[min(22rem,calc(100vw-2rem))] gap-4 p-(--space)">
@@ -96,9 +94,7 @@ export function UnitExternalLinkBadge({
 						</div>
 					</div>
 					{summary ? (
-						<p className="line-clamp-3 text-sm leading-6 text-muted-foreground">
-							{summary}
-						</p>
+						<p className="line-clamp-3 text-sm leading-6 text-muted-foreground">{summary}</p>
 					) : null}
 					<PopoverClose asChild>
 						<a

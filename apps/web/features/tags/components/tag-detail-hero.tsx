@@ -45,12 +45,7 @@ export function TagDetailHero({ tag }: { readonly tag: GetApiTagsByTagIdStatus20
 						{tag.capabilities.canEdit ? (
 							<Tooltip>
 								<TooltipTrigger asChild>
-									<Button
-										aria-label={t.ui.edit}
-										asChild
-										size="icon-md"
-										variant="quiet"
-									>
+									<Button aria-label={t.ui.edit} asChild size="icon-md" variant="quiet">
 										<Link href={tagManagementHref(tag.id)}>
 											<Pencil aria-hidden />
 										</Link>
@@ -63,9 +58,7 @@ export function TagDetailHero({ tag }: { readonly tag: GetApiTagsByTagIdStatus20
 						<UnitReportOverflowMenu
 							additionalItems={
 								<ContentLanguageVersionMenu
-									availableLanguages={tag.localizations.map(
-										({ language }) => language,
-									)}
+									availableLanguages={tag.localizations.map(({ language }) => language)}
 									currentLanguage={tag.language}
 								/>
 							}
@@ -75,10 +68,7 @@ export function TagDetailHero({ tag }: { readonly tag: GetApiTagsByTagIdStatus20
 				</div>
 				{localization?.summary ? (
 					<p className="max-w-3xl text-base font-medium leading-7 text-foreground/88">
-						<LocalizedText
-							language={localization.language}
-							value={localization.summary}
-						/>
+						<LocalizedText language={localization.language} value={localization.summary} />
 					</p>
 				) : null}
 				<ConnectedFeedEngagementBar

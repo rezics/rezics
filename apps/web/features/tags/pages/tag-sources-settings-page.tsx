@@ -77,10 +77,7 @@ export function TagSourcesSettingsPage() {
 		if (!item) return;
 		const position =
 			direction === "earlier"
-				? generateKeyBetween(
-						items[index - 2]?.position ?? null,
-						items[index - 1]?.position ?? null,
-					)
+				? generateKeyBetween(items[index - 2]?.position ?? null, items[index - 1]?.position ?? null)
 				: generateKeyBetween(
 						items[index + 1]?.position ?? null,
 						items[index + 2]?.position ?? null,
@@ -110,9 +107,7 @@ export function TagSourcesSettingsPage() {
 					<CardContent className="grid gap-4 p-5 sm:p-6">
 						<div className="grid gap-1">
 							<h3 className="font-semibold">{t.tags.sources.addTitle}</h3>
-							<p className="text-sm text-muted-foreground">
-								{t.tags.sources.addDescription}
-							</p>
+							<p className="text-sm text-muted-foreground">{t.tags.sources.addDescription}</p>
 						</div>
 						<div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto]">
 							<EntityPicker
@@ -146,20 +141,14 @@ export function TagSourcesSettingsPage() {
 												href={`/realms/${item.realmId}`}
 											>
 												{item.title ? (
-													<LocalizedText
-														language={item.language}
-														value={item.title}
-													/>
+													<LocalizedText language={item.language} value={item.title} />
 												) : (
 													t.tags.unnamedRealm
 												)}
 											</Link>
 											{item.summary ? (
 												<p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
-													<LocalizedText
-														language={item.language}
-														value={item.summary}
-													/>
+													<LocalizedText language={item.language} value={item.summary} />
 												</p>
 											) : null}
 										</div>
@@ -175,9 +164,7 @@ export function TagSourcesSettingsPage() {
 										</Button>
 										<Button
 											aria-label={t.tags.sources.moveLater}
-											disabled={
-												index === items.length - 1 || upsert.isPending
-											}
+											disabled={index === items.length - 1 || upsert.isPending}
 											onClick={() => void moveSource(index, "later")}
 											size="sm"
 											type="button"

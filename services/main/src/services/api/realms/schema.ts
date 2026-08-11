@@ -125,10 +125,7 @@ const NewRealmTaxonomyUnitDraftNode = t.Object(
 	{
 		state: t.Literal("new"),
 		...RealmTaxonomyDraftNodeBase,
-		content: t.Object(
-			{ kind: t.Literal("unit"), unitId: Uuid },
-			{ additionalProperties: false },
-		),
+		content: t.Object({ kind: t.Literal("unit"), unitId: Uuid }, { additionalProperties: false }),
 	},
 	{ additionalProperties: false },
 );
@@ -462,11 +459,7 @@ export const ModerateRealmUnitBody = t.Union([
 	t.Object(
 		{
 			...RealmGovernanceCommon,
-			command: t.Union([
-				t.Literal("hide"),
-				t.Literal("remove"),
-				t.Literal("lock_post_targeting"),
-			]),
+			command: t.Union([t.Literal("hide"), t.Literal("remove"), t.Literal("lock_post_targeting")]),
 			rules: t.Array(ContentGovernanceRuleReference, {
 				minItems: 1,
 				maxItems: ContentGovernanceMaxRuleReferences,

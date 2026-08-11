@@ -318,8 +318,7 @@ export function moveBookDraftSelection(
 		target.kind === "node" ? nodes.find(({ id }) => id === target.nodeId) : undefined;
 	if (target.kind === "node") {
 		if (!targetNode || !validTargetIds.has(target.nodeId)) return [...nodes];
-		if (target.placement === "inside" && !isBookDraftParentTarget(targetNode))
-			return [...nodes];
+		if (target.placement === "inside" && !isBookDraftParentTarget(targetNode)) return [...nodes];
 	}
 
 	const siblings = siblingMap(nodes);
@@ -410,9 +409,7 @@ export function toBookContentStructureSaveNodes(
 					contentKind: "chapter",
 					content: node.content,
 					status: node.status,
-					...(node.ownershipMode === undefined
-						? {}
-						: { ownershipMode: node.ownershipMode }),
+					...(node.ownershipMode === undefined ? {} : { ownershipMode: node.ownershipMode }),
 				};
 			return {
 				state: "new",

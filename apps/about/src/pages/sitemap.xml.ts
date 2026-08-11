@@ -34,9 +34,7 @@ export async function GET(): Promise<Response> {
 		].map(getCanonicalForPath),
 	);
 	urls.push(
-		...legalDocuments.map(({ locale, slug }) =>
-			getCanonicalForPath(getLegalPath(locale, slug)),
-		),
+		...legalDocuments.map(({ locale, slug }) => getCanonicalForPath(getLegalPath(locale, slug))),
 	);
 	urls.push(
 		...documentationDocuments.map(({ locale, slug }) =>

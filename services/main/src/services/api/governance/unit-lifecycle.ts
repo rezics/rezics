@@ -107,9 +107,7 @@ export default new Elysia({ prefix: "/platform/units" })
 			body: OverrideUnitOwnershipBody,
 			response: {
 				[StatusCodes.OK]: UnitOwnershipResponse,
-				[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
-					"UnitOwnershipOverrideConfirmationInvalid",
-				]),
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["UnitOwnershipOverrideConfirmationInvalid"]),
 				[StatusCodes.FORBIDDEN]: toApiErrorResponse([
 					"PlatformCapabilityRequired",
 					"FreshSessionRequired",
@@ -130,8 +128,7 @@ export default new Elysia({ prefix: "/platform/units" })
 		"/:unitId/delete",
 		async ({ authorization, profile, params, body }) => {
 			await authorization.platform.ensureCapability("unit.delete");
-			if (body.confirmationUnitId !== params.unitId)
-				throw new UnitLifecycleConfirmationInvalid();
+			if (body.confirmationUnitId !== params.unitId) throw new UnitLifecycleConfirmationInvalid();
 			return softDeletePlatformUnit({
 				unitId: params.unitId,
 				actorProfileId: profile.unitId,
@@ -164,8 +161,7 @@ export default new Elysia({ prefix: "/platform/units" })
 		"/:unitId/restore",
 		async ({ authorization, profile, params, body }) => {
 			await authorization.platform.ensureCapability("unit.restore");
-			if (body.confirmationUnitId !== params.unitId)
-				throw new UnitLifecycleConfirmationInvalid();
+			if (body.confirmationUnitId !== params.unitId) throw new UnitLifecycleConfirmationInvalid();
 			return restorePlatformUnit({
 				unitId: params.unitId,
 				actorProfileId: profile.unitId,

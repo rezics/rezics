@@ -244,9 +244,7 @@ describe("TagCreatePage", () => {
 		);
 
 		expect(
-			screen
-				.getByRole("button", { name: 'Create Tag and vote "Fits"' })
-				.hasAttribute("disabled"),
+			screen.getByRole("button", { name: 'Create Tag and vote "Fits"' }).hasAttribute("disabled"),
 		).toBe(true);
 		fireEvent.click(screen.getByRole("button", { name: "Confirm search" }));
 		fireEvent.click(screen.getByRole("button", { name: 'Create Tag and vote "Fits"' }));

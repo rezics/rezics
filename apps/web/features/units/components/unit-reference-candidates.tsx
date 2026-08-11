@@ -266,10 +266,7 @@ function AliasCandidates({
 				<CardDescription>{t.units.references.aliasesDescription}</CardDescription>
 			</CardHeader>
 			<CardContent className="grid gap-4">
-				<form
-					className="flex flex-col gap-2 sm:flex-row"
-					onSubmit={(event) => void submit(event)}
-				>
+				<form className="flex flex-col gap-2 sm:flex-row" onSubmit={(event) => void submit(event)}>
 					<Input
 						aria-label={t.units.references.aliasTerm}
 						name="term"
@@ -346,12 +343,7 @@ function AliasCandidates({
 											aria-label={t.units.references.withdraw}
 											disabled={busy}
 											onClick={() => {
-												if (
-													!window.confirm(
-														t.units.references.withdrawConfirm,
-													)
-												)
-													return;
+												if (!window.confirm(t.units.references.withdrawConfirm)) return;
 												void withdraw
 													.mutateAsync({
 														path: {
@@ -387,13 +379,7 @@ function AliasCandidates({
 					</Button>
 				) : null}
 				<RequestFailure
-					error={
-						create.error ??
-						vote.error ??
-						clearVote.error ??
-						curate.error ??
-						withdraw.error
-					}
+					error={create.error ?? vote.error ?? clearVote.error ?? curate.error ?? withdraw.error}
 					fallback={t.errors.unknown}
 				/>
 			</CardContent>
@@ -491,12 +477,7 @@ function ExternalLinkCandidates({
 					</Field>
 					<Field required>
 						<FieldLabel>{t.units.references.externalUrl}</FieldLabel>
-						<Input
-							name="url"
-							placeholder={t.units.references.urlPlaceholder}
-							required
-							type="url"
-						/>
+						<Input name="url" placeholder={t.units.references.urlPlaceholder} required type="url" />
 					</Field>
 					<Button
 						className="self-end"
@@ -507,10 +488,7 @@ function ExternalLinkCandidates({
 						{t.units.references.proposeExternalLink}
 					</Button>
 				</form>
-				<CandidateList
-					empty={t.units.references.noExternalLinks}
-					hasItems={items.length > 0}
-				>
+				<CandidateList empty={t.units.references.noExternalLinks} hasItems={items.length > 0}>
 					{items.map((candidate) => (
 						<li className="grid gap-3 p-3" key={candidate.id}>
 							<div className="flex flex-wrap items-start justify-between gap-2">
@@ -520,8 +498,7 @@ function ExternalLinkCandidates({
 									rel="ugc nofollow noreferrer"
 									target="_blank"
 								>
-									{candidate.url}{" "}
-									<ExternalLink aria-hidden className="inline size-3" />
+									{candidate.url} <ExternalLink aria-hidden className="inline size-3" />
 								</a>
 								<ReferenceStatus pinned={candidate.pinned} />
 							</div>
@@ -590,12 +567,7 @@ function ExternalLinkCandidates({
 											aria-label={t.units.references.withdraw}
 											disabled={busy}
 											onClick={() => {
-												if (
-													!window.confirm(
-														t.units.references.withdrawConfirm,
-													)
-												)
-													return;
+												if (!window.confirm(t.units.references.withdrawConfirm)) return;
 												void withdraw
 													.mutateAsync({
 														path: {
@@ -631,13 +603,7 @@ function ExternalLinkCandidates({
 					</Button>
 				) : null}
 				<RequestFailure
-					error={
-						create.error ??
-						vote.error ??
-						clearVote.error ??
-						curate.error ??
-						withdraw.error
-					}
+					error={create.error ?? vote.error ?? clearVote.error ?? curate.error ?? withdraw.error}
 					fallback={t.errors.unknown}
 				/>
 			</CardContent>
@@ -663,11 +629,7 @@ export function UnitReferenceCandidates({
 			</div>
 			<div className="grid gap-4 xl:grid-cols-2">
 				<AliasCandidates canCurate={canCurate.aliases} type={type} unitId={unitId} />
-				<ExternalLinkCandidates
-					canCurate={canCurate.externalLinks}
-					type={type}
-					unitId={unitId}
-				/>
+				<ExternalLinkCandidates canCurate={canCurate.externalLinks} type={type} unitId={unitId} />
 			</div>
 		</section>
 	);

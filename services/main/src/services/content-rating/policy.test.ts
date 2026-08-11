@@ -39,8 +39,8 @@ describe("content-rating policy", () => {
 
 	it("compiles match-none as a false predicate and allowlists as an IN predicate", () => {
 		expect(dialect.sqlToQuery(getContentRatingCondition({ kind: "none" })).sql).toBe("false");
-		expect(
-			dialect.sqlToQuery(getContentRatingCondition(DefaultContentRatingPolicy)).sql,
-		).toContain(" in (");
+		expect(dialect.sqlToQuery(getContentRatingCondition(DefaultContentRatingPolicy)).sql).toContain(
+			" in (",
+		);
 	});
 });

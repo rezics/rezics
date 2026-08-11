@@ -21,9 +21,7 @@ afterEach(() => {
 
 describe("browser Markdown storage", () => {
 	it("preserves a UTF-8 byte-order mark in the source value", async () => {
-		installOpenPicker(
-			new File([new Uint8Array([0xef, 0xbb, 0xbf]), "# Document"], "document.md"),
-		);
+		installOpenPicker(new File([new Uint8Array([0xef, 0xbb, 0xbf]), "# Document"], "document.md"));
 
 		const result = await createBrowserMarkdownStorage().openDocument();
 		expect(result.ok).toBe(true);

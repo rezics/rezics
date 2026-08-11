@@ -45,9 +45,7 @@ describe("content feed fixture data", () => {
 			expect(new Set(fixture.attributions.map(({ kind }) => kind))).toEqual(
 				new Set(["profile", "entity"]),
 			);
-			expect(new Set(fixture.realms.map((realm) => realm.id)).size).toBe(
-				fixture.realms.length,
-			);
+			expect(new Set(fixture.realms.map((realm) => realm.id)).size).toBe(fixture.realms.length);
 		}
 	});
 

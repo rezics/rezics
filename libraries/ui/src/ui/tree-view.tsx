@@ -191,9 +191,7 @@ const TreeViewBranchTitle = (props: TreeViewBranchTitleProps) => {
 							{...rest}
 						>
 							{Icon !== null && !nodeState.expanded && (
-								<TreeViewItemIcon>
-									{Icon ? <Icon /> : <FolderIcon />}
-								</TreeViewItemIcon>
+								<TreeViewItemIcon>{Icon ? <Icon /> : <FolderIcon />}</TreeViewItemIcon>
 							)}
 							{ExpandedIcon !== null && nodeState.expanded && (
 								<TreeViewItemIcon>

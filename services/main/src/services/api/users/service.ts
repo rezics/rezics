@@ -23,11 +23,7 @@ export function publicProfileSelection(localizationLanguages: readonly ContentLa
 		language: unitLocalization.language,
 		name: unitLocalization.title,
 		avatar: resolvedUnitLocalizationAvatar(unit.id, localizationLanguages),
-		bannerAssetId: resolvedUnitLocalizationImageAssetId(
-			unit.id,
-			"banner",
-			localizationLanguages,
-		),
+		bannerAssetId: resolvedUnitLocalizationImageAssetId(unit.id, "banner", localizationLanguages),
 		summary: unitLocalization.summary,
 		description: unitLocalization.description,
 		createdAt: unit.createdAt,

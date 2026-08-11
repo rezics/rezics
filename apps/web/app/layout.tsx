@@ -90,12 +90,11 @@ export const viewport: Viewport = {
 
 export default async function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
 	const requestHeaders = await headers();
-	const [{ locale, snapshot }, initialSession, initialPresentationPreferences] =
-		await Promise.all([
-			getTranslation(RootTranslationNamespaces),
-			getInitialAuthSession(requestHeaders),
-			getInitialPresentationPreferences(requestHeaders),
-		]);
+	const [{ locale, snapshot }, initialSession, initialPresentationPreferences] = await Promise.all([
+		getTranslation(RootTranslationNamespaces),
+		getInitialAuthSession(requestHeaders),
+		getInitialPresentationPreferences(requestHeaders),
+	]);
 	const queryClient = createQueryClient();
 	seedInitialPresentationPreferences(queryClient, initialSession, initialPresentationPreferences);
 	const dehydratedState = dehydrate(queryClient);
@@ -114,21 +113,13 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
 				{usesTraditionalChineseFont ? (
 					<>
 						<link href="https://fonts.googleapis.com" rel="preconnect" />
-						<link
-							crossOrigin="anonymous"
-							href="https://fonts.gstatic.com"
-							rel="preconnect"
-						/>
+						<link crossOrigin="anonymous" href="https://fonts.gstatic.com" rel="preconnect" />
 						<link href={notoSansTcStylesheet} rel="stylesheet" />
 					</>
 				) : null}
 				{fontAwesomeCss ? (
 					<>
-						<link
-							crossOrigin="anonymous"
-							href={fontAwesomeCss.origin}
-							rel="preconnect"
-						/>
+						<link crossOrigin="anonymous" href={fontAwesomeCss.origin} rel="preconnect" />
 						<link
 							crossOrigin="anonymous"
 							href={fontAwesomeCss.href}

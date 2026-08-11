@@ -34,12 +34,7 @@ export function PostEditorFields({
 				value={body}
 			/>
 			<RequestFailure error={error} />
-			<Button
-				className="w-fit"
-				disabled={!body.length || pending}
-				type="submit"
-				variant="solid"
-			>
+			<Button className="w-fit" disabled={!body.length || pending} type="submit" variant="solid">
 				{pending ? <Spinner data-icon="inline-start" /> : null}
 				{submitLabel}
 			</Button>

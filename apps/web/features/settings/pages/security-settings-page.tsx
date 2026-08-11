@@ -54,8 +54,7 @@ export function SecuritySettingsPage() {
 		const newPassword = String(formData.get("newPassword") ?? "");
 		const confirmPassword = String(formData.get("confirmPassword") ?? "");
 		const isMismatch =
-			confirmPassword.length > 0 &&
-			!passwordConfirmationMatches(newPassword, confirmPassword);
+			confirmPassword.length > 0 && !passwordConfirmationMatches(newPassword, confirmPassword);
 		if (isMismatch) setPasswordState("mismatch");
 		else if (passwordState === "mismatch") setPasswordState("idle");
 	};
@@ -119,9 +118,7 @@ export function SecuritySettingsPage() {
 					current.status === "ready"
 						? {
 								status: "ready",
-								sessions: current.sessions.filter(
-									(session) => session.token !== token,
-								),
+								sessions: current.sessions.filter((session) => session.token !== token),
 							}
 						: current,
 				);
@@ -167,19 +164,13 @@ export function SecuritySettingsPage() {
 								/>
 								<AuthPasswordField
 									autoComplete="new-password"
-									error={
-										passwordState === "mismatch"
-											? t.auth.passwordMismatch
-											: undefined
-									}
+									error={passwordState === "mismatch" ? t.auth.passwordMismatch : undefined}
 									label={t.auth.confirmPassword}
 									minLength={8}
 									name="confirmPassword"
 									onBlur={handleConfirmPasswordBlur}
 									visibilityLabel={(visible) =>
-										visible
-											? t.auth.hideConfirmPassword
-											: t.auth.showConfirmPassword
+										visible ? t.auth.hideConfirmPassword : t.auth.showConfirmPassword
 									}
 								/>
 								<Field orientation="horizontal">
@@ -187,18 +178,12 @@ export function SecuritySettingsPage() {
 									<FieldLabel>{t.settings.revokeOtherSessions}</FieldLabel>
 								</Field>
 								{passwordState === "saved" ? (
-									<p className="text-success text-sm">
-										{t.settings.passwordChanged}
-									</p>
+									<p className="text-success text-sm">{t.settings.passwordChanged}</p>
 								) : null}
 								{passwordState === "error" ? (
 									<p className="text-destructive text-sm">{t.ui.retryLater}</p>
 								) : null}
-								<Button
-									isLoading={passwordState === "pending"}
-									type="submit"
-									variant="solid"
-								>
+								<Button isLoading={passwordState === "pending"} type="submit" variant="solid">
 									{t.ui.save}
 								</Button>
 							</FieldGroup>
@@ -222,8 +207,7 @@ export function SecuritySettingsPage() {
 						) : null}
 						{sessionList.status === "ready"
 							? sessionList.sessions.map((session) => {
-									const isCurrent =
-										session.token === currentSession.data?.session.token;
+									const isCurrent = session.token === currentSession.data?.session.token;
 									return (
 										<div
 											className="flex flex-wrap items-start justify-between gap-4 rounded-lg border border-border-weak p-4"
@@ -232,16 +216,13 @@ export function SecuritySettingsPage() {
 											<div className="min-w-0 text-sm">
 												<p className="break-words font-medium">
 													{session.userAgent || t.settings.unknownDevice}
-													{isCurrent
-														? ` · ${t.settings.currentSession}`
-														: ""}
+													{isCurrent ? ` · ${t.settings.currentSession}` : ""}
 												</p>
 												<p className="mt-1 text-muted-foreground">
 													{session.ipAddress || t.settings.unknownAddress}
 												</p>
 												<p className="mt-1 text-xs text-muted-foreground">
-													{t.settings.lastUpdated}:{" "}
-													{formatDate(session.updatedAt, locale.current)}{" "}
+													{t.settings.lastUpdated}: {formatDate(session.updatedAt, locale.current)}{" "}
 													· {t.settings.sessionExpires}:{" "}
 													{formatDate(session.expiresAt, locale.current)}
 												</p>
@@ -249,9 +230,7 @@ export function SecuritySettingsPage() {
 											{!isCurrent ? (
 												<Button
 													isLoading={revokingToken === session.token}
-													onClick={() =>
-														void revokeSession(session.token)
-													}
+													onClick={() => void revokeSession(session.token)}
 													size="sm"
 													type="button"
 													variant="outline"

@@ -20,8 +20,7 @@ export default {
 		sections: {
 			profile: {
 				label: "プロフィール",
-				description:
-					"公開名、自己紹介、アバター、バナー、プロフィールアドレスを更新します。",
+				description: "公開名、自己紹介、アバター、バナー、プロフィールアドレスを更新します。",
 			},
 			preferences: {
 				label: "設定",
@@ -45,8 +44,7 @@ export default {
 			},
 			tokens: {
 				label: `${verbatimTerms.api.value}トークン`,
-				description:
-					"自動化ツール用のアクセス トークンを作成、制限、無効化、取り消します。",
+				description: "自動化ツール用のアクセス トークンを作成、制限、無効化、取り消します。",
 			},
 		},
 	},
@@ -54,8 +52,7 @@ export default {
 		title: "プライバシー",
 		description: "評価と現在の進捗に対する全体の公開上限を設定します。",
 		scoreTitle: "評価",
-		scoreDescription:
-			"プロフィールや関連レビューで、ほかの利用者に評価を表示するかを制限します。",
+		scoreDescription: "プロフィールや関連レビューで、ほかの利用者に評価を表示するかを制限します。",
 		progressTitle: "進捗",
 		progressDescription:
 			"プロフィールや関連レビューで、ほかの利用者に現在の進捗を表示するかを制限します。",
@@ -67,8 +64,7 @@ export default {
 	slugAddress: unitSlugTerms.label,
 	slugAddressHint: `小文字の${verbatimTerms.ascii.value}文字、数字、またはハイフンを1～63文字使用します。変更後、古い${verbatimTerms.url.value}は新しい${verbatimTerms.url.value}に永久にリダイレクトされます。`,
 	profileSlugAddressHint: `慎重に選んでください。現在は一度だけ設定でき、設定後は変更できません。小文字の${verbatimTerms.ascii.value}文字、数字、またはハイフンを1～63文字使用します。プラットフォームが予約している名前は使用できません。`,
-	profileSlugAddressAssignedHint:
-		"このプロフィールのアドレスは設定済みで、現在は変更できません。",
+	profileSlugAddressAssignedHint: "このプロフィールのアドレスは設定済みで、現在は変更できません。",
 	profileSlugReserved: "このプロフィールのアドレスは予約されているため使用できません。",
 	preferences: "設定",
 	interfaceLanguage: "インターフェース言語",
@@ -218,8 +214,7 @@ export default {
 		copyToken: "トークンをコピー",
 		dismissSecret: "安全に保存しました",
 		listTitle: "既存のトークン",
-		listDescription:
-			"使用状況を定期的に確認し、不要になったトークンはすぐに取り消してください。",
+		listDescription: "使用状況を定期的に確認し、不要になったトークンはすぐに取り消してください。",
 		empty: `まだ${verbatimTerms.api.value}トークンは作成されていません。`,
 		enabled: "有効",
 		disabled: "無効",

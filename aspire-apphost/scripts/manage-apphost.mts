@@ -104,10 +104,7 @@ function runAspireJson(args: string[]): unknown {
 	const result = runAspire([...args, "--non-interactive", "--nologo"]);
 	if (result.error || result.status !== 0)
 		throw new Error(
-			result.error?.message ??
-				result.stderr.trim() ??
-				result.stdout.trim() ??
-				"Aspire failed",
+			result.error?.message ?? result.stderr.trim() ?? result.stdout.trim() ?? "Aspire failed",
 		);
 	return JSON.parse(result.stdout) as unknown;
 }
@@ -239,9 +236,7 @@ async function verifySmoke(resources: ResourceDescription[]) {
 	const worker = findResource(resources, "recommendation-worker");
 	const web = findResource(resources, "web");
 	if (api.source !== "bun" || worker.source !== "bun")
-		throw new Error(
-			`API and worker must run under Bun; got ${api.source} and ${worker.source}`,
-		);
+		throw new Error(`API and worker must run under Bun; got ${api.source} and ${worker.source}`);
 	for (const excluded of ["about", "auth"])
 		if (resources.some((resource) => resource.displayName === excluded))
 			throw new Error(`${excluded} must not be part of the default Aspire topology`);

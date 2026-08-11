@@ -148,9 +148,7 @@ describe("API response values", () => {
 				{
 					_key: "block-1",
 					_type: "block" as const,
-					children: [
-						{ _key: "span-1", _type: "span" as const, text: "Safe by construction" },
-					],
+					children: [{ _key: "span-1", _type: "span" as const, text: "Safe by construction" }],
 				},
 			],
 		};

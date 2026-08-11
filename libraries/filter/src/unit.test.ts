@@ -116,10 +116,7 @@ describe("Feed language presentation boundary", () => {
 			readUnitLanguageBoundary({
 				localizations: {
 					some: {
-						all: [
-							{ language: { in: ["ja", "ko"] } },
-							{ language: { in: ["ko", "en"] } },
-						],
+						all: [{ language: { in: ["ja", "ko"] } }, { language: { in: ["ko", "en"] } }],
 					},
 				},
 			}),

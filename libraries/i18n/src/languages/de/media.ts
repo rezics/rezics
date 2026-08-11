@@ -43,9 +43,12 @@ export default {
 			cover: "Cover anpassen",
 		},
 		description: {
-			avatar: "Verschiebe und zoome das Bild innerhalb des quadratischen Ausschnitts. Die kreisförmige Avatarvorschau entfernt die ursprünglichen Ecken nicht.",
-			banner: "Verschiebe und zoome das Bild innerhalb des festen Ausschnitts im Verhältnis 4:1. Neue Banner beginnen oben links.",
-			cover: "Zeige standardmäßig das vollständige Bild oder wechsle zu einem festen Ausschnitt im Verhältnis 3:4, wenn die Komposition wichtiger ist.",
+			avatar:
+				"Verschiebe und zoome das Bild innerhalb des quadratischen Ausschnitts. Die kreisförmige Avatarvorschau entfernt die ursprünglichen Ecken nicht.",
+			banner:
+				"Verschiebe und zoome das Bild innerhalb des festen Ausschnitts im Verhältnis 4:1. Neue Banner beginnen oben links.",
+			cover:
+				"Zeige standardmäßig das vollständige Bild oder wechsle zu einem festen Ausschnitt im Verhältnis 3:4, wenn die Komposition wichtiger ist.",
 		},
 		close: "Bildanpassung schließen",
 		loading: "Originalbild wird geladen…",

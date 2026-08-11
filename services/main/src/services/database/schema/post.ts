@@ -67,11 +67,7 @@ export const postReply = pgTable(
 			name: "post_reply_parent_root_fkey",
 		}).onDelete("restrict"),
 		index("post_reply_root_created_at_idx").on(table.rootPostId, table.createdAt, table.postId),
-		index("post_reply_parent_created_at_idx").on(
-			table.parentPostId,
-			table.createdAt,
-			table.postId,
-		),
+		index("post_reply_parent_created_at_idx").on(table.parentPostId, table.createdAt, table.postId),
 		check("post_reply_not_root_check", sql`${table.postId} <> ${table.rootPostId}`),
 		check(
 			"post_reply_not_self_parent_check",

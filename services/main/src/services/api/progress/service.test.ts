@@ -27,12 +27,8 @@ describe("automatic chapter reading progress", () => {
 	it("uses a rolling 24-hour checkpoint interval", () => {
 		const now = new Date("2026-07-29T12:00:00.000Z");
 		expect(isAutomaticProgressCheckpointDue(undefined, now)).toBe(true);
-		expect(isAutomaticProgressCheckpointDue(new Date("2026-07-28T12:00:00.001Z"), now)).toBe(
-			false,
-		);
-		expect(isAutomaticProgressCheckpointDue(new Date("2026-07-28T12:00:00.000Z"), now)).toBe(
-			true,
-		);
+		expect(isAutomaticProgressCheckpointDue(new Date("2026-07-28T12:00:00.001Z"), now)).toBe(false);
+		expect(isAutomaticProgressCheckpointDue(new Date("2026-07-28T12:00:00.000Z"), now)).toBe(true);
 	});
 });
 

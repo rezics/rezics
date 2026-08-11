@@ -183,9 +183,7 @@ export function SubjectPostComposer({
 					}}
 					type="button"
 				>
-					{postKind === "excerpt"
-						? t.posts.openExcerptComposer
-						: t.posts.openDiscussionComposer}
+					{postKind === "excerpt" ? t.posts.openExcerptComposer : t.posts.openDiscussionComposer}
 				</button>
 			)}
 			<RealmRulesAcknowledgementPrompt controller={rulesAcknowledgement} intent="publish" />

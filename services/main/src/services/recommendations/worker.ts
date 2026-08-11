@@ -69,9 +69,7 @@ export async function refreshRecommendationSnapshot(): Promise<string | null> {
 				.returning({ id: recommendationSnapshot.id });
 			if (!snapshot) throw new Error("Recommendation snapshot insertion returned no row");
 			snapshotId = snapshot.id;
-			await session.transaction((tx) =>
-				buildUnitBestScores(tx, snapshot.id, sourceWatermark),
-			);
+			await session.transaction((tx) => buildUnitBestScores(tx, snapshot.id, sourceWatermark));
 
 			await session.transaction(async (tx) => {
 				const completedAt = new Date();
@@ -93,10 +91,7 @@ export async function refreshRecommendationSnapshot(): Promise<string | null> {
 						state: "failed",
 						active: false,
 						completedAt: new Date(),
-						error:
-							error instanceof Error
-								? error.message.slice(0, 2_000)
-								: "Unknown refresh error",
+						error: error instanceof Error ? error.message.slice(0, 2_000) : "Unknown refresh error",
 					})
 					.where(eq(recommendationSnapshot.id, snapshotId));
 			throw error;

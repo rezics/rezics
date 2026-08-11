@@ -444,8 +444,7 @@ async function seedProfiles(
 		const createdAt = data.pastDate(1_460);
 		return {
 			name: index === 0 ? "REZICS Demo" : data.name(language),
-			email:
-				index === 0 ? DemoCredentials.email : `seed-user-${position(index)}@example.test`,
+			email: index === 0 ? DemoCredentials.email : `seed-user-${position(index)}@example.test`,
 			emailVerified: index === 0 || index % 5 !== 0,
 			image: index === 0 ? null : data.fakerByLanguage[language].image.avatar(),
 			createdAt,
@@ -523,8 +522,7 @@ async function seedProfiles(
 	await writeBatches(
 		profiles.map((value, index) => {
 			const contentLanguage = itemAt(data.languages(index), 0);
-			const interfaceLocale =
-				contentLanguage === "zh" ? ("zh-Hant" as const) : contentLanguage;
+			const interfaceLocale = contentLanguage === "zh" ? ("zh-Hant" as const) : contentLanguage;
 			return {
 				profileId: value.id,
 				interfaceLocale,
@@ -752,11 +750,7 @@ async function seedUnitFixtures(
 		(batch) => tx.insert(realm).values(batch),
 	);
 	await insertUnitDetails(tx, data, allUnits, OfficialProfileIds.community);
-	const [fixtureBook, fixtureMedia, fixtureSoftware] = [
-		books[0],
-		mediaItems[0],
-		softwareUnits[0],
-	];
+	const [fixtureBook, fixtureMedia, fixtureSoftware] = [books[0], mediaItems[0], softwareUnits[0]];
 	if (!fixtureBook || !fixtureMedia || !fixtureSoftware)
 		throw new Error("Official Zone Unit scenarios require Book, Media, and Software Units");
 	await seedOfficialZoneFixtures(tx, data, {
@@ -1116,10 +1110,7 @@ async function seedUnitFixtures(
 					contentStatus: pollUnit.status === "published" ? "published" : "draft",
 				})
 				.where(
-					and(
-						eq(unitLocalization.unitId, pollUnit.id),
-						eq(unitLocalization.language, language),
-					),
+					and(eq(unitLocalization.unitId, pollUnit.id), eq(unitLocalization.language, language)),
 				);
 		}
 	}
@@ -1151,13 +1142,10 @@ function toaruWikiBody(language: "zh" | "en") {
 				}
 			: {
 					heading: "Welcome to the A Certain Magical Index Wiki",
-					intro: "Explore the setting, characters, and works of A Certain Magical Index and its science-side spin-offs.",
+					intro:
+						"Explore the setting, characters, and works of A Certain Magical Index and its science-side spin-offs.",
 					guide: "New here? Start with the reading guide and the overview of the setting.",
-					sections: [
-						"Works and series",
-						"Characters and groups",
-						"Setting and terminology",
-					],
+					sections: ["Works and series", "Characters and groups", "Setting and terminology"],
 				};
 	const text = (
 		key: string,
@@ -1608,11 +1596,9 @@ async function seedContent(
 	const chapters = await insertUnits(tx, descriptors(SeedPlan.chapters, "chapter", "post"));
 	const chapterLabels = await insertUnits(
 		tx,
-		descriptors(
-			SeedPlan.contentStructureNodes - SeedPlan.chapters,
-			"chapter-label",
-			"title",
-		).map((value): UnitDescriptor => ({ ...value, kind: "label" })),
+		descriptors(SeedPlan.contentStructureNodes - SeedPlan.chapters, "chapter-label", "title").map(
+			(value): UnitDescriptor => ({ ...value, kind: "label" }),
+		),
 	);
 	const allPosts = [...rootPosts, ...replies, ...reviews, ...chapters];
 	await insertUnitDetails(tx, data, [...allPosts, ...chapterLabels]);
@@ -1895,10 +1881,7 @@ async function seedStructure(
 				return {
 					realmId: realmUnit.id,
 					profileId: member.id,
-					state: itemAt(
-						["active", "active", "active", "pending", "muted"] as const,
-						index,
-					),
+					state: itemAt(["active", "active", "active", "pending", "muted"] as const, index),
 					joinedAt,
 					updatedAt: joinedAt,
 				};
@@ -1973,15 +1956,12 @@ async function seedStructure(
 	);
 	await writeBatches(
 		revisions.flatMap((revision, revisionIndex) =>
-			Array.from(
-				{ length: SeedPlan.realmRuleAcceptances / revisions.length },
-				(_, index) => ({
-					revisionId: revision.id,
-					profileId: itemAt(profiles, revisionIndex * 7 + index).id,
-					language: itemAt(data.languages(revisionIndex + index), 0),
-					acceptedAt: revision.publishedAt,
-				}),
-			),
+			Array.from({ length: SeedPlan.realmRuleAcceptances / revisions.length }, (_, index) => ({
+				revisionId: revision.id,
+				profileId: itemAt(profiles, revisionIndex * 7 + index).id,
+				language: itemAt(data.languages(revisionIndex + index), 0),
+				acceptedAt: revision.publishedAt,
+			})),
 		),
 		(batch) => tx.insert(realmRuleAcceptance).values(batch),
 	);
@@ -2015,10 +1995,7 @@ async function seedStructure(
 				realmId: realmUnit.id,
 				unitId: target.id,
 				postTargetingLocked: index % 19 === 0,
-				status: itemAt(
-					["visible", "visible", "visible", "visible", "pending"] as const,
-					index,
-				),
+				status: itemAt(["visible", "visible", "visible", "visible", "pending"] as const, index),
 				createdAt,
 				updatedAt: createdAt,
 			};
@@ -2054,9 +2031,7 @@ async function seedStructure(
 				grantedByProfileId: itemAt(platformGrantProfiles, index * 11 + 1).id,
 				expiresAt: index % 5 === 0 ? data.futureDate(365) : null,
 				revokedAt: revoked ? new Date(createdAt.getTime() + 86_400_000) : null,
-				revokedByProfileId: revoked
-					? itemAt(platformGrantProfiles, index * 13 + 2).id
-					: null,
+				revokedByProfileId: revoked ? itemAt(platformGrantProfiles, index * 13 + 2).id : null,
 				createdAt,
 				updatedAt: createdAt,
 			};
@@ -2065,14 +2040,11 @@ async function seedStructure(
 	);
 	await writeBatches(
 		unitFixtures.zones.flatMap((zoneUnit, zoneIndex) =>
-			Array.from(
-				{ length: SeedPlan.zoneUnitFollows / unitFixtures.zones.length },
-				(_, index) => ({
-					unitId: zoneUnit.id,
-					followerProfileId: itemAt(profiles, zoneIndex * 7 + index).id,
-					createdAt: zoneUnit.createdAt,
-				}),
-			),
+			Array.from({ length: SeedPlan.zoneUnitFollows / unitFixtures.zones.length }, (_, index) => ({
+				unitId: zoneUnit.id,
+				followerProfileId: itemAt(profiles, zoneIndex * 7 + index).id,
+				createdAt: zoneUnit.createdAt,
+			})),
 		),
 		(batch) => tx.insert(unitFollow).values(batch),
 	);
@@ -2090,21 +2062,14 @@ async function seedInteractions(
 	await writeBatches(
 		profiles.flatMap((follower, followerIndex) => {
 			const candidates = profiles.filter((value) => value.id !== follower.id);
-			return Array.from(
-				{ length: SeedPlan.profileUnitFollows / profiles.length },
-				(_, index) => {
-					const followed = itemAt(candidates, followerIndex * 7 + index);
-					return {
-						followerProfileId: follower.id,
-						unitId: followed.id,
-						createdAt: latestDate(
-							data.pastDate(365),
-							follower.createdAt,
-							followed.createdAt,
-						),
-					};
-				},
-			);
+			return Array.from({ length: SeedPlan.profileUnitFollows / profiles.length }, (_, index) => {
+				const followed = itemAt(candidates, followerIndex * 7 + index);
+				return {
+					followerProfileId: follower.id,
+					unitId: followed.id,
+					createdAt: latestDate(data.pastDate(365), follower.createdAt, followed.createdAt),
+				};
+			});
 		}),
 		(batch) => tx.insert(unitFollow).values(batch),
 	);
@@ -2131,11 +2096,7 @@ async function seedInteractions(
 		profiles.flatMap((seedProfile, profileIndex) =>
 			Array.from({ length: SeedPlan.unitProgress / profiles.length }, (_, index) => {
 				const target = itemAt(unitFixtures.works, profileIndex * 17 + index);
-				const createdAt = latestDate(
-					data.pastDate(365),
-					seedProfile.createdAt,
-					target.createdAt,
-				);
+				const createdAt = latestDate(data.pastDate(365), seedProfile.createdAt, target.createdAt);
 				const lastSeenAt = new Date(createdAt.getTime() + (index + 1) * 60_000);
 				const progress = (index % 11) / 10;
 				return {
@@ -2148,16 +2109,11 @@ async function seedInteractions(
 					),
 					completedCount: progress === 1 ? 1 : 0,
 					totalTimeMs: BigInt((index + 1) * 900_000),
-					visibility: itemAt(
-						["public", "unlisted", "private"] as const,
-						profileIndex + index,
-					),
+					visibility: itemAt(["public", "unlisted", "private"] as const, profileIndex + index),
 					firstSeenAt: createdAt,
 					lastSeenAt,
 					lastContentStructureNodeId:
-						target.kind === "book"
-							? (firstNodeByBook.get(target.id)?.id ?? null)
-							: null,
+						target.kind === "book" ? (firstNodeByBook.get(target.id)?.id ?? null) : null,
 					createdAt,
 					updatedAt: lastSeenAt,
 				};
@@ -2174,11 +2130,7 @@ async function seedInteractions(
 					return {
 						profileId: seedProfile.id,
 						nodeId: node.id,
-						completedAt: latestDate(
-							data.pastDate(180),
-							seedProfile.createdAt,
-							node.createdAt,
-						),
+						completedAt: latestDate(data.pastDate(180), seedProfile.createdAt, node.createdAt),
 					};
 				},
 			),
@@ -2225,11 +2177,7 @@ async function seedInteractions(
 				return {
 					profileId: seedProfile.id,
 					unitId: target.id,
-					createdAt: latestDate(
-						data.pastDate(365),
-						seedProfile.createdAt,
-						target.createdAt,
-					),
+					createdAt: latestDate(data.pastDate(365), seedProfile.createdAt, target.createdAt),
 				};
 			}),
 		),
@@ -2251,10 +2199,7 @@ async function seedInteractions(
 					unitId: target.id,
 					realmId: realmUnit.id,
 					value: 1 + ((profileIndex + index * 3) % 10),
-					visibility: itemAt(
-						["public", "unlisted", "private"] as const,
-						profileIndex + index,
-					),
+					visibility: itemAt(["public", "unlisted", "private"] as const, profileIndex + index),
 					createdAt,
 					updatedAt: createdAt,
 				};
@@ -2339,9 +2284,7 @@ async function seedCommunications(
 			return {
 				conversationId: value.id,
 				senderProfileId: index % 2 === 0 ? value.lowId : value.highId,
-				content: deleted
-					? null
-					: data.fakerByLanguage.en.lorem.sentences({ min: 1, max: 2 }),
+				content: deleted ? null : data.fakerByLanguage.en.lorem.sentences({ min: 1, max: 2 }),
 				deletedAt: deleted ? new Date(createdAt.getTime() + 60_000) : null,
 				createdAt,
 				updatedAt: createdAt,
@@ -2365,8 +2308,7 @@ async function seedCommunications(
 			return [value.lowId, value.highId].map((profileId, index) => ({
 				conversationId: value.id,
 				profileId,
-				lastReadMessageId:
-					index === 0 ? lastMessage.id : itemAt(conversationMessages, 4).id,
+				lastReadMessageId: index === 0 ? lastMessage.id : itemAt(conversationMessages, 4).id,
 				readAt: lastMessage.createdAt,
 				createdAt: conversationMessages[0]?.createdAt ?? lastMessage.createdAt,
 				updatedAt: lastMessage.createdAt,
@@ -2441,8 +2383,7 @@ async function seedCommunications(
 					inAppVisible: index % 9 !== 0,
 					readAt: index % 3 === 0 ? new Date(createdAt.getTime() + 60_000) : null,
 					emailStatus,
-					emailedAt:
-						emailStatus === "sent" ? new Date(createdAt.getTime() + 120_000) : null,
+					emailedAt: emailStatus === "sent" ? new Date(createdAt.getTime() + 120_000) : null,
 					emailError: emailStatus === "failed" ? "Seeded delivery failure" : null,
 					createdAt,
 					updatedAt: createdAt,
@@ -2660,24 +2601,15 @@ async function seedGovernance(
 				previousState,
 				resultingState,
 				previousPostTargetingLocked:
-					kind === "lock_post_targeting"
-						? false
-						: kind === "unlock_post_targeting"
-							? true
-							: null,
+					kind === "lock_post_targeting" ? false : kind === "unlock_post_targeting" ? true : null,
 				resultingPostTargetingLocked:
-					kind === "lock_post_targeting"
-						? true
-						: kind === "unlock_post_targeting"
-							? false
-							: null,
+					kind === "lock_post_targeting" ? true : kind === "unlock_post_targeting" ? false : null,
 				requestId: `seed-content-governance-request-${position(index)}`,
 				idempotencyKey: `seed-content-governance-action-${position(index)}`,
 				createdAt: latestDate(data.pastDate(120), caseRow.createdAt, actor.createdAt),
 			})
 			.returning();
-		if (!createdAction)
-			throw new Error("Seed content governance Action insertion returned no row");
+		if (!createdAction) throw new Error("Seed content governance Action insertion returned no row");
 		normalActions.push(createdAction);
 		if (kind === "remove" || kind === "lock_post_targeting") {
 			const sourceRealmId = caseRow.realmId ?? OfficialRealmUnitIds.rule;
@@ -2759,10 +2691,7 @@ async function seedGovernance(
 			actorCredentialKind: index % 10 === 0 ? ("system" as const) : ("session" as const),
 			authorityKind: "unit" as const,
 			authorityId: itemAt(governanceTargets, index * 17).id,
-			action: itemAt(
-				["unit.update", "moderation.decide", "realm.manage", "profile.login"],
-				index,
-			),
+			action: itemAt(["unit.update", "moderation.decide", "realm.manage", "profile.login"], index),
 			reasonCode: index % 13 === 0 ? "policy_denied" : null,
 			requestId: `seed-audit-${position(index)}`,
 			targetKind: "unit",
@@ -2824,21 +2753,14 @@ async function seedRecommendations(
 	);
 	await writeBatches(
 		profiles.flatMap((seedProfile, profileIndex) =>
-			Array.from(
-				{ length: SeedPlan.recommendationExclusions / profiles.length },
-				(_, index) => {
-					const target = itemAt(targets, profileIndex * 17 + index);
-					return {
-						profileId: seedProfile.id,
-						unitId: target.id,
-						createdAt: latestDate(
-							data.pastDate(180),
-							seedProfile.createdAt,
-							target.createdAt,
-						),
-					};
-				},
-			),
+			Array.from({ length: SeedPlan.recommendationExclusions / profiles.length }, (_, index) => {
+				const target = itemAt(targets, profileIndex * 17 + index);
+				return {
+					profileId: seedProfile.id,
+					unitId: target.id,
+					createdAt: latestDate(data.pastDate(180), seedProfile.createdAt, target.createdAt),
+				};
+			}),
 		),
 		(batch) => tx.insert(recommendationExclusion).values(batch),
 	);
@@ -3260,9 +3182,7 @@ export class DatabaseSeedService {
 					.where(notInArray(unit.id, [...BootstrapUnitIds]))
 					.limit(1);
 				if (existingUser || existingUnit) {
-					throw new Error(
-						"Seed requires an empty database; run `task --yes local:reset`",
-					);
+					throw new Error("Seed requires an empty database; run `task --yes local:reset`");
 				}
 
 				console.info("Seeding identities scenario");

@@ -40,9 +40,7 @@ export const unitSlugAddress = pgTable(
 		updatedAt: createUpdatedAtColumn(),
 	},
 	(table) => [
-		unique("unit_slug_address_scope_slug_key")
-			.on(table.scopeUnitId, table.slug)
-			.nullsNotDistinct(),
+		unique("unit_slug_address_scope_slug_key").on(table.scopeUnitId, table.slug).nullsNotDistinct(),
 		uniqueIndex("unit_slug_address_target_canonical_key")
 			.on(table.targetUnitId)
 			.where(sql`${table.kind} = 'canonical'`),

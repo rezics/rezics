@@ -97,15 +97,11 @@ afterEach(() => {
 
 describe("SearchSurface", () => {
 	it("uses infinite Feed continuation and keeps its stable request cursor-free", () => {
-		render(
-			<SearchSurface id="global-search" source={{ kind: "template", template: "global" }} />,
-		);
+		render(<SearchSurface id="global-search" source={{ kind: "template", template: "global" }} />);
 
 		fireEvent.click(screen.getByRole("button", { name: "Execute" }));
 
-		expect(screen.getByTestId("search-results").getAttribute("data-pagination")).toBe(
-			"infinite",
-		);
+		expect(screen.getByTestId("search-results").getAttribute("data-pagination")).toBe("infinite");
 		expect(mocks.useSearchFeedQuery).toHaveBeenLastCalledWith(
 			expect.objectContaining({
 				enabled: true,

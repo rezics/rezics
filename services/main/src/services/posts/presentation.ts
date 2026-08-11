@@ -22,11 +22,7 @@ export async function getPostSubjectPresentation(
 			language: resolvedUnitLocalizationLanguage(unit.id, localizationLanguages),
 			title: resolvedUnitLocalizationTitle(unit.id, localizationLanguages),
 			summary: resolvedUnitLocalizationSummary(unit.id, localizationLanguages),
-			coverAssetId: resolvedUnitLocalizationImageAssetId(
-				unit.id,
-				"cover",
-				localizationLanguages,
-			),
+			coverAssetId: resolvedUnitLocalizationImageAssetId(unit.id, "cover", localizationLanguages),
 		})
 		.from(unit)
 		.where(eq(unit.id, subjectId))

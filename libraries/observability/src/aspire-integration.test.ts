@@ -32,15 +32,13 @@ describe("Aspire OpenTelemetry integration", () => {
 		const environmentVariables = requireRecord(httpsProfile, "environmentVariables");
 
 		expect(requireString(httpsProfile, "applicationUrl")).toMatch(/^https:\/\/localhost:\d+$/);
-		expect(
-			requireString(environmentVariables, "ASPIRE_DASHBOARD_OTLP_HTTP_ENDPOINT_URL"),
-		).toMatch(/^http:\/\/localhost:\d+$/);
+		expect(requireString(environmentVariables, "ASPIRE_DASHBOARD_OTLP_HTTP_ENDPOINT_URL")).toMatch(
+			/^http:\/\/localhost:\d+$/,
+		);
 		expect(requireString(environmentVariables, "ASPIRE_RESOURCE_SERVICE_ENDPOINT_URL")).toMatch(
 			/^https:\/\/localhost:\d+$/,
 		);
-		expect(requireString(environmentVariables, "ASPIRE_ALLOW_UNSECURED_TRANSPORT")).toBe(
-			"true",
-		);
+		expect(requireString(environmentVariables, "ASPIRE_ALLOW_UNSECURED_TRANSPORT")).toBe("true");
 		expect(environmentVariables).not.toHaveProperty("ASPIRE_DASHBOARD_OTLP_ENDPOINT_URL");
 		expect(appHostSource).not.toContain('.withEnvironment("OTEL_EXPORTER_OTLP_PROTOCOL"');
 	});

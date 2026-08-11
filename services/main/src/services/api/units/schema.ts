@@ -173,10 +173,7 @@ const CreateUnitFields = {
 	initialTagIds: t.Optional(
 		t.Array(Uuid, { maxItems: InitialTagApplicationLimit, uniqueItems: true, default: [] }),
 	),
-	creditAttributionRequestConsent: t.Union([
-		t.Literal("direct_only"),
-		t.Literal("allow_requests"),
-	]),
+	creditAttributionRequestConsent: t.Union([t.Literal("direct_only"), t.Literal("allow_requests")]),
 	version: UnitVersionInput,
 	localization: UnitLocalizationInput,
 	visibility: LifecycleInput.visibility,

@@ -49,18 +49,8 @@ export const env = createEnv({
 			.min(100)
 			.max(30_000)
 			.default(2_000),
-		DATABASE_POOL_IDLE_TIMEOUT_MS: z.coerce
-			.number()
-			.int()
-			.min(1_000)
-			.max(300_000)
-			.default(30_000),
-		DATABASE_POOL_MAX_LIFETIME_SECONDS: z.coerce
-			.number()
-			.int()
-			.min(60)
-			.max(86_400)
-			.default(1_800),
+		DATABASE_POOL_IDLE_TIMEOUT_MS: z.coerce.number().int().min(1_000).max(300_000).default(30_000),
+		DATABASE_POOL_MAX_LIFETIME_SECONDS: z.coerce.number().int().min(60).max(86_400).default(1_800),
 		DATABASE_STATEMENT_TIMEOUT_MS: z.coerce.number().int().min(100).max(60_000).default(10_000),
 		BETTER_AUTH_SECRET: z.string().min(32),
 		BETTER_AUTH_URL: origin,
@@ -80,12 +70,7 @@ export const env = createEnv({
 		EMAIL_FROM_NAME: z.string().trim().min(1).default("Rezics"),
 		CLOUDFLARE_ACCOUNT_ID: z.string().min(1).optional(),
 		CLOUDFLARE_EMAIL_API_TOKEN: z.string().min(1).optional(),
-		EMAIL_DISPATCH_POLL_INTERVAL_MS: z.coerce
-			.number()
-			.int()
-			.min(250)
-			.max(60_000)
-			.default(1_000),
+		EMAIL_DISPATCH_POLL_INTERVAL_MS: z.coerce.number().int().min(250).max(60_000).default(1_000),
 		EMAIL_DISPATCH_BATCH_SIZE: z.coerce.number().int().min(1).max(100).default(20),
 		EMAIL_DISPATCH_MAX_ATTEMPTS: z.coerce.number().int().min(1).max(20).default(5),
 		BETTER_AUTH_TRUSTED_ORIGINS: z
@@ -108,12 +93,7 @@ export const env = createEnv({
 			.default(true),
 		S3_PRESIGN_EXPIRES_IN: z.coerce.number().int().min(1).max(604_800).default(900),
 		IMAGE_ASSET_CLEANUP_INTERVAL_MS: z.coerce.number().int().min(60_000).default(300_000),
-		IMAGE_ASSET_CLEANUP_GRACE_MS: z.coerce
-			.number()
-			.int()
-			.min(0)
-			.max(86_400_000)
-			.default(300_000),
+		IMAGE_ASSET_CLEANUP_GRACE_MS: z.coerce.number().int().min(0).max(86_400_000).default(300_000),
 		IMAGE_ASSET_CLEANUP_BATCH_SIZE: z.coerce.number().int().min(1).max(500).default(100),
 		API_QUOTA_CLEANUP_INTERVAL_MS: z.coerce.number().int().min(60_000).default(3_600_000),
 		SEARCH_STATEMENT_TIMEOUT_MS: z.coerce

@@ -94,11 +94,7 @@ export function MediaContents({ mediaId }: { readonly mediaId: string }) {
 		return (
 			<section className="grid gap-3">
 				<p className="text-sm text-destructive">{t.state.error}</p>
-				<Button
-					className="w-fit"
-					onClick={() => void structure.refetch()}
-					variant="outline"
-				>
+				<Button className="w-fit" onClick={() => void structure.refetch()} variant="outline">
 					{t.actions.retry}
 				</Button>
 			</section>
@@ -145,9 +141,7 @@ function MediaContentsList({
 	const { t } = useTranslation(["units"]);
 	const tree = useMemo(() => buildContentStructureTree(items), [items]);
 	const expandableIds = useMemo(() => collectBookStructureLabelIds(tree), [tree]);
-	const [expandedIds, setExpandedIds] = useState<ReadonlySet<string>>(
-		() => new Set(expandableIds),
-	);
+	const [expandedIds, setExpandedIds] = useState<ReadonlySet<string>>(() => new Set(expandableIds));
 	const visibleEntries = useMemo(
 		() => flattenVisibleBookStructureTree(tree, expandedIds),
 		[expandedIds, tree],
@@ -218,10 +212,7 @@ function MediaContentsList({
 									: ListTree;
 						const content = (
 							<>
-								<Icon
-									aria-hidden
-									className="size-5 shrink-0 text-muted-foreground"
-								/>
+								<Icon aria-hidden className="size-5 shrink-0 text-muted-foreground" />
 								<span className="min-w-0 flex-1">
 									<span className="flex min-w-0 items-center gap-2">
 										{label ? (
@@ -233,15 +224,12 @@ function MediaContentsList({
 												)}
 											/>
 										) : null}
-										<span className="truncate font-heading font-semibold">
-											{node.title}
-										</span>
+										<span className="truncate font-heading font-semibold">{node.title}</span>
 									</span>
 									<span className="mt-2 flex gap-4 text-sm text-muted-foreground">
 										{label
 											? t.units.content.childCount({ count: children.length })
-											: (formatDuration(node.durationSeconds) ??
-												t.units.content.durationUnknown)}
+											: (formatDuration(node.durationSeconds) ?? t.units.content.durationUnknown)}
 									</span>
 								</span>
 							</>
@@ -298,9 +286,7 @@ function MediaContentsList({
 				/>
 			) : (
 				<div className="grid min-h-[36rem] place-items-center px-6 text-center">
-					<p className="text-sm text-muted-foreground">
-						{t.units.content.noMediaContent}
-					</p>
+					<p className="text-sm text-muted-foreground">{t.units.content.noMediaContent}</p>
 				</div>
 			)}
 		</section>

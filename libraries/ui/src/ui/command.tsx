@@ -165,11 +165,7 @@ export const CommandList = (props: CommandListProps) => {
 
 	return (
 		<div className="max-h-72 min-h-0 flex-1">
-			<ComboboxList
-				className={cn("flex-1 pr-2.5", className)}
-				data-slot="command-list"
-				{...rest}
-			/>
+			<ComboboxList className={cn("flex-1 pr-2.5", className)} data-slot="command-list" {...rest} />
 		</div>
 	);
 };

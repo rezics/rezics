@@ -85,9 +85,7 @@ export function planDraftSiblingPositions(input: {
 			currentById.set(member.id, compacted);
 			rebalancedIds.add(member.id);
 		}
-		const currentIndexById = new Map(
-			currentSiblings.map(({ id }, index) => [id, index] as const),
-		);
+		const currentIndexById = new Map(currentSiblings.map(({ id }, index) => [id, index] as const));
 		const anchoredMembers = desiredSiblings.flatMap(({ id }) => {
 			const current = currentById.get(id);
 			const currentIndex = currentIndexById.get(id);
@@ -116,9 +114,7 @@ export function planDraftSiblingPositions(input: {
 			)
 				index += 1;
 			const nextRetained = desiredSiblings[index];
-			const after = nextRetained
-				? (currentById.get(nextRetained.id)?.position ?? null)
-				: null;
+			const after = nextRetained ? (currentById.get(nextRetained.id)?.position ?? null) : null;
 			const generated = fractionalPositionsBetween(before, after, index - runStart);
 			for (let offset = 0; offset < generated.length; offset += 1) {
 				const member = desiredSiblings[runStart + offset];
@@ -163,8 +159,7 @@ export function deletedDraftSubtreeRootIds(
 	deletedNodeIds: ReadonlySet<string>,
 ): readonly string[] {
 	return currentNodes.flatMap((node) =>
-		deletedNodeIds.has(node.id) &&
-		(node.parentId === null || !deletedNodeIds.has(node.parentId))
+		deletedNodeIds.has(node.id) && (node.parentId === null || !deletedNodeIds.has(node.parentId))
 			? [node.id]
 			: [],
 	);

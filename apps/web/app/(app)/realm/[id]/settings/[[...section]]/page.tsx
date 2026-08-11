@@ -26,9 +26,7 @@ export default async function Page({
 	return (
 		<RealmSettingsWorkspacePage
 			baseHref={baseHref}
-			comparison={
-				route.comparison ? { from: query.from ?? null, to: query.to ?? null } : undefined
-			}
+			comparison={route.comparison ? { from: query.from ?? null, to: query.to ?? null } : undefined}
 			realmId={id}
 			section={route.section}
 		/>

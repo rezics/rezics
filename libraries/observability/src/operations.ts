@@ -107,33 +107,23 @@ function createInstrumentedPostgresClient<T extends object>(
 					const callback = arguments_.at(-1);
 					if (typeof callback === "function") {
 						const wrappedArguments = arguments_.slice(0, -1);
-						wrappedArguments.push(
-							(error: unknown, connected: unknown, ...rest: unknown[]) =>
-								otelContext.with(connectionContext, () =>
-									Reflect.apply(callback, undefined, [
-										error,
-										connected !== null && typeof connected === "object"
-											? createInstrumentedPostgresClient(
-													connected,
-													connectionContext,
-													false,
-												)
-											: connected,
-										...rest,
-									]),
-								),
+						wrappedArguments.push((error: unknown, connected: unknown, ...rest: unknown[]) =>
+							otelContext.with(connectionContext, () =>
+								Reflect.apply(callback, undefined, [
+									error,
+									connected !== null && typeof connected === "object"
+										? createInstrumentedPostgresClient(connected, connectionContext, false)
+										: connected,
+									...rest,
+								]),
+							),
 						);
 						return Reflect.apply(value, target, wrappedArguments);
 					}
-					return Promise.resolve(Reflect.apply(value, target, arguments_)).then(
-						(connected) =>
-							connected !== null && typeof connected === "object"
-								? createInstrumentedPostgresClient(
-										connected,
-										connectionContext,
-										false,
-									)
-								: connected,
+					return Promise.resolve(Reflect.apply(value, target, arguments_)).then((connected) =>
+						connected !== null && typeof connected === "object"
+							? createInstrumentedPostgresClient(connected, connectionContext, false)
+							: connected,
 					);
 				};
 			if (property !== "query" || typeof value !== "function") return value;
@@ -191,9 +181,7 @@ export async function runWorkerJob<T>(
 			} catch (error) {
 				span.setAttribute("job.result", "failed");
 				span.setStatus({ code: SpanStatusCode.ERROR });
-				span.recordException(
-					error instanceof Error ? error : new Error("Unknown worker failure"),
-				);
+				span.recordException(error instanceof Error ? error : new Error("Unknown worker failure"));
 				observability.logger.error("Worker job failed", {
 					eventName: `worker.${name}.failed`,
 					errorCode: "WorkerJobFailed",

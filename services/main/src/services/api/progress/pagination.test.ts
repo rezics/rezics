@@ -31,9 +31,9 @@ describe("Progress entry pagination", () => {
 			id: EntryId,
 		};
 
-		expect(
-			decodeProgressEntryCursor(encodeProgressEntryCursor(scope, boundary), scope),
-		).toEqual(boundary);
+		expect(decodeProgressEntryCursor(encodeProgressEntryCursor(scope, boundary), scope)).toEqual(
+			boundary,
+		);
 	});
 
 	it("binds the cursor to its Unit and status filter", () => {

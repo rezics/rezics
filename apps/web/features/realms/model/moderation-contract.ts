@@ -19,9 +19,7 @@ export function hasAuthoredAnnotation(value: PortableTextValue): boolean {
 		(block) =>
 			block._type === "image" ||
 			(isPortableTextValueBlock(block) &&
-				block.children.some(
-					(child) => child._type === "span" && child.text.trim().length > 0,
-				)),
+				block.children.some((child) => child._type === "span" && child.text.trim().length > 0)),
 	);
 }
 

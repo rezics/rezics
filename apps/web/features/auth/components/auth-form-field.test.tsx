@@ -9,9 +9,7 @@ afterEach(cleanup);
 
 describe("authentication form fields", () => {
 	it("keeps a required text field label visible and associated with its input", () => {
-		render(
-			<AuthTextField label="Email" name="email" placeholder="you@example.com" type="email" />,
-		);
+		render(<AuthTextField label="Email" name="email" placeholder="you@example.com" type="email" />);
 
 		const input = screen.getByLabelText(/^Email/);
 		const label = screen.getByText("Email").closest("label");

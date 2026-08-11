@@ -171,9 +171,7 @@ export default new Elysia()
 			.put(
 				"/:postId/scores",
 				async ({ params, profile, authorization, body }) => {
-					await authorization.unit.ensureCanUpdate(params.postId, [
-						["relations", "scores"],
-					]);
+					await authorization.unit.ensureCanUpdate(params.postId, [["relations", "scores"]]);
 					const scoreIds = body.map(({ scoreId }) => scoreId);
 					if (new Set(scoreIds).size !== scoreIds.length) throw new PostScoreDuplicate();
 					await database.transaction(async (tx) => {
@@ -204,10 +202,7 @@ export default new Elysia()
 									and(
 										inArray(score.id, scoreIds),
 										existingScoreIds.length
-											? or(
-													eq(score.profileId, profile.unitId),
-													inArray(score.id, existingScoreIds),
-												)
+											? or(eq(score.profileId, profile.unitId), inArray(score.id, existingScoreIds))
 											: eq(score.profileId, profile.unitId),
 									),
 								);
@@ -246,9 +241,7 @@ export default new Elysia()
 							"PostNotFound",
 							"PostScoreNotFound",
 						]),
-						[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse([
-							"PostScoreDuplicate",
-						]),
+						[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["PostScoreDuplicate"]),
 					},
 					detail: { summary: "Replace Post Scores", tags: ["Posts"] },
 				},
@@ -284,10 +277,7 @@ export default new Elysia()
 								eq(unitLocalization.unitId, post.id),
 								eq(
 									unitLocalization.language,
-									resolvedUnitLocalizationLanguage(
-										post.id,
-										localizationLanguages,
-									),
+									resolvedUnitLocalizationLanguage(post.id, localizationLanguages),
 								),
 							),
 						)
@@ -300,9 +290,7 @@ export default new Elysia()
 								query.realmId
 									? sql`exists(select 1 from realm_unit rc where rc.unit_id = ${post.id} and rc.realm_id = ${query.realmId} and rc.status = 'visible' and rc.publication_state = 'active')`
 									: undefined,
-								query.subjectId
-									? eq(post.subjectUnitId, query.subjectId)
-									: undefined,
+								query.subjectId ? eq(post.subjectUnitId, query.subjectId) : undefined,
 							),
 						)
 						.orderBy(desc(unit.createdAt), desc(unit.id))
@@ -330,10 +318,7 @@ export default new Elysia()
 			.post(
 				"",
 				async ({ profile, authorization, body }) => {
-					await authorization.realm.ensureUnitCreation(
-						body.publishRealmIds,
-						"realm.units.create",
-					);
+					await authorization.realm.ensureUnitCreation(body.publishRealmIds, "realm.units.create");
 					if (body.subjectId) {
 						await authorization.unit.ensureCanRead(body.subjectId);
 					}
@@ -405,10 +390,7 @@ export default new Elysia()
 							"RealmCapabilityRequired",
 							"EntityAssociationRestricted",
 						]),
-						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
-							"UnitNotFound",
-							"EntityEntryNotFound",
-						]),
+						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "EntityEntryNotFound"]),
 						[StatusCodes.CONFLICT]: toApiErrorResponse([
 							"RealmRulesAcceptanceRequired",
 							"PostTargetingLocked",
@@ -420,10 +402,7 @@ export default new Elysia()
 			.post(
 				"/wiki",
 				async ({ profile, authorization, body }) => {
-					await authorization.realm.ensureUnitCreation(
-						body.publishRealmIds,
-						"realm.units.create",
-					);
+					await authorization.realm.ensureUnitCreation(body.publishRealmIds, "realm.units.create");
 					if (body.subjectId) await authorization.unit.ensureCanRead(body.subjectId);
 					const id = await database.transaction(async (tx) => {
 						const created = await createWikiPost(tx, {
@@ -449,10 +428,7 @@ export default new Elysia()
 							"RealmCapabilityRequired",
 							"EntityAssociationRestricted",
 						]),
-						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
-							"UnitNotFound",
-							"EntityEntryNotFound",
-						]),
+						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "EntityEntryNotFound"]),
 						[StatusCodes.CONFLICT]: toApiErrorResponse([
 							"RealmRulesAcceptanceRequired",
 							"PostTargetingLocked",
@@ -468,10 +444,7 @@ export default new Elysia()
 					const { authorization } = identity;
 					const viewerProfileId = identity.profile?.unitId;
 					const localizationLanguages = query.localizationLanguages ?? [];
-					await authorization.unit.ensureCanRead(
-						params.postId,
-						() => new UnitNotFound("Post"),
-					);
+					await authorization.unit.ensureCanRead(params.postId, () => new UnitNotFound("Post"));
 					const [row] = await database
 						.select({
 							id: post.id,
@@ -499,10 +472,7 @@ export default new Elysia()
 								eq(unitLocalization.unitId, post.id),
 								eq(
 									unitLocalization.language,
-									resolvedUnitLocalizationLanguage(
-										post.id,
-										localizationLanguages,
-									),
+									resolvedUnitLocalizationLanguage(post.id, localizationLanguages),
 								),
 							),
 						)
@@ -525,12 +495,7 @@ export default new Elysia()
 						? authorization.unit
 								.canRead(subjectId)
 								.then((canRead) =>
-									canRead
-										? getPostSubjectPresentation(
-												subjectId,
-												localizationLanguages,
-											)
-										: null,
+									canRead ? getPostSubjectPresentation(subjectId, localizationLanguages) : null,
 								)
 						: Promise.resolve(null);
 					const [
@@ -553,14 +518,13 @@ export default new Elysia()
 							.where(eq(unitLocalization.unitId, row.id))
 							.orderBy(unitLocalization.position, unitLocalization.language),
 						getAttributionSummariesByUnitIds([row.id], localizationLanguages),
-						selectPostScores(row.id, viewerProfileId, localizationLanguages).then(
-							(items) =>
-								items.map(({ scoreId, realmId, realmTitle, value }) => ({
-									scoreId,
-									realmId,
-									realmTitle,
-									value,
-								})),
+						selectPostScores(row.id, viewerProfileId, localizationLanguages).then((items) =>
+							items.map(({ scoreId, realmId, realmTitle, value }) => ({
+								scoreId,
+								realmId,
+								realmTitle,
+								value,
+							})),
 						),
 						row.postKind === "review"
 							? selectPostProgressEntry(row.id, viewerProfileId)
@@ -608,10 +572,7 @@ export default new Elysia()
 							...common,
 							postKind: "review" as const,
 							targetId,
-							body:
-								row.body === null
-									? null
-									: toPortableTextResponse(row.body, "post.body"),
+							body: row.body === null ? null : toPortableTextResponse(row.body, "post.body"),
 							latestRevisionId: row.latestRevisionId,
 							progressEntry: progressEntries[0]
 								? {
@@ -649,12 +610,9 @@ export default new Elysia()
 							canReply: replyCreationDecision.allowed && !targetingLock,
 						},
 					};
-					if (row.postKind === "reply")
-						return { ...threadDetail, postKind: "reply" as const };
-					if (row.postKind === "excerpt")
-						return { ...threadDetail, postKind: "excerpt" as const };
-					if (row.postKind === "wiki")
-						return { ...threadDetail, postKind: "wiki" as const };
+					if (row.postKind === "reply") return { ...threadDetail, postKind: "reply" as const };
+					if (row.postKind === "excerpt") return { ...threadDetail, postKind: "excerpt" as const };
+					if (row.postKind === "wiki") return { ...threadDetail, postKind: "wiki" as const };
 					return { ...threadDetail, postKind: "post" as const };
 				},
 				{
@@ -753,12 +711,8 @@ export default new Elysia()
 			.get(
 				"",
 				async ({ params, query, request }) => {
-					const authorization = (await resolveIdentity(request, "unit:read"))
-						.authorization;
-					await authorization.unit.ensureCanRead(
-						params.postId,
-						() => new UnitNotFound("Post"),
-					);
+					const authorization = (await resolveIdentity(request, "unit:read")).authorization;
+					await authorization.unit.ensureCanRead(params.postId, () => new UnitNotFound("Post"));
 					await ensureRootPost(params.postId, query.realmId);
 					const localizationLanguages = query.localizationLanguages ?? [];
 					const selection = await selectReplyTree({
@@ -768,8 +722,7 @@ export default new Elysia()
 						...(query.cursor ? { cursor: query.cursor } : {}),
 						...(query.limit ? { limit: query.limit } : {}),
 					});
-					if (!selection.items.length)
-						return { items: [], nextCursor: selection.nextCursor };
+					if (!selection.items.length) return { items: [], nextCursor: selection.nextCursor };
 					const rows = await database
 						.select(replySelection)
 						.from(postReply)
@@ -781,10 +734,7 @@ export default new Elysia()
 								eq(unitLocalization.unitId, postReply.postId),
 								eq(
 									unitLocalization.language,
-									resolvedUnitLocalizationLanguage(
-										postReply.postId,
-										localizationLanguages,
-									),
+									resolvedUnitLocalizationLanguage(postReply.postId, localizationLanguages),
 								),
 							),
 						)
@@ -822,22 +772,14 @@ export default new Elysia()
 						...(query.realmId ? { realmId: query.realmId } : {}),
 					});
 					const replyCreationAllowed = query.realmId
-						? (
-								await authorization.unit.decide(
-									query.realmId,
-									"realm.post.replies.create",
-								)
-							).allowed
+						? (await authorization.unit.decide(query.realmId, "realm.post.replies.create")).allowed
 						: true;
 					const rowById = new Map(rows.map((row) => [row.id, row]));
 					return {
 						items: await Promise.all(
 							selection.items.map(async (selected) => {
 								const row = rowById.get(selected.postId);
-								if (!row)
-									throw new Error(
-										`Selected reply ${selected.postId} was not hydrated`,
-									);
+								if (!row) throw new Error(`Selected reply ${selected.postId} was not hydrated`);
 								return {
 									...toReplyResponse(
 										row,
@@ -865,10 +807,7 @@ export default new Elysia()
 					response: {
 						[StatusCodes.OK]: ReplyListResponse,
 						[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["InvalidPaginationCursor"]),
-						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
-							"UnitNotFound",
-							"PostNotFound",
-						]),
+						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "PostNotFound"]),
 					},
 					detail: { summary: "List a bounded reply-post tree", tags: ["Posts"] },
 				},
@@ -876,10 +815,7 @@ export default new Elysia()
 			.post(
 				"",
 				async ({ params, profile, authorization, body }) => {
-					await authorization.unit.ensureCanRead(
-						params.postId,
-						() => new UnitNotFound("Post"),
-					);
+					await authorization.unit.ensureCanRead(params.postId, () => new UnitNotFound("Post"));
 					await ensureRootPost(params.postId, body.realmId);
 					await authorization.realm.ensureUnitCreation(
 						body.realmId ? [body.realmId] : [],
@@ -913,8 +849,7 @@ export default new Elysia()
 									),
 								)
 								.limit(1);
-							if (!parent || parent.rootPostId !== params.postId)
-								throw new ParentReplyNotFound();
+							if (!parent || parent.rootPostId !== params.postId) throw new ParentReplyNotFound();
 							if (parent.depth >= 64) throw new ReplyDepthExceeded();
 							depth = parent.depth + 1;
 							recipientUnitId = body.parentPostId;
@@ -976,14 +911,10 @@ export default new Elysia()
 						const recipients = await tx
 							.selectDistinct({ profileId: profileTable.id })
 							.from(creditAttribution)
-							.innerJoin(
-								profileTable,
-								eq(profileTable.id, creditAttribution.creditedUnitId),
-							)
+							.innerJoin(profileTable, eq(profileTable.id, creditAttribution.creditedUnitId))
 							.where(eq(creditAttribution.sourceUnitId, recipientUnitId));
 						for (const recipient of recipients) {
-							if (!recipient.profileId || recipient.profileId === profile.unitId)
-								continue;
+							if (!recipient.profileId || recipient.profileId === profile.unitId) continue;
 							await createNotification(tx, {
 								recipientProfileId: recipient.profileId,
 								actorProfileId: profile.unitId,
@@ -1020,8 +951,7 @@ export default new Elysia()
 						capabilities: {
 							canEdit,
 							canReply:
-								!lockedTargetIds.has(params.postId) &&
-								!lockedTargetIds.has(createdReply.id),
+								!lockedTargetIds.has(params.postId) && !lockedTargetIds.has(createdReply.id),
 						},
 					};
 				},
@@ -1103,10 +1033,7 @@ export default new Elysia()
 					response: {
 						[StatusCodes.OK]: IdResponse,
 						[StatusCodes.FORBIDDEN]: toApiErrorResponse(["UnitPermissionForbidden"]),
-						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
-							"ReplyPostNotFound",
-							"UnitNotFound",
-						]),
+						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["ReplyPostNotFound", "UnitNotFound"]),
 						[StatusCodes.CONFLICT]: toApiErrorResponse([
 							"UnitRevisionConflict",
 							"PostTagMentionVoteConflict",

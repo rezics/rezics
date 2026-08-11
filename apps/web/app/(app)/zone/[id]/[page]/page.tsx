@@ -82,11 +82,7 @@ export default async function Page({
 				unitId={resolvedPage.id}
 				requestedLanguage={requestedLanguage}
 			/>
-			<ZonePage
-				baseHref={zoneHref}
-				id={id}
-				selection={{ by: "slug", slug: resolvedPage.slug }}
-			/>
+			<ZonePage baseHref={zoneHref} id={id} selection={{ by: "slug", slug: resolvedPage.slug }} />
 		</>
 	);
 }

@@ -85,11 +85,7 @@ function realmPlacementCondition(filter: RealmPlacementFilter): SQL {
 	const conditions = logicConditions(filter, realmPlacementCondition);
 	if (filter.realm)
 		conditions.push(
-			unitReferenceCondition(
-				filter.realm,
-				sql`filter_realm_unit.realm_id`,
-				sql`filter_realm.kind`,
-			),
+			unitReferenceCondition(filter.realm, sql`filter_realm_unit.realm_id`, sql`filter_realm.kind`),
 		);
 	if (filter.status)
 		conditions.push(valuesCondition(sql`filter_realm_unit.status`, filter.status.in));
@@ -242,13 +238,9 @@ function scoreCondition(
 	if (filter.realm)
 		conditions.push(unitReferenceCondition(filter.realm, columns.realmId, columns.realmKind));
 	if (filter.target)
-		conditions.push(
-			unitReferenceCondition(filter.target, columns.targetId, columns.targetKind),
-		);
+		conditions.push(unitReferenceCondition(filter.target, columns.targetId, columns.targetKind));
 	if (filter.author)
-		conditions.push(
-			profileReferenceCondition(filter.author, columns.authorId, viewerProfileId),
-		);
+		conditions.push(profileReferenceCondition(filter.author, columns.authorId, viewerProfileId));
 	return conjunction(conditions);
 }
 
@@ -438,9 +430,7 @@ function tagAssertionCandidateSet(
 		if (allSet) conjunctiveSets.push(allSet);
 	}
 	if (filter.any) {
-		const childSets = filter.any.map((child) =>
-			tagAssertionCandidateSet(child, viewerProfileId),
-		);
+		const childSets = filter.any.map((child) => tagAssertionCandidateSet(child, viewerProfileId));
 		if (childSets.every((set): set is SQL => set !== undefined)) {
 			const anySet = combineCandidateSets(childSets, "union");
 			if (anySet) conjunctiveSets.push(anySet);
@@ -464,12 +454,8 @@ function tagAssertionCandidateSet(
 			conjunctiveSets.push(sql`select filter_realm_tag.unit_id
 				from realm_unit_tag filter_realm_tag
 				where ${conjunction([
-					realmIds
-						? valuesCondition(sql`filter_realm_tag.realm_id`, realmIds, true)
-						: sql`true`,
-					tagIds
-						? valuesCondition(sql`filter_realm_tag.tag_id`, tagIds, true)
-						: sql`true`,
+					realmIds ? valuesCondition(sql`filter_realm_tag.realm_id`, realmIds, true) : sql`true`,
+					tagIds ? valuesCondition(sql`filter_realm_tag.tag_id`, tagIds, true) : sql`true`,
 				])}`);
 	} else if (authority.kind === "realm") {
 		const realmIds = authority.realm.id?.in;
@@ -480,19 +466,13 @@ function tagAssertionCandidateSet(
 					realmIds
 						? valuesCondition(sql`filter_realm_tag_stat.realm_id`, realmIds, true)
 						: sql`true`,
-					tagIds
-						? valuesCondition(sql`filter_realm_tag_stat.tag_id`, tagIds, true)
-						: sql`true`,
+					tagIds ? valuesCondition(sql`filter_realm_tag_stat.tag_id`, tagIds, true) : sql`true`,
 				])}`);
 	} else if (viewerProfileId) {
 		conjunctiveSets.push(sql`select filter_profile_tag.unit_id
 			from profile_unit_tag filter_profile_tag
 			where filter_profile_tag.profile_id = ${viewerProfileId}::uuid
-				and ${
-					tagIds
-						? valuesCondition(sql`filter_profile_tag.tag_id`, tagIds, true)
-						: sql`true`
-				}`);
+				and ${tagIds ? valuesCondition(sql`filter_profile_tag.tag_id`, tagIds, true) : sql`true`}`);
 	}
 	return combineCandidateSets(conjunctiveSets, "intersect");
 }
@@ -514,9 +494,7 @@ function scoreCandidateSet(
 		if (allSet) conjunctiveSets.push(allSet);
 	}
 	if (filter.any) {
-		const childSets = filter.any.map((child) =>
-			scoreCandidateSet(child, viewerProfileId, target),
-		);
+		const childSets = filter.any.map((child) => scoreCandidateSet(child, viewerProfileId, target));
 		if (childSets.every((set): set is SQL => set !== undefined)) {
 			const anySet = combineCandidateSets(childSets, "union");
 			if (anySet) conjunctiveSets.push(anySet);
@@ -600,9 +578,7 @@ function postCandidateSet(filter: PostFilter, viewerProfileId?: string): SQL | u
 					realmIds
 						? valuesCondition(sql`filter_candidate_context.realm_id`, realmIds, true)
 						: sql`true`,
-					tagIds
-						? valuesCondition(sql`filter_candidate_context.tag_id`, tagIds, true)
-						: sql`true`,
+					tagIds ? valuesCondition(sql`filter_candidate_context.tag_id`, tagIds, true) : sql`true`,
 				])}`);
 	}
 	const displayed = filter.scores?.displayed;
@@ -722,11 +698,7 @@ export function compileUnitPredicateCandidateSet(
 		if (tagSet) conjunctiveSets.push(tagSet);
 	}
 	if (filter.scores?.received && "some" in filter.scores.received) {
-		const scoreSet = scoreCandidateSet(
-			filter.scores.received.some,
-			viewerProfileId,
-			"received",
-		);
+		const scoreSet = scoreCandidateSet(filter.scores.received.some, viewerProfileId, "received");
 		if (scoreSet) conjunctiveSets.push(scoreSet);
 	}
 	if (filter.post && "is" in filter.post) {

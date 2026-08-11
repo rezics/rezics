@@ -86,8 +86,7 @@ export function markdownWorkspaceReducer(
 		case "operation-started":
 			return { ...state, operation: action.operation, notice: undefined };
 		case "opened":
-			if (action.revision !== state.revision)
-				return { ...state, operation: { kind: "idle" } };
+			if (action.revision !== state.revision) return { ...state, operation: { kind: "idle" } };
 			return {
 				source: action.opened.source,
 				mode: state.mode,

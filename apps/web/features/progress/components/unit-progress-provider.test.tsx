@@ -212,8 +212,6 @@ describe("UnitProgressProvider editor lifecycle", () => {
 			},
 		});
 
-		expect(screen.getByTestId("content-structure-nodes").textContent).toBe(
-			"第一集:25,第二集:100",
-		);
+		expect(screen.getByTestId("content-structure-nodes").textContent).toBe("第一集:25,第二集:100");
 	});
 });

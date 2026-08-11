@@ -25,9 +25,9 @@ function document(...unitIds: string[]) {
 
 describe("Post Unit mention side effects", () => {
 	it("returns only distinct mentions newly added to the document", () => {
-		expect(
-			collectNewPostUnitMentionIds(document(first), document(first, second, second)),
-		).toEqual([second]);
+		expect(collectNewPostUnitMentionIds(document(first), document(first, second, second))).toEqual([
+			second,
+		]);
 	});
 
 	it("does not interpret mention removal as a reversible vote", () => {

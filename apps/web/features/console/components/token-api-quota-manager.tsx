@@ -59,9 +59,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 function parsePositiveInteger(value: unknown): number | undefined {
-	return typeof value === "number" && Number.isSafeInteger(value) && value > 0
-		? value
-		: undefined;
+	return typeof value === "number" && Number.isSafeInteger(value) && value > 0 ? value : undefined;
 }
 
 function parseOperationLimits(value: unknown): OperationLimits | undefined {
@@ -118,8 +116,7 @@ function initialLimits(token: ManagedToken): LimitValues {
 	const override = token.quota.configurationOverride.limits;
 	return {
 		requestsPerMinute: String(
-			override?.requestRate?.requestsPerMinute ??
-				token.quota.limits.requestRate.requestsPerMinute,
+			override?.requestRate?.requestsPerMinute ?? token.quota.limits.requestRate.requestsPerMinute,
 		),
 		burstCapacity: String(
 			override?.requestRate?.burstCapacity ?? token.quota.limits.requestRate.burstCapacity,
@@ -154,8 +151,7 @@ export function TokenApiQuotaManager({ userId }: { readonly userId: string }) {
 	});
 
 	if (!canReadTokenApiQuotas) return null;
-	if (tokens.isPending || (canUpdateTokenApiQuotas && policies.isPending))
-		return <QueryPending />;
+	if (tokens.isPending || (canUpdateTokenApiQuotas && policies.isPending)) return <QueryPending />;
 	if (tokens.isError || !tokens.data)
 		return <QueryFailure error={tokens.error} retry={() => void tokens.refetch()} />;
 	if (canUpdateTokenApiQuotas && (policies.isError || !policies.data))
@@ -168,9 +164,7 @@ export function TokenApiQuotaManager({ userId }: { readonly userId: string }) {
 		<section className="grid gap-4">
 			<header>
 				<h3 className="font-semibold">{t.settings.tokens.listTitle}</h3>
-				<p className="mt-1 text-muted-foreground text-sm">
-					{t.settings.tokens.listDescription}
-				</p>
+				<p className="mt-1 text-muted-foreground text-sm">{t.settings.tokens.listDescription}</p>
 			</header>
 			{tokens.data.items.length === 0 ? (
 				<p className="rounded-lg border border-border p-6 text-center text-muted-foreground text-sm">
@@ -307,22 +301,14 @@ function TokenQuotaCard({
 				<div className="flex flex-wrap items-start justify-between gap-3">
 					<div className="min-w-0">
 						<CardTitle className="break-words">{token.name}</CardTitle>
-						<CardDescription className="mt-1 font-mono">
-							{token.tokenPrefix}
-						</CardDescription>
+						<CardDescription className="mt-1 font-mono">{token.tokenPrefix}</CardDescription>
 					</div>
 					<div className="flex flex-wrap gap-2">
 						<Badge variant={token.enabled ? "success" : "secondary"}>
 							{token.enabled ? t.settings.tokens.enabled : t.settings.tokens.disabled}
 						</Badge>
-						<Badge variant="secondary">
-							{t.console.apiQuotas.classes[token.quota.class]}
-						</Badge>
-						<Badge
-							variant={
-								token.quota.source === "privileged_fallback" ? "warning" : "outline"
-							}
-						>
+						<Badge variant="secondary">{t.console.apiQuotas.classes[token.quota.class]}</Badge>
+						<Badge variant={token.quota.source === "privileged_fallback" ? "warning" : "outline"}>
 							{t.console.users.accountQuota.sources[token.quota.source]}
 						</Badge>
 					</div>
@@ -363,22 +349,17 @@ function TokenQuotaCard({
 								>
 									{policies.map((policy) => (
 										<NativeSelectOption key={policy.id} value={policy.key}>
-											{policy.key} ·{" "}
-											{t.console.apiQuotas.classes[policy.class]}
+											{policy.key} · {t.console.apiQuotas.classes[policy.class]}
 										</NativeSelectOption>
 									))}
 								</NativeSelect>
 							</Field>
 							{selectedPolicy.class === "privileged" ? (
 								<Field required>
-									<FieldLabel>
-										{t.console.users.accountQuota.validUntil}
-									</FieldLabel>
+									<FieldLabel>{t.console.users.accountQuota.validUntil}</FieldLabel>
 									<Input
 										min={new Date().toISOString().slice(0, 16)}
-										onChange={(event) =>
-											setValidUntil(event.currentTarget.value)
-										}
+										onChange={(event) => setValidUntil(event.currentTarget.value)}
 										required
 										type="datetime-local"
 										value={validUntil}
@@ -392,12 +373,8 @@ function TokenQuotaCard({
 								onCheckedChange={({ checked }) => setCustomize(checked === true)}
 							/>
 							<div>
-								<FieldLabel className="font-normal">
-									{t.settings.tokens.configureLimits}
-								</FieldLabel>
-								<FieldDescription>
-									{t.settings.tokens.limitsDescription}
-								</FieldDescription>
+								<FieldLabel className="font-normal">{t.settings.tokens.configureLimits}</FieldLabel>
+								<FieldDescription>{t.settings.tokens.limitsDescription}</FieldDescription>
 							</div>
 						</Field>
 						{customize ? (
@@ -405,15 +382,9 @@ function TokenQuotaCard({
 								<div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
 									{(
 										[
-											[
-												"requestsPerMinute",
-												t.console.apiQuotas.requestsPerMinute,
-											],
+											["requestsPerMinute", t.console.apiQuotas.requestsPerMinute],
 											["burstCapacity", t.console.apiQuotas.burstCapacity],
-											[
-												"maxConcurrentRequests",
-												t.console.apiQuotas.maxConcurrentRequests,
-											],
+											["maxConcurrentRequests", t.console.apiQuotas.maxConcurrentRequests],
 											["dailyCostUnits", t.console.apiQuotas.dailyCostUnits],
 										] as const
 									).map(([name, label]) => (
@@ -437,14 +408,10 @@ function TokenQuotaCard({
 									))}
 								</div>
 								<Field invalid={operations === undefined}>
-									<FieldLabel>
-										{t.console.apiQuotas.operationOverrides}
-									</FieldLabel>
+									<FieldLabel>{t.console.apiQuotas.operationOverrides}</FieldLabel>
 									<Textarea
 										className="min-h-40 font-mono text-xs"
-										onChange={(event) =>
-											setOperationsText(event.currentTarget.value)
-										}
+										onChange={(event) => setOperationsText(event.currentTarget.value)}
 										spellCheck={false}
 										value={operationsText}
 									/>

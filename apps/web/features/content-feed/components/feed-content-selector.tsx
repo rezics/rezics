@@ -137,9 +137,7 @@ function FeedContentMenuItem({
 			<span className="grid gap-0.5">
 				<span className="font-semibold">{option.label}</span>
 				{option.description ? (
-					<span className="text-muted-foreground text-xs leading-5">
-						{option.description}
-					</span>
+					<span className="text-muted-foreground text-xs leading-5">{option.description}</span>
 				) : null}
 			</span>
 		</MenuCheckboxItem>

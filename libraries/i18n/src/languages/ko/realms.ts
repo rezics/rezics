@@ -189,8 +189,7 @@ export default {
 		removeTitle: "분류 노드를 제거할까요?",
 		removeDescription:
 			"하위 노드가 있습니다. 하위 노드를 유지해 위로 올리거나 전체 하위 트리를 제거할 수 있습니다.",
-		removeLeafDescription:
-			"이 노드는 초안에서 제거됩니다. 저장 전에는 변경을 취소할 수 있습니다.",
+		removeLeafDescription: "이 노드는 초안에서 제거됩니다. 저장 전에는 변경을 취소할 수 있습니다.",
 		promoteChildren: "하위 노드를 유지하고 위로 이동",
 		removeSubtree: "전체 하위 트리 제거",
 		cancel: "취소",

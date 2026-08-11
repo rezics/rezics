@@ -219,9 +219,7 @@ function UnitTagCurationEditor({
 	function handleDragEnd(event: DragEndEvent) {
 		if (!event.over) return;
 		const tagId = String(event.active.id);
-		const targetIndex = displayedFeatured.findIndex(
-			(tag) => tag.tagId === String(event.over?.id),
-		);
+		const targetIndex = displayedFeatured.findIndex((tag) => tag.tagId === String(event.over?.id));
 		if (targetIndex >= 0) void moveFeatured(tagId, targetIndex);
 	}
 
@@ -237,9 +235,7 @@ function UnitTagCurationEditor({
 					<h2 className="text-lg font-semibold" id="featured-tags-title">
 						{t.tags.management.featuredTitle}
 					</h2>
-					<p className="text-sm text-muted-foreground">
-						{t.tags.management.featuredDescription}
-					</p>
+					<p className="text-sm text-muted-foreground">{t.tags.management.featuredDescription}</p>
 				</div>
 				{displayedFeatured.length ? (
 					<DndContext
@@ -286,9 +282,7 @@ function UnitTagCurationEditor({
 										count={displayedFeatured.length}
 										index={index}
 										key={tag.tagId}
-										onMove={(targetIndex) =>
-											void moveFeatured(tag.tagId, targetIndex)
-										}
+										onMove={(targetIndex) => void moveFeatured(tag.tagId, targetIndex)}
 										onUnfeature={() => void unfeature(tag)}
 										tag={tag}
 									/>
@@ -306,19 +300,14 @@ function UnitTagCurationEditor({
 					<h2 className="text-lg font-semibold" id="ranked-tags-title">
 						{t.tags.management.rankedTitle}
 					</h2>
-					<p className="text-sm text-muted-foreground">
-						{t.tags.management.rankedDescription}
-					</p>
+					<p className="text-sm text-muted-foreground">{t.tags.management.rankedDescription}</p>
 				</div>
 				{ranked.length ? (
 					<ul className="grid gap-2">
 						{ranked.map((tag) => (
 							<RankedTagRow
 								busy={mutation.isPending}
-								featuring={
-									mutation.isPending &&
-									mutation.variables?.path.tagId === tag.tagId
-								}
+								featuring={mutation.isPending && mutation.variables?.path.tagId === tag.tagId}
 								key={tag.tagId}
 								onFeature={() => void feature(tag)}
 								tag={tag}
@@ -406,13 +395,7 @@ function SortableFeaturedTag({
 						>
 							<ArrowDown aria-hidden />
 						</Button>
-						<Button
-							disabled={busy}
-							onClick={onUnfeature}
-							size="sm"
-							type="button"
-							variant="outline"
-						>
+						<Button disabled={busy} onClick={onUnfeature} size="sm" type="button" variant="outline">
 							<PinOff aria-hidden />
 							{t.tags.management.unfeature}
 						</Button>

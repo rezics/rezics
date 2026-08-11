@@ -16,9 +16,7 @@ const nodes = [
 
 describe("editable tree", () => {
 	it("normalizes nested selections to their roots", () => {
-		expect(normalizeEditableTreeSelection(nodes, new Set(["a", "b", "c"]))).toEqual(
-			new Set(["a"]),
-		);
+		expect(normalizeEditableTreeSelection(nodes, new Set(["a", "b", "c"]))).toEqual(new Set(["a"]));
 	});
 
 	it("rejects moves into a selected subtree", () => {

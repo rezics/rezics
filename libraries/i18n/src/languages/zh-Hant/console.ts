@@ -191,8 +191,7 @@ export default {
 			policy: "額度策略",
 			validUntil: "特權額度到期時間",
 			customize: "為此帳戶覆寫策略",
-			customizeDescription:
-				"帳戶覆寫會與不可變政策修訂分開保存；指派特權政策時仍須設定到期時間。",
+			customizeDescription: "帳戶覆寫會與不可變政策修訂分開保存；指派特權政策時仍須設定到期時間。",
 			reason: "指派原因",
 			reasonPlaceholder: "記錄作業依據；內容會寫入安全稽核紀錄。",
 			invalid: "請檢查額度限制、操作覆寫與特權額度到期時間。",

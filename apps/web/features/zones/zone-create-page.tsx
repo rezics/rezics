@@ -119,9 +119,7 @@ function ZoneCreateContent() {
 							/>
 							{categoriesInvalid ? (
 								<Alert variant="destructive">
-									<AlertDescription>
-										{t.zones.create.categoriesRequired}
-									</AlertDescription>
+									<AlertDescription>{t.zones.create.categoriesRequired}</AlertDescription>
 								</Alert>
 							) : null}
 						</Field>
@@ -155,8 +153,7 @@ function ZoneCreateContent() {
 							<NativeSelect
 								onChange={(event) => {
 									const value = event.currentTarget.value;
-									if (value === "comfortable" || value === "compact")
-										setDensity(value);
+									if (value === "comfortable" || value === "compact") setDensity(value);
 								}}
 								value={density}
 							>
@@ -185,12 +182,7 @@ function ZoneCreateContent() {
 							/>
 						</Field>
 						<RequestFailure error={create.error} />
-						<Button
-							className="w-fit"
-							isLoading={create.isPending}
-							type="submit"
-							variant="solid"
-						>
+						<Button className="w-fit" isLoading={create.isPending} type="submit" variant="solid">
 							{t.zones.create.submit}
 						</Button>
 					</FieldGroup>

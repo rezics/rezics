@@ -85,12 +85,7 @@ const itemMediaVariants = tv({
 		variant: {
 			default: "bg-transparent",
 			icon: ["[&_svg:not([class*='size-'])]:size-4"],
-			image: [
-				"size-10",
-				"rounded-xl",
-				"overflow-hidden",
-				"[&_img]:size-full [&_img]:object-cover",
-			],
+			image: ["size-10", "rounded-xl", "overflow-hidden", "[&_img]:size-full [&_img]:object-cover"],
 		},
 	},
 	defaultVariants: {

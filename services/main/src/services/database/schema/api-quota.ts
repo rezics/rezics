@@ -43,10 +43,7 @@ export const apiQuotaPolicy = pgTable(
 	},
 	(table) => [
 		check("api_quota_policy_key_check", sql`${table.key} ~ '^[a-z][a-z0-9_-]{0,63}$'`),
-		check(
-			"api_quota_policy_subject_kind_check",
-			sql`${table.subjectKind} in ('account', 'token')`,
-		),
+		check("api_quota_policy_subject_kind_check", sql`${table.subjectKind} in ('account', 'token')`),
 		check("api_quota_policy_class_check", sql`${table.class} in ('standard', 'privileged')`),
 		check("api_quota_policy_current_revision_check", sql`${table.currentRevision} > 0`),
 		uniqueIndex("api_quota_policy_id_subject_kind_key").on(table.id, table.subjectKind),
@@ -75,10 +72,7 @@ export const apiQuotaPolicyRevision = pgTable(
 			"api_quota_policy_revision_configuration_json_object_check",
 			sql`jsonb_typeof(${table.configuration}) = 'object'`,
 		),
-		check(
-			"api_quota_policy_revision_change_reason_check",
-			sql`btrim(${table.changeReason}) <> ''`,
-		),
+		check("api_quota_policy_revision_change_reason_check", sql`btrim(${table.changeReason}) <> ''`),
 	],
 );
 
@@ -121,10 +115,7 @@ export const apiAccountQuotaBinding = pgTable(
 			"api_account_quota_binding_validity_check",
 			sql`${table.validUntil} is null or ${table.validUntil} > ${table.createdAt}`,
 		),
-		check(
-			"api_account_quota_binding_reason_check",
-			sql`btrim(${table.assignmentReason}) <> ''`,
-		),
+		check("api_account_quota_binding_reason_check", sql`btrim(${table.assignmentReason}) <> ''`),
 	],
 );
 
@@ -154,10 +145,7 @@ export const apiTokenQuotaBinding = pgTable(
 		}).onDelete("restrict"),
 		index("api_token_quota_binding_policy_idx").on(table.policyId),
 		index("api_token_quota_binding_assigned_by_idx").on(table.assignedByProfileId),
-		check(
-			"api_token_quota_binding_policy_kind_check",
-			sql`${table.policySubjectKind} = 'token'`,
-		),
+		check("api_token_quota_binding_policy_kind_check", sql`${table.policySubjectKind} = 'token'`),
 		check("api_token_quota_binding_revision_check", sql`${table.revision} > 0`),
 		check(
 			"api_token_quota_binding_configuration_json_object_check",
@@ -270,11 +258,7 @@ export const apiQuotaDailyUsage = pgTable(
 			.on(table.tokenId, table.scope, table.usageDate)
 			.where(sql`${table.tokenId} is not null`),
 		index("api_quota_daily_usage_date_idx").on(table.usageDate),
-		quotaSubjectCheck(
-			"api_quota_daily_usage_subject_check",
-			table.accountUserId,
-			table.tokenId,
-		),
+		quotaSubjectCheck("api_quota_daily_usage_subject_check", table.accountUserId, table.tokenId),
 		check(
 			"api_quota_daily_usage_scope_check",
 			sql`btrim(${table.scope}) <> '' and length(${table.scope}) <= 256`,
@@ -308,11 +292,7 @@ export const apiQuotaRequestLease = pgTable(
 			.on(table.tokenId, table.scope, table.expiresAt)
 			.where(sql`${table.tokenId} is not null`),
 		index("api_quota_request_lease_expiry_idx").on(table.expiresAt),
-		quotaSubjectCheck(
-			"api_quota_request_lease_subject_check",
-			table.accountUserId,
-			table.tokenId,
-		),
+		quotaSubjectCheck("api_quota_request_lease_subject_check", table.accountUserId, table.tokenId),
 		check(
 			"api_quota_request_lease_scope_check",
 			sql`btrim(${table.scope}) <> '' and length(${table.scope}) <= 256`,

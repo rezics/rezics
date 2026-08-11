@@ -39,11 +39,7 @@ export function ImageUploadProgress({ status }: { readonly status: ImageUploadSt
 			role="status"
 		>
 			<p className="font-medium text-foreground text-sm">{statusText}</p>
-			<Progress
-				aria-label={statusText}
-				indeterminate={progress === undefined}
-				value={progress}
-			/>
+			<Progress aria-label={statusText} indeterminate={progress === undefined} value={progress} />
 		</div>
 	);
 }

@@ -98,10 +98,7 @@ export function PermissionMatrix<Value extends string>({
 		return [...grouped.entries()];
 	}, [deferredSearch, resources]);
 	const allValues = useMemo(
-		() =>
-			new Set(
-				resources.flatMap((resource) => resource.actions.map((action) => action.value)),
-			),
+		() => new Set(resources.flatMap((resource) => resource.actions.map((action) => action.value))),
 		[resources],
 	);
 	const selectedTemplate = templates.find((template) => equalSets(template.values, value));
@@ -146,9 +143,7 @@ export function PermissionMatrix<Value extends string>({
 								onClick={() => onValueChange(new Set(template.values))}
 								size="sm"
 								type="button"
-								variant={
-									selectedTemplate?.id === template.id ? "secondary" : "outline"
-								}
+								variant={selectedTemplate?.id === template.id ? "secondary" : "outline"}
 							>
 								{selectedTemplate?.id === template.id ? <CheckIcon /> : null}
 								{template.label}
@@ -160,9 +155,7 @@ export function PermissionMatrix<Value extends string>({
 
 			<section className="grid gap-3" aria-label={labels.permissions}>
 				<div className="flex items-center justify-between gap-4">
-					<p className="font-medium text-sm text-muted-foreground">
-						{labels.permissions}
-					</p>
+					<p className="font-medium text-sm text-muted-foreground">{labels.permissions}</p>
 					<Button onClick={clear} size="sm" type="button" variant="ghost">
 						{labels.clear}
 					</Button>
@@ -198,9 +191,7 @@ export function PermissionMatrix<Value extends string>({
 						{categories.map(([category, categoryResources]) => {
 							const selectedCount = categoryResources.reduce(
 								(count, resource) =>
-									count +
-									resource.actions.filter((action) => value.has(action.value))
-										.length,
+									count + resource.actions.filter((action) => value.has(action.value)).length,
 								0,
 							);
 							return (
@@ -222,15 +213,9 @@ export function PermissionMatrix<Value extends string>({
 												>
 													<div className="min-w-0">
 														<div className="flex flex-wrap items-center gap-2">
-															<p className="font-medium">
-																{resource.label}
-															</p>
-															{resource.actions.some(
-																(action) => action.required,
-															) ? (
-																<Badge variant="outline">
-																	{labels.required}
-																</Badge>
+															<p className="font-medium">{resource.label}</p>
+															{resource.actions.some((action) => action.required) ? (
+																<Badge variant="outline">{labels.required}</Badge>
 															) : null}
 														</div>
 														{resource.description ? (
@@ -241,33 +226,25 @@ export function PermissionMatrix<Value extends string>({
 													</div>
 													<div className="flex shrink-0 flex-wrap gap-1.5">
 														{resource.actions.map((action) => {
-															const selected = value.has(
-																action.value,
-															);
+															const selected = value.has(action.value);
 															return (
 																<Button
 																	aria-pressed={selected}
 																	disabled={action.disabled}
 																	key={action.value}
-																	onClick={() =>
-																		toggle(resource, action)
-																	}
+																	onClick={() => toggle(resource, action)}
 																	size="sm"
 																	title={action.description}
 																	type="button"
 																	variant={
-																		selected &&
-																		action.tone ===
-																			"destructive"
+																		selected && action.tone === "destructive"
 																			? "destructive"
 																			: selected
 																				? "secondary"
 																				: "outline"
 																	}
 																>
-																	{selected ? (
-																		<CheckIcon />
-																	) : null}
+																	{selected ? <CheckIcon /> : null}
 																	{action.label}
 																</Button>
 															);

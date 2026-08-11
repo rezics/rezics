@@ -94,11 +94,7 @@ export async function listFollowing(input: ListFollowingInput) {
 			language: resolvedUnitLocalizationLanguage(unit.id, localizationLanguages),
 			title: resolvedUnitLocalizationTitle(unit.id, localizationLanguages),
 			avatar: resolvedUnitLocalizationAvatar(unit.id, localizationLanguages),
-			coverAssetId: resolvedUnitLocalizationImageAssetId(
-				unit.id,
-				"cover",
-				localizationLanguages,
-			),
+			coverAssetId: resolvedUnitLocalizationImageAssetId(unit.id, "cover", localizationLanguages),
 			position: unitFollow.position,
 			favorite: unitFollow.favorite,
 			createdAt: unitFollow.createdAt,
@@ -211,9 +207,7 @@ export async function followUnit(input: {
 export async function unfollowUnit(followerProfileId: string, unitId: string) {
 	await database
 		.delete(unitFollow)
-		.where(
-			and(eq(unitFollow.followerProfileId, followerProfileId), eq(unitFollow.unitId, unitId)),
-		);
+		.where(and(eq(unitFollow.followerProfileId, followerProfileId), eq(unitFollow.unitId, unitId)));
 	return { following: false as const };
 }
 
@@ -233,10 +227,7 @@ export async function getFollowingStatus(input: {
 		.leftJoin(
 			unitFollowNotificationPreference,
 			and(
-				eq(
-					unitFollowNotificationPreference.followerProfileId,
-					unitFollow.followerProfileId,
-				),
+				eq(unitFollowNotificationPreference.followerProfileId, unitFollow.followerProfileId),
 				eq(unitFollowNotificationPreference.unitId, unitFollow.unitId),
 			),
 		)
@@ -392,9 +383,7 @@ export async function updateFollowingPresentation(
 			...(input.position === undefined ? {} : { position: input.position }),
 			updatedAt: new Date(),
 		})
-		.where(
-			and(eq(unitFollow.followerProfileId, followerProfileId), eq(unitFollow.unitId, unitId)),
-		)
+		.where(and(eq(unitFollow.followerProfileId, followerProfileId), eq(unitFollow.unitId, unitId)))
 		.returning({
 			unitId: unitFollow.unitId,
 			position: unitFollow.position,

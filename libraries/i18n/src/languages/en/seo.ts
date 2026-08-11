@@ -40,8 +40,7 @@ export default {
 			kind: String,
 		}),
 		restricted: "This page’s content rating is not eligible for search indexing metadata.",
-		unavailable:
-			"Public information for this page is currently unavailable for search indexing.",
+		unavailable: "Public information for this page is currently unavailable for search indexing.",
 	},
 	kinds: {
 		profile: ui.profile,

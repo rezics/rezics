@@ -70,8 +70,7 @@ async function listTypeScriptFiles(directory: string): Promise<string[]> {
 	for (const entry of entries) {
 		const path = resolve(directory, entry.name);
 		if (entry.isDirectory()) files.push(...(await listTypeScriptFiles(path)));
-		else if (extname(entry.name) === ".ts" && !entry.name.endsWith(".test.ts"))
-			files.push(path);
+		else if (extname(entry.name) === ".ts" && !entry.name.endsWith(".test.ts")) files.push(path);
 	}
 	return files;
 }

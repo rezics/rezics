@@ -125,9 +125,7 @@ function mapSlugCollision(
 }
 
 async function lockSlugTree(tx: DatabaseTransaction): Promise<void> {
-	await tx.execute(
-		sql`select pg_advisory_xact_lock(hashtextextended(${SlugTreeMutationLock}, 0))`,
-	);
+	await tx.execute(sql`select pg_advisory_xact_lock(hashtextextended(${SlugTreeMutationLock}, 0))`);
 }
 
 function scopeMatches(scopeUnitId: string | null) {
@@ -148,12 +146,7 @@ async function loadCanonicalAddress(
 				slug: unitSlugAddress.slug,
 			})
 			.from(unitSlugAddress)
-			.where(
-				and(
-					eq(unitSlugAddress.kind, "canonical"),
-					eq(unitSlugAddress.targetUnitId, unitId),
-				),
-			)
+			.where(and(eq(unitSlugAddress.kind, "canonical"), eq(unitSlugAddress.targetUnitId, unitId)))
 			.limit(1)
 	)[0];
 }
@@ -182,10 +175,7 @@ async function loadScopeDepth(
 			.from(unitSlugAddress)
 			.innerJoin(unit, eq(unit.id, unitSlugAddress.targetUnitId))
 			.where(
-				and(
-					eq(unitSlugAddress.kind, "canonical"),
-					eq(unitSlugAddress.targetUnitId, currentId),
-				),
+				and(eq(unitSlugAddress.kind, "canonical"), eq(unitSlugAddress.targetUnitId, currentId)),
 			)
 			.limit(1);
 		if (!current) throw new SlugScopeNotFound();
@@ -234,11 +224,7 @@ async function replaceCanonicalAddress(
 	try {
 		scopeDepth = await loadScopeDepth(tx, input.scopeUnitId, target.id);
 	} catch (cause) {
-		if (
-			!(cause instanceof SlugScopeNotFound) ||
-			!input.allowUnaddressedScope ||
-			!input.scopeUnitId
-		)
+		if (!(cause instanceof SlugScopeNotFound) || !input.allowUnaddressedScope || !input.scopeUnitId)
 			throw cause;
 		const [scope] = await tx
 			.select({ deletedAt: unit.deletedAt })
@@ -404,9 +390,7 @@ export async function getPublicCanonicalUnitSlugAddresses(
 		}
 
 		const targetIds = [
-			...new Set(
-				states.filter((state) => !state.finished).map((state) => state.currentUnitId),
-			),
+			...new Set(states.filter((state) => !state.finished).map((state) => state.currentUnitId)),
 		];
 		if (!targetIds.length) break;
 		const records = await database
@@ -490,10 +474,7 @@ async function loadCanonicalUnitPath(
 			.from(unitSlugAddress)
 			.innerJoin(unit, eq(unit.id, unitSlugAddress.targetUnitId))
 			.where(
-				and(
-					eq(unitSlugAddress.kind, "canonical"),
-					eq(unitSlugAddress.targetUnitId, currentId),
-				),
+				and(eq(unitSlugAddress.kind, "canonical"), eq(unitSlugAddress.targetUnitId, currentId)),
 			)
 			.limit(1);
 		if (!current) throw new UnitSlugAddressNotFound();
@@ -560,8 +541,7 @@ export async function getCanonicalUnitSlugAddressWithPlatformAccess(
 
 /** Resolves a complete public slug path to an immutable Unit identity. */
 export async function resolveUnitPath(segments: readonly string[]): Promise<ResolvedUnitPath> {
-	if (!segments.length || segments.length > SlugAddressMaximumDepth)
-		throw new SlugDepthExceeded();
+	if (!segments.length || segments.length > SlugAddressMaximumDepth) throw new SlugDepthExceeded();
 	const path = segments.map(parseSlugLabel);
 	let resolved:
 		| {
@@ -656,11 +636,7 @@ export async function resolveScopedUnitAddress(
 		.innerJoin(unit, eq(unit.id, unitSlugAddress.targetUnitId))
 		.where(and(eq(unitSlugAddress.scopeUnitId, scopeUnitId), eq(unitSlugAddress.slug, slug)))
 		.limit(1);
-	if (
-		!address ||
-		!isPublicAddressNode(address) ||
-		(expectedKind && address.kind !== expectedKind)
-	)
+	if (!address || !isPublicAddressNode(address) || (expectedKind && address.kind !== expectedKind))
 		throw new UnitNotFound();
 	const path = [...scopePath, slug];
 	if (path.length > SlugAddressMaximumDepth) throw new UnitNotFound();
@@ -1050,10 +1026,7 @@ export async function releaseSlugRedirect(
 			})
 			.from(unitSlugAddress)
 			.where(
-				and(
-					eq(unitSlugAddress.id, input.redirectAddressId),
-					eq(unitSlugAddress.kind, "redirect"),
-				),
+				and(eq(unitSlugAddress.id, input.redirectAddressId), eq(unitSlugAddress.kind, "redirect")),
 			)
 			.limit(1);
 		if (!redirect) throw new SlugRedirectNotFound();

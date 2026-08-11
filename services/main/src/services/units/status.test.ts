@@ -17,10 +17,7 @@ describe("Unit status changes", () => {
 		["draft", "draft"],
 		["archived", "archived"],
 		["published", "published"],
-	] as const)(
-		"does not require status-update permission for %s -> %s",
-		(fromStatus, toStatus) => {
-			expect(changesUnitStatus(fromStatus, toStatus)).toBe(false);
-		},
-	);
+	] as const)("does not require status-update permission for %s -> %s", (fromStatus, toStatus) => {
+		expect(changesUnitStatus(fromStatus, toStatus)).toBe(false);
+	});
 });

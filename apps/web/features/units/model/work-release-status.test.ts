@@ -8,8 +8,7 @@ describe("Work release status", () => {
 	});
 
 	it("proves form values at runtime", () => {
-		for (const status of WorkReleaseStatusValues)
-			expect(isWorkReleaseStatus(status)).toBe(true);
+		for (const status of WorkReleaseStatusValues) expect(isWorkReleaseStatus(status)).toBe(true);
 		expect(isWorkReleaseStatus("releasing")).toBe(false);
 		expect(isWorkReleaseStatus(null)).toBe(false);
 	});

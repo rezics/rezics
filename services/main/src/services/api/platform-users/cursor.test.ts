@@ -13,9 +13,7 @@ describe("platform user cursor", () => {
 
 	it.each([
 		"not-json",
-		Buffer.from(JSON.stringify({ createdAt: "invalid", userId: "invalid" })).toString(
-			"base64url",
-		),
+		Buffer.from(JSON.stringify({ createdAt: "invalid", userId: "invalid" })).toString("base64url"),
 		Buffer.from(
 			JSON.stringify({
 				createdAt: "2026-07-28T12:00:00.000Z",

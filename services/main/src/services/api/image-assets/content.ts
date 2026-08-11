@@ -38,8 +38,7 @@ export default new Elysia({ prefix: "/image-assets" })
 				status: StatusCodes.MOVED_TEMPORARILY,
 				headers: {
 					location: resolved.location,
-					"cache-control":
-						asset.access === "public" ? "public, max-age=60" : "private, no-store",
+					"cache-control": asset.access === "public" ? "public, max-age=60" : "private, no-store",
 					vary: "Accept",
 				},
 			});
@@ -66,8 +65,7 @@ export default new Elysia({ prefix: "/image-assets" })
 				status: StatusCodes.MOVED_TEMPORARILY,
 				headers: {
 					location: await storage.presignGet({ Key: asset.storageKey }),
-					"cache-control":
-						asset.access === "public" ? "public, max-age=60" : "private, no-store",
+					"cache-control": asset.access === "public" ? "public, max-age=60" : "private, no-store",
 				},
 			});
 		},

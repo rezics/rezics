@@ -77,9 +77,7 @@ function TagStructureAdminEditor({
 			<CardContent className="grid gap-5 p-5 sm:p-6">
 				<div className="grid gap-1">
 					<h2 className="font-semibold">{t.tags.adminEditStructure.title}</h2>
-					<p className="text-sm text-muted-foreground">
-						{t.tags.adminEditStructure.description}
-					</p>
+					<p className="text-sm text-muted-foreground">{t.tags.adminEditStructure.description}</p>
 				</div>
 				<form className="grid gap-5" onSubmit={submit}>
 					<TagStructureMemberEditor members={members} onChange={setMembers} />
@@ -144,9 +142,7 @@ export function TagStructureDetailPage({ structureId }: { readonly structureId: 
 						fallback={t.tags.structures.memberFallback}
 						members={query.data.members}
 					/>
-					<p className="text-sm text-muted-foreground">
-						{t.tags.createStructure.description}
-					</p>
+					<p className="text-sm text-muted-foreground">{t.tags.createStructure.description}</p>
 					<TagVoteControls
 						canVote={Boolean(session)}
 						isPending={vote.isPending || clearVote.isPending}
@@ -161,10 +157,7 @@ export function TagStructureDetailPage({ structureId }: { readonly structureId: 
 						viewerVote={query.data.viewerVote}
 						voteCount={toNonNegativeApiInteger(query.data.voteCount)}
 					/>
-					<RequestFailure
-						error={vote.error ?? clearVote.error}
-						fallback={t.ui.retryLater}
-					/>
+					<RequestFailure error={vote.error ?? clearVote.error} fallback={t.ui.retryLater} />
 				</CardContent>
 			</Card>
 			{canCorrect ? (

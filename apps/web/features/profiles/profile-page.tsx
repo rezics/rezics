@@ -28,9 +28,7 @@ export function ProfilePage() {
 							variant="article"
 						/>
 					) : (
-						<p className="text-muted-foreground text-sm leading-6">
-							{t.profiles.aboutEmpty}
-						</p>
+						<p className="text-muted-foreground text-sm leading-6">{t.profiles.aboutEmpty}</p>
 					)}
 				</CardContent>
 			</Card>

@@ -125,9 +125,7 @@ export function VirtualizedBookContentStructureRows<Node extends BookStructureVi
 	});
 	const scrollTargetIndex = useMemo(
 		() =>
-			scrollToNodeId
-				? entries.findIndex(({ entry }) => entry.node.id === scrollToNodeId)
-				: -1,
+			scrollToNodeId ? entries.findIndex(({ entry }) => entry.node.id === scrollToNodeId) : -1,
 		[entries, scrollToNodeId],
 	);
 
@@ -216,8 +214,7 @@ export function BookContentStructureRowFrame({
 				"group/structure-row relative flex min-h-24 items-center gap-3 pe-3 transition-colors",
 				dragging && "opacity-45",
 				activePlacement === "before" && "border-t-2 border-t-primary",
-				activePlacement === "inside" &&
-					"bg-primary/8 outline-2 outline-primary -outline-offset-2",
+				activePlacement === "inside" && "bg-primary/8 outline-2 outline-primary -outline-offset-2",
 				activePlacement === "after" && "border-b-2 border-b-primary",
 				!activePlacement && !selected && "hover:bg-muted/40",
 				selected && "bg-accent/70",
@@ -285,9 +282,7 @@ export function BookContentStructureRowText({
 				</span>
 			</span>
 			<span className="mt-2 flex items-center gap-4 text-muted-foreground text-sm">
-				{label ? (
-					<span>{t.units.content.childCount({ count: directChildCount })}</span>
-				) : null}
+				{label ? <span>{t.units.content.childCount({ count: directChildCount })}</span> : null}
 				<span className="inline-flex items-center gap-1.5">
 					<Text aria-hidden className="size-4" />
 					{language === "zh"

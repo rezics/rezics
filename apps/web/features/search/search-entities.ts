@@ -43,9 +43,7 @@ async function resolveExactUnit(
 		signal,
 	});
 	return data.items
-		.filter(
-			(item) => indexIncludesKind(index, item.kind) && (!kinds || kinds.includes(item.kind)),
-		)
+		.filter((item) => indexIncludesKind(index, item.kind) && (!kinds || kinds.includes(item.kind)))
 		.map((item) => ({
 			id: item.id,
 			label: item.title ?? item.id,

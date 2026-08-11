@@ -195,9 +195,7 @@ function parseResourceAttributes(value: string | undefined): Readonly<Record<str
 	for (const entry of value.split(",")) {
 		const separator = entry.indexOf("=");
 		if (separator < 1)
-			throw new Error(
-				"OTEL_RESOURCE_ATTRIBUTES must contain comma-separated key=value pairs",
-			);
+			throw new Error("OTEL_RESOURCE_ATTRIBUTES must contain comma-separated key=value pairs");
 		let key: string;
 		let attributeValue: string;
 		try {
@@ -209,14 +207,8 @@ function parseResourceAttributes(value: string | undefined): Readonly<Record<str
 		if (!ResourceKey.test(key)) throw new Error(`Invalid OpenTelemetry resource key: ${key}`);
 		if (SensitiveResourceKey.test(key))
 			throw new Error(`Sensitive resource attribute is prohibited: ${key}`);
-		if (
-			attributeValue.length < 1 ||
-			attributeValue.length > 256 ||
-			/[\r\n]/.test(attributeValue)
-		)
-			throw new Error(
-				`OpenTelemetry resource attribute ${key} must contain 1-256 safe characters`,
-			);
+		if (attributeValue.length < 1 || attributeValue.length > 256 || /[\r\n]/.test(attributeValue))
+			throw new Error(`OpenTelemetry resource attribute ${key} must contain 1-256 safe characters`);
 		attributes[key] = attributeValue;
 	}
 	return attributes;
@@ -269,14 +261,8 @@ export function resolveObservabilityConfiguration(
 	void metricProtocol;
 	for (const [name, value] of [
 		["OTEL_EXPORTER_OTLP_COMPRESSION", environment.OTEL_EXPORTER_OTLP_COMPRESSION],
-		[
-			"OTEL_EXPORTER_OTLP_TRACES_COMPRESSION",
-			environment.OTEL_EXPORTER_OTLP_TRACES_COMPRESSION,
-		],
-		[
-			"OTEL_EXPORTER_OTLP_METRICS_COMPRESSION",
-			environment.OTEL_EXPORTER_OTLP_METRICS_COMPRESSION,
-		],
+		["OTEL_EXPORTER_OTLP_TRACES_COMPRESSION", environment.OTEL_EXPORTER_OTLP_TRACES_COMPRESSION],
+		["OTEL_EXPORTER_OTLP_METRICS_COMPRESSION", environment.OTEL_EXPORTER_OTLP_METRICS_COMPRESSION],
 	] as const)
 		enumValue(value, "none", name, ["none", "gzip"] as const);
 
@@ -311,10 +297,7 @@ export function resolveObservabilityConfiguration(
 			"commit revision",
 		) ?? "unknown";
 	const service = {
-		name: requiredIdentity(
-			environment.OTEL_SERVICE_NAME ?? options.service.name,
-			"service name",
-		),
+		name: requiredIdentity(environment.OTEL_SERVICE_NAME ?? options.service.name, "service name"),
 		version: requiredIdentity(options.service.version, "service version"),
 		environment: requiredIdentity(options.service.environment, "deployment environment"),
 		instanceId,

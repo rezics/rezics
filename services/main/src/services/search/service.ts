@@ -130,11 +130,7 @@ function toUuidArray(values: readonly string[]): SQL {
 
 function validateRequest(category: SearchCategory, request: DomainSearchRequest): void {
 	const filters = [
-		[
-			"Languages",
-			SearchFieldByDomainRequestFilter.Languages,
-			Boolean(request.Languages?.length),
-		],
+		["Languages", SearchFieldByDomainRequestFilter.Languages, Boolean(request.Languages?.length)],
 		["kinds", SearchFieldByDomainRequestFilter.kind, Boolean(request.kinds?.length)],
 		[
 			"contentRatings",
@@ -331,8 +327,7 @@ function compileFilter(
 	if (filter.field === "category") {
 		const values = scalarStrings(searchFilterValues(filter), filter.field);
 		const matches = values.includes(category);
-		if (filter.operator === "not-equals" || filter.operator === "none-of")
-			return sql`${!matches}`;
+		if (filter.operator === "not-equals" || filter.operator === "none-of") return sql`${!matches}`;
 		return sql`${matches}`;
 	}
 	if (filter.field === "content-license") {
@@ -344,10 +339,7 @@ function compileFilter(
 						.select({ unitId: unitContentLicense.unitId })
 						.from(unitContentLicense)
 						.where(
-							and(
-								eq(unitContentLicense.unitId, unit.id),
-								eq(unitContentLicense.status, "active"),
-							),
+							and(eq(unitContentLicense.unitId, unit.id), eq(unitContentLicense.status, "active")),
 						),
 				),
 				filter,
@@ -752,8 +744,7 @@ export function compilePostgresSearchExpression(
 		const requirementFilters = expression.clauses.filter(
 			(clause): clause is SearchControlPredicate =>
 				"field" in clause &&
-				(clause.field === "software-platform" ||
-					clause.field === "software-requirement-tier"),
+				(clause.field === "software-platform" || clause.field === "software-requirement-tier"),
 		);
 		if (
 			requirementFilters.some((filter) => filter.field === "software-platform") &&
@@ -897,10 +888,7 @@ function buildEffectiveSearchExpression(
 		});
 	addValue(SearchFieldByDomainRequestFilter.creditedUnitId, request.creditedUnitId);
 	addValue(SearchFieldByDomainRequestFilter.realmId, request.realmId);
-	addValue(
-		SearchFieldByDomainRequestFilter.realmTagContextRealmId,
-		request.realmTagContextRealmId,
-	);
+	addValue(SearchFieldByDomainRequestFilter.realmTagContextRealmId, request.realmTagContextRealmId);
 	addValue(SearchFieldByDomainRequestFilter.subjectId, request.subjectId);
 	addValue(SearchFieldByDomainRequestFilter.targetId, request.targetId);
 	addValue(SearchFieldByDomainRequestFilter.rootId, request.rootId);
@@ -1187,12 +1175,7 @@ function nullableTimestampCandidateSource(input: {
 			from ${input.relation}
 			where ${input.baseCondition}
 				and ${input.column} is not null
-				and ${timestampKeysetCondition(
-					input.column,
-					input.id,
-					input.direction,
-					input.position,
-				)}
+				and ${timestampKeysetCondition(input.column, input.id, input.direction, input.position)}
 			order by ${input.column} ${orderDirection}, ${input.id} ${orderDirection}
 			limit ${input.limit}`);
 	}
@@ -1245,9 +1228,7 @@ function bestCandidateSource(
 				false as search_fallback where false`,
 		};
 	const bestPosition =
-		position?.source === "best-positive" || position?.source === "best-zero"
-			? position
-			: undefined;
+		position?.source === "best-positive" || position?.source === "best-zero" ? position : undefined;
 	const selectedSnapshot = bestPosition
 		? bestPosition.snapshotId === null
 			? sql`select ${recommendationSnapshot.id} from ${recommendationSnapshot} where false`
@@ -1261,8 +1242,7 @@ function bestCandidateSource(
 			limit 1`;
 	const positivePosition = bestPosition?.source === "best-positive" ? bestPosition : undefined;
 	const zeroPosition = bestPosition?.source === "best-zero" ? bestPosition : undefined;
-	const includePositive =
-		bestPosition?.source !== "best-zero" && bestPosition?.snapshotId !== null;
+	const includePositive = bestPosition?.source !== "best-zero" && bestPosition?.snapshotId !== null;
 	const positiveKeyset = positivePosition
 		? (() => {
 				const { primary, secondary } = requirePositionValues(positivePosition);
@@ -1385,9 +1365,7 @@ function sparseFollowerCandidateSource(
 	const orderDirection = direction === "asc" ? sql`asc` : sql`desc`;
 	if (cursorPhase === undefined || positivePhase >= cursorPhase) {
 		const positivePosition =
-			cursorPhase === positivePhase && position?.source === "count-positive"
-				? position
-				: undefined;
+			cursorPhase === positivePhase && position?.source === "count-positive" ? position : undefined;
 		const orderDirection = direction === "asc" ? sql`asc` : sql`desc`;
 		branches.push(sql`
 			select ${unitFollowStat.unitId} as unit_id,
@@ -1595,12 +1573,7 @@ function seededUnitCandidateSource(
 			from filter_seed
 			inner join ${unit} on ${unit.id} = filter_seed.unit_id
 			where ${publicDiscoverableCandidate}
-				and ${timestampKeysetCondition(
-					timestamp,
-					sql`${unit.id}`,
-					direction,
-					orderedPosition,
-				)}
+				and ${timestampKeysetCondition(timestamp, sql`${unit.id}`, direction, orderedPosition)}
 			order by ${timestamp} ${orderDirection}, ${unit.id} ${orderDirection}
 			limit ${limit}`,
 	};
@@ -2031,8 +2004,7 @@ async function searchCandidatePage(input: {
 				scannedCount,
 				boundedTextFallback: true,
 			};
-		if (batch.scannedCount < 1)
-			throw new Error("PostgreSQL Search batch made no keyset progress");
+		if (batch.scannedCount < 1) throw new Error("PostgreSQL Search batch made no keyset progress");
 		scanLimit = Math.min(maximumScan - scannedCount, scanLimit * 2);
 	}
 	return position
@@ -2172,9 +2144,7 @@ async function searchDomainScan(
 		try {
 			cursor = parseSearchCursor(request.cursor);
 		} catch (cause) {
-			throw new InvalidSearch(
-				cause instanceof Error ? cause.message : "Invalid Search cursor",
-			);
+			throw new InvalidSearch(cause instanceof Error ? cause.message : "Invalid Search cursor");
 		}
 		if (cursor.requestHash !== requestHash || cursor.pageSize !== limit)
 			throw new InvalidSearch("Search cursor does not match this request");
@@ -2193,10 +2163,7 @@ async function searchDomainScan(
 		],
 		...(request.domainFilter
 			? {
-					candidateSet: compileUnitPredicateCandidateSet(
-						request.domainFilter,
-						request.profileId,
-					),
+					candidateSet: compileUnitPredicateCandidateSet(request.domainFilter, request.profileId),
 				}
 			: {}),
 		query: request.query?.trim() ?? "",
@@ -2225,19 +2192,11 @@ async function searchDomainScan(
 				)
 			: Promise.resolve([]),
 	]);
-	if (hasFacets)
-		metrics.searchFacetScan("current", candidates.scannedCount, 1, candidates.hasMore);
+	if (hasFacets) metrics.searchFacetScan("current", candidates.scannedCount, 1, candidates.hasMore);
 	const seen = cursorSeen + page.rows.length;
 	const nextPosition = page.nextPosition;
 	const lowerBound = page.hasMore;
-	metrics.searchCandidateScan(
-		"current",
-		page.scannedCount,
-		page.rows.length,
-		1,
-		false,
-		lowerBound,
-	);
+	metrics.searchCandidateScan("current", page.scannedCount, page.rows.length, 1, false, lowerBound);
 	const common = {
 		total: {
 			kind: lowerBound ? "lower-bound" : "exact",
@@ -2283,9 +2242,7 @@ async function searchDomainScan(
  */
 export async function searchDomain(category: SearchCategory, request: DomainSearchRequest) {
 	const result = await searchDomainScan(category, request, "hits");
-	const slugAddresses = await getPublicCanonicalUnitSlugAddresses(
-		result.hits.map((hit) => hit.id),
-	);
+	const slugAddresses = await getPublicCanonicalUnitSlugAddresses(result.hits.map((hit) => hit.id));
 	return {
 		...result,
 		hits: result.hits.map((hit) => ({
@@ -2302,9 +2259,7 @@ export async function searchDomainWithFacets(
 	fields: readonly string[],
 ) {
 	const { facets, ...result } = await searchDomainScan(category, request, "hits", fields);
-	const slugAddresses = await getPublicCanonicalUnitSlugAddresses(
-		result.hits.map((hit) => hit.id),
-	);
+	const slugAddresses = await getPublicCanonicalUnitSlugAddresses(result.hits.map((hit) => hit.id));
 	return {
 		group: {
 			...result,
@@ -2366,8 +2321,7 @@ function prepareGlobalSearchRequest(
 			...(branch.searchExpression ? { searchExpression: branch.searchExpression } : {}),
 		} satisfies DomainSearchRequest;
 		const searchExpression = buildEffectiveSearchExpression(domainRequest);
-		const categoryKinds: readonly UnitKind[] =
-			CurrentSearchUnitKindsByCategory[branch.category];
+		const categoryKinds: readonly UnitKind[] = CurrentSearchUnitKindsByCategory[branch.category];
 		const sourceUnitKinds =
 			branch.sourceUnitKinds ?? resolveSourceUnitKinds(branch.category, commonRequest.kinds);
 		if (sourceUnitKinds.some((kind) => !categoryKinds.includes(kind)))
@@ -2375,12 +2329,7 @@ function prepareGlobalSearchRequest(
 		return {
 			category: branch.category,
 			sourceUnitKinds,
-			conditions: buildSearchConditions(
-				branch.category,
-				domainRequest,
-				searchExpression,
-				false,
-			),
+			conditions: buildSearchConditions(branch.category, domainRequest, searchExpression, false),
 			...(searchExpression ? { searchExpression } : {}),
 		};
 	});
@@ -2392,18 +2341,14 @@ function prepareGlobalSearchRequest(
 		commonConditions: [...buildCommonSearchConditions(commonRequest), ...additionalConditions],
 		...(request.domainFilter
 			? {
-					candidateSet: compileUnitPredicateCandidateSet(
-						request.domainFilter,
-						request.profileId,
-					),
+					candidateSet: compileUnitPredicateCandidateSet(request.domainFilter, request.profileId),
 				}
 			: {}),
 		languageBoundary: [
 			...new Set(
 				[
 					...preparedBranches.flatMap(
-						({ searchExpression }) =>
-							readSearchExpressionLanguageBoundary(searchExpression) ?? [],
+						({ searchExpression }) => readSearchExpressionLanguageBoundary(searchExpression) ?? [],
 					),
 					...(readUnitLanguageBoundary(request.domainFilter) ?? []),
 				].filter(isContentLanguage),
@@ -2645,10 +2590,7 @@ export async function searchDomainFacets(
 		],
 		...(request.domainFilter
 			? {
-					candidateSet: compileUnitPredicateCandidateSet(
-						request.domainFilter,
-						request.profileId,
-					),
+					candidateSet: compileUnitPredicateCandidateSet(request.domainFilter, request.profileId),
 				}
 			: {}),
 		query: request.query?.trim() ?? "",
@@ -2775,8 +2717,7 @@ export async function searchGlobalFacets(
 		...new Set(
 			[
 				...preparedBranches.flatMap(
-					({ searchExpression }) =>
-						readSearchExpressionLanguageBoundary(searchExpression) ?? [],
+					({ searchExpression }) => readSearchExpressionLanguageBoundary(searchExpression) ?? [],
 				),
 				...(readUnitLanguageBoundary(first.request.domainFilter) ?? []),
 			].filter(isContentLanguage),

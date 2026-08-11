@@ -48,11 +48,7 @@ export function TagStructureMemberEditor({
 						value={picked}
 					/>
 					<Button
-						disabled={
-							!picked ||
-							members.some(({ id }) => id === picked.id) ||
-							members.length >= 16
-						}
+						disabled={!picked || members.some(({ id }) => id === picked.id) || members.length >= 16}
 						onClick={add}
 						type="button"
 						variant="outline"
@@ -99,11 +95,7 @@ export function TagStructureMemberEditor({
 											{t.tags.createStructure.moveLater}
 										</Button>
 										<Button
-											onClick={() =>
-												onChange(
-													members.filter(({ id }) => id !== member.id),
-												)
-											}
+											onClick={() => onChange(members.filter(({ id }) => id !== member.id))}
 											type="button"
 											variant="quiet"
 										>
@@ -115,9 +107,7 @@ export function TagStructureMemberEditor({
 						</ol>
 					</>
 				) : (
-					<p className="text-sm text-muted-foreground">
-						{t.tags.createStructure.minimum}
-					</p>
+					<p className="text-sm text-muted-foreground">{t.tags.createStructure.minimum}</p>
 				)}
 			</div>
 		</>

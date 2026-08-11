@@ -206,8 +206,7 @@ export default {
 		dailyCostUnits: "일일 비용 단위",
 		create: "토큰 생성",
 		createdTitle: "새 토큰을 지금 저장",
-		createdDescription:
-			"이 알림을 닫으면 다시 볼 수 없습니다. 분실한 토큰은 취소하고 교체하세요.",
+		createdDescription: "이 알림을 닫으면 다시 볼 수 없습니다. 분실한 토큰은 취소하고 교체하세요.",
 		copyToken: "토큰 복사",
 		dismissSecret: "안전하게 저장했습니다",
 		listTitle: "기존 토큰",

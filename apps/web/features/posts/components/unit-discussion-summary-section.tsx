@@ -19,10 +19,7 @@ import { useTranslation } from "@/i18n/client";
 import { toNonNegativeApiInteger } from "@/lib/api-number";
 
 function useSubjectFeedTotal(kind: "discussion" | "excerpt", subjectId: string) {
-	const filter = useMemo(
-		() => createSubjectFeedPredicate({ kind, subjectId }),
-		[kind, subjectId],
-	);
+	const filter = useMemo(() => createSubjectFeedPredicate({ kind, subjectId }), [kind, subjectId]);
 	const body = { filter: { where: filter }, limit: 1, sort: "best" } as const;
 	return useQuery({
 		queryKey: [...FeedQueryKey, "subject-total", body],
@@ -101,9 +98,7 @@ export function UnitDiscussionSummarySection({
 
 	return (
 		<section className="grid gap-4 pt-8">
-			<h2 className="font-heading text-2xl font-bold sm:text-3xl">
-				{t.engagement.joinDiscussion}
-			</h2>
+			<h2 className="font-heading text-2xl font-bold sm:text-3xl">{t.engagement.joinDiscussion}</h2>
 			<div className="grid gap-2 sm:grid-cols-3">
 				<DiscussionMetric
 					count={displayTotal(excerpts.data?.total)}

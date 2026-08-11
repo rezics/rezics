@@ -136,9 +136,7 @@ function ConversationContent({ conversationId }: { conversationId: string }) {
 
 	if (conversation.isPending || messages.isPending) return <QueryPending />;
 	if (conversation.isError)
-		return (
-			<QueryFailure error={conversation.error} retry={() => void conversation.refetch()} />
-		);
+		return <QueryFailure error={conversation.error} retry={() => void conversation.refetch()} />;
 	if (messages.isError)
 		return <QueryFailure error={messages.error} retry={() => void messages.refetch()} />;
 
@@ -182,8 +180,7 @@ function ConversationContent({ conversationId }: { conversationId: string }) {
 			{orderedMessages.length ? (
 				<ol className="flex flex-col gap-3">
 					{orderedMessages.map((message) => {
-						const fromParticipant =
-							message.senderProfileId === conversation.data.otherProfileId;
+						const fromParticipant = message.senderProfileId === conversation.data.otherProfileId;
 						return (
 							<li
 								className="scroll-mt-24 rounded-xl border border-border-weak px-4 py-3 target:ring-2 target:ring-primary/40"
@@ -208,9 +205,7 @@ function ConversationContent({ conversationId }: { conversationId: string }) {
 			) : (
 				<div className="rounded-xl border border-border-weak px-6 py-10 text-center">
 					<h2 className="font-medium">{t.messages.emptyTitle}</h2>
-					<p className="mt-2 text-muted-foreground text-sm">
-						{t.messages.emptyDescription}
-					</p>
+					<p className="mt-2 text-muted-foreground text-sm">{t.messages.emptyDescription}</p>
 				</div>
 			)}
 

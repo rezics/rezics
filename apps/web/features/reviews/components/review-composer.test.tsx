@@ -217,11 +217,6 @@ describe("ReviewComposer", () => {
 				}),
 			}),
 		);
-		expect(invalidateReviews).toHaveBeenCalledWith(
-			{},
-			"review-1",
-			"review-target",
-			"score-realm",
-		);
+		expect(invalidateReviews).toHaveBeenCalledWith({}, "review-1", "review-target", "score-realm");
 	});
 });

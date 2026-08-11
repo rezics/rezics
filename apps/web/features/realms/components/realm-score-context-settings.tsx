@@ -134,10 +134,7 @@ function RealmScoreContextSettingsForm({
 						<FieldDescription>{copy.postHint}</FieldDescription>
 					</Field>
 					{contextPostId ? (
-						<RealmScoreContextPostLink
-							contextPostId={contextPostId}
-							realmId={realmId}
-						/>
+						<RealmScoreContextPostLink contextPostId={contextPostId} realmId={realmId} />
 					) : (
 						<p className="text-muted-foreground text-sm">{copy.notConfigured}</p>
 					)}

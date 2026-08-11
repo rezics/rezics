@@ -257,16 +257,14 @@ describe("database schema contracts", () => {
 			]),
 		);
 		expect(
-			grant.indexes.find(
-				(index) => index.config.name === "unit_content_license_active_unit_key",
-			)?.config.where,
+			grant.indexes.find((index) => index.config.name === "unit_content_license_active_unit_key")
+				?.config.where,
 		).toBeDefined();
 		expect(unitContentLicense.status.enumValues).toEqual(["active", "invalidated"]);
 		expect(unitContentLicense.status.hasDefault).toBe(true);
 		expect(
-			grant.foreignKeys.find(
-				(key) => key.getName() === "unit_content_license_unit_id_unit_id_fk",
-			)?.onDelete,
+			grant.foreignKeys.find((key) => key.getName() === "unit_content_license_unit_id_unit_id_fk")
+				?.onDelete,
 		).toBe("restrict");
 		expect(grant.columns.map((column) => column.name)).not.toContain("revoked_at");
 		expect(grant.checks.map((constraint) => constraint.name)).toContain(
@@ -301,11 +299,7 @@ describe("database schema contracts", () => {
 		expect(realmAccessSubjectRelation.enumValues).toEqual(RealmAccessSubjectRelationValues);
 		expect(grant.columns.map((column) => column.name)).toContain("realm_relation");
 		expect(restriction.columns.map((column) => column.name)).toContain("realm_relation");
-		expect(unitAccessGrant.subjectKind.enumValues).toEqual([
-			"profile",
-			"realm",
-			"authenticated",
-		]);
+		expect(unitAccessGrant.subjectKind.enumValues).toEqual(["profile", "realm", "authenticated"]);
 		expect(grant.indexes.map((index) => index.config.name)).toEqual(
 			expect.arrayContaining([
 				"unit_access_grant_active_profile_scope_key",
@@ -423,9 +417,7 @@ describe("database schema contracts", () => {
 
 	it("keeps localized content metrics as a rebuildable projection", () => {
 		const metric = getTableConfig(unitLocalizationContentMetric);
-		expect(getTableName(unitLocalizationContentMetric)).toBe(
-			"unit_localization_content_metric",
-		);
+		expect(getTableName(unitLocalizationContentMetric)).toBe("unit_localization_content_metric");
 		expect(metric.primaryKeys[0]?.columns.map((column) => column.name)).toEqual([
 			"unit_id",
 			"language",
@@ -456,9 +448,9 @@ describe("database schema contracts", () => {
 		expect(getTableConfig(subjectAssociation).columns.map((column) => column.name)).toEqual(
 			expect.arrayContaining(["unit_id", "entity_id", "role"]),
 		);
-		expect(
-			getTableConfig(subjectAssociation).columns.map((column) => column.name),
-		).not.toContain("subject_entity_id");
+		expect(getTableConfig(subjectAssociation).columns.map((column) => column.name)).not.toContain(
+			"subject_entity_id",
+		);
 		const proposal = getTableConfig(unitAssociationProposal);
 		expect(getTableName(unitAssociationProposal)).toBe("unit_association_proposal");
 		expect(proposal.columns.map((column) => column.name)).toContain("target_unit_id");
@@ -510,9 +502,7 @@ describe("database schema contracts", () => {
 		expect(attribution.uniqueConstraints.map((constraint) => constraint.name)).toContain(
 			"credit_attribution_source_credited_role_key",
 		);
-		expect(attribution.checks.map(({ name }) => name)).toContain(
-			"credit_attribution_role_check",
-		);
+		expect(attribution.checks.map(({ name }) => name)).toContain("credit_attribution_role_check");
 	});
 
 	it("stores immutable, curated Alias voting candidates", () => {
@@ -664,12 +654,7 @@ describe("database schema contracts", () => {
 		);
 		const reportRuleConfig = getTableConfig(contentReportRule);
 		expect(reportRuleConfig.columns.map((column) => column.name)).toEqual(
-			expect.arrayContaining([
-				"report_id",
-				"rule_source_realm_id",
-				"rule_revision_id",
-				"rule_id",
-			]),
+			expect.arrayContaining(["report_id", "rule_source_realm_id", "rule_revision_id", "rule_id"]),
 		);
 		expect(reportRuleConfig.foreignKeys.map((key) => key.getName())).toEqual(
 			expect.arrayContaining([
@@ -705,9 +690,7 @@ describe("database schema contracts", () => {
 				"content_review_case_platform_state_updated_idx",
 			]),
 		);
-		expect(
-			getTableConfig(contentReviewCaseReportCounter).checks.map(({ name }) => name),
-		).toEqual(
+		expect(getTableConfig(contentReviewCaseReportCounter).checks.map(({ name }) => name)).toEqual(
 			expect.arrayContaining([
 				"content_review_case_report_counter_bucket_check",
 				"content_review_case_report_counter_count_check",
@@ -717,9 +700,7 @@ describe("database schema contracts", () => {
 		expect(getTableConfig(accountEnforcementAction).columns.map(({ name }) => name)).toEqual(
 			expect.arrayContaining(["target_profile_id", "kind", "enforcement_kind"]),
 		);
-		expect(getTableConfig(auditEvent).columns.map((column) => column.name)).not.toContain(
-			"reason",
-		);
+		expect(getTableConfig(auditEvent).columns.map((column) => column.name)).not.toContain("reason");
 	});
 
 	it("requires Excerpt Posts to identify their source Unit", () => {
@@ -769,11 +750,7 @@ describe("database schema contracts", () => {
 		expect(preference.checks.map((constraint) => constraint.name)).toContain(
 			"profile_preference_content_ratings_check",
 		);
-		expect(profilePreference.scoreVisibility.enumValues).toEqual([
-			"public",
-			"unlisted",
-			"private",
-		]);
+		expect(profilePreference.scoreVisibility.enumValues).toEqual(["public", "unlisted", "private"]);
 		expect(profilePreference.progressVisibility.enumValues).toEqual([
 			"public",
 			"unlisted",
@@ -831,10 +808,7 @@ describe("database schema contracts", () => {
 			"updated_at",
 		]);
 		expect(variant.foreignKeys.map((key) => key.getName())).toEqual(
-			expect.arrayContaining([
-				"unit_variant_variant_kind_fkey",
-				"unit_variant_main_kind_fkey",
-			]),
+			expect.arrayContaining(["unit_variant_variant_kind_fkey", "unit_variant_main_kind_fkey"]),
 		);
 		expect(variant.checks.map((constraint) => constraint.name)).toEqual(
 			expect.arrayContaining(["unit_variant_kind_check", "unit_variant_not_self_check"]),
@@ -947,8 +921,8 @@ describe("database schema contracts", () => {
 			"tag_id",
 		]);
 		expect(
-			context.indexes.find((index) => index.config.name === "realm_tag_context_post_unique")
-				?.config.unique,
+			context.indexes.find((index) => index.config.name === "realm_tag_context_post_unique")?.config
+				.unique,
 		).toBe(true);
 		expect(context.indexes.map((index) => index.config.name)).toContain(
 			"realm_tag_context_tag_realm_idx",
@@ -1021,11 +995,7 @@ describe("database schema contracts", () => {
 		);
 		const notificationState = getTableConfig(notificationRecipientStat);
 		expect(notificationState.columns.map((column) => column.name)).toEqual(
-			expect.arrayContaining([
-				"read_through_created_at",
-				"read_through_id",
-				"read_through_at",
-			]),
+			expect.arrayContaining(["read_through_created_at", "read_through_id", "read_through_at"]),
 		);
 		expect(notificationState.checks.map((constraint) => constraint.name)).toEqual(
 			expect.arrayContaining([

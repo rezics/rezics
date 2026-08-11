@@ -36,10 +36,7 @@ function activeGrant() {
 function activeRestriction() {
 	return and(
 		isNull(unitAccessRestriction.revokedAt),
-		or(
-			isNull(unitAccessRestriction.expiresAt),
-			sql`${unitAccessRestriction.expiresAt} > now()`,
-		),
+		or(isNull(unitAccessRestriction.expiresAt), sql`${unitAccessRestriction.expiresAt} > now()`),
 	);
 }
 

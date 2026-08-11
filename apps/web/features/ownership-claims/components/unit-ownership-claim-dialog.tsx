@@ -99,11 +99,7 @@ export function UnitOwnershipClaimDialog({
 							? t.units.ownershipClaim.pendingDescription
 							: t.units.ownershipClaim.description
 					}
-					title={
-						pendingClaim
-							? t.units.ownershipClaim.pendingTitle
-							: t.units.ownershipClaim.title
-					}
+					title={pendingClaim ? t.units.ownershipClaim.pendingTitle : t.units.ownershipClaim.title}
 				/>
 				<DialogBody>
 					{pendingClaim ? (
@@ -112,13 +108,9 @@ export function UnitOwnershipClaimDialog({
 								<p className="text-muted-foreground text-xs">
 									{t.units.ownershipClaim.submittedDetails}
 								</p>
-								<p className="mt-2 whitespace-pre-wrap text-sm">
-									{pendingClaim.details}
-								</p>
+								<p className="mt-2 whitespace-pre-wrap text-sm">{pendingClaim.details}</p>
 							</div>
-							<p className="text-muted-foreground text-sm">
-								{t.units.ownershipClaim.effectNotice}
-							</p>
+							<p className="text-muted-foreground text-sm">{t.units.ownershipClaim.effectNotice}</p>
 							<RequestFailure error={withdrawClaim.error} />
 						</div>
 					) : (
@@ -132,13 +124,9 @@ export function UnitOwnershipClaimDialog({
 									rows={7}
 									value={details}
 								/>
-								<FieldDescription>
-									{t.units.ownershipClaim.detailsHint}
-								</FieldDescription>
+								<FieldDescription>{t.units.ownershipClaim.detailsHint}</FieldDescription>
 							</Field>
-							<p className="text-muted-foreground text-sm">
-								{t.units.ownershipClaim.effectNotice}
-							</p>
+							<p className="text-muted-foreground text-sm">{t.units.ownershipClaim.effectNotice}</p>
 							<RequestFailure error={createClaim.error} />
 						</form>
 					)}

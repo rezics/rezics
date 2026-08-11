@@ -126,9 +126,7 @@ describe("Studio work presentation", () => {
 				},
 			],
 		});
-		select
-			.mockImplementationOnce(() => activitySelect([]))
-			.mockImplementationOnce(resourceSelect);
+		select.mockImplementationOnce(() => activitySelect([])).mockImplementationOnce(resourceSelect);
 
 		const result = await listStudioContent({
 			profileId: ProfileId,

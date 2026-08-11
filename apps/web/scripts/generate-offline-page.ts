@@ -153,9 +153,7 @@ const formattedHtml = await formatWithBiome(html, outputPath);
 if (generationMode === "check") {
 	const currentHtml = await readFile(outputPath, "utf8");
 	if (currentHtml !== formattedHtml)
-		throw new Error(
-			`${outputPath} is stale; run yarn workspace @rezics/frontend generate:offline`,
-		);
+		throw new Error(`${outputPath} is stale; run yarn workspace @rezics/frontend generate:offline`);
 } else {
 	await writeFile(outputPath, formattedHtml);
 }

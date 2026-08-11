@@ -45,11 +45,7 @@ export const TableHeader = (props: React.ComponentProps<typeof ark.thead>) => {
 	const { className, ...rest } = props;
 
 	return (
-		<ark.thead
-			className={cn("[&_tr]:border-b", className)}
-			data-slot="table-header"
-			{...rest}
-		/>
+		<ark.thead className={cn("[&_tr]:border-b", className)} data-slot="table-header" {...rest} />
 	);
 };
 
@@ -72,13 +68,7 @@ export const TableFooter = (props: React.ComponentProps<typeof ark.tfoot>) => {
 
 	return (
 		<ark.tfoot
-			className={cn(
-				"border-t",
-				"bg-muted/48",
-				"font-medium",
-				"last:[&>tr]:border-b-0",
-				className,
-			)}
+			className={cn("border-t", "bg-muted/48", "font-medium", "last:[&>tr]:border-b-0", className)}
 			data-slot="table-footer"
 			{...rest}
 		/>

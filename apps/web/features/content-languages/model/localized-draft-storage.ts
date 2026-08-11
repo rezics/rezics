@@ -107,9 +107,7 @@ export async function readStoredLocalizedDraft(
 ): Promise<StoredLocalizedDraft | undefined> {
 	if (!indexedDraftStorageAvailable()) return;
 	try {
-		const draft = parseStoredLocalizedDraft(
-			await transact("readonly", (store) => store.get(key)),
-		);
+		const draft = parseStoredLocalizedDraft(await transact("readonly", (store) => store.get(key)));
 		if (!draft) return;
 		if (draft.expiresAt > Date.now()) return draft;
 		await removeStoredLocalizedDraft(key);

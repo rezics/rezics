@@ -62,9 +62,7 @@ export default new Elysia()
 			async ({ params, query, request }) => {
 				const identity = await resolveIdentity(request, "unit:read");
 				if (!identity.profile) throw new AuthenticationRequired();
-				await identity.authorization.platform.ensureCapability(
-					DevelopmentPreviewCapability,
-				);
+				await identity.authorization.platform.ensureCapability(DevelopmentPreviewCapability);
 				return getTagHierarchy({
 					tagId: params.tagId,
 					authorization: identity.authorization.unit,
@@ -107,9 +105,7 @@ export default new Elysia()
 						[StatusCodes.OK]: CreateTagStructureResponse,
 						[StatusCodes.FORBIDDEN]: toApiErrorResponse(["PlatformCapabilityRequired"]),
 						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["TagNotFound"]),
-						[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse([
-							"InvalidTagStructure",
-						]),
+						[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["InvalidTagStructure"]),
 					},
 					detail: {
 						summary: "Create or find and upvote a community-immutable Tag structure",
@@ -122,9 +118,7 @@ export default new Elysia()
 				async ({ params, query, request }) => {
 					const identity = await resolveIdentity(request, "unit:read");
 					if (!identity.profile) throw new AuthenticationRequired();
-					await identity.authorization.platform.ensureCapability(
-						DevelopmentPreviewCapability,
-					);
+					await identity.authorization.platform.ensureCapability(DevelopmentPreviewCapability);
 					return getTagStructure({
 						structureId: params.structureId,
 						viewerProfileId: identity.profile?.unitId,
@@ -169,17 +163,12 @@ export default new Elysia()
 					response: {
 						[StatusCodes.OK]: TagStructureResponse,
 						[StatusCodes.FORBIDDEN]: toApiErrorResponse(["PlatformCapabilityRequired"]),
-						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
-							"TagNotFound",
-							"TagStructureNotFound",
-						]),
+						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["TagNotFound", "TagStructureNotFound"]),
 						[StatusCodes.CONFLICT]: toApiErrorResponse([
 							"TagStructureChanged",
 							"TagStructureDefinitionConflict",
 						]),
-						[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse([
-							"InvalidTagStructure",
-						]),
+						[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["InvalidTagStructure"]),
 					},
 					detail: {
 						summary: "Administratively correct a Tag structure definition",
@@ -237,10 +226,7 @@ export default new Elysia()
 				async ({ params, query, request }) => {
 					await checkUnitType(params.unitId, params.type);
 					const identity = await resolveIdentity(request, "unit:read");
-					await identity.authorization.unit.ensureCanRead(
-						params.unitId,
-						() => new UnitNotFound(),
-					);
+					await identity.authorization.unit.ensureCanRead(params.unitId, () => new UnitNotFound());
 					const includeStructures = await identity.authorization.platform.hasCapability(
 						DevelopmentPreviewCapability,
 					);
@@ -286,13 +272,8 @@ export default new Elysia()
 					response: {
 						[StatusCodes.OK]: TagStructureApplicationResponse,
 						[StatusCodes.FORBIDDEN]: toApiErrorResponse(["PlatformCapabilityRequired"]),
-						[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse([
-							"InvalidTagStructure",
-						]),
-						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
-							"UnitNotFound",
-							"TagStructureNotFound",
-						]),
+						[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["InvalidTagStructure"]),
+						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "TagStructureNotFound"]),
 					},
 					detail: { summary: "Apply a Tag structure to a Unit", tags: ["Tags"] },
 				},
@@ -348,9 +329,7 @@ export default new Elysia()
 					response: {
 						[StatusCodes.OK]: TagStructureApplicationResponse,
 						[StatusCodes.FORBIDDEN]: toApiErrorResponse(["PlatformCapabilityRequired"]),
-						[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse([
-							"InvalidTagStructure",
-						]),
+						[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["InvalidTagStructure"]),
 						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
 							"UnitNotFound",
 							"TagStructureApplicationNotFound",

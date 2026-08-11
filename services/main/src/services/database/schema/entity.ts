@@ -117,10 +117,7 @@ export const unitAssociationProposal = pgTable(
 			"unit_association_proposal_not_self_check",
 			sql`${table.sourceUnitId} <> ${table.targetUnitId}`,
 		),
-		check(
-			"unit_association_proposal_expiry_check",
-			sql`${table.expiresAt} > ${table.createdAt}`,
-		),
+		check("unit_association_proposal_expiry_check", sql`${table.expiresAt} > ${table.createdAt}`),
 		check(
 			"unit_association_proposal_resolution_shape_check",
 			sql`(
@@ -197,11 +194,7 @@ export const subjectAssociation = pgTable(
 		updatedAt: createUpdatedAtColumn(),
 	},
 	(table) => [
-		unique("subject_association_unit_entity_role_key").on(
-			table.unitId,
-			table.entityId,
-			table.role,
-		),
+		unique("subject_association_unit_entity_role_key").on(table.unitId, table.entityId, table.role),
 		index("subject_association_entity_role_idx").on(table.entityId, table.role),
 		index("subject_association_search_unit_idx").on(table.entityId, table.unitId),
 		index("subject_association_context_post_idx")

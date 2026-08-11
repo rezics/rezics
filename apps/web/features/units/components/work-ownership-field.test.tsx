@@ -60,9 +60,7 @@ describe("WorkOwnershipField", () => {
 			await screen.findByText("公共作品由社群擁有並共同維護。", { exact: false }),
 		).toBeTruthy();
 		expect(
-			screen.getByText(
-				"公共作品通常用來收錄你不持有著作權的既有作品，建立可搜尋的索引資料。",
-			),
+			screen.getByText("公共作品通常用來收錄你不持有著作權的既有作品，建立可搜尋的索引資料。"),
 		).toBeTruthy();
 	});
 

@@ -55,11 +55,7 @@ export default async function Page({
 				unitId={unit}
 				requestedLanguage={requestedLanguage}
 			/>
-			{isUnitDetailUnitType(type) ? (
-				<UnitOverviewPage />
-			) : (
-				<UnitDetail type={type} unit={unit} />
-			)}
+			{isUnitDetailUnitType(type) ? <UnitOverviewPage /> : <UnitDetail type={type} unit={unit} />}
 		</>
 	);
 }

@@ -29,9 +29,7 @@ async function recordFailure(
 	});
 	logger.error("Email delivery attempt failed", {
 		eventName:
-			outcome === "retry_scheduled"
-				? "email.delivery.retry_scheduled"
-				: "email.delivery.failed",
+			outcome === "retry_scheduled" ? "email.delivery.retry_scheduled" : "email.delivery.failed",
 		errorCode: input.code,
 		error: input.error,
 	});
@@ -52,8 +50,7 @@ async function processClaimedEmail(item: ClaimedEmail): Promise<void> {
 		message = await renderClaimedEmail(item);
 	} catch (error) {
 		await recordFailure(item, {
-			code:
-				error instanceof InvalidEmailIntent ? "InvalidEmailIntent" : "EmailContentFailure",
+			code: error instanceof InvalidEmailIntent ? "InvalidEmailIntent" : "EmailContentFailure",
 			error,
 			retryable: !(error instanceof InvalidEmailIntent),
 		});

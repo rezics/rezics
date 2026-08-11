@@ -19,8 +19,7 @@ export default {
 	sections: {
 		overview: {
 			label: "Vue d’ensemble",
-			description:
-				"Consultez les zones de gestion et l’état actuel des services de plateforme.",
+			description: "Consultez les zones de gestion et l’état actuel des services de plateforme.",
 		},
 		users: {
 			label: "Utilisateurs",
@@ -141,8 +140,7 @@ export default {
 		details: "Fondement de la revendication",
 		approve: "Approuver",
 		reject: "Rejeter",
-		readOnly:
-			"Vous pouvez consulter les revendications, mais pas les approuver ni les rejeter.",
+		readOnly: "Vous pouvez consulter les revendications, mais pas les approuver ni les rejeter.",
 		resolved: "Cette revendication est traitée et sa décision ne peut plus être modifiée.",
 		selectClaim: "Sélectionner une revendication",
 		selectClaimDescription:
@@ -291,8 +289,7 @@ export default {
 		changeReason: "Motif de la révision",
 		changeReasonPlaceholder:
 			"Consignez le motif de la révision immuable et du journal de sécurité.",
-		updateFailed:
-			"Impossible de mettre à jour la politique de quota. Rechargez puis réessayez.",
+		updateFailed: "Impossible de mettre à jour la politique de quota. Rechargez puis réessayez.",
 		readOnly:
 			"Vous pouvez consulter les politiques de quota, mais pas publier de nouvelle révision.",
 		save: "Enregistrer la règle",

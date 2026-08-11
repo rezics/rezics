@@ -262,11 +262,7 @@ export async function restoreDockRevision(
 		dockId: input.dockId,
 		revisionId: input.sourceRevisionId,
 	});
-	const [current] = await tx
-		.select()
-		.from(unitDock)
-		.where(eq(unitDock.id, input.dockId))
-		.limit(1);
+	const [current] = await tx.select().from(unitDock).where(eq(unitDock.id, input.dockId)).limit(1);
 	if (!current) throw new DockRevisionConflict(head?.revisionId ?? null);
 	let restoredState: DockLogicalState;
 	if ("deleted" in state) {

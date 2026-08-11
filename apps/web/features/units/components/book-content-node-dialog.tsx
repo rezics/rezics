@@ -201,15 +201,12 @@ export function BookContentNodeDialog({
 									</Field>
 									{contentKind === "chapter" ? (
 										<Field>
-											<FieldLabel>
-												{t.units.content.chapterOwnership}
-											</FieldLabel>
+											<FieldLabel>{t.units.content.chapterOwnership}</FieldLabel>
 											<NativeSelect
 												name="chapterOwnership"
 												onChange={(event) => {
 													const nextValue = event.currentTarget.value;
-													if (!isChapterOwnershipSelection(nextValue))
-														return;
+													if (!isChapterOwnershipSelection(nextValue)) return;
 													setInput((current) => ({
 														...current,
 														create: {
@@ -232,13 +229,10 @@ export function BookContentNodeDialog({
 											</NativeSelect>
 											<FieldDescription>
 												{input.create.ownershipMode === "book_default"
-													? t.units.content.chapterOwnershipDefaultDescription(
-															{
-																ownership: defaultOwnershipLabel,
-															},
-														)
-													: t.units.content
-															.chapterOwnershipOverrideDescription}
+													? t.units.content.chapterOwnershipDefaultDescription({
+															ownership: defaultOwnershipLabel,
+														})
+													: t.units.content.chapterOwnershipOverrideDescription}
 											</FieldDescription>
 										</Field>
 									) : null}
@@ -257,9 +251,7 @@ export function BookContentNodeDialog({
 														? t.units.content.searchExistingChapter
 														: t.units.content.searchExistingLabel
 												}
-												index={
-													contentKind === "chapter" ? "posts" : "units"
-												}
+												index={contentKind === "chapter" ? "posts" : "units"}
 												kind={contentKind}
 												onChange={(unit) =>
 													setInput((current) => ({
@@ -293,17 +285,11 @@ export function BookContentNodeDialog({
 									onClick={() => setDestinationDialogOpen(true)}
 									type="button"
 								>
-									<Folder
-										aria-hidden
-										className="size-4 shrink-0 text-muted-foreground"
-									/>
+									<Folder aria-hidden className="size-4 shrink-0 text-muted-foreground" />
 									<span className="min-w-0 flex-1 truncate font-medium">
 										{destinationLabel(nodes, destination, t.units.content.root)}
 									</span>
-									<ChevronRight
-										aria-hidden
-										className="size-4 shrink-0 text-muted-foreground"
-									/>
+									<ChevronRight aria-hidden className="size-4 shrink-0 text-muted-foreground" />
 								</button>
 							</Field>
 							{unsavedChanges ? (

@@ -57,11 +57,7 @@ export const ToggleIndicator = (props: React.ComponentProps<typeof ArkToggle.Ind
 	const { children, ...rest } = props;
 
 	return (
-		<ArkToggle.Indicator
-			className="flex items-center gap-2"
-			data-slot="toggle-indicator"
-			{...rest}
-		>
+		<ArkToggle.Indicator className="flex items-center gap-2" data-slot="toggle-indicator" {...rest}>
 			{children}
 		</ArkToggle.Indicator>
 	);

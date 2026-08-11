@@ -187,8 +187,7 @@ export default {
 			policy: "配额策略",
 			validUntil: "特权配额到期时间",
 			customize: "为此账户覆盖策略",
-			customizeDescription:
-				"账户覆盖会与不可变策略修订分开保存；分配特权策略时仍须设置到期时间。",
+			customizeDescription: "账户覆盖会与不可变策略修订分开保存；分配特权策略时仍须设置到期时间。",
 			reason: "分配原因",
 			reasonPlaceholder: "记录操作依据；内容会写入安全审计记录。",
 			invalid: "请检查配额限制、操作覆盖和特权配额到期时间。",

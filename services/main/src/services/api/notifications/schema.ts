@@ -11,9 +11,7 @@ import { NullablePublicSlugAddressResponse } from "../slug-addresses/schema";
 
 export const NotificationCursorQuery = t.Object({
 	cursor: t.Optional(t.String({ maxLength: 512 })),
-	direction: t.Optional(
-		t.Union([t.Literal("before"), t.Literal("after")], { default: "before" }),
-	),
+	direction: t.Optional(t.Union([t.Literal("before"), t.Literal("after")], { default: "before" })),
 	unreadOnly: t.Optional(t.Boolean({ default: false })),
 	limit: t.Optional(t.Integer({ minimum: 1, maximum: 100, default: 30 })),
 });

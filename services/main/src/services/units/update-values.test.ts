@@ -18,9 +18,9 @@ function update(input: Omit<UpdateUnitInput, "expectedUpdatedAt"> = {}): UpdateU
 
 describe("Unit update values", () => {
 	it("advances the aggregate optimistic-concurrency token within the same millisecond", () => {
-		expect(
-			nextUnitUpdatedAt(ExpectedUpdatedAt, ExpectedUpdatedAt.getTime()).toISOString(),
-		).toBe("2026-08-03T10:00:00.124Z");
+		expect(nextUnitUpdatedAt(ExpectedUpdatedAt, ExpectedUpdatedAt.getTime()).toISOString()).toBe(
+			"2026-08-03T10:00:00.124Z",
+		);
 		expect(
 			nextUnitUpdatedAt(ExpectedUpdatedAt, ExpectedUpdatedAt.getTime() + 10).toISOString(),
 		).toBe("2026-08-03T10:00:00.133Z");

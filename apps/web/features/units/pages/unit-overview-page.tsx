@@ -155,9 +155,7 @@ export function UnitOverviewPage() {
 					<DetailSection title={t.units.detail.subjectAssociations}>
 						<Card>
 							<CardContent className="grid gap-4 p-5 sm:p-6">
-								<UnitSubjectGroups
-									associations={unit.subjectAssociations.slice(0, 8)}
-								/>
+								<UnitSubjectGroups associations={unit.subjectAssociations.slice(0, 8)} />
 								<Link
 									className="w-fit text-sm font-medium text-link hover:text-link-hover hover:underline"
 									href={`/units/${type}/${unit.id}/associations`}
@@ -225,10 +223,7 @@ function getDomainFacts(
 		case "book":
 			return [
 				[t.units.fields.isbn13, detail.unit.details.isbn13],
-				[
-					t.units.fields.publicationDate,
-					formatDate(detail.unit.details.publicationDate, language),
-				],
+				[t.units.fields.publicationDate, formatDate(detail.unit.details.publicationDate, language)],
 				[t.units.fields.pageCount, detail.unit.details.pageCount],
 				[t.units.fields.format, detail.unit.details.format],
 				[

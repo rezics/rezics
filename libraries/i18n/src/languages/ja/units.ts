@@ -437,8 +437,7 @@ export default {
 		main: "メイン作品",
 		variant: "バリエーション",
 		standalone: "独立した作品",
-		standaloneDescription:
-			"この作品はメイン作品に接続されておらず、バリエーションもありません。",
+		standaloneDescription: "この作品はメイン作品に接続されておらず、バリエーションもありません。",
 		attachMain: "メイン作品を選択",
 		changeMain: "メイン作品を変更",
 		changeMainDescription:
@@ -509,12 +508,9 @@ export default {
 		moveDown: "下に移動",
 		moveLast: "最後に移動",
 		remove: "言語を削除",
-		removeConfirm: insert(
-			"このユニットから{{language}}とそのすべてのコンテンツを削除しますか？",
-			{
-				language: String,
-			},
-		),
+		removeConfirm: insert("このユニットから{{language}}とそのすべてのコンテンツを削除しますか？", {
+			language: String,
+		}),
 		saveOrder: "並び順を保存",
 		cancel: "キャンセル",
 		noMoreLanguages: "すべての対応言語はすでに追加されています。",

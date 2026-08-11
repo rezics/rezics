@@ -480,11 +480,7 @@ const UnitAllowedDecisionResponse = t.Union([
 			allowed: t.Literal(true),
 			source: t.Literal("grant"),
 			grantId: Uuid,
-			subjectKind: t.Union([
-				t.Literal("profile"),
-				t.Literal("realm"),
-				t.Literal("authenticated"),
-			]),
+			subjectKind: t.Union([t.Literal("profile"), t.Literal("realm"), t.Literal("authenticated")]),
 		},
 		{ additionalProperties: false },
 	),

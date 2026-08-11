@@ -29,12 +29,10 @@ describe("unit management routes", () => {
 		expect(unitManagementSectionHref("book", "unit-1", "metadata")).toBe(
 			"/units/book/unit-1/edit/metadata",
 		);
-		expect(parseUnitManagementSection("/units/book/unit-1/edit", "book", "unit-1")).toBe(
-			undefined,
+		expect(parseUnitManagementSection("/units/book/unit-1/edit", "book", "unit-1")).toBe(undefined);
+		expect(parseUnitManagementSection("/units/book/unit-1/edit/content", "book", "unit-1")).toBe(
+			"content",
 		);
-		expect(
-			parseUnitManagementSection("/units/book/unit-1/edit/content", "book", "unit-1"),
-		).toBe("content");
 		expect(
 			parseUnitManagementSection("/units/book/unit-1/edit/basic", "book", "unit-1"),
 		).toBeUndefined();
@@ -56,9 +54,9 @@ describe("unit management routes", () => {
 	});
 
 	it("maps Dock management to the Dock section", () => {
-		expect(
-			parseUnitManagementSection("/units/media/unit-1/edit/docks", "media", "unit-1"),
-		).toBe("docks");
+		expect(parseUnitManagementSection("/units/media/unit-1/edit/docks", "media", "unit-1")).toBe(
+			"docks",
+		);
 	});
 
 	it("keeps nested content-structure history in the content section", () => {

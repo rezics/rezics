@@ -65,8 +65,7 @@ export function RealmTagContextForm({
 				<Field>
 					<RadioGroup
 						onValueChange={({ value }) => {
-							if (value && isRealmTagContextComposerIntent(value))
-								setSelectedIntent(value);
+							if (value && isRealmTagContextComposerIntent(value)) setSelectedIntent(value);
 						}}
 						value={intent}
 					>
@@ -233,9 +232,7 @@ function RealmTagContextBindForm({ realmId }: { readonly realmId: string }) {
 						placeholder={t.ui.pickerPlaceholders.tag}
 						value={tag}
 					/>
-					<FieldDescription>
-						{t.realms.tagContext.bindExistingDescription}
-					</FieldDescription>
+					<FieldDescription>{t.realms.tagContext.bindExistingDescription}</FieldDescription>
 				</Field>
 				<Field required>
 					<FieldLabel>{t.realms.tagContext.existingWiki}</FieldLabel>
@@ -252,12 +249,7 @@ function RealmTagContextBindForm({ realmId }: { readonly realmId: string }) {
 					<FieldDescription>{t.realms.tagContext.existingWikiHint}</FieldDescription>
 				</Field>
 				<RequestFailure error={bind.error} />
-				<Button
-					disabled={!tag || !wiki}
-					isLoading={bind.isPending}
-					type="submit"
-					variant="solid"
-				>
+				<Button disabled={!tag || !wiki} isLoading={bind.isPending} type="submit" variant="solid">
 					{t.realms.tagContext.bindExisting}
 				</Button>
 			</FieldGroup>

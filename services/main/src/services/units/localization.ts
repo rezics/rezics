@@ -219,8 +219,7 @@ export function resolveUnitLocalizationAvatarFromOrdered(
 	let resolved: (UnitLocalizationAvatarColumns & { language: ContentLanguage }) | undefined;
 	for (const language of languages) {
 		resolved = eligibleLocalizations.find(
-			(localization) =>
-				localization.language === language && localization.avatarType !== null,
+			(localization) => localization.language === language && localization.avatarType !== null,
 		);
 		if (resolved) break;
 	}
@@ -310,9 +309,7 @@ function contentLanguageOrdersEqual(
 	left: readonly ContentLanguage[],
 	right: readonly ContentLanguage[],
 ): boolean {
-	return (
-		left.length === right.length && left.every((language, index) => language === right[index])
-	);
+	return left.length === right.length && left.every((language, index) => language === right[index]);
 }
 
 function contentLanguageSetsEqual(
@@ -368,9 +365,7 @@ export async function reorderUnitLocalizations(
 		await tx
 			.update(unitLocalization)
 			.set({ position: fractionalPositionAt(index) })
-			.where(
-				and(eq(unitLocalization.unitId, unitId), eq(unitLocalization.language, language)),
-			);
+			.where(and(eq(unitLocalization.unitId, unitId), eq(unitLocalization.language, language)));
 	return true;
 }
 

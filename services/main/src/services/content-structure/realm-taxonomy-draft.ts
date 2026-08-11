@@ -237,9 +237,7 @@ export async function saveRealmTaxonomyDraft(
 				if (node.state === "existing") {
 					const existing = currentById.get(node.id);
 					if (!existing)
-						throw new ContentStructureInvalid(
-							`Realm taxonomy node ${node.id} does not exist`,
-						);
+						throw new ContentStructureInvalid(`Realm taxonomy node ${node.id} does not exist`);
 					return {
 						...node,
 						contentUnitId: existing.contentUnitId,
@@ -309,9 +307,7 @@ export async function saveRealmTaxonomyDraft(
 					);
 
 			const inputById = new Map(input.nodes.map((node) => [node.id, node]));
-			const newNodeIds = plan.nodes
-				.filter(({ state }) => state === "new")
-				.map(({ id }) => id);
+			const newNodeIds = plan.nodes.filter(({ state }) => state === "new").map(({ id }) => id);
 			if (newNodeIds.length) {
 				const collision = await tx
 					.select({ id: contentStructureNode.id })
@@ -319,17 +315,13 @@ export async function saveRealmTaxonomyDraft(
 					.where(inArray(contentStructureNode.id, newNodeIds))
 					.limit(1);
 				if (collision.length)
-					throw new ContentStructureInvalid(
-						"New Realm taxonomy draft node ID already exists",
-					);
+					throw new ContentStructureInvalid("New Realm taxonomy draft node ID already exists");
 			}
 			for (const node of plan.nodes) {
 				if (node.state !== "new") continue;
 				const source = inputById.get(node.id);
 				if (!source || source.state !== "new")
-					throw new ContentStructureInvalid(
-						"New Realm taxonomy node source is unavailable",
-					);
+					throw new ContentStructureInvalid("New Realm taxonomy node source is unavailable");
 				const contentUnitId =
 					source.content.kind === "label"
 						? await createDraftLabel(tx, {

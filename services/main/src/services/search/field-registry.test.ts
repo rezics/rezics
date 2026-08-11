@@ -6,9 +6,7 @@ import { SearchFieldByDomainRequestFilter } from "./schema";
 
 describe("Search field capability contract", () => {
 	it("describes every public Search field exactly once", () => {
-		expect(Object.keys(CurrentSearchFieldRegistry).sort()).toEqual(
-			[...SearchFieldValues].sort(),
-		);
+		expect(Object.keys(CurrentSearchFieldRegistry).sort()).toEqual([...SearchFieldValues].sort());
 	});
 
 	it("describes every public Search sort exactly once", () => {

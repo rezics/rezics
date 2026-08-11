@@ -231,9 +231,7 @@ function serializeCookie({
 	if (isRecord(value)) {
 		const entries = Object.entries(value).filter(([, item]) => notNullish(item));
 		if (explode)
-			return entries
-				.map(([key, item]) => `${key}=${encodeURIComponent(toValue(item))}`)
-				.join("; ");
+			return entries.map(([key, item]) => `${key}=${encodeURIComponent(toValue(item))}`).join("; ");
 		return `${name}=${entries
 			.flatMap(([key, item]) => [key, item])
 			.map((item) => encodeURIComponent(toValue(item)))
@@ -326,10 +324,7 @@ function encodeComponent(value: unknown): string {
  */
 function isRecord(value: unknown): value is Record<string, unknown> {
 	return (
-		typeof value === "object" &&
-		value !== null &&
-		!Array.isArray(value) &&
-		!(value instanceof Date)
+		typeof value === "object" && value !== null && !Array.isArray(value) && !(value instanceof Date)
 	);
 }
 

@@ -74,19 +74,13 @@ export function FeedVoteControl({
 			<Button
 				aria-label={t.engagement.upvote}
 				aria-pressed={reaction === "upvote"}
-				className={cn(
-					"border-0",
-					reaction === "upvote" && "text-primary hover:text-primary",
-				)}
+				className={cn("border-0", reaction === "upvote" && "text-primary hover:text-primary")}
 				disabled={disabled}
 				onClick={() => onReactionChange(reaction === "upvote" ? null : "upvote")}
 				size="icon-md"
 				variant="quiet"
 			>
-				<ArrowBigUpIcon
-					aria-hidden
-					fill={reaction === "upvote" ? "currentColor" : "none"}
-				/>
+				<ArrowBigUpIcon aria-hidden fill={reaction === "upvote" ? "currentColor" : "none"} />
 			</Button>
 			<ButtonGroupText
 				aria-live="polite"
@@ -107,10 +101,7 @@ export function FeedVoteControl({
 				size="icon-md"
 				variant="quiet"
 			>
-				<ArrowBigDownIcon
-					aria-hidden
-					fill={reaction === "downvote" ? "currentColor" : "none"}
-				/>
+				<ArrowBigDownIcon aria-hidden fill={reaction === "downvote" ? "currentColor" : "none"} />
 			</Button>
 		</ButtonGroup>
 	);
@@ -221,12 +212,7 @@ export function FeedEngagementBar({
 					/>
 				) : null}
 				{policy.primary === "follow" ? (
-					<FollowButton
-						className="min-h-8"
-						size="sm"
-						unitId={itemId}
-						variant="secondary"
-					/>
+					<FollowButton className="min-h-8" size="sm" unitId={itemId} variant="secondary" />
 				) : null}
 				{actions}
 				{showShare ? <FeedShareSurface href={href} itemId={itemId} /> : null}

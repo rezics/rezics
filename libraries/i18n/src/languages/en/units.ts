@@ -125,8 +125,7 @@ export default {
 		sections: {
 			content: {
 				label: "Content",
-				description:
-					"Edit titles, summaries, descriptions, and covers in each content language.",
+				description: "Edit titles, summaries, descriptions, and covers in each content language.",
 			},
 			metadata: {
 				label: metadataTerms.label,
@@ -138,8 +137,7 @@ export default {
 			},
 			tags: {
 				label: "Tags",
-				description:
-					"Feature global Tags and arrange the order in which they appear first.",
+				description: "Feature global Tags and arrange the order in which they appear first.",
 			},
 			realms: {
 				label: `${realmTerms.label} publication`,
@@ -147,8 +145,7 @@ export default {
 			},
 			contentStructure: {
 				label: "Content structure",
-				description:
-					"Manage Book chapters or Media items in a collapsible, indented tree editor.",
+				description: "Manage Book chapters or Media items in a collapsible, indented tree editor.",
 				developmentBadge: "In development",
 			},
 			releases: {
@@ -378,11 +375,9 @@ export default {
 	},
 	relationshipManagement: {
 		credits: "Credits",
-		creditsDescription:
-			"People and organizations credited for creating or publishing this work.",
+		creditsDescription: "People and organizations credited for creating or publishing this work.",
 		subjects: "Subjects",
-		subjectsDescription:
-			"People, organizations, and topics depicted in or discussed by this work.",
+		subjectsDescription: "People, organizations, and topics depicted in or discussed by this work.",
 		externalLinks: "External links",
 		externalLinksDescription: "External pages and reference material connected to this work.",
 		variants: "Main and variants",
@@ -404,8 +399,7 @@ export default {
 		noSubjects: "No subjects yet",
 		noSubjectsDescription: "Add people, organizations, or topics represented by this work.",
 		noExternalLinks: "No external links yet",
-		noExternalLinksDescription:
-			"Add a reliable public page that supports this work's information.",
+		noExternalLinksDescription: "Add a reliable public page that supports this work's information.",
 		noVariants: "No variants yet",
 		noVariantsDescription: "This work is the Main and has no connected Variants.",
 		pendingRequests: "Pending consent",
@@ -577,8 +571,7 @@ export default {
 			"Use the Book's current ownership mode: {{ownership}}.",
 			{ ownership: String },
 		),
-		chapterOwnershipOverrideDescription:
-			"Override the Book's default ownership for this Chapter.",
+		chapterOwnershipOverrideDescription: "Override the Book's default ownership for this Chapter.",
 		addLabelDescription:
 			"Create a new label or search for an existing label to add. Completing this action also saves the content structure.",
 		addVideoDescription: `Create a new ${videoTerms.inline} or search for an existing one to add. Completing this action also saves the content structure.`,

@@ -69,8 +69,7 @@ export default {
 		description:
 			"Envía una reclamación si tienes derecho a representar a la persona, organización, marca u obra descrita por esta Unit.",
 		detailsLabel: "Fundamento de la reclamación",
-		detailsPlaceholder:
-			"Explica tu relación con esta Unit y cómo puede verificarla la plataforma.",
+		detailsPlaceholder: "Explica tu relación con esta Unit y cómo puede verificarla la plataforma.",
 		detailsHint:
 			"Proporciona fuentes públicas que acrediten la representación o la relación de derechos. No envíes datos personales confidenciales.",
 		effectNotice: `La aprobación transfiere a tu perfil la titularidad de gestión de esta Unit en ${verbatimTerms.rezics.value}. No certifica tu identidad ni determina derechos de autor u otros derechos legales.`,
@@ -138,8 +137,7 @@ export default {
 			},
 			tags: {
 				label: "Etiquetas",
-				description:
-					"Destaca etiquetas globales y organiza el orden en el que aparecen primero.",
+				description: "Destaca etiquetas globales y organiza el orden en el que aparecen primero.",
 			},
 			realms: {
 				label: `Difusión en ${realmTerms.pluralLabel}`,
@@ -393,8 +391,7 @@ export default {
 		externalLinksDescription:
 			"Páginas externas y material de referencia relacionados con esta obra.",
 		variants: "Obra principal y variantes",
-		variantsDescription:
-			"Gestiona la estructura directa entre la obra principal y sus variantes.",
+		variantsDescription: "Gestiona la estructura directa entre la obra principal y sus variantes.",
 		addCredit: "Añadir crédito",
 		addCreditDescription: "Elige la persona u organización y la función que desempeñó.",
 		creditedEntity: "Persona u organización acreditada",
@@ -450,8 +447,7 @@ export default {
 		main: "Obra principal",
 		variant: "Variante",
 		standalone: "Obra independiente",
-		standaloneDescription:
-			"Esta obra no está vinculada a una obra principal y no tiene variantes.",
+		standaloneDescription: "Esta obra no está vinculada a una obra principal y no tiene variantes.",
 		attachMain: "Elegir obra principal",
 		changeMain: "Cambiar obra principal",
 		changeMainDescription:
@@ -517,8 +513,7 @@ export default {
 		dialogDescription:
 			"Define el orden de visualización alternativo que se usa cuando los idiomas preferidos del lector no están disponibles.",
 		add: "Añadir idioma",
-		addDescription:
-			"Elige un idioma y guarda su contenido obligatorio para añadirlo a esta Unit.",
+		addDescription: "Elige un idioma y guarda su contenido obligatorio para añadirlo a esta Unit.",
 		pending: "Todavía no se ha añadido",
 		drag: "Arrastrar para cambiar el orden",
 		moveFirst: "Mover al principio",

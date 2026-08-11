@@ -72,8 +72,7 @@ function summarizePlan(plan: Record<string, unknown>): PlanSummary {
 		const children = node.Plans;
 		if (!Array.isArray(children)) return;
 		for (const child of children) {
-			if (typeof child === "object" && child !== null)
-				visit(child as Record<string, unknown>);
+			if (typeof child === "object" && child !== null) visit(child as Record<string, unknown>);
 		}
 	};
 	visit(plan);
@@ -82,8 +81,7 @@ function summarizePlan(plan: Record<string, unknown>): PlanSummary {
 		nodeTypes: [...nodeTypes].sort(),
 		// EXPLAIN's root counters already include child work; summing the tree
 		// double-counts the same shared blocks at every ancestor.
-		sharedHitBlocks:
-			typeof plan["Shared Hit Blocks"] === "number" ? plan["Shared Hit Blocks"] : 0,
+		sharedHitBlocks: typeof plan["Shared Hit Blocks"] === "number" ? plan["Shared Hit Blocks"] : 0,
 		sharedReadBlocks:
 			typeof plan["Shared Read Blocks"] === "number" ? plan["Shared Read Blocks"] : 0,
 		sharedWrittenBlocks:
@@ -238,7 +236,7 @@ function bestPositiveSql(cursor: boolean, limit = 20): string {
 					? `and (score.score, score.unit_updated_at, score.unit_id)
 					< ($2::double precision, $3::timestamptz, $4::uuid)`
 					: ""
-}
+			}
 		order by score.score desc, score.unit_updated_at desc, score.unit_id desc
 		limit ${limit}`;
 }
@@ -308,9 +306,7 @@ async function runConcurrencyTier(
 	let timedOut = 0;
 	const latencies: number[] = [];
 	try {
-		await Promise.all(
-			clients.map((worker) => worker.query("set statement_timeout = '1500ms'")),
-		);
+		await Promise.all(clients.map((worker) => worker.query("set statement_timeout = '1500ms'")));
 		const warmupStartedAt = performance.now();
 		const warmup = searchWorkloads[0];
 		if (!warmup) throw new Error("Search warm-up workload is unavailable");
@@ -422,9 +418,7 @@ try {
 			 from generate_series(1, $1::integer) ordinal`,
 			[rowCount],
 		);
-		await client.query(
-			"alter table public.unit disable trigger unit_search_document_from_unit",
-		);
+		await client.query("alter table public.unit disable trigger unit_search_document_from_unit");
 		await client.query(
 			"alter table public.unit_localization disable trigger unit_search_document_from_localization",
 		);
@@ -666,9 +660,7 @@ try {
 	if (!tagSeedProbePlan) throw new Error("PostgreSQL returned no Tag seed-probe plan");
 	const explainTagOrdered = async (cursor?: typeof tagDeepPosition): Promise<SearchPlan> => {
 		const result = await client.query<{ readonly "QUERY PLAN": SearchPlan }>(
-			`explain (analyze, buffers, wal, format json) ${tagOrderedUpdatedAtSql(
-				Boolean(cursor),
-			)}`,
+			`explain (analyze, buffers, wal, format json) ${tagOrderedUpdatedAtSql(Boolean(cursor))}`,
 			cursor ? [capacityTagId, cursor.updatedAt, cursor.id] : [capacityTagId],
 		);
 		const plan = result.rows[0]?.["QUERY PLAN"];
@@ -724,8 +716,7 @@ try {
 		[capacitySnapshotId, Math.floor((rowCount - positiveCount) / 2)],
 	);
 	const zeroPosition = zeroCursor.rows[0];
-	if (!zeroPosition)
-		throw new Error("Search capacity fixture produced no zero-score best cursor");
+	if (!zeroPosition) throw new Error("Search capacity fixture produced no zero-score best cursor");
 	const explainBestPositive = async (cursor?: typeof positivePosition): Promise<SearchPlan> => {
 		const result = await client.query<{ readonly "QUERY PLAN": SearchPlan }>(
 			`explain (analyze, buffers, wal, format json) ${bestPipelineSql(
@@ -906,9 +897,7 @@ try {
 				sampleCountPerConcurrency: sampleCount,
 				loadMilliseconds,
 				loadRowsPerSecond:
-					loadMilliseconds === null
-						? null
-						: Math.round((rowCount * 1000) / loadMilliseconds),
+					loadMilliseconds === null ? null : Math.round((rowCount * 1000) / loadMilliseconds),
 				loadWalBytes: reuseFixture ? null : Number(loadWal.rows[0]?.bytes ?? "0"),
 				qualificationWalBytes: Number(qualificationWal.rows[0]?.bytes ?? "0"),
 				pgroongaWal:

@@ -90,10 +90,7 @@ export function PlatformAccessEditor({
 	) => {
 		setState((current) => {
 			const next = new Map(current);
-			next.set(
-				capability,
-				transform(current.get(capability) ?? { enabled: false, expiry: "" }),
-			);
+			next.set(capability, transform(current.get(capability) ?? { enabled: false, expiry: "" }));
 			return next;
 		});
 	};
@@ -110,9 +107,7 @@ export function PlatformAccessEditor({
 							? [
 									{
 										capability,
-										expiresAt: value.expiry
-											? new Date(value.expiry).toISOString()
-											: null,
+										expiresAt: value.expiry ? new Date(value.expiry).toISOString() : null,
 									},
 								]
 							: [];
@@ -149,20 +144,10 @@ export function PlatformAccessEditor({
 			<CardContent className="grid gap-4 p-0">
 				{canManage ? (
 					<div className="flex flex-wrap gap-2 border-b px-4 py-3">
-						<Button
-							onClick={() => setAll(true)}
-							size="sm"
-							type="button"
-							variant="outline"
-						>
+						<Button onClick={() => setAll(true)} size="sm" type="button" variant="outline">
 							{t.console.access.grantAll}
 						</Button>
-						<Button
-							onClick={() => setAll(false)}
-							size="sm"
-							type="button"
-							variant="outline"
-						>
+						<Button onClick={() => setAll(false)} size="sm" type="button" variant="outline">
 							{t.console.access.clearAll}
 						</Button>
 					</div>
@@ -183,9 +168,7 @@ export function PlatformAccessEditor({
 					<TableBody>
 						{capabilities.map((capability) => {
 							const value = state.get(capability) ?? { enabled: false, expiry: "" };
-							const grant = profile.grants.find(
-								(candidate) => candidate.capability === capability,
-							);
+							const grant = profile.grants.find((candidate) => candidate.capability === capability);
 							return (
 								<TableRow key={capability}>
 									<TableCell className="min-w-64 whitespace-normal">
@@ -204,9 +187,7 @@ export function PlatformAccessEditor({
 												<span className="block font-medium">
 													{t.governance.capabilities[capability]}
 												</span>
-												<code className="text-muted-foreground text-xs">
-													{capability}
-												</code>
+												<code className="text-muted-foreground text-xs">{capability}</code>
 											</span>
 										</label>
 									</TableCell>
@@ -261,17 +242,13 @@ export function PlatformAccessEditor({
 									</AlertDialogTrigger>
 									<AlertDialogContent>
 										<AlertDialogHeader>
-											<AlertDialogTitle>
-												{t.console.access.revokeAllTitle}
-											</AlertDialogTitle>
+											<AlertDialogTitle>{t.console.access.revokeAllTitle}</AlertDialogTitle>
 											<AlertDialogDescription>
 												{t.console.access.revokeAllDescription}
 											</AlertDialogDescription>
 										</AlertDialogHeader>
 										<AlertDialogFooter>
-											<AlertDialogCancel>
-												{t.console.cancel}
-											</AlertDialogCancel>
+											<AlertDialogCancel>{t.console.cancel}</AlertDialogCancel>
 											<Button
 												isLoading={replace.isPending}
 												onClick={save}
@@ -284,12 +261,7 @@ export function PlatformAccessEditor({
 									</AlertDialogContent>
 								</AlertDialog>
 							) : (
-								<Button
-									isLoading={replace.isPending}
-									onClick={save}
-									type="button"
-									variant="solid"
-								>
+								<Button isLoading={replace.isPending} onClick={save} type="button" variant="solid">
 									{t.console.access.save}
 								</Button>
 							)}

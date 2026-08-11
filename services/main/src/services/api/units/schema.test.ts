@@ -134,9 +134,7 @@ describe("Unit creation semantics", () => {
 	it("accepts at most 32 distinct initial Tag IDs", () => {
 		const tagId = "019b0000-0000-7000-8000-000000000099";
 		expect(Check(CreateUnitBody, { ...publicMainUnit, initialTagIds: [tagId] })).toBe(true);
-		expect(Check(CreateUnitBody, { ...publicMainUnit, initialTagIds: [tagId, tagId] })).toBe(
-			false,
-		);
+		expect(Check(CreateUnitBody, { ...publicMainUnit, initialTagIds: [tagId, tagId] })).toBe(false);
 		expect(
 			Check(CreateUnitBody, {
 				...publicMainUnit,

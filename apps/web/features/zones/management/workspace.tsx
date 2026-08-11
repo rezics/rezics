@@ -51,9 +51,7 @@ export function ZoneManagementWorkspace({
 }) {
 	return (
 		<RequireSession>
-			<ZoneManagementWorkspaceContent zoneId={zoneId}>
-				{children}
-			</ZoneManagementWorkspaceContent>
+			<ZoneManagementWorkspaceContent zoneId={zoneId}>{children}</ZoneManagementWorkspaceContent>
 		</RequireSession>
 	);
 }
@@ -73,8 +71,7 @@ function ZoneManagementWorkspaceContent({
 		query: { localizationLanguages },
 	});
 	if (query.isPending) return <QueryPending />;
-	if (query.isError)
-		return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
+	if (query.isError) return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
 	const labels = t.zones.management.sections;
 	const sections: ManagementWorkspaceSection<ZoneManagementSectionId>[] = [
 		{

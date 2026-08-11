@@ -84,9 +84,9 @@ describe("REZICS Portable Text proof", () => {
 		const empty = decodeRezicsPortableText([{ _type: "table", _key: "table-1", rows: [] }]);
 		expect(empty.ok).toBe(false);
 		if (!empty.ok)
-			expect(
-				empty.diagnostics.some((item) => item.code === "portable-text.invalid-table"),
-			).toBe(true);
+			expect(empty.diagnostics.some((item) => item.code === "portable-text.invalid-table")).toBe(
+				true,
+			);
 
 		const textBlock = (key: string, text: string) => ({
 			_type: "block",
@@ -139,9 +139,7 @@ describe("REZICS Portable Text proof", () => {
 
 		expect(result.ok).toBe(false);
 		if (result.ok) return;
-		expect(result.diagnostics.map((item) => item.details?.expected)).toContain(
-			"list-item-only",
-		);
+		expect(result.diagnostics.map((item) => item.details?.expected)).toContain("list-item-only");
 		expect(result.diagnostics.map((item) => item.details?.expected)).toContain(
 			"referenced-annotation",
 		);

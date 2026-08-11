@@ -97,7 +97,6 @@ export default {
 			},
 		},
 		currentAttributions: "Attributions actuelles",
-		currentAttributionsDescription:
-			"Relations d’attribution établies et affichées sur ce contenu.",
+		currentAttributionsDescription: "Relations d’attribution établies et affichées sur ce contenu.",
 	},
 } satisfies typeof import("../zh-Hant/posts").default;

@@ -95,10 +95,7 @@ async function getUpstreamComponents(localComponents) {
 				missingCandidates.map(async (name) => {
 					const dependency = dependencyByName.get(name);
 					if (!dependency) throw new Error(`Missing registry dependency for ${name}.`);
-					const item = await readRegistryItem(
-						dependency,
-						`SharkUI registry item ${name}`,
-					);
+					const item = await readRegistryItem(dependency, `SharkUI registry item ${name}`);
 					return registryItemHasComponentSource(item) ? name : undefined;
 				}),
 			)

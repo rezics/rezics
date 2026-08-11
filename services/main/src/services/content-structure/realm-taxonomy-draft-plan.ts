@@ -52,11 +52,7 @@ export function planRealmTaxonomyDraft(
 
 	for (const draft of draftNodes) {
 		if (draftById.has(draft.id)) invalid(`Duplicate Realm taxonomy node ${draft.id}`);
-		if (
-			!Number.isSafeInteger(draft.order) ||
-			draft.order < 0 ||
-			draft.order >= draftNodes.length
-		)
+		if (!Number.isSafeInteger(draft.order) || draft.order < 0 || draft.order >= draftNodes.length)
 			invalid(`Realm taxonomy node ${draft.id} has an invalid sibling order`);
 		const current = currentById.get(draft.id);
 		if (draft.state === "existing" && !current)
@@ -66,13 +62,11 @@ export function planRealmTaxonomyDraft(
 		if (
 			draft.state === "existing" &&
 			current &&
-			(current.contentUnitId !== draft.contentUnitId ||
-				current.contentKind !== draft.contentKind)
+			(current.contentUnitId !== draft.contentUnitId || current.contentKind !== draft.contentKind)
 		)
 			invalid(`Realm taxonomy node ${draft.id} cannot replace its content Unit`);
 		if (draft.contentKind === "tag") {
-			if (!draft.contentUnitId)
-				invalid(`Realm taxonomy Tag node ${draft.id} has no content Unit`);
+			if (!draft.contentUnitId) invalid(`Realm taxonomy Tag node ${draft.id} has no content Unit`);
 			if (!draft.queryStrategy)
 				invalid(`Realm taxonomy Tag node ${draft.id} has no query strategy`);
 			if (tagUnitIds.has(draft.contentUnitId))
@@ -99,8 +93,7 @@ export function planRealmTaxonomyDraft(
 			if (!node) invalid(`Realm taxonomy node ${nodeId} does not exist`);
 			visitState.set(nodeId, "visiting");
 			path.push(nodeId);
-			if (node.parentId === node.id)
-				invalid(`Realm taxonomy node ${node.id} cannot parent itself`);
+			if (node.parentId === node.id) invalid(`Realm taxonomy node ${node.id} cannot parent itself`);
 			if (node.parentId !== null && !draftById.has(node.parentId))
 				invalid(`Realm taxonomy node ${node.id} has a missing parent`);
 			nodeId = node.parentId;
@@ -124,9 +117,7 @@ export function planRealmTaxonomyDraft(
 				(id) => id === undefined,
 			)
 		)
-			invalid(
-				`Realm taxonomy siblings under ${parentId ?? "root"} must use contiguous orders`,
-			);
+			invalid(`Realm taxonomy siblings under ${parentId ?? "root"} must use contiguous orders`);
 	}
 
 	const retainedIds = new Set(draftById.keys());

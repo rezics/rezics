@@ -94,12 +94,7 @@ function grantSubject(record: typeof unitAccessGrant.$inferSelect): AccessSubjec
 		!record.realmRelation
 	)
 		return { kind: "profile", profileId: record.profileId };
-	if (
-		record.subjectKind === "realm" &&
-		record.realmId &&
-		record.realmRelation &&
-		!record.profileId
-	)
+	if (record.subjectKind === "realm" && record.realmId && record.realmRelation && !record.profileId)
 		return { kind: "realm", realmId: record.realmId, relation: record.realmRelation };
 	if (
 		record.subjectKind === "authenticated" &&
@@ -119,12 +114,7 @@ function restrictionSubject(record: typeof unitAccessRestriction.$inferSelect): 
 		!record.realmRelation
 	)
 		return { kind: "profile", profileId: record.profileId };
-	if (
-		record.subjectKind === "realm" &&
-		record.realmId &&
-		record.realmRelation &&
-		!record.profileId
-	)
+	if (record.subjectKind === "realm" && record.realmId && record.realmRelation && !record.profileId)
 		return { kind: "realm", realmId: record.realmId, relation: record.realmRelation };
 	throw new Error(`Invalid Unit access restriction subject shape: ${record.id}`);
 }
@@ -241,10 +231,7 @@ async function getAccessSnapshot(
 					eq(unitAccessGrant.unitId, unitId),
 					eq(unitAccessGrant.scope, [...scope]),
 					isNull(unitAccessGrant.revokedAt),
-					or(
-						isNull(unitAccessGrant.expiresAt),
-						sql`${unitAccessGrant.expiresAt} > now()`,
-					),
+					or(isNull(unitAccessGrant.expiresAt), sql`${unitAccessGrant.expiresAt} > now()`),
 				),
 			),
 		database
@@ -352,9 +339,7 @@ async function getAccessSnapshot(
 						? publicRead
 							? ["unit.read" as const]
 							: []
-						: delegablePermissions.filter((permission) =>
-								inheritedBase.has(permission),
-							);
+						: delegablePermissions.filter((permission) => inheritedBase.has(permission));
 				const expiryValues = [...row.expiries];
 				return {
 					subject: row.subject,
@@ -365,9 +350,7 @@ async function getAccessSnapshot(
 					),
 					inherited,
 					expiresAt:
-						expiryValues.length === 1 && expiryValues[0] != null
-							? new Date(expiryValues[0])
-							: null,
+						expiryValues.length === 1 && expiryValues[0] != null ? new Date(expiryValues[0]) : null,
 				};
 			})
 			.sort((left, right) => {
@@ -520,12 +503,7 @@ export default new Elysia({ prefix: "/unit" })
 						!isUnitPermissionApplicable(target.kind, permission)
 					)
 						throw new UnitAccessConfigurationInvalid();
-					await authorization.unit.ensureInTransaction(
-						tx,
-						params.unitId,
-						permission,
-						body.scope,
-					);
+					await authorization.unit.ensureInTransaction(tx, params.unitId, permission, body.scope);
 				}
 				if (
 					body.subject.kind === "authenticated" &&
@@ -580,11 +558,9 @@ export default new Elysia({ prefix: "/unit" })
 						requestedGrants.map((permission) => ({
 							unitId: params.unitId,
 							subjectKind: body.subject.kind,
-							profileId:
-								body.subject.kind === "profile" ? body.subject.profileId : null,
+							profileId: body.subject.kind === "profile" ? body.subject.profileId : null,
 							realmId: body.subject.kind === "realm" ? body.subject.realmId : null,
-							realmRelation:
-								body.subject.kind === "realm" ? body.subject.relation : null,
+							realmRelation: body.subject.kind === "realm" ? body.subject.relation : null,
 							permission,
 							scope: body.scope,
 							grantedByProfileId: profile.unitId,
@@ -613,12 +589,9 @@ export default new Elysia({ prefix: "/unit" })
 							requestedRestrictions.map((permission) => ({
 								unitId: params.unitId,
 								subjectKind: restrictionSubjectKind,
-								profileId:
-									body.subject.kind === "profile" ? body.subject.profileId : null,
-								realmId:
-									body.subject.kind === "realm" ? body.subject.realmId : null,
-								realmRelation:
-									body.subject.kind === "realm" ? body.subject.relation : null,
+								profileId: body.subject.kind === "profile" ? body.subject.profileId : null,
+								realmId: body.subject.kind === "realm" ? body.subject.realmId : null,
+								realmRelation: body.subject.kind === "realm" ? body.subject.relation : null,
 								permission,
 								scope: body.scope,
 								reasonCode: body.reasonCode ?? "administrative",
@@ -799,13 +772,8 @@ export default new Elysia({ prefix: "/unit" })
 		async ({ authorization, profile, params, body }) => {
 			return database.transaction(async (tx) => {
 				await lockUnitAccessState(tx, [params.unitId]);
-				await authorization.unit.ensureInTransaction(
-					tx,
-					params.unitId,
-					"unit.ownership.transfer",
-				);
-				if (body.expectedOwnerProfileId !== profile.unitId)
-					throw new UnitOwnershipChanged();
+				await authorization.unit.ensureInTransaction(tx, params.unitId, "unit.ownership.transfer");
+				if (body.expectedOwnerProfileId !== profile.unitId) throw new UnitOwnershipChanged();
 				if (!(await isEligibleOwnershipCandidate(tx, params.unitId, body.targetProfileId)))
 					throw new UnitOwnershipTargetIneligible();
 				const now = new Date();
@@ -817,8 +785,7 @@ export default new Elysia({ prefix: "/unit" })
 					now,
 				});
 				if (!replaced.ok) {
-					if (replaced.reason === "owner_unchanged")
-						throw new UnitOwnershipTargetIneligible();
+					if (replaced.reason === "owner_unchanged") throw new UnitOwnershipTargetIneligible();
 					throw new UnitOwnershipChanged();
 				}
 				await recordAccessAudit(tx, {
@@ -868,13 +835,8 @@ export default new Elysia({ prefix: "/unit" })
 		async ({ authorization, profile, params, body }) => {
 			const result = await database.transaction(async (tx) => {
 				await lockUnitAccessState(tx, [params.unitId]);
-				await authorization.unit.ensureInTransaction(
-					tx,
-					params.unitId,
-					"unit.ownership.transfer",
-				);
-				if (body.expectedOwnerProfileId !== profile.unitId)
-					throw new UnitOwnershipChanged();
+				await authorization.unit.ensureInTransaction(tx, params.unitId, "unit.ownership.transfer");
+				if (body.expectedOwnerProfileId !== profile.unitId) throw new UnitOwnershipChanged();
 				if (body.expectedOwnerProfileId === OfficialProfileIds.community)
 					throw new UnitOwnershipRelinquishmentForbidden();
 				const now = new Date();

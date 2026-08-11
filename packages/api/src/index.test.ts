@@ -21,9 +21,7 @@ describe("public API client", () => {
 		expect(typeof resolveAuth).toBe("function");
 		if (typeof resolveAuth !== "function") throw new Error("Expected an auth resolver");
 		expect(await resolveAuth({ type: "http", scheme: "bearer" })).toBe(token);
-		expect(await resolveAuth({ type: "apiKey", name: "session", in: "cookie" })).toBe(
-			undefined,
-		);
+		expect(await resolveAuth({ type: "apiKey", name: "session", in: "cookie" })).toBe(undefined);
 		const publicRequest = await client.interceptors.request.run({
 			url: "http://localhost:3000/api/v1/health",
 			method: "GET",
@@ -41,9 +39,9 @@ describe("public API client", () => {
 
 	test("rejects credentials in URLs and insecure remote origins", () => {
 		const token = apiTokenFromEnv("test-token");
-		expect(() =>
-			createRezicsClient({ baseUrl: "https://user:pass@example.com", token }),
-		).toThrow("must not contain credentials");
+		expect(() => createRezicsClient({ baseUrl: "https://user:pass@example.com", token })).toThrow(
+			"must not contain credentials",
+		);
 		expect(() => createRezicsClient({ baseUrl: "http://example.com", token })).toThrow(
 			"must use HTTPS",
 		);

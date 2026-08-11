@@ -23,9 +23,7 @@ export interface ZonePostContext {
 export type PostInteractionContext = RealmPostContext | ZonePostContext;
 
 export function postCreateHref(defaultRealmId?: string): string {
-	return defaultRealmId
-		? `/posts/new?realmId=${encodeURIComponent(defaultRealmId)}`
-		: "/posts/new";
+	return defaultRealmId ? `/posts/new?realmId=${encodeURIComponent(defaultRealmId)}` : "/posts/new";
 }
 
 export function postHref(postId: string, context?: PostInteractionContext, hash?: string): string {
@@ -33,8 +31,7 @@ export function postHref(postId: string, context?: PostInteractionContext, hash?
 		context?.kind === "zone"
 			? `${zoneHref(context.zone)}/posts/${encodeURIComponent(postId)}`
 			: `/posts/${encodeURIComponent(postId)}`;
-	const query =
-		context?.kind === "realm" ? `?realmId=${encodeURIComponent(context.realmId)}` : "";
+	const query = context?.kind === "realm" ? `?realmId=${encodeURIComponent(context.realmId)}` : "";
 	return `${baseHref}${query}${hash ? `#${hash}` : ""}`;
 }
 

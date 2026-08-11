@@ -48,8 +48,7 @@ export async function runRevisionedAggregateMutation<
 }): Promise<Result & Commit> {
 	await input.lock();
 	const latestRevisionId = await input.loadHeadRevisionId();
-	if (latestRevisionId !== input.expectedRevisionId)
-		throw input.revisionConflict(latestRevisionId);
+	if (latestRevisionId !== input.expectedRevisionId) throw input.revisionConflict(latestRevisionId);
 	const mutation = await input.mutate();
 	if (mutation.change === undefined)
 		return { ...mutation.result, ...input.unchanged(input.expectedRevisionId) };

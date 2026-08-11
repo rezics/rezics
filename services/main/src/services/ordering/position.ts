@@ -136,10 +136,7 @@ export function rebalanceFractionalPositionSequence(
 			} catch (error) {
 				if (!(error instanceof FractionalPositionCapacityExceeded)) throw error;
 			}
-			if (
-				generated &&
-				generated.every((position) => !fractionalPositionNeedsRebalance(position))
-			) {
+			if (generated && generated.every((position) => !fractionalPositionNeedsRebalance(position))) {
 				compacted.splice(start, end - start, ...generated);
 				cursor = end;
 				break;

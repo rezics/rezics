@@ -252,10 +252,7 @@ export function RealmPinsManager({
 					{t.realms.pinManager.add}
 				</Button>
 			</form>
-			<RequestFailure
-				error={add.error ?? move.error ?? remove.error}
-				fallback={t.ui.retryLater}
-			/>
+			<RequestFailure error={add.error ?? move.error ?? remove.error} fallback={t.ui.retryLater} />
 			{queryPending ? (
 				<Skeleton className="h-40 rounded-xl" />
 			) : error ? (
@@ -270,10 +267,7 @@ export function RealmPinsManager({
 						return (
 							<section aria-labelledby={headingId} className="grid gap-4" key={kind}>
 								<div className="flex flex-wrap items-center gap-2 rounded-xl border border-border-weak bg-surface-raised p-3">
-									<h2
-										className="me-auto font-heading font-semibold"
-										id={headingId}
-									>
+									<h2 className="me-auto font-heading font-semibold" id={headingId}>
 										{t.realms.pinManager.groupTitle({
 											kind: kindLabel,
 											count: groupEntries.length,
@@ -288,9 +282,7 @@ export function RealmPinsManager({
 										onClick={() =>
 											setSelectedIdsByKind((current) => ({
 												...current,
-												[kind]: new Set(
-													groupEntries.map(({ pin }) => pin.unitId),
-												),
+												[kind]: new Set(groupEntries.map(({ pin }) => pin.unitId)),
 											}))
 										}
 										size="sm"
@@ -334,41 +326,28 @@ export function RealmPinsManager({
 												<div className="grid gap-2" key={entry.pin.unitId}>
 													<div className="flex items-center gap-3 rounded-xl border border-border-weak bg-surface-raised p-3">
 														<Checkbox
-															aria-label={t.realms.pinManager.selectItem(
-																{
-																	title,
-																},
-															)}
-															checked={selectedIds.has(
-																entry.pin.unitId,
-															)}
+															aria-label={t.realms.pinManager.selectItem({
+																title,
+															})}
+															checked={selectedIds.has(entry.pin.unitId)}
 															disabled={mutationPending}
 															onCheckedChange={({ checked }) =>
-																toggleSelection(
-																	kind,
-																	entry.pin.unitId,
-																	checked === true,
-																)
+																toggleSelection(kind, entry.pin.unitId, checked === true)
 															}
 														/>
 														<span className="min-w-0 flex-1 truncate font-medium text-sm">
 															{title}
 														</span>
 														<Button
-															aria-label={t.realms.pinManager.removeItem(
-																{
-																	title,
-																},
-															)}
+															aria-label={t.realms.pinManager.removeItem({
+																title,
+															})}
 															disabled={mutationPending}
 															isLoading={
 																remove.isPending &&
-																remove.variables.path.unitId ===
-																	entry.pin.unitId
+																remove.variables.path.unitId === entry.pin.unitId
 															}
-															onClick={() =>
-																void removePin(entry.pin)
-															}
+															onClick={() => void removePin(entry.pin)}
 															size="icon-sm"
 															variant="destructive"
 														>
@@ -387,9 +366,7 @@ export function RealmPinsManager({
 										})}
 									</div>
 								) : (
-									<p className="text-muted-foreground text-sm">
-										{t.realms.pinManager.empty}
-									</p>
+									<p className="text-muted-foreground text-sm">{t.realms.pinManager.empty}</p>
 								)}
 							</section>
 						);
@@ -457,19 +434,14 @@ export function RealmPinsManager({
 									<FieldLabel>{t.realms.pinManager.afterItem}</FieldLabel>
 									<NativeSelect
 										disabled={move.isPending}
-										onChange={(event) =>
-											setDestinationUnitId(event.currentTarget.value)
-										}
+										onChange={(event) => setDestinationUnitId(event.currentTarget.value)}
 										value={destinationUnitId}
 									>
 										<NativeSelectOption value="">
 											{t.realms.pinManager.chooseDestination}
 										</NativeSelectOption>
 										{destinationEntries.map((entry) => (
-											<NativeSelectOption
-												key={entry.pin.unitId}
-												value={entry.pin.unitId}
-											>
+											<NativeSelectOption key={entry.pin.unitId} value={entry.pin.unitId}>
 												{titleFor(entry)}
 											</NativeSelectOption>
 										))}
@@ -480,17 +452,11 @@ export function RealmPinsManager({
 						<RequestFailure error={move.error} fallback={t.ui.retryLater} />
 					</DialogBody>
 					<DialogFooter>
-						<Button
-							disabled={move.isPending}
-							onClick={closeMoveDialog}
-							variant="outline"
-						>
+						<Button disabled={move.isPending} onClick={closeMoveDialog} variant="outline">
 							{t.realms.pinManager.cancel}
 						</Button>
 						<Button
-							disabled={
-								!movingIds?.size || (destinationRequired && !destinationUnitId)
-							}
+							disabled={!movingIds?.size || (destinationRequired && !destinationUnitId)}
 							isLoading={move.isPending}
 							onClick={() => void submitMove()}
 							variant="solid"

@@ -52,9 +52,7 @@ describe("health routes", () => {
 
 		const startup = await routes.handle(new Request("http://localhost/startup"));
 		const get = await routes.handle(new Request("http://localhost/health"));
-		const head = await routes.handle(
-			new Request("http://localhost/health", { method: "HEAD" }),
-		);
+		const head = await routes.handle(new Request("http://localhost/health", { method: "HEAD" }));
 
 		expect(startup.status).toBe(StatusCodes.OK);
 		expect(await startup.json()).toEqual({ status: "ok" });

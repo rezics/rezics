@@ -424,8 +424,7 @@ function BookContentStructureTree({
 	);
 	const selectedIds = useMemo(() => new Set(selectionCoverage.keys()), [selectionCoverage]);
 	const validDropTargetIds = useMemo(
-		() =>
-			draggingIds.size ? getBookDraftMoveTargetIds(nodes, draggingIds) : new Set<string>(),
+		() => (draggingIds.size ? getBookDraftMoveTargetIds(nodes, draggingIds) : new Set<string>()),
 		[nodes, draggingIds],
 	);
 	const { chapterCount, labelCount } = useMemo(
@@ -575,11 +574,7 @@ function BookContentStructureTree({
 							type="button"
 							variant={selectionMode ? "outline" : "quiet"}
 						>
-							{selectionMode ? (
-								<SquareCheckBig aria-hidden />
-							) : (
-								<Square aria-hidden />
-							)}
+							{selectionMode ? <SquareCheckBig aria-hidden /> : <Square aria-hidden />}
 							{selectionMode
 								? t.units.content.selectedCount({
 										count: selectedRootIds.size,
@@ -594,32 +589,21 @@ function BookContentStructureTree({
 							<ChevronsUpDown aria-hidden />
 							{t.units.content.expandAll}
 						</Button>
-						<Button
-							onClick={() => setExpandedIds(new Set())}
-							type="button"
-							variant="quiet"
-						>
+						<Button onClick={() => setExpandedIds(new Set())} type="button" variant="quiet">
 							<ChevronsDownUp aria-hidden />
 							{t.units.content.collapseAll}
 						</Button>
 						<span aria-hidden className="mx-1 h-7 w-px bg-border-weak" />
 						<Button
 							disabled={pending}
-							onClick={() =>
-								requestCreate({ kind: "label", destination: { kind: "root" } })
-							}
+							onClick={() => requestCreate({ kind: "label", destination: { kind: "root" } })}
 							type="button"
 							variant="outline"
 						>
 							<ListTree aria-hidden />
 							{t.units.content.newLabel}
 						</Button>
-						<Button
-							disabled={pending}
-							onClick={requestMainChapter}
-							type="button"
-							variant="solid"
-						>
+						<Button disabled={pending} onClick={requestMainChapter} type="button" variant="solid">
 							<Plus aria-hidden />
 							{t.units.content.newChapter}
 						</Button>
@@ -715,9 +699,7 @@ function BookContentStructureTree({
 					nodes={nodes}
 					onClose={() => setMovingIds(undefined)}
 					onSelect={(destination) => {
-						onChange((current) =>
-							moveBookDraftSelection(current, movingIds, destination),
-						);
+						onChange((current) => moveBookDraftSelection(current, movingIds, destination));
 						if (destination.kind === "node" && destination.placement === "inside")
 							setExpandedIds((current) => new Set([...current, destination.nodeId]));
 						setMovingIds(undefined);
@@ -793,9 +775,7 @@ function BookContentStructureRow(props: StructureRowProps) {
 	const siblings = siblingsByParentId.get(node.parentId) ?? [];
 	const siblingIndex = siblings.findIndex(({ id }) => id === node.id);
 	const activePlacement =
-		dropTarget?.kind === "node" && dropTarget.nodeId === node.id
-			? dropTarget.placement
-			: undefined;
+		dropTarget?.kind === "node" && dropTarget.nodeId === node.id ? dropTarget.placement : undefined;
 	const contentMetrics = contentMetricsByNodeId.get(node.id) ?? EmptyBookStructureContentMetrics;
 
 	function placement(event: DragEvent<HTMLDivElement>): "before" | "inside" | "after" {
@@ -893,9 +873,7 @@ function BookContentStructureRow(props: StructureRowProps) {
 			{selectionMode ? (
 				<SelectionActionMenu
 					canMoveToFirst={selected ? true : siblingIndex > 0}
-					canMoveToLast={
-						selected ? true : siblingIndex >= 0 && siblingIndex < siblings.length - 1
-					}
+					canMoveToLast={selected ? true : siblingIndex >= 0 && siblingIndex < siblings.length - 1}
 					nodeId={node.id}
 					onMoveRequest={onMoveRequest}
 					onMoveToEdge={onMoveToEdge}
@@ -928,9 +906,7 @@ function BookContentStructureRow(props: StructureRowProps) {
 					<SelectionContextMenuItems
 						canMoveToFirst={selected ? true : siblingIndex > 0}
 						canMoveToLast={
-							selected
-								? true
-								: siblingIndex >= 0 && siblingIndex < siblings.length - 1
+							selected ? true : siblingIndex >= 0 && siblingIndex < siblings.length - 1
 						}
 						nodeId={node.id}
 						onMoveRequest={onMoveRequest}
@@ -1262,11 +1238,7 @@ function NodeContextMenuItems({
 				<Move aria-hidden />
 				{t.units.content.move}
 			</ContextMenuItem>
-			<ContextMenuItem
-				disabled={pending}
-				onSelect={() => onRename(node)}
-				value="context-rename"
-			>
+			<ContextMenuItem disabled={pending} onSelect={() => onRename(node)} value="context-rename">
 				<Pencil aria-hidden />
 				{t.units.content.rename}
 			</ContextMenuItem>
@@ -1296,22 +1268,14 @@ function RenameStructureNodeDialog({
 				<form
 					onSubmit={(event) => {
 						event.preventDefault();
-						const title = String(
-							new FormData(event.currentTarget).get("title") ?? "",
-						).trim();
+						const title = String(new FormData(event.currentTarget).get("title") ?? "").trim();
 						if (title) onRename(title);
 					}}
 				>
 					<DialogBody>
 						<Field required>
 							<FieldLabel>{t.ui.title}</FieldLabel>
-							<Input
-								autoFocus
-								defaultValue={node.title}
-								maxLength={500}
-								name="title"
-								required
-							/>
+							<Input autoFocus defaultValue={node.title} maxLength={500} name="title" required />
 						</Field>
 					</DialogBody>
 					<DialogFooter>

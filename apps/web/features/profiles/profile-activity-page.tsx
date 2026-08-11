@@ -47,10 +47,7 @@ export function ProfileActivityPage() {
 				<div className="mt-6 grid gap-8">
 					{activity.data.scores.length ? (
 						<section aria-labelledby="profile-scores-title">
-							<h3
-								className="font-heading font-semibold text-lg"
-								id="profile-scores-title"
-							>
+							<h3 className="font-heading font-semibold text-lg" id="profile-scores-title">
 								{t.profiles.activityScores}
 							</h3>
 							<div className="mt-3 grid gap-3">
@@ -64,10 +61,7 @@ export function ProfileActivityPage() {
 											<CardContent className="flex flex-wrap items-center justify-between gap-4 p-4">
 												<div className="min-w-0">
 													{href ? (
-														<Link
-															className="font-medium hover:underline"
-															href={href}
-														>
+														<Link className="font-medium hover:underline" href={href}>
 															{title}
 														</Link>
 													) : (
@@ -79,23 +73,17 @@ export function ProfileActivityPage() {
 														})}
 													</p>
 													<p className="mt-1 text-muted-foreground text-xs">
-														{dateFormatter.format(
-															new Date(item.updatedAt),
-														)}
+														{dateFormatter.format(new Date(item.updatedAt))}
 													</p>
 												</div>
 												<div className="flex items-center gap-2">
 													<span className="font-heading font-bold text-xl">
 														{t.profiles.activityScoreValue({
-															value: toNonNegativeApiInteger(
-																item.value,
-															),
+															value: toNonNegativeApiInteger(item.value),
 														})}
 													</span>
 													{isCurrentUser ? (
-														<Badge variant="secondary">
-															{t.ui[item.visibility]}
-														</Badge>
+														<Badge variant="secondary">{t.ui[item.visibility]}</Badge>
 													) : null}
 												</div>
 											</CardContent>
@@ -108,10 +96,7 @@ export function ProfileActivityPage() {
 
 					{activity.data.progress.length ? (
 						<section aria-labelledby="profile-progress-title">
-							<h3
-								className="font-heading font-semibold text-lg"
-								id="profile-progress-title"
-							>
+							<h3 className="font-heading font-semibold text-lg" id="profile-progress-title">
 								{t.profiles.activityProgress}
 							</h3>
 							<div className="mt-3 grid gap-3">
@@ -120,44 +105,30 @@ export function ProfileActivityPage() {
 										? unitDetailHref(item.unitKind, item.unitId)
 										: undefined;
 									const title = item.unitTitle ?? t.ui.unnamed;
-									const percentage = Math.round(
-										clampProgress(item.progress) * 100,
-									);
+									const percentage = Math.round(clampProgress(item.progress) * 100);
 									return (
 										<Card appearance="outlined" key={item.unitId}>
 											<CardContent className="flex flex-wrap items-center justify-between gap-4 p-4">
 												<div className="min-w-0">
 													{href ? (
-														<Link
-															className="font-medium hover:underline"
-															href={href}
-														>
+														<Link className="font-medium hover:underline" href={href}>
 															{title}
 														</Link>
 													) : (
 														<p className="font-medium">{title}</p>
 													)}
 													<p className="mt-1 text-muted-foreground text-sm">
-														{
-															t.profiles.progressStatuses[
-																toProgressStatus(item.status)
-															]
-														}{" "}
-														·{" "}
+														{t.profiles.progressStatuses[toProgressStatus(item.status)]} ·{" "}
 														{t.profiles.activityProgressValue({
 															percentage,
 														})}
 													</p>
 													<p className="mt-1 text-muted-foreground text-xs">
-														{dateFormatter.format(
-															new Date(item.lastSeenAt),
-														)}
+														{dateFormatter.format(new Date(item.lastSeenAt))}
 													</p>
 												</div>
 												{isCurrentUser ? (
-													<Badge variant="secondary">
-														{t.ui[item.visibility]}
-													</Badge>
+													<Badge variant="secondary">{t.ui[item.visibility]}</Badge>
 												) : null}
 											</CardContent>
 										</Card>

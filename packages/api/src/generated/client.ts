@@ -743,9 +743,7 @@ export function getImageAssetsByIdPresentationsByRoleContent<ThrowOnError extend
 		method: "GET",
 		url: "/image-assets/{id}/presentations/{role}/content",
 		...config,
-	}) as Promise<
-		RequestResult<GetImageAssetsByIdPresentationsByRoleContentResponses, ThrowOnError>
-	>;
+	}) as Promise<RequestResult<GetImageAssetsByIdPresentationsByRoleContentResponses, ThrowOnError>>;
 }
 
 /**
@@ -830,10 +828,7 @@ export function postApiUnitByUnitIdAssociationProposalsInvitations<
 export function postApiUnitByUnitIdAssociationProposalsByProposalIdAccept<
 	ThrowOnError extends boolean = true,
 >(
-	options: Options<
-		PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptOptions,
-		ThrowOnError
-	>,
+	options: Options<PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptOptions, ThrowOnError>,
 ): Promise<
 	RequestResult<PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptResponses, ThrowOnError>
 > {
@@ -845,10 +840,7 @@ export function postApiUnitByUnitIdAssociationProposalsByProposalIdAccept<
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<
-		RequestResult<
-			PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptResponses,
-			ThrowOnError
-		>
+		RequestResult<PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptResponses, ThrowOnError>
 	>;
 }
 
@@ -859,10 +851,7 @@ export function postApiUnitByUnitIdAssociationProposalsByProposalIdAccept<
 export function postApiUnitByUnitIdAssociationProposalsByProposalIdDecline<
 	ThrowOnError extends boolean = true,
 >(
-	options: Options<
-		PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineOptions,
-		ThrowOnError
-	>,
+	options: Options<PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineOptions, ThrowOnError>,
 ): Promise<
 	RequestResult<PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineResponses, ThrowOnError>
 > {
@@ -874,10 +863,7 @@ export function postApiUnitByUnitIdAssociationProposalsByProposalIdDecline<
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<
-		RequestResult<
-			PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineResponses,
-			ThrowOnError
-		>
+		RequestResult<PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineResponses, ThrowOnError>
 	>;
 }
 
@@ -1275,9 +1261,7 @@ export function getApiMessagesConversationsByConversationId<ThrowOnError extends
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
 		],
 		...config,
-	}) as Promise<
-		RequestResult<GetApiMessagesConversationsByConversationIdResponses, ThrowOnError>
-	>;
+	}) as Promise<RequestResult<GetApiMessagesConversationsByConversationIdResponses, ThrowOnError>>;
 }
 
 /**
@@ -1611,9 +1595,7 @@ export function getApiApiQuotaPoliciesAccountsByUserIdTokens<ThrowOnError extend
 		url: "/api/v1/api-quota-policies/accounts/{userId}/tokens",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
-	}) as Promise<
-		RequestResult<GetApiApiQuotaPoliciesAccountsByUserIdTokensResponses, ThrowOnError>
-	>;
+	}) as Promise<RequestResult<GetApiApiQuotaPoliciesAccountsByUserIdTokensResponses, ThrowOnError>>;
 }
 
 /**
@@ -1658,10 +1640,7 @@ export function deleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenId<
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<
-		RequestResult<
-			DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdResponses,
-			ThrowOnError
-		>
+		RequestResult<DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdResponses, ThrowOnError>
 	>;
 }
 
@@ -1838,9 +1817,7 @@ export function getApiGovernanceUnitByUnitIdAccessCandidates<ThrowOnError extend
 		url: "/api/v1/governance/unit/{unitId}/access-candidates",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
-	}) as Promise<
-		RequestResult<GetApiGovernanceUnitByUnitIdAccessCandidatesResponses, ThrowOnError>
-	>;
+	}) as Promise<RequestResult<GetApiGovernanceUnitByUnitIdAccessCandidatesResponses, ThrowOnError>>;
 }
 
 /**
@@ -1857,9 +1834,7 @@ export function getApiGovernanceUnitByUnitIdAccessEffective<ThrowOnError extends
 		url: "/api/v1/governance/unit/{unitId}/access/effective",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
-	}) as Promise<
-		RequestResult<GetApiGovernanceUnitByUnitIdAccessEffectiveResponses, ThrowOnError>
-	>;
+	}) as Promise<RequestResult<GetApiGovernanceUnitByUnitIdAccessEffectiveResponses, ThrowOnError>>;
 }
 
 /**
@@ -2110,10 +2085,7 @@ export function getApiGovernancePlatformUnitsByUnitIdOwnershipCandidates<
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<
-		RequestResult<
-			GetApiGovernancePlatformUnitsByUnitIdOwnershipCandidatesResponses,
-			ThrowOnError
-		>
+		RequestResult<GetApiGovernancePlatformUnitsByUnitIdOwnershipCandidatesResponses, ThrowOnError>
 	>;
 }
 
@@ -2136,10 +2108,7 @@ export function postApiGovernancePlatformUnitsByUnitIdOwnershipOverride<
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<
-		RequestResult<
-			PostApiGovernancePlatformUnitsByUnitIdOwnershipOverrideResponses,
-			ThrowOnError
-		>
+		RequestResult<PostApiGovernancePlatformUnitsByUnitIdOwnershipOverrideResponses, ThrowOnError>
 	>;
 }
 
@@ -2157,9 +2126,7 @@ export function postApiGovernancePlatformUnitsByUnitIdDelete<ThrowOnError extend
 		url: "/api/v1/governance/platform/units/{unitId}/delete",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
-	}) as Promise<
-		RequestResult<PostApiGovernancePlatformUnitsByUnitIdDeleteResponses, ThrowOnError>
-	>;
+	}) as Promise<RequestResult<PostApiGovernancePlatformUnitsByUnitIdDeleteResponses, ThrowOnError>>;
 }
 
 /**
@@ -2205,10 +2172,7 @@ export function getApiGovernancePlatformOwnershipClaims<ThrowOnError extends boo
 export function postApiGovernancePlatformOwnershipClaimsByClaimIdDecision<
 	ThrowOnError extends boolean = true,
 >(
-	options: Options<
-		PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionOptions,
-		ThrowOnError
-	>,
+	options: Options<PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionOptions, ThrowOnError>,
 ): Promise<
 	RequestResult<PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionResponses, ThrowOnError>
 > {
@@ -2220,10 +2184,7 @@ export function postApiGovernancePlatformOwnershipClaimsByClaimIdDecision<
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<
-		RequestResult<
-			PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionResponses,
-			ThrowOnError
-		>
+		RequestResult<PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionResponses, ThrowOnError>
 	>;
 }
 
@@ -2312,9 +2273,7 @@ export function patchApiGovernanceContentReviewCasesByCaseId<ThrowOnError extend
 		url: "/api/v1/governance/content-review/cases/{caseId}",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
-	}) as Promise<
-		RequestResult<PatchApiGovernanceContentReviewCasesByCaseIdResponses, ThrowOnError>
-	>;
+	}) as Promise<RequestResult<PatchApiGovernanceContentReviewCasesByCaseIdResponses, ThrowOnError>>;
 }
 
 /**
@@ -2358,10 +2317,7 @@ export function postApiGovernanceAccountEnforcements<ThrowOnError extends boolea
 export function postApiGovernanceAccountEnforcementsByEnforcementIdRevoke<
 	ThrowOnError extends boolean = true,
 >(
-	options: Options<
-		PostApiGovernanceAccountEnforcementsByEnforcementIdRevokeOptions,
-		ThrowOnError
-	>,
+	options: Options<PostApiGovernanceAccountEnforcementsByEnforcementIdRevokeOptions, ThrowOnError>,
 ): Promise<
 	RequestResult<PostApiGovernanceAccountEnforcementsByEnforcementIdRevokeResponses, ThrowOnError>
 > {
@@ -2373,10 +2329,7 @@ export function postApiGovernanceAccountEnforcementsByEnforcementIdRevoke<
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<
-		RequestResult<
-			PostApiGovernanceAccountEnforcementsByEnforcementIdRevokeResponses,
-			ThrowOnError
-		>
+		RequestResult<PostApiGovernanceAccountEnforcementsByEnforcementIdRevokeResponses, ThrowOnError>
 	>;
 }
 
@@ -2609,9 +2562,7 @@ export function deleteApiZonesByZoneIdPagesByPageIdPlacement<ThrowOnError extend
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
 		],
 		...config,
-	}) as Promise<
-		RequestResult<DeleteApiZonesByZoneIdPagesByPageIdPlacementResponses, ThrowOnError>
-	>;
+	}) as Promise<RequestResult<DeleteApiZonesByZoneIdPagesByPageIdPlacementResponses, ThrowOnError>>;
 }
 
 /**
@@ -2663,9 +2614,7 @@ export function getApiZonesByZoneIdNavigationByNavigationId<ThrowOnError extends
 		method: "GET",
 		url: "/api/v1/zones/{zoneId}/navigation/{navigationId}",
 		...config,
-	}) as Promise<
-		RequestResult<GetApiZonesByZoneIdNavigationByNavigationIdResponses, ThrowOnError>
-	>;
+	}) as Promise<RequestResult<GetApiZonesByZoneIdNavigationByNavigationIdResponses, ThrowOnError>>;
 }
 
 /**
@@ -2685,9 +2634,7 @@ export function putApiZonesByZoneIdNavigationByNavigationId<ThrowOnError extends
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
 		],
 		...config,
-	}) as Promise<
-		RequestResult<PutApiZonesByZoneIdNavigationByNavigationIdResponses, ThrowOnError>
-	>;
+	}) as Promise<RequestResult<PutApiZonesByZoneIdNavigationByNavigationIdResponses, ThrowOnError>>;
 }
 
 /**
@@ -2749,9 +2696,7 @@ export function deleteApiSeriesBySeriesIdReleasesByReleaseId<ThrowOnError extend
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
 		],
 		...config,
-	}) as Promise<
-		RequestResult<DeleteApiSeriesBySeriesIdReleasesByReleaseIdResponses, ThrowOnError>
-	>;
+	}) as Promise<RequestResult<DeleteApiSeriesBySeriesIdReleasesByReleaseIdResponses, ThrowOnError>>;
 }
 
 /**
@@ -2787,9 +2732,7 @@ export function getApiSoftwareBySoftwareIdSystemRequirements<ThrowOnError extend
 		method: "GET",
 		url: "/api/v1/software/{softwareId}/system-requirements",
 		...config,
-	}) as Promise<
-		RequestResult<GetApiSoftwareBySoftwareIdSystemRequirementsResponses, ThrowOnError>
-	>;
+	}) as Promise<RequestResult<GetApiSoftwareBySoftwareIdSystemRequirementsResponses, ThrowOnError>>;
 }
 
 /**
@@ -2826,10 +2769,7 @@ export function putApiSoftwareBySoftwareIdSystemRequirementsByRequirementId<
 		ThrowOnError
 	>,
 ): Promise<
-	RequestResult<
-		PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdResponses,
-		ThrowOnError
-	>
+	RequestResult<PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdResponses, ThrowOnError>
 > {
 	const { client: request = client, ...config } = options;
 
@@ -2969,9 +2909,7 @@ export function getApiUnitsByIdByUnitIdDocksByKindRevisions<ThrowOnError extends
 		method: "GET",
 		url: "/api/v1/units/by-id/{unitId}/docks/{kind}/revisions",
 		...config,
-	}) as Promise<
-		RequestResult<GetApiUnitsByIdByUnitIdDocksByKindRevisionsResponses, ThrowOnError>
-	>;
+	}) as Promise<RequestResult<GetApiUnitsByIdByUnitIdDocksByKindRevisionsResponses, ThrowOnError>>;
 }
 
 /**
@@ -3760,10 +3698,7 @@ export function putApiUnitsByTypeByUnitIdTagStructuresByStructureIdVote<
 		],
 		...config,
 	}) as Promise<
-		RequestResult<
-			PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteResponses,
-			ThrowOnError
-		>
+		RequestResult<PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteResponses, ThrowOnError>
 	>;
 }
 
@@ -3774,10 +3709,7 @@ export function putApiUnitsByTypeByUnitIdTagStructuresByStructureIdVote<
 export function deleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVote<
 	ThrowOnError extends boolean = true,
 >(
-	options: Options<
-		DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteOptions,
-		ThrowOnError
-	>,
+	options: Options<DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteOptions, ThrowOnError>,
 ): Promise<
 	RequestResult<DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteResponses, ThrowOnError>
 > {
@@ -3792,10 +3724,7 @@ export function deleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVote<
 		],
 		...config,
 	}) as Promise<
-		RequestResult<
-			DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteResponses,
-			ThrowOnError
-		>
+		RequestResult<DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteResponses, ThrowOnError>
 	>;
 }
 
@@ -3836,9 +3765,7 @@ export function putApiUsersMeTagRealmSubscriptionsByRealmId<ThrowOnError extends
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
 		],
 		...config,
-	}) as Promise<
-		RequestResult<PutApiUsersMeTagRealmSubscriptionsByRealmIdResponses, ThrowOnError>
-	>;
+	}) as Promise<RequestResult<PutApiUsersMeTagRealmSubscriptionsByRealmIdResponses, ThrowOnError>>;
 }
 
 /**
@@ -4051,10 +3978,7 @@ export function postApiUnitsByIdByUnitIdRealmPublicationsByRealmId<
 export function postApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdraw<
 	ThrowOnError extends boolean = true,
 >(
-	options: Options<
-		PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawOptions,
-		ThrowOnError
-	>,
+	options: Options<PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawOptions, ThrowOnError>,
 ): Promise<
 	RequestResult<PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawResponses, ThrowOnError>
 > {
@@ -4069,10 +3993,7 @@ export function postApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdraw<
 		],
 		...config,
 	}) as Promise<
-		RequestResult<
-			PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawResponses,
-			ThrowOnError
-		>
+		RequestResult<PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawResponses, ThrowOnError>
 	>;
 }
 
@@ -4088,10 +4009,7 @@ export function postApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublish<
 		ThrowOnError
 	>,
 ): Promise<
-	RequestResult<
-		PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishResponses,
-		ThrowOnError
-	>
+	RequestResult<PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishResponses, ThrowOnError>
 > {
 	const { client: request = client, ...config } = options;
 
@@ -4411,10 +4329,7 @@ export function postApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestore<
 		],
 		...config,
 	}) as Promise<
-		RequestResult<
-			PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreResponses,
-			ThrowOnError
-		>
+		RequestResult<PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreResponses, ThrowOnError>
 	>;
 }
 
@@ -4761,9 +4676,7 @@ export function patchApiUnitsByTypeByUnitIdAliasesByAliasId<ThrowOnError extends
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
 		],
 		...config,
-	}) as Promise<
-		RequestResult<PatchApiUnitsByTypeByUnitIdAliasesByAliasIdResponses, ThrowOnError>
-	>;
+	}) as Promise<RequestResult<PatchApiUnitsByTypeByUnitIdAliasesByAliasIdResponses, ThrowOnError>>;
 }
 
 /**
@@ -4783,9 +4696,7 @@ export function deleteApiUnitsByTypeByUnitIdAliasesByAliasId<ThrowOnError extend
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
 		],
 		...config,
-	}) as Promise<
-		RequestResult<DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdResponses, ThrowOnError>
-	>;
+	}) as Promise<RequestResult<DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdResponses, ThrowOnError>>;
 }
 
 /**
@@ -4805,9 +4716,7 @@ export function postApiUnitsByTypeByUnitIdCreditAttributions<ThrowOnError extend
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
 		],
 		...config,
-	}) as Promise<
-		RequestResult<PostApiUnitsByTypeByUnitIdCreditAttributionsResponses, ThrowOnError>
-	>;
+	}) as Promise<RequestResult<PostApiUnitsByTypeByUnitIdCreditAttributionsResponses, ThrowOnError>>;
 }
 
 /**
@@ -4949,10 +4858,7 @@ export function postApiUnitsByTypeByUnitIdExternalLinks<ThrowOnError extends boo
 export function putApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVote<
 	ThrowOnError extends boolean = true,
 >(
-	options: Options<
-		PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteOptions,
-		ThrowOnError
-	>,
+	options: Options<PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteOptions, ThrowOnError>,
 ): Promise<
 	RequestResult<PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteResponses, ThrowOnError>
 > {
@@ -4967,10 +4873,7 @@ export function putApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVote<
 		],
 		...config,
 	}) as Promise<
-		RequestResult<
-			PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteResponses,
-			ThrowOnError
-		>
+		RequestResult<PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteResponses, ThrowOnError>
 	>;
 }
 
@@ -5031,10 +4934,7 @@ export function patchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkId<
 		],
 		...config,
 	}) as Promise<
-		RequestResult<
-			PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdResponses,
-			ThrowOnError
-		>
+		RequestResult<PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdResponses, ThrowOnError>
 	>;
 }
 
@@ -5045,10 +4945,7 @@ export function patchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkId<
 export function deleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkId<
 	ThrowOnError extends boolean = true,
 >(
-	options: Options<
-		DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdOptions,
-		ThrowOnError
-	>,
+	options: Options<DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdOptions, ThrowOnError>,
 ): Promise<
 	RequestResult<DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdResponses, ThrowOnError>
 > {
@@ -5063,10 +4960,7 @@ export function deleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkId<
 		],
 		...config,
 	}) as Promise<
-		RequestResult<
-			DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdResponses,
-			ThrowOnError
-		>
+		RequestResult<DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdResponses, ThrowOnError>
 	>;
 }
 
@@ -5167,9 +5061,7 @@ export function deleteApiUnitsByTypeByUnitIdTagsByTagIdVote<ThrowOnError extends
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
 		],
 		...config,
-	}) as Promise<
-		RequestResult<DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteResponses, ThrowOnError>
-	>;
+	}) as Promise<RequestResult<DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteResponses, ThrowOnError>>;
 }
 
 /**
@@ -5246,10 +5138,7 @@ export function deleteApiUnitsByIdByUnitIdContentStructuresByStructureId<
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<
-		RequestResult<
-			DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdResponses,
-			ThrowOnError
-		>
+		RequestResult<DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdResponses, ThrowOnError>
 	>;
 }
 
@@ -5360,10 +5249,7 @@ export function postApiUnitsByIdByUnitIdContentStructuresByStructureIdNodes<
 		ThrowOnError
 	>,
 ): Promise<
-	RequestResult<
-		PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesResponses,
-		ThrowOnError
-	>
+	RequestResult<PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesResponses, ThrowOnError>
 > {
 	const { client: request = client, ...config } = options;
 
@@ -5457,9 +5343,7 @@ export function getApiUnitsBookByUnitIdContentStructureNodes<ThrowOnError extend
 		method: "GET",
 		url: "/api/v1/units/book/{unitId}/content-structure/nodes",
 		...config,
-	}) as Promise<
-		RequestResult<GetApiUnitsBookByUnitIdContentStructureNodesResponses, ThrowOnError>
-	>;
+	}) as Promise<RequestResult<GetApiUnitsBookByUnitIdContentStructureNodesResponses, ThrowOnError>>;
 }
 
 /**
@@ -5556,10 +5440,7 @@ export function putApiChaptersByChapterIdLocalizationsByLanguageContent<
 		],
 		...config,
 	}) as Promise<
-		RequestResult<
-			PutApiChaptersByChapterIdLocalizationsByLanguageContentResponses,
-			ThrowOnError
-		>
+		RequestResult<PutApiChaptersByChapterIdLocalizationsByLanguageContentResponses, ThrowOnError>
 	>;
 }
 
@@ -6096,9 +5977,7 @@ export function getApiCollectionsByCollectionIdItemRevisions<ThrowOnError extend
 		method: "GET",
 		url: "/api/v1/collections/{collectionId}/item-revisions",
 		...config,
-	}) as Promise<
-		RequestResult<GetApiCollectionsByCollectionIdItemRevisionsResponses, ThrowOnError>
-	>;
+	}) as Promise<RequestResult<GetApiCollectionsByCollectionIdItemRevisionsResponses, ThrowOnError>>;
 }
 
 /**
@@ -6192,9 +6071,7 @@ export function deleteApiCollectionsFavoritesItemsByTargetId<ThrowOnError extend
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
 		],
 		...config,
-	}) as Promise<
-		RequestResult<DeleteApiCollectionsFavoritesItemsByTargetIdResponses, ThrowOnError>
-	>;
+	}) as Promise<RequestResult<DeleteApiCollectionsFavoritesItemsByTargetIdResponses, ThrowOnError>>;
 }
 
 /**

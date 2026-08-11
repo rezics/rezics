@@ -48,12 +48,10 @@ describe("Unit Tag page routes", () => {
 		const url = new URL(href, "https://rezics.example");
 
 		expect(url.pathname).toBe(`/units/book/${UnitId}/tags`);
-		await expect(loadUnitTagsRouteState(Object.fromEntries(url.searchParams))).resolves.toEqual(
-			{
-				context: { kind: "realm", realmId: RealmId },
-				createdTagId: TagId,
-			},
-		);
+		await expect(loadUnitTagsRouteState(Object.fromEntries(url.searchParams))).resolves.toEqual({
+			context: { kind: "realm", realmId: RealmId },
+			createdTagId: TagId,
+		});
 	});
 
 	it("falls back to global context and ignores invalid identifiers", async () => {

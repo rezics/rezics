@@ -205,9 +205,9 @@ describe("UnitScoreControl", () => {
 		expect((screen.getByRole("combobox", { name: "評分領域" }) as HTMLInputElement).value).toBe(
 			"REZICS 評分",
 		);
-		expect(
-			(screen.getByRole("combobox", { name: "單項可見性" }) as HTMLSelectElement).value,
-		).toBe("public");
+		expect((screen.getByRole("combobox", { name: "單項可見性" }) as HTMLSelectElement).value).toBe(
+			"public",
+		);
 		expect(screen.getByText("儲存後的實際可見性：私密")).toBeTruthy();
 		expect(state.mutateAsync).not.toHaveBeenCalled();
 

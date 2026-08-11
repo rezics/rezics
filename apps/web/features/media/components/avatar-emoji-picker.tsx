@@ -73,9 +73,7 @@ export function AvatarEmojiPicker({ onSelect }: { readonly onSelect: (emoji: str
 								aria-label={choice.label}
 								className="size-9 min-w-9 p-0 text-xl"
 								key={choice.emoji}
-								onClick={() =>
-									selectEmoji({ emoji: choice.emoji, label: choice.label })
-								}
+								onClick={() => selectEmoji({ emoji: choice.emoji, label: choice.label })}
 								title={choice.label}
 								type="button"
 								variant="quiet"

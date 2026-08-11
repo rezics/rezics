@@ -108,10 +108,7 @@ describe("SessionQueryClientBoundary", () => {
 
 		const initial = initialSession(null);
 		const view = render(
-			<SessionQueryClientBoundary
-				dehydratedState={EmptyDehydratedState}
-				initialSession={initial}
-			>
+			<SessionQueryClientBoundary dehydratedState={EmptyDehydratedState} initialSession={initial}>
 				<Probe />
 			</SessionQueryClientBoundary>,
 		);
@@ -121,10 +118,7 @@ describe("SessionQueryClientBoundary", () => {
 
 		sessionSnapshot.current = authenticated("account-a");
 		view.rerender(
-			<SessionQueryClientBoundary
-				dehydratedState={EmptyDehydratedState}
-				initialSession={initial}
-			>
+			<SessionQueryClientBoundary dehydratedState={EmptyDehydratedState} initialSession={initial}>
 				<Probe />
 			</SessionQueryClientBoundary>,
 		);

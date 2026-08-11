@@ -28,21 +28,19 @@ describe("Review Feed route state", () => {
 		expect(
 			reviewFeedSearchParams.languages.parseServerSide(requiredParam(params, "languages")),
 		).toEqual(["zh", "en"]);
-		expect(
-			reviewFeedSearchParams.realms.parseServerSide(requiredParam(params, "realms")),
-		).toEqual(["019f9000-0000-7000-8000-000000000002"]);
+		expect(reviewFeedSearchParams.realms.parseServerSide(requiredParam(params, "realms"))).toEqual([
+			"019f9000-0000-7000-8000-000000000002",
+		]);
 		expect(
 			reviewFeedSearchParams.scoreRealm.parseServerSide(requiredParam(params, "scoreRealm")),
 		).toEqual({
 			id: "019f9000-0000-7000-8000-000000000003",
 			label: "Readers",
 		});
-		expect(
-			reviewFeedSearchParams.scores.parseServerSide(requiredParam(params, "scores")),
-		).toEqual([8, 9]);
-		expect(reviewFeedSearchParams.sort.parseServerSide(requiredParam(params, "sort"))).toBe(
-			"new",
-		);
+		expect(reviewFeedSearchParams.scores.parseServerSide(requiredParam(params, "scores"))).toEqual([
+			8, 9,
+		]);
+		expect(reviewFeedSearchParams.sort.parseServerSide(requiredParam(params, "sort"))).toBe("new");
 		expect(reviewFeedSearchParams.tags.parseServerSide(requiredParam(params, "tags"))).toEqual([
 			"019f9000-0000-7000-8000-000000000004",
 		]);

@@ -32,8 +32,7 @@ describe("permission schema", () => {
 		for (const permission of UnitPermissionValues) {
 			const definition = UnitPermissionDefinitions[permission];
 			expect(permission.split(".").at(-1)).toBe(definition.action);
-			if (definition.kind === "standard")
-				expect(standardActions.has(definition.action)).toBe(true);
+			if (definition.kind === "standard") expect(standardActions.has(definition.action)).toBe(true);
 			else expect(definition.rationale.trim().length).toBeGreaterThan(0);
 		}
 	});
@@ -98,9 +97,7 @@ describe("permission schema", () => {
 		expect(isUnitPermissionApplicable("unit", "realm.members.manage")).toBe(false);
 		expect(isUnitPermissionApplicable("entity", "entity.association.credit.direct")).toBe(true);
 		expect(unitPermissionsForTarget("realm")).toContain("unit.status.update");
-		expect(unitPermissionsForTarget("realm")).not.toContain(
-			"entity.association.credit.request",
-		);
+		expect(unitPermissionsForTarget("realm")).not.toContain("entity.association.credit.request");
 	});
 
 	it("keeps authenticated grants inside the declared boundary", () => {
@@ -117,12 +114,8 @@ describe("permission schema", () => {
 		expect(isUnitPermissionGrantableToAuthenticated("realm.tag-voting.update")).toBe(false);
 		expect(isUnitPermissionGrantableToAuthenticated("realm.tag-contexts.manage")).toBe(false);
 		expect(isUnitPermissionGrantableToAuthenticated("unit.tag-curation.manage")).toBe(false);
-		expect(isUnitPermissionGrantableToAuthenticated("unit.reference-curation.manage")).toBe(
-			false,
-		);
-		expect(isUnitPermissionGrantableToAuthenticated("unit.realm-publication.manage")).toBe(
-			false,
-		);
+		expect(isUnitPermissionGrantableToAuthenticated("unit.reference-curation.manage")).toBe(false);
+		expect(isUnitPermissionGrantableToAuthenticated("unit.realm-publication.manage")).toBe(false);
 	});
 
 	it("keeps ownership transfer owner-only and outside delegated access", () => {
@@ -144,9 +137,9 @@ describe("permission schema", () => {
 
 	it("uses one platform release gate for every development preview", () => {
 		expect(DevelopmentPreviewCapability).toBe("platform.development_preview.access");
-		expect(
-			PlatformCapabilityValues.filter((capability) => capability.includes("preview")),
-		).toEqual([DevelopmentPreviewCapability]);
+		expect(PlatformCapabilityValues.filter((capability) => capability.includes("preview"))).toEqual(
+			[DevelopmentPreviewCapability],
+		);
 	});
 
 	it("defines every platform capability and keeps audit reads independent", () => {
@@ -155,9 +148,7 @@ describe("permission schema", () => {
 			"platform.access.read",
 			"platform.access.manage",
 		]);
-		expect(expandPlatformCapabilities(["platform.audit.read"])).toEqual([
-			"platform.audit.read",
-		]);
+		expect(expandPlatformCapabilities(["platform.audit.read"])).toEqual(["platform.audit.read"]);
 		expect(expandPlatformCapabilities(["platform.user.status.update"])).toEqual([
 			"platform.user.read",
 			"platform.user.status.update",
@@ -175,12 +166,7 @@ describe("permission schema", () => {
 		]);
 		expect(
 			expandPlatformCapabilities(["unit.ownership.override", "unit.delete", "unit.restore"]),
-		).toEqual([
-			"unit.governance.read",
-			"unit.ownership.override",
-			"unit.delete",
-			"unit.restore",
-		]);
+		).toEqual(["unit.governance.read", "unit.ownership.override", "unit.delete", "unit.restore"]);
 	});
 });
 

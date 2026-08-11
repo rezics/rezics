@@ -47,8 +47,7 @@ const client = new S3Client({
 try {
 	await client.send(new HeadBucketCommand({ Bucket: env.S3_BUCKET }));
 } catch (error: unknown) {
-	if (!(error instanceof S3ServiceException) || error.$metadata.httpStatusCode !== 404)
-		throw error;
+	if (!(error instanceof S3ServiceException) || error.$metadata.httpStatusCode !== 404) throw error;
 
 	try {
 		await client.send(new CreateBucketCommand({ Bucket: env.S3_BUCKET }));

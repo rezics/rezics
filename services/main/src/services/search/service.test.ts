@@ -255,12 +255,8 @@ describe("direct PostgreSQL Search", () => {
 		const result = await searchDomain("units", { query: "(common OR hidden", limit: 20 });
 		const candidateQuery = dialect.sqlToQuery(execute.mock.calls[1]![0] as SQL);
 		expect(candidateQuery.sql).toContain("public.search_text_candidates");
-		expect(candidateQuery.params.filter((value) => value === "(common OR hidden")).toHaveLength(
-			9,
-		);
-		expect(candidateQuery.params).toEqual(
-			expect.arrayContaining(["book", "software", "media"]),
-		);
+		expect(candidateQuery.params.filter((value) => value === "(common OR hidden")).toHaveLength(9);
+		expect(candidateQuery.params).toEqual(expect.arrayContaining(["book", "software", "media"]));
 		expect(result.total).toEqual({ kind: "exact", value: 1 });
 		expect(result.nextCursor).toBeUndefined();
 	});
@@ -512,9 +508,7 @@ describe("direct PostgreSQL Search", () => {
 		expect(candidateSql).toContain(
 			'inner join filter_seed on filter_seed.unit_id = "unit_best_score"."unit_id"',
 		);
-		expect(candidateSql).toContain(
-			'inner join filter_seed on filter_seed.unit_id = "unit"."id"',
-		);
+		expect(candidateSql).toContain('inner join filter_seed on filter_seed.unit_id = "unit"."id"');
 	});
 
 	it("switches a dense relational seed back to bounded ordered keyset scanning", async () => {

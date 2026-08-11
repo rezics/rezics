@@ -147,10 +147,7 @@ export function ReplyPostThread({
 					className="h-11 w-full justify-start rounded-xl text-muted-foreground"
 					destination={
 						signInDestination ??
-						postHref(
-							parentPostId ?? rootPostId,
-							realmId ? { kind: "realm", realmId } : undefined,
-						)
+						postHref(parentPostId ?? rootPostId, realmId ? { kind: "realm", realmId } : undefined)
 					}
 					variant="outline"
 				>
@@ -195,11 +192,7 @@ export function ReplyPostThread({
 					{replies.isFetchNextPageError ? (
 						<div className="flex flex-col items-center gap-2">
 							<RequestFailure error={replies.error} />
-							<Button
-								onClick={() => void replies.fetchNextPage()}
-								size="sm"
-								variant="outline"
-							>
+							<Button onClick={() => void replies.fetchNextPage()} size="sm" variant="outline">
 								{t.actions.retry}
 							</Button>
 						</div>
@@ -349,9 +342,7 @@ function ReplyPostNode({
 											postPublisherUnitIds={postPublisherUnitIds}
 										/>
 									))}
-									{childReplies.isError ? (
-										<RequestFailure error={childReplies.error} />
-									) : null}
+									{childReplies.isError ? <RequestFailure error={childReplies.error} /> : null}
 									{hasMoreChildren ? (
 										<Button
 											className="mt-1 w-fit"
@@ -367,14 +358,9 @@ function ReplyPostNode({
 											{childReplies.isFetching ? (
 												<Spinner data-icon="inline-start" />
 											) : (
-												<MessagesSquareIcon
-													aria-hidden
-													data-icon="inline-start"
-												/>
+												<MessagesSquareIcon aria-hidden data-icon="inline-start" />
 											)}
-											{childReplies.isError
-												? t.actions.retry
-												: t.actions.loadMore}
+											{childReplies.isError ? t.actions.retry : t.actions.loadMore}
 											<ChevronDownIcon aria-hidden data-icon="inline-end" />
 										</Button>
 									) : null}
@@ -389,9 +375,7 @@ function ReplyPostNode({
 				content={
 					<div className="min-w-0">
 						{reply.status === "deleted" ? (
-							<p className="mt-2 text-muted-foreground text-sm">
-								{t.posts.deletedReply}
-							</p>
+							<p className="mt-2 text-muted-foreground text-sm">{t.posts.deletedReply}</p>
 						) : editing ? (
 							<form className="mt-3" onSubmit={save}>
 								<FieldGroup>
@@ -409,9 +393,7 @@ function ReplyPostNode({
 											size="sm"
 											disabled={!body.length || update.isPending}
 										>
-											{update.isPending && (
-												<Spinner data-icon="inline-start" />
-											)}
+											{update.isPending && <Spinner data-icon="inline-start" />}
 											{t.ui.save}
 										</Button>
 										<Button
@@ -452,10 +434,7 @@ function ReplyPostNode({
 											type="button"
 											variant="secondary"
 										>
-											<MessageCircleIcon
-												aria-hidden
-												data-icon="inline-start"
-											/>
+											<MessageCircleIcon aria-hidden data-icon="inline-start" />
 											{t.posts.reply}
 										</Button>
 									) : null
@@ -513,10 +492,7 @@ function ReplyPostNode({
 						/>
 						<Link
 							className="text-muted-foreground text-xs hover:underline"
-							href={postHref(
-								reply.id,
-								realmId ? { kind: "realm", realmId } : undefined,
-							)}
+							href={postHref(reply.id, realmId ? { kind: "realm", realmId } : undefined)}
 						>
 							{formatRelativeTime(reply.createdAt, locale.target)}
 						</Link>

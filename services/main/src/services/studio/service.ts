@@ -340,9 +340,7 @@ async function selectCandidateBatch(input: {
 		id: row.id,
 		relevantAt: dateValue(row.relevantAt, "candidate.relevantAt"),
 		lastVisitedAt:
-			row.lastVisitedAt === null
-				? null
-				: dateValue(row.lastVisitedAt, "candidate.lastVisitedAt"),
+			row.lastVisitedAt === null ? null : dateValue(row.lastVisitedAt, "candidate.lastVisitedAt"),
 		bucket: row.bucket,
 		sortAt: dateValue(row.sortAt, "candidate.sortAt"),
 	}));
@@ -461,8 +459,7 @@ function permissionSource(decision: ResolvedPermission["decision"]): StudioAcces
 function relationMatchesView(relations: readonly StudioRelation[], view: StudioView): boolean {
 	if (view === "all")
 		return relations.some(
-			(relation) =>
-				relation === "created" || relation === "contributed" || relation === "assigned",
+			(relation) => relation === "created" || relation === "contributed" || relation === "assigned",
 		);
 	return relations.includes(view);
 }
@@ -481,11 +478,7 @@ async function presentCandidate(input: {
 			id: unit.id,
 			language: resolvedUnitLocalizationLanguage(unit.id, localizationLanguages),
 			title: resolvedUnitLocalizationTitle(unit.id, localizationLanguages),
-			coverAssetId: resolvedUnitLocalizationImageAssetId(
-				unit.id,
-				"cover",
-				localizationLanguages,
-			),
+			coverAssetId: resolvedUnitLocalizationImageAssetId(unit.id, "cover", localizationLanguages),
 			status: unit.status,
 			visibility: unit.visibility,
 			createdAt: unit.createdAt,
@@ -562,10 +555,7 @@ async function presentCandidate(input: {
 		lastContributedAt: contributed.length
 			? new Date(Math.max(...contributed.map(({ lastAt }) => lastAt.getTime())))
 			: null,
-		contributionCount: contributed.reduce(
-			(total, activity) => total + activity.activityCount,
-			0,
-		),
+		contributionCount: contributed.reduce((total, activity) => total + activity.activityCount, 0),
 		assignedAt: assigned.length
 			? new Date(Math.min(...assigned.map(({ createdAt }) => createdAt.getTime())))
 			: null,
@@ -653,9 +643,7 @@ export async function listStudioContent(input: {
 			slugAddress: slugAddresses.get(item.id) ?? null,
 		})),
 		nextCursor:
-			items.length > limit && last
-				? encodeStudioCursor(input.query, last.cursorBoundary)
-				: null,
+			items.length > limit && last ? encodeStudioCursor(input.query, last.cursorBoundary) : null,
 	};
 }
 

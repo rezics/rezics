@@ -49,8 +49,7 @@ export default {
 			},
 			rules: {
 				label: "Reglas",
-				description:
-					"Edita las reglas localizadas y las acciones que requieren su aceptación.",
+				description: "Edita las reglas localizadas y las acciones que requieren su aceptación.",
 			},
 			scoring: {
 				label: "Criterios de puntuación",
@@ -58,8 +57,7 @@ export default {
 			},
 			tagVoting: {
 				label: "Votación de etiquetas",
-				description:
-					"Controla la votación y revisa todas las relaciones de contexto de etiqueta.",
+				description: "Controla la votación y revisa todas las relaciones de contexto de etiqueta.",
 			},
 			pins: {
 				label: "Contenido fijado",
@@ -168,8 +166,7 @@ export default {
 		addLabel: "Añadir encabezado de categoría",
 		attachTag: "Añadir etiqueta",
 		attachWiki: "Añadir artículo wiki",
-		addDescription:
-			"El nodo nuevo se añade a la raíz o bajo el único nodo que esté seleccionado.",
+		addDescription: "El nodo nuevo se añade a la raíz o bajo el único nodo que esté seleccionado.",
 		addKinds: {
 			label: "Añadir encabezado de categoría",
 			tag: "Añadir etiqueta",
@@ -183,7 +180,8 @@ export default {
 		bulkStrategy: "Estrategia de consulta conjunta",
 		chooseStrategy: "Elegir una estrategia",
 		queryStrategy: "Estrategia de consulta",
-		empty: "La taxonomía está vacía. Añade un encabezado de categoría, una etiqueta o un artículo wiki.",
+		empty:
+			"La taxonomía está vacía. Añade un encabezado de categoría, una etiqueta o un artículo wiki.",
 		emptySearch: "Ningún nodo coincide con la búsqueda.",
 		select: "Seleccionar nodo",
 		deselect: "Anular selección del nodo",
@@ -282,8 +280,7 @@ export default {
 		applyPolicyTag: "Aplicar etiqueta",
 		policyTagAdded: `Etiqueta de política del ${realmTerms.label} añadida`,
 		loadingModeration: "Cargando las herramientas de moderación de este contenido.",
-		moderationLoadFailed:
-			"No se pudieron cargar las herramientas de moderación de este contenido.",
+		moderationLoadFailed: "No se pudieron cargar las herramientas de moderación de este contenido.",
 	},
 	follow: followTerms.actionLabel,
 	unfollow: followTerms.undoActionLabel,

@@ -66,7 +66,8 @@ export const enContent = {
 		explore: "Explore web novels",
 		understand: `Understand ${BRAND}`,
 		problem: {
-			title: "A serial should not become fragments because of its platform, language, or translated title.",
+			title:
+				"A serial should not become fragments because of its platform, language, or translated title.",
 			body: "Readers are looking for the same story, yet today they must identify it again and again across platform pages, translated-title entries, progress tools, and discussion groups. When the work updates, those fragments may not move forward together.",
 		},
 		promise: {
@@ -152,7 +153,8 @@ export const enContent = {
 				],
 			},
 			identity: {
-				title: "A serial should not become fragments because of its platform, language, or translated title.",
+				title:
+					"A serial should not become fragments because of its platform, language, or translated title.",
 				body: `Readers are looking for the same story, yet today they must identify it again and again across platform pages, translated-title entries, progress tools, and discussion groups. ${BRAND} reconnects them to one work identity first.`,
 				sourcesTitle: "Cross-platform sources",
 				sources: [
@@ -231,7 +233,8 @@ export const enContent = {
 	},
 	how: {
 		eyebrow: "How a work network takes shape",
-		title: "The same work can cross platforms and languages, and be understood anew in different communities.",
+		title:
+			"The same work can cross platforms and languages, and be understood anew in different communities.",
 		lead: `${BRAND} first points works, sources, and relationships to a shared identity, then returns language presentation, ${REALM} context, tag votes, and personal preferences to their own scopes. What should be shared need not be duplicated, and what should retain differences is not compressed into the site's one answer.`,
 		stages: [
 			{
@@ -370,7 +373,8 @@ export const enContent = {
 							"Content Structure arranges occurrence and order; History preserves published revisions",
 						],
 						example: {
-							title: "The body is one piece of content; the chapter position is another relationship",
+							title:
+								"The body is one piece of content; the chapter position is another relationship",
 							body: "The same chapter can be placed in the right position by Content Structure and reused where needed. Reordering a table of contents does not require duplicating the body, while publishing and restoring preserve history through explicit revisions.",
 						},
 						rule: "The editor creates and validates documents; content Units own the body; Content Structure arranges occurrence; publication history preserves traceable revisions.",
@@ -443,7 +447,8 @@ export const enContent = {
 			{
 				title: "Publish your own articles and work content",
 				body: `Edit ${enTerminology.post.forms.label}s with ${PORTABLE_TEXT}, store evolvable documents with ${BLOCK_SCHEMA}, and use Content Structure to arrange chapters and publication history.`,
-				result: "Content is not only readable; it can also be cited, reused, and revised continuously.",
+				result:
+					"Content is not only readable; it can also be cited, reused, and revised continuously.",
 			},
 			{
 				title: `Build new ${ENTRY} points through open interfaces`,
@@ -452,7 +457,8 @@ export const enContent = {
 			},
 		],
 		closing: {
-			title: "Want to distinguish what is available now, being built, and headed for the long term?",
+			title:
+				"Want to distinguish what is available now, being built, and headed for the long term?",
 			body: "The capability map marks the stage of every capability, then uses complete documentation to explain its relationship to the work network.",
 			action: "Browse the capability map",
 		},

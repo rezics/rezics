@@ -77,9 +77,7 @@ function UnitContentLicenseSummary({
 		<>
 			<p className="font-medium">{t.licenses.unitContent.options[referenceSlug].label}</p>
 			<FieldDescription>
-				{granted
-					? t.licenses.unitContent.grantedNotice
-					: t.licenses.unitContent.grantNotice}
+				{granted ? t.licenses.unitContent.grantedNotice : t.licenses.unitContent.grantNotice}
 			</FieldDescription>
 			{granted ? (
 				<FieldDescription>{t.licenses.unitContent.contributionNotice}</FieldDescription>
@@ -113,11 +111,7 @@ export function UnitContentLicenseField(props: UnitContentLicenseFieldProps) {
 			<Field>
 				<div className="flex items-center gap-1">
 					<FieldLabel>{t.units.fields.contentLicense}</FieldLabel>
-					<HoverCard
-						closeDelay={160}
-						openDelay={240}
-						positioning={{ placement: "bottom-start" }}
-					>
+					<HoverCard closeDelay={160} openDelay={240} positioning={{ placement: "bottom-start" }}>
 						<HoverCardTrigger asChild>
 							<Button
 								aria-label={t.licenses.unitContent.viewTerms}
@@ -208,9 +202,7 @@ export function UnitContentLicenseField(props: UnitContentLicenseFieldProps) {
 								? t.licenses.unitContent.noneConfirmationNotice
 								: t.licenses.unitContent.grantNotice}
 						</AlertDialogDescription>
-						{pendingGrant ? (
-							<UnitContentLicenseLink referenceSlug={referenceSlug} />
-						) : null}
+						{pendingGrant ? <UnitContentLicenseLink referenceSlug={referenceSlug} /> : null}
 					</AlertDialogBody>
 					<AlertDialogFooter>
 						<AlertDialogCancel onClick={() => setPendingChange(null)}>

@@ -44,10 +44,7 @@ vi.mock("@/features/search/search-feature", () => ({
 	}: {
 		appearance: string;
 		children: ReactNode;
-		onExecute: (request: {
-			injections: [];
-			state: { cursor: "s1_stale"; sort: "best" };
-		}) => void;
+		onExecute: (request: { injections: []; state: { cursor: "s1_stale"; sort: "best" } }) => void;
 		surface: string;
 	}) => (
 		<div data-appearance={appearance} data-surface={surface} data-testid="search-feature">

@@ -63,9 +63,7 @@ export function UnitTagManagement({
 					<div className="flex flex-wrap items-start justify-between gap-3">
 						<div className="grid gap-1">
 							<h2 className="font-semibold">{t.tags.structures.addTitle}</h2>
-							<p className="text-sm text-muted-foreground">
-								{t.tags.structures.addDescription}
-							</p>
+							<p className="text-sm text-muted-foreground">{t.tags.structures.addDescription}</p>
 						</div>
 						<Button asChild variant="outline">
 							<Link href="/tag-structures/new">{t.tags.structures.create}</Link>
@@ -97,9 +95,7 @@ export function UnitTagManagement({
 			) : null}
 			<div
 				className={
-					showStructureManagement
-						? "grid gap-3 border-t border-border-weak pt-6"
-						: "grid gap-3"
+					showStructureManagement ? "grid gap-3 border-t border-border-weak pt-6" : "grid gap-3"
 				}
 			>
 				<div className="flex flex-wrap items-start justify-between gap-3">

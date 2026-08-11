@@ -372,9 +372,7 @@ function MobileUserMenu(model: UserMenuModel) {
 							<X aria-hidden />
 						</Button>
 					</SheetClose>
-					<SheetDescription className="sr-only">
-						{t.nav.userMenu.description}
-					</SheetDescription>
+					<SheetDescription className="sr-only">{t.nav.userMenu.description}</SheetDescription>
 				</SheetHeader>
 
 				<SheetBody className="p-2">
@@ -410,11 +408,7 @@ function MobileUserMenu(model: UserMenuModel) {
 									</Link>
 								</Button>
 							) : (
-								<Button
-									className={MobileMenuItemClassName}
-									disabled
-									variant="quiet"
-								>
+								<Button className={MobileMenuItemClassName} disabled variant="quiet">
 									<FileText aria-hidden />
 									{t.nav.userMenu.myContent}
 								</Button>

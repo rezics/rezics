@@ -125,8 +125,7 @@ export function ConsoleUnitsPage() {
 
 	if (!canReadUnits) return <p className="text-destructive text-sm">{t.errors.forbidden}</p>;
 	if (units.isPending) return <QueryPending />;
-	if (units.isError)
-		return <QueryFailure error={units.error} retry={() => void units.refetch()} />;
+	if (units.isError) return <QueryFailure error={units.error} retry={() => void units.refetch()} />;
 
 	function openCommand(nextCommand: LifecycleCommand) {
 		setCommand(nextCommand);
@@ -144,8 +143,7 @@ export function ConsoleUnitsPage() {
 			...(note.trim() ? { note: note.trim() } : {}),
 		};
 		try {
-			if (command === "delete")
-				await remove.mutateAsync({ path: { unitId: selected.id }, body });
+			if (command === "delete") await remove.mutateAsync({ path: { unitId: selected.id }, body });
 			else await restore.mutateAsync({ path: { unitId: selected.id }, body });
 			await queryClient.invalidateQueries({
 				queryKey: getApiGovernancePlatformUnitsQueryKey({ query: baseQuery }),
@@ -159,12 +157,8 @@ export function ConsoleUnitsPage() {
 	return (
 		<section className="flex h-full min-h-0 flex-col">
 			<header className="border-border/70 border-b px-4 py-4 md:px-6">
-				<h1 className="font-semibold text-xl tracking-tight">
-					{t.console.sections.units.label}
-				</h1>
-				<p className="mt-1 text-muted-foreground text-sm">
-					{t.console.sections.units.description}
-				</p>
+				<h1 className="font-semibold text-xl tracking-tight">{t.console.sections.units.label}</h1>
+				<p className="mt-1 text-muted-foreground text-sm">{t.console.sections.units.description}</p>
 			</header>
 			<div className="grid min-h-0 flex-1 lg:grid-cols-[24rem_minmax(0,1fr)]">
 				<div className="flex min-h-0 flex-col border-border/70 lg:border-e">
@@ -209,10 +203,7 @@ export function ConsoleUnitsPage() {
 						role="listbox"
 					>
 						{items.length ? (
-							<div
-								className="relative"
-								style={{ height: virtualizer.getTotalSize() }}
-							>
+							<div className="relative" style={{ height: virtualizer.getTotalSize() }}>
 								{virtualRows.map((virtualRow) => {
 									const item = items[virtualRow.index];
 									if (!item) return null;
@@ -261,20 +252,12 @@ export function ConsoleUnitsPage() {
 									<h2 className="truncate font-semibold text-2xl">
 										{selected.title ?? t.console.units.untitled}
 									</h2>
-									<p className="mt-1 break-all text-muted-foreground text-sm">
-										{selected.id}
-									</p>
+									<p className="mt-1 break-all text-muted-foreground text-sm">{selected.id}</p>
 								</div>
 								<div className="flex flex-wrap gap-2">
-									<Badge variant="outline">
-										{t.console.units.statuses[selected.status]}
-									</Badge>
-									<Badge
-										variant={selected.deletedAt ? "destructive" : "secondary"}
-									>
-										{selected.deletedAt
-											? t.console.units.deleted
-											: t.console.units.active}
+									<Badge variant="outline">{t.console.units.statuses[selected.status]}</Badge>
+									<Badge variant={selected.deletedAt ? "destructive" : "secondary"}>
+										{selected.deletedAt ? t.console.units.deleted : t.console.units.active}
 									</Badge>
 									{selected.protected ? (
 										<Badge variant="outline">{t.console.units.protected}</Badge>
@@ -283,27 +266,19 @@ export function ConsoleUnitsPage() {
 							</div>
 							<dl className="grid gap-4 rounded-xl border p-5 sm:grid-cols-2">
 								<div>
-									<dt className="text-muted-foreground text-sm">
-										{t.console.units.kind}
-									</dt>
+									<dt className="text-muted-foreground text-sm">{t.console.units.kind}</dt>
 									<dd className="mt-1 font-medium">
 										<code>{selected.kind}</code>
 									</dd>
 								</div>
 								<div>
-									<dt className="text-muted-foreground text-sm">
-										{t.console.units.owner}
-									</dt>
+									<dt className="text-muted-foreground text-sm">{t.console.units.owner}</dt>
 									<dd className="mt-1 font-medium">
-										{selected.owner?.label ??
-											selected.owner?.profileId ??
-											t.console.units.noOwner}
+										{selected.owner?.label ?? selected.owner?.profileId ?? t.console.units.noOwner}
 									</dd>
 								</div>
 								<div>
-									<dt className="text-muted-foreground text-sm">
-										{t.console.units.updatedAt}
-									</dt>
+									<dt className="text-muted-foreground text-sm">{t.console.units.updatedAt}</dt>
 									<dd className="mt-1">
 										{new Intl.DateTimeFormat(locale.target, {
 											dateStyle: "medium",
@@ -313,9 +288,7 @@ export function ConsoleUnitsPage() {
 								</div>
 								{selected.deletedAt ? (
 									<div>
-										<dt className="text-muted-foreground text-sm">
-											{t.console.units.deletedAt}
-										</dt>
+										<dt className="text-muted-foreground text-sm">{t.console.units.deletedAt}</dt>
 										<dd className="mt-1">
 											{new Intl.DateTimeFormat(locale.target, {
 												dateStyle: "medium",
@@ -326,15 +299,10 @@ export function ConsoleUnitsPage() {
 								) : null}
 							</dl>
 							<div className="flex flex-wrap gap-3">
-								{canOverrideUnitOwnership ? (
-									<OwnershipOverrideControl item={selected} />
-								) : null}
+								{canOverrideUnitOwnership ? <OwnershipOverrideControl item={selected} /> : null}
 								{selected.deletedAt ? (
 									canRestoreUnits ? (
-										<Button
-											onClick={() => openCommand("restore")}
-											type="button"
-										>
+										<Button onClick={() => openCommand("restore")} type="button">
 											<ArchiveRestore />
 											{t.console.units.restore}
 										</Button>
@@ -360,9 +328,7 @@ export function ConsoleUnitsPage() {
 					) : (
 						<div className="grid min-h-80 place-items-center text-center">
 							<div>
-								<h2 className="font-semibold text-lg">
-									{t.console.units.selectUnit}
-								</h2>
+								<h2 className="font-semibold text-lg">{t.console.units.selectUnit}</h2>
 								<p className="mt-1 text-muted-foreground text-sm">
 									{t.console.units.selectUnitDescription}
 								</p>
@@ -456,10 +422,7 @@ function OwnershipOverrideControl({ item }: { readonly item: PlatformUnit }) {
 	const overrideOwnership = usePostApiGovernancePlatformUnitsByUnitIdOwnershipOverride();
 	const currentOwner = item.owner?.label ?? item.owner?.profileId ?? t.console.units.noOwner;
 	const candidateName =
-		candidate?.label ??
-		candidate?.slug ??
-		candidate?.profileId ??
-		t.console.units.unnamedProfile;
+		candidate?.label ?? candidate?.slug ?? candidate?.profileId ?? t.console.units.unnamedProfile;
 	const confirmationValid = confirmationUnitId === item.id && candidate !== null;
 
 	function openPicker() {
@@ -541,15 +504,9 @@ function OwnershipOverrideControl({ item }: { readonly item: PlatformUnit }) {
 							{candidates.isPending ? (
 								<QueryPending />
 							) : candidates.isError ? (
-								<QueryFailure
-									error={candidates.error}
-									retry={() => void candidates.refetch()}
-								/>
+								<QueryFailure error={candidates.error} retry={() => void candidates.refetch()} />
 							) : items.length ? (
-								<div
-									className="relative"
-									style={{ height: candidateVirtualizer.getTotalSize() }}
-								>
+								<div className="relative" style={{ height: candidateVirtualizer.getTotalSize() }}>
 									{candidateRows.map((virtualRow) => {
 										const entry = items[virtualRow.index];
 										if (!entry) return null;
@@ -560,11 +517,9 @@ function OwnershipOverrideControl({ item }: { readonly item: PlatformUnit }) {
 											t.console.units.unnamedProfile;
 										return (
 											<button
-												aria-label={t.console.units.ownershipCandidateSelect(
-													{
-														profile: label,
-													},
-												)}
+												aria-label={t.console.units.ownershipCandidateSelect({
+													profile: label,
+												})}
 												className="absolute inset-x-0 grid gap-1 border-b px-4 py-3 text-start hover:bg-muted/48 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
 												key={entry.profileId}
 												onClick={() => selectCandidate(entry)}
@@ -575,9 +530,7 @@ function OwnershipOverrideControl({ item }: { readonly item: PlatformUnit }) {
 												}}
 												type="button"
 											>
-												<span className="truncate font-medium">
-													{label}
-												</span>
+												<span className="truncate font-medium">{label}</span>
 												<span className="truncate text-muted-foreground text-xs">
 													{entry.slug ? `@${entry.slug} · ` : ""}
 													{entry.profileId}
@@ -602,8 +555,7 @@ function OwnershipOverrideControl({ item }: { readonly item: PlatformUnit }) {
 			</Dialog>
 			<Dialog
 				onOpenChange={({ open }) => {
-					if (!open && !overrideOwnership.isPending && step === "confirmation")
-						setStep(null);
+					if (!open && !overrideOwnership.isPending && step === "confirmation") setStep(null);
 				}}
 				open={step === "confirmation"}
 			>
@@ -618,15 +570,11 @@ function OwnershipOverrideControl({ item }: { readonly item: PlatformUnit }) {
 					<DialogBody className="grid gap-5">
 						<dl className="grid gap-4 rounded-lg border p-4 sm:grid-cols-2">
 							<div>
-								<dt className="text-muted-foreground text-sm">
-									{t.console.units.owner}
-								</dt>
+								<dt className="text-muted-foreground text-sm">{t.console.units.owner}</dt>
 								<dd className="mt-1 break-all font-medium">{currentOwner}</dd>
 							</div>
 							<div>
-								<dt className="text-muted-foreground text-sm">
-									{t.console.units.newOwner}
-								</dt>
+								<dt className="text-muted-foreground text-sm">{t.console.units.newOwner}</dt>
 								<dd className="mt-1 break-all font-medium">{candidateName}</dd>
 							</div>
 						</dl>
@@ -664,9 +612,7 @@ function OwnershipOverrideControl({ item }: { readonly item: PlatformUnit }) {
 							</p>
 							<Input
 								autoComplete="off"
-								onChange={(event) =>
-									setConfirmationUnitId(event.currentTarget.value.trim())
-								}
+								onChange={(event) => setConfirmationUnitId(event.currentTarget.value.trim())}
 								spellCheck={false}
 								value={confirmationUnitId}
 							/>
@@ -742,9 +688,7 @@ function LifecycleCommandDialog({
 							: t.console.units.softDeleteDescription
 					}
 					title={
-						command === "restore"
-							? t.console.units.restoreTitle
-							: t.console.units.softDeleteTitle
+						command === "restore" ? t.console.units.restoreTitle : t.console.units.softDeleteTitle
 					}
 				/>
 				<DialogBody className="grid gap-5">
@@ -782,9 +726,7 @@ function LifecycleCommandDialog({
 						</p>
 						<Input
 							autoComplete="off"
-							onChange={(event) =>
-								onConfirmationUnitIdChange(event.currentTarget.value.trim())
-							}
+							onChange={(event) => onConfirmationUnitIdChange(event.currentTarget.value.trim())}
 							spellCheck={false}
 							value={confirmationUnitId}
 						/>

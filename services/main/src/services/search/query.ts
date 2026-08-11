@@ -27,10 +27,7 @@ export const SearchExpression = Type.Recursive(
 				},
 				{ additionalProperties: false },
 			),
-			Type.Object(
-				{ operator: Type.Literal("not"), clause: This },
-				{ additionalProperties: false },
-			),
+			Type.Object({ operator: Type.Literal("not"), clause: This }, { additionalProperties: false }),
 		]),
 	{ $id: "SearchExpression" },
 );
@@ -49,9 +46,7 @@ export function readSearchExpressionLanguageBoundary(
 	const constrained = boundaries.filter(
 		(boundary): boundary is readonly string[] => boundary !== undefined,
 	);
-	return constrained.length
-		? [...new Set(constrained.flatMap((boundary) => boundary))]
-		: undefined;
+	return constrained.length ? [...new Set(constrained.flatMap((boundary) => boundary))] : undefined;
 }
 
 export interface SearchExpressionValidationLimits {
@@ -155,9 +150,7 @@ export function specializeSearchExpressionForCategory(
 	for (const clause of expression.clauses) {
 		const specialized = specializeSearchExpressionForCategory(category, clause);
 		if (specialized.state === annihilator)
-			return expression.operator === "all"
-				? MatchNoCategoryDocuments
-				: MatchAllCategoryDocuments;
+			return expression.operator === "all" ? MatchNoCategoryDocuments : MatchAllCategoryDocuments;
 		if (specialized.state === "expression") clauses.push(specialized.expression);
 	}
 	const combined = combineSearchExpressions(expression.operator, clauses);
@@ -427,11 +420,7 @@ function assertFilterShape(filter: SearchControlPredicate, path: string): void {
 			["score", filter.score],
 			["voteCount", filter.voteCount],
 		] as const)
-			if (
-				range?.lower !== undefined &&
-				range.upper !== undefined &&
-				range.lower > range.upper
-			)
+			if (range?.lower !== undefined && range.upper !== undefined && range.lower > range.upper)
 				throw new TypeError(`${path} ${name} lower bound exceeds upper bound`);
 		return;
 	}

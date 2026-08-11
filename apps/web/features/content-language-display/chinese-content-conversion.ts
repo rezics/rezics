@@ -106,16 +106,12 @@ export async function convertChinesePortableText(
 			if (!isPortableTextImageBlock(block)) return block;
 
 			const [alt, caption] = await Promise.all([
-				block.alt
-					? convertChineseContentText(block.alt, display)
-					: Promise.resolve(block.alt),
+				block.alt ? convertChineseContentText(block.alt, display) : Promise.resolve(block.alt),
 				block.caption
 					? convertChineseContentText(block.caption, display)
 					: Promise.resolve(block.caption),
 			]);
-			return alt === block.alt && caption === block.caption
-				? block
-				: { ...block, alt, caption };
+			return alt === block.alt && caption === block.caption ? block : { ...block, alt, caption };
 		}),
 	);
 }

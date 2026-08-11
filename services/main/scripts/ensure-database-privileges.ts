@@ -49,14 +49,10 @@ try {
 			await transaction.execute(sql.raw(`grant usage on schema public to ${role}`));
 			await transaction.execute(sql.raw(`grant usage on schema approx_count to ${role}`));
 			await transaction.execute(
-				sql.raw(
-					`grant select, insert, update, delete on all tables in schema public to ${role}`,
-				),
+				sql.raw(`grant select, insert, update, delete on all tables in schema public to ${role}`),
 			);
 			await transaction.execute(
-				sql.raw(
-					`revoke all privileges on table public.atlas_schema_revisions from ${role}`,
-				),
+				sql.raw(`revoke all privileges on table public.atlas_schema_revisions from ${role}`),
 			);
 			await transaction.execute(
 				sql.raw(`grant usage, select on all sequences in schema public to ${role}`),
@@ -72,21 +68,15 @@ try {
 				),
 			);
 			await transaction.execute(
-				sql.raw(
-					`revoke execute on all functions in schema approx_count from public, ${role}`,
-				),
+				sql.raw(`revoke execute on all functions in schema approx_count from public, ${role}`),
 			);
-			await transaction.execute(
-				sql.raw(`grant select on table approx_count.metrics to ${role}`),
-			);
+			await transaction.execute(sql.raw(`grant select on table approx_count.metrics to ${role}`));
 			await transaction.execute(
 				sql.raw(
 					`grant execute on function approx_count.approx_count_info(regclass, interval, boolean) to ${role}`,
 				),
 			);
-			await transaction.execute(
-				sql.raw(`alter role ${role} set approx_count.sample_rate = '0'`),
-			);
+			await transaction.execute(sql.raw(`alter role ${role} set approx_count.sample_rate = '0'`));
 			await transaction.execute(
 				sql.raw(`
 					do $privileges$
@@ -178,24 +168,18 @@ try {
 		)
 			throw new Error("Database backup and admin URLs must address the same database");
 		if (backupRole === adminRole || backupRole === applicationRole)
-			throw new Error(
-				"Database backup role must be distinct from admin and application roles",
-			);
+			throw new Error("Database backup role must be distinct from admin and application roles");
 		const role = quoteIdentifier(backupRole);
 		await migrationDatabase.transaction(async (transaction) => {
 			await transaction.execute(
-				sql.raw(
-					`grant connect on database ${quoteIdentifier(backupDatabaseName)} to ${role}`,
-				),
+				sql.raw(`grant connect on database ${quoteIdentifier(backupDatabaseName)} to ${role}`),
 			);
 			await transaction.execute(sql.raw(`grant usage on schema public to ${role}`));
 			await transaction.execute(sql.raw(`grant usage on schema approx_count to ${role}`));
 			await transaction.execute(
 				sql.raw(`revoke all privileges on all tables in schema public from ${role}`),
 			);
-			await transaction.execute(
-				sql.raw(`grant select on all tables in schema public to ${role}`),
-			);
+			await transaction.execute(sql.raw(`grant select on all tables in schema public to ${role}`));
 			await transaction.execute(
 				sql.raw(`grant select on all sequences in schema public to ${role}`),
 			);
@@ -203,14 +187,10 @@ try {
 				sql.raw(`grant select on all tables in schema approx_count to ${role}`),
 			);
 			await transaction.execute(
-				sql.raw(
-					`alter default privileges in schema public grant select on tables to ${role}`,
-				),
+				sql.raw(`alter default privileges in schema public grant select on tables to ${role}`),
 			);
 			await transaction.execute(
-				sql.raw(
-					`alter default privileges in schema public grant select on sequences to ${role}`,
-				),
+				sql.raw(`alter default privileges in schema public grant select on sequences to ${role}`),
 			);
 			const privilegeProof = await transaction.execute<
 				Record<string, unknown> & {

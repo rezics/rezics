@@ -203,13 +203,7 @@ export function buildMarkdownLivePreviewDecorations(
 				const node = reference.node;
 				const inlineClass = inlineClassByNodeName[node.name];
 				if (inlineClass)
-					addVisibleMark(
-						`inline:${node.name}`,
-						inlineClass,
-						node.from,
-						node.to,
-						visibleRange,
-					);
+					addVisibleMark(`inline:${node.name}`, inlineClass, node.from, node.to, visibleRange);
 
 				const heading = /^(?:ATX|Setext)Heading([1-6])$/u.exec(node.name)?.[1];
 				if (heading) {
@@ -233,30 +227,16 @@ export function buildMarkdownLivePreviewDecorations(
 						visibleRange,
 					);
 				if (node.name === "FencedCode" || node.name === "CodeBlock")
-					addVisibleLines(
-						"code-block",
-						"cm-rezics-md-code-line",
-						node.from,
-						node.to,
-						visibleRange,
-					);
+					addVisibleLines("code-block", "cm-rezics-md-code-line", node.from, node.to, visibleRange);
 
 				if (node.name === "HorizontalRule") {
 					if (selectionTouchesNode(state, node)) {
-						addDecoration(
-							"active-horizontal-rule",
-							activeSyntaxDecoration,
-							node.from,
-							node.to,
-						);
+						addDecoration("active-horizontal-rule", activeSyntaxDecoration, node.from, node.to);
 					} else {
 						addDecoration(
 							"horizontal-rule",
 							Decoration.replace({
-								widget: new MarkdownMarkerWidget(
-									"\u200b",
-									"cm-rezics-md-horizontal-rule",
-								),
+								widget: new MarkdownMarkerWidget("\u200b", "cm-rezics-md-horizontal-rule"),
 								rezicsMarkdownKind: "horizontal-rule",
 							}),
 							node.from,
@@ -270,12 +250,7 @@ export function buildMarkdownLivePreviewDecorations(
 					if (selectionTouchesNode(state, node)) {
 						addDecoration("active-escape", activeSyntaxDecoration, node.from, node.to);
 					} else if (node.to > node.from + 1) {
-						addDecoration(
-							"hidden-escape",
-							hiddenSyntaxDecoration,
-							node.from,
-							node.from + 1,
-						);
+						addDecoration("hidden-escape", hiddenSyntaxDecoration, node.from, node.from + 1);
 					}
 					return;
 				}
@@ -286,23 +261,13 @@ export function buildMarkdownLivePreviewDecorations(
 
 				const container = revealContainer(node);
 				if (!container || selectionTouchesNode(state, container)) {
-					addDecoration(
-						`active-syntax:${node.name}`,
-						activeSyntaxDecoration,
-						node.from,
-						node.to,
-					);
+					addDecoration(`active-syntax:${node.name}`, activeSyntaxDecoration, node.from, node.to);
 					return;
 				}
 
 				if (node.name === "ListMark") {
 					if (container.name === "ListItem" && container.getChild("Task")) {
-						addDecoration(
-							"hidden-task-list-marker",
-							hiddenSyntaxDecoration,
-							node.from,
-							node.to,
-						);
+						addDecoration("hidden-task-list-marker", hiddenSyntaxDecoration, node.from, node.to);
 						return;
 					}
 					const sourceMarker = state.doc.sliceString(node.from, node.to);
@@ -310,10 +275,7 @@ export function buildMarkdownLivePreviewDecorations(
 					addDecoration(
 						"list-marker",
 						Decoration.replace({
-							widget: new MarkdownMarkerWidget(
-								renderedMarker,
-								"cm-rezics-md-list-marker",
-							),
+							widget: new MarkdownMarkerWidget(renderedMarker, "cm-rezics-md-list-marker"),
 							rezicsMarkdownKind: "list-marker",
 						}),
 						node.from,
@@ -327,10 +289,7 @@ export function buildMarkdownLivePreviewDecorations(
 					addDecoration(
 						"task-marker",
 						Decoration.replace({
-							widget: new MarkdownMarkerWidget(
-								checked ? "☑" : "☐",
-								"cm-rezics-md-task-marker",
-							),
+							widget: new MarkdownMarkerWidget(checked ? "☑" : "☐", "cm-rezics-md-task-marker"),
 							rezicsMarkdownKind: "task-marker",
 						}),
 						node.from,
@@ -363,12 +322,7 @@ export function buildMarkdownLivePreviewDecorations(
 					node.from === container.from
 				)
 					hiddenTo += 1;
-				addDecoration(
-					`hidden-syntax:${node.name}`,
-					hiddenSyntaxDecoration,
-					node.from,
-					hiddenTo,
-				);
+				addDecoration(`hidden-syntax:${node.name}`, hiddenSyntaxDecoration, node.from, hiddenTo);
 			},
 		});
 	}

@@ -72,9 +72,7 @@ export function RealmModeration({
 						<NativeSelect
 							value={filter}
 							onChange={(event) => {
-								const nextFilter = toRealmModerationFilter(
-									event.currentTarget.value,
-								);
+								const nextFilter = toRealmModerationFilter(event.currentTarget.value);
 								setSelectedUnitId(undefined);
 								void setFilter(nextFilter);
 							}}
@@ -98,9 +96,7 @@ export function RealmModeration({
 							value={publicationFilter}
 							onChange={(event) => {
 								setSelectedUnitId(undefined);
-								void setPublicationFilter(
-									toRealmPublicationFilter(event.currentTarget.value),
-								);
+								void setPublicationFilter(toRealmPublicationFilter(event.currentTarget.value));
 							}}
 						>
 							<NativeSelectOption value="active">
@@ -109,9 +105,7 @@ export function RealmModeration({
 							<NativeSelectOption value="withdrawn">
 								{t.units.realmPublications.publicationStates.withdrawn}
 							</NativeSelectOption>
-							<NativeSelectOption value="all">
-								{t.units.realmPublications.all}
-							</NativeSelectOption>
+							<NativeSelectOption value="all">{t.units.realmPublications.all}</NativeSelectOption>
 						</NativeSelect>
 					</Field>
 					<Field className="w-full sm:w-52">
@@ -120,9 +114,7 @@ export function RealmModeration({
 							value={reportFilter}
 							onChange={(event) => {
 								setSelectedUnitId(undefined);
-								void setReportFilter(
-									toRealmReportFilter(event.currentTarget.value),
-								);
+								void setReportFilter(toRealmReportFilter(event.currentTarget.value));
 							}}
 						>
 							<NativeSelectOption value={AllRealmReportStates}>

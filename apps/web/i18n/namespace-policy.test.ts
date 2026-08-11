@@ -20,10 +20,7 @@ const SeededClientEntries = new Set(["native-i18n/next/seeded", "native-i18n/rea
 
 function isAstNode(value: unknown): value is AstNode {
 	return (
-		value !== null &&
-		typeof value === "object" &&
-		"type" in value &&
-		typeof value.type === "string"
+		value !== null && typeof value === "object" && "type" in value && typeof value.type === "string"
 	);
 }
 
@@ -120,16 +117,10 @@ function checkResourceRegistry(path: string, source: string): string[] {
 		if (node.type === "ImportDeclaration") {
 			const sourceValue = stringLiteralValue(node.source);
 			if (sourceValue === "server-only" || sourceValue?.startsWith("node:"))
-				errors.push(
-					`${location(path, node)} keep the translation resource registry client-safe`,
-				);
+				errors.push(`${location(path, node)} keep the translation resource registry client-safe`);
 		}
 
-		if (
-			node.type === "CallExpression" &&
-			isAstNode(node.callee) &&
-			node.callee.type === "Import"
-		) {
+		if (node.type === "CallExpression" && isAstNode(node.callee) && node.callee.type === "Import") {
 			const sourceValue = stringLiteralValue(nodeArray(node.arguments)[0]);
 			if (!sourceValue?.startsWith("./languages/"))
 				errors.push(
@@ -142,9 +133,7 @@ function checkResourceRegistry(path: string, source: string): string[] {
 			identifierName(node.object) === "process" &&
 			identifierName(node.property) === "env"
 		)
-			errors.push(
-				`${location(path, node)} do not read environment values in the client registry`,
-			);
+			errors.push(`${location(path, node)} do not read environment values in the client registry`);
 	});
 
 	return errors;

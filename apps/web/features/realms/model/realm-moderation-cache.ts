@@ -41,9 +41,7 @@ export function updateRealmModerationPages(
 			...page,
 			items: removeFromFilteredQueue
 				? page.items.filter((unit) => unit.unitId !== unitId)
-				: page.items.map((unit) =>
-						unit.unitId === unitId ? { ...unit, ...target } : unit,
-					),
+				: page.items.map((unit) => (unit.unitId === unitId ? { ...unit, ...target } : unit)),
 		})),
 	};
 }

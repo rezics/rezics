@@ -36,9 +36,9 @@ export default {
 		},
 		levelDescriptions: {
 			visible: "Cualquiera que pueda leer esta Unit puede ver la revisión.",
-			hidden: "Solo quienes tengan acceso de moderación de la plataforma pueden ver los datos seleccionados.",
-			suppressed:
-				"Solo quienes tengan acceso de supresión pueden ver los datos seleccionados.",
+			hidden:
+				"Solo quienes tengan acceso de moderación de la plataforma pueden ver los datos seleccionados.",
+			suppressed: "Solo quienes tengan acceso de supresión pueden ver los datos seleccionados.",
 		},
 		fieldsLabel: "Datos protegidos",
 		fields: {

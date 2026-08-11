@@ -291,11 +291,7 @@ function NavigationSubmenu({
 				onPointerLeave={hoverBoundary.onPointerLeave}
 			>
 				{item.children.map((child) => (
-					<NavigationMenuNode
-						hoverBoundary={hoverBoundary}
-						item={child}
-						key={child._key}
-					/>
+					<NavigationMenuNode hoverBoundary={hoverBoundary} item={child} key={child._key} />
 				))}
 			</MenuSubContent>
 		</MenuSub>
@@ -357,11 +353,7 @@ function NavigationDropdown({
 				onPointerLeave={hoverBoundary.onPointerLeave}
 			>
 				{item.children.map((child) => (
-					<NavigationMenuNode
-						hoverBoundary={hoverBoundary}
-						item={child}
-						key={child._key}
-					/>
+					<NavigationMenuNode hoverBoundary={hoverBoundary} item={child} key={child._key} />
 				))}
 			</MenuContent>
 		</Menu>
@@ -535,9 +527,7 @@ function SearchResults({
 						<div className="rounded-lg border border-border-weak px-3 py-2 transition-colors hover:bg-accent">
 							<p className="font-medium text-sm">{title}</p>
 							{result.summary ? (
-								<p className="mt-1 line-clamp-2 text-muted-foreground text-xs">
-									{result.summary}
-								</p>
+								<p className="mt-1 line-clamp-2 text-muted-foreground text-xs">{result.summary}</p>
 							) : null}
 						</div>
 					);
@@ -637,9 +627,7 @@ function ZoneSearchFeature({
 			pending={pending}
 			resolveLabel={(unitId) => context.units.get(unitId)?.title ?? undefined}
 			resolveOptionLabel={(_control, value) =>
-				typeof value === "string"
-					? (context.units.get(value)?.title ?? undefined)
-					: undefined
+				typeof value === "string" ? (context.units.get(value)?.title ?? undefined) : undefined
 			}
 			surface={surface}
 			toolbarFilters={renderToolbarFilters?.(definition.document.template.id)}
@@ -775,9 +763,7 @@ function ZoneFeedBlock({
 			(result) => {
 				if (sequence !== executionSequence.current) return;
 				setPage((current) =>
-					append
-						? appendZoneFeedPage(current, toZoneFeedPage(result))
-						: toZoneFeedPage(result),
+					append ? appendZoneFeedPage(current, toZoneFeedPage(result)) : toZoneFeedPage(result),
 				);
 			},
 			() => undefined,
@@ -792,9 +778,7 @@ function ZoneFeedBlock({
 		if (!request) return;
 		run(requestWithoutCursor(request), nextContentKinds, false);
 	};
-	const canLoadMore = Boolean(
-		page?.nextCursor && (!maxResults || page.items.length < maxResults),
-	);
+	const canLoadMore = Boolean(page?.nextCursor && (!maxResults || page.items.length < maxResults));
 	const continuationState: FeedContinuationState = !canLoadMore
 		? { status: "exhausted" }
 		: pending
@@ -868,13 +852,7 @@ function useZoneFeedBlockExecution(blockKey: string, surface: ZoneBlockSurface) 
 	const context = useZoneBlocks();
 	const localizationLanguages = useLocalizationLanguages();
 	return useMutation({
-		mutationFn: async ({
-			request,
-			signal,
-		}: {
-			request: ZoneFeedRequest;
-			signal: AbortSignal;
-		}) => {
+		mutationFn: async ({ request, signal }: { request: ZoneFeedRequest; signal: AbortSignal }) => {
 			const { data } = await postApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecute({
 				body: { ...request, localizationLanguages, surface },
 				path: { blockKey, zoneId: context.projection.zone.id },
@@ -938,8 +916,7 @@ function unitListClasses(layout: UnitListLayout): string {
 	return cn(
 		"my-6 grid gap-4",
 		layout === "grid" && "sm:grid-cols-2 lg:grid-cols-3",
-		layout === "carousel" &&
-			"grid-flow-col auto-cols-[minmax(16rem,22rem)] overflow-x-auto pb-3",
+		layout === "carousel" && "grid-flow-col auto-cols-[minmax(16rem,22rem)] overflow-x-auto pb-3",
 	);
 }
 
@@ -1096,10 +1073,7 @@ function ZoneMediaBlock({ block }: { readonly block: Extract<Block, { _type: "me
 		<figure className="my-6 overflow-hidden rounded-xl border border-border-weak">
 			<img
 				alt={alt}
-				className={cn(
-					"h-auto w-full",
-					block.fit === "cover" && "max-h-[36rem] object-cover",
-				)}
+				className={cn("h-auto w-full", block.fit === "cover" && "max-h-[36rem] object-cover")}
 				src={asset.url}
 			/>
 			{captionUnit ? (
@@ -1119,9 +1093,7 @@ function ZoneBlock({ block }: { block: Block }) {
 	const context = useZoneBlocks();
 	const surface = useContext(ZoneBlockSurfaceContext);
 	if (block._type === "portable-text")
-		return (
-			<WikiPortableText language={context.projection.zone.language} value={block.content} />
-		);
+		return <WikiPortableText language={context.projection.zone.language} value={block.content} />;
 	if (block._type === "post-full-view") {
 		const wikiPost = context.projection.references.wikiPosts.find(
 			(candidate) => candidate.id === block.postId,
@@ -1131,10 +1103,7 @@ function ZoneBlock({ block }: { block: Block }) {
 			<article>
 				<header className="mb-8 border-b border-border-weak pb-6">
 					<h1 className="font-serif font-bold text-3xl tracking-tight sm:text-4xl">
-						<LocalizedText
-							language={wikiPost.language}
-							value={wikiPost.title ?? t.ui.unnamed}
-						/>
+						<LocalizedText language={wikiPost.language} value={wikiPost.title ?? t.ui.unnamed} />
 					</h1>
 					{wikiPost.summary ? (
 						<p className="mt-3 max-w-3xl text-muted-foreground leading-7">
@@ -1165,9 +1134,7 @@ function ZoneBlock({ block }: { block: Block }) {
 	}
 	if (block._type === "unit-ref") {
 		const referenced = context.units.get(block.unitId);
-		return referenced ? (
-			<ReferencedUnit appearance={block.appearance} unit={referenced} />
-		) : null;
+		return referenced ? <ReferencedUnit appearance={block.appearance} unit={referenced} /> : null;
 	}
 	if (block._type === "unit-list") {
 		if (block.source.kind === "collection")
@@ -1225,9 +1192,7 @@ function ZoneBlock({ block }: { block: Block }) {
 		return block.style === "space" ? (
 			<div aria-hidden className="h-8" />
 		) : (
-			<Separator
-				className={cn("my-8 bg-border-weak", block.style === "section" && "h-0.5")}
-			/>
+			<Separator className={cn("my-8 bg-border-weak", block.style === "section" && "h-0.5")} />
 		);
 	if (block._type === "group")
 		return (
@@ -1299,9 +1264,7 @@ export function ZoneBlockProvider({
 			projection,
 			units: new Map(projection.references.units.map((unit) => [unit.id, unit])),
 			assets: new Map(projection.references.assets.map((asset) => [asset.id, asset])),
-			navigations: new Map(
-				projection.navigations.map((navigation) => [navigation.id, navigation]),
-			),
+			navigations: new Map(projection.navigations.map((navigation) => [navigation.id, navigation])),
 		}),
 		[baseHref, projection],
 	);

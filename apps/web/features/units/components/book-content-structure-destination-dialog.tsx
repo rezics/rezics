@@ -106,9 +106,7 @@ function buildDestinationTree(
 
 function collectExpandableIds(nodes: readonly ContentStructureDestinationTreeNode[]): string[] {
 	return nodes.flatMap(({ node, children }) =>
-		children.length
-			? [node.id, ...collectExpandableIds(children)]
-			: collectExpandableIds(children),
+		children.length ? [node.id, ...collectExpandableIds(children)] : collectExpandableIds(children),
 	);
 }
 

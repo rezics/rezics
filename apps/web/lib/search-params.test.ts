@@ -6,10 +6,7 @@ import { authSearchParamsParsers, searchParamsParsers, SearchScopes } from "./se
 describe("URL state parsers", () => {
 	it("parses search state through its declared vocabulary", () => {
 		expect(searchParamsParsers.q.parseServerSide(undefined)).toBe("");
-		expect(searchParamsParsers.scope.parseServerSide("posts,units")).toEqual([
-			"posts",
-			"units",
-		]);
+		expect(searchParamsParsers.scope.parseServerSide("posts,units")).toEqual(["posts", "units"]);
 		expect(searchParamsParsers.scope.parseServerSide(undefined)).toEqual(SearchScopes);
 		expect(searchParamsParsers.language.parseServerSide("zh")).toBe("zh");
 		expect(searchParamsParsers.language.parseServerSide("zh-Hant")).toBeNull();

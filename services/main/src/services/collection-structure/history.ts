@@ -111,9 +111,7 @@ async function commitCollectionStructureRevision(
 			? undefined
 			: assertSnapshotIdentity(input.collectionId, input.checkpoint);
 	const delta =
-		input.delta === undefined
-			? undefined
-			: assertDeltaIdentity(input.collectionId, input.delta);
+		input.delta === undefined ? undefined : assertDeltaIdentity(input.collectionId, input.delta);
 	const deltaByteSize = delta ? revisionPayloadByteSize(delta) : 0;
 	const checkpoint =
 		checkpointState !== undefined ||
@@ -242,8 +240,7 @@ export async function mutateCollectionStructureWithPlannedHistory<Result extends
 	return runRevisionedAggregateMutation({
 		expectedRevisionId: input.baseRevisionId,
 		lock: () => lockCollectionStructureHistory(tx, input.collectionId),
-		loadHeadRevisionId: async () =>
-			(await loadHead(tx, input.collectionId))?.revisionId ?? null,
+		loadHeadRevisionId: async () => (await loadHead(tx, input.collectionId))?.revisionId ?? null,
 		revisionConflict: (latestRevisionId) =>
 			new CollectionStructureRevisionConflict(latestRevisionId),
 		mutate,

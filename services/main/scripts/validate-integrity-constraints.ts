@@ -237,9 +237,7 @@ async function main(): Promise<void> {
 
 		const database = await client.query<{ name: string }>("select current_database() as name");
 		if (database.rows[0]?.name !== "rezics_atlas")
-			throw new Error(
-				"Bulk validation is restricted to the disposable rezics_atlas database",
-			);
+			throw new Error("Bulk validation is restricted to the disposable rezics_atlas database");
 		for (const constraint of IntegrityConstraints) await validate(client, constraint);
 		await proveReferenceMoveLimits(client);
 		await proveReferenceMoveTriggers(client);

@@ -37,9 +37,7 @@ function NotificationDetailsContent({ notificationId }: { notificationId: string
 	});
 	if (notification.isPending) return <QueryPending />;
 	if (notification.isError)
-		return (
-			<QueryFailure error={notification.error} retry={() => void notification.refetch()} />
-		);
+		return <QueryFailure error={notification.error} retry={() => void notification.refetch()} />;
 
 	const item = notification.data;
 	const subjectHref = item.subject ? publicUnitHref(item.subject.kind, item.subject) : undefined;

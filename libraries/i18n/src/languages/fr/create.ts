@@ -77,19 +77,17 @@ export default {
 	},
 	communityUnitSearch: {
 		policyTitle: "Rechercher avant de créer",
-		policy: "Afin de préserver une communauté saine, effectuez une recherche avant de créer une entrée publique et vérifiez que le contenu souhaité n’existe pas déjà. Tout usage abusif de cette fonction peut entraîner des sanctions.",
+		policy:
+			"Afin de préserver une communauté saine, effectuez une recherche avant de créer une entrée publique et vérifiez que le contenu souhaité n’existe pas déjà. Tout usage abusif de cette fonction peut entraîner des sanctions.",
 		confirmationLabel: insert(
 			"J’ai effectué une recherche parmi les {{subject}} et confirmé que cette entrée n’existe pas déjà.",
 			{ subject: String },
 		),
 		prompt: insert("Rechercher les {{subject}} existants", { subject: String }),
 		pageTitle: insert("Rechercher les {{subject}} existants", { subject: String }),
-		pageDescription: insert(
-			"Vérifiez si les {{subject}} que vous souhaitez créer existent déjà.",
-			{
-				subject: String,
-			},
-		),
+		pageDescription: insert("Vérifiez si les {{subject}} que vous souhaitez créer existent déjà.", {
+			subject: String,
+		}),
 		backToSection: insert("Retour aux {{subject}}", { subject: String }),
 		searchLabel: insert("Rechercher des {{subject}}", { subject: String }),
 		searchPlaceholder: insert("Saisissez le nom des {{subject}}", { subject: String }),

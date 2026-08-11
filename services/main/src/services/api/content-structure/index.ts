@@ -289,9 +289,7 @@ async function readBookContentStructure(
 			.map((row) => {
 				const contentKind = resolveBookContentKind(row.unitKind, row.postKind);
 				if (!contentKind)
-					throw new Error(
-						`Invalid Book content node ${row.id} unit ${row.contentUnitId}`,
-					);
+					throw new Error(`Invalid Book content node ${row.id} unit ${row.contentUnitId}`);
 				const hasReadableContent =
 					contentKind === "chapter" &&
 					row.content !== null &&
@@ -402,9 +400,7 @@ async function readMediaContentStructure(
 								? ("label" as const)
 								: null;
 				if (!contentKind)
-					throw new Error(
-						`Invalid Media content node ${row.id} unit ${row.contentUnitId}`,
-					);
+					throw new Error(`Invalid Media content node ${row.id} unit ${row.contentUnitId}`);
 				return {
 					id: row.id,
 					parentId: row.parentId,
@@ -502,9 +498,7 @@ export default new Elysia()
 				);
 				return {
 					...presentContentStructure(snapshot.structure, latestRevisionId),
-					nodes: await Promise.all(
-						snapshot.nodes.map(presentGenericContentStructureNode),
-					),
+					nodes: await Promise.all(snapshot.nodes.map(presentGenericContentStructureNode)),
 				};
 			});
 		},
@@ -513,10 +507,7 @@ export default new Elysia()
 			response: {
 				[StatusCodes.OK]: ContentStructureDetailResponse,
 				[StatusCodes.FORBIDDEN]: ContentStructureForbiddenResponse,
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse([
-					"UnitNotFound",
-					"ContentStructureNotFound",
-				]),
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "ContentStructureNotFound"]),
 			},
 			detail: { summary: "Get Content Structure", tags: ["Content Structure"] },
 		},
@@ -530,11 +521,7 @@ export default new Elysia()
 				await ensureReleasedContentStructureApi(tx, params.unitId, authorization);
 				await ensureContentStructureOwner(tx, params.unitId, params.structureId);
 				return {
-					items: await listContentStructureRevisions(
-						tx,
-						params.structureId,
-						query.limit ?? 50,
-					),
+					items: await listContentStructureRevisions(tx, params.structureId, query.limit ?? 50),
 				};
 			});
 		},
@@ -544,10 +531,7 @@ export default new Elysia()
 			response: {
 				[StatusCodes.OK]: ContentStructureRevisionListResponse,
 				[StatusCodes.FORBIDDEN]: ContentStructureForbiddenResponse,
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse([
-					"UnitNotFound",
-					"ContentStructureNotFound",
-				]),
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "ContentStructureNotFound"]),
 			},
 			detail: { summary: "List Content Structure revisions", tags: ["Content Structure"] },
 		},
@@ -585,10 +569,7 @@ export default new Elysia()
 				[StatusCodes.OK]: ContentStructureDeleteResponse,
 				[StatusCodes.CONFLICT]: toApiErrorResponse(["ContentStructureRevisionConflict"]),
 				[StatusCodes.FORBIDDEN]: ContentStructureForbiddenResponse,
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse([
-					"UnitNotFound",
-					"ContentStructureNotFound",
-				]),
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "ContentStructureNotFound"]),
 			},
 			detail: {
 				summary: "Restore a Content Structure revision",
@@ -639,10 +620,7 @@ export default new Elysia()
 				[StatusCodes.OK]: ContentStructureBatchMutationResponse,
 				[StatusCodes.CONFLICT]: toApiErrorResponse(["ContentStructureRevisionConflict"]),
 				[StatusCodes.FORBIDDEN]: ContentStructureForbiddenResponse,
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse([
-					"UnitNotFound",
-					"ContentStructureNotFound",
-				]),
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "ContentStructureNotFound"]),
 				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["ContentStructureInvalid"]),
 			},
 			detail: {
@@ -658,10 +636,8 @@ export default new Elysia()
 				ownerUnitId: params.unitId,
 				structureId: params.structureId,
 			});
-			if (body.content.kind === "unit")
-				await authorization.unit.ensureCanRead(body.content.unitId);
-			if (body.target?.kind === "unit")
-				await authorization.unit.ensureCanRead(body.target.unitId);
+			if (body.content.kind === "unit") await authorization.unit.ensureCanRead(body.content.unitId);
+			if (body.target?.kind === "unit") await authorization.unit.ensureCanRead(body.target.unitId);
 			const result = await database.transaction(async (tx) => {
 				await ensureReleasedContentStructureApi(tx, params.unitId, authorization);
 				let contentUnitId: string;
@@ -720,10 +696,7 @@ export default new Elysia()
 				[StatusCodes.OK]: ContentStructureNodeMutationResponse,
 				[StatusCodes.CONFLICT]: toApiErrorResponse(["ContentStructureRevisionConflict"]),
 				[StatusCodes.FORBIDDEN]: ContentStructureForbiddenResponse,
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse([
-					"UnitNotFound",
-					"ContentStructureNotFound",
-				]),
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "ContentStructureNotFound"]),
 				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["ContentStructureInvalid"]),
 			},
 			detail: { summary: "Insert Content Structure node", tags: ["Content Structure"] },
@@ -737,8 +710,7 @@ export default new Elysia()
 				structureId: params.structureId,
 			});
 			if (body.contentUnitId) await authorization.unit.ensureCanRead(body.contentUnitId);
-			if (body.target?.kind === "unit")
-				await authorization.unit.ensureCanRead(body.target.unitId);
+			if (body.target?.kind === "unit") await authorization.unit.ensureCanRead(body.target.unitId);
 			const result = await database.transaction(async (tx) => {
 				await ensureReleasedContentStructureApi(tx, params.unitId, authorization);
 				return updateContentStructureNode(tx, {
@@ -770,10 +742,7 @@ export default new Elysia()
 				[StatusCodes.OK]: ContentStructureNodeMutationResponse,
 				[StatusCodes.CONFLICT]: toApiErrorResponse(["ContentStructureRevisionConflict"]),
 				[StatusCodes.FORBIDDEN]: ContentStructureForbiddenResponse,
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse([
-					"UnitNotFound",
-					"ContentStructureNotFound",
-				]),
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "ContentStructureNotFound"]),
 				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["ContentStructureInvalid"]),
 			},
 			detail: { summary: "Update Content Structure node", tags: ["Content Structure"] },
@@ -810,10 +779,7 @@ export default new Elysia()
 				[StatusCodes.OK]: ContentStructureDeleteResponse,
 				[StatusCodes.CONFLICT]: toApiErrorResponse(["ContentStructureRevisionConflict"]),
 				[StatusCodes.FORBIDDEN]: ContentStructureForbiddenResponse,
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse([
-					"UnitNotFound",
-					"ContentStructureNotFound",
-				]),
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "ContentStructureNotFound"]),
 			},
 			detail: {
 				summary: "Delete Content Structure node subtree",
@@ -852,10 +818,7 @@ export default new Elysia()
 				[StatusCodes.OK]: ContentStructureDeleteResponse,
 				[StatusCodes.CONFLICT]: toApiErrorResponse(["ContentStructureRevisionConflict"]),
 				[StatusCodes.FORBIDDEN]: ContentStructureForbiddenResponse,
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse([
-					"UnitNotFound",
-					"ContentStructureNotFound",
-				]),
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "ContentStructureNotFound"]),
 				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["ContentStructureInvalid"]),
 			},
 			detail: { summary: "Delete Content Structure", tags: ["Content Structure"] },
@@ -868,12 +831,7 @@ export default new Elysia()
 			if (!(await authorization.unit.canRead(params.unitId))) throw new BookNotFound();
 			const canEditBook = await authorization.unit.canUpdate(params.unitId);
 			return database.transaction((tx) =>
-				readBookContentStructure(
-					tx,
-					params.unitId,
-					canEditBook,
-					query.localizationLanguages,
-				),
+				readBookContentStructure(tx, params.unitId, canEditBook, query.localizationLanguages),
 			);
 		},
 		{
@@ -896,9 +854,7 @@ export default new Elysia()
 			return database.transaction(async (tx) => {
 				const attachedContentUnitIds = [
 					...new Set(
-						body.nodes.flatMap((node) =>
-							node.state === "attached" ? [node.contentUnitId] : [],
-						),
+						body.nodes.flatMap((node) => (node.state === "attached" ? [node.contentUnitId] : [])),
 					),
 				];
 				for (const unitId of attachedContentUnitIds)
@@ -948,12 +904,7 @@ export default new Elysia()
 			if (!(await authorization.unit.canRead(params.unitId))) throw new MediaNotFound();
 			const canEditMedia = await authorization.unit.canUpdate(params.unitId);
 			return database.transaction((tx) =>
-				readMediaContentStructure(
-					tx,
-					params.unitId,
-					canEditMedia,
-					query.localizationLanguages,
-				),
+				readMediaContentStructure(tx, params.unitId, canEditMedia, query.localizationLanguages),
 			);
 		},
 		{
@@ -976,9 +927,7 @@ export default new Elysia()
 			return database.transaction(async (tx) => {
 				const attachedContentUnitIds = [
 					...new Set(
-						body.nodes.flatMap((node) =>
-							node.state === "attached" ? [node.contentUnitId] : [],
-						),
+						body.nodes.flatMap((node) => (node.state === "attached" ? [node.contentUnitId] : [])),
 					),
 				];
 				for (const unitId of attachedContentUnitIds)
@@ -1029,10 +978,7 @@ export default new Elysia()
 					unitVisibility: unit.visibility,
 				})
 				.from(contentStructureNode)
-				.innerJoin(
-					contentStructure,
-					eq(contentStructure.id, contentStructureNode.structureId),
-				)
+				.innerJoin(contentStructure, eq(contentStructure.id, contentStructureNode.structureId))
 				.innerJoin(unit, eq(unit.id, contentStructureNode.contentUnitId))
 				.innerJoin(post, eq(post.id, contentStructureNode.contentUnitId))
 				.where(
@@ -1076,14 +1022,9 @@ export default new Elysia()
 			});
 			if (!selected) throw new ChapterLanguageNotFound();
 			const canPresentContent =
-				selected.content !== null &&
-				(canEditBook || selected.contentStatus === "published");
+				selected.content !== null && (canEditBook || selected.contentStatus === "published");
 			const contentMetrics = canPresentContent
-				? await getUnitLocalizationContentMetric(
-						database,
-						params.chapterId,
-						selected.language,
-					)
+				? await getUnitLocalizationContentMetric(database, params.chapterId, selected.language)
 				: null;
 			if (canPresentContent && !contentMetrics)
 				throw new Error(
@@ -1099,10 +1040,7 @@ export default new Elysia()
 					postKind: post.kind,
 				})
 				.from(contentStructureNode)
-				.innerJoin(
-					contentStructure,
-					eq(contentStructure.id, contentStructureNode.structureId),
-				)
+				.innerJoin(contentStructure, eq(contentStructure.id, contentStructureNode.structureId))
 				.innerJoin(unit, eq(unit.id, contentStructureNode.contentUnitId))
 				.leftJoin(post, eq(post.id, contentStructureNode.contentUnitId))
 				.where(
@@ -1114,10 +1052,7 @@ export default new Elysia()
 						isNull(unit.deletedAt),
 						canEditBook
 							? undefined
-							: and(
-									eq(unit.status, "published"),
-									inArray(unit.visibility, ["public", "unlisted"]),
-								),
+							: and(eq(unit.status, "published"), inArray(unit.visibility, ["public", "unlisted"])),
 					),
 				)
 				.orderBy(asc(contentStructureNode.position), asc(contentStructureNode.id));
@@ -1152,10 +1087,7 @@ export default new Elysia()
 			query: ReadChapterQuery,
 			response: {
 				[StatusCodes.OK]: ChapterDetailResponse,
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse([
-					"ChapterNotFound",
-					"ChapterLanguageNotFound",
-				]),
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["ChapterNotFound", "ChapterLanguageNotFound"]),
 			},
 			detail: { summary: "Read chapter", tags: ["Books"] },
 		},

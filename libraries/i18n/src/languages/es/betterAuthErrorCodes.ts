@@ -7,8 +7,7 @@ export default {
 	FAILED_TO_GET_SESSION: "No se pudo cargar la sesión actual.",
 	INVALID_PASSWORD: "La contraseña no es válida.",
 	INVALID_EMAIL: "La dirección de correo electrónico no es válida.",
-	INVALID_EMAIL_OR_PASSWORD:
-		"La dirección de correo electrónico o la contraseña son incorrectas.",
+	INVALID_EMAIL_OR_PASSWORD: "La dirección de correo electrónico o la contraseña son incorrectas.",
 	INVALID_USER: "La cuenta no es válida.",
 	USER_NOT_FOUND: "No se encontró este usuario.",
 	SOCIAL_ACCOUNT_ALREADY_LINKED: "Esta cuenta de red social ya está vinculada.",

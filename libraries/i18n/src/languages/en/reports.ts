@@ -22,8 +22,7 @@ export default {
 	cancel: "Cancel",
 	submit: "Submit report",
 	submitted: "Report submitted",
-	submittedDescription:
-		"We’ll review it under the applicable rule. Track progress in My reports.",
+	submittedDescription: "We’ll review it under the applicable rule. Track progress in My reports.",
 	viewMyReports: "View",
 	myReports: {
 		title: "My reports",

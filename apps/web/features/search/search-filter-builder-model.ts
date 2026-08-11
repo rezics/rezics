@@ -56,8 +56,7 @@ function valuesOf(filter: SearchControlPredicate): readonly SearchScalar[] {
 }
 
 function defaultOperator(control: ResolvedSearchControl): SearchOperator {
-	if (control.component === "multi-select" && control.operators.includes("any-of"))
-		return "any-of";
+	if (control.component === "multi-select" && control.operators.includes("any-of")) return "any-of";
 	return control.operators[0] ?? "equals";
 }
 
@@ -90,10 +89,7 @@ export function draftFromExpression(
 	selections: readonly SharedSearchQuerySelection[] = [],
 ): DraftSearchGroup {
 	const presentation = new Map(
-		selections.map((selection) => [
-			presentationKey(selection.field, selection.value),
-			selection,
-		]),
+		selections.map((selection) => [presentationKey(selection.field, selection.value), selection]),
 	);
 	function convert(node: SearchControlExpression): DraftSearchNode {
 		if ("controlKey" in node) {
@@ -226,12 +222,9 @@ export function compileDraftSearch(
 		if (field === "realm-tag-vote" && node.operator === "matches") {
 			const realmId = node.realmTagVote?.realm?.value;
 			const tagId = node.realmTagVote?.tag?.value;
-			const { scoreLower, scoreUpper, voteCountLower, voteCountUpper } =
-				node.realmTagVote ?? {};
+			const { scoreLower, scoreUpper, voteCountLower, voteCountUpper } = node.realmTagVote ?? {};
 			const boundsValid =
-				(scoreLower === undefined ||
-					scoreUpper === undefined ||
-					scoreLower <= scoreUpper) &&
+				(scoreLower === undefined || scoreUpper === undefined || scoreLower <= scoreUpper) &&
 				(voteCountLower === undefined ||
 					voteCountUpper === undefined ||
 					voteCountLower <= voteCountUpper) &&
@@ -259,8 +252,7 @@ export function compileDraftSearch(
 								lower: node.lower,
 								upper: node.upper,
 							};
-			else if (node.upper !== undefined)
-				filter = { field, operator: "range", upper: node.upper };
+			else if (node.upper !== undefined) filter = { field, operator: "range", upper: node.upper };
 		} else if (field !== "realm-tag-vote" && node.operator === "exists") {
 			const value = values[0];
 			if (typeof value === "boolean") filter = { field, operator: "exists", value };
@@ -272,9 +264,7 @@ export function compileDraftSearch(
 			if (value !== undefined) filter = { field, operator: "not-equals", value };
 		} else if (
 			field !== "realm-tag-vote" &&
-			(node.operator === "any-of" ||
-				node.operator === "all-of" ||
-				node.operator === "none-of") &&
+			(node.operator === "any-of" || node.operator === "all-of" || node.operator === "none-of") &&
 			values.length
 		) {
 			filter = { field, operator: node.operator, values };

@@ -138,10 +138,7 @@ describe("Media Content Structure draft", () => {
 
 	it("moves a normalized multi-selection while protecting its descendants", () => {
 		const draft = createMediaContentStructureDraft(remote);
-		const selected = normalizeMediaDraftSelectionIds(
-			draft,
-			new Set(["label-node", "audio-node"]),
-		);
+		const selected = normalizeMediaDraftSelectionIds(draft, new Set(["label-node", "audio-node"]));
 		const coverage = indexMediaDraftSelectionCoverage(draft, selected);
 
 		expect(selected).toEqual(new Set(["label-node"]));

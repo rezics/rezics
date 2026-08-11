@@ -20,8 +20,7 @@ export function UnitDockSettings({
 	const firstKind = allowedKinds[0];
 	const [selectedKind, setSelectedKind] = useState<DockKind | undefined>(firstKind);
 	if (!firstKind) return null;
-	const activeKind =
-		selectedKind && allowedKinds.includes(selectedKind) ? selectedKind : firstKind;
+	const activeKind = selectedKind && allowedKinds.includes(selectedKind) ? selectedKind : firstKind;
 	if (allowedKinds.length === 1) {
 		const target = createDockTarget(ownerKind, firstKind);
 		return target ? <UnitDockManager ownerUnitId={ownerUnitId} target={target} /> : null;

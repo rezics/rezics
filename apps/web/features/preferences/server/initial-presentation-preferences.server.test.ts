@@ -52,9 +52,7 @@ describe("initial presentation preferences", () => {
 			{ status: "resolved", data: payload },
 		);
 
-		expect(queryClient.getQueryData(presentationPreferencesQueryKey("account-a"))).toEqual(
-			payload,
-		);
+		expect(queryClient.getQueryData(presentationPreferencesQueryKey("account-a"))).toEqual(payload);
 		expect(queryClient.getQueryData(presentationPreferencesQueryKey(payload.profileId))).toBe(
 			undefined,
 		);

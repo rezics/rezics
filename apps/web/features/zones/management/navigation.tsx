@@ -135,8 +135,7 @@ export function ZoneNavigationManagement() {
 	const query = useGetApiZonesByZoneIdNavigation({ path: { zoneId } });
 	const [selectedId, setSelectedId] = useState<string | "new">("new");
 	if (query.isPending) return <QueryPending />;
-	if (query.isError)
-		return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
+	if (query.isError) return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
 	const selected = query.data.items.find((item) => item.id === selectedId);
 	return (
 		<section>
@@ -155,9 +154,7 @@ export function ZoneNavigationManagement() {
 			<div className="grid gap-6 lg:grid-cols-[minmax(13rem,0.45fr)_minmax(0,1.55fr)]">
 				<Card appearance="outlined">
 					<CardContent className="grid gap-2 p-4">
-						<h2 className="font-semibold">
-							{t.zones.management.navigationEditor.resources}
-						</h2>
+						<h2 className="font-semibold">{t.zones.management.navigationEditor.resources}</h2>
 						{query.data.items.length ? (
 							query.data.items.map((item, index) => (
 								<Button
@@ -167,8 +164,8 @@ export function ZoneNavigationManagement() {
 									type="button"
 									variant={selected?.id === item.id ? "secondary" : "quiet"}
 								>
-									<LinkIcon aria-hidden />{" "}
-									{t.zones.management.sections.navigation.label} {index + 1}
+									<LinkIcon aria-hidden /> {t.zones.management.sections.navigation.label}{" "}
+									{index + 1}
 								</Button>
 							))
 						) : (
@@ -178,11 +175,7 @@ export function ZoneNavigationManagement() {
 						)}
 					</CardContent>
 				</Card>
-				<NavigationEditor
-					key={selected?.id ?? "new"}
-					navigation={selected}
-					zoneId={zoneId}
-				/>
+				<NavigationEditor key={selected?.id ?? "new"} navigation={selected} zoneId={zoneId} />
 			</div>
 		</section>
 	);
@@ -212,9 +205,7 @@ function NavigationEditor({ navigation, zoneId }: { navigation?: Navigation; zon
 			<CardContent className="grid gap-5 p-6">
 				<NavigationTree document={document} onChange={setDocument} />
 				<Button
-					onClick={() =>
-						setDocument({ ...document, items: [...document.items, createLeaf()] })
-					}
+					onClick={() => setDocument({ ...document, items: [...document.items, createLeaf()] })}
 					type="button"
 					variant="outline"
 				>
@@ -529,9 +520,7 @@ function NavigationItemFields({
 				</Button>
 				{"children" in item && depth < 3 ? (
 					<Button
-						onClick={() =>
-							onChange({ ...item, children: [...item.children, createLeaf()] })
-						}
+						onClick={() => onChange({ ...item, children: [...item.children, createLeaf()] })}
 						size="sm"
 						type="button"
 						variant="quiet"

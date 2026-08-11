@@ -110,9 +110,7 @@ async function resolveScope(compiled: CompiledSearchRequest): Promise<{
 	if (!record) throw new InvalidSearch("Search Zone scope does not exist");
 	const boundary = parseDocument(ZoneBoundaryDocument, record.boundaryDocument);
 	return {
-		categories: compiled.categories.filter((category) =>
-			boundary.categories.includes(category),
-		),
+		categories: compiled.categories.filter((category) => boundary.categories.includes(category)),
 		filters: [],
 		...(boundary.filter ? { domainFilter: boundary.filter } : {}),
 	};
@@ -139,9 +137,7 @@ async function resolveCompiledExecution(
 	const contentRatingPolicy = contentRatingPolicyFromAllowlist(contentRatings);
 	const scope = {
 		categories: hostScope
-			? configuredScope.categories.filter((category) =>
-					hostScope.categories.includes(category),
-				)
+			? configuredScope.categories.filter((category) => hostScope.categories.includes(category))
 			: configuredScope.categories,
 		filters: [...configuredScope.filters, ...(hostScope?.filters ?? [])],
 		scopeUnitId: configuredScope.scopeUnitId,
@@ -208,8 +204,7 @@ function mergeSearchFacets(
 					.map(([value, count]) => ({ value, count }))
 					.sort(
 						(left, right) =>
-							right.count.value - left.count.value ||
-							left.value.localeCompare(right.value),
+							right.count.value - left.count.value || left.value.localeCompare(right.value),
 					)
 					.slice(0, 100),
 			},
@@ -239,17 +234,13 @@ async function executeCompiledSearchWithPresentation<Hit extends RankedSearchHit
 		try {
 			cursor = parseSearchCursor(compiled.cursor);
 		} catch (cause) {
-			throw new InvalidSearch(
-				cause instanceof Error ? cause.message : "Invalid Search cursor",
-			);
+			throw new InvalidSearch(cause instanceof Error ? cause.message : "Invalid Search cursor");
 		}
 	if (cursor && (cursor.requestHash !== requestHash || cursor.pageSize !== compiled.pageSize))
 		throw new InvalidSearch("Search cursor does not match this request");
 	if (
 		cursor &&
-		Object.values(cursor.categories).some(
-			(category) => category.seen >= compiled.maxResultWindow,
-		)
+		Object.values(cursor.categories).some((category) => category.seen >= compiled.maxResultWindow)
 	)
 		throw new InvalidSearch("Search cursor exceeds the configured result window");
 	const facetFields = cursor ? [] : compiled.facets;
@@ -392,9 +383,7 @@ export async function executeCompiledSearchIdentifiers(
 		try {
 			cursor = parseGlobalSearchCursor(compiled.cursor);
 		} catch (cause) {
-			throw new InvalidSearch(
-				cause instanceof Error ? cause.message : "Invalid Search cursor",
-			);
+			throw new InvalidSearch(cause instanceof Error ? cause.message : "Invalid Search cursor");
 		}
 	if (cursor && (cursor.requestHash !== requestHash || cursor.pageSize !== compiled.pageSize))
 		throw new InvalidSearch("Search cursor does not match this request");

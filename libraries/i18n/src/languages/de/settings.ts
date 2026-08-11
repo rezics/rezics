@@ -28,8 +28,7 @@ export default {
 			},
 			privacy: {
 				label: "Datenschutz",
-				description:
-					"Lege fest, ob andere deine Bewertungen und Fortschritte sehen können.",
+				description: "Lege fest, ob andere deine Bewertungen und Fortschritte sehen können.",
 			},
 			tagSources: {
 				label: "Tag-Quellen",

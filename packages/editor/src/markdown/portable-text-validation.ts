@@ -343,8 +343,7 @@ function textBlockContainsLineBreak(value: Record<string, unknown>): boolean {
 	return (
 		Array.isArray(value.children) &&
 		value.children.some(
-			(child) =>
-				isRecord(child) && typeof child.text === "string" && /[\r\n]/u.test(child.text),
+			(child) => isRecord(child) && typeof child.text === "string" && /[\r\n]/u.test(child.text),
 		)
 	);
 }
@@ -463,10 +462,7 @@ function validateTable(
 					diagnostics.push(diagnostic("portable-text.invalid-table", blockPath));
 					continue;
 				}
-				if (
-					(block.style !== undefined && block.style !== "normal") ||
-					block.listItem !== undefined
-				)
+				if ((block.style !== undefined && block.style !== "normal") || block.listItem !== undefined)
 					diagnostics.push(
 						diagnostic("portable-text.invalid-table", blockPath, {
 							expected: "normal-non-list-text-block",
@@ -580,8 +576,7 @@ function validateBlock(
 export function decodeRezicsPortableText(
 	value: unknown,
 ): EditorResult<RezicsPortableTextValue, RezicsMarkdownDiagnostic> {
-	if (!Array.isArray(value))
-		return editorFailure([diagnostic("portable-text.expected-array", [])]);
+	if (!Array.isArray(value)) return editorFailure([diagnostic("portable-text.expected-array", [])]);
 
 	const diagnostics: RezicsMarkdownDiagnostic[] = [];
 	const seen = new WeakSet<object>();

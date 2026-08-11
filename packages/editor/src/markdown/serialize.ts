@@ -57,8 +57,7 @@ function textFromMarkTree(value: PortableTextRecord): string {
 	if (value._type !== "@span") throw new TypeError("Expected a text-only code mark subtree");
 	return records(value.children)
 		.map((child) => {
-			if (child._type !== "@text")
-				throw new TypeError("Expected a text-only code mark subtree");
+			if (child._type !== "@text") throw new TypeError("Expected a text-only code mark subtree");
 			return stringValue(child.text);
 		})
 		.join("");
@@ -222,8 +221,7 @@ function rootFromPortableText(value: RezicsPortableTextValue): Root {
 			let nextIndex = index;
 			while (nextIndex < nested.length) {
 				const candidate = nested[nextIndex];
-				if (!candidate || candidate._type !== "block" || candidate.style !== "blockquote")
-					break;
+				if (!candidate || candidate._type !== "block" || candidate.style !== "blockquote") break;
 				quoted.push({ type: "paragraph", children: blockPhrasing(candidate) });
 				nextIndex += 1;
 			}

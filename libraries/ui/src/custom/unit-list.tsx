@@ -53,9 +53,7 @@ export function UnitList(props: UnitListProps) {
 				{Array.from({ length: variant === "shelf" ? 10 : 4 }, (_, index) => (
 					<Skeleton
 						key={index}
-						className={
-							variant === "shelf" ? "aspect-[3/4] rounded-xl" : "h-24 rounded-xl"
-						}
+						className={variant === "shelf" ? "aspect-[3/4] rounded-xl" : "h-24 rounded-xl"}
 					/>
 				))}
 			</div>
@@ -69,14 +67,10 @@ export function UnitList(props: UnitListProps) {
 	if (!items?.length) return <p className="text-muted-foreground text-sm">{messages.empty}</p>;
 	if (props.variant === "shelf")
 		return (
-			<div
-				className="grid grid-cols-2 gap-x-4 gap-y-7 sm:grid-cols-3 lg:grid-cols-5"
-				role="list"
-			>
+			<div className="grid grid-cols-2 gap-x-4 gap-y-7 sm:grid-cols-3 lg:grid-cols-5" role="list">
 				{items.map((item) => {
 					const title =
-						item.title ??
-						(typeof messages.unnamed === "string" ? messages.unnamed : "Unnamed");
+						item.title ?? (typeof messages.unnamed === "string" ? messages.unnamed : "Unnamed");
 					return (
 						<div key={item.id} role="listitem">
 							<UnitCard
@@ -98,8 +92,7 @@ export function UnitList(props: UnitListProps) {
 				const target = props.href?.(item) ?? item.href;
 				const usesAvatar = Boolean(item.avatar);
 				const title =
-					item.title ??
-					(typeof messages.unnamed === "string" ? messages.unnamed : "Unnamed");
+					item.title ?? (typeof messages.unnamed === "string" ? messages.unnamed : "Unnamed");
 				return (
 					<LinkBox key={item.id}>
 						<Item
@@ -125,9 +118,7 @@ export function UnitList(props: UnitListProps) {
 							<ItemContent className="min-w-0 justify-center">
 								<ItemTitle>
 									{target ? (
-										<LinkOverlay href={target}>
-											{item.title ?? messages.unnamed}
-										</LinkOverlay>
+										<LinkOverlay href={target}>{item.title ?? messages.unnamed}</LinkOverlay>
 									) : (
 										(item.title ?? messages.unnamed)
 									)}

@@ -18,9 +18,9 @@ describe("notification destinations", () => {
 	it("links every semantic destination to its owning frontend route", () => {
 		const id = "019b76da-a800-7300-8000-000000000002";
 		expect(notificationHref(item({ kind: "post", postId: id }))).toBe(`/posts/${id}`);
-		expect(
-			notificationHref(item({ kind: "profile", profile: { id, slugAddress: null } })),
-		).toBe(`/user/${id}`);
+		expect(notificationHref(item({ kind: "profile", profile: { id, slugAddress: null } }))).toBe(
+			`/user/${id}`,
+		);
 		expect(
 			notificationHref(item({ kind: "conversation", conversationId: id, messageId: id })),
 		).toBe(`/messages/${id}#message-${id}`);

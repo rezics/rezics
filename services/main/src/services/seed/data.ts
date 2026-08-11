@@ -280,8 +280,7 @@ export function collectUnique<T>(count: number, create: () => T, key: (value: T)
 }
 
 export function position(index: number): string {
-	if (!Number.isInteger(index) || index < 0)
-		throw new Error("Position index must be non-negative");
+	if (!Number.isInteger(index) || index < 0) throw new Error("Position index must be non-negative");
 	return index.toString().padStart(8, "0");
 }
 

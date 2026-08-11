@@ -94,14 +94,10 @@ export function ZoneHeader({
 				<div
 					className={cn(
 						"hidden min-w-0 items-center overflow-x-auto [scrollbar-width:none] sm:flex [&::-webkit-scrollbar]:hidden",
-						expanded
-							? "sm:col-start-2 sm:row-start-2"
-							: "sm:col-start-3 sm:row-start-1",
+						expanded ? "sm:col-start-2 sm:row-start-2" : "sm:col-start-3 sm:row-start-1",
 					)}
 				>
-					{hasMenu ? (
-						<ZoneDocument blocks={menuBlocks ?? []} surface={{ kind: "dock" }} />
-					) : null}
+					{hasMenu ? <ZoneDocument blocks={menuBlocks ?? []} surface={{ kind: "dock" }} /> : null}
 				</div>
 				<div
 					className={cn(

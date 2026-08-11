@@ -217,30 +217,17 @@ function RealmCreateContent() {
 						</Field>
 						<Field>
 							<FieldLabel>{t.media.roles.banner.title}</FieldLabel>
-							<LocalizationImageUploadField
-								onChange={setBanner}
-								role="banner"
-								value={banner}
-							/>
+							<LocalizationImageUploadField onChange={setBanner} role="banner" value={banner} />
 						</Field>
 						<Field>
 							<FieldLabel>{t.realms.joinPolicy}</FieldLabel>
 							<NativeSelect name="joinPolicy" defaultValue="open">
-								<NativeSelectOption value="open">
-									{t.realms.open}
-								</NativeSelectOption>
-								<NativeSelectOption value="approval">
-									{t.realms.approval}
-								</NativeSelectOption>
+								<NativeSelectOption value="open">{t.realms.open}</NativeSelectOption>
+								<NativeSelectOption value="approval">{t.realms.approval}</NativeSelectOption>
 							</NativeSelect>
 						</Field>
 						<RequestFailure error={create.error} />
-						<Button
-							variant="solid"
-							type="submit"
-							className="w-fit"
-							isLoading={create.isPending}
-						>
+						<Button variant="solid" type="submit" className="w-fit" isLoading={create.isPending}>
 							{t.realms.create}
 						</Button>
 					</FieldGroup>
@@ -323,8 +310,7 @@ export function RealmDetailPage({ id, page = "main" }: { id: string; page?: Real
 	if (localizationState.status === "error")
 		return <QueryFailure error={localizationState.error} retry={localizationState.retry} />;
 	if (localizationState.status === "restoring") return <QueryPending />;
-	if (query.isError)
-		return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
+	if (query.isError) return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
 	if (!query.data) return <QueryPending />;
 	const realm = query.data;
 	const enabledPage = page === "info" || page === "main" || realm.pages.includes(page);
@@ -352,9 +338,7 @@ export function RealmDetailPage({ id, page = "main" }: { id: string; page?: Real
 						<div className="flex flex-wrap items-center gap-2">
 							<Badge variant="secondary">{t.ui.realm}</Badge>
 							<Badge variant="outline">
-								{realm.joinPolicy === "approval"
-									? t.realms.approval
-									: t.realms.open}
+								{realm.joinPolicy === "approval" ? t.realms.approval : t.realms.open}
 							</Badge>
 							{realm.viewerMembership?.state === "pending" ? (
 								<Badge variant="outline">{t.realms.membershipPending}</Badge>
@@ -398,22 +382,16 @@ export function RealmDetailPage({ id, page = "main" }: { id: string; page?: Real
 												status: "ready",
 												items: pins.data.contentItems.map((item) => ({
 													id: item.id,
-													body:
-														item.itemType === "post"
-															? item.body
-															: undefined,
+													body: item.itemType === "post" ? item.body : undefined,
 													href: realmPinnedContentHref(item, realm.id),
 													avatar:
-														item.itemType === "unit" &&
-														item.presentation.kind === "identity"
+														item.itemType === "unit" && item.presentation.kind === "identity"
 															? item.presentation.avatar
 															: null,
 													identity:
-														item.itemType === "unit" &&
-														item.presentation.kind === "identity",
+														item.itemType === "unit" && item.presentation.kind === "identity",
 													imageUrl:
-														item.itemType === "unit" &&
-														item.presentation.kind === "identity"
+														item.itemType === "unit" && item.presentation.kind === "identity"
 															? null
 															: item.cover?.url,
 													language: item.language,
@@ -421,15 +399,13 @@ export function RealmDetailPage({ id, page = "main" }: { id: string; page?: Real
 														item.itemType === "unit" &&
 														item.unitKind === "tag" &&
 														item.presentation.kind === "identity"
-															? (item.presentation.realmTagContext
-																	?.summary ?? item.summary)
+															? (item.presentation.realmTagContext?.summary ?? item.summary)
 															: item.summary,
 													summaryLanguage:
 														item.itemType === "unit" &&
 														item.unitKind === "tag" &&
 														item.presentation.kind === "identity"
-															? (item.presentation.realmTagContext
-																	?.language ?? item.language)
+															? (item.presentation.realmTagContext?.language ?? item.language)
 															: item.language,
 													title: item.title,
 												})),
@@ -549,10 +525,7 @@ function RealmInfoSections({
 					count: toNonNegativeApiInteger(realm.memberCount),
 				})}
 			/>
-			<UnitDockRenderer
-				ownerUnitId={realm.id}
-				target={{ ownerKind: "realm", dockKind: "main" }}
-			/>
+			<UnitDockRenderer ownerUnitId={realm.id} target={{ ownerKind: "realm", dockKind: "main" }} />
 		</>
 	);
 }
@@ -670,12 +643,10 @@ function RealmActions({
 									leave.mutate(
 										{ path: { realmId: realm.id } },
 										{
-											onSuccess: () =>
-												invalidateRealmDetails(queryClient, realm.id),
+											onSuccess: () => invalidateRealmDetails(queryClient, realm.id),
 										},
 									);
-								else
-									void rulesAcknowledgement.run(joinRealm).catch(() => undefined);
+								else void rulesAcknowledgement.run(joinRealm).catch(() => undefined);
 							}}
 						>
 							{membership ? t.realms.leave : t.realms.join}
@@ -683,9 +654,7 @@ function RealmActions({
 					)}
 					{canPost ? (
 						<Button variant="solid" asChild>
-							<Link href={realmContentCreateHref(realm)}>
-								{t.realms.contentComposer.open}
-							</Link>
+							<Link href={realmContentCreateHref(realm)}>{t.realms.contentComposer.open}</Link>
 						</Button>
 					) : null}
 					{canManage && (

@@ -263,9 +263,7 @@ export async function getAttributionSummariesWithStatisticsByUnitIds(
 ): Promise<Map<string, UnitAttributionSummaryWithStatistics[]>> {
 	const summaries = await getAttributionSummariesByUnitIds(sourceUnitIds, localizationLanguages);
 	const statistics = await getAttributionStatisticsByUnitIds(
-		[...summaries.values()].flatMap((items) =>
-			items.map(({ creditedUnit }) => creditedUnit.id),
-		),
+		[...summaries.values()].flatMap((items) => items.map(({ creditedUnit }) => creditedUnit.id)),
 	);
 	return new Map(
 		[...summaries].map(([sourceUnitId, items]) => [

@@ -20,8 +20,6 @@ describe("Post management routes", () => {
 	});
 
 	it("does not treat another resource path as a management section", () => {
-		expect(
-			parsePostManagementSection("/reviews/post-1/edit/history", "post-1"),
-		).toBeUndefined();
+		expect(parsePostManagementSection("/reviews/post-1/edit/history", "post-1")).toBeUndefined();
 	});
 });

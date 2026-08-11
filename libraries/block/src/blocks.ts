@@ -24,11 +24,7 @@ export const UnitRefBlock = Type.Object(
 		_type: Type.Literal("unit-ref"),
 		_key: BlockKey,
 		unitId: Uuid,
-		appearance: Type.Union([
-			Type.Literal("inline"),
-			Type.Literal("card"),
-			Type.Literal("cover"),
-		]),
+		appearance: Type.Union([Type.Literal("inline"), Type.Literal("card"), Type.Literal("cover")]),
 	},
 	{ additionalProperties: false, $id: "UnitRefBlock" },
 );
@@ -202,11 +198,7 @@ function createContainerBlocks<ThisSchema extends TSchema>(This: ThisSchema) {
 			{
 				_type: Type.Literal("group"),
 				_key: BlockKey,
-				layout: Type.Union([
-					Type.Literal("stack"),
-					Type.Literal("row"),
-					Type.Literal("grid"),
-				]),
+				layout: Type.Union([Type.Literal("stack"), Type.Literal("row"), Type.Literal("grid")]),
 				blocks: Type.Array(This, { minItems: 1, maxItems: 50 }),
 			},
 			{ additionalProperties: false },
@@ -250,11 +242,7 @@ function createContainerBlocks<ThisSchema extends TSchema>(This: ThisSchema) {
 
 export const Block = Type.Recursive(
 	(This) =>
-		Type.Union([
-			PortableTextDocument,
-			...ReferencedAtomicBlocks,
-			...createContainerBlocks(This),
-		]),
+		Type.Union([PortableTextDocument, ...ReferencedAtomicBlocks, ...createContainerBlocks(This)]),
 	{ $id: "Block" },
 );
 export type Block = Static<typeof Block>;

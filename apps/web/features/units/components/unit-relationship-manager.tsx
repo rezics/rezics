@@ -118,9 +118,9 @@ function useResolvedUnitPresentations(
 ): ReadonlyMap<string, UnitMentionPresentation> {
 	const resolve = useUnitMentionResolver();
 	const key = [...new Set(unitIds)].sort().join("\u0000");
-	const [presentations, setPresentations] = useState<
-		ReadonlyMap<string, UnitMentionPresentation>
-	>(new Map());
+	const [presentations, setPresentations] = useState<ReadonlyMap<string, UnitMentionPresentation>>(
+		new Map(),
+	);
 
 	useEffect(() => {
 		if (!resolve || !key) {
@@ -341,10 +341,7 @@ export function AddCreditDialog({
 					description={t.units.relationshipManagement.addCreditDescription}
 					title={t.units.relationshipManagement.addCredit}
 				/>
-				<form
-					className="flex min-h-0 flex-1 flex-col"
-					onSubmit={(event) => void submit(event)}
-				>
+				<form className="flex min-h-0 flex-1 flex-col" onSubmit={(event) => void submit(event)}>
 					<DialogBody className="grid gap-4">
 						<Field required>
 							<FieldLabel>{t.units.relationshipManagement.creditedEntity}</FieldLabel>
@@ -456,10 +453,7 @@ function AddSubjectDialog({
 					description={t.units.relationshipManagement.addSubjectDescription}
 					title={t.units.relationshipManagement.addSubject}
 				/>
-				<form
-					className="flex min-h-0 flex-1 flex-col"
-					onSubmit={(event) => void submit(event)}
-				>
+				<form className="flex min-h-0 flex-1 flex-col" onSubmit={(event) => void submit(event)}>
 					<DialogBody className="grid gap-4">
 						<Field required>
 							<FieldLabel>{t.units.relationshipManagement.subjectEntity}</FieldLabel>
@@ -669,8 +663,7 @@ function PendingProposalList({
 		pending.map((proposal) => proposal.targetUnitId),
 	);
 	if (query.isPending) return <QueryPending />;
-	if (query.isError)
-		return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
+	if (query.isError) return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
 	if (pending.length === 0) return null;
 
 	return (
@@ -694,13 +687,7 @@ function PendingProposalList({
 								: proposal.role;
 					return (
 						<RelationshipRow
-							actions={
-								<ProposalActions
-									onChanged={refresh}
-									proposal={proposal}
-									unitId={unitId}
-								/>
-							}
+							actions={<ProposalActions onChanged={refresh} proposal={proposal} unitId={unitId} />}
 							avatar={presentation?.avatar}
 							description={
 								<>
@@ -763,11 +750,9 @@ function CreditSection({
 							<RelationshipRow
 								actions={
 									<RemoveRelationshipDialog
-										description={t.units.relationshipManagement.removeCreditDescription(
-											{
-												name: title,
-											},
-										)}
+										description={t.units.relationshipManagement.removeCreditDescription({
+											name: title,
+										})}
 										label={t.units.relationshipManagement.removeCreditLabel({
 											name: title,
 										})}
@@ -780,14 +765,9 @@ function CreditSection({
 														associationId: attribution.id,
 													},
 												});
-												await invalidateUnitDetail(
-													queryClient,
-													type,
-													unit.id,
-												);
+												await invalidateUnitDetail(queryClient, type, unit.id);
 												toast.create({
-													title: t.units.relationshipManagement
-														.creditRemoved,
+													title: t.units.relationshipManagement.creditRemoved,
 													type: "success",
 												});
 											} catch {
@@ -865,11 +845,9 @@ function SubjectSection({
 							<RelationshipRow
 								actions={
 									<RemoveRelationshipDialog
-										description={t.units.relationshipManagement.removeSubjectDescription(
-											{
-												name: title,
-											},
-										)}
+										description={t.units.relationshipManagement.removeSubjectDescription({
+											name: title,
+										})}
 										label={t.units.relationshipManagement.removeSubjectLabel({
 											name: title,
 										})}
@@ -882,14 +860,9 @@ function SubjectSection({
 														associationId: association.id,
 													},
 												});
-												await invalidateUnitDetail(
-													queryClient,
-													type,
-													unit.id,
-												);
+												await invalidateUnitDetail(queryClient, type, unit.id);
 												toast.create({
-													title: t.units.relationshipManagement
-														.subjectRemoved,
+													title: t.units.relationshipManagement.subjectRemoved,
 													type: "success",
 												});
 											} catch {
@@ -987,10 +960,7 @@ function MainUnitDialog({
 					description={t.units.relationshipManagement.changeMainDescription}
 					title={t.units.relationshipManagement.changeMain}
 				/>
-				<form
-					className="flex min-h-0 flex-1 flex-col"
-					onSubmit={(event) => void submit(event)}
-				>
+				<form className="flex min-h-0 flex-1 flex-col" onSubmit={(event) => void submit(event)}>
 					<DialogBody className="grid gap-4">
 						<Field required>
 							<FieldLabel>{t.units.relationshipManagement.mainUnit}</FieldLabel>
@@ -1079,9 +1049,7 @@ function VariantSection({
 						<RelationshipRow
 							actions={
 								<RemoveRelationshipDialog
-									description={
-										t.units.relationshipManagement.detachMainDescription
-									}
+									description={t.units.relationshipManagement.detachMainDescription}
 									label={t.units.relationshipManagement.detachMain}
 									onRemove={async () => {
 										try {
@@ -1128,11 +1096,9 @@ function VariantSection({
 								<AlertDialog>
 									<AlertDialogTrigger asChild>
 										<Button
-											aria-label={t.units.relationshipManagement.promoteLabel(
-												{
-													name: variant.title ?? t.ui.unnamed,
-												},
-											)}
+											aria-label={t.units.relationshipManagement.promoteLabel({
+												name: variant.title ?? t.ui.unnamed,
+											})}
 											size="icon-md"
 											type="button"
 											variant="quiet"
@@ -1165,14 +1131,9 @@ function VariantSection({
 															path: { type, unitId: variant.id },
 															body: { expectedMainUnitId: unit.id },
 														});
-														await invalidateUnitDetail(
-															queryClient,
-															type,
-															unit.id,
-														);
+														await invalidateUnitDetail(queryClient, type, unit.id);
 														toast.create({
-															title: t.units.relationshipManagement
-																.promoted,
+															title: t.units.relationshipManagement.promoted,
 															type: "success",
 														});
 													} catch {
@@ -1237,8 +1198,7 @@ export function UnitRelationshipManager({
 	};
 	const variantContext =
 		isVariantUnitType(type) && unit.variantContext.role !== "main"
-			? unit.variantContext.role === "variant" &&
-				unit.variantContext.main.state === "available"
+			? unit.variantContext.role === "variant" && unit.variantContext.main.state === "available"
 				? unit.variantContext.main.unit.id
 				: null
 			: null;

@@ -102,8 +102,7 @@ export function UnitDetail({ type, unit }: { type: UnitType; unit: string }) {
 	});
 
 	if (query.isPending) return <QueryPending />;
-	if (query.isError)
-		return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
+	if (query.isError) return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
 	if (!query.data) return <QueryPending />;
 
 	const item = query.data;
@@ -205,10 +204,7 @@ export function UnitDetail({ type, unit }: { type: UnitType; unit: string }) {
 					</h1>
 					{localization?.summary && (
 						<p className="max-w-3xl text-lg leading-8 text-muted-foreground">
-							<LocalizedText
-								language={localization.language}
-								value={localization.summary}
-							/>
+							<LocalizedText language={localization.language} value={localization.summary} />
 						</p>
 					)}
 					<div className="flex flex-wrap gap-2">
@@ -222,17 +218,14 @@ export function UnitDetail({ type, unit }: { type: UnitType; unit: string }) {
 							<>
 								{(type === "book" || type === "media") && (
 									<Button variant="outline" asChild>
-										<Link
-											href={`/units/${type}/${item.id}/edit/content-structure`}
-										>
+										<Link href={`/units/${type}/${item.id}/edit/content-structure`}>
 											{t.units.content.edit}
 										</Link>
 									</Button>
 								)}
 							</>
 						)}
-						{item.capabilities.canManageAccess ||
-						item.capabilities.canManageAssociations ? (
+						{item.capabilities.canManageAccess || item.capabilities.canManageAssociations ? (
 							<Button variant="outline" asChild>
 								<Link
 									href={`/units/${type}/${item.id}/edit/${item.capabilities.canManageAccess ? "access" : "relationships"}`}
@@ -276,10 +269,7 @@ export function UnitDetail({ type, unit }: { type: UnitType; unit: string }) {
 				))}
 			</nav>
 
-			<div
-				id="overview"
-				className="grid scroll-mt-20 gap-8 lg:grid-cols-[minmax(0,1fr)_18rem]"
-			>
+			<div id="overview" className="grid scroll-mt-20 gap-8 lg:grid-cols-[minmax(0,1fr)_18rem]">
 				<div className="grid min-w-0 gap-8">
 					<DetailSection title={t.ui.description}>
 						<Card>
@@ -348,10 +338,7 @@ export function UnitDetail({ type, unit }: { type: UnitType; unit: string }) {
 											</p>
 											{entry.summary && (
 												<p className="break-words text-muted-foreground">
-													<LocalizedText
-														language={entry.language}
-														value={entry.summary}
-													/>
+													<LocalizedText language={entry.language} value={entry.summary} />
 												</p>
 											)}
 										</div>
@@ -427,10 +414,7 @@ export function UnitDetail({ type, unit }: { type: UnitType; unit: string }) {
 								{item.tags.map((tag) => {
 									const label = tag.title ?? tag.tagId;
 									return (
-										<Link
-											href={tagSearchHref(type, tag.tagId, label)}
-											key={tag.id}
-										>
+										<Link href={tagSearchHref(type, tag.tagId, label)} key={tag.id}>
 											<Badge variant="outline">{label}</Badge>
 										</Link>
 									);
@@ -449,9 +433,7 @@ export function UnitDetail({ type, unit }: { type: UnitType; unit: string }) {
 											className="break-all text-link hover:text-link-hover hover:underline"
 											href={`/units/${type}/${version.id}`}
 										>
-											{version.kind === "version"
-												? t.units.detail.version
-												: t.units.detail.primary}
+											{version.kind === "version" ? t.units.detail.version : t.units.detail.primary}
 										</Link>
 									))}
 								</CardContent>

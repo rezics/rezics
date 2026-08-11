@@ -14,10 +14,7 @@ export function getPlatformCapabilityCondition(profileId: string, capability: Pl
 			.where(
 				and(
 					eq(platformCapabilityGrant.profileId, profileId),
-					inArray(
-						platformCapabilityGrant.capability,
-						grantingPlatformCapabilities(capability),
-					),
+					inArray(platformCapabilityGrant.capability, grantingPlatformCapabilities(capability)),
 					isNull(platformCapabilityGrant.revokedAt),
 					or(
 						isNull(platformCapabilityGrant.expiresAt),

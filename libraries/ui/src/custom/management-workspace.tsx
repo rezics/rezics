@@ -58,14 +58,10 @@ export function ManagementWorkspaceHeader({
 					{title}
 				</h1>
 				{description ? (
-					<p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
-						{description}
-					</p>
+					<p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">{description}</p>
 				) : null}
 			</div>
-			{action ? (
-				<div className="flex shrink-0 flex-wrap items-center gap-2">{action}</div>
-			) : null}
+			{action ? <div className="flex shrink-0 flex-wrap items-center gap-2">{action}</div> : null}
 		</header>
 	);
 }
@@ -216,10 +212,7 @@ export function ManagementWorkspaceSectionHeader({
 				{showBackOnMobile || showBackOnDesktop ? (
 					<Button
 						asChild
-						className={cn(
-							"-ms-2 mb-3 w-fit",
-							showBackOnDesktop ? undefined : "md:hidden",
-						)}
+						className={cn("-ms-2 mb-3 w-fit", showBackOnDesktop ? undefined : "md:hidden")}
 						size="sm"
 						variant="quiet"
 					>
@@ -233,14 +226,10 @@ export function ManagementWorkspaceSectionHeader({
 					{title}
 				</h2>
 				{description ? (
-					<p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
-						{description}
-					</p>
+					<p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">{description}</p>
 				) : null}
 			</div>
-			{action ? (
-				<div className="flex shrink-0 flex-wrap items-center gap-2">{action}</div>
-			) : null}
+			{action ? <div className="flex shrink-0 flex-wrap items-center gap-2">{action}</div> : null}
 		</header>
 	);
 }

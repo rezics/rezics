@@ -87,10 +87,7 @@ describe("Realm member API contract", () => {
 		).toBe(true);
 		expect(
 			Check(MoveRealmPinsBody, {
-				unitIds: [
-					"019f995d-7595-7c99-9183-250790bbfe2f",
-					"019f995d-7595-7c99-9183-250790bbfe2f",
-				],
+				unitIds: ["019f995d-7595-7c99-9183-250790bbfe2f", "019f995d-7595-7c99-9183-250790bbfe2f"],
 				destinationKind: "highlight",
 				placement: { kind: "end" },
 			}),
@@ -191,16 +188,12 @@ describe("Realm member API contract", () => {
 		} as const;
 		expect(Check(UpdateRealmRulesBody, body)).toBe(true);
 		expect(Check(UpdateRealmRulesBody, { ...body, baseRevisionId: undefined })).toBe(false);
-		expect(Check(UpdateRealmRulesBody, { ...body, rules: [{ localizations: [] }] })).toBe(
-			false,
-		);
+		expect(Check(UpdateRealmRulesBody, { ...body, rules: [{ localizations: [] }] })).toBe(false);
 	});
 
 	it("rejects duplicate localization languages at the API boundary", () => {
 		expect(hasUniqueLocalizationLanguages([{ language: "en" }, { language: "zh" }])).toBe(true);
-		expect(hasUniqueLocalizationLanguages([{ language: "en" }, { language: "en" }])).toBe(
-			false,
-		);
+		expect(hasUniqueLocalizationLanguages([{ language: "en" }, { language: "en" }])).toBe(false);
 	});
 
 	it("requires a concrete rule revision and acknowledgement language", () => {

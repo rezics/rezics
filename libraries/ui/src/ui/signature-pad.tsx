@@ -70,12 +70,7 @@ const SignaturePadClear = (props: React.ComponentProps<typeof ArkSignaturePad.Cl
 	return (
 		<ArkSignaturePad.ClearTrigger
 			asChild
-			className={cn(
-				"absolute inset-e-2 top-2",
-				"bg-muted",
-				"text-muted-foreground",
-				className,
-			)}
+			className={cn("absolute inset-e-2 top-2", "bg-muted", "text-muted-foreground", className)}
 			data-slot="signature-pad-clear"
 			{...rest}
 		>

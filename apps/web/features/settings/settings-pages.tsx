@@ -164,9 +164,7 @@ export function ProfileSettings() {
 
 function ProfileSettingsForLanguage({ current }: { readonly current: GetApiUsersMeStatus200 }) {
 	const { selectedLanguage } = useContentLanguageEditor();
-	return (
-		<ProfileSettingsForm current={current} key={`${current.updatedAt}:${selectedLanguage}`} />
-	);
+	return <ProfileSettingsForm current={current} key={`${current.updatedAt}:${selectedLanguage}`} />;
 }
 
 function ProfileSettingsForm({ current }: { current: GetApiUsersMeStatus200 }) {
@@ -267,9 +265,7 @@ function ProfileSettingsForm({ current }: { current: GetApiUsersMeStatus200 }) {
 							<FieldLabel>{t.media.roles.avatar.title}</FieldLabel>
 							<AvatarField
 								fallback={avatarOptions[0] ?? null}
-								onChange={(avatar) =>
-									draft.setValue((current) => ({ ...current, avatar }))
-								}
+								onChange={(avatar) => draft.setValue((current) => ({ ...current, avatar }))}
 								options={avatarOptions}
 								value={value.avatar}
 							/>
@@ -278,9 +274,7 @@ function ProfileSettingsForm({ current }: { current: GetApiUsersMeStatus200 }) {
 							<FieldLabel>{t.media.roles.banner.title}</FieldLabel>
 							<LocalizationImageUploadField
 								fallback={bannerOptions[0] ?? null}
-								onChange={(banner) =>
-									draft.setValue((current) => ({ ...current, banner }))
-								}
+								onChange={(banner) => draft.setValue((current) => ({ ...current, banner }))}
 								options={bannerOptions}
 								role="banner"
 								value={value.banner}
@@ -369,8 +363,7 @@ export function PreferenceSettings() {
 					previousRatings.length !== data.contentRatings.length ||
 					previousRatings.some((rating, index) => rating !== data.contentRatings[index]);
 				queryClient.setQueryData(getApiUsersMePreferencesQueryKey(), data);
-				if (session)
-					setPresentationPreferencesQueryData(queryClient, session.user.id, data);
+				if (session) setPresentationPreferencesQueryData(queryClient, session.user.id, data);
 				if (contentRatingsChanged) await resetContentRatingDependentQueries(queryClient);
 				else await queryClient.invalidateQueries({ queryKey: FeedQueryKey });
 			},
@@ -477,8 +470,7 @@ export function PreferenceSettings() {
 					defaultScoreRealmId: defaultScoreRealm.id,
 					collectionConfig: current.collectionConfig,
 					personalizedFeed: data.get("personalizedFeed") === "true",
-					filterFeedByPreferredLanguages:
-						data.get("filterFeedByPreferredLanguages") === "true",
+					filterFeedByPreferredLanguages: data.get("filterFeedByPreferredLanguages") === "true",
 					contentRatings,
 					preferredLanguages,
 				},
@@ -495,10 +487,7 @@ export function PreferenceSettings() {
 				<FieldGroup>
 					<Field>
 						<FieldLabel>{t.settings.interfaceLanguage}</FieldLabel>
-						<NativeSelect
-							name="interfaceLocale"
-							defaultValue={preferences.data.interfaceLocale}
-						>
+						<NativeSelect name="interfaceLocale" defaultValue={preferences.data.interfaceLocale}>
 							{StoredUiLocaleValues.map((value) => (
 								<NativeSelectOption key={value} value={value}>
 									{t.locale.uiLocales[value]}
@@ -508,9 +497,7 @@ export function PreferenceSettings() {
 					</Field>
 					<Field>
 						<FieldLabel>{t.locale.chineseContentDisplay.label}</FieldLabel>
-						<p className="text-sm text-muted-foreground">
-							{t.locale.chineseContentDisplay.hint}
-						</p>
+						<p className="text-sm text-muted-foreground">{t.locale.chineseContentDisplay.hint}</p>
 						<NativeSelect
 							name="chineseContentDisplay"
 							defaultValue={preferences.data.chineseContentDisplay}
@@ -524,9 +511,7 @@ export function PreferenceSettings() {
 					</Field>
 					<Field>
 						<FieldLabel>{t.settings.contentLanguages}</FieldLabel>
-						<p className="text-sm text-muted-foreground">
-							{t.settings.contentLanguagesHint}
-						</p>
+						<p className="text-sm text-muted-foreground">{t.settings.contentLanguagesHint}</p>
 						<ol className="grid gap-2">
 							{preferredLanguages.map((language, index) => (
 								<li
@@ -586,9 +571,7 @@ export function PreferenceSettings() {
 										disabled={preferredLanguages.length === 1}
 										onClick={() =>
 											setEditedPreferredLanguages(
-												preferredLanguages.filter(
-													(candidate) => candidate !== language,
-												),
+												preferredLanguages.filter((candidate) => candidate !== language),
 											)
 										}
 										size="icon-sm"
@@ -618,10 +601,7 @@ export function PreferenceSettings() {
 								</NativeSelect>
 								<Button
 									onClick={() => {
-										setEditedPreferredLanguages([
-											...preferredLanguages,
-											languageToAdd,
-										]);
+										setEditedPreferredLanguages([...preferredLanguages, languageToAdd]);
 										setPendingLanguage(undefined);
 									}}
 									type="button"
@@ -639,9 +619,7 @@ export function PreferenceSettings() {
 							name="defaultLicense"
 							defaultValue={preferences.data.defaultLicense ?? ""}
 						>
-							<NativeSelectOption value="">
-								{t.licenses.unspecified}
-							</NativeSelectOption>
+							<NativeSelectOption value="">{t.licenses.unspecified}</NativeSelectOption>
 							{PublicationLicenseIds.map((id) => (
 								<NativeSelectOption key={id} value={id}>
 									{t.licenses.options[id].label}
@@ -658,9 +636,7 @@ export function PreferenceSettings() {
 							placeholder={t.ui.pickerPlaceholders.realm}
 							value={defaultScoreRealm}
 						/>
-						<p className="text-sm text-muted-foreground">
-							{t.settings.defaultScoreRealmHint}
-						</p>
+						<p className="text-sm text-muted-foreground">{t.settings.defaultScoreRealmHint}</p>
 					</Field>
 					<ContentRatingPreferenceField
 						generalLabel={t.settings.general}

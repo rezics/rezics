@@ -164,10 +164,7 @@ export default new Elysia({ prefix: "/users" })
 				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["InvalidSlug"]),
 				[StatusCodes.UNAUTHORIZED]: toApiErrorResponse(["InteractiveSessionRequired"]),
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
-				[StatusCodes.CONFLICT]: toApiErrorResponse([
-					"ProfileSlugChangeUnavailable",
-					"SlugTaken",
-				]),
+				[StatusCodes.CONFLICT]: toApiErrorResponse(["ProfileSlugChangeUnavailable", "SlugTaken"]),
 				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse([
 					"SlugReserved",
 					"SlugDepthExceeded",
@@ -233,9 +230,7 @@ export default new Elysia({ prefix: "/users" })
 	.patch(
 		"/me",
 		async ({ profile, authorization, body }) => {
-			await authorization.unit.ensureCanUpdate(profile.unitId, [
-				["localizations", body.language],
-			]);
+			await authorization.unit.ensureCanUpdate(profile.unitId, [["localizations", body.language]]);
 			await database.transaction(async (tx) => {
 				await ensureImageAssetsAttachable(
 					tx,
@@ -339,9 +334,7 @@ export default new Elysia({ prefix: "/users" })
 			const [preference] = await database
 				.update(profilePreference)
 				.set({
-					...(body.scoreVisibility === undefined
-						? {}
-						: { scoreVisibility: body.scoreVisibility }),
+					...(body.scoreVisibility === undefined ? {} : { scoreVisibility: body.scoreVisibility }),
 					...(body.progressVisibility === undefined
 						? {}
 						: { progressVisibility: body.progressVisibility }),
@@ -375,9 +368,7 @@ export default new Elysia({ prefix: "/users" })
 			const [preference] = await database
 				.update(profilePreference)
 				.set({
-					...(body.interfaceLocale === undefined
-						? {}
-						: { interfaceLocale: body.interfaceLocale }),
+					...(body.interfaceLocale === undefined ? {} : { interfaceLocale: body.interfaceLocale }),
 					...(body.chineseContentDisplay === undefined
 						? {}
 						: { chineseContentDisplay: body.chineseContentDisplay }),
@@ -587,20 +578,14 @@ export default new Elysia({ prefix: "/users" })
 							localizationLanguages,
 						),
 						realmId: score.realmId,
-						realmTitle: resolvedUnitLocalizationTitle(
-							activityScoreRealm.id,
-							localizationLanguages,
-						),
+						realmTitle: resolvedUnitLocalizationTitle(activityScoreRealm.id, localizationLanguages),
 						value: score.value,
 						visibility: score.visibility,
 						updatedAt: score.updatedAt,
 					})
 					.from(score)
 					.innerJoin(profilePreference, eq(profilePreference.profileId, score.profileId))
-					.innerJoin(
-						activityScoreTargetUnit,
-						eq(activityScoreTargetUnit.id, score.unitId),
-					)
+					.innerJoin(activityScoreTargetUnit, eq(activityScoreTargetUnit.id, score.unitId))
 					.innerJoin(activityScoreRealm, eq(activityScoreRealm.id, score.realmId))
 					.where(
 						and(
@@ -617,11 +602,7 @@ export default new Elysia({ prefix: "/users" })
 								referencedUnitReadOptions,
 								activityScoreTargetUnit,
 							),
-							getUnitReadCondition(
-								viewerProfileId,
-								referencedUnitReadOptions,
-								activityScoreRealm,
-							),
+							getUnitReadCondition(viewerProfileId, referencedUnitReadOptions, activityScoreRealm),
 						),
 					)
 					.orderBy(desc(score.updatedAt), desc(score.id))
@@ -645,10 +626,7 @@ export default new Elysia({ prefix: "/users" })
 						lastSeenAt: unitProgress.lastSeenAt,
 					})
 					.from(unitProgress)
-					.innerJoin(
-						profilePreference,
-						eq(profilePreference.profileId, unitProgress.profileId),
-					)
+					.innerJoin(profilePreference, eq(profilePreference.profileId, unitProgress.profileId))
 					.innerJoin(
 						activityProgressTargetUnit,
 						eq(activityProgressTargetUnit.id, unitProgress.unitId),
@@ -704,10 +682,7 @@ export default new Elysia({ prefix: "/users" })
 						eq(unitLocalization.unitId, profileTable.id),
 						eq(
 							unitLocalization.language,
-							resolvedUnitLocalizationLanguage(
-								profileTable.id,
-								localizationLanguages,
-							),
+							resolvedUnitLocalizationLanguage(profileTable.id, localizationLanguages),
 						),
 					),
 				)

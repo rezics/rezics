@@ -49,8 +49,7 @@ export function lowerBoundCount(value: number): CountResult {
 
 export function estimateCount(value: number, asOf: Date): EstimateCount {
 	assertCountValue(value);
-	if (Number.isNaN(asOf.getTime()))
-		throw new RangeError("Count estimate timestamp must be valid");
+	if (Number.isNaN(asOf.getTime())) throw new RangeError("Count estimate timestamp must be valid");
 	return { kind: "estimate", value, asOf: asOf.toISOString() };
 }
 

@@ -62,9 +62,7 @@ describe("Portable Text editor spoiler capabilities", () => {
 						{
 							_key: "list-1",
 							_type: "block",
-							children: [
-								{ _key: "span-1", _type: "span", text: "First item", marks: [] },
-							],
+							children: [{ _key: "span-1", _type: "span", text: "First item", marks: [] }],
 							markDefs: [],
 							style: "normal",
 							listItem: "bullet",
@@ -133,11 +131,7 @@ describe("Portable Text editor spoiler capabilities", () => {
 		const onChange = vi.fn();
 		const enabled = render(
 			<UiProvider>
-				<PortableTextEditor
-					capabilities={spoilerCapabilities}
-					onChange={onChange}
-					value={[]}
-				/>
+				<PortableTextEditor capabilities={spoilerCapabilities} onChange={onChange} value={[]} />
 			</UiProvider>,
 		);
 

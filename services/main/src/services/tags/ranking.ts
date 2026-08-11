@@ -75,8 +75,7 @@ export function compareGlobalTagRank(left: GlobalTagRankInput, right: GlobalTagR
 				? -1
 				: compareBytewisePositions(left.position, right.position);
 	const confidence =
-		wilsonLowerBound(right.score, right.voteCount) -
-		wilsonLowerBound(left.score, left.voteCount);
+		wilsonLowerBound(right.score, right.voteCount) - wilsonLowerBound(left.score, left.voteCount);
 	if (confidence !== 0) return confidence;
 	if (left.score !== right.score) return right.score - left.score;
 	if (left.voteCount !== right.voteCount) return right.voteCount - left.voteCount;

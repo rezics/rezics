@@ -37,10 +37,7 @@ function notificationData(): InfiniteData<GetApiNotificationsStatus200, unknown>
 		pageParams: [undefined],
 		pages: [
 			{
-				items: [
-					notificationItem(FirstNotificationId),
-					notificationItem(SecondNotificationId),
-				],
+				items: [notificationItem(FirstNotificationId), notificationItem(SecondNotificationId)],
 				nextCursor: null,
 				pollCursor: null,
 				unreadCount: {
@@ -88,8 +85,7 @@ describe("notification optimistic read cache", () => {
 			value: 1,
 		});
 		expect(
-			queryClient.getQueryData<GetApiNotificationsUnreadCountStatus200>(unreadCountKey)
-				?.count,
+			queryClient.getQueryData<GetApiNotificationsUnreadCountStatus200>(unreadCountKey)?.count,
 		).toMatchObject({ kind: "estimate", value: 1 });
 
 		await optimisticallyMarkNotificationRead(queryClient, FirstNotificationId, ReadAt);

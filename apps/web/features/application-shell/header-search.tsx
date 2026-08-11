@@ -53,15 +53,13 @@ export function HeaderSearchProvider({ children }: { readonly children: ReactNod
 
 export function useCurrentHeaderSearch(): HeaderSearchDescriptor | undefined {
 	const context = useContext(HeaderSearchContext);
-	if (!context)
-		throw new Error("useCurrentHeaderSearch must be used within HeaderSearchProvider");
+	if (!context) throw new Error("useCurrentHeaderSearch must be used within HeaderSearchProvider");
 	return context.current;
 }
 
 export function useHeaderSearchOverride(descriptor?: HeaderSearchDescriptor): void {
 	const context = useContext(HeaderSearchContext);
-	if (!context)
-		throw new Error("useHeaderSearchOverride must be used within HeaderSearchProvider");
+	if (!context) throw new Error("useHeaderSearchOverride must be used within HeaderSearchProvider");
 	const { register, unregister } = context;
 
 	useEffect(() => {

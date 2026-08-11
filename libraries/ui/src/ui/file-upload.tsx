@@ -178,10 +178,7 @@ export const FileUploadList = (props: FileUploadListProps) => {
 
 						<FileUploadItemDeleteTrigger asChild className="me-auto rtl:ms-auto">
 							<Button
-								className={cn(
-									"rounded-lg",
-									"hover:bg-destructive/10 hover:text-destructive",
-								)}
+								className={cn("rounded-lg", "hover:bg-destructive/10 hover:text-destructive")}
 								size="icon-xs"
 								variant="ghost"
 							>

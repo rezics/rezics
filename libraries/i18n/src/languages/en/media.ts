@@ -42,9 +42,12 @@ export default {
 			cover: "Adjust cover",
 		},
 		description: {
-			avatar: "Drag and zoom the image inside the square crop. The circular avatar preview does not remove the original corners.",
-			banner: "Drag and zoom the image inside the fixed 4:1 crop. New banners start from the top-left.",
-			cover: "Keep the complete image by default, or switch to a fixed 3:4 crop when composition matters more.",
+			avatar:
+				"Drag and zoom the image inside the square crop. The circular avatar preview does not remove the original corners.",
+			banner:
+				"Drag and zoom the image inside the fixed 4:1 crop. New banners start from the top-left.",
+			cover:
+				"Keep the complete image by default, or switch to a fixed 3:4 crop when composition matters more.",
 		},
 		close: "Close image adjustment",
 		loading: "Loading the original image…",

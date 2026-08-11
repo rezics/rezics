@@ -51,8 +51,7 @@ export function notificationHref(item: Pick<NotificationItem, "id" | "destinatio
 			return accessInvitationHref(destination.unitId, destination.invitationId);
 		case "unit":
 			return (
-				publicUnitHref(destination.unit.kind, destination.unit) ??
-				notificationDetailsHref(item.id)
+				publicUnitHref(destination.unit.kind, destination.unit) ?? notificationDetailsHref(item.id)
 			);
 		case "notification_details":
 			return notificationDetailsHref(destination.notificationId);

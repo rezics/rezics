@@ -188,10 +188,7 @@ export default new Elysia({ prefix: "/recommendations" })
 						.select({ id: unit.id })
 						.from(unit)
 						.where(
-							and(
-								eq(unit.id, resolvedMainUnitId),
-								getUnitReadCondition(identity.profile?.unitId),
-							),
+							and(eq(unit.id, resolvedMainUnitId), getUnitReadCondition(identity.profile?.unitId)),
 						)
 						.limit(1);
 					if (readableMain) inheritedSeedUnitId = resolvedMainUnitId;

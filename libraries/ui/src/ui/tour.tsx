@@ -285,18 +285,13 @@ export const TourActions = (props: React.ComponentProps<typeof DialogFooter>) =>
 
 	return (
 		<ArkTour.Control {...rest} asChild>
-			<DialogFooter
-				className={cn("flex flex-wrap gap-2", className)}
-				data-slot="tour-actions"
-			>
+			<DialogFooter className={cn("flex flex-wrap gap-2", className)} data-slot="tour-actions">
 				{actions.map((action) => (
 					<TourActionTrigger action={action} asChild key={action.label}>
 						<Button
 							size="sm"
 							variant={
-								action.action === "dismiss" || action.action === "prev"
-									? "outline"
-									: "default"
+								action.action === "dismiss" || action.action === "prev" ? "outline" : "default"
 							}
 						>
 							{action.action === "prev" && <ChevronLeft />}

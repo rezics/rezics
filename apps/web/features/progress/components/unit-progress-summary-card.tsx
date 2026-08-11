@@ -48,12 +48,7 @@ export function UnitProgressSummaryCard({ className }: { readonly className?: st
 				</CardHeader>
 				<CardContent className="grid gap-3">
 					<RequestFailure error={progress.state.error} fallback={t.ui.retryLater} />
-					<Button
-						className="w-fit"
-						onClick={progress.retryProgress}
-						size="sm"
-						variant="outline"
-					>
+					<Button className="w-fit" onClick={progress.retryProgress} size="sm" variant="outline">
 						{t.engagement.retryProgress}
 					</Button>
 				</CardContent>
@@ -61,9 +56,7 @@ export function UnitProgressSummaryCard({ className }: { readonly className?: st
 		);
 
 	const record =
-		progress.state.kind === "untracked"
-			? null
-			: progressRecordFromEditableState(progress.state);
+		progress.state.kind === "untracked" ? null : progressRecordFromEditableState(progress.state);
 	const percentage = Math.round((record?.progress ?? 0) * 100);
 	const href = unitProgressHref(progress.domain.type, progress.domain.unitId);
 

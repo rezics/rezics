@@ -31,9 +31,7 @@ describe("pagination cursors", () => {
 
 		for (const value of [null, { v: 1 }, { v: 1, offset: -1 }, { v: 2, offset: 12 }]) {
 			const cursor = Buffer.from(JSON.stringify(value)).toString("base64url");
-			expect(() => parseJsonCursor(cursor, schema)).toThrow(
-				"Cursor does not match its schema",
-			);
+			expect(() => parseJsonCursor(cursor, schema)).toThrow("Cursor does not match its schema");
 		}
 		expect(() => parseJsonCursor("not-json", schema)).toThrow();
 	});

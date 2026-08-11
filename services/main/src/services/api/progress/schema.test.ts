@@ -67,9 +67,7 @@ describe("progress API contract", () => {
 		expect(Check(CompleteProgressBody, { visibility: "public" })).toBe(true);
 		expect(Check(CompleteProgressBody, { visibility: "followers" })).toBe(false);
 		expect(Check(CompleteProgressBody, { totalTimeMs: -1 })).toBe(false);
-		expect(Check(CompleteProgressBody, { totalTimeMs: Number.MAX_SAFE_INTEGER + 1 })).toBe(
-			false,
-		);
+		expect(Check(CompleteProgressBody, { totalTimeMs: Number.MAX_SAFE_INTEGER + 1 })).toBe(false);
 	});
 
 	it("keeps current-snapshot selection and record provenance out of journal writes", () => {

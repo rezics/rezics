@@ -130,10 +130,7 @@ afterEach(() => {
 describe("SubjectPostComposer", () => {
 	it("expands the complete editor and publishes an Excerpt for the fixed subject", async () => {
 		render(
-			<SubjectPostComposer
-				postKind="excerpt"
-				subjectId="019b76da-a800-7300-8000-000000000002"
-			/>,
+			<SubjectPostComposer postKind="excerpt" subjectId="019b76da-a800-7300-8000-000000000002" />,
 		);
 
 		const trigger = screen.getByRole("button", { name: "Add an excerpt" });

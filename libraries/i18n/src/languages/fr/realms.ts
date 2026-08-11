@@ -49,8 +49,7 @@ export default {
 			},
 			rules: {
 				label: "Règles",
-				description:
-					"Modifiez les règles localisées et les actions qui exigent leur acceptation.",
+				description: "Modifiez les règles localisées et les actions qui exigent leur acceptation.",
 			},
 			scoring: {
 				label: "Critères de notation",
@@ -58,13 +57,11 @@ export default {
 			},
 			tagVoting: {
 				label: "Vote sur les étiquettes",
-				description:
-					"Contrôler le vote et consulter tous les liens de contexte d’étiquette.",
+				description: "Contrôler le vote et consulter tous les liens de contexte d’étiquette.",
 			},
 			pins: {
 				label: "Contenu épinglé",
-				description:
-					"Gérez le contenu épinglé et mis en avant ainsi que son ordre d’affichage.",
+				description: "Gérez le contenu épinglé et mis en avant ainsi que son ordre d’affichage.",
 			},
 			access: {
 				label: "Accès",
@@ -73,8 +70,7 @@ export default {
 			},
 			moderation: {
 				label: "Modération du contenu",
-				description:
-					"Examinez le contenu en attente et appliquez des actions de modération.",
+				description: "Examinez le contenu en attente et appliquez des actions de modération.",
 			},
 			history: {
 				label: "Historique des versions",

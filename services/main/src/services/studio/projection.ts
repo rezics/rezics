@@ -106,21 +106,18 @@ async function resolveStudioWorkTarget(
 				},
 			];
 		case "unit_contribution":
-			return (await resolveStudioResourceUnitIds(tx, target.unitId)).map(
-				(resourceUnitId) => ({
-					resourceUnitId,
-					authorizationUnitId: target.unitId,
-					authorizationScope: target.authorizationScope,
-				}),
-			);
+			return (await resolveStudioResourceUnitIds(tx, target.unitId)).map((resourceUnitId) => ({
+				resourceUnitId,
+				authorizationUnitId: target.unitId,
+				authorizationScope: target.authorizationScope,
+			}));
 		case "content_structure": {
 			const [record] = await tx
 				.select({ ownerUnitId: contentStructure.ownerUnitId })
 				.from(contentStructure)
 				.where(eq(contentStructure.id, target.structureId))
 				.limit(1);
-			if (!record)
-				throw new Error(`Studio Content Structure ${target.structureId} does not exist`);
+			if (!record) throw new Error(`Studio Content Structure ${target.structureId} does not exist`);
 			return [
 				{
 					resourceUnitId: record.ownerUnitId,
@@ -167,9 +164,7 @@ export async function recordStudioWorkRelation(
 				profileId: input.profileId,
 				resourceUnitId: target.resourceUnitId,
 				authorizationUnitId: target.authorizationUnitId,
-				authorizationScope: target.authorizationScope
-					? [...target.authorizationScope]
-					: null,
+				authorizationScope: target.authorizationScope ? [...target.authorizationScope] : null,
 				authorizationScopeKey,
 				relation: input.relation,
 				source: input.source,

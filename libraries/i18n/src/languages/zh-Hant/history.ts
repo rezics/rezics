@@ -42,8 +42,7 @@ export default {
 			summary: "編輯摘要",
 			actor: "編輯者身分",
 		},
-		currentRevisionContent:
-			"目前修訂的內容不能隱藏。請先發布不含侵權內容的新修訂，再保護舊修訂。",
+		currentRevisionContent: "目前修訂的內容不能隱藏。請先發布不含侵權內容的新修訂，再保護舊修訂。",
 		reasonLabel: "原因",
 		selectReason: "選擇原因",
 		atLeastOneField: "請至少選擇一項要保護的資料。",

@@ -47,11 +47,7 @@ export function UnitRatingsReviewsSection({
 				<h3 className="font-heading text-xl font-bold sm:text-2xl">
 					{t.engagement.communityReviews}
 				</h3>
-				<UnitReviewFeed
-					mode="preview"
-					moreReviewsHref={moreReviewsHref}
-					targetId={targetId}
-				/>
+				<UnitReviewFeed mode="preview" moreReviewsHref={moreReviewsHref} targetId={targetId} />
 			</div>
 		</section>
 	);

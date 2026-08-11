@@ -19,17 +19,11 @@ export function WikiAccessModeField({
 			<FieldLabel>{t.posts.wikiAccessMode}</FieldLabel>
 			<NativeSelect
 				onChange={(event) =>
-					onChange(
-						event.currentTarget.value === "restricted"
-							? "restricted"
-							: "community_owned",
-					)
+					onChange(event.currentTarget.value === "restricted" ? "restricted" : "community_owned")
 				}
 				value={accessMode}
 			>
-				<NativeSelectOption value="community_owned">
-					{t.posts.wikiCommunityUnit}
-				</NativeSelectOption>
+				<NativeSelectOption value="community_owned">{t.posts.wikiCommunityUnit}</NativeSelectOption>
 				<NativeSelectOption value="restricted">{t.posts.wikiRestricted}</NativeSelectOption>
 			</NativeSelect>
 			<FieldDescription>

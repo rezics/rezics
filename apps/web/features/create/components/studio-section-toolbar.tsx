@@ -98,11 +98,7 @@ export function StudioSectionToolbar({
 					placeholder={t.create.filters.viewLabel}
 					value={[filters.view]}
 				/>
-				<Button
-					onClick={() => setShowAdvancedFilters(true)}
-					type="button"
-					variant="outline"
-				>
+				<Button onClick={() => setShowAdvancedFilters(true)} type="button" variant="outline">
 					<SlidersHorizontalIcon aria-hidden data-icon="inline-start" />
 					{t.create.filters.more}
 					{activeCount > 0 ? (

@@ -68,10 +68,7 @@ export const contentStructureRevision = pgTable(
 			table.createdAt.desc(),
 			table.id.desc(),
 		),
-		check(
-			"content_structure_revision_replay_byte_size_check",
-			sql`${table.replayByteSize} >= 0`,
-		),
+		check("content_structure_revision_replay_byte_size_check", sql`${table.replayByteSize} >= 0`),
 		check(
 			"content_structure_revision_checkpoint_byte_size_check",
 			sql`${table.checkpointByteSize} >= 0`,

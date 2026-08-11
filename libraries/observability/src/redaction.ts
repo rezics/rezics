@@ -152,9 +152,7 @@ function sanitizeSpan(span: ReadableSpan, production: boolean): ReadableSpan {
 		endTime: span.endTime,
 		status: {
 			...span.status,
-			message: span.status.message
-				? redactString(span.status.message).slice(0, 1_024)
-				: undefined,
+			message: span.status.message ? redactString(span.status.message).slice(0, 1_024) : undefined,
 		},
 		attributes: sanitizeSpanAttributes(span.attributes, production),
 		events: span.events.map((event) => ({
@@ -166,9 +164,7 @@ function sanitizeSpan(span: ReadableSpan, production: boolean): ReadableSpan {
 		})),
 		links: span.links.map((link) => ({
 			context: link.context,
-			attributes: link.attributes
-				? sanitizeSpanAttributes(link.attributes, production)
-				: undefined,
+			attributes: link.attributes ? sanitizeSpanAttributes(link.attributes, production) : undefined,
 		})),
 		duration: span.duration,
 		ended: span.ended,

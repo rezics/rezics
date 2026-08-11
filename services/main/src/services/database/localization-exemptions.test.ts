@@ -24,8 +24,7 @@ const reviewedExemptions = [
 	},
 	{
 		file: "src/services/database/schema/communication.ts",
-		rationale:
-			"Authored snapshot: original direct message; translation would alter the message.",
+		rationale: "Authored snapshot: original direct message; translation would alter the message.",
 	},
 	{
 		file: "src/services/database/schema/communication.ts",
@@ -33,8 +32,7 @@ const reviewedExemptions = [
 	},
 	{
 		file: "src/services/database/schema/communication.ts",
-		rationale:
-			"Machine diagnostic: raw delivery failure detail for operators, never display copy.",
+		rationale: "Machine diagnostic: raw delivery failure detail for operators, never display copy.",
 	},
 	{
 		file: "src/services/database/schema/content-structure-history.ts",
@@ -54,13 +52,11 @@ const reviewedExemptions = [
 	},
 	{
 		file: "src/services/database/schema/recommendation.ts",
-		rationale:
-			"Machine diagnostic: raw snapshot failure detail for operators, never display copy.",
+		rationale: "Machine diagnostic: raw snapshot failure detail for operators, never display copy.",
 	},
 	{
 		file: "src/services/database/schema/unit.ts",
-		rationale:
-			"Search synonym: language-tagged lookup term, never canonical Unit display copy.",
+		rationale: "Search synonym: language-tagged lookup term, never canonical Unit display copy.",
 	},
 	{
 		file: "src/services/database/schema/zone.ts",

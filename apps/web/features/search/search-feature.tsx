@@ -204,9 +204,7 @@ function summarizeExpression(
 							(value): value is SearchScalar => value !== undefined,
 						);
 		return `${label(control)} · ${operatorLabel(filter.operator)}${
-			values.length
-				? ` · ${values.map((value) => valueLabel(control, value)).join(", ")}`
-				: ""
+			values.length ? ` · ${values.map((value) => valueLabel(control, value)).join(", ")}` : ""
 		}`;
 	}
 	if (expression.operator === "not")
@@ -311,13 +309,13 @@ export function SearchFeature({
 		unitFilterSearchQuery(initialState?.filter) || initialQuery || "",
 	);
 	const [category, setCategory] = useState(() =>
-		valuesOf(initial.quick.find((value) => value.filter.field === "category")).flatMap(
-			(value) => (typeof value === "string" ? [value] : []),
+		valuesOf(initial.quick.find((value) => value.filter.field === "category")).flatMap((value) =>
+			typeof value === "string" ? [value] : [],
 		),
 	);
 	const [language, setLanguage] = useState(() =>
-		valuesOf(initial.quick.find((value) => value.filter.field === "language")).flatMap(
-			(value) => (typeof value === "string" ? [value] : []),
+		valuesOf(initial.quick.find((value) => value.filter.field === "language")).flatMap((value) =>
+			typeof value === "string" ? [value] : [],
 		),
 	);
 	const initialTagValues = (excluded: boolean) =>
@@ -525,9 +523,7 @@ export function SearchFeature({
 	function resetFilters() {
 		const defaultQuery = "";
 		const preferredLanguages =
-			appearance === "feed" &&
-			languageControl &&
-			preferences.data?.filterFeedByPreferredLanguages
+			appearance === "feed" && languageControl && preferences.data?.filterFeedByPreferredLanguages
 				? (preferences.data?.preferredLanguages ?? [])
 				: [];
 		const languageDefault: SearchControlValue | undefined =
@@ -593,19 +589,13 @@ export function SearchFeature({
 							>
 								{t.injectionSources[injection.source]}:{" "}
 								{valuesOf(injection.value)
-									.map((value) =>
-										control ? valueLabel(control, value) : String(value),
-									)
+									.map((value) => (control ? valueLabel(control, value) : String(value)))
 									.join(", ")}
 								{injection.removable && onInjectionsChange ? (
 									<button
 										aria-label={t.removeAppliedContext}
 										onClick={() =>
-											onInjectionsChange(
-												injections.filter(
-													(_, candidate) => candidate !== index,
-												),
-											)
+											onInjectionsChange(injections.filter((_, candidate) => candidate !== index))
 										}
 										type="button"
 									>
@@ -637,12 +627,7 @@ export function SearchFeature({
 							value={query}
 						/>
 					</div>
-					<Button
-						className="h-12 shrink-0 px-5"
-						isLoading={pending}
-						type="submit"
-						variant="solid"
-					>
+					<Button className="h-12 shrink-0 px-5" isLoading={pending} type="submit" variant="solid">
 						<Search aria-hidden />
 						<span className="max-sm:sr-only">{t.submit}</span>
 					</Button>
@@ -786,10 +771,7 @@ export function SearchFeature({
 			{advanced ? (
 				<section className="flex flex-wrap items-center gap-2 rounded-lg bg-muted/50 px-3 py-3">
 					<span className="font-medium text-sm">{t.appliedAdvancedFilters}</span>
-					<Badge
-						className="max-w-full whitespace-normal text-start leading-5"
-						variant="secondary"
-					>
+					<Badge className="max-w-full whitespace-normal text-start leading-5" variant="secondary">
 						{advancedSummary}
 					</Badge>
 					<Button
@@ -825,11 +807,7 @@ export function SearchFeature({
 		<>
 			{appearance === "feed" ? (
 				<div className="border-b border-border-weak pb-4">
-					<div
-						aria-label={t.filters}
-						className="flex flex-wrap items-center gap-2"
-						role="group"
-					>
+					<div aria-label={t.filters} className="flex flex-wrap items-center gap-2" role="group">
 						<ChoiceSelect
 							ariaLabel={t.sort}
 							onValueChange={([nextSort]) => {
@@ -851,11 +829,7 @@ export function SearchFeature({
 						<DialogContent size="3xl">
 							<DialogHeader title={t.filters} />
 							<DialogBody>
-								<form
-									className="grid gap-5"
-									id={`${id}-feed-filters`}
-									onSubmit={submit}
-								>
+								<form className="grid gap-5" id={`${id}-feed-filters`} onSubmit={submit}>
 									{editor}
 								</form>
 							</DialogBody>

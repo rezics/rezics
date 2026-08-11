@@ -22,11 +22,7 @@ export const InputOTP = (props: InputOTPProps) => {
 			{...rest}
 		>
 			<ArkPinInput.Control
-				className={cn(
-					"flex items-center gap-2",
-					"*:data-[slot=input-otp-input]:size-9",
-					className,
-				)}
+				className={cn("flex items-center gap-2", "*:data-[slot=input-otp-input]:size-9", className)}
 				data-slot="input-otp-control"
 			>
 				{children}

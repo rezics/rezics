@@ -39,10 +39,7 @@ export function TagVoteControls({
 						type="button"
 						variant="quiet"
 					>
-						<ArrowBigUpIcon
-							aria-hidden
-							fill={viewerVote === 1 ? "currentColor" : "none"}
-						/>
+						<ArrowBigUpIcon aria-hidden fill={viewerVote === 1 ? "currentColor" : "none"} />
 						{t.tags.vote.fits}
 					</Button>
 					<Button
@@ -54,20 +51,11 @@ export function TagVoteControls({
 						type="button"
 						variant="quiet"
 					>
-						<ArrowBigDownIcon
-							aria-hidden
-							fill={viewerVote === -1 ? "currentColor" : "none"}
-						/>
+						<ArrowBigDownIcon aria-hidden fill={viewerVote === -1 ? "currentColor" : "none"} />
 						{t.tags.vote.doesNotFit}
 					</Button>
 					{viewerVote !== null ? (
-						<Button
-							disabled={isPending}
-							onClick={onClear}
-							size="sm"
-							type="button"
-							variant="quiet"
-						>
+						<Button disabled={isPending} onClick={onClear} size="sm" type="button" variant="quiet">
 							{t.tags.vote.clear}
 						</Button>
 					) : null}

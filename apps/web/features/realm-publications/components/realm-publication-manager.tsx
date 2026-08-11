@@ -122,9 +122,7 @@ export function RealmPublicationManager({ unitId }: { readonly unitId: string })
 						}}
 						value={publicationState}
 					>
-						<NativeSelectOption value="active">
-							{copy.publicationStates.active}
-						</NativeSelectOption>
+						<NativeSelectOption value="active">{copy.publicationStates.active}</NativeSelectOption>
 						<NativeSelectOption value="withdrawn">
 							{copy.publicationStates.withdrawn}
 						</NativeSelectOption>
@@ -216,15 +214,11 @@ function RealmPublicationCard({
 					<div className="min-w-0">
 						<CardTitle>{item.title ?? copy.unnamedRealm}</CardTitle>
 						<CardDescription>
-							{item.effectivelyVisible
-								? copy.effectivelyVisible
-								: copy.notEffectivelyVisible}
+							{item.effectivelyVisible ? copy.effectivelyVisible : copy.notEffectivelyVisible}
 						</CardDescription>
 					</div>
 					<div className="flex flex-wrap gap-2">
-						<Badge variant="secondary">
-							{copy.publicationStates[item.publicationState]}
-						</Badge>
+						<Badge variant="secondary">{copy.publicationStates[item.publicationState]}</Badge>
 						<Badge variant="outline">{copy.realmStatuses[item.status]}</Badge>
 					</div>
 				</div>
@@ -233,9 +227,7 @@ function RealmPublicationCard({
 				<div className="text-muted-foreground text-sm">
 					{item.latestGovernance
 						? copy.governanceAction({
-								action: t.realms.governanceActions[
-									item.latestGovernance.actionKind
-								],
+								action: t.realms.governanceActions[item.latestGovernance.actionKind],
 							})
 						: null}
 				</div>

@@ -51,8 +51,7 @@ export function toUnitVariantConstraintError(error: unknown) {
 		constraint === "unit_variant_not_self_check"
 	)
 		return new UnitVariantTargetIsVariant();
-	if (constraint === "unit_variant_source_has_variants")
-		return new UnitVariantSourceHasVariants();
+	if (constraint === "unit_variant_source_has_variants") return new UnitVariantSourceHasVariants();
 	return undefined;
 }
 
@@ -200,11 +199,7 @@ async function readableSummaries(
 			type: unit.kind,
 			language: resolvedUnitLocalizationLanguage(unit.id, localizationLanguages),
 			title: resolvedUnitLocalizationTitle(unit.id, localizationLanguages),
-			coverAssetId: resolvedUnitLocalizationImageAssetId(
-				unit.id,
-				"cover",
-				localizationLanguages,
-			),
+			coverAssetId: resolvedUnitLocalizationImageAssetId(unit.id, "cover", localizationLanguages),
 		})
 		.from(unit)
 		.where(and(inArray(unit.id, ids), getUnitReadCondition(profileId)));
@@ -289,20 +284,13 @@ export async function getUnitSeriesMemberships(
 			releasedOn: seriesRelease.releasedOn,
 			language: resolvedUnitLocalizationLanguage(unit.id, localizationLanguages),
 			title: resolvedUnitLocalizationTitle(unit.id, localizationLanguages),
-			coverAssetId: resolvedUnitLocalizationImageAssetId(
-				unit.id,
-				"cover",
-				localizationLanguages,
-			),
+			coverAssetId: resolvedUnitLocalizationImageAssetId(unit.id, "cover", localizationLanguages),
 		})
 		.from(unit)
 		.innerJoin(series, eq(series.id, unit.id))
 		.innerJoin(seriesRelease, eq(seriesRelease.seriesId, series.id))
 		.where(
-			and(
-				inArray(seriesRelease.releaseUnitId, releaseUnitIds),
-				getUnitReadCondition(profileId),
-			),
+			and(inArray(seriesRelease.releaseUnitId, releaseUnitIds), getUnitReadCondition(profileId)),
 		)
 		.orderBy(
 			sql`case when ${seriesRelease.releaseUnitId} = ${unitId}::uuid then 0 else 1 end`,
@@ -378,12 +366,7 @@ export async function updateUnitVariantContext(input: {
 		if (inbound) throw new UnitVariantSourceHasVariants();
 
 		if (input.mainUnitId) {
-			const pair = requireVariantPair(
-				locked,
-				input.variantUnitId,
-				input.mainUnitId,
-				input.kind,
-			);
+			const pair = requireVariantPair(locked, input.variantUnitId, input.mainUnitId, input.kind);
 			await ensureTargetReadable(tx, input.authorization, input.mainUnitId);
 			const [targetOutbound] = await tx
 				.select({ mainUnitId: unitVariant.mainUnitId })
@@ -493,11 +476,7 @@ export async function promoteUnitVariantToMain(input: {
 			unitKind: input.kind,
 		});
 
-		const changedUnitIds = [
-			input.variantUnitId,
-			input.expectedMainUnitId,
-			...siblingIds,
-		].sort();
+		const changedUnitIds = [input.variantUnitId, input.expectedMainUnitId, ...siblingIds].sort();
 		for (const unitId of changedUnitIds)
 			await recordUnitRevision(tx, {
 				unitId,

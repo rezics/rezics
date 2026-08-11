@@ -84,9 +84,7 @@ describe("FeedListItems", () => {
 			/>,
 		);
 
-		expect(screen.getByRole("feed", { name: "Test feed" }).getAttribute("aria-busy")).toBe(
-			"true",
-		);
+		expect(screen.getByRole("feed", { name: "Test feed" }).getAttribute("aria-busy")).toBe("true");
 	});
 
 	it("does not impose a scroll container on an infinite feed", () => {

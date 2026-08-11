@@ -160,8 +160,7 @@ export function ContentLanguageSettingsDialog({
 										aria-label={t.units.contentLanguages.controlLabel}
 										onChange={(event) => {
 											const language = event.currentTarget.value;
-											if (isContentLanguage(language))
-												setLanguageToAdd(language);
+											if (isContentLanguage(language)) setLanguageToAdd(language);
 										}}
 										value={languageToAdd}
 									>
@@ -174,8 +173,7 @@ export function ContentLanguageSettingsDialog({
 									<Button
 										disabled={!languageToAdd}
 										onClick={() => {
-											if (languageToAdd && requestLanguage(languageToAdd))
-												onOpenChange(false);
+											if (languageToAdd && requestLanguage(languageToAdd)) onOpenChange(false);
 										}}
 										size="sm"
 										type="button"
@@ -198,16 +196,12 @@ export function ContentLanguageSettingsDialog({
 							announcements: {
 								onDragStart({ active }) {
 									const language = contentLanguageFromDragId(active.id);
-									return language
-										? t.locale.contentLanguages[language]
-										: undefined;
+									return language ? t.locale.contentLanguages[language] : undefined;
 								},
 								onDragOver({ over }) {
 									if (!over) return;
 									const language = contentLanguageFromDragId(over.id);
-									return language
-										? t.locale.contentLanguages[language]
-										: undefined;
+									return language ? t.locale.contentLanguages[language] : undefined;
 								},
 								onDragEnd({ active, over }) {
 									if (!over) return;
@@ -241,9 +235,7 @@ export function ContentLanguageSettingsDialog({
 										onCancelRemove={() => setLanguageToRemove(undefined)}
 										onConfirmRemove={() => void confirmRemove()}
 										onMove={(targetIndex) =>
-											setDraft(
-												moveContentLanguage(draft, language, targetIndex),
-											)
+											setDraft(moveContentLanguage(draft, language, targetIndex))
 										}
 										onRemove={() => setLanguageToRemove(language)}
 										order={draft}
@@ -253,10 +245,7 @@ export function ContentLanguageSettingsDialog({
 							</ul>
 						</SortableContext>
 					</DndContext>
-					<RequestFailure
-						error={reorder.error ?? remove.error}
-						fallback={t.errors.unknown}
-					/>
+					<RequestFailure error={reorder.error ?? remove.error} fallback={t.errors.unknown} />
 				</DialogBody>
 				<DialogFooter>
 					<Button onClick={() => onOpenChange(false)} type="button" variant="quiet">
@@ -321,9 +310,7 @@ function SortableLanguage({
 				>
 					<GripVertical aria-hidden />
 				</Button>
-				<span className="min-w-0 flex-1 font-medium">
-					{t.locale.contentLanguages[language]}
-				</span>
+				<span className="min-w-0 flex-1 font-medium">{t.locale.contentLanguages[language]}</span>
 				<div className="flex items-center gap-1">
 					<Button
 						aria-label={t.units.contentLanguages.moveFirst}

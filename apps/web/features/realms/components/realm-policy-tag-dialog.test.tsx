@@ -55,9 +55,7 @@ vi.mock("@rezics/ui", async () => {
 			open ? <section role="dialog">{children}</section> : null,
 		DialogBody: ({ children }: { readonly children: ReactNode }) => <div>{children}</div>,
 		DialogContent: ({ children }: { readonly children: ReactNode }) => <div>{children}</div>,
-		DialogFooter: ({ children }: { readonly children: ReactNode }) => (
-			<footer>{children}</footer>
-		),
+		DialogFooter: ({ children }: { readonly children: ReactNode }) => <footer>{children}</footer>,
 		DialogHeader: ({
 			description,
 			title,

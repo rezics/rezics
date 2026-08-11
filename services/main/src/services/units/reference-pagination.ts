@@ -71,8 +71,7 @@ function compareRankedReferences(
 		throw new Error("Unpinned Unit reference unexpectedly has a position");
 
 	const confidence =
-		wilsonLowerBound(right.score, right.voteCount) -
-		wilsonLowerBound(left.score, left.voteCount);
+		wilsonLowerBound(right.score, right.voteCount) - wilsonLowerBound(left.score, left.voteCount);
 	if (confidence !== 0) return confidence;
 	if (left.score !== right.score) return right.score - left.score;
 	if (left.voteCount !== right.voteCount) return right.voteCount - left.voteCount;
@@ -149,9 +148,7 @@ export function paginateUnitReferences<Reference extends RankedUnitReference>(in
 		compareRankedReferences(boundaryOf(left), boundaryOf(right)),
 	);
 	const remaining = boundary
-		? ordered.filter(
-				(reference) => compareRankedReferences(boundaryOf(reference), boundary) > 0,
-			)
+		? ordered.filter((reference) => compareRankedReferences(boundaryOf(reference), boundary) > 0)
 		: ordered;
 	const items = remaining.slice(0, input.limit);
 	const last = items.at(-1);

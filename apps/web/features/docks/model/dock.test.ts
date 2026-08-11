@@ -53,9 +53,7 @@ describe("Dock frontend contract", () => {
 			"zone-ref",
 			"divider",
 		]);
-		expect(getDockAddableBlockTypes({ ownerKind: "realm", dockKind: "wiki" })).toContain(
-			"menu",
-		);
+		expect(getDockAddableBlockTypes({ ownerKind: "realm", dockKind: "wiki" })).toContain("menu");
 		expect(getDockAddableBlockTypes({ ownerKind: "book", dockKind: "main" })).toEqual([
 			"realm-ref",
 			"zone-ref",

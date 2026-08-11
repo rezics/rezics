@@ -71,10 +71,7 @@ export const unitStructure = pgTable(
 			"unit_structure_member_null_check",
 			sql`array_position(${table.memberUnitIds}, null) is null`,
 		),
-		check(
-			"unit_structure_not_self_check",
-			sql`not (${table.id} = any(${table.memberUnitIds}))`,
-		),
+		check("unit_structure_not_self_check", sql`not (${table.id} = any(${table.memberUnitIds}))`),
 	],
 );
 
@@ -92,10 +89,7 @@ export const unitStructureMember = pgTable(
 	},
 	(table) => [
 		primaryKey({ columns: [table.structureId, table.ordinal] }),
-		unique("unit_structure_member_structure_member_key").on(
-			table.structureId,
-			table.memberUnitId,
-		),
+		unique("unit_structure_member_structure_member_key").on(table.structureId, table.memberUnitId),
 		index("unit_structure_member_unit_idx").on(
 			table.memberUnitId,
 			table.structureId,
@@ -132,10 +126,7 @@ export const unitStructureEdge = pgTable(
 			table.parentUnitId,
 			table.structureId,
 		),
-		check(
-			"unit_structure_edge_not_self_check",
-			sql`${table.parentUnitId} <> ${table.childUnitId}`,
-		),
+		check("unit_structure_edge_not_self_check", sql`${table.parentUnitId} <> ${table.childUnitId}`),
 		check("unit_structure_edge_ordinal_check", sql`${table.ordinal} >= 0`),
 	],
 );

@@ -100,10 +100,8 @@ export default {
 	ContentGovernanceTargetNotFound: "Das Moderationsziel wurde nicht gefunden.",
 	ContentReviewRealmMissing: `In diesem Moderationsfall fehlt der ${realmTerms.inline}.`,
 	ContentReviewCaseNotFound: "Dieser Moderationsfall wurde nicht gefunden.",
-	ContentGovernanceReversedActionInvalid:
-		"Die zurückgenommene Aktion gehört nicht zu diesem Fall.",
-	ContentGovernanceActionIncompatible:
-		"Diese Aktion ist für das Moderationsziel nicht verfügbar.",
+	ContentGovernanceReversedActionInvalid: "Die zurückgenommene Aktion gehört nicht zu diesem Fall.",
+	ContentGovernanceActionIncompatible: "Diese Aktion ist für das Moderationsziel nicht verfügbar.",
 	ContentGovernanceTransitionInvalid:
 		"Das Ziel kann diesen Wechsel des Moderationsstatus nicht vornehmen.",
 	ContentGovernanceActionNoEffect: "Die Moderationsaktion würde das Ziel nicht ändern.",
@@ -115,8 +113,7 @@ export default {
 		"Füge höchstens eine interne Notiz und eine öffentliche Mitteilung hinzu.",
 	ReportAlreadySubmitted: "Du hast diese Unit für den laufenden Fall bereits gemeldet.",
 	ReportTargetRevisionUnavailable: "Diese Unit hat keine Revision, die gemeldet werden kann.",
-	ReportRuleUnavailable:
-		"Für den gewählten Zuständigkeitsbereich gibt es keine aktuellen Regeln.",
+	ReportRuleUnavailable: "Für den gewählten Zuständigkeitsbereich gibt es keine aktuellen Regeln.",
 	ReportRuleChanged: "Die gewählte Regel wurde geändert. Wähle sie vor dem Senden erneut aus.",
 	ReportRuleSourceForbidden: `Meldungen dürfen nur Regeln des aktuellen ${realmTerms.label} und offizielle Regeln anführen.`,
 	ContentGovernanceRuleSourceForbidden:
@@ -140,8 +137,7 @@ export default {
 	UnitOwnerRestrictionForbidden: "Der Eigentümer einer Unit kann nicht eingeschränkt werden.",
 	UnitAccessConfigurationInvalid:
 		"Diese Konfiguration des Unit-Zugriffs ist ungültig oder überschreitet die Berechtigungen, die du delegieren darfst.",
-	UnitOwnershipChanged:
-		"Der Eigentümer der Unit wurde geändert. Lade neu und versuche es erneut.",
+	UnitOwnershipChanged: "Der Eigentümer der Unit wurde geändert. Lade neu und versuche es erneut.",
 	UnitOwnershipTargetIneligible:
 		"Das gewählte Profil kann das Eigentum an der Unit nicht mehr erhalten.",
 	UnitOwnershipRelinquishmentForbidden:
@@ -177,8 +173,7 @@ export default {
 	ReplyPostNotFound: `Dieser Antwort-${postTerms.inline} wurde nicht gefunden.`,
 	ParentReplyNotFound: `Der übergeordnete Antwort-${postTerms.inline} wurde in dieser Diskussion nicht gefunden.`,
 	ReplyDepthExceeded: "Diese Antwort würde die maximale Diskussionstiefe überschreiten.",
-	InvalidNotificationCursor:
-		"Dieser Link zur Benachrichtigungsseite ist ungültig oder abgelaufen.",
+	InvalidNotificationCursor: "Dieser Link zur Benachrichtigungsseite ist ungültig oder abgelaufen.",
 	NotificationNotFound: "Diese Benachrichtigung wurde nicht gefunden.",
 	EntityEntryNotFound: `Dieser ${entityTerms.label}seintrag wurde nicht gefunden.`,
 	EntityAssociationRestricted: `Diese ${entityTerms.label} akzeptiert diese Art der Zuordnung nicht.`,
@@ -190,8 +185,7 @@ export default {
 	AssociationProposalRoleInvalid:
 		"Die ausgewählte Zuordnungsrolle stimmt nicht mit dem Zuordnungstyp überein.",
 	CreditAttributionNotFound: "Diese Mitwirkendenzuordnung wurde nicht gefunden.",
-	CreditAttributionRoleInvalid:
-		"Die ausgewählte Mitwirkendenrolle gilt nicht für diesen Unit-Typ.",
+	CreditAttributionRoleInvalid: "Die ausgewählte Mitwirkendenrolle gilt nicht für diesen Unit-Typ.",
 	CreditAttributionRequestConfirmationRequired:
 		"Bestätige, bevor Mitwirkendeneinladungen gesendet werden.",
 	SubjectAssociationNotFound: "Diese Themenzuordnung wurde nicht gefunden.",

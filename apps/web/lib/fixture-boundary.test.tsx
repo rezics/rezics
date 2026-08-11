@@ -14,8 +14,7 @@ async function collectSourceFiles(directory: URL): Promise<URL[]> {
 	const entries = await readdir(directory, { withFileTypes: true });
 	const files = await Promise.all(
 		entries.map((entry): Promise<URL[]> => {
-			if (entry.isDirectory() && IgnoredDirectories.has(entry.name))
-				return Promise.resolve([]);
+			if (entry.isDirectory() && IgnoredDirectories.has(entry.name)) return Promise.resolve([]);
 			const path = new URL(entry.name + (entry.isDirectory() ? "/" : ""), directory);
 			if (entry.isDirectory()) return collectSourceFiles(path);
 			return Promise.resolve(SourceExtensions.has(extname(entry.name)) ? [path] : []);
@@ -63,9 +62,7 @@ describe("fixture package boundaries", () => {
 			const source = await readFile(path, "utf8");
 			for (const specifier of FixturePackageSpecifiers) {
 				if (source.includes(specifier)) {
-					violations.push(
-						`${relative(FrontendRoot.pathname, path.pathname)} imports ${specifier}`,
-					);
+					violations.push(`${relative(FrontendRoot.pathname, path.pathname)} imports ${specifier}`);
 				}
 			}
 		}

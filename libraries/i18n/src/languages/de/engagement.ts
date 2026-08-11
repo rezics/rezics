@@ -45,10 +45,9 @@ export default {
 	scoreGuidelines: "Bewertungsrichtlinien anzeigen",
 	scoreEditorHint: `Wähle einen ${realmTerms.inline}, um eine vorhandene Bewertung zu aktualisieren oder eine Bewertung in einem anderen ${realmTerms.inline} hinzuzufügen.`,
 	itemVisibility: "Sichtbarkeit dieses Eintrags",
-	effectiveItemVisibility: insert(
-		"Tatsächliche Sichtbarkeit nach dem Speichern: {{visibility}}",
-		{ visibility: String },
-	),
+	effectiveItemVisibility: insert("Tatsächliche Sichtbarkeit nach dem Speichern: {{visibility}}", {
+		visibility: String,
+	}),
 	editScores: "Bewertungen verwalten",
 	noScoredRealms: `Noch keine Bewertungen in einem ${realmTerms.inline}.`,
 	scoreAssociation: "Bewertungszuordnung",
@@ -61,10 +60,9 @@ export default {
 	saveScoreAssociation: "Bewertungen und Reihenfolge speichern",
 	addScoreRealms: `Bewertung in weiteren ${realmTerms.pluralLabel} hinzufügen`,
 	selectScoreRealms: `${realmTerms.pluralLabel} für Bewertungen auswählen`,
-	scoreAssociationLimit: insert(
-		`Du kannst noch {{count}} ${realmTerms.pluralLabel} hinzufügen.`,
-		{ count: Number },
-	),
+	scoreAssociationLimit: insert(`Du kannst noch {{count}} ${realmTerms.pluralLabel} hinzufügen.`, {
+		count: Number,
+	}),
 	addSelectedScores: "Ausgewählte Bewertungen hinzufügen",
 	removeScoreRealm: insert("Bewertung für {{realm}} entfernen", { realm: String }),
 	scoreValueForRealm: insert("Bewertung für {{realm}}", { realm: String }),
@@ -371,13 +369,10 @@ export default {
 			"Diese Rezension wird mit dem auf der Fortschrittsseite gewählten Ereignis verknüpft.",
 	},
 	progressNotRecorded: "Nicht erfasst",
-	completionCountChange: insert(
-		"Die Anzahl der Abschlüsse steigt von {{current}} auf {{next}}.",
-		{
-			current: Number,
-			next: Number,
-		},
-	),
+	completionCountChange: insert("Die Anzahl der Abschlüsse steigt von {{current}} auf {{next}}.", {
+		current: Number,
+		next: Number,
+	}),
 	updateProgress: "Fortschritt aktualisieren",
 	removeProgress: "Fortschritt löschen",
 	removeProgressPrompt:

@@ -120,10 +120,7 @@ export default new Elysia({ prefix: "/units/by-id" })
 		"/:unitId/docks",
 		async ({ params, request }) => {
 			const identity = await resolveIdentity(request, "unit:read");
-			await identity.authorization.unit.ensureCanRead(
-				params.unitId,
-				() => new UnitNotFound(),
-			);
+			await identity.authorization.unit.ensureCanRead(params.unitId, () => new UnitNotFound());
 			const owner = await getDockOwner(params.unitId);
 			return database.transaction(async (tx) => {
 				const records = await tx
@@ -158,10 +155,7 @@ export default new Elysia({ prefix: "/units/by-id" })
 		"/:unitId/docks/:kind",
 		async ({ params, request }) => {
 			const identity = await resolveIdentity(request, "unit:read");
-			await identity.authorization.unit.ensureCanRead(
-				params.unitId,
-				() => new UnitNotFound(),
-			);
+			await identity.authorization.unit.ensureCanRead(params.unitId, () => new UnitNotFound());
 			const owner = await getDockOwner(params.unitId);
 			ensureSupported(owner, params.kind);
 			const [record] = await database
@@ -176,9 +170,7 @@ export default new Elysia({ prefix: "/units/by-id" })
 				)
 				.limit(1);
 			if (!record) throw new DockNotFound();
-			const latestRevisionId = await database.transaction((tx) =>
-				getDockRevisionId(tx, record.id),
-			);
+			const latestRevisionId = await database.transaction((tx) => getDockRevisionId(tx, record.id));
 			if (!latestRevisionId) throw new DockNotFound();
 			return presentDock(record, latestRevisionId);
 		},
@@ -255,10 +247,7 @@ export default new Elysia({ prefix: "/units/by-id" })
 			body: PutDockBody,
 			response: {
 				[StatusCodes.OK]: DockResponse,
-				[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
-					"DockNotSupported",
-					"DockDocumentInvalid",
-				]),
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["DockNotSupported", "DockDocumentInvalid"]),
 				[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
 				[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
 				[StatusCodes.CONFLICT]: toApiErrorResponse(["DockRevisionConflict"]),
@@ -270,10 +259,7 @@ export default new Elysia({ prefix: "/units/by-id" })
 		"/:unitId/docks/:kind/revisions",
 		async ({ params, query, request }) => {
 			const identity = await resolveIdentity(request, "unit:read");
-			await identity.authorization.unit.ensureCanRead(
-				params.unitId,
-				() => new UnitNotFound(),
-			);
+			await identity.authorization.unit.ensureCanRead(params.unitId, () => new UnitNotFound());
 			const owner = await getDockOwner(params.unitId);
 			ensureSupported(owner, params.kind);
 			return database.transaction(async (tx) => {
@@ -334,10 +320,7 @@ export default new Elysia({ prefix: "/units/by-id" })
 			body: DockRevisionBody,
 			response: {
 				[StatusCodes.OK]: DockMutationResponse,
-				[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
-					"DockNotSupported",
-					"DockDocumentInvalid",
-				]),
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["DockNotSupported", "DockDocumentInvalid"]),
 				[StatusCodes.CONFLICT]: toApiErrorResponse(["DockRevisionConflict"]),
 				[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "DockNotFound"]),

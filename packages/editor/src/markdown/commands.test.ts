@@ -50,9 +50,9 @@ describe("REZICS Markdown source commands", () => {
 	it("selects the placeholder for an empty link", () => {
 		const view = runCommand("", { anchor: 0 }, insertMarkdownLink);
 		expect(view.state.doc.toString()).toBe("[link text](https://)");
-		expect(
-			view.state.sliceDoc(view.state.selection.main.from, view.state.selection.main.to),
-		).toBe("link text");
+		expect(view.state.sliceDoc(view.state.selection.main.from, view.state.selection.main.to)).toBe(
+			"link text",
+		);
 	});
 
 	it("toggles headings and line prefixes across selections", () => {
@@ -64,11 +64,7 @@ describe("REZICS Markdown source commands", () => {
 	});
 
 	it("adds a line prefix only where a mixed selection is missing it", () => {
-		const view = runCommand(
-			"- first\nsecond",
-			{ anchor: 0, head: 14 },
-			toggleMarkdownBulletList,
-		);
+		const view = runCommand("- first\nsecond", { anchor: 0, head: 14 }, toggleMarkdownBulletList);
 		expect(view.state.doc.toString()).toBe("- first\n- second");
 	});
 });

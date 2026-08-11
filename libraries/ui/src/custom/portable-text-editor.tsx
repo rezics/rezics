@@ -139,8 +139,7 @@ function stripPortableTextSpoilersFromInput(value: unknown): unknown {
 							? {
 									...child,
 									marks: child.marks.filter(
-										(mark) =>
-											typeof mark !== "string" || !spoilerKeys.has(mark),
+										(mark) => typeof mark !== "string" || !spoilerKeys.has(mark),
 									),
 								}
 							: child,
@@ -323,14 +322,9 @@ function samePath(left: readonly unknown[], right: readonly unknown[]): boolean 
 function currentCaretPosition(): { left: number; top: number } {
 	const nativeSelection = window.getSelection();
 	const range =
-		nativeSelection && nativeSelection.rangeCount > 0
-			? nativeSelection.getRangeAt(0)
-			: undefined;
+		nativeSelection && nativeSelection.rangeCount > 0 ? nativeSelection.getRangeAt(0) : undefined;
 	const rectangle = range?.getBoundingClientRect();
-	const left = Math.max(
-		12,
-		Math.min(rectangle?.left ?? 12, Math.max(12, window.innerWidth - 332)),
-	);
+	const left = Math.max(12, Math.min(rectangle?.left ?? 12, Math.max(12, window.innerWidth - 332)));
 	const preferredTop = (rectangle?.bottom ?? 0) + 8;
 	return {
 		left,
@@ -511,9 +505,7 @@ function SlashCommandEditable({
 					(items) => {
 						if (controller.signal.aborted) return;
 						setHits(
-							activeSlash.prefix === "z"
-								? items.filter((item) => item.kind === "zone")
-								: items,
+							activeSlash.prefix === "z" ? items.filter((item) => item.kind === "zone") : items,
 						);
 					},
 					() => {
@@ -569,9 +561,7 @@ function SlashCommandEditable({
 			event.preventDefault();
 			if (itemCount === 0) return;
 			setActiveIndex((index) =>
-				event.key === "ArrowDown"
-					? (index + 1) % itemCount
-					: (index - 1 + itemCount) % itemCount,
+				event.key === "ArrowDown" ? (index + 1) % itemCount : (index - 1 + itemCount) % itemCount,
 			);
 			return;
 		}
@@ -687,15 +677,11 @@ function SlashCommandEditable({
 											className="size-7 shrink-0"
 											fallback={(hit.label || "?").slice(0, 1).toUpperCase()}
 										/>
-										<span className="min-w-0 flex-1 truncate">
-											{hit.label || messages.unnamed}
-										</span>
+										<span className="min-w-0 flex-1 truncate">{hit.label || messages.unnamed}</span>
 									</button>
 								))}
 						{isPending ? (
-							<p className="px-3 py-2 text-muted-foreground text-sm">
-								{messages.loading}
-							</p>
+							<p className="px-3 py-2 text-muted-foreground text-sm">{messages.loading}</p>
 						) : null}
 						{isError ? (
 							<p className="px-3 py-2 text-destructive text-sm" role="alert">
@@ -927,8 +913,7 @@ function textBlocksContainAnnotation(
 			annotationKeys.size > 0 &&
 			node.children.some(
 				(child) =>
-					isEditorTextSpan(child) &&
-					(child.marks ?? []).some((mark) => annotationKeys.has(mark)),
+					isEditorTextSpan(child) && (child.marks ?? []).some((mark) => annotationKeys.has(mark)),
 			)
 		);
 	});
@@ -1005,9 +990,7 @@ function LinkButton({ schemaType }: { schemaType: ToolbarAnnotationSchemaType })
 			open={open}
 			positioning={{ placement: "bottom-start", gutter: 6 }}
 		>
-			<ToolbarPopoverTrigger
-				label={spoilerActive ? labels.spoilerLinkConflict : labels.addLink}
-			>
+			<ToolbarPopoverTrigger label={spoilerActive ? labels.spoilerLinkConflict : labels.addLink}>
 				<Button
 					aria-label={labels.addLink}
 					disabled={button.snapshot.matches("disabled") || spoilerActive}
@@ -1096,9 +1079,7 @@ function SpoilerButton({ schemaType }: { schemaType: ToolbarAnnotationSchemaType
 				: null
 			: selectionForTextBlocks(targetBlocks);
 	const targetHasSpoiler =
-		range === "selection"
-			? spoilerActive
-			: textBlocksContainAnnotation(targetBlocks, "spoiler");
+		range === "selection" ? spoilerActive : textBlocksContainAnnotation(targetBlocks, "spoiler");
 	const hasLinkConflict =
 		!targetHasSpoiler &&
 		(range === "selection" ? linkActive : textBlocksContainAnnotation(targetBlocks, "link"));
@@ -1161,9 +1142,7 @@ function SpoilerButton({ schemaType }: { schemaType: ToolbarAnnotationSchemaType
 			open={open}
 			positioning={{ placement: "bottom-start", gutter: 6 }}
 		>
-			<ToolbarPopoverTrigger
-				label={linkActive ? labels.spoilerLinkConflict : labels.addSpoiler}
-			>
+			<ToolbarPopoverTrigger label={linkActive ? labels.spoilerLinkConflict : labels.addSpoiler}>
 				<Button
 					aria-label={labels.addSpoiler}
 					disabled={button.snapshot.matches("disabled") || linkActive}
@@ -1175,9 +1154,7 @@ function SpoilerButton({ schemaType }: { schemaType: ToolbarAnnotationSchemaType
 			</ToolbarPopoverTrigger>
 			<PopoverContent className="w-[min(24rem,calc(100vw-2rem))]">
 				<form onSubmit={submit}>
-					<PopoverHeader
-						title={targetHasSpoiler ? labels.removeSpoiler : labels.addSpoiler}
-					/>
+					<PopoverHeader title={targetHasSpoiler ? labels.removeSpoiler : labels.addSpoiler} />
 					<PopoverBody className="grid gap-4">
 						<div className="grid gap-1.5">
 							<label className="font-medium text-sm" htmlFor={rangeId}>
@@ -1187,20 +1164,15 @@ function SpoilerButton({ schemaType }: { schemaType: ToolbarAnnotationSchemaType
 								className="w-full"
 								id={rangeId}
 								onChange={(event) => {
-									if (isSpoilerRange(event.target.value))
-										setRange(event.target.value);
+									if (isSpoilerRange(event.target.value)) setRange(event.target.value);
 								}}
 								value={range}
 							>
 								<NativeSelectOption value="selection">
 									{labels.spoilerRangeSelection}
 								</NativeSelectOption>
-								<NativeSelectOption value="blocks">
-									{labels.spoilerRangeBlocks}
-								</NativeSelectOption>
-								<NativeSelectOption value="body">
-									{labels.spoilerRangeBody}
-								</NativeSelectOption>
+								<NativeSelectOption value="blocks">{labels.spoilerRangeBlocks}</NativeSelectOption>
+								<NativeSelectOption value="body">{labels.spoilerRangeBody}</NativeSelectOption>
 							</NativeSelect>
 						</div>
 						{targetHasSpoiler ? null : (
@@ -1214,9 +1186,7 @@ function SpoilerButton({ schemaType }: { schemaType: ToolbarAnnotationSchemaType
 								/>
 							</div>
 						)}
-						<p className="text-muted-foreground text-xs">
-							{labels.spoilerTextOnlyHint}
-						</p>
+						<p className="text-muted-foreground text-xs">{labels.spoilerTextOnlyHint}</p>
 						{hasLinkConflict ? (
 							<p className="text-destructive text-sm" role="alert">
 								{labels.spoilerLinkConflict}

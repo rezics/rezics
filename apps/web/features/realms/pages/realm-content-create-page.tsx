@@ -79,9 +79,7 @@ function RealmContentCreateContent({ realmId }: { readonly realmId: string }) {
 	});
 	if (!modes.length)
 		return (
-			<p className="mx-auto max-w-2xl px-4 py-10 text-sm text-destructive">
-				{t.errors.forbidden}
-			</p>
+			<p className="mx-auto max-w-2xl px-4 py-10 text-sm text-destructive">{t.errors.forbidden}</p>
 		);
 	const baseContentAvailable = realm.data.capabilities.canCreateUnits;
 	const tagContextAvailable = modes.includes("tag-context");
@@ -100,9 +98,7 @@ function RealmContentCreateContent({ realmId }: { readonly realmId: string }) {
 			/>
 			<div className="grid gap-2">
 				<PageHeading title={t.realms.contentComposer.title} />
-				<p className="text-muted-foreground text-sm">
-					{t.realms.contentComposer.description}
-				</p>
+				<p className="text-muted-foreground text-sm">{t.realms.contentComposer.description}</p>
 			</div>
 			<ToggleGroup
 				aria-label={t.realms.contentComposer.modeLabel}
@@ -110,8 +106,7 @@ function RealmContentCreateContent({ realmId }: { readonly realmId: string }) {
 				multiple={false}
 				onValueChange={({ value }) => {
 					const next = value[0];
-					if (next && isRealmContentComposerMode(next) && modes.includes(next))
-						void setMode(next);
+					if (next && isRealmContentComposerMode(next) && modes.includes(next)) void setMode(next);
 				}}
 				value={[mode]}
 				variant="outline"
@@ -281,12 +276,7 @@ function RealmWikiForm({ realmId }: { readonly realmId: string }) {
 							value={subject}
 						/>
 						{subject ? (
-							<Button
-								onClick={() => setSubject(undefined)}
-								size="xs"
-								type="button"
-								variant="quiet"
-							>
+							<Button onClick={() => setSubject(undefined)} size="xs" type="button" variant="quiet">
 								{t.posts.clearSubject}
 							</Button>
 						) : null}

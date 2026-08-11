@@ -24,12 +24,7 @@ export function createUnitBlockReferenceResolver(
 				const rows = await tx
 					.select({ id: unit.id })
 					.from(unit)
-					.where(
-						and(
-							inArray(unit.id, [...identifiers]),
-							getUnitReadCondition(input.profileId),
-						),
-					);
+					.where(and(inArray(unit.id, [...identifiers]), getUnitReadCondition(input.profileId)));
 				return new Set(rows.map((row) => row.id));
 			}
 			if (kind === "wiki-post") {
@@ -55,10 +50,7 @@ export function createUnitBlockReferenceResolver(
 							inArray(imageAsset.id, [...identifiers]),
 							eq(imageAsset.status, "ready"),
 							isNull(imageAsset.deletedAt),
-							or(
-								eq(imageAsset.access, "public"),
-								eq(imageAsset.ownerProfileId, input.profileId),
-							),
+							or(eq(imageAsset.access, "public"), eq(imageAsset.ownerProfileId, input.profileId)),
 						),
 					);
 				return new Set(rows.map((row) => row.id));

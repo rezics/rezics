@@ -295,8 +295,7 @@ export function moveMediaDraftSelection(
 		target.kind === "node" ? nodes.find(({ id }) => id === target.nodeId) : undefined;
 	if (target.kind === "node") {
 		if (!targetNode || !validTargetIds.has(target.nodeId)) return [...nodes];
-		if (target.placement === "inside" && !isMediaDraftParentTarget(targetNode))
-			return [...nodes];
+		if (target.placement === "inside" && !isMediaDraftParentTarget(targetNode)) return [...nodes];
 	}
 	const siblings = siblingMap(nodes);
 	for (const [parentId, entries] of siblings)

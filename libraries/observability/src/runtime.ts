@@ -306,9 +306,7 @@ export function initializeObservability(
 	let shutdownPromise: Promise<void> | undefined;
 	async function flush(): Promise<void> {
 		await settleWithin(
-			Promise.all([tracerProvider.forceFlush(), meterProvider.forceFlush()]).then(
-				() => undefined,
-			),
+			Promise.all([tracerProvider.forceFlush(), meterProvider.forceFlush()]).then(() => undefined),
 			configuration.lifecycleTimeoutMillis,
 			logger,
 			"flush",
@@ -319,9 +317,7 @@ export function initializeObservability(
 		shutdownPromise = (async () => {
 			await flush();
 			await settleWithin(
-				Promise.all([tracerProvider.shutdown(), meterProvider.shutdown()]).then(
-					() => undefined,
-				),
+				Promise.all([tracerProvider.shutdown(), meterProvider.shutdown()]).then(() => undefined),
 				configuration.lifecycleTimeoutMillis,
 				logger,
 				"shutdown",

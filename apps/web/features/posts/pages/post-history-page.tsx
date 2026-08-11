@@ -30,10 +30,7 @@ export function PostHistoryPage() {
 				);
 	return (
 		<section>
-			<PostManagementSectionHeader
-				description={t.history.description}
-				title={t.history.title}
-			/>
+			<PostManagementSectionHeader description={t.history.description} title={t.history.title} />
 			<UnitRevisionHistory
 				compareHref={(from, to) =>
 					`${historyHref}/compare?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`

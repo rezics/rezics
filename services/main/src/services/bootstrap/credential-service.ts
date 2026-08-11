@@ -30,9 +30,7 @@ export async function rotatePlatformCredentials(): Promise<readonly IssuedPlatfo
 				storedAccount.providerId !== "credential" ||
 				storedAccount.userId !== profile.authUserId
 			)
-				throw new Error(
-					`Platform credential account ${profile.key} has an invalid identity`,
-				);
+				throw new Error(`Platform credential account ${profile.key} has an invalid identity`);
 			const prepared = await preparePlatformCredential();
 			const updated = await tx
 				.update(accounts)

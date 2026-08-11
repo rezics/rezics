@@ -377,9 +377,7 @@ function EntityLocalizationForm({ entity }: { entity: GetApiEntitiesByUnitIdStat
 							<FieldLabel>{t.media.roles.avatar.title}</FieldLabel>
 							<AvatarField
 								fallback={avatarOptions[0] ?? null}
-								onChange={(avatar) =>
-									draft.setValue((current) => ({ ...current, avatar }))
-								}
+								onChange={(avatar) => draft.setValue((current) => ({ ...current, avatar }))}
 								options={avatarOptions}
 								value={value.avatar}
 							/>
@@ -388,21 +386,14 @@ function EntityLocalizationForm({ entity }: { entity: GetApiEntitiesByUnitIdStat
 							<FieldLabel>{t.media.roles.banner.title}</FieldLabel>
 							<LocalizationImageUploadField
 								fallback={bannerOptions[0] ?? null}
-								onChange={(banner) =>
-									draft.setValue((current) => ({ ...current, banner }))
-								}
+								onChange={(banner) => draft.setValue((current) => ({ ...current, banner }))}
 								options={bannerOptions}
 								role="banner"
 								value={value.banner}
 							/>
 						</Field>
 						<RequestFailure error={update.error} />
-						<Button
-							variant="solid"
-							className="w-fit"
-							isLoading={update.isPending}
-							type="submit"
-						>
+						<Button variant="solid" className="w-fit" isLoading={update.isPending} type="submit">
 							{t.ui.save}
 						</Button>
 					</FieldGroup>
@@ -454,9 +445,7 @@ export function EntityCreatePage() {
 	const searchSubject = entityCommunityUnitSearchSubject(kind);
 	const [error, setError] = useState(false);
 	const [ownershipMode, setOwnershipMode] = useState<"profile_owned" | "community_owned">(() =>
-		searchParams.get("ownershipMode") === "community_owned"
-			? "community_owned"
-			: "profile_owned",
+		searchParams.get("ownershipMode") === "community_owned" ? "community_owned" : "profile_owned",
 	);
 	const [avatar, setAvatar] = useState<AvatarFieldValue | null>(null);
 	const [banner, setBanner] = useState<LocalizationImageAssetValue | null>(null);
@@ -554,12 +543,8 @@ export function EntityCreatePage() {
 							value={kind}
 						>
 							<NativeSelectOption value="person">{t.ui.person}</NativeSelectOption>
-							<NativeSelectOption value="organization">
-								{t.ui.organization}
-							</NativeSelectOption>
-							<NativeSelectOption value="character">
-								{t.ui.character}
-							</NativeSelectOption>
+							<NativeSelectOption value="organization">{t.ui.organization}</NativeSelectOption>
+							<NativeSelectOption value="character">{t.ui.character}</NativeSelectOption>
 						</NativeSelect>
 					</Field>
 					{ownershipMode === "community_owned" ? (
@@ -581,11 +566,7 @@ export function EntityCreatePage() {
 					</Field>
 					<Field>
 						<FieldLabel>{t.media.roles.banner.title}</FieldLabel>
-						<LocalizationImageUploadField
-							onChange={setBanner}
-							role="banner"
-							value={banner}
-						/>
+						<LocalizationImageUploadField onChange={setBanner} role="banner" value={banner} />
 					</Field>
 					{error && <p className="text-destructive text-sm">{t.ui.retryLater}</p>}
 					<Button

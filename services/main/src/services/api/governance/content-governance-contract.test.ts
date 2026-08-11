@@ -113,9 +113,7 @@ describe("content governance contracts", () => {
 		expect(() => assertReportCaseDismissible("reviewing", 0)).toThrow(
 			"would not change the target",
 		);
-		expect(() => assertReportCaseDismissible("rejected", 1)).toThrow(
-			"would not change the target",
-		);
+		expect(() => assertReportCaseDismissible("rejected", 1)).toThrow("would not change the target");
 	});
 
 	it("fingerprints selected rules but not the retry key", () => {

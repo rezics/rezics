@@ -88,8 +88,7 @@ export default {
 			},
 			attributions: {
 				label: "クレジット関係",
-				description:
-					"現在のクレジットを確認し、相手が承認する必要があるクレジット提案を管理",
+				description: "現在のクレジットを確認し、相手が承認する必要があるクレジット提案を管理",
 			},
 		},
 		currentAttributions: "現在のクレジット",

@@ -112,17 +112,12 @@ export async function ensureContentStructureNodeAllowed(
 			.where(and(eq(unit.id, input.target.unitId), isNull(unit.deletedAt)))
 			.limit(1);
 		if (!target) throw new ContentStructureInvalid("Target Unit does not exist");
-		if (
-			input.kind === "wiki.navigation" &&
-			!(target.kind === "post" && target.postKind === "wiki")
-		)
+		if (input.kind === "wiki.navigation" && !(target.kind === "post" && target.postKind === "wiki"))
 			throw new ContentStructureInvalid("Realm Wiki navigation targets must be Wiki Posts");
 	}
 	if (input.kind === "wiki.navigation") {
 		const wikiUnitIds = [
-			...(content.kind === "post" && content.postKind === "wiki"
-				? [input.contentUnitId]
-				: []),
+			...(content.kind === "post" && content.postKind === "wiki" ? [input.contentUnitId] : []),
 			...(input.target.kind === "unit" ? [input.target.unitId] : []),
 		];
 		if (wikiUnitIds.length) {
@@ -147,9 +142,7 @@ export async function ensureContentStructureNodeAllowed(
 		const [ownedPage] = await tx
 			.select({ zoneId: zonePage.zoneId })
 			.from(zonePage)
-			.where(
-				and(eq(zonePage.id, input.contentUnitId), eq(zonePage.zoneId, input.ownerUnitId)),
-			)
+			.where(and(eq(zonePage.id, input.contentUnitId), eq(zonePage.zoneId, input.ownerUnitId)))
 			.limit(1);
 		if (!ownedPage) throw new ContentStructureInvalid("Zone Page Unit belongs to another Zone");
 		const [membership] = await tx
@@ -301,6 +294,5 @@ export async function assertContentStructureParent(
 	`);
 	const validation = result.rows[0];
 	if (!validation?.parentExists) throw new ContentStructureInvalid("Parent node does not exist");
-	if (validation.createsCycle)
-		throw new ContentStructureInvalid("Node move would create a cycle");
+	if (validation.createsCycle) throw new ContentStructureInvalid("Node move would create a cycle");
 }

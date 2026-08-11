@@ -11,11 +11,7 @@ export const Resizable = (props: React.ComponentProps<typeof ArkSplitter.Root>) 
 	const { className, ...rest } = props;
 
 	return (
-		<ArkSplitter.Root
-			className={cn("flex size-full", className)}
-			data-slot="resizable"
-			{...rest}
-		/>
+		<ArkSplitter.Root className={cn("flex size-full", className)} data-slot="resizable" {...rest} />
 	);
 };
 

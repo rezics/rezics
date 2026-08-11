@@ -74,18 +74,14 @@ export function ConsoleAuditPage() {
 								aria-label={t.console.audit.category}
 								onChange={(event) => {
 									setCategory(
-										(event.currentTarget.value || undefined) as
-											| AuditCategory
-											| undefined,
+										(event.currentTarget.value || undefined) as AuditCategory | undefined,
 									);
 									setCursorHistory([undefined]);
 									setSelected(undefined);
 								}}
 								value={category ?? ""}
 							>
-								<NativeSelectOption value="">
-									{t.console.audit.allCategories}
-								</NativeSelectOption>
+								<NativeSelectOption value="">{t.console.audit.allCategories}</NativeSelectOption>
 								<NativeSelectOption value="admin_activity">
 									{t.console.audit.categories.admin_activity}
 								</NativeSelectOption>
@@ -102,19 +98,13 @@ export function ConsoleAuditPage() {
 							<NativeSelect
 								aria-label={t.console.audit.outcome}
 								onChange={(event) => {
-									setOutcome(
-										(event.currentTarget.value || undefined) as
-											| AuditOutcome
-											| undefined,
-									);
+									setOutcome((event.currentTarget.value || undefined) as AuditOutcome | undefined);
 									setCursorHistory([undefined]);
 									setSelected(undefined);
 								}}
 								value={outcome ?? ""}
 							>
-								<NativeSelectOption value="">
-									{t.console.audit.allOutcomes}
-								</NativeSelectOption>
+								<NativeSelectOption value="">{t.console.audit.allOutcomes}</NativeSelectOption>
 								<NativeSelectOption value="succeeded">
 									{t.console.audit.outcomes.succeeded}
 								</NativeSelectOption>
@@ -147,17 +137,11 @@ export function ConsoleAuditPage() {
 										{audit.data.items.map((event) => (
 											<TableRow
 												className="cursor-pointer"
-												data-state={
-													selected?.id === event.id
-														? "selected"
-														: undefined
-												}
+												data-state={selected?.id === event.id ? "selected" : undefined}
 												key={event.id}
 												onClick={() => setSelected(event)}
 											>
-												<TableCell>
-													{formatter.format(new Date(event.createdAt))}
-												</TableCell>
+												<TableCell>{formatter.format(new Date(event.createdAt))}</TableCell>
 												<TableCell>
 													<code className="text-xs">{event.action}</code>
 												</TableCell>
@@ -166,13 +150,7 @@ export function ConsoleAuditPage() {
 														event.actor.profileId ??
 														t.console.audit.systemActor}
 												</TableCell>
-												<TableCell>
-													{
-														t.console.audit.authorities[
-															event.authority.kind
-														]
-													}
-												</TableCell>
+												<TableCell>{t.console.audit.authorities[event.authority.kind]}</TableCell>
 												<TableCell>
 													<AuditOutcomeBadge outcome={event.outcome} />
 												</TableCell>
@@ -181,16 +159,12 @@ export function ConsoleAuditPage() {
 									</TableBody>
 								</Table>
 							) : (
-								<p className="p-6 text-muted-foreground text-sm">
-									{t.console.audit.empty}
-								</p>
+								<p className="p-6 text-muted-foreground text-sm">{t.console.audit.empty}</p>
 							)}
 							<div className="flex justify-between border-t p-3">
 								<Button
 									disabled={cursorHistory.length === 1}
-									onClick={() =>
-										setCursorHistory((current) => current.slice(0, -1))
-									}
+									onClick={() => setCursorHistory((current) => current.slice(0, -1))}
 									size="sm"
 									type="button"
 									variant="outline"
@@ -200,10 +174,7 @@ export function ConsoleAuditPage() {
 								<Button
 									disabled={!audit.data.nextCursor}
 									onClick={() =>
-										setCursorHistory((current) => [
-											...current,
-											audit.data.nextCursor ?? undefined,
-										])
+										setCursorHistory((current) => [...current, audit.data.nextCursor ?? undefined])
 									}
 									size="sm"
 									type="button"
@@ -227,11 +198,7 @@ function AuditOutcomeBadge({ outcome }: { readonly outcome: AuditOutcome }) {
 	return (
 		<Badge
 			variant={
-				outcome === "succeeded"
-					? "success"
-					: outcome === "denied"
-						? "warning"
-						: "destructive"
+				outcome === "succeeded" ? "success" : outcome === "denied" ? "warning" : "destructive"
 			}
 		>
 			{t.console.audit.outcomes[outcome]}
@@ -269,21 +236,15 @@ function AuditEventDetails({ event }: { readonly event?: AuditEvent }) {
 					<Detail label={t.console.audit.category}>
 						{t.console.audit.categories[event.category]}
 					</Detail>
-					<Detail label={t.console.audit.outcome}>
-						{t.console.audit.outcomes[event.outcome]}
-					</Detail>
+					<Detail label={t.console.audit.outcome}>{t.console.audit.outcomes[event.outcome]}</Detail>
 					<Detail label={t.console.audit.actor}>
-						{event.actor.profileName ??
-							event.actor.profileId ??
-							t.console.audit.systemActor}
+						{event.actor.profileName ?? event.actor.profileId ?? t.console.audit.systemActor}
 					</Detail>
 					<Detail label={t.console.audit.credential}>
 						{t.console.audit.credentials[event.actor.credentialKind]}
 					</Detail>
 					{event.actor.credentialId ? (
-						<Detail label={t.console.audit.credentialId}>
-							{event.actor.credentialId}
-						</Detail>
+						<Detail label={t.console.audit.credentialId}>{event.actor.credentialId}</Detail>
 					) : null}
 					<Detail label={t.console.audit.authority}>
 						{event.authority.id
@@ -295,10 +256,7 @@ function AuditEventDetails({ event }: { readonly event?: AuditEvent }) {
 					</Detail>
 					<Detail label={t.console.audit.target}>
 						{event.target
-							? (event.target.name ??
-								event.target.id ??
-								event.target.path ??
-								event.target.kind)
+							? (event.target.name ?? event.target.id ?? event.target.path ?? event.target.kind)
 							: t.console.audit.noTarget}
 					</Detail>
 					{event.reasonCode ? (
@@ -307,9 +265,7 @@ function AuditEventDetails({ event }: { readonly event?: AuditEvent }) {
 					{event.requestId ? (
 						<Detail label={t.console.audit.requestId}>{event.requestId}</Detail>
 					) : null}
-					{event.traceId ? (
-						<Detail label={t.console.audit.traceId}>{event.traceId}</Detail>
-					) : null}
+					{event.traceId ? <Detail label={t.console.audit.traceId}>{event.traceId}</Detail> : null}
 				</dl>
 				<div>
 					<h3 className="mb-2 font-medium">{t.console.audit.rawDetails}</h3>

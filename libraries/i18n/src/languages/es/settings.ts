@@ -29,8 +29,7 @@ export default {
 			},
 			privacy: {
 				label: "Privacidad",
-				description:
-					"Controla si otras personas pueden ver tus puntuaciones y tu progreso.",
+				description: "Controla si otras personas pueden ver tus puntuaciones y tu progreso.",
 			},
 			tagSources: {
 				label: "Fuentes de etiquetas",
@@ -38,13 +37,11 @@ export default {
 			},
 			account: {
 				label: "Cuenta",
-				description:
-					"Revisa la información de la cuenta y gestiona tu inicio de sesión actual.",
+				description: "Revisa la información de la cuenta y gestiona tu inicio de sesión actual.",
 			},
 			security: {
 				label: "Seguridad",
-				description:
-					"Cambia tu contraseña y gestiona los dispositivos con sesión iniciada.",
+				description: "Cambia tu contraseña y gestiona los dispositivos con sesión iniciada.",
 			},
 			tokens: {
 				label: `Tokens de ${verbatimTerms.api.value}`,
@@ -55,8 +52,7 @@ export default {
 	},
 	privacy: {
 		title: "Privacidad",
-		description:
-			"Define el límite general de visibilidad de tus puntuaciones y progreso actual.",
+		description: "Define el límite general de visibilidad de tus puntuaciones y progreso actual.",
 		scoreTitle: "Puntuaciones",
 		scoreDescription:
 			"Limita si otras personas pueden ver tus puntuaciones en tu perfil o en reseñas relacionadas.",

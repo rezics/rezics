@@ -37,8 +37,7 @@ export default {
 			},
 			account: {
 				label: "Compte",
-				description:
-					"Consultez les informations du compte et gérez votre connexion actuelle.",
+				description: "Consultez les informations du compte et gérez votre connexion actuelle.",
 			},
 			security: {
 				label: "Sécurité",

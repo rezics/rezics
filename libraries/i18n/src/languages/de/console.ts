@@ -19,13 +19,11 @@ export default {
 	sections: {
 		overview: {
 			label: "Übersicht",
-			description:
-				"Verwaltungsbereiche und den aktuellen Zustand der Plattformdienste prüfen.",
+			description: "Verwaltungsbereiche und den aktuellen Zustand der Plattformdienste prüfen.",
 		},
 		users: {
 			label: "Benutzer",
-			description:
-				"Kontostatus, Plattformzugriff, Sitzungen und Sicherheitsaktivitäten verwalten.",
+			description: "Kontostatus, Plattformzugriff, Sitzungen und Sicherheitsaktivitäten verwalten.",
 		},
 		units: {
 			label: "Unit-Verwaltung",
@@ -155,10 +153,9 @@ export default {
 		notePlaceholder:
 			"Prüfquellen und Entscheidungsgrundlage dokumentieren. Die Notiz wird im Sicherheitsprotokoll gespeichert.",
 		confirmationLabel: `Antrags-${verbatimTerms.id.value} zur Bestätigung eingeben`,
-		confirmationInstruction: insert(
-			"Gib {{claimId}} ein, um diese Entscheidung zu bestätigen.",
-			{ claimId: String },
-		),
+		confirmationInstruction: insert("Gib {{claimId}} ein, um diese Entscheidung zu bestätigen.", {
+			claimId: String,
+		}),
 		confirmApprove: "Genehmigung bestätigen",
 		confirmReject: "Ablehnung bestätigen",
 	},
@@ -289,8 +286,7 @@ export default {
 		changeReasonPlaceholder:
 			"Begründung für die unveränderliche Revision und das Sicherheitsprotokoll.",
 		updateFailed: "Die Kontingentrichtlinie konnte nicht aktualisiert werden. Bitte neu laden.",
-		readOnly:
-			"Du kannst Kontingentrichtlinien anzeigen, aber keine neue Revision veröffentlichen.",
+		readOnly: "Du kannst Kontingentrichtlinien anzeigen, aber keine neue Revision veröffentlichen.",
 		save: "Richtlinie speichern",
 	},
 	dashboard: {
@@ -357,10 +353,9 @@ export default {
 		submit: "Moderationsaktion anwenden",
 		succeeded: "Globale Moderationsaktion abgeschlossen",
 		confirmRemovalTitle: "Diesen Inhalt von der Plattform entfernen?",
-		confirmRemovalDescription: insert(
-			"{{title}} wird auf Plattformebene als entfernt markiert.",
-			{ title: String },
-		),
+		confirmRemovalDescription: insert("{{title}} wird auf Plattformebene als entfernt markiert.", {
+			title: String,
+		}),
 		confirmRemoval: "Inhalt entfernen",
 		confirmLicenseInvalidationTitle: "Diese Inhaltslizenz ungültig machen?",
 		confirmLicenseInvalidationDescription: insert(

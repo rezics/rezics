@@ -38,19 +38,16 @@ describe("FeedContentSelector", () => {
 
 		const checkboxes = await screen.findAllByRole("menuitemcheckbox");
 		expect(checkboxes.length).toBeGreaterThan(0);
-		expect(
-			checkboxes.every((checkbox) => checkbox.getAttribute("aria-checked") === "false"),
-		).toBe(true);
+		expect(checkboxes.every((checkbox) => checkbox.getAttribute("aria-checked") === "false")).toBe(
+			true,
+		);
 	});
 
 	it("offers only clear-all as the special content action", async () => {
 		const onValueChange = vi.fn();
 		render(
 			<TranslationProvider initial={translation.snapshot}>
-				<FeedContentSelector
-					onValueChange={onValueChange}
-					value={["unit:book", "post:review"]}
-				/>
+				<FeedContentSelector onValueChange={onValueChange} value={["unit:book", "post:review"]} />
 			</TranslationProvider>,
 		);
 

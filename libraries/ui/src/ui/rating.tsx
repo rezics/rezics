@@ -32,10 +32,7 @@ export const Rating = (props: RatingProps) => {
 			data-slot="rating"
 			{...rest}
 		>
-			<ArkRatingGroup.Control
-				className="inline-flex items-center gap-1"
-				data-slot="rating-control"
-			>
+			<ArkRatingGroup.Control className="inline-flex items-center gap-1" data-slot="rating-control">
 				<ArkRatingGroup.Context>
 					{({ items }) =>
 						items.map((item) => (

@@ -15,9 +15,9 @@ describe("Chinese content display conversion", () => {
 	it("converts both display directions without rewriting URLs", async () => {
 		await expect(convertChineseContentText("汉字", "hant")).resolves.toBe("漢字");
 		await expect(convertChineseContentText("漢字", "hans")).resolves.toBe("汉字");
-		await expect(
-			convertChineseContentText("查看 https://例子.测试/汉字", "hant"),
-		).resolves.toBe("查看 https://例子.测试/汉字");
+		await expect(convertChineseContentText("查看 https://例子.测试/汉字", "hant")).resolves.toBe(
+			"查看 https://例子.测试/汉字",
+		);
 	});
 
 	it("projects only Portable Text prose leaves without mutating input", async () => {

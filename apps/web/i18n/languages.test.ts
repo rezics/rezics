@@ -44,13 +44,8 @@ describe("language dictionaries", () => {
 		for (const [index, translation] of translations.entries()) {
 			const locale = UiLocaleValues[index];
 			expect(translation.locale.current).toBe(locale);
-			assertSameTranslationShape(
-				traditionalChinese.t,
-				translation.t,
-				`translation.${locale}`,
-			);
-			for (const key of UiLocaleValues)
-				expect(translation.t.locale.uiLocales[key]).not.toBe(key);
+			assertSameTranslationShape(traditionalChinese.t, translation.t, `translation.${locale}`);
+			for (const key of UiLocaleValues) expect(translation.t.locale.uiLocales[key]).not.toBe(key);
 			for (const key of ContentLanguageValues)
 				expect(translation.t.locale.contentLanguages[key]).not.toBe(key);
 		}

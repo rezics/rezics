@@ -154,9 +154,5 @@ export async function ensureZoneDefaultExperienceInTransaction(
 		return found;
 	});
 	if (!hasFeed)
-		await createDefaultFeedPage(
-			tx,
-			input,
-			!pages.some((page) => page.slug === ZoneHomePageSlug),
-		);
+		await createDefaultFeedPage(tx, input, !pages.some((page) => page.slug === ZoneHomePageSlug));
 }

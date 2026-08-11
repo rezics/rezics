@@ -100,9 +100,7 @@ export function AvatarField({
 			<div className="grid w-fit justify-items-center gap-2">
 				<DialogTrigger asChild>
 					<Button
-						aria-label={
-							displayed ? t.media.avatarPicker.edit : t.media.avatarPicker.setup
-						}
+						aria-label={displayed ? t.media.avatarPicker.edit : t.media.avatarPicker.setup}
 						className={cn(
 							"group/avatar-field relative size-28 overflow-hidden p-0",
 							displayed
@@ -147,9 +145,7 @@ export function AvatarField({
 				<DialogHeader className="flex-row items-start justify-between gap-4">
 					<div className="grid gap-2">
 						<DialogTitle>{t.media.avatarPicker.dialogTitle}</DialogTitle>
-						<DialogDescription>
-							{t.media.avatarPicker.dialogDescription}
-						</DialogDescription>
+						<DialogDescription>{t.media.avatarPicker.dialogDescription}</DialogDescription>
 					</div>
 					<div className="flex shrink-0 items-center gap-1">
 						{value ? (
@@ -182,9 +178,7 @@ export function AvatarField({
 					{options.length > 0 ? (
 						<NativeSelect
 							aria-label={t.media.avatarPicker.source}
-							value={
-								matchingOption ? avatarKey(matchingOption) : value ? "current" : ""
-							}
+							value={matchingOption ? avatarKey(matchingOption) : value ? "current" : ""}
 							onChange={(event) => {
 								if (event.currentTarget.value === "current") return;
 								const selected = options.find(
@@ -194,13 +188,9 @@ export function AvatarField({
 								if (selected) setTab(selected.type);
 							}}
 						>
-							<NativeSelectOption value="">
-								{t.media.roles.avatar.inherit}
-							</NativeSelectOption>
+							<NativeSelectOption value="">{t.media.roles.avatar.inherit}</NativeSelectOption>
 							{value && !matchingOption ? (
-								<NativeSelectOption value="current">
-									{t.media.current}
-								</NativeSelectOption>
+								<NativeSelectOption value="current">{t.media.current}</NativeSelectOption>
 							) : null}
 							{options.map((option) => (
 								<NativeSelectOption
@@ -255,9 +245,7 @@ export function AvatarField({
 									</p>
 								}
 							>
-								<FontAwesomeIconPicker
-									onSelect={(icon) => select({ type: "icon", icon })}
-								/>
+								<FontAwesomeIconPicker onSelect={(icon) => select({ type: "icon", icon })} />
 							</Suspense>
 						</TabsContent>
 						<TabsContent value="emoji">
@@ -268,9 +256,7 @@ export function AvatarField({
 									</p>
 								}
 							>
-								<AvatarEmojiPicker
-									onSelect={(emoji) => select({ type: "emoji", emoji })}
-								/>
+								<AvatarEmojiPicker onSelect={(emoji) => select({ type: "emoji", emoji })} />
 							</Suspense>
 						</TabsContent>
 					</Tabs>

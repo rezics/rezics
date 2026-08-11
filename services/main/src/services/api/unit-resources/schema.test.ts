@@ -62,21 +62,17 @@ describe("Unit resource API schemas", () => {
 			sourceEntityId: "018ff2b7-7c00-7000-8000-000000000001",
 		};
 		expect(Value.Check(AddUnitExternalLinkBody, externalLink)).toBe(true);
-		expect(Value.Check(AddUnitExternalLinkBody, { ...externalLink, position: "a0" })).toBe(
-			false,
-		);
-		expect(Value.Check(AddUnitExternalLinkBody, { ...externalLink, role: "official" })).toBe(
-			false,
-		);
+		expect(Value.Check(AddUnitExternalLinkBody, { ...externalLink, position: "a0" })).toBe(false);
+		expect(Value.Check(AddUnitExternalLinkBody, { ...externalLink, role: "official" })).toBe(false);
 		expect(
 			Value.Check(AddUnitExternalLinkBody, {
 				...externalLink,
 				fallbackText: "Official page",
 			}),
 		).toBe(false);
-		expect(
-			Value.Check(AddUnitExternalLinkBody, { ...externalLink, label: "Official page" }),
-		).toBe(false);
+		expect(Value.Check(AddUnitExternalLinkBody, { ...externalLink, label: "Official page" })).toBe(
+			false,
+		);
 		expect(
 			Value.Check(AddUnitExternalLinkBody, {
 				...externalLink,

@@ -68,9 +68,7 @@ function ExternalLinkVoteControls({
 				<div className="flex flex-wrap items-center gap-1">
 					<Button
 						aria-pressed={link.voteSummary.viewerVote === 1}
-						className={cn(
-							link.voteSummary.viewerVote === 1 && "text-primary hover:text-primary",
-						)}
+						className={cn(link.voteSummary.viewerVote === 1 && "text-primary hover:text-primary")}
 						disabled={busy}
 						onClick={() => (link.voteSummary.viewerVote === 1 ? onClear() : onVote(1))}
 						size="sm"
@@ -85,13 +83,9 @@ function ExternalLinkVoteControls({
 					</Button>
 					<Button
 						aria-pressed={link.voteSummary.viewerVote === -1}
-						className={cn(
-							link.voteSummary.viewerVote === -1 && "text-info hover:text-info",
-						)}
+						className={cn(link.voteSummary.viewerVote === -1 && "text-info hover:text-info")}
 						disabled={busy}
-						onClick={() =>
-							link.voteSummary.viewerVote === -1 ? onClear() : onVote(-1)
-						}
+						onClick={() => (link.voteSummary.viewerVote === -1 ? onClear() : onVote(-1))}
 						size="sm"
 						type="button"
 						variant="quiet"
@@ -198,20 +192,11 @@ export function EntityExternalLinks({
 		<section className="grid scroll-mt-20 gap-4" id="external-links">
 			<div className="flex flex-wrap items-end justify-between gap-3">
 				<div className="grid gap-1">
-					<h2 className="font-heading text-xl font-bold">
-						{t.units.detail.externalLinks}
-					</h2>
-					<p className="text-sm text-muted-foreground">
-						{t.entities.externalLinksDescription}
-					</p>
+					<h2 className="font-heading text-xl font-bold">{t.units.detail.externalLinks}</h2>
+					<p className="text-sm text-muted-foreground">{t.entities.externalLinksDescription}</p>
 				</div>
 				{developmentPreview.state === "allowed" ? (
-					<Button
-						onClick={() => setDialogOpen(true)}
-						size="sm"
-						type="button"
-						variant="outline"
-					>
+					<Button onClick={() => setDialogOpen(true)} size="sm" type="button" variant="outline">
 						<Plus aria-hidden />
 						{t.units.references.proposeExternalLink}
 					</Button>
@@ -273,11 +258,7 @@ export function EntityExternalLinks({
 						title={t.units.references.proposeExternalLink}
 					/>
 					<DialogBody>
-						<form
-							className="grid gap-4"
-							id={`entity-external-link-${entityId}`}
-							onSubmit={submit}
-						>
+						<form className="grid gap-4" id={`entity-external-link-${entityId}`} onSubmit={submit}>
 							<Field required>
 								<FieldLabel>{t.units.references.sourceEntity}</FieldLabel>
 								<EntityPicker

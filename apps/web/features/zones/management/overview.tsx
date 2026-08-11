@@ -193,9 +193,7 @@ function ZoneManagementOverviewForLanguage() {
 						serverChanged={localizationDraft.serverChanged || sharedDraft.serverChanged}
 					>
 						<form className="grid gap-6" onSubmit={submit}>
-							<h2 className="font-semibold text-lg">
-								{t.zones.management.profile.title}
-							</h2>
+							<h2 className="font-semibold text-lg">{t.zones.management.profile.title}</h2>
 							<FieldGroup className="grid gap-4 sm:grid-cols-2">
 								<Field required>
 									<FieldLabel>{t.zones.management.profile.name}</FieldLabel>
@@ -270,9 +268,7 @@ function ZoneManagementOverviewForLanguage() {
 									/>
 								</Field>
 								<Field>
-									<FieldLabel>
-										{t.zones.management.profile.colorScheme}
-									</FieldLabel>
+									<FieldLabel>{t.zones.management.profile.colorScheme}</FieldLabel>
 									<NativeSelect
 										onChange={(event) => {
 											const colorScheme = event.currentTarget.value;
@@ -344,10 +340,7 @@ function ZoneManagementOverviewForLanguage() {
 									/>
 								</Field>
 							</FieldGroup>
-							<Button
-								isLoading={update.isPending || replaceSlug.isPending}
-								type="submit"
-							>
+							<Button isLoading={update.isPending || replaceSlug.isPending} type="submit">
 								{t.zones.management.profile.save}
 							</Button>
 							<RequestFailure
@@ -363,10 +356,7 @@ function ZoneManagementOverviewForLanguage() {
 					.filter((section) => section.id !== "overview")
 					.map((section) => (
 						<Link href={section.href} key={section.id}>
-							<Card
-								appearance="outlined"
-								className="h-full transition-colors hover:bg-accent"
-							>
+							<Card appearance="outlined" className="h-full transition-colors hover:bg-accent">
 								<CardHeader>
 									<CardTitle>{section.label}</CardTitle>
 									<CardDescription>{section.description}</CardDescription>

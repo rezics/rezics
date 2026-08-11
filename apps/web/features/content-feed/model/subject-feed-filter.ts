@@ -9,11 +9,7 @@ export function createSubjectFeedPredicate(input: {
 			is: {
 				kind: {
 					in: [
-						input.kind === "discussion"
-							? "post"
-							: input.kind === "excerpt"
-								? "excerpt"
-								: "review",
+						input.kind === "discussion" ? "post" : input.kind === "excerpt" ? "excerpt" : "review",
 					],
 				},
 				subject: {

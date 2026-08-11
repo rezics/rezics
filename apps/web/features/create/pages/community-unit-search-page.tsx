@@ -65,8 +65,7 @@ export function CommunityUnitSearchPage({
 	const canCreateTag = subject.kind !== "tag" || unitTagVoteTarget?.context.kind !== "realm";
 	const normalizedQuery = normalizeCommunityUnitSearchQuery(query);
 	const displayedState =
-		state.status !== "idle" &&
-		normalizeCommunityUnitSearchQuery(state.query) === normalizedQuery
+		state.status !== "idle" && normalizeCommunityUnitSearchQuery(state.query) === normalizedQuery
 			? state
 			: ({ status: "idle" } as const);
 
@@ -122,9 +121,7 @@ export function CommunityUnitSearchPage({
 				<form onSubmit={(event) => void submit(event)}>
 					<FieldGroup>
 						<Field required>
-							<FieldLabel>
-								{messages.searchLabel({ subject: subjectLabel })}
-							</FieldLabel>
+							<FieldLabel>{messages.searchLabel({ subject: subjectLabel })}</FieldLabel>
 							<Input
 								autoComplete="off"
 								autoFocus
@@ -158,9 +155,7 @@ export function CommunityUnitSearchPage({
 					</Alert>
 				) : (
 					<section className="grid gap-4" aria-live="polite">
-						<h2 className="font-heading font-semibold text-xl">
-							{messages.resultsTitle}
-						</h2>
+						<h2 className="font-heading font-semibold text-xl">{messages.resultsTitle}</h2>
 						{resultItems.length > 0 ? (
 							<UnitList error={false} items={resultItems} pending={false} />
 						) : null}
@@ -182,17 +177,13 @@ export function CommunityUnitSearchPage({
 									<Button asChild size="sm" variant="solid">
 										<Link
 											href={
-												subject.kind === "tag" &&
-												unitTagVoteTarget?.context.kind === "global"
+												subject.kind === "tag" && unitTagVoteTarget?.context.kind === "global"
 													? unitTagVoteCreateHref(displayedState.query, {
 															type: unitTagVoteTarget.type,
 															unitId: unitTagVoteTarget.unitId,
 															context: { kind: "global" },
 														})
-													: communityUnitCreationHref(
-															subject,
-															displayedState.query,
-														)
+													: communityUnitCreationHref(subject, displayedState.query)
 											}
 										>
 											{messages.createAction}

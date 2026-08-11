@@ -93,9 +93,7 @@ describe("Unit external-link presentation", () => {
 	});
 
 	it("accepts owner-specific controls without coupling them to the shared badge", () => {
-		render(
-			<UnitExternalLinkBadge controls={<button type="button">Support</button>} link={link} />,
-		);
+		render(<UnitExternalLinkBadge controls={<button type="button">Support</button>} link={link} />);
 
 		expect(screen.getByRole("button", { name: "Support" })).toBeTruthy();
 	});

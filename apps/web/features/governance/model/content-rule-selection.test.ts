@@ -77,9 +77,9 @@ describe("content-governance rule selection", () => {
 			"realm:one",
 			"official:two",
 		]);
-		expect(
-			updateContentRuleSelection(["realm:one", "official:two"], "realm:one", false),
-		).toEqual(["official:two"]);
+		expect(updateContentRuleSelection(["realm:one", "official:two"], "realm:one", false)).toEqual([
+			"official:two",
+		]);
 	});
 
 	it("does not auto-select or exceed the API rule-reference bound", () => {

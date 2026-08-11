@@ -156,8 +156,7 @@ export default {
 		save: "권한 저장",
 		saving: "저장 중…",
 		cancel: "취소",
-		inheritedDescription:
-			"이 권한은 상속된 소스도 가지고 있습니다; 직접 제한이 여전히 우선합니다.",
+		inheritedDescription: "이 권한은 상속된 소스도 가지고 있습니다; 직접 제한이 여전히 우선합니다.",
 		subjectKinds: {
 			profile: "프로필",
 			realm: realmTerms.label,

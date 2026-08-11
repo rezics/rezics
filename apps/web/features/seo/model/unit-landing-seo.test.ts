@@ -135,9 +135,7 @@ describe("Unit landing SEO metadata", () => {
 			},
 		});
 
-		expect(build(value).metadata.description).toBe(
-			"View the Book “Types and Proofs” on REZICS.",
-		);
+		expect(build(value).metadata.description).toBe("View the Book “Types and Proofs” on REZICS.");
 	});
 
 	it("refuses a projection whose immutable identity or kind does not match the route", () => {

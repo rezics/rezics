@@ -27,8 +27,7 @@ function normalizeTargets(targets: readonly PostTarget[]): readonly PostTarget[]
 			(target, index, all) =>
 				all.findIndex(
 					(candidate) =>
-						candidate.unitId === target.unitId &&
-						candidate.relation === target.relation,
+						candidate.unitId === target.unitId && candidate.relation === target.relation,
 				) === index,
 		)
 		.sort(
@@ -89,9 +88,7 @@ async function ensurePostTargetingAllowed(
 	const mountedRealms = await tx
 		.select({ realmId: realmUnit.realmId })
 		.from(realmUnit)
-		.where(
-			and(eq(realmUnit.unitId, input.sourcePostId), eq(realmUnit.publicationState, "active")),
-		)
+		.where(and(eq(realmUnit.unitId, input.sourcePostId), eq(realmUnit.publicationState, "active")))
 		.orderBy(realmUnit.realmId);
 	const realmIds = [
 		...new Set([...mountedRealms.map((row) => row.realmId), ...(input.realmIds ?? [])]),
@@ -152,9 +149,7 @@ export async function ensureReplyPostTargetingAllowed(
 		sourcePostId: input.sourcePostId,
 		targets: [
 			{ relation: "root", unitId: input.rootPostId },
-			...(input.parentPostId
-				? [{ relation: "parent" as const, unitId: input.parentPostId }]
-				: []),
+			...(input.parentPostId ? [{ relation: "parent" as const, unitId: input.parentPostId }] : []),
 		],
 		...(input.realmId ? { realmIds: [input.realmId] } : {}),
 	});
@@ -181,9 +176,7 @@ export async function ensurePostMountTargetingAllowed(
 			...(stored.subjectUnitId
 				? [{ relation: "subject" as const, unitId: stored.subjectUnitId }]
 				: []),
-			...(stored.rootPostId
-				? [{ relation: "root" as const, unitId: stored.rootPostId }]
-				: []),
+			...(stored.rootPostId ? [{ relation: "root" as const, unitId: stored.rootPostId }] : []),
 			...(stored.parentPostId
 				? [{ relation: "parent" as const, unitId: stored.parentPostId }]
 				: []),
@@ -279,8 +272,7 @@ export function toPostTargetingConstraintError(error: unknown): PostTargetingLoc
 				if (
 					detail &&
 					typeof detail === "object" &&
-					(Reflect.get(detail, "scope") === "global" ||
-						Reflect.get(detail, "scope") === "realm") &&
+					(Reflect.get(detail, "scope") === "global" || Reflect.get(detail, "scope") === "realm") &&
 					(Reflect.get(detail, "relation") === "subject" ||
 						Reflect.get(detail, "relation") === "root" ||
 						Reflect.get(detail, "relation") === "parent") &&

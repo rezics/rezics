@@ -121,10 +121,7 @@ export default new Elysia({ prefix: "/messages" })
 					sortAt: conversationParticipantStat.sortAt,
 				})
 				.from(conversationParticipantStat)
-				.innerJoin(
-					conversation,
-					eq(conversation.id, conversationParticipantStat.conversationId),
-				)
+				.innerJoin(conversation, eq(conversation.id, conversationParticipantStat.conversationId))
 				.where(
 					and(
 						eq(conversationParticipantStat.profileId, profile.unitId),
@@ -172,18 +169,12 @@ export default new Elysia({ prefix: "/messages" })
 	.post(
 		"/conversations",
 		async ({ profile, body }) => {
-			if (body.participantProfileId === profile.unitId)
-				throw new ConversationParticipantsInvalid();
+			if (body.participantProfileId === profile.unitId) throw new ConversationParticipantsInvalid();
 			const [target] = await database
 				.select({ id: profileTable.id })
 				.from(profileTable)
 				.innerJoin(unit, eq(unit.id, profileTable.id))
-				.where(
-					and(
-						eq(profileTable.id, body.participantProfileId),
-						eq(unit.status, "published"),
-					),
-				)
+				.where(and(eq(profileTable.id, body.participantProfileId), eq(unit.status, "published")))
 				.limit(1);
 			if (!target) throw new UserNotFound();
 			const [low, high] =
@@ -196,14 +187,8 @@ export default new Elysia({ prefix: "/messages" })
 					.from(profileBlock)
 					.where(
 						or(
-							and(
-								eq(profileBlock.blockerProfileId, low),
-								eq(profileBlock.blockedProfileId, high),
-							),
-							and(
-								eq(profileBlock.blockerProfileId, high),
-								eq(profileBlock.blockedProfileId, low),
-							),
+							and(eq(profileBlock.blockerProfileId, low), eq(profileBlock.blockedProfileId, high)),
+							and(eq(profileBlock.blockerProfileId, high), eq(profileBlock.blockedProfileId, low)),
 						),
 					)
 					.limit(1);
@@ -261,10 +246,7 @@ export default new Elysia({ prefix: "/messages" })
 					updatedAt: conversationParticipantStat.sortAt,
 				})
 				.from(conversationParticipantStat)
-				.innerJoin(
-					conversation,
-					eq(conversation.id, conversationParticipantStat.conversationId),
-				)
+				.innerJoin(conversation, eq(conversation.id, conversationParticipantStat.conversationId))
 				.innerJoin(profileTable, eq(profileTable.id, otherProfileId))
 				.where(
 					and(
@@ -309,10 +291,7 @@ export default new Elysia({ prefix: "/messages" })
 						boundary
 							? or(
 									lt(message.createdAt, boundary.date),
-									and(
-										eq(message.createdAt, boundary.date),
-										lt(message.id, boundary.id),
-									),
+									and(eq(message.createdAt, boundary.date), lt(message.id, boundary.id)),
 								)
 							: undefined,
 					),
@@ -360,8 +339,7 @@ export default new Elysia({ prefix: "/messages" })
 					.limit(1);
 				if (!current || (current.low !== profile.unitId && current.high !== profile.unitId))
 					throw new ConversationNotFound();
-				const recipientProfileId =
-					current.low === profile.unitId ? current.high : current.low;
+				const recipientProfileId = current.low === profile.unitId ? current.high : current.low;
 				const [blocked] = await tx
 					.select({ id: profileBlock.blockerProfileId })
 					.from(profileBlock)
@@ -436,8 +414,7 @@ export default new Elysia({ prefix: "/messages" })
 				// Marking a conversation read is intentionally a latest-message operation. The
 				// participant row is locked, so the unread counter can be reset in O(1) while
 				// concurrent sends wait and subsequently apply their own +1 delta.
-				if (participant.lastMessageId !== body.lastReadMessageId)
-					throw new MessageNotFound(true);
+				if (participant.lastMessageId !== body.lastReadMessageId) throw new MessageNotFound(true);
 				const [lastMessage] = await tx
 					.select({ id: message.id })
 					.from(message)
@@ -485,10 +462,7 @@ export default new Elysia({ prefix: "/messages" })
 			body: MarkConversationReadBody,
 			response: {
 				[StatusCodes.OK]: ReadConversationResponse,
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse([
-					"ConversationNotFound",
-					"MessageNotFound",
-				]),
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["ConversationNotFound", "MessageNotFound"]),
 			},
 			detail: { summary: "Mark direct-message conversation read", tags: ["Messages"] },
 		},

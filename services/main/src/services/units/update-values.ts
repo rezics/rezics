@@ -55,8 +55,7 @@ export function toBookUpdateValues(input: UpdateUnitInput) {
 	return whenAnyValueIsDefined({
 		releaseStatus: details.releaseStatus,
 		isbn13: details.isbn13,
-		publicationDate:
-			details.publicationDate === undefined ? releasedOn : details.publicationDate,
+		publicationDate: details.publicationDate === undefined ? releasedOn : details.publicationDate,
 		pageCount: details.pageCount,
 		wordCount: details.wordCount,
 		format: details.format,

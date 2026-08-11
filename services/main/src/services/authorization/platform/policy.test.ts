@@ -17,9 +17,7 @@ describe("platform authorization policy", () => {
 			"platform.access.read",
 			"platform.access.manage",
 		]);
-		expect(grantingPlatformCapabilities("platform.audit.read")).toEqual([
-			"platform.audit.read",
-		]);
+		expect(grantingPlatformCapabilities("platform.audit.read")).toEqual(["platform.audit.read"]);
 	});
 
 	it("treats Unit governance reads as the prerequisite for independent mutations", () => {

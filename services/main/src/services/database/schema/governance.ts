@@ -286,10 +286,7 @@ export const contentReportReferral = pgTable(
 		createdAt: createCreatedAtColumn(),
 	},
 	(table) => [
-		unique("content_report_referral_report_source_key").on(
-			table.reportId,
-			table.ruleSourceRealmId,
-		),
+		unique("content_report_referral_report_source_key").on(table.reportId, table.ruleSourceRealmId),
 		unique("content_report_referral_case_report_key").on(table.caseId, table.reportId),
 		index("content_report_referral_case_created_idx").on(
 			table.caseId,

@@ -144,9 +144,7 @@ export function UnitProgressProvider({
 	);
 	const confirmedRecord = useMemo(
 		() =>
-			recordQuery.data?.state === "tracked"
-				? toUnitProgressRecord(recordQuery.data.record)
-				: null,
+			recordQuery.data?.state === "tracked" ? toUnitProgressRecord(recordQuery.data.record) : null,
 		[recordQuery.data],
 	);
 	const currentEntryId =
@@ -279,9 +277,7 @@ export function UnitProgressProvider({
 	);
 
 	const completeCurrentProgress = useCallback(
-		async (
-			update?: Pick<UnitProgressUpdate, "totalTimeMs" | "visibility">,
-		): Promise<boolean> => {
+		async (update?: Pick<UnitProgressUpdate, "totalTimeMs" | "visibility">): Promise<boolean> => {
 			if (completionInFlight.current) return false;
 			completionInFlight.current = true;
 			setCompletionFeedbackCount(undefined);
@@ -290,12 +286,8 @@ export function UnitProgressProvider({
 				const updated = await completeProgressRequest({
 					path: { unitId: domain.unitId },
 					body: {
-						...(update?.totalTimeMs === undefined
-							? {}
-							: { totalTimeMs: update.totalTimeMs }),
-						...(update?.visibility === undefined
-							? {}
-							: { visibility: update.visibility }),
+						...(update?.totalTimeMs === undefined ? {} : { totalTimeMs: update.totalTimeMs }),
+						...(update?.visibility === undefined ? {} : { visibility: update.visibility }),
 					},
 				});
 				queryClient.setQueryData(progressQueryKey, {

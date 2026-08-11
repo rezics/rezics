@@ -101,10 +101,7 @@ export const collectionStructureRevisionHead = pgTable(
 		}).onDelete("cascade"),
 		foreignKey({
 			columns: [table.revisionId, table.collectionId],
-			foreignColumns: [
-				collectionStructureRevision.id,
-				collectionStructureRevision.collectionId,
-			],
+			foreignColumns: [collectionStructureRevision.id, collectionStructureRevision.collectionId],
 			name: "collection_structure_revision_head_revision_collection_fkey",
 		}).onDelete("restrict"),
 	],

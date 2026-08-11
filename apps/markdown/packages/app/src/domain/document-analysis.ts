@@ -12,8 +12,7 @@ function sourceOutline(source: string): readonly MarkdownOutlineItem[] {
 		const line = lines[index] ?? "";
 		if (fence) {
 			const closing = /^ {0,3}(`+|~+)[ \t]*$/u.exec(line)?.[1];
-			if (closing?.startsWith(fence.marker) && closing.length >= fence.length)
-				fence = undefined;
+			if (closing?.startsWith(fence.marker) && closing.length >= fence.length) fence = undefined;
 			continue;
 		}
 		const opening = /^ {0,3}(`{3,}|~{3,})(.*)$/u.exec(line);

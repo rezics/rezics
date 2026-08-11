@@ -29,13 +29,7 @@ export const FramePanel = (props: React.ComponentProps<typeof ark.div>) => {
 
 	return (
 		<ark.div
-			className={cn(
-				"relative",
-				"p-5",
-				"bg-background",
-				"rounded-xl border shadow-xs/5",
-				className,
-			)}
+			className={cn("relative", "p-5", "bg-background", "rounded-xl border shadow-xs/5", className)}
 			data-slot="frame-panel"
 			{...rest}
 		/>
@@ -66,11 +60,7 @@ export const FrameHeader = (props: FrameHeaderProps) => {
 
 			{!!description && <FrameDescription>{description}</FrameDescription>}
 
-			{!title && typeof children === "string" ? (
-				<FrameTitle>{children}</FrameTitle>
-			) : (
-				children
-			)}
+			{!title && typeof children === "string" ? <FrameTitle>{children}</FrameTitle> : children}
 		</ark.header>
 	);
 };
@@ -103,10 +93,6 @@ export const FrameFooter = (props: React.ComponentProps<typeof ark.footer>) => {
 	const { className, ...rest } = props;
 
 	return (
-		<ark.footer
-			className={cn("px-5 py-4", className)}
-			data-slot="frame-panel-footer"
-			{...rest}
-		/>
+		<ark.footer className={cn("px-5 py-4", className)} data-slot="frame-panel-footer" {...rest} />
 	);
 };

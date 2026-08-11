@@ -4,9 +4,9 @@ import { ownershipClaimPlacement } from "./ownership-claim-placement";
 
 describe("ownership claim placement", () => {
 	it("shows a public Entity claim outside the overflow menu", () => {
-		expect(
-			ownershipClaimPlacement({ unitType: "entity", ownershipMode: "community_owned" }),
-		).toBe("external");
+		expect(ownershipClaimPlacement({ unitType: "entity", ownershipMode: "community_owned" })).toBe(
+			"external",
+		);
 	});
 
 	it.each(["book", "media", "software"])(
@@ -19,11 +19,11 @@ describe("ownership claim placement", () => {
 	);
 
 	it("does not offer claims for owned or unsupported entries", () => {
-		expect(
-			ownershipClaimPlacement({ unitType: "entity", ownershipMode: "profile_owned" }),
-		).toBe("none");
-		expect(
-			ownershipClaimPlacement({ unitType: "series", ownershipMode: "community_owned" }),
-		).toBe("none");
+		expect(ownershipClaimPlacement({ unitType: "entity", ownershipMode: "profile_owned" })).toBe(
+			"none",
+		);
+		expect(ownershipClaimPlacement({ unitType: "series", ownershipMode: "community_owned" })).toBe(
+			"none",
+		);
 	});
 });

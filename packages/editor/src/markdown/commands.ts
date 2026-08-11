@@ -55,8 +55,7 @@ function toggleLinePrefix(prefix: string): Command {
 		const changes: ChangeSpec[] = [];
 		for (const line of lines) {
 			if (allPrefixed) changes.push({ from: line.from, to: line.from + prefix.length });
-			else if (!line.text.startsWith(prefix))
-				changes.push({ from: line.from, insert: prefix });
+			else if (!line.text.startsWith(prefix)) changes.push({ from: line.from, insert: prefix });
 		}
 		view.dispatch({ changes });
 		return true;
@@ -94,8 +93,7 @@ export function setMarkdownHeading(level: 0 | 1 | 2 | 3 | 4 | 5 | 6): Command {
 		const headingPattern = /^(#{1,6})\s+/u;
 		const targetPrefix = level === 0 ? "" : `${"#".repeat(level)} `;
 		const allAtTarget =
-			level > 0 &&
-			lines.every((line) => line.text.match(headingPattern)?.[1]?.length === level);
+			level > 0 && lines.every((line) => line.text.match(headingPattern)?.[1]?.length === level);
 		const effectivePrefix = allAtTarget ? "" : targetPrefix;
 		const changes: ChangeSpec[] = [];
 		for (const line of lines) {

@@ -286,9 +286,7 @@ describe("feed eligibility SQL", () => {
 		expect(query.sql).toContain('"score"."value" in');
 		expect(query.sql).toContain('"profile_preference"."score_visibility"');
 		expect(query.sql).toContain('"score"."visibility"');
-		expect(query.params).toEqual(
-			expect.arrayContaining(["review", realmId, 8, 9, 10, "general"]),
-		);
+		expect(query.params).toEqual(expect.arrayContaining(["review", realmId, 8, 9, 10, "general"]));
 	});
 
 	it("compiles Tag and displayed Score predicates from the public Filter tree", () => {

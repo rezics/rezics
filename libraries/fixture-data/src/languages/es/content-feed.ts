@@ -24,8 +24,7 @@ export default {
 		{
 			name: "A Certain Magical Index",
 			initials: "I",
-			summary:
-				"Conversaciones sobre el mundo, los personajes, la trama y las ideas de la serie.",
+			summary: "Conversaciones sobre el mundo, los personajes, la trama y las ideas de la serie.",
 		},
 		{
 			name: "Inteligencia colectiva",
@@ -35,8 +34,7 @@ export default {
 		{
 			name: "Estudios de ciencia ficción",
 			initials: "C",
-			summary:
-				"Lecturas detalladas de ciencia ficción a través de distintos medios y tradiciones.",
+			summary: "Lecturas detalladas de ciencia ficción a través de distintos medios y tradiciones.",
 		},
 	],
 	post: {

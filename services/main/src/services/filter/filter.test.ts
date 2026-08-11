@@ -92,10 +92,7 @@ describe("domain Filter contract", () => {
 				contentKinds: ["post:review", "unit:media", "unit:book", "unit:book"],
 			}),
 		).toEqual({
-			any: [
-				{ kind: { in: ["book", "media"] } },
-				{ post: { is: { kind: { in: ["review"] } } } },
-			],
+			any: [{ kind: { in: ["book", "media"] } }, { post: { is: { kind: { in: ["review"] } } } }],
 		});
 	});
 
@@ -269,10 +266,7 @@ describe("domain Filter contract", () => {
 		).toBeUndefined();
 		expect(
 			compileUnitPredicateCandidateSet({
-				any: [
-					{ tags: { some: { tag: { id: { in: [TagId] } } } } },
-					{ kind: { in: ["book"] } },
-				],
+				any: [{ tags: { some: { tag: { id: { in: [TagId] } } } } }, { kind: { in: ["book"] } }],
 			}),
 		).toBeUndefined();
 	});

@@ -156,12 +156,7 @@ export default new Elysia({ prefix: "/polls" })
 				? await database
 						.select({ optionId: pollVote.optionId })
 						.from(pollVote)
-						.where(
-							and(
-								eq(pollVote.pollId, params.pollId),
-								eq(pollVote.profileId, viewer.unitId),
-							),
-						)
+						.where(and(eq(pollVote.pollId, params.pollId), eq(pollVote.profileId, viewer.unitId)))
 				: [];
 			const closed = Boolean(
 				pollRecord.closedAt || (pollRecord.closesAt && pollRecord.closesAt <= new Date()),
@@ -199,8 +194,7 @@ export default new Elysia({ prefix: "/polls" })
 							: null,
 					};
 					if (sourceKind === "literal") {
-						if (targetUnitId !== null)
-							throw new TypeError("Literal Poll option has a target Unit");
+						if (targetUnitId !== null) throw new TypeError("Literal Poll option has a target Unit");
 						return { ...presentation, sourceKind, targetUnitId };
 					}
 					if (targetUnitId === null)
@@ -234,31 +228,18 @@ export default new Elysia({ prefix: "/polls" })
 					.where(eq(poll.id, params.pollId))
 					.limit(1);
 				if (!pollRecord) throw new PollNotFound();
-				if (
-					pollRecord.closedAt ||
-					(pollRecord.closesAt && pollRecord.closesAt <= new Date())
-				)
+				if (pollRecord.closedAt || (pollRecord.closesAt && pollRecord.closesAt <= new Date()))
 					throw new PollClosed();
 				if (pollRecord.mode === "single" && body.optionIds.length !== 1)
 					throw new PollSingleChoiceInvalid();
 				const valid = await tx
 					.select({ id: pollOption.id })
 					.from(pollOption)
-					.where(
-						and(
-							eq(pollOption.pollId, params.pollId),
-							inArray(pollOption.id, body.optionIds),
-						),
-					);
+					.where(and(eq(pollOption.pollId, params.pollId), inArray(pollOption.id, body.optionIds)));
 				if (valid.length !== new Set(body.optionIds).size) throw new PollOptionInvalid();
 				await tx
 					.delete(pollVote)
-					.where(
-						and(
-							eq(pollVote.pollId, params.pollId),
-							eq(pollVote.profileId, profile.unitId),
-						),
-					);
+					.where(and(eq(pollVote.pollId, params.pollId), eq(pollVote.profileId, profile.unitId)));
 				await tx.insert(pollVote).values(
 					body.optionIds.map((optionId) => ({
 						pollId: params.pollId,
@@ -280,10 +261,7 @@ export default new Elysia({ prefix: "/polls" })
 					"PollSingleChoiceInvalid",
 					"PollOptionInvalid",
 				]),
-				[StatusCodes.FORBIDDEN]: toApiErrorResponse([
-					"RealmCapabilityRequired",
-					"PollClosed",
-				]),
+				[StatusCodes.FORBIDDEN]: toApiErrorResponse(["RealmCapabilityRequired", "PollClosed"]),
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "PollNotFound"]),
 			},
 			detail: { summary: "Replace poll vote", tags: ["Polls"] },
@@ -303,19 +281,11 @@ export default new Elysia({ prefix: "/polls" })
 					.where(eq(poll.id, params.pollId))
 					.limit(1);
 				if (!pollRecord) throw new PollNotFound();
-				if (
-					pollRecord.closedAt ||
-					(pollRecord.closesAt && pollRecord.closesAt <= new Date())
-				)
+				if (pollRecord.closedAt || (pollRecord.closesAt && pollRecord.closesAt <= new Date()))
 					throw new PollClosed();
 				await tx
 					.delete(pollVote)
-					.where(
-						and(
-							eq(pollVote.pollId, params.pollId),
-							eq(pollVote.profileId, profile.unitId),
-						),
-					);
+					.where(and(eq(pollVote.pollId, params.pollId), eq(pollVote.profileId, profile.unitId)));
 			});
 			return { optionIds: [] };
 		},

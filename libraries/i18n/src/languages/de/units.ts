@@ -77,11 +77,9 @@ export default {
 		submit: "Antrag senden",
 		cancel: "Abbrechen",
 		submitted: "Antrag gesendet",
-		submittedDescription:
-			"Nach der Prüfung durch die Plattformverwaltung wirst du benachrichtigt.",
+		submittedDescription: "Nach der Prüfung durch die Plattformverwaltung wirst du benachrichtigt.",
 		pendingTitle: "Eigentumsantrag wird geprüft",
-		pendingDescription:
-			"Die Plattformverwaltung hat über diesen Antrag noch nicht entschieden.",
+		pendingDescription: "Die Plattformverwaltung hat über diesen Antrag noch nicht entschieden.",
 		submittedDetails: "Deine eingereichte Begründung",
 		withdraw: "Antrag zurückziehen",
 		withdrawn: "Antrag zurückgezogen",
@@ -165,8 +163,7 @@ export default {
 			},
 			history: {
 				label: "Versionsverlauf",
-				description:
-					"Prüfe, vergleiche, widerrufe oder stelle Inhaltsversionen wieder her.",
+				description: "Prüfe, vergleiche, widerrufe oder stelle Inhaltsversionen wieder her.",
 			},
 		},
 	},
@@ -288,8 +285,7 @@ export default {
 				discussion: `Durchsuche ${postTerms.pluralLabel}, die dieses Buch als Thema verwenden.`,
 			},
 			media: {
-				overview:
-					"Medienbeschreibung, Veröffentlichungsinformationen und Wiedergabestatus.",
+				overview: "Medienbeschreibung, Veröffentlichungsinformationen und Wiedergabestatus.",
 				contents: `Durchsuche die ${videoTerms.label}- und ${audioTerms.label}struktur und erfasse deinen Wiedergabefortschritt.`,
 				tags: "Prüfe globale Tags und kontextbezogene Bewertungen aus deinen ausgewählten Quellen.",
 				associations:
@@ -405,8 +401,7 @@ export default {
 		addSubjectDescription: "Bezug, Beziehungsrolle und optional eine Kontextseite auswählen.",
 		subjectEntity: "Inhaltlicher Bezug",
 		addExternalLink: "Externen Link hinzufügen",
-		addExternalLinkDescription:
-			"Externen Link hinzufügen und optional den Quelleneintrag angeben.",
+		addExternalLinkDescription: "Externen Link hinzufügen und optional den Quelleneintrag angeben.",
 		sourceEntity: "Quelle",
 		urlPlaceholder: `${verbatimTerms.https.value}://`,
 		cancel: "Abbrechen",

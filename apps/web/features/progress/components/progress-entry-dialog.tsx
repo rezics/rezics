@@ -50,9 +50,7 @@ export function ProgressEntryDialog({
 }) {
 	return (
 		<Dialog onOpenChange={({ open: nextOpen }) => onOpenChange(nextOpen)} open={open}>
-			{open ? (
-				<ProgressEntryEditor entry={entry} onClose={() => onOpenChange(false)} />
-			) : null}
+			{open ? <ProgressEntryEditor entry={entry} onClose={() => onOpenChange(false)} /> : null}
 		</Dialog>
 	);
 }
@@ -115,9 +113,7 @@ function ProgressEntryEditor({
 						{draft.entryKind === "completion" ? null : (
 							<>
 								<Field>
-									<FieldLabel htmlFor="progress-entry-status">
-										{copy.status}
-									</FieldLabel>
+									<FieldLabel htmlFor="progress-entry-status">{copy.status}</FieldLabel>
 									<NativeSelect
 										id="progress-entry-status"
 										onChange={(event) => {
@@ -125,29 +121,19 @@ function ProgressEntryEditor({
 											setDraft((current) => ({
 												...current,
 												status:
-													ProgressStatuses.find(
-														(status) => status === value,
-													) ?? current.status,
+													ProgressStatuses.find((status) => status === value) ?? current.status,
 											}));
 										}}
 										value={draft.status}
 									>
 										{ProgressStatuses.map((status) => (
 											<NativeSelectOption key={status} value={status}>
-												{
-													t.engagement.progressByType[
-														progress.domain.type
-													].statuses[status]
-												}
+												{t.engagement.progressByType[progress.domain.type].statuses[status]}
 											</NativeSelectOption>
 										))}
 									</NativeSelect>
 								</Field>
-								<PositionFields
-									draft={draft}
-									onChange={setDraft}
-									type={progress.domain.type}
-								/>
+								<PositionFields draft={draft} onChange={setDraft} type={progress.domain.type} />
 							</>
 						)}
 						<DateFields draft={draft} onChange={setDraft} />
@@ -156,10 +142,7 @@ function ProgressEntryEditor({
 								{t.errors.invalid}
 							</p>
 						) : null}
-						<RequestFailure
-							error={create.error ?? replace.error}
-							fallback={t.ui.retryLater}
-						/>
+						<RequestFailure error={create.error ?? replace.error} fallback={t.ui.retryLater} />
 					</FieldGroup>
 				</form>
 			</DialogBody>
@@ -167,12 +150,7 @@ function ProgressEntryEditor({
 				<Button disabled={pending} onClick={onClose} variant="quiet">
 					{t.engagement.cancel}
 				</Button>
-				<Button
-					form={ProgressEntryFormId}
-					isLoading={pending}
-					type="submit"
-					variant="solid"
-				>
+				<Button form={ProgressEntryFormId} isLoading={pending} type="submit" variant="solid">
 					{copy.saveEntry}
 				</Button>
 			</DialogFooter>
@@ -200,8 +178,7 @@ function EntryKindField({
 					const value = event.currentTarget.value;
 					onChange((current) => ({
 						...current,
-						entryKind:
-							ProgressEntryKinds.find((kind) => kind === value) ?? current.entryKind,
+						entryKind: ProgressEntryKinds.find((kind) => kind === value) ?? current.entryKind,
 					}));
 				}}
 				value={draft.entryKind}
@@ -274,8 +251,7 @@ function PositionFields({
 					</FieldLabel>
 					<NativeSelect
 						disabled={
-							progress.contentStructureNodesPending ||
-							Boolean(progress.contentStructureNodesError)
+							progress.contentStructureNodesPending || Boolean(progress.contentStructureNodesError)
 						}
 						id="progress-entry-content-structure-node"
 						onChange={(event) => {
@@ -306,10 +282,7 @@ function PositionFields({
 					{draft.lastNodeId ? (
 						<FieldDescription>{contentStructureCopy.description}</FieldDescription>
 					) : null}
-					<RequestFailure
-						error={progress.contentStructureNodesError}
-						fallback={t.ui.retryLater}
-					/>
+					<RequestFailure error={progress.contentStructureNodesError} fallback={t.ui.retryLater} />
 				</Field>
 			) : null}
 			{type === "book" ? null : (
@@ -351,16 +324,12 @@ function DateFields({
 	return (
 		<>
 			<Field>
-				<FieldLabel htmlFor="progress-entry-date-precision">
-					{copy.datePrecision}
-				</FieldLabel>
+				<FieldLabel htmlFor="progress-entry-date-precision">{copy.datePrecision}</FieldLabel>
 				<NativeSelect
 					id="progress-entry-date-precision"
 					onChange={(event) => {
 						const value = event.currentTarget.value;
-						const datePrecision = ProgressDatePrecisions.find(
-							(precision) => precision === value,
-						);
+						const datePrecision = ProgressDatePrecisions.find((precision) => precision === value);
 						onChange((current) => ({
 							...current,
 							datePrecision: datePrecision ?? current.datePrecision,

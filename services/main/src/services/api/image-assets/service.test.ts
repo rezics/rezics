@@ -11,14 +11,12 @@ describe("image asset identity", () => {
 	});
 
 	it("derives a stable role presentation URL from the asset id", () => {
-		expect(
-			imageAssetPresentationContentUrl("019f73cb-926e-7e50-9a7f-da67701accb3", "banner"),
-		).toBe("/image-assets/019f73cb-926e-7e50-9a7f-da67701accb3/presentations/banner/content");
+		expect(imageAssetPresentationContentUrl("019f73cb-926e-7e50-9a7f-da67701accb3", "banner")).toBe(
+			"/image-assets/019f73cb-926e-7e50-9a7f-da67701accb3/presentations/banner/content",
+		);
 		expect(
 			imageAssetPresentationContentUrl("019f73cb-926e-7e50-9a7f-da67701accb3", "banner", 3),
-		).toBe(
-			"/image-assets/019f73cb-926e-7e50-9a7f-da67701accb3/presentations/banner/content?v=3",
-		);
+		).toBe("/image-assets/019f73cb-926e-7e50-9a7f-da67701accb3/presentations/banner/content?v=3");
 	});
 
 	it("keeps uploader identity on the physical storage object", () => {

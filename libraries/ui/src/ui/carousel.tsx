@@ -93,11 +93,7 @@ export const CarouselIndicatorGroup = (
 
 	return (
 		<ArkCarousel.IndicatorGroup
-			className={cn(
-				"flex justify-center gap-2",
-				"data-[orientation=vertical]:flex-col",
-				className,
-			)}
+			className={cn("flex justify-center gap-2", "data-[orientation=vertical]:flex-col", className)}
 			data-slot="carousel-indicator-group"
 			{...rest}
 		/>

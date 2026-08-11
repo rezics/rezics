@@ -31,15 +31,11 @@ describe("unit detail routes", () => {
 		expect(unitDetailHref("software", UnitId, "requirements")).toBe(
 			`/units/software/${UnitId}/requirements`,
 		);
-		expect(unitDetailHref("series", UnitId, "releases")).toBe(
-			`/units/series/${UnitId}/releases`,
-		);
+		expect(unitDetailHref("series", UnitId, "releases")).toBe(`/units/series/${UnitId}/releases`);
 		expect(unitDetailHref("book", UnitId, "associations")).toBe(
 			`/units/book/${UnitId}/associations`,
 		);
-		expect(unitDetailHref("book", UnitId, "collections")).toBe(
-			`/units/book/${UnitId}/collections`,
-		);
+		expect(unitDetailHref("book", UnitId, "collections")).toBe(`/units/book/${UnitId}/collections`);
 	});
 
 	it("rejects a section that belongs to another domain", () => {
@@ -65,9 +61,7 @@ describe("unit detail routes", () => {
 
 	it("keeps dedicated pages outside the tab section registry", () => {
 		expect(unitCreditsHref("book", UnitId)).toBe(`/units/book/${UnitId}/credits`);
-		expect(parseUnitDetailSection(unitCreditsHref("book", UnitId), "book", UnitId)).toBe(
-			undefined,
-		);
+		expect(parseUnitDetailSection(unitCreditsHref("book", UnitId), "book", UnitId)).toBe(undefined);
 		expect(UnitDetailSections.book).not.toContain("credits");
 		expect(UnitDetailSections.book).not.toContain("tags");
 		expect(UnitDetailSections.book).not.toContain("reviews");

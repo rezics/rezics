@@ -52,16 +52,13 @@ export function createReviewScoreDrafts(
 			const value = apiValueToUnitScore(score.value);
 			if (value === undefined) return [];
 			seenRealmIds.add(score.realmId);
-			const knownRealm =
-				viewerByScoreId.get(score.scoreId) ?? viewerByRealmId.get(score.realmId);
+			const knownRealm = viewerByScoreId.get(score.scoreId) ?? viewerByRealmId.get(score.realmId);
 			return [
 				{
 					state: "stored",
 					scoreId: score.scoreId,
 					realmId: score.realmId,
-					realmLabel: knownRealm
-						? toRealmLabel(knownRealm)
-						: (score.realmTitle ?? score.realmId),
+					realmLabel: knownRealm ? toRealmLabel(knownRealm) : (score.realmTitle ?? score.realmId),
 					value,
 					persistedValue: value,
 				},

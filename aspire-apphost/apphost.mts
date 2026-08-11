@@ -67,9 +67,7 @@ function requireHttpOrigin(name: string): string {
 
 function seconds(milliseconds: number): number {
 	if (!Number.isSafeInteger(milliseconds) || milliseconds <= 0 || milliseconds % 1_000 !== 0)
-		throw new Error(
-			`Probe duration must be a positive whole number of seconds: ${milliseconds}`,
-		);
+		throw new Error(`Probe duration must be a positive whole number of seconds: ${milliseconds}`);
 	return milliseconds / 1_000;
 }
 

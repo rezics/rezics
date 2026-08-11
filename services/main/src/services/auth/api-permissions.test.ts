@@ -21,9 +21,7 @@ describe("API permissions", () => {
 	it("keeps Unit as the canonical content capability", () => {
 		expect(ApiPermissionValues).toContain("unit:create");
 		expect(ApiPermissionValues).toContain("unit:update");
-		expect(ApiPermissionValues.some((permission) => permission.startsWith("unknown:"))).toBe(
-			false,
-		);
+		expect(ApiPermissionValues.some((permission) => permission.startsWith("unknown:"))).toBe(false);
 	});
 
 	it("rejects unknown permission strings", () => {

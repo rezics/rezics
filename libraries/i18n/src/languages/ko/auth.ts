@@ -30,8 +30,7 @@ export default {
 	securityVerificationLabel: "보안 확인",
 	securityVerificationFailed: "보안 확인에 실패했습니다. 다시 시도하세요.",
 	securityVerificationRequired: "먼저 보안 확인을 완료하세요.",
-	securityVerificationUnavailable:
-		"현재 보안 확인을 사용할 수 없습니다. 잠시 후 다시 시도하세요.",
+	securityVerificationUnavailable: "현재 보안 확인을 사용할 수 없습니다. 잠시 후 다시 시도하세요.",
 	haveAccount: "이미 계정이 있으신가요?",
 	createAccountTitle: "계정 만들기",
 	name: "이름",

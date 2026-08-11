@@ -24,9 +24,7 @@ export function TagStructureCreatePage() {
 		<RequireSession>
 			<main className="mx-auto flex w-full max-w-4xl flex-col gap-8 px-4 py-10 sm:px-6">
 				<PageHeading title={t.tags.createStructure.title} />
-				<p className="max-w-3xl text-muted-foreground">
-					{t.tags.createStructure.description}
-				</p>
+				<p className="max-w-3xl text-muted-foreground">{t.tags.createStructure.description}</p>
 				<Card>
 					<CardContent className="grid gap-5 p-5 sm:p-6">
 						<TagStructureMemberEditor members={members} onChange={setMembers} />
@@ -41,9 +39,7 @@ export function TagStructureCreatePage() {
 											memberTagIds: members.map(({ id }) => id),
 										},
 									})
-									.then(({ structureId }) =>
-										router.push(tagStructureHref(structureId)),
-									)
+									.then(({ structureId }) => router.push(tagStructureHref(structureId)))
 									.catch(() => undefined);
 							}}
 							type="button"

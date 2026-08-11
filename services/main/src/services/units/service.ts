@@ -170,9 +170,7 @@ export function presentImageAsset(assetId: string | null, role?: "avatar" | "ban
 	return assetId
 		? {
 				id: assetId,
-				url: role
-					? imageAssetPresentationContentUrl(assetId, role)
-					: imageAssetContentUrl(assetId),
+				url: role ? imageAssetPresentationContentUrl(assetId, role) : imageAssetContentUrl(assetId),
 			}
 		: null;
 }
@@ -192,10 +190,7 @@ export function presentUnitLocalization({
 }: StoredUnitLocalization) {
 	return {
 		...row,
-		description: presentNullablePortableTextDocument(
-			description,
-			"unit_localization.description",
-		),
+		description: presentNullablePortableTextDocument(description, "unit_localization.description"),
 		avatar: presentAvatar(
 			avatarReferenceFromColumns({
 				avatarType,
@@ -253,15 +248,12 @@ export async function createUnit(
 		});
 		let createdStructure: typeof contentStructure.$inferSelect | undefined;
 		if (input.details.type === "book") {
-			await tx
-				.insert(book)
-				.values({ id: created.id, releaseStatus: input.details.releaseStatus });
+			await tx.insert(book).values({ id: created.id, releaseStatus: input.details.releaseStatus });
 			[createdStructure] = await tx
 				.insert(contentStructure)
 				.values({ ownerUnitId: created.id, kind: "book.contents" })
 				.returning();
-			if (!createdStructure)
-				throw new Error("Book Content Structure insertion returned no row");
+			if (!createdStructure) throw new Error("Book Content Structure insertion returned no row");
 		}
 		if (input.details.type === "software") await tx.insert(software).values({ id: created.id });
 		if (input.details.type === "media") {
@@ -274,8 +266,7 @@ export async function createUnit(
 				.insert(contentStructure)
 				.values({ ownerUnitId: created.id, kind: "media.contents" })
 				.returning();
-			if (!createdStructure)
-				throw new Error("Media Content Structure insertion returned no row");
+			if (!createdStructure) throw new Error("Media Content Structure insertion returned no row");
 		}
 		await tx.insert(unitLocalization).values({
 			unitId: created.id,
@@ -284,10 +275,7 @@ export async function createUnit(
 		if (input.ownershipMode === "profile_owned")
 			await createProfileOwnedUnitAccess(tx, created.id, ownerId);
 		else
-			await createPublicEditableUnitAccess(tx, created.id, [
-				"unit.update",
-				"unit.status.update",
-			]);
+			await createPublicEditableUnitAccess(tx, created.id, ["unit.update", "unit.status.update"]);
 		if (input.ownershipMode === "profile_owned" && input.contentLicense)
 			await tx.insert(unitContentLicense).values({
 				unitId: created.id,
@@ -385,10 +373,7 @@ async function getUnitDetails(
 						})
 						.from(unitContentLicense)
 						.where(
-							and(
-								eq(unitContentLicense.unitId, unitId),
-								eq(unitContentLicense.status, "active"),
-							),
+							and(eq(unitContentLicense.unitId, unitId), eq(unitContentLicense.status, "active")),
 						)
 						.limit(1)
 				)[0] ?? null)
@@ -473,19 +458,16 @@ export async function getUnit(
 	if (!resolvedLocalization) throw new UnitNotFound();
 	const selectedLocalization = resolvedLocalization;
 	const attributions =
-		(
-			await getAttributionSummariesWithStatisticsByUnitIds([base.id], localizationLanguages)
-		).get(base.id) ?? [];
+		(await getAttributionSummariesWithStatisticsByUnitIds([base.id], localizationLanguages)).get(
+			base.id,
+		) ?? [];
 	const subjectAssociationRows = await database
 		.select({
 			id: subjectAssociation.id,
 			entityEntryId: subjectAssociation.entityId,
 			role: subjectAssociation.role,
 			position: subjectAssociation.position,
-			title: resolvedUnitLocalizationTitle(
-				subjectAssociation.entityId,
-				localizationLanguages,
-			),
+			title: resolvedUnitLocalizationTitle(subjectAssociation.entityId, localizationLanguages),
 		})
 		.from(subjectAssociation)
 		.innerJoin(entity, eq(entity.id, subjectAssociation.entityId))
@@ -519,10 +501,7 @@ export async function getUnit(
 		.from(unitTag)
 		.leftJoin(
 			unitTagVoteStat,
-			and(
-				eq(unitTagVoteStat.unitId, unitTag.unitId),
-				eq(unitTagVoteStat.tagId, unitTag.tagId),
-			),
+			and(eq(unitTagVoteStat.unitId, unitTag.unitId), eq(unitTagVoteStat.tagId, unitTag.tagId)),
 		)
 		.where(eq(unitTag.unitId, base.id))
 		.orderBy(
@@ -627,11 +606,7 @@ export async function getUnit(
 			"banner",
 		),
 		cover: presentImageAsset(
-			resolveUnitLocalizationImageAssetIdFromOrdered(
-				localizations,
-				"cover",
-				localizationLanguages,
-			),
+			resolveUnitLocalizationImageAssetIdFromOrdered(localizations, "cover", localizationLanguages),
 			"cover",
 		),
 		localizations: localizations.map(presentUnitLocalization),
@@ -713,16 +688,8 @@ export async function listUnits(
 			title: unitLocalization.title,
 			summary: unitLocalization.summary,
 			avatar: resolvedUnitLocalizationAvatar(unit.id, localizationLanguages),
-			bannerAssetId: resolvedUnitLocalizationImageAssetId(
-				unit.id,
-				"banner",
-				localizationLanguages,
-			),
-			coverAssetId: resolvedUnitLocalizationImageAssetId(
-				unit.id,
-				"cover",
-				localizationLanguages,
-			),
+			bannerAssetId: resolvedUnitLocalizationImageAssetId(unit.id, "banner", localizationLanguages),
+			coverAssetId: resolvedUnitLocalizationImageAssetId(unit.id, "cover", localizationLanguages),
 		})
 		.from(unit)
 		.innerJoin(
@@ -796,11 +763,7 @@ export async function updateUnitInTransaction(
 			...(Object.hasOwn(body, "license") ? { license: body.license } : {}),
 		})
 		.where(
-			and(
-				eq(unit.id, unitId),
-				eq(unit.kind, kind),
-				eq(unit.updatedAt, body.expectedUpdatedAt),
-			),
+			and(eq(unit.id, unitId), eq(unit.kind, kind), eq(unit.updatedAt, body.expectedUpdatedAt)),
 		)
 		.returning({ id: unit.id, status: unit.status });
 	if (!updated) {
@@ -825,8 +788,7 @@ export async function updateUnitInTransaction(
 	const bookUpdate = kind === "book" ? toBookUpdateValues(body) : undefined;
 	if (bookUpdate) await tx.update(book).set(bookUpdate).where(eq(book.id, unitId));
 	const softwareUpdate = kind === "software" ? toSoftwareUpdateValues(body) : undefined;
-	if (softwareUpdate)
-		await tx.update(software).set(softwareUpdate).where(eq(software.id, unitId));
+	if (softwareUpdate) await tx.update(software).set(softwareUpdate).where(eq(software.id, unitId));
 	const mediaUpdate = kind === "media" ? toMediaUpdateValues(body) : undefined;
 	if (mediaUpdate) await tx.update(media).set(mediaUpdate).where(eq(media.id, unitId));
 	const timedMediaUpdate =
@@ -925,15 +887,9 @@ export async function upsertLocalization(
 					title: input.title,
 					summary: input.summary,
 					description: input.description,
-					...(Object.hasOwn(input, "avatar")
-						? avatarReferenceToColumns(input.avatar ?? null)
-						: {}),
-					...(Object.hasOwn(input, "bannerAssetId")
-						? { bannerAssetId: input.bannerAssetId }
-						: {}),
-					...(Object.hasOwn(input, "coverAssetId")
-						? { coverAssetId: input.coverAssetId }
-						: {}),
+					...(Object.hasOwn(input, "avatar") ? avatarReferenceToColumns(input.avatar ?? null) : {}),
+					...(Object.hasOwn(input, "bannerAssetId") ? { bannerAssetId: input.bannerAssetId } : {}),
+					...(Object.hasOwn(input, "coverAssetId") ? { coverAssetId: input.coverAssetId } : {}),
 				},
 			});
 		await recordUnitRevision(tx, {

@@ -70,10 +70,7 @@ export function ReviewAttachedScores({
 										</ItemTitle>
 									</ItemContent>
 									<ItemActions className="shrink-0 gap-1.5">
-										<StarIcon
-											aria-hidden
-											className="size-4 fill-warning text-warning"
-										/>
+										<StarIcon aria-hidden className="size-4 fill-warning text-warning" />
 										<span className="font-semibold tabular-nums">
 											{t.engagement.scoreOutOfTen({ score: String(value) })}
 										</span>

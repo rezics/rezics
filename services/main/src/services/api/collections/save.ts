@@ -54,9 +54,7 @@ export function planCollectionItemInsertions(input: {
 			if (reviewPosition === undefined) append(subjectId);
 			else {
 				if (!input.positionBeforeReviewByTargetId.has(targetId))
-					throw new TypeError(
-						`Missing predecessor position for existing Review ${targetId}`,
-					);
+					throw new TypeError(`Missing predecessor position for existing Review ${targetId}`);
 				const position = fractionalPositionBetween(
 					input.positionBeforeReviewByTargetId.get(targetId) ?? undefined,
 					reviewPosition,

@@ -178,10 +178,7 @@ export async function transitionUnitStatus(
 		.where(eq(unit.id, input.unitId))
 		.limit(1);
 	if (!current || current.deletedAt) throw new UnitNotFound();
-	if (
-		input.expectedUpdatedAt &&
-		current.updatedAt.getTime() !== input.expectedUpdatedAt.getTime()
-	)
+	if (input.expectedUpdatedAt && current.updatedAt.getTime() !== input.expectedUpdatedAt.getTime())
 		throw new UnitChanged(current.updatedAt);
 	if (!changesUnitStatus(current.status, input.toStatus))
 		return { changed: false, status: current.status, publishedAt: current.publishedAt };

@@ -56,10 +56,7 @@ export const WorkPolicy = {
 } as const;
 
 function assertPolicyInvariants(): void {
-	if (
-		WorkPolicy.localization.maxBatchUnits * WorkPolicy.localization.maxLanguagesPerUnit !==
-		3_500
-	)
+	if (WorkPolicy.localization.maxBatchUnits * WorkPolicy.localization.maxLanguagesPerUnit !== 3_500)
 		throw new Error("Localization hydration budget is internally inconsistent");
 }
 

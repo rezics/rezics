@@ -50,7 +50,8 @@ export default {
 	},
 	communityUnitSearch: {
 		policyTitle: "建立前請先搜尋",
-		policy: "為了維持良好的社群環境，建立公共條目前，請先搜尋並確認您想建立的內容尚不存在。若您濫用建立公共條目的權限，可能會受到處分。",
+		policy:
+			"為了維持良好的社群環境，建立公共條目前，請先搜尋並確認您想建立的內容尚不存在。若您濫用建立公共條目的權限，可能會受到處分。",
 		confirmationLabel: insert("我已檢查現有{{subject}}，並確認這個條目尚不存在。", {
 			subject: String,
 		}),

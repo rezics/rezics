@@ -31,12 +31,8 @@ export function TagStructurePage() {
 		>
 			<section className="grid gap-4">
 				<div className="grid gap-1">
-					<h2 className="font-heading text-xl font-bold">
-						{t.tags.detail.childrenTitle}
-					</h2>
-					<p className="text-sm text-muted-foreground">
-						{t.tags.detail.childrenDescription}
-					</p>
+					<h2 className="font-heading text-xl font-bold">{t.tags.detail.childrenTitle}</h2>
+					<p className="text-sm text-muted-foreground">{t.tags.detail.childrenDescription}</p>
 				</div>
 				{query.data.children.length ? (
 					<div className="grid gap-3 md:grid-cols-2">
@@ -49,42 +45,29 @@ export function TagStructurePage() {
 											href={tagDetailHref(child.tagId)}
 										>
 											{child.title ? (
-												<LocalizedText
-													language={child.language}
-													value={child.title}
-												/>
+												<LocalizedText language={child.language} value={child.title} />
 											) : (
 												t.tags.unnamedTag
 											)}
 										</Link>
 										{child.summary ? (
 											<p className="text-sm text-muted-foreground">
-												<LocalizedText
-													language={child.language}
-													value={child.summary}
-												/>
+												<LocalizedText language={child.language} value={child.summary} />
 											</p>
 										) : null}
 										<p className="text-xs text-muted-foreground">
 											{t.tags.vote.summary({
 												score: String(toFiniteApiNumber(child.score) ?? 0),
-												count: String(
-													toNonNegativeApiInteger(child.voteCount),
-												),
+												count: String(toNonNegativeApiInteger(child.voteCount)),
 											})}
 										</p>
 									</div>
 									{child.children.length ? (
 										<div className="grid gap-2">
-											<h3 className="text-sm font-medium">
-												{t.tags.detail.grandchildrenTitle}
-											</h3>
+											<h3 className="text-sm font-medium">{t.tags.detail.grandchildrenTitle}</h3>
 											<div className="flex flex-wrap gap-2">
 												{child.children.map((grandchild) => (
-													<Link
-														href={tagDetailHref(grandchild.tagId)}
-														key={grandchild.tagId}
-													>
+													<Link href={tagDetailHref(grandchild.tagId)} key={grandchild.tagId}>
 														<Badge variant="outline">
 															{grandchild.title ? (
 																<LocalizedText

@@ -246,10 +246,7 @@ describe("FeedPostCard", () => {
 	it("removes the redundant subject card in its Unit context and keeps the attached Score", () => {
 		const { container } = render(
 			<TranslationProvider initial={translation.snapshot}>
-				<FeedPostCard
-					displayContext={{ kind: "unit", unitId: review.subject.id }}
-					post={review}
-				/>
+				<FeedPostCard displayContext={{ kind: "unit", unitId: review.subject.id }} post={review} />
 			</TranslationProvider>,
 		);
 
@@ -495,10 +492,7 @@ describe("FeedUnitCard", () => {
 		expect(
 			screen
 				.getAllByRole("link")
-				.some(
-					(link) =>
-						link.getAttribute("href") === `/posts/${contextPostId}?realmId=${realmId}`,
-				),
+				.some((link) => link.getAttribute("href") === `/posts/${contextPostId}?realmId=${realmId}`),
 		).toBe(true);
 		expect(screen.getByLabelText("discussion action").getAttribute("href")).toBe(
 			`/tags/${tag.id}/discussion`,

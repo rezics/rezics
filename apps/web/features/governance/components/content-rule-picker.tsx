@@ -132,23 +132,14 @@ export function ContentRuleMultiSelect({
 					</MenuItem>
 					{rules.map((rule) => {
 						if (!destination) return null;
-						const key = contentRuleSelectionKey(
-							destination.id,
-							destination.revisionId,
-							rule.id,
-						);
+						const key = contentRuleSelectionKey(destination.id, destination.revisionId, rule.id);
 						const checked = selectedKeySet.has(key);
 						return (
 							<MenuCheckboxItem
 								checked={checked}
 								className="items-start py-2.5"
-								disabled={
-									!checked &&
-									totalSelectedCount >= ContentGovernanceMaximumRuleReferences
-								}
-								onCheckedChange={(nextChecked) =>
-									onRuleCheckedChange(key, nextChecked === true)
-								}
+								disabled={!checked && totalSelectedCount >= ContentGovernanceMaximumRuleReferences}
+								onCheckedChange={(nextChecked) => onRuleCheckedChange(key, nextChecked === true)}
 								value={key}
 								valueText={rule.title}
 								key={key}

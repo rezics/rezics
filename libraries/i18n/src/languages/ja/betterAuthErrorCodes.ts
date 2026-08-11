@@ -47,8 +47,7 @@ export default {
 	FIELD_NOT_ALLOWED: "このフィールドは変更できません。",
 	ASYNC_VALIDATION_NOT_SUPPORTED: "この検証リクエストはサポートされていません。",
 	MISSING_FIELD: "必須フィールドが欠落しています。",
-	METHOD_NOT_ALLOWED_DEFER_SESSION_REQUIRED:
-		"このセッションリクエストの方法は許可されていません。",
+	METHOD_NOT_ALLOWED_DEFER_SESSION_REQUIRED: "このセッションリクエストの方法は許可されていません。",
 	BODY_MUST_BE_AN_OBJECT: "送信データはオブジェクトである必要があります。",
 	PASSWORD_ALREADY_SET: "このアカウントにはすでにパスワードが設定されています。",
 } satisfies typeof import("../zh-Hant/betterAuthErrorCodes").default;

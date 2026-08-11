@@ -44,8 +44,7 @@ export default {
 			},
 			tokens: {
 				label: `${verbatimTerms.api.value} tokens`,
-				description:
-					"Create, limit, disable, and revoke access tokens for automation tools.",
+				description: "Create, limit, disable, and revoke access tokens for automation tools.",
 			},
 		},
 	},
@@ -119,8 +118,7 @@ export default {
 			year: "365 days",
 		},
 		permissions: "Permissions",
-		permissionsDescription:
-			"Grant only the operations needed for the job. Select at least one.",
+		permissionsDescription: "Grant only the operations needed for the job. Select at least one.",
 		selectContentAgent: "Select content-agent defaults",
 		selectReadOnly: "Select read-only defaults",
 		permissionsRequired: "Select at least one permission.",

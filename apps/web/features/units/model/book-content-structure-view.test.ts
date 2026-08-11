@@ -29,9 +29,7 @@ describe("book content structure presentation kinds", () => {
 	it("renders labels as labels whether or not they have children", () => {
 		expect(isBookStructureDisplayLabel(entry("empty-label", "label"))).toBe(true);
 		expect(
-			isBookStructureDisplayLabel(
-				entry("parent-label", "label", [entry("child", "chapter")]),
-			),
+			isBookStructureDisplayLabel(entry("parent-label", "label", [entry("child", "chapter")])),
 		).toBe(true);
 	});
 

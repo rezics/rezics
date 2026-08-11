@@ -33,9 +33,7 @@ export default new Elysia({ prefix: "/platform/ownership-claims" })
 			});
 			const response: Static<typeof PlatformUnitOwnershipClaimListResponse> = {
 				items: result.items,
-				nextCursor: result.nextCursor
-					? encodeUnitOwnershipClaimCursor(result.nextCursor)
-					: null,
+				nextCursor: result.nextCursor ? encodeUnitOwnershipClaimCursor(result.nextCursor) : null,
 			};
 			return response;
 		},
@@ -69,18 +67,13 @@ export default new Elysia({ prefix: "/platform/ownership-claims" })
 			body: DecideUnitOwnershipClaimBody,
 			response: {
 				[StatusCodes.OK]: UnitOwnershipClaimDecisionResponse,
-				[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
-					"UnitOwnershipClaimConfirmationInvalid",
-				]),
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["UnitOwnershipClaimConfirmationInvalid"]),
 				[StatusCodes.FORBIDDEN]: toApiErrorResponse([
 					"PlatformCapabilityRequired",
 					"FreshSessionRequired",
 					"UnitOwnershipClaimSelfDecisionForbidden",
 				]),
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse([
-					"UnitOwnershipClaimNotFound",
-					"UnitNotFound",
-				]),
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitOwnershipClaimNotFound", "UnitNotFound"]),
 				[StatusCodes.CONFLICT]: toApiErrorResponse(["UnitOwnershipClaimChanged"]),
 			},
 			detail: { summary: "Resolve a Unit ownership claim", tags: ["Governance"] },

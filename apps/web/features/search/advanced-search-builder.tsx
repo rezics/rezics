@@ -201,9 +201,7 @@ export function AdvancedSearchBuilder({
 	function valueEditor(condition: DraftSearchCondition, control: ResolvedSearchControl) {
 		if (control.field === "realm-tag-vote") {
 			const relation = condition.realmTagVote;
-			const entityOption = (
-				value: DraftSearchValue | undefined,
-			): readonly SearchEntityOption[] =>
+			const entityOption = (value: DraftSearchValue | undefined): readonly SearchEntityOption[] =>
 				value && typeof value.value === "string"
 					? [
 							{
@@ -219,9 +217,7 @@ export function AdvancedSearchBuilder({
 				const parsed = Number(value);
 				return Number.isSafeInteger(parsed) ? parsed : undefined;
 			};
-			const replaceRelation = (
-				patch: Partial<NonNullable<DraftSearchCondition["realmTagVote"]>>,
-			) =>
+			const replaceRelation = (patch: Partial<NonNullable<DraftSearchCondition["realmTagVote"]>>) =>
 				updateCondition({
 					...condition,
 					realmTagVote: { ...relation, ...patch },
@@ -285,16 +281,8 @@ export function AdvancedSearchBuilder({
 							[
 								["scoreLower", t.realmTagVote.scoreMinimum, relation?.scoreLower],
 								["scoreUpper", t.realmTagVote.scoreMaximum, relation?.scoreUpper],
-								[
-									"voteCountLower",
-									t.realmTagVote.voteCountMinimum,
-									relation?.voteCountLower,
-								],
-								[
-									"voteCountUpper",
-									t.realmTagVote.voteCountMaximum,
-									relation?.voteCountUpper,
-								],
+								["voteCountLower", t.realmTagVote.voteCountMinimum, relation?.voteCountLower],
+								["voteCountUpper", t.realmTagVote.voteCountMaximum, relation?.voteCountUpper],
 							] as const
 						).map(([key, label, value]) => (
 							<Input
@@ -400,9 +388,7 @@ export function AdvancedSearchBuilder({
 							),
 						})
 					}
-					placeholder={
-						control.field === "tag" ? t.tagSearchPlaceholder : t.entitySearchPlaceholder
-					}
+					placeholder={control.field === "tag" ? t.tagSearchPlaceholder : t.entitySearchPlaceholder}
 					removeLabel={t.removeSelection}
 					selected={selected}
 				/>
@@ -436,9 +422,7 @@ export function AdvancedSearchBuilder({
 							...condition,
 							values: keys.flatMap((key) => {
 								const value = byKey.get(key);
-								return value === undefined
-									? []
-									: [{ value, label: valueLabel(control, value) }];
+								return value === undefined ? [] : [{ value, label: valueLabel(control, value) }];
 							}),
 						})
 					}
@@ -486,9 +470,7 @@ export function AdvancedSearchBuilder({
 						appearance="field"
 						ariaLabel={t.builder.condition}
 						onValueChange={(keys) => {
-							const next = advancedControls.find(
-								(candidate) => candidate.key === keys[0],
-							);
+							const next = advancedControls.find((candidate) => candidate.key === keys[0]);
 							if (!next) return;
 							const replacement = createDraftCondition([next]);
 							if (replacement) updateCondition({ ...replacement, id: condition.id });
@@ -508,10 +490,7 @@ export function AdvancedSearchBuilder({
 						ariaLabel={t.builder.operator}
 						onValueChange={(keys) => {
 							const operator = keys[0];
-							if (
-								!operator ||
-								!control.operators.some((candidate) => candidate === operator)
-							)
+							if (!operator || !control.operators.some((candidate) => candidate === operator))
 								return;
 							updateCondition({
 								...condition,
@@ -570,9 +549,7 @@ export function AdvancedSearchBuilder({
 						onValueChange={(values) => {
 							const operator = values[0];
 							if (operator !== "all" && operator !== "any") return;
-							setRoot((current) =>
-								replaceDraftNode(current, group.id, { ...group, operator }),
-							);
+							setRoot((current) => replaceDraftNode(current, group.id, { ...group, operator }));
 						}}
 						options={[
 							{ value: "all", label: t.builder.matchAll },
@@ -595,9 +572,7 @@ export function AdvancedSearchBuilder({
 				</div>
 				<div>
 					{group.clauses.map((node) =>
-						node.kind === "group"
-							? groupEditor(node, depth + 1)
-							: conditionEditor(node),
+						node.kind === "group" ? groupEditor(node, depth + 1) : conditionEditor(node),
 					)}
 				</div>
 				{invalid ? (
@@ -606,22 +581,12 @@ export function AdvancedSearchBuilder({
 					</p>
 				) : null}
 				<div className="flex flex-wrap gap-2">
-					<Button
-						onClick={() => addCondition(group)}
-						size="sm"
-						type="button"
-						variant="outline"
-					>
+					<Button onClick={() => addCondition(group)} size="sm" type="button" variant="outline">
 						<Plus aria-hidden />
 						{t.builder.addCondition}
 					</Button>
 					{depth < 1 ? (
-						<Button
-							onClick={() => addGroup(group)}
-							size="sm"
-							type="button"
-							variant="outline"
-						>
+						<Button onClick={() => addGroup(group)} size="sm" type="button" variant="outline">
 							<Plus aria-hidden />
 							{t.builder.addGroup}
 						</Button>
@@ -658,10 +623,7 @@ export function AdvancedSearchBuilder({
 						onClick={() => {
 							setAttempted(true);
 							if (!compiled.ok) return;
-							onApply(
-								compiled.expression,
-								sharedSelectionsFromDraft(root, advancedControls),
-							);
+							onApply(compiled.expression, sharedSelectionsFromDraft(root, advancedControls));
 							onOpenChange(false);
 						}}
 						type="button"

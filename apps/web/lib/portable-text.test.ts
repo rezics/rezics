@@ -88,9 +88,7 @@ describe("Portable Text boundaries", () => {
 		expect(
 			normalized.flatMap((block) =>
 				isPortableTextValueBlock(block)
-					? block.children.flatMap((child) =>
-							child._type === "span" ? [child.text] : [],
-						)
+					? block.children.flatMap((child) => (child._type === "span" ? [child.text] : []))
 					: [],
 			),
 		).toEqual(["The searchable spoiler text"]);

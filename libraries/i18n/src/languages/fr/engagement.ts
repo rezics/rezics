@@ -45,10 +45,9 @@ export default {
 	scoreGuidelines: "Voir les critères de notation",
 	scoreEditorHint: `Choisissez un ${realmTerms.inline} pour mettre à jour une note existante ou ajouter une note dans un autre ${realmTerms.inline}.`,
 	itemVisibility: "Visibilité de cet élément",
-	effectiveItemVisibility: insert(
-		"Visibilité effective après l’enregistrement : {{visibility}}",
-		{ visibility: String },
-	),
+	effectiveItemVisibility: insert("Visibilité effective après l’enregistrement : {{visibility}}", {
+		visibility: String,
+	}),
 	editScores: "Gérer les notes",
 	noScoredRealms: `Aucune note dans un ${realmTerms.inline} pour le moment.`,
 	scoreAssociation: "Association de note",

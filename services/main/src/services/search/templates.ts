@@ -275,9 +275,7 @@ function validateTemplateDocument(document: SearchDocument): SearchTemplateDefin
 			throw new InvalidSearch(`Search field ${control.field} cannot be repeated`);
 		const definition = fieldDefinition(control.field);
 		if (!definition.categories.some((category) => document.categories.includes(category)))
-			throw new InvalidSearch(
-				`Search control ${control.key} does not apply to its categories`,
-			);
+			throw new InvalidSearch(`Search control ${control.key} does not apply to its categories`);
 		if (control.optionPolicy && control.optionPolicy.kind !== "all")
 			for (const value of control.optionPolicy.values) validateScalar(control.field, value);
 	}
@@ -289,9 +287,7 @@ function validateTemplateDocument(document: SearchDocument): SearchTemplateDefin
 				template.id !== "progress" &&
 				document.categories.some((category) => !supportsCurrentSearchSort(category, sort))
 			)
-				throw new InvalidSearch(
-					`Search sort ${sort} does not apply to every document category`,
-				);
+				throw new InvalidSearch(`Search sort ${sort} does not apply to every document category`);
 	}
 	if (document.results.maxPageSize > template.maxPageSize)
 		throw new InvalidSearch("Search document page size exceeds its template");
@@ -409,11 +405,7 @@ export function resolveSearchDocument(
 				operators: [...definition.operators],
 				...(optionSourceFor(control.field, definition, document.categories)
 					? {
-							optionSource: optionSourceFor(
-								control.field,
-								definition,
-								document.categories,
-							),
+							optionSource: optionSourceFor(control.field, definition, document.categories),
 						}
 					: {}),
 				...(control.optionPolicy ? { optionPolicy: control.optionPolicy } : {}),
@@ -474,11 +466,7 @@ function validateControlValue(
 }
 
 function normalizeFilterExpression(filter: SearchControlPredicate): SearchExpression {
-	if (
-		filter.operator !== "all-of" &&
-		filter.operator !== "any-of" &&
-		filter.operator !== "none-of"
-	)
+	if (filter.operator !== "all-of" && filter.operator !== "any-of" && filter.operator !== "none-of")
 		return filter;
 	const clauses = filter.values.map((value): SearchControlPredicate => {
 		if (filter.operator === "none-of")
@@ -507,9 +495,7 @@ function unwrapExpression(
 	const clauses = expression.clauses
 		.map((clause) => unwrapExpression(clause, controls, used))
 		.flatMap((clause) =>
-			!("field" in clause) && clause.operator === expression.operator
-				? clause.clauses
-				: [clause],
+			!("field" in clause) && clause.operator === expression.operator ? clause.clauses : [clause],
 		);
 	return combineSearchExpressions(expression.operator, clauses)!;
 }
@@ -655,9 +641,7 @@ export function compileSearchFeatureInput(
 			...input,
 			document: {
 				...input.document,
-				categories: input.document.categories.filter(
-					(category) => category !== "tag-structures",
-				),
+				categories: input.document.categories.filter((category) => category !== "tag-structures"),
 			},
 		};
 	if (input.document.categories.length === 0)
@@ -717,8 +701,7 @@ export function compileSearchFeatureInput(
 	const categories = searchExpression
 		? input.document.categories.filter(
 				(category) =>
-					specializeSearchExpressionForCategory(category, searchExpression).state !==
-					"match-none",
+					specializeSearchExpressionForCategory(category, searchExpression).state !== "match-none",
 			)
 		: input.document.categories;
 	if (!categories.length) throw new InvalidSearch("Search filters exclude every category");

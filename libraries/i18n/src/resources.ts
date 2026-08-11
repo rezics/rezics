@@ -11,22 +11,18 @@ export const resources = defineResources({
 			brand: () => import("./languages/zh-Hant/brand").then((module) => module.default),
 			entities: () => import("./languages/zh-Hant/entities").then((module) => module.default),
 			cover: () => import("./languages/zh-Hant/cover").then((module) => module.default),
-			collections: () =>
-				import("./languages/zh-Hant/collections").then((module) => module.default),
+			collections: () => import("./languages/zh-Hant/collections").then((module) => module.default),
 			create: () => import("./languages/zh-Hant/create").then((module) => module.default),
 			docks: () => import("./languages/zh-Hant/docks").then((module) => module.default),
 			previewAccess: () =>
 				import("./languages/zh-Hant/previewAccess").then((module) => module.default),
 			editor: () => import("./languages/zh-Hant/editor").then((module) => module.default),
 			emails: () => import("./languages/zh-Hant/emails").then((module) => module.default),
-			engagement: () =>
-				import("./languages/zh-Hant/engagement").then((module) => module.default),
-			errorCodes: () =>
-				import("./languages/zh-Hant/errorCodes").then((module) => module.default),
+			engagement: () => import("./languages/zh-Hant/engagement").then((module) => module.default),
+			errorCodes: () => import("./languages/zh-Hant/errorCodes").then((module) => module.default),
 			errors: () => import("./languages/zh-Hant/errors").then((module) => module.default),
 			feed: () => import("./languages/zh-Hant/feed").then((module) => module.default),
-			governance: () =>
-				import("./languages/zh-Hant/governance").then((module) => module.default),
+			governance: () => import("./languages/zh-Hant/governance").then((module) => module.default),
 			history: () => import("./languages/zh-Hant/history").then((module) => module.default),
 			home: () => import("./languages/zh-Hant/home").then((module) => module.default),
 			locale: () => import("./languages/zh-Hant/locale").then((module) => module.default),
@@ -59,22 +55,18 @@ export const resources = defineResources({
 			brand: () => import("./languages/zh-Hans/brand").then((module) => module.default),
 			entities: () => import("./languages/zh-Hans/entities").then((module) => module.default),
 			cover: () => import("./languages/zh-Hans/cover").then((module) => module.default),
-			collections: () =>
-				import("./languages/zh-Hans/collections").then((module) => module.default),
+			collections: () => import("./languages/zh-Hans/collections").then((module) => module.default),
 			create: () => import("./languages/zh-Hans/create").then((module) => module.default),
 			docks: () => import("./languages/zh-Hans/docks").then((module) => module.default),
 			previewAccess: () =>
 				import("./languages/zh-Hans/previewAccess").then((module) => module.default),
 			editor: () => import("./languages/zh-Hans/editor").then((module) => module.default),
 			emails: () => import("./languages/zh-Hans/emails").then((module) => module.default),
-			engagement: () =>
-				import("./languages/zh-Hans/engagement").then((module) => module.default),
-			errorCodes: () =>
-				import("./languages/zh-Hans/errorCodes").then((module) => module.default),
+			engagement: () => import("./languages/zh-Hans/engagement").then((module) => module.default),
+			errorCodes: () => import("./languages/zh-Hans/errorCodes").then((module) => module.default),
 			errors: () => import("./languages/zh-Hans/errors").then((module) => module.default),
 			feed: () => import("./languages/zh-Hans/feed").then((module) => module.default),
-			governance: () =>
-				import("./languages/zh-Hans/governance").then((module) => module.default),
+			governance: () => import("./languages/zh-Hans/governance").then((module) => module.default),
 			history: () => import("./languages/zh-Hans/history").then((module) => module.default),
 			home: () => import("./languages/zh-Hans/home").then((module) => module.default),
 			locale: () => import("./languages/zh-Hans/locale").then((module) => module.default),
@@ -107,12 +99,10 @@ export const resources = defineResources({
 			brand: () => import("./languages/en/brand").then((module) => module.default),
 			entities: () => import("./languages/en/entities").then((module) => module.default),
 			cover: () => import("./languages/en/cover").then((module) => module.default),
-			collections: () =>
-				import("./languages/en/collections").then((module) => module.default),
+			collections: () => import("./languages/en/collections").then((module) => module.default),
 			create: () => import("./languages/en/create").then((module) => module.default),
 			docks: () => import("./languages/en/docks").then((module) => module.default),
-			previewAccess: () =>
-				import("./languages/en/previewAccess").then((module) => module.default),
+			previewAccess: () => import("./languages/en/previewAccess").then((module) => module.default),
 			editor: () => import("./languages/en/editor").then((module) => module.default),
 			emails: () => import("./languages/en/emails").then((module) => module.default),
 			engagement: () => import("./languages/en/engagement").then((module) => module.default),
@@ -127,8 +117,7 @@ export const resources = defineResources({
 			media: () => import("./languages/en/media").then((module) => module.default),
 			messages: () => import("./languages/en/messages").then((module) => module.default),
 			nav: () => import("./languages/en/nav").then((module) => module.default),
-			notifications: () =>
-				import("./languages/en/notifications").then((module) => module.default),
+			notifications: () => import("./languages/en/notifications").then((module) => module.default),
 			posts: () => import("./languages/en/posts").then((module) => module.default),
 			profiles: () => import("./languages/en/profiles").then((module) => module.default),
 			realms: () => import("./languages/en/realms").then((module) => module.default),
@@ -152,12 +141,10 @@ export const resources = defineResources({
 			brand: () => import("./languages/ja/brand").then((module) => module.default),
 			entities: () => import("./languages/ja/entities").then((module) => module.default),
 			cover: () => import("./languages/ja/cover").then((module) => module.default),
-			collections: () =>
-				import("./languages/ja/collections").then((module) => module.default),
+			collections: () => import("./languages/ja/collections").then((module) => module.default),
 			create: () => import("./languages/ja/create").then((module) => module.default),
 			docks: () => import("./languages/ja/docks").then((module) => module.default),
-			previewAccess: () =>
-				import("./languages/ja/previewAccess").then((module) => module.default),
+			previewAccess: () => import("./languages/ja/previewAccess").then((module) => module.default),
 			editor: () => import("./languages/ja/editor").then((module) => module.default),
 			emails: () => import("./languages/ja/emails").then((module) => module.default),
 			engagement: () => import("./languages/ja/engagement").then((module) => module.default),
@@ -172,8 +159,7 @@ export const resources = defineResources({
 			media: () => import("./languages/ja/media").then((module) => module.default),
 			messages: () => import("./languages/ja/messages").then((module) => module.default),
 			nav: () => import("./languages/ja/nav").then((module) => module.default),
-			notifications: () =>
-				import("./languages/ja/notifications").then((module) => module.default),
+			notifications: () => import("./languages/ja/notifications").then((module) => module.default),
 			posts: () => import("./languages/ja/posts").then((module) => module.default),
 			profiles: () => import("./languages/ja/profiles").then((module) => module.default),
 			realms: () => import("./languages/ja/realms").then((module) => module.default),
@@ -197,12 +183,10 @@ export const resources = defineResources({
 			brand: () => import("./languages/ko/brand").then((module) => module.default),
 			entities: () => import("./languages/ko/entities").then((module) => module.default),
 			cover: () => import("./languages/ko/cover").then((module) => module.default),
-			collections: () =>
-				import("./languages/ko/collections").then((module) => module.default),
+			collections: () => import("./languages/ko/collections").then((module) => module.default),
 			create: () => import("./languages/ko/create").then((module) => module.default),
 			docks: () => import("./languages/ko/docks").then((module) => module.default),
-			previewAccess: () =>
-				import("./languages/ko/previewAccess").then((module) => module.default),
+			previewAccess: () => import("./languages/ko/previewAccess").then((module) => module.default),
 			editor: () => import("./languages/ko/editor").then((module) => module.default),
 			emails: () => import("./languages/ko/emails").then((module) => module.default),
 			engagement: () => import("./languages/ko/engagement").then((module) => module.default),
@@ -217,8 +201,7 @@ export const resources = defineResources({
 			media: () => import("./languages/ko/media").then((module) => module.default),
 			messages: () => import("./languages/ko/messages").then((module) => module.default),
 			nav: () => import("./languages/ko/nav").then((module) => module.default),
-			notifications: () =>
-				import("./languages/ko/notifications").then((module) => module.default),
+			notifications: () => import("./languages/ko/notifications").then((module) => module.default),
 			posts: () => import("./languages/ko/posts").then((module) => module.default),
 			profiles: () => import("./languages/ko/profiles").then((module) => module.default),
 			realms: () => import("./languages/ko/realms").then((module) => module.default),
@@ -242,12 +225,10 @@ export const resources = defineResources({
 			brand: () => import("./languages/de/brand").then((module) => module.default),
 			entities: () => import("./languages/de/entities").then((module) => module.default),
 			cover: () => import("./languages/de/cover").then((module) => module.default),
-			collections: () =>
-				import("./languages/de/collections").then((module) => module.default),
+			collections: () => import("./languages/de/collections").then((module) => module.default),
 			create: () => import("./languages/de/create").then((module) => module.default),
 			docks: () => import("./languages/de/docks").then((module) => module.default),
-			previewAccess: () =>
-				import("./languages/de/previewAccess").then((module) => module.default),
+			previewAccess: () => import("./languages/de/previewAccess").then((module) => module.default),
 			editor: () => import("./languages/de/editor").then((module) => module.default),
 			emails: () => import("./languages/de/emails").then((module) => module.default),
 			engagement: () => import("./languages/de/engagement").then((module) => module.default),
@@ -262,8 +243,7 @@ export const resources = defineResources({
 			media: () => import("./languages/de/media").then((module) => module.default),
 			messages: () => import("./languages/de/messages").then((module) => module.default),
 			nav: () => import("./languages/de/nav").then((module) => module.default),
-			notifications: () =>
-				import("./languages/de/notifications").then((module) => module.default),
+			notifications: () => import("./languages/de/notifications").then((module) => module.default),
 			posts: () => import("./languages/de/posts").then((module) => module.default),
 			profiles: () => import("./languages/de/profiles").then((module) => module.default),
 			realms: () => import("./languages/de/realms").then((module) => module.default),
@@ -287,12 +267,10 @@ export const resources = defineResources({
 			brand: () => import("./languages/fr/brand").then((module) => module.default),
 			entities: () => import("./languages/fr/entities").then((module) => module.default),
 			cover: () => import("./languages/fr/cover").then((module) => module.default),
-			collections: () =>
-				import("./languages/fr/collections").then((module) => module.default),
+			collections: () => import("./languages/fr/collections").then((module) => module.default),
 			create: () => import("./languages/fr/create").then((module) => module.default),
 			docks: () => import("./languages/fr/docks").then((module) => module.default),
-			previewAccess: () =>
-				import("./languages/fr/previewAccess").then((module) => module.default),
+			previewAccess: () => import("./languages/fr/previewAccess").then((module) => module.default),
 			editor: () => import("./languages/fr/editor").then((module) => module.default),
 			emails: () => import("./languages/fr/emails").then((module) => module.default),
 			engagement: () => import("./languages/fr/engagement").then((module) => module.default),
@@ -307,8 +285,7 @@ export const resources = defineResources({
 			media: () => import("./languages/fr/media").then((module) => module.default),
 			messages: () => import("./languages/fr/messages").then((module) => module.default),
 			nav: () => import("./languages/fr/nav").then((module) => module.default),
-			notifications: () =>
-				import("./languages/fr/notifications").then((module) => module.default),
+			notifications: () => import("./languages/fr/notifications").then((module) => module.default),
 			posts: () => import("./languages/fr/posts").then((module) => module.default),
 			profiles: () => import("./languages/fr/profiles").then((module) => module.default),
 			realms: () => import("./languages/fr/realms").then((module) => module.default),
@@ -332,12 +309,10 @@ export const resources = defineResources({
 			brand: () => import("./languages/es/brand").then((module) => module.default),
 			entities: () => import("./languages/es/entities").then((module) => module.default),
 			cover: () => import("./languages/es/cover").then((module) => module.default),
-			collections: () =>
-				import("./languages/es/collections").then((module) => module.default),
+			collections: () => import("./languages/es/collections").then((module) => module.default),
 			create: () => import("./languages/es/create").then((module) => module.default),
 			docks: () => import("./languages/es/docks").then((module) => module.default),
-			previewAccess: () =>
-				import("./languages/es/previewAccess").then((module) => module.default),
+			previewAccess: () => import("./languages/es/previewAccess").then((module) => module.default),
 			editor: () => import("./languages/es/editor").then((module) => module.default),
 			emails: () => import("./languages/es/emails").then((module) => module.default),
 			engagement: () => import("./languages/es/engagement").then((module) => module.default),
@@ -352,8 +327,7 @@ export const resources = defineResources({
 			media: () => import("./languages/es/media").then((module) => module.default),
 			messages: () => import("./languages/es/messages").then((module) => module.default),
 			nav: () => import("./languages/es/nav").then((module) => module.default),
-			notifications: () =>
-				import("./languages/es/notifications").then((module) => module.default),
+			notifications: () => import("./languages/es/notifications").then((module) => module.default),
 			posts: () => import("./languages/es/posts").then((module) => module.default),
 			profiles: () => import("./languages/es/profiles").then((module) => module.default),
 			realms: () => import("./languages/es/realms").then((module) => module.default),

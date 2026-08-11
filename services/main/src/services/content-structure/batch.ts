@@ -78,10 +78,7 @@ async function normalizeRealmTagStrategies(
 	const tagUnitIds = new Set<string>();
 	if (input.structureKind === "realm.taxonomy")
 		for (const contentUnitIds of revisionedBatchChunks([...candidateContentUnitIds])) {
-			const rows = await tx
-				.select({ id: tag.id })
-				.from(tag)
-				.where(inArray(tag.id, contentUnitIds));
+			const rows = await tx.select({ id: tag.id }).from(tag).where(inArray(tag.id, contentUnitIds));
 			for (const { id } of rows) tagUnitIds.add(id);
 		}
 	const normalize = (value: {
@@ -100,16 +97,12 @@ async function normalizeRealmTagStrategies(
 		}
 		if (!tagContent) {
 			if (value.requested !== undefined && value.requested !== null)
-				throw new ContentStructureInvalid(
-					"Realm Tag query strategies are only valid on Tag nodes",
-				);
+				throw new ContentStructureInvalid("Realm Tag query strategies are only valid on Tag nodes");
 			return null;
 		}
 		if (value.requested === null)
 			throw new ContentStructureInvalid("Realm taxonomy Tag nodes require a query strategy");
-		return (
-			value.requested ?? (value.contentChanged ? null : value.current) ?? "global_effective"
-		);
+		return value.requested ?? (value.contentChanged ? null : value.current) ?? "global_effective";
 	};
 	const normalized: ContentStructureBatchCommand[] = [];
 	for (const command of input.commands) {
@@ -185,9 +178,7 @@ async function validatePersistedBatchNodes(
 	for (const { node, tagId } of nodes) {
 		if (structure.kind === "realm.taxonomy") {
 			if ((tagId !== null) !== (node.realmTagQueryStrategy !== null))
-				throw new ContentStructureInvalid(
-					"Only Realm taxonomy Tag nodes have a query strategy",
-				);
+				throw new ContentStructureInvalid("Only Realm taxonomy Tag nodes have a query strategy");
 		} else if (node.realmTagQueryStrategy !== null) {
 			throw new ContentStructureInvalid(
 				"Realm Tag query strategies are only valid in a Realm taxonomy",
@@ -252,9 +243,7 @@ export async function applyContentStructureBatch(
 			});
 			ensureBinding(before.structure.kind, input.binding ?? "direct");
 			const compiledCommands =
-				typeof input.commands === "function"
-					? await input.commands(before)
-					: input.commands;
+				typeof input.commands === "function" ? await input.commands(before) : input.commands;
 			if (compiledCommands.length > RevisionedBatchCommandLimit)
 				throw new ContentStructureInvalid(
 					`Content Structure batch exceeds ${RevisionedBatchCommandLimit} commands`,
@@ -298,9 +287,7 @@ export async function applyContentStructureBatch(
 					)
 					.limit(1);
 				if (collision.length)
-					throw new ContentStructureInvalid(
-						"A new Content Structure node ID already exists",
-					);
+					throw new ContentStructureInvalid("A new Content Structure node ID already exists");
 			}
 			const updates = plan.delta.operations.flatMap((operation) =>
 				operation.kind === "node.update" ? [operation] : [],

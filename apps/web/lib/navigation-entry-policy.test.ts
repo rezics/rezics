@@ -16,9 +16,7 @@ async function collectSourceFiles(directory: string): Promise<string[]> {
 		entries.map((entry): Promise<string[]> => {
 			const path = resolve(directory, entry.name);
 			if (entry.isDirectory())
-				return IgnoredDirectories.has(entry.name)
-					? Promise.resolve([])
-					: collectSourceFiles(path);
+				return IgnoredDirectories.has(entry.name) ? Promise.resolve([]) : collectSourceFiles(path);
 			if (!SourceExtensions.has(extname(entry.name)) || entry.name.includes(".test."))
 				return Promise.resolve([]);
 			return Promise.resolve([path]);

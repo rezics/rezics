@@ -69,9 +69,7 @@ export interface RecommendationSnapshotContext {
 export async function resolveRecommendationSnapshot(
 	requestedId?: string | null,
 ): Promise<RecommendationSnapshotContext | null> {
-	const staleBoundary = new Date(
-		Date.now() - RecommendationPolicy.snapshotStaleHours * 3_600_000,
-	);
+	const staleBoundary = new Date(Date.now() - RecommendationPolicy.snapshotStaleHours * 3_600_000);
 	const [snapshot] = await database
 		.select({
 			id: recommendationSnapshot.id,
@@ -81,10 +79,7 @@ export async function resolveRecommendationSnapshot(
 		.from(recommendationSnapshot)
 		.where(
 			requestedId
-				? and(
-						eq(recommendationSnapshot.id, requestedId),
-						eq(recommendationSnapshot.state, "ready"),
-					)
+				? and(eq(recommendationSnapshot.id, requestedId), eq(recommendationSnapshot.state, "ready"))
 				: and(
 						eq(recommendationSnapshot.active, true),
 						eq(recommendationSnapshot.state, "ready"),

@@ -98,10 +98,7 @@ export async function syncUnitLocalizationContentMetrics(
 			.insert(unitLocalizationContentMetric)
 			.values({ unitId, ...metric })
 			.onConflictDoUpdate({
-				target: [
-					unitLocalizationContentMetric.unitId,
-					unitLocalizationContentMetric.language,
-				],
+				target: [unitLocalizationContentMetric.unitId, unitLocalizationContentMetric.language],
 				set: {
 					wordCount: metric.wordCount,
 					characterCount: metric.characterCount,
@@ -168,9 +165,6 @@ export async function listPublishedBookContentMetrics(
 		language: row.language,
 		chapterCount: toSafeInteger(row.chapterCount, `${row.language} chapter metric count`),
 		wordCount: toSafeInteger(row.wordCount, `${row.language} chapter word count`),
-		characterCount: toSafeInteger(
-			row.characterCount,
-			`${row.language} chapter character count`,
-		),
+		characterCount: toSafeInteger(row.characterCount, `${row.language} chapter character count`),
 	}));
 }

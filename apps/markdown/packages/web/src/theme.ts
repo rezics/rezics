@@ -45,9 +45,7 @@ export function installMarkdownTheme(targetDocument: Document, targetWindow: Win
 		);
 		targetDocument.documentElement.classList.toggle("dark", scheme === "dark");
 		targetDocument.documentElement.dataset.theme = scheme;
-		const themeColor = targetDocument.querySelector<HTMLMetaElement>(
-			'meta[name="theme-color"]',
-		);
+		const themeColor = targetDocument.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
 		if (themeColor) themeColor.content = markdownThemeColor(scheme);
 	};
 	const onStorage = (event: StorageEvent): void => {

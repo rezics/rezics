@@ -37,8 +37,7 @@ vi.mock("@/i18n/client", () => ({
 				realmTagContextOnly: "Only explicitly explained Realm Tags are available.",
 				pageDescription: ({ subject }: { readonly subject: string }) =>
 					`Check existing ${subject}.`,
-				pageTitle: ({ subject }: { readonly subject: string }) =>
-					`Search existing ${subject}`,
+				pageTitle: ({ subject }: { readonly subject: string }) => `Search existing ${subject}`,
 				policy: "Search before creating.",
 				policyTitle: "Search first",
 				resultsTitle: "Possible existing entries",
@@ -46,8 +45,7 @@ vi.mock("@/i18n/client", () => ({
 				searchFailed: "Search failed.",
 				searchHint: "Enter a name.",
 				searchLabel: ({ subject }: { readonly subject: string }) => `Search ${subject}`,
-				searchPlaceholder: ({ subject }: { readonly subject: string }) =>
-					`Enter ${subject}`,
+				searchPlaceholder: ({ subject }: { readonly subject: string }) => `Enter ${subject}`,
 				subjects: {
 					book: "books",
 					character: "characters",
@@ -109,10 +107,7 @@ describe("CommunityUnitSearchPage", () => {
 
 	it("uses the Tag domain without sending the unsupported kind filter", async () => {
 		render(
-			<CommunityUnitSearchPage
-				initialQuery="science"
-				subject={TagCommunityUnitSearchSubject}
-			/>,
+			<CommunityUnitSearchPage initialQuery="science" subject={TagCommunityUnitSearchSubject} />,
 		);
 
 		fireEvent.click(screen.getByRole("button", { name: "Search" }));

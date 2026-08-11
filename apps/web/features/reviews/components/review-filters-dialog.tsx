@@ -65,9 +65,7 @@ export function ReviewFiltersDialog({
 							appearance="field"
 							ariaLabel={t.engagement.reviewLanguage}
 							multiple
-							onValueChange={(languages) =>
-								setDraft((current) => ({ ...current, languages }))
-							}
+							onValueChange={(languages) => setDraft((current) => ({ ...current, languages }))}
 							options={ContentLanguageValues.map((value) => ({
 								label: t.locale.contentLanguages[value],
 								value,
@@ -118,9 +116,7 @@ export function ReviewFiltersDialog({
 								{t.engagement.allReviewRealms}
 							</Button>
 						) : (
-							<p className="text-sm text-muted-foreground">
-								{t.engagement.allReviewRealms}
-							</p>
+							<p className="text-sm text-muted-foreground">{t.engagement.allReviewRealms}</p>
 						)}
 					</Field>
 				</DialogBody>

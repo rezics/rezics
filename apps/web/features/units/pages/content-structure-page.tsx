@@ -47,8 +47,7 @@ function MediaContentStructurePage({ mediaId }: { mediaId: string }) {
 		},
 	);
 	if (query.isPending) return <QueryPending />;
-	if (query.isError)
-		return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
+	if (query.isError) return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
 	return (
 		<MediaContentStructureEditor
 			initial={query.data}
@@ -74,8 +73,7 @@ function BookContentStructurePage({ bookId }: { bookId: string }) {
 		},
 	);
 	if (query.isPending) return <QueryPending />;
-	if (query.isError)
-		return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
+	if (query.isError) return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
 	if (!query.data?.structureId || !query.data.latestRevisionId)
 		return (
 			<div className="grid min-h-64 w-full place-items-center">
@@ -113,9 +111,7 @@ export function UnreleasedContentStructurePage() {
 			/>
 			<Card appearance="outlined">
 				<CardContent className="grid min-h-48 place-items-center gap-2 p-8 text-center">
-					<h2 className="font-heading text-lg font-semibold">
-						{t.units.content.development}
-					</h2>
+					<h2 className="font-heading text-lg font-semibold">{t.units.content.development}</h2>
 					<p className="max-w-xl text-sm leading-6 text-muted-foreground">
 						{t.units.content.developmentDescription}
 					</p>

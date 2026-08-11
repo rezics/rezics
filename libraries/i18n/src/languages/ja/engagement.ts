@@ -182,8 +182,7 @@ export default {
 			completedCount: "完了した読書",
 			lastChapter: "現在の章",
 			noChapter: "章が選択されていません",
-			estimatedFromContents:
-				"選択した章と目次の内容量から推定しました。必要に応じて調整できます。",
+			estimatedFromContents: "選択した章と目次の内容量から推定しました。必要に応じて調整できます。",
 			history: {
 				completion: insert("{{date}} にこの本を読み終えました。", { date: String }),
 				update: insert("{{date}} に {{percent}}% まで読みました。", {

@@ -85,8 +85,7 @@ function deriveDelegableUnitPermissionValues(): readonly [
 	...DelegableUnitPermission[],
 ] {
 	const values = UnitPermissionValues.filter(
-		(permission): permission is DelegableUnitPermission =>
-			permission !== "unit.ownership.transfer",
+		(permission): permission is DelegableUnitPermission => permission !== "unit.ownership.transfer",
 	);
 	const [first, ...rest] = values;
 	if (!first) throw new Error("UnitPermissionValues must contain a delegable permission");
@@ -180,8 +179,7 @@ export const PlatformCapabilityDefinitions = {
 	"platform.access.read": {
 		resource: "platform.access",
 		action: "read",
-		rationale:
-			"Inspecting who has platform authority is independently grantable from changing it.",
+		rationale: "Inspecting who has platform authority is independently grantable from changing it.",
 	},
 	"platform.access.manage": {
 		resource: "platform.access",
@@ -261,8 +259,7 @@ export const PlatformCapabilityDefinitions = {
 	"unit.restore": {
 		resource: "unit",
 		action: "restore",
-		rationale:
-			"Restores a platform-soft-deleted Unit without granting authority over its content.",
+		rationale: "Restores a platform-soft-deleted Unit without granting authority over its content.",
 	},
 	"unit.slug.manage": {
 		resource: "unit.slug",
@@ -635,8 +632,7 @@ export const UnitPermissionDefinitions = {
 		target: "entity",
 		resource: "entity.association.credit",
 		action: "direct",
-		rationale:
-			"Direct association bypasses the request workflow and is independently grantable.",
+		rationale: "Direct association bypasses the request workflow and is independently grantable.",
 	},
 	"entity.association.subject.request": {
 		kind: "domain",
@@ -651,8 +647,7 @@ export const UnitPermissionDefinitions = {
 		target: "entity",
 		resource: "entity.association.subject",
 		action: "direct",
-		rationale:
-			"Direct association bypasses the request workflow and is independently grantable.",
+		rationale: "Direct association bypasses the request workflow and is independently grantable.",
 	},
 } as const satisfies Record<UnitPermission, PermissionDefinition>;
 

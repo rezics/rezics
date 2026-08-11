@@ -101,9 +101,5 @@ export async function getUnitExternalLinkPreviewWithSources(input: {
 	readonly profileId?: string;
 }) {
 	const externalLinks = await getUnitExternalLinkPreview(input.unitId, input.profileId);
-	return attachReadableSourceEntities(
-		externalLinks,
-		input.localizationLanguages,
-		input.profileId,
-	);
+	return attachReadableSourceEntities(externalLinks, input.localizationLanguages, input.profileId);
 }

@@ -14,9 +14,7 @@ describe("Unit ownership claim API contracts", () => {
 			}),
 		).toBe(true);
 		expect(Check(CreateUnitOwnershipClaimBody, { unitId, details: "   " })).toBe(false);
-		expect(Check(CreateUnitOwnershipClaimBody, { unitId, details: "x".repeat(2_001) })).toBe(
-			false,
-		);
+		expect(Check(CreateUnitOwnershipClaimBody, { unitId, details: "x".repeat(2_001) })).toBe(false);
 	});
 
 	it("requires an explicit claim id confirmation for a platform decision", () => {

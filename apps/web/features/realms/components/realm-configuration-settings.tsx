@@ -116,16 +116,10 @@ export function RealmPagesSettings({ realm }: { readonly realm: GetApiRealmsByRe
 			</div>
 			{(["tags", "wiki"] as const).map((page) =>
 				pages.includes(page) ? null : (
-					<Field
-						className="rounded-xl border bg-muted/24 p-4"
-						key={page}
-						orientation="horizontal"
-					>
+					<Field className="rounded-xl border bg-muted/24 p-4" key={page} orientation="horizontal">
 						<FieldContent>
 							<FieldLabel>{t.realms.pages[page]}</FieldLabel>
-							<FieldDescription>
-								{t.realms.pageSettings.enableDescription}
-							</FieldDescription>
+							<FieldDescription>{t.realms.pageSettings.enableDescription}</FieldDescription>
 						</FieldContent>
 						<Switch
 							checked={false}

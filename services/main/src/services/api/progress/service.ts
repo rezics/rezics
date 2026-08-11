@@ -321,9 +321,7 @@ function normalizeEntry(
 			progress: 1,
 			status: "completed",
 			totalTimeMs:
-				input.totalTimeMs === undefined
-					? (snapshot?.totalTimeMs ?? 0n)
-					: BigInt(input.totalTimeMs),
+				input.totalTimeMs === undefined ? (snapshot?.totalTimeMs ?? 0n) : BigInt(input.totalTimeMs),
 		};
 	const atBoundary = input.status === "backlog" || input.status === "completed";
 	return {
@@ -339,9 +337,7 @@ function normalizeEntry(
 					: (input.progress ?? snapshot?.progress ?? 0),
 		status: input.status,
 		totalTimeMs:
-			input.totalTimeMs === undefined
-				? (snapshot?.totalTimeMs ?? 0n)
-				: BigInt(input.totalTimeMs),
+			input.totalTimeMs === undefined ? (snapshot?.totalTimeMs ?? 0n) : BigInt(input.totalTimeMs),
 	};
 }
 
@@ -464,9 +460,7 @@ export async function refreshProgressSnapshot(
 			: statistics.lastSeenAt;
 	const status = readingSnapshot ? readingSnapshot.status : (current?.status ?? "backlog");
 	const progress = readingSnapshot ? readingSnapshot.progress : (current?.progress ?? 0);
-	const totalTimeMs = readingSnapshot
-		? readingSnapshot.totalTimeMs
-		: (current?.totalTimeMs ?? 0n);
+	const totalTimeMs = readingSnapshot ? readingSnapshot.totalTimeMs : (current?.totalTimeMs ?? 0n);
 	const lastContentStructureNodeId = readingSnapshot
 		? readingSnapshot.lastContentStructureNodeId
 		: (current?.contentStructureNodeId ?? null);
@@ -584,9 +578,7 @@ export async function recordChapterReading(
 			completed: input.canReadUnpublished
 				? bookChapterProgressStat.allCompletedCount
 				: bookChapterProgressStat.publicCompletedCount,
-			total: input.canReadUnpublished
-				? bookChapterStat.allCount
-				: bookChapterStat.publicCount,
+			total: input.canReadUnpublished ? bookChapterStat.allCount : bookChapterStat.publicCount,
 		})
 		.from(bookChapterStat)
 		.leftJoin(

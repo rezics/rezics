@@ -72,9 +72,9 @@ describe("Tag API schemas", () => {
 			updatedAt: "2026-07-30T00:00:00.000Z",
 		};
 		expect(Value.Check(RealmTagSubscriptionResponse, subscription)).toBe(true);
-		expect(
-			Value.Check(RealmTagSubscriptionResponse, { ...subscription, avatar: undefined }),
-		).toBe(false);
+		expect(Value.Check(RealmTagSubscriptionResponse, { ...subscription, avatar: undefined })).toBe(
+			false,
+		);
 		expect(
 			Value.Check(UnitTagLandscapeResponse, {
 				structures: [],

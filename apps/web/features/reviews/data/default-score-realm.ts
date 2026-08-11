@@ -49,8 +49,6 @@ export function useDefaultScoreRealm() {
 		realm: selection,
 		error: realm.error,
 		isPending:
-			session.isPending ||
-			(Boolean(session.data) && preferences.isPending) ||
-			realm.isPending,
+			session.isPending || (Boolean(session.data) && preferences.isPending) || realm.isPending,
 	};
 }

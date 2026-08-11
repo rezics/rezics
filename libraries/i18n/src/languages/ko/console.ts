@@ -32,13 +32,11 @@ export default {
 		},
 		ownershipClaims: {
 			label: "소유권 요청",
-			description:
-				"공개 유닛의 소유권 요청을 검토하고 적절한 요청자에게 관리 소유권을 돌려줍니다.",
+			description: "공개 유닛의 소유권 요청을 검토하고 적절한 요청자에게 관리 소유권을 돌려줍니다.",
 		},
 		moderation: {
 			label: "전역 콘텐츠 거버넌스",
-			description:
-				"전역 규칙에 따라 제출된 신고를 처리하고 유닛의 플랫폼 수준 상태를 관리합니다.",
+			description: "전역 규칙에 따라 제출된 신고를 처리하고 유닛의 플랫폼 수준 상태를 관리합니다.",
 		},
 		audit: {
 			label: "보안 감사",
@@ -103,8 +101,7 @@ export default {
 		restoreDescription:
 			"유닛이 일반 조회에 다시 표시됩니다. 삭제 전에 게시된 유닛은 검토 없이 다시 공개되지 않도록 보관 상태로 복원됩니다.",
 		softDeleteTitle: "이 유닛을 소프트 삭제할까요?",
-		softDeleteDescription:
-			"유닛과 기록은 보존되지만 일반 제품 조회와 작업에서는 즉시 숨겨집니다.",
+		softDeleteDescription: "유닛과 기록은 보존되지만 일반 제품 조회와 작업에서는 즉시 숨겨집니다.",
 		reason: "거버넌스 사유",
 		internalNote: "내부 메모(선택 사항)",
 		notePlaceholder: "작업 근거를 기록하세요. 보안 감사 로그에 저장됩니다.",
@@ -231,8 +228,7 @@ export default {
 		platformAccessUnavailable:
 			"이 로그인 계정에는 프로필이 없어 관리할 플랫폼 접근 권한이 없습니다.",
 		sessionsTitle: "활성 세션",
-		sessionsDescription:
-			"기기 및 네트워크 정보를 확인하고 의심스러운 자격 증명을 즉시 취소합니다.",
+		sessionsDescription: "기기 및 네트워크 정보를 확인하고 의심스러운 자격 증명을 즉시 취소합니다.",
 		revokeAllSessions: "모두 취소",
 		noSessions: "이 사용자에게 활성 세션이 없습니다.",
 		unknownDevice: "알 수 없는 기기",
@@ -283,8 +279,7 @@ export default {
 	dashboard: {
 		managementAreas: "관리 기능",
 		systemHealth: "시스템 상태",
-		systemHealthDescription:
-			"데이터베이스, 파일 저장소, 추천 및 검색 서비스의 현재 가용성입니다.",
+		systemHealthDescription: "데이터베이스, 파일 저장소, 추천 및 검색 서비스의 현재 가용성입니다.",
 		checking: "확인 중",
 		healthUnavailable: "현재 시스템 상태를 확인할 수 없습니다.",
 		checks: {

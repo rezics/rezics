@@ -11,10 +11,7 @@ const state = vi.hoisted(() => ({
 }));
 
 vi.mock("@rezics/openapi-tanstack-query", () => ({
-	getApiRealmsByRealmIdRulesAuthoringQueryKey: (input: unknown) => [
-		"realm-rules-authoring",
-		input,
-	],
+	getApiRealmsByRealmIdRulesAuthoringQueryKey: (input: unknown) => ["realm-rules-authoring", input],
 	getApiRealmsByRealmIdRulesQueryKey: (input: unknown) => ["realm-rules", input],
 	usePutApiRealmsByRealmIdRules: () => ({
 		error: null,
@@ -64,8 +61,7 @@ vi.mock("@/i18n/client", () => ({
 				ruleNumber: ({ position }: { position: number }) => `第 ${position} 條規則`,
 				ruleTitle: "規則標題",
 				ruleTranslationCount: ({ count }: { count: number }) => `翻譯：${count}`,
-				ruleTranslationMissing: ({ language }: { language: string }) =>
-					`尚未新增${language}翻譯。`,
+				ruleTranslationMissing: ({ language }: { language: string }) => `尚未新增${language}翻譯。`,
 				ruleTranslationsIncomplete: "每個翻譯都必須填寫標題。",
 				removeRule: "移除規則",
 				rules: "規則",

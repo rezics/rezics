@@ -57,8 +57,7 @@ export default {
 		"platform.session.revoke": "Revocar sesiones de usuarios",
 		"entity.associations.override": `Omitir los permisos de asociación de ${entityTerms.plural}`,
 		"unit.edit": "Editar todas las Units",
-		"platform.development_preview.access":
-			"Acceder a vistas previas de desarrollo no publicadas",
+		"platform.development_preview.access": "Acceder a vistas previas de desarrollo no publicadas",
 		"unit.governance.read": "Consultar la gobernanza de todas las Units",
 		"unit.ownership.override": "Reasignar la titularidad de cualquier Unit",
 		"unit.content_license.manage": "Invalidar o restaurar licencias de contenido de Units",
@@ -141,13 +140,10 @@ export default {
 		selectOwnershipCandidate: "Seleccionar",
 		noOwnershipCandidates: "No hay colaboradores aptos.",
 		confirmTransferTitle: "Confirmar transferencia de propiedad",
-		confirmTransferDescription: insert(
-			"¿Transferir la propiedad de «{{unit}}» a {{profile}}?",
-			{
-				unit: String,
-				profile: String,
-			},
-		),
+		confirmTransferDescription: insert("¿Transferir la propiedad de «{{unit}}» a {{profile}}?", {
+			unit: String,
+			profile: String,
+		}),
 		untitledOwnershipUnit: "Unit sin título",
 		transferOwnershipWarning:
 			"Perderás de inmediato la autoridad de propietario. Solo el nuevo propietario podrá revertirlo mediante otra transferencia.",

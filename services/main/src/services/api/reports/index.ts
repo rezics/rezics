@@ -125,14 +125,8 @@ async function hydrateReports(
 				id: contentReportRule.ruleId,
 				sourceRealmId: contentReportRule.ruleSourceRealmId,
 				revisionId: contentReportRule.ruleRevisionId,
-				language: resolvedUnitLocalizationLanguage(
-					contentReportRule.ruleId,
-					localizationLanguages,
-				),
-				title: resolvedUnitLocalizationTitle(
-					contentReportRule.ruleId,
-					localizationLanguages,
-				),
+				language: resolvedUnitLocalizationLanguage(contentReportRule.ruleId, localizationLanguages),
+				title: resolvedUnitLocalizationTitle(contentReportRule.ruleId, localizationLanguages),
 			})
 			.from(contentReportRule)
 			.where(inArray(contentReportRule.reportId, reportIds))
@@ -380,10 +374,7 @@ export default new Elysia().use(session).group("", (app) =>
 						.select({ unitId: realmUnit.unitId })
 						.from(realmUnit)
 						.where(
-							and(
-								eq(realmUnit.realmId, query.contextRealmId),
-								eq(realmUnit.unitId, params.unitId),
-							),
+							and(eq(realmUnit.realmId, query.contextRealmId), eq(realmUnit.unitId, params.unitId)),
 						)
 						.limit(1);
 					if (!membership) throw new ReportRealmMismatch();
@@ -397,11 +388,7 @@ export default new Elysia().use(session).group("", (app) =>
 				const items = (
 					await Promise.all(
 						destinationRequests.map((destination) =>
-							loadReportDestination(
-								destination.id,
-								destination.scope,
-								query.localizationLanguages,
-							),
+							loadReportDestination(destination.id, destination.scope, query.localizationLanguages),
 						),
 					)
 				).filter((item) => item !== undefined);
@@ -437,19 +424,14 @@ export default new Elysia().use(session).group("", (app) =>
 						referralId: contentReportReferral.id,
 					})
 					.from(contentReportReferral)
-					.innerJoin(
-						contentReviewCase,
-						eq(contentReviewCase.id, contentReportReferral.caseId),
-					)
+					.innerJoin(contentReviewCase, eq(contentReviewCase.id, contentReportReferral.caseId))
 					.innerJoin(contentReport, eq(contentReport.id, contentReportReferral.reportId))
 					.where(
 						and(
 							eq(contentReviewCase.authority, "realm"),
 							eq(contentReviewCase.realmId, params.realmId),
 							eq(contentReportReferral.ruleSourceRealmId, params.realmId),
-							query.unitId
-								? eq(contentReviewCase.targetUnitId, query.unitId)
-								: undefined,
+							query.unitId ? eq(contentReviewCase.targetUnitId, query.unitId) : undefined,
 							query.state ? eq(contentReviewCase.state, query.state) : undefined,
 							cursor
 								? or(
@@ -504,10 +486,7 @@ export default new Elysia().use(session).group("", (app) =>
 					.limit(1);
 				if (!caseRow) return { items: [], nextCursor: null };
 				if (caseRow.authority === "realm" && caseRow.realmId)
-					await authorization.realm.ensureCapability(
-						caseRow.realmId,
-						"realm.units.moderate",
-					);
+					await authorization.realm.ensureCapability(caseRow.realmId, "realm.units.moderate");
 				else await authorization.platform.ensureCapability("platform.moderate");
 				const limit = query.limit ?? 50;
 				const cursor = decodeMyReportCursor(query.cursor);
@@ -579,10 +558,7 @@ export default new Elysia().use(session).group("", (app) =>
 						caseState: contentReviewCase.state,
 						unitId: unit.id,
 						unitKind: unit.kind,
-						language: resolvedUnitLocalizationLanguage(
-							unit.id,
-							query.localizationLanguages,
-						),
+						language: resolvedUnitLocalizationLanguage(unit.id, query.localizationLanguages),
 						title: resolvedUnitLocalizationTitle(unit.id, query.localizationLanguages),
 						moderationStatus: unit.moderationStatus,
 						postTargetingLocked: unit.postTargetingLocked,
@@ -660,29 +636,19 @@ export default new Elysia().use(session).group("", (app) =>
 										invalidatedContentLicenses.map((license) => license.id),
 									),
 									eq(contentGovernanceAction.kind, "invalidate_content_license"),
-									eq(
-										contentGovernanceAction.resultingContentLicenseStatus,
-										"invalidated",
-									),
+									eq(contentGovernanceAction.resultingContentLicenseStatus, "invalidated"),
 								),
 							)
-							.orderBy(
-								desc(contentGovernanceAction.createdAt),
-								desc(contentGovernanceAction.id),
-							)
+							.orderBy(desc(contentGovernanceAction.createdAt), desc(contentGovernanceAction.id))
 					: [];
 				const invalidationActionByLicense = new Map<string, string>();
 				for (const action of invalidationActions)
-					if (
-						action.contentLicenseId &&
-						!invalidationActionByLicense.has(action.contentLicenseId)
-					)
+					if (action.contentLicenseId && !invalidationActionByLicense.has(action.contentLicenseId))
 						invalidationActionByLicense.set(action.contentLicenseId, action.id);
 				const last = page.at(-1);
 				return {
 					items: page.map((row) => {
-						if (!row.language)
-							throw new Error(`Reported Unit ${row.unitId} has no localization`);
+						if (!row.language) throw new Error(`Reported Unit ${row.unitId} has no localization`);
 						const license = contentLicenseByUnit.get(row.unitId);
 						const contentLicense = !license
 							? null
@@ -694,9 +660,7 @@ export default new Elysia().use(session).group("", (app) =>
 										invalidationActionId:
 											invalidationActionByLicense.get(license.id) ??
 											(() => {
-												throw new Error(
-													`Invalidated content license ${license.id} has no action`,
-												);
+												throw new Error(`Invalidated content license ${license.id} has no action`);
 											})(),
 									};
 						const hasOpenReports = isActiveContentReviewCaseState(row.caseState);
@@ -709,9 +673,7 @@ export default new Elysia().use(session).group("", (app) =>
 								...getPlatformUnitModerationCommands(
 									row.moderationStatus,
 									row.postTargetingLocked,
-									canManageContentLicenses
-										? (contentLicense?.status ?? null)
-										: null,
+									canManageContentLicenses ? (contentLicense?.status ?? null) : null,
 									hasOpenReports,
 								),
 							],
@@ -740,9 +702,7 @@ export default new Elysia().use(session).group("", (app) =>
 		.post(
 			"/reports/units/:unitId",
 			async ({ params, body, query, profile, authorization }) => {
-				const sourceRealmIds = [
-					...new Set(body.rules.map((rule) => rule.sourceRealmId)),
-				].sort();
+				const sourceRealmIds = [...new Set(body.rules.map((rule) => rule.sourceRealmId))].sort();
 				if (sourceRealmIds.length > ContentGovernanceMaxRuleSources)
 					throw new ReportRuleSourceForbidden();
 				const allowedSourceRealmIds = new Set([
@@ -750,19 +710,14 @@ export default new Elysia().use(session).group("", (app) =>
 					...(body.contextRealmId ? [body.contextRealmId] : []),
 				]);
 				if (
-					sourceRealmIds.some(
-						(sourceRealmId) => !allowedSourceRealmIds.has(sourceRealmId),
-					) ||
+					sourceRealmIds.some((sourceRealmId) => !allowedSourceRealmIds.has(sourceRealmId)) ||
 					new Set(body.rules.map((rule) => rule.ruleId)).size !== body.rules.length
 				)
 					throw new ReportRuleSourceForbidden();
 				await Promise.all([
 					authorization.unit.ensureCanRead(params.unitId),
 					...sourceRealmIds.map((sourceRealmId) =>
-						authorization.unit.ensureCanRead(
-							sourceRealmId,
-							() => new UnitNotFound("Realm"),
-						),
+						authorization.unit.ensureCanRead(sourceRealmId, () => new UnitNotFound("Realm")),
 					),
 				]);
 				const details = body.details?.trim() || null;
@@ -791,9 +746,7 @@ export default new Elysia().use(session).group("", (app) =>
 						title: string;
 					}> = [];
 					for (const sourceRealmId of sourceRealmIds) {
-						const sourceRules = body.rules.filter(
-							(rule) => rule.sourceRealmId === sourceRealmId,
-						);
+						const sourceRules = body.rules.filter((rule) => rule.sourceRealmId === sourceRealmId);
 						const [currentRevision] = await tx
 							.select({ id: realmRuleRevision.id })
 							.from(realmRuleRevision)
@@ -810,10 +763,7 @@ export default new Elysia().use(session).group("", (app) =>
 									realmRule.id,
 									query.localizationLanguages,
 								),
-								title: resolvedUnitLocalizationTitle(
-									realmRule.id,
-									query.localizationLanguages,
-								),
+								title: resolvedUnitLocalizationTitle(realmRule.id, query.localizationLanguages),
 							})
 							.from(realmRule)
 							.where(
@@ -825,13 +775,10 @@ export default new Elysia().use(session).group("", (app) =>
 									),
 								),
 							);
-						if (selectedRules.length !== sourceRules.length)
-							throw new ReportRuleChanged();
+						if (selectedRules.length !== sourceRules.length) throw new ReportRuleChanged();
 						for (const selectedRule of selectedRules) {
 							if (!selectedRule.language || !selectedRule.title)
-								throw new Error(
-									`Report rule ${selectedRule.id} has no localization`,
-								);
+								throw new Error(`Report rule ${selectedRule.id} has no localization`);
 							selectedRuleRows.push({
 								id: selectedRule.id,
 								sourceRealmId,
@@ -855,8 +802,7 @@ export default new Elysia().use(session).group("", (app) =>
 								sourceRealmId === OfficialRealmUnitIds.rule
 									? ("platform" as const)
 									: ("realm" as const),
-							realmId:
-								sourceRealmId === OfficialRealmUnitIds.rule ? null : sourceRealmId,
+							realmId: sourceRealmId === OfficialRealmUnitIds.rule ? null : sourceRealmId,
 						}))
 						.sort((left, right) =>
 							`${left.authority}:${left.realmId ?? ""}`.localeCompare(
@@ -901,30 +847,18 @@ export default new Elysia().use(session).group("", (app) =>
 								.where(
 									and(
 										eq(contentReviewCase.authority, route.authority),
-										route.realmId
-											? eq(contentReviewCase.realmId, route.realmId)
-											: undefined,
+										route.realmId ? eq(contentReviewCase.realmId, route.realmId) : undefined,
 										eq(contentReviewCase.targetUnitId, params.unitId),
-										inArray(
-											contentReviewCase.state,
-											ActiveContentReviewCaseStateValues,
-										),
+										inArray(contentReviewCase.state, ActiveContentReviewCaseStateValues),
 									),
 								)
-								.orderBy(
-									desc(contentReviewCase.updatedAt),
-									desc(contentReviewCase.id),
-								)
+								.orderBy(desc(contentReviewCase.updatedAt), desc(contentReviewCase.id))
 								.limit(1)
 								.for("share");
 						let [caseRow] = await loadActiveCase();
 						if (!caseRow) {
 							await tx.execute(
-								contentReviewCaseAdvisoryLock(
-									route.authority,
-									route.realmId,
-									params.unitId,
-								),
+								contentReviewCaseAdvisoryLock(route.authority, route.realmId, params.unitId),
 							);
 							[caseRow] = await loadActiveCase();
 						}
@@ -941,18 +875,12 @@ export default new Elysia().use(session).group("", (app) =>
 									state: contentReviewCase.state,
 								});
 						}
-						if (!caseRow)
-							throw new Error("Content review case insertion returned no row");
-						await tx.execute(
-							contentReviewReporterAdvisoryLock(caseRow.id, profile.unitId),
-						);
+						if (!caseRow) throw new Error("Content review case insertion returned no row");
+						await tx.execute(contentReviewReporterAdvisoryLock(caseRow.id, profile.unitId));
 						const [existing] = await tx
 							.select({ id: contentReport.id })
 							.from(contentReportReferral)
-							.innerJoin(
-								contentReport,
-								eq(contentReport.id, contentReportReferral.reportId),
-							)
+							.innerJoin(contentReport, eq(contentReport.id, contentReportReferral.reportId))
 							.where(
 								and(
 									eq(contentReportReferral.caseId, caseRow.id),
@@ -969,8 +897,7 @@ export default new Elysia().use(session).group("", (app) =>
 								ruleSourceRealmId: route.sourceRealmId,
 							})
 							.returning({ id: contentReportReferral.id });
-						if (!referral)
-							throw new Error("Content report referral insertion returned no row");
+						if (!referral) throw new Error("Content report referral insertion returned no row");
 						await tx
 							.insert(contentReviewCaseReportCounter)
 							.values({

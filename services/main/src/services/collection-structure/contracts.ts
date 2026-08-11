@@ -129,8 +129,7 @@ export function diffCollectionStructureSnapshots(
 	const beforeItems = new Map(before.items.map((item) => [item.targetUnitId, item]));
 	const afterItems = new Map(after.items.map((item) => [item.targetUnitId, item]));
 	for (const item of before.items)
-		if (!afterItems.has(item.targetUnitId))
-			operations.push({ kind: "item.delete", before: item });
+		if (!afterItems.has(item.targetUnitId)) operations.push({ kind: "item.delete", before: item });
 	for (const item of after.items) {
 		const previous = beforeItems.get(item.targetUnitId);
 		if (!previous) operations.push({ kind: "item.insert", after: item });
@@ -158,26 +157,20 @@ export function applyCollectionStructureDelta(
 		switch (operation.kind) {
 			case "item.insert":
 				if (items.has(operation.after.targetUnitId))
-					throw new TypeError(
-						`Collection item ${operation.after.targetUnitId} already exists`,
-					);
+					throw new TypeError(`Collection item ${operation.after.targetUnitId} already exists`);
 				items.set(operation.after.targetUnitId, operation.after);
 				break;
 			case "item.update": {
 				const current = items.get(operation.before.targetUnitId);
 				if (!current || comparable(current) !== comparable(operation.before))
-					throw new TypeError(
-						`Collection item ${operation.before.targetUnitId} base changed`,
-					);
+					throw new TypeError(`Collection item ${operation.before.targetUnitId} base changed`);
 				items.set(operation.after.targetUnitId, operation.after);
 				break;
 			}
 			case "item.delete": {
 				const current = items.get(operation.before.targetUnitId);
 				if (!current || comparable(current) !== comparable(operation.before))
-					throw new TypeError(
-						`Collection item ${operation.before.targetUnitId} base changed`,
-					);
+					throw new TypeError(`Collection item ${operation.before.targetUnitId} base changed`);
 				items.delete(operation.before.targetUnitId);
 				break;
 			}

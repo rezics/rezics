@@ -111,9 +111,7 @@ export default new Elysia({ prefix: "/platform-users" })
 				[StatusCodes.FORBIDDEN]: UserMutationForbiddenResponse,
 				[StatusCodes.NOT_FOUND]: UserNotFoundResponse,
 				[StatusCodes.CONFLICT]: UserMutationConflictResponse,
-				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse([
-					"UserAccountStateExpiryInvalid",
-				]),
+				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["UserAccountStateExpiryInvalid"]),
 			},
 			detail: { summary: "Replace a platform user account state", tags: ["Platform Users"] },
 		},

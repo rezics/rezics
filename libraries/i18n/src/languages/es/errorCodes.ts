@@ -58,8 +58,7 @@ export default {
 	DockDocumentInvalid: `El documento de la ${dockTerms.inline} no es válido.`,
 	ApiTokenNotFound: `No se ha encontrado el token de ${verbatimTerms.api.value} activo.`,
 	InvalidSearch: "La solicitud de búsqueda no es válida.",
-	SearchUnavailable:
-		"La búsqueda no está disponible temporalmente. Inténtalo de nuevo más tarde.",
+	SearchUnavailable: "La búsqueda no está disponible temporalmente. Inténtalo de nuevo más tarde.",
 	RealmCapabilityRequired: `No tienes el permiso necesario para el ${realmTerms.inline}.`,
 	RealmRulesAcceptanceRequired: `Acepta las reglas actuales del ${realmTerms.inline} para continuar.`,
 	RealmRuleRevisionChanged:
@@ -114,8 +113,7 @@ export default {
 		"Esta clave de reintento ya se ha usado para otra solicitud de moderación.",
 	GovernanceNoteRoleDuplicate: "Añade como máximo una nota interna y un aviso público.",
 	ReportAlreadySubmitted: "Ya has denunciado esta unidad para el caso activo.",
-	ReportTargetRevisionUnavailable:
-		"Esta unidad no tiene ninguna revisión que se pueda denunciar.",
+	ReportTargetRevisionUnavailable: "Esta unidad no tiene ninguna revisión que se pueda denunciar.",
 	ReportRuleUnavailable: "El alcance de gobernanza seleccionado no tiene reglas vigentes.",
 	ReportRuleChanged:
 		"La regla seleccionada ha cambiado. Vuelve a elegir una regla antes de enviar.",
@@ -133,8 +131,7 @@ export default {
 	CapabilityGrantNotFound: "No se ha encontrado esta concesión activa de capacidad.",
 	UnitAccessExpiryInvalid: "El vencimiento del acceso a la Unit debe estar en el futuro.",
 	UnitAccessInvitationNotFound: "No se ha encontrado esta invitación de acceso a una Unit.",
-	UnitAccessInvitationConflict:
-		"Ya no se puede responder a esta invitación de acceso a una Unit.",
+	UnitAccessInvitationConflict: "Ya no se puede responder a esta invitación de acceso a una Unit.",
 	UnitAccessInvitationExpired: "Esta invitación de acceso a una Unit ha vencido.",
 	UnitAccessInvitationSelfForbidden: "No puedes invitarte a ti mismo a una Unit.",
 	UnitOwnerRestrictionForbidden: "No se puede restringir al propietario de una Unit.",
@@ -238,8 +235,7 @@ export default {
 	ImageAssetUploadNotFound: "No se ha encontrado el objeto de imagen subido.",
 	ImageAssetUnsupportedType: "Este formato de imagen no es compatible.",
 	ImageAssetInvalidSize: "El tamaño de la imagen no es válido.",
-	ImageAssetContentMismatch:
-		"El contenido de la imagen no coincide con su declaración de subida.",
+	ImageAssetContentMismatch: "El contenido de la imagen no coincide con su declaración de subida.",
 	ImageAssetInvalidState: "El estado del recurso de imagen no permite esta operación.",
 	ImageAssetInvalidPresentation: "El área mostrada no es válida para esta imagen y función.",
 	ImageAssetInUse: "No se puede eliminar un recurso de imagen que esté en uso.",
@@ -248,8 +244,7 @@ export default {
 	UnitLocalizationOrderInvalid:
 		"El orden de idiomas debe incluir exactamente una vez cada idioma de contenido existente.",
 	UnitLocalizationNotFound: "Ese idioma del contenido ya no existe.",
-	UnitLastLocalizationRemovalForbidden:
-		"Una Unit debe conservar al menos un idioma de contenido.",
+	UnitLastLocalizationRemovalForbidden: "Una Unit debe conservar al menos un idioma de contenido.",
 	InvalidSlug: `El ${unitSlugTerms.inline} debe ser una etiqueta ${verbatimTerms.ascii.value} en minúsculas, de entre 1 y 63 caracteres y separada por guiones.`,
 	SlugTaken: `Ese ${unitSlugTerms.inline} ya se usa en este espacio de nombres de Unit.`,
 	SlugReserved: `Ese ${unitSlugTerms.inline} está reservado y no se puede utilizar.`,

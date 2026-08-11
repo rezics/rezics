@@ -207,10 +207,7 @@ async function ensureSlugNamespaces(tx: DatabaseTransaction): Promise<void> {
 			})
 			.from(unitSlugAddress)
 			.where(
-				and(
-					eq(unitSlugAddress.kind, "canonical"),
-					eq(unitSlugAddress.targetUnitId, namespace.id),
-				),
+				and(eq(unitSlugAddress.kind, "canonical"), eq(unitSlugAddress.targetUnitId, namespace.id)),
 			)
 			.limit(1);
 		assertFields(`slug namespace address ${namespace.slug}`, storedAddress, {
@@ -279,9 +276,7 @@ async function ensureBootstrapAddressedUnit(
 			slug: unitSlugAddress.slug,
 		})
 		.from(unitSlugAddress)
-		.where(
-			and(eq(unitSlugAddress.kind, "canonical"), eq(unitSlugAddress.targetUnitId, input.id)),
-		)
+		.where(and(eq(unitSlugAddress.kind, "canonical"), eq(unitSlugAddress.targetUnitId, input.id)))
 		.limit(1);
 	let addressChanged = false;
 	if (canonicalAddress) {
@@ -314,9 +309,7 @@ async function ensureBootstrapAddressedUnit(
 			targetUnitId: unitSlugAddress.targetUnitId,
 		})
 		.from(unitSlugAddress)
-		.where(
-			and(eq(unitSlugAddress.kind, "canonical"), eq(unitSlugAddress.targetUnitId, input.id)),
-		)
+		.where(and(eq(unitSlugAddress.kind, "canonical"), eq(unitSlugAddress.targetUnitId, input.id)))
 		.limit(1);
 	assertFields(`${input.kind} address ${input.slug}`, address, {
 		kind: "canonical",
@@ -362,10 +355,7 @@ async function ensureLocalization(
 		})
 		.from(unitLocalization)
 		.where(
-			and(
-				eq(unitLocalization.unitId, input.unitId),
-				eq(unitLocalization.language, input.language),
-			),
+			and(eq(unitLocalization.unitId, input.unitId), eq(unitLocalization.language, input.language)),
 		)
 		.limit(1);
 	if (
@@ -452,12 +442,7 @@ async function ensureBootstrapProfiles(
 				userId: accounts.userId,
 			})
 			.from(accounts)
-			.where(
-				and(
-					eq(accounts.providerId, "credential"),
-					eq(accounts.accountId, value.authUserId),
-				),
-			)
+			.where(and(eq(accounts.providerId, "credential"), eq(accounts.accountId, value.authUserId)))
 			.limit(1);
 		if (storedAccount) {
 			assertFields(`credential account ${value.key}`, storedAccount, {
@@ -890,9 +875,7 @@ async function ensureBootstrapRealm(
 		const [stored] = await tx
 			.select({ state: realmMember.state })
 			.from(realmMember)
-			.where(
-				and(eq(realmMember.realmId, value.id), eq(realmMember.profileId, memberProfileId)),
-			)
+			.where(and(eq(realmMember.realmId, value.id), eq(realmMember.profileId, memberProfileId)))
 			.limit(1);
 		assertFields(`Realm member ${memberProfileId}`, stored, {
 			state: "active",
@@ -1388,13 +1371,8 @@ async function ensureOfficialZones(tx: DatabaseTransaction): Promise<void> {
 				kind: "zone.navigation",
 			});
 			if (!valuesEqual(current.document, value.navigation.document)) {
-				const revisionId = await getContentStructureRevision(
-					tx,
-					value.id,
-					value.navigation.id,
-				);
-				if (!revisionId)
-					throw new Error("Official Zone navigation has no component revision");
+				const revisionId = await getContentStructureRevision(tx, value.id, value.navigation.id);
+				if (!revisionId) throw new Error("Official Zone navigation has no component revision");
 				await replaceNavigationStructure(tx, {
 					ownerUnitId: value.id,
 					structureId: value.navigation.id,
@@ -1419,11 +1397,7 @@ async function ensureOfficialZones(tx: DatabaseTransaction): Promise<void> {
 			.select()
 			.from(unitDock)
 			.where(
-				and(
-					eq(unitDock.unitId, value.id),
-					eq(unitDock.kind, "main"),
-					isNull(unitDock.deletedAt),
-				),
+				and(eq(unitDock.unitId, value.id), eq(unitDock.kind, "main"), isNull(unitDock.deletedAt)),
 			)
 			.limit(1);
 		if (storedDock) {
@@ -1534,8 +1508,7 @@ async function getZoneDefaultExperienceInput(
 		language: localization.language,
 		title: localization.title,
 		searchTemplate:
-			OfficialZoneManifest.find((candidate) => candidate.id === zoneId)?.searchTemplate ??
-			"global",
+			OfficialZoneManifest.find((candidate) => candidate.id === zoneId)?.searchTemplate ?? "global",
 	};
 }
 
@@ -1546,10 +1519,7 @@ async function ensureAllZoneExperiences(tx: DatabaseTransaction): Promise<void> 
 		.innerJoin(unit, eq(unit.id, zone.id))
 		.where(and(eq(unit.kind, "zone"), isNull(unit.deletedAt)));
 	for (const { id } of zones)
-		await ensureZoneDefaultExperienceInTransaction(
-			tx,
-			await getZoneDefaultExperienceInput(tx, id),
-		);
+		await ensureZoneDefaultExperienceInTransaction(tx, await getZoneDefaultExperienceInput(tx, id));
 }
 
 async function areAllZoneExperiencesReady(): Promise<boolean> {
@@ -2019,12 +1989,8 @@ async function isInitialInstallationBundleReady(): Promise<boolean> {
 			.from(unitLocalization)
 			.where(
 				inArray(unitLocalization.unitId, [
-					...BootstrapProfileManifest.map(
-						(bootstrapProfile) => bootstrapProfile.profileId,
-					),
-					...CuratedCreationTagCollectionManifest.map(
-						(curatedCollection) => curatedCollection.id,
-					),
+					...BootstrapProfileManifest.map((bootstrapProfile) => bootstrapProfile.profileId),
+					...CuratedCreationTagCollectionManifest.map((curatedCollection) => curatedCollection.id),
 					...BootstrapRealmManifest.map((bootstrapRealm) => bootstrapRealm.id),
 					...RezicsRuleRealmManifest.rules.items.map((rule) => rule.id),
 					...OfficialZoneManifest.map((officialZone) => officialZone.id),
@@ -2093,8 +2059,7 @@ async function isInitialInstallationBundleReady(): Promise<boolean> {
 		CuratedCreationTagCollectionManifest.every((expected) =>
 			curatedTagCollectionOwners.some(
 				(actual) =>
-					actual.unitId === expected.id &&
-					actual.profileId === OfficialProfileIds.editorial,
+					actual.unitId === expected.id && actual.profileId === OfficialProfileIds.editorial,
 			),
 		) &&
 		curatedTagCollectionPublishers.length === CuratedCreationTagCollectionManifest.length &&
@@ -2108,9 +2073,7 @@ async function isInitialInstallationBundleReady(): Promise<boolean> {
 		) &&
 		curatedTagCollectionStructureHeads.length === CuratedCreationTagCollectionManifest.length &&
 		CuratedCreationTagCollectionManifest.every((expected) =>
-			curatedTagCollectionStructureHeads.some(
-				(actual) => actual.collectionId === expected.id,
-			),
+			curatedTagCollectionStructureHeads.some((actual) => actual.collectionId === expected.id),
 		) &&
 		BootstrapPlatformAccessManifest.every((access) =>
 			access.capabilities.every((capability) =>
@@ -2159,10 +2122,7 @@ async function isInitialInstallationBundleReady(): Promise<boolean> {
 				(actual) =>
 					actual.zoneId === expected.id &&
 					actual.enabled &&
-					valuesEqual(
-						actual.document,
-						createDefaultSearchDocument(expected.searchTemplate),
-					),
+					valuesEqual(actual.document, createDefaultSearchDocument(expected.searchTemplate)),
 			),
 		) &&
 		officialWikiPosts.length === OfficialZoneManifest.length &&
@@ -2206,8 +2166,7 @@ async function isInitialInstallationBundleReady(): Promise<boolean> {
 		BootstrapProfileManifest.every((expected) =>
 			profileFavorites.some(
 				(actual) =>
-					actual.profileId === expected.profileId &&
-					actual.id === expected.favoritesCollectionId,
+					actual.profileId === expected.profileId && actual.id === expected.favoritesCollectionId,
 			),
 		) &&
 		allProfiles.every((targetProfile) =>
@@ -2216,21 +2175,16 @@ async function isInitialInstallationBundleReady(): Promise<boolean> {
 		allProfiles.every((targetProfile) =>
 			profilePreferences.some(
 				(preference) =>
-					preference.profileId === targetProfile.id &&
-					preference.defaultScoreRealmId !== null,
+					preference.profileId === targetProfile.id && preference.defaultScoreRealmId !== null,
 			),
 		) &&
 		allProfiles.every((targetProfile) => {
-			const follows = profileFollows.filter(
-				(follow) => follow.profileId === targetProfile.id,
-			);
+			const follows = profileFollows.filter((follow) => follow.profileId === targetProfile.id);
 			const officialFollows = OfficialZoneManifest.map((expected) =>
 				follows.find((follow) => follow.unitId === expected.id),
 			);
 			if (officialFollows.some((follow) => !follow)) return false;
-			const positions = officialFollows.flatMap((follow) =>
-				follow ? [follow.position] : [],
-			);
+			const positions = officialFollows.flatMap((follow) => (follow ? [follow.position] : []));
 			if (
 				positions.some((position, index) => {
 					if (index === 0) return false;
@@ -2249,8 +2203,7 @@ async function isInitialInstallationBundleReady(): Promise<boolean> {
 				.toSorted(compareFractionalPositions)[0];
 			return firstOrdinaryPosition
 				? positions.every(
-						(position) =>
-							compareFractionalPositions(position, firstOrdinaryPosition) < 0,
+						(position) => compareFractionalPositions(position, firstOrdinaryPosition) < 0,
 					)
 				: true;
 		}) &&
@@ -2258,8 +2211,7 @@ async function isInitialInstallationBundleReady(): Promise<boolean> {
 		OfficialZoneManifest.every((expected) =>
 			officialZoneDocks.some(
 				(actual) =>
-					actual.unitId === expected.id &&
-					valuesEqual(actual.document, expected.mainDockDocument),
+					actual.unitId === expected.id && valuesEqual(actual.document, expected.mainDockDocument),
 			),
 		) &&
 		localizations.length === expectedLocalizations.length &&
@@ -2272,17 +2224,14 @@ async function isInitialInstallationBundleReady(): Promise<boolean> {
 					actual.title === expected.title &&
 					actual.summary === expected.summary &&
 					actual.avatarType === ("avatarType" in expected ? expected.avatarType : null) &&
-					actual.avatarAssetId ===
-						("avatarAssetId" in expected ? expected.avatarAssetId : null) &&
-					actual.avatarEmoji ===
-						("avatarEmoji" in expected ? expected.avatarEmoji : null) &&
+					actual.avatarAssetId === ("avatarAssetId" in expected ? expected.avatarAssetId : null) &&
+					actual.avatarEmoji === ("avatarEmoji" in expected ? expected.avatarEmoji : null) &&
 					actual.avatarIconPrefix ===
 						("avatarIconPrefix" in expected ? expected.avatarIconPrefix : null) &&
 					actual.avatarIconName ===
 						("avatarIconName" in expected ? expected.avatarIconName : null) &&
 					valuesEqual(actual.content, "content" in expected ? expected.content : null) &&
-					actual.contentStatus ===
-						("contentStatus" in expected ? expected.contentStatus : null),
+					actual.contentStatus === ("contentStatus" in expected ? expected.contentStatus : null),
 			),
 		)
 	);

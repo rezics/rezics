@@ -203,9 +203,7 @@ export function ReviewComposer({
 				<RequestFailure error={create.error} fallback={t.ui.retryLater} />
 				<Button
 					className="w-fit"
-					disabled={
-						!selectedTarget || !body.length || (score !== undefined && !scoreRealm)
-					}
+					disabled={!selectedTarget || !body.length || (score !== undefined && !scoreRealm)}
 					isLoading={create.isPending}
 					type="submit"
 					variant="solid"

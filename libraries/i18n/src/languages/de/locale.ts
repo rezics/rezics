@@ -39,7 +39,8 @@ export default {
 			"Die Inhaltssprache ist nicht eindeutig; deine erste Sprachpräferenz wird verwendet.",
 		unsupported:
 			"Die erkannte Sprache wird noch nicht unterstützt; deine erste Sprachpräferenz wird verwendet.",
-		failed: "Die Spracherkennung ist vorübergehend nicht verfügbar; deine erste Sprachpräferenz wird verwendet.",
+		failed:
+			"Die Spracherkennung ist vorübergehend nicht verfügbar; deine erste Sprachpräferenz wird verwendet.",
 	},
 	chineseContentDisplay: {
 		label: "Darstellung chinesischer Inhalte",

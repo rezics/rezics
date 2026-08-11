@@ -53,9 +53,7 @@ export function TagContextSection({
 			<div className="grid gap-1">
 				<Heading className="min-w-0 font-semibold">{heading ?? displayedTitle}</Heading>
 				{displayedDescription ? (
-					<p className="text-sm leading-6 text-muted-foreground">
-						{displayedDescription}
-					</p>
+					<p className="text-sm leading-6 text-muted-foreground">{displayedDescription}</p>
 				) : null}
 			</div>
 			{items.length ? (

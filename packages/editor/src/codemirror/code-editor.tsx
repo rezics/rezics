@@ -92,8 +92,7 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(function
 						if (
 							update.docChanged &&
 							!update.transactions.some(
-								(transaction) =>
-									transaction.annotation(externalValueChange) === true,
+								(transaction) => transaction.annotation(externalValueChange) === true,
 							)
 						) {
 							onChangeRef.current(update.state.doc.toString());

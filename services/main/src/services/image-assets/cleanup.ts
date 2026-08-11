@@ -47,14 +47,8 @@ async function claimImageAssetCleanupBatch(input: {
 				and(
 					isNull(imageAsset.deletedAt),
 					or(
-						and(
-							eq(imageAsset.status, "failed"),
-							lte(imageAsset.updatedAt, input.retryCutoff),
-						),
-						and(
-							eq(imageAsset.status, "pending"),
-							lte(imageAsset.createdAt, input.cutoff),
-						),
+						and(eq(imageAsset.status, "failed"), lte(imageAsset.updatedAt, input.retryCutoff)),
+						and(eq(imageAsset.status, "pending"), lte(imageAsset.createdAt, input.cutoff)),
 					),
 				),
 			)

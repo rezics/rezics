@@ -35,10 +35,6 @@ describe("global Unit Tag ranking", () => {
 			{ tagId: "c", pinned: false, position: "a1", score: 0, voteCount: 0 },
 			{ tagId: "a", pinned: false, position: "a1", score: 0, voteCount: 0 },
 		];
-		expect(items.toSorted(compareGlobalTagRank).map(({ tagId }) => tagId)).toEqual([
-			"a",
-			"c",
-			"b",
-		]);
+		expect(items.toSorted(compareGlobalTagRank).map(({ tagId }) => tagId)).toEqual(["a", "c", "b"]);
 	});
 });

@@ -140,10 +140,7 @@ export function FeedPostCard({
 		post.subject?.title ?? t.actions.view,
 		post.subject?.language,
 	);
-	const subjectSummary = useChineseContentText(
-		post.subject?.summary ?? "",
-		post.subject?.language,
-	);
+	const subjectSummary = useChineseContentText(post.subject?.summary ?? "", post.subject?.language);
 	const excerptSource =
 		post.postKind === "excerpt" && post.subject && subjectHref
 			? {
@@ -180,10 +177,7 @@ export function FeedPostCard({
 				? attachedRating
 				: {
 						kind: "aggregate",
-						score: toFeedTargetScore(
-							selectFeedRating(post.subject.scores),
-							t.ui.unnamed,
-						),
+						score: toFeedTargetScore(selectFeedRating(post.subject.scores), t.ui.unnamed),
 					}
 			: undefined;
 	const subjectIsCurrentUnit = isCurrentFeedSubject(displayContext, post.subject?.id);
@@ -240,9 +234,7 @@ export function FeedPostCard({
 						{displayedTitle}
 					</h2>
 					{post.summary ? (
-						<p className="mt-2 text-muted-foreground text-sm leading-6">
-							{displayedSummary}
-						</p>
+						<p className="mt-2 text-muted-foreground text-sm leading-6">{displayedSummary}</p>
 					) : post.body ? (
 						<div className="prose prose-sm mt-2 max-w-none text-muted-foreground leading-6">
 							<LocalizedPortableTextContent
@@ -341,10 +333,7 @@ export function FeedUnitCard({
 		unit.presentation.kind === "rated-work"
 			? {
 					kind: "aggregate",
-					score: toFeedTargetScore(
-						selectFeedRating(unit.presentation.scores),
-						t.ui.unnamed,
-					),
+					score: toFeedTargetScore(selectFeedRating(unit.presentation.scores), t.ui.unnamed),
 				}
 			: undefined;
 	const identityPresentation = unit.presentation.kind === "identity" ? unit.presentation : null;
@@ -412,9 +401,7 @@ export function FeedUnitCard({
 							{isRealm && identityPresentation.memberCount !== null ? (
 								<p className="mt-2 text-xs font-medium text-muted-foreground">
 									{t.realms.memberCount({
-										count: toNonNegativeApiInteger(
-											identityPresentation.memberCount,
-										),
+										count: toNonNegativeApiInteger(identityPresentation.memberCount),
 									})}
 								</p>
 							) : null}

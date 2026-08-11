@@ -156,8 +156,7 @@ export function ContentLanguageEditorProvider({
 
 export function useContentLanguageEditor(): ContentLanguageEditorContextValue {
 	const value = useContext(ContentLanguageEditorContext);
-	if (!value)
-		throw new Error("Content language controls require a ContentLanguageEditorProvider");
+	if (!value) throw new Error("Content language controls require a ContentLanguageEditorProvider");
 	return value;
 }
 
@@ -237,9 +236,7 @@ export function useLocalizedDraft<Value extends object>({
 			if (nextDirty) localizedDirtyDraftKeys.add(memoryKey);
 			else localizedDirtyDraftKeys.delete(memoryKey);
 			setDirty(
-				[...localizedDirtyDraftKeys].some((candidate) =>
-					candidate.startsWith(`${ownerKey}\u0000`),
-				),
+				[...localizedDirtyDraftKeys].some((candidate) => candidate.startsWith(`${ownerKey}\u0000`)),
 			);
 		},
 		[memoryKey, ownerKey, setDirty],

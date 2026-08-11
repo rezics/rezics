@@ -80,12 +80,7 @@ export function UnitDetailHero<Type extends UnitDetailUnitType>({
 						{unit.capabilities.canEdit ? (
 							<Tooltip>
 								<TooltipTrigger asChild>
-									<Button
-										aria-label={t.ui.edit}
-										asChild
-										size="icon-md"
-										variant="quiet"
-									>
+									<Button aria-label={t.ui.edit} asChild size="icon-md" variant="quiet">
 										<Link href={`/units/${type}/${unit.id}/edit`}>
 											<Pencil aria-hidden />
 										</Link>
@@ -98,9 +93,7 @@ export function UnitDetailHero<Type extends UnitDetailUnitType>({
 						<UnitUnitOverflowMenu
 							additionalItems={
 								<ContentLanguageVersionMenu
-									availableLanguages={unit.localizations.map(
-										({ language }) => language,
-									)}
+									availableLanguages={unit.localizations.map(({ language }) => language)}
 									currentLanguage={unit.language}
 								/>
 							}
@@ -114,10 +107,7 @@ export function UnitDetailHero<Type extends UnitDetailUnitType>({
 
 				{localization?.summary ? (
 					<p className="max-w-3xl text-base font-medium leading-7 text-foreground/88">
-						<LocalizedText
-							language={localization.language}
-							value={localization.summary}
-						/>
+						<LocalizedText language={localization.language} value={localization.summary} />
 					</p>
 				) : null}
 

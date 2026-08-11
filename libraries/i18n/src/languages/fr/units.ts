@@ -77,8 +77,7 @@ export default {
 		submit: "Envoyer la revendication",
 		cancel: "Annuler",
 		submitted: "Revendication envoyée",
-		submittedDescription:
-			"Vous serez informé après l’examen par la gouvernance de la plateforme.",
+		submittedDescription: "Vous serez informé après l’examen par la gouvernance de la plateforme.",
 		pendingTitle: "Revendication en cours d’examen",
 		pendingDescription: "La gouvernance de la plateforme n’a pas encore rendu sa décision.",
 		submittedDetails: "Fondement envoyé",
@@ -154,8 +153,7 @@ export default {
 			},
 			releases: {
 				label: "Sorties de la série",
-				description:
-					"Gérez les Units, leur ordre et leurs dates de sortie au sein de cette série.",
+				description: "Gérez les Units, leur ordre et leurs dates de sortie au sein de cette série.",
 			},
 			access: {
 				label: "Accès",
@@ -385,22 +383,19 @@ export default {
 	},
 	relationshipManagement: {
 		credits: "Crédits",
-		creditsDescription:
-			"Personnes et organisations ayant créé, développé ou publié cette œuvre.",
+		creditsDescription: "Personnes et organisations ayant créé, développé ou publié cette œuvre.",
 		subjects: "Sujets",
 		subjectsDescription:
 			"Personnes, organisations et thèmes représentés ou abordés dans cette œuvre.",
 		externalLinks: "Liens externes",
 		externalLinksDescription: "Pages externes et références associées à cette œuvre.",
 		variants: "Œuvre principale et variantes",
-		variantsDescription:
-			"Gérer la structure directe entre l’œuvre principale et ses variantes.",
+		variantsDescription: "Gérer la structure directe entre l’œuvre principale et ses variantes.",
 		addCredit: "Ajouter un crédit",
 		addCreditDescription: "Choisissez la personne ou l’organisation à créditer et son rôle.",
 		creditedEntity: "Personne ou organisation créditée",
 		addSubject: "Ajouter un sujet",
-		addSubjectDescription:
-			"Choisissez le sujet, son rôle et, si nécessaire, une page de contexte.",
+		addSubjectDescription: "Choisissez le sujet, son rôle et, si nécessaire, une page de contexte.",
 		subjectEntity: "Sujet",
 		addExternalLink: "Ajouter un lien externe",
 		addExternalLinkDescription: `Ajoutez un lien externe et indiquez éventuellement son ${entityTerms.inline} source.`,
@@ -409,8 +404,7 @@ export default {
 		cancel: "Annuler",
 		confirmRemove: "Supprimer",
 		noCredits: "Aucun crédit pour le moment",
-		noCreditsDescription:
-			"Ajoutez les personnes ou organisations ayant contribué à cette œuvre.",
+		noCreditsDescription: "Ajoutez les personnes ou organisations ayant contribué à cette œuvre.",
 		noSubjects: "Aucun sujet pour le moment",
 		noSubjectsDescription:
 			"Ajoutez les personnes, organisations ou thèmes représentés dans l’œuvre.",
@@ -418,8 +412,7 @@ export default {
 		noExternalLinksDescription:
 			"Ajoutez une page publique fiable qui étaye les informations sur l’œuvre.",
 		noVariants: "Aucune variante pour le moment",
-		noVariantsDescription:
-			"Cette œuvre est l’œuvre principale et ne possède aucune variante liée.",
+		noVariantsDescription: "Cette œuvre est l’œuvre principale et ne possède aucune variante liée.",
 		pendingRequests: "Consentement en attente",
 		unavailableUnit: "Élément indisponible",
 		contextPost: insert("Contexte : {{title}}", { title: String }),
@@ -487,8 +480,7 @@ export default {
 		aliasesTitle: "Alias",
 		aliasesDescription: "D’autres noms permettant de retrouver plus facilement cette œuvre.",
 		externalLinksTitle: "Liens externes",
-		externalLinksDescription:
-			"Des pages publiques qui étayent les informations sur cette œuvre.",
+		externalLinksDescription: "Des pages publiques qui étayent les informations sur cette œuvre.",
 		aliasTerm: "Alias",
 		aliasPlaceholder: "Saisir un autre nom",
 		proposeAlias: "Proposer l’alias",

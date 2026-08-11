@@ -33,8 +33,7 @@ export default {
 		publicWorkHelpTitle: "什么是公共作品？",
 		publicWorkHelpOwnership:
 			"公共作品由社区拥有并共同维护。创建后，你不会因为是创建者而获得所有者身份或额外权限；所有已登录用户都能按照公共作品的共同权限编辑。",
-		publicWorkHelpIndexing:
-			"公共作品通常用于收录你不持有版权的现有作品，创建可搜索的索引资料。",
+		publicWorkHelpIndexing: "公共作品通常用于收录你不持有版权的现有作品，创建可搜索的索引资料。",
 		publicWorkHelpAlternative:
 			"如果你持有版权，或想创建由你管理、再向特定对象开放协作的作品，请选择“自有作品”，创建后在权限设置中授予相应的编辑权限。",
 		entryOwnershipLabel: "条目所有方式",
@@ -564,8 +563,7 @@ export default {
 		saveCurrentChangesNotice: "此操作会一并保存当前尚未保存的内容结构变更。",
 		choosePosition: "选择结构位置",
 		choosePositionDescription: "选择标目会加入其子项目末尾；选择章节会插入该章节下方。",
-		mediaChoosePositionDescription:
-			"选择标目会加入其子项目末尾；选择媒体项目会插入该项目下方。",
+		mediaChoosePositionDescription: "选择标目会加入其子项目末尾；选择媒体项目会插入该项目下方。",
 		newChapter: "新建章节",
 		newLabel: "新建标目",
 		newMediaItem: "新增媒体项目",

@@ -62,11 +62,7 @@ export const imageAsset = pgTable(
 			table.status,
 			table.createdAt,
 		),
-		index("image_asset_owner_status_idx").on(
-			table.ownerProfileId,
-			table.status,
-			table.createdAt,
-		),
+		index("image_asset_owner_status_idx").on(table.ownerProfileId, table.status, table.createdAt),
 		index("image_asset_cleanup_idx")
 			.on(table.status, table.createdAt, table.id)
 			.where(sql`${table.deletedAt} is null`),

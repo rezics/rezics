@@ -38,9 +38,7 @@ export function ScoreOverview({ realmId, targetId }: { realmId: string; targetId
 								>
 									<strong>{score}</strong>
 									<span className="text-muted-foreground">
-										{toNonNegativeApiInteger(
-											query.data.distribution[String(score)],
-										)}
+										{toNonNegativeApiInteger(query.data.distribution[String(score)])}
 									</span>
 								</div>
 							))}

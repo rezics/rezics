@@ -102,8 +102,7 @@ export function TagVoteContextSelector({
 	const { collection, filter, set } = useListCollection<TagVoteContextOption>({
 		filter: contains,
 		initialItems: options,
-		itemToString: (item) =>
-			item.description ? `${item.label} ${item.description}` : item.label,
+		itemToString: (item) => (item.description ? `${item.label} ${item.description}` : item.label),
 		itemToValue: (item) => item.value,
 	});
 	const [inputValue, setInputValue] = useState(selectedOption.label);
@@ -157,11 +156,7 @@ export function TagVoteContextSelector({
 			<ComboboxContent className="w-[min(22rem,calc(100vw-2rem))]">
 				<ComboboxList>
 					{visibleOptions.map((option) => (
-						<ComboboxItem
-							className="items-start py-2.5"
-							item={option}
-							key={option.value}
-						>
+						<ComboboxItem className="items-start py-2.5" item={option} key={option.value}>
 							{option.icon}
 							<span className="grid min-w-0 flex-1 gap-0.5">
 								<span className="truncate font-semibold">{option.label}</span>

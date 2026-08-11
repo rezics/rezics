@@ -66,9 +66,7 @@ export function validateCreditAttributionDrafts(
 	for (const draft of drafts) {
 		const entityRequired = !draft.entity;
 		const role =
-			draft.role && isCreditAttributionRoleForUnitType(type, draft.role)
-				? draft.role
-				: undefined;
+			draft.role && isCreditAttributionRoleForUnitType(type, draft.role) ? draft.role : undefined;
 		const roleRequired = !role;
 		const pair = draft.entity && role ? `${draft.entity.id}\u0000${role}` : undefined;
 		const duplicate = pair ? pairs.has(pair) : false;

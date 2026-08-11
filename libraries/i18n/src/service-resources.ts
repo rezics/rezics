@@ -14,33 +14,27 @@ export const serviceResources = defineResources({
 		},
 		en: {
 			emails: () => import("./languages/en/emails").then((module) => module.default),
-			notifications: () =>
-				import("./languages/en/notifications").then((module) => module.default),
+			notifications: () => import("./languages/en/notifications").then((module) => module.default),
 		},
 		ja: {
 			emails: () => import("./languages/ja/emails").then((module) => module.default),
-			notifications: () =>
-				import("./languages/ja/notifications").then((module) => module.default),
+			notifications: () => import("./languages/ja/notifications").then((module) => module.default),
 		},
 		ko: {
 			emails: () => import("./languages/ko/emails").then((module) => module.default),
-			notifications: () =>
-				import("./languages/ko/notifications").then((module) => module.default),
+			notifications: () => import("./languages/ko/notifications").then((module) => module.default),
 		},
 		de: {
 			emails: () => import("./languages/de/emails").then((module) => module.default),
-			notifications: () =>
-				import("./languages/de/notifications").then((module) => module.default),
+			notifications: () => import("./languages/de/notifications").then((module) => module.default),
 		},
 		fr: {
 			emails: () => import("./languages/fr/emails").then((module) => module.default),
-			notifications: () =>
-				import("./languages/fr/notifications").then((module) => module.default),
+			notifications: () => import("./languages/fr/notifications").then((module) => module.default),
 		},
 		es: {
 			emails: () => import("./languages/es/emails").then((module) => module.default),
-			notifications: () =>
-				import("./languages/es/notifications").then((module) => module.default),
+			notifications: () => import("./languages/es/notifications").then((module) => module.default),
 		},
 	},
 });

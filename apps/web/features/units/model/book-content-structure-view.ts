@@ -133,8 +133,7 @@ export function indexBookStructureSubtreeContentMetrics<Node extends BookStructu
 			}
 			continue;
 		}
-		const own =
-			ownContentMetricsByNodeId.get(entry.node.id) ?? EmptyBookStructureContentMetrics;
+		const own = ownContentMetricsByNodeId.get(entry.node.id) ?? EmptyBookStructureContentMetrics;
 		let wordCount = own.wordCount;
 		let characterCount = own.characterCount;
 		for (const child of entry.children) {

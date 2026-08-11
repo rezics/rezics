@@ -182,8 +182,7 @@ function isAtOrBeforeReadThrough(candidate: NotificationCandidate): boolean {
 	const createdDifference =
 		candidate.createdAt.getTime() - candidate.readThroughCreatedAt.getTime();
 	return (
-		createdDifference < 0 ||
-		(createdDifference === 0 && candidate.id <= candidate.readThroughId)
+		createdDifference < 0 || (createdDifference === 0 && candidate.id <= candidate.readThroughId)
 	);
 }
 
@@ -330,17 +329,14 @@ async function hydrateNotifications(
 						? ({
 								kind: "conversation",
 								conversationId: value.context.conversationId,
-								...(value.context.messageId
-									? { messageId: value.context.messageId }
-									: {}),
+								...(value.context.messageId ? { messageId: value.context.messageId } : {}),
 							} as const)
 						: detailsDestination;
 				return { ...base, ...value, destination };
 			}
 			case "moderation": {
 				const destination =
-					value.context.type === "report_resolution" &&
-					availableReports.has(value.context.reportId)
+					value.context.type === "report_resolution" && availableReports.has(value.context.reportId)
 						? { kind: "report" as const, reportId: value.context.reportId }
 						: detailsDestination;
 				return { ...base, ...value, destination };
@@ -365,8 +361,7 @@ async function hydrateNotifications(
 					  }
 					| { readonly kind: "unit"; readonly unit: NonNullable<typeof subject> } =
 					detailsDestination;
-				if (value.context.type !== "system_event")
-					return { ...base, ...value, destination };
+				if (value.context.type !== "system_event") return { ...base, ...value, destination };
 				if (value.context.event === "unit_access_invitation" && subject) {
 					const invitationId = value.context.references.invitationId;
 					if (availableInvitations.get(invitationId) === subject.id)
@@ -443,17 +438,11 @@ export default new Elysia({ prefix: "/notifications" })
 				? direction === "after"
 					? or(
 							gt(notification.createdAt, cursor.date),
-							and(
-								eq(notification.createdAt, cursor.date),
-								gt(notification.id, cursor.id),
-							),
+							and(eq(notification.createdAt, cursor.date), gt(notification.id, cursor.id)),
 						)
 					: or(
 							lt(notification.createdAt, cursor.date),
-							and(
-								eq(notification.createdAt, cursor.date),
-								lt(notification.id, cursor.id),
-							),
+							and(eq(notification.createdAt, cursor.date), lt(notification.id, cursor.id)),
 						)
 				: undefined;
 			const limit = query.limit ?? 30;
@@ -461,10 +450,7 @@ export default new Elysia({ prefix: "/notifications" })
 				.select(notificationSelection())
 				.from(notification)
 				.leftJoin(notificationActor, eq(notificationActor.id, notification.actorProfileId))
-				.leftJoin(
-					notificationSubject,
-					eq(notificationSubject.id, notification.subjectUnitId),
-				)
+				.leftJoin(notificationSubject, eq(notificationSubject.id, notification.subjectUnitId))
 				.leftJoin(
 					notificationRecipientStat,
 					eq(notificationRecipientStat.profileId, notification.recipientProfileId),
@@ -478,9 +464,7 @@ export default new Elysia({ prefix: "/notifications" })
 					),
 				)
 				.orderBy(
-					direction === "after"
-						? asc(notification.createdAt)
-						: desc(notification.createdAt),
+					direction === "after" ? asc(notification.createdAt) : desc(notification.createdAt),
 					direction === "after" ? asc(notification.id) : desc(notification.id),
 				)
 				.limit(limit + 1);
@@ -560,10 +544,7 @@ export default new Elysia({ prefix: "/notifications" })
 				.select(notificationSelection())
 				.from(notification)
 				.leftJoin(notificationActor, eq(notificationActor.id, notification.actorProfileId))
-				.leftJoin(
-					notificationSubject,
-					eq(notificationSubject.id, notification.subjectUnitId),
-				)
+				.leftJoin(notificationSubject, eq(notificationSubject.id, notification.subjectUnitId))
 				.leftJoin(
 					notificationRecipientStat,
 					eq(notificationRecipientStat.profileId, notification.recipientProfileId),
@@ -598,9 +579,7 @@ export default new Elysia({ prefix: "/notifications" })
 	.put(
 		"/read-all",
 		async ({ profile, authorization, body }) => {
-			await authorization.unit.ensureCanUpdate(profile.unitId, [
-				["notification-preferences"],
-			]);
+			await authorization.unit.ensureCanUpdate(profile.unitId, [["notification-preferences"]]);
 			const through = decodeCursor(body.through, false);
 			return database.transaction(async (tx) => {
 				await tx.execute(
@@ -739,8 +718,7 @@ export default new Elysia({ prefix: "/notifications" })
 					.set({ readAt: sql`greatest(clock_timestamp(), ${current.createdAt})` })
 					.where(and(eq(notification.id, current.id), isNull(notification.readAt)))
 					.returning({ readAt: notification.readAt });
-				if (!updated?.readAt)
-					throw new Error("Notification read update returned no timestamp");
+				if (!updated?.readAt) throw new Error("Notification read update returned no timestamp");
 				return { updated: true, readAt: updated.readAt };
 			}),
 		{
@@ -806,9 +784,7 @@ export default new Elysia({ prefix: "/notifications" })
 				]),
 			);
 			return {
-				items: preferenceKinds.map(
-					(kind) => rows.get(kind) ?? { kind, inApp: true, email: false },
-				),
+				items: preferenceKinds.map((kind) => rows.get(kind) ?? { kind, inApp: true, email: false }),
 			};
 		},
 		{

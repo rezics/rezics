@@ -117,9 +117,7 @@ export function formatProgressEntryDate(
 				timeStyle: "short",
 			}).format(date);
 		case "day":
-			return new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeZone: "UTC" }).format(
-				date,
-			);
+			return new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeZone: "UTC" }).format(date);
 		case "month":
 			return new Intl.DateTimeFormat(locale, {
 				month: "long",
@@ -127,9 +125,7 @@ export function formatProgressEntryDate(
 				timeZone: "UTC",
 			}).format(date);
 		case "year":
-			return new Intl.DateTimeFormat(locale, { year: "numeric", timeZone: "UTC" }).format(
-				date,
-			);
+			return new Intl.DateTimeFormat(locale, { year: "numeric", timeZone: "UTC" }).format(date);
 	}
 }
 

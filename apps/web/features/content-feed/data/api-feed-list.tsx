@@ -227,9 +227,7 @@ export function ApiFeedList({
 				aria-label={ariaLabel ?? t.feed.title}
 				className={showControls ? "mt-3 sm:mt-4" : undefined}
 				continuation={
-					pagination === "none"
-						? undefined
-						: { mode: pagination, state: continuationState }
+					pagination === "none" ? undefined : { mode: pagination, state: continuationState }
 				}
 				emptyBody={emptyBody ?? t.feed.emptyBody}
 				emptyTitle={emptyTitle ?? t.feed.emptyTitle}
@@ -399,10 +397,7 @@ export function FeedListControls({
 					/>
 				) : null}
 				{onContentKindsChange ? (
-					<FeedContentSelector
-						onValueChange={onContentKindsChange}
-						value={contentKinds}
-					/>
+					<FeedContentSelector onValueChange={onContentKindsChange} value={contentKinds} />
 				) : null}
 				{hasAdditionalFilters ? (
 					<Button

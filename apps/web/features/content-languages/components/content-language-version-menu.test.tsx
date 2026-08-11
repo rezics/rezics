@@ -75,9 +75,7 @@ describe("ContentLanguageVersionMenu", () => {
 	});
 
 	it("restores automatic selection on the current detail page", () => {
-		render(
-			<ContentLanguageVersionMenu availableLanguages={["zh", "ko"]} currentLanguage="zh" />,
-		);
+		render(<ContentLanguageVersionMenu availableLanguages={["zh", "ko"]} currentLanguage="zh" />);
 
 		act(() => fireEvent.click(screen.getByRole("button", { name: "自動選擇" })));
 

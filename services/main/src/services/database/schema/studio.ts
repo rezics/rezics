@@ -56,10 +56,7 @@ export const studioWorkRelation = pgTable(
 			table.relation,
 			table.source,
 		),
-		index("studio_work_relation_profile_resource_idx").on(
-			table.profileId,
-			table.resourceUnitId,
-		),
+		index("studio_work_relation_profile_resource_idx").on(table.profileId, table.resourceUnitId),
 		index("studio_work_relation_profile_relation_last_idx").on(
 			table.profileId,
 			table.relation,

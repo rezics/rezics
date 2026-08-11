@@ -86,9 +86,9 @@ describe("app theme", () => {
 					foreground === "brandForeground" ||
 					foreground === "primaryForeground" ||
 					foreground === "sidebarPrimaryForeground";
-				expect(
-					contrastRatio(colors[background], colors[foreground]),
-				).toBeGreaterThanOrEqual(usesBrandWhite ? 4.4 : 4.5);
+				expect(contrastRatio(colors[background], colors[foreground])).toBeGreaterThanOrEqual(
+					usesBrandWhite ? 4.4 : 4.5,
+				);
 			}
 		}
 	});
@@ -106,10 +106,7 @@ describe("app theme", () => {
 	});
 
 	it("keeps the static offline fallback aligned with the theme", () => {
-		const offlineHtml = readFileSync(
-			new URL("../public/offline.html", import.meta.url),
-			"utf8",
-		);
+		const offlineHtml = readFileSync(new URL("../public/offline.html", import.meta.url), "utf8");
 		const offlineColors = [
 			appTheme.light.brand,
 			appTheme.light.background,

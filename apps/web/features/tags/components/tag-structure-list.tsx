@@ -99,9 +99,7 @@ export function TagStructureList({
 									canVote={canVote}
 									isPending={isPending(structure.structureId)}
 									onClear={() => onClearStructureVote(structure.structureId)}
-									onVote={(value) =>
-										onStructureVote(structure.structureId, value)
-									}
+									onVote={(value) => onStructureVote(structure.structureId, value)}
 									score={toFiniteApiNumber(structure.score) ?? 0}
 									viewerVote={structure.viewerVote}
 									voteCount={toNonNegativeApiInteger(structure.voteCount)}

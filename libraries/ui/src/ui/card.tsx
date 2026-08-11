@@ -31,11 +31,7 @@ const cardMediaVariants = tv({
 		variant: {
 			default: "bg-transparent",
 			icon: "[&_svg:not([class*='size-'])]:size-4",
-			image: [
-				"overflow-hidden rounded-t-md",
-				"px-0",
-				"[&_img]:size-full [&_img]:object-cover",
-			],
+			image: ["overflow-hidden rounded-t-md", "px-0", "[&_img]:size-full [&_img]:object-cover"],
 		},
 	},
 	defaultVariants: {
@@ -122,10 +118,7 @@ export const CardAction = (props: React.ComponentProps<typeof ark.div>) => {
 
 	return (
 		<ark.div
-			className={cn(
-				"col-start-2 row-span-2 row-start-1 self-start justify-self-end",
-				className,
-			)}
+			className={cn("col-start-2 row-span-2 row-start-1 self-start justify-self-end", className)}
 			data-slot="card-action"
 			{...rest}
 		/>

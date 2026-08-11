@@ -383,10 +383,7 @@ export const PostFilter = Type.Recursive(
 				subject: Type.Optional(
 					Type.Union([
 						Type.Object({ is: UnitReferenceFilter }, { additionalProperties: false }),
-						Type.Object(
-							{ absent: Type.Literal(true) },
-							{ additionalProperties: false },
-						),
+						Type.Object({ absent: Type.Literal(true) }, { additionalProperties: false }),
 					]),
 				),
 				scores: Type.Optional(
@@ -438,19 +435,13 @@ export const UnitPredicate = Type.Recursive(
 				post: Type.Optional(
 					Type.Union([
 						Type.Object({ is: PostFilter }, { additionalProperties: false }),
-						Type.Object(
-							{ absent: Type.Literal(true) },
-							{ additionalProperties: false },
-						),
+						Type.Object({ absent: Type.Literal(true) }, { additionalProperties: false }),
 					]),
 				),
 				collection: Type.Optional(
 					Type.Union([
 						Type.Object({ is: CollectionFilter }, { additionalProperties: false }),
-						Type.Object(
-							{ absent: Type.Literal(true) },
-							{ additionalProperties: false },
-						),
+						Type.Object({ absent: Type.Literal(true) }, { additionalProperties: false }),
 					]),
 				),
 			},
@@ -687,10 +678,7 @@ function readLocalizationLanguageBoundary(
 		const allBoundary = intersectLanguageBoundaries(
 			predicate.all
 				.map(readLocalizationLanguageBoundary)
-				.filter(
-					(boundary): boundary is readonly FilterContentLanguage[] =>
-						boundary !== undefined,
-				),
+				.filter((boundary): boundary is readonly FilterContentLanguage[] => boundary !== undefined),
 		);
 		if (allBoundary) boundaries.push(allBoundary);
 	}
@@ -721,9 +709,7 @@ export function readUnitLanguageBoundary(
 	if (predicate.all) {
 		const allBoundaries = predicate.all
 			.map(readUnitLanguageBoundary)
-			.filter(
-				(boundary): boundary is readonly FilterContentLanguage[] => boundary !== undefined,
-			);
+			.filter((boundary): boundary is readonly FilterContentLanguage[] => boundary !== undefined);
 		const allBoundary = unionLanguageBoundaries(allBoundaries);
 		if (allBoundary) boundaries.push(allBoundary);
 	}
@@ -917,8 +903,7 @@ export function collectUnitPredicateReferenceIds(value: unknown): string[] {
 		if (id && typeof id === "object" && "in" in id) {
 			const values = (id as { in?: unknown }).in;
 			if (Array.isArray(values))
-				for (const candidate of values)
-					if (typeof candidate === "string") ids.add(candidate);
+				for (const candidate of values) if (typeof candidate === "string") ids.add(candidate);
 		}
 		Object.values(record).forEach(visit);
 	};

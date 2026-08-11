@@ -71,8 +71,7 @@ async function renderNotificationIntent(item: ClaimedEmail): Promise<RenderedMai
 		.innerJoin(users, eq(users.id, profile.authUserId))
 		.where(eq(notification.id, item.notificationId))
 		.limit(1);
-	if (!row)
-		throw new InvalidEmailIntent("Notification email intent has no deliverable recipient");
+	if (!row) throw new InvalidEmailIntent("Notification email intent has no deliverable recipient");
 	const locale = toDeliveryLocale(toUiLocale(row.interfaceLocale ?? DefaultStoredUiLocale));
 	const { t } = await getTranslation(["emails", "notifications"], [locale]);
 	const copy = t.notifications[notificationTranslationKey(row.kind, row.payload)];
@@ -95,12 +94,7 @@ export function renderClaimedEmail(item: ClaimedEmail): Promise<RenderedMailMess
 				throw new InvalidEmailIntent(
 					"Authentication email intent is missing its recipient, locale, or action URL",
 				);
-			return renderAuthenticationIntent(
-				item,
-				item.locale,
-				item.actionUrl,
-				item.recipientEmail,
-			);
+			return renderAuthenticationIntent(item, item.locale, item.actionUrl, item.recipientEmail);
 		}
 	}
 }

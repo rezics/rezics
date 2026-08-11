@@ -24,9 +24,7 @@ export function PostAttributionsPage() {
 				<Card appearance="outlined">
 					<CardHeader>
 						<CardTitle>{t.posts.workspace.currentAttributions}</CardTitle>
-						<CardDescription>
-							{t.posts.workspace.currentAttributionsDescription}
-						</CardDescription>
+						<CardDescription>{t.posts.workspace.currentAttributionsDescription}</CardDescription>
 					</CardHeader>
 					<CardContent>
 						<AttributionLinks

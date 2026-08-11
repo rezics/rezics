@@ -132,11 +132,7 @@ function presentImageAssetPresentation(
 		fit: presentation.fit,
 		crop,
 		revision: presentation.revision,
-		contentUrl: imageAssetPresentationContentUrl(
-			assetId,
-			presentation.role,
-			presentation.revision,
-		),
+		contentUrl: imageAssetPresentationContentUrl(assetId, presentation.role, presentation.revision),
 	};
 }
 
@@ -158,10 +154,7 @@ export async function findImageAssetPresentation(
 			.select(presentationSelection)
 			.from(imageAssetPresentation)
 			.where(
-				and(
-					eq(imageAssetPresentation.assetId, assetId),
-					eq(imageAssetPresentation.role, role),
-				),
+				and(eq(imageAssetPresentation.assetId, assetId), eq(imageAssetPresentation.role, role)),
 			)
 			.limit(1)
 	)[0];
@@ -413,8 +406,7 @@ export async function upsertImageAssetPresentation(
 ) {
 	const asset = await findImageAsset(assetId);
 	if (!asset || asset.ownerProfileId !== profileId) throw new ImageAssetNotFound();
-	if (asset.status !== "ready" || !asset.width || !asset.height)
-		throw new ImageAssetInvalidState();
+	if (asset.status !== "ready" || !asset.width || !asset.height) throw new ImageAssetInvalidState();
 	const validated = validateImageAssetPresentation(role, asset.width, asset.height, input);
 	const columns = toImageAssetPresentationColumns(validated);
 	const [stored] = await database

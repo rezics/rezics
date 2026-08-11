@@ -500,9 +500,7 @@ function CreateTokenCard({ refresh }: { refresh: () => Promise<unknown> }) {
 							</NativeSelect>
 						</Field>
 						<FieldSet>
-							<FieldLegend variant="label">
-								{t.settings.tokens.permissions}
-							</FieldLegend>
+							<FieldLegend variant="label">{t.settings.tokens.permissions}</FieldLegend>
 							<p className="text-sm text-muted-foreground">
 								{t.settings.tokens.permissionsDescription}
 							</p>
@@ -645,9 +643,7 @@ function TokenQuotaEditor({
 		maxConcurrentRequests: Number(
 			storedOverride?.limits?.maxConcurrentRequests ?? policyLimits.maxConcurrentRequests,
 		),
-		dailyCostUnits: Number(
-			storedOverride?.limits?.dailyCostUnits ?? policyLimits.dailyCostUnits,
-		),
+		dailyCostUnits: Number(storedOverride?.limits?.dailyCostUnits ?? policyLimits.dailyCostUnits),
 	};
 	const [limitValues, setLimitValues] = useState<TokenQuotaLimitValues>(() =>
 		quotaLimitValues(effectiveOverrideLimits),
@@ -691,9 +687,7 @@ function TokenQuotaEditor({
 
 	function updateOperation(key: string, patch: Partial<OperationLimitRow>) {
 		setOperations((current) =>
-			current.map((operation) =>
-				operation.key === key ? { ...operation, ...patch } : operation,
-			),
+			current.map((operation) => (operation.key === key ? { ...operation, ...patch } : operation)),
 		);
 	}
 
@@ -704,10 +698,7 @@ function TokenQuotaEditor({
 		let operationsValid = true;
 		for (const operation of operations) {
 			const operationLimits = parseTokenQuotaLimits(operation, ranges);
-			if (
-				Object.hasOwn(configurationOperations, operation.operationId) ||
-				!operationLimits.valid
-			) {
+			if (Object.hasOwn(configurationOperations, operation.operationId) || !operationLimits.valid) {
 				operationsValid = false;
 				continue;
 			}
@@ -736,9 +727,7 @@ function TokenQuotaEditor({
 				<FieldDescription>{t.settings.tokens.limitsDescription}</FieldDescription>
 				<LimitRangeDescription ranges={ranges} />
 				<QuotaLimitFields
-					onChange={(name, value) =>
-						setLimitValues((current) => ({ ...current, [name]: value }))
-					}
+					onChange={(name, value) => setLimitValues((current) => ({ ...current, [name]: value }))}
 					ranges={ranges}
 					values={limitValues}
 				/>
@@ -759,8 +748,7 @@ function TokenQuotaEditor({
 								<NativeSelect
 									onChange={(event) =>
 										updateOperation(operation.key, {
-											operationId: event.currentTarget
-												.value as QuotaOperationId,
+											operationId: event.currentTarget.value as QuotaOperationId,
 										})
 									}
 									value={operation.operationId}
@@ -775,18 +763,14 @@ function TokenQuotaEditor({
 							<QuotaLimitField
 								label={t.settings.tokens.burstCapacity}
 								name="burstCapacity"
-								onChange={(value) =>
-									updateOperation(operation.key, { burstCapacity: value })
-								}
+								onChange={(value) => updateOperation(operation.key, { burstCapacity: value })}
 								range={ranges.burstCapacity}
 								value={operation.burstCapacity}
 							/>
 							<QuotaLimitField
 								label={t.settings.tokens.requestsPerMinute}
 								name="requestsPerMinute"
-								onChange={(value) =>
-									updateOperation(operation.key, { requestsPerMinute: value })
-								}
+								onChange={(value) => updateOperation(operation.key, { requestsPerMinute: value })}
 								range={ranges.requestsPerMinute}
 								value={operation.requestsPerMinute}
 							/>
@@ -802,9 +786,7 @@ function TokenQuotaEditor({
 							<QuotaLimitField
 								label={t.settings.tokens.dailyCostUnits}
 								name="dailyCostUnits"
-								onChange={(value) =>
-									updateOperation(operation.key, { dailyCostUnits: value })
-								}
+								onChange={(value) => updateOperation(operation.key, { dailyCostUnits: value })}
 								range={ranges.dailyCostUnits}
 								value={operation.dailyCostUnits}
 							/>
@@ -812,9 +794,7 @@ function TokenQuotaEditor({
 								aria-label={t.settings.tokens.removeOperation}
 								onClick={() =>
 									setOperations((current) =>
-										current.filter(
-											(candidate) => candidate.key !== operation.key,
-										),
+										current.filter((candidate) => candidate.key !== operation.key),
 									)
 								}
 								size="sm"
@@ -842,22 +822,15 @@ function TokenQuotaEditor({
 								key: `new-${crypto.randomUUID()}`,
 								operationId:
 									QuotaOperationIds.find(
-										(operationId) =>
-											!current.some(
-												(item) => item.operationId === operationId,
-											),
+										(operationId) => !current.some((item) => item.operationId === operationId),
 									) ?? "search.execute",
 								requestsPerMinute: String(
-									requestsPerMinute.kind === "valid"
-										? Math.min(requestsPerMinute.value, 30)
-										: 30,
+									requestsPerMinute.kind === "valid" ? Math.min(requestsPerMinute.value, 30) : 30,
 								),
 								maxConcurrentRequests: "1",
 								burstCapacity: "5",
 								dailyCostUnits: String(
-									dailyCostUnits.kind === "valid"
-										? Math.min(dailyCostUnits.value, 1_000)
-										: 1_000,
+									dailyCostUnits.kind === "valid" ? Math.min(dailyCostUnits.value, 1_000) : 1_000,
 								),
 							},
 						]);
@@ -935,19 +908,13 @@ function TokenCard({
 				<div className="flex flex-wrap items-start justify-between gap-3">
 					<div className="min-w-0">
 						<CardTitle className="break-words">{token.name}</CardTitle>
-						<CardDescription className="mt-1 font-mono">
-							{token.tokenPrefix}
-						</CardDescription>
+						<CardDescription className="mt-1 font-mono">{token.tokenPrefix}</CardDescription>
 					</div>
 					<div className="flex flex-wrap gap-2">
 						<Badge variant={token.enabled ? "success" : "secondary"}>
 							{token.enabled ? t.settings.tokens.enabled : t.settings.tokens.disabled}
 						</Badge>
-						<Badge
-							variant={
-								token.quota.token.class === "privileged" ? "warning" : "outline"
-							}
-						>
+						<Badge variant={token.quota.token.class === "privileged" ? "warning" : "outline"}>
 							{policyLabel}
 						</Badge>
 					</div>
@@ -968,56 +935,39 @@ function TokenCard({
 						</dd>
 					</div>
 					<div>
-						<dt className="text-muted-foreground">
-							{t.settings.tokens.requestsPerMinute}
-						</dt>
+						<dt className="text-muted-foreground">{t.settings.tokens.requestsPerMinute}</dt>
 						<dd>
-							{Number(
-								token.quota.token.limits.requestRate.requestsPerMinute,
-							).toLocaleString(locale)}
-						</dd>
-					</div>
-					<div>
-						<dt className="text-muted-foreground">
-							{t.settings.tokens.maxConcurrentRequests}
-						</dt>
-						<dd>
-							{Number(token.quota.token.limits.maxConcurrentRequests).toLocaleString(
+							{Number(token.quota.token.limits.requestRate.requestsPerMinute).toLocaleString(
 								locale,
 							)}
 						</dd>
 					</div>
+					<div>
+						<dt className="text-muted-foreground">{t.settings.tokens.maxConcurrentRequests}</dt>
+						<dd>{Number(token.quota.token.limits.maxConcurrentRequests).toLocaleString(locale)}</dd>
+					</div>
 				</dl>
 				{token.quota.token.class === "privileged" && token.quota.token.validUntil ? (
 					<p className="text-sm text-warning">
-						{t.settings.tokens.trustedUntil}:{" "}
-						{formatDate(token.quota.token.validUntil, locale)}
+						{t.settings.tokens.trustedUntil}: {formatDate(token.quota.token.validUntil, locale)}
 					</p>
 				) : null}
 				<div className="flex flex-wrap gap-2">
 					<Button
-						onClick={() =>
-							setEditor((current) => (current === "access" ? undefined : "access"))
-						}
+						onClick={() => setEditor((current) => (current === "access" ? undefined : "access"))}
 						size="sm"
 						type="button"
 						variant="outline"
 					>
-						{editor === "access"
-							? t.settings.tokens.hideEditor
-							: t.settings.tokens.manageAccess}
+						{editor === "access" ? t.settings.tokens.hideEditor : t.settings.tokens.manageAccess}
 					</Button>
 					<Button
-						onClick={() =>
-							setEditor((current) => (current === "quota" ? undefined : "quota"))
-						}
+						onClick={() => setEditor((current) => (current === "quota" ? undefined : "quota"))}
 						size="sm"
 						type="button"
 						variant="outline"
 					>
-						{editor === "quota"
-							? t.settings.tokens.hideEditor
-							: t.settings.tokens.configureLimits}
+						{editor === "quota" ? t.settings.tokens.hideEditor : t.settings.tokens.configureLimits}
 					</Button>
 					<Button
 						isLoading={update.isPending}
@@ -1118,9 +1068,7 @@ export function TokenSettingsPage() {
 				<CreateTokenCard refresh={refresh} />
 				<div className="grid gap-4">
 					<div>
-						<h2 className="font-heading text-xl font-semibold">
-							{t.settings.tokens.listTitle}
-						</h2>
+						<h2 className="font-heading text-xl font-semibold">{t.settings.tokens.listTitle}</h2>
 						<p className="mt-1 text-sm text-muted-foreground">
 							{t.settings.tokens.listDescription}
 						</p>
@@ -1135,12 +1083,7 @@ export function TokenSettingsPage() {
 						</p>
 					) : null}
 					{tokens.data?.items.map((token) => (
-						<TokenCard
-							key={token.id}
-							locale={locale.current}
-							refresh={refresh}
-							token={token}
-						/>
+						<TokenCard key={token.id} locale={locale.current} refresh={refresh} token={token} />
 					))}
 				</div>
 			</div>

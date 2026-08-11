@@ -71,9 +71,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 function parsePositiveInteger(value: unknown): number | undefined {
-	return typeof value === "number" && Number.isSafeInteger(value) && value > 0
-		? value
-		: undefined;
+	return typeof value === "number" && Number.isSafeInteger(value) && value > 0 ? value : undefined;
 }
 
 function parseOperationLimits(value: unknown): OperationLimits | undefined {
@@ -130,8 +128,7 @@ function initialLimitValues(quota: AccountQuota): LimitValues {
 	const override = quota.configurationOverride;
 	return {
 		requestsPerMinute: String(
-			override.limits?.requestRate?.requestsPerMinute ??
-				quota.limits.requestRate.requestsPerMinute,
+			override.limits?.requestRate?.requestsPerMinute ?? quota.limits.requestRate.requestsPerMinute,
 		),
 		burstCapacity: String(
 			override.limits?.requestRate?.burstCapacity ?? quota.limits.requestRate.burstCapacity,
@@ -168,8 +165,7 @@ export function AccountApiQuotaEditor({ userId }: { readonly userId: string }) {
 
 	if (!canReadAccountApiQuotas)
 		return <p className="text-destructive text-sm">{t.console.users.quotaUnavailable}</p>;
-	if (quota.isPending || (canUpdateAccountApiQuotas && policies.isPending))
-		return <QueryPending />;
+	if (quota.isPending || (canUpdateAccountApiQuotas && policies.isPending)) return <QueryPending />;
 	if (quota.isError || !quota.data)
 		return <QueryFailure error={quota.error} retry={() => void quota.refetch()} />;
 	if (canUpdateAccountApiQuotas && (policies.isError || !policies.data))
@@ -228,9 +224,7 @@ function AccountApiQuotaForm({
 		const nextPolicy = enabledPolicies.find((policy) => policy.key === nextKey);
 		if (!nextPolicy) return;
 		setLimits({
-			requestsPerMinute: String(
-				nextPolicy.configuration.limits.requestRate.requestsPerMinute,
-			),
+			requestsPerMinute: String(nextPolicy.configuration.limits.requestRate.requestsPerMinute),
 			burstCapacity: String(nextPolicy.configuration.limits.requestRate.burstCapacity),
 			maxConcurrentRequests: String(nextPolicy.configuration.limits.maxConcurrentRequests),
 			dailyCostUnits: String(nextPolicy.configuration.limits.dailyCostUnits),
@@ -309,17 +303,11 @@ function AccountApiQuotaForm({
 				<div className="flex flex-wrap items-start justify-between gap-3">
 					<div>
 						<CardTitle>{t.console.users.accountQuota.title}</CardTitle>
-						<CardDescription>
-							{t.console.users.accountQuota.description}
-						</CardDescription>
+						<CardDescription>{t.console.users.accountQuota.description}</CardDescription>
 					</div>
 					<div className="flex flex-wrap gap-2">
-						<Badge variant="secondary">
-							{t.console.apiQuotas.classes[quota.class]}
-						</Badge>
-						<Badge
-							variant={quota.source === "privileged_fallback" ? "warning" : "outline"}
-						>
+						<Badge variant="secondary">{t.console.apiQuotas.classes[quota.class]}</Badge>
+						<Badge variant={quota.source === "privileged_fallback" ? "warning" : "outline"}>
 							{sourceLabel}
 						</Badge>
 					</div>
@@ -343,10 +331,7 @@ function AccountApiQuotaForm({
 						label={t.console.apiQuotas.dailyCostUnits}
 						value={quota.limits.dailyCostUnits}
 					/>
-					<QuotaValue
-						label={t.console.apiQuotas.maxActiveTokens}
-						value={quota.maxActiveTokens}
-					/>
+					<QuotaValue label={t.console.apiQuotas.maxActiveTokens} value={quota.maxActiveTokens} />
 				</div>
 				{canUpdateAccountApiQuotas && selectedPolicy ? (
 					<form className="grid gap-5" onSubmit={submit}>
@@ -359,22 +344,17 @@ function AccountApiQuotaForm({
 								>
 									{enabledPolicies.map((policy) => (
 										<NativeSelectOption key={policy.id} value={policy.key}>
-											{policy.key} ·{" "}
-											{t.console.apiQuotas.classes[policy.class]}
+											{policy.key} · {t.console.apiQuotas.classes[policy.class]}
 										</NativeSelectOption>
 									))}
 								</NativeSelect>
 							</Field>
 							{selectedPolicy.class === "privileged" ? (
 								<Field required>
-									<FieldLabel>
-										{t.console.users.accountQuota.validUntil}
-									</FieldLabel>
+									<FieldLabel>{t.console.users.accountQuota.validUntil}</FieldLabel>
 									<Input
 										min={new Date().toISOString().slice(0, 16)}
-										onChange={(event) =>
-											setValidUntil(event.currentTarget.value)
-										}
+										onChange={(event) => setValidUntil(event.currentTarget.value)}
 										required
 										type="datetime-local"
 										value={validUntil}
@@ -401,20 +381,11 @@ function AccountApiQuotaForm({
 								<div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
 									{(
 										[
-											[
-												"requestsPerMinute",
-												t.console.apiQuotas.requestsPerMinute,
-											],
+											["requestsPerMinute", t.console.apiQuotas.requestsPerMinute],
 											["burstCapacity", t.console.apiQuotas.burstCapacity],
-											[
-												"maxConcurrentRequests",
-												t.console.apiQuotas.maxConcurrentRequests,
-											],
+											["maxConcurrentRequests", t.console.apiQuotas.maxConcurrentRequests],
 											["dailyCostUnits", t.console.apiQuotas.dailyCostUnits],
-											[
-												"maxActiveTokens",
-												t.console.apiQuotas.maxActiveTokens,
-											],
+											["maxActiveTokens", t.console.apiQuotas.maxActiveTokens],
 										] as const
 									).map(([name, label]) => (
 										<Field key={name} required>
@@ -437,14 +408,10 @@ function AccountApiQuotaForm({
 									))}
 								</div>
 								<Field invalid={operations === undefined}>
-									<FieldLabel>
-										{t.console.apiQuotas.operationOverrides}
-									</FieldLabel>
+									<FieldLabel>{t.console.apiQuotas.operationOverrides}</FieldLabel>
 									<Textarea
 										className="min-h-48 font-mono text-xs"
-										onChange={(event) =>
-											setOperationsText(event.currentTarget.value)
-										}
+										onChange={(event) => setOperationsText(event.currentTarget.value)}
 										spellCheck={false}
 										value={operationsText}
 									/>
@@ -467,9 +434,7 @@ function AccountApiQuotaForm({
 							/>
 						</Field>
 						{invalid ? (
-							<p className="text-destructive text-sm">
-								{t.console.users.accountQuota.invalid}
-							</p>
+							<p className="text-destructive text-sm">{t.console.users.accountQuota.invalid}</p>
 						) : null}
 						<RequestFailure
 							error={assign.error ?? reset.error}
@@ -498,9 +463,7 @@ function AccountApiQuotaForm({
 						</div>
 					</form>
 				) : (
-					<p className="text-muted-foreground text-sm">
-						{t.console.users.accountQuota.readOnly}
-					</p>
+					<p className="text-muted-foreground text-sm">{t.console.users.accountQuota.readOnly}</p>
 				)}
 			</CardContent>
 		</Card>

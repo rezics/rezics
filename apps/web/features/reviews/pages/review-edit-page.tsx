@@ -115,19 +115,11 @@ function ReviewEditForm({
 					language: selectedLanguage,
 					title: nullablePostLocalizationText(form, "title"),
 					summary: nullablePostLocalizationText(form, "summary"),
-					body: writePortableText(
-						value.body,
-						selectedLanguageIsPending ? undefined : review.body,
-					),
+					body: writePortableText(value.body, selectedLanguageIsPending ? undefined : review.body),
 				},
 			});
 			draft.commit();
-			await invalidateReviews(
-				queryClient,
-				review.id,
-				review.targetId,
-				review.scores[0]?.realmId,
-			);
+			await invalidateReviews(queryClient, review.id, review.targetId, review.scores[0]?.realmId);
 			await languagesChanged();
 			router.push(postDetailHref(review.id));
 		} catch {
@@ -181,12 +173,7 @@ function ReviewEditForm({
 					</p>
 				) : null}
 				<RequestFailure error={update.error} fallback={t.ui.retryLater} />
-				<Button
-					className="w-fit"
-					isLoading={update.isPending}
-					type="submit"
-					variant="solid"
-				>
+				<Button className="w-fit" isLoading={update.isPending} type="submit" variant="solid">
 					{t.ui.save}
 				</Button>
 			</form>

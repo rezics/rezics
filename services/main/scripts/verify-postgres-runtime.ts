@@ -59,9 +59,7 @@ try {
 	`);
 	const setting = settings.rows[0];
 	if (!setting) throw new Error("Required PostgreSQL/PGroonga runtime settings are unavailable");
-	const preloads = new Set(
-		setting.sharedPreloadLibraries.split(",").map((value) => value.trim()),
-	);
+	const preloads = new Set(setting.sharedPreloadLibraries.split(",").map((value) => value.trim()));
 	for (const preload of RequiredPreloads)
 		if (!preloads.has(preload))
 			throw new Error(`${preload} is not present in shared_preload_libraries`);
@@ -91,8 +89,7 @@ try {
 			`Expected approx_count 1.0; found ${installed.get("approx_count") ?? "missing"}`,
 		);
 	for (const extension of ["pg_stat_statements", "amcheck", "pgstattuple"])
-		if (!installed.has(extension))
-			throw new Error(`Required extension is missing: ${extension}`);
+		if (!installed.has(extension)) throw new Error(`Required extension is missing: ${extension}`);
 
 	const logicalSlots = await adminDatabase.execute<{ count: number }>(sql`
 		select count(*)::integer as count from pg_replication_slots where slot_type = 'logical'

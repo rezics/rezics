@@ -182,11 +182,7 @@ function SeriesCreatePage() {
 						<DraftContentLanguageField controller={language.controller} />
 						<Field>
 							<FieldLabel>{t.media.roles.cover.title}</FieldLabel>
-							<LocalizationImageUploadField
-								onChange={setCover}
-								role="cover"
-								value={cover}
-							/>
+							<LocalizationImageUploadField onChange={setCover} role="cover" value={cover} />
 						</Field>
 						<RequestFailure error={create.error} fallback={t.ui.retryLater} />
 						<Button variant="solid" isLoading={create.isPending} type="submit">
@@ -417,17 +413,11 @@ function VariantUnitCreatePage({ type }: { type: VariantUnitType }) {
 							<NativeSelect
 								name="versionKind"
 								onChange={(event) =>
-									setVersionKind(
-										event.currentTarget.value === "variant"
-											? "variant"
-											: "main",
-									)
+									setVersionKind(event.currentTarget.value === "variant" ? "variant" : "main")
 								}
 								value={versionKind}
 							>
-								<NativeSelectOption value="main">
-									{t.units.creation.mainVersion}
-								</NativeSelectOption>
+								<NativeSelectOption value="main">{t.units.creation.mainVersion}</NativeSelectOption>
 								<NativeSelectOption value="variant">
 									{t.units.creation.variantVersion}
 								</NativeSelectOption>
@@ -471,42 +461,24 @@ function VariantUnitCreatePage({ type }: { type: VariantUnitType }) {
 						/>
 						<Field>
 							<FieldLabel>{t.media.roles.cover.title}</FieldLabel>
-							<LocalizationImageUploadField
-								value={cover}
-								onChange={setCover}
-								role="cover"
-							/>
+							<LocalizationImageUploadField value={cover} onChange={setCover} role="cover" />
 						</Field>
 						{type === "book" || type === "media" ? <WorkReleaseStatusField /> : null}
 						<Field>
 							<FieldLabel>{t.ui.visibility}</FieldLabel>
 							<NativeSelect defaultValue="public" name="visibility">
-								<NativeSelectOption value="public">
-									{t.ui.public}
-								</NativeSelectOption>
-								<NativeSelectOption value="unlisted">
-									{t.ui.unlisted}
-								</NativeSelectOption>
-								<NativeSelectOption value="private">
-									{t.ui.private}
-								</NativeSelectOption>
+								<NativeSelectOption value="public">{t.ui.public}</NativeSelectOption>
+								<NativeSelectOption value="unlisted">{t.ui.unlisted}</NativeSelectOption>
+								<NativeSelectOption value="private">{t.ui.private}</NativeSelectOption>
 							</NativeSelect>
 						</Field>
 						<Field>
 							<FieldLabel>{t.ui.contentRating}</FieldLabel>
 							<NativeSelect defaultValue="general" name="contentRating">
-								<NativeSelectOption value="general">
-									{t.units.rating.general}
-								</NativeSelectOption>
-								<NativeSelectOption value="r15">
-									{t.units.rating.r15}
-								</NativeSelectOption>
-								<NativeSelectOption value="r18">
-									{t.units.rating.r18}
-								</NativeSelectOption>
-								<NativeSelectOption value="r18g">
-									{t.units.rating.r18g}
-								</NativeSelectOption>
+								<NativeSelectOption value="general">{t.units.rating.general}</NativeSelectOption>
+								<NativeSelectOption value="r15">{t.units.rating.r15}</NativeSelectOption>
+								<NativeSelectOption value="r18">{t.units.rating.r18}</NativeSelectOption>
+								<NativeSelectOption value="r18g">{t.units.rating.r18g}</NativeSelectOption>
 							</NativeSelect>
 						</Field>
 						<Field>
@@ -515,9 +487,7 @@ function VariantUnitCreatePage({ type }: { type: VariantUnitType }) {
 								<NativeSelectOption value="unknown">
 									{t.units.aiDisclosure.unknown}
 								</NativeSelectOption>
-								<NativeSelectOption value="none">
-									{t.units.aiDisclosure.none}
-								</NativeSelectOption>
+								<NativeSelectOption value="none">{t.units.aiDisclosure.none}</NativeSelectOption>
 								<NativeSelectOption value="ai_assisted">
 									{t.units.aiDisclosure.ai_assisted}
 								</NativeSelectOption>
@@ -532,9 +502,7 @@ function VariantUnitCreatePage({ type }: { type: VariantUnitType }) {
 						<Field>
 							<FieldLabel>{t.units.detail.license}</FieldLabel>
 							<NativeSelect defaultValue="" name="license">
-								<NativeSelectOption value="">
-									{t.licenses.unspecified}
-								</NativeSelectOption>
+								<NativeSelectOption value="">{t.licenses.unspecified}</NativeSelectOption>
 								{PublicationLicenseIds.map((id) => (
 									<NativeSelectOption key={id} value={id}>
 										{t.licenses.options[id].label}
@@ -549,10 +517,7 @@ function VariantUnitCreatePage({ type }: { type: VariantUnitType }) {
 						)}
 						<RequestFailure
 							error={
-								hasErrorCode(
-									create.error,
-									"CreditAttributionRequestConfirmationRequired",
-								)
+								hasErrorCode(create.error, "CreditAttributionRequestConfirmationRequired")
 									? undefined
 									: create.error
 							}

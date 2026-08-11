@@ -33,9 +33,7 @@ describe("PGroonga index lifecycle support", () => {
 	});
 
 	it("rejects unknown indexes and unconfirmed maintenance", () => {
-		expect(() => parseSearchIndexOptions(["check", "--index", "users_pkey"])).toThrow(
-			TypeError,
-		);
+		expect(() => parseSearchIndexOptions(["check", "--index", "users_pkey"])).toThrow(TypeError);
 		expect(() => parseSearchIndexOptions(["reindex"])).toThrow(SearchIndexConfigurationError);
 	});
 });

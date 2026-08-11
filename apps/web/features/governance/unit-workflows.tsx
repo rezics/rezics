@@ -170,8 +170,7 @@ export function AccessInvitationManager({ unitId }: { unitId: string }) {
 									{
 										templates: t.governance.access.matrix.templates,
 										permissions: t.governance.access.matrix.permissions,
-										searchPlaceholder:
-											t.governance.access.matrix.searchPlaceholder,
+										searchPlaceholder: t.governance.access.matrix.searchPlaceholder,
 										clear: t.governance.access.matrix.clear,
 										selected: (selected, total) =>
 											t.governance.access.matrix.selected({
@@ -233,10 +232,7 @@ export function AccessInvitationManager({ unitId }: { unitId: string }) {
 				</form>
 				{invitations.isPending ? <QueryPending /> : null}
 				{invitations.isError ? (
-					<QueryFailure
-						error={invitations.error}
-						retry={() => void invitations.refetch()}
-					/>
+					<QueryFailure error={invitations.error} retry={() => void invitations.refetch()} />
 				) : null}
 				<div className="grid gap-3">
 					{invitations.data?.items.map((invitation) => (
@@ -248,19 +244,14 @@ export function AccessInvitationManager({ unitId }: { unitId: string }) {
 									</Link>
 									<span className="text-muted-foreground">
 										{invitation.permissions
-											.map(
-												(permission) =>
-													t.governance.access.permissions[permission],
-											)
+											.map((permission) => t.governance.access.permissions[permission])
 											.join(", ")}{" "}
 										· {invitation.scope.join("/") || "/"} ·{" "}
 										{formatDate(invitation.expiresAt, locale.current)}
 									</span>
 								</div>
 								<div className="flex items-center gap-2">
-									<Badge variant="outline">
-										{t.governance.states[invitation.state]}
-									</Badge>
+									<Badge variant="outline">{t.governance.states[invitation.state]}</Badge>
 									{invitation.state === "pending" ? (
 										<Button
 											onClick={() =>
@@ -279,9 +270,7 @@ export function AccessInvitationManager({ unitId }: { unitId: string }) {
 						</div>
 					))}
 					{invitations.data?.items.length === 0 ? (
-						<p className="text-muted-foreground text-sm">
-							{t.governance.noInvitations}
-						</p>
+						<p className="text-muted-foreground text-sm">{t.governance.noInvitations}</p>
 					) : null}
 				</div>
 				<RequestFailure error={cancel.error} />
@@ -334,9 +323,7 @@ export function ReceivedAccessInvitations({
 							</span>
 							<span className="text-muted-foreground">
 								{invitation.permissions
-									.map(
-										(permission) => t.governance.access.permissions[permission],
-									)
+									.map((permission) => t.governance.access.permissions[permission])
 									.join(", ")}{" "}
 								· {invitation.scope.join("/") || "/"} ·{" "}
 								{formatDate(invitation.expiresAt, locale.current)}
@@ -598,9 +585,7 @@ function AssociationProposalManager({
 							isLoading={side === "source" ? request.isPending : invite.isPending}
 							type="submit"
 						>
-							{side === "source"
-								? t.governance.requestAssociation
-								: t.governance.inviteAssociation}
+							{side === "source" ? t.governance.requestAssociation : t.governance.inviteAssociation}
 						</Button>
 					</FieldGroup>
 				</form>
@@ -618,25 +603,19 @@ function AssociationProposalManager({
 								<div className="flex flex-wrap items-start justify-between gap-3">
 									<div className="grid gap-1">
 										<span className="font-medium">
-											{proposal.kind === "credit" &&
-											isKnownAttributionRole(proposal.role)
+											{proposal.kind === "credit" && isKnownAttributionRole(proposal.role)
 												? t.units.attributionRoles[proposal.role]
-												: proposal.kind === "subject" &&
-														isSubjectAssociationRole(proposal.role)
+												: proposal.kind === "subject" && isSubjectAssociationRole(proposal.role)
 													? t.units.subjectAssociationRoles[proposal.role]
 													: proposal.role}
 										</span>
 										<span className="text-muted-foreground">
 											{t.governance.direction[proposal.direction]} ·{" "}
-											{side === "source"
-												? proposal.targetUnitId
-												: proposal.sourceUnitId}{" "}
-											· {formatDate(proposal.expiresAt, locale.current)}
+											{side === "source" ? proposal.targetUnitId : proposal.sourceUnitId} ·{" "}
+											{formatDate(proposal.expiresAt, locale.current)}
 										</span>
 									</div>
-									<Badge variant="outline">
-										{t.governance.states[proposal.state]}
-									</Badge>
+									<Badge variant="outline">{t.governance.states[proposal.state]}</Badge>
 								</div>
 								{proposal.state === "pending" ? (
 									<div className="mt-3 flex gap-2">
@@ -827,8 +806,7 @@ function EntityPublisherManager({ entity }: { entity: GetApiEntitiesByUnitIdStat
 								)}
 								<Button
 									isLoading={
-										remove.isPending &&
-										remove.variables?.path.associationId === attribution.id
+										remove.isPending && remove.variables?.path.associationId === attribution.id
 									}
 									onClick={() =>
 										void remove.mutateAsync({

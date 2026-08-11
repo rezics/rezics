@@ -60,12 +60,9 @@ export default {
 	saveScoreAssociation: "점수와 순서 저장",
 	addScoreRealms: `평가 ${realmTerms.pluralLabel} 추가`,
 	selectScoreRealms: `평가 ${realmTerms.pluralLabel} 선택`,
-	scoreAssociationLimit: insert(
-		`${realmTerms.pluralLabel}을 {{count}}개 더 추가할 수 있습니다.`,
-		{
-			count: Number,
-		},
-	),
+	scoreAssociationLimit: insert(`${realmTerms.pluralLabel}을 {{count}}개 더 추가할 수 있습니다.`, {
+		count: Number,
+	}),
 	addSelectedScores: "선택한 점수 추가",
 	removeScoreRealm: insert("{{realm}} 점수 연결 해제", { realm: String }),
 	scoreValueForRealm: insert("{{realm}} 점수", { realm: String }),
@@ -331,8 +328,7 @@ export default {
 		},
 		updateNow: "현재 진행률 업데이트",
 		addHistory: "과거 기록 추가",
-		addHistoryDescription:
-			"과거 진행 변경을 추가합니다. 기본적으로 현재 진행률은 바뀌지 않습니다.",
+		addHistoryDescription: "과거 진행 변경을 추가합니다. 기본적으로 현재 진행률은 바뀌지 않습니다.",
 		importHistory: "기록 가져오기",
 		importHelpDescription: `기록을 일괄로 가져오려면 ${verbatimTerms.api.value} 토큰 페이지에서 토큰을 만드세요. 필요한 경우 ${verbatimTerms.ai.value}의 도움을 받을 수 있습니다.`,
 		openApiTokens: `${verbatimTerms.api.value} 토큰 페이지로 이동`,

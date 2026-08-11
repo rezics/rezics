@@ -25,9 +25,7 @@ export const users = pgTable(
 			.$type<ContentLanguage>()
 			.default("en")
 			.notNull(),
-		createdAt: timestamp("created_at", { withTimezone: true, precision: 3 })
-			.defaultNow()
-			.notNull(),
+		createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).defaultNow().notNull(),
 		updatedAt: timestamp("updated_at", { withTimezone: true, precision: 3 })
 			.defaultNow()
 			.$onUpdate(() => /* @__PURE__ */ new Date())
@@ -47,9 +45,7 @@ export const sessions = pgTable(
 		id: uuid("id").default(sql`uuidv7()`).primaryKey(),
 		expiresAt: timestamp("expires_at", { withTimezone: true, precision: 3 }).notNull(),
 		token: text("token").notNull().unique(),
-		createdAt: timestamp("created_at", { withTimezone: true, precision: 3 })
-			.defaultNow()
-			.notNull(),
+		createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).defaultNow().notNull(),
 		updatedAt: timestamp("updated_at", { withTimezone: true, precision: 3 })
 			.defaultNow()
 			.$onUpdate(() => /* @__PURE__ */ new Date())
@@ -85,9 +81,7 @@ export const accounts = pgTable(
 		}),
 		scope: text("scope"),
 		password: text("password"),
-		createdAt: timestamp("created_at", { withTimezone: true, precision: 3 })
-			.defaultNow()
-			.notNull(),
+		createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).defaultNow().notNull(),
 		updatedAt: timestamp("updated_at", { withTimezone: true, precision: 3 })
 			.defaultNow()
 			.$onUpdate(() => /* @__PURE__ */ new Date())
@@ -106,9 +100,7 @@ export const verifications = pgTable(
 		identifier: text("identifier").notNull(),
 		value: text("value").notNull(),
 		expiresAt: timestamp("expires_at", { withTimezone: true, precision: 3 }).notNull(),
-		createdAt: timestamp("created_at", { withTimezone: true, precision: 3 })
-			.defaultNow()
-			.notNull(),
+		createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).defaultNow().notNull(),
 		updatedAt: timestamp("updated_at", { withTimezone: true, precision: 3 })
 			.defaultNow()
 			.$onUpdate(() => /* @__PURE__ */ new Date())

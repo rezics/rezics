@@ -34,8 +34,7 @@ export function matchUiLocaleTag(value: string): UiLocale | undefined {
 	if (locale.language === "zh") {
 		if (locale.script === "Hant" || ["TW", "HK", "MO"].includes(locale.region ?? ""))
 			return "zh-Hant";
-		if (locale.script === "Hans" || ["CN", "SG"].includes(locale.region ?? ""))
-			return "zh-Hans";
+		if (locale.script === "Hans" || ["CN", "SG"].includes(locale.region ?? "")) return "zh-Hans";
 		// REZICS deliberately keeps its Traditional Chinese house default.
 		return "zh-Hant";
 	}

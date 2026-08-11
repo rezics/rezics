@@ -41,9 +41,7 @@ function ChapterHistoryContent({ bookId, chapterId }: { bookId: string; chapterI
 			<PageHeading
 				action={
 					<Button asChild variant="outline">
-						<Link href={chapterEditorHref(bookId, chapterId)}>
-							{t.history.backToEditor}
-						</Link>
+						<Link href={chapterEditorHref(bookId, chapterId)}>{t.history.backToEditor}</Link>
 					</Button>
 				}
 				description={t.units.chapter.title}
@@ -77,9 +75,7 @@ export function ChapterHistoryComparePage({
 			<PageHeading
 				action={
 					<Button asChild variant="outline">
-						<Link href={chapterHistoryHref(bookId, chapterId)}>
-							{t.history.backToHistory}
-						</Link>
+						<Link href={chapterHistoryHref(bookId, chapterId)}>{t.history.backToHistory}</Link>
 					</Button>
 				}
 				title={t.history.compareTitle}

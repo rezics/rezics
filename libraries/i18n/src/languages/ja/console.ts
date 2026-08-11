@@ -33,8 +33,7 @@ export default {
 		},
 		ownershipClaims: {
 			label: "所有権申請",
-			description:
-				"公開ユニットの所有権申請を審査し、適切な申請者へ管理上の所有権を返還します。",
+			description: "公開ユニットの所有権申請を審査し、適切な申請者へ管理上の所有権を返還します。",
 		},
 		moderation: {
 			label: "グローバルコンテンツガバナンス",
@@ -199,8 +198,7 @@ export default {
 			customizeDescription:
 				"アカウント固有値は不変の改訂履歴とは別に保存されます。特権ポリシーの割り当てには引き続き有効期限が必要です。",
 			reason: "割り当て理由",
-			reasonPlaceholder:
-				"運用上の根拠を記録します。内容はセキュリティ監査ログに保存されます。",
+			reasonPlaceholder: "運用上の根拠を記録します。内容はセキュリティ監査ログに保存されます。",
 			invalid: "クォータ制限、操作別の上書き、特権アクセスの有効期限を確認してください。",
 			updateFailed:
 				"アカウントのクォータを更新できませんでした。再読み込みしてもう一度お試しください。",
@@ -286,8 +284,7 @@ export default {
 	dashboard: {
 		managementAreas: "管理機能",
 		systemHealth: "システムの稼働状況",
-		systemHealthDescription:
-			"データベース、ファイル保存、推薦、検索サービスの現在の可用性です。",
+		systemHealthDescription: "データベース、ファイル保存、推薦、検索サービスの現在の可用性です。",
 		checking: "確認中",
 		healthUnavailable: "システムの稼働状況を取得できません。",
 		checks: {

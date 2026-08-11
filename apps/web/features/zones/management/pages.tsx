@@ -177,8 +177,7 @@ export function ZonePagesManagement() {
 	});
 	const [selectedId, setSelectedId] = useState<string | "new">("new");
 	if (query.isPending) return <QueryPending />;
-	if (query.isError)
-		return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
+	if (query.isError) return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
 
 	const pages = query.data.items;
 	const placedPages = pages.filter(isPlacedPage);
@@ -208,17 +207,12 @@ export function ZonePagesManagement() {
 									const siblings = placedPages
 										.filter(
 											(candidate) =>
-												candidate.placement.parentPageId ===
-												page.placement.parentPageId,
+												candidate.placement.parentPageId === page.placement.parentPageId,
 										)
 										.toSorted((left, right) =>
-											left.placement.position.localeCompare(
-												right.placement.position,
-											),
+											left.placement.position.localeCompare(right.placement.position),
 										);
-									const index = siblings.findIndex(
-										(candidate) => candidate.id === page.id,
-									);
+									const index = siblings.findIndex((candidate) => candidate.id === page.id);
 									if (index < 0) return;
 									const position =
 										direction === -1
@@ -234,8 +228,7 @@ export function ZonePagesManagement() {
 										await move.mutateAsync({
 											path: { zoneId, pageId: page.id },
 											body: {
-												baseStructureRevisionId:
-													page.placement.latestStructureRevisionId,
+												baseStructureRevisionId: page.placement.latestStructureRevisionId,
 												parentPageId: page.placement.parentPageId,
 												position,
 											},
@@ -250,9 +243,7 @@ export function ZonePagesManagement() {
 								setSelectedId={setSelectedId}
 							/>
 						) : pages.length ? null : (
-							<p className="text-sm text-muted-foreground">
-								{t.zones.management.pages.empty}
-							</p>
+							<p className="text-sm text-muted-foreground">{t.zones.management.pages.empty}</p>
 						)}
 						{unplacedPages.length ? (
 							<div className="grid gap-2">
@@ -280,10 +271,7 @@ export function ZonePagesManagement() {
 					</CardContent>
 				</Card>
 				{selected ? (
-					<ContentLanguageEditorBoundary
-						onLanguagesChanged={invalidate}
-						unitId={selected.id}
-					>
+					<ContentLanguageEditorBoundary onLanguagesChanged={invalidate} unitId={selected.id}>
 						<PageEditorForLanguage
 							onSaved={setSelectedId}
 							page={selected}
@@ -365,9 +353,7 @@ function PageTreeRow({
 	const { t } = useTranslation("zones");
 	if (!node.page) return null;
 	const siblings = pages
-		.filter(
-			(candidate) => candidate.placement.parentPageId === node.page?.placement.parentPageId,
-		)
+		.filter((candidate) => candidate.placement.parentPageId === node.page?.placement.parentPageId)
 		.toSorted((left, right) => left.placement.position.localeCompare(right.placement.position));
 	const siblingIndex = siblings.findIndex((candidate) => candidate.id === node.page?.id);
 	const label = (
@@ -380,9 +366,7 @@ function PageTreeRow({
 				{node.page.home ? <Home aria-hidden className="size-4" /> : null}
 				<span
 					className={
-						selectedId === node.page.id
-							? "truncate font-semibold text-primary"
-							: "truncate"
+						selectedId === node.page.id ? "truncate font-semibold text-primary" : "truncate"
 					}
 				>
 					{node.page.title}
@@ -561,9 +545,7 @@ function PageEditor({
 					body: {
 						parentPageId: targetParentId,
 						position,
-						...(structureRevisionId
-							? { baseStructureRevisionId: structureRevisionId }
-							: {}),
+						...(structureRevisionId ? { baseStructureRevisionId: structureRevisionId } : {}),
 					},
 				});
 			} else if (page?.placement) {
@@ -605,9 +587,7 @@ function PageEditor({
 				>
 					<form className="grid gap-6" onSubmit={submit}>
 						<h2 className="font-semibold text-xl">
-							{page
-								? t.zones.management.pages.editPage
-								: t.zones.management.pages.newPage}
+							{page ? t.zones.management.pages.editPage : t.zones.management.pages.newPage}
 						</h2>
 						<FieldGroup className="grid gap-4 sm:grid-cols-2">
 							<Field>
@@ -657,14 +637,10 @@ function PageEditor({
 									{placedPages
 										.filter(
 											(candidate) =>
-												candidate.id !== page?.id &&
-												!excludedParents.has(candidate.id),
+												candidate.id !== page?.id && !excludedParents.has(candidate.id),
 										)
 										.map((candidate) => (
-											<NativeSelectOption
-												key={candidate.id}
-												value={candidate.id}
-											>
+											<NativeSelectOption key={candidate.id} value={candidate.id}>
 												{candidate.title}
 											</NativeSelectOption>
 										))}

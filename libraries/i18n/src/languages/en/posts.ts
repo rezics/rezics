@@ -26,8 +26,7 @@ export default {
 	wikiPublicDescription:
 		"Every signed-in user can edit it; the creator receives no special access.",
 	wikiRestricted: "Restricted",
-	wikiRestrictedDescription:
-		"Only the creator and people explicitly authorized later can edit it.",
+	wikiRestrictedDescription: "Only the creator and people explicitly authorized later can edit it.",
 	replies: `Reply ${postTerms.plural}`,
 	replyPost: `Reply ${postTerms.inline}`,
 	signInToReply: "Sign in to reply",

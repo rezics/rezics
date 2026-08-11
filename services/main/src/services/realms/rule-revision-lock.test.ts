@@ -10,9 +10,7 @@ describe("current Realm rule revision read lock", () => {
 		const realmId = "019b76da-a800-7300-8000-000000000003";
 		const query = dialect.sqlToQuery(currentRealmRuleRevisionReadLock(realmId));
 
-		expect(query.sql).toBe(
-			"select pg_advisory_xact_lock_shared(hashtextextended($1::text, 0))",
-		);
+		expect(query.sql).toBe("select pg_advisory_xact_lock_shared(hashtextextended($1::text, 0))");
 		expect(query.params).toEqual([realmId]);
 	});
 });

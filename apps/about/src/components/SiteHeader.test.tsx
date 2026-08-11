@@ -68,9 +68,7 @@ describe("SiteHeader", () => {
 		expect(languageTriggers[0]).toHaveClass("justify-center", "gap-0!");
 		expect(languageTriggers[0]).toHaveTextContent(/^$/);
 		expect(languageTriggers[1]).toHaveTextContent(ABOUT_LOCALE_META.en.nativeName);
-		expect(
-			container.querySelector('[data-slot="native-select-wrapper"]'),
-		).not.toBeInTheDocument();
+		expect(container.querySelector('[data-slot="native-select-wrapper"]')).not.toBeInTheDocument();
 	});
 
 	test("opens the mobile navigation and changes the visible label", () => {

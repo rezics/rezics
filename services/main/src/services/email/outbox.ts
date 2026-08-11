@@ -49,14 +49,8 @@ export async function claimEmailBatch(options: ClaimEmailBatchOptions) {
 			.from(emailOutbox)
 			.where(
 				or(
-					and(
-						eq(emailOutbox.status, "pending"),
-						lte(emailOutbox.availableAt, options.now),
-					),
-					and(
-						eq(emailOutbox.status, "processing"),
-						lte(emailOutbox.leaseExpiresAt, options.now),
-					),
+					and(eq(emailOutbox.status, "pending"), lte(emailOutbox.availableAt, options.now)),
+					and(eq(emailOutbox.status, "processing"), lte(emailOutbox.leaseExpiresAt, options.now)),
 				),
 			)
 			.orderBy(asc(emailOutbox.availableAt), asc(emailOutbox.createdAt))
@@ -138,10 +132,7 @@ export async function markEmailAccepted(
 				.update(notification)
 				.set({ emailError: null, emailedAt: now, emailStatus: "sent" })
 				.where(
-					and(
-						eq(notification.id, item.notificationId),
-						eq(notification.emailStatus, "pending"),
-					),
+					and(eq(notification.id, item.notificationId), eq(notification.emailStatus, "pending")),
 				);
 	});
 }
@@ -171,10 +162,7 @@ export async function markEmailFailed(
 				set: {
 					availableAt: new Date(
 						input.now.getTime() +
-							retryDelayMilliseconds(
-								item.attemptCount,
-								input.retryJitter ?? Math.random(),
-							),
+							retryDelayMilliseconds(item.attemptCount, input.retryJitter ?? Math.random()),
 					),
 					lastError: error,
 					leaseExpiresAt: null,
@@ -202,10 +190,7 @@ export async function markEmailFailed(
 				.update(notification)
 				.set({ emailError: error, emailedAt: null, emailStatus: "failed" })
 				.where(
-					and(
-						eq(notification.id, item.notificationId),
-						eq(notification.emailStatus, "pending"),
-					),
+					and(eq(notification.id, item.notificationId), eq(notification.emailStatus, "pending")),
 				);
 	});
 	return shouldRetry ? "retry_scheduled" : "failed";

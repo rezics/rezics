@@ -135,11 +135,7 @@ export function ReviewScoreRealmMultiPicker({
 				type="search"
 			>
 				{selected.map((option) => (
-					<Badge
-						className="my-0.5 max-w-56 gap-1.5"
-						key={option.realmId}
-						variant="secondary"
-					>
+					<Badge className="my-0.5 max-w-56 gap-1.5" key={option.realmId} variant="secondary">
 						<span className="truncate">{option.realmLabel}</span>
 						{option.value === undefined ? null : (
 							<span className="text-muted-foreground">
@@ -155,11 +151,7 @@ export function ReviewScoreRealmMultiPicker({
 							className="rounded-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
 							onClick={(event) => {
 								event.stopPropagation();
-								onChange(
-									selected.filter(
-										(candidate) => candidate.realmId !== option.realmId,
-									),
-								);
+								onChange(selected.filter((candidate) => candidate.realmId !== option.realmId));
 							}}
 							type="button"
 						>
@@ -180,9 +172,7 @@ export function ReviewScoreRealmMultiPicker({
 						<ComboboxList>
 							{collection.items.map((item) => (
 								<ComboboxItem item={item} key={item.realmId}>
-									<span className="min-w-0 flex-1 truncate">
-										{item.realmLabel}
-									</span>
+									<span className="min-w-0 flex-1 truncate">{item.realmLabel}</span>
 									{item.value === undefined ? null : (
 										<span className="text-muted-foreground">
 											{t.engagement.scoreOutOfTen({

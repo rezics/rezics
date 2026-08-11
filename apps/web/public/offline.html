@@ -19,16 +19,13 @@
 		}
 		:root:lang(zh-Hant) {
 			font-family:
-				Inter, "Noto Sans CJK TC", "Microsoft JhengHei", ui-sans-serif, system-ui,
-				sans-serif;
+				Inter, "Noto Sans CJK TC", "Microsoft JhengHei", ui-sans-serif, system-ui, sans-serif;
 		}
 		:root:lang(ja) {
-			font-family:
-				Inter, "Noto Sans CJK JP", "Yu Gothic", ui-sans-serif, system-ui, sans-serif;
+			font-family: Inter, "Noto Sans CJK JP", "Yu Gothic", ui-sans-serif, system-ui, sans-serif;
 		}
 		:root:lang(ko) {
-			font-family:
-				Inter, "Noto Sans CJK KR", "Malgun Gothic", ui-sans-serif, system-ui, sans-serif;
+			font-family: Inter, "Noto Sans CJK KR", "Malgun Gothic", ui-sans-serif, system-ui, sans-serif;
 		}
 		body {
 			min-height: 100svh;
@@ -144,18 +141,13 @@
 					try {
 						const locale = new Intl.Locale(value.replaceAll("_", "-"));
 						if (locale.language === "zh") {
-							if (
-								locale.script === "Hant" ||
-								["TW", "HK", "MO"].includes(locale.region)
-							)
+							if (locale.script === "Hant" || ["TW", "HK", "MO"].includes(locale.region))
 								return "zh-Hant";
 							if (locale.script === "Hans" || ["CN", "SG"].includes(locale.region))
 								return "zh-Hans";
 							return "zh-Hant";
 						}
-						return Object.hasOwn(messages, locale.language)
-							? locale.language
-							: undefined;
+						return Object.hasOwn(messages, locale.language) ? locale.language : undefined;
 					} catch {
 						return undefined;
 					}

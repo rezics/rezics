@@ -162,8 +162,7 @@ const RealmRulesDraftCodec: LocalizedDraftCodec<RealmRulesDraft> = {
 		const rules = value.rules.map(decodeRuleDraft);
 		if (rules.some((rule) => !rule)) return;
 		const decodedRules = rules.filter((rule): rule is RuleDraft => Boolean(rule));
-		if (new Set(decodedRules.map(({ draftId }) => draftId)).size !== decodedRules.length)
-			return;
+		if (new Set(decodedRules.map(({ draftId }) => draftId)).size !== decodedRules.length) return;
 		return {
 			acknowledgementMode,
 			requireOnJoin,
@@ -301,9 +300,7 @@ export function RealmProfileSettings({
 
 	return (
 		<section className="grid gap-3">
-			{embedded ? null : (
-				<h2 className="font-heading text-xl font-bold">{t.realms.profile}</h2>
-			)}
+			{embedded ? null : <h2 className="font-heading text-xl font-bold">{t.realms.profile}</h2>}
 			<Card>
 				<CardContent className="grid gap-6 p-5">
 					<ContentLanguageControl />
@@ -386,26 +383,16 @@ export function RealmProfileSettings({
 											value={sharedValue.status}
 											onChange={(event) => {
 												const status = event.currentTarget.value;
-												if (
-													status === "draft" ||
-													status === "published" ||
-													status === "archived"
-												)
+												if (status === "draft" || status === "published" || status === "archived")
 													sharedDraft.setValue((current) => ({
 														...current,
 														status,
 													}));
 											}}
 										>
-											<NativeSelectOption value="draft">
-												{t.ui.draft}
-											</NativeSelectOption>
-											<NativeSelectOption value="published">
-												{t.ui.published}
-											</NativeSelectOption>
-											<NativeSelectOption value="archived">
-												{t.ui.archived}
-											</NativeSelectOption>
+											<NativeSelectOption value="draft">{t.ui.draft}</NativeSelectOption>
+											<NativeSelectOption value="published">{t.ui.published}</NativeSelectOption>
+											<NativeSelectOption value="archived">{t.ui.archived}</NativeSelectOption>
 										</NativeSelect>
 									</Field>
 									<Field>
@@ -426,15 +413,9 @@ export function RealmProfileSettings({
 													}));
 											}}
 										>
-											<NativeSelectOption value="public">
-												{t.ui.public}
-											</NativeSelectOption>
-											<NativeSelectOption value="unlisted">
-												{t.ui.unlisted}
-											</NativeSelectOption>
-											<NativeSelectOption value="private">
-												{t.ui.private}
-											</NativeSelectOption>
+											<NativeSelectOption value="public">{t.ui.public}</NativeSelectOption>
+											<NativeSelectOption value="unlisted">{t.ui.unlisted}</NativeSelectOption>
+											<NativeSelectOption value="private">{t.ui.private}</NativeSelectOption>
 										</NativeSelect>
 									</Field>
 									<Field>
@@ -444,22 +425,15 @@ export function RealmProfileSettings({
 											value={sharedValue.joinPolicy}
 											onChange={(event) => {
 												const joinPolicy = event.currentTarget.value;
-												if (
-													joinPolicy === "open" ||
-													joinPolicy === "approval"
-												)
+												if (joinPolicy === "open" || joinPolicy === "approval")
 													sharedDraft.setValue((current) => ({
 														...current,
 														joinPolicy,
 													}));
 											}}
 										>
-											<NativeSelectOption value="open">
-												{t.realms.open}
-											</NativeSelectOption>
-											<NativeSelectOption value="approval">
-												{t.realms.approval}
-											</NativeSelectOption>
+											<NativeSelectOption value="open">{t.realms.open}</NativeSelectOption>
+											<NativeSelectOption value="approval">{t.realms.approval}</NativeSelectOption>
 										</NativeSelect>
 									</Field>
 								</div>
@@ -565,9 +539,7 @@ function RealmRulesEditor({
 			requireOnPost: data.requireOnPost,
 			rules: data.items.length
 				? data.items.map((rule) => {
-						const localizations: Partial<
-							Record<ContentLanguage, RuleLocalizationDraft>
-						> = {};
+						const localizations: Partial<Record<ContentLanguage, RuleLocalizationDraft>> = {};
 						const localizationOrder: ContentLanguage[] = [];
 						for (const localization of rule.localizations) {
 							localizationOrder.push(localization.language);
@@ -612,9 +584,7 @@ function RealmRulesEditor({
 			delete localizations[language];
 			return {
 				...current,
-				localizationOrder: current.localizationOrder.filter(
-					(candidate) => candidate !== language,
-				),
+				localizationOrder: current.localizationOrder.filter((candidate) => candidate !== language),
 				localizations,
 			};
 		});
@@ -668,9 +638,7 @@ function RealmRulesEditor({
 						localizations: rule.localizationOrder.map((language) => {
 							const localization = rule.localizations[language];
 							if (!localization)
-								throw new Error(
-									"Realm rule draft localization order is inconsistent",
-								);
+								throw new Error("Realm rule draft localization order is inconsistent");
 							return {
 								language,
 								title: localization.title.trim(),
@@ -744,8 +712,7 @@ function RealmRulesEditor({
 									value={activeLanguage}
 									onChange={(event) => {
 										const language = event.currentTarget.value;
-										if (isContentLanguage(language))
-											setActiveLanguage(language);
+										if (isContentLanguage(language)) setActiveLanguage(language);
 									}}
 								>
 									{ContentLanguageValues.map((language) => (
@@ -780,9 +747,7 @@ function RealmRulesEditor({
 										{t.realms.requireOnPost}
 									</RuleRequirement>
 								</div>
-								<p className="text-muted-foreground text-sm">
-									{t.realms.ruleAcknowledgementHint}
-								</p>
+								<p className="text-muted-foreground text-sm">{t.realms.ruleAcknowledgementHint}</p>
 							</div>
 							<div aria-live="polite" className="sr-only" role="status">
 								{moveAnnouncement}
@@ -829,9 +794,7 @@ function RealmRulesEditor({
 												onClick={() =>
 													draft.setValue((current) => ({
 														...current,
-														rules: current.rules.filter(
-															(item) => item.draftId !== rule.draftId,
-														),
+														rules: current.rules.filter((item) => item.draftId !== rule.draftId),
 													}))
 												}
 												size="sm"
@@ -883,10 +846,7 @@ function RealmRulesEditor({
 											<div className="grid justify-items-start gap-3 rounded-xl border border-dashed p-5">
 												<p className="text-sm text-muted-foreground">
 													{t.realms.ruleTranslationMissing({
-														language:
-															t.locale.contentLanguages[
-																activeLanguage
-															],
+														language: t.locale.contentLanguages[activeLanguage],
 													})}
 												</p>
 												<Button
@@ -937,9 +897,7 @@ function RealmRulesEditor({
 								</Button>
 							</div>
 							{incomplete ? (
-								<p className="text-sm text-destructive">
-									{t.realms.ruleTranslationsIncomplete}
-								</p>
+								<p className="text-sm text-destructive">{t.realms.ruleTranslationsIncomplete}</p>
 							) : null}
 							<RequestFailure error={save.error} />
 						</form>
@@ -961,10 +919,7 @@ function RuleRequirement({
 }) {
 	return (
 		<Field className="w-auto" orientation="horizontal">
-			<Checkbox
-				checked={checked}
-				onCheckedChange={({ checked }) => onChange(checked === true)}
-			/>
+			<Checkbox checked={checked} onCheckedChange={({ checked }) => onChange(checked === true)} />
 			<FieldLabel className="font-normal">{children}</FieldLabel>
 		</Field>
 	);

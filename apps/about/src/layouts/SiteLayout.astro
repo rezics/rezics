@@ -33,8 +33,7 @@ type Props = {
 const { locale, active, pageKind, meta, slug, alternateLocales } = Astro.props;
 const copy = getSiteCopy(locale);
 const alternatePaths = getAlternatePaths(pageKind, slug).filter(
-	({ locale: alternateLocale }) =>
-		!alternateLocales || alternateLocales.includes(alternateLocale),
+	({ locale: alternateLocale }) => !alternateLocales || alternateLocales.includes(alternateLocale),
 );
 const canonicalPath = getLocalizedPath(locale, pageKind, slug);
 const defaultPath = getLocalizedPath(DEFAULT_LOCALE, pageKind, slug);

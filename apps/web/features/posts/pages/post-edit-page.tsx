@@ -130,10 +130,7 @@ function PostContentEditForm({ post }: { post: RootPostContent }) {
 					language: selectedLanguage,
 					title: nullablePostLocalizationText(form, "title"),
 					summary: nullablePostLocalizationText(form, "summary"),
-					body: writePortableText(
-						value.body,
-						selectedLanguageIsPending ? undefined : post.body,
-					),
+					body: writePortableText(value.body, selectedLanguageIsPending ? undefined : post.body),
 					baseRevisionId: post.latestRevisionId,
 				},
 			},
@@ -219,10 +216,7 @@ function ReplyPostEditForm({ post }: { post: ReplyPost }) {
 				path: { postId: rootPostId, replyPostId: post.id },
 				body: {
 					language: selectedLanguage,
-					body: writePortableText(
-						value.body,
-						selectedLanguageIsPending ? undefined : post.body,
-					),
+					body: writePortableText(value.body, selectedLanguageIsPending ? undefined : post.body),
 					baseRevisionId: post.latestRevisionId,
 				},
 			},

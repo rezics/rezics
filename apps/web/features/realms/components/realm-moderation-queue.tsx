@@ -91,12 +91,7 @@ export function RealmModerationQueue({
 									{nextPageError ? (
 										<div className="grid justify-items-center gap-2">
 											<RequestFailure error={nextPageError} />
-											<Button
-												onClick={onLoadNextPage}
-												size="sm"
-												type="button"
-												variant="outline"
-											>
+											<Button onClick={onLoadNextPage} size="sm" type="button" variant="outline">
 												{t.realms.retryModerationQueue}
 											</Button>
 										</div>
@@ -135,11 +130,7 @@ export function RealmModerationQueue({
 												{t.realms.moderationStates[unit.status]}
 											</Badge>
 											<Badge variant="secondary">
-												{
-													t.units.realmPublications.publicationStates[
-														unit.publicationState
-													]
-												}
+												{t.units.realmPublications.publicationStates[unit.publicationState]}
 											</Badge>
 											{openReportCount ? (
 												<Badge variant="warning">
@@ -154,15 +145,9 @@ export function RealmModerationQueue({
 										<span className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-muted-foreground text-xs">
 											<span className="inline-flex items-center gap-1">
 												{unit.postTargetingLocked ? (
-													<LockIcon
-														aria-hidden="true"
-														className="size-3"
-													/>
+													<LockIcon aria-hidden="true" className="size-3" />
 												) : (
-													<LockOpenIcon
-														aria-hidden="true"
-														className="size-3"
-													/>
+													<LockOpenIcon aria-hidden="true" className="size-3" />
 												)}
 												{unit.postTargetingLocked
 													? t.realms.postTargetingLocked
@@ -170,18 +155,12 @@ export function RealmModerationQueue({
 											</span>
 											<time dateTime={unit.updatedAt}>
 												{t.realms.moderationUpdatedAt({
-													date: formatDateTime(
-														unit.updatedAt,
-														locale.current,
-													),
+													date: formatDateTime(unit.updatedAt, locale.current),
 												})}
 											</time>
 										</span>
 									</span>
-									<ChevronRightIcon
-										aria-hidden="true"
-										className="size-4 text-muted-foreground"
-									/>
+									<ChevronRightIcon aria-hidden="true" className="size-4 text-muted-foreground" />
 								</button>
 							</div>
 						);

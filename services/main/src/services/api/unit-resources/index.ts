@@ -244,10 +244,7 @@ async function getReferenceCurationVersion(
 		.select({ version: unitReferenceCurationHead.version })
 		.from(unitReferenceCurationHead)
 		.where(
-			and(
-				eq(unitReferenceCurationHead.unitId, unitId),
-				eq(unitReferenceCurationHead.kind, kind),
-			),
+			and(eq(unitReferenceCurationHead.unitId, unitId), eq(unitReferenceCurationHead.kind, kind)),
 		)
 		.limit(1);
 	return head?.version ?? 0;
@@ -280,10 +277,7 @@ async function getAliasReference(aliasId: string, viewerProfileId: string) {
 		.leftJoin(unitAliasVoteStat, eq(unitAliasVoteStat.aliasId, unitAlias.id))
 		.leftJoin(
 			unitAliasVote,
-			and(
-				eq(unitAliasVote.aliasId, unitAlias.id),
-				eq(unitAliasVote.profileId, viewerProfileId),
-			),
+			and(eq(unitAliasVote.aliasId, unitAlias.id), eq(unitAliasVote.profileId, viewerProfileId)),
 		)
 		.where(and(eq(unitAlias.id, aliasId), isNull(unitAlias.withdrawnAt)))
 		.limit(1);
@@ -436,10 +430,7 @@ export default new Elysia()
 								eq(unitLocalization.unitId, unit.id),
 								eq(
 									unitLocalization.language,
-									resolvedUnitLocalizationLanguage(
-										unit.id,
-										localizationLanguages,
-									),
+									resolvedUnitLocalizationLanguage(unit.id, localizationLanguages),
 								),
 							),
 						)
@@ -447,23 +438,19 @@ export default new Elysia()
 							and(
 								entityCondition,
 								query.kind ? eq(entity.kind, query.kind) : undefined,
-								query.query
-									? ilike(unitLocalization.title, `%${query.query}%`)
-									: undefined,
+								query.query ? ilike(unitLocalization.title, `%${query.query}%`) : undefined,
 							),
 						)
 						.orderBy(desc(unit.createdAt))
 						.limit(query.limit ?? 20);
 					return {
-						items: items.map(
-							({ avatar, bannerAssetId, coverAssetId, kind, ...item }) => ({
-								...item,
-								kind: requireEntityKind(kind),
-								avatar: presentAvatar(avatar),
-								banner: presentImageAsset(bannerAssetId, "banner"),
-								cover: presentImageAsset(coverAssetId, "cover"),
-							}),
-						),
+						items: items.map(({ avatar, bannerAssetId, coverAssetId, kind, ...item }) => ({
+							...item,
+							kind: requireEntityKind(kind),
+							avatar: presentAvatar(avatar),
+							banner: presentImageAsset(bannerAssetId, "banner"),
+							cover: presentImageAsset(coverAssetId, "cover"),
+						})),
 					};
 				},
 				{
@@ -519,12 +506,9 @@ export default new Elysia()
 					);
 					if (!selectedLocalization) throw new EntityEntryNotFound();
 					const attributions =
-						(
-							await getAttributionSummariesByUnitIds(
-								[params.unitId],
-								localizationLanguages,
-							)
-						).get(params.unitId) ?? [];
+						(await getAttributionSummariesByUnitIds([params.unitId], localizationLanguages)).get(
+							params.unitId,
+						) ?? [];
 					const localizations = storedLocalizations.map((row) => ({
 						unitId: row.unitId,
 						language: row.language,
@@ -534,10 +518,7 @@ export default new Elysia()
 						description:
 							row.description === null
 								? null
-								: toPortableTextResponse(
-										row.description,
-										"unit_localization.description",
-									),
+								: toPortableTextResponse(row.description, "unit_localization.description"),
 						avatar: presentAvatar(avatarReferenceFromColumns(row)),
 						banner: presentImageAsset(row.bannerAssetId, "banner"),
 						cover: presentImageAsset(row.coverAssetId, "cover"),
@@ -572,10 +553,7 @@ export default new Elysia()
 						.from(subjectAssociation)
 						.innerJoin(unit, eq(unit.id, subjectAssociation.unitId))
 						.where(
-							and(
-								eq(subjectAssociation.entityId, params.unitId),
-								publiclyReadableUnitCondition(),
-							),
+							and(eq(subjectAssociation.entityId, params.unitId), publiclyReadableUnitCondition()),
 						);
 					const contextPosts = await getAssociationContextPostsByAssociationIds(
 						subjectAssociations.map(({ id }) => id),
@@ -589,21 +567,13 @@ export default new Elysia()
 					const [owner] = await database
 						.select({ profileId: unitOwnership.profileId })
 						.from(unitOwnership)
-						.where(
-							and(
-								eq(unitOwnership.unitId, params.unitId),
-								isNull(unitOwnership.revokedAt),
-							),
-						)
+						.where(and(eq(unitOwnership.unitId, params.unitId), isNull(unitOwnership.revokedAt)))
 						.limit(1);
 					const entityEntry = entry;
 					const ownerSummary = owner?.profileId
-						? ((
-								await getPublicUnitSummariesByIds(
-									[owner.profileId],
-									localizationLanguages,
-								)
-							).get(owner.profileId) ?? null)
+						? ((await getPublicUnitSummariesByIds([owner.profileId], localizationLanguages)).get(
+								owner.profileId,
+							) ?? null)
 						: null;
 					const [
 						canEdit,
@@ -614,37 +584,25 @@ export default new Elysia()
 						ownershipClaim,
 					] = await Promise.all([
 						identity.authorization.unit.canUpdate(params.unitId, ["localizations"]),
-						identity.authorization.unit.canUpdate(params.unitId, [
-							"credit-attributions",
-						]),
+						identity.authorization.unit.canUpdate(params.unitId, ["credit-attributions"]),
 						identity.authorization.unit.decide(params.unitId, "unit.access.manage"),
-						identity.authorization.unit.decide(
-							params.unitId,
-							"unit.association.manage",
-							["associations", "credit"],
-						),
-						identity.authorization.unit.decide(
-							params.unitId,
-							"unit.association.manage",
-							["associations", "subject"],
-						),
-						getPendingUnitOwnershipClaim(
-							params.unitId,
-							identity.authorization.profileId,
-						),
+						identity.authorization.unit.decide(params.unitId, "unit.association.manage", [
+							"associations",
+							"credit",
+						]),
+						identity.authorization.unit.decide(params.unitId, "unit.association.manage", [
+							"associations",
+							"subject",
+						]),
+						getPendingUnitOwnershipClaim(params.unitId, identity.authorization.profileId),
 					]);
 					return {
 						...entityEntry,
-						ownershipMode: unitOwnershipModeFromOwnerProfileId(
-							owner?.profileId ?? null,
-						),
+						ownershipMode: unitOwnershipModeFromOwnerProfileId(owner?.profileId ?? null),
 						kind: requireEntityKind(entry.kind),
 						language: selectedLocalization.language,
 						avatar: presentAvatar(
-							resolveUnitLocalizationAvatarFromOrdered(
-								storedLocalizations,
-								localizationLanguages,
-							),
+							resolveUnitLocalizationAvatarFromOrdered(storedLocalizations, localizationLanguages),
 						),
 						banner: presentImageAsset(
 							resolveUnitLocalizationImageAssetIdFromOrdered(
@@ -734,10 +692,7 @@ export default new Elysia()
 									eq(unitLocalization.unitId, unit.id),
 									eq(
 										unitLocalization.language,
-										resolvedUnitLocalizationLanguage(
-											unit.id,
-											localizationLanguages,
-										),
+										resolvedUnitLocalizationLanguage(unit.id, localizationLanguages),
 									),
 								),
 							)
@@ -803,10 +758,7 @@ export default new Elysia()
 						...tagEntry,
 						language: selectedLocalization.language,
 						avatar: presentAvatar(
-							resolveUnitLocalizationAvatarFromOrdered(
-								storedLocalizations,
-								localizationLanguages,
-							),
+							resolveUnitLocalizationAvatarFromOrdered(storedLocalizations, localizationLanguages),
 						),
 						localizations: storedLocalizations.map((row) => ({
 							unitId: row.unitId,
@@ -817,10 +769,7 @@ export default new Elysia()
 							description:
 								row.description === null
 									? null
-									: toPortableTextResponse(
-											row.description,
-											"unit_localization.description",
-										),
+									: toPortableTextResponse(row.description, "unit_localization.description"),
 							avatar: presentAvatar(avatarReferenceFromColumns(row)),
 							banner: presentImageAsset(row.bannerAssetId, "banner"),
 							cover: presentImageAsset(row.coverAssetId, "cover"),
@@ -890,10 +839,7 @@ export default new Elysia()
 								updatedAt: unitAlias.updatedAt,
 							})
 							.from(unitAlias)
-							.leftJoin(
-								unitAliasVoteStat,
-								eq(unitAliasVoteStat.aliasId, unitAlias.id),
-							)
+							.leftJoin(unitAliasVoteStat, eq(unitAliasVoteStat.aliasId, unitAlias.id))
 							.leftJoin(
 								unitAliasVote,
 								and(
@@ -901,12 +847,7 @@ export default new Elysia()
 									eq(unitAliasVote.profileId, profile.unitId),
 								),
 							)
-							.where(
-								and(
-									eq(unitAlias.unitId, params.unitId),
-									isNull(unitAlias.withdrawnAt),
-								),
-							)
+							.where(and(eq(unitAlias.unitId, params.unitId), isNull(unitAlias.withdrawnAt)))
 							.limit(UnitReferenceActiveLimit + 1),
 						getReferenceCurationVersion(params.unitId, "alias"),
 					]);
@@ -1068,10 +1009,7 @@ export default new Elysia()
 					response: {
 						[StatusCodes.OK]: VoteResponse,
 						[StatusCodes.FORBIDDEN]: UnitInteractionForbiddenResponse,
-						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
-							"UnitNotFound",
-							"AliasNotFound",
-						]),
+						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "AliasNotFound"]),
 					},
 					detail: { summary: "Vote on Unit alias", tags: ["Units"] },
 				},
@@ -1109,10 +1047,7 @@ export default new Elysia()
 					response: {
 						[StatusCodes.OK]: VoteResponse,
 						[StatusCodes.FORBIDDEN]: UnitInteractionForbiddenResponse,
-						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
-							"UnitNotFound",
-							"AliasNotFound",
-						]),
+						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "AliasNotFound"]),
 					},
 					detail: { summary: "Remove Unit alias vote", tags: ["Units"] },
 				},
@@ -1147,10 +1082,7 @@ export default new Elysia()
 					response: {
 						[StatusCodes.OK]: AliasCurationResponse,
 						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
-						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
-							"UnitNotFound",
-							"AliasNotFound",
-						]),
+						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "AliasNotFound"]),
 						[StatusCodes.CONFLICT]: toApiErrorResponse([
 							"UnitReferenceCurationChanged",
 							"UnitReferencePinnedLimitReached",
@@ -1183,13 +1115,8 @@ export default new Elysia()
 					response: {
 						[StatusCodes.NO_CONTENT]: t.Void(),
 						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
-						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
-							"UnitNotFound",
-							"AliasNotFound",
-						]),
-						[StatusCodes.CONFLICT]: toApiErrorResponse([
-							"UnitReferenceCurationChanged",
-						]),
+						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "AliasNotFound"]),
+						[StatusCodes.CONFLICT]: toApiErrorResponse(["UnitReferenceCurationChanged"]),
 					},
 					detail: {
 						summary: "Withdraw Unit alias reference",
@@ -1208,11 +1135,7 @@ export default new Elysia()
 						"credit-attributions",
 					]);
 					const credit = await database.transaction(async (tx) => {
-						await ensureDirectCreditAttributionAllowed(
-							authorization,
-							tx,
-							body.creditedUnitId,
-						);
+						await ensureDirectCreditAttributionAllowed(authorization, tx, body.creditedUnitId);
 						await tx.execute(
 							sql`select pg_advisory_xact_lock(hashtextextended(${params.unitId}::text, 0))`,
 						);
@@ -1227,9 +1150,7 @@ export default new Elysia()
 							.values({
 								sourceUnitId: params.unitId,
 								...body,
-								position:
-									body.position ??
-									fractionalPositionBetween(last?.position, null),
+								position: body.position ?? fractionalPositionBetween(last?.position, null),
 							})
 							.returning();
 						await recordUnitRevision(tx, {
@@ -1241,12 +1162,9 @@ export default new Elysia()
 					});
 					if (!credit) throw new Error("Credit insertion did not return a row");
 					const attributions =
-						(await getAttributionSummariesByUnitIds([params.unitId])).get(
-							params.unitId,
-						) ?? [];
+						(await getAttributionSummariesByUnitIds([params.unitId])).get(params.unitId) ?? [];
 					const created = attributions.find(({ id }) => id === credit.id);
-					if (!created)
-						throw new Error("Created credit attribution could not be resolved");
+					if (!created) throw new Error("Created credit attribution could not be resolved");
 					return created;
 				},
 				{
@@ -1255,17 +1173,12 @@ export default new Elysia()
 					body: AddUnitCreditBody,
 					response: {
 						[StatusCodes.OK]: CreditAttributionResponse,
-						[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
-							"CreditAttributionRoleInvalid",
-						]),
+						[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["CreditAttributionRoleInvalid"]),
 						[StatusCodes.FORBIDDEN]: toApiErrorResponse([
 							"UnitPermissionForbidden",
 							"EntityAssociationRestricted",
 						]),
-						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
-							"UnitNotFound",
-							"EntityEntryNotFound",
-						]),
+						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "EntityEntryNotFound"]),
 					},
 					detail: { summary: "Add Unit credit attribution", tags: ["Units"] },
 				},
@@ -1327,13 +1240,8 @@ export default new Elysia()
 							() => new AssociationContextPostInvalid(),
 						);
 					const association = await database.transaction(async (tx) => {
-						if (body.contextPostId)
-							await ensureWikiAssociationContextPost(tx, body.contextPostId);
-						await authorization.entity.ensureAssociationAllowed(
-							tx,
-							body.entityId,
-							"subject",
-						);
+						if (body.contextPostId) await ensureWikiAssociationContextPost(tx, body.contextPostId);
+						await authorization.entity.ensureAssociationAllowed(tx, body.entityId, "subject");
 						await tx.execute(
 							sql`select pg_advisory_xact_lock(hashtextextended(${params.unitId}::text, 0))`,
 						);
@@ -1350,13 +1258,10 @@ export default new Elysia()
 								entityId: body.entityId,
 								contextPostId: body.contextPostId ?? null,
 								role: body.role,
-								position:
-									body.position ??
-									fractionalPositionBetween(last?.position, null),
+								position: body.position ?? fractionalPositionBetween(last?.position, null),
 							})
 							.returning();
-						if (!created)
-							throw new Error("Subject association insertion returned no row");
+						if (!created) throw new Error("Subject association insertion returned no row");
 						await recordUnitRevision(tx, {
 							unitId: params.unitId,
 							actorProfileId: authorization.profileId,
@@ -1372,17 +1277,12 @@ export default new Elysia()
 					body: AddUnitSubjectAssociationBody,
 					response: {
 						[StatusCodes.OK]: SubjectAssociationResponse,
-						[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
-							"AssociationContextPostInvalid",
-						]),
+						[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["AssociationContextPostInvalid"]),
 						[StatusCodes.FORBIDDEN]: toApiErrorResponse([
 							"UnitPermissionForbidden",
 							"EntityAssociationRestricted",
 						]),
-						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
-							"UnitNotFound",
-							"EntityEntryNotFound",
-						]),
+						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "EntityEntryNotFound"]),
 					},
 					detail: { summary: "Add Unit subject association", tags: ["Units"] },
 				},
@@ -1532,9 +1432,7 @@ export default new Elysia()
 					await authorization.unit.ensureCanRead(params.unitId);
 					await ensureReadableSourceEntity(authorization.unit, body.sourceEntityId);
 					const { url, normalizedUrl } = normalizeExternalWebUrl(body.url);
-					const normalizedUrlHash = createHash("sha256")
-						.update(normalizedUrl)
-						.digest("hex");
+					const normalizedUrlHash = createHash("sha256").update(normalizedUrl).digest("hex");
 					const externalLinkId = await database.transaction(async (tx) => {
 						await tx.execute(
 							sql`select pg_advisory_xact_lock(hashtextextended(${`unit-reference:external_link:${params.unitId}`}, 0))`,
@@ -1551,10 +1449,7 @@ export default new Elysia()
 							)
 							.limit(1);
 						if (existing?.withdrawnAt) throw new UnitReferenceWithdrawn();
-						if (
-							existing?.normalizedUrl !== undefined &&
-							existing.normalizedUrl !== normalizedUrl
-						)
+						if (existing?.normalizedUrl !== undefined && existing.normalizedUrl !== normalizedUrl)
 							throw new Error("External link URL normalization hash collision");
 						if (!existing)
 							await ensureUnitReferenceCanBeCreated(tx, {
@@ -1585,10 +1480,7 @@ export default new Elysia()
 								value: 1,
 							})
 							.onConflictDoUpdate({
-								target: [
-									unitExternalLinkVote.externalLinkId,
-									unitExternalLinkVote.profileId,
-								],
+								target: [unitExternalLinkVote.externalLinkId, unitExternalLinkVote.profileId],
 								set: { value: 1, updatedAt: new Date() },
 								setWhere: ne(unitExternalLinkVote.value, 1),
 							});
@@ -1603,10 +1495,7 @@ export default new Elysia()
 					response: {
 						[StatusCodes.OK]: UnitExternalLinkResponse,
 						[StatusCodes.FORBIDDEN]: UnitInteractionForbiddenResponse,
-						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
-							"UnitNotFound",
-							"EntityEntryNotFound",
-						]),
+						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "EntityEntryNotFound"]),
 						[StatusCodes.CONFLICT]: toApiErrorResponse([
 							"UnitReferenceLimitReached",
 							"UnitReferenceWithdrawn",
@@ -1640,10 +1529,7 @@ export default new Elysia()
 							value: body.value,
 						})
 						.onConflictDoUpdate({
-							target: [
-								unitExternalLinkVote.externalLinkId,
-								unitExternalLinkVote.profileId,
-							],
+							target: [unitExternalLinkVote.externalLinkId, unitExternalLinkVote.profileId],
 							set: { value: body.value, updatedAt: new Date() },
 							setWhere: ne(unitExternalLinkVote.value, body.value),
 						});
@@ -1724,10 +1610,7 @@ export default new Elysia()
 							: { pinned: false, position: null },
 					});
 					return {
-						reference: await getExternalLinkReference(
-							params.externalLinkId,
-							profile.unitId,
-						),
+						reference: await getExternalLinkReference(params.externalLinkId, profile.unitId),
 						curationVersion: result.curationVersion,
 					};
 				},
@@ -1778,9 +1661,7 @@ export default new Elysia()
 							"UnitNotFound",
 							"UnitExternalLinkNotFound",
 						]),
-						[StatusCodes.CONFLICT]: toApiErrorResponse([
-							"UnitReferenceCurationChanged",
-						]),
+						[StatusCodes.CONFLICT]: toApiErrorResponse(["UnitReferenceCurationChanged"]),
 					},
 					detail: {
 						summary: "Withdraw Unit external-link reference",
@@ -1821,20 +1702,14 @@ export default new Elysia()
 								value: 1,
 							})
 							.onConflictDoUpdate({
-								target: [
-									unitTagVote.unitId,
-									unitTagVote.tagId,
-									unitTagVote.profileId,
-								],
+								target: [unitTagVote.unitId, unitTagVote.tagId, unitTagVote.profileId],
 								set: { value: 1, updatedAt: new Date() },
 							});
 					});
 					const [application] = await database
 						.select()
 						.from(unitTag)
-						.where(
-							and(eq(unitTag.unitId, params.unitId), eq(unitTag.tagId, params.tagId)),
-						)
+						.where(and(eq(unitTag.unitId, params.unitId), eq(unitTag.tagId, params.tagId)))
 						.limit(1);
 					if (!application) throw new TagApplicationNotFound(true);
 					const totals = await getTagVoteSummary(params.unitId, params.tagId, 1);
@@ -1883,10 +1758,7 @@ export default new Elysia()
 					response: {
 						[StatusCodes.OK]: TagApplicationResponse,
 						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
-						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
-							"UnitNotFound",
-							"TagApplicationNotFound",
-						]),
+						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "TagApplicationNotFound"]),
 						[StatusCodes.CONFLICT]: toApiErrorResponse(["UnitTagCurationChanged"]),
 					},
 					detail: {
@@ -1903,12 +1775,7 @@ export default new Elysia()
 					await database.transaction(async (tx) => {
 						const deleted = await tx
 							.delete(unitTag)
-							.where(
-								and(
-									eq(unitTag.unitId, params.unitId),
-									eq(unitTag.tagId, params.tagId),
-								),
-							)
+							.where(and(eq(unitTag.unitId, params.unitId), eq(unitTag.tagId, params.tagId)))
 							.returning({ id: unitTag.tagId });
 						if (!deleted.length) throw new TagApplicationNotFound();
 						await recordUnitRevision(tx, {
@@ -1925,10 +1792,7 @@ export default new Elysia()
 					response: {
 						[StatusCodes.NO_CONTENT]: t.Void(),
 						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
-						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
-							"UnitNotFound",
-							"TagApplicationNotFound",
-						]),
+						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "TagApplicationNotFound"]),
 					},
 					detail: {
 						summary: "Remove Unit tag",
@@ -1945,9 +1809,7 @@ export default new Elysia()
 					const [application] = await database
 						.select({ tagId: unitTag.tagId })
 						.from(unitTag)
-						.where(
-							and(eq(unitTag.unitId, params.unitId), eq(unitTag.tagId, params.tagId)),
-						)
+						.where(and(eq(unitTag.unitId, params.unitId), eq(unitTag.tagId, params.tagId)))
 						.limit(1);
 					if (!application) throw new TagApplicationNotFound();
 					await database
@@ -1971,13 +1833,8 @@ export default new Elysia()
 					response: {
 						[StatusCodes.OK]: VoteResponse,
 						[StatusCodes.FORBIDDEN]: UnitInteractionForbiddenResponse,
-						[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse([
-							"InvalidTagStructure",
-						]),
-						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
-							"UnitNotFound",
-							"TagApplicationNotFound",
-						]),
+						[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["InvalidTagStructure"]),
+						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "TagApplicationNotFound"]),
 					},
 					detail: { summary: "Vote on Unit tag", tags: ["Units"] },
 				},
@@ -1990,9 +1847,7 @@ export default new Elysia()
 					const [application] = await database
 						.select({ tagId: unitTag.tagId })
 						.from(unitTag)
-						.where(
-							and(eq(unitTag.unitId, params.unitId), eq(unitTag.tagId, params.tagId)),
-						)
+						.where(and(eq(unitTag.unitId, params.unitId), eq(unitTag.tagId, params.tagId)))
 						.limit(1);
 					if (!application) throw new TagApplicationNotFound();
 					await database
@@ -2012,10 +1867,7 @@ export default new Elysia()
 					response: {
 						[StatusCodes.OK]: VoteResponse,
 						[StatusCodes.FORBIDDEN]: UnitInteractionForbiddenResponse,
-						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
-							"UnitNotFound",
-							"TagApplicationNotFound",
-						]),
+						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "TagApplicationNotFound"]),
 					},
 					detail: { summary: "Remove Unit tag vote", tags: ["Units"] },
 				},

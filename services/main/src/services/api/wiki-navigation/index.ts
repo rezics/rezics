@@ -107,8 +107,7 @@ async function ensureReferences(
 			}),
 		);
 	} catch (cause) {
-		if (cause instanceof UnresolvedBlockReferenceError)
-			throw new WikiNavigationDocumentInvalid();
+		if (cause instanceof UnresolvedBlockReferenceError) throw new WikiNavigationDocumentInvalid();
 		throw cause;
 	}
 }
@@ -128,11 +127,7 @@ export default new Elysia({ prefix: "/realms" })
 			);
 			await ensureRealm(params.realmId);
 			return database.transaction(async (tx) => {
-				const records = await listNavigationStructures(
-					tx,
-					params.realmId,
-					"wiki.navigation",
-				);
+				const records = await listNavigationStructures(tx, params.realmId, "wiki.navigation");
 				return {
 					items: records.map((record) => present(record, record.latestRevisionId)),
 				};
@@ -233,10 +228,7 @@ export default new Elysia({ prefix: "/realms" })
 				[StatusCodes.OK]: WikiNavigationResponse,
 				[StatusCodes.UNAUTHORIZED]: AuthenticationRequiredResponse,
 				[StatusCodes.FORBIDDEN]: WikiNavigationReadForbiddenResponse,
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse([
-					"UnitNotFound",
-					"WikiNavigationNotFound",
-				]),
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "WikiNavigationNotFound"]),
 			},
 			detail: {
 				summary: "Get Realm Wiki navigation",
@@ -273,10 +265,7 @@ export default new Elysia({ prefix: "/realms" })
 						structureId: params.navigationId,
 						kind: "wiki.navigation",
 					});
-					return present(
-						record,
-						result.revisionCreated ? result.revisionId : body.baseRevisionId,
-					);
+					return present(record, result.revisionCreated ? result.revisionId : body.baseRevisionId);
 				});
 			} catch (cause) {
 				rethrowWikiNavigationNotFound(cause);
@@ -290,10 +279,7 @@ export default new Elysia({ prefix: "/realms" })
 				[StatusCodes.OK]: WikiNavigationResponse,
 				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["WikiNavigationDocumentInvalid"]),
 				[StatusCodes.FORBIDDEN]: WikiNavigationMutationForbiddenResponse,
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse([
-					"UnitNotFound",
-					"WikiNavigationNotFound",
-				]),
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "WikiNavigationNotFound"]),
 				[StatusCodes.CONFLICT]: toApiErrorResponse(["ContentStructureRevisionConflict"]),
 			},
 			detail: {
@@ -319,14 +305,12 @@ export default new Elysia({ prefix: "/realms" })
 					const docks = await tx
 						.select({ document: unitDock.document })
 						.from(unitDock)
-						.where(
-							and(eq(unitDock.unitId, params.realmId), isNull(unitDock.deletedAt)),
-						);
+						.where(and(eq(unitDock.unitId, params.realmId), isNull(unitDock.deletedAt)));
 					if (
 						docks.some((dock) =>
-							collectBlockReferences(
-								parseDocument(DockDocument, dock.document),
-							).navigationIds.has(params.navigationId),
+							collectBlockReferences(parseDocument(DockDocument, dock.document)).navigationIds.has(
+								params.navigationId,
+							),
 						)
 					)
 						throw new WikiNavigationInUse();
@@ -350,10 +334,7 @@ export default new Elysia({ prefix: "/realms" })
 			response: {
 				[StatusCodes.NO_CONTENT]: t.Void(),
 				[StatusCodes.FORBIDDEN]: WikiNavigationMutationForbiddenResponse,
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse([
-					"UnitNotFound",
-					"WikiNavigationNotFound",
-				]),
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "WikiNavigationNotFound"]),
 				[StatusCodes.CONFLICT]: toApiErrorResponse([
 					"WikiNavigationInUse",
 					"ContentStructureRevisionConflict",

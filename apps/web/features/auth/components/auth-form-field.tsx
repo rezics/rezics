@@ -48,9 +48,7 @@ export function AuthTextField({
 				required
 				size="lg"
 			/>
-			{description ? (
-				<FieldDescription id={descriptionId}>{description}</FieldDescription>
-			) : null}
+			{description ? <FieldDescription id={descriptionId}>{description}</FieldDescription> : null}
 		</Field>
 	);
 }
@@ -115,9 +113,7 @@ export function AuthPasswordField({
 					/>
 				</PasswordInputGroup>
 			</PasswordInput>
-			{description ? (
-				<FieldDescription id={descriptionId}>{description}</FieldDescription>
-			) : null}
+			{description ? <FieldDescription id={descriptionId}>{description}</FieldDescription> : null}
 			{error ? <FieldError id={errorId}>{error}</FieldError> : null}
 		</Field>
 	);

@@ -113,13 +113,9 @@ export function PostDetailArticle({
 						<span aria-hidden className="text-xs">
 							·
 						</span>
-						<time className="text-xs">
-							{formatRelativeTime(post.createdAt, locale.target)}
-						</time>
+						<time className="text-xs">{formatRelativeTime(post.createdAt, locale.target)}</time>
 					</div>
-					{actions ? (
-						<div className="flex flex-wrap justify-end gap-2">{actions}</div>
-					) : null}
+					{actions ? <div className="flex flex-wrap justify-end gap-2">{actions}</div> : null}
 				</header>
 				<div className="mt-4">{content}</div>
 			</article>
@@ -138,9 +134,7 @@ export function PostDetailArticle({
 						<span aria-hidden> · </span>
 						<time>{formatRelativeTime(post.createdAt, locale.target)}</time>
 					</div>
-					{actions ? (
-						<div className="flex flex-wrap justify-end gap-2">{actions}</div>
-					) : null}
+					{actions ? <div className="flex flex-wrap justify-end gap-2">{actions}</div> : null}
 				</CardHeader>
 				<CardContent className="px-4 py-5 sm:px-6 sm:py-6">{content}</CardContent>
 			</article>

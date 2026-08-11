@@ -15,10 +15,7 @@ type CollectionLocalizationFieldsProps = {
 } & (
 	| {
 			readonly value: { readonly title: string; readonly summary: string };
-			readonly onValueChange: (value: {
-				readonly title: string;
-				readonly summary: string;
-			}) => void;
+			readonly onValueChange: (value: { readonly title: string; readonly summary: string }) => void;
 			readonly initial?: never;
 	  }
 	| {

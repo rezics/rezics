@@ -33,9 +33,7 @@ vi.mock("@rezics/ui", () => ({
 	CardDescription: ({ children }: { children: ReactNode }) => <p>{children}</p>,
 	CardHeader: ({ children }: { children: ReactNode }) => <header>{children}</header>,
 	CardTitle: ({ children }: { children: ReactNode }) => <h2>{children}</h2>,
-	Checkbox: (props: InputHTMLAttributes<HTMLInputElement>) => (
-		<input type="checkbox" {...props} />
-	),
+	Checkbox: (props: InputHTMLAttributes<HTMLInputElement>) => <input type="checkbox" {...props} />,
 	Field: ({ children }: { children: ReactNode }) => <div>{children}</div>,
 	FieldGroup: ({ children }: { children: ReactNode }) => <div>{children}</div>,
 	FieldLabel: (props: LabelHTMLAttributes<HTMLLabelElement>) => <label {...props} />,
@@ -61,15 +59,7 @@ vi.mock("@/features/application-shell/components/app-link", () => ({
 }));
 
 vi.mock("@/features/auth/components/auth-form-field", () => ({
-	AuthPasswordField: ({
-		error,
-		label,
-		name,
-	}: {
-		error?: string;
-		label: string;
-		name: string;
-	}) => (
+	AuthPasswordField: ({ error, label, name }: { error?: string; label: string; name: string }) => (
 		<>
 			<label>
 				{label}

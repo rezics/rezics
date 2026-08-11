@@ -19,8 +19,7 @@ export default new Elysia({ prefix: "/audit" }).use(session).get(
 		if (query.category) predicates.push(eq(auditEvent.category, query.category));
 		if (query.outcome) predicates.push(eq(auditEvent.outcome, query.outcome));
 		if (query.action) predicates.push(eq(auditEvent.action, query.action));
-		if (query.actorProfileId)
-			predicates.push(eq(auditEvent.actorProfileId, query.actorProfileId));
+		if (query.actorProfileId) predicates.push(eq(auditEvent.actorProfileId, query.actorProfileId));
 		if (query.authorityKind) predicates.push(eq(auditEvent.authorityKind, query.authorityKind));
 		if (query.authorityId) predicates.push(eq(auditEvent.authorityId, query.authorityId));
 		if (query.targetId) predicates.push(eq(auditEvent.targetId, query.targetId));

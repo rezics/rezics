@@ -95,10 +95,7 @@ export function SeriesReleasesPage() {
 		if (!item) return;
 		const position =
 			direction === "earlier"
-				? generateKeyBetween(
-						items[index - 2]?.position ?? null,
-						items[index - 1]?.position ?? null,
-					)
+				? generateKeyBetween(items[index - 2]?.position ?? null, items[index - 1]?.position ?? null)
 				: generateKeyBetween(
 						items[index + 1]?.position ?? null,
 						items[index + 2]?.position ?? null,
@@ -148,9 +145,7 @@ export function SeriesReleasesPage() {
 											</Button>
 											<Button
 												aria-label={t.units.series.moveLater}
-												disabled={
-													index === items.length - 1 || update.isPending
-												}
+												disabled={index === items.length - 1 || update.isPending}
 												onClick={() => void moveRelease(index, "later")}
 												size="icon-sm"
 												variant="quiet"
@@ -220,11 +215,7 @@ export function SeriesReleasesPage() {
 							>
 								{t.units.contentLanguages.cancel}
 							</Button>
-							<Button
-								disabled={!selectedUnit}
-								isLoading={update.isPending}
-								type="submit"
-							>
+							<Button disabled={!selectedUnit} isLoading={update.isPending} type="submit">
 								{t.units.series.addRelease}
 							</Button>
 						</DialogFooter>

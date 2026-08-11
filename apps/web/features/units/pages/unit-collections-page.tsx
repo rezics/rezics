@@ -38,9 +38,7 @@ export function UnitCollectionsPage() {
 						variant="shelf"
 					/>
 				) : (
-					<p className="text-sm text-muted-foreground">
-						{t.collections.containingUnitEmpty}
-					</p>
+					<p className="text-sm text-muted-foreground">{t.collections.containingUnitEmpty}</p>
 				)
 			) : null}
 		</UnitDetailSectionFrame>

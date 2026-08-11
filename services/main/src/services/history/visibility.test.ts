@@ -31,9 +31,7 @@ describe("revision visibility", () => {
 				suppressed: true,
 			},
 		] as const) {
-			expect(revisionVisibilityToStorage(revisionVisibilityFromStorage(stored))).toEqual(
-				stored,
-			);
+			expect(revisionVisibilityToStorage(revisionVisibilityFromStorage(stored))).toEqual(stored);
 		}
 	});
 

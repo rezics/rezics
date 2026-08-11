@@ -94,9 +94,7 @@ export async function updateDirectUnitTagCuration(input: {
 							position: input.state.position,
 							updatedAt: nextUnitTagCurationUpdatedAt(current.updatedAt),
 						})
-						.where(
-							and(eq(unitTag.unitId, input.unitId), eq(unitTag.tagId, input.tagId)),
-						)
+						.where(and(eq(unitTag.unitId, input.unitId), eq(unitTag.tagId, input.tagId)))
 						.returning();
 					if (!updated) throw new TagApplicationNotFound();
 					await recordUnitRevision(tx, {
@@ -112,12 +110,7 @@ export async function updateDirectUnitTagCuration(input: {
 				voteCount: unitTagVoteStat.voteCount,
 			})
 			.from(unitTagVoteStat)
-			.where(
-				and(
-					eq(unitTagVoteStat.unitId, input.unitId),
-					eq(unitTagVoteStat.tagId, input.tagId),
-				),
-			)
+			.where(and(eq(unitTagVoteStat.unitId, input.unitId), eq(unitTagVoteStat.tagId, input.tagId)))
 			.limit(1);
 		return {
 			...application,

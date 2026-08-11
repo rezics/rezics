@@ -44,11 +44,7 @@ function useFixtureCardContext() {
 
 function FixtureMenu() {
 	return (
-		<FeedOverflowMenuView
-			canExclude
-			onNotInterested={() => undefined}
-			onSave={() => undefined}
-		/>
+		<FeedOverflowMenuView canExclude onNotInterested={() => undefined} onSave={() => undefined} />
 	);
 }
 

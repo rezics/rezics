@@ -67,10 +67,7 @@ export function ConsoleOwnershipClaimsPage() {
 	const [reasonCode, setReasonCode] = useState<GovernanceReasonCode>("administrative");
 	const [note, setNote] = useState("");
 	const [confirmationClaimId, setConfirmationClaimId] = useState("");
-	const baseQuery = useMemo(
-		() => ({ limit: 50, ...(state === "all" ? {} : { state }) }),
-		[state],
-	);
+	const baseQuery = useMemo(() => ({ limit: 50, ...(state === "all" ? {} : { state }) }), [state]);
 	const claims = useInfiniteQuery({
 		queryKey: getApiGovernancePlatformOwnershipClaimsQueryKey({ query: baseQuery }),
 		queryFn: async ({ pageParam, signal }) => {
@@ -112,8 +109,7 @@ export function ConsoleOwnershipClaimsPage() {
 	}
 
 	async function applyDecision() {
-		if (!selected || !decision || confirmationClaimId !== selected.id || decide.isPending)
-			return;
+		if (!selected || !decision || confirmationClaimId !== selected.id || decide.isPending) return;
 		try {
 			await decide.mutateAsync({
 				path: { claimId: selected.id },
@@ -154,9 +150,7 @@ export function ConsoleOwnershipClaimsPage() {
 					}}
 					value={state}
 				>
-					<NativeSelectOption value="all">
-						{t.console.ownershipClaims.allStates}
-					</NativeSelectOption>
+					<NativeSelectOption value="all">{t.console.ownershipClaims.allStates}</NativeSelectOption>
 					{ClaimStates.map((value) => (
 						<NativeSelectOption key={value} value={value}>
 							{t.console.ownershipClaims.states[value]}
@@ -188,16 +182,14 @@ export function ConsoleOwnershipClaimsPage() {
 								>
 									<span className="flex items-center justify-between gap-3">
 										<span className="truncate font-medium">
-											{claim.unitTitle ??
-												t.console.ownershipClaims.untitledUnit}
+											{claim.unitTitle ?? t.console.ownershipClaims.untitledUnit}
 										</span>
 										<Badge variant="secondary">
 											{t.console.ownershipClaims.states[claim.state]}
 										</Badge>
 									</span>
 									<span className="truncate text-muted-foreground text-xs">
-										{claim.claimantLabel ??
-											t.console.ownershipClaims.unnamedClaimant}
+										{claim.claimantLabel ?? t.console.ownershipClaims.unnamedClaimant}
 									</span>
 									<span className="text-muted-foreground text-xs">
 										{formatter.format(new Date(claim.createdAt))}
@@ -230,8 +222,7 @@ export function ConsoleOwnershipClaimsPage() {
 							<div className="flex flex-wrap items-start justify-between gap-3">
 								<div>
 									<h2 className="font-semibold text-lg">
-										{selected.unitTitle ??
-											t.console.ownershipClaims.untitledUnit}
+										{selected.unitTitle ?? t.console.ownershipClaims.untitledUnit}
 									</h2>
 									<p className="mt-1 text-muted-foreground text-sm">
 										{selected.unitKind} · {selected.unitId}
@@ -252,8 +243,7 @@ export function ConsoleOwnershipClaimsPage() {
 										{t.console.ownershipClaims.claimant}
 									</dt>
 									<dd className="mt-1 break-all font-medium">
-										{selected.claimantLabel ??
-											t.console.ownershipClaims.unnamedClaimant}
+										{selected.claimantLabel ?? t.console.ownershipClaims.unnamedClaimant}
 									</dd>
 									<dd className="break-all text-muted-foreground text-xs">
 										{selected.claimantProfileId}
@@ -283,10 +273,7 @@ export function ConsoleOwnershipClaimsPage() {
 											<Check aria-hidden />
 											{t.console.ownershipClaims.approve}
 										</Button>
-										<Button
-											onClick={() => openDecision("rejected")}
-											variant="destructive"
-										>
+										<Button onClick={() => openDecision("rejected")} variant="destructive">
 											<X aria-hidden />
 											{t.console.ownershipClaims.reject}
 										</Button>
@@ -371,9 +358,7 @@ export function ConsoleOwnershipClaimsPage() {
 							</p>
 							<Input
 								autoComplete="off"
-								onChange={(event) =>
-									setConfirmationClaimId(event.currentTarget.value.trim())
-								}
+								onChange={(event) => setConfirmationClaimId(event.currentTarget.value.trim())}
 								spellCheck={false}
 								value={confirmationClaimId}
 							/>
@@ -381,11 +366,7 @@ export function ConsoleOwnershipClaimsPage() {
 						<RequestFailure error={decide.error} />
 					</DialogBody>
 					<DialogFooter>
-						<Button
-							disabled={decide.isPending}
-							onClick={() => setDecision(null)}
-							variant="outline"
-						>
+						<Button disabled={decide.isPending} onClick={() => setDecision(null)} variant="outline">
 							{t.console.cancel}
 						</Button>
 						<Button

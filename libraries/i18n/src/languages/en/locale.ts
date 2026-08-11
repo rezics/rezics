@@ -38,7 +38,8 @@ export default {
 		ambiguous: "The content language is uncertain, so your first language preference is used.",
 		unsupported:
 			"The detected language is not supported yet, so your first language preference is used.",
-		failed: "Language detection is temporarily unavailable, so your first language preference is used.",
+		failed:
+			"Language detection is temporarily unavailable, so your first language preference is used.",
 	},
 	chineseContentDisplay: {
 		label: "Chinese content display",

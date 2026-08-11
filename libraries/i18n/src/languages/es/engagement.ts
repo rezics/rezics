@@ -361,8 +361,7 @@ export default {
 		writeReview: "Reseñar este evento",
 		viewReview: "Ver reseña vinculada",
 		linkedReview: "Progreso vinculado a esta reseña",
-		reviewBindingNotice:
-			"Esta reseña se vinculará al evento elegido desde la página de progreso.",
+		reviewBindingNotice: "Esta reseña se vinculará al evento elegido desde la página de progreso.",
 	},
 	progressNotRecorded: "Sin registrar",
 	completionCountChange: insert(

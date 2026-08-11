@@ -24,9 +24,7 @@ export function RealmFeedModerationSheet({
 		query: { localizationLanguages },
 	});
 	if (query.data)
-		return (
-			<RealmModerationSheet onOpenChange={onOpenChange} realmId={realmId} unit={query.data} />
-		);
+		return <RealmModerationSheet onOpenChange={onOpenChange} realmId={realmId} unit={query.data} />;
 
 	const title = target.title ?? t.posts.untitled;
 	const copy = t.realms.feedManagement;
@@ -34,9 +32,7 @@ export function RealmFeedModerationSheet({
 		<Sheet onOpenChange={({ open }) => onOpenChange(open)} open>
 			<SheetContent className="sm:max-w-2xl" placement="right">
 				<SheetHeader
-					description={
-						query.isPending ? copy.loadingModeration : copy.moderationLoadFailed
-					}
+					description={query.isPending ? copy.loadingModeration : copy.moderationLoadFailed}
 					title={title}
 				/>
 				<SheetBody>

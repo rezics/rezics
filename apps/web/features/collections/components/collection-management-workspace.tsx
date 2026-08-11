@@ -54,8 +54,7 @@ const CollectionManagementContext = createContext<CollectionManagementContextVal
 
 export function useCollectionManagement(): CollectionManagementContextValue {
 	const value = useContext(CollectionManagementContext);
-	if (!value)
-		throw new Error("Collection management context is unavailable outside its workspace");
+	if (!value) throw new Error("Collection management context is unavailable outside its workspace");
 	return value;
 }
 
@@ -90,8 +89,7 @@ function CollectionManagementWorkspaceContent({
 	});
 	const { t } = useTranslation(["collections", "errors", "ui", "units"]);
 	if (query.isPending) return <QueryPending />;
-	if (query.isError)
-		return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
+	if (query.isError) return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
 	const collection = query.data;
 	if (!canOpenCollectionManagement(collection.capabilities))
 		return (
@@ -155,8 +153,7 @@ function CollectionManagementWorkspaceContent({
 	const sections = allSections.filter(({ id }) => visibleSectionIds.has(id));
 	const currentSectionId = parseCollectionManagementSection(pathname, collectionId);
 	const requestedSection = allSections.find(({ id }) => id === currentSectionId);
-	const sectionAllowed =
-		currentSectionId === undefined || visibleSectionIds.has(currentSectionId);
+	const sectionAllowed = currentSectionId === undefined || visibleSectionIds.has(currentSectionId);
 	const localization = selectLocalization(collection.localizations, collection.language);
 	const title =
 		collection.purpose === "favorites"

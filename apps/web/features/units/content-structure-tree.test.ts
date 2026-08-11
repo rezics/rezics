@@ -43,9 +43,7 @@ const nodes: ContentStructureNode[] = [
 describe("content tree", () => {
 	it("keeps hierarchy and excludes descendants as move targets", () => {
 		const tree = buildContentStructureTree([nodes[2]!, nodes[1]!, nodes[0]!]);
-		expect(
-			flattenContentStructureTree(tree).map(({ node, depth }) => [node.id, depth]),
-		).toEqual([
+		expect(flattenContentStructureTree(tree).map(({ node, depth }) => [node.id, depth])).toEqual([
 			["part", 0],
 			["chapter", 1],
 			["appendix", 0],

@@ -131,10 +131,7 @@ describe("RealmPinnedContentSection", () => {
 
 	it("suppresses card activation after a mouse drag but preserves ordinary clicks", () => {
 		render(
-			<RealmPinnedContentSection
-				{...labels}
-				state={{ status: "ready", items: contentItems }}
-			/>,
+			<RealmPinnedContentSection {...labels} state={{ status: "ready", items: contentItems }} />,
 		);
 		const title = screen.getByText("The pinned book");
 		const link = title.closest("a");

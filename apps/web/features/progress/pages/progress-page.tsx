@@ -119,10 +119,7 @@ function ProgressList() {
 	if (definitionQuery.isPending) return <QueryPending />;
 	if (definitionQuery.isError)
 		return (
-			<QueryFailure
-				error={definitionQuery.error}
-				retry={() => void definitionQuery.refetch()}
-			/>
+			<QueryFailure error={definitionQuery.error} retry={() => void definitionQuery.refetch()} />
 		);
 
 	const definition: SearchFeatureDefinition = parseSearchFeatureDefinition(definitionQuery.data);
@@ -156,22 +153,14 @@ function ProgressList() {
 						{result.items.length > 0 ? (
 							<div className="grid gap-3">
 								{result.items.map((item) => (
-									<ProgressListItem
-										item={item}
-										key={item.unitId}
-										onEdit={setSelectedDomain}
-									/>
+									<ProgressListItem item={item} key={item.unitId} onEdit={setSelectedDomain} />
 								))}
 							</div>
 						) : (
 							<div className="rounded-2xl border border-border-weak px-5 py-10 text-center">
-								<p className="font-medium">
-									{activeQuery ? t.search.empty : t.ui.emptyProgress}
-								</p>
+								<p className="font-medium">{activeQuery ? t.search.empty : t.ui.emptyProgress}</p>
 								{activeQuery ? (
-									<p className="mt-1 text-muted-foreground text-sm">
-										{t.search.emptyBody}
-									</p>
+									<p className="mt-1 text-muted-foreground text-sm">{t.search.emptyBody}</p>
 								) : null}
 							</div>
 						)}
@@ -295,15 +284,11 @@ function ProgressListItem({
 						</h2>
 					)}
 					{summary ? (
-						<p className="mt-1 line-clamp-2 text-muted-foreground text-sm leading-6">
-							{summary}
-						</p>
+						<p className="mt-1 line-clamp-2 text-muted-foreground text-sm leading-6">{summary}</p>
 					) : null}
 					<div className="mt-4">
 						<div className="mb-1.5 flex items-center justify-between gap-3 text-xs">
-							<span className="font-medium text-muted-foreground">
-								{copy.progressLabel}
-							</span>
+							<span className="font-medium text-muted-foreground">{copy.progressLabel}</span>
 							<span className="font-semibold tabular-nums">
 								{t.engagement.progressPercent({ percent })}
 							</span>

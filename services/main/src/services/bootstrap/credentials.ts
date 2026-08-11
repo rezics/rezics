@@ -18,8 +18,7 @@ export interface PreparedPlatformCredential {
 /** Generate a URL-safe credential with 256 random bits and explicit complexity classes. */
 export function generateBootstrapPassword(): string {
 	return (
-		BootstrapPasswordComplexityPrefix +
-		randomBytes(BootstrapPasswordBytes).toString("base64url")
+		BootstrapPasswordComplexityPrefix + randomBytes(BootstrapPasswordBytes).toString("base64url")
 	);
 }
 

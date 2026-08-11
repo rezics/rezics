@@ -81,9 +81,7 @@ describe("public Unit slug routes", () => {
 				canonicalPath: ["zones", "summer"],
 			},
 		};
-		expect(zonePageHref(zone, { id: "page/id", slug: null })).toBe(
-			"/zone/zone-id/page/page%2Fid",
-		);
+		expect(zonePageHref(zone, { id: "page/id", slug: null })).toBe("/zone/zone-id/page/page%2Fid");
 	});
 
 	it("does not emit reserved application segments as Page slug routes", () => {

@@ -58,9 +58,7 @@ export async function getLegalDocument(
 export async function getLegalDocumentLocales(slug: string): Promise<readonly AboutLocale[]> {
 	const documents = await loadLegalDocuments();
 	const available = new Set(
-		documents
-			.filter((reference) => reference.slug === slug)
-			.map((reference) => reference.locale),
+		documents.filter((reference) => reference.slug === slug).map((reference) => reference.locale),
 	);
 	return ABOUT_LOCALES.filter((locale) => available.has(locale));
 }

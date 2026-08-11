@@ -71,9 +71,7 @@ export function TagBadgeCard({
 	const summary = useChineseContentText(item.identity.summary ?? "", item.identity.language);
 	const realmTitle = useChineseContentText(
 		item.context.kind === "realm" ? (item.context.realmTitle ?? t.tags.unnamedRealm) : "",
-		item.context.kind === "realm" && item.context.realmTitle
-			? item.context.realmLanguage
-			: null,
+		item.context.kind === "realm" && item.context.realmTitle ? item.context.realmLanguage : null,
 	);
 
 	const handleLinkClick = (event: MouseEvent<HTMLAnchorElement>) => {
@@ -138,9 +136,7 @@ export function TagBadgeCard({
 						/>
 						<span className="min-w-0 truncate">{label}</span>
 						{score === undefined ? null : (
-							<span className="shrink-0 tabular-nums text-[0.6875rem] opacity-75">
-								{score}
-							</span>
+							<span className="shrink-0 tabular-nums text-[0.6875rem] opacity-75">{score}</span>
 						)}
 					</Link>
 				</PopoverTrigger>
@@ -188,9 +184,7 @@ export function TagBadgeCard({
 					</PopoverHeader>
 					<PopoverBody className="grid gap-4">
 						{summary ? (
-							<p className="line-clamp-3 text-sm leading-6 text-muted-foreground">
-								{summary}
-							</p>
+							<p className="line-clamp-3 text-sm leading-6 text-muted-foreground">{summary}</p>
 						) : null}
 						{item.vote.kind === "available" ? (
 							<TagVoteControls
@@ -205,11 +199,7 @@ export function TagBadgeCard({
 						) : null}
 						<div className="flex flex-wrap items-center gap-1 border-t border-border-weak pt-2">
 							<Button asChild className="w-fit" size="sm" variant="quiet">
-								<Link
-									href={tagSearchHref(type, [
-										{ tagId: item.identity.tagId, label },
-									])}
-								>
+								<Link href={tagSearchHref(type, [{ tagId: item.identity.tagId, label }])}>
 									<Search aria-hidden />
 									<span className="truncate">{t.tags.card.search}</span>
 								</Link>

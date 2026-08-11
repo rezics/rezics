@@ -62,8 +62,7 @@ export default {
 			},
 			pins: {
 				label: "Fixierte Inhalte",
-				description:
-					"Verwalte fixierte und hervorgehobene Inhalte sowie deren Anzeigereihenfolge.",
+				description: "Verwalte fixierte und hervorgehobene Inhalte sowie deren Anzeigereihenfolge.",
 			},
 			access: {
 				label: "Zugriff",
@@ -76,8 +75,7 @@ export default {
 			},
 			history: {
 				label: "Versionsverlauf",
-				description:
-					"Prüfe, vergleiche, widerrufe oder stelle Einstellungsversionen wieder her.",
+				description: "Prüfe, vergleiche, widerrufe oder stelle Einstellungsversionen wieder her.",
 			},
 		},
 	},
@@ -183,7 +181,8 @@ export default {
 		bulkStrategy: "Abfragestrategie gesammelt ändern",
 		chooseStrategy: "Strategie auswählen",
 		queryStrategy: "Abfragestrategie",
-		empty: "Die Taxonomie ist leer. Füge eine Kategorieüberschrift, einen Tag oder einen Wiki-Artikel hinzu.",
+		empty:
+			"Die Taxonomie ist leer. Füge eine Kategorieüberschrift, einen Tag oder einen Wiki-Artikel hinzu.",
 		emptySearch: "Keine Knoten entsprechen der Suche.",
 		select: "Knoten auswählen",
 		deselect: "Knotenauswahl aufheben",

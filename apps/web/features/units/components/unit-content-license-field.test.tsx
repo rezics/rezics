@@ -180,10 +180,7 @@ describe("UnitContentLicenseField", () => {
 	it("keeps an existing irrevocable grant selected and disabled", () => {
 		const { container } = render(
 			<TranslationProvider initial={translation.snapshot}>
-				<UnitContentLicenseField
-					context="edit"
-					grantedSlug={CurrentUnitContentLicenseSlug}
-				/>
+				<UnitContentLicenseField context="edit" grantedSlug={CurrentUnitContentLicenseSlug} />
 			</TranslationProvider>,
 		);
 		const select = contentLicenseSelect(container);

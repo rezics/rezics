@@ -60,18 +60,12 @@ function SoftwareRequirementsContent({
 								<CardContent className="p-5">
 									<DataList>
 										<DataListItem>
-											<DataListItemLabel>
-												{t.units.detail.requirementTier}
-											</DataListItemLabel>
-											<DataListItemValue>
-												{requirement.tier}
-											</DataListItemValue>
+											<DataListItemLabel>{t.units.detail.requirementTier}</DataListItemLabel>
+											<DataListItemValue>{requirement.tier}</DataListItemValue>
 										</DataListItem>
 										{requirement.platformEntityId ? (
 											<DataListItem>
-												<DataListItemLabel>
-													{t.units.detail.requirementPlatform}
-												</DataListItemLabel>
+												<DataListItemLabel>{t.units.detail.requirementPlatform}</DataListItemLabel>
 												<DataListItemValue className="break-all text-end">
 													<Link
 														className="text-link hover:text-link-hover hover:underline"
@@ -84,9 +78,7 @@ function SoftwareRequirementsContent({
 										) : null}
 										{requirement.sourceExternalLinkId ? (
 											<DataListItem>
-												<DataListItemLabel>
-													{t.units.detail.requirementSource}
-												</DataListItemLabel>
+												<DataListItemLabel>{t.units.detail.requirementSource}</DataListItemLabel>
 												<DataListItemValue className="break-all text-end">
 													{externalLink ? (
 														<a
@@ -103,28 +95,18 @@ function SoftwareRequirementsContent({
 												</DataListItemValue>
 											</DataListItem>
 										) : null}
-										{Object.entries(requirement.hardware).map(
-											([label, value]) => (
-												<DataListItem key={label}>
-													<DataListItemLabel className="break-words">
-														{label}
-													</DataListItemLabel>
-													<DataListItemValue className="min-w-0 break-words text-end">
-														{formatRequirementValue(
-															value,
-															locale.current,
-															{
-																no: t.units.fields.no,
-																notSpecified:
-																	t.units.detail
-																		.requirementNotSpecified,
-																yes: t.units.fields.yes,
-															},
-														)}
-													</DataListItemValue>
-												</DataListItem>
-											),
-										)}
+										{Object.entries(requirement.hardware).map(([label, value]) => (
+											<DataListItem key={label}>
+												<DataListItemLabel className="break-words">{label}</DataListItemLabel>
+												<DataListItemValue className="min-w-0 break-words text-end">
+													{formatRequirementValue(value, locale.current, {
+														no: t.units.fields.no,
+														notSpecified: t.units.detail.requirementNotSpecified,
+														yes: t.units.fields.yes,
+													})}
+												</DataListItemValue>
+											</DataListItem>
+										))}
 									</DataList>
 								</CardContent>
 							</Card>

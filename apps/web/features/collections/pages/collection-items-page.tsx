@@ -59,9 +59,7 @@ export function CollectionItemsPage() {
 
 	const items = collectionContentItems(content);
 	const pending = add.isPending || move.isPending || remove.isPending;
-	const selectableDestinations = items.filter(
-		(item) => !selectedIds.has(item.membership.targetId),
-	);
+	const selectableDestinations = items.filter((item) => !selectedIds.has(item.membership.targetId));
 
 	if (!collection.capabilities.canManageItems)
 		return <p className="text-sm text-destructive">{t.errors.forbidden}</p>;
@@ -193,11 +191,7 @@ export function CollectionItemsPage() {
 					<div className="flex flex-wrap items-center gap-2 rounded-xl border border-border-weak bg-surface-raised p-3">
 						<Button
 							disabled={pending || selectedIds.size === items.length}
-							onClick={() =>
-								setSelectedIds(
-									new Set(items.map((item) => item.membership.targetId)),
-								)
-							}
+							onClick={() => setSelectedIds(new Set(items.map((item) => item.membership.targetId)))}
 							size="sm"
 							variant="outline"
 						>
@@ -234,13 +228,9 @@ export function CollectionItemsPage() {
 										aria-label={t.collections.items.selectItem({ title })}
 										checked={selectedIds.has(targetId)}
 										disabled={pending}
-										onCheckedChange={({ checked }) =>
-											toggleSelection(targetId, checked === true)
-										}
+										onCheckedChange={({ checked }) => toggleSelection(targetId, checked === true)}
 									/>
-									<span className="min-w-0 flex-1 truncate font-medium text-sm">
-										{title}
-									</span>
+									<span className="min-w-0 flex-1 truncate font-medium text-sm">{title}</span>
 									<Button
 										aria-label={t.collections.items.removeItem({ title })}
 										disabled={pending}
@@ -287,9 +277,7 @@ export function CollectionItemsPage() {
 								<NativeSelect
 									disabled={move.isPending}
 									onChange={(event) => {
-										setPlacementKind(
-											event.currentTarget.value as MovePlacementKind,
-										);
+										setPlacementKind(event.currentTarget.value as MovePlacementKind);
 										setDestinationTargetId("");
 									}}
 									value={placementKind}
@@ -310,9 +298,7 @@ export function CollectionItemsPage() {
 									<FieldLabel>{t.collections.items.afterItem}</FieldLabel>
 									<NativeSelect
 										disabled={move.isPending}
-										onChange={(event) =>
-											setDestinationTargetId(event.currentTarget.value)
-										}
+										onChange={(event) => setDestinationTargetId(event.currentTarget.value)}
 										value={destinationTargetId}
 									>
 										<NativeSelectOption value="">
@@ -333,17 +319,11 @@ export function CollectionItemsPage() {
 						<RequestFailure error={move.error} fallback={t.ui.retryLater} />
 					</DialogBody>
 					<DialogFooter>
-						<Button
-							disabled={move.isPending}
-							onClick={closeMoveDialog}
-							variant="outline"
-						>
+						<Button disabled={move.isPending} onClick={closeMoveDialog} variant="outline">
 							{t.collections.cancel}
 						</Button>
 						<Button
-							disabled={
-								!selectedIds.size || (destinationRequired && !destinationTargetId)
-							}
+							disabled={!selectedIds.size || (destinationRequired && !destinationTargetId)}
 							isLoading={move.isPending}
 							onClick={() => void submitMove()}
 							variant="solid"

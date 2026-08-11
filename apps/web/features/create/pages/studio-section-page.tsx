@@ -93,10 +93,7 @@ function StudioSectionContent({ sectionId }: { readonly sectionId: StudioSection
 				link={Link}
 				title={section.label}
 			/>
-			<StudioSectionToolbar
-				filters={filters}
-				onChange={(change) => void setFilters(change)}
-			/>
+			<StudioSectionToolbar filters={filters} onChange={(change) => void setFilters(change)} />
 			<StudioContentList
 				hasNextPage={query.hasNextPage}
 				isFetchingNextPage={query.isFetchingNextPage}

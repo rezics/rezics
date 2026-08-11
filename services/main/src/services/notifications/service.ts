@@ -157,8 +157,7 @@ export function notificationTranslationKey(
 			payload.references !== null
 				? payload.references
 				: null;
-		const resolution =
-			references && "resolution" in references ? references.resolution : undefined;
+		const resolution = references && "resolution" in references ? references.resolution : undefined;
 		if (resolution === "approved") return "unit_ownership_claim_approved";
 		if (resolution === "rejected") return "unit_ownership_claim_rejected";
 		if (resolution === "superseded") return "unit_ownership_claim_superseded";

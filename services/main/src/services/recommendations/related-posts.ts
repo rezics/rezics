@@ -35,12 +35,7 @@ export async function recommendRelatedPosts(input: {
 		...RelatedPostFeedQuery,
 		localizationLanguages: input.localizationLanguages,
 	};
-	const eligible = getFeedEligibilityCondition(
-		input.viewer,
-		feedQuery,
-		input.asOf,
-		input.afterId,
-	);
+	const eligible = getFeedEligibilityCondition(input.viewer, feedQuery, input.asOf, input.afterId);
 	const [subjectRows, creditRows, best] = await Promise.all([
 		input.seed.subjectId
 			? database
@@ -48,11 +43,7 @@ export async function recommendRelatedPosts(input: {
 					.from(post)
 					.innerJoin(unit, eq(unit.id, post.id))
 					.where(
-						and(
-							eq(post.subjectUnitId, input.seed.subjectId),
-							ne(post.id, input.seed.id),
-							eligible,
-						),
+						and(eq(post.subjectUnitId, input.seed.subjectId), ne(post.id, input.seed.id), eligible),
 					)
 					.orderBy(desc(post.createdAt), desc(post.id))
 					.limit(RecommendationPolicy.maxRelationCandidates)
@@ -65,9 +56,7 @@ export async function recommendRelatedPosts(input: {
 					.innerJoin(unit, eq(unit.id, post.id))
 					.where(
 						and(
-							inArray(creditAttribution.creditedUnitId, [
-								...input.seed.creditedUnitIds,
-							]),
+							inArray(creditAttribution.creditedUnitId, [...input.seed.creditedUnitIds]),
 							ne(post.id, input.seed.id),
 							eligible,
 						),

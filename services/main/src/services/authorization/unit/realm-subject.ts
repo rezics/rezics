@@ -84,10 +84,7 @@ export function profileCanManageRealmAccess(
 					eq(managerRestriction.subjectKind, "profile"),
 					eq(managerRestriction.profileId, profileId),
 					isNull(managerRestriction.revokedAt),
-					or(
-						isNull(managerRestriction.expiresAt),
-						sql`${managerRestriction.expiresAt} > now()`,
-					),
+					or(isNull(managerRestriction.expiresAt), sql`${managerRestriction.expiresAt} > now()`),
 				),
 			),
 	);
@@ -103,20 +100,14 @@ export function profileCanManageRealmAccess(
 					eq(managerRestriction.subjectKind, "realm"),
 					eq(managerRestriction.realmRelation, "member"),
 					isNull(managerRestriction.revokedAt),
-					or(
-						isNull(managerRestriction.expiresAt),
-						sql`${managerRestriction.expiresAt} > now()`,
-					),
+					or(isNull(managerRestriction.expiresAt), sql`${managerRestriction.expiresAt} > now()`),
 					exists(
 						executor
 							.select({ id: managerRestrictionMember.profileId })
 							.from(managerRestrictionMember)
 							.where(
 								and(
-									eq(
-										managerRestrictionMember.realmId,
-										managerRestriction.realmId,
-									),
+									eq(managerRestrictionMember.realmId, managerRestriction.realmId),
 									eq(managerRestrictionMember.profileId, profileId),
 									eq(managerRestrictionMember.state, "active"),
 								),
@@ -137,10 +128,7 @@ export function profileCanManageRealmAccess(
 					isNull(managerGrant.revokedAt),
 					or(isNull(managerGrant.expiresAt), sql`${managerGrant.expiresAt} > now()`),
 					or(
-						and(
-							eq(managerGrant.subjectKind, "profile"),
-							eq(managerGrant.profileId, profileId),
-						),
+						and(eq(managerGrant.subjectKind, "profile"), eq(managerGrant.profileId, profileId)),
 						and(
 							eq(managerGrant.subjectKind, "realm"),
 							eq(managerGrant.realmRelation, "member"),
@@ -176,9 +164,6 @@ export function profileMatchesRealmAccessSubject(
 ): SQL {
 	return or(
 		and(eq(relation, "member"), activeRealmMembership(executor, realmId, profileId)),
-		and(
-			eq(relation, "access_manager"),
-			profileCanManageRealmAccess(executor, realmId, profileId),
-		),
+		and(eq(relation, "access_manager"), profileCanManageRealmAccess(executor, realmId, profileId)),
 	) as SQL;
 }

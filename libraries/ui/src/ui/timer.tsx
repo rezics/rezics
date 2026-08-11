@@ -18,12 +18,7 @@ export const Timer = (props: React.ComponentProps<typeof ArkTimer.Root>) => {
 
 	return (
 		<ArkTimer.Root
-			className={cn(
-				"min-w-0",
-				"flex flex-col items-start gap-4",
-				"text-foreground",
-				className,
-			)}
+			className={cn("min-w-0", "flex flex-col items-start gap-4", "text-foreground", className)}
 			data-slot="timer"
 			{...rest}
 		/>
@@ -139,12 +134,7 @@ export const TimerPause = (props: TimerActionProps) => (
 );
 
 export const TimerResume = (props: TimerActionProps) => (
-	<ArkTimer.ActionTrigger
-		aria-label="Resume"
-		data-slot="timer-resume"
-		{...props}
-		action="resume"
-	/>
+	<ArkTimer.ActionTrigger aria-label="Resume" data-slot="timer-resume" {...props} action="resume" />
 );
 
 export const TimerStart = (props: TimerActionProps) => (

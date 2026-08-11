@@ -11,9 +11,7 @@ export type ReviewSort = Static<typeof ReviewSortSchema>;
 const ListReviewsCommonQuery = {
 	targetId: t.Optional(Uuid),
 	realmIds: t.Optional(t.Array(Uuid, { minItems: 1, maxItems: 50, uniqueItems: true })),
-	languages: t.Optional(
-		t.Array(ContentLanguage, { minItems: 1, maxItems: 50, uniqueItems: true }),
-	),
+	languages: t.Optional(t.Array(ContentLanguage, { minItems: 1, maxItems: 50, uniqueItems: true })),
 	...LocalizationLanguageQuery,
 	sort: t.Optional(ReviewSortSchema),
 	cursor: t.Optional(t.String({ maxLength: 1024 })),

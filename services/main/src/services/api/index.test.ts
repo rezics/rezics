@@ -124,9 +124,7 @@ describe("API root", () => {
 			{ ApiToken: [] },
 			{ SessionCookie: [] },
 		]);
-		expect(document.paths["/api/v1/api-tokens"]?.get?.security).toEqual([
-			{ SessionCookie: [] },
-		]);
+		expect(document.paths["/api/v1/api-tokens"]?.get?.security).toEqual([{ SessionCookie: [] }]);
 		expect(
 			document.paths["/api/v1/api-tokens"]?.get?.responses?.[StatusCodes.FORBIDDEN],
 		).toBeUndefined();
@@ -147,10 +145,8 @@ describe("API root", () => {
 			document.paths["/api/v1/units/{type}/{unitId}/aliases/{aliasId}/vote"]?.put,
 			document.paths["/api/v1/units/{type}/{unitId}/aliases/{aliasId}/vote"]?.delete,
 			document.paths["/api/v1/units/{type}/{unitId}/external-links"]?.post,
-			document.paths["/api/v1/units/{type}/{unitId}/external-links/{externalLinkId}/vote"]
-				?.put,
-			document.paths["/api/v1/units/{type}/{unitId}/external-links/{externalLinkId}/vote"]
-				?.delete,
+			document.paths["/api/v1/units/{type}/{unitId}/external-links/{externalLinkId}/vote"]?.put,
+			document.paths["/api/v1/units/{type}/{unitId}/external-links/{externalLinkId}/vote"]?.delete,
 		];
 
 		for (const operation of operations) {
@@ -165,10 +161,8 @@ describe("API root", () => {
 			document.paths["/api/v1/units/{type}/{unitId}/external-links"]?.post,
 			document.paths["/api/v1/units/{type}/{unitId}/external-links/{externalLinkId}"]?.patch,
 			document.paths["/api/v1/units/{type}/{unitId}/external-links/{externalLinkId}"]?.delete,
-			document.paths["/api/v1/units/{type}/{unitId}/external-links/{externalLinkId}/vote"]
-				?.put,
-			document.paths["/api/v1/units/{type}/{unitId}/external-links/{externalLinkId}/vote"]
-				?.delete,
+			document.paths["/api/v1/units/{type}/{unitId}/external-links/{externalLinkId}/vote"]?.put,
+			document.paths["/api/v1/units/{type}/{unitId}/external-links/{externalLinkId}/vote"]?.delete,
 		];
 
 		for (const operation of operations) {
@@ -179,35 +173,28 @@ describe("API root", () => {
 			);
 			if (!typeParameter || "$ref" in typeParameter || !typeParameter.schema)
 				throw new Error("Expected an inline Unit type path parameter");
-			if ("$ref" in typeParameter.schema)
-				throw new Error("Expected an inline Unit type schema");
+			if ("$ref" in typeParameter.schema) throw new Error("Expected an inline Unit type schema");
 			expect(typeParameter.schema.enum).toEqual(UnitKindValues);
 		}
 
 		const postResponses =
 			document.paths["/api/v1/units/{type}/{unitId}/external-links"]?.post?.responses;
-		expect(JSON.stringify(postResponses?.[StatusCodes.NOT_FOUND])).toContain(
-			"EntityEntryNotFound",
-		);
-		expect(
-			document.paths["/api/v1/units/{type}/{unitId}/aliases/{aliasId}"]?.delete,
-		).toBeDefined();
+		expect(JSON.stringify(postResponses?.[StatusCodes.NOT_FOUND])).toContain("EntityEntryNotFound");
+		expect(document.paths["/api/v1/units/{type}/{unitId}/aliases/{aliasId}"]?.delete).toBeDefined();
 	});
 
 	it("documents the development preview gate on unreleased Zone address writes", () => {
 		const document = toOpenAPISchema(api);
 		const methods = ["delete", "get", "patch", "post", "put"] as const;
-		const previewProtectedZoneOperations = Object.entries(document.paths).flatMap(
-			([path, item]) =>
-				path.includes("/zones")
-					? methods.flatMap((method) => {
-							const forbidden = item?.[method]?.responses?.[StatusCodes.FORBIDDEN];
-							return forbidden &&
-								JSON.stringify(forbidden).includes("PlatformCapabilityRequired")
-								? [`${method.toUpperCase()} ${path}`]
-								: [];
-						})
-					: [],
+		const previewProtectedZoneOperations = Object.entries(document.paths).flatMap(([path, item]) =>
+			path.includes("/zones")
+				? methods.flatMap((method) => {
+						const forbidden = item?.[method]?.responses?.[StatusCodes.FORBIDDEN];
+						return forbidden && JSON.stringify(forbidden).includes("PlatformCapabilityRequired")
+							? [`${method.toUpperCase()} ${path}`]
+							: [];
+					})
+				: [],
 		);
 
 		expect(previewProtectedZoneOperations.toSorted()).toEqual([
@@ -255,9 +242,7 @@ describe("API root", () => {
 
 	it("requires authentication before checking the Tag hierarchy preview capability", async () => {
 		const response = await api.handle(
-			new Request(
-				"http://localhost/api/v1/tags/00000000-0000-7000-8000-000000000001/hierarchy",
-			),
+			new Request("http://localhost/api/v1/tags/00000000-0000-7000-8000-000000000001/hierarchy"),
 		);
 
 		expect(response.status).toBe(StatusCodes.UNAUTHORIZED);
@@ -309,8 +294,7 @@ describe("API root", () => {
 			path.includes("/tag-structures/")
 				? methods.flatMap((method) => {
 						const forbidden = item?.[method]?.responses?.[StatusCodes.FORBIDDEN];
-						return forbidden &&
-							JSON.stringify(forbidden).includes("PlatformCapabilityRequired")
+						return forbidden && JSON.stringify(forbidden).includes("PlatformCapabilityRequired")
 							? [`${method.toUpperCase()} ${path}`]
 							: [];
 					})
@@ -361,9 +345,7 @@ describe("API root", () => {
 	it("documents JSON only for routes that declare a request body", () => {
 		const document = toOpenAPISchema(api);
 
-		expect(
-			document.paths["/api/v1/users/me/following/{unitId}"]?.put?.requestBody,
-		).toBeUndefined();
+		expect(document.paths["/api/v1/users/me/following/{unitId}"]?.put?.requestBody).toBeUndefined();
 		const preferencesBody = document.paths["/api/v1/users/me/preferences"]?.put?.requestBody;
 		if (!preferencesBody || "$ref" in preferencesBody)
 			throw new Error("Expected an inline preferences request body");

@@ -129,9 +129,7 @@ export function FeedCardHeader({
 				{realms.length > 0 ? (
 					<>
 						{showAttributions ? (
-							<span className="text-muted-foreground text-xs">
-								{t.feed.contextSeparator}
-							</span>
+							<span className="text-muted-foreground text-xs">{t.feed.contextSeparator}</span>
 						) : null}
 						<FeedContextGroup
 							items={realms}
@@ -262,9 +260,7 @@ export function FeedCardTarget({
 						<ItemDescription className="text-xs">{label}</ItemDescription>
 						<ItemTitle>{title}</ItemTitle>
 						{description ? (
-							<ItemDescription className="line-clamp-1 text-xs">
-								{description}
-							</ItemDescription>
+							<ItemDescription className="line-clamp-1 text-xs">{description}</ItemDescription>
 						) : null}
 						{rating ? <FeedCardRating rating={rating} /> : null}
 					</ItemContent>
@@ -303,10 +299,7 @@ export function FeedCardRating({
 	if (!score)
 		return (
 			<p
-				className={cn(
-					"mt-1 flex items-center gap-1.5 text-muted-foreground text-xs",
-					className,
-				)}
+				className={cn("mt-1 flex items-center gap-1.5 text-muted-foreground text-xs", className)}
 				data-slot="feed-card-rating"
 			>
 				<StarIcon aria-hidden className="size-3.5" />
@@ -437,27 +430,19 @@ function FeedContextGroup<T extends FeedContextItem>({
 										>
 											<FeedAvatar item={item} />
 											<span className="min-w-0 flex-1 truncate">
-												<LocalizedText
-													language={item.language}
-													value={item.name}
-												/>
+												<LocalizedText language={item.language} value={item.name} />
 											</span>
 										</a>
 									) : (
 										<span className="flex min-h-11 min-w-0 items-center gap-2 px-2 py-1.5 text-sm">
 											<FeedAvatar item={item} />
 											<span className="min-w-0 flex-1 truncate">
-												<LocalizedText
-													language={item.language}
-													value={item.name}
-												/>
+												<LocalizedText language={item.language} value={item.name} />
 											</span>
 										</span>
 									)}
 								</HoverCardTrigger>
-								<HoverCardContent className="w-72">
-									{renderInfoCard(item)}
-								</HoverCardContent>
+								<HoverCardContent className="w-72">{renderInfoCard(item)}</HoverCardContent>
 							</HoverCard>
 						</div>
 					))}

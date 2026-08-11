@@ -26,12 +26,7 @@ export const PasswordInput = (props: PasswordInputProps) => {
 
 	return (
 		<ArkPasswordInput.Root
-			className={cn(
-				"group/password-input",
-				"w-full",
-				"flex flex-col items-start gap-2",
-				className,
-			)}
+			className={cn("group/password-input", "w-full", "flex flex-col items-start gap-2", className)}
 			data-size={size}
 			data-slot="password-input"
 			{...rest}
@@ -71,10 +66,7 @@ export const PasswordInputTrigger = (
 
 	return (
 		<InputGroupAddon align="inline-end">
-			<ArkPasswordInput.VisibilityTrigger
-				asChild
-				data-slot="password-input-visibility-trigger"
-			>
+			<ArkPasswordInput.VisibilityTrigger asChild data-slot="password-input-visibility-trigger">
 				<InputGroupButton size="icon-xs" variant="ghost" {...rest}>
 					{children ?? <PasswordInputIndicator />}
 				</InputGroupButton>

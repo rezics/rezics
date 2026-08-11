@@ -5,12 +5,9 @@ import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 export default {
 	layout: {
 		automatedMessage: "Este es un mensaje automático. No respondas a este correo electrónico.",
-		copyright: insert(
-			`© {{year}} ${verbatimTerms.rezics.value}. Todos los derechos reservados.`,
-			{
-				year: Number,
-			},
-		),
+		copyright: insert(`© {{year}} ${verbatimTerms.rezics.value}. Todos los derechos reservados.`, {
+			year: Number,
+		}),
 	},
 	resetPassword: {
 		subject: `Restablece tu contraseña de ${verbatimTerms.rezics.value}`,

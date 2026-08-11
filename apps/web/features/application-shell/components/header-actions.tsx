@@ -42,12 +42,7 @@ export function RestoringHeaderActions() {
 
 function CreateAction({ href, label }: { href: string; label: string }) {
 	return (
-		<Button
-			variant="solid"
-			asChild
-			className="size-11 lg:h-9 lg:w-auto lg:px-3.5"
-			size="icon-xl"
-		>
+		<Button variant="solid" asChild className="size-11 lg:h-9 lg:w-auto lg:px-3.5" size="icon-xl">
 			<AppLink aria-label={label} href={href} title={label}>
 				<Plus aria-hidden data-icon="inline-start" />
 				<span className="hidden lg:inline">{label}</span>

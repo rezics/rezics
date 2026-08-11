@@ -262,22 +262,17 @@ function SubjectAccessTable({
 		};
 		byKey.delete("authenticated");
 		const targetMembersKey = `realm:${snapshot.unitId}:member`;
-		const targetMembers =
-			snapshot.unitKind === "realm" ? byKey.get(targetMembersKey) : undefined;
+		const targetMembers = snapshot.unitKind === "realm" ? byKey.get(targetMembersKey) : undefined;
 		byKey.delete(targetMembersKey);
 		const targetMembersMatches =
 			Boolean(targetMembers) &&
 			(filter === "all" || filter === "realm") &&
 			(!deferredSearch ||
-				t.governance.access.currentRealmMembersLabel
-					.toLocaleLowerCase()
-					.includes(deferredSearch));
+				t.governance.access.currentRealmMembersLabel.toLocaleLowerCase().includes(deferredSearch));
 		const authenticatedMatches =
 			filter === "all" &&
 			(!deferredSearch ||
-				t.governance.access.authenticatedLabel
-					.toLocaleLowerCase()
-					.includes(deferredSearch));
+				t.governance.access.authenticatedLabel.toLocaleLowerCase().includes(deferredSearch));
 		return [
 			...(targetMembersMatches && targetMembers ? [targetMembers] : []),
 			...(authenticatedMatches ? [authenticated] : []),
@@ -308,21 +303,13 @@ function SubjectAccessTable({
 					</div>
 					<div className="flex flex-wrap gap-2">
 						{scope.length === 0 && snapshot.canTransferOwnership ? (
-							<Button
-								onClick={() => setTransferOpen(true)}
-								type="button"
-								variant="outline"
-							>
+							<Button onClick={() => setTransferOpen(true)} type="button" variant="outline">
 								<UserRoundCogIcon />
 								{t.governance.access.transferOwnership}
 							</Button>
 						) : null}
 						{scope.length === 0 && snapshot.canRelinquishOwnership ? (
-							<Button
-								onClick={() => setRelinquishOpen(true)}
-								type="button"
-								variant="outline"
-							>
+							<Button onClick={() => setRelinquishOpen(true)} type="button" variant="outline">
 								{t.governance.access.relinquishOwnership}
 							</Button>
 						) : null}
@@ -348,10 +335,7 @@ function SubjectAccessTable({
 							value={search}
 						/>
 					</div>
-					<div
-						className="flex flex-wrap gap-2"
-						aria-label={t.governance.access.filterLabel}
-					>
+					<div className="flex flex-wrap gap-2" aria-label={t.governance.access.filterLabel}>
 						{(["all", "profile", "realm"] as const).map((kind) => (
 							<Button
 								aria-pressed={filter === kind}
@@ -380,10 +364,7 @@ function SubjectAccessTable({
 					</div>
 					<div className="max-h-[30rem] overflow-auto" ref={scrollRef} role="rowgroup">
 						{subjects.length ? (
-							<div
-								className="relative"
-								style={{ height: virtualizer.getTotalSize() }}
-							>
+							<div className="relative" style={{ height: virtualizer.getTotalSize() }}>
 								{virtualizer.getVirtualItems().map((virtualRow) => {
 									const subject = subjects[virtualRow.index];
 									if (!subject) return null;
@@ -409,10 +390,7 @@ function SubjectAccessTable({
 											}}
 											type="button"
 										>
-											<span
-												className="flex min-w-0 items-center gap-3"
-												role="cell"
-											>
+											<span className="flex min-w-0 items-center gap-3" role="cell">
 												<span className="grid size-8 shrink-0 place-items-center rounded-full bg-muted">
 													{subject.subject.kind === "profile" ? (
 														<KeyRoundIcon className="size-4" />
@@ -420,40 +398,22 @@ function SubjectAccessTable({
 														<UsersRoundIcon className="size-4" />
 													)}
 												</span>
-												<span className="truncate font-medium">
-													{label}
-												</span>
+												<span className="truncate font-medium">{label}</span>
 												{isOwner ? (
-													<Badge variant="secondary">
-														{t.governance.access.owner}
-													</Badge>
+													<Badge variant="secondary">{t.governance.access.owner}</Badge>
 												) : null}
 												{isBuiltInAudience ? (
-													<Badge variant="outline">
-														{t.governance.access.builtInAudience}
-													</Badge>
+													<Badge variant="outline">{t.governance.access.builtInAudience}</Badge>
 												) : null}
 											</span>
-											<span
-												className="text-muted-foreground text-sm"
-												role="cell"
-											>
+											<span className="text-muted-foreground text-sm" role="cell">
 												{subject.subject.kind === "realm"
-													? t.governance.access.subjectRelations[
-															subject.subject.relation
-														]
-													: t.governance.access.subjectKinds[
-															subject.subject.kind
-														]}
+													? t.governance.access.subjectRelations[subject.subject.relation]
+													: t.governance.access.subjectKinds[subject.subject.kind]}
 											</span>
-											<span
-												className="text-end text-muted-foreground text-sm"
-												role="cell"
-											>
+											<span className="text-end text-muted-foreground text-sm" role="cell">
 												{t.governance.access.table.ruleCount({
-													count:
-														subject.grants.length +
-														subject.restrictions.length,
+													count: subject.grants.length + subject.restrictions.length,
 												})}
 											</span>
 										</button>
@@ -644,10 +604,7 @@ function OwnershipTransferDialogs({
 							/>
 						</div>
 						{candidates.isError ? (
-							<QueryFailure
-								error={candidates.error}
-								retry={() => void candidates.refetch()}
-							/>
+							<QueryFailure error={candidates.error} retry={() => void candidates.refetch()} />
 						) : candidates.isPending ? (
 							<QueryPending />
 						) : items.length ? (
@@ -657,10 +614,7 @@ function OwnershipTransferDialogs({
 								ref={scrollRef}
 								role="listbox"
 							>
-								<div
-									className="relative"
-									style={{ height: virtualizer.getTotalSize() }}
-								>
+								<div className="relative" style={{ height: virtualizer.getTotalSize() }}>
 									{virtualRows.map((virtualRow) => {
 										const candidate = items[virtualRow.index];
 										if (!candidate) return null;
@@ -686,9 +640,7 @@ function OwnershipTransferDialogs({
 														{candidateLabel(candidate)}
 													</span>
 													<span className="block truncate text-muted-foreground text-xs">
-														{candidate.slug
-															? `@${candidate.slug}`
-															: candidate.profileId}
+														{candidate.slug ? `@${candidate.slug}` : candidate.profileId}
 													</span>
 												</span>
 												<span className="text-muted-foreground text-sm">
@@ -719,9 +671,7 @@ function OwnershipTransferDialogs({
 						description={
 							selected
 								? t.governance.access.confirmTransferDescription({
-										unit:
-											snapshot.unitTitle ??
-											t.governance.access.untitledOwnershipUnit,
+										unit: snapshot.unitTitle ?? t.governance.access.untitledOwnershipUnit,
 										profile: candidateLabel(selected),
 									})
 								: undefined
@@ -808,9 +758,7 @@ function OwnershipRelinquishmentDialog({
 		>
 			<AlertDialogContent>
 				<AlertDialogHeader>
-					<AlertDialogTitle>
-						{t.governance.access.relinquishOwnershipTitle}
-					</AlertDialogTitle>
+					<AlertDialogTitle>{t.governance.access.relinquishOwnershipTitle}</AlertDialogTitle>
 					<AlertDialogDescription>
 						{t.governance.access.relinquishOwnershipDescription}
 					</AlertDialogDescription>
@@ -919,13 +867,9 @@ function AddSubjectDialog({
 											}
 											type="button"
 										>
-											<span className="truncate font-medium">
-												{candidate.label ?? key}
-											</span>
+											<span className="truncate font-medium">{candidate.label ?? key}</span>
 											{isExisting ? (
-												<Badge variant="outline">
-													{t.governance.access.alreadyAdded}
-												</Badge>
+												<Badge variant="outline">{t.governance.access.alreadyAdded}</Badge>
 											) : null}
 										</button>
 									);

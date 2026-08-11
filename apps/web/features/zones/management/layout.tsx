@@ -20,10 +20,7 @@ export function ZoneLayoutManagement() {
 				link={Link}
 				title={t.zones.management.sections.layout.label}
 			/>
-			<UnitDockManager
-				ownerUnitId={zoneId}
-				target={{ ownerKind: "zone", dockKind: "main" }}
-			/>
+			<UnitDockManager ownerUnitId={zoneId} target={{ ownerKind: "zone", dockKind: "main" }} />
 		</section>
 	);
 }

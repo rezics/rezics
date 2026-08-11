@@ -106,18 +106,9 @@ export async function listGlobalUnitTags(input: {
 				unitEffectiveTag.tagId,
 				input.localizationLanguages,
 			),
-			title: resolvedUnitLocalizationTitle(
-				unitEffectiveTag.tagId,
-				input.localizationLanguages,
-			),
-			summary: resolvedUnitLocalizationSummary(
-				unitEffectiveTag.tagId,
-				input.localizationLanguages,
-			),
-			avatar: resolvedUnitLocalizationAvatar(
-				unitEffectiveTag.tagId,
-				input.localizationLanguages,
-			),
+			title: resolvedUnitLocalizationTitle(unitEffectiveTag.tagId, input.localizationLanguages),
+			summary: resolvedUnitLocalizationSummary(unitEffectiveTag.tagId, input.localizationLanguages),
+			avatar: resolvedUnitLocalizationAvatar(unitEffectiveTag.tagId, input.localizationLanguages),
 			pinned: sql<boolean>`coalesce(${unitTag.pinned}, false)`,
 			position: unitTag.position,
 			score: unitTagVoteStat.score,
@@ -131,10 +122,7 @@ export async function listGlobalUnitTags(input: {
 		.innerJoin(globalTagUnit, eq(globalTagUnit.id, unitEffectiveTag.tagId))
 		.leftJoin(
 			unitTag,
-			and(
-				eq(unitTag.unitId, unitEffectiveTag.unitId),
-				eq(unitTag.tagId, unitEffectiveTag.tagId),
-			),
+			and(eq(unitTag.unitId, unitEffectiveTag.unitId), eq(unitTag.tagId, unitEffectiveTag.tagId)),
 		)
 		.leftJoin(
 			unitTagVoteStat,
@@ -148,9 +136,7 @@ export async function listGlobalUnitTags(input: {
 			and(
 				eq(viewerUnitTagVote.unitId, unitEffectiveTag.unitId),
 				eq(viewerUnitTagVote.tagId, unitEffectiveTag.tagId),
-				input.viewerProfileId
-					? eq(viewerUnitTagVote.profileId, input.viewerProfileId)
-					: sql`false`,
+				input.viewerProfileId ? eq(viewerUnitTagVote.profileId, input.viewerProfileId) : sql`false`,
 			),
 		)
 		.where(
@@ -190,15 +176,9 @@ export async function listRealmTagSubscriptions(input: {
 	const rows = await database
 		.select({
 			realmId: profileRealmTagSubscription.realmId,
-			language: resolvedUnitLocalizationLanguage(
-				realmSourceUnit.id,
-				input.localizationLanguages,
-			),
+			language: resolvedUnitLocalizationLanguage(realmSourceUnit.id, input.localizationLanguages),
 			title: resolvedUnitLocalizationTitle(realmSourceUnit.id, input.localizationLanguages),
-			summary: resolvedUnitLocalizationSummary(
-				realmSourceUnit.id,
-				input.localizationLanguages,
-			),
+			summary: resolvedUnitLocalizationSummary(realmSourceUnit.id, input.localizationLanguages),
 			avatar: resolvedUnitLocalizationAvatar(realmSourceUnit.id, input.localizationLanguages),
 			position: profileRealmTagSubscription.position,
 			createdAt: profileRealmTagSubscription.createdAt,
@@ -247,18 +227,12 @@ export async function listRealmTagVoteContexts(input: {
 				voteContextRealmUnit.id,
 				input.localizationLanguages,
 			),
-			title: resolvedUnitLocalizationTitle(
-				voteContextRealmUnit.id,
-				input.localizationLanguages,
-			),
+			title: resolvedUnitLocalizationTitle(voteContextRealmUnit.id, input.localizationLanguages),
 			summary: resolvedUnitLocalizationSummary(
 				voteContextRealmUnit.id,
 				input.localizationLanguages,
 			),
-			avatar: resolvedUnitLocalizationAvatar(
-				voteContextRealmUnit.id,
-				input.localizationLanguages,
-			),
+			avatar: resolvedUnitLocalizationAvatar(voteContextRealmUnit.id, input.localizationLanguages),
 		})
 		.from(realmMember)
 		.innerJoin(realm, eq(realm.id, realmMember.realmId))
@@ -283,14 +257,8 @@ export async function listRealmTagVoteContexts(input: {
 						.innerJoin(
 							candidateContextRealmUnit,
 							and(
-								eq(
-									candidateContextRealmUnit.realmId,
-									candidateRealmTagContext.realmId,
-								),
-								eq(
-									candidateContextRealmUnit.unitId,
-									candidateRealmTagContext.contextPostId,
-								),
+								eq(candidateContextRealmUnit.realmId, candidateRealmTagContext.realmId),
+								eq(candidateContextRealmUnit.unitId, candidateRealmTagContext.contextPostId),
 							),
 						)
 						.innerJoin(
@@ -405,10 +373,7 @@ export async function listRealmVotedTags(input: {
 			),
 		)
 		.innerJoin(rankedTagUnit, eq(rankedTagUnit.id, realmTagVoteStat.tagId))
-		.innerJoin(
-			rankedContextPostUnit,
-			eq(rankedContextPostUnit.id, realmTagContext.contextPostId),
-		)
+		.innerJoin(rankedContextPostUnit, eq(rankedContextPostUnit.id, realmTagContext.contextPostId))
 		.innerJoin(
 			rankedContextRealmUnit,
 			and(
@@ -432,15 +397,9 @@ export async function listRealmVotedTags(input: {
 		.select({
 			realmId: rankedVoteStats.realmId,
 			tagId: rankedVoteStats.tagId,
-			language: resolvedUnitLocalizationLanguage(
-				votedTagUnit.id,
-				input.localizationLanguages,
-			),
+			language: resolvedUnitLocalizationLanguage(votedTagUnit.id, input.localizationLanguages),
 			title: resolvedUnitLocalizationTitle(votedTagUnit.id, input.localizationLanguages),
-			summary: resolvedUnitLocalizationSummary(
-				contextPostUnit.id,
-				input.localizationLanguages,
-			),
+			summary: resolvedUnitLocalizationSummary(contextPostUnit.id, input.localizationLanguages),
 			avatar: resolvedUnitLocalizationAvatar(votedTagUnit.id, input.localizationLanguages),
 			contextPostId: realmTagContext.contextPostId,
 			score: rankedVoteStats.score,
@@ -547,9 +506,7 @@ export async function getUnitTagLandscape(input: {
 				unitId: input.unitId,
 				localizationLanguages: input.localizationLanguages,
 				limit: input.globalLimit,
-				excludedTagIds: structures.flatMap(({ members }) =>
-					members.map(({ tagId }) => tagId),
-				),
+				excludedTagIds: structures.flatMap(({ members }) => members.map(({ tagId }) => tagId)),
 			}),
 			realms: [],
 			voteRealms: [],

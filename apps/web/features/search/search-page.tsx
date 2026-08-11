@@ -184,9 +184,7 @@ export function SearchSurface({
 						emptyBody={t.emptyBody}
 						emptyTitle={t.empty}
 						pagination="infinite"
-						preserveDisplayedLanguage={hasSearchLanguagePresentationBoundary(
-							lastRequest.state,
-						)}
+						preserveDisplayedLanguage={hasSearchLanguagePresentationBoundary(lastRequest.state)}
 						query={results}
 					/>
 				</section>
@@ -266,9 +264,7 @@ function SearchLayout({
 
 function RouteSearchPage() {
 	const [route, setRoute] = useQueryStates(searchParamsParsers);
-	const labels = new Map(
-		route.tag.map((tagId, index) => [tagId, route.tagLabel[index]] as const),
-	);
+	const labels = new Map(route.tag.map((tagId, index) => [tagId, route.tagLabel[index]] as const));
 	const injections: SearchInjection[] = route.tag.map((tagId) => ({
 		source: "tag",
 		removable: true,
@@ -302,8 +298,7 @@ function RouteSearchPage() {
 function SharedSearchPage({ id }: { readonly id: string }) {
 	const query = useGetApiSearchSharedQueriesById({ path: { id } });
 	if (query.isPending) return <QueryPending />;
-	if (query.isError)
-		return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
+	if (query.isError) return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
 	const document = parseSharedSearchQueryDocument(query.data.document);
 	return (
 		<SearchLayout

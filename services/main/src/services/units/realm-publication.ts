@@ -189,10 +189,7 @@ export async function listUnitRealmPublications(input: {
 		.select({
 			realmId: realmUnit.realmId,
 			realmKind: sql<"realm">`'realm'`,
-			language: resolvedUnitLocalizationLanguage(
-				realmUnit.realmId,
-				input.localizationLanguages,
-			),
+			language: resolvedUnitLocalizationLanguage(realmUnit.realmId, input.localizationLanguages),
 			title: resolvedUnitLocalizationTitle(realmUnit.realmId, input.localizationLanguages),
 			publicationState: realmUnit.publicationState,
 			status: realmUnit.status,
@@ -215,10 +212,7 @@ export async function listUnitRealmPublications(input: {
 				input.cursor
 					? or(
 							lt(realmUnit.updatedAt, input.cursor[0]),
-							and(
-								eq(realmUnit.updatedAt, input.cursor[0]),
-								lt(realmUnit.realmId, input.cursor[1]),
-							),
+							and(eq(realmUnit.updatedAt, input.cursor[0]), lt(realmUnit.realmId, input.cursor[1])),
 						)
 					: undefined,
 			),
@@ -235,10 +229,7 @@ export async function listUnitRealmPublications(input: {
 					createdAt: contentGovernanceAction.createdAt,
 				})
 				.from(contentGovernanceAction)
-				.innerJoin(
-					contentReviewCase,
-					eq(contentReviewCase.id, contentGovernanceAction.caseId),
-				)
+				.innerJoin(contentReviewCase, eq(contentReviewCase.id, contentGovernanceAction.caseId))
 				.where(
 					and(
 						eq(contentReviewCase.authority, "realm"),

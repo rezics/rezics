@@ -58,9 +58,7 @@ vi.mock("@rezics/ui", async () => {
 				>
 					{value?.label ?? ariaLabel}
 				</button>
-				{value ? (
-					<button aria-label="clear-test-entity" onClick={onClear} type="button" />
-				) : null}
+				{value ? <button aria-label="clear-test-entity" onClick={onClear} type="button" /> : null}
 			</div>
 		),
 	};

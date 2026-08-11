@@ -30,9 +30,7 @@ function requiredRealmIdsFromError(
 	if (!isRecord(details) || !Array.isArray(details.realms)) return operationRealmIds;
 	const operationRealmIdSet = new Set(operationRealmIds);
 	const required = details.realms.flatMap((value) =>
-		isRecord(value) &&
-		typeof value.realmId === "string" &&
-		operationRealmIdSet.has(value.realmId)
+		isRecord(value) && typeof value.realmId === "string" && operationRealmIdSet.has(value.realmId)
 			? [value.realmId]
 			: [],
 	);
@@ -64,10 +62,7 @@ export function useRealmRulesAcknowledgement(realmIds: readonly string[]) {
 			try {
 				await operation();
 			} catch (error) {
-				if (
-					!protectedRealmIds.length ||
-					!hasErrorCode(error, "RealmRulesAcceptanceRequired")
-				)
+				if (!protectedRealmIds.length || !hasErrorCode(error, "RealmRulesAcceptanceRequired"))
 					throw error;
 				const requiredRealmIds = requiredRealmIdsFromError(error, protectedRealmIds);
 				const [firstRealmId, ...remainingRealmIds] = requiredRealmIds;

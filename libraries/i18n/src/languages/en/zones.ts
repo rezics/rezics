@@ -69,8 +69,7 @@ export default {
 			},
 			pages: {
 				label: "Pages",
-				description:
-					"Manage localized pages and optionally organize them in the page structure.",
+				description: "Manage localized pages and optionally organize them in the page structure.",
 			},
 			search: {
 				label: "Search",

@@ -29,10 +29,7 @@ beforeEach(() => {
 	vi.stubGlobal(
 		"IntersectionObserver",
 		class IntersectionObserverMock {
-			constructor(
-				callback: IntersectionObserverCallback,
-				options?: IntersectionObserverInit,
-			) {
+			constructor(callback: IntersectionObserverCallback, options?: IntersectionObserverInit) {
 				observerOptions(options);
 				emitIntersection = (isIntersecting) =>
 					callback(
@@ -56,9 +53,7 @@ afterEach(() => {
 describe("FeedContinuation", () => {
 	it("loads an infinite feed once per ready state when its sentinel enters the viewport", () => {
 		const loadNext = vi.fn();
-		const view = render(
-			<FeedContinuation mode="infinite" state={{ status: "ready", loadNext }} />,
-		);
+		const view = render(<FeedContinuation mode="infinite" state={{ status: "ready", loadNext }} />);
 
 		expect(screen.getByRole("button", { name: "Load more" })).toBeDefined();
 		expect(observerOptions).toHaveBeenCalledWith({

@@ -187,18 +187,13 @@ describe("API quota policy creation", () => {
 describe("API account quota policy resolution", () => {
 	it("uses the Standard policy when an account has no binding", async () => {
 		const resolved = await resolveApiAccountQuotaPolicy(privilegedBinding.userId, {
-			executor: queuedSelectExecutor(
-				[],
-				[{ policy: standardPolicy, revision: standardRevision }],
-			),
+			executor: queuedSelectExecutor([], [{ policy: standardPolicy, revision: standardRevision }]),
 			now,
 		});
 
 		expect(resolved.source).toBe("standard_default");
 		expect(resolved.class).toBe("standard");
-		expect(resolved.configuration).toEqual(
-			DefaultApiQuotaPolicies.accountStandard.configuration,
-		);
+		expect(resolved.configuration).toEqual(DefaultApiQuotaPolicies.accountStandard.configuration);
 	});
 
 	it("applies an account override without changing the source policy revision", async () => {

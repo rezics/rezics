@@ -184,12 +184,11 @@ describe("MediaContentStructureEditor lazy initialization", () => {
 		const formId = submitButton.getAttribute("form");
 		expect(formId).not.toBeNull();
 		if (!formId) throw new Error("Expected an explicitly associated form");
-		expect(
-			submitButton.closest("[data-slot='dialog-footer']")?.parentElement?.dataset.slot,
-		).toBe("dialog-content");
+		expect(submitButton.closest("[data-slot='dialog-footer']")?.parentElement?.dataset.slot).toBe(
+			"dialog-content",
+		);
 		expect(submitButton).toBeInstanceOf(HTMLButtonElement);
-		if (!(submitButton instanceof HTMLButtonElement))
-			throw new Error("Expected a submit button");
+		if (!(submitButton instanceof HTMLButtonElement)) throw new Error("Expected a submit button");
 		expect(submitButton.form).toBe(document.getElementById(formId));
 		fireEvent.click(submitButton);
 

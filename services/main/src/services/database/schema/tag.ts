@@ -53,12 +53,7 @@ export const unitTag = pgTable(
 		primaryKey({ columns: [table.unitId, table.tagId] }),
 		index("unit_tag_tag_idx").on(table.tagId, table.unitId),
 		index("unit_tag_created_by_idx").on(table.createdByProfileId),
-		index("unit_tag_unit_position_idx").on(
-			table.unitId,
-			table.pinned,
-			table.position,
-			table.tagId,
-		),
+		index("unit_tag_unit_position_idx").on(table.unitId, table.pinned, table.position, table.tagId),
 		uniqueIndex("unit_tag_unit_pinned_position_unique")
 			.on(table.unitId, table.position)
 			.where(sql`${table.pinned}`),

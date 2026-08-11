@@ -241,9 +241,7 @@ function CompletedProgressAction({
 			feedback={showingFeedback}
 			isLoading={isSaving}
 			label={
-				showingFeedback
-					? copy.completedFeedback({ count: feedbackCount })
-					: copy.startAgainAction
+				showingFeedback ? copy.completedFeedback({ count: feedbackCount }) : copy.startAgainAction
 			}
 			onPrimaryAction={() => void startAgain()}
 			onSecondaryAction={openEditor}

@@ -42,9 +42,7 @@ export function ConsoleOverviewPage() {
 								<div className="mb-3 grid size-9 place-items-center rounded-lg bg-primary/10 text-primary">
 									<Icon className="size-4" />
 								</div>
-								<h3 className="font-medium group-hover:text-primary">
-									{section.label}
-								</h3>
+								<h3 className="font-medium group-hover:text-primary">{section.label}</h3>
 								<p className="mt-1 line-clamp-2 text-muted-foreground text-sm">
 									{section.description}
 								</p>
@@ -57,9 +55,7 @@ export function ConsoleOverviewPage() {
 				<CardHeader className="flex-row items-start justify-between gap-3">
 					<div>
 						<CardTitle>{t.console.dashboard.systemHealth}</CardTitle>
-						<CardDescription>
-							{t.console.dashboard.systemHealthDescription}
-						</CardDescription>
+						<CardDescription>{t.console.dashboard.systemHealthDescription}</CardDescription>
 					</div>
 					<Badge
 						variant={
@@ -72,18 +68,14 @@ export function ConsoleOverviewPage() {
 					>
 						{readiness.isPending
 							? t.console.dashboard.checking
-							: t.console.dashboard.healthStates[
-									readiness.data?.status ?? "unavailable"
-								]}
+							: t.console.dashboard.healthStates[readiness.data?.status ?? "unavailable"]}
 					</Badge>
 				</CardHeader>
 				<CardContent className="grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
 					{checks.map(([name, check]) => (
 						<div className="rounded-lg border border-border p-3" key={name}>
 							<div className="flex items-center justify-between gap-2">
-								<p className="font-medium text-sm">
-									{t.console.dashboard.checks[name]}
-								</p>
+								<p className="font-medium text-sm">{t.console.dashboard.checks[name]}</p>
 								<Badge
 									size="sm"
 									variant={
@@ -105,9 +97,7 @@ export function ConsoleOverviewPage() {
 						</div>
 					))}
 					{!readiness.isPending && checks.length === 0 ? (
-						<p className="text-destructive text-sm">
-							{t.console.dashboard.healthUnavailable}
-						</p>
+						<p className="text-destructive text-sm">{t.console.dashboard.healthUnavailable}</p>
 					) : null}
 				</CardContent>
 			</Card>

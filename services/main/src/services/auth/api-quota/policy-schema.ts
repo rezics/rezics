@@ -377,10 +377,7 @@ function capLimits(limits: ApiQuotaLimits, cap: ApiQuotaLimitOverride | undefine
 						limits.requestRate.requestsPerMinute,
 						cap.requestRate.requestsPerMinute,
 					),
-					burstCapacity: Math.min(
-						limits.requestRate.burstCapacity,
-						cap.requestRate.burstCapacity,
-					),
+					burstCapacity: Math.min(limits.requestRate.burstCapacity, cap.requestRate.burstCapacity),
 				}
 			: limits.requestRate,
 		maxConcurrentRequests:

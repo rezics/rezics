@@ -41,10 +41,7 @@ function active(expiresAt: typeof unitAccessGrant.expiresAt) {
 function activeRestriction() {
 	return and(
 		isNull(unitAccessRestriction.revokedAt),
-		or(
-			isNull(unitAccessRestriction.expiresAt),
-			sql`${unitAccessRestriction.expiresAt} > now()`,
-		),
+		or(isNull(unitAccessRestriction.expiresAt), sql`${unitAccessRestriction.expiresAt} > now()`),
 	);
 }
 
@@ -213,8 +210,7 @@ export class UnitAuthorization<ProfileId extends string | undefined> {
 		const matched = grants
 			.filter((grant) => permission === "unit.read" || scopeCovers(grant.scope, scope))
 			.sort(
-				(left, right) =>
-					right.scope.length - left.scope.length || left.id.localeCompare(right.id),
+				(left, right) => right.scope.length - left.scope.length || left.id.localeCompare(right.id),
 			)[0];
 		if (!matched) return { allowed: false, reason: "ungranted" };
 		return {
@@ -332,8 +328,7 @@ export class UnitAuthorization<ProfileId extends string | undefined> {
 		const candidateScopes = new Map<string, UnitScope>();
 		for (const grant of grants) candidateScopes.set(scopeKey(grant.scope), grant.scope);
 		for (const candidate of [...candidateScopes.values()].sort(
-			(left, right) =>
-				left.length - right.length || scopeKey(left).localeCompare(scopeKey(right)),
+			(left, right) => left.length - right.length || scopeKey(left).localeCompare(scopeKey(right)),
 		))
 			if ((await this.decide(unitId, permission, candidate)).allowed) return candidate;
 		return undefined;

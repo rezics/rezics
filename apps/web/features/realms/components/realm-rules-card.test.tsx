@@ -85,9 +85,9 @@ describe("RealmRulesCard", () => {
 		fireEvent.click(firstRule);
 
 		await waitFor(() =>
-			expect(
-				screen.getByRole("button", { name: /Be civil/ }).getAttribute("aria-expanded"),
-			).toBe("true"),
+			expect(screen.getByRole("button", { name: /Be civil/ }).getAttribute("aria-expanded")).toBe(
+				"true",
+			),
 		);
 		expect(
 			screen.getByRole("button", { name: /Stay on topic/ }).getAttribute("aria-expanded"),
@@ -97,9 +97,9 @@ describe("RealmRulesCard", () => {
 		fireEvent.click(secondRule);
 
 		await waitFor(() => {
-			expect(
-				screen.getByRole("button", { name: /Be civil/ }).getAttribute("aria-expanded"),
-			).toBe("true");
+			expect(screen.getByRole("button", { name: /Be civil/ }).getAttribute("aria-expanded")).toBe(
+				"true",
+			);
 			expect(
 				screen.getByRole("button", { name: /Stay on topic/ }).getAttribute("aria-expanded"),
 			).toBe("true");

@@ -53,8 +53,7 @@ export function ZoneSearchPage({
 	useHeaderSearchOverride(identity?.search);
 
 	if (query.isPending) return <QueryPending />;
-	if (query.isError)
-		return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
+	if (query.isError) return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
 	if (!projection || !identity) return null;
 	return (
 		<ZoneBlockProvider baseHref={baseHref} projection={projection}>

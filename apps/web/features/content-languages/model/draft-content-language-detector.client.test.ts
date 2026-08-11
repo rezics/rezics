@@ -48,10 +48,7 @@ describe("draft content language detector client", () => {
 			"./draft-content-language-detector.client"
 		);
 		const signal = new AbortController().signal;
-		const detection = detectDraftContentLanguageInBrowser(
-			"A sufficiently long sample.",
-			signal,
-		);
+		const detection = detectDraftContentLanguageInBrowser("A sufficiently long sample.", signal);
 
 		expect(workerInstances).toHaveLength(1);
 		const [worker] = workerInstances;

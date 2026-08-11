@@ -48,10 +48,7 @@ export function PostSubjectHero({ subject }: { readonly subject: PostSubjectPres
 				) : null}
 			</div>
 			{href ? (
-				<ChevronRightIcon
-					aria-hidden
-					className="me-4 size-5 self-center text-muted-foreground"
-				/>
+				<ChevronRightIcon aria-hidden className="me-4 size-5 self-center text-muted-foreground" />
 			) : null}
 		</>
 	);

@@ -36,7 +36,8 @@ export default {
 		},
 		levelDescriptions: {
 			visible: "Toute personne pouvant lire cette Unit peut consulter la révision.",
-			hidden: "Seules les personnes autorisées à modérer la plateforme peuvent consulter les données sélectionnées.",
+			hidden:
+				"Seules les personnes autorisées à modérer la plateforme peuvent consulter les données sélectionnées.",
 			suppressed:
 				"Seules les personnes autorisées à supprimer peuvent consulter les données sélectionnées.",
 		},

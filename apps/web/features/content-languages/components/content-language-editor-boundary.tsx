@@ -19,8 +19,7 @@ export function ContentLanguageEditorBoundary({
 		path: { unitId },
 	});
 	if (query.isPending) return <QueryPending />;
-	if (query.isError)
-		return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
+	if (query.isError) return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
 	return (
 		<ContentLanguageEditorProvider
 			localizations={query.data.languages.map((language) => ({ language }))}

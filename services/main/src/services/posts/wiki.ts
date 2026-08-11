@@ -44,10 +44,7 @@ export async function createWikiPost(
 	input: CreateWikiPostInput,
 ): Promise<{ readonly id: string; readonly revisionId: string }> {
 	if (input.subjectId)
-		await input.authorization.entity.ensureSubjectAssociationAllowedIfEntity(
-			tx,
-			input.subjectId,
-		);
+		await input.authorization.entity.ensureSubjectAssociationAllowedIfEntity(tx, input.subjectId);
 	const created = await insertUnit(tx, {
 		kind: "post",
 		status: "published",

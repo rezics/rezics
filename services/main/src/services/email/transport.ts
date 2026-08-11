@@ -155,7 +155,6 @@ export async function sendMail(message: MailMessage): Promise<MailAcceptance> {
 			fromName: env.EMAIL_FROM_NAME,
 		},
 		message,
-		(url, init) =>
-			observedFetch({ dependency: "cloudflare-email", operation: "send" }, url, init),
+		(url, init) => observedFetch({ dependency: "cloudflare-email", operation: "send" }, url, init),
 	);
 }

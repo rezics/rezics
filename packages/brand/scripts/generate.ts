@@ -35,9 +35,7 @@ function run(command: string, args: string[]) {
 		execFileSync(command, args, { stdio: "inherit" });
 	} catch (error) {
 		if (isMissingExecutable(error)) {
-			throw new Error(
-				`${command} is unavailable. Run this script inside the project devenv.`,
-			);
+			throw new Error(`${command} is unavailable. Run this script inside the project devenv.`);
 		}
 		throw error;
 	}
@@ -49,9 +47,7 @@ function requireFont(font: string) {
 		family = execFileSync("fc-match", ["-f", "%{family}", font], { encoding: "utf8" });
 	} catch (error) {
 		if (isMissingExecutable(error)) {
-			throw new Error(
-				"fontconfig is unavailable. Run this script inside the project devenv.",
-			);
+			throw new Error("fontconfig is unavailable. Run this script inside the project devenv.");
 		}
 		throw error;
 	}

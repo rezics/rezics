@@ -93,10 +93,7 @@ export async function getAssociationContextPostsByAssociationIds(
 						pinned: unitTag.pinned,
 					})
 					.from(unitTag)
-					.innerJoin(
-						associationContextTagUnit,
-						eq(associationContextTagUnit.id, unitTag.tagId),
-					)
+					.innerJoin(associationContextTagUnit, eq(associationContextTagUnit.id, unitTag.tagId))
 					.leftJoin(
 						unitTagVoteStat,
 						and(

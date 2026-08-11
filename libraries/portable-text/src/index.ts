@@ -240,8 +240,7 @@ export function collectPortableTextUnitMentionIds(value: unknown): string[] {
 			: value;
 	for (const block of normalizePortableText(content)) {
 		if (!isPortableTextValueBlock(block)) continue;
-		for (const child of block.children)
-			if (child._type === "unit-mention") ids.add(child.unitId);
+		for (const child of block.children) if (child._type === "unit-mention") ids.add(child.unitId);
 	}
 	return [...ids];
 }
@@ -256,8 +255,7 @@ export function collectPortableTextPresentationUnitIds(value: unknown): string[]
 	for (const block of normalizePortableText(content)) {
 		if (!isPortableTextValueBlock(block)) continue;
 		for (const definition of block.markDefs)
-			if (definition._type === "spoiler" && definition.scopeUnitId)
-				ids.add(definition.scopeUnitId);
+			if (definition._type === "spoiler" && definition.scopeUnitId) ids.add(definition.scopeUnitId);
 	}
 	return [...ids];
 }
@@ -328,9 +326,7 @@ export function normalizePortableText(value: unknown): PortableTextValue {
 					_type: "image",
 					assetId: candidate.assetId,
 					...(typeof candidate.alt === "string" ? { alt: candidate.alt } : {}),
-					...(typeof candidate.caption === "string"
-						? { caption: candidate.caption }
-						: {}),
+					...(typeof candidate.caption === "string" ? { caption: candidate.caption } : {}),
 				},
 			];
 		}
@@ -341,58 +337,46 @@ export function normalizePortableText(value: unknown): PortableTextValue {
 		}
 
 		const markDefs = Array.isArray(candidate.markDefs)
-			? candidate.markDefs.flatMap(
-					(definition, definitionIndex): PortableTextMarkDefinition[] => {
-						if (!isRecord(definition)) return [];
-						if (definition._type === "link") {
-							const href = normalizePortableTextUrl(definition.href);
-							if (!href) return [];
-							return [
-								{
-									_key: keyOr(
-										definition._key,
-										`link-${blockIndex}-${definitionIndex}`,
-									),
-									_type: "link",
-									href,
-									...(typeof definition.openInNewTab === "boolean"
-										? { openInNewTab: definition.openInNewTab }
-										: {}),
-								},
-							];
-						}
-						if (definition._type !== "spoiler") return [];
-						if (
-							definition.scopeUnitId !== undefined &&
-							(typeof definition.scopeUnitId !== "string" ||
-								!new RegExp(UUID_PATTERN, "i").test(definition.scopeUnitId))
-						)
-							return [];
+			? candidate.markDefs.flatMap((definition, definitionIndex): PortableTextMarkDefinition[] => {
+					if (!isRecord(definition)) return [];
+					if (definition._type === "link") {
+						const href = normalizePortableTextUrl(definition.href);
+						if (!href) return [];
 						return [
 							{
-								_key: keyOr(
-									definition._key,
-									`spoiler-${blockIndex}-${definitionIndex}`,
-								),
-								_type: "spoiler",
-								...(typeof definition.scopeUnitId === "string"
-									? { scopeUnitId: definition.scopeUnitId }
+								_key: keyOr(definition._key, `link-${blockIndex}-${definitionIndex}`),
+								_type: "link",
+								href,
+								...(typeof definition.openInNewTab === "boolean"
+									? { openInNewTab: definition.openInNewTab }
 									: {}),
 							},
 						];
-					},
-				)
+					}
+					if (definition._type !== "spoiler") return [];
+					if (
+						definition.scopeUnitId !== undefined &&
+						(typeof definition.scopeUnitId !== "string" ||
+							!new RegExp(UUID_PATTERN, "i").test(definition.scopeUnitId))
+					)
+						return [];
+					return [
+						{
+							_key: keyOr(definition._key, `spoiler-${blockIndex}-${definitionIndex}`),
+							_type: "spoiler",
+							...(typeof definition.scopeUnitId === "string"
+								? { scopeUnitId: definition.scopeUnitId }
+								: {}),
+						},
+					];
+				})
 			: [];
 		const annotationKeys = new Set(markDefs.map(({ _key }) => _key));
 		const spoilerKeys = new Set(
-			markDefs.flatMap((definition) =>
-				definition._type === "spoiler" ? [definition._key] : [],
-			),
+			markDefs.flatMap((definition) => (definition._type === "spoiler" ? [definition._key] : [])),
 		);
 		const linkKeys = new Set(
-			markDefs.flatMap((definition) =>
-				definition._type === "link" ? [definition._key] : [],
-			),
+			markDefs.flatMap((definition) => (definition._type === "link" ? [definition._key] : [])),
 		);
 		const children = Array.isArray(candidate.children)
 			? candidate.children.flatMap((child, childIndex): PortableTextValueChild[] => {
@@ -404,18 +388,13 @@ export function normalizePortableText(value: unknown): PortableTextValue {
 								unitId: child.unitId,
 							},
 						];
-					if (
-						!isRecord(child) ||
-						child._type !== "span" ||
-						typeof child.text !== "string"
-					)
+					if (!isRecord(child) || child._type !== "span" || typeof child.text !== "string")
 						return [];
 					const supportedMarks = Array.isArray(child.marks)
 						? child.marks.filter(
 								(mark): mark is string =>
 									typeof mark === "string" &&
-									(memberOf(PortableTextDecorators, mark) ||
-										annotationKeys.has(mark)),
+									(memberOf(PortableTextDecorators, mark) || annotationKeys.has(mark)),
 							)
 						: [];
 					const hasSpoiler = supportedMarks.some((mark) => spoilerKeys.has(mark));

@@ -680,9 +680,7 @@ export function searchFilterValues(filter: SearchControlPredicate): readonly Sea
 	if (filter.field === "realm-tag-vote") return [];
 	if ("values" in filter) return filter.values;
 	if ("value" in filter) return [filter.value];
-	return [filter.lower, filter.upper].filter(
-		(value): value is SearchScalar => value !== undefined,
-	);
+	return [filter.lower, filter.upper].filter((value): value is SearchScalar => value !== undefined);
 }
 
 function assertScalar(field: SearchField, scalar: SearchScalarKind, value: SearchScalar): void {

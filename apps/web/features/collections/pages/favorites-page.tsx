@@ -23,8 +23,7 @@ function FavoritesContent() {
 	});
 	const { t } = useTranslation(["collections"]);
 	if (query.isPending) return <QueryPending />;
-	if (query.isError)
-		return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
+	if (query.isError) return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
 	return (
 		<main className="mx-auto flex w-full max-w-5xl flex-col gap-8 px-0 py-8 sm:px-6 sm:py-10">
 			<div className="px-4 sm:px-0">

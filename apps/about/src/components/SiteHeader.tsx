@@ -113,16 +113,9 @@ export function SiteHeader({ locale, active, copy, links, alternatePaths, appUrl
 								title={theme === "dark" ? copy.theme.dark : copy.theme.light}
 								variant="quiet"
 							>
-								{theme === "dark" ? (
-									<Moon aria-hidden="true" />
-								) : (
-									<Sun aria-hidden="true" />
-								)}
+								{theme === "dark" ? <Moon aria-hidden="true" /> : <Sun aria-hidden="true" />}
 							</Button>
-							<a
-								className={buttonVariants({ variant: "brand", size: "lg" })}
-								href={appUrl}
-							>
+							<a className={buttonVariants({ variant: "brand", size: "lg" })} href={appUrl}>
 								{copy.nav.enter}
 							</a>
 						</div>
@@ -174,10 +167,7 @@ export function SiteHeader({ locale, active, copy, links, alternatePaths, appUrl
 								{theme === "dark" ? copy.theme.dark : copy.theme.light}
 							</Button>
 						</div>
-						<a
-							className={buttonVariants({ variant: "brand", size: "xl" })}
-							href={appUrl}
-						>
+						<a className={buttonVariants({ variant: "brand", size: "xl" })} href={appUrl}>
 							{copy.nav.enter}
 						</a>
 					</nav>

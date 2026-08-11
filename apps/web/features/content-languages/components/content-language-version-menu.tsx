@@ -45,9 +45,7 @@ export function ContentLanguageVersionMenu({
 					}}
 					value={selectedValue}
 				>
-					<MenuRadioItem value="automatic">
-						{t.locale.contentVersions.automatic}
-					</MenuRadioItem>
+					<MenuRadioItem value="automatic">{t.locale.contentVersions.automatic}</MenuRadioItem>
 					{availableLanguages.map((language) => (
 						<MenuRadioItem key={language} value={language}>
 							{t.locale.contentLanguages[language]}

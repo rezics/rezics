@@ -230,10 +230,7 @@ for (const [pathTemplate, path] of Object.entries(document.paths)) {
 							"application/json": {
 								...badRequestResponse.content?.["application/json"],
 								schema: {
-									oneOf: [
-										badRequestSchema,
-										{ $ref: "#/components/schemas/MalformedRequestBody" },
-									],
+									oneOf: [badRequestSchema, { $ref: "#/components/schemas/MalformedRequestBody" }],
 								},
 							},
 						},
@@ -250,10 +247,7 @@ for (const [pathTemplate, path] of Object.entries(document.paths)) {
 						content: {
 							"application/json": {
 								schema: {
-									oneOf: [
-										validationSchema,
-										{ $ref: "#/components/schemas/ValidationError" },
-									],
+									oneOf: [validationSchema, { $ref: "#/components/schemas/ValidationError" }],
 								},
 							},
 						},

@@ -82,9 +82,7 @@ export async function applyCollectionBatch(
 				...reviewSubjectByTargetId.values(),
 			]);
 			if (readableTargetIds.has(input.collectionId))
-				throw input.errors.invalid(
-					"a Collection cannot contain itself as a Review subject",
-				);
+				throw input.errors.invalid("a Collection cannot contain itself as a Review subject");
 			for (const targetId of readableTargetIds) await input.ensureTargetReadable(targetId);
 
 			const before = await loadCollectionStructureSnapshot(tx, input.collectionId);

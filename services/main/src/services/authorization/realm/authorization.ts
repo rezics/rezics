@@ -123,14 +123,10 @@ export class RealmAuthorization<ProfileId extends string | undefined> {
 		);
 		const requirements = (
 			await Promise.all(
-				normalizedRealmIds.map((realmId) =>
-					findRequiredRulesAcceptance(realmId, this.profileId),
-				),
+				normalizedRealmIds.map((realmId) => findRequiredRulesAcceptance(realmId, this.profileId)),
 			)
 		).filter(
-			(
-				requirement,
-			): requirement is { readonly realmId: string; readonly revisionId: string } =>
+			(requirement): requirement is { readonly realmId: string; readonly revisionId: string } =>
 				requirement !== undefined,
 		);
 		if (requirements.length) throw new RealmRulesAcceptanceRequired({ realms: requirements });

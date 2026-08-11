@@ -141,13 +141,10 @@ export default {
 		selectOwnershipCandidate: "Sélectionner",
 		noOwnershipCandidates: "Aucun collaborateur n’est admissible.",
 		confirmTransferTitle: "Confirmer le transfert de propriété",
-		confirmTransferDescription: insert(
-			"Transférer la propriété de « {{unit}} » à {{profile}} ?",
-			{
-				unit: String,
-				profile: String,
-			},
-		),
+		confirmTransferDescription: insert("Transférer la propriété de « {{unit}} » à {{profile}} ?", {
+			unit: String,
+			profile: String,
+		}),
 		untitledOwnershipUnit: "Unit sans titre",
 		transferOwnershipWarning:
 			"Vous perdrez immédiatement les droits de propriétaire. Seul le nouveau propriétaire pourra annuler cette opération par un nouveau transfert.",

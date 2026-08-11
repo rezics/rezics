@@ -134,8 +134,7 @@ export function LocalizationImageUploadField({
 			setEditorAssetId(completed.id);
 			setEditorOpen(true);
 		} catch (caught) {
-			if (assetId)
-				await deleteUpload.mutateAsync({ path: { id: assetId } }).catch(() => undefined);
+			if (assetId) await deleteUpload.mutateAsync({ path: { id: assetId } }).catch(() => undefined);
 			const status = getErrorStatus(caught);
 			setError(
 				status === StatusCodes.UNPROCESSABLE_ENTITY ||
@@ -263,12 +262,7 @@ export function LocalizationImageUploadField({
 					</FileUploadTrigger>
 				)}
 				{busy && (
-					<Button
-						onClick={() => xhr.current?.abort()}
-						size="sm"
-						type="button"
-						variant="quiet"
-					>
+					<Button onClick={() => xhr.current?.abort()} size="sm" type="button" variant="quiet">
 						<X aria-hidden className="size-3.5" />
 						{t.media.cancel}
 					</Button>
@@ -284,9 +278,7 @@ export function LocalizationImageUploadField({
 			{editorAssetId ? (
 				<Suspense
 					fallback={
-						<p className="text-muted-foreground text-sm">
-							{t.media.presentationEditor.loading}
-						</p>
+						<p className="text-muted-foreground text-sm">{t.media.presentationEditor.loading}</p>
 					}
 				>
 					<ImageAssetPresentationEditor

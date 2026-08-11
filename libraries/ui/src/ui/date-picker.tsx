@@ -55,12 +55,7 @@ export const DatePickerInput = (props: DatePickerInputProps) => {
 				</ArkDatePicker.Input>
 
 				<InputGroupAddon align="inline-end">
-					<InputGroupButton
-						asChild
-						data-slot="input-group-button"
-						size="icon-xs"
-						variant="ghost"
-					>
+					<InputGroupButton asChild data-slot="input-group-button" size="icon-xs" variant="ghost">
 						<ArkDatePicker.Trigger asChild data-slot="date-picker-trigger">
 							<Button size="icon-md" variant="ghost">
 								<CalendarIcon aria-hidden className="text-muted-foreground" />

@@ -111,8 +111,7 @@ export function planCollectionBatch(input: {
 			const targetId = ids[index];
 			const current = targetId ? items.get(targetId) : undefined;
 			const position = plan.positions[index];
-			if (!targetId || !current || !position)
-				throw new Error("Collection rebalance lost an item");
+			if (!targetId || !current || !position) throw new Error("Collection rebalance lost an item");
 			items.set(targetId, { ...current, position });
 			rebalancedIds.add(targetId);
 		}
@@ -186,8 +185,7 @@ export function planCollectionBatch(input: {
 				for (const [movingIndex, targetId] of movingIds.entries()) {
 					const current = items.get(targetId);
 					const position = positions[movingIndex];
-					if (!current || !position)
-						throw new Error("Collection move plan is incomplete");
+					if (!current || !position) throw new Error("Collection move plan is incomplete");
 					items.set(targetId, { ...current, position });
 				}
 				ids.splice(0, ids.length, ...remainingIds);
@@ -200,8 +198,7 @@ export function planCollectionBatch(input: {
 					invalid(command, "swap requires two different items");
 				const left = items.get(command.leftTargetId);
 				const right = items.get(command.rightTargetId);
-				if (!left || !right)
-					invalid(command, "both swapped items must belong to the Collection");
+				if (!left || !right) invalid(command, "both swapped items must belong to the Collection");
 				items.set(left.targetUnitId, { ...left, position: right.position });
 				items.set(right.targetUnitId, { ...right, position: left.position });
 				const leftIndex = ids.indexOf(left.targetUnitId);

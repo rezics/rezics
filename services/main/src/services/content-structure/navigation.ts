@@ -213,9 +213,7 @@ export async function replaceNavigationStructure(
 					return [node.documentKey, node] as const;
 				}),
 			);
-			const newNodeCount = desired.filter(
-				(node) => !currentByKey.has(node.documentKey),
-			).length;
+			const newNodeCount = desired.filter((node) => !currentByKey.has(node.documentKey)).length;
 			type GeneratedIdRow = { readonly id: string };
 			const generatedIds = newNodeCount
 				? (

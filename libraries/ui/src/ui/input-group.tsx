@@ -74,11 +74,7 @@ const inputGroupAddonVariants = tv({
 				"has-[>button]:ms-[-0.45rem]",
 				"has-[>kbd]:ms-[-0.35rem]",
 			],
-			"inline-end": [
-				"order-last pe-3",
-				"has-[>button]:me-[-0.45rem]",
-				"has-[>kbd]:me-[-0.35rem]",
-			],
+			"inline-end": ["order-last pe-3", "has-[>button]:me-[-0.45rem]", "has-[>kbd]:me-[-0.35rem]"],
 			"block-start": [
 				"order-first w-full justify-start px-3 pt-3",
 				"group-has-[>input]/input-group:pt-2.5",

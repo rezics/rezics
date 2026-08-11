@@ -20,10 +20,7 @@ export function RealmSearchPage({ realmId }: { readonly realmId: string }) {
 	});
 	const headerSearch = useMemo(() => {
 		if (!query.data) return undefined;
-		const localization = selectLocalization(
-			query.data.localizations,
-			query.data.language ?? "",
-		);
+		const localization = selectLocalization(query.data.localizations, query.data.language ?? "");
 		const name = localization?.title ?? t.realms.untitled;
 		return {
 			href: `${realmHref(query.data)}/search`,
@@ -36,8 +33,7 @@ export function RealmSearchPage({ realmId }: { readonly realmId: string }) {
 	useHeaderSearchOverride(headerSearch);
 
 	if (query.isPending) return <QueryPending />;
-	if (query.isError)
-		return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
+	if (query.isError) return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
 	return (
 		<ScopedSearchPage
 			contexts={[{ kind: "realm", realmId }]}

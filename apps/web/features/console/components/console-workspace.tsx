@@ -286,10 +286,7 @@ function ConsoleWorkspaceContent({ children }: { readonly children: ReactNode })
 								<SheetDescription>{t.console.description}</SheetDescription>
 							</SheetHeader>
 							<SheetBody className="p-0">
-								<ConsoleNavigation
-									currentSectionId={currentSectionId}
-									sections={sections}
-								/>
+								<ConsoleNavigation currentSectionId={currentSectionId} sections={sections} />
 							</SheetBody>
 						</SheetContent>
 					</Sheet>
@@ -317,10 +314,7 @@ function ConsoleWorkspaceContent({ children }: { readonly children: ReactNode })
 				</header>
 				<div className="grid h-[calc(100dvh-3.5rem)] min-h-0 md:grid-cols-[15rem_minmax(0,1fr)]">
 					<aside className="hidden min-h-0 overflow-y-auto border-border/70 border-e bg-muted/15 md:block">
-						<ConsoleNavigation
-							currentSectionId={currentSectionId}
-							sections={sections}
-						/>
+						<ConsoleNavigation currentSectionId={currentSectionId} sections={sections} />
 					</aside>
 					<main
 						className={cn(

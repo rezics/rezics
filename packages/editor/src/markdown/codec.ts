@@ -118,12 +118,7 @@ function structureDiagnostics(
 		}
 
 		if (token.type === "blockquote_open") {
-			const closeIndex = findClosingToken(
-				tokens,
-				index,
-				"blockquote_open",
-				"blockquote_close",
-			);
+			const closeIndex = findClosingToken(tokens, index, "blockquote_open", "blockquote_close");
 			const allowedTypes = new Set(["paragraph_open", "paragraph_close", "inline"]);
 			const unsupported = tokens
 				.slice(index + 1, closeIndex)
@@ -137,18 +132,12 @@ function structureDiagnostics(
 		}
 
 		if (token.type === "bullet_list_open") {
-			const closeIndex = findClosingToken(
-				tokens,
-				index,
-				"bullet_list_open",
-				"bullet_list_close",
-			);
+			const closeIndex = findClosingToken(tokens, index, "bullet_list_open", "bullet_list_close");
 			const directItemLevel = token.level + 1;
 			const taskFlags = tokens
 				.slice(index + 1, closeIndex)
 				.filter(
-					(candidate) =>
-						candidate.type === "list_item_open" && candidate.level === directItemLevel,
+					(candidate) => candidate.type === "list_item_open" && candidate.level === directItemLevel,
 				)
 				.map((candidate) => {
 					const line = candidate.map?.[0];

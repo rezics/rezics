@@ -152,8 +152,7 @@ function ContentReadTree({
 			currentChapterId
 				? entries.findIndex(
 						({ entry }) =>
-							entry.node.contentKind === "chapter" &&
-							entry.node.contentUnitId === currentChapterId,
+							entry.node.contentKind === "chapter" && entry.node.contentUnitId === currentChapterId,
 					)
 				: -1,
 		[entries, currentChapterId],
@@ -190,17 +189,10 @@ function ContentReadTree({
 	return (
 		<nav
 			aria-label={label}
-			className={cn(
-				"min-h-0 overflow-y-auto overscroll-contain rounded-lg border",
-				className,
-			)}
+			className={cn("min-h-0 overflow-y-auto overscroll-contain rounded-lg border", className)}
 			ref={scrollRef}
 		>
-			<div
-				className="relative w-full"
-				role="list"
-				style={{ height: virtualizer.getTotalSize() }}
-			>
+			<div className="relative w-full" role="list" style={{ height: virtualizer.getTotalSize() }}>
 				{virtualizer.getVirtualItems().map((virtualRow) => {
 					const visibleEntry = entries[virtualRow.index];
 					if (!visibleEntry) return null;
@@ -208,8 +200,7 @@ function ContentReadTree({
 					const { node } = entry;
 					const labelNode = isBookStructureDisplayLabel(entry);
 					const expanded = expandedIds.has(node.id);
-					const current =
-						node.contentKind === "chapter" && node.contentUnitId === currentChapterId;
+					const current = node.contentKind === "chapter" && node.contentUnitId === currentChapterId;
 					const rowClassName = cn(
 						"absolute start-0 top-0 flex h-9 w-full items-center gap-1 rounded-md pe-2 text-sm outline-none",
 						labelNode
@@ -250,10 +241,7 @@ function ContentReadTree({
 										)}
 									/>
 									<span className="truncate">
-										<LocalizedText
-											language={node.language}
-											value={node.title}
-										/>
+										<LocalizedText language={node.language} value={node.title} />
 									</span>
 								</button>
 							) : (
@@ -267,10 +255,7 @@ function ContentReadTree({
 									style={rowStyle}
 								>
 									<span className="truncate">
-										<LocalizedText
-											language={node.language}
-											value={node.title}
-										/>
+										<LocalizedText language={node.language} value={node.title} />
 									</span>
 								</Link>
 							)}
@@ -288,8 +273,7 @@ function findChapterAncestorLabelIds(
 ): string[] {
 	if (!chapterId) return [];
 	for (const entry of nodes) {
-		if (entry.node.contentKind === "chapter" && entry.node.contentUnitId === chapterId)
-			return [];
+		if (entry.node.contentKind === "chapter" && entry.node.contentUnitId === chapterId) return [];
 		const descendants = findChapterAncestorLabelIds(entry.children, chapterId);
 		if (
 			descendants.length ||
@@ -297,9 +281,7 @@ function findChapterAncestorLabelIds(
 				({ node }) => node.contentKind === "chapter" && node.contentUnitId === chapterId,
 			)
 		)
-			return entry.node.contentKind === "label"
-				? [entry.node.id, ...descendants]
-				: descendants;
+			return entry.node.contentKind === "label" ? [entry.node.id, ...descendants] : descendants;
 	}
 	return [];
 }
@@ -374,8 +356,7 @@ export function Reader({ bookId, chapterId }: { bookId: string; chapterId: strin
 		[outline.data?.items],
 	);
 	if (query.isPending) return <QueryPending />;
-	if (query.isError)
-		return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
+	if (query.isError) return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
 	if (!query.data) return <QueryPending />;
 	const selectedLanguageLabel =
 		selectedLanguage === undefined
@@ -443,9 +424,7 @@ export function Reader({ bookId, chapterId }: { bookId: string; chapterId: strin
 					</MenuTrigger>
 					<MenuContent className="w-64 p-1.5">
 						<Field className="gap-1.5 p-2">
-							<FieldLabel htmlFor="reader-font-size">
-								{t.units.reader.fontSize}
-							</FieldLabel>
+							<FieldLabel htmlFor="reader-font-size">{t.units.reader.fontSize}</FieldLabel>
 							<NativeSelect
 								id="reader-font-size"
 								onChange={(event) => {
@@ -477,10 +456,8 @@ export function Reader({ bookId, chapterId }: { bookId: string; chapterId: strin
 								<MenuRadioGroup
 									heading={t.units.reader.chapterLanguage}
 									onValueChange={({ value }) => {
-										if (value === "automatic")
-											replaceCurrentLanguage(undefined);
-										else if (isContentLanguage(value))
-											replaceCurrentLanguage(value);
+										if (value === "automatic") replaceCurrentLanguage(undefined);
+										else if (isContentLanguage(value)) replaceCurrentLanguage(value);
 									}}
 									value={selectedLanguage ?? "automatic"}
 								>
@@ -488,11 +465,7 @@ export function Reader({ bookId, chapterId }: { bookId: string; chapterId: strin
 										{t.units.reader.automaticLanguage}
 									</MenuRadioItem>
 									{query.data.availableLanguages.map((language) => (
-										<MenuRadioItem
-											closeOnSelect={false}
-											key={language}
-											value={language}
-										>
+										<MenuRadioItem closeOnSelect={false} key={language} value={language}>
 											{t.locale.contentLanguages[language]}
 										</MenuRadioItem>
 									))}
@@ -505,9 +478,7 @@ export function Reader({ bookId, chapterId }: { bookId: string; chapterId: strin
 
 			<div className="grid min-h-0 md:grid-cols-[17rem_minmax(0,1fr)]">
 				<aside className="hidden min-h-0 flex-col overflow-hidden border-e bg-card/45 p-4 md:flex">
-					<p className="mb-3 px-2 font-serif font-semibold text-lg">
-						{t.units.content.title}
-					</p>
+					<p className="mb-3 px-2 font-serif font-semibold text-lg">{t.units.content.title}</p>
 					<ReaderOutline
 						bookId={bookId}
 						className="min-h-0 flex-1 border-0 bg-transparent"
@@ -525,10 +496,7 @@ export function Reader({ bookId, chapterId }: { bookId: string; chapterId: strin
 								{t.units.content.chapter}
 							</p>
 							<h1 className="mt-3 font-serif font-semibold text-3xl tracking-tight sm:text-4xl">
-								<LocalizedText
-									language={query.data.language}
-									value={query.data.title}
-								/>
+								<LocalizedText language={query.data.language} value={query.data.title} />
 							</h1>
 						</header>
 						<article className="flex-1 py-8">
@@ -696,8 +664,7 @@ function ChapterLocalizationEditor({ bookId, chapterId }: { bookId: string; chap
 		path: { chapterId },
 		query: { localizationLanguages: [language], language },
 	});
-	const missingLocalization =
-		query.isError && hasErrorCode(query.error, "ChapterLanguageNotFound");
+	const missingLocalization = query.isError && hasErrorCode(query.error, "ChapterLanguageNotFound");
 	const chapter = query.data?.language === language ? query.data : undefined;
 	if (query.isPending) return <QueryPending />;
 	if (query.isError && !missingLocalization)
@@ -709,21 +676,12 @@ function ChapterLocalizationEditor({ bookId, chapterId }: { bookId: string; chap
 					<div className="flex flex-wrap justify-end gap-2">
 						<ContentLanguageControl />
 						<Button asChild variant="outline">
-							<Link
-								href={unitManagementSectionHref(
-									"book",
-									bookId,
-									"content-structure",
-								)}
-							>
+							<Link href={unitManagementSectionHref("book", bookId, "content-structure")}>
 								{t.units.chapter.backToStructure}
 							</Link>
 						</Button>
 						<Button asChild size="icon-md" variant="outline">
-							<Link
-								aria-label={t.history.title}
-								href={chapterHistoryHref(bookId, chapterId)}
-							>
+							<Link aria-label={t.history.title} href={chapterHistoryHref(bookId, chapterId)}>
 								<HistoryIcon aria-hidden />
 							</Link>
 						</Button>
@@ -824,29 +782,19 @@ function ChapterLocalizationForm({
 							name="status"
 							onChange={(event) => {
 								const status = event.currentTarget.value;
-								if (
-									status === "draft" ||
-									status === "published" ||
-									status === "archived"
-								)
+								if (status === "draft" || status === "published" || status === "archived")
 									draft.setValue((current) => ({ ...current, status }));
 							}}
 							value={value.status}
 						>
 							<NativeSelectOption value="draft">{t.ui.draft}</NativeSelectOption>
-							<NativeSelectOption value="published">
-								{t.ui.published}
-							</NativeSelectOption>
-							<NativeSelectOption value="archived">
-								{t.ui.archived}
-							</NativeSelectOption>
+							<NativeSelectOption value="published">{t.ui.published}</NativeSelectOption>
+							<NativeSelectOption value="archived">{t.ui.archived}</NativeSelectOption>
 						</NativeSelect>
 					</Field>
 					<PortableTextEditor
 						label={t.ui.body}
-						onChange={(content) =>
-							draft.setValue((current) => ({ ...current, content }))
-						}
+						onChange={(content) => draft.setValue((current) => ({ ...current, content }))}
 						required
 						value={value.content}
 						variant="document"
@@ -864,13 +812,7 @@ function ChapterLocalizationForm({
 						</Button>
 						<RequestFailure error={update.error} fallback={t.ui.retryLater} />
 						<Button asChild type="button" variant="outline">
-							<Link
-								href={unitManagementSectionHref(
-									"book",
-									bookId,
-									"content-structure",
-								)}
-							>
+							<Link href={unitManagementSectionHref("book", bookId, "content-structure")}>
 								{t.units.chapter.backToStructure}
 							</Link>
 						</Button>

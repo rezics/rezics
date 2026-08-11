@@ -182,10 +182,7 @@ function ProgressJournal({ title }: { readonly title?: string }) {
 			<section aria-labelledby="progress-history-heading" className="grid gap-4">
 				<div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
 					<div>
-						<h2
-							className="font-heading text-xl font-bold"
-							id="progress-history-heading"
-						>
+						<h2 className="font-heading text-xl font-bold" id="progress-history-heading">
 							{t.engagement.progressJournal.historyTitle}
 						</h2>
 						<p className="mt-1 text-muted-foreground text-sm">
@@ -201,9 +198,7 @@ function ProgressJournal({ title }: { readonly title?: string }) {
 						}}
 						value={historyFilter}
 					>
-						<RadioGroupLabel>
-							{t.engagement.progressJournal.filterLabel}
-						</RadioGroupLabel>
+						<RadioGroupLabel>{t.engagement.progressJournal.filterLabel}</RadioGroupLabel>
 						<div className="flex flex-wrap gap-2">
 							{ProgressHistoryFilters.map((status) => (
 								<RadioGroupItem
@@ -242,18 +237,14 @@ function ProgressJournal({ title }: { readonly title?: string }) {
 												<ProgressEntryDetails
 													entry={entry}
 													isSettingCurrent={
-														setCurrent.isPending &&
-														setCurrent.variables?.path.entryId ===
-															entry.id
+														setCurrent.isPending && setCurrent.variables?.path.entryId === entry.id
 													}
 													onDelete={() => setDeletingEntry(entry)}
 													onEdit={() => {
 														setEditingEntry(entry);
 														setEditorOpen(true);
 													}}
-													onSetCurrent={() =>
-														void setCurrentEntry(entry.id)
-													}
+													onSetCurrent={() => void setCurrentEntry(entry.id)}
 													setCurrentError={setCurrent.error}
 													type={progress.domain.type}
 												/>
@@ -278,8 +269,7 @@ function ProgressJournal({ title }: { readonly title?: string }) {
 								<ProgressEntryDetails
 									entry={selectedEntry}
 									isSettingCurrent={
-										setCurrent.isPending &&
-										setCurrent.variables?.path.entryId === selectedEntry.id
+										setCurrent.isPending && setCurrent.variables?.path.entryId === selectedEntry.id
 									}
 									onDelete={() => setDeletingEntry(selectedEntry)}
 									onEdit={() => {
@@ -402,9 +392,7 @@ function ProgressTimelineItem({
 			aria-pressed={selected}
 			className={cn(
 				"grid w-full grid-cols-[auto_minmax(0,1fr)_auto] items-start gap-3 rounded-xl border p-4 text-left transition-colors",
-				selected
-					? "border-primary bg-primary/6"
-					: "border-border-weak bg-card hover:bg-muted/50",
+				selected ? "border-primary bg-primary/6" : "border-border-weak bg-card hover:bg-muted/50",
 			)}
 			onClick={onSelect}
 			type="button"
@@ -496,9 +484,7 @@ function ProgressEntryDetails({
 					<dt className="text-muted-foreground">{copy.occurredAt}</dt>
 					<dd className="text-right">{date}</dd>
 					<dt className="text-muted-foreground">{copy.status}</dt>
-					<dd className="text-right">
-						{t.engagement.progressByType[type].statuses[entry.status]}
-					</dd>
+					<dd className="text-right">{t.engagement.progressByType[type].statuses[entry.status]}</dd>
 					<dt className="text-muted-foreground">{copy.percentage}</dt>
 					<dd className="text-right tabular-nums">
 						{t.engagement.progressPercent({
@@ -522,9 +508,7 @@ function ProgressEntryDetails({
 					{entry.entryKind === "completion" ? (
 						<>
 							<dt className="text-muted-foreground">{copy.completionIncrement}</dt>
-							<dd className="text-right">
-								{toNonNegativeApiInteger(entry.completionDelta)}
-							</dd>
+							<dd className="text-right">{toNonNegativeApiInteger(entry.completionDelta)}</dd>
 						</>
 					) : null}
 				</dl>
@@ -545,12 +529,7 @@ function ProgressEntryDetails({
 						</Button>
 					)}
 					{isCurrent ? null : (
-						<Button
-							isLoading={isSettingCurrent}
-							onClick={onSetCurrent}
-							size="sm"
-							variant="outline"
-						>
+						<Button isLoading={isSettingCurrent} onClick={onSetCurrent} size="sm" variant="outline">
 							<CheckCircle2 aria-hidden />
 							{copy.setCurrent}
 						</Button>
@@ -616,9 +595,7 @@ function DeleteProgressEntryDialog({
 					<RequestFailure error={remove.error} fallback={t.ui.retryLater} />
 				</AlertDialogBody>
 				<AlertDialogFooter>
-					<AlertDialogCancel disabled={remove.isPending}>
-						{t.engagement.cancel}
-					</AlertDialogCancel>
+					<AlertDialogCancel disabled={remove.isPending}>{t.engagement.cancel}</AlertDialogCancel>
 					<AlertDialogAction
 						isLoading={remove.isPending}
 						onClick={() => void confirm()}

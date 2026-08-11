@@ -40,9 +40,7 @@ describe("Realm moderation UI contract", () => {
 				{
 					_key: "block-1",
 					_type: "block",
-					children: [
-						{ _key: "span-1", _type: "span", text: "Decision context", marks: [] },
-					],
+					children: [{ _key: "span-1", _type: "span", text: "Decision context", marks: [] }],
 					markDefs: [],
 					style: "normal",
 				},

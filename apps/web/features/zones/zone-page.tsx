@@ -28,9 +28,7 @@ export function ZonePage({
 					) : (
 						<section className="mx-auto max-w-3xl py-8 text-center">
 							<h1 className="font-serif font-bold text-3xl">{t.zones.emptyTitle}</h1>
-							<p className="mt-3 text-muted-foreground leading-7">
-								{t.zones.emptyBody}
-							</p>
+							<p className="mt-3 text-muted-foreground leading-7">{t.zones.emptyBody}</p>
 						</section>
 					)}
 				</main>

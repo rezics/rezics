@@ -39,8 +39,7 @@ function observeRecommendationVisibility(element: Element, callback: (visible: b
 				for (const entry of entries) {
 					const subscription = visibilitySubscriptions.get(entry.target);
 					if (!subscription) continue;
-					subscription.intersecting =
-						entry.isIntersecting && entry.intersectionRatio >= 0.5;
+					subscription.intersecting = entry.isIntersecting && entry.intersectionRatio >= 0.5;
 					subscription.callback(
 						subscription.intersecting && document.visibilityState === "visible",
 					);
@@ -149,8 +148,7 @@ export function useRecommendationTracking(
 	}, [policyVersion, position, requestId, signature, surface, targetUnitId]);
 
 	const trackOpen = useCallback(() => {
-		if (!requestId || !surface || position === undefined || !policyVersion || !signature)
-			return;
+		if (!requestId || !surface || position === undefined || !policyVersion || !signature) return;
 		recordRecommendationEvent(
 			targetUnitId,
 			{ requestId, surface, position, policyVersion, signature },

@@ -22,8 +22,7 @@ export default {
 	cancel: "キャンセル",
 	submit: "報告を送信",
 	submitted: "報告を送信しました",
-	submittedDescription:
-		"適用されるルールに沿って確認します。進捗は「自分の報告」で確認できます。",
+	submittedDescription: "適用されるルールに沿って確認します。進捗は「自分の報告」で確認できます。",
 	viewMyReports: "確認",
 	myReports: {
 		title: "自分の報告",

@@ -98,11 +98,7 @@ export default new Elysia({ prefix: "/slug-addresses" })
 	.get(
 		"/scopes/:scopeUnitId/:slug",
 		async ({ params, query }) => {
-			const result = await resolveScopedUnitAddress(
-				params.scopeUnitId,
-				params.slug,
-				query.kind,
-			);
+			const result = await resolveScopedUnitAddress(params.scopeUnitId, params.slug, query.kind);
 			return { ...presentPath(result), path: [...result.path] };
 		},
 		{
@@ -135,10 +131,7 @@ export default new Elysia({ prefix: "/slug-addresses" })
 				[StatusCodes.OK]: CanonicalSlugAddressResponse,
 				[StatusCodes.UNAUTHORIZED]: AuthenticationRequiredResponse,
 				[StatusCodes.FORBIDDEN]: toApiErrorResponse(["PlatformCapabilityRequired"]),
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse([
-					"UnitNotFound",
-					"UnitSlugAddressNotFound",
-				]),
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "UnitSlugAddressNotFound"]),
 			},
 			detail: {
 				operationId: "getUnitSlugAddressWithPlatformAccess",

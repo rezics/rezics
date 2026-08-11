@@ -179,8 +179,7 @@ export function MarkdownEditorApp({
 						className="w-full [&_select]:px-1 [&_select]:text-center [&_svg]:hidden"
 						id="markdown-editor-locale"
 						onChange={(event) => {
-							if (isMarkdownEditorLocale(event.target.value))
-								setLocale(event.target.value);
+							if (isMarkdownEditorLocale(event.target.value)) setLocale(event.target.value);
 						}}
 						size="sm"
 						value={locale}
@@ -209,10 +208,7 @@ export function MarkdownEditorApp({
 								<FileTextIcon className="size-4 shrink-0 text-primary" />
 								<span className="min-w-0 flex-1 truncate">{state.file.name}</span>
 								{state.dirty ? (
-									<span
-										aria-hidden
-										className="size-1.5 shrink-0 rounded-full bg-primary"
-									/>
+									<span aria-hidden className="size-1.5 shrink-0 rounded-full bg-primary" />
 								) : null}
 							</div>
 						</div>
@@ -236,24 +232,19 @@ export function MarkdownEditorApp({
 					</div>
 					<ToggleGroup
 						aria-label={
-							state.mode === "source"
-								? messages.labels.sourceMode
-								: messages.labels.livePreviewMode
+							state.mode === "source" ? messages.labels.sourceMode : messages.labels.livePreviewMode
 						}
 						className="rounded-lg border border-input bg-muted/25 p-0.5"
 						disabled={busy}
 						multiple={false}
 						onValueChange={({ value }) => {
 							const nextMode = value[0];
-							if (nextMode === "source" || nextMode === "preview")
-								actions.setMode(nextMode);
+							if (nextMode === "source" || nextMode === "preview") actions.setMode(nextMode);
 						}}
 						size="sm"
 						value={[state.mode]}
 					>
-						<ToggleGroupItem value="preview">
-							{messages.actions.livePreview}
-						</ToggleGroupItem>
+						<ToggleGroupItem value="preview">{messages.actions.livePreview}</ToggleGroupItem>
 						<ToggleGroupItem value="source">{messages.actions.source}</ToggleGroupItem>
 					</ToggleGroup>
 					<TooltipButton
@@ -320,8 +311,7 @@ export function MarkdownEditorApp({
 					aria-live="polite"
 				>
 					<span>
-						{operationLabel ??
-							(state.dirty ? messages.status.unsaved : messages.status.saved)}
+						{operationLabel ?? (state.dirty ? messages.status.unsaved : messages.status.saved)}
 					</span>
 					<span className="ms-auto">{messages.status.words(analysis.words)}</span>
 					<span>{messages.status.characters(analysis.characters)}</span>

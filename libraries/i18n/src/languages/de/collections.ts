@@ -7,8 +7,7 @@ export default {
 	title: "Sammlungen",
 	favorites: "Favoriten",
 	newCollection: "Neue Sammlung",
-	createDescription:
-		"Erstelle eine Sammlung, um Inhalte zu ordnen, zu präsentieren und zu teilen.",
+	createDescription: "Erstelle eine Sammlung, um Inhalte zu ordnen, zu präsentieren und zu teilen.",
 	editCollection: "Sammlung verwalten",
 	deleteCollection: "Sammlung löschen",
 	deleteCollectionPrompt:

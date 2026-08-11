@@ -231,10 +231,7 @@ export async function resolveApiAccountQuotaPolicy(
 	try {
 		return resolvePolicyDocument(userId, currentPolicy, record.binding, "assigned");
 	} catch (error) {
-		if (
-			record.policy.class !== "privileged" ||
-			!(error instanceof ApiQuotaPolicyDocumentInvalid)
-		)
+		if (record.policy.class !== "privileged" || !(error instanceof ApiQuotaPolicyDocumentInvalid))
 			throw error;
 		logger.error("Invalid Privileged API quota policy; using Standard fallback", {
 			eventName: "api_quota.policy.privileged_fallback",
@@ -549,22 +546,14 @@ export async function resolveApiTokenQuotaPolicy(
 			record.binding.validUntil === null ||
 			record.binding.validUntil <= now);
 	if (privilegedUnavailable)
-		return resolveTokenStandardFallback(
-			executor,
-			tokenId,
-			"privileged_fallback",
-			record.binding,
-		);
+		return resolveTokenStandardFallback(executor, tokenId, "privileged_fallback", record.binding);
 	if (!record.policy.enabled)
 		throw new Error(`Assigned API quota policy is disabled: ${record.policy.key}`);
 
 	try {
 		return resolveTokenPolicyDocument(tokenId, currentPolicy, record.binding, "assigned");
 	} catch (error) {
-		if (
-			record.policy.class !== "privileged" ||
-			!(error instanceof ApiQuotaPolicyDocumentInvalid)
-		)
+		if (record.policy.class !== "privileged" || !(error instanceof ApiQuotaPolicyDocumentInvalid))
 			throw error;
 		logger.error("Invalid Privileged token API quota policy; using Standard fallback", {
 			eventName: "api_quota.token_policy.privileged_fallback",
@@ -576,12 +565,7 @@ export async function resolveApiTokenQuotaPolicy(
 				policyKey: record.policy.key,
 			},
 		});
-		return resolveTokenStandardFallback(
-			executor,
-			tokenId,
-			"privileged_fallback",
-			record.binding,
-		);
+		return resolveTokenStandardFallback(executor, tokenId, "privileged_fallback", record.binding);
 	}
 }
 

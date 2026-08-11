@@ -74,9 +74,7 @@ export default new Elysia({ prefix: "/image-assets" })
 				[StatusCodes.UNAUTHORIZED]: AuthenticationRequiredResponse,
 				[StatusCodes.NOT_FOUND]: ImageAssetNotFoundResponse,
 				[StatusCodes.CONFLICT]: toApiErrorResponse(["ImageAssetInvalidState"]),
-				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse([
-					"ImageAssetInvalidPresentation",
-				]),
+				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["ImageAssetInvalidPresentation"]),
 			},
 			detail: { summary: "Update image asset presentation", tags: ["Image Assets"] },
 		},

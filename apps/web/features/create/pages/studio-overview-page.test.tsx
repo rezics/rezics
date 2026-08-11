@@ -47,11 +47,7 @@ describe("StudioOverviewPage", () => {
 
 		const navigation = screen.getByRole("navigation", { name: "Studio sections" });
 		expect(navigation.querySelectorAll('a[href$="/new"]')).toHaveLength(0);
-		expect(screen.getByRole("link", { name: /Posts/ }).getAttribute("href")).toBe(
-			"/create/post",
-		);
-		expect(screen.getByRole("link", { name: /Books/ }).getAttribute("href")).toBe(
-			"/create/book",
-		);
+		expect(screen.getByRole("link", { name: /Posts/ }).getAttribute("href")).toBe("/create/post");
+		expect(screen.getByRole("link", { name: /Books/ }).getAttribute("href")).toBe("/create/book");
 	});
 });

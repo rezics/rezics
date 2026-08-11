@@ -163,9 +163,7 @@ export function RealmModerationSheet({
 	);
 	const activeDestination = getContentRuleDestination(destinationItems, ruleSourceId);
 	const activeSelectedRuleKeys = activeDestination
-		? getContentRuleKeys(activeDestination).filter((key) =>
-				currentSelectedRuleKeys.includes(key),
-			)
+		? getContentRuleKeys(activeDestination).filter((key) => currentSelectedRuleKeys.includes(key))
 		: [];
 	const selectedRules = getContentRuleReferences(destinationItems, currentSelectedRuleKeys);
 	const annotationRequested = command === "note" || includeAnnotation;
@@ -295,11 +293,7 @@ export function RealmModerationSheet({
 				}}
 				open
 			>
-				<SheetContent
-					className="sm:max-w-2xl"
-					placement="right"
-					showCloseButton={!mutationPending}
-				>
+				<SheetContent className="sm:max-w-2xl" placement="right" showCloseButton={!mutationPending}>
 					<SheetHeader
 						description={t.realms.moderationSnapshot({
 							status: t.realms.moderationStates[unit.status],
@@ -316,10 +310,7 @@ export function RealmModerationSheet({
 								<NativeSelect
 									onChange={(event) =>
 										setCommandSelection(
-											toRealmModerationCommand(
-												event.currentTarget.value,
-												unit.allowedCommands,
-											),
+											toRealmModerationCommand(event.currentTarget.value, unit.allowedCommands),
 										)
 									}
 									value={command}
@@ -351,12 +342,8 @@ export function RealmModerationSheet({
 									) : null}
 									<Field required>
 										<FieldLabel>{t.reports.rule}</FieldLabel>
-										{destinations.isPending ? (
-											<Skeleton className="h-28 rounded-xl" />
-										) : null}
-										{destinations.error ? (
-											<RequestFailure error={destinations.error} />
-										) : null}
+										{destinations.isPending ? <Skeleton className="h-28 rounded-xl" /> : null}
+										{destinations.error ? <RequestFailure error={destinations.error} /> : null}
 										<ContentRuleMultiSelect
 											destination={activeDestination}
 											labels={{
@@ -382,13 +369,9 @@ export function RealmModerationSheet({
 								<Checkbox
 									checked={annotationRequested}
 									disabled={command === "note"}
-									onCheckedChange={({ checked }) =>
-										setIncludeAnnotation(checked === true)
-									}
+									onCheckedChange={({ checked }) => setIncludeAnnotation(checked === true)}
 								/>
-								<FieldLabel className="font-normal">
-									{t.realms.includeAnnotation}
-								</FieldLabel>
+								<FieldLabel className="font-normal">{t.realms.includeAnnotation}</FieldLabel>
 							</Field>
 
 							{annotationRequested ? (
@@ -399,8 +382,7 @@ export function RealmModerationSheet({
 											<NativeSelect
 												onChange={(event) =>
 													setAnnotationRole(
-														event.currentTarget.value ===
-															"public_notice"
+														event.currentTarget.value === "public_notice"
 															? "public_notice"
 															: "internal_note",
 													)
@@ -420,8 +402,7 @@ export function RealmModerationSheet({
 											<NativeSelect
 												onChange={(event) => {
 													const value = event.currentTarget.value;
-													if (isContentLanguage(value))
-														setAnnotationLanguage(value);
+													if (isContentLanguage(value)) setAnnotationLanguage(value);
 												}}
 												value={annotationLanguage}
 											>
@@ -439,9 +420,7 @@ export function RealmModerationSheet({
 										required
 										value={annotation}
 									/>
-									<p className="text-muted-foreground text-xs">
-										{t.realms.annotationPostHint}
-									</p>
+									<p className="text-muted-foreground text-xs">{t.realms.annotationPostHint}</p>
 								</div>
 							) : null}
 							<RequestFailure error={actionMutation.error ?? reviewMutation.error} />
@@ -454,11 +433,7 @@ export function RealmModerationSheet({
 							{reportItems.length ? (
 								<div className="grid gap-3">
 									{reportItems.map((item) => (
-										<RealmReportItem
-											key={item.id}
-											realmId={realmId}
-											report={item}
-										/>
+										<RealmReportItem key={item.id} realmId={realmId} report={item} />
 									))}
 									{reports.hasNextPage ? (
 										<Button
@@ -486,17 +461,11 @@ export function RealmModerationSheet({
 							) : history.data?.items.length ? (
 								<div className="grid gap-3">
 									{history.data.items.map((item) => (
-										<RealmModerationHistoryItem
-											item={item}
-											key={item.id}
-											ruleTitles={ruleTitles}
-										/>
+										<RealmModerationHistoryItem item={item} key={item.id} ruleTitles={ruleTitles} />
 									))}
 								</div>
 							) : (
-								<p className="text-muted-foreground text-sm">
-									{t.realms.noModerationHistory}
-								</p>
+								<p className="text-muted-foreground text-sm">{t.realms.noModerationHistory}</p>
 							)}
 						</div>
 					</SheetBody>
@@ -621,11 +590,7 @@ function RealmModerationHistoryItem({
 							.map(
 								(rule) =>
 									ruleTitles.get(
-										contentRuleSelectionKey(
-											rule.sourceRealmId,
-											rule.revisionId,
-											rule.ruleId,
-										),
+										contentRuleSelectionKey(rule.sourceRealmId, rule.revisionId, rule.ruleId),
 									) ?? rule.ruleId,
 							)
 							.join(" · ")}
@@ -640,8 +605,7 @@ function RealmModerationHistoryItem({
 						})}
 					</p>
 				) : null}
-				{item.previousPostTargetingLocked !== null &&
-				item.resultingPostTargetingLocked !== null ? (
+				{item.previousPostTargetingLocked !== null && item.resultingPostTargetingLocked !== null ? (
 					<p>
 						{t.realms.postTargetingLockTransition}:{" "}
 						{t.realms.moderationTransition({

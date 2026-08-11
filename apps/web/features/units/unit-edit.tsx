@@ -109,9 +109,7 @@ export function UnitMetadataEditor({ type, unit }: { type: UnitType; unit: Unit 
 		)
 			return;
 		const status =
-			submittedStatus === "published" || submittedStatus === "archived"
-				? submittedStatus
-				: "draft";
+			submittedStatus === "published" || submittedStatus === "archived" ? submittedStatus : "draft";
 		const visibility =
 			submittedVisibility === "unlisted" || submittedVisibility === "private"
 				? submittedVisibility
@@ -163,11 +161,7 @@ export function UnitMetadataEditor({ type, unit }: { type: UnitType; unit: Unit 
 				const runtimeMinutes = readPositiveInteger(form, "runtimeMinutes");
 				const episodeCount = readPositiveInteger(form, "episodeCount");
 				const seasonCount = readPositiveInteger(form, "seasonCount");
-				if (
-					runtimeMinutes === undefined ||
-					episodeCount === undefined ||
-					seasonCount === undefined
-				)
+				if (runtimeMinutes === undefined || episodeCount === undefined || seasonCount === undefined)
 					return undefined;
 				const kind = String(form.get("kind") ?? "").trim();
 				if (!kind) return undefined;
@@ -219,50 +213,30 @@ export function UnitMetadataEditor({ type, unit }: { type: UnitType; unit: Unit 
 			<CardContent className="p-6">
 				<form onSubmit={submit}>
 					<FieldGroup>
-						<h2 className="font-heading text-xl font-bold">
-							{t.units.editor.settings}
-						</h2>
+						<h2 className="font-heading text-xl font-bold">{t.units.editor.settings}</h2>
 						<Field>
 							<FieldLabel>{t.ui.status}</FieldLabel>
 							<NativeSelect name="status" defaultValue={unit.status}>
 								<NativeSelectOption value="draft">{t.ui.draft}</NativeSelectOption>
-								<NativeSelectOption value="published">
-									{t.ui.published}
-								</NativeSelectOption>
-								<NativeSelectOption value="archived">
-									{t.ui.archived}
-								</NativeSelectOption>
+								<NativeSelectOption value="published">{t.ui.published}</NativeSelectOption>
+								<NativeSelectOption value="archived">{t.ui.archived}</NativeSelectOption>
 							</NativeSelect>
 						</Field>
 						<Field>
 							<FieldLabel>{t.ui.visibility}</FieldLabel>
 							<NativeSelect name="visibility" defaultValue={unit.visibility}>
-								<NativeSelectOption value="public">
-									{t.ui.public}
-								</NativeSelectOption>
-								<NativeSelectOption value="unlisted">
-									{t.ui.unlisted}
-								</NativeSelectOption>
-								<NativeSelectOption value="private">
-									{t.ui.private}
-								</NativeSelectOption>
+								<NativeSelectOption value="public">{t.ui.public}</NativeSelectOption>
+								<NativeSelectOption value="unlisted">{t.ui.unlisted}</NativeSelectOption>
+								<NativeSelectOption value="private">{t.ui.private}</NativeSelectOption>
 							</NativeSelect>
 						</Field>
 						<Field>
 							<FieldLabel>{t.ui.contentRating}</FieldLabel>
 							<NativeSelect name="contentRating" defaultValue={unit.contentRating}>
-								<NativeSelectOption value="general">
-									{t.units.rating.general}
-								</NativeSelectOption>
-								<NativeSelectOption value="r15">
-									{t.units.rating.r15}
-								</NativeSelectOption>
-								<NativeSelectOption value="r18">
-									{t.units.rating.r18}
-								</NativeSelectOption>
-								<NativeSelectOption value="r18g">
-									{t.units.rating.r18g}
-								</NativeSelectOption>
+								<NativeSelectOption value="general">{t.units.rating.general}</NativeSelectOption>
+								<NativeSelectOption value="r15">{t.units.rating.r15}</NativeSelectOption>
+								<NativeSelectOption value="r18">{t.units.rating.r18}</NativeSelectOption>
+								<NativeSelectOption value="r18g">{t.units.rating.r18g}</NativeSelectOption>
 							</NativeSelect>
 						</Field>
 						<Field>
@@ -271,9 +245,7 @@ export function UnitMetadataEditor({ type, unit }: { type: UnitType; unit: Unit 
 								<NativeSelectOption value="unknown">
 									{t.units.aiDisclosure.unknown}
 								</NativeSelectOption>
-								<NativeSelectOption value="none">
-									{t.units.aiDisclosure.none}
-								</NativeSelectOption>
+								<NativeSelectOption value="none">{t.units.aiDisclosure.none}</NativeSelectOption>
 								<NativeSelectOption value="ai_assisted">
 									{t.units.aiDisclosure.ai_assisted}
 								</NativeSelectOption>
@@ -294,11 +266,7 @@ export function UnitMetadataEditor({ type, unit }: { type: UnitType; unit: Unit 
 										? t.units.fields.publicationDate
 										: t.units.fields.releaseDate}
 								</FieldLabel>
-								<Input
-									defaultValue={unit.releasedOn ?? ""}
-									name="releasedOn"
-									type="date"
-								/>
+								<Input defaultValue={unit.releasedOn ?? ""} name="releasedOn" type="date" />
 							</Field>
 						) : null}
 						<UnitTypeSpecificFields unit={unit} />
@@ -308,17 +276,13 @@ export function UnitMetadataEditor({ type, unit }: { type: UnitType; unit: Unit 
 							unit.details.type === "media") ? (
 							<UnitContentLicenseField
 								context="edit"
-								grantedSlug={
-									unit.details.contentLicense?.referenceLicenseSlug ?? null
-								}
+								grantedSlug={unit.details.contentLicense?.referenceLicenseSlug ?? null}
 							/>
 						) : null}
 						<Field>
 							<FieldLabel>{t.units.detail.license}</FieldLabel>
 							<NativeSelect defaultValue={unit.license ?? ""} name="license">
-								<NativeSelectOption value="">
-									{t.licenses.unspecified}
-								</NativeSelectOption>
+								<NativeSelectOption value="">{t.licenses.unspecified}</NativeSelectOption>
 								{PublicationLicenseIds.map((id) => (
 									<NativeSelectOption key={id} value={id}>
 										{t.licenses.options[id].label}
@@ -350,12 +314,7 @@ function UnitTypeSpecificFields({ unit }: { unit: Unit }) {
 				</Field>
 				<Field>
 					<FieldLabel>{t.units.fields.pageCount}</FieldLabel>
-					<Input
-						defaultValue={details.pageCount ?? ""}
-						min={1}
-						name="pageCount"
-						type="number"
-					/>
+					<Input defaultValue={details.pageCount ?? ""} min={1} name="pageCount" type="number" />
 				</Field>
 				<Field>
 					<FieldLabel>{t.units.fields.format}</FieldLabel>
@@ -440,9 +399,7 @@ export function UnitContentEditor({ type, unit }: { type: UnitType; unit: Unit }
 			<div className="flex flex-wrap items-center gap-4 rounded-2xl bg-card p-4 sm:p-5">
 				<LocalizationMediaFallbackNotice />
 				{selectedLanguageIsPending ? (
-					<p className="text-sm text-muted-foreground">
-						{t.units.contentLanguages.addDescription}
-					</p>
+					<p className="text-sm text-muted-foreground">{t.units.contentLanguages.addDescription}</p>
 				) : null}
 				<div className="ms-auto shrink-0">
 					<ContentLanguageControl />
@@ -558,18 +515,14 @@ function UnitLocalizationForm({
 						</Field>
 						<PortableTextEditor
 							label={t.ui.description}
-							onChange={(description) =>
-								draft.setValue((current) => ({ ...current, description }))
-							}
+							onChange={(description) => draft.setValue((current) => ({ ...current, description }))}
 							value={value.description}
 						/>
 						<Field>
 							<FieldLabel>{t.cover.title}</FieldLabel>
 							<LocalizationImageUploadField
 								fallback={fallbackCover}
-								onChange={(cover) =>
-									draft.setValue((current) => ({ ...current, cover }))
-								}
+								onChange={(cover) => draft.setValue((current) => ({ ...current, cover }))}
 								options={coverOptions}
 								role="cover"
 								value={value.cover}

@@ -268,9 +268,7 @@ export const realmUnit = pgTable(
 		/** Rejects new Post relations targeting this Unit in this Realm. */
 		postTargetingLocked: boolean().default(false).notNull(),
 		status: realmUnitStatus().default("visible").notNull(),
-		publicationState: realmUnitPublicationState("publication_state")
-			.default("active")
-			.notNull(),
+		publicationState: realmUnitPublicationState("publication_state").default("active").notNull(),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),
 	},

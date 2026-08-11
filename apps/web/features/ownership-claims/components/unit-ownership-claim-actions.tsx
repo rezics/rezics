@@ -106,16 +106,9 @@ export function EntityOwnershipClaimButton({
 
 	return (
 		<>
-			<Button
-				className="w-fit"
-				onClick={claimRequest.request}
-				type="button"
-				variant="outline"
-			>
+			<Button className="w-fit" onClick={claimRequest.request} type="button" variant="outline">
 				<KeyRound aria-hidden />
-				{pendingClaim
-					? t.units.ownershipClaim.pendingAction
-					: t.units.ownershipClaim.action}
+				{pendingClaim ? t.units.ownershipClaim.pendingAction : t.units.ownershipClaim.action}
 			</Button>
 			<UnitOwnershipClaimDialog
 				onChanged={() =>

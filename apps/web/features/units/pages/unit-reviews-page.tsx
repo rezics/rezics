@@ -52,9 +52,7 @@ export function UnitReviewsPage({
 			<PageHeading
 				action={
 					<Button asChild variant="solid">
-						<Link href={targetedReviewCreateHref(type, unitId)}>
-							{t.engagement.newReview}
-						</Link>
+						<Link href={targetedReviewCreateHref(type, unitId)}>{t.engagement.newReview}</Link>
 					</Button>
 				}
 				description={localization?.title ?? t.ui.unnamed}

@@ -210,10 +210,7 @@ export default new Elysia({ prefix: "/api-tokens" })
 			]);
 			const tokenQuotas = await Promise.all(
 				result.apiKeys.map(async (key) =>
-					Promise.all([
-						resolveApiTokenQuotaPolicy(key.id),
-						getApiTokenQuotaOverride(key.id),
-					]),
+					Promise.all([resolveApiTokenQuotaPolicy(key.id), getApiTokenQuotaOverride(key.id)]),
 				),
 			);
 			return {
@@ -312,13 +309,9 @@ export default new Elysia({ prefix: "/api-tokens" })
 						keyId: params.tokenId,
 						userId: user.id,
 						name: body.name,
-						permissions: body.permissions
-							? toApiKeyPermissions(body.permissions)
-							: undefined,
+						permissions: body.permissions ? toApiKeyPermissions(body.permissions) : undefined,
 						expiresIn:
-							body.expiresInDays === undefined
-								? undefined
-								: body.expiresInDays * 24 * 60 * 60,
+							body.expiresInDays === undefined ? undefined : body.expiresInDays * 24 * 60 * 60,
 						enabled: body.enabled,
 					},
 				});

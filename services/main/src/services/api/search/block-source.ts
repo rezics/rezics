@@ -26,8 +26,7 @@ export function findFeedBlock(
 	let found: Extract<Block, { readonly _type: "feed" }> | undefined;
 	walkBlockTree(document, (block) => {
 		if (block._key !== blockKey) return;
-		if (block._type !== "feed")
-			throw new InvalidSearch("The selected Block is not a Feed block");
+		if (block._type !== "feed") throw new InvalidSearch("The selected Block is not a Feed block");
 		found = block;
 	});
 	if (!found) throw new InvalidSearch("Feed block does not exist in this surface");

@@ -93,10 +93,7 @@ export function RealmTagVotingSettings({
 			</Field>
 			<RequestFailure error={update.error} />
 			{realm.capabilities.canManageTagContexts ? (
-				<RealmTagContextRelationshipList
-					createHref={tagContextCreateHref}
-					realmId={realm.id}
-				/>
+				<RealmTagContextRelationshipList createHref={tagContextCreateHref} realmId={realm.id} />
 			) : null}
 		</div>
 	);
@@ -117,10 +114,7 @@ function RealmTagContextRelationshipList({
 		readonly tagTitle: string | null;
 	} | null>(null);
 	const remove = useDeleteApiRealmsByRealmIdTagsByTagIdContext();
-	const baseQuery = useMemo(
-		() => ({ limit: 50, localizationLanguages }),
-		[localizationLanguages],
-	);
+	const baseQuery = useMemo(() => ({ limit: 50, localizationLanguages }), [localizationLanguages]);
 	const query = useInfiniteQuery({
 		queryKey: getApiRealmsByRealmIdTagContextsQueryKey({
 			path: { realmId },
@@ -184,9 +178,7 @@ function RealmTagContextRelationshipList({
 			<Card appearance="outlined" className="overflow-hidden">
 				<CardHeader>
 					<CardTitle>{t.tagVotingSettings.relationshipsTitle}</CardTitle>
-					<CardDescription>
-						{t.tagVotingSettings.relationshipsDescription}
-					</CardDescription>
+					<CardDescription>{t.tagVotingSettings.relationshipsDescription}</CardDescription>
 					{createHref ? (
 						<CardAction>
 							<Button asChild variant="solid">
@@ -218,10 +210,7 @@ function RealmTagContextRelationshipList({
 								height: Math.min(Math.max(virtualizer.getTotalSize(), 76), 456),
 							}}
 						>
-							<div
-								className="relative"
-								style={{ height: virtualizer.getTotalSize() }}
-							>
+							<div className="relative" style={{ height: virtualizer.getTotalSize() }}>
 								{virtualItems.map((virtualRow) => {
 									const item = items[virtualRow.index];
 									if (!item) return null;
@@ -236,21 +225,11 @@ function RealmTagContextRelationshipList({
 											}}
 										>
 											<RelationshipTarget
-												href={
-													item.tagReadable
-														? tagDetailHref(item.tagId)
-														: undefined
-												}
+												href={item.tagReadable ? tagDetailHref(item.tagId) : undefined}
 												icon={<TagsIcon className="size-4" />}
-												label={
-													item.tagTitle ??
-													t.tagVotingSettings.unavailableTag
-												}
+												label={item.tagTitle ?? t.tagVotingSettings.unavailableTag}
 											/>
-											<ArrowRightIcon
-												aria-hidden="true"
-												className="size-4 text-muted-foreground"
-											/>
+											<ArrowRightIcon aria-hidden="true" className="size-4 text-muted-foreground" />
 											<RelationshipTarget
 												href={
 													item.contextReadable
@@ -261,19 +240,12 @@ function RealmTagContextRelationshipList({
 														: undefined
 												}
 												icon={<BookOpenTextIcon className="size-4" />}
-												label={
-													item.contextTitle ??
-													t.tagVotingSettings.unavailableContext
-												}
+												label={item.contextTitle ?? t.tagVotingSettings.unavailableContext}
 											/>
 											<Button
-												aria-label={t.tagVotingSettings.removeRelationshipLabel(
-													{
-														tag:
-															item.tagTitle ??
-															t.tagVotingSettings.unavailableTag,
-													},
-												)}
+												aria-label={t.tagVotingSettings.removeRelationshipLabel({
+													tag: item.tagTitle ?? t.tagVotingSettings.unavailableTag,
+												})}
 												onClick={() =>
 													setPendingRemoval({
 														tagId: item.tagId,
@@ -304,9 +276,7 @@ function RealmTagContextRelationshipList({
 			>
 				<AlertDialogContent>
 					<AlertDialogHeader>
-						<AlertDialogTitle>
-							{t.tagVotingSettings.removeRelationshipTitle}
-						</AlertDialogTitle>
+						<AlertDialogTitle>{t.tagVotingSettings.removeRelationshipTitle}</AlertDialogTitle>
 						<AlertDialogDescription>
 							{t.tagVotingSettings.removeRelationshipDescription({
 								tag: pendingRemoval?.tagTitle ?? t.tagVotingSettings.unavailableTag,
@@ -342,9 +312,7 @@ function RelationshipTarget({
 }) {
 	const content = (
 		<>
-			<span className="grid size-8 shrink-0 place-items-center rounded-full bg-muted">
-				{icon}
-			</span>
+			<span className="grid size-8 shrink-0 place-items-center rounded-full bg-muted">{icon}</span>
 			<span className="truncate font-medium text-sm">{label}</span>
 		</>
 	);

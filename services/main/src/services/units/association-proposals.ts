@@ -269,11 +269,7 @@ export async function createAssociationRequestInTransaction(
 			);
 			await ensureWikiAssociationContextPost(tx, input.contextPostId);
 		}
-		await authorization.entity.ensureAssociationRequestAllowed(
-			tx,
-			input.targetUnitId,
-			input.kind,
-		);
+		await authorization.entity.ensureAssociationRequestAllowed(tx, input.targetUnitId, input.kind);
 	}
 	await ensureNoRelationshipOrProposal(tx, input);
 	return insertProposal(tx, {
@@ -376,10 +372,7 @@ async function loadUnresolvedProposal(
 		.select()
 		.from(unitAssociationProposal)
 		.where(
-			and(
-				eq(unitAssociationProposal.id, proposalId),
-				isNull(unitAssociationProposal.resolution),
-			),
+			and(eq(unitAssociationProposal.id, proposalId), isNull(unitAssociationProposal.resolution)),
 		)
 		.limit(1);
 	if (!proposal) throw new AssociationProposalNotFound();
@@ -395,9 +388,7 @@ async function ensureResolutionAuthorized(
 	action: "accept" | "decline" | "cancel",
 ) {
 	const actsForSource =
-		action === "cancel"
-			? proposal.direction === "request"
-			: proposal.direction === "invitation";
+		action === "cancel" ? proposal.direction === "request" : proposal.direction === "invitation";
 	const expectedUnitId = actsForSource ? proposal.sourceUnitId : proposal.targetUnitId;
 	if (actingUnitId !== expectedUnitId) throw new AssociationProposalNotFound();
 	if (actsForSource)
@@ -548,13 +539,7 @@ export async function resolveAssociationProposal(
 			proposalBeforeLock.targetUnitId,
 		);
 		const proposal = await loadUnresolvedProposal(tx, input.proposalId);
-		await ensureResolutionAuthorized(
-			tx,
-			authorization,
-			proposal,
-			input.actingUnitId,
-			input.action,
-		);
+		await ensureResolutionAuthorized(tx, authorization, proposal, input.actingUnitId, input.action);
 		if (input.action === "accept" && proposal.kind === "subject" && proposal.contextPostId)
 			await authorization.unit.ensureCanRead(
 				proposal.contextPostId,

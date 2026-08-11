@@ -73,9 +73,7 @@ export function VirtualizedTreeRows<Node extends EditableTreeNode>({
 	});
 	const scrollTargetIndex = useMemo(
 		() =>
-			scrollToNodeId
-				? entries.findIndex(({ entry }) => entry.node.id === scrollToNodeId)
-				: -1,
+			scrollToNodeId ? entries.findIndex(({ entry }) => entry.node.id === scrollToNodeId) : -1,
 		[entries, scrollToNodeId],
 	);
 
@@ -164,8 +162,7 @@ export function TreeEditorRowFrame({
 				"group/structure-row relative flex min-h-24 items-center gap-3 pe-3 transition-colors",
 				dragging && "opacity-45",
 				activePlacement === "before" && "border-t-2 border-t-primary",
-				activePlacement === "inside" &&
-					"bg-primary/8 outline-2 outline-primary -outline-offset-2",
+				activePlacement === "inside" && "bg-primary/8 outline-2 outline-primary -outline-offset-2",
 				activePlacement === "after" && "border-b-2 border-b-primary",
 				!activePlacement && !selected && "hover:bg-muted/40",
 				selected && "bg-accent/70",

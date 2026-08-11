@@ -70,8 +70,6 @@ describe("avatar recents", () => {
 		rememberRecentEmojiChoice(storage, "zh-hant", { emoji: "🦈", label: "鯊魚" });
 
 		expect(readRecentEmojiChoices(storage, "en")).toEqual([{ emoji: "🦈", label: "Shark" }]);
-		expect(readRecentEmojiChoices(storage, "zh-hant")).toEqual([
-			{ emoji: "🦈", label: "鯊魚" },
-		]);
+		expect(readRecentEmojiChoices(storage, "zh-hant")).toEqual([{ emoji: "🦈", label: "鯊魚" }]);
 	});
 });

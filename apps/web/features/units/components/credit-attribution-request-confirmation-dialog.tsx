@@ -36,9 +36,7 @@ export function CreditAttributionRequestConfirmationDialog({
 		>
 			<AlertDialogContent>
 				<AlertDialogHeader>
-					<AlertDialogTitle>
-						{t.units.creation.creditRequestConfirmationTitle}
-					</AlertDialogTitle>
+					<AlertDialogTitle>{t.units.creation.creditRequestConfirmationTitle}</AlertDialogTitle>
 				</AlertDialogHeader>
 				<AlertDialogBody>
 					<AlertDialogDescription>

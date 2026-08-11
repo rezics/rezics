@@ -277,15 +277,9 @@ export default new Elysia({ prefix: "/progress" })
 			const condition = and(baseCondition, boundaryCondition);
 			const orderBy =
 				request.sort === "title:asc"
-					? [
-							sql`lower(${unitLocalization.title}) asc nulls last`,
-							asc(unitProgress.unitId),
-						]
+					? [sql`lower(${unitLocalization.title}) asc nulls last`, asc(unitProgress.unitId)]
 					: request.sort === "title:desc"
-						? [
-								sql`lower(${unitLocalization.title}) desc nulls last`,
-								asc(unitProgress.unitId),
-							]
+						? [sql`lower(${unitLocalization.title}) desc nulls last`, asc(unitProgress.unitId)]
 						: request.sort === "progressLastSeenAt:asc"
 							? [asc(unitProgress.lastSeenAt), asc(unitProgress.unitId)]
 							: [desc(unitProgress.lastSeenAt), asc(unitProgress.unitId)];
@@ -431,10 +425,7 @@ export default new Elysia({ prefix: "/progress" })
 					updatedAt: unitProgressEntry.updatedAt,
 				})
 				.from(unitProgressEntry)
-				.leftJoin(
-					postProgressEntry,
-					eq(postProgressEntry.progressEntryId, unitProgressEntry.id),
-				)
+				.leftJoin(postProgressEntry, eq(postProgressEntry.progressEntryId, unitProgressEntry.id))
 				.where(
 					and(
 						eq(unitProgressEntry.profileId, profile.unitId),
@@ -562,10 +553,7 @@ export default new Elysia({ prefix: "/progress" })
 			access: "write:interaction:write",
 			params: ProgressEntryParams,
 			response: {
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse([
-					"UnitNotFound",
-					"ProgressEntryNotFound",
-				]),
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "ProgressEntryNotFound"]),
 			},
 			detail: {
 				summary: "Set a Progress journal entry as current",
@@ -588,10 +576,7 @@ export default new Elysia({ prefix: "/progress" })
 			access: "write:interaction:write",
 			params: ProgressEntryParams,
 			response: {
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse([
-					"UnitNotFound",
-					"ProgressEntryNotFound",
-				]),
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "ProgressEntryNotFound"]),
 			},
 			detail: {
 				summary: "Delete a Progress journal entry",
@@ -614,10 +599,7 @@ export default new Elysia({ prefix: "/progress" })
 					contentStructureNode,
 					eq(contentStructureNode.id, contentStructureNodeProgress.nodeId),
 				)
-				.innerJoin(
-					contentStructure,
-					eq(contentStructure.id, contentStructureNode.structureId),
-				)
+				.innerJoin(contentStructure, eq(contentStructure.id, contentStructureNode.structureId))
 				.innerJoin(unit, eq(unit.id, contentStructureNode.contentUnitId))
 				.leftJoin(post, eq(post.id, contentStructureNode.contentUnitId))
 				.where(
@@ -806,10 +788,7 @@ export default new Elysia({ prefix: "/progress" })
 						lastSeenAt: now,
 					})
 					.where(
-						and(
-							eq(unitProgress.profileId, profile.unitId),
-							eq(unitProgress.unitId, params.unitId),
-						),
+						and(eq(unitProgress.profileId, profile.unitId), eq(unitProgress.unitId, params.unitId)),
 					);
 				await tx
 					.update(unitProgressEntry)
@@ -838,10 +817,7 @@ export default new Elysia({ prefix: "/progress" })
 		"/:unitId/nodes/:nodeId",
 		async ({ profile, authorization, params }) => {
 			await authorization.unit.ensureCanRead(params.unitId);
-			const nodeKind = await findCompletableContentStructureNode(
-				params.unitId,
-				params.nodeId,
-			);
+			const nodeKind = await findCompletableContentStructureNode(params.unitId, params.nodeId);
 			if (!nodeKind) throw new ContentStructureNodeNotFound();
 			if (nodeKind === "media") {
 				const canReadUnpublished = await authorization.unit.canUpdate(params.unitId);
@@ -880,10 +856,7 @@ export default new Elysia({ prefix: "/progress" })
 		"/:unitId/nodes/:nodeId",
 		async ({ profile, authorization, params }) => {
 			await authorization.unit.ensureCanRead(params.unitId);
-			const nodeKind = await findCompletableContentStructureNode(
-				params.unitId,
-				params.nodeId,
-			);
+			const nodeKind = await findCompletableContentStructureNode(params.unitId, params.nodeId);
 			if (!nodeKind) throw new ContentStructureNodeNotFound();
 			if (nodeKind === "media") {
 				const canReadUnpublished = await authorization.unit.canUpdate(params.unitId);

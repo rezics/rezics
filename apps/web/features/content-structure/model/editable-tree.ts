@@ -250,9 +250,7 @@ export function removeEditableTreeNodes<Node extends EditableTreeNode>(
 	if (!roots.length) return [...nodes];
 	const rootIds = new Set(roots.map(({ id }) => id));
 	const removedIds =
-		mode === "subtree"
-			? new Set(editableTreeSelectionCoverage(nodes, rootIds).keys())
-			: rootIds;
+		mode === "subtree" ? new Set(editableTreeSelectionCoverage(nodes, rootIds).keys()) : rootIds;
 	const parentByRemovedId = new Map(roots.map((node) => [node.id, node.parentId]));
 	const next = nodes.flatMap((node): Node[] => {
 		if (removedIds.has(node.id)) return [];

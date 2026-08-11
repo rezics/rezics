@@ -102,11 +102,7 @@ const DateInputControl = (props: DateInputControlProps) => {
 			>
 				<div
 					aria-invalid={dateInput.invalid || undefined}
-					className={cn(
-						"min-w-0",
-						"flex flex-1 items-center gap-2",
-						"text-base md:text-sm",
-					)}
+					className={cn("min-w-0", "flex flex-1 items-center gap-2", "text-base md:text-sm")}
 					data-slot="date-input-field"
 				>
 					{children}

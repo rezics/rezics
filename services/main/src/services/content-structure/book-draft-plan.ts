@@ -104,11 +104,7 @@ export function planContentStructureDraft<Node extends ContentStructureDraftNode
 	const draftById = new Map<string, Node>();
 	for (const draft of draftNodes) {
 		if (draftById.has(draft.id)) invalid(`Duplicate draft node ${draft.id}`);
-		if (
-			!Number.isSafeInteger(draft.order) ||
-			draft.order < 0 ||
-			draft.order >= draftNodes.length
-		)
+		if (!Number.isSafeInteger(draft.order) || draft.order < 0 || draft.order >= draftNodes.length)
 			invalid(`Draft node ${draft.id} has an invalid sibling order`);
 		const title = draft.title.trim();
 		if (!title) invalid(`Draft node ${draft.id} has a blank title`);

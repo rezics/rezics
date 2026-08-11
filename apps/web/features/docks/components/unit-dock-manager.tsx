@@ -93,9 +93,7 @@ export function UnitDockManager({
 			{deleted ? (
 				<Card appearance="outlined">
 					<CardContent className="grid gap-3 p-6">
-						<h2 className="font-semibold text-lg">
-							{t.docks.kinds[target.dockKind].label}
-						</h2>
+						<h2 className="font-semibold text-lg">{t.docks.kinds[target.dockKind].label}</h2>
 						<p className="text-muted-foreground text-sm">{t.docks.deleted}</p>
 					</CardContent>
 				</Card>
@@ -199,9 +197,7 @@ function UnitDockEditor({
 		<Card appearance="outlined">
 			<CardContent className="grid gap-5 p-6">
 				<div className="flex flex-wrap items-center justify-between gap-3">
-					<h2 className="font-semibold text-lg">
-						{t.docks.kinds[target.dockKind].label}
-					</h2>
+					<h2 className="font-semibold text-lg">{t.docks.kinds[target.dockKind].label}</h2>
 					{dirty ? <Badge variant="warning">{t.docks.unsaved}</Badge> : null}
 				</div>
 				<p className="text-muted-foreground text-sm">
@@ -250,9 +246,7 @@ function UnitDockEditor({
 									<AlertDialogTitle>{t.docks.removeTitle}</AlertDialogTitle>
 								</AlertDialogHeader>
 								<AlertDialogBody>
-									<AlertDialogDescription>
-										{t.docks.removeDescription}
-									</AlertDialogDescription>
+									<AlertDialogDescription>{t.docks.removeDescription}</AlertDialogDescription>
 								</AlertDialogBody>
 								<AlertDialogFooter>
 									<AlertDialogCancel>{t.docks.cancel}</AlertDialogCancel>
@@ -284,12 +278,7 @@ function UnitDockEditor({
 				<RequestFailure error={remove.error} fallback={t.ui.retryLater} />
 				<RequestFailure error={wikiNavigation.error} fallback={t.ui.retryLater} />
 				{hasStatus(save.error, 409) || hasStatus(remove.error, 409) ? (
-					<Button
-						onClick={() => void invalidate()}
-						size="sm"
-						type="button"
-						variant="outline"
-					>
+					<Button onClick={() => void invalidate()} size="sm" type="button" variant="outline">
 						{t.docks.reload}
 					</Button>
 				) : null}
@@ -341,19 +330,14 @@ function UnitDockHistory({
 							>
 								<div className="grid gap-1">
 									<strong>{t.docks.revisionKinds[revision.kind]}</strong>
-									<time
-										className="text-muted-foreground text-xs"
-										dateTime={revision.createdAt}
-									>
+									<time className="text-muted-foreground text-xs" dateTime={revision.createdAt}>
 										{new Intl.DateTimeFormat(locale.current, {
 											dateStyle: "medium",
 											timeStyle: "short",
 										}).format(new Date(revision.createdAt))}
 									</time>
 									{revision.editSummary ? (
-										<p className="text-muted-foreground text-sm">
-											{revision.editSummary}
-										</p>
+										<p className="text-muted-foreground text-sm">{revision.editSummary}</p>
 									) : null}
 								</div>
 								<Button

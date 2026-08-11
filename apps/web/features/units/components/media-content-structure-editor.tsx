@@ -239,9 +239,7 @@ export function MediaContentStructureEditor({
 						<Button
 							aria-label={t.units.content.discardDraft}
 							disabled={!dirty || save.isPending}
-							onClick={() =>
-								setDocument((current) => ({ ...current, draft: current.baseline }))
-							}
+							onClick={() => setDocument((current) => ({ ...current, draft: current.baseline }))}
 							size="icon-md"
 							type="button"
 							variant="outline"
@@ -403,8 +401,7 @@ function MediaStructureTree({
 	);
 	const selectedIds = useMemo(() => new Set(selectionCoverage.keys()), [selectionCoverage]);
 	const validDropTargetIds = useMemo(
-		() =>
-			draggingIds.size ? getMediaDraftMoveTargetIds(nodes, draggingIds) : new Set<string>(),
+		() => (draggingIds.size ? getMediaDraftMoveTargetIds(nodes, draggingIds) : new Set<string>()),
 		[draggingIds, nodes],
 	);
 	const counts = useMemo(
@@ -552,9 +549,7 @@ function MediaStructureTree({
 			<section>
 				<header className="flex flex-wrap items-end justify-between gap-4 border-b border-border-weak pb-4">
 					<div className="min-w-0">
-						<h2 className="font-heading text-lg font-semibold">
-							{t.units.content.title}
-						</h2>
+						<h2 className="font-heading text-lg font-semibold">{t.units.content.title}</h2>
 						<p className="mt-1 text-sm text-muted-foreground">
 							{t.units.content.mediaStructureSummary({
 								videos: counts.video,
@@ -570,11 +565,7 @@ function MediaStructureTree({
 							type="button"
 							variant={selectionMode ? "outline" : "quiet"}
 						>
-							{selectionMode ? (
-								<SquareCheckBig aria-hidden />
-							) : (
-								<Square aria-hidden />
-							)}
+							{selectionMode ? <SquareCheckBig aria-hidden /> : <Square aria-hidden />}
 							{selectionMode
 								? t.units.content.selectedCount({ count: selectedRootIds.size })
 								: t.units.content.multiSelect}
@@ -587,11 +578,7 @@ function MediaStructureTree({
 							<ChevronsUpDown aria-hidden />
 							{t.units.content.expandAll}
 						</Button>
-						<Button
-							onClick={() => setExpandedIds(new Set())}
-							type="button"
-							variant="quiet"
-						>
+						<Button onClick={() => setExpandedIds(new Set())} type="button" variant="quiet">
 							<ChevronsDownUp aria-hidden />
 							{t.units.content.collapseAll}
 						</Button>
@@ -618,17 +605,11 @@ function MediaStructureTree({
 								</Button>
 							</MenuTrigger>
 							<MenuContent>
-								<MenuItem
-									onSelect={() => requestMainMediaItem("video")}
-									value="new-video"
-								>
+								<MenuItem onSelect={() => requestMainMediaItem("video")} value="new-video">
 									<Video aria-hidden />
 									{t.units.content.newVideo}
 								</MenuItem>
-								<MenuItem
-									onSelect={() => requestMainMediaItem("audio")}
-									value="new-audio"
-								>
+								<MenuItem onSelect={() => requestMainMediaItem("audio")} value="new-audio">
 									<AudioLines aria-hidden />
 									{t.units.content.newAudio}
 								</MenuItem>
@@ -705,10 +686,7 @@ function MediaStructureTree({
 					) : (
 						<div className="grid min-h-[36rem] place-items-center px-6 text-center">
 							<div>
-								<ListTree
-									aria-hidden
-									className="mx-auto size-8 text-muted-foreground"
-								/>
+								<ListTree aria-hidden className="mx-auto size-8 text-muted-foreground" />
 								<p className="mt-3 text-sm text-muted-foreground">
 									{t.units.content.noMediaContent}
 								</p>
@@ -722,9 +700,7 @@ function MediaStructureTree({
 					node={renamingNode}
 					onClose={() => setRenamingNode(undefined)}
 					onRename={(title) => {
-						onChange((current) =>
-							renameMediaDraftNode(current, renamingNode.id, title),
-						);
+						onChange((current) => renameMediaDraftNode(current, renamingNode.id, title));
 						setRenamingNode(undefined);
 					}}
 				/>
@@ -735,9 +711,7 @@ function MediaStructureTree({
 					nodes={nodes}
 					onClose={() => setMovingIds(undefined)}
 					onSelect={(destination) => {
-						onChange((current) =>
-							moveMediaDraftSelection(current, movingIds, destination),
-						);
+						onChange((current) => moveMediaDraftSelection(current, movingIds, destination));
 						if (destination.kind === "node" && destination.placement === "inside")
 							setExpandedIds((current) => new Set([...current, destination.nodeId]));
 						setMovingIds(undefined);
@@ -797,9 +771,7 @@ function MediaContentStructureRow(props: MediaStructureRowProps) {
 	const siblings = siblingsByParentId.get(node.parentId) ?? [];
 	const siblingIndex = siblings.findIndex(({ id }) => id === node.id);
 	const activePlacement =
-		dropTarget?.kind === "node" && dropTarget.nodeId === node.id
-			? dropTarget.placement
-			: undefined;
+		dropTarget?.kind === "node" && dropTarget.nodeId === node.id ? dropTarget.placement : undefined;
 
 	function placement(event: DragEvent<HTMLDivElement>): "before" | "inside" | "after" {
 		const bounds = event.currentTarget.getBoundingClientRect();
@@ -891,10 +863,7 @@ function MediaContentStructureRow(props: MediaStructureRowProps) {
 						{label ? (
 							<span>{t.units.content.childCount({ count: children.length })}</span>
 						) : (
-							<span>
-								{formatDuration(node.durationSeconds) ??
-									t.units.content.durationUnknown}
-							</span>
+							<span>{formatDuration(node.durationSeconds) ?? t.units.content.durationUnknown}</span>
 						)}
 					</span>
 				</span>
@@ -919,9 +888,7 @@ function MediaContentStructureRow(props: MediaStructureRowProps) {
 			{selectionMode ? (
 				<MediaSelectionActionMenu
 					canMoveToFirst={selected ? true : siblingIndex > 0}
-					canMoveToLast={
-						selected ? true : siblingIndex >= 0 && siblingIndex < siblings.length - 1
-					}
+					canMoveToLast={selected ? true : siblingIndex >= 0 && siblingIndex < siblings.length - 1}
 					nodeId={node.id}
 					onMoveRequest={onMoveRequest}
 					onMoveToEdge={onMoveToEdge}
@@ -952,9 +919,7 @@ function MediaContentStructureRow(props: MediaStructureRowProps) {
 					<MediaSelectionContextMenuItems
 						canMoveToFirst={selected ? true : siblingIndex > 0}
 						canMoveToLast={
-							selected
-								? true
-								: siblingIndex >= 0 && siblingIndex < siblings.length - 1
+							selected ? true : siblingIndex >= 0 && siblingIndex < siblings.length - 1
 						}
 						nodeId={node.id}
 						onMoveRequest={onMoveRequest}
@@ -1127,24 +1092,15 @@ function MediaNodeActionMenu(props: MediaNodeMenuProps) {
 				</Button>
 			</MenuTrigger>
 			<MenuContent>
-				<MenuItem
-					onSelect={() => onCreate({ kind: "video", destination })}
-					value="new-video"
-				>
+				<MenuItem onSelect={() => onCreate({ kind: "video", destination })} value="new-video">
 					<Video aria-hidden />
 					{label ? t.units.content.newVideo : t.units.content.newVideoAfter}
 				</MenuItem>
-				<MenuItem
-					onSelect={() => onCreate({ kind: "audio", destination })}
-					value="new-audio"
-				>
+				<MenuItem onSelect={() => onCreate({ kind: "audio", destination })} value="new-audio">
 					<AudioLines aria-hidden />
 					{label ? t.units.content.newAudio : t.units.content.newAudioAfter}
 				</MenuItem>
-				<MenuItem
-					onSelect={() => onCreate({ kind: "label", destination })}
-					value="new-label"
-				>
+				<MenuItem onSelect={() => onCreate({ kind: "label", destination })} value="new-label">
 					<ListTree aria-hidden />
 					{label ? t.units.content.newLabel : t.units.content.newLabelAfter}
 				</MenuItem>
@@ -1265,11 +1221,7 @@ function MediaNodeContextMenuItems(props: MediaNodeMenuProps) {
 				<Move aria-hidden />
 				{t.units.content.move}
 			</ContextMenuItem>
-			<ContextMenuItem
-				disabled={pending}
-				onSelect={() => onRename(node)}
-				value="context-rename"
-			>
+			<ContextMenuItem disabled={pending} onSelect={() => onRename(node)} value="context-rename">
 				<Pencil aria-hidden />
 				{t.units.content.rename}
 			</ContextMenuItem>
@@ -1299,22 +1251,14 @@ function RenameMediaNodeDialog({
 				<form
 					onSubmit={(event) => {
 						event.preventDefault();
-						const title = String(
-							new FormData(event.currentTarget).get("title") ?? "",
-						).trim();
+						const title = String(new FormData(event.currentTarget).get("title") ?? "").trim();
 						if (title) onRename(title);
 					}}
 				>
 					<DialogBody>
 						<Field required>
 							<FieldLabel>{t.ui.title}</FieldLabel>
-							<Input
-								autoFocus
-								defaultValue={node.title}
-								maxLength={500}
-								name="title"
-								required
-							/>
+							<Input autoFocus defaultValue={node.title} maxLength={500} name="title" required />
 						</Field>
 					</DialogBody>
 					<DialogFooter>

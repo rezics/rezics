@@ -155,18 +155,13 @@ export function ConsoleUsersPage({ selectedUserId }: { readonly selectedUserId: 
 	]);
 
 	if (users.isPending) return <QueryPending />;
-	if (users.isError)
-		return <QueryFailure error={users.error} retry={() => void users.refetch()} />;
+	if (users.isError) return <QueryFailure error={users.error} retry={() => void users.refetch()} />;
 
 	return (
 		<section className="flex h-full min-h-0 flex-col">
 			<header className="border-border/70 border-b px-4 py-4 md:px-6">
-				<h1 className="font-semibold text-xl tracking-tight">
-					{t.console.sections.users.label}
-				</h1>
-				<p className="mt-1 text-muted-foreground text-sm">
-					{t.console.sections.users.description}
-				</p>
+				<h1 className="font-semibold text-xl tracking-tight">{t.console.sections.users.label}</h1>
+				<p className="mt-1 text-muted-foreground text-sm">{t.console.sections.users.description}</p>
 			</header>
 			<div className="grid min-h-0 flex-1 lg:grid-cols-[23rem_minmax(0,1fr)]">
 				<div
@@ -191,15 +186,11 @@ export function ConsoleUsersPage({ selectedUserId }: { readonly selectedUserId: 
 								aria-label={t.console.users.stateFilter}
 								onChange={(event) => {
 									const value = event.currentTarget.value;
-									setState(
-										value === "all" ? "all" : (value as PlatformUserState),
-									);
+									setState(value === "all" ? "all" : (value as PlatformUserState));
 								}}
 								value={state}
 							>
-								<NativeSelectOption value="all">
-									{t.console.users.allStates}
-								</NativeSelectOption>
+								<NativeSelectOption value="all">{t.console.users.allStates}</NativeSelectOption>
 								{Object.values(GetApiPlatformUsersState).map((value) => (
 									<NativeSelectOption key={value} value={value}>
 										{t.console.users.states[value]}
@@ -209,18 +200,14 @@ export function ConsoleUsersPage({ selectedUserId }: { readonly selectedUserId: 
 							<NativeSelect
 								aria-label={t.console.users.verificationFilter}
 								onChange={(event) =>
-									setVerification(
-										event.currentTarget.value as EmailVerificationFilter,
-									)
+									setVerification(event.currentTarget.value as EmailVerificationFilter)
 								}
 								value={verification}
 							>
 								<NativeSelectOption value="all">
 									{t.console.users.allVerificationStates}
 								</NativeSelectOption>
-								<NativeSelectOption value="verified">
-									{t.console.users.verified}
-								</NativeSelectOption>
+								<NativeSelectOption value="verified">{t.console.users.verified}</NativeSelectOption>
 								<NativeSelectOption value="unverified">
 									{t.console.users.unverified}
 								</NativeSelectOption>
@@ -267,25 +254,11 @@ export function ConsoleUsersPage({ selectedUserId }: { readonly selectedUserId: 
 													{user.name.slice(0, 1).toUpperCase()}
 												</div>
 												<div className="min-w-0 flex-1">
-													<p className="truncate font-medium text-sm">
-														{user.name}
-													</p>
-													<p className="truncate text-muted-foreground text-xs">
-														{user.email}
-													</p>
+													<p className="truncate font-medium text-sm">{user.name}</p>
+													<p className="truncate text-muted-foreground text-xs">{user.email}</p>
 												</div>
-												<Badge
-													pill
-													size="sm"
-													variant={accountStateBadge(
-														user.accountState.state,
-													)}
-												>
-													{
-														t.console.users.states[
-															user.accountState.state
-														]
-													}
+												<Badge pill size="sm" variant={accountStateBadge(user.accountState.state)}>
+													{t.console.users.states[user.accountState.state]}
 												</Badge>
 											</Link>
 										</div>
@@ -301,10 +274,7 @@ export function ConsoleUsersPage({ selectedUserId }: { readonly selectedUserId: 
 					</div>
 				</div>
 				<div
-					className={cn(
-						"min-h-0 overflow-y-auto",
-						selectedUserId ? "block" : "hidden lg:block",
-					)}
+					className={cn("min-h-0 overflow-y-auto", selectedUserId ? "block" : "hidden lg:block")}
 				>
 					{selectedUserId ? (
 						<UserInspector key={selectedUserId} userId={selectedUserId} />
@@ -394,9 +364,7 @@ function UserInspector({ userId }: { readonly userId: string }) {
 					</TabsContent>
 					<TabsContent value="apiQuota">
 						<div className="grid gap-6">
-							{canReadAccountApiQuotas ? (
-								<AccountApiQuotaEditor userId={userId} />
-							) : null}
+							{canReadAccountApiQuotas ? <AccountApiQuotaEditor userId={userId} /> : null}
 							<TokenApiQuotaManager userId={userId} />
 						</div>
 					</TabsContent>
@@ -425,9 +393,7 @@ function UserOverview({
 	const { canManageUserStatus } = useConsoleWorkspace();
 	const queryClient = useQueryClient();
 	const [state, setState] = useState<PlatformUserState>(user.accountState.state);
-	const [reason, setReason] = useState<AccountStateReason>(
-		user.accountState.reason ?? "security",
-	);
+	const [reason, setReason] = useState<AccountStateReason>(user.accountState.reason ?? "security");
 	const [note, setNote] = useState(user.accountState.note ?? "");
 	const [expiresAt, setExpiresAt] = useState("");
 	const mutation = usePutApiPlatformUsersByUserIdAccountState({
@@ -492,12 +458,8 @@ function UserOverview({
 					<div>
 						<p className="text-muted-foreground">{t.console.users.verification}</p>
 						<p className="mt-1 flex items-center gap-2 font-medium">
-							{user.emailVerified ? (
-								<CheckCircle2 className="size-4 text-success" />
-							) : null}
-							{user.emailVerified
-								? t.console.users.verified
-								: t.console.users.unverified}
+							{user.emailVerified ? <CheckCircle2 className="size-4 text-success" /> : null}
+							{user.emailVerified ? t.console.users.verified : t.console.users.unverified}
 						</p>
 					</div>
 					<div>
@@ -512,9 +474,7 @@ function UserOverview({
 					</div>
 					<div>
 						<p className="text-muted-foreground">{t.console.users.createdAt}</p>
-						<p className="mt-1 font-medium">
-							{formatter.format(new Date(user.createdAt))}
-						</p>
+						<p className="mt-1 font-medium">{formatter.format(new Date(user.createdAt))}</p>
 					</div>
 					<div>
 						<p className="text-muted-foreground">{t.console.users.activeSessions}</p>
@@ -533,9 +493,7 @@ function UserOverview({
 							<Field>
 								<FieldLabel>{t.console.users.accountState}</FieldLabel>
 								<NativeSelect
-									onChange={(event) =>
-										setState(event.currentTarget.value as PlatformUserState)
-									}
+									onChange={(event) => setState(event.currentTarget.value as PlatformUserState)}
 									value={state}
 								>
 									{Object.values(GetApiPlatformUsersState).map((value) => (
@@ -551,9 +509,7 @@ function UserOverview({
 										<FieldLabel>{t.console.users.reason}</FieldLabel>
 										<NativeSelect
 											onChange={(event) =>
-												setReason(
-													event.currentTarget.value as AccountStateReason,
-												)
+												setReason(event.currentTarget.value as AccountStateReason)
 											}
 											value={reason}
 										>
@@ -566,14 +522,10 @@ function UserOverview({
 									</Field>
 									{state === "suspended" ? (
 										<Field>
-											<FieldLabel>
-												{t.console.users.suspensionExpiry}
-											</FieldLabel>
+											<FieldLabel>{t.console.users.suspensionExpiry}</FieldLabel>
 											<Input
 												min={new Date().toISOString().slice(0, 16)}
-												onChange={(event) =>
-													setExpiresAt(event.currentTarget.value)
-												}
+												onChange={(event) => setExpiresAt(event.currentTarget.value)}
 												type="datetime-local"
 												value={expiresAt}
 											/>
@@ -590,10 +542,7 @@ function UserOverview({
 									</Field>
 								</>
 							) : null}
-							<RequestFailure
-								error={mutation.error}
-								fallback={t.console.users.updateFailed}
-							/>
+							<RequestFailure error={mutation.error} fallback={t.console.users.updateFailed} />
 							<Button
 								isLoading={mutation.isPending}
 								type="submit"
@@ -603,9 +552,7 @@ function UserOverview({
 							</Button>
 						</form>
 					) : (
-						<p className="text-muted-foreground text-sm">
-							{t.console.users.accountStateReadOnly}
-						</p>
+						<p className="text-muted-foreground text-sm">{t.console.users.accountStateReadOnly}</p>
 					)}
 				</CardContent>
 			</Card>
@@ -724,9 +671,7 @@ function UserSessions({ userId }: { readonly userId: string }) {
 										{session.userAgent ?? t.console.users.unknownDevice}
 									</p>
 									{session.current ? (
-										<Badge variant="info">
-											{t.console.users.currentSession}
-										</Badge>
+										<Badge variant="info">{t.console.users.currentSession}</Badge>
 									) : null}
 								</div>
 								<p className="mt-1 text-muted-foreground text-xs">
@@ -778,9 +723,7 @@ function UserActivity({
 		{ query: { enabled: canReadAudit } },
 	);
 	if (!canReadAudit)
-		return (
-			<p className="text-muted-foreground text-sm">{t.console.users.activityUnavailable}</p>
-		);
+		return <p className="text-muted-foreground text-sm">{t.console.users.activityUnavailable}</p>;
 	if (activity.isPending) return <QueryPending />;
 	if (activity.isError || !activity.data)
 		return <QueryFailure error={activity.error} retry={() => void activity.refetch()} />;

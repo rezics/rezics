@@ -45,8 +45,7 @@ const QuotaScopeByRouteOperationId = {
 	postApiSearchFeaturesByTemplateFeed: "search.execute",
 	postApiSearchZonesByZoneIdFeatureExecute: "search.execute",
 	postApiSearchZonesByZoneIdFeatureFeed: "search.execute",
-	"postApiSearchUnitsByUnitIdContent-structuresByStructureIdNodesByNodeIdExecute":
-		"search.execute",
+	"postApiSearchUnitsByUnitIdContent-structuresByStructureIdNodesByNodeIdExecute": "search.execute",
 	postApiSearchZonesByZoneIdDockBlocksByBlockKeyExecute: "search.execute",
 	postApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecute: "search.execute",
 	"postApiSearchZonesByZoneIdFeed-blocksByBlockKeyExecute": "search.execute",

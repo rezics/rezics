@@ -135,10 +135,7 @@ async function commitContentStructureRevision(
 				forceCheckpoint: input.change.forceCheckpoint,
 			});
 		if (checkpoint)
-			checkpointState = assertStateIdentity(
-				input.structureId,
-				await input.change.checkpoint(),
-			);
+			checkpointState = assertStateIdentity(input.structureId, await input.change.checkpoint());
 	}
 
 	let content: StoredRevisionContent;
@@ -234,8 +231,7 @@ export async function mutateContentStructureWithHistory<Result extends object>(
 		expectedRevisionId: input.baseRevisionId,
 		lock: () => lockContentStructureHistory(tx, input.structureId),
 		loadHeadRevisionId: async () => (await loadHead(tx, input.structureId))?.revisionId ?? null,
-		revisionConflict: (latestRevisionId) =>
-			new ContentStructureRevisionConflict(latestRevisionId),
+		revisionConflict: (latestRevisionId) => new ContentStructureRevisionConflict(latestRevisionId),
 		mutate,
 		commit: (change) =>
 			commitContentStructureRevision(tx, {

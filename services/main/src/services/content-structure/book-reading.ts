@@ -48,9 +48,7 @@ export type BookReadingNode = {
 };
 
 function compareNodes(left: BookReadingNode, right: BookReadingNode): number {
-	return (
-		compareBytewisePositions(left.position, right.position) || left.id.localeCompare(right.id)
-	);
+	return compareBytewisePositions(left.position, right.position) || left.id.localeCompare(right.id);
 }
 
 /**
@@ -66,8 +64,7 @@ export function orderReaderChapterIds(nodes: readonly BookReadingNode[]): string
 	const nodeIds = new Set(nodes.map((node) => node.id));
 	const childrenByParent = new Map<string | null, BookReadingNode[]>();
 	for (const node of nodes) {
-		const parentId =
-			node.parentId !== null && nodeIds.has(node.parentId) ? node.parentId : null;
+		const parentId = node.parentId !== null && nodeIds.has(node.parentId) ? node.parentId : null;
 		const siblings = childrenByParent.get(parentId) ?? [];
 		siblings.push(node);
 		childrenByParent.set(parentId, siblings);

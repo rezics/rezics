@@ -69,8 +69,7 @@ export function ZoneSurface({
 	useHeaderSearchOverride(headerSearch);
 
 	if (query.isPending) return <QueryPending />;
-	if (query.isError)
-		return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
+	if (query.isError) return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
 	if (!projection) return null;
 
 	const localization = selectLocalization(

@@ -15,7 +15,5 @@ export default async function Page({
 	const { progressEntryId } = await searchParams;
 	if (!isUnitDetailUnitType(type) || !isUnitId(unit)) notFound();
 	if (progressEntryId !== undefined && !isUnitId(progressEntryId)) notFound();
-	return (
-		<TargetedReviewCreatePage progressEntryId={progressEntryId} targetId={unit} type={type} />
-	);
+	return <TargetedReviewCreatePage progressEntryId={progressEntryId} targetId={unit} type={type} />;
 }

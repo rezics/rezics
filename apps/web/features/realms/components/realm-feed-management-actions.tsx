@@ -73,11 +73,7 @@ export function RealmFeedManagementActions({
 				</MenuItem>
 			) : null}
 			{canManagePins ? (
-				<MenuItem
-					disabled={pin.isPending}
-					onSelect={() => void pinItem()}
-					value="realm-pin"
-				>
+				<MenuItem disabled={pin.isPending} onSelect={() => void pinItem()} value="realm-pin">
 					<PinIcon aria-hidden />
 					{t.realms.feedManagement.pin}
 				</MenuItem>

@@ -230,10 +230,7 @@ function DockBlock({
 			<figure className="overflow-hidden rounded-xl border border-border-weak">
 				<img
 					alt={alt}
-					className={cn(
-						"h-auto w-full",
-						block.fit === "cover" && "max-h-[36rem] object-cover",
-					)}
+					className={cn("h-auto w-full", block.fit === "cover" && "max-h-[36rem] object-cover")}
 					src={`/image-assets/${encodeURIComponent(block.assetId)}/content`}
 				/>
 				{block.captionUnitId ? (
@@ -261,9 +258,7 @@ function DockBlock({
 		return block.style === "space" ? (
 			<div aria-hidden className="h-6" />
 		) : (
-			<Separator
-				className={cn("my-3 bg-border-weak", block.style === "section" && "h-0.5")}
-			/>
+			<Separator className={cn("my-3 bg-border-weak", block.style === "section" && "h-0.5")} />
 		);
 	if (block._type === "columns") {
 		const style: CSSProperties & { "--dock-columns": string } = {
@@ -276,11 +271,7 @@ function DockBlock({
 			>
 				{block.columns.map((column) => (
 					<div className="min-w-0" key={column._key}>
-						<DockBlocks
-							blocks={column.blocks}
-							navigations={navigations}
-							units={units}
-						/>
+						<DockBlocks blocks={column.blocks} navigations={navigations} units={units} />
 					</div>
 				))}
 			</div>
@@ -375,8 +366,7 @@ function unitListClasses(layout: "list" | "grid" | "carousel"): string {
 	return cn(
 		"grid gap-3",
 		layout === "grid" && "sm:grid-cols-2",
-		layout === "carousel" &&
-			"grid-flow-col auto-cols-[minmax(14rem,20rem)] overflow-x-auto pb-2",
+		layout === "carousel" && "grid-flow-col auto-cols-[minmax(14rem,20rem)] overflow-x-auto pb-2",
 	);
 }
 
@@ -395,8 +385,7 @@ function DockCollection({
 		query: { limit, localizationLanguages },
 	});
 	if (query.isPending) return null;
-	if (query.isError)
-		return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
+	if (query.isError) return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
 	if (!query.data) return null;
 	return (
 		<div className={unitListClasses(layout)}>
@@ -428,12 +417,7 @@ function DockNavigation({
 				)}
 			>
 				{document.items.map((item) => (
-					<DockNavigationItem
-						appearance={appearance}
-						item={item}
-						key={item._key}
-						units={units}
-					/>
+					<DockNavigationItem appearance={appearance} item={item} key={item._key} units={units} />
 				))}
 			</ul>
 		</nav>

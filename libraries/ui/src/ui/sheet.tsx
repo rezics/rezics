@@ -199,10 +199,7 @@ export const SheetBody = (props: React.ComponentProps<typeof DialogBody>) => {
 
 	return (
 		<DialogBody
-			className={cn(
-				"in-[[data-slot=sheet-content]:has([data-slot=sheet-header])]:pt-0",
-				className,
-			)}
+			className={cn("in-[[data-slot=sheet-content]:has([data-slot=sheet-header])]:pt-0", className)}
 			data-slot="sheet-body"
 			{...rest}
 		/>
@@ -217,10 +214,6 @@ export const SheetFooter = (props: React.ComponentProps<typeof DialogFooter>) =>
 	const { className, ...rest } = props;
 
 	return (
-		<DialogFooter
-			className={cn("sm:rounded-none", className)}
-			data-slot="sheet-footer"
-			{...rest}
-		/>
+		<DialogFooter className={cn("sm:rounded-none", className)} data-slot="sheet-footer" {...rest} />
 	);
 };

@@ -107,8 +107,7 @@ function orderedSiblings(nodes: ReadonlyMap<string, ContentStructureNodeState>) 
 			const right = nodes.get(rightId);
 			if (!left || !right) throw new Error("Content Structure sibling index is invalid");
 			return (
-				compareFractionalPositions(left.position, right.position) ||
-				left.id.localeCompare(right.id)
+				compareFractionalPositions(left.position, right.position) || left.id.localeCompare(right.id)
 			);
 		});
 	return siblings;
@@ -123,8 +122,7 @@ function rebalanceDenseSiblingPositions(
 		const plan = rebalanceFractionalPositionSequence(
 			ids.map((id) => {
 				const node = nodes.get(id);
-				if (!node)
-					throw new Error("Content Structure sibling order references a missing node");
+				if (!node) throw new Error("Content Structure sibling order references a missing node");
 				return node.position;
 			}),
 		);
@@ -153,8 +151,7 @@ function insertAtPlacement(
 	if (!placement || placement.kind === "end") index = ids.length;
 	else if (placement.kind === "start") index = 0;
 	else if ("nodeId" in placement) {
-		if (placement.nodeId === nodeId)
-			invalid(command, "placement cannot reference the moved node");
+		if (placement.nodeId === nodeId) invalid(command, "placement cannot reference the moved node");
 		const anchor = nodes.get(placement.nodeId);
 		if (!anchor || anchor.parentId !== parentId)
 			invalid(command, "placement anchor is not a sibling at the destination");
@@ -186,8 +183,7 @@ function insertAtExactPosition(
 		const right = nodes.get(rightId);
 		if (!left || !right) throw new Error("Content Structure sibling index is invalid");
 		return (
-			compareFractionalPositions(left.position, right.position) ||
-			left.id.localeCompare(right.id)
+			compareFractionalPositions(left.position, right.position) || left.id.localeCompare(right.id)
 		);
 	});
 	siblings.set(parentId, ids);
@@ -276,14 +272,7 @@ export function planContentStructureBatch(
 					);
 				else {
 					node.position = command.position;
-					insertAtExactPosition(
-						command,
-						nodes,
-						siblings,
-						node.parentId,
-						node.id,
-						node.position,
-					);
+					insertAtExactPosition(command, nodes, siblings, node.parentId, node.id, node.position);
 				}
 				break;
 			}
@@ -293,16 +282,10 @@ export function planContentStructureBatch(
 				const target = command.target ? targetColumns(command.target) : undefined;
 				nodes.set(command.nodeId, {
 					...current,
-					...(command.contentUnitId === undefined
-						? {}
-						: { contentUnitId: command.contentUnitId }),
-					...(command.documentKey === undefined
-						? {}
-						: { documentKey: command.documentKey }),
+					...(command.contentUnitId === undefined ? {} : { contentUnitId: command.contentUnitId }),
+					...(command.documentKey === undefined ? {} : { documentKey: command.documentKey }),
 					...(target ?? {}),
-					...(command.contentRating === undefined
-						? {}
-						: { contentRating: command.contentRating }),
+					...(command.contentRating === undefined ? {} : { contentRating: command.contentRating }),
 					...(command.realmTagQueryStrategy === undefined
 						? {}
 						: { realmTagQueryStrategy: command.realmTagQueryStrategy }),
@@ -314,8 +297,7 @@ export function planContentStructureBatch(
 					invalid(command, "position and placement are mutually exclusive");
 				const current = nodes.get(command.nodeId);
 				if (!current) invalid(command, "node does not exist at this point in the batch");
-				const parentId =
-					command.parentId === undefined ? current.parentId : command.parentId;
+				const parentId = command.parentId === undefined ? current.parentId : command.parentId;
 				if (parentId === command.nodeId) invalid(command, "node cannot parent itself");
 				if (parentId !== null && !nodes.has(parentId))
 					invalid(command, "parent node does not exist at this point in the batch");
@@ -333,14 +315,7 @@ export function planContentStructureBatch(
 					);
 				else {
 					next.position = command.position;
-					insertAtExactPosition(
-						command,
-						nodes,
-						siblings,
-						next.parentId,
-						next.id,
-						next.position,
-					);
+					insertAtExactPosition(command, nodes, siblings, next.parentId, next.id, next.position);
 				}
 				break;
 			}
@@ -352,12 +327,10 @@ export function planContentStructureBatch(
 				if (!left || !right) invalid(command, "both swapped nodes must exist");
 				const leftIds = siblings.get(left.parentId);
 				const rightIds = siblings.get(right.parentId);
-				if (!leftIds || !rightIds)
-					throw new Error("Content Structure swap lost sibling state");
+				if (!leftIds || !rightIds) throw new Error("Content Structure swap lost sibling state");
 				const leftIndex = leftIds.indexOf(left.id);
 				const rightIndex = rightIds.indexOf(right.id);
-				if (leftIndex < 0 || rightIndex < 0)
-					throw new Error("Content Structure swap lost a node");
+				if (leftIndex < 0 || rightIndex < 0) throw new Error("Content Structure swap lost a node");
 				if (left.parentId === right.parentId) {
 					leftIds[leftIndex] = right.id;
 					leftIds[rightIndex] = left.id;

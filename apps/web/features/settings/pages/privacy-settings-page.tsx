@@ -46,8 +46,7 @@ function PrivacySettingsForm({
 	const [saved, setSaved] = useState(false);
 	const update = useUpdateCurrentUserPrivacy();
 	const dirty =
-		scoreVisibility !== initialScoreVisibility ||
-		progressVisibility !== initialProgressVisibility;
+		scoreVisibility !== initialScoreVisibility || progressVisibility !== initialProgressVisibility;
 
 	async function submit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
@@ -76,9 +75,7 @@ function PrivacySettingsForm({
 				<CardContent className="p-6">
 					<FieldGroup>
 						<Field>
-							<FieldLabel htmlFor="score-visibility">
-								{t.settings.privacy.scoreTitle}
-							</FieldLabel>
+							<FieldLabel htmlFor="score-visibility">{t.settings.privacy.scoreTitle}</FieldLabel>
 							<NativeSelect
 								id="score-visibility"
 								onChange={(event) => {
@@ -94,9 +91,7 @@ function PrivacySettingsForm({
 									</NativeSelectOption>
 								))}
 							</NativeSelect>
-							<FieldDescription>
-								{t.settings.privacy.scoreDescription}
-							</FieldDescription>
+							<FieldDescription>{t.settings.privacy.scoreDescription}</FieldDescription>
 						</Field>
 						<Field>
 							<FieldLabel htmlFor="progress-visibility">
@@ -117,9 +112,7 @@ function PrivacySettingsForm({
 									</NativeSelectOption>
 								))}
 							</NativeSelect>
-							<FieldDescription>
-								{t.settings.privacy.progressDescription}
-							</FieldDescription>
+							<FieldDescription>{t.settings.privacy.progressDescription}</FieldDescription>
 						</Field>
 						<div className="rounded-lg border border-border-weak bg-surface-subtle p-4 text-muted-foreground text-sm leading-6">
 							<p>{t.settings.privacy.categoryRule}</p>

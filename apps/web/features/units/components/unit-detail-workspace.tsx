@@ -123,9 +123,7 @@ function UnitDetailShell<Type extends UnitDetailUnitType>({
 		<main className="mx-auto flex w-full max-w-[76rem] flex-col gap-6 px-4 py-5 sm:px-6 sm:py-8">
 			<UnitDetailHero type={type} unit={unit} />
 
-			{isProgressTrackableUnitType(type) ? (
-				<UnitProgressSummaryCard className="lg:hidden" />
-			) : null}
+			{isProgressTrackableUnitType(type) ? <UnitProgressSummaryCard className="lg:hidden" /> : null}
 
 			<nav
 				aria-label={t.units.detail.sections}

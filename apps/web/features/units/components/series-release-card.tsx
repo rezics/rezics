@@ -52,10 +52,7 @@ export function SeriesReleaseCard({
 						{t.feed.content.kinds[`unit:${item.release.type}`]}
 					</p>
 					<Link className="block" href={href}>
-						<h3
-							className="mt-1 font-heading font-black text-[1.05rem] leading-snug"
-							id={headingId}
-						>
+						<h3 className="mt-1 font-heading font-black text-[1.05rem] leading-snug" id={headingId}>
 							<LocalizedText language={item.release.language} value={title} />
 						</h3>
 					</Link>

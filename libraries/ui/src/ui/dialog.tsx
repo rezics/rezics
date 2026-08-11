@@ -28,12 +28,7 @@ export const Dialog = (props: React.ComponentProps<typeof ArkDialog.Root>) => {
 
 	return (
 		<DialogContext.Provider value={{ modal }}>
-			<ArkDialog.Root
-				lazyMount={lazyMount}
-				modal={modal}
-				unmountOnExit={unmountOnExit}
-				{...rest}
-			/>
+			<ArkDialog.Root lazyMount={lazyMount} modal={modal} unmountOnExit={unmountOnExit} {...rest} />
 		</DialogContext.Provider>
 	);
 };
@@ -171,9 +166,7 @@ export const DialogContent = (props: DialogContentProps) => {
 			<DialogOverlay />
 
 			<DialogPositioner
-				className={cn(
-					bottomStickOnMobile && "max-sm:grid-rows-[1fr_auto] max-sm:p-0 max-sm:pt-12",
-				)}
+				className={cn(bottomStickOnMobile && "max-sm:grid-rows-[1fr_auto] max-sm:p-0 max-sm:pt-12")}
 			>
 				<ArkDialog.Content
 					className={cn(dialogContentVariants({ size, bottomStickOnMobile }), className)}
@@ -258,11 +251,7 @@ export const DialogHeader = (props: DialogHeaderProps) => {
 
 			{!!description && <DialogDescription>{description}</DialogDescription>}
 
-			{!title && typeof children === "string" ? (
-				<DialogTitle>{children}</DialogTitle>
-			) : (
-				children
-			)}
+			{!title && typeof children === "string" ? <DialogTitle>{children}</DialogTitle> : children}
 		</ark.div>
 	);
 };

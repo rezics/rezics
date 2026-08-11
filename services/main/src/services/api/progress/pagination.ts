@@ -88,10 +88,7 @@ export function progressEntryCursorCondition(cursor: ProgressEntryCursorBoundary
 			eq(progressEntrySortAt, cursor.sortAt),
 			or(
 				lt(unitProgressEntry.createdAt, cursor.createdAt),
-				and(
-					eq(unitProgressEntry.createdAt, cursor.createdAt),
-					lt(unitProgressEntry.id, cursor.id),
-				),
+				and(eq(unitProgressEntry.createdAt, cursor.createdAt), lt(unitProgressEntry.id, cursor.id)),
 			),
 		),
 	);

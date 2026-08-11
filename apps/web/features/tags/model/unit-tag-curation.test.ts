@@ -15,10 +15,7 @@ const items = [
 describe("Unit Tag curation ordering", () => {
 	it("proves the persisted pin and position invariant while partitioning", () => {
 		expect(
-			partitionUnitTagCuration([
-				...items,
-				{ tagId: "ranked", pinned: false, position: null },
-			]),
+			partitionUnitTagCuration([...items, { tagId: "ranked", pinned: false, position: null }]),
 		).toEqual({
 			featured: items,
 			ranked: [{ tagId: "ranked", pinned: false, position: null }],

@@ -22,8 +22,7 @@ function loadPortableTextEditorModule(): Promise<PortableTextEditorModule> {
 	const promise = import("@rezics/ui/custom/portable-text-editor");
 	portableTextEditorModulePromise = promise;
 	void promise.catch((error: unknown) => {
-		if (portableTextEditorModulePromise === promise)
-			portableTextEditorModulePromise = undefined;
+		if (portableTextEditorModulePromise === promise) portableTextEditorModulePromise = undefined;
 		console.error("Portable text editor loading failed.", error);
 	});
 	return promise;

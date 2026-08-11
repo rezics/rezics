@@ -50,11 +50,7 @@ export const ZoneThemeDocument = Type.Object(
 	{
 		_type: Type.Literal("zone-theme"),
 		_key: BlockKey,
-		colorScheme: Type.Union([
-			Type.Literal("system"),
-			Type.Literal("light"),
-			Type.Literal("dark"),
-		]),
+		colorScheme: Type.Union([Type.Literal("system"), Type.Literal("light"), Type.Literal("dark")]),
 		accent: Type.String({
 			pattern: "^#[0-9a-fA-F]{6}$",
 		}),

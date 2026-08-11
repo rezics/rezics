@@ -64,15 +64,10 @@ async function createBookDraftContentUnit(
 	let ownershipMode: UnitOwnershipMode;
 	if (!isChapter) ownershipMode = "profile_owned";
 	else if (input.bookOwnershipMode)
-		ownershipMode = resolveChapterOwnershipMode(
-			input.bookOwnershipMode,
-			input.node.ownershipMode,
-		);
+		ownershipMode = resolveChapterOwnershipMode(input.bookOwnershipMode, input.node.ownershipMode);
 	else if (input.node.ownershipMode) ownershipMode = input.node.ownershipMode;
 	else
-		throw new ContentStructureInvalid(
-			"Chapter ownership has no Book default or explicit override",
-		);
+		throw new ContentStructureInvalid("Chapter ownership has no Book default or explicit override");
 	const published = isChapter ? input.node.status === "published" : true;
 	const created = await insertUnit(tx, {
 		kind: isChapter ? "post" : "label",
@@ -218,9 +213,7 @@ export async function saveBookContentStructureDraft(
 				throw new ContentStructureInvalid("Book structure contains invalid content nodes");
 			const attachedContentUnitIds = [
 				...new Set(
-					input.nodes.flatMap((node) =>
-						node.state === "attached" ? [node.contentUnitId] : [],
-					),
+					input.nodes.flatMap((node) => (node.state === "attached" ? [node.contentUnitId] : [])),
 				),
 			];
 			const attachedContentRows = [];
@@ -297,9 +290,7 @@ export async function saveBookContentStructureDraft(
 				}).length,
 			});
 			const contentUnitIds = new Map(currentRows.map((row) => [row.id, row.contentUnitId]));
-			const newNodeIds = plan.nodes
-				.filter((node) => node.state !== "existing")
-				.map(({ id }) => id);
+			const newNodeIds = plan.nodes.filter((node) => node.state !== "existing").map(({ id }) => id);
 			const collidingNewNodes = newNodeIds.length
 				? await tx
 						.select({ id: contentStructureNode.id })

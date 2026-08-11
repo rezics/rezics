@@ -92,9 +92,7 @@ describe("UnitCreditAttributionEditor", () => {
 		expect(screen.getByRole("button", { name: "開啟署名說明" })).toBeTruthy();
 		expect(role).toHaveProperty("value", "director");
 		expect(screen.queryByRole("option", { name: "選擇角色" })).toBeNull();
-		expect(
-			role.compareDocumentPosition(entity) & Node.DOCUMENT_POSITION_FOLLOWING,
-		).toBeTruthy();
+		expect(role.compareDocumentPosition(entity) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
 		expect(entity.getAttribute("data-index")).toBe("entities");
 		expect(entity.getAttribute("data-search-on-open")).toBe("true");
 		expect(container.querySelector("legend")).toBeTruthy();

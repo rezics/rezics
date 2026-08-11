@@ -62,11 +62,13 @@ export const deContent = {
 		explore: "Webromane entdecken",
 		understand: `${BRAND} verstehen`,
 		problem: {
-			title: "Eine Serie sollte nicht durch Plattformen, Sprachen und übersetzte Titel zu Fragmenten werden.",
+			title:
+				"Eine Serie sollte nicht durch Plattformen, Sprachen und übersetzte Titel zu Fragmenten werden.",
 			body: "Lesende suchen dieselbe Geschichte, müssen sie heute jedoch immer wieder zwischen Plattformseiten, Einträgen zu übersetzten Titeln, Fortschrittswerkzeugen und Diskussionsgruppen erkennen. Wenn das Werk aktualisiert wird, ziehen diese Fragmente nicht unbedingt gemeinsam weiter.",
 		},
 		promise: {
-			title: "Zuerst dasselbe Werk wieder zusammenführen; dann können Lesen und Community natürlich wachsen.",
+			title:
+				"Zuerst dasselbe Werk wieder zusammenführen; dann können Lesen und Community natürlich wachsen.",
 			body: `${BRAND} nimmt eine stabile Werkidentität als gemeinsamen Ausgangspunkt. Namen können Sprachgrenzen überqueren, Serien können sich über Plattformen erstrecken, Kapitel können weiter wachsen und ${deTerminology.realm.forms.pluralLabel} können unterschiedliche Sichtweisen bilden; dennoch verweisen alle auf dasselbe verständliche und nachvollziehbare Werk.`,
 		},
 		principles: [
@@ -84,7 +86,8 @@ export const deContent = {
 			},
 		],
 		model: {
-			title: "Webromane sind der Einstieg; die Grundlage ist für alle Werke geschaffen, die sich fortlaufend entwickeln.",
+			title:
+				"Webromane sind der Einstieg; die Grundlage ist für alle Werke geschaffen, die sich fortlaufend entwickeln.",
 			body: "Werk, Quellen, Inhalt, Struktur, Geschichte und Community behalten jeweils klare Grenzen und arbeiten über explizite Beziehungen zusammen.",
 			steps: [
 				{
@@ -106,7 +109,8 @@ export const deContent = {
 			],
 		},
 		outcomes: {
-			title: "Zuerst die Probleme der Lesenden von heute lösen, dann das Werknetz von morgen aufbauen.",
+			title:
+				"Zuerst die Probleme der Lesenden von heute lösen, dann das Werknetz von morgen aufbauen.",
 			body: `Das Finden, ${deTerminology.follow.forms.gerund}, der Beitritt zu einer Community und das Ergänzen einer Beziehung senken die Suchkosten für die nächste lesende Person.`,
 			cards: [
 				{
@@ -148,7 +152,8 @@ export const deContent = {
 				],
 			},
 			identity: {
-				title: "Eine Serie sollte nicht durch Plattformen, Sprachen und übersetzte Titel zu Fragmenten werden.",
+				title:
+					"Eine Serie sollte nicht durch Plattformen, Sprachen und übersetzte Titel zu Fragmenten werden.",
 				body: `Lesende suchen dieselbe Geschichte, müssen sie heute jedoch immer wieder zwischen Plattformseiten, Einträgen zu übersetzten Titeln, Fortschrittswerkzeugen und Diskussionsgruppen erkennen. ${BRAND} führt sie zunächst wieder zu einer Werkidentität zusammen.`,
 				sourcesTitle: "Plattformübergreifende Quellen",
 				sources: [
@@ -174,7 +179,8 @@ export const deContent = {
 				workTitle: "Ein Werk, das sich fortlaufend entwickelt",
 			},
 			loop: {
-				title: "Vom Finden eines Buches zum Aufbau eines Werknetzes, das sich nicht leicht kopieren lässt.",
+				title:
+					"Vom Finden eines Buches zum Aufbau eines Werknetzes, das sich nicht leicht kopieren lässt.",
 				body: `Ein Startkatalog mit 400.000 Büchern löst den Kaltstart; was sich wirklich weiter ansammelt, sind plattformübergreifende Identität, sprachübergreifende Beziehungen, Lesespuren und die Community-Erinnerung von ${deTerminology.realm.forms.pluralLabel}.`,
 				steps: [
 					{
@@ -200,7 +206,8 @@ export const deContent = {
 				],
 			},
 			foundation: {
-				title: "Webromane sind der Einstieg; die Grundlage ist für alle Werke geschaffen, die sich fortlaufend entwickeln.",
+				title:
+					"Webromane sind der Einstieg; die Grundlage ist für alle Werke geschaffen, die sich fortlaufend entwickeln.",
 				body: `${BRAND} trennt Werkidentität, Quellen, Inhalt, Struktur, Geschichte und Communities in klare Grenzen und lässt sie dann über explizite Beziehungen zusammenarbeiten.`,
 				pillars: [
 					{
@@ -227,7 +234,8 @@ export const deContent = {
 	},
 	how: {
 		eyebrow: "Wie ein Werknetz entsteht",
-		title: "Dasselbe Werk kann Plattformen und Sprachen überqueren und in verschiedenen Communities neu verstanden werden.",
+		title:
+			"Dasselbe Werk kann Plattformen und Sprachen überqueren und in verschiedenen Communities neu verstanden werden.",
 		lead: `${BRAND} lässt zunächst Werke, Quellen und Beziehungen auf eine gemeinsame Identität verweisen; anschließend ordnet es sprachliche Darstellung, ${REALM}-Kontext, Tag-Abstimmungen und persönliche Vorlieben wieder ihren jeweiligen Bereichen zu. Gemeinsam Genutztes muss nicht dupliziert werden, und Unterschiede, die erhalten bleiben sollen, werden nicht zu einer einzigen Antwort für die gesamte Plattform plattgedrückt.`,
 		stages: [
 			{
@@ -261,7 +269,8 @@ export const deContent = {
 		},
 		v1: {
 			scope: {
-				title: "Zuerst klar unterscheiden, was geteilt werden muss und was unterschiedlich bleiben soll.",
+				title:
+					"Zuerst klar unterscheiden, was geteilt werden muss und was unterschiedlich bleiben soll.",
 				body: `Dasselbe Werk kann Plattformen, Sprachen und Communities überqueren, doch verschiedene Ebenen haben verschiedene Befugnisse. Diese Grenzen bestimmen, ob Daten wiederverwendet werden können und ob ${deTerminology.realm.forms.pluralLabel} sowie Einzelpersonen echte Autonomie behalten.`,
 				layers: [
 					{
@@ -337,7 +346,8 @@ export const deContent = {
 							`Das Entfernen einer Beziehung im ${REALM} löscht weder das ursprüngliche Werk noch den ${deTerminology.post.forms.label}`,
 						],
 						example: {
-							title: "Dasselbe Werk kann von verschiedenen Communities unterschiedlich verstanden werden",
+							title:
+								"Dasselbe Werk kann von verschiedenen Communities unterschiedlich verstanden werden",
 							body: `Ein ${REALM} zur Übersetzungsforschung kann Übersetzungen und Quellen ordnen; ein ${REALM} für Genreliebhaber kann thematische Kuration und Diskussionsregeln schaffen. Beide beziehen sich auf dasselbe Werk, müssen jedoch nicht dasselbe Community-Urteil teilen.`,
 						},
 						rule: `Ein ${REALM} regiert Veröffentlichungsbeziehungen und Community-Kontext und erwirbt nicht deshalb Eigentum am ursprünglichen Inhalt, weil dieser darin erscheint.`,
@@ -352,7 +362,8 @@ export const deContent = {
 							"Persönliche Tags: dienen nur der eigenen Art zu organisieren",
 						],
 						example: {
-							title: "„Isekai“ kann gemeinsamer Wortschatz sein und zugleich ein Community-Urteil haben",
+							title:
+								"„Isekai“ kann gemeinsamer Wortschatz sein und zugleich ein Community-Urteil haben",
 							body: `Tag-Name und mehrsprachige Erklärung können gemeinsam genutzt werden; ob ein Werk dieses Tag trägt, kann getrennt als Ergebnis globaler und ${REALM}-Abstimmungen erscheinen. Auch Einzelpersonen können eigene Tags nutzen, ohne sie als öffentliche Tatsache auszugeben.`,
 						},
 						rule: `Globale Abstimmungen dürfen nicht mit Abstimmungen im ${REALM} zusammengeführt werden; Anheften oder Policy-Urteile durch Governance-Verantwortliche zählen ebenfalls nicht als zustimmende Community-Stimmen.`,
@@ -407,7 +418,8 @@ export const deContent = {
 	},
 	uses: {
 		eyebrow: "Lesende erhalten zuerst Nutzen",
-		title: "Bücher finden, Aktualisierungen verfolgen, weiterlesen und dann echten Gleichgesinnten begegnen.",
+		title:
+			"Bücher finden, Aktualisierungen verfolgen, weiterlesen und dann echten Gleichgesinnten begegnen.",
 		lead: `Lesende müssen nicht zuerst Inhaltseinheiten, Blöcke oder Inhaltsstruktur verstehen. Sie beginnen einfach mit einem vertrauten Titel, einer Plattform oder Sprache; ${BRAND} verbindet im Hintergrund Identität und Beziehungen.`,
 		resultLabel: "Das Ergebnis",
 		journeys: [
@@ -424,7 +436,8 @@ export const deContent = {
 			{
 				title: `Einer Serie ${deTerminology.follow.forms.action} und an der letzten Stelle weitermachen`,
 				body: "Sehen, bis zu welchem Kapitel eine Quelle aktualisiert ist, ob sich das Werk noch in Fortsetzung befindet oder abgeschlossen ist, und den eigenen Lesestatus sowie die letzte Position speichern.",
-				result: "Das Werk wird aktualisiert, doch der Lesezusammenhang muss nicht von vorn beginnen.",
+				result:
+					"Das Werk wird aktualisiert, doch der Lesezusammenhang muss nicht von vorn beginnen.",
 			},
 			{
 				title: `Einem ${REALM} beitreten oder einen schaffen`,
@@ -434,12 +447,14 @@ export const deContent = {
 			{
 				title: "Quellen, Namen und Werkbeziehungen ergänzen",
 				body: "Dabei helfen, Übersetzungen, Plattformquellen, Serien, Veröffentlichungen, Schaffende und Themenbeziehungen zu korrigieren, und zugleich Governance- sowie Geschichtskontext bewahren.",
-				result: "Jede Korrektur hilft der nächsten lesenden Person, die Antwort schneller zu finden.",
+				result:
+					"Jede Korrektur hilft der nächsten lesenden Person, die Antwort schneller zu finden.",
 			},
 			{
 				title: `Eigene ${deTerminology.post.forms.pluralLabel} und Werk-Inhalte veröffentlichen`,
 				body: `Mit ${PORTABLE_TEXT} einen ${deTerminology.post.forms.label} bearbeiten, mit ${BLOCK_SCHEMA} entwicklungsfähige Dokumente bewahren und Kapitel sowie Veröffentlichungsgeschichte mit der Inhaltsstruktur anordnen.`,
-				result: "Inhalt ist nicht nur lesbar, sondern kann auch zitiert, wiederverwendet und fortlaufend überarbeitet werden.",
+				result:
+					"Inhalt ist nicht nur lesbar, sondern kann auch zitiert, wiederverwendet und fortlaufend überarbeitet werden.",
 			},
 			{
 				title: "Über offene Schnittstellen neue Einstiege schaffen",

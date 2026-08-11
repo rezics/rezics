@@ -46,9 +46,7 @@ describe("realm membership permissions", () => {
 
 	it("keeps member capabilities inside the members section", () => {
 		expect(
-			getRealmSettingsSectionIds(
-				capabilities({ canReadMembers: true, canManageMembers: true }),
-			),
+			getRealmSettingsSectionIds(capabilities({ canReadMembers: true, canManageMembers: true })),
 		).toEqual(["members", "history"]);
 	});
 

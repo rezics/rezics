@@ -29,10 +29,7 @@ export function parseUnitManagementSection(
 	if (pathname === `${base}/relationships`) return "relationships";
 	if (pathname === `${base}/tags`) return "tags";
 	if (pathname === `${base}/realms`) return "realms";
-	if (
-		pathname === `${base}/content-structure` ||
-		pathname.startsWith(`${base}/content-structure/`)
-	)
+	if (pathname === `${base}/content-structure` || pathname.startsWith(`${base}/content-structure/`))
 		return "content-structure";
 	if (pathname === `${base}/releases`) return "releases";
 	if (pathname === `${base}/docks`) return "docks";

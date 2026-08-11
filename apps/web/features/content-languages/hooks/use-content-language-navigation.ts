@@ -9,9 +9,7 @@ import { withContentLanguage } from "../routing/content-language-route";
 
 export function useRequestedContentLanguage(): ContentLanguage | undefined {
 	const requestedLanguage = useSearchParams()?.get("language");
-	return requestedLanguage && isContentLanguage(requestedLanguage)
-		? requestedLanguage
-		: undefined;
+	return requestedLanguage && isContentLanguage(requestedLanguage) ? requestedLanguage : undefined;
 }
 
 export function useContentLanguageNavigation() {

@@ -35,8 +35,7 @@ export function CollectionDetailPage({ collectionId }: { readonly collectionId: 
 	);
 	const summary = useChineseContentText(localization?.summary ?? "", localization?.language);
 	if (query.isPending) return <QueryPending />;
-	if (query.isError)
-		return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
+	if (query.isError) return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
 	const collection = query.data;
 	const canManage = Object.values(collection.capabilities).some(Boolean);
 	return (

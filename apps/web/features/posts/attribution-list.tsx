@@ -146,20 +146,12 @@ export function PublisherAttributionLinks({
 				const initials = Array.from(label.trim())[0]?.toLocaleUpperCase() ?? label;
 				const content = (
 					<>
-						<IdentityAvatar
-							avatar={creditedUnit.avatar}
-							fallback={initials}
-							size="sm"
-						/>
+						<IdentityAvatar avatar={creditedUnit.avatar} fallback={initials} size="sm" />
 						<span className="max-w-48 truncate font-semibold text-sm">{label}</span>
 					</>
 				);
 				return (
-					<span
-						className="flex min-w-0 items-center gap-1.5"
-						key={attribution.id}
-						role="listitem"
-					>
+					<span className="flex min-w-0 items-center gap-1.5" key={attribution.id} role="listitem">
 						{href ? (
 							<Link
 								className="flex min-w-0 items-center gap-1.5 hover:text-link-hover hover:underline"

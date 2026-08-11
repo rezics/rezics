@@ -41,9 +41,7 @@ export function UnitAssociationsPage() {
 		<UnitDetailSectionFrame description={labels.description} title={labels.title}>
 			<section className="grid gap-3">
 				<div className="grid gap-1">
-					<h2 className="font-heading text-xl font-bold">
-						{t.units.detail.subjectAssociations}
-					</h2>
+					<h2 className="font-heading text-xl font-bold">{t.units.detail.subjectAssociations}</h2>
 				</div>
 				{detail.unit.subjectAssociations.length ? (
 					<Card>
@@ -59,12 +57,8 @@ export function UnitAssociationsPage() {
 			{detail.type === "series" ? null : (
 				<section className="grid gap-3">
 					<div className="grid gap-1">
-						<h2 className="font-heading text-xl font-bold">
-							{t.units.detail.variants}
-						</h2>
-						<p className="text-sm text-muted-foreground">
-							{t.units.detail.variantsDescription}
-						</p>
+						<h2 className="font-heading text-xl font-bold">{t.units.detail.variants}</h2>
+						<p className="text-sm text-muted-foreground">{t.units.detail.variantsDescription}</p>
 					</div>
 					{related.length ? (
 						<FeedList
@@ -75,10 +69,7 @@ export function UnitAssociationsPage() {
 							getItemKey={({ unit }) => unit.id}
 							renderItem={({ relation, unit }, metadata) => (
 								<Card asChild className="gap-0 rounded-none py-0 sm:rounded-2xl">
-									<article
-										aria-posinset={metadata.position}
-										aria-setsize={metadata.setSize}
-									>
+									<article aria-posinset={metadata.position} aria-setsize={metadata.setSize}>
 										<CardContent
 											className={
 												unit.cover
@@ -97,24 +88,17 @@ export function UnitAssociationsPage() {
 												<div className="grid min-w-0 gap-1">
 													<strong>
 														{unit.title ? (
-															<LocalizedText
-																language={unit.language}
-																value={unit.title}
-															/>
+															<LocalizedText language={unit.language} value={unit.title} />
 														) : (
 															t.ui.unnamed
 														)}
 													</strong>
 													<span className="text-xs text-muted-foreground">
-														{relation === "main"
-															? t.units.detail.main
-															: t.units.detail.version}
+														{relation === "main" ? t.units.detail.main : t.units.detail.version}
 													</span>
 												</div>
 												<Button asChild size="sm" variant="outline">
-													<Link href={`/units/${unit.type}/${unit.id}`}>
-														{t.engagement.select}
-													</Link>
+													<Link href={`/units/${unit.type}/${unit.id}`}>{t.engagement.select}</Link>
 												</Button>
 											</div>
 											<FeedOverflowMenu canExclude={false} itemId={unit.id} />

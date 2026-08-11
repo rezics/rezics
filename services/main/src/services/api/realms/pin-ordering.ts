@@ -109,19 +109,14 @@ export function planRealmPinMove(
 		destinationIndex < destinationPins.length
 			? (destinationPins[destinationIndex]?.position ?? null)
 			: null;
-	const positions = fractionalPositionsBetween(
-		beforePosition,
-		afterPosition,
-		selectedPins.length,
-	);
+	const positions = fractionalPositionsBetween(beforePosition, afterPosition, selectedPins.length);
 	const destinationOrder = [...destinationPins];
 	destinationOrder.splice(
 		destinationIndex,
 		0,
 		...selectedPins.map((pin, index) => {
 			const position = positions[index];
-			if (!position)
-				throw new Error("Fractional position generation returned too few values");
+			if (!position) throw new Error("Fractional position generation returned too few values");
 			return { ...pin, kind: request.destinationKind, position };
 		}),
 	);

@@ -150,11 +150,7 @@ export async function getCollection(
 		purpose: favoritesProfileId ? "favorites" : "collection",
 		language: selectedLocalization.language,
 		cover: presentImageAsset(
-			resolveUnitLocalizationImageAssetIdFromOrdered(
-				localizations,
-				"cover",
-				localizationLanguages,
-			),
+			resolveUnitLocalizationImageAssetIdFromOrdered(localizations, "cover", localizationLanguages),
 			"cover",
 		),
 		attributions: attributionMap.get(collectionId) ?? [],
@@ -191,8 +187,7 @@ export async function getCollection(
 			canManageLocalizations: canUpdate,
 			canManageAccess: accessDecision.allowed && ordinaryCollection,
 			canManageRealmPublications: realmPublicationDecision.allowed && ordinaryCollection,
-			canViewHistory:
-				updateDecision.allowed || accessDecision.allowed || restoreDecision.allowed,
+			canViewHistory: updateDecision.allowed || accessDecision.allowed || restoreDecision.allowed,
 			canRestoreHistory: restoreDecision.allowed && ordinaryCollection,
 		},
 	};

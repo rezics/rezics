@@ -83,8 +83,7 @@ function MyReportsContent({ selectedReportId }: { readonly selectedReportId?: st
 		{ query: { enabled: Boolean(selectedReportId) } },
 	);
 
-	if (reports.isPending || (selectedReportId && selectedReport.isPending))
-		return <QueryPending />;
+	if (reports.isPending || (selectedReportId && selectedReport.isPending)) return <QueryPending />;
 	if (reports.isError || selectedReport.isError)
 		return (
 			<QueryFailure
@@ -98,9 +97,7 @@ function MyReportsContent({ selectedReportId }: { readonly selectedReportId?: st
 
 	const selected = selectedReport.data?.items[0];
 	const listed = reports.data.pages.flatMap((page) => page.items);
-	const items = selected
-		? [selected, ...listed.filter((item) => item.id !== selected.id)]
-		: listed;
+	const items = selected ? [selected, ...listed.filter((item) => item.id !== selected.id)] : listed;
 	return (
 		<main className="mx-auto flex w-full max-w-4xl flex-col gap-7 px-4 py-8 sm:px-6 sm:py-10">
 			<PageHeading
@@ -111,8 +108,7 @@ function MyReportsContent({ selectedReportId }: { readonly selectedReportId?: st
 			{items.length ? (
 				<div className="divide-y divide-border-weak border-y border-border-weak">
 					{items.map((item) => {
-						const target =
-							item.target.state === "available" ? item.target.unit : undefined;
+						const target = item.target.state === "available" ? item.target.unit : undefined;
 						const href = target ? publicUnitHref(target.kind, target) : undefined;
 						const targetTitle = target
 							? (target.title ?? t.ui.unnamed)
@@ -142,10 +138,7 @@ function MyReportsContent({ selectedReportId }: { readonly selectedReportId?: st
 											dateTime={item.createdAt}
 										>
 											{t.reports.myReports.submittedAt({
-												date: formatReportDate(
-													item.createdAt,
-													locale.current,
-												),
+												date: formatReportDate(item.createdAt, locale.current),
 											})}
 										</time>
 									</div>
@@ -156,33 +149,16 @@ function MyReportsContent({ selectedReportId }: { readonly selectedReportId?: st
 
 								<dl className="mt-4 grid gap-x-6 gap-y-4 text-sm sm:grid-cols-2">
 									<div>
-										<dt className="text-muted-foreground">
-											{t.reports.myReports.scope}
-										</dt>
+										<dt className="text-muted-foreground">{t.reports.myReports.scope}</dt>
 										<dd className="mt-2 grid gap-2">
 											{item.referrals.map((referral) => (
-												<div
-													className="flex flex-wrap items-center gap-2"
-													key={referral.id}
-												>
+												<div className="flex flex-wrap items-center gap-2" key={referral.id}>
 													<span className="font-medium">
 														{referral.destinationTitle ??
-															t.reports.myReports.scopes[
-																referral.scope
-															]}
+															t.reports.myReports.scopes[referral.scope]}
 													</span>
-													<Badge
-														variant={
-															MyReportStatusBadgeVariants[
-																referral.status
-															]
-														}
-													>
-														{
-															t.reports.myReports.statuses[
-																referral.status
-															]
-														}
+													<Badge variant={MyReportStatusBadgeVariants[referral.status]}>
+														{t.reports.myReports.statuses[referral.status]}
 													</Badge>
 													<span className="text-muted-foreground text-xs">
 														{t.reports.caseStates[referral.caseState]}
@@ -192,9 +168,7 @@ function MyReportsContent({ selectedReportId }: { readonly selectedReportId?: st
 										</dd>
 									</div>
 									<div>
-										<dt className="text-muted-foreground">
-											{t.reports.myReports.rule}
-										</dt>
+										<dt className="text-muted-foreground">{t.reports.myReports.rule}</dt>
 										<dd className="mt-2 grid gap-1">
 											{item.rules.map((rule) => (
 												<span className="font-medium" key={rule.id}>
@@ -205,9 +179,7 @@ function MyReportsContent({ selectedReportId }: { readonly selectedReportId?: st
 									</div>
 									{item.details ? (
 										<div className="sm:col-span-2">
-											<dt className="text-muted-foreground">
-												{t.reports.myReports.details}
-											</dt>
+											<dt className="text-muted-foreground">{t.reports.myReports.details}</dt>
 											<dd className="mt-1 whitespace-pre-wrap break-words leading-6">
 												{item.details}
 											</dd>

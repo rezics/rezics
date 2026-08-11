@@ -122,9 +122,7 @@ async function savedDownload(
 export function createBrowserMarkdownStorage(): MarkdownDocumentStorage {
 	const handles = new Map<string, BrowserFileHandle>();
 
-	const openDocument = async (): Promise<
-		MarkdownStorageResult<OpenedMarkdownDocument | null>
-	> => {
+	const openDocument = async (): Promise<MarkdownStorageResult<OpenedMarkdownDocument | null>> => {
 		try {
 			const picker = getGlobalFunction("showOpenFilePicker");
 			let file: File;
@@ -138,8 +136,7 @@ export function createBrowserMarkdownStorage(): MarkdownDocumentStorage {
 						},
 					],
 				});
-				if (!Array.isArray(picked) || picked.length === 0)
-					return markdownStorageSuccess(null);
+				if (!Array.isArray(picked) || picked.length === 0) return markdownStorageSuccess(null);
 				const first = picked[0];
 				if (!isBrowserFileHandle(first)) return markdownStorageFailure("invalid-response");
 				handle = first;
@@ -172,8 +169,7 @@ export function createBrowserMarkdownStorage(): MarkdownDocumentStorage {
 		request: SaveMarkdownDocumentRequest,
 	): Promise<MarkdownStorageResult<SavedMarkdownDocument>> => {
 		const bytes = new TextEncoder().encode(request.source);
-		if (bytes.byteLength > maximumMarkdownDocumentBytes)
-			return markdownStorageFailure("too-large");
+		if (bytes.byteLength > maximumMarkdownDocumentBytes) return markdownStorageFailure("too-large");
 		const handle = handles.get(request.storageId);
 		if (!handle) return markdownStorageFailure("unavailable");
 		try {
@@ -202,8 +198,7 @@ export function createBrowserMarkdownStorage(): MarkdownDocumentStorage {
 	): Promise<MarkdownStorageResult<SavedMarkdownDocument | null>> => {
 		const name = normalizeMarkdownFileName(request.suggestedName);
 		const bytes = new TextEncoder().encode(request.source);
-		if (bytes.byteLength > maximumMarkdownDocumentBytes)
-			return markdownStorageFailure("too-large");
+		if (bytes.byteLength > maximumMarkdownDocumentBytes) return markdownStorageFailure("too-large");
 		const picker = getGlobalFunction("showSaveFilePicker");
 		if (!picker) return savedDownload(name, request.source);
 		try {
@@ -216,8 +211,7 @@ export function createBrowserMarkdownStorage(): MarkdownDocumentStorage {
 				],
 			});
 			if (!isBrowserFileHandle(picked)) return markdownStorageFailure("invalid-response");
-			if (!isMarkdownFileName(picked.name))
-				return markdownStorageFailure("unsupported-extension");
+			if (!isMarkdownFileName(picked.name)) return markdownStorageFailure("unsupported-extension");
 			const writable = await picked.createWritable();
 			await writable.write(request.source);
 			await writable.close();

@@ -77,9 +77,9 @@ function workerReadinessDefinitions(
 export function createWorkerReadinessEvaluator(
 	state: WorkerHealthState,
 	databaseProbe: (signal: AbortSignal) => Promise<boolean> = checkDatabase,
-	onFreshReport: (
-		report: ReadinessReport<WorkerHealthCheckName>,
-	) => void = createReadinessObserver("recommendation-worker"),
+	onFreshReport: (report: ReadinessReport<WorkerHealthCheckName>) => void = createReadinessObserver(
+		"recommendation-worker",
+	),
 ) {
 	const definitions = workerReadinessDefinitions(state).map((definition) =>
 		definition.name === "database" ? { ...definition, probe: databaseProbe } : definition,

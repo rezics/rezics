@@ -79,9 +79,6 @@ describe("CreditAttributionRequestConfirmationDialog", () => {
 		renderDialog({ pending: true });
 
 		expect(screen.getByRole("button", { name: "取消" })).toHaveProperty("disabled", true);
-		expect(screen.getByRole("button", { name: "建立並送出邀請" })).toHaveProperty(
-			"disabled",
-			true,
-		);
+		expect(screen.getByRole("button", { name: "建立並送出邀請" })).toHaveProperty("disabled", true);
 	});
 });

@@ -54,12 +54,7 @@ export const AvatarImage = (props: React.ComponentProps<typeof ArkAvatar.Image>)
 
 	return (
 		<ArkAvatar.Image
-			className={cn(
-				"size-full",
-				"aspect-square object-cover",
-				"rounded-[inherit]",
-				className,
-			)}
+			className={cn("size-full", "aspect-square object-cover", "rounded-[inherit]", className)}
 			data-slot="avatar-image"
 			{...rest}
 		/>

@@ -47,8 +47,7 @@ function parseProfile(value: string | undefined): SeedProfile {
 function parseReferenceTime(value: string | undefined): Date {
 	if (!value) throw new TypeError("Seed reference time is missing");
 	const parsed = new Date(value);
-	if (Number.isNaN(parsed.getTime()))
-		throw new TypeError(`Invalid Seed reference time: ${value}`);
+	if (Number.isNaN(parsed.getTime())) throw new TypeError(`Invalid Seed reference time: ${value}`);
 	return parsed;
 }
 
@@ -57,8 +56,7 @@ export function createSeedRunOptions(
 ): SeedRunOptions {
 	const profile = input.profile ?? "demo";
 	const referenceTime = input.referenceTime ?? new Date(DefaultSeedReferenceTime);
-	if (Number.isNaN(referenceTime.getTime()))
-		throw new TypeError("Seed reference time is invalid");
+	if (Number.isNaN(referenceTime.getTime())) throw new TypeError("Seed reference time is invalid");
 	return {
 		profile,
 		referenceTime,

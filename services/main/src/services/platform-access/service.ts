@@ -63,8 +63,7 @@ function orderGrants(grants: readonly PlatformAccessGrant[]): PlatformAccessGran
 	return [...grants].sort(
 		(left, right) =>
 			(order.get(left.capability) ?? Number.MAX_SAFE_INTEGER) -
-				(order.get(right.capability) ?? Number.MAX_SAFE_INTEGER) ||
-			left.id.localeCompare(right.id),
+				(order.get(right.capability) ?? Number.MAX_SAFE_INTEGER) || left.id.localeCompare(right.id),
 	);
 }
 
@@ -236,8 +235,7 @@ export async function replacePlatformAccess(
 		throw new CapabilityGrantExpiryInvalid();
 	await lockPlatformAccess(tx);
 	const beforeProfile = await getPlatformAccessProfile(tx, input.targetProfileId);
-	if (beforeProfile.revision !== input.expectedRevision)
-		throw new PlatformAccessRevisionConflict();
+	if (beforeProfile.revision !== input.expectedRevision) throw new PlatformAccessRevisionConflict();
 
 	const desired = new Map(input.grants.map((grant) => [grant.capability, grant] as const));
 	if (desired.size !== input.grants.length) throw new PlatformAccessConfigurationInvalid();

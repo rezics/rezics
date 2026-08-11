@@ -3599,13 +3599,7 @@ export type DockDocument = {
 										 * @type string
 										 */
 										kind: "template";
-										template:
-											| "global"
-											| "book"
-											| "media"
-											| "software"
-											| "realm"
-											| "zone";
+										template: "global" | "book" | "media" | "software" | "realm" | "zone";
 								  }
 								| {
 										/**
@@ -4138,13 +4132,7 @@ export type UnitReferencedBlockDocument = {
 										 * @type string
 										 */
 										kind: "template";
-										template:
-											| "global"
-											| "book"
-											| "media"
-											| "software"
-											| "realm"
-											| "zone";
+										template: "global" | "book" | "media" | "software" | "realm" | "zone";
 								  }
 								| {
 										/**
@@ -23566,9 +23554,7 @@ export type PostApiFeedQueryStatus200 = {
 					downvote: string | number;
 				};
 				viewerReaction: (string | null) | null;
-				recommendationReason:
-					| (PostApiFeedQueryStatus200ItemsRecommendationReason | null)
-					| null;
+				recommendationReason: (PostApiFeedQueryStatus200ItemsRecommendationReason | null) | null;
 				tracking:
 					| ({
 							/**
@@ -56073,9 +56059,7 @@ export type GetApiUnitsByTypeByUnitIdTagsStatus200 = {
 			 * @type string
 			 */
 			tagId: string;
-			language:
-				| (GetApiUnitsByTypeByUnitIdTagsStatus200StructuresMembersLanguage | null)
-				| null;
+			language: (GetApiUnitsByTypeByUnitIdTagsStatus200StructuresMembersLanguage | null) | null;
 			title: (string | null) | null;
 			summary: (string | null) | null;
 			avatar:
@@ -64772,12 +64756,7 @@ export type PostApiUnitsByTypeBody =
 			 * @type string | undefined
 			 */
 			contentRating?: PostApiUnitsByTypeRequestContentRatingEnum;
-			aiDisclosure?:
-				| "unknown"
-				| "none"
-				| "ai_assisted"
-				| "ai_originated"
-				| "machine_generated";
+			aiDisclosure?: "unknown" | "none" | "ai_assisted" | "ai_originated" | "machine_generated";
 			license?: (PostApiUnitsByTypeRequestLicense | null) | null;
 			details:
 				| {
@@ -65089,12 +65068,7 @@ export type PostApiUnitsByTypeBody =
 			 * @type string | undefined
 			 */
 			contentRating?: PostApiUnitsByTypeRequestContentRatingEnum;
-			aiDisclosure?:
-				| "unknown"
-				| "none"
-				| "ai_assisted"
-				| "ai_originated"
-				| "machine_generated";
+			aiDisclosure?: "unknown" | "none" | "ai_assisted" | "ai_originated" | "machine_generated";
 			license?: (PostApiUnitsByTypeRequestLicense | null) | null;
 			details:
 				| {
@@ -116310,9 +116284,7 @@ export type GetApiRealmsByRealmIdTaxonomyDraftStatus200 = {
 		 * @type string
 		 */
 		position: string;
-		queryStrategy:
-			| (GetApiRealmsByRealmIdTaxonomyDraftStatus200ItemsQueryStrategy | null)
-			| null;
+		queryStrategy: (GetApiRealmsByRealmIdTaxonomyDraftStatus200ItemsQueryStrategy | null) | null;
 		contextPostId: (string | null) | null;
 		contextSummary: (string | null) | null;
 	}[];
@@ -116616,9 +116588,7 @@ export type PutApiRealmsByRealmIdTaxonomyDraftStatus200 = {
 		 * @type string
 		 */
 		position: string;
-		queryStrategy:
-			| (PutApiRealmsByRealmIdTaxonomyDraftStatus200ItemsQueryStrategy | null)
-			| null;
+		queryStrategy: (PutApiRealmsByRealmIdTaxonomyDraftStatus200ItemsQueryStrategy | null) | null;
 		contextPostId: (string | null) | null;
 		contextSummary: (string | null) | null;
 	}[];
@@ -116839,9 +116809,7 @@ export type PutApiRealmsByRealmIdTaxonomyDraftBody = {
 				id: string;
 				parentId: (string | null) | null;
 				order: string | number;
-				queryStrategy:
-					| (PutApiRealmsByRealmIdTaxonomyDraftRequestNodesQueryStrategy | null)
-					| null;
+				queryStrategy: (PutApiRealmsByRealmIdTaxonomyDraftRequestNodesQueryStrategy | null) | null;
 		  }
 		| {
 				/**
@@ -116893,9 +116861,7 @@ export type PutApiRealmsByRealmIdTaxonomyDraftBody = {
 				id: string;
 				parentId: (string | null) | null;
 				order: string | number;
-				queryStrategy:
-					| (PutApiRealmsByRealmIdTaxonomyDraftRequestNodesQueryStrategy | null)
-					| null;
+				queryStrategy: (PutApiRealmsByRealmIdTaxonomyDraftRequestNodesQueryStrategy | null) | null;
 				/**
 				 * @type object
 				 */
@@ -120389,9 +120355,7 @@ export type GetApiRealmsByRealmIdPinsStatus200 = {
 						 * @type string
 						 */
 						id: string;
-						language:
-							| (GetApiRealmsByRealmIdPinsStatus200ContentItemsLanguage | null)
-							| null;
+						language: (GetApiRealmsByRealmIdPinsStatus200ContentItemsLanguage | null) | null;
 						/**
 						 * @type array
 						 */
@@ -121062,9 +121026,7 @@ export type GetApiRealmsByRealmIdPinsStatus200 = {
 						 * @type string
 						 */
 						id: string;
-						language:
-							| (GetApiRealmsByRealmIdPinsStatus200ContentItemsLanguage | null)
-							| null;
+						language: (GetApiRealmsByRealmIdPinsStatus200ContentItemsLanguage | null) | null;
 						/**
 						 * @type array
 						 */
@@ -121753,9 +121715,7 @@ export type GetApiRealmsByRealmIdPinsStatus200 = {
 						 * @type string
 						 */
 						id: string;
-						language:
-							| (GetApiRealmsByRealmIdPinsStatus200ContentItemsLanguage | null)
-							| null;
+						language: (GetApiRealmsByRealmIdPinsStatus200ContentItemsLanguage | null) | null;
 						/**
 						 * @type array
 						 */
@@ -123692,9 +123652,7 @@ export type GetApiRealmsByRealmIdTagContextsStatus200 = {
 		 * @type boolean
 		 */
 		contextReadable: boolean;
-		contextLanguage:
-			| (GetApiRealmsByRealmIdTagContextsStatus200ItemsContextLanguage | null)
-			| null;
+		contextLanguage: (GetApiRealmsByRealmIdTagContextsStatus200ItemsContextLanguage | null) | null;
 		contextTitle: (string | null) | null;
 	}[];
 	nextCursor: (string | null) | null;
@@ -131539,9 +131497,7 @@ export type PostApiSearchFeaturesByTemplateFeedStatus200 = {
 						 * @type string
 						 */
 						id: string;
-						language:
-							| (PostApiSearchFeaturesByTemplateFeedStatus200ItemsLanguage | null)
-							| null;
+						language: (PostApiSearchFeaturesByTemplateFeedStatus200ItemsLanguage | null) | null;
 						/**
 						 * @type array
 						 */
@@ -132212,9 +132168,7 @@ export type PostApiSearchFeaturesByTemplateFeedStatus200 = {
 						 * @type string
 						 */
 						id: string;
-						language:
-							| (PostApiSearchFeaturesByTemplateFeedStatus200ItemsLanguage | null)
-							| null;
+						language: (PostApiSearchFeaturesByTemplateFeedStatus200ItemsLanguage | null) | null;
 						/**
 						 * @type array
 						 */
@@ -132903,9 +132857,7 @@ export type PostApiSearchFeaturesByTemplateFeedStatus200 = {
 						 * @type string
 						 */
 						id: string;
-						language:
-							| (PostApiSearchFeaturesByTemplateFeedStatus200ItemsLanguage | null)
-							| null;
+						language: (PostApiSearchFeaturesByTemplateFeedStatus200ItemsLanguage | null) | null;
 						/**
 						 * @type array
 						 */
@@ -136873,9 +136825,7 @@ export type PostApiSearchZonesByZoneIdFeatureFeedStatus200 = {
 				 * @type string
 				 */
 				id: string;
-				language:
-					| (PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsLanguage | null)
-					| null;
+				language: (PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsLanguage | null) | null;
 				/**
 				 * @type array
 				 */
@@ -137359,9 +137309,7 @@ export type PostApiSearchZonesByZoneIdFeatureFeedStatus200 = {
 						 * @type string
 						 */
 						id: string;
-						language:
-							| (PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsLanguage | null)
-							| null;
+						language: (PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsLanguage | null) | null;
 						/**
 						 * @type array
 						 */
@@ -138032,9 +137980,7 @@ export type PostApiSearchZonesByZoneIdFeatureFeedStatus200 = {
 						 * @type string
 						 */
 						id: string;
-						language:
-							| (PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsLanguage | null)
-							| null;
+						language: (PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsLanguage | null) | null;
 						/**
 						 * @type array
 						 */
@@ -138723,9 +138669,7 @@ export type PostApiSearchZonesByZoneIdFeatureFeedStatus200 = {
 						 * @type string
 						 */
 						id: string;
-						language:
-							| (PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsLanguage | null)
-							| null;
+						language: (PostApiSearchZonesByZoneIdFeatureFeedStatus200ItemsLanguage | null) | null;
 						/**
 						 * @type array
 						 */

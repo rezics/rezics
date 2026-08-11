@@ -32,10 +32,7 @@ describe("Profile content page requests", () => {
 			state: {
 				filter: {
 					where: {
-						any: [
-							{ kind: { in: ["collection"] } },
-							{ post: { is: { kind: { in: ["review"] } } } },
-						],
+						any: [{ kind: { in: ["collection"] } }, { post: { is: { kind: { in: ["review"] } } } }],
 					},
 				},
 				pageSize: 20,

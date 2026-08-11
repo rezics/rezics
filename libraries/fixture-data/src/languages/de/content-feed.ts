@@ -5,8 +5,7 @@ export default {
 		{
 			name: "Lesekreis Delfin",
 			initials: "D",
-			summary:
-				"Eine Lesegemeinschaft für spekulative Literatur, Kritik und gemeinsame Notizen.",
+			summary: "Eine Lesegemeinschaft für spekulative Literatur, Kritik und gemeinsame Notizen.",
 		},
 		{
 			name: "Lena Mori",
@@ -33,8 +32,7 @@ export default {
 		{
 			name: "Science-Fiction-Forschung",
 			initials: "S",
-			summary:
-				"Genaue Lektüren von Science-Fiction aus verschiedenen Medien und Traditionen.",
+			summary: "Genaue Lektüren von Science-Fiction aus verschiedenen Medien und Traditionen.",
 		},
 	],
 	post: {

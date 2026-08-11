@@ -362,13 +362,7 @@ async function snapshotExtension(
 		case "structure":
 			return parseSnapshotState(
 				unitStructureStateSchema,
-				(
-					await tx
-						.select()
-						.from(unitStructure)
-						.where(eq(unitStructure.id, unitId))
-						.limit(1)
-				)[0],
+				(await tx.select().from(unitStructure).where(eq(unitStructure.id, unitId)).limit(1))[0],
 			);
 		case "tag":
 		case "label":
@@ -518,10 +512,7 @@ async function restoreExtension(
 	if (!value) throw new Error(`Missing ${kind} extension in Unit snapshot`);
 	switch (kind) {
 		case "profile":
-			await tx
-				.update(profile)
-				.set(profileStateSchema.parse(value))
-				.where(eq(profile.id, unitId));
+			await tx.update(profile).set(profileStateSchema.parse(value)).where(eq(profile.id, unitId));
 			break;
 		case "book":
 			await tx.update(book).set(bookStateSchema.parse(value)).where(eq(book.id, unitId));
@@ -542,22 +533,13 @@ async function restoreExtension(
 			await tx.update(audio).set(audioStateSchema.parse(value)).where(eq(audio.id, unitId));
 			break;
 		case "entity":
-			await tx
-				.update(entity)
-				.set(entityStateSchema.parse(value))
-				.where(eq(entity.id, unitId));
+			await tx.update(entity).set(entityStateSchema.parse(value)).where(eq(entity.id, unitId));
 			break;
 		case "series":
-			await tx
-				.update(series)
-				.set(seriesStateSchema.parse(value))
-				.where(eq(series.id, unitId));
+			await tx.update(series).set(seriesStateSchema.parse(value)).where(eq(series.id, unitId));
 			break;
 		case "release":
-			await tx
-				.update(release)
-				.set(releaseStateSchema.parse(value))
-				.where(eq(release.id, unitId));
+			await tx.update(release).set(releaseStateSchema.parse(value)).where(eq(release.id, unitId));
 			break;
 		case "post":
 			await tx.update(post).set(postStateSchema.parse(value)).where(eq(post.id, unitId));
@@ -710,9 +692,7 @@ export async function restoreUnitSnapshot(
 		await authorization.entity.ensureAssociationAllowed(tx, targetEntityId, "subject");
 	const newContextPostIds = [
 		...new Set(
-			subjectAssociations.flatMap(({ contextPostId }) =>
-				contextPostId ? [contextPostId] : [],
-			),
+			subjectAssociations.flatMap(({ contextPostId }) => (contextPostId ? [contextPostId] : [])),
 		),
 	]
 		.filter((contextPostId) => !currentContextPostIds.has(contextPostId))
@@ -730,8 +710,7 @@ export async function restoreUnitSnapshot(
 				postState.subjectUnitId,
 			);
 	}
-	if (snapshot.kind === "structure")
-		await authorization.platform.ensureCapability("unit.edit", tx);
+	if (snapshot.kind === "structure") await authorization.platform.ensureCapability("unit.edit", tx);
 	if (snapshot.kind === "post" && snapshot.extension) {
 		const postState = postStateSchema.parse(snapshot.extension);
 		if (postState.subjectUnitId !== current.subjectUnitId)
@@ -760,9 +739,7 @@ export async function restoreUnitSnapshot(
 	if (snapshot.owned.credits.length) await tx.insert(creditAttribution).values(credits);
 	if (subjectAssociations.length) await tx.insert(subjectAssociation).values(subjectAssociations);
 	if (snapshot.owned.tags.length)
-		await tx
-			.insert(unitTag)
-			.values(snapshot.owned.tags.map((row) => unitTagRowSchema.parse(row)));
+		await tx.insert(unitTag).values(snapshot.owned.tags.map((row) => unitTagRowSchema.parse(row)));
 	if (snapshot.owned.structureApplications.length)
 		await tx
 			.insert(unitStructureApplication)
@@ -781,17 +758,13 @@ export async function restoreUnitSnapshot(
 		if (snapshot.owned.seriesReleases.length)
 			await tx
 				.insert(seriesRelease)
-				.values(
-					snapshot.owned.seriesReleases.map((row) => seriesReleaseRowSchema.parse(row)),
-				);
+				.values(snapshot.owned.seriesReleases.map((row) => seriesReleaseRowSchema.parse(row)));
 	}
 	if (snapshot.kind === "software" && snapshot.owned.softwareRequirements.length)
 		await tx
 			.insert(softwareRequirement)
 			.values(
-				snapshot.owned.softwareRequirements.map((row) =>
-					softwareRequirementRowSchema.parse(row),
-				),
+				snapshot.owned.softwareRequirements.map((row) => softwareRequirementRowSchema.parse(row)),
 			);
 	// Dynamic Content Structure slots are restored by their content-model adapter.
 	if (snapshot.kind === "poll") await restoreSoftRows(tx, unitId, snapshot.owned.pollOptions);
@@ -1034,8 +1007,7 @@ export function getUnitRevisionSlotContent(
 		identity.role === "localization"
 			? documents.localizations[identity.slotKey]
 			: documents[identity.role];
-	if (!document)
-		throw new Error(`Missing Unit revision slot ${identity.role}:${identity.slotKey}`);
+	if (!document) throw new Error(`Missing Unit revision slot ${identity.role}:${identity.slotKey}`);
 	assertSlotDocumentModel(identity.role, document);
 	if (identity.role === "localization") parseLocalizationSlot(identity.slotKey, document);
 	return document.payload;
@@ -1200,8 +1172,7 @@ export async function recordUnitRevision(
 		Boolean(head) &&
 		parsedPreviousSlots.length === contents.length &&
 		contents.every(
-			(content) =>
-				previousByIdentity.get(slotIdentityMapKey(content))?.contentId === content.id,
+			(content) => previousByIdentity.get(slotIdentityMapKey(content))?.contentId === content.id,
 		);
 	if (unchanged && head) return { revisionId: head.revisionId, revisionCreated: false };
 
@@ -1258,9 +1229,7 @@ export async function recordUnitRevision(
 			[...tags].map((tag) => ({
 				revisionId: revision.id,
 				tag,
-				metadata: input.sourceRevisionId
-					? { sourceRevisionId: input.sourceRevisionId }
-					: {},
+				metadata: input.sourceRevisionId ? { sourceRevisionId: input.sourceRevisionId } : {},
 			})),
 		);
 	if (input.event !== "create")
@@ -1307,12 +1276,7 @@ export async function restoreUnitRevision(
 		throw new UnitRevisionConflict(head.revisionId, ["/"]);
 	const documents = await getUnitRevisionDocuments(tx, input.sourceRevisionId);
 	if (!documents.main) throw new Error("Unit revision not found");
-	await restoreUnitSnapshot(
-		tx,
-		input.unitId,
-		documentsToSnapshot(documents),
-		input.authorization,
-	);
+	await restoreUnitSnapshot(tx, input.unitId, documentsToSnapshot(documents), input.authorization);
 	return recordUnitRevision(tx, {
 		unitId: input.unitId,
 		actorProfileId: input.actorProfileId,

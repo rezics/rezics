@@ -16,12 +16,10 @@ describe("Poll API contract", () => {
 
 	it("represents literal and Unit-backed options as disjoint inputs", () => {
 		expect(Check(PollOptionInput, { sourceKind: "literal", label: "First" })).toBe(true);
-		expect(Check(PollOptionInput, { sourceKind: "unit", targetUnitId, label: "First" })).toBe(
-			true,
+		expect(Check(PollOptionInput, { sourceKind: "unit", targetUnitId, label: "First" })).toBe(true);
+		expect(Check(PollOptionInput, { sourceKind: "literal", targetUnitId, label: "First" })).toBe(
+			false,
 		);
-		expect(
-			Check(PollOptionInput, { sourceKind: "literal", targetUnitId, label: "First" }),
-		).toBe(false);
 		expect(Check(PollOptionInput, { sourceKind: "unit", label: "First" })).toBe(false);
 	});
 

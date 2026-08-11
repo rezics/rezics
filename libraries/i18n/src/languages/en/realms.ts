@@ -164,8 +164,7 @@ export default {
 		addLabel: "Add category label",
 		attachTag: "Add Tag",
 		attachWiki: "Add Wiki article",
-		addDescription:
-			"The new node is added at the root, or under the one currently selected node.",
+		addDescription: "The new node is added at the root, or under the one currently selected node.",
 		addKinds: {
 			label: "Add category label",
 			tag: "Add Tag",

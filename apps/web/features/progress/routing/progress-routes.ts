@@ -12,8 +12,7 @@ export const progressHistoryFilterParser = parseAsStringLiteral(ProgressHistoryF
 
 export function toProgressHistoryFilter(value: string | null | undefined): ProgressHistoryFilter {
 	return (
-		ProgressHistoryFilters.find((candidate) => candidate === value) ??
-		AllProgressHistoryStatuses
+		ProgressHistoryFilters.find((candidate) => candidate === value) ?? AllProgressHistoryStatuses
 	);
 }
 

@@ -96,11 +96,7 @@ export function MarkdownEditor({
 				{iconButton(messages.actions.quote, toggleMarkdownBlockquote, <QuoteIcon />)}
 				<Separator className="mx-1 h-5" orientation="vertical" />
 				{iconButton(messages.actions.bulletList, toggleMarkdownBulletList, <ListIcon />)}
-				{iconButton(
-					messages.actions.numberedList,
-					toggleMarkdownNumberedList,
-					<ListOrderedIcon />,
-				)}
+				{iconButton(messages.actions.numberedList, toggleMarkdownNumberedList, <ListOrderedIcon />)}
 				{iconButton(messages.actions.taskList, toggleMarkdownTaskList, <ListChecksIcon />)}
 				<Separator className="mx-1 h-5" orientation="vertical" />
 				{iconButton(messages.actions.link, insertMarkdownLink, <LinkIcon />)}
@@ -109,9 +105,7 @@ export function MarkdownEditor({
 			</div>
 			<CodeEditor
 				ariaLabel={
-					mode === "preview"
-						? messages.labels.livePreviewEditor
-						: messages.labels.sourceEditor
+					mode === "preview" ? messages.labels.livePreviewEditor : messages.labels.sourceEditor
 				}
 				className={
 					mode === "preview"

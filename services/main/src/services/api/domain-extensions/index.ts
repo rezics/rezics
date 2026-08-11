@@ -277,11 +277,7 @@ async function toZoneResponse(
 			"banner",
 		),
 		cover: presentImageAsset(
-			resolveUnitLocalizationImageAssetIdFromOrdered(
-				localizations,
-				"cover",
-				localizationLanguages,
-			),
+			resolveUnitLocalizationImageAssetIdFromOrdered(localizations, "cover", localizationLanguages),
 			"cover",
 		),
 		localizations: localizations.map(
@@ -381,9 +377,7 @@ function presentRenderUnit(
 		language: selected.language,
 		title: selected.title,
 		summary: selected.summary,
-		avatar: presentAvatar(
-			resolveUnitLocalizationAvatarFromOrdered(rows, localizationLanguages),
-		),
+		avatar: presentAvatar(resolveUnitLocalizationAvatarFromOrdered(rows, localizationLanguages)),
 		banner: presentImageAsset(
 			resolveUnitLocalizationImageAssetIdFromOrdered(rows, "banner", localizationLanguages),
 			"banner",
@@ -511,10 +505,7 @@ export default new Elysia()
 					const localizationLanguages = query.localizationLanguages ?? [];
 					const identity = await resolveIdentity(request, "unit:read");
 					const { authorization } = identity;
-					await authorization.unit.ensureCanRead(
-						params.seriesId,
-						() => new UnitNotFound("Series"),
-					);
+					await authorization.unit.ensureCanRead(params.seriesId, () => new UnitNotFound("Series"));
 					const rows = await database
 						.select({
 							seriesId: seriesRelease.seriesId,
@@ -540,10 +531,7 @@ export default new Elysia()
 								eq(unitLocalization.unitId, unit.id),
 								eq(
 									unitLocalization.language,
-									resolvedUnitLocalizationLanguage(
-										unit.id,
-										localizationLanguages,
-									),
+									resolvedUnitLocalizationLanguage(unit.id, localizationLanguages),
 								),
 							),
 						)
@@ -611,9 +599,7 @@ export default new Elysia()
 							"SlugScopeUnavailable",
 							"SlugScopeCycle",
 						]),
-						[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse([
-							"SlugDepthExceeded",
-						]),
+						[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["SlugDepthExceeded"]),
 					},
 					detail: {
 						operationId: "replaceZoneSlugAddress",
@@ -627,12 +613,8 @@ export default new Elysia()
 			.get(
 				"/:zoneId",
 				async ({ params, query, request }) => {
-					const authorization = (await resolveIdentity(request, "unit:read"))
-						.authorization;
-					await authorization.unit.ensureCanRead(
-						params.zoneId,
-						() => new UnitNotFound("Zone"),
-					);
+					const authorization = (await resolveIdentity(request, "unit:read")).authorization;
+					await authorization.unit.ensureCanRead(params.zoneId, () => new UnitNotFound("Zone"));
 					return toZoneResponse(
 						await getZone(params.zoneId),
 						query.localizationLanguages,
@@ -661,12 +643,7 @@ export default new Elysia()
 					if (query.page && query.pageId) throw new ZonePageNotFound();
 					const pageRecord = await database.transaction((tx) =>
 						query.pageId
-							? getZonePageUnitById(
-									tx,
-									params.zoneId,
-									query.pageId,
-									query.localizationLanguages,
-								)
+							? getZonePageUnitById(tx, params.zoneId, query.pageId, query.localizationLanguages)
 							: getZonePageUnitBySlug(
 									tx,
 									params.zoneId,
@@ -687,11 +664,7 @@ export default new Elysia()
 						)
 						.limit(1);
 					const navigations = await database.transaction(async (tx) => {
-						const records = await listNavigationStructures(
-							tx,
-							params.zoneId,
-							"zone.navigation",
-						);
+						const records = await listNavigationStructures(tx, params.zoneId, "zone.navigation");
 						return records.map((record) =>
 							toZoneNavigationResponse(record, record.latestRevisionId),
 						);
@@ -722,9 +695,7 @@ export default new Elysia()
 						if (zoneWikiPost) wikiPostIds.add(zoneWikiPost.id);
 					}
 					let usesZoneSearchFeature = false;
-					const mergeBlockReferences = (document: {
-						readonly blocks: readonly Block[];
-					}) => {
+					const mergeBlockReferences = (document: { readonly blocks: readonly Block[] }) => {
 						const references = collectBlockReferences(document);
 						for (const id of references.unitIds) unitIds.add(id);
 						for (const id of references.wikiPostIds) wikiPostIds.add(id);
@@ -756,8 +727,7 @@ export default new Elysia()
 								...feature.document.controls.flatMap((control) =>
 									control.field === "tag" && control.optionPolicy?.kind !== "all"
 										? (control.optionPolicy?.values ?? []).filter(
-												(value): value is string =>
-													typeof value === "string",
+												(value): value is string => typeof value === "string",
 											)
 										: [],
 								),
@@ -790,9 +760,9 @@ export default new Elysia()
 						identity.authorization.profileId,
 					);
 					const zonePageSlugs = new Map(
-						(
-							await database.transaction((tx) => listZonePageUnits(tx, params.zoneId))
-						).map((candidate) => [candidate.id, candidate.slug] as const),
+						(await database.transaction((tx) => listZonePageUnits(tx, params.zoneId))).map(
+							(candidate) => [candidate.id, candidate.slug] as const,
+						),
 					);
 					const units = [...unitIds].flatMap((id) => {
 						const presented = presentRenderUnit(
@@ -838,10 +808,7 @@ export default new Elysia()
 					query: ZoneRenderQuery,
 					response: {
 						[StatusCodes.OK]: ZoneRenderResponse,
-						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
-							"UnitNotFound",
-							"ZonePageNotFound",
-						]),
+						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "ZonePageNotFound"]),
 					},
 					detail: {
 						operationId: "getZoneRenderProjection",
@@ -860,18 +827,13 @@ export default new Elysia()
 							throw new ZoneDocumentInvalid();
 						}
 					const scopes: string[][] = [];
-					if (body.localization)
-						scopes.push(["localizations", body.localization.language]);
+					if (body.localization) scopes.push(["localizations", body.localization.language]);
 					if (body.boundaryDocument) scopes.push(["zone", "boundary"]);
 					if (body.themeDocument) scopes.push(["zone", "theme"]);
 					if (body.startsAt !== undefined || body.endsAt !== undefined)
 						scopes.push(["zone", "settings"]);
 					for (const scope of scopes)
-						await ensureUnitMutationAuthorized(
-							authorization.unit,
-							params.zoneId,
-							scope,
-						);
+						await ensureUnitMutationAuthorized(authorization.unit, params.zoneId, scope);
 					const current = await getZone(params.zoneId);
 					const startsAt =
 						body.startsAt === undefined
@@ -914,12 +876,8 @@ export default new Elysia()
 							await tx
 								.update(zone)
 								.set({
-									...(body.boundaryDocument
-										? { boundaryDocument: body.boundaryDocument }
-										: {}),
-									...(body.themeDocument
-										? { themeDocument: body.themeDocument }
-										: {}),
+									...(body.boundaryDocument ? { boundaryDocument: body.boundaryDocument } : {}),
+									...(body.themeDocument ? { themeDocument: body.themeDocument } : {}),
 									...(body.startsAt !== undefined ? { startsAt } : {}),
 									...(body.endsAt !== undefined ? { endsAt } : {}),
 								})
@@ -955,12 +913,8 @@ export default new Elysia()
 			.get(
 				"/:zoneId/page-addresses/by-id/:pageId",
 				async ({ params, request }) => {
-					const authorization = (await resolveIdentity(request, "unit:read"))
-						.authorization;
-					await authorization.unit.ensureCanRead(
-						params.zoneId,
-						() => new UnitNotFound("Zone"),
-					);
+					const authorization = (await resolveIdentity(request, "unit:read")).authorization;
+					await authorization.unit.ensureCanRead(params.zoneId, () => new UnitNotFound("Zone"));
 					await getZone(params.zoneId);
 					const address = await database.transaction((tx) =>
 						getZonePageAddressById(tx, params.zoneId, params.pageId),
@@ -972,10 +926,7 @@ export default new Elysia()
 					params: ZonePageIdParams,
 					response: {
 						[StatusCodes.OK]: ZonePageAddressResponse,
-						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
-							"UnitNotFound",
-							"ZonePageNotFound",
-						]),
+						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "ZonePageNotFound"]),
 					},
 					detail: {
 						operationId: "getZonePageAddressById",
@@ -987,12 +938,8 @@ export default new Elysia()
 			.get(
 				"/:zoneId/page-addresses/by-slug/:slug",
 				async ({ params, request }) => {
-					const authorization = (await resolveIdentity(request, "unit:read"))
-						.authorization;
-					await authorization.unit.ensureCanRead(
-						params.zoneId,
-						() => new UnitNotFound("Zone"),
-					);
+					const authorization = (await resolveIdentity(request, "unit:read")).authorization;
+					await authorization.unit.ensureCanRead(params.zoneId, () => new UnitNotFound("Zone"));
 					await getZone(params.zoneId);
 					const address = await database.transaction((tx) =>
 						resolveZonePageAddressBySlug(tx, params.zoneId, params.slug),
@@ -1004,10 +951,7 @@ export default new Elysia()
 					params: ZonePageSlugParams,
 					response: {
 						[StatusCodes.OK]: ZonePageAddressResponse,
-						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
-							"UnitNotFound",
-							"ZonePageNotFound",
-						]),
+						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "ZonePageNotFound"]),
 					},
 					detail: {
 						operationId: "resolveZonePageAddressBySlug",
@@ -1019,12 +963,8 @@ export default new Elysia()
 			.get(
 				"/:zoneId/pages",
 				async ({ params, request }) => {
-					const authorization = (await resolveIdentity(request, "unit:read"))
-						.authorization;
-					await authorization.unit.ensureCanRead(
-						params.zoneId,
-						() => new UnitNotFound("Zone"),
-					);
+					const authorization = (await resolveIdentity(request, "unit:read")).authorization;
+					await authorization.unit.ensureCanRead(params.zoneId, () => new UnitNotFound("Zone"));
 					await getZone(params.zoneId);
 					return database.transaction(async (tx) => ({
 						items: await listZonePageUnits(tx, params.zoneId),
@@ -1044,10 +984,7 @@ export default new Elysia()
 				"/:zoneId/pages",
 				async ({ params, profile, authorization, body }) => {
 					await authorization.platform.ensureCapability(DevelopmentPreviewCapability);
-					await ensureUnitMutationAuthorized(authorization.unit, params.zoneId, [
-						"zone",
-						"page",
-					]);
+					await ensureUnitMutationAuthorized(authorization.unit, params.zoneId, ["zone", "page"]);
 					await getZone(params.zoneId);
 					ensureZoneBlockDocument(body.localization.document);
 					try {
@@ -1063,8 +1000,7 @@ export default new Elysia()
 								}),
 						});
 					} catch (cause) {
-						if (cause instanceof ContentStructureInvalid)
-							throw new ZoneDocumentInvalid();
+						if (cause instanceof ContentStructureInvalid) throw new ZoneDocumentInvalid();
 						throw cause;
 					}
 				},
@@ -1074,16 +1010,10 @@ export default new Elysia()
 					body: ZonePageBody,
 					response: {
 						[StatusCodes.OK]: ZonePageResponse,
-						[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
-							"InvalidSlug",
-							"ZoneDocumentInvalid",
-						]),
+						[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["InvalidSlug", "ZoneDocumentInvalid"]),
 						[StatusCodes.FORBIDDEN]: ZonePreviewMutationForbiddenResponse,
 						[StatusCodes.NOT_FOUND]: UnitMutationNotFoundResponse,
-						[StatusCodes.CONFLICT]: toApiErrorResponse([
-							"SlugTaken",
-							"UnitRevisionConflict",
-						]),
+						[StatusCodes.CONFLICT]: toApiErrorResponse(["SlugTaken", "UnitRevisionConflict"]),
 					},
 					detail: {
 						summary: "Create Zone page in development preview",
@@ -1094,12 +1024,8 @@ export default new Elysia()
 			.get(
 				"/:zoneId/pages/:pageId",
 				async ({ params, request }) => {
-					const authorization = (await resolveIdentity(request, "unit:read"))
-						.authorization;
-					await authorization.unit.ensureCanRead(
-						params.zoneId,
-						() => new UnitNotFound("Zone"),
-					);
+					const authorization = (await resolveIdentity(request, "unit:read")).authorization;
+					await authorization.unit.ensureCanRead(params.zoneId, () => new UnitNotFound("Zone"));
 					const page = await database.transaction((tx) =>
 						getZonePageUnitById(tx, params.zoneId, params.pageId),
 					);
@@ -1110,10 +1036,7 @@ export default new Elysia()
 					params: ZonePageIdParams,
 					response: {
 						[StatusCodes.OK]: ZonePageResponse,
-						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
-							"UnitNotFound",
-							"ZonePageNotFound",
-						]),
+						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "ZonePageNotFound"]),
 					},
 					detail: { summary: "Get Zone page by Unit ID", tags: ["Zones"] },
 				},
@@ -1143,8 +1066,7 @@ export default new Elysia()
 								}),
 						});
 					} catch (cause) {
-						if (cause instanceof ContentStructureInvalid)
-							throw new ZoneDocumentInvalid();
+						if (cause instanceof ContentStructureInvalid) throw new ZoneDocumentInvalid();
 						throw cause;
 					}
 				},
@@ -1154,16 +1076,10 @@ export default new Elysia()
 					body: ZonePageBody,
 					response: {
 						[StatusCodes.OK]: ZonePageResponse,
-						[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
-							"InvalidSlug",
-							"ZoneDocumentInvalid",
-						]),
+						[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["InvalidSlug", "ZoneDocumentInvalid"]),
 						[StatusCodes.FORBIDDEN]: ZonePreviewMutationForbiddenResponse,
 						[StatusCodes.NOT_FOUND]: UnitMutationNotFoundResponse,
-						[StatusCodes.CONFLICT]: toApiErrorResponse([
-							"SlugTaken",
-							"UnitRevisionConflict",
-						]),
+						[StatusCodes.CONFLICT]: toApiErrorResponse(["SlugTaken", "UnitRevisionConflict"]),
 					},
 					detail: {
 						summary: "Replace Zone page in development preview",
@@ -1195,12 +1111,8 @@ export default new Elysia()
 						[StatusCodes.OK]: ZonePageResponse,
 						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
 						[StatusCodes.NOT_FOUND]: UnitMutationNotFoundResponse,
-						[StatusCodes.CONFLICT]: toApiErrorResponse([
-							"ContentStructureRevisionConflict",
-						]),
-						[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse([
-							"ContentStructureInvalid",
-						]),
+						[StatusCodes.CONFLICT]: toApiErrorResponse(["ContentStructureRevisionConflict"]),
+						[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["ContentStructureInvalid"]),
 					},
 					detail: { summary: "Index Zone page in page-structure", tags: ["Zones"] },
 				},
@@ -1248,19 +1160,11 @@ export default new Elysia()
 			.get(
 				"/:zoneId/navigation",
 				async ({ params, request }) => {
-					const authorization = (await resolveIdentity(request, "unit:read"))
-						.authorization;
-					await authorization.unit.ensureCanRead(
-						params.zoneId,
-						() => new UnitNotFound("Zone"),
-					);
+					const authorization = (await resolveIdentity(request, "unit:read")).authorization;
+					await authorization.unit.ensureCanRead(params.zoneId, () => new UnitNotFound("Zone"));
 					await getZone(params.zoneId);
 					return database.transaction(async (tx) => {
-						const records = await listNavigationStructures(
-							tx,
-							params.zoneId,
-							"zone.navigation",
-						);
+						const records = await listNavigationStructures(tx, params.zoneId, "zone.navigation");
 						return {
 							items: records.map((record) =>
 								toZoneNavigationResponse(record, record.latestRevisionId),
@@ -1324,12 +1228,8 @@ export default new Elysia()
 			.get(
 				"/:zoneId/navigation/:navigationId",
 				async ({ params, request }) => {
-					const authorization = (await resolveIdentity(request, "unit:read"))
-						.authorization;
-					await authorization.unit.ensureCanRead(
-						params.zoneId,
-						() => new UnitNotFound("Zone"),
-					);
+					const authorization = (await resolveIdentity(request, "unit:read")).authorization;
+					await authorization.unit.ensureCanRead(params.zoneId, () => new UnitNotFound("Zone"));
 					await getZone(params.zoneId);
 					return database.transaction(async (tx) => {
 						try {
@@ -1355,10 +1255,7 @@ export default new Elysia()
 					params: ZoneNavigationParams,
 					response: {
 						[StatusCodes.OK]: ZoneNavigationResponse,
-						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
-							"UnitNotFound",
-							"ZoneNavigationNotFound",
-						]),
+						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "ZoneNavigationNotFound"]),
 					},
 					detail: { summary: "Get Zone navigation resource", tags: ["Zones"] },
 				},
@@ -1412,13 +1309,8 @@ export default new Elysia()
 						[StatusCodes.OK]: ZoneNavigationResponse,
 						[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["ZoneDocumentInvalid"]),
 						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
-						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
-							"UnitNotFound",
-							"ZoneNavigationNotFound",
-						]),
-						[StatusCodes.CONFLICT]: toApiErrorResponse([
-							"ContentStructureRevisionConflict",
-						]),
+						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "ZoneNavigationNotFound"]),
+						[StatusCodes.CONFLICT]: toApiErrorResponse(["ContentStructureRevisionConflict"]),
 					},
 					detail: { summary: "Replace Zone navigation", tags: ["Zones"] },
 				},
@@ -1446,12 +1338,7 @@ export default new Elysia()
 							const docks = await tx
 								.select({ document: unitDock.document })
 								.from(unitDock)
-								.where(
-									and(
-										eq(unitDock.unitId, params.zoneId),
-										isNull(unitDock.deletedAt),
-									),
-								);
+								.where(and(eq(unitDock.unitId, params.zoneId), isNull(unitDock.deletedAt)));
 							if (
 								docks.some((dock) =>
 									collectBlockReferences(
@@ -1459,9 +1346,7 @@ export default new Elysia()
 									).navigationIds.has(params.navigationId),
 								) ||
 								pages.some((page) =>
-									collectBlockReferences(page.document).navigationIds.has(
-										params.navigationId,
-									),
+									collectBlockReferences(page.document).navigationIds.has(params.navigationId),
 								)
 							)
 								throw new ZoneNavigationInUse();
@@ -1485,10 +1370,7 @@ export default new Elysia()
 					response: {
 						[StatusCodes.NO_CONTENT]: t.Void(),
 						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
-						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
-							"UnitNotFound",
-							"ZoneNavigationNotFound",
-						]),
+						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "ZoneNavigationNotFound"]),
 						[StatusCodes.CONFLICT]: toApiErrorResponse([
 							"ZoneNavigationInUse",
 							"ContentStructureRevisionConflict",
@@ -1507,9 +1389,7 @@ export default new Elysia()
 			.put(
 				"/:seriesId/releases/:releaseId",
 				async ({ params, profile, authorization, body }) => {
-					await ensureUnitMutationAuthorized(authorization.unit, params.seriesId, [
-						"releases",
-					]);
+					await ensureUnitMutationAuthorized(authorization.unit, params.seriesId, ["releases"]);
 					await authorization.unit.ensureCanRead(
 						params.releaseId,
 						() => new UnitNotFound("Release Unit"),
@@ -1564,9 +1444,7 @@ export default new Elysia()
 			.delete(
 				"/:seriesId/releases/:releaseId",
 				async ({ params, profile, authorization }) => {
-					await ensureUnitMutationAuthorized(authorization.unit, params.seriesId, [
-						"releases",
-					]);
+					await ensureUnitMutationAuthorized(authorization.unit, params.seriesId, ["releases"]);
 					await database.transaction(async (tx) => {
 						const deleted = await tx
 							.delete(seriesRelease)
@@ -1592,10 +1470,7 @@ export default new Elysia()
 					response: {
 						[StatusCodes.NO_CONTENT]: t.Void(),
 						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
-						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
-							"UnitNotFound",
-							"SeriesReleaseNotFound",
-						]),
+						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "SeriesReleaseNotFound"]),
 					},
 					detail: {
 						summary: "Remove Series release",
@@ -1669,8 +1544,7 @@ export default new Elysia()
 			.get(
 				"/:softwareId/system-requirements",
 				async ({ params, request }) => {
-					const authorization = (await resolveIdentity(request, "unit:read"))
-						.authorization;
+					const authorization = (await resolveIdentity(request, "unit:read")).authorization;
 					await authorization.unit.ensureCanRead(
 						params.softwareId,
 						() => new UnitNotFound("Software"),
@@ -1728,8 +1602,7 @@ export default new Elysia()
 						});
 						return rows;
 					});
-					if (!created)
-						throw new Error("System requirement insertion did not return a row");
+					if (!created) throw new Error("System requirement insertion did not return a row");
 					return presentSystemRequirement(created);
 				},
 				{
@@ -1742,10 +1615,7 @@ export default new Elysia()
 							"SoftwareSystemRequirementSourceInvalid",
 						]),
 						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
-						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
-							"UnitNotFound",
-							"SoftwareNotFound",
-						]),
+						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "SoftwareNotFound"]),
 					},
 					detail: { summary: "Create Software system requirement", tags: ["Software"] },
 				},

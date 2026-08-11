@@ -88,8 +88,7 @@ function FollowingContent() {
 	];
 
 	if (query.isPending) return <QueryPending />;
-	if (query.isError)
-		return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
+	if (query.isError) return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
 
 	const items = query.data.pages.flatMap((page) => page.items);
 	return (
@@ -110,8 +109,7 @@ function FollowingContent() {
 				<div className="divide-y divide-border-weak border-y border-border-weak">
 					{items.map((item) => {
 						const avatar =
-							item.avatar ??
-							(item.cover ? { type: "image" as const, image: item.cover } : null);
+							item.avatar ?? (item.cover ? { type: "image" as const, image: item.cover } : null);
 						const destination = followingHref(item.kind, item);
 						return (
 							<article className="flex min-w-0 items-center gap-2 py-3" key={item.id}>
@@ -128,11 +126,7 @@ function FollowingContent() {
 									</div>
 								)}
 								<Button
-									aria-label={
-										item.favorite
-											? t.nav.following.unfavorite
-											: t.nav.following.favorite
-									}
+									aria-label={item.favorite ? t.nav.following.unfavorite : t.nav.following.favorite}
 									className="shrink-0"
 									disabled={update.isPending || unfollow.isPending}
 									onClick={() =>
@@ -142,17 +136,10 @@ function FollowingContent() {
 										})
 									}
 									size="icon-md"
-									title={
-										item.favorite
-											? t.nav.following.unfavorite
-											: t.nav.following.favorite
-									}
+									title={item.favorite ? t.nav.following.unfavorite : t.nav.following.favorite}
 									variant="quiet"
 								>
-									<Star
-										aria-hidden
-										className={item.favorite ? "fill-current" : undefined}
-									/>
+									<Star aria-hidden className={item.favorite ? "fill-current" : undefined} />
 								</Button>
 								<Button
 									aria-label={t.ui.unfollow}
@@ -211,9 +198,7 @@ function FollowingIdentity({
 			/>
 			<span className="min-w-0">
 				<strong className="block truncate text-sm">{title}</strong>
-				<span className="text-muted-foreground text-xs">
-					{t.nav.following.types[item.kind]}
-				</span>
+				<span className="text-muted-foreground text-xs">{t.nav.following.types[item.kind]}</span>
 			</span>
 		</>
 	);

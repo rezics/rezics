@@ -42,11 +42,7 @@ export const seriesRelease = pgTable(
 	},
 	(table) => [
 		primaryKey({ columns: [table.seriesId, table.releaseUnitId] }),
-		index("series_release_position_idx").on(
-			table.seriesId,
-			table.position,
-			table.releaseUnitId,
-		),
+		index("series_release_position_idx").on(table.seriesId, table.position, table.releaseUnitId),
 		index("series_release_unit_idx").on(table.releaseUnitId),
 		check("series_release_not_self_check", sql`${table.seriesId} <> ${table.releaseUnitId}`),
 		createFractionalIndexPositionByteLengthConstraint(

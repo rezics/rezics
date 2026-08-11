@@ -94,9 +94,7 @@ export class PlatformAuthorization<ProfileId extends string | undefined> {
 		if (!this.profileId)
 			return new Map(capabilities.map((capability) => [capability, false] as const));
 		const grantingCapabilities = [
-			...new Set(
-				capabilities.flatMap((capability) => grantingPlatformCapabilities(capability)),
-			),
+			...new Set(capabilities.flatMap((capability) => grantingPlatformCapabilities(capability))),
 		];
 		const grants = await executor
 			.select({ capability: platformCapabilityGrant.capability })

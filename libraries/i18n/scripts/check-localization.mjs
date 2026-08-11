@@ -81,8 +81,7 @@ for (const path of (await Promise.all(sourceRoots.map(collectFiles))).flat().toS
 		rejectUnapprovedTokens:
 			locale === "zh-Hant" || (!isAboutContent && ["ja", "ko", "zh-Hans"].includes(locale)),
 	};
-	if (path.endsWith(".ts") || path.endsWith(".tsx"))
-		errors.push(...checkTypeScriptSource(common));
+	if (path.endsWith(".ts") || path.endsWith(".tsx")) errors.push(...checkTypeScriptSource(common));
 	else errors.push(...checkMarkdownSource(common));
 }
 

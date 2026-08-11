@@ -19,9 +19,7 @@ export function UnitSubjectGroups({
 		<div className="grid gap-4">
 			{groupByAssociationRole(associations).map((group) => (
 				<section className="grid gap-1.5" key={group.role}>
-					<h3 className="text-sm font-semibold">
-						{t.units.subjectAssociationRoles[group.role]}
-					</h3>
+					<h3 className="text-sm font-semibold">{t.units.subjectAssociationRoles[group.role]}</h3>
 					<div className="grid gap-2">
 						{group.items.map((association) => (
 							<div className="grid gap-1 rounded-lg border p-3" key={association.id}>
@@ -37,17 +35,12 @@ export function UnitSubjectGroups({
 											className="w-fit text-muted-foreground text-xs hover:text-link hover:underline"
 											href={`/posts/${association.contextPost.id}`}
 										>
-											{association.contextPost.title ??
-												t.units.editor.contextWikiPost}
+											{association.contextPost.title ?? t.units.editor.contextWikiPost}
 										</Link>
 										{association.contextPost.tags.length ? (
 											<div className="flex flex-wrap gap-1.5">
 												{association.contextPost.tags.map((tag) => (
-													<Badge
-														key={tag.tagId}
-														size="sm"
-														variant="outline"
-													>
+													<Badge key={tag.tagId} size="sm" variant="outline">
 														{tag.title ?? t.ui.unnamed} · {tag.score}
 													</Badge>
 												))}

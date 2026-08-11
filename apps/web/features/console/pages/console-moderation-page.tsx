@@ -209,9 +209,7 @@ export function ConsoleModerationPage() {
 	);
 	const activeDestination = getContentRuleDestination(destinationItems);
 	const activeSelectedRuleKeys = activeDestination
-		? getContentRuleKeys(activeDestination).filter((key) =>
-				currentSelectedRuleKeys.includes(key),
-			)
+		? getContentRuleKeys(activeDestination).filter((key) => currentSelectedRuleKeys.includes(key))
 		: [];
 	const selectedRules = getContentRuleReferences(destinationItems, currentSelectedRuleKeys);
 	const noteRequired = command === "note";
@@ -265,9 +263,7 @@ export function ConsoleModerationPage() {
 					path: { caseId: selected.caseId },
 					body: {
 						...(command === "dismiss" ? { state: "rejected" as const } : {}),
-						...(language && document
-							? { internalNote: { language, content: document } }
-							: {}),
+						...(language && document ? { internalNote: { language, content: document } } : {}),
 					},
 				});
 			} else {
@@ -297,11 +293,7 @@ export function ConsoleModerationPage() {
 						reversesActionId: selected.contentLicense.invalidationActionId,
 					};
 				} else {
-					if (
-						command !== "approve" &&
-						command !== "restore" &&
-						command !== "unlock_post_targeting"
-					)
+					if (command !== "approve" && command !== "restore" && command !== "unlock_post_targeting")
 						return;
 					body = { ...common, kind: command };
 				}
@@ -329,8 +321,7 @@ export function ConsoleModerationPage() {
 
 	if (!canModerate) return <p className="text-destructive text-sm">{t.errors.forbidden}</p>;
 	if (cases.isPending) return <QueryPending />;
-	if (cases.isError)
-		return <QueryFailure error={cases.error} retry={() => void cases.refetch()} />;
+	if (cases.isError) return <QueryFailure error={cases.error} retry={() => void cases.refetch()} />;
 
 	return (
 		<section>
@@ -353,9 +344,7 @@ export function ConsoleModerationPage() {
 							}}
 							value={state ?? ""}
 						>
-							<NativeSelectOption value="">
-								{t.console.moderation.allStates}
-							</NativeSelectOption>
+							<NativeSelectOption value="">{t.console.moderation.allStates}</NativeSelectOption>
 							{CaseStates.map((value) => (
 								<NativeSelectOption key={value} value={value}>
 									{t.reports.caseStates[value]}
@@ -382,41 +371,25 @@ export function ConsoleModerationPage() {
 						<CardContent className="grid gap-6 pt-5">
 							<CaseSnapshot item={selected} />
 							<div className="grid gap-3">
-								<h3 className="font-heading font-bold">
-									{t.console.moderation.reports}
-								</h3>
+								<h3 className="font-heading font-bold">{t.console.moderation.reports}</h3>
 								{reports.isPending ? <QueryPending /> : null}
 								{reports.isError ? (
-									<QueryFailure
-										error={reports.error}
-										retry={() => void reports.refetch()}
-									/>
+									<QueryFailure error={reports.error} retry={() => void reports.refetch()} />
 								) : null}
 								{reports.data?.pages
 									.flatMap((page) => page.items)
 									.map((report) => (
-										<article
-											className="grid gap-2 rounded-lg border p-4 text-sm"
-											key={report.id}
-										>
+										<article className="grid gap-2 rounded-lg border p-4 text-sm" key={report.id}>
 											<div className="flex flex-wrap justify-between gap-2">
 												<p className="font-medium">
-													{report.rules
-														.map((rule) => rule.title)
-														.join(" · ")}
+													{report.rules.map((rule) => rule.title).join(" · ")}
 												</p>
-												<time
-													className="text-muted-foreground text-xs"
-													dateTime={report.createdAt}
-												>
+												<time className="text-muted-foreground text-xs" dateTime={report.createdAt}>
 													{t.reports.reportedAt({
-														date: new Intl.DateTimeFormat(
-															locale.current,
-															{
-																dateStyle: "medium",
-																timeStyle: "short",
-															},
-														).format(new Date(report.createdAt)),
+														date: new Intl.DateTimeFormat(locale.current, {
+															dateStyle: "medium",
+															timeStyle: "short",
+														}).format(new Date(report.createdAt)),
 													})}
 												</time>
 											</div>
@@ -445,21 +418,16 @@ export function ConsoleModerationPage() {
 										onChange={(event) =>
 											setCommandSelection({
 												caseId: selected.caseId,
-												value: selectCommand(
-													event.currentTarget.value,
-													selected.allowedCommands,
-												),
+												value: selectCommand(event.currentTarget.value, selected.allowedCommands),
 											})
 										}
 										value={command}
 									>
-										{selected.allowedCommands
-											.filter(isPlatformCommand)
-											.map((value) => (
-												<NativeSelectOption key={value} value={value}>
-													{t.realms.governanceActions[value]}
-												</NativeSelectOption>
-											))}
+										{selected.allowedCommands.filter(isPlatformCommand).map((value) => (
+											<NativeSelectOption key={value} value={value}>
+												{t.realms.governanceActions[value]}
+											</NativeSelectOption>
+										))}
 									</NativeSelect>
 								</Field>
 								{AdverseCommands.has(command) ? (
@@ -503,19 +471,14 @@ export function ConsoleModerationPage() {
 								</Field>
 								<DraftContentLanguageField controller={noteLanguage} />
 								<RequestFailure
-									error={
-										actionMutation.error ??
-										caseMutation.error ??
-										destinations.error
-									}
+									error={actionMutation.error ?? caseMutation.error ?? destinations.error}
 								/>
 								<Button
 									disabled={!noteValid || !rulesValid}
 									isLoading={mutationPending}
 									type="submit"
 									variant={
-										command === "remove" ||
-										command === "invalidate_content_license"
+										command === "remove" || command === "invalidate_content_license"
 											? "destructive"
 											: "solid"
 									}
@@ -557,9 +520,7 @@ export function ConsoleModerationPage() {
 						</AlertDialogDescription>
 					</AlertDialogHeader>
 					<AlertDialogFooter>
-						<AlertDialogCancel disabled={mutationPending}>
-							{t.console.cancel}
-						</AlertDialogCancel>
+						<AlertDialogCancel disabled={mutationPending}>{t.console.cancel}</AlertDialogCancel>
 						<AlertDialogAction
 							disabled={mutationPending}
 							onClick={() => {
@@ -627,9 +588,7 @@ function CaseList({
 						</Button>
 					))
 				) : (
-					<p className="p-3 text-muted-foreground text-sm">
-						{t.console.moderation.empty}
-					</p>
+					<p className="p-3 text-muted-foreground text-sm">{t.console.moderation.empty}</p>
 				)}
 				{hasMore ? (
 					<Button
@@ -661,11 +620,7 @@ function CaseSnapshot({ item }: { readonly item: PlatformReportCase }) {
 						: t.console.moderation.targetingUnlocked}
 				</Badge>
 				{item.contentLicense ? (
-					<Badge
-						variant={
-							item.contentLicense.status === "invalidated" ? "warning" : "outline"
-						}
-					>
+					<Badge variant={item.contentLicense.status === "invalidated" ? "warning" : "outline"}>
 						{item.contentLicense.status === "invalidated"
 							? t.console.moderation.contentLicenseInvalidated
 							: t.console.moderation.contentLicenseActive}

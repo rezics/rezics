@@ -104,10 +104,7 @@ export function PostDetailPage({
 	useEffect(() => {
 		if (!chapterBookId || !chapterId) return;
 		router.replace(
-			withContentLanguage(
-				`/units/book/${chapterBookId}/read/${chapterId}`,
-				requestedLanguage,
-			),
+			withContentLanguage(`/units/book/${chapterBookId}/read/${chapterId}`, requestedLanguage),
 			{ scroll: false },
 		);
 	}, [chapterBookId, chapterId, requestedLanguage, router]);
@@ -141,17 +138,11 @@ export function PostDetailPage({
 
 	if (chapterQuery.isPending || chapterQuery.data) return <QueryPending />;
 	if (chapterQuery.isError && !hasErrorCode(chapterQuery.error, "ChapterNotFound"))
-		return (
-			<QueryFailure error={chapterQuery.error} retry={() => void chapterQuery.refetch()} />
-		);
-	if (query.isError)
-		return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
+		return <QueryFailure error={chapterQuery.error} retry={() => void chapterQuery.refetch()} />;
+	if (query.isError) return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
 	if (hasRealmContext && contextQuery.isError)
-		return (
-			<QueryFailure error={contextQuery.error} retry={() => void contextQuery.refetch()} />
-		);
-	if (!query.data || (hasRealmContext && contextQuery.data === undefined))
-		return <QueryPending />;
+		return <QueryFailure error={contextQuery.error} retry={() => void contextQuery.refetch()} />;
+	if (!query.data || (hasRealmContext && contextQuery.data === undefined)) return <QueryPending />;
 	const post = query.data;
 	const postPublisherUnitIds = getPublisherUnitIds(post.attributions);
 	const discussionHref =
@@ -179,11 +170,7 @@ export function PostDetailPage({
 	};
 	const mobileRealmContext = hasRealmContext ? (
 		<div className="grid gap-3 border-border-weak border-y py-4 lg:hidden">
-			<PostRealmContextSelector
-				onValueChange={changeRealm}
-				realms={realms}
-				value={realmContext}
-			/>
+			<PostRealmContextSelector onValueChange={changeRealm} realms={realms} value={realmContext} />
 			{selectedRealm ? (
 				<UnitDockRenderer
 					ownerUnitId={selectedRealm.id}
@@ -194,11 +181,7 @@ export function PostDetailPage({
 	) : null;
 	const desktopRealmContext = hasRealmContext ? (
 		<aside className="sticky top-20 hidden min-w-0 flex-col gap-3 lg:flex">
-			<PostRealmContextSelector
-				onValueChange={changeRealm}
-				realms={realms}
-				value={realmContext}
-			/>
+			<PostRealmContextSelector onValueChange={changeRealm} realms={realms} value={realmContext} />
 			{selectedRealm ? (
 				<>
 					<PostRealmContextCard realm={selectedRealm} />
@@ -278,9 +261,7 @@ export function PostDetailPage({
 				<div className="flex min-w-0 flex-col gap-8">
 					<PostDetailArticle
 						bodyContent={
-							post.postKind === "wiki" && renderWikiBody
-								? renderWikiBody(post)
-								: undefined
+							post.postKind === "wiki" && renderWikiBody ? renderWikiBody(post) : undefined
 						}
 						engagementOverflow={
 							<PostOverflowMenu
@@ -290,10 +271,7 @@ export function PostDetailPage({
 									managementSectionId
 										? {
 												kind: "link",
-												href: postManagementSectionHref(
-													post.id,
-													managementSectionId,
-												),
+												href: postManagementSectionHref(post.id, managementSectionId),
 											}
 										: undefined
 								}

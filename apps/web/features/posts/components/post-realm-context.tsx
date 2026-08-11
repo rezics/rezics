@@ -104,9 +104,7 @@ export function PostRealmContextSelector({
 		readonly icon: ReactNode;
 	}[];
 	const selectedValue =
-		value.kind === "global"
-			? GlobalContextOptionValue
-			: realmContextOptionValue(value.realm.id);
+		value.kind === "global" ? GlobalContextOptionValue : realmContextOptionValue(value.realm.id);
 
 	return (
 		<ChoiceSelect
@@ -153,9 +151,7 @@ export function PostRealmContextBar({ realm }: { readonly realm: RealmContextBar
 				imageAlt={name}
 				size="md"
 			/>
-			<span className="min-w-0 truncate font-heading font-bold text-sm sm:text-base">
-				{name}
-			</span>
+			<span className="min-w-0 truncate font-heading font-bold text-sm sm:text-base">{name}</span>
 		</>
 	);
 

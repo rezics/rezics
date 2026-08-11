@@ -80,9 +80,7 @@ export function rememberRecentEmojiChoice(
 		recentEmojiStorageKey(locale),
 		[
 			verified,
-			...readRecentEmojiChoices(storage, locale).filter(
-				({ emoji }) => emoji !== verified.emoji,
-			),
+			...readRecentEmojiChoices(storage, locale).filter(({ emoji }) => emoji !== verified.emoji),
 		].slice(0, RecentChoiceLimit),
 	);
 }

@@ -61,9 +61,7 @@ export function FeedUnitContent({
 					</Heading>
 					{rating}
 					{summary ? (
-						<p className="mt-2 line-clamp-3 text-muted-foreground text-sm leading-6">
-							{summary}
-						</p>
+						<p className="mt-2 line-clamp-3 text-muted-foreground text-sm leading-6">{summary}</p>
 					) : null}
 					{metadata}
 				</FeedUnitContentLink>

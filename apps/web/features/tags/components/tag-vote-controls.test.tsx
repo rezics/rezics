@@ -21,8 +21,7 @@ vi.mock("@/i18n/client", () => ({
 					fits: "Fits",
 					doesNotFit: "Does not fit",
 					clear: "Clear",
-					summary: ({ score, count }: { score: string; count: string }) =>
-						`${score} / ${count}`,
+					summary: ({ score, count }: { score: string; count: string }) => `${score} / ${count}`,
 				},
 			},
 		},

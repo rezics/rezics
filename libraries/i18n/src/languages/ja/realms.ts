@@ -68,8 +68,7 @@ export default {
 			},
 			moderation: {
 				label: "コンテンツモデレーション",
-				description:
-					"キューに入ったコンテンツを確認し、モデレーションアクションを適用します。",
+				description: "キューに入ったコンテンツを確認し、モデレーションアクションを適用します。",
 			},
 			history: {
 				label: "改訂履歴",
@@ -86,8 +85,7 @@ export default {
 	},
 	pageSettings: {
 		title: "有効なページ",
-		description:
-			"メインページは常に有効です。タグとウィキを有効にし、タブの順序を変更できます。",
+		description: "メインページは常に有効です。タグとウィキを有効にし、タブの順序を変更できます。",
 		mainRequired: "常に有効",
 		enableDescription: `${realmTerms.inline} のナビゲーションにこのページを表示します。`,
 		moveUp: "ページを前へ移動",

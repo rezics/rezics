@@ -205,11 +205,7 @@ export const unitLocalization = pgTable(
 	(table) => [
 		primaryKey({ columns: [table.unitId, table.language] }),
 		unique("unit_localization_unit_position_key").on(table.unitId, table.position),
-		index("unit_localization_unit_position_idx").on(
-			table.unitId,
-			table.position,
-			table.language,
-		),
+		index("unit_localization_unit_position_idx").on(table.unitId, table.position, table.language),
 		index("unit_localization_language_unit_idx").on(table.language, table.unitId),
 		index("unit_localization_content_status_idx").on(table.contentStatus, table.updatedAt),
 		index(CanonicalPgroongaIndexes[0])

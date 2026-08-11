@@ -28,8 +28,7 @@ export default {
 			"Les images sont recherchées selon les préférences linguistiques de chaque personne. Si une langue ne fournit pas l’image concernée, elle est ignorée et la recherche continue.",
 		defaultOrder:
 			"Si aucune langue préférée ne fournit cette image, la recherche continue selon l’ordre de localisation par défaut du contenu.",
-		noImage:
-			"Si aucune localisation ne fournit l’image, aucune image localisée n’est renvoyée.",
+		noImage: "Si aucune localisation ne fournit l’image, aucune image localisée n’est renvoyée.",
 		textDifference:
 			"Le texte suit une règle différente : une localisation complète est choisie, sans repli champ par champ du titre, du résumé ou de la description.",
 		example:
@@ -43,9 +42,12 @@ export default {
 			cover: "Ajuster la couverture",
 		},
 		description: {
-			avatar: "Déplacez et agrandissez l’image dans le recadrage carré. L’aperçu circulaire de l’avatar ne supprime pas les coins de l’original.",
-			banner: "Déplacez et agrandissez l’image dans le recadrage fixe 4:1. Les nouvelles bannières commencent en haut à gauche.",
-			cover: "Conservez l’image complète par défaut, ou utilisez un recadrage fixe 3:4 lorsque la composition est prioritaire.",
+			avatar:
+				"Déplacez et agrandissez l’image dans le recadrage carré. L’aperçu circulaire de l’avatar ne supprime pas les coins de l’original.",
+			banner:
+				"Déplacez et agrandissez l’image dans le recadrage fixe 4:1. Les nouvelles bannières commencent en haut à gauche.",
+			cover:
+				"Conservez l’image complète par défaut, ou utilisez un recadrage fixe 3:4 lorsque la composition est prioritaire.",
 		},
 		close: "Fermer le réglage de l’image",
 		loading: "Chargement de l’image d’origine…",

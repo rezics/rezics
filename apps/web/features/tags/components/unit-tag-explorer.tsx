@@ -89,10 +89,7 @@ export function UnitTagExplorer({
 	const queryClient = useQueryClient();
 	const [requestedVoteContext, setRequestedVoteContext] =
 		useState<TagVoteContextRequest>(initialVoteContext);
-	const [selection, dispatchSelection] = useReducer(
-		tagSelectionReducer,
-		InitialTagSelectionState,
-	);
+	const [selection, dispatchSelection] = useReducer(tagSelectionReducer, InitialTagSelectionState);
 	const selectionLabels = useRef(new Map<string, string>());
 	const queryInput = {
 		path: { type, unitId },
@@ -270,9 +267,7 @@ export function UnitTagExplorer({
 				}
 			>
 				{surface === "section" ? (
-					<h2 className="font-heading text-lg font-bold sm:text-xl">
-						{t.tags.page.title}
-					</h2>
+					<h2 className="font-heading text-lg font-bold sm:text-xl">{t.tags.page.title}</h2>
 				) : null}
 				{surface === "page" ? (
 					<Button asChild variant="outline">
@@ -280,9 +275,7 @@ export function UnitTagExplorer({
 					</Button>
 				) : null}
 				<Button
-					onClick={() =>
-						dispatchSelection(selectionMode ? { type: "exit" } : { type: "enter" })
-					}
+					onClick={() => dispatchSelection(selectionMode ? { type: "exit" } : { type: "enter" })}
 					variant={selectionMode ? "secondary" : "outline"}
 				>
 					{selectionMode ? t.tags.selection.finish : t.tags.selection.start}
@@ -294,9 +287,7 @@ export function UnitTagExplorer({
 					<section className="grid gap-5">
 						<div className="grid gap-3">
 							<div className="grid gap-1">
-								<h2 className="font-heading text-xl font-bold">
-									{t.tags.voteContext.title}
-								</h2>
+								<h2 className="font-heading text-xl font-bold">{t.tags.voteContext.title}</h2>
 								<p className="max-w-3xl text-sm leading-6 text-muted-foreground">
 									{t.tags.voteContext.description}
 								</p>
@@ -339,9 +330,7 @@ export function UnitTagExplorer({
 							<TagContextSection
 								description={activeVoteContext.realm.summary}
 								descriptionLanguage={
-									activeVoteContext.realm.summary
-										? activeVoteContext.realm.language
-										: null
+									activeVoteContext.realm.summary ? activeVoteContext.realm.language : null
 								}
 								empty={t.tags.realms.empty}
 								fallbackLabel={t.tags.unnamedTag}
@@ -362,23 +351,15 @@ export function UnitTagExplorer({
 								selectionMode={selectionMode}
 								title={activeVoteContext.realm.title ?? t.tags.unnamedRealm}
 								titleLanguage={
-									activeVoteContext.realm.title
-										? activeVoteContext.realm.language
-										: null
+									activeVoteContext.realm.title ? activeVoteContext.realm.language : null
 								}
 								type={type}
 							/>
 						)}
 
 						<UnitTagManagement
-							addError={
-								activeVoteContext.kind === "global" ? add.error : realmVote.error
-							}
-							addPending={
-								activeVoteContext.kind === "global"
-									? add.isPending
-									: realmVote.isPending
-							}
+							addError={activeVoteContext.kind === "global" ? add.error : realmVote.error}
+							addPending={activeVoteContext.kind === "global" ? add.isPending : realmVote.isPending}
 							addStructureError={addStructure.error}
 							addStructurePending={addStructure.isPending}
 							canVote={activeVoteContext.kind === "realm" || Boolean(session)}
@@ -430,9 +411,7 @@ export function UnitTagExplorer({
 
 					<section className="grid gap-5 border-t border-border-weak pt-6">
 						<div className="grid gap-1">
-							<h2 className="font-heading text-xl font-bold">
-								{t.tags.details.title}
-							</h2>
+							<h2 className="font-heading text-xl font-bold">{t.tags.details.title}</h2>
 							<p className="max-w-3xl text-sm leading-6 text-muted-foreground">
 								{t.tags.details.description}
 							</p>
@@ -466,10 +445,7 @@ export function UnitTagExplorer({
 										empty={t.tags.realms.empty}
 										fallbackLabel={t.tags.unnamedTag}
 										heading={
-											<RealmTagContextHeading
-												fallbackTitle={t.tags.unnamedRealm}
-												realm={group}
-											/>
+											<RealmTagContextHeading fallbackTitle={t.tags.unnamedRealm} realm={group} />
 										}
 										headingLevel="h3"
 										items={group.tags}
@@ -514,9 +490,7 @@ export function UnitTagExplorer({
 
 					{realmGroups.length ? (
 						<section className="grid gap-5 border-t border-border-weak pt-6">
-							<h3 className="font-heading text-lg font-bold">
-								{t.tags.realms.title}
-							</h3>
+							<h3 className="font-heading text-lg font-bold">{t.tags.realms.title}</h3>
 							<div className="grid gap-6">
 								{realmGroups.map((group) => (
 									<TagContextSection
@@ -525,10 +499,7 @@ export function UnitTagExplorer({
 										empty={t.tags.realms.empty}
 										fallbackLabel={t.tags.unnamedTag}
 										heading={
-											<RealmTagContextHeading
-												fallbackTitle={t.tags.unnamedRealm}
-												realm={group}
-											/>
+											<RealmTagContextHeading fallbackTitle={t.tags.unnamedRealm} realm={group} />
 										}
 										headingLevel={groupHeadingLevel}
 										items={group.tags}

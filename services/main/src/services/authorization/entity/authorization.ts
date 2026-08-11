@@ -79,12 +79,7 @@ export class EntityAuthorization<ProfileId extends string | undefined> {
 		await lockEntityAssociationState(tx, entityId);
 		if (!(await entityExists(tx, entityId))) throw new EntityEntryNotFound();
 		try {
-			await this.ensureAssociationCommandAllowedForExistingEntity(
-				tx,
-				entityId,
-				kind,
-				command,
-			);
+			await this.ensureAssociationCommandAllowedForExistingEntity(tx, entityId, kind, command);
 			return true;
 		} catch (error) {
 			if (

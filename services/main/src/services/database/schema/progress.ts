@@ -94,11 +94,7 @@ export const unitProgressEntry = pgTable(
 		updatedAt: createUpdatedAtColumn(),
 	},
 	(table) => [
-		unique("unit_progress_entry_id_profile_unit_key").on(
-			table.id,
-			table.profileId,
-			table.unitId,
-		),
+		unique("unit_progress_entry_id_profile_unit_key").on(table.id, table.profileId, table.unitId),
 		foreignKey({
 			columns: [table.contentStructureNodeId, table.unitId],
 			foreignColumns: [contentStructureNode.id, contentStructureNode.ownerUnitId],

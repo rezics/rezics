@@ -38,12 +38,8 @@ const localizations = [
 
 describe("resolveUnitLocalizationFromOrdered", () => {
 	it("matches the ordered language query against the ordered Unit localization list", () => {
-		expect(resolveUnitLocalizationFromOrdered(localizations, ["zh", "en"])?.language).toBe(
-			"zh",
-		);
-		expect(resolveUnitLocalizationFromOrdered(localizations, ["en", "zh"])?.language).toBe(
-			"en",
-		);
+		expect(resolveUnitLocalizationFromOrdered(localizations, ["zh", "en"])?.language).toBe("zh");
+		expect(resolveUnitLocalizationFromOrdered(localizations, ["en", "zh"])?.language).toBe("en");
 	});
 
 	it("falls back to the Unit's position-language order when the query has no match", () => {
@@ -52,9 +48,7 @@ describe("resolveUnitLocalizationFromOrdered", () => {
 	});
 
 	it("never falls back outside an explicit allowed-language boundary", () => {
-		expect(resolveUnitLocalizationFromOrdered(localizations, ["en"], ["zh"])?.language).toBe(
-			"zh",
-		);
+		expect(resolveUnitLocalizationFromOrdered(localizations, ["en"], ["zh"])?.language).toBe("zh");
 		expect(resolveUnitLocalizationFromOrdered(localizations, ["en"], ["ja"])).toBeUndefined();
 	});
 });
@@ -90,9 +84,7 @@ describe("resolvedUnitLocalizationAvatar", () => {
 	});
 
 	it("preserves the caller's language preference order for array filters", () => {
-		const query = new PgDialect().sqlToQuery(
-			resolvedUnitLocalizationTitle(unit.id, ["zh", "en"]),
-		);
+		const query = new PgDialect().sqlToQuery(resolvedUnitLocalizationTitle(unit.id, ["zh", "en"]));
 
 		expect(query.sql).toContain("array_position");
 		expect(query.sql).toContain("array[$1, $2]::text[]");
@@ -140,15 +132,13 @@ describe("avatar storage", () => {
 
 describe("resolveUnitLocalizationImageAssetIdFromOrdered", () => {
 	it("inherits the first available asset when the requested localization is empty", () => {
-		expect(
-			resolveUnitLocalizationImageAssetIdFromOrdered(localizations, "banner", ["zh"]),
-		).toBe("banner-default");
+		expect(resolveUnitLocalizationImageAssetIdFromOrdered(localizations, "banner", ["zh"])).toBe(
+			"banner-default",
+		);
 	});
 
 	it("falls forward when the first fallback localization has no asset", () => {
-		expect(resolveUnitLocalizationImageAssetIdFromOrdered(localizations, "cover")).toBe(
-			"cover-zh",
-		);
+		expect(resolveUnitLocalizationImageAssetIdFromOrdered(localizations, "cover")).toBe("cover-zh");
 	});
 
 	it("returns null when no localization defines the role", () => {

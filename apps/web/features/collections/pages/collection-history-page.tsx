@@ -31,9 +31,7 @@ export function CollectionHistoryPage() {
 				title={t.collections.workspace.sections.history.label}
 			/>
 			<section className="grid gap-3">
-				<h2 className="text-lg font-semibold">
-					{t.collections.workspace.sections.metadata.label}
-				</h2>
+				<h2 className="text-lg font-semibold">{t.collections.workspace.sections.metadata.label}</h2>
 				<UnitRevisionHistory
 					compareHref={(from, to) =>
 						`${historyHref}/compare?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`
@@ -43,9 +41,7 @@ export function CollectionHistoryPage() {
 				/>
 			</section>
 			<section className="grid gap-3">
-				<h2 className="text-lg font-semibold">
-					{t.collections.workspace.sections.items.label}
-				</h2>
+				<h2 className="text-lg font-semibold">{t.collections.workspace.sections.items.label}</h2>
 				<CollectionStructureRevisionHistory
 					canRestore={collection.capabilities.canRestoreHistory}
 					collectionId={collection.id}

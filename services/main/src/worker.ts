@@ -87,24 +87,19 @@ async function run() {
 			await runWorkerJob({ name: "email.dispatch", retryCount: 0 }, dispatchEmailBatch);
 			if (Date.now() >= nextRecommendationAt) {
 				try {
-					await runWorkerJob(
-						{ name: "recommendation.refresh", retryCount: 0 },
-						async () => {
-							const snapshotId = await refreshRecommendationSnapshot();
-							await aggregateRecommendationMetrics();
-							await purgeRecommendationData();
-							logger.info(
-								snapshotId
-									? "Recommendation refresh completed"
-									: "Recommendation refresh skipped",
-								{
-									eventName: snapshotId
-										? "recommendation.refresh.completed"
-										: "recommendation.refresh.skipped",
-								},
-							);
-						},
-					);
+					await runWorkerJob({ name: "recommendation.refresh", retryCount: 0 }, async () => {
+						const snapshotId = await refreshRecommendationSnapshot();
+						await aggregateRecommendationMetrics();
+						await purgeRecommendationData();
+						logger.info(
+							snapshotId ? "Recommendation refresh completed" : "Recommendation refresh skipped",
+							{
+								eventName: snapshotId
+									? "recommendation.refresh.completed"
+									: "recommendation.refresh.skipped",
+							},
+						);
+					});
 				} finally {
 					nextRecommendationAt = Date.now() + env.RECOMMENDATION_REFRESH_INTERVAL_MS;
 				}

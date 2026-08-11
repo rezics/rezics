@@ -199,12 +199,7 @@ export function TurnstileWidget({
 
 	return (
 		<div className="space-y-2">
-			<div
-				aria-label={label}
-				className="min-h-[65px] w-full"
-				ref={containerRef}
-				role="group"
-			/>
+			<div aria-label={label} className="min-h-[65px] w-full" ref={containerRef} role="group" />
 			{unavailable ? (
 				<p className="text-destructive text-sm" role="alert">
 					{unavailableMessage}

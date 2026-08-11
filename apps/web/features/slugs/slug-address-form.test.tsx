@@ -51,8 +51,6 @@ describe("Profile slug assignment form", () => {
 		fireEvent.click(screen.getByRole("button", { name: "儲存" }));
 
 		expect(onSubmit).not.toHaveBeenCalled();
-		expect(screen.getByRole("alert").textContent).toBe(
-			"這個個人網址是平台保留名稱，無法使用。",
-		);
+		expect(screen.getByRole("alert").textContent).toBe("這個個人網址是平台保留名稱，無法使用。");
 	});
 });

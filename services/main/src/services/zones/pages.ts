@@ -232,11 +232,7 @@ export async function listZonePageUnits(
 		.innerJoin(unit, eq(unit.id, zonePage.id))
 		.innerJoin(
 			post,
-			and(
-				eq(post.id, zonePage.id),
-				eq(post.kind, "page"),
-				eq(post.subjectUnitId, zonePage.zoneId),
-			),
+			and(eq(post.id, zonePage.id), eq(post.kind, "page"), eq(post.subjectUnitId, zonePage.zoneId)),
 		)
 		.where(and(eq(zonePage.zoneId, zoneId), eq(unit.kind, "zone_page"), isNull(unit.deletedAt)))
 		.orderBy(asc(unit.createdAt), asc(unit.id));
@@ -317,9 +313,7 @@ export async function listZonePageUnits(
 				? {
 						structureId: structure.id,
 						nodeId: node.id,
-						parentPageId: node.parentId
-							? (pageIdByNodeId.get(node.parentId) ?? null)
-							: null,
+						parentPageId: node.parentId ? (pageIdByNodeId.get(node.parentId) ?? null) : null,
 						position: node.position,
 						latestStructureRevisionId,
 					}
@@ -380,8 +374,7 @@ async function loadOrCreatePageStructure(
 	const [existing] = await listContentStructures(tx, input.zoneId, "page-structure");
 	if (existing) {
 		const revisionId = await getContentStructureRevision(tx, input.zoneId, existing.id);
-		if (!revisionId)
-			throw new ContentStructureInvalid("Zone page-structure has no history head");
+		if (!revisionId) throw new ContentStructureInvalid("Zone page-structure has no history head");
 		return { structure: existing, revisionId, created: false as const };
 	}
 	const created = await createContentStructure(tx, {
@@ -502,8 +495,7 @@ export async function upsertZonePageUnit(input: ZonePageMutationInput) {
 					),
 				)
 				.limit(1);
-			const slugChanged =
-				input.slug !== undefined && (currentAddress?.slug ?? null) !== input.slug;
+			const slugChanged = input.slug !== undefined && (currentAddress?.slug ?? null) !== input.slug;
 			const localizationChanged =
 				!currentLocalization ||
 				currentLocalization.title !== input.localization.title ||
@@ -511,9 +503,7 @@ export async function upsertZonePageUnit(input: ZonePageMutationInput) {
 				!isDeepStrictEqual(currentLocalization.content, input.localization.document);
 			if (slugChanged || localizationChanged) {
 				if (!input.baseUnitRevisionId)
-					throw new ContentStructureInvalid(
-						"Updating a Zone Page Unit requires a base revision",
-					);
+					throw new ContentStructureInvalid("Updating a Zone Page Unit requires a base revision");
 				if (slugChanged)
 					await replaceZonePageSlugAddress(tx, {
 						zoneId: input.zoneId,
@@ -533,10 +523,7 @@ export async function upsertZonePageUnit(input: ZonePageMutationInput) {
 						.values({
 							unitId: pageId,
 							language: input.localization.language,
-							position: fractionalPositionBetween(
-								lastLocalization?.position ?? null,
-								null,
-							),
+							position: fractionalPositionBetween(lastLocalization?.position ?? null, null),
 							title: input.localization.title,
 							content: input.localization.document,
 							contentStatus: "published",
@@ -611,8 +598,7 @@ export async function upsertZonePagePlacement(input: ZonePagePlacementMutationIn
 			node = inserted.node;
 			revisionId = inserted.revisionId;
 		} else {
-			const parentId =
-				input.parentPageId === undefined ? node.parentId : (parentNode?.id ?? null);
+			const parentId = input.parentPageId === undefined ? node.parentId : (parentNode?.id ?? null);
 			const changed =
 				parentId !== node.parentId ||
 				(input.position !== undefined && input.position !== node.position);

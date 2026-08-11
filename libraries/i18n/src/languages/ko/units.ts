@@ -398,8 +398,7 @@ export default {
 		noSubjects: "아직 내용 대상이 없습니다",
 		noSubjectsDescription: "작품에서 다루는 인물, 단체 또는 주제를 추가하세요.",
 		noExternalLinks: "아직 외부 링크가 없습니다",
-		noExternalLinksDescription:
-			"작품 정보를 뒷받침하는 신뢰할 수 있는 공개 페이지를 추가하세요.",
+		noExternalLinksDescription: "작품 정보를 뒷받침하는 신뢰할 수 있는 공개 페이지를 추가하세요.",
 		noVariants: "아직 변형이 없습니다",
 		noVariantsDescription: "이 작품은 기본 작품이며 연결된 변형이 없습니다.",
 		pendingRequests: "동의 대기",
@@ -496,8 +495,7 @@ export default {
 		controlLabel: "콘텐츠 언어",
 		settings: "언어 설정",
 		dialogTitle: "콘텐츠 언어 설정",
-		dialogDescription:
-			"사용자의 선호 언어를 사용할 수 없는 경우 표시될 대체 순서를 설정합니다.",
+		dialogDescription: "사용자의 선호 언어를 사용할 수 없는 경우 표시될 대체 순서를 설정합니다.",
 		add: "언어 추가",
 		addDescription: "언어를 선택한 후 필수 콘텐츠를 저장하여 이 유닛에 추가하세요.",
 		pending: "아직 추가되지 않음",
@@ -563,10 +561,9 @@ export default {
 		bookDefaultOwnership: "책 기본값 사용",
 		profileOwnedChapter: "소유 챕터",
 		communityOwnedChapter: "공공 챕터",
-		chapterOwnershipDefaultDescription: insert(
-			"책의 현재 소유 방식을 사용합니다: {{ownership}}.",
-			{ ownership: String },
-		),
+		chapterOwnershipDefaultDescription: insert("책의 현재 소유 방식을 사용합니다: {{ownership}}.", {
+			ownership: String,
+		}),
 		chapterOwnershipOverrideDescription: "이 챕터에서 책의 기본값을 덮어씁니다.",
 		addLabelDescription:
 			"새 레이블을 만들거나 기존 레이블을 검색해 추가합니다. 완료하면 콘텐츠 구조도 함께 저장됩니다.",

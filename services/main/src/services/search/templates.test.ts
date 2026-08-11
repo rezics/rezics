@@ -134,12 +134,7 @@ describe("Search Feature v1", () => {
 				emptyQuery: "progressLastSeenAt:desc",
 				textQuery: "progressLastSeenAt:desc",
 			},
-			options: [
-				"progressLastSeenAt:desc",
-				"progressLastSeenAt:asc",
-				"title:asc",
-				"title:desc",
-			],
+			options: ["progressLastSeenAt:desc", "progressLastSeenAt:asc", "title:asc", "title:desc"],
 		});
 		expect(resolveSearchDocument(document, true).controls).toEqual([]);
 	});
@@ -188,12 +183,12 @@ describe("Search Feature v1", () => {
 				.request.sort,
 		).toBe("relevance");
 		expect(
-			compileSearchFeatureInputForPolicy({ ...input, state: textState }, GlobalSearchPolicy)
-				.request.sort,
+			compileSearchFeatureInputForPolicy({ ...input, state: textState }, GlobalSearchPolicy).request
+				.sort,
 		).toBe("relevance");
 		expect(
-			compileSearchFeatureInputForPolicy({ ...input, state: textState }, GlobalFeedPolicy)
-				.request.sort,
+			compileSearchFeatureInputForPolicy({ ...input, state: textState }, GlobalFeedPolicy).request
+				.sort,
 		).toBe("best");
 		expect(() =>
 			compileSearchFeatureInputForPolicy(

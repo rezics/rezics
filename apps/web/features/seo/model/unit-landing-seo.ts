@@ -67,8 +67,7 @@ function metadataTitle(
 ): string {
 	const presentation = projection.presentation;
 	const brand = input.t.brand.name;
-	const entityContext =
-		presentation.context?.kind === "entity" ? presentation.context : undefined;
+	const entityContext = presentation.context?.kind === "entity" ? presentation.context : undefined;
 	const contextLabel =
 		presentation.context?.kind === "zone_page"
 			? presentation.context.zoneTitle
@@ -88,8 +87,7 @@ function metadataTitle(
 		return input.t.seo.titles.typed({
 			name: presentation.title,
 			kind:
-				entityKindLabel(input.t, entityContext?.entityKind) ??
-				input.t.seo.kinds[projection.kind],
+				entityKindLabel(input.t, entityContext?.entityKind) ?? input.t.seo.kinds[projection.kind],
 			brand,
 		});
 	return input.t.seo.titles.standard({ name: presentation.title, brand });
@@ -164,9 +162,7 @@ function structuredMainEntity(
 			return { "@type": "CreativeWork", ...shared };
 		case "entity": {
 			const context =
-				projection.presentation.context?.kind === "entity"
-					? projection.presentation.context
-					: null;
+				projection.presentation.context?.kind === "entity" ? projection.presentation.context : null;
 			const type =
 				context?.entityKind === "person"
 					? "Person"

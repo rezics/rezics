@@ -211,11 +211,7 @@ export function CollectionSaveControl({
 					{t.collections.save.action}
 				</Button>
 			) : null}
-			<DialogContent
-				className="h-[min(44rem,calc(100svh-2rem))]"
-				showCloseButton={false}
-				size="sm"
-			>
+			<DialogContent className="h-[min(44rem,calc(100svh-2rem))]" showCloseButton={false} size="sm">
 				<DialogHeader
 					description={t.collections.save.directDescription}
 					title={t.collections.save.title}
@@ -260,9 +256,7 @@ export function CollectionSaveControl({
 							<Input
 								id={`${formId}-new-title`}
 								maxLength={500}
-								onChange={(event) =>
-									setNewCollectionTitle(event.currentTarget.value)
-								}
+								onChange={(event) => setNewCollectionTitle(event.currentTarget.value)}
 								placeholder={t.collections.save.createPlaceholder}
 								value={newCollectionTitle}
 							/>

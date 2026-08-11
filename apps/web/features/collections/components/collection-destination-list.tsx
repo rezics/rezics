@@ -84,9 +84,7 @@ export function CollectionDestinationList({
 		virtualizer.scrollToIndex(boundedIndex, { align: "auto" });
 		requestAnimationFrame(() => {
 			scrollRef.current
-				?.querySelector<HTMLButtonElement>(
-					`[data-collection-option-index="${boundedIndex}"]`,
-				)
+				?.querySelector<HTMLButtonElement>(`[data-collection-option-index="${boundedIndex}"]`)
 				?.focus();
 		});
 	}
@@ -128,9 +126,7 @@ export function CollectionDestinationList({
 						const isFavorite = collection.purpose === "favorites";
 						const isSelfReference = collection.id === targetId;
 						const isChanging = changingCollectionId === collection.id;
-						const title = isFavorite
-							? favoritesLabel
-							: (collection.title ?? unnamedLabel);
+						const title = isFavorite ? favoritesLabel : (collection.title ?? unnamedLabel);
 						return (
 							<div
 								className="absolute inset-x-0 p-1"
@@ -149,9 +145,7 @@ export function CollectionDestinationList({
 									disabled={disabled || isChanging || isSelfReference}
 									onClick={() => onToggle(collection)}
 									onFocus={() => setActiveIndex(virtualItem.index)}
-									onKeyDown={(event) =>
-										handleOptionKeyDown(event, virtualItem.index)
-									}
+									onKeyDown={(event) => handleOptionKeyDown(event, virtualItem.index)}
 									role="option"
 									tabIndex={virtualItem.index === focusableIndex ? 0 : -1}
 									variant={collection.containsTarget ? "secondary" : "outline"}

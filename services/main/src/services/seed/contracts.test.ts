@@ -13,9 +13,7 @@ describe("Seed service contracts", () => {
 
 		expect(options.referenceTime.toISOString()).toBe("2026-07-15T12:00:00.000Z");
 		expect(options.scenarios).toEqual(SeedScenarioValues);
-		expect(createSeedRunOptions({ profile: "demo" }).referenceTime).toEqual(
-			options.referenceTime,
-		);
+		expect(createSeedRunOptions({ profile: "demo" }).referenceTime).toEqual(options.referenceTime);
 	});
 
 	it("keeps demo data focused without weakening the coverage profile", () => {

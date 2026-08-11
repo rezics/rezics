@@ -148,11 +148,7 @@ export function UnitMultiPicker({
 								<Button
 									aria-label={`${removeLabel}: ${label}`}
 									className="size-5"
-									onClick={() =>
-										onValuesChange(
-											values.filter((candidate) => candidate !== id),
-										)
-									}
+									onClick={() => onValuesChange(values.filter((candidate) => candidate !== id))}
 									size="icon-sm"
 									type="button"
 									variant="quiet"

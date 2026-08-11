@@ -144,9 +144,7 @@ function propertyName(node) {
 
 function isApprovedUiLocaleAutonym(path, node, parent, ancestors) {
 	if (
-		!path
-			.replaceAll("\\", "/")
-			.match(/(?:^|\/)libraries\/i18n\/src\/languages\/[^/]+\/locale\.ts$/)
+		!path.replaceAll("\\", "/").match(/(?:^|\/)libraries\/i18n\/src\/languages\/[^/]+\/locale\.ts$/)
 	)
 		return false;
 	if (node.type !== "StringLiteral" || parent?.type !== "ObjectProperty") return false;
@@ -319,13 +317,8 @@ function maskMdxEsm(path, source) {
 					!isModuleSpecifier(current, parent) &&
 					!isPropertyName(current, parent)) ||
 				current.type === "TemplateElement";
-			if (
-				isVisibleString &&
-				typeof current.start === "number" &&
-				typeof current.end === "number"
-			) {
-				const valueStart =
-					current.type === "StringLiteral" ? current.start + 1 : current.start;
+			if (isVisibleString && typeof current.start === "number" && typeof current.end === "number") {
+				const valueStart = current.type === "StringLiteral" ? current.start + 1 : current.start;
 				const valueEnd = current.type === "StringLiteral" ? current.end - 1 : current.end;
 				for (let index = valueStart; index < valueEnd; index += 1) {
 					output[start + index] = source[start + index];
@@ -433,16 +426,13 @@ export function checkMarkdownSource({
 		}
 	}
 	if (rejectUnapprovedTokens)
-		errors.push(
-			...checkUnapprovedTokens(path, source, mdxSource.value, 0, verbatimDefinitions),
-		);
+		errors.push(...checkUnapprovedTokens(path, source, mdxSource.value, 0, verbatimDefinitions));
 	for (const definition of verbatimDefinitions) {
 		const canonical = definition.value;
 		const lowerCanonical = canonical.toLocaleLowerCase("en-US");
 		for (const match of prose.matchAll(/[A-Za-z][A-Za-z0-9]*(?:[-_.][A-Za-z0-9]+)*/g)) {
 			const token = match[0];
-			if (token === canonical || token.toLocaleLowerCase("en-US") !== lowerCanonical)
-				continue;
+			if (token === canonical || token.toLocaleLowerCase("en-US") !== lowerCanonical) continue;
 			errors.push(
 				`${location(path, source, match.index ?? 0)} use canonical spelling ${JSON.stringify(canonical)} instead of ${JSON.stringify(token)}`,
 			);

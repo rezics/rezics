@@ -366,20 +366,12 @@ export const DrawerHeader = (props: DrawerHeaderProps) => {
 	const { className, title, description, children, ...rest } = props;
 
 	return (
-		<ark.div
-			className={cn(drawerHeaderVariants(), className)}
-			data-slot="drawer-header"
-			{...rest}
-		>
+		<ark.div className={cn(drawerHeaderVariants(), className)} data-slot="drawer-header" {...rest}>
 			{!!title && <DrawerTitle>{title}</DrawerTitle>}
 
 			{!!description && <DrawerDescription>{description}</DrawerDescription>}
 
-			{!title && typeof children === "string" ? (
-				<DrawerTitle>{children}</DrawerTitle>
-			) : (
-				children
-			)}
+			{!title && typeof children === "string" ? <DrawerTitle>{children}</DrawerTitle> : children}
 		</ark.div>
 	);
 };

@@ -134,8 +134,7 @@ const en: MarkdownEditorMessages = {
 	notices: {
 		saved: "Document saved.",
 		storageErrors: {
-			conflict:
-				"The file changed outside the editor. Save a copy or reopen it before overwriting.",
+			conflict: "The file changed outside the editor. Save a copy or reopen it before overwriting.",
 			"invalid-encoding": `The file is not valid ${utf8} ${markdown}.`,
 			"invalid-response": "The desktop host returned an invalid response.",
 			io: "The file operation failed.",

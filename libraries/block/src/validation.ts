@@ -235,9 +235,7 @@ const BlockKeyPattern = /^[0-9a-f]{12}$/;
 export function normalizePortableTextDocument(value: unknown): PortableTextDocumentNormalization {
 	if (isPortableTextDocument(value)) return { state: "valid", document: value };
 	const record =
-		typeof value === "object" && value !== null
-			? (value as Record<string, unknown>)
-			: undefined;
+		typeof value === "object" && value !== null ? (value as Record<string, unknown>) : undefined;
 	return {
 		state: "repaired",
 		document: {
@@ -321,8 +319,7 @@ function assertBlockTree(value: BlockContainerDocument, policy: BlockHostPolicy)
 
 	walkBlockTree(value, (block, { depth, parentType }) => {
 		count += 1;
-		if (count > policy.maxBlocks)
-			throw new TypeError("Block document exceeds host block limit");
+		if (count > policy.maxBlocks) throw new TypeError("Block document exceeds host block limit");
 		if (depth > policy.maxDepth) throw new TypeError("Block document exceeds host depth limit");
 		if (keys.has(block._key)) throw new TypeError(`Duplicate Block key ${block._key}`);
 		keys.add(block._key);
@@ -414,8 +411,7 @@ export function collectBlockReferences(document: BlockContainerDocument): BlockR
 		if (block._type === "post-full-view") wikiPostIds.add(block.postId);
 		if (block._type === "unit-ref") unitIds.add(block.unitId);
 		if (block._type === "unit-list") {
-			if (block.source.kind === "units")
-				block.source.unitIds.forEach((id) => unitIds.add(id));
+			if (block.source.kind === "units") block.source.unitIds.forEach((id) => unitIds.add(id));
 			if (block.source.kind === "collection") unitIds.add(block.source.collectionId);
 		}
 		if (block._type === "menu") navigationIds.add(block.navigationId);

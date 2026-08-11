@@ -69,8 +69,7 @@ export default {
 			},
 			pages: {
 				label: "ページ",
-				description:
-					"ローカライズされたページを管理し、必要に応じてページ構造で整理します。",
+				description: "ローカライズされたページを管理し、必要に応じてページ構造で整理します。",
 			},
 			search: {
 				label: "検索",

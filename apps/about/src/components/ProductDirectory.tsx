@@ -72,11 +72,7 @@ export function ProductDirectory({ items, layers, labels }: Props) {
 				<div aria-label={stageCopy.legend} className="stage-legend">
 					<span>{stageCopy.legend}</span>
 					{PRODUCT_STAGE_IDS.map((stage) => (
-						<ProductStageBadge
-							key={stage}
-							label={stageCopy.labels[stage]}
-							stage={stage}
-						/>
+						<ProductStageBadge key={stage} label={stageCopy.labels[stage]} stage={stage} />
 					))}
 				</div>
 			) : null}
@@ -119,9 +115,7 @@ export function ProductDirectory({ items, layers, labels }: Props) {
 				layer.items.length > 0 ? (
 					<section className="directory-layer" id={layer.id} key={layer.id}>
 						<header>
-							<p className="section-index">
-								{String(layerIndex + 1).padStart(2, "0")}
-							</p>
+							<p className="section-index">{String(layerIndex + 1).padStart(2, "0")}</p>
 							<div>
 								<h2>{layer.title}</h2>
 								<p>{layer.body}</p>
@@ -137,10 +131,7 @@ export function ProductDirectory({ items, layers, labels }: Props) {
 									<h3>{item.title}</h3>
 									<p>{item.summary}</p>
 									{stageCopy ? (
-										<ProductStageBadge
-											label={stageCopy.labels[item.stage]}
-											stage={item.stage}
-										/>
+										<ProductStageBadge label={stageCopy.labels[item.stage]} stage={item.stage} />
 									) : null}
 									<ArrowRight aria-hidden="true" />
 									<span className="sr-only">{labels.open}</span>

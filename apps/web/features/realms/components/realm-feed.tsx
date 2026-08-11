@@ -55,14 +55,10 @@ export function RealmFeed({
 						: undefined
 				}
 				onLanguagesChange={
-					showControls
-						? (nextLanguages) => void setLanguages([...nextLanguages])
-						: undefined
+					showControls ? (nextLanguages) => void setLanguages([...nextLanguages]) : undefined
 				}
 				onSortChange={showControls ? (nextSort) => void setSort(nextSort) : undefined}
-				onTagIdsChange={
-					showControls ? (nextTagIds) => void setTagIds([...nextTagIds]) : undefined
-				}
+				onTagIdsChange={showControls ? (nextTagIds) => void setTagIds([...nextTagIds]) : undefined}
 				pagination="infinite"
 				realmIds={[realmId]}
 				renderOverflowActions={(item) => (
@@ -71,12 +67,8 @@ export function RealmFeed({
 						canManageTags={canManageTags}
 						canModerateUnits={canModerateUnits}
 						item={item}
-						onAddPolicyTag={() =>
-							setManagementRequest({ kind: "policy-tag", target: item })
-						}
-						onModerate={() =>
-							setManagementRequest({ kind: "moderation", target: item })
-						}
+						onAddPolicyTag={() => setManagementRequest({ kind: "policy-tag", target: item })}
+						onModerate={() => setManagementRequest({ kind: "moderation", target: item })}
 						realmId={realmId}
 					/>
 				)}

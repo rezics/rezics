@@ -55,11 +55,9 @@ describe("Tag hierarchy authorization", () => {
 
 	it("maps a denied Unit read to TagNotFound before querying Tag data", async () => {
 		const authorization = {
-			ensureCanRead: vi.fn(
-				async (_unitId: string, onDenied: () => TagNotFound): Promise<void> => {
-					throw onDenied();
-				},
-			),
+			ensureCanRead: vi.fn(async (_unitId: string, onDenied: () => TagNotFound): Promise<void> => {
+				throw onDenied();
+			}),
 		};
 
 		await expect(

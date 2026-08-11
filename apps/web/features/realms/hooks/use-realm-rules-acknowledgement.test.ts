@@ -87,9 +87,7 @@ describe("useRealmRulesAcknowledgement", () => {
 		const operation = vi
 			.fn<() => Promise<void>>()
 			.mockRejectedValue(apiError("RealmRulesAcceptanceRequired"));
-		generated.acknowledge.mutateAsync.mockRejectedValueOnce(
-			apiError("RealmRuleRevisionChanged"),
-		);
+		generated.acknowledge.mutateAsync.mockRejectedValueOnce(apiError("RealmRuleRevisionChanged"));
 		const { result } = renderHook(() =>
 			useRealmRulesAcknowledgement(["019f995d-7595-7c99-9183-250790bbfe30"]),
 		);

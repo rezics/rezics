@@ -33,9 +33,7 @@ export function SeriesReleaseFeed({
 		limit !== undefined && allItems.length > items.length ? (
 			<div className="mt-4 flex justify-end">
 				<Button asChild variant="outline">
-					<Link href={`/units/series/${seriesId}/releases`}>
-						{t.units.series.viewAllReleases}
-					</Link>
+					<Link href={`/units/series/${seriesId}/releases`}>{t.units.series.viewAllReleases}</Link>
 				</Button>
 			</div>
 		) : undefined;
@@ -49,11 +47,7 @@ export function SeriesReleaseFeed({
 			footer={footer}
 			getItemKey={(item) => item.releaseUnitId}
 			renderItem={(item, metadata) => (
-				<SeriesReleaseCard
-					item={item}
-					position={metadata.position}
-					setSize={allItems.length}
-				/>
+				<SeriesReleaseCard item={item} position={metadata.position} setSize={allItems.length} />
 			)}
 			retryLabel={t.actions.retry}
 			setSize={allItems.length}

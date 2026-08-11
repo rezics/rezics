@@ -167,8 +167,7 @@ export function FontAwesomeIconPicker({
 	useEffect(() => {
 		setConfigured(document.documentElement.dataset.fontAwesome === "configured");
 		const configuredLicense = document.documentElement.dataset.fontAwesomeLicense;
-		if (configuredLicense && isFontAwesomeLicense(configuredLicense))
-			setLicense(configuredLicense);
+		if (configuredLicense && isFontAwesomeLicense(configuredLicense)) setLicense(configuredLicense);
 	}, []);
 
 	const results = (search.data ?? []).filter((icon) =>
@@ -226,10 +225,7 @@ export function FontAwesomeIconPicker({
 									type="button"
 									variant="quiet"
 								>
-									<i
-										aria-hidden
-										className={fontAwesomeIconClassNames(reference).join(" ")}
-									/>
+									<i aria-hidden className={fontAwesomeIconClassNames(reference).join(" ")} />
 								</Button>
 							);
 						})}
@@ -266,10 +262,7 @@ export function FontAwesomeIconPicker({
 								type="button"
 								variant="quiet"
 							>
-								<i
-									aria-hidden
-									className={fontAwesomeIconClassNames(reference).join(" ")}
-								/>
+								<i aria-hidden className={fontAwesomeIconClassNames(reference).join(" ")} />
 							</Button>
 						);
 					})}

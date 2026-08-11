@@ -144,9 +144,7 @@ describe("Post Score API contracts", () => {
 			updatedAt: "2026-07-30T00:00:00.000Z",
 		};
 		expect(Check(PostScoreListResponse, { items: [score] })).toBe(true);
-		expect(Check(PostScoreListResponse, { items: [{ ...score, realmTitle: null }] })).toBe(
-			true,
-		);
+		expect(Check(PostScoreListResponse, { items: [{ ...score, realmTitle: null }] })).toBe(true);
 		const { realmTitle: _realmTitle, ...scoreWithoutRealmTitle } = score;
 		expect(Check(PostScoreListResponse, { items: [scoreWithoutRealmTitle] })).toBe(false);
 	});

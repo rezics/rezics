@@ -92,9 +92,7 @@ const legalFilesByLocale = new Map(
 				const files = await readdir(join(localeContentRoot, locale, "legal"));
 				return [
 					locale,
-					files
-						.filter((file) => file.endsWith(".mdx"))
-						.map((file) => file.replace(/\.mdx$/, "")),
+					files.filter((file) => file.endsWith(".mdx")).map((file) => file.replace(/\.mdx$/, "")),
 				] as const;
 			} catch {
 				return [locale, [] as string[]] as const;
@@ -230,10 +228,7 @@ for (const locale of ABOUT_LOCALES) {
 			throw new Error(`Missing canonical ${canonical} in ${localizedContactPath}`);
 		}
 		for (const alternateLocale of CONTACT_LOCALES) {
-			const alternate = new URL(
-				getContactPath(alternateLocale),
-				ABOUT_SITE_ORIGIN,
-			).toString();
+			const alternate = new URL(getContactPath(alternateLocale), ABOUT_SITE_ORIGIN).toString();
 			const languageTag = ABOUT_LOCALE_META[alternateLocale].htmlLang;
 			if (!html.includes(`hreflang="${languageTag}" href="${alternate}"`)) {
 				throw new Error(`Missing ${alternateLocale} alternate on ${localizedContactPath}.`);
@@ -273,14 +268,9 @@ for (const slug of documentationSlugs) {
 		const html = await readOutput(getDocumentationPath(locale, slug));
 		const hasDocument = documentationFilesByLocale.get(locale)?.includes(slug) ?? false;
 		if (hasDocument) {
-			const canonical = new URL(
-				getDocumentationPath(locale, slug),
-				ABOUT_SITE_ORIGIN,
-			).toString();
+			const canonical = new URL(getDocumentationPath(locale, slug), ABOUT_SITE_ORIGIN).toString();
 			if (!html.includes(`rel="canonical" href="${canonical}"`)) {
-				throw new Error(
-					`Missing canonical ${canonical} in documentation document ${slug}.`,
-				);
+				throw new Error(`Missing canonical ${canonical} in documentation document ${slug}.`);
 			}
 			continue;
 		}

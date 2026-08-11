@@ -32,11 +32,7 @@ export function CollectionContentFeed({ collectionId }: { readonly collectionId:
 			errorLabel={t.state.error}
 			getItemKey={(item) => item.membership.targetId}
 			renderItem={(item, metadata) => (
-				<FeedItemCard
-					item={item.content}
-					position={metadata.position}
-					setSize={metadata.setSize}
-				/>
+				<FeedItemCard item={item.content} position={metadata.position} setSize={metadata.setSize} />
 			)}
 			retryLabel={t.actions.retry}
 			state={state}

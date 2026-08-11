@@ -25,8 +25,7 @@ export default {
 		detailsOpenSubject: "관련 유닛 열기",
 		detailsOpenActor: insert("{{name}}님의 프로필 열기", { name: String }),
 		detailsOpenPublicNotice: "공개 안내 열기",
-		detailsTargetUnavailable:
-			"관련 콘텐츠를 더 이상 사용할 수 없거나 현재 접근 권한이 없습니다.",
+		detailsTargetUnavailable: "관련 콘텐츠를 더 이상 사용할 수 없거나 현재 접근 권한이 없습니다.",
 	},
 	followingSettings: {
 		triggerEnabled: `${followTerms.actionLabel} 알림 설정 열기. 앱 내 알림 켜짐`,

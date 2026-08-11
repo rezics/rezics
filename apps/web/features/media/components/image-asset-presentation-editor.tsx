@@ -139,9 +139,7 @@ function FixedCropArea({
 			clampNormalizedImageCrop({
 				...origin.crop,
 				x: origin.crop.x - ((event.clientX - origin.x) / bounds.width) * origin.crop.width,
-				y:
-					origin.crop.y -
-					((event.clientY - origin.y) / bounds.height) * origin.crop.height,
+				y: origin.crop.y - ((event.clientY - origin.y) / bounds.height) * origin.crop.height,
 			}),
 		);
 	}
@@ -256,12 +254,7 @@ function FixedCropArea({
 				>
 					<Plus aria-hidden />
 				</Button>
-				<Button
-					onClick={() => onChange(maximumCrop)}
-					size="sm"
-					type="button"
-					variant="quiet"
-				>
+				<Button onClick={() => onChange(maximumCrop)} size="sm" type="button" variant="quiet">
 					<RotateCcw aria-hidden className="size-3.5" />
 					{resetLabel}
 				</Button>
@@ -329,12 +322,7 @@ export function ImageAssetPresentationEditor({
 						<DialogDescription>{copy.description[role]}</DialogDescription>
 					</div>
 					<DialogClose asChild>
-						<Button
-							aria-label={copy.close}
-							size="icon-sm"
-							type="button"
-							variant="quiet"
-						>
+						<Button aria-label={copy.close} size="icon-sm" type="button" variant="quiet">
 							<X aria-hidden />
 						</Button>
 					</DialogClose>
@@ -355,17 +343,14 @@ export function ImageAssetPresentationEditor({
 									<NativeSelect
 										onChange={(event) => {
 											const nextFit = event.currentTarget.value;
-											if (nextFit === "contain" || nextFit === "crop")
-												setFit(nextFit);
+											if (nextFit === "contain" || nextFit === "crop") setFit(nextFit);
 										}}
 										value={fit}
 									>
 										<NativeSelectOption value="contain">
 											{copy.coverMode.contain}
 										</NativeSelectOption>
-										<NativeSelectOption value="crop">
-											{copy.coverMode.crop}
-										</NativeSelectOption>
+										<NativeSelectOption value="crop">{copy.coverMode.crop}</NativeSelectOption>
 									</NativeSelect>
 									<p className="text-muted-foreground text-xs">
 										{fit === "contain"
@@ -423,9 +408,7 @@ export function ImageAssetPresentationEditor({
 							) : null}
 						</>
 					)}
-					{update.isError ? (
-						<p className="text-destructive text-sm">{copy.saveFailed}</p>
-					) : null}
+					{update.isError ? <p className="text-destructive text-sm">{copy.saveFailed}</p> : null}
 				</DialogBody>
 				<DialogFooter>
 					<DialogClose asChild>

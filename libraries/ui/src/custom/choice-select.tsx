@@ -115,10 +115,7 @@ export function ChoiceSelect<Value extends string>({
 				{triggerIcon}
 				{triggerPresentation === "value" ? (
 					<span
-						className={cn(
-							"min-w-0 truncate",
-							!selectedLabels.length && "text-muted-foreground",
-						)}
+						className={cn("min-w-0 truncate", !selectedLabels.length && "text-muted-foreground")}
 					>
 						{selectedLabels.length ? selectedLabels.join(", ") : placeholder}
 					</span>

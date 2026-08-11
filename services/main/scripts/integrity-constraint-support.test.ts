@@ -31,10 +31,7 @@ describe("integrity constraint operations", () => {
 			action: "validate-disposable",
 		});
 		expect(() =>
-			parseIntegrityConstraintCommand([
-				"validate-disposable",
-				"image_object_metadata_shape_check",
-			]),
+			parseIntegrityConstraintCommand(["validate-disposable", "image_object_metadata_shape_check"]),
 		).toThrow(/does not accept/);
 	});
 });

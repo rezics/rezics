@@ -17,8 +17,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 function isStorageErrorCode(value: unknown): value is MarkdownStorageErrorCode {
 	return (
-		typeof value === "string" &&
-		markdownStorageErrorCodes.some((errorCode) => errorCode === value)
+		typeof value === "string" && markdownStorageErrorCodes.some((errorCode) => errorCode === value)
 	);
 }
 

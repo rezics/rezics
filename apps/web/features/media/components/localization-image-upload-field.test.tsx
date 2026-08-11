@@ -53,9 +53,7 @@ vi.mock("@rezics/ui", () => ({
 		</div>
 	),
 	FileUploadDropzone: ({ children }: { readonly children: ReactNode }) => <div>{children}</div>,
-	FileUploadDropzoneIcon: ({ children }: { readonly children: ReactNode }) => (
-		<div>{children}</div>
-	),
+	FileUploadDropzoneIcon: ({ children }: { readonly children: ReactNode }) => <div>{children}</div>,
 	FileUploadHelper: ({ children }: { readonly children: ReactNode }) => <div>{children}</div>,
 	FileUploadTitle: ({ children }: { readonly children: ReactNode }) => <div>{children}</div>,
 	FileUploadTrigger: ({ children }: { readonly children: ReactNode }) => children,
@@ -186,9 +184,7 @@ describe("LocalizationImageUploadField", () => {
 		act(() => {
 			XMLHttpRequestMock.latest?.onload?.();
 		});
-		expect((await screen.findByRole("status")).textContent).toContain(
-			"上傳完成，正在處理圖片……",
-		);
+		expect((await screen.findByRole("status")).textContent).toContain("上傳完成，正在處理圖片……");
 		expect(screen.getByRole("progressbar").getAttribute("data-indeterminate")).toBe("true");
 
 		act(() => {

@@ -77,9 +77,7 @@ function LoadedCommunityScoreOverview({
 	});
 	const { t } = useTranslation(["ui"]);
 	const ratingCount = toNonNegativeApiInteger(query.data?.totalCount);
-	const average = ratingCount
-		? (toFiniteApiNumber(query.data?.totalScore) ?? 0) / ratingCount
-		: 0;
+	const average = ratingCount ? (toFiniteApiNumber(query.data?.totalScore) ?? 0) / ratingCount : 0;
 	const countFor = (score: UnitScore) =>
 		toNonNegativeApiInteger(query.data?.distribution[String(score)]);
 	const counts: Readonly<Record<UnitScore, number>> = {
@@ -161,9 +159,7 @@ function CommunityScoreOverviewContent({
 				{UnitScoreValues.map((score) => {
 					const count = counts[score];
 					const percent = ratingCount ? Math.round((count / ratingCount) * 100) : 0;
-					const heightPercent = maximumCount
-						? Math.round((count / maximumCount) * 100)
-						: 0;
+					const heightPercent = maximumCount ? Math.round((count / maximumCount) * 100) : 0;
 					const isSelected = selectedScores.includes(score);
 					const scoreLabel = t.engagement.scoreDistributionLabel({ score });
 					const distributionLabel = t.engagement.scoreDistribution({

@@ -229,9 +229,7 @@ export function BlockDocumentEditor({
 											});
 											onChange({
 												...document,
-												blocks: document.blocks.filter(
-													(_, candidate) => candidate !== index,
-												),
+												blocks: document.blocks.filter((_, candidate) => candidate !== index),
 											});
 										}}
 										size="icon-sm"
@@ -279,10 +277,7 @@ export function BlockDocumentEditor({
 						onClick={() => {
 							const block = createBlock(activeType);
 							const kind = relatedUnitKind(activeType);
-							if (kind)
-								setRelatedKinds((current) =>
-									new Map(current).set(block._key, kind),
-								);
+							if (kind) setRelatedKinds((current) => new Map(current).set(block._key, kind));
 							onChange({
 								...document,
 								blocks: [...document.blocks, block],
@@ -329,11 +324,7 @@ function BlockFields({
 						ariaLabel={labels.identifier}
 						index={block._type === "post-full-view" ? "posts" : "units"}
 						kinds={
-							block._type === "post-full-view"
-								? ["post"]
-								: relatedKind
-									? [relatedKind]
-									: undefined
+							block._type === "post-full-view" ? ["post"] : relatedKind ? [relatedKind] : undefined
 						}
 						onValueChange={(value) =>
 							onChange(
@@ -343,9 +334,7 @@ function BlockFields({
 							)
 						}
 						placeholder={
-							block._type === "post-full-view"
-								? pickerPlaceholders.post
-								: pickerPlaceholders.unit
+							block._type === "post-full-view" ? pickerPlaceholders.post : pickerPlaceholders.unit
 						}
 						value={block._type === "post-full-view" ? block.postId : block.unitId}
 					/>
@@ -356,8 +345,7 @@ function BlockFields({
 						<NativeSelect
 							onChange={(event) => {
 								const { value } = event.currentTarget;
-								if (isUnitRefAppearance(value))
-									onChange({ ...block, appearance: value });
+								if (isUnitRefAppearance(value)) onChange({ ...block, appearance: value });
 							}}
 							value={block.appearance}
 						>
@@ -408,15 +396,10 @@ function BlockFields({
 									feature: { kind: "template", template: value },
 								});
 						}}
-						value={
-							block.feature.kind === "zone" ? "zone-feature" : block.feature.template
-						}
+						value={block.feature.kind === "zone" ? "zone-feature" : block.feature.template}
 					>
 						{allowZoneSearchSource || block.feature.kind === "zone" ? (
-							<NativeSelectOption
-								disabled={!allowZoneSearchSource}
-								value="zone-feature"
-							>
+							<NativeSelectOption disabled={!allowZoneSearchSource} value="zone-feature">
 								{labels.zoneSearch}
 							</NativeSelectOption>
 						) : null}
@@ -487,8 +470,7 @@ function BlockFields({
 					<NativeSelect
 						onChange={(event) => {
 							const { value } = event.currentTarget;
-							if (isMenuOrientation(value))
-								onChange({ ...block, orientation: value });
+							if (isMenuOrientation(value)) onChange({ ...block, orientation: value });
 						}}
 						value={block.orientation}
 					>

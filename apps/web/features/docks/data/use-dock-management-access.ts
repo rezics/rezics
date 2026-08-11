@@ -44,8 +44,7 @@ export function useDockManagementAccess(unitId: string, ownerKind: string, enabl
 		(kind): kind is DockKind => supportedKinds.includes(kind) && canUpdate(queries[kind].data),
 	);
 	const pending =
-		(enabled && mainSupported && main.isPending) ||
-		(enabled && wikiSupported && wiki.isPending);
+		(enabled && mainSupported && main.isPending) || (enabled && wikiSupported && wiki.isPending);
 	const error =
 		(enabled && mainSupported && main.isError ? main.error : undefined) ??
 		(enabled && wikiSupported && wiki.isError ? wiki.error : undefined);

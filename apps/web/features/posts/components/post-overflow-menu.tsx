@@ -37,11 +37,7 @@ export function PostOverflowMenu({
 	const { t } = useTranslation(["ui"]);
 
 	return (
-		<FeedOverflowMenu
-			canExclude={false}
-			itemId={postId}
-			reportTarget={{ unitId: postId, realmId }}
-		>
+		<FeedOverflowMenu canExclude={false} itemId={postId} reportTarget={{ unitId: postId, realmId }}>
 			{availableLanguages && currentLanguage ? (
 				<ContentLanguageVersionMenu
 					availableLanguages={availableLanguages}

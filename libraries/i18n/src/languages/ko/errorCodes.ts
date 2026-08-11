@@ -56,8 +56,7 @@ export default {
 	SearchUnavailable: "현재 검색을 일시적으로 사용할 수 없습니다. 나중에 다시 시도하세요.",
 	RealmCapabilityRequired: `필요한 ${realmTerms.label} 권한이 없습니다.`,
 	RealmRulesAcceptanceRequired: `계속하려면 현재 ${realmTerms.label} 규칙을 수락하세요.`,
-	RealmRuleRevisionChanged:
-		"서버의 규칙이 변경되었습니다. 최신 개정을 확인한 후 다시 시도하세요.",
+	RealmRuleRevisionChanged: "서버의 규칙이 변경되었습니다. 최신 개정을 확인한 후 다시 시도하세요.",
 	PlatformCapabilityRequired: "이 작업에는 플랫폼 권한이 필요합니다.",
 	PlatformAccessManagerRequired:
 		"플랫폼은 만료되지 않는 액세스 관리자를 최소한 하나 이상 유지해야 합니다.",
@@ -73,8 +72,7 @@ export default {
 	UserFollowBlocked: `차단된 사용자 간에는 ${followTerms.stateLabel}를 사용할 수 없습니다.`,
 	FollowingTargetKindMismatch: `${followTerms.actionLabel} 항목의 유형이 변경되었습니다. 설정을 다시 불러오세요.`,
 	UserSelfBlockForbidden: "자신을 차단할 수 없습니다.",
-	SoftwareSystemRequirementSourceInvalid:
-		"시스템 요구 사항 소스는 이 소프트웨어에 속해야 합니다.",
+	SoftwareSystemRequirementSourceInvalid: "시스템 요구 사항 소스는 이 소프트웨어에 속해야 합니다.",
 	SeriesReleaseNotFound: "이 시리즈 릴리스를 찾을 수 없습니다.",
 	ZonePageNotFound: `이 ${zoneTerms.inline} 페이지를 찾을 수 없습니다.`,
 	ZonePageInUse: `이 ${zoneTerms.inline} 페이지는 여전히 블록 또는 탐색 문서에서 사용 중입니다.`,
@@ -180,8 +178,7 @@ export default {
 	UnitReferenceCurationChanged:
 		"참조 정보 선별이 다른 곳에서 변경되었습니다. 최신 순서를 불러왔으니 다시 시도해 주세요.",
 	UnitReferenceLimitReached: "이 작품에서 활성화할 수 있는 참고 자료 수가 한도에 도달했습니다.",
-	UnitReferencePinnedLimitReached:
-		"이 작품에서 고정할 수 있는 참고 자료 수가 한도에 도달했습니다.",
+	UnitReferencePinnedLimitReached: "이 작품에서 고정할 수 있는 참고 자료 수가 한도에 도달했습니다.",
 	UnitReferenceWithdrawn: "이 참고 자료는 철회되었습니다.",
 	UnitVariantKindMismatch: "변형과 주 버전은 동일한 지원 유닛 유형을 사용해야 합니다.",
 	UnitVariantTargetIsVariant: "변형은 반드시 주 버전을 직접 가리켜야 합니다.",

@@ -328,9 +328,7 @@ export async function decidePlatformUnitOwnershipClaim(
 					resolvedByProfileId: input.actorProfileId,
 					updatedAt: now,
 				})
-				.where(
-					and(eq(unitOwnershipClaim.id, claim.id), isNull(unitOwnershipClaim.resolution)),
-				)
+				.where(and(eq(unitOwnershipClaim.id, claim.id), isNull(unitOwnershipClaim.resolution)))
 				.returning({ id: unitOwnershipClaim.id });
 			if (!resolved) throw new UnitOwnershipClaimChanged();
 			await recordAuditEvent(tx, {

@@ -36,10 +36,7 @@ export function decideProfileSlugAssignment(
 	requestedSlug: SlugLabel,
 ): ProfileSlugAssignmentDecision {
 	if (!current) return "assign";
-	if (
-		current.scopeUnitId === TopLevelSlugNamespaceUnitIds.users &&
-		current.slug === requestedSlug
-	)
+	if (current.scopeUnitId === TopLevelSlugNamespaceUnitIds.users && current.slug === requestedSlug)
 		return "unchanged";
 	throw new ProfileSlugChangeUnavailable();
 }

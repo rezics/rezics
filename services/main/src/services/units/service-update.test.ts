@@ -32,11 +32,7 @@ function transactionDouble(input?: {
 					table === unit
 						? {
 								returning: vi.fn(async () =>
-									Array.from(
-										input?.unitUpdateResult ?? [
-											{ id: UnitId, status: "draft" },
-										],
-									),
+									Array.from(input?.unitUpdateResult ?? [{ id: UnitId, status: "draft" }]),
 								),
 							}
 						: Promise.resolve(undefined),
@@ -70,9 +66,7 @@ describe("Unit update transaction", () => {
 
 		expect(updates).toHaveLength(1);
 		expect(updates[0]?.table).toBe(unit);
-		expect(updates[0]?.values).toEqual(
-			expect.objectContaining({ updatedAt: expect.any(Date) }),
-		);
+		expect(updates[0]?.values).toEqual(expect.objectContaining({ updatedAt: expect.any(Date) }));
 		expect(transitionUnitStatus).toHaveBeenCalledWith(
 			transaction,
 			expect.objectContaining({

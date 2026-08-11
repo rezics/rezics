@@ -110,9 +110,7 @@ export function DetailedCreditAttributionGroups({
 		<div className="grid gap-10">
 			{groupByAssociationRole(attributions).map((group) => (
 				<section className="grid gap-3" key={group.role}>
-					<h2 className="font-heading text-xl font-bold">
-						{t.units.attributionRoles[group.role]}
-					</h2>
+					<h2 className="font-heading text-xl font-bold">{t.units.attributionRoles[group.role]}</h2>
 					<Card>
 						<CardContent className="divide-y divide-border-weak p-0">
 							{group.items.map((attribution) => {
@@ -170,9 +168,7 @@ export function PrimaryBookAuthorSection({ attribution }: { attribution: CreditA
 			: statistics.followers({ count: numberFormat.format(followerCount) });
 	return (
 		<section className="grid gap-2.5">
-			<h2 className="font-heading text-lg font-bold sm:text-xl">
-				{t.units.detail.aboutAuthor}
-			</h2>
+			<h2 className="font-heading text-lg font-bold sm:text-xl">{t.units.detail.aboutAuthor}</h2>
 			<div className="grid gap-4">
 				<div className="flex items-center justify-between gap-4">
 					<div className="grid min-w-0 grid-cols-[4rem_minmax(0,1fr)] items-center gap-4">
@@ -199,9 +195,7 @@ export function PrimaryBookAuthorSection({ attribution }: { attribution: CreditA
 					/>
 				</div>
 				{attribution.creditedUnit.summary ? (
-					<p className="leading-7 text-muted-foreground">
-						{attribution.creditedUnit.summary}
-					</p>
+					<p className="leading-7 text-muted-foreground">{attribution.creditedUnit.summary}</p>
 				) : null}
 			</div>
 		</section>

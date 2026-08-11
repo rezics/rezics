@@ -35,8 +35,7 @@ export function createReadinessObserver(processName: "api" | "recommendation-wor
 					})),
 				},
 			} as const;
-			if (report.status === "ready")
-				observability.logger.info("Readiness recovered", details);
+			if (report.status === "ready") observability.logger.info("Readiness recovered", details);
 			else observability.logger.warn("Readiness lost", details);
 		}
 		previous = report.status;

@@ -75,9 +75,7 @@ export function EntityDetailPage({ id }: { readonly id: string }) {
 	return (
 		<main className="mx-auto flex w-full max-w-5xl flex-col gap-8 px-4 py-10 sm:px-6">
 			<PageHeading title={displayedTitle} />
-			{banner ? (
-				<Banner alt="" className="rounded-2xl bg-muted" priority src={banner.url} />
-			) : null}
+			{banner ? <Banner alt="" className="rounded-2xl bg-muted" priority src={banner.url} /> : null}
 			<Card>
 				<CardContent className="grid gap-3 p-5 text-sm">
 					<IdentityAvatar
@@ -86,8 +84,7 @@ export function EntityDetailPage({ id }: { readonly id: string }) {
 						fallback={displayedTitle.slice(0, 1).toUpperCase()}
 					/>
 					<p>
-						<span className="text-muted-foreground">{t.entities.kind}</span>{" "}
-						{entityKindLabel}
+						<span className="text-muted-foreground">{t.entities.kind}</span> {entityKindLabel}
 					</p>
 					<p>
 						<span className="text-muted-foreground">{t.entities.verification}</span>{" "}
@@ -124,17 +121,13 @@ export function EntityDetailPage({ id }: { readonly id: string }) {
 						query.data.capabilities.canManageCreditAssociations ||
 						query.data.capabilities.canManageSubjectAssociations ? (
 							<Button asChild className="w-fit" variant="outline">
-								<Link href={`/entities/${query.data.id}/governance`}>
-									{t.governance.open}
-								</Link>
+								<Link href={`/entities/${query.data.id}/governance`}>{t.governance.open}</Link>
 							</Button>
 						) : null}
 						<UnitReportOverflowMenu
 							additionalItems={
 								<ContentLanguageVersionMenu
-									availableLanguages={query.data.localizations.map(
-										({ language }) => language,
-									)}
+									availableLanguages={query.data.localizations.map(({ language }) => language)}
 									currentLanguage={query.data.language}
 								/>
 							}

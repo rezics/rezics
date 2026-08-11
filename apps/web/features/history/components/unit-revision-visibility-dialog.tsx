@@ -139,9 +139,7 @@ export function UnitRevisionVisibilityDialog({
 							<div className="rounded-xl border bg-muted/32 p-4">
 								<div className="flex flex-wrap items-center justify-between gap-3">
 									<div className="min-w-0 flex-1">
-										<p className="font-medium text-sm">
-											{t.history.visibility.copyrightPreset}
-										</p>
+										<p className="font-medium text-sm">{t.history.visibility.copyrightPreset}</p>
 										<p className="mt-1 text-muted-foreground text-sm">
 											{t.history.visibility.copyrightPresetDescription}
 										</p>
@@ -168,11 +166,7 @@ export function UnitRevisionVisibilityDialog({
 								{UnitRevisionVisibilityKinds.map((value) => (
 									<NativeSelectOption
 										disabled={
-											!canSetRevisionVisibility(
-												revision.visibility.kind,
-												value,
-												capabilities,
-											)
+											!canSetRevisionVisibility(revision.visibility.kind, value, capabilities)
 										}
 										key={value}
 										value={value}
@@ -187,21 +181,15 @@ export function UnitRevisionVisibilityDialog({
 						</Field>
 
 						<fieldset className="grid gap-3" disabled={kind === "visible"}>
-							<legend className="font-medium text-sm">
-								{t.history.visibility.fieldsLabel}
-							</legend>
+							<legend className="font-medium text-sm">{t.history.visibility.fieldsLabel}</legend>
 							{UnitRevisionHiddenFields.map((field) => {
-								const disabled =
-									kind === "visible" ||
-									(revision.isCurrent && field === "content");
+								const disabled = kind === "visible" || (revision.isCurrent && field === "content");
 								return (
 									<label className="flex items-start gap-3 text-sm" key={field}>
 										<Checkbox
 											checked={hiddenFields.includes(field)}
 											disabled={disabled}
-											onCheckedChange={(details) =>
-												toggleField(field, details.checked === true)
-											}
+											onCheckedChange={(details) => toggleField(field, details.checked === true)}
 										/>
 										<span>{t.history.visibility.fields[field]}</span>
 									</label>
@@ -213,9 +201,7 @@ export function UnitRevisionVisibilityDialog({
 								</p>
 							) : null}
 							{kind !== "visible" && hiddenFields.length === 0 ? (
-								<p className="text-destructive text-sm">
-									{t.history.visibility.atLeastOneField}
-								</p>
+								<p className="text-destructive text-sm">{t.history.visibility.atLeastOneField}</p>
 							) : null}
 						</fieldset>
 

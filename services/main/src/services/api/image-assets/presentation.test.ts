@@ -33,9 +33,9 @@ describe("image asset presentation policy", () => {
 	});
 
 	it("rejects contain for fixed-crop roles", () => {
-		expect(() =>
-			validateImageAssetPresentation("banner", 1200, 1600, { fit: "contain" }),
-		).toThrow(ImageAssetInvalidPresentation);
+		expect(() => validateImageAssetPresentation("banner", 1200, 1600, { fit: "contain" })).toThrow(
+			ImageAssetInvalidPresentation,
+		);
 	});
 
 	it("rejects a crop whose effective pixel aspect does not match the role", () => {

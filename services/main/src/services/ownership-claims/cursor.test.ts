@@ -17,9 +17,7 @@ describe("Unit ownership claim cursor", () => {
 	});
 
 	it("rejects malformed or structurally invalid values", () => {
-		expect(() => decodeUnitOwnershipClaimCursor("not-a-cursor")).toThrow(
-			InvalidPaginationCursor,
-		);
+		expect(() => decodeUnitOwnershipClaimCursor("not-a-cursor")).toThrow(InvalidPaginationCursor);
 		const wrongVersion = Buffer.from(
 			JSON.stringify({
 				v: 2,

@@ -51,8 +51,7 @@ export function useLocalizationLanguageState(): LocalizationLanguageState {
 			languages: AnonymousLocalizationLanguages,
 			source: "anonymous",
 		};
-	if (profileLanguages)
-		return { status: "ready", languages: profileLanguages, source: "profile" };
+	if (profileLanguages) return { status: "ready", languages: profileLanguages, source: "profile" };
 	if (preferences.isError)
 		return {
 			status: "error",

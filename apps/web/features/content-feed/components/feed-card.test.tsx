@@ -141,19 +141,12 @@ describe("FeedCardHeader", () => {
 		const longAttributionTitle =
 			"AnUninterruptedProfileTitleThatMustRemainInsideTheAttributionListCard";
 		const longRealmTitle = "AnUninterruptedRealmTitleThatMustRemainInsideTheRealmListCard";
-		const longAttributions = [
-			{ ...attributions[0], name: longAttributionTitle },
-			attributions[1],
-		];
+		const longAttributions = [{ ...attributions[0], name: longAttributionTitle }, attributions[1]];
 		const longRealms = [{ ...realms[0], name: longRealmTitle }, realms[1]];
 
 		render(
 			<TranslationProvider initial={translation.snapshot}>
-				<FeedCardHeader
-					attributions={longAttributions}
-					realms={longRealms}
-					timestamp="2 小時前"
-				/>
+				<FeedCardHeader attributions={longAttributions} realms={longRealms} timestamp="2 小時前" />
 			</TranslationProvider>,
 		);
 
@@ -161,9 +154,7 @@ describe("FeedCardHeader", () => {
 		const attributionList = await screen.findByRole("list", {
 			name: "2 位署名創作者",
 		});
-		expect(attributionList.parentElement?.className).toContain(
-			"w-[min(22rem,calc(100vw-2rem))]",
-		);
+		expect(attributionList.parentElement?.className).toContain("w-[min(22rem,calc(100vw-2rem))]");
 		const attributionTitle = within(attributionList).getByText(longAttributionTitle);
 		expect(attributionTitle.className).toContain("min-w-0");
 		expect(attributionTitle.className).toContain("flex-1");
@@ -213,9 +204,7 @@ describe("FeedCardTarget", () => {
 		expect(realmLabel.compareDocumentPosition(scoreIcon ?? scoreSummary)).toBe(
 			Node.DOCUMENT_POSITION_FOLLOWING,
 		);
-		expect(scoreIcon?.compareDocumentPosition(scoreSummary)).toBe(
-			Node.DOCUMENT_POSITION_FOLLOWING,
-		);
+		expect(scoreIcon?.compareDocumentPosition(scoreSummary)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
 	});
 
 	it("keeps the Cover and rating rows when a rated work has neither", () => {

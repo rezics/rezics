@@ -38,10 +38,7 @@ function createBackendUrl(
 	prefix: BackendRoutePrefix,
 	path: readonly string[],
 ): URL | undefined {
-	if (
-		path.length === 0 ||
-		path.some((segment) => !segment || segment === "." || segment === "..")
-	)
+	if (path.length === 0 || path.some((segment) => !segment || segment === "." || segment === ".."))
 		return undefined;
 
 	const url = new URL(

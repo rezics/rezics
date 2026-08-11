@@ -248,9 +248,7 @@ describe("REZICS Markdown codec", () => {
 			diagnostics: [{ code: "markdown.ordered-list-start-unsupported" }],
 		});
 
-		const multiBlockItem = markdownToRezicsPortableText(
-			"- first paragraph\n\n  second paragraph",
-		);
+		const multiBlockItem = markdownToRezicsPortableText("- first paragraph\n\n  second paragraph");
 		expect(multiBlockItem.ok).toBe(false);
 		if (!multiBlockItem.ok)
 			expect(

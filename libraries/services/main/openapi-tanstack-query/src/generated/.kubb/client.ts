@@ -356,9 +356,7 @@ export type ClientInstance<TRequest = Request, TResponse = Response> = {
 	setConfig: (config: ClientConfig<TRequest, TResponse>) => ClientConfig<TRequest, TResponse>;
 	getUrl: <TBody = unknown>(config: RequestConfig<TBody, TRequest, TResponse>) => string;
 	interceptors: Interceptors<TRequest, TResponse>;
-	createClient: (
-		config?: ClientConfig<TRequest, TResponse>,
-	) => ClientInstance<TRequest, TResponse>;
+	createClient: (config?: ClientConfig<TRequest, TResponse>) => ClientInstance<TRequest, TResponse>;
 };
 
 /**
@@ -740,10 +738,7 @@ async function settleResult<TRequest, TResponse>({
  * Builds the shared client core bound to a transport, exported by each plugin as `client` plus a `createClient` factory.
  */
 export function createClientCore<TRequest = Request, TResponse = Response>(
-	options: { defaultTransport: Transport<TRequest, TResponse> } & ClientConfig<
-		TRequest,
-		TResponse
-	>,
+	options: { defaultTransport: Transport<TRequest, TResponse> } & ClientConfig<TRequest, TResponse>,
 ): ClientInstance<TRequest, TResponse> {
 	const { defaultTransport, ...initialConfig } = options;
 	let config: ClientConfig<TRequest, TResponse> = { ...initialConfig };
@@ -784,9 +779,7 @@ export function createClientCore<TRequest = Request, TResponse = Response>(
 	client.getUrl = (requestConfig) => {
 		const { querySerializer, pathSerializer } = resolveSerializers({ config, requestConfig });
 		const query: Record<string, unknown> = {
-			...((requestConfig.query ?? requestConfig.params) as
-				| Record<string, unknown>
-				| undefined),
+			...((requestConfig.query ?? requestConfig.params) as Record<string, unknown> | undefined),
 		};
 		return serializeUrl({
 			parts: [requestConfig.baseURL ?? config.baseURL, requestConfig.url],
@@ -808,8 +801,7 @@ export function createClientCore<TRequest = Request, TResponse = Response>(
 function detectResponseType(contentType: string | null): ResponseType | undefined {
 	if (!contentType) return undefined;
 	if (contentType.includes("text/event-stream")) return "stream";
-	if (contentType.includes("application/json") || contentType.includes("text/json"))
-		return "json";
+	if (contentType.includes("application/json") || contentType.includes("text/json")) return "json";
 	if (contentType.includes("text/")) return "text";
 	if (contentType.includes("image/") || contentType.includes("application/octet-stream"))
 		return "blob";
@@ -985,9 +977,7 @@ export async function toEventStream<TData = unknown>(
 	const { data, response } = await result;
 	return {
 		response,
-		stream: parseEventStream<TData>(
-			data as ReadableStream<Uint8Array> | AsyncIterable<Uint8Array>,
-		),
+		stream: parseEventStream<TData>(data as ReadableStream<Uint8Array> | AsyncIterable<Uint8Array>),
 	};
 }
 

@@ -163,10 +163,7 @@ export default new Elysia({ prefix: "/governance" })
 	.get(
 		"/notes/:postId",
 		async ({ params, authorization }) => {
-			await authorization.unit.ensureCanRead(
-				params.postId,
-				() => new GovernanceNoteNotFound(),
-			);
+			await authorization.unit.ensureCanRead(params.postId, () => new GovernanceNoteNotFound());
 			const note = await database.transaction((tx) => getGovernanceNote(tx, params.postId));
 			if (!note) throw new GovernanceNoteNotFound();
 			const { subjectId: _subjectId, ...response } = note;
@@ -187,8 +184,7 @@ export default new Elysia({ prefix: "/governance" })
 		async ({ params, profile, authorization, body }) => {
 			await authorization.unit.ensureCanUpdate(params.postId, [["localizations"]]);
 			const note = await database.transaction(async (tx) => {
-				if (!(await getGovernanceNote(tx, params.postId)))
-					throw new GovernanceNoteNotFound();
+				if (!(await getGovernanceNote(tx, params.postId))) throw new GovernanceNoteNotFound();
 				await tx
 					.insert(unitLocalization)
 					.values({
@@ -227,10 +223,7 @@ export default new Elysia({ prefix: "/governance" })
 			response: {
 				[StatusCodes.OK]: GovernanceNoteResponse,
 				[StatusCodes.FORBIDDEN]: toApiErrorResponse(["UnitPermissionForbidden"]),
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse([
-					"UnitNotFound",
-					"GovernanceNoteNotFound",
-				]),
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "GovernanceNoteNotFound"]),
 				[StatusCodes.CONFLICT]: toApiErrorResponse(["UnitRevisionConflict"]),
 			},
 			detail: { summary: "Update governance note", tags: ["Governance"] },
@@ -250,9 +243,7 @@ export default new Elysia({ prefix: "/governance" })
 					.where(
 						and(
 							eq(contentReviewCase.authority, query.realmId ? "realm" : "platform"),
-							query.realmId
-								? eq(contentReviewCase.realmId, query.realmId)
-								: undefined,
+							query.realmId ? eq(contentReviewCase.realmId, query.realmId) : undefined,
 							query.state ? eq(contentReviewCase.state, query.state) : undefined,
 						),
 					)
@@ -424,8 +415,7 @@ export default new Elysia({ prefix: "/governance" })
 						enforcementKind: body.kind,
 					})
 					.returning({ id: accountEnforcementAction.id });
-				if (!action)
-					throw new Error("Account enforcement action insertion returned no row");
+				if (!action) throw new Error("Account enforcement action insertion returned no row");
 				const notePostIds: string[] = [];
 				let publicNoticePostId: string | undefined;
 				for (const note of body.notes ?? []) {
@@ -519,8 +509,7 @@ export default new Elysia({ prefix: "/governance" })
 						reversesActionId: current.decisionActionId,
 					})
 					.returning({ id: accountEnforcementAction.id });
-				if (!action)
-					throw new Error("Account enforcement action insertion returned no row");
+				if (!action) throw new Error("Account enforcement action insertion returned no row");
 				const notePostIds: string[] = [];
 				let publicNoticePostId: string | undefined;
 				for (const note of body.notes ?? []) {

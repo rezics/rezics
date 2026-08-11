@@ -122,11 +122,7 @@ export const PopoverHeader = (props: PopoverHeaderProps) => {
 		>
 			{!!title && <PopoverTitle>{title}</PopoverTitle>}
 			{!!description && <PopoverDescription>{description}</PopoverDescription>}
-			{!title && typeof children === "string" ? (
-				<PopoverTitle>{children}</PopoverTitle>
-			) : (
-				children
-			)}
+			{!title && typeof children === "string" ? <PopoverTitle>{children}</PopoverTitle> : children}
 		</ark.div>
 	);
 };

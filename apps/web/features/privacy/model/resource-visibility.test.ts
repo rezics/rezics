@@ -26,9 +26,7 @@ describe("resource visibility", () => {
 	] as const)(
 		"resolves category %s and item %s to effective %s",
 		(categoryVisibility, itemVisibility, expected) => {
-			expect(resolveEffectiveResourceVisibility(categoryVisibility, itemVisibility)).toBe(
-				expected,
-			);
+			expect(resolveEffectiveResourceVisibility(categoryVisibility, itemVisibility)).toBe(expected);
 		},
 	);
 });

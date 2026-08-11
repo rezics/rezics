@@ -95,8 +95,7 @@ export function UnitScoreControl({
 	);
 	const realmOptions = useMemo(() => {
 		const defaultRealm = defaultScoreRealm.realm;
-		if (!defaultRealm || scoredRealms.some(({ id }) => id === defaultRealm.id))
-			return scoredRealms;
+		if (!defaultRealm || scoredRealms.some(({ id }) => id === defaultRealm.id)) return scoredRealms;
 		return [
 			{
 				...defaultRealm,
@@ -212,9 +211,7 @@ export function UnitScoreControl({
 							})}
 				</p>
 				<RequestFailure error={viewerScores.error} fallback={t.ui.retryLater} />
-				{dialogOpen ? null : (
-					<RequestFailure error={mutation.error} fallback={t.ui.retryLater} />
-				)}
+				{dialogOpen ? null : <RequestFailure error={mutation.error} fallback={t.ui.retryLater} />}
 			</div>
 
 			<Dialog
@@ -234,17 +231,13 @@ export function UnitScoreControl({
 									onChange={(realm) => {
 										setSelectedRealm(realm);
 										setDraftScore(realm.score);
-										setDraftVisibility(
-											realm.visibility ?? DefaultResourceVisibility,
-										);
+										setDraftVisibility(realm.visibility ?? DefaultResourceVisibility);
 										mutation.reset();
 									}}
 									options={realmOptions}
 									value={selectedRealm}
 								/>
-								{selectedRealm ? (
-									<RealmScoreContextLink realmId={selectedRealm.id} />
-								) : null}
+								{selectedRealm ? <RealmScoreContextLink realmId={selectedRealm.id} /> : null}
 							</div>
 							{selectedRealm ? (
 								<p className="text-sm text-muted-foreground">
@@ -256,9 +249,7 @@ export function UnitScoreControl({
 						</Field>
 						{selectedRealm?.score === undefined ? null : (
 							<Field>
-								<FieldLabel htmlFor="score-visibility">
-									{t.engagement.itemVisibility}
-								</FieldLabel>
+								<FieldLabel htmlFor="score-visibility">{t.engagement.itemVisibility}</FieldLabel>
 								<NativeSelect
 									id="score-visibility"
 									onChange={(event) => {
@@ -303,10 +294,7 @@ export function UnitScoreControl({
 								</span>
 							)}
 						</div>
-						<RequestFailure
-							error={defaultScoreRealm.error}
-							fallback={t.ui.retryLater}
-						/>
+						<RequestFailure error={defaultScoreRealm.error} fallback={t.ui.retryLater} />
 						<RequestFailure error={mutation.error} fallback={t.ui.retryLater} />
 					</DialogBody>
 					<DialogFooter>
@@ -318,12 +306,7 @@ export function UnitScoreControl({
 							isLoading={mutation.isPending}
 							onClick={() => {
 								if (selectedRealm && draftScore !== undefined)
-									void saveScore(
-										selectedRealm,
-										draftScore,
-										draftVisibility,
-										true,
-									);
+									void saveScore(selectedRealm, draftScore, draftVisibility, true);
 							}}
 							variant="solid"
 						>

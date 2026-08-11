@@ -3372,8 +3372,7 @@ export function usePostApiUnitByUnitIdAssociationProposalsInvitations<TContext>(
 	const { mutation = {}, client: config = {} } = options ?? {};
 	const { client: queryClient, ...mutationOptions } = mutation;
 	const mutationKey =
-		mutationOptions.mutationKey ??
-		postApiUnitByUnitIdAssociationProposalsInvitationsMutationKey();
+		mutationOptions.mutationKey ?? postApiUnitByUnitIdAssociationProposalsInvitationsMutationKey();
 
 	const baseOptions = postApiUnitByUnitIdAssociationProposalsInvitationsMutationOptions(
 		config,
@@ -3898,9 +3897,7 @@ export function headApiHealthQueryOptions(
 	const queryKey = headApiHealthQueryKey();
 	return queryOptions<
 		HeadApiHealthStatus204,
-		ResponseErrorConfig<
-			HeadApiHealthStatus422 | HeadApiHealthStatus429 | HeadApiHealthStatus500
-		>,
+		ResponseErrorConfig<HeadApiHealthStatus422 | HeadApiHealthStatus429 | HeadApiHealthStatus500>,
 		HeadApiHealthStatus204,
 		typeof queryKey
 	>({
@@ -3953,9 +3950,7 @@ export function useHeadApiHealth<
 		queryClient,
 	) as UseQueryResult<
 		TData,
-		ResponseErrorConfig<
-			HeadApiHealthStatus422 | HeadApiHealthStatus429 | HeadApiHealthStatus500
-		>
+		ResponseErrorConfig<HeadApiHealthStatus422 | HeadApiHealthStatus429 | HeadApiHealthStatus500>
 	> & { queryKey: TQueryKey };
 
 	queryResult.queryKey = queryKey as TQueryKey;
@@ -4171,8 +4166,7 @@ export function useGetApiNotificationsUnreadCount<
 			QueryObserverOptions<
 				GetApiNotificationsUnreadCountStatus200,
 				ResponseErrorConfig<
-					| GetApiNotificationsUnreadCountStatus429
-					| GetApiNotificationsUnreadCountStatus500
+					GetApiNotificationsUnreadCountStatus429 | GetApiNotificationsUnreadCountStatus500
 				>,
 				TData,
 				TQueryData,
@@ -4545,8 +4539,7 @@ export function useGetApiNotificationsPreferences<
 			QueryObserverOptions<
 				GetApiNotificationsPreferencesStatus200,
 				ResponseErrorConfig<
-					| GetApiNotificationsPreferencesStatus429
-					| GetApiNotificationsPreferencesStatus500
+					GetApiNotificationsPreferencesStatus429 | GetApiNotificationsPreferencesStatus500
 				>,
 				TData,
 				TQueryData,
@@ -4944,8 +4937,7 @@ export function useGetApiRecommendationsUnits<
 	const { query: queryConfig = {}, client: config = {} } = options ?? {};
 	const { client: queryClient, ...resolvedOptions } = queryConfig;
 	const resolvedParams = { query: typeof query === "function" ? query() : query };
-	const queryKey =
-		resolvedOptions?.queryKey ?? getApiRecommendationsUnitsQueryKey(resolvedParams);
+	const queryKey = resolvedOptions?.queryKey ?? getApiRecommendationsUnitsQueryKey(resolvedParams);
 
 	const queryResult = useQuery(
 		{
@@ -5469,8 +5461,7 @@ export function useGetApiMessagesConversations<
 	const { query: queryConfig = {}, client: config = {} } = options ?? {};
 	const { client: queryClient, ...resolvedOptions } = queryConfig;
 	const resolvedParams = { query: typeof query === "function" ? query() : query };
-	const queryKey =
-		resolvedOptions?.queryKey ?? getApiMessagesConversationsQueryKey(resolvedParams);
+	const queryKey = resolvedOptions?.queryKey ?? getApiMessagesConversationsQueryKey(resolvedParams);
 
 	const queryResult = useQuery(
 		{
@@ -5801,10 +5792,7 @@ export function useGetApiMessagesConversationsByConversationIdMessages<
 
 	const queryResult = useQuery(
 		{
-			...getApiMessagesConversationsByConversationIdMessagesQueryOptions(
-				resolvedParams,
-				config,
-			),
+			...getApiMessagesConversationsByConversationIdMessagesQueryOptions(resolvedParams, config),
 			...resolvedOptions,
 			queryKey,
 		} as unknown as QueryObserverOptions,
@@ -6792,9 +6780,7 @@ export function useGetCurrentApiToken<
 			QueryObserverOptions<
 				GetCurrentApiTokenStatus200,
 				ResponseErrorConfig<
-					| GetCurrentApiTokenStatus401
-					| GetCurrentApiTokenStatus429
-					| GetCurrentApiTokenStatus500
+					GetCurrentApiTokenStatus401 | GetCurrentApiTokenStatus429 | GetCurrentApiTokenStatus500
 				>,
 				TData,
 				TQueryData,
@@ -7070,8 +7056,7 @@ export function usePutApiApiQuotaPoliciesByPolicyKey<TContext>(
 ) {
 	const { mutation = {}, client: config = {} } = options ?? {};
 	const { client: queryClient, ...mutationOptions } = mutation;
-	const mutationKey =
-		mutationOptions.mutationKey ?? putApiApiQuotaPoliciesByPolicyKeyMutationKey();
+	const mutationKey = mutationOptions.mutationKey ?? putApiApiQuotaPoliciesByPolicyKeyMutationKey();
 
 	const baseOptions = putApiApiQuotaPoliciesByPolicyKeyMutationOptions(
 		config,
@@ -8384,8 +8369,7 @@ export function useGetApiReportsPlatformCases<
 	const { query: queryConfig = {}, client: config = {} } = options ?? {};
 	const { client: queryClient, ...resolvedOptions } = queryConfig;
 	const resolvedParams = { query: typeof query === "function" ? query() : query };
-	const queryKey =
-		resolvedOptions?.queryKey ?? getApiReportsPlatformCasesQueryKey(resolvedParams);
+	const queryKey = resolvedOptions?.queryKey ?? getApiReportsPlatformCasesQueryKey(resolvedParams);
 
 	const queryResult = useQuery(
 		{
@@ -9629,13 +9613,12 @@ export function postApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcce
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } =
-				await postApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAccept({
-					...config,
-					path,
-					body,
-					throwOnError: true,
-				});
+			const { data } = await postApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAccept({
+				...config,
+				path,
+				body,
+				throwOnError: true,
+			});
 			return data;
 		},
 	});
@@ -9738,13 +9721,12 @@ export function postApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDecl
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } =
-				await postApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDecline({
-					...config,
-					path,
-					body,
-					throwOnError: true,
-				});
+			const { data } = await postApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDecline({
+				...config,
+				path,
+				body,
+				throwOnError: true,
+			});
 			return data;
 		},
 	});
@@ -9883,21 +9865,20 @@ export function useDeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationI
 		mutationOptions.mutationKey ??
 		deleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdMutationKey();
 
-	const baseOptions =
-		deleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdMutationOptions(
-			config,
-		) as UseMutationOptions<
-			DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdStatus204,
-			ResponseErrorConfig<
-				| DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdStatus403
-				| DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdStatus404
-				| DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdStatus409
-				| DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdStatus422
-				| DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdStatus500
-			>,
-			DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdOptions,
-			TContext
-		>;
+	const baseOptions = deleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdMutationOptions(
+		config,
+	) as UseMutationOptions<
+		DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdStatus204,
+		ResponseErrorConfig<
+			| DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdStatus403
+			| DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdStatus404
+			| DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdStatus409
+			| DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdStatus422
+			| DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdStatus500
+		>,
+		DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdOptions,
+		TContext
+	>;
 
 	return useMutation<
 		DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdStatus204,
@@ -10552,8 +10533,7 @@ export function useGetApiGovernancePlatformOwnershipClaims<
 	const { client: queryClient, ...resolvedOptions } = queryConfig;
 	const resolvedParams = { query: typeof query === "function" ? query() : query };
 	const queryKey =
-		resolvedOptions?.queryKey ??
-		getApiGovernancePlatformOwnershipClaimsQueryKey(resolvedParams);
+		resolvedOptions?.queryKey ?? getApiGovernancePlatformOwnershipClaimsQueryKey(resolvedParams);
 
 	const queryResult = useQuery(
 		{
@@ -10845,9 +10825,7 @@ export function usePatchApiGovernanceNotesByPostId<TContext>(
 	const { client: queryClient, ...mutationOptions } = mutation;
 	const mutationKey = mutationOptions.mutationKey ?? patchApiGovernanceNotesByPostIdMutationKey();
 
-	const baseOptions = patchApiGovernanceNotesByPostIdMutationOptions(
-		config,
-	) as UseMutationOptions<
+	const baseOptions = patchApiGovernanceNotesByPostIdMutationOptions(config) as UseMutationOptions<
 		PatchApiGovernanceNotesByPostIdStatus200,
 		ResponseErrorConfig<
 			| PatchApiGovernanceNotesByPostIdStatus400
@@ -11071,8 +11049,7 @@ export function useGetApiGovernanceContentReviewCasesByCaseId<
 	const { client: queryClient, ...resolvedOptions } = queryConfig;
 	const resolvedParams = { path: typeof path === "function" ? path() : path };
 	const queryKey =
-		resolvedOptions?.queryKey ??
-		getApiGovernanceContentReviewCasesByCaseIdQueryKey(resolvedParams);
+		resolvedOptions?.queryKey ?? getApiGovernanceContentReviewCasesByCaseIdQueryKey(resolvedParams);
 
 	const queryResult = useQuery(
 		{
@@ -11720,10 +11697,7 @@ export const getApiSeriesBySeriesIdReleasesQueryKey = ({
 	path,
 	query,
 }: Omit<GetApiSeriesBySeriesIdReleasesOptions, "headers">) =>
-	[
-		{ url: "/api/v1/series/:seriesId/releases", params: path },
-		...(query ? [query] : []),
-	] as const;
+	[{ url: "/api/v1/series/:seriesId/releases", params: path }, ...(query ? [query] : [])] as const;
 
 type GetApiSeriesBySeriesIdReleasesQueryKey = ReturnType<
 	typeof getApiSeriesBySeriesIdReleasesQueryKey
@@ -11954,9 +11928,7 @@ export function getApiZonesByZoneIdQueryOptions(
 	return queryOptions<
 		GetApiZonesByZoneIdStatus200,
 		ResponseErrorConfig<
-			| GetApiZonesByZoneIdStatus404
-			| GetApiZonesByZoneIdStatus422
-			| GetApiZonesByZoneIdStatus500
+			GetApiZonesByZoneIdStatus404 | GetApiZonesByZoneIdStatus422 | GetApiZonesByZoneIdStatus500
 		>,
 		GetApiZonesByZoneIdStatus200,
 		typeof queryKey
@@ -11996,9 +11968,7 @@ export function useGetApiZonesByZoneId<
 			QueryObserverOptions<
 				GetApiZonesByZoneIdStatus200,
 				ResponseErrorConfig<
-					| GetApiZonesByZoneIdStatus404
-					| GetApiZonesByZoneIdStatus422
-					| GetApiZonesByZoneIdStatus500
+					GetApiZonesByZoneIdStatus404 | GetApiZonesByZoneIdStatus422 | GetApiZonesByZoneIdStatus500
 				>,
 				TData,
 				TQueryData,
@@ -12026,9 +11996,7 @@ export function useGetApiZonesByZoneId<
 	) as UseQueryResult<
 		TData,
 		ResponseErrorConfig<
-			| GetApiZonesByZoneIdStatus404
-			| GetApiZonesByZoneIdStatus422
-			| GetApiZonesByZoneIdStatus500
+			GetApiZonesByZoneIdStatus404 | GetApiZonesByZoneIdStatus422 | GetApiZonesByZoneIdStatus500
 		>
 	> & { queryKey: TQueryKey };
 
@@ -12193,9 +12161,7 @@ export function useGetZoneRenderProjection<
 		path,
 		query,
 	}: {
-		path:
-			| GetZoneRenderProjectionOptions["path"]
-			| (() => GetZoneRenderProjectionOptions["path"]);
+		path: GetZoneRenderProjectionOptions["path"] | (() => GetZoneRenderProjectionOptions["path"]);
 		query?:
 			| GetZoneRenderProjectionOptions["query"]
 			| (() => GetZoneRenderProjectionOptions["query"]);
@@ -12480,9 +12446,7 @@ export function useGetApiZonesByZoneIdPages<
 	{
 		path,
 	}: {
-		path:
-			| GetApiZonesByZoneIdPagesOptions["path"]
-			| (() => GetApiZonesByZoneIdPagesOptions["path"]);
+		path: GetApiZonesByZoneIdPagesOptions["path"] | (() => GetApiZonesByZoneIdPagesOptions["path"]);
 	},
 	options: {
 		query?: Partial<
@@ -12795,12 +12759,9 @@ export function usePutApiZonesByZoneIdPagesByPageId<TContext>(
 ) {
 	const { mutation = {}, client: config = {} } = options ?? {};
 	const { client: queryClient, ...mutationOptions } = mutation;
-	const mutationKey =
-		mutationOptions.mutationKey ?? putApiZonesByZoneIdPagesByPageIdMutationKey();
+	const mutationKey = mutationOptions.mutationKey ?? putApiZonesByZoneIdPagesByPageIdMutationKey();
 
-	const baseOptions = putApiZonesByZoneIdPagesByPageIdMutationOptions(
-		config,
-	) as UseMutationOptions<
+	const baseOptions = putApiZonesByZoneIdPagesByPageIdMutationOptions(config) as UseMutationOptions<
 		PutApiZonesByZoneIdPagesByPageIdStatus200,
 		ResponseErrorConfig<
 			| PutApiZonesByZoneIdPagesByPageIdStatus400
@@ -14305,21 +14266,20 @@ export function useDeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementI
 		mutationOptions.mutationKey ??
 		deleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdMutationKey();
 
-	const baseOptions =
-		deleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdMutationOptions(
-			config,
-		) as UseMutationOptions<
-			DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus204,
-			ResponseErrorConfig<
-				| DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus403
-				| DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus404
-				| DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus422
-				| DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus429
-				| DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus500
-			>,
-			DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdOptions,
-			TContext
-		>;
+	const baseOptions = deleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdMutationOptions(
+		config,
+	) as UseMutationOptions<
+		DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus204,
+		ResponseErrorConfig<
+			| DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus403
+			| DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus404
+			| DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus422
+			| DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus429
+			| DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus500
+		>,
+		DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdOptions,
+		TContext
+	>;
 
 	return useMutation<
 		DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus204,
@@ -14900,8 +14860,7 @@ export const postApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestoreMuta
 export function postApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestoreMutationOptions<
 	TContext = unknown,
 >(config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {}) {
-	const mutationKey =
-		postApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestoreMutationKey();
+	const mutationKey = postApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestoreMutationKey();
 	return mutationOptions<
 		PostApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestoreStatus200,
 		ResponseErrorConfig<
@@ -15055,9 +15014,7 @@ export function useGetApiUsersMe<
 	TQueryData = GetApiUsersMeStatus200,
 	TQueryKey extends QueryKey = GetApiUsersMeQueryKey,
 >(
-	{
-		query,
-	}: { query?: GetApiUsersMeOptions["query"] | (() => GetApiUsersMeOptions["query"]) } = {},
+	{ query }: { query?: GetApiUsersMeOptions["query"] | (() => GetApiUsersMeOptions["query"]) } = {},
 	options: {
 		query?: Partial<
 			QueryObserverOptions<
@@ -15951,9 +15908,7 @@ export function useGetApiUsersMeFollowing<
 	{
 		query,
 	}: {
-		query?:
-			| GetApiUsersMeFollowingOptions["query"]
-			| (() => GetApiUsersMeFollowingOptions["query"]);
+		query?: GetApiUsersMeFollowingOptions["query"] | (() => GetApiUsersMeFollowingOptions["query"]);
 	} = {},
 	options: {
 		query?: Partial<
@@ -16251,8 +16206,7 @@ export function useDeleteApiUsersMeFollowingByUnitId<TContext>(
 ) {
 	const { mutation = {}, client: config = {} } = options ?? {};
 	const { client: queryClient, ...mutationOptions } = mutation;
-	const mutationKey =
-		mutationOptions.mutationKey ?? deleteApiUsersMeFollowingByUnitIdMutationKey();
+	const mutationKey = mutationOptions.mutationKey ?? deleteApiUsersMeFollowingByUnitIdMutationKey();
 
 	const baseOptions = deleteApiUsersMeFollowingByUnitIdMutationOptions(
 		config,
@@ -16350,12 +16304,9 @@ export function usePatchApiUsersMeFollowingByUnitId<TContext>(
 ) {
 	const { mutation = {}, client: config = {} } = options ?? {};
 	const { client: queryClient, ...mutationOptions } = mutation;
-	const mutationKey =
-		mutationOptions.mutationKey ?? patchApiUsersMeFollowingByUnitIdMutationKey();
+	const mutationKey = mutationOptions.mutationKey ?? patchApiUsersMeFollowingByUnitIdMutationKey();
 
-	const baseOptions = patchApiUsersMeFollowingByUnitIdMutationOptions(
-		config,
-	) as UseMutationOptions<
+	const baseOptions = patchApiUsersMeFollowingByUnitIdMutationOptions(config) as UseMutationOptions<
 		PatchApiUsersMeFollowingByUnitIdStatus200,
 		ResponseErrorConfig<
 			| PatchApiUsersMeFollowingByUnitIdStatus400
@@ -16561,9 +16512,7 @@ export function useGetUserProfileActivity<
 		query,
 	}: {
 		path: GetUserProfileActivityOptions["path"] | (() => GetUserProfileActivityOptions["path"]);
-		query?:
-			| GetUserProfileActivityOptions["query"]
-			| (() => GetUserProfileActivityOptions["query"]);
+		query?: GetUserProfileActivityOptions["query"] | (() => GetUserProfileActivityOptions["query"]);
 	},
 	options: {
 		query?: Partial<
@@ -16964,9 +16913,7 @@ export function getApiPlatformAccessPolicyQueryOptions(
 	const queryKey = getApiPlatformAccessPolicyQueryKey();
 	return queryOptions<
 		GetApiPlatformAccessPolicyStatus200,
-		ResponseErrorConfig<
-			GetApiPlatformAccessPolicyStatus403 | GetApiPlatformAccessPolicyStatus500
-		>,
+		ResponseErrorConfig<GetApiPlatformAccessPolicyStatus403 | GetApiPlatformAccessPolicyStatus500>,
 		GetApiPlatformAccessPolicyStatus200,
 		typeof queryKey
 	>({
@@ -17019,9 +16966,7 @@ export function useGetApiPlatformAccessPolicy<
 		queryClient,
 	) as UseQueryResult<
 		TData,
-		ResponseErrorConfig<
-			GetApiPlatformAccessPolicyStatus403 | GetApiPlatformAccessPolicyStatus500
-		>
+		ResponseErrorConfig<GetApiPlatformAccessPolicyStatus403 | GetApiPlatformAccessPolicyStatus500>
 	> & { queryKey: TQueryKey };
 
 	queryResult.queryKey = queryKey as TQueryKey;
@@ -17200,8 +17145,7 @@ export function useGetApiPlatformAccessProfilesByProfileId<
 	const { client: queryClient, ...resolvedOptions } = queryConfig;
 	const resolvedParams = { path: typeof path === "function" ? path() : path };
 	const queryKey =
-		resolvedOptions?.queryKey ??
-		getApiPlatformAccessProfilesByProfileIdQueryKey(resolvedParams);
+		resolvedOptions?.queryKey ?? getApiPlatformAccessProfilesByProfileIdQueryKey(resolvedParams);
 
 	const queryResult = useQuery(
 		{
@@ -17508,8 +17452,7 @@ export function useGetApiPlatformUsersByUserId<
 	const { query: queryConfig = {}, client: config = {} } = options ?? {};
 	const { client: queryClient, ...resolvedOptions } = queryConfig;
 	const resolvedParams = { path: typeof path === "function" ? path() : path };
-	const queryKey =
-		resolvedOptions?.queryKey ?? getApiPlatformUsersByUserIdQueryKey(resolvedParams);
+	const queryKey = resolvedOptions?.queryKey ?? getApiPlatformUsersByUserIdQueryKey(resolvedParams);
 
 	const queryResult = useQuery(
 		{
@@ -17911,8 +17854,7 @@ export function useDeleteApiPlatformUsersByUserIdSessionsBySessionId<TContext>(
 	const { mutation = {}, client: config = {} } = options ?? {};
 	const { client: queryClient, ...mutationOptions } = mutation;
 	const mutationKey =
-		mutationOptions.mutationKey ??
-		deleteApiPlatformUsersByUserIdSessionsBySessionIdMutationKey();
+		mutationOptions.mutationKey ?? deleteApiPlatformUsersByUserIdSessionsBySessionIdMutationKey();
 
 	const baseOptions = deleteApiPlatformUsersByUserIdSessionsBySessionIdMutationOptions(
 		config,
@@ -18047,8 +17989,7 @@ export function useGetApiTagsByTagIdHierarchy<
 		path: typeof path === "function" ? path() : path,
 		query: typeof query === "function" ? query() : query,
 	};
-	const queryKey =
-		resolvedOptions?.queryKey ?? getApiTagsByTagIdHierarchyQueryKey(resolvedParams);
+	const queryKey = resolvedOptions?.queryKey ?? getApiTagsByTagIdHierarchyQueryKey(resolvedParams);
 
 	const queryResult = useQuery(
 		{
@@ -18353,12 +18294,9 @@ export function usePutApiTagStructuresByStructureId<TContext>(
 ) {
 	const { mutation = {}, client: config = {} } = options ?? {};
 	const { client: queryClient, ...mutationOptions } = mutation;
-	const mutationKey =
-		mutationOptions.mutationKey ?? putApiTagStructuresByStructureIdMutationKey();
+	const mutationKey = mutationOptions.mutationKey ?? putApiTagStructuresByStructureIdMutationKey();
 
-	const baseOptions = putApiTagStructuresByStructureIdMutationOptions(
-		config,
-	) as UseMutationOptions<
+	const baseOptions = putApiTagStructuresByStructureIdMutationOptions(config) as UseMutationOptions<
 		PutApiTagStructuresByStructureIdStatus200,
 		ResponseErrorConfig<
 			| PutApiTagStructuresByStructureIdStatus400
@@ -18784,8 +18722,7 @@ export function usePutApiUnitsByTypeByUnitIdTagStructuresByStructureId<TContext>
 	const { mutation = {}, client: config = {} } = options ?? {};
 	const { client: queryClient, ...mutationOptions } = mutation;
 	const mutationKey =
-		mutationOptions.mutationKey ??
-		putApiUnitsByTypeByUnitIdTagStructuresByStructureIdMutationKey();
+		mutationOptions.mutationKey ?? putApiUnitsByTypeByUnitIdTagStructuresByStructureIdMutationKey();
 
 	const baseOptions = putApiUnitsByTypeByUnitIdTagStructuresByStructureIdMutationOptions(
 		config,
@@ -19598,9 +19535,7 @@ export function useGetPublicUnitSlugAddress<
 	{
 		path,
 	}: {
-		path:
-			| GetPublicUnitSlugAddressOptions["path"]
-			| (() => GetPublicUnitSlugAddressOptions["path"]);
+		path: GetPublicUnitSlugAddressOptions["path"] | (() => GetPublicUnitSlugAddressOptions["path"]);
 	},
 	options: {
 		query?: Partial<
@@ -20283,8 +20218,7 @@ export function useGetPublicUnitSeoProjection<
 		path: typeof path === "function" ? path() : path,
 		query: typeof query === "function" ? query() : query,
 	};
-	const queryKey =
-		resolvedOptions?.queryKey ?? getPublicUnitSeoProjectionQueryKey(resolvedParams);
+	const queryKey = resolvedOptions?.queryKey ?? getPublicUnitSeoProjectionQueryKey(resolvedParams);
 
 	const queryResult = useQuery(
 		{
@@ -20490,8 +20424,7 @@ export function useGetApiUnitsByIdByUnitIdRealmPublications<
 		query: typeof query === "function" ? query() : query,
 	};
 	const queryKey =
-		resolvedOptions?.queryKey ??
-		getApiUnitsByIdByUnitIdRealmPublicationsQueryKey(resolvedParams);
+		resolvedOptions?.queryKey ?? getApiUnitsByIdByUnitIdRealmPublicationsQueryKey(resolvedParams);
 
 	const queryResult = useQuery(
 		{
@@ -20574,8 +20507,7 @@ export function usePostApiUnitsByIdByUnitIdRealmPublicationsByRealmId<TContext>(
 	const { mutation = {}, client: config = {} } = options ?? {};
 	const { client: queryClient, ...mutationOptions } = mutation;
 	const mutationKey =
-		mutationOptions.mutationKey ??
-		postApiUnitsByIdByUnitIdRealmPublicationsByRealmIdMutationKey();
+		mutationOptions.mutationKey ?? postApiUnitsByIdByUnitIdRealmPublicationsByRealmIdMutationKey();
 
 	const baseOptions = postApiUnitsByIdByUnitIdRealmPublicationsByRealmIdMutationOptions(
 		config,
@@ -20933,8 +20865,7 @@ export function useGetApiUnitsByIdByUnitIdSeriesMemberships<
 		query: typeof query === "function" ? query() : query,
 	};
 	const queryKey =
-		resolvedOptions?.queryKey ??
-		getApiUnitsByIdByUnitIdSeriesMembershipsQueryKey(resolvedParams);
+		resolvedOptions?.queryKey ?? getApiUnitsByIdByUnitIdSeriesMembershipsQueryKey(resolvedParams);
 
 	const queryResult = useQuery(
 		{
@@ -21143,8 +21074,7 @@ export function useGetApiUnitsByIdByUnitIdLocalizationOrder<
 	const { client: queryClient, ...resolvedOptions } = queryConfig;
 	const resolvedParams = { path: typeof path === "function" ? path() : path };
 	const queryKey =
-		resolvedOptions?.queryKey ??
-		getApiUnitsByIdByUnitIdLocalizationOrderQueryKey(resolvedParams);
+		resolvedOptions?.queryKey ?? getApiUnitsByIdByUnitIdLocalizationOrderQueryKey(resolvedParams);
 
 	const queryResult = useQuery(
 		{
@@ -21344,8 +21274,7 @@ export function useDeleteApiUnitsByIdByUnitIdLocalizationsByLanguage<TContext>(
 	const { mutation = {}, client: config = {} } = options ?? {};
 	const { client: queryClient, ...mutationOptions } = mutation;
 	const mutationKey =
-		mutationOptions.mutationKey ??
-		deleteApiUnitsByIdByUnitIdLocalizationsByLanguageMutationKey();
+		mutationOptions.mutationKey ?? deleteApiUnitsByIdByUnitIdLocalizationsByLanguageMutationKey();
 
 	const baseOptions = deleteApiUnitsByIdByUnitIdLocalizationsByLanguageMutationOptions(
 		config,
@@ -21459,9 +21388,7 @@ export function useGetApiUnitsByType<
 			QueryObserverOptions<
 				GetApiUnitsByTypeStatus200,
 				ResponseErrorConfig<
-					| GetApiUnitsByTypeStatus400
-					| GetApiUnitsByTypeStatus422
-					| GetApiUnitsByTypeStatus500
+					GetApiUnitsByTypeStatus400 | GetApiUnitsByTypeStatus422 | GetApiUnitsByTypeStatus500
 				>,
 				TData,
 				TQueryData,
@@ -22134,8 +22061,7 @@ export function usePutApiUnitsByTypeByUnitIdLocalizationsByLanguage<TContext>(
 	const { mutation = {}, client: config = {} } = options ?? {};
 	const { client: queryClient, ...mutationOptions } = mutation;
 	const mutationKey =
-		mutationOptions.mutationKey ??
-		putApiUnitsByTypeByUnitIdLocalizationsByLanguageMutationKey();
+		mutationOptions.mutationKey ?? putApiUnitsByTypeByUnitIdLocalizationsByLanguageMutationKey();
 
 	const baseOptions = putApiUnitsByTypeByUnitIdLocalizationsByLanguageMutationOptions(
 		config,
@@ -22800,8 +22726,7 @@ export function usePatchApiHistoryUnitRevisionsByRevisionIdVisibility<TContext>(
 	const { mutation = {}, client: config = {} } = options ?? {};
 	const { client: queryClient, ...mutationOptions } = mutation;
 	const mutationKey =
-		mutationOptions.mutationKey ??
-		patchApiHistoryUnitRevisionsByRevisionIdVisibilityMutationKey();
+		mutationOptions.mutationKey ?? patchApiHistoryUnitRevisionsByRevisionIdVisibilityMutationKey();
 
 	const baseOptions = patchApiHistoryUnitRevisionsByRevisionIdVisibilityMutationOptions(
 		config,
@@ -22927,8 +22852,7 @@ export function useGetApiHistoryRecentChanges<
 	const { query: queryConfig = {}, client: config = {} } = options ?? {};
 	const { client: queryClient, ...resolvedOptions } = queryConfig;
 	const resolvedParams = { query: typeof query === "function" ? query() : query };
-	const queryKey =
-		resolvedOptions?.queryKey ?? getApiHistoryRecentChangesQueryKey(resolvedParams);
+	const queryKey = resolvedOptions?.queryKey ?? getApiHistoryRecentChangesQueryKey(resolvedParams);
 
 	const queryResult = useQuery(
 		{
@@ -23367,9 +23291,7 @@ export function useGetApiEntitiesByUnitId<
 		query,
 	}: {
 		path: GetApiEntitiesByUnitIdOptions["path"] | (() => GetApiEntitiesByUnitIdOptions["path"]);
-		query?:
-			| GetApiEntitiesByUnitIdOptions["query"]
-			| (() => GetApiEntitiesByUnitIdOptions["query"]);
+		query?: GetApiEntitiesByUnitIdOptions["query"] | (() => GetApiEntitiesByUnitIdOptions["query"]);
 	},
 	options: {
 		query?: Partial<
@@ -23609,10 +23531,7 @@ export function postApiTagsMutationOptions<TContext = unknown>(
 	return mutationOptions<
 		PostApiTagsStatus200,
 		ResponseErrorConfig<
-			| PostApiTagsStatus400
-			| PostApiTagsStatus422
-			| PostApiTagsStatus429
-			| PostApiTagsStatus500
+			PostApiTagsStatus400 | PostApiTagsStatus422 | PostApiTagsStatus429 | PostApiTagsStatus500
 		>,
 		PostApiTagsOptions,
 		TContext
@@ -23634,10 +23553,7 @@ export function usePostApiTags<TContext>(
 		mutation?: UseMutationOptions<
 			PostApiTagsStatus200,
 			ResponseErrorConfig<
-				| PostApiTagsStatus400
-				| PostApiTagsStatus422
-				| PostApiTagsStatus429
-				| PostApiTagsStatus500
+				PostApiTagsStatus400 | PostApiTagsStatus422 | PostApiTagsStatus429 | PostApiTagsStatus500
 			>,
 			PostApiTagsOptions,
 			TContext
@@ -23652,10 +23568,7 @@ export function usePostApiTags<TContext>(
 	const baseOptions = postApiTagsMutationOptions(config) as UseMutationOptions<
 		PostApiTagsStatus200,
 		ResponseErrorConfig<
-			| PostApiTagsStatus400
-			| PostApiTagsStatus422
-			| PostApiTagsStatus429
-			| PostApiTagsStatus500
+			PostApiTagsStatus400 | PostApiTagsStatus422 | PostApiTagsStatus429 | PostApiTagsStatus500
 		>,
 		PostApiTagsOptions,
 		TContext
@@ -23664,10 +23577,7 @@ export function usePostApiTags<TContext>(
 	return useMutation<
 		PostApiTagsStatus200,
 		ResponseErrorConfig<
-			| PostApiTagsStatus400
-			| PostApiTagsStatus422
-			| PostApiTagsStatus429
-			| PostApiTagsStatus500
+			PostApiTagsStatus400 | PostApiTagsStatus422 | PostApiTagsStatus429 | PostApiTagsStatus500
 		>,
 		PostApiTagsOptions,
 		TContext
@@ -23681,10 +23591,7 @@ export function usePostApiTags<TContext>(
 	) as UseMutationResult<
 		PostApiTagsStatus200,
 		ResponseErrorConfig<
-			| PostApiTagsStatus400
-			| PostApiTagsStatus422
-			| PostApiTagsStatus429
-			| PostApiTagsStatus500
+			PostApiTagsStatus400 | PostApiTagsStatus422 | PostApiTagsStatus429 | PostApiTagsStatus500
 		>,
 		PostApiTagsOptions,
 		TContext
@@ -23747,9 +23654,7 @@ export function useGetApiTagsByTagId<
 			QueryObserverOptions<
 				GetApiTagsByTagIdStatus200,
 				ResponseErrorConfig<
-					| GetApiTagsByTagIdStatus404
-					| GetApiTagsByTagIdStatus422
-					| GetApiTagsByTagIdStatus500
+					GetApiTagsByTagIdStatus404 | GetApiTagsByTagIdStatus422 | GetApiTagsByTagIdStatus500
 				>,
 				TData,
 				TQueryData,
@@ -24067,8 +23972,7 @@ export function usePostApiUnitsByTypeByUnitIdAliases<TContext>(
 ) {
 	const { mutation = {}, client: config = {} } = options ?? {};
 	const { client: queryClient, ...mutationOptions } = mutation;
-	const mutationKey =
-		mutationOptions.mutationKey ?? postApiUnitsByTypeByUnitIdAliasesMutationKey();
+	const mutationKey = mutationOptions.mutationKey ?? postApiUnitsByTypeByUnitIdAliasesMutationKey();
 
 	const baseOptions = postApiUnitsByTypeByUnitIdAliasesMutationOptions(
 		config,
@@ -24288,8 +24192,7 @@ export function useDeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVote<TContext>(
 	const { mutation = {}, client: config = {} } = options ?? {};
 	const { client: queryClient, ...mutationOptions } = mutation;
 	const mutationKey =
-		mutationOptions.mutationKey ??
-		deleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteMutationKey();
+		mutationOptions.mutationKey ?? deleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteMutationKey();
 
 	const baseOptions = deleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteMutationOptions(
 		config,
@@ -24731,21 +24634,20 @@ export function useDeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationId
 		mutationOptions.mutationKey ??
 		deleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdMutationKey();
 
-	const baseOptions =
-		deleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdMutationOptions(
-			config,
-		) as UseMutationOptions<
-			DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus204,
-			ResponseErrorConfig<
-				| DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus403
-				| DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus404
-				| DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus422
-				| DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus429
-				| DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus500
-			>,
-			DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdOptions,
-			TContext
-		>;
+	const baseOptions = deleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdMutationOptions(
+		config,
+	) as UseMutationOptions<
+		DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus204,
+		ResponseErrorConfig<
+			| DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus403
+			| DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus404
+			| DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus422
+			| DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus429
+			| DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus500
+		>,
+		DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdOptions,
+		TContext
+	>;
 
 	return useMutation<
 		DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus204,
@@ -24947,21 +24849,20 @@ export function useDeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationI
 		mutationOptions.mutationKey ??
 		deleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdMutationKey();
 
-	const baseOptions =
-		deleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdMutationOptions(
-			config,
-		) as UseMutationOptions<
-			DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus204,
-			ResponseErrorConfig<
-				| DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus403
-				| DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus404
-				| DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus422
-				| DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus429
-				| DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus500
-			>,
-			DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdOptions,
-			TContext
-		>;
+	const baseOptions = deleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdMutationOptions(
+		config,
+	) as UseMutationOptions<
+		DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus204,
+		ResponseErrorConfig<
+			| DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus403
+			| DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus404
+			| DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus422
+			| DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus429
+			| DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus500
+		>,
+		DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdOptions,
+		TContext
+	>;
 
 	return useMutation<
 		DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus204,
@@ -25394,21 +25295,20 @@ export function useDeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVote
 		mutationOptions.mutationKey ??
 		deleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteMutationKey();
 
-	const baseOptions =
-		deleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteMutationOptions(
-			config,
-		) as UseMutationOptions<
-			DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus200,
-			ResponseErrorConfig<
-				| DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus403
-				| DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus404
-				| DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus422
-				| DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus429
-				| DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus500
-			>,
-			DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteOptions,
-			TContext
-		>;
+	const baseOptions = deleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteMutationOptions(
+		config,
+	) as UseMutationOptions<
+		DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus200,
+		ResponseErrorConfig<
+			| DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus403
+			| DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus404
+			| DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus422
+			| DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus429
+			| DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus500
+		>,
+		DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteOptions,
+		TContext
+	>;
 
 	return useMutation<
 		DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteStatus200,
@@ -26288,8 +26188,7 @@ export function useGetApiUnitsByIdByUnitIdContentStructures<
 	const { client: queryClient, ...resolvedOptions } = queryConfig;
 	const resolvedParams = { path: typeof path === "function" ? path() : path };
 	const queryKey =
-		resolvedOptions?.queryKey ??
-		getApiUnitsByIdByUnitIdContentStructuresQueryKey(resolvedParams);
+		resolvedOptions?.queryKey ?? getApiUnitsByIdByUnitIdContentStructuresQueryKey(resolvedParams);
 
 	const queryResult = useQuery(
 		{
@@ -26499,10 +26398,7 @@ export function useGetApiUnitsByIdByUnitIdContentStructuresByStructureId<
 
 	const queryResult = useQuery(
 		{
-			...getApiUnitsByIdByUnitIdContentStructuresByStructureIdQueryOptions(
-				resolvedParams,
-				config,
-			),
+			...getApiUnitsByIdByUnitIdContentStructuresByStructureIdQueryOptions(resolvedParams, config),
 			...resolvedOptions,
 			queryKey,
 		} as unknown as QueryObserverOptions,
@@ -26785,9 +26681,12 @@ export function postApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsB
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
 			const { data } =
-				await postApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestore(
-					{ ...config, path, body, throwOnError: true },
-				);
+				await postApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestore({
+					...config,
+					path,
+					body,
+					throwOnError: true,
+				});
 			return data;
 		},
 	});
@@ -26880,8 +26779,7 @@ export const postApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchMut
 export function postApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchMutationOptions<
 	TContext = unknown,
 >(config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {}) {
-	const mutationKey =
-		postApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchMutationKey();
+	const mutationKey = postApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchMutationKey();
 	return mutationOptions<
 		PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchStatus200,
 		ResponseErrorConfig<
@@ -26897,9 +26795,12 @@ export function postApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatch
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await postApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatch(
-				{ ...config, path, body, throwOnError: true },
-			);
+			const { data } = await postApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatch({
+				...config,
+				path,
+				body,
+				throwOnError: true,
+			});
 			return data;
 		},
 	});
@@ -27118,13 +27019,12 @@ export function patchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNo
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } =
-				await patchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeId({
-					...config,
-					path,
-					body,
-					throwOnError: true,
-				});
+			const { data } = await patchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeId({
+				...config,
+				path,
+				body,
+				throwOnError: true,
+			});
 			return data;
 		},
 	});
@@ -27211,9 +27111,7 @@ export function usePatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesB
 
 export const deleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdMutationKey =
 	() =>
-		[
-			{ url: "/api/v1/units/by-id/:unitId/content-structures/:structureId/nodes/:nodeId" },
-		] as const;
+		[{ url: "/api/v1/units/by-id/:unitId/content-structures/:structureId/nodes/:nodeId" }] as const;
 
 export function deleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdMutationOptions<
 	TContext = unknown,
@@ -27235,13 +27133,12 @@ export function deleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByN
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } =
-				await deleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeId({
-					...config,
-					path,
-					body,
-					throwOnError: true,
-				});
+			const { data } = await deleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeId({
+				...config,
+				path,
+				body,
+				throwOnError: true,
+			});
 			return data;
 		},
 	});
@@ -28067,9 +27964,7 @@ export function useGetApiProgress<
 		queryClient,
 	) as UseQueryResult<
 		TData,
-		ResponseErrorConfig<
-			GetApiProgressStatus422 | GetApiProgressStatus429 | GetApiProgressStatus500
-		>
+		ResponseErrorConfig<GetApiProgressStatus422 | GetApiProgressStatus429 | GetApiProgressStatus500>
 	> & { queryKey: TQueryKey };
 
 	queryResult.queryKey = queryKey as TQueryKey;
@@ -29046,8 +28941,7 @@ export function useGetApiProgressByUnitIdNodes<
 	const { query: queryConfig = {}, client: config = {} } = options ?? {};
 	const { client: queryClient, ...resolvedOptions } = queryConfig;
 	const resolvedParams = { path: typeof path === "function" ? path() : path };
-	const queryKey =
-		resolvedOptions?.queryKey ?? getApiProgressByUnitIdNodesQueryKey(resolvedParams);
+	const queryKey = resolvedOptions?.queryKey ?? getApiProgressByUnitIdNodesQueryKey(resolvedParams);
 
 	const queryResult = useQuery(
 		{
@@ -29227,9 +29121,7 @@ export function usePostApiProgressByUnitIdComplete<TContext>(
 	const { client: queryClient, ...mutationOptions } = mutation;
 	const mutationKey = mutationOptions.mutationKey ?? postApiProgressByUnitIdCompleteMutationKey();
 
-	const baseOptions = postApiProgressByUnitIdCompleteMutationOptions(
-		config,
-	) as UseMutationOptions<
+	const baseOptions = postApiProgressByUnitIdCompleteMutationOptions(config) as UseMutationOptions<
 		PostApiProgressByUnitIdCompleteStatus200,
 		ResponseErrorConfig<
 			| PostApiProgressByUnitIdCompleteStatus400
@@ -29524,9 +29416,7 @@ export function useGetApiCollections<
 			QueryObserverOptions<
 				GetApiCollectionsStatus200,
 				ResponseErrorConfig<
-					| GetApiCollectionsStatus400
-					| GetApiCollectionsStatus422
-					| GetApiCollectionsStatus500
+					GetApiCollectionsStatus400 | GetApiCollectionsStatus422 | GetApiCollectionsStatus500
 				>,
 				TData,
 				TQueryData,
@@ -29729,8 +29619,7 @@ export function useGetApiCollectionsFavorites<
 	const { query: queryConfig = {}, client: config = {} } = options ?? {};
 	const { client: queryClient, ...resolvedOptions } = queryConfig;
 	const resolvedParams = { query: typeof query === "function" ? query() : query };
-	const queryKey =
-		resolvedOptions?.queryKey ?? getApiCollectionsFavoritesQueryKey(resolvedParams);
+	const queryKey = resolvedOptions?.queryKey ?? getApiCollectionsFavoritesQueryKey(resolvedParams);
 
 	const queryResult = useQuery(
 		{
@@ -29870,10 +29759,7 @@ export const getApiCollectionsByCollectionIdQueryKey = ({
 	path,
 	query,
 }: Omit<GetApiCollectionsByCollectionIdOptions, "headers">) =>
-	[
-		{ url: "/api/v1/collections/:collectionId", params: path },
-		...(query ? [query] : []),
-	] as const;
+	[{ url: "/api/v1/collections/:collectionId", params: path }, ...(query ? [query] : [])] as const;
 
 type GetApiCollectionsByCollectionIdQueryKey = ReturnType<
 	typeof getApiCollectionsByCollectionIdQueryKey
@@ -30034,8 +29920,7 @@ export function usePatchApiCollectionsByCollectionId<TContext>(
 ) {
 	const { mutation = {}, client: config = {} } = options ?? {};
 	const { client: queryClient, ...mutationOptions } = mutation;
-	const mutationKey =
-		mutationOptions.mutationKey ?? patchApiCollectionsByCollectionIdMutationKey();
+	const mutationKey = mutationOptions.mutationKey ?? patchApiCollectionsByCollectionIdMutationKey();
 
 	const baseOptions = patchApiCollectionsByCollectionIdMutationOptions(
 		config,
@@ -30150,8 +30035,7 @@ export function usePostApiCollectionsByCollectionIdItemsBatchUpdate<TContext>(
 	const { mutation = {}, client: config = {} } = options ?? {};
 	const { client: queryClient, ...mutationOptions } = mutation;
 	const mutationKey =
-		mutationOptions.mutationKey ??
-		postApiCollectionsByCollectionIdItemsBatchUpdateMutationKey();
+		mutationOptions.mutationKey ?? postApiCollectionsByCollectionIdItemsBatchUpdateMutationKey();
 
 	const baseOptions = postApiCollectionsByCollectionIdItemsBatchUpdateMutationOptions(
 		config,
@@ -30609,8 +30493,7 @@ export function useDeleteApiCollectionsByCollectionIdItemsByTargetId<TContext>(
 	const { mutation = {}, client: config = {} } = options ?? {};
 	const { client: queryClient, ...mutationOptions } = mutation;
 	const mutationKey =
-		mutationOptions.mutationKey ??
-		deleteApiCollectionsByCollectionIdItemsByTargetIdMutationKey();
+		mutationOptions.mutationKey ?? deleteApiCollectionsByCollectionIdItemsByTargetIdMutationKey();
 
 	const baseOptions = deleteApiCollectionsByCollectionIdItemsByTargetIdMutationOptions(
 		config,
@@ -30865,10 +30748,7 @@ export function useGetApiCollectionsByCollectionIdItemRevisionsCompare<
 
 	const queryResult = useQuery(
 		{
-			...getApiCollectionsByCollectionIdItemRevisionsCompareQueryOptions(
-				resolvedParams,
-				config,
-			),
+			...getApiCollectionsByCollectionIdItemRevisionsCompareQueryOptions(resolvedParams, config),
 			...resolvedOptions,
 			queryKey,
 		} as unknown as QueryObserverOptions,
@@ -30894,8 +30774,7 @@ export const postApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestoreMut
 export function postApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestoreMutationOptions<
 	TContext = unknown,
 >(config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {}) {
-	const mutationKey =
-		postApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestoreMutationKey();
+	const mutationKey = postApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestoreMutationKey();
 	return mutationOptions<
 		PostApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestoreStatus200,
 		ResponseErrorConfig<
@@ -30911,9 +30790,12 @@ export function postApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestore
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await postApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestore(
-				{ ...config, path, body, throwOnError: true },
-			);
+			const { data } = await postApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestore({
+				...config,
+				path,
+				body,
+				throwOnError: true,
+			});
 			return data;
 		},
 	});
@@ -31225,9 +31107,7 @@ export function getApiReviewsQueryOptions(
 	const queryKey = getApiReviewsQueryKey({ query });
 	return queryOptions<
 		GetApiReviewsStatus200,
-		ResponseErrorConfig<
-			GetApiReviewsStatus400 | GetApiReviewsStatus422 | GetApiReviewsStatus500
-		>,
+		ResponseErrorConfig<GetApiReviewsStatus400 | GetApiReviewsStatus422 | GetApiReviewsStatus500>,
 		GetApiReviewsStatus200,
 		typeof queryKey
 	>({
@@ -31253,9 +31133,7 @@ export function useGetApiReviews<
 	TQueryData = GetApiReviewsStatus200,
 	TQueryKey extends QueryKey = GetApiReviewsQueryKey,
 >(
-	{
-		query,
-	}: { query?: GetApiReviewsOptions["query"] | (() => GetApiReviewsOptions["query"]) } = {},
+	{ query }: { query?: GetApiReviewsOptions["query"] | (() => GetApiReviewsOptions["query"]) } = {},
 	options: {
 		query?: Partial<
 			QueryObserverOptions<
@@ -31285,9 +31163,7 @@ export function useGetApiReviews<
 		queryClient,
 	) as UseQueryResult<
 		TData,
-		ResponseErrorConfig<
-			GetApiReviewsStatus400 | GetApiReviewsStatus422 | GetApiReviewsStatus500
-		>
+		ResponseErrorConfig<GetApiReviewsStatus400 | GetApiReviewsStatus422 | GetApiReviewsStatus500>
 	> & { queryKey: TQueryKey };
 
 	queryResult.queryKey = queryKey as TQueryKey;
@@ -31451,9 +31327,7 @@ export function useGetApiReviewsByReviewId<
 		path,
 		query,
 	}: {
-		path:
-			| GetApiReviewsByReviewIdOptions["path"]
-			| (() => GetApiReviewsByReviewIdOptions["path"]);
+		path: GetApiReviewsByReviewIdOptions["path"] | (() => GetApiReviewsByReviewIdOptions["path"]);
 		query?:
 			| GetApiReviewsByReviewIdOptions["query"]
 			| (() => GetApiReviewsByReviewIdOptions["query"]);
@@ -31774,9 +31648,7 @@ export function useGetApiScoresByTargetId<
 		query,
 	}: {
 		path: GetApiScoresByTargetIdOptions["path"] | (() => GetApiScoresByTargetIdOptions["path"]);
-		query:
-			| GetApiScoresByTargetIdOptions["query"]
-			| (() => GetApiScoresByTargetIdOptions["query"]);
+		query: GetApiScoresByTargetIdOptions["query"] | (() => GetApiScoresByTargetIdOptions["query"]);
 	},
 	options: {
 		query?: Partial<
@@ -32192,9 +32064,7 @@ export function useDeleteApiReactionsUnitsByUnitId<TContext>(
 	const { client: queryClient, ...mutationOptions } = mutation;
 	const mutationKey = mutationOptions.mutationKey ?? deleteApiReactionsUnitsByUnitIdMutationKey();
 
-	const baseOptions = deleteApiReactionsUnitsByUnitIdMutationOptions(
-		config,
-	) as UseMutationOptions<
+	const baseOptions = deleteApiReactionsUnitsByUnitIdMutationOptions(config) as UseMutationOptions<
 		DeleteApiReactionsUnitsByUnitIdStatus200,
 		ResponseErrorConfig<
 			| DeleteApiReactionsUnitsByUnitIdStatus400
@@ -32382,12 +32252,9 @@ export function useDeleteApiReactionsSharesByUnitId<TContext>(
 ) {
 	const { mutation = {}, client: config = {} } = options ?? {};
 	const { client: queryClient, ...mutationOptions } = mutation;
-	const mutationKey =
-		mutationOptions.mutationKey ?? deleteApiReactionsSharesByUnitIdMutationKey();
+	const mutationKey = mutationOptions.mutationKey ?? deleteApiReactionsSharesByUnitIdMutationKey();
 
-	const baseOptions = deleteApiReactionsSharesByUnitIdMutationOptions(
-		config,
-	) as UseMutationOptions<
+	const baseOptions = deleteApiReactionsSharesByUnitIdMutationOptions(config) as UseMutationOptions<
 		DeleteApiReactionsSharesByUnitIdStatus200,
 		ResponseErrorConfig<
 			| DeleteApiReactionsSharesByUnitIdStatus422
@@ -32538,9 +32405,7 @@ export function getApiPollsByPollIdQueryOptions(
 	return queryOptions<
 		GetApiPollsByPollIdStatus200,
 		ResponseErrorConfig<
-			| GetApiPollsByPollIdStatus404
-			| GetApiPollsByPollIdStatus422
-			| GetApiPollsByPollIdStatus500
+			GetApiPollsByPollIdStatus404 | GetApiPollsByPollIdStatus422 | GetApiPollsByPollIdStatus500
 		>,
 		GetApiPollsByPollIdStatus200,
 		typeof queryKey
@@ -32580,9 +32445,7 @@ export function useGetApiPollsByPollId<
 			QueryObserverOptions<
 				GetApiPollsByPollIdStatus200,
 				ResponseErrorConfig<
-					| GetApiPollsByPollIdStatus404
-					| GetApiPollsByPollIdStatus422
-					| GetApiPollsByPollIdStatus500
+					GetApiPollsByPollIdStatus404 | GetApiPollsByPollIdStatus422 | GetApiPollsByPollIdStatus500
 				>,
 				TData,
 				TQueryData,
@@ -32610,9 +32473,7 @@ export function useGetApiPollsByPollId<
 	) as UseQueryResult<
 		TData,
 		ResponseErrorConfig<
-			| GetApiPollsByPollIdStatus404
-			| GetApiPollsByPollIdStatus422
-			| GetApiPollsByPollIdStatus500
+			GetApiPollsByPollIdStatus404 | GetApiPollsByPollIdStatus422 | GetApiPollsByPollIdStatus500
 		>
 	> & { queryKey: TQueryKey };
 
@@ -33437,9 +33298,7 @@ export function getApiPostsByPostIdQueryOptions(
 	return queryOptions<
 		GetApiPostsByPostIdStatus200,
 		ResponseErrorConfig<
-			| GetApiPostsByPostIdStatus404
-			| GetApiPostsByPostIdStatus422
-			| GetApiPostsByPostIdStatus500
+			GetApiPostsByPostIdStatus404 | GetApiPostsByPostIdStatus422 | GetApiPostsByPostIdStatus500
 		>,
 		GetApiPostsByPostIdStatus200,
 		typeof queryKey
@@ -33479,9 +33338,7 @@ export function useGetApiPostsByPostId<
 			QueryObserverOptions<
 				GetApiPostsByPostIdStatus200,
 				ResponseErrorConfig<
-					| GetApiPostsByPostIdStatus404
-					| GetApiPostsByPostIdStatus422
-					| GetApiPostsByPostIdStatus500
+					GetApiPostsByPostIdStatus404 | GetApiPostsByPostIdStatus422 | GetApiPostsByPostIdStatus500
 				>,
 				TData,
 				TQueryData,
@@ -33509,9 +33366,7 @@ export function useGetApiPostsByPostId<
 	) as UseQueryResult<
 		TData,
 		ResponseErrorConfig<
-			| GetApiPostsByPostIdStatus404
-			| GetApiPostsByPostIdStatus422
-			| GetApiPostsByPostIdStatus500
+			GetApiPostsByPostIdStatus404 | GetApiPostsByPostIdStatus422 | GetApiPostsByPostIdStatus500
 		>
 	> & { queryKey: TQueryKey };
 
@@ -33713,8 +33568,7 @@ export function useGetApiPostsByPostIdReplies<
 		path: typeof path === "function" ? path() : path,
 		query: typeof query === "function" ? query() : query,
 	};
-	const queryKey =
-		resolvedOptions?.queryKey ?? getApiPostsByPostIdRepliesQueryKey(resolvedParams);
+	const queryKey = resolvedOptions?.queryKey ?? getApiPostsByPostIdRepliesQueryKey(resolvedParams);
 
 	const queryResult = useQuery(
 		{
@@ -34029,10 +33883,9 @@ export function useGetApiRealms<
 			queryKey,
 		} as unknown as QueryObserverOptions,
 		queryClient,
-	) as UseQueryResult<
-		TData,
-		ResponseErrorConfig<GetApiRealmsStatus422 | GetApiRealmsStatus500>
-	> & { queryKey: TQueryKey };
+	) as UseQueryResult<TData, ResponseErrorConfig<GetApiRealmsStatus422 | GetApiRealmsStatus500>> & {
+		queryKey: TQueryKey;
+	};
 
 	queryResult.queryKey = queryKey as TQueryKey;
 
@@ -34299,9 +34152,7 @@ export function useGetApiRealmsByRealmId<
 		query,
 	}: {
 		path: GetApiRealmsByRealmIdOptions["path"] | (() => GetApiRealmsByRealmIdOptions["path"]);
-		query?:
-			| GetApiRealmsByRealmIdOptions["query"]
-			| (() => GetApiRealmsByRealmIdOptions["query"]);
+		query?: GetApiRealmsByRealmIdOptions["query"] | (() => GetApiRealmsByRealmIdOptions["query"]);
 	},
 	options: {
 		query?: Partial<
@@ -35051,8 +34902,7 @@ export function usePutApiRealmsByRealmIdScoreContext<TContext>(
 ) {
 	const { mutation = {}, client: config = {} } = options ?? {};
 	const { client: queryClient, ...mutationOptions } = mutation;
-	const mutationKey =
-		mutationOptions.mutationKey ?? putApiRealmsByRealmIdScoreContextMutationKey();
+	const mutationKey = mutationOptions.mutationKey ?? putApiRealmsByRealmIdScoreContextMutationKey();
 
 	const baseOptions = putApiRealmsByRealmIdScoreContextMutationOptions(
 		config,
@@ -35358,9 +35208,7 @@ export function usePutApiRealmsByRealmIdMembership<TContext>(
 	const { client: queryClient, ...mutationOptions } = mutation;
 	const mutationKey = mutationOptions.mutationKey ?? putApiRealmsByRealmIdMembershipMutationKey();
 
-	const baseOptions = putApiRealmsByRealmIdMembershipMutationOptions(
-		config,
-	) as UseMutationOptions<
+	const baseOptions = putApiRealmsByRealmIdMembershipMutationOptions(config) as UseMutationOptions<
 		PutApiRealmsByRealmIdMembershipStatus200,
 		ResponseErrorConfig<
 			| PutApiRealmsByRealmIdMembershipStatus404
@@ -35918,8 +35766,7 @@ export function useGetApiRealmsByRealmIdRules<
 		path: typeof path === "function" ? path() : path,
 		query: typeof query === "function" ? query() : query,
 	};
-	const queryKey =
-		resolvedOptions?.queryKey ?? getApiRealmsByRealmIdRulesQueryKey(resolvedParams);
+	const queryKey = resolvedOptions?.queryKey ?? getApiRealmsByRealmIdRulesQueryKey(resolvedParams);
 
 	const queryResult = useQuery(
 		{
@@ -36415,8 +36262,7 @@ export function usePutApiRealmsByRealmIdPinsByUnitId<TContext>(
 ) {
 	const { mutation = {}, client: config = {} } = options ?? {};
 	const { client: queryClient, ...mutationOptions } = mutation;
-	const mutationKey =
-		mutationOptions.mutationKey ?? putApiRealmsByRealmIdPinsByUnitIdMutationKey();
+	const mutationKey = mutationOptions.mutationKey ?? putApiRealmsByRealmIdPinsByUnitIdMutationKey();
 
 	const baseOptions = putApiRealmsByRealmIdPinsByUnitIdMutationOptions(
 		config,
@@ -36848,8 +36694,7 @@ export function usePostApiRealmsByRealmIdTagContexts<TContext>(
 ) {
 	const { mutation = {}, client: config = {} } = options ?? {};
 	const { client: queryClient, ...mutationOptions } = mutation;
-	const mutationKey =
-		mutationOptions.mutationKey ?? postApiRealmsByRealmIdTagContextsMutationKey();
+	const mutationKey = mutationOptions.mutationKey ?? postApiRealmsByRealmIdTagContextsMutationKey();
 
 	const baseOptions = postApiRealmsByRealmIdTagContextsMutationOptions(
 		config,
@@ -36978,8 +36823,7 @@ export function useGetApiRealmsByRealmIdTagsByTagIdContext<
 	const { client: queryClient, ...resolvedOptions } = queryConfig;
 	const resolvedParams = { path: typeof path === "function" ? path() : path };
 	const queryKey =
-		resolvedOptions?.queryKey ??
-		getApiRealmsByRealmIdTagsByTagIdContextQueryKey(resolvedParams);
+		resolvedOptions?.queryKey ?? getApiRealmsByRealmIdTagsByTagIdContextQueryKey(resolvedParams);
 
 	const queryResult = useQuery(
 		{
@@ -37272,8 +37116,7 @@ export function usePutApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagId<TContext>
 	const { mutation = {}, client: config = {} } = options ?? {};
 	const { client: queryClient, ...mutationOptions } = mutation;
 	const mutationKey =
-		mutationOptions.mutationKey ??
-		putApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdMutationKey();
+		mutationOptions.mutationKey ?? putApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdMutationKey();
 
 	const baseOptions = putApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdMutationOptions(
 		config,
@@ -37592,8 +37435,7 @@ export function usePutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVote<TContext>(
 	const { mutation = {}, client: config = {} } = options ?? {};
 	const { client: queryClient, ...mutationOptions } = mutation;
 	const mutationKey =
-		mutationOptions.mutationKey ??
-		putApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteMutationKey();
+		mutationOptions.mutationKey ?? putApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteMutationKey();
 
 	const baseOptions = putApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteMutationOptions(
 		config,
@@ -37835,8 +37677,7 @@ export function useGetApiRealmsByRealmIdUnits<
 		path: typeof path === "function" ? path() : path,
 		query: typeof query === "function" ? query() : query,
 	};
-	const queryKey =
-		resolvedOptions?.queryKey ?? getApiRealmsByRealmIdUnitsQueryKey(resolvedParams);
+	const queryKey = resolvedOptions?.queryKey ?? getApiRealmsByRealmIdUnitsQueryKey(resolvedParams);
 
 	const queryResult = useQuery(
 		{
@@ -38175,8 +38016,7 @@ export function useGetApiRealmsByRealmIdUnitsByUnitIdHistory<
 		query: typeof query === "function" ? query() : query,
 	};
 	const queryKey =
-		resolvedOptions?.queryKey ??
-		getApiRealmsByRealmIdUnitsByUnitIdHistoryQueryKey(resolvedParams);
+		resolvedOptions?.queryKey ?? getApiRealmsByRealmIdUnitsByUnitIdHistoryQueryKey(resolvedParams);
 
 	const queryResult = useQuery(
 		{
@@ -38619,10 +38459,7 @@ export function useGetApiRealmsByRealmIdWikiNavigationByNavigationId<
 
 	const queryResult = useQuery(
 		{
-			...getApiRealmsByRealmIdWikiNavigationByNavigationIdQueryOptions(
-				resolvedParams,
-				config,
-			),
+			...getApiRealmsByRealmIdWikiNavigationByNavigationIdQueryOptions(resolvedParams, config),
 			...resolvedOptions,
 			queryKey,
 		} as unknown as QueryObserverOptions,
@@ -38705,8 +38542,7 @@ export function usePutApiRealmsByRealmIdWikiNavigationByNavigationId<TContext>(
 	const { mutation = {}, client: config = {} } = options ?? {};
 	const { client: queryClient, ...mutationOptions } = mutation;
 	const mutationKey =
-		mutationOptions.mutationKey ??
-		putApiRealmsByRealmIdWikiNavigationByNavigationIdMutationKey();
+		mutationOptions.mutationKey ?? putApiRealmsByRealmIdWikiNavigationByNavigationIdMutationKey();
 
 	const baseOptions = putApiRealmsByRealmIdWikiNavigationByNavigationIdMutationOptions(
 		config,
@@ -38934,8 +38770,7 @@ export function useGetApiSearchFeaturesByTemplate<
 			QueryObserverOptions<
 				GetApiSearchFeaturesByTemplateStatus200,
 				ResponseErrorConfig<
-					| GetApiSearchFeaturesByTemplateStatus422
-					| GetApiSearchFeaturesByTemplateStatus500
+					GetApiSearchFeaturesByTemplateStatus422 | GetApiSearchFeaturesByTemplateStatus500
 				>,
 				TData,
 				TQueryData,
@@ -39337,12 +39172,9 @@ export function usePutApiSearchZonesByZoneIdFeature<TContext>(
 ) {
 	const { mutation = {}, client: config = {} } = options ?? {};
 	const { client: queryClient, ...mutationOptions } = mutation;
-	const mutationKey =
-		mutationOptions.mutationKey ?? putApiSearchZonesByZoneIdFeatureMutationKey();
+	const mutationKey = mutationOptions.mutationKey ?? putApiSearchZonesByZoneIdFeatureMutationKey();
 
-	const baseOptions = putApiSearchZonesByZoneIdFeatureMutationOptions(
-		config,
-	) as UseMutationOptions<
+	const baseOptions = putApiSearchZonesByZoneIdFeatureMutationOptions(config) as UseMutationOptions<
 		PutApiSearchZonesByZoneIdFeatureStatus200,
 		ResponseErrorConfig<
 			| PutApiSearchZonesByZoneIdFeatureStatus400
@@ -39686,8 +39518,7 @@ export function useGetApiSearchZonesByZoneIdFeatureRevisions<
 	const { client: queryClient, ...resolvedOptions } = queryConfig;
 	const resolvedParams = { path: typeof path === "function" ? path() : path };
 	const queryKey =
-		resolvedOptions?.queryKey ??
-		getApiSearchZonesByZoneIdFeatureRevisionsQueryKey(resolvedParams);
+		resolvedOptions?.queryKey ?? getApiSearchZonesByZoneIdFeatureRevisionsQueryKey(resolvedParams);
 
 	const queryResult = useQuery(
 		{
@@ -39993,22 +39824,21 @@ export function usePostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecut
 		mutationOptions.mutationKey ??
 		postApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteMutationKey();
 
-	const baseOptions =
-		postApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteMutationOptions(
-			config,
-		) as UseMutationOptions<
-			PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus200,
-			ResponseErrorConfig<
-				| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus400
-				| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus404
-				| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus422
-				| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus429
-				| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus500
-				| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus503
-			>,
-			PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteOptions,
-			TContext
-		>;
+	const baseOptions = postApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteMutationOptions(
+		config,
+	) as UseMutationOptions<
+		PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus200,
+		ResponseErrorConfig<
+			| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus400
+			| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus404
+			| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus422
+			| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus429
+			| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus500
+			| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus503
+		>,
+		PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteOptions,
+		TContext
+	>;
 
 	return useMutation<
 		PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus200,

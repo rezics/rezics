@@ -101,11 +101,7 @@ export function BookContents({ bookId }: { readonly bookId: string }) {
 		return (
 			<section className="grid gap-3">
 				<p className="text-destructive text-sm">{t.state.error}</p>
-				<Button
-					className="w-fit"
-					onClick={() => void structure.refetch()}
-					variant="outline"
-				>
+				<Button className="w-fit" onClick={() => void structure.refetch()} variant="outline">
 					{t.actions.retry}
 				</Button>
 			</section>
@@ -237,11 +233,7 @@ function BookContentsList({
 							<ChevronsUpDown aria-hidden />
 							{t.units.content.expandAll}
 						</Button>
-						<Button
-							onClick={() => setExpandedIds(new Set())}
-							type="button"
-							variant="quiet"
-						>
+						<Button onClick={() => setExpandedIds(new Set())} type="button" variant="quiet">
 							<ChevronsDownUp aria-hidden />
 							{t.units.content.collapseAll}
 						</Button>
@@ -265,8 +257,7 @@ function BookContentsList({
 							const rowText = (
 								<BookContentStructureRowText
 									contentMetrics={
-										contentMetricsByNodeId.get(node.id) ??
-										EmptyBookStructureContentMetrics
+										contentMetricsByNodeId.get(node.id) ?? EmptyBookStructureContentMetrics
 									}
 									directChildCount={children.length}
 									expanded={expanded}
@@ -274,9 +265,7 @@ function BookContentsList({
 									language={node.language}
 									metadataAfter={
 										displayAsLabel ? null : (
-											<BookContentStructureChapterViewMetric
-												label={t.units.content.views}
-											/>
+											<BookContentStructureChapterViewMetric label={t.units.content.views} />
 										)
 									}
 									title={node.title}
@@ -293,11 +282,7 @@ function BookContentsList({
 									role="treeitem"
 								>
 									{displayAsLabel ? (
-										<button
-											className={mainClassName}
-											onClick={() => toggle(node.id)}
-											type="button"
-										>
+										<button className={mainClassName} onClick={() => toggle(node.id)} type="button">
 											{rowText}
 										</button>
 									) : (
@@ -322,15 +307,9 @@ function BookContentsList({
 											size="sm"
 											variant={completed ? "secondary" : "quiet"}
 										>
-											{completed ? (
-												<CheckIcon aria-hidden />
-											) : (
-												<CircleIcon aria-hidden />
-											)}
+											{completed ? <CheckIcon aria-hidden /> : <CircleIcon aria-hidden />}
 											<span className="hidden sm:inline">
-												{completed
-													? t.units.reader.read
-													: t.units.reader.unread}
+												{completed ? t.units.reader.read : t.units.reader.unread}
 											</span>
 										</Button>
 									) : null}
@@ -361,9 +340,7 @@ function BookContentsList({
 												{t.feed.actions.shareTitle}
 											</MenuItem>
 											<MenuItem
-												onSelect={() =>
-													requestCollection(node.contentUnitId)
-												}
+												onSelect={() => requestCollection(node.contentUnitId)}
 												value={`collection-${node.id}`}
 											>
 												<LibraryIcon aria-hidden />

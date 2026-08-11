@@ -203,10 +203,7 @@ function revisionTagCondition(tag: string | undefined) {
 					.select({ id: unitRevisionTag.revisionId })
 					.from(unitRevisionTag)
 					.where(
-						and(
-							eq(unitRevisionTag.revisionId, unitRevision.id),
-							eq(unitRevisionTag.tag, tag),
-						),
+						and(eq(unitRevisionTag.revisionId, unitRevision.id), eq(unitRevisionTag.tag, tag)),
 					),
 			)
 		: undefined;
@@ -222,11 +219,7 @@ export default new Elysia({ prefix: "/history" })
 			const [access, restoreDecision, [targetUnit]] = await Promise.all([
 				getVisibilityAccess(authorization),
 				authorization.unit.decide(params.unitId, "unit.history.restore"),
-				database
-					.select({ kind: unit.kind })
-					.from(unit)
-					.where(eq(unit.id, params.unitId))
-					.limit(1),
+				database.select({ kind: unit.kind }).from(unit).where(eq(unit.id, params.unitId)).limit(1),
 			]);
 			const canRestore =
 				restoreDecision.allowed &&
@@ -249,9 +242,7 @@ export default new Elysia({ prefix: "/history" })
 					canSuppress: access.suppress,
 				},
 				nextCursor:
-					rows.length > limit && last
-						? encodeCursor(scope, last.createdAt, last.id)
-						: null,
+					rows.length > limit && last ? encodeCursor(scope, last.createdAt, last.id) : null,
 			};
 		},
 		{
@@ -322,10 +313,7 @@ export default new Elysia({ prefix: "/history" })
 			params: UnitRevisionParams,
 			response: {
 				[StatusCodes.OK]: UnitRevisionResponse,
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse([
-					"UnitNotFound",
-					"UnitRevisionNotFound",
-				]),
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "UnitRevisionNotFound"]),
 			},
 			detail: { summary: "Get Unit revision", tags: ["History"] },
 		},
@@ -362,10 +350,7 @@ export default new Elysia({ prefix: "/history" })
 			query: UnitRevisionCompareQuery,
 			response: {
 				[StatusCodes.OK]: UnitRevisionCompareResponse,
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse([
-					"UnitNotFound",
-					"UnitRevisionNotFound",
-				]),
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "UnitRevisionNotFound"]),
 			},
 			detail: { summary: "Compare Unit revisions", tags: ["History"] },
 		},
@@ -509,9 +494,7 @@ export default new Elysia({ prefix: "/history" })
 			body: RevisionVisibilityBody,
 			response: {
 				[StatusCodes.NO_CONTENT]: t.Void(),
-				[StatusCodes.CONFLICT]: toApiErrorResponse([
-					"CurrentRevisionContentVisibilityForbidden",
-				]),
+				[StatusCodes.CONFLICT]: toApiErrorResponse(["CurrentRevisionContentVisibilityForbidden"]),
 				[StatusCodes.FORBIDDEN]: toApiErrorResponse(["PlatformCapabilityRequired"]),
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitRevisionNotFound"]),
 			},
@@ -543,9 +526,7 @@ export default new Elysia({ prefix: "/history" })
 			return {
 				items: items.map((row) => presentSummary(row, access)),
 				nextCursor:
-					rows.length > limit && last
-						? encodeCursor(scope, last.createdAt, last.id)
-						: null,
+					rows.length > limit && last ? encodeCursor(scope, last.createdAt, last.id) : null,
 			};
 		},
 		{
@@ -588,9 +569,7 @@ export default new Elysia({ prefix: "/history" })
 			return {
 				items: items.map((row) => presentSummary(row, access)),
 				nextCursor:
-					rows.length > limit && last
-						? encodeCursor(scope, last.createdAt, last.id)
-						: null,
+					rows.length > limit && last ? encodeCursor(scope, last.createdAt, last.id) : null,
 			};
 		},
 		{

@@ -28,8 +28,7 @@ export default {
 		privacyPolicy: "Datenschutzrichtlinie",
 	},
 	securityVerificationLabel: "Sicherheitsüberprüfung",
-	securityVerificationFailed:
-		"Die Sicherheitsüberprüfung ist fehlgeschlagen. Versuche es erneut.",
+	securityVerificationFailed: "Die Sicherheitsüberprüfung ist fehlgeschlagen. Versuche es erneut.",
 	securityVerificationRequired: "Schließe zuerst die Sicherheitsüberprüfung ab.",
 	securityVerificationUnavailable:
 		"Die Sicherheitsüberprüfung ist derzeit nicht verfügbar. Versuche es später erneut.",

@@ -64,9 +64,7 @@ describe("FeedFiltersDialog", () => {
 		expect(screen.getByRole("combobox", { name: "語言" })).toBeDefined();
 		expect(screen.getByRole("combobox", { name: "標籤" })).toBeDefined();
 		expect(screen.queryByRole("combobox", { name: "領域" })).toBeNull();
-		expect(screen.getByRole("button", { name: "清除篩選" }).hasAttribute("disabled")).toBe(
-			true,
-		);
+		expect(screen.getByRole("button", { name: "清除篩選" }).hasAttribute("disabled")).toBe(true);
 	});
 
 	it("applies cleared editable filters together", () => {

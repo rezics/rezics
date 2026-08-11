@@ -30,9 +30,7 @@ export function estimateBookChapterProgresses(
 		.filter((node) => node.contentKind === "chapter");
 	if (chapters.length === 0) return [];
 
-	const wordCounts = chapters.map((node) =>
-		toNonNegativeApiInteger(node.contentMetrics.wordCount),
-	);
+	const wordCounts = chapters.map((node) => toNonNegativeApiInteger(node.contentMetrics.wordCount));
 	const characterCounts = chapters.map((node) =>
 		toNonNegativeApiInteger(node.contentMetrics.characterCount),
 	);

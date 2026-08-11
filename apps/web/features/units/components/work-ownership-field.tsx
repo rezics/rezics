@@ -46,14 +46,10 @@ export function WorkOwnershipField({
 				value={value}
 			>
 				<NativeSelectOption value="profile_owned">{creation.ownedWork}</NativeSelectOption>
-				<NativeSelectOption value="community_owned">
-					{creation.publicWork}
-				</NativeSelectOption>
+				<NativeSelectOption value="community_owned">{creation.publicWork}</NativeSelectOption>
 			</NativeSelect>
 			<FieldDescription>
-				{value === "profile_owned"
-					? creation.ownedWorkDescription
-					: creation.publicWorkDescription}
+				{value === "profile_owned" ? creation.ownedWorkDescription : creation.publicWorkDescription}
 			</FieldDescription>
 			{value === "community_owned" ? (
 				<Popover

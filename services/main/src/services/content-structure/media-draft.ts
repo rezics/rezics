@@ -193,9 +193,7 @@ export async function saveMediaContentStructureDraft(
 
 		const attachedContentUnitIds = [
 			...new Set(
-				input.nodes.flatMap((node) =>
-					node.state === "attached" ? [node.contentUnitId] : [],
-				),
+				input.nodes.flatMap((node) => (node.state === "attached" ? [node.contentUnitId] : [])),
 			),
 		];
 		const attachedContentRows = [];
@@ -259,9 +257,7 @@ export async function saveMediaContentStructureDraft(
 			}).length,
 		});
 		const contentUnitIds = new Map(currentRows.map((row) => [row.id, row.contentUnitId]));
-		const newNodeIds = plan.nodes
-			.filter((node) => node.state !== "existing")
-			.map(({ id }) => id);
+		const newNodeIds = plan.nodes.filter((node) => node.state !== "existing").map(({ id }) => id);
 		const collidingNewNodes = newNodeIds.length
 			? await tx
 					.select({ id: contentStructureNode.id })
@@ -362,9 +358,7 @@ export async function saveMediaContentStructureDraft(
 			});
 		}
 
-		const nextUpdatedAt = new Date(
-			Math.max(Date.now(), before.structure.updatedAt.getTime() + 1),
-		);
+		const nextUpdatedAt = new Date(Math.max(Date.now(), before.structure.updatedAt.getTime() + 1));
 		await tx
 			.update(contentStructure)
 			.set({ updatedAt: nextUpdatedAt })
@@ -374,8 +368,7 @@ export async function saveMediaContentStructureDraft(
 			ownerUnitId: input.ownerUnitId,
 		});
 		const delta = diffContentStructureSnapshots(before, after);
-		if (!delta)
-			throw new Error("Changed Media Content Structure draft produced no revision delta");
+		if (!delta) throw new Error("Changed Media Content Structure draft produced no revision delta");
 		return {
 			result: {},
 			change: {

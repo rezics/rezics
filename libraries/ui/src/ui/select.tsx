@@ -238,11 +238,7 @@ export const SelectEmpty = (props: React.ComponentProps<typeof ark.div>) => {
 	if (empty) {
 		return (
 			<ark.div
-				className={cn(
-					"px-2 py-1.5",
-					"text-center text-muted-foreground text-sm",
-					className,
-				)}
+				className={cn("px-2 py-1.5", "text-center text-muted-foreground text-sm", className)}
 				role="presentation"
 				{...rest}
 			/>

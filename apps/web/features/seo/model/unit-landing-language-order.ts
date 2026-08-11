@@ -16,10 +16,7 @@ export function buildUnitLandingLocalizationLanguages(input: {
 	readonly profile?: UnitLandingProfileLanguagePreferences;
 }): ContentLanguage[] {
 	const fallbackLanguages = input.profile
-		? buildLocalizationLanguages(
-				input.profile.preferredLanguages,
-				input.profile.interfaceLanguage,
-			)
+		? buildLocalizationLanguages(input.profile.preferredLanguages, input.profile.interfaceLanguage)
 		: [];
 	return input.requestedLanguage
 		? [

@@ -154,10 +154,7 @@ export function PostCreatePage({ defaultRealmId }: { defaultRealmId?: string }) 
 						/>
 					</FieldGroup>
 				</form>
-				<RealmRulesAcknowledgementPrompt
-					controller={rulesAcknowledgement}
-					intent="publish"
-				/>
+				<RealmRulesAcknowledgementPrompt controller={rulesAcknowledgement} intent="publish" />
 			</main>
 		</RequireSession>
 	);

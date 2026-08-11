@@ -33,9 +33,7 @@ describe("presentation preferences", () => {
 			filterFeedByPreferredLanguages: false,
 		};
 
-		expect(
-			parsePresentationPreferences({ ...base, preferredLanguages: ["pt"] }),
-		).toBeUndefined();
+		expect(parsePresentationPreferences({ ...base, preferredLanguages: ["pt"] })).toBeUndefined();
 		expect(
 			parsePresentationPreferences({ ...base, preferredLanguages: ["en", "en"] }),
 		).toBeUndefined();

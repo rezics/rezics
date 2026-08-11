@@ -236,10 +236,7 @@ export async function getPublicUnitSeoProjection(
 		.where(
 			and(
 				eq(unitLocalization.unitId, base.id),
-				or(
-					isNull(unitLocalization.contentStatus),
-					eq(unitLocalization.contentStatus, "published"),
-				),
+				or(isNull(unitLocalization.contentStatus), eq(unitLocalization.contentStatus, "published")),
 			),
 		)
 		.orderBy(

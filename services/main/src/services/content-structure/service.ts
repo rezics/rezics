@@ -103,11 +103,7 @@ export async function listContentStructures(
 				isNull(contentStructure.deletedAt),
 			),
 		)
-		.orderBy(
-			asc(contentStructure.kind),
-			asc(contentStructure.createdAt),
-			asc(contentStructure.id),
-		);
+		.orderBy(asc(contentStructure.kind), asc(contentStructure.createdAt), asc(contentStructure.id));
 }
 
 export async function createContentStructure(
@@ -136,8 +132,7 @@ export async function createContentStructure(
 				),
 			)
 			.limit(1);
-		if (existing)
-			throw new ContentStructureInvalid(`${input.kind} already exists for this Unit`);
+		if (existing) throw new ContentStructureInvalid(`${input.kind} already exists for this Unit`);
 	}
 	const [created] = await tx
 		.insert(contentStructure)
@@ -320,8 +315,7 @@ export async function deleteContentStructure(
 				structureId: input.structureId,
 				ownerUnitId: input.ownerUnitId,
 			});
-			if (input.binding === "direct")
-				ensureDirectContentStructureEditing(before.structure.kind);
+			if (input.binding === "direct") ensureDirectContentStructureEditing(before.structure.kind);
 			else if (before.structure.kind !== input.kind) throw new ContentStructureNotFound();
 			if (input.binding === "direct" && before.structure.kind === "realm.taxonomy")
 				throw new ContentStructureInvalid(

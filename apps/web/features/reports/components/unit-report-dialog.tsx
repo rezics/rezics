@@ -209,9 +209,7 @@ export function UnitReportDialog({
 							{destinations.data && !destinationItems.length ? (
 								<FieldDescription>{t.reports.noRealms}</FieldDescription>
 							) : destinations.data &&
-								destinationItems.every(
-									(destination) => !destination.rules.length,
-								) ? (
+								destinationItems.every((destination) => !destination.rules.length) ? (
 								<FieldDescription>{t.reports.noRules}</FieldDescription>
 							) : null}
 							<FieldDescription>
@@ -295,12 +293,7 @@ export function UnitReportOverflowMenu({
 					<UnitReportMenuItem onSelect={requestReport} />
 				</MenuContent>
 			</Menu>
-			<UnitReportDialog
-				onOpenChange={setOpen}
-				open={open}
-				realmId={realmId}
-				unitId={unitId}
-			/>
+			<UnitReportDialog onOpenChange={setOpen} open={open} realmId={realmId} unitId={unitId} />
 		</>
 	);
 }

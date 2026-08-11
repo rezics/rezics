@@ -48,10 +48,7 @@ export function SearchFeatureFeed({
 	if (definitionQuery.isPending) return <QueryPending />;
 	if (definitionQuery.isError || !definitionQuery.data)
 		return (
-			<QueryFailure
-				error={definitionQuery.error}
-				retry={() => void definitionQuery.refetch()}
-			/>
+			<QueryFailure error={definitionQuery.error} retry={() => void definitionQuery.refetch()} />
 		);
 
 	const definition = parseSearchFeatureDefinition(definitionQuery.data);

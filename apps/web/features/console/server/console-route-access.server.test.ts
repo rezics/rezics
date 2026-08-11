@@ -20,15 +20,10 @@ describe("console route access", () => {
 	});
 
 	it("treats a rejected session as unauthenticated", async () => {
-		const fetcher = vi
-			.fn<typeof fetch>()
-			.mockResolvedValue(new Response(null, { status: 401 }));
+		const fetcher = vi.fn<typeof fetch>().mockResolvedValue(new Response(null, { status: 401 }));
 
 		await expect(
-			getConsoleRouteAccess(
-				new Headers({ cookie: "better-auth.session_token=expired" }),
-				fetcher,
-			),
+			getConsoleRouteAccess(new Headers({ cookie: "better-auth.session_token=expired" }), fetcher),
 		).resolves.toEqual({ kind: "unauthenticated" });
 	});
 
@@ -36,11 +31,7 @@ describe("console route access", () => {
 		process.env.REZICS_API_ORIGIN = "https://api.internal.example";
 		const fetcher = vi.fn<typeof fetch>().mockResolvedValue(
 			Response.json({
-				platformCapabilities: [
-					"platform.audit.read",
-					"platform.moderate",
-					"future.capability",
-				],
+				platformCapabilities: ["platform.audit.read", "platform.moderate", "future.capability"],
 			}),
 		);
 
@@ -73,10 +64,7 @@ describe("console route access", () => {
 			.mockResolvedValue(Response.json({ platformCapabilities: [] }));
 
 		await expect(
-			getConsoleRouteAccess(
-				new Headers({ cookie: "better-auth.session_token=ordinary" }),
-				fetcher,
-			),
+			getConsoleRouteAccess(new Headers({ cookie: "better-auth.session_token=ordinary" }), fetcher),
 		).resolves.toEqual({
 			kind: "authenticated",
 			platformCapabilities: [],

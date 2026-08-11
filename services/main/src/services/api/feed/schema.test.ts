@@ -49,9 +49,7 @@ describe("Feed API contract", () => {
 
 	it("rejects malformed and duplicate Filter sets", () => {
 		expect(checkFeedRequest({ filter: { where: { kind: { in: [] } } } })).toBe(false);
-		expect(checkFeedRequest({ filter: { where: { kind: { in: ["book", "book"] } } } })).toBe(
-			false,
-		);
+		expect(checkFeedRequest({ filter: { where: { kind: { in: ["book", "book"] } } } })).toBe(false);
 		expect(
 			checkFeedRequest({
 				filter: {

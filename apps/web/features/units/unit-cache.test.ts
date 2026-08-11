@@ -9,9 +9,7 @@ import {
 
 function createQueryClient() {
 	const queryClient = new QueryClient();
-	const invalidateQueries = vi
-		.spyOn(queryClient, "invalidateQueries")
-		.mockResolvedValue(undefined);
+	const invalidateQueries = vi.spyOn(queryClient, "invalidateQueries").mockResolvedValue(undefined);
 	return { queryClient, invalidateQueries };
 }
 

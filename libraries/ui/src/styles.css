@@ -154,8 +154,8 @@
 
 :root:lang(zh-Hans) {
 	--rezics-font-sans:
-		Inter, "Noto Sans CJK SC", "Source Han Sans SC", "Microsoft YaHei", ui-sans-serif,
-		system-ui, sans-serif;
+		Inter, "Noto Sans CJK SC", "Source Han Sans SC", "Microsoft YaHei", ui-sans-serif, system-ui,
+		sans-serif;
 	--rezics-font-heading:
 		"Noto Serif CJK SC", "Source Han Serif SC", "Songti SC", Georgia, ui-serif, serif;
 }

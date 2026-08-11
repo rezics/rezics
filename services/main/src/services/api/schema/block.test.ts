@@ -104,9 +104,9 @@ describe("Block document contracts", () => {
 		);
 
 		expect(() => assertWikiPostPortableTextDocument(body)).not.toThrow();
-		expect([
-			...collectBlockReferences({ _key: "000000000056", blocks: [body] }).unitIds,
-		]).toEqual([postId]);
+		expect([...collectBlockReferences({ _key: "000000000056", blocks: [body] }).unitIds]).toEqual([
+			postId,
+		]);
 		expect(() =>
 			assertWikiPostPortableTextDocument({
 				...body,
@@ -453,9 +453,7 @@ describe("Search execution primitives", () => {
 		);
 
 		expect(expression).toMatchObject({ operator: "all" });
-		expect(() =>
-			assertSearchExpression(expression, { maxDepth: 6, maxNodes: 100 }),
-		).not.toThrow();
+		expect(() => assertSearchExpression(expression, { maxDepth: 6, maxNodes: 100 })).not.toThrow();
 	});
 
 	test("round-trips opaque cursors", () => {

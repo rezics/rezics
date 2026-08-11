@@ -295,10 +295,7 @@ async function loadContentLicenseInvalidationPlan(
 		})
 		.from(unitContentLicense)
 		.where(
-			and(
-				eq(unitContentLicense.unitId, row.targetUnitId),
-				eq(unitContentLicense.status, "active"),
-			),
+			and(eq(unitContentLicense.unitId, row.targetUnitId), eq(unitContentLicense.status, "active")),
 		)
 		.for("update")
 		.limit(1);
@@ -370,17 +367,13 @@ async function loadContentLicenseRestorationPlan(
 		.where(eq(unitContentLicense.id, invalidation.contentLicenseId))
 		.for("update")
 		.limit(1);
-	if (!current || current.unitId !== row.targetUnitId)
-		throw new ModerationReversedActionInvalid();
+	if (!current || current.unitId !== row.targetUnitId) throw new ModerationReversedActionInvalid();
 	if (current.status !== "invalidated") throw new ModerationReversalUnavailable();
 	const [activeGrant] = await tx
 		.select({ id: unitContentLicense.id })
 		.from(unitContentLicense)
 		.where(
-			and(
-				eq(unitContentLicense.unitId, row.targetUnitId),
-				eq(unitContentLicense.status, "active"),
-			),
+			and(eq(unitContentLicense.unitId, row.targetUnitId), eq(unitContentLicense.status, "active")),
 		)
 		.limit(1);
 	if (activeGrant) throw new ModerationReversalUnavailable();
@@ -436,8 +429,7 @@ async function loadReversalPlan(
 				.for("update")
 				.limit(1);
 			if (!current) throw new ModerationTargetNotFound();
-			if (current.state !== reversed.resultingState)
-				throw new ModerationReversalUnavailable();
+			if (current.state !== reversed.resultingState) throw new ModerationReversalUnavailable();
 			return {
 				type: "unit_state",
 				previousState: current.state,
@@ -445,23 +437,17 @@ async function loadReversalPlan(
 			};
 		}
 		if (row.authority === "realm") {
-			if (
-				!isRealmUnitStatus(reversed.previousState) ||
-				!isRealmUnitStatus(reversed.resultingState)
-			)
+			if (!isRealmUnitStatus(reversed.previousState) || !isRealmUnitStatus(reversed.resultingState))
 				throw new ModerationReversalUnavailable();
 			if (!row.realmId) throw new ModerationRealmMissing();
 			const [current] = await tx
 				.select({ state: realmUnit.status })
 				.from(realmUnit)
-				.where(
-					and(eq(realmUnit.realmId, row.realmId), eq(realmUnit.unitId, row.targetUnitId)),
-				)
+				.where(and(eq(realmUnit.realmId, row.realmId), eq(realmUnit.unitId, row.targetUnitId)))
 				.for("update")
 				.limit(1);
 			if (!current) throw new ModerationTargetNotFound();
-			if (current.state !== reversed.resultingState)
-				throw new ModerationReversalUnavailable();
+			if (current.state !== reversed.resultingState) throw new ModerationReversalUnavailable();
 			return {
 				type: "realm_unit_state",
 				previousState: current.state,
@@ -486,9 +472,7 @@ async function loadReversalPlan(
 			const [current] = await tx
 				.select({ postTargetingLocked: realmUnit.postTargetingLocked })
 				.from(realmUnit)
-				.where(
-					and(eq(realmUnit.realmId, row.realmId), eq(realmUnit.unitId, row.targetUnitId)),
-				)
+				.where(and(eq(realmUnit.realmId, row.realmId), eq(realmUnit.unitId, row.targetUnitId)))
 				.for("update")
 				.limit(1);
 			if (!current) throw new ModerationTargetNotFound();
@@ -579,8 +563,7 @@ async function validateContentGovernanceRules(
 					),
 				),
 			);
-		if (selectedRules.length !== sourceReferences.length)
-			throw new ContentGovernanceRuleChanged();
+		if (selectedRules.length !== sourceReferences.length) throw new ContentGovernanceRuleChanged();
 	}
 	return references;
 }
@@ -619,9 +602,7 @@ async function executeActionPlan(
 		const [updated] = await tx
 			.update(unit)
 			.set({ moderationStatus: plan.resultingState })
-			.where(
-				and(eq(unit.id, row.targetUnitId), eq(unit.moderationStatus, plan.previousState)),
-			)
+			.where(and(eq(unit.id, row.targetUnitId), eq(unit.moderationStatus, plan.previousState)))
 			.returning({ id: unit.id });
 		if (!updated) throw new ModerationTransitionInvalid();
 		return;
@@ -722,8 +703,7 @@ export async function executeAuthorizedContentGovernanceAction(
 			)
 			.limit(1);
 		if (existing) {
-			if (existing.requestFingerprint !== fingerprint)
-				throw new ModerationIdempotencyConflict();
+			if (existing.requestFingerprint !== fingerprint) throw new ModerationIdempotencyConflict();
 			const { requestFingerprint: _requestFingerprint, ...created } = existing;
 			const notes = (
 				await listGovernanceNotes(tx, {
@@ -739,10 +719,7 @@ export async function executeAuthorizedContentGovernanceAction(
 				})
 				.from(contentGovernanceActionRule)
 				.where(eq(contentGovernanceActionRule.actionId, created.id))
-				.orderBy(
-					contentGovernanceActionRule.ruleSourceRealmId,
-					contentGovernanceActionRule.ruleId,
-				);
+				.orderBy(contentGovernanceActionRule.ruleSourceRealmId, contentGovernanceActionRule.ruleId);
 			const response = { ...created, rules, notes } satisfies ContentGovernanceActionResponse;
 			return { created: response, replayed: true };
 		}

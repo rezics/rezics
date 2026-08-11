@@ -155,9 +155,7 @@ export class ValidatedSearchPlan<Request extends CompiledSearchRequest> {
 					maxNodes: WorkPolicy.search.maxExpressionNodes,
 				});
 		} catch (cause) {
-			throw new InvalidSearch(
-				cause instanceof Error ? cause.message : "Search exceeds budget",
-			);
+			throw new InvalidSearch(cause instanceof Error ? cause.message : "Search exceeds budget");
 		}
 		if (
 			request.categories.length < 1 ||
@@ -201,10 +199,7 @@ export class ValidatedSearchPlan<Request extends CompiledSearchRequest> {
 		];
 		const executedPredicates = request.categories.flatMap((category) => {
 			if (!request.searchExpression) return [];
-			const specialized = specializeSearchExpressionForCategory(
-				category,
-				request.searchExpression,
-			);
+			const specialized = specializeSearchExpressionForCategory(category, request.searchExpression);
 			return specialized.state === "expression"
 				? summarizeExpression(specialized.expression).predicates.map((predicate) => ({
 						category,

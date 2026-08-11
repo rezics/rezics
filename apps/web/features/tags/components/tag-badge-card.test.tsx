@@ -111,9 +111,7 @@ describe("TagBadgeCard", () => {
 		const trigger = screen.getByRole("link", {
 			name: "開啟「置頂標籤」標籤卡片（全域情境）",
 		});
-		expect(trigger.closest('[data-slot="badge"]')?.getAttribute("data-variant")).toBe(
-			"outline",
-		);
+		expect(trigger.closest('[data-slot="badge"]')?.getAttribute("data-variant")).toBe("outline");
 		fireEvent.click(trigger);
 		const titleLink = await screen.findByRole("link", { name: "置頂標籤" });
 		expect(titleLink.classList.contains("hover:underline")).toBe(true);

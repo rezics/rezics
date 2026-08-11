@@ -125,13 +125,12 @@ export const ChartStyle = ({ config, id }: { config: ChartConfig; id: string }) 
 						([theme, prefix]) => `
             ${prefix} [data-chart=${id}] {
             ${colorConfig
-				.map(([key, itemConfig]) => {
-					const color =
-						itemConfig.theme?.[theme as keyof typeof itemConfig.theme] ||
-						itemConfig.color;
-					return color ? `  --color-${key}: ${color};` : null;
-				})
-				.join("\n")}
+							.map(([key, itemConfig]) => {
+								const color =
+									itemConfig.theme?.[theme as keyof typeof itemConfig.theme] || itemConfig.color;
+								return color ? `  --color-${key}: ${color};` : null;
+							})
+							.join("\n")}
             }
             `,
 					)
@@ -181,9 +180,7 @@ export const ChartTooltipContent = (props: CustomTooltipProps) => {
 
 		if (labelFormatter) {
 			return (
-				<div className={cn("font-medium", labelClassName)}>
-					{labelFormatter(value, payload)}
-				</div>
+				<div className={cn("font-medium", labelClassName)}>{labelFormatter(value, payload)}</div>
 			);
 		}
 
@@ -238,17 +235,12 @@ export const ChartTooltipContent = (props: CustomTooltipProps) => {
 									) : (
 										!hideIndicator && (
 											<div
-												className={cn(
-													"shrink-0 rounded-[2px] border-border bg-(--color-bg)",
-													{
-														"h-2.5 w-2.5": indicator === "dot",
-														"my-0.5":
-															nestLabel && indicator === "dashed",
-														"w-0 border-[1.5px] border-dashed bg-transparent":
-															indicator === "dashed",
-														"w-1": indicator === "line",
-													},
-												)}
+												className={cn("shrink-0 rounded-[2px] border-border bg-(--color-bg)", {
+													"h-2.5 w-2.5": indicator === "dot",
+													"my-0.5": nestLabel && indicator === "dashed",
+													"w-0 border-[1.5px] border-dashed bg-transparent": indicator === "dashed",
+													"w-1": indicator === "line",
+												})}
 												style={
 													{
 														"--color-bg": indicatorColor,

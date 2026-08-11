@@ -98,9 +98,7 @@ export function MediaContentNodeDialog({
 	const [title, setTitle] = useState("");
 	const [unit, setUnit] = useState<EntityPickerValue>();
 	const [mediaKindFilter, setMediaKindFilter] = useState<TimedMediaKindFilter>("all");
-	const [destination, setDestination] = useState<ContentStructureDestination>(
-		request.destination,
-	);
+	const [destination, setDestination] = useState<ContentStructureDestination>(request.destination);
 	const [destinationDialogOpen, setDestinationDialogOpen] = useState(false);
 	const label = request.kind === "label";
 	const dialogTitle =
@@ -181,9 +179,7 @@ export function MediaContentNodeDialog({
 											autoFocus
 											disabled={pending}
 											maxLength={500}
-											onChange={(event) =>
-												setTitle(event.currentTarget.value)
-											}
+											onChange={(event) => setTitle(event.currentTarget.value)}
 											required
 											value={title}
 										/>
@@ -192,20 +188,12 @@ export function MediaContentNodeDialog({
 								<TabsContent className="grid gap-4 pt-3" value="attach">
 									{label ? null : (
 										<Field>
-											<FieldLabel>
-												{t.units.content.mediaKindFilter}
-											</FieldLabel>
+											<FieldLabel>{t.units.content.mediaKindFilter}</FieldLabel>
 											<NativeSelect
 												disabled={pending}
 												onChange={(event) => {
-													if (
-														isTimedMediaKindFilter(
-															event.currentTarget.value,
-														)
-													) {
-														setMediaKindFilter(
-															event.currentTarget.value,
-														);
+													if (isTimedMediaKindFilter(event.currentTarget.value)) {
+														setMediaKindFilter(event.currentTarget.value);
 														setUnit(undefined);
 													}
 												}}
@@ -214,20 +202,14 @@ export function MediaContentNodeDialog({
 												<NativeSelectOption value="all">
 													{t.units.content.allMediaKinds}
 												</NativeSelectOption>
-												<NativeSelectOption value="video">
-													{t.units.types.video}
-												</NativeSelectOption>
-												<NativeSelectOption value="audio">
-													{t.units.types.audio}
-												</NativeSelectOption>
+												<NativeSelectOption value="video">{t.units.types.video}</NativeSelectOption>
+												<NativeSelectOption value="audio">{t.units.types.audio}</NativeSelectOption>
 											</NativeSelect>
 										</Field>
 									)}
 									<Field required>
 										<FieldLabel>
-											{label
-												? t.units.content.existingLabel
-												: t.units.content.existingMediaItem}
+											{label ? t.units.content.existingLabel : t.units.content.existingMediaItem}
 										</FieldLabel>
 										<fieldset className="contents" disabled={pending}>
 											<EntityPicker
@@ -241,9 +223,7 @@ export function MediaContentNodeDialog({
 													? { kind: "label" }
 													: {
 															kinds:
-																mediaKindFilter === "all"
-																	? ["video", "audio"]
-																	: [mediaKindFilter],
+																mediaKindFilter === "all" ? ["video", "audio"] : [mediaKindFilter],
 														})}
 												onChange={setUnit}
 												onClear={() => setUnit(undefined)}
@@ -263,17 +243,11 @@ export function MediaContentNodeDialog({
 									onClick={() => setDestinationDialogOpen(true)}
 									type="button"
 								>
-									<Folder
-										aria-hidden
-										className="size-4 shrink-0 text-muted-foreground"
-									/>
+									<Folder aria-hidden className="size-4 shrink-0 text-muted-foreground" />
 									<span className="min-w-0 flex-1 truncate font-medium">
 										{destinationLabel(nodes, destination, t.units.content.root)}
 									</span>
-									<ChevronRight
-										aria-hidden
-										className="size-4 shrink-0 text-muted-foreground"
-									/>
+									<ChevronRight aria-hidden className="size-4 shrink-0 text-muted-foreground" />
 								</button>
 							</Field>
 							{unsavedChanges ? (

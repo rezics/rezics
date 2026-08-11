@@ -31,11 +31,7 @@ export function CollectionHistoryComparePage({
 			/>
 			{from && to ? (
 				stream === "items" ? (
-					<CollectionStructureRevisionCompare
-						collectionId={collection.id}
-						from={from}
-						to={to}
-					/>
+					<CollectionStructureRevisionCompare collectionId={collection.id} from={from} to={to} />
 				) : (
 					<UnitRevisionCompare from={from} to={to} unitId={collection.id} />
 				)

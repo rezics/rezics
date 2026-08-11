@@ -121,9 +121,7 @@ function RealmSettingsWorkspaceContent({
 	const canManageDocks = dockAccess.allowedKinds.length > 0;
 	if (!canOpenRealmSettings(capabilities, canManageDocks))
 		return (
-			<p className="mx-auto max-w-4xl px-4 py-10 text-sm text-destructive">
-				{t.errors.forbidden}
-			</p>
+			<p className="mx-auto max-w-4xl px-4 py-10 text-sm text-destructive">{t.errors.forbidden}</p>
 		);
 	const labels = t.realms.settingsWorkspace.sections;
 	const allSections: ManagementWorkspaceSection<RealmSettingsSectionId>[] = [
@@ -321,11 +319,7 @@ function RealmSettingsWorkspaceContent({
 						<RealmModeration embedded realmId={realmId} />
 					</RealmSettingsSection>
 				) : (
-					<RealmHistorySection
-						baseHref={baseHref}
-						comparison={comparison}
-						realmId={realmId}
-					/>
+					<RealmHistorySection baseHref={baseHref} comparison={comparison} realmId={realmId} />
 				)}
 			</ManagementWorkspace>
 		</ContentLanguageEditorProvider>
@@ -448,11 +442,7 @@ function RealmHistorySection({
 		<RealmSettingsSection baseHref={baseHref} section="history">
 			{comparison ? (
 				comparison.from && comparison.to ? (
-					<UnitRevisionCompare
-						from={comparison.from}
-						to={comparison.to}
-						unitId={realmId}
-					/>
+					<UnitRevisionCompare from={comparison.from} to={comparison.to} unitId={realmId} />
 				) : (
 					<p className="text-sm text-destructive">{t.errors.invalid}</p>
 				)

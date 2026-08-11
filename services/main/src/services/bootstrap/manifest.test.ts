@@ -213,9 +213,7 @@ describe("database bootstrap manifest", () => {
 			expect.objectContaining({ language: "zh", title: verbatimTerms.rezics.value }),
 			expect.objectContaining({ language: "en", title: verbatimTerms.rezics.value }),
 		]);
-		expect(OfficialZoneManifest.map((value) => value.id)).not.toContain(
-			OfficialRealmManifest.id,
-		);
+		expect(OfficialZoneManifest.map((value) => value.id)).not.toContain(OfficialRealmManifest.id);
 	});
 
 	it("bootstraps REZICS Score as a distinct fixed-identity Realm", () => {

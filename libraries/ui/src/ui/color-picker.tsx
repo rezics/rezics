@@ -390,9 +390,7 @@ export const ColorPickerInput = (
 ) => {
 	const { channel = "hex", ...rest } = props;
 
-	return (
-		<ArkColorPicker.ChannelInput channel={channel} data-slot="color-picker-input" {...rest} />
-	);
+	return <ArkColorPicker.ChannelInput channel={channel} data-slot="color-picker-input" {...rest} />;
 };
 
 export const ColorPickerSwatchPreview = (props: React.ComponentProps<typeof ark.div>) => {

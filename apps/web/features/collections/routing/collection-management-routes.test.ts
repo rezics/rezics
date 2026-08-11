@@ -32,19 +32,13 @@ describe("Collection management routes", () => {
 			"/collections/collection-1/edit/content",
 		);
 		expect(
-			parseCollectionManagementSection(
-				"/collections/collection-1/edit/content",
-				"collection-1",
-			),
+			parseCollectionManagementSection("/collections/collection-1/edit/content", "collection-1"),
 		).toBe("content");
 		expect(collectionManagementSectionHref("collection-1", "metadata")).toBe(
 			"/collections/collection-1/edit/metadata",
 		);
 		expect(
-			parseCollectionManagementSection(
-				"/collections/collection-1/edit/metadata",
-				"collection-1",
-			),
+			parseCollectionManagementSection("/collections/collection-1/edit/metadata", "collection-1"),
 		).toBe("metadata");
 	});
 });

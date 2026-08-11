@@ -59,13 +59,8 @@ export const recommendationSnapshot = pgTable(
 		error: text(),
 	},
 	(table) => [
-		uniqueIndex("recommendation_snapshot_active_key")
-			.on(table.active)
-			.where(sql`${table.active}`),
-		index("recommendation_snapshot_state_started_at_idx").on(
-			table.state,
-			table.startedAt.desc(),
-		),
+		uniqueIndex("recommendation_snapshot_active_key").on(table.active).where(sql`${table.active}`),
+		index("recommendation_snapshot_state_started_at_idx").on(table.state, table.startedAt.desc()),
 		check(
 			"recommendation_snapshot_policy_version_not_blank",
 			sql`btrim(${table.policyVersion}) <> ''`,

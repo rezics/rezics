@@ -61,12 +61,7 @@ export function CollectionMetadataPage() {
 				<form className="grid max-w-xl gap-6" onSubmit={(event) => void submit(event)}>
 					<CollectionLifecycleFields status={status} visibility={visibility} />
 					<RequestFailure error={update.error} fallback={t.ui.retryLater} />
-					<Button
-						className="w-fit"
-						isLoading={update.isPending}
-						type="submit"
-						variant="solid"
-					>
+					<Button className="w-fit" isLoading={update.isPending} type="submit" variant="solid">
 						{t.collections.form.save}
 					</Button>
 				</form>

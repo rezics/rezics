@@ -197,9 +197,9 @@ describe("UnitProgressDialog", () => {
 		fireEvent.change(screen.getByRole("combobox", { name: "目前項目" }), {
 			target: { value: "019f0000-0000-7000-8000-000000000057" },
 		});
-		expect(
-			(screen.getByRole("spinbutton", { name: "播放進度" }) as HTMLInputElement).value,
-		).toBe("57");
+		expect((screen.getByRole("spinbutton", { name: "播放進度" }) as HTMLInputElement).value).toBe(
+			"57",
+		);
 		fireEvent.click(screen.getByRole("button", { name: "更新進度" }));
 
 		await vi.waitFor(() =>
@@ -217,9 +217,9 @@ describe("UnitProgressDialog", () => {
 		setProgressState({ ...existingRecord, progress: 0.57 }, "media");
 		renderDialog();
 
-		expect(
-			(screen.getByRole("spinbutton", { name: "播放進度" }) as HTMLInputElement).value,
-		).toBe("57");
+		expect((screen.getByRole("spinbutton", { name: "播放進度" }) as HTMLInputElement).value).toBe(
+			"57",
+		);
 		expect(screen.queryByText("57")).toBeNull();
 	});
 

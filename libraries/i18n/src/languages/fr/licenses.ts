@@ -45,8 +45,7 @@ export default {
 		keepLicense: "Conserver la licence",
 		confirmNone: "Continuer sans licence",
 		publicWorkNotice: `Les œuvres communautaires n’accordent aucune licence de contenu à ${verbatimTerms.rezics.value} et ne doivent contenir que des informations d’index sur l’œuvre.`,
-		grantedNotice:
-			"Cette licence de contenu a été accordée de façon permanente pour ce contenu.",
+		grantedNotice: "Cette licence de contenu a été accordée de façon permanente pour ce contenu.",
 		contributionNotice: `Le contenu que vous fournissez pendant l’application de cette licence est concédé à ${verbatimTerms.rezics.value} selon les mêmes conditions ; aucune sélection de licence distincte n’est nécessaire.`,
 		cancelGrant: "Annuler",
 		confirmGrant: "Accorder la licence",

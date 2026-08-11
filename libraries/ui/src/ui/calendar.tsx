@@ -212,9 +212,7 @@ export const CalendarWeekDays = (props: CalendarWeekDaysProps) => {
 				<CalendarTableHead data-slot="calendar-table-head" {...rest}>
 					<CalendarTableRow>
 						{calendar.weekDays.map((weekDay) => (
-							<CalendarTableHeader key={weekDay.short}>
-								{weekDay[format]}
-							</CalendarTableHeader>
+							<CalendarTableHeader key={weekDay.short}>{weekDay[format]}</CalendarTableHeader>
 						))}
 					</CalendarTableRow>
 				</CalendarTableHead>
@@ -232,11 +230,7 @@ export const CalendarTableDays = (props: React.ComponentProps<typeof CalendarTab
 					{calendar.weeks.map((week, index) => (
 						<CalendarTableRow key={index}>
 							{week.map((day) => (
-								<CalendarTableCell
-									key={day.day}
-									tabIndex={tabIndex ?? undefined}
-									value={day}
-								>
+								<CalendarTableCell key={day.day} tabIndex={tabIndex ?? undefined} value={day}>
 									{day.day}
 								</CalendarTableCell>
 							))}

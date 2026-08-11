@@ -600,14 +600,8 @@ export function getFeedEligibilityCondition(
 						.select({ scoreId: score.id })
 						.from(postScore)
 						.innerJoin(score, eq(score.id, postScore.scoreId))
-						.innerJoin(
-							profilePreference,
-							eq(profilePreference.profileId, score.profileId),
-						)
-						.innerJoin(
-							feedReviewScoreTargetUnit,
-							eq(feedReviewScoreTargetUnit.id, score.unitId),
-						)
+						.innerJoin(profilePreference, eq(profilePreference.profileId, score.profileId))
+						.innerJoin(feedReviewScoreTargetUnit, eq(feedReviewScoreTargetUnit.id, score.unitId))
 						.innerJoin(feedReviewScoreRealm, eq(feedReviewScoreRealm.id, score.realmId))
 						.where(
 							and(
@@ -621,11 +615,7 @@ export function getFeedEligibilityCondition(
 									viewerProfileId: viewer.profileId,
 									surface: "linked",
 								}),
-								getUnitReadCondition(
-									viewer.profileId,
-									{},
-									feedReviewScoreTargetUnit,
-								),
+								getUnitReadCondition(viewer.profileId, {}, feedReviewScoreTargetUnit),
 								getUnitReadCondition(viewer.profileId, {}, feedReviewScoreRealm),
 							),
 						),
@@ -688,10 +678,7 @@ export function createFeedTotal(input: {
 	const value = positionOffset + input.candidates.length;
 	if (!Number.isSafeInteger(value)) throw new RangeError("Feed total exceeds safe integer range");
 	return {
-		kind:
-			input.coverage === "exhaustive" && input.searchKind === "exact"
-				? "exact"
-				: "lower-bound",
+		kind: input.coverage === "exhaustive" && input.searchKind === "exact" ? "exact" : "lower-bound",
 		value,
 	};
 }
@@ -916,15 +903,11 @@ export async function hydrateFeedItems(
 				isFeedUnitKind(row.unitKind) && isFeedRatedWorkUnitKind(row.unitKind),
 		)
 		.map(({ id }) => id);
-	const subjectIds = [
-		...new Set(rows.flatMap(({ subjectId }) => (subjectId ? [subjectId] : []))),
-	];
+	const subjectIds = [...new Set(rows.flatMap(({ subjectId }) => (subjectId ? [subjectId] : [])))];
 	const scoreTargetIds = [...new Set([...ratedWorkIds, ...subjectIds])];
 	const globalScoreRealmId = OfficialRealmUnitIds.score;
 	const scoreRealmIds = [...new Set([viewer.defaultScoreRealmId, globalScoreRealmId])];
-	const rootIds = [
-		...new Set(rows.flatMap(({ rootPostId }) => (rootPostId ? [rootPostId] : []))),
-	];
+	const rootIds = [...new Set(rows.flatMap(({ rootPostId }) => (rootPostId ? [rootPostId] : [])))];
 	const [
 		availableLanguageRows,
 		rootReplyCounts,
@@ -1002,11 +985,7 @@ export async function hydrateFeedItems(
 						language: resolvedUnitLocalizationLanguage(unit.id, displayLanguages),
 						title: unitLocalization.title,
 						summary: unitLocalization.summary,
-						coverAssetId: resolvedUnitLocalizationImageAssetId(
-							unit.id,
-							"cover",
-							displayLanguages,
-						),
+						coverAssetId: resolvedUnitLocalizationImageAssetId(unit.id, "cover", displayLanguages),
 					})
 					.from(unit)
 					.leftJoin(
@@ -1106,14 +1085,8 @@ export async function hydrateFeedItems(
 							feedRealmContextTagUnit.id,
 							displayLanguages,
 						),
-						title: resolvedUnitLocalizationTitle(
-							feedRealmContextTagUnit.id,
-							displayLanguages,
-						),
-						avatar: resolvedUnitLocalizationAvatar(
-							feedRealmContextTagUnit.id,
-							displayLanguages,
-						),
+						title: resolvedUnitLocalizationTitle(feedRealmContextTagUnit.id, displayLanguages),
+						avatar: resolvedUnitLocalizationAvatar(feedRealmContextTagUnit.id, displayLanguages),
 					})
 					.from(realmTagContext)
 					.innerJoin(
@@ -1125,10 +1098,7 @@ export async function hydrateFeedItems(
 							eq(realmUnit.publicationState, "active"),
 						),
 					)
-					.innerJoin(
-						feedRealmContextTagUnit,
-						eq(feedRealmContextTagUnit.id, realmTagContext.tagId),
-					)
+					.innerJoin(feedRealmContextTagUnit, eq(feedRealmContextTagUnit.id, realmTagContext.tagId))
 					.where(
 						and(
 							inArray(realmTagContext.contextPostId, wikiIds),
@@ -1146,10 +1116,7 @@ export async function hydrateFeedItems(
 							feedRealmContextPostUnit.id,
 							displayLanguages,
 						),
-						summary: resolvedUnitLocalizationSummary(
-							feedRealmContextPostUnit.id,
-							displayLanguages,
-						),
+						summary: resolvedUnitLocalizationSummary(feedRealmContextPostUnit.id, displayLanguages),
 					})
 					.from(realmTagContext)
 					.innerJoin(
@@ -1179,20 +1146,14 @@ export async function hydrateFeedItems(
 						postId: postScore.postId,
 						scoreId: score.id,
 						realmId: score.realmId,
-						realmTitle: resolvedUnitLocalizationTitle(
-							feedReviewScoreRealm.id,
-							displayLanguages,
-						),
+						realmTitle: resolvedUnitLocalizationTitle(feedReviewScoreRealm.id, displayLanguages),
 						value: score.value,
 						position: postScore.position,
 					})
 					.from(postScore)
 					.innerJoin(score, eq(score.id, postScore.scoreId))
 					.innerJoin(profilePreference, eq(profilePreference.profileId, score.profileId))
-					.innerJoin(
-						feedReviewScoreTargetUnit,
-						eq(feedReviewScoreTargetUnit.id, score.unitId),
-					)
+					.innerJoin(feedReviewScoreTargetUnit, eq(feedReviewScoreTargetUnit.id, score.unitId))
 					.innerJoin(feedReviewScoreRealm, eq(feedReviewScoreRealm.id, score.realmId))
 					.where(
 						and(
@@ -1405,15 +1366,10 @@ export async function hydrateFeedItems(
 							kind: "identity",
 							avatar: presentAvatar(row.avatar),
 							banner: presentImageAsset(row.bannerAssetId, "banner"),
-							memberCount:
-								row.unitKind === "realm"
-									? (realmMemberCount.get(row.id) ?? 0)
-									: null,
+							memberCount: row.unitKind === "realm" ? (realmMemberCount.get(row.id) ?? 0) : null,
 							realmTagContext:
 								row.unitKind === "tag" && ranked.realmId
-									? (realmTagContextByRealmTag.get(
-											`${ranked.realmId}:${row.id}`,
-										) ?? null)
+									? (realmTagContextByRealmTag.get(`${ranked.realmId}:${row.id}`) ?? null)
 									: null,
 						},
 					},
@@ -1440,9 +1396,7 @@ export async function hydrateFeedItems(
 			parentPostId: row.parentPostId,
 			body: row.body === null ? null : toPortableTextResponse(row.body, "post.body"),
 			replyCount:
-				row.postKind === "reply"
-					? (childCount.get(row.id) ?? 0)
-					: (rootCount.get(row.id) ?? 0),
+				row.postKind === "reply" ? (childCount.get(row.id) ?? 0) : (rootCount.get(row.id) ?? 0),
 			title: row.title,
 			latestRevisionId: row.latestRevisionId,
 			replyContext: row.rootPostId ? (rootContext.get(row.rootPostId) ?? null) : null,
@@ -1551,9 +1505,7 @@ export default new Elysia({ prefix: "/feed" }).model(FilterSchemaModels).post(
 		const sources: CandidateSources = {
 			ids: [...searchSelection.ids],
 			reason: new Map(
-				sort === "new"
-					? searchSelection.ids.map((id) => [id, "new_and_relevant"] as const)
-					: [],
+				sort === "new" ? searchSelection.ids.map((id) => [id, "new_and_relevant"] as const) : [],
 			),
 		};
 		const candidates = await getFeedRankingCandidates({
@@ -1593,9 +1545,7 @@ export default new Elysia({ prefix: "/feed" }).model(FilterSchemaModels).post(
 							v: 11,
 							sort,
 							filterHash: body.filter
-								? createHash("sha256")
-										.update(canonicalUnitFilter(body.filter))
-										.digest("hex")
+								? createHash("sha256").update(canonicalUnitFilter(body.filter)).digest("hex")
 								: null,
 							filterLanguages,
 							localizationLanguages,
@@ -1616,10 +1566,7 @@ export default new Elysia({ prefix: "/feed" }).model(FilterSchemaModels).post(
 		body: FeedRequest,
 		response: {
 			[StatusCodes.OK]: FeedResponse,
-			[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
-				"InvalidFeedCursor",
-				"InvalidFeedFilter",
-			]),
+			[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["InvalidFeedCursor", "InvalidFeedFilter"]),
 			[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["InvalidSearch"]),
 			[StatusCodes.SERVICE_UNAVAILABLE]: toApiErrorResponse(["SearchUnavailable"]),
 		},

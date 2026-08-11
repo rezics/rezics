@@ -37,8 +37,7 @@ export default {
 		levelDescriptions: {
 			visible: "Alle mit Lesezugriff auf diese Unit können die Version sehen.",
 			hidden: "Nur Personen mit Plattform-Moderationszugriff können die gewählten Daten sehen.",
-			suppressed:
-				"Nur Personen mit Unterdrückungsberechtigung können die gewählten Daten sehen.",
+			suppressed: "Nur Personen mit Unterdrückungsberechtigung können die gewählten Daten sehen.",
 		},
 		fieldsLabel: "Geschützte Daten",
 		fields: {

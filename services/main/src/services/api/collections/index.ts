@@ -176,9 +176,7 @@ export default new Elysia({ prefix: "/collections" })
 		"",
 		async ({ query, request }) => {
 			const localizationLanguages = query.localizationLanguages ?? [];
-			const identity = query.editableOnly
-				? await resolveIdentity(request, "unit:read")
-				: undefined;
+			const identity = query.editableOnly ? await resolveIdentity(request, "unit:read") : undefined;
 			const viewerId = identity?.profile?.unitId;
 			if (query.editableOnly && !viewerId) return { items: [], nextCursor: null };
 			if (viewerId) await ensureFavorites(viewerId);
@@ -196,10 +194,7 @@ export default new Elysia({ prefix: "/collections" })
 			const cursorCondition = cursor
 				? or(
 						lt(favoritesRank, cursor.favoritesRank),
-						and(
-							eq(favoritesRank, cursor.favoritesRank),
-							lt(unit.updatedAt, cursor.updatedAt),
-						),
+						and(eq(favoritesRank, cursor.favoritesRank), lt(unit.updatedAt, cursor.updatedAt)),
 						and(
 							eq(favoritesRank, cursor.favoritesRank),
 							eq(unit.updatedAt, cursor.updatedAt),
@@ -293,17 +288,10 @@ export default new Elysia({ prefix: "/collections" })
 			);
 			return {
 				items: items.map(
-					({
-						coverAssetId,
-						favoritesRank: _favoritesRank,
-						favoritesProfileId,
-						...item
-					}) => ({
+					({ coverAssetId, favoritesRank: _favoritesRank, favoritesProfileId, ...item }) => ({
 						...item,
 						itemCount: toSafeInteger(item.itemCount, "Collection item count"),
-						purpose: favoritesProfileId
-							? ("favorites" as const)
-							: ("collection" as const),
+						purpose: favoritesProfileId ? ("favorites" as const) : ("collection" as const),
 						acceptsItems: Boolean(query.editableOnly),
 						attributions: attributionMap.get(item.id) ?? [],
 						cover: presentImageAsset(coverAssetId, "cover"),
@@ -447,9 +435,7 @@ export default new Elysia({ prefix: "/collections" })
 		async ({ params, profile, authorization, body }) => {
 			await authorization.unit.ensure(params.collectionId, "unit.update");
 			const statusUpdateDecision = body.status
-				? await authorization.unit.decide(params.collectionId, "unit.status.update", [
-						"unit",
-					])
+				? await authorization.unit.decide(params.collectionId, "unit.status.update", ["unit"])
 				: undefined;
 			const [current] = await database
 				.select({ favoritesProfileId: profileFavoritesCollection.profileId })
@@ -512,10 +498,7 @@ export default new Elysia({ prefix: "/collections" })
 				[StatusCodes.OK]: CollectionDetailResponse,
 				[StatusCodes.FORBIDDEN]: CollectionMutationForbiddenResponse,
 				[StatusCodes.NOT_FOUND]: CollectionMutationNotFoundResponse,
-				[StatusCodes.CONFLICT]: t.Union([
-					FavoritesEditResponse,
-					UnitRevisionConflictResponse,
-				]),
+				[StatusCodes.CONFLICT]: t.Union([FavoritesEditResponse, UnitRevisionConflictResponse]),
 			},
 			detail: { summary: "Update collection", tags: ["Collections"] },
 		},
@@ -598,8 +581,7 @@ export default new Elysia({ prefix: "/collections" })
 				return {
 					items: body.items.map(({ targetId }, index) => {
 						const itemState = result.results[index]?.itemState;
-						if (!itemState)
-							throw new Error("Collection add batch result is incomplete");
+						if (!itemState) throw new Error("Collection add batch result is incomplete");
 						return { targetId, state: itemState };
 					}),
 					latestItemsRevisionId: result.revisionId,
@@ -743,11 +725,7 @@ export default new Elysia({ prefix: "/collections" })
 			const { authorization } = await resolveIdentity(request, "unit:read");
 			await authorization.unit.ensureCanRead(params.collectionId);
 			return database.transaction(async (tx) => ({
-				items: await listCollectionStructureRevisions(
-					tx,
-					params.collectionId,
-					query.limit ?? 50,
-				),
+				items: await listCollectionStructureRevisions(tx, params.collectionId, query.limit ?? 50),
 			}));
 		},
 		{

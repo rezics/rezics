@@ -43,9 +43,9 @@ describe("unit public-entry search subjects", () => {
 
 describe("public-entry search routes", () => {
 	it("carries the exact subject and current title into Studio search", () => {
-		expect(
-			communityUnitSearchHref(unitCommunityUnitSearchSubject("media"), "  The Bear  "),
-		).toBe("/create/media/search?kind=media&q=The+Bear");
+		expect(communityUnitSearchHref(unitCommunityUnitSearchSubject("media"), "  The Bear  ")).toBe(
+			"/create/media/search?kind=media&q=The+Bear",
+		);
 		expect(communityUnitSearchHref(entityCommunityUnitSearchSubject("person"), "")).toBe(
 			"/create/entity/search?kind=person",
 		);

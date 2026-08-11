@@ -39,7 +39,8 @@ export default {
 			"El idioma del contenido no está claro, así que se usa tu primera preferencia de idioma.",
 		unsupported:
 			"El idioma detectado aún no es compatible, así que se usa tu primera preferencia de idioma.",
-		failed: "La detección de idioma no está disponible temporalmente, así que se usa tu primera preferencia de idioma.",
+		failed:
+			"La detección de idioma no está disponible temporalmente, así que se usa tu primera preferencia de idioma.",
 	},
 	chineseContentDisplay: {
 		label: "Visualización del contenido en chino",

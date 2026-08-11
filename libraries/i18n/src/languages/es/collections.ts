@@ -54,8 +54,7 @@ export default {
 		sections: {
 			content: {
 				label: "Contenido",
-				description:
-					"Edita el título, el resumen y la portada en cada idioma del contenido.",
+				description: "Edita el título, el resumen y la portada en cada idioma del contenido.",
 			},
 			metadata: {
 				label: metadataTerms.label,

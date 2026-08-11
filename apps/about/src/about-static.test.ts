@@ -37,9 +37,9 @@ describe("public content contract", () => {
 		expect(PRODUCT_DEFINITIONS).toHaveLength(26);
 		expect(PRODUCT_IDS).toHaveLength(26);
 		expect(validateProductRegistry()).toEqual([]);
-		expect(
-			PRODUCT_DEFINITIONS.every((product) => PRODUCT_STAGE_IDS.includes(product.stage)),
-		).toBe(true);
+		expect(PRODUCT_DEFINITIONS.every((product) => PRODUCT_STAGE_IDS.includes(product.stage))).toBe(
+			true,
+		);
 		for (const stage of PRODUCT_STAGE_IDS) {
 			expect(
 				PRODUCT_DEFINITIONS.filter((product) => product.stage === stage).length,
@@ -96,9 +96,7 @@ describe("public content contract", () => {
 				expect(source).toContain(`productId: ${id}`);
 				expect(source).toContain(`locale: ${locale}`);
 				expect(sections).toHaveLength(expectedStructure.sectionCount);
-				expect(source.match(/^1\. /gm)?.length ?? 0).toBe(
-					expectedStructure.numberedItemCount,
-				);
+				expect(source.match(/^1\. /gm)?.length ?? 0).toBe(expectedStructure.numberedItemCount);
 				expect(source.match(/^```/gm)?.length ?? 0).toBe(expectedStructure.codeFenceCount);
 				expect(source).toContain("statusNote:");
 				expect(sections.length).toBeGreaterThanOrEqual(4);
@@ -153,9 +151,7 @@ describe("public content contract", () => {
 				expect(copy.how.v1.mechanisms.items).toHaveLength(HOW_MECHANISM_DEFINITIONS.length);
 				expect(copy.how.v1.mechanisms.items[1]?.example.title).toContain("日文書單");
 				expect(copy.how.v1.mechanisms.items[2]?.rule).toContain("不會因內容出現在其中");
-				expect(copy.how.v1.mechanisms.items[3]?.rule).toContain(
-					"全域投票不得和領域投票合併",
-				);
+				expect(copy.how.v1.mechanisms.items[3]?.rule).toContain("全域投票不得和領域投票合併");
 				expect(copy.how.v1.mechanisms.items[4]?.title).toContain("Portable Text");
 				expect(copy.how.v1.loop.steps).toHaveLength(5);
 				expect(copy.products.stage.labels).toEqual({

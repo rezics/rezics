@@ -49,11 +49,7 @@ export function CommunityUnitSearchPrompt({
 					onCheckedChange={({ checked }) => onConfirmedChange(checked === true)}
 					required
 				/>
-				<FieldLabel
-					className="font-normal"
-					htmlFor={confirmationInputId}
-					id={confirmationLabelId}
-				>
+				<FieldLabel className="font-normal" htmlFor={confirmationInputId} id={confirmationLabelId}>
 					{messages.confirmationLabel({ subject: subjectLabel })}
 				</FieldLabel>
 			</Field>

@@ -57,8 +57,7 @@ export default {
 		"platform.session.revoke": "Benutzersitzungen widerrufen",
 		"entity.associations.override": `Berechtigungen für Zuordnungen zu ${entityTerms.plural} übergehen`,
 		"unit.edit": "Alle Units bearbeiten",
-		"platform.development_preview.access":
-			"Auf unveröffentlichte Entwicklungsvorschauen zugreifen",
+		"platform.development_preview.access": "Auf unveröffentlichte Entwicklungsvorschauen zugreifen",
 		"unit.governance.read": "Verwaltungsdaten aller Units einsehen",
 		"unit.ownership.override": "Eigentümerschaft einer beliebigen Unit neu zuweisen",
 		"unit.content_license.manage":

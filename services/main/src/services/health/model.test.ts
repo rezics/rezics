@@ -90,20 +90,17 @@ describe("readiness check model", () => {
 			"dependency",
 		],
 		["timeout", async (): Promise<boolean> => new Promise(() => undefined), "timeout"],
-	] as const)(
-		"keeps the API ready for an optional %s result",
-		async (_label, probe, category) => {
-			const report = await evaluator([check("storage", "optional", probe, 10)])();
+	] as const)("keeps the API ready for an optional %s result", async (_label, probe, category) => {
+		const report = await evaluator([check("storage", "optional", probe, 10)])();
 
-			expect(report.status).toBe("ready");
-			expect(report.checks[0]).toMatchObject({
-				name: "storage",
-				state: "degraded",
-				failureCategory: category,
-			});
-			expect(JSON.stringify(report)).not.toContain("storage-secret");
-		},
-	);
+		expect(report.status).toBe("ready");
+		expect(report.checks[0]).toMatchObject({
+			name: "storage",
+			state: "degraded",
+			failureCategory: category,
+		});
+		expect(JSON.stringify(report)).not.toContain("storage-secret");
+	});
 
 	it("distinguishes configuration failures internally without exposing an error", async () => {
 		const report = await evaluator([

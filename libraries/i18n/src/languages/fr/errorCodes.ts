@@ -27,8 +27,7 @@ export default {
 	ApiTokenLimitReached: `Ce compte a atteint sa limite de jetons ${verbatimTerms.api.value}.`,
 	ApiTokenQuotaOverrideInvalid: `La dérogation de quota du jeton ${verbatimTerms.api.value} n’est pas valide.`,
 	ApiTokenQuotaOverrideRevisionConflict: `La dérogation de quota du jeton ${verbatimTerms.api.value} a changé. Rechargez-la avant d’enregistrer.`,
-	InteractiveSessionRequired:
-		"Connectez-vous de manière interactive pour gérer les identifiants.",
+	InteractiveSessionRequired: "Connectez-vous de manière interactive pour gérer les identifiants.",
 	FreshSessionRequired: "Reconnectez-vous avant d’effectuer une action administrative sensible.",
 	EmailVerificationRequired: "Vérifiez votre adresse e-mail pour continuer.",
 	AccountSuspended: "Ce compte est actuellement suspendu.",
@@ -95,8 +94,7 @@ export default {
 	PollSingleChoiceInvalid: "Choisissez exactement une option pour ce sondage.",
 	PollOptionInvalid: "L’option de sondage sélectionnée n’est pas valide.",
 	PollAlreadyClosed: "Ce sondage est déjà clos.",
-	ContentStructureInvalid:
-		"Cette structure de contenu ne respecte pas les règles de sa fonction.",
+	ContentStructureInvalid: "Cette structure de contenu ne respecte pas les règles de sa fonction.",
 	ContentStructureNotFound: "Cette structure de contenu est introuvable.",
 	ContentStructureNodeNotFound: "Ce nœud de la structure de contenu est introuvable.",
 	ReviewNotFound: "Cet avis est introuvable.",
@@ -109,18 +107,15 @@ export default {
 	ContentGovernanceTransitionInvalid:
 		"La cible ne peut pas effectuer cette transition d’état de modération.",
 	ContentGovernanceActionNoEffect: "L’action de modération ne modifierait pas la cible.",
-	ContentGovernanceReversalUnavailable:
-		"Cette action ne peut plus être annulée en toute sécurité.",
+	ContentGovernanceReversalUnavailable: "Cette action ne peut plus être annulée en toute sécurité.",
 	ContentGovernanceIdempotencyConflict:
 		"Cette clé de nouvelle tentative a déjà été utilisée pour une autre demande de modération.",
 	GovernanceNoteRoleDuplicate: "Ajoutez au maximum une note interne et un avis public.",
 	ReportAlreadySubmitted: "Vous avez déjà signalé cette unité pour le dossier en cours.",
-	ReportTargetRevisionUnavailable:
-		"Cette unité ne possède aucune révision pouvant être signalée.",
+	ReportTargetRevisionUnavailable: "Cette unité ne possède aucune révision pouvant être signalée.",
 	ReportRuleUnavailable:
 		"Le périmètre de gouvernance sélectionné ne comporte aucune règle en vigueur.",
-	ReportRuleChanged:
-		"La règle sélectionnée a changé. Sélectionnez-en une à nouveau avant l’envoi.",
+	ReportRuleChanged: "La règle sélectionnée a changé. Sélectionnez-en une à nouveau avant l’envoi.",
 	ReportRuleSourceForbidden: `Les signalements ne peuvent citer que les règles du ${realmTerms.inline} actuel et les règles officielles.`,
 	ContentGovernanceRuleSourceForbidden:
 		"La règle sélectionnée ne relève pas de cette autorité de gouvernance des contenus.",
@@ -204,8 +199,7 @@ export default {
 	UnitExternalLinkNotFound: "Ce lien externe de l’œuvre est introuvable.",
 	UnitReferenceCurationChanged:
 		"La sélection des références a été modifiée ailleurs. Le dernier ordre a été chargé ; veuillez réessayer.",
-	UnitReferenceLimitReached:
-		"Cette œuvre a déjà atteint le nombre maximal de références actives.",
+	UnitReferenceLimitReached: "Cette œuvre a déjà atteint le nombre maximal de références actives.",
 	UnitReferencePinnedLimitReached:
 		"Cette œuvre a déjà atteint le nombre maximal de références épinglées.",
 	UnitReferenceWithdrawn: "Cette référence a été retirée.",
@@ -216,8 +210,7 @@ export default {
 		"Un élément principal possédant des variantes ne peut pas devenir une variante.",
 	UnitVariantChanged:
 		"La relation entre la Unit et son élément principal a changé. Actualisez la page et réessayez.",
-	UnitVariantMainUnavailable:
-		"L’élément principal n’est pas disponible pour cet état de variante.",
+	UnitVariantMainUnavailable: "L’élément principal n’est pas disponible pour cet état de variante.",
 	InvalidMessageCursor: "Ce lien de page de messages n’est pas valide ou a expiré.",
 	ConversationNotFound: "Cette conversation est introuvable.",
 	ConversationParticipantsInvalid: "Une conversation directe nécessite deux utilisateurs.",

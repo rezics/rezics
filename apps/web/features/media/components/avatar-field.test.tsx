@@ -88,11 +88,7 @@ describe("AvatarField", () => {
 	it("shows the fallback preview without per-field policy copy or a remove action", async () => {
 		const onChange = vi.fn();
 		renderField(
-			<AvatarField
-				fallback={{ type: "emoji", emoji: "🦈" }}
-				onChange={onChange}
-				value={null}
-			/>,
+			<AvatarField fallback={{ type: "emoji", emoji: "🦈" }} onChange={onChange} value={null} />,
 		);
 
 		expect(screen.queryByText("繼承的頭像")).toBeNull();

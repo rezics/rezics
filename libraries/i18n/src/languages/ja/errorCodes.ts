@@ -133,8 +133,7 @@ export default {
 	UnitOwnershipChanged: "ユニットの所有者が変更されました。再読み込みして再試行してください。",
 	UnitOwnershipTargetIneligible:
 		"選択したプロフィールはユニットの所有権を受け取る条件を満たしていません。",
-	UnitOwnershipRelinquishmentForbidden:
-		"コミュニティが所有するユニットの所有権は放棄できません。",
+	UnitOwnershipRelinquishmentForbidden: "コミュニティが所有するユニットの所有権は放棄できません。",
 	UnitOwnershipOverrideConfirmationInvalid:
 		"入力したユニット識別子が所有者の強制変更対象と一致しません。",
 	UnitOwnershipClaimUnavailable:

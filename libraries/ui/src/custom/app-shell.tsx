@@ -216,10 +216,7 @@ function useFollowingAccordionState() {
 		const verifiedValue = nextValue.filter(isFollowingGroupId);
 		setValue(verifiedValue);
 		try {
-			window.localStorage.setItem(
-				FollowingAccordionPreferenceKey,
-				JSON.stringify(verifiedValue),
-			);
+			window.localStorage.setItem(FollowingAccordionPreferenceKey, JSON.stringify(verifiedValue));
 		} catch {
 			// The in-memory accordion state still works for this visit.
 		}
@@ -311,10 +308,7 @@ function FollowingAccordionGroup({
 									<FollowingMark fallbackLabel={fallbackLabel} item={item} />
 									<span className="min-w-0 flex-1 truncate">{item.label}</span>
 									{item.favorite ? (
-										<Star
-											aria-hidden
-											className="size-3 fill-current text-muted-foreground"
-										/>
+										<Star aria-hidden className="size-3 fill-current text-muted-foreground" />
 									) : null}
 								</Link>
 							);
@@ -322,9 +316,7 @@ function FollowingAccordionGroup({
 					) : group.isError ? (
 						<p className="px-3 py-2 text-destructive text-xs leading-5">{errorLabel}</p>
 					) : (
-						<p className="px-3 py-2 text-muted-foreground text-xs leading-5">
-							{group.emptyLabel}
-						</p>
+						<p className="px-3 py-2 text-muted-foreground text-xs leading-5">{group.emptyLabel}</p>
 					)}
 				</div>
 			</AccordionContent>
@@ -355,10 +347,7 @@ function SidebarShortcutList({
 				return (
 					<Link
 						aria-current={active ? "page" : undefined}
-						className={cn(
-							SidebarRowClassName,
-							active && "bg-surface-selected text-foreground",
-						)}
+						className={cn(SidebarRowClassName, active && "bg-surface-selected text-foreground")}
 						href={item.href}
 						key={item.id}
 						onClick={onNavigate}
@@ -432,9 +421,7 @@ function SidebarContents({
 					{following ? (
 						<>
 							<p aria-live="polite" className="sr-only" role="status">
-								{following.groups.some((group) => group.isLoading)
-									? following.loadingLabel
-									: null}
+								{following.groups.some((group) => group.isLoading) ? following.loadingLabel : null}
 							</p>
 							<Accordion
 								className="grid gap-1 px-3 py-2"
@@ -553,14 +540,8 @@ export function AppShell({
 						>
 							<Menu aria-hidden />
 						</Button>
-						<Link
-							aria-label={brandName}
-							className="flex h-10 items-center px-1"
-							href="/"
-						>
-							<span className="font-black text-primary text-sm tracking-[0.12em]">
-								{brandName}
-							</span>
+						<Link aria-label={brandName} className="flex h-10 items-center px-1" href="/">
+							<span className="font-black text-primary text-sm tracking-[0.12em]">{brandName}</span>
 						</Link>
 					</div>
 
@@ -571,10 +552,7 @@ export function AppShell({
 							key={`${search.href}:${search.defaultValue ?? ""}`}
 							role="search"
 						>
-							<InputGroup
-								className="border-border-weak bg-surface-container shadow-none"
-								size="lg"
-							>
+							<InputGroup className="border-border-weak bg-surface-container shadow-none" size="lg">
 								<InputGroupAddon align="inline-start">
 									{search.avatarFallback !== undefined ? (
 										<IdentityAvatar
@@ -653,16 +631,9 @@ export function AppShell({
 							{brandName}
 						</span>
 						<SheetTitle className="sr-only">{sidebar.title}</SheetTitle>
-						<SheetDescription className="sr-only">
-							{sidebar.description}
-						</SheetDescription>
+						<SheetDescription className="sr-only">{sidebar.description}</SheetDescription>
 						<SheetClose asChild>
-							<Button
-								aria-label={sidebar.close}
-								className="ms-auto"
-								size="icon-md"
-								variant="quiet"
-							>
+							<Button aria-label={sidebar.close} className="ms-auto" size="icon-md" variant="quiet">
 								<X aria-hidden />
 							</Button>
 						</SheetClose>

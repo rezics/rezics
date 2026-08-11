@@ -99,10 +99,7 @@ function ProgressEditor({ record }: { readonly record: UnitProgressRecord | null
 	const nextCompletedCount = (sourceRecord?.completedCount ?? 0) + 1;
 	const submittedVisibility = sourceRecord ? visibility : DefaultResourceVisibility;
 	const effectiveVisibility = preferences.data
-		? resolveEffectiveResourceVisibility(
-				preferences.data.progressVisibility,
-				submittedVisibility,
-			)
+		? resolveEffectiveResourceVisibility(preferences.data.progressVisibility, submittedVisibility)
 		: undefined;
 
 	async function completeCurrentProgress() {
@@ -149,9 +146,7 @@ function ProgressEditor({ record }: { readonly record: UnitProgressRecord | null
 					<FieldGroup>
 						<ProgressStatusField
 							onChange={(status) =>
-								setDraft((current) =>
-									changeProgressDraftStatus(current, status, sourceRecord),
-								)
+								setDraft((current) => changeProgressDraftStatus(current, status, sourceRecord))
 							}
 							status={draft.status}
 							t={t}
@@ -159,14 +154,11 @@ function ProgressEditor({ record }: { readonly record: UnitProgressRecord | null
 						/>
 						{sourceRecord ? (
 							<Field>
-								<FieldLabel htmlFor="progress-visibility">
-									{t.engagement.itemVisibility}
-								</FieldLabel>
+								<FieldLabel htmlFor="progress-visibility">{t.engagement.itemVisibility}</FieldLabel>
 								<NativeSelect
 									id="progress-visibility"
 									onChange={(event) => {
-										if (isResourceVisibility(event.target.value))
-											setVisibility(event.target.value);
+										if (isResourceVisibility(event.target.value)) setVisibility(event.target.value);
 									}}
 									value={visibility}
 								>
@@ -218,9 +210,7 @@ function ProgressEditor({ record }: { readonly record: UnitProgressRecord | null
 					<div className="border-t border-border-weak pt-4">
 						<Button
 							className="text-destructive hover:text-destructive"
-							disabled={
-								progress.isSaving || progress.isCompleting || progress.isRemoving
-							}
+							disabled={progress.isSaving || progress.isCompleting || progress.isRemoving}
 							onClick={() => setRemoveOpen(true)}
 							size="sm"
 							variant="quiet"
@@ -242,13 +232,8 @@ function ProgressEditor({ record }: { readonly record: UnitProgressRecord | null
 							<AlertDialogTitle>{t.engagement.removeProgress}</AlertDialogTitle>
 						</AlertDialogHeader>
 						<AlertDialogBody className="grid gap-3">
-							<AlertDialogDescription>
-								{t.engagement.removeProgressPrompt}
-							</AlertDialogDescription>
-							<RequestFailure
-								error={progress.removeError}
-								fallback={t.ui.retryLater}
-							/>
+							<AlertDialogDescription>{t.engagement.removeProgressPrompt}</AlertDialogDescription>
+							<RequestFailure error={progress.removeError} fallback={t.ui.retryLater} />
 						</AlertDialogBody>
 						<AlertDialogFooter>
 							<AlertDialogCancel disabled={progress.isRemoving}>
@@ -429,8 +414,7 @@ function ContentStructureNodeField({
 			<FieldLabel htmlFor="unit-progress-content-structure-node">{label}</FieldLabel>
 			<NativeSelect
 				disabled={
-					progress.contentStructureNodesPending ||
-					Boolean(progress.contentStructureNodesError)
+					progress.contentStructureNodesPending || Boolean(progress.contentStructureNodesError)
 				}
 				id="unit-progress-content-structure-node"
 				onChange={(event) => {
@@ -454,10 +438,7 @@ function ContentStructureNodeField({
 				))}
 			</NativeSelect>
 			{draft.lastNodeId ? <FieldDescription>{description}</FieldDescription> : null}
-			<RequestFailure
-				error={progress.contentStructureNodesError}
-				fallback={t.ui.retryLater}
-			/>
+			<RequestFailure error={progress.contentStructureNodesError} fallback={t.ui.retryLater} />
 		</Field>
 	);
 }

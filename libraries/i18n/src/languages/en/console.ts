@@ -233,8 +233,7 @@ export default {
 		reason: "Reason",
 		suspensionExpiry: "Suspension expiry (optional)",
 		internalNote: "Internal note (optional)",
-		notePlaceholder:
-			"Record the rationale; this is visible only in the console and audit record.",
+		notePlaceholder: "Record the rationale; this is visible only in the console and audit record.",
 		updateFailed: "The account state could not be updated. Reload and try again.",
 		saveAccountState: "Update account state",
 		accountStateReadOnly: "You can inspect account state but cannot change it.",
@@ -358,10 +357,9 @@ export default {
 		submit: "Apply governance action",
 		succeeded: "Global governance action completed",
 		confirmRemovalTitle: "Remove this content from the platform?",
-		confirmRemovalDescription: insert(
-			"{{title}} will be marked as removed at platform level.",
-			{ title: String },
-		),
+		confirmRemovalDescription: insert("{{title}} will be marked as removed at platform level.", {
+			title: String,
+		}),
 		confirmRemoval: "Remove content",
 		confirmLicenseInvalidationTitle: "Invalidate this content license?",
 		confirmLicenseInvalidationDescription: insert(

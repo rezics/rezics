@@ -70,8 +70,7 @@ export const ContentStructureStateSchema = z
 		updatedAt: DateSchema,
 	})
 	.superRefine((structure, context) => {
-		const navigation =
-			structure.kind === "wiki.navigation" || structure.kind === "zone.navigation";
+		const navigation = structure.kind === "wiki.navigation" || structure.kind === "zone.navigation";
 		if (navigation !== (structure.documentKey !== null))
 			context.addIssue({
 				code: "custom",
@@ -353,26 +352,20 @@ export function applyContentStructureDelta(
 		switch (operation.kind) {
 			case "node.insert":
 				if (nodes.has(operation.after.id))
-					throw new TypeError(
-						`Content Structure node ${operation.after.id} already exists`,
-					);
+					throw new TypeError(`Content Structure node ${operation.after.id} already exists`);
 				nodes.set(operation.after.id, operation.after);
 				break;
 			case "node.update": {
 				const current = nodes.get(operation.before.id);
 				if (!current || comparable(current) !== comparable(operation.before))
-					throw new TypeError(
-						`Content Structure node ${operation.before.id} base changed`,
-					);
+					throw new TypeError(`Content Structure node ${operation.before.id} base changed`);
 				nodes.set(operation.after.id, operation.after);
 				break;
 			}
 			case "node.delete": {
 				const current = nodes.get(operation.before.id);
 				if (!current || comparable(current) !== comparable(operation.before))
-					throw new TypeError(
-						`Content Structure node ${operation.before.id} base changed`,
-					);
+					throw new TypeError(`Content Structure node ${operation.before.id} base changed`);
 				nodes.delete(operation.before.id);
 				break;
 			}

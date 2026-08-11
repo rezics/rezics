@@ -68,19 +68,16 @@ export const storage = {
 		const unhoistableHeaders = new Set(
 			Object.keys(input.Metadata ?? {}).map((key) => `x-amz-meta-${key.toLowerCase()}`),
 		);
-		return getSignedUrl(
-			storageClient,
-			new PutObjectCommand({ ...input, Bucket: env.S3_BUCKET }),
-			{ expiresIn, unhoistableHeaders },
-		);
+		return getSignedUrl(storageClient, new PutObjectCommand({ ...input, Bucket: env.S3_BUCKET }), {
+			expiresIn,
+			unhoistableHeaders,
+		});
 	},
 
 	presignGet(input: StorageObjectInput, expiresIn = env.S3_PRESIGN_EXPIRES_IN) {
-		return getSignedUrl(
-			storageClient,
-			new GetObjectCommand({ ...input, Bucket: env.S3_BUCKET }),
-			{ expiresIn },
-		);
+		return getSignedUrl(storageClient, new GetObjectCommand({ ...input, Bucket: env.S3_BUCKET }), {
+			expiresIn,
+		});
 	},
 };
 

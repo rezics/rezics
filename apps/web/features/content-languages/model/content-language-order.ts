@@ -9,8 +9,7 @@ export function parseContentLanguageOrder(
 	const languages: ContentLanguage[] = [];
 	const seen = new Set<ContentLanguage>();
 	for (const value of values) {
-		if (typeof value !== "string" || !isContentLanguage(value) || seen.has(value))
-			return undefined;
+		if (typeof value !== "string" || !isContentLanguage(value) || seen.has(value)) return undefined;
 		seen.add(value);
 		languages.push(value);
 	}
@@ -39,7 +38,5 @@ export function contentLanguageOrdersEqual(
 	left: readonly ContentLanguage[],
 	right: readonly ContentLanguage[],
 ): boolean {
-	return (
-		left.length === right.length && left.every((language, index) => language === right[index])
-	);
+	return left.length === right.length && left.every((language, index) => language === right[index]);
 }

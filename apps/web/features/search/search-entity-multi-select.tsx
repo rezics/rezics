@@ -151,9 +151,7 @@ export function SearchEntityMultiSelect({
 							className="rounded-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
 							onClick={(event) => {
 								event.stopPropagation();
-								onChange(
-									selected.filter((candidate) => candidate.id !== option.id),
-								);
+								onChange(selected.filter((candidate) => candidate.id !== option.id));
 							}}
 							type="button"
 						>

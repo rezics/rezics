@@ -16,12 +16,8 @@ describe("Book Content Structure draft planning", () => {
 	it("uses the explicit Chapter ownership override before the Book default", () => {
 		expect(resolveChapterOwnershipMode("community_owned", undefined)).toBe("community_owned");
 		expect(resolveChapterOwnershipMode("profile_owned", undefined)).toBe("profile_owned");
-		expect(resolveChapterOwnershipMode("community_owned", "profile_owned")).toBe(
-			"profile_owned",
-		);
-		expect(resolveChapterOwnershipMode("profile_owned", "community_owned")).toBe(
-			"community_owned",
-		);
+		expect(resolveChapterOwnershipMode("community_owned", "profile_owned")).toBe("profile_owned");
+		expect(resolveChapterOwnershipMode("profile_owned", "community_owned")).toBe("community_owned");
 	});
 
 	it("recognizes a semantic no-op without rewriting positions", () => {

@@ -11,8 +11,7 @@ const { forms: zoneTerms } = deTerminology.zone;
 export default {
 	workspace: {
 		title: verbatimTerms.studio.value,
-		description:
-			"Zeige Inhalte an, die du erstellt, betreut oder zur Verwaltung erhalten hast.",
+		description: "Zeige Inhalte an, die du erstellt, betreut oder zur Verwaltung erhalten hast.",
 		backToApplication: `Zurück zu ${verbatimTerms.rezics.value}`,
 		navigation: `${verbatimTerms.studio.value}-Navigation`,
 		overview: "Inhaltstypen",
@@ -78,7 +77,8 @@ export default {
 	},
 	communityUnitSearch: {
 		policyTitle: "Vor dem Erstellen suchen",
-		policy: "Um ein gutes Miteinander zu wahren, suche vor dem Erstellen eines öffentlichen Eintrags und vergewissere dich, dass der gewünschte Inhalt noch nicht existiert. Der Missbrauch dieser Funktion kann Sanktionen nach sich ziehen.",
+		policy:
+			"Um ein gutes Miteinander zu wahren, suche vor dem Erstellen eines öffentlichen Eintrags und vergewissere dich, dass der gewünschte Inhalt noch nicht existiert. Der Missbrauch dieser Funktion kann Sanktionen nach sich ziehen.",
 		confirmationLabel: insert(
 			"Ich habe die vorhandenen {{subject}} geprüft und bestätigt, dass dieser Eintrag noch nicht existiert.",
 			{ subject: String },

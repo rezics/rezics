@@ -52,9 +52,6 @@ export const softwareRequirement = pgTable(
 		index("software_requirement_platform_idx").on(table.platformEntityId),
 		index("software_requirement_source_external_link_idx").on(table.sourceExternalLinkId),
 		check("software_requirement_tier_not_blank", sql`btrim(${table.tier}) <> ''`),
-		createJsonObjectConstraint(
-			"software_requirement_hardware_json_object_check",
-			table.hardware,
-		),
+		createJsonObjectConstraint("software_requirement_hardware_json_object_check", table.hardware),
 	],
 );

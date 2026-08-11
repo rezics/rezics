@@ -45,9 +45,7 @@ function SpoilerMark({
 	const [revealed, setRevealed] = useState(false);
 	const contentId = useId();
 	const contentRef = useRef<HTMLSpanElement>(null);
-	const scopedTitle = value?.scopeUnitId
-		? presentations.get(value.scopeUnitId)?.label
-		: undefined;
+	const scopedTitle = value?.scopeUnitId ? presentations.get(value.scopeUnitId)?.label : undefined;
 	const revealLabel = scopedTitle
 		? labels.showScopedSpoiler({ title: scopedTitle })
 		: labels.showSpoiler;

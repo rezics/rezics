@@ -202,8 +202,7 @@ function UnitManagementWorkspaceContent({
 	);
 	const currentSectionId = parseUnitManagementSection(pathname, type, unitId);
 	const requestedSection = allSections.find((section) => section.id === currentSectionId);
-	const sectionAllowed =
-		currentSectionId === undefined || visibleSectionIds.has(currentSectionId);
+	const sectionAllowed = currentSectionId === undefined || visibleSectionIds.has(currentSectionId);
 	const content = sectionAllowed ? (
 		children
 	) : requestedSection ? (

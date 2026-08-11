@@ -151,10 +151,7 @@ export function FollowButton({
 									: t.notifications.followingSettings.triggerEnabled
 							}
 							disabled={
-								buttonProps.disabled ||
-								statusUnavailable ||
-								status.isPending ||
-								mutationPending
+								buttonProps.disabled || statusUnavailable || status.isPending || mutationPending
 							}
 							pill
 							title={
@@ -179,10 +176,7 @@ export function FollowButton({
 						/>
 						<DialogBody>
 							<FieldGroup>
-								<Field
-									className="rounded-xl border bg-muted/24 p-4"
-									orientation="horizontal"
-								>
+								<Field className="rounded-xl border bg-muted/24 p-4" orientation="horizontal">
 									<FieldContent>
 										<FieldLabel htmlFor={inAppInputId} id={inAppLabelId}>
 											{t.notifications.followingSettings.inAppTitle}
@@ -203,25 +197,13 @@ export function FollowButton({
 								</Field>
 								{followingStatus?.kind === "realm" ? (
 									<>
-										<Field
-											className="rounded-xl border bg-muted/24 p-4"
-											orientation="horizontal"
-										>
+										<Field className="rounded-xl border bg-muted/24 p-4" orientation="horizontal">
 											<FieldContent>
-												<FieldLabel
-													htmlFor={realmTagInputId}
-													id={realmTagLabelId}
-												>
-													{
-														t.notifications.followingSettings
-															.realmTagSourceTitle
-													}
+												<FieldLabel htmlFor={realmTagInputId} id={realmTagLabelId}>
+													{t.notifications.followingSettings.realmTagSourceTitle}
 												</FieldLabel>
 												<FieldDescription id={realmTagDescriptionId}>
-													{
-														t.notifications.followingSettings
-															.realmTagSourceDescription
-													}
+													{t.notifications.followingSettings.realmTagSourceDescription}
 												</FieldDescription>
 											</FieldContent>
 											<Switch
@@ -238,10 +220,7 @@ export function FollowButton({
 											/>
 										</Field>
 										<p className="text-muted-foreground text-xs">
-											{
-												t.notifications.followingSettings
-													.unfollowKeepsRealmTagSource
-											}
+											{t.notifications.followingSettings.unfollowKeepsRealmTagSource}
 										</p>
 									</>
 								) : null}
@@ -281,10 +260,7 @@ export function FollowButton({
 					{...buttonProps}
 					aria-pressed={false}
 					disabled={
-						buttonProps.disabled ||
-						statusUnavailable ||
-						status.isPending ||
-						mutationPending
+						buttonProps.disabled || statusUnavailable || status.isPending || mutationPending
 					}
 					isLoading={status.isPending || follow.isPending}
 					onClick={() => follow.mutate({ path: { unitId } })}

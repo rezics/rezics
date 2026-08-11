@@ -32,8 +32,7 @@ export function ContentStructureRevisionHistory({
 	const refresh = async () => {
 		await Promise.all([
 			queryClient.invalidateQueries({
-				queryKey:
-					getApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsQueryKey(options),
+				queryKey: getApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsQueryKey(options),
 			}),
 			invalidateBookContentStructure(queryClient, unitId),
 		]);
@@ -43,8 +42,7 @@ export function ContentStructureRevisionHistory({
 			mutation: { onSuccess: refresh },
 		});
 	if (query.isPending) return <QueryPending />;
-	if (query.isError)
-		return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
+	if (query.isError) return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
 	if (!query.data.items.length)
 		return <p className="text-sm text-muted-foreground">{t.history.noRevisions}</p>;
 	return (
@@ -56,17 +54,11 @@ export function ContentStructureRevisionHistory({
 							<CardContent className="flex flex-wrap items-center justify-between gap-4 p-4">
 								<div className="grid gap-1">
 									<div className="flex flex-wrap items-center gap-2">
-										<span className="font-medium">
-											{t.history.structureKinds[revision.kind]}
-										</span>
+										<span className="font-medium">{t.history.structureKinds[revision.kind]}</span>
 										{revision.id === latestRevisionId ? (
-											<Badge variant="secondary">
-												{t.history.currentRevision}
-											</Badge>
+											<Badge variant="secondary">{t.history.currentRevision}</Badge>
 										) : null}
-										{revision.minor ? (
-											<Badge variant="outline">{t.history.minorEdit}</Badge>
-										) : null}
+										{revision.minor ? <Badge variant="outline">{t.history.minorEdit}</Badge> : null}
 									</div>
 									<p className="text-sm text-muted-foreground">
 										{new Intl.DateTimeFormat(locale.current, {
@@ -85,9 +77,7 @@ export function ContentStructureRevisionHistory({
 											</>
 										) : null}
 									</p>
-									<p className="text-sm">
-										{revision.editSummary ?? t.history.noEditSummary}
-									</p>
+									<p className="text-sm">{revision.editSummary ?? t.history.noEditSummary}</p>
 								</div>
 								{canRestore && revision.id !== latestRevisionId ? (
 									<Button

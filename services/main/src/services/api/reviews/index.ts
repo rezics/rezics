@@ -258,13 +258,9 @@ export default new Elysia()
 					const searchPage = await searchGlobalIdentifiers({
 						branches: [{ category: "reviews", sourceUnitKinds: ["post"] }],
 						...(viewer.profileId ? { profileId: viewer.profileId } : {}),
-						contentRatingPolicy: contentRatingPolicyFromAllowlist(
-							viewer.contentRatings,
-						),
+						contentRatingPolicy: contentRatingPolicyFromAllowlist(viewer.contentRatings),
 						contentRatings: [...viewer.contentRatings],
-						additionalConditions: [
-							getFeedEligibilityCondition(rankingViewer, scope, asOf),
-						],
+						additionalConditions: [getFeedEligibilityCondition(rankingViewer, scope, asOf)],
 						limit,
 						sort: sort === "new" ? "createdAt:desc" : "best",
 						...(cursor ? { position: cursor.searchPosition } : {}),
@@ -275,10 +271,7 @@ export default new Elysia()
 								.select({
 									id: unit.id,
 									subjectId: post.subjectUnitId,
-									realmId: getFeedCandidateRealmIdExpression(
-										rankingViewer,
-										scope.realmIds,
-									),
+									realmId: getFeedCandidateRealmIdExpression(rankingViewer, scope.realmIds),
 								})
 								.from(unit)
 								.innerJoin(post, eq(post.id, unit.id))
@@ -312,8 +305,7 @@ export default new Elysia()
 								: [],
 						),
 					);
-					const scoreRealmId =
-						scoreFilter.status === "present" ? scoreFilter.realmId : null;
+					const scoreRealmId = scoreFilter.status === "present" ? scoreFilter.realmId : null;
 					const scores = scoreFilter.status === "present" ? scoreFilter.values : [];
 					return {
 						totalCount,
@@ -363,10 +355,7 @@ export default new Elysia()
 				"",
 				async ({ profile, authorization, body }) => {
 					await authorization.unit.ensureCanRead(body.targetId);
-					await authorization.realm.ensureUnitCreation(
-						body.publishRealmIds,
-						"realm.units.create",
-					);
+					await authorization.realm.ensureUnitCreation(body.publishRealmIds, "realm.units.create");
 					await authorization.realm.ensureParticipation(body.score?.realmId);
 					const id = await database.transaction(async (tx) => {
 						if (body.progressEntryId) {
@@ -398,10 +387,7 @@ export default new Elysia()
 									progressEntryId: "Progress entry already has a Review",
 								});
 						}
-						await authorization.entity.ensureSubjectAssociationAllowedIfEntity(
-							tx,
-							body.targetId,
-						);
+						await authorization.entity.ensureSubjectAssociationAllowedIfEntity(tx, body.targetId);
 						const created = await insertUnit(tx, {
 							kind: "post",
 							status: "published",
@@ -484,10 +470,7 @@ export default new Elysia()
 							"RealmCapabilityRequired",
 							"EntityAssociationRestricted",
 						]),
-						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
-							"UnitNotFound",
-							"EntityEntryNotFound",
-						]),
+						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "EntityEntryNotFound"]),
 						[StatusCodes.CONFLICT]: toApiErrorResponse([
 							"RealmRulesAcceptanceRequired",
 							"PostTargetingLocked",
@@ -503,10 +486,7 @@ export default new Elysia()
 					const identity = await resolveIdentity(request, "unit:read");
 					const { authorization } = identity;
 					const viewerProfileId = identity.profile?.unitId;
-					await authorization.unit.ensureCanRead(
-						params.reviewId,
-						() => new UnitNotFound("Review"),
-					);
+					await authorization.unit.ensureCanRead(params.reviewId, () => new UnitNotFound("Review"));
 					const localizationLanguages = query.localizationLanguages ?? [];
 					const [review] = await database
 						.select({
@@ -531,10 +511,7 @@ export default new Elysia()
 								eq(unitLocalization.unitId, post.id),
 								eq(
 									unitLocalization.language,
-									resolvedUnitLocalizationLanguage(
-										post.id,
-										localizationLanguages,
-									),
+									resolvedUnitLocalizationLanguage(post.id, localizationLanguages),
 								),
 							),
 						)
@@ -553,9 +530,7 @@ export default new Elysia()
 					const subjectPromise = authorization.unit
 						.canRead(targetId)
 						.then((canRead) =>
-							canRead
-								? getPostSubjectPresentation(targetId, localizationLanguages)
-								: null,
+							canRead ? getPostSubjectPresentation(targetId, localizationLanguages) : null,
 						);
 					const [
 						availableLanguageRows,
@@ -577,14 +552,13 @@ export default new Elysia()
 							.where(eq(unitLocalization.unitId, review.id))
 							.orderBy(unitLocalization.position, unitLocalization.language),
 						getAttributionSummariesByUnitIds([review.id], localizationLanguages),
-						selectPostScores(review.id, viewerProfileId, localizationLanguages).then(
-							(items) =>
-								items.map(({ scoreId, realmId, realmTitle, value }) => ({
-									scoreId,
-									realmId,
-									realmTitle,
-									value,
-								})),
+						selectPostScores(review.id, viewerProfileId, localizationLanguages).then((items) =>
+							items.map(({ scoreId, realmId, realmTitle, value }) => ({
+								scoreId,
+								realmId,
+								realmTitle,
+								value,
+							})),
 						),
 						selectPostProgressEntry(review.id, viewerProfileId),
 						subjectPromise,
@@ -608,10 +582,7 @@ export default new Elysia()
 						realmId: query.realmId ?? null,
 						attributions: attributionMap.get(review.id) ?? [],
 						targetId,
-						body:
-							review.body === null
-								? null
-								: toPortableTextResponse(review.body, "post.body"),
+						body: review.body === null ? null : toPortableTextResponse(review.body, "post.body"),
 						replyCount: toSafeInteger(review.replyCount, "reply count"),
 						subject,
 						scores,
@@ -641,10 +612,7 @@ export default new Elysia()
 					query: GetReviewQuery,
 					response: {
 						[StatusCodes.OK]: ReviewDetailResponse,
-						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
-							"UnitNotFound",
-							"ReviewNotFound",
-						]),
+						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "ReviewNotFound"]),
 					},
 					detail: { summary: "Get review", tags: ["Reviews"] },
 				},
@@ -757,19 +725,11 @@ export default new Elysia()
 							realmId: score.realmId,
 							value: score.value,
 							visibility: score.visibility,
-							realmTitle: resolvedUnitLocalizationTitle(
-								score.realmId,
-								query.localizationLanguages,
-							),
+							realmTitle: resolvedUnitLocalizationTitle(score.realmId, query.localizationLanguages),
 							updatedAt: score.updatedAt,
 						})
 						.from(score)
-						.where(
-							and(
-								eq(score.profileId, profile.unitId),
-								eq(score.unitId, params.targetId),
-							),
-						)
+						.where(and(eq(score.profileId, profile.unitId), eq(score.unitId, params.targetId)))
 						.orderBy(desc(score.updatedAt), asc(score.realmId));
 					return { items };
 				},
@@ -790,19 +750,13 @@ export default new Elysia()
 			.get(
 				"/:targetId",
 				async ({ params, query, request }) => {
-					const authorization = (await resolveIdentity(request, "unit:read"))
-						.authorization;
+					const authorization = (await resolveIdentity(request, "unit:read")).authorization;
 					await authorization.unit.ensureCanRead(params.targetId);
 					await authorization.unit.ensureCanRead(query.realmId);
 					const [stat] = await database
 						.select()
 						.from(scoreStat)
-						.where(
-							and(
-								eq(scoreStat.unitId, params.targetId),
-								eq(scoreStat.realmId, query.realmId),
-							),
-						)
+						.where(and(eq(scoreStat.unitId, params.targetId), eq(scoreStat.realmId, query.realmId)))
 						.limit(1);
 					const distribution = [
 						stat?.score1Count ?? 0n,

@@ -32,9 +32,7 @@ interface KbdProps extends React.ComponentProps<typeof ark.kbd>, VariantProps<ty
 export const Kbd = (props: KbdProps) => {
 	const { variant = "default", className, ...rest } = props;
 
-	return (
-		<ark.kbd className={cn(kbdVariants({ variant }), className)} data-slot="kbd" {...rest} />
-	);
+	return <ark.kbd className={cn(kbdVariants({ variant }), className)} data-slot="kbd" {...rest} />;
 };
 
 export const KbdGroup = (props: React.ComponentProps<typeof ark.div>) => {

@@ -28,8 +28,7 @@ export default {
 			"Las imágenes se buscan según las preferencias de idioma de cada persona. Si un idioma no contiene esa imagen, se omite y la búsqueda continúa con el siguiente idioma preferido.",
 		defaultOrder:
 			"Si ninguno de los idiomas preferidos contiene la imagen, la búsqueda continúa según el orden de localización predeterminado del contenido.",
-		noImage:
-			"Si ninguna localización contiene la imagen, no se devuelve una imagen localizada.",
+		noImage: "Si ninguna localización contiene la imagen, no se devuelve una imagen localizada.",
 		textDifference:
 			"El texto sigue una regla distinta: se elige una localización completa y el título, el resumen y la descripción no se sustituyen campo por campo desde idiomas diferentes.",
 		example:
@@ -43,9 +42,12 @@ export default {
 			cover: "Ajustar portada",
 		},
 		description: {
-			avatar: "Arrastra y amplía la imagen dentro del recorte cuadrado. La vista previa circular del avatar no elimina las esquinas originales.",
-			banner: "Arrastra y amplía la imagen dentro del recorte fijo 4:1. Los banners nuevos comienzan en la esquina superior izquierda.",
-			cover: "Mantén la imagen completa de forma predeterminada o cambia a un recorte fijo 3:4 cuando la composición sea más importante.",
+			avatar:
+				"Arrastra y amplía la imagen dentro del recorte cuadrado. La vista previa circular del avatar no elimina las esquinas originales.",
+			banner:
+				"Arrastra y amplía la imagen dentro del recorte fijo 4:1. Los banners nuevos comienzan en la esquina superior izquierda.",
+			cover:
+				"Mantén la imagen completa de forma predeterminada o cambia a un recorte fijo 3:4 cuando la composición sea más importante.",
 		},
 		close: "Cerrar el ajuste de imagen",
 		loading: "Cargando la imagen original…",

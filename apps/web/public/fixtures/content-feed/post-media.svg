@@ -21,11 +21,7 @@
 			stroke-opacity=".24"
 			filter="url(#blur)"
 		/>
-		<path
-			d="M-20 685C260 260 514 760 780 300s460 100 660-210"
-			stroke="#b6f2ff"
-			stroke-width="4"
-		/>
+		<path d="M-20 685C260 260 514 760 780 300s460 100 660-210" stroke="#b6f2ff" stroke-width="4" />
 		<path d="M120 70c230 250 355 60 550 300s390 72 610 300" stroke="#ffd387" stroke-width="4" />
 	</g>
 	<g fill="#fff4bd">

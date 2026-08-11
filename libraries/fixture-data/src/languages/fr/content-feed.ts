@@ -24,8 +24,7 @@ export default {
 		{
 			name: "A Certain Magical Index",
 			initials: "I",
-			summary:
-				"Discussions sur l'univers, les personnages, l'intrigue et les idées de la série.",
+			summary: "Discussions sur l'univers, les personnages, l'intrigue et les idées de la série.",
 		},
 		{
 			name: "Intelligence collective",
@@ -40,7 +39,8 @@ export default {
 		},
 	],
 	post: {
-		title: "Pourquoi le réseau Misaka est-il la conscience collective la plus singulière d'Academy City ?",
+		title:
+			"Pourquoi le réseau Misaka est-il la conscience collective la plus singulière d'Academy City ?",
 		body: "Le réseau Misaka dépasse la simple somme des esprits individuels. Son support électromagnétique franchit les limites des capacités personnelles tout en préservant les différences entre chaque individu.",
 		mediaAlt: "Une ville de nuit traversée par des lignes de réseau lumineuses",
 	},

@@ -83,12 +83,8 @@ export function UnitRevisionHistory({ unitId, compareHref, onChanged }: UnitRevi
 											timeStyle: "short",
 										}).format(new Date(revision.createdAt))}
 									</time>
-									{revision.isCurrent ? (
-										<Badge>{t.history.currentRevision}</Badge>
-									) : null}
-									{revision.minor ? (
-										<Badge variant="secondary">{t.history.minorEdit}</Badge>
-									) : null}
+									{revision.isCurrent ? <Badge>{t.history.currentRevision}</Badge> : null}
+									{revision.minor ? <Badge variant="secondary">{t.history.minorEdit}</Badge> : null}
 									{revision.visibility.kind !== "visible" ? (
 										<Badge variant="destructive">
 											{revision.visibility.kind === "suppressed"
@@ -115,8 +111,7 @@ export function UnitRevisionHistory({ unitId, compareHref, onChanged }: UnitRevi
 												className="text-link hover:text-link-hover"
 												href={profileHref(revision.actorProfileId)}
 											>
-												{revision.actorName ??
-													revision.actorProfileId.slice(0, 8)}
+												{revision.actorName ?? revision.actorProfileId.slice(0, 8)}
 											</Link>
 										</>
 									) : null}
@@ -127,12 +122,7 @@ export function UnitRevisionHistory({ unitId, compareHref, onChanged }: UnitRevi
 								revision.contentAvailable &&
 								revision.parentContentAvailable ? (
 									<Button asChild size="sm" variant="outline">
-										<Link
-											href={compareHref(
-												revision.parentRevisionId,
-												revision.id,
-											)}
-										>
+										<Link href={compareHref(revision.parentRevisionId, revision.id)}>
 											{t.history.compareWithParent}
 										</Link>
 									</Button>
@@ -156,9 +146,7 @@ export function UnitRevisionHistory({ unitId, compareHref, onChanged }: UnitRevi
 										size="sm"
 										variant="secondary"
 									>
-										{undo.isPending ? (
-											<Spinner data-icon="inline-start" />
-										) : null}
+										{undo.isPending ? <Spinner data-icon="inline-start" /> : null}
 										{t.history.undoRevision}
 									</Button>
 								) : null}
@@ -180,9 +168,7 @@ export function UnitRevisionHistory({ unitId, compareHref, onChanged }: UnitRevi
 										size="sm"
 										variant="solid"
 									>
-										{restore.isPending ? (
-											<Spinner data-icon="inline-start" />
-										) : null}
+										{restore.isPending ? <Spinner data-icon="inline-start" /> : null}
 										{t.history.restoreRevision}
 									</Button>
 								) : null}

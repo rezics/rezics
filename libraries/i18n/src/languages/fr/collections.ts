@@ -53,8 +53,7 @@ export default {
 		sections: {
 			content: {
 				label: "Contenu",
-				description:
-					"Modifiez le titre, le résumé et la couverture dans chaque langue de contenu.",
+				description: "Modifiez le titre, le résumé et la couverture dans chaque langue de contenu.",
 			},
 			metadata: {
 				label: metadataTerms.label,
@@ -70,8 +69,7 @@ export default {
 			},
 			access: {
 				label: "Accès",
-				description:
-					"Gérez les sujets d’autorisation, les permissions et les restrictions.",
+				description: "Gérez les sujets d’autorisation, les permissions et les restrictions.",
 			},
 			history: {
 				label: "Historique",
@@ -89,8 +87,7 @@ export default {
 		removeItem: insert("Supprimer {{title}}", { title: String }),
 		move: "Déplacer",
 		moveTitle: "Déplacer les éléments sélectionnés",
-		moveDescription:
-			"L’ordre relatif est conservé et la modification est appliquée atomiquement.",
+		moveDescription: "L’ordre relatif est conservé et la modification est appliquée atomiquement.",
 		destination: "Destination",
 		moveToStart: "Déplacer au début",
 		moveToEnd: "Déplacer à la fin",

@@ -181,8 +181,7 @@ export function useDraftContentLanguage(
 			} catch {
 				const latest = stateRef.current;
 				if (latest.mode === "manual") return latest.language;
-				if (version !== requestVersionRef.current)
-					return selectedDraftContentLanguage(latest);
+				if (version !== requestVersionRef.current) return selectedDraftContentLanguage(latest);
 				const failed: DraftContentLanguageState = {
 					mode: "auto",
 					fallbackLanguage: latest.fallbackLanguage,

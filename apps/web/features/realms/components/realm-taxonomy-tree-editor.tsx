@@ -187,16 +187,13 @@ export function RealmTaxonomySettings({ realmId }: { readonly realmId: string })
 	const dirty = draftFingerprint !== baselineFingerprint;
 	const valid = realmTaxonomyDraftIsValid(document?.draft ?? []);
 	const selectedTagNodes =
-		document?.draft.filter(
-			(node) => selectedCoverage.has(node.id) && node.contentKind === "tag",
-		) ?? [];
+		document?.draft.filter((node) => selectedCoverage.has(node.id) && node.contentKind === "tag") ??
+		[];
 
 	function changeDraft(
 		change: (nodes: readonly RealmTaxonomyDraftNode[]) => RealmTaxonomyDraftNode[],
 	) {
-		setDocument((current) =>
-			current ? { ...current, draft: change(current.draft) } : current,
-		);
+		setDocument((current) => (current ? { ...current, draft: change(current.draft) } : current));
 	}
 
 	function activateNode(
@@ -257,9 +254,7 @@ export function RealmTaxonomySettings({ realmId }: { readonly realmId: string })
 		const nextSelection = selectedCoverage.has(nodeId) ? selectedIds : new Set([nodeId]);
 		setSelectedIds(nextSelection);
 		if (document)
-			setDraggingIds(
-				new Set(editableTreeSelectionCoverage(document.draft, nextSelection).keys()),
-			);
+			setDraggingIds(new Set(editableTreeSelectionCoverage(document.draft, nextSelection).keys()));
 	}
 
 	function handleDragOver(event: DragEvent<HTMLElement>, nodeId: string) {
@@ -267,8 +262,7 @@ export function RealmTaxonomySettings({ realmId }: { readonly realmId: string })
 		event.preventDefault();
 		const bounds = event.currentTarget.getBoundingClientRect();
 		const ratio = (event.clientY - bounds.top) / Math.max(bounds.height, 1);
-		const placement: DropPlacement =
-			ratio < 0.28 ? "before" : ratio > 0.72 ? "after" : "inside";
+		const placement: DropPlacement = ratio < 0.28 ? "before" : ratio > 0.72 ? "after" : "inside";
 		setDropTarget({ nodeId, placement });
 	}
 
@@ -303,13 +297,11 @@ export function RealmTaxonomySettings({ realmId }: { readonly realmId: string })
 						id: crypto.randomUUID(),
 						language,
 						...placement,
-						presentation:
-							typeof value === "string" ? { id: value, label: value } : value,
+						presentation: typeof value === "string" ? { id: value, label: value } : value,
 						contentKind: request,
 					});
 		changeDraft((nodes) => [...nodes, node]);
-		if (placement.parentId)
-			setExpandedIds((current) => new Set([...current, placement.parentId!]));
+		if (placement.parentId) setExpandedIds((current) => new Set([...current, placement.parentId!]));
 		setSelectedIds(new Set([node.id]));
 		setLastSelectedId(node.id);
 		setAddRequest(undefined);
@@ -368,9 +360,7 @@ export function RealmTaxonomySettings({ realmId }: { readonly realmId: string })
 		<div className="grid gap-4">
 			<div className="flex flex-wrap items-start justify-between gap-4">
 				<div className="grid gap-1">
-					<h2 className="font-heading font-bold text-xl">
-						{t.realms.taxonomySettings.title}
-					</h2>
+					<h2 className="font-heading font-bold text-xl">{t.realms.taxonomySettings.title}</h2>
 					<p className="max-w-3xl text-muted-foreground text-sm">
 						{t.realms.taxonomySettings.description}
 					</p>
@@ -402,12 +392,8 @@ export function RealmTaxonomySettings({ realmId }: { readonly realmId: string })
 				</div>
 			</div>
 			<div className="flex min-h-6 items-center gap-2">
-				<p className="text-muted-foreground text-sm">
-					{t.realms.taxonomySettings.draftHint}
-				</p>
-				{dirty ? (
-					<Badge variant="warning">{t.realms.taxonomySettings.unsavedDraft}</Badge>
-				) : null}
+				<p className="text-muted-foreground text-sm">{t.realms.taxonomySettings.draftHint}</p>
+				{dirty ? <Badge variant="warning">{t.realms.taxonomySettings.unsavedDraft}</Badge> : null}
 				{dirty && !valid ? (
 					<Badge variant="destructive">{t.realms.taxonomySettings.invalidDraft}</Badge>
 				) : null}
@@ -465,11 +451,7 @@ export function RealmTaxonomySettings({ realmId }: { readonly realmId: string })
 							))}
 						</NativeSelect>
 					</Field>
-					<Button
-						onClick={() => setRemoveRequest(selectedIds)}
-						type="button"
-						variant="outline"
-					>
+					<Button onClick={() => setRemoveRequest(selectedIds)} type="button" variant="outline">
 						<Trash2 aria-hidden />
 						{t.realms.taxonomySettings.remove}
 					</Button>
@@ -495,9 +477,7 @@ export function RealmTaxonomySettings({ realmId }: { readonly realmId: string })
 							return (
 								<TreeEditorRowFrame
 									activePlacement={
-										dropTarget?.nodeId === node.id
-											? dropTarget.placement
-											: undefined
+										dropTarget?.nodeId === node.id ? dropTarget.placement : undefined
 									}
 									aria-expanded={parentIds.has(node.id) ? expanded : undefined}
 									aria-level={depth + 1}
@@ -506,9 +486,7 @@ export function RealmTaxonomySettings({ realmId }: { readonly realmId: string })
 									aria-setsize={setSize}
 									depth={depth}
 									dragging={draggingIds.has(node.id)}
-									onClick={(event: MouseEvent<HTMLDivElement>) =>
-										activateNode(node.id, event)
-									}
+									onClick={(event: MouseEvent<HTMLDivElement>) => activateNode(node.id, event)}
 									onDragOver={(event) => handleDragOver(event, node.id)}
 									onDrop={(event) => {
 										event.preventDefault();
@@ -531,11 +509,7 @@ export function RealmTaxonomySettings({ realmId }: { readonly realmId: string })
 										type="button"
 										variant="quiet"
 									>
-										{selected ? (
-											<SquareCheckBig aria-hidden />
-										) : (
-											<Square aria-hidden />
-										)}
+										{selected ? <SquareCheckBig aria-hidden /> : <Square aria-hidden />}
 									</Button>
 									<button
 										aria-label={t.realms.taxonomySettings.move}
@@ -576,10 +550,7 @@ export function RealmTaxonomySettings({ realmId }: { readonly realmId: string })
 										>
 											<ChevronRight
 												aria-hidden
-												className={cn(
-													"transition-transform",
-													expanded && "rotate-90",
-												)}
+												className={cn("transition-transform", expanded && "rotate-90")}
 											/>
 										</Button>
 									) : (
@@ -594,26 +565,18 @@ export function RealmTaxonomySettings({ realmId }: { readonly realmId: string })
 										<div className="flex min-w-0 items-center gap-2">
 											{node.state === "new-label" ? (
 												<Input
-													aria-label={
-														t.realms.taxonomySettings.labelTitle
-													}
+													aria-label={t.realms.taxonomySettings.labelTitle}
 													className="h-9 max-w-md"
 													onChange={(event) =>
 														changeDraft((nodes) =>
-															renameRealmTaxonomyLabel(
-																nodes,
-																node.id,
-																event.currentTarget.value,
-															),
+															renameRealmTaxonomyLabel(nodes, node.id, event.currentTarget.value),
 														)
 													}
 													onClick={(event) => event.stopPropagation()}
 													value={node.title}
 												/>
 											) : (
-												<span className="truncate font-semibold">
-													{title}
-												</span>
+												<span className="truncate font-semibold">{title}</span>
 											)}
 											<Badge variant="outline">
 												{t.realms.taxonomySettings.kinds[node.contentKind]}
@@ -635,8 +598,7 @@ export function RealmTaxonomySettings({ realmId }: { readonly realmId: string })
 												if (!isQueryStrategy(strategy)) return;
 												changeDraft((nodes) =>
 													nodes.map((candidate) =>
-														candidate.id === node.id &&
-														candidate.contentKind === "tag"
+														candidate.id === node.id && candidate.contentKind === "tag"
 															? {
 																	...candidate,
 																	queryStrategy: strategy,
@@ -761,10 +723,7 @@ function AddTaxonomyNodeDialog({
 	return (
 		<Dialog onOpenChange={({ open }) => !open && onClose()} open>
 			<DialogContent>
-				<DialogHeader
-					description={t.realms.taxonomySettings.addDescription}
-					title={label}
-				/>
+				<DialogHeader description={t.realms.taxonomySettings.addDescription} title={label} />
 				<DialogBody>
 					<Field required>
 						<FieldLabel>
@@ -784,9 +743,7 @@ function AddTaxonomyNodeDialog({
 								index={kind === "tag" ? "tags" : "posts"}
 								onChange={setPicked}
 								placeholder={
-									kind === "tag"
-										? t.ui.pickerPlaceholders.tag
-										: t.ui.pickerPlaceholders.post
+									kind === "tag" ? t.ui.pickerPlaceholders.tag : t.ui.pickerPlaceholders.post
 								}
 								value={picked}
 							/>
@@ -845,11 +802,7 @@ function RemoveTaxonomyNodesDialog({
 						</Button>
 					</DialogClose>
 					{hasChildren ? (
-						<Button
-							onClick={() => onRemove("promote-children")}
-							type="button"
-							variant="outline"
-						>
+						<Button onClick={() => onRemove("promote-children")} type="button" variant="outline">
 							{t.realms.taxonomySettings.promoteChildren}
 						</Button>
 					) : null}

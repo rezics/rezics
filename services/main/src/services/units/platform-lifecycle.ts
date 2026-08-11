@@ -163,8 +163,7 @@ function ensureExpectedUpdatedAt(current: Date, expected: Date): void {
 }
 
 function ensureDeletable(unitId: string, actorProfileId: string): void {
-	if (unitId === actorProfileId || ProtectedUnitIds.has(unitId))
-		throw new UnitLifecycleProtected();
+	if (unitId === actorProfileId || ProtectedUnitIds.has(unitId)) throw new UnitLifecycleProtected();
 }
 
 async function recordLifecycleAudit(

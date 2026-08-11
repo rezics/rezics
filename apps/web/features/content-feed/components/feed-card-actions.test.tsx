@@ -57,11 +57,7 @@ describe("FeedVoteControl", () => {
 
 		rerender(
 			<TranslationProvider initial={translation.snapshot}>
-				<FeedVoteControl
-					onReactionChange={onReactionChange}
-					reaction="upvote"
-					score="228"
-				/>
+				<FeedVoteControl onReactionChange={onReactionChange} reaction="upvote" score="228" />
 			</TranslationProvider>,
 		);
 		const selectedUpvote = screen.getByRole("button", { name: "贊成" });
@@ -72,11 +68,7 @@ describe("FeedVoteControl", () => {
 
 		rerender(
 			<TranslationProvider initial={translation.snapshot}>
-				<FeedVoteControl
-					onReactionChange={onReactionChange}
-					reaction="downvote"
-					score="226"
-				/>
+				<FeedVoteControl onReactionChange={onReactionChange} reaction="downvote" score="226" />
 			</TranslationProvider>,
 		);
 		const selectedDownvote = screen.getByRole("button", { name: "不贊成" });

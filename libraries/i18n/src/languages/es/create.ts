@@ -31,8 +31,7 @@ export default {
 		},
 		software: {
 			label: "Software",
-			description:
-				"Consulta y gestiona las entradas de software relacionadas con tu trabajo.",
+			description: "Consulta y gestiona las entradas de software relacionadas con tu trabajo.",
 		},
 		media: {
 			label: "Contenido multimedia",
@@ -81,7 +80,8 @@ export default {
 	},
 	communityUnitSearch: {
 		policyTitle: "Busca antes de crear",
-		policy: "Para mantener una comunidad saludable, busca antes de crear una entrada pública y confirma que el contenido que quieres crear todavía no existe. El uso indebido de esta función puede conllevar sanciones.",
+		policy:
+			"Para mantener una comunidad saludable, busca antes de crear una entrada pública y confirma que el contenido que quieres crear todavía no existe. El uso indebido de esta función puede conllevar sanciones.",
 		confirmationLabel: insert(
 			"He buscado entre {{subject}} existentes y he confirmado que esta entrada aún no existe.",
 			{ subject: String },

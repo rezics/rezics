@@ -208,8 +208,7 @@ export function parseScaleSeedOptions(arguments_: readonly string[]): ScaleSeedO
 	if (!confirmed) throw new Error("Scale seed requires explicit --yes confirmation");
 	if (!runId) throw new TypeError("--run-id is required\n" + usage());
 	if (action === "purge") {
-		if (seedOnlyOptionUsed)
-			throw new TypeError("scale-seed purge accepts only --run-id and --yes");
+		if (seedOnlyOptionUsed) throw new TypeError("scale-seed purge accepts only --run-id and --yes");
 		return { action, confirmed: true, runId };
 	}
 	if (units === undefined)

@@ -39,10 +39,7 @@ export function ReviewPostDetail({ review }: { readonly review: ReviewPost }) {
 					</CardHeader>
 					<CardContent>
 						<p className="text-sm">
-							<ProgressEventDescription
-								entry={review.progressEntry}
-								type={review.subject.type}
-							/>
+							<ProgressEventDescription entry={review.progressEntry} type={review.subject.type} />
 						</p>
 					</CardContent>
 				</Card>

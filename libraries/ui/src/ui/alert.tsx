@@ -62,11 +62,7 @@ export const Alert = (props: AlertProps) => {
 	const { variant, className, ...rest } = props;
 
 	return (
-		<ark.div
-			className={cn(alertVariants({ variant }), className)}
-			data-slot="alert"
-			{...rest}
-		/>
+		<ark.div className={cn(alertVariants({ variant }), className)} data-slot="alert" {...rest} />
 	);
 };
 

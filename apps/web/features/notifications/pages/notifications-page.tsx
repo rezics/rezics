@@ -76,10 +76,8 @@ function NotificationsContent() {
 	const markAllRead = usePutApiNotificationsReadAll<NotificationCacheSnapshot>({
 		mutation: {
 			scope: NotificationReadMutationScope,
-			onMutate: () =>
-				optimisticallyMarkAllNotificationsRead(queryClient, new Date().toISOString()),
-			onError: (_error, _variables, snapshot) =>
-				restoreNotificationCache(queryClient, snapshot),
+			onMutate: () => optimisticallyMarkAllNotificationsRead(queryClient, new Date().toISOString()),
+			onError: (_error, _variables, snapshot) => restoreNotificationCache(queryClient, snapshot),
 			onSettled: refresh,
 		},
 	});
@@ -95,8 +93,7 @@ function NotificationsContent() {
 					new Date().toISOString(),
 				);
 			},
-			onError: (_error, _variables, snapshot) =>
-				restoreNotificationCache(queryClient, snapshot),
+			onError: (_error, _variables, snapshot) => restoreNotificationCache(queryClient, snapshot),
 			onSettled: (_data, _error, variables) => {
 				const notificationId = variables.path.notificationId;
 				setPendingNotificationIds((current) => {
@@ -111,9 +108,7 @@ function NotificationsContent() {
 
 	if (notifications.isPending) return <QueryPending />;
 	if (notifications.isError)
-		return (
-			<QueryFailure error={notifications.error} retry={() => void notifications.refetch()} />
-		);
+		return <QueryFailure error={notifications.error} retry={() => void notifications.refetch()} />;
 
 	const items = notifications.data.pages.flatMap((page) => page.items);
 	const hasUnread = normalizeUnreadCount(notifications.data.pages[0]?.unreadCount) > 0;
@@ -153,20 +148,13 @@ function NotificationsContent() {
 								<div className="flex items-center gap-2">
 									{item.readAt === null ? (
 										<>
-											<span className="sr-only">
-												{t.notifications.center.unread}
-											</span>
-											<span
-												aria-hidden
-												className="size-2 shrink-0 rounded-full bg-primary"
-											/>
+											<span className="sr-only">{t.notifications.center.unread}</span>
+											<span aria-hidden className="size-2 shrink-0 rounded-full bg-primary" />
 										</>
 									) : null}
 									<strong className="font-medium text-sm">{item.title}</strong>
 								</div>
-								<p className="mt-1 text-muted-foreground text-sm leading-6">
-									{item.body}
-								</p>
+								<p className="mt-1 text-muted-foreground text-sm leading-6">{item.body}</p>
 								<time
 									className="mt-1 block text-muted-foreground text-xs"
 									dateTime={item.createdAt}
@@ -181,10 +169,7 @@ function NotificationsContent() {
 									className="min-w-0 flex-1 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
 									href={href}
 									onClick={() => {
-										if (
-											item.readAt === null &&
-											!pendingNotificationIds.has(item.id)
-										)
+										if (item.readAt === null && !pendingNotificationIds.has(item.id))
 											markRead.mutate({
 												path: { notificationId: item.id },
 											});
@@ -197,9 +182,7 @@ function NotificationsContent() {
 										aria-label={t.notifications.center.markRead}
 										className="shrink-0"
 										disabled={pendingNotificationIds.has(item.id)}
-										onClick={() =>
-											markRead.mutate({ path: { notificationId: item.id } })
-										}
+										onClick={() => markRead.mutate({ path: { notificationId: item.id } })}
 										size="icon-md"
 										title={t.notifications.center.markRead}
 										variant="quiet"

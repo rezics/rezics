@@ -116,8 +116,7 @@ function ApplicationShellContent({ children }: { readonly children: ReactNode })
 			scope: { id: "interface-locale" },
 			onSuccess: (data) => {
 				queryClient.setQueryData(getApiUsersMePreferencesQueryKey(), data);
-				if (session)
-					setPresentationPreferencesQueryData(queryClient, session.user.id, data);
+				if (session) setPresentationPreferencesQueryData(queryClient, session.user.id, data);
 			},
 		},
 	});
@@ -159,9 +158,7 @@ function ApplicationShellContent({ children }: { readonly children: ReactNode })
 						id: item.id,
 						href: sidebarFollowingHref("realm", item),
 						label: item.title ?? t.ui.unnamed,
-						avatar:
-							item.avatar ??
-							(item.cover ? { type: "image", image: item.cover } : null),
+						avatar: item.avatar ?? (item.cover ? { type: "image", image: item.cover } : null),
 						favorite: item.favorite,
 					},
 				]
@@ -288,11 +285,8 @@ function ApplicationShellContent({ children }: { readonly children: ReactNode })
 											emptyLabel: t.nav.sidebar.zonesEmpty,
 											icon: PanelsTopLeft,
 											isLoading:
-												localizationState.status === "restoring" ||
-												followedZones.isPending,
-											isError:
-												localizationState.status === "error" ||
-												followedZones.isError,
+												localizationState.status === "restoring" || followedZones.isPending,
+											isError: localizationState.status === "error" || followedZones.isError,
 											items: zoneItems,
 										},
 										{
@@ -303,11 +297,8 @@ function ApplicationShellContent({ children }: { readonly children: ReactNode })
 											emptyLabel: t.nav.sidebar.realmsEmpty,
 											icon: Globe2,
 											isLoading:
-												localizationState.status === "restoring" ||
-												followedRealms.isPending,
-											isError:
-												localizationState.status === "error" ||
-												followedRealms.isError,
+												localizationState.status === "restoring" || followedRealms.isPending,
+											isError: localizationState.status === "error" || followedRealms.isError,
 											items: realmItems,
 										},
 									],
@@ -339,10 +330,7 @@ function ApplicationShellContent({ children }: { readonly children: ReactNode })
 					) : null}
 					{updateInterfaceLocale.error ? (
 						<div className="max-w-sm rounded-xl border border-destructive/30 bg-background px-4 py-3 shadow-lg">
-							<RequestFailure
-								error={updateInterfaceLocale.error}
-								fallback={t.ui.retryLater}
-							/>
+							<RequestFailure error={updateInterfaceLocale.error} fallback={t.ui.retryLater} />
 						</div>
 					) : null}
 				</div>

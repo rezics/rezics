@@ -55,9 +55,7 @@ describe("progress record input", () => {
 
 	it("starts a fresh position when leaving a completed record", () => {
 		const completed = { ...activeBook, progress: 1, status: "completed" } as const;
-		expect(
-			changeProgressDraftStatus(createProgressDraft(completed), "active", completed),
-		).toEqual({
+		expect(changeProgressDraftStatus(createProgressDraft(completed), "active", completed)).toEqual({
 			status: "active",
 			percentage: "0",
 			totalMinutes: "0",
@@ -67,9 +65,7 @@ describe("progress record input", () => {
 
 	it("treats completion as a dedicated transition", () => {
 		expect(isCompletionTransition(activeBook, "completed")).toBe(true);
-		expect(isCompletionTransition({ ...activeBook, status: "completed" }, "completed")).toBe(
-			false,
-		);
+		expect(isCompletionTransition({ ...activeBook, status: "completed" }, "completed")).toBe(false);
 		expect(completeProgressOptimistically(activeBook)).toEqual({
 			...activeBook,
 			completedCount: 3,

@@ -236,8 +236,8 @@ describe("user preference inputs", () => {
 		};
 		expect(Check(ReplacePreferencesBody, preferences)).toBe(true);
 		expect(Check(ReplacePreferencesBody, { ...preferences, contentRatings: [] })).toBe(false);
-		expect(
-			Check(ReplacePreferencesBody, { ...preferences, defaultLicense: "custom terms" }),
-		).toBe(false);
+		expect(Check(ReplacePreferencesBody, { ...preferences, defaultLicense: "custom terms" })).toBe(
+			false,
+		);
 	});
 });

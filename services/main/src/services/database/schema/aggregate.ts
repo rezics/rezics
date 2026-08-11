@@ -83,10 +83,7 @@ export const unitAliasVoteStat = pgTable(
 	(table) => [
 		check("unit_alias_vote_stat_count_check", sql`${table.voteCount} >= 0`),
 		check("unit_alias_vote_stat_score_check", sql`abs(${table.score}) <= ${table.voteCount}`),
-		check(
-			"unit_alias_vote_stat_parity_check",
-			sql`(${table.voteCount} + ${table.score}) % 2 = 0`,
-		),
+		check("unit_alias_vote_stat_parity_check", sql`(${table.voteCount} + ${table.score}) % 2 = 0`),
 	],
 );
 
@@ -131,10 +128,7 @@ export const unitTagVoteStat = pgTable(
 		}).onDelete("cascade"),
 		check("unit_tag_vote_stat_count_check", sql`${table.voteCount} >= 0`),
 		check("unit_tag_vote_stat_score_check", sql`abs(${table.score}) <= ${table.voteCount}`),
-		check(
-			"unit_tag_vote_stat_parity_check",
-			sql`(${table.voteCount} + ${table.score}) % 2 = 0`,
-		),
+		check("unit_tag_vote_stat_parity_check", sql`(${table.voteCount} + ${table.score}) % 2 = 0`),
 	],
 );
 
@@ -150,10 +144,7 @@ export const unitStructureVoteStat = pgTable(
 	},
 	(table) => [
 		check("unit_structure_vote_stat_count_check", sql`${table.voteCount} >= 0`),
-		check(
-			"unit_structure_vote_stat_score_check",
-			sql`abs(${table.score}) <= ${table.voteCount}`,
-		),
+		check("unit_structure_vote_stat_score_check", sql`abs(${table.score}) <= ${table.voteCount}`),
 		check(
 			"unit_structure_vote_stat_parity_check",
 			sql`(${table.voteCount} + ${table.score}) % 2 = 0`,
@@ -221,17 +212,10 @@ export const realmTagVoteStat = pgTable(
 			foreignColumns: [realmTagContext.realmId, realmTagContext.tagId],
 			name: "realm_tag_vote_stat_context_fkey",
 		}).onDelete("cascade"),
-		index("realm_tag_vote_stat_realm_tag_unit_idx").on(
-			table.realmId,
-			table.tagId,
-			table.unitId,
-		),
+		index("realm_tag_vote_stat_realm_tag_unit_idx").on(table.realmId, table.tagId, table.unitId),
 		check("realm_tag_vote_stat_count_check", sql`${table.voteCount} >= 0`),
 		check("realm_tag_vote_stat_score_check", sql`abs(${table.score}) <= ${table.voteCount}`),
-		check(
-			"realm_tag_vote_stat_parity_check",
-			sql`(${table.voteCount} + ${table.score}) % 2 = 0`,
-		),
+		check("realm_tag_vote_stat_parity_check", sql`(${table.voteCount} + ${table.score}) % 2 = 0`),
 	],
 );
 

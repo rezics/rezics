@@ -18,9 +18,9 @@ export function useUnitMentionPresentations(
 	const resolveUnitMentions = useUnitMentionResolver();
 	const identity = collectPortableTextPresentationUnitIds(value).join(",");
 	const ids = useMemo(() => (identity ? identity.split(",") : []), [identity]);
-	const [presentations, setPresentations] = useState<
-		ReadonlyMap<string, UnitMentionPresentation>
-	>(new Map());
+	const [presentations, setPresentations] = useState<ReadonlyMap<string, UnitMentionPresentation>>(
+		new Map(),
+	);
 
 	useEffect(() => {
 		if (!resolveUnitMentions || ids.length === 0) {

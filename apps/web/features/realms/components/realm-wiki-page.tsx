@@ -47,18 +47,10 @@ export function RealmWikiPage({ realm }: { readonly realm: GetApiRealmsByRealmId
 				{contextTags.length ? (
 					<Field className="max-w-sm">
 						<FieldLabel>{t.realms.wiki.contextFilter}</FieldLabel>
-						<NativeSelect
-							onChange={(event) => setTagId(event.currentTarget.value)}
-							value={tagId}
-						>
-							<NativeSelectOption value="">
-								{t.realms.wiki.allArticles}
-							</NativeSelectOption>
+						<NativeSelect onChange={(event) => setTagId(event.currentTarget.value)} value={tagId}>
+							<NativeSelectOption value="">{t.realms.wiki.allArticles}</NativeSelectOption>
 							{contextTags.map((tag) => (
-								<NativeSelectOption
-									key={tag.contentUnitId}
-									value={tag.contentUnitId}
-								>
+								<NativeSelectOption key={tag.contentUnitId} value={tag.contentUnitId}>
 									{tag.title ?? t.tags.unnamedTag}
 								</NativeSelectOption>
 							))}

@@ -88,10 +88,7 @@ export function UnitCreditAttributionEditor({
 												item.key === draft.key
 													? {
 															...item,
-															role: isCreditAttributionRoleForUnitType(
-																type,
-																role,
-															)
+															role: isCreditAttributionRoleForUnitType(type, role)
 																? role
 																: undefined,
 														}
@@ -121,17 +118,13 @@ export function UnitCreditAttributionEditor({
 									invalid={entityInvalid}
 									onChange={(entity) =>
 										onChange(
-											value.map((item) =>
-												item.key === draft.key ? { ...item, entity } : item,
-											),
+											value.map((item) => (item.key === draft.key ? { ...item, entity } : item)),
 										)
 									}
 									onClear={() =>
 										onChange(
 											value.map((item) =>
-												item.key === draft.key
-													? { ...item, entity: undefined }
-													: item,
+												item.key === draft.key ? { ...item, entity: undefined } : item,
 											),
 										)
 									}
@@ -152,9 +145,7 @@ export function UnitCreditAttributionEditor({
 										aria-label={t.units.creation.removeCreditAttribution({
 											number,
 										})}
-										onClick={() =>
-											onChange(value.filter((item) => item.key !== draft.key))
-										}
+										onClick={() => onChange(value.filter((item) => item.key !== draft.key))}
 										size="icon-md"
 										type="button"
 										variant="quiet"

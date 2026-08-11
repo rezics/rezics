@@ -74,9 +74,7 @@ export function ReviewScoreAssociationManager() {
 	});
 
 	if (viewerScores.isError)
-		return (
-			<QueryFailure error={viewerScores.error} retry={() => void viewerScores.refetch()} />
-		);
+		return <QueryFailure error={viewerScores.error} retry={() => void viewerScores.refetch()} />;
 	if (!viewerScores.data) return <QueryPending />;
 
 	return (
@@ -234,26 +232,18 @@ function LoadedReviewScoreAssociationManager({
 						},
 						announcements: {
 							onDragStart({ active }) {
-								const item = drafts.find(
-									({ realmId }) => realmId === String(active.id),
-								);
+								const item = drafts.find(({ realmId }) => realmId === String(active.id));
 								return item?.realmLabel;
 							},
 							onDragOver({ over }) {
 								if (!over) return;
-								const item = drafts.find(
-									({ realmId }) => realmId === String(over.id),
-								);
+								const item = drafts.find(({ realmId }) => realmId === String(over.id));
 								return item?.realmLabel;
 							},
 							onDragEnd({ active, over }) {
 								if (!over) return;
-								const item = drafts.find(
-									({ realmId }) => realmId === String(active.id),
-								);
-								const targetIndex = drafts.findIndex(
-									({ realmId }) => realmId === String(over.id),
-								);
+								const item = drafts.find(({ realmId }) => realmId === String(active.id));
+								const targetIndex = drafts.findIndex(({ realmId }) => realmId === String(over.id));
 								return item && targetIndex >= 0
 									? t.engagement.scoreMoved({
 											realm: item.realmLabel,
@@ -283,13 +273,7 @@ function LoadedReviewScoreAssociationManager({
 									index={index}
 									key={draft.realmId}
 									onMove={(targetIndex) =>
-										setDrafts(
-											moveReviewScoreDraft(
-												drafts,
-												draft.realmId,
-												targetIndex,
-											),
-										)
+										setDrafts(moveReviewScoreDraft(drafts, draft.realmId, targetIndex))
 									}
 									onRemove={() => removeScore(draft.realmId)}
 									onSelect={() => setSelectedRealmId(draft.realmId)}
@@ -373,8 +357,7 @@ function LoadedReviewScoreAssociationManager({
 									disabled={pending}
 									onValueChange={({ value }) => {
 										const score = starValueToUnitScore(value);
-										if (score !== undefined)
-											updateScoreValue(selected.realmId, score);
+										if (score !== undefined) updateScoreValue(selected.realmId, score);
 									}}
 									value={selected.value === undefined ? 0 : selected.value / 2}
 								/>
@@ -390,9 +373,7 @@ function LoadedReviewScoreAssociationManager({
 						<RealmScoreContextLink realmId={selected.realmId} />
 					</div>
 				) : (
-					<p className="text-muted-foreground text-sm">
-						{t.engagement.noAssociatedScores}
-					</p>
+					<p className="text-muted-foreground text-sm">{t.engagement.noAssociatedScores}</p>
 				)}
 
 				{invalid ? (
@@ -400,10 +381,7 @@ function LoadedReviewScoreAssociationManager({
 						{t.engagement.completeScoreValues}
 					</p>
 				) : null}
-				<RequestFailure
-					error={upsertScore.error ?? replace.error}
-					fallback={t.ui.retryLater}
-				/>
+				<RequestFailure error={upsertScore.error ?? replace.error} fallback={t.ui.retryLater} />
 				<Button
 					className="w-fit"
 					disabled={adding}

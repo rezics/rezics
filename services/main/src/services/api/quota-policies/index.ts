@@ -221,8 +221,7 @@ export default new Elysia({ prefix: "/api-quota-policies" })
 						actorProfileId: profile.unitId,
 					});
 					if (!updated) {
-						if (!(await getPolicyState(tx, params.policyKey)))
-							throw new ApiQuotaPolicyNotFound();
+						if (!(await getPolicyState(tx, params.policyKey))) throw new ApiQuotaPolicyNotFound();
 						throw new ApiQuotaPolicyRevisionConflict();
 					}
 					await recordAuditEvent(tx, {
@@ -341,10 +340,7 @@ export default new Elysia({ prefix: "/api-quota-policies" })
 				[StatusCodes.OK]: ApiAccountQuotaPolicyResponse,
 				[StatusCodes.UNAUTHORIZED]: AuthenticationResponse,
 				[StatusCodes.FORBIDDEN]: PlatformAccessResponse,
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse([
-					"UserNotFound",
-					"ApiQuotaPolicyNotFound",
-				]),
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UserNotFound", "ApiQuotaPolicyNotFound"]),
 				[StatusCodes.CONFLICT]: AccountQuotaRevisionConflictResponse,
 				[StatusCodes.UNPROCESSABLE_ENTITY]: PolicyInvalidResponse,
 			},
@@ -409,9 +405,7 @@ export default new Elysia({ prefix: "/api-quota-policies" })
 				.from(apikeys)
 				.where(eq(apikeys.referenceId, params.userId))
 				.orderBy(desc(apikeys.createdAt));
-			const quotas = await Promise.all(
-				tokens.map((token) => resolveApiTokenQuotaPolicy(token.id)),
-			);
+			const quotas = await Promise.all(tokens.map((token) => resolveApiTokenQuotaPolicy(token.id)));
 			return {
 				items: tokens.map((token, index) => ({
 					id: token.id,
@@ -441,9 +435,7 @@ export default new Elysia({ prefix: "/api-quota-policies" })
 	.put(
 		"/accounts/:userId/tokens/:tokenId",
 		async ({ authorization, profile, params, body }) => {
-			await authorization.platform.ensureCapability(
-				"platform.user.api_token.api_quota.update",
-			);
+			await authorization.platform.ensureCapability("platform.user.api_token.api_quota.update");
 			try {
 				return await database.transaction(async (tx) => {
 					await requireOwnedToken(tx, params.userId, params.tokenId);
@@ -496,10 +488,7 @@ export default new Elysia({ prefix: "/api-quota-policies" })
 				[StatusCodes.OK]: ApiTokenQuotaPolicyResponse,
 				[StatusCodes.UNAUTHORIZED]: AuthenticationResponse,
 				[StatusCodes.FORBIDDEN]: PlatformAccessResponse,
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse([
-					"UserNotFound",
-					"ApiQuotaPolicyNotFound",
-				]),
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UserNotFound", "ApiQuotaPolicyNotFound"]),
 				[StatusCodes.CONFLICT]: TokenQuotaRevisionConflictResponse,
 				[StatusCodes.UNPROCESSABLE_ENTITY]: PolicyInvalidResponse,
 			},
@@ -509,9 +498,7 @@ export default new Elysia({ prefix: "/api-quota-policies" })
 	.delete(
 		"/accounts/:userId/tokens/:tokenId",
 		async ({ authorization, profile, params, body }) => {
-			await authorization.platform.ensureCapability(
-				"platform.user.api_token.api_quota.update",
-			);
+			await authorization.platform.ensureCapability("platform.user.api_token.api_quota.update");
 			return database.transaction(async (tx) => {
 				await requireOwnedToken(tx, params.userId, params.tokenId);
 				const reset = await resetApiTokenQuotaPolicy(tx, {

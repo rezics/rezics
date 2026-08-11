@@ -98,10 +98,7 @@ export const SearchControlExpression = Type.Recursive(
 				},
 				{ additionalProperties: false },
 			),
-			Type.Object(
-				{ operator: Type.Literal("not"), clause: This },
-				{ additionalProperties: false },
-			),
+			Type.Object({ operator: Type.Literal("not"), clause: This }, { additionalProperties: false }),
 		]),
 	{ $id: "SearchControlExpression" },
 );
@@ -140,9 +137,7 @@ export function readSearchLanguageBoundary(
 	const constrained = boundaries.filter(
 		(boundary): boundary is readonly string[] => boundary !== undefined,
 	);
-	return constrained.length
-		? [...new Set(constrained.flatMap((boundary) => boundary))]
-		: undefined;
+	return constrained.length ? [...new Set(constrained.flatMap((boundary) => boundary))] : undefined;
 }
 
 export const SearchDocumentControl = Type.Object(
@@ -241,10 +236,7 @@ export type SearchDocument = Static<typeof SearchDocument>;
 
 export const SearchFeatureContext = Type.Union(
 	[
-		Type.Object(
-			{ kind: Type.Literal("realm"), realmId: Uuid },
-			{ additionalProperties: false },
-		),
+		Type.Object({ kind: Type.Literal("realm"), realmId: Uuid }, { additionalProperties: false }),
 		Type.Object(
 			{ kind: Type.Literal("profile"), profileId: Uuid },
 			{ additionalProperties: false },
@@ -401,11 +393,7 @@ function assertFilterShape(filter: SearchControlPredicate, path: string): void {
 			["score", filter.score],
 			["voteCount", filter.voteCount],
 		] as const)
-			if (
-				range?.lower !== undefined &&
-				range.upper !== undefined &&
-				range.lower > range.upper
-			)
+			if (range?.lower !== undefined && range.upper !== undefined && range.lower > range.upper)
 				throw new TypeError(`${path} ${name} lower bound exceeds upper bound`);
 		return;
 	}
@@ -512,9 +500,7 @@ export function assertSearchDocument(value: unknown): asserts value is SearchDoc
 	if (value.filter) assertUnitPredicate(value.filter);
 	if (!unique(value.defaults.map((item) => item.controlKey)))
 		throw new TypeError("Search defaults must target unique controls");
-	value.defaults.forEach((item, index) =>
-		assertControlValue(item, controls, `defaults[${index}]`),
-	);
+	value.defaults.forEach((item, index) => assertControlValue(item, controls, `defaults[${index}]`));
 }
 
 export function assertSearchFeatureInput(value: unknown): asserts value is SearchFeatureInput {
@@ -560,9 +546,7 @@ export function parseSharedSearchQueryDocument(value: unknown): SharedSearchQuer
 	if (!Check(SharedSearchQueryDocument, [UnitPredicateSchema, UnitFilter], value))
 		throw new TypeError("Invalid shared Search query document v1");
 	if (
-		!unique(
-			value.selections.map((selection) => JSON.stringify([selection.field, selection.value])),
-		)
+		!unique(value.selections.map((selection) => JSON.stringify([selection.field, selection.value])))
 	)
 		throw new TypeError("Shared Search query selections must be unique");
 	if (value.state.filter) assertUnitFilter(value.state.filter);

@@ -121,10 +121,7 @@ export default new Elysia({ normalize: "typebox" })
 			);
 		if (code === "PARSE") {
 			const malformedRequestBody = new MalformedRequestBody();
-			return status(
-				malformedRequestBody.status,
-				toApiErrorBody(malformedRequestBody, requestId),
-			);
+			return status(malformedRequestBody.status, toApiErrorBody(malformedRequestBody, requestId));
 		}
 		if (code === "VALIDATION") {
 			const failure = classifyValidationFailure(error);
@@ -144,10 +141,7 @@ export default new Elysia({ normalize: "typebox" })
 			if (failure.kind === "response")
 				logger.error("Response validation failed", { ...details, error });
 			else logger.info("Request validation failed", details);
-			return status(
-				failure.publicError.status,
-				toApiErrorBody(failure.publicError, requestId),
-			);
+			return status(failure.publicError.status, toApiErrorBody(failure.publicError, requestId));
 		}
 		logger.error("Request failed", {
 			eventName: "http.request.failed",

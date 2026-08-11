@@ -39,7 +39,8 @@ export default {
 			"La langue du contenu est incertaine ; votre première préférence linguistique est utilisée.",
 		unsupported:
 			"La langue détectée n’est pas encore prise en charge ; votre première préférence linguistique est utilisée.",
-		failed: "La détection de la langue est temporairement indisponible ; votre première préférence linguistique est utilisée.",
+		failed:
+			"La détection de la langue est temporairement indisponible ; votre première préférence linguistique est utilisée.",
 	},
 	chineseContentDisplay: {
 		label: "Affichage des contenus en chinois",

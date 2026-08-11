@@ -70,9 +70,7 @@ export function PostManagementWorkspace({
 }) {
 	return (
 		<RequireSession>
-			<PostManagementWorkspaceLoader postId={postId}>
-				{children}
-			</PostManagementWorkspaceLoader>
+			<PostManagementWorkspaceLoader postId={postId}>{children}</PostManagementWorkspaceLoader>
 		</RequireSession>
 	);
 }
@@ -109,10 +107,7 @@ function PostManagementWorkspaceLoader({
 			}}
 			unitId={postId}
 		>
-			<LoadedPostManagementWorkspace
-				resource={{ item: postQuery.data }}
-				children={children}
-			/>
+			<LoadedPostManagementWorkspace resource={{ item: postQuery.data }} children={children} />
 		</ContentLanguageEditorBoundary>
 	);
 }
@@ -181,8 +176,7 @@ function LoadedPostManagementWorkspace({
 	const sections = allSections.filter(({ id }) => visibleSectionIds.has(id));
 	const currentSectionId = parsePostManagementSection(pathname, postId);
 	const requestedSection = allSections.find(({ id }) => id === currentSectionId);
-	const sectionAllowed =
-		currentSectionId !== undefined && visibleSectionIds.has(currentSectionId);
+	const sectionAllowed = currentSectionId !== undefined && visibleSectionIds.has(currentSectionId);
 	const title = resolvePostPresentationTitle(resource.item, {
 		postBy: t.posts.postFallbackTitle,
 		reviewOf: t.posts.reviewFallbackTitle,

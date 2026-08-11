@@ -38,9 +38,7 @@ const observability = initializeObservability({
 
 try {
 	const baseline = new Elysia().get("/items/:id", () => "ok");
-	const instrumented = new Elysia()
-		.use(createElysiaObservability())
-		.get("/items/:id", () => "ok");
+	const instrumented = new Elysia().use(createElysiaObservability()).get("/items/:id", () => "ok");
 	await exercise(baseline, 200);
 	await exercise(instrumented, 200);
 	const heapBefore = process.memoryUsage().heapUsed;

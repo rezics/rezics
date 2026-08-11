@@ -87,9 +87,6 @@ export const sharedSearchQuery = pgTable(
 		createdAt: createCreatedAtColumn(),
 	},
 	(table) => [
-		check(
-			"shared_search_query_document_check",
-			sql`jsonb_typeof(${table.document}) = 'object'`,
-		),
+		check("shared_search_query_document_check", sql`jsonb_typeof(${table.document}) = 'object'`),
 	],
 );

@@ -95,8 +95,7 @@ export default {
 		voteGroup: "Évaluation du contenu",
 		comments: insert("{{count}} réponses", { count: Number }),
 		shareTitle: "Partager le contenu",
-		shareDescription:
-			"Utilisez le menu de partage de votre appareil ou copiez le lien du contenu.",
+		shareDescription: "Utilisez le menu de partage de votre appareil ou copiez le lien du contenu.",
 		shareNative: "Partager dans une autre application",
 		copyLink: "Copier le lien",
 		linkCopied: "Lien copié",

@@ -97,8 +97,7 @@ export function EntityPicker({
 
 	useEffect(() => {
 		const query = inputValue.trim();
-		const shouldSearch =
-			Boolean(searchEntities) && (query.length > 0 || (searchOnOpen && open));
+		const shouldSearch = Boolean(searchEntities) && (query.length > 0 || (searchOnOpen && open));
 		if (!shouldSearch || !searchEntities) {
 			const shouldPreservePreloadedResults =
 				Boolean(searchEntities) && searchOnOpen && !open && query.length === 0;
@@ -116,13 +115,10 @@ export function EntityPicker({
 				void searchEntities(index, query, request.signal, { kinds: requestedKinds }).then(
 					(nextHits) => {
 						if (request.signal.aborted) return;
-						const allowed = allowedKindsKey
-							? new Set(allowedKindsKey.split("\u0000"))
-							: undefined;
+						const allowed = allowedKindsKey ? new Set(allowedKindsKey.split("\u0000")) : undefined;
 						set(
 							nextHits.filter(
-								(hit) =>
-									!allowed || (hit.kind !== undefined && allowed.has(hit.kind)),
+								(hit) => !allowed || (hit.kind !== undefined && allowed.has(hit.kind)),
 							),
 						);
 						setSearchResolution({ status: "ready", query });
@@ -193,9 +189,7 @@ export function EntityPicker({
 				/>
 				<ComboboxContent>
 					{isPending || currentResolution.status === "pending" ? (
-						<p className="px-2 py-1.5 text-muted-foreground text-sm">
-							{messages.loading}
-						</p>
+						<p className="px-2 py-1.5 text-muted-foreground text-sm">{messages.loading}</p>
 					) : currentResolution.status === "error" ? (
 						<p className="px-2 py-1.5 text-destructive text-sm" role="alert">
 							{messages.error}
@@ -216,16 +210,12 @@ export function EntityPicker({
 									</ComboboxItem>
 								))}
 							</ComboboxList>
-							{(query || (searchOnOpen && open)) && (
-								<ComboboxEmpty>{messages.empty}</ComboboxEmpty>
-							)}
+							{(query || (searchOnOpen && open)) && <ComboboxEmpty>{messages.empty}</ComboboxEmpty>}
 						</>
 					)}
 				</ComboboxContent>
 			</Combobox>
-			{showNoResultsAction ? (
-				<div aria-live="polite">{renderNoResultsAction(query)}</div>
-			) : null}
+			{showNoResultsAction ? <div aria-live="polite">{renderNoResultsAction(query)}</div> : null}
 		</div>
 	);
 }

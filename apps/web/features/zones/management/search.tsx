@@ -95,8 +95,7 @@ function reviseControl(
 		}
 	}
 	const facets = enabled
-		? template.results.facets.includes(controlKey) &&
-			!document.results.facets.includes(controlKey)
+		? template.results.facets.includes(controlKey) && !document.results.facets.includes(controlKey)
 			? [...document.results.facets, controlKey]
 			: document.results.facets
 		: document.results.facets.filter((key) => key !== controlKey);
@@ -127,10 +126,7 @@ function addTagControl(document: SearchDocument, template: SearchDocument): Sear
 						? { ...section, controls: [...section.controls, key] }
 						: section,
 				)
-			: [
-					...document.sections,
-					{ key: "filters", disclosure: "visible" as const, controls: [key] },
-				],
+			: [...document.sections, { key: "filters", disclosure: "visible" as const, controls: [key] }],
 		results: { ...document.results, facets: [...document.results.facets, key] },
 	});
 }
@@ -263,13 +259,9 @@ function SearchDocumentEditor({
 					</FieldGroup>
 					<div>
 						<div className="flex flex-wrap items-center justify-between gap-3">
-							<h2 className="font-semibold text-lg">
-								{t.zones.management.search.controls}
-							</h2>
+							<h2 className="font-semibold text-lg">{t.zones.management.search.controls}</h2>
 							<Button
-								onClick={() =>
-									setDraft(addTagControl(document, templateDefinition.document))
-								}
+								onClick={() => setDraft(addTagControl(document, templateDefinition.document))}
 								size="sm"
 								type="button"
 								variant="outline"
@@ -292,53 +284,34 @@ function SearchDocumentEditor({
 											<div className="flex flex-wrap items-center gap-2">
 												<strong>{t.search.fields[control.field]}</strong>
 												{metadata?.component ? (
-													<Badge variant="secondary">
-														{metadata.component}
-													</Badge>
+													<Badge variant="secondary">{metadata.component}</Badge>
 												) : null}
 											</div>
-											<code className="text-xs text-muted-foreground">
-												{control.key}
-											</code>
+											<code className="text-xs text-muted-foreground">{control.key}</code>
 										</div>
 										<label className="flex items-center gap-2 text-sm">
 											<Checkbox
 												checked={control.enabled}
 												onCheckedChange={(details) =>
 													setDraft(
-														reviseControl(
-															document,
-															templateDefinition.document,
-															control.key,
-															{
-																enabled: details.checked === true,
-															},
-														),
+														reviseControl(document, templateDefinition.document, control.key, {
+															enabled: details.checked === true,
+														}),
 													)
 												}
 											/>
 											{t.zones.management.search.controlEnabled}
 										</label>
 										<Field>
-											<FieldLabel>
-												{t.zones.management.search.disclosure}
-											</FieldLabel>
+											<FieldLabel>{t.zones.management.search.disclosure}</FieldLabel>
 											<NativeSelect
 												disabled={!control.enabled}
 												onChange={(event) =>
 													setDraft(
-														reviseControl(
-															document,
-															templateDefinition.document,
-															control.key,
-															{
-																disclosure:
-																	event.currentTarget.value ===
-																	"hidden"
-																		? "hidden"
-																		: "visible",
-															},
-														),
+														reviseControl(document, templateDefinition.document, control.key, {
+															disclosure:
+																event.currentTarget.value === "hidden" ? "hidden" : "visible",
+														}),
 													)
 												}
 												value={control.disclosure}
@@ -352,27 +325,23 @@ function SearchDocumentEditor({
 											</NativeSelect>
 										</Field>
 										<Field className="sm:col-span-2">
-											<FieldLabel>
-												{t.zones.management.search.labelUnitId}
-											</FieldLabel>
+											<FieldLabel>{t.zones.management.search.labelUnitId}</FieldLabel>
 											<UnitPicker
 												ariaLabel={t.zones.management.search.labelUnitId}
 												onValueChange={(labelUnitId) => {
 													setDraft({
 														...document,
-														controls: document.controls.map(
-															(candidate) =>
-																candidate.key === control.key
-																	? {
-																			...candidate,
-																			...(labelUnitId
-																				? { labelUnitId }
-																				: {
-																						labelUnitId:
-																							undefined,
-																					}),
-																		}
-																	: candidate,
+														controls: document.controls.map((candidate) =>
+															candidate.key === control.key
+																? {
+																		...candidate,
+																		...(labelUnitId
+																			? { labelUnitId }
+																			: {
+																					labelUnitId: undefined,
+																				}),
+																	}
+																: candidate,
 														),
 													});
 												}}
@@ -382,48 +351,37 @@ function SearchDocumentEditor({
 										</Field>
 										{control.field === "tag" ? (
 											<Field>
-												<FieldLabel>
-													{t.zones.management.search.allowedTagIds}
-												</FieldLabel>
+												<FieldLabel>{t.zones.management.search.allowedTagIds}</FieldLabel>
 												<UnitMultiPicker
-													ariaLabel={
-														t.zones.management.search.allowedTagIds
-													}
+													ariaLabel={t.zones.management.search.allowedTagIds}
 													index="tags"
 													kinds={["tag"]}
 													onValuesChange={(values) => {
 														setDraft({
 															...document,
-															controls: document.controls.map(
-																(candidate) =>
-																	candidate.key === control.key
-																		? {
-																				...candidate,
-																				optionPolicy:
-																					values.length
-																						? {
-																								kind: "include",
-																								values: [
-																									...values,
-																								],
-																							}
-																						: {
-																								kind: "all",
-																							},
-																			}
-																		: candidate,
+															controls: document.controls.map((candidate) =>
+																candidate.key === control.key
+																	? {
+																			...candidate,
+																			optionPolicy: values.length
+																				? {
+																						kind: "include",
+																						values: [...values],
+																					}
+																				: {
+																						kind: "all",
+																					},
+																		}
+																	: candidate,
 															),
 														});
 													}}
-													removeLabel={
-														t.zones.management.search.removeAllowedTag
-													}
+													removeLabel={t.zones.management.search.removeAllowedTag}
 													placeholder={t.ui.pickerPlaceholders.tag}
 													values={
 														control.optionPolicy?.kind === "include"
 															? control.optionPolicy.values.filter(
-																	(value): value is string =>
-																		typeof value === "string",
+																	(value): value is string => typeof value === "string",
 																)
 															: []
 													}
@@ -432,15 +390,12 @@ function SearchDocumentEditor({
 										) : null}
 										{custom ? (
 											<Button
-												onClick={() =>
-													setDraft(removeControl(document, control.key))
-												}
+												onClick={() => setDraft(removeControl(document, control.key))}
 												size="sm"
 												type="button"
 												variant="quiet"
 											>
-												<Trash2 aria-hidden />{" "}
-												{t.zones.management.search.removeTagControl}
+												<Trash2 aria-hidden /> {t.zones.management.search.removeTagControl}
 											</Button>
 										) : null}
 									</div>
@@ -465,9 +420,7 @@ function SearchDocumentEditor({
 									path: { zoneId },
 									body: {
 										document,
-										...(existing
-											? { baseRevisionId: existing.latestRevisionId }
-											: {}),
+										...(existing ? { baseRevisionId: existing.latestRevisionId } : {}),
 										...(message.trim() ? { message: message.trim() } : {}),
 									},
 								});
@@ -487,15 +440,10 @@ function SearchDocumentEditor({
 			{existing ? (
 				<Card appearance="outlined">
 					<CardContent className="p-6">
-						<h2 className="font-semibold text-lg">
-							{t.zones.management.search.history}
-						</h2>
+						<h2 className="font-semibold text-lg">{t.zones.management.search.history}</h2>
 						{history.isPending ? <QueryPending /> : null}
 						{history.isError ? (
-							<QueryFailure
-								error={history.error}
-								retry={() => void history.refetch()}
-							/>
+							<QueryFailure error={history.error} retry={() => void history.refetch()} />
 						) : null}
 						{history.data ? (
 							<ul className="mt-4 grid gap-3">
@@ -505,13 +453,7 @@ function SearchDocumentEditor({
 										key={revision.id}
 									>
 										<div>
-											<strong>
-												{
-													t.zones.management.search.revisionKinds[
-														revision.kind
-													]
-												}
-											</strong>
+											<strong>{t.zones.management.search.revisionKinds[revision.kind]}</strong>
 											<p className="text-sm text-muted-foreground">
 												{revision.editSummary ??
 													new Intl.DateTimeFormat(locale.target, {
@@ -529,15 +471,10 @@ function SearchDocumentEditor({
 														path: { zoneId },
 														body: {
 															sourceRevisionId: revision.id,
-															baseRevisionId:
-																existing.latestRevisionId,
+															baseRevisionId: existing.latestRevisionId,
 														},
 													});
-													setDraft(
-														parseSearchFeatureDefinition(
-															restored.definition,
-														).document,
-													);
+													setDraft(parseSearchFeatureDefinition(restored.definition).document);
 												} catch {
 													// The typed mutation state supplies the visible request failure.
 												}

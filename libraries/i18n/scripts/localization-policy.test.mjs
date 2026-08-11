@@ -30,13 +30,11 @@ function checkTypeScript(source, path = "libraries/i18n/src/languages/zh-Hant/ex
 
 describe("localization terminology policy", () => {
 	it("maps core, fixture, and about paths to canonical locale tags", () => {
+		expect(localeForLocalizationPath("/repo/libraries/i18n/src/languages/zh-Hant/example.ts")).toBe(
+			"zh-Hant",
+		);
 		expect(
-			localeForLocalizationPath("/repo/libraries/i18n/src/languages/zh-Hant/example.ts"),
-		).toBe("zh-Hant");
-		expect(
-			localeForLocalizationPath(
-				"/repo/libraries/fixture-data/src/languages/en/content-feed.ts",
-			),
+			localeForLocalizationPath("/repo/libraries/fixture-data/src/languages/en/content-feed.ts"),
 		).toBe("en");
 		expect(
 			localeForLocalizationPath("/repo/apps/about/src/content/locales/zh-hans/example.ts"),

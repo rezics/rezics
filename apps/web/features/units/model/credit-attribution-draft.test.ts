@@ -66,10 +66,7 @@ describe("Unit creation credit attribution drafts", () => {
 			]),
 		).toMatchObject({ ok: true });
 		expect(
-			validateCreditAttributionDrafts("book", [
-				publisher,
-				{ ...publisher, key: "duplicate" },
-			]),
+			validateCreditAttributionDrafts("book", [publisher, { ...publisher, key: "duplicate" }]),
 		).toMatchObject({
 			ok: false,
 			issues: { duplicate: { duplicate: true } },

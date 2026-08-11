@@ -23,9 +23,7 @@ export function useFormDraftContentLanguage(
 	);
 	const onInput = useCallback(
 		(event: FormEvent<HTMLFormElement>) => {
-			setFormSample(
-				readDraftContentLanguageFormSample(event.currentTarget, stableFieldNames),
-			);
+			setFormSample(readDraftContentLanguageFormSample(event.currentTarget, stableFieldNames));
 		},
 		[stableFieldNames],
 	);

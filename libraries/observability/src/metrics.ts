@@ -190,9 +190,7 @@ export class ObservabilityMetrics {
 			.createObservableGauge("rezics.worker.job.active_age", { unit: "s" })
 			.addCallback((result) => {
 				if (this.#activeWorkerJobStartedAt !== undefined)
-					result.observe(
-						Math.max(0, Date.now() - this.#activeWorkerJobStartedAt) / 1_000,
-					);
+					result.observe(Math.max(0, Date.now() - this.#activeWorkerJobStartedAt) / 1_000);
 			});
 	}
 
@@ -334,9 +332,7 @@ export class ObservabilityMetrics {
 
 	fractionalPositionRebalanced(owner: string, members: number): void {
 		if (!Number.isSafeInteger(members) || members <= 0)
-			throw new Error(
-				"Fractional-position rebalance members must be a positive safe integer",
-			);
+			throw new Error("Fractional-position rebalance members must be a positive safe integer");
 		const attributes = { "ordering.owner": normalizeOperationName(owner) };
 		this.#fractionalPositionRebalances.add(1, attributes);
 		this.#fractionalPositionRebalanceMembers.record(members, attributes);

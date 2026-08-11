@@ -68,11 +68,7 @@ export function SignInButton({
 }) {
 	const { openAuthPortal } = useAuthPortal();
 	return (
-		<Button
-			variant="brand"
-			{...props}
-			onClick={() => openAuthPortal("login", { destination })}
-		/>
+		<Button variant="brand" {...props} onClick={() => openAuthPortal("login", { destination })} />
 	);
 }
 
@@ -588,9 +584,7 @@ function ForgotPasswordForm({
 					</FieldGroup>
 				</form>
 			)}
-			<AuthModeFooter onClick={() => onModeChange("login")}>
-				{t.auth.backToLogin}
-			</AuthModeFooter>
+			<AuthModeFooter onClick={() => onModeChange("login")}>{t.auth.backToLogin}</AuthModeFooter>
 		</>
 	);
 }
@@ -627,8 +621,7 @@ function ResetPasswordForm({
 		const newPassword = String(formData.get("password") ?? "");
 		const confirmPassword = String(formData.get("confirmPassword") ?? "");
 		setPasswordMismatch(
-			confirmPassword.length > 0 &&
-				!passwordConfirmationMatches(newPassword, confirmPassword),
+			confirmPassword.length > 0 && !passwordConfirmationMatches(newPassword, confirmPassword),
 		);
 	};
 
@@ -665,9 +658,7 @@ function ResetPasswordForm({
 			) : !token ? (
 				<Alert variant="destructive">
 					<AlertDescription>
-						{errorCode === "INVALID_TOKEN"
-							? t.auth.invalidResetLink
-							: t.auth.missingResetLink}
+						{errorCode === "INVALID_TOKEN" ? t.auth.invalidResetLink : t.auth.missingResetLink}
 					</AlertDescription>
 				</Alert>
 			) : (
@@ -703,9 +694,7 @@ function ResetPasswordForm({
 					</FieldGroup>
 				</form>
 			)}
-			<AuthModeFooter onClick={() => onModeChange("login")}>
-				{t.auth.backToLogin}
-			</AuthModeFooter>
+			<AuthModeFooter onClick={() => onModeChange("login")}>{t.auth.backToLogin}</AuthModeFooter>
 		</>
 	);
 }
@@ -763,19 +752,12 @@ function VerifyEmailForm({
 						<p className="text-muted-foreground text-sm">{t.auth.verificationSent}</p>
 					) : null}
 					<FormError error={error} />
-					<Button
-						className="w-full"
-						isLoading={isSubmitting}
-						type="submit"
-						variant="outline"
-					>
+					<Button className="w-full" isLoading={isSubmitting} type="submit" variant="outline">
 						{t.auth.resendVerification}
 					</Button>
 				</FieldGroup>
 			</form>
-			<AuthModeFooter onClick={() => onModeChange("login")}>
-				{t.auth.backToLogin}
-			</AuthModeFooter>
+			<AuthModeFooter onClick={() => onModeChange("login")}>{t.auth.backToLogin}</AuthModeFooter>
 		</>
 	);
 }

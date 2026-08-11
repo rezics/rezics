@@ -50,13 +50,9 @@ export function UnitCard({
 					sizes={sizes}
 					src={cover?.url}
 				/>
-				<Heading className="mt-2.5 line-clamp-2 font-semibold text-sm leading-5">
-					{title}
-				</Heading>
+				<Heading className="mt-2.5 line-clamp-2 font-semibold text-sm leading-5">{title}</Heading>
 				{description ? (
-					<p className="mt-1 line-clamp-2 text-muted-foreground text-xs leading-5">
-						{description}
-					</p>
+					<p className="mt-1 line-clamp-2 text-muted-foreground text-xs leading-5">{description}</p>
 				) : null}
 			</a>
 		</Card>

@@ -85,9 +85,7 @@ export const TagsInputControl = (props: TagsInputControlProps) => {
 				{...rest}
 			>
 				{children}
-				{showClear && api.value.length > 0 && (
-					<TagsInputClearTrigger aria-label="Clear all tags" />
-				)}
+				{showClear && api.value.length > 0 && <TagsInputClearTrigger aria-label="Clear all tags" />}
 			</InputGroup>
 		</ArkTagsInput.Control>
 	);
@@ -163,11 +161,7 @@ export const TagsInputItemDeleteTrigger = (
 	const { className, children, ...rest } = props;
 
 	return (
-		<ArkTagsInput.ItemDeleteTrigger
-			asChild
-			data-slot="tags-input-item-delete-trigger"
-			{...rest}
-		>
+		<ArkTagsInput.ItemDeleteTrigger asChild data-slot="tags-input-item-delete-trigger" {...rest}>
 			<InputGroupButton
 				className={cn(
 					"in-data-[size=lg]:size-6 in-data-[size=sm]:size-4 size-5",

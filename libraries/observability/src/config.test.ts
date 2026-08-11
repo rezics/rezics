@@ -71,9 +71,9 @@ describe("observability environment configuration", () => {
 			resolve({ OTEL_EXPORTER_OTLP_ENDPOINT: "https://user:secret@collector/" }),
 		).toThrow(/credentials/);
 		expect(() => resolve({ OTEL_EXPORTER_OTLP_PROTOCOL: "grpc" })).toThrow(/http\/protobuf/);
-		expect(() =>
-			resolve({ OTEL_RESOURCE_ATTRIBUTES: "enduser.email=test@example.com" }),
-		).toThrow(/Sensitive resource attribute/);
+		expect(() => resolve({ OTEL_RESOURCE_ATTRIBUTES: "enduser.email=test@example.com" })).toThrow(
+			/Sensitive resource attribute/,
+		);
 		expect(() =>
 			resolve({ OTEL_BSP_MAX_QUEUE_SIZE: "8", OTEL_BSP_MAX_EXPORT_BATCH_SIZE: "9" }),
 		).toThrow(/between 1 and 8/);

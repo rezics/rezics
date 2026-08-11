@@ -65,19 +65,17 @@ export default {
 	},
 	communityUnitSearch: {
 		policyTitle: "Search before creating",
-		policy: "To maintain a healthy community, search before creating a public entry and confirm that the content you want to create does not already exist. Misuse of the ability to create public entries may result in penalties.",
+		policy:
+			"To maintain a healthy community, search before creating a public entry and confirm that the content you want to create does not already exist. Misuse of the ability to create public entries may result in penalties.",
 		confirmationLabel: insert(
 			"I checked the existing {{subject}} and confirmed that this entry does not already exist.",
 			{ subject: String },
 		),
 		prompt: insert("Search existing {{subject}}", { subject: String }),
 		pageTitle: insert("Search existing {{subject}}", { subject: String }),
-		pageDescription: insert(
-			"Check whether the {{subject}} you want to create already exists.",
-			{
-				subject: String,
-			},
-		),
+		pageDescription: insert("Check whether the {{subject}} you want to create already exists.", {
+			subject: String,
+		}),
 		backToSection: insert("Back to {{subject}}", { subject: String }),
 		searchLabel: insert("Search {{subject}}", { subject: String }),
 		searchPlaceholder: insert("Enter the name of the {{subject}}", { subject: String }),

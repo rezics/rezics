@@ -55,9 +55,7 @@ function filterValues(filter: SearchControlPredicate): readonly SearchScalar[] {
 	if (filter.field === "realm-tag-vote") return [];
 	if ("values" in filter) return filter.values;
 	if ("value" in filter) return [filter.value];
-	return [filter.lower, filter.upper].filter(
-		(value): value is SearchScalar => value !== undefined,
-	);
+	return [filter.lower, filter.upper].filter((value): value is SearchScalar => value !== undefined);
 }
 
 async function ensureDocumentReferences(
@@ -81,8 +79,7 @@ async function ensureDocumentReferences(
 			realmIds.add(filter.realmId);
 			tagIds.add(filter.tagId);
 		} else if (filter.field === "tag")
-			for (const value of filterValues(filter))
-				if (typeof value === "string") tagIds.add(value);
+			for (const value of filterValues(filter)) if (typeof value === "string") tagIds.add(value);
 	const filterUnitIds = document.filter ? collectUnitPredicateReferenceIds(document.filter) : [];
 	const ids = [...new Set([...labelIds, ...tagIds, ...realmIds, ...filterUnitIds])];
 	if (!ids.length) return;
@@ -121,13 +118,9 @@ async function ensureDocumentReferences(
 	if ([...tagIds].some((id) => !isPublicKind(id, "tag")))
 		throw new InvalidSearch("Search document tag options must target public active Tag Units");
 	if ([...realmIds].some((id) => !isPublicKind(id, "realm")))
-		throw new InvalidSearch(
-			"Search document Realm references must target public active Realms",
-		);
+		throw new InvalidSearch("Search document Realm references must target public active Realms");
 	if (filterUnitIds.some((id) => !isPublicUnit(id)))
-		throw new InvalidSearch(
-			"Search document Filter references must target public active Units",
-		);
+		throw new InvalidSearch("Search document Filter references must target public active Units");
 }
 
 export async function getZoneSearchFeature(

@@ -90,12 +90,7 @@ export async function createUnitAccessInvitation(
 
 	return database.transaction(async (tx) => {
 		await lockUnitAccessState(tx, [input.unitId]);
-		await authorization.ensureInTransaction(
-			tx,
-			input.unitId,
-			"unit.access.manage",
-			input.scope,
-		);
+		await authorization.ensureInTransaction(tx, input.unitId, "unit.access.manage", input.scope);
 		for (const permission of permissions)
 			await authorization.ensureInTransaction(tx, input.unitId, permission, input.scope);
 
@@ -255,10 +250,7 @@ export async function acceptUnitAccessInvitation(
 					eq(unitAccessGrant.scope, invitation.scope),
 					inArray(unitAccessGrant.permission, invitation.permissions),
 					isNull(unitAccessGrant.revokedAt),
-					or(
-						isNull(unitAccessGrant.expiresAt),
-						sql`${unitAccessGrant.expiresAt} > ${now}`,
-					),
+					or(isNull(unitAccessGrant.expiresAt), sql`${unitAccessGrant.expiresAt} > ${now}`),
 				),
 			);
 		const existingPermissions = new Set(existing.map(({ permission }) => permission));
@@ -290,10 +282,7 @@ export async function acceptUnitAccessInvitation(
 				resolvedByProfileId: profileId,
 			})
 			.where(
-				and(
-					eq(unitAccessInvitation.id, invitation.id),
-					isNull(unitAccessInvitation.resolution),
-				),
+				and(eq(unitAccessInvitation.id, invitation.id), isNull(unitAccessInvitation.resolution)),
 			)
 			.returning();
 		if (!resolved) throw new UnitAccessInvitationConflict();
@@ -325,10 +314,7 @@ export async function declineUnitAccessInvitation(
 			.update(unitAccessInvitation)
 			.set({ resolution: "declined", resolvedAt: new Date(), resolvedByProfileId: profileId })
 			.where(
-				and(
-					eq(unitAccessInvitation.id, invitation.id),
-					isNull(unitAccessInvitation.resolution),
-				),
+				and(eq(unitAccessInvitation.id, invitation.id), isNull(unitAccessInvitation.resolution)),
 			)
 			.returning();
 		if (!resolved) throw new UnitAccessInvitationConflict();
@@ -360,10 +346,7 @@ export async function cancelUnitAccessInvitation(
 				resolvedByProfileId: actorProfileId,
 			})
 			.where(
-				and(
-					eq(unitAccessInvitation.id, invitation.id),
-					isNull(unitAccessInvitation.resolution),
-				),
+				and(eq(unitAccessInvitation.id, invitation.id), isNull(unitAccessInvitation.resolution)),
 			)
 			.returning();
 		if (!resolved) throw new UnitAccessInvitationConflict();

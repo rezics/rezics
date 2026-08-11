@@ -38,8 +38,7 @@ export function revisionVisibilityFromStorage(input: StoredRevisionVisibility): 
 	if (input.summaryHidden) hiddenFields.push("summary");
 	if (input.actorHidden) hiddenFields.push("actor");
 	if (hiddenFields.length === 0) {
-		if (input.suppressed)
-			throw new TypeError("A suppressed revision must hide at least one field");
+		if (input.suppressed) throw new TypeError("A suppressed revision must hide at least one field");
 		return { kind: "visible" };
 	}
 	return createRevisionVisibility(input.suppressed ? "suppressed" : "hidden", hiddenFields);

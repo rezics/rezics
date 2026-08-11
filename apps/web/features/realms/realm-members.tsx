@@ -66,13 +66,10 @@ export function RealmMembers({
 		[deferredSearch, items, stateFilter],
 	);
 	const existingProfileIds = new Set(items.map((member) => member.profileId));
-	const selectedProfileIds = [...selected].filter((profileId) =>
-		existingProfileIds.has(profileId),
-	);
+	const selectedProfileIds = [...selected].filter((profileId) => existingProfileIds.has(profileId));
 	const visibleProfileIds = filtered.map((member) => member.profileId);
 	const allVisibleSelected =
-		visibleProfileIds.length > 0 &&
-		visibleProfileIds.every((profileId) => selected.has(profileId));
+		visibleProfileIds.length > 0 && visibleProfileIds.every((profileId) => selected.has(profileId));
 	const someVisibleSelected = visibleProfileIds.some((profileId) => selected.has(profileId));
 
 	const invalidateMembers = async () => {
@@ -150,9 +147,7 @@ export function RealmMembers({
 						}}
 						value={stateFilter}
 					>
-						<NativeSelectOption value="all">
-							{t.realms.membersView.allStates}
-						</NativeSelectOption>
+						<NativeSelectOption value="all">{t.realms.membersView.allStates}</NativeSelectOption>
 						{MemberStates.map((state) => (
 							<NativeSelectOption key={state} value={state}>
 								{t.realms.memberStates[state]}
@@ -172,17 +167,9 @@ export function RealmMembers({
 						<div className="grid min-h-12 grid-cols-[auto_minmax(0,1fr)] items-center gap-3 border-b border-border-weak bg-muted/32 px-4 py-2 sm:grid-cols-[auto_minmax(12rem,1fr)_8rem_10rem]">
 							<Checkbox
 								aria-label={t.realms.membersView.selectAll}
-								checked={
-									allVisibleSelected
-										? true
-										: someVisibleSelected
-											? "indeterminate"
-											: false
-								}
+								checked={allVisibleSelected ? true : someVisibleSelected ? "indeterminate" : false}
 								disabled={!canManage || !visibleProfileIds.length}
-								onCheckedChange={(details) =>
-									toggleAllVisible(details.checked === true)
-								}
+								onCheckedChange={(details) => toggleAllVisible(details.checked === true)}
 							/>
 							{selectedProfileIds.length ? (
 								<div className="flex min-w-0 flex-wrap items-center gap-2 sm:col-span-3">
@@ -199,8 +186,7 @@ export function RealmMembers({
 											onChange={(event) => {
 												const value = event.currentTarget.value;
 												setBulkState(value);
-												if (isMemberState(value))
-													void applyBulkState(value);
+												if (isMemberState(value)) void applyBulkState(value);
 											}}
 											value={bulkState}
 										>
