@@ -15,7 +15,7 @@ import {
 
 import { UnitCoverFallback } from "@/features/units/components/unit-cover-fallback";
 import { useTranslation } from "@/i18n/client";
-import type { StudioSort } from "../model/studio-filters";
+import type { StudioMode } from "../model/studio-filters";
 import type { StudioSectionId } from "../model/studio-section";
 import {
 	StudioContentCard,
@@ -32,17 +32,17 @@ export function StudioContentList({
 	hasNextPage,
 	isFetchingNextPage,
 	loadMore,
+	mode,
 	onOpen,
 	sectionId,
-	sort,
 	state,
 }: {
 	readonly hasNextPage: boolean;
 	readonly isFetchingNextPage: boolean;
 	readonly loadMore: () => void;
+	readonly mode: StudioMode;
 	readonly onOpen: (item: StudioContentItem) => void;
 	readonly sectionId: StudioSectionId;
-	readonly sort: StudioSort;
 	readonly state: StudioContentListState;
 }) {
 	const { t } = useTranslation(["actions", "create"]);
@@ -76,7 +76,7 @@ export function StudioContentList({
 				className="grid min-h-40 place-items-center px-6 py-8 text-center text-muted-foreground text-sm"
 				role="status"
 			>
-				{t.create.list.empty}
+				{t.create.list.empty[mode]}
 			</div>
 		);
 
@@ -84,8 +84,8 @@ export function StudioContentList({
 		<>
 			<ul className="grid gap-3">
 				{state.items.map((item) => (
-					<li key={item.id}>
-						<StudioContentCard item={item} onOpen={() => onOpen(item)} sort={sort} />
+					<li key={`${item.kind}:${item.resource.id}`}>
+						<StudioContentCard item={item} onOpen={() => onOpen(item)} />
 					</li>
 				))}
 			</ul>

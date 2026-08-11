@@ -389,6 +389,8 @@ import type {
 	PostApiUnitsByTypeByUnitIdVariantContextPromoteResponses,
 	PutApiUnitsByTypeByUnitIdLocalizationsByLanguageOptions,
 	PutApiUnitsByTypeByUnitIdLocalizationsByLanguageResponses,
+	ListCurrentUserContributionResourcesOptions,
+	ListCurrentUserContributionResourcesResponses,
 	GetApiHistoryUnitsByUnitIdRevisionsOptions,
 	GetApiHistoryUnitsByUnitIdRevisionsResponses,
 	GetApiHistoryUnitRevisionsByRevisionIdOptions,
@@ -2759,11 +2761,9 @@ export function getApiZonesByZoneIdNavigation<ThrowOnError extends boolean = tru
 ): Promise<RequestResult<GetApiZonesByZoneIdNavigationResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/zones/{zoneId}/navigation",
-		...config,
-	}) as Promise<RequestResult<GetApiZonesByZoneIdNavigationResponses, ThrowOnError>>;
+	return request({ method: "GET", url: "/api/v1/zones/{zoneId}/navigation", ...config }) as Promise<
+		RequestResult<GetApiZonesByZoneIdNavigationResponses, ThrowOnError>
+	>;
 }
 
 /**
@@ -3173,7 +3173,7 @@ export function patchApiUsersMe<ThrowOnError extends boolean = true>(
 }
 
 /**
- * @summary List current user's Studio work resources
+ * @summary List current user's actionable Studio workspace resources
  * {@link /api/v1/users/me/studio}
  */
 export function listCurrentUserStudioContent<ThrowOnError extends boolean = true>(
@@ -4106,11 +4106,9 @@ export function getPublicUnitSeoProjection<ThrowOnError extends boolean = true>(
 ): Promise<RequestResult<GetPublicUnitSeoProjectionResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/units/by-id/{unitId}/seo",
-		...config,
-	}) as Promise<RequestResult<GetPublicUnitSeoProjectionResponses, ThrowOnError>>;
+	return request({ method: "GET", url: "/api/v1/units/by-id/{unitId}/seo", ...config }) as Promise<
+		RequestResult<GetPublicUnitSeoProjectionResponses, ThrowOnError>
+	>;
 }
 
 /**
@@ -4459,6 +4457,26 @@ export function putApiUnitsByTypeByUnitIdLocalizationsByLanguage<
 	}) as Promise<
 		RequestResult<PutApiUnitsByTypeByUnitIdLocalizationsByLanguageResponses, ThrowOnError>
 	>;
+}
+
+/**
+ * @summary List public resources the current user has created or contributed to
+ * {@link /api/v1/history/contribution-resources/me}
+ */
+export function listCurrentUserContributionResources<ThrowOnError extends boolean = true>(
+	options: Options<ListCurrentUserContributionResourcesOptions, ThrowOnError>,
+): Promise<RequestResult<ListCurrentUserContributionResourcesResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/v1/history/contribution-resources/me",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<ListCurrentUserContributionResourcesResponses, ThrowOnError>>;
 }
 
 /**
@@ -6407,11 +6425,9 @@ export function getApiReactionsUnitsByUnitId<ThrowOnError extends boolean = true
 ): Promise<RequestResult<GetApiReactionsUnitsByUnitIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/reactions/units/{unitId}",
-		...config,
-	}) as Promise<RequestResult<GetApiReactionsUnitsByUnitIdResponses, ThrowOnError>>;
+	return request({ method: "GET", url: "/api/v1/reactions/units/{unitId}", ...config }) as Promise<
+		RequestResult<GetApiReactionsUnitsByUnitIdResponses, ThrowOnError>
+	>;
 }
 
 /**
@@ -6879,11 +6895,9 @@ export function getApiRealmsByRealmIdTaxonomy<ThrowOnError extends boolean = tru
 ): Promise<RequestResult<GetApiRealmsByRealmIdTaxonomyResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/realms/{realmId}/taxonomy",
-		...config,
-	}) as Promise<RequestResult<GetApiRealmsByRealmIdTaxonomyResponses, ThrowOnError>>;
+	return request({ method: "GET", url: "/api/v1/realms/{realmId}/taxonomy", ...config }) as Promise<
+		RequestResult<GetApiRealmsByRealmIdTaxonomyResponses, ThrowOnError>
+	>;
 }
 
 /**

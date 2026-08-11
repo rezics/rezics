@@ -25,9 +25,9 @@ describe("StudioContentList", () => {
 					hasNextPage={false}
 					isFetchingNextPage={false}
 					loadMore={vi.fn()}
+					mode="workspace"
 					onOpen={vi.fn()}
 					sectionId="book"
-					sort="recent"
 					state={{ status: "pending" }}
 				/>
 			</TranslationProvider>,
@@ -46,9 +46,9 @@ describe("StudioContentList", () => {
 					hasNextPage={false}
 					isFetchingNextPage={false}
 					loadMore={vi.fn()}
+					mode="workspace"
 					onOpen={vi.fn()}
 					sectionId="tag"
-					sort="recent"
 					state={{ status: "error", error: new Error("failed"), retry }}
 				/>
 			</TranslationProvider>,
@@ -63,13 +63,13 @@ describe("StudioContentList", () => {
 					hasNextPage={false}
 					isFetchingNextPage={false}
 					loadMore={vi.fn()}
+					mode="workspace"
 					onOpen={vi.fn()}
 					sectionId="tag"
-					sort="recent"
 					state={{ status: "ready", items: [] }}
 				/>
 			</TranslationProvider>,
 		);
-		expect(screen.getByRole("status").textContent).toContain("沒有符合目前篩選條件的內容。");
+		expect(screen.getByRole("status").textContent).toContain("沒有符合目前篩選條件的可編輯內容。");
 	});
 });

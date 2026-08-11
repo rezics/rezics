@@ -85,7 +85,7 @@ import {
 	replaceUnitStructureDefinition,
 } from "../tag-structures/definition";
 import { syncUnitLocalizationContentMetrics } from "../content-metrics/service";
-import { recordStudioWorkRelation } from "../studio/projection";
+import { recordProfileResourceParticipation } from "../history/participation";
 
 export type UnitRevisionEvent = "create" | "update" | "delete" | "restore";
 
@@ -1233,10 +1233,9 @@ export async function recordUnitRevision(
 			})),
 		);
 	if (input.event !== "create")
-		await recordStudioWorkRelation(tx, {
+		await recordProfileResourceParticipation(tx, {
 			profileId: input.actorProfileId,
 			relation: "contributed",
-			source: "unit_revision",
 			occurredAt: revision.createdAt,
 			target: {
 				kind: "unit_contribution",

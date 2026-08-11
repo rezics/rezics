@@ -2,27 +2,20 @@ import { describe, expect, it } from "vitest";
 
 import {
 	AnyStudioFilter,
-	StudioPermissions,
-	StudioSorts,
+	ContributionKinds,
+	StudioModes,
 	StudioStatuses,
-	StudioViews,
 	StudioVisibilities,
-	StudioWorkStates,
+	WorkspaceSources,
 } from "./studio-filters";
 
 describe("Studio filters", () => {
 	it("derives every filter value from the generated API contract", () => {
-		expect(StudioViews).toEqual(["all", "created", "contributed", "assigned", "delegated"]);
-		expect(StudioPermissions).toEqual([
-			"unit.update",
-			"unit.status.update",
-			"unit.access.manage",
-			"unit.realm-publication.manage",
-		]);
-		expect(StudioWorkStates).toEqual(["actionable", "blocked"]);
+		expect(StudioModes).toEqual(["workspace", "contributions"]);
+		expect(WorkspaceSources).toEqual(["all", "owned", "direct", "delegated"]);
+		expect(ContributionKinds).toEqual(["all", "created", "contributed"]);
 		expect(StudioStatuses).toEqual(["draft", "published", "archived"]);
 		expect(StudioVisibilities).toEqual(["public", "unlisted", "private"]);
-		expect(StudioSorts).toEqual(["recent", "updated", "created", "relevant"]);
 		expect(AnyStudioFilter).toBe("any");
 	});
 });

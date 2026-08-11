@@ -1,111 +1,73 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const execute = vi.hoisted(() => vi.fn());
-const select = vi.hoisted(() => vi.fn());
 const getPublicCanonicalUnitSlugAddresses = vi.hoisted(() => vi.fn());
 
-vi.mock("../database", () => ({
-	database: { execute, select },
-}));
-
-vi.mock("../units/slug-address", () => ({
-	getPublicCanonicalUnitSlugAddresses,
-}));
+vi.mock("../database", async () => {
+	const { sql } = await import("drizzle-orm");
+	const query = { getSQL: () => sql`select 1` };
+	return {
+		database: {
+			execute,
+			select: () => ({ from: () => ({ where: () => query }) }),
+		},
+	};
+});
+vi.mock("../units/slug-address", () => ({ getPublicCanonicalUnitSlugAddresses }));
 
 import { listStudioContent } from "./service";
 
 const ProfileId = "019b76da-a800-7300-8000-000000000001";
 const UnitId = "019b76da-a800-7300-8000-000000000002";
-const AuthorizationUnitId = "019b76da-a800-7300-8000-000000000003";
 const CoverId = "019b76da-a800-7300-8000-000000000005";
-const RelevantAt = new Date("2026-07-27T08:00:00.000Z");
+const RelevantAt = "2026-07-27T08:00:00.000Z";
 
-function resourceSelect() {
+function directCandidate(overrides: Record<string, unknown> = {}) {
 	return {
-		from: vi.fn(() => ({
-			where: vi.fn(() => ({
-				limit: vi.fn(async () => [
-					{
-						id: UnitId,
-						language: "en",
-						title: "Public work",
-						coverAssetId: CoverId,
-						status: "published",
-						visibility: "public",
-						createdAt: new Date("2026-01-01T00:00:00.000Z"),
-						updatedAt: new Date("2026-07-01T00:00:00.000Z"),
-					},
-				]),
-			})),
-		})),
-	};
-}
-
-function activitySelect(rows: readonly object[]) {
-	return {
-		from: vi.fn(() => ({
-			where: vi.fn(async () => rows),
-		})),
-	};
-}
-
-function candidate() {
-	return {
-		id: UnitId,
-		relevantAt: RelevantAt.toISOString(),
+		unitId: UnitId,
+		sourceKind: "profile",
+		sourceKey: "profile",
+		relevantAt: RelevantAt,
+		ownerSince: null,
+		directGrantSince: "2026-07-01T08:00:00.000Z",
+		realmGrantSince: null,
 		lastVisitedAt: null,
-		bucket: false,
-		sortAt: RelevantAt.toISOString(),
+		accepted: true,
+		hasOwnerAccess: false,
+		hasDirectAccess: true,
+		hasRealmAccess: false,
+		language: "en",
+		title: "Editable work",
+		coverAssetId: CoverId,
+		status: "published",
+		visibility: "public",
+		createdAt: "2026-01-01T00:00:00.000Z",
+		updatedAt: "2026-07-01T00:00:00.000Z",
+		...overrides,
 	};
 }
 
-function deniedAuthorization() {
-	return {
-		canRead: vi.fn(async () => true),
-		decide: vi.fn(async () => ({ allowed: false as const, reason: "ungranted" as const })),
-		findAllowedScope: vi.fn(async () => undefined),
-	};
-}
-
-describe("Studio work presentation", () => {
+describe("Studio workspace presentation", () => {
 	beforeEach(() => {
 		execute.mockReset();
-		select.mockReset();
 		getPublicCanonicalUnitSlugAddresses.mockReset();
 		getPublicCanonicalUnitSlugAddresses.mockResolvedValue(new Map());
 	});
 
-	it("keeps historical contributions readable after update access is revoked", async () => {
-		execute.mockResolvedValueOnce({ rows: [candidate()] }).mockResolvedValueOnce({ rows: [] });
-		select
-			.mockImplementationOnce(() =>
-				activitySelect([
-					{
-						resourceUnitId: UnitId,
-						authorizationUnitId: AuthorizationUnitId,
-						authorizationScope: null,
-						relation: "contributed",
-						firstAt: RelevantAt,
-						lastAt: RelevantAt,
-						activityCount: 3,
-					},
-				]),
-			)
-			.mockImplementationOnce(resourceSelect);
+	it("returns only a currently actionable explicit editor assignment", async () => {
+		execute.mockResolvedValueOnce({ rows: [directCandidate()] });
 
 		const result = await listStudioContent({
 			profileId: ProfileId,
-			authorization: deniedAuthorization(),
-			query: { section: "wiki", view: "contributed", sort: "recent", limit: 1 },
+			query: { section: "book", source: "direct", limit: 1 },
 		});
 
+		expect(execute).toHaveBeenCalledOnce();
 		expect(result.items).toHaveLength(1);
 		expect(result.items[0]).toMatchObject({
 			id: UnitId,
-			relations: ["contributed"],
-			workState: "blocked",
-			permissions: [],
-			contributionCount: 3,
+			accessSources: ["direct"],
+			assignedAt: new Date("2026-07-01T08:00:00.000Z"),
 			cover: {
 				id: CoverId,
 				url: `/image-assets/${CoverId}/presentations/cover/content`,
@@ -113,58 +75,28 @@ describe("Studio work presentation", () => {
 		});
 	});
 
-	it("keeps a direct permission assignment visible when effective actions are denied", async () => {
-		execute.mockResolvedValueOnce({ rows: [candidate()] }).mockResolvedValueOnce({
-			rows: [
-				{
-					id: "019b76da-a800-7300-8000-000000000004",
-					resourceUnitId: UnitId,
-					authorizationUnitId: UnitId,
-					relation: "assigned",
-					scope: [],
-					createdAt: RelevantAt.toISOString(),
-				},
-			],
-		});
-		select.mockImplementationOnce(() => activitySelect([])).mockImplementationOnce(resourceSelect);
+	it("does not retain a blocked or expired candidate as workspace content", async () => {
+		execute.mockResolvedValueOnce({ rows: [directCandidate({ accepted: false })] });
 
 		const result = await listStudioContent({
 			profileId: ProfileId,
-			authorization: deniedAuthorization(),
-			query: { section: "book", view: "assigned", sort: "recent", limit: 1 },
+			query: { section: "book", source: "direct", limit: 1 },
 		});
 
-		expect(result.items).toHaveLength(1);
-		expect(result.items[0]).toMatchObject({
-			id: UnitId,
-			relations: ["assigned"],
-			workState: "blocked",
-			permissions: [],
-			assignedAt: RelevantAt,
-		});
+		expect(result.items).toEqual([]);
+		expect(result.nextCursor).toBeNull();
 	});
 
 	it("rejects an invalid raw assignment timestamp at the database boundary", async () => {
-		execute.mockResolvedValueOnce({ rows: [candidate()] }).mockResolvedValueOnce({
-			rows: [
-				{
-					id: "019b76da-a800-7300-8000-000000000004",
-					resourceUnitId: UnitId,
-					authorizationUnitId: UnitId,
-					relation: "assigned",
-					scope: [],
-					createdAt: "not-a-timestamp",
-				},
-			],
+		execute.mockResolvedValueOnce({
+			rows: [directCandidate({ directGrantSince: "not-a-timestamp" })],
 		});
-		select.mockImplementationOnce(() => activitySelect([]));
 
 		await expect(
 			listStudioContent({
 				profileId: ProfileId,
-				authorization: deniedAuthorization(),
-				query: { section: "book", view: "assigned", sort: "recent", limit: 1 },
+				query: { section: "book", source: "direct", limit: 1 },
 			}),
-		).rejects.toThrow("Studio assignment.createdAt is not a valid date");
+		).rejects.toThrow("Studio candidate.directGrantSince is not a valid date");
 	});
 });

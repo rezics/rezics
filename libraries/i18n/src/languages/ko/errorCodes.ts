@@ -271,4 +271,6 @@ export default {
 	UnitRealmPublicationNotFound: `이 콘텐츠와 ${realmTerms.label}의 게시 관계를 찾을 수 없습니다.`,
 	UnitRealmPublicationAlreadyExists: `이 콘텐츠에는 이미 ${realmTerms.label} 게시 관계가 있습니다.`,
 	UnitRealmPublicationTransitionInvalid: "게시 관계가 이미 요청한 상태입니다.",
+	StudioRealmSubjectLimitExceeded:
+		"소속된 팀이 너무 많아 작업 공간에서 팀이 위임한 콘텐츠를 표시할 수 없습니다.",
 } satisfies typeof import("../zh-Hant/errorCodes").default;

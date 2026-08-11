@@ -280,4 +280,6 @@ export default {
 	UnitRealmPublicationAlreadyExists: `This content already has a publication relationship with that ${realmTerms.label}.`,
 	UnitRealmPublicationTransitionInvalid:
 		"The publication relationship is already in the requested state.",
+	StudioRealmSubjectLimitExceeded:
+		"You belong to too many teams for the workspace to list team-delegated content.",
 } satisfies typeof import("../zh-Hant/errorCodes").default;

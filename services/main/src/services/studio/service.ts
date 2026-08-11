@@ -1,427 +1,91 @@
-import { and, eq, inArray, isNull, sql, type SQL } from "drizzle-orm";
+import { and, eq, exists, isNull, not, or, sql, type SQL } from "drizzle-orm";
+import { alias } from "drizzle-orm/pg-core";
 import type { ContentLanguage } from "@rezics/i18n";
 
-import type { UnitAuthorization, UnitAccessDecision } from "../authorization/unit/authorization";
-import type { UnitScope } from "../authorization/unit/scope";
+import type { UnitAuthorization } from "../authorization/unit/authorization";
+import {
+	getExplicitUnitAnyScopePermissionCondition,
+	getUnitReadCondition,
+} from "../authorization/unit/query";
+import { profileCanManageRealmAccess } from "../authorization/unit/realm-subject";
 import { database } from "../database";
 import {
-	contentStructure,
-	contentStructureNode,
-	post,
+	realm,
 	realmMember,
+	studioProfileEditorCandidate,
+	studioRealmEditorCandidate,
 	studioResourceVisit,
-	studioWorkRelation,
 	unit,
 	unitAccessGrant,
 	unitOwnership,
-	type StudioWorkRelation,
 } from "../database/schema";
 import type {
 	StudioAccessSource,
 	StudioContentListQuery,
-	StudioPermission,
-	StudioRelation,
-	StudioSection,
-	StudioView,
-	StudioWorkState,
+	StudioWorkspaceSource,
 } from "../api/users/schema";
+import { StudioRealmSubjectLimitExceeded } from "../api/users/errors";
 import {
 	resolvedUnitLocalizationImageAssetId,
 	resolvedUnitLocalizationLanguage,
 	resolvedUnitLocalizationTitle,
 } from "../units/localization";
 import { getPublicCanonicalUnitSlugAddresses } from "../units/slug-address";
+import { resourceSectionCondition } from "../units/resource-section";
 import { presentImageAsset } from "../units/service";
 import { decodeStudioCursor, encodeStudioCursor, type StudioCursorBoundary } from "./cursor";
-import { resolveStudioResourceUnitId } from "./projection";
 
-const StudioPermissions = [
-	"unit.update",
-	"unit.status.update",
-	"unit.access.manage",
-	"unit.realm-publication.manage",
-] as const satisfies readonly StudioPermission[];
+const StudioCandidateScanBudget = 4_096;
+const StudioRealmSubjectLimit = 256;
+const StudioCandidateBatchMaximum = 256;
 
-type CandidateRow = {
-	readonly id: string;
-	readonly relevantAt: Date;
-	readonly lastVisitedAt: Date | null;
-	readonly bucket: boolean;
-	readonly sortAt: Date;
+type RealmSubject = {
+	readonly realmId: string;
+	readonly realmRelation: "member" | "access_manager";
 };
 
-type RawCandidateRow = {
-	readonly id: string;
+type RawRealmSubject = {
+	readonly realmId: string;
+	readonly realmRelation: string;
+};
+
+type RawWorkspaceCandidate = {
+	readonly unitId: string;
+	readonly sourceKind: string;
+	readonly sourceKey: string;
 	readonly relevantAt: unknown;
-	readonly lastVisitedAt: unknown;
-	readonly bucket: boolean;
-	readonly sortAt: unknown;
+	readonly ownerSince: unknown | null;
+	readonly directGrantSince: unknown | null;
+	readonly realmGrantSince: unknown | null;
+	readonly lastVisitedAt: unknown | null;
+	readonly accepted: boolean;
+	readonly hasOwnerAccess: boolean;
+	readonly hasDirectAccess: boolean;
+	readonly hasRealmAccess: boolean;
+	readonly language: ContentLanguage | null;
+	readonly title: string | null;
+	readonly coverAssetId: string | null;
+	readonly status: "draft" | "published" | "archived" | null;
+	readonly visibility: "public" | "unlisted" | "private" | null;
+	readonly createdAt: unknown | null;
+	readonly updatedAt: unknown | null;
 };
 
-type StudioAssignmentRow = {
+type PresentedWorkspaceCandidate = {
 	readonly id: string;
-	readonly resourceUnitId: string;
-	readonly authorizationUnitId: string;
-	readonly relation: "assigned" | "delegated";
-	readonly scope: string[];
-	readonly createdAt: Date;
-};
-
-type RawStudioAssignmentRow = Omit<StudioAssignmentRow, "createdAt"> & {
-	readonly createdAt: unknown;
-};
-
-type ActivityRow = {
-	readonly resourceUnitId: string;
-	readonly authorizationUnitId: string;
-	readonly authorizationScope: string[] | null;
-	readonly relation: StudioWorkRelation;
-	readonly firstAt: Date;
-	readonly lastAt: Date;
-	readonly activityCount: number;
-};
-
-type WorkTarget = {
-	readonly authorizationUnitId: string;
-	readonly authorizationScope: UnitScope | null;
-};
-
-type ResolvedPermission = {
-	readonly permission: StudioPermission;
-	readonly decision: Extract<UnitAccessDecision, { readonly allowed: true }>;
-};
-
-type StudioListAuthorization = Pick<
-	UnitAuthorization<string>,
-	"canRead" | "decide" | "findAllowedScope"
->;
-
-type PresentedCandidate = {
-	readonly id: string;
-	readonly section: StudioSection;
+	readonly section: StudioContentListQuery["section"];
 	readonly language: ContentLanguage;
 	readonly title: string | null;
 	readonly cover: { readonly id: string; readonly url: string } | null;
 	readonly status: "draft" | "published" | "archived";
 	readonly visibility: "public" | "unlisted" | "private";
-	readonly relations: StudioRelation[];
-	readonly workState: StudioWorkState;
-	readonly permissions: StudioPermission[];
 	readonly accessSources: StudioAccessSource[];
-	readonly firstContributedAt: Date | null;
-	readonly lastContributedAt: Date | null;
-	readonly contributionCount: number;
-	readonly assignedAt: Date | null;
+	readonly assignedAt: Date;
 	readonly lastVisitedAt: Date | null;
-	readonly relevantAt: Date;
 	readonly createdAt: Date;
 	readonly updatedAt: Date;
 	readonly cursorBoundary: StudioCursorBoundary;
 };
-
-function toUuidArray(values: readonly string[]): SQL {
-	return sql`array[${sql.join(
-		values.map((value) => sql`${value}::uuid`),
-		sql`, `,
-	)}]::uuid[]`;
-}
-
-function groupBy<Key, Value>(
-	values: readonly Value[],
-	keyOf: (value: Value) => Key,
-): Map<Key, Value[]> {
-	const groups = new Map<Key, Value[]>();
-	for (const value of values) {
-		const key = keyOf(value);
-		const group = groups.get(key);
-		if (group) group.push(value);
-		else groups.set(key, [value]);
-	}
-	return groups;
-}
-
-function studioSectionCondition(section: StudioSection): SQL {
-	switch (section) {
-		case "post":
-		case "review":
-		case "wiki":
-			return sql`
-				resource.kind = 'post'
-				and exists (
-					select 1
-					from ${post} studio_post
-					where studio_post.id = resource.id
-						and studio_post.kind = ${section}
-				)
-			`;
-		case "book":
-		case "software":
-		case "media":
-		case "entity":
-		case "tag":
-		case "realm":
-		case "zone":
-		case "collection":
-		case "poll":
-			return sql`resource.kind = ${section}`;
-	}
-}
-
-function activitySource(profileId: string, view: StudioView): SQL | undefined {
-	if (view === "assigned" || view === "delegated") return undefined;
-	const relationCondition =
-		view === "all"
-			? sql`relation.relation in ('created', 'contributed')`
-			: sql`relation.relation = ${view}`;
-	return sql`
-		select relation.resource_unit_id, relation.last_at as relevant_at
-		from ${studioWorkRelation} relation
-		where relation.profile_id = ${profileId}
-			and ${relationCondition}
-	`;
-}
-
-function directAssignmentSource(profileId: string, view: StudioView): SQL | undefined {
-	if (view === "created" || view === "contributed" || view === "delegated") return undefined;
-	return sql`
-		select
-			coalesce(book_owner.owner_unit_id, assignment.unit_id) as resource_unit_id,
-			assignment.created_at as relevant_at
-		from (
-			select ownership.unit_id, ownership.created_at
-			from ${unitOwnership} ownership
-			where ownership.profile_id = ${profileId}
-				and ownership.revoked_at is null
-			union all
-			select access_grant.unit_id, access_grant.created_at
-			from ${unitAccessGrant} access_grant
-			where access_grant.subject_kind = 'profile'
-				and access_grant.profile_id = ${profileId}
-				and access_grant.permission in ('unit.update', 'unit.status.update', 'unit.access.manage', 'unit.realm-publication.manage')
-				and access_grant.revoked_at is null
-				and (access_grant.expires_at is null or access_grant.expires_at > now())
-		) assignment
-		left join lateral (
-			select distinct structure.owner_unit_id
-			from ${contentStructureNode} node
-			join ${contentStructure} structure
-				on structure.id = node.structure_id
-				and structure.owner_unit_id = node.owner_unit_id
-			where node.content_unit_id = assignment.unit_id
-				and node.deleted_at is null
-				and structure.kind = 'book.contents'
-				and structure.deleted_at is null
-		) book_owner on true
-	`;
-}
-
-function delegatedAssignmentSource(profileId: string, view: StudioView): SQL | undefined {
-	if (view !== "delegated") return undefined;
-	return sql`
-		select
-			coalesce(book_owner.owner_unit_id, access_grant.unit_id) as resource_unit_id,
-			access_grant.created_at as relevant_at
-		from ${unitAccessGrant} access_grant
-		join ${realmMember} member
-			on member.realm_id = access_grant.realm_id
-			and member.profile_id = ${profileId}
-			and member.state = 'active'
-		left join lateral (
-			select distinct structure.owner_unit_id
-			from ${contentStructureNode} node
-			join ${contentStructure} structure
-				on structure.id = node.structure_id
-				and structure.owner_unit_id = node.owner_unit_id
-			where node.content_unit_id = access_grant.unit_id
-				and node.deleted_at is null
-				and structure.kind = 'book.contents'
-				and structure.deleted_at is null
-		) book_owner on true
-		where access_grant.subject_kind = 'realm'
-			and access_grant.permission in ('unit.update', 'unit.status.update', 'unit.access.manage', 'unit.realm-publication.manage')
-			and access_grant.revoked_at is null
-			and (access_grant.expires_at is null or access_grant.expires_at > now())
-	`;
-}
-
-function candidateSources(profileId: string, view: StudioView): SQL {
-	const sources = [
-		activitySource(profileId, view),
-		directAssignmentSource(profileId, view),
-		delegatedAssignmentSource(profileId, view),
-	].filter((source): source is SQL => Boolean(source));
-	if (!sources.length) throw new Error(`Studio view ${view} has no candidate source`);
-	return sql.join(sources, sql` union all `);
-}
-
-function candidateSort(sort: NonNullable<StudioContentListQuery["sort"]>) {
-	switch (sort) {
-		case "recent":
-			return {
-				bucket: sql`visit.last_visited_at is not null`,
-				sortAt: sql`coalesce(visit.last_visited_at, candidate.relevant_at)`,
-			};
-		case "updated":
-			return { bucket: sql`true`, sortAt: sql`resource.updated_at` };
-		case "created":
-			return { bucket: sql`true`, sortAt: sql`resource.created_at` };
-		case "relevant":
-			return { bucket: sql`true`, sortAt: sql`candidate.relevant_at` };
-	}
-}
-
-async function selectCandidateBatch(input: {
-	readonly profileId: string;
-	readonly query: StudioContentListQuery;
-	readonly cursor?: StudioCursorBoundary;
-	readonly limit: number;
-}): Promise<CandidateRow[]> {
-	const view = input.query.view ?? "all";
-	const sort = input.query.sort ?? "recent";
-	const ordering = candidateSort(sort);
-	const cursorCondition = input.cursor
-		? sql`
-			and (
-				(case when ranked.bucket then 1 else 0 end),
-				ranked.sort_at,
-				ranked.id
-			) < (
-				${input.cursor.bucket ? 1 : 0},
-				${input.cursor.sortAt},
-				${input.cursor.unitId}::uuid
-			)
-		`
-		: sql``;
-	const statusCondition = input.query.status
-		? sql`and resource.status = ${input.query.status}`
-		: sql``;
-	const visibilityCondition = input.query.visibility
-		? sql`and resource.visibility = ${input.query.visibility}`
-		: sql``;
-	const result = await database.execute<RawCandidateRow>(sql`
-		with candidate_event as materialized (
-			${candidateSources(input.profileId, view)}
-		),
-		candidate as materialized (
-			select resource_unit_id, max(relevant_at) as relevant_at
-			from candidate_event
-			group by resource_unit_id
-		),
-		ranked as (
-			select
-				resource.id,
-				candidate.relevant_at as "relevantAt",
-				visit.last_visited_at as "lastVisitedAt",
-				${ordering.bucket} as bucket,
-				${ordering.sortAt} as sort_at
-			from candidate
-			join ${unit} resource on resource.id = candidate.resource_unit_id
-			left join ${studioResourceVisit} visit
-				on visit.profile_id = ${input.profileId}
-				and visit.resource_unit_id = resource.id
-			where resource.deleted_at is null
-				and ${studioSectionCondition(input.query.section)}
-				${statusCondition}
-				${visibilityCondition}
-		)
-		select
-			ranked.id,
-			ranked."relevantAt",
-			ranked."lastVisitedAt",
-			ranked.bucket,
-			ranked.sort_at as "sortAt"
-		from ranked
-		where true
-			${cursorCondition}
-		order by ranked.bucket desc, ranked.sort_at desc, ranked.id desc
-		limit ${input.limit}
-	`);
-	return result.rows.map((row) => ({
-		id: row.id,
-		relevantAt: dateValue(row.relevantAt, "candidate.relevantAt"),
-		lastVisitedAt:
-			row.lastVisitedAt === null ? null : dateValue(row.lastVisitedAt, "candidate.lastVisitedAt"),
-		bucket: row.bucket,
-		sortAt: dateValue(row.sortAt, "candidate.sortAt"),
-	}));
-}
-
-async function loadAssignments(
-	profileId: string,
-	resourceUnitIds: readonly string[],
-): Promise<StudioAssignmentRow[]> {
-	if (!resourceUnitIds.length) return [];
-	const result = await database.execute<RawStudioAssignmentRow>(sql`
-		select
-			assignment.id,
-			coalesce(book_owner.owner_unit_id, assignment.unit_id) as "resourceUnitId",
-			assignment.unit_id as "authorizationUnitId",
-			case
-				when assignment.subject_kind in ('profile', 'owner') then 'assigned'
-				else 'delegated'
-			end as relation,
-			assignment.scope,
-			assignment.created_at as "createdAt"
-		from (
-			select
-				ownership.id,
-				ownership.unit_id,
-				'owner'::text as subject_kind,
-				null::uuid as realm_id,
-				array[]::text[] as scope,
-				ownership.created_at
-			from ${unitOwnership} ownership
-			where ownership.profile_id = ${profileId}
-				and ownership.revoked_at is null
-			union all
-			select
-				access_grant.id,
-				access_grant.unit_id,
-				access_grant.subject_kind::text,
-				access_grant.realm_id,
-				access_grant.scope,
-				access_grant.created_at
-			from ${unitAccessGrant} access_grant
-			where (
-					(access_grant.subject_kind = 'profile' and access_grant.profile_id = ${profileId})
-					or access_grant.subject_kind = 'realm'
-				)
-				and access_grant.permission in ('unit.update', 'unit.status.update', 'unit.access.manage', 'unit.realm-publication.manage')
-				and access_grant.revoked_at is null
-				and (access_grant.expires_at is null or access_grant.expires_at > now())
-		) assignment
-		left join ${realmMember} member
-			on member.realm_id = assignment.realm_id
-			and member.profile_id = ${profileId}
-			and member.state = 'active'
-		left join lateral (
-			select distinct structure.owner_unit_id
-			from ${contentStructureNode} node
-			join ${contentStructure} structure
-				on structure.id = node.structure_id
-				and structure.owner_unit_id = node.owner_unit_id
-			where node.content_unit_id = assignment.unit_id
-				and node.deleted_at is null
-				and structure.kind = 'book.contents'
-				and structure.deleted_at is null
-		) book_owner on true
-		where (
-				(
-					assignment.subject_kind in ('profile', 'owner')
-				) or (
-					assignment.subject_kind = 'realm'
-					and member.profile_id is not null
-				)
-			)
-			and coalesce(book_owner.owner_unit_id, assignment.unit_id) = any(
-				${toUuidArray(resourceUnitIds)}
-			)
-	`);
-	return result.rows.map((row) => ({
-		...row,
-		createdAt: dateValue(row.createdAt, "assignment.createdAt"),
-	}));
-}
 
 function dateValue(value: unknown, field: string): Date {
 	const parsed =
@@ -431,219 +95,538 @@ function dateValue(value: unknown, field: string): Date {
 	return parsed;
 }
 
-async function resolvePermission(
-	authorization: StudioListAuthorization,
-	target: WorkTarget,
-	permission: StudioPermission,
-): Promise<ResolvedPermission | undefined> {
-	const scope =
-		target.authorizationScope ??
-		(await authorization.findAllowedScope(target.authorizationUnitId, permission));
-	if (scope === undefined) return undefined;
-	const decision = await authorization.decide(target.authorizationUnitId, permission, scope);
-	return decision.allowed ? { permission, decision } : undefined;
+function realmRelation(value: string): RealmSubject["realmRelation"] {
+	if (value === "member" || value === "access_manager") return value;
+	throw new TypeError("Studio Realm subject relation is invalid");
 }
 
-function permissionSource(decision: ResolvedPermission["decision"]): StudioAccessSource {
-	if (decision.source === "platform") return "platform";
-	if (decision.source === "owner") return "direct";
-	if (decision.source === "grant")
-		return decision.subjectKind === "profile"
-			? "direct"
-			: decision.subjectKind === "realm"
-				? "realm"
-				: "authenticated";
-	throw new Error("Studio write permission cannot be public");
+/** Loads the small dynamic userset used to seek Realm candidate streams. */
+async function loadRealmSubjects(profileId: string): Promise<RealmSubject[]> {
+	const managedRealm = alias(unit, "studio_managed_realm_subject");
+	const result = await database.execute<RawRealmSubject>(sql`
+		with possible_subject as (
+			select member.realm_id, 'member'::text as realm_relation
+			from ${realmMember} member
+			where member.profile_id = ${profileId}
+				and member.state = 'active'
+
+			union all
+
+			select ownership.unit_id, 'access_manager'
+			from ${unitOwnership} ownership
+			where ownership.profile_id = ${profileId}
+				and ownership.revoked_at is null
+
+			union all
+
+			select access_grant.unit_id, 'access_manager'
+			from ${unitAccessGrant} access_grant
+			where access_grant.subject_kind = 'profile'
+				and access_grant.profile_id = ${profileId}
+				and access_grant.permission = 'unit.access.manage'
+				and cardinality(access_grant.scope) = 0
+				and access_grant.revoked_at is null
+				and (access_grant.expires_at is null or access_grant.expires_at > now())
+
+			union all
+
+			select access_grant.unit_id, 'access_manager'
+			from ${unitAccessGrant} access_grant
+			join ${realmMember} member
+				on member.realm_id = access_grant.realm_id
+				and member.profile_id = ${profileId}
+				and member.state = 'active'
+			where access_grant.subject_kind = 'realm'
+				and access_grant.realm_relation = 'member'
+				and access_grant.permission = 'unit.access.manage'
+				and cardinality(access_grant.scope) = 0
+				and access_grant.revoked_at is null
+				and (access_grant.expires_at is null or access_grant.expires_at > now())
+		)
+		select distinct
+			possible_subject.realm_id as "realmId",
+			possible_subject.realm_relation as "realmRelation"
+		from possible_subject
+		where exists (
+			select 1
+			from ${realm}
+			where ${realm.id} = possible_subject.realm_id
+		)
+			and (
+				possible_subject.realm_relation = 'member'
+			or exists (
+					select 1
+					from ${unit} studio_managed_realm_subject
+					where ${managedRealm.id} = possible_subject.realm_id
+						and ${profileCanManageRealmAccess(database, managedRealm.id, profileId)}
+				)
+			)
+		order by possible_subject.realm_id, possible_subject.realm_relation
+		limit ${StudioRealmSubjectLimit + 1}
+	`);
+	if (result.rows.length > StudioRealmSubjectLimit)
+		throw new StudioRealmSubjectLimitExceeded(StudioRealmSubjectLimit);
+	return result.rows.map((subject) => ({
+		realmId: subject.realmId,
+		realmRelation: realmRelation(subject.realmRelation),
+	}));
 }
 
-function relationMatchesView(relations: readonly StudioRelation[], view: StudioView): boolean {
-	if (view === "all")
-		return relations.some(
-			(relation) => relation === "created" || relation === "contributed" || relation === "assigned",
-		);
-	return relations.includes(view);
+function cursorCondition(
+	cursor: StudioCursorBoundary | undefined,
+	relevantAt: SQL,
+	unitId: SQL,
+	sourceKey: SQL,
+): SQL {
+	return cursor
+		? sql`(${relevantAt}, ${unitId}, ${sourceKey}) < (
+			${cursor.relevantAt},
+			${cursor.unitId}::uuid,
+			${cursor.sourceKey}
+		)`
+		: sql`true`;
 }
 
-async function presentCandidate(input: {
-	readonly authorization: StudioListAuthorization;
+function emptyCandidateStream(): SQL {
+	return sql`
+		select
+			null::uuid as unit_id,
+			null::timestamptz as relevant_at,
+			null::text as source_kind,
+			null::text as source_key,
+			null::uuid as realm_id,
+			null::realm_access_subject_relation as realm_relation,
+			null::timestamptz as owner_since,
+			null::timestamptz as direct_grant_since,
+			null::timestamptz as realm_grant_since
+		where false
+	`;
+}
+
+function profileCandidateStream(input: {
+	readonly profileId: string;
+	readonly source: StudioWorkspaceSource;
+	readonly cursor?: StudioCursorBoundary;
+	readonly scanLimit: number;
+}): SQL {
+	if (input.source === "delegated") return emptyCandidateStream();
+	const sourceCondition =
+		input.source === "owned"
+			? sql`candidate.owner_since is not null`
+			: input.source === "direct"
+				? sql`candidate.direct_grant_since is not null`
+				: sql`true`;
+	const sourceKey = sql`'profile'::text`;
+	return sql`
+		select
+			candidate.unit_id,
+			candidate.relevant_at,
+			'profile'::text as source_kind,
+			${sourceKey} as source_key,
+			null::uuid as realm_id,
+			null::realm_access_subject_relation as realm_relation,
+			candidate.owner_since,
+			candidate.direct_grant_since,
+			null::timestamptz as realm_grant_since
+		from ${studioProfileEditorCandidate} candidate
+		where candidate.profile_id = ${input.profileId}
+			and (candidate.valid_until is null or candidate.valid_until > now())
+			and ${sourceCondition}
+			and ${cursorCondition(
+				input.cursor,
+				sql`candidate.relevant_at`,
+				sql`candidate.unit_id`,
+				sourceKey,
+			)}
+		order by
+			candidate.relevant_at desc nulls last,
+			candidate.unit_id desc nulls last,
+			source_key desc nulls last
+		limit ${input.scanLimit}
+	`;
+}
+
+function realmSubjectValues(subjects: readonly RealmSubject[]): SQL {
+	if (!subjects.length)
+		return sql`select null::uuid as realm_id, null::realm_access_subject_relation as realm_relation where false`;
+	return sql`values ${sql.join(
+		subjects.map(
+			(subject) =>
+				sql`(${subject.realmId}::uuid, ${subject.realmRelation}::realm_access_subject_relation)`,
+		),
+		sql`, `,
+	)}`;
+}
+
+function realmCandidateStream(input: {
+	readonly source: StudioWorkspaceSource;
+	readonly cursor?: StudioCursorBoundary;
+	readonly scanLimit: number;
+}): SQL {
+	if (input.source === "owned" || input.source === "direct") return emptyCandidateStream();
+	const sourceKey = sql`(
+		'realm:' || candidate.realm_id::text || ':' || candidate.realm_relation::text
+	)`;
+	return sql`
+		select
+			candidate.unit_id,
+			candidate.relevant_at,
+			'realm'::text as source_kind,
+			${sourceKey} as source_key,
+			candidate.realm_id,
+			candidate.realm_relation,
+			null::timestamptz as owner_since,
+			null::timestamptz as direct_grant_since,
+			candidate.grant_since as realm_grant_since
+		from realm_subject subject
+		cross join lateral (
+			select realm_candidate.*
+			from ${studioRealmEditorCandidate} realm_candidate
+			where realm_candidate.realm_id = subject.realm_id
+				and realm_candidate.realm_relation = subject.realm_relation
+				and (realm_candidate.valid_until is null or realm_candidate.valid_until > now())
+				and ${cursorCondition(
+					input.cursor,
+					sql`realm_candidate.relevant_at`,
+					sql`realm_candidate.unit_id`,
+					sql`('realm:' || realm_candidate.realm_id::text || ':' || realm_candidate.realm_relation::text)`,
+				)}
+			order by
+				realm_candidate.relevant_at desc nulls last,
+				realm_candidate.unit_id desc nulls last
+			limit ${input.scanLimit}
+		) candidate
+		order by
+			candidate.relevant_at desc nulls last,
+			candidate.unit_id desc nulls last,
+			source_key desc nulls last
+		limit ${input.scanLimit}
+	`;
+}
+
+function profileEffectiveCondition(
+	source: StudioWorkspaceSource,
+	ownerAccess: SQL,
+	directAccess: SQL,
+): SQL {
+	switch (source) {
+		case "all":
+			return or(ownerAccess, directAccess) as SQL;
+		case "owned":
+			return ownerAccess;
+		case "direct":
+			return directAccess;
+		case "delegated":
+			return sql`false`;
+	}
+}
+
+async function selectWorkspaceCandidateBatch(input: {
+	readonly profileId: string;
 	readonly query: StudioContentListQuery;
-	readonly candidate: CandidateRow;
-	readonly activities: readonly ActivityRow[];
-	readonly assignments: readonly StudioAssignmentRow[];
-}): Promise<PresentedCandidate | undefined> {
-	if (!(await input.authorization.canRead(input.candidate.id))) return undefined;
+	readonly realmSubjects: readonly RealmSubject[];
+	readonly cursor?: StudioCursorBoundary;
+	readonly scanLimit: number;
+}): Promise<RawWorkspaceCandidate[]> {
+	const source = input.query.source ?? "all";
+	const resource = alias(unit, "studio_workspace_resource");
+	const subjectRealm = alias(unit, "studio_workspace_subject_realm");
+	const otherRealmCandidate = alias(
+		studioRealmEditorCandidate,
+		"studio_other_realm_editor_candidate",
+	);
+	const ownerAccess = exists(
+		database
+			.select({ id: unitOwnership.id })
+			.from(unitOwnership)
+			.where(
+				and(
+					eq(unitOwnership.unitId, resource.id),
+					eq(unitOwnership.profileId, input.profileId),
+					isNull(unitOwnership.revokedAt),
+				),
+			),
+	);
+	const directAccess = getExplicitUnitAnyScopePermissionCondition(
+		input.profileId,
+		"unit.update",
+		{ source: { kind: "profile" }, includeOwnership: false },
+		resource,
+	);
+	const realmAccess = getExplicitUnitAnyScopePermissionCondition(
+		input.profileId,
+		"unit.update",
+		{
+			source: {
+				kind: "realm",
+				realmId: sql`page.realm_id`,
+				realmRelation: sql`page.realm_relation`,
+			},
+			includeOwnership: false,
+		},
+		resource,
+	);
+	const currentRealmSubject = exists(
+		database
+			.select({ id: subjectRealm.id })
+			.from(subjectRealm)
+			.where(
+				and(
+					eq(subjectRealm.id, sql`page.realm_id`),
+					or(
+						and(
+							sql`page.realm_relation = 'member'::realm_access_subject_relation`,
+							exists(
+								database
+									.select({ profileId: realmMember.profileId })
+									.from(realmMember)
+									.where(
+										and(
+											eq(realmMember.realmId, subjectRealm.id),
+											eq(realmMember.profileId, input.profileId),
+											eq(realmMember.state, "active"),
+										),
+									),
+							),
+						),
+						and(
+							sql`page.realm_relation = 'access_manager'::realm_access_subject_relation`,
+							profileCanManageRealmAccess(database, subjectRealm.id, input.profileId),
+						),
+					),
+				),
+			),
+	);
+	const otherRealmAccess = getExplicitUnitAnyScopePermissionCondition(
+		input.profileId,
+		"unit.update",
+		{
+			source: {
+				kind: "realm",
+				realmId: otherRealmCandidate.realmId,
+				realmRelation: otherRealmCandidate.realmRelation,
+			},
+			includeOwnership: false,
+		},
+		resource,
+	);
+	const earlierRealmSource = sql`exists (
+		select 1
+		from realm_subject earlier_subject
+		join ${studioRealmEditorCandidate} studio_other_realm_editor_candidate
+			on ${otherRealmCandidate.realmId} = earlier_subject.realm_id
+			and ${otherRealmCandidate.realmRelation} = earlier_subject.realm_relation
+		where ${otherRealmCandidate.unitId} = ${resource.id}
+			and (
+				${otherRealmCandidate.validUntil} is null
+				or ${otherRealmCandidate.validUntil} > now()
+			)
+			and ${otherRealmAccess}
+			and (
+				'realm:' || ${otherRealmCandidate.realmId}::text || ':' || ${otherRealmCandidate.realmRelation}::text
+			) < page.source_key
+	)`;
+	const canonicalRealmAccess = and(
+		currentRealmSubject,
+		realmAccess,
+		source === "all" ? not(or(ownerAccess, directAccess) as SQL) : sql`true`,
+		not(earlierRealmSource),
+	) as SQL;
+	const acceptedSource = sql`case
+		when page.source_kind = 'profile' then ${profileEffectiveCondition(
+			source,
+			ownerAccess,
+			directAccess,
+		)}
+		when page.source_kind = 'realm' then ${canonicalRealmAccess}
+		else false
+	end`;
+	const statusCondition = input.query.status ? eq(resource.status, input.query.status) : sql`true`;
+	const visibilityCondition = input.query.visibility
+		? eq(resource.visibility, input.query.visibility)
+		: sql`true`;
 	const localizationLanguages = input.query.localizationLanguages ?? [];
-	const [resource] = await database
-		.select({
-			id: unit.id,
-			language: resolvedUnitLocalizationLanguage(unit.id, localizationLanguages),
-			title: resolvedUnitLocalizationTitle(unit.id, localizationLanguages),
-			coverAssetId: resolvedUnitLocalizationImageAssetId(unit.id, "cover", localizationLanguages),
-			status: unit.status,
-			visibility: unit.visibility,
-			createdAt: unit.createdAt,
-			updatedAt: unit.updatedAt,
-		})
-		.from(unit)
-		.where(and(eq(unit.id, input.candidate.id), isNull(unit.deletedAt)))
-		.limit(1);
-	if (!resource || !resource.language) return undefined;
+	const accepted = and(
+		sql`${resource.id} is not null`,
+		getUnitReadCondition(input.profileId, {}, resource),
+		resourceSectionCondition(input.query.section, resource),
+		statusCondition,
+		visibilityCondition,
+		acceptedSource,
+	) as SQL;
+	const result = await database.execute<RawWorkspaceCandidate>(sql`
+		with realm_subject (realm_id, realm_relation) as materialized (
+			${realmSubjectValues(input.realmSubjects)}
+		), profile_scan as materialized (
+			${profileCandidateStream({
+				profileId: input.profileId,
+				source,
+				cursor: input.cursor,
+				scanLimit: input.scanLimit,
+			})}
+		), realm_scan as materialized (
+			${realmCandidateStream({
+				source,
+				cursor: input.cursor,
+				scanLimit: input.scanLimit,
+			})}
+		), scanned as materialized (
+			select * from profile_scan
+			union all
+			select * from realm_scan
+		), page as materialized (
+			select *
+			from scanned
+			order by
+				relevant_at desc nulls last,
+				unit_id desc nulls last,
+				source_key desc nulls last
+			limit ${input.scanLimit}
+		)
+		select
+			page.unit_id as "unitId",
+			page.source_kind as "sourceKind",
+			page.source_key as "sourceKey",
+			page.relevant_at as "relevantAt",
+			page.owner_since as "ownerSince",
+			page.direct_grant_since as "directGrantSince",
+			page.realm_grant_since as "realmGrantSince",
+			visit.last_visited_at as "lastVisitedAt",
+			${accepted} as accepted,
+			${ownerAccess} as "hasOwnerAccess",
+			${directAccess} as "hasDirectAccess",
+			case when page.source_kind = 'realm' then ${realmAccess} else false end as "hasRealmAccess",
+			${resolvedUnitLocalizationLanguage(resource.id, localizationLanguages)} as language,
+			${resolvedUnitLocalizationTitle(resource.id, localizationLanguages)} as title,
+			${resolvedUnitLocalizationImageAssetId(resource.id, "cover", localizationLanguages)} as "coverAssetId",
+			${resource.status} as status,
+			${resource.visibility} as visibility,
+			${resource.createdAt} as "createdAt",
+			${resource.updatedAt} as "updatedAt"
+		from page
+		left join ${unit} studio_workspace_resource on ${resource.id} = page.unit_id
+		left join ${studioResourceVisit} visit
+			on visit.profile_id = ${input.profileId}
+			and visit.resource_unit_id = page.unit_id
+		order by
+			page.relevant_at desc nulls last,
+			page.unit_id desc nulls last,
+			page.source_key desc nulls last
+	`);
+	return result.rows;
+}
 
-	const relations = new Set<StudioRelation>();
-	for (const activity of input.activities) relations.add(activity.relation);
-	if (input.assignments.some((assignment) => assignment.relation === "assigned"))
-		relations.add("assigned");
-	if (input.assignments.some((assignment) => assignment.relation === "delegated"))
-		relations.add("delegated");
-	const relationValues = [...relations];
-	const view = input.query.view ?? "all";
-	if (!relationMatchesView(relationValues, view)) return undefined;
-
-	const targets = new Map<string, WorkTarget>();
-	for (const activity of input.activities) {
-		const scopeKey = activity.authorizationScope?.join("/") ?? "*";
-		targets.set(`${activity.authorizationUnitId}:${scopeKey}`, {
-			authorizationUnitId: activity.authorizationUnitId,
-			authorizationScope: activity.authorizationScope,
-		});
-	}
-	for (const assignment of input.assignments)
-		targets.set(`${assignment.authorizationUnitId}:${assignment.scope.join("/")}`, {
-			authorizationUnitId: assignment.authorizationUnitId,
-			authorizationScope: assignment.scope,
-		});
-
-	const resolvedPermissions: ResolvedPermission[] = [];
-	for (const permission of StudioPermissions) {
-		for (const target of targets.values()) {
-			const resolved = await resolvePermission(input.authorization, target, permission);
-			if (resolved) {
-				resolvedPermissions.push(resolved);
-				break;
-			}
+function presentCandidate(
+	row: RawWorkspaceCandidate,
+	section: StudioContentListQuery["section"],
+): PresentedWorkspaceCandidate | undefined {
+	if (
+		!row.accepted ||
+		!row.language ||
+		!row.status ||
+		!row.visibility ||
+		row.createdAt === null ||
+		row.updatedAt === null
+	)
+		return undefined;
+	const accessSources: StudioAccessSource[] = [];
+	const assignedDates: Date[] = [];
+	if (row.sourceKind === "profile") {
+		if (row.hasOwnerAccess && row.ownerSince !== null) {
+			accessSources.push("owner");
+			assignedDates.push(dateValue(row.ownerSince, "candidate.ownerSince"));
 		}
+		if (row.hasDirectAccess && row.directGrantSince !== null) {
+			accessSources.push("direct");
+			assignedDates.push(dateValue(row.directGrantSince, "candidate.directGrantSince"));
+		}
+	} else if (row.sourceKind === "realm" && row.hasRealmAccess && row.realmGrantSince !== null) {
+		accessSources.push("realm");
+		assignedDates.push(dateValue(row.realmGrantSince, "candidate.realmGrantSince"));
 	}
-	const permissions = resolvedPermissions.map(({ permission }) => permission);
-	const workState: StudioWorkState = permissions.length ? "actionable" : "blocked";
-	if (input.query.permission && !permissions.includes(input.query.permission)) return undefined;
-	if (input.query.workState && input.query.workState !== workState) return undefined;
-
-	const contributed = input.activities.filter((activity) => activity.relation === "contributed");
-	const assigned = input.assignments.filter((assignment) => assignment.relation === "assigned");
-	const accessSources = new Set<StudioAccessSource>();
-	if (assigned.length) accessSources.add("direct");
-	if (input.assignments.some((assignment) => assignment.relation === "delegated"))
-		accessSources.add("realm");
-	for (const permission of resolvedPermissions)
-		accessSources.add(permissionSource(permission.decision));
-
+	if (!accessSources.length || !assignedDates.length) return undefined;
+	const relevantAt = dateValue(row.relevantAt, "candidate.relevantAt");
 	return {
-		id: resource.id,
-		section: input.query.section,
-		language: resource.language,
-		title: resource.title,
-		cover: presentImageAsset(resource.coverAssetId, "cover"),
-		status: resource.status,
-		visibility: resource.visibility,
-		relations: relationValues,
-		workState,
-		permissions,
-		accessSources: [...accessSources],
-		firstContributedAt: contributed.length
-			? new Date(Math.min(...contributed.map(({ firstAt }) => firstAt.getTime())))
-			: null,
-		lastContributedAt: contributed.length
-			? new Date(Math.max(...contributed.map(({ lastAt }) => lastAt.getTime())))
-			: null,
-		contributionCount: contributed.reduce((total, activity) => total + activity.activityCount, 0),
-		assignedAt: assigned.length
-			? new Date(Math.min(...assigned.map(({ createdAt }) => createdAt.getTime())))
-			: null,
-		lastVisitedAt: input.candidate.lastVisitedAt,
-		relevantAt: input.candidate.relevantAt,
-		createdAt: resource.createdAt,
-		updatedAt: resource.updatedAt,
+		id: row.unitId,
+		section,
+		language: row.language,
+		title: row.title,
+		cover: presentImageAsset(row.coverAssetId, "cover"),
+		status: row.status,
+		visibility: row.visibility,
+		accessSources,
+		assignedAt: new Date(Math.min(...assignedDates.map((value) => value.getTime()))),
+		lastVisitedAt:
+			row.lastVisitedAt === null ? null : dateValue(row.lastVisitedAt, "candidate.lastVisitedAt"),
+		createdAt: dateValue(row.createdAt, "candidate.createdAt"),
+		updatedAt: dateValue(row.updatedAt, "candidate.updatedAt"),
 		cursorBoundary: {
-			bucket: input.candidate.bucket,
-			sortAt: input.candidate.sortAt,
-			unitId: resource.id,
+			relevantAt,
+			unitId: row.unitId,
+			sourceKey: row.sourceKey,
 		},
 	};
 }
 
 export async function listStudioContent(input: {
 	readonly profileId: string;
-	readonly authorization: StudioListAuthorization;
 	readonly query: StudioContentListQuery;
 }) {
-	const limit = input.query.limit ?? 50;
+	const limit = input.query.limit ?? 30;
 	const initialCursor = decodeStudioCursor(input.query.cursor, input.query);
-	const items: PresentedCandidate[] = [];
+	const source = input.query.source ?? "all";
+	const realmSubjects =
+		source === "all" || source === "delegated" ? await loadRealmSubjects(input.profileId) : [];
+	const items: PresentedWorkspaceCandidate[] = [];
 	let scanCursor = initialCursor;
+	let scanned = 0;
 	let exhausted = false;
-	while (items.length < limit + 1 && !exhausted) {
-		const batchLimit = Math.max(50, (limit + 1 - items.length) * 2);
-		const candidates = await selectCandidateBatch({
+	while (items.length < limit + 1 && scanned < StudioCandidateScanBudget && !exhausted) {
+		const scanLimit = Math.min(
+			StudioCandidateBatchMaximum,
+			StudioCandidateScanBudget - scanned,
+			Math.max(64, (limit + 1 - items.length) * 3),
+		);
+		const rows = await selectWorkspaceCandidateBatch({
 			profileId: input.profileId,
 			query: input.query,
+			realmSubjects,
 			cursor: scanCursor,
-			limit: batchLimit,
+			scanLimit,
 		});
-		if (!candidates.length) break;
-		const candidateIds = candidates.map(({ id }) => id);
-		const [activities, assignments] = await Promise.all([
-			database
-				.select({
-					resourceUnitId: studioWorkRelation.resourceUnitId,
-					authorizationUnitId: studioWorkRelation.authorizationUnitId,
-					authorizationScope: studioWorkRelation.authorizationScope,
-					relation: studioWorkRelation.relation,
-					firstAt: studioWorkRelation.firstAt,
-					lastAt: studioWorkRelation.lastAt,
-					activityCount: studioWorkRelation.activityCount,
-				})
-				.from(studioWorkRelation)
-				.where(
-					and(
-						eq(studioWorkRelation.profileId, input.profileId),
-						inArray(studioWorkRelation.resourceUnitId, candidateIds),
-					),
-				),
-			loadAssignments(input.profileId, candidateIds),
-		]);
-		const activityByResource = groupBy(activities, ({ resourceUnitId }) => resourceUnitId);
-		const assignmentByResource = groupBy(assignments, ({ resourceUnitId }) => resourceUnitId);
-		for (const candidate of candidates) {
-			const item = await presentCandidate({
-				authorization: input.authorization,
-				query: input.query,
-				candidate,
-				activities: activityByResource.get(candidate.id) ?? [],
-				assignments: assignmentByResource.get(candidate.id) ?? [],
-			});
-			if (item) items.push(item);
-			if (items.length >= limit + 1) break;
+		if (!rows.length) {
+			exhausted = true;
+			break;
 		}
-		const lastScanned = candidates.at(-1);
-		if (!lastScanned) break;
-		scanCursor = {
-			bucket: lastScanned.bucket,
-			sortAt: lastScanned.sortAt,
-			unitId: lastScanned.id,
-		};
-		exhausted = candidates.length < batchLimit;
+		for (const row of rows) {
+			scanned += 1;
+			scanCursor = {
+				relevantAt: dateValue(row.relevantAt, "candidate.relevantAt"),
+				unitId: row.unitId,
+				sourceKey: row.sourceKey,
+			};
+			const item = presentCandidate(row, input.query.section);
+			if (item) items.push(item);
+			if (items.length >= limit + 1 || scanned >= StudioCandidateScanBudget) break;
+		}
+		exhausted = rows.length < scanLimit;
 	}
 
 	const page = items.slice(0, limit);
 	const last = page.at(-1);
 	const slugAddresses = await getPublicCanonicalUnitSlugAddresses(page.map(({ id }) => id));
+	const hasMoreAccepted = items.length > limit;
+	const nextBoundary = hasMoreAccepted
+		? last?.cursorBoundary
+		: !exhausted && scanned >= StudioCandidateScanBudget
+			? scanCursor
+			: undefined;
 	return {
 		items: page.map(({ cursorBoundary: _cursorBoundary, ...item }) => ({
 			...item,
 			slugAddress: slugAddresses.get(item.id) ?? null,
 		})),
-		nextCursor:
-			items.length > limit && last ? encodeStudioCursor(input.query, last.cursorBoundary) : null,
+		nextCursor: nextBoundary ? encodeStudioCursor(input.query, nextBoundary) : null,
 	};
 }
 
@@ -653,14 +636,12 @@ export async function recordStudioVisit(input: {
 	readonly authorization: UnitAuthorization<string>;
 }) {
 	await input.authorization.ensureCanRead(input.unitId);
-	const resourceUnitId = await resolveStudioResourceUnitId(database, input.unitId);
-	if (resourceUnitId !== input.unitId) await input.authorization.ensureCanRead(resourceUnitId);
 	const now = new Date();
 	const [visit] = await database
 		.insert(studioResourceVisit)
 		.values({
 			profileId: input.profileId,
-			resourceUnitId,
+			resourceUnitId: input.unitId,
 			lastVisitedAt: now,
 		})
 		.onConflictDoUpdate({

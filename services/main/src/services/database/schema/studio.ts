@@ -1,109 +1,118 @@
 import { sql } from "drizzle-orm";
-import { check, index, integer, primaryKey, text, uniqueIndex, uuid } from "drizzle-orm/pg-core";
+import { check, index, primaryKey, uuid } from "drizzle-orm/pg-core";
 
+import { realmAccessSubjectRelation } from "./access";
 import { pgTable } from "./base";
-import { createCreatedAtColumn, createTimestampMsColumn, createUuidv7PrimaryKey } from "./columns";
+import { createTimestampMsColumn, createUpdatedAtColumn } from "./columns";
 import { profile } from "./profile";
+import { realm } from "./realm";
 import { unit } from "./unit";
 
-export const StudioWorkRelationValues = ["created", "contributed"] as const;
-export type StudioWorkRelation = (typeof StudioWorkRelationValues)[number];
-
-export const StudioWorkSourceValues = [
-	"unit_status",
-	"unit_revision",
-	"content_structure_revision",
-	"collection_structure_revision",
-	"dock_revision",
-] as const;
-export type StudioWorkSource = (typeof StudioWorkSourceValues)[number];
-
 /**
- * Rebuildable evidence that a Profile created or contributed to a Studio resource.
+ * Rebuildable access-owned candidate index for a Profile's explicit editor assignments.
  *
- * Authorization scopes are nullable because historical Unit revisions do not
- * always preserve the exact command scope. Null tells permission presentation
- * to discover a currently authorized scope; it never means root access.
+ * This is not an authorization cache. Readers must still validate the current
+ * ownership/grants, restrictions, expiry, and Unit readability. The row only
+ * makes "list my editable Units" an ordered, Profile-selective operation.
  */
-export const studioWorkRelation = pgTable(
-	"studio_work_relation",
+export const studioProfileEditorCandidate = pgTable(
+	"studio_profile_editor_candidate",
 	{
-		id: createUuidv7PrimaryKey(),
 		profileId: uuid()
 			.notNull()
 			.references(() => profile.id, { onDelete: "cascade" }),
-		resourceUnitId: uuid()
+		unitId: uuid()
 			.notNull()
 			.references(() => unit.id, { onDelete: "cascade" }),
-		authorizationUnitId: uuid()
-			.notNull()
-			.references(() => unit.id, { onDelete: "cascade" }),
-		authorizationScope: text().array(),
-		authorizationScopeKey: text().notNull(),
-		relation: text().$type<StudioWorkRelation>().notNull(),
-		source: text().$type<StudioWorkSource>().notNull(),
-		firstAt: createTimestampMsColumn().notNull(),
-		lastAt: createTimestampMsColumn().notNull(),
-		activityCount: integer().notNull(),
-		createdAt: createCreatedAtColumn(),
+		ownerSince: createTimestampMsColumn(),
+		directGrantSince: createTimestampMsColumn(),
+		directGrantLastAt: createTimestampMsColumn(),
+		/** Latest source assignment; the keyset ordering column. */
+		relevantAt: createTimestampMsColumn().notNull(),
+		/** Null when ownership or a non-expiring direct grant keeps the candidate live. */
+		validUntil: createTimestampMsColumn(),
+		projectionUpdatedAt: createUpdatedAtColumn(),
 	},
 	(table) => [
-		uniqueIndex("studio_work_relation_identity_key").on(
+		primaryKey({ columns: [table.profileId, table.unitId] }),
+		index("studio_profile_editor_candidate_profile_recent_idx").on(
 			table.profileId,
-			table.resourceUnitId,
-			table.authorizationUnitId,
-			table.authorizationScopeKey,
-			table.relation,
-			table.source,
+			table.relevantAt.desc(),
+			table.unitId.desc(),
 		),
-		index("studio_work_relation_profile_resource_idx").on(table.profileId, table.resourceUnitId),
-		index("studio_work_relation_resource_merge_idx").on(table.resourceUnitId, table.id),
-		index("studio_work_relation_authorization_merge_idx").on(table.authorizationUnitId, table.id),
-		index("studio_work_relation_profile_relation_last_idx").on(
-			table.profileId,
-			table.relation,
-			table.lastAt.desc(),
-			table.resourceUnitId.desc(),
+		index("studio_profile_editor_candidate_unit_idx").on(table.unitId, table.profileId),
+		index("studio_profile_editor_candidate_expiry_idx")
+			.on(table.validUntil, table.profileId, table.unitId)
+			.where(sql`${table.validUntil} is not null`),
+		check(
+			"studio_profile_editor_candidate_source_check",
+			sql`${table.ownerSince} is not null or ${table.directGrantSince} is not null`,
 		),
 		check(
-			"studio_work_relation_scope_key_check",
+			"studio_profile_editor_candidate_relevant_at_check",
+			sql`${table.relevantAt} = greatest(${table.ownerSince}, ${table.directGrantLastAt})`,
+		),
+		check(
+			"studio_profile_editor_candidate_direct_grant_time_check",
 			sql`(
-				${table.authorizationScope} is null and ${table.authorizationScopeKey} = '*'
+				${table.directGrantSince} is null
+				and ${table.directGrantLastAt} is null
 			) or (
-				${table.authorizationScope} is not null and
-				${table.authorizationScopeKey} = array_to_string(${table.authorizationScope}, '/')
+				${table.directGrantSince} is not null
+				and ${table.directGrantLastAt} is not null
+				and ${table.directGrantSince} <= ${table.directGrantLastAt}
 			)`,
 		),
 		check(
-			"studio_work_relation_relation_check",
-			sql`${table.relation} in ('created', 'contributed')`,
+			"studio_profile_editor_candidate_validity_check",
+			sql`${table.validUntil} is null or ${table.directGrantSince} is not null`,
 		),
+	],
+);
+
+/**
+ * Rebuildable access-owned candidate index for Realm-subject editor grants.
+ *
+ * Realm membership is deliberately not fanned out into Profile rows. Listing
+ * joins the current subject set and validates the exact Realm grant live.
+ */
+export const studioRealmEditorCandidate = pgTable(
+	"studio_realm_editor_candidate",
+	{
+		realmId: uuid()
+			.notNull()
+			.references(() => realm.id, { onDelete: "cascade" }),
+		realmRelation: realmAccessSubjectRelation().notNull(),
+		unitId: uuid()
+			.notNull()
+			.references(() => unit.id, { onDelete: "cascade" }),
+		grantSince: createTimestampMsColumn().notNull(),
+		/** Latest matching grant assignment; the keyset ordering column. */
+		relevantAt: createTimestampMsColumn().notNull(),
+		/** Null when at least one matching Realm grant does not expire. */
+		validUntil: createTimestampMsColumn(),
+		projectionUpdatedAt: createUpdatedAtColumn(),
+	},
+	(table) => [
+		primaryKey({ columns: [table.realmId, table.realmRelation, table.unitId] }),
+		index("studio_realm_editor_candidate_subject_recent_idx").on(
+			table.realmId,
+			table.realmRelation,
+			table.relevantAt.desc(),
+			table.unitId.desc(),
+		),
+		index("studio_realm_editor_candidate_unit_idx").on(
+			table.unitId,
+			table.realmId,
+			table.realmRelation,
+		),
+		index("studio_realm_editor_candidate_expiry_idx")
+			.on(table.validUntil, table.realmId, table.realmRelation, table.unitId)
+			.where(sql`${table.validUntil} is not null`),
 		check(
-			"studio_work_relation_source_check",
-			sql`${table.source} in (
-				'unit_status',
-				'unit_revision',
-				'content_structure_revision',
-				'collection_structure_revision',
-				'dock_revision'
-			)`,
+			"studio_realm_editor_candidate_time_check",
+			sql`${table.grantSince} <= ${table.relevantAt}`,
 		),
-		check(
-			"studio_work_relation_relation_source_check",
-			sql`(
-				${table.relation} = 'created' and ${table.source} = 'unit_status'
-			) or (
-				${table.relation} = 'contributed' and
-				${table.source} in (
-					'unit_revision',
-					'content_structure_revision',
-					'collection_structure_revision',
-					'dock_revision'
-				)
-			)`,
-		),
-		check("studio_work_relation_activity_count_check", sql`${table.activityCount} > 0`),
-		check("studio_work_relation_time_check", sql`${table.firstAt} <= ${table.lastAt}`),
 	],
 );
 

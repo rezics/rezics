@@ -1,9 +1,25 @@
 import { Value } from "@sinclair/typebox/value";
 import { describe, expect, it } from "vitest";
 
-import { RevisionVisibilityBody } from "./schema";
+import { ContributionResourceListQuery, RevisionVisibilityBody } from "./schema";
 
 describe("History API schemas", () => {
+	it("keeps public contribution-resource filters typed and bounded", () => {
+		expect(
+			Value.Check(ContributionResourceListQuery, {
+				section: "book",
+				kind: "contributed",
+				localizationLanguages: ["zh", "en"],
+				limit: 100,
+			}),
+		).toBe(true);
+		expect(Value.Check(ContributionResourceListQuery, { section: "book" })).toBe(true);
+		expect(Value.Check(ContributionResourceListQuery, { section: "book", kind: "assigned" })).toBe(
+			false,
+		);
+		expect(Value.Check(ContributionResourceListQuery, { section: "book", limit: 101 })).toBe(false);
+	});
+
 	it.each([
 		{
 			visibility: { kind: "visible" },

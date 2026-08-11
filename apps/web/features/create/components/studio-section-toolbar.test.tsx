@@ -42,12 +42,11 @@ vi.stubGlobal("matchMedia", (query: string) => ({
 
 const translation = await create(resources).getTranslation(["create"], ["zh-Hant"]);
 const filters = {
-	view: "all",
-	permission: "unit.update",
-	workState: "any",
+	mode: "workspace",
+	source: "all",
+	kind: "all",
 	status: "draft",
 	visibility: "any",
-	sort: "recent",
 } satisfies StudioFilterState;
 
 afterEach(cleanup);
@@ -61,23 +60,31 @@ describe("StudioSectionToolbar", () => {
 			</TranslationProvider>,
 		);
 
-		expect(screen.getByRole("combobox", { name: "工作關係" })).toBeTruthy();
-		expect(screen.getByRole("combobox", { name: "排序方式" })).toBeTruthy();
+		expect(screen.getByRole("combobox", { name: "內容清單" })).toBeTruthy();
+		expect(screen.getByRole("combobox", { name: "工作空間來源" })).toBeTruthy();
 		fireEvent.click(screen.getByRole("button", { name: /更多篩選/ }));
 
 		const dialog = screen.getByRole("dialog");
-		expect(within(dialog).getByRole("combobox", { name: "目前權限" })).toBeTruthy();
-		expect(within(dialog).getByRole("combobox", { name: "工作狀態" })).toBeTruthy();
 		expect(within(dialog).getByRole("combobox", { name: "內容狀態" })).toBeTruthy();
 		expect(within(dialog).getByRole("combobox", { name: "可見性" })).toBeTruthy();
 
 		fireEvent.click(within(dialog).getByRole("button", { name: "清除篩選" }));
 		fireEvent.click(within(dialog).getByRole("button", { name: "套用篩選" }));
 		expect(onChange).toHaveBeenCalledWith({
-			permission: "any",
 			status: "any",
 			visibility: "any",
-			workState: "any",
 		});
+	});
+
+	it("shows contribution-specific controls without workspace-only filters", () => {
+		render(
+			<TranslationProvider initial={translation.snapshot}>
+				<StudioSectionToolbar filters={{ ...filters, mode: "contributions" }} onChange={vi.fn()} />
+			</TranslationProvider>,
+		);
+
+		expect(screen.getByRole("combobox", { name: "內容清單" })).toBeTruthy();
+		expect(screen.getByRole("combobox", { name: "貢獻類型" })).toBeTruthy();
+		expect(screen.queryByRole("button", { name: /更多篩選/ })).toBeNull();
 	});
 });

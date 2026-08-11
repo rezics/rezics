@@ -23,50 +23,16 @@ import {
 	UnitKind,
 	Uuid,
 } from "../schema";
+import { ResourceSectionValues, type ResourceSection } from "../../units/resource-section";
 
-export const StudioSectionValues = [
-	"book",
-	"software",
-	"media",
-	"entity",
-	"tag",
-	"realm",
-	"zone",
-	"post",
-	"wiki",
-	"collection",
-	"review",
-	"poll",
-] as const;
-export const StudioSection = t.UnionEnum(StudioSectionValues, { default: undefined });
-export type StudioSection = Static<typeof StudioSection>;
+export const StudioSection = t.UnionEnum(ResourceSectionValues, { default: undefined });
+export type StudioSection = ResourceSection;
 
-export const StudioViewValues = ["all", "created", "contributed", "assigned", "delegated"] as const;
-export const StudioView = t.UnionEnum(StudioViewValues, { default: "all" });
-export type StudioView = Static<typeof StudioView>;
+export const StudioWorkspaceSourceValues = ["all", "owned", "direct", "delegated"] as const;
+export const StudioWorkspaceSource = t.UnionEnum(StudioWorkspaceSourceValues, { default: "all" });
+export type StudioWorkspaceSource = Static<typeof StudioWorkspaceSource>;
 
-export const StudioPermissionValues = [
-	"unit.update",
-	"unit.status.update",
-	"unit.access.manage",
-	"unit.realm-publication.manage",
-] as const;
-export const StudioPermission = t.UnionEnum(StudioPermissionValues, { default: undefined });
-export type StudioPermission = Static<typeof StudioPermission>;
-
-export const StudioWorkStateValues = ["actionable", "blocked"] as const;
-export const StudioWorkState = t.UnionEnum(StudioWorkStateValues, { default: undefined });
-export type StudioWorkState = Static<typeof StudioWorkState>;
-
-export const StudioSortValues = ["recent", "updated", "created", "relevant"] as const;
-export const StudioSort = t.UnionEnum(StudioSortValues, { default: "recent" });
-export type StudioSort = Static<typeof StudioSort>;
-
-export const StudioRelationValues = ["created", "contributed", "assigned", "delegated"] as const;
-export const StudioRelation = t.UnionEnum(StudioRelationValues, { default: undefined });
-export type StudioRelation = Static<typeof StudioRelation>;
-
-export const StudioAccessSourceValues = ["direct", "realm", "authenticated", "platform"] as const;
+export const StudioAccessSourceValues = ["owner", "direct", "realm"] as const;
 export const StudioAccessSource = t.UnionEnum(StudioAccessSourceValues, {
 	default: undefined,
 });
@@ -75,15 +41,12 @@ export type StudioAccessSource = Static<typeof StudioAccessSource>;
 export const StudioContentListQuery = t.Object(
 	{
 		section: StudioSection,
-		view: t.Optional(StudioView),
-		permission: t.Optional(StudioPermission),
-		workState: t.Optional(StudioWorkState),
+		source: t.Optional(StudioWorkspaceSource),
 		status: t.Optional(t.UnionEnum(UnitStatusValues, { default: undefined })),
 		visibility: t.Optional(t.UnionEnum(ResourceVisibilityValues, { default: undefined })),
-		sort: t.Optional(StudioSort),
 		...LocalizationLanguageQuery,
 		cursor: t.Optional(t.String({ maxLength: 1_024 })),
-		limit: t.Optional(t.Integer({ minimum: 1, maximum: 100, default: 50 })),
+		limit: t.Optional(t.Integer({ minimum: 1, maximum: 100, default: 30 })),
 	},
 	{ additionalProperties: false },
 );
@@ -100,16 +63,12 @@ export const StudioContentListResponse = t.Object({
 			cover: t.Nullable(t.Object({ id: Uuid, url: t.String() })),
 			status: t.UnionEnum(UnitStatusValues),
 			visibility: t.UnionEnum(ResourceVisibilityValues),
-			relations: t.Array(StudioRelation, { minItems: 1, uniqueItems: true }),
-			workState: StudioWorkState,
-			permissions: t.Array(StudioPermission, { uniqueItems: true }),
-			accessSources: t.Array(StudioAccessSource, { uniqueItems: true }),
-			firstContributedAt: t.Nullable(DateTime),
-			lastContributedAt: t.Nullable(DateTime),
-			contributionCount: t.Integer({ minimum: 0 }),
-			assignedAt: t.Nullable(DateTime),
+			accessSources: t.Array(StudioAccessSource, {
+				minItems: 1,
+				uniqueItems: true,
+			}),
+			assignedAt: DateTime,
 			lastVisitedAt: t.Nullable(DateTime),
-			relevantAt: DateTime,
 			createdAt: DateTime,
 			updatedAt: DateTime,
 		}),

@@ -52,9 +52,14 @@ tasks:
             - yarn exec tsx scripts/rebuild-content-metrics.ts
 
     studio:rebuild:
-        desc: Rebuild the personalized Studio work-relation projection.
+        desc: Rebuild Studio's current explicit-editor candidate indexes (maintenance only).
         cmds:
             - yarn exec tsx scripts/rebuild-studio.ts
+
+    participation:rebuild:
+        desc: Rebuild the History-owned Profile/resource participation projection (maintenance only).
+        cmds:
+            - yarn exec tsx scripts/rebuild-participation.ts
 
     search:index:
         desc: Check or explicitly reindex the canonical authoritative PGroonga indexes.
@@ -201,6 +206,7 @@ tasks:
         cmds:
             - task: content-metrics:rebuild
             - task: studio:rebuild
+            - task: participation:rebuild
 
     platform:install:
         desc: Install the factory platform graph exactly once on an empty database.

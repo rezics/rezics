@@ -1,17 +1,20 @@
 "use client";
 
 import {
+	listCurrentUserContributionResources,
+	listCurrentUserContributionResourcesQueryKey,
 	listCurrentUserStudioContent,
 	listCurrentUserStudioContentQueryKey,
 	useRecordCurrentUserStudioVisit,
+	type ListCurrentUserContributionResourcesQuery,
 	type ListCurrentUserStudioContentQuery,
 } from "@rezics/openapi-tanstack-query";
 import { Button, ManagementWorkspaceSectionHeader } from "@rezics/ui";
 import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
-import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import { useQueryStates } from "nuqs";
 
+import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import { DevelopmentPreviewBoundary } from "@/features/preview-access/components/development-preview-boundary";
 import { useTranslation } from "@/i18n/client";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
@@ -26,27 +29,45 @@ function StudioSectionContent({ sectionId }: { readonly sectionId: StudioSection
 	const localizationLanguages = useLocalizationLanguages();
 	const queryClient = useQueryClient();
 	const [filters, setFilters] = useQueryStates(studioFilterParsers);
-	const baseQuery = {
+	const workspaceBaseQuery = {
 		section: sectionId,
-		view: filters.view,
-		sort: filters.sort,
+		source: filters.source,
 		localizationLanguages,
 		limit: 30,
-		...(filters.permission === AnyStudioFilter ? {} : { permission: filters.permission }),
-		...(filters.workState === AnyStudioFilter ? {} : { workState: filters.workState }),
 		...(filters.status === AnyStudioFilter ? {} : { status: filters.status }),
 		...(filters.visibility === AnyStudioFilter ? {} : { visibility: filters.visibility }),
 	} satisfies ListCurrentUserStudioContentQuery;
-	const query = useInfiniteQuery({
-		queryKey: listCurrentUserStudioContentQueryKey({ query: baseQuery }),
+	const contributionBaseQuery = {
+		section: sectionId,
+		kind: filters.kind,
+		localizationLanguages,
+		limit: 30,
+	} satisfies ListCurrentUserContributionResourcesQuery;
+	const workspaceQuery = useInfiniteQuery({
+		queryKey: listCurrentUserStudioContentQueryKey({ query: workspaceBaseQuery }),
 		queryFn: async ({ pageParam, signal }) => {
 			const { data } = await listCurrentUserStudioContent({
-				query: { ...baseQuery, ...(pageParam ? { cursor: pageParam } : {}) },
+				query: { ...workspaceBaseQuery, ...(pageParam ? { cursor: pageParam } : {}) },
 				signal,
 				throwOnError: true,
 			});
 			return data;
 		},
+		enabled: filters.mode === "workspace",
+		initialPageParam: "",
+		getNextPageParam: (page) => page.nextCursor ?? undefined,
+	});
+	const contributionQuery = useInfiniteQuery({
+		queryKey: listCurrentUserContributionResourcesQueryKey({ query: contributionBaseQuery }),
+		queryFn: async ({ pageParam, signal }) => {
+			const { data } = await listCurrentUserContributionResources({
+				query: { ...contributionBaseQuery, ...(pageParam ? { cursor: pageParam } : {}) },
+				signal,
+				throwOnError: true,
+			});
+			return data;
+		},
+		enabled: filters.mode === "contributions",
 		initialPageParam: "",
 		getNextPageParam: (page) => page.nextCursor ?? undefined,
 	});
@@ -54,25 +75,42 @@ function StudioSectionContent({ sectionId }: { readonly sectionId: StudioSection
 		mutation: {
 			onSuccess: () =>
 				queryClient.invalidateQueries({
-					queryKey: listCurrentUserStudioContentQueryKey({ query: baseQuery }),
+					queryKey: listCurrentUserStudioContentQueryKey({ query: workspaceBaseQuery }),
 				}),
 		},
 	});
-	const section = t.create.sections[sectionId];
-	const createHref = studioSectionCreateHref(sectionId);
 	let listState: StudioContentListState;
-	if (query.isPending) listState = { status: "pending" };
-	else if (query.isError)
+	if (filters.mode === "workspace") {
+		if (workspaceQuery.isPending) listState = { status: "pending" };
+		else if (workspaceQuery.isError)
+			listState = {
+				status: "error",
+				error: workspaceQuery.error,
+				retry: () => void workspaceQuery.refetch(),
+			};
+		else
+			listState = {
+				status: "ready",
+				items: workspaceQuery.data.pages.flatMap((page) =>
+					page.items.map((resource) => ({ kind: "workspace" as const, resource })),
+				),
+			};
+	} else if (contributionQuery.isPending) listState = { status: "pending" };
+	else if (contributionQuery.isError)
 		listState = {
 			status: "error",
-			error: query.error,
-			retry: () => void query.refetch(),
+			error: contributionQuery.error,
+			retry: () => void contributionQuery.refetch(),
 		};
 	else
 		listState = {
 			status: "ready",
-			items: query.data.pages.flatMap((page) => page.items),
+			items: contributionQuery.data.pages.flatMap((page) =>
+				page.items.map((resource) => ({ kind: "contribution" as const, resource })),
+			),
 		};
+	const section = t.create.sections[sectionId];
+	const createHref = studioSectionCreateHref(sectionId);
 
 	return (
 		<section>
@@ -95,12 +133,23 @@ function StudioSectionContent({ sectionId }: { readonly sectionId: StudioSection
 			/>
 			<StudioSectionToolbar filters={filters} onChange={(change) => void setFilters(change)} />
 			<StudioContentList
-				hasNextPage={query.hasNextPage}
-				isFetchingNextPage={query.isFetchingNextPage}
-				loadMore={() => void query.fetchNextPage()}
-				onOpen={(item) => visit.mutate({ path: { unitId: item.id } })}
+				hasNextPage={
+					filters.mode === "workspace" ? workspaceQuery.hasNextPage : contributionQuery.hasNextPage
+				}
+				isFetchingNextPage={
+					filters.mode === "workspace"
+						? workspaceQuery.isFetchingNextPage
+						: contributionQuery.isFetchingNextPage
+				}
+				loadMore={() => {
+					if (filters.mode === "workspace") void workspaceQuery.fetchNextPage();
+					else void contributionQuery.fetchNextPage();
+				}}
+				mode={filters.mode}
+				onOpen={(item) => {
+					if (item.kind === "workspace") visit.mutate({ path: { unitId: item.resource.id } });
+				}}
 				sectionId={sectionId}
-				sort={filters.sort}
 				state={listState}
 			/>
 		</section>

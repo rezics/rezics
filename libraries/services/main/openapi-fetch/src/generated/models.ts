@@ -5561,6 +5561,7 @@ export const ApiErrorCode = {
 	PlatformUserManagerRequired: "PlatformUserManagerRequired",
 	UserAccountStateExpiryInvalid: "UserAccountStateExpiryInvalid",
 	SessionNotFound: "SessionNotFound",
+	StudioRealmSubjectLimitExceeded: "StudioRealmSubjectLimitExceeded",
 	SoftwareSystemRequirementSourceInvalid: "SoftwareSystemRequirementSourceInvalid",
 	SeriesReleaseNotFound: "SeriesReleaseNotFound",
 	ZonePageNotFound: "ZonePageNotFound",
@@ -51546,34 +51547,15 @@ export const ListCurrentUserStudioContentSection = {
 export type ListCurrentUserStudioContentSection =
 	(typeof ListCurrentUserStudioContentSection)[keyof typeof ListCurrentUserStudioContentSection];
 
-export const ListCurrentUserStudioContentView = {
+export const ListCurrentUserStudioContentSource = {
 	all: "all",
-	created: "created",
-	contributed: "contributed",
-	assigned: "assigned",
+	owned: "owned",
+	direct: "direct",
 	delegated: "delegated",
 } as const;
 
-export type ListCurrentUserStudioContentView =
-	(typeof ListCurrentUserStudioContentView)[keyof typeof ListCurrentUserStudioContentView];
-
-export const ListCurrentUserStudioContentPermission = {
-	"unit.update": "unit.update",
-	"unit.status.update": "unit.status.update",
-	"unit.access.manage": "unit.access.manage",
-	"unit.realm-publication.manage": "unit.realm-publication.manage",
-} as const;
-
-export type ListCurrentUserStudioContentPermission =
-	(typeof ListCurrentUserStudioContentPermission)[keyof typeof ListCurrentUserStudioContentPermission];
-
-export const ListCurrentUserStudioContentWorkState = {
-	actionable: "actionable",
-	blocked: "blocked",
-} as const;
-
-export type ListCurrentUserStudioContentWorkState =
-	(typeof ListCurrentUserStudioContentWorkState)[keyof typeof ListCurrentUserStudioContentWorkState];
+export type ListCurrentUserStudioContentSource =
+	(typeof ListCurrentUserStudioContentSource)[keyof typeof ListCurrentUserStudioContentSource];
 
 export const ListCurrentUserStudioContentStatus = {
 	draft: "draft",
@@ -51592,16 +51574,6 @@ export const ListCurrentUserStudioContentVisibility = {
 
 export type ListCurrentUserStudioContentVisibility =
 	(typeof ListCurrentUserStudioContentVisibility)[keyof typeof ListCurrentUserStudioContentVisibility];
-
-export const ListCurrentUserStudioContentSort = {
-	recent: "recent",
-	updated: "updated",
-	created: "created",
-	relevant: "relevant",
-} as const;
-
-export type ListCurrentUserStudioContentSort =
-	(typeof ListCurrentUserStudioContentSort)[keyof typeof ListCurrentUserStudioContentSort];
 
 export const ListCurrentUserStudioContentLocalizationLanguagesEnum = {
 	zh: "zh",
@@ -51628,15 +51600,7 @@ export type ListCurrentUserStudioContentQuery = {
 	 * @default 'all'
 	 * @type string | undefined
 	 */
-	view?: ListCurrentUserStudioContentView;
-	/**
-	 * @type string | undefined
-	 */
-	permission?: ListCurrentUserStudioContentPermission;
-	/**
-	 * @type string | undefined
-	 */
-	workState?: ListCurrentUserStudioContentWorkState;
+	source?: ListCurrentUserStudioContentSource;
 	/**
 	 * @type string | undefined
 	 */
@@ -51645,11 +51609,6 @@ export type ListCurrentUserStudioContentQuery = {
 	 * @type string | undefined
 	 */
 	visibility?: ListCurrentUserStudioContentVisibility;
-	/**
-	 * @default 'recent'
-	 * @type string | undefined
-	 */
-	sort?: ListCurrentUserStudioContentSort;
 	/**
 	 * @type array | undefined
 	 */
@@ -51660,7 +51619,7 @@ export type ListCurrentUserStudioContentQuery = {
 	 */
 	cursor?: string;
 	/**
-	 * @default 50
+	 * @default 30
 	 */
 	limit?: string | number;
 };
@@ -51714,39 +51673,10 @@ export const ListCurrentUserStudioContentStatus200ItemsVisibilityEnum = {
 export type ListCurrentUserStudioContentStatus200ItemsVisibilityEnum =
 	(typeof ListCurrentUserStudioContentStatus200ItemsVisibilityEnum)[keyof typeof ListCurrentUserStudioContentStatus200ItemsVisibilityEnum];
 
-export const ListCurrentUserStudioContentStatus200ItemsRelationsEnum = {
-	created: "created",
-	contributed: "contributed",
-	assigned: "assigned",
-	delegated: "delegated",
-} as const;
-
-export type ListCurrentUserStudioContentStatus200ItemsRelationsEnum =
-	(typeof ListCurrentUserStudioContentStatus200ItemsRelationsEnum)[keyof typeof ListCurrentUserStudioContentStatus200ItemsRelationsEnum];
-
-export const ListCurrentUserStudioContentStatus200ItemsWorkStateEnum = {
-	actionable: "actionable",
-	blocked: "blocked",
-} as const;
-
-export type ListCurrentUserStudioContentStatus200ItemsWorkStateEnum =
-	(typeof ListCurrentUserStudioContentStatus200ItemsWorkStateEnum)[keyof typeof ListCurrentUserStudioContentStatus200ItemsWorkStateEnum];
-
-export const ListCurrentUserStudioContentStatus200ItemsPermissionsEnum = {
-	"unit.update": "unit.update",
-	"unit.status.update": "unit.status.update",
-	"unit.access.manage": "unit.access.manage",
-	"unit.realm-publication.manage": "unit.realm-publication.manage",
-} as const;
-
-export type ListCurrentUserStudioContentStatus200ItemsPermissionsEnum =
-	(typeof ListCurrentUserStudioContentStatus200ItemsPermissionsEnum)[keyof typeof ListCurrentUserStudioContentStatus200ItemsPermissionsEnum];
-
 export const ListCurrentUserStudioContentStatus200ItemsAccessSourcesEnum = {
+	owner: "owner",
 	direct: "direct",
 	realm: "realm",
-	authenticated: "authenticated",
-	platform: "platform",
 } as const;
 
 export type ListCurrentUserStudioContentStatus200ItemsAccessSourcesEnum =
@@ -51823,30 +51753,14 @@ export type ListCurrentUserStudioContentStatus200 = {
 		/**
 		 * @type array
 		 */
-		relations: ListCurrentUserStudioContentStatus200ItemsRelationsEnum[];
-		/**
-		 * @type string
-		 */
-		workState: ListCurrentUserStudioContentStatus200ItemsWorkStateEnum;
-		/**
-		 * @type array
-		 */
-		permissions: ListCurrentUserStudioContentStatus200ItemsPermissionsEnum[];
-		/**
-		 * @type array
-		 */
 		accessSources: ListCurrentUserStudioContentStatus200ItemsAccessSourcesEnum[];
-		firstContributedAt: (string | null) | null;
-		lastContributedAt: (string | null) | null;
-		contributionCount: string | number;
-		assignedAt: (string | null) | null;
-		lastVisitedAt: (string | null) | null;
 		/**
 		 * @description
 		 * Format: `date-time`
 		 * @type string
 		 */
-		relevantAt: string;
+		assignedAt: string;
+		lastVisitedAt: (string | null) | null;
 		/**
 		 * @description
 		 * Format: `date-time`
@@ -51919,10 +51833,32 @@ export type ListCurrentUserStudioContentStatus403 = {
 	requestId: string;
 };
 
-/**
- * @type object
- */
-export type ListCurrentUserStudioContentStatus422 = ValidationError;
+export type ListCurrentUserStudioContentStatus422 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'StudioRealmSubjectLimitExceeded'
+				 * @type string
+				 */
+				code: "StudioRealmSubjectLimitExceeded";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| ValidationError;
 
 export const ListCurrentUserStudioContentStatus429ErrorCodeEnum = {
 	ApiQuotaExceeded: "ApiQuotaExceeded",
@@ -77990,6 +77926,348 @@ export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageResponse =
 	| PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus422
 	| PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus429
 	| PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus500;
+
+export const ListCurrentUserContributionResourcesSection = {
+	book: "book",
+	software: "software",
+	media: "media",
+	entity: "entity",
+	tag: "tag",
+	realm: "realm",
+	zone: "zone",
+	post: "post",
+	wiki: "wiki",
+	collection: "collection",
+	review: "review",
+	poll: "poll",
+} as const;
+
+export type ListCurrentUserContributionResourcesSection =
+	(typeof ListCurrentUserContributionResourcesSection)[keyof typeof ListCurrentUserContributionResourcesSection];
+
+export const ListCurrentUserContributionResourcesKind = {
+	all: "all",
+	created: "created",
+	contributed: "contributed",
+} as const;
+
+export type ListCurrentUserContributionResourcesKind =
+	(typeof ListCurrentUserContributionResourcesKind)[keyof typeof ListCurrentUserContributionResourcesKind];
+
+export const ListCurrentUserContributionResourcesLocalizationLanguagesEnum = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type ListCurrentUserContributionResourcesLocalizationLanguagesEnum =
+	(typeof ListCurrentUserContributionResourcesLocalizationLanguagesEnum)[keyof typeof ListCurrentUserContributionResourcesLocalizationLanguagesEnum];
+
+/**
+ * @type object
+ */
+export type ListCurrentUserContributionResourcesQuery = {
+	/**
+	 * @type string
+	 */
+	section: ListCurrentUserContributionResourcesSection;
+	/**
+	 * @default 'all'
+	 * @type string | undefined
+	 */
+	kind?: ListCurrentUserContributionResourcesKind;
+	/**
+	 * @type array | undefined
+	 */
+	localizationLanguages?: ListCurrentUserContributionResourcesLocalizationLanguagesEnum[];
+	/**
+	 * @maxLength 1024
+	 * @type string | undefined
+	 */
+	cursor?: string;
+	/**
+	 * @default 30
+	 */
+	limit?: string | number;
+};
+
+export const ListCurrentUserContributionResourcesStatus200ItemsSectionEnum = {
+	book: "book",
+	software: "software",
+	media: "media",
+	entity: "entity",
+	tag: "tag",
+	realm: "realm",
+	zone: "zone",
+	post: "post",
+	wiki: "wiki",
+	collection: "collection",
+	review: "review",
+	poll: "poll",
+} as const;
+
+export type ListCurrentUserContributionResourcesStatus200ItemsSectionEnum =
+	(typeof ListCurrentUserContributionResourcesStatus200ItemsSectionEnum)[keyof typeof ListCurrentUserContributionResourcesStatus200ItemsSectionEnum];
+
+export const ListCurrentUserContributionResourcesStatus200ItemsLanguageEnum = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type ListCurrentUserContributionResourcesStatus200ItemsLanguageEnum =
+	(typeof ListCurrentUserContributionResourcesStatus200ItemsLanguageEnum)[keyof typeof ListCurrentUserContributionResourcesStatus200ItemsLanguageEnum];
+
+export const ListCurrentUserContributionResourcesStatus200ItemsStatusEnum = {
+	draft: "draft",
+	published: "published",
+	archived: "archived",
+} as const;
+
+export type ListCurrentUserContributionResourcesStatus200ItemsStatusEnum =
+	(typeof ListCurrentUserContributionResourcesStatus200ItemsStatusEnum)[keyof typeof ListCurrentUserContributionResourcesStatus200ItemsStatusEnum];
+
+export const ListCurrentUserContributionResourcesStatus200ItemsVisibilityEnum = {
+	public: "public",
+	unlisted: "unlisted",
+	private: "private",
+} as const;
+
+export type ListCurrentUserContributionResourcesStatus200ItemsVisibilityEnum =
+	(typeof ListCurrentUserContributionResourcesStatus200ItemsVisibilityEnum)[keyof typeof ListCurrentUserContributionResourcesStatus200ItemsVisibilityEnum];
+
+/**
+ * @type object
+ */
+export type ListCurrentUserContributionResourcesStatus200 = {
+	/**
+	 * @type array
+	 */
+	items: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		id: string;
+		slugAddress:
+			| ({
+					/**
+					 * @minLength 1
+					 * @maxLength 63
+					 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+					 * @type string
+					 */
+					slug: string;
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					scopeUnitId: string;
+					/**
+					 * @type array
+					 */
+					canonicalPath: string[];
+			  } | null)
+			| null;
+		/**
+		 * @type string
+		 */
+		section: ListCurrentUserContributionResourcesStatus200ItemsSectionEnum;
+		/**
+		 * @type string
+		 */
+		language: ListCurrentUserContributionResourcesStatus200ItemsLanguageEnum;
+		title: (string | null) | null;
+		cover:
+			| ({
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					id: string;
+					/**
+					 * @type string
+					 */
+					url: string;
+			  } | null)
+			| null;
+		/**
+		 * @default 'draft'
+		 * @type string
+		 */
+		status: ListCurrentUserContributionResourcesStatus200ItemsStatusEnum;
+		/**
+		 * @default 'public'
+		 * @type string
+		 */
+		visibility: ListCurrentUserContributionResourcesStatus200ItemsVisibilityEnum;
+		createdResourceAt: (string | null) | null;
+		firstContributedAt: (string | null) | null;
+		lastContributedAt: (string | null) | null;
+		contributionCount: string | number;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		lastParticipatedAt: string;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		createdAt: string;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		updatedAt: string;
+	}[];
+	nextCursor: (string | null) | null;
+};
+
+/**
+ * @type object
+ */
+export type ListCurrentUserContributionResourcesStatus400 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'InvalidPaginationCursor'
+		 * @type string
+		 */
+		code: "InvalidPaginationCursor";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type ListCurrentUserContributionResourcesStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'PlatformCapabilityRequired'
+		 * @type string
+		 */
+		code: "PlatformCapabilityRequired";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type ListCurrentUserContributionResourcesStatus422 = ValidationError;
+
+export const ListCurrentUserContributionResourcesStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type ListCurrentUserContributionResourcesStatus429ErrorCodeEnum =
+	(typeof ListCurrentUserContributionResourcesStatus429ErrorCodeEnum)[keyof typeof ListCurrentUserContributionResourcesStatus429ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type ListCurrentUserContributionResourcesStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: ListCurrentUserContributionResourcesStatus429ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type ListCurrentUserContributionResourcesStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type ListCurrentUserContributionResourcesOptions = {
+	body?: never;
+	path?: never;
+	query: ListCurrentUserContributionResourcesQuery;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type ListCurrentUserContributionResourcesResponses = {
+	"200": ListCurrentUserContributionResourcesStatus200;
+	"400": ListCurrentUserContributionResourcesStatus400;
+	"403": ListCurrentUserContributionResourcesStatus403;
+	"422": ListCurrentUserContributionResourcesStatus422;
+	"429": ListCurrentUserContributionResourcesStatus429;
+	"500": ListCurrentUserContributionResourcesStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type ListCurrentUserContributionResourcesResponse =
+	| ListCurrentUserContributionResourcesStatus200
+	| ListCurrentUserContributionResourcesStatus400
+	| ListCurrentUserContributionResourcesStatus403
+	| ListCurrentUserContributionResourcesStatus422
+	| ListCurrentUserContributionResourcesStatus429
+	| ListCurrentUserContributionResourcesStatus500;
 
 /**
  * @type object

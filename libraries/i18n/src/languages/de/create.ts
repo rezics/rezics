@@ -11,11 +11,19 @@ const { forms: zoneTerms } = deTerminology.zone;
 export default {
 	workspace: {
 		title: verbatimTerms.studio.value,
-		description: "Zeige Inhalte an, die du erstellt, betreut oder zur Verwaltung erhalten hast.",
+		description:
+			"Zeige Inhalte, die du derzeit bearbeiten kannst, oder öffentliche Inhalte, an denen du mitgewirkt hast.",
 		backToApplication: `Zurück zu ${verbatimTerms.rezics.value}`,
 		navigation: `${verbatimTerms.studio.value}-Navigation`,
 		overview: "Inhaltstypen",
 		backToOverview: "Zurück zu den Inhaltstypen",
+	},
+	mode: {
+		label: "Inhaltsliste",
+		options: {
+			workspace: "Dein Arbeitsbereich",
+			contributions: "Deine Mitwirkungen",
+		},
 	},
 	entityHelp: {
 		label: "Hinweise zu Mitwirkungsangaben öffnen",
@@ -116,57 +124,49 @@ export default {
 	},
 	list: {
 		create: "Erstellen",
-		empty: "Keine Inhalte entsprechen den aktuellen Filtern.",
+		empty: {
+			workspace: "Keine bearbeitbaren Inhalte entsprechen den aktuellen Filtern.",
+			contributions: "Keine öffentlichen Mitwirkungen entsprechen den aktuellen Filtern.",
+		},
 		untitled: "Inhalt ohne Titel",
 		contributionCount: insert("Mitwirkungen: {{count}}", { count: Number }),
 		activity: {
 			visited: "Besucht",
-			updated: "Aktualisiert",
+			assigned: "Zugewiesen",
 			created: "Erstellt",
-			relevant: "Relevant",
+			participated: "Bearbeitet",
 		},
 	},
 	filters: {
-		viewLabel: "Arbeitsbeziehung",
-		permissionLabel: "Aktuelle Berechtigung",
-		workStateLabel: "Arbeitsstatus",
+		sourceLabel: "Quelle des Arbeitsbereichs",
+		kindLabel: "Beitragstyp",
 		statusLabel: "Inhaltsstatus",
 		visibilityLabel: "Sichtbarkeit",
-		sortLabel: "Sortierung",
 		any: "Alle",
 		more: "Weitere Filter",
 		clear: "Filter zurücksetzen",
 		cancel: "Abbrechen",
 		apply: "Filter anwenden",
-		views: {
-			all: "Meine Arbeit",
+		sources: {
+			all: "Alle bearbeitbaren Inhalte",
+			owned: "Meine Inhalte",
+			direct: "Direkt zugewiesen",
+			delegated: "Über Team delegiert",
+		},
+		kinds: {
+			all: "Alle Mitwirkungen",
 			created: "Von mir erstellt",
-			contributed: "Mit meiner Beteiligung",
-			assigned: "Direkt zugewiesen",
-			delegated: "Vom Team delegiert",
+			contributed: "Von mir bearbeitet",
 		},
-		permissions: {
-			"unit.update": "Darf bearbeiten",
-			"unit.status.update": "Darf den Status ändern",
-			"unit.access.manage": "Darf den Zugriff verwalten",
-			"unit.realm-publication.manage": `Darf Veröffentlichungen in ${realmTerms.label} verwalten`,
-		},
-		workStates: { actionable: "Bearbeitbar", blocked: "Derzeit blockiert" },
 		statuses: { draft: "Entwurf", published: "Veröffentlicht", archived: "Archiviert" },
 		visibilities: { public: "Öffentlich", unlisted: "Nicht gelistet", private: "Privat" },
-		sorts: {
-			recent: "Zuletzt besucht",
-			updated: "Zuletzt aktualisiert",
-			created: "Zuletzt erstellt",
-			relevant: "Zuletzt relevant",
-		},
 	},
 	relations: {
+		owner: "Eigentümer",
+		direct: "Direkt zugewiesen",
+		realm: "Über Team delegiert",
 		created: "Ersteller",
 		contributed: "Mitwirkender",
-		assigned: "Direkt zugewiesen",
-		delegated: "Vom Team delegiert",
-		blocked: "Derzeit blockiert",
 	},
 	developmentBadge: "In Entwicklung",
 } satisfies typeof import("../zh-Hant/create").default;

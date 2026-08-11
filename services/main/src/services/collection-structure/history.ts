@@ -13,7 +13,7 @@ import {
 	type StoredRevisionContent,
 } from "../history/content";
 import { runRevisionedAggregateMutation } from "../history/revisioned-batch";
-import { recordStudioWorkRelation } from "../studio/projection";
+import { recordProfileResourceParticipation } from "../history/participation";
 import {
 	CollectionStructureCheckpointDepth,
 	CollectionStructureContentModel,
@@ -177,10 +177,9 @@ async function commitCollectionStructureRevision(
 			target: collectionStructureRevisionHead.collectionId,
 			set: { revisionId: revision.id },
 		});
-	await recordStudioWorkRelation(tx, {
+	await recordProfileResourceParticipation(tx, {
 		profileId: input.actorProfileId,
 		relation: "contributed",
-		source: "collection_structure_revision",
 		occurredAt: revision.createdAt,
 		target: {
 			kind: "unit_contribution",

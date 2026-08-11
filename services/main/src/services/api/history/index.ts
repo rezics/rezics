@@ -38,6 +38,8 @@ import {
 	unitRevisionDocumentsToComparisonValue,
 } from "../../units/history";
 import { toApiErrorResponse } from "../schema/response";
+import { DevelopmentPreviewCapability } from "@rezics/access";
+import { listCurrentProfileContributionResources } from "../../history/contribution-resources";
 import {
 	CurrentRevisionContentVisibilityForbidden,
 	InvalidHistoryCursor,
@@ -45,6 +47,8 @@ import {
 } from "./errors";
 import {
 	ChangeTagListResponse,
+	ContributionResourceListQuery,
+	ContributionResourceListResponse,
 	RevisionActionBody,
 	RevisionActionResponse,
 	RevisionContributionParams,
@@ -211,6 +215,31 @@ function revisionTagCondition(tag: string | undefined) {
 
 export default new Elysia({ prefix: "/history" })
 	.use(session)
+	.get(
+		"/contribution-resources/me",
+		async ({ authorization, profile, query }) => {
+			if (query.section === "zone")
+				await authorization.platform.ensureCapability(DevelopmentPreviewCapability);
+			return listCurrentProfileContributionResources({
+				profileId: profile.unitId,
+				query,
+			});
+		},
+		{
+			access: "profile:read",
+			query: ContributionResourceListQuery,
+			response: {
+				[StatusCodes.OK]: ContributionResourceListResponse,
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["InvalidPaginationCursor"]),
+				[StatusCodes.FORBIDDEN]: toApiErrorResponse(["PlatformCapabilityRequired"]),
+			},
+			detail: {
+				operationId: "listCurrentUserContributionResources",
+				summary: "List public resources the current user has created or contributed to",
+				tags: ["History"],
+			},
+		},
+	)
 	.get(
 		"/units/:unitId/revisions",
 		async ({ params, query, request }) => {

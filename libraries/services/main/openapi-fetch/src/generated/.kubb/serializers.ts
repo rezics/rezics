@@ -180,12 +180,7 @@ export const defaultBodySerializer: BodySerializer = ({ body, contentType, encod
 			const partContentType = encoding?.[key]?.contentType;
 			if (Array.isArray(value))
 				for (const item of value)
-					appendFormDataValue({
-						formData,
-						key,
-						value: item,
-						contentType: partContentType,
-					});
+					appendFormDataValue({ formData, key, value: item, contentType: partContentType });
 			else appendFormDataValue({ formData, key, value, contentType: partContentType });
 		}
 		return formData;

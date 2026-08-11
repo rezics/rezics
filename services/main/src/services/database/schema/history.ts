@@ -1,5 +1,6 @@
 import { inArray, sql } from "drizzle-orm";
 import {
+	bigint,
 	boolean,
 	check,
 	foreignKey,
@@ -14,7 +15,12 @@ import {
 } from "drizzle-orm/pg-core";
 
 import { pgTable } from "./base";
-import { createCreatedAtColumn, createUuidv7PrimaryKey } from "./columns";
+import {
+	createCreatedAtColumn,
+	createTimestampMsColumn,
+	createUpdatedAtColumn,
+	createUuidv7PrimaryKey,
+} from "./columns";
 import {
 	type ContentLanguage,
 	ContentLanguageValues,
@@ -23,6 +29,69 @@ import {
 } from "./contract-values";
 import { profile } from "./profile";
 import { unit, unitStatus } from "./unit";
+
+/**
+ * History-owned, rebuildable summary of one Profile's participation in one resource.
+ *
+ * Current publication and visibility are intentionally absent: they are mutable
+ * Unit facts and are applied live by the contribution-resource query.
+ */
+export const profileResourceParticipation = pgTable(
+	"profile_resource_participation",
+	{
+		profileId: uuid()
+			.notNull()
+			.references(() => profile.id, { onDelete: "cascade" }),
+		resourceUnitId: uuid()
+			.notNull()
+			.references(() => unit.id, { onDelete: "cascade" }),
+		createdResourceAt: createTimestampMsColumn(),
+		firstContributedAt: createTimestampMsColumn(),
+		lastContributedAt: createTimestampMsColumn(),
+		contributionCount: bigint({ mode: "number" }).default(0).notNull(),
+		lastParticipatedAt: createTimestampMsColumn().notNull(),
+		projectionUpdatedAt: createUpdatedAtColumn(),
+	},
+	(table) => [
+		primaryKey({ columns: [table.profileId, table.resourceUnitId] }),
+		index("profile_resource_participation_profile_recent_idx").on(
+			table.profileId,
+			table.lastParticipatedAt.desc(),
+			table.resourceUnitId.desc(),
+		),
+		index("profile_resource_participation_profile_created_idx")
+			.on(table.profileId, table.createdResourceAt.desc(), table.resourceUnitId.desc())
+			.where(sql`${table.createdResourceAt} is not null`),
+		index("profile_resource_participation_profile_contributed_idx")
+			.on(table.profileId, table.lastContributedAt.desc(), table.resourceUnitId.desc())
+			.where(sql`${table.lastContributedAt} is not null`),
+		index("profile_resource_participation_resource_idx").on(table.resourceUnitId, table.profileId),
+		check(
+			"profile_resource_participation_source_check",
+			sql`${table.createdResourceAt} is not null or ${table.firstContributedAt} is not null`,
+		),
+		check(
+			"profile_resource_participation_contribution_shape_check",
+			sql`(
+				${table.contributionCount} = 0
+				and ${table.firstContributedAt} is null
+				and ${table.lastContributedAt} is null
+			) or (
+				${table.contributionCount} > 0
+				and ${table.firstContributedAt} is not null
+				and ${table.lastContributedAt} is not null
+				and ${table.firstContributedAt} <= ${table.lastContributedAt}
+			)`,
+		),
+		check(
+			"profile_resource_participation_last_at_check",
+			sql`${table.lastParticipatedAt} = greatest(
+				${table.createdResourceAt},
+				${table.lastContributedAt}
+			)`,
+		),
+	],
+);
 
 export const UnitRevisionSlotRoleValues = [
 	"main",

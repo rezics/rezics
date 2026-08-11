@@ -1,8 +1,14 @@
 import { type Static, t } from "elysia";
-import { GovernanceReasonCodeValues } from "../../database/schema/contract-values";
+import {
+	GovernanceReasonCodeValues,
+	ResourceVisibilityValues,
+	UnitStatusValues,
+} from "../../database/schema/contract-values";
 import { RevisionHiddenFieldValues } from "../../history/visibility";
 import { UnitRevisionChangeTags } from "../../units/history";
-import { ContentLanguage, DateTime, Uuid } from "../schema";
+import { ResourceSectionValues } from "../../units/resource-section";
+import { ContentLanguage, DateTime, LocalizationLanguageQuery, Uuid } from "../schema";
+import { NullablePublicSlugAddressResponse } from "../slug-addresses/schema";
 
 export const UnitHistoryParams = t.Object({ unitId: Uuid });
 export const UnitRevisionParams = t.Object({ revisionId: Uuid });
@@ -23,6 +29,49 @@ export const RevisionFeedQuery = t.Object({
 });
 
 export const RevisionContributionParams = t.Object({ profileId: Uuid });
+
+export const ContributionResourceKindValues = ["all", "created", "contributed"] as const;
+export const ContributionResourceKind = t.UnionEnum(ContributionResourceKindValues, {
+	default: "all",
+});
+export const ContributionResourceSection = t.UnionEnum(ResourceSectionValues, {
+	default: undefined,
+});
+
+export const ContributionResourceListQuery = t.Object(
+	{
+		section: ContributionResourceSection,
+		kind: t.Optional(ContributionResourceKind),
+		...LocalizationLanguageQuery,
+		cursor: t.Optional(t.String({ maxLength: 1_024 })),
+		limit: t.Optional(t.Integer({ minimum: 1, maximum: 100, default: 30 })),
+	},
+	{ additionalProperties: false },
+);
+export type ContributionResourceListQuery = Static<typeof ContributionResourceListQuery>;
+
+export const ContributionResourceListResponse = t.Object({
+	items: t.Array(
+		t.Object({
+			id: Uuid,
+			slugAddress: NullablePublicSlugAddressResponse,
+			section: ContributionResourceSection,
+			language: ContentLanguage,
+			title: t.Nullable(t.String()),
+			cover: t.Nullable(t.Object({ id: Uuid, url: t.String() })),
+			status: t.UnionEnum(UnitStatusValues),
+			visibility: t.UnionEnum(ResourceVisibilityValues),
+			createdResourceAt: t.Nullable(DateTime),
+			firstContributedAt: t.Nullable(DateTime),
+			lastContributedAt: t.Nullable(DateTime),
+			contributionCount: t.Integer({ minimum: 0 }),
+			lastParticipatedAt: DateTime,
+			createdAt: DateTime,
+			updatedAt: DateTime,
+		}),
+	),
+	nextCursor: t.Nullable(t.String()),
+});
 
 export const RevisionActionBody = t.Object(
 	{

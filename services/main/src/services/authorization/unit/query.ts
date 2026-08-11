@@ -11,6 +11,7 @@ import {
 	type SQL,
 	type SQLWrapper,
 } from "drizzle-orm";
+import { alias } from "drizzle-orm/pg-core";
 
 import { database } from "../../database";
 import { unit, unitAccessGrant, unitAccessRestriction, unitOwnership } from "../../database/schema";
@@ -144,10 +145,8 @@ export function getUnitReadCondition(
 		isNull(target.deletedAt),
 		or(
 			platformSubject,
-			and(
-				not(profileRestriction),
-				or(ownership, and(not(realmRestriction), or(visible, matchingGrant))),
-			),
+			ownership,
+			and(not(profileRestriction), not(realmRestriction), or(visible, matchingGrant)),
 		),
 	);
 }
@@ -160,6 +159,107 @@ function scopePrefixCondition(
 		eq(column, scope.slice(0, length)),
 	);
 	return or(...prefixes) ?? sql`false`;
+}
+
+type ExplicitAnyScopeGrantSource =
+	| { readonly kind: "profile" }
+	| {
+			readonly kind: "realm";
+			readonly realmId: SQLWrapper;
+			readonly realmRelation: SQLWrapper;
+	  };
+
+/**
+ * Returns whether one explicit Profile/Realm assignment grants at least one
+ * effective scope for a delegable permission.
+ *
+ * Unlike the ordinary point-decision predicate, this listing predicate does
+ * not admit authenticated grants or the platform recovery override. Ownership
+ * is optional because only the Profile candidate stream may be seeded by it.
+ */
+export function getExplicitUnitAnyScopePermissionCondition(
+	profileId: string,
+	permission: DelegableUnitPermission,
+	options: {
+		readonly source: ExplicitAnyScopeGrantSource;
+		readonly includeOwnership: boolean;
+	},
+	target: Pick<UnitReadTarget, "id" | "deletedAt"> = unit,
+): SQL {
+	const candidateGrant = alias(unitAccessGrant, "explicit_any_scope_grant");
+	const candidateRestriction = alias(unitAccessRestriction, "explicit_any_scope_restriction");
+	const ownership = exists(
+		database
+			.select({ id: unitOwnership.id })
+			.from(unitOwnership)
+			.where(
+				and(
+					eq(unitOwnership.unitId, target.id),
+					eq(unitOwnership.profileId, profileId),
+					isNull(unitOwnership.revokedAt),
+				),
+			),
+	);
+	const grantSubject =
+		options.source.kind === "profile"
+			? and(eq(candidateGrant.subjectKind, "profile"), eq(candidateGrant.profileId, profileId))
+			: and(
+					eq(candidateGrant.subjectKind, "realm"),
+					sql`${candidateGrant.realmId} = ${options.source.realmId}`,
+					sql`${candidateGrant.realmRelation} = ${options.source.realmRelation}`,
+				);
+	const applicableRestriction = exists(
+		database
+			.select({ id: candidateRestriction.id })
+			.from(candidateRestriction)
+			.where(
+				and(
+					eq(candidateRestriction.unitId, candidateGrant.unitId),
+					eq(candidateRestriction.permission, permission),
+					isNull(candidateRestriction.revokedAt),
+					or(
+						isNull(candidateRestriction.expiresAt),
+						sql`${candidateRestriction.expiresAt} > now()`,
+					),
+					or(
+						and(
+							eq(candidateRestriction.subjectKind, "profile"),
+							eq(candidateRestriction.profileId, profileId),
+						),
+						and(
+							eq(candidateRestriction.subjectKind, "realm"),
+							profileMatchesRealmAccessSubject(
+								database,
+								candidateRestriction.realmId,
+								candidateRestriction.realmRelation,
+								profileId,
+							),
+						),
+					),
+					sql`cardinality(${candidateRestriction.scope}) <= cardinality(${candidateGrant.scope})`,
+					sql`(${candidateGrant.scope})[1:cardinality(${candidateRestriction.scope})] = ${candidateRestriction.scope}`,
+				),
+			),
+	);
+	const matchingGrant = exists(
+		database
+			.select({ id: candidateGrant.id })
+			.from(candidateGrant)
+			.where(
+				and(
+					eq(candidateGrant.unitId, target.id),
+					eq(candidateGrant.permission, permission),
+					grantSubject,
+					isNull(candidateGrant.revokedAt),
+					or(isNull(candidateGrant.expiresAt), sql`${candidateGrant.expiresAt} > now()`),
+					not(applicableRestriction),
+				),
+			),
+	);
+	return and(
+		isNull(target.deletedAt),
+		options.includeOwnership ? or(ownership, matchingGrant) : matchingGrant,
+	) as SQL;
 }
 
 /** Return the SQL predicate equivalent of a scoped delegable Unit permission decision. */

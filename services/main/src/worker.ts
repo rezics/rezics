@@ -18,6 +18,7 @@ const [
 	emailDispatcher,
 	imageAssetCleanup,
 	apiQuotaCleanup,
+	studioCandidateCleanup,
 	unitMergeWorker,
 	unitMergeService,
 	workerHealth,
@@ -29,6 +30,7 @@ const [
 	import("./services/email/dispatcher"),
 	import("./services/image-assets/cleanup"),
 	import("./services/auth/api-quota/cleanup"),
+	import("./services/studio/cleanup"),
 	import("./services/units/merge/worker"),
 	import("./services/units/merge/service"),
 	import("./services/health/worker-health"),
@@ -38,6 +40,7 @@ const { aggregateRecommendationMetrics, purgeRecommendationData, refreshRecommen
 const { dispatchEmailBatch } = emailDispatcher;
 const { cleanupExpiredPendingImageAssets } = imageAssetCleanup;
 const { cleanupApiQuotaState } = apiQuotaCleanup;
+const { cleanupExpiredStudioEditorCandidates } = studioCandidateCleanup;
 const { dispatchUnitMergeBatch } = unitMergeWorker;
 const { expireUnitMergeRequests } = unitMergeService;
 const { logger } = observability;
@@ -86,6 +89,7 @@ async function run() {
 	let nextRecommendationAt = 0;
 	let nextImageAssetCleanupAt = 0;
 	let nextApiQuotaCleanupAt = 0;
+	let nextStudioCandidateCleanupAt = 0;
 	while (!stopping) {
 		healthState.startJob();
 		observability.metrics.workerHeartbeat(healthState.activeJobStartedAt());
@@ -132,6 +136,19 @@ async function run() {
 					if (cleaned > 0)
 						logger.info("Expired API quota state cleaned", {
 							eventName: "api_quota.cleanup.completed",
+							attributes: { cleaned },
+						});
+				});
+			}
+			if (Date.now() >= nextStudioCandidateCleanupAt) {
+				nextStudioCandidateCleanupAt = Date.now() + env.STUDIO_CANDIDATE_CLEANUP_INTERVAL_MS;
+				await runWorkerJob({ name: "studio_candidate.cleanup", retryCount: 0 }, async () => {
+					const cleaned = await cleanupExpiredStudioEditorCandidates({
+						batchSize: env.STUDIO_CANDIDATE_CLEANUP_BATCH_SIZE,
+					});
+					if (cleaned > 0)
+						logger.info("Expired Studio editor candidates cleaned", {
+							eventName: "studio_candidate.cleanup.completed",
 							attributes: { cleaned },
 						});
 				});

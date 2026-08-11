@@ -96,6 +96,8 @@ export const env = createEnv({
 		IMAGE_ASSET_CLEANUP_GRACE_MS: z.coerce.number().int().min(0).max(86_400_000).default(300_000),
 		IMAGE_ASSET_CLEANUP_BATCH_SIZE: z.coerce.number().int().min(1).max(500).default(100),
 		API_QUOTA_CLEANUP_INTERVAL_MS: z.coerce.number().int().min(60_000).default(3_600_000),
+		STUDIO_CANDIDATE_CLEANUP_INTERVAL_MS: z.coerce.number().int().min(1_000).default(10_000),
+		STUDIO_CANDIDATE_CLEANUP_BATCH_SIZE: z.coerce.number().int().min(1).max(10_000).default(5_000),
 		SEARCH_STATEMENT_TIMEOUT_MS: z.coerce
 			.number()
 			.int()

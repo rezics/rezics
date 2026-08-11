@@ -11,11 +11,19 @@ const { forms: zoneTerms } = esTerminology.zone;
 export default {
 	workspace: {
 		title: verbatimTerms.studio.value,
-		description: "Consulta el contenido que has creado, mantenido o recibido para gestionar.",
+		description:
+			"Consulta el contenido que puedes editar ahora o el contenido público al que contribuiste.",
 		backToApplication: `Volver a ${verbatimTerms.rezics.value}`,
 		navigation: `Navegación de ${verbatimTerms.studio.value}`,
 		overview: "Tipos de contenido",
 		backToOverview: "Volver a los tipos de contenido",
+	},
+	mode: {
+		label: "Lista de contenido",
+		options: {
+			workspace: "Tu espacio de trabajo",
+			contributions: "Tus contribuciones",
+		},
 	},
 	entityHelp: {
 		label: "Más información sobre los créditos",
@@ -119,57 +127,49 @@ export default {
 	},
 	list: {
 		create: "Crear",
-		empty: "Ningún contenido coincide con los filtros actuales.",
+		empty: {
+			workspace: "Ningún contenido editable coincide con los filtros actuales.",
+			contributions: "Ninguna contribución pública coincide con los filtros actuales.",
+		},
 		untitled: "Contenido sin título",
 		contributionCount: insert("Contribuciones: {{count}}", { count: Number }),
 		activity: {
 			visited: "Visitado",
-			updated: "Actualizado",
+			assigned: "Asignado",
 			created: "Creado",
-			relevant: "Relacionado",
+			participated: "Contribución",
 		},
 	},
 	filters: {
-		viewLabel: "Relación con el trabajo",
-		permissionLabel: "Permiso actual",
-		workStateLabel: "Estado del trabajo",
+		sourceLabel: "Origen del espacio de trabajo",
+		kindLabel: "Tipo de contribución",
 		statusLabel: "Estado del contenido",
 		visibilityLabel: "Visibilidad",
-		sortLabel: "Orden",
 		any: "Cualquiera",
 		more: "Más filtros",
 		clear: "Borrar filtros",
 		cancel: "Cancelar",
 		apply: "Aplicar filtros",
-		views: {
-			all: "Mi trabajo",
-			created: "Creado por mí",
-			contributed: "Con mi contribución",
-			assigned: "Asignado directamente",
+		sources: {
+			all: "Todo el contenido editable",
+			owned: "De mi propiedad",
+			direct: "Asignado directamente",
 			delegated: "Delegado por el equipo",
 		},
-		permissions: {
-			"unit.update": "Puede editar",
-			"unit.status.update": "Puede cambiar el estado",
-			"unit.access.manage": "Puede gestionar el acceso",
-			"unit.realm-publication.manage": `Puede gestionar la difusión en ${realmTerms.label}`,
+		kinds: {
+			all: "Todas las contribuciones",
+			created: "Creado por mí",
+			contributed: "Editado por mí",
 		},
-		workStates: { actionable: "Se puede gestionar", blocked: "Bloqueado actualmente" },
 		statuses: { draft: "Borrador", published: "Publicado", archived: "Archivado" },
 		visibilities: { public: "Público", unlisted: "Sin listar", private: "Privado" },
-		sorts: {
-			recent: "Visitado recientemente",
-			updated: "Actualizado recientemente",
-			created: "Creado recientemente",
-			relevant: "Relevante recientemente",
-		},
 	},
 	relations: {
+		owner: "Propietario",
+		direct: "Asignado directamente",
+		realm: "Delegado por el equipo",
 		created: "Creador",
 		contributed: "Colaborador",
-		assigned: "Asignado directamente",
-		delegated: "Delegado por el equipo",
-		blocked: "Bloqueado actualmente",
 	},
 	developmentBadge: "En desarrollo",
 } satisfies typeof import("../zh-Hant/create").default;

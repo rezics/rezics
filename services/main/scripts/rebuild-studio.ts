@@ -1,4 +1,4 @@
-import { rebuildStudioWorkRelations } from "../src/services/studio/projection";
+import { rebuildStudioEditorCandidates } from "../src/services/studio/projection";
 
-await rebuildStudioWorkRelations();
-console.log("Studio work relations rebuilt");
+await rebuildStudioEditorCandidates();
+console.log("Studio editor candidates rebuilt");

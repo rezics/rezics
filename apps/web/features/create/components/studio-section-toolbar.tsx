@@ -19,41 +19,31 @@ import { useState } from "react";
 import { useTranslation } from "@/i18n/client";
 import {
 	AnyStudioFilter,
-	StudioPermissions,
-	StudioSorts,
+	ContributionKinds,
+	StudioModes,
 	StudioStatuses,
-	StudioViews,
 	StudioVisibilities,
-	StudioWorkStates,
-	type OptionalStudioPermission,
+	WorkspaceSources,
+	type ContributionKind,
 	type OptionalStudioStatus,
 	type OptionalStudioVisibility,
-	type OptionalStudioWorkState,
-	type StudioPermission,
-	type StudioSort,
+	type StudioMode,
 	type StudioStatus,
-	type StudioView,
 	type StudioVisibility,
-	type StudioWorkState,
+	type WorkspaceSource,
 } from "../model/studio-filters";
 
 export interface StudioFilterState {
-	readonly view: StudioView;
-	readonly permission: OptionalStudioPermission;
-	readonly workState: OptionalStudioWorkState;
+	readonly mode: StudioMode;
+	readonly source: WorkspaceSource;
+	readonly kind: ContributionKind;
 	readonly status: OptionalStudioStatus;
 	readonly visibility: OptionalStudioVisibility;
-	readonly sort: StudioSort;
 }
 
-type StudioAdvancedFilterState = Pick<
-	StudioFilterState,
-	"permission" | "status" | "visibility" | "workState"
->;
+type StudioAdvancedFilterState = Pick<StudioFilterState, "status" | "visibility">;
 
 const EmptyAdvancedFilters = {
-	permission: AnyStudioFilter,
-	workState: AnyStudioFilter,
 	status: AnyStudioFilter,
 	visibility: AnyStudioFilter,
 } as const satisfies StudioAdvancedFilterState;
@@ -72,50 +62,65 @@ export function StudioSectionToolbar({
 	const { t } = useTranslation(["create"]);
 	const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
 	const advancedFilters = {
-		permission: filters.permission,
-		workState: filters.workState,
 		status: filters.status,
 		visibility: filters.visibility,
 	} satisfies StudioAdvancedFilterState;
 	const activeCount = activeAdvancedFilterCount(advancedFilters);
-	const viewOptions: readonly ChoiceOption<StudioView>[] = StudioViews.map((value) => ({
+	const modeOptions: readonly ChoiceOption<StudioMode>[] = StudioModes.map((value) => ({
 		value,
-		label: t.create.filters.views[value],
+		label: t.create.mode.options[value],
 	}));
-	const sortOptions: readonly ChoiceOption<StudioSort>[] = StudioSorts.map((value) => ({
+	const sourceOptions: readonly ChoiceOption<WorkspaceSource>[] = WorkspaceSources.map((value) => ({
 		value,
-		label: t.create.filters.sorts[value],
+		label: t.create.filters.sources[value],
+	}));
+	const kindOptions: readonly ChoiceOption<ContributionKind>[] = ContributionKinds.map((value) => ({
+		value,
+		label: t.create.filters.kinds[value],
 	}));
 
 	return (
 		<>
 			<div className="mb-5 flex min-w-0 flex-wrap items-center gap-2">
 				<ChoiceSelect
-					ariaLabel={t.create.filters.viewLabel}
-					className="min-w-36"
-					onValueChange={(values) => onChange({ view: values[0] ?? "all" })}
-					options={viewOptions}
-					placeholder={t.create.filters.viewLabel}
-					value={[filters.view]}
+					ariaLabel={t.create.mode.label}
+					className="min-w-44"
+					onValueChange={(values) => onChange({ mode: values[0] ?? "workspace" })}
+					options={modeOptions}
+					placeholder={t.create.mode.label}
+					value={[filters.mode]}
 				/>
-				<Button onClick={() => setShowAdvancedFilters(true)} type="button" variant="outline">
-					<SlidersHorizontalIcon aria-hidden data-icon="inline-start" />
-					{t.create.filters.more}
-					{activeCount > 0 ? (
-						<Badge className="ms-0.5" size="sm" variant="secondary">
-							{activeCount}
-						</Badge>
-					) : null}
-				</Button>
-				<ChoiceSelect
-					ariaLabel={t.create.filters.sortLabel}
-					className="min-w-36"
-					onValueChange={(values) => onChange({ sort: values[0] ?? "recent" })}
-					options={sortOptions}
-					placeholder={t.create.filters.sortLabel}
-					value={[filters.sort]}
-				/>
-				{activeCount > 0 ? (
+				{filters.mode === "workspace" ? (
+					<ChoiceSelect
+						ariaLabel={t.create.filters.sourceLabel}
+						className="min-w-40"
+						onValueChange={(values) => onChange({ source: values[0] ?? "all" })}
+						options={sourceOptions}
+						placeholder={t.create.filters.sourceLabel}
+						value={[filters.source]}
+					/>
+				) : (
+					<ChoiceSelect
+						ariaLabel={t.create.filters.kindLabel}
+						className="min-w-40"
+						onValueChange={(values) => onChange({ kind: values[0] ?? "all" })}
+						options={kindOptions}
+						placeholder={t.create.filters.kindLabel}
+						value={[filters.kind]}
+					/>
+				)}
+				{filters.mode === "workspace" ? (
+					<Button onClick={() => setShowAdvancedFilters(true)} type="button" variant="outline">
+						<SlidersHorizontalIcon aria-hidden data-icon="inline-start" />
+						{t.create.filters.more}
+						{activeCount > 0 ? (
+							<Badge className="ms-0.5" size="sm" variant="secondary">
+								{activeCount}
+							</Badge>
+						) : null}
+					</Button>
+				) : null}
+				{filters.mode === "workspace" && activeCount > 0 ? (
 					<Button
 						className="ms-auto"
 						onClick={() => onChange(EmptyAdvancedFilters)}
@@ -148,20 +153,6 @@ function StudioAdvancedFiltersDialog({
 }) {
 	const { t } = useTranslation(["create"]);
 	const [draft, setDraft] = useState(filters);
-	const permissionOptions: readonly ChoiceOption<OptionalStudioPermission>[] = [
-		{ value: AnyStudioFilter, label: t.create.filters.any },
-		...StudioPermissions.map((value: StudioPermission) => ({
-			value,
-			label: t.create.filters.permissions[value],
-		})),
-	];
-	const workStateOptions: readonly ChoiceOption<OptionalStudioWorkState>[] = [
-		{ value: AnyStudioFilter, label: t.create.filters.any },
-		...StudioWorkStates.map((value: StudioWorkState) => ({
-			value,
-			label: t.create.filters.workStates[value],
-		})),
-	];
 	const statusOptions: readonly ChoiceOption<OptionalStudioStatus>[] = [
 		{ value: AnyStudioFilter, label: t.create.filters.any },
 		...StudioStatuses.map((value: StudioStatus) => ({
@@ -196,38 +187,6 @@ function StudioAdvancedFiltersDialog({
 					>
 						{t.create.filters.clear}
 					</Button>
-					<Field>
-						<FieldLabel>{t.create.filters.permissionLabel}</FieldLabel>
-						<ChoiceSelect
-							appearance="field"
-							ariaLabel={t.create.filters.permissionLabel}
-							onValueChange={(values) =>
-								setDraft((current) => ({
-									...current,
-									permission: values[0] ?? AnyStudioFilter,
-								}))
-							}
-							options={permissionOptions}
-							placeholder={t.create.filters.permissionLabel}
-							value={[draft.permission]}
-						/>
-					</Field>
-					<Field>
-						<FieldLabel>{t.create.filters.workStateLabel}</FieldLabel>
-						<ChoiceSelect
-							appearance="field"
-							ariaLabel={t.create.filters.workStateLabel}
-							onValueChange={(values) =>
-								setDraft((current) => ({
-									...current,
-									workState: values[0] ?? AnyStudioFilter,
-								}))
-							}
-							options={workStateOptions}
-							placeholder={t.create.filters.workStateLabel}
-							value={[draft.workState]}
-						/>
-					</Field>
 					<Field>
 						<FieldLabel>{t.create.filters.statusLabel}</FieldLabel>
 						<ChoiceSelect

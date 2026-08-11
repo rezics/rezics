@@ -186,7 +186,6 @@ export default new Elysia({ prefix: "/users" })
 				await authorization.platform.ensureCapability(DevelopmentPreviewCapability);
 			return listStudioContent({
 				profileId: profile.unitId,
-				authorization: authorization.unit,
 				query,
 			});
 		},
@@ -197,10 +196,11 @@ export default new Elysia({ prefix: "/users" })
 				[StatusCodes.OK]: StudioContentListResponse,
 				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["InvalidPaginationCursor"]),
 				[StatusCodes.FORBIDDEN]: toApiErrorResponse(["PlatformCapabilityRequired"]),
+				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["StudioRealmSubjectLimitExceeded"]),
 			},
 			detail: {
 				operationId: "listCurrentUserStudioContent",
-				summary: "List current user's Studio work resources",
+				summary: "List current user's actionable Studio workspace resources",
 				tags: ["Users", "Studio"],
 			},
 		},

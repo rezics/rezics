@@ -1316,6 +1316,13 @@ import type {
 	PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus422,
 	PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus429,
 	PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus500,
+	ListCurrentUserContributionResourcesOptions,
+	ListCurrentUserContributionResourcesStatus200,
+	ListCurrentUserContributionResourcesStatus400,
+	ListCurrentUserContributionResourcesStatus403,
+	ListCurrentUserContributionResourcesStatus422,
+	ListCurrentUserContributionResourcesStatus429,
+	ListCurrentUserContributionResourcesStatus500,
 	GetApiHistoryUnitsByUnitIdRevisionsOptions,
 	GetApiHistoryUnitsByUnitIdRevisionsStatus200,
 	GetApiHistoryUnitsByUnitIdRevisionsStatus400,
@@ -2775,6 +2782,7 @@ import {
 	patchApiUnitsByTypeByUnitIdVariantContext,
 	postApiUnitsByTypeByUnitIdVariantContextPromote,
 	putApiUnitsByTypeByUnitIdLocalizationsByLanguage,
+	listCurrentUserContributionResources,
 	getApiHistoryUnitsByUnitIdRevisions,
 	getApiHistoryUnitRevisionsByRevisionId,
 	getApiHistoryUnitsByUnitIdCompare,
@@ -3867,9 +3875,7 @@ export function useGetApiStartup<
 			queryKey,
 		} as unknown as QueryObserverOptions,
 		queryClient,
-	) as UseQueryResult<TData, ResponseErrorConfig<GetApiStartupStatus500>> & {
-		queryKey: TQueryKey;
-	};
+	) as UseQueryResult<TData, ResponseErrorConfig<GetApiStartupStatus500>> & { queryKey: TQueryKey };
 
 	queryResult.queryKey = queryKey as TQueryKey;
 
@@ -3935,9 +3941,7 @@ export function useGetApiHealth<
 			queryKey,
 		} as unknown as QueryObserverOptions,
 		queryClient,
-	) as UseQueryResult<TData, ResponseErrorConfig<GetApiHealthStatus500>> & {
-		queryKey: TQueryKey;
-	};
+	) as UseQueryResult<TData, ResponseErrorConfig<GetApiHealthStatus500>> & { queryKey: TQueryKey };
 
 	queryResult.queryKey = queryKey as TQueryKey;
 
@@ -4376,11 +4380,7 @@ export function putApiNotificationsReadAllMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ body }) => {
-			const { data } = await putApiNotificationsReadAll({
-				...config,
-				body,
-				throwOnError: true,
-			});
+			const { data } = await putApiNotificationsReadAll({ ...config, body, throwOnError: true });
 			return data;
 		},
 	});
@@ -5150,11 +5150,7 @@ export function postApiRecommendationsEventsMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ body }) => {
-			const { data } = await postApiRecommendationsEvents({
-				...config,
-				body,
-				throwOnError: true,
-			});
+			const { data } = await postApiRecommendationsEvents({ ...config, body, throwOnError: true });
 			return data;
 		},
 	});
@@ -5565,11 +5561,7 @@ export function postApiMessagesConversationsMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ body }) => {
-			const { data } = await postApiMessagesConversations({
-				...config,
-				body,
-				throwOnError: true,
-			});
+			const { data } = await postApiMessagesConversations({ ...config, body, throwOnError: true });
 			return data;
 		},
 	});
@@ -6106,11 +6098,7 @@ export function deleteApiMessagesByMessageIdMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path }) => {
-			const { data } = await deleteApiMessagesByMessageId({
-				...config,
-				path,
-				throwOnError: true,
-			});
+			const { data } = await deleteApiMessagesByMessageId({ ...config, path, throwOnError: true });
 			return data;
 		},
 	});
@@ -6485,11 +6473,7 @@ export function deleteApiApiTokensByTokenIdMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path }) => {
-			const { data } = await deleteApiApiTokensByTokenId({
-				...config,
-				path,
-				throwOnError: true,
-			});
+			const { data } = await deleteApiApiTokensByTokenId({ ...config, path, throwOnError: true });
 			return data;
 		},
 	});
@@ -12346,9 +12330,7 @@ export function useGetApiAuditEvents<
 >(
 	{
 		query,
-	}: {
-		query?: GetApiAuditEventsOptions["query"] | (() => GetApiAuditEventsOptions["query"]);
-	} = {},
+	}: { query?: GetApiAuditEventsOptions["query"] | (() => GetApiAuditEventsOptions["query"]) } = {},
 	options: {
 		query?: Partial<
 			QueryObserverOptions<
@@ -12619,12 +12601,7 @@ export function replaceZoneSlugAddressMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await replaceZoneSlugAddress({
-				...config,
-				path,
-				body,
-				throwOnError: true,
-			});
+			const { data } = await replaceZoneSlugAddress({ ...config, path, body, throwOnError: true });
 			return data;
 		},
 	});
@@ -12823,12 +12800,7 @@ export function patchApiZonesByZoneIdMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await patchApiZonesByZoneId({
-				...config,
-				path,
-				body,
-				throwOnError: true,
-			});
+			const { data } = await patchApiZonesByZoneId({ ...config, path, body, throwOnError: true });
 			return data;
 		},
 	});
@@ -15985,11 +15957,7 @@ export function assignCurrentProfileSlugMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ body }) => {
-			const { data } = await assignCurrentProfileSlug({
-				...config,
-				body,
-				throwOnError: true,
-			});
+			const { data } = await assignCurrentProfileSlug({ ...config, body, throwOnError: true });
 			return data;
 		},
 	});
@@ -16108,7 +16076,7 @@ export function listCurrentUserStudioContentQueryOptions(
 }
 
 /**
- * @summary List current user's Studio work resources
+ * @summary List current user's actionable Studio workspace resources
  * {@link /api/v1/users/me/studio}
  */
 export function useListCurrentUserStudioContent<
@@ -16191,11 +16159,7 @@ export function recordCurrentUserStudioVisitMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path }) => {
-			const { data } = await recordCurrentUserStudioVisit({
-				...config,
-				path,
-				throwOnError: true,
-			});
+			const { data } = await recordCurrentUserStudioVisit({ ...config, path, throwOnError: true });
 			return data;
 		},
 	});
@@ -16370,11 +16334,7 @@ export function patchApiUsersMePreferencesMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ body }) => {
-			const { data } = await patchApiUsersMePreferences({
-				...config,
-				body,
-				throwOnError: true,
-			});
+			const { data } = await patchApiUsersMePreferences({ ...config, body, throwOnError: true });
 			return data;
 		},
 	});
@@ -16472,11 +16432,7 @@ export function putApiUsersMePreferencesMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ body }) => {
-			const { data } = await putApiUsersMePreferences({
-				...config,
-				body,
-				throwOnError: true,
-			});
+			const { data } = await putApiUsersMePreferences({ ...config, body, throwOnError: true });
 			return data;
 		},
 	});
@@ -16577,11 +16533,7 @@ export function updateCurrentUserPrivacyMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ body }) => {
-			const { data } = await updateCurrentUserPrivacy({
-				...config,
-				body,
-				throwOnError: true,
-			});
+			const { data } = await updateCurrentUserPrivacy({ ...config, body, throwOnError: true });
 			return data;
 		},
 	});
@@ -21057,11 +21009,7 @@ export function postApiUnitsPresentationsMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ body }) => {
-			const { data } = await postApiUnitsPresentations({
-				...config,
-				body,
-				throwOnError: true,
-			});
+			const { data } = await postApiUnitsPresentations({ ...config, body, throwOnError: true });
 			return data;
 		},
 	});
@@ -22245,12 +22193,7 @@ export function postApiUnitsByTypeMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await postApiUnitsByType({
-				...config,
-				path,
-				body,
-				throwOnError: true,
-			});
+			const { data } = await postApiUnitsByType({ ...config, path, body, throwOnError: true });
 			return data;
 		},
 	});
@@ -22911,6 +22854,109 @@ export function usePutApiUnitsByTypeByUnitIdLocalizationsByLanguage<TContext>(
 		PutApiUnitsByTypeByUnitIdLocalizationsByLanguageOptions,
 		TContext
 	>;
+}
+
+export const listCurrentUserContributionResourcesQueryKey = ({
+	query,
+}: Omit<ListCurrentUserContributionResourcesOptions, "headers">) =>
+	[{ url: "/api/v1/history/contribution-resources/me" }, ...(query ? [query] : [])] as const;
+
+type ListCurrentUserContributionResourcesQueryKey = ReturnType<
+	typeof listCurrentUserContributionResourcesQueryKey
+>;
+
+export function listCurrentUserContributionResourcesQueryOptions(
+	{ query }: ListCurrentUserContributionResourcesOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = listCurrentUserContributionResourcesQueryKey({ query });
+	return queryOptions<
+		ListCurrentUserContributionResourcesStatus200,
+		ResponseErrorConfig<
+			| ListCurrentUserContributionResourcesStatus400
+			| ListCurrentUserContributionResourcesStatus403
+			| ListCurrentUserContributionResourcesStatus422
+			| ListCurrentUserContributionResourcesStatus429
+			| ListCurrentUserContributionResourcesStatus500
+		>,
+		ListCurrentUserContributionResourcesStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			const { data } = await listCurrentUserContributionResources({
+				...config,
+				query,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary List public resources the current user has created or contributed to
+ * {@link /api/v1/history/contribution-resources/me}
+ */
+export function useListCurrentUserContributionResources<
+	TData = ListCurrentUserContributionResourcesStatus200,
+	TQueryData = ListCurrentUserContributionResourcesStatus200,
+	TQueryKey extends QueryKey = ListCurrentUserContributionResourcesQueryKey,
+>(
+	{
+		query,
+	}: {
+		query:
+			| ListCurrentUserContributionResourcesOptions["query"]
+			| (() => ListCurrentUserContributionResourcesOptions["query"]);
+	},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				ListCurrentUserContributionResourcesStatus200,
+				ResponseErrorConfig<
+					| ListCurrentUserContributionResourcesStatus400
+					| ListCurrentUserContributionResourcesStatus403
+					| ListCurrentUserContributionResourcesStatus422
+					| ListCurrentUserContributionResourcesStatus429
+					| ListCurrentUserContributionResourcesStatus500
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = { query: typeof query === "function" ? query() : query };
+	const queryKey =
+		resolvedOptions?.queryKey ?? listCurrentUserContributionResourcesQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...listCurrentUserContributionResourcesQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			| ListCurrentUserContributionResourcesStatus400
+			| ListCurrentUserContributionResourcesStatus403
+			| ListCurrentUserContributionResourcesStatus422
+			| ListCurrentUserContributionResourcesStatus429
+			| ListCurrentUserContributionResourcesStatus500
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
 }
 
 export const getApiHistoryUnitsByUnitIdRevisionsQueryKey = ({
@@ -27331,10 +27377,7 @@ export const getApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsQuery
 	query,
 }: Omit<GetApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsOptions, "headers">) =>
 	[
-		{
-			url: "/api/v1/units/by-id/:unitId/content-structures/:structureId/revisions",
-			params: path,
-		},
+		{ url: "/api/v1/units/by-id/:unitId/content-structures/:structureId/revisions", params: path },
 		...(query ? [query] : []),
 	] as const;
 
@@ -28976,12 +29019,7 @@ export function putApiProgressByUnitIdMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await putApiProgressByUnitId({
-				...config,
-				path,
-				body,
-				throwOnError: true,
-			});
+			const { data } = await putApiProgressByUnitId({ ...config, path, body, throwOnError: true });
 			return data;
 		},
 	});
@@ -29076,11 +29114,7 @@ export function deleteApiProgressByUnitIdMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path }) => {
-			const { data } = await deleteApiProgressByUnitId({
-				...config,
-				path,
-				throwOnError: true,
-			});
+			const { data } = await deleteApiProgressByUnitId({ ...config, path, throwOnError: true });
 			return data;
 		},
 	});
@@ -30205,9 +30239,7 @@ export function useGetApiCollections<
 >(
 	{
 		query,
-	}: {
-		query?: GetApiCollectionsOptions["query"] | (() => GetApiCollectionsOptions["query"]);
-	} = {},
+	}: { query?: GetApiCollectionsOptions["query"] | (() => GetApiCollectionsOptions["query"]) } = {},
 	options: {
 		query?: Partial<
 			QueryObserverOptions<
@@ -32309,12 +32341,7 @@ export function putApiScoresByTargetIdMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await putApiScoresByTargetId({
-				...config,
-				path,
-				body,
-				throwOnError: true,
-			});
+			const { data } = await putApiScoresByTargetId({ ...config, path, body, throwOnError: true });
 			return data;
 		},
 	});
@@ -32923,11 +32950,7 @@ export function putApiReactionsSharesByUnitIdMutationOptions<TContext = unknown>
 	>({
 		mutationKey,
 		mutationFn: async ({ path }) => {
-			const { data } = await putApiReactionsSharesByUnitId({
-				...config,
-				path,
-				throwOnError: true,
-			});
+			const { data } = await putApiReactionsSharesByUnitId({ ...config, path, throwOnError: true });
 			return data;
 		},
 	});
@@ -33301,12 +33324,7 @@ export function putApiPollsByPollIdVoteMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await putApiPollsByPollIdVote({
-				...config,
-				path,
-				body,
-				throwOnError: true,
-			});
+			const { data } = await putApiPollsByPollIdVote({ ...config, path, body, throwOnError: true });
 			return data;
 		},
 	});
@@ -33407,11 +33425,7 @@ export function deleteApiPollsByPollIdVoteMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path }) => {
-			const { data } = await deleteApiPollsByPollIdVote({
-				...config,
-				path,
-				throwOnError: true,
-			});
+			const { data } = await deleteApiPollsByPollIdVote({ ...config, path, throwOnError: true });
 			return data;
 		},
 	});
@@ -33509,11 +33523,7 @@ export function postApiPollsByPollIdCloseMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path }) => {
-			const { data } = await postApiPollsByPollIdClose({
-				...config,
-				path,
-				throwOnError: true,
-			});
+			const { data } = await postApiPollsByPollIdClose({ ...config, path, throwOnError: true });
 			return data;
 		},
 	});
@@ -34194,12 +34204,7 @@ export function patchApiPostsByPostIdMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await patchApiPostsByPostId({
-				...config,
-				path,
-				body,
-				throwOnError: true,
-			});
+			const { data } = await patchApiPostsByPostId({ ...config, path, body, throwOnError: true });
 			return data;
 		},
 	});
@@ -34808,12 +34813,7 @@ export function replaceRealmSlugAddressMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await replaceRealmSlugAddress({
-				...config,
-				path,
-				body,
-				throwOnError: true,
-			});
+			const { data } = await replaceRealmSlugAddress({ ...config, path, body, throwOnError: true });
 			return data;
 		},
 	});
@@ -35019,12 +35019,7 @@ export function patchApiRealmsByRealmIdMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await patchApiRealmsByRealmId({
-				...config,
-				path,
-				body,
-				throwOnError: true,
-			});
+			const { data } = await patchApiRealmsByRealmId({ ...config, path, body, throwOnError: true });
 			return data;
 		},
 	});
@@ -40899,11 +40894,7 @@ export function postApiSearchSharedQueriesMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ body }) => {
-			const { data } = await postApiSearchSharedQueries({
-				...config,
-				body,
-				throwOnError: true,
-			});
+			const { data } = await postApiSearchSharedQueries({ ...config, body, throwOnError: true });
 			return data;
 		},
 	});
@@ -41098,12 +41089,7 @@ export function postApiSearchByIndexMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await postApiSearchByIndex({
-				...config,
-				path,
-				body,
-				throwOnError: true,
-			});
+			const { data } = await postApiSearchByIndex({ ...config, path, body, throwOnError: true });
 			return data;
 		},
 	});
@@ -41563,9 +41549,7 @@ export function useGetApiImageAssetsById<
 >(
 	{
 		path,
-	}: {
-		path: GetApiImageAssetsByIdOptions["path"] | (() => GetApiImageAssetsByIdOptions["path"]);
-	},
+	}: { path: GetApiImageAssetsByIdOptions["path"] | (() => GetApiImageAssetsByIdOptions["path"]) },
 	options: {
 		query?: Partial<
 			QueryObserverOptions<
@@ -41635,11 +41619,7 @@ export function deleteApiImageAssetsByIdMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path }) => {
-			const { data } = await deleteApiImageAssetsById({
-				...config,
-				path,
-				throwOnError: true,
-			});
+			const { data } = await deleteApiImageAssetsById({ ...config, path, throwOnError: true });
 			return data;
 		},
 	});

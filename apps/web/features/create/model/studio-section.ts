@@ -1,5 +1,10 @@
 import type { ListCurrentUserStudioContentSection } from "@rezics/openapi-tanstack-query";
 
+import {
+	publicUnitHref,
+	type PublicUnitRouteValue,
+} from "@/features/units/routing/public-unit-route";
+
 export const StudioSectionIds = [
 	"post",
 	"book",
@@ -45,30 +50,26 @@ export function studioSectionCreateHref(sectionId: StudioSectionId): string | un
 	return StudioSectionCreateHrefs[sectionId];
 }
 
-export function studioContentHref(sectionId: StudioSectionId, unitId: string): string {
-	switch (sectionId) {
-		case "book":
-		case "software":
-		case "media":
-			return `/units/${sectionId}/${unitId}`;
-		case "entity":
-			return `/entities/${unitId}`;
-		case "tag":
-			return `/tags/${unitId}`;
-		case "realm":
-			return `/realm/${unitId}`;
-		case "zone":
-			return `/zone/${unitId}`;
-		case "post":
-		case "wiki":
-		case "review":
-			return `/posts/${unitId}`;
-		case "collection":
-			return `/collections/${unitId}`;
-		case "poll":
-			return `/polls/${unitId}`;
-		default:
-			sectionId satisfies never;
-			throw new Error("Unsupported Studio section");
-	}
+const StudioPublicUnitKinds = {
+	book: "book",
+	software: "software",
+	media: "media",
+	entity: "entity",
+	tag: "tag",
+	realm: "realm",
+	zone: "zone",
+	post: "post",
+	wiki: "post",
+	collection: "collection",
+	review: "post",
+	poll: "poll",
+} as const satisfies Record<StudioSectionId, string>;
+
+export function studioContentHref(
+	sectionId: StudioSectionId,
+	resource: PublicUnitRouteValue,
+): string {
+	const href = publicUnitHref(StudioPublicUnitKinds[sectionId], resource);
+	if (!href) throw new Error("Unsupported Studio section");
+	return href;
 }

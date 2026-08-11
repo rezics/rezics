@@ -8,7 +8,6 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { TranslationProvider } from "@/i18n/client";
 import {
 	StudioContentCard,
-	studioContentActivity,
 	studioContentShowsCover,
 	type StudioContentItem,
 } from "./studio-content-card";
@@ -19,7 +18,7 @@ vi.mock("@/i18n/client", async () => {
 });
 
 const translation = await create(resources).getTranslation(["create"], ["zh-Hant"]);
-const item = {
+const resource = {
 	id: "019b76da-a800-7300-8000-000000000002",
 	slugAddress: null,
 	section: "book",
@@ -31,64 +30,43 @@ const item = {
 	},
 	status: "published",
 	visibility: "public",
-	relations: ["created", "contributed"],
-	workState: "actionable",
-	permissions: ["unit.update"],
-	accessSources: ["direct"],
+	createdResourceAt: "2026-01-01T08:00:00.000Z",
 	firstContributedAt: "2026-07-01T08:00:00.000Z",
 	lastContributedAt: "2026-07-27T08:00:00.000Z",
 	contributionCount: 3,
-	assignedAt: null,
-	lastVisitedAt: "2026-07-28T08:00:00.000Z",
-	relevantAt: "2026-07-27T08:00:00.000Z",
+	lastParticipatedAt: "2026-07-27T08:00:00.000Z",
 	createdAt: "2026-01-01T08:00:00.000Z",
 	updatedAt: "2026-07-26T08:00:00.000Z",
+} as const;
+const item = {
+	kind: "contribution",
+	resource,
 } satisfies StudioContentItem;
 
 afterEach(cleanup);
 
 describe("Studio content presentation", () => {
-	it("selects the timestamp that explains each sort", () => {
-		expect(studioContentActivity(item, "recent")).toEqual({
-			kind: "visited",
-			value: item.lastVisitedAt,
-		});
-		expect(studioContentActivity({ ...item, lastVisitedAt: null }, "recent")).toEqual({
-			kind: "relevant",
-			value: item.relevantAt,
-		});
-		expect(studioContentActivity(item, "updated")).toEqual({
-			kind: "updated",
-			value: item.updatedAt,
-		});
-		expect(studioContentActivity(item, "created")).toEqual({
-			kind: "created",
-			value: item.createdAt,
-		});
-		expect(studioContentActivity(item, "relevant")).toEqual({
-			kind: "relevant",
-			value: item.relevantAt,
-		});
-	});
-
 	it("reserves a cover for cover-led sections and honors an actual cover elsewhere", () => {
 		expect(studioContentShowsCover({ cover: null, section: "book" })).toBe(true);
 		expect(studioContentShowsCover({ cover: null, section: "tag" })).toBe(false);
-		expect(studioContentShowsCover({ cover: item.cover, section: "tag" })).toBe(true);
+		expect(studioContentShowsCover({ cover: resource.cover, section: "tag" })).toBe(true);
 	});
 
 	it("renders the resolved cover and management metadata without Feed reactions", () => {
 		const onOpen = vi.fn();
 		const { container } = render(
 			<TranslationProvider initial={translation.snapshot}>
-				<StudioContentCard item={item} onOpen={onOpen} sort="updated" />
+				<StudioContentCard item={item} onOpen={onOpen} />
 			</TranslationProvider>,
 		);
 
 		const cover = container.querySelector('[data-slot="cover"]');
-		expect(cover?.querySelector(`img[src="${item.cover.url}"]`)).toBeTruthy();
+		expect(cover?.querySelector(`img[src="${resource.cover.url}"]`)).toBeTruthy();
+		expect(screen.getByText("參與編輯")).toBeTruthy();
 		expect(screen.getByText("已發布")).toBeTruthy();
 		expect(screen.getByText("公開")).toBeTruthy();
+		expect(screen.getByText("建立者")).toBeTruthy();
+		expect(screen.getByText("貢獻者")).toBeTruthy();
 		expect(screen.getByText("貢獻 3 次")).toBeTruthy();
 		expect(container.querySelector('[data-slot="feed-card-action-bar"]')).toBeNull();
 		expect(container.querySelector('[data-slot="feed-engagement-bar"]')).toBeNull();

@@ -303,4 +303,6 @@ export default {
 	UnitRealmPublicationAlreadyExists: `Für diesen Inhalt besteht bereits eine Veröffentlichungsrelation mit diesem ${realmTerms.label}.`,
 	UnitRealmPublicationTransitionInvalid:
 		"Die Veröffentlichungsrelation befindet sich bereits im angeforderten Status.",
+	StudioRealmSubjectLimitExceeded:
+		"Du gehörst zu zu vielen Teams, um teamdelegierte Inhalte im Arbeitsbereich aufzulisten.",
 } satisfies typeof import("../zh-Hant/errorCodes").default;

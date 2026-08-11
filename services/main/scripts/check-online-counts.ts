@@ -53,10 +53,24 @@ const allowRules: readonly AllowRule[] = [
 		reason: "the offline daily metrics worker scans a fixed two-day window",
 	},
 	{
-		file: "studio/projection.ts",
-		line: /count\(\*\)::integer/,
-		maximumOccurrences: 5,
-		reason: "the explicitly rebuildable Studio projection runs off the request path",
+		file: "history/participation.ts",
+		line: /having count\(distinct structure\.owner_unit_id\)/,
+		maximumOccurrences: 2,
+		reason:
+			"the current and historical participation fan-out preflights run only during an explicit rebuild",
+	},
+	{
+		file: "history/participation.ts",
+		line: /count\(\*\) filter \(where relation = 'contributed'\)/,
+		maximumOccurrences: 1,
+		reason: "the contribution aggregation runs only during an explicit projection rebuild",
+	},
+	{
+		file: "studio/cleanup.ts",
+		line: /select count\(\*\)::int as count from deleted/,
+		maximumOccurrences: 2,
+		reason:
+			"each deleted relation is materialized from a lock-skipping batch capped at 10,000 rows",
 	},
 ];
 

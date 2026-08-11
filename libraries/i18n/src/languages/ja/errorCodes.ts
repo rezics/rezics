@@ -279,4 +279,6 @@ export default {
 	UnitRealmPublicationNotFound: `このコンテンツと${realmTerms.label}の公開関係が見つかりません。`,
 	UnitRealmPublicationAlreadyExists: `このコンテンツには既に${realmTerms.label}との公開関係があります。`,
 	UnitRealmPublicationTransitionInvalid: "公開関係は既に要求された状態です。",
+	StudioRealmSubjectLimitExceeded:
+		"所属するチームが多すぎるため、ワークスペースにチームから委任されたコンテンツを表示できません。",
 } satisfies typeof import("../zh-Hant/errorCodes").default;

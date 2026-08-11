@@ -299,4 +299,6 @@ export default {
 	UnitRealmPublicationAlreadyExists: `Este contenido ya tiene una relación de inclusión con ese ${realmTerms.label}.`,
 	UnitRealmPublicationTransitionInvalid:
 		"La relación de inclusión ya se encuentra en el estado solicitado.",
+	StudioRealmSubjectLimitExceeded:
+		"Perteneces a demasiados equipos para mostrar contenido delegado por equipos en el espacio de trabajo.",
 } satisfies typeof import("../zh-Hant/errorCodes").default;

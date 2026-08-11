@@ -7,7 +7,7 @@ import {
 	findOrCreateRevisionContent,
 	materializeStoredRevisionContent,
 } from "../../history/content";
-import { recordStudioWorkRelation } from "../../studio/projection";
+import { recordProfileResourceParticipation } from "../../history/participation";
 import { DockRevisionConflict } from "./errors";
 
 export const DockContentModel = "rezics.dock.v1" as const;
@@ -139,10 +139,9 @@ async function commitDockRevision(
 			target: dockRevisionHead.dockId,
 			set: { revisionId: revision.id },
 		});
-	await recordStudioWorkRelation(tx, {
+	await recordProfileResourceParticipation(tx, {
 		profileId: input.actorProfileId,
 		relation: "contributed",
-		source: "dock_revision",
 		occurredAt: revision.createdAt,
 		target: { kind: "dock", dockId: input.dockId },
 	});

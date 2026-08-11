@@ -73,6 +73,20 @@ export class SessionNotFound extends Data.TaggedError("SessionNotFound") {
 	readonly message = "Session not found";
 }
 
+export class StudioRealmSubjectLimitExceeded extends Data.TaggedError(
+	"StudioRealmSubjectLimitExceeded",
+) {
+	static readonly status = StatusCodes.UNPROCESSABLE_ENTITY as const;
+	readonly status = StudioRealmSubjectLimitExceeded.status;
+	readonly message = "Studio workspace Realm subject limit exceeded";
+	readonly details: { readonly maximum: number };
+
+	constructor(maximum: number) {
+		super();
+		this.details = { maximum };
+	}
+}
+
 export const UserErrors = [
 	ProfileNotFound,
 	ProfileChanged,
@@ -84,4 +98,5 @@ export const UserErrors = [
 	PlatformUserManagerRequired,
 	UserAccountStateExpiryInvalid,
 	SessionNotFound,
+	StudioRealmSubjectLimitExceeded,
 ] as const;

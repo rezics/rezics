@@ -256,4 +256,5 @@ export default {
 	UnitRealmPublicationNotFound: `找不到這項內容與該${realmTerms.label}的發布關係。`,
 	UnitRealmPublicationAlreadyExists: `這項內容已與該${realmTerms.label}建立發布關係。`,
 	UnitRealmPublicationTransitionInvalid: "這項發布關係已經處於要求的狀態。",
+	StudioRealmSubjectLimitExceeded: "你所屬的團隊過多，工作空間暫時無法列出團隊委派內容。",
 };

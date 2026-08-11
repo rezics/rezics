@@ -1844,32 +1844,97 @@ async function derivedStateBatch(
 				where visit.profile_id = visit_batch.profile_id
 					and visit.resource_unit_id = ${input.sourceUnitId}::uuid
 				returning 1
-			), resource_work_batch as materialized (
-				select id
-				from studio_work_relation
+			), participation_batch as materialized (
+				select
+					profile_id,
+					created_resource_at,
+					first_contributed_at,
+					last_contributed_at,
+					contribution_count,
+					last_participated_at,
+					projection_updated_at
+				from profile_resource_participation
 				where resource_unit_id = ${input.sourceUnitId}::uuid
-				order by id
+				order by profile_id
 				limit ${input.batchSize}
 				for update skip locked
-			), authorization_work_batch as materialized (
-				select id
-				from studio_work_relation
-				where authorization_unit_id = ${input.sourceUnitId}::uuid
-					and resource_unit_id <> ${input.sourceUnitId}::uuid
-				order by id
-				limit greatest(
-					${input.batchSize} - cardinality(array(select 1 from resource_work_batch)),
-					0
+			), copied_participation as (
+				insert into profile_resource_participation (
+					profile_id,
+					resource_unit_id,
+					created_resource_at,
+					first_contributed_at,
+					last_contributed_at,
+					contribution_count,
+					last_participated_at,
+					projection_updated_at
 				)
+				select
+					profile_id,
+					${input.targetUnitId}::uuid,
+					created_resource_at,
+					first_contributed_at,
+					last_contributed_at,
+					contribution_count,
+					last_participated_at,
+					projection_updated_at
+				from participation_batch
+				on conflict (profile_id, resource_unit_id) do update set
+					created_resource_at = least(
+						profile_resource_participation.created_resource_at,
+						excluded.created_resource_at
+					),
+					first_contributed_at = least(
+						profile_resource_participation.first_contributed_at,
+						excluded.first_contributed_at
+					),
+					last_contributed_at = greatest(
+						profile_resource_participation.last_contributed_at,
+						excluded.last_contributed_at
+					),
+					contribution_count =
+						profile_resource_participation.contribution_count + excluded.contribution_count,
+					last_participated_at = greatest(
+						profile_resource_participation.last_participated_at,
+						excluded.last_participated_at
+					),
+					projection_updated_at = greatest(
+						profile_resource_participation.projection_updated_at,
+						excluded.projection_updated_at
+					)
+				returning 1
+			), deleted_participation as (
+				delete from profile_resource_participation as participation
+				using participation_batch
+				where participation.profile_id = participation_batch.profile_id
+					and participation.resource_unit_id = ${input.sourceUnitId}::uuid
+				returning 1
+			), profile_candidate_batch as materialized (
+				select profile_id
+				from studio_profile_editor_candidate
+				where unit_id = ${input.sourceUnitId}::uuid
+				order by profile_id
+				limit ${input.batchSize}
 				for update skip locked
-			), work_batch as materialized (
-				select id from resource_work_batch
-				union all
-				select id from authorization_work_batch
-			), deleted_work as (
-				delete from studio_work_relation as relation
-				using work_batch
-				where relation.id = work_batch.id
+			), deleted_profile_candidates as (
+				delete from studio_profile_editor_candidate as candidate
+				using profile_candidate_batch
+				where candidate.profile_id = profile_candidate_batch.profile_id
+					and candidate.unit_id = ${input.sourceUnitId}::uuid
+				returning 1
+			), realm_candidate_batch as materialized (
+				select realm_id, realm_relation
+				from studio_realm_editor_candidate
+				where unit_id = ${input.sourceUnitId}::uuid
+				order by realm_id, realm_relation
+				limit ${input.batchSize}
+				for update skip locked
+			), deleted_realm_candidates as (
+				delete from studio_realm_editor_candidate as candidate
+				using realm_candidate_batch
+				where candidate.realm_id = realm_candidate_batch.realm_id
+					and candidate.realm_relation = realm_candidate_batch.realm_relation
+					and candidate.unit_id = ${input.sourceUnitId}::uuid
 				returning 1
 			), score_batch as materialized (
 				select snapshot_id, unit_id
@@ -1892,7 +1957,9 @@ async function derivedStateBatch(
 			select (
 				cardinality(array(select 1 from deleted_exclusions)) +
 				cardinality(array(select 1 from deleted_visits)) +
-				cardinality(array(select 1 from deleted_work)) +
+				cardinality(array(select 1 from deleted_participation)) +
+				cardinality(array(select 1 from deleted_profile_candidates)) +
+				cardinality(array(select 1 from deleted_realm_candidates)) +
 				cardinality(array(select 1 from deleted_scores)) +
 				cardinality(array(select 1 from deleted_search))
 			)::int as processed,
@@ -1900,9 +1967,16 @@ async function derivedStateBatch(
 				exists(select 1 from recommendation_exclusion where unit_id = ${input.sourceUnitId}::uuid)
 				or exists(select 1 from studio_resource_visit where resource_unit_id = ${input.sourceUnitId}::uuid)
 				or exists(
-					select 1 from studio_work_relation
+					select 1 from profile_resource_participation
 					where resource_unit_id = ${input.sourceUnitId}::uuid
-						or authorization_unit_id = ${input.sourceUnitId}::uuid
+				)
+				or exists(
+					select 1 from studio_profile_editor_candidate
+					where unit_id = ${input.sourceUnitId}::uuid
+				)
+				or exists(
+					select 1 from studio_realm_editor_candidate
+					where unit_id = ${input.sourceUnitId}::uuid
 				)
 				or exists(select 1 from unit_best_score where unit_id = ${input.sourceUnitId}::uuid)
 			) as remaining

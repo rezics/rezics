@@ -2,75 +2,59 @@ import { t } from "elysia";
 import type { ContentLanguage } from "@rezics/i18n";
 
 import {
-	StudioPermissionValues,
-	StudioSectionValues,
-	StudioSortValues,
-	StudioViewValues,
-	StudioWorkStateValues,
+	StudioWorkspaceSourceValues,
 	type StudioContentListQuery,
-	type StudioPermission,
-	type StudioSection,
-	type StudioSort,
-	type StudioView,
-	type StudioWorkState,
+	type StudioWorkspaceSource,
 } from "../api/users/schema";
 import {
 	ContentLanguageValues,
 	ResourceVisibilityValues,
 	UnitStatusValues,
 } from "../database/schema/contract-values";
-import { InvalidPaginationCursor } from "../pagination/errors";
 import { parseJsonCursor } from "../pagination";
+import { InvalidPaginationCursor } from "../pagination/errors";
+import { ResourceSectionValues, type ResourceSection } from "../units/resource-section";
 
 type UnitStatus = NonNullable<StudioContentListQuery["status"]>;
 type ResourceVisibility = NonNullable<StudioContentListQuery["visibility"]>;
 
 const StudioCursor = t.Object(
 	{
-		v: t.Literal(1),
-		section: t.UnionEnum(StudioSectionValues, { default: undefined }),
-		view: t.UnionEnum(StudioViewValues, { default: undefined }),
-		permission: t.Nullable(t.UnionEnum(StudioPermissionValues, { default: undefined })),
-		workState: t.Nullable(t.UnionEnum(StudioWorkStateValues, { default: undefined })),
+		v: t.Literal(2),
+		section: t.UnionEnum(ResourceSectionValues, { default: undefined }),
+		source: t.UnionEnum(StudioWorkspaceSourceValues, { default: undefined }),
 		status: t.Nullable(t.UnionEnum(UnitStatusValues, { default: undefined })),
 		visibility: t.Nullable(t.UnionEnum(ResourceVisibilityValues, { default: undefined })),
-		sort: t.UnionEnum(StudioSortValues, { default: undefined }),
 		localizationLanguages: t.Array(t.UnionEnum(ContentLanguageValues, { default: undefined }), {
 			uniqueItems: true,
 		}),
-		bucket: t.Boolean(),
-		sortAt: t.String({ format: "date-time" }),
+		relevantAt: t.String({ format: "date-time" }),
 		unitId: t.String({ format: "uuid" }),
+		sourceKey: t.String({ minLength: 1, maxLength: 128 }),
 	},
 	{ additionalProperties: false },
 );
 
 export type StudioCursorScope = {
-	readonly section: StudioSection;
-	readonly view: StudioView;
-	readonly permission?: StudioPermission;
-	readonly workState?: StudioWorkState;
+	readonly section: ResourceSection;
+	readonly source: StudioWorkspaceSource;
 	readonly status?: UnitStatus;
 	readonly visibility?: ResourceVisibility;
-	readonly sort: StudioSort;
 	readonly localizationLanguages: readonly ContentLanguage[];
 };
 
 export type StudioCursorBoundary = {
-	readonly bucket: boolean;
-	readonly sortAt: Date;
+	readonly relevantAt: Date;
 	readonly unitId: string;
+	readonly sourceKey: string;
 };
 
 function cursorScope(query: StudioContentListQuery): StudioCursorScope {
 	return {
 		section: query.section,
-		view: query.view ?? "all",
-		permission: query.permission,
-		workState: query.workState,
+		source: query.source ?? "all",
 		status: query.status,
 		visibility: query.visibility,
-		sort: query.sort ?? "recent",
 		localizationLanguages: query.localizationLanguages ?? [],
 	};
 }
@@ -85,15 +69,13 @@ export function encodeStudioCursor(
 ): string {
 	return Buffer.from(
 		JSON.stringify({
-			v: 1,
+			v: 2,
 			...cursorScope(query),
-			permission: query.permission ?? null,
-			workState: query.workState ?? null,
 			status: query.status ?? null,
 			visibility: query.visibility ?? null,
-			bucket: boundary.bucket,
-			sortAt: boundary.sortAt.toISOString(),
+			relevantAt: boundary.relevantAt.toISOString(),
 			unitId: boundary.unitId,
+			sourceKey: boundary.sourceKey,
 		}),
 	).toString("base64url");
 }
@@ -108,18 +90,19 @@ export function decodeStudioCursor(
 		const scope = cursorScope(query);
 		if (
 			cursor.section !== scope.section ||
-			cursor.view !== scope.view ||
-			cursor.permission !== (scope.permission ?? null) ||
-			cursor.workState !== (scope.workState ?? null) ||
+			cursor.source !== scope.source ||
 			cursor.status !== (scope.status ?? null) ||
 			cursor.visibility !== (scope.visibility ?? null) ||
-			cursor.sort !== scope.sort ||
 			!sameArray(cursor.localizationLanguages, scope.localizationLanguages)
 		)
 			throw new InvalidPaginationCursor();
-		const sortAt = new Date(cursor.sortAt);
-		if (Number.isNaN(sortAt.getTime())) throw new InvalidPaginationCursor();
-		return { bucket: cursor.bucket, sortAt, unitId: cursor.unitId };
+		const relevantAt = new Date(cursor.relevantAt);
+		if (Number.isNaN(relevantAt.getTime())) throw new InvalidPaginationCursor();
+		return {
+			relevantAt,
+			unitId: cursor.unitId,
+			sourceKey: cursor.sourceKey,
+		};
 	} catch {
 		throw new InvalidPaginationCursor();
 	}

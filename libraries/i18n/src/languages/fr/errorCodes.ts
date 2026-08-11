@@ -301,4 +301,6 @@ export default {
 	UnitRealmPublicationNotFound: `Ce contenu n’a aucune relation d’inclusion avec ce ${realmTerms.label}.`,
 	UnitRealmPublicationAlreadyExists: `Ce contenu possède déjà une relation d’inclusion avec ce ${realmTerms.label}.`,
 	UnitRealmPublicationTransitionInvalid: "La relation d’inclusion est déjà dans l’état demandé.",
+	StudioRealmSubjectLimitExceeded:
+		"Vous appartenez à trop d’équipes pour afficher les contenus délégués dans votre environnement de travail.",
 } satisfies typeof import("../zh-Hant/errorCodes").default;
