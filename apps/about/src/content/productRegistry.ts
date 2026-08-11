@@ -32,6 +32,7 @@ export const PRODUCT_IDS = [
 export type ProductId = (typeof PRODUCT_IDS)[number];
 
 export const PRODUCT_PRESENTATION_ORDER = [
+	"unit",
 	"collection",
 	"tag",
 	"wiki",
@@ -42,7 +43,6 @@ export const PRODUCT_PRESENTATION_ORDER = [
 	"review",
 	"comment",
 	"score",
-	"unit",
 	"entity",
 	"series",
 	"release",
@@ -68,7 +68,7 @@ export const PRODUCT_DEFINITIONS = [
 		id: "unit",
 		slug: "unit",
 		stage: "available",
-		relatedProductIds: ["book", "media", "software", "series", "release", "entity", "tag"],
+		relatedProductIds: ["collection", "book", "post", "realm", "history", "release", "entity"],
 	}),
 	defineProduct({
 		id: "entity",

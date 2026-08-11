@@ -46,13 +46,13 @@ export const deContent = {
 		},
 		products: {
 			title: `Produkte — ${BRAND}`,
-			description: `Mit sprachübergreifenden Bücherlisten, Tags und Community-Klassifikation, Wikis und ${deTerminology.realm.forms.pluralLabel} Werke finden, verstehen, sammeln und gemeinsam weitertragen.`,
+			description: `Von Grund auf mehrsprachige Einheiten bilden die gemeinsame Grundlage; sprachübergreifende Bücherlisten, Tags und Community-Klassifikation, Wikis und ${deTerminology.realm.forms.pluralLabel} tragen Werke dann über Sprachen, Plattformen und Communities hinweg weiter.`,
 		},
 	},
 	home: {
 		eyebrow: "Weitergeben · Schaffen · Verbreiten",
 		title: "Den Geschichten begegnen, die du liebst.",
-		lead: `Ausgangspunkt sind Webromane, die über verschiedene Plattformen und Sprachen verstreut sind. ${BRAND} verbindet Originaltitel, Übersetzungen, Fortsetzungsquellen, Kapitel und Communities wieder zu einem einzigen Werk, das sich fortlaufend entwickelt.`,
+		lead: `Ausgangspunkt sind Webromane, die über verschiedene Plattformen und Sprachen verstreut sind. ${BRAND} verbindet das Originalwerk und seine Darstellungen in verschiedenen Sprachen, Fortsetzungsquellen, Kapitel und Communities wieder zu einem einzigen Werk, das sich fortlaufend entwickelt.`,
 		explore: "Webromane entdecken",
 		productsAction: "Produkte entdecken",
 		problem: {
@@ -63,7 +63,7 @@ export const deContent = {
 		promise: {
 			title:
 				"Zuerst dasselbe Werk wieder zusammenführen; dann können Lesen und Community natürlich wachsen.",
-			body: `${BRAND} nimmt eine stabile Werkidentität als gemeinsamen Ausgangspunkt. Namen können Sprachgrenzen überqueren, Serien können sich über Plattformen erstrecken, Kapitel können weiter wachsen und ${deTerminology.realm.forms.pluralLabel} können unterschiedliche Sichtweisen bilden; dennoch verweisen alle auf dasselbe verständliche und nachvollziehbare Werk.`,
+			body: `${BRAND} nimmt eine von Grund auf mehrsprachige Einheit als gemeinsamen Ausgangspunkt. Dasselbe Werk kann mehrere Inhaltssprachen tragen, Serien können sich über Plattformen erstrecken, Kapitel können weiter wachsen und ${deTerminology.realm.forms.pluralLabel} können unterschiedliche Sichtweisen bilden; Original, Übersetzungen und Communities teilen dennoch eine verständliche und nachvollziehbare Identität.`,
 		},
 		principles: [
 			{
@@ -85,8 +85,8 @@ export const deContent = {
 			body: "Werk, Quellen, Inhalt, Struktur, Geschichte und Community behalten jeweils klare Grenzen und arbeiten über explizite Beziehungen zusammen.",
 			steps: [
 				{
-					title: "Werkidentität",
-					body: "Sprachübergreifende Namen und plattformübergreifende Quellen führen zu einer einzigen verwaltbaren Identität zurück.",
+					title: "Von Grund auf mehrsprachige Einheit",
+					body: "Eine Werkidentität trägt von Anfang an die Darstellung jeder Sprache, sodass Namen, Inhalte und Plattformquellen nicht in unverbundene Einträge zerfallen.",
 				},
 				{
 					title: "Quellen und Serien",
@@ -196,8 +196,8 @@ export const deContent = {
 				body: `${BRAND} trennt Werkidentität, Quellen, Inhalt, Struktur, Geschichte und Communities in klare Grenzen und lässt sie dann über explizite Beziehungen zusammenarbeiten.`,
 				pillars: [
 					{
-						title: "Werkidentität und Quellen",
-						body: "Sprachübergreifende Namen, Plattformquellen, Haupteinträge/Varianten und Governance von Zusammenführungen.",
+						title: "Von Grund auf mehrsprachige Einheit",
+						body: "Eine Werkidentität trägt Sprachdarstellungen, Plattformquellen, Haupteinträge/Varianten und die Governance von Zusammenführungen.",
 					},
 					{
 						title: "Inhaltsstruktur",
@@ -230,9 +230,9 @@ export const deContent = {
 				result: "Nicht mehr jeden Plattformeintrag für ein anderes Buch halten.",
 			},
 			{
-				title: "Es in jeder vertrauten Sprache finden",
-				body: "Originaltitel, Romanisierung, offizielle Übersetzungen und gebräuchliche Namen der Community werden gemeinsam zu Sucheinstiegen und bewahren ihren jeweiligen Sprachkontext.",
-				result: "Sprachen überqueren, ohne dasselbe Werk neu kennenlernen zu müssen.",
+				title: "Es in einer vertrauten Sprache finden und verstehen",
+				body: "Originaltitel, Romanisierung und gebräuchliche Namen der Community werden zu Sucheinstiegen; dieselbe Einheit zeigt anschließend Name, Zusammenfassung und Inhalt passend zu den Spracheinstellungen der lesenden Person.",
+				result: "Sprachen überqueren, ohne Originalwerk oder bestehende Community zu verlassen.",
 			},
 			{
 				title: `Einer Serie ${deTerminology.follow.forms.action} und an der letzten Stelle weitermachen`,
@@ -272,7 +272,7 @@ export const deContent = {
 	products: {
 		eyebrow: "Produkte",
 		title: "Werke finden, verstehen, sammeln und gemeinsam weitertragen.",
-		lead: `Sprachübergreifende Bücherlisten, Tags und Community-Klassifikation, Wikis und ${deTerminology.realm.forms.pluralLabel} führen alle zum selben Werk. Mit jedem neuen Namen, jeder Quelle, jedem ${deTerminology.post.forms.label} und jeder Community wächst sein gemeinsamer Wert.`,
+		lead: `Jedes Werk bewahrt zunächst seine Sprachdarstellungen, Beziehungen und Überarbeitungen in einer von Grund auf mehrsprachigen Einheit. Sprachübergreifende Bücherlisten, Tags und Community-Klassifikation, Wikis und ${deTerminology.realm.forms.pluralLabel} tragen es anschließend zu Lesenden und Communities anderer Sprachen.`,
 		openProduct: "Produkt ansehen",
 		stage: {
 			legend: "Produktstatus",

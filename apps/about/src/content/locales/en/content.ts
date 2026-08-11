@@ -49,13 +49,13 @@ export const enContent = {
 		},
 		products: {
 			title: `Products — ${BRAND}`,
-			description: `Use cross-language booklists, tags and community classification, wikis, and ${REALM}s to find, understand, collect, and carry works forward.`,
+			description: `Start with natively multilingual Units, then use cross-language booklists, tags and community classification, wikis, and ${REALM}s to carry works across languages, platforms, and communities.`,
 		},
 	},
 	home: {
 		eyebrow: "inherit · create · spread",
 		title: "Meet the stories you love.",
-		lead: `Start with web novels scattered across platforms and languages. ${BRAND} reconnects original titles, translated titles, serial sources, chapters, and communities as one evolving work.`,
+		lead: `Start with web novels scattered across platforms and languages. ${BRAND} reconnects an original work and its localized presentations, serial sources, chapters, and communities as one evolving work.`,
 		explore: "Explore web novels",
 		productsAction: "Explore products",
 		problem: {
@@ -65,7 +65,7 @@ export const enContent = {
 		},
 		promise: {
 			title: "Reconnect the same work first; then let reading and community grow naturally.",
-			body: `${BRAND} starts from a stable work identity. Names can cross languages, serials can cross platforms, chapters can keep growing, and ${REALM}s can form different perspectives; they still point to the same understandable, traceable work.`,
+			body: `${BRAND} starts from a natively multilingual Unit. The same work can carry several content languages, serials can cross platforms, chapters can keep growing, and ${REALM}s can form different perspectives; originals, translations, and communities still share one understandable, traceable identity.`,
 		},
 		principles: [
 			{
@@ -86,8 +86,8 @@ export const enContent = {
 			body: "Works, sources, content, structure, history, and communities each keep clear boundaries, then cooperate through explicit relationships.",
 			steps: [
 				{
-					title: "Work identity",
-					body: "Cross-language names and cross-platform sources return to one governable identity.",
+					title: "Natively multilingual Unit",
+					body: "One work identity natively carries each language presentation, so names, content, and platform sources do not split into disconnected entries.",
 				},
 				{
 					title: "Sources and serials",
@@ -194,8 +194,8 @@ export const enContent = {
 				body: `${BRAND} separates work identity, sources, content, structure, history, and communities into clear boundaries, then lets them cooperate through explicit relationships.`,
 				pillars: [
 					{
-						title: "Work identity and sources",
-						body: "Cross-language names, platform sources, canonical/variant records, and merge governance.",
+						title: "Natively multilingual Unit",
+						body: "One work identity carries localized presentations, platform sources, canonical/variant records, and merge governance.",
 					},
 					{
 						title: "Content Structure",
@@ -227,9 +227,9 @@ export const enContent = {
 				result: `Stop treating every platform ${ENTRY} as a different book.`,
 			},
 			{
-				title: "Find it in any language you know",
-				body: `Original titles, romanization, official translated titles, and community names all become search ${ENTRY} points while retaining their own language context.`,
-				result: "Cross languages without having to get to know the same work again.",
+				title: "Find and understand it in a familiar language",
+				body: `Original titles, romanization, and community names become search ${ENTRY} points; the same Unit then presents the name, summary, and content that best fit the reader's preferences.`,
+				result: "Cross languages without leaving the original work or its existing community.",
 			},
 			{
 				title: `${FOLLOW} serials and resume from where you left off`,
@@ -267,7 +267,7 @@ export const enContent = {
 	products: {
 		eyebrow: "Products",
 		title: "Find, understand, collect, and carry works forward together.",
-		lead: `Cross-language booklists, tags and community classification, wikis, and ${REALM}s all return to the same work. Every new name, source, contribution, and community helps it keep growing.`,
+		lead: `Each work first keeps localized presentations, relationships, and revisions in one natively multilingual Unit. Cross-language booklists, tags and community classification, wikis, and ${REALM}s then carry it to readers and communities in other languages.`,
 		openProduct: "View product",
 		stage: {
 			legend: "Product status",

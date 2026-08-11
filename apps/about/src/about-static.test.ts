@@ -37,7 +37,7 @@ describe("public content contract", () => {
 		expect(PRODUCT_DEFINITIONS).toHaveLength(26);
 		expect(PRODUCT_IDS).toHaveLength(26);
 		expect(PRODUCT_PRESENTATION_ORDER).toHaveLength(PRODUCT_IDS.length);
-		expect(PRODUCT_PRESENTATION_ORDER.slice(0, 4)).toEqual(["collection", "tag", "wiki", "realm"]);
+		expect(PRODUCT_PRESENTATION_ORDER.slice(0, 4)).toEqual(["unit", "collection", "tag", "wiki"]);
 		expect([...PRODUCT_PRESENTATION_ORDER].sort()).toEqual([...PRODUCT_IDS].sort());
 		expect(validateProductRegistry()).toEqual([]);
 		expect(PRODUCT_DEFINITIONS.every((product) => PRODUCT_STAGE_IDS.includes(product.stage))).toBe(

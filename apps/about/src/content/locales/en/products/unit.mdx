@@ -1,36 +1,40 @@
 ---
 productId: unit
 locale: en
-title: "Work Identity"
-summary: "Reconnect original titles, translations, platform sources, and canonical/variant records to one stable, governable identity."
-description: "A Unit is REZICS's shared capability foundation: identity, localization, state, relationships, permissions, and history—not a category into which everything is forced."
-statusNote: "Stable Unit identity, localization, state, relationships, and permission foundations are available; general duplicate detection plus merge and split workflows remain in development."
+title: "Natively Multilingual Units"
+summary: "Let a work exist in several content languages from the start, so each language keeps its own presentation and revision context without splitting identity, governance, or community."
+description: "A Unit is REZICS's shared, natively multilingual foundation: one durable identity can carry ordered language presentations, relationships, permissions, and history across products."
+statusNote: "Multiple content languages, explicit and preference-based presentation, localized authoring, revision history, and multilingual SEO metadata are available; translation review, language-scoped access UI, contributor credit, update status, and Unit sitemap discovery are still expanding."
 ---
 
-## Core purpose
+## Translation should not begin by copying another entry
 
-In REZICS, “everything is a Unit” does not mean everything is the same. Every object that must persist receives a shared capability set: stable ID, multilingual names, visibility, state, relationships, permissions, and traceable history. Books, media, software, posts, Realms, and people add their own fields on that foundation.
+Adding a translation to a work should not require copying its identity, collections, relationships, and community, then trying to reconnect the duplicate to the original. In REZICS, an object that must endure first becomes a Unit. The same Unit can natively carry several content languages, while books, media, software, Posts, Realms, and people add their own product capabilities on that foundation.
 
-For web novels, this resolves a practical problem: platform URLs, original titles, translations, and publication listings can all change, while the reader is still looking for the same work.
+Every localization retains an explicit language while sharing a stable ID, relationships, permissions, and history. Languages are semantic peers rather than one required primary language. A reader can request a language directly or receive the best available presentation through their preferences and the Unit's fallback order.
 
 ## What is available now
 
-1. Create a stable work identity independent of any single language or platform.
-1. Preserve multilingual names, summaries, aliases, and localized presentation.
-1. Connect series, releases, entities, tags, sources, and other Unit relationships.
-1. Point content, collections, progress, reviews, and Realms at the same object.
-1. Use state, visibility, permissions, and governance rules to decide who may read or change it.
+1. Preserve several content languages in one stable Unit, carrying names, summaries, descriptions, bodies, and images as each product requires.
+1. Resolve presentation through an explicit choice, reader language preferences, and the Unit fallback order, with a way to switch to other available languages.
+1. Search through names and aliases in each language and generate server-rendered localized SEO metadata and structured data.
+1. Keep collections, follows, relationships, reviews, and Realms pointing to one identity rather than a language-specific copy.
+1. Preserve each language's revision content within one shared history while retaining contributor, permission, and governance context.
 
-## Canonical records, variants, and cross-platform sources
+## Keep original and translation communities in one context
 
-REZICS does not claim it can define one unique, absolute “original” for every work. The product uses canonical-record and variant relationships: a community can agree on a primary identity while other language editions, platform editions, or clear variants keep their full capabilities and point to it.
+Original content, sources, and work relationships can remain on one Unit while translators add or revise their own language presentation there. Readers do not need to follow a second entry, and existing booklists, tags, reviews, and communities benefit directly. A translation community or Realm can develop its own collaboration practices without taking the work identity away.
 
-A source URL says where an object appears; it does not replace work identity. People collect, review, and publish into a Realm about the work, not an unscoped URL.
+Sharing a Unit does not flatten differences. Each language still has its own content and revision path. The next translation workflow will also record the source language and source revision on which a translation depends, so an original update can mark translations for review without declaring one language the permanent absolute original for every kind of content.
 
-## In development
+## Available foundation and next workflow
 
-Large work networks need duplicate detection, Unit merge and split, external authority identifiers, source evidence, bulk imports, permanent post-merge redirects, and cross-language name disambiguation. These capabilities directly determine data quality after the initial 400,000-book catalogue.
+People can already add, edit, order, and remove content languages; resolve a presentation from reader preferences or an explicit language; and emit localized metadata and structured data for safely public Units. Multilingual SEO presentation itself is available. The remaining discovery gap is a Unit sitemap and language-version enumeration that let search engines find these presentations systematically.
+
+Translation proposals, review and publication states, source-revision and stale indicators, language-scoped access management UI, translator and reviewer credit, and source-update notifications are still expanding. This layer should make translation communities effective without replacing the shared work with disconnected copies.
 
 ## Relationships and boundaries
 
-A Unit is neither a genre tag nor generic JSON. Shared fields belong on Units; only fields truly unique to a product belong on models such as books, posts, and Realms. A name is not identity, and a source is not proof of ownership.
+Language presentations of the same work stay on one Unit. When a language edition has a distinct publisher, license, format, content, or release lifecycle, it should become a Release or variant Unit with an explicit relationship back to the main work. A source URL only says where content appears; it does not replace work identity or prove ownership.
+
+A Unit is neither a translation-memory tool nor generic JSON. Shared identity and multilingual capabilities belong on Units; fields truly unique to books, Posts, Realms, and other products remain on their extension models.
