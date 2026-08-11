@@ -12,6 +12,7 @@ import {
 	BootstrapUnitIds,
 	CuratedCreationTagCollectionManifest,
 	OfficialProfileManifest,
+	OfficialRealmAvatarAsset,
 	OfficialRealmManifest,
 	OfficialZoneManifest,
 	RezicsRuleRealmManifest,
@@ -202,9 +203,31 @@ describe("database bootstrap manifest", () => {
 	});
 
 	it("uses the REZICS title without making the official Realm a Zone default", () => {
+		expect(OfficialRealmAvatarAsset).toEqual({
+			id: "019b76da-a800-7800-8000-000000000001",
+			objectId: "019b76da-a800-7810-8000-000000000001",
+			storageKey: "bootstrap/image-objects/official-zone-avatar/original",
+			mediaType: "image/png",
+			width: 800,
+			height: 800,
+		});
 		expect(OfficialRealmManifest.localizations).toEqual([
-			expect.objectContaining({ language: "zh", title: verbatimTerms.rezics.value }),
-			expect.objectContaining({ language: "en", title: verbatimTerms.rezics.value }),
+			expect.objectContaining({
+				language: "zh",
+				title: verbatimTerms.rezics.value,
+				avatar: {
+					type: "image",
+					image: { assetId: OfficialRealmAvatarAsset.id },
+				},
+			}),
+			expect.objectContaining({
+				language: "en",
+				title: verbatimTerms.rezics.value,
+				avatar: {
+					type: "image",
+					image: { assetId: OfficialRealmAvatarAsset.id },
+				},
+			}),
 		]);
 		expect(OfficialZoneManifest.map((value) => value.id)).not.toContain(OfficialRealmManifest.id);
 	});

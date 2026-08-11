@@ -24,7 +24,6 @@ import {
 	CuratedCreationTagCollectionManifest,
 	OfficialProfileIds,
 	OfficialRealmManifest,
-	OfficialZoneAvatarAsset,
 	TopLevelSlugNamespaceUnitIds,
 } from "../bootstrap/manifest";
 import { assertPlatformCoreReady, inspectPlatformCore } from "../bootstrap/core";
@@ -1255,8 +1254,11 @@ async function seedToaruWiki(
 			.values({
 				unitId: zoneUnit.id,
 				position: fractionalPositionAt(index),
-				avatarType: "image",
-				avatarAssetId: OfficialZoneAvatarAsset.id,
+				avatarType: null,
+				avatarAssetId: null,
+				avatarEmoji: null,
+				avatarIconPrefix: null,
+				avatarIconName: null,
 				...localization,
 				createdAt,
 				updatedAt: createdAt,
@@ -1265,8 +1267,8 @@ async function seedToaruWiki(
 				target: [unitLocalization.unitId, unitLocalization.language],
 				set: {
 					position: fractionalPositionAt(index),
-					avatarType: "image",
-					avatarAssetId: OfficialZoneAvatarAsset.id,
+					avatarType: null,
+					avatarAssetId: null,
 					avatarEmoji: null,
 					avatarIconPrefix: null,
 					avatarIconName: null,

@@ -244,6 +244,24 @@ export const CuratedCreationTagCollectionManifest = [
 	},
 ] as const;
 
+/**
+ * Fixed image asset for the official REZICS Realm. The historical storage key
+ * remains stable because released installations already store the object there.
+ */
+export const OfficialRealmAvatarAsset = {
+	id: "019b76da-a800-7800-8000-000000000001",
+	objectId: "019b76da-a800-7810-8000-000000000001",
+	storageKey: "bootstrap/image-objects/official-zone-avatar/original",
+	mediaType: "image/png",
+	width: 800,
+	height: 800,
+} as const;
+
+const OfficialRealmAvatar = {
+	type: "image",
+	image: { assetId: OfficialRealmAvatarAsset.id },
+} as const satisfies AvatarReference;
+
 export const OfficialRealmManifest = {
 	id: OfficialRealmUnitIds.community,
 	slug: "rezics",
@@ -253,11 +271,13 @@ export const OfficialRealmManifest = {
 			language: "zh",
 			title: RezicsBrandName,
 			summary: `${RezicsBrandName} 官方社群領域。`,
+			avatar: OfficialRealmAvatar,
 		},
 		{
 			language: "en",
 			title: RezicsBrandName,
 			summary: `The official ${RezicsBrandName} community Realm.`,
+			avatar: OfficialRealmAvatar,
 		},
 	],
 	ownerProfileId: OfficialProfileIds.community,
@@ -554,12 +574,6 @@ export const BootstrapRealmManifest = [
 	RezicsScoreRealmManifest,
 	RezicsRuleRealmManifest,
 ] as const;
-
-export const OfficialZoneAvatarAsset = {
-	id: "019b76da-a800-7800-8000-000000000001",
-	objectId: "019b76da-a800-7810-8000-000000000001",
-	storageKey: "bootstrap/image-objects/official-zone-avatar/original",
-} as const;
 
 function officialZoneIcon(name: string): AvatarReference {
 	const icon = {
@@ -901,8 +915,8 @@ export const ReservedBootstrapUuidv7s = [
 	...OfficialZoneManifest.map((zone) => zone.homePage.structureId),
 	...OfficialZoneManifest.map((zone) => zone.navigation.id),
 	RezicsRuleRealmManifest.rules.revisionId,
-	OfficialZoneAvatarAsset.id,
-	OfficialZoneAvatarAsset.objectId,
+	OfficialRealmAvatarAsset.id,
+	OfficialRealmAvatarAsset.objectId,
 ] as const;
 
 const UuidV7Pattern = /^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;

@@ -5,6 +5,7 @@ import { and, count, eq, inArray, isNull, sql } from "drizzle-orm";
 import { isDeepStrictEqual } from "node:util";
 import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
+import sharp from "sharp";
 
 import { database, type DatabaseTransaction } from "../database";
 import {
@@ -103,8 +104,8 @@ import {
 	BootstrapUnitIds,
 	CuratedCreationTagCollectionManifest,
 	OfficialProfileIds,
+	OfficialRealmAvatarAsset,
 	OfficialRealmManifest,
-	OfficialZoneAvatarAsset,
 	OfficialZoneManifest,
 	RezicsRuleRealmManifest,
 	RezicsScoreRealmManifest,
@@ -1018,25 +1019,32 @@ async function ensureScoreRealmProfileDefaults(tx: DatabaseTransaction): Promise
 		.where(isNull(profilePreference.defaultScoreRealmId));
 }
 
-async function ensureOfficialZoneAvatar(tx: DatabaseTransaction): Promise<void> {
+async function ensureOfficialRealmAvatar(tx: DatabaseTransaction): Promise<void> {
 	const createdAt = bootstrapEpoch();
 	const bytes = await readFile(fileURLToPath(import.meta.resolve("@rezics/brand/avatar.png")));
+	const metadata = await sharp(bytes, { animated: false }).metadata();
+	if (
+		metadata.format !== "png" ||
+		metadata.width !== OfficialRealmAvatarAsset.width ||
+		metadata.height !== OfficialRealmAvatarAsset.height
+	)
+		throw new Error("Bundled official Realm avatar does not match its bootstrap metadata");
 	const tracking = {
-		image_asset_id: OfficialZoneAvatarAsset.id,
-		image_object_id: OfficialZoneAvatarAsset.objectId,
+		image_asset_id: OfficialRealmAvatarAsset.id,
+		image_object_id: OfficialRealmAvatarAsset.objectId,
 		uploader_profile_id: OfficialProfileIds.editorial,
 	};
 	await storage.put({
-		Key: OfficialZoneAvatarAsset.storageKey,
+		Key: OfficialRealmAvatarAsset.storageKey,
 		Body: bytes,
-		ContentType: "image/png",
+		ContentType: OfficialRealmAvatarAsset.mediaType,
 		ContentLength: bytes.byteLength,
 		Metadata: tracking,
 	});
 	await tx
 		.insert(imageAsset)
 		.values({
-			id: OfficialZoneAvatarAsset.id,
+			id: OfficialRealmAvatarAsset.id,
 			uploaderProfileId: OfficialProfileIds.editorial,
 			ownerProfileId: OfficialProfileIds.editorial,
 			status: "ready",
@@ -1058,21 +1066,25 @@ async function ensureOfficialZoneAvatar(tx: DatabaseTransaction): Promise<void> 
 	await tx
 		.insert(imageObject)
 		.values({
-			id: OfficialZoneAvatarAsset.objectId,
-			assetId: OfficialZoneAvatarAsset.id,
-			storageKey: OfficialZoneAvatarAsset.storageKey,
-			mediaType: "image/png",
+			id: OfficialRealmAvatarAsset.objectId,
+			assetId: OfficialRealmAvatarAsset.id,
+			storageKey: OfficialRealmAvatarAsset.storageKey,
+			mediaType: OfficialRealmAvatarAsset.mediaType,
 			byteSize: bytes.byteLength,
+			width: OfficialRealmAvatarAsset.width,
+			height: OfficialRealmAvatarAsset.height,
 			createdAt,
 			updatedAt: createdAt,
 		})
 		.onConflictDoUpdate({
 			target: imageObject.id,
 			set: {
-				assetId: OfficialZoneAvatarAsset.id,
-				storageKey: OfficialZoneAvatarAsset.storageKey,
-				mediaType: "image/png",
+				assetId: OfficialRealmAvatarAsset.id,
+				storageKey: OfficialRealmAvatarAsset.storageKey,
+				mediaType: OfficialRealmAvatarAsset.mediaType,
 				byteSize: bytes.byteLength,
+				width: OfficialRealmAvatarAsset.width,
+				height: OfficialRealmAvatarAsset.height,
 				updatedAt: createdAt,
 			},
 		});
@@ -1603,6 +1615,7 @@ async function isInitialInstallationBundleReady(): Promise<boolean> {
 			bootstrapRealm.localizations.map((localization, index) => ({
 				unitId: bootstrapRealm.id,
 				position: fractionalPositionAt(index),
+				...avatarReferenceToColumns("avatar" in localization ? localization.avatar : null),
 				...localization,
 			})),
 		),
@@ -1682,7 +1695,7 @@ async function isInitialInstallationBundleReady(): Promise<boolean> {
 		officialWikiPosts,
 		officialZonePages,
 		officialZoneNavigations,
-		officialZoneAvatar,
+		officialRealmAvatar,
 		allProfiles,
 		profileFavorites,
 		profileScoreMemberships,
@@ -1901,10 +1914,14 @@ async function isInitialInstallationBundleReady(): Promise<boolean> {
 				access: imageAsset.access,
 				objectId: imageObject.id,
 				storageKey: imageObject.storageKey,
+				mediaType: imageObject.mediaType,
+				byteSize: imageObject.byteSize,
+				width: imageObject.width,
+				height: imageObject.height,
 			})
 			.from(imageAsset)
 			.innerJoin(imageObject, eq(imageObject.assetId, imageAsset.id))
-			.where(eq(imageAsset.id, OfficialZoneAvatarAsset.id))
+			.where(eq(imageAsset.id, OfficialRealmAvatarAsset.id))
 			.limit(1),
 		database.select({ id: profile.id }).from(profile),
 		database
@@ -2105,11 +2122,16 @@ async function isInitialInstallationBundleReady(): Promise<boolean> {
 					valuesEqual(actual.document, expected.navigation.document),
 			),
 		) &&
-		officialZoneAvatar[0]?.id === OfficialZoneAvatarAsset.id &&
-		officialZoneAvatar[0]?.status === "ready" &&
-		officialZoneAvatar[0]?.access === "public" &&
-		officialZoneAvatar[0]?.objectId === OfficialZoneAvatarAsset.objectId &&
-		officialZoneAvatar[0]?.storageKey === OfficialZoneAvatarAsset.storageKey &&
+		officialRealmAvatar[0]?.id === OfficialRealmAvatarAsset.id &&
+		officialRealmAvatar[0]?.status === "ready" &&
+		officialRealmAvatar[0]?.access === "public" &&
+		officialRealmAvatar[0]?.objectId === OfficialRealmAvatarAsset.objectId &&
+		officialRealmAvatar[0]?.storageKey === OfficialRealmAvatarAsset.storageKey &&
+		officialRealmAvatar[0]?.mediaType === OfficialRealmAvatarAsset.mediaType &&
+		officialRealmAvatar[0]?.byteSize !== null &&
+		officialRealmAvatar[0].byteSize > 0 &&
+		officialRealmAvatar[0]?.width === OfficialRealmAvatarAsset.width &&
+		officialRealmAvatar[0]?.height === OfficialRealmAvatarAsset.height &&
 		profileFavorites.length === allProfiles.length &&
 		allProfiles.every((targetProfile) =>
 			profileFavorites.some((favorites) => favorites.profileId === targetProfile.id),
@@ -2212,9 +2234,9 @@ async function installPlatform(
 		await ensureCuratedCreationTagCollections(tx);
 		await ensureBootstrapPlatformAccess(tx);
 		await ensureDefaultApiQuotaPolicies(tx);
+		await ensureOfficialRealmAvatar(tx);
 		for (const realm of BootstrapRealmManifest) await ensureBootstrapRealm(tx, realm);
 		await ensureScoreRealmProfileDefaults(tx);
-		await ensureOfficialZoneAvatar(tx);
 		await ensureOfficialZones(tx);
 		await ensureAllZoneExperiences(tx);
 		await ensureOfficialZoneFollows(tx);
