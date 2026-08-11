@@ -242,6 +242,86 @@ export class UnitNotDeleted extends Data.TaggedError("UnitNotDeleted") {
 	readonly message = "The Unit is not soft-deleted";
 }
 
+export class UnitMergeNotFound extends Data.TaggedError("UnitMergeNotFound") {
+	static readonly status = StatusCodes.NOT_FOUND as const;
+	readonly status = UnitMergeNotFound.status;
+	readonly message = "Unit merge request not found";
+}
+
+export class UnitMergeConfirmationInvalid extends Data.TaggedError("UnitMergeConfirmationInvalid") {
+	static readonly status = StatusCodes.BAD_REQUEST as const;
+	readonly status = UnitMergeConfirmationInvalid.status;
+	readonly message = "The Unit merge confirmations do not match the source and target";
+}
+
+export class UnitMergeKindIneligible extends Data.TaggedError("UnitMergeKindIneligible") {
+	static readonly status = StatusCodes.UNPROCESSABLE_ENTITY as const;
+	readonly status = UnitMergeKindIneligible.status;
+	readonly message = "This Unit kind is not eligible for identity merge";
+}
+
+export class UnitMergeKindMismatch extends Data.TaggedError("UnitMergeKindMismatch") {
+	static readonly status = StatusCodes.CONFLICT as const;
+	readonly status = UnitMergeKindMismatch.status;
+	readonly message = "Source and target Units must have the same kind";
+}
+
+export class UnitMergeRequestConflict extends Data.TaggedError("UnitMergeRequestConflict") {
+	static readonly status = StatusCodes.CONFLICT as const;
+	readonly status = UnitMergeRequestConflict.status;
+	readonly message = "The source Unit already has an active or completed merge";
+}
+
+export class UnitMergeIdempotencyConflict extends Data.TaggedError("UnitMergeIdempotencyConflict") {
+	static readonly status = StatusCodes.CONFLICT as const;
+	readonly status = UnitMergeIdempotencyConflict.status;
+	readonly message = "The Unit merge idempotency key was used for a different command";
+}
+
+export class UnitMergeManifestStale extends Data.TaggedError("UnitMergeManifestStale") {
+	static readonly status = StatusCodes.CONFLICT as const;
+	readonly status = UnitMergeManifestStale.status;
+	readonly message = "The source, target, or Variant graph changed after this merge was proposed";
+}
+
+export class UnitMergeReviewSelfForbidden extends Data.TaggedError("UnitMergeReviewSelfForbidden") {
+	static readonly status = StatusCodes.FORBIDDEN as const;
+	readonly status = UnitMergeReviewSelfForbidden.status;
+	readonly message = "A Unit merge proposer cannot review their own request";
+}
+
+export class UnitMergeReviewDuplicate extends Data.TaggedError("UnitMergeReviewDuplicate") {
+	static readonly status = StatusCodes.CONFLICT as const;
+	readonly status = UnitMergeReviewDuplicate.status;
+	readonly message = "This Profile has already reviewed the Unit merge request";
+}
+
+export class UnitMergeReviewFingerprintMismatch extends Data.TaggedError(
+	"UnitMergeReviewFingerprintMismatch",
+) {
+	static readonly status = StatusCodes.CONFLICT as const;
+	readonly status = UnitMergeReviewFingerprintMismatch.status;
+	readonly message = "The Unit merge review was submitted against an older request manifest";
+}
+
+export class UnitMergeRequestNotPending extends Data.TaggedError("UnitMergeRequestNotPending") {
+	static readonly status = StatusCodes.CONFLICT as const;
+	readonly status = UnitMergeRequestNotPending.status;
+	readonly message = "The Unit merge request is no longer pending review";
+}
+
+export class UnitMergeRequestExpired extends Data.TaggedError("UnitMergeRequestExpired") {
+	static readonly status = StatusCodes.CONFLICT as const;
+	readonly status = UnitMergeRequestExpired.status;
+	readonly message = "The Unit merge request has expired";
+}
+
+export class UnitMergeRetryUnavailable extends Data.TaggedError("UnitMergeRetryUnavailable") {
+	static readonly status = StatusCodes.CONFLICT as const;
+	readonly status = UnitMergeRetryUnavailable.status;
+	readonly message = "This Unit merge operation cannot be retried in its current state";
+}
+
 export const GovernanceErrors = [
 	GovernanceNoteNotFound,
 	ContentGovernanceTargetNotFound,
@@ -278,4 +358,17 @@ export const GovernanceErrors = [
 	UnitLifecycleProtected,
 	UnitAlreadyDeleted,
 	UnitNotDeleted,
+	UnitMergeNotFound,
+	UnitMergeConfirmationInvalid,
+	UnitMergeKindIneligible,
+	UnitMergeKindMismatch,
+	UnitMergeRequestConflict,
+	UnitMergeIdempotencyConflict,
+	UnitMergeManifestStale,
+	UnitMergeReviewSelfForbidden,
+	UnitMergeReviewDuplicate,
+	UnitMergeReviewFingerprintMismatch,
+	UnitMergeRequestNotPending,
+	UnitMergeRequestExpired,
+	UnitMergeRetryUnavailable,
 ] as const;

@@ -2,7 +2,9 @@ import { insert } from "native-i18n";
 
 import { zhHansTerminology } from "@rezics/i18n/terminology/zh-Hans";
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
+import units from "./units";
 
+const { forms: entityTerms } = zhHansTerminology.entity;
 const { forms: realmTerms } = zhHansTerminology.realm;
 const { forms: postTerms } = zhHansTerminology.post;
 
@@ -31,6 +33,10 @@ export default {
 		ownershipClaims: {
 			label: "所有权认领",
 			description: "审核公共条目的所有权认领，并将管理所有权归还给适当的申请者。",
+		},
+		unitMerges: {
+			label: "条目合并",
+			description: "提出、审核、执行及重试不可逆的条目身份合并，并保留完整审计记录。",
 		},
 		moderation: {
 			label: "全局内容治理",
@@ -72,6 +78,7 @@ export default {
 		deletedAt: "软删除时间",
 		restore: "还原条目",
 		softDelete: "软删除条目",
+		merge: "合并条目",
 		overrideOwnership: "强制转移所有权",
 		ownershipPickerTitle: "选择新的所有者",
 		ownershipPickerDescription:
@@ -109,6 +116,88 @@ export default {
 		}),
 		confirmRestore: "确认还原",
 		confirmSoftDelete: "确认软删除",
+	},
+	unitMerges: {
+		newMerge: "新增合并",
+		stateFilter: "合并状态",
+		allStates: "所有状态",
+		states: {
+			pending_review: "等待审核",
+			accepted: "已进入队列",
+			rejected: "已驳回",
+			expired: "已过期",
+			superseded: "已被取代",
+			executing: "执行中",
+			completed: "已完成",
+			failed: "失败",
+		},
+		listLabel: "条目合并申请列表",
+		untitled: "未命名条目",
+		empty: "当前状态下没有条目合并申请。",
+		loadMore: "加载更多",
+		source: "来源身份",
+		target: "正式目标",
+		openUnit: "打开条目",
+		kind: "条目类型",
+		kinds: {
+			book: units.types.book,
+			software: units.types.software,
+			media: units.types.media,
+			entity: entityTerms.label,
+		},
+		mode: "决策途径",
+		modes: { reviewed: "四人审核", privileged_direct: "高权限直接合并" },
+		proposer: "提出者",
+		approvalProgress: insert("已获得 {{count}}／{{required}} 票同意", {
+			count: Number,
+			required: Number,
+		}),
+		graphActions: {
+			none: "无需更改变体关系图。",
+			detach_source: "将来源变体从当前主条目分离。",
+			reparent_source_variants_to_target: "将来源的变体移至目标下。",
+			reparent_source_variants_to_target_main: "将来源的变体移至目标的主条目下。",
+			promote_target_from_source: "将目标变体提升为主条目，并把来源的其他变体移至其下。",
+		},
+		operation: "引用收敛",
+		operationStates: {
+			pending: "已进入队列",
+			processing: "处理中",
+			retry_wait: "等待重试",
+			completed: "已完成",
+			failed: "需要手动重试",
+		},
+		processedRows: insert("已处理 {{count}} 条引用", { count: Number }),
+		reviews: "审核记录",
+		decisions: { approve: "同意", reject: "驳回" },
+		noReviews: "尚未提交任何审核。",
+		approve: "同意",
+		reject: "驳回",
+		retry: "重试任务",
+		selectRequest: "选择合并申请",
+		selectRequestDescription: "选择申请以查看不可变的合并规格、审核记录及执行状态。",
+		createTitle: "将一个条目身份合并至另一个",
+		createDescription: "预检会先验证类型、当前版本及变体关系图，然后才创建申请。",
+		sourceId: `来源条目 ${verbatimTerms.id.value}`,
+		targetId: `目标条目 ${verbatimTerms.id.value}`,
+		preflight: "执行预检",
+		irreversibleWarning: "接受后无法还原。来源会成为永久重定向，所有实时引用将收敛至目标。",
+		reason: "治理原因",
+		internalNote: "内部备注（可选）",
+		notePlaceholder: "记录重复内容证据、核验来源，以及选择此正式目标的理由。",
+		confirmSource: `再次输入来源条目 ${verbatimTerms.id.value}`,
+		confirmTarget: `再次输入目标条目 ${verbatimTerms.id.value}`,
+		submitForReview: "提交四人审核",
+		mergeDirectly: "直接合并",
+		approveTitle: "要同意此条目合并吗？",
+		approveDescription: "你的同意票会绑定当前显示的合并规格；第四票会以原子事务接受不可逆合并。",
+		rejectTitle: "要驳回此条目合并吗？",
+		rejectDescription: "一票驳回会永久关闭此申请；高权限覆盖必须另建直接合并申请。",
+		reviewNote: "审核备注（可选）",
+		reviewNotePlaceholder: "记录已核验的证据及此决定的依据。",
+		confirmRequest: `输入合并申请 ${verbatimTerms.id.value} 以确认`,
+		confirmApprove: "确认同意",
+		confirmReject: "确认驳回",
 	},
 	ownershipClaims: {
 		stateFilter: "认领状态",

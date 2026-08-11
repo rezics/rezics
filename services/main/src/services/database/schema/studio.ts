@@ -57,6 +57,8 @@ export const studioWorkRelation = pgTable(
 			table.source,
 		),
 		index("studio_work_relation_profile_resource_idx").on(table.profileId, table.resourceUnitId),
+		index("studio_work_relation_resource_merge_idx").on(table.resourceUnitId, table.id),
+		index("studio_work_relation_authorization_merge_idx").on(table.authorizationUnitId, table.id),
 		index("studio_work_relation_profile_relation_last_idx").on(
 			table.profileId,
 			table.relation,
@@ -124,5 +126,6 @@ export const studioResourceVisit = pgTable(
 			table.lastVisitedAt.desc(),
 			table.resourceUnitId.desc(),
 		),
+		index("studio_resource_visit_resource_merge_idx").on(table.resourceUnitId, table.profileId),
 	],
 );

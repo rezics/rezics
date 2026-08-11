@@ -5626,6 +5626,19 @@ export const ApiErrorCode = {
 	UnitLifecycleProtected: "UnitLifecycleProtected",
 	UnitAlreadyDeleted: "UnitAlreadyDeleted",
 	UnitNotDeleted: "UnitNotDeleted",
+	UnitMergeNotFound: "UnitMergeNotFound",
+	UnitMergeConfirmationInvalid: "UnitMergeConfirmationInvalid",
+	UnitMergeKindIneligible: "UnitMergeKindIneligible",
+	UnitMergeKindMismatch: "UnitMergeKindMismatch",
+	UnitMergeRequestConflict: "UnitMergeRequestConflict",
+	UnitMergeIdempotencyConflict: "UnitMergeIdempotencyConflict",
+	UnitMergeManifestStale: "UnitMergeManifestStale",
+	UnitMergeReviewSelfForbidden: "UnitMergeReviewSelfForbidden",
+	UnitMergeReviewDuplicate: "UnitMergeReviewDuplicate",
+	UnitMergeReviewFingerprintMismatch: "UnitMergeReviewFingerprintMismatch",
+	UnitMergeRequestNotPending: "UnitMergeRequestNotPending",
+	UnitMergeRequestExpired: "UnitMergeRequestExpired",
+	UnitMergeRetryUnavailable: "UnitMergeRetryUnavailable",
 	ReportRealmMismatch: "ReportRealmMismatch",
 	ReportAlreadySubmitted: "ReportAlreadySubmitted",
 	ReportTargetRevisionUnavailable: "ReportTargetRevisionUnavailable",
@@ -32051,6 +32064,7 @@ export const PostApiGovernancePlatformUnitsByUnitIdDeleteStatus409ErrorCodeEnum 
 	UnitLifecycleProtected: "UnitLifecycleProtected",
 	UnitAlreadyDeleted: "UnitAlreadyDeleted",
 	UnitNotDeleted: "UnitNotDeleted",
+	UnitMergeRequestConflict: "UnitMergeRequestConflict",
 } as const;
 
 export type PostApiGovernancePlatformUnitsByUnitIdDeleteStatus409ErrorCodeEnum =
@@ -32364,6 +32378,7 @@ export const PostApiGovernancePlatformUnitsByUnitIdRestoreStatus409ErrorCodeEnum
 	UnitLifecycleProtected: "UnitLifecycleProtected",
 	UnitAlreadyDeleted: "UnitAlreadyDeleted",
 	UnitNotDeleted: "UnitNotDeleted",
+	UnitMergeRequestConflict: "UnitMergeRequestConflict",
 } as const;
 
 export type PostApiGovernancePlatformUnitsByUnitIdRestoreStatus409ErrorCodeEnum =
@@ -32488,6 +32503,3670 @@ export type PostApiGovernancePlatformUnitsByUnitIdRestoreResponse =
 	| PostApiGovernancePlatformUnitsByUnitIdRestoreStatus409
 	| PostApiGovernancePlatformUnitsByUnitIdRestoreStatus422
 	| PostApiGovernancePlatformUnitsByUnitIdRestoreStatus500;
+
+export const GetApiGovernancePlatformUnitMergesState = {
+	pending_review: "pending_review",
+	accepted: "accepted",
+	rejected: "rejected",
+	expired: "expired",
+	superseded: "superseded",
+	executing: "executing",
+	completed: "completed",
+	failed: "failed",
+} as const;
+
+export type GetApiGovernancePlatformUnitMergesState =
+	(typeof GetApiGovernancePlatformUnitMergesState)[keyof typeof GetApiGovernancePlatformUnitMergesState];
+
+/**
+ * @type object
+ */
+export type GetApiGovernancePlatformUnitMergesQuery = {
+	/**
+	 * @type string | undefined
+	 */
+	state?: GetApiGovernancePlatformUnitMergesState;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string | undefined
+	 */
+	cursor?: string;
+	/**
+	 * @default 50
+	 */
+	limit?: string | number;
+};
+
+export const GetApiGovernancePlatformUnitMergesStatus200ItemsUnitKindEnum = {
+	book: "book",
+	software: "software",
+	media: "media",
+	entity: "entity",
+} as const;
+
+export type GetApiGovernancePlatformUnitMergesStatus200ItemsUnitKindEnum =
+	(typeof GetApiGovernancePlatformUnitMergesStatus200ItemsUnitKindEnum)[keyof typeof GetApiGovernancePlatformUnitMergesStatus200ItemsUnitKindEnum];
+
+export const GetApiGovernancePlatformUnitMergesStatus200ItemsModeEnum = {
+	reviewed: "reviewed",
+	privileged_direct: "privileged_direct",
+} as const;
+
+export type GetApiGovernancePlatformUnitMergesStatus200ItemsModeEnum =
+	(typeof GetApiGovernancePlatformUnitMergesStatus200ItemsModeEnum)[keyof typeof GetApiGovernancePlatformUnitMergesStatus200ItemsModeEnum];
+
+export const GetApiGovernancePlatformUnitMergesStatus200ItemsStateEnum = {
+	pending_review: "pending_review",
+	accepted: "accepted",
+	rejected: "rejected",
+	expired: "expired",
+	superseded: "superseded",
+	executing: "executing",
+	completed: "completed",
+	failed: "failed",
+} as const;
+
+export type GetApiGovernancePlatformUnitMergesStatus200ItemsStateEnum =
+	(typeof GetApiGovernancePlatformUnitMergesStatus200ItemsStateEnum)[keyof typeof GetApiGovernancePlatformUnitMergesStatus200ItemsStateEnum];
+
+export const GetApiGovernancePlatformUnitMergesStatus200ItemsReasonCodeEnum = {
+	content_policy: "content_policy",
+	copyright: "copyright",
+	realm_rules: "realm_rules",
+	spam: "spam",
+	harassment: "harassment",
+	unsafe_content: "unsafe_content",
+	off_topic: "off_topic",
+	duplicate: "duplicate",
+	account_security: "account_security",
+	user_request: "user_request",
+	appeal: "appeal",
+	administrative: "administrative",
+	other: "other",
+} as const;
+
+export type GetApiGovernancePlatformUnitMergesStatus200ItemsReasonCodeEnum =
+	(typeof GetApiGovernancePlatformUnitMergesStatus200ItemsReasonCodeEnum)[keyof typeof GetApiGovernancePlatformUnitMergesStatus200ItemsReasonCodeEnum];
+
+export const GetApiGovernancePlatformUnitMergesStatus200ItemsManifestGraphPlanSourceRoleEnum = {
+	standalone: "standalone",
+	variant: "variant",
+	main: "main",
+} as const;
+
+export type GetApiGovernancePlatformUnitMergesStatus200ItemsManifestGraphPlanSourceRoleEnum =
+	(typeof GetApiGovernancePlatformUnitMergesStatus200ItemsManifestGraphPlanSourceRoleEnum)[keyof typeof GetApiGovernancePlatformUnitMergesStatus200ItemsManifestGraphPlanSourceRoleEnum];
+
+export const GetApiGovernancePlatformUnitMergesStatus200ItemsManifestGraphPlanTargetRoleEnum = {
+	standalone: "standalone",
+	variant: "variant",
+	main: "main",
+} as const;
+
+export type GetApiGovernancePlatformUnitMergesStatus200ItemsManifestGraphPlanTargetRoleEnum =
+	(typeof GetApiGovernancePlatformUnitMergesStatus200ItemsManifestGraphPlanTargetRoleEnum)[keyof typeof GetApiGovernancePlatformUnitMergesStatus200ItemsManifestGraphPlanTargetRoleEnum];
+
+export const GetApiGovernancePlatformUnitMergesStatus200ItemsManifestGraphPlanActionEnum = {
+	none: "none",
+	detach_source: "detach_source",
+	reparent_source_variants_to_target: "reparent_source_variants_to_target",
+	reparent_source_variants_to_target_main: "reparent_source_variants_to_target_main",
+	promote_target_from_source: "promote_target_from_source",
+} as const;
+
+export type GetApiGovernancePlatformUnitMergesStatus200ItemsManifestGraphPlanActionEnum =
+	(typeof GetApiGovernancePlatformUnitMergesStatus200ItemsManifestGraphPlanActionEnum)[keyof typeof GetApiGovernancePlatformUnitMergesStatus200ItemsManifestGraphPlanActionEnum];
+
+export const GetApiGovernancePlatformUnitMergesStatus200ItemsReviewsDecisionEnum = {
+	approve: "approve",
+	reject: "reject",
+} as const;
+
+export type GetApiGovernancePlatformUnitMergesStatus200ItemsReviewsDecisionEnum =
+	(typeof GetApiGovernancePlatformUnitMergesStatus200ItemsReviewsDecisionEnum)[keyof typeof GetApiGovernancePlatformUnitMergesStatus200ItemsReviewsDecisionEnum];
+
+export const GetApiGovernancePlatformUnitMergesStatus200ItemsOperationStateEnum = {
+	pending: "pending",
+	processing: "processing",
+	retry_wait: "retry_wait",
+	completed: "completed",
+	failed: "failed",
+} as const;
+
+export type GetApiGovernancePlatformUnitMergesStatus200ItemsOperationStateEnum =
+	(typeof GetApiGovernancePlatformUnitMergesStatus200ItemsOperationStateEnum)[keyof typeof GetApiGovernancePlatformUnitMergesStatus200ItemsOperationStateEnum];
+
+export const GetApiGovernancePlatformUnitMergesStatus200ItemsOperationPhaseEnum = {
+	variant_graph: "variant_graph",
+	slug_addresses: "slug_addresses",
+	slug_scopes: "slug_scopes",
+	aliases: "aliases",
+	external_links: "external_links",
+	external_link_sources: "external_link_sources",
+	software_requirements: "software_requirements",
+	software_requirement_platforms: "software_requirement_platforms",
+	unit_reactions: "unit_reactions",
+	unit_shares: "unit_shares",
+	unit_follows: "unit_follows",
+	scores: "scores",
+	collection_items: "collection_items",
+	unit_tags: "unit_tags",
+	realm_tag_votes: "realm_tag_votes",
+	profile_unit_tags: "profile_unit_tags",
+	realm_pins: "realm_pins",
+	realm_units: "realm_units",
+	realm_unit_tags: "realm_unit_tags",
+	post_subjects: "post_subjects",
+	association_proposal_sources: "association_proposal_sources",
+	association_proposal_targets: "association_proposal_targets",
+	credit_sources: "credit_sources",
+	credit_targets: "credit_targets",
+	subject_sources: "subject_sources",
+	subject_entities: "subject_entities",
+	release_parents: "release_parents",
+	series_releases: "series_releases",
+	poll_options: "poll_options",
+	content_nodes_content: "content_nodes_content",
+	content_nodes_target: "content_nodes_target",
+	structure_members: "structure_members",
+	structure_edges_parent: "structure_edges_parent",
+	structure_edges_child: "structure_edges_child",
+	structure_applications: "structure_applications",
+	progress_entries: "progress_entries",
+	progress_snapshots: "progress_snapshots",
+	notification_subjects: "notification_subjects",
+	derived_state: "derived_state",
+	finalize: "finalize",
+} as const;
+
+export type GetApiGovernancePlatformUnitMergesStatus200ItemsOperationPhaseEnum =
+	(typeof GetApiGovernancePlatformUnitMergesStatus200ItemsOperationPhaseEnum)[keyof typeof GetApiGovernancePlatformUnitMergesStatus200ItemsOperationPhaseEnum];
+
+/**
+ * @type object
+ */
+export type GetApiGovernancePlatformUnitMergesStatus200 = {
+	/**
+	 * @type array
+	 */
+	items: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		id: string;
+		/**
+		 * @type object
+		 */
+		sourceUnit: {
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			id: string;
+			title: (string | null) | null;
+		};
+		/**
+		 * @type object
+		 */
+		targetUnit: {
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			id: string;
+			title: (string | null) | null;
+		};
+		/**
+		 * @default 'book'
+		 * @type string
+		 */
+		unitKind: GetApiGovernancePlatformUnitMergesStatus200ItemsUnitKindEnum;
+		/**
+		 * @default 'reviewed'
+		 * @type string
+		 */
+		mode: GetApiGovernancePlatformUnitMergesStatus200ItemsModeEnum;
+		/**
+		 * @default 'pending_review'
+		 * @type string
+		 */
+		state: GetApiGovernancePlatformUnitMergesStatus200ItemsStateEnum;
+		/**
+		 * @type object
+		 */
+		proposer: {
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			profileId: string;
+			label: (string | null) | null;
+		};
+		overrideOfRequestId: (string | null) | null;
+		/**
+		 * @type string
+		 */
+		reasonCode: GetApiGovernancePlatformUnitMergesStatus200ItemsReasonCodeEnum;
+		note: (string | null) | null;
+		/**
+		 * @type object
+		 */
+		policy: {
+			version: string | number;
+			requiredApprovals: string | number;
+			/**
+			 * @type boolean
+			 */
+			vetoEnabled: boolean;
+			/**
+			 * @type boolean
+			 */
+			selfReviewForbidden: boolean;
+		};
+		/**
+		 * @type object
+		 */
+		manifest: {
+			/**
+			 * @type number
+			 */
+			version: 1;
+			/**
+			 * @description
+			 * Format: `date-time`
+			 * @type string
+			 */
+			sourceUpdatedAt: string;
+			/**
+			 * @description
+			 * Format: `date-time`
+			 * @type string
+			 */
+			targetUpdatedAt: string;
+			sourceGraphRevision: string | number;
+			targetGraphRevision: string | number;
+			/**
+			 * @type object
+			 */
+			graphPlan: {
+				/**
+				 * @type number
+				 */
+				version: 1;
+				/**
+				 * @default 'standalone'
+				 * @type string
+				 */
+				sourceRole: GetApiGovernancePlatformUnitMergesStatus200ItemsManifestGraphPlanSourceRoleEnum;
+				/**
+				 * @default 'standalone'
+				 * @type string
+				 */
+				targetRole: GetApiGovernancePlatformUnitMergesStatus200ItemsManifestGraphPlanTargetRoleEnum;
+				sourceMainUnitId: (string | null) | null;
+				targetMainUnitId: (string | null) | null;
+				destinationMainUnitId: (string | null) | null;
+				/**
+				 * @default 'none'
+				 * @type string
+				 */
+				action: GetApiGovernancePlatformUnitMergesStatus200ItemsManifestGraphPlanActionEnum;
+			};
+			/**
+			 * @pattern ^[a-f0-9]{64}$
+			 * @type string
+			 */
+			fingerprint: string;
+		};
+		approvals: string | number;
+		rejections: string | number;
+		/**
+		 * @type array
+		 */
+		reviews: {
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			reviewerProfileId: string;
+			reviewerLabel: (string | null) | null;
+			/**
+			 * @default 'approve'
+			 * @type string
+			 */
+			decision: GetApiGovernancePlatformUnitMergesStatus200ItemsReviewsDecisionEnum;
+			note: (string | null) | null;
+			/**
+			 * @description
+			 * Format: `date-time`
+			 * @type string
+			 */
+			createdAt: string;
+		}[];
+		operation:
+			| ({
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					id: string;
+					/**
+					 * @default 'pending'
+					 * @type string
+					 */
+					state: GetApiGovernancePlatformUnitMergesStatus200ItemsOperationStateEnum;
+					/**
+					 * @default 'variant_graph'
+					 * @type string
+					 */
+					phase: GetApiGovernancePlatformUnitMergesStatus200ItemsOperationPhaseEnum;
+					attemptCount: string | number;
+					processedRows: string | number;
+					/**
+					 * @description
+					 * Format: `date-time`
+					 * @type string
+					 */
+					availableAt: string;
+					lastErrorCode: (string | null) | null;
+					lastErrorMessage: (string | null) | null;
+					startedAt: (string | null) | null;
+					completedAt: (string | null) | null;
+			  } | null)
+			| null;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		expiresAt: string;
+		acceptedAt: (string | null) | null;
+		rejectedAt: (string | null) | null;
+		supersededAt: (string | null) | null;
+		completedAt: (string | null) | null;
+		failedAt: (string | null) | null;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		createdAt: string;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		updatedAt: string;
+	}[];
+	nextCursor: (string | null) | null;
+};
+
+/**
+ * @type object
+ */
+export type GetApiGovernancePlatformUnitMergesStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'PlatformCapabilityRequired'
+		 * @type string
+		 */
+		code: "PlatformCapabilityRequired";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiGovernancePlatformUnitMergesStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type GetApiGovernancePlatformUnitMergesStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type GetApiGovernancePlatformUnitMergesOptions = {
+	body?: never;
+	path?: never;
+	query?: GetApiGovernancePlatformUnitMergesQuery;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type GetApiGovernancePlatformUnitMergesResponses = {
+	"200": GetApiGovernancePlatformUnitMergesStatus200;
+	"403": GetApiGovernancePlatformUnitMergesStatus403;
+	"422": GetApiGovernancePlatformUnitMergesStatus422;
+	"500": GetApiGovernancePlatformUnitMergesStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type GetApiGovernancePlatformUnitMergesResponse =
+	| GetApiGovernancePlatformUnitMergesStatus200
+	| GetApiGovernancePlatformUnitMergesStatus403
+	| GetApiGovernancePlatformUnitMergesStatus422
+	| GetApiGovernancePlatformUnitMergesStatus500;
+
+export const PostApiGovernancePlatformUnitMergesStatus200UnitKindEnum = {
+	book: "book",
+	software: "software",
+	media: "media",
+	entity: "entity",
+} as const;
+
+export type PostApiGovernancePlatformUnitMergesStatus200UnitKindEnum =
+	(typeof PostApiGovernancePlatformUnitMergesStatus200UnitKindEnum)[keyof typeof PostApiGovernancePlatformUnitMergesStatus200UnitKindEnum];
+
+export const PostApiGovernancePlatformUnitMergesStatus200ModeEnum = {
+	reviewed: "reviewed",
+	privileged_direct: "privileged_direct",
+} as const;
+
+export type PostApiGovernancePlatformUnitMergesStatus200ModeEnum =
+	(typeof PostApiGovernancePlatformUnitMergesStatus200ModeEnum)[keyof typeof PostApiGovernancePlatformUnitMergesStatus200ModeEnum];
+
+export const PostApiGovernancePlatformUnitMergesStatus200StateEnum = {
+	pending_review: "pending_review",
+	accepted: "accepted",
+	rejected: "rejected",
+	expired: "expired",
+	superseded: "superseded",
+	executing: "executing",
+	completed: "completed",
+	failed: "failed",
+} as const;
+
+export type PostApiGovernancePlatformUnitMergesStatus200StateEnum =
+	(typeof PostApiGovernancePlatformUnitMergesStatus200StateEnum)[keyof typeof PostApiGovernancePlatformUnitMergesStatus200StateEnum];
+
+export const PostApiGovernancePlatformUnitMergesStatus200ReasonCodeEnum = {
+	content_policy: "content_policy",
+	copyright: "copyright",
+	realm_rules: "realm_rules",
+	spam: "spam",
+	harassment: "harassment",
+	unsafe_content: "unsafe_content",
+	off_topic: "off_topic",
+	duplicate: "duplicate",
+	account_security: "account_security",
+	user_request: "user_request",
+	appeal: "appeal",
+	administrative: "administrative",
+	other: "other",
+} as const;
+
+export type PostApiGovernancePlatformUnitMergesStatus200ReasonCodeEnum =
+	(typeof PostApiGovernancePlatformUnitMergesStatus200ReasonCodeEnum)[keyof typeof PostApiGovernancePlatformUnitMergesStatus200ReasonCodeEnum];
+
+export const PostApiGovernancePlatformUnitMergesStatus200ManifestGraphPlanSourceRoleEnum = {
+	standalone: "standalone",
+	variant: "variant",
+	main: "main",
+} as const;
+
+export type PostApiGovernancePlatformUnitMergesStatus200ManifestGraphPlanSourceRoleEnum =
+	(typeof PostApiGovernancePlatformUnitMergesStatus200ManifestGraphPlanSourceRoleEnum)[keyof typeof PostApiGovernancePlatformUnitMergesStatus200ManifestGraphPlanSourceRoleEnum];
+
+export const PostApiGovernancePlatformUnitMergesStatus200ManifestGraphPlanTargetRoleEnum = {
+	standalone: "standalone",
+	variant: "variant",
+	main: "main",
+} as const;
+
+export type PostApiGovernancePlatformUnitMergesStatus200ManifestGraphPlanTargetRoleEnum =
+	(typeof PostApiGovernancePlatformUnitMergesStatus200ManifestGraphPlanTargetRoleEnum)[keyof typeof PostApiGovernancePlatformUnitMergesStatus200ManifestGraphPlanTargetRoleEnum];
+
+export const PostApiGovernancePlatformUnitMergesStatus200ManifestGraphPlanActionEnum = {
+	none: "none",
+	detach_source: "detach_source",
+	reparent_source_variants_to_target: "reparent_source_variants_to_target",
+	reparent_source_variants_to_target_main: "reparent_source_variants_to_target_main",
+	promote_target_from_source: "promote_target_from_source",
+} as const;
+
+export type PostApiGovernancePlatformUnitMergesStatus200ManifestGraphPlanActionEnum =
+	(typeof PostApiGovernancePlatformUnitMergesStatus200ManifestGraphPlanActionEnum)[keyof typeof PostApiGovernancePlatformUnitMergesStatus200ManifestGraphPlanActionEnum];
+
+export const PostApiGovernancePlatformUnitMergesStatus200ReviewsDecisionEnum = {
+	approve: "approve",
+	reject: "reject",
+} as const;
+
+export type PostApiGovernancePlatformUnitMergesStatus200ReviewsDecisionEnum =
+	(typeof PostApiGovernancePlatformUnitMergesStatus200ReviewsDecisionEnum)[keyof typeof PostApiGovernancePlatformUnitMergesStatus200ReviewsDecisionEnum];
+
+export const PostApiGovernancePlatformUnitMergesStatus200OperationStateEnum = {
+	pending: "pending",
+	processing: "processing",
+	retry_wait: "retry_wait",
+	completed: "completed",
+	failed: "failed",
+} as const;
+
+export type PostApiGovernancePlatformUnitMergesStatus200OperationStateEnum =
+	(typeof PostApiGovernancePlatformUnitMergesStatus200OperationStateEnum)[keyof typeof PostApiGovernancePlatformUnitMergesStatus200OperationStateEnum];
+
+export const PostApiGovernancePlatformUnitMergesStatus200OperationPhaseEnum = {
+	variant_graph: "variant_graph",
+	slug_addresses: "slug_addresses",
+	slug_scopes: "slug_scopes",
+	aliases: "aliases",
+	external_links: "external_links",
+	external_link_sources: "external_link_sources",
+	software_requirements: "software_requirements",
+	software_requirement_platforms: "software_requirement_platforms",
+	unit_reactions: "unit_reactions",
+	unit_shares: "unit_shares",
+	unit_follows: "unit_follows",
+	scores: "scores",
+	collection_items: "collection_items",
+	unit_tags: "unit_tags",
+	realm_tag_votes: "realm_tag_votes",
+	profile_unit_tags: "profile_unit_tags",
+	realm_pins: "realm_pins",
+	realm_units: "realm_units",
+	realm_unit_tags: "realm_unit_tags",
+	post_subjects: "post_subjects",
+	association_proposal_sources: "association_proposal_sources",
+	association_proposal_targets: "association_proposal_targets",
+	credit_sources: "credit_sources",
+	credit_targets: "credit_targets",
+	subject_sources: "subject_sources",
+	subject_entities: "subject_entities",
+	release_parents: "release_parents",
+	series_releases: "series_releases",
+	poll_options: "poll_options",
+	content_nodes_content: "content_nodes_content",
+	content_nodes_target: "content_nodes_target",
+	structure_members: "structure_members",
+	structure_edges_parent: "structure_edges_parent",
+	structure_edges_child: "structure_edges_child",
+	structure_applications: "structure_applications",
+	progress_entries: "progress_entries",
+	progress_snapshots: "progress_snapshots",
+	notification_subjects: "notification_subjects",
+	derived_state: "derived_state",
+	finalize: "finalize",
+} as const;
+
+export type PostApiGovernancePlatformUnitMergesStatus200OperationPhaseEnum =
+	(typeof PostApiGovernancePlatformUnitMergesStatus200OperationPhaseEnum)[keyof typeof PostApiGovernancePlatformUnitMergesStatus200OperationPhaseEnum];
+
+/**
+ * @type object
+ */
+export type PostApiGovernancePlatformUnitMergesStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	id: string;
+	/**
+	 * @type object
+	 */
+	sourceUnit: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		id: string;
+		title: (string | null) | null;
+	};
+	/**
+	 * @type object
+	 */
+	targetUnit: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		id: string;
+		title: (string | null) | null;
+	};
+	/**
+	 * @default 'book'
+	 * @type string
+	 */
+	unitKind: PostApiGovernancePlatformUnitMergesStatus200UnitKindEnum;
+	/**
+	 * @default 'reviewed'
+	 * @type string
+	 */
+	mode: PostApiGovernancePlatformUnitMergesStatus200ModeEnum;
+	/**
+	 * @default 'pending_review'
+	 * @type string
+	 */
+	state: PostApiGovernancePlatformUnitMergesStatus200StateEnum;
+	/**
+	 * @type object
+	 */
+	proposer: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		profileId: string;
+		label: (string | null) | null;
+	};
+	overrideOfRequestId: (string | null) | null;
+	/**
+	 * @type string
+	 */
+	reasonCode: PostApiGovernancePlatformUnitMergesStatus200ReasonCodeEnum;
+	note: (string | null) | null;
+	/**
+	 * @type object
+	 */
+	policy: {
+		version: string | number;
+		requiredApprovals: string | number;
+		/**
+		 * @type boolean
+		 */
+		vetoEnabled: boolean;
+		/**
+		 * @type boolean
+		 */
+		selfReviewForbidden: boolean;
+	};
+	/**
+	 * @type object
+	 */
+	manifest: {
+		/**
+		 * @type number
+		 */
+		version: 1;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		sourceUpdatedAt: string;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		targetUpdatedAt: string;
+		sourceGraphRevision: string | number;
+		targetGraphRevision: string | number;
+		/**
+		 * @type object
+		 */
+		graphPlan: {
+			/**
+			 * @type number
+			 */
+			version: 1;
+			/**
+			 * @default 'standalone'
+			 * @type string
+			 */
+			sourceRole: PostApiGovernancePlatformUnitMergesStatus200ManifestGraphPlanSourceRoleEnum;
+			/**
+			 * @default 'standalone'
+			 * @type string
+			 */
+			targetRole: PostApiGovernancePlatformUnitMergesStatus200ManifestGraphPlanTargetRoleEnum;
+			sourceMainUnitId: (string | null) | null;
+			targetMainUnitId: (string | null) | null;
+			destinationMainUnitId: (string | null) | null;
+			/**
+			 * @default 'none'
+			 * @type string
+			 */
+			action: PostApiGovernancePlatformUnitMergesStatus200ManifestGraphPlanActionEnum;
+		};
+		/**
+		 * @pattern ^[a-f0-9]{64}$
+		 * @type string
+		 */
+		fingerprint: string;
+	};
+	approvals: string | number;
+	rejections: string | number;
+	/**
+	 * @type array
+	 */
+	reviews: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		reviewerProfileId: string;
+		reviewerLabel: (string | null) | null;
+		/**
+		 * @default 'approve'
+		 * @type string
+		 */
+		decision: PostApiGovernancePlatformUnitMergesStatus200ReviewsDecisionEnum;
+		note: (string | null) | null;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		createdAt: string;
+	}[];
+	operation:
+		| ({
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				id: string;
+				/**
+				 * @default 'pending'
+				 * @type string
+				 */
+				state: PostApiGovernancePlatformUnitMergesStatus200OperationStateEnum;
+				/**
+				 * @default 'variant_graph'
+				 * @type string
+				 */
+				phase: PostApiGovernancePlatformUnitMergesStatus200OperationPhaseEnum;
+				attemptCount: string | number;
+				processedRows: string | number;
+				/**
+				 * @description
+				 * Format: `date-time`
+				 * @type string
+				 */
+				availableAt: string;
+				lastErrorCode: (string | null) | null;
+				lastErrorMessage: (string | null) | null;
+				startedAt: (string | null) | null;
+				completedAt: (string | null) | null;
+		  } | null)
+		| null;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	expiresAt: string;
+	acceptedAt: (string | null) | null;
+	rejectedAt: (string | null) | null;
+	supersededAt: (string | null) | null;
+	completedAt: (string | null) | null;
+	failedAt: (string | null) | null;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	createdAt: string;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	updatedAt: string;
+};
+
+export type PostApiGovernancePlatformUnitMergesStatus400 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'UnitMergeConfirmationInvalid'
+				 * @type string
+				 */
+				code: "UnitMergeConfirmationInvalid";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| MalformedRequestBody;
+
+export const PostApiGovernancePlatformUnitMergesStatus403ErrorCodeEnum = {
+	PlatformCapabilityRequired: "PlatformCapabilityRequired",
+	FreshSessionRequired: "FreshSessionRequired",
+} as const;
+
+export type PostApiGovernancePlatformUnitMergesStatus403ErrorCodeEnum =
+	(typeof PostApiGovernancePlatformUnitMergesStatus403ErrorCodeEnum)[keyof typeof PostApiGovernancePlatformUnitMergesStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PostApiGovernancePlatformUnitMergesStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'PlatformCapabilityRequired'
+		 * @type string
+		 */
+		code: PostApiGovernancePlatformUnitMergesStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const PostApiGovernancePlatformUnitMergesStatus404ErrorCodeEnum = {
+	UnitMergeNotFound: "UnitMergeNotFound",
+	UnitNotFound: "UnitNotFound",
+} as const;
+
+export type PostApiGovernancePlatformUnitMergesStatus404ErrorCodeEnum =
+	(typeof PostApiGovernancePlatformUnitMergesStatus404ErrorCodeEnum)[keyof typeof PostApiGovernancePlatformUnitMergesStatus404ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PostApiGovernancePlatformUnitMergesStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitMergeNotFound'
+		 * @type string
+		 */
+		code: PostApiGovernancePlatformUnitMergesStatus404ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const PostApiGovernancePlatformUnitMergesStatus409ErrorCodeEnum = {
+	UnitMergeKindMismatch: "UnitMergeKindMismatch",
+	UnitMergeRequestConflict: "UnitMergeRequestConflict",
+	UnitMergeIdempotencyConflict: "UnitMergeIdempotencyConflict",
+	UnitMergeManifestStale: "UnitMergeManifestStale",
+} as const;
+
+export type PostApiGovernancePlatformUnitMergesStatus409ErrorCodeEnum =
+	(typeof PostApiGovernancePlatformUnitMergesStatus409ErrorCodeEnum)[keyof typeof PostApiGovernancePlatformUnitMergesStatus409ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PostApiGovernancePlatformUnitMergesStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitMergeKindMismatch'
+		 * @type string
+		 */
+		code: PostApiGovernancePlatformUnitMergesStatus409ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export type PostApiGovernancePlatformUnitMergesStatus422 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'UnitMergeKindIneligible'
+				 * @type string
+				 */
+				code: "UnitMergeKindIneligible";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| ValidationError;
+
+/**
+ * @type object
+ */
+export type PostApiGovernancePlatformUnitMergesStatus500 = InternalError;
+
+export const PostApiGovernancePlatformUnitMergesRequestReasonCodeEnum = {
+	content_policy: "content_policy",
+	copyright: "copyright",
+	realm_rules: "realm_rules",
+	spam: "spam",
+	harassment: "harassment",
+	unsafe_content: "unsafe_content",
+	off_topic: "off_topic",
+	duplicate: "duplicate",
+	account_security: "account_security",
+	user_request: "user_request",
+	appeal: "appeal",
+	administrative: "administrative",
+	other: "other",
+} as const;
+
+export type PostApiGovernancePlatformUnitMergesRequestReasonCodeEnum =
+	(typeof PostApiGovernancePlatformUnitMergesRequestReasonCodeEnum)[keyof typeof PostApiGovernancePlatformUnitMergesRequestReasonCodeEnum];
+
+/**
+ * @type object
+ */
+export type PostApiGovernancePlatformUnitMergesBody = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	sourceUnitId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	targetUnitId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	confirmationSourceUnitId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	confirmationTargetUnitId: string;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	expectedSourceUpdatedAt: string;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	expectedTargetUpdatedAt: string;
+	/**
+	 * @minLength 1
+	 * @maxLength 200
+	 * @type string
+	 */
+	idempotencyKey: string;
+	/**
+	 * @type string
+	 */
+	reasonCode: PostApiGovernancePlatformUnitMergesRequestReasonCodeEnum;
+	/**
+	 * @minLength 1
+	 * @maxLength 2000
+	 * @type string | undefined
+	 */
+	note?: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiGovernancePlatformUnitMergesOptions = {
+	body: PostApiGovernancePlatformUnitMergesBody;
+	path?: never;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PostApiGovernancePlatformUnitMergesResponses = {
+	"200": PostApiGovernancePlatformUnitMergesStatus200;
+	"400": PostApiGovernancePlatformUnitMergesStatus400;
+	"403": PostApiGovernancePlatformUnitMergesStatus403;
+	"404": PostApiGovernancePlatformUnitMergesStatus404;
+	"409": PostApiGovernancePlatformUnitMergesStatus409;
+	"422": PostApiGovernancePlatformUnitMergesStatus422;
+	"500": PostApiGovernancePlatformUnitMergesStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PostApiGovernancePlatformUnitMergesResponse =
+	| PostApiGovernancePlatformUnitMergesStatus200
+	| PostApiGovernancePlatformUnitMergesStatus400
+	| PostApiGovernancePlatformUnitMergesStatus403
+	| PostApiGovernancePlatformUnitMergesStatus404
+	| PostApiGovernancePlatformUnitMergesStatus409
+	| PostApiGovernancePlatformUnitMergesStatus422
+	| PostApiGovernancePlatformUnitMergesStatus500;
+
+/**
+ * @type object
+ */
+export type GetApiGovernancePlatformUnitMergesByRequestIdPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const GetApiGovernancePlatformUnitMergesByRequestIdStatus200UnitKindEnum = {
+	book: "book",
+	software: "software",
+	media: "media",
+	entity: "entity",
+} as const;
+
+export type GetApiGovernancePlatformUnitMergesByRequestIdStatus200UnitKindEnum =
+	(typeof GetApiGovernancePlatformUnitMergesByRequestIdStatus200UnitKindEnum)[keyof typeof GetApiGovernancePlatformUnitMergesByRequestIdStatus200UnitKindEnum];
+
+export const GetApiGovernancePlatformUnitMergesByRequestIdStatus200ModeEnum = {
+	reviewed: "reviewed",
+	privileged_direct: "privileged_direct",
+} as const;
+
+export type GetApiGovernancePlatformUnitMergesByRequestIdStatus200ModeEnum =
+	(typeof GetApiGovernancePlatformUnitMergesByRequestIdStatus200ModeEnum)[keyof typeof GetApiGovernancePlatformUnitMergesByRequestIdStatus200ModeEnum];
+
+export const GetApiGovernancePlatformUnitMergesByRequestIdStatus200StateEnum = {
+	pending_review: "pending_review",
+	accepted: "accepted",
+	rejected: "rejected",
+	expired: "expired",
+	superseded: "superseded",
+	executing: "executing",
+	completed: "completed",
+	failed: "failed",
+} as const;
+
+export type GetApiGovernancePlatformUnitMergesByRequestIdStatus200StateEnum =
+	(typeof GetApiGovernancePlatformUnitMergesByRequestIdStatus200StateEnum)[keyof typeof GetApiGovernancePlatformUnitMergesByRequestIdStatus200StateEnum];
+
+export const GetApiGovernancePlatformUnitMergesByRequestIdStatus200ReasonCodeEnum = {
+	content_policy: "content_policy",
+	copyright: "copyright",
+	realm_rules: "realm_rules",
+	spam: "spam",
+	harassment: "harassment",
+	unsafe_content: "unsafe_content",
+	off_topic: "off_topic",
+	duplicate: "duplicate",
+	account_security: "account_security",
+	user_request: "user_request",
+	appeal: "appeal",
+	administrative: "administrative",
+	other: "other",
+} as const;
+
+export type GetApiGovernancePlatformUnitMergesByRequestIdStatus200ReasonCodeEnum =
+	(typeof GetApiGovernancePlatformUnitMergesByRequestIdStatus200ReasonCodeEnum)[keyof typeof GetApiGovernancePlatformUnitMergesByRequestIdStatus200ReasonCodeEnum];
+
+export const GetApiGovernancePlatformUnitMergesByRequestIdStatus200ManifestGraphPlanSourceRoleEnum =
+	{
+		standalone: "standalone",
+		variant: "variant",
+		main: "main",
+	} as const;
+
+export type GetApiGovernancePlatformUnitMergesByRequestIdStatus200ManifestGraphPlanSourceRoleEnum =
+	(typeof GetApiGovernancePlatformUnitMergesByRequestIdStatus200ManifestGraphPlanSourceRoleEnum)[keyof typeof GetApiGovernancePlatformUnitMergesByRequestIdStatus200ManifestGraphPlanSourceRoleEnum];
+
+export const GetApiGovernancePlatformUnitMergesByRequestIdStatus200ManifestGraphPlanTargetRoleEnum =
+	{
+		standalone: "standalone",
+		variant: "variant",
+		main: "main",
+	} as const;
+
+export type GetApiGovernancePlatformUnitMergesByRequestIdStatus200ManifestGraphPlanTargetRoleEnum =
+	(typeof GetApiGovernancePlatformUnitMergesByRequestIdStatus200ManifestGraphPlanTargetRoleEnum)[keyof typeof GetApiGovernancePlatformUnitMergesByRequestIdStatus200ManifestGraphPlanTargetRoleEnum];
+
+export const GetApiGovernancePlatformUnitMergesByRequestIdStatus200ManifestGraphPlanActionEnum = {
+	none: "none",
+	detach_source: "detach_source",
+	reparent_source_variants_to_target: "reparent_source_variants_to_target",
+	reparent_source_variants_to_target_main: "reparent_source_variants_to_target_main",
+	promote_target_from_source: "promote_target_from_source",
+} as const;
+
+export type GetApiGovernancePlatformUnitMergesByRequestIdStatus200ManifestGraphPlanActionEnum =
+	(typeof GetApiGovernancePlatformUnitMergesByRequestIdStatus200ManifestGraphPlanActionEnum)[keyof typeof GetApiGovernancePlatformUnitMergesByRequestIdStatus200ManifestGraphPlanActionEnum];
+
+export const GetApiGovernancePlatformUnitMergesByRequestIdStatus200ReviewsDecisionEnum = {
+	approve: "approve",
+	reject: "reject",
+} as const;
+
+export type GetApiGovernancePlatformUnitMergesByRequestIdStatus200ReviewsDecisionEnum =
+	(typeof GetApiGovernancePlatformUnitMergesByRequestIdStatus200ReviewsDecisionEnum)[keyof typeof GetApiGovernancePlatformUnitMergesByRequestIdStatus200ReviewsDecisionEnum];
+
+export const GetApiGovernancePlatformUnitMergesByRequestIdStatus200OperationStateEnum = {
+	pending: "pending",
+	processing: "processing",
+	retry_wait: "retry_wait",
+	completed: "completed",
+	failed: "failed",
+} as const;
+
+export type GetApiGovernancePlatformUnitMergesByRequestIdStatus200OperationStateEnum =
+	(typeof GetApiGovernancePlatformUnitMergesByRequestIdStatus200OperationStateEnum)[keyof typeof GetApiGovernancePlatformUnitMergesByRequestIdStatus200OperationStateEnum];
+
+export const GetApiGovernancePlatformUnitMergesByRequestIdStatus200OperationPhaseEnum = {
+	variant_graph: "variant_graph",
+	slug_addresses: "slug_addresses",
+	slug_scopes: "slug_scopes",
+	aliases: "aliases",
+	external_links: "external_links",
+	external_link_sources: "external_link_sources",
+	software_requirements: "software_requirements",
+	software_requirement_platforms: "software_requirement_platforms",
+	unit_reactions: "unit_reactions",
+	unit_shares: "unit_shares",
+	unit_follows: "unit_follows",
+	scores: "scores",
+	collection_items: "collection_items",
+	unit_tags: "unit_tags",
+	realm_tag_votes: "realm_tag_votes",
+	profile_unit_tags: "profile_unit_tags",
+	realm_pins: "realm_pins",
+	realm_units: "realm_units",
+	realm_unit_tags: "realm_unit_tags",
+	post_subjects: "post_subjects",
+	association_proposal_sources: "association_proposal_sources",
+	association_proposal_targets: "association_proposal_targets",
+	credit_sources: "credit_sources",
+	credit_targets: "credit_targets",
+	subject_sources: "subject_sources",
+	subject_entities: "subject_entities",
+	release_parents: "release_parents",
+	series_releases: "series_releases",
+	poll_options: "poll_options",
+	content_nodes_content: "content_nodes_content",
+	content_nodes_target: "content_nodes_target",
+	structure_members: "structure_members",
+	structure_edges_parent: "structure_edges_parent",
+	structure_edges_child: "structure_edges_child",
+	structure_applications: "structure_applications",
+	progress_entries: "progress_entries",
+	progress_snapshots: "progress_snapshots",
+	notification_subjects: "notification_subjects",
+	derived_state: "derived_state",
+	finalize: "finalize",
+} as const;
+
+export type GetApiGovernancePlatformUnitMergesByRequestIdStatus200OperationPhaseEnum =
+	(typeof GetApiGovernancePlatformUnitMergesByRequestIdStatus200OperationPhaseEnum)[keyof typeof GetApiGovernancePlatformUnitMergesByRequestIdStatus200OperationPhaseEnum];
+
+/**
+ * @type object
+ */
+export type GetApiGovernancePlatformUnitMergesByRequestIdStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	id: string;
+	/**
+	 * @type object
+	 */
+	sourceUnit: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		id: string;
+		title: (string | null) | null;
+	};
+	/**
+	 * @type object
+	 */
+	targetUnit: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		id: string;
+		title: (string | null) | null;
+	};
+	/**
+	 * @default 'book'
+	 * @type string
+	 */
+	unitKind: GetApiGovernancePlatformUnitMergesByRequestIdStatus200UnitKindEnum;
+	/**
+	 * @default 'reviewed'
+	 * @type string
+	 */
+	mode: GetApiGovernancePlatformUnitMergesByRequestIdStatus200ModeEnum;
+	/**
+	 * @default 'pending_review'
+	 * @type string
+	 */
+	state: GetApiGovernancePlatformUnitMergesByRequestIdStatus200StateEnum;
+	/**
+	 * @type object
+	 */
+	proposer: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		profileId: string;
+		label: (string | null) | null;
+	};
+	overrideOfRequestId: (string | null) | null;
+	/**
+	 * @type string
+	 */
+	reasonCode: GetApiGovernancePlatformUnitMergesByRequestIdStatus200ReasonCodeEnum;
+	note: (string | null) | null;
+	/**
+	 * @type object
+	 */
+	policy: {
+		version: string | number;
+		requiredApprovals: string | number;
+		/**
+		 * @type boolean
+		 */
+		vetoEnabled: boolean;
+		/**
+		 * @type boolean
+		 */
+		selfReviewForbidden: boolean;
+	};
+	/**
+	 * @type object
+	 */
+	manifest: {
+		/**
+		 * @type number
+		 */
+		version: 1;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		sourceUpdatedAt: string;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		targetUpdatedAt: string;
+		sourceGraphRevision: string | number;
+		targetGraphRevision: string | number;
+		/**
+		 * @type object
+		 */
+		graphPlan: {
+			/**
+			 * @type number
+			 */
+			version: 1;
+			/**
+			 * @default 'standalone'
+			 * @type string
+			 */
+			sourceRole: GetApiGovernancePlatformUnitMergesByRequestIdStatus200ManifestGraphPlanSourceRoleEnum;
+			/**
+			 * @default 'standalone'
+			 * @type string
+			 */
+			targetRole: GetApiGovernancePlatformUnitMergesByRequestIdStatus200ManifestGraphPlanTargetRoleEnum;
+			sourceMainUnitId: (string | null) | null;
+			targetMainUnitId: (string | null) | null;
+			destinationMainUnitId: (string | null) | null;
+			/**
+			 * @default 'none'
+			 * @type string
+			 */
+			action: GetApiGovernancePlatformUnitMergesByRequestIdStatus200ManifestGraphPlanActionEnum;
+		};
+		/**
+		 * @pattern ^[a-f0-9]{64}$
+		 * @type string
+		 */
+		fingerprint: string;
+	};
+	approvals: string | number;
+	rejections: string | number;
+	/**
+	 * @type array
+	 */
+	reviews: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		reviewerProfileId: string;
+		reviewerLabel: (string | null) | null;
+		/**
+		 * @default 'approve'
+		 * @type string
+		 */
+		decision: GetApiGovernancePlatformUnitMergesByRequestIdStatus200ReviewsDecisionEnum;
+		note: (string | null) | null;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		createdAt: string;
+	}[];
+	operation:
+		| ({
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				id: string;
+				/**
+				 * @default 'pending'
+				 * @type string
+				 */
+				state: GetApiGovernancePlatformUnitMergesByRequestIdStatus200OperationStateEnum;
+				/**
+				 * @default 'variant_graph'
+				 * @type string
+				 */
+				phase: GetApiGovernancePlatformUnitMergesByRequestIdStatus200OperationPhaseEnum;
+				attemptCount: string | number;
+				processedRows: string | number;
+				/**
+				 * @description
+				 * Format: `date-time`
+				 * @type string
+				 */
+				availableAt: string;
+				lastErrorCode: (string | null) | null;
+				lastErrorMessage: (string | null) | null;
+				startedAt: (string | null) | null;
+				completedAt: (string | null) | null;
+		  } | null)
+		| null;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	expiresAt: string;
+	acceptedAt: (string | null) | null;
+	rejectedAt: (string | null) | null;
+	supersededAt: (string | null) | null;
+	completedAt: (string | null) | null;
+	failedAt: (string | null) | null;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	createdAt: string;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	updatedAt: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiGovernancePlatformUnitMergesByRequestIdStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'PlatformCapabilityRequired'
+		 * @type string
+		 */
+		code: "PlatformCapabilityRequired";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiGovernancePlatformUnitMergesByRequestIdStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitMergeNotFound'
+		 * @type string
+		 */
+		code: "UnitMergeNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiGovernancePlatformUnitMergesByRequestIdStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type GetApiGovernancePlatformUnitMergesByRequestIdStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type GetApiGovernancePlatformUnitMergesByRequestIdOptions = {
+	body?: never;
+	path: GetApiGovernancePlatformUnitMergesByRequestIdPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type GetApiGovernancePlatformUnitMergesByRequestIdResponses = {
+	"200": GetApiGovernancePlatformUnitMergesByRequestIdStatus200;
+	"403": GetApiGovernancePlatformUnitMergesByRequestIdStatus403;
+	"404": GetApiGovernancePlatformUnitMergesByRequestIdStatus404;
+	"422": GetApiGovernancePlatformUnitMergesByRequestIdStatus422;
+	"500": GetApiGovernancePlatformUnitMergesByRequestIdStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type GetApiGovernancePlatformUnitMergesByRequestIdResponse =
+	| GetApiGovernancePlatformUnitMergesByRequestIdStatus200
+	| GetApiGovernancePlatformUnitMergesByRequestIdStatus403
+	| GetApiGovernancePlatformUnitMergesByRequestIdStatus404
+	| GetApiGovernancePlatformUnitMergesByRequestIdStatus422
+	| GetApiGovernancePlatformUnitMergesByRequestIdStatus500;
+
+export const PostApiGovernancePlatformUnitMergesPreflightStatus200UnitKindEnum = {
+	book: "book",
+	software: "software",
+	media: "media",
+	entity: "entity",
+} as const;
+
+export type PostApiGovernancePlatformUnitMergesPreflightStatus200UnitKindEnum =
+	(typeof PostApiGovernancePlatformUnitMergesPreflightStatus200UnitKindEnum)[keyof typeof PostApiGovernancePlatformUnitMergesPreflightStatus200UnitKindEnum];
+
+export const PostApiGovernancePlatformUnitMergesPreflightStatus200ManifestGraphPlanSourceRoleEnum =
+	{
+		standalone: "standalone",
+		variant: "variant",
+		main: "main",
+	} as const;
+
+export type PostApiGovernancePlatformUnitMergesPreflightStatus200ManifestGraphPlanSourceRoleEnum =
+	(typeof PostApiGovernancePlatformUnitMergesPreflightStatus200ManifestGraphPlanSourceRoleEnum)[keyof typeof PostApiGovernancePlatformUnitMergesPreflightStatus200ManifestGraphPlanSourceRoleEnum];
+
+export const PostApiGovernancePlatformUnitMergesPreflightStatus200ManifestGraphPlanTargetRoleEnum =
+	{
+		standalone: "standalone",
+		variant: "variant",
+		main: "main",
+	} as const;
+
+export type PostApiGovernancePlatformUnitMergesPreflightStatus200ManifestGraphPlanTargetRoleEnum =
+	(typeof PostApiGovernancePlatformUnitMergesPreflightStatus200ManifestGraphPlanTargetRoleEnum)[keyof typeof PostApiGovernancePlatformUnitMergesPreflightStatus200ManifestGraphPlanTargetRoleEnum];
+
+export const PostApiGovernancePlatformUnitMergesPreflightStatus200ManifestGraphPlanActionEnum = {
+	none: "none",
+	detach_source: "detach_source",
+	reparent_source_variants_to_target: "reparent_source_variants_to_target",
+	reparent_source_variants_to_target_main: "reparent_source_variants_to_target_main",
+	promote_target_from_source: "promote_target_from_source",
+} as const;
+
+export type PostApiGovernancePlatformUnitMergesPreflightStatus200ManifestGraphPlanActionEnum =
+	(typeof PostApiGovernancePlatformUnitMergesPreflightStatus200ManifestGraphPlanActionEnum)[keyof typeof PostApiGovernancePlatformUnitMergesPreflightStatus200ManifestGraphPlanActionEnum];
+
+/**
+ * @type object
+ */
+export type PostApiGovernancePlatformUnitMergesPreflightStatus200 = {
+	/**
+	 * @type object
+	 */
+	sourceUnit: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		id: string;
+		title: (string | null) | null;
+	};
+	/**
+	 * @type object
+	 */
+	targetUnit: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		id: string;
+		title: (string | null) | null;
+	};
+	/**
+	 * @default 'book'
+	 * @type string
+	 */
+	unitKind: PostApiGovernancePlatformUnitMergesPreflightStatus200UnitKindEnum;
+	/**
+	 * @type object
+	 */
+	policy: {
+		version: string | number;
+		requiredApprovals: string | number;
+		/**
+		 * @type boolean
+		 */
+		vetoEnabled: boolean;
+		/**
+		 * @type boolean
+		 */
+		selfReviewForbidden: boolean;
+	};
+	/**
+	 * @type object
+	 */
+	manifest: {
+		/**
+		 * @type number
+		 */
+		version: 1;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		sourceUpdatedAt: string;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		targetUpdatedAt: string;
+		sourceGraphRevision: string | number;
+		targetGraphRevision: string | number;
+		/**
+		 * @type object
+		 */
+		graphPlan: {
+			/**
+			 * @type number
+			 */
+			version: 1;
+			/**
+			 * @default 'standalone'
+			 * @type string
+			 */
+			sourceRole: PostApiGovernancePlatformUnitMergesPreflightStatus200ManifestGraphPlanSourceRoleEnum;
+			/**
+			 * @default 'standalone'
+			 * @type string
+			 */
+			targetRole: PostApiGovernancePlatformUnitMergesPreflightStatus200ManifestGraphPlanTargetRoleEnum;
+			sourceMainUnitId: (string | null) | null;
+			targetMainUnitId: (string | null) | null;
+			destinationMainUnitId: (string | null) | null;
+			/**
+			 * @default 'none'
+			 * @type string
+			 */
+			action: PostApiGovernancePlatformUnitMergesPreflightStatus200ManifestGraphPlanActionEnum;
+		};
+		/**
+		 * @pattern ^[a-f0-9]{64}$
+		 * @type string
+		 */
+		fingerprint: string;
+	};
+};
+
+/**
+ * @type object
+ */
+export type PostApiGovernancePlatformUnitMergesPreflightStatus400 = MalformedRequestBody;
+
+/**
+ * @type object
+ */
+export type PostApiGovernancePlatformUnitMergesPreflightStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'PlatformCapabilityRequired'
+		 * @type string
+		 */
+		code: "PlatformCapabilityRequired";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const PostApiGovernancePlatformUnitMergesPreflightStatus404ErrorCodeEnum = {
+	UnitMergeNotFound: "UnitMergeNotFound",
+	UnitNotFound: "UnitNotFound",
+} as const;
+
+export type PostApiGovernancePlatformUnitMergesPreflightStatus404ErrorCodeEnum =
+	(typeof PostApiGovernancePlatformUnitMergesPreflightStatus404ErrorCodeEnum)[keyof typeof PostApiGovernancePlatformUnitMergesPreflightStatus404ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PostApiGovernancePlatformUnitMergesPreflightStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitMergeNotFound'
+		 * @type string
+		 */
+		code: PostApiGovernancePlatformUnitMergesPreflightStatus404ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const PostApiGovernancePlatformUnitMergesPreflightStatus409ErrorCodeEnum = {
+	UnitMergeKindMismatch: "UnitMergeKindMismatch",
+	UnitMergeRequestConflict: "UnitMergeRequestConflict",
+	UnitMergeIdempotencyConflict: "UnitMergeIdempotencyConflict",
+	UnitMergeManifestStale: "UnitMergeManifestStale",
+} as const;
+
+export type PostApiGovernancePlatformUnitMergesPreflightStatus409ErrorCodeEnum =
+	(typeof PostApiGovernancePlatformUnitMergesPreflightStatus409ErrorCodeEnum)[keyof typeof PostApiGovernancePlatformUnitMergesPreflightStatus409ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PostApiGovernancePlatformUnitMergesPreflightStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitMergeKindMismatch'
+		 * @type string
+		 */
+		code: PostApiGovernancePlatformUnitMergesPreflightStatus409ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export type PostApiGovernancePlatformUnitMergesPreflightStatus422 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'UnitMergeKindIneligible'
+				 * @type string
+				 */
+				code: "UnitMergeKindIneligible";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| ValidationError;
+
+/**
+ * @type object
+ */
+export type PostApiGovernancePlatformUnitMergesPreflightStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type PostApiGovernancePlatformUnitMergesPreflightBody = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	sourceUnitId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	targetUnitId: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiGovernancePlatformUnitMergesPreflightOptions = {
+	body: PostApiGovernancePlatformUnitMergesPreflightBody;
+	path?: never;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PostApiGovernancePlatformUnitMergesPreflightResponses = {
+	"200": PostApiGovernancePlatformUnitMergesPreflightStatus200;
+	"400": PostApiGovernancePlatformUnitMergesPreflightStatus400;
+	"403": PostApiGovernancePlatformUnitMergesPreflightStatus403;
+	"404": PostApiGovernancePlatformUnitMergesPreflightStatus404;
+	"409": PostApiGovernancePlatformUnitMergesPreflightStatus409;
+	"422": PostApiGovernancePlatformUnitMergesPreflightStatus422;
+	"500": PostApiGovernancePlatformUnitMergesPreflightStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PostApiGovernancePlatformUnitMergesPreflightResponse =
+	| PostApiGovernancePlatformUnitMergesPreflightStatus200
+	| PostApiGovernancePlatformUnitMergesPreflightStatus400
+	| PostApiGovernancePlatformUnitMergesPreflightStatus403
+	| PostApiGovernancePlatformUnitMergesPreflightStatus404
+	| PostApiGovernancePlatformUnitMergesPreflightStatus409
+	| PostApiGovernancePlatformUnitMergesPreflightStatus422
+	| PostApiGovernancePlatformUnitMergesPreflightStatus500;
+
+export const PostApiGovernancePlatformUnitMergesDirectStatus200UnitKindEnum = {
+	book: "book",
+	software: "software",
+	media: "media",
+	entity: "entity",
+} as const;
+
+export type PostApiGovernancePlatformUnitMergesDirectStatus200UnitKindEnum =
+	(typeof PostApiGovernancePlatformUnitMergesDirectStatus200UnitKindEnum)[keyof typeof PostApiGovernancePlatformUnitMergesDirectStatus200UnitKindEnum];
+
+export const PostApiGovernancePlatformUnitMergesDirectStatus200ModeEnum = {
+	reviewed: "reviewed",
+	privileged_direct: "privileged_direct",
+} as const;
+
+export type PostApiGovernancePlatformUnitMergesDirectStatus200ModeEnum =
+	(typeof PostApiGovernancePlatformUnitMergesDirectStatus200ModeEnum)[keyof typeof PostApiGovernancePlatformUnitMergesDirectStatus200ModeEnum];
+
+export const PostApiGovernancePlatformUnitMergesDirectStatus200StateEnum = {
+	pending_review: "pending_review",
+	accepted: "accepted",
+	rejected: "rejected",
+	expired: "expired",
+	superseded: "superseded",
+	executing: "executing",
+	completed: "completed",
+	failed: "failed",
+} as const;
+
+export type PostApiGovernancePlatformUnitMergesDirectStatus200StateEnum =
+	(typeof PostApiGovernancePlatformUnitMergesDirectStatus200StateEnum)[keyof typeof PostApiGovernancePlatformUnitMergesDirectStatus200StateEnum];
+
+export const PostApiGovernancePlatformUnitMergesDirectStatus200ReasonCodeEnum = {
+	content_policy: "content_policy",
+	copyright: "copyright",
+	realm_rules: "realm_rules",
+	spam: "spam",
+	harassment: "harassment",
+	unsafe_content: "unsafe_content",
+	off_topic: "off_topic",
+	duplicate: "duplicate",
+	account_security: "account_security",
+	user_request: "user_request",
+	appeal: "appeal",
+	administrative: "administrative",
+	other: "other",
+} as const;
+
+export type PostApiGovernancePlatformUnitMergesDirectStatus200ReasonCodeEnum =
+	(typeof PostApiGovernancePlatformUnitMergesDirectStatus200ReasonCodeEnum)[keyof typeof PostApiGovernancePlatformUnitMergesDirectStatus200ReasonCodeEnum];
+
+export const PostApiGovernancePlatformUnitMergesDirectStatus200ManifestGraphPlanSourceRoleEnum = {
+	standalone: "standalone",
+	variant: "variant",
+	main: "main",
+} as const;
+
+export type PostApiGovernancePlatformUnitMergesDirectStatus200ManifestGraphPlanSourceRoleEnum =
+	(typeof PostApiGovernancePlatformUnitMergesDirectStatus200ManifestGraphPlanSourceRoleEnum)[keyof typeof PostApiGovernancePlatformUnitMergesDirectStatus200ManifestGraphPlanSourceRoleEnum];
+
+export const PostApiGovernancePlatformUnitMergesDirectStatus200ManifestGraphPlanTargetRoleEnum = {
+	standalone: "standalone",
+	variant: "variant",
+	main: "main",
+} as const;
+
+export type PostApiGovernancePlatformUnitMergesDirectStatus200ManifestGraphPlanTargetRoleEnum =
+	(typeof PostApiGovernancePlatformUnitMergesDirectStatus200ManifestGraphPlanTargetRoleEnum)[keyof typeof PostApiGovernancePlatformUnitMergesDirectStatus200ManifestGraphPlanTargetRoleEnum];
+
+export const PostApiGovernancePlatformUnitMergesDirectStatus200ManifestGraphPlanActionEnum = {
+	none: "none",
+	detach_source: "detach_source",
+	reparent_source_variants_to_target: "reparent_source_variants_to_target",
+	reparent_source_variants_to_target_main: "reparent_source_variants_to_target_main",
+	promote_target_from_source: "promote_target_from_source",
+} as const;
+
+export type PostApiGovernancePlatformUnitMergesDirectStatus200ManifestGraphPlanActionEnum =
+	(typeof PostApiGovernancePlatformUnitMergesDirectStatus200ManifestGraphPlanActionEnum)[keyof typeof PostApiGovernancePlatformUnitMergesDirectStatus200ManifestGraphPlanActionEnum];
+
+export const PostApiGovernancePlatformUnitMergesDirectStatus200ReviewsDecisionEnum = {
+	approve: "approve",
+	reject: "reject",
+} as const;
+
+export type PostApiGovernancePlatformUnitMergesDirectStatus200ReviewsDecisionEnum =
+	(typeof PostApiGovernancePlatformUnitMergesDirectStatus200ReviewsDecisionEnum)[keyof typeof PostApiGovernancePlatformUnitMergesDirectStatus200ReviewsDecisionEnum];
+
+export const PostApiGovernancePlatformUnitMergesDirectStatus200OperationStateEnum = {
+	pending: "pending",
+	processing: "processing",
+	retry_wait: "retry_wait",
+	completed: "completed",
+	failed: "failed",
+} as const;
+
+export type PostApiGovernancePlatformUnitMergesDirectStatus200OperationStateEnum =
+	(typeof PostApiGovernancePlatformUnitMergesDirectStatus200OperationStateEnum)[keyof typeof PostApiGovernancePlatformUnitMergesDirectStatus200OperationStateEnum];
+
+export const PostApiGovernancePlatformUnitMergesDirectStatus200OperationPhaseEnum = {
+	variant_graph: "variant_graph",
+	slug_addresses: "slug_addresses",
+	slug_scopes: "slug_scopes",
+	aliases: "aliases",
+	external_links: "external_links",
+	external_link_sources: "external_link_sources",
+	software_requirements: "software_requirements",
+	software_requirement_platforms: "software_requirement_platforms",
+	unit_reactions: "unit_reactions",
+	unit_shares: "unit_shares",
+	unit_follows: "unit_follows",
+	scores: "scores",
+	collection_items: "collection_items",
+	unit_tags: "unit_tags",
+	realm_tag_votes: "realm_tag_votes",
+	profile_unit_tags: "profile_unit_tags",
+	realm_pins: "realm_pins",
+	realm_units: "realm_units",
+	realm_unit_tags: "realm_unit_tags",
+	post_subjects: "post_subjects",
+	association_proposal_sources: "association_proposal_sources",
+	association_proposal_targets: "association_proposal_targets",
+	credit_sources: "credit_sources",
+	credit_targets: "credit_targets",
+	subject_sources: "subject_sources",
+	subject_entities: "subject_entities",
+	release_parents: "release_parents",
+	series_releases: "series_releases",
+	poll_options: "poll_options",
+	content_nodes_content: "content_nodes_content",
+	content_nodes_target: "content_nodes_target",
+	structure_members: "structure_members",
+	structure_edges_parent: "structure_edges_parent",
+	structure_edges_child: "structure_edges_child",
+	structure_applications: "structure_applications",
+	progress_entries: "progress_entries",
+	progress_snapshots: "progress_snapshots",
+	notification_subjects: "notification_subjects",
+	derived_state: "derived_state",
+	finalize: "finalize",
+} as const;
+
+export type PostApiGovernancePlatformUnitMergesDirectStatus200OperationPhaseEnum =
+	(typeof PostApiGovernancePlatformUnitMergesDirectStatus200OperationPhaseEnum)[keyof typeof PostApiGovernancePlatformUnitMergesDirectStatus200OperationPhaseEnum];
+
+/**
+ * @type object
+ */
+export type PostApiGovernancePlatformUnitMergesDirectStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	id: string;
+	/**
+	 * @type object
+	 */
+	sourceUnit: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		id: string;
+		title: (string | null) | null;
+	};
+	/**
+	 * @type object
+	 */
+	targetUnit: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		id: string;
+		title: (string | null) | null;
+	};
+	/**
+	 * @default 'book'
+	 * @type string
+	 */
+	unitKind: PostApiGovernancePlatformUnitMergesDirectStatus200UnitKindEnum;
+	/**
+	 * @default 'reviewed'
+	 * @type string
+	 */
+	mode: PostApiGovernancePlatformUnitMergesDirectStatus200ModeEnum;
+	/**
+	 * @default 'pending_review'
+	 * @type string
+	 */
+	state: PostApiGovernancePlatformUnitMergesDirectStatus200StateEnum;
+	/**
+	 * @type object
+	 */
+	proposer: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		profileId: string;
+		label: (string | null) | null;
+	};
+	overrideOfRequestId: (string | null) | null;
+	/**
+	 * @type string
+	 */
+	reasonCode: PostApiGovernancePlatformUnitMergesDirectStatus200ReasonCodeEnum;
+	note: (string | null) | null;
+	/**
+	 * @type object
+	 */
+	policy: {
+		version: string | number;
+		requiredApprovals: string | number;
+		/**
+		 * @type boolean
+		 */
+		vetoEnabled: boolean;
+		/**
+		 * @type boolean
+		 */
+		selfReviewForbidden: boolean;
+	};
+	/**
+	 * @type object
+	 */
+	manifest: {
+		/**
+		 * @type number
+		 */
+		version: 1;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		sourceUpdatedAt: string;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		targetUpdatedAt: string;
+		sourceGraphRevision: string | number;
+		targetGraphRevision: string | number;
+		/**
+		 * @type object
+		 */
+		graphPlan: {
+			/**
+			 * @type number
+			 */
+			version: 1;
+			/**
+			 * @default 'standalone'
+			 * @type string
+			 */
+			sourceRole: PostApiGovernancePlatformUnitMergesDirectStatus200ManifestGraphPlanSourceRoleEnum;
+			/**
+			 * @default 'standalone'
+			 * @type string
+			 */
+			targetRole: PostApiGovernancePlatformUnitMergesDirectStatus200ManifestGraphPlanTargetRoleEnum;
+			sourceMainUnitId: (string | null) | null;
+			targetMainUnitId: (string | null) | null;
+			destinationMainUnitId: (string | null) | null;
+			/**
+			 * @default 'none'
+			 * @type string
+			 */
+			action: PostApiGovernancePlatformUnitMergesDirectStatus200ManifestGraphPlanActionEnum;
+		};
+		/**
+		 * @pattern ^[a-f0-9]{64}$
+		 * @type string
+		 */
+		fingerprint: string;
+	};
+	approvals: string | number;
+	rejections: string | number;
+	/**
+	 * @type array
+	 */
+	reviews: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		reviewerProfileId: string;
+		reviewerLabel: (string | null) | null;
+		/**
+		 * @default 'approve'
+		 * @type string
+		 */
+		decision: PostApiGovernancePlatformUnitMergesDirectStatus200ReviewsDecisionEnum;
+		note: (string | null) | null;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		createdAt: string;
+	}[];
+	operation:
+		| ({
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				id: string;
+				/**
+				 * @default 'pending'
+				 * @type string
+				 */
+				state: PostApiGovernancePlatformUnitMergesDirectStatus200OperationStateEnum;
+				/**
+				 * @default 'variant_graph'
+				 * @type string
+				 */
+				phase: PostApiGovernancePlatformUnitMergesDirectStatus200OperationPhaseEnum;
+				attemptCount: string | number;
+				processedRows: string | number;
+				/**
+				 * @description
+				 * Format: `date-time`
+				 * @type string
+				 */
+				availableAt: string;
+				lastErrorCode: (string | null) | null;
+				lastErrorMessage: (string | null) | null;
+				startedAt: (string | null) | null;
+				completedAt: (string | null) | null;
+		  } | null)
+		| null;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	expiresAt: string;
+	acceptedAt: (string | null) | null;
+	rejectedAt: (string | null) | null;
+	supersededAt: (string | null) | null;
+	completedAt: (string | null) | null;
+	failedAt: (string | null) | null;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	createdAt: string;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	updatedAt: string;
+};
+
+export type PostApiGovernancePlatformUnitMergesDirectStatus400 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'UnitMergeConfirmationInvalid'
+				 * @type string
+				 */
+				code: "UnitMergeConfirmationInvalid";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| MalformedRequestBody;
+
+export const PostApiGovernancePlatformUnitMergesDirectStatus403ErrorCodeEnum = {
+	PlatformCapabilityRequired: "PlatformCapabilityRequired",
+	FreshSessionRequired: "FreshSessionRequired",
+} as const;
+
+export type PostApiGovernancePlatformUnitMergesDirectStatus403ErrorCodeEnum =
+	(typeof PostApiGovernancePlatformUnitMergesDirectStatus403ErrorCodeEnum)[keyof typeof PostApiGovernancePlatformUnitMergesDirectStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PostApiGovernancePlatformUnitMergesDirectStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'PlatformCapabilityRequired'
+		 * @type string
+		 */
+		code: PostApiGovernancePlatformUnitMergesDirectStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const PostApiGovernancePlatformUnitMergesDirectStatus404ErrorCodeEnum = {
+	UnitMergeNotFound: "UnitMergeNotFound",
+	UnitNotFound: "UnitNotFound",
+} as const;
+
+export type PostApiGovernancePlatformUnitMergesDirectStatus404ErrorCodeEnum =
+	(typeof PostApiGovernancePlatformUnitMergesDirectStatus404ErrorCodeEnum)[keyof typeof PostApiGovernancePlatformUnitMergesDirectStatus404ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PostApiGovernancePlatformUnitMergesDirectStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitMergeNotFound'
+		 * @type string
+		 */
+		code: PostApiGovernancePlatformUnitMergesDirectStatus404ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const PostApiGovernancePlatformUnitMergesDirectStatus409ErrorCodeEnum = {
+	UnitMergeKindMismatch: "UnitMergeKindMismatch",
+	UnitMergeRequestConflict: "UnitMergeRequestConflict",
+	UnitMergeIdempotencyConflict: "UnitMergeIdempotencyConflict",
+	UnitMergeManifestStale: "UnitMergeManifestStale",
+} as const;
+
+export type PostApiGovernancePlatformUnitMergesDirectStatus409ErrorCodeEnum =
+	(typeof PostApiGovernancePlatformUnitMergesDirectStatus409ErrorCodeEnum)[keyof typeof PostApiGovernancePlatformUnitMergesDirectStatus409ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PostApiGovernancePlatformUnitMergesDirectStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitMergeKindMismatch'
+		 * @type string
+		 */
+		code: PostApiGovernancePlatformUnitMergesDirectStatus409ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export type PostApiGovernancePlatformUnitMergesDirectStatus422 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'UnitMergeKindIneligible'
+				 * @type string
+				 */
+				code: "UnitMergeKindIneligible";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| ValidationError;
+
+/**
+ * @type object
+ */
+export type PostApiGovernancePlatformUnitMergesDirectStatus500 = InternalError;
+
+export const PostApiGovernancePlatformUnitMergesDirectRequestReasonCodeEnum = {
+	content_policy: "content_policy",
+	copyright: "copyright",
+	realm_rules: "realm_rules",
+	spam: "spam",
+	harassment: "harassment",
+	unsafe_content: "unsafe_content",
+	off_topic: "off_topic",
+	duplicate: "duplicate",
+	account_security: "account_security",
+	user_request: "user_request",
+	appeal: "appeal",
+	administrative: "administrative",
+	other: "other",
+} as const;
+
+export type PostApiGovernancePlatformUnitMergesDirectRequestReasonCodeEnum =
+	(typeof PostApiGovernancePlatformUnitMergesDirectRequestReasonCodeEnum)[keyof typeof PostApiGovernancePlatformUnitMergesDirectRequestReasonCodeEnum];
+
+/**
+ * @type object
+ */
+export type PostApiGovernancePlatformUnitMergesDirectBody = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	sourceUnitId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	targetUnitId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	confirmationSourceUnitId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	confirmationTargetUnitId: string;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	expectedSourceUpdatedAt: string;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	expectedTargetUpdatedAt: string;
+	/**
+	 * @minLength 1
+	 * @maxLength 200
+	 * @type string
+	 */
+	idempotencyKey: string;
+	/**
+	 * @type string
+	 */
+	reasonCode: PostApiGovernancePlatformUnitMergesDirectRequestReasonCodeEnum;
+	/**
+	 * @minLength 1
+	 * @maxLength 2000
+	 * @type string | undefined
+	 */
+	note?: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string | undefined
+	 */
+	overrideOfRequestId?: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiGovernancePlatformUnitMergesDirectOptions = {
+	body: PostApiGovernancePlatformUnitMergesDirectBody;
+	path?: never;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PostApiGovernancePlatformUnitMergesDirectResponses = {
+	"200": PostApiGovernancePlatformUnitMergesDirectStatus200;
+	"400": PostApiGovernancePlatformUnitMergesDirectStatus400;
+	"403": PostApiGovernancePlatformUnitMergesDirectStatus403;
+	"404": PostApiGovernancePlatformUnitMergesDirectStatus404;
+	"409": PostApiGovernancePlatformUnitMergesDirectStatus409;
+	"422": PostApiGovernancePlatformUnitMergesDirectStatus422;
+	"500": PostApiGovernancePlatformUnitMergesDirectStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PostApiGovernancePlatformUnitMergesDirectResponse =
+	| PostApiGovernancePlatformUnitMergesDirectStatus200
+	| PostApiGovernancePlatformUnitMergesDirectStatus400
+	| PostApiGovernancePlatformUnitMergesDirectStatus403
+	| PostApiGovernancePlatformUnitMergesDirectStatus404
+	| PostApiGovernancePlatformUnitMergesDirectStatus409
+	| PostApiGovernancePlatformUnitMergesDirectStatus422
+	| PostApiGovernancePlatformUnitMergesDirectStatus500;
+
+/**
+ * @type object
+ */
+export type PostApiGovernancePlatformUnitMergesByRequestIdReviewsPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus200UnitKindEnum = {
+	book: "book",
+	software: "software",
+	media: "media",
+	entity: "entity",
+} as const;
+
+export type PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus200UnitKindEnum =
+	(typeof PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus200UnitKindEnum)[keyof typeof PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus200UnitKindEnum];
+
+export const PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus200ModeEnum = {
+	reviewed: "reviewed",
+	privileged_direct: "privileged_direct",
+} as const;
+
+export type PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus200ModeEnum =
+	(typeof PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus200ModeEnum)[keyof typeof PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus200ModeEnum];
+
+export const PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus200StateEnum = {
+	pending_review: "pending_review",
+	accepted: "accepted",
+	rejected: "rejected",
+	expired: "expired",
+	superseded: "superseded",
+	executing: "executing",
+	completed: "completed",
+	failed: "failed",
+} as const;
+
+export type PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus200StateEnum =
+	(typeof PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus200StateEnum)[keyof typeof PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus200StateEnum];
+
+export const PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus200ReasonCodeEnum = {
+	content_policy: "content_policy",
+	copyright: "copyright",
+	realm_rules: "realm_rules",
+	spam: "spam",
+	harassment: "harassment",
+	unsafe_content: "unsafe_content",
+	off_topic: "off_topic",
+	duplicate: "duplicate",
+	account_security: "account_security",
+	user_request: "user_request",
+	appeal: "appeal",
+	administrative: "administrative",
+	other: "other",
+} as const;
+
+export type PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus200ReasonCodeEnum =
+	(typeof PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus200ReasonCodeEnum)[keyof typeof PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus200ReasonCodeEnum];
+
+export const PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus200ManifestGraphPlanSourceRoleEnum =
+	{
+		standalone: "standalone",
+		variant: "variant",
+		main: "main",
+	} as const;
+
+export type PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus200ManifestGraphPlanSourceRoleEnum =
+	(typeof PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus200ManifestGraphPlanSourceRoleEnum)[keyof typeof PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus200ManifestGraphPlanSourceRoleEnum];
+
+export const PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus200ManifestGraphPlanTargetRoleEnum =
+	{
+		standalone: "standalone",
+		variant: "variant",
+		main: "main",
+	} as const;
+
+export type PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus200ManifestGraphPlanTargetRoleEnum =
+	(typeof PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus200ManifestGraphPlanTargetRoleEnum)[keyof typeof PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus200ManifestGraphPlanTargetRoleEnum];
+
+export const PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus200ManifestGraphPlanActionEnum =
+	{
+		none: "none",
+		detach_source: "detach_source",
+		reparent_source_variants_to_target: "reparent_source_variants_to_target",
+		reparent_source_variants_to_target_main: "reparent_source_variants_to_target_main",
+		promote_target_from_source: "promote_target_from_source",
+	} as const;
+
+export type PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus200ManifestGraphPlanActionEnum =
+	(typeof PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus200ManifestGraphPlanActionEnum)[keyof typeof PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus200ManifestGraphPlanActionEnum];
+
+export const PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus200ReviewsDecisionEnum = {
+	approve: "approve",
+	reject: "reject",
+} as const;
+
+export type PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus200ReviewsDecisionEnum =
+	(typeof PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus200ReviewsDecisionEnum)[keyof typeof PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus200ReviewsDecisionEnum];
+
+export const PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus200OperationStateEnum = {
+	pending: "pending",
+	processing: "processing",
+	retry_wait: "retry_wait",
+	completed: "completed",
+	failed: "failed",
+} as const;
+
+export type PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus200OperationStateEnum =
+	(typeof PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus200OperationStateEnum)[keyof typeof PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus200OperationStateEnum];
+
+export const PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus200OperationPhaseEnum = {
+	variant_graph: "variant_graph",
+	slug_addresses: "slug_addresses",
+	slug_scopes: "slug_scopes",
+	aliases: "aliases",
+	external_links: "external_links",
+	external_link_sources: "external_link_sources",
+	software_requirements: "software_requirements",
+	software_requirement_platforms: "software_requirement_platforms",
+	unit_reactions: "unit_reactions",
+	unit_shares: "unit_shares",
+	unit_follows: "unit_follows",
+	scores: "scores",
+	collection_items: "collection_items",
+	unit_tags: "unit_tags",
+	realm_tag_votes: "realm_tag_votes",
+	profile_unit_tags: "profile_unit_tags",
+	realm_pins: "realm_pins",
+	realm_units: "realm_units",
+	realm_unit_tags: "realm_unit_tags",
+	post_subjects: "post_subjects",
+	association_proposal_sources: "association_proposal_sources",
+	association_proposal_targets: "association_proposal_targets",
+	credit_sources: "credit_sources",
+	credit_targets: "credit_targets",
+	subject_sources: "subject_sources",
+	subject_entities: "subject_entities",
+	release_parents: "release_parents",
+	series_releases: "series_releases",
+	poll_options: "poll_options",
+	content_nodes_content: "content_nodes_content",
+	content_nodes_target: "content_nodes_target",
+	structure_members: "structure_members",
+	structure_edges_parent: "structure_edges_parent",
+	structure_edges_child: "structure_edges_child",
+	structure_applications: "structure_applications",
+	progress_entries: "progress_entries",
+	progress_snapshots: "progress_snapshots",
+	notification_subjects: "notification_subjects",
+	derived_state: "derived_state",
+	finalize: "finalize",
+} as const;
+
+export type PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus200OperationPhaseEnum =
+	(typeof PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus200OperationPhaseEnum)[keyof typeof PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus200OperationPhaseEnum];
+
+/**
+ * @type object
+ */
+export type PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	id: string;
+	/**
+	 * @type object
+	 */
+	sourceUnit: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		id: string;
+		title: (string | null) | null;
+	};
+	/**
+	 * @type object
+	 */
+	targetUnit: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		id: string;
+		title: (string | null) | null;
+	};
+	/**
+	 * @default 'book'
+	 * @type string
+	 */
+	unitKind: PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus200UnitKindEnum;
+	/**
+	 * @default 'reviewed'
+	 * @type string
+	 */
+	mode: PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus200ModeEnum;
+	/**
+	 * @default 'pending_review'
+	 * @type string
+	 */
+	state: PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus200StateEnum;
+	/**
+	 * @type object
+	 */
+	proposer: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		profileId: string;
+		label: (string | null) | null;
+	};
+	overrideOfRequestId: (string | null) | null;
+	/**
+	 * @type string
+	 */
+	reasonCode: PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus200ReasonCodeEnum;
+	note: (string | null) | null;
+	/**
+	 * @type object
+	 */
+	policy: {
+		version: string | number;
+		requiredApprovals: string | number;
+		/**
+		 * @type boolean
+		 */
+		vetoEnabled: boolean;
+		/**
+		 * @type boolean
+		 */
+		selfReviewForbidden: boolean;
+	};
+	/**
+	 * @type object
+	 */
+	manifest: {
+		/**
+		 * @type number
+		 */
+		version: 1;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		sourceUpdatedAt: string;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		targetUpdatedAt: string;
+		sourceGraphRevision: string | number;
+		targetGraphRevision: string | number;
+		/**
+		 * @type object
+		 */
+		graphPlan: {
+			/**
+			 * @type number
+			 */
+			version: 1;
+			/**
+			 * @default 'standalone'
+			 * @type string
+			 */
+			sourceRole: PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus200ManifestGraphPlanSourceRoleEnum;
+			/**
+			 * @default 'standalone'
+			 * @type string
+			 */
+			targetRole: PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus200ManifestGraphPlanTargetRoleEnum;
+			sourceMainUnitId: (string | null) | null;
+			targetMainUnitId: (string | null) | null;
+			destinationMainUnitId: (string | null) | null;
+			/**
+			 * @default 'none'
+			 * @type string
+			 */
+			action: PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus200ManifestGraphPlanActionEnum;
+		};
+		/**
+		 * @pattern ^[a-f0-9]{64}$
+		 * @type string
+		 */
+		fingerprint: string;
+	};
+	approvals: string | number;
+	rejections: string | number;
+	/**
+	 * @type array
+	 */
+	reviews: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		reviewerProfileId: string;
+		reviewerLabel: (string | null) | null;
+		/**
+		 * @default 'approve'
+		 * @type string
+		 */
+		decision: PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus200ReviewsDecisionEnum;
+		note: (string | null) | null;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		createdAt: string;
+	}[];
+	operation:
+		| ({
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				id: string;
+				/**
+				 * @default 'pending'
+				 * @type string
+				 */
+				state: PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus200OperationStateEnum;
+				/**
+				 * @default 'variant_graph'
+				 * @type string
+				 */
+				phase: PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus200OperationPhaseEnum;
+				attemptCount: string | number;
+				processedRows: string | number;
+				/**
+				 * @description
+				 * Format: `date-time`
+				 * @type string
+				 */
+				availableAt: string;
+				lastErrorCode: (string | null) | null;
+				lastErrorMessage: (string | null) | null;
+				startedAt: (string | null) | null;
+				completedAt: (string | null) | null;
+		  } | null)
+		| null;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	expiresAt: string;
+	acceptedAt: (string | null) | null;
+	rejectedAt: (string | null) | null;
+	supersededAt: (string | null) | null;
+	completedAt: (string | null) | null;
+	failedAt: (string | null) | null;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	createdAt: string;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	updatedAt: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus400 = MalformedRequestBody;
+
+export const PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus403ErrorCodeEnum = {
+	PlatformCapabilityRequired: "PlatformCapabilityRequired",
+	FreshSessionRequired: "FreshSessionRequired",
+	UnitMergeReviewSelfForbidden: "UnitMergeReviewSelfForbidden",
+} as const;
+
+export type PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus403ErrorCodeEnum =
+	(typeof PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus403ErrorCodeEnum)[keyof typeof PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'PlatformCapabilityRequired'
+		 * @type string
+		 */
+		code: PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitMergeNotFound'
+		 * @type string
+		 */
+		code: "UnitMergeNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus409ErrorCodeEnum = {
+	UnitMergeManifestStale: "UnitMergeManifestStale",
+	UnitMergeRequestConflict: "UnitMergeRequestConflict",
+	UnitMergeReviewDuplicate: "UnitMergeReviewDuplicate",
+	UnitMergeReviewFingerprintMismatch: "UnitMergeReviewFingerprintMismatch",
+	UnitMergeRequestNotPending: "UnitMergeRequestNotPending",
+	UnitMergeRequestExpired: "UnitMergeRequestExpired",
+} as const;
+
+export type PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus409ErrorCodeEnum =
+	(typeof PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus409ErrorCodeEnum)[keyof typeof PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus409ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitMergeManifestStale'
+		 * @type string
+		 */
+		code: PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus409ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus500 = InternalError;
+
+export const PostApiGovernancePlatformUnitMergesByRequestIdReviewsRequestDecisionEnum = {
+	approve: "approve",
+	reject: "reject",
+} as const;
+
+export type PostApiGovernancePlatformUnitMergesByRequestIdReviewsRequestDecisionEnum =
+	(typeof PostApiGovernancePlatformUnitMergesByRequestIdReviewsRequestDecisionEnum)[keyof typeof PostApiGovernancePlatformUnitMergesByRequestIdReviewsRequestDecisionEnum];
+
+/**
+ * @type object
+ */
+export type PostApiGovernancePlatformUnitMergesByRequestIdReviewsBody = {
+	/**
+	 * @default 'approve'
+	 * @type string
+	 */
+	decision: PostApiGovernancePlatformUnitMergesByRequestIdReviewsRequestDecisionEnum;
+	/**
+	 * @pattern ^[a-f0-9]{64}$
+	 * @type string
+	 */
+	requestFingerprint: string;
+	/**
+	 * @minLength 1
+	 * @maxLength 2000
+	 * @type string | undefined
+	 */
+	note?: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiGovernancePlatformUnitMergesByRequestIdReviewsOptions = {
+	body: PostApiGovernancePlatformUnitMergesByRequestIdReviewsBody;
+	path: PostApiGovernancePlatformUnitMergesByRequestIdReviewsPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PostApiGovernancePlatformUnitMergesByRequestIdReviewsResponses = {
+	"200": PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus200;
+	"400": PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus400;
+	"403": PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus403;
+	"404": PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus404;
+	"409": PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus409;
+	"422": PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus422;
+	"500": PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PostApiGovernancePlatformUnitMergesByRequestIdReviewsResponse =
+	| PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus200
+	| PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus400
+	| PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus403
+	| PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus404
+	| PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus409
+	| PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus422
+	| PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus500;
+
+/**
+ * @type object
+ */
+export type PostApiGovernancePlatformUnitMergesByRequestIdRetryPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus200UnitKindEnum = {
+	book: "book",
+	software: "software",
+	media: "media",
+	entity: "entity",
+} as const;
+
+export type PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus200UnitKindEnum =
+	(typeof PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus200UnitKindEnum)[keyof typeof PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus200UnitKindEnum];
+
+export const PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus200ModeEnum = {
+	reviewed: "reviewed",
+	privileged_direct: "privileged_direct",
+} as const;
+
+export type PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus200ModeEnum =
+	(typeof PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus200ModeEnum)[keyof typeof PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus200ModeEnum];
+
+export const PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus200StateEnum = {
+	pending_review: "pending_review",
+	accepted: "accepted",
+	rejected: "rejected",
+	expired: "expired",
+	superseded: "superseded",
+	executing: "executing",
+	completed: "completed",
+	failed: "failed",
+} as const;
+
+export type PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus200StateEnum =
+	(typeof PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus200StateEnum)[keyof typeof PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus200StateEnum];
+
+export const PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus200ReasonCodeEnum = {
+	content_policy: "content_policy",
+	copyright: "copyright",
+	realm_rules: "realm_rules",
+	spam: "spam",
+	harassment: "harassment",
+	unsafe_content: "unsafe_content",
+	off_topic: "off_topic",
+	duplicate: "duplicate",
+	account_security: "account_security",
+	user_request: "user_request",
+	appeal: "appeal",
+	administrative: "administrative",
+	other: "other",
+} as const;
+
+export type PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus200ReasonCodeEnum =
+	(typeof PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus200ReasonCodeEnum)[keyof typeof PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus200ReasonCodeEnum];
+
+export const PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus200ManifestGraphPlanSourceRoleEnum =
+	{
+		standalone: "standalone",
+		variant: "variant",
+		main: "main",
+	} as const;
+
+export type PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus200ManifestGraphPlanSourceRoleEnum =
+	(typeof PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus200ManifestGraphPlanSourceRoleEnum)[keyof typeof PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus200ManifestGraphPlanSourceRoleEnum];
+
+export const PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus200ManifestGraphPlanTargetRoleEnum =
+	{
+		standalone: "standalone",
+		variant: "variant",
+		main: "main",
+	} as const;
+
+export type PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus200ManifestGraphPlanTargetRoleEnum =
+	(typeof PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus200ManifestGraphPlanTargetRoleEnum)[keyof typeof PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus200ManifestGraphPlanTargetRoleEnum];
+
+export const PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus200ManifestGraphPlanActionEnum =
+	{
+		none: "none",
+		detach_source: "detach_source",
+		reparent_source_variants_to_target: "reparent_source_variants_to_target",
+		reparent_source_variants_to_target_main: "reparent_source_variants_to_target_main",
+		promote_target_from_source: "promote_target_from_source",
+	} as const;
+
+export type PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus200ManifestGraphPlanActionEnum =
+	(typeof PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus200ManifestGraphPlanActionEnum)[keyof typeof PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus200ManifestGraphPlanActionEnum];
+
+export const PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus200ReviewsDecisionEnum = {
+	approve: "approve",
+	reject: "reject",
+} as const;
+
+export type PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus200ReviewsDecisionEnum =
+	(typeof PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus200ReviewsDecisionEnum)[keyof typeof PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus200ReviewsDecisionEnum];
+
+export const PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus200OperationStateEnum = {
+	pending: "pending",
+	processing: "processing",
+	retry_wait: "retry_wait",
+	completed: "completed",
+	failed: "failed",
+} as const;
+
+export type PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus200OperationStateEnum =
+	(typeof PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus200OperationStateEnum)[keyof typeof PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus200OperationStateEnum];
+
+export const PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus200OperationPhaseEnum = {
+	variant_graph: "variant_graph",
+	slug_addresses: "slug_addresses",
+	slug_scopes: "slug_scopes",
+	aliases: "aliases",
+	external_links: "external_links",
+	external_link_sources: "external_link_sources",
+	software_requirements: "software_requirements",
+	software_requirement_platforms: "software_requirement_platforms",
+	unit_reactions: "unit_reactions",
+	unit_shares: "unit_shares",
+	unit_follows: "unit_follows",
+	scores: "scores",
+	collection_items: "collection_items",
+	unit_tags: "unit_tags",
+	realm_tag_votes: "realm_tag_votes",
+	profile_unit_tags: "profile_unit_tags",
+	realm_pins: "realm_pins",
+	realm_units: "realm_units",
+	realm_unit_tags: "realm_unit_tags",
+	post_subjects: "post_subjects",
+	association_proposal_sources: "association_proposal_sources",
+	association_proposal_targets: "association_proposal_targets",
+	credit_sources: "credit_sources",
+	credit_targets: "credit_targets",
+	subject_sources: "subject_sources",
+	subject_entities: "subject_entities",
+	release_parents: "release_parents",
+	series_releases: "series_releases",
+	poll_options: "poll_options",
+	content_nodes_content: "content_nodes_content",
+	content_nodes_target: "content_nodes_target",
+	structure_members: "structure_members",
+	structure_edges_parent: "structure_edges_parent",
+	structure_edges_child: "structure_edges_child",
+	structure_applications: "structure_applications",
+	progress_entries: "progress_entries",
+	progress_snapshots: "progress_snapshots",
+	notification_subjects: "notification_subjects",
+	derived_state: "derived_state",
+	finalize: "finalize",
+} as const;
+
+export type PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus200OperationPhaseEnum =
+	(typeof PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus200OperationPhaseEnum)[keyof typeof PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus200OperationPhaseEnum];
+
+/**
+ * @type object
+ */
+export type PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	id: string;
+	/**
+	 * @type object
+	 */
+	sourceUnit: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		id: string;
+		title: (string | null) | null;
+	};
+	/**
+	 * @type object
+	 */
+	targetUnit: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		id: string;
+		title: (string | null) | null;
+	};
+	/**
+	 * @default 'book'
+	 * @type string
+	 */
+	unitKind: PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus200UnitKindEnum;
+	/**
+	 * @default 'reviewed'
+	 * @type string
+	 */
+	mode: PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus200ModeEnum;
+	/**
+	 * @default 'pending_review'
+	 * @type string
+	 */
+	state: PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus200StateEnum;
+	/**
+	 * @type object
+	 */
+	proposer: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		profileId: string;
+		label: (string | null) | null;
+	};
+	overrideOfRequestId: (string | null) | null;
+	/**
+	 * @type string
+	 */
+	reasonCode: PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus200ReasonCodeEnum;
+	note: (string | null) | null;
+	/**
+	 * @type object
+	 */
+	policy: {
+		version: string | number;
+		requiredApprovals: string | number;
+		/**
+		 * @type boolean
+		 */
+		vetoEnabled: boolean;
+		/**
+		 * @type boolean
+		 */
+		selfReviewForbidden: boolean;
+	};
+	/**
+	 * @type object
+	 */
+	manifest: {
+		/**
+		 * @type number
+		 */
+		version: 1;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		sourceUpdatedAt: string;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		targetUpdatedAt: string;
+		sourceGraphRevision: string | number;
+		targetGraphRevision: string | number;
+		/**
+		 * @type object
+		 */
+		graphPlan: {
+			/**
+			 * @type number
+			 */
+			version: 1;
+			/**
+			 * @default 'standalone'
+			 * @type string
+			 */
+			sourceRole: PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus200ManifestGraphPlanSourceRoleEnum;
+			/**
+			 * @default 'standalone'
+			 * @type string
+			 */
+			targetRole: PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus200ManifestGraphPlanTargetRoleEnum;
+			sourceMainUnitId: (string | null) | null;
+			targetMainUnitId: (string | null) | null;
+			destinationMainUnitId: (string | null) | null;
+			/**
+			 * @default 'none'
+			 * @type string
+			 */
+			action: PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus200ManifestGraphPlanActionEnum;
+		};
+		/**
+		 * @pattern ^[a-f0-9]{64}$
+		 * @type string
+		 */
+		fingerprint: string;
+	};
+	approvals: string | number;
+	rejections: string | number;
+	/**
+	 * @type array
+	 */
+	reviews: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		reviewerProfileId: string;
+		reviewerLabel: (string | null) | null;
+		/**
+		 * @default 'approve'
+		 * @type string
+		 */
+		decision: PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus200ReviewsDecisionEnum;
+		note: (string | null) | null;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		createdAt: string;
+	}[];
+	operation:
+		| ({
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				id: string;
+				/**
+				 * @default 'pending'
+				 * @type string
+				 */
+				state: PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus200OperationStateEnum;
+				/**
+				 * @default 'variant_graph'
+				 * @type string
+				 */
+				phase: PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus200OperationPhaseEnum;
+				attemptCount: string | number;
+				processedRows: string | number;
+				/**
+				 * @description
+				 * Format: `date-time`
+				 * @type string
+				 */
+				availableAt: string;
+				lastErrorCode: (string | null) | null;
+				lastErrorMessage: (string | null) | null;
+				startedAt: (string | null) | null;
+				completedAt: (string | null) | null;
+		  } | null)
+		| null;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	expiresAt: string;
+	acceptedAt: (string | null) | null;
+	rejectedAt: (string | null) | null;
+	supersededAt: (string | null) | null;
+	completedAt: (string | null) | null;
+	failedAt: (string | null) | null;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	createdAt: string;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	updatedAt: string;
+};
+
+export const PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus403ErrorCodeEnum = {
+	PlatformCapabilityRequired: "PlatformCapabilityRequired",
+	FreshSessionRequired: "FreshSessionRequired",
+} as const;
+
+export type PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus403ErrorCodeEnum =
+	(typeof PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus403ErrorCodeEnum)[keyof typeof PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'PlatformCapabilityRequired'
+		 * @type string
+		 */
+		code: PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitMergeNotFound'
+		 * @type string
+		 */
+		code: "UnitMergeNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitMergeRetryUnavailable'
+		 * @type string
+		 */
+		code: "UnitMergeRetryUnavailable";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type PostApiGovernancePlatformUnitMergesByRequestIdRetryOptions = {
+	body?: never;
+	path: PostApiGovernancePlatformUnitMergesByRequestIdRetryPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PostApiGovernancePlatformUnitMergesByRequestIdRetryResponses = {
+	"200": PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus200;
+	"403": PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus403;
+	"404": PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus404;
+	"409": PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus409;
+	"422": PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus422;
+	"500": PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PostApiGovernancePlatformUnitMergesByRequestIdRetryResponse =
+	| PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus200
+	| PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus403
+	| PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus404
+	| PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus409
+	| PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus422
+	| PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus500;
 
 export const GetApiGovernancePlatformOwnershipClaimsState = {
 	pending: "pending",
@@ -40088,6 +43767,239 @@ export type GetZoneRenderProjectionResponse =
 /**
  * @type object
  */
+export type GetZonePageAddressByIdPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	zoneId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	pageId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetZonePageAddressByIdStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	id: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	zoneId: string;
+	slug: (string | null) | null;
+	/**
+	 * @type boolean
+	 */
+	redirected: boolean;
+};
+
+export const GetZonePageAddressByIdStatus404ErrorCodeEnum = {
+	UnitNotFound: "UnitNotFound",
+	ZonePageNotFound: "ZonePageNotFound",
+} as const;
+
+export type GetZonePageAddressByIdStatus404ErrorCodeEnum =
+	(typeof GetZonePageAddressByIdStatus404ErrorCodeEnum)[keyof typeof GetZonePageAddressByIdStatus404ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type GetZonePageAddressByIdStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: GetZonePageAddressByIdStatus404ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetZonePageAddressByIdStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type GetZonePageAddressByIdStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type GetZonePageAddressByIdOptions = {
+	body?: never;
+	path: GetZonePageAddressByIdPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type GetZonePageAddressByIdResponses = {
+	"200": GetZonePageAddressByIdStatus200;
+	"404": GetZonePageAddressByIdStatus404;
+	"422": GetZonePageAddressByIdStatus422;
+	"500": GetZonePageAddressByIdStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type GetZonePageAddressByIdResponse =
+	| GetZonePageAddressByIdStatus200
+	| GetZonePageAddressByIdStatus404
+	| GetZonePageAddressByIdStatus422
+	| GetZonePageAddressByIdStatus500;
+
+/**
+ * @type object
+ */
+export type ResolveZonePageAddressBySlugPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	zoneId: string;
+	/**
+	 * @minLength 1
+	 * @maxLength 63
+	 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+	 * @type string
+	 */
+	slug: string;
+};
+
+/**
+ * @type object
+ */
+export type ResolveZonePageAddressBySlugStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	id: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	zoneId: string;
+	slug: (string | null) | null;
+	/**
+	 * @type boolean
+	 */
+	redirected: boolean;
+};
+
+export const ResolveZonePageAddressBySlugStatus404ErrorCodeEnum = {
+	UnitNotFound: "UnitNotFound",
+	ZonePageNotFound: "ZonePageNotFound",
+} as const;
+
+export type ResolveZonePageAddressBySlugStatus404ErrorCodeEnum =
+	(typeof ResolveZonePageAddressBySlugStatus404ErrorCodeEnum)[keyof typeof ResolveZonePageAddressBySlugStatus404ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type ResolveZonePageAddressBySlugStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: ResolveZonePageAddressBySlugStatus404ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type ResolveZonePageAddressBySlugStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type ResolveZonePageAddressBySlugStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type ResolveZonePageAddressBySlugOptions = {
+	body?: never;
+	path: ResolveZonePageAddressBySlugPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type ResolveZonePageAddressBySlugResponses = {
+	"200": ResolveZonePageAddressBySlugStatus200;
+	"404": ResolveZonePageAddressBySlugStatus404;
+	"422": ResolveZonePageAddressBySlugStatus422;
+	"500": ResolveZonePageAddressBySlugStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type ResolveZonePageAddressBySlugResponse =
+	| ResolveZonePageAddressBySlugStatus200
+	| ResolveZonePageAddressBySlugStatus404
+	| ResolveZonePageAddressBySlugStatus422
+	| ResolveZonePageAddressBySlugStatus500;
+
+/**
+ * @type object
+ */
 export type GetApiZonesByZoneIdPagesPath = {
 	/**
 	 * @description
@@ -46000,6 +49912,9 @@ export const GetApiUsersMeStatus200PlatformCapabilitiesEnum = {
 	"unit.edit": "unit.edit",
 	"platform.development_preview.access": "platform.development_preview.access",
 	"unit.governance.read": "unit.governance.read",
+	"unit.merge.propose": "unit.merge.propose",
+	"unit.merge.review": "unit.merge.review",
+	"unit.merge": "unit.merge",
 	"unit.ownership.override": "unit.ownership.override",
 	"unit.content_license.manage": "unit.content_license.manage",
 	"unit.delete": "unit.delete",
@@ -51543,6 +55458,9 @@ export const GetApiPlatformAccessPolicyStatus200CapabilitiesEnum = {
 	"unit.edit": "unit.edit",
 	"platform.development_preview.access": "platform.development_preview.access",
 	"unit.governance.read": "unit.governance.read",
+	"unit.merge.propose": "unit.merge.propose",
+	"unit.merge.review": "unit.merge.review",
+	"unit.merge": "unit.merge",
 	"unit.ownership.override": "unit.ownership.override",
 	"unit.content_license.manage": "unit.content_license.manage",
 	"unit.delete": "unit.delete",
@@ -51673,6 +55591,9 @@ export const GetApiPlatformAccessProfilesStatus200ItemsGrantsCapabilityEnum = {
 	"unit.edit": "unit.edit",
 	"platform.development_preview.access": "platform.development_preview.access",
 	"unit.governance.read": "unit.governance.read",
+	"unit.merge.propose": "unit.merge.propose",
+	"unit.merge.review": "unit.merge.review",
+	"unit.merge": "unit.merge",
 	"unit.ownership.override": "unit.ownership.override",
 	"unit.content_license.manage": "unit.content_license.manage",
 	"unit.delete": "unit.delete",
@@ -51860,6 +55781,9 @@ export const GetApiPlatformAccessProfilesByProfileIdStatus200GrantsCapabilityEnu
 	"unit.edit": "unit.edit",
 	"platform.development_preview.access": "platform.development_preview.access",
 	"unit.governance.read": "unit.governance.read",
+	"unit.merge.propose": "unit.merge.propose",
+	"unit.merge.review": "unit.merge.review",
+	"unit.merge": "unit.merge",
 	"unit.ownership.override": "unit.ownership.override",
 	"unit.content_license.manage": "unit.content_license.manage",
 	"unit.delete": "unit.delete",
@@ -52072,6 +55996,9 @@ export const PutApiPlatformAccessProfilesByProfileIdStatus200GrantsCapabilityEnu
 	"unit.edit": "unit.edit",
 	"platform.development_preview.access": "platform.development_preview.access",
 	"unit.governance.read": "unit.governance.read",
+	"unit.merge.propose": "unit.merge.propose",
+	"unit.merge.review": "unit.merge.review",
+	"unit.merge": "unit.merge",
 	"unit.ownership.override": "unit.ownership.override",
 	"unit.content_license.manage": "unit.content_license.manage",
 	"unit.delete": "unit.delete",
@@ -52320,6 +56247,9 @@ export const PutApiPlatformAccessProfilesByProfileIdRequestGrantsCapabilityEnum 
 	"unit.edit": "unit.edit",
 	"platform.development_preview.access": "platform.development_preview.access",
 	"unit.governance.read": "unit.governance.read",
+	"unit.merge.propose": "unit.merge.propose",
+	"unit.merge.review": "unit.merge.review",
+	"unit.merge": "unit.merge",
 	"unit.ownership.override": "unit.ownership.override",
 	"unit.content_license.manage": "unit.content_license.manage",
 	"unit.delete": "unit.delete",
@@ -58996,6 +62926,399 @@ export type ReleaseSlugRedirectWithPlatformAccessResponse =
 	| ReleaseSlugRedirectWithPlatformAccessStatus404
 	| ReleaseSlugRedirectWithPlatformAccessStatus422
 	| ReleaseSlugRedirectWithPlatformAccessStatus500;
+
+/**
+ * @type object
+ */
+export type GetPublicUnitSeoProjectionPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+};
+
+export const GetPublicUnitSeoProjectionLocalizationLanguagesEnum = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetPublicUnitSeoProjectionLocalizationLanguagesEnum =
+	(typeof GetPublicUnitSeoProjectionLocalizationLanguagesEnum)[keyof typeof GetPublicUnitSeoProjectionLocalizationLanguagesEnum];
+
+/**
+ * @type object
+ */
+export type GetPublicUnitSeoProjectionQuery = {
+	/**
+	 * @type array | undefined
+	 */
+	localizationLanguages?: GetPublicUnitSeoProjectionLocalizationLanguagesEnum[];
+};
+
+export const GetPublicUnitSeoProjectionStatus200KindEnum = {
+	profile: "profile",
+	book: "book",
+	software: "software",
+	media: "media",
+	video: "video",
+	audio: "audio",
+	entity: "entity",
+	tag: "tag",
+	structure: "structure",
+	series: "series",
+	zone: "zone",
+	zone_page: "zone_page",
+	collection: "collection",
+	post: "post",
+	poll: "poll",
+	realm: "realm",
+} as const;
+
+export type GetPublicUnitSeoProjectionStatus200KindEnum =
+	(typeof GetPublicUnitSeoProjectionStatus200KindEnum)[keyof typeof GetPublicUnitSeoProjectionStatus200KindEnum];
+
+export const GetPublicUnitSeoProjectionStatus200ContentRatingEnum = {
+	general: "general",
+	r15: "r15",
+	r18: "r18",
+	r18g: "r18g",
+} as const;
+
+export type GetPublicUnitSeoProjectionStatus200ContentRatingEnum =
+	(typeof GetPublicUnitSeoProjectionStatus200ContentRatingEnum)[keyof typeof GetPublicUnitSeoProjectionStatus200ContentRatingEnum];
+
+export const GetPublicUnitSeoProjectionStatus200PresentationLanguageEnum = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetPublicUnitSeoProjectionStatus200PresentationLanguageEnum =
+	(typeof GetPublicUnitSeoProjectionStatus200PresentationLanguageEnum)[keyof typeof GetPublicUnitSeoProjectionStatus200PresentationLanguageEnum];
+
+export type GetPublicUnitSeoProjectionStatus200 =
+	| {
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			id: string;
+			/**
+			 * @default 'profile'
+			 * @type string
+			 */
+			kind: GetPublicUnitSeoProjectionStatus200KindEnum;
+			/**
+			 * @type string
+			 */
+			contentRating: GetPublicUnitSeoProjectionStatus200ContentRatingEnum;
+			publishedAt: (string | null) | null;
+			/**
+			 * @description
+			 * Format: `date-time`
+			 * @type string
+			 */
+			updatedAt: string;
+			/**
+			 * @type object
+			 */
+			indexing: {
+				/**
+				 * @type string
+				 */
+				state: "index";
+			};
+			/**
+			 * @type object
+			 */
+			presentation: {
+				/**
+				 * @type string
+				 */
+				language: GetPublicUnitSeoProjectionStatus200PresentationLanguageEnum;
+				/**
+				 * @minLength 1
+				 * @maxLength 500
+				 * @type string
+				 */
+				title: string;
+				description: (string | null) | null;
+				image:
+					| ({
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							id: string;
+							/**
+							 * @type string
+							 */
+							url: string;
+					  } | null)
+					| null;
+				context:
+					| (
+							| (
+									| {
+											/**
+											 * @type string
+											 */
+											kind: "entity";
+											/**
+											 * @minLength 1
+											 * @type string
+											 */
+											entityKind: string;
+									  }
+									| {
+											/**
+											 * @type string
+											 */
+											kind: "zone_page";
+											/**
+											 * @description
+											 * Format: `uuid`
+											 * @type string
+											 */
+											zoneId: string;
+											zoneTitle: (string | null) | null;
+									  }
+									| {
+											/**
+											 * @type string
+											 */
+											kind: "post";
+											attributionTitle: (string | null) | null;
+									  }
+							  )
+							| null
+					  )
+					| null;
+			};
+	  }
+	| {
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			id: string;
+			/**
+			 * @default 'profile'
+			 * @type string
+			 */
+			kind: GetPublicUnitSeoProjectionStatus200KindEnum;
+			/**
+			 * @type string
+			 */
+			contentRating: GetPublicUnitSeoProjectionStatus200ContentRatingEnum;
+			publishedAt: (string | null) | null;
+			/**
+			 * @description
+			 * Format: `date-time`
+			 * @type string
+			 */
+			updatedAt: string;
+			/**
+			 * @type object
+			 */
+			indexing: {
+				/**
+				 * @type string
+				 */
+				state: "noindex";
+				/**
+				 * @type string
+				 */
+				reason: "unlisted";
+			};
+			/**
+			 * @type object
+			 */
+			presentation: {
+				/**
+				 * @type string
+				 */
+				language: GetPublicUnitSeoProjectionStatus200PresentationLanguageEnum;
+				/**
+				 * @minLength 1
+				 * @maxLength 500
+				 * @type string
+				 */
+				title: string;
+				description: (string | null) | null;
+				image:
+					| ({
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							id: string;
+							/**
+							 * @type string
+							 */
+							url: string;
+					  } | null)
+					| null;
+				context:
+					| (
+							| (
+									| {
+											/**
+											 * @type string
+											 */
+											kind: "entity";
+											/**
+											 * @minLength 1
+											 * @type string
+											 */
+											entityKind: string;
+									  }
+									| {
+											/**
+											 * @type string
+											 */
+											kind: "zone_page";
+											/**
+											 * @description
+											 * Format: `uuid`
+											 * @type string
+											 */
+											zoneId: string;
+											zoneTitle: (string | null) | null;
+									  }
+									| {
+											/**
+											 * @type string
+											 */
+											kind: "post";
+											attributionTitle: (string | null) | null;
+									  }
+							  )
+							| null
+					  )
+					| null;
+			};
+	  }
+	| {
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			id: string;
+			/**
+			 * @default 'profile'
+			 * @type string
+			 */
+			kind: GetPublicUnitSeoProjectionStatus200KindEnum;
+			/**
+			 * @type string
+			 */
+			contentRating: GetPublicUnitSeoProjectionStatus200ContentRatingEnum;
+			publishedAt: (string | null) | null;
+			/**
+			 * @description
+			 * Format: `date-time`
+			 * @type string
+			 */
+			updatedAt: string;
+			/**
+			 * @type object
+			 */
+			indexing: {
+				/**
+				 * @type string
+				 */
+				state: "noindex";
+				reason: "adult" | "incomplete";
+			};
+			/**
+			 * @type null
+			 */
+			presentation: null;
+	  };
+
+/**
+ * @type object
+ */
+export type GetPublicUnitSeoProjectionStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: "UnitNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetPublicUnitSeoProjectionStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type GetPublicUnitSeoProjectionStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type GetPublicUnitSeoProjectionOptions = {
+	body?: never;
+	path: GetPublicUnitSeoProjectionPath;
+	query?: GetPublicUnitSeoProjectionQuery;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type GetPublicUnitSeoProjectionResponses = {
+	"200": GetPublicUnitSeoProjectionStatus200;
+	"404": GetPublicUnitSeoProjectionStatus404;
+	"422": GetPublicUnitSeoProjectionStatus422;
+	"500": GetPublicUnitSeoProjectionStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type GetPublicUnitSeoProjectionResponse =
+	| GetPublicUnitSeoProjectionStatus200
+	| GetPublicUnitSeoProjectionStatus404
+	| GetPublicUnitSeoProjectionStatus422
+	| GetPublicUnitSeoProjectionStatus500;
 
 export const PostApiUnitsPresentationsStatus200ItemsKindEnum = {
 	slug_namespace: "slug_namespace",

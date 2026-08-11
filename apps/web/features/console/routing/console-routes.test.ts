@@ -7,6 +7,7 @@ describe("console routes", () => {
 		expect(consoleSectionHref("users")).toBe("/console/users");
 		expect(consoleSectionHref("units")).toBe("/console/units");
 		expect(consoleSectionHref("ownership-claims")).toBe("/console/ownership-claims");
+		expect(consoleSectionHref("unit-merges")).toBe("/console/unit-merges");
 		expect(consoleSectionHref("moderation")).toBe("/console/moderation");
 		expect(consoleSectionHref("audit")).toBe("/console/audit");
 		expect(consoleSectionHref("api-quotas")).toBe("/console/api-quotas");
@@ -17,6 +18,7 @@ describe("console routes", () => {
 		["/console/users/user-id", "users"],
 		["/console/units", "units"],
 		["/console/ownership-claims", "ownership-claims"],
+		["/console/unit-merges", "unit-merges"],
 		["/console/moderation", "moderation"],
 		["/console/audit/", "audit"],
 		["/console/api-quotas", "api-quotas"],

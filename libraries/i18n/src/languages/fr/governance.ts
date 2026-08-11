@@ -11,6 +11,7 @@ const { forms: postTerms } = frTerminology.post;
 export default {
 	title: "Gouvernance de la Unit",
 	open: "Ouvrir les réglages de gouvernance",
+	platformOpen: "Ouvrir la gouvernance de la plateforme",
 	accessInvitations: "Invitations d’accès",
 	receivedInvitations: "Invitations d’accès reçues",
 	accessInvitationDescription:
@@ -60,6 +61,9 @@ export default {
 		"unit.edit": "Modifier toutes les Units",
 		"platform.development_preview.access": "Accéder aux aperçus de développement non publiés",
 		"unit.governance.read": "Consulter la gouvernance de toutes les Units",
+		"unit.merge.propose": "Proposer des fusions d’Units",
+		"unit.merge.review": "Examiner les fusions d’Units",
+		"unit.merge": "Fusionner directement des Units",
 		"unit.ownership.override": "Réattribuer la propriété de n’importe quelle Unit",
 		"unit.content_license.manage": "Invalider ou rétablir les licences de contenu des Units",
 		"unit.delete": "Supprimer provisoirement n’importe quelle Unit",

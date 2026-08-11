@@ -15,6 +15,14 @@ import {
 	ContentReviewCaseStateValues,
 	EnforcementKindValues,
 	GovernanceReasonCodeValues,
+	UnitMergeEligibleKindValues,
+	UnitMergeGraphActionValues,
+	UnitMergeGraphRoleValues,
+	UnitMergeOperationPhaseValues,
+	UnitMergeOperationStateValues,
+	UnitMergeRequestModeValues,
+	UnitMergeRequestStateValues,
+	UnitMergeReviewDecisionValues,
 	UnitKindValues,
 	UnitStatusValues,
 } from "../../database/schema/contract-values";
@@ -306,6 +314,163 @@ export const PlatformUnitListResponse = t.Object({
 	nextCursor: t.Nullable(Uuid),
 });
 export const PlatformUnitLifecycleResponse = PlatformUnitLifecycleItem;
+
+const UnitMergeGraphPlanResponse = t.Object(
+	{
+		version: t.Literal(1),
+		sourceRole: t.UnionEnum(UnitMergeGraphRoleValues),
+		targetRole: t.UnionEnum(UnitMergeGraphRoleValues),
+		sourceMainUnitId: t.Nullable(Uuid),
+		targetMainUnitId: t.Nullable(Uuid),
+		destinationMainUnitId: t.Nullable(Uuid),
+		action: t.UnionEnum(UnitMergeGraphActionValues),
+	},
+	{ additionalProperties: false },
+);
+const UnitMergeFingerprint = t.String({ pattern: "^[a-f0-9]{64}$" });
+const UnitMergePolicyResponse = t.Object(
+	{
+		version: t.Integer({ minimum: 1 }),
+		requiredApprovals: t.Integer({ minimum: 1 }),
+		vetoEnabled: t.Boolean(),
+		selfReviewForbidden: t.Boolean(),
+	},
+	{ additionalProperties: false },
+);
+const UnitMergeManifestResponse = t.Object(
+	{
+		version: t.Literal(1),
+		sourceUpdatedAt: DateTime,
+		targetUpdatedAt: DateTime,
+		sourceGraphRevision: t.Integer({ minimum: 0 }),
+		targetGraphRevision: t.Integer({ minimum: 0 }),
+		graphPlan: UnitMergeGraphPlanResponse,
+		fingerprint: UnitMergeFingerprint,
+	},
+	{ additionalProperties: false },
+);
+const UnitMergeUnitResponse = t.Object(
+	{ id: Uuid, title: t.Nullable(t.String()) },
+	{ additionalProperties: false },
+);
+
+export const UnitMergePreflightBody = t.Object(
+	{ sourceUnitId: Uuid, targetUnitId: Uuid },
+	{ additionalProperties: false },
+);
+export const UnitMergePreflightResponse = t.Object(
+	{
+		sourceUnit: UnitMergeUnitResponse,
+		targetUnit: UnitMergeUnitResponse,
+		unitKind: t.UnionEnum(UnitMergeEligibleKindValues),
+		policy: UnitMergePolicyResponse,
+		manifest: UnitMergeManifestResponse,
+	},
+	{ additionalProperties: false },
+);
+
+const UnitMergeCommandFields = {
+	sourceUnitId: Uuid,
+	targetUnitId: Uuid,
+	confirmationSourceUnitId: Uuid,
+	confirmationTargetUnitId: Uuid,
+	expectedSourceUpdatedAt: DateTime,
+	expectedTargetUpdatedAt: DateTime,
+	idempotencyKey: t.String({ minLength: 1, maxLength: 200 }),
+	reasonCode: GovernanceReasonCode,
+	note: t.Optional(t.String({ minLength: 1, maxLength: 2_000 })),
+} as const;
+export const CreateReviewedUnitMergeBody = t.Object(UnitMergeCommandFields, {
+	additionalProperties: false,
+});
+export const CreateDirectUnitMergeBody = t.Object(
+	{
+		...UnitMergeCommandFields,
+		overrideOfRequestId: t.Optional(Uuid),
+	},
+	{ additionalProperties: false },
+);
+export const UnitMergeRequestParams = t.Object(
+	{ requestId: Uuid },
+	{ additionalProperties: false },
+);
+export const ReviewUnitMergeBody = t.Object(
+	{
+		decision: t.UnionEnum(UnitMergeReviewDecisionValues),
+		requestFingerprint: UnitMergeFingerprint,
+		note: t.Optional(t.String({ minLength: 1, maxLength: 2_000 })),
+	},
+	{ additionalProperties: false },
+);
+export const ListUnitMergeRequestsQuery = t.Object(
+	{
+		state: t.Optional(t.UnionEnum(UnitMergeRequestStateValues, { default: undefined })),
+		cursor: t.Optional(Uuid),
+		limit: t.Optional(t.Integer({ minimum: 1, maximum: 100, default: 50 })),
+	},
+	{ additionalProperties: false },
+);
+const UnitMergeReviewResponse = t.Object(
+	{
+		reviewerProfileId: Uuid,
+		reviewerLabel: t.Nullable(t.String()),
+		decision: t.UnionEnum(UnitMergeReviewDecisionValues),
+		note: t.Nullable(t.String()),
+		createdAt: DateTime,
+	},
+	{ additionalProperties: false },
+);
+const UnitMergeOperationResponse = t.Object(
+	{
+		id: Uuid,
+		state: t.UnionEnum(UnitMergeOperationStateValues),
+		phase: t.UnionEnum(UnitMergeOperationPhaseValues),
+		attemptCount: t.Integer({ minimum: 0 }),
+		processedRows: t.Integer({ minimum: 0 }),
+		availableAt: DateTime,
+		lastErrorCode: t.Nullable(t.String()),
+		lastErrorMessage: t.Nullable(t.String()),
+		startedAt: t.Nullable(DateTime),
+		completedAt: t.Nullable(DateTime),
+	},
+	{ additionalProperties: false },
+);
+export const UnitMergeRequestResponse = t.Object(
+	{
+		id: Uuid,
+		sourceUnit: UnitMergeUnitResponse,
+		targetUnit: UnitMergeUnitResponse,
+		unitKind: t.UnionEnum(UnitMergeEligibleKindValues),
+		mode: t.UnionEnum(UnitMergeRequestModeValues),
+		state: t.UnionEnum(UnitMergeRequestStateValues),
+		proposer: t.Object(
+			{ profileId: Uuid, label: t.Nullable(t.String()) },
+			{ additionalProperties: false },
+		),
+		overrideOfRequestId: t.Nullable(Uuid),
+		reasonCode: GovernanceReasonCode,
+		note: t.Nullable(t.String()),
+		policy: UnitMergePolicyResponse,
+		manifest: UnitMergeManifestResponse,
+		approvals: t.Integer({ minimum: 0 }),
+		rejections: t.Integer({ minimum: 0 }),
+		reviews: t.Array(UnitMergeReviewResponse),
+		operation: t.Nullable(UnitMergeOperationResponse),
+		expiresAt: DateTime,
+		acceptedAt: t.Nullable(DateTime),
+		rejectedAt: t.Nullable(DateTime),
+		supersededAt: t.Nullable(DateTime),
+		completedAt: t.Nullable(DateTime),
+		failedAt: t.Nullable(DateTime),
+		createdAt: DateTime,
+		updatedAt: DateTime,
+	},
+	{ additionalProperties: false },
+);
+export const UnitMergeRequestListResponse = t.Object(
+	{ items: t.Array(UnitMergeRequestResponse), nextCursor: t.Nullable(Uuid) },
+	{ additionalProperties: false },
+);
 export const UnitAccessRestrictionSubject = t.Union([
 	t.Object({ kind: t.Literal("profile"), profileId: Uuid }, { additionalProperties: false }),
 	t.Object(

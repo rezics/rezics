@@ -48,6 +48,90 @@ export const CommunityOwnedUnitKindValues = [
 ] as const;
 
 export const VariantCapableUnitKindValues = ["book", "software", "media"] as const;
+/** Unit kinds released for irreversible identity convergence in merge policy v1. */
+export const UnitMergeEligibleKindValues = ["book", "software", "media", "entity"] as const;
+export type UnitMergeEligibleKind = (typeof UnitMergeEligibleKindValues)[number];
+
+export const UnitMergeRequestModeValues = ["reviewed", "privileged_direct"] as const;
+export type UnitMergeRequestMode = (typeof UnitMergeRequestModeValues)[number];
+export const UnitMergeRequestStateValues = [
+	"pending_review",
+	"accepted",
+	"rejected",
+	"expired",
+	"superseded",
+	"executing",
+	"completed",
+	"failed",
+] as const;
+export type UnitMergeRequestState = (typeof UnitMergeRequestStateValues)[number];
+export const UnitMergeReviewDecisionValues = ["approve", "reject"] as const;
+export type UnitMergeReviewDecision = (typeof UnitMergeReviewDecisionValues)[number];
+export const UnitMergeOperationStateValues = [
+	"pending",
+	"processing",
+	"retry_wait",
+	"completed",
+	"failed",
+] as const;
+export type UnitMergeOperationState = (typeof UnitMergeOperationStateValues)[number];
+export const UnitMergeGraphRoleValues = ["standalone", "variant", "main"] as const;
+export type UnitMergeGraphRole = (typeof UnitMergeGraphRoleValues)[number];
+export const UnitMergeGraphActionValues = [
+	"none",
+	"detach_source",
+	"reparent_source_variants_to_target",
+	"reparent_source_variants_to_target_main",
+	"promote_target_from_source",
+] as const;
+export type UnitMergeGraphAction = (typeof UnitMergeGraphActionValues)[number];
+/**
+ * Durable, ordered execution phases. Appending before `finalize` is a persisted
+ * contract change; renaming or reordering a released phase requires a cutover.
+ */
+export const UnitMergeOperationPhaseValues = [
+	"variant_graph",
+	"slug_addresses",
+	"slug_scopes",
+	"aliases",
+	"external_links",
+	"external_link_sources",
+	"software_requirements",
+	"software_requirement_platforms",
+	"unit_reactions",
+	"unit_shares",
+	"unit_follows",
+	"scores",
+	"collection_items",
+	"unit_tags",
+	"realm_tag_votes",
+	"profile_unit_tags",
+	"realm_pins",
+	"realm_units",
+	"realm_unit_tags",
+	"post_subjects",
+	"association_proposal_sources",
+	"association_proposal_targets",
+	"credit_sources",
+	"credit_targets",
+	"subject_sources",
+	"subject_entities",
+	"release_parents",
+	"series_releases",
+	"poll_options",
+	"content_nodes_content",
+	"content_nodes_target",
+	"structure_members",
+	"structure_edges_parent",
+	"structure_edges_child",
+	"structure_applications",
+	"progress_entries",
+	"progress_snapshots",
+	"notification_subjects",
+	"derived_state",
+	"finalize",
+] as const;
+export type UnitMergeOperationPhase = (typeof UnitMergeOperationPhaseValues)[number];
 export const TimedMediaUnitKindValues = ["video", "audio"] as const;
 export const UnitOwnershipModeValues = ["profile_owned", "community_owned"] as const;
 export const UnitOwnershipClaimableUnitKindValues = [

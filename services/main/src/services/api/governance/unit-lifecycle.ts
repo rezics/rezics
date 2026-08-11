@@ -33,6 +33,7 @@ const LifecycleConflictResponse = toApiErrorResponse([
 	"UnitLifecycleProtected",
 	"UnitAlreadyDeleted",
 	"UnitNotDeleted",
+	"UnitMergeRequestConflict",
 ]);
 
 export default new Elysia({ prefix: "/platform/units" })

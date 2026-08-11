@@ -11,6 +11,7 @@ const { forms: postTerms } = deTerminology.post;
 export default {
 	title: "Unit-Governance",
 	open: "Governance-Einstellungen öffnen",
+	platformOpen: "Plattformverwaltung öffnen",
 	accessInvitations: "Zugriffseinladungen",
 	receivedInvitations: "Erhaltene Zugriffseinladungen",
 	accessInvitationDescription: "Zugriff wird erst gewährt, wenn die Einladung angenommen wurde.",
@@ -59,6 +60,9 @@ export default {
 		"unit.edit": "Alle Units bearbeiten",
 		"platform.development_preview.access": "Auf unveröffentlichte Entwicklungsvorschauen zugreifen",
 		"unit.governance.read": "Verwaltungsdaten aller Units einsehen",
+		"unit.merge.propose": "Zusammenführungen von Units vorschlagen",
+		"unit.merge.review": "Zusammenführungen von Units prüfen",
+		"unit.merge": "Units direkt zusammenführen",
 		"unit.ownership.override": "Eigentümerschaft einer beliebigen Unit neu zuweisen",
 		"unit.content_license.manage":
 			"Inhaltslizenzen von Units ungültig machen oder wiederherstellen",

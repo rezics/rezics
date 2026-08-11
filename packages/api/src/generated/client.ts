@@ -155,6 +155,20 @@ import type {
 	PostApiGovernancePlatformUnitsByUnitIdDeleteResponses,
 	PostApiGovernancePlatformUnitsByUnitIdRestoreOptions,
 	PostApiGovernancePlatformUnitsByUnitIdRestoreResponses,
+	GetApiGovernancePlatformUnitMergesOptions,
+	GetApiGovernancePlatformUnitMergesResponses,
+	PostApiGovernancePlatformUnitMergesOptions,
+	PostApiGovernancePlatformUnitMergesResponses,
+	GetApiGovernancePlatformUnitMergesByRequestIdOptions,
+	GetApiGovernancePlatformUnitMergesByRequestIdResponses,
+	PostApiGovernancePlatformUnitMergesPreflightOptions,
+	PostApiGovernancePlatformUnitMergesPreflightResponses,
+	PostApiGovernancePlatformUnitMergesDirectOptions,
+	PostApiGovernancePlatformUnitMergesDirectResponses,
+	PostApiGovernancePlatformUnitMergesByRequestIdReviewsOptions,
+	PostApiGovernancePlatformUnitMergesByRequestIdReviewsResponses,
+	PostApiGovernancePlatformUnitMergesByRequestIdRetryOptions,
+	PostApiGovernancePlatformUnitMergesByRequestIdRetryResponses,
 	GetApiGovernancePlatformOwnershipClaimsOptions,
 	GetApiGovernancePlatformOwnershipClaimsResponses,
 	PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionOptions,
@@ -189,6 +203,10 @@ import type {
 	PatchApiZonesByZoneIdResponses,
 	GetZoneRenderProjectionOptions,
 	GetZoneRenderProjectionResponses,
+	GetZonePageAddressByIdOptions,
+	GetZonePageAddressByIdResponses,
+	ResolveZonePageAddressBySlugOptions,
+	ResolveZonePageAddressBySlugResponses,
 	GetApiZonesByZoneIdPagesOptions,
 	GetApiZonesByZoneIdPagesResponses,
 	PostApiZonesByZoneIdPagesOptions,
@@ -335,6 +353,8 @@ import type {
 	ReplaceUnitSlugAddressWithPlatformAccessResponses,
 	ReleaseSlugRedirectWithPlatformAccessOptions,
 	ReleaseSlugRedirectWithPlatformAccessResponses,
+	GetPublicUnitSeoProjectionOptions,
+	GetPublicUnitSeoProjectionResponses,
 	PostApiUnitsPresentationsOptions,
 	PostApiUnitsPresentationsResponses,
 	GetApiUnitsByIdByUnitIdRealmPublicationsOptions,
@@ -2149,6 +2169,139 @@ export function postApiGovernancePlatformUnitsByUnitIdRestore<ThrowOnError exten
 }
 
 /**
+ * @summary List Unit merge governance requests
+ * {@link /api/v1/governance/platform/unit-merges}
+ */
+export function getApiGovernancePlatformUnitMerges<ThrowOnError extends boolean = true>(
+	options: Options<GetApiGovernancePlatformUnitMergesOptions, ThrowOnError> = {},
+): Promise<RequestResult<GetApiGovernancePlatformUnitMergesResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/v1/governance/platform/unit-merges",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<RequestResult<GetApiGovernancePlatformUnitMergesResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Propose a reviewed Unit identity merge
+ * {@link /api/v1/governance/platform/unit-merges}
+ */
+export function postApiGovernancePlatformUnitMerges<ThrowOnError extends boolean = true>(
+	options: Options<PostApiGovernancePlatformUnitMergesOptions, ThrowOnError>,
+): Promise<RequestResult<PostApiGovernancePlatformUnitMergesResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/v1/governance/platform/unit-merges",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<RequestResult<PostApiGovernancePlatformUnitMergesResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Get a Unit merge governance request
+ * {@link /api/v1/governance/platform/unit-merges/:requestId}
+ */
+export function getApiGovernancePlatformUnitMergesByRequestId<ThrowOnError extends boolean = true>(
+	options: Options<GetApiGovernancePlatformUnitMergesByRequestIdOptions, ThrowOnError>,
+): Promise<RequestResult<GetApiGovernancePlatformUnitMergesByRequestIdResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/v1/governance/platform/unit-merges/{requestId}",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<
+		RequestResult<GetApiGovernancePlatformUnitMergesByRequestIdResponses, ThrowOnError>
+	>;
+}
+
+/**
+ * @summary Preflight a Unit identity merge
+ * {@link /api/v1/governance/platform/unit-merges/preflight}
+ */
+export function postApiGovernancePlatformUnitMergesPreflight<ThrowOnError extends boolean = true>(
+	options: Options<PostApiGovernancePlatformUnitMergesPreflightOptions, ThrowOnError>,
+): Promise<RequestResult<PostApiGovernancePlatformUnitMergesPreflightResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/v1/governance/platform/unit-merges/preflight",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<RequestResult<PostApiGovernancePlatformUnitMergesPreflightResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Start a privileged direct Unit identity merge
+ * {@link /api/v1/governance/platform/unit-merges/direct}
+ */
+export function postApiGovernancePlatformUnitMergesDirect<ThrowOnError extends boolean = true>(
+	options: Options<PostApiGovernancePlatformUnitMergesDirectOptions, ThrowOnError>,
+): Promise<RequestResult<PostApiGovernancePlatformUnitMergesDirectResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/v1/governance/platform/unit-merges/direct",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<RequestResult<PostApiGovernancePlatformUnitMergesDirectResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Approve or reject a Unit merge request
+ * {@link /api/v1/governance/platform/unit-merges/:requestId/reviews}
+ */
+export function postApiGovernancePlatformUnitMergesByRequestIdReviews<
+	ThrowOnError extends boolean = true,
+>(
+	options: Options<PostApiGovernancePlatformUnitMergesByRequestIdReviewsOptions, ThrowOnError>,
+): Promise<
+	RequestResult<PostApiGovernancePlatformUnitMergesByRequestIdReviewsResponses, ThrowOnError>
+> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/v1/governance/platform/unit-merges/{requestId}/reviews",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<
+		RequestResult<PostApiGovernancePlatformUnitMergesByRequestIdReviewsResponses, ThrowOnError>
+	>;
+}
+
+/**
+ * @summary Retry a failed Unit merge operation
+ * {@link /api/v1/governance/platform/unit-merges/:requestId/retry}
+ */
+export function postApiGovernancePlatformUnitMergesByRequestIdRetry<
+	ThrowOnError extends boolean = true,
+>(
+	options: Options<PostApiGovernancePlatformUnitMergesByRequestIdRetryOptions, ThrowOnError>,
+): Promise<
+	RequestResult<PostApiGovernancePlatformUnitMergesByRequestIdRetryResponses, ThrowOnError>
+> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/v1/governance/platform/unit-merges/{requestId}/retry",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<
+		RequestResult<PostApiGovernancePlatformUnitMergesByRequestIdRetryResponses, ThrowOnError>
+	>;
+}
+
+/**
  * @summary List platform Unit ownership claims
  * {@link /api/v1/governance/platform/ownership-claims}
  */
@@ -2453,6 +2606,38 @@ export function getZoneRenderProjection<ThrowOnError extends boolean = true>(
 	return request({ method: "GET", url: "/api/v1/zones/{zoneId}/render", ...config }) as Promise<
 		RequestResult<GetZoneRenderProjectionResponses, ThrowOnError>
 	>;
+}
+
+/**
+ * @summary Get one bounded Zone Page address projection by Unit ID
+ * {@link /api/v1/zones/:zoneId/page-addresses/by-id/:pageId}
+ */
+export function getZonePageAddressById<ThrowOnError extends boolean = true>(
+	options: Options<GetZonePageAddressByIdOptions, ThrowOnError>,
+): Promise<RequestResult<GetZonePageAddressByIdResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/v1/zones/{zoneId}/page-addresses/by-id/{pageId}",
+		...config,
+	}) as Promise<RequestResult<GetZonePageAddressByIdResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Resolve one bounded Zone Page address by scoped slug
+ * {@link /api/v1/zones/:zoneId/page-addresses/by-slug/:slug}
+ */
+export function resolveZonePageAddressBySlug<ThrowOnError extends boolean = true>(
+	options: Options<ResolveZonePageAddressBySlugOptions, ThrowOnError>,
+): Promise<RequestResult<ResolveZonePageAddressBySlugResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/v1/zones/{zoneId}/page-addresses/by-slug/{slug}",
+		...config,
+	}) as Promise<RequestResult<ResolveZonePageAddressBySlugResponses, ThrowOnError>>;
 }
 
 /**
@@ -3909,6 +4094,23 @@ export function releaseSlugRedirectWithPlatformAccess<ThrowOnError extends boole
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<RequestResult<ReleaseSlugRedirectWithPlatformAccessResponses, ThrowOnError>>;
+}
+
+/**
+ * @description Returns bounded metadata for one publicly visitable Unit. Adult-rated Units return only a noindex decision and never expose authored titles, summaries, descriptions, or images.
+ * @summary Get a sanitized public Unit SEO projection
+ * {@link /api/v1/units/by-id/:unitId/seo}
+ */
+export function getPublicUnitSeoProjection<ThrowOnError extends boolean = true>(
+	options: Options<GetPublicUnitSeoProjectionOptions, ThrowOnError>,
+): Promise<RequestResult<GetPublicUnitSeoProjectionResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/v1/units/by-id/{unitId}/seo",
+		...config,
+	}) as Promise<RequestResult<GetPublicUnitSeoProjectionResponses, ThrowOnError>>;
 }
 
 /**

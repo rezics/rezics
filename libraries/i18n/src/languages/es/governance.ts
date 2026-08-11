@@ -11,6 +11,7 @@ const { forms: postTerms } = esTerminology.post;
 export default {
 	title: "Gobernanza de la Unit",
 	open: "Abrir la configuración de gobernanza",
+	platformOpen: "Abrir la gobernanza de la plataforma",
 	accessInvitations: "Invitaciones de acceso",
 	receivedInvitations: "Invitaciones de acceso recibidas",
 	accessInvitationDescription: "No se concede ningún acceso hasta que se acepta la invitación.",
@@ -59,6 +60,9 @@ export default {
 		"unit.edit": "Editar todas las Units",
 		"platform.development_preview.access": "Acceder a vistas previas de desarrollo no publicadas",
 		"unit.governance.read": "Consultar la gobernanza de todas las Units",
+		"unit.merge.propose": "Proponer fusiones de Units",
+		"unit.merge.review": "Revisar fusiones de Units",
+		"unit.merge": "Fusionar Units directamente",
 		"unit.ownership.override": "Reasignar la titularidad de cualquier Unit",
 		"unit.content_license.manage": "Invalidar o restaurar licencias de contenido de Units",
 		"unit.delete": "Eliminar provisionalmente cualquier Unit",

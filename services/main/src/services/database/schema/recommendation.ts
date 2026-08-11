@@ -174,6 +174,7 @@ export const unitBestScore = pgTable(
 			table.unitUpdatedAt.desc().nullsFirst(),
 			table.unitId.desc().nullsFirst(),
 		),
+		index("unit_best_score_unit_merge_idx").on(table.unitId, table.snapshotId),
 		check("unit_best_score_positive_check", sql`${table.score} > 0`),
 	],
 );

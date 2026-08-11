@@ -21,6 +21,7 @@ import {
 	FileClock,
 	Gauge,
 	Handshake,
+	GitMerge,
 	KeyRound,
 	Menu,
 	ShieldCheck,
@@ -68,6 +69,11 @@ interface ConsoleWorkspaceModel {
 	readonly canUpdateTokenApiQuotas: boolean;
 	readonly canReadUnits: boolean;
 	readonly canReadOwnershipClaims: boolean;
+	readonly canReadUnitMerges: boolean;
+	readonly canProposeUnitMerges: boolean;
+	readonly canReviewUnitMerges: boolean;
+	readonly canMergeUnitsDirectly: boolean;
+	readonly currentProfileId: string;
 	readonly canDecideOwnershipClaims: boolean;
 	readonly canDeleteUnits: boolean;
 	readonly canRestoreUnits: boolean;
@@ -151,6 +157,10 @@ function ConsoleWorkspaceContent({ children }: { readonly children: ReactNode })
 	const canReadUsers = accessibleSectionIds.has("users");
 	const canReadUnits = accessibleSectionIds.has("units");
 	const canReadOwnershipClaims = accessibleSectionIds.has("ownership-claims");
+	const canReadUnitMerges = accessibleSectionIds.has("unit-merges");
+	const canProposeUnitMerges = capabilities.has("unit.merge.propose");
+	const canReviewUnitMerges = capabilities.has("unit.merge.review");
+	const canMergeUnitsDirectly = capabilities.has("unit.merge");
 	const canDecideOwnershipClaims = capabilities.has("unit.ownership.override");
 	const canDeleteUnits = capabilities.has("unit.delete");
 	const canRestoreUnits = capabilities.has("unit.restore");
@@ -200,6 +210,17 @@ function ConsoleWorkspaceContent({ children }: { readonly children: ReactNode })
 						label: labels.ownershipClaims.label,
 						description: labels.ownershipClaims.description,
 						icon: Handshake,
+					},
+				]
+			: []),
+		...(canReadUnitMerges
+			? [
+					{
+						id: "unit-merges" as const,
+						href: consoleSectionHref("unit-merges"),
+						label: labels.unitMerges.label,
+						description: labels.unitMerges.description,
+						icon: GitMerge,
 					},
 				]
 			: []),
@@ -260,6 +281,11 @@ function ConsoleWorkspaceContent({ children }: { readonly children: ReactNode })
 		canUpdateTokenApiQuotas,
 		canReadUnits,
 		canReadOwnershipClaims,
+		canReadUnitMerges,
+		canProposeUnitMerges,
+		canReviewUnitMerges,
+		canMergeUnitsDirectly,
+		currentProfileId: me.data.id,
 		canDecideOwnershipClaims,
 		canDeleteUnits,
 		canRestoreUnits,

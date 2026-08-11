@@ -3,7 +3,14 @@ import { and, eq, gt, inArray, isNotNull, isNull, or, sql } from "drizzle-orm";
 import { recordAuditEvent } from "../audit";
 import { BootstrapUnitIds } from "../bootstrap/manifest";
 import { database, type DatabaseExecutor, type DatabaseTransaction } from "../database";
-import { profile, unit, unitOwnership, unitSlugAddress } from "../database/schema";
+import {
+	profile,
+	unit,
+	unitMergeGraphLock,
+	unitMergeRedirect,
+	unitOwnership,
+	unitSlugAddress,
+} from "../database/schema";
 import {
 	GovernanceReasonCodeValues,
 	type UnitKind,
@@ -13,6 +20,7 @@ import {
 	UnitAlreadyDeleted,
 	UnitLifecycleChanged,
 	UnitLifecycleProtected,
+	UnitMergeRequestConflict,
 	UnitNotDeleted,
 } from "../api/governance/errors";
 import { UnitNotFound } from "./errors";
@@ -194,6 +202,21 @@ async function recordLifecycleAudit(
 	});
 }
 
+async function ensureNoActiveUnitMerge(tx: DatabaseTransaction, unitId: string): Promise<void> {
+	const [mergeLock] = await tx
+		.select({ unitId: unitMergeGraphLock.unitId })
+		.from(unitMergeGraphLock)
+		.where(eq(unitMergeGraphLock.unitId, unitId))
+		.limit(1);
+	if (mergeLock) throw new UnitMergeRequestConflict();
+}
+
+async function lockUnitMergeIdentity(tx: DatabaseTransaction, unitId: string): Promise<void> {
+	await tx.execute(
+		sql`select pg_advisory_xact_lock(hashtextextended('unit-merge:' || ${unitId}::text, 0))`,
+	);
+}
+
 export async function softDeletePlatformUnit(input: {
 	readonly unitId: string;
 	readonly actorProfileId: string;
@@ -202,7 +225,9 @@ export async function softDeletePlatformUnit(input: {
 	readonly note?: string;
 }): Promise<PlatformUnitLifecycleItem> {
 	return database.transaction(async (tx) => {
+		await lockUnitMergeIdentity(tx, input.unitId);
 		const current = await lockPlatformUnit(tx, input.unitId);
+		await ensureNoActiveUnitMerge(tx, current.id);
 		ensureDeletable(current.id, input.actorProfileId);
 		ensureExpectedUpdatedAt(current.updatedAt, input.expectedUpdatedAt);
 		if (current.deletedAt) throw new UnitAlreadyDeleted();
@@ -243,9 +268,17 @@ export async function restorePlatformUnit(input: {
 	readonly note?: string;
 }): Promise<PlatformUnitLifecycleItem> {
 	return database.transaction(async (tx) => {
+		await lockUnitMergeIdentity(tx, input.unitId);
 		const current = await lockPlatformUnit(tx, input.unitId);
+		await ensureNoActiveUnitMerge(tx, current.id);
 		ensureExpectedUpdatedAt(current.updatedAt, input.expectedUpdatedAt);
 		if (!current.deletedAt) throw new UnitNotDeleted();
+		const [redirect] = await tx
+			.select({ sourceUnitId: unitMergeRedirect.sourceUnitId })
+			.from(unitMergeRedirect)
+			.where(eq(unitMergeRedirect.sourceUnitId, current.id))
+			.limit(1);
+		if (redirect) throw new UnitMergeRequestConflict();
 
 		const now = new Date();
 		await tx

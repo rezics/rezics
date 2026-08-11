@@ -11,6 +11,7 @@ const { forms: postTerms } = jaTerminology.post;
 export default {
 	title: "ユニットガバナンス",
 	open: "ガバナンス設定を開く",
+	platformOpen: "プラットフォームガバナンスを開く",
 	accessInvitations: "アクセス招待",
 	receivedInvitations: "受け取ったアクセス招待",
 	accessInvitationDescription: "招待が承諾されるまでアクセスは許可されません。",
@@ -58,6 +59,9 @@ export default {
 		"unit.edit": "すべてのユニットを編集する",
 		"platform.development_preview.access": "未リリースの開発プレビューにアクセスする",
 		"unit.governance.read": "すべてのユニットのガバナンス情報を閲覧する",
+		"unit.merge.propose": "ユニットの統合を提案する",
+		"unit.merge.review": "ユニットの統合を審査する",
+		"unit.merge": "ユニットを直接統合する",
 		"unit.ownership.override": "任意のユニットの所有者を強制変更する",
 		"unit.content_license.manage": "ユニットのコンテンツライセンスを無効化または復元する",
 		"unit.delete": "任意のユニットを論理削除する",

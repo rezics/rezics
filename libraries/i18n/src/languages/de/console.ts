@@ -2,7 +2,9 @@ import { insert } from "native-i18n";
 
 import { deTerminology } from "@rezics/i18n/terminology/de";
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
+import units from "./units";
 
+const { forms: entityTerms } = deTerminology.entity;
 const { forms: realmTerms } = deTerminology.realm;
 const { forms: postTerms } = deTerminology.post;
 
@@ -34,6 +36,11 @@ export default {
 			label: "Eigentumsanträge",
 			description:
 				"Eigentumsanträge für öffentliche Units prüfen und die Verwaltungseigentümerschaft an die berechtigte Person zurückgeben.",
+		},
+		unitMerges: {
+			label: "Unit-Zusammenführungen",
+			description:
+				"Unumkehrbare Zusammenführungen von Unit-Identitäten mit vollständiger Prüfhistorie vorschlagen, prüfen, ausführen und wiederholen.",
 		},
 		moderation: {
 			label: "Globale Inhaltsmoderation",
@@ -76,6 +83,7 @@ export default {
 		deletedAt: "Vorläufig gelöscht am",
 		restore: "Unit wiederherstellen",
 		softDelete: "Unit vorläufig löschen",
+		merge: "Unit zusammenführen",
 		overrideOwnership: "Eigentümerschaft neu zuweisen",
 		ownershipPickerTitle: "Neuen Eigentümer auswählen",
 		ownershipPickerDescription:
@@ -116,6 +124,99 @@ export default {
 		}),
 		confirmRestore: "Wiederherstellung bestätigen",
 		confirmSoftDelete: "Vorläufiges Löschen bestätigen",
+	},
+	unitMerges: {
+		newMerge: "Neue Zusammenführung",
+		stateFilter: "Zusammenführungsstatus",
+		allStates: "Alle Status",
+		states: {
+			pending_review: "Prüfung ausstehend",
+			accepted: "Eingereiht",
+			rejected: "Abgelehnt",
+			expired: "Abgelaufen",
+			superseded: "Ersetzt",
+			executing: "Wird ausgeführt",
+			completed: "Abgeschlossen",
+			failed: "Fehlgeschlagen",
+		},
+		listLabel: "Liste der Unit-Zusammenführungen",
+		untitled: "Unbenannte Unit",
+		empty: "Für diesen Status gibt es keine Unit-Zusammenführungen.",
+		loadMore: "Mehr laden",
+		source: "Quellidentität",
+		target: "Kanonisches Ziel",
+		openUnit: "Unit öffnen",
+		kind: "Unit-Art",
+		kinds: {
+			book: units.types.book,
+			software: units.types.software,
+			media: units.types.media,
+			entity: entityTerms.label,
+		},
+		mode: "Entscheidungsweg",
+		modes: {
+			reviewed: "Prüfung durch vier Personen",
+			privileged_direct: "Direkte privilegierte Zusammenführung",
+		},
+		proposer: "Vorgeschlagen von",
+		approvalProgress: insert("{{count}} von {{required}} Zustimmungen", {
+			count: Number,
+			required: Number,
+		}),
+		graphActions: {
+			none: "Keine Änderung am Variant-Graphen erforderlich.",
+			detach_source: "Quell-Variant von seiner aktuellen Main-Unit trennen.",
+			reparent_source_variants_to_target: "Variants der Quelle dem Ziel unterordnen.",
+			reparent_source_variants_to_target_main:
+				"Variants der Quelle der Main-Unit des Ziels unterordnen.",
+			promote_target_from_source:
+				"Ziel-Variant hochstufen und die übrigen Quell-Variants darunter verschieben.",
+		},
+		operation: "Konvergenz der Referenzen",
+		operationStates: {
+			pending: "Eingereiht",
+			processing: "In Bearbeitung",
+			retry_wait: "Wartet auf Wiederholung",
+			completed: "Abgeschlossen",
+			failed: "Manuelle Wiederholung erforderlich",
+		},
+		processedRows: insert("{{count}} Referenzen verarbeitet", { count: Number }),
+		reviews: "Prüfungen",
+		decisions: { approve: "Zugestimmt", reject: "Abgelehnt" },
+		noReviews: "Noch keine Prüfung abgegeben.",
+		approve: "Zustimmen",
+		reject: "Ablehnen",
+		retry: "Vorgang wiederholen",
+		selectRequest: "Zusammenführung auswählen",
+		selectRequestDescription:
+			"Wähle einen Antrag aus, um sein unveränderliches Manifest, die Prüfungen und den Ausführungsstatus einzusehen.",
+		createTitle: "Eine Unit-Identität mit einer anderen zusammenführen",
+		createDescription:
+			"Die Vorprüfung validiert Art, aktuelle Revisionen und Variant-Graph, bevor ein Antrag erstellt wird.",
+		sourceId: `Quell-Unit-${verbatimTerms.id.value}`,
+		targetId: `Ziel-Unit-${verbatimTerms.id.value}`,
+		preflight: "Vorprüfung ausführen",
+		irreversibleWarning:
+			"Die Annahme ist unumkehrbar. Die Quelle wird zu einer dauerhaften Weiterleitung und alle aktiven Referenzen werden auf das Ziel umgestellt.",
+		reason: "Verwaltungsgrund",
+		internalNote: "Interne Notiz (optional)",
+		notePlaceholder:
+			"Belege für das Duplikat, Prüfquellen und die Wahl des kanonischen Ziels festhalten.",
+		confirmSource: `Quell-Unit-${verbatimTerms.id.value} erneut eingeben`,
+		confirmTarget: `Ziel-Unit-${verbatimTerms.id.value} erneut eingeben`,
+		submitForReview: "Zur Vier-Personen-Prüfung senden",
+		mergeDirectly: "Direkt zusammenführen",
+		approveTitle: "Dieser Unit-Zusammenführung zustimmen?",
+		approveDescription:
+			"Deine Zustimmung ist an das angezeigte Manifest gebunden. Die vierte Zustimmung nimmt die unumkehrbare Zusammenführung atomar an.",
+		rejectTitle: "Diese Unit-Zusammenführung ablehnen?",
+		rejectDescription:
+			"Eine Ablehnung schließt diesen Antrag endgültig. Eine privilegierte Übersteuerung muss einen separaten Direktantrag erstellen.",
+		reviewNote: "Prüfnotiz (optional)",
+		reviewNotePlaceholder: "Geprüfte Belege und Entscheidungsgrundlage festhalten.",
+		confirmRequest: `Zusammenführungsantrag-${verbatimTerms.id.value} zur Bestätigung eingeben`,
+		confirmApprove: "Zustimmung bestätigen",
+		confirmReject: "Ablehnung bestätigen",
 	},
 	ownershipClaims: {
 		stateFilter: "Antragsstatus",

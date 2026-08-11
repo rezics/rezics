@@ -11,6 +11,7 @@ const { forms: postTerms } = enTerminology.post;
 export default {
 	title: "Unit governance",
 	open: "Open governance settings",
+	platformOpen: "Open platform governance",
 	accessInvitations: "Access invitations",
 	receivedInvitations: "Received access invitations",
 	accessInvitationDescription: "No access is granted until the invitation is accepted.",
@@ -59,6 +60,9 @@ export default {
 		"unit.edit": "Edit every Unit",
 		"platform.development_preview.access": "Access unreleased development previews",
 		"unit.governance.read": "Inspect governance data for every Unit",
+		"unit.merge.propose": "Propose Unit merges",
+		"unit.merge.review": "Review Unit merges",
+		"unit.merge": "Merge Units directly",
 		"unit.ownership.override": "Override the owner of any Unit",
 		"unit.content_license.manage": "Invalidate or restore Unit content licenses",
 		"unit.delete": "Soft-delete any Unit",

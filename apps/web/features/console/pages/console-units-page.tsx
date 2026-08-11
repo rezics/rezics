@@ -37,11 +37,13 @@ import {
 } from "@rezics/ui";
 import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { ArchiveRestore, Search, Trash2, UserRoundCog } from "lucide-react";
+import { ArchiveRestore, GitMerge, Search, Trash2, UserRoundCog } from "lucide-react";
+import { useSearchParams } from "next/navigation";
 import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
+import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import { useConsoleWorkspace } from "../components/console-workspace";
 
 type PlatformUnit = GetApiGovernancePlatformUnitsStatus200["items"][number];
@@ -58,11 +60,17 @@ const OwnershipGovernanceReasonCodes = Object.values(
 );
 
 export function ConsoleUnitsPage() {
+	const searchParams = useSearchParams();
 	const { locale, t } = useTranslation(["console", "errors", "realms"]);
-	const { canReadUnits, canDeleteUnits, canRestoreUnits, canOverrideUnitOwnership } =
-		useConsoleWorkspace();
+	const {
+		canReadUnits,
+		canDeleteUnits,
+		canRestoreUnits,
+		canOverrideUnitOwnership,
+		canProposeUnitMerges,
+	} = useConsoleWorkspace();
 	const queryClient = useQueryClient();
-	const [search, setSearch] = useState("");
+	const [search, setSearch] = useState(() => searchParams.get("query")?.trim() ?? "");
 	const deferredSearch = useDeferredValue(search.trim());
 	const [state, setState] = useState<UnitListState>("active");
 	const [selectedUnitId, setSelectedUnitId] = useState("");
@@ -299,6 +307,19 @@ export function ConsoleUnitsPage() {
 								) : null}
 							</dl>
 							<div className="flex flex-wrap gap-3">
+								{canProposeUnitMerges &&
+								!selected.deletedAt &&
+								(selected.kind === "book" ||
+									selected.kind === "software" ||
+									selected.kind === "media" ||
+									selected.kind === "entity") ? (
+									<Button asChild type="button" variant="outline">
+										<Link href={`/console/unit-merges?source=${selected.id}`}>
+											<GitMerge />
+											{t.console.units.merge}
+										</Link>
+									</Button>
+								) : null}
 								{canOverrideUnitOwnership ? <OwnershipOverrideControl item={selected} /> : null}
 								{selected.deletedAt ? (
 									canRestoreUnits ? (

@@ -6,6 +6,7 @@ export const ConsoleSectionRequiredCapability = {
 	users: "platform.user.read",
 	units: "unit.governance.read",
 	"ownership-claims": "unit.governance.read",
+	"unit-merges": "unit.governance.read",
 	moderation: "platform.moderate",
 	audit: "platform.audit.read",
 	"api-quotas": "platform.api_quota_policy.read",

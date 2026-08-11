@@ -145,6 +145,9 @@ export const PlatformCapabilityValues = [
 	"unit.edit",
 	DevelopmentPreviewCapability,
 	"unit.governance.read",
+	"unit.merge.propose",
+	"unit.merge.review",
+	"unit.merge",
 	"unit.ownership.override",
 	"unit.content_license.manage",
 	"unit.delete",
@@ -237,6 +240,24 @@ export const PlatformCapabilityDefinitions = {
 		action: "read",
 		rationale:
 			"Inspects platform-wide Unit lifecycle and ownership state without authorizing mutations.",
+	},
+	"unit.merge.propose": {
+		resource: "unit.merge",
+		action: "propose",
+		rationale:
+			"Creates an irreversible Unit merge request without granting approval or execution authority.",
+	},
+	"unit.merge.review": {
+		resource: "unit.merge",
+		action: "review",
+		rationale:
+			"Approves or vetoes another Profile's irreversible Unit merge request without granting direct execution authority.",
+	},
+	"unit.merge": {
+		resource: "unit",
+		action: "merge",
+		rationale:
+			"Directly accepts an irreversible Unit identity merge and administers retryable execution.",
 	},
 	"unit.ownership.override": {
 		resource: "unit.ownership",
@@ -405,6 +426,9 @@ export const PlatformCapabilityImplications: Partial<
 		"platform.api_quota_policy.read",
 	],
 	"unit.ownership.override": ["unit.governance.read"],
+	"unit.merge.propose": ["unit.governance.read"],
+	"unit.merge.review": ["unit.governance.read"],
+	"unit.merge": ["unit.merge.propose", "unit.merge.review"],
 	"unit.content_license.manage": ["unit.governance.read"],
 	"unit.delete": ["unit.governance.read"],
 	"unit.restore": ["unit.governance.read"],

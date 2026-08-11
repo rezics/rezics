@@ -161,6 +161,25 @@ export default {
 	UnitLifecycleProtected: "Diese geschützte Unit kann nicht vorläufig gelöscht werden.",
 	UnitAlreadyDeleted: "Diese Unit wurde bereits vorläufig gelöscht.",
 	UnitNotDeleted: "Diese Unit ist derzeit nicht vorläufig gelöscht.",
+	UnitMergeNotFound: "Dieser Antrag auf Unit-Zusammenführung wurde nicht gefunden.",
+	UnitMergeConfirmationInvalid: "Die Bestätigung für Quelle oder Ziel stimmt nicht überein.",
+	UnitMergeKindIneligible: "Diese Unit-Art kann nicht zusammengeführt werden.",
+	UnitMergeKindMismatch: "Quell- und Ziel-Unit müssen dieselbe Art haben.",
+	UnitMergeRequestConflict:
+		"Für die Quell-Unit besteht bereits eine aktive oder abgeschlossene Zusammenführung.",
+	UnitMergeIdempotencyConflict:
+		"Dieser Wiederholungsschlüssel wurde bereits für eine andere Zusammenführung verwendet.",
+	UnitMergeManifestStale:
+		"Quelle, Ziel oder Variant-Graph wurden geändert. Führe die Vorprüfung erneut aus.",
+	UnitMergeReviewSelfForbidden:
+		"Du kannst eine selbst vorgeschlagene Unit-Zusammenführung nicht prüfen.",
+	UnitMergeReviewDuplicate: "Du hast diese Unit-Zusammenführung bereits geprüft.",
+	UnitMergeReviewFingerprintMismatch:
+		"Diese Prüfung bezieht sich auf ein älteres Zusammenführungsmanifest.",
+	UnitMergeRequestNotPending: "Diese Unit-Zusammenführung wartet nicht mehr auf Prüfung.",
+	UnitMergeRequestExpired: "Dieser Antrag auf Unit-Zusammenführung ist abgelaufen.",
+	UnitMergeRetryUnavailable:
+		"Diese Unit-Zusammenführung kann in ihrem aktuellen Status nicht wiederholt werden.",
 	InvalidPaginationCursor: "Dieser Seitenlink ist ungültig oder abgelaufen.",
 	BookNotFound: "Dieses Buch wurde nicht gefunden.",
 	MediaNotFound: "Dieses Medienelement wurde nicht gefunden.",

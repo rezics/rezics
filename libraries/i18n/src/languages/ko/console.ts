@@ -2,7 +2,9 @@ import { insert } from "native-i18n";
 
 import { koTerminology } from "@rezics/i18n/terminology/ko";
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
+import units from "./units";
 
+const { forms: entityTerms } = koTerminology.entity;
 const { forms: realmTerms } = koTerminology.realm;
 const { forms: postTerms } = koTerminology.post;
 
@@ -33,6 +35,11 @@ export default {
 		ownershipClaims: {
 			label: "소유권 요청",
 			description: "공개 유닛의 소유권 요청을 검토하고 적절한 요청자에게 관리 소유권을 돌려줍니다.",
+		},
+		unitMerges: {
+			label: "유닛 병합",
+			description:
+				"완전한 감사 기록과 함께 되돌릴 수 없는 유닛 식별자 병합을 제안, 검토, 실행하고 재시도합니다.",
 		},
 		moderation: {
 			label: "전역 콘텐츠 거버넌스",
@@ -74,6 +81,7 @@ export default {
 		deletedAt: "소프트 삭제 시각",
 		restore: "유닛 복원",
 		softDelete: "유닛 소프트 삭제",
+		merge: "유닛 병합",
 		overrideOwnership: "소유권 강제 변경",
 		ownershipPickerTitle: "새 소유자 선택",
 		ownershipPickerDescription:
@@ -111,6 +119,93 @@ export default {
 		}),
 		confirmRestore: "복원 확인",
 		confirmSoftDelete: "소프트 삭제 확인",
+	},
+	unitMerges: {
+		newMerge: "새 병합",
+		stateFilter: "병합 상태",
+		allStates: "모든 상태",
+		states: {
+			pending_review: "검토 대기",
+			accepted: "대기열에 등록됨",
+			rejected: "거부됨",
+			expired: "만료됨",
+			superseded: "대체됨",
+			executing: "실행 중",
+			completed: "완료됨",
+			failed: "실패",
+		},
+		listLabel: "유닛 병합 요청 목록",
+		untitled: "제목 없는 유닛",
+		empty: "현재 상태에 해당하는 유닛 병합이 없습니다.",
+		loadMore: "더 불러오기",
+		source: "원본 식별자",
+		target: "정식 대상",
+		openUnit: "유닛 열기",
+		kind: "유닛 종류",
+		kinds: {
+			book: units.types.book,
+			software: units.types.software,
+			media: units.types.media,
+			entity: entityTerms.label,
+		},
+		mode: "결정 경로",
+		modes: { reviewed: "4인 검토", privileged_direct: "고권한 직접 병합" },
+		proposer: "제안자",
+		approvalProgress: insert("승인 {{required}}건 중 {{count}}건", {
+			count: Number,
+			required: Number,
+		}),
+		graphActions: {
+			none: "변형 관계도 변경이 필요하지 않습니다.",
+			detach_source: "원본 변형본을 현재 기준본에서 분리합니다.",
+			reparent_source_variants_to_target: "원본의 변형본을 대상 아래로 이동합니다.",
+			reparent_source_variants_to_target_main: "원본의 변형본을 대상의 기준본 아래로 이동합니다.",
+			promote_target_from_source:
+				"대상 변형본을 기준본으로 승격하고 원본의 다른 변형본을 그 아래로 이동합니다.",
+		},
+		operation: "참조 수렴",
+		operationStates: {
+			pending: "대기열에 등록됨",
+			processing: "처리 중",
+			retry_wait: "재시도 대기",
+			completed: "완료됨",
+			failed: "수동 재시도 필요",
+		},
+		processedRows: insert("참조 {{count}}건 처리됨", { count: Number }),
+		reviews: "검토 기록",
+		decisions: { approve: "승인", reject: "거부" },
+		noReviews: "제출된 검토가 없습니다.",
+		approve: "승인",
+		reject: "거부",
+		retry: "작업 재시도",
+		selectRequest: "병합 요청 선택",
+		selectRequestDescription:
+			"요청을 선택하여 변경 불가능한 병합 명세, 검토 기록, 실행 상태를 확인합니다.",
+		createTitle: "한 유닛 식별자를 다른 식별자로 병합",
+		createDescription: "요청을 만들기 전에 종류, 현재 리비전, 변형 관계도를 사전 검사합니다.",
+		sourceId: `원본 유닛 ${verbatimTerms.id.value}`,
+		targetId: `대상 유닛 ${verbatimTerms.id.value}`,
+		preflight: "사전 검사 실행",
+		irreversibleWarning:
+			"수락 후에는 되돌릴 수 없습니다. 원본은 영구 리디렉션이 되며 모든 활성 참조가 대상으로 수렴합니다.",
+		reason: "관리 사유",
+		internalNote: "내부 메모(선택 사항)",
+		notePlaceholder: "중복 근거, 확인한 출처, 이 대상을 정식 항목으로 선택한 이유를 기록하세요.",
+		confirmSource: `원본 유닛 ${verbatimTerms.id.value} 다시 입력`,
+		confirmTarget: `대상 유닛 ${verbatimTerms.id.value} 다시 입력`,
+		submitForReview: "4인 검토로 제출",
+		mergeDirectly: "직접 병합",
+		approveTitle: "이 유닛 병합을 승인할까요?",
+		approveDescription:
+			"승인은 표시된 병합 명세에 연결됩니다. 네 번째 승인이 되돌릴 수 없는 병합을 원자적으로 수락합니다.",
+		rejectTitle: "이 유닛 병합을 거부할까요?",
+		rejectDescription:
+			"한 번의 거부로 요청이 영구 종료됩니다. 고권한 재정의는 별도의 직접 병합 요청을 만들어야 합니다.",
+		reviewNote: "검토 메모(선택 사항)",
+		reviewNotePlaceholder: "확인한 근거와 결정 이유를 기록하세요.",
+		confirmRequest: `확인하려면 병합 요청 ${verbatimTerms.id.value} 입력`,
+		confirmApprove: "승인 확인",
+		confirmReject: "거부 확인",
 	},
 	ownershipClaims: {
 		stateFilter: "요청 상태",

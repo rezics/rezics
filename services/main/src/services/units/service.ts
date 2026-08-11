@@ -47,6 +47,7 @@ import {
 	toUnitLocalizationStorage,
 	unitLocalizationImageAssetReferences,
 } from "./localization";
+import { resolveCanonicalUnitId } from "./merge/canonical";
 import {
 	book,
 	audio,
@@ -438,10 +439,11 @@ export async function getUnit(
 	authorization: Authorization,
 	localizationLanguages: readonly ContentLanguage[] = [],
 ): Promise<UnitDetail> {
+	const canonicalUnitId = await resolveCanonicalUnitId(database, unitId);
 	const [base] = await database
 		.select()
 		.from(unit)
-		.where(and(eq(unit.id, unitId), eq(unit.kind, kind), isNull(unit.deletedAt)))
+		.where(and(eq(unit.id, canonicalUnitId), eq(unit.kind, kind), isNull(unit.deletedAt)))
 		.limit(1);
 	if (!base) throw new UnitNotFound(kind);
 	await authorization.unit.ensureCanRead(base.id, () => new UnitNotFound(kind));

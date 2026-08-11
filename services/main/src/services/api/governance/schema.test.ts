@@ -6,8 +6,10 @@ import {
 	CreateAccountEnforcementBody,
 	CreateContentGovernanceActionBody,
 	CreateUnitAccessInvitationBody,
+	CreateReviewedUnitMergeBody,
 	OverrideUnitOwnershipBody,
 	ReplaceUnitSubjectAccessBody,
+	ReviewUnitMergeBody,
 	RevokeAccountEnforcementBody,
 	TransferUnitOwnershipBody,
 	UpdateContentReviewCaseBody,
@@ -24,6 +26,35 @@ const rule = {
 };
 
 describe("adjacent governance API contracts", () => {
+	it("requires immutable merge revisions, exact confirmations, and a fingerprinted review", () => {
+		const command = {
+			sourceUnitId: profileId,
+			targetUnitId: secondProfileId,
+			confirmationSourceUnitId: profileId,
+			confirmationTargetUnitId: secondProfileId,
+			expectedSourceUpdatedAt: "2026-08-11T00:00:00.000Z",
+			expectedTargetUpdatedAt: "2026-08-11T00:00:00.000Z",
+			idempotencyKey: "merge-command-1",
+			reasonCode: "duplicate",
+		};
+		expect(Check(CreateReviewedUnitMergeBody, command)).toBe(true);
+		expect(
+			Check(CreateReviewedUnitMergeBody, { ...command, expectedSourceUpdatedAt: undefined }),
+		).toBe(false);
+		expect(
+			Check(ReviewUnitMergeBody, {
+				decision: "approve",
+				requestFingerprint: "a".repeat(64),
+			}),
+		).toBe(true);
+		expect(
+			Check(ReviewUnitMergeBody, {
+				decision: "approve",
+				requestFingerprint: "stale",
+			}),
+		).toBe(false);
+	});
+
 	it("keeps review-case prose in a Post-backed internal note", () => {
 		expect(Check(UpdateContentReviewCaseBody, { internalNote })).toBe(true);
 		expect(Check(UpdateContentReviewCaseBody, { reason: "copied rationale" })).toBe(false);

@@ -11,6 +11,7 @@ const { forms: postTerms } = koTerminology.post;
 export default {
 	title: "유닛 관리",
 	open: "관리 설정 열기",
+	platformOpen: "플랫폼 관리 열기",
 	accessInvitations: "접근 초대",
 	receivedInvitations: "받은 접근 초대",
 	accessInvitationDescription: "초대가 수락될 때까지 접근이 허용되지 않습니다.",
@@ -58,6 +59,9 @@ export default {
 		"unit.edit": "모든 유닛 편집",
 		"platform.development_preview.access": "출시되지 않은 개발 미리보기 접근",
 		"unit.governance.read": "모든 유닛의 관리 정보 보기",
+		"unit.merge.propose": "유닛 병합 제안",
+		"unit.merge.review": "유닛 병합 검토",
+		"unit.merge": "유닛 직접 병합",
 		"unit.ownership.override": "모든 유닛의 소유자 강제 변경",
 		"unit.content_license.manage": "유닛 콘텐츠 라이선스 무효화 또는 복원",
 		"unit.delete": "모든 유닛 소프트 삭제",

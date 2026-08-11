@@ -1,0 +1,73 @@
+import { describe, expect, it } from "vitest";
+
+import { planUnitMergeGraph } from "./manifest";
+
+const sourceUnitId = "0195c49b-8f3b-7e18-8c45-c2f36ee8d337";
+const targetUnitId = "0195c49b-8f3b-7e18-8c45-c2f36ee8d338";
+const otherMainUnitId = "0195c49b-8f3b-7e18-8c45-c2f36ee8d339";
+
+describe("Unit merge Variant graph planning", () => {
+	it("does not mutate the graph for a standalone source", () => {
+		expect(
+			planUnitMergeGraph({
+				sourceUnitId,
+				targetUnitId,
+				source: { role: "standalone", mainUnitId: null },
+				target: { role: "variant", mainUnitId: otherMainUnitId },
+			}),
+		).toMatchObject({ action: "none", destinationMainUnitId: null });
+	});
+
+	it("detaches a source Variant regardless of the target role", () => {
+		expect(
+			planUnitMergeGraph({
+				sourceUnitId,
+				targetUnitId,
+				source: { role: "variant", mainUnitId: otherMainUnitId },
+				target: { role: "main", mainUnitId: null },
+			}),
+		).toMatchObject({ action: "detach_source", destinationMainUnitId: null });
+	});
+
+	it("promotes a target Variant that belongs to the source Main", () => {
+		expect(
+			planUnitMergeGraph({
+				sourceUnitId,
+				targetUnitId,
+				source: { role: "main", mainUnitId: null },
+				target: { role: "variant", mainUnitId: sourceUnitId },
+			}),
+		).toMatchObject({
+			action: "promote_target_from_source",
+			destinationMainUnitId: targetUnitId,
+		});
+	});
+
+	it("moves source Variants under an unrelated target Variant's Main", () => {
+		expect(
+			planUnitMergeGraph({
+				sourceUnitId,
+				targetUnitId,
+				source: { role: "main", mainUnitId: null },
+				target: { role: "variant", mainUnitId: otherMainUnitId },
+			}),
+		).toMatchObject({
+			action: "reparent_source_variants_to_target_main",
+			destinationMainUnitId: otherMainUnitId,
+		});
+	});
+
+	it("moves source Variants directly under a standalone target", () => {
+		expect(
+			planUnitMergeGraph({
+				sourceUnitId,
+				targetUnitId,
+				source: { role: "main", mainUnitId: null },
+				target: { role: "standalone", mainUnitId: null },
+			}),
+		).toMatchObject({
+			action: "reparent_source_variants_to_target",
+			destinationMainUnitId: targetUnitId,
+		});
+	});
+});

@@ -161,6 +161,22 @@ export default {
 	UnitLifecycleProtected: "Cette Unit protégée ne peut pas être supprimée provisoirement.",
 	UnitAlreadyDeleted: "Cette Unit est déjà supprimée provisoirement.",
 	UnitNotDeleted: "Cette Unit n’est pas supprimée provisoirement.",
+	UnitMergeNotFound: "Cette demande de fusion d’Units est introuvable.",
+	UnitMergeConfirmationInvalid: "La confirmation de la source ou de la cible ne correspond pas.",
+	UnitMergeKindIneligible: "Ce type d’Unit ne peut pas être fusionné.",
+	UnitMergeKindMismatch: "Les Units source et cible doivent être du même type.",
+	UnitMergeRequestConflict: "La Unit source possède déjà une fusion active ou terminée.",
+	UnitMergeIdempotencyConflict:
+		"Cette clé de nouvelle tentative a déjà servi pour une autre fusion.",
+	UnitMergeManifestStale:
+		"La source, la cible ou le graphe des Variants a changé. Relancez le contrôle préalable.",
+	UnitMergeReviewSelfForbidden:
+		"Vous ne pouvez pas examiner une fusion d’Units que vous avez proposée.",
+	UnitMergeReviewDuplicate: "Vous avez déjà examiné cette fusion d’Units.",
+	UnitMergeReviewFingerprintMismatch: "Cet examen se rapporte à un ancien manifeste de fusion.",
+	UnitMergeRequestNotPending: "Cette fusion d’Units n’attend plus d’examen.",
+	UnitMergeRequestExpired: "Cette demande de fusion d’Units a expiré.",
+	UnitMergeRetryUnavailable: "Cette fusion d’Units ne peut pas être relancée dans son état actuel.",
 	InvalidPaginationCursor: "Ce lien de page n’est pas valide ou a expiré.",
 	BookNotFound: "Ce livre est introuvable.",
 	MediaNotFound: "Cet élément multimédia est introuvable.",

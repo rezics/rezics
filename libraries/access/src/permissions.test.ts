@@ -167,6 +167,12 @@ describe("permission schema", () => {
 		expect(
 			expandPlatformCapabilities(["unit.ownership.override", "unit.delete", "unit.restore"]),
 		).toEqual(["unit.governance.read", "unit.ownership.override", "unit.delete", "unit.restore"]);
+		expect(expandPlatformCapabilities(["unit.merge"])).toEqual([
+			"unit.governance.read",
+			"unit.merge.propose",
+			"unit.merge.review",
+			"unit.merge",
+		]);
 	});
 });
 

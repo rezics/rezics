@@ -16,6 +16,7 @@ import { ensureSubjectPostTargetingAllowed } from "./targeting";
 import { createProfilePublisherAttribution } from "../units/attribution";
 import { insertUnit } from "../units/create";
 import { recordUnitRevision } from "../units/history";
+import { resolveCanonicalUnitId } from "../units/merge/canonical";
 
 export type CreateWikiPostInput = {
 	readonly profileId: string;
@@ -43,8 +44,9 @@ export async function createWikiPost(
 	tx: DatabaseTransaction,
 	input: CreateWikiPostInput,
 ): Promise<{ readonly id: string; readonly revisionId: string }> {
-	if (input.subjectId)
-		await input.authorization.entity.ensureSubjectAssociationAllowedIfEntity(tx, input.subjectId);
+	const subjectId = input.subjectId ? await resolveCanonicalUnitId(tx, input.subjectId) : undefined;
+	if (subjectId)
+		await input.authorization.entity.ensureSubjectAssociationAllowedIfEntity(tx, subjectId);
 	const created = await insertUnit(tx, {
 		kind: "post",
 		status: "published",
@@ -54,13 +56,13 @@ export async function createWikiPost(
 	});
 	await ensureSubjectPostTargetingAllowed(tx, {
 		sourcePostId: created.id,
-		subjectUnitId: input.subjectId,
+		subjectUnitId: subjectId,
 		realmIds: input.publishRealmIds,
 	});
 	await tx.insert(post).values({
 		id: created.id,
 		kind: "wiki",
-		subjectUnitId: input.subjectId,
+		subjectUnitId: subjectId,
 	});
 	await tx.insert(unitLocalization).values({
 		unitId: created.id,

@@ -51,6 +51,7 @@ import {
 import unitAccessRoutes from "./unit-access";
 import unitAccessInvitationRoutes from "./unit-access-invitations";
 import unitLifecycleRoutes from "./unit-lifecycle";
+import unitMergeRoutes from "./unit-merges";
 import ownershipClaimRoutes from "./ownership-claims";
 import {
 	executeAuthorizedContentGovernanceAction,
@@ -159,6 +160,7 @@ export default new Elysia({ prefix: "/governance" })
 	.use(unitAccessRoutes)
 	.use(unitAccessInvitationRoutes)
 	.use(unitLifecycleRoutes)
+	.use(unitMergeRoutes)
 	.use(ownershipClaimRoutes)
 	.get(
 		"/notes/:postId",

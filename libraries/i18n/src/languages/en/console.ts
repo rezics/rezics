@@ -2,7 +2,9 @@ import { insert } from "native-i18n";
 
 import { enTerminology } from "@rezics/i18n/terminology/en";
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
+import units from "./units";
 
+const { forms: entityTerms } = enTerminology.entity;
 const { forms: realmTerms } = enTerminology.realm;
 const { forms: postTerms } = enTerminology.post;
 
@@ -35,6 +37,11 @@ export default {
 			label: "Ownership claims",
 			description:
 				"Review public-entry ownership claims and return management ownership to the appropriate claimant.",
+		},
+		unitMerges: {
+			label: "Unit merges",
+			description:
+				"Propose, review, execute, and retry irreversible Unit identity merges with a complete audit trail.",
 		},
 		moderation: {
 			label: "Global content governance",
@@ -77,6 +84,7 @@ export default {
 		deletedAt: "Soft-deleted at",
 		restore: "Restore Unit",
 		softDelete: "Soft-delete Unit",
+		merge: "Merge Unit",
 		overrideOwnership: "Override ownership",
 		ownershipPickerTitle: "Select a new owner",
 		ownershipPickerDescription:
@@ -117,6 +125,98 @@ export default {
 		}),
 		confirmRestore: "Confirm restoration",
 		confirmSoftDelete: "Confirm soft-deletion",
+	},
+	unitMerges: {
+		newMerge: "New merge",
+		stateFilter: "Merge state",
+		allStates: "All states",
+		states: {
+			pending_review: "Pending review",
+			accepted: "Queued",
+			rejected: "Rejected",
+			expired: "Expired",
+			superseded: "Superseded",
+			executing: "Executing",
+			completed: "Completed",
+			failed: "Failed",
+		},
+		listLabel: "Unit merge request list",
+		untitled: "Untitled Unit",
+		empty: "No Unit merges match the current state.",
+		loadMore: "Load more",
+		source: "Source identity",
+		target: "Canonical target",
+		openUnit: "Open Unit",
+		kind: "Unit kind",
+		kinds: {
+			book: units.types.book,
+			software: units.types.software,
+			media: units.types.media,
+			entity: entityTerms.label,
+		},
+		mode: "Decision path",
+		modes: {
+			reviewed: "Four-person review",
+			privileged_direct: "Administrative direct merge",
+		},
+		proposer: "Proposed by",
+		approvalProgress: insert("{{count}} of {{required}} approvals", {
+			count: Number,
+			required: Number,
+		}),
+		graphActions: {
+			none: "No Variant graph change is required.",
+			detach_source: "Detach the source Variant from its current Main.",
+			reparent_source_variants_to_target: "Move source Variants under the target.",
+			reparent_source_variants_to_target_main: "Move source Variants under the target’s Main.",
+			promote_target_from_source:
+				"Promote the target Variant and move the source’s other Variants under it.",
+		},
+		operation: "Reference convergence",
+		operationStates: {
+			pending: "Queued",
+			processing: "Processing",
+			retry_wait: "Waiting to retry",
+			completed: "Completed",
+			failed: "Manual retry required",
+		},
+		processedRows: insert("{{count}} references processed", { count: Number }),
+		reviews: "Reviews",
+		decisions: { approve: "Approved", reject: "Rejected" },
+		noReviews: "No reviews have been submitted.",
+		approve: "Approve",
+		reject: "Reject",
+		retry: "Retry operation",
+		selectRequest: "Select a merge request",
+		selectRequestDescription:
+			"Choose a request to inspect its immutable manifest, reviews, and execution state.",
+		createTitle: "Merge one Unit identity into another",
+		createDescription:
+			"Preflight validates kind, current revisions, and the Variant graph before any request is created.",
+		sourceId: `Source Unit ${verbatimTerms.id.value}`,
+		targetId: `Target Unit ${verbatimTerms.id.value}`,
+		preflight: "Run preflight",
+		irreversibleWarning:
+			"Acceptance is irreversible. The source becomes a permanent redirect and all live references converge on the target.",
+		reason: "Governance reason",
+		internalNote: "Internal note (optional)",
+		notePlaceholder:
+			"Record duplicate evidence, verification sources, and why this target is canonical.",
+		confirmSource: `Re-enter the source Unit ${verbatimTerms.id.value}`,
+		confirmTarget: `Re-enter the target Unit ${verbatimTerms.id.value}`,
+		submitForReview: "Submit for four reviews",
+		mergeDirectly: "Merge directly",
+		approveTitle: "Approve this Unit merge?",
+		approveDescription:
+			"Your approval is bound to the displayed manifest. The fourth approval atomically accepts the irreversible merge.",
+		rejectTitle: "Reject this Unit merge?",
+		rejectDescription:
+			"One rejection closes this request permanently. A privileged override must create a separate direct request.",
+		reviewNote: "Review note (optional)",
+		reviewNotePlaceholder: "Record the evidence checked and the basis for this decision.",
+		confirmRequest: `Enter the merge request ${verbatimTerms.id.value} to confirm`,
+		confirmApprove: "Confirm approval",
+		confirmReject: "Confirm rejection",
 	},
 	ownershipClaims: {
 		stateFilter: "Claim state",

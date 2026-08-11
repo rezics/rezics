@@ -2,7 +2,9 @@ import { insert } from "native-i18n";
 
 import { frTerminology } from "@rezics/i18n/terminology/fr";
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
+import units from "./units";
 
+const { forms: entityTerms } = frTerminology.entity;
 const { forms: realmTerms } = frTerminology.realm;
 const { forms: postTerms } = frTerminology.post;
 
@@ -35,6 +37,11 @@ export default {
 			label: "Revendications de propriété",
 			description:
 				"Examinez les revendications portant sur les Units publiques et restituez leur gestion au demandeur légitime.",
+		},
+		unitMerges: {
+			label: "Fusions d’Units",
+			description:
+				"Proposer, examiner, exécuter et relancer les fusions irréversibles d’identités d’Unit avec une piste d’audit complète.",
 		},
 		moderation: {
 			label: "Gouvernance globale des contenus",
@@ -77,6 +84,7 @@ export default {
 		deletedAt: "Suppression provisoire",
 		restore: "Restaurer la Unit",
 		softDelete: "Supprimer provisoirement la Unit",
+		merge: "Fusionner la Unit",
 		overrideOwnership: "Réattribuer la propriété",
 		ownershipPickerTitle: "Sélectionner un nouveau propriétaire",
 		ownershipPickerDescription:
@@ -118,6 +126,99 @@ export default {
 		}),
 		confirmRestore: "Confirmer la restauration",
 		confirmSoftDelete: "Confirmer la suppression provisoire",
+	},
+	unitMerges: {
+		newMerge: "Nouvelle fusion",
+		stateFilter: "État de la fusion",
+		allStates: "Tous les états",
+		states: {
+			pending_review: "En attente d’examen",
+			accepted: "En file d’attente",
+			rejected: "Rejetée",
+			expired: "Expirée",
+			superseded: "Remplacée",
+			executing: "En cours",
+			completed: "Terminée",
+			failed: "Échouée",
+		},
+		listLabel: "Liste des demandes de fusion d’Units",
+		untitled: "Unit sans titre",
+		empty: "Aucune fusion d’Units ne correspond à cet état.",
+		loadMore: "Charger davantage",
+		source: "Identité source",
+		target: "Cible canonique",
+		openUnit: "Ouvrir la Unit",
+		kind: "Type d’Unit",
+		kinds: {
+			book: units.types.book,
+			software: units.types.software,
+			media: units.types.media,
+			entity: entityTerms.label,
+		},
+		mode: "Circuit de décision",
+		modes: {
+			reviewed: "Examen par quatre personnes",
+			privileged_direct: "Fusion directe privilégiée",
+		},
+		proposer: "Proposée par",
+		approvalProgress: insert("{{count}} approbations sur {{required}}", {
+			count: Number,
+			required: Number,
+		}),
+		graphActions: {
+			none: "Aucune modification du graphe des Variants n’est requise.",
+			detach_source: "Détacher la Variant source de sa Main actuelle.",
+			reparent_source_variants_to_target: "Déplacer les Variants de la source sous la cible.",
+			reparent_source_variants_to_target_main:
+				"Déplacer les Variants de la source sous la Main de la cible.",
+			promote_target_from_source:
+				"Promouvoir la Variant cible et placer sous elle les autres Variants de la source.",
+		},
+		operation: "Convergence des références",
+		operationStates: {
+			pending: "En file d’attente",
+			processing: "Traitement en cours",
+			retry_wait: "En attente d’une nouvelle tentative",
+			completed: "Terminée",
+			failed: "Nouvelle tentative manuelle requise",
+		},
+		processedRows: insert("{{count}} références traitées", { count: Number }),
+		reviews: "Examens",
+		decisions: { approve: "Approuvée", reject: "Rejetée" },
+		noReviews: "Aucun examen n’a encore été envoyé.",
+		approve: "Approuver",
+		reject: "Rejeter",
+		retry: "Relancer l’opération",
+		selectRequest: "Sélectionner une demande de fusion",
+		selectRequestDescription:
+			"Choisissez une demande pour consulter son manifeste immuable, ses examens et son état d’exécution.",
+		createTitle: "Fusionner une identité d’Unit dans une autre",
+		createDescription:
+			"Le contrôle préalable valide le type, les révisions actuelles et le graphe des Variants avant de créer une demande.",
+		sourceId: `${verbatimTerms.id.value} de la Unit source`,
+		targetId: `${verbatimTerms.id.value} de la Unit cible`,
+		preflight: "Lancer le contrôle préalable",
+		irreversibleWarning:
+			"L’acceptation est irréversible. La source devient une redirection permanente et toutes les références actives convergent vers la cible.",
+		reason: "Motif de gouvernance",
+		internalNote: "Note interne (facultative)",
+		notePlaceholder:
+			"Consignez les preuves de doublon, les sources vérifiées et le choix de cette cible canonique.",
+		confirmSource: `Saisir à nouveau l’${verbatimTerms.id.value} de la Unit source`,
+		confirmTarget: `Saisir à nouveau l’${verbatimTerms.id.value} de la Unit cible`,
+		submitForReview: "Soumettre à quatre examens",
+		mergeDirectly: "Fusionner directement",
+		approveTitle: "Approuver cette fusion d’Units ?",
+		approveDescription:
+			"Votre approbation est liée au manifeste affiché. La quatrième approbation accepte atomiquement la fusion irréversible.",
+		rejectTitle: "Rejeter cette fusion d’Units ?",
+		rejectDescription:
+			"Un seul rejet clôt définitivement cette demande. Un contournement privilégié doit créer une demande directe distincte.",
+		reviewNote: "Note d’examen (facultative)",
+		reviewNotePlaceholder: "Consignez les preuves vérifiées et le fondement de cette décision.",
+		confirmRequest: `Saisir l’${verbatimTerms.id.value} de la demande de fusion pour confirmer`,
+		confirmApprove: "Confirmer l’approbation",
+		confirmReject: "Confirmer le rejet",
 	},
 	ownershipClaims: {
 		stateFilter: "État de la revendication",

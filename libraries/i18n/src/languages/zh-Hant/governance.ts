@@ -11,6 +11,7 @@ const { forms: postTerms } = zhHantTerminology.post;
 export default {
 	title: "條目治理",
 	open: "開啟治理設定",
+	platformOpen: "開啟平台治理",
 	accessInvitations: "存取邀請",
 	receivedInvitations: "收到的存取邀請",
 	accessInvitationDescription: "接受邀請前不會產生任何存取權限。",
@@ -58,6 +59,9 @@ export default {
 		"unit.edit": "編輯所有條目",
 		"platform.development_preview.access": "使用尚未發布的開發預覽功能",
 		"unit.governance.read": "檢視所有條目的治理資料",
+		"unit.merge.propose": "提出條目合併",
+		"unit.merge.review": "審核條目合併",
+		"unit.merge": "直接合併條目",
 		"unit.ownership.override": "強制移轉任意條目的所有權",
 		"unit.content_license.manage": "使條目內容授權失效或恢復",
 		"unit.delete": "軟刪除任意條目",

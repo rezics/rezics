@@ -11,6 +11,7 @@ const { forms: postTerms } = zhHansTerminology.post;
 export default {
 	title: "条目治理",
 	open: "打开治理设置",
+	platformOpen: "打开平台治理",
 	accessInvitations: "访问邀请",
 	receivedInvitations: "收到的访问邀请",
 	accessInvitationDescription: "接受邀请前不会产生任何访问权限。",
@@ -58,6 +59,9 @@ export default {
 		"unit.edit": "编辑所有条目",
 		"platform.development_preview.access": "使用尚未发布的开发预览功能",
 		"unit.governance.read": "查看所有条目的治理数据",
+		"unit.merge.propose": "提出条目合并",
+		"unit.merge.review": "审核条目合并",
+		"unit.merge": "直接合并条目",
 		"unit.ownership.override": "强制转移任意条目的所有权",
 		"unit.content_license.manage": "使条目内容授权失效或恢复",
 		"unit.delete": "软删除任意条目",

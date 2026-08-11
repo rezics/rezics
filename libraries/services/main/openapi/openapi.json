@@ -10562,6 +10562,19 @@
 					"UnitLifecycleProtected",
 					"UnitAlreadyDeleted",
 					"UnitNotDeleted",
+					"UnitMergeNotFound",
+					"UnitMergeConfirmationInvalid",
+					"UnitMergeKindIneligible",
+					"UnitMergeKindMismatch",
+					"UnitMergeRequestConflict",
+					"UnitMergeIdempotencyConflict",
+					"UnitMergeManifestStale",
+					"UnitMergeReviewSelfForbidden",
+					"UnitMergeReviewDuplicate",
+					"UnitMergeReviewFingerprintMismatch",
+					"UnitMergeRequestNotPending",
+					"UnitMergeRequestExpired",
+					"UnitMergeRetryUnavailable",
 					"ReportRealmMismatch",
 					"ReportAlreadySubmitted",
 					"ReportTargetRevisionUnavailable",
@@ -53033,7 +53046,8 @@
 														"UnitLifecycleChanged",
 														"UnitLifecycleProtected",
 														"UnitAlreadyDeleted",
-														"UnitNotDeleted"
+														"UnitNotDeleted",
+														"UnitMergeRequestConflict"
 													]
 												},
 												"message": { "type": "string" },
@@ -53310,7 +53324,8 @@
 														"UnitLifecycleChanged",
 														"UnitLifecycleProtected",
 														"UnitAlreadyDeleted",
-														"UnitNotDeleted"
+														"UnitNotDeleted",
+														"UnitMergeRequestConflict"
 													]
 												},
 												"message": { "type": "string" },
@@ -53342,6 +53357,4360 @@
 				},
 				"operationId": "postApiGovernancePlatformUnitsByUnitIdRestore",
 				"x-rezics-quota-route-operation-id": "postApiGovernancePlatformUnitsByUnitIdRestore",
+				"x-rezics-quota-operation-id": "*",
+				"x-rezics-quota-cost-units": 1
+			}
+		},
+		"/api/v1/governance/platform/unit-merges": {
+			"get": {
+				"summary": "List Unit merge governance requests",
+				"tags": ["Governance"],
+				"security": [{ "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "state",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"type": "string",
+							"enum": [
+								"pending_review",
+								"accepted",
+								"rejected",
+								"expired",
+								"superseded",
+								"executing",
+								"completed",
+								"failed"
+							]
+						}
+					},
+					{
+						"name": "cursor",
+						"in": "query",
+						"required": false,
+						"schema": { "format": "uuid", "type": "string" }
+					},
+					{
+						"name": "limit",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"minimum": 1,
+							"maximum": 100,
+							"default": 50,
+							"anyOf": [
+								{ "format": "integer", "default": 0, "type": "string" },
+								{ "minimum": 1, "maximum": 100, "default": 50, "type": "integer" }
+							]
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"additionalProperties": false,
+									"type": "object",
+									"required": ["items", "nextCursor"],
+									"properties": {
+										"items": {
+											"type": "array",
+											"items": {
+												"additionalProperties": false,
+												"type": "object",
+												"required": [
+													"id",
+													"sourceUnit",
+													"targetUnit",
+													"unitKind",
+													"mode",
+													"state",
+													"proposer",
+													"overrideOfRequestId",
+													"reasonCode",
+													"note",
+													"policy",
+													"manifest",
+													"approvals",
+													"rejections",
+													"reviews",
+													"operation",
+													"expiresAt",
+													"acceptedAt",
+													"rejectedAt",
+													"supersededAt",
+													"completedAt",
+													"failedAt",
+													"createdAt",
+													"updatedAt"
+												],
+												"properties": {
+													"id": { "format": "uuid", "type": "string" },
+													"sourceUnit": {
+														"additionalProperties": false,
+														"type": "object",
+														"required": ["id", "title"],
+														"properties": {
+															"id": {
+																"format": "uuid",
+																"type": "string"
+															},
+															"title": {
+																"nullable": true,
+																"anyOf": [{ "type": "string" }, { "type": "null" }]
+															}
+														}
+													},
+													"targetUnit": {
+														"additionalProperties": false,
+														"type": "object",
+														"required": ["id", "title"],
+														"properties": {
+															"id": {
+																"format": "uuid",
+																"type": "string"
+															},
+															"title": {
+																"nullable": true,
+																"anyOf": [{ "type": "string" }, { "type": "null" }]
+															}
+														}
+													},
+													"unitKind": {
+														"default": "book",
+														"type": "string",
+														"enum": ["book", "software", "media", "entity"]
+													},
+													"mode": {
+														"default": "reviewed",
+														"type": "string",
+														"enum": ["reviewed", "privileged_direct"]
+													},
+													"state": {
+														"default": "pending_review",
+														"type": "string",
+														"enum": [
+															"pending_review",
+															"accepted",
+															"rejected",
+															"expired",
+															"superseded",
+															"executing",
+															"completed",
+															"failed"
+														]
+													},
+													"proposer": {
+														"additionalProperties": false,
+														"type": "object",
+														"required": ["profileId", "label"],
+														"properties": {
+															"profileId": {
+																"format": "uuid",
+																"type": "string"
+															},
+															"label": {
+																"nullable": true,
+																"anyOf": [{ "type": "string" }, { "type": "null" }]
+															}
+														}
+													},
+													"overrideOfRequestId": {
+														"nullable": true,
+														"anyOf": [{ "format": "uuid", "type": "string" }, { "type": "null" }]
+													},
+													"reasonCode": {
+														"type": "string",
+														"enum": [
+															"content_policy",
+															"copyright",
+															"realm_rules",
+															"spam",
+															"harassment",
+															"unsafe_content",
+															"off_topic",
+															"duplicate",
+															"account_security",
+															"user_request",
+															"appeal",
+															"administrative",
+															"other"
+														]
+													},
+													"note": {
+														"nullable": true,
+														"anyOf": [{ "type": "string" }, { "type": "null" }]
+													},
+													"policy": {
+														"additionalProperties": false,
+														"type": "object",
+														"required": [
+															"version",
+															"requiredApprovals",
+															"vetoEnabled",
+															"selfReviewForbidden"
+														],
+														"properties": {
+															"version": {
+																"minimum": 1,
+																"anyOf": [
+																	{
+																		"format": "integer",
+																		"default": 0,
+																		"type": "string"
+																	},
+																	{
+																		"minimum": 1,
+																		"type": "integer"
+																	}
+																]
+															},
+															"requiredApprovals": {
+																"minimum": 1,
+																"anyOf": [
+																	{
+																		"format": "integer",
+																		"default": 0,
+																		"type": "string"
+																	},
+																	{
+																		"minimum": 1,
+																		"type": "integer"
+																	}
+																]
+															},
+															"vetoEnabled": { "type": "boolean" },
+															"selfReviewForbidden": {
+																"type": "boolean"
+															}
+														}
+													},
+													"manifest": {
+														"additionalProperties": false,
+														"type": "object",
+														"required": [
+															"version",
+															"sourceUpdatedAt",
+															"targetUpdatedAt",
+															"sourceGraphRevision",
+															"targetGraphRevision",
+															"graphPlan",
+															"fingerprint"
+														],
+														"properties": {
+															"version": {
+																"const": 1,
+																"type": "number"
+															},
+															"sourceUpdatedAt": {
+																"format": "date-time",
+																"type": "string"
+															},
+															"targetUpdatedAt": {
+																"format": "date-time",
+																"type": "string"
+															},
+															"sourceGraphRevision": {
+																"minimum": 0,
+																"anyOf": [
+																	{
+																		"format": "integer",
+																		"default": 0,
+																		"type": "string"
+																	},
+																	{
+																		"minimum": 0,
+																		"type": "integer"
+																	}
+																]
+															},
+															"targetGraphRevision": {
+																"minimum": 0,
+																"anyOf": [
+																	{
+																		"format": "integer",
+																		"default": 0,
+																		"type": "string"
+																	},
+																	{
+																		"minimum": 0,
+																		"type": "integer"
+																	}
+																]
+															},
+															"graphPlan": {
+																"additionalProperties": false,
+																"type": "object",
+																"required": [
+																	"version",
+																	"sourceRole",
+																	"targetRole",
+																	"sourceMainUnitId",
+																	"targetMainUnitId",
+																	"destinationMainUnitId",
+																	"action"
+																],
+																"properties": {
+																	"version": {
+																		"const": 1,
+																		"type": "number"
+																	},
+																	"sourceRole": {
+																		"default": "standalone",
+																		"type": "string",
+																		"enum": ["standalone", "variant", "main"]
+																	},
+																	"targetRole": {
+																		"default": "standalone",
+																		"type": "string",
+																		"enum": ["standalone", "variant", "main"]
+																	},
+																	"sourceMainUnitId": {
+																		"nullable": true,
+																		"anyOf": [
+																			{
+																				"format": "uuid",
+																				"type": "string"
+																			},
+																			{ "type": "null" }
+																		]
+																	},
+																	"targetMainUnitId": {
+																		"nullable": true,
+																		"anyOf": [
+																			{
+																				"format": "uuid",
+																				"type": "string"
+																			},
+																			{ "type": "null" }
+																		]
+																	},
+																	"destinationMainUnitId": {
+																		"nullable": true,
+																		"anyOf": [
+																			{
+																				"format": "uuid",
+																				"type": "string"
+																			},
+																			{ "type": "null" }
+																		]
+																	},
+																	"action": {
+																		"default": "none",
+																		"type": "string",
+																		"enum": [
+																			"none",
+																			"detach_source",
+																			"reparent_source_variants_to_target",
+																			"reparent_source_variants_to_target_main",
+																			"promote_target_from_source"
+																		]
+																	}
+																}
+															},
+															"fingerprint": {
+																"pattern": "^[a-f0-9]{64}$",
+																"type": "string"
+															}
+														}
+													},
+													"approvals": {
+														"minimum": 0,
+														"anyOf": [
+															{
+																"format": "integer",
+																"default": 0,
+																"type": "string"
+															},
+															{ "minimum": 0, "type": "integer" }
+														]
+													},
+													"rejections": {
+														"minimum": 0,
+														"anyOf": [
+															{
+																"format": "integer",
+																"default": 0,
+																"type": "string"
+															},
+															{ "minimum": 0, "type": "integer" }
+														]
+													},
+													"reviews": {
+														"type": "array",
+														"items": {
+															"additionalProperties": false,
+															"type": "object",
+															"required": [
+																"reviewerProfileId",
+																"reviewerLabel",
+																"decision",
+																"note",
+																"createdAt"
+															],
+															"properties": {
+																"reviewerProfileId": {
+																	"format": "uuid",
+																	"type": "string"
+																},
+																"reviewerLabel": {
+																	"nullable": true,
+																	"anyOf": [{ "type": "string" }, { "type": "null" }]
+																},
+																"decision": {
+																	"default": "approve",
+																	"type": "string",
+																	"enum": ["approve", "reject"]
+																},
+																"note": {
+																	"nullable": true,
+																	"anyOf": [{ "type": "string" }, { "type": "null" }]
+																},
+																"createdAt": {
+																	"format": "date-time",
+																	"type": "string"
+																}
+															}
+														}
+													},
+													"operation": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"additionalProperties": false,
+																"type": "object",
+																"required": [
+																	"id",
+																	"state",
+																	"phase",
+																	"attemptCount",
+																	"processedRows",
+																	"availableAt",
+																	"lastErrorCode",
+																	"lastErrorMessage",
+																	"startedAt",
+																	"completedAt"
+																],
+																"properties": {
+																	"id": {
+																		"format": "uuid",
+																		"type": "string"
+																	},
+																	"state": {
+																		"default": "pending",
+																		"type": "string",
+																		"enum": [
+																			"pending",
+																			"processing",
+																			"retry_wait",
+																			"completed",
+																			"failed"
+																		]
+																	},
+																	"phase": {
+																		"default": "variant_graph",
+																		"type": "string",
+																		"enum": [
+																			"variant_graph",
+																			"slug_addresses",
+																			"slug_scopes",
+																			"aliases",
+																			"external_links",
+																			"external_link_sources",
+																			"software_requirements",
+																			"software_requirement_platforms",
+																			"unit_reactions",
+																			"unit_shares",
+																			"unit_follows",
+																			"scores",
+																			"collection_items",
+																			"unit_tags",
+																			"realm_tag_votes",
+																			"profile_unit_tags",
+																			"realm_pins",
+																			"realm_units",
+																			"realm_unit_tags",
+																			"post_subjects",
+																			"association_proposal_sources",
+																			"association_proposal_targets",
+																			"credit_sources",
+																			"credit_targets",
+																			"subject_sources",
+																			"subject_entities",
+																			"release_parents",
+																			"series_releases",
+																			"poll_options",
+																			"content_nodes_content",
+																			"content_nodes_target",
+																			"structure_members",
+																			"structure_edges_parent",
+																			"structure_edges_child",
+																			"structure_applications",
+																			"progress_entries",
+																			"progress_snapshots",
+																			"notification_subjects",
+																			"derived_state",
+																			"finalize"
+																		]
+																	},
+																	"attemptCount": {
+																		"minimum": 0,
+																		"anyOf": [
+																			{
+																				"format": "integer",
+																				"default": 0,
+																				"type": "string"
+																			},
+																			{
+																				"minimum": 0,
+																				"type": "integer"
+																			}
+																		]
+																	},
+																	"processedRows": {
+																		"minimum": 0,
+																		"anyOf": [
+																			{
+																				"format": "integer",
+																				"default": 0,
+																				"type": "string"
+																			},
+																			{
+																				"minimum": 0,
+																				"type": "integer"
+																			}
+																		]
+																	},
+																	"availableAt": {
+																		"format": "date-time",
+																		"type": "string"
+																	},
+																	"lastErrorCode": {
+																		"nullable": true,
+																		"anyOf": [{ "type": "string" }, { "type": "null" }]
+																	},
+																	"lastErrorMessage": {
+																		"nullable": true,
+																		"anyOf": [{ "type": "string" }, { "type": "null" }]
+																	},
+																	"startedAt": {
+																		"nullable": true,
+																		"anyOf": [
+																			{
+																				"format": "date-time",
+																				"type": "string"
+																			},
+																			{ "type": "null" }
+																		]
+																	},
+																	"completedAt": {
+																		"nullable": true,
+																		"anyOf": [
+																			{
+																				"format": "date-time",
+																				"type": "string"
+																			},
+																			{ "type": "null" }
+																		]
+																	}
+																}
+															},
+															{ "type": "null" }
+														]
+													},
+													"expiresAt": {
+														"format": "date-time",
+														"type": "string"
+													},
+													"acceptedAt": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"format": "date-time",
+																"type": "string"
+															},
+															{ "type": "null" }
+														]
+													},
+													"rejectedAt": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"format": "date-time",
+																"type": "string"
+															},
+															{ "type": "null" }
+														]
+													},
+													"supersededAt": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"format": "date-time",
+																"type": "string"
+															},
+															{ "type": "null" }
+														]
+													},
+													"completedAt": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"format": "date-time",
+																"type": "string"
+															},
+															{ "type": "null" }
+														]
+													},
+													"failedAt": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"format": "date-time",
+																"type": "string"
+															},
+															{ "type": "null" }
+														]
+													},
+													"createdAt": {
+														"format": "date-time",
+														"type": "string"
+													},
+													"updatedAt": {
+														"format": "date-time",
+														"type": "string"
+													}
+												}
+											}
+										},
+										"nextCursor": {
+											"nullable": true,
+											"anyOf": [{ "format": "uuid", "type": "string" }, { "type": "null" }]
+										}
+									}
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "PlatformCapabilityRequired",
+													"type": "string",
+													"enum": ["PlatformCapabilityRequired"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "getApiGovernancePlatformUnit-merges",
+				"x-rezics-quota-route-operation-id": "getApiGovernancePlatformUnit-merges",
+				"x-rezics-quota-operation-id": "*",
+				"x-rezics-quota-cost-units": 1
+			},
+			"post": {
+				"summary": "Propose a reviewed Unit identity merge",
+				"tags": ["Governance"],
+				"security": [{ "SessionCookie": [] }],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"additionalProperties": false,
+								"type": "object",
+								"required": [
+									"sourceUnitId",
+									"targetUnitId",
+									"confirmationSourceUnitId",
+									"confirmationTargetUnitId",
+									"expectedSourceUpdatedAt",
+									"expectedTargetUpdatedAt",
+									"idempotencyKey",
+									"reasonCode"
+								],
+								"properties": {
+									"sourceUnitId": { "format": "uuid", "type": "string" },
+									"targetUnitId": { "format": "uuid", "type": "string" },
+									"confirmationSourceUnitId": {
+										"format": "uuid",
+										"type": "string"
+									},
+									"confirmationTargetUnitId": {
+										"format": "uuid",
+										"type": "string"
+									},
+									"expectedSourceUpdatedAt": {
+										"format": "date-time",
+										"type": "string"
+									},
+									"expectedTargetUpdatedAt": {
+										"format": "date-time",
+										"type": "string"
+									},
+									"idempotencyKey": {
+										"minLength": 1,
+										"maxLength": 200,
+										"type": "string"
+									},
+									"reasonCode": {
+										"type": "string",
+										"enum": [
+											"content_policy",
+											"copyright",
+											"realm_rules",
+											"spam",
+											"harassment",
+											"unsafe_content",
+											"off_topic",
+											"duplicate",
+											"account_security",
+											"user_request",
+											"appeal",
+											"administrative",
+											"other"
+										]
+									},
+									"note": { "minLength": 1, "maxLength": 2000, "type": "string" }
+								}
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"additionalProperties": false,
+									"type": "object",
+									"required": [
+										"id",
+										"sourceUnit",
+										"targetUnit",
+										"unitKind",
+										"mode",
+										"state",
+										"proposer",
+										"overrideOfRequestId",
+										"reasonCode",
+										"note",
+										"policy",
+										"manifest",
+										"approvals",
+										"rejections",
+										"reviews",
+										"operation",
+										"expiresAt",
+										"acceptedAt",
+										"rejectedAt",
+										"supersededAt",
+										"completedAt",
+										"failedAt",
+										"createdAt",
+										"updatedAt"
+									],
+									"properties": {
+										"id": { "format": "uuid", "type": "string" },
+										"sourceUnit": {
+											"additionalProperties": false,
+											"type": "object",
+											"required": ["id", "title"],
+											"properties": {
+												"id": { "format": "uuid", "type": "string" },
+												"title": {
+													"nullable": true,
+													"anyOf": [{ "type": "string" }, { "type": "null" }]
+												}
+											}
+										},
+										"targetUnit": {
+											"additionalProperties": false,
+											"type": "object",
+											"required": ["id", "title"],
+											"properties": {
+												"id": { "format": "uuid", "type": "string" },
+												"title": {
+													"nullable": true,
+													"anyOf": [{ "type": "string" }, { "type": "null" }]
+												}
+											}
+										},
+										"unitKind": {
+											"default": "book",
+											"type": "string",
+											"enum": ["book", "software", "media", "entity"]
+										},
+										"mode": {
+											"default": "reviewed",
+											"type": "string",
+											"enum": ["reviewed", "privileged_direct"]
+										},
+										"state": {
+											"default": "pending_review",
+											"type": "string",
+											"enum": [
+												"pending_review",
+												"accepted",
+												"rejected",
+												"expired",
+												"superseded",
+												"executing",
+												"completed",
+												"failed"
+											]
+										},
+										"proposer": {
+											"additionalProperties": false,
+											"type": "object",
+											"required": ["profileId", "label"],
+											"properties": {
+												"profileId": { "format": "uuid", "type": "string" },
+												"label": {
+													"nullable": true,
+													"anyOf": [{ "type": "string" }, { "type": "null" }]
+												}
+											}
+										},
+										"overrideOfRequestId": {
+											"nullable": true,
+											"anyOf": [{ "format": "uuid", "type": "string" }, { "type": "null" }]
+										},
+										"reasonCode": {
+											"type": "string",
+											"enum": [
+												"content_policy",
+												"copyright",
+												"realm_rules",
+												"spam",
+												"harassment",
+												"unsafe_content",
+												"off_topic",
+												"duplicate",
+												"account_security",
+												"user_request",
+												"appeal",
+												"administrative",
+												"other"
+											]
+										},
+										"note": {
+											"nullable": true,
+											"anyOf": [{ "type": "string" }, { "type": "null" }]
+										},
+										"policy": {
+											"additionalProperties": false,
+											"type": "object",
+											"required": [
+												"version",
+												"requiredApprovals",
+												"vetoEnabled",
+												"selfReviewForbidden"
+											],
+											"properties": {
+												"version": {
+													"minimum": 1,
+													"anyOf": [
+														{
+															"format": "integer",
+															"default": 0,
+															"type": "string"
+														},
+														{ "minimum": 1, "type": "integer" }
+													]
+												},
+												"requiredApprovals": {
+													"minimum": 1,
+													"anyOf": [
+														{
+															"format": "integer",
+															"default": 0,
+															"type": "string"
+														},
+														{ "minimum": 1, "type": "integer" }
+													]
+												},
+												"vetoEnabled": { "type": "boolean" },
+												"selfReviewForbidden": { "type": "boolean" }
+											}
+										},
+										"manifest": {
+											"additionalProperties": false,
+											"type": "object",
+											"required": [
+												"version",
+												"sourceUpdatedAt",
+												"targetUpdatedAt",
+												"sourceGraphRevision",
+												"targetGraphRevision",
+												"graphPlan",
+												"fingerprint"
+											],
+											"properties": {
+												"version": { "const": 1, "type": "number" },
+												"sourceUpdatedAt": {
+													"format": "date-time",
+													"type": "string"
+												},
+												"targetUpdatedAt": {
+													"format": "date-time",
+													"type": "string"
+												},
+												"sourceGraphRevision": {
+													"minimum": 0,
+													"anyOf": [
+														{
+															"format": "integer",
+															"default": 0,
+															"type": "string"
+														},
+														{ "minimum": 0, "type": "integer" }
+													]
+												},
+												"targetGraphRevision": {
+													"minimum": 0,
+													"anyOf": [
+														{
+															"format": "integer",
+															"default": 0,
+															"type": "string"
+														},
+														{ "minimum": 0, "type": "integer" }
+													]
+												},
+												"graphPlan": {
+													"additionalProperties": false,
+													"type": "object",
+													"required": [
+														"version",
+														"sourceRole",
+														"targetRole",
+														"sourceMainUnitId",
+														"targetMainUnitId",
+														"destinationMainUnitId",
+														"action"
+													],
+													"properties": {
+														"version": { "const": 1, "type": "number" },
+														"sourceRole": {
+															"default": "standalone",
+															"type": "string",
+															"enum": ["standalone", "variant", "main"]
+														},
+														"targetRole": {
+															"default": "standalone",
+															"type": "string",
+															"enum": ["standalone", "variant", "main"]
+														},
+														"sourceMainUnitId": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"format": "uuid",
+																	"type": "string"
+																},
+																{ "type": "null" }
+															]
+														},
+														"targetMainUnitId": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"format": "uuid",
+																	"type": "string"
+																},
+																{ "type": "null" }
+															]
+														},
+														"destinationMainUnitId": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"format": "uuid",
+																	"type": "string"
+																},
+																{ "type": "null" }
+															]
+														},
+														"action": {
+															"default": "none",
+															"type": "string",
+															"enum": [
+																"none",
+																"detach_source",
+																"reparent_source_variants_to_target",
+																"reparent_source_variants_to_target_main",
+																"promote_target_from_source"
+															]
+														}
+													}
+												},
+												"fingerprint": {
+													"pattern": "^[a-f0-9]{64}$",
+													"type": "string"
+												}
+											}
+										},
+										"approvals": {
+											"minimum": 0,
+											"anyOf": [
+												{
+													"format": "integer",
+													"default": 0,
+													"type": "string"
+												},
+												{ "minimum": 0, "type": "integer" }
+											]
+										},
+										"rejections": {
+											"minimum": 0,
+											"anyOf": [
+												{
+													"format": "integer",
+													"default": 0,
+													"type": "string"
+												},
+												{ "minimum": 0, "type": "integer" }
+											]
+										},
+										"reviews": {
+											"type": "array",
+											"items": {
+												"additionalProperties": false,
+												"type": "object",
+												"required": [
+													"reviewerProfileId",
+													"reviewerLabel",
+													"decision",
+													"note",
+													"createdAt"
+												],
+												"properties": {
+													"reviewerProfileId": {
+														"format": "uuid",
+														"type": "string"
+													},
+													"reviewerLabel": {
+														"nullable": true,
+														"anyOf": [{ "type": "string" }, { "type": "null" }]
+													},
+													"decision": {
+														"default": "approve",
+														"type": "string",
+														"enum": ["approve", "reject"]
+													},
+													"note": {
+														"nullable": true,
+														"anyOf": [{ "type": "string" }, { "type": "null" }]
+													},
+													"createdAt": {
+														"format": "date-time",
+														"type": "string"
+													}
+												}
+											}
+										},
+										"operation": {
+											"nullable": true,
+											"anyOf": [
+												{
+													"additionalProperties": false,
+													"type": "object",
+													"required": [
+														"id",
+														"state",
+														"phase",
+														"attemptCount",
+														"processedRows",
+														"availableAt",
+														"lastErrorCode",
+														"lastErrorMessage",
+														"startedAt",
+														"completedAt"
+													],
+													"properties": {
+														"id": {
+															"format": "uuid",
+															"type": "string"
+														},
+														"state": {
+															"default": "pending",
+															"type": "string",
+															"enum": ["pending", "processing", "retry_wait", "completed", "failed"]
+														},
+														"phase": {
+															"default": "variant_graph",
+															"type": "string",
+															"enum": [
+																"variant_graph",
+																"slug_addresses",
+																"slug_scopes",
+																"aliases",
+																"external_links",
+																"external_link_sources",
+																"software_requirements",
+																"software_requirement_platforms",
+																"unit_reactions",
+																"unit_shares",
+																"unit_follows",
+																"scores",
+																"collection_items",
+																"unit_tags",
+																"realm_tag_votes",
+																"profile_unit_tags",
+																"realm_pins",
+																"realm_units",
+																"realm_unit_tags",
+																"post_subjects",
+																"association_proposal_sources",
+																"association_proposal_targets",
+																"credit_sources",
+																"credit_targets",
+																"subject_sources",
+																"subject_entities",
+																"release_parents",
+																"series_releases",
+																"poll_options",
+																"content_nodes_content",
+																"content_nodes_target",
+																"structure_members",
+																"structure_edges_parent",
+																"structure_edges_child",
+																"structure_applications",
+																"progress_entries",
+																"progress_snapshots",
+																"notification_subjects",
+																"derived_state",
+																"finalize"
+															]
+														},
+														"attemptCount": {
+															"minimum": 0,
+															"anyOf": [
+																{
+																	"format": "integer",
+																	"default": 0,
+																	"type": "string"
+																},
+																{ "minimum": 0, "type": "integer" }
+															]
+														},
+														"processedRows": {
+															"minimum": 0,
+															"anyOf": [
+																{
+																	"format": "integer",
+																	"default": 0,
+																	"type": "string"
+																},
+																{ "minimum": 0, "type": "integer" }
+															]
+														},
+														"availableAt": {
+															"format": "date-time",
+															"type": "string"
+														},
+														"lastErrorCode": {
+															"nullable": true,
+															"anyOf": [{ "type": "string" }, { "type": "null" }]
+														},
+														"lastErrorMessage": {
+															"nullable": true,
+															"anyOf": [{ "type": "string" }, { "type": "null" }]
+														},
+														"startedAt": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"format": "date-time",
+																	"type": "string"
+																},
+																{ "type": "null" }
+															]
+														},
+														"completedAt": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"format": "date-time",
+																	"type": "string"
+																},
+																{ "type": "null" }
+															]
+														}
+													}
+												},
+												{ "type": "null" }
+											]
+										},
+										"expiresAt": { "format": "date-time", "type": "string" },
+										"acceptedAt": {
+											"nullable": true,
+											"anyOf": [{ "format": "date-time", "type": "string" }, { "type": "null" }]
+										},
+										"rejectedAt": {
+											"nullable": true,
+											"anyOf": [{ "format": "date-time", "type": "string" }, { "type": "null" }]
+										},
+										"supersededAt": {
+											"nullable": true,
+											"anyOf": [{ "format": "date-time", "type": "string" }, { "type": "null" }]
+										},
+										"completedAt": {
+											"nullable": true,
+											"anyOf": [{ "format": "date-time", "type": "string" }, { "type": "null" }]
+										},
+										"failedAt": {
+											"nullable": true,
+											"anyOf": [{ "format": "date-time", "type": "string" }, { "type": "null" }]
+										},
+										"createdAt": { "format": "date-time", "type": "string" },
+										"updatedAt": { "format": "date-time", "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Response for status 400",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"type": "object",
+											"required": ["error", "requestId"],
+											"properties": {
+												"error": {
+													"type": "object",
+													"required": ["code", "message"],
+													"properties": {
+														"code": {
+															"default": "UnitMergeConfirmationInvalid",
+															"type": "string",
+															"enum": ["UnitMergeConfirmationInvalid"]
+														},
+														"message": { "type": "string" },
+														"details": {}
+													}
+												},
+												"requestId": { "type": "string" }
+											}
+										},
+										{ "$ref": "#/components/schemas/MalformedRequestBody" }
+									]
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "PlatformCapabilityRequired",
+													"type": "string",
+													"enum": ["PlatformCapabilityRequired", "FreshSessionRequired"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitMergeNotFound",
+													"type": "string",
+													"enum": ["UnitMergeNotFound", "UnitNotFound"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitMergeKindMismatch",
+													"type": "string",
+													"enum": [
+														"UnitMergeKindMismatch",
+														"UnitMergeRequestConflict",
+														"UnitMergeIdempotencyConflict",
+														"UnitMergeManifestStale"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Response for status 422",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"type": "object",
+											"required": ["error", "requestId"],
+											"properties": {
+												"error": {
+													"type": "object",
+													"required": ["code", "message"],
+													"properties": {
+														"code": {
+															"default": "UnitMergeKindIneligible",
+															"type": "string",
+															"enum": ["UnitMergeKindIneligible"]
+														},
+														"message": { "type": "string" },
+														"details": {}
+													}
+												},
+												"requestId": { "type": "string" }
+											}
+										},
+										{ "$ref": "#/components/schemas/ValidationError" }
+									]
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "postApiGovernancePlatformUnit-merges",
+				"x-rezics-quota-route-operation-id": "postApiGovernancePlatformUnit-merges",
+				"x-rezics-quota-operation-id": "*",
+				"x-rezics-quota-cost-units": 1
+			}
+		},
+		"/api/v1/governance/platform/unit-merges/{requestId}": {
+			"get": {
+				"summary": "Get a Unit merge governance request",
+				"tags": ["Governance"],
+				"security": [{ "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "requestId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"additionalProperties": false,
+									"type": "object",
+									"required": [
+										"id",
+										"sourceUnit",
+										"targetUnit",
+										"unitKind",
+										"mode",
+										"state",
+										"proposer",
+										"overrideOfRequestId",
+										"reasonCode",
+										"note",
+										"policy",
+										"manifest",
+										"approvals",
+										"rejections",
+										"reviews",
+										"operation",
+										"expiresAt",
+										"acceptedAt",
+										"rejectedAt",
+										"supersededAt",
+										"completedAt",
+										"failedAt",
+										"createdAt",
+										"updatedAt"
+									],
+									"properties": {
+										"id": { "format": "uuid", "type": "string" },
+										"sourceUnit": {
+											"additionalProperties": false,
+											"type": "object",
+											"required": ["id", "title"],
+											"properties": {
+												"id": { "format": "uuid", "type": "string" },
+												"title": {
+													"nullable": true,
+													"anyOf": [{ "type": "string" }, { "type": "null" }]
+												}
+											}
+										},
+										"targetUnit": {
+											"additionalProperties": false,
+											"type": "object",
+											"required": ["id", "title"],
+											"properties": {
+												"id": { "format": "uuid", "type": "string" },
+												"title": {
+													"nullable": true,
+													"anyOf": [{ "type": "string" }, { "type": "null" }]
+												}
+											}
+										},
+										"unitKind": {
+											"default": "book",
+											"type": "string",
+											"enum": ["book", "software", "media", "entity"]
+										},
+										"mode": {
+											"default": "reviewed",
+											"type": "string",
+											"enum": ["reviewed", "privileged_direct"]
+										},
+										"state": {
+											"default": "pending_review",
+											"type": "string",
+											"enum": [
+												"pending_review",
+												"accepted",
+												"rejected",
+												"expired",
+												"superseded",
+												"executing",
+												"completed",
+												"failed"
+											]
+										},
+										"proposer": {
+											"additionalProperties": false,
+											"type": "object",
+											"required": ["profileId", "label"],
+											"properties": {
+												"profileId": { "format": "uuid", "type": "string" },
+												"label": {
+													"nullable": true,
+													"anyOf": [{ "type": "string" }, { "type": "null" }]
+												}
+											}
+										},
+										"overrideOfRequestId": {
+											"nullable": true,
+											"anyOf": [{ "format": "uuid", "type": "string" }, { "type": "null" }]
+										},
+										"reasonCode": {
+											"type": "string",
+											"enum": [
+												"content_policy",
+												"copyright",
+												"realm_rules",
+												"spam",
+												"harassment",
+												"unsafe_content",
+												"off_topic",
+												"duplicate",
+												"account_security",
+												"user_request",
+												"appeal",
+												"administrative",
+												"other"
+											]
+										},
+										"note": {
+											"nullable": true,
+											"anyOf": [{ "type": "string" }, { "type": "null" }]
+										},
+										"policy": {
+											"additionalProperties": false,
+											"type": "object",
+											"required": [
+												"version",
+												"requiredApprovals",
+												"vetoEnabled",
+												"selfReviewForbidden"
+											],
+											"properties": {
+												"version": {
+													"minimum": 1,
+													"anyOf": [
+														{
+															"format": "integer",
+															"default": 0,
+															"type": "string"
+														},
+														{ "minimum": 1, "type": "integer" }
+													]
+												},
+												"requiredApprovals": {
+													"minimum": 1,
+													"anyOf": [
+														{
+															"format": "integer",
+															"default": 0,
+															"type": "string"
+														},
+														{ "minimum": 1, "type": "integer" }
+													]
+												},
+												"vetoEnabled": { "type": "boolean" },
+												"selfReviewForbidden": { "type": "boolean" }
+											}
+										},
+										"manifest": {
+											"additionalProperties": false,
+											"type": "object",
+											"required": [
+												"version",
+												"sourceUpdatedAt",
+												"targetUpdatedAt",
+												"sourceGraphRevision",
+												"targetGraphRevision",
+												"graphPlan",
+												"fingerprint"
+											],
+											"properties": {
+												"version": { "const": 1, "type": "number" },
+												"sourceUpdatedAt": {
+													"format": "date-time",
+													"type": "string"
+												},
+												"targetUpdatedAt": {
+													"format": "date-time",
+													"type": "string"
+												},
+												"sourceGraphRevision": {
+													"minimum": 0,
+													"anyOf": [
+														{
+															"format": "integer",
+															"default": 0,
+															"type": "string"
+														},
+														{ "minimum": 0, "type": "integer" }
+													]
+												},
+												"targetGraphRevision": {
+													"minimum": 0,
+													"anyOf": [
+														{
+															"format": "integer",
+															"default": 0,
+															"type": "string"
+														},
+														{ "minimum": 0, "type": "integer" }
+													]
+												},
+												"graphPlan": {
+													"additionalProperties": false,
+													"type": "object",
+													"required": [
+														"version",
+														"sourceRole",
+														"targetRole",
+														"sourceMainUnitId",
+														"targetMainUnitId",
+														"destinationMainUnitId",
+														"action"
+													],
+													"properties": {
+														"version": { "const": 1, "type": "number" },
+														"sourceRole": {
+															"default": "standalone",
+															"type": "string",
+															"enum": ["standalone", "variant", "main"]
+														},
+														"targetRole": {
+															"default": "standalone",
+															"type": "string",
+															"enum": ["standalone", "variant", "main"]
+														},
+														"sourceMainUnitId": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"format": "uuid",
+																	"type": "string"
+																},
+																{ "type": "null" }
+															]
+														},
+														"targetMainUnitId": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"format": "uuid",
+																	"type": "string"
+																},
+																{ "type": "null" }
+															]
+														},
+														"destinationMainUnitId": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"format": "uuid",
+																	"type": "string"
+																},
+																{ "type": "null" }
+															]
+														},
+														"action": {
+															"default": "none",
+															"type": "string",
+															"enum": [
+																"none",
+																"detach_source",
+																"reparent_source_variants_to_target",
+																"reparent_source_variants_to_target_main",
+																"promote_target_from_source"
+															]
+														}
+													}
+												},
+												"fingerprint": {
+													"pattern": "^[a-f0-9]{64}$",
+													"type": "string"
+												}
+											}
+										},
+										"approvals": {
+											"minimum": 0,
+											"anyOf": [
+												{
+													"format": "integer",
+													"default": 0,
+													"type": "string"
+												},
+												{ "minimum": 0, "type": "integer" }
+											]
+										},
+										"rejections": {
+											"minimum": 0,
+											"anyOf": [
+												{
+													"format": "integer",
+													"default": 0,
+													"type": "string"
+												},
+												{ "minimum": 0, "type": "integer" }
+											]
+										},
+										"reviews": {
+											"type": "array",
+											"items": {
+												"additionalProperties": false,
+												"type": "object",
+												"required": [
+													"reviewerProfileId",
+													"reviewerLabel",
+													"decision",
+													"note",
+													"createdAt"
+												],
+												"properties": {
+													"reviewerProfileId": {
+														"format": "uuid",
+														"type": "string"
+													},
+													"reviewerLabel": {
+														"nullable": true,
+														"anyOf": [{ "type": "string" }, { "type": "null" }]
+													},
+													"decision": {
+														"default": "approve",
+														"type": "string",
+														"enum": ["approve", "reject"]
+													},
+													"note": {
+														"nullable": true,
+														"anyOf": [{ "type": "string" }, { "type": "null" }]
+													},
+													"createdAt": {
+														"format": "date-time",
+														"type": "string"
+													}
+												}
+											}
+										},
+										"operation": {
+											"nullable": true,
+											"anyOf": [
+												{
+													"additionalProperties": false,
+													"type": "object",
+													"required": [
+														"id",
+														"state",
+														"phase",
+														"attemptCount",
+														"processedRows",
+														"availableAt",
+														"lastErrorCode",
+														"lastErrorMessage",
+														"startedAt",
+														"completedAt"
+													],
+													"properties": {
+														"id": {
+															"format": "uuid",
+															"type": "string"
+														},
+														"state": {
+															"default": "pending",
+															"type": "string",
+															"enum": ["pending", "processing", "retry_wait", "completed", "failed"]
+														},
+														"phase": {
+															"default": "variant_graph",
+															"type": "string",
+															"enum": [
+																"variant_graph",
+																"slug_addresses",
+																"slug_scopes",
+																"aliases",
+																"external_links",
+																"external_link_sources",
+																"software_requirements",
+																"software_requirement_platforms",
+																"unit_reactions",
+																"unit_shares",
+																"unit_follows",
+																"scores",
+																"collection_items",
+																"unit_tags",
+																"realm_tag_votes",
+																"profile_unit_tags",
+																"realm_pins",
+																"realm_units",
+																"realm_unit_tags",
+																"post_subjects",
+																"association_proposal_sources",
+																"association_proposal_targets",
+																"credit_sources",
+																"credit_targets",
+																"subject_sources",
+																"subject_entities",
+																"release_parents",
+																"series_releases",
+																"poll_options",
+																"content_nodes_content",
+																"content_nodes_target",
+																"structure_members",
+																"structure_edges_parent",
+																"structure_edges_child",
+																"structure_applications",
+																"progress_entries",
+																"progress_snapshots",
+																"notification_subjects",
+																"derived_state",
+																"finalize"
+															]
+														},
+														"attemptCount": {
+															"minimum": 0,
+															"anyOf": [
+																{
+																	"format": "integer",
+																	"default": 0,
+																	"type": "string"
+																},
+																{ "minimum": 0, "type": "integer" }
+															]
+														},
+														"processedRows": {
+															"minimum": 0,
+															"anyOf": [
+																{
+																	"format": "integer",
+																	"default": 0,
+																	"type": "string"
+																},
+																{ "minimum": 0, "type": "integer" }
+															]
+														},
+														"availableAt": {
+															"format": "date-time",
+															"type": "string"
+														},
+														"lastErrorCode": {
+															"nullable": true,
+															"anyOf": [{ "type": "string" }, { "type": "null" }]
+														},
+														"lastErrorMessage": {
+															"nullable": true,
+															"anyOf": [{ "type": "string" }, { "type": "null" }]
+														},
+														"startedAt": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"format": "date-time",
+																	"type": "string"
+																},
+																{ "type": "null" }
+															]
+														},
+														"completedAt": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"format": "date-time",
+																	"type": "string"
+																},
+																{ "type": "null" }
+															]
+														}
+													}
+												},
+												{ "type": "null" }
+											]
+										},
+										"expiresAt": { "format": "date-time", "type": "string" },
+										"acceptedAt": {
+											"nullable": true,
+											"anyOf": [{ "format": "date-time", "type": "string" }, { "type": "null" }]
+										},
+										"rejectedAt": {
+											"nullable": true,
+											"anyOf": [{ "format": "date-time", "type": "string" }, { "type": "null" }]
+										},
+										"supersededAt": {
+											"nullable": true,
+											"anyOf": [{ "format": "date-time", "type": "string" }, { "type": "null" }]
+										},
+										"completedAt": {
+											"nullable": true,
+											"anyOf": [{ "format": "date-time", "type": "string" }, { "type": "null" }]
+										},
+										"failedAt": {
+											"nullable": true,
+											"anyOf": [{ "format": "date-time", "type": "string" }, { "type": "null" }]
+										},
+										"createdAt": { "format": "date-time", "type": "string" },
+										"updatedAt": { "format": "date-time", "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "PlatformCapabilityRequired",
+													"type": "string",
+													"enum": ["PlatformCapabilityRequired"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitMergeNotFound",
+													"type": "string",
+													"enum": ["UnitMergeNotFound"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "getApiGovernancePlatformUnit-mergesByRequestId",
+				"x-rezics-quota-route-operation-id": "getApiGovernancePlatformUnit-mergesByRequestId",
+				"x-rezics-quota-operation-id": "*",
+				"x-rezics-quota-cost-units": 1
+			}
+		},
+		"/api/v1/governance/platform/unit-merges/preflight": {
+			"post": {
+				"summary": "Preflight a Unit identity merge",
+				"tags": ["Governance"],
+				"security": [{ "SessionCookie": [] }],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"additionalProperties": false,
+								"type": "object",
+								"required": ["sourceUnitId", "targetUnitId"],
+								"properties": {
+									"sourceUnitId": { "format": "uuid", "type": "string" },
+									"targetUnitId": { "format": "uuid", "type": "string" }
+								}
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"additionalProperties": false,
+									"type": "object",
+									"required": ["sourceUnit", "targetUnit", "unitKind", "policy", "manifest"],
+									"properties": {
+										"sourceUnit": {
+											"additionalProperties": false,
+											"type": "object",
+											"required": ["id", "title"],
+											"properties": {
+												"id": { "format": "uuid", "type": "string" },
+												"title": {
+													"nullable": true,
+													"anyOf": [{ "type": "string" }, { "type": "null" }]
+												}
+											}
+										},
+										"targetUnit": {
+											"additionalProperties": false,
+											"type": "object",
+											"required": ["id", "title"],
+											"properties": {
+												"id": { "format": "uuid", "type": "string" },
+												"title": {
+													"nullable": true,
+													"anyOf": [{ "type": "string" }, { "type": "null" }]
+												}
+											}
+										},
+										"unitKind": {
+											"default": "book",
+											"type": "string",
+											"enum": ["book", "software", "media", "entity"]
+										},
+										"policy": {
+											"additionalProperties": false,
+											"type": "object",
+											"required": [
+												"version",
+												"requiredApprovals",
+												"vetoEnabled",
+												"selfReviewForbidden"
+											],
+											"properties": {
+												"version": {
+													"minimum": 1,
+													"anyOf": [
+														{
+															"format": "integer",
+															"default": 0,
+															"type": "string"
+														},
+														{ "minimum": 1, "type": "integer" }
+													]
+												},
+												"requiredApprovals": {
+													"minimum": 1,
+													"anyOf": [
+														{
+															"format": "integer",
+															"default": 0,
+															"type": "string"
+														},
+														{ "minimum": 1, "type": "integer" }
+													]
+												},
+												"vetoEnabled": { "type": "boolean" },
+												"selfReviewForbidden": { "type": "boolean" }
+											}
+										},
+										"manifest": {
+											"additionalProperties": false,
+											"type": "object",
+											"required": [
+												"version",
+												"sourceUpdatedAt",
+												"targetUpdatedAt",
+												"sourceGraphRevision",
+												"targetGraphRevision",
+												"graphPlan",
+												"fingerprint"
+											],
+											"properties": {
+												"version": { "const": 1, "type": "number" },
+												"sourceUpdatedAt": {
+													"format": "date-time",
+													"type": "string"
+												},
+												"targetUpdatedAt": {
+													"format": "date-time",
+													"type": "string"
+												},
+												"sourceGraphRevision": {
+													"minimum": 0,
+													"anyOf": [
+														{
+															"format": "integer",
+															"default": 0,
+															"type": "string"
+														},
+														{ "minimum": 0, "type": "integer" }
+													]
+												},
+												"targetGraphRevision": {
+													"minimum": 0,
+													"anyOf": [
+														{
+															"format": "integer",
+															"default": 0,
+															"type": "string"
+														},
+														{ "minimum": 0, "type": "integer" }
+													]
+												},
+												"graphPlan": {
+													"additionalProperties": false,
+													"type": "object",
+													"required": [
+														"version",
+														"sourceRole",
+														"targetRole",
+														"sourceMainUnitId",
+														"targetMainUnitId",
+														"destinationMainUnitId",
+														"action"
+													],
+													"properties": {
+														"version": { "const": 1, "type": "number" },
+														"sourceRole": {
+															"default": "standalone",
+															"type": "string",
+															"enum": ["standalone", "variant", "main"]
+														},
+														"targetRole": {
+															"default": "standalone",
+															"type": "string",
+															"enum": ["standalone", "variant", "main"]
+														},
+														"sourceMainUnitId": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"format": "uuid",
+																	"type": "string"
+																},
+																{ "type": "null" }
+															]
+														},
+														"targetMainUnitId": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"format": "uuid",
+																	"type": "string"
+																},
+																{ "type": "null" }
+															]
+														},
+														"destinationMainUnitId": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"format": "uuid",
+																	"type": "string"
+																},
+																{ "type": "null" }
+															]
+														},
+														"action": {
+															"default": "none",
+															"type": "string",
+															"enum": [
+																"none",
+																"detach_source",
+																"reparent_source_variants_to_target",
+																"reparent_source_variants_to_target_main",
+																"promote_target_from_source"
+															]
+														}
+													}
+												},
+												"fingerprint": {
+													"pattern": "^[a-f0-9]{64}$",
+													"type": "string"
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "PlatformCapabilityRequired",
+													"type": "string",
+													"enum": ["PlatformCapabilityRequired"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitMergeNotFound",
+													"type": "string",
+													"enum": ["UnitMergeNotFound", "UnitNotFound"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitMergeKindMismatch",
+													"type": "string",
+													"enum": [
+														"UnitMergeKindMismatch",
+														"UnitMergeRequestConflict",
+														"UnitMergeIdempotencyConflict",
+														"UnitMergeManifestStale"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Response for status 422",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"type": "object",
+											"required": ["error", "requestId"],
+											"properties": {
+												"error": {
+													"type": "object",
+													"required": ["code", "message"],
+													"properties": {
+														"code": {
+															"default": "UnitMergeKindIneligible",
+															"type": "string",
+															"enum": ["UnitMergeKindIneligible"]
+														},
+														"message": { "type": "string" },
+														"details": {}
+													}
+												},
+												"requestId": { "type": "string" }
+											}
+										},
+										{ "$ref": "#/components/schemas/ValidationError" }
+									]
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "postApiGovernancePlatformUnit-mergesPreflight",
+				"x-rezics-quota-route-operation-id": "postApiGovernancePlatformUnit-mergesPreflight",
+				"x-rezics-quota-operation-id": "*",
+				"x-rezics-quota-cost-units": 1
+			}
+		},
+		"/api/v1/governance/platform/unit-merges/direct": {
+			"post": {
+				"summary": "Start a privileged direct Unit identity merge",
+				"tags": ["Governance"],
+				"security": [{ "SessionCookie": [] }],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"additionalProperties": false,
+								"type": "object",
+								"required": [
+									"sourceUnitId",
+									"targetUnitId",
+									"confirmationSourceUnitId",
+									"confirmationTargetUnitId",
+									"expectedSourceUpdatedAt",
+									"expectedTargetUpdatedAt",
+									"idempotencyKey",
+									"reasonCode"
+								],
+								"properties": {
+									"sourceUnitId": { "format": "uuid", "type": "string" },
+									"targetUnitId": { "format": "uuid", "type": "string" },
+									"confirmationSourceUnitId": {
+										"format": "uuid",
+										"type": "string"
+									},
+									"confirmationTargetUnitId": {
+										"format": "uuid",
+										"type": "string"
+									},
+									"expectedSourceUpdatedAt": {
+										"format": "date-time",
+										"type": "string"
+									},
+									"expectedTargetUpdatedAt": {
+										"format": "date-time",
+										"type": "string"
+									},
+									"idempotencyKey": {
+										"minLength": 1,
+										"maxLength": 200,
+										"type": "string"
+									},
+									"reasonCode": {
+										"type": "string",
+										"enum": [
+											"content_policy",
+											"copyright",
+											"realm_rules",
+											"spam",
+											"harassment",
+											"unsafe_content",
+											"off_topic",
+											"duplicate",
+											"account_security",
+											"user_request",
+											"appeal",
+											"administrative",
+											"other"
+										]
+									},
+									"note": { "minLength": 1, "maxLength": 2000, "type": "string" },
+									"overrideOfRequestId": { "format": "uuid", "type": "string" }
+								}
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"additionalProperties": false,
+									"type": "object",
+									"required": [
+										"id",
+										"sourceUnit",
+										"targetUnit",
+										"unitKind",
+										"mode",
+										"state",
+										"proposer",
+										"overrideOfRequestId",
+										"reasonCode",
+										"note",
+										"policy",
+										"manifest",
+										"approvals",
+										"rejections",
+										"reviews",
+										"operation",
+										"expiresAt",
+										"acceptedAt",
+										"rejectedAt",
+										"supersededAt",
+										"completedAt",
+										"failedAt",
+										"createdAt",
+										"updatedAt"
+									],
+									"properties": {
+										"id": { "format": "uuid", "type": "string" },
+										"sourceUnit": {
+											"additionalProperties": false,
+											"type": "object",
+											"required": ["id", "title"],
+											"properties": {
+												"id": { "format": "uuid", "type": "string" },
+												"title": {
+													"nullable": true,
+													"anyOf": [{ "type": "string" }, { "type": "null" }]
+												}
+											}
+										},
+										"targetUnit": {
+											"additionalProperties": false,
+											"type": "object",
+											"required": ["id", "title"],
+											"properties": {
+												"id": { "format": "uuid", "type": "string" },
+												"title": {
+													"nullable": true,
+													"anyOf": [{ "type": "string" }, { "type": "null" }]
+												}
+											}
+										},
+										"unitKind": {
+											"default": "book",
+											"type": "string",
+											"enum": ["book", "software", "media", "entity"]
+										},
+										"mode": {
+											"default": "reviewed",
+											"type": "string",
+											"enum": ["reviewed", "privileged_direct"]
+										},
+										"state": {
+											"default": "pending_review",
+											"type": "string",
+											"enum": [
+												"pending_review",
+												"accepted",
+												"rejected",
+												"expired",
+												"superseded",
+												"executing",
+												"completed",
+												"failed"
+											]
+										},
+										"proposer": {
+											"additionalProperties": false,
+											"type": "object",
+											"required": ["profileId", "label"],
+											"properties": {
+												"profileId": { "format": "uuid", "type": "string" },
+												"label": {
+													"nullable": true,
+													"anyOf": [{ "type": "string" }, { "type": "null" }]
+												}
+											}
+										},
+										"overrideOfRequestId": {
+											"nullable": true,
+											"anyOf": [{ "format": "uuid", "type": "string" }, { "type": "null" }]
+										},
+										"reasonCode": {
+											"type": "string",
+											"enum": [
+												"content_policy",
+												"copyright",
+												"realm_rules",
+												"spam",
+												"harassment",
+												"unsafe_content",
+												"off_topic",
+												"duplicate",
+												"account_security",
+												"user_request",
+												"appeal",
+												"administrative",
+												"other"
+											]
+										},
+										"note": {
+											"nullable": true,
+											"anyOf": [{ "type": "string" }, { "type": "null" }]
+										},
+										"policy": {
+											"additionalProperties": false,
+											"type": "object",
+											"required": [
+												"version",
+												"requiredApprovals",
+												"vetoEnabled",
+												"selfReviewForbidden"
+											],
+											"properties": {
+												"version": {
+													"minimum": 1,
+													"anyOf": [
+														{
+															"format": "integer",
+															"default": 0,
+															"type": "string"
+														},
+														{ "minimum": 1, "type": "integer" }
+													]
+												},
+												"requiredApprovals": {
+													"minimum": 1,
+													"anyOf": [
+														{
+															"format": "integer",
+															"default": 0,
+															"type": "string"
+														},
+														{ "minimum": 1, "type": "integer" }
+													]
+												},
+												"vetoEnabled": { "type": "boolean" },
+												"selfReviewForbidden": { "type": "boolean" }
+											}
+										},
+										"manifest": {
+											"additionalProperties": false,
+											"type": "object",
+											"required": [
+												"version",
+												"sourceUpdatedAt",
+												"targetUpdatedAt",
+												"sourceGraphRevision",
+												"targetGraphRevision",
+												"graphPlan",
+												"fingerprint"
+											],
+											"properties": {
+												"version": { "const": 1, "type": "number" },
+												"sourceUpdatedAt": {
+													"format": "date-time",
+													"type": "string"
+												},
+												"targetUpdatedAt": {
+													"format": "date-time",
+													"type": "string"
+												},
+												"sourceGraphRevision": {
+													"minimum": 0,
+													"anyOf": [
+														{
+															"format": "integer",
+															"default": 0,
+															"type": "string"
+														},
+														{ "minimum": 0, "type": "integer" }
+													]
+												},
+												"targetGraphRevision": {
+													"minimum": 0,
+													"anyOf": [
+														{
+															"format": "integer",
+															"default": 0,
+															"type": "string"
+														},
+														{ "minimum": 0, "type": "integer" }
+													]
+												},
+												"graphPlan": {
+													"additionalProperties": false,
+													"type": "object",
+													"required": [
+														"version",
+														"sourceRole",
+														"targetRole",
+														"sourceMainUnitId",
+														"targetMainUnitId",
+														"destinationMainUnitId",
+														"action"
+													],
+													"properties": {
+														"version": { "const": 1, "type": "number" },
+														"sourceRole": {
+															"default": "standalone",
+															"type": "string",
+															"enum": ["standalone", "variant", "main"]
+														},
+														"targetRole": {
+															"default": "standalone",
+															"type": "string",
+															"enum": ["standalone", "variant", "main"]
+														},
+														"sourceMainUnitId": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"format": "uuid",
+																	"type": "string"
+																},
+																{ "type": "null" }
+															]
+														},
+														"targetMainUnitId": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"format": "uuid",
+																	"type": "string"
+																},
+																{ "type": "null" }
+															]
+														},
+														"destinationMainUnitId": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"format": "uuid",
+																	"type": "string"
+																},
+																{ "type": "null" }
+															]
+														},
+														"action": {
+															"default": "none",
+															"type": "string",
+															"enum": [
+																"none",
+																"detach_source",
+																"reparent_source_variants_to_target",
+																"reparent_source_variants_to_target_main",
+																"promote_target_from_source"
+															]
+														}
+													}
+												},
+												"fingerprint": {
+													"pattern": "^[a-f0-9]{64}$",
+													"type": "string"
+												}
+											}
+										},
+										"approvals": {
+											"minimum": 0,
+											"anyOf": [
+												{
+													"format": "integer",
+													"default": 0,
+													"type": "string"
+												},
+												{ "minimum": 0, "type": "integer" }
+											]
+										},
+										"rejections": {
+											"minimum": 0,
+											"anyOf": [
+												{
+													"format": "integer",
+													"default": 0,
+													"type": "string"
+												},
+												{ "minimum": 0, "type": "integer" }
+											]
+										},
+										"reviews": {
+											"type": "array",
+											"items": {
+												"additionalProperties": false,
+												"type": "object",
+												"required": [
+													"reviewerProfileId",
+													"reviewerLabel",
+													"decision",
+													"note",
+													"createdAt"
+												],
+												"properties": {
+													"reviewerProfileId": {
+														"format": "uuid",
+														"type": "string"
+													},
+													"reviewerLabel": {
+														"nullable": true,
+														"anyOf": [{ "type": "string" }, { "type": "null" }]
+													},
+													"decision": {
+														"default": "approve",
+														"type": "string",
+														"enum": ["approve", "reject"]
+													},
+													"note": {
+														"nullable": true,
+														"anyOf": [{ "type": "string" }, { "type": "null" }]
+													},
+													"createdAt": {
+														"format": "date-time",
+														"type": "string"
+													}
+												}
+											}
+										},
+										"operation": {
+											"nullable": true,
+											"anyOf": [
+												{
+													"additionalProperties": false,
+													"type": "object",
+													"required": [
+														"id",
+														"state",
+														"phase",
+														"attemptCount",
+														"processedRows",
+														"availableAt",
+														"lastErrorCode",
+														"lastErrorMessage",
+														"startedAt",
+														"completedAt"
+													],
+													"properties": {
+														"id": {
+															"format": "uuid",
+															"type": "string"
+														},
+														"state": {
+															"default": "pending",
+															"type": "string",
+															"enum": ["pending", "processing", "retry_wait", "completed", "failed"]
+														},
+														"phase": {
+															"default": "variant_graph",
+															"type": "string",
+															"enum": [
+																"variant_graph",
+																"slug_addresses",
+																"slug_scopes",
+																"aliases",
+																"external_links",
+																"external_link_sources",
+																"software_requirements",
+																"software_requirement_platforms",
+																"unit_reactions",
+																"unit_shares",
+																"unit_follows",
+																"scores",
+																"collection_items",
+																"unit_tags",
+																"realm_tag_votes",
+																"profile_unit_tags",
+																"realm_pins",
+																"realm_units",
+																"realm_unit_tags",
+																"post_subjects",
+																"association_proposal_sources",
+																"association_proposal_targets",
+																"credit_sources",
+																"credit_targets",
+																"subject_sources",
+																"subject_entities",
+																"release_parents",
+																"series_releases",
+																"poll_options",
+																"content_nodes_content",
+																"content_nodes_target",
+																"structure_members",
+																"structure_edges_parent",
+																"structure_edges_child",
+																"structure_applications",
+																"progress_entries",
+																"progress_snapshots",
+																"notification_subjects",
+																"derived_state",
+																"finalize"
+															]
+														},
+														"attemptCount": {
+															"minimum": 0,
+															"anyOf": [
+																{
+																	"format": "integer",
+																	"default": 0,
+																	"type": "string"
+																},
+																{ "minimum": 0, "type": "integer" }
+															]
+														},
+														"processedRows": {
+															"minimum": 0,
+															"anyOf": [
+																{
+																	"format": "integer",
+																	"default": 0,
+																	"type": "string"
+																},
+																{ "minimum": 0, "type": "integer" }
+															]
+														},
+														"availableAt": {
+															"format": "date-time",
+															"type": "string"
+														},
+														"lastErrorCode": {
+															"nullable": true,
+															"anyOf": [{ "type": "string" }, { "type": "null" }]
+														},
+														"lastErrorMessage": {
+															"nullable": true,
+															"anyOf": [{ "type": "string" }, { "type": "null" }]
+														},
+														"startedAt": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"format": "date-time",
+																	"type": "string"
+																},
+																{ "type": "null" }
+															]
+														},
+														"completedAt": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"format": "date-time",
+																	"type": "string"
+																},
+																{ "type": "null" }
+															]
+														}
+													}
+												},
+												{ "type": "null" }
+											]
+										},
+										"expiresAt": { "format": "date-time", "type": "string" },
+										"acceptedAt": {
+											"nullable": true,
+											"anyOf": [{ "format": "date-time", "type": "string" }, { "type": "null" }]
+										},
+										"rejectedAt": {
+											"nullable": true,
+											"anyOf": [{ "format": "date-time", "type": "string" }, { "type": "null" }]
+										},
+										"supersededAt": {
+											"nullable": true,
+											"anyOf": [{ "format": "date-time", "type": "string" }, { "type": "null" }]
+										},
+										"completedAt": {
+											"nullable": true,
+											"anyOf": [{ "format": "date-time", "type": "string" }, { "type": "null" }]
+										},
+										"failedAt": {
+											"nullable": true,
+											"anyOf": [{ "format": "date-time", "type": "string" }, { "type": "null" }]
+										},
+										"createdAt": { "format": "date-time", "type": "string" },
+										"updatedAt": { "format": "date-time", "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Response for status 400",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"type": "object",
+											"required": ["error", "requestId"],
+											"properties": {
+												"error": {
+													"type": "object",
+													"required": ["code", "message"],
+													"properties": {
+														"code": {
+															"default": "UnitMergeConfirmationInvalid",
+															"type": "string",
+															"enum": ["UnitMergeConfirmationInvalid"]
+														},
+														"message": { "type": "string" },
+														"details": {}
+													}
+												},
+												"requestId": { "type": "string" }
+											}
+										},
+										{ "$ref": "#/components/schemas/MalformedRequestBody" }
+									]
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "PlatformCapabilityRequired",
+													"type": "string",
+													"enum": ["PlatformCapabilityRequired", "FreshSessionRequired"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitMergeNotFound",
+													"type": "string",
+													"enum": ["UnitMergeNotFound", "UnitNotFound"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitMergeKindMismatch",
+													"type": "string",
+													"enum": [
+														"UnitMergeKindMismatch",
+														"UnitMergeRequestConflict",
+														"UnitMergeIdempotencyConflict",
+														"UnitMergeManifestStale"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Response for status 422",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"type": "object",
+											"required": ["error", "requestId"],
+											"properties": {
+												"error": {
+													"type": "object",
+													"required": ["code", "message"],
+													"properties": {
+														"code": {
+															"default": "UnitMergeKindIneligible",
+															"type": "string",
+															"enum": ["UnitMergeKindIneligible"]
+														},
+														"message": { "type": "string" },
+														"details": {}
+													}
+												},
+												"requestId": { "type": "string" }
+											}
+										},
+										{ "$ref": "#/components/schemas/ValidationError" }
+									]
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "postApiGovernancePlatformUnit-mergesDirect",
+				"x-rezics-quota-route-operation-id": "postApiGovernancePlatformUnit-mergesDirect",
+				"x-rezics-quota-operation-id": "*",
+				"x-rezics-quota-cost-units": 1
+			}
+		},
+		"/api/v1/governance/platform/unit-merges/{requestId}/reviews": {
+			"post": {
+				"summary": "Approve or reject a Unit merge request",
+				"tags": ["Governance"],
+				"security": [{ "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "requestId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"additionalProperties": false,
+								"type": "object",
+								"required": ["decision", "requestFingerprint"],
+								"properties": {
+									"decision": {
+										"default": "approve",
+										"type": "string",
+										"enum": ["approve", "reject"]
+									},
+									"requestFingerprint": {
+										"pattern": "^[a-f0-9]{64}$",
+										"type": "string"
+									},
+									"note": { "minLength": 1, "maxLength": 2000, "type": "string" }
+								}
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"additionalProperties": false,
+									"type": "object",
+									"required": [
+										"id",
+										"sourceUnit",
+										"targetUnit",
+										"unitKind",
+										"mode",
+										"state",
+										"proposer",
+										"overrideOfRequestId",
+										"reasonCode",
+										"note",
+										"policy",
+										"manifest",
+										"approvals",
+										"rejections",
+										"reviews",
+										"operation",
+										"expiresAt",
+										"acceptedAt",
+										"rejectedAt",
+										"supersededAt",
+										"completedAt",
+										"failedAt",
+										"createdAt",
+										"updatedAt"
+									],
+									"properties": {
+										"id": { "format": "uuid", "type": "string" },
+										"sourceUnit": {
+											"additionalProperties": false,
+											"type": "object",
+											"required": ["id", "title"],
+											"properties": {
+												"id": { "format": "uuid", "type": "string" },
+												"title": {
+													"nullable": true,
+													"anyOf": [{ "type": "string" }, { "type": "null" }]
+												}
+											}
+										},
+										"targetUnit": {
+											"additionalProperties": false,
+											"type": "object",
+											"required": ["id", "title"],
+											"properties": {
+												"id": { "format": "uuid", "type": "string" },
+												"title": {
+													"nullable": true,
+													"anyOf": [{ "type": "string" }, { "type": "null" }]
+												}
+											}
+										},
+										"unitKind": {
+											"default": "book",
+											"type": "string",
+											"enum": ["book", "software", "media", "entity"]
+										},
+										"mode": {
+											"default": "reviewed",
+											"type": "string",
+											"enum": ["reviewed", "privileged_direct"]
+										},
+										"state": {
+											"default": "pending_review",
+											"type": "string",
+											"enum": [
+												"pending_review",
+												"accepted",
+												"rejected",
+												"expired",
+												"superseded",
+												"executing",
+												"completed",
+												"failed"
+											]
+										},
+										"proposer": {
+											"additionalProperties": false,
+											"type": "object",
+											"required": ["profileId", "label"],
+											"properties": {
+												"profileId": { "format": "uuid", "type": "string" },
+												"label": {
+													"nullable": true,
+													"anyOf": [{ "type": "string" }, { "type": "null" }]
+												}
+											}
+										},
+										"overrideOfRequestId": {
+											"nullable": true,
+											"anyOf": [{ "format": "uuid", "type": "string" }, { "type": "null" }]
+										},
+										"reasonCode": {
+											"type": "string",
+											"enum": [
+												"content_policy",
+												"copyright",
+												"realm_rules",
+												"spam",
+												"harassment",
+												"unsafe_content",
+												"off_topic",
+												"duplicate",
+												"account_security",
+												"user_request",
+												"appeal",
+												"administrative",
+												"other"
+											]
+										},
+										"note": {
+											"nullable": true,
+											"anyOf": [{ "type": "string" }, { "type": "null" }]
+										},
+										"policy": {
+											"additionalProperties": false,
+											"type": "object",
+											"required": [
+												"version",
+												"requiredApprovals",
+												"vetoEnabled",
+												"selfReviewForbidden"
+											],
+											"properties": {
+												"version": {
+													"minimum": 1,
+													"anyOf": [
+														{
+															"format": "integer",
+															"default": 0,
+															"type": "string"
+														},
+														{ "minimum": 1, "type": "integer" }
+													]
+												},
+												"requiredApprovals": {
+													"minimum": 1,
+													"anyOf": [
+														{
+															"format": "integer",
+															"default": 0,
+															"type": "string"
+														},
+														{ "minimum": 1, "type": "integer" }
+													]
+												},
+												"vetoEnabled": { "type": "boolean" },
+												"selfReviewForbidden": { "type": "boolean" }
+											}
+										},
+										"manifest": {
+											"additionalProperties": false,
+											"type": "object",
+											"required": [
+												"version",
+												"sourceUpdatedAt",
+												"targetUpdatedAt",
+												"sourceGraphRevision",
+												"targetGraphRevision",
+												"graphPlan",
+												"fingerprint"
+											],
+											"properties": {
+												"version": { "const": 1, "type": "number" },
+												"sourceUpdatedAt": {
+													"format": "date-time",
+													"type": "string"
+												},
+												"targetUpdatedAt": {
+													"format": "date-time",
+													"type": "string"
+												},
+												"sourceGraphRevision": {
+													"minimum": 0,
+													"anyOf": [
+														{
+															"format": "integer",
+															"default": 0,
+															"type": "string"
+														},
+														{ "minimum": 0, "type": "integer" }
+													]
+												},
+												"targetGraphRevision": {
+													"minimum": 0,
+													"anyOf": [
+														{
+															"format": "integer",
+															"default": 0,
+															"type": "string"
+														},
+														{ "minimum": 0, "type": "integer" }
+													]
+												},
+												"graphPlan": {
+													"additionalProperties": false,
+													"type": "object",
+													"required": [
+														"version",
+														"sourceRole",
+														"targetRole",
+														"sourceMainUnitId",
+														"targetMainUnitId",
+														"destinationMainUnitId",
+														"action"
+													],
+													"properties": {
+														"version": { "const": 1, "type": "number" },
+														"sourceRole": {
+															"default": "standalone",
+															"type": "string",
+															"enum": ["standalone", "variant", "main"]
+														},
+														"targetRole": {
+															"default": "standalone",
+															"type": "string",
+															"enum": ["standalone", "variant", "main"]
+														},
+														"sourceMainUnitId": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"format": "uuid",
+																	"type": "string"
+																},
+																{ "type": "null" }
+															]
+														},
+														"targetMainUnitId": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"format": "uuid",
+																	"type": "string"
+																},
+																{ "type": "null" }
+															]
+														},
+														"destinationMainUnitId": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"format": "uuid",
+																	"type": "string"
+																},
+																{ "type": "null" }
+															]
+														},
+														"action": {
+															"default": "none",
+															"type": "string",
+															"enum": [
+																"none",
+																"detach_source",
+																"reparent_source_variants_to_target",
+																"reparent_source_variants_to_target_main",
+																"promote_target_from_source"
+															]
+														}
+													}
+												},
+												"fingerprint": {
+													"pattern": "^[a-f0-9]{64}$",
+													"type": "string"
+												}
+											}
+										},
+										"approvals": {
+											"minimum": 0,
+											"anyOf": [
+												{
+													"format": "integer",
+													"default": 0,
+													"type": "string"
+												},
+												{ "minimum": 0, "type": "integer" }
+											]
+										},
+										"rejections": {
+											"minimum": 0,
+											"anyOf": [
+												{
+													"format": "integer",
+													"default": 0,
+													"type": "string"
+												},
+												{ "minimum": 0, "type": "integer" }
+											]
+										},
+										"reviews": {
+											"type": "array",
+											"items": {
+												"additionalProperties": false,
+												"type": "object",
+												"required": [
+													"reviewerProfileId",
+													"reviewerLabel",
+													"decision",
+													"note",
+													"createdAt"
+												],
+												"properties": {
+													"reviewerProfileId": {
+														"format": "uuid",
+														"type": "string"
+													},
+													"reviewerLabel": {
+														"nullable": true,
+														"anyOf": [{ "type": "string" }, { "type": "null" }]
+													},
+													"decision": {
+														"default": "approve",
+														"type": "string",
+														"enum": ["approve", "reject"]
+													},
+													"note": {
+														"nullable": true,
+														"anyOf": [{ "type": "string" }, { "type": "null" }]
+													},
+													"createdAt": {
+														"format": "date-time",
+														"type": "string"
+													}
+												}
+											}
+										},
+										"operation": {
+											"nullable": true,
+											"anyOf": [
+												{
+													"additionalProperties": false,
+													"type": "object",
+													"required": [
+														"id",
+														"state",
+														"phase",
+														"attemptCount",
+														"processedRows",
+														"availableAt",
+														"lastErrorCode",
+														"lastErrorMessage",
+														"startedAt",
+														"completedAt"
+													],
+													"properties": {
+														"id": {
+															"format": "uuid",
+															"type": "string"
+														},
+														"state": {
+															"default": "pending",
+															"type": "string",
+															"enum": ["pending", "processing", "retry_wait", "completed", "failed"]
+														},
+														"phase": {
+															"default": "variant_graph",
+															"type": "string",
+															"enum": [
+																"variant_graph",
+																"slug_addresses",
+																"slug_scopes",
+																"aliases",
+																"external_links",
+																"external_link_sources",
+																"software_requirements",
+																"software_requirement_platforms",
+																"unit_reactions",
+																"unit_shares",
+																"unit_follows",
+																"scores",
+																"collection_items",
+																"unit_tags",
+																"realm_tag_votes",
+																"profile_unit_tags",
+																"realm_pins",
+																"realm_units",
+																"realm_unit_tags",
+																"post_subjects",
+																"association_proposal_sources",
+																"association_proposal_targets",
+																"credit_sources",
+																"credit_targets",
+																"subject_sources",
+																"subject_entities",
+																"release_parents",
+																"series_releases",
+																"poll_options",
+																"content_nodes_content",
+																"content_nodes_target",
+																"structure_members",
+																"structure_edges_parent",
+																"structure_edges_child",
+																"structure_applications",
+																"progress_entries",
+																"progress_snapshots",
+																"notification_subjects",
+																"derived_state",
+																"finalize"
+															]
+														},
+														"attemptCount": {
+															"minimum": 0,
+															"anyOf": [
+																{
+																	"format": "integer",
+																	"default": 0,
+																	"type": "string"
+																},
+																{ "minimum": 0, "type": "integer" }
+															]
+														},
+														"processedRows": {
+															"minimum": 0,
+															"anyOf": [
+																{
+																	"format": "integer",
+																	"default": 0,
+																	"type": "string"
+																},
+																{ "minimum": 0, "type": "integer" }
+															]
+														},
+														"availableAt": {
+															"format": "date-time",
+															"type": "string"
+														},
+														"lastErrorCode": {
+															"nullable": true,
+															"anyOf": [{ "type": "string" }, { "type": "null" }]
+														},
+														"lastErrorMessage": {
+															"nullable": true,
+															"anyOf": [{ "type": "string" }, { "type": "null" }]
+														},
+														"startedAt": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"format": "date-time",
+																	"type": "string"
+																},
+																{ "type": "null" }
+															]
+														},
+														"completedAt": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"format": "date-time",
+																	"type": "string"
+																},
+																{ "type": "null" }
+															]
+														}
+													}
+												},
+												{ "type": "null" }
+											]
+										},
+										"expiresAt": { "format": "date-time", "type": "string" },
+										"acceptedAt": {
+											"nullable": true,
+											"anyOf": [{ "format": "date-time", "type": "string" }, { "type": "null" }]
+										},
+										"rejectedAt": {
+											"nullable": true,
+											"anyOf": [{ "format": "date-time", "type": "string" }, { "type": "null" }]
+										},
+										"supersededAt": {
+											"nullable": true,
+											"anyOf": [{ "format": "date-time", "type": "string" }, { "type": "null" }]
+										},
+										"completedAt": {
+											"nullable": true,
+											"anyOf": [{ "format": "date-time", "type": "string" }, { "type": "null" }]
+										},
+										"failedAt": {
+											"nullable": true,
+											"anyOf": [{ "format": "date-time", "type": "string" }, { "type": "null" }]
+										},
+										"createdAt": { "format": "date-time", "type": "string" },
+										"updatedAt": { "format": "date-time", "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "PlatformCapabilityRequired",
+													"type": "string",
+													"enum": [
+														"PlatformCapabilityRequired",
+														"FreshSessionRequired",
+														"UnitMergeReviewSelfForbidden"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitMergeNotFound",
+													"type": "string",
+													"enum": ["UnitMergeNotFound"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitMergeManifestStale",
+													"type": "string",
+													"enum": [
+														"UnitMergeManifestStale",
+														"UnitMergeRequestConflict",
+														"UnitMergeReviewDuplicate",
+														"UnitMergeReviewFingerprintMismatch",
+														"UnitMergeRequestNotPending",
+														"UnitMergeRequestExpired"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "postApiGovernancePlatformUnit-mergesByRequestIdReviews",
+				"x-rezics-quota-route-operation-id": "postApiGovernancePlatformUnit-mergesByRequestIdReviews",
+				"x-rezics-quota-operation-id": "*",
+				"x-rezics-quota-cost-units": 1
+			}
+		},
+		"/api/v1/governance/platform/unit-merges/{requestId}/retry": {
+			"post": {
+				"summary": "Retry a failed Unit merge operation",
+				"tags": ["Governance"],
+				"security": [{ "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "requestId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"additionalProperties": false,
+									"type": "object",
+									"required": [
+										"id",
+										"sourceUnit",
+										"targetUnit",
+										"unitKind",
+										"mode",
+										"state",
+										"proposer",
+										"overrideOfRequestId",
+										"reasonCode",
+										"note",
+										"policy",
+										"manifest",
+										"approvals",
+										"rejections",
+										"reviews",
+										"operation",
+										"expiresAt",
+										"acceptedAt",
+										"rejectedAt",
+										"supersededAt",
+										"completedAt",
+										"failedAt",
+										"createdAt",
+										"updatedAt"
+									],
+									"properties": {
+										"id": { "format": "uuid", "type": "string" },
+										"sourceUnit": {
+											"additionalProperties": false,
+											"type": "object",
+											"required": ["id", "title"],
+											"properties": {
+												"id": { "format": "uuid", "type": "string" },
+												"title": {
+													"nullable": true,
+													"anyOf": [{ "type": "string" }, { "type": "null" }]
+												}
+											}
+										},
+										"targetUnit": {
+											"additionalProperties": false,
+											"type": "object",
+											"required": ["id", "title"],
+											"properties": {
+												"id": { "format": "uuid", "type": "string" },
+												"title": {
+													"nullable": true,
+													"anyOf": [{ "type": "string" }, { "type": "null" }]
+												}
+											}
+										},
+										"unitKind": {
+											"default": "book",
+											"type": "string",
+											"enum": ["book", "software", "media", "entity"]
+										},
+										"mode": {
+											"default": "reviewed",
+											"type": "string",
+											"enum": ["reviewed", "privileged_direct"]
+										},
+										"state": {
+											"default": "pending_review",
+											"type": "string",
+											"enum": [
+												"pending_review",
+												"accepted",
+												"rejected",
+												"expired",
+												"superseded",
+												"executing",
+												"completed",
+												"failed"
+											]
+										},
+										"proposer": {
+											"additionalProperties": false,
+											"type": "object",
+											"required": ["profileId", "label"],
+											"properties": {
+												"profileId": { "format": "uuid", "type": "string" },
+												"label": {
+													"nullable": true,
+													"anyOf": [{ "type": "string" }, { "type": "null" }]
+												}
+											}
+										},
+										"overrideOfRequestId": {
+											"nullable": true,
+											"anyOf": [{ "format": "uuid", "type": "string" }, { "type": "null" }]
+										},
+										"reasonCode": {
+											"type": "string",
+											"enum": [
+												"content_policy",
+												"copyright",
+												"realm_rules",
+												"spam",
+												"harassment",
+												"unsafe_content",
+												"off_topic",
+												"duplicate",
+												"account_security",
+												"user_request",
+												"appeal",
+												"administrative",
+												"other"
+											]
+										},
+										"note": {
+											"nullable": true,
+											"anyOf": [{ "type": "string" }, { "type": "null" }]
+										},
+										"policy": {
+											"additionalProperties": false,
+											"type": "object",
+											"required": [
+												"version",
+												"requiredApprovals",
+												"vetoEnabled",
+												"selfReviewForbidden"
+											],
+											"properties": {
+												"version": {
+													"minimum": 1,
+													"anyOf": [
+														{
+															"format": "integer",
+															"default": 0,
+															"type": "string"
+														},
+														{ "minimum": 1, "type": "integer" }
+													]
+												},
+												"requiredApprovals": {
+													"minimum": 1,
+													"anyOf": [
+														{
+															"format": "integer",
+															"default": 0,
+															"type": "string"
+														},
+														{ "minimum": 1, "type": "integer" }
+													]
+												},
+												"vetoEnabled": { "type": "boolean" },
+												"selfReviewForbidden": { "type": "boolean" }
+											}
+										},
+										"manifest": {
+											"additionalProperties": false,
+											"type": "object",
+											"required": [
+												"version",
+												"sourceUpdatedAt",
+												"targetUpdatedAt",
+												"sourceGraphRevision",
+												"targetGraphRevision",
+												"graphPlan",
+												"fingerprint"
+											],
+											"properties": {
+												"version": { "const": 1, "type": "number" },
+												"sourceUpdatedAt": {
+													"format": "date-time",
+													"type": "string"
+												},
+												"targetUpdatedAt": {
+													"format": "date-time",
+													"type": "string"
+												},
+												"sourceGraphRevision": {
+													"minimum": 0,
+													"anyOf": [
+														{
+															"format": "integer",
+															"default": 0,
+															"type": "string"
+														},
+														{ "minimum": 0, "type": "integer" }
+													]
+												},
+												"targetGraphRevision": {
+													"minimum": 0,
+													"anyOf": [
+														{
+															"format": "integer",
+															"default": 0,
+															"type": "string"
+														},
+														{ "minimum": 0, "type": "integer" }
+													]
+												},
+												"graphPlan": {
+													"additionalProperties": false,
+													"type": "object",
+													"required": [
+														"version",
+														"sourceRole",
+														"targetRole",
+														"sourceMainUnitId",
+														"targetMainUnitId",
+														"destinationMainUnitId",
+														"action"
+													],
+													"properties": {
+														"version": { "const": 1, "type": "number" },
+														"sourceRole": {
+															"default": "standalone",
+															"type": "string",
+															"enum": ["standalone", "variant", "main"]
+														},
+														"targetRole": {
+															"default": "standalone",
+															"type": "string",
+															"enum": ["standalone", "variant", "main"]
+														},
+														"sourceMainUnitId": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"format": "uuid",
+																	"type": "string"
+																},
+																{ "type": "null" }
+															]
+														},
+														"targetMainUnitId": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"format": "uuid",
+																	"type": "string"
+																},
+																{ "type": "null" }
+															]
+														},
+														"destinationMainUnitId": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"format": "uuid",
+																	"type": "string"
+																},
+																{ "type": "null" }
+															]
+														},
+														"action": {
+															"default": "none",
+															"type": "string",
+															"enum": [
+																"none",
+																"detach_source",
+																"reparent_source_variants_to_target",
+																"reparent_source_variants_to_target_main",
+																"promote_target_from_source"
+															]
+														}
+													}
+												},
+												"fingerprint": {
+													"pattern": "^[a-f0-9]{64}$",
+													"type": "string"
+												}
+											}
+										},
+										"approvals": {
+											"minimum": 0,
+											"anyOf": [
+												{
+													"format": "integer",
+													"default": 0,
+													"type": "string"
+												},
+												{ "minimum": 0, "type": "integer" }
+											]
+										},
+										"rejections": {
+											"minimum": 0,
+											"anyOf": [
+												{
+													"format": "integer",
+													"default": 0,
+													"type": "string"
+												},
+												{ "minimum": 0, "type": "integer" }
+											]
+										},
+										"reviews": {
+											"type": "array",
+											"items": {
+												"additionalProperties": false,
+												"type": "object",
+												"required": [
+													"reviewerProfileId",
+													"reviewerLabel",
+													"decision",
+													"note",
+													"createdAt"
+												],
+												"properties": {
+													"reviewerProfileId": {
+														"format": "uuid",
+														"type": "string"
+													},
+													"reviewerLabel": {
+														"nullable": true,
+														"anyOf": [{ "type": "string" }, { "type": "null" }]
+													},
+													"decision": {
+														"default": "approve",
+														"type": "string",
+														"enum": ["approve", "reject"]
+													},
+													"note": {
+														"nullable": true,
+														"anyOf": [{ "type": "string" }, { "type": "null" }]
+													},
+													"createdAt": {
+														"format": "date-time",
+														"type": "string"
+													}
+												}
+											}
+										},
+										"operation": {
+											"nullable": true,
+											"anyOf": [
+												{
+													"additionalProperties": false,
+													"type": "object",
+													"required": [
+														"id",
+														"state",
+														"phase",
+														"attemptCount",
+														"processedRows",
+														"availableAt",
+														"lastErrorCode",
+														"lastErrorMessage",
+														"startedAt",
+														"completedAt"
+													],
+													"properties": {
+														"id": {
+															"format": "uuid",
+															"type": "string"
+														},
+														"state": {
+															"default": "pending",
+															"type": "string",
+															"enum": ["pending", "processing", "retry_wait", "completed", "failed"]
+														},
+														"phase": {
+															"default": "variant_graph",
+															"type": "string",
+															"enum": [
+																"variant_graph",
+																"slug_addresses",
+																"slug_scopes",
+																"aliases",
+																"external_links",
+																"external_link_sources",
+																"software_requirements",
+																"software_requirement_platforms",
+																"unit_reactions",
+																"unit_shares",
+																"unit_follows",
+																"scores",
+																"collection_items",
+																"unit_tags",
+																"realm_tag_votes",
+																"profile_unit_tags",
+																"realm_pins",
+																"realm_units",
+																"realm_unit_tags",
+																"post_subjects",
+																"association_proposal_sources",
+																"association_proposal_targets",
+																"credit_sources",
+																"credit_targets",
+																"subject_sources",
+																"subject_entities",
+																"release_parents",
+																"series_releases",
+																"poll_options",
+																"content_nodes_content",
+																"content_nodes_target",
+																"structure_members",
+																"structure_edges_parent",
+																"structure_edges_child",
+																"structure_applications",
+																"progress_entries",
+																"progress_snapshots",
+																"notification_subjects",
+																"derived_state",
+																"finalize"
+															]
+														},
+														"attemptCount": {
+															"minimum": 0,
+															"anyOf": [
+																{
+																	"format": "integer",
+																	"default": 0,
+																	"type": "string"
+																},
+																{ "minimum": 0, "type": "integer" }
+															]
+														},
+														"processedRows": {
+															"minimum": 0,
+															"anyOf": [
+																{
+																	"format": "integer",
+																	"default": 0,
+																	"type": "string"
+																},
+																{ "minimum": 0, "type": "integer" }
+															]
+														},
+														"availableAt": {
+															"format": "date-time",
+															"type": "string"
+														},
+														"lastErrorCode": {
+															"nullable": true,
+															"anyOf": [{ "type": "string" }, { "type": "null" }]
+														},
+														"lastErrorMessage": {
+															"nullable": true,
+															"anyOf": [{ "type": "string" }, { "type": "null" }]
+														},
+														"startedAt": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"format": "date-time",
+																	"type": "string"
+																},
+																{ "type": "null" }
+															]
+														},
+														"completedAt": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"format": "date-time",
+																	"type": "string"
+																},
+																{ "type": "null" }
+															]
+														}
+													}
+												},
+												{ "type": "null" }
+											]
+										},
+										"expiresAt": { "format": "date-time", "type": "string" },
+										"acceptedAt": {
+											"nullable": true,
+											"anyOf": [{ "format": "date-time", "type": "string" }, { "type": "null" }]
+										},
+										"rejectedAt": {
+											"nullable": true,
+											"anyOf": [{ "format": "date-time", "type": "string" }, { "type": "null" }]
+										},
+										"supersededAt": {
+											"nullable": true,
+											"anyOf": [{ "format": "date-time", "type": "string" }, { "type": "null" }]
+										},
+										"completedAt": {
+											"nullable": true,
+											"anyOf": [{ "format": "date-time", "type": "string" }, { "type": "null" }]
+										},
+										"failedAt": {
+											"nullable": true,
+											"anyOf": [{ "format": "date-time", "type": "string" }, { "type": "null" }]
+										},
+										"createdAt": { "format": "date-time", "type": "string" },
+										"updatedAt": { "format": "date-time", "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "PlatformCapabilityRequired",
+													"type": "string",
+													"enum": ["PlatformCapabilityRequired", "FreshSessionRequired"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitMergeNotFound",
+													"type": "string",
+													"enum": ["UnitMergeNotFound"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitMergeRetryUnavailable",
+													"type": "string",
+													"enum": ["UnitMergeRetryUnavailable"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "postApiGovernancePlatformUnit-mergesByRequestIdRetry",
+				"x-rezics-quota-route-operation-id": "postApiGovernancePlatformUnit-mergesByRequestIdRetry",
 				"x-rezics-quota-operation-id": "*",
 				"x-rezics-quota-cost-units": 1
 			}
@@ -68712,6 +73081,9 @@
 															"unit.edit",
 															"platform.development_preview.access",
 															"unit.governance.read",
+															"unit.merge.propose",
+															"unit.merge.review",
+															"unit.merge",
 															"unit.ownership.override",
 															"unit.content_license.manage",
 															"unit.delete",
@@ -73844,6 +78216,9 @@
 													"unit.edit",
 													"platform.development_preview.access",
 													"unit.governance.read",
+													"unit.merge.propose",
+													"unit.merge.review",
+													"unit.merge",
 													"unit.ownership.override",
 													"unit.content_license.manage",
 													"unit.delete",
@@ -74007,6 +78382,9 @@
 																		"unit.edit",
 																		"platform.development_preview.access",
 																		"unit.governance.read",
+																		"unit.merge.propose",
+																		"unit.merge.review",
+																		"unit.merge",
 																		"unit.ownership.override",
 																		"unit.content_license.manage",
 																		"unit.delete",
@@ -74177,6 +78555,9 @@
 															"unit.edit",
 															"platform.development_preview.access",
 															"unit.governance.read",
+															"unit.merge.propose",
+															"unit.merge.review",
+															"unit.merge",
 															"unit.ownership.override",
 															"unit.content_license.manage",
 															"unit.delete",
@@ -74335,7 +78716,7 @@
 								"properties": {
 									"expectedRevision": { "minLength": 1, "type": "string" },
 									"grants": {
-										"maxItems": 38,
+										"maxItems": 41,
 										"uniqueItems": true,
 										"type": "array",
 										"items": {
@@ -74358,6 +78739,9 @@
 														"unit.edit",
 														"platform.development_preview.access",
 														"unit.governance.read",
+														"unit.merge.propose",
+														"unit.merge.review",
+														"unit.merge",
 														"unit.ownership.override",
 														"unit.content_license.manage",
 														"unit.delete",
@@ -74444,6 +78828,9 @@
 															"unit.edit",
 															"platform.development_preview.access",
 															"unit.governance.read",
+															"unit.merge.propose",
+															"unit.merge.review",
+															"unit.merge",
 															"unit.ownership.override",
 															"unit.content_license.manage",
 															"unit.delete",

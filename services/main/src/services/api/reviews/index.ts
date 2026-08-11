@@ -84,6 +84,7 @@ import { ValidationError } from "../errors";
 import { applyNewPostTagMentionVotes } from "../../posts/tag-mentions";
 import type { SearchKeysetPosition } from "../../search/query";
 import { searchGlobalIdentifiers } from "../../search/service";
+import { resolveCanonicalUnitId } from "../../units/merge/canonical";
 
 const UnitReadFailureResponse = toApiErrorResponse(["UnitNotFound"]);
 const UnitMutationForbiddenResponse = toApiErrorResponse(["UnitPermissionForbidden"]);
@@ -354,7 +355,8 @@ export default new Elysia()
 			.post(
 				"",
 				async ({ profile, authorization, body }) => {
-					await authorization.unit.ensureCanRead(body.targetId);
+					const targetId = await resolveCanonicalUnitId(database, body.targetId);
+					await authorization.unit.ensureCanRead(targetId);
 					await authorization.realm.ensureUnitCreation(body.publishRealmIds, "realm.units.create");
 					await authorization.realm.ensureParticipation(body.score?.realmId);
 					const id = await database.transaction(async (tx) => {
@@ -366,7 +368,7 @@ export default new Elysia()
 									and(
 										eq(unitProgressEntry.id, body.progressEntryId),
 										eq(unitProgressEntry.profileId, profile.unitId),
-										eq(unitProgressEntry.unitId, body.targetId),
+										eq(unitProgressEntry.unitId, targetId),
 										isNull(unitProgressEntry.deletedAt),
 									),
 								)
@@ -387,7 +389,7 @@ export default new Elysia()
 									progressEntryId: "Progress entry already has a Review",
 								});
 						}
-						await authorization.entity.ensureSubjectAssociationAllowedIfEntity(tx, body.targetId);
+						await authorization.entity.ensureSubjectAssociationAllowedIfEntity(tx, targetId);
 						const created = await insertUnit(tx, {
 							kind: "post",
 							status: "published",
@@ -397,12 +399,12 @@ export default new Elysia()
 						});
 						await ensureSubjectPostTargetingAllowed(tx, {
 							sourcePostId: created.id,
-							subjectUnitId: body.targetId,
+							subjectUnitId: targetId,
 							realmIds: body.publishRealmIds,
 						});
 						await tx.insert(post).values({
 							id: created.id,
-							subjectUnitId: body.targetId,
+							subjectUnitId: targetId,
 							kind: "review",
 						});
 						await tx.insert(unitLocalization).values({
@@ -431,7 +433,7 @@ export default new Elysia()
 							const storedScore = await upsertScore(
 								tx,
 								profile.unitId,
-								body.targetId,
+								targetId,
 								body.score.realmId,
 								body.score.value,
 							);

@@ -23,6 +23,9 @@ describe("platform authorization policy", () => {
 	it("treats Unit governance reads as the prerequisite for independent mutations", () => {
 		expect(grantingPlatformCapabilities("unit.governance.read")).toEqual([
 			"unit.governance.read",
+			"unit.merge.propose",
+			"unit.merge.review",
+			"unit.merge",
 			"unit.ownership.override",
 			"unit.content_license.manage",
 			"unit.delete",

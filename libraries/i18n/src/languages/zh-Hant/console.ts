@@ -2,7 +2,9 @@ import { insert } from "native-i18n";
 
 import { zhHantTerminology } from "@rezics/i18n/terminology/zh-Hant";
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
+import units from "./units";
 
+const { forms: entityTerms } = zhHantTerminology.entity;
 const { forms: realmTerms } = zhHantTerminology.realm;
 const { forms: postTerms } = zhHantTerminology.post;
 
@@ -31,6 +33,10 @@ export default {
 		ownershipClaims: {
 			label: "所有權認領",
 			description: "審核公共條目的所有權認領，並將管理所有權歸還給適當的申請者。",
+		},
+		unitMerges: {
+			label: "條目合併",
+			description: "提出、審核、執行及重試不可逆的條目身分合併，並保留完整稽核軌跡。",
 		},
 		moderation: {
 			label: "全域內容治理",
@@ -72,6 +78,7 @@ export default {
 		deletedAt: "軟刪除時間",
 		restore: "還原條目",
 		softDelete: "軟刪除條目",
+		merge: "合併條目",
 		overrideOwnership: "強制移轉所有權",
 		ownershipPickerTitle: "選擇新的擁有者",
 		ownershipPickerDescription:
@@ -109,6 +116,88 @@ export default {
 		}),
 		confirmRestore: "確認還原",
 		confirmSoftDelete: "確認軟刪除",
+	},
+	unitMerges: {
+		newMerge: "新增合併",
+		stateFilter: "合併狀態",
+		allStates: "所有狀態",
+		states: {
+			pending_review: "等待審核",
+			accepted: "已排入佇列",
+			rejected: "已駁回",
+			expired: "已逾期",
+			superseded: "已被取代",
+			executing: "執行中",
+			completed: "已完成",
+			failed: "失敗",
+		},
+		listLabel: "條目合併申請清單",
+		untitled: "未命名條目",
+		empty: "目前狀態下沒有條目合併申請。",
+		loadMore: "載入更多",
+		source: "來源身分",
+		target: "正式目標",
+		openUnit: "開啟條目",
+		kind: "條目類型",
+		kinds: {
+			book: units.types.book,
+			software: units.types.software,
+			media: units.types.media,
+			entity: entityTerms.label,
+		},
+		mode: "決策途徑",
+		modes: { reviewed: "四人審核", privileged_direct: "高權限直接合併" },
+		proposer: "提出者",
+		approvalProgress: insert("已取得 {{count}}／{{required}} 票同意", {
+			count: Number,
+			required: Number,
+		}),
+		graphActions: {
+			none: "不需要變更變體關係圖。",
+			detach_source: "將來源變體自目前的主條目分離。",
+			reparent_source_variants_to_target: "將來源的變體移至目標之下。",
+			reparent_source_variants_to_target_main: "將來源的變體移至目標的主條目之下。",
+			promote_target_from_source: "將目標變體升為主條目，並把來源的其他變體移至其下。",
+		},
+		operation: "參照收斂",
+		operationStates: {
+			pending: "已排入佇列",
+			processing: "處理中",
+			retry_wait: "等待重試",
+			completed: "已完成",
+			failed: "需要手動重試",
+		},
+		processedRows: insert("已處理 {{count}} 筆參照", { count: Number }),
+		reviews: "審核紀錄",
+		decisions: { approve: "同意", reject: "駁回" },
+		noReviews: "尚未送出任何審核。",
+		approve: "同意",
+		reject: "駁回",
+		retry: "重試任務",
+		selectRequest: "選擇合併申請",
+		selectRequestDescription: "選擇申請以檢視不可變的合併規格、審核紀錄及執行狀態。",
+		createTitle: "將一個條目身分合併至另一個",
+		createDescription: "預檢會先驗證類型、目前版本及變體關係圖，之後才建立申請。",
+		sourceId: `來源條目 ${verbatimTerms.id.value}`,
+		targetId: `目標條目 ${verbatimTerms.id.value}`,
+		preflight: "執行預檢",
+		irreversibleWarning: "接受後無法還原。來源會成為永久重新導向，所有即時參照將收斂至目標。",
+		reason: "治理原因",
+		internalNote: "內部備註（選填）",
+		notePlaceholder: "記錄重複內容證據、查核來源，以及選擇此正式目標的理由。",
+		confirmSource: `再次輸入來源條目 ${verbatimTerms.id.value}`,
+		confirmTarget: `再次輸入目標條目 ${verbatimTerms.id.value}`,
+		submitForReview: "送交四人審核",
+		mergeDirectly: "直接合併",
+		approveTitle: "要同意這項條目合併嗎？",
+		approveDescription: "你的同意票會綁定目前顯示的合併規格；第四票會以原子交易接受不可逆合併。",
+		rejectTitle: "要駁回這項條目合併嗎？",
+		rejectDescription: "一票駁回會永久關閉此申請；高權限覆寫必須另建直接合併申請。",
+		reviewNote: "審核備註（選填）",
+		reviewNotePlaceholder: "記錄已查核的證據及此決定的依據。",
+		confirmRequest: `輸入合併申請 ${verbatimTerms.id.value} 以確認`,
+		confirmApprove: "確認同意",
+		confirmReject: "確認駁回",
 	},
 	ownershipClaims: {
 		stateFilter: "認領狀態",

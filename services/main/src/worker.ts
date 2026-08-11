@@ -18,6 +18,8 @@ const [
 	emailDispatcher,
 	imageAssetCleanup,
 	apiQuotaCleanup,
+	unitMergeWorker,
+	unitMergeService,
 	workerHealth,
 ] = await Promise.all([
 	import("srvx"),
@@ -27,6 +29,8 @@ const [
 	import("./services/email/dispatcher"),
 	import("./services/image-assets/cleanup"),
 	import("./services/auth/api-quota/cleanup"),
+	import("./services/units/merge/worker"),
+	import("./services/units/merge/service"),
 	import("./services/health/worker-health"),
 ]);
 const { aggregateRecommendationMetrics, purgeRecommendationData, refreshRecommendationSnapshot } =
@@ -34,6 +38,8 @@ const { aggregateRecommendationMetrics, purgeRecommendationData, refreshRecommen
 const { dispatchEmailBatch } = emailDispatcher;
 const { cleanupExpiredPendingImageAssets } = imageAssetCleanup;
 const { cleanupApiQuotaState } = apiQuotaCleanup;
+const { dispatchUnitMergeBatch } = unitMergeWorker;
+const { expireUnitMergeRequests } = unitMergeService;
 const { logger } = observability;
 const healthState = new workerHealth.WorkerHealthState();
 const evaluateReadiness = workerHealth.createWorkerReadinessEvaluator(healthState);
@@ -85,6 +91,10 @@ async function run() {
 		observability.metrics.workerHeartbeat(healthState.activeJobStartedAt());
 		try {
 			await runWorkerJob({ name: "email.dispatch", retryCount: 0 }, dispatchEmailBatch);
+			await runWorkerJob({ name: "unit_merge.dispatch", retryCount: 0 }, async () => {
+				await dispatchUnitMergeBatch();
+				await expireUnitMergeRequests();
+			});
 			if (Date.now() >= nextRecommendationAt) {
 				try {
 					await runWorkerJob({ name: "recommendation.refresh", retryCount: 0 }, async () => {

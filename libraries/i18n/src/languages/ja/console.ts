@@ -2,7 +2,9 @@ import { insert } from "native-i18n";
 
 import { jaTerminology } from "@rezics/i18n/terminology/ja";
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
+import units from "./units";
 
+const { forms: entityTerms } = jaTerminology.entity;
 const { forms: realmTerms } = jaTerminology.realm;
 const { forms: postTerms } = jaTerminology.post;
 
@@ -34,6 +36,11 @@ export default {
 		ownershipClaims: {
 			label: "所有権申請",
 			description: "公開ユニットの所有権申請を審査し、適切な申請者へ管理上の所有権を返還します。",
+		},
+		unitMerges: {
+			label: "ユニット統合",
+			description:
+				"完全な監査証跡を保ちながら、不可逆なユニット識別子の統合を提案・審査・実行・再試行します。",
 		},
 		moderation: {
 			label: "グローバルコンテンツガバナンス",
@@ -76,6 +83,7 @@ export default {
 		deletedAt: "論理削除日時",
 		restore: "ユニットを復元",
 		softDelete: "ユニットを論理削除",
+		merge: "ユニットを統合",
 		overrideOwnership: "所有者を強制変更",
 		ownershipPickerTitle: "新しい所有者を選択",
 		ownershipPickerDescription:
@@ -114,6 +122,93 @@ export default {
 		}),
 		confirmRestore: "復元を確定",
 		confirmSoftDelete: "論理削除を確定",
+	},
+	unitMerges: {
+		newMerge: "新しい統合",
+		stateFilter: "統合の状態",
+		allStates: "すべての状態",
+		states: {
+			pending_review: "審査待ち",
+			accepted: "キュー登録済み",
+			rejected: "却下済み",
+			expired: "期限切れ",
+			superseded: "置換済み",
+			executing: "実行中",
+			completed: "完了",
+			failed: "失敗",
+		},
+		listLabel: "ユニット統合申請一覧",
+		untitled: "無題のユニット",
+		empty: "この状態のユニット統合はありません。",
+		loadMore: "さらに読み込む",
+		source: "統合元の識別子",
+		target: "正規の統合先",
+		openUnit: "ユニットを開く",
+		kind: "ユニット種別",
+		kinds: {
+			book: units.types.book,
+			software: units.types.software,
+			media: units.types.media,
+			entity: entityTerms.label,
+		},
+		mode: "決定経路",
+		modes: { reviewed: "4名による審査", privileged_direct: "特権による直接統合" },
+		proposer: "提案者",
+		approvalProgress: insert("{{required}} 件中 {{count}} 件の承認", {
+			count: Number,
+			required: Number,
+		}),
+		graphActions: {
+			none: "派生関係図の変更は不要です。",
+			detach_source: "統合元の派生版を現在の基準版から切り離します。",
+			reparent_source_variants_to_target: "統合元の派生版を統合先の配下へ移します。",
+			reparent_source_variants_to_target_main: "統合元の派生版を統合先の基準版配下へ移します。",
+			promote_target_from_source:
+				"統合先の派生版を基準版に昇格し、統合元のほかの派生版をその配下へ移します。",
+		},
+		operation: "参照の収束",
+		operationStates: {
+			pending: "キュー登録済み",
+			processing: "処理中",
+			retry_wait: "再試行待ち",
+			completed: "完了",
+			failed: "手動での再試行が必要",
+		},
+		processedRows: insert("{{count}} 件の参照を処理済み", { count: Number }),
+		reviews: "審査履歴",
+		decisions: { approve: "承認", reject: "却下" },
+		noReviews: "審査はまだ送信されていません。",
+		approve: "承認",
+		reject: "却下",
+		retry: "処理を再試行",
+		selectRequest: "統合申請を選択",
+		selectRequestDescription:
+			"申請を選択して、変更不能な統合仕様、審査履歴、実行状態を確認します。",
+		createTitle: "ユニット識別子を別の識別子へ統合",
+		createDescription: "申請を作成する前に、種別、現在のリビジョン、派生関係図を事前検証します。",
+		sourceId: `統合元ユニットの ${verbatimTerms.id.value}`,
+		targetId: `統合先ユニットの ${verbatimTerms.id.value}`,
+		preflight: "事前検証を実行",
+		irreversibleWarning:
+			"承認後は元に戻せません。統合元は恒久的なリダイレクトとなり、すべての有効な参照が統合先へ収束します。",
+		reason: "ガバナンス上の理由",
+		internalNote: "内部メモ（任意）",
+		notePlaceholder: "重複の根拠、確認した情報源、この統合先を正規とする理由を記録します。",
+		confirmSource: `統合元ユニットの ${verbatimTerms.id.value} を再入力`,
+		confirmTarget: `統合先ユニットの ${verbatimTerms.id.value} を再入力`,
+		submitForReview: "4名審査へ送信",
+		mergeDirectly: "直接統合",
+		approveTitle: "このユニット統合を承認しますか？",
+		approveDescription:
+			"承認は表示中の統合仕様に紐づきます。4件目の承認で不可逆な統合がアトミックに受理されます。",
+		rejectTitle: "このユニット統合を却下しますか？",
+		rejectDescription:
+			"1件の却下で申請は恒久的に終了します。特権による上書きには別の直接統合申請が必要です。",
+		reviewNote: "審査メモ（任意）",
+		reviewNotePlaceholder: "確認した根拠と判断理由を記録します。",
+		confirmRequest: `確認のため統合申請の ${verbatimTerms.id.value} を入力`,
+		confirmApprove: "承認を確定",
+		confirmReject: "却下を確定",
 	},
 	ownershipClaims: {
 		stateFilter: "申請状態",

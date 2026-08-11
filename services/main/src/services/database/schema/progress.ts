@@ -114,6 +114,7 @@ export const unitProgressEntry = pgTable(
 				table.id.desc(),
 			)
 			.where(sql`${table.deletedAt} is null`),
+		index("unit_progress_entry_unit_id_merge_idx").on(table.unitId, table.id),
 		index("unit_progress_entry_profile_unit_status_sort_idx")
 			.on(
 				table.profileId,

@@ -77,6 +77,7 @@ import {
 import { selectReplyTree } from "./reply-tree-query";
 import { applyNewPostTagMentionVotes } from "../../posts/tag-mentions";
 import { createWikiPost } from "../../posts/wiki";
+import { resolveCanonicalUnitId } from "../../units/merge/canonical";
 
 const UnitMutationForbiddenResponse = toApiErrorResponse(["UnitPermissionForbidden"]);
 const ordinaryPostKind = sql<"post" | "reply">`${post.kind}::text`;
@@ -319,15 +320,15 @@ export default new Elysia()
 				"",
 				async ({ profile, authorization, body }) => {
 					await authorization.realm.ensureUnitCreation(body.publishRealmIds, "realm.units.create");
-					if (body.subjectId) {
-						await authorization.unit.ensureCanRead(body.subjectId);
+					const subjectId = body.subjectId
+						? await resolveCanonicalUnitId(database, body.subjectId)
+						: undefined;
+					if (subjectId) {
+						await authorization.unit.ensureCanRead(subjectId);
 					}
 					const id = await database.transaction(async (tx) => {
-						if (body.subjectId)
-							await authorization.entity.ensureSubjectAssociationAllowedIfEntity(
-								tx,
-								body.subjectId,
-							);
+						if (subjectId)
+							await authorization.entity.ensureSubjectAssociationAllowedIfEntity(tx, subjectId);
 						const created = await insertUnit(tx, {
 							kind: "post",
 							status: "published",
@@ -337,13 +338,13 @@ export default new Elysia()
 						});
 						await ensureSubjectPostTargetingAllowed(tx, {
 							sourcePostId: created.id,
-							subjectUnitId: body.subjectId,
+							subjectUnitId: subjectId,
 							realmIds: body.publishRealmIds,
 						});
 						await tx.insert(post).values({
 							id: created.id,
 							kind: body.postKind,
-							subjectUnitId: body.subjectId,
+							subjectUnitId: subjectId,
 						});
 						await tx.insert(unitLocalization).values({
 							unitId: created.id,
@@ -403,7 +404,10 @@ export default new Elysia()
 				"/wiki",
 				async ({ profile, authorization, body }) => {
 					await authorization.realm.ensureUnitCreation(body.publishRealmIds, "realm.units.create");
-					if (body.subjectId) await authorization.unit.ensureCanRead(body.subjectId);
+					const subjectId = body.subjectId
+						? await resolveCanonicalUnitId(database, body.subjectId)
+						: undefined;
+					if (subjectId) await authorization.unit.ensureCanRead(subjectId);
 					const id = await database.transaction(async (tx) => {
 						const created = await createWikiPost(tx, {
 							profileId: profile.unitId,
@@ -413,7 +417,7 @@ export default new Elysia()
 							body: body.body,
 							language: body.language,
 							publishRealmIds: body.publishRealmIds,
-							...(body.subjectId ? { subjectId: body.subjectId } : {}),
+							...(subjectId ? { subjectId } : {}),
 						});
 						return created.id;
 					});

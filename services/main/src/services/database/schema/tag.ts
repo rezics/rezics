@@ -208,6 +208,12 @@ export const realmTagVote = pgTable(
 		}).onDelete("cascade"),
 		index("realm_tag_vote_profile_idx").on(table.profileId),
 		index("realm_tag_vote_realm_tag_unit_idx").on(table.realmId, table.tagId, table.unitId),
+		index("realm_tag_vote_unit_merge_idx").on(
+			table.unitId,
+			table.realmId,
+			table.tagId,
+			table.profileId,
+		),
 		check("realm_tag_vote_not_self_check", sql`${table.unitId} <> ${table.tagId}`),
 		check("realm_tag_vote_value_check", sql`${table.value} in (-1, 1)`),
 	],
@@ -237,6 +243,7 @@ export const realmUnitTag = pgTable(
 			name: "realm_unit_tag_realm_unit_fkey",
 		}).onDelete("cascade"),
 		index("realm_unit_tag_tag_idx").on(table.realmId, table.tagId, table.unitId),
+		index("realm_unit_tag_unit_merge_idx").on(table.unitId, table.realmId, table.tagId),
 		check("realm_unit_tag_not_self_check", sql`${table.unitId} <> ${table.tagId}`),
 		createFractionalIndexPositionByteLengthConstraint(
 			"realm_unit_tag_position_byte_length_check",

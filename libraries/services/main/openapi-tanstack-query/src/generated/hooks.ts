@@ -495,6 +495,56 @@ import type {
 	PostApiGovernancePlatformUnitsByUnitIdRestoreStatus409,
 	PostApiGovernancePlatformUnitsByUnitIdRestoreStatus422,
 	PostApiGovernancePlatformUnitsByUnitIdRestoreStatus500,
+	GetApiGovernancePlatformUnitMergesOptions,
+	GetApiGovernancePlatformUnitMergesStatus200,
+	GetApiGovernancePlatformUnitMergesStatus403,
+	GetApiGovernancePlatformUnitMergesStatus422,
+	GetApiGovernancePlatformUnitMergesStatus500,
+	PostApiGovernancePlatformUnitMergesOptions,
+	PostApiGovernancePlatformUnitMergesStatus200,
+	PostApiGovernancePlatformUnitMergesStatus400,
+	PostApiGovernancePlatformUnitMergesStatus403,
+	PostApiGovernancePlatformUnitMergesStatus404,
+	PostApiGovernancePlatformUnitMergesStatus409,
+	PostApiGovernancePlatformUnitMergesStatus422,
+	PostApiGovernancePlatformUnitMergesStatus500,
+	GetApiGovernancePlatformUnitMergesByRequestIdOptions,
+	GetApiGovernancePlatformUnitMergesByRequestIdStatus200,
+	GetApiGovernancePlatformUnitMergesByRequestIdStatus403,
+	GetApiGovernancePlatformUnitMergesByRequestIdStatus404,
+	GetApiGovernancePlatformUnitMergesByRequestIdStatus422,
+	GetApiGovernancePlatformUnitMergesByRequestIdStatus500,
+	PostApiGovernancePlatformUnitMergesPreflightOptions,
+	PostApiGovernancePlatformUnitMergesPreflightStatus200,
+	PostApiGovernancePlatformUnitMergesPreflightStatus400,
+	PostApiGovernancePlatformUnitMergesPreflightStatus403,
+	PostApiGovernancePlatformUnitMergesPreflightStatus404,
+	PostApiGovernancePlatformUnitMergesPreflightStatus409,
+	PostApiGovernancePlatformUnitMergesPreflightStatus422,
+	PostApiGovernancePlatformUnitMergesPreflightStatus500,
+	PostApiGovernancePlatformUnitMergesDirectOptions,
+	PostApiGovernancePlatformUnitMergesDirectStatus200,
+	PostApiGovernancePlatformUnitMergesDirectStatus400,
+	PostApiGovernancePlatformUnitMergesDirectStatus403,
+	PostApiGovernancePlatformUnitMergesDirectStatus404,
+	PostApiGovernancePlatformUnitMergesDirectStatus409,
+	PostApiGovernancePlatformUnitMergesDirectStatus422,
+	PostApiGovernancePlatformUnitMergesDirectStatus500,
+	PostApiGovernancePlatformUnitMergesByRequestIdReviewsOptions,
+	PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus200,
+	PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus400,
+	PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus403,
+	PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus404,
+	PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus409,
+	PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus422,
+	PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus500,
+	PostApiGovernancePlatformUnitMergesByRequestIdRetryOptions,
+	PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus200,
+	PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus403,
+	PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus404,
+	PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus409,
+	PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus422,
+	PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus500,
 	GetApiGovernancePlatformOwnershipClaimsOptions,
 	GetApiGovernancePlatformOwnershipClaimsStatus200,
 	GetApiGovernancePlatformOwnershipClaimsStatus403,
@@ -2607,6 +2657,13 @@ import {
 	postApiGovernancePlatformUnitsByUnitIdOwnershipOverride,
 	postApiGovernancePlatformUnitsByUnitIdDelete,
 	postApiGovernancePlatformUnitsByUnitIdRestore,
+	getApiGovernancePlatformUnitMerges,
+	postApiGovernancePlatformUnitMerges,
+	getApiGovernancePlatformUnitMergesByRequestId,
+	postApiGovernancePlatformUnitMergesPreflight,
+	postApiGovernancePlatformUnitMergesDirect,
+	postApiGovernancePlatformUnitMergesByRequestIdReviews,
+	postApiGovernancePlatformUnitMergesByRequestIdRetry,
 	getApiGovernancePlatformOwnershipClaims,
 	postApiGovernancePlatformOwnershipClaimsByClaimIdDecision,
 	getApiGovernanceNotesByPostId,
@@ -10455,6 +10512,746 @@ export function usePostApiGovernancePlatformUnitsByUnitIdRestore<TContext>(
 			| PostApiGovernancePlatformUnitsByUnitIdRestoreStatus500
 		>,
 		PostApiGovernancePlatformUnitsByUnitIdRestoreOptions,
+		TContext
+	>;
+}
+
+export const getApiGovernancePlatformUnitMergesQueryKey = ({
+	query,
+}: Omit<GetApiGovernancePlatformUnitMergesOptions, "headers"> = {}) =>
+	[{ url: "/api/v1/governance/platform/unit-merges" }, ...(query ? [query] : [])] as const;
+
+type GetApiGovernancePlatformUnitMergesQueryKey = ReturnType<
+	typeof getApiGovernancePlatformUnitMergesQueryKey
+>;
+
+export function getApiGovernancePlatformUnitMergesQueryOptions(
+	{ query }: GetApiGovernancePlatformUnitMergesOptions = {},
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = getApiGovernancePlatformUnitMergesQueryKey({ query });
+	return queryOptions<
+		GetApiGovernancePlatformUnitMergesStatus200,
+		ResponseErrorConfig<
+			| GetApiGovernancePlatformUnitMergesStatus403
+			| GetApiGovernancePlatformUnitMergesStatus422
+			| GetApiGovernancePlatformUnitMergesStatus500
+		>,
+		GetApiGovernancePlatformUnitMergesStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			const { data } = await getApiGovernancePlatformUnitMerges({
+				...config,
+				query,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary List Unit merge governance requests
+ * {@link /api/v1/governance/platform/unit-merges}
+ */
+export function useGetApiGovernancePlatformUnitMerges<
+	TData = GetApiGovernancePlatformUnitMergesStatus200,
+	TQueryData = GetApiGovernancePlatformUnitMergesStatus200,
+	TQueryKey extends QueryKey = GetApiGovernancePlatformUnitMergesQueryKey,
+>(
+	{
+		query,
+	}: {
+		query?:
+			| GetApiGovernancePlatformUnitMergesOptions["query"]
+			| (() => GetApiGovernancePlatformUnitMergesOptions["query"]);
+	} = {},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				GetApiGovernancePlatformUnitMergesStatus200,
+				ResponseErrorConfig<
+					| GetApiGovernancePlatformUnitMergesStatus403
+					| GetApiGovernancePlatformUnitMergesStatus422
+					| GetApiGovernancePlatformUnitMergesStatus500
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = { query: typeof query === "function" ? query() : query };
+	const queryKey =
+		resolvedOptions?.queryKey ?? getApiGovernancePlatformUnitMergesQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...getApiGovernancePlatformUnitMergesQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			| GetApiGovernancePlatformUnitMergesStatus403
+			| GetApiGovernancePlatformUnitMergesStatus422
+			| GetApiGovernancePlatformUnitMergesStatus500
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const postApiGovernancePlatformUnitMergesMutationKey = () =>
+	[{ url: "/api/v1/governance/platform/unit-merges" }] as const;
+
+export function postApiGovernancePlatformUnitMergesMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = postApiGovernancePlatformUnitMergesMutationKey();
+	return mutationOptions<
+		PostApiGovernancePlatformUnitMergesStatus200,
+		ResponseErrorConfig<
+			| PostApiGovernancePlatformUnitMergesStatus400
+			| PostApiGovernancePlatformUnitMergesStatus403
+			| PostApiGovernancePlatformUnitMergesStatus404
+			| PostApiGovernancePlatformUnitMergesStatus409
+			| PostApiGovernancePlatformUnitMergesStatus422
+			| PostApiGovernancePlatformUnitMergesStatus500
+		>,
+		PostApiGovernancePlatformUnitMergesOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ body }) => {
+			const { data } = await postApiGovernancePlatformUnitMerges({
+				...config,
+				body,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Propose a reviewed Unit identity merge
+ * {@link /api/v1/governance/platform/unit-merges}
+ */
+export function usePostApiGovernancePlatformUnitMerges<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			PostApiGovernancePlatformUnitMergesStatus200,
+			ResponseErrorConfig<
+				| PostApiGovernancePlatformUnitMergesStatus400
+				| PostApiGovernancePlatformUnitMergesStatus403
+				| PostApiGovernancePlatformUnitMergesStatus404
+				| PostApiGovernancePlatformUnitMergesStatus409
+				| PostApiGovernancePlatformUnitMergesStatus422
+				| PostApiGovernancePlatformUnitMergesStatus500
+			>,
+			PostApiGovernancePlatformUnitMergesOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ?? postApiGovernancePlatformUnitMergesMutationKey();
+
+	const baseOptions = postApiGovernancePlatformUnitMergesMutationOptions(
+		config,
+	) as UseMutationOptions<
+		PostApiGovernancePlatformUnitMergesStatus200,
+		ResponseErrorConfig<
+			| PostApiGovernancePlatformUnitMergesStatus400
+			| PostApiGovernancePlatformUnitMergesStatus403
+			| PostApiGovernancePlatformUnitMergesStatus404
+			| PostApiGovernancePlatformUnitMergesStatus409
+			| PostApiGovernancePlatformUnitMergesStatus422
+			| PostApiGovernancePlatformUnitMergesStatus500
+		>,
+		PostApiGovernancePlatformUnitMergesOptions,
+		TContext
+	>;
+
+	return useMutation<
+		PostApiGovernancePlatformUnitMergesStatus200,
+		ResponseErrorConfig<
+			| PostApiGovernancePlatformUnitMergesStatus400
+			| PostApiGovernancePlatformUnitMergesStatus403
+			| PostApiGovernancePlatformUnitMergesStatus404
+			| PostApiGovernancePlatformUnitMergesStatus409
+			| PostApiGovernancePlatformUnitMergesStatus422
+			| PostApiGovernancePlatformUnitMergesStatus500
+		>,
+		PostApiGovernancePlatformUnitMergesOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PostApiGovernancePlatformUnitMergesStatus200,
+		ResponseErrorConfig<
+			| PostApiGovernancePlatformUnitMergesStatus400
+			| PostApiGovernancePlatformUnitMergesStatus403
+			| PostApiGovernancePlatformUnitMergesStatus404
+			| PostApiGovernancePlatformUnitMergesStatus409
+			| PostApiGovernancePlatformUnitMergesStatus422
+			| PostApiGovernancePlatformUnitMergesStatus500
+		>,
+		PostApiGovernancePlatformUnitMergesOptions,
+		TContext
+	>;
+}
+
+export const getApiGovernancePlatformUnitMergesByRequestIdQueryKey = ({
+	path,
+}: Omit<GetApiGovernancePlatformUnitMergesByRequestIdOptions, "headers">) =>
+	[{ url: "/api/v1/governance/platform/unit-merges/:requestId", params: path }] as const;
+
+type GetApiGovernancePlatformUnitMergesByRequestIdQueryKey = ReturnType<
+	typeof getApiGovernancePlatformUnitMergesByRequestIdQueryKey
+>;
+
+export function getApiGovernancePlatformUnitMergesByRequestIdQueryOptions(
+	{ path }: GetApiGovernancePlatformUnitMergesByRequestIdOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = getApiGovernancePlatformUnitMergesByRequestIdQueryKey({ path });
+	return queryOptions<
+		GetApiGovernancePlatformUnitMergesByRequestIdStatus200,
+		ResponseErrorConfig<
+			| GetApiGovernancePlatformUnitMergesByRequestIdStatus403
+			| GetApiGovernancePlatformUnitMergesByRequestIdStatus404
+			| GetApiGovernancePlatformUnitMergesByRequestIdStatus422
+			| GetApiGovernancePlatformUnitMergesByRequestIdStatus500
+		>,
+		GetApiGovernancePlatformUnitMergesByRequestIdStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			const { data } = await getApiGovernancePlatformUnitMergesByRequestId({
+				...config,
+				path,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Get a Unit merge governance request
+ * {@link /api/v1/governance/platform/unit-merges/:requestId}
+ */
+export function useGetApiGovernancePlatformUnitMergesByRequestId<
+	TData = GetApiGovernancePlatformUnitMergesByRequestIdStatus200,
+	TQueryData = GetApiGovernancePlatformUnitMergesByRequestIdStatus200,
+	TQueryKey extends QueryKey = GetApiGovernancePlatformUnitMergesByRequestIdQueryKey,
+>(
+	{
+		path,
+	}: {
+		path:
+			| GetApiGovernancePlatformUnitMergesByRequestIdOptions["path"]
+			| (() => GetApiGovernancePlatformUnitMergesByRequestIdOptions["path"]);
+	},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				GetApiGovernancePlatformUnitMergesByRequestIdStatus200,
+				ResponseErrorConfig<
+					| GetApiGovernancePlatformUnitMergesByRequestIdStatus403
+					| GetApiGovernancePlatformUnitMergesByRequestIdStatus404
+					| GetApiGovernancePlatformUnitMergesByRequestIdStatus422
+					| GetApiGovernancePlatformUnitMergesByRequestIdStatus500
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = { path: typeof path === "function" ? path() : path };
+	const queryKey =
+		resolvedOptions?.queryKey ??
+		getApiGovernancePlatformUnitMergesByRequestIdQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...getApiGovernancePlatformUnitMergesByRequestIdQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			| GetApiGovernancePlatformUnitMergesByRequestIdStatus403
+			| GetApiGovernancePlatformUnitMergesByRequestIdStatus404
+			| GetApiGovernancePlatformUnitMergesByRequestIdStatus422
+			| GetApiGovernancePlatformUnitMergesByRequestIdStatus500
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const postApiGovernancePlatformUnitMergesPreflightMutationKey = () =>
+	[{ url: "/api/v1/governance/platform/unit-merges/preflight" }] as const;
+
+export function postApiGovernancePlatformUnitMergesPreflightMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = postApiGovernancePlatformUnitMergesPreflightMutationKey();
+	return mutationOptions<
+		PostApiGovernancePlatformUnitMergesPreflightStatus200,
+		ResponseErrorConfig<
+			| PostApiGovernancePlatformUnitMergesPreflightStatus400
+			| PostApiGovernancePlatformUnitMergesPreflightStatus403
+			| PostApiGovernancePlatformUnitMergesPreflightStatus404
+			| PostApiGovernancePlatformUnitMergesPreflightStatus409
+			| PostApiGovernancePlatformUnitMergesPreflightStatus422
+			| PostApiGovernancePlatformUnitMergesPreflightStatus500
+		>,
+		PostApiGovernancePlatformUnitMergesPreflightOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ body }) => {
+			const { data } = await postApiGovernancePlatformUnitMergesPreflight({
+				...config,
+				body,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Preflight a Unit identity merge
+ * {@link /api/v1/governance/platform/unit-merges/preflight}
+ */
+export function usePostApiGovernancePlatformUnitMergesPreflight<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			PostApiGovernancePlatformUnitMergesPreflightStatus200,
+			ResponseErrorConfig<
+				| PostApiGovernancePlatformUnitMergesPreflightStatus400
+				| PostApiGovernancePlatformUnitMergesPreflightStatus403
+				| PostApiGovernancePlatformUnitMergesPreflightStatus404
+				| PostApiGovernancePlatformUnitMergesPreflightStatus409
+				| PostApiGovernancePlatformUnitMergesPreflightStatus422
+				| PostApiGovernancePlatformUnitMergesPreflightStatus500
+			>,
+			PostApiGovernancePlatformUnitMergesPreflightOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ?? postApiGovernancePlatformUnitMergesPreflightMutationKey();
+
+	const baseOptions = postApiGovernancePlatformUnitMergesPreflightMutationOptions(
+		config,
+	) as UseMutationOptions<
+		PostApiGovernancePlatformUnitMergesPreflightStatus200,
+		ResponseErrorConfig<
+			| PostApiGovernancePlatformUnitMergesPreflightStatus400
+			| PostApiGovernancePlatformUnitMergesPreflightStatus403
+			| PostApiGovernancePlatformUnitMergesPreflightStatus404
+			| PostApiGovernancePlatformUnitMergesPreflightStatus409
+			| PostApiGovernancePlatformUnitMergesPreflightStatus422
+			| PostApiGovernancePlatformUnitMergesPreflightStatus500
+		>,
+		PostApiGovernancePlatformUnitMergesPreflightOptions,
+		TContext
+	>;
+
+	return useMutation<
+		PostApiGovernancePlatformUnitMergesPreflightStatus200,
+		ResponseErrorConfig<
+			| PostApiGovernancePlatformUnitMergesPreflightStatus400
+			| PostApiGovernancePlatformUnitMergesPreflightStatus403
+			| PostApiGovernancePlatformUnitMergesPreflightStatus404
+			| PostApiGovernancePlatformUnitMergesPreflightStatus409
+			| PostApiGovernancePlatformUnitMergesPreflightStatus422
+			| PostApiGovernancePlatformUnitMergesPreflightStatus500
+		>,
+		PostApiGovernancePlatformUnitMergesPreflightOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PostApiGovernancePlatformUnitMergesPreflightStatus200,
+		ResponseErrorConfig<
+			| PostApiGovernancePlatformUnitMergesPreflightStatus400
+			| PostApiGovernancePlatformUnitMergesPreflightStatus403
+			| PostApiGovernancePlatformUnitMergesPreflightStatus404
+			| PostApiGovernancePlatformUnitMergesPreflightStatus409
+			| PostApiGovernancePlatformUnitMergesPreflightStatus422
+			| PostApiGovernancePlatformUnitMergesPreflightStatus500
+		>,
+		PostApiGovernancePlatformUnitMergesPreflightOptions,
+		TContext
+	>;
+}
+
+export const postApiGovernancePlatformUnitMergesDirectMutationKey = () =>
+	[{ url: "/api/v1/governance/platform/unit-merges/direct" }] as const;
+
+export function postApiGovernancePlatformUnitMergesDirectMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = postApiGovernancePlatformUnitMergesDirectMutationKey();
+	return mutationOptions<
+		PostApiGovernancePlatformUnitMergesDirectStatus200,
+		ResponseErrorConfig<
+			| PostApiGovernancePlatformUnitMergesDirectStatus400
+			| PostApiGovernancePlatformUnitMergesDirectStatus403
+			| PostApiGovernancePlatformUnitMergesDirectStatus404
+			| PostApiGovernancePlatformUnitMergesDirectStatus409
+			| PostApiGovernancePlatformUnitMergesDirectStatus422
+			| PostApiGovernancePlatformUnitMergesDirectStatus500
+		>,
+		PostApiGovernancePlatformUnitMergesDirectOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ body }) => {
+			const { data } = await postApiGovernancePlatformUnitMergesDirect({
+				...config,
+				body,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Start a privileged direct Unit identity merge
+ * {@link /api/v1/governance/platform/unit-merges/direct}
+ */
+export function usePostApiGovernancePlatformUnitMergesDirect<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			PostApiGovernancePlatformUnitMergesDirectStatus200,
+			ResponseErrorConfig<
+				| PostApiGovernancePlatformUnitMergesDirectStatus400
+				| PostApiGovernancePlatformUnitMergesDirectStatus403
+				| PostApiGovernancePlatformUnitMergesDirectStatus404
+				| PostApiGovernancePlatformUnitMergesDirectStatus409
+				| PostApiGovernancePlatformUnitMergesDirectStatus422
+				| PostApiGovernancePlatformUnitMergesDirectStatus500
+			>,
+			PostApiGovernancePlatformUnitMergesDirectOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ?? postApiGovernancePlatformUnitMergesDirectMutationKey();
+
+	const baseOptions = postApiGovernancePlatformUnitMergesDirectMutationOptions(
+		config,
+	) as UseMutationOptions<
+		PostApiGovernancePlatformUnitMergesDirectStatus200,
+		ResponseErrorConfig<
+			| PostApiGovernancePlatformUnitMergesDirectStatus400
+			| PostApiGovernancePlatformUnitMergesDirectStatus403
+			| PostApiGovernancePlatformUnitMergesDirectStatus404
+			| PostApiGovernancePlatformUnitMergesDirectStatus409
+			| PostApiGovernancePlatformUnitMergesDirectStatus422
+			| PostApiGovernancePlatformUnitMergesDirectStatus500
+		>,
+		PostApiGovernancePlatformUnitMergesDirectOptions,
+		TContext
+	>;
+
+	return useMutation<
+		PostApiGovernancePlatformUnitMergesDirectStatus200,
+		ResponseErrorConfig<
+			| PostApiGovernancePlatformUnitMergesDirectStatus400
+			| PostApiGovernancePlatformUnitMergesDirectStatus403
+			| PostApiGovernancePlatformUnitMergesDirectStatus404
+			| PostApiGovernancePlatformUnitMergesDirectStatus409
+			| PostApiGovernancePlatformUnitMergesDirectStatus422
+			| PostApiGovernancePlatformUnitMergesDirectStatus500
+		>,
+		PostApiGovernancePlatformUnitMergesDirectOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PostApiGovernancePlatformUnitMergesDirectStatus200,
+		ResponseErrorConfig<
+			| PostApiGovernancePlatformUnitMergesDirectStatus400
+			| PostApiGovernancePlatformUnitMergesDirectStatus403
+			| PostApiGovernancePlatformUnitMergesDirectStatus404
+			| PostApiGovernancePlatformUnitMergesDirectStatus409
+			| PostApiGovernancePlatformUnitMergesDirectStatus422
+			| PostApiGovernancePlatformUnitMergesDirectStatus500
+		>,
+		PostApiGovernancePlatformUnitMergesDirectOptions,
+		TContext
+	>;
+}
+
+export const postApiGovernancePlatformUnitMergesByRequestIdReviewsMutationKey = () =>
+	[{ url: "/api/v1/governance/platform/unit-merges/:requestId/reviews" }] as const;
+
+export function postApiGovernancePlatformUnitMergesByRequestIdReviewsMutationOptions<
+	TContext = unknown,
+>(config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {}) {
+	const mutationKey = postApiGovernancePlatformUnitMergesByRequestIdReviewsMutationKey();
+	return mutationOptions<
+		PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus200,
+		ResponseErrorConfig<
+			| PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus400
+			| PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus403
+			| PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus404
+			| PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus409
+			| PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus422
+			| PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus500
+		>,
+		PostApiGovernancePlatformUnitMergesByRequestIdReviewsOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			const { data } = await postApiGovernancePlatformUnitMergesByRequestIdReviews({
+				...config,
+				path,
+				body,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Approve or reject a Unit merge request
+ * {@link /api/v1/governance/platform/unit-merges/:requestId/reviews}
+ */
+export function usePostApiGovernancePlatformUnitMergesByRequestIdReviews<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus200,
+			ResponseErrorConfig<
+				| PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus400
+				| PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus403
+				| PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus404
+				| PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus409
+				| PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus422
+				| PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus500
+			>,
+			PostApiGovernancePlatformUnitMergesByRequestIdReviewsOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ??
+		postApiGovernancePlatformUnitMergesByRequestIdReviewsMutationKey();
+
+	const baseOptions = postApiGovernancePlatformUnitMergesByRequestIdReviewsMutationOptions(
+		config,
+	) as UseMutationOptions<
+		PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus200,
+		ResponseErrorConfig<
+			| PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus400
+			| PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus403
+			| PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus404
+			| PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus409
+			| PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus422
+			| PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus500
+		>,
+		PostApiGovernancePlatformUnitMergesByRequestIdReviewsOptions,
+		TContext
+	>;
+
+	return useMutation<
+		PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus200,
+		ResponseErrorConfig<
+			| PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus400
+			| PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus403
+			| PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus404
+			| PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus409
+			| PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus422
+			| PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus500
+		>,
+		PostApiGovernancePlatformUnitMergesByRequestIdReviewsOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus200,
+		ResponseErrorConfig<
+			| PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus400
+			| PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus403
+			| PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus404
+			| PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus409
+			| PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus422
+			| PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus500
+		>,
+		PostApiGovernancePlatformUnitMergesByRequestIdReviewsOptions,
+		TContext
+	>;
+}
+
+export const postApiGovernancePlatformUnitMergesByRequestIdRetryMutationKey = () =>
+	[{ url: "/api/v1/governance/platform/unit-merges/:requestId/retry" }] as const;
+
+export function postApiGovernancePlatformUnitMergesByRequestIdRetryMutationOptions<
+	TContext = unknown,
+>(config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {}) {
+	const mutationKey = postApiGovernancePlatformUnitMergesByRequestIdRetryMutationKey();
+	return mutationOptions<
+		PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus200,
+		ResponseErrorConfig<
+			| PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus403
+			| PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus404
+			| PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus409
+			| PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus422
+			| PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus500
+		>,
+		PostApiGovernancePlatformUnitMergesByRequestIdRetryOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path }) => {
+			const { data } = await postApiGovernancePlatformUnitMergesByRequestIdRetry({
+				...config,
+				path,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Retry a failed Unit merge operation
+ * {@link /api/v1/governance/platform/unit-merges/:requestId/retry}
+ */
+export function usePostApiGovernancePlatformUnitMergesByRequestIdRetry<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus200,
+			ResponseErrorConfig<
+				| PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus403
+				| PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus404
+				| PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus409
+				| PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus422
+				| PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus500
+			>,
+			PostApiGovernancePlatformUnitMergesByRequestIdRetryOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ?? postApiGovernancePlatformUnitMergesByRequestIdRetryMutationKey();
+
+	const baseOptions = postApiGovernancePlatformUnitMergesByRequestIdRetryMutationOptions(
+		config,
+	) as UseMutationOptions<
+		PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus200,
+		ResponseErrorConfig<
+			| PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus403
+			| PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus404
+			| PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus409
+			| PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus422
+			| PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus500
+		>,
+		PostApiGovernancePlatformUnitMergesByRequestIdRetryOptions,
+		TContext
+	>;
+
+	return useMutation<
+		PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus200,
+		ResponseErrorConfig<
+			| PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus403
+			| PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus404
+			| PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus409
+			| PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus422
+			| PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus500
+		>,
+		PostApiGovernancePlatformUnitMergesByRequestIdRetryOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus200,
+		ResponseErrorConfig<
+			| PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus403
+			| PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus404
+			| PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus409
+			| PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus422
+			| PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus500
+		>,
+		PostApiGovernancePlatformUnitMergesByRequestIdRetryOptions,
 		TContext
 	>;
 }

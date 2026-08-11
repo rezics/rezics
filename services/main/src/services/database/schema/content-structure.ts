@@ -119,6 +119,7 @@ export const contentStructureNode = pgTable(
 		index("content_structure_node_content_unit_structure_idx")
 			.on(table.contentUnitId, table.structureId)
 			.where(sql`${table.deletedAt} is null`),
+		index("content_structure_node_content_unit_merge_idx").on(table.contentUnitId, table.id),
 		index("content_structure_node_target_unit_idx").on(table.targetUnitId),
 		check(
 			"content_structure_node_not_self_parent",

@@ -5,6 +5,7 @@ import type { ContentGovernanceActionKindValues, EnforcementKindValues } from ".
 import type { DatabaseTransaction } from "../database";
 import { enqueueNotificationEmail } from "../email/outbox";
 import { emailIntentDeliveryEnabled } from "../email/policy";
+import { resolveCanonicalUnitId } from "../units/merge/canonical";
 
 type ContentGovernanceActionKind = (typeof ContentGovernanceActionKindValues)[number];
 type EnforcementKind = (typeof EnforcementKindValues)[number];
@@ -183,13 +184,17 @@ export async function createNotification(tx: DatabaseTransaction, input: Notific
 	const inAppVisible = preferences?.inApp ?? true;
 	const emailEnabled = emailIntentDeliveryEnabled("notification") && (preferences?.email ?? true);
 	if (!inAppVisible && !emailEnabled) return;
+	const subjectUnitId =
+		"subjectUnitId" in input && input.subjectUnitId
+			? await resolveCanonicalUnitId(tx, input.subjectUnitId)
+			: undefined;
 	const [created] = await tx
 		.insert(notification)
 		.values({
 			recipientProfileId: input.recipientProfileId,
 			actorProfileId: input.actorProfileId,
 			kind: input.kind,
-			subjectUnitId: input.subjectUnitId,
+			subjectUnitId,
 			payload: input.payload,
 			dedupeKey: input.dedupeKey,
 			inAppVisible,
