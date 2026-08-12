@@ -284,7 +284,7 @@ tasks:
             - yarn exec tsx scripts/install-platform.ts {{.CLI_ARGS}}
 
     official-rules:seed:
-        desc: Publish starter content only when the official Rule Realm has no online history.
+        desc: Locally publish starter Rules when the official Realm has no history; never run in production.
         cmds:
             - yarn exec tsx scripts/seed-official-rule-realm.ts {{.CLI_ARGS}}
 
@@ -310,15 +310,12 @@ tasks:
             - yarn exec tsx scripts/rotate-platform-credentials.ts --yes
 
     db:install:
-        desc: Migrate and install a database before its first application deployment.
+        desc: Migrate and install Bootstrap state before an application's first deployment.
         cmds:
             - task: db:migrate
             - task: platform:install
               vars:
                   CLI_ARGS: "{{.CLI_ARGS}}"
-            - task: official-rules:seed
-              vars:
-                  CLI_ARGS: --yes --if-needed
             - task: platform:verify
             - task: db:runtime:verify
             - task: db:project
@@ -338,7 +335,7 @@ tasks:
             - yarn exec atlas migrate status --env main --url "${DATABASE_ADMIN_URL}"
 
     db:seed:
-        desc: Run the independent Seed service and rebuild every derived database projection.
+        desc: Build local/CI platform infrastructure and Fixtures, then rebuild derived projections.
         cmds:
             - yarn exec tsx scripts/seed.ts {{.CLI_ARGS}}
             - task: platform:verify

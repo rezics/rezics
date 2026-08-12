@@ -11,7 +11,7 @@ import {
 import { createFilterDocument } from "@rezics/filter";
 import { defaultKeyHasher } from "@better-auth/api-key";
 import { hashPassword } from "better-auth/crypto";
-import { and, desc, eq, inArray, isNull, notInArray, sql } from "drizzle-orm";
+import { and, desc, eq, inArray, isNull, sql } from "drizzle-orm";
 import { OfficialRealmUnitIds, ZoneHomePageSlug } from "@rezics/slug";
 import { PlatformCapabilityValues } from "@rezics/access";
 import { CurrentUnitContentLicenseSlug } from "@rezics/license";
@@ -19,8 +19,6 @@ import { CurrentUnitContentLicenseSlug } from "@rezics/license";
 import { env } from "../config";
 import { Authorization } from "../authorization";
 import {
-	BootstrapAuthUserIds,
-	BootstrapUnitIds,
 	CuratedCreationTagCollectionManifest,
 	OfficialProfileIds,
 	OfficialRealmManifest,
@@ -160,6 +158,8 @@ import {
 	type SeedData,
 } from "./data";
 import { createSeedRunOptions, includesSeedScenario, type SeedRunOptions } from "./contracts";
+import { assertFixtureSeedTargetEmpty } from "./fixture-target";
+import { seedPlatformInfrastructure } from "./platform-infrastructure";
 
 type UnitKind = (typeof unit.$inferSelect)["kind"];
 type UnitStatus = (typeof unit.$inferSelect)["status"];
@@ -3253,19 +3253,8 @@ export class DatabaseSeedService {
 		const demoPasswordHash = await hashPassword(DemoCredentials.password);
 		await database.transaction(
 			async (tx) => {
-				const [existingUser] = await tx
-					.select({ id: users.id })
-					.from(users)
-					.where(notInArray(users.id, [...BootstrapAuthUserIds]))
-					.limit(1);
-				const [existingUnit] = await tx
-					.select({ id: unit.id })
-					.from(unit)
-					.where(notInArray(unit.id, [...BootstrapUnitIds]))
-					.limit(1);
-				if (existingUser || existingUnit) {
-					throw new Error("Seed requires an empty database; run `task --yes local:reset`");
-				}
+				await assertFixtureSeedTargetEmpty(tx);
+				await seedPlatformInfrastructure(tx);
 
 				console.info("Seeding identities scenario");
 				const profiles = await seedProfiles(tx, data, demoPasswordHash);

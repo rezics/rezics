@@ -180,11 +180,12 @@ from `dev` and from the target-database `db:migrate` operation.
 
 `db:install` is the explicit first-installation workflow for an empty target
 database. It applies pending migrations, reconciles application-role
-privileges, installs the Git-versioned factory bundle, and issues the initial
-platform Profile credentials. It then publishes the special official Rule
-starter Seed only if the fixed Rule Realm has no online revision. It refuses an
-already installed or occupied database unless local setup deliberately
-supplies `--if-needed`.
+privileges, installs the Git-versioned Bootstrap bundle, and issues the initial
+platform Profile credentials. It never creates mutable Platform Infrastructure
+such as Rule revisions. Production creates and evolves that data exclusively
+through authenticated administration APIs. Installation refuses an already
+installed or occupied database unless local setup deliberately supplies
+`--if-needed`.
 
 `db:prepare` is the recurring pre-deploy administration workflow. It applies
 pending migrations, reconciles application-role privileges, and then performs
@@ -195,14 +196,14 @@ failure stops deployment for explicit operator repair. Credential rotation is
 available only through the separately confirmed
 `platform:credentials:rotate` task.
 
-Platform Installation and Seed are separate database services with different
-safety contracts. Installation copies the factory Profiles, Realms, Zones,
-content, policies, navigation, and required media exactly once; those records
-become ordinary platform-owned product data afterward. Rule revisions are not
-part of that factory bundle: the special official Rule Seed initializes an
-empty online history without reconciling it later. The ordinary Seed owns
-disposable development scenarios and refuses to run when non-installation data
-already exists.
+Bootstrap Installation, Platform Infrastructure Seed, and Fixture Seed have
+separate safety contracts. Installation copies the fixed Profiles, Realms,
+Zones, content, policies, navigation, and required media exactly once. The
+local/CI-only Platform Infrastructure Seed then supplies official Rules needed
+by disposable scenarios; production never runs it. Fixture Seed first proves
+that no non-Bootstrap data exists, then runs every infrastructure provider and
+Fixture scenario in one transaction. Each infrastructure provider inspects
+only its own domain and ignores unrelated Units.
 
 ```sh
 # Reproducible demo data without communication or governance cases.
