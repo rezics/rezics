@@ -59,9 +59,9 @@
 		"@img/sharp-linux-x64": "0.34.5"
 	},
 	"devDependencies": {
-		"@ariga/atlas": "1.2.3",
 		"@biomejs/biome": "2.5.7",
 		"@faker-js/faker": "^10.5.0",
+		"@rezics/atlas": "workspace:*",
 		"@types/node": "26",
 		"@types/pg": "^8",
 		"drizzle-kit": "1.0.0-rc.4",

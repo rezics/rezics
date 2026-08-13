@@ -5490,6 +5490,21 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@rezics/atlas@workspace:*, @rezics/atlas@workspace:packages/atlas":
+  version: 0.0.0-use.local
+  resolution: "@rezics/atlas@workspace:packages/atlas"
+  dependencies:
+    "@ariga/atlas": "npm:1.2.3"
+    "@types/node": "npm:26"
+    typescript: "npm:7"
+  dependenciesMeta:
+    "@ariga/atlas":
+      optional: true
+  bin:
+    atlas: ./bin/atlas.mjs
+  languageName: unknown
+  linkType: soft
+
 "@rezics/avatar@workspace:*, @rezics/avatar@workspace:libraries/avatar":
   version: 0.0.0-use.local
   resolution: "@rezics/avatar@workspace:libraries/avatar"
@@ -5503,7 +5518,6 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@rezics/backend@workspace:services/main"
   dependencies:
-    "@ariga/atlas": "npm:1.2.3"
     "@aws-sdk/client-s3": "npm:^3.1085.0"
     "@aws-sdk/s3-request-presigner": "npm:^3.1085.0"
     "@better-auth/api-key": "npm:1.7.0-rc.1"
@@ -5518,6 +5532,7 @@ __metadata:
     "@img/sharp-libvips-linux-x64": "npm:1.2.4"
     "@img/sharp-linux-x64": "npm:0.34.5"
     "@rezics/access": "workspace:*"
+    "@rezics/atlas": "workspace:*"
     "@rezics/avatar": "workspace:*"
     "@rezics/block": "workspace:*"
     "@rezics/brand": "workspace:*"

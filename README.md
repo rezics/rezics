@@ -133,12 +133,19 @@ preserve that upstream boundary.
 
 The Drizzle TypeScript schema is the desired state. Atlas owns the versioned
 SQL migration directory, per-file transactions, checksums, and application
-history. The Atlas CLI is pinned through `@ariga/atlas`; its installer is the
-only dependency build script explicitly enabled by the root `dependenciesMeta`
+history. The Atlas CLI is invoked through the private `@rezics/atlas` platform
+adapter. Linux, macOS, CI, and production use its exact `@ariga/atlas` optional
+dependency. Windows development uses a native `atlas.exe` from
+`REZICS_ATLAS_BINARY` or `PATH` and accepts the repository baseline or a newer
+stable version in the same Atlas major release. The official installer remains the only
+dependency build script explicitly enabled by the root `dependenciesMeta`
 configuration. A small exporter uses Drizzle Kit's programmatic API so Atlas
 always receives the complete schema instead of the CLI's size-limited output.
 
 ```sh
+# Verify that a compatible platform-specific Atlas CLI is available.
+task services-main:db:atlas:check
+
 # Change the Drizzle schema first, then generate and review SQL.
 task services-main:db:generate -- add_example
 

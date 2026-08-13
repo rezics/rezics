@@ -1,0 +1,12 @@
+version: "3"
+
+tasks:
+    typecheck:
+        desc: Type-check the REZICS Atlas CLI adapter.
+        cmds:
+            - yarn run typecheck
+
+    test:
+        desc: Run Atlas CLI adapter behavior tests.
+        cmds:
+            - yarn run test

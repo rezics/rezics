@@ -26,6 +26,9 @@ includes:
     packages-api:
         taskfile: ./packages/api/Taskfile.yml
         dir: ./packages/api
+    packages-atlas:
+        taskfile: ./packages/atlas/Taskfile.yml
+        dir: ./packages/atlas
     packages-editor:
         taskfile: ./packages/editor/Taskfile.yml
         dir: ./packages/editor
@@ -69,6 +72,7 @@ tasks:
             - task: apps-about:check
             - task: libraries:typecheck
             - task: packages-api:typecheck
+            - task: packages-atlas:typecheck
             - task: packages-editor:typecheck
             - task: apps-markdown:check
 
@@ -86,6 +90,7 @@ tasks:
             - task: apps-web:test
             - task: apps-about:test
             - task: packages-api:test
+            - task: packages-atlas:test
             - task: packages-editor:test
             - task: apps-markdown:test
 
@@ -152,6 +157,7 @@ tasks:
         desc: Destructively remove and recreate all persistent development infrastructure data.
         prompt: This deletes the local PostgreSQL and RustFS data. Continue?
         cmds:
+            - task: services-main:db:atlas:check
             - docker compose --profile migration-test down --timeout 30 --remove-orphans --volumes
             - task: infra:up
             - task: services-main:db:install

@@ -131,6 +131,11 @@ tasks:
             - task: db:replay:down
             - task: db:replay:up
 
+    db:atlas:check:
+        desc: Verify an Atlas CLI version compatible with REZICS.
+        cmds:
+            - yarn exec atlas version
+
     db:generate:
         desc: Replay migrations into a shadow database and diff it against the Drizzle schema.
         cmds:
@@ -249,6 +254,7 @@ tasks:
     db:migrate:
         desc: Apply pending Atlas migrations and reconcile application privileges.
         cmds:
+            - task: db:atlas:check
             - test -n "${DATABASE_ADMIN_URL:-}"
             - task: filter-documents:migrate
               vars:
@@ -361,6 +367,7 @@ tasks:
         desc: Internal database-only reset; PGroonga indexes are maintained by PostgreSQL.
         internal: true
         cmds:
+            - task: db:atlas:check
             - yarn exec tsx scripts/reset-database.ts {{.CLI_ARGS}}
             - task: db:install
               vars:

@@ -21,6 +21,7 @@
 				"services/main/scripts/migrate-filter-documents.ts",
 				"services/main/scripts/verify-platform-core.ts",
 				"libraries/filter/**",
+				"packages/atlas/**",
 				"deploy/scripts/database-operation.sh"
 			]
 		},

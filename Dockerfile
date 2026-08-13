@@ -34,6 +34,7 @@ COPY libraries/license/package.json libraries/license/package.json
 COPY libraries/observability/package.json libraries/observability/package.json
 COPY libraries/portable-text/package.json libraries/portable-text/package.json
 COPY libraries/slug/package.json libraries/slug/package.json
+COPY packages/atlas/package.json packages/atlas/package.json
 COPY packages/brand/package.json packages/brand/package.json
 COPY services/main/package.json services/main/package.json
 
@@ -64,6 +65,7 @@ COPY libraries/license /libraries/license
 COPY libraries/observability /libraries/observability
 COPY libraries/portable-text /libraries/portable-text
 COPY libraries/slug /libraries/slug
+COPY packages/atlas /packages/atlas
 COPY packages/brand /packages/brand
 COPY services/main /services/main
 
@@ -148,6 +150,7 @@ RUN --mount=type=cache,target=/root/.yarn/berry/cache \
 	yarn workspaces focus @rezics/backend
 COPY --from=backend-source / /workspace/
 COPY deploy/scripts/database-operation.sh /workspace/deploy/scripts/database-operation.sh
+RUN yarn workspace @rezics/backend exec atlas version
 
 FROM node-tooling AS database
 

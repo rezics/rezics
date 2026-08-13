@@ -36,6 +36,10 @@ validate_database_identity() {
 validate_database_identity DATABASE_ADMIN_URL
 validate_database_identity DATABASE_URL
 
+atlas_check() {
+	yarn exec atlas version >/dev/null
+}
+
 cd /workspace/services/main
 
 preflight() {
@@ -60,6 +64,10 @@ project() {
 	yarn exec tsx scripts/rebuild-content-metrics.ts
 	yarn exec tsx scripts/rebuild-studio.ts
 }
+
+case "${operation}" in
+	install | release | preflight | migrate) atlas_check ;;
+esac
 
 search_index() {
 	if (($# != 1)); then
