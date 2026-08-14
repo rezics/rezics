@@ -1,1 +1,30 @@
+* text=auto eol=lf
+
+/services/main/src/services/database/migrations/*.sql text eol=lf
+/services/main/src/services/database/migrations/atlas.sum text eol=lf
+
+*.svg text eol=lf
+
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ico binary
+*.icns binary
+*.pdf binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.otf binary
+*.eot binary
+*.zip binary
+*.gz binary
+*.br binary
+*.wasm binary
+*.db binary
+*.sqlite binary
+*.mp3 binary
+*.mp4 binary
+
 apps/web/worker-configuration.d.ts -whitespace
