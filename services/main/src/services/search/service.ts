@@ -89,6 +89,7 @@ import {
 	type SearchHit,
 	type SearchSort,
 } from "./schema";
+import { expandSearchQuery, type ExpandedSearchQuery } from "./query-expansion";
 import { getPublicCanonicalUnitSlugAddresses } from "../units/slug-address";
 import { compileUnitPredicateCandidateSet, compileUnitPredicateSql } from "../filter/sql";
 
@@ -1430,7 +1431,7 @@ function sparseFollowerCandidateSource(
 }
 
 function textCandidateSource(
-	query: string,
+	query: ExpandedSearchQuery,
 	languageBoundary: readonly ContentLanguage[],
 	sourceUnitKinds: readonly UnitKind[],
 	position: SearchKeysetPosition | undefined,
@@ -1460,7 +1461,7 @@ function textCandidateSource(
 				(not text_candidate.search_matched) as search_fallback,
 				text_candidate.search_matched
 			from public.search_text_candidates(
-				${query},
+				${toTextArray(query.variants)},
 				${toTextArray(languageBoundary)},
 				${kind},
 				${cursorMicros},
@@ -1580,7 +1581,7 @@ function seededUnitCandidateSource(
 }
 
 function orderedCandidateSource(input: {
-	readonly query: string;
+	readonly query: ExpandedSearchQuery;
 	readonly sort: SearchSort;
 	readonly position?: SearchKeysetPosition;
 	readonly languageBoundary: readonly ContentLanguage[];
@@ -1692,7 +1693,7 @@ function orderedCandidateSource(input: {
 }
 
 function currentSearchDocumentCondition(
-	query: string,
+	query: ExpandedSearchQuery,
 	languageBoundary: readonly ContentLanguage[],
 ): SQL {
 	const languageColumns: Readonly<Record<ContentLanguage, SQL>> = {
@@ -1708,18 +1709,26 @@ function currentSearchDocumentCondition(
 		? languageBoundary.map((language) => languageColumns[language])
 		: [sql`${boundedSearchDocument.textAll}`];
 	return sql`(${sql.join(
-		columns.map((column) => sql`${column} &@~ public.pgroonga_query_escape(${query})`),
+		columns.map(
+			(column) =>
+				sql`(${sql.join(
+					query.variants.map(
+						(variant) => sql`${column} &@~ public.pgroonga_query_escape(${variant})`,
+					),
+					sql` or `,
+				)})`,
+		),
 		sql` or `,
 	)})`;
 }
 
 function currentSearchSources(
-	query: string,
+	query: ExpandedSearchQuery,
 	languageBoundary: readonly ContentLanguage[],
 	candidateRelation: SQL,
 	sourceMayPreMatch: boolean,
 ): SQL {
-	if (!query)
+	if (!query.query)
 		return sql`select bounded_search_candidate.unit_id
 			from ${candidateRelation} as bounded_search_candidate`;
 	const boundedMatch = sql`exists (
@@ -1748,7 +1757,7 @@ async function searchCandidateBatch(input: {
 	readonly branches: readonly PreparedSearchBranch[];
 	readonly candidateSet?: SQL;
 	readonly commonConditions?: readonly SQL[];
-	readonly query: string;
+	readonly query: ExpandedSearchQuery;
 	readonly sort: SearchSort;
 	readonly position?: SearchKeysetPosition;
 	readonly limit: number;
@@ -1954,7 +1963,7 @@ async function searchCandidatePage(input: {
 	readonly branches: readonly PreparedSearchBranch[];
 	readonly candidateSet?: SQL;
 	readonly commonConditions?: readonly SQL[];
-	readonly query: string;
+	readonly query: ExpandedSearchQuery;
 	readonly sort: SearchSort;
 	readonly position?: SearchKeysetPosition;
 	readonly limit: number;
@@ -2112,6 +2121,7 @@ async function searchDomainScan(
 			].filter(isContentLanguage),
 		),
 	];
+	const expandedQuery = expandSearchQuery(request.query ?? "", presentationLanguages);
 	const conditions = buildSearchConditions(category, request, searchExpression);
 	const sort = request.sort ?? (request.query?.trim() ? "relevance" : "best");
 	const limit = request.limit ?? 20;
@@ -2119,7 +2129,9 @@ async function searchDomainScan(
 		.update(
 			JSON.stringify({
 				category,
-				query: request.query?.trim() ?? "",
+				query: expandedQuery.query,
+				queryVariants: expandedQuery.variants,
+				queryExpansionPolicyVersion: expandedQuery.policyVersion,
 				limit,
 				sort,
 				localizationLanguages: request.localizationLanguages,
@@ -2166,7 +2178,7 @@ async function searchDomainScan(
 					candidateSet: compileUnitPredicateCandidateSet(request.domainFilter, request.profileId),
 				}
 			: {}),
-		query: request.query?.trim() ?? "",
+		query: expandedQuery,
 		sort,
 		position: cursorPosition,
 		limit: hasFacets ? Math.max(limit, env.SEARCH_FACET_SCAN_LIMIT) : limit,
@@ -2304,6 +2316,7 @@ interface PreparedGlobalSearchRequest {
 	readonly limit: number;
 	readonly initialOffset: number;
 	readonly languageBoundary: readonly ContentLanguage[];
+	readonly query: ExpandedSearchQuery;
 	readonly commonConditions: readonly SQL[];
 	readonly candidateSet?: SQL;
 }
@@ -2333,6 +2346,16 @@ function prepareGlobalSearchRequest(
 			...(searchExpression ? { searchExpression } : {}),
 		};
 	});
+	const languageBoundary = [
+		...new Set(
+			[
+				...preparedBranches.flatMap(
+					({ searchExpression }) => readSearchExpressionLanguageBoundary(searchExpression) ?? [],
+				),
+				...(readUnitLanguageBoundary(request.domainFilter) ?? []),
+			].filter(isContentLanguage),
+		),
+	];
 	return {
 		branches: preparedBranches,
 		sort: request.sort ?? (request.query?.trim() ? "relevance" : "best"),
@@ -2344,16 +2367,8 @@ function prepareGlobalSearchRequest(
 					candidateSet: compileUnitPredicateCandidateSet(request.domainFilter, request.profileId),
 				}
 			: {}),
-		languageBoundary: [
-			...new Set(
-				[
-					...preparedBranches.flatMap(
-						({ searchExpression }) => readSearchExpressionLanguageBoundary(searchExpression) ?? [],
-					),
-					...(readUnitLanguageBoundary(request.domainFilter) ?? []),
-				].filter(isContentLanguage),
-			),
-		],
+		languageBoundary,
+		query: expandSearchQuery(request.query ?? "", languageBoundary),
 	};
 }
 
@@ -2416,7 +2431,7 @@ export async function searchGlobalIdentifiers(
 		branches: prepared.branches,
 		candidateSet: prepared.candidateSet,
 		commonConditions: prepared.commonConditions,
-		query: request.query?.trim() ?? "",
+		query: prepared.query,
 		sort: prepared.sort,
 		position: request.position,
 		limit: prepared.limit,
@@ -2580,6 +2595,7 @@ export async function searchDomainFacets(
 			].filter(isContentLanguage),
 		),
 	];
+	const expandedQuery = expandSearchQuery(request.query ?? "", languageBoundary);
 	const candidates = await searchCandidatePage({
 		branches: [
 			{
@@ -2593,7 +2609,7 @@ export async function searchDomainFacets(
 					candidateSet: compileUnitPredicateCandidateSet(request.domainFilter, request.profileId),
 				}
 			: {}),
-		query: request.query?.trim() ?? "",
+		query: expandedQuery,
 		sort: request.sort ?? (request.query?.trim() ? "relevance" : "best"),
 		limit: candidateLimit,
 		languageBoundary,
@@ -2723,9 +2739,10 @@ export async function searchGlobalFacets(
 			].filter(isContentLanguage),
 		),
 	];
+	const expandedQuery = expandSearchQuery(first.request.query ?? "", languageBoundary);
 	const candidates = await searchCandidatePage({
 		branches: preparedBranches,
-		query: first.request.query?.trim() ?? "",
+		query: expandedQuery,
 		sort: first.request.sort ?? (first.request.query?.trim() ? "relevance" : "best"),
 		limit: env.SEARCH_FACET_SCAN_LIMIT,
 		languageBoundary,
@@ -2772,7 +2789,7 @@ export async function searchGlobalIdentifiersWithFacets(
 		branches: prepared.branches,
 		candidateSet: prepared.candidateSet,
 		commonConditions: prepared.commonConditions,
-		query: request.query?.trim() ?? "",
+		query: prepared.query,
 		sort: prepared.sort,
 		position: request.position,
 		limit: hasFacets ? Math.max(prepared.limit, env.SEARCH_FACET_SCAN_LIMIT) : prepared.limit,

@@ -93,6 +93,7 @@ FROM backend-build AS api-build
 
 RUN bun-modern build \
 	--external=sharp \
+	--external=opencc \
 	--minify-whitespace \
 	--minify-syntax \
 	--outdir=/tmp/api \
@@ -124,6 +125,8 @@ COPY --from=main-dependencies --chown=bun:bun /workspace/node_modules/@img/colou
 COPY --from=main-dependencies --chown=bun:bun /workspace/node_modules/@img/sharp-libvips-linux-x64 /app/node_modules/@img/sharp-libvips-linux-x64
 COPY --from=main-dependencies --chown=bun:bun /workspace/node_modules/@img/sharp-linux-x64 /app/node_modules/@img/sharp-linux-x64
 COPY --from=main-dependencies --chown=bun:bun /workspace/node_modules/detect-libc /app/node_modules/detect-libc
+COPY --from=main-dependencies --chown=bun:bun /workspace/node_modules/@opencc/opencc-linux-x64 /app/node_modules/@opencc/opencc-linux-x64
+COPY --from=main-dependencies --chown=bun:bun /workspace/node_modules/opencc /app/node_modules/opencc
 COPY --from=main-dependencies --chown=bun:bun /workspace/node_modules/semver /app/node_modules/semver
 COPY --from=main-dependencies --chown=bun:bun /workspace/node_modules/sharp /app/node_modules/sharp
 

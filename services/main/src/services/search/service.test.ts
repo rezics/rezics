@@ -127,7 +127,9 @@ describe("direct PostgreSQL Search", () => {
 			Languages: ["en"],
 		});
 		const candidateSql = sqlText(execute.mock.calls[1]![0] as SQL);
+		const candidateQuery = dialect.sqlToQuery(execute.mock.calls[1]![0] as SQL);
 		expect(candidateSql).toContain("public.search_text_candidates");
+		expect(candidateQuery.params).toEqual(expect.arrayContaining(["資料庫", "数据库"]));
 		expect(candidateSql).toContain("text_candidate.unit_updated_at_micros");
 		expect(candidateSql).toContain("text_candidate.search_matched");
 		expect(candidateSql).not.toContain("pgroonga_score");

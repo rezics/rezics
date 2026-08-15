@@ -7,6 +7,15 @@ license terms. Those terms take precedence over the repository's
 Files that carry their own copyright or license notices, including generated
 runtime declarations and bundled development tooling, retain those notices.
 
+## OpenCC
+
+The backend uses [OpenCC](https://github.com/BYVoid/OpenCC) 1.4.1 for bounded
+Simplified/Traditional Chinese search-query expansion. OpenCC and its Linux
+native runtime, Copyright 2010-2026 Carbo Kuo and contributors, are distributed
+under the Apache License 2.0; the complete
+license text is retained in the `opencc` package's `LICENSE` file and is
+available at <https://www.apache.org/licenses/LICENSE-2.0>.
+
 ## Kubb
 
 Generated API clients and their helper modules under `libraries/services/main`

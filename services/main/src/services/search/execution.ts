@@ -21,6 +21,7 @@ import {
 } from "../content-rating/policy";
 import type { SearchCountResult } from "../counts/contract";
 import { InvalidSearch } from "./errors";
+import { SearchQueryExpansionPolicyVersion } from "./query-expansion";
 import {
 	assertSearchExpression,
 	combineSearchExpressions,
@@ -162,6 +163,7 @@ async function resolveCompiledExecution(
 				scope,
 				categories: scope.categories,
 				query: compiled.query.trim(),
+				queryExpansionPolicyVersion: SearchQueryExpansionPolicyVersion,
 				sort: compiled.sort,
 				localizationLanguages,
 				maxResultWindow: compiled.maxResultWindow,

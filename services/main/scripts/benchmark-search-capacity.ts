@@ -140,7 +140,7 @@ function searchSql(cursor = false): string {
 				0::numeric as secondary_order,
 				text_candidate.search_matched
 			from public.search_text_candidates(
-				$1, array[]::text[], 'book',
+				ARRAY[$1::text]::text[], array[]::text[], 'book',
 				${cursor ? "$2::bigint, $3::uuid" : "null, null"},
 				50000,
 				65

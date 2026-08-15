@@ -52,6 +52,25 @@ Units.
 See [Sparse best ranking](../../../../../docs/architecture/sparse-best-ranking.md) for the shared
 Feed/Search model, 500-million-row complexity boundary, and deployment cutover.
 
+## Chinese script expansion
+
+The stored projection and its four canonical PGroonga indexes are unchanged. At the request
+boundary, `query-expansion.ts` NFC-normalizes and trims the input, keeps the original query, and
+adds at most two OpenCC 1.4.1 variants (`s2twp.json` and `tw2sp.json`). This covers both script
+conversion and the Taiwan regional vocabulary mappings (for example, `软件`/`軟體` and
+`服务器`/`伺服器`) without a per-token Cartesian product. Japanese-bound queries and queries
+containing kana or Hangul are not expanded. The expansion policy version is included in every
+cursor fingerprint, so changing OpenCC data or rules invalidates old cursors safely.
+
+The privileged `search_text_candidates` function accepts one to three variants, escapes each
+variant independently, and submits one parenthesized `OR` query to PGroonga. Posting estimation
+sums the bounded keyword estimates across the same query, so the existing 50,000-posting budget,
+4,096 candidate scan limit, and dense fallback remain in force. Request work is therefore bounded
+by three conversions plus the existing `O(T(q) + P(q) + k log k)` sparse path; it does not create
+additional indexes, scan the corpus, or multiply the candidate window. At both the 500-million
+Unit planning baseline and the 3-billion forward estimate, expansion changes only constant query
+fan-out; the existing shard-before-limit cutover remains the capacity path.
+
 For an unfiltered page, B-tree candidate generation is `O(log N + k)` at every cursor depth, not
 only on the first page. Residual authorization or relational filters make the request
 `O(log N + S * filterCost)`, where `S <= 4,096` is enforced by server policy. If a selective
