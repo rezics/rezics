@@ -183,9 +183,6 @@ export const unitRevision = pgTable(
 		primaryContributionKind: unitRevisionPrimaryContributionKind()
 			.default("unattributed")
 			.notNull(),
-		creditedEntityId: uuid().references(() => entity.id, { onDelete: "restrict" }),
-		creditRole: unitRevisionContributionRole(),
-		attributionAssurance: unitRevisionAttributionAssurance(),
 		/** @UNIT_LOCALIZATION_EXEMPT Authored snapshot: original point-in-time edit summary, never interface copy. */
 		editSummary: text(),
 		minor: boolean().default(false).notNull(),
@@ -214,29 +211,41 @@ export const unitRevision = pgTable(
 			table.createdAt.desc(),
 			table.id.desc(),
 		),
-		index("unit_revision_ai_entity_created_at_idx")
-			.on(table.creditedEntityId, table.createdAt.desc(), table.id.desc())
-			.where(sql`${table.primaryContributionKind} = 'ai'`),
 		check("unit_revision_byte_size_check", sql`${table.byteSize} >= 0`),
 		check(
-			"unit_revision_primary_contribution_shape_check",
-			sql`(
-				${table.primaryContributionKind} = 'ai'
-				and ${table.actorProfileId} is not null
-				and ${table.creditedEntityId} is not null
-				and ${table.creditRole} is not null
-				and ${table.attributionAssurance} is not null
-			) or (
-				${table.primaryContributionKind} in ('human', 'unattributed')
-				and ${table.creditedEntityId} is null
-				and ${table.creditRole} is null
-				and ${table.attributionAssurance} is null
-				and (${table.primaryContributionKind} = 'unattributed' or ${table.actorProfileId} is not null)
-			)`,
+			"unit_revision_primary_contribution_actor_check",
+			sql`${table.primaryContributionKind} = 'unattributed' or ${table.actorProfileId} is not null`,
 		),
 		check(
 			"unit_revision_suppressed_check",
 			sql`not ${table.suppressed} or ${table.contentHidden} or ${table.summaryHidden} or ${table.actorHidden}`,
+		),
+	],
+);
+
+/** Immutable AI-specific credit attached to one Unit revision. */
+export const unitRevisionCreditAttribution = pgTable(
+	"unit_revision_credit_attribution",
+	{
+		revisionId: uuid().primaryKey(),
+		creditedEntityId: uuid().notNull(),
+		role: unitRevisionContributionRole().notNull(),
+		assurance: unitRevisionAttributionAssurance().notNull(),
+	},
+	(table) => [
+		foreignKey({
+			columns: [table.revisionId],
+			foreignColumns: [unitRevision.id],
+			name: "unit_revision_credit_revision_fkey",
+		}).onDelete("cascade"),
+		foreignKey({
+			columns: [table.creditedEntityId],
+			foreignColumns: [entity.id],
+			name: "unit_revision_credit_entity_fkey",
+		}).onDelete("restrict"),
+		index("unit_revision_credit_attribution_entity_revision_idx").on(
+			table.creditedEntityId,
+			table.revisionId.desc(),
 		),
 	],
 );

@@ -17,6 +17,7 @@ import {
 	ContentRatingValues,
 	NonRealmUnitKindValues,
 	ResourceVisibilityValues,
+	RevisionAttributionAssuranceValues,
 	RevisionContributionRoleValues,
 	StoredUiLocaleValues,
 	UnitKindValues,
@@ -151,7 +152,7 @@ export const RevisionPrimaryContribution = t.Union([
 				{
 					creditedEntityId: Uuid,
 					role: t.UnionEnum(RevisionContributionRoleValues),
-					assurance: t.UnionEnum(["self_declared", "credential_bound", "server_observed"]),
+					assurance: t.UnionEnum(RevisionAttributionAssuranceValues),
 				},
 				{ additionalProperties: false },
 			),

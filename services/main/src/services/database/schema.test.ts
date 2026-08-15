@@ -108,6 +108,7 @@ import {
 	unitSlugAddress,
 	unitRevisionSlot,
 	unitRevision,
+	unitRevisionCreditAttribution,
 	unitStatusEvent,
 	unitVariant,
 	imageAssetPresentation,
@@ -422,23 +423,36 @@ describe("database schema contracts", () => {
 		);
 	});
 
-	it("keeps revision primary contribution fields row-local and shape constrained", () => {
+	it("separates sparse revision AI credit from the primary contribution discriminator", () => {
 		expect(unitRevision.primaryContributionKind.enumValues).toEqual(
 			UnitRevisionPrimaryContributionKindValues,
 		);
-		expect(unitRevision.creditRole.enumValues).toEqual(RevisionContributionRoleValues);
-		expect(unitRevision.attributionAssurance.enumValues).toEqual(
+		expect(unitRevisionCreditAttribution.role.enumValues).toEqual(RevisionContributionRoleValues);
+		expect(unitRevisionCreditAttribution.assurance.enumValues).toEqual(
 			RevisionAttributionAssuranceValues,
 		);
 		const revision = getTableConfig(unitRevision);
-		expect(revision.foreignKeys.map((key) => key.getName())).toContain(
-			"unit_revision_credited_entity_id_entity_id_fk",
-		);
 		expect(revision.checks.map((constraint) => constraint.name)).toContain(
-			"unit_revision_primary_contribution_shape_check",
+			"unit_revision_primary_contribution_actor_check",
 		);
-		expect(revision.indexes.map((index) => index.config.name)).toContain(
-			"unit_revision_ai_entity_created_at_idx",
+		expect(revision.columns.map((column) => column.name)).not.toEqual(
+			expect.arrayContaining(["credited_entity_id", "credit_role", "attribution_assurance"]),
+		);
+
+		const attribution = getTableConfig(unitRevisionCreditAttribution);
+		expect(getTableName(unitRevisionCreditAttribution)).toBe("unit_revision_credit_attribution");
+		expect(attribution.columns.find((column) => column.name === "revision_id")?.primary).toBe(true);
+		expect(
+			attribution.columns.filter((column) => column.notNull).map((column) => column.name),
+		).toEqual(expect.arrayContaining(["revision_id", "credited_entity_id", "role", "assurance"]));
+		expect(attribution.foreignKeys.map((key) => key.getName())).toEqual(
+			expect.arrayContaining([
+				"unit_revision_credit_revision_fkey",
+				"unit_revision_credit_entity_fkey",
+			]),
+		);
+		expect(attribution.indexes.map((index) => index.config.name)).toContain(
+			"unit_revision_credit_attribution_entity_revision_idx",
 		);
 	});
 

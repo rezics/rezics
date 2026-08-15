@@ -65,6 +65,37 @@ is a logical snapshot size, not the newly allocated physical bytes for the edit.
 zero for an already-known content hash and must not be inferred from adjacent revisions'
 `byte_size` values.
 
+### Unit revision contribution provenance
+
+Each revision records one primary semantic contribution kind: `human`, `ai`, or `unattributed`.
+The accountable Profile remains `unit_revision.actor_profile_id`; it is authorization and audit
+identity, not evidence that the Profile personally produced the content. Human and AI declarations
+therefore require an accountable actor, while workflows that omit a declaration are stored as
+unattributed.
+
+AI-specific credit is an immutable optional one-to-one child row in
+`unit_revision_credit_attribution`. The revision row keeps only the discriminator; the child stores
+the credited published `software_agent` Entity, contribution role, and server-derived assurance.
+The API reconstructs and returns one discriminated `primaryContribution` value with every revision
+summary. Storage normalization is not exposed as a second client request.
+
+History lists use UUIDv7 keyset pagination capped at 100 revisions. Their outer join probes the
+credit table by its `revision_id` primary key only for the bounded page; it never scans attribution
+to enumerate revision history. The `(credited_entity_id, revision_id)` index supports foreign-key
+maintenance and any future Entity-scoped audit read without a corpus scan. Attribution remains
+public provenance when the accountable actor is hidden: actor visibility protects the human
+account identity, not the separately credited public software-agent Entity.
+
+Capacity planning treats `unit_revision` as a 500,000,000-row baseline and 3,000,000,000-row
+estimate. At a planning AI-credit density of 1%, the child contains 5,000,000 and 30,000,000 rows;
+the 10% stress case contains 50,000,000 and 300,000,000 rows. Each revision creates at most one
+child insert in the same transaction, and every history response performs at most 100 primary-key
+lookups. A hot credited Entity can own millions of rows, so Entity-scoped reads must use keyset
+pagination and bounded batches. Monitor child/index bytes, write amplification, WAL, cache hit rate,
+and hot-key latency. If the 10% case exceeds a single node's index or maintenance window, cut over
+by UUIDv7 time ranges so history pages prune old partitions; cross-partition Entity audit reads must
+remain bounded by their cursor and may be routed to archival replicas.
+
 ### Unit revision visibility
 
 Unit revision visibility preserves the immutable revision and its audit trail while restricting

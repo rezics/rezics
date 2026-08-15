@@ -12,6 +12,7 @@ import {
 	profile as profileTable,
 	unit,
 	unitRevision,
+	unitRevisionCreditAttribution,
 	unitRevisionHead,
 	unitRevisionSlot,
 	unitRevisionTag,
@@ -38,6 +39,7 @@ import {
 	UnitRevisionChangeTags,
 	unitRevisionDocumentsToComparisonValue,
 } from "../../units/history";
+import { presentStoredRevisionPrimaryContribution } from "../../units/revision-contribution";
 import { toApiErrorResponse } from "../schema/response";
 import { DevelopmentPreviewCapability } from "@rezics/access";
 import { listCurrentProfileContributionResources } from "../../history/contribution-resources";
@@ -106,9 +108,9 @@ const summarySelection = {
 	parentRevisionId: unitRevision.parentRevisionId,
 	actorProfileId: unitRevision.actorProfileId,
 	primaryContributionKind: unitRevision.primaryContributionKind,
-	creditedEntityId: unitRevision.creditedEntityId,
-	creditRole: unitRevision.creditRole,
-	attributionAssurance: unitRevision.attributionAssurance,
+	creditedEntityId: unitRevisionCreditAttribution.creditedEntityId,
+	creditRole: unitRevisionCreditAttribution.role,
+	attributionAssurance: unitRevisionCreditAttribution.assurance,
 	actorName: firstUnitLocalizationTitle(profileTable.id),
 	editSummary: unitRevision.editSummary,
 	minor: unitRevision.minor,
@@ -127,29 +129,14 @@ const summarySelection = {
 
 type SummaryRow = Awaited<ReturnType<typeof selectSummaries>>[number];
 
-function requireRevisionCreditEntityId(value: SummaryRow["creditedEntityId"]): string {
-	if (value === null) throw new Error("AI revision is missing its credited Entity");
-	return value;
-}
-
-function requireRevisionCreditRole(
-	value: SummaryRow["creditRole"],
-): NonNullable<SummaryRow["creditRole"]> {
-	if (value === null) throw new Error("AI revision is missing its credit role");
-	return value;
-}
-
-function requireRevisionCreditAssurance(
-	value: SummaryRow["attributionAssurance"],
-): NonNullable<SummaryRow["attributionAssurance"]> {
-	if (value === null) throw new Error("AI revision is missing attribution assurance");
-	return value;
-}
-
 function selectSummaries(executor: DatabaseExecutor = database) {
 	return executor
 		.select(summarySelection)
 		.from(unitRevision)
+		.leftJoin(
+			unitRevisionCreditAttribution,
+			eq(unitRevisionCreditAttribution.revisionId, unitRevision.id),
+		)
 		.leftJoin(parentRevision, eq(parentRevision.id, unitRevision.parentRevisionId))
 		.leftJoin(profileTable, eq(profileTable.id, unitRevision.actorProfileId))
 		.leftJoin(unitRevisionHead, eq(unitRevisionHead.unitId, unitRevision.unitId));
@@ -174,17 +161,12 @@ function presentSummary(row: SummaryRow, access: { moderate: boolean; suppress: 
 		parentRevisionId: row.parentRevisionId,
 		actorProfileId: row.actorHidden && !canSeeRestrictedFields ? null : row.actorProfileId,
 		actorName: row.actorHidden && !canSeeRestrictedFields ? null : row.actorName,
-		primaryContribution:
-			row.primaryContributionKind === "ai"
-				? {
-						kind: "ai" as const,
-						creditAttribution: {
-							creditedEntityId: requireRevisionCreditEntityId(row.creditedEntityId),
-							role: requireRevisionCreditRole(row.creditRole),
-							assurance: requireRevisionCreditAssurance(row.attributionAssurance),
-						},
-					}
-				: { kind: row.primaryContributionKind },
+		primaryContribution: presentStoredRevisionPrimaryContribution({
+			kind: row.primaryContributionKind,
+			creditedEntityId: row.creditedEntityId,
+			role: row.creditRole,
+			assurance: row.attributionAssurance,
+		}),
 		editSummary: row.summaryHidden && !canSeeRestrictedFields ? null : row.editSummary,
 		minor: row.minor,
 		byteSize: row.byteSize,

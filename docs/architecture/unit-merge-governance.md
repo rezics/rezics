@@ -94,9 +94,12 @@ foreign key:
   an explicit deterministic winner or aggregate rule before the source row is removed.
 - **Rebuildable projection:** Studio work relations, best-score rows, and search documents
   are removed and rebuilt from authoritative state.
-- **Historical or authority evidence:** audit events, Unit revisions, resolved proposals,
-  ownership/access history, moderation evidence, recommendation events, and source-owned
-  content remain attached to the source tombstone. Moving these would falsify history.
+- **Historical or authority evidence:** audit events, Unit revisions and their revision-specific
+  credit attribution, resolved proposals, ownership/access history, moderation evidence,
+  recommendation events, and source-owned content remain attached to the source tombstone.
+  A revision credit keeps the originally credited Entity ID; new credits to an already merged
+  Entity are rejected and ordinary Entity reads resolve that historical ID through its redirect.
+  Moving these records would falsify history.
 - **Canonical content:** target-owned localization, content-license, dock, and structure
   content wins. Source content remains preserved on the tombstone and is not presented as
   current target content.

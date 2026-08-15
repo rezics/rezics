@@ -47,6 +47,7 @@ import {
 	creditAttribution,
 	unitLocalization,
 	unitRevision,
+	unitRevisionCreditAttribution,
 	unitRevisionHead,
 	unitRevisionSlot,
 	UnitRevisionSlotRoleValues,
@@ -1141,7 +1142,7 @@ export async function recordUnitRevision(
 	input: {
 		unitId: string;
 		actorProfileId?: string | null;
-		/** Omitted legacy/internal declarations are intentionally unattributed. */
+		/** Workflows that omit a declaration are intentionally unattributed. */
 		contribution?: RevisionContributionInput;
 		event: UnitRevisionEvent;
 		message?: string;
@@ -1242,15 +1243,19 @@ export async function recordUnitRevision(
 			parentRevisionId: head?.revisionId,
 			actorProfileId: input.actorProfileId,
 			primaryContributionKind: contribution.primary,
-			creditedEntityId: contribution.primary === "ai" ? contribution.creditedEntityId : null,
-			creditRole: contribution.primary === "ai" ? contribution.role : null,
-			attributionAssurance: contribution.primary === "ai" ? contribution.assurance : null,
 			editSummary: input.message,
 			minor: input.minor ?? false,
 			byteSize,
 		})
 		.returning({ id: unitRevision.id, createdAt: unitRevision.createdAt });
 	if (!revision) throw new Error("Unit revision insertion did not return an id");
+	if (contribution.primary === "ai")
+		await tx.insert(unitRevisionCreditAttribution).values({
+			revisionId: revision.id,
+			creditedEntityId: contribution.creditedEntityId,
+			role: contribution.role,
+			assurance: contribution.assurance,
+		});
 
 	await tx.insert(unitRevisionSlot).values(
 		contents.map((content) => {
