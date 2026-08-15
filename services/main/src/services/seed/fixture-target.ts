@@ -1,6 +1,6 @@
 import { notInArray } from "drizzle-orm";
 
-import { BootstrapAuthUserIds, BootstrapUnitIds } from "../bootstrap/manifest";
+import { BootstrapAuthUserIds, BootstrapUnitIds } from "../bootstrap/data";
 import type { DatabaseTransaction } from "../database";
 import { unit, users } from "../database/schema";
 
