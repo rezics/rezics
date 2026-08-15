@@ -5,6 +5,7 @@ import {
 	ContentLanguage,
 	FractionalPositionInput,
 	LocalizationLanguageQuery,
+	RevisionContext,
 	Uuid,
 } from "../schema";
 import {
@@ -78,6 +79,7 @@ export const CreateGenericContentStructureNodeBody = t.Object(
 		position: t.Optional(FractionalPositionInput),
 		contentRating: t.Optional(t.UnionEnum(ContentRatingValues)),
 		realmTagQueryStrategy: t.Optional(t.UnionEnum(RealmTagQueryStrategyValues)),
+		revisionContext: t.Optional(RevisionContext),
 	},
 	{ additionalProperties: false },
 );
@@ -252,6 +254,7 @@ const AttachedBookContentStructureDraftNode = t.Object(
 export const SaveBookContentStructureDraftBody = t.Object(
 	{
 		baseRevisionId: Uuid,
+		revisionContext: t.Optional(RevisionContext),
 		nodes: t.Array(
 			t.Union([
 				ExistingBookContentStructureDraftNode,
@@ -309,6 +312,7 @@ const MediaContentStructureDraftBase = t.Union([
 export const SaveMediaContentStructureDraftBody = t.Object(
 	{
 		base: MediaContentStructureDraftBase,
+		revisionContext: t.Optional(RevisionContext),
 		nodes: t.Array(
 			t.Union([
 				ExistingMediaContentStructureDraftNode,
@@ -343,5 +347,6 @@ export const UpsertChapterLocalizationBody = t.Object({
 	title: t.String({ minLength: 1, maxLength: 500 }),
 	content: PortableTextDocument,
 	status: t.Union([t.Literal("draft"), t.Literal("published"), t.Literal("archived")]),
+	revisionContext: t.Optional(RevisionContext),
 });
 export type UpsertChapterLocalizationBody = Static<typeof UpsertChapterLocalizationBody>;

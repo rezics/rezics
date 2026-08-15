@@ -4,6 +4,7 @@ import {
 	LifecycleInput,
 	UnitLocalizationInput,
 	LocalizationLanguageQuery,
+	RevisionContext,
 	Uuid,
 } from "../schema";
 import { RevisionedBatchCommandLimit } from "../../history/revisioned-batch";
@@ -27,6 +28,7 @@ export type ListCollectionsQuery = Static<typeof ListCollectionsQuery>;
 export const CreateCollectionBody = t.Object({
 	localization: UnitLocalizationInput,
 	visibility: LifecycleInput.visibility,
+	revisionContext: t.Optional(RevisionContext),
 });
 export type CreateCollectionBody = Static<typeof CreateCollectionBody>;
 
@@ -53,6 +55,7 @@ export const UpdateCollectionBody = t.Object(
 		status: LifecycleInput.status,
 		visibility: LifecycleInput.visibility,
 		localization: t.Optional(UnitLocalizationInput),
+		revisionContext: t.Optional(RevisionContext),
 	},
 	{ additionalProperties: false },
 );

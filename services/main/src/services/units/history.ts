@@ -1,4 +1,4 @@
-import { and, desc, eq, max, sql } from "drizzle-orm";
+import { and, desc, eq, inArray, isNull, max, sql } from "drizzle-orm";
 import { createSchemaFactory } from "drizzle-orm/zod";
 import { z } from "zod";
 import { AvatarTypeValues, FontAwesomeIconPrefixValues } from "@rezics/avatar";
@@ -73,7 +73,17 @@ import {
 	FractionalPositionStorageMaximumBytes,
 	isFractionalPosition,
 } from "../ordering/position";
-import { AssociationContextPostInvalid, UnitRevisionConflict } from "./errors";
+import {
+	AssociationContextPostInvalid,
+	RevisionCreditEntityInvalid,
+	RevisionContributionActorRequired,
+	UnitRevisionConflict,
+} from "./errors";
+import type {
+	RevisionContributionInput,
+	TrustedRevisionContribution,
+} from "./revision-contribution";
+import { defaultRevisionContribution } from "./revision-contribution";
 import { ensureWikiAssociationContextPosts } from "./association-context";
 import { insertUnit } from "./create";
 import { finalizeInitialUnitStatusRevision } from "./status";
@@ -1092,11 +1102,47 @@ export async function getUnitRevisionDocuments(
 	return documents;
 }
 
+async function resolveRevisionContribution(
+	tx: DatabaseTransaction,
+	actorProfileId: string | null | undefined,
+	input: RevisionContributionInput | undefined,
+): Promise<TrustedRevisionContribution> {
+	const contribution = input ?? defaultRevisionContribution;
+	if (contribution.primary === "unattributed") return contribution;
+	if (!actorProfileId) throw new RevisionContributionActorRequired();
+	if (contribution.primary === "human") return contribution;
+
+	const [eligibleEntity] = await tx
+		.select({ id: entity.id })
+		.from(entity)
+		.innerJoin(unit, eq(unit.id, entity.id))
+		.where(
+			and(
+				eq(entity.id, contribution.creditedEntityId),
+				eq(entity.kind, "software_agent"),
+				eq(unit.status, "published"),
+				inArray(unit.visibility, ["public", "unlisted"]),
+				eq(unit.moderationStatus, "approved"),
+				isNull(unit.deletedAt),
+			),
+		)
+		.limit(1);
+	if (!eligibleEntity) throw new RevisionCreditEntityInvalid();
+	return {
+		primary: "ai",
+		creditedEntityId: eligibleEntity.id,
+		role: contribution.role,
+		assurance: "self_declared",
+	};
+}
+
 export async function recordUnitRevision(
 	tx: DatabaseTransaction,
 	input: {
 		unitId: string;
 		actorProfileId?: string | null;
+		/** Omitted legacy/internal declarations are intentionally unattributed. */
+		contribution?: RevisionContributionInput;
 		event: UnitRevisionEvent;
 		message?: string;
 		minor?: boolean;
@@ -1105,6 +1151,11 @@ export async function recordUnitRevision(
 		tags?: readonly UnitRevisionChangeTag[];
 	},
 ): Promise<UnitRevisionCommitResult> {
+	const contribution = await resolveRevisionContribution(
+		tx,
+		input.actorProfileId,
+		input.contribution,
+	);
 	await lockUnitHistory(tx, input.unitId);
 	const [head] = await tx
 		.select({ revisionId: unitRevisionHead.revisionId })
@@ -1190,6 +1241,10 @@ export async function recordUnitRevision(
 			unitId: input.unitId,
 			parentRevisionId: head?.revisionId,
 			actorProfileId: input.actorProfileId,
+			primaryContributionKind: contribution.primary,
+			creditedEntityId: contribution.primary === "ai" ? contribution.creditedEntityId : null,
+			creditRole: contribution.primary === "ai" ? contribution.role : null,
+			attributionAssurance: contribution.primary === "ai" ? contribution.assurance : null,
 			editSummary: input.message,
 			minor: input.minor ?? false,
 			byteSize,
@@ -1260,6 +1315,7 @@ export async function restoreUnitRevision(
 		sourceRevisionId: string;
 		baseRevisionId: string;
 		actorProfileId: string;
+		contribution?: RevisionContributionInput;
 		message?: string;
 		minor?: boolean;
 		authorization: Authorization<string>;
@@ -1286,6 +1342,7 @@ export async function restoreUnitRevision(
 	return recordUnitRevision(tx, {
 		unitId: input.unitId,
 		actorProfileId: input.actorProfileId,
+		contribution: input.contribution,
 		event: "restore",
 		message: input.message,
 		minor: input.minor,
@@ -1487,6 +1544,7 @@ export async function undoUnitRevision(
 		targetRevisionId: string;
 		baseRevisionId: string;
 		actorProfileId: string;
+		contribution?: RevisionContributionInput;
 		message?: string;
 		minor?: boolean;
 		authorization: Authorization<string>;
@@ -1522,6 +1580,7 @@ export async function undoUnitRevision(
 	return recordUnitRevision(tx, {
 		unitId: input.unitId,
 		actorProfileId: input.actorProfileId,
+		contribution: input.contribution,
 		event: "update",
 		message: input.message,
 		minor: input.minor,

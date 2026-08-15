@@ -16,6 +16,7 @@ import {
 	FractionalPositionInput,
 	ContentLanguage,
 	LocalizationLanguageQuery,
+	RevisionContext,
 	UnitLocalizationInput,
 	Uuid,
 } from "../schema";
@@ -48,6 +49,7 @@ export const CreateSeriesBody = t.Object(
 	{
 		kind: t.String({ minLength: 1, maxLength: 64 }),
 		localization: UnitLocalizationInput,
+		revisionContext: t.Optional(RevisionContext),
 	},
 	{ additionalProperties: false },
 );
@@ -60,6 +62,7 @@ export const UpsertSeriesReleaseBody = t.Object(
 	{
 		position: FractionalPositionInput,
 		releasedOn: t.Optional(t.Nullable(t.String({ format: "date" }))),
+		revisionContext: t.Optional(RevisionContext),
 	},
 	{ additionalProperties: false },
 );
@@ -75,6 +78,7 @@ export const SystemRequirementBody = t.Object(
 		tier: t.String({ minLength: 1, maxLength: 32 }),
 		sourceExternalLinkId: t.Optional(t.Nullable(Uuid)),
 		hardware: t.Record(t.String(), JsonValue),
+		revisionContext: t.Optional(RevisionContext),
 	},
 	{ additionalProperties: false },
 );
@@ -91,6 +95,7 @@ export const CreateZoneBody = t.Object(
 		startsAt: t.Optional(t.Nullable(t.String({ format: "date-time" }))),
 		endsAt: t.Optional(t.Nullable(t.String({ format: "date-time" }))),
 		localRuleRealmId: t.Optional(t.Nullable(Uuid)),
+		revisionContext: t.Optional(RevisionContext),
 	},
 	{ additionalProperties: false },
 );
@@ -132,6 +137,7 @@ export const UpdateZoneBody = t.Object(
 		startsAt: t.Optional(t.Nullable(t.String({ format: "date-time" }))),
 		endsAt: t.Optional(t.Nullable(t.String({ format: "date-time" }))),
 		localRuleRealmId: t.Optional(t.Nullable(Uuid)),
+		revisionContext: t.Optional(RevisionContext),
 	},
 	{ minProperties: 1, additionalProperties: false },
 );
@@ -155,6 +161,7 @@ export const ZonePageBody = t.Object(
 			{ additionalProperties: false },
 		),
 		baseUnitRevisionId: t.Optional(Uuid),
+		revisionContext: t.Optional(RevisionContext),
 	},
 	{ additionalProperties: false },
 );

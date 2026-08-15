@@ -7,6 +7,7 @@ import {
 	DateTimeString,
 	FractionalPosition,
 	FractionalPositionInput,
+	RevisionContext,
 	Uuid,
 } from "../schema";
 import { WorkUnitType } from "../units/schema";
@@ -194,6 +195,7 @@ export const CreateTagStructureBody = t.Object(
 			maxItems: 16,
 			uniqueItems: true,
 		}),
+		revisionContext: t.Optional(RevisionContext),
 	},
 	{ additionalProperties: false },
 );
@@ -208,6 +210,7 @@ export const UpdateTagStructureBody = t.Object(
 		}),
 		updatedAt: DateTime,
 		reason: t.String({ minLength: 1, maxLength: 500 }),
+		revisionContext: t.Optional(RevisionContext),
 	},
 	{ additionalProperties: false },
 );

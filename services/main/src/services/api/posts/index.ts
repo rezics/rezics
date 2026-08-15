@@ -80,6 +80,10 @@ import { createWikiPost } from "../../posts/wiki";
 import { resolveCanonicalUnitId } from "../../units/merge/canonical";
 
 const UnitMutationForbiddenResponse = toApiErrorResponse(["UnitPermissionForbidden"]);
+const RevisionContributionBadRequestResponse = toApiErrorResponse([
+	"RevisionCreditEntityInvalid",
+	"RevisionContributionActorRequired",
+]);
 const ordinaryPostKind = sql<"post" | "reply">`${post.kind}::text`;
 const interactivePostKind = sql<
 	"post" | "reply" | "excerpt" | "review" | "wiki"
@@ -376,6 +380,7 @@ export default new Elysia()
 						await recordUnitRevision(tx, {
 							unitId: created.id,
 							actorProfileId: profile.unitId,
+							contribution: body.revisionContext?.contribution,
 							event: "create",
 						});
 						return created.id;
@@ -387,6 +392,7 @@ export default new Elysia()
 					body: CreatePostBody,
 					response: {
 						[StatusCodes.OK]: IdResponse,
+						[StatusCodes.BAD_REQUEST]: RevisionContributionBadRequestResponse,
 						[StatusCodes.FORBIDDEN]: toApiErrorResponse([
 							"RealmCapabilityRequired",
 							"EntityAssociationRestricted",
@@ -417,6 +423,7 @@ export default new Elysia()
 							body: body.body,
 							language: body.language,
 							publishRealmIds: body.publishRealmIds,
+							contribution: body.revisionContext?.contribution,
 							...(subjectId ? { subjectId } : {}),
 						});
 						return created.id;
@@ -428,6 +435,7 @@ export default new Elysia()
 					body: CreateWikiBody,
 					response: {
 						[StatusCodes.OK]: IdResponse,
+						[StatusCodes.BAD_REQUEST]: RevisionContributionBadRequestResponse,
 						[StatusCodes.FORBIDDEN]: toApiErrorResponse([
 							"RealmCapabilityRequired",
 							"EntityAssociationRestricted",
@@ -681,6 +689,7 @@ export default new Elysia()
 						await recordUnitRevision(tx, {
 							unitId: params.postId,
 							actorProfileId: profile.unitId,
+							contribution: body.revisionContext?.contribution,
 							event: "update",
 							baseRevisionId: body.baseRevisionId,
 							message: body.editSummary,
@@ -695,6 +704,7 @@ export default new Elysia()
 					body: UpdatePostBody,
 					response: {
 						[StatusCodes.OK]: IdResponse,
+						[StatusCodes.BAD_REQUEST]: RevisionContributionBadRequestResponse,
 						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
 						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
 							"UnitNotFound",
@@ -910,6 +920,7 @@ export default new Elysia()
 						const revision = await recordUnitRevision(tx, {
 							unitId: created.id,
 							actorProfileId: profile.unitId,
+							contribution: body.revisionContext?.contribution,
 							event: "create",
 						});
 						const recipients = await tx
@@ -965,6 +976,7 @@ export default new Elysia()
 					body: CreateReplyBody,
 					response: {
 						[StatusCodes.OK]: ReplyResponse,
+						[StatusCodes.BAD_REQUEST]: RevisionContributionBadRequestResponse,
 						[StatusCodes.FORBIDDEN]: toApiErrorResponse([
 							"RealmCapabilityRequired",
 							"ReplyDepthExceeded",
@@ -1022,6 +1034,7 @@ export default new Elysia()
 						await recordUnitRevision(tx, {
 							unitId: params.replyPostId,
 							actorProfileId: profile.unitId,
+							contribution: body.revisionContext?.contribution,
 							event: "update",
 							baseRevisionId: body.baseRevisionId,
 							message: body.editSummary,
@@ -1036,6 +1049,7 @@ export default new Elysia()
 					body: UpdateReplyBody,
 					response: {
 						[StatusCodes.OK]: IdResponse,
+						[StatusCodes.BAD_REQUEST]: RevisionContributionBadRequestResponse,
 						[StatusCodes.FORBIDDEN]: toApiErrorResponse(["UnitPermissionForbidden"]),
 						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["ReplyPostNotFound", "UnitNotFound"]),
 						[StatusCodes.CONFLICT]: toApiErrorResponse([

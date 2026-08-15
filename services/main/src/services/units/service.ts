@@ -116,6 +116,7 @@ import { applyInitialTags } from "../tags/initial-applications";
 import { getPendingUnitOwnershipClaim } from "../ownership-claims/service";
 import { unitScope } from "../authorization/unit/scope";
 import { getUnitExternalLinkPreviewWithSources } from "./external-links";
+import type { RevisionContributionInput } from "./revision-contribution";
 
 export type VariantUnitKind = "book" | "software" | "media";
 export type WorkUnitKind = VariantUnitKind | "series";
@@ -145,6 +146,7 @@ type CreateUnitAccessInput =
 	  };
 
 export type CreateUnitInput = CreateUnitAccessInput & {
+	revisionContribution?: RevisionContributionInput;
 	initialTagIds: readonly string[];
 	creditAttributionRequestConsent: CreditAttributionRequestConsent;
 	version: { readonly kind: "main" } | { readonly kind: "variant"; readonly mainUnitId: string };
@@ -346,6 +348,7 @@ export async function createUnit(
 		await recordUnitRevision(tx, {
 			unitId: created.id,
 			actorProfileId: ownerId,
+			contribution: input.revisionContribution,
 			event: "create",
 		});
 		if (structureSnapshot)
@@ -816,6 +819,7 @@ export async function updateUnitInTransaction(
 	const revision = await recordUnitRevision(tx, {
 		unitId,
 		actorProfileId,
+		contribution: body.revisionContribution,
 		event: "update",
 	});
 	if (body.status) {
@@ -868,20 +872,22 @@ export async function upsertLocalization(
 		avatar?: AvatarReference | null;
 		bannerAssetId?: string | null;
 		coverAssetId?: string | null;
+		revisionContribution?: RevisionContributionInput;
 	},
 ): Promise<void> {
 	await authorization.unit.ensureCanUpdate(unitId, [["localizations", input.language]]);
 	await database.transaction(async (tx) => {
+		const { revisionContribution, ...localization } = input;
 		await ensureImageAssetsAttachable(
 			tx,
 			authorization.profileId,
-			unitLocalizationImageAssetReferences(input),
+			unitLocalizationImageAssetReferences(localization),
 		);
 		await tx
 			.insert(unitLocalization)
 			.values({
 				unitId,
-				...toUnitLocalizationStorage(input),
+				...toUnitLocalizationStorage(localization),
 			})
 			.onConflictDoUpdate({
 				target: [unitLocalization.unitId, unitLocalization.language],
@@ -897,6 +903,7 @@ export async function upsertLocalization(
 		await recordUnitRevision(tx, {
 			unitId,
 			actorProfileId: authorization.profileId,
+			contribution: revisionContribution,
 			event: "update",
 		});
 	});
@@ -908,6 +915,7 @@ export async function updateUnitLocalizationOrder(
 	input: {
 		expectedLanguages: readonly ContentLanguage[];
 		languages: readonly ContentLanguage[];
+		revisionContribution?: RevisionContributionInput;
 	},
 ): Promise<ContentLanguage[]> {
 	await authorization.unit.ensureCanUpdate(unitId, [["localizations"]]);
@@ -922,6 +930,7 @@ export async function updateUnitLocalizationOrder(
 			await recordUnitRevision(tx, {
 				unitId,
 				actorProfileId: authorization.profileId,
+				contribution: input.revisionContribution,
 				event: "update",
 			});
 	});
@@ -947,6 +956,7 @@ export async function deleteUnitContentLanguage(
 	language: ContentLanguage,
 	authorization: Authorization<string>,
 	expectedLanguages: readonly ContentLanguage[],
+	revisionContribution?: RevisionContributionInput,
 ): Promise<ContentLanguage[]> {
 	await authorization.unit.ensureCanUpdate(unitId, [["localizations"]]);
 	return database.transaction(async (tx) => {
@@ -954,6 +964,7 @@ export async function deleteUnitContentLanguage(
 		await recordUnitRevision(tx, {
 			unitId,
 			actorProfileId: authorization.profileId,
+			contribution: revisionContribution,
 			event: "update",
 		});
 		return languages;

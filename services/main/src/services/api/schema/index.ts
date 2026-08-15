@@ -17,6 +17,7 @@ import {
 	ContentRatingValues,
 	NonRealmUnitKindValues,
 	ResourceVisibilityValues,
+	RevisionContributionRoleValues,
 	StoredUiLocaleValues,
 	UnitKindValues,
 	UnitStatusValues,
@@ -111,6 +112,55 @@ export const DateTime = t
 export const Uuid = t.String({ format: "uuid" });
 export type Uuid = Static<typeof Uuid>;
 
+/** A client declaration of the primary semantic source of a revision. */
+export const RevisionContributionInput = t.Union([
+	t.Object({ primary: t.Literal("human") }, { additionalProperties: false }),
+	t.Object({ primary: t.Literal("unattributed") }, { additionalProperties: false }),
+	t.Object(
+		{
+			primary: t.Literal("ai"),
+			creditedEntityId: Uuid,
+			role: t.UnionEnum(RevisionContributionRoleValues),
+		},
+		{ additionalProperties: false },
+	),
+]);
+export type RevisionContributionInput = Static<typeof RevisionContributionInput>;
+
+export const RevisionContext = t.Object(
+	{ contribution: t.Optional(RevisionContributionInput) },
+	{ additionalProperties: false },
+);
+export type RevisionContext = Static<typeof RevisionContext>;
+
+/** Optional body shape for commands whose only mutation context is revision provenance. */
+export const RevisionContextBody = t.Object(
+	{ revisionContext: t.Optional(RevisionContext) },
+	{ additionalProperties: false },
+);
+export type RevisionContextBody = Static<typeof RevisionContextBody>;
+
+/** The normalized contribution union returned by history reads. */
+export const RevisionPrimaryContribution = t.Union([
+	t.Object({ kind: t.Literal("human") }, { additionalProperties: false }),
+	t.Object({ kind: t.Literal("unattributed") }, { additionalProperties: false }),
+	t.Object(
+		{
+			kind: t.Literal("ai"),
+			creditAttribution: t.Object(
+				{
+					creditedEntityId: Uuid,
+					role: t.UnionEnum(RevisionContributionRoleValues),
+					assurance: t.UnionEnum(["self_declared", "credential_bound", "server_observed"]),
+				},
+				{ additionalProperties: false },
+			),
+		},
+		{ additionalProperties: false },
+	),
+]);
+export type RevisionPrimaryContribution = Static<typeof RevisionPrimaryContribution>;
+
 export const AvatarInput = t.Union([
 	t.Object(
 		{ type: t.Literal("image"), image: t.Object({ assetId: Uuid }) },
@@ -173,14 +223,14 @@ export const DisplayPosition = t.Integer({ minimum: 0, maximum: 999 });
 export const UnitIdParams = t.Object({ unitId: Uuid });
 export type UnitIdParams = Static<typeof UnitIdParams>;
 
+export const UnitLocalizationContentFields = {
+	title: t.String({ minLength: 1, maxLength: 500 }),
+	summary: t.Optional(t.String({ maxLength: 2_000 })),
+	description: t.Optional(PortableTextDocument),
+	...LocalizationImageInput,
+} as const;
 export const UnitLocalizationInput = t.Object(
-	{
-		...LocalizationLanguageField,
-		title: t.String({ minLength: 1, maxLength: 500 }),
-		summary: t.Optional(t.String({ maxLength: 2_000 })),
-		description: t.Optional(PortableTextDocument),
-		...LocalizationImageInput,
-	},
+	{ ...LocalizationLanguageField, ...UnitLocalizationContentFields },
 	{ additionalProperties: false },
 );
 export type UnitLocalizationInput = Static<typeof UnitLocalizationInput>;

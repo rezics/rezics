@@ -95,6 +95,20 @@ export class UnitRevisionConflict extends Data.TaggedError("UnitRevisionConflict
 	}
 }
 
+export class RevisionCreditEntityInvalid extends Data.TaggedError("RevisionCreditEntityInvalid") {
+	static readonly status = StatusCodes.BAD_REQUEST as const;
+	readonly status = RevisionCreditEntityInvalid.status;
+	readonly message = "The credited revision Entity is unavailable or not a software agent";
+}
+
+export class RevisionContributionActorRequired extends Data.TaggedError(
+	"RevisionContributionActorRequired",
+) {
+	static readonly status = StatusCodes.BAD_REQUEST as const;
+	readonly status = RevisionContributionActorRequired.status;
+	readonly message = "A human or AI revision contribution requires an accountable actor";
+}
+
 export class UnitLocalizationOrderChanged extends Data.TaggedError("UnitLocalizationOrderChanged") {
 	static readonly status = StatusCodes.CONFLICT as const;
 	readonly status = UnitLocalizationOrderChanged.status;
@@ -294,6 +308,8 @@ export const UnitErrors = [
 	UnitRealmPublicationAlreadyExists,
 	UnitRealmPublicationTransitionInvalid,
 	UnitRevisionConflict,
+	RevisionCreditEntityInvalid,
+	RevisionContributionActorRequired,
 	UnitLocalizationOrderChanged,
 	UnitLocalizationOrderInvalid,
 	UnitLocalizationNotFound,

@@ -107,6 +107,7 @@ import {
 	unitSearchDocument,
 	unitSlugAddress,
 	unitRevisionSlot,
+	unitRevision,
 	unitStatusEvent,
 	unitVariant,
 	imageAssetPresentation,
@@ -115,6 +116,9 @@ import {
 	ImageAssetPresentationFitValues,
 	ImageAssetPresentationRoleValues,
 	UnitRevisionSlotRoleValues,
+	RevisionAttributionAssuranceValues,
+	RevisionContributionRoleValues,
+	UnitRevisionPrimaryContributionKindValues,
 	UnitStatusActorKindValues,
 	WorkReleaseStatusValues,
 	UnitKindValues,
@@ -415,6 +419,26 @@ describe("database schema contracts", () => {
 		]);
 		expect(slot.checks.map((constraint) => constraint.name)).toContain(
 			"unit_revision_slot_key_shape_check",
+		);
+	});
+
+	it("keeps revision primary contribution fields row-local and shape constrained", () => {
+		expect(unitRevision.primaryContributionKind.enumValues).toEqual(
+			UnitRevisionPrimaryContributionKindValues,
+		);
+		expect(unitRevision.creditRole.enumValues).toEqual(RevisionContributionRoleValues);
+		expect(unitRevision.attributionAssurance.enumValues).toEqual(
+			RevisionAttributionAssuranceValues,
+		);
+		const revision = getTableConfig(unitRevision);
+		expect(revision.foreignKeys.map((key) => key.getName())).toContain(
+			"unit_revision_credited_entity_id_entity_id_fk",
+		);
+		expect(revision.checks.map((constraint) => constraint.name)).toContain(
+			"unit_revision_primary_contribution_shape_check",
+		);
+		expect(revision.indexes.map((index) => index.config.name)).toContain(
+			"unit_revision_ai_entity_created_at_idx",
 		);
 	});
 

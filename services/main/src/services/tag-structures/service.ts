@@ -23,6 +23,7 @@ import {
 } from "../database/schema";
 import { insertUnit } from "../units/create";
 import { lockUnitHistory, recordUnitRevision } from "../units/history";
+import type { RevisionContributionInput } from "../units/revision-contribution";
 import {
 	resolvedUnitLocalizationAvatar,
 	resolvedUnitLocalizationLanguage,
@@ -147,6 +148,7 @@ async function upsertDefinitionVote(
 export interface CreateTagStructureInput {
 	readonly memberTagIds: readonly string[];
 	readonly profileId: string;
+	readonly contribution?: RevisionContributionInput;
 	readonly createdAt?: Date;
 }
 
@@ -198,6 +200,7 @@ export async function createTagStructureInTransaction(
 	await recordUnitRevision(tx, {
 		unitId: created.id,
 		actorProfileId: input.profileId,
+		contribution: input.contribution,
 		event: "create",
 	});
 	return { structureId: created.id, created: true };
@@ -216,6 +219,7 @@ export async function updateTagStructureDefinition(input: {
 	readonly reason: string;
 	readonly actorProfileId: string;
 	readonly authorization: PlatformAuthorization<string>;
+	readonly contribution?: RevisionContributionInput;
 }): Promise<{ readonly changed: boolean; readonly updatedAt: Date }> {
 	validateMemberTagIds(input.memberTagIds);
 	const reason = input.reason.trim();
@@ -266,6 +270,7 @@ export async function updateTagStructureDefinition(input: {
 		await recordUnitRevision(tx, {
 			unitId: input.structureId,
 			actorProfileId: input.actorProfileId,
+			contribution: input.contribution,
 			event: "update",
 			message: reason,
 		});
@@ -497,6 +502,7 @@ export async function applyTagStructure(input: {
 	readonly unitId: string;
 	readonly structureId: string;
 	readonly profileId: string;
+	readonly contribution?: RevisionContributionInput;
 }) {
 	return database.transaction(async (tx) => {
 		const [structure] = await tx
@@ -523,6 +529,7 @@ export async function applyTagStructure(input: {
 			await recordUnitRevision(tx, {
 				unitId: input.unitId,
 				actorProfileId: input.profileId,
+				contribution: input.contribution,
 				event: "update",
 			});
 		return getApplicationVoteSummary(tx, {
@@ -537,6 +544,7 @@ export async function removeTagStructureApplication(input: {
 	readonly unitId: string;
 	readonly structureId: string;
 	readonly profileId: string;
+	readonly contribution?: RevisionContributionInput;
 }): Promise<void> {
 	await database.transaction(async (tx) => {
 		const deleted = await tx
@@ -552,6 +560,7 @@ export async function removeTagStructureApplication(input: {
 		await recordUnitRevision(tx, {
 			unitId: input.unitId,
 			actorProfileId: input.profileId,
+			contribution: input.contribution,
 			event: "update",
 		});
 	});

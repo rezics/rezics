@@ -291,6 +291,7 @@ export default new Elysia({ prefix: "/users" })
 				await recordUnitRevision(tx, {
 					unitId: profile.unitId,
 					actorProfileId: profile.unitId,
+					contribution: body.revisionContext?.contribution,
 					event: "update",
 				});
 			});
@@ -301,6 +302,10 @@ export default new Elysia({ prefix: "/users" })
 			body: UpdateProfileBody,
 			response: {
 				[StatusCodes.OK]: PublicProfileResponse,
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
+					"RevisionCreditEntityInvalid",
+					"RevisionContributionActorRequired",
+				]),
 				[StatusCodes.FORBIDDEN]: UnitForbiddenResponse,
 				[StatusCodes.NOT_FOUND]: ProfileMutationNotFoundResponse,
 				[StatusCodes.CONFLICT]: toApiErrorResponse(["ProfileChanged"]),

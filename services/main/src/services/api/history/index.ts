@@ -105,6 +105,10 @@ const summarySelection = {
 	unitId: unitRevision.unitId,
 	parentRevisionId: unitRevision.parentRevisionId,
 	actorProfileId: unitRevision.actorProfileId,
+	primaryContributionKind: unitRevision.primaryContributionKind,
+	creditedEntityId: unitRevision.creditedEntityId,
+	creditRole: unitRevision.creditRole,
+	attributionAssurance: unitRevision.attributionAssurance,
 	actorName: firstUnitLocalizationTitle(profileTable.id),
 	editSummary: unitRevision.editSummary,
 	minor: unitRevision.minor,
@@ -122,6 +126,25 @@ const summarySelection = {
 };
 
 type SummaryRow = Awaited<ReturnType<typeof selectSummaries>>[number];
+
+function requireRevisionCreditEntityId(value: SummaryRow["creditedEntityId"]): string {
+	if (value === null) throw new Error("AI revision is missing its credited Entity");
+	return value;
+}
+
+function requireRevisionCreditRole(
+	value: SummaryRow["creditRole"],
+): NonNullable<SummaryRow["creditRole"]> {
+	if (value === null) throw new Error("AI revision is missing its credit role");
+	return value;
+}
+
+function requireRevisionCreditAssurance(
+	value: SummaryRow["attributionAssurance"],
+): NonNullable<SummaryRow["attributionAssurance"]> {
+	if (value === null) throw new Error("AI revision is missing attribution assurance");
+	return value;
+}
 
 function selectSummaries(executor: DatabaseExecutor = database) {
 	return executor
@@ -151,6 +174,17 @@ function presentSummary(row: SummaryRow, access: { moderate: boolean; suppress: 
 		parentRevisionId: row.parentRevisionId,
 		actorProfileId: row.actorHidden && !canSeeRestrictedFields ? null : row.actorProfileId,
 		actorName: row.actorHidden && !canSeeRestrictedFields ? null : row.actorName,
+		primaryContribution:
+			row.primaryContributionKind === "ai"
+				? {
+						kind: "ai" as const,
+						creditAttribution: {
+							creditedEntityId: requireRevisionCreditEntityId(row.creditedEntityId),
+							role: requireRevisionCreditRole(row.creditRole),
+							assurance: requireRevisionCreditAssurance(row.attributionAssurance),
+						},
+					}
+				: { kind: row.primaryContributionKind },
 		editSummary: row.summaryHidden && !canSeeRestrictedFields ? null : row.editSummary,
 		minor: row.minor,
 		byteSize: row.byteSize,
@@ -400,6 +434,7 @@ export default new Elysia({ prefix: "/history" })
 					sourceRevisionId: params.revisionId,
 					baseRevisionId: body.baseRevisionId,
 					actorProfileId: profile.unitId,
+					contribution: body.revisionContext?.contribution,
 					message: body.editSummary,
 					minor: body.minor,
 					authorization,
@@ -414,6 +449,10 @@ export default new Elysia({ prefix: "/history" })
 			response: {
 				[StatusCodes.OK]: RevisionActionResponse,
 				[StatusCodes.CONFLICT]: toApiErrorResponse(["UnitRevisionConflict"]),
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
+					"RevisionCreditEntityInvalid",
+					"RevisionContributionActorRequired",
+				]),
 				[StatusCodes.FORBIDDEN]: toApiErrorResponse([
 					"UnitPermissionForbidden",
 					"EntityAssociationRestricted",
@@ -449,6 +488,7 @@ export default new Elysia({ prefix: "/history" })
 					targetRevisionId: params.revisionId,
 					baseRevisionId: body.baseRevisionId,
 					actorProfileId: profile.unitId,
+					contribution: body.revisionContext?.contribution,
 					message: body.editSummary,
 					minor: body.minor,
 					authorization,
@@ -463,6 +503,10 @@ export default new Elysia({ prefix: "/history" })
 			response: {
 				[StatusCodes.OK]: RevisionActionResponse,
 				[StatusCodes.CONFLICT]: toApiErrorResponse(["UnitRevisionConflict"]),
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
+					"RevisionCreditEntityInvalid",
+					"RevisionContributionActorRequired",
+				]),
 				[StatusCodes.FORBIDDEN]: toApiErrorResponse([
 					"UnitPermissionForbidden",
 					"EntityAssociationRestricted",

@@ -24,6 +24,7 @@ import {
 	LocalizationLanguageField,
 	LocalizationLanguageQuery,
 	localizationSet,
+	RevisionContext,
 	UnitLocalizationInput,
 	Uuid,
 } from "../schema";
@@ -58,6 +59,7 @@ export const CreateRealmBody = t.Object({
 	localization: UnitLocalizationInput,
 	visibility: RealmVisibility,
 	joinPolicy: RealmJoinPolicy,
+	revisionContext: t.Optional(RevisionContext),
 });
 export type CreateRealmBody = Static<typeof CreateRealmBody>;
 
@@ -126,6 +128,7 @@ const NewRealmTaxonomyUnitDraftNode = t.Object(
 export const SaveRealmTaxonomyDraftBody = t.Object(
 	{
 		baseRevisionId: Uuid,
+		revisionContext: t.Optional(RevisionContext),
 		nodes: t.Array(
 			t.Union([
 				ExistingRealmTaxonomyDraftNode,
@@ -144,13 +147,14 @@ export const UpdateRealmBody = t.Object(
 		visibility: t.Optional(RealmVisibility),
 		status: t.Optional(RealmStatus),
 		localization: t.Optional(UnitLocalizationInput),
+		revisionContext: t.Optional(RevisionContext),
 	},
 	{ additionalProperties: false },
 );
 export type UpdateRealmBody = Static<typeof UpdateRealmBody>;
 
 export const UpdateRealmTagVotingBody = t.Object(
-	{ enabled: t.Boolean() },
+	{ enabled: t.Boolean(), revisionContext: t.Optional(RevisionContext) },
 	{ additionalProperties: false },
 );
 export type UpdateRealmTagVotingBody = Static<typeof UpdateRealmTagVotingBody>;
@@ -170,6 +174,7 @@ export const UpdateRealmPagesBody = t.Object(
 	{
 		pages: RealmPages,
 		baseRevisionId: Uuid,
+		revisionContext: t.Optional(RevisionContext),
 	},
 	{ additionalProperties: false },
 );
@@ -218,6 +223,7 @@ export const UpdateRealmRulesBody = t.Object(
 		acknowledgementMode: t.UnionEnum(RealmRuleAcknowledgementModeValues),
 		requireOnJoin: t.Boolean(),
 		requireOnPost: t.Boolean(),
+		revisionContext: t.Optional(RevisionContext),
 		rules: t.Array(
 			t.Object(
 				{ localizations: localizationSet(RealmRuleLocalizationInput) },
@@ -253,6 +259,7 @@ export type RealmPinKind = Static<typeof RealmPinKind>;
 export const CreateRealmPinBody = t.Object(
 	{
 		kind: t.Optional(RealmPinKind),
+		revisionContext: t.Optional(RevisionContext),
 	},
 	{ additionalProperties: false },
 );
@@ -280,6 +287,7 @@ export const MoveRealmPinsBody = t.Object(
 		unitIds: t.Array(Uuid, { minItems: 1, maxItems: 100, uniqueItems: true }),
 		destinationKind: RealmPinKind,
 		placement: RealmPinPlacement,
+		revisionContext: t.Optional(RevisionContext),
 	},
 	{ additionalProperties: false },
 );
@@ -447,6 +455,7 @@ const RealmModerationAnnotation = t.Object(
 );
 const RealmGovernanceCommon = {
 	idempotencyKey: t.Optional(t.String({ minLength: 1, maxLength: 256 })),
+	revisionContext: t.Optional(RevisionContext),
 };
 export const ModerateRealmUnitBody = t.Union([
 	t.Object(
@@ -477,6 +486,7 @@ export const ReviewRealmUnitBody = t.Union([
 		{
 			command: t.Literal("dismiss"),
 			annotation: t.Optional(RealmModerationAnnotation),
+			revisionContext: t.Optional(RevisionContext),
 		},
 		{ additionalProperties: false },
 	),
@@ -484,6 +494,7 @@ export const ReviewRealmUnitBody = t.Union([
 		{
 			command: t.Literal("note"),
 			annotation: RealmModerationAnnotation,
+			revisionContext: t.Optional(RevisionContext),
 		},
 		{ additionalProperties: false },
 	),

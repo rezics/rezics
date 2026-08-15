@@ -18,6 +18,7 @@ import {
 	LocalizationLanguageQuery,
 	NonRealmUnitKind,
 	PublicationLicense,
+	RevisionContext,
 	ResourceVisibility,
 	StoredUiLocale,
 	UnitKind,
@@ -108,6 +109,7 @@ export const UpdateProfileBody = t.Object(
 		bannerAssetId: t.Optional(t.Nullable(Uuid)),
 		summary: t.Optional(t.String({ maxLength: 500 })),
 		description: t.Optional(PortableTextDocument),
+		revisionContext: t.Optional(RevisionContext),
 	},
 	{ additionalProperties: false },
 );

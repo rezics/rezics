@@ -13814,6 +13814,8 @@ export const ApiErrorCode = {
 	UnitRealmPublicationAlreadyExists: "UnitRealmPublicationAlreadyExists",
 	UnitRealmPublicationTransitionInvalid: "UnitRealmPublicationTransitionInvalid",
 	UnitRevisionConflict: "UnitRevisionConflict",
+	RevisionCreditEntityInvalid: "RevisionCreditEntityInvalid",
+	RevisionContributionActorRequired: "RevisionContributionActorRequired",
 	UnitLocalizationOrderChanged: "UnitLocalizationOrderChanged",
 	UnitLocalizationOrderInvalid: "UnitLocalizationOrderInvalid",
 	UnitLocalizationNotFound: "UnitLocalizationNotFound",
@@ -15566,11 +15568,40 @@ export type PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus200 =
 	contextPostId: (string | null) | null;
 };
 
-/**
- * @type object
- */
+export const PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus400ErrorCodeEnum = {
+	RevisionCreditEntityInvalid: "RevisionCreditEntityInvalid",
+	RevisionContributionActorRequired: "RevisionContributionActorRequired",
+} as const;
+
+export type PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus400ErrorCodeEnum =
+	(typeof PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus400ErrorCodeEnum)[keyof typeof PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus400ErrorCodeEnum];
+
 export type PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus400 =
-	MalformedRequestBody;
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'RevisionCreditEntityInvalid'
+				 * @type string
+				 */
+				code: PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus400ErrorCodeEnum;
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| MalformedRequestBody;
 
 export const PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus403ErrorCodeEnum = {
 	UnitPermissionForbidden: "UnitPermissionForbidden",
@@ -15692,10 +15723,57 @@ export type PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus422 =
  */
 export type PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus500 = InternalError;
 
+export const PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptRequestRevisionContextContributionRoleEnum =
+	{
+		creator: "creator",
+		editor: "editor",
+		translator: "translator",
+		researcher: "researcher",
+	} as const;
+
+export type PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptRequestRevisionContextContributionRoleEnum =
+	(typeof PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptRequestRevisionContextContributionRoleEnum)[keyof typeof PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptRequestRevisionContextContributionRoleEnum];
+
 /**
  * @type object
  */
-export type PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptBody = object;
+export type PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptBody = {
+	/**
+	 * @type object | undefined
+	 */
+	revisionContext?: {
+		contribution?:
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "human";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "unattributed";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "ai";
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					creditedEntityId: string;
+					/**
+					 * @default 'creator'
+					 * @type string
+					 */
+					role: PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptRequestRevisionContextContributionRoleEnum;
+			  };
+	};
+};
 
 /**
  * @type object
@@ -40395,6 +40473,8 @@ export type PostApiGovernancePlatformUnitsByUnitIdDeleteStatus200 = {
 export const PostApiGovernancePlatformUnitsByUnitIdDeleteStatus400ErrorCodeEnum = {
 	UnitLifecycleConfirmationInvalid: "UnitLifecycleConfirmationInvalid",
 	GovernanceRuleSourceForbidden: "GovernanceRuleSourceForbidden",
+	RevisionCreditEntityInvalid: "RevisionCreditEntityInvalid",
+	RevisionContributionActorRequired: "RevisionContributionActorRequired",
 } as const;
 
 export type PostApiGovernancePlatformUnitsByUnitIdDeleteStatus400ErrorCodeEnum =
@@ -40541,6 +40621,17 @@ export type PostApiGovernancePlatformUnitsByUnitIdDeleteStatus422 = ValidationEr
  */
 export type PostApiGovernancePlatformUnitsByUnitIdDeleteStatus500 = InternalError;
 
+export const PostApiGovernancePlatformUnitsByUnitIdDeleteRequestRevisionContextContributionRoleEnum =
+	{
+		creator: "creator",
+		editor: "editor",
+		translator: "translator",
+		researcher: "researcher",
+	} as const;
+
+export type PostApiGovernancePlatformUnitsByUnitIdDeleteRequestRevisionContextContributionRoleEnum =
+	(typeof PostApiGovernancePlatformUnitsByUnitIdDeleteRequestRevisionContextContributionRoleEnum)[keyof typeof PostApiGovernancePlatformUnitsByUnitIdDeleteRequestRevisionContextContributionRoleEnum];
+
 /**
  * @type object
  */
@@ -40586,6 +40677,41 @@ export type PostApiGovernancePlatformUnitsByUnitIdDeleteBody = {
 	 * @type string | undefined
 	 */
 	note?: string;
+	/**
+	 * @type object | undefined
+	 */
+	revisionContext?: {
+		contribution?:
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "human";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "unattributed";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "ai";
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					creditedEntityId: string;
+					/**
+					 * @default 'creator'
+					 * @type string
+					 */
+					role: PostApiGovernancePlatformUnitsByUnitIdDeleteRequestRevisionContextContributionRoleEnum;
+			  };
+	};
 };
 
 /**
@@ -40715,6 +40841,15 @@ export type PostApiGovernancePlatformUnitsByUnitIdRestoreStatus200 = {
 	protected: boolean;
 };
 
+export const PostApiGovernancePlatformUnitsByUnitIdRestoreStatus400ErrorCodeEnum = {
+	UnitLifecycleConfirmationInvalid: "UnitLifecycleConfirmationInvalid",
+	RevisionCreditEntityInvalid: "RevisionCreditEntityInvalid",
+	RevisionContributionActorRequired: "RevisionContributionActorRequired",
+} as const;
+
+export type PostApiGovernancePlatformUnitsByUnitIdRestoreStatus400ErrorCodeEnum =
+	(typeof PostApiGovernancePlatformUnitsByUnitIdRestoreStatus400ErrorCodeEnum)[keyof typeof PostApiGovernancePlatformUnitsByUnitIdRestoreStatus400ErrorCodeEnum];
+
 export type PostApiGovernancePlatformUnitsByUnitIdRestoreStatus400 =
 	| {
 			/**
@@ -40725,7 +40860,7 @@ export type PostApiGovernancePlatformUnitsByUnitIdRestoreStatus400 =
 				 * @default 'UnitLifecycleConfirmationInvalid'
 				 * @type string
 				 */
-				code: "UnitLifecycleConfirmationInvalid";
+				code: PostApiGovernancePlatformUnitsByUnitIdRestoreStatus400ErrorCodeEnum;
 				/**
 				 * @type string
 				 */
@@ -40856,6 +40991,17 @@ export type PostApiGovernancePlatformUnitsByUnitIdRestoreStatus422 = ValidationE
  */
 export type PostApiGovernancePlatformUnitsByUnitIdRestoreStatus500 = InternalError;
 
+export const PostApiGovernancePlatformUnitsByUnitIdRestoreRequestRevisionContextContributionRoleEnum =
+	{
+		creator: "creator",
+		editor: "editor",
+		translator: "translator",
+		researcher: "researcher",
+	} as const;
+
+export type PostApiGovernancePlatformUnitsByUnitIdRestoreRequestRevisionContextContributionRoleEnum =
+	(typeof PostApiGovernancePlatformUnitsByUnitIdRestoreRequestRevisionContextContributionRoleEnum)[keyof typeof PostApiGovernancePlatformUnitsByUnitIdRestoreRequestRevisionContextContributionRoleEnum];
+
 /**
  * @type object
  */
@@ -40878,6 +41024,41 @@ export type PostApiGovernancePlatformUnitsByUnitIdRestoreBody = {
 	 * @type string | undefined
 	 */
 	note?: string;
+	/**
+	 * @type object | undefined
+	 */
+	revisionContext?: {
+		contribution?:
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "human";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "unattributed";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "ai";
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					creditedEntityId: string;
+					/**
+					 * @default 'creator'
+					 * @type string
+					 */
+					role: PostApiGovernancePlatformUnitsByUnitIdRestoreRequestRevisionContextContributionRoleEnum;
+			  };
+	};
 };
 
 /**
@@ -44898,6 +45079,8 @@ export type PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionStatus200 =
 export const PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionStatus400ErrorCodeEnum = {
 	UnitOwnershipClaimConfirmationInvalid: "UnitOwnershipClaimConfirmationInvalid",
 	GovernanceRuleSourceForbidden: "GovernanceRuleSourceForbidden",
+	RevisionCreditEntityInvalid: "RevisionCreditEntityInvalid",
+	RevisionContributionActorRequired: "RevisionContributionActorRequired",
 } as const;
 
 export type PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionStatus400ErrorCodeEnum =
@@ -45057,6 +45240,17 @@ export const PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionRequestDec
 export type PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionRequestDecisionEnum =
 	(typeof PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionRequestDecisionEnum)[keyof typeof PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionRequestDecisionEnum];
 
+export const PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionRequestRevisionContextContributionRoleEnum =
+	{
+		creator: "creator",
+		editor: "editor",
+		translator: "translator",
+		researcher: "researcher",
+	} as const;
+
+export type PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionRequestRevisionContextContributionRoleEnum =
+	(typeof PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionRequestRevisionContextContributionRoleEnum)[keyof typeof PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionRequestRevisionContextContributionRoleEnum];
+
 /**
  * @type object
  */
@@ -45100,6 +45294,41 @@ export type PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionBody = {
 	 * @type string | undefined
 	 */
 	note?: string;
+	/**
+	 * @type object | undefined
+	 */
+	revisionContext?: {
+		contribution?:
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "human";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "unattributed";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "ai";
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					creditedEntityId: string;
+					/**
+					 * @default 'creator'
+					 * @type string
+					 */
+					role: PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionRequestRevisionContextContributionRoleEnum;
+			  };
+	};
 };
 
 /**
@@ -45846,10 +46075,40 @@ export type PatchApiGovernanceNotesByPostIdStatus200 = {
 	updatedAt: string;
 };
 
-/**
- * @type object
- */
-export type PatchApiGovernanceNotesByPostIdStatus400 = MalformedRequestBody;
+export const PatchApiGovernanceNotesByPostIdStatus400ErrorCodeEnum = {
+	RevisionCreditEntityInvalid: "RevisionCreditEntityInvalid",
+	RevisionContributionActorRequired: "RevisionContributionActorRequired",
+} as const;
+
+export type PatchApiGovernanceNotesByPostIdStatus400ErrorCodeEnum =
+	(typeof PatchApiGovernanceNotesByPostIdStatus400ErrorCodeEnum)[keyof typeof PatchApiGovernanceNotesByPostIdStatus400ErrorCodeEnum];
+
+export type PatchApiGovernanceNotesByPostIdStatus400 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'RevisionCreditEntityInvalid'
+				 * @type string
+				 */
+				code: PatchApiGovernanceNotesByPostIdStatus400ErrorCodeEnum;
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| MalformedRequestBody;
 
 /**
  * @type object
@@ -45997,6 +46256,16 @@ export const PatchApiGovernanceNotesByPostIdRequestLanguageEnum = {
 
 export type PatchApiGovernanceNotesByPostIdRequestLanguageEnum =
 	(typeof PatchApiGovernanceNotesByPostIdRequestLanguageEnum)[keyof typeof PatchApiGovernanceNotesByPostIdRequestLanguageEnum];
+
+export const PatchApiGovernanceNotesByPostIdRequestRevisionContextContributionRoleEnum = {
+	creator: "creator",
+	editor: "editor",
+	translator: "translator",
+	researcher: "researcher",
+} as const;
+
+export type PatchApiGovernanceNotesByPostIdRequestRevisionContextContributionRoleEnum =
+	(typeof PatchApiGovernanceNotesByPostIdRequestRevisionContextContributionRoleEnum)[keyof typeof PatchApiGovernanceNotesByPostIdRequestRevisionContextContributionRoleEnum];
 
 /**
  * @type object
@@ -46151,6 +46420,41 @@ export type PatchApiGovernanceNotesByPostIdBody = {
 	 * @type boolean | undefined
 	 */
 	minor?: boolean;
+	/**
+	 * @type object | undefined
+	 */
+	revisionContext?: {
+		contribution?:
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "human";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "unattributed";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "ai";
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					creditedEntityId: string;
+					/**
+					 * @default 'creator'
+					 * @type string
+					 */
+					role: PatchApiGovernanceNotesByPostIdRequestRevisionContextContributionRoleEnum;
+			  };
+	};
 };
 
 /**
@@ -46813,6 +47117,42 @@ export type GetApiGovernanceContentReviewCasesByCaseIdStatus200 = {
 	updatedAt: string;
 };
 
+export const GetApiGovernanceContentReviewCasesByCaseIdStatus400ErrorCodeEnum = {
+	RevisionCreditEntityInvalid: "RevisionCreditEntityInvalid",
+	RevisionContributionActorRequired: "RevisionContributionActorRequired",
+} as const;
+
+export type GetApiGovernanceContentReviewCasesByCaseIdStatus400ErrorCodeEnum =
+	(typeof GetApiGovernanceContentReviewCasesByCaseIdStatus400ErrorCodeEnum)[keyof typeof GetApiGovernanceContentReviewCasesByCaseIdStatus400ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type GetApiGovernanceContentReviewCasesByCaseIdStatus400 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'RevisionCreditEntityInvalid'
+		 * @type string
+		 */
+		code: GetApiGovernanceContentReviewCasesByCaseIdStatus400ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
 export const GetApiGovernanceContentReviewCasesByCaseIdStatus403ErrorCodeEnum = {
 	RealmCapabilityRequired: "RealmCapabilityRequired",
 	PlatformCapabilityRequired: "PlatformCapabilityRequired",
@@ -46902,6 +47242,7 @@ export type GetApiGovernanceContentReviewCasesByCaseIdOptions = {
  */
 export type GetApiGovernanceContentReviewCasesByCaseIdResponses = {
 	"200": GetApiGovernanceContentReviewCasesByCaseIdStatus200;
+	"400": GetApiGovernanceContentReviewCasesByCaseIdStatus400;
 	"403": GetApiGovernanceContentReviewCasesByCaseIdStatus403;
 	"404": GetApiGovernanceContentReviewCasesByCaseIdStatus404;
 	"422": GetApiGovernanceContentReviewCasesByCaseIdStatus422;
@@ -46913,6 +47254,7 @@ export type GetApiGovernanceContentReviewCasesByCaseIdResponses = {
  */
 export type GetApiGovernanceContentReviewCasesByCaseIdResponse =
 	| GetApiGovernanceContentReviewCasesByCaseIdStatus200
+	| GetApiGovernanceContentReviewCasesByCaseIdStatus400
 	| GetApiGovernanceContentReviewCasesByCaseIdStatus403
 	| GetApiGovernanceContentReviewCasesByCaseIdStatus404
 	| GetApiGovernanceContentReviewCasesByCaseIdStatus422
@@ -47285,6 +47627,17 @@ export const PatchApiGovernanceContentReviewCasesByCaseIdRequestInternalNoteLang
 export type PatchApiGovernanceContentReviewCasesByCaseIdRequestInternalNoteLanguageEnum =
 	(typeof PatchApiGovernanceContentReviewCasesByCaseIdRequestInternalNoteLanguageEnum)[keyof typeof PatchApiGovernanceContentReviewCasesByCaseIdRequestInternalNoteLanguageEnum];
 
+export const PatchApiGovernanceContentReviewCasesByCaseIdRequestRevisionContextContributionRoleEnum =
+	{
+		creator: "creator",
+		editor: "editor",
+		translator: "translator",
+		researcher: "researcher",
+	} as const;
+
+export type PatchApiGovernanceContentReviewCasesByCaseIdRequestRevisionContextContributionRoleEnum =
+	(typeof PatchApiGovernanceContentReviewCasesByCaseIdRequestRevisionContextContributionRoleEnum)[keyof typeof PatchApiGovernanceContentReviewCasesByCaseIdRequestRevisionContextContributionRoleEnum];
+
 /**
  * @type object
  */
@@ -47434,6 +47787,41 @@ export type PatchApiGovernanceContentReviewCasesByCaseIdBody = {
 			)[];
 		};
 	};
+	/**
+	 * @type object | undefined
+	 */
+	revisionContext?: {
+		contribution?:
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "human";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "unattributed";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "ai";
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					creditedEntityId: string;
+					/**
+					 * @default 'creator'
+					 * @type string
+					 */
+					role: PatchApiGovernanceContentReviewCasesByCaseIdRequestRevisionContextContributionRoleEnum;
+			  };
+	};
 };
 
 /**
@@ -47580,6 +47968,8 @@ export const PostApiGovernanceContentGovernanceActionsStatus400ErrorCodeEnum = {
 	GovernanceNoteRoleDuplicate: "GovernanceNoteRoleDuplicate",
 	ContentReviewRealmMissing: "ContentReviewRealmMissing",
 	GovernanceRuleSourceForbidden: "GovernanceRuleSourceForbidden",
+	RevisionCreditEntityInvalid: "RevisionCreditEntityInvalid",
+	RevisionContributionActorRequired: "RevisionContributionActorRequired",
 } as const;
 
 export type PostApiGovernanceContentGovernanceActionsStatus400ErrorCodeEnum =
@@ -47748,6 +48138,16 @@ export const PostApiGovernanceContentGovernanceActionsRequestNotesLanguageEnum =
 export type PostApiGovernanceContentGovernanceActionsRequestNotesLanguageEnum =
 	(typeof PostApiGovernanceContentGovernanceActionsRequestNotesLanguageEnum)[keyof typeof PostApiGovernanceContentGovernanceActionsRequestNotesLanguageEnum];
 
+export const PostApiGovernanceContentGovernanceActionsRequestRevisionContextContributionRoleEnum = {
+	creator: "creator",
+	editor: "editor",
+	translator: "translator",
+	researcher: "researcher",
+} as const;
+
+export type PostApiGovernanceContentGovernanceActionsRequestRevisionContextContributionRoleEnum =
+	(typeof PostApiGovernanceContentGovernanceActionsRequestRevisionContextContributionRoleEnum)[keyof typeof PostApiGovernanceContentGovernanceActionsRequestRevisionContextContributionRoleEnum];
+
 export type PostApiGovernanceContentGovernanceActionsBody =
 	| {
 			/**
@@ -47902,6 +48302,41 @@ export type PostApiGovernanceContentGovernanceActionsBody =
 			 * @type string | undefined
 			 */
 			idempotencyKey?: string;
+			/**
+			 * @type object | undefined
+			 */
+			revisionContext?: {
+				contribution?:
+					| {
+							/**
+							 * @type string
+							 */
+							primary: "human";
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							primary: "unattributed";
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							primary: "ai";
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							creditedEntityId: string;
+							/**
+							 * @default 'creator'
+							 * @type string
+							 */
+							role: PostApiGovernanceContentGovernanceActionsRequestRevisionContextContributionRoleEnum;
+					  };
+			};
 			kind:
 				| "approve"
 				| "hide"
@@ -48088,6 +48523,41 @@ export type PostApiGovernanceContentGovernanceActionsBody =
 			 */
 			idempotencyKey?: string;
 			/**
+			 * @type object | undefined
+			 */
+			revisionContext?: {
+				contribution?:
+					| {
+							/**
+							 * @type string
+							 */
+							primary: "human";
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							primary: "unattributed";
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							primary: "ai";
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							creditedEntityId: string;
+							/**
+							 * @default 'creator'
+							 * @type string
+							 */
+							role: PostApiGovernanceContentGovernanceActionsRequestRevisionContextContributionRoleEnum;
+					  };
+			};
+			/**
 			 * @type string
 			 */
 			kind: "restore_content_license";
@@ -48252,6 +48722,41 @@ export type PostApiGovernanceContentGovernanceActionsBody =
 			 */
 			idempotencyKey?: string;
 			/**
+			 * @type object | undefined
+			 */
+			revisionContext?: {
+				contribution?:
+					| {
+							/**
+							 * @type string
+							 */
+							primary: "human";
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							primary: "unattributed";
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							primary: "ai";
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							creditedEntityId: string;
+							/**
+							 * @default 'creator'
+							 * @type string
+							 */
+							role: PostApiGovernanceContentGovernanceActionsRequestRevisionContextContributionRoleEnum;
+					  };
+			};
+			/**
 			 * @type string
 			 */
 			kind: "reverse";
@@ -48354,6 +48859,8 @@ export const PostApiGovernanceAccountEnforcementsStatus400ErrorCodeEnum = {
 	EnforcementExpiryInvalid: "EnforcementExpiryInvalid",
 	GovernanceNoteRoleDuplicate: "GovernanceNoteRoleDuplicate",
 	GovernanceRuleSourceForbidden: "GovernanceRuleSourceForbidden",
+	RevisionCreditEntityInvalid: "RevisionCreditEntityInvalid",
+	RevisionContributionActorRequired: "RevisionContributionActorRequired",
 } as const;
 
 export type PostApiGovernanceAccountEnforcementsStatus400ErrorCodeEnum =
@@ -48520,6 +49027,16 @@ export const PostApiGovernanceAccountEnforcementsRequestNotesLanguageEnum = {
 
 export type PostApiGovernanceAccountEnforcementsRequestNotesLanguageEnum =
 	(typeof PostApiGovernanceAccountEnforcementsRequestNotesLanguageEnum)[keyof typeof PostApiGovernanceAccountEnforcementsRequestNotesLanguageEnum];
+
+export const PostApiGovernanceAccountEnforcementsRequestRevisionContextContributionRoleEnum = {
+	creator: "creator",
+	editor: "editor",
+	translator: "translator",
+	researcher: "researcher",
+} as const;
+
+export type PostApiGovernanceAccountEnforcementsRequestRevisionContextContributionRoleEnum =
+	(typeof PostApiGovernanceAccountEnforcementsRequestRevisionContextContributionRoleEnum)[keyof typeof PostApiGovernanceAccountEnforcementsRequestRevisionContextContributionRoleEnum];
 
 /**
  * @type object
@@ -48707,6 +49224,41 @@ export type PostApiGovernanceAccountEnforcementsBody = {
 	 * @type string | undefined
 	 */
 	expiresAt?: string;
+	/**
+	 * @type object | undefined
+	 */
+	revisionContext?: {
+		contribution?:
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "human";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "unattributed";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "ai";
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					creditedEntityId: string;
+					/**
+					 * @default 'creator'
+					 * @type string
+					 */
+					role: PostApiGovernanceAccountEnforcementsRequestRevisionContextContributionRoleEnum;
+			  };
+	};
 };
 
 /**
@@ -48808,6 +49360,15 @@ export type PostApiGovernanceAccountEnforcementsByEnforcementIdRevokeStatus200 =
 	updatedAt: string;
 };
 
+export const PostApiGovernanceAccountEnforcementsByEnforcementIdRevokeStatus400ErrorCodeEnum = {
+	GovernanceNoteRoleDuplicate: "GovernanceNoteRoleDuplicate",
+	RevisionCreditEntityInvalid: "RevisionCreditEntityInvalid",
+	RevisionContributionActorRequired: "RevisionContributionActorRequired",
+} as const;
+
+export type PostApiGovernanceAccountEnforcementsByEnforcementIdRevokeStatus400ErrorCodeEnum =
+	(typeof PostApiGovernanceAccountEnforcementsByEnforcementIdRevokeStatus400ErrorCodeEnum)[keyof typeof PostApiGovernanceAccountEnforcementsByEnforcementIdRevokeStatus400ErrorCodeEnum];
+
 export type PostApiGovernanceAccountEnforcementsByEnforcementIdRevokeStatus400 =
 	| {
 			/**
@@ -48818,7 +49379,7 @@ export type PostApiGovernanceAccountEnforcementsByEnforcementIdRevokeStatus400 =
 				 * @default 'GovernanceNoteRoleDuplicate'
 				 * @type string
 				 */
-				code: "GovernanceNoteRoleDuplicate";
+				code: PostApiGovernanceAccountEnforcementsByEnforcementIdRevokeStatus400ErrorCodeEnum;
 				/**
 				 * @type string
 				 */
@@ -48967,6 +49528,17 @@ export const PostApiGovernanceAccountEnforcementsByEnforcementIdRevokeRequestNot
 export type PostApiGovernanceAccountEnforcementsByEnforcementIdRevokeRequestNotesLanguageEnum =
 	(typeof PostApiGovernanceAccountEnforcementsByEnforcementIdRevokeRequestNotesLanguageEnum)[keyof typeof PostApiGovernanceAccountEnforcementsByEnforcementIdRevokeRequestNotesLanguageEnum];
 
+export const PostApiGovernanceAccountEnforcementsByEnforcementIdRevokeRequestRevisionContextContributionRoleEnum =
+	{
+		creator: "creator",
+		editor: "editor",
+		translator: "translator",
+		researcher: "researcher",
+	} as const;
+
+export type PostApiGovernanceAccountEnforcementsByEnforcementIdRevokeRequestRevisionContextContributionRoleEnum =
+	(typeof PostApiGovernanceAccountEnforcementsByEnforcementIdRevokeRequestRevisionContextContributionRoleEnum)[keyof typeof PostApiGovernanceAccountEnforcementsByEnforcementIdRevokeRequestRevisionContextContributionRoleEnum];
+
 /**
  * @type object
  */
@@ -49114,6 +49686,41 @@ export type PostApiGovernanceAccountEnforcementsByEnforcementIdRevokeBody = {
 			)[];
 		};
 	}[];
+	/**
+	 * @type object | undefined
+	 */
+	revisionContext?: {
+		contribution?:
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "human";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "unattributed";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "ai";
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					creditedEntityId: string;
+					/**
+					 * @default 'creator'
+					 * @type string
+					 */
+					role: PostApiGovernanceAccountEnforcementsByEnforcementIdRevokeRequestRevisionContextContributionRoleEnum;
+			  };
+	};
 };
 
 /**
@@ -49480,10 +50087,40 @@ export type PostApiSeriesStatus200 = {
 	id: string;
 };
 
-/**
- * @type object
- */
-export type PostApiSeriesStatus400 = MalformedRequestBody;
+export const PostApiSeriesStatus400ErrorCodeEnum = {
+	RevisionCreditEntityInvalid: "RevisionCreditEntityInvalid",
+	RevisionContributionActorRequired: "RevisionContributionActorRequired",
+} as const;
+
+export type PostApiSeriesStatus400ErrorCodeEnum =
+	(typeof PostApiSeriesStatus400ErrorCodeEnum)[keyof typeof PostApiSeriesStatus400ErrorCodeEnum];
+
+export type PostApiSeriesStatus400 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'RevisionCreditEntityInvalid'
+				 * @type string
+				 */
+				code: PostApiSeriesStatus400ErrorCodeEnum;
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| MalformedRequestBody;
 
 /**
  * @type object
@@ -49575,6 +50212,16 @@ export const PostApiSeriesRequestLocalizationAvatarIconPrefixEnum = {
 
 export type PostApiSeriesRequestLocalizationAvatarIconPrefixEnum =
 	(typeof PostApiSeriesRequestLocalizationAvatarIconPrefixEnum)[keyof typeof PostApiSeriesRequestLocalizationAvatarIconPrefixEnum];
+
+export const PostApiSeriesRequestRevisionContextContributionRoleEnum = {
+	creator: "creator",
+	editor: "editor",
+	translator: "translator",
+	researcher: "researcher",
+} as const;
+
+export type PostApiSeriesRequestRevisionContextContributionRoleEnum =
+	(typeof PostApiSeriesRequestRevisionContextContributionRoleEnum)[keyof typeof PostApiSeriesRequestRevisionContextContributionRoleEnum];
 
 /**
  * @type object
@@ -49799,6 +50446,41 @@ export type PostApiSeriesBody = {
 			| null;
 		bannerAssetId?: (string | null) | null;
 		coverAssetId?: (string | null) | null;
+	};
+	/**
+	 * @type object | undefined
+	 */
+	revisionContext?: {
+		contribution?:
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "human";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "unattributed";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "ai";
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					creditedEntityId: string;
+					/**
+					 * @default 'creator'
+					 * @type string
+					 */
+					role: PostApiSeriesRequestRevisionContextContributionRoleEnum;
+			  };
 	};
 };
 
@@ -51035,6 +51717,8 @@ export const PatchApiZonesByZoneIdStatus400ErrorCodeEnum = {
 	ZoneDocumentInvalid: "ZoneDocumentInvalid",
 	ZoneRuleRealmInvalid: "ZoneRuleRealmInvalid",
 	ZoneTimeRangeInvalid: "ZoneTimeRangeInvalid",
+	RevisionCreditEntityInvalid: "RevisionCreditEntityInvalid",
+	RevisionContributionActorRequired: "RevisionContributionActorRequired",
 } as const;
 
 export type PatchApiZonesByZoneIdStatus400ErrorCodeEnum =
@@ -51193,6 +51877,16 @@ export const PatchApiZonesByZoneIdRequestLocalizationAvatarIconPrefixEnum = {
 
 export type PatchApiZonesByZoneIdRequestLocalizationAvatarIconPrefixEnum =
 	(typeof PatchApiZonesByZoneIdRequestLocalizationAvatarIconPrefixEnum)[keyof typeof PatchApiZonesByZoneIdRequestLocalizationAvatarIconPrefixEnum];
+
+export const PatchApiZonesByZoneIdRequestRevisionContextContributionRoleEnum = {
+	creator: "creator",
+	editor: "editor",
+	translator: "translator",
+	researcher: "researcher",
+} as const;
+
+export type PatchApiZonesByZoneIdRequestRevisionContextContributionRoleEnum =
+	(typeof PatchApiZonesByZoneIdRequestRevisionContextContributionRoleEnum)[keyof typeof PatchApiZonesByZoneIdRequestRevisionContextContributionRoleEnum];
 
 /**
  * @type object
@@ -51423,6 +52117,41 @@ export type PatchApiZonesByZoneIdBody = {
 	startsAt?: (string | null) | null;
 	endsAt?: (string | null) | null;
 	localRuleRealmId?: (string | null) | null;
+	/**
+	 * @type object | undefined
+	 */
+	revisionContext?: {
+		contribution?:
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "human";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "unattributed";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "ai";
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					creditedEntityId: string;
+					/**
+					 * @default 'creator'
+					 * @type string
+					 */
+					role: PatchApiZonesByZoneIdRequestRevisionContextContributionRoleEnum;
+			  };
+	};
 };
 
 /**
@@ -53011,6 +53740,8 @@ export type PostApiZonesByZoneIdPagesStatus200 = {
 export const PostApiZonesByZoneIdPagesStatus400ErrorCodeEnum = {
 	InvalidSlug: "InvalidSlug",
 	ZoneDocumentInvalid: "ZoneDocumentInvalid",
+	RevisionCreditEntityInvalid: "RevisionCreditEntityInvalid",
+	RevisionContributionActorRequired: "RevisionContributionActorRequired",
 } as const;
 
 export type PostApiZonesByZoneIdPagesStatus400ErrorCodeEnum =
@@ -53206,6 +53937,16 @@ export const PostApiZonesByZoneIdPagesRequestLocalizationLanguageEnum = {
 export type PostApiZonesByZoneIdPagesRequestLocalizationLanguageEnum =
 	(typeof PostApiZonesByZoneIdPagesRequestLocalizationLanguageEnum)[keyof typeof PostApiZonesByZoneIdPagesRequestLocalizationLanguageEnum];
 
+export const PostApiZonesByZoneIdPagesRequestRevisionContextContributionRoleEnum = {
+	creator: "creator",
+	editor: "editor",
+	translator: "translator",
+	researcher: "researcher",
+} as const;
+
+export type PostApiZonesByZoneIdPagesRequestRevisionContextContributionRoleEnum =
+	(typeof PostApiZonesByZoneIdPagesRequestRevisionContextContributionRoleEnum)[keyof typeof PostApiZonesByZoneIdPagesRequestRevisionContextContributionRoleEnum];
+
 /**
  * @type object
  */
@@ -53236,6 +53977,41 @@ export type PostApiZonesByZoneIdPagesBody = {
 	 * @type string | undefined
 	 */
 	baseUnitRevisionId?: string;
+	/**
+	 * @type object | undefined
+	 */
+	revisionContext?: {
+		contribution?:
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "human";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "unattributed";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "ai";
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					creditedEntityId: string;
+					/**
+					 * @default 'creator'
+					 * @type string
+					 */
+					role: PostApiZonesByZoneIdPagesRequestRevisionContextContributionRoleEnum;
+			  };
+	};
 };
 
 /**
@@ -53671,6 +54447,8 @@ export type PutApiZonesByZoneIdPagesByPageIdStatus200 = {
 export const PutApiZonesByZoneIdPagesByPageIdStatus400ErrorCodeEnum = {
 	InvalidSlug: "InvalidSlug",
 	ZoneDocumentInvalid: "ZoneDocumentInvalid",
+	RevisionCreditEntityInvalid: "RevisionCreditEntityInvalid",
+	RevisionContributionActorRequired: "RevisionContributionActorRequired",
 } as const;
 
 export type PutApiZonesByZoneIdPagesByPageIdStatus400ErrorCodeEnum =
@@ -53866,6 +54644,16 @@ export const PutApiZonesByZoneIdPagesByPageIdRequestLocalizationLanguageEnum = {
 export type PutApiZonesByZoneIdPagesByPageIdRequestLocalizationLanguageEnum =
 	(typeof PutApiZonesByZoneIdPagesByPageIdRequestLocalizationLanguageEnum)[keyof typeof PutApiZonesByZoneIdPagesByPageIdRequestLocalizationLanguageEnum];
 
+export const PutApiZonesByZoneIdPagesByPageIdRequestRevisionContextContributionRoleEnum = {
+	creator: "creator",
+	editor: "editor",
+	translator: "translator",
+	researcher: "researcher",
+} as const;
+
+export type PutApiZonesByZoneIdPagesByPageIdRequestRevisionContextContributionRoleEnum =
+	(typeof PutApiZonesByZoneIdPagesByPageIdRequestRevisionContextContributionRoleEnum)[keyof typeof PutApiZonesByZoneIdPagesByPageIdRequestRevisionContextContributionRoleEnum];
+
 /**
  * @type object
  */
@@ -53896,6 +54684,41 @@ export type PutApiZonesByZoneIdPagesByPageIdBody = {
 	 * @type string | undefined
 	 */
 	baseUnitRevisionId?: string;
+	/**
+	 * @type object | undefined
+	 */
+	revisionContext?: {
+		contribution?:
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "human";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "unattributed";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "ai";
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					creditedEntityId: string;
+					/**
+					 * @default 'creator'
+					 * @type string
+					 */
+					role: PutApiZonesByZoneIdPagesByPageIdRequestRevisionContextContributionRoleEnum;
+			  };
+	};
 };
 
 /**
@@ -54336,10 +55159,40 @@ export type DeleteApiZonesByZoneIdPagesByPageIdPlacementPath = {
  */
 export type DeleteApiZonesByZoneIdPagesByPageIdPlacementStatus204 = void;
 
-/**
- * @type object
- */
-export type DeleteApiZonesByZoneIdPagesByPageIdPlacementStatus400 = MalformedRequestBody;
+export const DeleteApiZonesByZoneIdPagesByPageIdPlacementStatus400ErrorCodeEnum = {
+	RevisionCreditEntityInvalid: "RevisionCreditEntityInvalid",
+	RevisionContributionActorRequired: "RevisionContributionActorRequired",
+} as const;
+
+export type DeleteApiZonesByZoneIdPagesByPageIdPlacementStatus400ErrorCodeEnum =
+	(typeof DeleteApiZonesByZoneIdPagesByPageIdPlacementStatus400ErrorCodeEnum)[keyof typeof DeleteApiZonesByZoneIdPagesByPageIdPlacementStatus400ErrorCodeEnum];
+
+export type DeleteApiZonesByZoneIdPagesByPageIdPlacementStatus400 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'RevisionCreditEntityInvalid'
+				 * @type string
+				 */
+				code: DeleteApiZonesByZoneIdPagesByPageIdPlacementStatus400ErrorCodeEnum;
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| MalformedRequestBody;
 
 /**
  * @type object
@@ -55306,10 +56159,40 @@ export type DeleteApiZonesByZoneIdNavigationByNavigationIdPath = {
  */
 export type DeleteApiZonesByZoneIdNavigationByNavigationIdStatus204 = void;
 
-/**
- * @type object
- */
-export type DeleteApiZonesByZoneIdNavigationByNavigationIdStatus400 = MalformedRequestBody;
+export const DeleteApiZonesByZoneIdNavigationByNavigationIdStatus400ErrorCodeEnum = {
+	RevisionCreditEntityInvalid: "RevisionCreditEntityInvalid",
+	RevisionContributionActorRequired: "RevisionContributionActorRequired",
+} as const;
+
+export type DeleteApiZonesByZoneIdNavigationByNavigationIdStatus400ErrorCodeEnum =
+	(typeof DeleteApiZonesByZoneIdNavigationByNavigationIdStatus400ErrorCodeEnum)[keyof typeof DeleteApiZonesByZoneIdNavigationByNavigationIdStatus400ErrorCodeEnum];
+
+export type DeleteApiZonesByZoneIdNavigationByNavigationIdStatus400 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'RevisionCreditEntityInvalid'
+				 * @type string
+				 */
+				code: DeleteApiZonesByZoneIdNavigationByNavigationIdStatus400ErrorCodeEnum;
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| MalformedRequestBody;
 
 /**
  * @type object
@@ -55559,10 +56442,40 @@ export type PutApiSeriesBySeriesIdReleasesByReleaseIdStatus200 = {
 	updatedAt: string;
 };
 
-/**
- * @type object
- */
-export type PutApiSeriesBySeriesIdReleasesByReleaseIdStatus400 = MalformedRequestBody;
+export const PutApiSeriesBySeriesIdReleasesByReleaseIdStatus400ErrorCodeEnum = {
+	RevisionCreditEntityInvalid: "RevisionCreditEntityInvalid",
+	RevisionContributionActorRequired: "RevisionContributionActorRequired",
+} as const;
+
+export type PutApiSeriesBySeriesIdReleasesByReleaseIdStatus400ErrorCodeEnum =
+	(typeof PutApiSeriesBySeriesIdReleasesByReleaseIdStatus400ErrorCodeEnum)[keyof typeof PutApiSeriesBySeriesIdReleasesByReleaseIdStatus400ErrorCodeEnum];
+
+export type PutApiSeriesBySeriesIdReleasesByReleaseIdStatus400 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'RevisionCreditEntityInvalid'
+				 * @type string
+				 */
+				code: PutApiSeriesBySeriesIdReleasesByReleaseIdStatus400ErrorCodeEnum;
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| MalformedRequestBody;
 
 /**
  * @type object
@@ -55662,6 +56575,16 @@ export type PutApiSeriesBySeriesIdReleasesByReleaseIdStatus429 = {
  */
 export type PutApiSeriesBySeriesIdReleasesByReleaseIdStatus500 = InternalError;
 
+export const PutApiSeriesBySeriesIdReleasesByReleaseIdRequestRevisionContextContributionRoleEnum = {
+	creator: "creator",
+	editor: "editor",
+	translator: "translator",
+	researcher: "researcher",
+} as const;
+
+export type PutApiSeriesBySeriesIdReleasesByReleaseIdRequestRevisionContextContributionRoleEnum =
+	(typeof PutApiSeriesBySeriesIdReleasesByReleaseIdRequestRevisionContextContributionRoleEnum)[keyof typeof PutApiSeriesBySeriesIdReleasesByReleaseIdRequestRevisionContextContributionRoleEnum];
+
 /**
  * @type object
  */
@@ -55675,6 +56598,41 @@ export type PutApiSeriesBySeriesIdReleasesByReleaseIdBody = {
 	 */
 	position: string;
 	releasedOn?: (string | null) | null;
+	/**
+	 * @type object | undefined
+	 */
+	revisionContext?: {
+		contribution?:
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "human";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "unattributed";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "ai";
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					creditedEntityId: string;
+					/**
+					 * @default 'creator'
+					 * @type string
+					 */
+					role: PutApiSeriesBySeriesIdReleasesByReleaseIdRequestRevisionContextContributionRoleEnum;
+			  };
+	};
 };
 
 /**
@@ -55734,6 +56692,11 @@ export type DeleteApiSeriesBySeriesIdReleasesByReleaseIdPath = {
  * @type void
  */
 export type DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus204 = void;
+
+/**
+ * @type object
+ */
+export type DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus400 = MalformedRequestBody;
 
 /**
  * @type object
@@ -55841,11 +56804,63 @@ export type DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus429 = {
  */
 export type DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus500 = InternalError;
 
+export const DeleteApiSeriesBySeriesIdReleasesByReleaseIdRequestRevisionContextContributionRoleEnum =
+	{
+		creator: "creator",
+		editor: "editor",
+		translator: "translator",
+		researcher: "researcher",
+	} as const;
+
+export type DeleteApiSeriesBySeriesIdReleasesByReleaseIdRequestRevisionContextContributionRoleEnum =
+	(typeof DeleteApiSeriesBySeriesIdReleasesByReleaseIdRequestRevisionContextContributionRoleEnum)[keyof typeof DeleteApiSeriesBySeriesIdReleasesByReleaseIdRequestRevisionContextContributionRoleEnum];
+
+/**
+ * @type object
+ */
+export type DeleteApiSeriesBySeriesIdReleasesByReleaseIdBody = {
+	/**
+	 * @type object | undefined
+	 */
+	revisionContext?: {
+		contribution?:
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "human";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "unattributed";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "ai";
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					creditedEntityId: string;
+					/**
+					 * @default 'creator'
+					 * @type string
+					 */
+					role: DeleteApiSeriesBySeriesIdReleasesByReleaseIdRequestRevisionContextContributionRoleEnum;
+			  };
+	};
+};
+
 /**
  * @type object
  */
 export type DeleteApiSeriesBySeriesIdReleasesByReleaseIdOptions = {
-	body?: never;
+	body: DeleteApiSeriesBySeriesIdReleasesByReleaseIdBody;
 	path: DeleteApiSeriesBySeriesIdReleasesByReleaseIdPath;
 	query?: never;
 	headers?: never;
@@ -55856,6 +56871,7 @@ export type DeleteApiSeriesBySeriesIdReleasesByReleaseIdOptions = {
  */
 export type DeleteApiSeriesBySeriesIdReleasesByReleaseIdResponses = {
 	"204": DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus204;
+	"400": DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus400;
 	"403": DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus403;
 	"404": DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus404;
 	"422": DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus422;
@@ -55868,6 +56884,7 @@ export type DeleteApiSeriesBySeriesIdReleasesByReleaseIdResponses = {
  */
 export type DeleteApiSeriesBySeriesIdReleasesByReleaseIdResponse =
 	| DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus204
+	| DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus400
 	| DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus403
 	| DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus404
 	| DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus422
@@ -55890,6 +56907,8 @@ export const PostApiZonesStatus400ErrorCodeEnum = {
 	ZoneDocumentInvalid: "ZoneDocumentInvalid",
 	ZoneRuleRealmInvalid: "ZoneRuleRealmInvalid",
 	ZoneTimeRangeInvalid: "ZoneTimeRangeInvalid",
+	RevisionCreditEntityInvalid: "RevisionCreditEntityInvalid",
+	RevisionContributionActorRequired: "RevisionContributionActorRequired",
 } as const;
 
 export type PostApiZonesStatus400ErrorCodeEnum =
@@ -56056,6 +57075,16 @@ export const PostApiZonesRequestLocalizationAvatarIconPrefixEnum = {
 
 export type PostApiZonesRequestLocalizationAvatarIconPrefixEnum =
 	(typeof PostApiZonesRequestLocalizationAvatarIconPrefixEnum)[keyof typeof PostApiZonesRequestLocalizationAvatarIconPrefixEnum];
+
+export const PostApiZonesRequestRevisionContextContributionRoleEnum = {
+	creator: "creator",
+	editor: "editor",
+	translator: "translator",
+	researcher: "researcher",
+} as const;
+
+export type PostApiZonesRequestRevisionContextContributionRoleEnum =
+	(typeof PostApiZonesRequestRevisionContextContributionRoleEnum)[keyof typeof PostApiZonesRequestRevisionContextContributionRoleEnum];
 
 /**
  * @type object
@@ -56286,6 +57315,41 @@ export type PostApiZonesBody = {
 	startsAt?: (string | null) | null;
 	endsAt?: (string | null) | null;
 	localRuleRealmId?: (string | null) | null;
+	/**
+	 * @type object | undefined
+	 */
+	revisionContext?: {
+		contribution?:
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "human";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "unattributed";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "ai";
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					creditedEntityId: string;
+					/**
+					 * @default 'creator'
+					 * @type string
+					 */
+					role: PostApiZonesRequestRevisionContextContributionRoleEnum;
+			  };
+	};
 };
 
 /**
@@ -56519,6 +57583,15 @@ export type PostApiSoftwareBySoftwareIdSystemRequirementsStatus200 = {
 	updatedAt: string;
 };
 
+export const PostApiSoftwareBySoftwareIdSystemRequirementsStatus400ErrorCodeEnum = {
+	SoftwareSystemRequirementSourceInvalid: "SoftwareSystemRequirementSourceInvalid",
+	RevisionCreditEntityInvalid: "RevisionCreditEntityInvalid",
+	RevisionContributionActorRequired: "RevisionContributionActorRequired",
+} as const;
+
+export type PostApiSoftwareBySoftwareIdSystemRequirementsStatus400ErrorCodeEnum =
+	(typeof PostApiSoftwareBySoftwareIdSystemRequirementsStatus400ErrorCodeEnum)[keyof typeof PostApiSoftwareBySoftwareIdSystemRequirementsStatus400ErrorCodeEnum];
+
 export type PostApiSoftwareBySoftwareIdSystemRequirementsStatus400 =
 	| {
 			/**
@@ -56529,7 +57602,7 @@ export type PostApiSoftwareBySoftwareIdSystemRequirementsStatus400 =
 				 * @default 'SoftwareSystemRequirementSourceInvalid'
 				 * @type string
 				 */
-				code: "SoftwareSystemRequirementSourceInvalid";
+				code: PostApiSoftwareBySoftwareIdSystemRequirementsStatus400ErrorCodeEnum;
 				/**
 				 * @type string
 				 */
@@ -56652,6 +57725,17 @@ export type PostApiSoftwareBySoftwareIdSystemRequirementsStatus429 = {
  */
 export type PostApiSoftwareBySoftwareIdSystemRequirementsStatus500 = InternalError;
 
+export const PostApiSoftwareBySoftwareIdSystemRequirementsRequestRevisionContextContributionRoleEnum =
+	{
+		creator: "creator",
+		editor: "editor",
+		translator: "translator",
+		researcher: "researcher",
+	} as const;
+
+export type PostApiSoftwareBySoftwareIdSystemRequirementsRequestRevisionContextContributionRoleEnum =
+	(typeof PostApiSoftwareBySoftwareIdSystemRequirementsRequestRevisionContextContributionRoleEnum)[keyof typeof PostApiSoftwareBySoftwareIdSystemRequirementsRequestRevisionContextContributionRoleEnum];
+
 /**
  * @type object
  */
@@ -56676,6 +57760,41 @@ export type PostApiSoftwareBySoftwareIdSystemRequirementsBody = {
 			| JsonValue[]
 			| {
 					[key: string]: JsonValue;
+			  };
+	};
+	/**
+	 * @type object | undefined
+	 */
+	revisionContext?: {
+		contribution?:
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "human";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "unattributed";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "ai";
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					creditedEntityId: string;
+					/**
+					 * @default 'creator'
+					 * @type string
+					 */
+					role: PostApiSoftwareBySoftwareIdSystemRequirementsRequestRevisionContextContributionRoleEnum;
 			  };
 	};
 };
@@ -56783,6 +57902,15 @@ export type PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus200
 	updatedAt: string;
 };
 
+export const PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus400ErrorCodeEnum = {
+	SoftwareSystemRequirementSourceInvalid: "SoftwareSystemRequirementSourceInvalid",
+	RevisionCreditEntityInvalid: "RevisionCreditEntityInvalid",
+	RevisionContributionActorRequired: "RevisionContributionActorRequired",
+} as const;
+
+export type PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus400ErrorCodeEnum =
+	(typeof PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus400ErrorCodeEnum)[keyof typeof PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus400ErrorCodeEnum];
+
 export type PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus400 =
 	| {
 			/**
@@ -56793,7 +57921,7 @@ export type PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus400
 				 * @default 'SoftwareSystemRequirementSourceInvalid'
 				 * @type string
 				 */
-				code: "SoftwareSystemRequirementSourceInvalid";
+				code: PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus400ErrorCodeEnum;
 				/**
 				 * @type string
 				 */
@@ -56916,6 +58044,17 @@ export type PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus429
  */
 export type PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus500 = InternalError;
 
+export const PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdRequestRevisionContextContributionRoleEnum =
+	{
+		creator: "creator",
+		editor: "editor",
+		translator: "translator",
+		researcher: "researcher",
+	} as const;
+
+export type PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdRequestRevisionContextContributionRoleEnum =
+	(typeof PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdRequestRevisionContextContributionRoleEnum)[keyof typeof PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdRequestRevisionContextContributionRoleEnum];
+
 /**
  * @type object
  */
@@ -56940,6 +58079,41 @@ export type PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdBody = {
 			| JsonValue[]
 			| {
 					[key: string]: JsonValue;
+			  };
+	};
+	/**
+	 * @type object | undefined
+	 */
+	revisionContext?: {
+		contribution?:
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "human";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "unattributed";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "ai";
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					creditedEntityId: string;
+					/**
+					 * @default 'creator'
+					 * @type string
+					 */
+					role: PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdRequestRevisionContextContributionRoleEnum;
 			  };
 	};
 };
@@ -57001,6 +58175,12 @@ export type DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdPath =
  * @type void
  */
 export type DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus204 = void;
+
+/**
+ * @type object
+ */
+export type DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus400 =
+	MalformedRequestBody;
 
 /**
  * @type object
@@ -57111,11 +58291,63 @@ export type DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus
  */
 export type DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus500 = InternalError;
 
+export const DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdRequestRevisionContextContributionRoleEnum =
+	{
+		creator: "creator",
+		editor: "editor",
+		translator: "translator",
+		researcher: "researcher",
+	} as const;
+
+export type DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdRequestRevisionContextContributionRoleEnum =
+	(typeof DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdRequestRevisionContextContributionRoleEnum)[keyof typeof DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdRequestRevisionContextContributionRoleEnum];
+
+/**
+ * @type object
+ */
+export type DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdBody = {
+	/**
+	 * @type object | undefined
+	 */
+	revisionContext?: {
+		contribution?:
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "human";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "unattributed";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "ai";
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					creditedEntityId: string;
+					/**
+					 * @default 'creator'
+					 * @type string
+					 */
+					role: DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdRequestRevisionContextContributionRoleEnum;
+			  };
+	};
+};
+
 /**
  * @type object
  */
 export type DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdOptions = {
-	body?: never;
+	body: DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdBody;
 	path: DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdPath;
 	query?: never;
 	headers?: never;
@@ -57126,6 +58358,7 @@ export type DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdOption
  */
 export type DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdResponses = {
 	"204": DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus204;
+	"400": DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus400;
 	"403": DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus403;
 	"404": DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus404;
 	"422": DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus422;
@@ -57138,6 +58371,7 @@ export type DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdRespon
  */
 export type DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdResponse =
 	| DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus204
+	| DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus400
 	| DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus403
 	| DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus404
 	| DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus422
@@ -59516,10 +60750,40 @@ export type PatchApiUsersMeStatus200 = {
 	viewerFollowing?: boolean;
 };
 
-/**
- * @type object
- */
-export type PatchApiUsersMeStatus400 = MalformedRequestBody;
+export const PatchApiUsersMeStatus400ErrorCodeEnum = {
+	RevisionCreditEntityInvalid: "RevisionCreditEntityInvalid",
+	RevisionContributionActorRequired: "RevisionContributionActorRequired",
+} as const;
+
+export type PatchApiUsersMeStatus400ErrorCodeEnum =
+	(typeof PatchApiUsersMeStatus400ErrorCodeEnum)[keyof typeof PatchApiUsersMeStatus400ErrorCodeEnum];
+
+export type PatchApiUsersMeStatus400 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'RevisionCreditEntityInvalid'
+				 * @type string
+				 */
+				code: PatchApiUsersMeStatus400ErrorCodeEnum;
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| MalformedRequestBody;
 
 /**
  * @type object
@@ -59675,6 +60939,16 @@ export const PatchApiUsersMeRequestAvatarIconPrefixEnum = {
 
 export type PatchApiUsersMeRequestAvatarIconPrefixEnum =
 	(typeof PatchApiUsersMeRequestAvatarIconPrefixEnum)[keyof typeof PatchApiUsersMeRequestAvatarIconPrefixEnum];
+
+export const PatchApiUsersMeRequestRevisionContextContributionRoleEnum = {
+	creator: "creator",
+	editor: "editor",
+	translator: "translator",
+	researcher: "researcher",
+} as const;
+
+export type PatchApiUsersMeRequestRevisionContextContributionRoleEnum =
+	(typeof PatchApiUsersMeRequestRevisionContextContributionRoleEnum)[keyof typeof PatchApiUsersMeRequestRevisionContextContributionRoleEnum];
 
 /**
  * @type object
@@ -59893,6 +61167,41 @@ export type PatchApiUsersMeBody = {
 					[key: string]: unknown;
 			  }
 		)[];
+	};
+	/**
+	 * @type object | undefined
+	 */
+	revisionContext?: {
+		contribution?:
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "human";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "unattributed";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "ai";
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					creditedEntityId: string;
+					/**
+					 * @default 'creator'
+					 * @type string
+					 */
+					role: PatchApiUsersMeRequestRevisionContextContributionRoleEnum;
+			  };
 	};
 };
 
@@ -66698,10 +68007,40 @@ export type PostApiTagStructuresStatus200 = {
 	created: boolean;
 };
 
-/**
- * @type object
- */
-export type PostApiTagStructuresStatus400 = MalformedRequestBody;
+export const PostApiTagStructuresStatus400ErrorCodeEnum = {
+	RevisionCreditEntityInvalid: "RevisionCreditEntityInvalid",
+	RevisionContributionActorRequired: "RevisionContributionActorRequired",
+} as const;
+
+export type PostApiTagStructuresStatus400ErrorCodeEnum =
+	(typeof PostApiTagStructuresStatus400ErrorCodeEnum)[keyof typeof PostApiTagStructuresStatus400ErrorCodeEnum];
+
+export type PostApiTagStructuresStatus400 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'RevisionCreditEntityInvalid'
+				 * @type string
+				 */
+				code: PostApiTagStructuresStatus400ErrorCodeEnum;
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| MalformedRequestBody;
 
 /**
  * @type object
@@ -66823,6 +68162,16 @@ export type PostApiTagStructuresStatus429 = {
  */
 export type PostApiTagStructuresStatus500 = InternalError;
 
+export const PostApiTagStructuresRequestRevisionContextContributionRoleEnum = {
+	creator: "creator",
+	editor: "editor",
+	translator: "translator",
+	researcher: "researcher",
+} as const;
+
+export type PostApiTagStructuresRequestRevisionContextContributionRoleEnum =
+	(typeof PostApiTagStructuresRequestRevisionContextContributionRoleEnum)[keyof typeof PostApiTagStructuresRequestRevisionContextContributionRoleEnum];
+
 /**
  * @type object
  */
@@ -66831,6 +68180,41 @@ export type PostApiTagStructuresBody = {
 	 * @type array
 	 */
 	memberTagIds: string[];
+	/**
+	 * @type object | undefined
+	 */
+	revisionContext?: {
+		contribution?:
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "human";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "unattributed";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "ai";
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					creditedEntityId: string;
+					/**
+					 * @default 'creator'
+					 * @type string
+					 */
+					role: PostApiTagStructuresRequestRevisionContextContributionRoleEnum;
+			  };
+	};
 };
 
 /**
@@ -67381,10 +68765,40 @@ export type PutApiTagStructuresByStructureIdStatus200 = {
 	updatedAt: string;
 };
 
-/**
- * @type object
- */
-export type PutApiTagStructuresByStructureIdStatus400 = MalformedRequestBody;
+export const PutApiTagStructuresByStructureIdStatus400ErrorCodeEnum = {
+	RevisionCreditEntityInvalid: "RevisionCreditEntityInvalid",
+	RevisionContributionActorRequired: "RevisionContributionActorRequired",
+} as const;
+
+export type PutApiTagStructuresByStructureIdStatus400ErrorCodeEnum =
+	(typeof PutApiTagStructuresByStructureIdStatus400ErrorCodeEnum)[keyof typeof PutApiTagStructuresByStructureIdStatus400ErrorCodeEnum];
+
+export type PutApiTagStructuresByStructureIdStatus400 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'RevisionCreditEntityInvalid'
+				 * @type string
+				 */
+				code: PutApiTagStructuresByStructureIdStatus400ErrorCodeEnum;
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| MalformedRequestBody;
 
 /**
  * @type object
@@ -67550,6 +68964,16 @@ export type PutApiTagStructuresByStructureIdStatus429 = {
  */
 export type PutApiTagStructuresByStructureIdStatus500 = InternalError;
 
+export const PutApiTagStructuresByStructureIdRequestRevisionContextContributionRoleEnum = {
+	creator: "creator",
+	editor: "editor",
+	translator: "translator",
+	researcher: "researcher",
+} as const;
+
+export type PutApiTagStructuresByStructureIdRequestRevisionContextContributionRoleEnum =
+	(typeof PutApiTagStructuresByStructureIdRequestRevisionContextContributionRoleEnum)[keyof typeof PutApiTagStructuresByStructureIdRequestRevisionContextContributionRoleEnum];
+
 /**
  * @type object
  */
@@ -67570,6 +68994,41 @@ export type PutApiTagStructuresByStructureIdBody = {
 	 * @type string
 	 */
 	reason: string;
+	/**
+	 * @type object | undefined
+	 */
+	revisionContext?: {
+		contribution?:
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "human";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "unattributed";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "ai";
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					creditedEntityId: string;
+					/**
+					 * @default 'creator'
+					 * @type string
+					 */
+					role: PutApiTagStructuresByStructureIdRequestRevisionContextContributionRoleEnum;
+			  };
+	};
 };
 
 /**
@@ -68703,6 +70162,41 @@ export type PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus200 = {
 	viewerVote: ((-1 | 1) | null) | null;
 };
 
+export const PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus400ErrorCodeEnum = {
+	RevisionCreditEntityInvalid: "RevisionCreditEntityInvalid",
+	RevisionContributionActorRequired: "RevisionContributionActorRequired",
+} as const;
+
+export type PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus400ErrorCodeEnum =
+	(typeof PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus400ErrorCodeEnum)[keyof typeof PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus400ErrorCodeEnum];
+
+export type PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus400 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'RevisionCreditEntityInvalid'
+				 * @type string
+				 */
+				code: PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus400ErrorCodeEnum;
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| MalformedRequestBody;
+
 /**
  * @type object
  */
@@ -68831,11 +70325,63 @@ export type PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus429 = {
  */
 export type PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus500 = InternalError;
 
+export const PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdRequestRevisionContextContributionRoleEnum =
+	{
+		creator: "creator",
+		editor: "editor",
+		translator: "translator",
+		researcher: "researcher",
+	} as const;
+
+export type PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdRequestRevisionContextContributionRoleEnum =
+	(typeof PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdRequestRevisionContextContributionRoleEnum)[keyof typeof PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdRequestRevisionContextContributionRoleEnum];
+
+/**
+ * @type object
+ */
+export type PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdBody = {
+	/**
+	 * @type object | undefined
+	 */
+	revisionContext?: {
+		contribution?:
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "human";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "unattributed";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "ai";
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					creditedEntityId: string;
+					/**
+					 * @default 'creator'
+					 * @type string
+					 */
+					role: PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdRequestRevisionContextContributionRoleEnum;
+			  };
+	};
+};
+
 /**
  * @type object
  */
 export type PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdOptions = {
-	body?: never;
+	body: PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdBody;
 	path: PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdPath;
 	query?: never;
 	headers?: never;
@@ -68846,6 +70392,7 @@ export type PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdOptions = {
  */
 export type PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdResponses = {
 	"200": PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus200;
+	"400": PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus400;
 	"403": PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus403;
 	"404": PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus404;
 	"422": PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus422;
@@ -68858,6 +70405,7 @@ export type PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdResponses = {
  */
 export type PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdResponse =
 	| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus200
+	| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus400
 	| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus403
 	| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus404
 	| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus422
@@ -68887,6 +70435,41 @@ export type DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdPath = {
  * @type void
  */
 export type DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus204 = void;
+
+export const DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus400ErrorCodeEnum = {
+	RevisionCreditEntityInvalid: "RevisionCreditEntityInvalid",
+	RevisionContributionActorRequired: "RevisionContributionActorRequired",
+} as const;
+
+export type DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus400ErrorCodeEnum =
+	(typeof DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus400ErrorCodeEnum)[keyof typeof DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus400ErrorCodeEnum];
+
+export type DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus400 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'RevisionCreditEntityInvalid'
+				 * @type string
+				 */
+				code: DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus400ErrorCodeEnum;
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| MalformedRequestBody;
 
 export const DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus403ErrorCodeEnum = {
 	PlatformCapabilityRequired: "PlatformCapabilityRequired",
@@ -69003,11 +70586,63 @@ export type DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus429 = {
  */
 export type DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus500 = InternalError;
 
+export const DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdRequestRevisionContextContributionRoleEnum =
+	{
+		creator: "creator",
+		editor: "editor",
+		translator: "translator",
+		researcher: "researcher",
+	} as const;
+
+export type DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdRequestRevisionContextContributionRoleEnum =
+	(typeof DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdRequestRevisionContextContributionRoleEnum)[keyof typeof DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdRequestRevisionContextContributionRoleEnum];
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdBody = {
+	/**
+	 * @type object | undefined
+	 */
+	revisionContext?: {
+		contribution?:
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "human";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "unattributed";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "ai";
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					creditedEntityId: string;
+					/**
+					 * @default 'creator'
+					 * @type string
+					 */
+					role: DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdRequestRevisionContextContributionRoleEnum;
+			  };
+	};
+};
+
 /**
  * @type object
  */
 export type DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdOptions = {
-	body?: never;
+	body: DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdBody;
 	path: DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdPath;
 	query?: never;
 	headers?: never;
@@ -69018,6 +70653,7 @@ export type DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdOptions = {
  */
 export type DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdResponses = {
 	"204": DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus204;
+	"400": DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus400;
 	"403": DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus403;
 	"404": DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus404;
 	"422": DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus422;
@@ -69030,6 +70666,7 @@ export type DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdResponses = {
  */
 export type DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdResponse =
 	| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus204
+	| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus400
 	| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus403
 	| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus404
 	| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus422
@@ -71085,6 +72722,8 @@ export type CreateSlugNamespaceWithPlatformAccessStatus201 = {
 export const CreateSlugNamespaceWithPlatformAccessStatus400ErrorCodeEnum = {
 	InvalidSlug: "InvalidSlug",
 	GovernanceRuleSourceForbidden: "GovernanceRuleSourceForbidden",
+	RevisionCreditEntityInvalid: "RevisionCreditEntityInvalid",
+	RevisionContributionActorRequired: "RevisionContributionActorRequired",
 } as const;
 
 export type CreateSlugNamespaceWithPlatformAccessStatus400ErrorCodeEnum =
@@ -71287,6 +72926,16 @@ export type CreateSlugNamespaceWithPlatformAccessStatus422 =
  */
 export type CreateSlugNamespaceWithPlatformAccessStatus500 = InternalError;
 
+export const CreateSlugNamespaceWithPlatformAccessRequestRevisionContextContributionRoleEnum = {
+	creator: "creator",
+	editor: "editor",
+	translator: "translator",
+	researcher: "researcher",
+} as const;
+
+export type CreateSlugNamespaceWithPlatformAccessRequestRevisionContextContributionRoleEnum =
+	(typeof CreateSlugNamespaceWithPlatformAccessRequestRevisionContextContributionRoleEnum)[keyof typeof CreateSlugNamespaceWithPlatformAccessRequestRevisionContextContributionRoleEnum];
+
 /**
  * @type object
  */
@@ -71322,6 +72971,41 @@ export type CreateSlugNamespaceWithPlatformAccessBody = {
 		 */
 		ruleId: string;
 	}[];
+	/**
+	 * @type object | undefined
+	 */
+	revisionContext?: {
+		contribution?:
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "human";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "unattributed";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "ai";
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					creditedEntityId: string;
+					/**
+					 * @default 'creator'
+					 * @type string
+					 */
+					role: CreateSlugNamespaceWithPlatformAccessRequestRevisionContextContributionRoleEnum;
+			  };
+	};
 };
 
 /**
@@ -73736,6 +75420,15 @@ export type PutApiUnitsByIdByUnitIdLocalizationOrderStatus200 = {
 	languages: PutApiUnitsByIdByUnitIdLocalizationOrderStatus200LanguagesEnum[];
 };
 
+export const PutApiUnitsByIdByUnitIdLocalizationOrderStatus400ErrorCodeEnum = {
+	UnitLocalizationOrderInvalid: "UnitLocalizationOrderInvalid",
+	RevisionCreditEntityInvalid: "RevisionCreditEntityInvalid",
+	RevisionContributionActorRequired: "RevisionContributionActorRequired",
+} as const;
+
+export type PutApiUnitsByIdByUnitIdLocalizationOrderStatus400ErrorCodeEnum =
+	(typeof PutApiUnitsByIdByUnitIdLocalizationOrderStatus400ErrorCodeEnum)[keyof typeof PutApiUnitsByIdByUnitIdLocalizationOrderStatus400ErrorCodeEnum];
+
 export type PutApiUnitsByIdByUnitIdLocalizationOrderStatus400 =
 	| {
 			/**
@@ -73746,7 +75439,7 @@ export type PutApiUnitsByIdByUnitIdLocalizationOrderStatus400 =
 				 * @default 'UnitLocalizationOrderInvalid'
 				 * @type string
 				 */
-				code: "UnitLocalizationOrderInvalid";
+				code: PutApiUnitsByIdByUnitIdLocalizationOrderStatus400ErrorCodeEnum;
 				/**
 				 * @type string
 				 */
@@ -73933,6 +75626,16 @@ export const PutApiUnitsByIdByUnitIdLocalizationOrderRequestLanguagesEnum = {
 export type PutApiUnitsByIdByUnitIdLocalizationOrderRequestLanguagesEnum =
 	(typeof PutApiUnitsByIdByUnitIdLocalizationOrderRequestLanguagesEnum)[keyof typeof PutApiUnitsByIdByUnitIdLocalizationOrderRequestLanguagesEnum];
 
+export const PutApiUnitsByIdByUnitIdLocalizationOrderRequestRevisionContextContributionRoleEnum = {
+	creator: "creator",
+	editor: "editor",
+	translator: "translator",
+	researcher: "researcher",
+} as const;
+
+export type PutApiUnitsByIdByUnitIdLocalizationOrderRequestRevisionContextContributionRoleEnum =
+	(typeof PutApiUnitsByIdByUnitIdLocalizationOrderRequestRevisionContextContributionRoleEnum)[keyof typeof PutApiUnitsByIdByUnitIdLocalizationOrderRequestRevisionContextContributionRoleEnum];
+
 /**
  * @type object
  */
@@ -73945,6 +75648,41 @@ export type PutApiUnitsByIdByUnitIdLocalizationOrderBody = {
 	 * @type array
 	 */
 	languages: PutApiUnitsByIdByUnitIdLocalizationOrderRequestLanguagesEnum[];
+	/**
+	 * @type object | undefined
+	 */
+	revisionContext?: {
+		contribution?:
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "human";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "unattributed";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "ai";
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					creditedEntityId: string;
+					/**
+					 * @default 'creator'
+					 * @type string
+					 */
+					role: PutApiUnitsByIdByUnitIdLocalizationOrderRequestRevisionContextContributionRoleEnum;
+			  };
+	};
 };
 
 /**
@@ -74036,10 +75774,41 @@ export type DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus200 = {
 	languages: DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus200LanguagesEnum[];
 };
 
-/**
- * @type object
- */
-export type DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus400 = MalformedRequestBody;
+export const DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus400ErrorCodeEnum = {
+	UnitLocalizationOrderInvalid: "UnitLocalizationOrderInvalid",
+	RevisionCreditEntityInvalid: "RevisionCreditEntityInvalid",
+	RevisionContributionActorRequired: "RevisionContributionActorRequired",
+} as const;
+
+export type DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus400ErrorCodeEnum =
+	(typeof DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus400ErrorCodeEnum)[keyof typeof DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus400ErrorCodeEnum];
+
+export type DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus400 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'UnitLocalizationOrderInvalid'
+				 * @type string
+				 */
+				code: DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageStatus400ErrorCodeEnum;
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| MalformedRequestBody;
 
 /**
  * @type object
@@ -74234,6 +76003,17 @@ export const DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageRequestExpectedLan
 export type DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageRequestExpectedLanguagesEnum =
 	(typeof DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageRequestExpectedLanguagesEnum)[keyof typeof DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageRequestExpectedLanguagesEnum];
 
+export const DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageRequestRevisionContextContributionRoleEnum =
+	{
+		creator: "creator",
+		editor: "editor",
+		translator: "translator",
+		researcher: "researcher",
+	} as const;
+
+export type DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageRequestRevisionContextContributionRoleEnum =
+	(typeof DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageRequestRevisionContextContributionRoleEnum)[keyof typeof DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageRequestRevisionContextContributionRoleEnum];
+
 /**
  * @type object
  */
@@ -74242,6 +76022,41 @@ export type DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageBody = {
 	 * @type array
 	 */
 	expectedLanguages: DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageRequestExpectedLanguagesEnum[];
+	/**
+	 * @type object | undefined
+	 */
+	revisionContext?: {
+		contribution?:
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "human";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "unattributed";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "ai";
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					creditedEntityId: string;
+					/**
+					 * @default 'creator'
+					 * @type string
+					 */
+					role: DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageRequestRevisionContextContributionRoleEnum;
+			  };
+	};
 };
 
 /**
@@ -76306,6 +78121,15 @@ export type PostApiUnitsByTypeStatus200 = {
 	};
 };
 
+export const PostApiUnitsByTypeStatus400ErrorCodeEnum = {
+	CreditAttributionRoleInvalid: "CreditAttributionRoleInvalid",
+	RevisionCreditEntityInvalid: "RevisionCreditEntityInvalid",
+	RevisionContributionActorRequired: "RevisionContributionActorRequired",
+} as const;
+
+export type PostApiUnitsByTypeStatus400ErrorCodeEnum =
+	(typeof PostApiUnitsByTypeStatus400ErrorCodeEnum)[keyof typeof PostApiUnitsByTypeStatus400ErrorCodeEnum];
+
 export type PostApiUnitsByTypeStatus400 =
 	| {
 			/**
@@ -76316,7 +78140,7 @@ export type PostApiUnitsByTypeStatus400 =
 				 * @default 'CreditAttributionRoleInvalid'
 				 * @type string
 				 */
-				code: "CreditAttributionRoleInvalid";
+				code: PostApiUnitsByTypeStatus400ErrorCodeEnum;
 				/**
 				 * @type string
 				 */
@@ -76602,6 +78426,16 @@ export const PostApiUnitsByTypeRequestDetailsReleaseStatusEnum = {
 
 export type PostApiUnitsByTypeRequestDetailsReleaseStatusEnum =
 	(typeof PostApiUnitsByTypeRequestDetailsReleaseStatusEnum)[keyof typeof PostApiUnitsByTypeRequestDetailsReleaseStatusEnum];
+
+export const PostApiUnitsByTypeRequestRevisionContextContributionRoleEnum = {
+	creator: "creator",
+	editor: "editor",
+	translator: "translator",
+	researcher: "researcher",
+} as const;
+
+export type PostApiUnitsByTypeRequestRevisionContextContributionRoleEnum =
+	(typeof PostApiUnitsByTypeRequestRevisionContextContributionRoleEnum)[keyof typeof PostApiUnitsByTypeRequestRevisionContextContributionRoleEnum];
 
 export type PostApiUnitsByTypeBody =
 	| {
@@ -76926,6 +78760,41 @@ export type PostApiUnitsByTypeBody =
 						 */
 						releaseStatus: PostApiUnitsByTypeRequestDetailsReleaseStatusEnum;
 				  };
+			/**
+			 * @type object | undefined
+			 */
+			revisionContext?: {
+				contribution?:
+					| {
+							/**
+							 * @type string
+							 */
+							primary: "human";
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							primary: "unattributed";
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							primary: "ai";
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							creditedEntityId: string;
+							/**
+							 * @default 'creator'
+							 * @type string
+							 */
+							role: PostApiUnitsByTypeRequestRevisionContextContributionRoleEnum;
+					  };
+			};
 	  }
 	| {
 			/**
@@ -77238,6 +79107,41 @@ export type PostApiUnitsByTypeBody =
 						 */
 						releaseStatus: PostApiUnitsByTypeRequestDetailsReleaseStatusEnum;
 				  };
+			/**
+			 * @type object | undefined
+			 */
+			revisionContext?: {
+				contribution?:
+					| {
+							/**
+							 * @type string
+							 */
+							primary: "human";
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							primary: "unattributed";
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							primary: "ai";
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							creditedEntityId: string;
+							/**
+							 * @default 'creator'
+							 * @type string
+							 */
+							role: PostApiUnitsByTypeRequestRevisionContextContributionRoleEnum;
+					  };
+			};
 	  };
 
 /**
@@ -80481,10 +82385,40 @@ export type PatchApiUnitsByTypeByUnitIdStatus200 = {
 	};
 };
 
-/**
- * @type object
- */
-export type PatchApiUnitsByTypeByUnitIdStatus400 = MalformedRequestBody;
+export const PatchApiUnitsByTypeByUnitIdStatus400ErrorCodeEnum = {
+	RevisionCreditEntityInvalid: "RevisionCreditEntityInvalid",
+	RevisionContributionActorRequired: "RevisionContributionActorRequired",
+} as const;
+
+export type PatchApiUnitsByTypeByUnitIdStatus400ErrorCodeEnum =
+	(typeof PatchApiUnitsByTypeByUnitIdStatus400ErrorCodeEnum)[keyof typeof PatchApiUnitsByTypeByUnitIdStatus400ErrorCodeEnum];
+
+export type PatchApiUnitsByTypeByUnitIdStatus400 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'RevisionCreditEntityInvalid'
+				 * @type string
+				 */
+				code: PatchApiUnitsByTypeByUnitIdStatus400ErrorCodeEnum;
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| MalformedRequestBody;
 
 /**
  * @type object
@@ -80721,6 +82655,16 @@ export const PatchApiUnitsByTypeByUnitIdRequestDetailsReleaseStatusEnum = {
 export type PatchApiUnitsByTypeByUnitIdRequestDetailsReleaseStatusEnum =
 	(typeof PatchApiUnitsByTypeByUnitIdRequestDetailsReleaseStatusEnum)[keyof typeof PatchApiUnitsByTypeByUnitIdRequestDetailsReleaseStatusEnum];
 
+export const PatchApiUnitsByTypeByUnitIdRequestRevisionContextContributionRoleEnum = {
+	creator: "creator",
+	editor: "editor",
+	translator: "translator",
+	researcher: "researcher",
+} as const;
+
+export type PatchApiUnitsByTypeByUnitIdRequestRevisionContextContributionRoleEnum =
+	(typeof PatchApiUnitsByTypeByUnitIdRequestRevisionContextContributionRoleEnum)[keyof typeof PatchApiUnitsByTypeByUnitIdRequestRevisionContextContributionRoleEnum];
+
 /**
  * @type object
  */
@@ -80788,6 +82732,41 @@ export type PatchApiUnitsByTypeByUnitIdBody = {
 		 * @type string | undefined
 		 */
 		releaseStatus?: PatchApiUnitsByTypeByUnitIdRequestDetailsReleaseStatusEnum;
+	};
+	/**
+	 * @type object | undefined
+	 */
+	revisionContext?: {
+		contribution?:
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "human";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "unattributed";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "ai";
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					creditedEntityId: string;
+					/**
+					 * @default 'creator'
+					 * @type string
+					 */
+					role: PatchApiUnitsByTypeByUnitIdRequestRevisionContextContributionRoleEnum;
+			  };
 	};
 };
 
@@ -82405,10 +84384,40 @@ export type PatchApiUnitsByTypeByUnitIdVariantContextStatus200 = {
 	};
 };
 
-/**
- * @type object
- */
-export type PatchApiUnitsByTypeByUnitIdVariantContextStatus400 = MalformedRequestBody;
+export const PatchApiUnitsByTypeByUnitIdVariantContextStatus400ErrorCodeEnum = {
+	RevisionCreditEntityInvalid: "RevisionCreditEntityInvalid",
+	RevisionContributionActorRequired: "RevisionContributionActorRequired",
+} as const;
+
+export type PatchApiUnitsByTypeByUnitIdVariantContextStatus400ErrorCodeEnum =
+	(typeof PatchApiUnitsByTypeByUnitIdVariantContextStatus400ErrorCodeEnum)[keyof typeof PatchApiUnitsByTypeByUnitIdVariantContextStatus400ErrorCodeEnum];
+
+export type PatchApiUnitsByTypeByUnitIdVariantContextStatus400 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'RevisionCreditEntityInvalid'
+				 * @type string
+				 */
+				code: PatchApiUnitsByTypeByUnitIdVariantContextStatus400ErrorCodeEnum;
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| MalformedRequestBody;
 
 /**
  * @type object
@@ -82585,12 +84594,57 @@ export type PatchApiUnitsByTypeByUnitIdVariantContextStatus429 = {
  */
 export type PatchApiUnitsByTypeByUnitIdVariantContextStatus500 = InternalError;
 
+export const PatchApiUnitsByTypeByUnitIdVariantContextRequestRevisionContextContributionRoleEnum = {
+	creator: "creator",
+	editor: "editor",
+	translator: "translator",
+	researcher: "researcher",
+} as const;
+
+export type PatchApiUnitsByTypeByUnitIdVariantContextRequestRevisionContextContributionRoleEnum =
+	(typeof PatchApiUnitsByTypeByUnitIdVariantContextRequestRevisionContextContributionRoleEnum)[keyof typeof PatchApiUnitsByTypeByUnitIdVariantContextRequestRevisionContextContributionRoleEnum];
+
 /**
  * @type object
  */
 export type PatchApiUnitsByTypeByUnitIdVariantContextBody = {
 	mainUnitId: (string | null) | null;
 	expectedMainUnitId: (string | null) | null;
+	/**
+	 * @type object | undefined
+	 */
+	revisionContext?: {
+		contribution?:
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "human";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "unattributed";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "ai";
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					creditedEntityId: string;
+					/**
+					 * @default 'creator'
+					 * @type string
+					 */
+					role: PatchApiUnitsByTypeByUnitIdVariantContextRequestRevisionContextContributionRoleEnum;
+			  };
+	};
 };
 
 /**
@@ -84212,10 +86266,40 @@ export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200 = {
 	};
 };
 
-/**
- * @type object
- */
-export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus400 = MalformedRequestBody;
+export const PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus400ErrorCodeEnum = {
+	RevisionCreditEntityInvalid: "RevisionCreditEntityInvalid",
+	RevisionContributionActorRequired: "RevisionContributionActorRequired",
+} as const;
+
+export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus400ErrorCodeEnum =
+	(typeof PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus400ErrorCodeEnum)[keyof typeof PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus400ErrorCodeEnum];
+
+export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus400 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'RevisionCreditEntityInvalid'
+				 * @type string
+				 */
+				code: PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus400ErrorCodeEnum;
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| MalformedRequestBody;
 
 /**
  * @type object
@@ -84392,6 +86476,17 @@ export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus429 = {
  */
 export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus500 = InternalError;
 
+export const PostApiUnitsByTypeByUnitIdVariantContextPromoteRequestRevisionContextContributionRoleEnum =
+	{
+		creator: "creator",
+		editor: "editor",
+		translator: "translator",
+		researcher: "researcher",
+	} as const;
+
+export type PostApiUnitsByTypeByUnitIdVariantContextPromoteRequestRevisionContextContributionRoleEnum =
+	(typeof PostApiUnitsByTypeByUnitIdVariantContextPromoteRequestRevisionContextContributionRoleEnum)[keyof typeof PostApiUnitsByTypeByUnitIdVariantContextPromoteRequestRevisionContextContributionRoleEnum];
+
 /**
  * @type object
  */
@@ -84402,6 +86497,41 @@ export type PostApiUnitsByTypeByUnitIdVariantContextPromoteBody = {
 	 * @type string
 	 */
 	expectedMainUnitId: string;
+	/**
+	 * @type object | undefined
+	 */
+	revisionContext?: {
+		contribution?:
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "human";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "unattributed";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "ai";
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					creditedEntityId: string;
+					/**
+					 * @default 'creator'
+					 * @type string
+					 */
+					role: PostApiUnitsByTypeByUnitIdVariantContextPromoteRequestRevisionContextContributionRoleEnum;
+			  };
+	};
 };
 
 /**
@@ -86029,10 +88159,40 @@ export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200 = {
 	};
 };
 
-/**
- * @type object
- */
-export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus400 = MalformedRequestBody;
+export const PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus400ErrorCodeEnum = {
+	RevisionCreditEntityInvalid: "RevisionCreditEntityInvalid",
+	RevisionContributionActorRequired: "RevisionContributionActorRequired",
+} as const;
+
+export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus400ErrorCodeEnum =
+	(typeof PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus400ErrorCodeEnum)[keyof typeof PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus400ErrorCodeEnum];
+
+export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus400 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'RevisionCreditEntityInvalid'
+				 * @type string
+				 */
+				code: PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus400ErrorCodeEnum;
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| MalformedRequestBody;
 
 /**
  * @type object
@@ -86186,6 +88346,17 @@ export const PutApiUnitsByTypeByUnitIdLocalizationsByLanguageRequestAvatarIconPr
 
 export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageRequestAvatarIconPrefixEnum =
 	(typeof PutApiUnitsByTypeByUnitIdLocalizationsByLanguageRequestAvatarIconPrefixEnum)[keyof typeof PutApiUnitsByTypeByUnitIdLocalizationsByLanguageRequestAvatarIconPrefixEnum];
+
+export const PutApiUnitsByTypeByUnitIdLocalizationsByLanguageRequestRevisionContextContributionRoleEnum =
+	{
+		creator: "creator",
+		editor: "editor",
+		translator: "translator",
+		researcher: "researcher",
+	} as const;
+
+export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageRequestRevisionContextContributionRoleEnum =
+	(typeof PutApiUnitsByTypeByUnitIdLocalizationsByLanguageRequestRevisionContextContributionRoleEnum)[keyof typeof PutApiUnitsByTypeByUnitIdLocalizationsByLanguageRequestRevisionContextContributionRoleEnum];
 
 /**
  * @type object
@@ -86396,6 +88567,41 @@ export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageBody = {
 		| null;
 	bannerAssetId?: (string | null) | null;
 	coverAssetId?: (string | null) | null;
+	/**
+	 * @type object | undefined
+	 */
+	revisionContext?: {
+		contribution?:
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "human";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "unattributed";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "ai";
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					creditedEntityId: string;
+					/**
+					 * @default 'creator'
+					 * @type string
+					 */
+					role: PutApiUnitsByTypeByUnitIdLocalizationsByLanguageRequestRevisionContextContributionRoleEnum;
+			  };
+	};
 };
 
 /**
@@ -86804,6 +89010,27 @@ export type GetApiHistoryUnitsByUnitIdRevisionsQuery = {
 	limit?: string | number;
 };
 
+export const GetApiHistoryUnitsByUnitIdRevisionsStatus200ItemsPrimaryContributionCreditAttributionRoleEnum =
+	{
+		creator: "creator",
+		editor: "editor",
+		translator: "translator",
+		researcher: "researcher",
+	} as const;
+
+export type GetApiHistoryUnitsByUnitIdRevisionsStatus200ItemsPrimaryContributionCreditAttributionRoleEnum =
+	(typeof GetApiHistoryUnitsByUnitIdRevisionsStatus200ItemsPrimaryContributionCreditAttributionRoleEnum)[keyof typeof GetApiHistoryUnitsByUnitIdRevisionsStatus200ItemsPrimaryContributionCreditAttributionRoleEnum];
+
+export const GetApiHistoryUnitsByUnitIdRevisionsStatus200ItemsPrimaryContributionCreditAttributionAssuranceEnum =
+	{
+		self_declared: "self_declared",
+		credential_bound: "credential_bound",
+		server_observed: "server_observed",
+	} as const;
+
+export type GetApiHistoryUnitsByUnitIdRevisionsStatus200ItemsPrimaryContributionCreditAttributionAssuranceEnum =
+	(typeof GetApiHistoryUnitsByUnitIdRevisionsStatus200ItemsPrimaryContributionCreditAttributionAssuranceEnum)[keyof typeof GetApiHistoryUnitsByUnitIdRevisionsStatus200ItemsPrimaryContributionCreditAttributionAssuranceEnum];
+
 export const GetApiHistoryUnitsByUnitIdRevisionsStatus200ItemsVisibilityHiddenFieldsEnum = {
 	content: "content",
 	summary: "summary",
@@ -86833,6 +89060,46 @@ export type GetApiHistoryUnitsByUnitIdRevisionsStatus200 = {
 		parentRevisionId: (string | null) | null;
 		actorProfileId: (string | null) | null;
 		actorName: (string | null) | null;
+		primaryContribution:
+			| {
+					/**
+					 * @type string
+					 */
+					kind: "human";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					kind: "unattributed";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					kind: "ai";
+					/**
+					 * @type object
+					 */
+					creditAttribution: {
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						creditedEntityId: string;
+						/**
+						 * @default 'creator'
+						 * @type string
+						 */
+						role: GetApiHistoryUnitsByUnitIdRevisionsStatus200ItemsPrimaryContributionCreditAttributionRoleEnum;
+						/**
+						 * @default 'self_declared'
+						 * @type string
+						 */
+						assurance: GetApiHistoryUnitsByUnitIdRevisionsStatus200ItemsPrimaryContributionCreditAttributionAssuranceEnum;
+					};
+			  };
 		editSummary: (string | null) | null;
 		/**
 		 * @type boolean
@@ -87020,6 +89287,27 @@ export type GetApiHistoryUnitRevisionsByRevisionIdPath = {
 	revisionId: string;
 };
 
+export const GetApiHistoryUnitRevisionsByRevisionIdStatus200PrimaryContributionCreditAttributionRoleEnum =
+	{
+		creator: "creator",
+		editor: "editor",
+		translator: "translator",
+		researcher: "researcher",
+	} as const;
+
+export type GetApiHistoryUnitRevisionsByRevisionIdStatus200PrimaryContributionCreditAttributionRoleEnum =
+	(typeof GetApiHistoryUnitRevisionsByRevisionIdStatus200PrimaryContributionCreditAttributionRoleEnum)[keyof typeof GetApiHistoryUnitRevisionsByRevisionIdStatus200PrimaryContributionCreditAttributionRoleEnum];
+
+export const GetApiHistoryUnitRevisionsByRevisionIdStatus200PrimaryContributionCreditAttributionAssuranceEnum =
+	{
+		self_declared: "self_declared",
+		credential_bound: "credential_bound",
+		server_observed: "server_observed",
+	} as const;
+
+export type GetApiHistoryUnitRevisionsByRevisionIdStatus200PrimaryContributionCreditAttributionAssuranceEnum =
+	(typeof GetApiHistoryUnitRevisionsByRevisionIdStatus200PrimaryContributionCreditAttributionAssuranceEnum)[keyof typeof GetApiHistoryUnitRevisionsByRevisionIdStatus200PrimaryContributionCreditAttributionAssuranceEnum];
+
 export const GetApiHistoryUnitRevisionsByRevisionIdStatus200VisibilityHiddenFieldsEnum = {
 	content: "content",
 	summary: "summary",
@@ -87058,6 +89346,46 @@ export type GetApiHistoryUnitRevisionsByRevisionIdStatus200 = {
 	parentRevisionId: (string | null) | null;
 	actorProfileId: (string | null) | null;
 	actorName: (string | null) | null;
+	primaryContribution:
+		| {
+				/**
+				 * @type string
+				 */
+				kind: "human";
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				kind: "unattributed";
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				kind: "ai";
+				/**
+				 * @type object
+				 */
+				creditAttribution: {
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					creditedEntityId: string;
+					/**
+					 * @default 'creator'
+					 * @type string
+					 */
+					role: GetApiHistoryUnitRevisionsByRevisionIdStatus200PrimaryContributionCreditAttributionRoleEnum;
+					/**
+					 * @default 'self_declared'
+					 * @type string
+					 */
+					assurance: GetApiHistoryUnitRevisionsByRevisionIdStatus200PrimaryContributionCreditAttributionAssuranceEnum;
+				};
+		  };
 	editSummary: (string | null) | null;
 	/**
 	 * @type boolean
@@ -87412,10 +89740,40 @@ export type PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus200 = {
 	revisionCreated: boolean;
 };
 
-/**
- * @type object
- */
-export type PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus400 = MalformedRequestBody;
+export const PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus400ErrorCodeEnum = {
+	RevisionCreditEntityInvalid: "RevisionCreditEntityInvalid",
+	RevisionContributionActorRequired: "RevisionContributionActorRequired",
+} as const;
+
+export type PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus400ErrorCodeEnum =
+	(typeof PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus400ErrorCodeEnum)[keyof typeof PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus400ErrorCodeEnum];
+
+export type PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus400 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'RevisionCreditEntityInvalid'
+				 * @type string
+				 */
+				code: PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus400ErrorCodeEnum;
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| MalformedRequestBody;
 
 export const PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus403ErrorCodeEnum = {
 	UnitPermissionForbidden: "UnitPermissionForbidden",
@@ -87583,6 +89941,17 @@ export type PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus429 = {
  */
 export type PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus500 = InternalError;
 
+export const PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreRequestRevisionContextContributionRoleEnum =
+	{
+		creator: "creator",
+		editor: "editor",
+		translator: "translator",
+		researcher: "researcher",
+	} as const;
+
+export type PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreRequestRevisionContextContributionRoleEnum =
+	(typeof PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreRequestRevisionContextContributionRoleEnum)[keyof typeof PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreRequestRevisionContextContributionRoleEnum];
+
 /**
  * @type object
  */
@@ -87603,6 +89972,41 @@ export type PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreBody = {
 	 * @type boolean | undefined
 	 */
 	minor?: boolean;
+	/**
+	 * @type object | undefined
+	 */
+	revisionContext?: {
+		contribution?:
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "human";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "unattributed";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "ai";
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					creditedEntityId: string;
+					/**
+					 * @default 'creator'
+					 * @type string
+					 */
+					role: PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreRequestRevisionContextContributionRoleEnum;
+			  };
+	};
 };
 
 /**
@@ -87682,10 +90086,40 @@ export type PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus200 = {
 	revisionCreated: boolean;
 };
 
-/**
- * @type object
- */
-export type PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus400 = MalformedRequestBody;
+export const PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus400ErrorCodeEnum = {
+	RevisionCreditEntityInvalid: "RevisionCreditEntityInvalid",
+	RevisionContributionActorRequired: "RevisionContributionActorRequired",
+} as const;
+
+export type PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus400ErrorCodeEnum =
+	(typeof PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus400ErrorCodeEnum)[keyof typeof PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus400ErrorCodeEnum];
+
+export type PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus400 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'RevisionCreditEntityInvalid'
+				 * @type string
+				 */
+				code: PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus400ErrorCodeEnum;
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| MalformedRequestBody;
 
 export const PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus403ErrorCodeEnum = {
 	UnitPermissionForbidden: "UnitPermissionForbidden",
@@ -87853,6 +90287,17 @@ export type PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus429 = {
  */
 export type PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus500 = InternalError;
 
+export const PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoRequestRevisionContextContributionRoleEnum =
+	{
+		creator: "creator",
+		editor: "editor",
+		translator: "translator",
+		researcher: "researcher",
+	} as const;
+
+export type PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoRequestRevisionContextContributionRoleEnum =
+	(typeof PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoRequestRevisionContextContributionRoleEnum)[keyof typeof PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoRequestRevisionContextContributionRoleEnum];
+
 /**
  * @type object
  */
@@ -87873,6 +90318,41 @@ export type PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoBody = {
 	 * @type boolean | undefined
 	 */
 	minor?: boolean;
+	/**
+	 * @type object | undefined
+	 */
+	revisionContext?: {
+		contribution?:
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "human";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "unattributed";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "ai";
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					creditedEntityId: string;
+					/**
+					 * @default 'creator'
+					 * @type string
+					 */
+					role: PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoRequestRevisionContextContributionRoleEnum;
+			  };
+	};
 };
 
 /**
@@ -88220,6 +90700,27 @@ export type GetApiHistoryRecentChangesQuery = {
 	minor?: boolean | string;
 };
 
+export const GetApiHistoryRecentChangesStatus200ItemsPrimaryContributionCreditAttributionRoleEnum =
+	{
+		creator: "creator",
+		editor: "editor",
+		translator: "translator",
+		researcher: "researcher",
+	} as const;
+
+export type GetApiHistoryRecentChangesStatus200ItemsPrimaryContributionCreditAttributionRoleEnum =
+	(typeof GetApiHistoryRecentChangesStatus200ItemsPrimaryContributionCreditAttributionRoleEnum)[keyof typeof GetApiHistoryRecentChangesStatus200ItemsPrimaryContributionCreditAttributionRoleEnum];
+
+export const GetApiHistoryRecentChangesStatus200ItemsPrimaryContributionCreditAttributionAssuranceEnum =
+	{
+		self_declared: "self_declared",
+		credential_bound: "credential_bound",
+		server_observed: "server_observed",
+	} as const;
+
+export type GetApiHistoryRecentChangesStatus200ItemsPrimaryContributionCreditAttributionAssuranceEnum =
+	(typeof GetApiHistoryRecentChangesStatus200ItemsPrimaryContributionCreditAttributionAssuranceEnum)[keyof typeof GetApiHistoryRecentChangesStatus200ItemsPrimaryContributionCreditAttributionAssuranceEnum];
+
 export const GetApiHistoryRecentChangesStatus200ItemsVisibilityHiddenFieldsEnum = {
 	content: "content",
 	summary: "summary",
@@ -88252,6 +90753,46 @@ export type GetApiHistoryRecentChangesStatus200 = {
 		parentRevisionId: (string | null) | null;
 		actorProfileId: (string | null) | null;
 		actorName: (string | null) | null;
+		primaryContribution:
+			| {
+					/**
+					 * @type string
+					 */
+					kind: "human";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					kind: "unattributed";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					kind: "ai";
+					/**
+					 * @type object
+					 */
+					creditAttribution: {
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						creditedEntityId: string;
+						/**
+						 * @default 'creator'
+						 * @type string
+						 */
+						role: GetApiHistoryRecentChangesStatus200ItemsPrimaryContributionCreditAttributionRoleEnum;
+						/**
+						 * @default 'self_declared'
+						 * @type string
+						 */
+						assurance: GetApiHistoryRecentChangesStatus200ItemsPrimaryContributionCreditAttributionAssuranceEnum;
+					};
+			  };
 		editSummary: (string | null) | null;
 		/**
 		 * @type boolean
@@ -88419,6 +90960,27 @@ export type GetApiHistoryContributionsByProfileIdQuery = {
 	minor?: boolean | string;
 };
 
+export const GetApiHistoryContributionsByProfileIdStatus200ItemsPrimaryContributionCreditAttributionRoleEnum =
+	{
+		creator: "creator",
+		editor: "editor",
+		translator: "translator",
+		researcher: "researcher",
+	} as const;
+
+export type GetApiHistoryContributionsByProfileIdStatus200ItemsPrimaryContributionCreditAttributionRoleEnum =
+	(typeof GetApiHistoryContributionsByProfileIdStatus200ItemsPrimaryContributionCreditAttributionRoleEnum)[keyof typeof GetApiHistoryContributionsByProfileIdStatus200ItemsPrimaryContributionCreditAttributionRoleEnum];
+
+export const GetApiHistoryContributionsByProfileIdStatus200ItemsPrimaryContributionCreditAttributionAssuranceEnum =
+	{
+		self_declared: "self_declared",
+		credential_bound: "credential_bound",
+		server_observed: "server_observed",
+	} as const;
+
+export type GetApiHistoryContributionsByProfileIdStatus200ItemsPrimaryContributionCreditAttributionAssuranceEnum =
+	(typeof GetApiHistoryContributionsByProfileIdStatus200ItemsPrimaryContributionCreditAttributionAssuranceEnum)[keyof typeof GetApiHistoryContributionsByProfileIdStatus200ItemsPrimaryContributionCreditAttributionAssuranceEnum];
+
 export const GetApiHistoryContributionsByProfileIdStatus200ItemsVisibilityHiddenFieldsEnum = {
 	content: "content",
 	summary: "summary",
@@ -88451,6 +91013,46 @@ export type GetApiHistoryContributionsByProfileIdStatus200 = {
 		parentRevisionId: (string | null) | null;
 		actorProfileId: (string | null) | null;
 		actorName: (string | null) | null;
+		primaryContribution:
+			| {
+					/**
+					 * @type string
+					 */
+					kind: "human";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					kind: "unattributed";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					kind: "ai";
+					/**
+					 * @type object
+					 */
+					creditAttribution: {
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						creditedEntityId: string;
+						/**
+						 * @default 'creator'
+						 * @type string
+						 */
+						role: GetApiHistoryContributionsByProfileIdStatus200ItemsPrimaryContributionCreditAttributionRoleEnum;
+						/**
+						 * @default 'self_declared'
+						 * @type string
+						 */
+						assurance: GetApiHistoryContributionsByProfileIdStatus200ItemsPrimaryContributionCreditAttributionAssuranceEnum;
+					};
+			  };
 		editSummary: (string | null) | null;
 		/**
 		 * @type boolean
@@ -88635,6 +91237,7 @@ export const GetApiEntitiesKind = {
 	person: "person",
 	organization: "organization",
 	character: "character",
+	software_agent: "software_agent",
 } as const;
 
 export type GetApiEntitiesKind = (typeof GetApiEntitiesKind)[keyof typeof GetApiEntitiesKind];
@@ -88684,6 +91287,7 @@ export const GetApiEntitiesStatus200ItemsKindEnum = {
 	person: "person",
 	organization: "organization",
 	character: "character",
+	software_agent: "software_agent",
 } as const;
 
 export type GetApiEntitiesStatus200ItemsKindEnum =
@@ -88946,10 +91550,40 @@ export type PostApiEntitiesStatus200 = {
 	id: string;
 };
 
-/**
- * @type object
- */
-export type PostApiEntitiesStatus400 = MalformedRequestBody;
+export const PostApiEntitiesStatus400ErrorCodeEnum = {
+	RevisionCreditEntityInvalid: "RevisionCreditEntityInvalid",
+	RevisionContributionActorRequired: "RevisionContributionActorRequired",
+} as const;
+
+export type PostApiEntitiesStatus400ErrorCodeEnum =
+	(typeof PostApiEntitiesStatus400ErrorCodeEnum)[keyof typeof PostApiEntitiesStatus400ErrorCodeEnum];
+
+export type PostApiEntitiesStatus400 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'RevisionCreditEntityInvalid'
+				 * @type string
+				 */
+				code: PostApiEntitiesStatus400ErrorCodeEnum;
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| MalformedRequestBody;
 
 /**
  * @type object
@@ -89033,6 +91667,7 @@ export const PostApiEntitiesRequestKindEnum = {
 	person: "person",
 	organization: "organization",
 	character: "character",
+	software_agent: "software_agent",
 } as const;
 
 export type PostApiEntitiesRequestKindEnum =
@@ -89058,6 +91693,16 @@ export const PostApiEntitiesRequestLocalizationAvatarIconPrefixEnum = {
 
 export type PostApiEntitiesRequestLocalizationAvatarIconPrefixEnum =
 	(typeof PostApiEntitiesRequestLocalizationAvatarIconPrefixEnum)[keyof typeof PostApiEntitiesRequestLocalizationAvatarIconPrefixEnum];
+
+export const PostApiEntitiesRequestRevisionContextContributionRoleEnum = {
+	creator: "creator",
+	editor: "editor",
+	translator: "translator",
+	researcher: "researcher",
+} as const;
+
+export type PostApiEntitiesRequestRevisionContextContributionRoleEnum =
+	(typeof PostApiEntitiesRequestRevisionContextContributionRoleEnum)[keyof typeof PostApiEntitiesRequestRevisionContextContributionRoleEnum];
 
 /**
  * @type object
@@ -89285,6 +91930,41 @@ export type PostApiEntitiesBody = {
 		bannerAssetId?: (string | null) | null;
 		coverAssetId?: (string | null) | null;
 	};
+	/**
+	 * @type object | undefined
+	 */
+	revisionContext?: {
+		contribution?:
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "human";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "unattributed";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "ai";
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					creditedEntityId: string;
+					/**
+					 * @default 'creator'
+					 * @type string
+					 */
+					role: PostApiEntitiesRequestRevisionContextContributionRoleEnum;
+			  };
+	};
 };
 
 /**
@@ -89359,6 +92039,7 @@ export const GetApiEntitiesByUnitIdStatus200KindEnum = {
 	person: "person",
 	organization: "organization",
 	character: "character",
+	software_agent: "software_agent",
 } as const;
 
 export type GetApiEntitiesByUnitIdStatus200KindEnum =
@@ -90623,10 +93304,40 @@ export type PutApiEntitiesByUnitIdLocalizationsByLanguageStatus200 = {
 	id: string;
 };
 
-/**
- * @type object
- */
-export type PutApiEntitiesByUnitIdLocalizationsByLanguageStatus400 = MalformedRequestBody;
+export const PutApiEntitiesByUnitIdLocalizationsByLanguageStatus400ErrorCodeEnum = {
+	RevisionCreditEntityInvalid: "RevisionCreditEntityInvalid",
+	RevisionContributionActorRequired: "RevisionContributionActorRequired",
+} as const;
+
+export type PutApiEntitiesByUnitIdLocalizationsByLanguageStatus400ErrorCodeEnum =
+	(typeof PutApiEntitiesByUnitIdLocalizationsByLanguageStatus400ErrorCodeEnum)[keyof typeof PutApiEntitiesByUnitIdLocalizationsByLanguageStatus400ErrorCodeEnum];
+
+export type PutApiEntitiesByUnitIdLocalizationsByLanguageStatus400 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'RevisionCreditEntityInvalid'
+				 * @type string
+				 */
+				code: PutApiEntitiesByUnitIdLocalizationsByLanguageStatus400ErrorCodeEnum;
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| MalformedRequestBody;
 
 export const PutApiEntitiesByUnitIdLocalizationsByLanguageStatus403ErrorCodeEnum = {
 	UnitPermissionForbidden: "UnitPermissionForbidden",
@@ -90749,6 +93460,17 @@ export const PutApiEntitiesByUnitIdLocalizationsByLanguageRequestAvatarIconPrefi
 
 export type PutApiEntitiesByUnitIdLocalizationsByLanguageRequestAvatarIconPrefixEnum =
 	(typeof PutApiEntitiesByUnitIdLocalizationsByLanguageRequestAvatarIconPrefixEnum)[keyof typeof PutApiEntitiesByUnitIdLocalizationsByLanguageRequestAvatarIconPrefixEnum];
+
+export const PutApiEntitiesByUnitIdLocalizationsByLanguageRequestRevisionContextContributionRoleEnum =
+	{
+		creator: "creator",
+		editor: "editor",
+		translator: "translator",
+		researcher: "researcher",
+	} as const;
+
+export type PutApiEntitiesByUnitIdLocalizationsByLanguageRequestRevisionContextContributionRoleEnum =
+	(typeof PutApiEntitiesByUnitIdLocalizationsByLanguageRequestRevisionContextContributionRoleEnum)[keyof typeof PutApiEntitiesByUnitIdLocalizationsByLanguageRequestRevisionContextContributionRoleEnum];
 
 /**
  * @type object
@@ -90959,6 +93681,41 @@ export type PutApiEntitiesByUnitIdLocalizationsByLanguageBody = {
 		| null;
 	bannerAssetId?: (string | null) | null;
 	coverAssetId?: (string | null) | null;
+	/**
+	 * @type object | undefined
+	 */
+	revisionContext?: {
+		contribution?:
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "human";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "unattributed";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "ai";
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					creditedEntityId: string;
+					/**
+					 * @default 'creator'
+					 * @type string
+					 */
+					role: PutApiEntitiesByUnitIdLocalizationsByLanguageRequestRevisionContextContributionRoleEnum;
+			  };
+	};
 };
 
 /**
@@ -91105,10 +93862,40 @@ export type PostApiTagsStatus200 = {
 	id: string;
 };
 
-/**
- * @type object
- */
-export type PostApiTagsStatus400 = MalformedRequestBody;
+export const PostApiTagsStatus400ErrorCodeEnum = {
+	RevisionCreditEntityInvalid: "RevisionCreditEntityInvalid",
+	RevisionContributionActorRequired: "RevisionContributionActorRequired",
+} as const;
+
+export type PostApiTagsStatus400ErrorCodeEnum =
+	(typeof PostApiTagsStatus400ErrorCodeEnum)[keyof typeof PostApiTagsStatus400ErrorCodeEnum];
+
+export type PostApiTagsStatus400 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'RevisionCreditEntityInvalid'
+				 * @type string
+				 */
+				code: PostApiTagsStatus400ErrorCodeEnum;
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| MalformedRequestBody;
 
 /**
  * @type object
@@ -91172,6 +93959,16 @@ export const PostApiTagsRequestLocalizationAvatarIconPrefixEnum = {
 
 export type PostApiTagsRequestLocalizationAvatarIconPrefixEnum =
 	(typeof PostApiTagsRequestLocalizationAvatarIconPrefixEnum)[keyof typeof PostApiTagsRequestLocalizationAvatarIconPrefixEnum];
+
+export const PostApiTagsRequestRevisionContextContributionRoleEnum = {
+	creator: "creator",
+	editor: "editor",
+	translator: "translator",
+	researcher: "researcher",
+} as const;
+
+export type PostApiTagsRequestRevisionContextContributionRoleEnum =
+	(typeof PostApiTagsRequestRevisionContextContributionRoleEnum)[keyof typeof PostApiTagsRequestRevisionContextContributionRoleEnum];
 
 /**
  * @type object
@@ -91396,6 +94193,41 @@ export type PostApiTagsBody = {
 			| null;
 		bannerAssetId?: (string | null) | null;
 		coverAssetId?: (string | null) | null;
+	};
+	/**
+	 * @type object | undefined
+	 */
+	revisionContext?: {
+		contribution?:
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "human";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "unattributed";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "ai";
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					creditedEntityId: string;
+					/**
+					 * @default 'creator'
+					 * @type string
+					 */
+					role: PostApiTagsRequestRevisionContextContributionRoleEnum;
+			  };
 	};
 };
 
@@ -91974,10 +94806,40 @@ export type PutApiTagsByTagIdLocalizationsByLanguageStatus200 = {
 	id: string;
 };
 
-/**
- * @type object
- */
-export type PutApiTagsByTagIdLocalizationsByLanguageStatus400 = MalformedRequestBody;
+export const PutApiTagsByTagIdLocalizationsByLanguageStatus400ErrorCodeEnum = {
+	RevisionCreditEntityInvalid: "RevisionCreditEntityInvalid",
+	RevisionContributionActorRequired: "RevisionContributionActorRequired",
+} as const;
+
+export type PutApiTagsByTagIdLocalizationsByLanguageStatus400ErrorCodeEnum =
+	(typeof PutApiTagsByTagIdLocalizationsByLanguageStatus400ErrorCodeEnum)[keyof typeof PutApiTagsByTagIdLocalizationsByLanguageStatus400ErrorCodeEnum];
+
+export type PutApiTagsByTagIdLocalizationsByLanguageStatus400 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'RevisionCreditEntityInvalid'
+				 * @type string
+				 */
+				code: PutApiTagsByTagIdLocalizationsByLanguageStatus400ErrorCodeEnum;
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| MalformedRequestBody;
 
 export const PutApiTagsByTagIdLocalizationsByLanguageStatus403ErrorCodeEnum = {
 	UnitPermissionForbidden: "UnitPermissionForbidden",
@@ -92100,6 +94962,16 @@ export const PutApiTagsByTagIdLocalizationsByLanguageRequestAvatarIconPrefixEnum
 
 export type PutApiTagsByTagIdLocalizationsByLanguageRequestAvatarIconPrefixEnum =
 	(typeof PutApiTagsByTagIdLocalizationsByLanguageRequestAvatarIconPrefixEnum)[keyof typeof PutApiTagsByTagIdLocalizationsByLanguageRequestAvatarIconPrefixEnum];
+
+export const PutApiTagsByTagIdLocalizationsByLanguageRequestRevisionContextContributionRoleEnum = {
+	creator: "creator",
+	editor: "editor",
+	translator: "translator",
+	researcher: "researcher",
+} as const;
+
+export type PutApiTagsByTagIdLocalizationsByLanguageRequestRevisionContextContributionRoleEnum =
+	(typeof PutApiTagsByTagIdLocalizationsByLanguageRequestRevisionContextContributionRoleEnum)[keyof typeof PutApiTagsByTagIdLocalizationsByLanguageRequestRevisionContextContributionRoleEnum];
 
 /**
  * @type object
@@ -92310,6 +95182,41 @@ export type PutApiTagsByTagIdLocalizationsByLanguageBody = {
 		| null;
 	bannerAssetId?: (string | null) | null;
 	coverAssetId?: (string | null) | null;
+	/**
+	 * @type object | undefined
+	 */
+	revisionContext?: {
+		contribution?:
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "human";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "unattributed";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "ai";
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					creditedEntityId: string;
+					/**
+					 * @default 'creator'
+					 * @type string
+					 */
+					role: PutApiTagsByTagIdLocalizationsByLanguageRequestRevisionContextContributionRoleEnum;
+			  };
+	};
 };
 
 /**
@@ -94132,6 +97039,15 @@ export type PostApiUnitsByTypeByUnitIdCreditAttributionsStatus200 = {
 	};
 };
 
+export const PostApiUnitsByTypeByUnitIdCreditAttributionsStatus400ErrorCodeEnum = {
+	CreditAttributionRoleInvalid: "CreditAttributionRoleInvalid",
+	RevisionCreditEntityInvalid: "RevisionCreditEntityInvalid",
+	RevisionContributionActorRequired: "RevisionContributionActorRequired",
+} as const;
+
+export type PostApiUnitsByTypeByUnitIdCreditAttributionsStatus400ErrorCodeEnum =
+	(typeof PostApiUnitsByTypeByUnitIdCreditAttributionsStatus400ErrorCodeEnum)[keyof typeof PostApiUnitsByTypeByUnitIdCreditAttributionsStatus400ErrorCodeEnum];
+
 export type PostApiUnitsByTypeByUnitIdCreditAttributionsStatus400 =
 	| {
 			/**
@@ -94142,7 +97058,7 @@ export type PostApiUnitsByTypeByUnitIdCreditAttributionsStatus400 =
 				 * @default 'CreditAttributionRoleInvalid'
 				 * @type string
 				 */
-				code: "CreditAttributionRoleInvalid";
+				code: PostApiUnitsByTypeByUnitIdCreditAttributionsStatus400ErrorCodeEnum;
 				/**
 				 * @type string
 				 */
@@ -94297,6 +97213,17 @@ export const PostApiUnitsByTypeByUnitIdCreditAttributionsRequestRoleEnum = {
 export type PostApiUnitsByTypeByUnitIdCreditAttributionsRequestRoleEnum =
 	(typeof PostApiUnitsByTypeByUnitIdCreditAttributionsRequestRoleEnum)[keyof typeof PostApiUnitsByTypeByUnitIdCreditAttributionsRequestRoleEnum];
 
+export const PostApiUnitsByTypeByUnitIdCreditAttributionsRequestRevisionContextContributionRoleEnum =
+	{
+		creator: "creator",
+		editor: "editor",
+		translator: "translator",
+		researcher: "researcher",
+	} as const;
+
+export type PostApiUnitsByTypeByUnitIdCreditAttributionsRequestRevisionContextContributionRoleEnum =
+	(typeof PostApiUnitsByTypeByUnitIdCreditAttributionsRequestRevisionContextContributionRoleEnum)[keyof typeof PostApiUnitsByTypeByUnitIdCreditAttributionsRequestRevisionContextContributionRoleEnum];
+
 /**
  * @type object
  */
@@ -94320,6 +97247,41 @@ export type PostApiUnitsByTypeByUnitIdCreditAttributionsBody = {
 	 * @type string | undefined
 	 */
 	position?: string;
+	/**
+	 * @type object | undefined
+	 */
+	revisionContext?: {
+		contribution?:
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "human";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "unattributed";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "ai";
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					creditedEntityId: string;
+					/**
+					 * @default 'creator'
+					 * @type string
+					 */
+					role: PostApiUnitsByTypeByUnitIdCreditAttributionsRequestRevisionContextContributionRoleEnum;
+			  };
+	};
 };
 
 /**
@@ -94380,6 +97342,41 @@ export type DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdPath = 
  * @type void
  */
 export type DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus204 = void;
+
+export const DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus400ErrorCodeEnum = {
+	RevisionCreditEntityInvalid: "RevisionCreditEntityInvalid",
+	RevisionContributionActorRequired: "RevisionContributionActorRequired",
+} as const;
+
+export type DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus400ErrorCodeEnum =
+	(typeof DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus400ErrorCodeEnum)[keyof typeof DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus400ErrorCodeEnum];
+
+export type DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus400 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'RevisionCreditEntityInvalid'
+				 * @type string
+				 */
+				code: DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus400ErrorCodeEnum;
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| MalformedRequestBody;
 
 export const DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus403ErrorCodeEnum = {
 	UnitPermissionForbidden: "UnitPermissionForbidden",
@@ -94496,11 +97493,63 @@ export type DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus4
  */
 export type DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus500 = InternalError;
 
+export const DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdRequestRevisionContextContributionRoleEnum =
+	{
+		creator: "creator",
+		editor: "editor",
+		translator: "translator",
+		researcher: "researcher",
+	} as const;
+
+export type DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdRequestRevisionContextContributionRoleEnum =
+	(typeof DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdRequestRevisionContextContributionRoleEnum)[keyof typeof DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdRequestRevisionContextContributionRoleEnum];
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdBody = {
+	/**
+	 * @type object | undefined
+	 */
+	revisionContext?: {
+		contribution?:
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "human";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "unattributed";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "ai";
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					creditedEntityId: string;
+					/**
+					 * @default 'creator'
+					 * @type string
+					 */
+					role: DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdRequestRevisionContextContributionRoleEnum;
+			  };
+	};
+};
+
 /**
  * @type object
  */
 export type DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdOptions = {
-	body?: never;
+	body: DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdBody;
 	path: DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdPath;
 	query?: never;
 	headers?: never;
@@ -94511,6 +97560,7 @@ export type DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdOptions
  */
 export type DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdResponses = {
 	"204": DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus204;
+	"400": DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus400;
 	"403": DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus403;
 	"404": DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus404;
 	"422": DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus422;
@@ -94523,6 +97573,7 @@ export type DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdRespons
  */
 export type DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdResponse =
 	| DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus204
+	| DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus400
 	| DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus403
 	| DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus404
 	| DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus422
@@ -94606,6 +97657,15 @@ export type PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus200 = {
 	updatedAt: string;
 };
 
+export const PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus400ErrorCodeEnum = {
+	AssociationContextPostInvalid: "AssociationContextPostInvalid",
+	RevisionCreditEntityInvalid: "RevisionCreditEntityInvalid",
+	RevisionContributionActorRequired: "RevisionContributionActorRequired",
+} as const;
+
+export type PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus400ErrorCodeEnum =
+	(typeof PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus400ErrorCodeEnum)[keyof typeof PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus400ErrorCodeEnum];
+
 export type PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus400 =
 	| {
 			/**
@@ -94616,7 +97676,7 @@ export type PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus400 =
 				 * @default 'AssociationContextPostInvalid'
 				 * @type string
 				 */
-				code: "AssociationContextPostInvalid";
+				code: PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus400ErrorCodeEnum;
 				/**
 				 * @type string
 				 */
@@ -94761,6 +97821,17 @@ export const PostApiUnitsByTypeByUnitIdSubjectAssociationsRequestRoleEnum = {
 export type PostApiUnitsByTypeByUnitIdSubjectAssociationsRequestRoleEnum =
 	(typeof PostApiUnitsByTypeByUnitIdSubjectAssociationsRequestRoleEnum)[keyof typeof PostApiUnitsByTypeByUnitIdSubjectAssociationsRequestRoleEnum];
 
+export const PostApiUnitsByTypeByUnitIdSubjectAssociationsRequestRevisionContextContributionRoleEnum =
+	{
+		creator: "creator",
+		editor: "editor",
+		translator: "translator",
+		researcher: "researcher",
+	} as const;
+
+export type PostApiUnitsByTypeByUnitIdSubjectAssociationsRequestRevisionContextContributionRoleEnum =
+	(typeof PostApiUnitsByTypeByUnitIdSubjectAssociationsRequestRevisionContextContributionRoleEnum)[keyof typeof PostApiUnitsByTypeByUnitIdSubjectAssociationsRequestRevisionContextContributionRoleEnum];
+
 /**
  * @type object
  */
@@ -94790,6 +97861,41 @@ export type PostApiUnitsByTypeByUnitIdSubjectAssociationsBody = {
 	 * @type string | undefined
 	 */
 	position?: string;
+	/**
+	 * @type object | undefined
+	 */
+	revisionContext?: {
+		contribution?:
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "human";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "unattributed";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "ai";
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					creditedEntityId: string;
+					/**
+					 * @default 'creator'
+					 * @type string
+					 */
+					role: PostApiUnitsByTypeByUnitIdSubjectAssociationsRequestRevisionContextContributionRoleEnum;
+			  };
+	};
 };
 
 /**
@@ -94850,6 +97956,42 @@ export type DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdPath =
  * @type void
  */
 export type DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus204 = void;
+
+export const DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus400ErrorCodeEnum =
+	{
+		RevisionCreditEntityInvalid: "RevisionCreditEntityInvalid",
+		RevisionContributionActorRequired: "RevisionContributionActorRequired",
+	} as const;
+
+export type DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus400ErrorCodeEnum =
+	(typeof DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus400ErrorCodeEnum)[keyof typeof DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus400ErrorCodeEnum];
+
+export type DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus400 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'RevisionCreditEntityInvalid'
+				 * @type string
+				 */
+				code: DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus400ErrorCodeEnum;
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| MalformedRequestBody;
 
 export const DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus403ErrorCodeEnum =
 	{
@@ -94969,11 +98111,63 @@ export type DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus
  */
 export type DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus500 = InternalError;
 
+export const DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdRequestRevisionContextContributionRoleEnum =
+	{
+		creator: "creator",
+		editor: "editor",
+		translator: "translator",
+		researcher: "researcher",
+	} as const;
+
+export type DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdRequestRevisionContextContributionRoleEnum =
+	(typeof DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdRequestRevisionContextContributionRoleEnum)[keyof typeof DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdRequestRevisionContextContributionRoleEnum];
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdBody = {
+	/**
+	 * @type object | undefined
+	 */
+	revisionContext?: {
+		contribution?:
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "human";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "unattributed";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "ai";
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					creditedEntityId: string;
+					/**
+					 * @default 'creator'
+					 * @type string
+					 */
+					role: DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdRequestRevisionContextContributionRoleEnum;
+			  };
+	};
+};
+
 /**
  * @type object
  */
 export type DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdOptions = {
-	body?: never;
+	body: DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdBody;
 	path: DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdPath;
 	query?: never;
 	headers?: never;
@@ -94984,6 +98178,7 @@ export type DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdOption
  */
 export type DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdResponses = {
 	"204": DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus204;
+	"400": DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus400;
 	"403": DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus403;
 	"404": DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus404;
 	"422": DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus422;
@@ -94996,6 +98191,7 @@ export type DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdRespon
  */
 export type DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdResponse =
 	| DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus204
+	| DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus400
 	| DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus403
 	| DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus404
 	| DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus422
@@ -97023,10 +100219,40 @@ export type PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus200 = {
 	updatedAt: string;
 };
 
-/**
- * @type object
- */
-export type PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus400 = MalformedRequestBody;
+export const PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus400ErrorCodeEnum = {
+	RevisionCreditEntityInvalid: "RevisionCreditEntityInvalid",
+	RevisionContributionActorRequired: "RevisionContributionActorRequired",
+} as const;
+
+export type PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus400ErrorCodeEnum =
+	(typeof PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus400ErrorCodeEnum)[keyof typeof PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus400ErrorCodeEnum];
+
+export type PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus400 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'RevisionCreditEntityInvalid'
+				 * @type string
+				 */
+				code: PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus400ErrorCodeEnum;
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| MalformedRequestBody;
 
 export const PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus403ErrorCodeEnum = {
 	UnitPermissionForbidden: "UnitPermissionForbidden",
@@ -97170,6 +100396,16 @@ export type PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus429 = {
  */
 export type PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus500 = InternalError;
 
+export const PatchApiUnitsByTypeByUnitIdTagsByTagIdRequestRevisionContextContributionRoleEnum = {
+	creator: "creator",
+	editor: "editor",
+	translator: "translator",
+	researcher: "researcher",
+} as const;
+
+export type PatchApiUnitsByTypeByUnitIdTagsByTagIdRequestRevisionContextContributionRoleEnum =
+	(typeof PatchApiUnitsByTypeByUnitIdTagsByTagIdRequestRevisionContextContributionRoleEnum)[keyof typeof PatchApiUnitsByTypeByUnitIdTagsByTagIdRequestRevisionContextContributionRoleEnum];
+
 export type PatchApiUnitsByTypeByUnitIdTagsByTagIdBody =
 	| {
 			/**
@@ -97194,6 +100430,41 @@ export type PatchApiUnitsByTypeByUnitIdTagsByTagIdBody =
 			 * @type array
 			 */
 			expectedFeaturedTagIds: string[];
+			/**
+			 * @type object | undefined
+			 */
+			revisionContext?: {
+				contribution?:
+					| {
+							/**
+							 * @type string
+							 */
+							primary: "human";
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							primary: "unattributed";
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							primary: "ai";
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							creditedEntityId: string;
+							/**
+							 * @default 'creator'
+							 * @type string
+							 */
+							role: PatchApiUnitsByTypeByUnitIdTagsByTagIdRequestRevisionContextContributionRoleEnum;
+					  };
+			};
 	  }
 	| {
 			/**
@@ -97214,6 +100485,41 @@ export type PatchApiUnitsByTypeByUnitIdTagsByTagIdBody =
 			 * @type array
 			 */
 			expectedFeaturedTagIds: string[];
+			/**
+			 * @type object | undefined
+			 */
+			revisionContext?: {
+				contribution?:
+					| {
+							/**
+							 * @type string
+							 */
+							primary: "human";
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							primary: "unattributed";
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							primary: "ai";
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							creditedEntityId: string;
+							/**
+							 * @default 'creator'
+							 * @type string
+							 */
+							role: PatchApiUnitsByTypeByUnitIdTagsByTagIdRequestRevisionContextContributionRoleEnum;
+					  };
+			};
 	  };
 
 /**
@@ -97276,6 +100582,41 @@ export type DeleteApiUnitsByTypeByUnitIdTagsByTagIdPath = {
  * @type void
  */
 export type DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus204 = void;
+
+export const DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus400ErrorCodeEnum = {
+	RevisionCreditEntityInvalid: "RevisionCreditEntityInvalid",
+	RevisionContributionActorRequired: "RevisionContributionActorRequired",
+} as const;
+
+export type DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus400ErrorCodeEnum =
+	(typeof DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus400ErrorCodeEnum)[keyof typeof DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus400ErrorCodeEnum];
+
+export type DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus400 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'RevisionCreditEntityInvalid'
+				 * @type string
+				 */
+				code: DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus400ErrorCodeEnum;
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| MalformedRequestBody;
 
 export const DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus403ErrorCodeEnum = {
 	UnitPermissionForbidden: "UnitPermissionForbidden",
@@ -97391,11 +100732,62 @@ export type DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus429 = {
  */
 export type DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus500 = InternalError;
 
+export const DeleteApiUnitsByTypeByUnitIdTagsByTagIdRequestRevisionContextContributionRoleEnum = {
+	creator: "creator",
+	editor: "editor",
+	translator: "translator",
+	researcher: "researcher",
+} as const;
+
+export type DeleteApiUnitsByTypeByUnitIdTagsByTagIdRequestRevisionContextContributionRoleEnum =
+	(typeof DeleteApiUnitsByTypeByUnitIdTagsByTagIdRequestRevisionContextContributionRoleEnum)[keyof typeof DeleteApiUnitsByTypeByUnitIdTagsByTagIdRequestRevisionContextContributionRoleEnum];
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitsByTypeByUnitIdTagsByTagIdBody = {
+	/**
+	 * @type object | undefined
+	 */
+	revisionContext?: {
+		contribution?:
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "human";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "unattributed";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "ai";
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					creditedEntityId: string;
+					/**
+					 * @default 'creator'
+					 * @type string
+					 */
+					role: DeleteApiUnitsByTypeByUnitIdTagsByTagIdRequestRevisionContextContributionRoleEnum;
+			  };
+	};
+};
+
 /**
  * @type object
  */
 export type DeleteApiUnitsByTypeByUnitIdTagsByTagIdOptions = {
-	body?: never;
+	body: DeleteApiUnitsByTypeByUnitIdTagsByTagIdBody;
 	path: DeleteApiUnitsByTypeByUnitIdTagsByTagIdPath;
 	query?: never;
 	headers?: never;
@@ -97406,6 +100798,7 @@ export type DeleteApiUnitsByTypeByUnitIdTagsByTagIdOptions = {
  */
 export type DeleteApiUnitsByTypeByUnitIdTagsByTagIdResponses = {
 	"204": DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus204;
+	"400": DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus400;
 	"403": DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus403;
 	"404": DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus404;
 	"422": DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus422;
@@ -97418,6 +100811,7 @@ export type DeleteApiUnitsByTypeByUnitIdTagsByTagIdResponses = {
  */
 export type DeleteApiUnitsByTypeByUnitIdTagsByTagIdResponse =
 	| DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus204
+	| DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus400
 	| DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus403
 	| DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus404
 	| DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus422
@@ -99825,11 +103219,40 @@ export type PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus200
 	revisionCreated: boolean;
 };
 
-/**
- * @type object
- */
+export const PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus400ErrorCodeEnum = {
+	RevisionCreditEntityInvalid: "RevisionCreditEntityInvalid",
+	RevisionContributionActorRequired: "RevisionContributionActorRequired",
+} as const;
+
+export type PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus400ErrorCodeEnum =
+	(typeof PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus400ErrorCodeEnum)[keyof typeof PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus400ErrorCodeEnum];
+
 export type PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus400 =
-	MalformedRequestBody;
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'RevisionCreditEntityInvalid'
+				 * @type string
+				 */
+				code: PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus400ErrorCodeEnum;
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| MalformedRequestBody;
 
 export const PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus403ErrorCodeEnum = {
 	RealmCapabilityRequired: "RealmCapabilityRequired",
@@ -99998,6 +103421,17 @@ export const PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesRequestR
 export type PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesRequestRealmTagQueryStrategyEnum =
 	(typeof PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesRequestRealmTagQueryStrategyEnum)[keyof typeof PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesRequestRealmTagQueryStrategyEnum];
 
+export const PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesRequestRevisionContextContributionRoleEnum =
+	{
+		creator: "creator",
+		editor: "editor",
+		translator: "translator",
+		researcher: "researcher",
+	} as const;
+
+export type PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesRequestRevisionContextContributionRoleEnum =
+	(typeof PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesRequestRevisionContextContributionRoleEnum)[keyof typeof PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesRequestRevisionContextContributionRoleEnum];
+
 /**
  * @type object
  */
@@ -100104,6 +103538,41 @@ export type PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBody = {
 	 * @type string | undefined
 	 */
 	realmTagQueryStrategy?: PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesRequestRealmTagQueryStrategyEnum;
+	/**
+	 * @type object | undefined
+	 */
+	revisionContext?: {
+		contribution?:
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "human";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "unattributed";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "ai";
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					creditedEntityId: string;
+					/**
+					 * @default 'creator'
+					 * @type string
+					 */
+					role: PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesRequestRevisionContextContributionRoleEnum;
+			  };
+	};
 };
 
 /**
@@ -101078,10 +104547,40 @@ export type PutApiUnitsBookByUnitIdContentStructureStatus200 = {
 	}[];
 };
 
-/**
- * @type object
- */
-export type PutApiUnitsBookByUnitIdContentStructureStatus400 = MalformedRequestBody;
+export const PutApiUnitsBookByUnitIdContentStructureStatus400ErrorCodeEnum = {
+	RevisionCreditEntityInvalid: "RevisionCreditEntityInvalid",
+	RevisionContributionActorRequired: "RevisionContributionActorRequired",
+} as const;
+
+export type PutApiUnitsBookByUnitIdContentStructureStatus400ErrorCodeEnum =
+	(typeof PutApiUnitsBookByUnitIdContentStructureStatus400ErrorCodeEnum)[keyof typeof PutApiUnitsBookByUnitIdContentStructureStatus400ErrorCodeEnum];
+
+export type PutApiUnitsBookByUnitIdContentStructureStatus400 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'RevisionCreditEntityInvalid'
+				 * @type string
+				 */
+				code: PutApiUnitsBookByUnitIdContentStructureStatus400ErrorCodeEnum;
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| MalformedRequestBody;
 
 /**
  * @type object
@@ -101240,6 +104739,16 @@ export type PutApiUnitsBookByUnitIdContentStructureStatus429 = {
  */
 export type PutApiUnitsBookByUnitIdContentStructureStatus500 = InternalError;
 
+export const PutApiUnitsBookByUnitIdContentStructureRequestRevisionContextContributionRoleEnum = {
+	creator: "creator",
+	editor: "editor",
+	translator: "translator",
+	researcher: "researcher",
+} as const;
+
+export type PutApiUnitsBookByUnitIdContentStructureRequestRevisionContextContributionRoleEnum =
+	(typeof PutApiUnitsBookByUnitIdContentStructureRequestRevisionContextContributionRoleEnum)[keyof typeof PutApiUnitsBookByUnitIdContentStructureRequestRevisionContextContributionRoleEnum];
+
 export const PutApiUnitsBookByUnitIdContentStructureRequestNodesLanguageEnum = {
 	zh: "zh",
 	en: "en",
@@ -101271,6 +104780,41 @@ export type PutApiUnitsBookByUnitIdContentStructureBody = {
 	 * @type string
 	 */
 	baseRevisionId: string;
+	/**
+	 * @type object | undefined
+	 */
+	revisionContext?: {
+		contribution?:
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "human";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "unattributed";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "ai";
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					creditedEntityId: string;
+					/**
+					 * @default 'creator'
+					 * @type string
+					 */
+					role: PutApiUnitsBookByUnitIdContentStructureRequestRevisionContextContributionRoleEnum;
+			  };
+	};
 	/**
 	 * @type array
 	 */
@@ -101840,10 +105384,40 @@ export type PutApiUnitsMediaByUnitIdContentStructureStatus200 = {
 	}[];
 };
 
-/**
- * @type object
- */
-export type PutApiUnitsMediaByUnitIdContentStructureStatus400 = MalformedRequestBody;
+export const PutApiUnitsMediaByUnitIdContentStructureStatus400ErrorCodeEnum = {
+	RevisionCreditEntityInvalid: "RevisionCreditEntityInvalid",
+	RevisionContributionActorRequired: "RevisionContributionActorRequired",
+} as const;
+
+export type PutApiUnitsMediaByUnitIdContentStructureStatus400ErrorCodeEnum =
+	(typeof PutApiUnitsMediaByUnitIdContentStructureStatus400ErrorCodeEnum)[keyof typeof PutApiUnitsMediaByUnitIdContentStructureStatus400ErrorCodeEnum];
+
+export type PutApiUnitsMediaByUnitIdContentStructureStatus400 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'RevisionCreditEntityInvalid'
+				 * @type string
+				 */
+				code: PutApiUnitsMediaByUnitIdContentStructureStatus400ErrorCodeEnum;
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| MalformedRequestBody;
 
 /**
  * @type object
@@ -101993,6 +105567,16 @@ export type PutApiUnitsMediaByUnitIdContentStructureStatus429 = {
  */
 export type PutApiUnitsMediaByUnitIdContentStructureStatus500 = InternalError;
 
+export const PutApiUnitsMediaByUnitIdContentStructureRequestRevisionContextContributionRoleEnum = {
+	creator: "creator",
+	editor: "editor",
+	translator: "translator",
+	researcher: "researcher",
+} as const;
+
+export type PutApiUnitsMediaByUnitIdContentStructureRequestRevisionContextContributionRoleEnum =
+	(typeof PutApiUnitsMediaByUnitIdContentStructureRequestRevisionContextContributionRoleEnum)[keyof typeof PutApiUnitsMediaByUnitIdContentStructureRequestRevisionContextContributionRoleEnum];
+
 export const PutApiUnitsMediaByUnitIdContentStructureRequestNodesLanguageEnum = {
 	zh: "zh",
 	en: "en",
@@ -102038,6 +105622,41 @@ export type PutApiUnitsMediaByUnitIdContentStructureBody = {
 				 */
 				revisionId: string;
 		  };
+	/**
+	 * @type object | undefined
+	 */
+	revisionContext?: {
+		contribution?:
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "human";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "unattributed";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "ai";
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					creditedEntityId: string;
+					/**
+					 * @default 'creator'
+					 * @type string
+					 */
+					role: PutApiUnitsMediaByUnitIdContentStructureRequestRevisionContextContributionRoleEnum;
+			  };
+	};
 	/**
 	 * @type array
 	 */
@@ -102540,10 +106159,40 @@ export type PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus200 = {
 	updated: boolean;
 };
 
-/**
- * @type object
- */
-export type PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus400 = MalformedRequestBody;
+export const PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus400ErrorCodeEnum = {
+	RevisionCreditEntityInvalid: "RevisionCreditEntityInvalid",
+	RevisionContributionActorRequired: "RevisionContributionActorRequired",
+} as const;
+
+export type PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus400ErrorCodeEnum =
+	(typeof PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus400ErrorCodeEnum)[keyof typeof PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus400ErrorCodeEnum];
+
+export type PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus400 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'RevisionCreditEntityInvalid'
+				 * @type string
+				 */
+				code: PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus400ErrorCodeEnum;
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| MalformedRequestBody;
 
 /**
  * @type object
@@ -102679,6 +106328,17 @@ export const PutApiChaptersByChapterIdLocalizationsByLanguageContentRequestStatu
 
 export type PutApiChaptersByChapterIdLocalizationsByLanguageContentRequestStatusEnum =
 	(typeof PutApiChaptersByChapterIdLocalizationsByLanguageContentRequestStatusEnum)[keyof typeof PutApiChaptersByChapterIdLocalizationsByLanguageContentRequestStatusEnum];
+
+export const PutApiChaptersByChapterIdLocalizationsByLanguageContentRequestRevisionContextContributionRoleEnum =
+	{
+		creator: "creator",
+		editor: "editor",
+		translator: "translator",
+		researcher: "researcher",
+	} as const;
+
+export type PutApiChaptersByChapterIdLocalizationsByLanguageContentRequestRevisionContextContributionRoleEnum =
+	(typeof PutApiChaptersByChapterIdLocalizationsByLanguageContentRequestRevisionContextContributionRoleEnum)[keyof typeof PutApiChaptersByChapterIdLocalizationsByLanguageContentRequestRevisionContextContributionRoleEnum];
 
 /**
  * @type object
@@ -102824,6 +106484,41 @@ export type PutApiChaptersByChapterIdLocalizationsByLanguageContentBody = {
 	 * @type string
 	 */
 	status: PutApiChaptersByChapterIdLocalizationsByLanguageContentRequestStatusEnum;
+	/**
+	 * @type object | undefined
+	 */
+	revisionContext?: {
+		contribution?:
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "human";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "unattributed";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "ai";
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					creditedEntityId: string;
+					/**
+					 * @default 'creator'
+					 * @type string
+					 */
+					role: PutApiChaptersByChapterIdLocalizationsByLanguageContentRequestRevisionContextContributionRoleEnum;
+			  };
+	};
 };
 
 /**
@@ -110281,10 +113976,40 @@ export type PostApiCollectionsStatus200 = {
 	};
 };
 
-/**
- * @type object
- */
-export type PostApiCollectionsStatus400 = MalformedRequestBody;
+export const PostApiCollectionsStatus400ErrorCodeEnum = {
+	RevisionCreditEntityInvalid: "RevisionCreditEntityInvalid",
+	RevisionContributionActorRequired: "RevisionContributionActorRequired",
+} as const;
+
+export type PostApiCollectionsStatus400ErrorCodeEnum =
+	(typeof PostApiCollectionsStatus400ErrorCodeEnum)[keyof typeof PostApiCollectionsStatus400ErrorCodeEnum];
+
+export type PostApiCollectionsStatus400 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'RevisionCreditEntityInvalid'
+				 * @type string
+				 */
+				code: PostApiCollectionsStatus400ErrorCodeEnum;
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| MalformedRequestBody;
 
 export const PostApiCollectionsStatus404ErrorCodeEnum = {
 	CollectionNotFound: "CollectionNotFound",
@@ -110393,6 +114118,16 @@ export const PostApiCollectionsRequestVisibilityEnum = {
 
 export type PostApiCollectionsRequestVisibilityEnum =
 	(typeof PostApiCollectionsRequestVisibilityEnum)[keyof typeof PostApiCollectionsRequestVisibilityEnum];
+
+export const PostApiCollectionsRequestRevisionContextContributionRoleEnum = {
+	creator: "creator",
+	editor: "editor",
+	translator: "translator",
+	researcher: "researcher",
+} as const;
+
+export type PostApiCollectionsRequestRevisionContextContributionRoleEnum =
+	(typeof PostApiCollectionsRequestRevisionContextContributionRoleEnum)[keyof typeof PostApiCollectionsRequestRevisionContextContributionRoleEnum];
 
 /**
  * @type object
@@ -110616,6 +114351,41 @@ export type PostApiCollectionsBody = {
 	 * @type string | undefined
 	 */
 	visibility?: PostApiCollectionsRequestVisibilityEnum;
+	/**
+	 * @type object | undefined
+	 */
+	revisionContext?: {
+		contribution?:
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "human";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "unattributed";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "ai";
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					creditedEntityId: string;
+					/**
+					 * @default 'creator'
+					 * @type string
+					 */
+					role: PostApiCollectionsRequestRevisionContextContributionRoleEnum;
+			  };
+	};
 };
 
 /**
@@ -115348,10 +119118,40 @@ export type PatchApiCollectionsByCollectionIdStatus200 = {
 	};
 };
 
-/**
- * @type object
- */
-export type PatchApiCollectionsByCollectionIdStatus400 = MalformedRequestBody;
+export const PatchApiCollectionsByCollectionIdStatus400ErrorCodeEnum = {
+	RevisionCreditEntityInvalid: "RevisionCreditEntityInvalid",
+	RevisionContributionActorRequired: "RevisionContributionActorRequired",
+} as const;
+
+export type PatchApiCollectionsByCollectionIdStatus400ErrorCodeEnum =
+	(typeof PatchApiCollectionsByCollectionIdStatus400ErrorCodeEnum)[keyof typeof PatchApiCollectionsByCollectionIdStatus400ErrorCodeEnum];
+
+export type PatchApiCollectionsByCollectionIdStatus400 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'RevisionCreditEntityInvalid'
+				 * @type string
+				 */
+				code: PatchApiCollectionsByCollectionIdStatus400ErrorCodeEnum;
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| MalformedRequestBody;
 
 export const PatchApiCollectionsByCollectionIdStatus403ErrorCodeEnum = {
 	UnitPermissionForbidden: "UnitPermissionForbidden",
@@ -115555,6 +119355,16 @@ export const PatchApiCollectionsByCollectionIdRequestLocalizationAvatarIconPrefi
 
 export type PatchApiCollectionsByCollectionIdRequestLocalizationAvatarIconPrefixEnum =
 	(typeof PatchApiCollectionsByCollectionIdRequestLocalizationAvatarIconPrefixEnum)[keyof typeof PatchApiCollectionsByCollectionIdRequestLocalizationAvatarIconPrefixEnum];
+
+export const PatchApiCollectionsByCollectionIdRequestRevisionContextContributionRoleEnum = {
+	creator: "creator",
+	editor: "editor",
+	translator: "translator",
+	researcher: "researcher",
+} as const;
+
+export type PatchApiCollectionsByCollectionIdRequestRevisionContextContributionRoleEnum =
+	(typeof PatchApiCollectionsByCollectionIdRequestRevisionContextContributionRoleEnum)[keyof typeof PatchApiCollectionsByCollectionIdRequestRevisionContextContributionRoleEnum];
 
 /**
  * @type object
@@ -115787,6 +119597,41 @@ export type PatchApiCollectionsByCollectionIdBody = {
 			| null;
 		bannerAssetId?: (string | null) | null;
 		coverAssetId?: (string | null) | null;
+	};
+	/**
+	 * @type object | undefined
+	 */
+	revisionContext?: {
+		contribution?:
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "human";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "unattributed";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "ai";
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					creditedEntityId: string;
+					/**
+					 * @default 'creator'
+					 * @type string
+					 */
+					role: PatchApiCollectionsByCollectionIdRequestRevisionContextContributionRoleEnum;
+			  };
 	};
 };
 
@@ -119284,10 +123129,40 @@ export type PostApiReviewsStatus200 = {
 	id: string;
 };
 
-/**
- * @type object
- */
-export type PostApiReviewsStatus400 = MalformedRequestBody;
+export const PostApiReviewsStatus400ErrorCodeEnum = {
+	RevisionCreditEntityInvalid: "RevisionCreditEntityInvalid",
+	RevisionContributionActorRequired: "RevisionContributionActorRequired",
+} as const;
+
+export type PostApiReviewsStatus400ErrorCodeEnum =
+	(typeof PostApiReviewsStatus400ErrorCodeEnum)[keyof typeof PostApiReviewsStatus400ErrorCodeEnum];
+
+export type PostApiReviewsStatus400 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'RevisionCreditEntityInvalid'
+				 * @type string
+				 */
+				code: PostApiReviewsStatus400ErrorCodeEnum;
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| MalformedRequestBody;
 
 export const PostApiReviewsStatus403ErrorCodeEnum = {
 	RealmCapabilityRequired: "RealmCapabilityRequired",
@@ -119474,6 +123349,16 @@ export const PostApiReviewsRequestLanguageEnum = {
 export type PostApiReviewsRequestLanguageEnum =
 	(typeof PostApiReviewsRequestLanguageEnum)[keyof typeof PostApiReviewsRequestLanguageEnum];
 
+export const PostApiReviewsRequestRevisionContextContributionRoleEnum = {
+	creator: "creator",
+	editor: "editor",
+	translator: "translator",
+	researcher: "researcher",
+} as const;
+
+export type PostApiReviewsRequestRevisionContextContributionRoleEnum =
+	(typeof PostApiReviewsRequestRevisionContextContributionRoleEnum)[keyof typeof PostApiReviewsRequestRevisionContextContributionRoleEnum];
+
 /**
  * @type object
  */
@@ -119651,6 +123536,41 @@ export type PostApiReviewsBody = {
 					[key: string]: unknown;
 			  }
 		)[];
+	};
+	/**
+	 * @type object | undefined
+	 */
+	revisionContext?: {
+		contribution?:
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "human";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "unattributed";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "ai";
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					creditedEntityId: string;
+					/**
+					 * @default 'creator'
+					 * @type string
+					 */
+					role: PostApiReviewsRequestRevisionContextContributionRoleEnum;
+			  };
 	};
 };
 
@@ -120393,10 +124313,40 @@ export type PatchApiReviewsByReviewIdStatus200 = {
 	id: string;
 };
 
-/**
- * @type object
- */
-export type PatchApiReviewsByReviewIdStatus400 = MalformedRequestBody;
+export const PatchApiReviewsByReviewIdStatus400ErrorCodeEnum = {
+	RevisionCreditEntityInvalid: "RevisionCreditEntityInvalid",
+	RevisionContributionActorRequired: "RevisionContributionActorRequired",
+} as const;
+
+export type PatchApiReviewsByReviewIdStatus400ErrorCodeEnum =
+	(typeof PatchApiReviewsByReviewIdStatus400ErrorCodeEnum)[keyof typeof PatchApiReviewsByReviewIdStatus400ErrorCodeEnum];
+
+export type PatchApiReviewsByReviewIdStatus400 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'RevisionCreditEntityInvalid'
+				 * @type string
+				 */
+				code: PatchApiReviewsByReviewIdStatus400ErrorCodeEnum;
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| MalformedRequestBody;
 
 /**
  * @type object
@@ -120537,6 +124487,16 @@ export const PatchApiReviewsByReviewIdRequestLanguageEnum = {
 export type PatchApiReviewsByReviewIdRequestLanguageEnum =
 	(typeof PatchApiReviewsByReviewIdRequestLanguageEnum)[keyof typeof PatchApiReviewsByReviewIdRequestLanguageEnum];
 
+export const PatchApiReviewsByReviewIdRequestRevisionContextContributionRoleEnum = {
+	creator: "creator",
+	editor: "editor",
+	translator: "translator",
+	researcher: "researcher",
+} as const;
+
+export type PatchApiReviewsByReviewIdRequestRevisionContextContributionRoleEnum =
+	(typeof PatchApiReviewsByReviewIdRequestRevisionContextContributionRoleEnum)[keyof typeof PatchApiReviewsByReviewIdRequestRevisionContextContributionRoleEnum];
+
 /**
  * @type object
  */
@@ -120676,6 +124636,41 @@ export type PatchApiReviewsByReviewIdBody = {
 					[key: string]: unknown;
 			  }
 		)[];
+	};
+	/**
+	 * @type object | undefined
+	 */
+	revisionContext?: {
+		contribution?:
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "human";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "unattributed";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "ai";
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					creditedEntityId: string;
+					/**
+					 * @default 'creator'
+					 * @type string
+					 */
+					role: PatchApiReviewsByReviewIdRequestRevisionContextContributionRoleEnum;
+			  };
 	};
 };
 
@@ -121811,6 +125806,15 @@ export type PostApiPollsStatus200 = {
 	id: string;
 };
 
+export const PostApiPollsStatus400ErrorCodeEnum = {
+	PollOptionsDuplicated: "PollOptionsDuplicated",
+	RevisionCreditEntityInvalid: "RevisionCreditEntityInvalid",
+	RevisionContributionActorRequired: "RevisionContributionActorRequired",
+} as const;
+
+export type PostApiPollsStatus400ErrorCodeEnum =
+	(typeof PostApiPollsStatus400ErrorCodeEnum)[keyof typeof PostApiPollsStatus400ErrorCodeEnum];
+
 export type PostApiPollsStatus400 =
 	| {
 			/**
@@ -121821,7 +125825,7 @@ export type PostApiPollsStatus400 =
 				 * @default 'PollOptionsDuplicated'
 				 * @type string
 				 */
-				code: "PollOptionsDuplicated";
+				code: PostApiPollsStatus400ErrorCodeEnum;
 				/**
 				 * @type string
 				 */
@@ -121937,6 +125941,16 @@ export const PostApiPollsRequestResultsVisibilityEnum = {
 export type PostApiPollsRequestResultsVisibilityEnum =
 	(typeof PostApiPollsRequestResultsVisibilityEnum)[keyof typeof PostApiPollsRequestResultsVisibilityEnum];
 
+export const PostApiPollsRequestRevisionContextContributionRoleEnum = {
+	creator: "creator",
+	editor: "editor",
+	translator: "translator",
+	researcher: "researcher",
+} as const;
+
+export type PostApiPollsRequestRevisionContextContributionRoleEnum =
+	(typeof PostApiPollsRequestRevisionContextContributionRoleEnum)[keyof typeof PostApiPollsRequestRevisionContextContributionRoleEnum];
+
 /**
  * @type object
  */
@@ -122005,6 +126019,41 @@ export type PostApiPollsBody = {
 	 * @type string | undefined
 	 */
 	closesAt?: string;
+	/**
+	 * @type object | undefined
+	 */
+	revisionContext?: {
+		contribution?:
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "human";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "unattributed";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "ai";
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					creditedEntityId: string;
+					/**
+					 * @default 'creator'
+					 * @type string
+					 */
+					role: PostApiPollsRequestRevisionContextContributionRoleEnum;
+			  };
+	};
 };
 
 /**
@@ -122668,6 +126717,41 @@ export type PostApiPollsByPollIdCloseStatus200 = {
 	id: string;
 };
 
+export const PostApiPollsByPollIdCloseStatus400ErrorCodeEnum = {
+	RevisionCreditEntityInvalid: "RevisionCreditEntityInvalid",
+	RevisionContributionActorRequired: "RevisionContributionActorRequired",
+} as const;
+
+export type PostApiPollsByPollIdCloseStatus400ErrorCodeEnum =
+	(typeof PostApiPollsByPollIdCloseStatus400ErrorCodeEnum)[keyof typeof PostApiPollsByPollIdCloseStatus400ErrorCodeEnum];
+
+export type PostApiPollsByPollIdCloseStatus400 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'RevisionCreditEntityInvalid'
+				 * @type string
+				 */
+				code: PostApiPollsByPollIdCloseStatus400ErrorCodeEnum;
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| MalformedRequestBody;
+
 /**
  * @type object
  */
@@ -122794,11 +126878,62 @@ export type PostApiPollsByPollIdCloseStatus429 = {
  */
 export type PostApiPollsByPollIdCloseStatus500 = InternalError;
 
+export const PostApiPollsByPollIdCloseRequestRevisionContextContributionRoleEnum = {
+	creator: "creator",
+	editor: "editor",
+	translator: "translator",
+	researcher: "researcher",
+} as const;
+
+export type PostApiPollsByPollIdCloseRequestRevisionContextContributionRoleEnum =
+	(typeof PostApiPollsByPollIdCloseRequestRevisionContextContributionRoleEnum)[keyof typeof PostApiPollsByPollIdCloseRequestRevisionContextContributionRoleEnum];
+
+/**
+ * @type object
+ */
+export type PostApiPollsByPollIdCloseBody = {
+	/**
+	 * @type object | undefined
+	 */
+	revisionContext?: {
+		contribution?:
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "human";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "unattributed";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "ai";
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					creditedEntityId: string;
+					/**
+					 * @default 'creator'
+					 * @type string
+					 */
+					role: PostApiPollsByPollIdCloseRequestRevisionContextContributionRoleEnum;
+			  };
+	};
+};
+
 /**
  * @type object
  */
 export type PostApiPollsByPollIdCloseOptions = {
-	body?: never;
+	body: PostApiPollsByPollIdCloseBody;
 	path: PostApiPollsByPollIdClosePath;
 	query?: never;
 	headers?: never;
@@ -122809,6 +126944,7 @@ export type PostApiPollsByPollIdCloseOptions = {
  */
 export type PostApiPollsByPollIdCloseResponses = {
 	"200": PostApiPollsByPollIdCloseStatus200;
+	"400": PostApiPollsByPollIdCloseStatus400;
 	"403": PostApiPollsByPollIdCloseStatus403;
 	"404": PostApiPollsByPollIdCloseStatus404;
 	"409": PostApiPollsByPollIdCloseStatus409;
@@ -122822,6 +126958,7 @@ export type PostApiPollsByPollIdCloseResponses = {
  */
 export type PostApiPollsByPollIdCloseResponse =
 	| PostApiPollsByPollIdCloseStatus200
+	| PostApiPollsByPollIdCloseStatus400
 	| PostApiPollsByPollIdCloseStatus403
 	| PostApiPollsByPollIdCloseStatus404
 	| PostApiPollsByPollIdCloseStatus409
@@ -123715,10 +127852,40 @@ export type PostApiPostsStatus200 = {
 	id: string;
 };
 
-/**
- * @type object
- */
-export type PostApiPostsStatus400 = MalformedRequestBody;
+export const PostApiPostsStatus400ErrorCodeEnum = {
+	RevisionCreditEntityInvalid: "RevisionCreditEntityInvalid",
+	RevisionContributionActorRequired: "RevisionContributionActorRequired",
+} as const;
+
+export type PostApiPostsStatus400ErrorCodeEnum =
+	(typeof PostApiPostsStatus400ErrorCodeEnum)[keyof typeof PostApiPostsStatus400ErrorCodeEnum];
+
+export type PostApiPostsStatus400 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'RevisionCreditEntityInvalid'
+				 * @type string
+				 */
+				code: PostApiPostsStatus400ErrorCodeEnum;
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| MalformedRequestBody;
 
 export const PostApiPostsStatus403ErrorCodeEnum = {
 	RealmCapabilityRequired: "RealmCapabilityRequired",
@@ -123883,6 +128050,16 @@ export const PostApiPostsRequestLanguageEnum = {
 export type PostApiPostsRequestLanguageEnum =
 	(typeof PostApiPostsRequestLanguageEnum)[keyof typeof PostApiPostsRequestLanguageEnum];
 
+export const PostApiPostsRequestRevisionContextContributionRoleEnum = {
+	creator: "creator",
+	editor: "editor",
+	translator: "translator",
+	researcher: "researcher",
+} as const;
+
+export type PostApiPostsRequestRevisionContextContributionRoleEnum =
+	(typeof PostApiPostsRequestRevisionContextContributionRoleEnum)[keyof typeof PostApiPostsRequestRevisionContextContributionRoleEnum];
+
 export type PostApiPostsBody =
 	| {
 			/**
@@ -124045,6 +128222,41 @@ export type PostApiPostsBody =
 			 * @type string | undefined
 			 */
 			subjectId?: string;
+			/**
+			 * @type object | undefined
+			 */
+			revisionContext?: {
+				contribution?:
+					| {
+							/**
+							 * @type string
+							 */
+							primary: "human";
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							primary: "unattributed";
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							primary: "ai";
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							creditedEntityId: string;
+							/**
+							 * @default 'creator'
+							 * @type string
+							 */
+							role: PostApiPostsRequestRevisionContextContributionRoleEnum;
+					  };
+			};
 	  }
 	| {
 			/**
@@ -124207,6 +128419,41 @@ export type PostApiPostsBody =
 			 * @type string
 			 */
 			subjectId: string;
+			/**
+			 * @type object | undefined
+			 */
+			revisionContext?: {
+				contribution?:
+					| {
+							/**
+							 * @type string
+							 */
+							primary: "human";
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							primary: "unattributed";
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							primary: "ai";
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							creditedEntityId: string;
+							/**
+							 * @default 'creator'
+							 * @type string
+							 */
+							role: PostApiPostsRequestRevisionContextContributionRoleEnum;
+					  };
+			};
 	  };
 
 /**
@@ -124258,10 +128505,40 @@ export type PostApiPostsWikiStatus200 = {
 	id: string;
 };
 
-/**
- * @type object
- */
-export type PostApiPostsWikiStatus400 = MalformedRequestBody;
+export const PostApiPostsWikiStatus400ErrorCodeEnum = {
+	RevisionCreditEntityInvalid: "RevisionCreditEntityInvalid",
+	RevisionContributionActorRequired: "RevisionContributionActorRequired",
+} as const;
+
+export type PostApiPostsWikiStatus400ErrorCodeEnum =
+	(typeof PostApiPostsWikiStatus400ErrorCodeEnum)[keyof typeof PostApiPostsWikiStatus400ErrorCodeEnum];
+
+export type PostApiPostsWikiStatus400 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'RevisionCreditEntityInvalid'
+				 * @type string
+				 */
+				code: PostApiPostsWikiStatus400ErrorCodeEnum;
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| MalformedRequestBody;
 
 export const PostApiPostsWikiStatus403ErrorCodeEnum = {
 	RealmCapabilityRequired: "RealmCapabilityRequired",
@@ -124434,6 +128711,16 @@ export const PostApiPostsWikiRequestLanguageEnum = {
 export type PostApiPostsWikiRequestLanguageEnum =
 	(typeof PostApiPostsWikiRequestLanguageEnum)[keyof typeof PostApiPostsWikiRequestLanguageEnum];
 
+export const PostApiPostsWikiRequestRevisionContextContributionRoleEnum = {
+	creator: "creator",
+	editor: "editor",
+	translator: "translator",
+	researcher: "researcher",
+} as const;
+
+export type PostApiPostsWikiRequestRevisionContextContributionRoleEnum =
+	(typeof PostApiPostsWikiRequestRevisionContextContributionRoleEnum)[keyof typeof PostApiPostsWikiRequestRevisionContextContributionRoleEnum];
+
 /**
  * @type object
  */
@@ -124592,6 +128879,41 @@ export type PostApiPostsWikiBody = {
 	 * @type string | undefined
 	 */
 	subjectId?: string;
+	/**
+	 * @type object | undefined
+	 */
+	revisionContext?: {
+		contribution?:
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "human";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "unattributed";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "ai";
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					creditedEntityId: string;
+					/**
+					 * @default 'creator'
+					 * @type string
+					 */
+					role: PostApiPostsWikiRequestRevisionContextContributionRoleEnum;
+			  };
+	};
 };
 
 /**
@@ -126848,10 +131170,40 @@ export type PatchApiPostsByPostIdStatus200 = {
 	id: string;
 };
 
-/**
- * @type object
- */
-export type PatchApiPostsByPostIdStatus400 = MalformedRequestBody;
+export const PatchApiPostsByPostIdStatus400ErrorCodeEnum = {
+	RevisionCreditEntityInvalid: "RevisionCreditEntityInvalid",
+	RevisionContributionActorRequired: "RevisionContributionActorRequired",
+} as const;
+
+export type PatchApiPostsByPostIdStatus400ErrorCodeEnum =
+	(typeof PatchApiPostsByPostIdStatus400ErrorCodeEnum)[keyof typeof PatchApiPostsByPostIdStatus400ErrorCodeEnum];
+
+export type PatchApiPostsByPostIdStatus400 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'RevisionCreditEntityInvalid'
+				 * @type string
+				 */
+				code: PatchApiPostsByPostIdStatus400ErrorCodeEnum;
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| MalformedRequestBody;
 
 /**
  * @type object
@@ -127009,6 +131361,16 @@ export const PatchApiPostsByPostIdRequestLanguageEnum = {
 export type PatchApiPostsByPostIdRequestLanguageEnum =
 	(typeof PatchApiPostsByPostIdRequestLanguageEnum)[keyof typeof PatchApiPostsByPostIdRequestLanguageEnum];
 
+export const PatchApiPostsByPostIdRequestRevisionContextContributionRoleEnum = {
+	creator: "creator",
+	editor: "editor",
+	translator: "translator",
+	researcher: "researcher",
+} as const;
+
+export type PatchApiPostsByPostIdRequestRevisionContextContributionRoleEnum =
+	(typeof PatchApiPostsByPostIdRequestRevisionContextContributionRoleEnum)[keyof typeof PatchApiPostsByPostIdRequestRevisionContextContributionRoleEnum];
+
 /**
  * @type object
  */
@@ -127164,6 +131526,41 @@ export type PatchApiPostsByPostIdBody = {
 	 * @type boolean | undefined
 	 */
 	minor?: boolean;
+	/**
+	 * @type object | undefined
+	 */
+	revisionContext?: {
+		contribution?:
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "human";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "unattributed";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "ai";
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					creditedEntityId: string;
+					/**
+					 * @default 'creator'
+					 * @type string
+					 */
+					role: PatchApiPostsByPostIdRequestRevisionContextContributionRoleEnum;
+			  };
+	};
 };
 
 /**
@@ -128233,10 +132630,40 @@ export type PostApiPostsByPostIdRepliesStatus200 = {
 	};
 };
 
-/**
- * @type object
- */
-export type PostApiPostsByPostIdRepliesStatus400 = MalformedRequestBody;
+export const PostApiPostsByPostIdRepliesStatus400ErrorCodeEnum = {
+	RevisionCreditEntityInvalid: "RevisionCreditEntityInvalid",
+	RevisionContributionActorRequired: "RevisionContributionActorRequired",
+} as const;
+
+export type PostApiPostsByPostIdRepliesStatus400ErrorCodeEnum =
+	(typeof PostApiPostsByPostIdRepliesStatus400ErrorCodeEnum)[keyof typeof PostApiPostsByPostIdRepliesStatus400ErrorCodeEnum];
+
+export type PostApiPostsByPostIdRepliesStatus400 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'RevisionCreditEntityInvalid'
+				 * @type string
+				 */
+				code: PostApiPostsByPostIdRepliesStatus400ErrorCodeEnum;
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| MalformedRequestBody;
 
 export const PostApiPostsByPostIdRepliesStatus403ErrorCodeEnum = {
 	RealmCapabilityRequired: "RealmCapabilityRequired",
@@ -128402,6 +132829,16 @@ export const PostApiPostsByPostIdRepliesRequestLanguageEnum = {
 export type PostApiPostsByPostIdRepliesRequestLanguageEnum =
 	(typeof PostApiPostsByPostIdRepliesRequestLanguageEnum)[keyof typeof PostApiPostsByPostIdRepliesRequestLanguageEnum];
 
+export const PostApiPostsByPostIdRepliesRequestRevisionContextContributionRoleEnum = {
+	creator: "creator",
+	editor: "editor",
+	translator: "translator",
+	researcher: "researcher",
+} as const;
+
+export type PostApiPostsByPostIdRepliesRequestRevisionContextContributionRoleEnum =
+	(typeof PostApiPostsByPostIdRepliesRequestRevisionContextContributionRoleEnum)[keyof typeof PostApiPostsByPostIdRepliesRequestRevisionContextContributionRoleEnum];
+
 /**
  * @type object
  */
@@ -128552,6 +132989,41 @@ export type PostApiPostsByPostIdRepliesBody = {
 			  }
 		)[];
 	};
+	/**
+	 * @type object | undefined
+	 */
+	revisionContext?: {
+		contribution?:
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "human";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "unattributed";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "ai";
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					creditedEntityId: string;
+					/**
+					 * @default 'creator'
+					 * @type string
+					 */
+					role: PostApiPostsByPostIdRepliesRequestRevisionContextContributionRoleEnum;
+			  };
+	};
 };
 
 /**
@@ -128621,10 +133093,40 @@ export type PatchApiPostsByPostIdRepliesByReplyPostIdStatus200 = {
 	id: string;
 };
 
-/**
- * @type object
- */
-export type PatchApiPostsByPostIdRepliesByReplyPostIdStatus400 = MalformedRequestBody;
+export const PatchApiPostsByPostIdRepliesByReplyPostIdStatus400ErrorCodeEnum = {
+	RevisionCreditEntityInvalid: "RevisionCreditEntityInvalid",
+	RevisionContributionActorRequired: "RevisionContributionActorRequired",
+} as const;
+
+export type PatchApiPostsByPostIdRepliesByReplyPostIdStatus400ErrorCodeEnum =
+	(typeof PatchApiPostsByPostIdRepliesByReplyPostIdStatus400ErrorCodeEnum)[keyof typeof PatchApiPostsByPostIdRepliesByReplyPostIdStatus400ErrorCodeEnum];
+
+export type PatchApiPostsByPostIdRepliesByReplyPostIdStatus400 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'RevisionCreditEntityInvalid'
+				 * @type string
+				 */
+				code: PatchApiPostsByPostIdRepliesByReplyPostIdStatus400ErrorCodeEnum;
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| MalformedRequestBody;
 
 /**
  * @type object
@@ -128781,6 +133283,16 @@ export const PatchApiPostsByPostIdRepliesByReplyPostIdRequestLanguageEnum = {
 export type PatchApiPostsByPostIdRepliesByReplyPostIdRequestLanguageEnum =
 	(typeof PatchApiPostsByPostIdRepliesByReplyPostIdRequestLanguageEnum)[keyof typeof PatchApiPostsByPostIdRepliesByReplyPostIdRequestLanguageEnum];
 
+export const PatchApiPostsByPostIdRepliesByReplyPostIdRequestRevisionContextContributionRoleEnum = {
+	creator: "creator",
+	editor: "editor",
+	translator: "translator",
+	researcher: "researcher",
+} as const;
+
+export type PatchApiPostsByPostIdRepliesByReplyPostIdRequestRevisionContextContributionRoleEnum =
+	(typeof PatchApiPostsByPostIdRepliesByReplyPostIdRequestRevisionContextContributionRoleEnum)[keyof typeof PatchApiPostsByPostIdRepliesByReplyPostIdRequestRevisionContextContributionRoleEnum];
+
 /**
  * @type object
  */
@@ -128934,6 +133446,41 @@ export type PatchApiPostsByPostIdRepliesByReplyPostIdBody = {
 	 * @type boolean | undefined
 	 */
 	minor?: boolean;
+	/**
+	 * @type object | undefined
+	 */
+	revisionContext?: {
+		contribution?:
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "human";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "unattributed";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "ai";
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					creditedEntityId: string;
+					/**
+					 * @default 'creator'
+					 * @type string
+					 */
+					role: PatchApiPostsByPostIdRepliesByReplyPostIdRequestRevisionContextContributionRoleEnum;
+			  };
+	};
 };
 
 /**
@@ -129223,10 +133770,40 @@ export type PostApiRealmsStatus200 = {
 	id: string;
 };
 
-/**
- * @type object
- */
-export type PostApiRealmsStatus400 = MalformedRequestBody;
+export const PostApiRealmsStatus400ErrorCodeEnum = {
+	RevisionCreditEntityInvalid: "RevisionCreditEntityInvalid",
+	RevisionContributionActorRequired: "RevisionContributionActorRequired",
+} as const;
+
+export type PostApiRealmsStatus400ErrorCodeEnum =
+	(typeof PostApiRealmsStatus400ErrorCodeEnum)[keyof typeof PostApiRealmsStatus400ErrorCodeEnum];
+
+export type PostApiRealmsStatus400 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'RevisionCreditEntityInvalid'
+				 * @type string
+				 */
+				code: PostApiRealmsStatus400ErrorCodeEnum;
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| MalformedRequestBody;
 
 export const PostApiRealmsStatus404ErrorCodeEnum = {
 	ImageAssetNotFound: "ImageAssetNotFound",
@@ -129343,6 +133920,16 @@ export const PostApiRealmsRequestJoinPolicyEnum = {
 
 export type PostApiRealmsRequestJoinPolicyEnum =
 	(typeof PostApiRealmsRequestJoinPolicyEnum)[keyof typeof PostApiRealmsRequestJoinPolicyEnum];
+
+export const PostApiRealmsRequestRevisionContextContributionRoleEnum = {
+	creator: "creator",
+	editor: "editor",
+	translator: "translator",
+	researcher: "researcher",
+} as const;
+
+export type PostApiRealmsRequestRevisionContextContributionRoleEnum =
+	(typeof PostApiRealmsRequestRevisionContextContributionRoleEnum)[keyof typeof PostApiRealmsRequestRevisionContextContributionRoleEnum];
 
 /**
  * @type object
@@ -129575,6 +134162,41 @@ export type PostApiRealmsBody = {
 	 * @type string
 	 */
 	joinPolicy: PostApiRealmsRequestJoinPolicyEnum;
+	/**
+	 * @type object | undefined
+	 */
+	revisionContext?: {
+		contribution?:
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "human";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "unattributed";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "ai";
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					creditedEntityId: string;
+					/**
+					 * @default 'creator'
+					 * @type string
+					 */
+					role: PostApiRealmsRequestRevisionContextContributionRoleEnum;
+			  };
+	};
 };
 
 /**
@@ -130422,10 +135044,40 @@ export type PatchApiRealmsByRealmIdStatus200 = {
 	id: string;
 };
 
-/**
- * @type object
- */
-export type PatchApiRealmsByRealmIdStatus400 = MalformedRequestBody;
+export const PatchApiRealmsByRealmIdStatus400ErrorCodeEnum = {
+	RevisionCreditEntityInvalid: "RevisionCreditEntityInvalid",
+	RevisionContributionActorRequired: "RevisionContributionActorRequired",
+} as const;
+
+export type PatchApiRealmsByRealmIdStatus400ErrorCodeEnum =
+	(typeof PatchApiRealmsByRealmIdStatus400ErrorCodeEnum)[keyof typeof PatchApiRealmsByRealmIdStatus400ErrorCodeEnum];
+
+export type PatchApiRealmsByRealmIdStatus400 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'RevisionCreditEntityInvalid'
+				 * @type string
+				 */
+				code: PatchApiRealmsByRealmIdStatus400ErrorCodeEnum;
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| MalformedRequestBody;
 
 /**
  * @type object
@@ -130579,6 +135231,16 @@ export const PatchApiRealmsByRealmIdRequestLocalizationAvatarIconPrefixEnum = {
 
 export type PatchApiRealmsByRealmIdRequestLocalizationAvatarIconPrefixEnum =
 	(typeof PatchApiRealmsByRealmIdRequestLocalizationAvatarIconPrefixEnum)[keyof typeof PatchApiRealmsByRealmIdRequestLocalizationAvatarIconPrefixEnum];
+
+export const PatchApiRealmsByRealmIdRequestRevisionContextContributionRoleEnum = {
+	creator: "creator",
+	editor: "editor",
+	translator: "translator",
+	researcher: "researcher",
+} as const;
+
+export type PatchApiRealmsByRealmIdRequestRevisionContextContributionRoleEnum =
+	(typeof PatchApiRealmsByRealmIdRequestRevisionContextContributionRoleEnum)[keyof typeof PatchApiRealmsByRealmIdRequestRevisionContextContributionRoleEnum];
 
 /**
  * @type object
@@ -130810,6 +135472,41 @@ export type PatchApiRealmsByRealmIdBody = {
 		bannerAssetId?: (string | null) | null;
 		coverAssetId?: (string | null) | null;
 	};
+	/**
+	 * @type object | undefined
+	 */
+	revisionContext?: {
+		contribution?:
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "human";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "unattributed";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "ai";
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					creditedEntityId: string;
+					/**
+					 * @default 'creator'
+					 * @type string
+					 */
+					role: PatchApiRealmsByRealmIdRequestRevisionContextContributionRoleEnum;
+			  };
+	};
 };
 
 /**
@@ -130884,10 +135581,40 @@ export type PutApiRealmsByRealmIdPagesStatus200 = {
 	latestRevisionId: string;
 };
 
-/**
- * @type object
- */
-export type PutApiRealmsByRealmIdPagesStatus400 = MalformedRequestBody;
+export const PutApiRealmsByRealmIdPagesStatus400ErrorCodeEnum = {
+	RevisionCreditEntityInvalid: "RevisionCreditEntityInvalid",
+	RevisionContributionActorRequired: "RevisionContributionActorRequired",
+} as const;
+
+export type PutApiRealmsByRealmIdPagesStatus400ErrorCodeEnum =
+	(typeof PutApiRealmsByRealmIdPagesStatus400ErrorCodeEnum)[keyof typeof PutApiRealmsByRealmIdPagesStatus400ErrorCodeEnum];
+
+export type PutApiRealmsByRealmIdPagesStatus400 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'RevisionCreditEntityInvalid'
+				 * @type string
+				 */
+				code: PutApiRealmsByRealmIdPagesStatus400ErrorCodeEnum;
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| MalformedRequestBody;
 
 /**
  * @type object
@@ -130992,6 +135719,16 @@ export const PutApiRealmsByRealmIdPagesRequestPagesEnum = {
 export type PutApiRealmsByRealmIdPagesRequestPagesEnum =
 	(typeof PutApiRealmsByRealmIdPagesRequestPagesEnum)[keyof typeof PutApiRealmsByRealmIdPagesRequestPagesEnum];
 
+export const PutApiRealmsByRealmIdPagesRequestRevisionContextContributionRoleEnum = {
+	creator: "creator",
+	editor: "editor",
+	translator: "translator",
+	researcher: "researcher",
+} as const;
+
+export type PutApiRealmsByRealmIdPagesRequestRevisionContextContributionRoleEnum =
+	(typeof PutApiRealmsByRealmIdPagesRequestRevisionContextContributionRoleEnum)[keyof typeof PutApiRealmsByRealmIdPagesRequestRevisionContextContributionRoleEnum];
+
 /**
  * @type object
  */
@@ -131006,6 +135743,41 @@ export type PutApiRealmsByRealmIdPagesBody = {
 	 * @type string
 	 */
 	baseRevisionId: string;
+	/**
+	 * @type object | undefined
+	 */
+	revisionContext?: {
+		contribution?:
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "human";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "unattributed";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "ai";
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					creditedEntityId: string;
+					/**
+					 * @default 'creator'
+					 * @type string
+					 */
+					role: PutApiRealmsByRealmIdPagesRequestRevisionContextContributionRoleEnum;
+			  };
+	};
 };
 
 /**
@@ -131810,10 +136582,40 @@ export type PutApiRealmsByRealmIdTaxonomyDraftStatus200 = {
 	revisionCreated: boolean;
 };
 
-/**
- * @type object
- */
-export type PutApiRealmsByRealmIdTaxonomyDraftStatus400 = MalformedRequestBody;
+export const PutApiRealmsByRealmIdTaxonomyDraftStatus400ErrorCodeEnum = {
+	RevisionCreditEntityInvalid: "RevisionCreditEntityInvalid",
+	RevisionContributionActorRequired: "RevisionContributionActorRequired",
+} as const;
+
+export type PutApiRealmsByRealmIdTaxonomyDraftStatus400ErrorCodeEnum =
+	(typeof PutApiRealmsByRealmIdTaxonomyDraftStatus400ErrorCodeEnum)[keyof typeof PutApiRealmsByRealmIdTaxonomyDraftStatus400ErrorCodeEnum];
+
+export type PutApiRealmsByRealmIdTaxonomyDraftStatus400 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'RevisionCreditEntityInvalid'
+				 * @type string
+				 */
+				code: PutApiRealmsByRealmIdTaxonomyDraftStatus400ErrorCodeEnum;
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| MalformedRequestBody;
 
 export const PutApiRealmsByRealmIdTaxonomyDraftStatus403ErrorCodeEnum = {
 	RealmCapabilityRequired: "RealmCapabilityRequired",
@@ -131972,6 +136774,16 @@ export type PutApiRealmsByRealmIdTaxonomyDraftStatus429 = {
  */
 export type PutApiRealmsByRealmIdTaxonomyDraftStatus500 = InternalError;
 
+export const PutApiRealmsByRealmIdTaxonomyDraftRequestRevisionContextContributionRoleEnum = {
+	creator: "creator",
+	editor: "editor",
+	translator: "translator",
+	researcher: "researcher",
+} as const;
+
+export type PutApiRealmsByRealmIdTaxonomyDraftRequestRevisionContextContributionRoleEnum =
+	(typeof PutApiRealmsByRealmIdTaxonomyDraftRequestRevisionContextContributionRoleEnum)[keyof typeof PutApiRealmsByRealmIdTaxonomyDraftRequestRevisionContextContributionRoleEnum];
+
 export const PutApiRealmsByRealmIdTaxonomyDraftRequestNodesQueryStrategy = {
 	global_effective: "global_effective",
 	realm_community: "realm_community",
@@ -132004,6 +136816,41 @@ export type PutApiRealmsByRealmIdTaxonomyDraftBody = {
 	 * @type string
 	 */
 	baseRevisionId: string;
+	/**
+	 * @type object | undefined
+	 */
+	revisionContext?: {
+		contribution?:
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "human";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "unattributed";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "ai";
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					creditedEntityId: string;
+					/**
+					 * @default 'creator'
+					 * @type string
+					 */
+					role: PutApiRealmsByRealmIdTaxonomyDraftRequestRevisionContextContributionRoleEnum;
+			  };
+	};
 	/**
 	 * @type array
 	 */
@@ -132495,10 +137342,40 @@ export type PutApiRealmsByRealmIdTagVotingStatus200 = {
 	enabled: boolean;
 };
 
-/**
- * @type object
- */
-export type PutApiRealmsByRealmIdTagVotingStatus400 = MalformedRequestBody;
+export const PutApiRealmsByRealmIdTagVotingStatus400ErrorCodeEnum = {
+	RevisionCreditEntityInvalid: "RevisionCreditEntityInvalid",
+	RevisionContributionActorRequired: "RevisionContributionActorRequired",
+} as const;
+
+export type PutApiRealmsByRealmIdTagVotingStatus400ErrorCodeEnum =
+	(typeof PutApiRealmsByRealmIdTagVotingStatus400ErrorCodeEnum)[keyof typeof PutApiRealmsByRealmIdTagVotingStatus400ErrorCodeEnum];
+
+export type PutApiRealmsByRealmIdTagVotingStatus400 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'RevisionCreditEntityInvalid'
+				 * @type string
+				 */
+				code: PutApiRealmsByRealmIdTagVotingStatus400ErrorCodeEnum;
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| MalformedRequestBody;
 
 /**
  * @type object
@@ -132598,6 +137475,16 @@ export type PutApiRealmsByRealmIdTagVotingStatus429 = {
  */
 export type PutApiRealmsByRealmIdTagVotingStatus500 = InternalError;
 
+export const PutApiRealmsByRealmIdTagVotingRequestRevisionContextContributionRoleEnum = {
+	creator: "creator",
+	editor: "editor",
+	translator: "translator",
+	researcher: "researcher",
+} as const;
+
+export type PutApiRealmsByRealmIdTagVotingRequestRevisionContextContributionRoleEnum =
+	(typeof PutApiRealmsByRealmIdTagVotingRequestRevisionContextContributionRoleEnum)[keyof typeof PutApiRealmsByRealmIdTagVotingRequestRevisionContextContributionRoleEnum];
+
 /**
  * @type object
  */
@@ -132606,6 +137493,41 @@ export type PutApiRealmsByRealmIdTagVotingBody = {
 	 * @type boolean
 	 */
 	enabled: boolean;
+	/**
+	 * @type object | undefined
+	 */
+	revisionContext?: {
+		contribution?:
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "human";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "unattributed";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "ai";
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					creditedEntityId: string;
+					/**
+					 * @default 'creator'
+					 * @type string
+					 */
+					role: PutApiRealmsByRealmIdTagVotingRequestRevisionContextContributionRoleEnum;
+			  };
+	};
 };
 
 /**
@@ -133541,10 +138463,40 @@ export type PutApiRealmsByRealmIdRulesStatus200 = {
 	version: string | number;
 };
 
-/**
- * @type object
- */
-export type PutApiRealmsByRealmIdRulesStatus400 = MalformedRequestBody;
+export const PutApiRealmsByRealmIdRulesStatus400ErrorCodeEnum = {
+	RevisionCreditEntityInvalid: "RevisionCreditEntityInvalid",
+	RevisionContributionActorRequired: "RevisionContributionActorRequired",
+} as const;
+
+export type PutApiRealmsByRealmIdRulesStatus400ErrorCodeEnum =
+	(typeof PutApiRealmsByRealmIdRulesStatus400ErrorCodeEnum)[keyof typeof PutApiRealmsByRealmIdRulesStatus400ErrorCodeEnum];
+
+export type PutApiRealmsByRealmIdRulesStatus400 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'RevisionCreditEntityInvalid'
+				 * @type string
+				 */
+				code: PutApiRealmsByRealmIdRulesStatus400ErrorCodeEnum;
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| MalformedRequestBody;
 
 /**
  * @type object
@@ -133674,6 +138626,16 @@ export const PutApiRealmsByRealmIdRulesRequestAcknowledgementModeEnum = {
 export type PutApiRealmsByRealmIdRulesRequestAcknowledgementModeEnum =
 	(typeof PutApiRealmsByRealmIdRulesRequestAcknowledgementModeEnum)[keyof typeof PutApiRealmsByRealmIdRulesRequestAcknowledgementModeEnum];
 
+export const PutApiRealmsByRealmIdRulesRequestRevisionContextContributionRoleEnum = {
+	creator: "creator",
+	editor: "editor",
+	translator: "translator",
+	researcher: "researcher",
+} as const;
+
+export type PutApiRealmsByRealmIdRulesRequestRevisionContextContributionRoleEnum =
+	(typeof PutApiRealmsByRealmIdRulesRequestRevisionContextContributionRoleEnum)[keyof typeof PutApiRealmsByRealmIdRulesRequestRevisionContextContributionRoleEnum];
+
 export const PutApiRealmsByRealmIdRulesRequestRulesLocalizationsLanguageEnum = {
 	zh: "zh",
 	en: "en",
@@ -133705,6 +138667,41 @@ export type PutApiRealmsByRealmIdRulesBody = {
 	 * @type boolean
 	 */
 	requireOnPost: boolean;
+	/**
+	 * @type object | undefined
+	 */
+	revisionContext?: {
+		contribution?:
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "human";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "unattributed";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "ai";
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					creditedEntityId: string;
+					/**
+					 * @default 'creator'
+					 * @type string
+					 */
+					role: PutApiRealmsByRealmIdRulesRequestRevisionContextContributionRoleEnum;
+			  };
+	};
 	/**
 	 * @type array
 	 */
@@ -137779,10 +142776,40 @@ export type PostApiRealmsByRealmIdPinsMoveStatus200 = {
 	latestRevisionId: string;
 };
 
-/**
- * @type object
- */
-export type PostApiRealmsByRealmIdPinsMoveStatus400 = MalformedRequestBody;
+export const PostApiRealmsByRealmIdPinsMoveStatus400ErrorCodeEnum = {
+	RevisionCreditEntityInvalid: "RevisionCreditEntityInvalid",
+	RevisionContributionActorRequired: "RevisionContributionActorRequired",
+} as const;
+
+export type PostApiRealmsByRealmIdPinsMoveStatus400ErrorCodeEnum =
+	(typeof PostApiRealmsByRealmIdPinsMoveStatus400ErrorCodeEnum)[keyof typeof PostApiRealmsByRealmIdPinsMoveStatus400ErrorCodeEnum];
+
+export type PostApiRealmsByRealmIdPinsMoveStatus400 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'RevisionCreditEntityInvalid'
+				 * @type string
+				 */
+				code: PostApiRealmsByRealmIdPinsMoveStatus400ErrorCodeEnum;
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| MalformedRequestBody;
 
 /**
  * @type object
@@ -137892,6 +142919,16 @@ export const PostApiRealmsByRealmIdPinsMoveRequestPlacementKindEnum = {
 export type PostApiRealmsByRealmIdPinsMoveRequestPlacementKindEnum =
 	(typeof PostApiRealmsByRealmIdPinsMoveRequestPlacementKindEnum)[keyof typeof PostApiRealmsByRealmIdPinsMoveRequestPlacementKindEnum];
 
+export const PostApiRealmsByRealmIdPinsMoveRequestRevisionContextContributionRoleEnum = {
+	creator: "creator",
+	editor: "editor",
+	translator: "translator",
+	researcher: "researcher",
+} as const;
+
+export type PostApiRealmsByRealmIdPinsMoveRequestRevisionContextContributionRoleEnum =
+	(typeof PostApiRealmsByRealmIdPinsMoveRequestRevisionContextContributionRoleEnum)[keyof typeof PostApiRealmsByRealmIdPinsMoveRequestRevisionContextContributionRoleEnum];
+
 /**
  * @type object
  */
@@ -137925,6 +142962,41 @@ export type PostApiRealmsByRealmIdPinsMoveBody = {
 				 */
 				unitId: string;
 		  };
+	/**
+	 * @type object | undefined
+	 */
+	revisionContext?: {
+		contribution?:
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "human";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "unattributed";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "ai";
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					creditedEntityId: string;
+					/**
+					 * @default 'creator'
+					 * @type string
+					 */
+					role: PostApiRealmsByRealmIdPinsMoveRequestRevisionContextContributionRoleEnum;
+			  };
+	};
 };
 
 /**
@@ -138029,10 +143101,40 @@ export type PutApiRealmsByRealmIdPinsByUnitIdStatus200 = {
 	updatedAt: string;
 };
 
-/**
- * @type object
- */
-export type PutApiRealmsByRealmIdPinsByUnitIdStatus400 = MalformedRequestBody;
+export const PutApiRealmsByRealmIdPinsByUnitIdStatus400ErrorCodeEnum = {
+	RevisionCreditEntityInvalid: "RevisionCreditEntityInvalid",
+	RevisionContributionActorRequired: "RevisionContributionActorRequired",
+} as const;
+
+export type PutApiRealmsByRealmIdPinsByUnitIdStatus400ErrorCodeEnum =
+	(typeof PutApiRealmsByRealmIdPinsByUnitIdStatus400ErrorCodeEnum)[keyof typeof PutApiRealmsByRealmIdPinsByUnitIdStatus400ErrorCodeEnum];
+
+export type PutApiRealmsByRealmIdPinsByUnitIdStatus400 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'RevisionCreditEntityInvalid'
+				 * @type string
+				 */
+				code: PutApiRealmsByRealmIdPinsByUnitIdStatus400ErrorCodeEnum;
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| MalformedRequestBody;
 
 /**
  * @type object
@@ -138162,6 +143264,16 @@ export const PutApiRealmsByRealmIdPinsByUnitIdRequestKindEnum = {
 export type PutApiRealmsByRealmIdPinsByUnitIdRequestKindEnum =
 	(typeof PutApiRealmsByRealmIdPinsByUnitIdRequestKindEnum)[keyof typeof PutApiRealmsByRealmIdPinsByUnitIdRequestKindEnum];
 
+export const PutApiRealmsByRealmIdPinsByUnitIdRequestRevisionContextContributionRoleEnum = {
+	creator: "creator",
+	editor: "editor",
+	translator: "translator",
+	researcher: "researcher",
+} as const;
+
+export type PutApiRealmsByRealmIdPinsByUnitIdRequestRevisionContextContributionRoleEnum =
+	(typeof PutApiRealmsByRealmIdPinsByUnitIdRequestRevisionContextContributionRoleEnum)[keyof typeof PutApiRealmsByRealmIdPinsByUnitIdRequestRevisionContextContributionRoleEnum];
+
 /**
  * @type object
  */
@@ -138171,6 +143283,41 @@ export type PutApiRealmsByRealmIdPinsByUnitIdBody = {
 	 * @type string | undefined
 	 */
 	kind?: PutApiRealmsByRealmIdPinsByUnitIdRequestKindEnum;
+	/**
+	 * @type object | undefined
+	 */
+	revisionContext?: {
+		contribution?:
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "human";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "unattributed";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "ai";
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					creditedEntityId: string;
+					/**
+					 * @default 'creator'
+					 * @type string
+					 */
+					role: PutApiRealmsByRealmIdPinsByUnitIdRequestRevisionContextContributionRoleEnum;
+			  };
+	};
 };
 
 /**
@@ -138250,6 +143397,41 @@ export type DeleteApiRealmsByRealmIdPinsByUnitIdQuery = {
  */
 export type DeleteApiRealmsByRealmIdPinsByUnitIdStatus204 = void;
 
+export const DeleteApiRealmsByRealmIdPinsByUnitIdStatus400ErrorCodeEnum = {
+	RevisionCreditEntityInvalid: "RevisionCreditEntityInvalid",
+	RevisionContributionActorRequired: "RevisionContributionActorRequired",
+} as const;
+
+export type DeleteApiRealmsByRealmIdPinsByUnitIdStatus400ErrorCodeEnum =
+	(typeof DeleteApiRealmsByRealmIdPinsByUnitIdStatus400ErrorCodeEnum)[keyof typeof DeleteApiRealmsByRealmIdPinsByUnitIdStatus400ErrorCodeEnum];
+
+export type DeleteApiRealmsByRealmIdPinsByUnitIdStatus400 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'RevisionCreditEntityInvalid'
+				 * @type string
+				 */
+				code: DeleteApiRealmsByRealmIdPinsByUnitIdStatus400ErrorCodeEnum;
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| MalformedRequestBody;
+
 /**
  * @type object
  */
@@ -138320,11 +143502,62 @@ export type DeleteApiRealmsByRealmIdPinsByUnitIdStatus429 = {
  */
 export type DeleteApiRealmsByRealmIdPinsByUnitIdStatus500 = InternalError;
 
+export const DeleteApiRealmsByRealmIdPinsByUnitIdRequestRevisionContextContributionRoleEnum = {
+	creator: "creator",
+	editor: "editor",
+	translator: "translator",
+	researcher: "researcher",
+} as const;
+
+export type DeleteApiRealmsByRealmIdPinsByUnitIdRequestRevisionContextContributionRoleEnum =
+	(typeof DeleteApiRealmsByRealmIdPinsByUnitIdRequestRevisionContextContributionRoleEnum)[keyof typeof DeleteApiRealmsByRealmIdPinsByUnitIdRequestRevisionContextContributionRoleEnum];
+
+/**
+ * @type object
+ */
+export type DeleteApiRealmsByRealmIdPinsByUnitIdBody = {
+	/**
+	 * @type object | undefined
+	 */
+	revisionContext?: {
+		contribution?:
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "human";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "unattributed";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "ai";
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					creditedEntityId: string;
+					/**
+					 * @default 'creator'
+					 * @type string
+					 */
+					role: DeleteApiRealmsByRealmIdPinsByUnitIdRequestRevisionContextContributionRoleEnum;
+			  };
+	};
+};
+
 /**
  * @type object
  */
 export type DeleteApiRealmsByRealmIdPinsByUnitIdOptions = {
-	body?: never;
+	body: DeleteApiRealmsByRealmIdPinsByUnitIdBody;
 	path: DeleteApiRealmsByRealmIdPinsByUnitIdPath;
 	query?: DeleteApiRealmsByRealmIdPinsByUnitIdQuery;
 	headers?: never;
@@ -138335,6 +143568,7 @@ export type DeleteApiRealmsByRealmIdPinsByUnitIdOptions = {
  */
 export type DeleteApiRealmsByRealmIdPinsByUnitIdResponses = {
 	"204": DeleteApiRealmsByRealmIdPinsByUnitIdStatus204;
+	"400": DeleteApiRealmsByRealmIdPinsByUnitIdStatus400;
 	"403": DeleteApiRealmsByRealmIdPinsByUnitIdStatus403;
 	"422": DeleteApiRealmsByRealmIdPinsByUnitIdStatus422;
 	"429": DeleteApiRealmsByRealmIdPinsByUnitIdStatus429;
@@ -138346,6 +143580,7 @@ export type DeleteApiRealmsByRealmIdPinsByUnitIdResponses = {
  */
 export type DeleteApiRealmsByRealmIdPinsByUnitIdResponse =
 	| DeleteApiRealmsByRealmIdPinsByUnitIdStatus204
+	| DeleteApiRealmsByRealmIdPinsByUnitIdStatus400
 	| DeleteApiRealmsByRealmIdPinsByUnitIdStatus403
 	| DeleteApiRealmsByRealmIdPinsByUnitIdStatus422
 	| DeleteApiRealmsByRealmIdPinsByUnitIdStatus429
@@ -141708,6 +146943,8 @@ export type PatchApiRealmsByRealmIdUnitsByUnitIdStatus200 = {
 export const PatchApiRealmsByRealmIdUnitsByUnitIdStatus400ErrorCodeEnum = {
 	ContentGovernanceActionIncompatible: "ContentGovernanceActionIncompatible",
 	GovernanceRuleSourceForbidden: "GovernanceRuleSourceForbidden",
+	RevisionCreditEntityInvalid: "RevisionCreditEntityInvalid",
+	RevisionContributionActorRequired: "RevisionContributionActorRequired",
 } as const;
 
 export type PatchApiRealmsByRealmIdUnitsByUnitIdStatus400ErrorCodeEnum =
@@ -141877,6 +147114,16 @@ export type PatchApiRealmsByRealmIdUnitsByUnitIdStatus429 = {
  */
 export type PatchApiRealmsByRealmIdUnitsByUnitIdStatus500 = InternalError;
 
+export const PatchApiRealmsByRealmIdUnitsByUnitIdRequestRevisionContextContributionRoleEnum = {
+	creator: "creator",
+	editor: "editor",
+	translator: "translator",
+	researcher: "researcher",
+} as const;
+
+export type PatchApiRealmsByRealmIdUnitsByUnitIdRequestRevisionContextContributionRoleEnum =
+	(typeof PatchApiRealmsByRealmIdUnitsByUnitIdRequestRevisionContextContributionRoleEnum)[keyof typeof PatchApiRealmsByRealmIdUnitsByUnitIdRequestRevisionContextContributionRoleEnum];
+
 export const PatchApiRealmsByRealmIdUnitsByUnitIdRequestCommandEnum = {
 	approve: "approve",
 	hide: "hide",
@@ -141920,6 +147167,41 @@ export type PatchApiRealmsByRealmIdUnitsByUnitIdBody = {
 	 * @type string | undefined
 	 */
 	idempotencyKey?: string;
+	/**
+	 * @type object | undefined
+	 */
+	revisionContext?: {
+		contribution?:
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "human";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "unattributed";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "ai";
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					creditedEntityId: string;
+					/**
+					 * @default 'creator'
+					 * @type string
+					 */
+					role: PatchApiRealmsByRealmIdUnitsByUnitIdRequestRevisionContextContributionRoleEnum;
+			  };
+	};
 	/**
 	 * @type string
 	 */
@@ -142655,10 +147937,40 @@ export type PostApiRealmsByRealmIdUnitsByUnitIdReviewStatus200 = {
 	};
 };
 
-/**
- * @type object
- */
-export type PostApiRealmsByRealmIdUnitsByUnitIdReviewStatus400 = MalformedRequestBody;
+export const PostApiRealmsByRealmIdUnitsByUnitIdReviewStatus400ErrorCodeEnum = {
+	RevisionCreditEntityInvalid: "RevisionCreditEntityInvalid",
+	RevisionContributionActorRequired: "RevisionContributionActorRequired",
+} as const;
+
+export type PostApiRealmsByRealmIdUnitsByUnitIdReviewStatus400ErrorCodeEnum =
+	(typeof PostApiRealmsByRealmIdUnitsByUnitIdReviewStatus400ErrorCodeEnum)[keyof typeof PostApiRealmsByRealmIdUnitsByUnitIdReviewStatus400ErrorCodeEnum];
+
+export type PostApiRealmsByRealmIdUnitsByUnitIdReviewStatus400 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'RevisionCreditEntityInvalid'
+				 * @type string
+				 */
+				code: PostApiRealmsByRealmIdUnitsByUnitIdReviewStatus400ErrorCodeEnum;
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| MalformedRequestBody;
 
 /**
  * @type object
@@ -142798,6 +148110,16 @@ export const PostApiRealmsByRealmIdUnitsByUnitIdReviewRequestAnnotationLanguageE
 
 export type PostApiRealmsByRealmIdUnitsByUnitIdReviewRequestAnnotationLanguageEnum =
 	(typeof PostApiRealmsByRealmIdUnitsByUnitIdReviewRequestAnnotationLanguageEnum)[keyof typeof PostApiRealmsByRealmIdUnitsByUnitIdReviewRequestAnnotationLanguageEnum];
+
+export const PostApiRealmsByRealmIdUnitsByUnitIdReviewRequestRevisionContextContributionRoleEnum = {
+	creator: "creator",
+	editor: "editor",
+	translator: "translator",
+	researcher: "researcher",
+} as const;
+
+export type PostApiRealmsByRealmIdUnitsByUnitIdReviewRequestRevisionContextContributionRoleEnum =
+	(typeof PostApiRealmsByRealmIdUnitsByUnitIdReviewRequestRevisionContextContributionRoleEnum)[keyof typeof PostApiRealmsByRealmIdUnitsByUnitIdReviewRequestRevisionContextContributionRoleEnum];
 
 export type PostApiRealmsByRealmIdUnitsByUnitIdReviewBody =
 	| {
@@ -142945,6 +148267,41 @@ export type PostApiRealmsByRealmIdUnitsByUnitIdReviewBody =
 					)[];
 				};
 			};
+			/**
+			 * @type object | undefined
+			 */
+			revisionContext?: {
+				contribution?:
+					| {
+							/**
+							 * @type string
+							 */
+							primary: "human";
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							primary: "unattributed";
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							primary: "ai";
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							creditedEntityId: string;
+							/**
+							 * @default 'creator'
+							 * @type string
+							 */
+							role: PostApiRealmsByRealmIdUnitsByUnitIdReviewRequestRevisionContextContributionRoleEnum;
+					  };
+			};
 	  }
 	| {
 			/**
@@ -143090,6 +148447,41 @@ export type PostApiRealmsByRealmIdUnitsByUnitIdReviewBody =
 						  }
 					)[];
 				};
+			};
+			/**
+			 * @type object | undefined
+			 */
+			revisionContext?: {
+				contribution?:
+					| {
+							/**
+							 * @type string
+							 */
+							primary: "human";
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							primary: "unattributed";
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							primary: "ai";
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							creditedEntityId: string;
+							/**
+							 * @default 'creator'
+							 * @type string
+							 */
+							role: PostApiRealmsByRealmIdUnitsByUnitIdReviewRequestRevisionContextContributionRoleEnum;
+					  };
 			};
 	  };
 

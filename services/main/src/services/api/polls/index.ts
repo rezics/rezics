@@ -19,7 +19,7 @@ import {
 import { UnitNotFound } from "../../units/errors";
 import { recordUnitRevision } from "../../units/history";
 import { insertUnit } from "../../units/create";
-import { CreatePollBody, PollDetailQuery, PollParams, VotePollBody } from "./schema";
+import { ClosePollBody, CreatePollBody, PollDetailQuery, PollParams, VotePollBody } from "./schema";
 import { toApiErrorResponse, PollDetailResponse } from "../schema/response";
 import { IdResponse, PollVoteResponse } from "../schema/action-response";
 import {
@@ -97,6 +97,7 @@ export default new Elysia({ prefix: "/polls" })
 				await recordUnitRevision(tx, {
 					unitId: pollUnit.id,
 					actorProfileId: profile.unitId,
+					contribution: body.revisionContext?.contribution,
 					event: "create",
 				});
 				return pollUnit.id;
@@ -108,7 +109,11 @@ export default new Elysia({ prefix: "/polls" })
 			body: CreatePollBody,
 			response: {
 				[StatusCodes.OK]: IdResponse,
-				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["PollOptionsDuplicated"]),
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
+					"PollOptionsDuplicated",
+					"RevisionCreditEntityInvalid",
+					"RevisionContributionActorRequired",
+				]),
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
 			},
 			detail: { summary: "Create poll", tags: ["Polls"] },
@@ -302,7 +307,7 @@ export default new Elysia({ prefix: "/polls" })
 	)
 	.post(
 		"/:pollId/close",
-		async ({ params, profile, authorization }) => {
+		async ({ params, profile, authorization, body }) => {
 			await authorization.unit.ensureCanUpdate(params.pollId, [["poll", "closed-at"]]);
 			await database.transaction(async (tx) => {
 				await tx.execute(
@@ -317,6 +322,7 @@ export default new Elysia({ prefix: "/polls" })
 				await recordUnitRevision(tx, {
 					unitId: params.pollId,
 					actorProfileId: profile.unitId,
+					contribution: body.revisionContext?.contribution,
 					event: "update",
 				});
 			});
@@ -325,8 +331,13 @@ export default new Elysia({ prefix: "/polls" })
 		{
 			access: "write:interaction:write",
 			params: PollParams,
+			body: ClosePollBody,
 			response: {
 				[StatusCodes.OK]: IdResponse,
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
+					"RevisionCreditEntityInvalid",
+					"RevisionContributionActorRequired",
+				]),
 				[StatusCodes.FORBIDDEN]: toApiErrorResponse(["UnitPermissionForbidden"]),
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
 				[StatusCodes.CONFLICT]: toApiErrorResponse(["PollAlreadyClosed"]),

@@ -28,6 +28,7 @@ import {
 import { UnitNotFound } from "../../units/errors";
 import { checkUnitType } from "../unit-resources/service";
 import { RealmNotFound } from "../realms/errors";
+import { RevisionContextBody } from "../schema";
 import { toApiErrorResponse } from "../schema/response";
 import {
 	RealmTagSubscriptionListQuery,
@@ -96,6 +97,7 @@ export default new Elysia()
 					return createTagStructure({
 						memberTagIds: body.memberTagIds,
 						profileId: profile.unitId,
+						contribution: body.revisionContext?.contribution,
 					});
 				},
 				{
@@ -106,6 +108,10 @@ export default new Elysia()
 						[StatusCodes.FORBIDDEN]: toApiErrorResponse(["PlatformCapabilityRequired"]),
 						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["TagNotFound"]),
 						[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["InvalidTagStructure"]),
+						[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
+							"RevisionCreditEntityInvalid",
+							"RevisionContributionActorRequired",
+						]),
 					},
 					detail: {
 						summary: "Create or find and upvote a community-immutable Tag structure",
@@ -148,6 +154,7 @@ export default new Elysia()
 						reason: body.reason,
 						actorProfileId: profile.unitId,
 						authorization: authorization.platform,
+						contribution: body.revisionContext?.contribution,
 					});
 					return getTagStructure({
 						structureId: params.structureId,
@@ -169,6 +176,10 @@ export default new Elysia()
 							"TagStructureDefinitionConflict",
 						]),
 						[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["InvalidTagStructure"]),
+						[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
+							"RevisionCreditEntityInvalid",
+							"RevisionContributionActorRequired",
+						]),
 					},
 					detail: {
 						summary: "Administratively correct a Tag structure definition",
@@ -256,7 +267,7 @@ export default new Elysia()
 			)
 			.put(
 				"/:type/:unitId/tag-structures/:structureId",
-				async ({ params, profile, authorization }) => {
+				async ({ params, body, profile, authorization }) => {
 					await authorization.platform.ensureCapability(DevelopmentPreviewCapability);
 					await checkUnitType(params.unitId, params.type);
 					await authorization.unit.ensureCanRead(params.unitId);
@@ -264,23 +275,29 @@ export default new Elysia()
 						unitId: params.unitId,
 						structureId: params.structureId,
 						profileId: profile.unitId,
+						contribution: body?.revisionContext?.contribution,
 					});
 				},
 				{
 					access: "contribute:interaction:write",
 					params: UnitTagStructureParams,
+					body: t.Optional(RevisionContextBody),
 					response: {
 						[StatusCodes.OK]: TagStructureApplicationResponse,
 						[StatusCodes.FORBIDDEN]: toApiErrorResponse(["PlatformCapabilityRequired"]),
 						[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["InvalidTagStructure"]),
 						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "TagStructureNotFound"]),
+						[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
+							"RevisionCreditEntityInvalid",
+							"RevisionContributionActorRequired",
+						]),
 					},
 					detail: { summary: "Apply a Tag structure to a Unit", tags: ["Tags"] },
 				},
 			)
 			.delete(
 				"/:type/:unitId/tag-structures/:structureId",
-				async ({ params, profile, authorization }) => {
+				async ({ params, body, profile, authorization }) => {
 					await authorization.platform.ensureCapability(DevelopmentPreviewCapability);
 					await checkUnitType(params.unitId, params.type);
 					await authorization.unit.ensure(params.unitId, "unit.tag-curation.manage");
@@ -288,12 +305,14 @@ export default new Elysia()
 						unitId: params.unitId,
 						structureId: params.structureId,
 						profileId: profile.unitId,
+						contribution: body?.revisionContext?.contribution,
 					});
 					return new Response(null, { status: StatusCodes.NO_CONTENT });
 				},
 				{
 					access: "write:unit:update",
 					params: UnitTagStructureParams,
+					body: t.Optional(RevisionContextBody),
 					response: {
 						[StatusCodes.NO_CONTENT]: t.Void(),
 						[StatusCodes.FORBIDDEN]: toApiErrorResponse([
@@ -304,6 +323,10 @@ export default new Elysia()
 						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
 							"UnitNotFound",
 							"TagStructureApplicationNotFound",
+						]),
+						[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
+							"RevisionCreditEntityInvalid",
+							"RevisionContributionActorRequired",
 						]),
 					},
 					detail: { summary: "Remove a Tag structure from a Unit", tags: ["Tags"] },

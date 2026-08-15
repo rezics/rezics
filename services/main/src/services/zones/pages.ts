@@ -37,6 +37,7 @@ import {
 } from "../content-structure/errors";
 import { insertUnit } from "../units/create";
 import { recordUnitRevision } from "../units/history";
+import type { RevisionContributionInput } from "../units/revision-contribution";
 import { replaceZonePageSlugAddress } from "../units/slug-address";
 import { fractionalPositionBetween } from "../ordering/position";
 
@@ -51,6 +52,7 @@ export interface ZonePageMutationInput {
 	readonly pageId?: string;
 	readonly slug?: string | null;
 	readonly actorProfileId: string;
+	readonly contribution?: RevisionContributionInput;
 	readonly localization: ZonePageLocalizationInput;
 	readonly baseUnitRevisionId?: string;
 	readonly ensureReferences: (
@@ -467,6 +469,7 @@ export async function upsertZonePageUnit(input: ZonePageMutationInput) {
 			await recordUnitRevision(tx, {
 				unitId: pageId,
 				actorProfileId: input.actorProfileId,
+				contribution: input.contribution,
 				event: "create",
 			});
 		} else {
@@ -541,6 +544,7 @@ export async function upsertZonePageUnit(input: ZonePageMutationInput) {
 				await recordUnitRevision(tx, {
 					unitId: pageId,
 					actorProfileId: input.actorProfileId,
+					contribution: input.contribution,
 					event: "update",
 					baseRevisionId: input.baseUnitRevisionId,
 				});

@@ -4,7 +4,7 @@ import {
 	UnitOwnershipModeValues,
 	UnitOwnershipClaimResolutionValues,
 } from "../database/schema/contract-values";
-import { DateTime, UnitKind, Uuid } from "../api/schema";
+import { DateTime, RevisionContext, UnitKind, Uuid } from "../api/schema";
 import { GovernanceRuleReferences } from "../api/governance/schema";
 
 export const UnitOwnershipClaimStateValues = [
@@ -85,6 +85,7 @@ export const DecideUnitOwnershipClaimBody = t.Object(
 		confirmationClaimId: Uuid,
 		rules: GovernanceRuleReferences,
 		note: t.Optional(t.String({ minLength: 1, maxLength: 2_000 })),
+		revisionContext: t.Optional(RevisionContext),
 	},
 	{ additionalProperties: false },
 );

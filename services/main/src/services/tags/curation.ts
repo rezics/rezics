@@ -5,6 +5,7 @@ import { database } from "../database";
 import { toSafeInteger } from "../database/integer";
 import { unitTag, unitTagVoteStat } from "../database/schema";
 import { lockUnitHistory, recordUnitRevision } from "../units/history";
+import type { RevisionContributionInput } from "../units/revision-contribution";
 
 export type UnitTagCurationState =
 	| {
@@ -59,6 +60,7 @@ export async function updateDirectUnitTagCuration(input: {
 	readonly expectedUpdatedAt: Date;
 	readonly expectedFeaturedTagIds: readonly string[];
 	readonly state: UnitTagCurationState;
+	readonly contribution?: RevisionContributionInput;
 }) {
 	return database.transaction(async (tx) => {
 		await lockUnitHistory(tx, input.unitId);
@@ -100,6 +102,7 @@ export async function updateDirectUnitTagCuration(input: {
 					await recordUnitRevision(tx, {
 						unitId: input.unitId,
 						actorProfileId: input.actorProfileId,
+						contribution: input.contribution,
 						event: "update",
 					});
 					return updated;

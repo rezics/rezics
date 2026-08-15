@@ -105,6 +105,7 @@ import {
 } from "../../zones/pages";
 import { provisionZoneDefaultExperienceInTransaction } from "../../zones/default-experience";
 import { IdResponse, NoContentResponse } from "../schema/action-response";
+import { RevisionContextBody } from "../schema";
 import { toApiErrorResponse } from "../schema/response";
 import {
 	ReplacePublicUnitSlugAddressBody,
@@ -581,6 +582,7 @@ export default new Elysia()
 						await recordUnitRevision(tx, {
 							unitId,
 							actorProfileId: profile.unitId,
+							contribution: body.revisionContext?.contribution,
 							event: "create",
 						});
 						return unitId;
@@ -592,6 +594,10 @@ export default new Elysia()
 					body: CreateSeriesBody,
 					response: {
 						[StatusCodes.OK]: IdResponse,
+						[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
+							"RevisionCreditEntityInvalid",
+							"RevisionContributionActorRequired",
+						]),
 						[StatusCodes.NOT_FOUND]: ImageAssetNotFoundResponse,
 					},
 					detail: { summary: "Create Series", tags: ["Series"] },
@@ -984,6 +990,7 @@ export default new Elysia()
 						await recordUnitRevision(tx, {
 							unitId: params.zoneId,
 							actorProfileId: profile.unitId,
+							contribution: body.revisionContext?.contribution,
 							event: "update",
 						});
 					});
@@ -1003,6 +1010,8 @@ export default new Elysia()
 							"ZoneDocumentInvalid",
 							"ZoneRuleRealmInvalid",
 							"ZoneTimeRangeInvalid",
+							"RevisionCreditEntityInvalid",
+							"RevisionContributionActorRequired",
 						]),
 						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
 						[StatusCodes.NOT_FOUND]: UnitMutationNotFoundResponse,
@@ -1092,6 +1101,7 @@ export default new Elysia()
 							zoneId: params.zoneId,
 							slug: body.slug,
 							actorProfileId: profile.unitId,
+							contribution: body.revisionContext?.contribution,
 							localization: body.localization,
 							ensureReferences: (tx, document) =>
 								ensureZoneBlockReferences(tx, document, {
@@ -1110,7 +1120,12 @@ export default new Elysia()
 					body: ZonePageBody,
 					response: {
 						[StatusCodes.OK]: ZonePageResponse,
-						[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["InvalidSlug", "ZoneDocumentInvalid"]),
+						[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
+							"InvalidSlug",
+							"ZoneDocumentInvalid",
+							"RevisionCreditEntityInvalid",
+							"RevisionContributionActorRequired",
+						]),
 						[StatusCodes.FORBIDDEN]: ZonePreviewMutationForbiddenResponse,
 						[StatusCodes.NOT_FOUND]: UnitMutationNotFoundResponse,
 						[StatusCodes.CONFLICT]: toApiErrorResponse(["SlugTaken", "UnitRevisionConflict"]),
@@ -1157,6 +1172,7 @@ export default new Elysia()
 							pageId: params.pageId,
 							slug: body.slug,
 							actorProfileId: profile.unitId,
+							contribution: body.revisionContext?.contribution,
 							localization: body.localization,
 							baseUnitRevisionId: body.baseUnitRevisionId,
 							ensureReferences: (tx, document) =>
@@ -1176,7 +1192,12 @@ export default new Elysia()
 					body: ZonePageBody,
 					response: {
 						[StatusCodes.OK]: ZonePageResponse,
-						[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["InvalidSlug", "ZoneDocumentInvalid"]),
+						[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
+							"InvalidSlug",
+							"ZoneDocumentInvalid",
+							"RevisionCreditEntityInvalid",
+							"RevisionContributionActorRequired",
+						]),
 						[StatusCodes.FORBIDDEN]: ZonePreviewMutationForbiddenResponse,
 						[StatusCodes.NOT_FOUND]: UnitMutationNotFoundResponse,
 						[StatusCodes.CONFLICT]: toApiErrorResponse(["SlugTaken", "UnitRevisionConflict"]),
@@ -1243,6 +1264,10 @@ export default new Elysia()
 					body: ZonePagePlacementDeleteBody,
 					response: {
 						[StatusCodes.NO_CONTENT]: t.Void(),
+						[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
+							"RevisionCreditEntityInvalid",
+							"RevisionContributionActorRequired",
+						]),
 						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
 						[StatusCodes.NOT_FOUND]: UnitMutationNotFoundResponse,
 						[StatusCodes.CONFLICT]: toApiErrorResponse([
@@ -1469,6 +1494,10 @@ export default new Elysia()
 					body: ZoneNavigationRevisionBody,
 					response: {
 						[StatusCodes.NO_CONTENT]: t.Void(),
+						[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
+							"RevisionCreditEntityInvalid",
+							"RevisionContributionActorRequired",
+						]),
 						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
 						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "ZoneNavigationNotFound"]),
 						[StatusCodes.CONFLICT]: toApiErrorResponse([
@@ -1489,6 +1518,7 @@ export default new Elysia()
 			.put(
 				"/:seriesId/releases/:releaseId",
 				async ({ params, profile, authorization, body }) => {
+					const { revisionContext, ...release } = body;
 					await ensureUnitMutationAuthorized(authorization.unit, params.seriesId, ["releases"]);
 					await authorization.unit.ensureCanRead(
 						params.releaseId,
@@ -1512,16 +1542,17 @@ export default new Elysia()
 							.values({
 								seriesId: params.seriesId,
 								releaseUnitId: params.releaseId,
-								...body,
+								...release,
 							})
 							.onConflictDoUpdate({
 								target: [seriesRelease.seriesId, seriesRelease.releaseUnitId],
-								set: body,
+								set: release,
 							})
 							.returning();
 						await recordUnitRevision(tx, {
 							unitId: params.seriesId,
 							actorProfileId: profile.unitId,
+							contribution: revisionContext?.contribution,
 							event: "update",
 						});
 						return rows;
@@ -1535,6 +1566,10 @@ export default new Elysia()
 					body: UpsertSeriesReleaseBody,
 					response: {
 						[StatusCodes.OK]: SeriesReleaseResponse,
+						[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
+							"RevisionCreditEntityInvalid",
+							"RevisionContributionActorRequired",
+						]),
 						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
 						[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
 					},
@@ -1543,7 +1578,7 @@ export default new Elysia()
 			)
 			.delete(
 				"/:seriesId/releases/:releaseId",
-				async ({ params, profile, authorization }) => {
+				async ({ params, profile, authorization, body }) => {
 					await ensureUnitMutationAuthorized(authorization.unit, params.seriesId, ["releases"]);
 					await database.transaction(async (tx) => {
 						const deleted = await tx
@@ -1559,6 +1594,7 @@ export default new Elysia()
 						await recordUnitRevision(tx, {
 							unitId: params.seriesId,
 							actorProfileId: profile.unitId,
+							contribution: body?.revisionContext?.contribution,
 							event: "update",
 						});
 					});
@@ -1567,6 +1603,7 @@ export default new Elysia()
 				{
 					access: "contribute:unit:update",
 					params: SeriesReleaseParams,
+					body: t.Optional(RevisionContextBody),
 					response: {
 						[StatusCodes.NO_CONTENT]: t.Void(),
 						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
@@ -1609,6 +1646,7 @@ export default new Elysia()
 					await recordUnitRevision(tx, {
 						unitId,
 						actorProfileId: profile.unitId,
+						contribution: body.revisionContext?.contribution,
 						event: "create",
 					});
 					await provisionZoneDefaultExperienceInTransaction(tx, {
@@ -1630,6 +1668,8 @@ export default new Elysia()
 						"ZoneDocumentInvalid",
 						"ZoneRuleRealmInvalid",
 						"ZoneTimeRangeInvalid",
+						"RevisionCreditEntityInvalid",
+						"RevisionContributionActorRequired",
 					]),
 					[StatusCodes.FORBIDDEN]: toApiErrorResponse([
 						"PlatformCapabilityRequired",
@@ -1700,6 +1740,7 @@ export default new Elysia()
 						await recordUnitRevision(tx, {
 							unitId: params.softwareId,
 							actorProfileId: profile.unitId,
+							contribution: body.revisionContext?.contribution,
 							event: "update",
 						});
 						return rows;
@@ -1715,6 +1756,8 @@ export default new Elysia()
 						[StatusCodes.OK]: SystemRequirementResponse,
 						[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
 							"SoftwareSystemRequirementSourceInvalid",
+							"RevisionCreditEntityInvalid",
+							"RevisionContributionActorRequired",
 						]),
 						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
 						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "SoftwareNotFound"]),
@@ -1750,6 +1793,7 @@ export default new Elysia()
 						await recordUnitRevision(tx, {
 							unitId: params.softwareId,
 							actorProfileId: profile.unitId,
+							contribution: body.revisionContext?.contribution,
 							event: "update",
 						});
 						return presentSystemRequirement(updated);
@@ -1763,6 +1807,8 @@ export default new Elysia()
 						[StatusCodes.OK]: SystemRequirementResponse,
 						[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
 							"SoftwareSystemRequirementSourceInvalid",
+							"RevisionCreditEntityInvalid",
+							"RevisionContributionActorRequired",
 						]),
 						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
 						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
@@ -1775,7 +1821,7 @@ export default new Elysia()
 			)
 			.delete(
 				"/:softwareId/system-requirements/:requirementId",
-				async ({ params, profile, authorization }) => {
+				async ({ params, profile, authorization, body }) => {
 					await ensureUnitMutationAuthorized(authorization.unit, params.softwareId, [
 						"system-requirements",
 					]);
@@ -1793,6 +1839,7 @@ export default new Elysia()
 						await recordUnitRevision(tx, {
 							unitId: params.softwareId,
 							actorProfileId: profile.unitId,
+							contribution: body?.revisionContext?.contribution,
 							event: "update",
 						});
 					});
@@ -1801,6 +1848,7 @@ export default new Elysia()
 				{
 					access: "contribute:unit:update",
 					params: SoftwareRequirementParams,
+					body: t.Optional(RevisionContextBody),
 					response: {
 						[StatusCodes.NO_CONTENT]: t.Void(),
 						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,

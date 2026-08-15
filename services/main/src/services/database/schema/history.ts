@@ -24,9 +24,13 @@ import {
 import {
 	type ContentLanguage,
 	ContentLanguageValues,
+	RevisionAttributionAssuranceValues,
+	RevisionContributionRoleValues,
 	UnitStatusActorKindValues,
+	UnitRevisionPrimaryContributionKindValues,
 	toEnumValues,
 } from "./contract-values";
+import { entity } from "./entity";
 import { profile } from "./profile";
 import { unit, unitStatus } from "./unit";
 
@@ -111,6 +115,18 @@ export const unitStatusActorKind = pgEnum(
 	"unit_status_actor_kind",
 	toEnumValues(UnitStatusActorKindValues),
 );
+export const unitRevisionPrimaryContributionKind = pgEnum(
+	"unit_revision_primary_contribution_kind",
+	toEnumValues(UnitRevisionPrimaryContributionKindValues),
+);
+export const unitRevisionContributionRole = pgEnum(
+	"unit_revision_contribution_role",
+	toEnumValues(RevisionContributionRoleValues),
+);
+export const unitRevisionAttributionAssurance = pgEnum(
+	"unit_revision_attribution_assurance",
+	toEnumValues(RevisionAttributionAssuranceValues),
+);
 
 export const revisionContent = pgTable(
 	"revision_content",
@@ -164,6 +180,12 @@ export const unitRevision = pgTable(
 			.references(() => unit.id, { onDelete: "restrict" }),
 		parentRevisionId: uuid(),
 		actorProfileId: uuid().references(() => profile.id, { onDelete: "restrict" }),
+		primaryContributionKind: unitRevisionPrimaryContributionKind()
+			.default("unattributed")
+			.notNull(),
+		creditedEntityId: uuid().references(() => entity.id, { onDelete: "restrict" }),
+		creditRole: unitRevisionContributionRole(),
+		attributionAssurance: unitRevisionAttributionAssurance(),
 		/** @UNIT_LOCALIZATION_EXEMPT Authored snapshot: original point-in-time edit summary, never interface copy. */
 		editSummary: text(),
 		minor: boolean().default(false).notNull(),
@@ -192,7 +214,26 @@ export const unitRevision = pgTable(
 			table.createdAt.desc(),
 			table.id.desc(),
 		),
+		index("unit_revision_ai_entity_created_at_idx")
+			.on(table.creditedEntityId, table.createdAt.desc(), table.id.desc())
+			.where(sql`${table.primaryContributionKind} = 'ai'`),
 		check("unit_revision_byte_size_check", sql`${table.byteSize} >= 0`),
+		check(
+			"unit_revision_primary_contribution_shape_check",
+			sql`(
+				${table.primaryContributionKind} = 'ai'
+				and ${table.actorProfileId} is not null
+				and ${table.creditedEntityId} is not null
+				and ${table.creditRole} is not null
+				and ${table.attributionAssurance} is not null
+			) or (
+				${table.primaryContributionKind} in ('human', 'unattributed')
+				and ${table.creditedEntityId} is null
+				and ${table.creditRole} is null
+				and ${table.attributionAssurance} is null
+				and (${table.primaryContributionKind} = 'unattributed' or ${table.actorProfileId} is not null)
+			)`,
+		),
 		check(
 			"unit_revision_suppressed_check",
 			sql`not ${table.suppressed} or ${table.contentHidden} or ${table.summaryHidden} or ${table.actorHidden}`,

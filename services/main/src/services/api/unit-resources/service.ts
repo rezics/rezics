@@ -87,6 +87,7 @@ export async function createUnitResource(
 		await recordUnitRevision(tx, {
 			unitId: created.id,
 			actorProfileId: ownerId,
+			contribution: body.revisionContext?.contribution,
 			event: "create",
 		});
 		return created.id;

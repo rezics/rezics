@@ -26,6 +26,7 @@ import {
 	ListAssociationProposalsQuery,
 	UnitAssociationProposalActionParams,
 	UnitAssociationProposalParams,
+	ResolveAssociationProposalBody,
 } from "./schema";
 
 function futureDate(value: string): Date {
@@ -159,21 +160,26 @@ export default new Elysia({ prefix: "/unit" })
 	)
 	.post(
 		"/:unitId/association-proposals/:proposalId/accept",
-		async ({ authorization, profile, params }) =>
+		async ({ authorization, profile, params, body }) =>
 			resolveAssociationProposal(authorization, profile.unitId, {
 				actingUnitId: params.unitId,
 				proposalId: params.proposalId,
 				action: "accept",
+				contribution: body?.revisionContext?.contribution,
 			}),
 		{
 			access: "session-only",
 			params: UnitAssociationProposalActionParams,
-			body: t.Optional(t.Object({}, { additionalProperties: false })),
+			body: ResolveAssociationProposalBody,
 			response: {
 				[StatusCodes.OK]: AssociationProposalResponse,
 				[StatusCodes.FORBIDDEN]: ProposalForbiddenResponse,
 				[StatusCodes.NOT_FOUND]: ProposalNotFoundResponse,
 				[StatusCodes.CONFLICT]: ProposalConflictResponse,
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
+					"RevisionCreditEntityInvalid",
+					"RevisionContributionActorRequired",
+				]),
 			},
 			detail: { summary: "Accept Unit association proposal", tags: ["Unit"] },
 		},

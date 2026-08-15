@@ -16,6 +16,8 @@ import {
 	ContentRating,
 	LifecycleInput,
 	LocalizationLanguageQuery,
+	RevisionContext,
+	UnitLocalizationContentFields,
 	UnitLocalizationInput,
 	Uuid,
 	WorkReleaseStatus,
@@ -200,6 +202,7 @@ export const CreateUnitBody = t.Union([
 				uniqueItems: true,
 			}),
 			...CreateUnitFields,
+			revisionContext: t.Optional(RevisionContext),
 		},
 		{ additionalProperties: false },
 	),
@@ -210,6 +213,7 @@ export const CreateUnitBody = t.Union([
 				uniqueItems: true,
 			}),
 			...CreateUnitFields,
+			revisionContext: t.Optional(RevisionContext),
 		},
 		{ additionalProperties: false },
 	),
@@ -248,6 +252,7 @@ export const UpdateUnitBody = t.Object(
 			),
 		),
 		details: t.Optional(UnitDetailsInput),
+		revisionContext: t.Optional(RevisionContext),
 	},
 	{ additionalProperties: false },
 );
@@ -354,13 +359,14 @@ export const UpdateUnitVariantContextBody = t.Object(
 	{
 		mainUnitId: t.Nullable(Uuid),
 		expectedMainUnitId: t.Nullable(Uuid),
+		revisionContext: t.Optional(RevisionContext),
 	},
 	{ additionalProperties: false },
 );
 export type UpdateUnitVariantContextBody = Static<typeof UpdateUnitVariantContextBody>;
 
 export const PromoteUnitVariantBody = t.Object(
-	{ expectedMainUnitId: Uuid },
+	{ expectedMainUnitId: Uuid, revisionContext: t.Optional(RevisionContext) },
 	{ additionalProperties: false },
 );
 export type PromoteUnitVariantBody = Static<typeof PromoteUnitVariantBody>;
@@ -372,7 +378,10 @@ export const UnitLocalizationParams = t.Object({
 });
 export type UnitLocalizationParams = Static<typeof UnitLocalizationParams>;
 
-export const UnitLocalizationBody = t.Omit(UnitLocalizationInput, ["language"]);
+export const UnitLocalizationBody = t.Object(
+	{ ...UnitLocalizationContentFields, revisionContext: t.Optional(RevisionContext) },
+	{ additionalProperties: false },
+);
 export type UnitLocalizationBody = Static<typeof UnitLocalizationBody>;
 
 const ContentLanguageOrder = t.Array(ContentLanguage, {
@@ -390,12 +399,13 @@ export const UnitLocalizationOrderBody = t.Object(
 	{
 		expectedLanguages: ContentLanguageOrder,
 		languages: ContentLanguageOrder,
+		revisionContext: t.Optional(RevisionContext),
 	},
 	{ additionalProperties: false },
 );
 export type UnitLocalizationOrderBody = Static<typeof UnitLocalizationOrderBody>;
 export const UnitLocalizationDeleteBody = t.Object(
-	{ expectedLanguages: ContentLanguageOrder },
+	{ expectedLanguages: ContentLanguageOrder, revisionContext: t.Optional(RevisionContext) },
 	{ additionalProperties: false },
 );
 export type UnitLocalizationDeleteBody = Static<typeof UnitLocalizationDeleteBody>;

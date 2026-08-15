@@ -23,6 +23,7 @@ import { shouldCreateProfilePublisherAttributionForPost } from "../posts/attribu
 import { applyNewPostTagMentionVotes } from "../posts/tag-mentions";
 import { createProfilePublisherAttribution } from "../units/attribution";
 import { recordUnitRevision } from "../units/history";
+import type { RevisionContributionInput } from "../units/revision-contribution";
 import { revisionedBatchChunks } from "../history/revisioned-batch";
 import { diffContentStructureSnapshots } from "./contracts";
 import { ContentStructureInvalid, ContentStructureNotFound } from "./errors";
@@ -44,6 +45,7 @@ export type SaveBookContentStructureDraftInput = {
 	readonly ownerUnitId: string;
 	readonly baseRevisionId: string;
 	readonly actorProfileId: string;
+	readonly contribution?: RevisionContributionInput;
 	readonly nodes: readonly (
 		| ExistingBookDraftNode
 		| NewBookDraftNode
@@ -57,6 +59,7 @@ async function createBookDraftContentUnit(
 		readonly bookId: string;
 		readonly bookOwnershipMode: UnitOwnershipMode | undefined;
 		readonly actorProfileId: string;
+		readonly contribution?: RevisionContributionInput;
 		readonly node: NewBookDraftNode;
 	},
 ): Promise<string> {
@@ -112,6 +115,7 @@ async function createBookDraftContentUnit(
 	await recordUnitRevision(tx, {
 		unitId: created.id,
 		actorProfileId: input.actorProfileId,
+		contribution: input.contribution,
 		event: "create",
 	});
 	return created.id;
@@ -335,6 +339,7 @@ export async function saveBookContentStructureDraft(
 								bookId: input.ownerUnitId,
 								bookOwnershipMode,
 								actorProfileId: input.actorProfileId,
+								contribution: input.contribution,
 								node,
 							});
 				contentUnitIds.set(node.id, contentUnitId);
@@ -388,6 +393,7 @@ export async function saveBookContentStructureDraft(
 				await recordUnitRevision(tx, {
 					unitId: contentUnitId,
 					actorProfileId: input.actorProfileId,
+					contribution: input.contribution,
 					event: "update",
 				});
 			}

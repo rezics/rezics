@@ -350,6 +350,7 @@ export default new Elysia({ prefix: "/collections" })
 				await recordUnitRevision(tx, {
 					unitId: created.id,
 					actorProfileId: profile.unitId,
+					contribution: body.revisionContext?.contribution,
 					event: "create",
 				});
 				await createCollectionStructureHistory(tx, {
@@ -365,6 +366,10 @@ export default new Elysia({ prefix: "/collections" })
 			body: CreateCollectionBody,
 			response: {
 				[StatusCodes.OK]: CollectionDetailResponse,
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
+					"RevisionCreditEntityInvalid",
+					"RevisionContributionActorRequired",
+				]),
 				[StatusCodes.NOT_FOUND]: CollectionMutationNotFoundResponse,
 			},
 			detail: { summary: "Create collection", tags: ["Collections"] },
@@ -473,6 +478,7 @@ export default new Elysia({ prefix: "/collections" })
 				const revision = await recordUnitRevision(tx, {
 					unitId: params.collectionId,
 					actorProfileId: profile.unitId,
+					contribution: body.revisionContext?.contribution,
 					event: "update",
 					baseRevisionId: body.baseRevisionId,
 				});
@@ -496,6 +502,10 @@ export default new Elysia({ prefix: "/collections" })
 			body: UpdateCollectionBody,
 			response: {
 				[StatusCodes.OK]: CollectionDetailResponse,
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
+					"RevisionCreditEntityInvalid",
+					"RevisionContributionActorRequired",
+				]),
 				[StatusCodes.FORBIDDEN]: CollectionMutationForbiddenResponse,
 				[StatusCodes.NOT_FOUND]: CollectionMutationNotFoundResponse,
 				[StatusCodes.CONFLICT]: t.Union([FavoritesEditResponse, UnitRevisionConflictResponse]),

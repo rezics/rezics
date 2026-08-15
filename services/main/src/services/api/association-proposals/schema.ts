@@ -5,7 +5,7 @@ import {
 	CreditAttributionRoleValues,
 	SubjectAssociationRoleValues,
 } from "../../database/schema/contract-values";
-import { DateTime, Uuid } from "../schema";
+import { DateTime, RevisionContext, Uuid } from "../schema";
 
 const AssociationKind = t.UnionEnum(AssociationKindValues);
 
@@ -85,6 +85,9 @@ export const AssociationProposalResponse = t.Object({
 	role: AssociationRole,
 	contextPostId: t.Nullable(Uuid),
 });
+export const ResolveAssociationProposalBody = t.Optional(
+	t.Object({ revisionContext: t.Optional(RevisionContext) }, { additionalProperties: false }),
+);
 export const AssociationProposalListResponse = t.Object({
 	items: t.Array(AssociationProposalResponse),
 });

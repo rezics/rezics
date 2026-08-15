@@ -14,6 +14,7 @@ import {
 	FractionalPositionInput,
 	ContentLanguage,
 	LocalizationLanguageQuery,
+	RevisionContext,
 	UnitLocalizationInput,
 	Uuid,
 } from "../schema";
@@ -23,6 +24,7 @@ export const CreateUnitResourceBody = t.Object(
 	{
 		kind: t.Optional(t.String({ minLength: 1, maxLength: 64 })),
 		localization: UnitLocalizationInput,
+		revisionContext: t.Optional(RevisionContext),
 	},
 	{ additionalProperties: false },
 );
@@ -33,6 +35,7 @@ export const CreateEntityBody = t.Object(
 		ownershipMode: UnitOwnershipMode,
 		kind: t.Optional(t.UnionEnum(EntityKindValues, { default: undefined })),
 		localization: UnitLocalizationInput,
+		revisionContext: t.Optional(RevisionContext),
 	},
 	{ additionalProperties: false },
 );
@@ -78,11 +81,15 @@ export type TagDetailParams = Static<typeof TagDetailParams>;
 export const TagLocalizationParams = t.Object({ tagId: Uuid, language: ContentLanguage });
 export type TagLocalizationParams = Static<typeof TagLocalizationParams>;
 
-export const AddUnitCreditBody = t.Object({
-	creditedUnitId: Uuid,
-	role: t.UnionEnum(CreditAttributionRoleValues),
-	position: t.Optional(FractionalPositionInput),
-});
+export const AddUnitCreditBody = t.Object(
+	{
+		creditedUnitId: Uuid,
+		role: t.UnionEnum(CreditAttributionRoleValues),
+		position: t.Optional(FractionalPositionInput),
+		revisionContext: t.Optional(RevisionContext),
+	},
+	{ additionalProperties: false },
+);
 export type AddUnitCreditBody = Static<typeof AddUnitCreditBody>;
 
 export const AddUnitSubjectAssociationBody = t.Object(
@@ -91,6 +98,7 @@ export const AddUnitSubjectAssociationBody = t.Object(
 		contextPostId: t.Optional(Uuid),
 		role: t.UnionEnum(SubjectAssociationRoleValues),
 		position: t.Optional(FractionalPositionInput),
+		revisionContext: t.Optional(RevisionContext),
 	},
 	{ additionalProperties: false },
 );
@@ -176,6 +184,7 @@ export const UpdateUnitTagCurationBody = t.Union([
 			position: FractionalPositionInput,
 			updatedAt: DateTime,
 			expectedFeaturedTagIds: t.Array(Uuid),
+			revisionContext: t.Optional(RevisionContext),
 		},
 		{ additionalProperties: false },
 	),
@@ -185,6 +194,7 @@ export const UpdateUnitTagCurationBody = t.Union([
 			position: t.Null(),
 			updatedAt: DateTime,
 			expectedFeaturedTagIds: t.Array(Uuid),
+			revisionContext: t.Optional(RevisionContext),
 		},
 		{ additionalProperties: false },
 	),

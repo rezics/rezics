@@ -1,7 +1,7 @@
 import { type Static, t } from "elysia";
 import { SlugAddressMaximumDepth, SlugLabelPatternSource } from "@rezics/slug";
 
-import { UnitKind, Uuid } from "../schema";
+import { RevisionContext, UnitKind, Uuid } from "../schema";
 import { GovernanceRuleReferences } from "../governance/schema";
 
 export const SlugLabelInput = t.String({
@@ -74,9 +74,12 @@ export const ReplaceUnitSlugAddressBody = t.Object(PlatformSlugAddressInput, {
 	additionalProperties: false,
 });
 
-export const CreateSlugNamespaceBody = t.Object(PlatformSlugAddressInput, {
-	additionalProperties: false,
-});
+export const CreateSlugNamespaceBody = t.Object(
+	{ ...PlatformSlugAddressInput, revisionContext: t.Optional(RevisionContext) },
+	{
+		additionalProperties: false,
+	},
+);
 
 export const CanonicalSlugAddressResponse = t.Object({
 	addressId: Uuid,

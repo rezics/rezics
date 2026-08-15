@@ -205,6 +205,7 @@ import { createWikiPost } from "../../posts/wiki";
 import { getContentStructureRevision } from "../../content-structure/service";
 import { RealmUnitTagVoteListQuery, RealmUnitTagVoteListResponse } from "../tags/schema";
 import { ValidationError } from "../errors";
+import { RevisionContextBody } from "../schema";
 import { planRealmPinMove } from "./pin-ordering";
 
 const RealmNotFoundResponse = toApiErrorResponse(["RealmNotFound"]);
@@ -700,6 +701,7 @@ export default new Elysia({ prefix: "/realms" })
 				await recordUnitRevision(tx, {
 					unitId: created.id,
 					actorProfileId: profile.unitId,
+					contribution: body.revisionContext?.contribution,
 					event: "create",
 				});
 				await createContentStructureHistory(tx, {
@@ -716,6 +718,10 @@ export default new Elysia({ prefix: "/realms" })
 			body: CreateRealmBody,
 			response: {
 				[StatusCodes.OK]: IdResponse,
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
+					"RevisionCreditEntityInvalid",
+					"RevisionContributionActorRequired",
+				]),
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["ImageAssetNotFound", "TagNotFound"]),
 			},
 			detail: { summary: "Create Realm", tags: ["Realms"] },
@@ -940,6 +946,7 @@ export default new Elysia({ prefix: "/realms" })
 				const revision = await recordUnitRevision(tx, {
 					unitId: params.realmId,
 					actorProfileId: profile.unitId,
+					contribution: body.revisionContext?.contribution,
 					event: "update",
 					baseRevisionId: body.baseRevisionId,
 				});
@@ -956,6 +963,10 @@ export default new Elysia({ prefix: "/realms" })
 			body: UpdateRealmPagesBody,
 			response: {
 				[StatusCodes.OK]: RealmPagesResponse,
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
+					"RevisionCreditEntityInvalid",
+					"RevisionContributionActorRequired",
+				]),
 				[StatusCodes.FORBIDDEN]: RealmMutationForbiddenResponse,
 				[StatusCodes.NOT_FOUND]: RealmNotFoundResponse,
 				[StatusCodes.CONFLICT]: toApiErrorResponse(["UnitRevisionConflict"]),
@@ -1019,6 +1030,7 @@ export default new Elysia({ prefix: "/realms" })
 					ownerUnitId: params.realmId,
 					baseRevisionId: body.baseRevisionId,
 					actorProfileId: profile.unitId,
+					contribution: body.revisionContext?.contribution,
 					nodes: body.nodes,
 				});
 				const saved = await readRealmTaxonomy(tx, params.realmId, []);
@@ -1037,6 +1049,10 @@ export default new Elysia({ prefix: "/realms" })
 					"UnitPermissionForbidden",
 				]),
 				[StatusCodes.NOT_FOUND]: RealmNotFoundResponse,
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
+					"RevisionCreditEntityInvalid",
+					"RevisionContributionActorRequired",
+				]),
 				[StatusCodes.CONFLICT]: toApiErrorResponse(["ContentStructureRevisionConflict"]),
 				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["ContentStructureInvalid"]),
 			},
@@ -1233,6 +1249,7 @@ export default new Elysia({ prefix: "/realms" })
 				const revision = await recordUnitRevision(tx, {
 					unitId: params.realmId,
 					actorProfileId: profile.unitId,
+					contribution: body.revisionContext?.contribution,
 					event: "update",
 				});
 				if (body.status)
@@ -1256,6 +1273,10 @@ export default new Elysia({ prefix: "/realms" })
 			body: UpdateRealmBody,
 			response: {
 				[StatusCodes.OK]: IdResponse,
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
+					"RevisionCreditEntityInvalid",
+					"RevisionContributionActorRequired",
+				]),
 				[StatusCodes.FORBIDDEN]: RealmMutationForbiddenResponse,
 				[StatusCodes.NOT_FOUND]: RealmMutationNotFoundResponse,
 			},
@@ -1276,6 +1297,7 @@ export default new Elysia({ prefix: "/realms" })
 				await recordUnitRevision(tx, {
 					unitId: params.realmId,
 					actorProfileId: profile.unitId,
+					contribution: body.revisionContext?.contribution,
 					event: "update",
 				});
 				await recordAuditEvent(tx, profile.unitId, "realm.tag-voting.update", params.realmId, {
@@ -1290,6 +1312,10 @@ export default new Elysia({ prefix: "/realms" })
 			body: UpdateRealmTagVotingBody,
 			response: {
 				[StatusCodes.OK]: RealmTagVotingResponse,
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
+					"RevisionCreditEntityInvalid",
+					"RevisionContributionActorRequired",
+				]),
 				[StatusCodes.FORBIDDEN]: RealmMutationForbiddenResponse,
 				[StatusCodes.NOT_FOUND]: RealmNotFoundResponse,
 			},
@@ -1567,7 +1593,12 @@ export default new Elysia({ prefix: "/realms" })
 				const result = await publishRealmRuleRevision(tx, {
 					realmId: params.realmId,
 					actorProfileId: profile.unitId,
-					...body,
+					baseRevisionId: body.baseRevisionId,
+					acknowledgementMode: body.acknowledgementMode,
+					requireOnJoin: body.requireOnJoin,
+					requireOnPost: body.requireOnPost,
+					rules: body.rules,
+					contribution: body.revisionContext?.contribution,
 				});
 				if (result.status === "revision_changed")
 					throw new RealmRuleRevisionChanged({
@@ -1589,6 +1620,10 @@ export default new Elysia({ prefix: "/realms" })
 			body: UpdateRealmRulesBody,
 			response: {
 				[StatusCodes.OK]: RealmRuleRevisionResponse,
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
+					"RevisionCreditEntityInvalid",
+					"RevisionContributionActorRequired",
+				]),
 				[StatusCodes.FORBIDDEN]: RealmMutationForbiddenResponse,
 				[StatusCodes.CONFLICT]: toApiErrorResponse(["RealmRuleRevisionChanged"]),
 				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["ValidationError"]),
@@ -1848,6 +1883,7 @@ export default new Elysia({ prefix: "/realms" })
 				const revision = await recordUnitRevision(tx, {
 					unitId: params.realmId,
 					actorProfileId: profile.unitId,
+					contribution: body.revisionContext?.contribution,
 					event: "update",
 				});
 				await recordAuditEvent(tx, profile.unitId, "realm.pins.move", params.realmId, {
@@ -1865,6 +1901,10 @@ export default new Elysia({ prefix: "/realms" })
 			body: MoveRealmPinsBody,
 			response: {
 				[StatusCodes.OK]: SavedResponse,
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
+					"RevisionCreditEntityInvalid",
+					"RevisionContributionActorRequired",
+				]),
 				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["ValidationError"]),
 				[StatusCodes.FORBIDDEN]: RealmMutationForbiddenResponse,
 			},
@@ -1923,6 +1963,7 @@ export default new Elysia({ prefix: "/realms" })
 				await recordUnitRevision(tx, {
 					unitId: params.realmId,
 					actorProfileId: profile.unitId,
+					contribution: body.revisionContext?.contribution,
 					event: "update",
 				});
 				await recordAuditEvent(tx, profile.unitId, "realm.pins.upsert", params.unitId, {
@@ -1937,6 +1978,10 @@ export default new Elysia({ prefix: "/realms" })
 			body: CreateRealmPinBody,
 			response: {
 				[StatusCodes.OK]: RealmPinResponse,
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
+					"RevisionCreditEntityInvalid",
+					"RevisionContributionActorRequired",
+				]),
 				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["ValidationError"]),
 				[StatusCodes.FORBIDDEN]: RealmMutationForbiddenResponse,
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
@@ -1946,7 +1991,7 @@ export default new Elysia({ prefix: "/realms" })
 	)
 	.delete(
 		"/:realmId/pins/:unitId",
-		async ({ params, profile, authorization, query }) => {
+		async ({ params, profile, authorization, query, body }) => {
 			await ensureRealmFieldsAuthorized(authorization, params.realmId, "realm.pins.manage", [
 				"pins",
 			]);
@@ -1968,6 +2013,7 @@ export default new Elysia({ prefix: "/realms" })
 				await recordUnitRevision(tx, {
 					unitId: params.realmId,
 					actorProfileId: profile.unitId,
+					contribution: body?.revisionContext?.contribution,
 					event: "update",
 				});
 				await recordAuditEvent(tx, profile.unitId, "realm.pins.delete", params.unitId, {
@@ -1980,8 +2026,13 @@ export default new Elysia({ prefix: "/realms" })
 			access: "write:realm:manage",
 			params: RealmPinParams,
 			query: RemoveRealmPinQuery,
+			body: t.Optional(RevisionContextBody),
 			response: {
 				[StatusCodes.NO_CONTENT]: t.Void(),
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
+					"RevisionCreditEntityInvalid",
+					"RevisionContributionActorRequired",
+				]),
 				[StatusCodes.FORBIDDEN]: RealmMutationForbiddenResponse,
 			},
 			detail: {
@@ -2931,6 +2982,7 @@ export default new Elysia({ prefix: "/realms" })
 				const common = {
 					caseId: caseRow.id,
 					idempotencyKey: body.idempotencyKey,
+					revisionContext: body.revisionContext,
 					...(body.annotation ? { notes: [body.annotation] } : {}),
 				};
 				const actionBody: CreateContentGovernanceActionBody = {
@@ -2989,6 +3041,8 @@ export default new Elysia({ prefix: "/realms" })
 				[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
 					"ContentGovernanceActionIncompatible",
 					"GovernanceRuleSourceForbidden",
+					"RevisionCreditEntityInvalid",
+					"RevisionContributionActorRequired",
 				]),
 				[StatusCodes.FORBIDDEN]: toApiErrorResponse(["RealmCapabilityRequired"]),
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["RealmUnitNotFound"]),
@@ -3067,6 +3121,7 @@ export default new Elysia({ prefix: "/realms" })
 							publicRecipientProfileIds: [
 								...new Set(reportRows.map((report) => report.reporterProfileId)),
 							],
+							revisionContribution: body.revisionContext?.contribution,
 							note: body.annotation,
 						})
 					: undefined;
@@ -3144,6 +3199,10 @@ export default new Elysia({ prefix: "/realms" })
 			body: ReviewRealmUnitBody,
 			response: {
 				[StatusCodes.OK]: RealmUnitReviewResponse,
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
+					"RevisionCreditEntityInvalid",
+					"RevisionContributionActorRequired",
+				]),
 				[StatusCodes.FORBIDDEN]: toApiErrorResponse(["RealmCapabilityRequired"]),
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["RealmUnitNotFound"]),
 				[StatusCodes.CONFLICT]: toApiErrorResponse(["ContentGovernanceActionNoEffect"]),

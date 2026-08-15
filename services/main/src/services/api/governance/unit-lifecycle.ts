@@ -133,6 +133,7 @@ export default new Elysia({ prefix: "/platform/units" })
 				expectedUpdatedAt: new Date(body.expectedUpdatedAt),
 				rules: body.rules,
 				note: body.note?.trim() || undefined,
+				contribution: body.revisionContext?.contribution,
 			});
 		},
 		{
@@ -144,6 +145,8 @@ export default new Elysia({ prefix: "/platform/units" })
 				[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
 					"UnitLifecycleConfirmationInvalid",
 					"GovernanceRuleSourceForbidden",
+					"RevisionCreditEntityInvalid",
+					"RevisionContributionActorRequired",
 				]),
 				[StatusCodes.FORBIDDEN]: toApiErrorResponse([
 					"PlatformCapabilityRequired",
@@ -175,6 +178,7 @@ export default new Elysia({ prefix: "/platform/units" })
 				actorProfileId: profile.unitId,
 				expectedUpdatedAt: new Date(body.expectedUpdatedAt),
 				note: body.note?.trim() || undefined,
+				contribution: body.revisionContext?.contribution,
 			});
 		},
 		{
@@ -183,7 +187,11 @@ export default new Elysia({ prefix: "/platform/units" })
 			body: RestoreUnitLifecycleCommandBody,
 			response: {
 				[StatusCodes.OK]: PlatformUnitLifecycleResponse,
-				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["UnitLifecycleConfirmationInvalid"]),
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
+					"UnitLifecycleConfirmationInvalid",
+					"RevisionCreditEntityInvalid",
+					"RevisionContributionActorRequired",
+				]),
 				[StatusCodes.FORBIDDEN]: toApiErrorResponse([
 					"PlatformCapabilityRequired",
 					"FreshSessionRequired",

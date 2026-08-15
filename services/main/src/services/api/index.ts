@@ -14,6 +14,7 @@ import wikiNavigation from "./wiki-navigation";
 import contentStructure from "./content-structure";
 import posts from "./posts";
 import health from "./health";
+import agentGuide from "./agent-guide";
 import history from "./history";
 import imageAssetContent from "./image-assets/content";
 import imageAssets from "./image-assets";
@@ -155,6 +156,7 @@ export default new Elysia({ normalize: "typebox" })
 	})
 	.mount(auth.handler)
 	.use(session)
+	.use(agentGuide)
 	.use(imageAssetContent)
 	.group("/api/v1", (api) =>
 		api.guard({ parse: ["empty-body", "json"] }, (api) =>

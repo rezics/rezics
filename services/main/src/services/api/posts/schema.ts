@@ -6,6 +6,7 @@ import {
 	FractionalPosition,
 	ContentLanguage,
 	LocalizationLanguageQuery,
+	RevisionContext,
 	ResourceVisibility,
 	Uuid,
 } from "../schema";
@@ -46,6 +47,7 @@ export const CreatePostBody = t.Union([
 			...CreatePostFields,
 			postKind: t.Literal("post"),
 			subjectId: t.Optional(Uuid),
+			revisionContext: t.Optional(RevisionContext),
 		},
 		{ additionalProperties: false },
 	),
@@ -54,6 +56,7 @@ export const CreatePostBody = t.Union([
 			...CreatePostFields,
 			postKind: t.Literal("excerpt"),
 			subjectId: Uuid,
+			revisionContext: t.Optional(RevisionContext),
 		},
 		{ additionalProperties: false },
 	),
@@ -68,6 +71,7 @@ export const CreateWikiBody = t.Object(
 		language: ContentLanguage,
 		publishRealmIds: PostPublishRealmIds,
 		subjectId: t.Optional(Uuid),
+		revisionContext: t.Optional(RevisionContext),
 	},
 	{ additionalProperties: false },
 );
@@ -112,6 +116,7 @@ export const UpdatePostBody = t.Object({
 	baseRevisionId: Uuid,
 	editSummary: t.Optional(t.String({ maxLength: 500 })),
 	minor: t.Optional(t.Boolean()),
+	revisionContext: t.Optional(RevisionContext),
 });
 export type UpdatePostBody = Static<typeof UpdatePostBody>;
 
@@ -132,6 +137,7 @@ export const CreateReplyBody = t.Object({
 	realmId: t.Optional(Uuid),
 	language: ContentLanguage,
 	body: PortableTextDocument,
+	revisionContext: t.Optional(RevisionContext),
 });
 export type CreateReplyBody = Static<typeof CreateReplyBody>;
 
@@ -147,5 +153,6 @@ export const UpdateReplyBody = t.Object({
 	baseRevisionId: Uuid,
 	editSummary: t.Optional(t.String({ maxLength: 500 })),
 	minor: t.Optional(t.Boolean()),
+	revisionContext: t.Optional(RevisionContext),
 });
 export type UpdateReplyBody = Static<typeof UpdateReplyBody>;

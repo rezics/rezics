@@ -27,6 +27,7 @@ import {
 } from "./errors";
 import { insertUnit } from "./create";
 import { recordUnitRevision } from "./history";
+import type { RevisionContributionInput } from "./revision-contribution";
 import { decideProfileSlugAssignment, parseAssignableProfileSlug } from "./profile-slug-policy";
 import {
 	SystemSlugNamespaceUnitIds,
@@ -967,6 +968,7 @@ export async function createSlugNamespace(
 		readonly scopeUnitId: string | null;
 		readonly slug: string;
 		readonly rules: readonly GovernanceRuleReference[];
+		readonly contribution?: RevisionContributionInput;
 	},
 ): Promise<UnitAddressMutationResult> {
 	await authorization.platform.ensureCapability("unit.slug.namespace.manage");
@@ -1005,6 +1007,7 @@ export async function createSlugNamespace(
 		await recordUnitRevision(tx, {
 			unitId: created.id,
 			actorProfileId: authorization.profileId,
+			contribution: input.contribution,
 			event: "create",
 		});
 		return { unitId: created.id, mutation };

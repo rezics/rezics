@@ -16,6 +16,7 @@ import { ensureSubjectPostTargetingAllowed } from "./targeting";
 import { createProfilePublisherAttribution } from "../units/attribution";
 import { insertUnit } from "../units/create";
 import { recordUnitRevision } from "../units/history";
+import type { RevisionContributionInput } from "../units/revision-contribution";
 import { resolveCanonicalUnitId } from "../units/merge/canonical";
 
 export type CreateWikiPostInput = {
@@ -27,6 +28,7 @@ export type CreateWikiPostInput = {
 	readonly body: PortableTextDocument;
 	readonly language: ContentLanguage;
 	readonly publishRealmIds: readonly string[];
+	readonly contribution?: RevisionContributionInput;
 	readonly governanceRealmId?: string;
 	readonly subjectId?: string;
 };
@@ -100,6 +102,7 @@ export async function createWikiPost(
 	const revision = await recordUnitRevision(tx, {
 		unitId: created.id,
 		actorProfileId: input.profileId,
+		contribution: input.contribution,
 		event: "create",
 	});
 	return { id: created.id, revisionId: revision.revisionId };

@@ -3,7 +3,14 @@ import { ResourceVisibilityValues, UnitStatusValues } from "../../database/schem
 import { RevisionHiddenFieldValues } from "../../history/visibility";
 import { UnitRevisionChangeTags } from "../../units/history";
 import { ResourceSectionValues } from "../../units/resource-section";
-import { ContentLanguage, DateTime, LocalizationLanguageQuery, Uuid } from "../schema";
+import {
+	ContentLanguage,
+	DateTime,
+	LocalizationLanguageQuery,
+	RevisionContext,
+	RevisionPrimaryContribution,
+	Uuid,
+} from "../schema";
 import { NullablePublicSlugAddressResponse } from "../slug-addresses/schema";
 import { GovernanceRuleReferences } from "../governance/schema";
 
@@ -75,6 +82,7 @@ export const RevisionActionBody = t.Object(
 		baseRevisionId: Uuid,
 		editSummary: t.Optional(t.String({ maxLength: 500 })),
 		minor: t.Optional(t.Boolean({ default: false })),
+		revisionContext: t.Optional(RevisionContext),
 	},
 	{ additionalProperties: false },
 );
@@ -112,6 +120,7 @@ export const UnitRevisionSummaryResponse = t.Object({
 	parentRevisionId: t.Nullable(Uuid),
 	actorProfileId: t.Nullable(Uuid),
 	actorName: t.Nullable(t.String()),
+	primaryContribution: RevisionPrimaryContribution,
 	editSummary: t.Nullable(t.String()),
 	minor: t.Boolean(),
 	byteSize: t.Integer(),

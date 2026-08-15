@@ -752,6 +752,7 @@ export async function executeAuthorizedContentGovernanceAction(
 				subjectId: created.id,
 				subjectUnitId: target.subjectUnitId,
 				realmId: input.caseRow.realmId,
+				revisionContribution: input.body.revisionContext?.contribution,
 				publicRecipientProfileIds: [
 					...new Set([...target.recipientProfileIds, ...reportRecipientProfileIds]),
 				],

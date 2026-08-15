@@ -19,6 +19,7 @@ import { insertUnit } from "../units/create";
 import { createProfilePublisherAttribution } from "../units/attribution";
 import { isFirstUnitLocalization } from "../units/localization";
 import { ensureSubjectPostTargetingAllowed } from "../posts/targeting";
+import type { RevisionContributionInput } from "../units/revision-contribution";
 
 export type GovernanceNoteRole = (typeof GovernanceNoteRoleValues)[number];
 export type GovernanceNoteSubjectKind = (typeof GovernanceNoteSubjectKindValues)[number];
@@ -47,6 +48,7 @@ export async function createGovernanceNotePost(
 		realmId?: string | null;
 		viewerProfileIds?: readonly string[];
 		publicRecipientProfileIds?: readonly string[];
+		revisionContribution?: RevisionContributionInput;
 		note: GovernanceNote;
 	},
 ): Promise<{ postId: string }> {
@@ -111,6 +113,7 @@ export async function createGovernanceNotePost(
 	await recordUnitRevision(tx, {
 		unitId: created.id,
 		actorProfileId: input.actorProfileId,
+		contribution: input.revisionContribution,
 		event: "create",
 	});
 	await tx.insert(governancePostBinding).values({

@@ -183,9 +183,15 @@ export default new Elysia({ prefix: "/slug-addresses" })
 		"/namespaces",
 		async ({ authorization, body, status }) => {
 			await authorization.platform.ensureCapability(DevelopmentPreviewCapability);
+			const { revisionContext, ...namespace } = body;
 			return status(
 				StatusCodes.CREATED,
-				presentPath(await createSlugNamespace(authorization, body)),
+				presentPath(
+					await createSlugNamespace(authorization, {
+						...namespace,
+						contribution: revisionContext?.contribution,
+					}),
+				),
 			);
 		},
 		{
@@ -196,6 +202,8 @@ export default new Elysia({ prefix: "/slug-addresses" })
 				[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
 					"InvalidSlug",
 					"GovernanceRuleSourceForbidden",
+					"RevisionCreditEntityInvalid",
+					"RevisionContributionActorRequired",
 				]),
 				[StatusCodes.UNAUTHORIZED]: AuthenticationRequiredResponse,
 				[StatusCodes.FORBIDDEN]: SlugMutationForbiddenResponse,

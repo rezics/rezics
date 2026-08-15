@@ -16,6 +16,25 @@ async function readErrorBody(response: Response) {
 }
 
 describe("API root", () => {
+	it("serves the versioned agent contribution guide", async () => {
+		const response = await api.handle(
+			new Request("http://localhost/.well-known/rezics-agent.json"),
+		);
+		expect(response.status).toBe(StatusCodes.OK);
+		expect(response.headers.get("Cache-Control")).toBe("public, max-age=300");
+		expect(await response.json()).toMatchObject({
+			version: "1",
+			contribution: {
+				requestField: "revisionContext.contribution",
+				assurance: "server_derived",
+			},
+			workflow: {
+				entitySearchKind: "software_agent",
+				noModelVersionField: true,
+			},
+		});
+	});
+
 	it("serves health checks without dependencies", async () => {
 		const get = await api.handle(new Request("http://localhost/api/v1/health"));
 		const head = await api.handle(

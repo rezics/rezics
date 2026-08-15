@@ -1,10 +1,12 @@
 import type { PublicationLicenseId, UnitContentLicenseSlug } from "@rezics/license";
 
 import type { WorkReleaseStatus } from "../database/schema/contract-values";
+import type { RevisionContributionInput } from "./revision-contribution";
 
 /** @internal */
 export interface UpdateUnitInput {
 	readonly expectedUpdatedAt: Date;
+	readonly revisionContribution?: RevisionContributionInput;
 	readonly status?: "draft" | "published" | "archived";
 	readonly visibility?: "public" | "unlisted" | "private";
 	readonly contentRating?: "general" | "r15" | "r18" | "r18g";

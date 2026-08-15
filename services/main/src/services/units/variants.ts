@@ -30,6 +30,7 @@ import {
 	UnitVariantTargetIsVariant,
 } from "./errors";
 import { recordUnitRevision } from "./history";
+import type { RevisionContributionInput } from "./revision-contribution";
 import { isDiscoverableVariantUnit } from "./variant-policy";
 
 const VariantCapableUnitKinds: ReadonlySet<string> = new Set(VariantCapableUnitKindValues);
@@ -327,6 +328,7 @@ export async function updateUnitVariantContext(input: {
 	readonly mainUnitId: string | null;
 	readonly expectedMainUnitId: string | null;
 	readonly actorProfileId: string;
+	readonly contribution?: RevisionContributionInput;
 	readonly authorization: UnitAuthorization<string>;
 }): Promise<UnitVariantMutationResult> {
 	return database.transaction(async (tx) => {
@@ -394,6 +396,7 @@ export async function updateUnitVariantContext(input: {
 		await recordUnitRevision(tx, {
 			unitId: input.variantUnitId,
 			actorProfileId: input.actorProfileId,
+			contribution: input.contribution,
 			event: "update",
 		});
 		await recordAuditEvent(tx, {
@@ -421,6 +424,7 @@ export async function promoteUnitVariantToMain(input: {
 	readonly variantUnitId: string;
 	readonly expectedMainUnitId: string;
 	readonly actorProfileId: string;
+	readonly contribution?: RevisionContributionInput;
 	readonly authorization: UnitAuthorization<string>;
 }): Promise<UnitVariantPromotionResult> {
 	return database.transaction(async (tx) => {
@@ -481,6 +485,7 @@ export async function promoteUnitVariantToMain(input: {
 			await recordUnitRevision(tx, {
 				unitId,
 				actorProfileId: input.actorProfileId,
+				contribution: input.contribution,
 				event: "update",
 			});
 		await recordAuditEvent(tx, {

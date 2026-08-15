@@ -26,6 +26,7 @@ import {
 } from "../api/governance/errors";
 import { UnitNotFound } from "./errors";
 import { recordUnitRevision } from "./history";
+import type { RevisionContributionInput } from "./revision-contribution";
 import { firstUnitLocalizationTitle } from "./localization";
 import { transitionUnitStatus } from "./status";
 import { ensureUnitVariantLifecycle } from "./variant-policy";
@@ -223,6 +224,7 @@ export async function softDeletePlatformUnit(input: {
 	readonly expectedUpdatedAt: Date;
 	readonly rules: readonly GovernanceRuleReference[];
 	readonly note?: string;
+	readonly contribution?: RevisionContributionInput;
 }): Promise<PlatformUnitLifecycleItem> {
 	return database.transaction(async (tx) => {
 		await lockUnitMergeIdentity(tx, input.unitId);
@@ -248,6 +250,7 @@ export async function softDeletePlatformUnit(input: {
 		await recordUnitRevision(tx, {
 			unitId: current.id,
 			actorProfileId: input.actorProfileId,
+			contribution: input.contribution,
 			event: "delete",
 		});
 		if (current.kind === "book" || current.kind === "software" || current.kind === "media")
@@ -273,6 +276,7 @@ export async function restorePlatformUnit(input: {
 	readonly actorProfileId: string;
 	readonly expectedUpdatedAt: Date;
 	readonly note?: string;
+	readonly contribution?: RevisionContributionInput;
 }): Promise<PlatformUnitLifecycleItem> {
 	return database.transaction(async (tx) => {
 		await lockUnitMergeIdentity(tx, input.unitId);
@@ -316,6 +320,7 @@ export async function restorePlatformUnit(input: {
 		const revision = await recordUnitRevision(tx, {
 			unitId: current.id,
 			actorProfileId: input.actorProfileId,
+			contribution: input.contribution,
 			event: "restore",
 		});
 		const resultingStatus = current.status === "published" ? "archived" : current.status;

@@ -19,6 +19,7 @@ import {
 } from "../database/schema";
 import { createNotification } from "../notifications/service";
 import { recordUnitRevision } from "../units/history";
+import type { RevisionContributionInput } from "../units/revision-contribution";
 import { firstUnitLocalizationTitle } from "../units/localization";
 import { UnitNotFound } from "../units/errors";
 import {
@@ -297,6 +298,7 @@ export async function decidePlatformUnitOwnershipClaim(
 		readonly decision: UnitOwnershipClaimDecision;
 		readonly rules: readonly GovernanceRuleReference[];
 		readonly note?: string;
+		readonly contribution?: RevisionContributionInput;
 	},
 ) {
 	return database.transaction(async (tx) => {
@@ -436,6 +438,7 @@ export async function decidePlatformUnitOwnershipClaim(
 		await recordUnitRevision(tx, {
 			unitId: claim.unitId,
 			actorProfileId: input.actorProfileId,
+			contribution: input.contribution,
 			event: "update",
 			message: "Transfer community-owned Unit to approved claimant",
 		});

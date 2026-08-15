@@ -89,7 +89,11 @@ const UnitCreateForbiddenResponse = toApiErrorResponse([
 	"AccountRestricted",
 	"EntityAssociationRestricted",
 ]);
-const UnitCreateBadRequestResponse = toApiErrorResponse(["CreditAttributionRoleInvalid"]);
+const UnitCreateBadRequestResponse = toApiErrorResponse([
+	"CreditAttributionRoleInvalid",
+	"RevisionCreditEntityInvalid",
+	"RevisionContributionActorRequired",
+]);
 const UnitCreateConflictResponse = toApiErrorResponse([
 	"CreditAttributionRequestConfirmationRequired",
 	"UnitVariantKindMismatch",
@@ -100,6 +104,8 @@ const UnitCreateConflictResponse = toApiErrorResponse([
 ]);
 const UnitLocalizationOrderBadRequestResponse = toApiErrorResponse([
 	"UnitLocalizationOrderInvalid",
+	"RevisionCreditEntityInvalid",
+	"RevisionContributionActorRequired",
 ]);
 const UnitLocalizationOrderConflictResponse = toApiErrorResponse([
 	"UnitLocalizationOrderChanged",
@@ -121,6 +127,10 @@ const UnitUpdateForbiddenResponse = toApiErrorResponse([
 	"AccountRestricted",
 	"UnitPermissionForbidden",
 	"UnitContentLicenseGrantForbidden",
+]);
+const UnitRevisionContributionBadRequestResponse = toApiErrorResponse([
+	"RevisionCreditEntityInvalid",
+	"RevisionContributionActorRequired",
 ]);
 const UnitAuthorizationForbiddenResponse = toApiErrorResponse([
 	"ApiTokenPermissionRequired",
@@ -390,9 +400,15 @@ export default new Elysia({ prefix: "/units" })
 	)
 	.put(
 		"/by-id/:unitId/localization-order",
-		async ({ params, authorization, body }) => ({
-			languages: await updateUnitLocalizationOrder(params.unitId, authorization, body),
-		}),
+		async ({ params, authorization, body }) => {
+			const { revisionContext, ...order } = body;
+			return {
+				languages: await updateUnitLocalizationOrder(params.unitId, authorization, {
+					...order,
+					revisionContribution: revisionContext?.contribution,
+				}),
+			};
+		},
 		{
 			access: "contribute:unit:update",
 			params: UnitLocalizationOrderParams,
@@ -415,6 +431,7 @@ export default new Elysia({ prefix: "/units" })
 				params.language,
 				authorization,
 				body.expectedLanguages,
+				body.revisionContext?.contribution,
 			),
 		}),
 		{
@@ -425,6 +442,7 @@ export default new Elysia({ prefix: "/units" })
 				[StatusCodes.OK]: UnitLocalizationOrderResponse,
 				[StatusCodes.UNAUTHORIZED]: AuthenticationRequiredResponse,
 				[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
+				[StatusCodes.BAD_REQUEST]: UnitLocalizationOrderBadRequestResponse,
 				[StatusCodes.NOT_FOUND]: UnitLocalizationMutationNotFoundResponse,
 				[StatusCodes.CONFLICT]: UnitLocalizationOrderConflictResponse,
 			},
@@ -470,8 +488,10 @@ export default new Elysia({ prefix: "/units" })
 				throw new ValidationError({
 					details: "must match the requested Unit type",
 				});
+			const { revisionContext, ...createBody } = body;
 			return createUnit(authorization, {
-				...body,
+				...createBody,
+				revisionContribution: revisionContext?.contribution,
 				initialTagIds: body.initialTagIds ?? [],
 			});
 		},
@@ -514,9 +534,10 @@ export default new Elysia({ prefix: "/units" })
 	.patch(
 		"/:type/:unitId",
 		async ({ params, authorization, body }) => {
-			const { updatedAt, ...update } = body;
+			const { updatedAt, revisionContext, ...update } = body;
 			return updateUnit(params.type, params.unitId, authorization, {
 				...update,
+				revisionContribution: revisionContext?.contribution,
 				expectedUpdatedAt: new Date(updatedAt),
 			});
 		},
@@ -528,6 +549,7 @@ export default new Elysia({ prefix: "/units" })
 				[StatusCodes.OK]: UnitDetailResponse,
 				[StatusCodes.UNAUTHORIZED]: AuthenticationRequiredResponse,
 				[StatusCodes.FORBIDDEN]: UnitUpdateForbiddenResponse,
+				[StatusCodes.BAD_REQUEST]: UnitRevisionContributionBadRequestResponse,
 				[StatusCodes.NOT_FOUND]: UnitMutationNotFoundResponse,
 				[StatusCodes.CONFLICT]: UnitChangedResponse,
 			},
@@ -543,6 +565,7 @@ export default new Elysia({ prefix: "/units" })
 				mainUnitId: body.mainUnitId,
 				expectedMainUnitId: body.expectedMainUnitId,
 				actorProfileId: authorization.profileId,
+				contribution: body.revisionContext?.contribution,
 				authorization: authorization.unit,
 			});
 			return getUnit(params.type, params.unitId, authorization);
@@ -555,6 +578,7 @@ export default new Elysia({ prefix: "/units" })
 				[StatusCodes.OK]: UnitDetailResponse,
 				[StatusCodes.UNAUTHORIZED]: AuthenticationRequiredResponse,
 				[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
+				[StatusCodes.BAD_REQUEST]: UnitRevisionContributionBadRequestResponse,
 				[StatusCodes.NOT_FOUND]: UnitReadFailureResponse,
 				[StatusCodes.CONFLICT]: UnitVariantConflictResponse,
 			},
@@ -569,6 +593,7 @@ export default new Elysia({ prefix: "/units" })
 				variantUnitId: params.unitId,
 				expectedMainUnitId: body.expectedMainUnitId,
 				actorProfileId: authorization.profileId,
+				contribution: body.revisionContext?.contribution,
 				authorization: authorization.unit,
 			});
 			return getUnit(params.type, params.unitId, authorization);
@@ -581,6 +606,7 @@ export default new Elysia({ prefix: "/units" })
 				[StatusCodes.OK]: UnitDetailResponse,
 				[StatusCodes.UNAUTHORIZED]: AuthenticationRequiredResponse,
 				[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
+				[StatusCodes.BAD_REQUEST]: UnitRevisionContributionBadRequestResponse,
 				[StatusCodes.NOT_FOUND]: UnitReadFailureResponse,
 				[StatusCodes.CONFLICT]: UnitVariantConflictResponse,
 			},
@@ -590,8 +616,10 @@ export default new Elysia({ prefix: "/units" })
 	.put(
 		"/:type/:unitId/localizations/:language",
 		async ({ params, authorization, body }) => {
+			const { revisionContext, ...localization } = body;
 			await upsertLocalization(params.unitId, authorization, {
-				...body,
+				...localization,
+				revisionContribution: revisionContext?.contribution,
 				language: params.language,
 			});
 			return getUnit(params.type, params.unitId, authorization);
@@ -604,6 +632,7 @@ export default new Elysia({ prefix: "/units" })
 				[StatusCodes.OK]: UnitDetailResponse,
 				[StatusCodes.UNAUTHORIZED]: AuthenticationRequiredResponse,
 				[StatusCodes.FORBIDDEN]: UnitAuthorizationForbiddenResponse,
+				[StatusCodes.BAD_REQUEST]: UnitRevisionContributionBadRequestResponse,
 				[StatusCodes.NOT_FOUND]: UnitMutationNotFoundResponse,
 			},
 			detail: { summary: "Create or replace unit localization", tags: ["Units"] },

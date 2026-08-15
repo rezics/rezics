@@ -37,7 +37,7 @@ export const UnitKindValues = [
 	"realm",
 	"realm_rule",
 ] as const;
-export const EntityKindValues = ["person", "organization", "character"] as const;
+export const EntityKindValues = ["person", "organization", "character", "software_agent"] as const;
 export const CommunityOwnedUnitKindValues = [
 	"book",
 	"software",
@@ -186,6 +186,28 @@ export const CreditAttributionRoleValues = [
 	"distributor",
 ] as const;
 export type CreditAttributionRole = (typeof CreditAttributionRoleValues)[number];
+
+/** The single primary source recorded for one Unit revision. */
+export const UnitRevisionPrimaryContributionKindValues = ["unattributed", "human", "ai"] as const;
+export type UnitRevisionPrimaryContributionKind =
+	(typeof UnitRevisionPrimaryContributionKindValues)[number];
+
+/** Revision-specific work performed by an AI Entity. */
+export const RevisionContributionRoleValues = [
+	"creator",
+	"editor",
+	"translator",
+	"researcher",
+] as const;
+export type RevisionContributionRole = (typeof RevisionContributionRoleValues)[number];
+
+/** Evidence strength is derived by the server and never accepted from clients. */
+export const RevisionAttributionAssuranceValues = [
+	"self_declared",
+	"credential_bound",
+	"server_observed",
+] as const;
+export type RevisionAttributionAssurance = (typeof RevisionAttributionAssuranceValues)[number];
 
 export const CreditAttributionRolesByUnitKind = {
 	book: [

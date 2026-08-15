@@ -1,7 +1,13 @@
 import { type Static, t } from "elysia";
 import { PortableTextDocument } from "@rezics/block";
 
-import { ContentLanguage, LocalizationLanguageQuery, ResourceVisibility, Uuid } from "../schema";
+import {
+	ContentLanguage,
+	LocalizationLanguageQuery,
+	RevisionContext,
+	ResourceVisibility,
+	Uuid,
+} from "../schema";
 import { PostPublishRealmIds } from "../posts/schema";
 
 export const ReviewSortValues = ["best", "new"] as const;
@@ -77,6 +83,7 @@ export const CreateReviewBody = t.Object({
 	title: OptionalReviewTitle,
 	summary: OptionalReviewSummary,
 	body: PortableTextDocument,
+	revisionContext: t.Optional(RevisionContext),
 });
 export type CreateReviewBody = Static<typeof CreateReviewBody>;
 
@@ -96,6 +103,7 @@ export const UpdateReviewBody = t.Object({
 	title: NullableReviewTitle,
 	summary: NullableReviewSummary,
 	body: PortableTextDocument,
+	revisionContext: t.Optional(RevisionContext),
 });
 export type UpdateReviewBody = Static<typeof UpdateReviewBody>;
 

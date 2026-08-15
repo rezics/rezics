@@ -23,6 +23,7 @@ import {
 import { fractionalPositionBetween } from "../ordering/position";
 import { EntityEntryNotFound } from "../entities/errors";
 import { recordUnitRevision } from "./history";
+import type { RevisionContributionInput } from "./revision-contribution";
 import {
 	ensureCreditAttributionInvitationAllowed,
 	ensureCreditAttributionRequestAllowed,
@@ -411,6 +412,7 @@ async function materializeProposal(
 	tx: DatabaseTransaction,
 	proposal: ProposalRecord,
 	acceptingProfileId: string,
+	contribution: RevisionContributionInput | undefined,
 ) {
 	const proposerAuthorization = new Authorization(proposal.createdByProfileId);
 	if (proposal.direction === "request")
@@ -479,6 +481,7 @@ async function materializeProposal(
 		unitId: proposal.sourceUnitId,
 		actorProfileId:
 			proposal.direction === "request" ? proposal.createdByProfileId : acceptingProfileId,
+		contribution,
 		event: "update",
 	});
 }
@@ -529,6 +532,7 @@ export async function resolveAssociationProposal(
 		readonly actingUnitId: string;
 		readonly proposalId: string;
 		readonly action: "accept" | "decline" | "cancel";
+		readonly contribution?: RevisionContributionInput;
 	},
 ) {
 	return database.transaction(async (tx) => {
@@ -545,7 +549,8 @@ export async function resolveAssociationProposal(
 				proposal.contextPostId,
 				() => new AssociationContextPostInvalid(),
 			);
-		if (input.action === "accept") await materializeProposal(tx, proposal, actorProfileId);
+		if (input.action === "accept")
+			await materializeProposal(tx, proposal, actorProfileId, input.contribution);
 		const resolution =
 			input.action === "accept"
 				? "accepted"

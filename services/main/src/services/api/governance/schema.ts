@@ -25,7 +25,13 @@ import {
 	UnitKindValues,
 	UnitStatusValues,
 } from "../../database/schema/contract-values";
-import { DateTime, ContentLanguage, LocalizationLanguageQuery, Uuid } from "../schema";
+import {
+	DateTime,
+	ContentLanguage,
+	LocalizationLanguageQuery,
+	RevisionContext,
+	Uuid,
+} from "../schema";
 
 const NullableUuid = t.Nullable(Uuid);
 
@@ -66,6 +72,7 @@ export const UpdateGovernanceNoteBody = t.Object(
 		baseRevisionId: Uuid,
 		editSummary: t.Optional(t.String({ maxLength: 500 })),
 		minor: t.Optional(t.Boolean()),
+		revisionContext: t.Optional(RevisionContext),
 	},
 	{ additionalProperties: false },
 );
@@ -83,6 +90,7 @@ const ContentGovernanceActionCommon = {
 	caseId: Uuid,
 	notes: t.Optional(GovernanceActionNotes),
 	idempotencyKey: t.Optional(t.String({ minLength: 1, maxLength: 256 })),
+	revisionContext: t.Optional(RevisionContext),
 };
 
 export const ListContentReviewCasesQuery = t.Object({
@@ -97,6 +105,7 @@ export const UpdateContentReviewCaseBody = t.Object(
 		assignedProfileId: t.Optional(NullableUuid),
 		duplicateOfCaseId: t.Optional(NullableUuid),
 		internalNote: t.Optional(GovernanceInternalNote),
+		revisionContext: t.Optional(RevisionContext),
 	},
 	{ minProperties: 1, additionalProperties: false },
 );
@@ -187,6 +196,7 @@ export const CreateAccountEnforcementBody = t.Object(
 		rules: GovernanceRuleReferences,
 		notes: t.Optional(GovernanceActionNotes),
 		expiresAt: t.Optional(t.String({ format: "date-time" })),
+		revisionContext: t.Optional(RevisionContext),
 	},
 	{ additionalProperties: false },
 );
@@ -194,6 +204,7 @@ export const AccountEnforcementParams = t.Object({ enforcementId: Uuid });
 export const RevokeAccountEnforcementBody = t.Object(
 	{
 		notes: t.Optional(GovernanceActionNotes),
+		revisionContext: t.Optional(RevisionContext),
 	},
 	{ additionalProperties: false },
 );
@@ -330,6 +341,7 @@ export const DeleteUnitLifecycleCommandBody = t.Object(
 		confirmationUnitId: Uuid,
 		rules: GovernanceRuleReferences,
 		note: t.Optional(t.String({ minLength: 1, maxLength: 2_000 })),
+		revisionContext: t.Optional(RevisionContext),
 	},
 	{ additionalProperties: false },
 );
@@ -338,6 +350,7 @@ export const RestoreUnitLifecycleCommandBody = t.Object(
 		expectedUpdatedAt: DateTime,
 		confirmationUnitId: Uuid,
 		note: t.Optional(t.String({ minLength: 1, maxLength: 2_000 })),
+		revisionContext: t.Optional(RevisionContext),
 	},
 	{ additionalProperties: false },
 );

@@ -585,6 +585,7 @@ import type {
 	GetApiGovernanceContentReviewCasesStatus500,
 	GetApiGovernanceContentReviewCasesByCaseIdOptions,
 	GetApiGovernanceContentReviewCasesByCaseIdStatus200,
+	GetApiGovernanceContentReviewCasesByCaseIdStatus400,
 	GetApiGovernanceContentReviewCasesByCaseIdStatus403,
 	GetApiGovernanceContentReviewCasesByCaseIdStatus404,
 	GetApiGovernanceContentReviewCasesByCaseIdStatus422,
@@ -767,6 +768,7 @@ import type {
 	PutApiSeriesBySeriesIdReleasesByReleaseIdStatus500,
 	DeleteApiSeriesBySeriesIdReleasesByReleaseIdOptions,
 	DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus204,
+	DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus400,
 	DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus403,
 	DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus404,
 	DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus422,
@@ -803,6 +805,7 @@ import type {
 	PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus500,
 	DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdOptions,
 	DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus204,
+	DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus400,
 	DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus403,
 	DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus404,
 	DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus422,
@@ -1092,6 +1095,7 @@ import type {
 	GetApiUnitsByTypeByUnitIdTagsStatus500,
 	PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdOptions,
 	PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus200,
+	PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus400,
 	PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus403,
 	PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus404,
 	PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus422,
@@ -1099,6 +1103,7 @@ import type {
 	PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus500,
 	DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdOptions,
 	DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus204,
+	DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus400,
 	DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus403,
 	DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus404,
 	DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus422,
@@ -1492,6 +1497,7 @@ import type {
 	PostApiUnitsByTypeByUnitIdCreditAttributionsStatus500,
 	DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdOptions,
 	DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus204,
+	DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus400,
 	DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus403,
 	DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus404,
 	DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus422,
@@ -1507,6 +1513,7 @@ import type {
 	PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus500,
 	DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdOptions,
 	DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus204,
+	DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus400,
 	DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus403,
 	DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus404,
 	DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus422,
@@ -1579,6 +1586,7 @@ import type {
 	PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus500,
 	DeleteApiUnitsByTypeByUnitIdTagsByTagIdOptions,
 	DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus204,
+	DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus400,
 	DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus403,
 	DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus404,
 	DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus422,
@@ -2031,6 +2039,7 @@ import type {
 	DeleteApiPollsByPollIdVoteStatus500,
 	PostApiPollsByPollIdCloseOptions,
 	PostApiPollsByPollIdCloseStatus200,
+	PostApiPollsByPollIdCloseStatus400,
 	PostApiPollsByPollIdCloseStatus403,
 	PostApiPollsByPollIdCloseStatus404,
 	PostApiPollsByPollIdCloseStatus409,
@@ -2275,6 +2284,7 @@ import type {
 	PutApiRealmsByRealmIdPinsByUnitIdStatus500,
 	DeleteApiRealmsByRealmIdPinsByUnitIdOptions,
 	DeleteApiRealmsByRealmIdPinsByUnitIdStatus204,
+	DeleteApiRealmsByRealmIdPinsByUnitIdStatus400,
 	DeleteApiRealmsByRealmIdPinsByUnitIdStatus403,
 	DeleteApiRealmsByRealmIdPinsByUnitIdStatus422,
 	DeleteApiRealmsByRealmIdPinsByUnitIdStatus429,
@@ -11855,6 +11865,7 @@ export function getApiGovernanceContentReviewCasesByCaseIdQueryOptions(
 	return queryOptions<
 		GetApiGovernanceContentReviewCasesByCaseIdStatus200,
 		ResponseErrorConfig<
+			| GetApiGovernanceContentReviewCasesByCaseIdStatus400
 			| GetApiGovernanceContentReviewCasesByCaseIdStatus403
 			| GetApiGovernanceContentReviewCasesByCaseIdStatus404
 			| GetApiGovernanceContentReviewCasesByCaseIdStatus422
@@ -11897,6 +11908,7 @@ export function useGetApiGovernanceContentReviewCasesByCaseId<
 			QueryObserverOptions<
 				GetApiGovernanceContentReviewCasesByCaseIdStatus200,
 				ResponseErrorConfig<
+					| GetApiGovernanceContentReviewCasesByCaseIdStatus400
 					| GetApiGovernanceContentReviewCasesByCaseIdStatus403
 					| GetApiGovernanceContentReviewCasesByCaseIdStatus404
 					| GetApiGovernanceContentReviewCasesByCaseIdStatus422
@@ -11926,6 +11938,7 @@ export function useGetApiGovernanceContentReviewCasesByCaseId<
 	) as UseQueryResult<
 		TData,
 		ResponseErrorConfig<
+			| GetApiGovernanceContentReviewCasesByCaseIdStatus400
 			| GetApiGovernanceContentReviewCasesByCaseIdStatus403
 			| GetApiGovernanceContentReviewCasesByCaseIdStatus404
 			| GetApiGovernanceContentReviewCasesByCaseIdStatus422
@@ -14552,6 +14565,7 @@ export function deleteApiSeriesBySeriesIdReleasesByReleaseIdMutationOptions<TCon
 	return mutationOptions<
 		DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus204,
 		ResponseErrorConfig<
+			| DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus400
 			| DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus403
 			| DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus404
 			| DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus422
@@ -14562,10 +14576,11 @@ export function deleteApiSeriesBySeriesIdReleasesByReleaseIdMutationOptions<TCon
 		TContext
 	>({
 		mutationKey,
-		mutationFn: async ({ path }) => {
+		mutationFn: async ({ path, body }) => {
 			const { data } = await deleteApiSeriesBySeriesIdReleasesByReleaseId({
 				...config,
 				path,
+				body,
 				throwOnError: true,
 			});
 			return data;
@@ -14582,6 +14597,7 @@ export function useDeleteApiSeriesBySeriesIdReleasesByReleaseId<TContext>(
 		mutation?: UseMutationOptions<
 			DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus204,
 			ResponseErrorConfig<
+				| DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus400
 				| DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus403
 				| DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus404
 				| DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus422
@@ -14604,6 +14620,7 @@ export function useDeleteApiSeriesBySeriesIdReleasesByReleaseId<TContext>(
 	) as UseMutationOptions<
 		DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus204,
 		ResponseErrorConfig<
+			| DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus400
 			| DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus403
 			| DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus404
 			| DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus422
@@ -14617,6 +14634,7 @@ export function useDeleteApiSeriesBySeriesIdReleasesByReleaseId<TContext>(
 	return useMutation<
 		DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus204,
 		ResponseErrorConfig<
+			| DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus400
 			| DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus403
 			| DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus404
 			| DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus422
@@ -14635,6 +14653,7 @@ export function useDeleteApiSeriesBySeriesIdReleasesByReleaseId<TContext>(
 	) as UseMutationResult<
 		DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus204,
 		ResponseErrorConfig<
+			| DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus400
 			| DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus403
 			| DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus404
 			| DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus422
@@ -15076,6 +15095,7 @@ export function deleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdMu
 	return mutationOptions<
 		DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus204,
 		ResponseErrorConfig<
+			| DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus400
 			| DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus403
 			| DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus404
 			| DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus422
@@ -15086,10 +15106,11 @@ export function deleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdMu
 		TContext
 	>({
 		mutationKey,
-		mutationFn: async ({ path }) => {
+		mutationFn: async ({ path, body }) => {
 			const { data } = await deleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementId({
 				...config,
 				path,
+				body,
 				throwOnError: true,
 			});
 			return data;
@@ -15106,6 +15127,7 @@ export function useDeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementI
 		mutation?: UseMutationOptions<
 			DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus204,
 			ResponseErrorConfig<
+				| DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus400
 				| DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus403
 				| DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus404
 				| DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus422
@@ -15129,6 +15151,7 @@ export function useDeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementI
 	) as UseMutationOptions<
 		DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus204,
 		ResponseErrorConfig<
+			| DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus400
 			| DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus403
 			| DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus404
 			| DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus422
@@ -15142,6 +15165,7 @@ export function useDeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementI
 	return useMutation<
 		DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus204,
 		ResponseErrorConfig<
+			| DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus400
 			| DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus403
 			| DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus404
 			| DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus422
@@ -15160,6 +15184,7 @@ export function useDeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementI
 	) as UseMutationResult<
 		DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus204,
 		ResponseErrorConfig<
+			| DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus400
 			| DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus403
 			| DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus404
 			| DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus422
@@ -19515,6 +19540,7 @@ export function putApiUnitsByTypeByUnitIdTagStructuresByStructureIdMutationOptio
 	return mutationOptions<
 		PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus200,
 		ResponseErrorConfig<
+			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus400
 			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus403
 			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus404
 			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus422
@@ -19525,10 +19551,11 @@ export function putApiUnitsByTypeByUnitIdTagStructuresByStructureIdMutationOptio
 		TContext
 	>({
 		mutationKey,
-		mutationFn: async ({ path }) => {
+		mutationFn: async ({ path, body }) => {
 			const { data } = await putApiUnitsByTypeByUnitIdTagStructuresByStructureId({
 				...config,
 				path,
+				body,
 				throwOnError: true,
 			});
 			return data;
@@ -19545,6 +19572,7 @@ export function usePutApiUnitsByTypeByUnitIdTagStructuresByStructureId<TContext>
 		mutation?: UseMutationOptions<
 			PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus200,
 			ResponseErrorConfig<
+				| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus400
 				| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus403
 				| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus404
 				| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus422
@@ -19567,6 +19595,7 @@ export function usePutApiUnitsByTypeByUnitIdTagStructuresByStructureId<TContext>
 	) as UseMutationOptions<
 		PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus200,
 		ResponseErrorConfig<
+			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus400
 			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus403
 			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus404
 			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus422
@@ -19580,6 +19609,7 @@ export function usePutApiUnitsByTypeByUnitIdTagStructuresByStructureId<TContext>
 	return useMutation<
 		PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus200,
 		ResponseErrorConfig<
+			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus400
 			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus403
 			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus404
 			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus422
@@ -19598,6 +19628,7 @@ export function usePutApiUnitsByTypeByUnitIdTagStructuresByStructureId<TContext>
 	) as UseMutationResult<
 		PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus200,
 		ResponseErrorConfig<
+			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus400
 			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus403
 			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus404
 			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus422
@@ -19619,6 +19650,7 @@ export function deleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdMutationOp
 	return mutationOptions<
 		DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus204,
 		ResponseErrorConfig<
+			| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus400
 			| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus403
 			| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus404
 			| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus422
@@ -19629,10 +19661,11 @@ export function deleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdMutationOp
 		TContext
 	>({
 		mutationKey,
-		mutationFn: async ({ path }) => {
+		mutationFn: async ({ path, body }) => {
 			const { data } = await deleteApiUnitsByTypeByUnitIdTagStructuresByStructureId({
 				...config,
 				path,
+				body,
 				throwOnError: true,
 			});
 			return data;
@@ -19649,6 +19682,7 @@ export function useDeleteApiUnitsByTypeByUnitIdTagStructuresByStructureId<TConte
 		mutation?: UseMutationOptions<
 			DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus204,
 			ResponseErrorConfig<
+				| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus400
 				| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus403
 				| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus404
 				| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus422
@@ -19672,6 +19706,7 @@ export function useDeleteApiUnitsByTypeByUnitIdTagStructuresByStructureId<TConte
 	) as UseMutationOptions<
 		DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus204,
 		ResponseErrorConfig<
+			| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus400
 			| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus403
 			| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus404
 			| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus422
@@ -19685,6 +19720,7 @@ export function useDeleteApiUnitsByTypeByUnitIdTagStructuresByStructureId<TConte
 	return useMutation<
 		DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus204,
 		ResponseErrorConfig<
+			| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus400
 			| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus403
 			| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus404
 			| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus422
@@ -19703,6 +19739,7 @@ export function useDeleteApiUnitsByTypeByUnitIdTagStructuresByStructureId<TConte
 	) as UseMutationResult<
 		DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus204,
 		ResponseErrorConfig<
+			| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus400
 			| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus403
 			| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus404
 			| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus422
@@ -25523,6 +25560,7 @@ export function deleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdMut
 	return mutationOptions<
 		DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus204,
 		ResponseErrorConfig<
+			| DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus400
 			| DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus403
 			| DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus404
 			| DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus422
@@ -25533,10 +25571,11 @@ export function deleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdMut
 		TContext
 	>({
 		mutationKey,
-		mutationFn: async ({ path }) => {
+		mutationFn: async ({ path, body }) => {
 			const { data } = await deleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationId({
 				...config,
 				path,
+				body,
 				throwOnError: true,
 			});
 			return data;
@@ -25553,6 +25592,7 @@ export function useDeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationId
 		mutation?: UseMutationOptions<
 			DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus204,
 			ResponseErrorConfig<
+				| DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus400
 				| DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus403
 				| DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus404
 				| DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus422
@@ -25576,6 +25616,7 @@ export function useDeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationId
 	) as UseMutationOptions<
 		DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus204,
 		ResponseErrorConfig<
+			| DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus400
 			| DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus403
 			| DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus404
 			| DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus422
@@ -25589,6 +25630,7 @@ export function useDeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationId
 	return useMutation<
 		DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus204,
 		ResponseErrorConfig<
+			| DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus400
 			| DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus403
 			| DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus404
 			| DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus422
@@ -25607,6 +25649,7 @@ export function useDeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationId
 	) as UseMutationResult<
 		DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus204,
 		ResponseErrorConfig<
+			| DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus400
 			| DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus403
 			| DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus404
 			| DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus422
@@ -25738,6 +25781,7 @@ export function deleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdMu
 	return mutationOptions<
 		DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus204,
 		ResponseErrorConfig<
+			| DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus400
 			| DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus403
 			| DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus404
 			| DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus422
@@ -25748,10 +25792,11 @@ export function deleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdMu
 		TContext
 	>({
 		mutationKey,
-		mutationFn: async ({ path }) => {
+		mutationFn: async ({ path, body }) => {
 			const { data } = await deleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationId({
 				...config,
 				path,
+				body,
 				throwOnError: true,
 			});
 			return data;
@@ -25768,6 +25813,7 @@ export function useDeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationI
 		mutation?: UseMutationOptions<
 			DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus204,
 			ResponseErrorConfig<
+				| DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus400
 				| DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus403
 				| DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus404
 				| DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus422
@@ -25791,6 +25837,7 @@ export function useDeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationI
 	) as UseMutationOptions<
 		DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus204,
 		ResponseErrorConfig<
+			| DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus400
 			| DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus403
 			| DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus404
 			| DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus422
@@ -25804,6 +25851,7 @@ export function useDeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationI
 	return useMutation<
 		DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus204,
 		ResponseErrorConfig<
+			| DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus400
 			| DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus403
 			| DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus404
 			| DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus422
@@ -25822,6 +25870,7 @@ export function useDeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationI
 	) as UseMutationResult<
 		DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus204,
 		ResponseErrorConfig<
+			| DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus400
 			| DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus403
 			| DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus404
 			| DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus422
@@ -26741,6 +26790,7 @@ export function deleteApiUnitsByTypeByUnitIdTagsByTagIdMutationOptions<TContext 
 	return mutationOptions<
 		DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus204,
 		ResponseErrorConfig<
+			| DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus400
 			| DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus403
 			| DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus404
 			| DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus422
@@ -26751,10 +26801,11 @@ export function deleteApiUnitsByTypeByUnitIdTagsByTagIdMutationOptions<TContext 
 		TContext
 	>({
 		mutationKey,
-		mutationFn: async ({ path }) => {
+		mutationFn: async ({ path, body }) => {
 			const { data } = await deleteApiUnitsByTypeByUnitIdTagsByTagId({
 				...config,
 				path,
+				body,
 				throwOnError: true,
 			});
 			return data;
@@ -26771,6 +26822,7 @@ export function useDeleteApiUnitsByTypeByUnitIdTagsByTagId<TContext>(
 		mutation?: UseMutationOptions<
 			DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus204,
 			ResponseErrorConfig<
+				| DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus400
 				| DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus403
 				| DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus404
 				| DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus422
@@ -26793,6 +26845,7 @@ export function useDeleteApiUnitsByTypeByUnitIdTagsByTagId<TContext>(
 	) as UseMutationOptions<
 		DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus204,
 		ResponseErrorConfig<
+			| DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus400
 			| DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus403
 			| DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus404
 			| DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus422
@@ -26806,6 +26859,7 @@ export function useDeleteApiUnitsByTypeByUnitIdTagsByTagId<TContext>(
 	return useMutation<
 		DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus204,
 		ResponseErrorConfig<
+			| DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus400
 			| DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus403
 			| DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus404
 			| DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus422
@@ -26824,6 +26878,7 @@ export function useDeleteApiUnitsByTypeByUnitIdTagsByTagId<TContext>(
 	) as UseMutationResult<
 		DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus204,
 		ResponseErrorConfig<
+			| DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus400
 			| DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus403
 			| DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus404
 			| DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus422
@@ -33677,6 +33732,7 @@ export function postApiPollsByPollIdCloseMutationOptions<TContext = unknown>(
 	return mutationOptions<
 		PostApiPollsByPollIdCloseStatus200,
 		ResponseErrorConfig<
+			| PostApiPollsByPollIdCloseStatus400
 			| PostApiPollsByPollIdCloseStatus403
 			| PostApiPollsByPollIdCloseStatus404
 			| PostApiPollsByPollIdCloseStatus409
@@ -33688,8 +33744,13 @@ export function postApiPollsByPollIdCloseMutationOptions<TContext = unknown>(
 		TContext
 	>({
 		mutationKey,
-		mutationFn: async ({ path }) => {
-			const { data } = await postApiPollsByPollIdClose({ ...config, path, throwOnError: true });
+		mutationFn: async ({ path, body }) => {
+			const { data } = await postApiPollsByPollIdClose({
+				...config,
+				path,
+				body,
+				throwOnError: true,
+			});
 			return data;
 		},
 	});
@@ -33704,6 +33765,7 @@ export function usePostApiPollsByPollIdClose<TContext>(
 		mutation?: UseMutationOptions<
 			PostApiPollsByPollIdCloseStatus200,
 			ResponseErrorConfig<
+				| PostApiPollsByPollIdCloseStatus400
 				| PostApiPollsByPollIdCloseStatus403
 				| PostApiPollsByPollIdCloseStatus404
 				| PostApiPollsByPollIdCloseStatus409
@@ -33724,6 +33786,7 @@ export function usePostApiPollsByPollIdClose<TContext>(
 	const baseOptions = postApiPollsByPollIdCloseMutationOptions(config) as UseMutationOptions<
 		PostApiPollsByPollIdCloseStatus200,
 		ResponseErrorConfig<
+			| PostApiPollsByPollIdCloseStatus400
 			| PostApiPollsByPollIdCloseStatus403
 			| PostApiPollsByPollIdCloseStatus404
 			| PostApiPollsByPollIdCloseStatus409
@@ -33738,6 +33801,7 @@ export function usePostApiPollsByPollIdClose<TContext>(
 	return useMutation<
 		PostApiPollsByPollIdCloseStatus200,
 		ResponseErrorConfig<
+			| PostApiPollsByPollIdCloseStatus400
 			| PostApiPollsByPollIdCloseStatus403
 			| PostApiPollsByPollIdCloseStatus404
 			| PostApiPollsByPollIdCloseStatus409
@@ -33757,6 +33821,7 @@ export function usePostApiPollsByPollIdClose<TContext>(
 	) as UseMutationResult<
 		PostApiPollsByPollIdCloseStatus200,
 		ResponseErrorConfig<
+			| PostApiPollsByPollIdCloseStatus400
 			| PostApiPollsByPollIdCloseStatus403
 			| PostApiPollsByPollIdCloseStatus404
 			| PostApiPollsByPollIdCloseStatus409
@@ -37282,6 +37347,7 @@ export function deleteApiRealmsByRealmIdPinsByUnitIdMutationOptions<TContext = u
 	return mutationOptions<
 		DeleteApiRealmsByRealmIdPinsByUnitIdStatus204,
 		ResponseErrorConfig<
+			| DeleteApiRealmsByRealmIdPinsByUnitIdStatus400
 			| DeleteApiRealmsByRealmIdPinsByUnitIdStatus403
 			| DeleteApiRealmsByRealmIdPinsByUnitIdStatus422
 			| DeleteApiRealmsByRealmIdPinsByUnitIdStatus429
@@ -37291,11 +37357,12 @@ export function deleteApiRealmsByRealmIdPinsByUnitIdMutationOptions<TContext = u
 		TContext
 	>({
 		mutationKey,
-		mutationFn: async ({ path, query }) => {
+		mutationFn: async ({ path, query, body }) => {
 			const { data } = await deleteApiRealmsByRealmIdPinsByUnitId({
 				...config,
 				path,
 				query,
+				body,
 				throwOnError: true,
 			});
 			return data;
@@ -37312,6 +37379,7 @@ export function useDeleteApiRealmsByRealmIdPinsByUnitId<TContext>(
 		mutation?: UseMutationOptions<
 			DeleteApiRealmsByRealmIdPinsByUnitIdStatus204,
 			ResponseErrorConfig<
+				| DeleteApiRealmsByRealmIdPinsByUnitIdStatus400
 				| DeleteApiRealmsByRealmIdPinsByUnitIdStatus403
 				| DeleteApiRealmsByRealmIdPinsByUnitIdStatus422
 				| DeleteApiRealmsByRealmIdPinsByUnitIdStatus429
@@ -37333,6 +37401,7 @@ export function useDeleteApiRealmsByRealmIdPinsByUnitId<TContext>(
 	) as UseMutationOptions<
 		DeleteApiRealmsByRealmIdPinsByUnitIdStatus204,
 		ResponseErrorConfig<
+			| DeleteApiRealmsByRealmIdPinsByUnitIdStatus400
 			| DeleteApiRealmsByRealmIdPinsByUnitIdStatus403
 			| DeleteApiRealmsByRealmIdPinsByUnitIdStatus422
 			| DeleteApiRealmsByRealmIdPinsByUnitIdStatus429
@@ -37345,6 +37414,7 @@ export function useDeleteApiRealmsByRealmIdPinsByUnitId<TContext>(
 	return useMutation<
 		DeleteApiRealmsByRealmIdPinsByUnitIdStatus204,
 		ResponseErrorConfig<
+			| DeleteApiRealmsByRealmIdPinsByUnitIdStatus400
 			| DeleteApiRealmsByRealmIdPinsByUnitIdStatus403
 			| DeleteApiRealmsByRealmIdPinsByUnitIdStatus422
 			| DeleteApiRealmsByRealmIdPinsByUnitIdStatus429
@@ -37362,6 +37432,7 @@ export function useDeleteApiRealmsByRealmIdPinsByUnitId<TContext>(
 	) as UseMutationResult<
 		DeleteApiRealmsByRealmIdPinsByUnitIdStatus204,
 		ResponseErrorConfig<
+			| DeleteApiRealmsByRealmIdPinsByUnitIdStatus400
 			| DeleteApiRealmsByRealmIdPinsByUnitIdStatus403
 			| DeleteApiRealmsByRealmIdPinsByUnitIdStatus422
 			| DeleteApiRealmsByRealmIdPinsByUnitIdStatus429

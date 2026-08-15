@@ -664,6 +664,7 @@ export default new Elysia()
 					await recordUnitRevision(tx, {
 						unitId: created.id,
 						actorProfileId: profile.unitId,
+						contribution: body.revisionContext?.contribution,
 						event: "create",
 					});
 					contentUnitId = created.id;
@@ -696,6 +697,10 @@ export default new Elysia()
 				[StatusCodes.OK]: ContentStructureNodeMutationResponse,
 				[StatusCodes.CONFLICT]: toApiErrorResponse(["ContentStructureRevisionConflict"]),
 				[StatusCodes.FORBIDDEN]: ContentStructureForbiddenResponse,
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
+					"RevisionCreditEntityInvalid",
+					"RevisionContributionActorRequired",
+				]),
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "ContentStructureNotFound"]),
 				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["ContentStructureInvalid"]),
 			},
@@ -863,6 +868,7 @@ export default new Elysia()
 					ownerUnitId: params.unitId,
 					baseRevisionId: body.baseRevisionId,
 					actorProfileId: profile.unitId,
+					contribution: body.revisionContext?.contribution,
 					nodes: body.nodes,
 				});
 				const saved = await readBookContentStructure(tx, params.unitId, true);
@@ -883,6 +889,10 @@ export default new Elysia()
 			response: {
 				[StatusCodes.OK]: SaveBookContentStructureDraftResponse,
 				[StatusCodes.FORBIDDEN]: UnitForbiddenResponse,
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
+					"RevisionCreditEntityInvalid",
+					"RevisionContributionActorRequired",
+				]),
 				[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
 				[StatusCodes.CONFLICT]: toApiErrorResponse([
 					"PostTargetingLocked",
@@ -936,6 +946,7 @@ export default new Elysia()
 					ownerUnitId: params.unitId,
 					base: body.base,
 					actorProfileId: profile.unitId,
+					contribution: body.revisionContext?.contribution,
 					nodes: body.nodes,
 				});
 				const saved = await readMediaContentStructure(tx, params.unitId, true);
@@ -954,6 +965,10 @@ export default new Elysia()
 			response: {
 				[StatusCodes.OK]: SaveMediaContentStructureDraftResponse,
 				[StatusCodes.FORBIDDEN]: UnitForbiddenResponse,
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
+					"RevisionCreditEntityInvalid",
+					"RevisionContributionActorRequired",
+				]),
 				[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
 				[StatusCodes.CONFLICT]: toApiErrorResponse(["ContentStructureRevisionConflict"]),
 				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["ContentStructureInvalid"]),
@@ -1136,6 +1151,7 @@ export default new Elysia()
 				await recordUnitRevision(tx, {
 					unitId: params.chapterId,
 					actorProfileId: profile.unitId,
+					contribution: body.revisionContext?.contribution,
 					event: "update",
 				});
 			});
@@ -1147,6 +1163,10 @@ export default new Elysia()
 			body: UpsertChapterLocalizationBody,
 			response: {
 				[StatusCodes.OK]: UpdateStateResponse,
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
+					"RevisionCreditEntityInvalid",
+					"RevisionContributionActorRequired",
+				]),
 				[StatusCodes.FORBIDDEN]: UnitForbiddenResponse,
 				[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
 				[StatusCodes.CONFLICT]: toApiErrorResponse(["PostTagMentionVoteConflict"]),

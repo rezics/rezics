@@ -4,6 +4,8 @@ import { createHash } from "node:crypto";
 import { and, asc, desc, eq, ilike, inArray, isNull, ne, or, sql } from "drizzle-orm";
 import Elysia, { t } from "elysia";
 
+import { RevisionContextBody } from "../schema";
+
 import session, { resolveIdentity } from "../../auth/session";
 import { AuthenticationRequired } from "../../auth/errors";
 import { getPlatformCapabilityCondition } from "../../authorization/platform/query";
@@ -472,6 +474,10 @@ export default new Elysia()
 					body: CreateEntityBody,
 					response: {
 						[StatusCodes.OK]: IdResponse,
+						[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
+							"RevisionCreditEntityInvalid",
+							"RevisionContributionActorRequired",
+						]),
 						[StatusCodes.NOT_FOUND]: ImageAssetNotFoundResponse,
 					},
 					detail: { summary: "Create entity entry", tags: ["Entity"] },
@@ -652,8 +658,10 @@ export default new Elysia()
 				"/:unitId/localizations/:language",
 				async ({ params, authorization, body }) => {
 					await checkUnitType(params.unitId, "entity");
+					const { revisionContext, ...localization } = body;
 					await upsertLocalization(params.unitId, authorization, {
-						...body,
+						...localization,
+						revisionContribution: revisionContext?.contribution,
 						language: params.language,
 					});
 					return { id: params.unitId };
@@ -665,6 +673,10 @@ export default new Elysia()
 					response: {
 						[StatusCodes.OK]: IdResponse,
 						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
+						[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
+							"RevisionCreditEntityInvalid",
+							"RevisionContributionActorRequired",
+						]),
 						[StatusCodes.NOT_FOUND]: UnitResourceMutationNotFoundResponse,
 					},
 					detail: { summary: "Create or replace entity localization", tags: ["Entity"] },
@@ -721,7 +733,13 @@ export default new Elysia()
 				{
 					access: "contribute:unit:create",
 					body: CreateUnitResourceBody,
-					response: { [StatusCodes.OK]: IdResponse },
+					response: {
+						[StatusCodes.OK]: IdResponse,
+						[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
+							"RevisionCreditEntityInvalid",
+							"RevisionContributionActorRequired",
+						]),
+					},
 					detail: { summary: "Create tag", tags: ["Tags"] },
 				},
 			)
@@ -793,8 +811,10 @@ export default new Elysia()
 				"/:tagId/localizations/:language",
 				async ({ params, authorization, body }) => {
 					await checkUnitType(params.tagId, "tag");
+					const { revisionContext, ...localization } = body;
 					await upsertLocalization(params.tagId, authorization, {
-						...body,
+						...localization,
+						revisionContribution: revisionContext?.contribution,
 						language: params.language,
 					});
 					return { id: params.tagId };
@@ -806,6 +826,10 @@ export default new Elysia()
 					response: {
 						[StatusCodes.OK]: IdResponse,
 						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
+						[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
+							"RevisionCreditEntityInvalid",
+							"RevisionContributionActorRequired",
+						]),
 						[StatusCodes.NOT_FOUND]: UnitResourceMutationNotFoundResponse,
 					},
 					detail: { summary: "Create or replace tag localization", tags: ["Tags"] },
@@ -1128,9 +1152,10 @@ export default new Elysia()
 			.post(
 				"/credit-attributions",
 				async ({ params, authorization, body }) => {
+					const { revisionContext, ...creditInput } = body;
 					await checkUnitType(params.unitId, params.type);
-					if (!isCreditAttributionRoleForUnitKind(params.type, body.role))
-						throw new CreditAttributionRoleInvalid(params.type, body.role);
+					if (!isCreditAttributionRoleForUnitKind(params.type, creditInput.role))
+						throw new CreditAttributionRoleInvalid(params.type, creditInput.role);
 					await ensureUnitMutationAuthorized(authorization.unit, params.unitId, [
 						"credit-attributions",
 					]);
@@ -1149,13 +1174,14 @@ export default new Elysia()
 							.insert(creditAttribution)
 							.values({
 								sourceUnitId: params.unitId,
-								...body,
-								position: body.position ?? fractionalPositionBetween(last?.position, null),
+								...creditInput,
+								position: creditInput.position ?? fractionalPositionBetween(last?.position, null),
 							})
 							.returning();
 						await recordUnitRevision(tx, {
 							unitId: params.unitId,
 							actorProfileId: authorization.profileId,
+							contribution: revisionContext?.contribution,
 							event: "update",
 						});
 						return created;
@@ -1173,7 +1199,11 @@ export default new Elysia()
 					body: AddUnitCreditBody,
 					response: {
 						[StatusCodes.OK]: CreditAttributionResponse,
-						[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["CreditAttributionRoleInvalid"]),
+						[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
+							"CreditAttributionRoleInvalid",
+							"RevisionCreditEntityInvalid",
+							"RevisionContributionActorRequired",
+						]),
 						[StatusCodes.FORBIDDEN]: toApiErrorResponse([
 							"UnitPermissionForbidden",
 							"EntityAssociationRestricted",
@@ -1185,7 +1215,7 @@ export default new Elysia()
 			)
 			.delete(
 				"/credit-attributions/:associationId",
-				async ({ params, profile, authorization }) => {
+				async ({ params, profile, authorization, body }) => {
 					await checkUnitType(params.unitId, params.type);
 					await ensureUnitMutationAuthorized(authorization.unit, params.unitId, [
 						"credit-attributions",
@@ -1204,6 +1234,7 @@ export default new Elysia()
 						await recordUnitRevision(tx, {
 							unitId: params.unitId,
 							actorProfileId: profile.unitId,
+							contribution: body?.revisionContext?.contribution,
 							event: "update",
 						});
 					});
@@ -1212,8 +1243,13 @@ export default new Elysia()
 				{
 					access: "write:unit:update",
 					params: AttributionAssociationParams,
+					body: t.Optional(RevisionContextBody),
 					response: {
 						[StatusCodes.NO_CONTENT]: t.Void(),
+						[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
+							"RevisionCreditEntityInvalid",
+							"RevisionContributionActorRequired",
+						]),
 						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
 						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
 							"UnitNotFound",
@@ -1230,18 +1266,24 @@ export default new Elysia()
 			.post(
 				"/subject-associations",
 				async ({ params, authorization, body }) => {
+					const { revisionContext, ...associationInput } = body;
 					await checkUnitType(params.unitId, params.type);
 					await ensureUnitMutationAuthorized(authorization.unit, params.unitId, [
 						"subject-associations",
 					]);
-					if (body.contextPostId)
+					if (associationInput.contextPostId)
 						await authorization.unit.ensureCanRead(
-							body.contextPostId,
+							associationInput.contextPostId,
 							() => new AssociationContextPostInvalid(),
 						);
 					const association = await database.transaction(async (tx) => {
-						if (body.contextPostId) await ensureWikiAssociationContextPost(tx, body.contextPostId);
-						await authorization.entity.ensureAssociationAllowed(tx, body.entityId, "subject");
+						if (associationInput.contextPostId)
+							await ensureWikiAssociationContextPost(tx, associationInput.contextPostId);
+						await authorization.entity.ensureAssociationAllowed(
+							tx,
+							associationInput.entityId,
+							"subject",
+						);
 						await tx.execute(
 							sql`select pg_advisory_xact_lock(hashtextextended(${params.unitId}::text, 0))`,
 						);
@@ -1255,16 +1297,18 @@ export default new Elysia()
 							.insert(subjectAssociation)
 							.values({
 								unitId: params.unitId,
-								entityId: body.entityId,
-								contextPostId: body.contextPostId ?? null,
-								role: body.role,
-								position: body.position ?? fractionalPositionBetween(last?.position, null),
+								entityId: associationInput.entityId,
+								contextPostId: associationInput.contextPostId ?? null,
+								role: associationInput.role,
+								position:
+									associationInput.position ?? fractionalPositionBetween(last?.position, null),
 							})
 							.returning();
 						if (!created) throw new Error("Subject association insertion returned no row");
 						await recordUnitRevision(tx, {
 							unitId: params.unitId,
 							actorProfileId: authorization.profileId,
+							contribution: revisionContext?.contribution,
 							event: "update",
 						});
 						return created;
@@ -1277,7 +1321,11 @@ export default new Elysia()
 					body: AddUnitSubjectAssociationBody,
 					response: {
 						[StatusCodes.OK]: SubjectAssociationResponse,
-						[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["AssociationContextPostInvalid"]),
+						[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
+							"AssociationContextPostInvalid",
+							"RevisionCreditEntityInvalid",
+							"RevisionContributionActorRequired",
+						]),
 						[StatusCodes.FORBIDDEN]: toApiErrorResponse([
 							"UnitPermissionForbidden",
 							"EntityAssociationRestricted",
@@ -1289,7 +1337,7 @@ export default new Elysia()
 			)
 			.delete(
 				"/subject-associations/:associationId",
-				async ({ params, profile, authorization }) => {
+				async ({ params, profile, authorization, body }) => {
 					await checkUnitType(params.unitId, params.type);
 					await ensureUnitMutationAuthorized(authorization.unit, params.unitId, [
 						"subject-associations",
@@ -1308,6 +1356,7 @@ export default new Elysia()
 						await recordUnitRevision(tx, {
 							unitId: params.unitId,
 							actorProfileId: profile.unitId,
+							contribution: body?.revisionContext?.contribution,
 							event: "update",
 						});
 					});
@@ -1316,8 +1365,13 @@ export default new Elysia()
 				{
 					access: "write:unit:update",
 					params: UnitAssociationParams,
+					body: t.Optional(RevisionContextBody),
 					response: {
 						[StatusCodes.NO_CONTENT]: t.Void(),
+						[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
+							"RevisionCreditEntityInvalid",
+							"RevisionContributionActorRequired",
+						]),
 						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
 						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
 							"UnitNotFound",
@@ -1746,6 +1800,7 @@ export default new Elysia()
 						actorProfileId: profile.unitId,
 						expectedUpdatedAt: body.updatedAt,
 						expectedFeaturedTagIds: body.expectedFeaturedTagIds,
+						contribution: body.revisionContext?.contribution,
 						state: body.pinned
 							? { pinned: true, position: body.position }
 							: { pinned: false, position: null },
@@ -1757,6 +1812,10 @@ export default new Elysia()
 					body: UpdateUnitTagCurationBody,
 					response: {
 						[StatusCodes.OK]: TagApplicationResponse,
+						[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
+							"RevisionCreditEntityInvalid",
+							"RevisionContributionActorRequired",
+						]),
 						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
 						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "TagApplicationNotFound"]),
 						[StatusCodes.CONFLICT]: toApiErrorResponse(["UnitTagCurationChanged"]),
@@ -1769,7 +1828,7 @@ export default new Elysia()
 			)
 			.delete(
 				"/tags/:tagId",
-				async ({ params, profile, authorization }) => {
+				async ({ params, profile, authorization, body }) => {
 					await checkUnitType(params.unitId, params.type);
 					await authorization.unit.ensure(params.unitId, "unit.tag-curation.manage");
 					await database.transaction(async (tx) => {
@@ -1781,6 +1840,7 @@ export default new Elysia()
 						await recordUnitRevision(tx, {
 							unitId: params.unitId,
 							actorProfileId: profile.unitId,
+							contribution: body?.revisionContext?.contribution,
 							event: "update",
 						});
 					});
@@ -1789,8 +1849,13 @@ export default new Elysia()
 				{
 					access: "write:unit:update",
 					params: UnitTagParams,
+					body: t.Optional(RevisionContextBody),
 					response: {
 						[StatusCodes.NO_CONTENT]: t.Void(),
+						[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
+							"RevisionCreditEntityInvalid",
+							"RevisionContributionActorRequired",
+						]),
 						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
 						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "TagApplicationNotFound"]),
 					},

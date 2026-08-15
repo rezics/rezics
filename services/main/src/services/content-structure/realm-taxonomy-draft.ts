@@ -16,6 +16,7 @@ import {
 import type { RealmTagQueryStrategy } from "../database/schema/contract-values";
 import { insertUnit } from "../units/create";
 import { recordUnitRevision } from "../units/history";
+import type { RevisionContributionInput } from "../units/revision-contribution";
 import { revisionedBatchChunks } from "../history/revisioned-batch";
 import { diffContentStructureSnapshots } from "./contracts";
 import { assertContentStructureDraftCommandLimit } from "./draft-batch";
@@ -62,6 +63,7 @@ export type SaveRealmTaxonomyDraftInput = {
 	readonly ownerUnitId: string;
 	readonly baseRevisionId: string;
 	readonly actorProfileId: string;
+	readonly contribution?: RevisionContributionInput;
 	readonly nodes: readonly RealmTaxonomyDraftNode[];
 };
 
@@ -81,6 +83,7 @@ async function createDraftLabel(
 	tx: DatabaseTransaction,
 	input: {
 		readonly actorProfileId: string;
+		readonly contribution?: RevisionContributionInput;
 		readonly language: ContentLanguage;
 		readonly title: string;
 	},
@@ -108,6 +111,7 @@ async function createDraftLabel(
 	await recordUnitRevision(tx, {
 		unitId: created.id,
 		actorProfileId: input.actorProfileId,
+		contribution: input.contribution,
 		event: "create",
 	});
 	return created.id;
@@ -326,6 +330,7 @@ export async function saveRealmTaxonomyDraft(
 					source.content.kind === "label"
 						? await createDraftLabel(tx, {
 								actorProfileId: input.actorProfileId,
+								contribution: input.contribution,
 								language: source.content.language,
 								title: source.content.title,
 							})

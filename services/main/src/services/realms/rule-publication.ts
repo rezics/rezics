@@ -7,6 +7,7 @@ import { realmRule, realmRuleRevision, unitLocalization, unitOwnership } from ".
 import { fractionalPositionAt } from "../ordering/position";
 import { insertUnit } from "../units/create";
 import { recordUnitRevision } from "../units/history";
+import type { RevisionContributionInput } from "../units/revision-contribution";
 import { getCurrentRealmRules } from "./service";
 
 export interface RealmRuleLocalizationPublication {
@@ -27,6 +28,7 @@ export interface PublishRealmRuleRevisionInput {
 	readonly requireOnJoin: boolean;
 	readonly requireOnPost: boolean;
 	readonly rules: readonly RealmRulePublication[];
+	readonly contribution?: RevisionContributionInput;
 	readonly publishedAt?: Date;
 }
 
@@ -123,6 +125,7 @@ export async function publishRealmRuleRevision(
 	await recordUnitRevision(tx, {
 		unitId: input.realmId,
 		actorProfileId: input.actorProfileId,
+		contribution: input.contribution,
 		event: "update",
 	});
 	return { status: "published", revision: created };

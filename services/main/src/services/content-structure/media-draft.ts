@@ -14,6 +14,7 @@ import {
 } from "../database/schema";
 import { insertUnit } from "../units/create";
 import { recordUnitRevision } from "../units/history";
+import type { RevisionContributionInput } from "../units/revision-contribution";
 import { revisionedBatchChunks } from "../history/revisioned-batch";
 import { isFirstUnitLocalization } from "../units/localization";
 import { planContentStructureDraft, type ContentStructureDraftNodeBase } from "./book-draft-plan";
@@ -53,6 +54,7 @@ export type SaveMediaContentStructureDraftInput = {
 	readonly ownerUnitId: string;
 	readonly base: MediaContentStructureDraftBase;
 	readonly actorProfileId: string;
+	readonly contribution?: RevisionContributionInput;
 	readonly nodes: readonly (
 		| ExistingMediaDraftNode
 		| NewMediaDraftNode
@@ -77,6 +79,7 @@ async function createMediaDraftContentUnit(
 	tx: DatabaseTransaction,
 	input: {
 		readonly actorProfileId: string;
+		readonly contribution?: RevisionContributionInput;
 		readonly node: NewMediaDraftNode;
 	},
 ): Promise<string> {
@@ -104,6 +107,7 @@ async function createMediaDraftContentUnit(
 	await recordUnitRevision(tx, {
 		unitId: created.id,
 		actorProfileId: input.actorProfileId,
+		contribution: input.contribution,
 		event: "create",
 	});
 	return created.id;
@@ -301,6 +305,7 @@ export async function saveMediaContentStructureDraft(
 					? node.contentUnitId
 					: await createMediaDraftContentUnit(tx, {
 							actorProfileId: input.actorProfileId,
+							contribution: input.contribution,
 							node,
 						});
 			contentUnitIds.set(node.id, contentUnitId);
@@ -354,6 +359,7 @@ export async function saveMediaContentStructureDraft(
 			await recordUnitRevision(tx, {
 				unitId: contentUnitId,
 				actorProfileId: input.actorProfileId,
+				contribution: input.contribution,
 				event: "update",
 			});
 		}

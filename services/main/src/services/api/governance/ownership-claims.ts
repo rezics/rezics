@@ -59,6 +59,7 @@ export default new Elysia({ prefix: "/platform/ownership-claims" })
 				decision: body.decision,
 				rules: body.rules,
 				note: body.note?.trim() || undefined,
+				contribution: body.revisionContext?.contribution,
 			});
 		},
 		{
@@ -70,6 +71,8 @@ export default new Elysia({ prefix: "/platform/ownership-claims" })
 				[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
 					"UnitOwnershipClaimConfirmationInvalid",
 					"GovernanceRuleSourceForbidden",
+					"RevisionCreditEntityInvalid",
+					"RevisionContributionActorRequired",
 				]),
 				[StatusCodes.FORBIDDEN]: toApiErrorResponse([
 					"PlatformCapabilityRequired",

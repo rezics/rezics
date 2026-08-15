@@ -88,6 +88,10 @@ import { resolveCanonicalUnitId } from "../../units/merge/canonical";
 
 const UnitReadFailureResponse = toApiErrorResponse(["UnitNotFound"]);
 const UnitMutationForbiddenResponse = toApiErrorResponse(["UnitPermissionForbidden"]);
+const RevisionContributionBadRequestResponse = toApiErrorResponse([
+	"RevisionCreditEntityInvalid",
+	"RevisionContributionActorRequired",
+]);
 
 const ReviewSearchPosition = t.Union([
 	t.Object(
@@ -457,6 +461,7 @@ export default new Elysia()
 						await recordUnitRevision(tx, {
 							unitId: created.id,
 							actorProfileId: profile.unitId,
+							contribution: body.revisionContext?.contribution,
 							event: "create",
 						});
 						return created.id;
@@ -468,6 +473,7 @@ export default new Elysia()
 					body: CreateReviewBody,
 					response: {
 						[StatusCodes.OK]: IdResponse,
+						[StatusCodes.BAD_REQUEST]: RevisionContributionBadRequestResponse,
 						[StatusCodes.FORBIDDEN]: toApiErrorResponse([
 							"RealmCapabilityRequired",
 							"EntityAssociationRestricted",
@@ -663,6 +669,7 @@ export default new Elysia()
 						await recordUnitRevision(tx, {
 							unitId: params.reviewId,
 							actorProfileId: profile.unitId,
+							contribution: body.revisionContext?.contribution,
 							event: "update",
 						});
 					});
@@ -674,6 +681,7 @@ export default new Elysia()
 					body: UpdateReviewBody,
 					response: {
 						[StatusCodes.OK]: IdResponse,
+						[StatusCodes.BAD_REQUEST]: RevisionContributionBadRequestResponse,
 						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
 						[StatusCodes.NOT_FOUND]: UnitReadFailureResponse,
 						[StatusCodes.CONFLICT]: toApiErrorResponse(["PostTagMentionVoteConflict"]),

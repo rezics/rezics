@@ -338,6 +338,7 @@ export default new Elysia({ prefix: "/governance" })
 				await recordUnitRevision(tx, {
 					unitId: params.postId,
 					actorProfileId: profile.unitId,
+					contribution: body.revisionContext?.contribution,
 					event: "update",
 					baseRevisionId: body.baseRevisionId,
 					message: body.editSummary,
@@ -356,6 +357,10 @@ export default new Elysia({ prefix: "/governance" })
 			body: UpdateGovernanceNoteBody,
 			response: {
 				[StatusCodes.OK]: GovernanceNoteResponse,
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
+					"RevisionCreditEntityInvalid",
+					"RevisionContributionActorRequired",
+				]),
 				[StatusCodes.FORBIDDEN]: toApiErrorResponse(["UnitPermissionForbidden"]),
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "GovernanceNoteNotFound"]),
 				[StatusCodes.CONFLICT]: toApiErrorResponse(["UnitRevisionConflict"]),
@@ -417,6 +422,10 @@ export default new Elysia({ prefix: "/governance" })
 			params: ContentReviewCaseParams,
 			response: {
 				[StatusCodes.OK]: ContentReviewCaseResponse,
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
+					"RevisionCreditEntityInvalid",
+					"RevisionContributionActorRequired",
+				]),
 				[StatusCodes.FORBIDDEN]: CapabilityForbiddenResponse,
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["ContentReviewCaseNotFound"]),
 			},
@@ -434,7 +443,7 @@ export default new Elysia({ prefix: "/governance" })
 			if (!current) throw new ModerationCaseNotFound();
 			await ensureCaseAccess(authorization, current);
 			return database.transaction(async (tx) => {
-				const { internalNote, ...changes } = body;
+				const { internalNote, revisionContext: _revisionContext, ...changes } = body;
 				const rows = await tx
 					.update(contentReviewCase)
 					.set({ ...changes, updatedAt: new Date() })
@@ -449,6 +458,7 @@ export default new Elysia({ prefix: "/governance" })
 							subjectId: current.id,
 							subjectUnitId: current.targetUnitId,
 							realmId: current.realmId,
+							revisionContribution: body.revisionContext?.contribution,
 							note: { role: "internal_note", ...internalNote },
 						})
 					: undefined;
@@ -507,6 +517,8 @@ export default new Elysia({ prefix: "/governance" })
 					"GovernanceNoteRoleDuplicate",
 					"ContentReviewRealmMissing",
 					"GovernanceRuleSourceForbidden",
+					"RevisionCreditEntityInvalid",
+					"RevisionContributionActorRequired",
 				]),
 				[StatusCodes.FORBIDDEN]: CapabilityForbiddenResponse,
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse([
@@ -569,6 +581,7 @@ export default new Elysia({ prefix: "/governance" })
 						subjectId: action.id,
 						subjectUnitId: target.id,
 						publicRecipientProfileIds: [target.id],
+						revisionContribution: body.revisionContext?.contribution,
 						note,
 					});
 					notePostIds.push(createdNote.postId);
@@ -618,6 +631,8 @@ export default new Elysia({ prefix: "/governance" })
 					"EnforcementExpiryInvalid",
 					"GovernanceNoteRoleDuplicate",
 					"GovernanceRuleSourceForbidden",
+					"RevisionCreditEntityInvalid",
+					"RevisionContributionActorRequired",
 				]),
 				[StatusCodes.FORBIDDEN]: CapabilityForbiddenResponse,
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["ProfileNotFound"]),
@@ -681,6 +696,7 @@ export default new Elysia({ prefix: "/governance" })
 						subjectId: action.id,
 						subjectUnitId: current.profileId,
 						publicRecipientProfileIds: [current.profileId],
+						revisionContribution: body.revisionContext?.contribution,
 						note,
 					});
 					notePostIds.push(createdNote.postId);
@@ -728,7 +744,11 @@ export default new Elysia({ prefix: "/governance" })
 			body: RevokeAccountEnforcementBody,
 			response: {
 				[StatusCodes.OK]: EnforcementResponse,
-				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["GovernanceNoteRoleDuplicate"]),
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
+					"GovernanceNoteRoleDuplicate",
+					"RevisionCreditEntityInvalid",
+					"RevisionContributionActorRequired",
+				]),
 				[StatusCodes.FORBIDDEN]: CapabilityForbiddenResponse,
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["EnforcementNotFound"]),
 				[StatusCodes.CONFLICT]: toApiErrorResponse([
