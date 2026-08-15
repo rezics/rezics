@@ -97,15 +97,20 @@ if ! grep -Fq 'topic=Deployment:*' \
 	printf '%s\n' 'Nomad deployment wait must subscribe to deployment events' >&2
 	exit 1
 fi
-for event_wait_script in \
-	deploy/scripts/wait-nomad-batch.sh \
-	deploy/scripts/wait-nomad-deployment.sh; do
-	if ! grep -Fq 'first(' "${repository_root}/${event_wait_script}" ||
-		! grep -Fq 'inputs |' "${repository_root}/${event_wait_script}"; then
-		printf 'Nomad event wait must close its stream at terminal state: %s\n' \
-			"${event_wait_script}" >&2
-		exit 1
-	fi
-done
+if ! grep -Fq 'first(' "${repository_root}/deploy/scripts/wait-nomad-batch.sh" &&
+	! grep -Fq 'terminal_status=' "${repository_root}/deploy/scripts/wait-nomad-batch.sh"; then
+	printf '%s\n' 'Nomad batch wait must close its stream at terminal state' >&2
+	exit 1
+fi
+if ! grep -Fq 'inputs |' "${repository_root}/deploy/scripts/wait-nomad-batch.sh" ||
+	! grep -Fq 'first(' "${repository_root}/deploy/scripts/wait-nomad-deployment.sh" ||
+	! grep -Fq 'inputs |' "${repository_root}/deploy/scripts/wait-nomad-deployment.sh"; then
+	printf '%s\n' 'Nomad event wait must parse the event stream incrementally' >&2
+	exit 1
+fi
+if ! grep -Fq 'kill "${stream_pid}"' "${repository_root}/deploy/scripts/wait-nomad-batch.sh"; then
+	printf '%s\n' 'Nomad batch wait must stop its stream after terminal allocation state' >&2
+	exit 1
+fi
 
 printf '%s\n' 'Validated terminal Nomad evaluation event monitoring'

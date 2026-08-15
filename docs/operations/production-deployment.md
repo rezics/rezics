@@ -35,8 +35,13 @@ workflow:
    `https://deploy.rezics.com/v1/releases/dispatch`;
 4. requires a matching `202 Accepted` receipt containing the tag ref, commit,
    dispatched job ID, and evaluation ID;
-5. creates the GitHub Release if it does not already exist;
-6. exits without polling, streaming logs, or deciding server deployment success.
+5. reconnects to the OIDC-protected
+   `GET https://deploy.rezics.com/v1/releases/dispatch` SSE stream and keeps
+   the CI step open until the root Nomad allocation reaches a terminal state;
+6. streams controller phase markers, child allocation/task events, and bounded
+   deploy-task output into the GitHub log, while a failed batch automatically
+   dumps evaluation, allocation events, and tail logs;
+7. creates the GitHub Release only after the server release has succeeded.
 
 The Web Worker has a separate GitHub-owned release boundary. A `web/v*` tag or
 an explicit manual dispatch starts `deploy-web-cloudflare.yml`, which builds and
@@ -84,9 +89,13 @@ The dependency order is:
 
 Unchanged components are skipped. A database change conservatively invalidates
 API, worker, and derived-data maintenance. API and worker have separate images and separate
-Nomad deployments. Web is independent of this graph. The controller and fixed
-service deploy runners follow Nomad event streams at dependency edges; there is
-no interval polling loop.
+Nomad deployments. Web is independent of this graph. The controller waits for
+each batch child through Nomad's allocation event stream. API and worker leaf
+deploys use Nomad's native `job run -verbose` monitor, so evaluation placement,
+allocation lifecycle, health, rolling deployment, and automatic rollback are
+emitted directly into the parent controller log. The public gateway exposes
+that parent log as a bounded, reconnectable SSE timeline; it polls authoritative
+allocation/evaluation objects as a safety net for event-buffer gaps.
 
 Nomad's canary, auto-promotion, and automatic-revert behavior follows the
 [Nomad update specification](https://developer.hashicorp.com/nomad/docs/job-specification/update).
