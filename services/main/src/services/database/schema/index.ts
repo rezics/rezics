@@ -5,6 +5,7 @@ export * from "./access";
 export * from "./aggregate";
 export * from "./base";
 export * from "./book";
+export * from "./book-chapter-draft";
 export * from "./collection";
 export * from "./collection-structure-history";
 export * from "./communication";

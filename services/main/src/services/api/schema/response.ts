@@ -24,6 +24,7 @@ import {
 } from ".";
 import {
 	ContentRatingValues,
+	ContentStatusValues,
 	ContentStructureKindValues,
 	CreditAttributionRoleValues,
 	EntityKindValues,
@@ -1187,6 +1188,12 @@ export const WikiPostDetailResponse = t.Object({
 	...PostThreadDetailFields,
 	postKind: t.Literal("wiki"),
 });
+export const ChapterPostDetailResponse = t.Object({
+	...PostThreadDetailFields,
+	postKind: t.Literal("chapter"),
+	body: t.Nullable(PortableTextDocument),
+	status: t.Nullable(t.UnionEnum(ContentStatusValues)),
+});
 export const ReviewDetailResponse = t.Object({
 	id: Uuid,
 	availableLanguages: t.Array(ContentLanguage, { uniqueItems: true }),
@@ -1218,6 +1225,7 @@ export const PostDetailResponse = t.Union([
 	OrdinaryPostDetailResponse,
 	ReplyPostDetailResponse,
 	ExcerptPostDetailResponse,
+	ChapterPostDetailResponse,
 	ReviewDetailResponse,
 	WikiPostDetailResponse,
 ]);
@@ -1366,7 +1374,7 @@ export const ContentStructureNodeResponse = t.Object({
 	createdAt: DateTime,
 	updatedAt: DateTime,
 });
-export const ChapterDetailResponse = t.Object({
+export const BookChapterNodeDetailResponse = t.Object({
 	nodeId: Uuid,
 	bookId: Uuid,
 	chapterId: Uuid,
@@ -1376,10 +1384,10 @@ export const ChapterDetailResponse = t.Object({
 	availableLanguages: t.Array(ContentLanguage),
 	content: t.Nullable(PortableTextDocument),
 	contentMetrics: t.Nullable(ContentMetricResponse),
-	status: t.Nullable(t.String()),
+	status: t.Nullable(t.UnionEnum(ContentStatusValues)),
 	updatedAt: DateTime,
-	previousChapterId: t.Nullable(Uuid),
-	nextChapterId: t.Nullable(Uuid),
+	previousNodeId: t.Nullable(Uuid),
+	nextNodeId: t.Nullable(Uuid),
 	capabilities: t.Object({ canReply: t.Boolean() }),
 });
 export const ReplyResponse = t.Object({

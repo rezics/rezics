@@ -44,6 +44,8 @@ export default {
 	UnitContentLicenseGrantForbidden: `只有個人擁有的作品可以對 ${verbatimTerms.rezics.value} 授權。`,
 	UnitChanged: "內容已變更，請重新整理後再試一次。",
 	UnitRevisionConflict: "修訂基礎已變更，請重新整理後再試一次。",
+	RevisionContributionActorRequired: "請指定這次修訂的主要貢獻者。",
+	RevisionCreditEntityInvalid: "所選的修訂貢獻者無效，請重新選擇。",
 	ContentStructureRevisionConflict: "內容結構已在其他地方變更，請重新整理後再試一次。",
 	CollectionStructureRevisionConflict: "項目結構已在其他地方變更，請重新整理後再試一次。",
 	DockRevisionConflict: `${dockTerms.label}已在其他地方變更，請重新整理後再試一次。`,

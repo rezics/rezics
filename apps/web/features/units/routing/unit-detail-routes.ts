@@ -30,6 +30,11 @@ export function unitQuestionsHref(type: UnitDetailUnitType, unitId: string): str
 	return `/units/${type}/${unitId}/questions`;
 }
 
+/** Addresses one Chapter occurrence in a Book; `nodeId` is not the Chapter Post ID. */
+export function bookReaderHref(bookId: string, nodeId: string): string {
+	return `/units/book/${bookId}/read/${nodeId}`;
+}
+
 export function unitTagsHref(type: UnitDetailUnitType, unitId: string): string {
 	return `/units/${type}/${unitId}/tags`;
 }

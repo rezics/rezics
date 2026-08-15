@@ -46,6 +46,10 @@ export default {
 	UnitChanged: "Dieser Inhalt wurde geändert. Aktualisiere die Seite und versuche es erneut.",
 	UnitRevisionConflict:
 		"Die Ausgangsversion wurde geändert. Aktualisiere die Seite und versuche es erneut.",
+	RevisionContributionActorRequired:
+		"Wähle die hauptverantwortliche Person für diese Revision aus.",
+	RevisionCreditEntityInvalid:
+		"Die ausgewählte Person für diese Revision ist ungültig. Wähle eine andere aus.",
 	ContentStructureRevisionConflict:
 		"Die Inhaltsstruktur wurde an anderer Stelle geändert. Aktualisiere die Seite und versuche es erneut.",
 	CollectionStructureRevisionConflict:

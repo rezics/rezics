@@ -57,7 +57,13 @@ describe("unit cache invalidation", () => {
 			],
 		});
 		expect(invalidateQueries).toHaveBeenNthCalledWith(2, {
-			queryKey: [{ url: "/api/v1/chapters/:chapterId", params: { chapterId: "chapter-1" } }],
+			queryKey: [{ url: "/api/v1/posts/:postId", params: { postId: "chapter-1" } }],
+		});
+		expect(invalidateQueries).toHaveBeenNthCalledWith(3, {
+			queryKey: [{ url: "/api/v1/books/:bookId/content-nodes/:nodeId" }],
+		});
+		expect(invalidateQueries).toHaveBeenNthCalledWith(4, {
+			queryKey: [{ url: "/api/v1/units/book/:unitId/content-structure/nodes" }],
 		});
 	});
 });

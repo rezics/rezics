@@ -253,6 +253,7 @@ export function SeriesReleasesPage() {
 										seriesId: unit.id,
 										releaseId: releasePendingRemoval.releaseUnitId,
 									},
+									body: {},
 								});
 								setReleasePendingRemoval(undefined);
 							}}

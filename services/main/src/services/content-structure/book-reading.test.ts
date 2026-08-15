@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { ContentLanguage } from "@rezics/i18n";
 
-import { orderReaderChapterIds, selectReaderChapterLocalization } from "./book-reading";
+import { orderReaderChapterNodeIds, selectReaderChapterLocalization } from "./book-reading";
 
 describe("selectReaderChapterLocalization", () => {
 	const rows: readonly {
@@ -16,7 +16,7 @@ describe("selectReaderChapterLocalization", () => {
 	it("falls back to any readable body before selecting a title-only localization", () => {
 		expect(
 			selectReaderChapterLocalization(rows, {
-				canEditBook: false,
+				canReadDraftContent: false,
 				localizationLanguages: ["zh"],
 			})?.language,
 		).toBe("en");
@@ -25,7 +25,7 @@ describe("selectReaderChapterLocalization", () => {
 	it("keeps an explicit title-only localization exact", () => {
 		expect(
 			selectReaderChapterLocalization(rows, {
-				canEditBook: false,
+				canReadDraftContent: false,
 				exactLanguage: "zh",
 				localizationLanguages: ["en"],
 			})?.language,
@@ -36,7 +36,7 @@ describe("selectReaderChapterLocalization", () => {
 		const titleOnly = rows.map((row) => ({ ...row, content: null, contentStatus: null }));
 		expect(
 			selectReaderChapterLocalization(titleOnly, {
-				canEditBook: false,
+				canReadDraftContent: false,
 				localizationLanguages: ["zh"],
 			})?.language,
 		).toBe("zh");
@@ -45,7 +45,7 @@ describe("selectReaderChapterLocalization", () => {
 	it("falls back when an explicitly requested language version does not exist", () => {
 		expect(
 			selectReaderChapterLocalization(rows.slice(0, 1), {
-				canEditBook: false,
+				canReadDraftContent: false,
 				exactLanguage: "en",
 				localizationLanguages: ["zh"],
 			})?.language,
@@ -60,17 +60,17 @@ describe("selectReaderChapterLocalization", () => {
 		}[] = [{ language: "zh", content: {}, contentStatus: "draft" }];
 		expect(
 			selectReaderChapterLocalization(draft, {
-				canEditBook: true,
+				canReadDraftContent: true,
 				localizationLanguages: ["zh"],
 			}),
 		).toBe(draft[0]);
 	});
 });
 
-describe("orderReaderChapterIds", () => {
+describe("orderReaderChapterNodeIds", () => {
 	it("uses depth-first structure order and omits labels", () => {
 		expect(
-			orderReaderChapterIds([
+			orderReaderChapterNodeIds([
 				{
 					id: "later-node",
 					contentUnitId: "later",
@@ -100,12 +100,12 @@ describe("orderReaderChapterIds", () => {
 					contentKind: "chapter",
 				},
 			]),
-		).toEqual(["nested-1", "nested-2", "later"]);
+		).toEqual(["nested-1-node", "nested-2-node", "later-node"]);
 	});
 
 	it("keeps title-only chapters in navigation", () => {
 		expect(
-			orderReaderChapterIds([
+			orderReaderChapterNodeIds([
 				{
 					id: "first-node",
 					contentUnitId: "first",
@@ -121,6 +121,6 @@ describe("orderReaderChapterIds", () => {
 					contentKind: "chapter",
 				},
 			]),
-		).toEqual(["first", "second"]);
+		).toEqual(["first-node", "second-node"]);
 	});
 });

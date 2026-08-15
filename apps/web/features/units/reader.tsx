@@ -3,32 +3,23 @@
 import { isContentLanguage, type ContentLanguage } from "@rezics/i18n";
 
 import {
-	type GetApiChaptersByChapterIdStatus200,
-	useGetApiChaptersByChapterId,
+	useGetApiBooksByBookIdContentNodesByNodeId,
 	useGetApiUnitsBookByUnitIdContentStructureNodes,
-	useGetApiUnitsByTypeByUnitId,
-	usePutApiChaptersByChapterIdLocalizationsByLanguageContent,
 } from "@rezics/openapi-tanstack-query";
-import { measurePortableText, type PortableTextValue } from "@rezics/portable-text";
-import { useQueryClient } from "@tanstack/react-query";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import {
 	ArrowLeftIcon,
 	ChevronRightIcon,
-	HistoryIcon,
 	LanguagesIcon,
 	ListTreeIcon,
 	SettingsIcon,
 } from "lucide-react";
 import { AppLink as Link } from "@/features/application-shell/components/app-link";
-import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import { PageHeading } from "@rezics/ui";
 import { QueryFailure, QueryPending } from "@rezics/ui";
 import { Button } from "@rezics/ui";
-import { Card, CardContent } from "@rezics/ui";
-import { Field, FieldGroup, FieldLabel } from "@rezics/ui";
-import { Input } from "@rezics/ui";
+import { Field, FieldLabel } from "@rezics/ui";
 import {
 	Menu,
 	MenuContent,
@@ -43,21 +34,6 @@ import { NativeSelect, NativeSelectOption } from "@rezics/ui";
 import { Skeleton } from "@rezics/ui";
 import { Sheet, SheetBody, SheetContent, SheetHeader, SheetTrigger } from "@rezics/ui";
 import { cn } from "@rezics/ui";
-import { RequireSession } from "@/features/auth/require-session";
-import { ContentLanguageControl } from "@/features/content-languages/components/content-language-control";
-import { ContentLanguageEditorBoundary } from "@/features/content-languages/components/content-language-editor-boundary";
-import { LocalizedDraftGate } from "@/features/content-languages/components/localized-draft-gate";
-import {
-	useContentLanguageEditor,
-	useLocalizedDraft,
-	type LocalizedDraftCodec,
-} from "@/features/content-languages/hooks/use-content-language-editor";
-import {
-	decodeDraftPortableText,
-	decodeDraftString,
-	isDraftRecord,
-} from "@/features/content-languages/model/localized-draft-codec";
-import { PortableTextEditor } from "@/features/editor/portable-text-editor";
 import { ChapterReadingProgress } from "@/features/progress/components/chapter-reading-progress";
 import { ReplyPostThread } from "@/features/posts/reply-thread";
 import { useTranslation } from "@/i18n/client";
@@ -69,8 +45,7 @@ import {
 } from "@/features/content-languages/hooks/use-content-language-navigation";
 import { withContentLanguage } from "@/features/content-languages/routing/content-language-route";
 import { RequestFailure } from "@/i18n/request-failure";
-import { hasErrorCode } from "@/i18n/errors";
-import { readPortableText, writePortableText } from "@/lib/block";
+import { readPortableText } from "@/lib/block";
 import { LocalizedPortableTextContent } from "@/features/content-language-display/localized-portable-text-content";
 import { LocalizedText } from "@/features/content-language-display/chinese-content-display-context";
 import { buildContentStructureTree, type ContentStructureTreeNode } from "./content-structure-tree";
@@ -79,35 +54,7 @@ import {
 	flattenVisibleBookStructureTree,
 	isBookStructureDisplayLabel,
 } from "./model/book-content-structure-view";
-import { unitDetailHref } from "./routing/unit-detail-routes";
-import { invalidateChapterContent } from "./unit-cache";
-import { chapterHistoryHref, unitManagementSectionHref } from "./routing/unit-management-routes";
-
-type ChapterLocalizationDraft = {
-	readonly title: string;
-	readonly status: "draft" | "published" | "archived";
-	readonly content: PortableTextValue;
-};
-
-function decodeChapterStatus(value: string): ChapterLocalizationDraft["status"] {
-	if (value === "draft" || value === "published" || value === "archived") return value;
-	throw new Error(`Unexpected Chapter status: ${value}`);
-}
-
-const ChapterLocalizationDraftCodec: LocalizedDraftCodec<ChapterLocalizationDraft> = {
-	version: 1,
-	decode(value) {
-		if (!isDraftRecord(value)) return;
-		const title = decodeDraftString(value.title);
-		const content = decodeDraftPortableText(value.content);
-		const status = value.status;
-		return title === undefined ||
-			!content ||
-			(status !== "draft" && status !== "published" && status !== "archived")
-			? undefined
-			: { title, content, status };
-	},
-};
+import { bookReaderHref, unitDetailHref } from "./routing/unit-detail-routes";
 
 const ReaderOutlineRowHeight = 36;
 const NestedMenuPositioning = { placement: "right-start", gutter: -2 } as const;
@@ -116,14 +63,14 @@ function ContentReadTree({
 	bookId,
 	label,
 	nodes,
-	currentChapterId,
+	currentNodeId,
 	language,
 	className,
 }: {
 	bookId: string;
 	label: string;
 	nodes: readonly ContentStructureTreeNode[];
-	currentChapterId?: string;
+	currentNodeId?: string;
 	language?: ContentLanguage;
 	className?: string;
 }) {
@@ -131,8 +78,8 @@ function ContentReadTree({
 	const labelIds = useMemo(() => collectBookStructureLabelIds(nodes), [nodes]);
 	const [expandedIds, setExpandedIds] = useState<ReadonlySet<string>>(() => new Set(labelIds));
 	const activeAncestorLabelIds = useMemo(
-		() => findChapterAncestorLabelIds(nodes, currentChapterId),
-		[nodes, currentChapterId],
+		() => findChapterAncestorLabelIds(nodes, currentNodeId),
+		[nodes, currentNodeId],
 	);
 
 	useEffect(() => {
@@ -148,14 +95,8 @@ function ContentReadTree({
 		[nodes, expandedIds],
 	);
 	const activeIndex = useMemo(
-		() =>
-			currentChapterId
-				? entries.findIndex(
-						({ entry }) =>
-							entry.node.contentKind === "chapter" && entry.node.contentUnitId === currentChapterId,
-					)
-				: -1,
-		[entries, currentChapterId],
+		() => (currentNodeId ? entries.findIndex(({ entry }) => entry.node.id === currentNodeId) : -1),
+		[entries, currentNodeId],
 	);
 	const getItemKey = useCallback(
 		(index: number) => entries[index]?.entry.node.id ?? index,
@@ -200,7 +141,7 @@ function ContentReadTree({
 					const { node } = entry;
 					const labelNode = isBookStructureDisplayLabel(entry);
 					const expanded = expandedIds.has(node.id);
-					const current = node.contentKind === "chapter" && node.contentUnitId === currentChapterId;
+					const current = node.contentKind === "chapter" && node.id === currentNodeId;
 					const rowClassName = cn(
 						"absolute start-0 top-0 flex h-9 w-full items-center gap-1 rounded-md pe-2 text-sm outline-none",
 						labelNode
@@ -248,10 +189,7 @@ function ContentReadTree({
 								<Link
 									aria-current={current ? "page" : undefined}
 									className={rowClassName}
-									href={withContentLanguage(
-										`/units/book/${bookId}/read/${node.contentUnitId}`,
-										language,
-									)}
+									href={withContentLanguage(bookReaderHref(bookId, node.id), language)}
 									style={rowStyle}
 								>
 									<span className="truncate">
@@ -269,17 +207,15 @@ function ContentReadTree({
 
 function findChapterAncestorLabelIds(
 	nodes: readonly ContentStructureTreeNode[],
-	chapterId?: string,
+	nodeId?: string,
 ): string[] {
-	if (!chapterId) return [];
+	if (!nodeId) return [];
 	for (const entry of nodes) {
-		if (entry.node.contentKind === "chapter" && entry.node.contentUnitId === chapterId) return [];
-		const descendants = findChapterAncestorLabelIds(entry.children, chapterId);
+		if (entry.node.contentKind === "chapter" && entry.node.id === nodeId) return [];
+		const descendants = findChapterAncestorLabelIds(entry.children, nodeId);
 		if (
 			descendants.length ||
-			entry.children.some(
-				({ node }) => node.contentKind === "chapter" && node.contentUnitId === chapterId,
-			)
+			entry.children.some(({ node }) => node.contentKind === "chapter" && node.id === nodeId)
 		)
 			return entry.node.contentKind === "label" ? [entry.node.id, ...descendants] : descendants;
 	}
@@ -325,7 +261,7 @@ function saveReaderFontSize(fontSize: ReaderFontSizeOption): void {
 	}
 }
 
-export function Reader({ bookId, chapterId }: { bookId: string; chapterId: string }) {
+export function Reader({ bookId, nodeId }: { bookId: string; nodeId: string }) {
 	const { t } = useTranslation(["actions", "brand", "errors", "locale", "state", "ui", "units"]);
 	const localizationLanguages = useLocalizationLanguages();
 	const [fontSize, setFontSize] = useState<ReaderFontSizeOption>(DefaultReaderFontSize);
@@ -335,8 +271,8 @@ export function Reader({ bookId, chapterId }: { bookId: string; chapterId: strin
 	}, []);
 	const selectedLanguage = useRequestedContentLanguage();
 	const { replaceCurrentLanguage } = useContentLanguageNavigation();
-	const query = useGetApiChaptersByChapterId({
-		path: { chapterId },
+	const query = useGetApiBooksByBookIdContentNodesByNodeId({
+		path: { bookId, nodeId },
 		query: {
 			localizationLanguages,
 			...(selectedLanguage ? { language: selectedLanguage } : {}),
@@ -345,7 +281,7 @@ export function Reader({ bookId, chapterId }: { bookId: string; chapterId: strin
 	useLocalizationFallbackToast({
 		actualLanguage: query.data?.language ?? null,
 		localizationLanguages,
-		unitId: chapterId,
+		unitId: query.data?.chapterId ?? nodeId,
 	});
 	const outline = useGetApiUnitsBookByUnitIdContentStructureNodes({
 		path: { unitId: bookId },
@@ -402,7 +338,7 @@ export function Reader({ bookId, chapterId }: { bookId: string; chapterId: strin
 							<ReaderOutline
 								bookId={bookId}
 								className="h-[calc(100svh-7.75rem)] border-0"
-								currentChapterId={chapterId}
+								currentNodeId={nodeId}
 								language={selectedLanguage}
 								outline={outline}
 								tree={tree}
@@ -482,7 +418,7 @@ export function Reader({ bookId, chapterId }: { bookId: string; chapterId: strin
 					<ReaderOutline
 						bookId={bookId}
 						className="min-h-0 flex-1 border-0 bg-transparent"
-						currentChapterId={chapterId}
+						currentNodeId={nodeId}
 						language={selectedLanguage}
 						outline={outline}
 						tree={tree}
@@ -513,11 +449,11 @@ export function Reader({ bookId, chapterId }: { bookId: string; chapterId: strin
 							) : null}
 						</article>
 						<footer className="flex flex-wrap items-center justify-between gap-3 border-t pt-6">
-							{query.data.previousChapterId ? (
+							{query.data.previousNodeId ? (
 								<Button asChild className="min-h-11 sm:min-h-8" variant="outline">
 									<Link
 										href={withContentLanguage(
-											`/units/book/${bookId}/read/${query.data.previousChapterId}`,
+											bookReaderHref(bookId, query.data.previousNodeId),
 											selectedLanguage,
 										)}
 									>
@@ -527,11 +463,11 @@ export function Reader({ bookId, chapterId }: { bookId: string; chapterId: strin
 							) : (
 								<span />
 							)}
-							{query.data.nextChapterId ? (
+							{query.data.nextNodeId ? (
 								<Button variant="solid" asChild className="min-h-11 sm:min-h-8">
 									<Link
 										href={withContentLanguage(
-											`/units/book/${bookId}/read/${query.data.nextChapterId}`,
+											bookReaderHref(bookId, query.data.nextNodeId),
 											selectedLanguage,
 										)}
 									>
@@ -545,9 +481,9 @@ export function Reader({ bookId, chapterId }: { bookId: string; chapterId: strin
 						<div className="mt-10 border-t pt-8">
 							<ReplyPostThread
 								canReply={query.data.capabilities.canReply}
-								rootPostId={chapterId}
+								rootPostId={query.data.chapterId}
 								signInDestination={withContentLanguage(
-									`/units/book/${bookId}/read/${chapterId}#replies`,
+									`${bookReaderHref(bookId, nodeId)}#replies`,
 									selectedLanguage,
 								)}
 							/>
@@ -562,14 +498,14 @@ export function Reader({ bookId, chapterId }: { bookId: string; chapterId: strin
 function ReaderOutline({
 	bookId,
 	className,
-	currentChapterId,
+	currentNodeId,
 	language,
 	outline,
 	tree,
 }: {
 	bookId: string;
 	className?: string;
-	currentChapterId: string;
+	currentNodeId: string;
 	language?: ContentLanguage;
 	outline: ReturnType<typeof useGetApiUnitsBookByUnitIdContentStructureNodes>;
 	tree: readonly ContentStructureTreeNode[];
@@ -591,234 +527,10 @@ function ReaderOutline({
 		<ContentReadTree
 			bookId={bookId}
 			className={className}
-			currentChapterId={currentChapterId}
+			currentNodeId={currentNodeId}
 			language={language}
 			label={t.units.content.title}
 			nodes={tree}
 		/>
-	);
-}
-
-export function ChapterLocalizationEdit({
-	bookId,
-	chapterId,
-}: {
-	bookId: string;
-	chapterId: string;
-}) {
-	return (
-		<RequireSession>
-			<ChapterLocalizationEditorContent bookId={bookId} chapterId={chapterId} />
-		</RequireSession>
-	);
-}
-
-function ChapterLocalizationEditorContent({
-	bookId,
-	chapterId,
-}: {
-	bookId: string;
-	chapterId: string;
-}) {
-	const { t } = useTranslation(["actions", "errors", "state", "ui", "units"]);
-	const localizationLanguages = useLocalizationLanguages();
-	const book = useGetApiUnitsByTypeByUnitId({
-		path: { type: "book", unitId: bookId },
-		query: { localizationLanguages },
-	});
-	if (book.isPending) return <QueryPending />;
-	if (book.isError) return <QueryFailure error={book.error} retry={() => void book.refetch()} />;
-	if (!book.data) return <QueryPending />;
-	if (book.data.ownershipMode === "community_owned")
-		return (
-			<main className="mx-auto flex min-h-64 w-full max-w-4xl flex-col items-start justify-center gap-5 px-4 py-10">
-				<PageHeading
-					description={t.units.chapter.communityUnitContentPolicyDescription}
-					title={t.units.chapter.communityUnitContentPolicyTitle}
-				/>
-				<Button asChild variant="outline">
-					<Link href={unitManagementSectionHref("book", bookId, "content-structure")}>
-						<ArrowLeftIcon aria-hidden />
-						{t.units.chapter.backToStructure}
-					</Link>
-				</Button>
-			</main>
-		);
-	if (!book.data.capabilities.canEdit)
-		return (
-			<main className="mx-auto grid min-h-64 w-full max-w-4xl place-items-center px-4 py-10">
-				<p className="text-destructive text-sm">{t.errors.forbidden}</p>
-			</main>
-		);
-	return (
-		<ContentLanguageEditorBoundary unitId={chapterId}>
-			<ChapterLocalizationEditor bookId={bookId} chapterId={chapterId} />
-		</ContentLanguageEditorBoundary>
-	);
-}
-
-function ChapterLocalizationEditor({ bookId, chapterId }: { bookId: string; chapterId: string }) {
-	const { t } = useTranslation(["actions", "errors", "history", "state", "ui", "units"]);
-	const { selectedLanguage: language } = useContentLanguageEditor();
-	const query = useGetApiChaptersByChapterId({
-		path: { chapterId },
-		query: { localizationLanguages: [language], language },
-	});
-	const missingLocalization = query.isError && hasErrorCode(query.error, "ChapterLanguageNotFound");
-	const chapter = query.data?.language === language ? query.data : undefined;
-	if (query.isPending) return <QueryPending />;
-	if (query.isError && !missingLocalization)
-		return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
-	return (
-		<main className="mx-auto flex w-full max-w-[90rem] flex-col gap-8 px-4 py-8 sm:px-6 sm:py-10">
-			<PageHeading
-				action={
-					<div className="flex flex-wrap justify-end gap-2">
-						<ContentLanguageControl />
-						<Button asChild variant="outline">
-							<Link href={unitManagementSectionHref("book", bookId, "content-structure")}>
-								{t.units.chapter.backToStructure}
-							</Link>
-						</Button>
-						<Button asChild size="icon-md" variant="outline">
-							<Link aria-label={t.history.title} href={chapterHistoryHref(bookId, chapterId)}>
-								<HistoryIcon aria-hidden />
-							</Link>
-						</Button>
-					</div>
-				}
-				title={t.units.chapter.title}
-			/>
-			<Card>
-				<CardContent className="grid gap-6 p-6">
-					<ChapterLocalizationForm
-						key={`${chapterId}:${language}:${query.data?.updatedAt ?? "new"}`}
-						bookId={bookId}
-						chapter={chapter}
-						chapterId={chapterId}
-						language={language}
-					/>
-				</CardContent>
-			</Card>
-		</main>
-	);
-}
-
-function ChapterLocalizationForm({
-	bookId,
-	chapterId,
-	language,
-	chapter,
-}: {
-	bookId: string;
-	chapterId: string;
-	language: ContentLanguage;
-	chapter: GetApiChaptersByChapterIdStatus200 | undefined;
-}) {
-	const { t } = useTranslation(["actions", "errors", "state", "ui", "units"]);
-	const queryClient = useQueryClient();
-	const { languagesChanged } = useContentLanguageEditor();
-	const draft = useLocalizedDraft<ChapterLocalizationDraft>({
-		scope: "chapter-localization",
-		baseVersion: chapter?.updatedAt ?? null,
-		codec: ChapterLocalizationDraftCodec,
-		createInitialValue: () => ({
-			title: chapter?.title ?? "",
-			status: chapter?.status ? decodeChapterStatus(chapter.status) : "draft",
-			content: readPortableText(chapter?.content),
-		}),
-	});
-	const { value } = draft;
-	const contentMetrics = useMemo(
-		() => measurePortableText(value.content, language),
-		[value.content, language],
-	);
-	const update = usePutApiChaptersByChapterIdLocalizationsByLanguageContent({
-		mutation: {
-			onSuccess: async () => invalidateChapterContent(queryClient, chapterId),
-		},
-	});
-	async function submit(event: FormEvent<HTMLFormElement>) {
-		event.preventDefault();
-		try {
-			await update.mutateAsync({
-				path: { chapterId, language },
-				body: {
-					title: value.title.trim(),
-					content: writePortableText(value.content, chapter?.content),
-					status: value.status,
-				},
-			});
-			draft.commit();
-			await languagesChanged();
-		} catch {
-			// The typed mutation state supplies the visible API error.
-		}
-	}
-	return (
-		<LocalizedDraftGate
-			hydrated={draft.hydrated}
-			onDiscard={draft.discard}
-			serverChanged={draft.serverChanged}
-		>
-			<form onSubmit={submit}>
-				<FieldGroup>
-					<Field required>
-						<FieldLabel>{t.ui.title}</FieldLabel>
-						<Input
-							maxLength={500}
-							name="title"
-							onChange={(event) => {
-								const title = event.currentTarget.value;
-								draft.setValue((current) => ({ ...current, title }));
-							}}
-							required
-							value={value.title}
-						/>
-					</Field>
-					<Field>
-						<FieldLabel>{t.ui.status}</FieldLabel>
-						<NativeSelect
-							name="status"
-							onChange={(event) => {
-								const status = event.currentTarget.value;
-								if (status === "draft" || status === "published" || status === "archived")
-									draft.setValue((current) => ({ ...current, status }));
-							}}
-							value={value.status}
-						>
-							<NativeSelectOption value="draft">{t.ui.draft}</NativeSelectOption>
-							<NativeSelectOption value="published">{t.ui.published}</NativeSelectOption>
-							<NativeSelectOption value="archived">{t.ui.archived}</NativeSelectOption>
-						</NativeSelect>
-					</Field>
-					<PortableTextEditor
-						label={t.ui.body}
-						onChange={(content) => draft.setValue((current) => ({ ...current, content }))}
-						required
-						value={value.content}
-						variant="document"
-					/>
-					<p aria-live="polite" className="text-muted-foreground text-sm">
-						{language === "zh" || language === "ja"
-							? t.units.chapter.characterCount({
-									count: contentMetrics.characterCount,
-								})
-							: t.units.chapter.wordCount({ count: contentMetrics.wordCount })}
-					</p>
-					<div className="flex flex-wrap gap-2">
-						<Button variant="solid" isLoading={update.isPending} type="submit">
-							{t.units.chapter.save}
-						</Button>
-						<RequestFailure error={update.error} fallback={t.ui.retryLater} />
-						<Button asChild type="button" variant="outline">
-							<Link href={unitManagementSectionHref("book", bookId, "content-structure")}>
-								{t.units.chapter.backToStructure}
-							</Link>
-						</Button>
-					</div>
-				</FieldGroup>
-			</form>
-		</LocalizedDraftGate>
 	);
 }

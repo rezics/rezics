@@ -764,6 +764,7 @@ function CreditSection({
 														unitId: unit.id,
 														associationId: attribution.id,
 													},
+													body: {},
 												});
 												await invalidateUnitDetail(queryClient, type, unit.id);
 												toast.create({
@@ -859,6 +860,7 @@ function SubjectSection({
 														unitId: unit.id,
 														associationId: association.id,
 													},
+													body: {},
 												});
 												await invalidateUnitDetail(queryClient, type, unit.id);
 												toast.create({

@@ -46,6 +46,10 @@ export default {
 	UnitContentLicenseGrantForbidden: `Seules les œuvres détenues à titre personnel peuvent accorder une licence à ${verbatimTerms.rezics.value}.`,
 	UnitChanged: "Ce contenu a changé. Actualisez la page et réessayez.",
 	UnitRevisionConflict: "La version de référence a changé. Actualisez la page et réessayez.",
+	RevisionContributionActorRequired:
+		"Choisissez la personne principalement responsable de cette version.",
+	RevisionCreditEntityInvalid:
+		"La personne choisie pour cette version n’est pas valide. Choisissez-en une autre.",
 	ContentStructureRevisionConflict:
 		"La structure de contenu a été modifiée ailleurs. Actualisez la page et réessayez.",
 	CollectionStructureRevisionConflict:

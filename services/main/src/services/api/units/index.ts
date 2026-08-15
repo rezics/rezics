@@ -48,6 +48,9 @@ import {
 	PublicUnitSeoParams,
 	PublicUnitSeoQuery,
 	PublicUnitSeoResponse,
+	BookChapterDraftJobParams,
+	CreateBookChapterDraftJobBody,
+	BookChapterDraftJobResponse,
 } from "./schema";
 import {
 	toApiErrorResponse,
@@ -69,6 +72,7 @@ import {
 } from "../../units/realm-publication";
 import { NoContentResponse } from "../schema/action-response";
 import { ValidationError } from "../errors";
+import { enqueueBookChapterDraftJob } from "../../units/book-chapter-draft";
 
 const AuthenticationRequiredResponse = toApiErrorResponse(["AuthenticationRequired"]);
 const UnitReadFailureResponse = toApiErrorResponse(["UnitNotFound"]);
@@ -511,6 +515,30 @@ export default new Elysia({ prefix: "/units" })
 			detail: { summary: "Create unit", tags: ["Units"] },
 		},
 	)
+	.post(
+		"/book/:bookId/chapter-draft-jobs",
+		async ({ params, profile, authorization, body }) => {
+			await authorization.unit.ensure(params.bookId, "unit.status.update", ["unit"]);
+			return enqueueBookChapterDraftJob({
+				bookId: params.bookId,
+				bookUpdatedAt: new Date(body.bookUpdatedAt),
+				requestedByProfileId: profile.unitId,
+			});
+		},
+		{
+			access: "contribute:unit:update",
+			params: BookChapterDraftJobParams,
+			body: CreateBookChapterDraftJobBody,
+			response: {
+				[StatusCodes.OK]: BookChapterDraftJobResponse,
+				[StatusCodes.UNAUTHORIZED]: AuthenticationRequiredResponse,
+				[StatusCodes.FORBIDDEN]: UnitAuthorizationForbiddenResponse,
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
+				[StatusCodes.CONFLICT]: UnitChangedResponse,
+			},
+			detail: { summary: "Draft Chapters attached to a draft Book", tags: ["Units"] },
+		},
+	)
 	.get(
 		"/:type/:unitId",
 		async ({ params, query, request }) => {
@@ -534,6 +562,13 @@ export default new Elysia({ prefix: "/units" })
 	.patch(
 		"/:type/:unitId",
 		async ({ params, authorization, body }) => {
+			if (
+				body.bookChapterDraftScope !== undefined &&
+				(params.type !== "book" || body.status !== "draft")
+			)
+				throw new ValidationError({
+					bookChapterDraftScope: "is only valid while setting a Book to draft",
+				});
 			const { updatedAt, revisionContext, ...update } = body;
 			return updateUnit(params.type, params.unitId, authorization, {
 				...update,
@@ -550,6 +585,7 @@ export default new Elysia({ prefix: "/units" })
 				[StatusCodes.UNAUTHORIZED]: AuthenticationRequiredResponse,
 				[StatusCodes.FORBIDDEN]: UnitUpdateForbiddenResponse,
 				[StatusCodes.BAD_REQUEST]: UnitRevisionContributionBadRequestResponse,
+				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["ValidationError"]),
 				[StatusCodes.NOT_FOUND]: UnitMutationNotFoundResponse,
 				[StatusCodes.CONFLICT]: UnitChangedResponse,
 			},

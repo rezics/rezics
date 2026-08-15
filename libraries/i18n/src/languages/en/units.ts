@@ -372,6 +372,13 @@ export default {
 		version: "Attach version",
 		canonicalUnit: "Primary unit",
 		saveSettings: "Save settings",
+		bookDraftScope: "Book takedown scope",
+		bookDraftScopeDescription: `Chapters are independent ${postTerms.pluralLabel}. Choose explicitly whether attached published Chapters should also become drafts.`,
+		bookDraftChoose: "Choose the takedown scope",
+		bookDraftBookOnly: "Draft the Book only",
+		bookDraftBookAndChapters: "Draft the Book and manageable published Chapters",
+		bookChapterDraftQueued:
+			"Chapter takedown is queued; Chapters you can manage will be processed in batches.",
 	},
 	relationshipManagement: {
 		credits: "Credits",

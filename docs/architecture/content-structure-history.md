@@ -165,6 +165,75 @@ is optional: its title and previous/next navigation remain available without Por
 Book editor allows only Labels to receive children, but that authoring convention is a frontend
 rule rather than a backend hierarchy constraint.
 
+## Chapter identity, Reader context, and takedown
+
+A Chapter is an independently authorized Post Unit. `GET /api/v1/posts/:chapterId` resolves its
+own Unit lifecycle, visibility, moderation, grants, restrictions, localization, attribution, and
+reply thread. It does not require a readable parent Book. Draft localization content is returned
+only to a caller who can update that Chapter's localizations; other callers may still receive a
+readable title-only Chapter when the Chapter Unit itself is readable.
+
+A Reader page is a contextual occurrence, not a second Chapter identity. It is addressed by
+`GET /api/v1/books/:bookId/content-nodes/:nodeId` and
+`/units/book/:bookId/read/:nodeId`. The request independently proves all three facts:
+
+1. the Book is readable;
+2. the active node belongs to that Book's `book.contents` structure and targets a Chapter; and
+3. the Chapter Unit is readable.
+
+Previous and next destinations are content node IDs because the same Chapter may occur more than
+once or in more than one Book. Book outlines and Reader links use node IDs; feeds, search results,
+collections, reply roots, and standalone shares use the Chapter Post ID. A Reader failure never
+falls back to standalone Post rendering, and standalone Post rendering never guesses a Book
+context. This removes authorization-dependent redirects and ambiguous multi-Book selection.
+
+Changing a Book to draft therefore takes down the Reader context but does not implicitly mutate
+independent Chapters. The management UI requires an explicit choice between the Book alone and the
+Book plus manageable published Chapters. The latter creates a durable
+`book_chapter_draft_job` in the same database transaction as the Book lifecycle change, so the
+choice cannot be partially committed. An exact-version command endpoint also supports an already
+draft Book. A worker walks occurrences that existed and were not rewritten after the captured
+request boundary with `(structure_id, node_id)` keyset pagination, processes at most 25 occurrences
+per transaction, re-evaluates
+`unit.status.update` for every distinct Chapter batch, and records ordinary immutable Unit status
+events. A later Book lifecycle transition cancels an outstanding job. Failed leases are reclaimed;
+retries are bounded and observable in the job row.
+
+The public API cutover is intentionally breaking at the v1 baseline: the removed
+`GET /api/v1/chapters/:chapterId` lookup selected an arbitrary Book occurrence and coupled Chapter
+content visibility to Book edit permission. Clients must use the standalone Post endpoint for a
+Chapter identity or provide both Book and content node identity for Reader context. Existing Reader
+URLs that put a Chapter ID in the final segment must be regenerated from the Book outline's node
+IDs; there is no safe redirect when a Chapter has multiple occurrences.
+
+### Workload and capacity
+
+Capacity planning treats `content_structure_node` as a 500-million-row relation and also evaluates
+3 billion rows. With a planning distribution of 100 active nodes per Book, those corpus sizes
+represent roughly 5 million and 30 million Book structures. Exact Reader resolution starts from the
+node primary key and verifies Book ownership and Chapter authorization without a corpus scan.
+Book-scoped outlines and depth-first neighbor calculation read one structure through its leading
+structure index; their work is `O(nodes_in_book)`, not `O(corpus)`. Track the per-Book node-count
+distribution, response bytes, query latency, sort memory, and authorization-subquery time. A Book
+whose outline approaches 10,000 nodes is the operational cutover signal for a paginated/materialized
+depth-first projection; do not raise request memory or statement timeouts to accommodate that skew.
+
+Chapter takedown work is independent of Book size on every transaction: two jobs are claimed at a
+time and each advances at most 25 occurrences. One batch performs one indexed node window read, one
+batched authorization read, and at most 25 lifecycle transitions, providing natural backpressure
+through the worker loop. Repeated Chapter occurrences are idempotent because only a currently
+published Chapter transitions. At an illustrative monthly takedown rate of 1% of Books, the job
+relation receives about 50,000 rows per month at the 500-million-node baseline and 300,000 at the
+3-billion-node estimate.
+
+The partial `(structure_id, id)` B-tree adds one entry per active node. At approximately 48–64 bytes
+per entry before fill-factor and bloat, raw index storage is about 24–32 GB for 500 million active
+nodes and 144–192 GB for 3 billion. It is created concurrently so migration does not block node
+writes. Monitor index size, WAL volume, replica lag, dead tuples, hot Book keys, worker lease age,
+retry count, and pending-job age. Before the 3-billion-row estimate approaches a single-node storage
+limit, partition nodes and jobs by a stable hash of the owning Book/structure so the keyset index,
+worker claim queue, and Reader reads remain independently scalable.
+
 Kinds are PostgreSQL `text` with a closed database check and a matching runtime discriminated
 union. Adding a kind requires a policy, runtime schema, migration, and tests.
 

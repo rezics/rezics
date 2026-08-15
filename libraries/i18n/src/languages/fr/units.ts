@@ -380,6 +380,13 @@ export default {
 		version: "Joindre une version",
 		canonicalUnit: "Unit principale",
 		saveSettings: "Enregistrer les réglages",
+		bookDraftScope: "Portée du retour au brouillon",
+		bookDraftScopeDescription: `Les chapitres sont des ${postTerms.plural} indépendants. Choisissez explicitement si les chapitres publiés rattachés doivent aussi repasser en brouillon.`,
+		bookDraftChoose: "Choisir la portée",
+		bookDraftBookOnly: "Repasser uniquement le livre en brouillon",
+		bookDraftBookAndChapters: "Repasser le livre et les chapitres publiés gérables en brouillon",
+		bookChapterDraftQueued:
+			"Le retour au brouillon des chapitres est en file d’attente ; les chapitres gérables seront traités par lots.",
 	},
 	relationshipManagement: {
 		credits: "Crédits",

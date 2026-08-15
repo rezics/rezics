@@ -44,6 +44,8 @@ export default {
 	UnitContentLicenseGrantForbidden: `個人所有の作品だけが ${verbatimTerms.rezics.value} にライセンスを付与できます。`,
 	UnitChanged: "このコンテンツは変更されました。更新してもう一度試してください。",
 	UnitRevisionConflict: "リビジョンの基準が変更されました。更新してもう一度試してください。",
+	RevisionContributionActorRequired: "このリビジョンの主な貢献者を指定してください。",
+	RevisionCreditEntityInvalid: "選択したリビジョン貢献者は無効です。別の貢献者を選択してください。",
 	ContentStructureRevisionConflict:
 		"コンテンツの構造が他の場所で変更されました。更新してもう一度試してください。",
 	CollectionStructureRevisionConflict:

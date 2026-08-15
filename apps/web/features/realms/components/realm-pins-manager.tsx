@@ -144,6 +144,7 @@ export function RealmPinsManager({
 			await remove.mutateAsync({
 				path: { realmId, unitId: pin.unitId },
 				query: { kind: pin.kind },
+				body: {},
 			});
 			setSelectedIdsByKind((current) => {
 				const selected = new Set(current[pin.kind]);

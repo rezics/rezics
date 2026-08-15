@@ -325,8 +325,8 @@ export const SaveMediaContentStructureDraftBody = t.Object(
 );
 export type SaveMediaContentStructureDraftBody = Static<typeof SaveMediaContentStructureDraftBody>;
 
-export const ChapterParams = t.Object({ chapterId: Uuid });
-export type ChapterParams = Static<typeof ChapterParams>;
+export const BookChapterNodeParams = t.Object({ bookId: Uuid, nodeId: Uuid });
+export type BookChapterNodeParams = Static<typeof BookChapterNodeParams>;
 
 export const ReadChapterQuery = t.Object(
 	{
@@ -347,6 +347,7 @@ export const UpsertChapterLocalizationBody = t.Object({
 	title: t.String({ minLength: 1, maxLength: 500 }),
 	content: PortableTextDocument,
 	status: t.Union([t.Literal("draft"), t.Literal("published"), t.Literal("archived")]),
+	baseRevisionId: Uuid,
 	revisionContext: t.Optional(RevisionContext),
 });
 export type UpsertChapterLocalizationBody = Static<typeof UpsertChapterLocalizationBody>;

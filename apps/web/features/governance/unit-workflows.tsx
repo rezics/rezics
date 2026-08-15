@@ -815,6 +815,7 @@ function EntityPublisherManager({ entity }: { entity: GetApiEntitiesByUnitIdStat
 												unitId: entity.id,
 												associationId: attribution.id,
 											},
+											body: {},
 										})
 									}
 									size="sm"

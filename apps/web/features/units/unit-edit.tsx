@@ -14,7 +14,7 @@ import {
 } from "@rezics/openapi-tanstack-query";
 import type { PortableTextValue } from "@rezics/portable-text";
 import { useQueryClient } from "@tanstack/react-query";
-import { useDeferredValue, type FormEvent } from "react";
+import { useDeferredValue, useState, type FormEvent } from "react";
 
 import { Badge } from "@rezics/ui";
 import { Button } from "@rezics/ui";
@@ -86,6 +86,11 @@ function readPositiveInteger(form: FormData, name: string): number | null | unde
 export function UnitMetadataEditor({ type, unit }: { type: UnitType; unit: Unit }) {
 	const { t } = useTranslation(["cover", "errors", "licenses", "ui", "units"]);
 	const queryClient = useQueryClient();
+	const [status, setStatus] = useState(unit.status);
+	const [bookChapterDraftAction, setBookChapterDraftAction] = useState<
+		"" | "book_only" | "book_and_chapters"
+	>("");
+	const [chapterDraftQueued, setChapterDraftQueued] = useState(false);
 	const update = usePatchApiUnitsByTypeByUnitId({
 		mutation: {
 			onSuccess: async () => invalidateUnitDetail(queryClient, type, unit.id, true),
@@ -108,8 +113,11 @@ export function UnitMetadataEditor({ type, unit }: { type: UnitType; unit: Unit 
 			!isPublicationLicenseId(submittedLicense)
 		)
 			return;
-		const status =
+		const submittedUnitStatus =
 			submittedStatus === "published" || submittedStatus === "archived" ? submittedStatus : "draft";
+		const draftsBook =
+			unit.details.type === "book" && unit.status !== "draft" && submittedUnitStatus === "draft";
+		if (draftsBook && !bookChapterDraftAction) return;
 		const visibility =
 			submittedVisibility === "unlisted" || submittedVisibility === "private"
 				? submittedVisibility
@@ -184,11 +192,20 @@ export function UnitMetadataEditor({ type, unit }: { type: UnitType; unit: Unit 
 		})();
 		if (!details) return;
 		try {
+			setChapterDraftQueued(false);
 			await update.mutateAsync({
 				path: { type, unitId: unit.id },
 				body: {
 					updatedAt: unit.updatedAt,
-					status,
+					...(draftsBook
+						? {
+								bookChapterDraftScope:
+									bookChapterDraftAction === "book_and_chapters"
+										? ("manageable_published_chapters" as const)
+										: ("book_only" as const),
+							}
+						: {}),
+					status: submittedUnitStatus,
 					visibility,
 					contentRating,
 					aiDisclosure,
@@ -203,6 +220,7 @@ export function UnitMetadataEditor({ type, unit }: { type: UnitType; unit: Unit 
 					details,
 				},
 			});
+			if (draftsBook && bookChapterDraftAction === "book_and_chapters") setChapterDraftQueued(true);
 		} catch {
 			// The typed mutation state supplies the visible API error.
 		}
@@ -216,12 +234,48 @@ export function UnitMetadataEditor({ type, unit }: { type: UnitType; unit: Unit 
 						<h2 className="font-heading text-xl font-bold">{t.units.editor.settings}</h2>
 						<Field>
 							<FieldLabel>{t.ui.status}</FieldLabel>
-							<NativeSelect name="status" defaultValue={unit.status}>
+							<NativeSelect
+								name="status"
+								onChange={(event) => {
+									const next = event.currentTarget.value;
+									if (next === "draft" || next === "published" || next === "archived")
+										setStatus(next);
+								}}
+								value={status}
+							>
 								<NativeSelectOption value="draft">{t.ui.draft}</NativeSelectOption>
 								<NativeSelectOption value="published">{t.ui.published}</NativeSelectOption>
 								<NativeSelectOption value="archived">{t.ui.archived}</NativeSelectOption>
 							</NativeSelect>
 						</Field>
+						{unit.details.type === "book" && unit.status !== "draft" && status === "draft" ? (
+							<Field required>
+								<FieldLabel>{t.units.editor.bookDraftScope}</FieldLabel>
+								<p className="text-sm text-muted-foreground">
+									{t.units.editor.bookDraftScopeDescription}
+								</p>
+								<NativeSelect
+									onChange={(event) => {
+										const action = event.currentTarget.value;
+										if (action === "book_only" || action === "book_and_chapters")
+											setBookChapterDraftAction(action);
+										else setBookChapterDraftAction("");
+									}}
+									required
+									value={bookChapterDraftAction}
+								>
+									<NativeSelectOption disabled value="">
+										{t.units.editor.bookDraftChoose}
+									</NativeSelectOption>
+									<NativeSelectOption value="book_only">
+										{t.units.editor.bookDraftBookOnly}
+									</NativeSelectOption>
+									<NativeSelectOption value="book_and_chapters">
+										{t.units.editor.bookDraftBookAndChapters}
+									</NativeSelectOption>
+								</NativeSelect>
+							</Field>
+						) : null}
 						<Field>
 							<FieldLabel>{t.ui.visibility}</FieldLabel>
 							<NativeSelect name="visibility" defaultValue={unit.visibility}>
@@ -294,6 +348,11 @@ export function UnitMetadataEditor({ type, unit }: { type: UnitType; unit: Unit 
 							{t.units.editor.saveSettings}
 						</Button>
 						<RequestFailure error={update.error} fallback={t.ui.retryLater} />
+						{chapterDraftQueued ? (
+							<p aria-live="polite" className="text-sm text-muted-foreground">
+								{t.units.editor.bookChapterDraftQueued}
+							</p>
+						) : null}
 					</FieldGroup>
 				</form>
 			</CardContent>

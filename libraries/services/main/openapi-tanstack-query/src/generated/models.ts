@@ -79416,6 +79416,262 @@ export type PostApiUnitsByTypeResponse =
 /**
  * @type object
  */
+export type PostApiUnitsBookByBookIdChapterDraftJobsPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	bookId: string;
+};
+
+export const PostApiUnitsBookByBookIdChapterDraftJobsStatus200StateEnum = {
+	pending: "pending",
+	completed: "completed",
+} as const;
+
+export type PostApiUnitsBookByBookIdChapterDraftJobsStatus200StateEnum =
+	(typeof PostApiUnitsBookByBookIdChapterDraftJobsStatus200StateEnum)[keyof typeof PostApiUnitsBookByBookIdChapterDraftJobsStatus200StateEnum];
+
+/**
+ * @type object
+ */
+export type PostApiUnitsBookByBookIdChapterDraftJobsStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	id: string;
+	/**
+	 * @type string
+	 */
+	state: PostApiUnitsBookByBookIdChapterDraftJobsStatus200StateEnum;
+};
+
+/**
+ * @type object
+ */
+export type PostApiUnitsBookByBookIdChapterDraftJobsStatus400 = MalformedRequestBody;
+
+/**
+ * @type object
+ */
+export type PostApiUnitsBookByBookIdChapterDraftJobsStatus401 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'AuthenticationRequired'
+		 * @type string
+		 */
+		code: "AuthenticationRequired";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const PostApiUnitsBookByBookIdChapterDraftJobsStatus403ErrorCodeEnum = {
+	ApiTokenPermissionRequired: "ApiTokenPermissionRequired",
+	EmailVerificationRequired: "EmailVerificationRequired",
+	AccountRestricted: "AccountRestricted",
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+} as const;
+
+export type PostApiUnitsBookByBookIdChapterDraftJobsStatus403ErrorCodeEnum =
+	(typeof PostApiUnitsBookByBookIdChapterDraftJobsStatus403ErrorCodeEnum)[keyof typeof PostApiUnitsBookByBookIdChapterDraftJobsStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PostApiUnitsBookByBookIdChapterDraftJobsStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'ApiTokenPermissionRequired'
+		 * @type string
+		 */
+		code: PostApiUnitsBookByBookIdChapterDraftJobsStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiUnitsBookByBookIdChapterDraftJobsStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: "UnitNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiUnitsBookByBookIdChapterDraftJobsStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitChanged'
+		 * @type string
+		 */
+		code: "UnitChanged";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiUnitsBookByBookIdChapterDraftJobsStatus422 = ValidationError;
+
+export const PostApiUnitsBookByBookIdChapterDraftJobsStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PostApiUnitsBookByBookIdChapterDraftJobsStatus429ErrorCodeEnum =
+	(typeof PostApiUnitsBookByBookIdChapterDraftJobsStatus429ErrorCodeEnum)[keyof typeof PostApiUnitsBookByBookIdChapterDraftJobsStatus429ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PostApiUnitsBookByBookIdChapterDraftJobsStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: PostApiUnitsBookByBookIdChapterDraftJobsStatus429ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiUnitsBookByBookIdChapterDraftJobsStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type PostApiUnitsBookByBookIdChapterDraftJobsBody = {
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	bookUpdatedAt: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiUnitsBookByBookIdChapterDraftJobsOptions = {
+	body: PostApiUnitsBookByBookIdChapterDraftJobsBody;
+	path: PostApiUnitsBookByBookIdChapterDraftJobsPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PostApiUnitsBookByBookIdChapterDraftJobsResponses = {
+	"200": PostApiUnitsBookByBookIdChapterDraftJobsStatus200;
+	"400": PostApiUnitsBookByBookIdChapterDraftJobsStatus400;
+	"401": PostApiUnitsBookByBookIdChapterDraftJobsStatus401;
+	"403": PostApiUnitsBookByBookIdChapterDraftJobsStatus403;
+	"404": PostApiUnitsBookByBookIdChapterDraftJobsStatus404;
+	"409": PostApiUnitsBookByBookIdChapterDraftJobsStatus409;
+	"422": PostApiUnitsBookByBookIdChapterDraftJobsStatus422;
+	"429": PostApiUnitsBookByBookIdChapterDraftJobsStatus429;
+	"500": PostApiUnitsBookByBookIdChapterDraftJobsStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PostApiUnitsBookByBookIdChapterDraftJobsResponse =
+	| PostApiUnitsBookByBookIdChapterDraftJobsStatus200
+	| PostApiUnitsBookByBookIdChapterDraftJobsStatus400
+	| PostApiUnitsBookByBookIdChapterDraftJobsStatus401
+	| PostApiUnitsBookByBookIdChapterDraftJobsStatus403
+	| PostApiUnitsBookByBookIdChapterDraftJobsStatus404
+	| PostApiUnitsBookByBookIdChapterDraftJobsStatus409
+	| PostApiUnitsBookByBookIdChapterDraftJobsStatus422
+	| PostApiUnitsBookByBookIdChapterDraftJobsStatus429
+	| PostApiUnitsBookByBookIdChapterDraftJobsStatus500;
+
+/**
+ * @type object
+ */
 export type GetApiUnitsByTypeByUnitIdPath = {
 	type: (("book" | "software" | "media") | "series") | ("video" | "audio");
 	/**
@@ -82782,10 +83038,32 @@ export type PatchApiUnitsByTypeByUnitIdStatus409 = {
 	requestId: string;
 };
 
-/**
- * @type object
- */
-export type PatchApiUnitsByTypeByUnitIdStatus422 = ValidationError;
+export type PatchApiUnitsByTypeByUnitIdStatus422 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'ValidationError'
+				 * @type string
+				 */
+				code: "ValidationError";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| ValidationError;
 
 export const PatchApiUnitsByTypeByUnitIdStatus429ErrorCodeEnum = {
 	ApiQuotaExceeded: "ApiQuotaExceeded",
@@ -82823,6 +83101,14 @@ export type PatchApiUnitsByTypeByUnitIdStatus429 = {
  * @type object
  */
 export type PatchApiUnitsByTypeByUnitIdStatus500 = InternalError;
+
+export const PatchApiUnitsByTypeByUnitIdRequestBookChapterDraftScopeEnum = {
+	book_only: "book_only",
+	manageable_published_chapters: "manageable_published_chapters",
+} as const;
+
+export type PatchApiUnitsByTypeByUnitIdRequestBookChapterDraftScopeEnum =
+	(typeof PatchApiUnitsByTypeByUnitIdRequestBookChapterDraftScopeEnum)[keyof typeof PatchApiUnitsByTypeByUnitIdRequestBookChapterDraftScopeEnum];
 
 export const PatchApiUnitsByTypeByUnitIdRequestStatusEnum = {
 	draft: "draft",
@@ -82905,6 +83191,10 @@ export type PatchApiUnitsByTypeByUnitIdBody = {
 	 * @type string
 	 */
 	updatedAt: string;
+	/**
+	 * @type string | undefined
+	 */
+	bookChapterDraftScope?: PatchApiUnitsByTypeByUnitIdRequestBookChapterDraftScopeEnum;
 	/**
 	 * @type string | undefined
 	 */
@@ -106003,16 +106293,22 @@ export type PutApiUnitsMediaByUnitIdContentStructureResponse =
 /**
  * @type object
  */
-export type GetApiChaptersByChapterIdPath = {
+export type GetApiBooksByBookIdContentNodesByNodeIdPath = {
 	/**
 	 * @description
 	 * Format: `uuid`
 	 * @type string
 	 */
-	chapterId: string;
+	bookId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	nodeId: string;
 };
 
-export const GetApiChaptersByChapterIdLocalizationLanguagesEnum = {
+export const GetApiBooksByBookIdContentNodesByNodeIdLocalizationLanguagesEnum = {
 	zh: "zh",
 	en: "en",
 	ja: "ja",
@@ -106022,10 +106318,10 @@ export const GetApiChaptersByChapterIdLocalizationLanguagesEnum = {
 	es: "es",
 } as const;
 
-export type GetApiChaptersByChapterIdLocalizationLanguagesEnum =
-	(typeof GetApiChaptersByChapterIdLocalizationLanguagesEnum)[keyof typeof GetApiChaptersByChapterIdLocalizationLanguagesEnum];
+export type GetApiBooksByBookIdContentNodesByNodeIdLocalizationLanguagesEnum =
+	(typeof GetApiBooksByBookIdContentNodesByNodeIdLocalizationLanguagesEnum)[keyof typeof GetApiBooksByBookIdContentNodesByNodeIdLocalizationLanguagesEnum];
 
-export const GetApiChaptersByChapterIdLanguage = {
+export const GetApiBooksByBookIdContentNodesByNodeIdLanguage = {
 	zh: "zh",
 	en: "en",
 	ja: "ja",
@@ -106035,24 +106331,24 @@ export const GetApiChaptersByChapterIdLanguage = {
 	es: "es",
 } as const;
 
-export type GetApiChaptersByChapterIdLanguage =
-	(typeof GetApiChaptersByChapterIdLanguage)[keyof typeof GetApiChaptersByChapterIdLanguage];
+export type GetApiBooksByBookIdContentNodesByNodeIdLanguage =
+	(typeof GetApiBooksByBookIdContentNodesByNodeIdLanguage)[keyof typeof GetApiBooksByBookIdContentNodesByNodeIdLanguage];
 
 /**
  * @type object
  */
-export type GetApiChaptersByChapterIdQuery = {
+export type GetApiBooksByBookIdContentNodesByNodeIdQuery = {
 	/**
 	 * @type array | undefined
 	 */
-	localizationLanguages?: GetApiChaptersByChapterIdLocalizationLanguagesEnum[];
+	localizationLanguages?: GetApiBooksByBookIdContentNodesByNodeIdLocalizationLanguagesEnum[];
 	/**
 	 * @type string | undefined
 	 */
-	language?: GetApiChaptersByChapterIdLanguage;
+	language?: GetApiBooksByBookIdContentNodesByNodeIdLanguage;
 };
 
-export const GetApiChaptersByChapterIdStatus200LanguageEnum = {
+export const GetApiBooksByBookIdContentNodesByNodeIdStatus200LanguageEnum = {
 	zh: "zh",
 	en: "en",
 	ja: "ja",
@@ -106062,10 +106358,10 @@ export const GetApiChaptersByChapterIdStatus200LanguageEnum = {
 	es: "es",
 } as const;
 
-export type GetApiChaptersByChapterIdStatus200LanguageEnum =
-	(typeof GetApiChaptersByChapterIdStatus200LanguageEnum)[keyof typeof GetApiChaptersByChapterIdStatus200LanguageEnum];
+export type GetApiBooksByBookIdContentNodesByNodeIdStatus200LanguageEnum =
+	(typeof GetApiBooksByBookIdContentNodesByNodeIdStatus200LanguageEnum)[keyof typeof GetApiBooksByBookIdContentNodesByNodeIdStatus200LanguageEnum];
 
-export const GetApiChaptersByChapterIdStatus200AvailableLanguagesEnum = {
+export const GetApiBooksByBookIdContentNodesByNodeIdStatus200AvailableLanguagesEnum = {
 	zh: "zh",
 	en: "en",
 	ja: "ja",
@@ -106075,13 +106371,22 @@ export const GetApiChaptersByChapterIdStatus200AvailableLanguagesEnum = {
 	es: "es",
 } as const;
 
-export type GetApiChaptersByChapterIdStatus200AvailableLanguagesEnum =
-	(typeof GetApiChaptersByChapterIdStatus200AvailableLanguagesEnum)[keyof typeof GetApiChaptersByChapterIdStatus200AvailableLanguagesEnum];
+export type GetApiBooksByBookIdContentNodesByNodeIdStatus200AvailableLanguagesEnum =
+	(typeof GetApiBooksByBookIdContentNodesByNodeIdStatus200AvailableLanguagesEnum)[keyof typeof GetApiBooksByBookIdContentNodesByNodeIdStatus200AvailableLanguagesEnum];
+
+export const GetApiBooksByBookIdContentNodesByNodeIdStatus200Status = {
+	draft: "draft",
+	published: "published",
+	archived: "archived",
+} as const;
+
+export type GetApiBooksByBookIdContentNodesByNodeIdStatus200Status =
+	(typeof GetApiBooksByBookIdContentNodesByNodeIdStatus200Status)[keyof typeof GetApiBooksByBookIdContentNodesByNodeIdStatus200Status];
 
 /**
  * @type object
  */
-export type GetApiChaptersByChapterIdStatus200 = {
+export type GetApiBooksByBookIdContentNodesByNodeIdStatus200 = {
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -106115,11 +106420,11 @@ export type GetApiChaptersByChapterIdStatus200 = {
 	/**
 	 * @type string
 	 */
-	language: GetApiChaptersByChapterIdStatus200LanguageEnum;
+	language: GetApiBooksByBookIdContentNodesByNodeIdStatus200LanguageEnum;
 	/**
 	 * @type array
 	 */
-	availableLanguages: GetApiChaptersByChapterIdStatus200AvailableLanguagesEnum[];
+	availableLanguages: GetApiBooksByBookIdContentNodesByNodeIdStatus200AvailableLanguagesEnum[];
 	content:
 		| ({
 				/**
@@ -106255,15 +106560,15 @@ export type GetApiChaptersByChapterIdStatus200 = {
 				characterCount: string | number;
 		  } | null)
 		| null;
-	status: (string | null) | null;
+	status: (GetApiBooksByBookIdContentNodesByNodeIdStatus200Status | null) | null;
 	/**
 	 * @description
 	 * Format: `date-time`
 	 * @type string
 	 */
 	updatedAt: string;
-	previousChapterId: (string | null) | null;
-	nextChapterId: (string | null) | null;
+	previousNodeId: (string | null) | null;
+	nextNodeId: (string | null) | null;
 	/**
 	 * @type object
 	 */
@@ -106275,18 +106580,18 @@ export type GetApiChaptersByChapterIdStatus200 = {
 	};
 };
 
-export const GetApiChaptersByChapterIdStatus404ErrorCodeEnum = {
+export const GetApiBooksByBookIdContentNodesByNodeIdStatus404ErrorCodeEnum = {
 	ChapterNotFound: "ChapterNotFound",
 	ChapterLanguageNotFound: "ChapterLanguageNotFound",
 } as const;
 
-export type GetApiChaptersByChapterIdStatus404ErrorCodeEnum =
-	(typeof GetApiChaptersByChapterIdStatus404ErrorCodeEnum)[keyof typeof GetApiChaptersByChapterIdStatus404ErrorCodeEnum];
+export type GetApiBooksByBookIdContentNodesByNodeIdStatus404ErrorCodeEnum =
+	(typeof GetApiBooksByBookIdContentNodesByNodeIdStatus404ErrorCodeEnum)[keyof typeof GetApiBooksByBookIdContentNodesByNodeIdStatus404ErrorCodeEnum];
 
 /**
  * @type object
  */
-export type GetApiChaptersByChapterIdStatus404 = {
+export type GetApiBooksByBookIdContentNodesByNodeIdStatus404 = {
 	/**
 	 * @type object
 	 */
@@ -106295,7 +106600,7 @@ export type GetApiChaptersByChapterIdStatus404 = {
 		 * @default 'ChapterNotFound'
 		 * @type string
 		 */
-		code: GetApiChaptersByChapterIdStatus404ErrorCodeEnum;
+		code: GetApiBooksByBookIdContentNodesByNodeIdStatus404ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -106314,41 +106619,41 @@ export type GetApiChaptersByChapterIdStatus404 = {
 /**
  * @type object
  */
-export type GetApiChaptersByChapterIdStatus422 = ValidationError;
+export type GetApiBooksByBookIdContentNodesByNodeIdStatus422 = ValidationError;
 
 /**
  * @type object
  */
-export type GetApiChaptersByChapterIdStatus500 = InternalError;
+export type GetApiBooksByBookIdContentNodesByNodeIdStatus500 = InternalError;
 
 /**
  * @type object
  */
-export type GetApiChaptersByChapterIdOptions = {
+export type GetApiBooksByBookIdContentNodesByNodeIdOptions = {
 	body?: never;
-	path: GetApiChaptersByChapterIdPath;
-	query?: GetApiChaptersByChapterIdQuery;
+	path: GetApiBooksByBookIdContentNodesByNodeIdPath;
+	query?: GetApiBooksByBookIdContentNodesByNodeIdQuery;
 	headers?: never;
 };
 
 /**
  * @type object
  */
-export type GetApiChaptersByChapterIdResponses = {
-	"200": GetApiChaptersByChapterIdStatus200;
-	"404": GetApiChaptersByChapterIdStatus404;
-	"422": GetApiChaptersByChapterIdStatus422;
-	"500": GetApiChaptersByChapterIdStatus500;
+export type GetApiBooksByBookIdContentNodesByNodeIdResponses = {
+	"200": GetApiBooksByBookIdContentNodesByNodeIdStatus200;
+	"404": GetApiBooksByBookIdContentNodesByNodeIdStatus404;
+	"422": GetApiBooksByBookIdContentNodesByNodeIdStatus422;
+	"500": GetApiBooksByBookIdContentNodesByNodeIdStatus500;
 };
 
 /**
  * @description Union of all possible responses
  */
-export type GetApiChaptersByChapterIdResponse =
-	| GetApiChaptersByChapterIdStatus200
-	| GetApiChaptersByChapterIdStatus404
-	| GetApiChaptersByChapterIdStatus422
-	| GetApiChaptersByChapterIdStatus500;
+export type GetApiBooksByBookIdContentNodesByNodeIdResponse =
+	| GetApiBooksByBookIdContentNodesByNodeIdStatus200
+	| GetApiBooksByBookIdContentNodesByNodeIdStatus404
+	| GetApiBooksByBookIdContentNodesByNodeIdStatus422
+	| GetApiBooksByBookIdContentNodesByNodeIdStatus500;
 
 export const PutApiChaptersByChapterIdLocalizationsByLanguageContentLanguage = {
 	zh: "zh",
@@ -106480,6 +106785,14 @@ export type PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus404 = {
 	requestId: string;
 };
 
+export const PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus409ErrorCodeEnum = {
+	UnitRevisionConflict: "UnitRevisionConflict",
+	PostTagMentionVoteConflict: "PostTagMentionVoteConflict",
+} as const;
+
+export type PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus409ErrorCodeEnum =
+	(typeof PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus409ErrorCodeEnum)[keyof typeof PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus409ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -106489,10 +106802,10 @@ export type PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus409 = {
 	 */
 	error: {
 		/**
-		 * @default 'PostTagMentionVoteConflict'
+		 * @default 'UnitRevisionConflict'
 		 * @type string
 		 */
-		code: "PostTagMentionVoteConflict";
+		code: PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus409ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -106714,6 +107027,12 @@ export type PutApiChaptersByChapterIdLocalizationsByLanguageContentBody = {
 	 * @type string
 	 */
 	status: PutApiChaptersByChapterIdLocalizationsByLanguageContentRequestStatusEnum;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	baseRevisionId: string;
 	/**
 	 * @type object | undefined
 	 */
@@ -129334,6 +129653,15 @@ export const GetApiPostsByPostIdStatus200SubjectLanguageEnum = {
 export type GetApiPostsByPostIdStatus200SubjectLanguageEnum =
 	(typeof GetApiPostsByPostIdStatus200SubjectLanguageEnum)[keyof typeof GetApiPostsByPostIdStatus200SubjectLanguageEnum];
 
+export const GetApiPostsByPostIdStatus200Status = {
+	draft: "draft",
+	published: "published",
+	archived: "archived",
+} as const;
+
+export type GetApiPostsByPostIdStatus200Status =
+	(typeof GetApiPostsByPostIdStatus200Status)[keyof typeof GetApiPostsByPostIdStatus200Status];
+
 export const GetApiPostsByPostIdStatus200ProgressEntryEntryKindEnum = {
 	update: "update",
 	completion: "completion",
@@ -130501,6 +130829,385 @@ export type GetApiPostsByPostIdStatus200 =
 			 * @type string
 			 */
 			postKind: "excerpt";
+	  }
+	| {
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			id: string;
+			/**
+			 * @type array
+			 */
+			availableLanguages: GetApiPostsByPostIdStatus200AvailableLanguagesEnum[];
+			/**
+			 * @type array
+			 */
+			attributions: {
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				id: string;
+				/**
+				 * @default 'author'
+				 * @type string
+				 */
+				role: GetApiPostsByPostIdStatus200AttributionsRoleEnum;
+				/**
+				 * @description
+				 * Format: `fractional-position`
+				 * @minLength 2
+				 * @maxLength 1024
+				 * @type string
+				 */
+				position: string;
+				/**
+				 * @type object
+				 */
+				creditedUnit: {
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					id: string;
+					/**
+					 * @default 'slug_namespace'
+					 * @type string
+					 */
+					kind: GetApiPostsByPostIdStatus200AttributionsCreditedUnitKindEnum;
+					/**
+					 * @type string
+					 */
+					language: GetApiPostsByPostIdStatus200AttributionsCreditedUnitLanguageEnum;
+					slugAddress:
+						| ({
+								/**
+								 * @minLength 1
+								 * @maxLength 63
+								 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+								 * @type string
+								 */
+								slug: string;
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								scopeUnitId: string;
+								/**
+								 * @type array
+								 */
+								canonicalPath: string[];
+						  } | null)
+						| null;
+					title: (string | null) | null;
+					summary: (string | null) | null;
+					avatar:
+						| (
+								| (
+										| {
+												/**
+												 * @type string
+												 */
+												type: "image";
+												/**
+												 * @type object
+												 */
+												image: {
+													/**
+													 * @description
+													 * Format: `uuid`
+													 * @type string
+													 */
+													id: string;
+													/**
+													 * @type string
+													 */
+													url: string;
+												};
+										  }
+										| {
+												/**
+												 * @type string
+												 */
+												type: "emoji";
+												/**
+												 * @maxLength 64
+												 * @type string
+												 */
+												emoji: string;
+										  }
+										| {
+												/**
+												 * @type string
+												 */
+												type: "icon";
+												/**
+												 * @type object
+												 */
+												icon: {
+													/**
+													 * @type string
+													 */
+													provider: "font-awesome";
+													/**
+													 * @type string
+													 */
+													prefix: GetApiPostsByPostIdStatus200AttributionsCreditedUnitAvatarIconPrefixEnum;
+													/**
+													 * @maxLength 128
+													 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+													 * @type string
+													 */
+													name: string;
+												};
+										  }
+								  )
+								| null
+						  )
+						| null;
+				};
+			}[];
+			realmId: (string | null) | null;
+			subjectId: (string | null) | null;
+			rootPostId: (string | null) | null;
+			parentPostId: (string | null) | null;
+			replyCount: string | number;
+			/**
+			 * @type string
+			 */
+			language: GetApiPostsByPostIdStatus200LanguageEnum;
+			title: (string | null) | null;
+			summary: (string | null) | null;
+			body:
+				| ({
+						/**
+						 * @type string
+						 */
+						_type: "portable-text";
+						/**
+						 * @pattern ^[0-9a-f]{12}$
+						 * @type string
+						 */
+						_key: string;
+						/**
+						 * @type array
+						 */
+						content: (
+							| {
+									/**
+									 * @type string
+									 */
+									_key: string;
+									/**
+									 * @type string
+									 */
+									_type: "block";
+									/**
+									 * @type array
+									 */
+									children: (
+										| {
+												/**
+												 * @type string
+												 */
+												_key: string;
+												/**
+												 * @type string
+												 */
+												_type: "span";
+												/**
+												 * @type string
+												 */
+												text: string;
+												/**
+												 * @type array | undefined
+												 */
+												marks?: string[];
+										  }
+										| {
+												/**
+												 * @type string
+												 */
+												_key: string;
+												/**
+												 * @type string
+												 */
+												_type: "unit-mention";
+												/**
+												 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+												 * @type string
+												 */
+												unitId: string;
+										  }
+									)[];
+									/**
+									 * @type array | undefined
+									 */
+									markDefs?: {
+										/**
+										 * @type string
+										 */
+										_key: string;
+										/**
+										 * @type string
+										 */
+										_type: string;
+										[key: string]: unknown;
+									}[];
+									/**
+									 * @type string | undefined
+									 */
+									listItem?: string;
+									/**
+									 * @type string | undefined
+									 */
+									style?: string;
+									/**
+									 * @minLength 1
+									 * @type integer | undefined
+									 */
+									level?: number;
+									[key: string]: unknown;
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									_key: string;
+									/**
+									 * @type string
+									 */
+									_type: "image";
+									/**
+									 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+									 * @type string
+									 */
+									assetId: string;
+									/**
+									 * @type string | undefined
+									 */
+									alt?: string;
+									/**
+									 * @type string | undefined
+									 */
+									caption?: string;
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									_key: string;
+									/**
+									 * @pattern ^(?!(?:block|image)$).+
+									 * @type string
+									 */
+									_type: string;
+									[key: string]: unknown;
+							  }
+						)[];
+				  } | null)
+				| null;
+			latestRevisionId: (string | null) | null;
+			/**
+			 * @description
+			 * Format: `date-time`
+			 * @type string
+			 */
+			createdAt: string;
+			/**
+			 * @description
+			 * Format: `date-time`
+			 * @type string
+			 */
+			updatedAt: string;
+			subject:
+				| ({
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						id: string;
+						/**
+						 * @type string
+						 */
+						type: string;
+						/**
+						 * @type string
+						 */
+						language: GetApiPostsByPostIdStatus200SubjectLanguageEnum;
+						title: (string | null) | null;
+						summary: (string | null) | null;
+						cover:
+							| ({
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									id: string;
+									/**
+									 * @type string
+									 */
+									url: string;
+							  } | null)
+							| null;
+				  } | null)
+				| null;
+			/**
+			 * @type array
+			 */
+			scores: {
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				scoreId: string;
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				realmId: string;
+				realmTitle: (string | null) | null;
+				value: string | number;
+			}[];
+			/**
+			 * @type object
+			 */
+			capabilities: {
+				/**
+				 * @type boolean
+				 */
+				canEdit: boolean;
+				/**
+				 * @type boolean
+				 */
+				canManageAttributions: boolean;
+				/**
+				 * @type boolean
+				 */
+				canManageRealmPublications: boolean;
+				/**
+				 * @type boolean
+				 */
+				canManageAccess: boolean;
+				/**
+				 * @type boolean
+				 */
+				canReply: boolean;
+			};
+			/**
+			 * @type string
+			 */
+			postKind: "chapter";
+			status: (GetApiPostsByPostIdStatus200Status | null) | null;
 	  }
 	| {
 			/**

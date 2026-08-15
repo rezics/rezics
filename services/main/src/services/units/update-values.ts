@@ -7,6 +7,7 @@ import type { RevisionContributionInput } from "./revision-contribution";
 export interface UpdateUnitInput {
 	readonly expectedUpdatedAt: Date;
 	readonly revisionContribution?: RevisionContributionInput;
+	readonly bookChapterDraftScope?: "book_only" | "manageable_published_chapters";
 	readonly status?: "draft" | "published" | "archived";
 	readonly visibility?: "public" | "unlisted" | "private";
 	readonly contentRating?: "general" | "r15" | "r18" | "r18g";

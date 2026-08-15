@@ -381,6 +381,8 @@ import type {
 	GetApiUnitsByTypeResponses,
 	PostApiUnitsByTypeOptions,
 	PostApiUnitsByTypeResponses,
+	PostApiUnitsBookByBookIdChapterDraftJobsOptions,
+	PostApiUnitsBookByBookIdChapterDraftJobsResponses,
 	GetApiUnitsByTypeByUnitIdOptions,
 	GetApiUnitsByTypeByUnitIdResponses,
 	PatchApiUnitsByTypeByUnitIdOptions,
@@ -497,8 +499,8 @@ import type {
 	GetApiUnitsMediaByUnitIdContentStructureNodesResponses,
 	PutApiUnitsMediaByUnitIdContentStructureOptions,
 	PutApiUnitsMediaByUnitIdContentStructureResponses,
-	GetApiChaptersByChapterIdOptions,
-	GetApiChaptersByChapterIdResponses,
+	GetApiBooksByBookIdContentNodesByNodeIdOptions,
+	GetApiBooksByBookIdContentNodesByNodeIdResponses,
 	PutApiChaptersByChapterIdLocalizationsByLanguageContentOptions,
 	PutApiChaptersByChapterIdLocalizationsByLanguageContentResponses,
 	GetApiProgressOptions,
@@ -4375,6 +4377,26 @@ export function postApiUnitsByType<ThrowOnError extends boolean = true>(
 }
 
 /**
+ * @summary Draft Chapters attached to a draft Book
+ * {@link /api/v1/units/book/:bookId/chapter-draft-jobs}
+ */
+export function postApiUnitsBookByBookIdChapterDraftJobs<ThrowOnError extends boolean = true>(
+	options: Options<PostApiUnitsBookByBookIdChapterDraftJobsOptions, ThrowOnError>,
+): Promise<RequestResult<PostApiUnitsBookByBookIdChapterDraftJobsResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/v1/units/book/{bookId}/chapter-draft-jobs",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<PostApiUnitsBookByBookIdChapterDraftJobsResponses, ThrowOnError>>;
+}
+
+/**
  * @summary Get unit
  * {@link /api/v1/units/:type/:unitId}
  */
@@ -5642,17 +5664,19 @@ export function putApiUnitsMediaByUnitIdContentStructure<ThrowOnError extends bo
 }
 
 /**
- * @summary Read chapter
- * {@link /api/v1/chapters/:chapterId}
+ * @summary Read a Chapter occurrence in a Book
+ * {@link /api/v1/books/:bookId/content-nodes/:nodeId}
  */
-export function getApiChaptersByChapterId<ThrowOnError extends boolean = true>(
-	options: Options<GetApiChaptersByChapterIdOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiChaptersByChapterIdResponses, ThrowOnError>> {
+export function getApiBooksByBookIdContentNodesByNodeId<ThrowOnError extends boolean = true>(
+	options: Options<GetApiBooksByBookIdContentNodesByNodeIdOptions, ThrowOnError>,
+): Promise<RequestResult<GetApiBooksByBookIdContentNodesByNodeIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/api/v1/chapters/{chapterId}", ...config }) as Promise<
-		RequestResult<GetApiChaptersByChapterIdResponses, ThrowOnError>
-	>;
+	return request({
+		method: "GET",
+		url: "/api/v1/books/{bookId}/content-nodes/{nodeId}",
+		...config,
+	}) as Promise<RequestResult<GetApiBooksByBookIdContentNodesByNodeIdResponses, ThrowOnError>>;
 }
 
 /**

@@ -44,6 +44,8 @@ export default {
 	UnitContentLicenseGrantForbidden: `Only personally owned works can grant a license to ${verbatimTerms.rezics.value}.`,
 	UnitChanged: "This content changed. Refresh and try again.",
 	UnitRevisionConflict: "The revision base changed. Refresh and try again.",
+	RevisionContributionActorRequired: "Choose the primary contributor for this revision.",
+	RevisionCreditEntityInvalid: "The selected revision contributor is invalid. Choose another one.",
 	ContentStructureRevisionConflict:
 		"The Content Structure changed elsewhere. Refresh and try again.",
 	CollectionStructureRevisionConflict:

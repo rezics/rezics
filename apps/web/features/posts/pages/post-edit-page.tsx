@@ -3,10 +3,21 @@
 import {
 	usePatchApiPostsByPostId,
 	usePatchApiPostsByPostIdRepliesByReplyPostId,
+	usePutApiChaptersByChapterIdLocalizationsByLanguageContent,
 	type GetApiPostsByPostIdStatus200,
 } from "@rezics/openapi-tanstack-query";
-import type { PortableTextValue } from "@rezics/portable-text";
-import { Button, Field, FieldGroup, FieldLabel, Input, Spinner, Textarea } from "@rezics/ui";
+import { measurePortableText, type PortableTextValue } from "@rezics/portable-text";
+import {
+	Button,
+	Field,
+	FieldGroup,
+	FieldLabel,
+	Input,
+	NativeSelect,
+	NativeSelectOption,
+	Spinner,
+	Textarea,
+} from "@rezics/ui";
 import { useQueryClient } from "@tanstack/react-query";
 import { useApplicationRouter } from "@/features/application-shell/hooks/use-application-router";
 import { type FormEvent } from "react";
@@ -37,11 +48,21 @@ import { usePostManagement } from "../components/post-management-workspace";
 import { nullablePostLocalizationText } from "../model/post-localization-input";
 import { invalidatePostQueries } from "../query";
 import { postDetailHref } from "../routing/post-management-routes";
+import { invalidateChapterContent } from "@/features/units/unit-cache";
 
-type RootPostContent = Exclude<GetApiPostsByPostIdStatus200, { postKind: "review" | "reply" }>;
+type RootPostContent = Exclude<
+	GetApiPostsByPostIdStatus200,
+	{ postKind: "review" | "reply" | "chapter" }
+>;
 type ReplyPost = Extract<GetApiPostsByPostIdStatus200, { postKind: "reply" }>;
+type ChapterPost = Extract<GetApiPostsByPostIdStatus200, { postKind: "chapter" }>;
 type PostLocalizationDraft = { title: string; summary: string; body: PortableTextValue };
 type ReplyLocalizationDraft = { body: PortableTextValue };
+type ChapterLocalizationDraft = {
+	title: string;
+	status: "draft" | "published" | "archived";
+	content: PortableTextValue;
+};
 const PostLocalizationDraftCodec: LocalizedDraftCodec<PostLocalizationDraft> = {
 	version: 1,
 	decode(value) {
@@ -60,6 +81,20 @@ const ReplyLocalizationDraftCodec: LocalizedDraftCodec<ReplyLocalizationDraft> =
 		if (!isDraftRecord(value)) return;
 		const body = decodeDraftPortableText(value.body);
 		return body ? { body } : undefined;
+	},
+};
+const ChapterLocalizationDraftCodec: LocalizedDraftCodec<ChapterLocalizationDraft> = {
+	version: 1,
+	decode(value) {
+		if (!isDraftRecord(value)) return;
+		const title = decodeDraftString(value.title);
+		const content = decodeDraftPortableText(value.content);
+		const status = value.status;
+		return title === undefined ||
+			!content ||
+			(status !== "draft" && status !== "published" && status !== "archived")
+			? undefined
+			: { title, content, status };
 	},
 };
 
@@ -92,11 +127,124 @@ function PostContentEditPage({
 				<ContentLanguageControl />
 				{post.postKind === "reply" ? (
 					<ReplyPostEditForm key={`${post.id}:${selectedLanguage}`} post={post} />
+				) : post.postKind === "chapter" ? (
+					<ChapterPostEditForm key={`${post.id}:${selectedLanguage}`} post={post} />
 				) : (
 					<PostContentEditForm key={`${post.id}:${selectedLanguage}`} post={post} />
 				)}
 			</div>
 		</section>
+	);
+}
+
+function ChapterPostEditForm({ post }: { post: ChapterPost }) {
+	const { t } = useTranslation(["posts", "ui", "units"]);
+	const router = useApplicationRouter();
+	const queryClient = useQueryClient();
+	const update = usePutApiChaptersByChapterIdLocalizationsByLanguageContent();
+	const { selectedLanguage, selectedLanguageIsPending, languagesChanged } =
+		useContentLanguageEditor();
+	const draft = useLocalizedDraft<ChapterLocalizationDraft>({
+		scope: "chapter-localization",
+		baseVersion: post.latestRevisionId,
+		codec: ChapterLocalizationDraftCodec,
+		createInitialValue: () => ({
+			title: selectedLanguageIsPending ? "" : (post.title ?? ""),
+			status: selectedLanguageIsPending ? "draft" : (post.status ?? "draft"),
+			content: readPortableText(selectedLanguageIsPending ? null : post.body),
+		}),
+	});
+	const { value } = draft;
+	const contentMetrics = measurePortableText(value.content, selectedLanguage);
+
+	async function submit(event: FormEvent<HTMLFormElement>) {
+		event.preventDefault();
+		if (!value.content.length || !post.latestRevisionId || !value.title.trim()) return;
+		try {
+			await update.mutateAsync({
+				path: { chapterId: post.id, language: selectedLanguage },
+				body: {
+					title: value.title.trim(),
+					content: writePortableText(
+						value.content,
+						selectedLanguageIsPending ? undefined : post.body,
+					),
+					status: value.status,
+					baseRevisionId: post.latestRevisionId,
+				},
+			});
+			draft.commit();
+			await Promise.all([
+				invalidateChapterContent(queryClient, post.id),
+				invalidatePostQueries(queryClient, post.id),
+				languagesChanged(),
+			]);
+			router.push(postDetailHref(post.id));
+		} catch {
+			// The typed mutation state supplies the visible API error.
+		}
+	}
+
+	return (
+		<LocalizedDraftGate
+			hydrated={draft.hydrated}
+			onDiscard={draft.discard}
+			serverChanged={draft.serverChanged}
+		>
+			<form onSubmit={submit}>
+				<FieldGroup>
+					<Field required>
+						<FieldLabel>{t.ui.title}</FieldLabel>
+						<Input
+							maxLength={500}
+							onChange={(event) => {
+								const title = event.currentTarget.value;
+								draft.setValue((current) => ({ ...current, title }));
+							}}
+							required
+							value={value.title}
+						/>
+					</Field>
+					<Field>
+						<FieldLabel>{t.ui.status}</FieldLabel>
+						<NativeSelect
+							onChange={(event) => {
+								const status = event.currentTarget.value;
+								if (status === "draft" || status === "published" || status === "archived")
+									draft.setValue((current) => ({ ...current, status }));
+							}}
+							value={value.status}
+						>
+							<NativeSelectOption value="draft">{t.ui.draft}</NativeSelectOption>
+							<NativeSelectOption value="published">{t.ui.published}</NativeSelectOption>
+							<NativeSelectOption value="archived">{t.ui.archived}</NativeSelectOption>
+						</NativeSelect>
+					</Field>
+					<PortableTextEditor
+						label={t.ui.body}
+						onChange={(content) => draft.setValue((current) => ({ ...current, content }))}
+						required
+						value={value.content}
+						variant="document"
+					/>
+					<p aria-live="polite" className="text-sm text-muted-foreground">
+						{selectedLanguage === "zh" || selectedLanguage === "ja"
+							? t.units.chapter.characterCount({ count: contentMetrics.characterCount })
+							: t.units.chapter.wordCount({ count: contentMetrics.wordCount })}
+					</p>
+					<RequestFailure error={update.error} />
+					<Button
+						className="w-fit"
+						disabled={!value.content.length || !value.title.trim() || update.isPending}
+						type="submit"
+						variant="solid"
+					>
+						{update.isPending ? <Spinner data-icon="inline-start" /> : null}
+						{t.ui.save}
+					</Button>
+				</FieldGroup>
+			</form>
+		</LocalizedDraftGate>
 	);
 }
 

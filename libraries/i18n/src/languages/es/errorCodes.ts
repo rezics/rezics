@@ -48,6 +48,9 @@ export default {
 	UnitChanged: "Este contenido ha cambiado. Actualiza la página e inténtalo de nuevo.",
 	UnitRevisionConflict:
 		"La versión de referencia ha cambiado. Actualiza la página e inténtalo de nuevo.",
+	RevisionContributionActorRequired:
+		"Elige a la persona que realizó la aportación principal de esta versión.",
+	RevisionCreditEntityInvalid: "La persona elegida para esta versión no es válida. Elige otra.",
 	ContentStructureRevisionConflict:
 		"La estructura de contenido se ha modificado en otro lugar. Actualiza la página e inténtalo de nuevo.",
 	CollectionStructureRevisionConflict:

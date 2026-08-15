@@ -21,6 +21,7 @@ const [
 	studioCandidateCleanup,
 	unitMergeWorker,
 	unitMergeService,
+	bookChapterDraftWorker,
 	workerHealth,
 ] = await Promise.all([
 	import("srvx"),
@@ -33,6 +34,7 @@ const [
 	import("./services/studio/cleanup"),
 	import("./services/units/merge/worker"),
 	import("./services/units/merge/service"),
+	import("./services/units/book-chapter-draft-worker"),
 	import("./services/health/worker-health"),
 ]);
 const { aggregateRecommendationMetrics, purgeRecommendationData, refreshRecommendationSnapshot } =
@@ -43,6 +45,7 @@ const { cleanupApiQuotaState } = apiQuotaCleanup;
 const { cleanupExpiredStudioEditorCandidates } = studioCandidateCleanup;
 const { dispatchUnitMergeBatch } = unitMergeWorker;
 const { expireUnitMergeRequests } = unitMergeService;
+const { dispatchBookChapterDraftJobs } = bookChapterDraftWorker;
 const { logger } = observability;
 const healthState = new workerHealth.WorkerHealthState();
 const evaluateReadiness = workerHealth.createWorkerReadinessEvaluator(healthState);
@@ -99,6 +102,10 @@ async function run() {
 				await dispatchUnitMergeBatch();
 				await expireUnitMergeRequests();
 			});
+			await runWorkerJob(
+				{ name: "book_chapter_draft.dispatch", retryCount: 0 },
+				dispatchBookChapterDraftJobs,
+			);
 			if (Date.now() >= nextRecommendationAt) {
 				try {
 					await runWorkerJob({ name: "recommendation.refresh", retryCount: 0 }, async () => {

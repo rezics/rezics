@@ -384,6 +384,7 @@ export function UnitTagExplorer({
 								addStructure
 									.mutateAsync({
 										path: { type, unitId, structureId },
+										body: {},
 									})
 									.then(() => undefined)
 							}

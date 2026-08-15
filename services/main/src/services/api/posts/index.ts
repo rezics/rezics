@@ -78,6 +78,7 @@ import { selectReplyTree } from "./reply-tree-query";
 import { applyNewPostTagMentionVotes } from "../../posts/tag-mentions";
 import { createWikiPost } from "../../posts/wiki";
 import { resolveCanonicalUnitId } from "../../units/merge/canonical";
+import { selectReaderChapterLocalization } from "../../content-structure/book-reading";
 
 const UnitMutationForbiddenResponse = toApiErrorResponse(["UnitPermissionForbidden"]);
 const RevisionContributionBadRequestResponse = toApiErrorResponse([
@@ -86,7 +87,7 @@ const RevisionContributionBadRequestResponse = toApiErrorResponse([
 ]);
 const ordinaryPostKind = sql<"post" | "reply">`${post.kind}::text`;
 const interactivePostKind = sql<
-	"post" | "reply" | "excerpt" | "review" | "wiki"
+	"post" | "reply" | "excerpt" | "review" | "wiki" | "chapter"
 >`${post.kind}::text`;
 
 const replyCount = sql<unknown>`coalesce(case when ${post.kind} = 'reply'::post_kind
@@ -491,7 +492,7 @@ export default new Elysia()
 						.where(
 							and(
 								eq(post.id, params.postId),
-								sql`${post.kind} in ('post'::post_kind, 'reply'::post_kind, 'excerpt'::post_kind, 'review'::post_kind, 'wiki'::post_kind)`,
+								sql`${post.kind} in ('post'::post_kind, 'reply'::post_kind, 'excerpt'::post_kind, 'review'::post_kind, 'wiki'::post_kind, 'chapter'::post_kind)`,
 								query.realmId
 									? sql`exists(select 1 from realm_unit rc where rc.unit_id = ${post.id} and rc.realm_id = ${query.realmId} and rc.status = 'visible' and rc.publication_state = 'active')`
 									: undefined,
@@ -501,7 +502,13 @@ export default new Elysia()
 					if (!row) throw new PostNotFound();
 					if (!row.language) throw new PostLocalizationNotFound();
 					if (row.postKind === "review" && !row.subjectId) throw new PostNotFound();
-					const language = row.language;
+					const initialLocalization = {
+						language: row.language,
+						title: row.title,
+						summary: row.summary,
+						content: row.body,
+						contentStatus: null,
+					};
 					const subjectId = row.subjectId;
 					const subjectPromise = subjectId
 						? authorization.unit
@@ -511,7 +518,7 @@ export default new Elysia()
 								)
 						: Promise.resolve(null);
 					const [
-						availableLanguageRows,
+						localizationRows,
 						attributionMap,
 						scores,
 						progressEntries,
@@ -525,7 +532,13 @@ export default new Elysia()
 						canManageScores,
 					] = await Promise.all([
 						database
-							.select({ language: unitLocalization.language })
+							.select({
+								language: unitLocalization.language,
+								title: unitLocalization.title,
+								summary: unitLocalization.summary,
+								content: unitLocalization.content,
+								contentStatus: unitLocalization.contentStatus,
+							})
 							.from(unitLocalization)
 							.where(eq(unitLocalization.unitId, row.id))
 							.orderBy(unitLocalization.position, unitLocalization.language),
@@ -563,20 +576,52 @@ export default new Elysia()
 							? authorization.unit.canUpdate(row.id, ["relations", "scores"])
 							: Promise.resolve(false),
 					]);
+					const chapterLocalization =
+						row.postKind === "chapter"
+							? selectReaderChapterLocalization(localizationRows, {
+									canReadDraftContent: canEdit,
+									localizationLanguages,
+								})
+							: undefined;
+					if (row.postKind === "chapter" && !chapterLocalization)
+						throw new PostLocalizationNotFound();
+					const presentedLocalization = chapterLocalization ?? initialLocalization;
 					const common = {
 						id: row.id,
-						language,
-						availableLanguages: availableLanguageRows.map(({ language }) => language),
+						language: presentedLocalization.language,
+						availableLanguages: localizationRows.map(({ language }) => language),
 						realmId: query.realmId ?? null,
 						attributions: attributionMap.get(row.id) ?? [],
-						title: row.title,
-						summary: row.summary,
+						title: presentedLocalization.title,
+						summary: presentedLocalization.summary,
 						createdAt: row.createdAt,
 						updatedAt: row.updatedAt,
 						subject,
 						scores,
 						replyCount: toSafeInteger(row.replyCount, "reply count"),
 					};
+					if (row.postKind === "chapter") {
+						const content = chapterLocalization?.content ?? null;
+						const canPresentContent =
+							content !== null && (canEdit || chapterLocalization?.contentStatus === "published");
+						return {
+							...common,
+							postKind: "chapter" as const,
+							subjectId: row.subjectId,
+							rootPostId: row.rootPostId,
+							parentPostId: row.parentPostId,
+							body: canPresentContent ? toPortableTextResponse(content, "post.body") : null,
+							status: canPresentContent ? (chapterLocalization?.contentStatus ?? null) : null,
+							latestRevisionId: row.latestRevisionId,
+							capabilities: {
+								canEdit,
+								canManageAttributions,
+								canManageRealmPublications: canManageRealmPublications.allowed,
+								canManageAccess: accessDecision.allowed,
+								canReply: replyCreationDecision.allowed && !targetingLock,
+							},
+						};
+					}
 					if (row.postKind === "review") {
 						const targetId = row.subjectId;
 						if (!targetId) throw new PostNotFound();

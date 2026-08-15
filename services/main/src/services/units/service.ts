@@ -87,6 +87,10 @@ import { recordUnitRevision } from "./history";
 import { insertUnit } from "./create";
 import { transitionUnitStatus } from "./status";
 import {
+	cancelBookChapterDraftJobs,
+	enqueueBookChapterDraftJobInTransaction,
+} from "./book-chapter-draft";
+import {
 	nextUnitUpdatedAt,
 	toBookUpdateValues,
 	toMediaUpdateValues,
@@ -822,6 +826,8 @@ export async function updateUnitInTransaction(
 		contribution: body.revisionContribution,
 		event: "update",
 	});
+	const changesBookStatus = kind === "book" && body.status && body.status !== updated.status;
+	if (changesBookStatus) await cancelBookChapterDraftJobs(tx, unitId);
 	if (body.status) {
 		await transitionUnitStatus(tx, {
 			unitId,
@@ -834,6 +840,16 @@ export async function updateUnitInTransaction(
 			revisionId: revision.revisionId,
 		});
 	}
+	if (
+		changesBookStatus &&
+		body.status === "draft" &&
+		body.bookChapterDraftScope === "manageable_published_chapters"
+	)
+		await enqueueBookChapterDraftJobInTransaction(tx, {
+			bookId: unitId,
+			bookUpdatedAt: updatedAt,
+			requestedByProfileId: actorProfileId,
+		});
 	if (kind === "book" || kind === "software" || kind === "media")
 		await ensureUnitVariantLifecycle(tx, unitId);
 }

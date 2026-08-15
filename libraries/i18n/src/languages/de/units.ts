@@ -381,6 +381,13 @@ export default {
 		version: "Version anhängen",
 		canonicalUnit: "Primäre Unit",
 		saveSettings: "Einstellungen speichern",
+		bookDraftScope: "Umfang der Depublikation",
+		bookDraftScopeDescription: `Kapitel sind eigenständige ${postTerms.pluralLabel}. Wähle ausdrücklich, ob verknüpfte veröffentlichte Kapitel ebenfalls zu Entwürfen werden sollen.`,
+		bookDraftChoose: "Umfang auswählen",
+		bookDraftBookOnly: "Nur das Buch als Entwurf speichern",
+		bookDraftBookAndChapters: "Buch und verwaltbare veröffentlichte Kapitel als Entwürfe speichern",
+		bookChapterDraftQueued:
+			"Die Depublikation der Kapitel wurde eingereiht; verwaltbare Kapitel werden stapelweise verarbeitet.",
 	},
 	relationshipManagement: {
 		credits: "Mitwirkende",

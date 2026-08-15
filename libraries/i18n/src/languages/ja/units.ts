@@ -373,6 +373,13 @@ export default {
 		version: "バージョンを添付",
 		canonicalUnit: "主要ユニット",
 		saveSettings: "設定を保存",
+		bookDraftScope: "書籍の公開停止範囲",
+		bookDraftScopeDescription: `チャプターは独立した${postTerms.label}です。現在紐づいている公開済みチャプターも下書きに戻すか、明示的に選択してください。`,
+		bookDraftChoose: "公開停止範囲を選択",
+		bookDraftBookOnly: "書籍のみ下書きに戻す",
+		bookDraftBookAndChapters: "書籍と管理可能な公開済みチャプターを下書きに戻す",
+		bookChapterDraftQueued:
+			"チャプターの公開停止処理を予約しました。管理権限のあるチャプターを順次処理します。",
 	},
 	relationshipManagement: {
 		credits: "クレジット",

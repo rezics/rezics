@@ -115,6 +115,9 @@ export const contentStructureNode = pgTable(
 		index("content_structure_node_owner_idx")
 			.on(table.ownerUnitId, table.structureId)
 			.where(sql`${table.deletedAt} is null`),
+		index("content_structure_node_structure_id_idx")
+			.on(table.structureId, table.id)
+			.where(sql`${table.deletedAt} is null`),
 		index("content_structure_node_parent_idx").on(table.parentId),
 		index("content_structure_node_content_unit_structure_idx")
 			.on(table.contentUnitId, table.structureId)

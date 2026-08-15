@@ -1285,6 +1285,16 @@ import type {
 	PostApiUnitsByTypeStatus422,
 	PostApiUnitsByTypeStatus429,
 	PostApiUnitsByTypeStatus500,
+	PostApiUnitsBookByBookIdChapterDraftJobsOptions,
+	PostApiUnitsBookByBookIdChapterDraftJobsStatus200,
+	PostApiUnitsBookByBookIdChapterDraftJobsStatus400,
+	PostApiUnitsBookByBookIdChapterDraftJobsStatus401,
+	PostApiUnitsBookByBookIdChapterDraftJobsStatus403,
+	PostApiUnitsBookByBookIdChapterDraftJobsStatus404,
+	PostApiUnitsBookByBookIdChapterDraftJobsStatus409,
+	PostApiUnitsBookByBookIdChapterDraftJobsStatus422,
+	PostApiUnitsBookByBookIdChapterDraftJobsStatus429,
+	PostApiUnitsBookByBookIdChapterDraftJobsStatus500,
 	GetApiUnitsByTypeByUnitIdOptions,
 	GetApiUnitsByTypeByUnitIdStatus200,
 	GetApiUnitsByTypeByUnitIdStatus404,
@@ -1708,11 +1718,11 @@ import type {
 	PutApiUnitsMediaByUnitIdContentStructureStatus422,
 	PutApiUnitsMediaByUnitIdContentStructureStatus429,
 	PutApiUnitsMediaByUnitIdContentStructureStatus500,
-	GetApiChaptersByChapterIdOptions,
-	GetApiChaptersByChapterIdStatus200,
-	GetApiChaptersByChapterIdStatus404,
-	GetApiChaptersByChapterIdStatus422,
-	GetApiChaptersByChapterIdStatus500,
+	GetApiBooksByBookIdContentNodesByNodeIdOptions,
+	GetApiBooksByBookIdContentNodesByNodeIdStatus200,
+	GetApiBooksByBookIdContentNodesByNodeIdStatus404,
+	GetApiBooksByBookIdContentNodesByNodeIdStatus422,
+	GetApiBooksByBookIdContentNodesByNodeIdStatus500,
 	PutApiChaptersByChapterIdLocalizationsByLanguageContentOptions,
 	PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus200,
 	PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus400,
@@ -2775,6 +2785,7 @@ import {
 	deleteApiUnitsByIdByUnitIdLocalizationsByLanguage,
 	getApiUnitsByType,
 	postApiUnitsByType,
+	postApiUnitsBookByBookIdChapterDraftJobs,
 	getApiUnitsByTypeByUnitId,
 	patchApiUnitsByTypeByUnitId,
 	patchApiUnitsByTypeByUnitIdVariantContext,
@@ -2833,7 +2844,7 @@ import {
 	putApiUnitsBookByUnitIdContentStructure,
 	getApiUnitsMediaByUnitIdContentStructureNodes,
 	putApiUnitsMediaByUnitIdContentStructure,
-	getApiChaptersByChapterId,
+	getApiBooksByBookIdContentNodesByNodeId,
 	putApiChaptersByChapterIdLocalizationsByLanguageContent,
 	getApiProgress,
 	getApiProgressSearchFilter,
@@ -22412,6 +22423,126 @@ export function usePostApiUnitsByType<TContext>(
 	>;
 }
 
+export const postApiUnitsBookByBookIdChapterDraftJobsMutationKey = () =>
+	[{ url: "/api/v1/units/book/:bookId/chapter-draft-jobs" }] as const;
+
+export function postApiUnitsBookByBookIdChapterDraftJobsMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = postApiUnitsBookByBookIdChapterDraftJobsMutationKey();
+	return mutationOptions<
+		PostApiUnitsBookByBookIdChapterDraftJobsStatus200,
+		ResponseErrorConfig<
+			| PostApiUnitsBookByBookIdChapterDraftJobsStatus400
+			| PostApiUnitsBookByBookIdChapterDraftJobsStatus401
+			| PostApiUnitsBookByBookIdChapterDraftJobsStatus403
+			| PostApiUnitsBookByBookIdChapterDraftJobsStatus404
+			| PostApiUnitsBookByBookIdChapterDraftJobsStatus409
+			| PostApiUnitsBookByBookIdChapterDraftJobsStatus422
+			| PostApiUnitsBookByBookIdChapterDraftJobsStatus429
+			| PostApiUnitsBookByBookIdChapterDraftJobsStatus500
+		>,
+		PostApiUnitsBookByBookIdChapterDraftJobsOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			const { data } = await postApiUnitsBookByBookIdChapterDraftJobs({
+				...config,
+				path,
+				body,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Draft Chapters attached to a draft Book
+ * {@link /api/v1/units/book/:bookId/chapter-draft-jobs}
+ */
+export function usePostApiUnitsBookByBookIdChapterDraftJobs<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			PostApiUnitsBookByBookIdChapterDraftJobsStatus200,
+			ResponseErrorConfig<
+				| PostApiUnitsBookByBookIdChapterDraftJobsStatus400
+				| PostApiUnitsBookByBookIdChapterDraftJobsStatus401
+				| PostApiUnitsBookByBookIdChapterDraftJobsStatus403
+				| PostApiUnitsBookByBookIdChapterDraftJobsStatus404
+				| PostApiUnitsBookByBookIdChapterDraftJobsStatus409
+				| PostApiUnitsBookByBookIdChapterDraftJobsStatus422
+				| PostApiUnitsBookByBookIdChapterDraftJobsStatus429
+				| PostApiUnitsBookByBookIdChapterDraftJobsStatus500
+			>,
+			PostApiUnitsBookByBookIdChapterDraftJobsOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ?? postApiUnitsBookByBookIdChapterDraftJobsMutationKey();
+
+	const baseOptions = postApiUnitsBookByBookIdChapterDraftJobsMutationOptions(
+		config,
+	) as UseMutationOptions<
+		PostApiUnitsBookByBookIdChapterDraftJobsStatus200,
+		ResponseErrorConfig<
+			| PostApiUnitsBookByBookIdChapterDraftJobsStatus400
+			| PostApiUnitsBookByBookIdChapterDraftJobsStatus401
+			| PostApiUnitsBookByBookIdChapterDraftJobsStatus403
+			| PostApiUnitsBookByBookIdChapterDraftJobsStatus404
+			| PostApiUnitsBookByBookIdChapterDraftJobsStatus409
+			| PostApiUnitsBookByBookIdChapterDraftJobsStatus422
+			| PostApiUnitsBookByBookIdChapterDraftJobsStatus429
+			| PostApiUnitsBookByBookIdChapterDraftJobsStatus500
+		>,
+		PostApiUnitsBookByBookIdChapterDraftJobsOptions,
+		TContext
+	>;
+
+	return useMutation<
+		PostApiUnitsBookByBookIdChapterDraftJobsStatus200,
+		ResponseErrorConfig<
+			| PostApiUnitsBookByBookIdChapterDraftJobsStatus400
+			| PostApiUnitsBookByBookIdChapterDraftJobsStatus401
+			| PostApiUnitsBookByBookIdChapterDraftJobsStatus403
+			| PostApiUnitsBookByBookIdChapterDraftJobsStatus404
+			| PostApiUnitsBookByBookIdChapterDraftJobsStatus409
+			| PostApiUnitsBookByBookIdChapterDraftJobsStatus422
+			| PostApiUnitsBookByBookIdChapterDraftJobsStatus429
+			| PostApiUnitsBookByBookIdChapterDraftJobsStatus500
+		>,
+		PostApiUnitsBookByBookIdChapterDraftJobsOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PostApiUnitsBookByBookIdChapterDraftJobsStatus200,
+		ResponseErrorConfig<
+			| PostApiUnitsBookByBookIdChapterDraftJobsStatus400
+			| PostApiUnitsBookByBookIdChapterDraftJobsStatus401
+			| PostApiUnitsBookByBookIdChapterDraftJobsStatus403
+			| PostApiUnitsBookByBookIdChapterDraftJobsStatus404
+			| PostApiUnitsBookByBookIdChapterDraftJobsStatus409
+			| PostApiUnitsBookByBookIdChapterDraftJobsStatus422
+			| PostApiUnitsBookByBookIdChapterDraftJobsStatus429
+			| PostApiUnitsBookByBookIdChapterDraftJobsStatus500
+		>,
+		PostApiUnitsBookByBookIdChapterDraftJobsOptions,
+		TContext
+	>;
+}
+
 export const getApiUnitsByTypeByUnitIdQueryKey = ({
 	path,
 	query,
@@ -28662,32 +28793,37 @@ export function usePutApiUnitsMediaByUnitIdContentStructure<TContext>(
 	>;
 }
 
-export const getApiChaptersByChapterIdQueryKey = ({
+export const getApiBooksByBookIdContentNodesByNodeIdQueryKey = ({
 	path,
 	query,
-}: Omit<GetApiChaptersByChapterIdOptions, "headers">) =>
-	[{ url: "/api/v1/chapters/:chapterId", params: path }, ...(query ? [query] : [])] as const;
+}: Omit<GetApiBooksByBookIdContentNodesByNodeIdOptions, "headers">) =>
+	[
+		{ url: "/api/v1/books/:bookId/content-nodes/:nodeId", params: path },
+		...(query ? [query] : []),
+	] as const;
 
-type GetApiChaptersByChapterIdQueryKey = ReturnType<typeof getApiChaptersByChapterIdQueryKey>;
+type GetApiBooksByBookIdContentNodesByNodeIdQueryKey = ReturnType<
+	typeof getApiBooksByBookIdContentNodesByNodeIdQueryKey
+>;
 
-export function getApiChaptersByChapterIdQueryOptions(
-	{ path, query }: GetApiChaptersByChapterIdOptions,
+export function getApiBooksByBookIdContentNodesByNodeIdQueryOptions(
+	{ path, query }: GetApiBooksByBookIdContentNodesByNodeIdOptions,
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
 ) {
-	const queryKey = getApiChaptersByChapterIdQueryKey({ path, query });
+	const queryKey = getApiBooksByBookIdContentNodesByNodeIdQueryKey({ path, query });
 	return queryOptions<
-		GetApiChaptersByChapterIdStatus200,
+		GetApiBooksByBookIdContentNodesByNodeIdStatus200,
 		ResponseErrorConfig<
-			| GetApiChaptersByChapterIdStatus404
-			| GetApiChaptersByChapterIdStatus422
-			| GetApiChaptersByChapterIdStatus500
+			| GetApiBooksByBookIdContentNodesByNodeIdStatus404
+			| GetApiBooksByBookIdContentNodesByNodeIdStatus422
+			| GetApiBooksByBookIdContentNodesByNodeIdStatus500
 		>,
-		GetApiChaptersByChapterIdStatus200,
+		GetApiBooksByBookIdContentNodesByNodeIdStatus200,
 		typeof queryKey
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiChaptersByChapterId({
+			const { data } = await getApiBooksByBookIdContentNodesByNodeId({
 				...config,
 				path,
 				query,
@@ -28700,33 +28836,33 @@ export function getApiChaptersByChapterIdQueryOptions(
 }
 
 /**
- * @summary Read chapter
- * {@link /api/v1/chapters/:chapterId}
+ * @summary Read a Chapter occurrence in a Book
+ * {@link /api/v1/books/:bookId/content-nodes/:nodeId}
  */
-export function useGetApiChaptersByChapterId<
-	TData = GetApiChaptersByChapterIdStatus200,
-	TQueryData = GetApiChaptersByChapterIdStatus200,
-	TQueryKey extends QueryKey = GetApiChaptersByChapterIdQueryKey,
+export function useGetApiBooksByBookIdContentNodesByNodeId<
+	TData = GetApiBooksByBookIdContentNodesByNodeIdStatus200,
+	TQueryData = GetApiBooksByBookIdContentNodesByNodeIdStatus200,
+	TQueryKey extends QueryKey = GetApiBooksByBookIdContentNodesByNodeIdQueryKey,
 >(
 	{
 		path,
 		query,
 	}: {
 		path:
-			| GetApiChaptersByChapterIdOptions["path"]
-			| (() => GetApiChaptersByChapterIdOptions["path"]);
+			| GetApiBooksByBookIdContentNodesByNodeIdOptions["path"]
+			| (() => GetApiBooksByBookIdContentNodesByNodeIdOptions["path"]);
 		query?:
-			| GetApiChaptersByChapterIdOptions["query"]
-			| (() => GetApiChaptersByChapterIdOptions["query"]);
+			| GetApiBooksByBookIdContentNodesByNodeIdOptions["query"]
+			| (() => GetApiBooksByBookIdContentNodesByNodeIdOptions["query"]);
 	},
 	options: {
 		query?: Partial<
 			QueryObserverOptions<
-				GetApiChaptersByChapterIdStatus200,
+				GetApiBooksByBookIdContentNodesByNodeIdStatus200,
 				ResponseErrorConfig<
-					| GetApiChaptersByChapterIdStatus404
-					| GetApiChaptersByChapterIdStatus422
-					| GetApiChaptersByChapterIdStatus500
+					| GetApiBooksByBookIdContentNodesByNodeIdStatus404
+					| GetApiBooksByBookIdContentNodesByNodeIdStatus422
+					| GetApiBooksByBookIdContentNodesByNodeIdStatus500
 				>,
 				TData,
 				TQueryData,
@@ -28742,11 +28878,12 @@ export function useGetApiChaptersByChapterId<
 		path: typeof path === "function" ? path() : path,
 		query: typeof query === "function" ? query() : query,
 	};
-	const queryKey = resolvedOptions?.queryKey ?? getApiChaptersByChapterIdQueryKey(resolvedParams);
+	const queryKey =
+		resolvedOptions?.queryKey ?? getApiBooksByBookIdContentNodesByNodeIdQueryKey(resolvedParams);
 
 	const queryResult = useQuery(
 		{
-			...getApiChaptersByChapterIdQueryOptions(resolvedParams, config),
+			...getApiBooksByBookIdContentNodesByNodeIdQueryOptions(resolvedParams, config),
 			...resolvedOptions,
 			queryKey,
 		} as unknown as QueryObserverOptions,
@@ -28754,9 +28891,9 @@ export function useGetApiChaptersByChapterId<
 	) as UseQueryResult<
 		TData,
 		ResponseErrorConfig<
-			| GetApiChaptersByChapterIdStatus404
-			| GetApiChaptersByChapterIdStatus422
-			| GetApiChaptersByChapterIdStatus500
+			| GetApiBooksByBookIdContentNodesByNodeIdStatus404
+			| GetApiBooksByBookIdContentNodesByNodeIdStatus422
+			| GetApiBooksByBookIdContentNodesByNodeIdStatus500
 		>
 	> & { queryKey: TQueryKey };
 

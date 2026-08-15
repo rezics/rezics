@@ -98301,6 +98301,221 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
+		"/api/v1/units/book/{bookId}/chapter-draft-jobs": {
+			"post": {
+				"summary": "Draft Chapters attached to a draft Book",
+				"tags": ["Units"],
+				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "bookId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"additionalProperties": false,
+								"type": "object",
+								"required": ["bookUpdatedAt"],
+								"properties": { "bookUpdatedAt": { "format": "date-time", "type": "string" } }
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"additionalProperties": false,
+									"type": "object",
+									"required": ["id", "state"],
+									"properties": {
+										"id": { "format": "uuid", "type": "string" },
+										"state": { "type": "string", "enum": ["pending", "completed"] }
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+							}
+						}
+					},
+					"401": {
+						"description": "Response for status 401",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "AuthenticationRequired",
+													"type": "string",
+													"enum": ["AuthenticationRequired"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "ApiTokenPermissionRequired",
+													"type": "string",
+													"enum": [
+														"ApiTokenPermissionRequired",
+														"EmailVerificationRequired",
+														"AccountRestricted",
+														"UnitPermissionForbidden"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitNotFound",
+													"type": "string",
+													"enum": ["UnitNotFound"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitChanged",
+													"type": "string",
+													"enum": ["UnitChanged"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/ValidationError" } }
+						}
+					},
+					"429": {
+						"description": "API quota exceeded",
+						"headers": {
+							"Retry-After": {
+								"description": "Seconds until the limiting window or concurrency lease can be retried",
+								"schema": { "type": "integer", "minimum": 1 }
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"type": "string",
+													"enum": ["ApiQuotaExceeded", "ApiTokenRateLimitExceeded"]
+												},
+												"message": { "type": "string" },
+												"details": { "$ref": "#/components/schemas/JsonValue" }
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/InternalError" } }
+						}
+					}
+				},
+				"operationId": "postApiUnitsBookByBookIdChapter-draft-jobs",
+				"x-rezics-quota-route-operation-id": "postApiUnitsBookByBookIdChapter-draft-jobs",
+				"x-rezics-quota-operation-id": "*",
+				"x-rezics-quota-cost-units": 1
+			}
+		},
 		"/api/v1/units/{type}/{unitId}": {
 			"get": {
 				"summary": "Get unit",
@@ -100124,6 +100339,10 @@
 								"required": ["updatedAt"],
 								"properties": {
 									"updatedAt": { "format": "date-time", "type": "string" },
+									"bookChapterDraftScope": {
+										"type": "string",
+										"enum": ["book_only", "manageable_published_chapters"]
+									},
 									"status": { "type": "string", "enum": ["draft", "published", "archived"] },
 									"visibility": { "type": "string", "enum": ["public", "unlisted", "private"] },
 									"contentRating": { "type": "string", "enum": ["general", "r15", "r18", "r18g"] },
@@ -102153,9 +102372,35 @@
 						}
 					},
 					"422": {
-						"description": "Request validation failed",
+						"description": "Response for status 422",
 						"content": {
-							"application/json": { "schema": { "$ref": "#/components/schemas/ValidationError" } }
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"type": "object",
+											"required": ["error", "requestId"],
+											"properties": {
+												"error": {
+													"type": "object",
+													"required": ["code", "message"],
+													"properties": {
+														"code": {
+															"default": "ValidationError",
+															"type": "string",
+															"enum": ["ValidationError"]
+														},
+														"message": { "type": "string" },
+														"details": {}
+													}
+												},
+												"requestId": { "type": "string" }
+											}
+										},
+										{ "$ref": "#/components/schemas/ValidationError" }
+									]
+								}
+							}
 						}
 					},
 					"429": {
@@ -124358,13 +124603,19 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/v1/chapters/{chapterId}": {
+		"/api/v1/books/{bookId}/content-nodes/{nodeId}": {
 			"get": {
-				"summary": "Read chapter",
+				"summary": "Read a Chapter occurrence in a Book",
 				"tags": ["Books"],
 				"parameters": [
 					{
-						"name": "chapterId",
+						"name": "bookId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					},
+					{
+						"name": "nodeId",
 						"in": "path",
 						"required": true,
 						"schema": { "format": "uuid", "type": "string" }
@@ -124406,8 +124657,8 @@
 										"contentMetrics",
 										"status",
 										"updatedAt",
-										"previousChapterId",
-										"nextChapterId",
+										"previousNodeId",
+										"nextNodeId",
 										"capabilities"
 									],
 									"properties": {
@@ -124642,14 +124893,21 @@
 										},
 										"status": {
 											"nullable": true,
-											"anyOf": [{ "type": "string" }, { "type": "null" }]
+											"anyOf": [
+												{
+													"default": "draft",
+													"type": "string",
+													"enum": ["draft", "published", "archived"]
+												},
+												{ "type": "null" }
+											]
 										},
 										"updatedAt": { "format": "date-time", "type": "string" },
-										"previousChapterId": {
+										"previousNodeId": {
 											"nullable": true,
 											"anyOf": [{ "format": "uuid", "type": "string" }, { "type": "null" }]
 										},
-										"nextChapterId": {
+										"nextNodeId": {
 											"nullable": true,
 											"anyOf": [{ "format": "uuid", "type": "string" }, { "type": "null" }]
 										},
@@ -124703,8 +124961,8 @@
 						}
 					}
 				},
-				"operationId": "getApiChaptersByChapterId",
-				"x-rezics-quota-route-operation-id": "getApiChaptersByChapterId",
+				"operationId": "getApiBooksByBookIdContent-nodesByNodeId",
+				"x-rezics-quota-route-operation-id": "getApiBooksByBookIdContent-nodesByNodeId",
 				"x-rezics-quota-operation-id": "*",
 				"x-rezics-quota-cost-units": 1
 			}
@@ -124733,7 +124991,7 @@
 						"application/json": {
 							"schema": {
 								"type": "object",
-								"required": ["title", "content", "status"],
+								"required": ["title", "content", "status", "baseRevisionId"],
 								"properties": {
 									"title": { "minLength": 1, "maxLength": 500, "type": "string" },
 									"content": {
@@ -124898,6 +125156,7 @@
 										}
 									},
 									"status": { "type": "string", "enum": ["draft", "published", "archived"] },
+									"baseRevisionId": { "format": "uuid", "type": "string" },
 									"revisionContext": {
 										"additionalProperties": false,
 										"type": "object",
@@ -125057,9 +125316,9 @@
 											"required": ["code", "message"],
 											"properties": {
 												"code": {
-													"default": "PostTagMentionVoteConflict",
+													"default": "UnitRevisionConflict",
 													"type": "string",
-													"enum": ["PostTagMentionVoteConflict"]
+													"enum": ["UnitRevisionConflict", "PostTagMentionVoteConflict"]
 												},
 												"message": { "type": "string" },
 												"details": {}
@@ -151308,6 +151567,546 @@
 													}
 												},
 												"postKind": { "const": "excerpt", "type": "string" }
+											}
+										},
+										{
+											"type": "object",
+											"required": [
+												"id",
+												"availableLanguages",
+												"attributions",
+												"realmId",
+												"subjectId",
+												"rootPostId",
+												"parentPostId",
+												"replyCount",
+												"language",
+												"title",
+												"summary",
+												"body",
+												"latestRevisionId",
+												"createdAt",
+												"updatedAt",
+												"subject",
+												"scores",
+												"capabilities",
+												"postKind",
+												"status"
+											],
+											"properties": {
+												"id": { "format": "uuid", "type": "string" },
+												"availableLanguages": {
+													"uniqueItems": true,
+													"type": "array",
+													"items": {
+														"type": "string",
+														"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+													}
+												},
+												"attributions": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"required": ["id", "role", "position", "creditedUnit"],
+														"properties": {
+															"id": { "format": "uuid", "type": "string" },
+															"role": {
+																"default": "author",
+																"type": "string",
+																"enum": [
+																	"author",
+																	"co-author",
+																	"translator",
+																	"illustrator",
+																	"editor",
+																	"publisher",
+																	"letterer",
+																	"colorist",
+																	"developer",
+																	"composer",
+																	"designer",
+																	"director",
+																	"producer",
+																	"writer",
+																	"actor",
+																	"narrator",
+																	"studio",
+																	"distributor"
+																]
+															},
+															"position": {
+																"format": "fractional-position",
+																"minLength": 2,
+																"maxLength": 1024,
+																"type": "string"
+															},
+															"creditedUnit": {
+																"type": "object",
+																"required": [
+																	"id",
+																	"kind",
+																	"language",
+																	"slugAddress",
+																	"title",
+																	"summary",
+																	"avatar"
+																],
+																"properties": {
+																	"id": { "format": "uuid", "type": "string" },
+																	"kind": {
+																		"default": "slug_namespace",
+																		"type": "string",
+																		"enum": [
+																			"slug_namespace",
+																			"profile",
+																			"book",
+																			"software",
+																			"media",
+																			"video",
+																			"audio",
+																			"release",
+																			"entity",
+																			"label",
+																			"tag",
+																			"structure",
+																			"series",
+																			"zone",
+																			"zone_page",
+																			"collection",
+																			"post",
+																			"poll",
+																			"realm",
+																			"realm_rule"
+																		]
+																	},
+																	"language": {
+																		"type": "string",
+																		"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+																	},
+																	"slugAddress": {
+																		"nullable": true,
+																		"anyOf": [
+																			{
+																				"additionalProperties": false,
+																				"type": "object",
+																				"required": ["slug", "scopeUnitId", "canonicalPath"],
+																				"properties": {
+																					"slug": {
+																						"minLength": 1,
+																						"maxLength": 63,
+																						"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																						"type": "string"
+																					},
+																					"scopeUnitId": { "format": "uuid", "type": "string" },
+																					"canonicalPath": {
+																						"minItems": 2,
+																						"maxItems": 3,
+																						"type": "array",
+																						"items": {
+																							"minLength": 1,
+																							"maxLength": 63,
+																							"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																							"type": "string"
+																						}
+																					}
+																				}
+																			},
+																			{ "type": "null" }
+																		]
+																	},
+																	"title": {
+																		"nullable": true,
+																		"anyOf": [{ "type": "string" }, { "type": "null" }]
+																	},
+																	"summary": {
+																		"nullable": true,
+																		"anyOf": [{ "type": "string" }, { "type": "null" }]
+																	},
+																	"avatar": {
+																		"nullable": true,
+																		"anyOf": [
+																			{
+																				"anyOf": [
+																					{
+																						"additionalProperties": false,
+																						"type": "object",
+																						"required": ["type", "image"],
+																						"properties": {
+																							"type": { "const": "image", "type": "string" },
+																							"image": {
+																								"type": "object",
+																								"required": ["id", "url"],
+																								"properties": {
+																									"id": { "format": "uuid", "type": "string" },
+																									"url": { "type": "string" }
+																								}
+																							}
+																						}
+																					},
+																					{
+																						"additionalProperties": false,
+																						"type": "object",
+																						"required": ["type", "emoji"],
+																						"properties": {
+																							"type": { "const": "emoji", "type": "string" },
+																							"emoji": { "maxLength": 64, "type": "string" }
+																						}
+																					},
+																					{
+																						"additionalProperties": false,
+																						"type": "object",
+																						"required": ["type", "icon"],
+																						"properties": {
+																							"type": { "const": "icon", "type": "string" },
+																							"icon": {
+																								"additionalProperties": false,
+																								"type": "object",
+																								"required": ["provider", "prefix", "name"],
+																								"properties": {
+																									"provider": {
+																										"const": "font-awesome",
+																										"type": "string"
+																									},
+																									"prefix": {
+																										"type": "string",
+																										"enum": ["fas", "fab"]
+																									},
+																									"name": {
+																										"pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+																										"maxLength": 128,
+																										"type": "string"
+																									}
+																								}
+																							}
+																						}
+																					}
+																				]
+																			},
+																			{ "type": "null" }
+																		]
+																	}
+																}
+															}
+														}
+													}
+												},
+												"realmId": {
+													"nullable": true,
+													"anyOf": [{ "format": "uuid", "type": "string" }, { "type": "null" }]
+												},
+												"subjectId": {
+													"nullable": true,
+													"anyOf": [{ "format": "uuid", "type": "string" }, { "type": "null" }]
+												},
+												"rootPostId": {
+													"nullable": true,
+													"anyOf": [{ "format": "uuid", "type": "string" }, { "type": "null" }]
+												},
+												"parentPostId": {
+													"nullable": true,
+													"anyOf": [{ "format": "uuid", "type": "string" }, { "type": "null" }]
+												},
+												"replyCount": {
+													"anyOf": [
+														{ "format": "integer", "default": 0, "type": "string" },
+														{ "type": "integer" }
+													]
+												},
+												"language": {
+													"type": "string",
+													"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+												},
+												"title": {
+													"nullable": true,
+													"anyOf": [{ "type": "string" }, { "type": "null" }]
+												},
+												"summary": {
+													"nullable": true,
+													"anyOf": [{ "type": "string" }, { "type": "null" }]
+												},
+												"body": {
+													"nullable": true,
+													"anyOf": [
+														{
+															"additionalProperties": false,
+															"$id": "PortableTextDocument",
+															"type": "object",
+															"required": ["_type", "_key", "content"],
+															"properties": {
+																"_type": { "const": "portable-text", "type": "string" },
+																"_key": {
+																	"pattern": "^[0-9a-f]{12}$",
+																	"$id": "BlockKey",
+																	"type": "string"
+																},
+																"content": {
+																	"$id": "PortableText",
+																	"type": "array",
+																	"items": {
+																		"$id": "PortableTextBlock",
+																		"anyOf": [
+																			{
+																				"additionalProperties": {
+																					"$id": "#/components/schemas/JsonValue",
+																					"anyOf": [
+																						{ "type": "null" },
+																						{ "type": "boolean" },
+																						{ "type": "number" },
+																						{ "type": "string" },
+																						{
+																							"type": "array",
+																							"items": { "$ref": "#/components/schemas/JsonValue" }
+																						},
+																						{
+																							"type": "object",
+																							"patternProperties": {
+																								"^(.*)$": {
+																									"$ref": "#/components/schemas/JsonValue"
+																								}
+																							}
+																						}
+																					]
+																				},
+																				"$id": "PortableTextTextBlock",
+																				"type": "object",
+																				"required": ["_key", "_type", "children"],
+																				"properties": {
+																					"_key": { "type": "string" },
+																					"_type": { "const": "block", "type": "string" },
+																					"children": {
+																						"type": "array",
+																						"items": {
+																							"$id": "PortableTextChild",
+																							"anyOf": [
+																								{
+																									"additionalProperties": false,
+																									"$id": "PortableTextSpan",
+																									"type": "object",
+																									"required": ["_key", "_type", "text"],
+																									"properties": {
+																										"_key": { "type": "string" },
+																										"_type": { "const": "span", "type": "string" },
+																										"text": { "type": "string" },
+																										"marks": {
+																											"type": "array",
+																											"items": { "type": "string" }
+																										}
+																									}
+																								},
+																								{
+																									"additionalProperties": false,
+																									"$id": "PortableTextUnitMention",
+																									"type": "object",
+																									"required": ["_key", "_type", "unitId"],
+																									"properties": {
+																										"_key": { "type": "string" },
+																										"_type": {
+																											"const": "unit-mention",
+																											"type": "string"
+																										},
+																										"unitId": {
+																											"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																											"type": "string"
+																										}
+																									}
+																								}
+																							]
+																						}
+																					},
+																					"markDefs": {
+																						"type": "array",
+																						"items": {
+																							"additionalProperties": {
+																								"$id": "#/components/schemas/JsonValue",
+																								"anyOf": [
+																									{ "type": "null" },
+																									{ "type": "boolean" },
+																									{ "type": "number" },
+																									{ "type": "string" },
+																									{
+																										"type": "array",
+																										"items": {
+																											"$ref": "#/components/schemas/JsonValue"
+																										}
+																									},
+																									{
+																										"type": "object",
+																										"patternProperties": {
+																											"^(.*)$": {
+																												"$ref": "#/components/schemas/JsonValue"
+																											}
+																										}
+																									}
+																								]
+																							},
+																							"$id": "PortableTextObject",
+																							"type": "object",
+																							"required": ["_key", "_type"],
+																							"properties": {
+																								"_key": { "type": "string" },
+																								"_type": { "type": "string" }
+																							}
+																						}
+																					},
+																					"listItem": { "type": "string" },
+																					"style": { "type": "string" },
+																					"level": { "minimum": 1, "type": "integer" }
+																				}
+																			},
+																			{
+																				"additionalProperties": false,
+																				"$id": "PortableTextImage",
+																				"type": "object",
+																				"required": ["_key", "_type", "assetId"],
+																				"properties": {
+																					"_key": { "type": "string" },
+																					"_type": { "const": "image", "type": "string" },
+																					"assetId": {
+																						"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																						"type": "string"
+																					},
+																					"alt": { "type": "string" },
+																					"caption": { "type": "string" }
+																				}
+																			},
+																			{
+																				"additionalProperties": {
+																					"$id": "#/components/schemas/JsonValue",
+																					"anyOf": [
+																						{ "type": "null" },
+																						{ "type": "boolean" },
+																						{ "type": "number" },
+																						{ "type": "string" },
+																						{
+																							"type": "array",
+																							"items": { "$ref": "#/components/schemas/JsonValue" }
+																						},
+																						{
+																							"type": "object",
+																							"patternProperties": {
+																								"^(.*)$": {
+																									"$ref": "#/components/schemas/JsonValue"
+																								}
+																							}
+																						}
+																					]
+																				},
+																				"type": "object",
+																				"required": ["_key", "_type"],
+																				"properties": {
+																					"_key": { "type": "string" },
+																					"_type": {
+																						"pattern": "^(?!(?:block|image)$).+",
+																						"type": "string"
+																					}
+																				}
+																			}
+																		]
+																	}
+																}
+															}
+														},
+														{ "type": "null" }
+													]
+												},
+												"latestRevisionId": {
+													"nullable": true,
+													"anyOf": [{ "format": "uuid", "type": "string" }, { "type": "null" }]
+												},
+												"createdAt": { "format": "date-time", "type": "string" },
+												"updatedAt": { "format": "date-time", "type": "string" },
+												"subject": {
+													"nullable": true,
+													"anyOf": [
+														{
+															"type": "object",
+															"required": ["id", "type", "language", "title", "summary", "cover"],
+															"properties": {
+																"id": { "format": "uuid", "type": "string" },
+																"type": { "type": "string" },
+																"language": {
+																	"type": "string",
+																	"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+																},
+																"title": {
+																	"nullable": true,
+																	"anyOf": [{ "type": "string" }, { "type": "null" }]
+																},
+																"summary": {
+																	"nullable": true,
+																	"anyOf": [{ "type": "string" }, { "type": "null" }]
+																},
+																"cover": {
+																	"nullable": true,
+																	"anyOf": [
+																		{
+																			"type": "object",
+																			"required": ["id", "url"],
+																			"properties": {
+																				"id": { "format": "uuid", "type": "string" },
+																				"url": { "type": "string" }
+																			}
+																		},
+																		{ "type": "null" }
+																	]
+																}
+															}
+														},
+														{ "type": "null" }
+													]
+												},
+												"scores": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"required": ["scoreId", "realmId", "realmTitle", "value"],
+														"properties": {
+															"scoreId": { "format": "uuid", "type": "string" },
+															"realmId": { "format": "uuid", "type": "string" },
+															"realmTitle": {
+																"nullable": true,
+																"anyOf": [{ "type": "string" }, { "type": "null" }]
+															},
+															"value": {
+																"minimum": 1,
+																"maximum": 10,
+																"anyOf": [
+																	{ "format": "integer", "default": 0, "type": "string" },
+																	{ "minimum": 1, "maximum": 10, "type": "integer" }
+																]
+															}
+														}
+													}
+												},
+												"capabilities": {
+													"type": "object",
+													"required": [
+														"canEdit",
+														"canManageAttributions",
+														"canManageRealmPublications",
+														"canManageAccess",
+														"canReply"
+													],
+													"properties": {
+														"canEdit": { "type": "boolean" },
+														"canManageAttributions": { "type": "boolean" },
+														"canManageRealmPublications": { "type": "boolean" },
+														"canManageAccess": { "type": "boolean" },
+														"canReply": { "type": "boolean" }
+													}
+												},
+												"postKind": { "const": "chapter", "type": "string" },
+												"status": {
+													"nullable": true,
+													"anyOf": [
+														{
+															"default": "draft",
+															"type": "string",
+															"enum": ["draft", "published", "archived"]
+														},
+														{ "type": "null" }
+													]
+												}
 											}
 										},
 										{

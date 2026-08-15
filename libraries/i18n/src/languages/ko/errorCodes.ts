@@ -43,6 +43,8 @@ export default {
 	UnitContentLicenseGrantForbidden: `개인 소유 작품만 ${verbatimTerms.rezics.value}에 라이선스를 부여할 수 있습니다.`,
 	UnitChanged: "이 콘텐츠가 변경되었습니다. 새로고침하고 다시 시도하세요.",
 	UnitRevisionConflict: "수정 기준이 변경되었습니다. 새로고침하고 다시 시도하세요.",
+	RevisionContributionActorRequired: "이 개정의 주요 기여자를 지정하세요.",
+	RevisionCreditEntityInvalid: "선택한 개정 기여자가 유효하지 않습니다. 다른 기여자를 선택하세요.",
 	ContentStructureRevisionConflict:
 		"콘텐츠 구조가 다른 곳에서 변경되었습니다. 새로고침하고 다시 시도하세요.",
 	CollectionStructureRevisionConflict:

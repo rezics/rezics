@@ -6,11 +6,25 @@ import {
 	SaveBookContentStructureDraftBody,
 	SaveMediaContentStructureDraftBody,
 	UpdateContentStructureNodesBatchBody,
+	UpsertChapterLocalizationBody,
 } from "./schema";
 
 const uuid = (index: number) => `019b1234-1234-7000-8000-${index.toString(16).padStart(12, "0")}`;
 
 describe("Content Structure API schemas", () => {
+	it("requires an optimistic-concurrency base for Chapter content writes", () => {
+		const body = {
+			title: "Chapter",
+			content: createPortableTextDocument([]),
+			status: "draft",
+			baseRevisionId: uuid(1),
+		};
+		expect(Value.Check(UpsertChapterLocalizationBody, body)).toBe(true);
+		expect(Value.Check(UpsertChapterLocalizationBody, { ...body, baseRevisionId: undefined })).toBe(
+			false,
+		);
+	});
+
 	it("accepts an attached Unit reference without client-owned presentation", () => {
 		const body = {
 			baseRevisionId: "018ff2b7-7c00-7000-8000-000000000001",

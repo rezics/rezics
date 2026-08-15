@@ -355,6 +355,12 @@ export default {
 		version: "关联版本",
 		canonicalUnit: "主版本",
 		saveSettings: "保存设置",
+		bookDraftScope: "书籍下线范围",
+		bookDraftScopeDescription: `章节是独立的${postTerms.label}。请明确选择是否也将目前附加的已发布章节设为草稿。`,
+		bookDraftChoose: "请选择下线范围",
+		bookDraftBookOnly: "仅将书籍设为草稿",
+		bookDraftBookAndChapters: "将书籍及可管理的已发布章节设为草稿",
+		bookChapterDraftQueued: "章节下线任务已排入队列；系统会分批处理您有权管理的章节。",
 	},
 	relationshipManagement: {
 		credits: "署名",

@@ -7,7 +7,8 @@ import { DateTime, DateTimeString } from ".";
 import {
 	CollectionContentResponse,
 	toPortableTextResponse,
-	ChapterDetailResponse,
+	BookChapterNodeDetailResponse,
+	ChapterPostDetailResponse,
 	ContentMetricResponse,
 	EntityDetailResponse,
 	FeedNonReviewPostItemResponse,
@@ -271,7 +272,7 @@ describe("API response values", () => {
 	});
 
 	it("keeps Post detail presentation and engagement context explicit", () => {
-		expect(PostDetailResponse.anyOf).toHaveLength(5);
+		expect(PostDetailResponse.anyOf).toHaveLength(6);
 		expect(OrdinaryPostDetailResponse.required).toContain("subject");
 		expect(OrdinaryPostDetailResponse.required).toContain("scores");
 		expect(OrdinaryPostDetailResponse.properties.capabilities.required).toEqual([
@@ -301,7 +302,9 @@ describe("API response values", () => {
 			"canReply",
 		]);
 		expect(WikiPostDetailResponse.properties.postKind.const).toBe("wiki");
-		expect(ChapterDetailResponse.properties.capabilities.required).toEqual(["canReply"]);
+		expect(ChapterPostDetailResponse.properties.postKind.const).toBe("chapter");
+		expect(ChapterPostDetailResponse.properties.body.anyOf).toBeDefined();
+		expect(BookChapterNodeDetailResponse.properties.capabilities.required).toEqual(["canReply"]);
 		expect(ReactionSummaryResponse.required).toContain("viewerReaction");
 	});
 

@@ -379,6 +379,13 @@ export default {
 		version: "Adjuntar versión",
 		canonicalUnit: "Unit principal",
 		saveSettings: "Guardar configuración",
+		bookDraftScope: "Alcance de la retirada",
+		bookDraftScopeDescription: `Los capítulos son ${postTerms.plural} independientes. Elige explícitamente si los capítulos publicados asociados también deben volver a borrador.`,
+		bookDraftChoose: "Elegir el alcance",
+		bookDraftBookOnly: "Pasar solo el libro a borrador",
+		bookDraftBookAndChapters: "Pasar a borrador el libro y los capítulos publicados administrables",
+		bookChapterDraftQueued:
+			"La retirada de capítulos está en cola; los capítulos administrables se procesarán por lotes.",
 	},
 	relationshipManagement: {
 		credits: "Créditos",

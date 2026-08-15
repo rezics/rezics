@@ -2,6 +2,7 @@ import { Check } from "@sinclair/typebox/value";
 import { describe, expect, it } from "vitest";
 
 import {
+	CreateBookChapterDraftJobBody,
 	WorkUnitTypeParams,
 	CreateUnitBody,
 	ManageableUnitTypeParams,
@@ -302,6 +303,10 @@ describe("Unit partial update shapes", () => {
 
 	it.each([
 		["status-only", { updatedAt, status: "published" }],
+		[
+			"Book draft scope",
+			{ updatedAt, status: "draft", bookChapterDraftScope: "manageable_published_chapters" },
+		],
 		["visibility-only", { updatedAt, visibility: "unlisted" }],
 		["details-only", { updatedAt, details: { releaseStatus: "ongoing" } }],
 	] as const)("accepts a %s patch", (_name, body) => {
@@ -310,6 +315,10 @@ describe("Unit partial update shapes", () => {
 
 	it("rejects an invalid optimistic-concurrency timestamp", () => {
 		expect(Check(UpdateUnitBody, { updatedAt: "not-a-date", status: "published" })).toBe(false);
+	});
+
+	it("rejects an open-ended Book draft scope", () => {
+		expect(Check(UpdateUnitBody, { updatedAt, bookChapterDraftScope: "all_chapters" })).toBe(false);
 	});
 });
 
@@ -357,5 +366,17 @@ describe("Unit content language order inputs", () => {
 		).toBe(false);
 		expect(Check(UnitLocalizationDeleteBody, { expectedLanguages: ["ja"] })).toBe(true);
 		expect(Check(UnitLocalizationDeleteBody, { expectedLanguages: ["zh-Hans"] })).toBe(false);
+	});
+});
+
+describe("Book Chapter draft job input", () => {
+	it("requires the exact saved Book version", () => {
+		expect(
+			Check(CreateBookChapterDraftJobBody, {
+				bookUpdatedAt: "2026-08-15T14:00:00.000Z",
+			}),
+		).toBe(true);
+		expect(Check(CreateBookChapterDraftJobBody, {})).toBe(false);
+		expect(Check(CreateBookChapterDraftJobBody, { bookUpdatedAt: "not-a-date" })).toBe(false);
 	});
 });

@@ -44,6 +44,8 @@ export default {
 	UnitContentLicenseGrantForbidden: `只有个人拥有的作品可以向 ${verbatimTerms.rezics.value} 授权。`,
 	UnitChanged: "内容已变更，请刷新后再试一次。",
 	UnitRevisionConflict: "修订基础已变更，请刷新后再试一次。",
+	RevisionContributionActorRequired: "请指定这次修订的主要贡献者。",
+	RevisionCreditEntityInvalid: "所选的修订贡献者无效，请重新选择。",
 	ContentStructureRevisionConflict: "内容结构已在其他地方变更，请刷新后再试一次。",
 	CollectionStructureRevisionConflict: "条目结构已在其他地方变更，请刷新后再试一次。",
 	DockRevisionConflict: `${dockTerms.label}已在其他地方变更，请刷新后再试一次。`,

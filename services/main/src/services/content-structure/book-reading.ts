@@ -17,7 +17,7 @@ type ChapterLocalization = {
 export function selectReaderChapterLocalization<Localization extends ChapterLocalization>(
 	localizations: readonly Localization[],
 	input: {
-		readonly canEditBook: boolean;
+		readonly canReadDraftContent: boolean;
 		readonly exactLanguage?: ContentLanguage;
 		readonly localizationLanguages: readonly ContentLanguage[];
 	},
@@ -31,7 +31,7 @@ export function selectReaderChapterLocalization<Localization extends ChapterLoca
 	const readableContent = localizations.filter(
 		(localization) =>
 			localization.content !== null &&
-			(input.canEditBook || localization.contentStatus === "published"),
+			(input.canReadDraftContent || localization.contentStatus === "published"),
 	);
 	return (
 		resolveUnitLocalizationFromOrdered(readableContent, input.localizationLanguages) ??
@@ -60,7 +60,7 @@ function compareNodes(left: BookReadingNode, right: BookReadingNode): number {
  *
  * @internal
  */
-export function orderReaderChapterIds(nodes: readonly BookReadingNode[]): string[] {
+export function orderReaderChapterNodeIds(nodes: readonly BookReadingNode[]): string[] {
 	const nodeIds = new Set(nodes.map((node) => node.id));
 	const childrenByParent = new Map<string | null, BookReadingNode[]>();
 	for (const node of nodes) {
@@ -72,14 +72,14 @@ export function orderReaderChapterIds(nodes: readonly BookReadingNode[]): string
 	for (const siblings of childrenByParent.values()) siblings.sort(compareNodes);
 
 	const visited = new Set<string>();
-	const chapterIds: string[] = [];
+	const chapterNodeIds: string[] = [];
 	const visit = (node: BookReadingNode): void => {
 		if (visited.has(node.id)) return;
 		visited.add(node.id);
-		if (node.contentKind === "chapter") chapterIds.push(node.contentUnitId);
+		if (node.contentKind === "chapter") chapterNodeIds.push(node.id);
 		for (const child of childrenByParent.get(node.id) ?? []) visit(child);
 	};
 	for (const root of childrenByParent.get(null) ?? []) visit(root);
 	for (const node of [...nodes].sort(compareNodes)) visit(node);
-	return chapterIds;
+	return chapterNodeIds;
 }

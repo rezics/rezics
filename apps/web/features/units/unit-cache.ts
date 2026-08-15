@@ -1,5 +1,5 @@
 import {
-	getApiChaptersByChapterIdQueryKey,
+	getApiPostsByPostIdQueryKey,
 	getApiUnitsBookByUnitIdContentStructureNodesQueryKey,
 	getApiUnitsMediaByUnitIdContentStructureNodesQueryKey,
 	getApiUnitsByTypeByUnitIdQueryKey,
@@ -46,11 +46,17 @@ export async function invalidateMediaContentStructure(queryClient: QueryClient, 
 }
 
 export async function invalidateChapterContent(queryClient: QueryClient, chapterId: string) {
-	await queryClient.invalidateQueries({
-		queryKey: getApiChaptersByChapterIdQueryKey({
-			path: { chapterId },
+	await Promise.all([
+		queryClient.invalidateQueries({
+			queryKey: getApiPostsByPostIdQueryKey({ path: { postId: chapterId } }),
 		}),
-	});
+		queryClient.invalidateQueries({
+			queryKey: [{ url: "/api/v1/books/:bookId/content-nodes/:nodeId" }],
+		}),
+		queryClient.invalidateQueries({
+			queryKey: [{ url: "/api/v1/units/book/:unitId/content-structure/nodes" }],
+		}),
+	]);
 }
 
 export async function invalidateChapter(queryClient: QueryClient, chapterId: string) {

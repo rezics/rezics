@@ -242,6 +242,9 @@ const UnitDetailsInput = t.Object(
 export const UpdateUnitBody = t.Object(
 	{
 		updatedAt: t.String({ format: "date-time" }),
+		bookChapterDraftScope: t.Optional(
+			t.Union([t.Literal("book_only"), t.Literal("manageable_published_chapters")]),
+		),
 		...LifecycleInput,
 		unit: t.Optional(
 			t.Object(
@@ -273,6 +276,19 @@ export const UnitLookupParams = t.Object({
 	unitId: Uuid,
 });
 export type UnitLookupParams = Static<typeof UnitLookupParams>;
+
+export const BookChapterDraftJobParams = t.Object({ bookId: Uuid });
+export const CreateBookChapterDraftJobBody = t.Object(
+	{ bookUpdatedAt: DateTime },
+	{ additionalProperties: false },
+);
+export const BookChapterDraftJobResponse = t.Object(
+	{
+		id: Uuid,
+		state: t.Union([t.Literal("pending"), t.Literal("completed")]),
+	},
+	{ additionalProperties: false },
+);
 export const UnitDetailQuery = t.Object(LocalizationLanguageQuery, {
 	additionalProperties: false,
 });

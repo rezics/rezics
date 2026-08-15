@@ -371,6 +371,13 @@ export default {
 		version: "버전 첨부",
 		canonicalUnit: "기본 유닛",
 		saveSettings: "설정 저장",
+		bookDraftScope: "책 공개 중단 범위",
+		bookDraftScopeDescription: `챕터는 독립된 ${postTerms.label}입니다. 현재 연결된 공개 챕터도 초안으로 전환할지 명확히 선택하세요.`,
+		bookDraftChoose: "공개 중단 범위 선택",
+		bookDraftBookOnly: "책만 초안으로 전환",
+		bookDraftBookAndChapters: "책과 관리 가능한 공개 챕터를 초안으로 전환",
+		bookChapterDraftQueued:
+			"챕터 공개 중단 작업이 대기열에 추가되었습니다. 관리 권한이 있는 챕터를 일괄 처리합니다.",
 	},
 	relationshipManagement: {
 		credits: "기여자",

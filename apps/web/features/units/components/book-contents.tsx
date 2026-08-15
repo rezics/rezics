@@ -30,6 +30,7 @@ import { RequestFailure } from "@/i18n/request-failure";
 import { toNonNegativeApiInteger } from "@/lib/api-number";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
 import { buildContentStructureTree } from "../content-structure-tree";
+import { bookReaderHref } from "../routing/unit-detail-routes";
 import {
 	collectBookStructureLabelIds,
 	countBookStructureDisplayedKinds,
@@ -286,10 +287,7 @@ function BookContentsList({
 											{rowText}
 										</button>
 									) : (
-										<Link
-											className={mainClassName}
-											href={`/units/book/${bookId}/read/${node.contentUnitId}`}
-										>
+										<Link className={mainClassName} href={bookReaderHref(bookId, node.id)}>
 											{rowText}
 										</Link>
 									)}
@@ -330,7 +328,7 @@ function BookContentsList({
 													setShareTarget({
 														href: displayAsLabel
 															? `/units/book/${bookId}/contents#content-node-${encodeURIComponent(node.id)}`
-															: `/units/book/${bookId}/read/${node.contentUnitId}`,
+															: bookReaderHref(bookId, node.id),
 														unitId: node.contentUnitId,
 													})
 												}
