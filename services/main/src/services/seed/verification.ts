@@ -5,7 +5,7 @@ import {
 	BootstrapUnitIds,
 	CuratedCreationTagCollectionManifest,
 	OfficialZoneManifest,
-} from "../bootstrap/manifest";
+} from "../bootstrap/data";
 import { database } from "../database";
 import {
 	contentReviewCase,

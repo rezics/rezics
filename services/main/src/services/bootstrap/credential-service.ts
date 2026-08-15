@@ -4,7 +4,7 @@ import { database } from "../database";
 import { accounts } from "../database/schema";
 import { assertPlatformCoreReady, inspectPlatformCore, PlatformInstallationLockName } from "./core";
 import { preparePlatformCredential, type IssuedPlatformCredential } from "./credentials";
-import { BootstrapProfileManifest } from "./manifest";
+import { BootstrapProfileManifest } from "./data";
 
 export async function rotatePlatformCredentials(): Promise<readonly IssuedPlatformCredential[]> {
 	return database.transaction(async (tx) => {

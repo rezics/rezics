@@ -11,7 +11,7 @@ import { recordAuditEvent } from "../../audit";
 import session from "../../auth/session";
 import { lockUnitAccessState } from "../../authorization/unit/invitations";
 import { replaceUnitOwnership } from "../../authorization/unit/ownership";
-import { OfficialProfileIds } from "../../bootstrap/manifest";
+import { OfficialProfileIds } from "../../bootstrap/data";
 import {
 	expandDelegableUnitPermissions,
 	isUnitPermissionApplicable,

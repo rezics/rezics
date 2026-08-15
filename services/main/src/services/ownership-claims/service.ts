@@ -1,7 +1,7 @@
 import { and, desc, eq, isNull, lt, or, sql } from "drizzle-orm";
 
 import { recordAuditEvent } from "../audit";
-import { OfficialProfileIds } from "../bootstrap/manifest";
+import { OfficialProfileIds } from "../bootstrap/data";
 import type { PlatformAuthorization } from "../authorization/platform/authorization";
 import {
 	replaceUnitOwnership,

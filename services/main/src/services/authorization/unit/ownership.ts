@@ -3,7 +3,7 @@ import { and, eq, isNull } from "drizzle-orm";
 
 import type { DatabaseTransaction } from "../../database";
 import { unitAccessGrant, unitAccessRestriction, unitOwnership } from "../../database/schema";
-import { OfficialProfileIds } from "../../bootstrap/manifest";
+import { OfficialProfileIds } from "../../bootstrap/data";
 import { expandDelegableUnitPermissions } from "./policy";
 
 export type UnitOwnershipMode = "profile_owned" | "community_owned";

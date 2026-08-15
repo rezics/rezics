@@ -1,7 +1,7 @@
 import { and, desc, eq, gt, inArray, isNotNull, isNull, or, sql } from "drizzle-orm";
 
 import { recordAuditEvent } from "../audit";
-import { BootstrapUnitIds } from "../bootstrap/manifest";
+import { BootstrapUnitIds } from "../bootstrap/data";
 import { database, type DatabaseExecutor, type DatabaseTransaction } from "../database";
 import {
 	profile,

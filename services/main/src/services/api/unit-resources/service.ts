@@ -16,7 +16,7 @@ import {
 } from "../../units/localization";
 import { ensureImageAssetsAttachable } from "../image-assets/service";
 import { createProfilePublisherAttribution } from "../../units/attribution";
-import { OfficialProfileIds } from "../../bootstrap/manifest";
+import { OfficialProfileIds } from "../../bootstrap/data";
 import type { CreateUnitResourceBody, CreateEntityBody } from "./schema";
 
 export function createUnitResource(

@@ -3,7 +3,6 @@ import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 
 import { generateBootstrapPassword } from "./credentials";
 import {
-	assertBootstrapManifest,
 	BootstrapEpochUnixMilliseconds,
 	BootstrapPlatformAccessManifest,
 	BootstrapProfileManifest,
@@ -19,8 +18,8 @@ import {
 	RezicsScoreRealmManifest,
 	ReservedBootstrapUuidv7s,
 	SlugNamespaceManifest,
-	uuidv7UnixMilliseconds,
-} from "./manifest";
+} from "./data";
+import { assertBootstrapManifest, uuidv7UnixMilliseconds } from "./manifest-validation";
 
 describe("database bootstrap manifest", () => {
 	it("uses unique, chronologically coherent UUIDv7 identifiers", () => {

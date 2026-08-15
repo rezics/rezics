@@ -1,6 +1,6 @@
 import { Client } from "pg";
 
-import { BootstrapPlatformAdministratorProfile } from "../src/services/bootstrap/manifest";
+import { BootstrapPlatformAdministratorProfile } from "../src/services/bootstrap/data";
 
 const FixtureFlag = "REZICS_DISPOSABLE_MIGRATION_FIXTURE";
 const ReviewExpiringGrantId = "72000000-0000-7000-8000-000000000001";

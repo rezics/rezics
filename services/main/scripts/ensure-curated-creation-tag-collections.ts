@@ -19,7 +19,7 @@ const [
 	import("drizzle-orm"),
 	import("../src/services/bootstrap/core"),
 	import("../src/services/bootstrap/service"),
-	import("../src/services/bootstrap/manifest"),
+	import("../src/services/bootstrap/data"),
 	import("../src/services/config"),
 	import("../src/services/database"),
 	import("../src/services/database/schema"),

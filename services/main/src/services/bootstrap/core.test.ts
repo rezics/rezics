@@ -5,7 +5,7 @@ import {
 	parsePlatformCredentialRotationCommand,
 	parsePlatformInstallCommandOptions,
 } from "./command-options";
-import { BootstrapAccountIds, BootstrapAuthUserIds, BootstrapUnitIds } from "./manifest";
+import { BootstrapAccountIds, BootstrapAuthUserIds, BootstrapUnitIds } from "./data";
 
 const allIdentityIds = new Set([
 	...BootstrapUnitIds,

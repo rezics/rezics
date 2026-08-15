@@ -2,7 +2,7 @@ import { inArray } from "drizzle-orm";
 
 import { database, type DatabaseExecutor } from "../database";
 import { accounts, unit, users } from "../database/schema";
-import { BootstrapAccountIds, BootstrapAuthUserIds, BootstrapUnitIds } from "./manifest";
+import { BootstrapAccountIds, BootstrapAuthUserIds, BootstrapUnitIds } from "./data";
 
 export const PlatformInstallationLockName = "rezics-platform-installation";
 

@@ -1,7 +1,7 @@
 import { initializeObservability } from "@rezics/observability";
 import { Client } from "pg";
 
-import { OfficialProfileIds } from "../src/services/bootstrap/manifest";
+import { OfficialProfileIds } from "../src/services/bootstrap/data";
 import { RezicsVersion } from "../src/version";
 import {
 	parseScaleSeedOptions,

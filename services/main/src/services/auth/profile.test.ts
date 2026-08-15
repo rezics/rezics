@@ -46,7 +46,7 @@ vi.mock("../collections/favorites", () => ({
 	ensureFavoritesInTransaction,
 }));
 
-import { OfficialRealmManifest, OfficialZoneManifest } from "../bootstrap/manifest";
+import { OfficialRealmManifest, OfficialZoneManifest } from "../bootstrap/data";
 import {
 	profilePreference,
 	realmMember,

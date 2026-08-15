@@ -2,7 +2,7 @@ import { OfficialRealmUnitIds } from "@rezics/slug";
 
 import { recordAuditEvent } from "../../audit";
 import { assertPlatformCoreReady, inspectPlatformCore } from "../../bootstrap/core";
-import { OfficialProfileIds } from "../../bootstrap/manifest";
+import { OfficialProfileIds } from "../../bootstrap/data";
 import { env } from "../../config";
 import { database, type DatabaseTransaction } from "../../database";
 import { publishRealmRuleRevision } from "../../realms/rule-publication";

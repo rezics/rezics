@@ -23,7 +23,7 @@ import {
 	OfficialProfileIds,
 	OfficialRealmManifest,
 	TopLevelSlugNamespaceUnitIds,
-} from "../bootstrap/manifest";
+} from "../bootstrap/data";
 import { assertPlatformCoreReady, inspectPlatformCore } from "../bootstrap/core";
 import { ApiPermissionValues, toApiKeyPermissions } from "../auth/api-permissions";
 import { database, type DatabaseTransaction } from "../database";

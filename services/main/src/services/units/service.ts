@@ -11,7 +11,7 @@ import {
 } from "@rezics/license";
 
 import type { Authorization } from "../authorization";
-import { OfficialProfileIds } from "../bootstrap/manifest";
+import { OfficialProfileIds } from "../bootstrap/data";
 import {
 	createProfileOwnedUnitAccess,
 	createPublicEditableUnitAccess,

@@ -3,7 +3,7 @@ import { and, asc, eq, notInArray } from "drizzle-orm";
 import type { DatabaseTransaction } from "../database";
 import { profile, unitFollow } from "../database/schema";
 import { fractionalPositionBetween } from "../ordering/position";
-import { OfficialZoneManifest } from "./manifest";
+import { OfficialZoneManifest } from "./data";
 
 function officialPositionsBefore(rightBoundary: string | null): string[] {
 	const positions = new Array<string>(OfficialZoneManifest.length);

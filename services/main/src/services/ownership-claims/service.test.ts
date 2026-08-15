@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { OfficialProfileIds } from "../bootstrap/manifest";
+import { OfficialProfileIds } from "../bootstrap/data";
 import { isUnitOwnershipClaimEligible, unitOwnershipClaimState } from "./service";
 
 describe("Unit ownership claim policy", () => {
