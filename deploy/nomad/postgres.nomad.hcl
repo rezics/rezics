@@ -2,6 +2,11 @@ variable "postgres_image" {
   type = string
 }
 
+variable "postgres_bind_address" {
+  type    = string
+  default = "10.64.0.2"
+}
+
 job "rezics-postgres" {
   namespace   = "rezics-infrastructure"
   datacenters = ["dc1"]
@@ -9,6 +14,12 @@ job "rezics-postgres" {
 
   group "postgres" {
     count = 1
+
+    constraint {
+      attribute = "${meta.role}"
+      operator  = "="
+      value     = "data"
+    }
 
     update {
       max_parallel      = 1
@@ -31,7 +42,7 @@ job "rezics-postgres" {
 
       port "postgres" {
         static       = 5432
-        host_network = "loopback"
+        host_network = "wireguard"
       }
     }
 
@@ -50,22 +61,22 @@ job "rezics-postgres" {
         network_mode = "host"
         ports        = ["postgres"]
         args = [
-          "-c", "listen_addresses=127.0.0.1",
+          "-c", "listen_addresses=${var.postgres_bind_address}",
           "-c", "wal_level=replica",
           "-c", "max_replication_slots=0",
           "-c", "max_wal_senders=10",
-          "-c", "max_wal_size=8GB",
-          "-c", "min_wal_size=2GB",
-          "-c", "max_connections=100",
-          "-c", "shared_buffers=2GB",
-          "-c", "effective_cache_size=6GB",
+          "-c", "max_wal_size=16GB",
+          "-c", "min_wal_size=4GB",
+          "-c", "max_connections=120",
+          "-c", "shared_buffers=12GB",
+          "-c", "effective_cache_size=36GB",
           "-c", "work_mem=8MB",
-          "-c", "maintenance_work_mem=512MB",
+          "-c", "maintenance_work_mem=1GB",
           "-c", "autovacuum_work_mem=512MB",
-          "-c", "max_worker_processes=12",
-          "-c", "max_parallel_workers=8",
-          "-c", "max_parallel_workers_per_gather=2",
-          "-c", "max_parallel_maintenance_workers=2",
+          "-c", "max_worker_processes=16",
+          "-c", "max_parallel_workers=12",
+          "-c", "max_parallel_workers_per_gather=4",
+          "-c", "max_parallel_maintenance_workers=4",
           "-c", "shared_preload_libraries=pg_stat_statements,pgroonga_wal_resource_manager,pgroonga_crash_safer",
           "-c", "pgroonga.enable_wal_resource_manager=on",
           "-c", "pgroonga.enable_wal=off",
@@ -122,8 +133,9 @@ job "rezics-postgres" {
       shutdown_delay = "5s"
 
       resources {
-        cpu    = 4000
-        memory = 8192
+        cpu        = 24000
+        memory     = 24576
+        memory_max = 45056
       }
     }
   }

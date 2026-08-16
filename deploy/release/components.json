@@ -1,6 +1,6 @@
 {
 	"schemaVersion": 1,
-	"maintenanceCutovers": ["v1.3.0", "v1.4.0", "v1.6.0"],
+	"maintenanceCutovers": ["v1.3.0", "v1.4.0", "v1.6.0", "v1.7.0"],
 	"components": {
 		"database": {
 			"order": 10,

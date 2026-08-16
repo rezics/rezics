@@ -10,6 +10,12 @@ job "rezics-databasus" {
   group "databasus" {
     count = 1
 
+    constraint {
+      attribute = "${meta.role}"
+      operator  = "="
+      value     = "data"
+    }
+
     update {
       max_parallel      = 1
       health_check      = "checks"
@@ -88,8 +94,9 @@ job "rezics-databasus" {
       shutdown_delay = "5s"
 
       resources {
-        cpu    = 1000
-        memory = 1536
+        cpu        = 2300
+        memory     = 512
+        memory_max = 2048
       }
     }
   }

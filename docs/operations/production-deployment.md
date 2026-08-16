@@ -78,7 +78,7 @@ The dependency order is:
 
 1. rootless builder exports Docker image archives for changed database, API, and worker
    targets;
-2. controller imports those archives into the loopback registry and resolves
+2. controller imports those archives into the internal WireGuard registry and resolves
    immutable digest references;
 3. for a release listed in `maintenanceCutovers`, the fixed maintenance job
    verifies the low-priority HTTP 503 fallback and stops worker then API;
@@ -117,7 +117,7 @@ The controller executes only its separate root-owned source copy.
 
 API and worker rollouts use pre-registered deploy jobs. Their constrained tasks
 run as `rezics-deploy`, reject anything except the matching
-`127.0.0.1:5000/rezics-<component>@sha256:<digest>` form, and can apply only the
+`${REZICS_REGISTRY:-10.64.0.1:5000}/rezics-<component>@sha256:<digest>` form, and can apply only the
 fixed jobspecs installed by NixOS. The production deploy token is never mounted
 in an application or build container.
 
@@ -248,7 +248,7 @@ its long-lived client token whose sole policy is `scale` in the `rezics`
 namespace. The Nomad client reserves 2,000 MHz and 2 GiB for the host and
 control-plane services. Verify the autoscaler health endpoint on
 `127.0.0.1:15001`, the gateway health endpoint,
-rootless Docker daemon, loopback registry, Nomad client drivers, and Outline
+rootless Docker daemon, internal registry, Nomad client drivers, and Outline
 allocation before dispatching the application release. When upgrading an
 installation that still has the retired `rezics-release-web` parent, first
 verify that no Web child allocation is running, then deregister that parent,

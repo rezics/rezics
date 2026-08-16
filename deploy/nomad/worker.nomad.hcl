@@ -19,6 +19,12 @@ job "rezics-worker" {
   group "worker" {
     count = 1
 
+    constraint {
+      attribute = "${meta.role}"
+      operator  = "="
+      value     = "edge"
+    }
+
     update {
       canary            = 1
       max_parallel      = 1
@@ -113,8 +119,9 @@ job "rezics-worker" {
       shutdown_delay = "5s"
 
       resources {
-        cpu    = 1500
-        memory = 2048
+        cpu        = 2300
+        memory     = 512
+        memory_max = 2048
       }
     }
   }

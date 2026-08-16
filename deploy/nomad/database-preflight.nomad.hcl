@@ -19,6 +19,12 @@ job "rezics-database-preflight" {
   group "database" {
     count = 1
 
+    constraint {
+      attribute = "${meta.role}"
+      operator  = "="
+      value     = "data"
+    }
+
     restart {
       attempts = 0
       mode     = "fail"
@@ -66,8 +72,9 @@ job "rezics-database-preflight" {
       kill_timeout = "2m"
 
       resources {
-        cpu    = 1000
-        memory = 1536
+        cpu        = 1000
+        memory     = 768
+        memory_max = 1536
       }
     }
   }

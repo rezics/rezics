@@ -21,9 +21,9 @@ done
 for setting in \
 	'"-c", "wal_level=replica"' \
 	'"-c", "max_replication_slots=0"' \
-	'"-c", "max_wal_size=8GB"' \
-	'"-c", "min_wal_size=2GB"' \
-	'"-c", "max_worker_processes=12"'; do
+	'"-c", "max_wal_size=16GB"' \
+	'"-c", "min_wal_size=4GB"' \
+	'"-c", "max_worker_processes=16"'; do
 	if ! grep -Fq "${setting}" deploy/nomad/postgres.nomad.hcl; then
 		printf 'Production PostgreSQL is missing the no-logical-CDC contract: %s\n' "${setting}" >&2
 		exit 1

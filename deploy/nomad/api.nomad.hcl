@@ -19,6 +19,12 @@ job "rezics-api" {
   group "api" {
     count = 4
 
+    constraint {
+      attribute = "${meta.role}"
+      operator  = "="
+      value     = "edge"
+    }
+
     scaling {
       enabled = true
       min     = 4
@@ -147,8 +153,9 @@ job "rezics-api" {
       shutdown_delay = "10s"
 
       resources {
-        cpu    = 1800
-        memory = 1536
+        cpu        = 1500
+        memory     = 512
+        memory_max = 1536
       }
     }
   }

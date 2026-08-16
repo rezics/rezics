@@ -1,6 +1,6 @@
 {
 	"openapi": "3.2.0",
-	"info": { "title": "REZICS API", "version": "1.6.0" },
+	"info": { "title": "REZICS API", "version": "1.7.0" },
 	"components": {
 		"schemas": {
 			"JsonValue": {

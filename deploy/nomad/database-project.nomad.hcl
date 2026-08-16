@@ -19,6 +19,12 @@ job "rezics-database-project" {
   group "database" {
     count = 1
 
+    constraint {
+      attribute = "${meta.role}"
+      operator  = "="
+      value     = "data"
+    }
+
     restart {
       attempts = 0
       mode     = "fail"
@@ -66,8 +72,9 @@ job "rezics-database-project" {
       kill_timeout = "2m"
 
       resources {
-        cpu    = 1500
-        memory = 2048
+        cpu        = 1500
+        memory     = 1024
+        memory_max = 2048
       }
     }
   }

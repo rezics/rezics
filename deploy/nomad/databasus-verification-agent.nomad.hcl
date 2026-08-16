@@ -14,6 +14,12 @@ job "rezics-databasus-verification-agent" {
   group "verification-agent" {
     count = 1
 
+    constraint {
+      attribute = "${meta.role}"
+      operator  = "="
+      value     = "data"
+    }
+
     restart {
       attempts = 10
       interval = "30m"
@@ -73,8 +79,9 @@ job "rezics-databasus-verification-agent" {
       kill_timeout = "10m"
 
       resources {
-        cpu    = 2500
-        memory = 4608
+        cpu        = 500
+        memory     = 512
+        memory_max = 1024
       }
     }
   }
