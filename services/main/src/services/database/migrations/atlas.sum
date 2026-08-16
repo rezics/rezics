@@ -1,4 +1,4 @@
-h1:mOFgOAaN2yKCNxOt3zQlXpj2wIAYTCghq2wIakK3Z5w=
+h1:+086ltA/wQQMJx88/VauioV7W7EL1ryMcKer63LqFtc=
 20260801000000_v1_baseline.sql h1:RkSyDwLRpFOPI7iqWg+WlFc5TAshnB4gsRkBpsTMjGY=
 20260807000000_search_ordered_candidates.sql h1:rPOS8iAdRmWOfc9lpyCNNsFWjduRV1e27Q1Mc1QpTFc=
 20260807000001_backfill_search_best_score.sql h1:lmLn+kpWiNWEPlk40W4QRIGsqpWezY//UsNaaZ8FToc=
@@ -22,5 +22,5 @@ h1:mOFgOAaN2yKCNxOt3zQlXpj2wIAYTCghq2wIakK3Z5w=
 20260811190002_governance_decision_reference_indexes.sql h1:CQkjrNwjnRWWPbG1ftk6ROcEMf1jRFxEVxkU18fuiG0=
 20260815000000_search_query_expansion.sql h1:UdNPN3LQCkVmDXSav71Vhu0QmVAUtZUacSWvpYe6f/Y=
 20260815092138_revision_primary_contribution.sql h1:TzxqiujD6HEx4bWCSncgQiu4u4/nRBopH01rRNj6aao=
-20260815145202_book_chapter_draft_jobs.sql h1:Y++0piP59dk26/BpInccUky6v8cV2x98MNW757G/Io0=
-20260815145203_book_chapter_draft_node_index.sql h1:Lr0py0WMNG61GcKqI+zl7SgAaMucm/VekYFiTGxekCc=
+20260815145202_book_chapter_draft_jobs.sql h1:ZDQxb3/bRWs9Z2QzsrWr33ZIT1Bvmj3u68BjQS8qVlI=
+20260815145203_book_chapter_draft_node_index.sql h1:YCocKqGANX/ZMPYLjPeHxCjv1b5a0chXdbsl/7VlLv0=

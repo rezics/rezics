@@ -1,3 +1,5 @@
+SET LOCAL search_path = public;
+
 -- Create enum type "book_chapter_draft_job_state"
 CREATE TYPE "book_chapter_draft_job_state" AS ENUM ('pending', 'processing', 'retry_wait', 'completed', 'cancelled', 'failed');
 -- Create "book_chapter_draft_job" table
