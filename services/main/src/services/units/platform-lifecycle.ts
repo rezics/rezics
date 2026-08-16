@@ -148,6 +148,32 @@ export async function listPlatformUnits(input: {
 	};
 }
 
+/**
+ * Loads one Unit for a platform governance deep link.
+ *
+ * @alpha
+ */
+export async function getPlatformUnit(unitId: string): Promise<PlatformUnitLifecycleItem> {
+	const [row] = await database
+		.select({
+			id: unit.id,
+			kind: unit.kind,
+			title: firstUnitLocalizationTitle(unit.id),
+			status: unit.status,
+			ownerProfileId: activeOwnerProfileId(unit.id),
+			deletedAt: unit.deletedAt,
+			updatedAt: unit.updatedAt,
+		})
+		.from(unit)
+		.where(eq(unit.id, unitId))
+		.limit(1);
+	if (!row) throw new UnitNotFound();
+
+	const [item] = await presentPlatformUnits(database, [row]);
+	if (!item) throw new UnitNotFound();
+	return item;
+}
+
 async function lockPlatformUnit(tx: DatabaseTransaction, unitId: string) {
 	const [record] = await tx
 		.select({

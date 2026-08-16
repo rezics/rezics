@@ -147,6 +147,8 @@ import type {
 	DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdResponses,
 	GetApiGovernancePlatformUnitsOptions,
 	GetApiGovernancePlatformUnitsResponses,
+	GetApiGovernancePlatformUnitsByUnitIdOptions,
+	GetApiGovernancePlatformUnitsByUnitIdResponses,
 	GetApiGovernancePlatformUnitsByUnitIdOwnershipCandidatesOptions,
 	GetApiGovernancePlatformUnitsByUnitIdOwnershipCandidatesResponses,
 	PostApiGovernancePlatformUnitsByUnitIdOwnershipOverrideOptions,
@@ -2090,6 +2092,23 @@ export function getApiGovernancePlatformUnits<ThrowOnError extends boolean = tru
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<RequestResult<GetApiGovernancePlatformUnitsResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Get one Unit for platform lifecycle administration
+ * {@link /api/v1/governance/platform/units/:unitId}
+ */
+export function getApiGovernancePlatformUnitsByUnitId<ThrowOnError extends boolean = true>(
+	options: Options<GetApiGovernancePlatformUnitsByUnitIdOptions, ThrowOnError>,
+): Promise<RequestResult<GetApiGovernancePlatformUnitsByUnitIdResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/v1/governance/platform/units/{unitId}",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<RequestResult<GetApiGovernancePlatformUnitsByUnitIdResponses, ThrowOnError>>;
 }
 
 /**

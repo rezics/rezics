@@ -465,6 +465,12 @@ import type {
 	GetApiGovernancePlatformUnitsStatus403,
 	GetApiGovernancePlatformUnitsStatus422,
 	GetApiGovernancePlatformUnitsStatus500,
+	GetApiGovernancePlatformUnitsByUnitIdOptions,
+	GetApiGovernancePlatformUnitsByUnitIdStatus200,
+	GetApiGovernancePlatformUnitsByUnitIdStatus403,
+	GetApiGovernancePlatformUnitsByUnitIdStatus404,
+	GetApiGovernancePlatformUnitsByUnitIdStatus422,
+	GetApiGovernancePlatformUnitsByUnitIdStatus500,
 	GetApiGovernancePlatformUnitsByUnitIdOwnershipCandidatesOptions,
 	GetApiGovernancePlatformUnitsByUnitIdOwnershipCandidatesStatus200,
 	GetApiGovernancePlatformUnitsByUnitIdOwnershipCandidatesStatus403,
@@ -2667,6 +2673,7 @@ import {
 	postApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDecline,
 	deleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationId,
 	getApiGovernancePlatformUnits,
+	getApiGovernancePlatformUnitsByUnitId,
 	getApiGovernancePlatformUnitsByUnitIdOwnershipCandidates,
 	postApiGovernancePlatformUnitsByUnitIdOwnershipOverride,
 	postApiGovernancePlatformUnitsByUnitIdDelete,
@@ -10050,6 +10057,106 @@ export function useGetApiGovernancePlatformUnits<
 			| GetApiGovernancePlatformUnitsStatus403
 			| GetApiGovernancePlatformUnitsStatus422
 			| GetApiGovernancePlatformUnitsStatus500
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const getApiGovernancePlatformUnitsByUnitIdQueryKey = ({
+	path,
+}: Omit<GetApiGovernancePlatformUnitsByUnitIdOptions, "headers">) =>
+	[{ url: "/api/v1/governance/platform/units/:unitId", params: path }] as const;
+
+type GetApiGovernancePlatformUnitsByUnitIdQueryKey = ReturnType<
+	typeof getApiGovernancePlatformUnitsByUnitIdQueryKey
+>;
+
+export function getApiGovernancePlatformUnitsByUnitIdQueryOptions(
+	{ path }: GetApiGovernancePlatformUnitsByUnitIdOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = getApiGovernancePlatformUnitsByUnitIdQueryKey({ path });
+	return queryOptions<
+		GetApiGovernancePlatformUnitsByUnitIdStatus200,
+		ResponseErrorConfig<
+			| GetApiGovernancePlatformUnitsByUnitIdStatus403
+			| GetApiGovernancePlatformUnitsByUnitIdStatus404
+			| GetApiGovernancePlatformUnitsByUnitIdStatus422
+			| GetApiGovernancePlatformUnitsByUnitIdStatus500
+		>,
+		GetApiGovernancePlatformUnitsByUnitIdStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			const { data } = await getApiGovernancePlatformUnitsByUnitId({
+				...config,
+				path,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Get one Unit for platform lifecycle administration
+ * {@link /api/v1/governance/platform/units/:unitId}
+ */
+export function useGetApiGovernancePlatformUnitsByUnitId<
+	TData = GetApiGovernancePlatformUnitsByUnitIdStatus200,
+	TQueryData = GetApiGovernancePlatformUnitsByUnitIdStatus200,
+	TQueryKey extends QueryKey = GetApiGovernancePlatformUnitsByUnitIdQueryKey,
+>(
+	{
+		path,
+	}: {
+		path:
+			| GetApiGovernancePlatformUnitsByUnitIdOptions["path"]
+			| (() => GetApiGovernancePlatformUnitsByUnitIdOptions["path"]);
+	},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				GetApiGovernancePlatformUnitsByUnitIdStatus200,
+				ResponseErrorConfig<
+					| GetApiGovernancePlatformUnitsByUnitIdStatus403
+					| GetApiGovernancePlatformUnitsByUnitIdStatus404
+					| GetApiGovernancePlatformUnitsByUnitIdStatus422
+					| GetApiGovernancePlatformUnitsByUnitIdStatus500
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = { path: typeof path === "function" ? path() : path };
+	const queryKey =
+		resolvedOptions?.queryKey ?? getApiGovernancePlatformUnitsByUnitIdQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...getApiGovernancePlatformUnitsByUnitIdQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			| GetApiGovernancePlatformUnitsByUnitIdStatus403
+			| GetApiGovernancePlatformUnitsByUnitIdStatus404
+			| GetApiGovernancePlatformUnitsByUnitIdStatus422
+			| GetApiGovernancePlatformUnitsByUnitIdStatus500
 		>
 	> & { queryKey: TQueryKey };
 

@@ -157,6 +157,25 @@ describe("API root", () => {
 		expect(document.paths["/api/v1/slug-addresses/profile"]).toBeUndefined();
 	});
 
+	it("documents an exact, session-only Unit governance lookup", () => {
+		const operation = toOpenAPISchema(api).paths["/api/v1/governance/platform/units/{unitId}"]?.get;
+
+		expect(operation?.security).toEqual([{ SessionCookie: [] }]);
+		expect(operation?.responses?.[StatusCodes.FORBIDDEN]).toBeDefined();
+		expect(operation?.responses?.[StatusCodes.NOT_FOUND]).toBeDefined();
+	});
+
+	it("requires an interactive session before loading a platform Unit", async () => {
+		const response = await api.handle(
+			new Request(
+				"http://localhost/api/v1/governance/platform/units/0195c49b-8f3b-7e18-8c45-c2f36ee8d337",
+			),
+		);
+
+		expect(response.status).toBe(StatusCodes.UNAUTHORIZED);
+		expect((await readErrorBody(response)).error.code).toBe("InteractiveSessionRequired");
+	});
+
 	it("allows API-token credentials on Unit reference proposal and vote routes", () => {
 		const document = toOpenAPISchema(api);
 		const operations = [

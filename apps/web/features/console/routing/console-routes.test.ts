@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { consoleSectionHref, parseConsoleSection } from "./console-routes";
+import { consoleSectionHref, consoleUnitHref, parseConsoleSection } from "./console-routes";
 
 describe("console routes", () => {
 	it("builds section routes", () => {
@@ -11,6 +11,12 @@ describe("console routes", () => {
 		expect(consoleSectionHref("moderation")).toBe("/console/moderation");
 		expect(consoleSectionHref("audit")).toBe("/console/audit");
 		expect(consoleSectionHref("api-quotas")).toBe("/console/api-quotas");
+	});
+
+	it("builds exact Unit governance routes", () => {
+		expect(consoleUnitHref("019f9872-bd49-7bb4-a6b7-ec621fca2032")).toBe(
+			"/console/units/019f9872-bd49-7bb4-a6b7-ec621fca2032",
+		);
 	});
 
 	it.each([

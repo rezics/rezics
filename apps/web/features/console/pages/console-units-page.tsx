@@ -4,11 +4,14 @@ import {
 	GetApiGovernancePlatformUnitsState,
 	getApiGovernancePlatformUnits,
 	getApiGovernancePlatformUnitsQueryKey,
+	getApiGovernancePlatformUnitsByUnitIdQueryKey,
 	getApiGovernancePlatformUnitsByUnitIdOwnershipCandidates,
 	getApiGovernancePlatformUnitsByUnitIdOwnershipCandidatesQueryKey,
+	type GetApiGovernancePlatformUnitsByUnitIdStatus200,
 	type GetApiGovernancePlatformUnitsByUnitIdOwnershipCandidatesStatus200,
 	type GetApiGovernancePlatformUnitsState as UnitListState,
 	type GetApiGovernancePlatformUnitsStatus200,
+	useGetApiGovernancePlatformUnitsByUnitId,
 	usePostApiGovernancePlatformUnitsByUnitIdDelete,
 	usePostApiGovernancePlatformUnitsByUnitIdOwnershipOverride,
 	usePostApiGovernancePlatformUnitsByUnitIdRestore,
@@ -44,14 +47,16 @@ import { GovernanceRulePicker } from "@/features/governance/components/governanc
 import type { GovernanceRuleReference } from "@/features/governance/model/governance-rule-selection";
 import { useConsoleWorkspace } from "../components/console-workspace";
 
-type PlatformUnit = GetApiGovernancePlatformUnitsStatus200["items"][number];
+type PlatformUnit =
+	| GetApiGovernancePlatformUnitsStatus200["items"][number]
+	| GetApiGovernancePlatformUnitsByUnitIdStatus200;
 type OwnershipCandidate =
 	GetApiGovernancePlatformUnitsByUnitIdOwnershipCandidatesStatus200["items"][number];
 type LifecycleCommand = "delete" | "restore";
 
 const UnitListStates = Object.values(GetApiGovernancePlatformUnitsState);
 
-export function ConsoleUnitsPage() {
+export function ConsoleUnitsPage({ initialUnitId }: { readonly initialUnitId?: string } = {}) {
 	const searchParams = useSearchParams();
 	const { locale, t } = useTranslation(["console", "errors", "governance"]);
 	const {
@@ -65,7 +70,7 @@ export function ConsoleUnitsPage() {
 	const [search, setSearch] = useState(() => searchParams.get("query")?.trim() ?? "");
 	const deferredSearch = useDeferredValue(search.trim());
 	const [state, setState] = useState<UnitListState>("active");
-	const [selectedUnitId, setSelectedUnitId] = useState("");
+	const [selectedUnitId, setSelectedUnitId] = useState(initialUnitId ?? "");
 	const [command, setCommand] = useState<LifecycleCommand | null>(null);
 	const [rules, setRules] = useState<GovernanceRuleReference[]>([]);
 	const [note, setNote] = useState("");
@@ -92,8 +97,16 @@ export function ConsoleUnitsPage() {
 		getNextPageParam: (page) => page.nextCursor ?? undefined,
 		enabled: canReadUnits,
 	});
+	const directUnit = useGetApiGovernancePlatformUnitsByUnitId(
+		{ path: { unitId: initialUnitId ?? "" } },
+		{ query: { enabled: Boolean(initialUnitId) && canReadUnits } },
+	);
 	const items = units.data?.pages.flatMap((page) => page.items) ?? [];
-	const selected = items.find((item) => item.id === selectedUnitId) ?? items[0];
+	const selectedFromList = items.find((item) => item.id === selectedUnitId);
+	const selected =
+		(initialUnitId && selectedUnitId === initialUnitId ? directUnit.data : undefined) ??
+		selectedFromList ??
+		(initialUnitId ? undefined : items[0]);
 	const scrollRef = useRef<HTMLDivElement>(null);
 	const virtualizer = useVirtualizer({
 		count: items.length,
@@ -124,6 +137,9 @@ export function ConsoleUnitsPage() {
 	const mutationError = command === "restore" ? restore.error : remove.error;
 
 	if (!canReadUnits) return <p className="text-destructive text-sm">{t.errors.forbidden}</p>;
+	if (initialUnitId && !selectedFromList && directUnit.isPending) return <QueryPending />;
+	if (initialUnitId && !selectedFromList && directUnit.isError)
+		return <QueryFailure error={directUnit.error} retry={() => void directUnit.refetch()} />;
 	if (units.isPending) return <QueryPending />;
 	if (units.isError) return <QueryFailure error={units.error} retry={() => void units.refetch()} />;
 
@@ -158,9 +174,16 @@ export function ConsoleUnitsPage() {
 					},
 				});
 			}
-			await queryClient.invalidateQueries({
-				queryKey: getApiGovernancePlatformUnitsQueryKey({ query: baseQuery }),
-			});
+			await Promise.all([
+				queryClient.invalidateQueries({
+					queryKey: getApiGovernancePlatformUnitsQueryKey({ query: baseQuery }),
+				}),
+				queryClient.invalidateQueries({
+					queryKey: getApiGovernancePlatformUnitsByUnitIdQueryKey({
+						path: { unitId: selected.id },
+					}),
+				}),
+			]);
 			setCommand(null);
 		} catch {
 			// The typed mutation state renders the request failure below.
@@ -482,6 +505,11 @@ function OwnershipOverrideControl({ item }: { readonly item: PlatformUnit }) {
 			});
 			await queryClient.invalidateQueries({
 				queryKey: getApiGovernancePlatformUnitsQueryKey(),
+			});
+			await queryClient.invalidateQueries({
+				queryKey: getApiGovernancePlatformUnitsByUnitIdQueryKey({
+					path: { unitId: item.id },
+				}),
 			});
 			setStep(null);
 		} catch {

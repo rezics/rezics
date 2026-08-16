@@ -3,6 +3,7 @@ import Elysia from "elysia";
 
 import session from "../../auth/session";
 import {
+	getPlatformUnit,
 	listPlatformUnits,
 	restorePlatformUnit,
 	softDeletePlatformUnit,
@@ -51,6 +52,26 @@ export default new Elysia({ prefix: "/platform/units" })
 			},
 			detail: {
 				summary: "List Units for platform lifecycle administration",
+				tags: ["Governance"],
+			},
+		},
+	)
+	.get(
+		"/:unitId",
+		async ({ authorization, params }) => {
+			await authorization.platform.ensureCapability("unit.governance.read");
+			return getPlatformUnit(params.unitId);
+		},
+		{
+			access: "session-only",
+			params: UnitGovernanceParams,
+			response: {
+				[StatusCodes.OK]: PlatformUnitLifecycleResponse,
+				[StatusCodes.FORBIDDEN]: toApiErrorResponse(["PlatformCapabilityRequired"]),
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
+			},
+			detail: {
+				summary: "Get one Unit for platform lifecycle administration",
 				tags: ["Governance"],
 			},
 		},

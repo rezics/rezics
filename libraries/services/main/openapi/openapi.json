@@ -61841,6 +61841,174 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
+		"/api/v1/governance/platform/units/{unitId}": {
+			"get": {
+				"summary": "Get one Unit for platform lifecycle administration",
+				"tags": ["Governance"],
+				"security": [{ "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "unitId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": [
+										"id",
+										"kind",
+										"title",
+										"status",
+										"owner",
+										"deletedAt",
+										"updatedAt",
+										"protected"
+									],
+									"properties": {
+										"id": { "format": "uuid", "type": "string" },
+										"kind": {
+											"default": "slug_namespace",
+											"type": "string",
+											"enum": [
+												"slug_namespace",
+												"profile",
+												"book",
+												"software",
+												"media",
+												"video",
+												"audio",
+												"release",
+												"entity",
+												"label",
+												"tag",
+												"structure",
+												"series",
+												"zone",
+												"zone_page",
+												"collection",
+												"post",
+												"poll",
+												"realm",
+												"realm_rule"
+											]
+										},
+										"title": {
+											"nullable": true,
+											"anyOf": [{ "type": "string" }, { "type": "null" }]
+										},
+										"status": {
+											"default": "draft",
+											"type": "string",
+											"enum": ["draft", "published", "archived"]
+										},
+										"owner": {
+											"nullable": true,
+											"anyOf": [
+												{
+													"type": "object",
+													"required": ["profileId", "label"],
+													"properties": {
+														"profileId": { "format": "uuid", "type": "string" },
+														"label": {
+															"nullable": true,
+															"anyOf": [{ "type": "string" }, { "type": "null" }]
+														}
+													}
+												},
+												{ "type": "null" }
+											]
+										},
+										"deletedAt": {
+											"nullable": true,
+											"anyOf": [{ "format": "date-time", "type": "string" }, { "type": "null" }]
+										},
+										"updatedAt": { "format": "date-time", "type": "string" },
+										"protected": { "type": "boolean" }
+									}
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "PlatformCapabilityRequired",
+													"type": "string",
+													"enum": ["PlatformCapabilityRequired"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitNotFound",
+													"type": "string",
+													"enum": ["UnitNotFound"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/ValidationError" } }
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/InternalError" } }
+						}
+					}
+				},
+				"operationId": "getApiGovernancePlatformUnitsByUnitId",
+				"x-rezics-quota-route-operation-id": "getApiGovernancePlatformUnitsByUnitId",
+				"x-rezics-quota-operation-id": "*",
+				"x-rezics-quota-cost-units": 1
+			}
+		},
 		"/api/v1/governance/platform/units/{unitId}/ownership-candidates": {
 			"get": {
 				"summary": "Search platform Unit ownership override recipients",

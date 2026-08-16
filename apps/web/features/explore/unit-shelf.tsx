@@ -13,6 +13,7 @@ import { Button, Menu, MenuContent, MenuItem, MenuTrigger, Skeleton, UnitCard } 
 import { recommendationReasonLabel } from "@/features/recommendations/reason";
 import { invalidateRecommendationQueries } from "@/features/recommendations/query";
 import { useRecommendationTracking } from "@/features/recommendations/tracking";
+import { PlatformUnitGovernanceMenuItem } from "@/features/governance/components/platform-unit-governance-menu-item";
 import { useTranslation } from "@/i18n/client";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
@@ -148,6 +149,7 @@ function UnitRecommendationCard({
 							<EyeOff aria-hidden />
 							{t.feed.notInterested}
 						</MenuItem>
+						<PlatformUnitGovernanceMenuItem unitId={item.id} />
 					</MenuContent>
 				</Menu>
 			) : null}

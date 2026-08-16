@@ -2,7 +2,6 @@
 
 import {
 	getApiReportsMeQueryKey,
-	useGetApiUsersMe,
 	useGetApiReportsUnitsByUnitIdDestinations,
 	usePostApiReportsUnitsByUnitId,
 } from "@rezics/openapi-tanstack-query";
@@ -23,12 +22,13 @@ import {
 	Textarea,
 	toast,
 } from "@rezics/ui";
-import { EllipsisIcon, FlagIcon, ShieldCheck } from "lucide-react";
+import { EllipsisIcon, FlagIcon } from "lucide-react";
 import { useState, type FormEvent, type ReactNode } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 
 import { useAuthPortal } from "@/features/auth/auth-portal-context";
 import { useApplicationRouter } from "@/features/application-shell/hooks/use-application-router";
+import { PlatformUnitGovernanceMenuItem } from "@/features/governance/components/platform-unit-governance-menu-item";
 import {
 	getGovernanceRuleSource,
 	getGovernanceRuleKeys,
@@ -44,7 +44,6 @@ import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
-import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import { MyReportsHref } from "../routing/report-routes";
 
 export type UnitReportTarget = Readonly<{
@@ -295,26 +294,12 @@ export function UnitReportOverflowMenu({
 				</MenuTrigger>
 				<MenuContent>
 					{additionalItems}
-					{session ? <PlatformUnitGovernanceMenuItem unitId={unitId} /> : null}
 					<UnitReportMenuItem onSelect={requestReport} />
+					{session ? <PlatformUnitGovernanceMenuItem unitId={unitId} /> : null}
 				</MenuContent>
 			</Menu>
 			<UnitReportDialog onOpenChange={setOpen} open={open} realmId={realmId} unitId={unitId} />
 		</>
-	);
-}
-
-function PlatformUnitGovernanceMenuItem({ unitId }: { readonly unitId: string }) {
-	const { t } = useTranslation(["governance"]);
-	const me = useGetApiUsersMe();
-	if (!me.data?.platformCapabilities.includes("unit.governance.read")) return null;
-	return (
-		<MenuItem asChild value="platform-unit-governance">
-			<Link href={`/console/units?query=${encodeURIComponent(unitId)}`}>
-				<ShieldCheck aria-hidden />
-				{t.governance.platformOpen}
-			</Link>
-		</MenuItem>
 	);
 }
 

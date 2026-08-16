@@ -39972,6 +39972,195 @@ export type GetApiGovernancePlatformUnitsResponse =
 /**
  * @type object
  */
+export type GetApiGovernancePlatformUnitsByUnitIdPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+};
+
+export const GetApiGovernancePlatformUnitsByUnitIdStatus200KindEnum = {
+	slug_namespace: "slug_namespace",
+	profile: "profile",
+	book: "book",
+	software: "software",
+	media: "media",
+	video: "video",
+	audio: "audio",
+	release: "release",
+	entity: "entity",
+	label: "label",
+	tag: "tag",
+	structure: "structure",
+	series: "series",
+	zone: "zone",
+	zone_page: "zone_page",
+	collection: "collection",
+	post: "post",
+	poll: "poll",
+	realm: "realm",
+	realm_rule: "realm_rule",
+} as const;
+
+export type GetApiGovernancePlatformUnitsByUnitIdStatus200KindEnum =
+	(typeof GetApiGovernancePlatformUnitsByUnitIdStatus200KindEnum)[keyof typeof GetApiGovernancePlatformUnitsByUnitIdStatus200KindEnum];
+
+export const GetApiGovernancePlatformUnitsByUnitIdStatus200StatusEnum = {
+	draft: "draft",
+	published: "published",
+	archived: "archived",
+} as const;
+
+export type GetApiGovernancePlatformUnitsByUnitIdStatus200StatusEnum =
+	(typeof GetApiGovernancePlatformUnitsByUnitIdStatus200StatusEnum)[keyof typeof GetApiGovernancePlatformUnitsByUnitIdStatus200StatusEnum];
+
+/**
+ * @type object
+ */
+export type GetApiGovernancePlatformUnitsByUnitIdStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	id: string;
+	/**
+	 * @default 'slug_namespace'
+	 * @type string
+	 */
+	kind: GetApiGovernancePlatformUnitsByUnitIdStatus200KindEnum;
+	title: (string | null) | null;
+	/**
+	 * @default 'draft'
+	 * @type string
+	 */
+	status: GetApiGovernancePlatformUnitsByUnitIdStatus200StatusEnum;
+	owner:
+		| ({
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				profileId: string;
+				label: (string | null) | null;
+		  } | null)
+		| null;
+	deletedAt: (string | null) | null;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	updatedAt: string;
+	/**
+	 * @type boolean
+	 */
+	protected: boolean;
+};
+
+/**
+ * @type object
+ */
+export type GetApiGovernancePlatformUnitsByUnitIdStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'PlatformCapabilityRequired'
+		 * @type string
+		 */
+		code: "PlatformCapabilityRequired";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiGovernancePlatformUnitsByUnitIdStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: "UnitNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiGovernancePlatformUnitsByUnitIdStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type GetApiGovernancePlatformUnitsByUnitIdStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type GetApiGovernancePlatformUnitsByUnitIdOptions = {
+	body?: never;
+	path: GetApiGovernancePlatformUnitsByUnitIdPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type GetApiGovernancePlatformUnitsByUnitIdResponses = {
+	"200": GetApiGovernancePlatformUnitsByUnitIdStatus200;
+	"403": GetApiGovernancePlatformUnitsByUnitIdStatus403;
+	"404": GetApiGovernancePlatformUnitsByUnitIdStatus404;
+	"422": GetApiGovernancePlatformUnitsByUnitIdStatus422;
+	"500": GetApiGovernancePlatformUnitsByUnitIdStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type GetApiGovernancePlatformUnitsByUnitIdResponse =
+	| GetApiGovernancePlatformUnitsByUnitIdStatus200
+	| GetApiGovernancePlatformUnitsByUnitIdStatus403
+	| GetApiGovernancePlatformUnitsByUnitIdStatus404
+	| GetApiGovernancePlatformUnitsByUnitIdStatus422
+	| GetApiGovernancePlatformUnitsByUnitIdStatus500;
+
+/**
+ * @type object
+ */
 export type GetApiGovernancePlatformUnitsByUnitIdOwnershipCandidatesPath = {
 	/**
 	 * @description

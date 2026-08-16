@@ -45,6 +45,7 @@ import {
 } from "@/features/reports/components/unit-report-dialog";
 import { CollectionPickerButton } from "@/features/collections/components/collection-picker-button";
 import { FollowButton } from "@/features/following/components/follow-button";
+import { PlatformUnitGovernanceMenuItem } from "@/features/governance/components/platform-unit-governance-menu-item";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
 import { toNonNegativeApiInteger } from "@/lib/api-number";
@@ -316,8 +317,9 @@ export function FeedOverflowMenu({
 				onNotInterested={onNotInterested}
 				onSave={openCollectionPicker}
 			>
-				{reportTarget ? <UnitReportMenuItem onSelect={openReport} /> : null}
 				{children}
+				{reportTarget ? <UnitReportMenuItem onSelect={openReport} /> : null}
+				{session ? <PlatformUnitGovernanceMenuItem unitId={itemId} /> : null}
 			</FeedOverflowMenuView>
 			<CollectionPickerButton
 				onOpenChange={setCollectionOpen}
