@@ -61,7 +61,7 @@ task dev
 
 `local:setup` is the explicit first-run/configuration workflow. It starts the
 persistent Compose infrastructure, initializes RustFS, applies migrations,
-installs the factory platform bundle when no installation exists, and verifies the
+ensures reserved platform identities when they are missing, and verifies the
 authoritative PGroonga indexes. On an installed database it verifies
 only permanent platform identities and never reconciles product-owned content.
 It is safe to rerun for a healthy unchanged database. Named volumes preserve PostgreSQL and
@@ -185,32 +185,32 @@ database, and verifies that the result matches the Drizzle schema. CI runs this
 check for every pull request and main-branch push. It is intentionally separate
 from `dev` and from the target-database `db:migrate` operation.
 
-`db:install` is the explicit first-installation workflow for an empty target
-database. It applies pending migrations, reconciles application-role
-privileges, installs the Git-versioned Bootstrap bundle, and issues the initial
-platform Profile credentials. It never creates mutable Platform Infrastructure
-such as Rule revisions. Production creates and evolves that data exclusively
-through authenticated administration APIs. Installation refuses an already
-installed or occupied database unless local setup deliberately supplies
-`--if-needed`.
+`db:install` is the first-installation workflow for a target database. It applies
+pending migrations, reconciles application-role privileges, ensures the reserved
+Bootstrap identity graph, and issues credentials only for newly created platform
+accounts. It never creates mutable Platform Infrastructure such as Rule revisions.
+Production creates and evolves that data exclusively through authenticated
+administration APIs. Ensure is safe to rerun. It refuses only an occupied
+database that has application rows and no reserved identities.
 
 `db:prepare` is the recurring pre-deploy administration workflow. It applies
-pending migrations, reconciles application-role privileges, and then performs
-a read-only verification of permanent platform Unit, Auth User, and Account
-identities. It never compares or rewrites live localization, theme, Search,
-navigation, Dock, access-policy, or other product-owned state. Core verification
-failure stops deployment for explicit operator repair. Credential rotation is
-available only through the separately confirmed
+pending migrations, reconciles application-role privileges, ensures any missing
+reserved identities (with starter content only for those new IDs), and then
+performs a read-only verification of permanent platform Unit, Auth User, and
+Account identities. It never compares or rewrites live localization, theme,
+Search, navigation, Dock, access-policy, or other product-owned state. Core
+verification failure after ensure stops deployment for explicit operator repair.
+Credential rotation is available only through the separately confirmed
 `platform:credentials:rotate` task.
 
-Bootstrap Installation, Platform Infrastructure Seed, and Fixture Seed have
-separate safety contracts. Installation copies the fixed Profiles, Realms,
-Zones, content, policies, navigation, and required media exactly once. The
-local/CI-only Platform Infrastructure Seed then supplies official Rules needed
-by disposable scenarios; production never runs it. Fixture Seed first proves
-that no non-Bootstrap data exists, then runs every infrastructure provider and
-Fixture scenario in one transaction. Each infrastructure provider inspects
-only its own domain and ignores unrelated Units.
+Bootstrap ensure, Platform Infrastructure Seed, and Fixture Seed have
+separate safety contracts. Ensure inserts reserved Profile, Realm, Zone, and
+related IDs and writes starter copy only when an identity is first created.
+The local/CI-only Platform Infrastructure Seed then supplies official Rules
+needed by disposable scenarios; production never runs it. Fixture Seed first
+proves that no non-Bootstrap data exists, then runs every infrastructure
+provider and Fixture scenario in one transaction. Each infrastructure provider
+inspects only its own domain and ignores unrelated Units.
 
 ```sh
 # Reproducible demo data without communication or governance cases.
@@ -235,8 +235,8 @@ zone-scoped lookup of each official workspace fixture.
 Production environments require one private, operator-confirmed `db:install`
 before their first application rollout. A stable application tag runs the
 database release job only when database inputs changed; that job completes
-preflight, migration, privilege reconciliation, and verification before API or
-worker rollout. Only database and maintenance jobs receive
+preflight, migration, privilege reconciliation, identity ensure, and
+verification before API or worker rollout. Only database and maintenance jobs receive
 `DATABASE_ADMIN_URL`; runtime services receive the narrower `DATABASE_URL`.
 Do not run migrations independently in every application replica.
 

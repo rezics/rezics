@@ -24,49 +24,30 @@ export async function ensureSlugNamespaces(tx: DatabaseTransaction): Promise<voi
 			.select({
 				id: unit.id,
 				kind: unit.kind,
-				status: unit.status,
-				visibility: unit.visibility,
-				deletedAt: unit.deletedAt,
 			})
 			.from(unit)
 			.where(eq(unit.id, namespace.id))
 			.limit(1);
-		assertFields(`slug namespace ${namespace.slug}`, stored, {
+		assertFields(`slug namespace ${namespace.id}`, stored, {
 			id: namespace.id,
 			kind: "slug_namespace",
-			status: "published",
-			visibility: "public",
-			deletedAt: null,
 		});
-		await tx
-			.insert(unitSlugAddress)
-			.values({
+		const [canonicalAddress] = await tx
+			.select({ id: unitSlugAddress.id })
+			.from(unitSlugAddress)
+			.where(
+				and(eq(unitSlugAddress.kind, "canonical"), eq(unitSlugAddress.targetUnitId, namespace.id)),
+			)
+			.limit(1);
+		if (!canonicalAddress)
+			await tx.insert(unitSlugAddress).values({
 				kind: "canonical",
 				scopeUnitId: null,
 				slug: namespace.slug,
 				targetUnitId: namespace.id,
 				createdAt,
 				updatedAt: createdAt,
-			})
-			.onConflictDoNothing();
-		const [storedAddress] = await tx
-			.select({
-				kind: unitSlugAddress.kind,
-				scopeUnitId: unitSlugAddress.scopeUnitId,
-				slug: unitSlugAddress.slug,
-				targetUnitId: unitSlugAddress.targetUnitId,
-			})
-			.from(unitSlugAddress)
-			.where(
-				and(eq(unitSlugAddress.kind, "canonical"), eq(unitSlugAddress.targetUnitId, namespace.id)),
-			)
-			.limit(1);
-		assertFields(`slug namespace address ${namespace.slug}`, storedAddress, {
-			kind: "canonical",
-			scopeUnitId: null,
-			slug: namespace.slug,
-			targetUnitId: namespace.id,
-		});
+			});
 		if (created)
 			await recordUnitRevision(tx, {
 				unitId: namespace.id,

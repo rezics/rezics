@@ -13,6 +13,7 @@ export function bootstrapEpoch(): Date {
 	return new Date(BootstrapEpochIso);
 }
 
+/** Asserts identity invariants only. Product-owned fields must not appear here. */
 export function assertFields(
 	label: string,
 	actual: Record<string, unknown> | undefined,
@@ -27,7 +28,11 @@ export function assertFields(
 	}
 }
 
-/** Installs an explicit reserved address; this never derives a slug from content. */
+/**
+ * Ensures a reserved Unit ID exists with the declared kind.
+ * Inserts the factory canonical slug only when that Unit has no canonical address.
+ * Never updates an existing address, status, visibility, or deletion state.
+ */
 export async function ensureBootstrapAddressedUnit(
 	tx: DatabaseTransaction,
 	input: {
@@ -41,20 +46,14 @@ export async function ensureBootstrapAddressedUnit(
 		.select({
 			id: unit.id,
 			kind: unit.kind,
-			status: unit.status,
-			visibility: unit.visibility,
-			deletedAt: unit.deletedAt,
 		})
 		.from(unit)
 		.where(eq(unit.id, input.id))
 		.limit(1);
 	if (existing) {
-		assertFields(`${input.kind} Unit ${input.slug}`, existing, {
+		assertFields(`${input.kind} Unit ${input.id}`, existing, {
 			id: input.id,
 			kind: input.kind,
-			status: "published",
-			visibility: "public",
-			deletedAt: null,
 		});
 	} else {
 		const createdAt = bootstrapEpoch();
@@ -72,27 +71,11 @@ export async function ensureBootstrapAddressedUnit(
 
 	const createdAt = bootstrapEpoch();
 	const [canonicalAddress] = await tx
-		.select({
-			id: unitSlugAddress.id,
-			scopeUnitId: unitSlugAddress.scopeUnitId,
-			slug: unitSlugAddress.slug,
-		})
+		.select({ id: unitSlugAddress.id })
 		.from(unitSlugAddress)
 		.where(and(eq(unitSlugAddress.kind, "canonical"), eq(unitSlugAddress.targetUnitId, input.id)))
 		.limit(1);
-	let addressChanged = false;
-	if (canonicalAddress) {
-		if (
-			canonicalAddress.scopeUnitId !== input.scopeUnitId ||
-			canonicalAddress.slug !== input.slug
-		) {
-			await tx
-				.update(unitSlugAddress)
-				.set({ scopeUnitId: input.scopeUnitId, slug: input.slug, updatedAt: createdAt })
-				.where(eq(unitSlugAddress.id, canonicalAddress.id));
-			addressChanged = true;
-		}
-	} else {
+	if (!canonicalAddress)
 		await tx.insert(unitSlugAddress).values({
 			kind: "canonical",
 			scopeUnitId: input.scopeUnitId,
@@ -101,28 +84,11 @@ export async function ensureBootstrapAddressedUnit(
 			createdAt,
 			updatedAt: createdAt,
 		});
-		addressChanged = true;
-	}
-	const [address] = await tx
-		.select({
-			kind: unitSlugAddress.kind,
-			scopeUnitId: unitSlugAddress.scopeUnitId,
-			slug: unitSlugAddress.slug,
-			targetUnitId: unitSlugAddress.targetUnitId,
-		})
-		.from(unitSlugAddress)
-		.where(and(eq(unitSlugAddress.kind, "canonical"), eq(unitSlugAddress.targetUnitId, input.id)))
-		.limit(1);
-	assertFields(`${input.kind} address ${input.slug}`, address, {
-		kind: "canonical",
-		scopeUnitId: input.scopeUnitId,
-		slug: input.slug,
-		targetUnitId: input.id,
-	});
-	return !existing || addressChanged;
+	return !existing;
 }
 
-export async function ensureLocalization(
+/** First-write starter copy for a newly created reserved Unit. Never updates. */
+export async function insertStarterLocalization(
 	tx: DatabaseTransaction,
 	input: {
 		readonly unitId: string;
@@ -134,72 +100,23 @@ export async function ensureLocalization(
 		readonly content?: unknown;
 		readonly contentStatus?: "published" | null;
 	},
-): Promise<boolean> {
+): Promise<void> {
 	const createdAt = bootstrapEpoch();
-	const desired = {
-		summary: input.summary ?? null,
-		...avatarReferenceToColumns(input.avatar ?? null),
-		content: input.content ?? null,
-		contentStatus: input.contentStatus ?? null,
-	};
-	const [stored] = await tx
-		.select({
-			position: unitLocalization.position,
-			title: unitLocalization.title,
-			summary: unitLocalization.summary,
-			avatarType: unitLocalization.avatarType,
-			avatarAssetId: unitLocalization.avatarAssetId,
-			avatarEmoji: unitLocalization.avatarEmoji,
-			avatarIconPrefix: unitLocalization.avatarIconPrefix,
-			avatarIconName: unitLocalization.avatarIconName,
-			content: unitLocalization.content,
-			contentStatus: unitLocalization.contentStatus,
+	await tx
+		.insert(unitLocalization)
+		.values({
+			unitId: input.unitId,
+			language: input.language,
+			position: input.position,
+			title: input.title,
+			summary: input.summary ?? null,
+			...avatarReferenceToColumns(input.avatar ?? null),
+			content: input.content ?? null,
+			contentStatus: input.contentStatus ?? null,
+			createdAt,
+			updatedAt: createdAt,
 		})
-		.from(unitLocalization)
-		.where(
-			and(eq(unitLocalization.unitId, input.unitId), eq(unitLocalization.language, input.language)),
-		)
-		.limit(1);
-	if (
-		stored?.position === input.position &&
-		stored.title === input.title &&
-		stored.summary === desired.summary &&
-		stored.avatarType === desired.avatarType &&
-		stored.avatarAssetId === desired.avatarAssetId &&
-		stored.avatarEmoji === desired.avatarEmoji &&
-		stored.avatarIconPrefix === desired.avatarIconPrefix &&
-		stored.avatarIconName === desired.avatarIconName &&
-		bootstrapValuesEqual(stored.content, desired.content) &&
-		stored.contentStatus === desired.contentStatus
-	)
-		return false;
-	if (stored) {
-		await tx
-			.update(unitLocalization)
-			.set({
-				position: input.position,
-				title: input.title,
-				...desired,
-				updatedAt: createdAt,
-			})
-			.where(
-				and(
-					eq(unitLocalization.unitId, input.unitId),
-					eq(unitLocalization.language, input.language),
-				),
-			);
-		return true;
-	}
-	await tx.insert(unitLocalization).values({
-		unitId: input.unitId,
-		language: input.language,
-		position: input.position,
-		title: input.title,
-		...desired,
-		createdAt,
-		updatedAt: createdAt,
-	});
-	return true;
+		.onConflictDoNothing();
 }
 
 export async function ensureOwnership(

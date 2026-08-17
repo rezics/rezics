@@ -3239,8 +3239,8 @@ const RequiredSeedScenarios = [
 ] as const;
 
 /**
- * Installs disposable development and test scenarios after the one-time
- * platform installation has established its fixed identities.
+ * Installs disposable development and test scenarios after reserved
+ * platform identities exist.
  */
 export class DatabaseSeedService {
 	async run(options: SeedRunOptions = createSeedRunOptions()): Promise<SeedResult> {

@@ -108,3 +108,10 @@ export function assertPlatformCoreReady(
 	if (state.status !== "ready")
 		throw new Error(`Platform core verification failed: ${describePlatformCoreState(state)}`);
 }
+
+export type PlatformEnsureDecision = "ensure" | "refuse-occupied";
+
+/** Occupied databases are the only state that must not receive reserved IDs. */
+export function decidePlatformEnsureAction(state: PlatformCoreState): PlatformEnsureDecision {
+	return state.status === "occupied" ? "refuse-occupied" : "ensure";
+}

@@ -10,7 +10,7 @@ import { fractionalPositionAt } from "../../ordering/position";
 import { insertUnitIfMissing } from "../../units/create";
 import { recordUnitRevision } from "../../units/history";
 import { CuratedCreationTagCollectionManifest, OfficialProfileIds } from "../data";
-import { assertFields, bootstrapEpoch, ensureLocalization, ensureOwnership } from "./common";
+import { assertFields, bootstrapEpoch, ensureOwnership, insertStarterLocalization } from "./common";
 
 export async function ensureCuratedCreationTagCollections(tx: DatabaseTransaction): Promise<void> {
 	const createdAt = bootstrapEpoch();
@@ -29,10 +29,6 @@ export async function ensureCuratedCreationTagCollections(tx: DatabaseTransactio
 			.select({
 				id: unit.id,
 				kind: unit.kind,
-				status: unit.status,
-				visibility: unit.visibility,
-				moderationStatus: unit.moderationStatus,
-				deletedAt: unit.deletedAt,
 			})
 			.from(unit)
 			.where(eq(unit.id, value.id))
@@ -40,19 +36,9 @@ export async function ensureCuratedCreationTagCollections(tx: DatabaseTransactio
 		assertFields(`curated Tag Collection ${value.key}`, storedUnit, {
 			id: value.id,
 			kind: "collection",
-			status: "published",
-			visibility: "public",
-			moderationStatus: "approved",
-			deletedAt: null,
 		});
 
-		let changed = created !== null;
-		const insertedCollection = await tx
-			.insert(collection)
-			.values({ id: value.id })
-			.onConflictDoNothing()
-			.returning({ id: collection.id });
-		changed ||= insertedCollection.length > 0;
+		await tx.insert(collection).values({ id: value.id }).onConflictDoNothing();
 		const [storedCollection] = await tx
 			.select({ id: collection.id })
 			.from(collection)
@@ -61,16 +47,15 @@ export async function ensureCuratedCreationTagCollections(tx: DatabaseTransactio
 		assertFields(`curated Tag Collection marker ${value.key}`, storedCollection, {
 			id: value.id,
 		});
-		for (const [index, localization] of value.localizations.entries()) {
-			changed =
-				(await ensureLocalization(tx, {
+		if (created)
+			for (const [index, localization] of value.localizations.entries())
+				await insertStarterLocalization(tx, {
 					unitId: value.id,
 					position: fractionalPositionAt(index),
 					...localization,
-				})) || changed;
-		}
-		changed = (await ensureOwnership(tx, value.id, OfficialProfileIds.editorial)) || changed;
-		const publisher = await tx
+				});
+		await ensureOwnership(tx, value.id, OfficialProfileIds.editorial);
+		await tx
 			.insert(creditAttribution)
 			.values({
 				sourceUnitId: value.id,
@@ -80,10 +65,8 @@ export async function ensureCuratedCreationTagCollections(tx: DatabaseTransactio
 				createdAt,
 				updatedAt: createdAt,
 			})
-			.onConflictDoNothing()
-			.returning({ id: creditAttribution.id });
-		changed ||= publisher.length > 0;
-		if (changed)
+			.onConflictDoNothing();
+		if (created)
 			await recordUnitRevision(tx, {
 				unitId: value.id,
 				actorProfileId: OfficialProfileIds.editorial,

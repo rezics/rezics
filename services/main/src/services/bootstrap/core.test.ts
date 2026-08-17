@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { classifyPlatformCore, describePlatformCoreState } from "./core";
+import {
+	classifyPlatformCore,
+	decidePlatformEnsureAction,
+	describePlatformCoreState,
+} from "./core";
 import {
 	parsePlatformCredentialRotationCommand,
 	parsePlatformInstallCommandOptions,
@@ -30,18 +34,24 @@ describe("platform core lifecycle", () => {
 		expect(describePlatformCoreState(state)).toContain(missingId);
 	});
 
+	it("ensures every non-occupied platform core and refuses only occupied databases", () => {
+		expect(decidePlatformEnsureAction({ status: "uninstalled" })).toBe("ensure");
+		expect(decidePlatformEnsureAction({ status: "incomplete", missingIdentities: [] })).toBe(
+			"ensure",
+		);
+		expect(decidePlatformEnsureAction({ status: "ready" })).toBe("ensure");
+		expect(decidePlatformEnsureAction({ status: "occupied" })).toBe("refuse-occupied");
+	});
+
 	it("requires explicit installation and credential-rotation confirmation", () => {
 		expect(parsePlatformInstallCommandOptions(["--yes"])).toEqual({
 			credentialOutput: "print",
-			whenInstalled: "fail",
 		});
 		expect(parsePlatformInstallCommandOptions(["--if-needed", "--yes"])).toEqual({
 			credentialOutput: "print",
-			whenInstalled: "skip",
 		});
 		expect(parsePlatformInstallCommandOptions(["--yes", "--suppress-credential-output"])).toEqual({
 			credentialOutput: "suppress",
-			whenInstalled: "fail",
 		});
 		expect(() => parsePlatformInstallCommandOptions([])).toThrow(/without --yes/);
 		expect(() => parsePlatformInstallCommandOptions(["--yes", "--unknown"])).toThrow(/Usage:/);

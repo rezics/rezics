@@ -1,5 +1,5 @@
 import { RealmUnitCreatePermissionValues } from "@rezics/access";
-import { and, eq, inArray, isNull } from "drizzle-orm";
+import { and, eq, inArray, isNull, type SQL } from "drizzle-orm";
 import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import sharp from "sharp";
@@ -26,30 +26,39 @@ import {
 	TopLevelSlugNamespaceUnitIds,
 } from "../data";
 import {
-	assertFields,
 	bootstrapEpoch,
 	ensureBootstrapAddressedUnit,
-	ensureLocalization,
 	ensureOwnership,
+	insertStarterLocalization,
 } from "./common";
+
+async function hasUnitAccessGrant(
+	tx: DatabaseTransaction,
+	clauses: readonly SQL[],
+): Promise<boolean> {
+	const [stored] = await tx
+		.select({ id: unitAccessGrant.id })
+		.from(unitAccessGrant)
+		.where(and(...clauses))
+		.limit(1);
+	return Boolean(stored);
+}
 
 export async function ensureBootstrapRealm(
 	tx: DatabaseTransaction,
 	value: (typeof BootstrapRealmManifest)[number],
 ): Promise<void> {
 	const createdAt = bootstrapEpoch();
-	let changed = await ensureBootstrapAddressedUnit(tx, {
+	const createdUnit = await ensureBootstrapAddressedUnit(tx, {
 		id: value.id,
 		kind: "realm",
 		scopeUnitId: TopLevelSlugNamespaceUnitIds.realms,
 		slug: value.slug,
 	});
-	const insertedRealm = await tx
+	await tx
 		.insert(realm)
 		.values({ id: value.id, joinPolicy: "open", createdAt, updatedAt: createdAt })
-		.onConflictDoNothing()
-		.returning({ id: realm.id });
-	changed ||= insertedRealm.length > 0;
+		.onConflictDoNothing();
 	const [storedTaxonomy] = await tx
 		.select({ id: contentStructure.id })
 		.from(contentStructure)
@@ -61,117 +70,93 @@ export async function ensureBootstrapRealm(
 			),
 		)
 		.limit(1);
-	if (!storedTaxonomy) {
+	if (!storedTaxonomy)
 		await tx.insert(contentStructure).values({
 			ownerUnitId: value.id,
 			kind: "realm.taxonomy",
 			createdAt,
 			updatedAt: createdAt,
 		});
-		changed = true;
-	}
-	for (const [index, localization] of value.localizations.entries()) {
-		changed =
-			(await ensureLocalization(tx, {
+	if (createdUnit)
+		for (const [index, localization] of value.localizations.entries())
+			await insertStarterLocalization(tx, {
 				unitId: value.id,
 				position: fractionalPositionAt(index),
 				...localization,
-			})) || changed;
-	}
-	changed = (await ensureOwnership(tx, value.id, value.ownerProfileId)) || changed;
+			});
+	await ensureOwnership(tx, value.id, value.ownerProfileId);
 	for (const permission of [
 		"unit.read",
 		"realm.contribute",
 		...RealmUnitCreatePermissionValues,
 	] as const) {
-		const [stored] = await tx
-			.select({ id: unitAccessGrant.id })
-			.from(unitAccessGrant)
-			.where(
-				and(
-					eq(unitAccessGrant.unitId, value.id),
-					eq(unitAccessGrant.subjectKind, "realm"),
-					eq(unitAccessGrant.realmId, value.id),
-					eq(unitAccessGrant.realmRelation, "member"),
-					eq(unitAccessGrant.permission, permission),
-					isNull(unitAccessGrant.revokedAt),
-				),
-			)
-			.limit(1);
-		if (!stored) {
-			await tx.insert(unitAccessGrant).values({
-				unitId: value.id,
-				subjectKind: "realm",
-				realmId: value.id,
-				realmRelation: "member",
-				permission,
-				scope: [],
-				grantedByProfileId: value.ownerProfileId,
-				createdAt,
-				updatedAt: createdAt,
-			});
-			changed = true;
-		}
+		if (
+			await hasUnitAccessGrant(tx, [
+				eq(unitAccessGrant.unitId, value.id),
+				eq(unitAccessGrant.subjectKind, "realm"),
+				eq(unitAccessGrant.realmId, value.id),
+				eq(unitAccessGrant.realmRelation, "member"),
+				eq(unitAccessGrant.permission, permission),
+			])
+		)
+			continue;
+		await tx.insert(unitAccessGrant).values({
+			unitId: value.id,
+			subjectKind: "realm",
+			realmId: value.id,
+			realmRelation: "member",
+			permission,
+			scope: [],
+			grantedByProfileId: value.ownerProfileId,
+			createdAt,
+			updatedAt: createdAt,
+		});
 	}
 	for (const permission of value.authenticatedContributions
 		? RealmUnitCreatePermissionValues
 		: []) {
-		const [stored] = await tx
-			.select({ id: unitAccessGrant.id })
-			.from(unitAccessGrant)
-			.where(
-				and(
+		if (
+			await hasUnitAccessGrant(tx, [
+				eq(unitAccessGrant.unitId, value.id),
+				eq(unitAccessGrant.subjectKind, "authenticated"),
+				eq(unitAccessGrant.permission, permission),
+			])
+		)
+			continue;
+		await tx.insert(unitAccessGrant).values({
+			unitId: value.id,
+			subjectKind: "authenticated",
+			permission,
+			scope: [],
+			grantedByProfileId: value.ownerProfileId,
+			createdAt,
+			updatedAt: createdAt,
+		});
+	}
+	for (const access of value.access)
+		for (const permission of access.permissions) {
+			if (
+				await hasUnitAccessGrant(tx, [
 					eq(unitAccessGrant.unitId, value.id),
-					eq(unitAccessGrant.subjectKind, "authenticated"),
+					eq(unitAccessGrant.subjectKind, "profile"),
+					eq(unitAccessGrant.profileId, access.profileId),
 					eq(unitAccessGrant.permission, permission),
-					isNull(unitAccessGrant.revokedAt),
-				),
+				])
 			)
-			.limit(1);
-		if (!stored) {
+				continue;
 			await tx.insert(unitAccessGrant).values({
 				unitId: value.id,
-				subjectKind: "authenticated",
+				subjectKind: "profile",
+				profileId: access.profileId,
 				permission,
 				scope: [],
 				grantedByProfileId: value.ownerProfileId,
 				createdAt,
 				updatedAt: createdAt,
 			});
-			changed = true;
 		}
-	}
-	for (const access of value.access)
-		for (const permission of access.permissions) {
-			const [stored] = await tx
-				.select({ id: unitAccessGrant.id })
-				.from(unitAccessGrant)
-				.where(
-					and(
-						eq(unitAccessGrant.unitId, value.id),
-						eq(unitAccessGrant.subjectKind, "profile"),
-						eq(unitAccessGrant.profileId, access.profileId),
-						eq(unitAccessGrant.permission, permission),
-						isNull(unitAccessGrant.revokedAt),
-					),
-				)
-				.limit(1);
-			if (!stored) {
-				await tx.insert(unitAccessGrant).values({
-					unitId: value.id,
-					subjectKind: "profile",
-					profileId: access.profileId,
-					permission,
-					scope: [],
-					grantedByProfileId: value.ownerProfileId,
-					createdAt,
-					updatedAt: createdAt,
-				});
-				changed = true;
-			}
-		}
-	for (const memberProfileId of value.members) {
-		const insertedMember = await tx
+	for (const memberProfileId of value.members)
+		await tx
 			.insert(realmMember)
 			.values({
 				realmId: value.id,
@@ -180,19 +165,8 @@ export async function ensureBootstrapRealm(
 				joinedAt: createdAt,
 				updatedAt: createdAt,
 			})
-			.onConflictDoNothing()
-			.returning({ profileId: realmMember.profileId });
-		changed ||= insertedMember.length > 0;
-		const [stored] = await tx
-			.select({ state: realmMember.state })
-			.from(realmMember)
-			.where(and(eq(realmMember.realmId, value.id), eq(realmMember.profileId, memberProfileId)))
-			.limit(1);
-		assertFields(`Realm member ${memberProfileId}`, stored, {
-			state: "active",
-		});
-	}
-	if (changed)
+			.onConflictDoNothing();
+	if (createdUnit)
 		await recordUnitRevision(tx, {
 			unitId: value.id,
 			actorProfileId: value.ownerProfileId,
@@ -238,6 +212,12 @@ export async function ensureScoreRealmProfileDefaults(tx: DatabaseTransaction): 
 }
 
 export async function ensureOfficialRealmAvatar(tx: DatabaseTransaction): Promise<void> {
+	const [existingAsset] = await tx
+		.select({ id: imageAsset.id })
+		.from(imageAsset)
+		.where(eq(imageAsset.id, OfficialRealmAvatarAsset.id))
+		.limit(1);
+	if (existingAsset) return;
 	const createdAt = bootstrapEpoch();
 	const bytes = await readFile(fileURLToPath(import.meta.resolve("@rezics/brand/avatar.png")));
 	const metadata = await sharp(bytes, { animated: false }).metadata();
@@ -259,51 +239,24 @@ export async function ensureOfficialRealmAvatar(tx: DatabaseTransaction): Promis
 		ContentLength: bytes.byteLength,
 		Metadata: tracking,
 	});
-	await tx
-		.insert(imageAsset)
-		.values({
-			id: OfficialRealmAvatarAsset.id,
-			uploaderProfileId: OfficialProfileIds.editorial,
-			ownerProfileId: OfficialProfileIds.editorial,
-			status: "ready",
-			access: "public",
-			createdAt,
-			updatedAt: createdAt,
-		})
-		.onConflictDoUpdate({
-			target: imageAsset.id,
-			set: {
-				uploaderProfileId: OfficialProfileIds.editorial,
-				ownerProfileId: OfficialProfileIds.editorial,
-				status: "ready",
-				access: "public",
-				deletedAt: null,
-				updatedAt: createdAt,
-			},
-		});
-	await tx
-		.insert(imageObject)
-		.values({
-			id: OfficialRealmAvatarAsset.objectId,
-			assetId: OfficialRealmAvatarAsset.id,
-			storageKey: OfficialRealmAvatarAsset.storageKey,
-			mediaType: OfficialRealmAvatarAsset.mediaType,
-			byteSize: bytes.byteLength,
-			width: OfficialRealmAvatarAsset.width,
-			height: OfficialRealmAvatarAsset.height,
-			createdAt,
-			updatedAt: createdAt,
-		})
-		.onConflictDoUpdate({
-			target: imageObject.id,
-			set: {
-				assetId: OfficialRealmAvatarAsset.id,
-				storageKey: OfficialRealmAvatarAsset.storageKey,
-				mediaType: OfficialRealmAvatarAsset.mediaType,
-				byteSize: bytes.byteLength,
-				width: OfficialRealmAvatarAsset.width,
-				height: OfficialRealmAvatarAsset.height,
-				updatedAt: createdAt,
-			},
-		});
+	await tx.insert(imageAsset).values({
+		id: OfficialRealmAvatarAsset.id,
+		uploaderProfileId: OfficialProfileIds.editorial,
+		ownerProfileId: OfficialProfileIds.editorial,
+		status: "ready",
+		access: "public",
+		createdAt,
+		updatedAt: createdAt,
+	});
+	await tx.insert(imageObject).values({
+		id: OfficialRealmAvatarAsset.objectId,
+		assetId: OfficialRealmAvatarAsset.id,
+		storageKey: OfficialRealmAvatarAsset.storageKey,
+		mediaType: OfficialRealmAvatarAsset.mediaType,
+		byteSize: bytes.byteLength,
+		width: OfficialRealmAvatarAsset.width,
+		height: OfficialRealmAvatarAsset.height,
+		createdAt,
+		updatedAt: createdAt,
+	});
 }

@@ -3,6 +3,7 @@ import { sql } from "drizzle-orm";
 import { database } from "../database";
 import {
 	assertPlatformCoreReady,
+	decidePlatformEnsureAction,
 	describePlatformCoreState,
 	inspectPlatformCore,
 	PlatformInstallationLockName,
@@ -24,12 +25,6 @@ import {
 import { ensureOfficialZoneExperiences, ensureOfficialZones } from "./installation/zones";
 import { isInitialInstallationBundleReady } from "./readiness";
 
-export { ensureCuratedCreationTagCollections };
-
-export interface PlatformInstallationOptions {
-	readonly whenInstalled: "fail" | "skip";
-}
-
 export type PlatformInstallationResult =
 	| {
 			readonly status: "installed";
@@ -40,24 +35,20 @@ export type PlatformInstallationResult =
 			readonly issuedCredentials: readonly [];
 	  };
 
-async function installPlatform(
-	options: PlatformInstallationOptions,
-): Promise<PlatformInstallationResult> {
+async function ensurePlatform(): Promise<PlatformInstallationResult> {
 	assertBootstrapManifest();
 	return database.transaction(async (tx): Promise<PlatformInstallationResult> => {
 		await tx.execute(
 			sql`select pg_advisory_xact_lock(hashtextextended(${PlatformInstallationLockName}, 0))`,
 		);
 		const initialState = await inspectPlatformCore(tx);
-		if (initialState.status === "ready") {
-			if (options.whenInstalled === "skip")
-				return { status: "already_installed", issuedCredentials: [] };
-			throw new Error("Platform installation is already complete");
-		}
-		if (initialState.status !== "uninstalled")
+		if (decidePlatformEnsureAction(initialState) === "refuse-occupied") {
+			if (initialState.status !== "occupied")
+				throw new Error("Platform ensure occupied decision lost its state proof");
 			throw new Error(
-				`Platform installation requires an empty database; ${describePlatformCoreState(initialState)}`,
+				`Platform ensure refuses an occupied database; ${describePlatformCoreState(initialState)}`,
 			);
+		}
 		await ensureSlugNamespaces(tx);
 		const issuedCredentials = await ensureBootstrapProfiles(tx);
 		await ensureBootstrapProfileFavorites(tx);
@@ -67,25 +58,29 @@ async function installPlatform(
 		await ensureOfficialRealmAvatar(tx);
 		for (const realm of BootstrapRealmManifest) await ensureBootstrapRealm(tx, realm);
 		await ensureScoreRealmProfileDefaults(tx);
-		await ensureOfficialZones(tx);
-		await ensureOfficialZoneExperiences(tx);
-		await ensureOfficialZoneFollows(tx, BootstrapProfileIdValues, { sequenceIsEmpty: true });
+		const createdZoneIds = await ensureOfficialZones(tx);
+		await ensureOfficialZoneExperiences(tx, createdZoneIds);
+		await ensureOfficialZoneFollows(tx, BootstrapProfileIdValues, {
+			sequenceIsEmpty: initialState.status === "uninstalled",
+		});
 		assertPlatformCoreReady(await inspectPlatformCore(tx));
+		if (initialState.status === "ready" && issuedCredentials.length === 0)
+			return { status: "already_installed", issuedCredentials: [] };
 		return { status: "installed", issuedCredentials };
 	});
 }
 
 /**
- * Installs the versioned factory bundle exactly once. Product-owned fields are
- * handed to the platform after this operation and are never reconciled here.
+ * Ensures reserved platform identities. Missing IDs receive starter content once.
+ * Existing product-owned fields are never overwritten.
  */
 export class PlatformInstallationService {
 	isInitialBundleReady(): Promise<boolean> {
 		return isInitialInstallationBundleReady();
 	}
 
-	install(options: PlatformInstallationOptions): Promise<PlatformInstallationResult> {
-		return installPlatform(options);
+	install(): Promise<PlatformInstallationResult> {
+		return ensurePlatform();
 	}
 }
 

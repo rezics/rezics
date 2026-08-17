@@ -19,6 +19,7 @@
 				"services/main/scripts/ensure-database-privileges.ts",
 				"services/main/scripts/filter-document-cutover.ts",
 				"services/main/scripts/migrate-filter-documents.ts",
+				"services/main/scripts/install-platform.ts",
 				"services/main/scripts/verify-platform-core.ts",
 				"libraries/filter/**",
 				"packages/atlas/**",

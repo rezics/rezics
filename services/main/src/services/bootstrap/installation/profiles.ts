@@ -11,8 +11,8 @@ import {
 	assertFields,
 	bootstrapEpoch,
 	ensureBootstrapAddressedUnit,
-	ensureLocalization,
 	ensureOwnership,
+	insertStarterLocalization,
 } from "./common";
 
 export async function ensureBootstrapProfiles(
@@ -33,21 +33,11 @@ export async function ensureBootstrapProfiles(
 			})
 			.onConflictDoNothing();
 		const [storedUser] = await tx
-			.select({
-				id: users.id,
-				name: users.name,
-				email: users.email,
-				emailVerified: users.emailVerified,
-			})
+			.select({ id: users.id })
 			.from(users)
 			.where(eq(users.id, value.authUserId))
 			.limit(1);
-		assertFields(`auth user ${value.key}`, storedUser, {
-			id: value.authUserId,
-			name: value.name,
-			email: value.email,
-			emailVerified: true,
-		});
+		assertFields(`auth user ${value.key}`, storedUser, { id: value.authUserId });
 
 		const [storedAccount] = await tx
 			.select({
@@ -66,9 +56,7 @@ export async function ensureBootstrapProfiles(
 				providerId: "credential",
 				userId: value.authUserId,
 			});
-		}
-
-		if (!storedAccount) {
+		} else {
 			const prepared = await preparePlatformCredential();
 			await tx.insert(accounts).values({
 				id: value.accountId,
@@ -87,13 +75,13 @@ export async function ensureBootstrapProfiles(
 			});
 		}
 
-		let changed = await ensureBootstrapAddressedUnit(tx, {
+		const createdUnit = await ensureBootstrapAddressedUnit(tx, {
 			id: value.profileId,
 			kind: "profile",
 			scopeUnitId: TopLevelSlugNamespaceUnitIds.users,
 			slug: value.slug,
 		});
-		const insertedProfile = await tx
+		await tx
 			.insert(profile)
 			.values({
 				id: value.profileId,
@@ -102,9 +90,7 @@ export async function ensureBootstrapProfiles(
 				createdAt,
 				updatedAt: createdAt,
 			})
-			.onConflictDoNothing()
-			.returning({ id: profile.id });
-		changed ||= insertedProfile.length > 0;
+			.onConflictDoNothing();
 		const [storedProfile] = await tx
 			.select({ id: profile.id, authUserId: profile.authUserId })
 			.from(profile)
@@ -114,22 +100,19 @@ export async function ensureBootstrapProfiles(
 			id: value.profileId,
 			authUserId: value.authUserId,
 		});
-		for (const [index, localization] of value.localizations.entries()) {
-			changed =
-				(await ensureLocalization(tx, {
+		if (createdUnit)
+			for (const [index, localization] of value.localizations.entries())
+				await insertStarterLocalization(tx, {
 					unitId: value.profileId,
 					position: fractionalPositionAt(index),
 					...localization,
-				})) || changed;
-		}
-		const insertedPreference = await tx
+				});
+		await tx
 			.insert(profilePreference)
 			.values({ profileId: value.profileId, createdAt, updatedAt: createdAt })
-			.onConflictDoNothing()
-			.returning({ profileId: profilePreference.profileId });
-		changed ||= insertedPreference.length > 0;
-		changed = (await ensureOwnership(tx, value.profileId, value.profileId)) || changed;
-		if (changed)
+			.onConflictDoNothing();
+		await ensureOwnership(tx, value.profileId, value.profileId);
+		if (createdUnit)
 			await recordUnitRevision(tx, {
 				unitId: value.profileId,
 				actorProfileId: value.profileId,

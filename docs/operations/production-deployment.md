@@ -82,7 +82,7 @@ The dependency order is:
    immutable digest references;
 3. for a release listed in `maintenanceCutovers`, the fixed maintenance job
    verifies the low-priority HTTP 503 fallback and stops worker then API;
-4. database preflight, migration, privilege reconciliation, and verification;
+4. database preflight, migration, privilege reconciliation, identity ensure, and verification;
 5. independent API and worker rollouts, which automatically shadow the fallback
    again after API readiness succeeds;
 6. explicit derived-data maintenance and PGroonga index health verification.
@@ -162,8 +162,8 @@ not mutate the stateful job. Nomad sends `SIGINT` for PostgreSQL's fast shutdown
 mode so persistent application pools cannot turn a graceful rollout into a
 forced `SIGKILL` after the task timeout.
 
-`deploy/scripts/database-operation.sh release` runs preflight, migration, and
-verification in one serialized batch job. It asserts that both administrative
+`deploy/scripts/database-operation.sh release` runs preflight, migration,
+identity ensure, and verification in one serialized batch job. It asserts that both administrative
 and runtime URLs target the REZICS production database before doing any work.
 Migration files normally follow expand/contract delivery: deploy
 backward-compatible structures first, then clean up only after the old

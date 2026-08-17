@@ -22,6 +22,7 @@ import {
 import { inspectInitialInstallationBundle } from "./readiness-inspection";
 import { bootstrapValuesEqual } from "./value-comparison";
 
+/** Factory snapshot for a fresh empty-database install. Not an operational deploy gate. */
 export async function isInitialInstallationBundleReady(): Promise<boolean> {
 	const expectedAddresses = [
 		...SlugNamespaceManifest.map((namespace) => ({

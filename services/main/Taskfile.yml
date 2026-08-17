@@ -270,11 +270,10 @@ tasks:
             - yarn exec tsx scripts/ensure-database-privileges.ts
 
     db:preflight:
-        desc: Read-only validation of migration history and permanent platform identities.
+        desc: Read-only validation of migration history.
         cmds:
             - task: db:validate
             - task: db:status
-            - task: platform:verify
 
     db:runtime:verify:
         desc: Verify PostgreSQL runtime settings, statistics, and extension health.
@@ -289,7 +288,7 @@ tasks:
             - task: participation:rebuild
 
     platform:install:
-        desc: Install the factory platform graph exactly once on an empty database.
+        desc: Ensure reserved platform identities; insert missing IDs with starter content only.
         cmds:
             - yarn exec tsx scripts/install-platform.ts {{.CLI_ARGS}}
 
@@ -299,12 +298,14 @@ tasks:
             - yarn exec tsx scripts/seed-official-rule-realm.ts {{.CLI_ARGS}}
 
     bootstrap:curated-collections:
-        desc: Run the one-off local backfill for the fixed creation-time Tag Collections.
+        desc: Alias for platform:install; reserved Tag Collection IDs are part of the identity graph.
         cmds:
-            - yarn exec tsx scripts/ensure-curated-creation-tag-collections.ts {{.CLI_ARGS}}
+            - task: platform:install
+              vars:
+                  CLI_ARGS: "{{.CLI_ARGS}}"
 
     platform:installation:check:
-        desc: Verify a fresh installation against the complete factory bundle.
+        desc: Verify a fresh empty-database first write against the factory snapshot. Not a deploy gate.
         cmds:
             - yarn exec tsx scripts/check-platform-installation.ts
 
@@ -320,7 +321,7 @@ tasks:
             - yarn exec tsx scripts/rotate-platform-credentials.ts --yes
 
     db:install:
-        desc: Migrate and install Bootstrap state before an application's first deployment.
+        desc: Migrate and ensure reserved Bootstrap identities before an application's first deployment.
         cmds:
             - task: db:migrate
             - task: platform:install
@@ -331,10 +332,13 @@ tasks:
             - task: db:project
 
     db:prepare:
-        desc: Preflight, migrate, and verify an installed database for application traffic.
+        desc: Preflight, migrate, ensure reserved identities, and verify an installed database.
         cmds:
             - task: db:preflight
             - task: db:migrate
+            - task: platform:install
+              vars:
+                  CLI_ARGS: --yes
             - task: db:runtime:verify
             - task: platform:verify
 

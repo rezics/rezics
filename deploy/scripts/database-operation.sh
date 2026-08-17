@@ -44,7 +44,6 @@ cd /workspace/services/main
 
 preflight() {
 	yarn exec atlas migrate status --env main --url "${DATABASE_ADMIN_URL}"
-	yarn exec tsx scripts/verify-platform-core.ts
 }
 
 migrate() {
@@ -53,6 +52,7 @@ migrate() {
 		yarn exec atlas migrate apply --env main --url "${DATABASE_ADMIN_URL}" \
 		--lock-timeout 5s
 	yarn exec tsx scripts/ensure-database-privileges.ts
+	yarn exec tsx scripts/install-platform.ts --yes
 }
 
 verify() {
@@ -88,7 +88,6 @@ search_index() {
 case "${operation}" in
 	install)
 		migrate
-		yarn exec tsx scripts/install-platform.ts --yes
 		yarn exec tsx scripts/seed-official-rule-realm.ts --yes --if-needed
 		verify
 		project

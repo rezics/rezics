@@ -1,6 +1,5 @@
 export interface PlatformInstallCommandOptions {
 	readonly credentialOutput: "print" | "suppress";
-	readonly whenInstalled: "fail" | "skip";
 }
 
 export function parsePlatformInstallCommandOptions(
@@ -21,7 +20,6 @@ export function parsePlatformInstallCommandOptions(
 		);
 	return {
 		credentialOutput: uniqueArgs.has("--suppress-credential-output") ? "suppress" : "print",
-		whenInstalled: uniqueArgs.has("--if-needed") ? "skip" : "fail",
 	};
 }
 

@@ -1,8 +1,11 @@
 # Platform bootstrap
 
-The bootstrap installs the versioned factory bundle once into an empty database. After the
-transaction commits, ordinary product services own mutable fields and online history; deployment
-preflight verifies only permanent identities through `core.ts`.
+Bootstrap owns the reserved identity graph, not live content. The ensure command is safe to
+rerun: it inserts missing reserved IDs and writes starter copy only for identities created in
+that run. After first write, ordinary product services own mutable fields and online history.
+Deployment verify checks only permanent identities through `core.ts`. An occupied database
+(application rows with no reserved IDs) is refused. Revoked platform capability grants are
+not restored. Existing Units do not receive starter localizations even when they have none.
 
 ## Module boundaries
 
@@ -14,8 +17,9 @@ preflight verifies only permanent identities through `core.ts`.
   `common.ts` owns only shared installation primitives whose invariants are reused by multiple
   domains.
 - `readiness-inspection.ts` performs bounded reads of persisted factory state; `readiness.ts`
-  compares that typed snapshot with bootstrap-owned data. Neither may turn online product state
-  into repository-owned configuration.
+  compares that typed snapshot with factory constructors. That comparison is a fresh-install
+  snapshot check, not an operational deploy gate, and must not turn online product state into
+  repository-owned configuration.
 - `service.ts` is the public facade and orchestration root. It owns the advisory lock, transaction,
   installation order, and result contract; domain SQL and manifest data do not belong there.
 
@@ -31,10 +35,10 @@ and 5 home Pages (38 Unit identities total). It also reserves 4 auth users, 4 ac
 structures, 5 navigations, and 2 avatar identities. Manifest values and expected projections are
 well below 1 MiB of process memory.
 
-Installation writes this fixed graph once per environment under one PostgreSQL advisory lock and
-one transaction. Concurrent attempts serialize on the installation key; there is no queue, fan-out,
-or recurring writer. The avatar object-store write is intentionally idempotent because it cannot
-participate in the database transaction. A failed attempt is retried from the same manifest.
+Ensure writes at most the missing identity subset under one PostgreSQL advisory lock and one
+transaction. Concurrent attempts serialize on the installation key; there is no queue, fan-out,
+or recurring writer. A newly created reserved avatar is written to the object store once; an
+existing avatar identity is left untouched. A failed attempt is retried from the same manifest.
 
 Fresh-install readiness performs fixed-ID primary-key, unique-key, or selective-index probes and
 returns only manifest-bounded rows. The one check against mutable follow ordering reads the first

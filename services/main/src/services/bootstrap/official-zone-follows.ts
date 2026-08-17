@@ -17,8 +17,8 @@ function officialPositionsBefore(rightBoundary: string | null): string[] {
 }
 
 /**
- * Subscribe Profiles to the official work Zones at the front of their
- * non-favorite sequence. Existing favorite choices are preserved.
+ * Insert missing official Zone follows. Existing follow rows and positions
+ * are left untouched, including favorite choices.
  */
 export async function ensureOfficialZoneFollows(
 	tx: DatabaseTransaction,
@@ -66,10 +66,7 @@ export async function ensureOfficialZoneFollows(
 			await tx
 				.insert(unitFollow)
 				.values({ followerProfileId: profileId, unitId: zoneId, position })
-				.onConflictDoUpdate({
-					target: [unitFollow.followerProfileId, unitFollow.unitId],
-					set: { position },
-				});
+				.onConflictDoNothing();
 		}
 	}
 }
