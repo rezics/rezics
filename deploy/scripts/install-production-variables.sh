@@ -31,6 +31,7 @@ readonly variables=(
 	"rezics application/runtime"
 	"rezics database/operations"
 	"rezics-infrastructure nomad/jobs/rezics-postgres/postgres/postgres"
+	"rezics-infrastructure nomad/jobs/signoz-agent"
 	"rezics-infrastructure database/databasus-control"
 	"rezics-infrastructure database/databasus-source"
 )
@@ -88,9 +89,11 @@ unset access_key_id secret_access_key bucket
 printf 'u%s\n' "$(openssl rand -hex 10 | cut -c 1-19)" >"${work_directory}/postgres-username"
 printf 'u%s\n' "$(openssl rand -hex 10 | cut -c 1-19)" >"${work_directory}/application-database-username"
 printf 'u%s\n' "$(openssl rand -hex 10 | cut -c 1-19)" >"${work_directory}/backup-database-username"
+printf 'u%s\n' "$(openssl rand -hex 10 | cut -c 1-19)" >"${work_directory}/monitoring-database-username"
 openssl rand -hex 32 >"${work_directory}/postgres-password"
 openssl rand -hex 32 >"${work_directory}/application-database-password"
 openssl rand -hex 32 >"${work_directory}/backup-database-password"
+openssl rand -hex 32 >"${work_directory}/monitoring-database-password"
 openssl rand -hex 32 >"${work_directory}/better-auth-secret"
 openssl rand -hex 36 >"${work_directory}/databasus-secret-key"
 
@@ -100,9 +103,11 @@ jq -n \
 	--rawfile postgresUsername "${work_directory}/postgres-username" \
 	--rawfile applicationDatabaseUsername "${work_directory}/application-database-username" \
 	--rawfile backupDatabaseUsername "${work_directory}/backup-database-username" \
+	--rawfile monitoringDatabaseUsername "${work_directory}/monitoring-database-username" \
 	--rawfile postgresPassword "${work_directory}/postgres-password" \
 	--rawfile applicationDatabasePassword "${work_directory}/application-database-password" \
 	--rawfile backupDatabasePassword "${work_directory}/backup-database-password" \
+	--rawfile monitoringDatabasePassword "${work_directory}/monitoring-database-password" \
 	--rawfile betterAuthSecret "${work_directory}/better-auth-secret" \
 	--rawfile databasusSecretKey "${work_directory}/databasus-secret-key" '
   def value: rtrimstr("\n");
@@ -110,9 +115,11 @@ jq -n \
   ($postgresUsername | value) as $postgresUsername |
   ($applicationDatabaseUsername | value) as $applicationDatabaseUsername |
   ($backupDatabaseUsername | value) as $backupDatabaseUsername |
+  ($monitoringDatabaseUsername | value) as $monitoringDatabaseUsername |
   ($postgresPassword | value) as $postgresPassword |
   ($applicationDatabasePassword | value) as $applicationDatabasePassword |
   ($backupDatabasePassword | value) as $backupDatabasePassword |
+  ($monitoringDatabasePassword | value) as $monitoringDatabasePassword |
   {
     DATABASE_URL: ("postgres://" + $applicationDatabaseUsername + ":" + $applicationDatabasePassword + "@10.64.0.2:5432/rezics?sslmode=disable"),
     BETTER_AUTH_SECRET: ($betterAuthSecret | value),
@@ -153,7 +160,17 @@ jq -n \
           REZICS_DATABASE_USERNAME: $applicationDatabaseUsername,
           REZICS_DATABASE_PASSWORD: $applicationDatabasePassword,
           REZICS_DATABASE_BACKUP_USERNAME: $backupDatabaseUsername,
-          REZICS_DATABASE_BACKUP_PASSWORD: $backupDatabasePassword
+          REZICS_DATABASE_BACKUP_PASSWORD: $backupDatabasePassword,
+          REZICS_DATABASE_MONITORING_USERNAME: $monitoringDatabaseUsername,
+          REZICS_DATABASE_MONITORING_PASSWORD: $monitoringDatabasePassword
+        }
+      },
+      {
+        Namespace: "rezics-infrastructure",
+        Path: "nomad/jobs/signoz-agent",
+        Items: {
+          POSTGRES_USERNAME: $monitoringDatabaseUsername,
+          POSTGRES_PASSWORD: $monitoringDatabasePassword
         }
       },
       {

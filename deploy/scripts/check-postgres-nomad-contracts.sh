@@ -44,10 +44,24 @@ fi
 for two_host_contract in \
 	'@10.64.0.2:5432/rezics?sslmode=disable' \
 	'POSTGRES_HOST: "10.64.0.2"' \
+	'nomad/jobs/signoz-agent' \
+	'REZICS_DATABASE_MONITORING_USERNAME' \
 	'({Items: .Items} | tojson)'; do
 	if ! grep -Fq "${two_host_contract}" deploy/scripts/install-production-variables.sh; then
 		printf 'Production Variable bootstrap is missing the two-host contract: %s\n' \
 			"${two_host_contract}" >&2
+		exit 1
+	fi
+done
+
+for monitoring_contract in \
+	'REZICS_DATABASE_MONITORING_USERNAME' \
+	'REZICS_DATABASE_MONITORING_PASSWORD' \
+	'GRANT pg_monitor'; do
+	if ! grep -Fq "${monitoring_contract}" \
+		services/main/docker/postgres/init/001-roles.sh; then
+		printf 'PostgreSQL bootstrap is missing the monitoring contract: %s\n' \
+			"${monitoring_contract}" >&2
 		exit 1
 	fi
 done
