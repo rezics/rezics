@@ -5,18 +5,16 @@ set -euo pipefail
 readonly volume_destination='destination = "/var/lib/postgresql"'
 readonly production_init_copy='COPY --chmod=0755 services/main/docker/postgres/init /docker-entrypoint-initdb.d'
 
-for jobspec in deploy/nomad/postgres.nomad.hcl; do
-	pgdata_count="$(grep -E -c \
-		'^[[:space:]]*PGDATA[[:space:]]*=[[:space:]]*"/var/lib/postgresql/18/docker"' \
-		"${jobspec}" || true)"
-	volume_count="$(grep -F -c "${volume_destination}" "${jobspec}" || true)"
+readonly postgres_jobspec="deploy/nomad/postgres.nomad.hcl"
+pgdata_count="$(grep -E -c \
+	'^[[:space:]]*PGDATA[[:space:]]*=[[:space:]]*"/var/lib/postgresql/18/docker"' \
+	"${postgres_jobspec}" || true)"
+volume_count="$(grep -F -c "${volume_destination}" "${postgres_jobspec}" || true)"
 
-	if ((pgdata_count != 1 || volume_count != 1)); then
-		printf 'Invalid PostgreSQL 18 volume layout in %s\n' "${jobspec}" >&2
-		exit 1
-	fi
-
-done
+if ((pgdata_count != 1 || volume_count != 1)); then
+	printf 'Invalid PostgreSQL 18 volume layout in %s\n' "${postgres_jobspec}" >&2
+	exit 1
+fi
 
 for setting in \
 	'"-c", "wal_level=replica"' \
@@ -29,6 +27,30 @@ for setting in \
 		exit 1
 	fi
 done
+
+for two_host_contract in \
+	'@10.64.0.2:5432/rezics?sslmode=disable' \
+	'POSTGRES_HOST: "10.64.0.2"' \
+	'({Items: .Items} | tojson)'; do
+	if ! grep -Fq "${two_host_contract}" deploy/scripts/install-production-variables.sh; then
+		printf 'Production Variable bootstrap is missing the two-host contract: %s\n' \
+			"${two_host_contract}" >&2
+		exit 1
+	fi
+done
+
+for production_script in deploy/scripts/deploy-production.sh deploy/scripts/deploy-production-infrastructure.sh; do
+	if ! grep -Fq 'wait-loopback-service.sh" 10.64.0.2 5432' "${production_script}"; then
+		printf 'Production deployment still waits for an A-local PostgreSQL socket: %s\n' \
+			"${production_script}" >&2
+		exit 1
+	fi
+done
+
+if ! grep -Fq 'Items: {' deploy/scripts/install-databasus-verification-agent.sh; then
+	printf '%s\n' 'Databasus agent bootstrap must submit a complete Nomad Variable specification' >&2
+	exit 1
+fi
 
 if ! grep -Fq '"-c", "pgroonga.enable_wal=off"' deploy/nomad/postgres.nomad.hcl; then
 	printf '%s\n' 'Legacy PGroonga WAL must be explicitly disabled with WAL Resource Manager' >&2
@@ -95,6 +117,13 @@ fi
 if ! grep -Fq 'FROM postgres AS postgres-verification' Dockerfile || \
 	! grep -Fq 'scripts/render-search-restore-acceptance.ts' Dockerfile; then
 	printf '%s\n' 'The PostgreSQL verification image must generate REZICS search acceptance' >&2
+	exit 1
+fi
+
+readonly search_acceptance_template="services/main/docker/postgres-verification/search-acceptance.sql.template"
+if grep -Fq 'alias.deleted_at' "${search_acceptance_template}" || \
+	[[ "$(grep -F -c 'alias.withdrawn_at IS NULL' "${search_acceptance_template}" || true)" != 2 ]]; then
+	printf '%s\n' 'Restore acceptance must use the current unit_alias withdrawal contract' >&2
 	exit 1
 fi
 

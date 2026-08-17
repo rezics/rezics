@@ -73,8 +73,8 @@ try {
 		throw new Error("PostgreSQL relation and WAL I/O timing must both be enabled");
 	if (setting.walLevel !== "replica" || setting.maxReplicationSlots !== "0")
 		throw new Error("PostgreSQL must retain replica WAL without logical replication slots");
-	if (setting.maxWalSize !== "8192" || setting.minWalSize !== "2048")
-		throw new Error("PostgreSQL WAL capacity must be max 8GB and min 2GB");
+	if (setting.maxWalSize !== "16384" || setting.minWalSize !== "4096")
+		throw new Error("PostgreSQL WAL capacity must be max 16GB and min 4GB");
 
 	const extensions = await adminDatabase.execute<{ name: string; version: string }>(sql`
 		select extname as name, extversion as version

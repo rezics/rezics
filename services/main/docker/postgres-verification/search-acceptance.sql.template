@@ -135,7 +135,7 @@ BEGIN
     SELECT 1
     FROM public.unit_alias AS alias
     JOIN public.unit_alias_vote_stat AS vote_stat ON vote_stat.alias_id = alias.id
-    WHERE alias.deleted_at IS NULL
+    WHERE alias.withdrawn_at IS NULL
       AND vote_stat.score >= {{ALIAS_SCORE_THRESHOLD}}
       AND (alias.language IS NULL OR alias.language = 'en')
       AND alias.term &@~ public.pgroonga_query_escape('rezicsaliasacceptance')
@@ -147,7 +147,7 @@ BEGIN
   PERFORM 1
   FROM public.unit_alias AS alias
   JOIN public.unit_alias_vote_stat AS vote_stat ON vote_stat.alias_id = alias.id
-  WHERE alias.deleted_at IS NULL
+  WHERE alias.withdrawn_at IS NULL
     AND vote_stat.score >= {{ALIAS_SCORE_THRESHOLD}}
     AND (alias.language IS NULL OR alias.language = 'en')
     AND alias.term &@~ public.pgroonga_query_escape('rezicsaliasacceptance')

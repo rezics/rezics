@@ -36,7 +36,7 @@ fi
 "${repository_root}/deploy/scripts/apply-nomad-job.sh" \
 	"${jobs_directory}/postgres.nomad.hcl" \
 	-var "postgres_image=${postgres_image}"
-"${repository_root}/deploy/scripts/wait-loopback-service.sh" 127.0.0.1 5432
+"${repository_root}/deploy/scripts/wait-loopback-service.sh" 10.64.0.2 5432
 "${repository_root}/deploy/scripts/wait-nomad-deployment.sh" \
 	--namespace "${infrastructure_namespace}" rezics-postgres
 

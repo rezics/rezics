@@ -73,7 +73,8 @@ jq -e '
   (.r2.endpoint | startswith("https://"))
 ' "${credentials_file}" >/dev/null
 
-readonly r2_endpoint="$(jq -er '.r2.endpoint' "${credentials_file}")"
+r2_endpoint="$(jq -er '.r2.endpoint' "${credentials_file}")"
+readonly r2_endpoint
 for workload in application backupManager; do
 	access_key_id="$(jq -er --arg workload "${workload}" '.r2[$workload].accessKeyId' "${credentials_file}")"
 	secret_access_key="$(jq -er --arg workload "${workload}" '.r2[$workload].secretAccessKey' "${credentials_file}")"
@@ -113,7 +114,7 @@ jq -n \
   ($applicationDatabasePassword | value) as $applicationDatabasePassword |
   ($backupDatabasePassword | value) as $backupDatabasePassword |
   {
-    DATABASE_URL: ("postgres://" + $applicationDatabaseUsername + ":" + $applicationDatabasePassword + "@127.0.0.1:5432/rezics?sslmode=disable"),
+    DATABASE_URL: ("postgres://" + $applicationDatabaseUsername + ":" + $applicationDatabasePassword + "@10.64.0.2:5432/rezics?sslmode=disable"),
     BETTER_AUTH_SECRET: ($betterAuthSecret | value),
     BETTER_AUTH_URL: "https://www.rezics.com",
     BETTER_AUTH_TRUSTED_ORIGINS: "https://www.rezics.com",
@@ -136,8 +137,8 @@ jq -n \
     RECOMMENDATION_REFRESH_INTERVAL_MS: "3600000"
   } as $applicationRuntime |
   ($applicationRuntime + {
-    DATABASE_ADMIN_URL: ("postgres://" + $postgresUsername + ":" + $postgresPassword + "@127.0.0.1:5432/rezics?sslmode=disable"),
-    DATABASE_BACKUP_URL: ("postgres://" + $backupDatabaseUsername + ":" + $backupDatabasePassword + "@127.0.0.1:5432/rezics?sslmode=disable")
+    DATABASE_ADMIN_URL: ("postgres://" + $postgresUsername + ":" + $postgresPassword + "@10.64.0.2:5432/rezics?sslmode=disable"),
+    DATABASE_BACKUP_URL: ("postgres://" + $backupDatabaseUsername + ":" + $backupDatabasePassword + "@10.64.0.2:5432/rezics?sslmode=disable")
   }) as $databaseOperations |
   {
     variables: [
@@ -166,7 +167,7 @@ jq -n \
         Namespace: "rezics-infrastructure",
         Path: "database/databasus-source",
         Items: {
-          POSTGRES_HOST: "127.0.0.1",
+          POSTGRES_HOST: "10.64.0.2",
           POSTGRES_PORT: "5432",
           POSTGRES_DATABASE: "rezics",
           POSTGRES_USERNAME: $backupDatabaseUsername,
@@ -184,10 +185,10 @@ jq -n \
   }
 ' >"${variables_file}"
 
-while IFS=$'\t' read -r namespace path items; do
-	printf '%s' "${items}" | "${nomad_operator}" var put -namespace="${namespace}" -in=json "${path}" - >/dev/null
+while IFS=$'\t' read -r namespace path specification; do
+	printf '%s' "${specification}" | "${nomad_operator}" var put -namespace="${namespace}" -in=json "${path}" - >/dev/null
 	printf '%s %s\n' "${namespace}" "${path}" >>"${installed_file}"
-done < <(jq -rc '.variables[] | [.Namespace, .Path, (.Items | tojson)] | @tsv' "${variables_file}")
+done < <(jq -rc '.variables[] | [.Namespace, .Path, ({Items: .Items} | tojson)] | @tsv' "${variables_file}")
 
 bootstrap_complete=true
 printf '%s\n' "Installed production runtime, PostgreSQL, and Databasus control/source Variables"

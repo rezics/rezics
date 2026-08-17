@@ -49,8 +49,10 @@ if "${nomad_command}" var get -namespace="${namespace}" "${variable_path}" >/dev
 fi
 
 jq -n --arg id "${agent_id}" --arg token "${agent_token}" '{
-  DATABASUS_VERIFICATION_AGENT_ID: $id,
-  DATABASUS_VERIFICATION_AGENT_TOKEN: $token
+  Items: {
+    DATABASUS_VERIFICATION_AGENT_ID: $id,
+    DATABASUS_VERIFICATION_AGENT_TOKEN: $token
+  }
 }' | "${nomad_command}" var put -namespace="${namespace}" -in=json \
 	"${variable_path}" - >/dev/null
 unset agent_token
