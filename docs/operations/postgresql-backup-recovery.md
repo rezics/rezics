@@ -57,10 +57,12 @@ repository passed to the Databasus verification agent. Databasus itself must be
 or different versions.
 
 The NixOS host must define a writable `rezics-databasus` host volume. The Databasus allocation
-mounts it at `/databasus-data`, exposes port 4005 only on loopback, and mounts its `secret.key`
-read-only from `rezics-infrastructure/database/databasus-control`. That independently stored key
-is sufficient for Databasus's documented manual recovery path even if its allocation and control
-database are lost.
+mounts it at `/databasus-data`, advertises port 4005 only on B's WireGuard network, and mounts its
+`secret.key` read-only from `rezics-infrastructure/database/databasus-control`. B's firewall
+allows that port only on `wg-rezics`; A exposes it to the existing Cloudflare Tunnel through a
+socket-activated loopback proxy, so there is no public origin port or idle proxy process. The
+independently stored key is sufficient for Databasus's documented manual recovery path even if
+its allocation and control database are lost.
 
 Run `install-production-variables.sh` once before the first deployment. Its input has separate
 `r2.application` and `r2.backupManager` credentials. It tests both buckets, creates a distinct
@@ -74,7 +76,7 @@ read-only PostgreSQL source role, generates the Databasus master key, and stores
 | `rezics-infrastructure` | `database/databasus-verification-agent` | Verification-agent identity and one-time token     |
 
 Never print a complete Variable or paste its secret items into a ticket, shell history, or
-Databasus URL. Access the loopback-only UI through an authenticated operator tunnel.
+Databasus URL. Access the UI only through the Cloudflare Access-protected operator tunnel.
 
 ## One-time Databasus configuration
 

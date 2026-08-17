@@ -37,7 +37,7 @@ job "rezics-databasus" {
 
       port "http" {
         static       = 4005
-        host_network = "loopback"
+        host_network = "wireguard"
       }
     }
 

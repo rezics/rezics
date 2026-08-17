@@ -127,6 +127,7 @@ fi
 for required in \
 	'databasus/databasus:v3\.51\.0@sha256:' \
 	'database/databasus-control' \
+	'host_network = "wireguard"' \
 	'/databasus-data/secret.key:ro'; do
 	if ! grep -Eq "${required}" deploy/scripts/deploy-production-infrastructure.sh \
 		deploy/nomad/databasus.nomad.hcl; then
