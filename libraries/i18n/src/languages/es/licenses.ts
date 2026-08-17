@@ -12,6 +12,9 @@ const options = {
 	"cc-by-sa-4.0": {
 		label: `${verbatimTerms.cc.value} Reconocimiento–CompartirIgual 4.0 Internacional`,
 	},
+	"cc-by-sa-3.0": {
+		label: `${verbatimTerms.cc.value} Reconocimiento–CompartirIgual 3.0 no portada`,
+	},
 	"all-rights-reserved": { label: "Todos los derechos reservados" },
 	"cc-by-nc-4.0": {
 		label: `${verbatimTerms.cc.value} Reconocimiento–NoComercial 4.0 Internacional`,

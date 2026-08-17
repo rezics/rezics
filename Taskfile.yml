@@ -198,6 +198,20 @@ tasks:
               vars:
                   CLI_ARGS: reindex --yes
 
+    local:showcase:
+        desc: Reset to Bootstrap only, then install sibling showcase packs (does not run Seed).
+        prompt: This deletes the local application database and installs showcase packs. Continue?
+        cmds:
+            - task: infra:start
+            - task: services-main:db:reset-bootstrap
+              vars:
+                  CLI_ARGS: --yes
+            - task: services-main:content-pack:apply
+            - task: services-main:search:index
+              vars:
+                  CLI_ARGS: reindex --yes
+            - task: services-main:content-pack:verify
+
     local:reset:
         desc: Reset and seed the local database; its PGroonga indexes are maintained in-database.
         prompt: This deletes and recreates the local application database. Continue?

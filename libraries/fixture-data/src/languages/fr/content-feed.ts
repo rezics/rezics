@@ -22,7 +22,7 @@ export default {
 	],
 	realms: [
 		{
-			name: "A Certain Magical Index",
+			name: "Archive Atlas",
 			initials: "I",
 			summary: "Discussions sur l'univers, les personnages, l'intrigue et les idées de la série.",
 		},
@@ -40,8 +40,8 @@ export default {
 	],
 	post: {
 		title:
-			"Pourquoi le réseau Misaka est-il la conscience collective la plus singulière d'Academy City ?",
-		body: "Le réseau Misaka dépasse la simple somme des esprits individuels. Son support électromagnétique franchit les limites des capacités personnelles tout en préservant les différences entre chaque individu.",
+			"Pourquoi le réseau de la Grille est-il la conscience collective la plus singulière de ce monde fictif ?",
+		body: "Le réseau de la Grille dépasse la simple somme des esprits individuels. Son support électromagnétique franchit les limites des capacités personnelles tout en préservant les différences entre chaque individu.",
 		mediaAlt: "Une ville de nuit traversée par des lignes de réseau lumineuses",
 	},
 	collection: {

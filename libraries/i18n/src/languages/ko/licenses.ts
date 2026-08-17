@@ -12,6 +12,9 @@ const options = {
 	"cc-by-sa-4.0": {
 		label: `${verbatimTerms.cc.value} 저작자표시-동일조건변경허락 4.0 국제`,
 	},
+	"cc-by-sa-3.0": {
+		label: `${verbatimTerms.cc.value} 저작자표시-동일조건변경허락 3.0 이식되지 않음`,
+	},
 	"all-rights-reserved": { label: "판권 소유" },
 	"cc-by-nc-4.0": {
 		label: `${verbatimTerms.cc.value} 저작자표시-비영리 4.0 국제`,

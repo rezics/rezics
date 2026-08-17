@@ -22,7 +22,7 @@ export default {
 	],
 	realms: [
 		{
-			name: "A Certain Magical Index",
+			name: "Archive Atlas",
 			initials: "I",
 			summary: "Conversaciones sobre el mundo, los personajes, la trama y las ideas de la serie.",
 		},
@@ -38,8 +38,8 @@ export default {
 		},
 	],
 	post: {
-		title: "¿Por qué la Red Misaka es la mente colectiva más singular de Ciudad Academia?",
-		body: "La Red Misaka es más que la suma de varias mentes individuales. Su medio electromagnético supera los límites de las capacidades personales sin borrar las diferencias entre cada individuo.",
+		title: "¿Por qué la Red de la Rejilla es la mente colectiva más singular de este mundo ficticio?",
+		body: "La Red de la Rejilla es más que la suma de varias mentes individuales. Su medio electromagnético supera los límites de las capacidades personales sin borrar las diferencias entre cada individuo.",
 		mediaAlt: "Una ciudad nocturna atravesada por rutas luminosas de red",
 	},
 	collection: {

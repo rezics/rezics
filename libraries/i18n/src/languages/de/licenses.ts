@@ -13,6 +13,9 @@ const options = {
 	"cc-by-sa-4.0": {
 		label: `${verbatimTerms.cc.value} Namensnennung–Weitergabe unter gleichen Bedingungen 4.0 International`,
 	},
+	"cc-by-sa-3.0": {
+		label: `${verbatimTerms.cc.value} Namensnennung–Weitergabe unter gleichen Bedingungen 3.0 Unportiert`,
+	},
 	"all-rights-reserved": { label: "Alle Rechte vorbehalten" },
 	"cc-by-nc-4.0": {
 		label: `${verbatimTerms.cc.value} Namensnennung–Nicht kommerziell 4.0 International`,

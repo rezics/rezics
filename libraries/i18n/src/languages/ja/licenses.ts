@@ -12,6 +12,9 @@ const options = {
 	"cc-by-sa-4.0": {
 		label: `${verbatimTerms.cc.value} 表示–継承 4.0 国際`,
 	},
+	"cc-by-sa-3.0": {
+		label: `${verbatimTerms.cc.value} 表示–継承 3.0 非移植`,
+	},
 	"all-rights-reserved": { label: "無断複写・転載を禁ず" },
 	"cc-by-nc-4.0": {
 		label: `${verbatimTerms.cc.value} 表示–非営利 4.0 国際`,

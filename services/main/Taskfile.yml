@@ -348,6 +348,36 @@ tasks:
             - test -n "${DATABASE_ADMIN_URL:-}"
             - yarn exec atlas migrate status --env main --url "${DATABASE_ADMIN_URL}"
 
+    content-pack:apply:
+        desc: Install showcase packs from a sibling checkout or --from directory (not used by CI Seed).
+        cmds:
+            - yarn exec tsx scripts/content-pack.ts apply {{.CLI_ARGS}}
+
+    content-pack:plan:
+        desc: Preview showcase pack installation without writing Units.
+        cmds:
+            - yarn exec tsx scripts/content-pack.ts plan {{.CLI_ARGS}}
+
+    content-pack:verify:
+        desc: Verify an installed showcase pack against the local checkout.
+        cmds:
+            - yarn exec tsx scripts/content-pack.ts verify {{.CLI_ARGS}}
+
+    content-pack:status:
+        desc: List installed showcase packs.
+        cmds:
+            - yarn exec tsx scripts/content-pack.ts status {{.CLI_ARGS}}
+
+    db:reset-bootstrap:
+        desc: Reset the local database and install Bootstrap only (no Seed, no showcase packs).
+        internal: true
+        cmds:
+            - task: db:atlas:check
+            - yarn exec tsx scripts/reset-database.ts {{.CLI_ARGS}}
+            - task: db:install
+              vars:
+                  CLI_ARGS: --yes
+
     db:seed:
         desc: Build local/CI platform infrastructure and Fixtures, then rebuild derived projections.
         cmds:

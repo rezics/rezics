@@ -20,9 +20,9 @@ export default {
 	],
 	realms: [
 		{
-			name: "A Certain Magical Index",
-			initials: "I",
-			summary: "Discussion of the series, its setting, characters, and ideas.",
+			name: "Archive Atlas",
+			initials: "X",
+			summary: "Discussion of a fictional series, its setting, characters, and ideas.",
 		},
 		{
 			name: "Collective Intelligence",
@@ -36,12 +36,12 @@ export default {
 		},
 	],
 	post: {
-		title: "Why is the Misaka Network Academy City's most unusual group mind?",
-		body: "The Misaka Network is more than a sum of individual minds. Its electromagnetic medium crosses the limits of personal ability while preserving differences between individuals.",
+		title: "Why is the Lattice Network the setting's most unusual group mind?",
+		body: "The Lattice Network is more than a sum of individual minds. Its electromagnetic medium crosses the limits of personal ability while preserving differences between individuals.",
 		mediaAlt: "A night skyline crossed by luminous network paths",
 	},
 	collection: {
-		title: "Where science and magic meet",
+		title: "Where science and story meet",
 		body: "A collection of chapters, reviews, and worldbuilding notes worth revisiting.",
 		coverAlt: "An abstract blue and amber book cover",
 	},

@@ -16,6 +16,7 @@ describe("publication License registry", () => {
 		expect(PublicationLicenseIds).toEqual([
 			"cc-by-nc-sa-4.0",
 			"cc-by-sa-4.0",
+			"cc-by-sa-3.0",
 			"all-rights-reserved",
 			"cc-by-nc-4.0",
 			"cc-by-4.0",

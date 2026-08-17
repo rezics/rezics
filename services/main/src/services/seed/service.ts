@@ -1130,19 +1130,18 @@ async function seedUnitFixtures(
 	};
 }
 
-function toaruWikiBody(language: "zh" | "en") {
+function exampleWikiBody(language: "zh" | "en") {
 	const copy =
 		language === "zh"
 			? {
-					heading: "歡迎來到魔法禁書目錄中文維基",
-					intro: "這裡整理《魔法禁書目錄》及其科學側衍生作品的世界觀、人物與作品資料。",
+					heading: "歡迎來到示例百科",
+					intro: "這裡整理一套虛構作品的世界觀、人物與條目，供開發與契約測試使用。",
 					guide: "第一次來到本站？從作品導覽與世界觀條目開始探索。",
 					sections: ["作品與系列", "角色與組織", "世界觀與術語"],
 				}
 			: {
-					heading: "Welcome to the A Certain Magical Index Wiki",
-					intro:
-						"Explore the setting, characters, and works of A Certain Magical Index and its science-side spin-offs.",
+					heading: "Welcome to the Example Wiki",
+					intro: "Explore a fictional setting, characters, and works used only as development fixtures.",
 					guide: "New here? Start with the reading guide and the overview of the setting.",
 					sections: ["Works and series", "Characters and groups", "Setting and terminology"],
 				};
@@ -1216,7 +1215,7 @@ function toaruWikiBody(language: "zh" | "en") {
 	return body;
 }
 
-async function seedToaruWiki(
+async function seedExampleWiki(
 	tx: DatabaseTransaction,
 	data: SeedData,
 	profiles: readonly CreatedProfile[],
@@ -1239,13 +1238,13 @@ async function seedToaruWiki(
 	const zoneLocalizations = [
 		{
 			language: "zh" as const,
-			title: "魔法禁書目錄中文維基",
-			summary: "《魔法禁書目錄》、《科學超電磁砲》及相關作品的百科專區。",
+			title: "示例百科",
+			summary: "虛構作品的百科專區，供開發與契約測試使用。",
 		},
 		{
 			language: "en" as const,
-			title: "A Certain Magical Index Wiki",
-			summary: "An encyclopedia for A Certain Magical Index, Railgun, and related works.",
+			title: "Example Wiki",
+			summary: "A fictional encyclopedia used only as a development fixture.",
 		},
 	];
 	for (const [index, localization] of zoneLocalizations.entries())
@@ -1280,7 +1279,7 @@ async function seedToaruWiki(
 	await tx.insert(unitSlugAddress).values({
 		kind: "canonical",
 		scopeUnitId: TopLevelSlugNamespaceUnitIds.zones,
-		slug: "toaru",
+		slug: "example-wiki",
 		targetUnitId: zoneUnit.id,
 		createdAt,
 		updatedAt: createdAt,
@@ -1299,7 +1298,7 @@ async function seedToaruWiki(
 		labelCopy.map((_, index) =>
 			createDescriptor(data, {
 				kind: "label",
-				seedKey: `toaru-navigation-${position(index)}`,
+				seedKey: `example-wiki-navigation-${position(index)}`,
 				ownerProfileId: owner.id,
 				localizationKind: "title",
 				stateIndex: 8_000 + index,
@@ -1340,7 +1339,7 @@ async function seedToaruWiki(
 	const [wikiPost] = await insertUnits(tx, [
 		createDescriptor(data, {
 			kind: "post",
-			seedKey: "toaru-wiki-home",
+			seedKey: "example-wiki-home",
 			ownerProfileId: owner.id,
 			localizationKind: "post",
 			stateIndex: 8_100,
@@ -1361,9 +1360,9 @@ async function seedToaruWiki(
 			unitId: wikiPost.id,
 			language,
 			position: fractionalPositionAt(index),
-			title: language === "zh" ? "魔法禁書目錄中文維基" : "A Certain Magical Index Wiki",
+			title: language === "zh" ? "示例百科" : "Example Wiki",
 			summary: zoneLocalizations[index]!.summary,
-			content: toaruWikiBody(language),
+			content: exampleWikiBody(language),
 			contentStatus: "published" as const,
 			createdAt: wikiPost.createdAt,
 			updatedAt: wikiPost.updatedAt,
@@ -1409,7 +1408,7 @@ async function seedToaruWiki(
 	const [pageUnit] = await insertUnits(tx, [
 		createDescriptor(data, {
 			kind: "zone_page",
-			seedKey: "toaru-zone-home-page",
+			seedKey: "example-wiki-zone-home-page",
 			ownerProfileId: owner.id,
 			localizationKind: "title",
 			stateIndex: 8_101,
@@ -1436,7 +1435,7 @@ async function seedToaruWiki(
 			unitId: pageUnit.id,
 			language,
 			position: fractionalPositionAt(index),
-			title: language === "zh" ? "魔法禁書目錄中文維基" : "A Certain Magical Index Wiki",
+			title: language === "zh" ? "示例百科" : "Example Wiki",
 			content: pageDocument,
 			contentStatus: "published" as const,
 			createdAt: pageUnit.createdAt,
@@ -3266,7 +3265,7 @@ export class DatabaseSeedService {
 				console.info("Seeding Unit fixtures scenario");
 				const unitFixtures = await seedUnitFixtures(tx, data, profiles);
 				console.info("Seeding official Zone content scenario");
-				await seedToaruWiki(tx, data, profiles, unitFixtures);
+				await seedExampleWiki(tx, data, profiles, unitFixtures);
 				console.info("Seeding content scenario");
 				const content = await seedContent(tx, data, profiles, unitFixtures);
 				console.info("Seeding structure scenario");

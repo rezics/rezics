@@ -1,6 +1,7 @@
 export const PublicationLicenseIds = [
 	"cc-by-nc-sa-4.0",
 	"cc-by-sa-4.0",
+	"cc-by-sa-3.0",
 	"all-rights-reserved",
 	"cc-by-nc-4.0",
 	"cc-by-4.0",
@@ -42,6 +43,12 @@ export const PublicationLicenseRegistry = {
 		id: "cc-by-sa-4.0",
 		url: "https://creativecommons.org/licenses/by-sa/4.0/",
 		spdxId: "CC-BY-SA-4.0",
+	},
+	"cc-by-sa-3.0": {
+		kind: "license",
+		id: "cc-by-sa-3.0",
+		url: "https://creativecommons.org/licenses/by-sa/3.0/",
+		spdxId: "CC-BY-SA-3.0",
 	},
 	"all-rights-reserved": {
 		kind: "rights-reserved",
