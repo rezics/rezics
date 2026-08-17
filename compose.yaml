@@ -43,6 +43,8 @@ services:
             REZICS_DATABASE_USERNAME: rezics_app
             REZICS_DATABASE_BACKUP_PASSWORD: rezics_backup
             REZICS_DATABASE_BACKUP_USERNAME: rezics_backup
+            REZICS_DATABASE_MONITORING_PASSWORD: rezics_monitoring
+            REZICS_DATABASE_MONITORING_USERNAME: rezics_monitoring
         ports:
             - "${COMPOSE_BIND_ADDRESS:-127.0.0.1}:${POSTGRES_HOST_PORT:-5432}:5432"
         volumes:

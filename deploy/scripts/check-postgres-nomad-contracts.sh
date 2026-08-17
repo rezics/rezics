@@ -66,6 +66,16 @@ for monitoring_contract in \
 	fi
 done
 
+for monitoring_variable in \
+	'REZICS_DATABASE_MONITORING_USERNAME' \
+	'REZICS_DATABASE_MONITORING_PASSWORD'; do
+	if ! grep -Fq "${monitoring_variable}" compose.yaml; then
+		printf 'Disposable PostgreSQL is missing the monitoring role input: %s\n' \
+			"${monitoring_variable}" >&2
+		exit 1
+	fi
+done
+
 for production_script in deploy/scripts/deploy-production.sh deploy/scripts/deploy-production-infrastructure.sh; do
 	if ! grep -Fq 'wait-loopback-service.sh" 10.64.0.2 5432' "${production_script}"; then
 		printf 'Production deployment still waits for an A-local PostgreSQL socket: %s\n' \
