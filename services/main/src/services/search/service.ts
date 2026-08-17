@@ -2121,7 +2121,7 @@ async function searchDomainScan(
 			].filter(isContentLanguage),
 		),
 	];
-	const expandedQuery = expandSearchQuery(request.query ?? "", presentationLanguages);
+	const expandedQuery = await expandSearchQuery(request.query ?? "", presentationLanguages);
 	const conditions = buildSearchConditions(category, request, searchExpression);
 	const sort = request.sort ?? (request.query?.trim() ? "relevance" : "best");
 	const limit = request.limit ?? 20;
@@ -2321,9 +2321,9 @@ interface PreparedGlobalSearchRequest {
 	readonly candidateSet?: SQL;
 }
 
-function prepareGlobalSearchRequest(
+async function prepareGlobalSearchRequest(
 	request: GlobalSearchIdentifiersRequest,
-): PreparedGlobalSearchRequest {
+): Promise<PreparedGlobalSearchRequest> {
 	if (!request.branches.length) throw new InvalidSearch("Search requires at least one category");
 	if (new Set(request.branches.map(({ category }) => category)).size !== request.branches.length)
 		throw new InvalidSearch("Search categories must be unique");
@@ -2368,7 +2368,7 @@ function prepareGlobalSearchRequest(
 				}
 			: {}),
 		languageBoundary,
-		query: expandSearchQuery(request.query ?? "", languageBoundary),
+		query: await expandSearchQuery(request.query ?? "", languageBoundary),
 	};
 }
 
@@ -2426,7 +2426,7 @@ export async function searchGlobalIdentifiers(
 	request: GlobalSearchIdentifiersRequest,
 ): Promise<SearchDomainScanResult<SearchIdentifier>> {
 	const startedAt = performance.now();
-	const prepared = prepareGlobalSearchRequest(request);
+	const prepared = await prepareGlobalSearchRequest(request);
 	const page = await searchCandidatePage({
 		branches: prepared.branches,
 		candidateSet: prepared.candidateSet,
@@ -2595,7 +2595,7 @@ export async function searchDomainFacets(
 			].filter(isContentLanguage),
 		),
 	];
-	const expandedQuery = expandSearchQuery(request.query ?? "", languageBoundary);
+	const expandedQuery = await expandSearchQuery(request.query ?? "", languageBoundary);
 	const candidates = await searchCandidatePage({
 		branches: [
 			{
@@ -2739,7 +2739,7 @@ export async function searchGlobalFacets(
 			].filter(isContentLanguage),
 		),
 	];
-	const expandedQuery = expandSearchQuery(first.request.query ?? "", languageBoundary);
+	const expandedQuery = await expandSearchQuery(first.request.query ?? "", languageBoundary);
 	const candidates = await searchCandidatePage({
 		branches: preparedBranches,
 		query: expandedQuery,
@@ -2774,7 +2774,7 @@ export async function searchGlobalIdentifiersWithFacets(
 	}[];
 }> {
 	const startedAt = performance.now();
-	const prepared = prepareGlobalSearchRequest(request);
+	const prepared = await prepareGlobalSearchRequest(request);
 	const fieldsByCategory = new Map(
 		facetFields.map(({ category, fields }) => [category, fields] as const),
 	);

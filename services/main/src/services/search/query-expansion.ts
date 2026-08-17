@@ -1,4 +1,4 @@
-import { OpenCC } from "opencc";
+import OpenCC from "opencc-wasm";
 
 import type { ContentLanguage } from "@rezics/i18n";
 
@@ -6,7 +6,7 @@ import type { ContentLanguage } from "@rezics/i18n";
  * Changes to the OpenCC package, configurations, or expansion rules invalidate
  * Search cursors because they can change the candidate set for the same input.
  */
-export const SearchQueryExpansionPolicyVersion = "opencc-1.4.1-s2twp-tw2sp-v1" as const;
+export const SearchQueryExpansionPolicyVersion = "opencc-wasm-0.13.0-s2twp-tw2sp-v1" as const;
 
 const MaxSearchQueryVariants = 3 as const;
 const MaxSearchQueryVariantLength = 512 as const;
@@ -22,8 +22,26 @@ export interface ExpandedSearchQuery {
 	readonly policyVersion: typeof SearchQueryExpansionPolicyVersion;
 }
 
-const simplifiedToTaiwan = new OpenCC("s2twp.json");
-const taiwanToSimplified = new OpenCC("tw2sp.json");
+const SearchQueryExpansionConfigs = {
+	simplifiedToTaiwan: "s2twp",
+	taiwanToSimplified: "tw2sp",
+} as const;
+
+const simplifiedToTaiwan = OpenCC.Converter({
+	config: SearchQueryExpansionConfigs.simplifiedToTaiwan,
+});
+const taiwanToSimplified = OpenCC.Converter({
+	config: SearchQueryExpansionConfigs.taiwanToSimplified,
+});
+
+async function convertQueryVariant(
+	convert: (text: string) => Promise<string>,
+	query: string,
+): Promise<string> {
+	const converted = await convert(query);
+	if (typeof converted !== "string") throw new Error("OpenCC conversion must return a string");
+	return converted;
+}
 
 function asNonEmptyStringTuple(values: readonly string[]): NonEmptyStringTuple {
 	const first = values[0];
@@ -70,16 +88,16 @@ function addVariant(variants: string[], candidate: string): void {
  * the request-time work bounded and preserving the existing query semantics for
  * whitespace and punctuation.
  */
-export function expandSearchQuery(
+export async function expandSearchQuery(
 	input: string,
 	languageBoundary: readonly ContentLanguage[] = [],
-): ExpandedSearchQuery {
+): Promise<ExpandedSearchQuery> {
 	const query = input.trim().normalize("NFC");
 	const variants: string[] = [query];
 
 	if (query && isChineseExpansionEligible(query, languageBoundary)) {
-		addVariant(variants, simplifiedToTaiwan.convertSync(query));
-		addVariant(variants, taiwanToSimplified.convertSync(query));
+		addVariant(variants, await convertQueryVariant(simplifiedToTaiwan, query));
+		addVariant(variants, await convertQueryVariant(taiwanToSimplified, query));
 	}
 
 	return {

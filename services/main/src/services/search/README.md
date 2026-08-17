@@ -56,7 +56,7 @@ Feed/Search model, 500-million-row complexity boundary, and deployment cutover.
 
 The stored projection and its four canonical PGroonga indexes are unchanged. At the request
 boundary, `query-expansion.ts` NFC-normalizes and trims the input, keeps the original query, and
-adds at most two OpenCC 1.4.1 variants (`s2twp.json` and `tw2sp.json`). This covers both script
+adds at most two OpenCC WASM 0.13.0 variants (`s2twp` and `tw2sp`). This covers both script
 conversion and the Taiwan regional vocabulary mappings (for example, `软件`/`軟體` and
 `服务器`/`伺服器`) without a per-token Cartesian product. Japanese-bound queries and queries
 containing kana or Hangul are not expanded. The expansion policy version is included in every

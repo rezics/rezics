@@ -4700,41 +4700,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@opencc/opencc-darwin-arm64@npm:1.4.1":
-  version: 1.4.1
-  resolution: "@opencc/opencc-darwin-arm64@npm:1.4.1"
-  conditions: os=darwin & cpu=arm64
-  languageName: node
-  linkType: hard
-
-"@opencc/opencc-darwin-x64@npm:1.4.1":
-  version: 1.4.1
-  resolution: "@opencc/opencc-darwin-x64@npm:1.4.1"
-  conditions: os=darwin & cpu=x64
-  languageName: node
-  linkType: hard
-
-"@opencc/opencc-linux-arm64@npm:1.4.1":
-  version: 1.4.1
-  resolution: "@opencc/opencc-linux-arm64@npm:1.4.1"
-  conditions: os=linux & cpu=arm64
-  languageName: node
-  linkType: hard
-
-"@opencc/opencc-linux-x64@npm:1.4.1":
-  version: 1.4.1
-  resolution: "@opencc/opencc-linux-x64@npm:1.4.1"
-  conditions: os=linux & cpu=x64
-  languageName: node
-  linkType: hard
-
-"@opencc/opencc-win32-x64@npm:1.4.1":
-  version: 1.4.1
-  resolution: "@opencc/opencc-win32-x64@npm:1.4.1"
-  conditions: os=win32 & cpu=x64
-  languageName: node
-  linkType: hard
-
 "@opentelemetry/api-logs@npm:0.220.0":
   version: 0.220.0
   resolution: "@opentelemetry/api-logs@npm:0.220.0"
@@ -5598,7 +5563,7 @@ __metadata:
     nanostores: "npm:^1.3.0"
     native-i18n: "npm:0.2.0"
     openapi-types: "npm:^12.1.3"
-    opencc: "npm:1.4.1"
+    opencc-wasm: "npm:0.13.0"
     pg: "npm:^8"
     sharp: "npm:^0.34.5"
     srvx: "npm:^0.11.21"
@@ -9019,13 +8984,6 @@ __metadata:
   version: 1.41.2
   resolution: "@zag-js/utils@npm:1.41.2"
   checksum: 10c0/5fcfa6caaa1736540daad883d637f0f3b4f64d5fff98582a87bb06b6fe937b0bfac3feaffcd12ef9b14e61044473bdd845bd59fe8b213388d421215d8ffca4ee
-  languageName: node
-  linkType: hard
-
-"abbrev@npm:^4.0.0":
-  version: 4.0.0
-  resolution: "abbrev@npm:4.0.0"
-  checksum: 10c0/b4cc16935235e80702fc90192e349e32f8ef0ed151ef506aa78c81a7c455ec18375c4125414b99f84b2e055199d66383e787675f0bcd87da7a4dbd59f9eac1d5
   languageName: node
   linkType: hard
 
@@ -14793,50 +14751,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"node-addon-api@npm:^8.8.0":
-  version: 8.9.2
-  resolution: "node-addon-api@npm:8.9.2"
-  dependencies:
-    node-gyp: "npm:latest"
-  checksum: 10c0/5cf5231e0da22b22862e6b593982a0e390ca89d022a9ac666c83deceecf20378cb8afe47c456ac1a58a9f62ef60099c950aec05814a287fdfd751d9d154fb12d
-  languageName: node
-  linkType: hard
-
 "node-fetch-native@npm:^1.6.7":
   version: 1.6.7
   resolution: "node-fetch-native@npm:1.6.7"
   checksum: 10c0/8b748300fb053d21ca4d3db9c3ff52593d5e8f8a2d9fe90cbfad159676e324b954fdaefab46aeca007b5b9edab3d150021c4846444e4e8ab1f4e44cd3807be87
-  languageName: node
-  linkType: hard
-
-"node-gyp-build@npm:^4.8.4":
-  version: 4.8.4
-  resolution: "node-gyp-build@npm:4.8.4"
-  bin:
-    node-gyp-build: bin.js
-    node-gyp-build-optional: optional.js
-    node-gyp-build-test: build-test.js
-  checksum: 10c0/444e189907ece2081fe60e75368784f7782cfddb554b60123743dfb89509df89f1f29c03bbfa16b3a3e0be3f48799a4783f487da6203245fa5bed239ba7407e1
-  languageName: node
-  linkType: hard
-
-"node-gyp@npm:^12.3.0":
-  version: 12.4.0
-  resolution: "node-gyp@npm:12.4.0"
-  dependencies:
-    env-paths: "npm:^2.2.0"
-    exponential-backoff: "npm:^3.1.1"
-    graceful-fs: "npm:^4.2.6"
-    nopt: "npm:^9.0.0"
-    proc-log: "npm:^6.0.0"
-    semver: "npm:^7.3.5"
-    tar: "npm:^7.5.4"
-    tinyglobby: "npm:^0.2.12"
-    undici: "npm:^6.25.0"
-    which: "npm:^6.0.0"
-  bin:
-    node-gyp: bin/node-gyp.js
-  checksum: 10c0/9acb7c798e124275a6f9c1f7eb64b5abd6196bb885a3945fb44ee0dccf435514e88cdfb0f228ee7ff76ef25107c1f39ff37a067bf92fd00b9aff9234db29ff9e
   languageName: node
   linkType: hard
 
@@ -14882,17 +14800,6 @@ __metadata:
   bin:
     nopt: bin/nopt.js
   checksum: 10c0/980d89257f9587f3e1f77877ddbf905d6aa3b738ec33e49a4fa1a059a0dd82eb28063982b150654a7ae9de386f2ead60e56172db7d37cf56de545f7392a2a26a
-  languageName: node
-  linkType: hard
-
-"nopt@npm:^9.0.0":
-  version: 9.0.0
-  resolution: "nopt@npm:9.0.0"
-  dependencies:
-    abbrev: "npm:^4.0.0"
-  bin:
-    nopt: bin/nopt.js
-  checksum: 10c0/1822eb6f9b020ef6f7a7516d7b64a8036e09666ea55ac40416c36e4b2b343122c3cff0e2f085675f53de1d2db99a2a89a60ccea1d120bcd6a5347bf6ceb4a7fd
   languageName: node
   linkType: hard
 
@@ -15052,32 +14959,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"opencc@npm:1.4.1":
-  version: 1.4.1
-  resolution: "opencc@npm:1.4.1"
-  dependencies:
-    "@opencc/opencc-darwin-arm64": "npm:1.4.1"
-    "@opencc/opencc-darwin-x64": "npm:1.4.1"
-    "@opencc/opencc-linux-arm64": "npm:1.4.1"
-    "@opencc/opencc-linux-x64": "npm:1.4.1"
-    "@opencc/opencc-win32-x64": "npm:1.4.1"
-    node-addon-api: "npm:^8.8.0"
-    node-gyp: "npm:^12.3.0"
-    node-gyp-build: "npm:^4.8.4"
-  dependenciesMeta:
-    "@opencc/opencc-darwin-arm64":
-      optional: true
-    "@opencc/opencc-darwin-x64":
-      optional: true
-    "@opencc/opencc-linux-arm64":
-      optional: true
-    "@opencc/opencc-linux-x64":
-      optional: true
-    "@opencc/opencc-win32-x64":
-      optional: true
-  bin:
-    opencc: node/cli.js
-  checksum: 10c0/7c5e639e38d7a91c2076503dacf05e6ae0476244dc9dda6e299b8368768f720207b1ad77a305f39f5ee005638b1f17d56bd27746e65bfd7b59325a93e276543d
+"opencc-wasm@npm:0.13.0":
+  version: 0.13.0
+  resolution: "opencc-wasm@npm:0.13.0"
+  checksum: 10c0/63df20b220099a9901978a4e39df048d6aa12f6b1d19be9e7a6a38c8d97c54d4c8b12d27c4658b352408e9cdc39d61da5453db25ce4df4fbcfab2bf2696ed9d2
   languageName: node
   linkType: hard
 
@@ -15521,13 +15406,6 @@ __metadata:
   version: 1.30.0
   resolution: "prismjs@npm:1.30.0"
   checksum: 10c0/f56205bfd58ef71ccfcbcb691fd0eb84adc96c6ff21b0b69fc6fdcf02be42d6ef972ba4aed60466310de3d67733f6a746f89f2fb79c00bf217406d465b3e8f23
-  languageName: node
-  linkType: hard
-
-"proc-log@npm:^6.0.0":
-  version: 6.1.0
-  resolution: "proc-log@npm:6.1.0"
-  checksum: 10c0/4f178d4062733ead9d71a9b1ab24ebcecdfe2250916a5b1555f04fe2eda972a0ec76fbaa8df1ad9c02707add6749219d118a4fc46dc56bdfe4dde4b47d80bb82
   languageName: node
   linkType: hard
 
@@ -18232,13 +18110,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"undici@npm:^6.25.0":
-  version: 6.28.0
-  resolution: "undici@npm:6.28.0"
-  checksum: 10c0/3029a70df06b38b5b2f30732932a1e92544c753cd82c8abdf0d35afad48e0ba91612e79fe3a442dbbb9434d6a9eba2b714d5ea28984c903dda2b5d5444f38354
-  languageName: node
-  linkType: hard
-
 "undici@npm:^8.4.1":
   version: 8.7.0
   resolution: "undici@npm:8.7.0"
@@ -19440,17 +19311,6 @@ __metadata:
   bin:
     node-which: ./bin/node-which
   checksum: 10c0/66522872a768b60c2a65a57e8ad184e5372f5b6a9ca6d5f033d4b0dc98aff63995655a7503b9c0a2598936f532120e81dd8cc155e2e92ed662a2b9377cc4374f
-  languageName: node
-  linkType: hard
-
-"which@npm:^6.0.0":
-  version: 6.0.1
-  resolution: "which@npm:6.0.1"
-  dependencies:
-    isexe: "npm:^4.0.0"
-  bin:
-    node-which: bin/which.js
-  checksum: 10c0/7e710e54ea36d2d6183bee2f9caa27a3b47b9baf8dee55a199b736fcf85eab3b9df7556fca3d02b50af7f3dfba5ea3a45644189836df06267df457e354da66d5
   languageName: node
   linkType: hard
 
