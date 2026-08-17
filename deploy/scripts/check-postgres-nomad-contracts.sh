@@ -28,6 +28,19 @@ for setting in \
 	fi
 done
 
+for setting in 'max_wal_size=16GB' 'min_wal_size=4GB'; do
+	if [[ "$(grep -F -c "${setting}" compose.yaml || true)" != 2 ]]; then
+		printf 'Development and CI PostgreSQL must match the production WAL contract: %s\n' \
+			"${setting}" >&2
+		exit 1
+	fi
+done
+
+if ! grep -Fq 'CLI_ARGS: --yes --suppress-credential-output' Taskfile.yml; then
+	printf '%s\n' 'CI seed installation must not print disposable platform credentials' >&2
+	exit 1
+fi
+
 for two_host_contract in \
 	'@10.64.0.2:5432/rezics?sslmode=disable' \
 	'POSTGRES_HOST: "10.64.0.2"' \

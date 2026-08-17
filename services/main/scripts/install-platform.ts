@@ -3,11 +3,14 @@ import { platformInstallationService } from "../src/services/bootstrap/service";
 import { database } from "../src/services/database";
 
 try {
-	const result = await platformInstallationService.install(
-		parsePlatformInstallCommandOptions(process.argv.slice(2)),
-	);
+	const options = parsePlatformInstallCommandOptions(process.argv.slice(2));
+	const result = await platformInstallationService.install(options);
 	if (result.status === "already_installed") {
 		console.info("Platform installation is already complete; no data was changed.");
+	} else if (options.credentialOutput === "suppress") {
+		console.info(
+			`Platform installation completed; ${result.issuedCredentials.length} initial credentials were intentionally suppressed.`,
+		);
 	} else {
 		console.info(
 			"Platform installation completed. Store these initial credentials now; they will not be shown again.",

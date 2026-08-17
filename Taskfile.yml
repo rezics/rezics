@@ -122,7 +122,7 @@ tasks:
         cmds:
             - task: services-main:db:install
               vars:
-                  CLI_ARGS: --yes
+                  CLI_ARGS: --yes --suppress-credential-output
             - task: services-main:platform:installation:check
             - task: services-main:db:seed
               vars:

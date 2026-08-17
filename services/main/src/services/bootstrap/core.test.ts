@@ -32,10 +32,16 @@ describe("platform core lifecycle", () => {
 
 	it("requires explicit installation and credential-rotation confirmation", () => {
 		expect(parsePlatformInstallCommandOptions(["--yes"])).toEqual({
+			credentialOutput: "print",
 			whenInstalled: "fail",
 		});
 		expect(parsePlatformInstallCommandOptions(["--if-needed", "--yes"])).toEqual({
+			credentialOutput: "print",
 			whenInstalled: "skip",
+		});
+		expect(parsePlatformInstallCommandOptions(["--yes", "--suppress-credential-output"])).toEqual({
+			credentialOutput: "suppress",
+			whenInstalled: "fail",
 		});
 		expect(() => parsePlatformInstallCommandOptions([])).toThrow(/without --yes/);
 		expect(() => parsePlatformInstallCommandOptions(["--yes", "--unknown"])).toThrow(/Usage:/);

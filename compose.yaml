@@ -19,9 +19,9 @@ services:
             - -c
             - max_replication_slots=0
             - -c
-            - max_wal_size=8GB
+            - max_wal_size=16GB
             - -c
-            - min_wal_size=2GB
+            - min_wal_size=4GB
             - -c
             - max_worker_processes=12
             - -c
@@ -100,9 +100,9 @@ services:
                 "-c",
                 "max_replication_slots=0",
                 "-c",
-                "max_wal_size=8GB",
+                "max_wal_size=16GB",
                 "-c",
-                "min_wal_size=2GB",
+                "min_wal_size=4GB",
                 "-c",
                 "max_worker_processes=12",
                 "-c",
