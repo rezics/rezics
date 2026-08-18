@@ -8,12 +8,13 @@ const environment = { ...process.env };
 // SHT_RELR sections emitted by newer Linux distributions (including Fedora 44).
 // The application itself is still compiled with Cargo's release profile; this
 // only disables linuxdeploy's second pass over the completed AppDir.
-if (process.platform === "linux" && environment.NO_STRIP === undefined) {
+// Unused on other platforms.
+if (environment.NO_STRIP === undefined) {
 	environment.NO_STRIP = "1";
 }
 
-const yarnExecutable = process.platform === "win32" ? "yarn.cmd" : "yarn";
-const result = spawnSync(yarnExecutable, ["exec", "tauri", "build", ...process.argv.slice(2)], {
+const tauriCli = fileURLToPath(import.meta.resolve("@tauri-apps/cli/tauri.js"));
+const result = spawnSync(process.execPath, [tauriCli, "build", ...process.argv.slice(2)], {
 	cwd: markdownWorkspace,
 	env: environment,
 	stdio: "inherit",

@@ -4,7 +4,7 @@ tasks:
     generate:icons:
         desc: Generate Tauri platform icons from app-icon.svg.
         cmds:
-            - node scripts/generate-icons.mjs
+            - yarn exec tauri icon ./app-icon.svg
 
     dev:
         desc: Run the local REZICS Markdown desktop application.
