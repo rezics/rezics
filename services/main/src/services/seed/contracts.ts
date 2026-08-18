@@ -4,7 +4,7 @@ export type SeedProfile = (typeof SeedProfileValues)[number];
 export const SeedScenarioValues = [
 	"identities",
 	"units",
-	"official-zone-content",
+	"example-wiki",
 	"content",
 	"structure",
 	"interactions",

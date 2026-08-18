@@ -1347,7 +1347,7 @@ async function seedExampleWiki(
 			notBefore: [createdAt],
 		}),
 	]);
-	if (!wikiPost) throw new Error("Toaru Wiki Post insertion failed");
+	if (!wikiPost) throw new Error("Example Wiki Post insertion failed");
 	await tx.insert(post).values({
 		id: wikiPost.id,
 		subjectUnitId: zoneUnit.id,
@@ -1416,7 +1416,7 @@ async function seedExampleWiki(
 			notBefore: [createdAt],
 		}),
 	]);
-	if (!pageUnit) throw new Error("Toaru Zone Page Unit insertion failed");
+	if (!pageUnit) throw new Error("Example Wiki Zone Page Unit insertion failed");
 	await tx.insert(post).values({
 		id: pageUnit.id,
 		subjectUnitId: zoneUnit.id,
@@ -1520,25 +1520,25 @@ async function seedExampleWiki(
 			unitId: label.id,
 			actorProfileId: OfficialProfileIds.community,
 			event: "create",
-			message: "Seed Toaru navigation label",
+			message: "Seed Example Wiki navigation label",
 		});
 	await recordUnitRevision(tx, {
 		unitId: wikiPost.id,
 		actorProfileId: owner.id,
 		event: "create",
-		message: "Seed Toaru Wiki Post",
+		message: "Seed Example Wiki Post",
 	});
 	await recordUnitRevision(tx, {
 		unitId: pageUnit.id,
 		actorProfileId: owner.id,
 		event: "create",
-		message: "Seed Toaru Zone Page Unit",
+		message: "Seed Example Wiki Zone Page Unit",
 	});
 	await recordUnitRevision(tx, {
 		unitId: zoneUnit.id,
 		actorProfileId: owner.id,
 		event: "update",
-		message: "Seed Toaru Zone layout",
+		message: "Seed Example Wiki Zone layout",
 	});
 }
 
@@ -3228,7 +3228,7 @@ export interface SeedResult {
 const RequiredSeedScenarios = [
 	"identities",
 	"units",
-	"official-zone-content",
+	"example-wiki",
 	"content",
 	"structure",
 	"interactions",
@@ -3264,7 +3264,7 @@ export class DatabaseSeedService {
 				);
 				console.info("Seeding Unit fixtures scenario");
 				const unitFixtures = await seedUnitFixtures(tx, data, profiles);
-				console.info("Seeding official Zone content scenario");
+				console.info("Seeding Example Wiki scenario");
 				await seedExampleWiki(tx, data, profiles, unitFixtures);
 				console.info("Seeding content scenario");
 				const content = await seedContent(tx, data, profiles, unitFixtures);
