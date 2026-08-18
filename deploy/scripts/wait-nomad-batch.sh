@@ -3,37 +3,13 @@
 set -euo pipefail
 
 namespace=""
-forward_logs=false
-while (($# > 0)); do
-	case "$1" in
-		--namespace)
-			if (($# < 2)); then
-				printf '%s\n' "--namespace requires a value" >&2
-				exit 64
-			fi
-			namespace="$2"
-			shift 2
-			;;
-		--forward-logs)
-			forward_logs=true
-			shift
-			;;
-		--)
-			shift
-			break
-			;;
-		-*)
-			printf 'Unknown option: %s\n' "$1" >&2
-			exit 64
-			;;
-		*)
-			break
-			;;
-	esac
-done
+if (($# == 3)) && [[ "$1" == "--namespace" ]]; then
+	namespace="$2"
+	shift 2
+fi
 
 if (($# != 1)); then
-	printf '%s\n' "Usage: wait-nomad-batch.sh [--namespace <namespace>] [--forward-logs] <job-id>" >&2
+	printf '%s\n' "Usage: wait-nomad-batch.sh [--namespace <namespace>] <job-id>" >&2
 	exit 64
 fi
 
@@ -53,77 +29,15 @@ timeline() {
 		"$(date --utc +%Y-%m-%dT%H:%M:%SZ)" "$*"
 }
 
-job_base="${job_id%%/dispatch-*}"
-logs_allowed=false
-if [[ "${forward_logs}" == true ]] &&
-	[[ "${job_base}" =~ ^rezics-release-(maintenance|database|api-deploy|worker-deploy|projection)$ ]]; then
-	logs_allowed=true
-fi
-
-declare -a log_forwarder_pids=()
-declare -A log_forwarder_keys=()
 stream_pid=""
 # Invoked indirectly by the EXIT trap below.
 # shellcheck disable=SC2329
 cleanup() {
-	local pid
 	if [[ -n "${stream_pid}" ]]; then
 		kill "${stream_pid}" 2>/dev/null || true
 	fi
-	for pid in "${log_forwarder_pids[@]}"; do
-		kill "${pid}" 2>/dev/null || true
-	done
 }
 trap cleanup EXIT
-
-start_allocation_logs() {
-	local allocation_id="$1"
-	local allocation_json task_name task_state key
-	[[ "${logs_allowed}" == true ]] || return 0
-
-	allocation_json="$(${nomad_command} alloc status -namespace="${namespace}" -json "${allocation_id}" 2>/dev/null || true)"
-	[[ -n "${allocation_json}" ]] || return 0
-	while IFS=$'\t' read -r task_name task_state; do
-		[[ -n "${task_name}" ]] || continue
-		case "${task_state}" in
-			running|dead|failed|complete) ;;
-			*) continue ;;
-		esac
-		key="${allocation_id}/${task_name}"
-		[[ -z "${log_forwarder_keys[${key}]+set}" ]] || continue
-		log_forwarder_keys["${key}"]=1
-		(
-			set +e
-			"${nomad_command}" alloc logs \
-				-namespace="${namespace}" \
-				-f \
-				-tail -n 200 \
-				"${allocation_id}" "${task_name}" 2>&1 |
-			{
-				line_count=0
-				byte_count=0
-				while IFS= read -r line || [[ -n "${line}" ]]; do
-					((line_count += 1))
-					((byte_count += ${#line} + 1))
-					if ((line_count > 4000 || byte_count > 1048576)); then
-						printf 'REZICS_TIMELINE %s alloc=%s task=%s log forwarding stopped after the bounded limit\n' \
-							"$(date --utc +%Y-%m-%dT%H:%M:%SZ)" \
-							"${allocation_id}" "${task_name}"
-						break
-					fi
-					line="${line//$'\r'/}"
-					printf 'REZICS_TIMELINE %s alloc=%s task=%s %s\n' \
-						"$(date --utc +%Y-%m-%dT%H:%M:%SZ)" \
-						"${allocation_id}" "${task_name}" "${line}"
-				done
-			}
-		) &
-		log_forwarder_pids+=("$!")
-	done < <(
-		jq -r '.TaskStates // {} | to_entries[] | [.key, (.value.State // "")] | @tsv' \
-			<<<"${allocation_json}"
-	)
-}
 
 job_status=""
 allocations=""
@@ -144,11 +58,6 @@ if [[ -n "${latest_version}" ]]; then
 	latest_statuses="$(jq -r --argjson version "${latest_version}" \
 		'[.[] | select(.JobVersion == $version) | .ClientStatus] | unique | .[]' \
 		<<<"${allocations}")"
-	while IFS= read -r allocation_id; do
-		[[ -n "${allocation_id}" ]] || continue
-		start_allocation_logs "${allocation_id}"
-	done < <(jq -r --argjson version "${latest_version}" \
-		'.[] | select(.JobVersion == $version) | .ID' <<<"${allocations}")
 	if grep -Eq '^(failed|lost)$' <<<"${latest_statuses}"; then
 		timeline "job=${job_id} version=${latest_version} status=failed"
 		printf 'Nomad batch job %s version %s failed\n' "${job_id}" "${latest_version}" >&2
@@ -219,7 +128,6 @@ while IFS= read -r record; do
 	desired_description="$(jq -r '.desired_description' <<<"${record}" | tr $'\r\n' '  ' | cut -c1-512)"
 	task_states="$(jq -r '.task_states' <<<"${record}")"
 	timeline "alloc=${allocation_id} client=${client_status} desired=${desired_status} tasks=${task_states} ${client_description} ${desired_description}"
-	start_allocation_logs "${allocation_id}"
 	case "${client_status}" in
 		complete)
 			terminal_status=complete

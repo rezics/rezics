@@ -21,9 +21,7 @@ jobs:
         if: github.ref_name != 'v1.0.0'
         runs-on: ubuntu-latest
         environment: production
-        # The controller's bounded component stages add up to just under six
-        # hours; keep the CI job alive until Nomad reports the terminal state.
-        timeout-minutes: 360
+        timeout-minutes: 10
         steps:
             - name: Checkout release metadata
               uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -39,9 +37,6 @@ jobs:
                   GH_TOKEN: ${{ github.token }}
                   GH_REPO: ${{ github.repository }}
                   GATEWAY_URL: https://deploy.rezics.com/v1/releases/dispatch
-                  # Reuse the existing Cloudflare ingress path; the gateway
-                  # separates dispatch POSTs from timeline GETs.
-                  TIMELINE_URL: https://deploy.rezics.com/v1/releases/dispatch
                   OIDC_AUDIENCE: rezics-nomad-release
               run: |
                   set -euo pipefail
@@ -80,11 +75,9 @@ jobs:
                        (.eval_id | type == "string" and length > 0)' \
                       "${dispatch_response}" >/dev/null
                   jq '{status, job_id, eval_id, ref, sha}' "${dispatch_response}"
-
                   job_id="$(jq -er '.job_id' "${dispatch_response}")"
-                  eval_id="$(jq -er '.eval_id' "${dispatch_response}")"
-                  bash deploy/scripts/follow-nomad-release.sh \
-                      "${TIMELINE_URL}" "${job_id}" "${eval_id}" "${OIDC_AUDIENCE}"
+                  printf 'Dispatched %s. Observe it at https://nomad.rezics.com/ui/jobs?namespace=rezics-release\n' \
+                      "${job_id}"
 
                   if ! gh release view "${GITHUB_REF_NAME}" >/dev/null 2>&1; then
                       release_notes="docs/releases/${GITHUB_REF_NAME#v}.md"

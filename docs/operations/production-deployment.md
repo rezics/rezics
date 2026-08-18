@@ -35,13 +35,10 @@ workflow:
    `https://deploy.rezics.com/v1/releases/dispatch`;
 4. requires a matching `202 Accepted` receipt containing the tag ref, commit,
    dispatched job ID, and evaluation ID;
-5. reconnects to the OIDC-protected
-   `GET https://deploy.rezics.com/v1/releases/dispatch` SSE stream and keeps
-   the CI step open until the root Nomad allocation reaches a terminal state;
-6. streams controller phase markers, child allocation/task events, and bounded
-   deploy-task output into the GitHub log, while a failed batch automatically
-   dumps evaluation, allocation events, and tail logs;
-7. creates the GitHub Release only after the server release has succeeded.
+5. prints the Nomad UI link for that dispatched job;
+6. creates the GitHub Release for the tag. The Release means the gateway
+   accepted and dispatched this immutable tag. Production success or failure
+   is observed in the Nomad UI at `https://nomad.rezics.com/ui/jobs`.
 
 The Web Worker has a separate GitHub-owned release boundary. A `web/v*` tag or
 an explicit manual dispatch starts `deploy-web-cloudflare.yml`, which builds and
@@ -91,11 +88,10 @@ Unchanged components are skipped. A database change conservatively invalidates
 API, worker, and derived-data maintenance. API and worker have separate images and separate
 Nomad deployments. Web is independent of this graph. The controller waits for
 each batch child through Nomad's allocation event stream. API and worker leaf
-deploys use Nomad's native `job run -verbose` monitor, so evaluation placement,
-allocation lifecycle, health, rolling deployment, and automatic rollback are
-emitted directly into the parent controller log. The public gateway exposes
-that parent log as a bounded, reconnectable SSE timeline; it polls authoritative
-allocation/evaluation objects as a safety net for event-buffer gaps.
+deploys use Nomad's native `job run -verbose` monitor. Watch the parent
+`rezics-release` dispatch, its child jobs in the `rezics-release` namespace,
+and the `rezics-api` / `rezics-worker` deployments in the Nomad UI. GitHub
+Actions does not follow Nomad output after dispatch.
 
 Nomad's canary, auto-promotion, and automatic-revert behavior follows the
 [Nomad update specification](https://developer.hashicorp.com/nomad/docs/job-specification/update).
