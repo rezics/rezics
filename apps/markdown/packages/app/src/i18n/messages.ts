@@ -1,4 +1,5 @@
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
+import type { MarkdownThemePreference } from "../domain/appearance";
 import type { MarkdownStorageErrorCode } from "../storage";
 
 export const markdownEditorLocales = ["en", "zh-Hans", "zh-Hant"] as const;
@@ -13,43 +14,78 @@ export interface MarkdownEditorMessages {
 	readonly productName: string;
 	readonly documentTitle: (name: string, dirty: boolean) => string;
 	readonly untitledName: string;
+	readonly newFolderName: string;
 	readonly welcomeDocument: string;
 	readonly labels: {
 		readonly application: string;
-		readonly documents: string;
+		readonly menuBar: string;
+		readonly sidebar: string;
+		readonly files: string;
 		readonly outline: string;
 		readonly noOutline: string;
-		readonly editorToolbar: string;
-		readonly formattingToolbar: string;
+		readonly emptyFolder: string;
+		readonly statusBar: string;
+		readonly documentTabs: string;
 		readonly sourceEditor: string;
 		readonly livePreviewEditor: string;
 		readonly language: string;
 		readonly sourceMode: string;
 		readonly livePreviewMode: string;
+		readonly aboutSummary: string;
+		readonly version: (version: string) => string;
+	};
+	readonly menus: {
+		readonly file: string;
+		readonly edit: string;
+		readonly view: string;
+		readonly help: string;
+		readonly about: string;
+		readonly preferences: string;
+		readonly newFolder: string;
+		readonly open: string;
+		readonly saveAs: string;
+		readonly closeAll: string;
+		readonly toggleSidebar: string;
+		readonly undo: string;
+		readonly redo: string;
+		readonly cut: string;
+		readonly copy: string;
+		readonly paste: string;
+		readonly selectAll: string;
+		readonly minimize: string;
+		readonly maximize: string;
+		readonly fullscreen: string;
+		readonly quit: string;
 	};
 	readonly actions: {
 		readonly newDocument: string;
+		readonly newFolder: string;
 		readonly open: string;
 		readonly save: string;
 		readonly saveAs: string;
-		readonly showDocuments: string;
-		readonly showOutline: string;
-		readonly source: string;
-		readonly livePreview: string;
-		readonly bold: string;
-		readonly italic: string;
-		readonly strikethrough: string;
-		readonly inlineCode: string;
-		readonly heading1: string;
-		readonly heading2: string;
-		readonly quote: string;
-		readonly bulletList: string;
-		readonly numberedList: string;
-		readonly taskList: string;
-		readonly link: string;
-		readonly table: string;
-		readonly codeBlock: string;
+		readonly closeDocument: string;
+		readonly closeAll: string;
+		readonly showSidebar: string;
+		readonly hideSidebar: string;
+		readonly enterSource: string;
+		readonly enterLivePreview: string;
+		readonly about: string;
+		readonly close: string;
 		readonly dismiss: string;
+	};
+	readonly preferences: {
+		readonly title: string;
+		readonly description: string;
+		readonly backToEditor: string;
+		readonly navigation: string;
+		readonly general: string;
+		readonly generalDescription: string;
+		readonly files: string;
+		readonly filesDescription: string;
+		readonly filesPlaceholder: string;
+		readonly theme: string;
+		readonly themeDescription: string;
+		readonly themes: Readonly<Record<MarkdownThemePreference, string>>;
 	};
 	readonly status: {
 		readonly saved: string;
@@ -59,6 +95,10 @@ export interface MarkdownEditorMessages {
 		readonly editorLoading: string;
 		readonly words: (count: number) => string;
 		readonly characters: (count: number) => string;
+		readonly lines: (count: number) => string;
+		readonly headings: (count: number) => string;
+		readonly cursor: (line: number, column: number) => string;
+		readonly readingTime: (minutes: number) => string;
 	};
 	readonly prompts: {
 		readonly discardChanges: string;
@@ -83,43 +123,78 @@ const en: MarkdownEditorMessages = {
 	productName,
 	documentTitle: (name, dirty) => `${dirty ? "• " : ""}${name} — ${productName}`,
 	untitledName: `Untitled${mdFileExtension}`,
+	newFolderName: "New Folder",
 	welcomeDocument: `# ${productName}\n\nA focused local editor with a source-backed live preview. Move the cursor into formatted text to reveal and edit its ${markdown} markers.\n\n## Start here\n\nOpen a local file or begin writing. Your document stays on this device.`,
 	labels: {
 		application: `${productName} application`,
-		documents: "Documents",
+		menuBar: "Application menu",
+		sidebar: "Sidebar",
+		files: "Files",
 		outline: "Outline",
 		noOutline: "Add a heading to build the outline.",
-		editorToolbar: "Document toolbar",
-		formattingToolbar: "Formatting toolbar",
+		emptyFolder: "Empty folder",
+		statusBar: "Status",
+		documentTabs: "Open documents",
 		sourceEditor: `${markdown} source editor`,
 		livePreviewEditor: `${markdown} live-preview editor`,
 		language: "Language",
-		sourceMode: "Source mode",
-		livePreviewMode: "Live-preview mode",
+		sourceMode: "Source",
+		livePreviewMode: "Live preview",
+		aboutSummary: `A local ${markdown} editor.`,
+		version: (version) => `Version ${version}`,
+	},
+	menus: {
+		file: "File",
+		edit: "Edit",
+		view: "View",
+		help: "Help",
+		about: "About",
+		preferences: "Preferences",
+		newFolder: "New Folder",
+		open: "Open…",
+		saveAs: "Save As…",
+		closeAll: "Close All",
+		toggleSidebar: "Toggle Sidebar",
+		undo: "Undo",
+		redo: "Redo",
+		cut: "Cut",
+		copy: "Copy",
+		paste: "Paste",
+		selectAll: "Select All",
+		minimize: "Minimize",
+		maximize: "Maximize",
+		fullscreen: "Full Screen",
+		quit: "Quit",
 	},
 	actions: {
 		newDocument: "New document",
+		newFolder: "New folder",
 		open: "Open",
 		save: "Save",
 		saveAs: "Save as",
-		showDocuments: "Show documents",
-		showOutline: "Show outline",
-		source: "Source",
-		livePreview: "Live preview",
-		bold: "Bold",
-		italic: "Italic",
-		strikethrough: "Strikethrough",
-		inlineCode: "Inline code",
-		heading1: "Heading 1",
-		heading2: "Heading 2",
-		quote: "Quote",
-		bulletList: "Bulleted list",
-		numberedList: "Numbered list",
-		taskList: "Task list",
-		link: "Link",
-		table: "Insert table",
-		codeBlock: "Insert code block",
+		closeDocument: "Close document",
+		closeAll: "Close all documents",
+		showSidebar: "Show sidebar",
+		hideSidebar: "Hide sidebar",
+		enterSource: "Edit source",
+		enterLivePreview: "Live preview",
+		about: "About",
+		close: "Close",
 		dismiss: "Dismiss",
+	},
+	preferences: {
+		title: "Preferences",
+		description: "Choose how the editor looks and behaves on this device.",
+		backToEditor: "Back to editor",
+		navigation: "Preference sections",
+		general: "General",
+		generalDescription: "Language and appearance for this editor.",
+		files: "Files",
+		filesDescription: "How the editor works with local files.",
+		filesPlaceholder: "File preferences will appear here.",
+		theme: "Theme",
+		themeDescription: "Use the system appearance or choose a fixed color scheme.",
+		themes: { system: "System", light: "Light", dark: "Dark" },
 	},
 	status: {
 		saved: "Saved",
@@ -129,6 +204,15 @@ const en: MarkdownEditorMessages = {
 		editorLoading: "Loading editor…",
 		words: (count) => `${count} words`,
 		characters: (count) => `${count} characters`,
+		lines: (count) => `${count} lines`,
+		headings: (count) => `${count} headings`,
+		cursor: (line, column) => `Line ${line}, Column ${column}`,
+		readingTime: (minutes) =>
+			minutes === 0
+				? "Less than a minute"
+				: minutes === 1
+					? "About 1 minute"
+					: `About ${minutes} minutes`,
 	},
 	prompts: { discardChanges: "Discard unsaved changes?" },
 	notices: {
@@ -152,43 +236,78 @@ const zhHans: MarkdownEditorMessages = {
 	productName,
 	documentTitle: (name, dirty) => `${dirty ? "• " : ""}${name} — ${productName}`,
 	untitledName: `未命名${mdFileExtension}`,
+	newFolderName: "新建文件夹",
 	welcomeDocument: `# ${productName}\n\n一款专注于本地写作的编辑器，提供以源码为唯一内容来源的实时预览。将光标移入带格式的文字，即可显示并直接编辑 ${markdown} 标记。\n\n## 从这里开始\n\n打开本地文件或直接开始写作。文档只保留在这台设备上。`,
 	labels: {
 		application: `${productName} 应用`,
-		documents: "文档",
+		menuBar: "应用菜单",
+		sidebar: "侧边栏",
+		files: "文件",
 		outline: "大纲",
 		noOutline: "添加标题后将在这里生成大纲。",
-		editorToolbar: "文档工具栏",
-		formattingToolbar: "格式工具栏",
+		emptyFolder: "空文件夹",
+		statusBar: "状态栏",
+		documentTabs: "已打开的文档",
 		sourceEditor: `${markdown} 源码编辑器`,
 		livePreviewEditor: `${markdown} 实时预览编辑器`,
 		language: "语言",
-		sourceMode: "源码模式",
-		livePreviewMode: "实时预览模式",
+		sourceMode: "源码",
+		livePreviewMode: "实时预览",
+		aboutSummary: `一款本地 ${markdown} 编辑器。`,
+		version: (version) => `版本 ${version}`,
+	},
+	menus: {
+		file: "文件",
+		edit: "编辑",
+		view: "查看",
+		help: "帮助",
+		about: "关于",
+		preferences: "偏好设置",
+		newFolder: "新建文件夹",
+		open: "打开…",
+		saveAs: "另存为…",
+		closeAll: "全部关闭",
+		toggleSidebar: "显示或隐藏侧边栏",
+		undo: "撤销",
+		redo: "重做",
+		cut: "剪切",
+		copy: "复制",
+		paste: "粘贴",
+		selectAll: "全选",
+		minimize: "最小化",
+		maximize: "最大化",
+		fullscreen: "全屏",
+		quit: "退出",
 	},
 	actions: {
 		newDocument: "新建文档",
+		newFolder: "新建文件夹",
 		open: "打开",
 		save: "保存",
 		saveAs: "另存为",
-		showDocuments: "显示文档",
-		showOutline: "显示大纲",
-		source: "源码",
-		livePreview: "实时预览",
-		bold: "粗体",
-		italic: "斜体",
-		strikethrough: "删除线",
-		inlineCode: "行内代码",
-		heading1: "一级标题",
-		heading2: "二级标题",
-		quote: "引用",
-		bulletList: "项目符号列表",
-		numberedList: "编号列表",
-		taskList: "任务列表",
-		link: "链接",
-		table: "插入表格",
-		codeBlock: "插入代码块",
+		closeDocument: "关闭文档",
+		closeAll: "关闭全部文档",
+		showSidebar: "显示侧边栏",
+		hideSidebar: "隐藏侧边栏",
+		enterSource: "编辑源码",
+		enterLivePreview: "实时预览",
+		about: "关于",
+		close: "关闭",
 		dismiss: "关闭",
+	},
+	preferences: {
+		title: "偏好设置",
+		description: "选择这台设备上编辑器的外观和行为。",
+		backToEditor: "返回编辑器",
+		navigation: "设置分类",
+		general: "通用",
+		generalDescription: "此编辑器的语言和外观。",
+		files: "文件",
+		filesDescription: "编辑器处理本地文件的方式。",
+		filesPlaceholder: "文件相关设定将放在这里。",
+		theme: "主题",
+		themeDescription: "跟随系统外观，或选择固定配色。",
+		themes: { system: "跟随系统", light: "浅色", dark: "深色" },
 	},
 	status: {
 		saved: "已保存",
@@ -198,6 +317,11 @@ const zhHans: MarkdownEditorMessages = {
 		editorLoading: "正在加载编辑器…",
 		words: (count) => `${count} 字词`,
 		characters: (count) => `${count} 字符`,
+		lines: (count) => `${count} 行`,
+		headings: (count) => `${count} 个标题`,
+		cursor: (line, column) => `第 ${line} 行，第 ${column} 列`,
+		readingTime: (minutes) =>
+			minutes === 0 ? "不到 1 分钟" : minutes === 1 ? "约 1 分钟" : `约 ${minutes} 分钟`,
 	},
 	prompts: { discardChanges: "要放弃尚未保存的更改吗？" },
 	notices: {
@@ -221,43 +345,78 @@ const zhHant: MarkdownEditorMessages = {
 	productName,
 	documentTitle: (name, dirty) => `${dirty ? "• " : ""}${name} — ${productName}`,
 	untitledName: `未命名${mdFileExtension}`,
+	newFolderName: "新增資料夾",
 	welcomeDocument: `# ${productName}\n\n一款專注於本機寫作的編輯器，提供以原始碼為唯一內容來源的即時預覽。將游標移入帶格式的文字，即會顯示並可直接編輯 ${markdown} 標記。\n\n## 從這裡開始\n\n開啟本機檔案或直接開始寫作。文件只會留在這台裝置上。`,
 	labels: {
 		application: `${productName} 應用程式`,
-		documents: "文件",
+		menuBar: "應用程式選單",
+		sidebar: "側邊欄",
+		files: "檔案",
 		outline: "大綱",
 		noOutline: "加入標題後，這裡會建立大綱。",
-		editorToolbar: "文件工具列",
-		formattingToolbar: "格式工具列",
+		emptyFolder: "空資料夾",
+		statusBar: "狀態列",
+		documentTabs: "已開啟的文件",
 		sourceEditor: `${markdown} 原始碼編輯器`,
 		livePreviewEditor: `${markdown} 即時預覽編輯器`,
 		language: "語言",
-		sourceMode: "原始碼模式",
-		livePreviewMode: "即時預覽模式",
+		sourceMode: "原始碼",
+		livePreviewMode: "即時預覽",
+		aboutSummary: `一款本機 ${markdown} 編輯器。`,
+		version: (version) => `版本 ${version}`,
+	},
+	menus: {
+		file: "檔案",
+		edit: "編輯",
+		view: "顯示方式",
+		help: "說明",
+		about: "關於",
+		preferences: "偏好設定",
+		newFolder: "新增資料夾",
+		open: "開啟…",
+		saveAs: "另存新檔…",
+		closeAll: "全部關閉",
+		toggleSidebar: "顯示或隱藏側邊欄",
+		undo: "復原",
+		redo: "重做",
+		cut: "剪下",
+		copy: "複製",
+		paste: "貼上",
+		selectAll: "全選",
+		minimize: "縮小",
+		maximize: "放大",
+		fullscreen: "全螢幕",
+		quit: "結束",
 	},
 	actions: {
 		newDocument: "新增文件",
+		newFolder: "新增資料夾",
 		open: "開啟",
 		save: "儲存",
 		saveAs: "另存新檔",
-		showDocuments: "顯示文件",
-		showOutline: "顯示大綱",
-		source: "原始碼",
-		livePreview: "即時預覽",
-		bold: "粗體",
-		italic: "斜體",
-		strikethrough: "刪除線",
-		inlineCode: "行內程式碼",
-		heading1: "第一層標題",
-		heading2: "第二層標題",
-		quote: "引言",
-		bulletList: "項目符號清單",
-		numberedList: "編號清單",
-		taskList: "待辦清單",
-		link: "連結",
-		table: "插入表格",
-		codeBlock: "插入程式碼區塊",
+		closeDocument: "關閉文件",
+		closeAll: "關閉全部文件",
+		showSidebar: "顯示側邊欄",
+		hideSidebar: "隱藏側邊欄",
+		enterSource: "編輯原始碼",
+		enterLivePreview: "即時預覽",
+		about: "關於",
+		close: "關閉",
 		dismiss: "關閉",
+	},
+	preferences: {
+		title: "偏好設定",
+		description: "選擇這台裝置上編輯器的外觀與行為。",
+		backToEditor: "返回編輯器",
+		navigation: "設定分類",
+		general: "一般",
+		generalDescription: "此編輯器的語言與外觀。",
+		files: "檔案",
+		filesDescription: "編輯器處理本機檔案的方式。",
+		filesPlaceholder: "檔案相關設定會放在這裡。",
+		theme: "主題",
+		themeDescription: "跟隨系統外觀，或選擇固定配色。",
+		themes: { system: "跟隨系統", light: "淺色", dark: "深色" },
 	},
 	status: {
 		saved: "已儲存",
@@ -267,6 +426,11 @@ const zhHant: MarkdownEditorMessages = {
 		editorLoading: "正在載入編輯器…",
 		words: (count) => `${count} 個字詞`,
 		characters: (count) => `${count} 個字元`,
+		lines: (count) => `${count} 行`,
+		headings: (count) => `${count} 個標題`,
+		cursor: (line, column) => `第 ${line} 行，第 ${column} 列`,
+		readingTime: (minutes) =>
+			minutes === 0 ? "不到 1 分鐘" : minutes === 1 ? "約 1 分鐘" : `約 ${minutes} 分鐘`,
 	},
 	prompts: { discardChanges: "要捨棄尚未儲存的變更嗎？" },
 	notices: {
@@ -303,4 +467,23 @@ export function resolveMarkdownEditorLocale(value: string | undefined): Markdown
 		return "zh-Hant";
 	if (normalized.startsWith("zh")) return "zh-Hans";
 	return "en";
+}
+
+export const markdownLocaleStorageKey = "rezics-markdown-locale";
+
+export function readStoredMarkdownLocale(storage: Storage): MarkdownEditorLocale | undefined {
+	try {
+		const stored = storage.getItem(markdownLocaleStorageKey);
+		return isMarkdownEditorLocale(stored) ? stored : undefined;
+	} catch {
+		return undefined;
+	}
+}
+
+export function writeStoredMarkdownLocale(storage: Storage, locale: MarkdownEditorLocale): void {
+	try {
+		storage.setItem(markdownLocaleStorageKey, locale);
+	} catch {
+		// Ignore quota or private-mode failures; the session locale still applies.
+	}
 }

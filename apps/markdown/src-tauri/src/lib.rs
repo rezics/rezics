@@ -12,6 +12,8 @@ use tempfile::NamedTempFile;
 use thiserror::Error;
 use uuid::Uuid;
 
+mod menu;
+
 const MAX_DOCUMENT_BYTES: u64 = 16 * 1024 * 1024;
 
 #[derive(Default)]
@@ -337,6 +339,13 @@ pub fn run() {
     tauri::Builder::default()
         .manage(DocumentRegistry::default())
         .plugin(tauri_plugin_dialog::init())
+        .setup(|app| {
+            menu::attach_application_menu(app.handle())?;
+            Ok(())
+        })
+        .on_menu_event(|app, event| {
+            menu::emit_menu_command(app, event.id().as_ref());
+        })
         .invoke_handler(tauri::generate_handler![
             open_markdown_document,
             save_markdown_document,

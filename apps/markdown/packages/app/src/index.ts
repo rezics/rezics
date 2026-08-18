@@ -2,6 +2,16 @@
 
 export { MarkdownEditorApp, type MarkdownEditorAppProps } from "./markdown-editor-app";
 export {
+	isMarkdownThemePreference,
+	markdownThemePreferences,
+	type MarkdownThemePreference,
+} from "./domain/appearance";
+export {
+	isMarkdownApplicationCommand,
+	type MarkdownApplicationCommand,
+	type MarkdownNativeMenuHost,
+} from "./domain/application-menu";
+export {
 	markdownEditorLocales,
 	markdownEditorMessages,
 	resolveMarkdownEditorLocale,

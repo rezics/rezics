@@ -4,6 +4,9 @@
 	"description": "Minimum core capability for the local Markdown editor window.",
 	"windows": ["main"],
 	"permissions": [
+		"core:event:default",
+		"core:menu:default",
+		"core:window:default",
 		"allow-open-markdown-document",
 		"allow-save-markdown-document",
 		"allow-save-markdown-document-as"

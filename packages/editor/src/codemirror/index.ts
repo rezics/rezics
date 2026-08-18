@@ -5,4 +5,5 @@ export {
 	rezicsCodeEditorTheme,
 } from "./code-editor";
 export type { Extension } from "@codemirror/state";
-export type { Command, EditorView } from "@codemirror/view";
+export type { Command } from "@codemirror/view";
+export { EditorView } from "@codemirror/view";

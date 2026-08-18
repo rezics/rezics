@@ -1,6 +1,10 @@
 import { appTheme, appThemeCss } from "@rezics/ui/theme";
+import {
+	isMarkdownThemePreference,
+	type MarkdownThemePreference,
+} from "@rezics/markdown-editor-app";
 
-export type MarkdownThemePreference = "light" | "dark" | "system";
+export type { MarkdownThemePreference };
 export type MarkdownColorScheme = Exclude<MarkdownThemePreference, "system">;
 
 export const markdownThemeStorageKey = "rezics-theme";
@@ -18,13 +22,35 @@ export function markdownThemeColor(scheme: MarkdownColorScheme): string {
 	return appTheme[scheme].background;
 }
 
-function readThemePreference(storage: Storage): MarkdownThemePreference {
+export function readMarkdownThemePreference(storage: Storage): MarkdownThemePreference {
 	try {
 		const stored = storage.getItem(markdownThemeStorageKey);
-		return stored === "light" || stored === "dark" ? stored : "system";
+		return isMarkdownThemePreference(stored) ? stored : "system";
 	} catch {
 		return "system";
 	}
+}
+
+export function writeMarkdownThemePreference(
+	storage: Storage,
+	preference: MarkdownThemePreference,
+): void {
+	try {
+		storage.setItem(markdownThemeStorageKey, preference);
+	} catch {
+		// Ignore quota or private-mode failures; the session preference still applies.
+	}
+}
+
+export function applyMarkdownTheme(targetDocument: Document, targetWindow: Window): void {
+	const scheme = resolveMarkdownColorScheme(
+		readMarkdownThemePreference(targetWindow.localStorage),
+		targetWindow.matchMedia("(prefers-color-scheme: dark)").matches,
+	);
+	targetDocument.documentElement.classList.toggle("dark", scheme === "dark");
+	targetDocument.documentElement.dataset.theme = scheme;
+	const themeColor = targetDocument.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
+	if (themeColor) themeColor.content = markdownThemeColor(scheme);
 }
 
 /** Installs the shared semantic theme before React renders and keeps system mode current. */
@@ -39,14 +65,7 @@ export function installMarkdownTheme(targetDocument: Document, targetWindow: Win
 
 	const darkMedia = targetWindow.matchMedia("(prefers-color-scheme: dark)");
 	const applyTheme = (): void => {
-		const scheme = resolveMarkdownColorScheme(
-			readThemePreference(targetWindow.localStorage),
-			darkMedia.matches,
-		);
-		targetDocument.documentElement.classList.toggle("dark", scheme === "dark");
-		targetDocument.documentElement.dataset.theme = scheme;
-		const themeColor = targetDocument.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
-		if (themeColor) themeColor.content = markdownThemeColor(scheme);
+		applyMarkdownTheme(targetDocument, targetWindow);
 	};
 	const onStorage = (event: StorageEvent): void => {
 		if (event.key === null || event.key === markdownThemeStorageKey) applyTheme();

@@ -17,7 +17,7 @@ task apps-markdown:dev
 
 The Web service uses browser file APIs with import/download fallbacks. The desktop build uses native dialogs, opaque file IDs, fingerprint conflict detection, UTF-8 and size validation, and atomic writes.
 
-Source and Live preview are two presentations of one CodeMirror document. Live preview styles parsed Markdown and hides inactive delimiters, then reveals the real source characters at the active selection so edits, selection, and undo history remain literal Markdown operations.
+The desktop build uses a native application menu. The browser host shows the same File, Edit, View, and Help commands in an in-window menu bar. The Files / Outline sidebar and source-mode control sit with word statistics in the status bar. Source and Live preview are two presentations of one CodeMirror document. Live preview styles parsed Markdown and hides inactive delimiters, then reveals the real source characters at the active selection so edits, selection, and undo history remain literal Markdown operations.
 
 ## Verification and release builds
 

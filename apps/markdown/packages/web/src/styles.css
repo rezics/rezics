@@ -1,12 +1,16 @@
 @import "@rezics/ui/styles.css";
 
+@source "../../../../../libraries/ui/src/custom/choice-select.tsx";
 @source "../../../../../libraries/ui/src/ui/button.tsx";
-@source "../../../../../libraries/ui/src/ui/native-select.tsx";
-@source "../../../../../libraries/ui/src/ui/scroll-area.tsx";
+@source "../../../../../libraries/ui/src/ui/dialog.tsx";
+@source "../../../../../libraries/ui/src/ui/field.tsx";
+@source "../../../../../libraries/ui/src/ui/input.tsx";
+@source "../../../../../libraries/ui/src/ui/menu.tsx";
+@source "../../../../../libraries/ui/src/ui/select.tsx";
 @source "../../../../../libraries/ui/src/ui/separator.tsx";
+@source "../../../../../libraries/ui/src/ui/sheet.tsx";
+@source "../../../../../libraries/ui/src/ui/scroll-area.tsx";
 @source "../../../../../libraries/ui/src/ui/spinner.tsx";
-@source "../../../../../libraries/ui/src/ui/toggle-group.tsx";
-@source "../../../../../libraries/ui/src/ui/toggle.tsx";
 @source "../../../../../libraries/ui/src/ui/tooltip.tsx";
 @source "../../app/src";
 @source "./";
@@ -17,7 +21,7 @@
 	font-synthesis: none;
 	text-rendering: optimizeLegibility;
 	--rezics-editor-monospace: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
-	--rezics-editor-padding: clamp(1.5rem, 4vw, 4rem);
+	--rezics-editor-padding: 0.75rem 1rem;
 }
 
 html,
@@ -36,8 +40,49 @@ body {
 	font-size: 0.925rem;
 }
 
+.rezics-code-editor .cm-scroller {
+	overflow-x: hidden;
+}
+
+.rezics-code-editor .cm-content,
+.rezics-code-editor .cm-line {
+	overflow-wrap: anywhere;
+	word-break: break-word;
+}
+
 .rezics-code-editor .cm-line {
 	padding-inline: 0.125rem;
+}
+
+.rezics-markdown-source {
+	--rezics-editor-padding: 0.35rem 0.75rem;
+}
+
+.rezics-markdown-source .cm-editor {
+	font-size: 0.8125rem;
+}
+
+.rezics-markdown-source .cm-scroller {
+	line-height: 1.55;
+}
+
+.rezics-markdown-source .cm-content {
+	max-width: 100%;
+}
+
+.rezics-markdown-source .cm-gutters {
+	background: color-mix(in oklab, var(--muted) 70%, transparent);
+	color: var(--muted-foreground);
+	border-inline-end: 1px solid var(--border);
+}
+
+.rezics-markdown-source .cm-lineNumbers .cm-gutterElement {
+	white-space: nowrap;
+}
+
+.rezics-markdown-source .cm-activeLineGutter {
+	background: color-mix(in oklab, var(--accent) 80%, transparent);
+	color: var(--foreground);
 }
 
 .rezics-code-editor .cm-selectionBackground,
@@ -57,6 +102,10 @@ body {
 .rezics-markdown-live-preview .cm-scroller {
 	font-family: var(--rezics-font-sans);
 	line-height: 1.75;
+}
+
+.rezics-markdown-live-preview {
+	--rezics-editor-padding: clamp(1.25rem, 4vw, 3rem) clamp(1.25rem, 5vw, 4rem);
 }
 
 .rezics-markdown-live-preview .cm-content {
