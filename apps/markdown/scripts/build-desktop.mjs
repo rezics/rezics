@@ -13,25 +13,6 @@ if (process.platform === "linux" && environment.NO_STRIP === undefined) {
 }
 
 const yarnExecutable = process.platform === "win32" ? "yarn.cmd" : "yarn";
-const iconGeneration = spawnSync(process.execPath, [fileURLToPath(new URL("./generate-icons.mjs", import.meta.url))], {
-	cwd: markdownWorkspace,
-	env: environment,
-	stdio: "inherit",
-});
-
-if (iconGeneration.error !== undefined) {
-	throw iconGeneration.error;
-}
-
-if (iconGeneration.signal !== null) {
-	console.error(`Tauri icon generation terminated by signal ${iconGeneration.signal}.`);
-	process.exit(1);
-}
-
-if (iconGeneration.status !== 0) {
-	process.exit(iconGeneration.status ?? 1);
-}
-
 const result = spawnSync(yarnExecutable, ["exec", "tauri", "build", ...process.argv.slice(2)], {
 	cwd: markdownWorkspace,
 	env: environment,

@@ -33,5 +33,5 @@ The desktop build delegates to a cross-platform Node entry point. On Linux it di
 Desktop platform icons are generated from `app-icon.svg` into `src-tauri/icons` and are not committed. `task apps-markdown:dev` and `task apps-markdown:build` regenerate them. To generate them alone:
 
 ```sh
-yarn workspace @rezics/markdown-editor run generate:icons
+task apps-markdown:generate:icons
 ```
