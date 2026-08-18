@@ -55,21 +55,33 @@ export function buildContentStructureTree<Node extends PositionedContentStructur
 	for (const siblings of children.values()) siblings.sort(comparePosition);
 
 	const seen = new Set<string>();
-	function visit(node: Node, ancestors: ReadonlySet<string>): ContentStructureTreeNode<Node> {
+	const roots: ContentStructureTreeNode<Node>[] = [];
+	function appendRoot(node: Node): void {
+		if (seen.has(node.id)) return;
+		const root: ContentStructureTreeNode<Node> = { node, children: [] };
 		seen.add(node.id);
-		const nextAncestors = new Set(ancestors);
-		nextAncestors.add(node.id);
-		return {
-			node,
-			children: (children.get(node.id) ?? [])
-				.filter((child) => !nextAncestors.has(child.id))
-				.map((child) => visit(child, nextAncestors)),
-		};
+		roots.push(root);
+		const stack = [root];
+		while (stack.length) {
+			const entry = stack.pop();
+			if (!entry) continue;
+			const childEntries: ContentStructureTreeNode<Node>[] = [];
+			for (const child of children.get(entry.node.id) ?? []) {
+				if (seen.has(child.id)) continue;
+				seen.add(child.id);
+				childEntries.push({ node: child, children: [] });
+			}
+			entry.children.push(...childEntries);
+			for (let index = childEntries.length - 1; index >= 0; index -= 1) {
+				const childEntry = childEntries[index];
+				if (childEntry) stack.push(childEntry);
+			}
+		}
 	}
 
-	const roots = (children.get(null) ?? []).map((node) => visit(node, new Set()));
+	for (const node of children.get(null) ?? []) appendRoot(node);
 	for (const node of nodes) {
-		if (!seen.has(node.id)) roots.push(visit(node, new Set()));
+		appendRoot(node);
 	}
 	return roots;
 }
@@ -78,10 +90,18 @@ export function flattenContentStructureTree<Node extends PositionedContentStruct
 	nodes: readonly ContentStructureTreeNode<Node>[],
 	depth = 0,
 ): FlattenedContentStructureTreeNode<Node>[] {
-	return nodes.flatMap((entry) => [
-		{ node: entry.node, depth },
-		...flattenContentStructureTree(entry.children, depth + 1),
-	]);
+	const result: FlattenedContentStructureTreeNode<Node>[] = [];
+	const stack = nodes.map((entry) => ({ entry, depth })).reverse();
+	while (stack.length) {
+		const item = stack.pop();
+		if (!item) continue;
+		result.push({ node: item.entry.node, depth: item.depth });
+		for (let index = item.entry.children.length - 1; index >= 0; index -= 1) {
+			const child = item.entry.children[index];
+			if (child) stack.push({ entry: child, depth: item.depth + 1 });
+		}
+	}
+	return result;
 }
 
 export function getContentStructureMoveTargets(
@@ -96,12 +116,13 @@ export function getContentStructureMoveTargets(
 		else children.set(node.parentId, [node.id]);
 	}
 	const blocked = new Set<string>();
-	function visit(nodeId: string) {
-		if (blocked.has(nodeId)) return;
+	const stack = [movingNodeId];
+	while (stack.length) {
+		const nodeId = stack.pop();
+		if (!nodeId || blocked.has(nodeId)) continue;
 		blocked.add(nodeId);
-		for (const childId of children.get(nodeId) ?? []) visit(childId);
+		stack.push(...(children.get(nodeId) ?? []));
 	}
-	visit(movingNodeId);
 	return nodes.filter((node) => !blocked.has(node.id));
 }
 

@@ -297,6 +297,7 @@ export function MediaContentStructureEditor({
 				<MediaContentNodeDialog
 					error={save.error}
 					nodes={document.draft}
+					ownerUnitId={mediaId}
 					onClose={() => {
 						save.reset();
 						setCreateRequest(undefined);
@@ -411,7 +412,7 @@ function MediaStructureTree({
 					...result,
 					[node.contentKind]: result[node.contentKind] + 1,
 				}),
-				{ video: 0, audio: 0, label: 0 },
+				{ media: 0, video: 0, audio: 0, label: 0 },
 			),
 		[nodes],
 	);
@@ -423,7 +424,7 @@ function MediaStructureTree({
 		onCreate(request);
 	}
 
-	function requestMainMediaItem(kind: "video" | "audio") {
+	function requestMainMediaItem(kind: "media" | "video" | "audio") {
 		const lastLabelId = findLastMediaDraftLabelId(nodes);
 		requestCreate({
 			kind,
@@ -554,6 +555,7 @@ function MediaStructureTree({
 							{t.units.content.mediaStructureSummary({
 								videos: counts.video,
 								audios: counts.audio,
+								media: counts.media,
 								labels: counts.label,
 							})}
 						</p>
@@ -605,6 +607,10 @@ function MediaStructureTree({
 								</Button>
 							</MenuTrigger>
 							<MenuContent>
+								<MenuItem onSelect={() => requestMainMediaItem("media")} value="add-media">
+									<Film aria-hidden />
+									{t.units.content.addMedia}
+								</MenuItem>
 								<MenuItem onSelect={() => requestMainMediaItem("video")} value="new-video">
 									<Video aria-hidden />
 									{t.units.content.newVideo}
@@ -781,13 +787,21 @@ function MediaContentStructureRow(props: MediaStructureRowProps) {
 	}
 
 	const Icon =
-		node.contentKind === "video" ? Video : node.contentKind === "audio" ? AudioLines : ListTree;
+		node.contentKind === "media"
+			? Film
+			: node.contentKind === "video"
+				? Video
+				: node.contentKind === "audio"
+					? AudioLines
+					: ListTree;
 	const kindLabel =
-		node.contentKind === "video"
-			? t.units.types.video
-			: node.contentKind === "audio"
-				? t.units.types.audio
-				: t.units.content.label;
+		node.contentKind === "media"
+			? t.units.types.media
+			: node.contentKind === "video"
+				? t.units.types.video
+				: node.contentKind === "audio"
+					? t.units.types.audio
+					: t.units.content.label;
 	const row = (
 		<BookContentStructureRowFrame
 			activePlacement={activePlacement}

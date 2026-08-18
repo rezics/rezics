@@ -81,18 +81,18 @@ import {
 	type InsertedBookDraftNodeInput,
 } from "../model/book-content-structure-draft";
 import {
-	collectBookStructureLabelIds,
+	collectBookStructureExpandableIds,
 	countBookStructureDisplayedKinds,
 	EmptyBookStructureContentMetrics,
 	flattenVisibleBookStructureTree,
 	indexBookStructureSubtreeContentMetrics,
-	isBookStructureDisplayLabel,
 	type BookStructureContentMetrics,
 	type VisibleBookStructureTreeNode,
 } from "../model/book-content-structure-view";
 import {
 	bookContentStructureHistoryHref,
 	chapterEditorHref,
+	unitManagementSectionHref,
 } from "../routing/unit-management-routes";
 import {
 	bookStructureDestinationForNode,
@@ -133,7 +133,7 @@ type StructureTreeProps = {
 	pending: boolean;
 	onChange: (change: (nodes: readonly BookDraftNode[]) => BookDraftNode[]) => void;
 	onCreate: (request: CreateRequest) => void;
-	onOpenChapter: (nodeId: string) => void;
+	onOpenContent: (nodeId: string) => void;
 };
 
 type StructureRowProps = {
@@ -223,19 +223,25 @@ export function BookContentStructureEditor({
 		}
 	}
 
-	async function openChapter(nodeId: string) {
+	async function openContent(nodeId: string) {
 		const node = document.draft.find(({ id }) => id === nodeId);
 		if (!node || save.isPending) return;
-		let chapterId = node.state === "existing" ? node.contentUnitId : undefined;
+		let contentUnitId = node.state === "existing" ? node.contentUnitId : undefined;
 		if (dirty) {
 			const saved = await saveDraft();
-			chapterId = saved?.items.find(({ id }) => id === nodeId)?.contentUnitId;
+			contentUnitId = saved?.items.find(({ id }) => id === nodeId)?.contentUnitId;
 		}
-		if (chapterId) router.push(chapterEditorHref(bookId, chapterId));
+		if (!contentUnitId) return;
+		router.push(
+			node.contentKind === "book"
+				? unitManagementSectionHref("book", contentUnitId, "content")
+				: chapterEditorHref(bookId, contentUnitId),
+		);
 	}
 
 	async function submitNode(submission: BookContentNodeDialogSubmission) {
 		if (!createRequest || save.isPending) return;
+		if (submission.mode === "create" && createRequest.kind === "book") return;
 		const placement = resolveCreatePlacement(document.draft, submission.destination);
 		if (!placement) return;
 		const common = {
@@ -341,7 +347,7 @@ export function BookContentStructureEditor({
 						}))
 					}
 					onCreate={openNodeDialog}
-					onOpenChapter={(nodeId) => void openChapter(nodeId)}
+					onOpenContent={(nodeId) => void openContent(nodeId)}
 					ownContentMetricsByNodeId={document.ownContentMetricsByNodeId}
 					pending={save.isPending}
 				/>
@@ -352,6 +358,7 @@ export function BookContentStructureEditor({
 					bookOwnershipMode={initial.ownershipMode}
 					error={save.error}
 					nodes={document.draft}
+					ownerUnitId={bookId}
 					onClose={() => {
 						save.reset();
 						setCreateRequest(undefined);
@@ -388,13 +395,13 @@ function BookContentStructureTree({
 	pending,
 	onChange,
 	onCreate,
-	onOpenChapter,
+	onOpenContent,
 	ownContentMetricsByNodeId,
 }: StructureTreeProps) {
 	const { t } = useTranslation(["units"]);
 	const tree = useMemo(() => buildBookDraftTree(nodes), [nodes]);
 	const siblingsByParentId = useMemo(() => groupSiblings(nodes), [nodes]);
-	const allExpandableIds = useMemo(() => collectBookStructureLabelIds(tree), [tree]);
+	const allExpandableIds = useMemo(() => collectBookStructureExpandableIds(tree), [tree]);
 	const expandableIdSet = useMemo(() => new Set(allExpandableIds), [allExpandableIds]);
 	const contentMetricsByNodeId = useMemo(
 		() => indexBookStructureSubtreeContentMetrics(tree, ownContentMetricsByNodeId),
@@ -427,7 +434,7 @@ function BookContentStructureTree({
 		() => (draggingIds.size ? getBookDraftMoveTargetIds(nodes, draggingIds) : new Set<string>()),
 		[nodes, draggingIds],
 	);
-	const { chapterCount, labelCount } = useMemo(
+	const { bookCount, chapterCount, labelCount } = useMemo(
 		() => countBookStructureDisplayedKinds(tree),
 		[tree],
 	);
@@ -513,7 +520,7 @@ function BookContentStructureTree({
 		if (!selectionMode && !modified) {
 			setSelectionAnchorId(nodeId);
 			if (expandableIdSet.has(nodeId)) toggle(nodeId);
-			else onOpenChapter(nodeId);
+			else onOpenContent(nodeId);
 			return;
 		}
 
@@ -563,6 +570,16 @@ function BookContentStructureTree({
 		});
 	}
 
+	function requestMainBook() {
+		const lastLabelId = findLastBookDraftLabelId(nodes);
+		requestCreate({
+			kind: "book",
+			destination: lastLabelId
+				? { kind: "node", nodeId: lastLabelId, placement: "inside" }
+				: { kind: "root" },
+		});
+	}
+
 	return (
 		<>
 			<BookContentStructureSection
@@ -594,6 +611,10 @@ function BookContentStructureTree({
 							{t.units.content.collapseAll}
 						</Button>
 						<span aria-hidden className="mx-1 h-7 w-px bg-border-weak" />
+						<Button disabled={pending} onClick={requestMainBook} type="button" variant="outline">
+							<BookOpenText aria-hidden />
+							{t.units.content.newBook}
+						</Button>
 						<Button
 							disabled={pending}
 							onClick={() => requestCreate({ kind: "label", destination: { kind: "root" } })}
@@ -609,6 +630,7 @@ function BookContentStructureTree({
 						</Button>
 					</>
 				}
+				bookCount={bookCount}
 				chapterCount={chapterCount}
 				labelCount={labelCount}
 			>
@@ -767,7 +789,6 @@ function BookContentStructureRow(props: StructureRowProps) {
 	const { t } = useTranslation(["units"]);
 	const { entry, depth, positionInSet, setSize } = visibleEntry;
 	const { node, children } = entry;
-	const displayAsLabel = isBookStructureDisplayLabel(entry);
 	const acceptsChildren = isBookDraftParentTarget(node);
 	const expanded = expandedIds.has(node.id);
 	const canDrop = validDropTargetIds.has(node.id);
@@ -789,7 +810,7 @@ function BookContentStructureRow(props: StructureRowProps) {
 		<BookContentStructureRowFrame
 			activePlacement={activePlacement}
 			aria-checked={selectionMode ? selected : undefined}
-			aria-expanded={displayAsLabel ? expanded : undefined}
+			aria-expanded={acceptsChildren ? expanded : undefined}
 			aria-level={depth + 1}
 			aria-posinset={positionInSet}
 			aria-setsize={setSize}
@@ -843,10 +864,10 @@ function BookContentStructureRow(props: StructureRowProps) {
 					contentMetrics={contentMetrics}
 					directChildCount={children.length}
 					expanded={expanded}
-					label={displayAsLabel}
+					label={acceptsChildren}
 					language={node.language}
 					metadataAfter={
-						displayAsLabel ? null : (
+						acceptsChildren ? null : (
 							<BookContentStructureChapterViewMetric label={t.units.content.views} />
 						)
 					}
@@ -884,7 +905,7 @@ function BookContentStructureRow(props: StructureRowProps) {
 				<NodeActionMenu
 					canMoveToFirst={siblingIndex > 0}
 					canMoveToLast={siblingIndex >= 0 && siblingIndex < siblings.length - 1}
-					displayAsLabel={displayAsLabel}
+					displayAsLabel={acceptsChildren}
 					expanded={expanded}
 					node={node}
 					onCreate={onCreate}
@@ -917,7 +938,7 @@ function BookContentStructureRow(props: StructureRowProps) {
 					<NodeContextMenuItems
 						canMoveToFirst={siblingIndex > 0}
 						canMoveToLast={siblingIndex >= 0 && siblingIndex < siblings.length - 1}
-						displayAsLabel={displayAsLabel}
+						displayAsLabel={acceptsChildren}
 						expanded={expanded}
 						node={node}
 						onCreate={onCreate}

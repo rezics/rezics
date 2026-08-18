@@ -209,6 +209,7 @@ export async function saveBookContentStructureDraft(
 					(row) =>
 						row.title === null ||
 						!(
+							row.unitKind === "book" ||
 							(row.unitKind === "post" && row.postKind === "chapter") ||
 							(row.unitKind === "label" && row.labelId !== null)
 						),
@@ -252,12 +253,13 @@ export async function saveBookContentStructureDraft(
 				if (
 					!content?.title ||
 					!(
+						content.unitKind === "book" ||
 						(content.unitKind === "post" && content.postKind === "chapter") ||
 						(content.unitKind === "label" && content.labelId !== null)
 					)
 				)
 					throw new ContentStructureInvalid(
-						"Attached Book content Unit must be a Chapter or Label",
+						"Attached Book content Unit must be a Book, Chapter, or Label",
 					);
 				return { ...node, title: content.title };
 			});

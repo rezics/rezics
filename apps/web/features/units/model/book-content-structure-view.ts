@@ -4,7 +4,7 @@ export type BookStructureViewNode = {
 	readonly id: string;
 	readonly title: string;
 	readonly language: ContentLanguage;
-	readonly contentKind: "chapter" | "video" | "audio" | "label";
+	readonly contentKind: "book" | "media" | "chapter" | "video" | "audio" | "label";
 };
 
 export type BookStructureViewTreeNode<Node extends BookStructureViewNode> = {
@@ -35,7 +35,8 @@ export function isBookStructureDisplayLabel<Node extends BookStructureViewNode>(
 	return entry.node.contentKind === "label";
 }
 
-export function collectBookStructureLabelIds<Node extends BookStructureViewNode>(
+/** Returns every local node with explicit children, regardless of content kind. */
+export function collectBookStructureExpandableIds<Node extends BookStructureViewNode>(
 	nodes: readonly BookStructureViewTreeNode<Node>[],
 ): string[] {
 	const result: string[] = [];
@@ -43,7 +44,7 @@ export function collectBookStructureLabelIds<Node extends BookStructureViewNode>
 	while (stack.length) {
 		const entry = stack.pop();
 		if (!entry) continue;
-		if (isBookStructureDisplayLabel(entry)) result.push(entry.node.id);
+		if (entry.children.length) result.push(entry.node.id);
 		for (let index = entry.children.length - 1; index >= 0; index -= 1) {
 			const child = entry.children[index];
 			if (child) stack.push(child);
@@ -73,12 +74,7 @@ export function flattenVisibleBookStructureTree<Node extends BookStructureViewNo
 		if (!visibleEntry) continue;
 		result.push(visibleEntry);
 		const { entry, depth } = visibleEntry;
-		if (
-			!entry.children.length ||
-			!isBookStructureDisplayLabel(entry) ||
-			!expandedIds.has(entry.node.id)
-		)
-			continue;
+		if (!entry.children.length || !expandedIds.has(entry.node.id)) continue;
 		for (let index = entry.children.length - 1; index >= 0; index -= 1) {
 			const child = entry.children[index];
 			if (!child) continue;
@@ -96,9 +92,11 @@ export function flattenVisibleBookStructureTree<Node extends BookStructureViewNo
 export function countBookStructureDisplayedKinds<Node extends BookStructureViewNode>(
 	nodes: readonly BookStructureViewTreeNode<Node>[],
 ): {
+	readonly bookCount: number;
 	readonly chapterCount: number;
 	readonly labelCount: number;
 } {
+	let bookCount = 0;
 	let chapterCount = 0;
 	let labelCount = 0;
 	const stack = [...nodes];
@@ -106,10 +104,11 @@ export function countBookStructureDisplayedKinds<Node extends BookStructureViewN
 		const entry = stack.pop();
 		if (!entry) continue;
 		if (isBookStructureDisplayLabel(entry)) labelCount += 1;
+		else if (entry.node.contentKind === "book") bookCount += 1;
 		else chapterCount += 1;
 		stack.push(...entry.children);
 	}
-	return { chapterCount, labelCount };
+	return { bookCount, chapterCount, labelCount };
 }
 
 export function indexBookStructureSubtreeContentMetrics<Node extends BookStructureViewNode>(

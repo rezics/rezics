@@ -21,7 +21,7 @@ import {
 	TabsTrigger,
 } from "@rezics/ui";
 import { ChevronRight, Folder } from "lucide-react";
-import { useId, useState } from "react";
+import { useId, useMemo, useState } from "react";
 
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
@@ -31,7 +31,8 @@ import {
 	type ContentStructureDestination,
 } from "./book-content-structure-destination-dialog";
 
-export type MediaContentNodeKind = "video" | "audio" | "label";
+export type MediaContentNodeKind = "media" | "video" | "audio" | "label";
+type CreatableMediaContentNodeKind = Exclude<MediaContentNodeKind, "media">;
 
 export type MediaContentNodeDialogRequest = {
 	readonly kind: MediaContentNodeKind;
@@ -42,7 +43,7 @@ export type MediaContentNodeDialogSubmission =
 	| {
 			readonly mode: "create";
 			readonly title: string;
-			readonly contentKind: MediaContentNodeKind;
+			readonly contentKind: CreatableMediaContentNodeKind;
 			readonly destination: ContentStructureDestination;
 	  }
 	| {
@@ -63,7 +64,7 @@ function isTimedMediaKindFilter(value: string): value is TimedMediaKindFilter {
 }
 
 function isMediaContentNodeKind(value: string | undefined): value is MediaContentNodeKind {
-	return value === "video" || value === "audio" || value === "label";
+	return value === "media" || value === "video" || value === "audio" || value === "label";
 }
 
 function destinationLabel(
@@ -78,6 +79,7 @@ function destinationLabel(
 export function MediaContentNodeDialog({
 	error,
 	nodes,
+	ownerUnitId,
 	onClose,
 	onSubmit,
 	pending,
@@ -86,6 +88,7 @@ export function MediaContentNodeDialog({
 }: {
 	readonly error: unknown;
 	readonly nodes: readonly MediaDraftNode[];
+	readonly ownerUnitId: string;
 	readonly onClose: () => void;
 	readonly onSubmit: (submission: MediaContentNodeDialogSubmission) => void;
 	readonly pending: boolean;
@@ -94,33 +97,42 @@ export function MediaContentNodeDialog({
 }) {
 	const { t } = useTranslation(["engagement", "units", "ui"]);
 	const formId = useId();
-	const [mode, setMode] = useState<DialogMode>("create");
+	const [mode, setMode] = useState<DialogMode>(request.kind === "media" ? "attach" : "create");
 	const [title, setTitle] = useState("");
 	const [unit, setUnit] = useState<EntityPickerValue>();
 	const [mediaKindFilter, setMediaKindFilter] = useState<TimedMediaKindFilter>("all");
 	const [destination, setDestination] = useState<ContentStructureDestination>(request.destination);
 	const [destinationDialogOpen, setDestinationDialogOpen] = useState(false);
+	const excludedUnitIds = useMemo(() => new Set([ownerUnitId]), [ownerUnitId]);
 	const label = request.kind === "label";
-	const dialogTitle =
-		request.kind === "video"
+	const media = request.kind === "media";
+	const dialogTitle = media
+		? t.units.content.addMedia
+		: request.kind === "video"
 			? t.units.content.addVideo
 			: request.kind === "audio"
 				? t.units.content.addAudio
 				: t.units.content.addLabel;
-	const description =
-		request.kind === "video"
+	const description = media
+		? t.units.content.addMediaDescription
+		: request.kind === "video"
 			? t.units.content.addVideoDescription
 			: request.kind === "audio"
 				? t.units.content.addAudioDescription
 				: t.units.content.addLabelDescription;
-	const attachKind = label
-		? unit?.kind === "label"
-			? "label"
+	const attachKind = media
+		? unit?.kind === "media"
+			? "media"
 			: undefined
-		: isMediaContentNodeKind(unit?.kind) && unit.kind !== "label"
-			? unit.kind
-			: undefined;
-	const canSubmit = mode === "create" ? Boolean(title.trim()) : Boolean(unit && attachKind);
+		: label
+			? unit?.kind === "label"
+				? "label"
+				: undefined
+			: isMediaContentNodeKind(unit?.kind) && unit.kind !== "label" && unit.kind !== "media"
+				? unit.kind
+				: undefined;
+	const canSubmit =
+		mode === "create" ? !media && Boolean(title.trim()) : Boolean(unit && attachKind);
 
 	return (
 		<>
@@ -139,7 +151,7 @@ export function MediaContentNodeDialog({
 							onSubmit={(event) => {
 								event.preventDefault();
 								if (pending) return;
-								if (mode === "create") {
+								if (mode === "create" && request.kind !== "media") {
 									const normalizedTitle = title.trim();
 									if (normalizedTitle)
 										onSubmit({
@@ -165,7 +177,7 @@ export function MediaContentNodeDialog({
 								value={mode}
 							>
 								<TabsList aria-label={t.units.content.addMode} className="w-full">
-									<TabsTrigger disabled={pending} value="create">
+									<TabsTrigger disabled={pending || media} value="create">
 										{t.units.content.createMode}
 									</TabsTrigger>
 									<TabsTrigger disabled={pending} value="attach">
@@ -186,7 +198,7 @@ export function MediaContentNodeDialog({
 									</Field>
 								</TabsContent>
 								<TabsContent className="grid gap-4 pt-3" value="attach">
-									{label ? null : (
+									{label || media ? null : (
 										<Field>
 											<FieldLabel>{t.units.content.mediaKindFilter}</FieldLabel>
 											<NativeSelect
@@ -209,22 +221,33 @@ export function MediaContentNodeDialog({
 									)}
 									<Field required>
 										<FieldLabel>
-											{label ? t.units.content.existingLabel : t.units.content.existingMediaItem}
+											{media
+												? t.units.content.existingMedia
+												: label
+													? t.units.content.existingLabel
+													: t.units.content.existingMediaItem}
 										</FieldLabel>
 										<fieldset className="contents" disabled={pending}>
 											<EntityPicker
 												ariaLabel={
-													label
-														? t.units.content.searchExistingLabel
-														: t.units.content.searchExistingMediaItem
+													media
+														? t.units.content.searchExistingMedia
+														: label
+															? t.units.content.searchExistingLabel
+															: t.units.content.searchExistingMediaItem
 												}
+												excludedIds={excludedUnitIds}
 												index="units"
-												{...(label
-													? { kind: "label" }
-													: {
-															kinds:
-																mediaKindFilter === "all" ? ["video", "audio"] : [mediaKindFilter],
-														})}
+												{...(media
+													? { kind: "media" }
+													: label
+														? { kind: "label" }
+														: {
+																kinds:
+																	mediaKindFilter === "all"
+																		? ["video", "audio"]
+																		: [mediaKindFilter],
+															})}
 												onChange={setUnit}
 												onClear={() => setUnit(undefined)}
 												placeholder={t.ui.pickerPlaceholders.unit}
@@ -275,9 +298,11 @@ export function MediaContentNodeDialog({
 								? label
 									? t.units.content.createLabelAndSave
 									: t.units.content.createMediaItemAndSave
-								: label
-									? t.units.content.attachLabelAndSave
-									: t.units.content.attachMediaItemAndSave}
+								: media
+									? t.units.content.attachMediaAndSave
+									: label
+										? t.units.content.attachLabelAndSave
+										: t.units.content.attachMediaItemAndSave}
 						</Button>
 					</DialogFooter>
 				</DialogContent>

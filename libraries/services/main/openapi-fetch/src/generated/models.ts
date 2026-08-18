@@ -62219,6 +62219,7 @@ export type GetApiUsersMePreferencesStatus200ChineseContentDisplayEnum =
 export const GetApiUsersMePreferencesStatus200DefaultLicense = {
 	"cc-by-nc-sa-4.0": "cc-by-nc-sa-4.0",
 	"cc-by-sa-4.0": "cc-by-sa-4.0",
+	"cc-by-sa-3.0": "cc-by-sa-3.0",
 	"all-rights-reserved": "all-rights-reserved",
 	"cc-by-nc-4.0": "cc-by-nc-4.0",
 	"cc-by-4.0": "cc-by-4.0",
@@ -62469,6 +62470,7 @@ export type PatchApiUsersMePreferencesStatus200ChineseContentDisplayEnum =
 export const PatchApiUsersMePreferencesStatus200DefaultLicense = {
 	"cc-by-nc-sa-4.0": "cc-by-nc-sa-4.0",
 	"cc-by-sa-4.0": "cc-by-sa-4.0",
+	"cc-by-sa-3.0": "cc-by-sa-3.0",
 	"all-rights-reserved": "all-rights-reserved",
 	"cc-by-nc-4.0": "cc-by-nc-4.0",
 	"cc-by-4.0": "cc-by-4.0",
@@ -62770,6 +62772,7 @@ export type PutApiUsersMePreferencesStatus200ChineseContentDisplayEnum =
 export const PutApiUsersMePreferencesStatus200DefaultLicense = {
 	"cc-by-nc-sa-4.0": "cc-by-nc-sa-4.0",
 	"cc-by-sa-4.0": "cc-by-sa-4.0",
+	"cc-by-sa-3.0": "cc-by-sa-3.0",
 	"all-rights-reserved": "all-rights-reserved",
 	"cc-by-nc-4.0": "cc-by-nc-4.0",
 	"cc-by-4.0": "cc-by-4.0",
@@ -63037,6 +63040,7 @@ export type PutApiUsersMePreferencesRequestChineseContentDisplayEnum =
 export const PutApiUsersMePreferencesRequestDefaultLicense = {
 	"cc-by-nc-sa-4.0": "cc-by-nc-sa-4.0",
 	"cc-by-sa-4.0": "cc-by-sa-4.0",
+	"cc-by-sa-3.0": "cc-by-sa-3.0",
 	"all-rights-reserved": "all-rights-reserved",
 	"cc-by-nc-4.0": "cc-by-nc-4.0",
 	"cc-by-4.0": "cc-by-4.0",
@@ -77025,6 +77029,7 @@ export type PostApiUnitsByTypeStatus200Language =
 export const PostApiUnitsByTypeStatus200License = {
 	"cc-by-nc-sa-4.0": "cc-by-nc-sa-4.0",
 	"cc-by-sa-4.0": "cc-by-sa-4.0",
+	"cc-by-sa-3.0": "cc-by-sa-3.0",
 	"all-rights-reserved": "all-rights-reserved",
 	"cc-by-nc-4.0": "cc-by-nc-4.0",
 	"cc-by-4.0": "cc-by-4.0",
@@ -78827,6 +78832,7 @@ export type PostApiUnitsByTypeRequestContentRatingEnum =
 export const PostApiUnitsByTypeRequestLicense = {
 	"cc-by-nc-sa-4.0": "cc-by-nc-sa-4.0",
 	"cc-by-sa-4.0": "cc-by-sa-4.0",
+	"cc-by-sa-3.0": "cc-by-sa-3.0",
 	"all-rights-reserved": "all-rights-reserved",
 	"cc-by-nc-4.0": "cc-by-nc-4.0",
 	"cc-by-4.0": "cc-by-4.0",
@@ -79922,6 +79928,7 @@ export type GetApiUnitsByTypeByUnitIdStatus200Language =
 export const GetApiUnitsByTypeByUnitIdStatus200License = {
 	"cc-by-nc-sa-4.0": "cc-by-nc-sa-4.0",
 	"cc-by-sa-4.0": "cc-by-sa-4.0",
+	"cc-by-sa-3.0": "cc-by-sa-3.0",
 	"all-rights-reserved": "all-rights-reserved",
 	"cc-by-nc-4.0": "cc-by-nc-4.0",
 	"cc-by-4.0": "cc-by-4.0",
@@ -81545,6 +81552,7 @@ export type PatchApiUnitsByTypeByUnitIdStatus200Language =
 export const PatchApiUnitsByTypeByUnitIdStatus200License = {
 	"cc-by-nc-sa-4.0": "cc-by-nc-sa-4.0",
 	"cc-by-sa-4.0": "cc-by-sa-4.0",
+	"cc-by-sa-3.0": "cc-by-sa-3.0",
 	"all-rights-reserved": "all-rights-reserved",
 	"cc-by-nc-4.0": "cc-by-nc-4.0",
 	"cc-by-4.0": "cc-by-4.0",
@@ -83341,6 +83349,7 @@ export type PatchApiUnitsByTypeByUnitIdRequestAiDisclosureEnum =
 export const PatchApiUnitsByTypeByUnitIdRequestLicense = {
 	"cc-by-nc-sa-4.0": "cc-by-nc-sa-4.0",
 	"cc-by-sa-4.0": "cc-by-sa-4.0",
+	"cc-by-sa-3.0": "cc-by-sa-3.0",
 	"all-rights-reserved": "all-rights-reserved",
 	"cc-by-nc-4.0": "cc-by-nc-4.0",
 	"cc-by-4.0": "cc-by-4.0",
@@ -83571,6 +83580,7 @@ export type PatchApiUnitsByTypeByUnitIdVariantContextStatus200Language =
 export const PatchApiUnitsByTypeByUnitIdVariantContextStatus200License = {
 	"cc-by-nc-sa-4.0": "cc-by-nc-sa-4.0",
 	"cc-by-sa-4.0": "cc-by-sa-4.0",
+	"cc-by-sa-3.0": "cc-by-sa-3.0",
 	"all-rights-reserved": "all-rights-reserved",
 	"cc-by-nc-4.0": "cc-by-nc-4.0",
 	"cc-by-4.0": "cc-by-4.0",
@@ -85448,6 +85458,7 @@ export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200Language =
 export const PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200License = {
 	"cc-by-nc-sa-4.0": "cc-by-nc-sa-4.0",
 	"cc-by-sa-4.0": "cc-by-sa-4.0",
+	"cc-by-sa-3.0": "cc-by-sa-3.0",
 	"all-rights-reserved": "all-rights-reserved",
 	"cc-by-nc-4.0": "cc-by-nc-4.0",
 	"cc-by-4.0": "cc-by-4.0",
@@ -87340,6 +87351,7 @@ export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200Language =
 export const PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200License = {
 	"cc-by-nc-sa-4.0": "cc-by-nc-sa-4.0",
 	"cc-by-sa-4.0": "cc-by-sa-4.0",
+	"cc-by-sa-3.0": "cc-by-sa-3.0",
 	"all-rights-reserved": "all-rights-reserved",
 	"cc-by-nc-4.0": "cc-by-nc-4.0",
 	"cc-by-4.0": "cc-by-4.0",
@@ -105000,6 +105012,7 @@ export type GetApiUnitsBookByUnitIdContentStructureNodesStatus200OwnershipModeEn
 	(typeof GetApiUnitsBookByUnitIdContentStructureNodesStatus200OwnershipModeEnum)[keyof typeof GetApiUnitsBookByUnitIdContentStructureNodesStatus200OwnershipModeEnum];
 
 export const GetApiUnitsBookByUnitIdContentStructureNodesStatus200ItemsContentKindEnum = {
+	book: "book",
 	chapter: "chapter",
 	label: "label",
 } as const;
@@ -105048,6 +105061,7 @@ export type GetApiUnitsBookByUnitIdContentStructureNodesStatus200 = {
 		 */
 		contentUnitId: string;
 		/**
+		 * @default 'book'
 		 * @type string
 		 */
 		contentKind: GetApiUnitsBookByUnitIdContentStructureNodesStatus200ItemsContentKindEnum;
@@ -105165,6 +105179,7 @@ export type PutApiUnitsBookByUnitIdContentStructureStatus200OwnershipModeEnum =
 	(typeof PutApiUnitsBookByUnitIdContentStructureStatus200OwnershipModeEnum)[keyof typeof PutApiUnitsBookByUnitIdContentStructureStatus200OwnershipModeEnum];
 
 export const PutApiUnitsBookByUnitIdContentStructureStatus200ItemsContentKindEnum = {
+	book: "book",
 	chapter: "chapter",
 	label: "label",
 } as const;
@@ -105227,6 +105242,7 @@ export type PutApiUnitsBookByUnitIdContentStructureStatus200 = {
 		 */
 		contentUnitId: string;
 		/**
+		 * @default 'book'
 		 * @type string
 		 */
 		contentKind: PutApiUnitsBookByUnitIdContentStructureStatus200ItemsContentKindEnum;
@@ -105835,6 +105851,7 @@ export type GetApiUnitsMediaByUnitIdContentStructureNodesQuery = {
 };
 
 export const GetApiUnitsMediaByUnitIdContentStructureNodesStatus200ItemsContentKindEnum = {
+	media: "media",
 	video: "video",
 	audio: "audio",
 	label: "label",
@@ -105902,7 +105919,7 @@ export type GetApiUnitsMediaByUnitIdContentStructureNodesStatus200 =
 				 */
 				contentUnitId: string;
 				/**
-				 * @default 'video'
+				 * @default 'media'
 				 * @type string
 				 */
 				contentKind: GetApiUnitsMediaByUnitIdContentStructureNodesStatus200ItemsContentKindEnum;
@@ -106006,6 +106023,7 @@ export type PutApiUnitsMediaByUnitIdContentStructurePath = {
 };
 
 export const PutApiUnitsMediaByUnitIdContentStructureStatus200ItemsContentKindEnum = {
+	media: "media",
 	video: "video",
 	audio: "audio",
 	label: "label",
@@ -106069,7 +106087,7 @@ export type PutApiUnitsMediaByUnitIdContentStructureStatus200 = {
 		 */
 		contentUnitId: string;
 		/**
-		 * @default 'video'
+		 * @default 'media'
 		 * @type string
 		 */
 		contentKind: PutApiUnitsMediaByUnitIdContentStructureStatus200ItemsContentKindEnum;
@@ -178016,6 +178034,7 @@ export type PostApiSearchByIndexRequestContentRatingsEnum =
 export const PostApiSearchByIndexRequestLicensesEnum = {
 	"cc-by-nc-sa-4.0": "cc-by-nc-sa-4.0",
 	"cc-by-sa-4.0": "cc-by-sa-4.0",
+	"cc-by-sa-3.0": "cc-by-sa-3.0",
 	"all-rights-reserved": "all-rights-reserved",
 	"cc-by-nc-4.0": "cc-by-nc-4.0",
 	"cc-by-4.0": "cc-by-4.0",

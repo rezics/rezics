@@ -362,7 +362,14 @@ export const notificationRecipientStat = pgTable(
 	],
 );
 
-/** Exact Chapter totals used to derive Book reading progress without an online scan. */
+/**
+ * Exact explicit Chapter-occurrence totals used to derive Book reading progress.
+ *
+ * @remarks
+ * Book and Label occurrences never enter this aggregate. A Chapter placed below
+ * either one contributes by its own node ID; referenced Book structures are not
+ * traversed. This keeps maintenance local to the changed occurrence.
+ */
 export const bookChapterStat = pgTable(
 	"book_chapter_stat",
 	{
@@ -381,7 +388,10 @@ export const bookChapterStat = pgTable(
 	],
 );
 
-/** Exact per-Profile Chapter completions used to derive Book reading progress. */
+/**
+ * Exact per-Profile completion totals for the Chapter occurrences above.
+ * Completion remains scoped to the occurrence node ID, not the Chapter Unit.
+ */
 export const bookChapterProgressStat = pgTable(
 	"book_chapter_progress_stat",
 	{

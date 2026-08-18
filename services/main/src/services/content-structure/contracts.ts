@@ -131,7 +131,6 @@ export const ContentStructureSnapshotSchema = z
 	})
 	.superRefine((snapshot, context) => {
 		const ids = new Set(snapshot.nodes.map((node) => node.id));
-		const parentById = new Map(snapshot.nodes.map((node) => [node.id, node.parentId]));
 		if (snapshot.structure.deletedAt !== null)
 			context.addIssue({ code: "custom", message: "Checkpoint structure is deleted" });
 		if (ids.size !== snapshot.nodes.length)
@@ -160,19 +159,6 @@ export const ContentStructureSnapshotSchema = z
 					code: "custom",
 					message: `Node ${node.id} has a missing parent`,
 				});
-			const visited = new Set<string>([node.id]);
-			let parentId = node.parentId;
-			while (parentId !== null) {
-				if (visited.has(parentId)) {
-					context.addIssue({
-						code: "custom",
-						message: `Node ${node.id} belongs to a cycle`,
-					});
-					break;
-				}
-				visited.add(parentId);
-				parentId = parentById.get(parentId) ?? null;
-			}
 		}
 	});
 export type ContentStructureSnapshot = z.infer<typeof ContentStructureSnapshotSchema>;
@@ -241,30 +227,55 @@ type KindPolicy = {
 	readonly targets: readonly ContentStructureTargetKind[];
 	readonly progress: "none" | "node_completion";
 	readonly acceptsContent: (kind: UnitKind, postKind: PostKind | null) => boolean;
+	readonly contributesProgress: (kind: UnitKind, postKind: PostKind | null) => boolean;
 };
 
 const anyContent = () => true;
+const noProgress: KindPolicy["contributesProgress"] = () => false;
+const timedMediaProgress: KindPolicy["contributesProgress"] = (kind) =>
+	kind === "video" || kind === "audio";
 const navigationTargets = ["unit", "external", "none"] as const;
 
+/**
+ * Defines the owner, content, target, and progress policy for each persisted
+ * Content Structure kind.
+ *
+ * @remarks
+ * Book progress is derived only from explicit Chapter occurrences in the
+ * current `book.contents` structure. Book and Label occurrences are structural
+ * or navigational and never contribute progress themselves. A Chapter nested
+ * beneath either one contributes because it is still an explicit occurrence
+ * owned by this structure; the referenced Book's structure is never traversed
+ * or inherited. Completion is scoped to the occurrence node ID, so one Chapter
+ * Unit can participate independently in multiple Books.
+ *
+ * Media follows the same rule: only explicit Video and Audio occurrences
+ * contribute. Media and Label occurrences do not, and referenced Media
+ * structures are never traversed.
+ */
 export const ContentStructureKindPolicies = {
 	"book.contents": {
 		ownerKinds: ["book"],
 		targets: ["content"],
 		progress: "node_completion",
 		acceptsContent: (kind, postKind) =>
-			kind === "label" || (kind === "post" && postKind === "chapter"),
+			kind === "book" || kind === "label" || (kind === "post" && postKind === "chapter"),
+		contributesProgress: (kind, postKind) => kind === "post" && postKind === "chapter",
 	},
 	"media.contents": {
 		ownerKinds: ["media"],
 		targets: ["content"],
 		progress: "node_completion",
-		acceptsContent: (kind) => kind === "label" || kind === "video" || kind === "audio",
+		acceptsContent: (kind) =>
+			kind === "media" || kind === "label" || kind === "video" || kind === "audio",
+		contributesProgress: timedMediaProgress,
 	},
 	"post.contents": {
 		ownerKinds: ["post"],
 		targets: ["content"],
 		progress: "none",
 		acceptsContent: anyContent,
+		contributesProgress: noProgress,
 	},
 	"realm.taxonomy": {
 		ownerKinds: ["realm"],
@@ -273,6 +284,7 @@ export const ContentStructureKindPolicies = {
 		/** TODO(wiki): project wiki Post bodies as long-form taxonomy descriptions. */
 		acceptsContent: (kind, postKind) =>
 			kind === "label" || kind === "tag" || (kind === "post" && postKind === "wiki"),
+		contributesProgress: noProgress,
 	},
 	"wiki.navigation": {
 		ownerKinds: ["realm"],
@@ -280,12 +292,14 @@ export const ContentStructureKindPolicies = {
 		progress: "none",
 		acceptsContent: (kind, postKind) =>
 			kind === "label" || (kind === "post" && postKind === "wiki"),
+		contributesProgress: noProgress,
 	},
 	"zone.navigation": {
 		ownerKinds: ["zone"],
 		targets: navigationTargets,
 		progress: "none",
 		acceptsContent: anyContent,
+		contributesProgress: noProgress,
 	},
 	/**
 	 * Optional visual index for Zone Page Units. A Page remains valid and
@@ -296,6 +310,7 @@ export const ContentStructureKindPolicies = {
 		targets: ["content"],
 		progress: "none",
 		acceptsContent: (kind) => kind === "zone_page",
+		contributesProgress: noProgress,
 	},
 } as const satisfies Record<ContentStructureKind, KindPolicy>;
 

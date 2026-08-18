@@ -164,6 +164,12 @@ tasks:
             - test -n "${DATABASE_ADMIN_URL:-}"
             - yarn exec tsx scripts/validate-integrity-constraints.ts {{.CLI_ARGS}}
 
+    db:postgres-schema:
+        desc: Verify migration-owned PostgreSQL functions and triggers against their canonical schema SQL.
+        cmds:
+            - test -n "${DATABASE_ADMIN_URL:-}"
+            - yarn exec tsx scripts/check-postgres-schema.ts
+
     db:check:
         desc: Replay migrations and verify that they match the Drizzle schema.
         cmds:
@@ -234,6 +240,9 @@ tasks:
                 REZICS_DISPOSABLE_MIGRATION_FIXTURE=1
                 DATABASE_ADMIN_URL="postgres://postgres:postgres@localhost:${POSTGRES_MIGRATION_LOCAL_PORT:-5433}/rezics_atlas?sslmode=disable"
                 yarn exec tsx scripts/check-revision-primary-contribution.ts
+            - >-
+                DATABASE_ADMIN_URL="postgres://postgres:postgres@localhost:${POSTGRES_MIGRATION_LOCAL_PORT:-5433}/rezics_atlas?sslmode=disable"
+                yarn exec tsx scripts/check-postgres-schema.ts
             - >-
                 DATABASE_ADMIN_URL="postgres://postgres:postgres@localhost:${POSTGRES_MIGRATION_LOCAL_PORT:-5433}/rezics_atlas?sslmode=disable"
                 yarn exec tsx scripts/validate-integrity-constraints.ts validate-disposable

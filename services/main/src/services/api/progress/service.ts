@@ -528,7 +528,11 @@ export function deriveChapterReadingProgress(
 }
 
 /**
- * Records one visible authenticated Book chapter read.
+ * Records one visible authenticated Chapter occurrence in a Book Content Structure.
+ *
+ * A Book or Label node is navigation-only and cannot enter this path. Chapters placed
+ * below either kind still contribute because aggregation is occurrence-based and does
+ * not traverse the referenced Book's own Content Structure.
  *
  * @internal
  */

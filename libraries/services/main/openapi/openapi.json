@@ -82439,6 +82439,7 @@
 													"enum": [
 														"cc-by-nc-sa-4.0",
 														"cc-by-sa-4.0",
+														"cc-by-sa-3.0",
 														"all-rights-reserved",
 														"cc-by-nc-4.0",
 														"cc-by-4.0",
@@ -82636,6 +82637,7 @@
 													"enum": [
 														"cc-by-nc-sa-4.0",
 														"cc-by-sa-4.0",
+														"cc-by-sa-3.0",
 														"all-rights-reserved",
 														"cc-by-nc-4.0",
 														"cc-by-4.0",
@@ -82820,6 +82822,7 @@
 												"enum": [
 													"cc-by-nc-sa-4.0",
 													"cc-by-sa-4.0",
+													"cc-by-sa-3.0",
 													"all-rights-reserved",
 													"cc-by-nc-4.0",
 													"cc-by-4.0",
@@ -82912,6 +82915,7 @@
 													"enum": [
 														"cc-by-nc-sa-4.0",
 														"cc-by-sa-4.0",
+														"cc-by-sa-3.0",
 														"all-rights-reserved",
 														"cc-by-nc-4.0",
 														"cc-by-4.0",
@@ -96022,6 +96026,7 @@
 														"enum": [
 															"cc-by-nc-sa-4.0",
 															"cc-by-sa-4.0",
+															"cc-by-sa-3.0",
 															"all-rights-reserved",
 															"cc-by-nc-4.0",
 															"cc-by-4.0",
@@ -96462,6 +96467,7 @@
 														"enum": [
 															"cc-by-nc-sa-4.0",
 															"cc-by-sa-4.0",
+															"cc-by-sa-3.0",
 															"all-rights-reserved",
 															"cc-by-nc-4.0",
 															"cc-by-4.0",
@@ -96613,6 +96619,7 @@
 													"enum": [
 														"cc-by-nc-sa-4.0",
 														"cc-by-sa-4.0",
+														"cc-by-sa-3.0",
 														"all-rights-reserved",
 														"cc-by-nc-4.0",
 														"cc-by-4.0",
@@ -98796,6 +98803,7 @@
 													"enum": [
 														"cc-by-nc-sa-4.0",
 														"cc-by-sa-4.0",
+														"cc-by-sa-3.0",
 														"all-rights-reserved",
 														"cc-by-nc-4.0",
 														"cc-by-4.0",
@@ -100526,6 +100534,7 @@
 												"enum": [
 													"cc-by-nc-sa-4.0",
 													"cc-by-sa-4.0",
+													"cc-by-sa-3.0",
 													"all-rights-reserved",
 													"cc-by-nc-4.0",
 													"cc-by-4.0",
@@ -100772,6 +100781,7 @@
 													"enum": [
 														"cc-by-nc-sa-4.0",
 														"cc-by-sa-4.0",
+														"cc-by-sa-3.0",
 														"all-rights-reserved",
 														"cc-by-nc-4.0",
 														"cc-by-4.0",
@@ -102757,6 +102767,7 @@
 													"enum": [
 														"cc-by-nc-sa-4.0",
 														"cc-by-sa-4.0",
+														"cc-by-sa-3.0",
 														"all-rights-reserved",
 														"cc-by-nc-4.0",
 														"cc-by-4.0",
@@ -104714,6 +104725,7 @@
 													"enum": [
 														"cc-by-nc-sa-4.0",
 														"cc-by-sa-4.0",
+														"cc-by-sa-3.0",
 														"all-rights-reserved",
 														"cc-by-nc-4.0",
 														"cc-by-4.0",
@@ -106926,6 +106938,7 @@
 													"enum": [
 														"cc-by-nc-sa-4.0",
 														"cc-by-sa-4.0",
+														"cc-by-sa-3.0",
 														"all-rights-reserved",
 														"cc-by-nc-4.0",
 														"cc-by-4.0",
@@ -123432,7 +123445,11 @@
 														"anyOf": [{ "format": "uuid", "type": "string" }, { "type": "null" }]
 													},
 													"contentUnitId": { "format": "uuid", "type": "string" },
-													"contentKind": { "type": "string", "enum": ["chapter", "label"] },
+													"contentKind": {
+														"default": "book",
+														"type": "string",
+														"enum": ["book", "chapter", "label"]
+													},
 													"language": {
 														"type": "string",
 														"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
@@ -123936,7 +123953,11 @@
 														"anyOf": [{ "format": "uuid", "type": "string" }, { "type": "null" }]
 													},
 													"contentUnitId": { "format": "uuid", "type": "string" },
-													"contentKind": { "type": "string", "enum": ["chapter", "label"] },
+													"contentKind": {
+														"default": "book",
+														"type": "string",
+														"enum": ["book", "chapter", "label"]
+													},
 													"language": {
 														"type": "string",
 														"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
@@ -124246,9 +124267,9 @@
 															},
 															"contentUnitId": { "format": "uuid", "type": "string" },
 															"contentKind": {
-																"default": "video",
+																"default": "media",
 																"type": "string",
-																"enum": ["video", "audio", "label"]
+																"enum": ["media", "video", "audio", "label"]
 															},
 															"language": {
 																"type": "string",
@@ -124542,9 +124563,9 @@
 													},
 													"contentUnitId": { "format": "uuid", "type": "string" },
 													"contentKind": {
-														"default": "video",
+														"default": "media",
 														"type": "string",
-														"enum": ["video", "audio", "label"]
+														"enum": ["media", "video", "audio", "label"]
 													},
 													"language": {
 														"type": "string",
@@ -211234,7 +211255,8 @@
 											"type": "string",
 											"enum": [
 												"cc-by-nc-sa-4.0",
-												"cc-by-sa-4.0",
+													"cc-by-sa-4.0",
+													"cc-by-sa-3.0",
 												"all-rights-reserved",
 												"cc-by-nc-4.0",
 												"cc-by-4.0",

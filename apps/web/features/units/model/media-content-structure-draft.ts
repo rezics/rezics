@@ -13,18 +13,21 @@ type MediaDraftNodeBase = {
 	readonly parentId: string | null;
 	readonly order: number;
 	readonly title: string;
-	readonly contentKind: "video" | "audio" | "label";
+	readonly contentKind: "media" | "video" | "audio" | "label";
 	readonly language: ContentLanguage;
 	readonly durationSeconds: string | number | null;
 };
+
+type NewMediaContentKind = Exclude<MediaDraftNodeBase["contentKind"], "media">;
 
 export type ExistingMediaDraftNode = MediaDraftNodeBase & {
 	readonly state: "existing";
 	readonly contentUnitId: string;
 };
 
-export type NewMediaDraftNode = MediaDraftNodeBase & {
+export type NewMediaDraftNode = Omit<MediaDraftNodeBase, "contentKind"> & {
 	readonly state: "new";
+	readonly contentKind: NewMediaContentKind;
 };
 
 export type AttachedMediaDraftNode = MediaDraftNodeBase & {
@@ -40,7 +43,7 @@ export type InsertedMediaDraftNodeInput =
 
 export type MediaDraftTreeNode = {
 	readonly node: MediaDraftNode;
-	readonly children: readonly MediaDraftTreeNode[];
+	readonly children: MediaDraftTreeNode[];
 };
 
 export type MediaDraftDropTarget =
@@ -51,8 +54,12 @@ export type MediaDraftDropTarget =
 			readonly placement: "before" | "inside" | "after";
 	  };
 
+/**
+ * Allows explicit children below Media and Label occurrences in the editor.
+ * This does not traverse a referenced Media structure and is not validation.
+ */
 export function isMediaDraftParentTarget(node: MediaDraftNode): boolean {
-	return node.contentKind === "label";
+	return node.contentKind === "media" || node.contentKind === "label";
 }
 
 function compareRemoteNodes(left: RemoteMediaNode, right: RemoteMediaNode): number {
@@ -77,7 +84,7 @@ export function createMediaContentStructureDraft(
 	const knownIds = new Set(remoteNodes.map(({ id }) => id));
 	const children = new Map<string | null, RemoteMediaNode[]>();
 	for (const node of remoteNodes) {
-		const parentId = normalizeParentId(node.id, node.parentId, knownIds);
+		const parentId = node.parentId && knownIds.has(node.parentId) ? node.parentId : null;
 		const siblings = children.get(parentId);
 		if (siblings) siblings.push(node);
 		else children.set(parentId, [node]);
@@ -89,7 +96,7 @@ export function createMediaContentStructureDraft(
 	return remoteNodes.map((node) => ({
 		state: "existing",
 		id: node.id,
-		parentId: normalizeParentId(node.id, node.parentId, knownIds),
+		parentId: node.parentId && knownIds.has(node.parentId) ? node.parentId : null,
 		order: orderByNodeId.get(node.id) ?? 0,
 		title: node.title,
 		contentUnitId: node.contentUnitId,
@@ -110,20 +117,31 @@ export function buildMediaDraftTree(nodes: readonly MediaDraftNode[]): MediaDraf
 	}
 	for (const siblings of children.values()) siblings.sort(compareDraftNodes);
 	const seen = new Set<string>();
-	function visit(node: MediaDraftNode, ancestors: ReadonlySet<string>): MediaDraftTreeNode {
+	const roots: MediaDraftTreeNode[] = [];
+	function appendRoot(node: MediaDraftNode): void {
+		if (seen.has(node.id)) return;
+		const root: MediaDraftTreeNode = { node, children: [] };
 		seen.add(node.id);
-		const nextAncestors = new Set(ancestors);
-		nextAncestors.add(node.id);
-		return {
-			node,
-			children: (children.get(node.id) ?? [])
-				.filter((child) => !nextAncestors.has(child.id))
-				.map((child) => visit(child, nextAncestors)),
-		};
+		roots.push(root);
+		const stack = [root];
+		while (stack.length) {
+			const entry = stack.pop();
+			if (!entry) continue;
+			const childEntries: MediaDraftTreeNode[] = [];
+			for (const child of children.get(entry.node.id) ?? []) {
+				if (seen.has(child.id)) continue;
+				seen.add(child.id);
+				childEntries.push({ node: child, children: [] });
+			}
+			entry.children.push(...childEntries);
+			for (let index = childEntries.length - 1; index >= 0; index -= 1) {
+				const childEntry = childEntries[index];
+				if (childEntry) stack.push(childEntry);
+			}
+		}
 	}
-	const roots = (children.get(null) ?? []).map((node) => visit(node, new Set()));
-	for (const node of nodes.toSorted(compareDraftNodes))
-		if (!seen.has(node.id)) roots.push(visit(node, new Set()));
+	for (const node of children.get(null) ?? []) appendRoot(node);
+	for (const node of nodes.toSorted(compareDraftNodes)) appendRoot(node);
 	return roots;
 }
 
@@ -131,10 +149,18 @@ export function flattenMediaDraftTree(
 	nodes: readonly MediaDraftTreeNode[],
 	depth = 0,
 ): readonly { readonly node: MediaDraftNode; readonly depth: number }[] {
-	return nodes.flatMap((entry) => [
-		{ node: entry.node, depth },
-		...flattenMediaDraftTree(entry.children, depth + 1),
-	]);
+	const result: { node: MediaDraftNode; depth: number }[] = [];
+	const stack = nodes.map((entry) => ({ entry, depth })).reverse();
+	while (stack.length) {
+		const item = stack.pop();
+		if (!item) continue;
+		result.push({ node: item.entry.node, depth: item.depth });
+		for (let index = item.entry.children.length - 1; index >= 0; index -= 1) {
+			const child = item.entry.children[index];
+			if (child) stack.push({ entry: child, depth: item.depth + 1 });
+		}
+	}
+	return result;
 }
 
 export function addMediaDraftNode(
@@ -219,14 +245,23 @@ export function getMediaDraftSelectionRoots(
 ): MediaDraftNode[] {
 	const selected = new Set(nodes.filter(({ id }) => selectedIds.has(id)).map(({ id }) => id));
 	const roots: MediaDraftNode[] = [];
-	function visit(entries: readonly MediaDraftTreeNode[], ancestorSelected: boolean): void {
-		for (const entry of entries) {
-			const nodeSelected = selected.has(entry.node.id);
-			if (nodeSelected && !ancestorSelected) roots.push(entry.node);
-			visit(entry.children, ancestorSelected || nodeSelected);
+	const stack = buildMediaDraftTree(nodes)
+		.map((entry) => ({ entry, ancestorSelected: false }))
+		.reverse();
+	while (stack.length) {
+		const item = stack.pop();
+		if (!item) continue;
+		const nodeSelected = selected.has(item.entry.node.id);
+		if (nodeSelected && !item.ancestorSelected) roots.push(item.entry.node);
+		for (let index = item.entry.children.length - 1; index >= 0; index -= 1) {
+			const child = item.entry.children[index];
+			if (child)
+				stack.push({
+					entry: child,
+					ancestorSelected: item.ancestorSelected || nodeSelected,
+				});
 		}
 	}
-	visit(buildMediaDraftTree(nodes), false);
 	return roots;
 }
 

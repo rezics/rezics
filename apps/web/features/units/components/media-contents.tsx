@@ -16,6 +16,7 @@ import {
 	ChevronsDownUp,
 	ChevronsUpDown,
 	Circle,
+	Film,
 	ListTree,
 	Video,
 } from "lucide-react";
@@ -30,13 +31,14 @@ import { useHydratedSession } from "@/lib/use-hydrated-session";
 import { Button, cn, Skeleton } from "@rezics/ui";
 import { buildContentStructureTree } from "../content-structure-tree";
 import {
-	collectBookStructureLabelIds,
+	collectBookStructureExpandableIds,
 	flattenVisibleBookStructureTree,
 } from "../model/book-content-structure-view";
 import {
 	BookContentStructureRowFrame,
 	VirtualizedBookContentStructureRows,
 } from "./book-content-structure-list";
+import { unitDetailHref } from "../routing/unit-detail-routes";
 
 type MediaNode = GetApiUnitsMediaByUnitIdContentStructureNodesStatus200["items"][number];
 
@@ -140,7 +142,7 @@ function MediaContentsList({
 }) {
 	const { t } = useTranslation(["units"]);
 	const tree = useMemo(() => buildContentStructureTree(items), [items]);
-	const expandableIds = useMemo(() => collectBookStructureLabelIds(tree), [tree]);
+	const expandableIds = useMemo(() => collectBookStructureExpandableIds(tree), [tree]);
 	const [expandedIds, setExpandedIds] = useState<ReadonlySet<string>>(() => new Set(expandableIds));
 	const visibleEntries = useMemo(
 		() => flattenVisibleBookStructureTree(tree, expandedIds),
@@ -153,7 +155,7 @@ function MediaContentsList({
 					...result,
 					[node.contentKind]: result[node.contentKind] + 1,
 				}),
-				{ video: 0, audio: 0, label: 0 },
+				{ media: 0, video: 0, audio: 0, label: 0 },
 			),
 		[items],
 	);
@@ -176,6 +178,7 @@ function MediaContentsList({
 						{t.units.content.mediaStructureSummary({
 							videos: counts.video,
 							audios: counts.audio,
+							media: counts.media,
 							labels: counts.label,
 						})}
 					</p>
@@ -202,14 +205,17 @@ function MediaContentsList({
 					renderRow={({ depth, entry, positionInSet, setSize }) => {
 						const { node, children } = entry;
 						const label = node.contentKind === "label";
+						const expandable = children.length > 0;
 						const expanded = expandedIds.has(node.id);
 						const completed = completedNodeIds.has(node.id);
 						const Icon =
-							node.contentKind === "video"
-								? Video
-								: node.contentKind === "audio"
-									? AudioLines
-									: ListTree;
+							node.contentKind === "media"
+								? Film
+								: node.contentKind === "video"
+									? Video
+									: node.contentKind === "audio"
+										? AudioLines
+										: ListTree;
 						const content = (
 							<>
 								<Icon aria-hidden className="size-5 shrink-0 text-muted-foreground" />
@@ -236,7 +242,7 @@ function MediaContentsList({
 						);
 						return (
 							<BookContentStructureRowFrame
-								aria-expanded={label ? expanded : undefined}
+								aria-expanded={expandable ? expanded : undefined}
 								aria-level={depth + 1}
 								aria-posinset={positionInSet}
 								aria-setsize={setSize}
@@ -252,14 +258,35 @@ function MediaContentsList({
 										{content}
 									</button>
 								) : (
-									<Link
-										className="flex min-w-0 flex-1 items-center gap-3 self-stretch"
-										href={`/units/${node.contentKind}/${node.contentUnitId}`}
-									>
-										{content}
-									</Link>
+									<>
+										{expandable ? (
+											<Button
+												aria-label={expanded ? t.units.content.collapse : t.units.content.expand}
+												onClick={() => toggle(node.id)}
+												size="icon-sm"
+												type="button"
+												variant="quiet"
+											>
+												<ChevronRight
+													aria-hidden
+													className={cn("transition-transform", expanded && "rotate-90")}
+												/>
+											</Button>
+										) : null}
+										<Link
+											className="flex min-w-0 flex-1 items-center gap-3 self-stretch"
+											href={
+												node.contentKind === "media"
+													? unitDetailHref("media", node.contentUnitId)
+													: `/units/${node.contentKind}/${node.contentUnitId}`
+											}
+										>
+											{content}
+										</Link>
+									</>
 								)}
-								{!label && showCompletion ? (
+								{(node.contentKind === "video" || node.contentKind === "audio") &&
+								showCompletion ? (
 									<Button
 										aria-label={
 											completed

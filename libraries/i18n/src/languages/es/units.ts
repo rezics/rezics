@@ -553,13 +553,14 @@ export default {
 		label: "Etiqueta",
 		structure: "Estructura",
 		root: "(Raíz)",
-		structureSummary: insert("{{chapters}} capítulos · {{labels}} etiquetas", {
+		structureSummary: insert("{{books}} libros · {{chapters}} capítulos · {{labels}} etiquetas", {
+			books: Number,
 			chapters: Number,
 			labels: Number,
 		}),
 		mediaStructureSummary: insert(
-			`{{videos}} ${videoTerms.plural} · {{audios}} elementos de ${audioTerms.inline} · {{labels}} etiquetas`,
-			{ videos: Number, audios: Number, labels: Number },
+			`{{media}} contenidos multimedia · {{videos}} ${videoTerms.plural} · {{audios}} elementos de ${audioTerms.inline} · {{labels}} etiquetas`,
+			{ media: Number, videos: Number, audios: Number, labels: Number },
 		),
 		childCount: insert("{{count}} elementos subordinados", { count: Number }),
 		totalWordCount: insert("{{count}} palabras en total", { count: Number }),
@@ -576,12 +577,18 @@ export default {
 		mediaMoveDescription:
 			"Elige una etiqueta para mover la selección al final de sus elementos subordinados o un elemento multimedia para moverla justo debajo.",
 		addChapter: "Añadir capítulo",
+		addBook: "Añadir libro",
+		addMedia: "Añadir contenido multimedia",
 		addLabel: "Añadir etiqueta",
 		addVideo: `Añadir ${videoTerms.inline}`,
 		addAudio: `Añadir ${audioTerms.inline}`,
 		addChapterDescription:
 			"Crea un capítulo nuevo o busca un capítulo existente para añadirlo. Al terminar también se guardará la estructura de contenido.",
 		chapterOwnership: "Titularidad del capítulo",
+		addBookDescription:
+			"Busca un libro existente para añadirlo. Esta acción también guarda la estructura de contenido.",
+		addMediaDescription:
+			"Busca contenido multimedia existente para añadirlo. Esta acción también guarda la estructura de contenido.",
 		bookDefaultOwnership: "Usar la predeterminada del libro",
 		profileOwnedChapter: "Capítulo propio",
 		communityOwnedChapter: "Capítulo comunitario",
@@ -599,9 +606,13 @@ export default {
 		createMode: "Crear",
 		attachMode: "Añadir existente",
 		existingChapter: "Capítulo existente",
+		existingBook: "Libro existente",
+		existingMedia: "Contenido multimedia existente",
 		existingLabel: "Etiqueta existente",
 		existingMediaItem: "Elemento multimedia existente",
 		searchExistingChapter: "Buscar capítulos existentes",
+		searchExistingBook: "Buscar libros existentes",
+		searchExistingMedia: "Buscar contenido multimedia existente",
 		searchExistingLabel: "Buscar etiquetas existentes",
 		searchExistingMediaItem: "Buscar elementos multimedia existentes",
 		mediaKindFilter: "Tipo de contenido",
@@ -610,6 +621,8 @@ export default {
 		createLabelAndSave: "Crear etiqueta y guardar",
 		createMediaItemAndSave: "Crear elemento multimedia y guardar",
 		attachChapterAndSave: "Añadir capítulo y guardar",
+		attachBookAndSave: "Añadir libro y guardar",
+		attachMediaAndSave: "Añadir contenido multimedia y guardar",
 		attachLabelAndSave: "Añadir etiqueta y guardar",
 		attachMediaItemAndSave: "Añadir elemento multimedia y guardar",
 		saveCurrentChangesNotice:
@@ -620,6 +633,7 @@ export default {
 		mediaChoosePositionDescription:
 			"Elige una etiqueta para añadir el elemento al final de sus elementos subordinados o un elemento multimedia para insertarlo justo debajo.",
 		newChapter: "Nuevo capítulo",
+		newBook: "Añadir libro",
 		newLabel: "Nueva etiqueta",
 		newMediaItem: "Añadir elemento multimedia",
 		newVideo: `Nuevo ${videoTerms.inline}`,

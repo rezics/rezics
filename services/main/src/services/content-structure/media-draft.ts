@@ -69,6 +69,7 @@ function isMediaContentUnit(row: {
 	readonly audioId: string | null;
 }): boolean {
 	return (
+		row.unitKind === "media" ||
 		(row.unitKind === "label" && row.labelId !== null) ||
 		(row.unitKind === "video" && row.videoId !== null) ||
 		(row.unitKind === "audio" && row.audioId !== null)
@@ -233,7 +234,7 @@ export async function saveMediaContentStructureDraft(
 			const content = attachedContentByUnitId.get(node.contentUnitId);
 			if (!content?.title || !isMediaContentUnit(content))
 				throw new ContentStructureInvalid(
-					"Attached Media content Unit must be a Video, Audio, or Label",
+					"Attached Media content Unit must be a Media, Video, Audio, or Label",
 				);
 			return { ...node, title: content.title };
 		});

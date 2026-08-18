@@ -104,13 +104,13 @@ describe("planRealmTaxonomyDraft", () => {
 		).toThrow(ContentStructureInvalid);
 	});
 
-	it("rejects cycles and non-contiguous sibling orders", () => {
-		expect(() =>
-			planRealmTaxonomyDraft(current, [
-				existing(current[0]!, 0, { parentId: tagId }),
-				existing(current[1]!, 0, { parentId: labelId }),
-			]),
-		).toThrow(/cycle/);
+	it("preserves cycles and rejects non-contiguous sibling orders", () => {
+		const cyclic = planRealmTaxonomyDraft(current, [
+			existing(current[0]!, 0, { parentId: tagId }),
+			existing(current[1]!, 0, { parentId: labelId }),
+		]);
+		expect(cyclic.nodes.find(({ id }) => id === labelId)?.parentId).toBe(tagId);
+		expect(cyclic.nodes.find(({ id }) => id === tagId)?.parentId).toBe(labelId);
 
 		expect(() =>
 			planRealmTaxonomyDraft(current, [

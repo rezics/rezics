@@ -93,8 +93,9 @@ function invalid(message: string): never {
 }
 
 /**
- * Proves that a complete Book Content Structure draft is a closed, acyclic tree
- * and derives the minimal sibling lists that need new fractional positions.
+ * Proves that a complete Book Content Structure draft has closed parent
+ * references and derives the minimal sibling lists that need new fractional
+ * positions. Parent cycles are valid persisted input.
  */
 export function planContentStructureDraft<Node extends ContentStructureDraftNodeBase>(
 	currentNodes: readonly CurrentBookDraftNode[],
@@ -115,26 +116,9 @@ export function planContentStructureDraft<Node extends ContentStructureDraftNode
 		draftById.set(draft.id, { ...draft, title });
 	}
 
-	const visitState = new Map<string, "visiting" | "visited">();
-	for (const startId of draftById.keys()) {
-		if (visitState.get(startId) === "visited") continue;
-		const path: string[] = [];
-		let nodeId: string | null = startId;
-		while (nodeId !== null) {
-			const state = visitState.get(nodeId);
-			if (state === "visiting") invalid(`Draft node ${nodeId} creates a cycle`);
-			if (state === "visited") break;
-			const node = draftById.get(nodeId);
-			if (!node) invalid(`Draft node ${nodeId} does not exist`);
-			visitState.set(nodeId, "visiting");
-			path.push(nodeId);
-			if (node.parentId === node.id) invalid(`Draft node ${node.id} cannot parent itself`);
-			if (node.parentId !== null && !draftById.has(node.parentId))
-				invalid(`Draft node ${node.id} has a missing parent`);
-			nodeId = node.parentId;
-		}
-		for (const pathNodeId of path) visitState.set(pathNodeId, "visited");
-	}
+	for (const node of draftById.values())
+		if (node.parentId !== null && !draftById.has(node.parentId))
+			invalid(`Draft node ${node.id} has a missing parent`);
 
 	const draftSiblingIds = new Map<string | null, string[]>();
 	for (const node of draftById.values()) {
@@ -199,8 +183,9 @@ export function planContentStructureDraft<Node extends ContentStructureDraftNode
 }
 
 /**
- * Proves that a complete Book Content Structure draft is a closed, acyclic tree
+ * Proves that a complete Book Content Structure draft has no missing parents
  * and derives the minimal sibling lists that need new fractional positions.
+ * Parent cycles are persisted unchanged; consumers must terminate independently.
  */
 export function planBookContentStructureDraft(
 	currentNodes: readonly CurrentBookDraftNode[],

@@ -50,7 +50,7 @@ import { LocalizedPortableTextContent } from "@/features/content-language-displa
 import { LocalizedText } from "@/features/content-language-display/chinese-content-display-context";
 import { buildContentStructureTree, type ContentStructureTreeNode } from "./content-structure-tree";
 import {
-	collectBookStructureLabelIds,
+	collectBookStructureExpandableIds,
 	flattenVisibleBookStructureTree,
 	isBookStructureDisplayLabel,
 } from "./model/book-content-structure-view";
@@ -74,21 +74,22 @@ function ContentReadTree({
 	language?: ContentLanguage;
 	className?: string;
 }) {
+	const { t } = useTranslation(["units"]);
 	const scrollRef = useRef<HTMLDivElement>(null);
-	const labelIds = useMemo(() => collectBookStructureLabelIds(nodes), [nodes]);
-	const [expandedIds, setExpandedIds] = useState<ReadonlySet<string>>(() => new Set(labelIds));
-	const activeAncestorLabelIds = useMemo(
-		() => findChapterAncestorLabelIds(nodes, currentNodeId),
+	const expandableIds = useMemo(() => collectBookStructureExpandableIds(nodes), [nodes]);
+	const [expandedIds, setExpandedIds] = useState<ReadonlySet<string>>(() => new Set(expandableIds));
+	const activeAncestorIds = useMemo(
+		() => findChapterAncestorIds(nodes, currentNodeId),
 		[nodes, currentNodeId],
 	);
 
 	useEffect(() => {
-		if (!activeAncestorLabelIds.length) return;
+		if (!activeAncestorIds.length) return;
 		setExpandedIds((current) => {
-			if (activeAncestorLabelIds.every((id) => current.has(id))) return current;
-			return new Set([...current, ...activeAncestorLabelIds]);
+			if (activeAncestorIds.every((id) => current.has(id))) return current;
+			return new Set([...current, ...activeAncestorIds]);
 		});
-	}, [activeAncestorLabelIds]);
+	}, [activeAncestorIds]);
 
 	const entries = useMemo(
 		() => flattenVisibleBookStructureTree(nodes, expandedIds),
@@ -118,7 +119,7 @@ function ContentReadTree({
 		return () => cancelAnimationFrame(frame);
 	}, [activeIndex, virtualizer]);
 
-	const toggleLabel = useCallback((nodeId: string) => {
+	const toggleNode = useCallback((nodeId: string) => {
 		setExpandedIds((current) => {
 			const next = new Set(current);
 			if (next.has(nodeId)) next.delete(nodeId);
@@ -140,6 +141,7 @@ function ContentReadTree({
 					const { depth, entry, positionInSet, setSize } = visibleEntry;
 					const { node } = entry;
 					const labelNode = isBookStructureDisplayLabel(entry);
+					const expandable = entry.children.length > 0;
 					const expanded = expandedIds.has(node.id);
 					const current = node.contentKind === "chapter" && node.id === currentNodeId;
 					const rowClassName = cn(
@@ -170,7 +172,7 @@ function ContentReadTree({
 										rowClassName,
 										"hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring",
 									)}
-									onClick={() => toggleLabel(node.id)}
+									onClick={() => toggleNode(node.id)}
 									style={rowStyle}
 									type="button"
 								>
@@ -186,16 +188,36 @@ function ContentReadTree({
 									</span>
 								</button>
 							) : (
-								<Link
-									aria-current={current ? "page" : undefined}
-									className={rowClassName}
-									href={withContentLanguage(bookReaderHref(bookId, node.id), language)}
-									style={rowStyle}
-								>
-									<span className="truncate">
+								<div className={rowClassName} style={rowStyle}>
+									{expandable ? (
+										<button
+											aria-expanded={expanded}
+											aria-label={expanded ? t.units.content.collapse : t.units.content.expand}
+											className="grid size-7 shrink-0 place-items-center rounded focus-visible:ring-2 focus-visible:ring-ring"
+											onClick={() => toggleNode(node.id)}
+											type="button"
+										>
+											<ChevronRightIcon
+												aria-hidden
+												className={cn(
+													"size-3.5 transition-transform motion-reduce:transition-none",
+													expanded && "rotate-90",
+												)}
+											/>
+										</button>
+									) : null}
+									<Link
+										aria-current={current ? "page" : undefined}
+										className="min-w-0 flex-1 truncate outline-none focus-visible:ring-2 focus-visible:ring-ring"
+										href={
+											node.contentKind === "book"
+												? unitDetailHref("book", node.contentUnitId)
+												: withContentLanguage(bookReaderHref(bookId, node.id), language)
+										}
+									>
 										<LocalizedText language={node.language} value={node.title} />
-									</span>
-								</Link>
+									</Link>
+								</div>
 							)}
 						</div>
 					);
@@ -205,21 +227,33 @@ function ContentReadTree({
 	);
 }
 
-function findChapterAncestorLabelIds(
+function findChapterAncestorIds(
 	nodes: readonly ContentStructureTreeNode[],
 	nodeId?: string,
 ): string[] {
 	if (!nodeId) return [];
-	for (const entry of nodes) {
-		if (entry.node.contentKind === "chapter" && entry.node.id === nodeId) return [];
-		const descendants = findChapterAncestorLabelIds(entry.children, nodeId);
-		if (
-			descendants.length ||
-			entry.children.some(({ node }) => node.contentKind === "chapter" && node.id === nodeId)
-		)
-			return entry.node.contentKind === "label" ? [entry.node.id, ...descendants] : descendants;
+	const parentById = new Map<string, ContentStructureTreeNode>();
+	let target: ContentStructureTreeNode | undefined;
+	const stack = [...nodes];
+	while (stack.length) {
+		const entry = stack.pop();
+		if (!entry) continue;
+		if (entry.node.contentKind === "chapter" && entry.node.id === nodeId) target = entry;
+		for (const child of entry.children) {
+			parentById.set(child.node.id, entry);
+			stack.push(child);
+		}
 	}
-	return [];
+	if (!target) return [];
+	const result: string[] = [];
+	const visited = new Set<string>();
+	let parent = parentById.get(target.node.id);
+	while (parent && !visited.has(parent.node.id)) {
+		visited.add(parent.node.id);
+		result.push(parent.node.id);
+		parent = parentById.get(parent.node.id);
+	}
+	return result.reverse();
 }
 
 const ReaderFontSizeOptions = [

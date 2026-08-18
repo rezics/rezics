@@ -5,7 +5,7 @@ import { estimateMediaItemProgresses } from "./media-progress-estimate";
 const node = (
 	id: string,
 	input: {
-		readonly contentKind?: "video" | "audio" | "label";
+		readonly contentKind?: "media" | "video" | "audio" | "label";
 		readonly durationSeconds?: number | null;
 		readonly parentId?: string | null;
 		readonly position: string;
@@ -55,6 +55,21 @@ describe("media progress estimation", () => {
 			{ id: "one", method: "item-order", percentage: 33 },
 			{ id: "two", method: "item-order", percentage: 67 },
 			{ id: "three", method: "item-order", percentage: 100 },
+		]);
+	});
+
+	it("excludes referenced Media occurrences from progress", () => {
+		const nodes = [
+			node("referenced-media", {
+				contentKind: "media",
+				durationSeconds: 600,
+				position: "a0",
+			}),
+			node("video", { durationSeconds: 100, position: "a1" }),
+		];
+
+		expect(estimateMediaItemProgresses(nodes)).toEqual([
+			{ id: "video", method: "duration", percentage: 100 },
 		]);
 	});
 });

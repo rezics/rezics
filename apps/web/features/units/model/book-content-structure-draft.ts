@@ -23,7 +23,7 @@ type BookDraftNodeBase = {
 export type ExistingBookDraftNode = BookDraftNodeBase & {
 	readonly state: "existing";
 	readonly contentUnitId: string;
-	readonly contentKind: "chapter" | "label";
+	readonly contentKind: "book" | "chapter" | "label";
 	readonly language: ContentLanguage;
 };
 
@@ -40,7 +40,7 @@ export type NewBookDraftNode = BookDraftNodeBase &
 export type AttachedBookDraftNode = BookDraftNodeBase &
 	AttachedBookContentStructureSaveNode & {
 		readonly state: "attached";
-		readonly contentKind: "chapter" | "label";
+		readonly contentKind: "book" | "chapter" | "label";
 		readonly language: ContentLanguage;
 	};
 
@@ -54,7 +54,7 @@ export type InsertedBookDraftNodeInput = InsertedBookDraftNode extends infer Nod
 
 export type BookDraftTreeNode = {
 	readonly node: BookDraftNode;
-	readonly children: readonly BookDraftTreeNode[];
+	readonly children: BookDraftTreeNode[];
 };
 
 export type BookDraftDropTarget =
@@ -69,14 +69,12 @@ export type BookDraftDropTarget =
  * Identifies nodes that may receive children through the book structure editor.
  *
  * @remarks
- * This is intentionally a frontend authoring rule: chapters created or moved by
- * the editor remain leaves, while labels may contain chapters or other labels.
- * The backend does not need to enforce this experience-only convention because
- * bypassing it affects only the bypassing author's own structure. Existing
- * non-leaf chapters are still accepted and rendered as labels by the frontend.
+ * This is intentionally a frontend authoring rule: Chapters remain leaves,
+ * while Book and Label occurrences may contain explicitly shared Chapters.
+ * It does not traverse the referenced Book and is not a backend invariant.
  */
 export function isBookDraftParentTarget(node: BookDraftNode): boolean {
-	return node.contentKind === "label";
+	return node.contentKind === "book" || node.contentKind === "label";
 }
 
 function compareRemoteNodes(left: RemoteBookNode, right: RemoteBookNode): number {
@@ -93,10 +91,7 @@ export function createBookContentStructureDraft(
 	const knownIds = new Set(remoteNodes.map(({ id }) => id));
 	const children = new Map<string | null, RemoteBookNode[]>();
 	for (const node of remoteNodes) {
-		const parentId =
-			node.parentId && node.parentId !== node.id && knownIds.has(node.parentId)
-				? node.parentId
-				: null;
+		const parentId = node.parentId && knownIds.has(node.parentId) ? node.parentId : null;
 		const siblings = children.get(parentId);
 		if (siblings) siblings.push(node);
 		else children.set(parentId, [node]);
@@ -106,10 +101,7 @@ export function createBookContentStructureDraft(
 	for (const siblings of children.values())
 		siblings.forEach((node, order) => orderByNodeId.set(node.id, order));
 	return remoteNodes.map((node) => {
-		const parentId =
-			node.parentId && node.parentId !== node.id && knownIds.has(node.parentId)
-				? node.parentId
-				: null;
+		const parentId = node.parentId && knownIds.has(node.parentId) ? node.parentId : null;
 		return {
 			state: "existing",
 			id: node.id,
@@ -137,26 +129,49 @@ export function buildBookDraftTree(nodes: readonly BookDraftNode[]): BookDraftTr
 	}
 	for (const siblings of children.values()) siblings.sort(compareDraftNodes);
 	const seen = new Set<string>();
-	function visit(node: BookDraftNode, ancestors: ReadonlySet<string>): BookDraftTreeNode {
+	const roots: BookDraftTreeNode[] = [];
+	function appendRoot(node: BookDraftNode): void {
+		if (seen.has(node.id)) return;
+		const root: BookDraftTreeNode = { node, children: [] };
 		seen.add(node.id);
-		const nextAncestors = new Set(ancestors);
-		nextAncestors.add(node.id);
-		return {
-			node,
-			children: (children.get(node.id) ?? [])
-				.filter((child) => !nextAncestors.has(child.id))
-				.map((child) => visit(child, nextAncestors)),
-		};
+		roots.push(root);
+		const stack = [root];
+		while (stack.length) {
+			const entry = stack.pop();
+			if (!entry) continue;
+			const childEntries: BookDraftTreeNode[] = [];
+			for (const child of children.get(entry.node.id) ?? []) {
+				if (seen.has(child.id)) continue;
+				seen.add(child.id);
+				childEntries.push({ node: child, children: [] });
+			}
+			entry.children.push(...childEntries);
+			for (let index = childEntries.length - 1; index >= 0; index -= 1) {
+				const childEntry = childEntries[index];
+				if (childEntry) stack.push(childEntry);
+			}
+		}
 	}
-	const roots = (children.get(null) ?? []).map((node) => visit(node, new Set()));
+	for (const node of children.get(null) ?? []) appendRoot(node);
 	for (const node of nodes.toSorted(compareDraftNodes)) {
-		if (!seen.has(node.id)) roots.push(visit(node, new Set()));
+		appendRoot(node);
 	}
 	return roots;
 }
 
 export function flattenBookDraftTree(nodes: readonly BookDraftTreeNode[]): BookDraftNode[] {
-	return nodes.flatMap((entry) => [entry.node, ...flattenBookDraftTree(entry.children)]);
+	const result: BookDraftNode[] = [];
+	const stack = [...nodes].reverse();
+	while (stack.length) {
+		const entry = stack.pop();
+		if (!entry) continue;
+		result.push(entry.node);
+		for (let index = entry.children.length - 1; index >= 0; index -= 1) {
+			const child = entry.children[index];
+			if (child) stack.push(child);
+		}
+	}
+	return result;
 }
 
 export function addBookDraftNode(
@@ -241,15 +256,23 @@ export function getBookDraftSelectionRoots(
 	const selected = new Set(nodes.filter(({ id }) => selectedIds.has(id)).map(({ id }) => id));
 	const roots: BookDraftNode[] = [];
 
-	function visit(entries: readonly BookDraftTreeNode[], ancestorSelected: boolean): void {
-		for (const entry of entries) {
-			const nodeSelected = selected.has(entry.node.id);
-			if (nodeSelected && !ancestorSelected) roots.push(entry.node);
-			visit(entry.children, ancestorSelected || nodeSelected);
+	const stack = buildBookDraftTree(nodes)
+		.map((entry) => ({ entry, ancestorSelected: false }))
+		.reverse();
+	while (stack.length) {
+		const item = stack.pop();
+		if (!item) continue;
+		const nodeSelected = selected.has(item.entry.node.id);
+		if (nodeSelected && !item.ancestorSelected) roots.push(item.entry.node);
+		for (let index = item.entry.children.length - 1; index >= 0; index -= 1) {
+			const child = item.entry.children[index];
+			if (child)
+				stack.push({
+					entry: child,
+					ancestorSelected: item.ancestorSelected || nodeSelected,
+				});
 		}
 	}
-
-	visit(buildBookDraftTree(nodes), false);
 	return roots;
 }
 

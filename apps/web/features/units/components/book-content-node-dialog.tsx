@@ -22,7 +22,7 @@ import {
 	TabsTrigger,
 } from "@rezics/ui";
 import { ChevronRight, Folder } from "lucide-react";
-import { useId, useState } from "react";
+import { useId, useMemo, useState } from "react";
 
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
@@ -34,7 +34,7 @@ import {
 } from "./book-content-structure-destination-dialog";
 
 export type BookContentNodeDialogRequest = {
-	readonly kind: "chapter" | "label";
+	readonly kind: "book" | "chapter" | "label";
 	readonly destination: BookStructureDestination;
 };
 
@@ -83,6 +83,7 @@ export function BookContentNodeDialog({
 	bookOwnershipMode,
 	error,
 	nodes,
+	ownerUnitId,
 	onClose,
 	onSubmit,
 	pending,
@@ -92,6 +93,7 @@ export function BookContentNodeDialog({
 	readonly error: unknown;
 	readonly bookOwnershipMode: WorkOwnershipMode;
 	readonly nodes: readonly BookDraftNode[];
+	readonly ownerUnitId: string;
 	readonly onClose: () => void;
 	readonly onSubmit: (submission: BookContentNodeDialogSubmission) => void;
 	readonly pending: boolean;
@@ -101,28 +103,40 @@ export function BookContentNodeDialog({
 	const { t } = useTranslation(["engagement", "units", "ui"]);
 	const formId = useId();
 	const [input, setInput] = useState<DialogInput>({
-		mode: "create",
+		mode: request.kind === "book" ? "attach" : "create",
 		create: { title: "", ownershipMode: "book_default" },
 		attach: {},
 	});
 	const [destination, setDestination] = useState<BookStructureDestination>(request.destination);
 	const [destinationDialogOpen, setDestinationDialogOpen] = useState(false);
+	const excludedUnitIds = useMemo(() => new Set([ownerUnitId]), [ownerUnitId]);
 	const contentKind = request.kind;
-	const title = contentKind === "chapter" ? t.units.content.addChapter : t.units.content.addLabel;
+	const title =
+		contentKind === "book"
+			? t.units.content.addBook
+			: contentKind === "chapter"
+				? t.units.content.addChapter
+				: t.units.content.addLabel;
 	const description =
-		contentKind === "chapter"
-			? t.units.content.addChapterDescription
-			: t.units.content.addLabelDescription;
+		contentKind === "book"
+			? t.units.content.addBookDescription
+			: contentKind === "chapter"
+				? t.units.content.addChapterDescription
+				: t.units.content.addLabelDescription;
 	const submitLabel =
 		input.mode === "create"
 			? contentKind === "chapter"
 				? t.units.content.createChapterAndSave
 				: t.units.content.createLabelAndSave
-			: contentKind === "chapter"
-				? t.units.content.attachChapterAndSave
-				: t.units.content.attachLabelAndSave;
+			: contentKind === "book"
+				? t.units.content.attachBookAndSave
+				: contentKind === "chapter"
+					? t.units.content.attachChapterAndSave
+					: t.units.content.attachLabelAndSave;
 	const canSubmit =
-		input.mode === "create" ? Boolean(input.create.title.trim()) : Boolean(input.attach.unit);
+		input.mode === "create"
+			? contentKind !== "book" && Boolean(input.create.title.trim())
+			: Boolean(input.attach.unit);
 	const defaultOwnershipLabel =
 		bookOwnershipMode === "community_owned"
 			? t.units.content.communityOwnedChapter
@@ -145,7 +159,7 @@ export function BookContentNodeDialog({
 							onSubmit={(event) => {
 								event.preventDefault();
 								if (pending) return;
-								if (input.mode === "create") {
+								if (input.mode === "create" && contentKind !== "book") {
 									const normalizedTitle = input.create.title.trim();
 									if (normalizedTitle)
 										onSubmit({
@@ -174,7 +188,7 @@ export function BookContentNodeDialog({
 								value={input.mode}
 							>
 								<TabsList aria-label={t.units.content.addMode} className="w-full">
-									<TabsTrigger disabled={pending} value="create">
+									<TabsTrigger disabled={pending || contentKind === "book"} value="create">
 										{t.units.content.createMode}
 									</TabsTrigger>
 									<TabsTrigger disabled={pending} value="attach">
@@ -240,17 +254,22 @@ export function BookContentNodeDialog({
 								<TabsContent className="pt-3" value="attach">
 									<Field required>
 										<FieldLabel>
-											{contentKind === "chapter"
-												? t.units.content.existingChapter
-												: t.units.content.existingLabel}
+											{contentKind === "book"
+												? t.units.content.existingBook
+												: contentKind === "chapter"
+													? t.units.content.existingChapter
+													: t.units.content.existingLabel}
 										</FieldLabel>
 										<fieldset className="contents" disabled={pending}>
 											<EntityPicker
 												ariaLabel={
-													contentKind === "chapter"
-														? t.units.content.searchExistingChapter
-														: t.units.content.searchExistingLabel
+													contentKind === "book"
+														? t.units.content.searchExistingBook
+														: contentKind === "chapter"
+															? t.units.content.searchExistingChapter
+															: t.units.content.searchExistingLabel
 												}
+												excludedIds={excludedUnitIds}
 												index={contentKind === "chapter" ? "posts" : "units"}
 												kind={contentKind}
 												onChange={(unit) =>

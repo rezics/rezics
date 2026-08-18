@@ -100,7 +100,7 @@ describe("Book Content Structure draft planning", () => {
 		expect(result.hasStructuralChanges).toBe(true);
 	});
 
-	it("rejects gaps and cycles", () => {
+	it("rejects sibling gaps while preserving parent cycles", () => {
 		expect(() =>
 			planBookContentStructureDraft(current, [
 				{ state: "existing", id: "a", parentId: null, order: 0, title: "A" },
@@ -108,13 +108,13 @@ describe("Book Content Structure draft planning", () => {
 				{ state: "existing", id: "c", parentId: "a", order: 0, title: "C" },
 			]),
 		).toThrow();
-		expect(() =>
-			planBookContentStructureDraft(current, [
-				{ state: "existing", id: "a", parentId: "c", order: 0, title: "A" },
-				{ state: "existing", id: "b", parentId: null, order: 0, title: "B" },
-				{ state: "existing", id: "c", parentId: "a", order: 0, title: "C" },
-			]),
-		).toThrow(/cycle/);
+		const cyclic = planBookContentStructureDraft(current, [
+			{ state: "existing", id: "a", parentId: "c", order: 0, title: "A" },
+			{ state: "existing", id: "b", parentId: null, order: 0, title: "B" },
+			{ state: "existing", id: "c", parentId: "a", order: 0, title: "C" },
+		]);
+		expect(cyclic.nodes.find(({ id }) => id === "a")?.parentId).toBe("c");
+		expect(cyclic.nodes.find(({ id }) => id === "c")?.parentId).toBe("a");
 	});
 
 	it("rejects an out-of-bounds order before allocating a sparse sibling list", () => {

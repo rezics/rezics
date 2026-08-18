@@ -540,13 +540,14 @@ export default {
 		label: "ラベル",
 		structure: "構造",
 		root: "(ルート)",
-		structureSummary: insert("{{chapters}} 章 · {{labels}} ラベル", {
+		structureSummary: insert("書籍 {{books}} 冊 · {{chapters}} 章 · {{labels}} ラベル", {
+			books: Number,
 			chapters: Number,
 			labels: Number,
 		}),
 		mediaStructureSummary: insert(
-			`${videoTerms.label} {{videos}} 件 · ${audioTerms.label} {{audios}} 件 · ラベル {{labels}} 件`,
-			{ videos: Number, audios: Number, labels: Number },
+			`メディア {{media}} 件 · ${videoTerms.label} {{videos}} 件 · ${audioTerms.label} {{audios}} 件 · ラベル {{labels}} 件`,
+			{ media: Number, videos: Number, audios: Number, labels: Number },
 		),
 		childCount: insert("{{count}} 子項目", { count: Number }),
 		totalWordCount: insert("合計 {{count}} 単語", { count: Number }),
@@ -562,12 +563,17 @@ export default {
 		mediaMoveDescription:
 			"ラベルを選ぶとその子項目の末尾へ、メディア項目を選ぶとその項目の直後へ移動します。",
 		addChapter: "章を追加",
+		addBook: "書籍を追加",
+		addMedia: "メディアを追加",
 		addLabel: "ラベルを追加",
 		addVideo: `${videoTerms.inline}を追加`,
 		addAudio: `${audioTerms.inline}を追加`,
 		addChapterDescription:
 			"新しい章を作成するか、既存の章を検索して追加します。完了時にコンテンツ構造も保存されます。",
 		chapterOwnership: "章の所有形態",
+		addBookDescription: "既存の書籍を検索して追加します。完了時にコンテンツ構造も保存されます。",
+		addMediaDescription:
+			"既存のメディアを検索して追加します。完了時にコンテンツ構造も保存されます。",
 		bookDefaultOwnership: "書籍のデフォルトを使用",
 		profileOwnedChapter: "所有する章",
 		communityOwnedChapter: "公共の章",
@@ -584,9 +590,13 @@ export default {
 		createMode: "新規作成",
 		attachMode: "既存から追加",
 		existingChapter: "既存の章",
+		existingBook: "既存の書籍",
+		existingMedia: "既存のメディア",
 		existingLabel: "既存のラベル",
 		existingMediaItem: "既存のメディア項目",
 		searchExistingChapter: "既存の章を検索",
+		searchExistingBook: "既存の書籍を検索",
+		searchExistingMedia: "既存のメディアを検索",
 		searchExistingLabel: "既存のラベルを検索",
 		searchExistingMediaItem: "既存のメディア項目を検索",
 		mediaKindFilter: "メディア種別",
@@ -595,6 +605,8 @@ export default {
 		createLabelAndSave: "ラベルを作成して保存",
 		createMediaItemAndSave: "メディア項目を作成して保存",
 		attachChapterAndSave: "章を追加して保存",
+		attachBookAndSave: "書籍を追加して保存",
+		attachMediaAndSave: "メディアを追加して保存",
 		attachLabelAndSave: "ラベルを追加して保存",
 		attachMediaItemAndSave: "メディア項目を追加して保存",
 		saveCurrentChangesNotice:
@@ -604,6 +616,7 @@ export default {
 		mediaChoosePositionDescription:
 			"ラベルを選ぶとその子項目の末尾へ、メディア項目を選ぶとその項目の直後へ追加します。",
 		newChapter: "新しい章",
+		newBook: "書籍を追加",
 		newLabel: "新しいラベル",
 		newMediaItem: "メディア項目を追加",
 		newVideo: `新しい${videoTerms.inline}`,

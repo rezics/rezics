@@ -125,10 +125,6 @@ export const contentStructureNode = pgTable(
 		index("content_structure_node_content_unit_merge_idx").on(table.contentUnitId, table.id),
 		index("content_structure_node_target_unit_idx").on(table.targetUnitId),
 		check(
-			"content_structure_node_not_self_parent",
-			sql`${table.parentId} is null or ${table.parentId} <> ${table.id}`,
-		),
-		check(
 			"content_structure_node_document_key_check",
 			sql`${table.documentKey} is null or ${table.documentKey} ~ '^[0-9a-f]{12}$'`,
 		),

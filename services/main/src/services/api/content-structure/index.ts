@@ -16,7 +16,9 @@ import {
 	contentStructure,
 	contentStructureNode,
 	audio,
+	book,
 	label,
+	media,
 	post,
 	unit,
 	unitOwnership,
@@ -108,7 +110,8 @@ const UnitNotFoundResponse = toApiErrorResponse(["UnitNotFound"]);
 function resolveBookContentKind(
 	unitKind: string,
 	postKind: string | null,
-): "chapter" | "label" | null {
+): "book" | "chapter" | "label" | null {
+	if (unitKind === "book") return "book";
 	if (unitKind === "label") return "label";
 	if (unitKind === "post" && postKind === "chapter") return "chapter";
 	return null;
@@ -245,6 +248,7 @@ async function readBookContentStructure(
 			position: contentStructureNode.position,
 			wordCount: unitLocalizationContentMetric.wordCount,
 			characterCount: unitLocalizationContentMetric.characterCount,
+			bookWordCount: book.wordCount,
 			contentStatus: unitLocalization.contentStatus,
 			canReadDraftContent: viewerProfileId
 				? sql<boolean>`${getUnitPermissionCondition(viewerProfileId, "unit.update", [
@@ -255,6 +259,7 @@ async function readBookContentStructure(
 		.from(contentStructureNode)
 		.innerJoin(unit, eq(unit.id, contentStructureNode.contentUnitId))
 		.leftJoin(post, eq(post.id, contentStructureNode.contentUnitId))
+		.leftJoin(book, eq(book.id, contentStructureNode.contentUnitId))
 		.innerJoin(
 			unitLocalization,
 			and(
@@ -311,10 +316,13 @@ async function readBookContentStructure(
 				language: row.language,
 				title: row.title ?? "",
 				position: row.position,
-				contentMetrics: {
-					wordCount: hasReadableContent ? (row.wordCount ?? 0) : 0,
-					characterCount: hasReadableContent ? (row.characterCount ?? 0) : 0,
-				},
+				contentMetrics:
+					contentKind === "book"
+						? { wordCount: row.bookWordCount ?? 0, characterCount: 0 }
+						: {
+								wordCount: hasReadableContent ? (row.wordCount ?? 0) : 0,
+								characterCount: hasReadableContent ? (row.characterCount ?? 0) : 0,
+							},
 			};
 		}),
 	};
@@ -352,6 +360,8 @@ async function readMediaContentStructure(
 			audioId: audio.id,
 			audioDurationSeconds: audio.durationSeconds,
 			labelId: label.id,
+			mediaId: media.id,
+			mediaRuntimeMinutes: media.runtimeMinutes,
 			unitStatus: unit.status,
 			unitVisibility: unit.visibility,
 		})
@@ -360,6 +370,7 @@ async function readMediaContentStructure(
 		.leftJoin(video, eq(video.id, contentStructureNode.contentUnitId))
 		.leftJoin(audio, eq(audio.id, contentStructureNode.contentUnitId))
 		.leftJoin(label, eq(label.id, contentStructureNode.contentUnitId))
+		.leftJoin(media, eq(media.id, contentStructureNode.contentUnitId))
 		.innerJoin(
 			unitLocalization,
 			and(
@@ -399,7 +410,9 @@ async function readMediaContentStructure(
 							? ("audio" as const)
 							: row.unitKind === "label" && row.labelId
 								? ("label" as const)
-								: null;
+								: row.unitKind === "media" && row.mediaId
+									? ("media" as const)
+									: null;
 				if (!contentKind)
 					throw new Error(`Invalid Media content node ${row.id} unit ${row.contentUnitId}`);
 				return {
@@ -415,7 +428,9 @@ async function readMediaContentStructure(
 							? row.videoDurationSeconds
 							: contentKind === "audio"
 								? row.audioDurationSeconds
-								: null,
+								: contentKind === "media" && row.mediaRuntimeMinutes !== null
+									? row.mediaRuntimeMinutes * 60
+									: null,
 				};
 			}),
 	};

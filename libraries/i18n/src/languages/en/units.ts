@@ -542,13 +542,14 @@ export default {
 		label: "Label",
 		structure: "Structure",
 		root: "(Root)",
-		structureSummary: insert("{{chapters}} chapters · {{labels}} labels", {
+		structureSummary: insert("{{books}} books · {{chapters}} chapters · {{labels}} labels", {
+			books: Number,
 			chapters: Number,
 			labels: Number,
 		}),
 		mediaStructureSummary: insert(
-			`{{videos}} ${videoTerms.plural} · {{audios}} ${audioTerms.inline} items · {{labels}} labels`,
-			{ videos: Number, audios: Number, labels: Number },
+			`{{media}} media · {{videos}} ${videoTerms.plural} · {{audios}} ${audioTerms.inline} items · {{labels}} labels`,
+			{ media: Number, videos: Number, audios: Number, labels: Number },
 		),
 		childCount: insert("{{count}} children", { count: Number }),
 		totalWordCount: insert("{{count}} words total", { count: Number }),
@@ -565,12 +566,18 @@ export default {
 		mediaMoveDescription:
 			"Choose a label to move the selection to the end of its children, or a media item to move directly below it.",
 		addChapter: "Add chapter",
+		addBook: "Add book",
+		addMedia: "Add media",
 		addLabel: "Add label",
 		addVideo: `Add ${videoTerms.inline}`,
 		addAudio: `Add ${audioTerms.inline}`,
 		addChapterDescription:
 			"Create a new chapter or search for an existing chapter to add. Completing this action also saves the content structure.",
 		chapterOwnership: "Chapter ownership",
+		addBookDescription:
+			"Search for an existing book to add. Completing this action also saves the content structure.",
+		addMediaDescription:
+			"Search for existing media to add. Completing this action also saves the content structure.",
 		bookDefaultOwnership: "Use Book default",
 		profileOwnedChapter: "Profile-owned Chapter",
 		communityOwnedChapter: "Community-owned Chapter",
@@ -587,9 +594,13 @@ export default {
 		createMode: "Create",
 		attachMode: "Add existing",
 		existingChapter: "Existing chapter",
+		existingBook: "Existing book",
+		existingMedia: "Existing media",
 		existingLabel: "Existing label",
 		existingMediaItem: "Existing media item",
 		searchExistingChapter: "Search existing chapters",
+		searchExistingBook: "Search existing books",
+		searchExistingMedia: "Search existing media",
 		searchExistingLabel: "Search existing labels",
 		searchExistingMediaItem: "Search existing media items",
 		mediaKindFilter: "Media type",
@@ -598,6 +609,8 @@ export default {
 		createLabelAndSave: "Create label and save",
 		createMediaItemAndSave: "Create media item and save",
 		attachChapterAndSave: "Add chapter and save",
+		attachBookAndSave: "Add book and save",
+		attachMediaAndSave: "Add media and save",
 		attachLabelAndSave: "Add label and save",
 		attachMediaItemAndSave: "Add media item and save",
 		saveCurrentChangesNotice:
@@ -608,6 +621,7 @@ export default {
 		mediaChoosePositionDescription:
 			"Choose a label to append to its children, or a media item to insert directly below it.",
 		newChapter: "New chapter",
+		newBook: "Add book",
 		newLabel: "New label",
 		newMediaItem: "Add media item",
 		newVideo: `New ${videoTerms.inline}`,

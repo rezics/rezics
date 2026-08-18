@@ -34,6 +34,7 @@ type EntityPickerSearchResolution =
 
 export function EntityPicker({
 	ariaLabel,
+	excludedIds,
 	index,
 	kind,
 	kinds,
@@ -48,6 +49,14 @@ export function EntityPicker({
 	renderNoResultsAction,
 }: {
 	ariaLabel: string;
+	/**
+	 * Hides matching entities from this picker's current client-side results.
+	 *
+	 * @remarks
+	 * This is only an authoring convenience. It is not validation, a persisted
+	 * invariant, or proof that the resulting relation is acyclic.
+	 */
+	excludedIds?: ReadonlySet<string>;
 	index: string;
 	kind?: string;
 	kinds?: readonly string[];
@@ -118,7 +127,9 @@ export function EntityPicker({
 						const allowed = allowedKindsKey ? new Set(allowedKindsKey.split("\u0000")) : undefined;
 						set(
 							nextHits.filter(
-								(hit) => !allowed || (hit.kind !== undefined && allowed.has(hit.kind)),
+								(hit) =>
+									!excludedIds?.has(hit.id) &&
+									(!allowed || (hit.kind !== undefined && allowed.has(hit.kind))),
 							),
 						);
 						setSearchResolution({ status: "ready", query });
@@ -137,7 +148,7 @@ export function EntityPicker({
 			window.clearTimeout(timer);
 			controller?.abort();
 		};
-	}, [allowedKindsKey, index, inputValue, open, searchEntities, searchOnOpen, set]);
+	}, [allowedKindsKey, excludedIds, index, inputValue, open, searchEntities, searchOnOpen, set]);
 
 	useEffect(() => {
 		setInputValue(value?.label ?? "");

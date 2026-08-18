@@ -562,13 +562,14 @@ export default {
 		label: "Bezeichnung",
 		structure: "Struktur",
 		root: "(Stamm)",
-		structureSummary: insert("{{chapters}} Kapitel · {{labels}} Bezeichnungen", {
+		structureSummary: insert("{{books}} Bücher · {{chapters}} Kapitel · {{labels}} Bezeichnungen", {
+			books: Number,
 			chapters: Number,
 			labels: Number,
 		}),
 		mediaStructureSummary: insert(
-			`{{videos}} ${videoTerms.pluralLabel} · {{audios}} ${audioTerms.label}elemente · {{labels}} Bezeichnungen`,
-			{ videos: Number, audios: Number, labels: Number },
+			`{{media}} Medien · {{videos}} ${videoTerms.pluralLabel} · {{audios}} ${audioTerms.label}elemente · {{labels}} Bezeichnungen`,
+			{ media: Number, videos: Number, audios: Number, labels: Number },
 		),
 		childCount: insert("{{count}} untergeordnete Elemente", { count: Number }),
 		totalWordCount: insert("Insgesamt {{count}} Wörter", { count: Number }),
@@ -585,12 +586,18 @@ export default {
 		mediaMoveDescription:
 			"Wähle eine Bezeichnung, um die Auswahl ans Ende ihrer Unterelemente zu verschieben, oder ein Medienelement, um sie direkt darunter zu verschieben.",
 		addChapter: "Kapitel hinzufügen",
+		addBook: "Buch hinzufügen",
+		addMedia: "Medien hinzufügen",
 		addLabel: "Bezeichnung hinzufügen",
 		addVideo: `${videoTerms.label} hinzufügen`,
 		addAudio: `${audioTerms.label} hinzufügen`,
 		addChapterDescription:
 			"Erstelle ein neues Kapitel oder suche nach einem vorhandenen Kapitel. Beim Abschluss wird auch die Inhaltsstruktur gespeichert.",
 		chapterOwnership: "Eigentumsform des Kapitels",
+		addBookDescription:
+			"Suche ein vorhandenes Buch zum Hinzufügen. Dabei wird auch die Inhaltsstruktur gespeichert.",
+		addMediaDescription:
+			"Suche vorhandene Medien zum Hinzufügen. Dabei wird auch die Inhaltsstruktur gespeichert.",
 		bookDefaultOwnership: "Buchstandard verwenden",
 		profileOwnedChapter: "Profilverwaltetes Kapitel",
 		communityOwnedChapter: "Gemeinschaftskapitel",
@@ -608,9 +615,13 @@ export default {
 		createMode: "Neu erstellen",
 		attachMode: "Vorhandenes hinzufügen",
 		existingChapter: "Vorhandenes Kapitel",
+		existingBook: "Vorhandenes Buch",
+		existingMedia: "Vorhandene Medien",
 		existingLabel: "Vorhandene Bezeichnung",
 		existingMediaItem: "Vorhandenes Medienelement",
 		searchExistingChapter: "Vorhandene Kapitel suchen",
+		searchExistingBook: "Vorhandene Bücher suchen",
+		searchExistingMedia: "Vorhandene Medien suchen",
 		searchExistingLabel: "Vorhandene Bezeichnungen suchen",
 		searchExistingMediaItem: "Vorhandene Medienelemente suchen",
 		mediaKindFilter: "Medientyp",
@@ -619,6 +630,8 @@ export default {
 		createLabelAndSave: "Bezeichnung erstellen und speichern",
 		createMediaItemAndSave: "Medienelement erstellen und speichern",
 		attachChapterAndSave: "Kapitel hinzufügen und speichern",
+		attachBookAndSave: "Buch hinzufügen und speichern",
+		attachMediaAndSave: "Medien hinzufügen und speichern",
 		attachLabelAndSave: "Bezeichnung hinzufügen und speichern",
 		attachMediaItemAndSave: "Medienelement hinzufügen und speichern",
 		saveCurrentChangesNotice:
@@ -629,6 +642,7 @@ export default {
 		mediaChoosePositionDescription:
 			"Wähle eine Bezeichnung, um das Element an ihre Unterelemente anzuhängen, oder ein Medienelement, um es direkt darunter einzufügen.",
 		newChapter: "Neues Kapitel",
+		newBook: "Buch hinzufügen",
 		newLabel: "Neue Bezeichnung",
 		newMediaItem: "Medienelement hinzufügen",
 		newVideo: `Neues ${videoTerms.inline}`,

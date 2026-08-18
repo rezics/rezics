@@ -137,6 +137,9 @@ client-supplied counts.
 Hosted Book totals sum currently readable, published chapter occurrences by content language.
 They remain explicitly separate from `book.word_count`, which is authoritative editorial
 metadata and may describe a Book whose text is not hosted by REZICS.
+When a Book Unit is itself one occurrence in `book.contents`, that occurrence uses the referenced
+Book's `book.word_count` as its direct word weight. It never recursively reads or sums the
+referenced Book's Content Structure.
 
 ## Naming and identities
 
@@ -150,20 +153,32 @@ the human-facing address does not invalidate the reference.
 
 ## Content Structure kinds
 
-| Kind              | Owner | Content                    | Targets                  | Progress        |
-| ----------------- | ----- | -------------------------- | ------------------------ | --------------- |
-| `book.contents`   | Book  | chapter Post or Label Unit | content                  | node completion |
-| `post.contents`   | Post  | readable Unit              | content                  | none            |
-| `realm.taxonomy`  | Realm | Label, Tag, or wiki Post   | content                  | none            |
-| `wiki.navigation` | Realm | Label or mounted Wiki Post | mounted Wiki Post, group | none            |
-| `zone.navigation` | Zone  | readable Unit              | Unit, HTTPS URL, group   | none            |
-| `page-structure`  | Zone  | owned `zone_page` Unit     | content                  | none            |
+| Kind              | Owner | Content                            | Targets                  | Progress                        |
+| ----------------- | ----- | ---------------------------------- | ------------------------ | ------------------------------- |
+| `book.contents`   | Book  | Book, chapter Post, or Label Unit  | content                  | explicit Chapter completion     |
+| `media.contents`  | Media | Media, Video, Audio, or Label Unit | content                  | explicit Video/Audio completion |
+| `post.contents`   | Post  | readable Unit                      | content                  | none                            |
+| `realm.taxonomy`  | Realm | Label, Tag, or wiki Post           | content                  | none                            |
+| `wiki.navigation` | Realm | Label or mounted Wiki Post         | mounted Wiki Post, group | none                            |
+| `zone.navigation` | Zone  | readable Unit                      | Unit, HTTPS URL, group   | none                            |
+| `page-structure`  | Zone  | owned `zone_page` Unit             | content                  | none                            |
 
 Within `book.contents`, a Label is always a structural display entry. Book outlines ignore any
 body that its localization may have in another context. A chapter is a readable entry whose body
-is optional: its title and previous/next navigation remain available without Portable Text. The
-Book editor allows only Labels to receive children, but that authoring convention is a frontend
-rule rather than a backend hierarchy constraint.
+is optional: its title and previous/next navigation remain available without Portable Text. A Book
+occurrence is one ordinary leaf: selecting it opens that Book's canonical Unit detail and does not
+project its nodes into the source Reader. `media.contents` applies the same rule to Media
+occurrences. No source parameter, return link, or inferred container relationship is carried to the
+target Unit. Editors allow Book/Label and Media/Label occurrences to receive explicit local
+children. That authoring convention is a frontend rule rather than a backend hierarchy constraint.
+
+Opening a Book or Media occurrence performs navigation only. It writes neither the source owner's
+progress nor the target Unit's progress. Book and Label occurrences are progress-neutral; only
+explicit Chapter occurrences in the current structure contribute to Book progress. A Chapter
+placed beneath a Book or Label contributes normally, but the referenced Book's own structure is
+never traversed or inherited. Media, Video, Audio, and Label follow the symmetric rule: only
+explicit Video and Audio occurrences contribute. Completion remains occurrence-local by node ID;
+the graph does not imply ownership, containment, edition, or anthology semantics.
 
 ## Chapter identity, Reader context, and takedown
 
@@ -186,6 +201,8 @@ once or in more than one Book. Book outlines and Reader links use node IDs; feed
 collections, reply roots, and standalone shares use the Chapter Post ID. A Reader failure never
 falls back to standalone Post rendering, and standalone Post rendering never guesses a Book
 context. This removes authorization-dependent redirects and ambiguous multi-Book selection.
+Book occurrences in an outline link directly to the target Book and are excluded from Reader
+previous/next chapter ordering.
 
 Changing a Book to draft therefore takes down the Reader context but does not implicitly mutate
 independent Chapters. The management UI requires an explicit choice between the Book alone and the
@@ -217,6 +234,18 @@ structure index; their work is `O(nodes_in_book)`, not `O(corpus)`. Track the pe
 distribution, response bytes, query latency, sort memory, and authorization-subquery time. A Book
 whose outline approaches 10,000 nodes is the operational cutover signal for a paginated/materialized
 depth-first projection; do not raise request memory or statement timeouts to accommodate that skew.
+
+Book-to-Book and Media-to-Media writes perform no direct or indirect cycle query. Target validation
+is one Unit lookup plus the ordinary indexed structure write, so its database work does not grow
+with a reachable cross-Unit graph at the 500-million-row baseline or 3-billion-row estimate. Book
+and Media authoring pickers hide the owner Unit as a low-cost UI convenience only; this is not
+validation or a persisted acyclicity invariant.
+
+Parent and cross-Unit cycles are valid persisted input. Every in-process hierarchy walk is
+iterative, maintains a visited node-ID set, and visits each node in the loaded local structure at
+most once. Disconnected and cyclic nodes remain visible without following a referenced Unit into
+another structure. Consequently a deep chain or cycle cannot cause recursion overflow, infinite
+traversal, recursive content expansion, or work proportional to a reachable cross-Unit graph.
 
 Chapter takedown work is independent of Book size on every transaction: two jobs are claimed at a
 time and each advances at most 25 occurrences. One batch performs one indexed node window read, one
@@ -257,9 +286,9 @@ batch contains at most 10,000 logical entries in `changes`; this limit does not 
 tree size, the number of nodes referenced by a command, or the number of rows changed when applying
 it. For example, a swap is one command and deleting a subtree is one command regardless of the
 number of descendants. The planner applies the commands to the current snapshot in memory and
-validates the complete resulting tree—including parent existence, sibling placement, and cycles—
-before any live row is written. Invalid batches have no partial effects and a successful batch
-creates at most one revision.
+validates parent existence and sibling placement before any live row is written. It deliberately
+preserves parent cycles. Invalid batches have no partial effects and a successful batch creates at
+most one revision.
 
 The single-node endpoints and Navigation document replacement are compatibility adapters over that
 planner. Complete Book, Media, and Realm taxonomy drafts compile their semantic differences into
@@ -353,14 +382,14 @@ contains all current localizations; an index hit is never an authorization grant
 ## Tree and storage invariants
 
 - Parent and child belong to the same structure and owner.
-- A node cannot parent itself or an ancestor; service validation and a database constraint trigger
-  both enforce this.
+- No acyclicity or self-parent invariant is persisted or validated.
+- Authoring UIs may hide obviously undesirable choices such as adding the owner Unit to its own
+  structure. That filter is only a convenience; all readers remain correct when cycles exist.
 - Live sibling order is `(position, id)` using the fractional-position contract.
 - Soft-deleted nodes and aggregates are excluded from active reads.
 - Active tree reads use `(structure_id, parent_id, position, id) WHERE deleted_at IS NULL`;
   reverse content lookups use `(content_unit_id, structure_id) WHERE deleted_at IS NULL`.
 
-Adjacency lists remain the canonical tree representation. Full bounded outlines are the dominant
-read, so a closure table would add write amplification without current evidence. PostgreSQL's
-recursive-query guidance covers stable ordering and cycle detection:
-[PostgreSQL recursive queries](https://www.postgresql.org/docs/current/queries-with.html).
+Adjacency lists remain the canonical hierarchy representation. Full bounded outlines are the
+dominant read, so a closure table would add write amplification without current evidence. Runtime
+consumers must use explicit visited sets rather than treating the adjacency relation as a tree.

@@ -555,13 +555,14 @@ export default {
 		label: "Libellé",
 		structure: "Structure",
 		root: "(Racine)",
-		structureSummary: insert("{{chapters}} chapitres · {{labels}} libellés", {
+		structureSummary: insert("{{books}} livres · {{chapters}} chapitres · {{labels}} libellés", {
+			books: Number,
 			chapters: Number,
 			labels: Number,
 		}),
 		mediaStructureSummary: insert(
-			`{{videos}} ${videoTerms.plural} · {{audios}} éléments ${audioTerms.inline} · {{labels}} libellés`,
-			{ videos: Number, audios: Number, labels: Number },
+			`{{media}} médias · {{videos}} ${videoTerms.plural} · {{audios}} éléments ${audioTerms.inline} · {{labels}} libellés`,
+			{ media: Number, videos: Number, audios: Number, labels: Number },
 		),
 		childCount: insert("{{count}} éléments enfants", { count: Number }),
 		totalWordCount: insert("{{count}} mots au total", { count: Number }),
@@ -578,12 +579,18 @@ export default {
 		mediaMoveDescription:
 			"Choisissez un libellé pour déplacer la sélection après ses enfants, ou un élément multimédia pour la placer directement en dessous.",
 		addChapter: "Ajouter un chapitre",
+		addBook: "Ajouter un livre",
+		addMedia: "Ajouter un média",
 		addLabel: "Ajouter un libellé",
 		addVideo: `Ajouter une ${videoTerms.inline}`,
 		addAudio: `Ajouter un élément ${audioTerms.inline}`,
 		addChapterDescription:
 			"Créez un chapitre ou recherchez un chapitre existant à ajouter. La structure du contenu sera également enregistrée.",
 		chapterOwnership: "Propriété du chapitre",
+		addBookDescription:
+			"Recherchez un livre existant à ajouter. La structure du contenu sera également enregistrée.",
+		addMediaDescription:
+			"Recherchez un média existant à ajouter. La structure du contenu sera également enregistrée.",
 		bookDefaultOwnership: "Utiliser la valeur par défaut du livre",
 		profileOwnedChapter: "Chapitre personnel",
 		communityOwnedChapter: "Chapitre communautaire",
@@ -601,9 +608,13 @@ export default {
 		createMode: "Créer",
 		attachMode: "Ajouter un élément existant",
 		existingChapter: "Chapitre existant",
+		existingBook: "Livre existant",
+		existingMedia: "Média existant",
 		existingLabel: "Libellé existant",
 		existingMediaItem: "Élément multimédia existant",
 		searchExistingChapter: "Rechercher des chapitres existants",
+		searchExistingBook: "Rechercher des livres existants",
+		searchExistingMedia: "Rechercher des médias existants",
 		searchExistingLabel: "Rechercher des libellés existants",
 		searchExistingMediaItem: "Rechercher des éléments multimédias existants",
 		mediaKindFilter: "Type de média",
@@ -612,6 +623,8 @@ export default {
 		createLabelAndSave: "Créer le libellé et enregistrer",
 		createMediaItemAndSave: "Créer l’élément multimédia et enregistrer",
 		attachChapterAndSave: "Ajouter le chapitre et enregistrer",
+		attachBookAndSave: "Ajouter le livre et enregistrer",
+		attachMediaAndSave: "Ajouter le média et enregistrer",
 		attachLabelAndSave: "Ajouter le libellé et enregistrer",
 		attachMediaItemAndSave: "Ajouter l’élément multimédia et enregistrer",
 		saveCurrentChangesNotice:
@@ -622,6 +635,7 @@ export default {
 		mediaChoosePositionDescription:
 			"Choisissez un libellé pour ajouter l’élément après ses enfants, ou un élément multimédia pour l’insérer directement en dessous.",
 		newChapter: "Nouveau chapitre",
+		newBook: "Ajouter un livre",
 		newLabel: "Nouveau libellé",
 		newMediaItem: "Ajouter un élément multimédia",
 		newVideo: `Nouvelle ${videoTerms.inline}`,

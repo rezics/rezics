@@ -64,6 +64,30 @@ describe("EntityPicker no-result actions", () => {
 		expect(await screen.findByText("Studio")).toBeTruthy();
 	});
 
+	it("hides explicitly excluded entities as a presentation-only convenience", async () => {
+		const search = vi.fn(async () => [
+			{ id: "owner-id", label: "Current owner" },
+			{ id: "other-id", label: "Other work" },
+		]);
+		render(
+			<UiProvider searchEntities={search}>
+				<EntityPicker
+					ariaLabel="Search entities"
+					excludedIds={new Set(["owner-id"])}
+					index="entities"
+					onChange={vi.fn()}
+					placeholder="Enter an entity name"
+					searchOnOpen
+				/>
+			</UiProvider>,
+		);
+
+		fireEvent.click(screen.getByRole("combobox", { name: "Search entities" }));
+
+		expect(await screen.findByText("Other work")).toBeTruthy();
+		expect(screen.queryByText("Current owner")).toBeNull();
+	});
+
 	it("commits a preloaded result on the first click", async () => {
 		const selected = { id: "entity-id", label: "Studio" };
 		const onChange = vi.fn();

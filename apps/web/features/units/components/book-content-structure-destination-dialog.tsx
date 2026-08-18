@@ -28,7 +28,7 @@ export type BookStructureDestination = ContentStructureDestination;
 export type ContentStructureDestinationNode = BookDraftNode | MediaDraftNode;
 type ContentStructureDestinationTreeNode = {
 	readonly node: ContentStructureDestinationNode;
-	readonly children: readonly ContentStructureDestinationTreeNode[];
+	readonly children: ContentStructureDestinationTreeNode[];
 };
 
 type ContentStructureNodeDestination = Extract<
@@ -42,7 +42,10 @@ export function contentStructureDestinationForNode(
 	return {
 		kind: "node",
 		nodeId: node.id,
-		placement: node.contentKind === "label" ? "inside" : "after",
+		placement:
+			node.contentKind === "book" || node.contentKind === "media" || node.contentKind === "label"
+				? "inside"
+				: "after",
 	};
 }
 export const bookStructureDestinationForNode = contentStructureDestinationForNode;
@@ -84,30 +87,54 @@ function buildDestinationTree(
 	}
 	for (const siblings of children.values()) siblings.sort(compareNodes);
 	const seen = new Set<string>();
-	function visit(
-		node: ContentStructureDestinationNode,
-		ancestors: ReadonlySet<string>,
-	): ContentStructureDestinationTreeNode {
+	const roots: ContentStructureDestinationTreeNode[] = [];
+	function appendRoot(node: ContentStructureDestinationNode): void {
+		if (seen.has(node.id)) return;
+		const root: ContentStructureDestinationTreeNode = { node, children: [] };
 		seen.add(node.id);
-		const nextAncestors = new Set(ancestors);
-		nextAncestors.add(node.id);
-		return {
-			node,
-			children: (children.get(node.id) ?? [])
-				.filter((child) => !nextAncestors.has(child.id))
-				.map((child) => visit(child, nextAncestors)),
-		};
+		roots.push(root);
+		const stack = [root];
+		while (stack.length) {
+			const entry = stack.pop();
+			if (!entry) continue;
+			const childEntries: ContentStructureDestinationTreeNode[] = [];
+			for (const child of children.get(entry.node.id) ?? []) {
+				if (seen.has(child.id)) continue;
+				seen.add(child.id);
+				childEntries.push({ node: child, children: [] });
+			}
+			entry.children.push(...childEntries);
+			for (let index = childEntries.length - 1; index >= 0; index -= 1) {
+				const childEntry = childEntries[index];
+				if (childEntry) stack.push(childEntry);
+			}
+		}
 	}
-	const roots = (children.get(null) ?? []).map((node) => visit(node, new Set()));
-	for (const node of nodes.toSorted(compareNodes))
-		if (!seen.has(node.id)) roots.push(visit(node, new Set()));
+	for (const node of children.get(null) ?? []) appendRoot(node);
+	for (const node of nodes.toSorted(compareNodes)) appendRoot(node);
 	return roots;
 }
 
-function collectExpandableIds(nodes: readonly ContentStructureDestinationTreeNode[]): string[] {
-	return nodes.flatMap(({ node, children }) =>
-		children.length ? [node.id, ...collectExpandableIds(children)] : collectExpandableIds(children),
-	);
+function flattenVisibleDestinationTree(
+	nodes: readonly ContentStructureDestinationTreeNode[],
+	expandedIds: ReadonlySet<string>,
+): readonly {
+	readonly entry: ContentStructureDestinationTreeNode;
+	readonly depth: number;
+}[] {
+	const result: { entry: ContentStructureDestinationTreeNode; depth: number }[] = [];
+	const stack = nodes.map((entry) => ({ entry, depth: 1 })).reverse();
+	while (stack.length) {
+		const item = stack.pop();
+		if (!item) continue;
+		result.push(item);
+		if (!expandedIds.has(item.entry.node.id)) continue;
+		for (let index = item.entry.children.length - 1; index >= 0; index -= 1) {
+			const child = item.entry.children[index];
+			if (child) stack.push({ entry: child, depth: item.depth + 1 });
+		}
+	}
+	return result;
 }
 
 export function ContentStructureDestinationDialog({
@@ -129,8 +156,10 @@ export function ContentStructureDestinationDialog({
 }) {
 	const { t } = useTranslation(["engagement", "units"]);
 	const tree = useMemo(() => buildDestinationTree(nodes), [nodes]);
-	const [expandedIds, setExpandedIds] = useState<ReadonlySet<string>>(
-		() => new Set(collectExpandableIds(tree)),
+	const [expandedIds, setExpandedIds] = useState<ReadonlySet<string>>(() => new Set());
+	const visibleEntries = useMemo(
+		() => flattenVisibleDestinationTree(tree, expandedIds),
+		[expandedIds, tree],
 	);
 
 	function toggle(nodeId: string) {
@@ -168,9 +197,9 @@ export function ContentStructureDestinationDialog({
 							<span className="truncate font-medium">{t.units.content.root}</span>
 						</button>
 						<ul className="m-0 list-none p-0">
-							{tree.map((entry) => (
+							{visibleEntries.map(({ depth, entry }) => (
 								<DestinationTreeRow
-									depth={1}
+									depth={depth}
 									entry={entry}
 									expandedIds={expandedIds}
 									key={entry.node.id}
@@ -269,22 +298,6 @@ function DestinationTreeRow({
 					<span className="truncate">{node.title}</span>
 				</button>
 			</div>
-			{expanded && children.length ? (
-				<ul className="m-0 list-none p-0">
-					{children.map((child) => (
-						<DestinationTreeRow
-							depth={depth + 1}
-							entry={child}
-							expandedIds={expandedIds}
-							key={child.node.id}
-							onSelect={onSelect}
-							onToggle={onToggle}
-							selectedDestination={selectedDestination}
-							validTargetIds={validTargetIds}
-						/>
-					))}
-				</ul>
-			) : null}
 		</li>
 	);
 }

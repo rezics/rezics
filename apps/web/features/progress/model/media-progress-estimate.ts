@@ -15,16 +15,17 @@ export interface MediaItemProgressEstimate {
 }
 
 /**
- * Estimates progress through the selected playable item while keeping labels
- * out of the denominator. Duration weighting is used only when every item has
- * a usable duration; otherwise deterministic item order is the honest fallback.
+ * Estimates progress through explicit Video and Audio occurrences. Media and
+ * Label occurrences are navigation-only and stay out of the denominator.
+ * Duration weighting is used only when every playable item has a usable
+ * duration; otherwise deterministic item order is the honest fallback.
  */
 export function estimateMediaItemProgresses(
 	nodes: readonly MediaContentNode[],
 ): readonly MediaItemProgressEstimate[] {
 	const items = flattenContentStructureTree(buildContentStructureTree(nodes))
 		.map(({ node }) => node)
-		.filter((node) => node.contentKind !== "label");
+		.filter((node) => node.contentKind === "video" || node.contentKind === "audio");
 	if (items.length === 0) return [];
 
 	const durations = items.map((node) => toNonNegativeApiInteger(node.durationSeconds));

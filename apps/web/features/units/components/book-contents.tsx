@@ -11,6 +11,7 @@ import {
 import { useQueryClient } from "@tanstack/react-query";
 import {
 	CheckIcon,
+	ChevronRight,
 	ChevronsDownUp,
 	ChevronsUpDown,
 	CircleIcon,
@@ -30,9 +31,9 @@ import { RequestFailure } from "@/i18n/request-failure";
 import { toNonNegativeApiInteger } from "@/lib/api-number";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
 import { buildContentStructureTree } from "../content-structure-tree";
-import { bookReaderHref } from "../routing/unit-detail-routes";
+import { bookReaderHref, unitDetailHref } from "../routing/unit-detail-routes";
 import {
-	collectBookStructureLabelIds,
+	collectBookStructureExpandableIds,
 	countBookStructureDisplayedKinds,
 	EmptyBookStructureContentMetrics,
 	flattenVisibleBookStructureTree,
@@ -156,7 +157,7 @@ function BookContentsList({
 	const { openAuthPortal } = useAuthPortal();
 	const tree = useMemo(() => buildContentStructureTree(items), [items]);
 	const nodeById = useMemo(() => new Map(items.map((node) => [node.id, node] as const)), [items]);
-	const allExpandableIds = useMemo(() => collectBookStructureLabelIds(tree), [tree]);
+	const allExpandableIds = useMemo(() => collectBookStructureExpandableIds(tree), [tree]);
 	const [expandedIds, setExpandedIds] = useState<ReadonlySet<string>>(
 		() => new Set(allExpandableIds),
 	);
@@ -172,7 +173,7 @@ function BookContentsList({
 		() => indexBookStructureSubtreeContentMetrics(tree, ownContentMetricsByNodeId),
 		[ownContentMetricsByNodeId, tree],
 	);
-	const { chapterCount, labelCount } = useMemo(
+	const { bookCount, chapterCount, labelCount } = useMemo(
 		() => countBookStructureDisplayedKinds(tree),
 		[tree],
 	);
@@ -240,6 +241,7 @@ function BookContentsList({
 						</Button>
 					</>
 				}
+				bookCount={bookCount}
 				chapterCount={chapterCount}
 				labelCount={labelCount}
 			>
@@ -251,6 +253,7 @@ function BookContentsList({
 						renderRow={({ depth, entry, positionInSet, setSize }) => {
 							const { node, children } = entry;
 							const displayAsLabel = isBookStructureDisplayLabel(entry);
+							const expandable = children.length > 0;
 							const expanded = expandedIds.has(node.id);
 							const completed = completedNodeIds.has(node.id);
 							const mainClassName =
@@ -274,7 +277,7 @@ function BookContentsList({
 							);
 							return (
 								<BookContentStructureRowFrame
-									aria-expanded={displayAsLabel ? expanded : undefined}
+									aria-expanded={expandable ? expanded : undefined}
 									aria-level={depth + 1}
 									aria-posinset={positionInSet}
 									aria-setsize={setSize}
@@ -287,11 +290,36 @@ function BookContentsList({
 											{rowText}
 										</button>
 									) : (
-										<Link className={mainClassName} href={bookReaderHref(bookId, node.id)}>
-											{rowText}
-										</Link>
+										<>
+											{expandable ? (
+												<Button
+													aria-label={expanded ? t.units.content.collapse : t.units.content.expand}
+													onClick={() => toggle(node.id)}
+													size="icon-sm"
+													type="button"
+													variant="quiet"
+												>
+													<ChevronRight
+														aria-hidden
+														className={
+															expanded ? "rotate-90 transition-transform" : "transition-transform"
+														}
+													/>
+												</Button>
+											) : null}
+											<Link
+												className={mainClassName}
+												href={
+													node.contentKind === "book"
+														? unitDetailHref("book", node.contentUnitId)
+														: bookReaderHref(bookId, node.id)
+												}
+											>
+												{rowText}
+											</Link>
+										</>
 									)}
-									{showCompletion && !displayAsLabel ? (
+									{showCompletion && node.contentKind === "chapter" ? (
 										<Button
 											aria-label={
 												completed
@@ -328,7 +356,9 @@ function BookContentsList({
 													setShareTarget({
 														href: displayAsLabel
 															? `/units/book/${bookId}/contents#content-node-${encodeURIComponent(node.id)}`
-															: bookReaderHref(bookId, node.id),
+															: node.contentKind === "book"
+																? unitDetailHref("book", node.contentUnitId)
+																: bookReaderHref(bookId, node.id),
 														unitId: node.contentUnitId,
 													})
 												}

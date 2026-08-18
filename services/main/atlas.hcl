@@ -19,8 +19,9 @@ env "main" {
 		exec_order       = LINEAR
 		revisions_schema = "public"
 
-		// Drizzle does not export these durable objects, so explicit SQL
-		// migrations own them and Atlas must not infer their removal.
+		// Atlas Community cannot inspect PostgreSQL functions or triggers. Their
+		// canonical definitions live under schema/postgres and are verified against
+		// migration replay separately; Atlas must not infer their removal.
 		exclude = [
 			"*[type=extension|function|trigger]",
 			"unit_localization.unit_localization_pgroonga_*[type=index]",

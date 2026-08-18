@@ -17,6 +17,7 @@ import {
 	FeedWikiItemResponse,
 	LocalizedContentMetricResponse,
 	MediaContentStructureNodeListResponse,
+	ContentStructureNodeListResponse,
 	OrdinaryPostDetailResponse,
 	PostDetailResponse,
 	ReviewDetailResponse,
@@ -257,6 +258,52 @@ describe("API response values", () => {
 				items: [],
 			}),
 		).toBe(false);
+	});
+
+	it("accepts Unit occurrences in Book and Media Content Structures", () => {
+		const structureId = "00000000-0000-7000-8000-000000000001";
+		const nodeId = "00000000-0000-7000-8000-000000000002";
+		const contentUnitId = "00000000-0000-7000-8000-000000000003";
+		const latestRevisionId = "00000000-0000-7000-8000-000000000004";
+
+		expect(
+			Check(ContentStructureNodeListResponse, {
+				ownershipMode: "profile_owned",
+				structureId,
+				latestRevisionId,
+				items: [
+					{
+						id: nodeId,
+						parentId: null,
+						contentUnitId,
+						contentKind: "book",
+						language: "en",
+						title: "Referenced Book",
+						position: "a0",
+						contentMetrics: { wordCount: 120_000, characterCount: 0 },
+					},
+				],
+			}),
+		).toBe(true);
+		expect(
+			Check(MediaContentStructureNodeListResponse, {
+				state: "initialized",
+				structureId,
+				latestRevisionId,
+				items: [
+					{
+						id: nodeId,
+						parentId: null,
+						contentUnitId,
+						contentKind: "media",
+						language: "en",
+						title: "Referenced Media",
+						position: "a0",
+						durationSeconds: 5_400,
+					},
+				],
+			}),
+		).toBe(true);
 	});
 
 	it("requires Scores only for Review Feed items", () => {

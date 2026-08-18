@@ -27,11 +27,13 @@ const EstimatedRowHeight = 6 * 16;
 
 export function BookContentStructureSection({
 	actions,
+	bookCount,
 	chapterCount,
 	children,
 	labelCount,
 }: {
 	readonly actions?: ReactNode;
+	readonly bookCount: number;
 	readonly chapterCount: number;
 	readonly children: ReactNode;
 	readonly labelCount: number;
@@ -45,6 +47,7 @@ export function BookContentStructureSection({
 					<h2 className="font-heading font-semibold text-lg">{t.units.content.title}</h2>
 					<p className="mt-1 text-muted-foreground text-sm">
 						{t.units.content.structureSummary({
+							books: bookCount,
 							chapters: chapterCount,
 							labels: labelCount,
 						})}

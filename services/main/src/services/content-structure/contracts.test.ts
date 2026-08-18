@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
 	ContentStructureContentModel,
 	ContentStructureCheckpointDepth,
+	ContentStructureKindPolicies,
 	ContentStructureLargeDeltaBytes,
 	ContentStructureReplayBytes,
 	ContentStructureSnapshotSchema,
@@ -135,7 +136,7 @@ describe("Content Structure History contract", () => {
 		});
 	});
 
-	it("rejects cycles and malformed discriminated targets at the History boundary", () => {
+	it("preserves cycles while rejecting malformed discriminated targets at the History boundary", () => {
 		const first = node({
 			id: FirstNodeId,
 			contentUnitId: FirstContentId,
@@ -148,7 +149,7 @@ describe("Content Structure History contract", () => {
 			parentId: FirstNodeId,
 			position: "a1",
 		});
-		expect(() => snapshot([first, second])).toThrow(/cycle/);
+		expect(snapshot([first, second]).nodes).toEqual([first, second]);
 		expect(() =>
 			snapshot([
 				{
@@ -162,5 +163,40 @@ describe("Content Structure History contract", () => {
 				},
 			]),
 		).toThrow(/target shape/);
+	});
+
+	it("allows same-domain Unit content without enabling Software contents", () => {
+		expect(ContentStructureKindPolicies["book.contents"].acceptsContent("book", null)).toBe(true);
+		expect(ContentStructureKindPolicies["media.contents"].acceptsContent("media")).toBe(true);
+		expect(ContentStructureKindPolicies["book.contents"].acceptsContent("media", null)).toBe(false);
+		expect("software.contents" in ContentStructureKindPolicies).toBe(false);
+	});
+
+	it("keeps same-domain container occurrences progress-neutral", () => {
+		expect(ContentStructureKindPolicies["book.contents"].contributesProgress("book", null)).toBe(
+			false,
+		);
+		expect(
+			ContentStructureKindPolicies["book.contents"].contributesProgress("post", "chapter"),
+		).toBe(true);
+		expect(ContentStructureKindPolicies["media.contents"].contributesProgress("media", null)).toBe(
+			false,
+		);
+		expect(ContentStructureKindPolicies["media.contents"].contributesProgress("video", null)).toBe(
+			true,
+		);
+	});
+
+	it("validates a deep parent chain without recursive stack growth", () => {
+		const nodes = Array.from({ length: 10_000 }, (_, index) =>
+			node({
+				id: `019b1234-1234-7000-8000-${String(index + 100).padStart(12, "0")}`,
+				contentUnitId: FirstContentId,
+				parentId:
+					index === 0 ? null : `019b1234-1234-7000-8000-${String(index + 99).padStart(12, "0")}`,
+				position: "a0",
+			}),
+		);
+		expect(snapshot(nodes).nodes).toHaveLength(10_000);
 	});
 });

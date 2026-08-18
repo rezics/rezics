@@ -44,7 +44,7 @@ export type BookReadingNode = {
 	readonly contentUnitId: string;
 	readonly parentId: string | null;
 	readonly position: string;
-	readonly contentKind: "chapter" | "label";
+	readonly contentKind: "book" | "chapter" | "label";
 };
 
 function compareNodes(left: BookReadingNode, right: BookReadingNode): number {
@@ -73,11 +73,19 @@ export function orderReaderChapterNodeIds(nodes: readonly BookReadingNode[]): st
 
 	const visited = new Set<string>();
 	const chapterNodeIds: string[] = [];
-	const visit = (node: BookReadingNode): void => {
-		if (visited.has(node.id)) return;
-		visited.add(node.id);
-		if (node.contentKind === "chapter") chapterNodeIds.push(node.id);
-		for (const child of childrenByParent.get(node.id) ?? []) visit(child);
+	const visit = (start: BookReadingNode): void => {
+		const stack = [start];
+		while (stack.length) {
+			const node = stack.pop();
+			if (!node || visited.has(node.id)) continue;
+			visited.add(node.id);
+			if (node.contentKind === "chapter") chapterNodeIds.push(node.id);
+			const children = childrenByParent.get(node.id) ?? [];
+			for (let index = children.length - 1; index >= 0; index -= 1) {
+				const child = children[index];
+				if (child) stack.push(child);
+			}
+		}
 	};
 	for (const root of childrenByParent.get(null) ?? []) visit(root);
 	for (const node of [...nodes].sort(compareNodes)) visit(node);

@@ -22,6 +22,7 @@ import {
 	unitProgressEntry,
 } from "../../database/schema";
 import { ContentStructureNodeNotFound } from "../content-structure/errors";
+import { ContentStructureKindPolicies } from "../../content-structure/contracts";
 import {
 	CompleteProgressBody,
 	CreateProgressEntryBody,
@@ -101,13 +102,12 @@ async function findCompletableContentStructureNode(
 		.limit(1);
 	if (
 		node?.structureKind === "book.contents" &&
-		node.unitKind === "post" &&
-		node.postKind === "chapter"
+		ContentStructureKindPolicies["book.contents"].contributesProgress(node.unitKind, node.postKind)
 	)
 		return "book";
 	if (
 		node?.structureKind === "media.contents" &&
-		(node.unitKind === "video" || node.unitKind === "audio")
+		ContentStructureKindPolicies["media.contents"].contributesProgress(node.unitKind, node.postKind)
 	)
 		return "media";
 	return null;

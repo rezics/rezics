@@ -207,8 +207,8 @@ function nodeMeaning(node: ContentStructureNodeState) {
 }
 
 /**
- * Applies an ordered command batch to an in-memory snapshot and proves the
- * complete resulting tree before any database write is allowed.
+ * Applies an ordered command batch to an in-memory snapshot. Parent cycles are
+ * accepted; every graph walk in this planner must terminate independently.
  */
 export function planContentStructureBatch(
 	before: ContentStructureSnapshot,
@@ -242,7 +242,11 @@ export function planContentStructureBatch(
 				if (reservedNodeIds.has(command.nodeId))
 					invalid(command, "node id already exists or was already used in this batch");
 				reservedNodeIds.add(command.nodeId);
-				if (command.parentId !== null && !nodes.has(command.parentId))
+				if (
+					command.parentId !== null &&
+					command.parentId !== command.nodeId &&
+					!nodes.has(command.parentId)
+				)
 					invalid(command, "parent node does not exist at this point in the batch");
 				const target = targetColumns(command.target ?? { kind: "content" });
 				const node: ContentStructureNodeState = {
@@ -298,7 +302,6 @@ export function planContentStructureBatch(
 				const current = nodes.get(command.nodeId);
 				if (!current) invalid(command, "node does not exist at this point in the batch");
 				const parentId = command.parentId === undefined ? current.parentId : command.parentId;
-				if (parentId === command.nodeId) invalid(command, "node cannot parent itself");
 				if (parentId !== null && !nodes.has(parentId))
 					invalid(command, "parent node does not exist at this point in the batch");
 				removeFromSiblings(siblings, current.parentId, current.id);
@@ -355,8 +358,11 @@ export function planContentStructureBatch(
 				if (!root) invalid(command, "node does not exist at this point in the batch");
 				removeFromSiblings(siblings, root.parentId, root.id);
 				const pending = [root.id];
+				const visited = new Set<string>();
 				for (let index = 0; index < pending.length; index += 1) {
 					const nodeId = pending[index]!;
+					if (visited.has(nodeId)) continue;
+					visited.add(nodeId);
 					pending.push(...(siblings.get(nodeId) ?? []));
 					nodes.delete(nodeId);
 					siblings.delete(nodeId);

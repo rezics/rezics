@@ -1,8 +1,9 @@
 import { describe, expect, it } from "vitest";
 
 import {
-	collectBookStructureLabelIds,
+	collectBookStructureExpandableIds,
 	countBookStructureDisplayedKinds,
+	flattenVisibleBookStructureTree,
 	isBookStructureDisplayLabel,
 	type BookStructureViewTreeNode,
 } from "./book-content-structure-view";
@@ -11,7 +12,7 @@ type TestNode = {
 	readonly id: string;
 	readonly title: string;
 	readonly language: "en";
-	readonly contentKind: "chapter" | "label";
+	readonly contentKind: "book" | "chapter" | "label";
 };
 
 function entry(
@@ -37,10 +38,27 @@ describe("book content structure presentation kinds", () => {
 		const chapter = entry("chapter", "chapter", [entry("nested", "chapter")]);
 
 		expect(isBookStructureDisplayLabel(chapter)).toBe(false);
-		expect(collectBookStructureLabelIds([chapter])).toEqual([]);
+		expect(collectBookStructureExpandableIds([chapter])).toEqual(["chapter"]);
 		expect(countBookStructureDisplayedKinds([chapter])).toEqual({
+			bookCount: 0,
 			chapterCount: 2,
 			labelCount: 0,
 		});
+	});
+
+	it("counts Book occurrences separately from chapters", () => {
+		const book = entry("book", "book", [entry("explicit-child", "chapter")]);
+		expect(countBookStructureDisplayedKinds([book])).toEqual({
+			bookCount: 1,
+			chapterCount: 1,
+			labelCount: 0,
+		});
+		expect(collectBookStructureExpandableIds([book])).toEqual(["book"]);
+		expect(
+			flattenVisibleBookStructureTree([book], new Set()).map(({ entry }) => entry.node.id),
+		).toEqual(["book"]);
+		expect(
+			flattenVisibleBookStructureTree([book], new Set(["book"])).map(({ entry }) => entry.node.id),
+		).toEqual(["book", "explicit-child"]);
 	});
 });

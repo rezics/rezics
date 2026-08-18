@@ -120,23 +120,45 @@ describe("Content Structure batch planner", () => {
 		expect(plan.after.nodes.find(({ id }) => id === SecondNodeId)?.position).toBe("a0");
 	});
 
-	it("rejects a cycle created only by the combined batch", () => {
-		expect(() =>
-			planContentStructureBatch(snapshot(), [
-				{
-					opId: "first",
-					type: "node.move",
-					nodeId: FirstNodeId,
-					parentId: SecondNodeId,
-				},
-				{
-					opId: "second",
-					type: "node.move",
-					nodeId: SecondNodeId,
-					parentId: FirstNodeId,
-				},
-			]),
-		).toThrow(/cycle/);
+	it("preserves a cycle created by the combined batch", () => {
+		const plan = planContentStructureBatch(snapshot(), [
+			{
+				opId: "first",
+				type: "node.move",
+				nodeId: FirstNodeId,
+				parentId: SecondNodeId,
+			},
+			{
+				opId: "second",
+				type: "node.move",
+				nodeId: SecondNodeId,
+				parentId: FirstNodeId,
+			},
+		]);
+
+		expect(plan.after.nodes.find(({ id }) => id === FirstNodeId)?.parentId).toBe(SecondNodeId);
+		expect(plan.after.nodes.find(({ id }) => id === SecondNodeId)?.parentId).toBe(FirstNodeId);
+	});
+
+	it("terminates subtree deletion when the selected component is cyclic", () => {
+		const plan = planContentStructureBatch(snapshot(), [
+			{
+				opId: "first",
+				type: "node.move",
+				nodeId: FirstNodeId,
+				parentId: SecondNodeId,
+			},
+			{
+				opId: "second",
+				type: "node.move",
+				nodeId: SecondNodeId,
+				parentId: FirstNodeId,
+			},
+			{ opId: "delete", type: "node.deleteSubtree", nodeId: FirstNodeId },
+		]);
+
+		expect(plan.after.nodes.map(({ id }) => id)).not.toContain(FirstNodeId);
+		expect(plan.after.nodes.map(({ id }) => id)).not.toContain(SecondNodeId);
 	});
 
 	it("never reuses a node identity deleted earlier in the batch", () => {

@@ -18,9 +18,11 @@ export interface BookChapterProgressEstimate extends BookProgressEstimate {
 }
 
 /**
- * Estimates progress through the selected chapter while keeping labels out of
- * the denominator. Content weighting is used only when every chapter has a
- * usable metric; otherwise deterministic chapter order is the honest fallback.
+ * Estimates progress through explicit Chapter occurrences. Book and Label
+ * occurrences stay out of the denominator; their explicit Chapter children
+ * remain ordinary occurrences in this structure. Content weighting is used
+ * only when every Chapter has a usable metric; otherwise deterministic Chapter
+ * order is the honest fallback.
  */
 export function estimateBookChapterProgresses(
 	nodes: readonly BookContentNode[],

@@ -123,4 +123,25 @@ describe("orderReaderChapterNodeIds", () => {
 			]),
 		).toEqual(["first-node", "second-node"]);
 	});
+
+	it("omits Book occurrences and terminates on cyclic input", () => {
+		expect(
+			orderReaderChapterNodeIds([
+				{
+					id: "book-node",
+					contentUnitId: "book",
+					parentId: "chapter-node",
+					position: "a1",
+					contentKind: "book",
+				},
+				{
+					id: "chapter-node",
+					contentUnitId: "chapter",
+					parentId: "book-node",
+					position: "a2",
+					contentKind: "chapter",
+				},
+			]),
+		).toEqual(["chapter-node"]);
+	});
 });

@@ -1,4 +1,4 @@
-import { and, asc, eq, inArray, isNull, sql } from "drizzle-orm";
+import { and, asc, eq, inArray, isNull } from "drizzle-orm";
 
 import type { DatabaseTransaction } from "../database";
 import {
@@ -204,24 +204,6 @@ export async function loadContentStructureSnapshot(
 	return ContentStructureSnapshotSchema.parse({ version: 1, structure, nodes });
 }
 
-function orderNodesParentsFirst(snapshot: ContentStructureSnapshot) {
-	const remaining = new Map(snapshot.nodes.map((node) => [node.id, node]));
-	const inserted = new Set<string>();
-	const ordered: ContentStructureSnapshot["nodes"] = [];
-	while (remaining.size) {
-		let progressed = false;
-		for (const [id, node] of remaining) {
-			if (node.parentId !== null && !inserted.has(node.parentId)) continue;
-			ordered.push(node);
-			inserted.add(id);
-			remaining.delete(id);
-			progressed = true;
-		}
-		if (!progressed) throw new ContentStructureInvalid("Content Structure contains a cycle");
-	}
-	return ordered;
-}
-
 export async function restoreContentStructureState(
 	tx: DatabaseTransaction,
 	structureId: string,
@@ -247,52 +229,26 @@ export async function restoreContentStructureState(
 		.insert(contentStructure)
 		.values(state.structure)
 		.onConflictDoUpdate({ target: contentStructure.id, set: structureState });
-	for (const node of orderNodesParentsFirst(state)) {
+	for (const node of state.nodes) {
 		const { id: _nodeId, ...nodeState } = node;
 		await tx
 			.insert(contentStructureNode)
-			.values(node)
-			.onConflictDoUpdate({ target: contentStructureNode.id, set: nodeState });
+			.values({ ...node, parentId: null })
+			.onConflictDoUpdate({
+				target: contentStructureNode.id,
+				set: { ...nodeState, parentId: null },
+			});
 	}
-}
-
-export async function assertContentStructureParent(
-	tx: DatabaseTransaction,
-	structureId: string,
-	nodeId: string,
-	parentId: string | null,
-): Promise<void> {
-	if (parentId === null) return;
-	type ParentValidationRow = { readonly parentExists: boolean; readonly createsCycle: boolean };
-	const result = await tx.execute<ParentValidationRow>(sql`
-		with recursive ancestors (id, parent_id, visited_ids) as (
-			select
-				candidate.id,
-				candidate.parent_id,
-				array[candidate.id]
-			from ${contentStructureNode} candidate
-			where candidate.id = ${parentId}::uuid
-				and candidate.structure_id = ${structureId}::uuid
-				and candidate.deleted_at is null
-
-			union all
-
-			select
-				parent.id,
-				parent.parent_id,
-				child.visited_ids || parent.id
-			from ancestors child
-			inner join ${contentStructureNode} parent
-				on parent.id = child.parent_id
-				and parent.structure_id = ${structureId}::uuid
-				and parent.deleted_at is null
-			where parent.id <> all(child.visited_ids)
-		)
-		select
-			exists(select 1 from ancestors) as "parentExists",
-			exists(select 1 from ancestors where id = ${nodeId}::uuid) as "createsCycle"
-	`);
-	const validation = result.rows[0];
-	if (!validation?.parentExists) throw new ContentStructureInvalid("Parent node does not exist");
-	if (validation.createsCycle) throw new ContentStructureInvalid("Node move would create a cycle");
+	for (const node of state.nodes) {
+		if (node.parentId === null) continue;
+		await tx
+			.update(contentStructureNode)
+			.set({ parentId: node.parentId })
+			.where(
+				and(
+					eq(contentStructureNode.id, node.id),
+					eq(contentStructureNode.structureId, structureId),
+				),
+			);
+	}
 }

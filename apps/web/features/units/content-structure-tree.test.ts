@@ -86,4 +86,19 @@ describe("content tree", () => {
 		expect(outdent.position > "a0").toBe(true);
 		expect(outdent.position < "a1").toBe(true);
 	});
+
+	it("builds and flattens a deep chain iteratively", () => {
+		const deep = Array.from(
+			{ length: 10_000 },
+			(_, index): ContentStructureNode => ({
+				...part,
+				id: `node-${index}`,
+				contentUnitId: `unit-${index}`,
+				parentId: index === 0 ? null : `node-${index - 1}`,
+			}),
+		);
+		const flattened = flattenContentStructureTree(buildContentStructureTree(deep));
+		expect(flattened).toHaveLength(10_000);
+		expect(flattened.at(-1)?.depth).toBe(9_999);
+	});
 });
