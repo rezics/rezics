@@ -28,6 +28,9 @@ dist/
 out/
 target/
 /apps/markdown/src-tauri/gen/schemas/
+# Generated Tauri platform icons. Keep the directory via .gitkeep.
+**/src-tauri/icons/**
+!**/src-tauri/icons/.gitkeep
 coverage/
 storybook-static/
 *.tsbuildinfo

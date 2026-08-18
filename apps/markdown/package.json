@@ -8,7 +8,8 @@
 		"packages/*"
 	],
 	"scripts": {
-		"dev": "tauri dev",
+		"generate:icons": "node scripts/generate-icons.mjs",
+		"dev": "node scripts/generate-icons.mjs && tauri dev",
 		"dev:web": "yarn workspace @rezics/markdown-editor-web dev",
 		"build": "node scripts/build-desktop.mjs",
 		"build:web": "yarn workspace @rezics/markdown-editor-web build",

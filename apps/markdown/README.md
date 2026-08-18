@@ -29,3 +29,9 @@ task apps-markdown:build
 ```
 
 The desktop build delegates to a cross-platform Node entry point. On Linux it disables linuxdeploy's secondary strip pass so AppImage packaging also works on distributions whose ELF files use modern `SHT_RELR` sections; Cargo still produces an optimized release binary.
+
+Desktop platform icons are generated from `app-icon.svg` into `src-tauri/icons` and are not committed. `task apps-markdown:dev` and `task apps-markdown:build` regenerate them. To generate them alone:
+
+```sh
+yarn workspace @rezics/markdown-editor run generate:icons
+```
