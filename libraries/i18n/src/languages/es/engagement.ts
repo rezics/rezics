@@ -160,6 +160,7 @@ export default {
 	resultsHidden: "Los resultados aparecerán después de que cierre la encuesta.",
 	emptyPolls: "Todavía no hay encuestas.",
 	progress: "Progreso",
+	continueAction: "Continuar",
 	scoreActionByType: {
 		book: "Valorar este libro",
 		media: "Valorar esta obra",

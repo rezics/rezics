@@ -36441,6 +36441,7 @@ export type GetApiGovernanceUnitByUnitIdAccessQuery = {
 export const GetApiGovernanceUnitByUnitIdAccessStatus200PermissionsEnum = {
 	"unit.read": "unit.read",
 	"unit.update": "unit.update",
+	"unit.metadata-only.update": "unit.metadata-only.update",
 	"unit.status.update": "unit.status.update",
 	"unit.history.restore": "unit.history.restore",
 	"unit.access.manage": "unit.access.manage",
@@ -36495,6 +36496,7 @@ export type GetApiGovernanceUnitByUnitIdAccessStatus200SubjectsSubjectRelationEn
 export const GetApiGovernanceUnitByUnitIdAccessStatus200SubjectsGrantsEnum = {
 	"unit.read": "unit.read",
 	"unit.update": "unit.update",
+	"unit.metadata-only.update": "unit.metadata-only.update",
 	"unit.status.update": "unit.status.update",
 	"unit.history.restore": "unit.history.restore",
 	"unit.access.manage": "unit.access.manage",
@@ -36526,6 +36528,7 @@ export type GetApiGovernanceUnitByUnitIdAccessStatus200SubjectsGrantsEnum =
 export const GetApiGovernanceUnitByUnitIdAccessStatus200SubjectsRestrictionsEnum = {
 	"unit.read": "unit.read",
 	"unit.update": "unit.update",
+	"unit.metadata-only.update": "unit.metadata-only.update",
 	"unit.status.update": "unit.status.update",
 	"unit.history.restore": "unit.history.restore",
 	"unit.access.manage": "unit.access.manage",
@@ -36557,6 +36560,7 @@ export type GetApiGovernanceUnitByUnitIdAccessStatus200SubjectsRestrictionsEnum 
 export const GetApiGovernanceUnitByUnitIdAccessStatus200SubjectsInheritedEnum = {
 	"unit.read": "unit.read",
 	"unit.update": "unit.update",
+	"unit.metadata-only.update": "unit.metadata-only.update",
 	"unit.status.update": "unit.status.update",
 	"unit.history.restore": "unit.history.restore",
 	"unit.access.manage": "unit.access.manage",
@@ -36805,6 +36809,7 @@ export type PutApiGovernanceUnitByUnitIdAccessPath = {
 export const PutApiGovernanceUnitByUnitIdAccessStatus200PermissionsEnum = {
 	"unit.read": "unit.read",
 	"unit.update": "unit.update",
+	"unit.metadata-only.update": "unit.metadata-only.update",
 	"unit.status.update": "unit.status.update",
 	"unit.history.restore": "unit.history.restore",
 	"unit.access.manage": "unit.access.manage",
@@ -36859,6 +36864,7 @@ export type PutApiGovernanceUnitByUnitIdAccessStatus200SubjectsSubjectRelationEn
 export const PutApiGovernanceUnitByUnitIdAccessStatus200SubjectsGrantsEnum = {
 	"unit.read": "unit.read",
 	"unit.update": "unit.update",
+	"unit.metadata-only.update": "unit.metadata-only.update",
 	"unit.status.update": "unit.status.update",
 	"unit.history.restore": "unit.history.restore",
 	"unit.access.manage": "unit.access.manage",
@@ -36890,6 +36896,7 @@ export type PutApiGovernanceUnitByUnitIdAccessStatus200SubjectsGrantsEnum =
 export const PutApiGovernanceUnitByUnitIdAccessStatus200SubjectsRestrictionsEnum = {
 	"unit.read": "unit.read",
 	"unit.update": "unit.update",
+	"unit.metadata-only.update": "unit.metadata-only.update",
 	"unit.status.update": "unit.status.update",
 	"unit.history.restore": "unit.history.restore",
 	"unit.access.manage": "unit.access.manage",
@@ -36921,6 +36928,7 @@ export type PutApiGovernanceUnitByUnitIdAccessStatus200SubjectsRestrictionsEnum 
 export const PutApiGovernanceUnitByUnitIdAccessStatus200SubjectsInheritedEnum = {
 	"unit.read": "unit.read",
 	"unit.update": "unit.update",
+	"unit.metadata-only.update": "unit.metadata-only.update",
 	"unit.status.update": "unit.status.update",
 	"unit.history.restore": "unit.history.restore",
 	"unit.access.manage": "unit.access.manage",
@@ -37215,6 +37223,7 @@ export type PutApiGovernanceUnitByUnitIdAccessRequestSubjectRelationEnum =
 export const PutApiGovernanceUnitByUnitIdAccessRequestGrantsEnum = {
 	"unit.read": "unit.read",
 	"unit.update": "unit.update",
+	"unit.metadata-only.update": "unit.metadata-only.update",
 	"unit.status.update": "unit.status.update",
 	"unit.history.restore": "unit.history.restore",
 	"unit.access.manage": "unit.access.manage",
@@ -37246,6 +37255,7 @@ export type PutApiGovernanceUnitByUnitIdAccessRequestGrantsEnum =
 export const PutApiGovernanceUnitByUnitIdAccessRequestRestrictionsEnum = {
 	"unit.read": "unit.read",
 	"unit.update": "unit.update",
+	"unit.metadata-only.update": "unit.metadata-only.update",
 	"unit.status.update": "unit.status.update",
 	"unit.history.restore": "unit.history.restore",
 	"unit.access.manage": "unit.access.manage",
@@ -37665,6 +37675,7 @@ export type GetApiGovernanceUnitByUnitIdAccessEffectiveQuery = {
 export const GetApiGovernanceUnitByUnitIdAccessEffectiveStatus200DecisionsPermissionEnum = {
 	"unit.read": "unit.read",
 	"unit.update": "unit.update",
+	"unit.metadata-only.update": "unit.metadata-only.update",
 	"unit.status.update": "unit.status.update",
 	"unit.history.restore": "unit.history.restore",
 	"unit.access.manage": "unit.access.manage",
@@ -38371,6 +38382,7 @@ export type GetApiGovernanceUnitAccessInvitationsQuery = {
 export const GetApiGovernanceUnitAccessInvitationsStatus200ItemsPermissionsEnum = {
 	"unit.read": "unit.read",
 	"unit.update": "unit.update",
+	"unit.metadata-only.update": "unit.metadata-only.update",
 	"unit.status.update": "unit.status.update",
 	"unit.history.restore": "unit.history.restore",
 	"unit.access.manage": "unit.access.manage",
@@ -38541,6 +38553,7 @@ export type GetApiGovernanceUnitByUnitIdAccessInvitationsQuery = {
 export const GetApiGovernanceUnitByUnitIdAccessInvitationsStatus200ItemsPermissionsEnum = {
 	"unit.read": "unit.read",
 	"unit.update": "unit.update",
+	"unit.metadata-only.update": "unit.metadata-only.update",
 	"unit.status.update": "unit.status.update",
 	"unit.history.restore": "unit.history.restore",
 	"unit.access.manage": "unit.access.manage",
@@ -38769,6 +38782,7 @@ export type PostApiGovernanceUnitByUnitIdAccessInvitationsPath = {
 export const PostApiGovernanceUnitByUnitIdAccessInvitationsStatus200PermissionsEnum = {
 	"unit.read": "unit.read",
 	"unit.update": "unit.update",
+	"unit.metadata-only.update": "unit.metadata-only.update",
 	"unit.status.update": "unit.status.update",
 	"unit.history.restore": "unit.history.restore",
 	"unit.access.manage": "unit.access.manage",
@@ -39028,6 +39042,7 @@ export type PostApiGovernanceUnitByUnitIdAccessInvitationsStatus500 = InternalEr
 export const PostApiGovernanceUnitByUnitIdAccessInvitationsRequestPermissionsEnum = {
 	"unit.read": "unit.read",
 	"unit.update": "unit.update",
+	"unit.metadata-only.update": "unit.metadata-only.update",
 	"unit.status.update": "unit.status.update",
 	"unit.history.restore": "unit.history.restore",
 	"unit.access.manage": "unit.access.manage",
@@ -39145,6 +39160,7 @@ export const PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptS
 	{
 		"unit.read": "unit.read",
 		"unit.update": "unit.update",
+		"unit.metadata-only.update": "unit.metadata-only.update",
 		"unit.status.update": "unit.status.update",
 		"unit.history.restore": "unit.history.restore",
 		"unit.access.manage": "unit.access.manage",
@@ -39392,6 +39408,7 @@ export const PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDecline
 	{
 		"unit.read": "unit.read",
 		"unit.update": "unit.update",
+		"unit.metadata-only.update": "unit.metadata-only.update",
 		"unit.status.update": "unit.status.update",
 		"unit.history.restore": "unit.history.restore",
 		"unit.access.manage": "unit.access.manage",
@@ -50643,6 +50660,7 @@ export const PostApiSeriesRequestLicensesEnum = {
 	"cc-by-nc-4.0": "cc-by-nc-4.0",
 	"cc-by-4.0": "cc-by-4.0",
 	"cc0-1.0": "cc0-1.0",
+	"pdm-1.0": "pdm-1.0",
 	"rezics-unit-content-license-v1": "rezics-unit-content-license-v1",
 } as const;
 
@@ -62266,6 +62284,7 @@ export const GetApiUsersMePreferencesStatus200DefaultLicensesEnum = {
 	"cc-by-nc-4.0": "cc-by-nc-4.0",
 	"cc-by-4.0": "cc-by-4.0",
 	"cc0-1.0": "cc0-1.0",
+	"pdm-1.0": "pdm-1.0",
 	"rezics-unit-content-license-v1": "rezics-unit-content-license-v1",
 } as const;
 
@@ -62521,6 +62540,7 @@ export const PatchApiUsersMePreferencesStatus200DefaultLicensesEnum = {
 	"cc-by-nc-4.0": "cc-by-nc-4.0",
 	"cc-by-4.0": "cc-by-4.0",
 	"cc0-1.0": "cc0-1.0",
+	"pdm-1.0": "pdm-1.0",
 	"rezics-unit-content-license-v1": "rezics-unit-content-license-v1",
 } as const;
 
@@ -62827,6 +62847,7 @@ export const PutApiUsersMePreferencesStatus200DefaultLicensesEnum = {
 	"cc-by-nc-4.0": "cc-by-nc-4.0",
 	"cc-by-4.0": "cc-by-4.0",
 	"cc0-1.0": "cc0-1.0",
+	"pdm-1.0": "pdm-1.0",
 	"rezics-unit-content-license-v1": "rezics-unit-content-license-v1",
 } as const;
 
@@ -63099,6 +63120,7 @@ export const PutApiUsersMePreferencesRequestDefaultLicensesEnum = {
 	"cc-by-nc-4.0": "cc-by-nc-4.0",
 	"cc-by-4.0": "cc-by-4.0",
 	"cc0-1.0": "cc0-1.0",
+	"pdm-1.0": "pdm-1.0",
 	"rezics-unit-content-license-v1": "rezics-unit-content-license-v1",
 } as const;
 
@@ -77092,6 +77114,7 @@ export const PostApiUnitsByTypeStatus200LicensesLicenseIdEnum = {
 	"cc-by-nc-4.0": "cc-by-nc-4.0",
 	"cc-by-4.0": "cc-by-4.0",
 	"cc0-1.0": "cc0-1.0",
+	"pdm-1.0": "pdm-1.0",
 	"rezics-unit-content-license-v1": "rezics-unit-content-license-v1",
 } as const;
 
@@ -77106,6 +77129,7 @@ export const PostApiUnitsByTypeStatus200LicenseOfferingsLicenseIdEnum = {
 	"cc-by-nc-4.0": "cc-by-nc-4.0",
 	"cc-by-4.0": "cc-by-4.0",
 	"cc0-1.0": "cc0-1.0",
+	"pdm-1.0": "pdm-1.0",
 	"rezics-unit-content-license-v1": "rezics-unit-content-license-v1",
 } as const;
 
@@ -77647,6 +77671,10 @@ export type PostApiUnitsByTypeStatus200 = {
 				 * @type string
 				 */
 				releaseStatus: PostApiUnitsByTypeStatus200DetailsReleaseStatusEnum;
+				/**
+				 * @type boolean
+				 */
+				metadataOnly: boolean;
 				isbn13: (string | null) | null;
 				publicationDate: (string | null) | null;
 				pageCount: ((string | number) | null) | null;
@@ -77669,6 +77697,10 @@ export type PostApiUnitsByTypeStatus200 = {
 				 * @type string
 				 */
 				type: "software";
+				/**
+				 * @type boolean
+				 */
+				metadataOnly: boolean;
 				releaseDate: (string | null) | null;
 				versionLabel: (string | null) | null;
 		  }
@@ -77681,6 +77713,10 @@ export type PostApiUnitsByTypeStatus200 = {
 				 * @type string
 				 */
 				releaseStatus: PostApiUnitsByTypeStatus200DetailsReleaseStatusEnum;
+				/**
+				 * @type boolean
+				 */
+				metadataOnly: boolean;
 				releaseDate: (string | null) | null;
 				/**
 				 * @type string
@@ -78579,6 +78615,10 @@ export type PostApiUnitsByTypeStatus200 = {
 		/**
 		 * @type boolean
 		 */
+		canUpdateMetadataOnly: boolean;
+		/**
+		 * @type boolean
+		 */
 		canManageAccess: boolean;
 		/**
 		 * @type boolean
@@ -78908,6 +78948,7 @@ export const PostApiUnitsByTypeRequestLicensesEnum = {
 	"cc-by-nc-4.0": "cc-by-nc-4.0",
 	"cc-by-4.0": "cc-by-4.0",
 	"cc0-1.0": "cc0-1.0",
+	"pdm-1.0": "pdm-1.0",
 	"rezics-unit-content-license-v1": "rezics-unit-content-license-v1",
 } as const;
 
@@ -79232,12 +79273,20 @@ export type PostApiUnitsByTypeBody =
 						 * @type string
 						 */
 						releaseStatus: PostApiUnitsByTypeRequestDetailsReleaseStatusEnum;
+						/**
+						 * @type boolean | undefined
+						 */
+						metadataOnly?: boolean;
 				  }
 				| {
 						/**
 						 * @type string
 						 */
 						type: "software";
+						/**
+						 * @type boolean | undefined
+						 */
+						metadataOnly?: boolean;
 				  }
 				| {
 						/**
@@ -79248,6 +79297,10 @@ export type PostApiUnitsByTypeBody =
 						 * @type string
 						 */
 						releaseStatus: PostApiUnitsByTypeRequestDetailsReleaseStatusEnum;
+						/**
+						 * @type boolean | undefined
+						 */
+						metadataOnly?: boolean;
 				  };
 			/**
 			 * @type object | undefined
@@ -79582,12 +79635,20 @@ export type PostApiUnitsByTypeBody =
 						 * @type string
 						 */
 						releaseStatus: PostApiUnitsByTypeRequestDetailsReleaseStatusEnum;
+						/**
+						 * @type boolean | undefined
+						 */
+						metadataOnly?: boolean;
 				  }
 				| {
 						/**
 						 * @type string
 						 */
 						type: "software";
+						/**
+						 * @type boolean | undefined
+						 */
+						metadataOnly?: boolean;
 				  }
 				| {
 						/**
@@ -79598,6 +79659,10 @@ export type PostApiUnitsByTypeBody =
 						 * @type string
 						 */
 						releaseStatus: PostApiUnitsByTypeRequestDetailsReleaseStatusEnum;
+						/**
+						 * @type boolean | undefined
+						 */
+						metadataOnly?: boolean;
 				  };
 			/**
 			 * @type object | undefined
@@ -80000,6 +80065,7 @@ export const GetApiUnitsByTypeByUnitIdStatus200LicensesLicenseIdEnum = {
 	"cc-by-nc-4.0": "cc-by-nc-4.0",
 	"cc-by-4.0": "cc-by-4.0",
 	"cc0-1.0": "cc0-1.0",
+	"pdm-1.0": "pdm-1.0",
 	"rezics-unit-content-license-v1": "rezics-unit-content-license-v1",
 } as const;
 
@@ -80014,6 +80080,7 @@ export const GetApiUnitsByTypeByUnitIdStatus200LicenseOfferingsLicenseIdEnum = {
 	"cc-by-nc-4.0": "cc-by-nc-4.0",
 	"cc-by-4.0": "cc-by-4.0",
 	"cc0-1.0": "cc0-1.0",
+	"pdm-1.0": "pdm-1.0",
 	"rezics-unit-content-license-v1": "rezics-unit-content-license-v1",
 } as const;
 
@@ -80555,6 +80622,10 @@ export type GetApiUnitsByTypeByUnitIdStatus200 = {
 				 * @type string
 				 */
 				releaseStatus: GetApiUnitsByTypeByUnitIdStatus200DetailsReleaseStatusEnum;
+				/**
+				 * @type boolean
+				 */
+				metadataOnly: boolean;
 				isbn13: (string | null) | null;
 				publicationDate: (string | null) | null;
 				pageCount: ((string | number) | null) | null;
@@ -80577,6 +80648,10 @@ export type GetApiUnitsByTypeByUnitIdStatus200 = {
 				 * @type string
 				 */
 				type: "software";
+				/**
+				 * @type boolean
+				 */
+				metadataOnly: boolean;
 				releaseDate: (string | null) | null;
 				versionLabel: (string | null) | null;
 		  }
@@ -80589,6 +80664,10 @@ export type GetApiUnitsByTypeByUnitIdStatus200 = {
 				 * @type string
 				 */
 				releaseStatus: GetApiUnitsByTypeByUnitIdStatus200DetailsReleaseStatusEnum;
+				/**
+				 * @type boolean
+				 */
+				metadataOnly: boolean;
 				releaseDate: (string | null) | null;
 				/**
 				 * @type string
@@ -81487,6 +81566,10 @@ export type GetApiUnitsByTypeByUnitIdStatus200 = {
 		/**
 		 * @type boolean
 		 */
+		canUpdateMetadataOnly: boolean;
+		/**
+		 * @type boolean
+		 */
 		canManageAccess: boolean;
 		/**
 		 * @type boolean
@@ -81633,6 +81716,7 @@ export const PatchApiUnitsByTypeByUnitIdStatus200LicensesLicenseIdEnum = {
 	"cc-by-nc-4.0": "cc-by-nc-4.0",
 	"cc-by-4.0": "cc-by-4.0",
 	"cc0-1.0": "cc0-1.0",
+	"pdm-1.0": "pdm-1.0",
 	"rezics-unit-content-license-v1": "rezics-unit-content-license-v1",
 } as const;
 
@@ -81647,6 +81731,7 @@ export const PatchApiUnitsByTypeByUnitIdStatus200LicenseOfferingsLicenseIdEnum =
 	"cc-by-nc-4.0": "cc-by-nc-4.0",
 	"cc-by-4.0": "cc-by-4.0",
 	"cc0-1.0": "cc0-1.0",
+	"pdm-1.0": "pdm-1.0",
 	"rezics-unit-content-license-v1": "rezics-unit-content-license-v1",
 } as const;
 
@@ -82188,6 +82273,10 @@ export type PatchApiUnitsByTypeByUnitIdStatus200 = {
 				 * @type string
 				 */
 				releaseStatus: PatchApiUnitsByTypeByUnitIdStatus200DetailsReleaseStatusEnum;
+				/**
+				 * @type boolean
+				 */
+				metadataOnly: boolean;
 				isbn13: (string | null) | null;
 				publicationDate: (string | null) | null;
 				pageCount: ((string | number) | null) | null;
@@ -82210,6 +82299,10 @@ export type PatchApiUnitsByTypeByUnitIdStatus200 = {
 				 * @type string
 				 */
 				type: "software";
+				/**
+				 * @type boolean
+				 */
+				metadataOnly: boolean;
 				releaseDate: (string | null) | null;
 				versionLabel: (string | null) | null;
 		  }
@@ -82222,6 +82315,10 @@ export type PatchApiUnitsByTypeByUnitIdStatus200 = {
 				 * @type string
 				 */
 				releaseStatus: PatchApiUnitsByTypeByUnitIdStatus200DetailsReleaseStatusEnum;
+				/**
+				 * @type boolean
+				 */
+				metadataOnly: boolean;
 				releaseDate: (string | null) | null;
 				/**
 				 * @type string
@@ -83120,6 +83217,10 @@ export type PatchApiUnitsByTypeByUnitIdStatus200 = {
 		/**
 		 * @type boolean
 		 */
+		canUpdateMetadataOnly: boolean;
+		/**
+		 * @type boolean
+		 */
 		canManageAccess: boolean;
 		/**
 		 * @type boolean
@@ -83449,6 +83550,7 @@ export const PatchApiUnitsByTypeByUnitIdRequestLicensesEnum = {
 	"cc-by-nc-4.0": "cc-by-nc-4.0",
 	"cc-by-4.0": "cc-by-4.0",
 	"cc0-1.0": "cc0-1.0",
+	"pdm-1.0": "pdm-1.0",
 	"rezics-unit-content-license-v1": "rezics-unit-content-license-v1",
 } as const;
 
@@ -83523,6 +83625,10 @@ export type PatchApiUnitsByTypeByUnitIdBody = {
 		publicationDate?: (string | null) | null;
 		pageCount?: ((string | number) | null) | null;
 		wordCount?: ((string | number) | null) | null;
+		/**
+		 * @type boolean | undefined
+		 */
+		metadataOnly?: boolean;
 		versionLabel?: (string | null) | null;
 		/**
 		 * @minLength 1
@@ -83672,6 +83778,7 @@ export const PatchApiUnitsByTypeByUnitIdVariantContextStatus200LicensesLicenseId
 	"cc-by-nc-4.0": "cc-by-nc-4.0",
 	"cc-by-4.0": "cc-by-4.0",
 	"cc0-1.0": "cc0-1.0",
+	"pdm-1.0": "pdm-1.0",
 	"rezics-unit-content-license-v1": "rezics-unit-content-license-v1",
 } as const;
 
@@ -83686,6 +83793,7 @@ export const PatchApiUnitsByTypeByUnitIdVariantContextStatus200LicenseOfferingsL
 	"cc-by-nc-4.0": "cc-by-nc-4.0",
 	"cc-by-4.0": "cc-by-4.0",
 	"cc0-1.0": "cc0-1.0",
+	"pdm-1.0": "pdm-1.0",
 	"rezics-unit-content-license-v1": "rezics-unit-content-license-v1",
 } as const;
 
@@ -84235,6 +84343,10 @@ export type PatchApiUnitsByTypeByUnitIdVariantContextStatus200 = {
 				 * @type string
 				 */
 				releaseStatus: PatchApiUnitsByTypeByUnitIdVariantContextStatus200DetailsReleaseStatusEnum;
+				/**
+				 * @type boolean
+				 */
+				metadataOnly: boolean;
 				isbn13: (string | null) | null;
 				publicationDate: (string | null) | null;
 				pageCount: ((string | number) | null) | null;
@@ -84257,6 +84369,10 @@ export type PatchApiUnitsByTypeByUnitIdVariantContextStatus200 = {
 				 * @type string
 				 */
 				type: "software";
+				/**
+				 * @type boolean
+				 */
+				metadataOnly: boolean;
 				releaseDate: (string | null) | null;
 				versionLabel: (string | null) | null;
 		  }
@@ -84269,6 +84385,10 @@ export type PatchApiUnitsByTypeByUnitIdVariantContextStatus200 = {
 				 * @type string
 				 */
 				releaseStatus: PatchApiUnitsByTypeByUnitIdVariantContextStatus200DetailsReleaseStatusEnum;
+				/**
+				 * @type boolean
+				 */
+				metadataOnly: boolean;
 				releaseDate: (string | null) | null;
 				/**
 				 * @type string
@@ -85167,6 +85287,10 @@ export type PatchApiUnitsByTypeByUnitIdVariantContextStatus200 = {
 		/**
 		 * @type boolean
 		 */
+		canUpdateMetadataOnly: boolean;
+		/**
+		 * @type boolean
+		 */
 		canManageAccess: boolean;
 		/**
 		 * @type boolean
@@ -85560,6 +85684,7 @@ export const PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200LicensesLic
 	"cc-by-nc-4.0": "cc-by-nc-4.0",
 	"cc-by-4.0": "cc-by-4.0",
 	"cc0-1.0": "cc0-1.0",
+	"pdm-1.0": "pdm-1.0",
 	"rezics-unit-content-license-v1": "rezics-unit-content-license-v1",
 } as const;
 
@@ -85575,6 +85700,7 @@ export const PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200LicenseOffe
 		"cc-by-nc-4.0": "cc-by-nc-4.0",
 		"cc-by-4.0": "cc-by-4.0",
 		"cc0-1.0": "cc0-1.0",
+		"pdm-1.0": "pdm-1.0",
 		"rezics-unit-content-license-v1": "rezics-unit-content-license-v1",
 	} as const;
 
@@ -86129,6 +86255,10 @@ export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200 = {
 				 * @type string
 				 */
 				releaseStatus: PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200DetailsReleaseStatusEnum;
+				/**
+				 * @type boolean
+				 */
+				metadataOnly: boolean;
 				isbn13: (string | null) | null;
 				publicationDate: (string | null) | null;
 				pageCount: ((string | number) | null) | null;
@@ -86151,6 +86281,10 @@ export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200 = {
 				 * @type string
 				 */
 				type: "software";
+				/**
+				 * @type boolean
+				 */
+				metadataOnly: boolean;
 				releaseDate: (string | null) | null;
 				versionLabel: (string | null) | null;
 		  }
@@ -86163,6 +86297,10 @@ export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200 = {
 				 * @type string
 				 */
 				releaseStatus: PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200DetailsReleaseStatusEnum;
+				/**
+				 * @type boolean
+				 */
+				metadataOnly: boolean;
 				releaseDate: (string | null) | null;
 				/**
 				 * @type string
@@ -87061,6 +87199,10 @@ export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200 = {
 		/**
 		 * @type boolean
 		 */
+		canUpdateMetadataOnly: boolean;
+		/**
+		 * @type boolean
+		 */
 		canManageAccess: boolean;
 		/**
 		 * @type boolean
@@ -87464,6 +87606,7 @@ export const PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200LicensesLi
 	"cc-by-nc-4.0": "cc-by-nc-4.0",
 	"cc-by-4.0": "cc-by-4.0",
 	"cc0-1.0": "cc0-1.0",
+	"pdm-1.0": "pdm-1.0",
 	"rezics-unit-content-license-v1": "rezics-unit-content-license-v1",
 } as const;
 
@@ -87479,6 +87622,7 @@ export const PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200LicenseOff
 		"cc-by-nc-4.0": "cc-by-nc-4.0",
 		"cc-by-4.0": "cc-by-4.0",
 		"cc0-1.0": "cc0-1.0",
+		"pdm-1.0": "pdm-1.0",
 		"rezics-unit-content-license-v1": "rezics-unit-content-license-v1",
 	} as const;
 
@@ -88034,6 +88178,10 @@ export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200 = {
 				 * @type string
 				 */
 				releaseStatus: PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200DetailsReleaseStatusEnum;
+				/**
+				 * @type boolean
+				 */
+				metadataOnly: boolean;
 				isbn13: (string | null) | null;
 				publicationDate: (string | null) | null;
 				pageCount: ((string | number) | null) | null;
@@ -88056,6 +88204,10 @@ export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200 = {
 				 * @type string
 				 */
 				type: "software";
+				/**
+				 * @type boolean
+				 */
+				metadataOnly: boolean;
 				releaseDate: (string | null) | null;
 				versionLabel: (string | null) | null;
 		  }
@@ -88068,6 +88220,10 @@ export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200 = {
 				 * @type string
 				 */
 				releaseStatus: PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200DetailsReleaseStatusEnum;
+				/**
+				 * @type boolean
+				 */
+				metadataOnly: boolean;
 				releaseDate: (string | null) | null;
 				/**
 				 * @type string
@@ -88963,6 +89119,10 @@ export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200 = {
 		 * @type boolean
 		 */
 		canEdit: boolean;
+		/**
+		 * @type boolean
+		 */
+		canUpdateMetadataOnly: boolean;
 		/**
 		 * @type boolean
 		 */
@@ -111450,6 +111610,22 @@ export const GetApiProgressByUnitIdStatus200RecordVisibilityEnum = {
 export type GetApiProgressByUnitIdStatus200RecordVisibilityEnum =
 	(typeof GetApiProgressByUnitIdStatus200RecordVisibilityEnum)[keyof typeof GetApiProgressByUnitIdStatus200RecordVisibilityEnum];
 
+export const GetApiProgressByUnitIdStatus200ContinuationContentUnitTypeEnum = {
+	video: "video",
+	audio: "audio",
+} as const;
+
+export type GetApiProgressByUnitIdStatus200ContinuationContentUnitTypeEnum =
+	(typeof GetApiProgressByUnitIdStatus200ContinuationContentUnitTypeEnum)[keyof typeof GetApiProgressByUnitIdStatus200ContinuationContentUnitTypeEnum];
+
+export const GetApiProgressByUnitIdStatus200ContinuationOwnerUnitTypeEnum = {
+	book: "book",
+	media: "media",
+} as const;
+
+export type GetApiProgressByUnitIdStatus200ContinuationOwnerUnitTypeEnum =
+	(typeof GetApiProgressByUnitIdStatus200ContinuationOwnerUnitTypeEnum)[keyof typeof GetApiProgressByUnitIdStatus200ContinuationOwnerUnitTypeEnum];
+
 export type GetApiProgressByUnitIdStatus200 =
 	| {
 			/**
@@ -111525,6 +111701,75 @@ export type GetApiProgressByUnitIdStatus200 =
 				 */
 				updatedAt: string;
 			};
+			continuation:
+				| {
+						/**
+						 * @type string
+						 */
+						kind: "book-node";
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						bookId: string;
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						nodeId: string;
+				  }
+				| {
+						/**
+						 * @type string
+						 */
+						kind: "unit";
+						/**
+						 * @type object
+						 */
+						contentUnit: {
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							id: string;
+							/**
+							 * @default 'video'
+							 * @type string
+							 */
+							type: GetApiProgressByUnitIdStatus200ContinuationContentUnitTypeEnum;
+						};
+				  }
+				| {
+						/**
+						 * @type string
+						 */
+						kind: "contents";
+						/**
+						 * @type object
+						 */
+						ownerUnit: {
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							id: string;
+							/**
+							 * @default 'book'
+							 * @type string
+							 */
+							type: GetApiProgressByUnitIdStatus200ContinuationOwnerUnitTypeEnum;
+						};
+				  }
+				| {
+						/**
+						 * @type string
+						 */
+						kind: "none";
+				  };
 	  };
 
 /**
@@ -178056,6 +178301,7 @@ export const PostApiSearchByIndexRequestLicensesEnum = {
 	"cc-by-nc-4.0": "cc-by-nc-4.0",
 	"cc-by-4.0": "cc-by-4.0",
 	"cc0-1.0": "cc0-1.0",
+	"pdm-1.0": "pdm-1.0",
 	"rezics-unit-content-license-v1": "rezics-unit-content-license-v1",
 } as const;
 

@@ -12,6 +12,11 @@ import { UnitProgressAction } from "./unit-progress-action";
 const progressContext = vi.hoisted(() => ({
 	current: {} as Record<string, unknown>,
 }));
+const push = vi.fn();
+
+vi.mock("@/features/application-shell/hooks/use-application-router", () => ({
+	useApplicationRouter: () => ({ push }),
+}));
 
 vi.mock("@/i18n/client", async () => {
 	const { create: createReactI18n } = await import("native-i18n/react/client");
@@ -37,6 +42,11 @@ const actions = {
 
 const activeRecord: UnitProgressRecord = {
 	completedCount: 1,
+	continuation: {
+		kind: "book-node",
+		bookId: "019f0000-0000-7000-8000-000000000001",
+		nodeId: "019f0000-0000-7000-8000-000000000002",
+	},
 	lastContentStructureNodeId: null,
 	progress: 0.4,
 	status: "active",
@@ -51,12 +61,13 @@ function setProgressState(
 				readonly kind: ProgressStatus;
 				readonly record: UnitProgressRecord;
 		  },
+	type: "book" | "media" | "software" = "book",
 ) {
 	progressContext.current = {
 		...actions,
 		completionFeedbackCount: undefined,
 		domain: {
-			type: "book",
+			type,
 			unitId: "019f0000-0000-7000-8000-000000000001",
 		},
 		isCompleting: false,
@@ -66,16 +77,17 @@ function setProgressState(
 	};
 }
 
-function renderAction() {
+function renderAction(metadataOnly = false) {
 	return render(
 		<TranslationProvider initial={translation.snapshot}>
-			<UnitProgressAction />
+			<UnitProgressAction metadataOnly={metadataOnly} />
 		</TranslationProvider>,
 	);
 }
 
 beforeEach(() => {
 	for (const action of Object.values(actions)) action.mockClear();
+	push.mockClear();
 });
 
 afterEach(cleanup);
@@ -93,7 +105,6 @@ describe("UnitProgressAction", () => {
 
 	it.each([
 		["backlog", "開始閱讀", "resumeProgress"],
-		["active", "更新進度", "openEditor"],
 		["paused", "繼續閱讀", "resumeProgress"],
 		["completed", "再讀一次", "startAgain"],
 		["dropped", "重新開始", "startAgain"],
@@ -107,5 +118,64 @@ describe("UnitProgressAction", () => {
 		fireEvent.click(screen.getByRole("button", { name: label }));
 
 		expect(actions[actionName]).toHaveBeenCalledOnce();
+	});
+
+	it("continues an active Book from the server-resolved destination", () => {
+		setProgressState({ kind: "active", record: { ...activeRecord, status: "active" } });
+		renderAction();
+
+		fireEvent.click(screen.getByRole("button", { name: "繼續" }));
+
+		expect(push).toHaveBeenCalledWith(
+			"/units/book/019f0000-0000-7000-8000-000000000001/read/019f0000-0000-7000-8000-000000000002",
+		);
+		expect(actions.openEditor).not.toHaveBeenCalled();
+	});
+
+	it("continues an active Media work from the server-resolved destination", () => {
+		setProgressState(
+			{
+				kind: "active",
+				record: {
+					...activeRecord,
+					continuation: {
+						kind: "unit",
+						unitId: "019f0000-0000-7000-8000-000000000003",
+						unitType: "video",
+					},
+					status: "active",
+				},
+			},
+			"media",
+		);
+		renderAction();
+
+		fireEvent.click(screen.getByRole("button", { name: "繼續" }));
+
+		expect(push).toHaveBeenCalledWith("/units/video/019f0000-0000-7000-8000-000000000003");
+		expect(actions.openEditor).not.toHaveBeenCalled();
+	});
+
+	it.each(["book", "media"] as const)("keeps active metadata-only %s progress manual", (type) => {
+		setProgressState({ kind: "active", record: { ...activeRecord, status: "active" } }, type);
+		renderAction(true);
+
+		fireEvent.click(screen.getByRole("button", { name: "更新進度" }));
+
+		expect(actions.openEditor).toHaveBeenCalledOnce();
+		expect(push).not.toHaveBeenCalled();
+	});
+
+	it("keeps Software progress manual even when full content is provided", () => {
+		setProgressState(
+			{ kind: "active", record: { ...activeRecord, continuation: { kind: "none" } } },
+			"software",
+		);
+		renderAction(false);
+
+		fireEvent.click(screen.getByRole("button", { name: "更新紀錄" }));
+
+		expect(actions.openEditor).toHaveBeenCalledOnce();
+		expect(push).not.toHaveBeenCalled();
 	});
 });

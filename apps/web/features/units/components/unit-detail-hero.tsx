@@ -36,9 +36,11 @@ const UnitIcons = {
 } as const;
 
 export function UnitDetailHero<Type extends UnitDetailUnitType>({
+	metadataOnly,
 	type,
 	unit,
 }: {
+	readonly metadataOnly: boolean | undefined;
 	readonly type: Type;
 	readonly unit: UnitDetailUnitFor<Type>;
 }) {
@@ -56,8 +58,12 @@ export function UnitDetailHero<Type extends UnitDetailUnitType>({
 					sizes="(min-width: 1024px) 13rem, 13rem"
 					src={unit.cover?.url}
 				/>
-				{isProgressTrackableUnitType(type) ? (
-					<UnitProgressAction buttonClassName="min-h-10" className="w-full" />
+				{isProgressTrackableUnitType(type) && metadataOnly !== undefined ? (
+					<UnitProgressAction
+						buttonClassName="min-h-10"
+						className="w-full"
+						metadataOnly={metadataOnly}
+					/>
 				) : null}
 				<CollectionPickerButton
 					targetId={unit.id}

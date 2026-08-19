@@ -1,6 +1,7 @@
 import { StatusCodes } from "http-status-codes";
 import { FilterSchemaModels, SearchFeatureDefinition } from "@rezics/filter";
 import { and, asc, desc, eq, inArray, isNull, or, sql } from "drizzle-orm";
+import { alias } from "drizzle-orm/pg-core";
 import Elysia from "elysia";
 
 import { getUnitReadCondition } from "../../authorization/unit/query";
@@ -30,6 +31,7 @@ import {
 	ListProgressEntriesQuery,
 	ProgressEntryParams,
 	ProgressLookupResponse,
+	type ProgressContinuationResponse,
 	ProgressNodeParams,
 	ProgressSearchBody,
 	ProgressUnitParams,
@@ -71,6 +73,8 @@ import {
 	resolveProgressSearchRequest,
 } from "./search";
 
+const continuationContentUnit = alias(unit, "progress_continuation_content_unit");
+
 function toProgressUnitType(value: string): "book" | "media" | "software" {
 	if (value === "book" || value === "media" || value === "software") return value;
 	throw new TypeError("Progress Search returned an unsupported Unit kind");
@@ -111,6 +115,71 @@ async function findCompletableContentStructureNode(
 	)
 		return "media";
 	return null;
+}
+
+async function resolveProgressContinuation(
+	unitId: string,
+	nodeId: string | null,
+): Promise<ProgressContinuationResponse> {
+	const [candidate] = await database
+		.select({
+			ownerKind: unit.kind,
+			nodeId: contentStructureNode.id,
+			structureKind: contentStructure.kind,
+			contentUnitId: continuationContentUnit.id,
+			contentUnitKind: continuationContentUnit.kind,
+			postKind: post.kind,
+		})
+		.from(unit)
+		.leftJoin(
+			contentStructureNode,
+			and(
+				nodeId ? eq(contentStructureNode.id, nodeId) : sql`false`,
+				eq(contentStructureNode.ownerUnitId, unit.id),
+				isNull(contentStructureNode.deletedAt),
+			),
+		)
+		.leftJoin(
+			contentStructure,
+			and(
+				eq(contentStructure.id, contentStructureNode.structureId),
+				eq(contentStructure.ownerUnitId, unit.id),
+				isNull(contentStructure.deletedAt),
+			),
+		)
+		.leftJoin(
+			continuationContentUnit,
+			and(
+				eq(continuationContentUnit.id, contentStructureNode.contentUnitId),
+				isNull(continuationContentUnit.deletedAt),
+				eq(continuationContentUnit.moderationStatus, "approved"),
+			),
+		)
+		.leftJoin(post, eq(post.id, continuationContentUnit.id))
+		.where(and(eq(unit.id, unitId), isNull(unit.deletedAt)))
+		.limit(1);
+	if (!candidate || candidate.ownerKind === "software") return { kind: "none" };
+	if (
+		candidate.ownerKind === "book" &&
+		candidate.nodeId &&
+		candidate.structureKind === "book.contents" &&
+		candidate.contentUnitKind === "post" &&
+		candidate.postKind === "chapter"
+	)
+		return { kind: "book-node", bookId: unitId, nodeId: candidate.nodeId };
+	if (
+		candidate.ownerKind === "media" &&
+		candidate.structureKind === "media.contents" &&
+		candidate.contentUnitId &&
+		(candidate.contentUnitKind === "video" || candidate.contentUnitKind === "audio")
+	)
+		return {
+			kind: "unit",
+			contentUnit: { id: candidate.contentUnitId, type: candidate.contentUnitKind },
+		};
+	if (candidate.ownerKind === "book" || candidate.ownerKind === "media")
+		return { kind: "contents", ownerUnit: { id: unitId, type: candidate.ownerKind } };
+	return { kind: "none" };
 }
 
 function toProgressResponse<
@@ -399,6 +468,10 @@ export default new Elysia({ prefix: "/progress" })
 			return {
 				state: "tracked",
 				record: toProgressResponse(result),
+				continuation: await resolveProgressContinuation(
+					params.unitId,
+					result.lastContentStructureNodeId,
+				),
 			} satisfies ProgressLookupResponse;
 		},
 		{

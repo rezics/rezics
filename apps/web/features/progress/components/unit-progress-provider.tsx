@@ -30,6 +30,7 @@ import { useHydratedSession } from "@/lib/use-hydrated-session";
 import { invalidateProgressQueries } from "../data/progress-cache";
 import { estimateBookChapterProgresses } from "../model/book-progress-estimate";
 import { estimateMediaItemProgresses } from "../model/media-progress-estimate";
+import { parseProgressContinuation } from "../model/progress-continuation";
 import {
 	clampProgress,
 	completeProgressOptimistically,
@@ -144,8 +145,13 @@ export function UnitProgressProvider({
 	);
 	const confirmedRecord = useMemo(
 		() =>
-			recordQuery.data?.state === "tracked" ? toUnitProgressRecord(recordQuery.data.record) : null,
-		[recordQuery.data],
+			recordQuery.data?.state === "tracked"
+				? toUnitProgressRecord(
+						recordQuery.data.record,
+						parseProgressContinuation(recordQuery.data.continuation, domain),
+					)
+				: null,
+		[domain, recordQuery.data],
 	);
 	const currentEntryId =
 		recordQuery.data?.state === "tracked" ? recordQuery.data.record.currentEntryId : null;
@@ -237,7 +243,7 @@ export function UnitProgressProvider({
 	}, [editorOpen, onEditorClosed]);
 
 	const refreshProgress = useCallback(() => {
-		void invalidateProgressQueries(queryClient, domain.unitId).catch(() => undefined);
+		return invalidateProgressQueries(queryClient, domain.unitId).catch(() => undefined);
 	}, [domain.unitId, queryClient]);
 	const retryProgress = useCallback(() => {
 		void recordQuery.refetch();
@@ -258,22 +264,18 @@ export function UnitProgressProvider({
 	const saveProgress = useCallback(
 		async (update: UnitProgressUpdate): Promise<boolean> => {
 			try {
-				const updated = await saveProgressRequest({
+				await saveProgressRequest({
 					path: { unitId: domain.unitId },
 					body: update,
 				});
-				queryClient.setQueryData(progressQueryKey, {
-					state: "tracked",
-					record: updated,
-				} satisfies GetApiProgressByUnitIdStatus200);
 				setEditorOpen(false);
-				refreshProgress();
+				await refreshProgress();
 				return true;
 			} catch {
 				return false;
 			}
 		},
-		[domain.unitId, progressQueryKey, queryClient, refreshProgress, saveProgressRequest],
+		[domain.unitId, refreshProgress, saveProgressRequest],
 	);
 
 	const completeCurrentProgress = useCallback(
@@ -290,13 +292,9 @@ export function UnitProgressProvider({
 						...(update?.visibility === undefined ? {} : { visibility: update.visibility }),
 					},
 				});
-				queryClient.setQueryData(progressQueryKey, {
-					state: "tracked",
-					record: updated,
-				} satisfies GetApiProgressByUnitIdStatus200);
 				setCompletionFeedbackCount(toNonNegativeApiInteger(updated.completedCount));
 				setEditorOpen(false);
-				refreshProgress();
+				await refreshProgress();
 				return true;
 			} catch {
 				return false;
@@ -305,14 +303,7 @@ export function UnitProgressProvider({
 				setCompletionPreview(undefined);
 			}
 		},
-		[
-			completeProgressRequest,
-			confirmedRecord,
-			domain.unitId,
-			progressQueryKey,
-			queryClient,
-			refreshProgress,
-		],
+		[completeProgressRequest, confirmedRecord, domain.unitId, refreshProgress],
 	);
 
 	const removeProgress = useCallback(async (): Promise<boolean> => {
@@ -323,7 +314,7 @@ export function UnitProgressProvider({
 			queryClient.setQueryData(progressQueryKey, {
 				state: "untracked",
 			} satisfies GetApiProgressByUnitIdStatus200);
-			refreshProgress();
+			void refreshProgress();
 			return true;
 		} catch {
 			return false;
@@ -413,16 +404,20 @@ export function UnitProgressProvider({
 	);
 }
 
-function toUnitProgressRecord(value: {
-	readonly completedCount: number | string;
-	readonly lastContentStructureNodeId: string | null;
-	readonly progress: number;
-	readonly status: string;
-	readonly totalTimeMs: number | string;
-	readonly visibility: string;
-}): UnitProgressRecord {
+function toUnitProgressRecord(
+	value: {
+		readonly completedCount: number | string;
+		readonly lastContentStructureNodeId: string | null;
+		readonly progress: number;
+		readonly status: string;
+		readonly totalTimeMs: number | string;
+		readonly visibility: string;
+	},
+	continuation: UnitProgressRecord["continuation"],
+): UnitProgressRecord {
 	return {
 		completedCount: toNonNegativeApiInteger(value.completedCount),
+		continuation,
 		lastContentStructureNodeId: value.lastContentStructureNodeId,
 		progress: clampProgress(value.progress),
 		status: toProgressStatus(value.status),

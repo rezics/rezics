@@ -15,12 +15,27 @@ export type UnitProgressDomain = {
 	readonly unitId: string;
 };
 
+export type ProgressContinuation =
+	| { readonly kind: "book-node"; readonly bookId: string; readonly nodeId: string }
+	| {
+			readonly kind: "unit";
+			readonly unitId: string;
+			readonly unitType: "video" | "audio";
+	  }
+	| {
+			readonly kind: "contents";
+			readonly unitId: string;
+			readonly unitType: "book" | "media";
+	  }
+	| { readonly kind: "none" };
+
 export function isProgressTrackableUnitType(value: string): value is ProgressTrackableUnitType {
 	return ProgressTrackableUnitTypes.some((candidate) => candidate === value);
 }
 
 export interface UnitProgressRecord<Status extends ProgressStatus = ProgressStatus> {
 	readonly completedCount: number;
+	readonly continuation: ProgressContinuation;
 	readonly lastContentStructureNodeId: string | null;
 	readonly progress: number;
 	readonly status: Status;
@@ -52,6 +67,7 @@ export interface UnitProgressUpdate {
 
 const EmptyProgressRecord: UnitProgressRecord = {
 	completedCount: 0,
+	continuation: { kind: "none" },
 	lastContentStructureNodeId: null,
 	progress: 0,
 	status: "active",

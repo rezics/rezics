@@ -32,7 +32,16 @@ describe("progress API contract", () => {
 		};
 
 		expect(Check(ProgressLookupResponse, { state: "untracked" })).toBe(true);
-		expect(Check(ProgressLookupResponse, { state: "tracked", record: progress })).toBe(true);
+		expect(
+			Check(ProgressLookupResponse, {
+				state: "tracked",
+				record: progress,
+				continuation: {
+					kind: "contents",
+					ownerUnit: { id: progress.unitId, type: "book" },
+				},
+			}),
+		).toBe(true);
 		expect(Check(ProgressLookupResponse, { state: "tracked" })).toBe(false);
 		expect(Check(ProgressLookupResponse, { state: "untracked", record: progress })).toBe(false);
 	});

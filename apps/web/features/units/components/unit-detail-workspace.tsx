@@ -80,6 +80,12 @@ function UnitDetailWorkspaceContent<Type extends UnitDetailUnitType>({
 	if (query.isPending) return <QueryPending />;
 	if (query.isError || !query.data)
 		return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
+	const metadataOnly =
+		query.data.details.type === "book" ||
+		query.data.details.type === "media" ||
+		query.data.details.type === "software"
+			? query.data.details.metadataOnly
+			: undefined;
 	if (!isUnitDetailUnitFor(query.data, type))
 		return (
 			<QueryFailure
@@ -90,7 +96,7 @@ function UnitDetailWorkspaceContent<Type extends UnitDetailUnitType>({
 
 	const value = { type, unit: query.data } as UnitDetailContextValue;
 	const shell = (
-		<UnitDetailShell type={type} unit={query.data}>
+		<UnitDetailShell metadataOnly={metadataOnly} type={type} unit={query.data}>
 			{children}
 		</UnitDetailShell>
 	);
@@ -109,10 +115,12 @@ function UnitDetailWorkspaceContent<Type extends UnitDetailUnitType>({
 
 function UnitDetailShell<Type extends UnitDetailUnitType>({
 	children,
+	metadataOnly,
 	type,
 	unit,
 }: {
 	children: ReactNode;
+	metadataOnly: boolean | undefined;
 	type: Type;
 	unit: UnitDetailUnitFor<Type>;
 }) {
@@ -121,7 +129,7 @@ function UnitDetailShell<Type extends UnitDetailUnitType>({
 	const currentSection = parseUnitDetailSection(pathname, type, unit.id);
 	return (
 		<main className="mx-auto flex w-full max-w-[76rem] flex-col gap-6 px-4 py-5 sm:px-6 sm:py-8">
-			<UnitDetailHero type={type} unit={unit} />
+			<UnitDetailHero metadataOnly={metadataOnly} type={type} unit={unit} />
 
 			{isProgressTrackableUnitType(type) ? <UnitProgressSummaryCard className="lg:hidden" /> : null}
 

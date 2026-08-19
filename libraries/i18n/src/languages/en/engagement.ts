@@ -160,6 +160,7 @@ export default {
 	resultsHidden: "Results will appear after the poll closes.",
 	emptyPolls: "No polls yet.",
 	progress: "Progress",
+	continueAction: "Continue",
 	scoreActionByType: {
 		book: "Rate this book",
 		media: "Rate this work",

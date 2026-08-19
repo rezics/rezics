@@ -37,12 +37,42 @@ export type ProgressSearchBody = Static<typeof ProgressSearchBody>;
 export const ProgressUnitParams = t.Object({ unitId: Uuid });
 export type ProgressUnitParams = Static<typeof ProgressUnitParams>;
 
+export const ProgressContinuationResponse = t.Union([
+	t.Object(
+		{ kind: t.Literal("book-node"), bookId: Uuid, nodeId: Uuid },
+		{ additionalProperties: false },
+	),
+	t.Object(
+		{
+			kind: t.Literal("unit"),
+			contentUnit: t.Object(
+				{ id: Uuid, type: t.UnionEnum(["video", "audio"]) },
+				{ additionalProperties: false },
+			),
+		},
+		{ additionalProperties: false },
+	),
+	t.Object(
+		{
+			kind: t.Literal("contents"),
+			ownerUnit: t.Object(
+				{ id: Uuid, type: t.UnionEnum(["book", "media"]) },
+				{ additionalProperties: false },
+			),
+		},
+		{ additionalProperties: false },
+	),
+	t.Object({ kind: t.Literal("none") }, { additionalProperties: false }),
+]);
+export type ProgressContinuationResponse = Static<typeof ProgressContinuationResponse>;
+
 export const ProgressLookupResponse = t.Union([
 	t.Object({ state: t.Literal("untracked") }, { additionalProperties: false }),
 	t.Object(
 		{
 			state: t.Literal("tracked"),
 			record: ProgressResponse,
+			continuation: ProgressContinuationResponse,
 		},
 		{ additionalProperties: false },
 	),

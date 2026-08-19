@@ -71,6 +71,7 @@ const translation = await create(resources).getTranslation(
 
 const existingRecord: UnitProgressRecord = {
 	completedCount: 0,
+	continuation: { kind: "none" },
 	lastContentStructureNodeId: null,
 	progress: 0,
 	status: "active",

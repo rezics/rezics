@@ -18,6 +18,11 @@ import {
 
 const activeBook: UnitProgressRecord = {
 	completedCount: 2,
+	continuation: {
+		kind: "book-node",
+		bookId: "019f0000-0000-7000-8000-000000000002",
+		nodeId: "019f0000-0000-7000-8000-000000000001",
+	},
 	lastContentStructureNodeId: "019f0000-0000-7000-8000-000000000001",
 	progress: 0.42,
 	status: "active",

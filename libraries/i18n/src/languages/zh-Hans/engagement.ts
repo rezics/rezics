@@ -162,6 +162,7 @@ export default {
 	resultsHidden: "投票结束后显示结果。",
 	emptyPolls: "还没有投票。",
 	progress: "进度记录",
+	continueAction: "继续",
 	scoreActionByType: {
 		book: "为这本书评分",
 		media: "为这部作品评分",

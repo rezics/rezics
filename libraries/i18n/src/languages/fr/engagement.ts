@@ -160,6 +160,7 @@ export default {
 	resultsHidden: "Les résultats apparaîtront après la clôture du sondage.",
 	emptyPolls: "Aucun sondage pour le moment.",
 	progress: "Progression",
+	continueAction: "Continuer",
 	scoreActionByType: {
 		book: "Noter ce livre",
 		media: "Noter cette œuvre",

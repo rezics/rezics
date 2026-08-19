@@ -58600,6 +58600,7 @@
 												"enum": [
 													"unit.read",
 													"unit.update",
+													"unit.metadata-only.update",
 													"unit.status.update",
 													"unit.history.restore",
 													"unit.access.manage",
@@ -58723,6 +58724,7 @@
 															"enum": [
 																"unit.read",
 																"unit.update",
+																"unit.metadata-only.update",
 																"unit.status.update",
 																"unit.history.restore",
 																"unit.access.manage",
@@ -58757,6 +58759,7 @@
 															"enum": [
 																"unit.read",
 																"unit.update",
+																"unit.metadata-only.update",
 																"unit.status.update",
 																"unit.history.restore",
 																"unit.access.manage",
@@ -58791,6 +58794,7 @@
 															"enum": [
 																"unit.read",
 																"unit.update",
+																"unit.metadata-only.update",
 																"unit.status.update",
 																"unit.history.restore",
 																"unit.access.manage",
@@ -58964,7 +58968,7 @@
 												]
 											},
 											"grants": {
-												"maxItems": 25,
+												"maxItems": 26,
 												"uniqueItems": true,
 												"type": "array",
 												"items": {
@@ -58973,6 +58977,7 @@
 													"enum": [
 														"unit.read",
 														"unit.update",
+														"unit.metadata-only.update",
 														"unit.status.update",
 														"unit.history.restore",
 														"unit.access.manage",
@@ -59012,7 +59017,7 @@
 											"expiresAt": { "format": "date-time", "type": "string" },
 											"restrictions": {
 												"minItems": 1,
-												"maxItems": 25,
+												"maxItems": 26,
 												"uniqueItems": true,
 												"type": "array",
 												"items": {
@@ -59021,6 +59026,7 @@
 													"enum": [
 														"unit.read",
 														"unit.update",
+														"unit.metadata-only.update",
 														"unit.status.update",
 														"unit.history.restore",
 														"unit.access.manage",
@@ -59104,7 +59110,7 @@
 												]
 											},
 											"grants": {
-												"maxItems": 25,
+												"maxItems": 26,
 												"uniqueItems": true,
 												"type": "array",
 												"items": {
@@ -59113,6 +59119,7 @@
 													"enum": [
 														"unit.read",
 														"unit.update",
+														"unit.metadata-only.update",
 														"unit.status.update",
 														"unit.history.restore",
 														"unit.access.manage",
@@ -59159,6 +59166,7 @@
 													"enum": [
 														"unit.read",
 														"unit.update",
+														"unit.metadata-only.update",
 														"unit.status.update",
 														"unit.history.restore",
 														"unit.access.manage",
@@ -59242,6 +59250,7 @@
 												"enum": [
 													"unit.read",
 													"unit.update",
+													"unit.metadata-only.update",
 													"unit.status.update",
 													"unit.history.restore",
 													"unit.access.manage",
@@ -59365,6 +59374,7 @@
 															"enum": [
 																"unit.read",
 																"unit.update",
+																"unit.metadata-only.update",
 																"unit.status.update",
 																"unit.history.restore",
 																"unit.access.manage",
@@ -59399,6 +59409,7 @@
 															"enum": [
 																"unit.read",
 																"unit.update",
+																"unit.metadata-only.update",
 																"unit.status.update",
 																"unit.history.restore",
 																"unit.access.manage",
@@ -59433,6 +59444,7 @@
 															"enum": [
 																"unit.read",
 																"unit.update",
+																"unit.metadata-only.update",
 																"unit.status.update",
 																"unit.history.restore",
 																"unit.access.manage",
@@ -59825,6 +59837,7 @@
 														"enum": [
 															"unit.read",
 															"unit.update",
+															"unit.metadata-only.update",
 															"unit.status.update",
 															"unit.history.restore",
 															"unit.access.manage",
@@ -60481,6 +60494,7 @@
 															"enum": [
 																"unit.read",
 																"unit.update",
+																"unit.metadata-only.update",
 																"unit.status.update",
 																"unit.history.restore",
 																"unit.access.manage",
@@ -60643,6 +60657,7 @@
 															"enum": [
 																"unit.read",
 																"unit.update",
+																"unit.metadata-only.update",
 																"unit.status.update",
 																"unit.history.restore",
 																"unit.access.manage",
@@ -60821,7 +60836,7 @@
 									"invitedProfileId": { "format": "uuid", "type": "string" },
 									"permissions": {
 										"minItems": 1,
-										"maxItems": 25,
+										"maxItems": 26,
 										"uniqueItems": true,
 										"type": "array",
 										"items": {
@@ -60830,6 +60845,7 @@
 											"enum": [
 												"unit.read",
 												"unit.update",
+												"unit.metadata-only.update",
 												"unit.status.update",
 												"unit.history.restore",
 												"unit.access.manage",
@@ -60909,6 +60925,7 @@
 												"enum": [
 													"unit.read",
 													"unit.update",
+													"unit.metadata-only.update",
 													"unit.status.update",
 													"unit.history.restore",
 													"unit.access.manage",
@@ -61180,6 +61197,7 @@
 												"enum": [
 													"unit.read",
 													"unit.update",
+													"unit.metadata-only.update",
 													"unit.status.update",
 													"unit.history.restore",
 													"unit.access.manage",
@@ -61397,6 +61415,7 @@
 												"enum": [
 													"unit.read",
 													"unit.update",
+													"unit.metadata-only.update",
 													"unit.status.update",
 													"unit.history.restore",
 													"unit.access.manage",
@@ -72186,7 +72205,7 @@
 									"kind": { "minLength": 1, "maxLength": 64, "type": "string" },
 									"licenses": {
 										"uniqueItems": true,
-										"maxItems": 8,
+										"maxItems": 9,
 										"type": "array",
 										"items": {
 											"type": "string",
@@ -72198,6 +72217,7 @@
 												"cc-by-nc-4.0",
 												"cc-by-4.0",
 												"cc0-1.0",
+												"pdm-1.0",
 												"rezics-unit-content-license-v1"
 											]
 										}
@@ -82738,6 +82758,7 @@
 													"cc-by-nc-4.0",
 													"cc-by-4.0",
 													"cc0-1.0",
+													"pdm-1.0",
 													"rezics-unit-content-license-v1"
 												]
 											}
@@ -82934,6 +82955,7 @@
 													"cc-by-nc-4.0",
 													"cc-by-4.0",
 													"cc0-1.0",
+													"pdm-1.0",
 													"rezics-unit-content-license-v1"
 												]
 											}
@@ -83107,7 +83129,7 @@
 									},
 									"defaultLicenses": {
 										"uniqueItems": true,
-										"maxItems": 8,
+										"maxItems": 9,
 										"type": "array",
 										"items": {
 											"type": "string",
@@ -83119,6 +83141,7 @@
 												"cc-by-nc-4.0",
 												"cc-by-4.0",
 												"cc0-1.0",
+												"pdm-1.0",
 												"rezics-unit-content-license-v1"
 											]
 										}
@@ -83210,6 +83233,7 @@
 													"cc-by-nc-4.0",
 													"cc-by-4.0",
 													"cc0-1.0",
+													"pdm-1.0",
 													"rezics-unit-content-license-v1"
 												]
 											}
@@ -96296,7 +96320,7 @@
 											},
 											"licenses": {
 												"uniqueItems": true,
-												"maxItems": 8,
+												"maxItems": 9,
 												"type": "array",
 												"items": {
 													"type": "string",
@@ -96308,6 +96332,7 @@
 														"cc-by-nc-4.0",
 														"cc-by-4.0",
 														"cc0-1.0",
+														"pdm-1.0",
 														"rezics-unit-content-license-v1"
 													]
 												}
@@ -96323,14 +96348,18 @@
 															"releaseStatus": {
 																"type": "string",
 																"enum": ["ongoing", "hiatus", "completed", "cancelled"]
-															}
+															},
+															"metadataOnly": { "type": "boolean" }
 														}
 													},
 													{
 														"additionalProperties": false,
 														"type": "object",
 														"required": ["type"],
-														"properties": { "type": { "const": "software", "type": "string" } }
+														"properties": {
+															"type": { "const": "software", "type": "string" },
+															"metadataOnly": { "type": "boolean" }
+														}
 													},
 													{
 														"additionalProperties": false,
@@ -96341,7 +96370,8 @@
 															"releaseStatus": {
 																"type": "string",
 																"enum": ["ongoing", "hiatus", "completed", "cancelled"]
-															}
+															},
+															"metadataOnly": { "type": "boolean" }
 														}
 													}
 												]
@@ -96737,7 +96767,7 @@
 											},
 											"licenses": {
 												"uniqueItems": true,
-												"maxItems": 8,
+												"maxItems": 9,
 												"type": "array",
 												"items": {
 													"type": "string",
@@ -96749,6 +96779,7 @@
 														"cc-by-nc-4.0",
 														"cc-by-4.0",
 														"cc0-1.0",
+														"pdm-1.0",
 														"rezics-unit-content-license-v1"
 													]
 												}
@@ -96764,14 +96795,18 @@
 															"releaseStatus": {
 																"type": "string",
 																"enum": ["ongoing", "hiatus", "completed", "cancelled"]
-															}
+															},
+															"metadataOnly": { "type": "boolean" }
 														}
 													},
 													{
 														"additionalProperties": false,
 														"type": "object",
 														"required": ["type"],
-														"properties": { "type": { "const": "software", "type": "string" } }
+														"properties": {
+															"type": { "const": "software", "type": "string" },
+															"metadataOnly": { "type": "boolean" }
+														}
 													},
 													{
 														"additionalProperties": false,
@@ -96782,7 +96817,8 @@
 															"releaseStatus": {
 																"type": "string",
 																"enum": ["ongoing", "hiatus", "completed", "cancelled"]
-															}
+															},
+															"metadataOnly": { "type": "boolean" }
 														}
 													}
 												]
@@ -96907,6 +96943,7 @@
 															"cc-by-nc-4.0",
 															"cc-by-4.0",
 															"cc0-1.0",
+															"pdm-1.0",
 															"rezics-unit-content-license-v1"
 														]
 													},
@@ -96943,6 +96980,7 @@
 															"cc-by-nc-4.0",
 															"cc-by-4.0",
 															"cc0-1.0",
+															"pdm-1.0",
 															"rezics-unit-content-license-v1"
 														]
 													},
@@ -97212,6 +97250,7 @@
 													"required": [
 														"type",
 														"releaseStatus",
+														"metadataOnly",
 														"isbn13",
 														"publicationDate",
 														"pageCount",
@@ -97224,6 +97263,7 @@
 															"type": "string",
 															"enum": ["ongoing", "hiatus", "completed", "cancelled"]
 														},
+														"metadataOnly": { "type": "boolean" },
 														"isbn13": {
 															"nullable": true,
 															"anyOf": [{ "type": "string" }, { "type": "null" }]
@@ -97303,9 +97343,10 @@
 												{
 													"additionalProperties": false,
 													"type": "object",
-													"required": ["type", "releaseDate", "versionLabel"],
+													"required": ["type", "metadataOnly", "releaseDate", "versionLabel"],
 													"properties": {
 														"type": { "const": "software", "type": "string" },
+														"metadataOnly": { "type": "boolean" },
 														"releaseDate": {
 															"nullable": true,
 															"anyOf": [{ "format": "date", "type": "string" }, { "type": "null" }]
@@ -97322,6 +97363,7 @@
 													"required": [
 														"type",
 														"releaseStatus",
+														"metadataOnly",
 														"releaseDate",
 														"kind",
 														"runtimeMinutes",
@@ -97334,6 +97376,7 @@
 															"type": "string",
 															"enum": ["ongoing", "hiatus", "completed", "cancelled"]
 														},
+														"metadataOnly": { "type": "boolean" },
 														"releaseDate": {
 															"nullable": true,
 															"anyOf": [{ "format": "date", "type": "string" }, { "type": "null" }]
@@ -98460,6 +98503,7 @@
 											"type": "object",
 											"required": [
 												"canEdit",
+												"canUpdateMetadataOnly",
 												"canManageAccess",
 												"canManageAssociations",
 												"canCurateTags",
@@ -98469,6 +98513,7 @@
 											],
 											"properties": {
 												"canEdit": { "type": "boolean" },
+												"canUpdateMetadataOnly": { "type": "boolean" },
 												"canManageAccess": { "type": "boolean" },
 												"canManageAssociations": { "type": "boolean" },
 												"canCurateTags": { "type": "boolean" },
@@ -99070,6 +99115,7 @@
 															"cc-by-nc-4.0",
 															"cc-by-4.0",
 															"cc0-1.0",
+															"pdm-1.0",
 															"rezics-unit-content-license-v1"
 														]
 													},
@@ -99106,6 +99152,7 @@
 															"cc-by-nc-4.0",
 															"cc-by-4.0",
 															"cc0-1.0",
+															"pdm-1.0",
 															"rezics-unit-content-license-v1"
 														]
 													},
@@ -99375,6 +99422,7 @@
 													"required": [
 														"type",
 														"releaseStatus",
+														"metadataOnly",
 														"isbn13",
 														"publicationDate",
 														"pageCount",
@@ -99387,6 +99435,7 @@
 															"type": "string",
 															"enum": ["ongoing", "hiatus", "completed", "cancelled"]
 														},
+														"metadataOnly": { "type": "boolean" },
 														"isbn13": {
 															"nullable": true,
 															"anyOf": [{ "type": "string" }, { "type": "null" }]
@@ -99466,9 +99515,10 @@
 												{
 													"additionalProperties": false,
 													"type": "object",
-													"required": ["type", "releaseDate", "versionLabel"],
+													"required": ["type", "metadataOnly", "releaseDate", "versionLabel"],
 													"properties": {
 														"type": { "const": "software", "type": "string" },
+														"metadataOnly": { "type": "boolean" },
 														"releaseDate": {
 															"nullable": true,
 															"anyOf": [{ "format": "date", "type": "string" }, { "type": "null" }]
@@ -99485,6 +99535,7 @@
 													"required": [
 														"type",
 														"releaseStatus",
+														"metadataOnly",
 														"releaseDate",
 														"kind",
 														"runtimeMinutes",
@@ -99497,6 +99548,7 @@
 															"type": "string",
 															"enum": ["ongoing", "hiatus", "completed", "cancelled"]
 														},
+														"metadataOnly": { "type": "boolean" },
 														"releaseDate": {
 															"nullable": true,
 															"anyOf": [{ "format": "date", "type": "string" }, { "type": "null" }]
@@ -100623,6 +100675,7 @@
 											"type": "object",
 											"required": [
 												"canEdit",
+												"canUpdateMetadataOnly",
 												"canManageAccess",
 												"canManageAssociations",
 												"canCurateTags",
@@ -100632,6 +100685,7 @@
 											],
 											"properties": {
 												"canEdit": { "type": "boolean" },
+												"canUpdateMetadataOnly": { "type": "boolean" },
 												"canManageAccess": { "type": "boolean" },
 												"canManageAssociations": { "type": "boolean" },
 												"canCurateTags": { "type": "boolean" },
@@ -100758,7 +100812,7 @@
 									},
 									"licenses": {
 										"uniqueItems": true,
-										"maxItems": 8,
+										"maxItems": 9,
 										"type": "array",
 										"items": {
 											"type": "string",
@@ -100770,6 +100824,7 @@
 												"cc-by-nc-4.0",
 												"cc-by-4.0",
 												"cc0-1.0",
+												"pdm-1.0",
 												"rezics-unit-content-license-v1"
 											]
 										}
@@ -100825,6 +100880,7 @@
 													{ "type": "null" }
 												]
 											},
+											"metadataOnly": { "type": "boolean" },
 											"versionLabel": {
 												"nullable": true,
 												"anyOf": [{ "type": "string" }, { "type": "null" }]
@@ -101006,6 +101062,7 @@
 															"cc-by-nc-4.0",
 															"cc-by-4.0",
 															"cc0-1.0",
+															"pdm-1.0",
 															"rezics-unit-content-license-v1"
 														]
 													},
@@ -101042,6 +101099,7 @@
 															"cc-by-nc-4.0",
 															"cc-by-4.0",
 															"cc0-1.0",
+															"pdm-1.0",
 															"rezics-unit-content-license-v1"
 														]
 													},
@@ -101311,6 +101369,7 @@
 													"required": [
 														"type",
 														"releaseStatus",
+														"metadataOnly",
 														"isbn13",
 														"publicationDate",
 														"pageCount",
@@ -101323,6 +101382,7 @@
 															"type": "string",
 															"enum": ["ongoing", "hiatus", "completed", "cancelled"]
 														},
+														"metadataOnly": { "type": "boolean" },
 														"isbn13": {
 															"nullable": true,
 															"anyOf": [{ "type": "string" }, { "type": "null" }]
@@ -101402,9 +101462,10 @@
 												{
 													"additionalProperties": false,
 													"type": "object",
-													"required": ["type", "releaseDate", "versionLabel"],
+													"required": ["type", "metadataOnly", "releaseDate", "versionLabel"],
 													"properties": {
 														"type": { "const": "software", "type": "string" },
+														"metadataOnly": { "type": "boolean" },
 														"releaseDate": {
 															"nullable": true,
 															"anyOf": [{ "format": "date", "type": "string" }, { "type": "null" }]
@@ -101421,6 +101482,7 @@
 													"required": [
 														"type",
 														"releaseStatus",
+														"metadataOnly",
 														"releaseDate",
 														"kind",
 														"runtimeMinutes",
@@ -101433,6 +101495,7 @@
 															"type": "string",
 															"enum": ["ongoing", "hiatus", "completed", "cancelled"]
 														},
+														"metadataOnly": { "type": "boolean" },
 														"releaseDate": {
 															"nullable": true,
 															"anyOf": [{ "format": "date", "type": "string" }, { "type": "null" }]
@@ -102559,6 +102622,7 @@
 											"type": "object",
 											"required": [
 												"canEdit",
+												"canUpdateMetadataOnly",
 												"canManageAccess",
 												"canManageAssociations",
 												"canCurateTags",
@@ -102568,6 +102632,7 @@
 											],
 											"properties": {
 												"canEdit": { "type": "boolean" },
+												"canUpdateMetadataOnly": { "type": "boolean" },
 												"canManageAccess": { "type": "boolean" },
 												"canManageAssociations": { "type": "boolean" },
 												"canCurateTags": { "type": "boolean" },
@@ -102972,6 +103037,7 @@
 															"cc-by-nc-4.0",
 															"cc-by-4.0",
 															"cc0-1.0",
+															"pdm-1.0",
 															"rezics-unit-content-license-v1"
 														]
 													},
@@ -103008,6 +103074,7 @@
 															"cc-by-nc-4.0",
 															"cc-by-4.0",
 															"cc0-1.0",
+															"pdm-1.0",
 															"rezics-unit-content-license-v1"
 														]
 													},
@@ -103277,6 +103344,7 @@
 													"required": [
 														"type",
 														"releaseStatus",
+														"metadataOnly",
 														"isbn13",
 														"publicationDate",
 														"pageCount",
@@ -103289,6 +103357,7 @@
 															"type": "string",
 															"enum": ["ongoing", "hiatus", "completed", "cancelled"]
 														},
+														"metadataOnly": { "type": "boolean" },
 														"isbn13": {
 															"nullable": true,
 															"anyOf": [{ "type": "string" }, { "type": "null" }]
@@ -103368,9 +103437,10 @@
 												{
 													"additionalProperties": false,
 													"type": "object",
-													"required": ["type", "releaseDate", "versionLabel"],
+													"required": ["type", "metadataOnly", "releaseDate", "versionLabel"],
 													"properties": {
 														"type": { "const": "software", "type": "string" },
+														"metadataOnly": { "type": "boolean" },
 														"releaseDate": {
 															"nullable": true,
 															"anyOf": [{ "format": "date", "type": "string" }, { "type": "null" }]
@@ -103387,6 +103457,7 @@
 													"required": [
 														"type",
 														"releaseStatus",
+														"metadataOnly",
 														"releaseDate",
 														"kind",
 														"runtimeMinutes",
@@ -103399,6 +103470,7 @@
 															"type": "string",
 															"enum": ["ongoing", "hiatus", "completed", "cancelled"]
 														},
+														"metadataOnly": { "type": "boolean" },
 														"releaseDate": {
 															"nullable": true,
 															"anyOf": [{ "format": "date", "type": "string" }, { "type": "null" }]
@@ -104525,6 +104597,7 @@
 											"type": "object",
 											"required": [
 												"canEdit",
+												"canUpdateMetadataOnly",
 												"canManageAccess",
 												"canManageAssociations",
 												"canCurateTags",
@@ -104534,6 +104607,7 @@
 											],
 											"properties": {
 												"canEdit": { "type": "boolean" },
+												"canUpdateMetadataOnly": { "type": "boolean" },
 												"canManageAccess": { "type": "boolean" },
 												"canManageAssociations": { "type": "boolean" },
 												"canCurateTags": { "type": "boolean" },
@@ -104905,6 +104979,7 @@
 															"cc-by-nc-4.0",
 															"cc-by-4.0",
 															"cc0-1.0",
+															"pdm-1.0",
 															"rezics-unit-content-license-v1"
 														]
 													},
@@ -104941,6 +105016,7 @@
 															"cc-by-nc-4.0",
 															"cc-by-4.0",
 															"cc0-1.0",
+															"pdm-1.0",
 															"rezics-unit-content-license-v1"
 														]
 													},
@@ -105210,6 +105286,7 @@
 													"required": [
 														"type",
 														"releaseStatus",
+														"metadataOnly",
 														"isbn13",
 														"publicationDate",
 														"pageCount",
@@ -105222,6 +105299,7 @@
 															"type": "string",
 															"enum": ["ongoing", "hiatus", "completed", "cancelled"]
 														},
+														"metadataOnly": { "type": "boolean" },
 														"isbn13": {
 															"nullable": true,
 															"anyOf": [{ "type": "string" }, { "type": "null" }]
@@ -105301,9 +105379,10 @@
 												{
 													"additionalProperties": false,
 													"type": "object",
-													"required": ["type", "releaseDate", "versionLabel"],
+													"required": ["type", "metadataOnly", "releaseDate", "versionLabel"],
 													"properties": {
 														"type": { "const": "software", "type": "string" },
+														"metadataOnly": { "type": "boolean" },
 														"releaseDate": {
 															"nullable": true,
 															"anyOf": [{ "format": "date", "type": "string" }, { "type": "null" }]
@@ -105320,6 +105399,7 @@
 													"required": [
 														"type",
 														"releaseStatus",
+														"metadataOnly",
 														"releaseDate",
 														"kind",
 														"runtimeMinutes",
@@ -105332,6 +105412,7 @@
 															"type": "string",
 															"enum": ["ongoing", "hiatus", "completed", "cancelled"]
 														},
+														"metadataOnly": { "type": "boolean" },
 														"releaseDate": {
 															"nullable": true,
 															"anyOf": [{ "format": "date", "type": "string" }, { "type": "null" }]
@@ -106458,6 +106539,7 @@
 											"type": "object",
 											"required": [
 												"canEdit",
+												"canUpdateMetadataOnly",
 												"canManageAccess",
 												"canManageAssociations",
 												"canCurateTags",
@@ -106467,6 +106549,7 @@
 											],
 											"properties": {
 												"canEdit": { "type": "boolean" },
+												"canUpdateMetadataOnly": { "type": "boolean" },
 												"canManageAccess": { "type": "boolean" },
 												"canManageAssociations": { "type": "boolean" },
 												"canCurateTags": { "type": "boolean" },
@@ -107093,6 +107176,7 @@
 															"cc-by-nc-4.0",
 															"cc-by-4.0",
 															"cc0-1.0",
+															"pdm-1.0",
 															"rezics-unit-content-license-v1"
 														]
 													},
@@ -107129,6 +107213,7 @@
 															"cc-by-nc-4.0",
 															"cc-by-4.0",
 															"cc0-1.0",
+															"pdm-1.0",
 															"rezics-unit-content-license-v1"
 														]
 													},
@@ -107398,6 +107483,7 @@
 													"required": [
 														"type",
 														"releaseStatus",
+														"metadataOnly",
 														"isbn13",
 														"publicationDate",
 														"pageCount",
@@ -107410,6 +107496,7 @@
 															"type": "string",
 															"enum": ["ongoing", "hiatus", "completed", "cancelled"]
 														},
+														"metadataOnly": { "type": "boolean" },
 														"isbn13": {
 															"nullable": true,
 															"anyOf": [{ "type": "string" }, { "type": "null" }]
@@ -107489,9 +107576,10 @@
 												{
 													"additionalProperties": false,
 													"type": "object",
-													"required": ["type", "releaseDate", "versionLabel"],
+													"required": ["type", "metadataOnly", "releaseDate", "versionLabel"],
 													"properties": {
 														"type": { "const": "software", "type": "string" },
+														"metadataOnly": { "type": "boolean" },
 														"releaseDate": {
 															"nullable": true,
 															"anyOf": [{ "format": "date", "type": "string" }, { "type": "null" }]
@@ -107508,6 +107596,7 @@
 													"required": [
 														"type",
 														"releaseStatus",
+														"metadataOnly",
 														"releaseDate",
 														"kind",
 														"runtimeMinutes",
@@ -107520,6 +107609,7 @@
 															"type": "string",
 															"enum": ["ongoing", "hiatus", "completed", "cancelled"]
 														},
+														"metadataOnly": { "type": "boolean" },
 														"releaseDate": {
 															"nullable": true,
 															"anyOf": [{ "format": "date", "type": "string" }, { "type": "null" }]
@@ -108646,6 +108736,7 @@
 											"type": "object",
 											"required": [
 												"canEdit",
+												"canUpdateMetadataOnly",
 												"canManageAccess",
 												"canManageAssociations",
 												"canCurateTags",
@@ -108655,6 +108746,7 @@
 											],
 											"properties": {
 												"canEdit": { "type": "boolean" },
+												"canUpdateMetadataOnly": { "type": "boolean" },
 												"canManageAccess": { "type": "boolean" },
 												"canManageAssociations": { "type": "boolean" },
 												"canCurateTags": { "type": "boolean" },
@@ -131694,7 +131786,7 @@
 										{
 											"additionalProperties": false,
 											"type": "object",
-											"required": ["state", "record"],
+											"required": ["state", "record", "continuation"],
 											"properties": {
 												"state": { "const": "tracked", "type": "string" },
 												"record": {
@@ -131759,6 +131851,68 @@
 														"createdAt": { "format": "date-time", "type": "string" },
 														"updatedAt": { "format": "date-time", "type": "string" }
 													}
+												},
+												"continuation": {
+													"anyOf": [
+														{
+															"additionalProperties": false,
+															"type": "object",
+															"required": ["kind", "bookId", "nodeId"],
+															"properties": {
+																"kind": { "const": "book-node", "type": "string" },
+																"bookId": { "format": "uuid", "type": "string" },
+																"nodeId": { "format": "uuid", "type": "string" }
+															}
+														},
+														{
+															"additionalProperties": false,
+															"type": "object",
+															"required": ["kind", "contentUnit"],
+															"properties": {
+																"kind": { "const": "unit", "type": "string" },
+																"contentUnit": {
+																	"additionalProperties": false,
+																	"type": "object",
+																	"required": ["id", "type"],
+																	"properties": {
+																		"id": { "format": "uuid", "type": "string" },
+																		"type": {
+																			"default": "video",
+																			"type": "string",
+																			"enum": ["video", "audio"]
+																		}
+																	}
+																}
+															}
+														},
+														{
+															"additionalProperties": false,
+															"type": "object",
+															"required": ["kind", "ownerUnit"],
+															"properties": {
+																"kind": { "const": "contents", "type": "string" },
+																"ownerUnit": {
+																	"additionalProperties": false,
+																	"type": "object",
+																	"required": ["id", "type"],
+																	"properties": {
+																		"id": { "format": "uuid", "type": "string" },
+																		"type": {
+																			"default": "book",
+																			"type": "string",
+																			"enum": ["book", "media"]
+																		}
+																	}
+																}
+															}
+														},
+														{
+															"additionalProperties": false,
+															"type": "object",
+															"required": ["kind"],
+															"properties": { "kind": { "const": "none", "type": "string" } }
+														}
+													]
 												}
 											}
 										}
@@ -211243,6 +211397,7 @@
 												"cc-by-nc-4.0",
 												"cc-by-4.0",
 												"cc0-1.0",
+												"pdm-1.0",
 												"rezics-unit-content-license-v1"
 											]
 										}

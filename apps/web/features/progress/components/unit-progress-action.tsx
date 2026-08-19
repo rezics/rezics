@@ -12,17 +12,27 @@ import {
 } from "lucide-react";
 
 import { SignInButton } from "@/features/auth/auth-portal";
+import { useApplicationRouter } from "@/features/application-shell/hooks/use-application-router";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
 import type { UnitProgressRecord } from "../model/progress-record";
+import { progressContinuationHref } from "../model/progress-continuation";
 import { useUnitProgress } from "./unit-progress-provider";
 
-interface UnitProgressActionProps {
+interface UnitProgressActionLayoutProps {
 	readonly buttonClassName?: string;
 	readonly className?: string;
 }
 
-export function UnitProgressAction({ buttonClassName, className }: UnitProgressActionProps = {}) {
+interface UnitProgressActionProps extends UnitProgressActionLayoutProps {
+	readonly metadataOnly: boolean;
+}
+
+export function UnitProgressAction({
+	buttonClassName,
+	className,
+	metadataOnly,
+}: UnitProgressActionProps) {
 	const { state } = useUnitProgress();
 	const props = { buttonClassName, className };
 
@@ -38,7 +48,7 @@ export function UnitProgressAction({ buttonClassName, className }: UnitProgressA
 		case "backlog":
 			return <BacklogProgressAction {...props} />;
 		case "active":
-			return <ActiveProgressAction {...props} />;
+			return <ActiveProgressAction {...props} metadataOnly={metadataOnly} record={state.record} />;
 		case "paused":
 			return <PausedProgressAction {...props} />;
 		case "completed":
@@ -48,7 +58,7 @@ export function UnitProgressAction({ buttonClassName, className }: UnitProgressA
 	}
 }
 
-function SignedOutProgressAction({ buttonClassName, className }: UnitProgressActionProps) {
+function SignedOutProgressAction({ buttonClassName, className }: UnitProgressActionLayoutProps) {
 	const { domain } = useUnitProgress();
 	const { t } = useTranslation(["engagement"]);
 	const copy = t.engagement.progressByType[domain.type];
@@ -75,7 +85,7 @@ function SignedOutProgressAction({ buttonClassName, className }: UnitProgressAct
 	);
 }
 
-function LoadingProgressAction({ buttonClassName, className }: UnitProgressActionProps) {
+function LoadingProgressAction({ buttonClassName, className }: UnitProgressActionLayoutProps) {
 	const { domain } = useUnitProgress();
 	const { t } = useTranslation(["engagement"]);
 	const copy = t.engagement.progressByType[domain.type];
@@ -100,7 +110,7 @@ function FailedProgressAction({
 	buttonClassName,
 	className,
 	error,
-}: UnitProgressActionProps & { readonly error: unknown }) {
+}: UnitProgressActionLayoutProps & { readonly error: unknown }) {
 	const { retryProgress } = useUnitProgress();
 	const { t } = useTranslation(["actions", "ui"]);
 
@@ -120,7 +130,7 @@ function FailedProgressAction({
 	);
 }
 
-function UntrackedProgressAction({ buttonClassName, className }: UnitProgressActionProps) {
+function UntrackedProgressAction({ buttonClassName, className }: UnitProgressActionLayoutProps) {
 	const { addToBacklog, domain, isSaving, openEditor, saveError } = useUnitProgress();
 	const { t } = useTranslation(["engagement", "ui"]);
 	const copy = t.engagement.progressByType[domain.type];
@@ -142,7 +152,7 @@ function UntrackedProgressAction({ buttonClassName, className }: UnitProgressAct
 	);
 }
 
-function BacklogProgressAction({ buttonClassName, className }: UnitProgressActionProps) {
+function BacklogProgressAction({ buttonClassName, className }: UnitProgressActionLayoutProps) {
 	const { domain, isSaving, openEditor, resumeProgress, saveError } = useUnitProgress();
 	const { t } = useTranslation(["engagement", "ui"]);
 	const copy = t.engagement.progressByType[domain.type];
@@ -164,28 +174,41 @@ function BacklogProgressAction({ buttonClassName, className }: UnitProgressActio
 	);
 }
 
-function ActiveProgressAction({ buttonClassName, className }: UnitProgressActionProps) {
+function ActiveProgressAction({
+	buttonClassName,
+	className,
+	metadataOnly,
+	record,
+}: UnitProgressActionLayoutProps & {
+	readonly metadataOnly: boolean;
+	readonly record: UnitProgressRecord<"active">;
+}) {
 	const { domain, openEditor, saveError } = useUnitProgress();
 	const { t } = useTranslation(["engagement", "ui"]);
 	const copy = t.engagement.progressByType[domain.type];
+	const router = useApplicationRouter();
+	const continuationHref = progressContinuationHref(record.continuation);
+	const continuesContent = !metadataOnly && (domain.type === "book" || domain.type === "media");
 
 	return (
 		<ProgressSplitButton
-			Icon={Gauge}
+			Icon={continuesContent ? Play : Gauge}
 			ariaLabel={copy.title}
 			buttonClassName={buttonClassName}
 			className={className}
 			error={saveError}
 			errorFallback={t.ui.retryLater}
-			label={copy.updateAction}
-			onPrimaryAction={openEditor}
+			label={continuesContent ? t.engagement.continueAction : copy.updateAction}
+			onPrimaryAction={() =>
+				continuationHref && continuesContent ? router.push(continuationHref) : openEditor()
+			}
 			onSecondaryAction={openEditor}
 			variant="secondary"
 		/>
 	);
 }
 
-function PausedProgressAction({ buttonClassName, className }: UnitProgressActionProps) {
+function PausedProgressAction({ buttonClassName, className }: UnitProgressActionLayoutProps) {
 	const { domain, isSaving, openEditor, resumeProgress, saveError } = useUnitProgress();
 	const { t } = useTranslation(["engagement", "ui"]);
 	const copy = t.engagement.progressByType[domain.type];
@@ -211,7 +234,7 @@ function CompletedProgressAction({
 	buttonClassName,
 	className,
 	record,
-}: UnitProgressActionProps & {
+}: UnitProgressActionLayoutProps & {
 	readonly record: UnitProgressRecord<"completed">;
 }) {
 	const {
@@ -250,7 +273,7 @@ function CompletedProgressAction({
 	);
 }
 
-function DroppedProgressAction({ buttonClassName, className }: UnitProgressActionProps) {
+function DroppedProgressAction({ buttonClassName, className }: UnitProgressActionLayoutProps) {
 	const { domain, isSaving, openEditor, saveError, startAgain } = useUnitProgress();
 	const { t } = useTranslation(["engagement", "ui"]);
 	const copy = t.engagement.progressByType[domain.type];
@@ -286,7 +309,7 @@ function ProgressSplitButton({
 	onPrimaryAction,
 	onSecondaryAction,
 	variant,
-}: UnitProgressActionProps & {
+}: UnitProgressActionLayoutProps & {
 	readonly Icon: LucideIcon;
 	readonly ariaLabel: string;
 	readonly disabled?: boolean;

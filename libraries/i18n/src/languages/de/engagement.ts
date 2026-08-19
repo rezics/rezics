@@ -162,6 +162,7 @@ export default {
 	resultsHidden: "Die Ergebnisse werden nach dem Schließen der Umfrage angezeigt.",
 	emptyPolls: "Noch keine Umfragen.",
 	progress: "Fortschritt",
+	continueAction: "Weiter",
 	scoreActionByType: {
 		book: "Dieses Buch bewerten",
 		media: "Dieses Werk bewerten",

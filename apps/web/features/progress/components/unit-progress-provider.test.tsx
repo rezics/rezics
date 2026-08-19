@@ -58,6 +58,13 @@ const queryResults = vi.hoisted(() => ({
 	progress: {
 		data: {
 			state: "tracked",
+			continuation: {
+				kind: "contents",
+				ownerUnit: {
+					id: "019f0000-0000-7000-8000-000000000099",
+					type: "media",
+				},
+			},
 			record: {
 				completedCount: 1,
 				currentEntryId: null,
