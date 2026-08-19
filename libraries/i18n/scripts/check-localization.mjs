@@ -59,22 +59,34 @@ async function collectFiles(directory) {
 	return files.flat().filter((path) => sourceExtensions.has(extname(path)));
 }
 
+function toPosixPath(path) {
+	return path.replaceAll("\\", "/");
+}
+
+function repoRelativePath(path) {
+	return toPosixPath(relative(repositoryRoot, path));
+}
+
+function isAboutPath(path) {
+	return toPosixPath(path).includes("/apps/about/");
+}
+
 function definitionsForPath(path) {
 	return verbatimDefinitions.filter((definition) =>
-		definition.scope === "about" ? path.includes("/apps/about/") : true,
+		definition.scope === "about" ? isAboutPath(path) : true,
 	);
 }
 
 for (const path of (await Promise.all(sourceRoots.map(collectFiles))).flat().toSorted()) {
 	const locale = localeForLocalizationPath(path);
 	if (!locale) {
-		errors.push(`${relative(repositoryRoot, path)}: unable to determine localization locale`);
+		errors.push(`${repoRelativePath(path)}: unable to determine localization locale`);
 		continue;
 	}
 	const source = await readFile(path, "utf8");
-	const isAboutContent = path.includes("/apps/about/");
+	const isAboutContent = isAboutPath(path);
 	const common = {
-		path: relative(repositoryRoot, path),
+		path: repoRelativePath(path),
 		source,
 		verbatimDefinitions: definitionsForPath(path),
 		terminologyDefinitions: flattenTerminology(terminologyByLocale[locale]),

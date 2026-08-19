@@ -1,5 +1,5 @@
 import { readdir, readFile } from "node:fs/promises";
-import { relative, resolve } from "node:path";
+import { relative, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { describe, expect, it } from "vitest";
@@ -95,7 +95,7 @@ describe("Unit localization exemptions", () => {
 				files.map(async (file) => {
 					const source = await readFile(file, "utf8");
 					return [...source.matchAll(expression)].map((match) => ({
-						file: relative(serviceRoot, file),
+						file: relative(serviceRoot, file).split(sep).join("/"),
 						rationale: match[1]?.trim(),
 					}));
 				}),

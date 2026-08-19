@@ -39,6 +39,16 @@ describe("localization terminology policy", () => {
 		expect(
 			localeForLocalizationPath("/repo/apps/about/src/content/locales/zh-hans/example.ts"),
 		).toBe("zh-Hans");
+		expect(
+			localeForLocalizationPath(
+				"D:\\repo\\libraries\\i18n\\src\\languages\\zh-Hant\\example.ts",
+			),
+		).toBe("zh-Hant");
+		expect(
+			localeForLocalizationPath(
+				"D:\\repo\\apps\\about\\src\\content\\locales\\zh-hans\\example.ts",
+			),
+		).toBe("zh-Hans");
 	});
 
 	it("requires TypeScript resources to reference approved terminology", () => {
@@ -143,32 +153,36 @@ describe("localization terminology policy", () => {
 	});
 
 	it("allows internal field terminology in about developer and legal references", () => {
+		const terminologyDefinitions = flattenTerminology({
+			unitSlug: {
+				forms: { label: "Path identifier" },
+				forbidden: ["slug"],
+			},
+		});
 		const docsErrors = checkMarkdownSource({
 			path: "apps/about/src/content/locales/en/docs/api/example.mdx",
 			source: "Use the Unit slug returned by the API.",
 			verbatimDefinitions,
-			terminologyDefinitions: flattenTerminology({
-				unitSlug: {
-					forms: { label: "Path identifier" },
-					forbidden: ["slug"],
-				},
-			}),
+			terminologyDefinitions,
+			rejectUnapprovedTokens: false,
+		});
+		const windowsDocsErrors = checkMarkdownSource({
+			path: "apps\\about\\src\\content\\locales\\en\\docs\\api\\example.mdx",
+			source: "Use the Unit slug returned by the API.",
+			verbatimDefinitions,
+			terminologyDefinitions,
 			rejectUnapprovedTokens: false,
 		});
 		const productErrors = checkMarkdownSource({
 			path: "apps/about/src/content/locales/en/products/example.mdx",
 			source: "Use the Unit slug returned by the API.",
 			verbatimDefinitions,
-			terminologyDefinitions: flattenTerminology({
-				unitSlug: {
-					forms: { label: "Path identifier" },
-					forbidden: ["slug"],
-				},
-			}),
+			terminologyDefinitions,
 			rejectUnapprovedTokens: false,
 		});
 
 		expect(docsErrors).toEqual([]);
+		expect(windowsDocsErrors).toEqual([]);
 		expect(productErrors).toEqual([
 			expect.stringContaining('forbidden unitSlug terminology "slug"'),
 		]);

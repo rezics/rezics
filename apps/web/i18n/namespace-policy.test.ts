@@ -1,5 +1,5 @@
 import { readdir, readFile } from "node:fs/promises";
-import { extname, relative, resolve } from "node:path";
+import { extname, relative, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { parse, type ParserPlugin } from "@babel/parser";
@@ -139,6 +139,10 @@ function checkResourceRegistry(path: string, source: string): string[] {
 	return errors;
 }
 
+function repoRelativePath(from: string, to: string): string {
+	return relative(from, to).split(sep).join("/");
+}
+
 async function collectSourceFiles(directory: string): Promise<string[]> {
 	const entries = await readdir(directory, { withFileTypes: true });
 	const files = await Promise.all(
@@ -204,14 +208,14 @@ describe("i18n namespace policy", () => {
 		const errors = (
 			await Promise.all(
 				sourceFiles.map(async (sourcePath) =>
-					checkSource(relative(WebRoot, sourcePath), await readFile(sourcePath, "utf8")),
+					checkSource(repoRelativePath(WebRoot, sourcePath), await readFile(sourcePath, "utf8")),
 				),
 			)
 		)
 			.flat()
 			.concat(
 				checkResourceRegistry(
-					relative(resolve(WebRoot, "../.."), ResourceRegistryPath),
+					repoRelativePath(resolve(WebRoot, "../.."), ResourceRegistryPath),
 					resourceRegistry,
 				),
 			);

@@ -1,5 +1,5 @@
 import { readdir, readFile } from "node:fs/promises";
-import { basename, extname, relative } from "node:path";
+import { basename, extname, relative, sep } from "node:path";
 import { FixtureProvider, useFixtureClient } from "@rezics/fixture-client";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
@@ -21,6 +21,10 @@ async function collectSourceFiles(directory: URL): Promise<URL[]> {
 		}),
 	);
 	return files.flat();
+}
+
+function repoRelativePath(from: string, to: string): string {
+	return relative(from, to).split(sep).join("/");
 }
 
 function isFixtureDevelopmentSurface(path: URL): boolean {
@@ -62,7 +66,9 @@ describe("fixture package boundaries", () => {
 			const source = await readFile(path, "utf8");
 			for (const specifier of FixturePackageSpecifiers) {
 				if (source.includes(specifier)) {
-					violations.push(`${relative(FrontendRoot.pathname, path.pathname)} imports ${specifier}`);
+					violations.push(
+						`${repoRelativePath(FrontendRoot.pathname, path.pathname)} imports ${specifier}`,
+					);
 				}
 			}
 		}
@@ -75,7 +81,7 @@ describe("fixture package boundaries", () => {
 		for (const path of await collectSourceFiles(ProductionLocaleRoot)) {
 			const source = await readFile(path, "utf8");
 			if (/\bfixture\s*:/.test(source)) {
-				violations.push(relative(ProductionLocaleRoot.pathname, path.pathname));
+				violations.push(repoRelativePath(ProductionLocaleRoot.pathname, path.pathname));
 			}
 		}
 

@@ -1,5 +1,5 @@
 import { readdir, readFile } from "node:fs/promises";
-import { extname, relative, resolve } from "node:path";
+import { extname, relative, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 
 type AllowRule = {
@@ -92,7 +92,7 @@ async function listTypeScriptFiles(directory: string): Promise<string[]> {
 const usage = new Map<AllowRule, number>(allowRules.map((rule) => [rule, 0]));
 const violations: string[] = [];
 for (const path of await listTypeScriptFiles(serviceRoot)) {
-	const file = relative(serviceRoot, path);
+	const file = relative(serviceRoot, path).split(sep).join("/");
 	if (offlineDirectoryPrefixes.some((prefix) => file.startsWith(prefix))) continue;
 	const lines = (await readFile(path, "utf8")).split("\n");
 	for (const [offset, line] of lines.entries()) {

@@ -1,5 +1,5 @@
 import { readdir, readFile } from "node:fs/promises";
-import { extname, relative, resolve } from "node:path";
+import { extname, relative, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { describe, expect, it } from "vitest";
@@ -30,7 +30,7 @@ describe("application navigation entry policy", () => {
 		const violations: string[] = [];
 
 		for (const path of await collectSourceFiles(FeatureRoot)) {
-			const featurePath = relative(FeatureRoot, path);
+			const featurePath = relative(FeatureRoot, path).split(sep).join("/");
 			const source = await readFile(path, "utf8");
 			if (source.includes('from "next/link"') && featurePath !== FrameworkLinkOwner)
 				violations.push(`${featurePath} imports next/link`);
