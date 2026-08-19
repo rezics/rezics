@@ -4,3 +4,8 @@ tasks:
     typecheck:
         cmds:
             - yarn exec tsc --noEmit -p tsconfig.json
+
+    test:
+        desc: Test filter and search-feature behavior.
+        cmds:
+            - yarn exec vitest run --config vitest.config.ts

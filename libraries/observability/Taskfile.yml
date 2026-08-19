@@ -5,6 +5,11 @@ tasks:
         cmds:
             - yarn exec tsc --noEmit -p tsconfig.json
 
+    test:
+        desc: Test observability configuration and runtime behavior.
+        cmds:
+            - yarn exec vitest run --config vitest.config.ts
+
     smoke:bun:
         desc: Prove the selected OpenTelemetry packages on the supported Bun runtime.
         cmds:

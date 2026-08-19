@@ -86,6 +86,8 @@ tasks:
             - task: libraries:i18n:test
             - task: libraries:email:test
             - task: libraries:fixture-data:test
+            - task: libraries:filter:test
+            - task: libraries:observability:test
             - task: services-main:test
             - task: apps-web:test
             - task: apps-about:test
