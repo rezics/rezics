@@ -198,20 +198,6 @@ tasks:
               vars:
                   CLI_ARGS: reindex --yes
 
-    local:showcase:
-        desc: Reset to Bootstrap only, then install sibling showcase packs (does not run Seed).
-        prompt: This deletes the local application database and installs showcase packs. Continue?
-        cmds:
-            - task: infra:start
-            - task: services-main:db:reset-bootstrap
-              vars:
-                  CLI_ARGS: --yes
-            - task: services-main:content-pack:apply
-            - task: services-main:search:index
-              vars:
-                  CLI_ARGS: reindex --yes
-            - task: services-main:content-pack:verify
-
     showcase-packs:build:
         desc: Rebuild generated toaru-core content in the sibling showcase-packs checkout.
         internal: true
@@ -219,8 +205,8 @@ tasks:
         cmds:
             - npm run toaru-core:build
 
-    local:showcase:reseed:
-        desc: Rebuild sibling showcase packs and apply missing Units. Does not reset the database.
+    local:showcase:
+        desc: Idempotent replay of sibling showcase packs.
         cmds:
             - task: infra:start
             - task: showcase-packs:build

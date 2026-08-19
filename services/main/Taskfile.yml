@@ -358,7 +358,7 @@ tasks:
             - yarn exec atlas migrate status --env main --url "${DATABASE_ADMIN_URL}"
 
     content-pack:apply:
-        desc: Install showcase packs from a sibling checkout or --from directory (not used by CI Seed).
+        desc: Idempotent replay of showcase packs from a sibling checkout or --from directory.
         cmds:
             - yarn exec tsx scripts/content-pack.ts apply {{.CLI_ARGS}}
 
