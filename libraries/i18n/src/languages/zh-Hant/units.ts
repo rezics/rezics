@@ -33,7 +33,8 @@ export default {
 		publicWorkHelpTitle: "什麼是公共作品？",
 		publicWorkHelpOwnership:
 			"公共作品由社群擁有並共同維護。建立後，你不會因為是建立者而取得擁有者身分或額外權限；所有已登入使用者都能依公共作品的共同權限編輯。",
-		publicWorkHelpIndexing: "公共作品通常用來收錄你不持有著作權的既有作品，建立可搜尋的索引資料。",
+		publicWorkHelpScope:
+			"當作品應由社群而非單一個人檔案維護時，請選擇此項。擁有方式不決定是否顯示章節正文。",
 		publicWorkHelpAlternative:
 			"如果你持有著作權，或想建立由你管理、再向特定對象開放協作的作品，請選擇「自有作品」，建立後到權限設定授予相應的編輯權限。",
 		entryOwnershipLabel: "條目擁有方式",
@@ -53,6 +54,11 @@ export default {
 		creditRequestConfirmationDescription: `部分選取的${entityTerms.plural}需要取得同意後才能顯示署名。確認後將建立此作品並送出署名邀請。`,
 		creditRequestConfirmationCancel: "取消",
 		creditRequestConfirmationConfirm: "建立並送出邀請",
+		metadataOnlyConfirmationTitle: "確定提供完整內容？",
+		metadataOnlyConfirmationDescription:
+			`關閉「僅收錄資料」後，${verbatimTerms.rezics.value} 可以呈現作品的完整內容。這可能適用於開放${licenseTerms.label}、已不受著作權保護的作品，或權利人直接同意提供的內容。此設定與所選${licenseTerms.label}都只是聲明；${verbatimTerms.rezics.value} 並未核實聲明人是否確實擁有相應權利。`,
+		metadataOnlyConfirmationCancel: "繼續僅收錄資料",
+		metadataOnlyConfirmationConfirm: "提供完整內容",
 		versionRole: "版本類型",
 		mainVersion: "主要版本",
 		variantVersion: "變體版本",
@@ -193,6 +199,12 @@ export default {
 	},
 	fields: {
 		isbn13: verbatimTerms.isbn13.value,
+		metadataOnly: "僅收錄資料",
+		metadataOnlyDescription: {
+			book: "保留作品資料、目錄、進度與討論，但不呈現平台託管的章節正文。既有正文不會被刪除。",
+			software: "保留軟體資料、版本、進度與討論，但不提供平台託管的安裝套件、二進位檔或原始碼封存檔。既有檔案不會被刪除。",
+			media: "保留媒體資料、目錄、進度與討論，但不呈現平台託管的媒體內容。既有內容不會被刪除。",
+		},
 		publicationDate: "出版日期",
 		pageCount: "頁數",
 		releaseStatus: "作品更新狀態",
@@ -625,7 +637,7 @@ export default {
 		useLanguage: "切換語言",
 		save: "儲存章節",
 		communityUnitContentPolicyTitle: "公共作品不提供章節正文編輯",
-		communityUnitContentPolicyDescription: `這本書由社群共同維護。你仍可整理內容結構或加入既有且可閱讀的${postTerms.label}，但此編輯器不提供${postTerms.label}正文編輯。`,
+		communityUnitContentPolicyDescription: `這本書由社群共同維護。你仍可整理內容結構或加入既有${postTerms.label}，但此編輯器不提供${postTerms.label}正文編輯。`,
 		wordCount: insert("{{count}} 個詞", { count: Number }),
 		characterCount: insert("{{count}} 字", { count: Number }),
 	},

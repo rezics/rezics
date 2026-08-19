@@ -46,10 +46,22 @@ describe("Unit update values", () => {
 			),
 		).toEqual({
 			releaseStatus: "ongoing",
+			metadataOnly: undefined,
 			isbn13: null,
 			publicationDate: undefined,
 			pageCount: undefined,
 			wordCount: 120_000,
+		});
+	});
+
+	it("maps the Book metadata-only presentation policy independently", () => {
+		expect(toBookUpdateValues(update({ details: { metadataOnly: true } }))).toEqual({
+			releaseStatus: undefined,
+			metadataOnly: true,
+			isbn13: undefined,
+			publicationDate: undefined,
+			pageCount: undefined,
+			wordCount: undefined,
 		});
 	});
 
@@ -72,7 +84,7 @@ describe("Unit update values", () => {
 			toSoftwareUpdateValues(
 				update({ unit: { releasedOn: null }, details: { versionLabel: "1.0.0" } }),
 			),
-		).toEqual({ releaseDate: null, versionLabel: "1.0.0" });
+		).toEqual({ metadataOnly: undefined, releaseDate: null, versionLabel: "1.0.0" });
 		expect(
 			toMediaUpdateValues(
 				update({
@@ -81,6 +93,7 @@ describe("Unit update values", () => {
 			),
 		).toEqual({
 			releaseStatus: "completed",
+			metadataOnly: undefined,
 			releaseDate: undefined,
 			kind: "animation",
 			runtimeMinutes: undefined,

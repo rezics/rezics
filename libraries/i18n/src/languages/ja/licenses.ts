@@ -23,6 +23,7 @@ const options = {
 		label: `${verbatimTerms.cc.value} 表示 4.0 国際`,
 	},
 	"cc0-1.0": { label: `${verbatimTerms.cc.value} 0 1.0 ユニバーサル` },
+	"pdm-1.0": { label: `${verbatimTerms.cc.value} ${verbatimTerms.pdm.value} 1.0 ユニバーサル` },
 	"rezics-unit-content-license-v1": {
 		label: verbatimTerms.rezicsUnitContentLicenseV1.value,
 	},
@@ -33,9 +34,9 @@ export default {
 	exclusiveSelectionHint: `「無断複写・転載を禁ず」を新たに選ぶと、今回新たに選んだ他の${licenseTerms.label}はいったん外れます。すでに保存されている組み合わせはそのまま残ります。`,
 	residualRightsNotice: `「無断複写・転載を禁ず」は、同時に示された他の${jaTerminology.license.forms.label}が明示的に与えていない残りの権利だけを対象にします。それらの${jaTerminology.license.forms.label}を覆したり取り消したりはしません。`,
 	viewTerms: `${licenseTerms.inline} 利用規約を見る`,
+	declarationNotice: `これらの選択は申告を記録するだけです。法的効力は申告者に必要な権限があるかどうかに左右され、${verbatimTerms.rezics.value} はその権限を確認しません。`,
 	options,
 	affirmativeAcknowledgement: {
 		confirmationLabel: `${verbatimTerms.rezicsUnitContentLicenseV1.value}を読み、同意したうえで、このコンテンツについてこの${jaTerminology.license.forms.label}を付与する権限があることを確認します。`,
-		profileOwnedOnlyNotice: `公共作品は ${verbatimTerms.rezics.value} にコンテンツ${jaTerminology.license.forms.label}を付与せず、作品の索引情報のみを収録するために使用します。`,
 	},
 } satisfies typeof import("../zh-Hant/licenses").default;

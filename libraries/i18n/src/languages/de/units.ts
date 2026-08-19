@@ -35,8 +35,8 @@ export default {
 		publicWorkHelpTitle: "Was ist ein Gemeinschaftswerk?",
 		publicWorkHelpOwnership:
 			"Gemeinschaftswerke gehören der Community und werden gemeinsam gepflegt. Durch das Erstellen erhältst du weder Eigentum noch zusätzliche Rechte; alle angemeldeten Personen bearbeiten sie mit denselben gemeinsamen Berechtigungen.",
-		publicWorkHelpIndexing:
-			"Gemeinschaftswerke dienen in der Regel dazu, durchsuchbare Verzeichniseinträge für bestehende Werke anzulegen, deren Urheberrecht du nicht besitzt.",
+		publicWorkHelpScope:
+			"Wähle dies, wenn die Community statt eines einzelnen Profils das Werk pflegen soll. Die Eigentumsform bestimmt nicht, ob Kapiteltexte angezeigt werden.",
 		publicWorkHelpAlternative:
 			"Wenn du das Urheberrecht besitzt oder ein von dir verwaltetes Werk für ausgewählte Personen zur Mitarbeit öffnen möchtest, wähle „Eigenes Werk“ und vergib nach dem Erstellen die passenden Bearbeitungsrechte.",
 		entryOwnershipLabel: "Eigentumsform des Eintrags",
@@ -57,6 +57,11 @@ export default {
 		creditRequestConfirmationDescription: `Einige ausgewählte ${entityTerms.plural} müssen zustimmen, bevor ihre Mitwirkung angezeigt werden kann. Bestätige, um das Werk zu erstellen und die Einladungen zu senden.`,
 		creditRequestConfirmationCancel: "Abbrechen",
 		creditRequestConfirmationConfirm: "Erstellen und Einladungen senden",
+		metadataOnlyConfirmationTitle: "Vollständigen Inhalt bereitstellen?",
+		metadataOnlyConfirmationDescription:
+			`Wenn „Nur ${metadataTerms.label}“ deaktiviert wird, darf ${verbatimTerms.rezics.value} den vollständigen Inhalt des Werks darstellen. Das kann bei einer offenen ${licenseTerms.label}, bei Gemeinfreiheit oder mit direkter Erlaubnis angemessen sein. Diese Einstellung und ausgewählte ${licenseTerms.label} sind lediglich Erklärungen; ${verbatimTerms.rezics.value} hat die erforderliche Berechtigung der erklärenden Person nicht geprüft.`,
+		metadataOnlyConfirmationCancel: `Nur ${metadataTerms.label} behalten`,
+		metadataOnlyConfirmationConfirm: "Vollständigen Inhalt bereitstellen",
 		versionRole: "Versionsart",
 		mainVersion: "Hauptversion",
 		variantVersion: "Variantenversion",
@@ -212,6 +217,13 @@ export default {
 	},
 	fields: {
 		isbn13: verbatimTerms.isbn13.value,
+		metadataOnly: `Nur ${metadataTerms.label}`,
+		metadataOnlyDescription: {
+			book: "Werkdaten, Inhaltsverzeichnis, Fortschritt und Diskussionen bleiben erhalten; gehostete Kapiteltexte werden jedoch nicht dargestellt. Vorhandene Texte werden nicht gelöscht.",
+			software:
+				"Softwaredaten, Versionen, Fortschritt und Diskussionen bleiben erhalten; gehostete Pakete, Binärdateien und Quellarchive werden jedoch nicht bereitgestellt. Vorhandene Dateien werden nicht gelöscht.",
+			media: "Mediendaten, Inhalte, Fortschritt und Diskussionen bleiben erhalten; gehostete Medieninhalte werden jedoch nicht dargestellt. Vorhandene Inhalte werden nicht gelöscht.",
+		},
 		publicationDate: "Erscheinungsdatum",
 		pageCount: "Seitenzahl",
 		releaseStatus: "Veröffentlichungsstatus des Werks",
@@ -679,7 +691,7 @@ export default {
 		save: "Kapitel speichern",
 		communityUnitContentPolicyTitle:
 			"Gemeinschaftswerke bieten hier keine Bearbeitung des Kapiteltexts",
-		communityUnitContentPolicyDescription: `Dieses Buch wird gemeinschaftlich gepflegt. Du kannst seine Inhaltsstruktur ordnen oder einen vorhandenen lesbaren ${postTerms.inline} anhängen; dieser Editor bietet jedoch keinen Editor für den ${postTerms.inline}-Text.`,
+		communityUnitContentPolicyDescription: `Dieses Buch wird gemeinschaftlich gepflegt. Du kannst seine Inhaltsstruktur ordnen oder einen vorhandenen ${postTerms.inline} anhängen; dieser Editor bietet jedoch keinen Editor für den ${postTerms.inline}-Text.`,
 		wordCount: insert("{{count}} Wörter", { count: Number }),
 		characterCount: insert("{{count}} Zeichen", { count: Number }),
 	},

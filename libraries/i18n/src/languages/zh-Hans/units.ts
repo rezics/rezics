@@ -33,7 +33,8 @@ export default {
 		publicWorkHelpTitle: "什么是公共作品？",
 		publicWorkHelpOwnership:
 			"公共作品由社区拥有并共同维护。创建后，你不会因为是创建者而获得所有者身份或额外权限；所有已登录用户都能按照公共作品的共同权限编辑。",
-		publicWorkHelpIndexing: "公共作品通常用于收录你不持有版权的现有作品，创建可搜索的索引资料。",
+		publicWorkHelpScope:
+			"当作品应由社区而非单一个人资料维护时，请选择此项。拥有方式不决定是否显示章节正文。",
 		publicWorkHelpAlternative:
 			"如果你持有版权，或想创建由你管理、再向特定对象开放协作的作品，请选择“自有作品”，创建后在权限设置中授予相应的编辑权限。",
 		entryOwnershipLabel: "条目所有方式",
@@ -53,6 +54,11 @@ export default {
 		creditRequestConfirmationDescription: `部分所选${entityTerms.plural}需要取得同意后才能显示署名。确认后将创建此作品并发送署名邀请。`,
 		creditRequestConfirmationCancel: "取消",
 		creditRequestConfirmationConfirm: "创建并发送邀请",
+		metadataOnlyConfirmationTitle: "确定提供完整内容？",
+		metadataOnlyConfirmationDescription:
+			`关闭“仅收录资料”后，${verbatimTerms.rezics.value} 可以展示作品的完整内容。这可能适用于开放${licenseTerms.label}、已不受著作权保护的作品，或权利人直接授权的内容。此设置与所选${licenseTerms.label}都只是声明；${verbatimTerms.rezics.value} 并未核验声明人是否确实拥有相应权利。`,
+		metadataOnlyConfirmationCancel: "继续仅收录资料",
+		metadataOnlyConfirmationConfirm: "提供完整内容",
 		versionRole: "版本类型",
 		mainVersion: "主要版本",
 		variantVersion: "变体版本",
@@ -190,6 +196,12 @@ export default {
 	},
 	fields: {
 		isbn13: verbatimTerms.isbn13.value,
+		metadataOnly: "仅收录资料",
+		metadataOnlyDescription: {
+			book: "保留作品资料、目录、进度与讨论，但不展示平台托管的章节正文。已有正文不会被删除。",
+			software: "保留软件资料、版本、进度与讨论，但不提供平台托管的安装包、二进制文件或源码归档。已有文件不会被删除。",
+			media: "保留媒体资料、目录、进度与讨论，但不展示平台托管的媒体内容。已有内容不会被删除。",
+		},
 		publicationDate: "出版日期",
 		pageCount: "页数",
 		releaseStatus: "作品更新状态",
@@ -617,7 +629,7 @@ export default {
 		useLanguage: "切换语言",
 		save: "保存章节",
 		communityUnitContentPolicyTitle: "公共作品不提供章节正文编辑",
-		communityUnitContentPolicyDescription: `这本书由社群共同维护。你仍可整理内容结构或加入现有且可阅读的${postTerms.label}，但此编辑器不提供${postTerms.label}正文编辑。`,
+		communityUnitContentPolicyDescription: `这本书由社群共同维护。你仍可整理内容结构或加入现有${postTerms.label}，但此编辑器不提供${postTerms.label}正文编辑。`,
 		wordCount: insert("{{count}} 个词", { count: Number }),
 		characterCount: insert("{{count}} 字", { count: Number }),
 	},

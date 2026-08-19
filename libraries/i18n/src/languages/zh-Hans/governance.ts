@@ -216,6 +216,7 @@ export default {
 		permissions: {
 			"unit.read": "查看",
 			"unit.update": "编辑",
+			"unit.metadata-only.update": "变更完整内容可用性",
 			"unit.status.update": "变更状态",
 			"unit.history.restore": "还原历史",
 			"unit.access.manage": "管理权限",

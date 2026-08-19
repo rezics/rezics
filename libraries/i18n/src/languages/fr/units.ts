@@ -35,8 +35,8 @@ export default {
 		publicWorkHelpTitle: "Qu’est-ce qu’une œuvre communautaire ?",
 		publicWorkHelpOwnership:
 			"Les œuvres communautaires appartiennent à la communauté et sont entretenues collectivement. Leur création ne vous confère ni propriété ni droits supplémentaires ; toutes les personnes connectées les modifient avec les mêmes autorisations partagées.",
-		publicWorkHelpIndexing:
-			"Elles servent généralement à créer des informations d’index consultables pour des œuvres existantes dont vous ne détenez pas les droits d’auteur.",
+		publicWorkHelpScope:
+			"Choisissez cette option lorsque l’œuvre doit être gérée par la communauté plutôt que par un seul profil. Le mode de propriété ne détermine pas l’affichage du corps des chapitres.",
 		publicWorkHelpAlternative:
 			"Si vous détenez les droits d’auteur ou souhaitez administrer une œuvre tout en l’ouvrant à certaines personnes, choisissez « Œuvre personnelle », puis accordez les droits de modification appropriés après sa création.",
 		entryOwnershipLabel: "Propriété de l’entrée",
@@ -57,6 +57,11 @@ export default {
 		creditRequestConfirmationDescription: `Certaines ${entityTerms.plural} sélectionnées doivent donner leur accord avant l’affichage de leurs crédits. Confirmez pour créer l’œuvre et envoyer les invitations.`,
 		creditRequestConfirmationCancel: "Annuler",
 		creditRequestConfirmationConfirm: "Créer et envoyer les invitations",
+		metadataOnlyConfirmationTitle: "Fournir le contenu intégral ?",
+		metadataOnlyConfirmationDescription:
+			`Désactiver « ${metadataTerms.label} uniquement » permet à ${verbatimTerms.rezics.value} de présenter le contenu intégral de l’œuvre. Cela peut convenir avec une ${licenseTerms.inline} ouverte, si l’œuvre n’est plus protégée par le droit d’auteur ou avec une autorisation directe. Ce réglage et les ${licenseTerms.label} sélectionnées ne sont que des déclarations ; ${verbatimTerms.rezics.value} n’a pas vérifié que leur auteur détenait les droits nécessaires.`,
+		metadataOnlyConfirmationCancel: `Conserver uniquement les ${metadataTerms.inline}`,
+		metadataOnlyConfirmationConfirm: "Fournir le contenu intégral",
 		versionRole: "Type de version",
 		mainVersion: "Version principale",
 		variantVersion: "Variante",
@@ -211,6 +216,13 @@ export default {
 	},
 	fields: {
 		isbn13: verbatimTerms.isbn13.value,
+		metadataOnly: `${metadataTerms.label} uniquement`,
+		metadataOnlyDescription: {
+			book: "Conserve les informations sur l’œuvre, le sommaire, la progression et les discussions, mais ne présente pas les chapitres hébergés. Les textes existants ne sont pas supprimés.",
+			software:
+				"Conserve les informations sur le logiciel, les versions, la progression et les discussions, mais ne fournit pas les paquets, binaires ou archives de code source hébergés. Les fichiers existants ne sont pas supprimés.",
+			media: "Conserve les informations, le sommaire, la progression et les discussions, mais ne présente pas le contenu multimédia hébergé. Le contenu existant n’est pas supprimé.",
+		},
 		publicationDate: "Date d’édition",
 		pageCount: "Nombre de pages",
 		releaseStatus: "Statut de parution de l’œuvre",
@@ -672,7 +684,7 @@ export default {
 		save: "Enregistrer le chapitre",
 		communityUnitContentPolicyTitle:
 			"Les œuvres communautaires ne permettent pas de modifier ici le corps du chapitre",
-		communityUnitContentPolicyDescription: `Ce livre est géré par la communauté. Vous pouvez organiser sa structure du contenu ou joindre un ${postTerms.inline} existant et lisible, mais cet éditeur ne propose pas d’éditeur pour son corps.`,
+		communityUnitContentPolicyDescription: `Ce livre est géré par la communauté. Vous pouvez organiser sa structure du contenu ou joindre un ${postTerms.inline} existant, mais cet éditeur ne propose pas d’éditeur pour son corps.`,
 		wordCount: insert("{{count}} mots", { count: Number }),
 		characterCount: insert("{{count}} caractères", { count: Number }),
 	},

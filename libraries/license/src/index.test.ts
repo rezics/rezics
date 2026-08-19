@@ -23,6 +23,7 @@ describe("License registry", () => {
 			"cc-by-nc-4.0",
 			"cc-by-4.0",
 			"cc0-1.0",
+			"pdm-1.0",
 			"rezics-unit-content-license-v1",
 		]);
 		for (const id of LicenseIds) {
@@ -31,7 +32,6 @@ describe("License registry", () => {
 			expect(LicenseLegalFormValues).toContain(definition.legalForm);
 			expect(typeof definition.ownerMayEndOffering).toBe("boolean");
 			expect(typeof definition.requiresAffirmativeAcknowledgement).toBe("boolean");
-			expect(typeof definition.profileOwnedOnly).toBe("boolean");
 			expect(definition.applicableUnitKinds).toBeNull();
 		}
 	});
@@ -67,9 +67,11 @@ describe("License registry", () => {
 			expect(Object.hasOwn(LicenseRegistry[id], "singletonFamily")).toBe(false);
 		}
 		expect(LicenseRegistry[RecommendedLicenseId].requiresAffirmativeAcknowledgement).toBe(true);
-		expect(LicenseRegistry[RecommendedLicenseId].profileOwnedOnly).toBe(true);
 		expect(LicenseRegistry["cc-by-4.0"].requiresAffirmativeAcknowledgement).toBe(false);
-		expect(LicenseRegistry["cc-by-4.0"].profileOwnedOnly).toBe(false);
+		expect(LicenseRegistry["pdm-1.0"].legalForm).toBe("public-domain-mark");
+		expect(LicenseRegistry["pdm-1.0"].termsUrl).toBe(
+			"https://creativecommons.org/publicdomain/mark/1.0/",
+		);
 	});
 
 	it("exposes recognition statuses without selection semantics", () => {

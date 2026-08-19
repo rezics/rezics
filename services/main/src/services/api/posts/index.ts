@@ -579,7 +579,7 @@ export default new Elysia()
 					const chapterLocalization =
 						row.postKind === "chapter"
 							? selectReaderChapterLocalization(localizationRows, {
-									canReadDraftContent: canEdit,
+									bodyPresentation: canEdit ? "preview" : "published",
 									localizationLanguages,
 								})
 							: undefined;

@@ -28,7 +28,7 @@ Nearly every saved JSON document needs an identifiable base object rather than a
 }
 ```
 
-`_type` selects the parsing and rendering protocol; `_key` preserves block identity during revisions, paragraph comments, and structural operations; document versions set clear migration boundaries. Format validation is followed by reference, permission, and visibility checks: an identifier's shape alone never proves its target is readable.
+`_type` selects the parsing and rendering protocol; `_key` preserves block identity during revisions, paragraph comments, and structural operations; document versions set clear migration boundaries. Format validation is followed by reference, permission, and visibility checks: an identifier's shape alone never proves that a caller may access its target.
 
 ## Implemented block families
 

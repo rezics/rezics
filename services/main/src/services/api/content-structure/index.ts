@@ -1,12 +1,10 @@
 import { DevelopmentPreviewCapability } from "@rezics/access";
 import { StatusCodes } from "http-status-codes";
 import type { ContentLanguage } from "@rezics/i18n";
-import { and, asc, eq, isNull, sql } from "drizzle-orm";
+import { and, asc, eq, isNull } from "drizzle-orm";
 import Elysia from "elysia";
 
-import { isContentStructureNodeReadable } from "../../authorization/content-structure/policy";
 import { canAccessContentStructureApi } from "../../authorization/content-structure/release";
-import { getUnitPermissionCondition, getUnitReadCondition } from "../../authorization/unit/query";
 import session, { resolveIdentity } from "../../auth/session";
 import type { Authorization } from "../../authorization";
 import { PlatformCapabilityRequired } from "../../authorization/errors";
@@ -214,7 +212,6 @@ async function ensureReleasedContentStructureApi(
 async function readBookContentStructure(
 	tx: DatabaseTransaction,
 	bookId: string,
-	viewerProfileId: string | undefined,
 	localizationLanguages: readonly ContentLanguage[] = [],
 ) {
 	const [owner] = await tx
@@ -244,17 +241,10 @@ async function readBookContentStructure(
 			postKind: post.kind,
 			language: unitLocalization.language,
 			title: unitLocalization.title,
-			content: unitLocalization.content,
 			position: contentStructureNode.position,
 			wordCount: unitLocalizationContentMetric.wordCount,
 			characterCount: unitLocalizationContentMetric.characterCount,
 			bookWordCount: book.wordCount,
-			contentStatus: unitLocalization.contentStatus,
-			canReadDraftContent: viewerProfileId
-				? sql<boolean>`${getUnitPermissionCondition(viewerProfileId, "unit.update", [
-						"localizations",
-					])}`
-				: sql<boolean>`false`,
 		})
 		.from(contentStructureNode)
 		.innerJoin(unit, eq(unit.id, contentStructureNode.contentUnitId))
@@ -284,7 +274,8 @@ async function readBookContentStructure(
 			and(
 				eq(contentStructureNode.structureId, structure.id),
 				isNull(contentStructureNode.deletedAt),
-				getUnitReadCondition(viewerProfileId),
+				isNull(unit.deletedAt),
+				eq(unit.moderationStatus, "approved"),
 			),
 		)
 		.orderBy(asc(contentStructureNode.position), asc(contentStructureNode.id));
@@ -296,18 +287,6 @@ async function readBookContentStructure(
 			const contentKind = resolveBookContentKind(row.unitKind, row.postKind);
 			if (!contentKind)
 				throw new Error(`Invalid Book content node ${row.id} unit ${row.contentUnitId}`);
-			const hasReadableContent =
-				contentKind === "chapter" &&
-				row.content !== null &&
-				(row.canReadDraftContent || row.contentStatus === "published");
-			if (
-				contentKind === "chapter" &&
-				hasReadableContent &&
-				(row.wordCount === null || row.characterCount === null)
-			)
-				throw new Error(
-					`Missing content metric for chapter ${row.contentUnitId} localization ${row.language}`,
-				);
 			return {
 				id: row.id,
 				parentId: row.parentId,
@@ -320,8 +299,8 @@ async function readBookContentStructure(
 					contentKind === "book"
 						? { wordCount: row.bookWordCount ?? 0, characterCount: 0 }
 						: {
-								wordCount: hasReadableContent ? (row.wordCount ?? 0) : 0,
-								characterCount: hasReadableContent ? (row.characterCount ?? 0) : 0,
+								wordCount: row.wordCount ?? 0,
+								characterCount: row.characterCount ?? 0,
 							},
 			};
 		}),
@@ -331,7 +310,6 @@ async function readBookContentStructure(
 async function readMediaContentStructure(
 	tx: DatabaseTransaction,
 	mediaId: string,
-	canEditMedia: boolean,
 	localizationLanguages: readonly ContentLanguage[] = [],
 ) {
 	const [structure] = await tx
@@ -362,8 +340,6 @@ async function readMediaContentStructure(
 			labelId: label.id,
 			mediaId: media.id,
 			mediaRuntimeMinutes: media.runtimeMinutes,
-			unitStatus: unit.status,
-			unitVisibility: unit.visibility,
 		})
 		.from(contentStructureNode)
 		.innerJoin(unit, eq(unit.id, contentStructureNode.contentUnitId))
@@ -388,6 +364,8 @@ async function readMediaContentStructure(
 			and(
 				eq(contentStructureNode.structureId, structure.id),
 				isNull(contentStructureNode.deletedAt),
+				isNull(unit.deletedAt),
+				eq(unit.moderationStatus, "approved"),
 			),
 		)
 		.orderBy(asc(contentStructureNode.position), asc(contentStructureNode.id));
@@ -398,41 +376,37 @@ async function readMediaContentStructure(
 		state: "initialized" as const,
 		structureId: structure.id,
 		latestRevisionId,
-		items: rows
-			.filter((row) =>
-				isContentStructureNodeReadable(canEditMedia, row.unitStatus, row.unitVisibility),
-			)
-			.map((row) => {
-				const contentKind =
-					row.unitKind === "video" && row.videoId
-						? ("video" as const)
-						: row.unitKind === "audio" && row.audioId
-							? ("audio" as const)
-							: row.unitKind === "label" && row.labelId
-								? ("label" as const)
-								: row.unitKind === "media" && row.mediaId
-									? ("media" as const)
-									: null;
-				if (!contentKind)
-					throw new Error(`Invalid Media content node ${row.id} unit ${row.contentUnitId}`);
-				return {
-					id: row.id,
-					parentId: row.parentId,
-					contentUnitId: row.contentUnitId,
-					contentKind,
-					language: row.language,
-					title: row.title ?? "",
-					position: row.position,
-					durationSeconds:
-						contentKind === "video"
-							? row.videoDurationSeconds
-							: contentKind === "audio"
-								? row.audioDurationSeconds
-								: contentKind === "media" && row.mediaRuntimeMinutes !== null
-									? row.mediaRuntimeMinutes * 60
-									: null,
-				};
-			}),
+		items: rows.map((row) => {
+			const contentKind =
+				row.unitKind === "video" && row.videoId
+					? ("video" as const)
+					: row.unitKind === "audio" && row.audioId
+						? ("audio" as const)
+						: row.unitKind === "label" && row.labelId
+							? ("label" as const)
+							: row.unitKind === "media" && row.mediaId
+								? ("media" as const)
+								: null;
+			if (!contentKind)
+				throw new Error(`Invalid Media content node ${row.id} unit ${row.contentUnitId}`);
+			return {
+				id: row.id,
+				parentId: row.parentId,
+				contentUnitId: row.contentUnitId,
+				contentKind,
+				language: row.language,
+				title: row.title ?? "",
+				position: row.position,
+				durationSeconds:
+					contentKind === "video"
+						? row.videoDurationSeconds
+						: contentKind === "audio"
+							? row.audioDurationSeconds
+							: contentKind === "media" && row.mediaRuntimeMinutes !== null
+								? row.mediaRuntimeMinutes * 60
+								: null,
+			};
+		}),
 	};
 }
 
@@ -848,16 +822,10 @@ export default new Elysia()
 	.get(
 		"/units/book/:unitId/content-structure/nodes",
 		async ({ params, query, request }) => {
-			const identity = await resolveIdentity(request, "unit:read");
-			const { authorization } = identity;
+			const { authorization } = await resolveIdentity(request, "unit:read");
 			if (!(await authorization.unit.canRead(params.unitId))) throw new BookNotFound();
 			return database.transaction((tx) =>
-				readBookContentStructure(
-					tx,
-					params.unitId,
-					identity.profile?.unitId,
-					query.localizationLanguages,
-				),
+				readBookContentStructure(tx, params.unitId, query.localizationLanguages),
 			);
 		},
 		{
@@ -892,7 +860,7 @@ export default new Elysia()
 					contribution: body.revisionContext?.contribution,
 					nodes: body.nodes,
 				});
-				const saved = await readBookContentStructure(tx, params.unitId, profile.unitId);
+				const saved = await readBookContentStructure(tx, params.unitId);
 				if (!saved.structureId || !saved.latestRevisionId) throw new BookNotFound();
 				return {
 					ownershipMode: saved.ownershipMode,
@@ -933,9 +901,8 @@ export default new Elysia()
 		async ({ params, query, request }) => {
 			const { authorization } = await resolveIdentity(request, "unit:read");
 			if (!(await authorization.unit.canRead(params.unitId))) throw new MediaNotFound();
-			const canEditMedia = await authorization.unit.canUpdate(params.unitId);
 			return database.transaction((tx) =>
-				readMediaContentStructure(tx, params.unitId, canEditMedia, query.localizationLanguages),
+				readMediaContentStructure(tx, params.unitId, query.localizationLanguages),
 			);
 		},
 		{
@@ -970,7 +937,7 @@ export default new Elysia()
 					contribution: body.revisionContext?.contribution,
 					nodes: body.nodes,
 				});
-				const saved = await readMediaContentStructure(tx, params.unitId, true);
+				const saved = await readMediaContentStructure(tx, params.unitId);
 				if (saved.state !== "initialized")
 					throw new Error("Saved Media Content Structure is uninitialized");
 				return {
@@ -1005,7 +972,6 @@ export default new Elysia()
 		async ({ params, query, request }) => {
 			const identity = await resolveIdentity(request, "unit:read");
 			const { authorization } = identity;
-			const viewerProfileId = identity.profile?.unitId;
 			if (!(await authorization.unit.canRead(params.bookId))) throw new ChapterNotFound();
 			const [node] = await database
 				.select({
@@ -1014,9 +980,11 @@ export default new Elysia()
 					bookId: contentStructureNode.ownerUnitId,
 					chapterId: contentStructureNode.contentUnitId,
 					position: contentStructureNode.position,
+					metadataOnly: book.metadataOnly,
 				})
 				.from(contentStructureNode)
 				.innerJoin(contentStructure, eq(contentStructure.id, contentStructureNode.structureId))
+				.innerJoin(book, eq(book.id, contentStructure.ownerUnitId))
 				.innerJoin(unit, eq(unit.id, contentStructureNode.contentUnitId))
 				.innerJoin(post, eq(post.id, contentStructureNode.contentUnitId))
 				.where(
@@ -1027,12 +995,17 @@ export default new Elysia()
 						eq(post.kind, "chapter"),
 						isNull(contentStructure.deletedAt),
 						isNull(contentStructureNode.deletedAt),
-						getUnitReadCondition(viewerProfileId),
+						isNull(unit.deletedAt),
+						eq(unit.moderationStatus, "approved"),
 					),
 				)
 				.limit(1);
 			if (!node?.chapterId) throw new ChapterNotFound();
-			const canEditChapter = await authorization.unit.canUpdate(node.chapterId, ["localizations"]);
+			const bodyPresentation = node.metadataOnly
+				? ("omit" as const)
+				: (await authorization.unit.canUpdate(node.chapterId, ["localizations"]))
+					? ("preview" as const)
+					: ("published" as const);
 			const localizationLanguages = query.localizationLanguages ?? [];
 			const [localizations, targetingLock] = await Promise.all([
 				database
@@ -1052,13 +1025,15 @@ export default new Elysia()
 				}),
 			]);
 			const selected = selectReaderChapterLocalization(localizations, {
-				canReadDraftContent: canEditChapter,
+				bodyPresentation,
 				exactLanguage: query.language,
 				localizationLanguages,
 			});
 			if (!selected) throw new ChapterLanguageNotFound();
 			const canPresentContent =
-				selected.content !== null && (canEditChapter || selected.contentStatus === "published");
+				bodyPresentation !== "omit" &&
+				selected.content !== null &&
+				(bodyPresentation === "preview" || selected.contentStatus === "published");
 			const contentMetrics = canPresentContent
 				? await getUnitLocalizationContentMetric(database, node.chapterId, selected.language)
 				: null;
@@ -1086,7 +1061,7 @@ export default new Elysia()
 						isNull(contentStructure.deletedAt),
 						isNull(contentStructureNode.deletedAt),
 						isNull(unit.deletedAt),
-						getUnitReadCondition(viewerProfileId),
+						eq(unit.moderationStatus, "approved"),
 					),
 				)
 				.orderBy(asc(contentStructureNode.position), asc(contentStructureNode.id));

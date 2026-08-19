@@ -270,6 +270,7 @@ const UnitDetailsResponse = t.Union([
 		{
 			type: t.Literal("book"),
 			releaseStatus: WorkReleaseStatus,
+			metadataOnly: t.Boolean(),
 			isbn13: NullableText,
 			publicationDate: t.Nullable(t.String({ format: "date" })),
 			pageCount: t.Nullable(t.Integer({ minimum: 1 })),
@@ -282,6 +283,7 @@ const UnitDetailsResponse = t.Union([
 	t.Object(
 		{
 			type: t.Literal("software"),
+			metadataOnly: t.Boolean(),
 			releaseDate: t.Nullable(t.String({ format: "date" })),
 			versionLabel: NullableText,
 		},
@@ -291,6 +293,7 @@ const UnitDetailsResponse = t.Union([
 		{
 			type: t.Literal("media"),
 			releaseStatus: WorkReleaseStatus,
+			metadataOnly: t.Boolean(),
 			releaseDate: t.Nullable(t.String({ format: "date" })),
 			kind: t.String(),
 			runtimeMinutes: t.Nullable(t.Integer({ minimum: 1 })),
@@ -445,6 +448,7 @@ export const UnitDetailResponse = t.Object({
 	ownershipClaim: t.Nullable(PendingUnitOwnershipClaimSummaryResponse),
 	capabilities: t.Object({
 		canEdit: t.Boolean(),
+		canUpdateMetadataOnly: t.Boolean(),
 		canManageAccess: t.Boolean(),
 		canManageAssociations: t.Boolean(),
 		canCurateTags: t.Boolean(),

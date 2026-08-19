@@ -6,14 +6,16 @@ Owner: Units
 
 ## Decision
 
-Every registered license or rights statement is an independent prior
-authorization. `unit_license_grant` records that someone declared a legal
-instrument for a Unit at a point in time. That fact is not a finding that the
-declarant had authority, and it is not a structural role such as publication
-or platform.
+Every registered license, dedication, or rights statement is an independent
+declaration. `unit_license_grant` records that someone selected a legal or
+rights instrument for a Unit at a point in time. That fact is not a finding
+that the declarant had authority, is not itself proof of legal effect, and is
+not a structural role such as publication or platform.
 
-Creative Commons licenses, CC0, All rights reserved, and the REZICS Unit
-content license may exist together. All rights reserved is a residual-rights
+Creative Commons licenses, CC0, the Public Domain Mark, All rights reserved,
+and the REZICS Unit content license may exist together. The Public Domain Mark
+records a claim that the work is already in the public domain; it is not a
+license or a dedication. All rights reserved is a residual-rights
 statement: when it sits next to a Creative Commons license, the Creative
 Commons terms still grant the rights they name, and All rights reserved covers
 only what those other instruments did not grant. Each REZICS License version
@@ -47,10 +49,11 @@ duplicate an invalidated row.
   A single declaration imported from the retired `unit.license` column
   has a null grantor and uses the cutover time because the old column retained
   neither the original actor nor the original selection time.
-- `profileOwnedOnly` and `applicableUnitKinds` are service checks read
-  directly from `LicenseRegistry` while the Unit row is locked. Every current
-  License applies to every Unit kind. Registry IDs and policy are validated by
-  the API/service layer and are not mirrored in database `CHECK` constraints.
+- `applicableUnitKinds` is a service check read directly from
+  `LicenseRegistry` while the Unit row is locked. Every current instrument
+  applies to every Unit kind, regardless of Unit ownership mode. Registry IDs
+  and policy are validated by the API/service layer and are not mirrored in
+  database `CHECK` constraints.
 - Every grant, offering-end, invalidation, and restore path locks the Unit
   row first.
 

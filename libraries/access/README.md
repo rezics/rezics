@@ -36,6 +36,7 @@ Examples:
 
 ```text
 unit.update
+unit.metadata-only.update
 unit.status.update
 realm.units.create
 realm.post.replies.create
@@ -56,6 +57,9 @@ Split two permission keys only when the product needs to grant the operations in
 
 - Editing a Unit and changing its lifecycle status are independently grantable, so status changes
   require both `unit.update` and `unit.status.update`.
+- Editing ordinary Unit metadata and changing whether hosted work content may be presented are
+  independently grantable, so an actual `metadataOnly` change requires both `unit.update` and
+  `unit.metadata-only.update`. Repeating the stored value is not a change.
 - Creating a direct Realm Unit and creating a Reply are independently grantable, so they use
   `realm.units.create` and `realm.post.replies.create`.
 - Updating Realm rules appends an immutable revision, but the logical operation remains

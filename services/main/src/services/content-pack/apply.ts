@@ -149,10 +149,9 @@ async function importUnit(
 			grantedByProfileId: ImportOwnerProfileId,
 			licenseIds: [license],
 			unitKind: object.unit.kind as UnitKind,
-			ownershipMode: object.import.ownershipMode,
 		});
 
-	await insertDetail(tx, pack, object, unitId);
+	await insertDetail(tx, pack, object, unitId, object.import.ownershipMode === "community_owned");
 	await tx.insert(unitLocalization).values(
 		object.localizations.map((localization, index) => {
 			if (!isContentLanguage(localization.language))
@@ -192,6 +191,7 @@ async function insertDetail(
 	pack: LoadedPack,
 	object: PackObject,
 	unitId: string,
+	metadataOnly: boolean,
 ): Promise<void> {
 	switch (object.unit.kind) {
 		case "entity":
@@ -216,6 +216,7 @@ async function insertDetail(
 			if (!object.book) throw new ContentPackInvalid(`${object.sourceKey} missing book`);
 			await tx.insert(book).values({
 				id: unitId,
+				metadataOnly,
 				releaseStatus: object.book.releaseStatus,
 				isbn13: object.book.isbn13 ?? null,
 				publicationDate: object.book.publicationDate ?? null,
@@ -226,6 +227,7 @@ async function insertDetail(
 			if (!object.media) throw new ContentPackInvalid(`${object.sourceKey} missing media`);
 			await tx.insert(media).values({
 				id: unitId,
+				metadataOnly,
 				kind: object.media.kind,
 				releaseStatus: object.media.releaseStatus,
 				releaseDate: object.media.releaseDate ?? null,

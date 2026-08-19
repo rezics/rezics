@@ -6,6 +6,7 @@ export const LicenseIds = [
 	"cc-by-nc-4.0",
 	"cc-by-4.0",
 	"cc0-1.0",
+	"pdm-1.0",
 	"rezics-unit-content-license-v1",
 ] as const;
 
@@ -17,6 +18,7 @@ export const RecommendedLicenseId = "rezics-unit-content-license-v1" satisfies L
 export const LicenseLegalFormValues = [
 	"license",
 	"public-domain-dedication",
+	"public-domain-mark",
 	"rights-reservation",
 ] as const;
 export type LicenseLegalForm = (typeof LicenseLegalFormValues)[number];
@@ -31,7 +33,6 @@ export type LicenseDefinition<Id extends LicenseId = LicenseId> = {
 	readonly spdxId: string | null;
 	readonly ownerMayEndOffering: boolean;
 	readonly requiresAffirmativeAcknowledgement: boolean;
-	readonly profileOwnedOnly: boolean;
 	/** `null` means the License applies to every Unit kind. */
 	readonly applicableUnitKinds: readonly string[] | null;
 };
@@ -50,7 +51,6 @@ export const LicenseRegistry = {
 		spdxId: "CC-BY-NC-SA-4.0",
 		ownerMayEndOffering: true,
 		requiresAffirmativeAcknowledgement: false,
-		profileOwnedOnly: false,
 		applicableUnitKinds: null,
 	},
 	"cc-by-sa-4.0": {
@@ -60,7 +60,6 @@ export const LicenseRegistry = {
 		spdxId: "CC-BY-SA-4.0",
 		ownerMayEndOffering: true,
 		requiresAffirmativeAcknowledgement: false,
-		profileOwnedOnly: false,
 		applicableUnitKinds: null,
 	},
 	"cc-by-sa-3.0": {
@@ -70,7 +69,6 @@ export const LicenseRegistry = {
 		spdxId: "CC-BY-SA-3.0",
 		ownerMayEndOffering: true,
 		requiresAffirmativeAcknowledgement: false,
-		profileOwnedOnly: false,
 		applicableUnitKinds: null,
 	},
 	"all-rights-reserved": {
@@ -80,7 +78,6 @@ export const LicenseRegistry = {
 		spdxId: null,
 		ownerMayEndOffering: true,
 		requiresAffirmativeAcknowledgement: false,
-		profileOwnedOnly: false,
 		applicableUnitKinds: null,
 	},
 	"cc-by-nc-4.0": {
@@ -90,7 +87,6 @@ export const LicenseRegistry = {
 		spdxId: "CC-BY-NC-4.0",
 		ownerMayEndOffering: true,
 		requiresAffirmativeAcknowledgement: false,
-		profileOwnedOnly: false,
 		applicableUnitKinds: null,
 	},
 	"cc-by-4.0": {
@@ -100,7 +96,6 @@ export const LicenseRegistry = {
 		spdxId: "CC-BY-4.0",
 		ownerMayEndOffering: true,
 		requiresAffirmativeAcknowledgement: false,
-		profileOwnedOnly: false,
 		applicableUnitKinds: null,
 	},
 	"cc0-1.0": {
@@ -110,7 +105,15 @@ export const LicenseRegistry = {
 		spdxId: "CC0-1.0",
 		ownerMayEndOffering: true,
 		requiresAffirmativeAcknowledgement: false,
-		profileOwnedOnly: false,
+		applicableUnitKinds: null,
+	},
+	"pdm-1.0": {
+		id: "pdm-1.0",
+		legalForm: "public-domain-mark",
+		termsUrl: "https://creativecommons.org/publicdomain/mark/1.0/",
+		spdxId: null,
+		ownerMayEndOffering: true,
+		requiresAffirmativeAcknowledgement: false,
 		applicableUnitKinds: null,
 	},
 	"rezics-unit-content-license-v1": {
@@ -120,7 +123,6 @@ export const LicenseRegistry = {
 		spdxId: null,
 		ownerMayEndOffering: true,
 		requiresAffirmativeAcknowledgement: true,
-		profileOwnedOnly: true,
 		applicableUnitKinds: null,
 	},
 } as const satisfies { readonly [Id in LicenseId]: LicenseDefinition<Id> };

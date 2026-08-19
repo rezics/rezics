@@ -1,5 +1,5 @@
 import { inArray, sql } from "drizzle-orm";
-import { check, date, index, integer, text, uuid } from "drizzle-orm/pg-core";
+import { boolean, check, date, index, integer, text, uuid } from "drizzle-orm/pg-core";
 
 import { pgTable } from "./base";
 import { createCreatedAtColumn, createUpdatedAtColumn } from "./columns";
@@ -13,6 +13,8 @@ export const media = pgTable(
 			.primaryKey()
 			.references(() => unit.id, { onDelete: "cascade" }),
 		releaseStatus: text({ enum: WorkReleaseStatusValues }).notNull(),
+		/** Describes that REZICS should expose metadata, but not hosted work content. */
+		metadataOnly: boolean("metadata_only").default(true).notNull(),
 		kind: text().notNull(),
 		releaseDate: date(),
 		runtimeMinutes: integer(),

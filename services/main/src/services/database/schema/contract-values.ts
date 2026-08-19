@@ -48,6 +48,9 @@ export const CommunityOwnedUnitKindValues = [
 ] as const;
 
 export const VariantCapableUnitKindValues = ["book", "software", "media"] as const;
+/** Unit kinds whose content-hosting choice is persisted as descriptive metadata. */
+export const MetadataOnlyUnitKindValues = ["book", "software", "media"] as const;
+export type MetadataOnlyUnitKind = (typeof MetadataOnlyUnitKindValues)[number];
 /** Unit kinds released for irreversible identity convergence in merge policy v1. */
 export const UnitMergeEligibleKindValues = ["book", "software", "media", "entity"] as const;
 export type UnitMergeEligibleKind = (typeof UnitMergeEligibleKindValues)[number];

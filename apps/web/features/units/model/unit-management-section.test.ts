@@ -4,6 +4,7 @@ import { canOpenUnitManagement, getUnitManagementSectionIds } from "./unit-manag
 
 const denied = {
 	canEdit: false,
+	canUpdateMetadataOnly: false,
 	canManageAccess: false,
 	canManageAssociations: false,
 	canCurateTags: false,

@@ -395,6 +395,7 @@ describe("API response values", () => {
 		const bookDetails = {
 			type: "book" as const,
 			releaseStatus: "ongoing" as const,
+			metadataOnly: false,
 			isbn13: null,
 			publicationDate: null,
 			pageCount: null,
@@ -409,6 +410,16 @@ describe("API response values", () => {
 		expect(
 			UnitDetailResponse.properties.details.anyOf.some((schema) => "format" in schema.properties),
 		).toBe(false);
+	});
+
+	it("requires metadata-only state and its independent update capability", () => {
+		for (const type of ["book", "software", "media"] as const) {
+			const details = UnitDetailResponse.properties.details.anyOf.find(
+				(schema) => schema.properties.type.const === type,
+			);
+			expect(details?.required).toContain("metadataOnly");
+		}
+		expect(UnitDetailResponse.properties.capabilities.required).toContain("canUpdateMetadataOnly");
 	});
 
 	it("uses one vote-backed external-link contract with source presentation on every detail", () => {

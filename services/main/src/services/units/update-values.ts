@@ -23,6 +23,7 @@ export interface UpdateUnitInput {
 	};
 	readonly details?: {
 		readonly isbn13?: string | null;
+		readonly metadataOnly?: boolean;
 		readonly publicationDate?: string | null;
 		readonly pageCount?: number | null;
 		readonly wordCount?: number | null;
@@ -53,6 +54,7 @@ export function toBookUpdateValues(input: UpdateUnitInput) {
 	const releasedOn = input.unit?.releasedOn;
 	return whenAnyValueIsDefined({
 		releaseStatus: details.releaseStatus,
+		metadataOnly: details.metadataOnly,
 		isbn13: details.isbn13,
 		publicationDate: details.publicationDate === undefined ? releasedOn : details.publicationDate,
 		pageCount: details.pageCount,
@@ -63,6 +65,7 @@ export function toBookUpdateValues(input: UpdateUnitInput) {
 /** Maps only Software-owned fields supplied by a partial Unit update. @internal */
 export function toSoftwareUpdateValues(input: UpdateUnitInput) {
 	return whenAnyValueIsDefined({
+		metadataOnly: input.details?.metadataOnly,
 		releaseDate: input.unit?.releasedOn,
 		versionLabel: input.details?.versionLabel,
 	});
@@ -72,6 +75,7 @@ export function toSoftwareUpdateValues(input: UpdateUnitInput) {
 export function toMediaUpdateValues(input: UpdateUnitInput) {
 	return whenAnyValueIsDefined({
 		releaseStatus: input.details?.releaseStatus,
+		metadataOnly: input.details?.metadataOnly,
 		releaseDate: input.unit?.releasedOn,
 		kind: input.details?.kind,
 		runtimeMinutes: input.details?.runtimeMinutes,

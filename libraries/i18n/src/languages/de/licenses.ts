@@ -23,6 +23,7 @@ const options = {
 		label: `${verbatimTerms.cc.value} Namensnennung 4.0 International`,
 	},
 	"cc0-1.0": { label: `${verbatimTerms.cc.value}0 1.0 Universell` },
+	"pdm-1.0": { label: `${verbatimTerms.cc.value} ${verbatimTerms.pdm.value} 1.0 Universell` },
 	"rezics-unit-content-license-v1": {
 		label: verbatimTerms.rezicsUnitContentLicenseV1.value,
 	},
@@ -35,9 +36,9 @@ export default {
 	residualRightsNotice:
 		"Alle Rechte vorbehalten erfasst nur Rechte, die die anderen aufgeführten Lizenzen nicht ausdrücklich einräumen. Es überschreibt oder widerruft diese Lizenzen nicht.",
 	viewTerms: `Bedingungen der ${licenseTerms.inline} anzeigen`,
+	declarationNotice: `Diese Auswahl erfasst lediglich Erklärungen. Ihre Rechtswirkung hängt davon ab, ob die erklärende Person dazu berechtigt ist; ${verbatimTerms.rezics.value} prüft diese Berechtigung nicht.`,
 	options,
 	affirmativeAcknowledgement: {
 		confirmationLabel: `Ich habe die ${verbatimTerms.rezicsUnitContentLicenseV1.value} gelesen und stimme ihr zu. Ich bestätige außerdem, dass ich berechtigt bin, diese ${deTerminology.license.forms.label} für diesen Inhalt zu erteilen.`,
-		profileOwnedOnlyNotice: `Gemeinschaftswerke erteilen ${verbatimTerms.rezics.value} keine Inhaltslizenz und sollten nur Verzeichnisangaben zum Werk enthalten.`,
 	},
 } satisfies typeof import("../zh-Hant/licenses").default;

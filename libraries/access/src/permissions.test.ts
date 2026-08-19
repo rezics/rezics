@@ -62,6 +62,15 @@ describe("permission schema", () => {
 		]);
 	});
 
+	it("keeps metadata-only updates supplemental and out of broad authenticated grants", () => {
+		expect(expandUnitPermissions(["unit.metadata-only.update"])).toEqual([
+			"unit.read",
+			"unit.metadata-only.update",
+		]);
+		expect(isUnitPermissionDelegable("unit.metadata-only.update")).toBe(true);
+		expect(isUnitPermissionGrantableToAuthenticated("unit.metadata-only.update")).toBe(false);
+	});
+
 	it("keeps direct Realm Unit creation independent from Reply creation", () => {
 		expect(expandUnitPermissions(["realm.units.create"])).toEqual([
 			"unit.read",

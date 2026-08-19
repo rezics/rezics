@@ -57,6 +57,7 @@ export const realmAccessSubjectRelation = pgEnum(
 const unitPermissionStorageValues = toEnumValues([
 	"unit.read",
 	"unit.update",
+	"unit.metadata-only.update",
 	"unit.status.update",
 	"unit.history.restore",
 	"unit.access.manage",

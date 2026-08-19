@@ -23,6 +23,7 @@ const options = {
 		label: `${verbatimTerms.cc.value} 저작자표시 4.0 국제`,
 	},
 	"cc0-1.0": { label: `${verbatimTerms.cc.value} 0 1.0 범용` },
+	"pdm-1.0": { label: `${verbatimTerms.cc.value} ${verbatimTerms.pdm.value} 1.0 범용` },
 	"rezics-unit-content-license-v1": {
 		label: verbatimTerms.rezicsUnitContentLicenseV1.value,
 	},
@@ -33,9 +34,9 @@ export default {
 	exclusiveSelectionHint: `판권 소유를 새로 선택하면 이번에 새로 고른 다른 공개 ${koTerminology.license.forms.label}는 일단 해제됩니다. 이미 저장된 조합은 그대로 유지됩니다.`,
 	residualRightsNotice: `판권 소유는 함께 나열된 다른 ${koTerminology.license.forms.label}가 명시적으로 부여하지 않은 나머지 권리에만 적용됩니다. 그 ${koTerminology.license.forms.label}를 덮거나 취소하지 않습니다.`,
 	viewTerms: `${licenseTerms.inline} 약관 보기`,
+	declarationNotice: `이 선택은 선언만 기록합니다. 법적 효력은 선언자에게 필요한 권한이 있는지에 따라 달라지며, ${verbatimTerms.rezics.value}는 그 권한을 확인하지 않습니다.`,
 	options,
 	affirmativeAcknowledgement: {
 		confirmationLabel: `${verbatimTerms.rezicsUnitContentLicenseV1.value}을(를) 읽고 동의했으며, 이 콘텐츠에 이 ${koTerminology.license.forms.label}를 부여할 권한이 있음을 확인합니다.`,
-		profileOwnedOnlyNotice: `공공 작품은 ${verbatimTerms.rezics.value}에 콘텐츠 ${koTerminology.license.forms.label}를 부여하지 않으며 작품 색인 정보만 수록하는 데 사용해야 합니다.`,
 	},
 } satisfies typeof import("../zh-Hant/licenses").default;

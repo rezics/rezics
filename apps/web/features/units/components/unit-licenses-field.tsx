@@ -3,7 +3,6 @@
 import {
 	LicenseIds,
 	LicenseRegistry,
-	RecommendedLicenseId,
 	ResidualRightsLicenseId,
 	type LicenseId,
 } from "@rezics/license";
@@ -14,12 +13,10 @@ import { useTranslation } from "@/i18n/client";
 import { reconcileLicenseSelection } from "../model/unit-licenses";
 
 export function UnitLicensesField({
-	allowProfileOwnedOnly = true,
 	defaultValue = [],
 	name = "licenses",
 	label,
 }: {
-	readonly allowProfileOwnedOnly?: boolean;
 	readonly defaultValue?: readonly LicenseId[];
 	readonly name?: string;
 	readonly label?: string;
@@ -39,7 +36,6 @@ export function UnitLicensesField({
 		setAcknowledged(false);
 		setSelected(
 			reconcileLicenseSelection({
-				allowProfileOwnedOnly,
 				initial: defaultValue,
 				next,
 				previous: selected,
@@ -54,14 +50,10 @@ export function UnitLicensesField({
 				<CheckboxGroup className="gap-3" name={name} onValueChange={onValueChange} value={selected}>
 					{LicenseIds.map((id) => {
 						const definition = LicenseRegistry[id];
-						const disabled = definition.profileOwnedOnly && !allowProfileOwnedOnly;
 						return (
 							<div className="grid gap-1" key={id}>
-								{disabled && selected.includes(id) ? (
-									<input name={name} type="hidden" value={id} />
-								) : null}
 								<label className="flex items-start gap-2 text-sm">
-									<Checkbox disabled={disabled} value={id} />
+									<Checkbox value={id} />
 									<span>{t.licenses.options[id].label}</span>
 								</label>
 								{definition.termsUrl ? (
@@ -74,11 +66,6 @@ export function UnitLicensesField({
 										{t.licenses.viewTerms}
 									</a>
 								) : null}
-								{disabled && id === RecommendedLicenseId ? (
-									<FieldDescription className="ml-6">
-										{t.licenses.affirmativeAcknowledgement.profileOwnedOnlyNotice}
-									</FieldDescription>
-								) : null}
 							</div>
 						);
 					})}
@@ -86,6 +73,7 @@ export function UnitLicensesField({
 				<FieldDescription>
 					{residualWithOthers ? t.licenses.residualRightsNotice : t.licenses.exclusiveSelectionHint}
 				</FieldDescription>
+				<FieldDescription>{t.licenses.declarationNotice}</FieldDescription>
 			</Field>
 			{requiresAcknowledgement ? (
 				<Field className="w-auto" orientation="horizontal" required>

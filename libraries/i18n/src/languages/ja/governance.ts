@@ -217,6 +217,7 @@ export default {
 		permissions: {
 			"unit.read": "読み取り",
 			"unit.update": "編集",
+			"unit.metadata-only.update": "完全なコンテンツの提供可否を変更",
 			"unit.status.update": "状態の変更",
 			"unit.history.restore": "履歴の復元",
 			"unit.access.manage": "アクセス管理",

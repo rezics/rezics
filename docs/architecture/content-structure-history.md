@@ -134,7 +134,7 @@ participate. Marks, links, accessibility alt text, and unknown custom blocks do 
 use the shared pure measuring function for immediate editor feedback, but the server never accepts
 client-supplied counts.
 
-Hosted Book totals sum currently readable, published chapter occurrences by content language.
+Hosted Book totals sum current Chapter occurrences by content language.
 They remain explicitly separate from `book.word_count`, which is authoritative editorial
 metadata and may describe a Book whose text is not hosted by REZICS.
 When a Book Unit is itself one occurrence in `book.contents`, that occurrence uses the referenced
@@ -157,14 +157,14 @@ the human-facing address does not invalidate the reference.
 | ----------------- | ----- | ---------------------------------- | ------------------------ | ------------------------------- |
 | `book.contents`   | Book  | Book, chapter Post, or Label Unit  | content                  | explicit Chapter completion     |
 | `media.contents`  | Media | Media, Video, Audio, or Label Unit | content                  | explicit Video/Audio completion |
-| `post.contents`   | Post  | readable Unit                      | content                  | none                            |
+| `post.contents`   | Post  | Unit                               | content                  | none                            |
 | `realm.taxonomy`  | Realm | Label, Tag, or wiki Post           | content                  | none                            |
 | `wiki.navigation` | Realm | Label or mounted Wiki Post         | mounted Wiki Post, group | none                            |
-| `zone.navigation` | Zone  | readable Unit                      | Unit, HTTPS URL, group   | none                            |
+| `zone.navigation` | Zone  | Unit                               | Unit, HTTPS URL, group   | none                            |
 | `page-structure`  | Zone  | owned `zone_page` Unit             | content                  | none                            |
 
 Within `book.contents`, a Label is always a structural display entry. Book outlines ignore any
-body that its localization may have in another context. A chapter is a readable entry whose body
+body that its localization may have in another context. A Chapter is a structural entry whose body
 is optional: its title and previous/next navigation remain available without Portable Text. A Book
 occurrence is one ordinary leaf: selecting it opens that Book's canonical Unit detail and does not
 project its nodes into the source Reader. `media.contents` applies the same rule to Media
@@ -184,17 +184,24 @@ the graph does not imply ownership, containment, edition, or anthology semantics
 
 A Chapter is an independently authorized Post Unit. `GET /api/v1/posts/:chapterId` resolves its
 own Unit lifecycle, visibility, moderation, grants, restrictions, localization, attribution, and
-reply thread. It does not require a readable parent Book. Draft localization content is returned
-only to a caller who can update that Chapter's localizations; other callers may still receive a
-readable title-only Chapter when the Chapter Unit itself is readable.
+reply thread. It does not require access to a parent Book. Draft localization content is returned
+only to a caller who can update that Chapter's localizations; standalone Chapter access remains
+governed by the Chapter Unit itself.
 
 A Reader page is a contextual occurrence, not a second Chapter identity. It is addressed by
 `GET /api/v1/books/:bookId/content-nodes/:nodeId` and
-`/units/book/:bookId/read/:nodeId`. The request independently proves all three facts:
+`/units/book/:bookId/read/:nodeId`. The request proves these contextual facts:
 
-1. the Book is readable;
-2. the active node belongs to that Book's `book.contents` structure and targets a Chapter; and
-3. the Chapter Unit is readable.
+1. the caller may access the Book; and
+2. the active node belongs to that Book's `book.contents` structure, targets a non-deleted,
+   moderation-approved Chapter, and remains part of the current structure.
+
+Inclusion in an accessible Content Structure publishes that occurrence's structural projection in
+that container. The Reader does not recalculate the target Chapter's standalone Unit authorization.
+It presents a published Chapter body, or a draft preview to a Chapter editor, unless the Book has
+`metadata_only = true`; in that mode it still presents the occurrence title, navigation, progress,
+and discussion context while omitting the body. This setting never deletes Chapter content and does
+not affect the standalone Chapter endpoint.
 
 Previous and next destinations are content node IDs because the same Chapter may occur more than
 once or in more than one Book. Book outlines and Reader links use node IDs; feeds, search results,
@@ -228,12 +235,13 @@ IDs; there is no safe redirect when a Chapter has multiple occurrences.
 Capacity planning treats `content_structure_node` as a 500-million-row relation and also evaluates
 3 billion rows. With a planning distribution of 100 active nodes per Book, those corpus sizes
 represent roughly 5 million and 30 million Book structures. Exact Reader resolution starts from the
-node primary key and verifies Book ownership and Chapter authorization without a corpus scan.
+node primary key and verifies Book ownership, structure membership, and global target safety without
+a corpus scan.
 Book-scoped outlines and depth-first neighbor calculation read one structure through its leading
 structure index; their work is `O(nodes_in_book)`, not `O(corpus)`. Track the per-Book node-count
-distribution, response bytes, query latency, sort memory, and authorization-subquery time. A Book
-whose outline approaches 10,000 nodes is the operational cutover signal for a paginated/materialized
-depth-first projection; do not raise request memory or statement timeouts to accommodate that skew.
+distribution, response bytes, query latency, and sort memory. Large Book outlines remain one
+structure-scoped response; any future pagination or materialized traversal is a separate network
+contract decision based on measured payload and latency, not part of the authorization model.
 
 Book-to-Book and Media-to-Media writes perform no direct or indirect cycle query. Target validation
 is one Unit lookup plus the ordinary indexed structure write, so its database work does not grow

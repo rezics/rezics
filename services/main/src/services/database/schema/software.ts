@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { check, date, index, text, unique, uuid } from "drizzle-orm/pg-core";
+import { boolean, check, date, index, text, unique, uuid } from "drizzle-orm/pg-core";
 
 import { pgTable } from "./base";
 import { unitExternalLink } from "./unit";
@@ -17,6 +17,8 @@ export const software = pgTable("software", {
 	id: uuid()
 		.primaryKey()
 		.references(() => unit.id, { onDelete: "cascade" }),
+	/** Describes that REZICS should expose metadata, but not hosted work content. */
+	metadataOnly: boolean("metadata_only").default(true).notNull(),
 	releaseDate: date(),
 	versionLabel: text(),
 	createdAt: createCreatedAtColumn(),

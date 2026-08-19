@@ -35,8 +35,8 @@ export default {
 		publicWorkHelpTitle: "公共作品とは？",
 		publicWorkHelpOwnership:
 			"公共作品はコミュニティが所有し、共同で管理します。作成しても所有者としての地位や追加権限は付与されず、ログイン中の全員が共通の権限で編集できます。",
-		publicWorkHelpIndexing:
-			"通常は、あなたが著作権を保有していない既存作品について、検索可能な索引情報を作成するために使用します。",
+		publicWorkHelpScope:
+			"単一のプロフィールではなくコミュニティが作品を管理する場合に選択します。所有形態は章本文の表示可否を決定しません。",
 		publicWorkHelpAlternative:
 			"著作権を保有している場合や、自分で管理しながら特定の相手との共同作業に開放したい場合は「所有作品」を選び、作成後に権限設定で適切な編集権限を付与してください。",
 		entryOwnershipLabel: "項目の所有形態",
@@ -57,6 +57,11 @@ export default {
 		creditRequestConfirmationDescription: `選択した一部の${entityTerms.plural}は、クレジットを表示する前に同意が必要です。確認すると作品を作成し、招待を送信します。`,
 		creditRequestConfirmationCancel: "キャンセル",
 		creditRequestConfirmationConfirm: "作成して招待を送信",
+		metadataOnlyConfirmationTitle: "完全なコンテンツを提供しますか？",
+		metadataOnlyConfirmationDescription:
+			`「${metadataTerms.label}のみ」をオフにすると、${verbatimTerms.rezics.value} で作品の完全なコンテンツを表示できるようになります。オープン${licenseTerms.label}、パブリックドメイン、または権利者からの直接の許諾がある場合に適しています。この設定と選択した${licenseTerms.label}は申告にすぎず、${verbatimTerms.rezics.value} は申告者が必要な権利を持つことを確認していません。`,
+		metadataOnlyConfirmationCancel: `${metadataTerms.label}のみを維持`,
+		metadataOnlyConfirmationConfirm: "完全なコンテンツを提供",
 		versionRole: "バージョン種別",
 		mainVersion: "メインバージョン",
 		variantVersion: "派生バージョン",
@@ -208,6 +213,13 @@ export default {
 	},
 	fields: {
 		isbn13: verbatimTerms.isbn13.value,
+		metadataOnly: `${metadataTerms.label}のみ`,
+		metadataOnlyDescription: {
+			book: "作品情報、目次、進捗、ディスカッションは保持しますが、ホストされている章本文は表示しません。既存の本文は削除されません。",
+			software:
+				"ソフトウェア情報、バージョン、進捗、ディスカッションは保持しますが、ホストされているパッケージ、バイナリ、ソースアーカイブは提供しません。既存のファイルは削除されません。",
+			media: "メディア情報、目次、進捗、ディスカッションは保持しますが、ホストされているメディアコンテンツは表示しません。既存のコンテンツは削除されません。",
+		},
 		publicationDate: "出版日",
 		pageCount: "ページ数",
 		releaseStatus: "作品の更新状況",
@@ -652,7 +664,7 @@ export default {
 		useLanguage: "言語を切り替える",
 		save: "章を保存する",
 		communityUnitContentPolicyTitle: "公共作品では章本文をここで編集できません",
-		communityUnitContentPolicyDescription: `この書籍はコミュニティによって管理されています。コンテンツ構造の整理や閲覧可能な既存${postTerms.label}の追加はできますが、このエディターには${postTerms.label}本文エディターがありません。`,
+		communityUnitContentPolicyDescription: `この書籍はコミュニティによって管理されています。コンテンツ構造の整理や既存${postTerms.label}の追加はできますが、このエディターには${postTerms.label}本文エディターがありません。`,
 		wordCount: insert("{{count}} 単語", { count: Number }),
 		characterCount: insert("{{count}} 文字", { count: Number }),
 	},

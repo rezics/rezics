@@ -97,6 +97,11 @@ export const verbatimTerms = {
 		category: "brand",
 		rationale: "Creative Commons brand initialism.",
 	},
+	pdm: {
+		value: "PDM",
+		category: "identifier",
+		rationale: "Canonical initialism for the Creative Commons Public Domain Mark.",
+	},
 	api: {
 		value: "API",
 		category: "protocol",

@@ -71,7 +71,7 @@ export function WorkOwnershipField({
 						</PopoverHeader>
 						<PopoverBody className="flex flex-col gap-3 text-sm leading-6">
 							<p>{creation.publicWorkHelpOwnership}</p>
-							<p>{creation.publicWorkHelpIndexing}</p>
+							<p>{creation.publicWorkHelpScope}</p>
 							<p>{creation.publicWorkHelpAlternative}</p>
 						</PopoverBody>
 					</PopoverContent>

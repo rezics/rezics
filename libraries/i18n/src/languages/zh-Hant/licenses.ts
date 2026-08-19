@@ -21,6 +21,7 @@ const options = {
 	},
 	"cc-by-4.0": { label: `創用 ${verbatimTerms.cc.value} 姓名標示 4.0 國際` },
 	"cc0-1.0": { label: `${verbatimTerms.cc.value}0 1.0 通用` },
+	"pdm-1.0": { label: `${verbatimTerms.cc.value} ${verbatimTerms.pdm.value} 1.0 通用` },
 	"rezics-unit-content-license-v1": {
 		label: verbatimTerms.rezicsUnitContentLicenseV1.value,
 	},
@@ -31,9 +32,9 @@ export default {
 	exclusiveSelectionHint: `新選「保留所有權利」時，會先清掉這次新勾的其他${licenseTerms.label}；後端已存在的組合會原樣保留。`,
 	residualRightsNotice: `「保留所有權利」只覆蓋其他${zhHantTerminology.license.forms.label}未明確授出的剩餘權利，不會覆蓋或撤銷同時列出的${zhHantTerminology.license.forms.label}。`,
 	viewTerms: `查看${licenseTerms.inline}`,
+	declarationNotice: `這些選項只記錄聲明。其法律效力取決於聲明人是否擁有必要權利；${verbatimTerms.rezics.value} 不會核實該項權利。`,
 	options,
 	affirmativeAcknowledgement: {
 		confirmationLabel: `我已閱讀並同意 ${verbatimTerms.rezicsUnitContentLicenseV1.value}，並確認我有權就這項內容授予此${zhHantTerminology.license.forms.label}。`,
-		profileOwnedOnlyNotice: `公共作品不會向 ${verbatimTerms.rezics.value} 授予內容${zhHantTerminology.license.forms.label}，應只用來收錄作品的索引資料。`,
 	},
 };

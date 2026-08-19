@@ -16,6 +16,7 @@ import { type ContentLanguage, ContentLanguageValues, isContentLanguage } from "
 
 import type { DatabaseTransaction } from "../database";
 import type { Authorization } from "../authorization";
+import { ensureMetadataOnlyChangeAllowed } from "./metadata-only";
 import { isFirstUnitLocalization } from "./localization";
 import {
 	audio,
@@ -211,13 +212,13 @@ const profileStateSchema = schemaFactory
 	.createSelectSchema(profile)
 	.omit({ id: true, authUserId: true, joinedAt: true, createdAt: true, updatedAt: true });
 const bookStateSchema = schemaFactory
-	.createSelectSchema(book)
+	.createSelectSchema(book, { metadataOnly: z.boolean().default(true) })
 	.omit({ id: true, createdAt: true, updatedAt: true });
 const softwareStateSchema = schemaFactory
-	.createSelectSchema(software)
+	.createSelectSchema(software, { metadataOnly: z.boolean().default(true) })
 	.omit({ id: true, createdAt: true, updatedAt: true });
 const mediaStateSchema = schemaFactory
-	.createSelectSchema(media)
+	.createSelectSchema(media, { metadataOnly: z.boolean().default(true) })
 	.omit({ id: true, createdAt: true, updatedAt: true });
 const videoStateSchema = schemaFactory
 	.createSelectSchema(video)
@@ -677,6 +678,30 @@ export async function restoreUnitSnapshot(
 		.where(eq(unit.id, unitId))
 		.limit(1);
 	if (!current || current.kind !== snapshot.kind) throw new Error("Unit snapshot kind mismatch");
+	if (snapshot.kind === "book" && snapshot.extension)
+		await ensureMetadataOnlyChangeAllowed(
+			tx,
+			authorization,
+			"book",
+			unitId,
+			bookStateSchema.parse(snapshot.extension).metadataOnly,
+		);
+	if (snapshot.kind === "software" && snapshot.extension)
+		await ensureMetadataOnlyChangeAllowed(
+			tx,
+			authorization,
+			"software",
+			unitId,
+			softwareStateSchema.parse(snapshot.extension).metadataOnly,
+		);
+	if (snapshot.kind === "media" && snapshot.extension)
+		await ensureMetadataOnlyChangeAllowed(
+			tx,
+			authorization,
+			"media",
+			unitId,
+			mediaStateSchema.parse(snapshot.extension).metadataOnly,
+		);
 	const currentCredits = await tx
 		.select({ creditedUnitId: creditAttribution.creditedUnitId })
 		.from(creditAttribution)

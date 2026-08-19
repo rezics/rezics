@@ -55,6 +55,7 @@ export type EntityAssociationPermission = (typeof EntityAssociationPermissionVal
 export const UnitPermissionValues = [
 	"unit.read",
 	"unit.update",
+	"unit.metadata-only.update",
 	"unit.status.update",
 	"unit.history.restore",
 	"unit.access.manage",
@@ -497,6 +498,14 @@ export const UnitPermissionDefinitions = {
 		resource: "unit",
 		action: "update",
 	},
+	"unit.metadata-only.update": {
+		kind: "domain",
+		target: "unit",
+		resource: "unit.metadata-only",
+		action: "update",
+		rationale:
+			"Changing whether REZICS may expose hosted work content is independently grantable from ordinary metadata editing.",
+	},
 	"unit.status.update": {
 		kind: "standard",
 		target: "unit",
@@ -688,6 +697,7 @@ export const UnitPermissionImplications: Partial<
 	Record<UnitPermission, readonly UnitPermission[]>
 > = {
 	"unit.update": ["unit.read"],
+	"unit.metadata-only.update": ["unit.read"],
 	"unit.status.update": ["unit.read"],
 	"unit.history.restore": ["unit.read", "unit.update"],
 	"unit.access.manage": ["unit.read"],

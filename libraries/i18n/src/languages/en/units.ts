@@ -35,8 +35,8 @@ export default {
 		publicWorkHelpTitle: "What is a public work?",
 		publicWorkHelpOwnership:
 			"Public works are owned and maintained by the community. Creating one does not give you ownership or additional access; every signed-in user edits with the same shared permissions.",
-		publicWorkHelpIndexing:
-			"Public works are generally used to create searchable index information for existing works whose copyright you do not hold.",
+		publicWorkHelpScope:
+			"Choose this when the community, rather than one Profile, should maintain the work. Ownership does not determine whether Chapter bodies are shown.",
 		publicWorkHelpAlternative:
 			"If you hold the copyright, or want to govern a work while opening collaboration to selected people, choose “Owned work” and grant the appropriate edit access in permissions after creation.",
 		entryOwnershipLabel: "Entry ownership",
@@ -57,6 +57,11 @@ export default {
 		creditRequestConfirmationDescription: `Some selected ${entityTerms.plural} require consent before their credits can appear. Confirm to create this work and send the invitations.`,
 		creditRequestConfirmationCancel: "Cancel",
 		creditRequestConfirmationConfirm: "Create and send invitations",
+		metadataOnlyConfirmationTitle: "Provide the full content?",
+		metadataOnlyConfirmationDescription:
+			`Turning off “${metadataTerms.label} only” means ${verbatimTerms.rezics.value} may present the work’s full content. This may be appropriate under an open ${licenseTerms.inline}, in the public domain, or with direct authorization. This setting and any selected ${licenseTerms.label} are declarations only; ${verbatimTerms.rezics.value} has not verified that the person making them has the required rights.`,
+		metadataOnlyConfirmationCancel: `Keep ${metadataTerms.inline} only`,
+		metadataOnlyConfirmationConfirm: "Provide full content",
 		versionRole: "Version type",
 		mainVersion: "Main version",
 		variantVersion: "Variant version",
@@ -207,6 +212,13 @@ export default {
 	},
 	fields: {
 		isbn13: verbatimTerms.isbn13.value,
+		metadataOnly: `${metadataTerms.label} only`,
+		metadataOnlyDescription: {
+			book: "Keep the work details, contents, progress, and discussions, but do not present hosted Chapter bodies. Existing bodies are not deleted.",
+			software:
+				"Keep the software details, versions, progress, and discussions, but do not present hosted packages, binaries, or source archives. Existing files are not deleted.",
+			media: "Keep the media details, contents, progress, and discussions, but do not present hosted media content. Existing content is not deleted.",
+		},
 		publicationDate: "Publication date",
 		pageCount: "Page count",
 		releaseStatus: "Work release status",
@@ -657,7 +669,7 @@ export default {
 		useLanguage: "Switch language",
 		save: "Save chapter",
 		communityUnitContentPolicyTitle: "Public works do not provide chapter body editing",
-		communityUnitContentPolicyDescription: `This Book is maintained by the community. You can organize its content structure or attach an existing readable ${postTerms.inline}, but this editor does not provide a ${postTerms.inline} body editor.`,
+		communityUnitContentPolicyDescription: `This Book is maintained by the community. You can organize its content structure or attach an existing ${postTerms.inline}, but this editor does not provide a ${postTerms.inline} body editor.`,
 		wordCount: insert("{{count}} words", { count: Number }),
 		characterCount: insert("{{count}} characters", { count: Number }),
 	},

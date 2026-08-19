@@ -217,6 +217,7 @@ export default {
 		permissions: {
 			"unit.read": "읽기",
 			"unit.update": "편집",
+			"unit.metadata-only.update": "전체 콘텐츠 제공 여부 변경",
 			"unit.status.update": "상태 변경",
 			"unit.history.restore": "기록 복원",
 			"unit.access.manage": "접근 관리",

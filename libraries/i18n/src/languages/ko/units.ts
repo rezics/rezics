@@ -35,8 +35,8 @@ export default {
 		publicWorkHelpTitle: "공공 작품이란?",
 		publicWorkHelpOwnership:
 			"공공 작품은 커뮤니티가 소유하고 공동으로 관리합니다. 작품을 만들어도 소유자 지위나 추가 권한을 얻지 않으며, 로그인한 모든 사용자가 같은 공통 권한으로 편집할 수 있습니다.",
-		publicWorkHelpIndexing:
-			"일반적으로 저작권을 보유하지 않은 기존 작품의 검색 가능한 색인 정보를 만들 때 사용합니다.",
+		publicWorkHelpScope:
+			"한 프로필이 아닌 커뮤니티가 작품을 관리해야 할 때 선택하세요. 소유 방식은 장 본문 표시 여부를 결정하지 않습니다.",
 		publicWorkHelpAlternative:
 			"저작권을 보유하고 있거나 직접 관리하면서 특정 대상에게 협업을 허용하려면 ‘소유 작품’을 선택한 뒤 생성 후 권한 설정에서 적절한 편집 권한을 부여하세요.",
 		entryOwnershipLabel: "항목 소유 방식",
@@ -57,6 +57,11 @@ export default {
 		creditRequestConfirmationDescription: `선택한 일부 ${entityTerms.plural}은 크레딧을 표시하기 전에 동의가 필요합니다. 확인하면 작품을 만들고 초대를 보냅니다.`,
 		creditRequestConfirmationCancel: "취소",
 		creditRequestConfirmationConfirm: "만들고 초대 보내기",
+		metadataOnlyConfirmationTitle: "전체 콘텐츠를 제공할까요?",
+		metadataOnlyConfirmationDescription:
+			`‘${metadataTerms.label}만’을 끄면 ${verbatimTerms.rezics.value}에서 작품의 전체 콘텐츠를 제공할 수 있습니다. 공개 ${licenseTerms.label}, 퍼블릭 도메인 또는 권리자의 직접 허가가 있는 경우에 적합할 수 있습니다. 이 설정과 선택한 ${licenseTerms.label}는 선언일 뿐이며, ${verbatimTerms.rezics.value}는 선언자에게 필요한 권리가 있는지 확인하지 않았습니다.`,
+		metadataOnlyConfirmationCancel: `${metadataTerms.label}만 유지`,
+		metadataOnlyConfirmationConfirm: "전체 콘텐츠 제공",
 		versionRole: "버전 유형",
 		mainVersion: "메인 버전",
 		variantVersion: "변형 버전",
@@ -206,6 +211,13 @@ export default {
 	},
 	fields: {
 		isbn13: verbatimTerms.isbn13.value,
+		metadataOnly: `${metadataTerms.label}만`,
+		metadataOnlyDescription: {
+			book: "작품 정보, 목차, 진행 기록과 토론은 유지하지만 호스팅된 장 본문은 표시하지 않습니다. 기존 본문은 삭제되지 않습니다.",
+			software:
+				"소프트웨어 정보, 버전, 진행 기록과 토론은 유지하지만 호스팅된 패키지, 바이너리 또는 소스 아카이브는 제공하지 않습니다. 기존 파일은 삭제되지 않습니다.",
+			media: "미디어 정보, 목차, 진행 기록과 토론은 유지하지만 호스팅된 미디어 콘텐츠는 표시하지 않습니다. 기존 콘텐츠는 삭제되지 않습니다.",
+		},
 		publicationDate: "출판 날짜",
 		pageCount: "페이지 수",
 		releaseStatus: "작품 업데이트 상태",
@@ -648,7 +660,7 @@ export default {
 		useLanguage: "언어 전환",
 		save: "챕터 저장",
 		communityUnitContentPolicyTitle: "공공 작품에서는 챕터 본문을 여기서 편집할 수 없습니다",
-		communityUnitContentPolicyDescription: `이 책은 커뮤니티에서 관리합니다. 콘텐츠 구조를 정리하거나 읽을 수 있는 기존 ${postTerms.label}를 추가할 수 있지만, 이 편집기에서는 ${postTerms.label} 본문 편집기를 제공하지 않습니다.`,
+		communityUnitContentPolicyDescription: `이 책은 커뮤니티에서 관리합니다. 콘텐츠 구조를 정리하거나 기존 ${postTerms.label}를 추가할 수 있지만, 이 편집기에서는 ${postTerms.label} 본문 편집기를 제공하지 않습니다.`,
 		wordCount: insert("{{count}} 단어", { count: Number }),
 		characterCount: insert("{{count}} 글자", { count: Number }),
 	},

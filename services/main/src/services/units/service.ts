@@ -121,6 +121,11 @@ import { getPendingUnitOwnershipClaim } from "../ownership-claims/service";
 import { unitScope } from "../authorization/unit/scope";
 import { getUnitExternalLinkPreviewWithSources } from "./external-links";
 import type { RevisionContributionInput } from "./revision-contribution";
+import {
+	ensureMetadataOnlyChangeAllowed,
+	isMetadataOnlyUnitKind,
+	resolveCreatedMetadataOnly,
+} from "./metadata-only";
 
 export type VariantUnitKind = "book" | "software" | "media";
 export type WorkUnitKind = VariantUnitKind | "series";
@@ -165,9 +170,17 @@ export type CreateUnitInput = CreateUnitAccessInput & {
 	aiDisclosure?: "unknown" | "none" | "ai_assisted" | "ai_originated" | "machine_generated";
 	licenses?: readonly LicenseId[];
 	details:
-		| { readonly type: "book"; readonly releaseStatus: WorkReleaseStatus }
-		| { readonly type: "software" }
-		| { readonly type: "media"; readonly releaseStatus: WorkReleaseStatus };
+		| {
+				readonly type: "book";
+				readonly releaseStatus: WorkReleaseStatus;
+				readonly metadataOnly?: boolean;
+		  }
+		| { readonly type: "software"; readonly metadataOnly?: boolean }
+		| {
+				readonly type: "media";
+				readonly releaseStatus: WorkReleaseStatus;
+				readonly metadataOnly?: boolean;
+		  };
 };
 
 export function presentImageAsset(assetId: string | null, role?: "avatar" | "banner" | "cover") {
@@ -251,19 +264,28 @@ export async function createUnit(
 		});
 		let createdStructure: typeof contentStructure.$inferSelect | undefined;
 		if (input.details.type === "book") {
-			await tx.insert(book).values({ id: created.id, releaseStatus: input.details.releaseStatus });
+			await tx.insert(book).values({
+				id: created.id,
+				releaseStatus: input.details.releaseStatus,
+				metadataOnly: resolveCreatedMetadataOnly(input.ownershipMode, input.details.metadataOnly),
+			});
 			[createdStructure] = await tx
 				.insert(contentStructure)
 				.values({ ownerUnitId: created.id, kind: "book.contents" })
 				.returning();
 			if (!createdStructure) throw new Error("Book Content Structure insertion returned no row");
 		}
-		if (input.details.type === "software") await tx.insert(software).values({ id: created.id });
+		if (input.details.type === "software")
+			await tx.insert(software).values({
+				id: created.id,
+				metadataOnly: resolveCreatedMetadataOnly(input.ownershipMode, input.details.metadataOnly),
+			});
 		if (input.details.type === "media") {
 			await tx.insert(media).values({
 				id: created.id,
 				kind: "other",
 				releaseStatus: input.details.releaseStatus,
+				metadataOnly: resolveCreatedMetadataOnly(input.ownershipMode, input.details.metadataOnly),
 			});
 			[createdStructure] = await tx
 				.insert(contentStructure)
@@ -285,7 +307,6 @@ export async function createUnit(
 				grantedByProfileId: ownerId,
 				licenseIds: input.licenses,
 				unitKind: kind,
-				ownershipMode: input.ownershipMode,
 			});
 		await applyInitialTags(tx, {
 			unitId: created.id,
@@ -374,6 +395,7 @@ async function getUnitDetails(
 		return {
 			type: "book",
 			releaseStatus: details.releaseStatus,
+			metadataOnly: details.metadataOnly,
 			isbn13: details.isbn13,
 			publicationDate: details.publicationDate,
 			pageCount: details.pageCount,
@@ -390,6 +412,7 @@ async function getUnitDetails(
 		if (!details) throw new UnitNotFound(kind);
 		return {
 			type: "software",
+			metadataOnly: details.metadataOnly,
 			releaseDate: details.releaseDate,
 			versionLabel: details.versionLabel,
 		};
@@ -400,6 +423,7 @@ async function getUnitDetails(
 		return {
 			type: "media",
 			releaseStatus: details.releaseStatus,
+			metadataOnly: details.metadataOnly,
 			releaseDate: details.releaseDate,
 			kind: details.kind,
 			runtimeMinutes: details.runtimeMinutes,
@@ -529,6 +553,7 @@ export async function getUnit(
 		canCurateAliases,
 		canCurateExternalLinks,
 		canManageRealmPublications,
+		metadataOnlyUpdateDecision,
 		accessDecision,
 		associationDecision,
 		hasDevelopmentPreviewAccess,
@@ -548,6 +573,9 @@ export async function getUnit(
 			unitScope("references", "external-links"),
 		),
 		authorization.unit.decide(base.id, "unit.realm-publication.manage"),
+		isMetadataOnlyUnitKind(kind)
+			? authorization.unit.decide(base.id, "unit.metadata-only.update", ["unit"])
+			: Promise.resolve({ allowed: false as const, reason: "ungranted" as const }),
 		authorization.unit.decide(base.id, "unit.access.manage"),
 		authorization.unit.decide(base.id, "unit.association.manage"),
 		authorization.platform.hasCapability(DevelopmentPreviewCapability),
@@ -649,6 +677,7 @@ export async function getUnit(
 		ownershipClaim: ownershipClaim ? { ...ownershipClaim, state: "pending" as const } : null,
 		capabilities: {
 			canEdit,
+			canUpdateMetadataOnly: canEdit && metadataOnlyUpdateDecision.allowed,
 			canManageAccess: accessDecision.allowed,
 			canManageAssociations: associationDecision.allowed,
 			canCurateTags: canCurateTags.allowed,
@@ -779,20 +808,11 @@ export async function updateUnitInTransaction(
 	if (kind === "audio" && timedMediaUpdate)
 		await tx.update(audio).set(timedMediaUpdate).where(eq(audio.id, unitId));
 	if (Object.hasOwn(body, "licenses")) {
-		const [activeOwnership] = await tx
-			.select({ profileId: unitOwnership.profileId })
-			.from(unitOwnership)
-			.where(and(eq(unitOwnership.unitId, unitId), isNull(unitOwnership.revokedAt)))
-			.limit(1);
 		await syncLicenseOfferings(tx, {
 			unitId,
 			actorProfileId,
 			desired: body.licenses ?? [],
 			unitKind: kind,
-			ownershipMode:
-				activeOwnership?.profileId && activeOwnership.profileId !== OfficialProfileIds.community
-					? "profile_owned"
-					: "community_owned",
 		});
 	}
 	const seriesUpdate = kind === "series" ? toSeriesUpdateValues(body) : undefined;
@@ -841,16 +861,19 @@ export async function updateUnit(
 	const statusUpdateDecision = body.status
 		? await authorization.unit.decide(unitId, "unit.status.update", ["unit"])
 		: undefined;
-	await database.transaction((tx) =>
-		updateUnitInTransaction(
+	await database.transaction(async (tx) => {
+		const nextMetadataOnly = body.details?.metadataOnly;
+		if (nextMetadataOnly !== undefined && isMetadataOnlyUnitKind(kind))
+			await ensureMetadataOnlyChangeAllowed(tx, authorization, kind, unitId, nextMetadataOnly);
+		await updateUnitInTransaction(
 			tx,
 			kind,
 			unitId,
 			authorization.profileId,
 			statusUpdateDecision?.allowed ?? false,
 			body,
-		),
-	);
+		);
+	});
 	return getUnit(kind, unitId, authorization);
 }
 

@@ -9,6 +9,8 @@ type ChapterLocalization = {
 	readonly contentStatus: string | null;
 };
 
+export type ChapterBodyPresentation = "omit" | "published" | "preview";
+
 /**
  * Selects the localization presented by the Book reader.
  *
@@ -17,7 +19,7 @@ type ChapterLocalization = {
 export function selectReaderChapterLocalization<Localization extends ChapterLocalization>(
 	localizations: readonly Localization[],
 	input: {
-		readonly canReadDraftContent: boolean;
+		readonly bodyPresentation: ChapterBodyPresentation;
 		readonly exactLanguage?: ContentLanguage;
 		readonly localizationLanguages: readonly ContentLanguage[];
 	},
@@ -28,13 +30,14 @@ export function selectReaderChapterLocalization<Localization extends ChapterLoca
 		);
 		if (exactLocalization) return exactLocalization;
 	}
-	const readableContent = localizations.filter(
+	const presentableContent = localizations.filter(
 		(localization) =>
+			input.bodyPresentation !== "omit" &&
 			localization.content !== null &&
-			(input.canReadDraftContent || localization.contentStatus === "published"),
+			(input.bodyPresentation === "preview" || localization.contentStatus === "published"),
 	);
 	return (
-		resolveUnitLocalizationFromOrdered(readableContent, input.localizationLanguages) ??
+		resolveUnitLocalizationFromOrdered(presentableContent, input.localizationLanguages) ??
 		resolveUnitLocalizationFromOrdered(localizations, input.localizationLanguages)
 	);
 }

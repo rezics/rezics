@@ -117,6 +117,39 @@ describe("independent Unit license offerings", () => {
 });
 
 describe("Unit creation semantics", () => {
+	it("accepts an explicit metadata-only presentation policy for contentful works", () => {
+		expect(
+			Check(CreateUnitBody, {
+				...ownedMainUnit,
+				details: { ...ownedMainUnit.details, metadataOnly: true },
+			}),
+		).toBe(true);
+		expect(
+			Check(CreateUnitBody, {
+				...ownedMainUnit,
+				details: { type: "software", metadataOnly: false },
+			}),
+		).toBe(true);
+		expect(
+			Check(CreateUnitBody, {
+				...ownedMainUnit,
+				details: { type: "media", releaseStatus: "ongoing", metadataOnly: true },
+			}),
+		).toBe(true);
+		expect(
+			Check(UpdateUnitBody, {
+				updatedAt: "2026-07-21T00:00:00.000Z",
+				details: { metadataOnly: false },
+			}),
+		).toBe(true);
+		expect(
+			Check(UpdateUnitBody, {
+				updatedAt: "2026-07-21T00:00:00.000Z",
+				details: { metadataOnly: "false" },
+			}),
+		).toBe(false);
+	});
+
 	it("accepts at most 32 distinct initial Tag IDs", () => {
 		const tagId = "019b0000-0000-7000-8000-000000000099";
 		expect(Check(CreateUnitBody, { ...publicMainUnit, initialTagIds: [tagId] })).toBe(true);

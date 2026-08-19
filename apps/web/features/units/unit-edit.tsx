@@ -49,6 +49,7 @@ import { readSubmittedLicenses } from "./model/unit-licenses";
 import { FeedUnitContent } from "@/features/content-feed/components/feed-unit-content";
 import { isWorkUnitType, type UnitType } from "./unit-types";
 import { WorkReleaseStatusField } from "./components/work-release-status-field";
+import { MetadataOnlyField } from "./components/metadata-only-field";
 import { isWorkReleaseStatus } from "./model/work-release-status";
 
 export type EditableUnit = GetApiUnitsByTypeByUnitIdStatus200;
@@ -88,6 +89,13 @@ export function UnitMetadataEditor({ type, unit }: { type: UnitType; unit: Unit 
 		"" | "book_only" | "book_and_chapters"
 	>("");
 	const [chapterDraftQueued, setChapterDraftQueued] = useState(false);
+	const [metadataOnly, setMetadataOnly] = useState(
+		() =>
+			(unit.details.type === "book" ||
+				unit.details.type === "software" ||
+				unit.details.type === "media") &&
+			unit.details.metadataOnly,
+	);
 	const update = usePatchApiUnitsByTypeByUnitId({
 		mutation: {
 			onSuccess: async () => invalidateUnitDetail(queryClient, type, unit.id, true),
@@ -134,6 +142,7 @@ export function UnitMetadataEditor({ type, unit }: { type: UnitType; unit: Unit 
 				if (pageCount === undefined) return undefined;
 				return {
 					releaseStatus: submittedReleaseStatus,
+					...(unit.capabilities.canUpdateMetadataOnly ? { metadataOnly } : {}),
 					isbn13: String(form.get("isbn13") ?? "").trim() || null,
 					publicationDate: releasedOn || null,
 					pageCount,
@@ -141,6 +150,7 @@ export function UnitMetadataEditor({ type, unit }: { type: UnitType; unit: Unit 
 			}
 			if (unit.details.type === "software")
 				return {
+					...(unit.capabilities.canUpdateMetadataOnly ? { metadataOnly } : {}),
 					versionLabel: String(form.get("versionLabel") ?? "").trim() || null,
 				};
 			if (unit.details.type === "media") {
@@ -154,6 +164,7 @@ export function UnitMetadataEditor({ type, unit }: { type: UnitType; unit: Unit 
 				if (!kind) return undefined;
 				return {
 					releaseStatus: submittedReleaseStatus,
+					...(unit.capabilities.canUpdateMetadataOnly ? { metadataOnly } : {}),
 					kind,
 					runtimeMinutes,
 					episodeCount,
@@ -301,11 +312,12 @@ export function UnitMetadataEditor({ type, unit }: { type: UnitType; unit: Unit 
 								<Input defaultValue={unit.releasedOn ?? ""} name="releasedOn" type="date" />
 							</Field>
 						) : null}
-						<UnitTypeSpecificFields unit={unit} />
-						<UnitLicensesField
-							allowProfileOwnedOnly={unit.ownershipMode === "profile_owned"}
-							defaultValue={openLicenseIds}
+						<UnitTypeSpecificFields
+							metadataOnly={metadataOnly}
+							onMetadataOnlyChange={setMetadataOnly}
+							unit={unit}
 						/>
+						<UnitLicensesField defaultValue={openLicenseIds} />
 						<Button variant="solid" isLoading={update.isPending} type="submit">
 							{t.units.editor.saveSettings}
 						</Button>
@@ -322,13 +334,27 @@ export function UnitMetadataEditor({ type, unit }: { type: UnitType; unit: Unit 
 	);
 }
 
-function UnitTypeSpecificFields({ unit }: { unit: Unit }) {
+function UnitTypeSpecificFields({
+	unit,
+	metadataOnly,
+	onMetadataOnlyChange,
+}: {
+	readonly unit: Unit;
+	readonly metadataOnly: boolean;
+	readonly onMetadataOnlyChange: (value: boolean) => void;
+}) {
 	const { t } = useTranslation(["units"]);
 	const details = unit.details;
 	if (details.type === "book")
 		return (
 			<>
 				<WorkReleaseStatusField defaultValue={details.releaseStatus} />
+				<MetadataOnlyField
+					disabled={!unit.capabilities.canUpdateMetadataOnly}
+					onChange={onMetadataOnlyChange}
+					type="book"
+					value={metadataOnly}
+				/>
 				<Field>
 					<FieldLabel>{t.units.fields.isbn13}</FieldLabel>
 					<Input defaultValue={details.isbn13 ?? ""} name="isbn13" pattern="[0-9]{13}" />
@@ -342,6 +368,12 @@ function UnitTypeSpecificFields({ unit }: { unit: Unit }) {
 	if (details.type === "software")
 		return (
 			<>
+				<MetadataOnlyField
+					disabled={!unit.capabilities.canUpdateMetadataOnly}
+					onChange={onMetadataOnlyChange}
+					type="software"
+					value={metadataOnly}
+				/>
 				<Field>
 					<FieldLabel>{t.units.fields.versionLabel}</FieldLabel>
 					<Input defaultValue={details.versionLabel ?? ""} name="versionLabel" />
@@ -352,6 +384,12 @@ function UnitTypeSpecificFields({ unit }: { unit: Unit }) {
 		return (
 			<>
 				<WorkReleaseStatusField defaultValue={details.releaseStatus} />
+				<MetadataOnlyField
+					disabled={!unit.capabilities.canUpdateMetadataOnly}
+					onChange={onMetadataOnlyChange}
+					type="media"
+					value={metadataOnly}
+				/>
 				<Field required>
 					<FieldLabel>{t.units.fields.mediaKind}</FieldLabel>
 					<Input defaultValue={details.kind} name="kind" required />

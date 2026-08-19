@@ -586,7 +586,6 @@ export default new Elysia()
 							grantedByProfileId: profile.unitId,
 							licenseIds: body.licenses,
 							unitKind: "series",
-							ownershipMode: "profile_owned",
 						});
 						await recordUnitRevision(tx, {
 							unitId,

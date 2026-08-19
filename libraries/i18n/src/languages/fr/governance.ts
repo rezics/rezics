@@ -222,6 +222,7 @@ export default {
 		permissions: {
 			"unit.read": "Lire",
 			"unit.update": "Modifier",
+			"unit.metadata-only.update": "Modifier la disponibilité du contenu intégral",
 			"unit.status.update": "Changer le statut",
 			"unit.history.restore": "Restaurer l’historique",
 			"unit.access.manage": "Gérer les accès",

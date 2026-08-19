@@ -35,8 +35,8 @@ export default {
 		publicWorkHelpTitle: "¿Qué es una obra comunitaria?",
 		publicWorkHelpOwnership:
 			"Las obras comunitarias pertenecen a la comunidad y se mantienen de forma colectiva. Crearlas no te concede la titularidad ni permisos adicionales; todas las personas con sesión iniciada las editan con los mismos permisos compartidos.",
-		publicWorkHelpIndexing:
-			"Normalmente se usan para crear información de índice que permita buscar obras existentes cuyos derechos de autor no posees.",
+		publicWorkHelpScope:
+			"Elige esta opción cuando la comunidad, y no un único perfil, deba mantener la obra. La titularidad no determina si se muestra el cuerpo de los capítulos.",
 		publicWorkHelpAlternative:
 			"Si posees los derechos de autor o quieres administrar una obra y permitir que determinadas personas colaboren, elige «Obra propia» y concede los permisos de edición adecuados después de crearla.",
 		entryOwnershipLabel: "Titularidad de la entrada",
@@ -57,6 +57,11 @@ export default {
 		creditRequestConfirmationDescription: `Algunas ${entityTerms.plural} seleccionadas deben dar su consentimiento antes de que aparezcan sus créditos. Confirma para crear la obra y enviar las invitaciones.`,
 		creditRequestConfirmationCancel: "Cancelar",
 		creditRequestConfirmationConfirm: "Crear y enviar invitaciones",
+		metadataOnlyConfirmationTitle: "¿Proporcionar el contenido completo?",
+		metadataOnlyConfirmationDescription:
+			`Al desactivar «Solo ${metadataTerms.inline}», ${verbatimTerms.rezics.value} podrá presentar el contenido completo de la obra. Puede ser apropiado con una ${licenseTerms.inline} abierta, si la obra ya no está protegida por derechos de autor o si existe una autorización directa. Esta opción y las ${licenseTerms.label} seleccionadas son solo declaraciones; ${verbatimTerms.rezics.value} no ha verificado que quien las realiza tenga los derechos necesarios.`,
+		metadataOnlyConfirmationCancel: `Mantener solo ${metadataTerms.inline}`,
+		metadataOnlyConfirmationConfirm: "Proporcionar el contenido completo",
 		versionRole: "Tipo de versión",
 		mainVersion: "Versión principal",
 		variantVersion: "Variante",
@@ -209,6 +214,13 @@ export default {
 	},
 	fields: {
 		isbn13: verbatimTerms.isbn13.value,
+		metadataOnly: `Solo ${metadataTerms.inline}`,
+		metadataOnlyDescription: {
+			book: "Conserva los datos de la obra, el contenido, el progreso y los debates, pero no presenta los capítulos alojados. El texto existente no se elimina.",
+			software:
+				"Conserva los datos del software, las versiones, el progreso y los debates, pero no ofrece paquetes, binarios ni archivos de código fuente alojados. Los archivos existentes no se eliminan.",
+			media: "Conserva los datos, el contenido, el progreso y los debates, pero no presenta contenido multimedia alojado. El contenido existente no se elimina.",
+		},
 		publicationDate: "Fecha de edición",
 		pageCount: "Número de páginas",
 		releaseStatus: "Estado de actualización de la obra",
@@ -670,7 +682,7 @@ export default {
 		save: "Guardar capítulo",
 		communityUnitContentPolicyTitle:
 			"Las obras comunitarias no permiten editar aquí el cuerpo del capítulo",
-		communityUnitContentPolicyDescription: `Este libro está mantenido por la comunidad. Puedes organizar su estructura de contenido o adjuntar una ${postTerms.inline} existente que puedas leer, pero este editor no ofrece un editor para su cuerpo.`,
+		communityUnitContentPolicyDescription: `Este libro está mantenido por la comunidad. Puedes organizar su estructura de contenido o adjuntar una ${postTerms.inline} existente, pero este editor no ofrece un editor para su cuerpo.`,
 		wordCount: insert("{{count}} palabras", { count: Number }),
 		characterCount: insert("{{count}} caracteres", { count: Number }),
 	},

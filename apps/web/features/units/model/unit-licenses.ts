@@ -1,26 +1,12 @@
-import {
-	isLicenseId,
-	LicenseRegistry,
-	ResidualRightsLicenseId,
-	type LicenseId,
-} from "@rezics/license";
+import { isLicenseId, ResidualRightsLicenseId, type LicenseId } from "@rezics/license";
 
 export function reconcileLicenseSelection(input: {
-	readonly allowProfileOwnedOnly: boolean;
 	readonly initial: readonly LicenseId[];
 	readonly previous: readonly LicenseId[];
 	readonly next: readonly string[];
 }): LicenseId[] {
 	const initial = new Set(input.initial);
-	const protectedInitial = input.initial.filter(
-		(id) => LicenseRegistry[id].profileOwnedOnly && !input.allowProfileOwnedOnly,
-	);
-	const licenses = [...new Set([...protectedInitial, ...input.next.filter(isLicenseId)])].filter(
-		(id) =>
-			input.allowProfileOwnedOnly ||
-			!LicenseRegistry[id].profileOwnedOnly ||
-			protectedInitial.includes(id),
-	);
+	const licenses = [...new Set(input.next.filter(isLicenseId))];
 	const addedResidual =
 		licenses.includes(ResidualRightsLicenseId) && !input.previous.includes(ResidualRightsLicenseId);
 	if (!addedResidual) return licenses;

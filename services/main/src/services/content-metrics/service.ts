@@ -144,7 +144,7 @@ export async function getUnitLocalizationContentMetric(
 }
 
 /**
- * Sums only currently public, published chapter occurrences for a hosted Book.
+ * Sums current public Chapter occurrences for a hosted Book.
  * Editorial `book.wordCount` is intentionally unrelated to this projection.
  */
 export async function listPublishedBookContentMetrics(

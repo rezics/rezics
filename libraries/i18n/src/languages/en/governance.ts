@@ -220,6 +220,7 @@ export default {
 		permissions: {
 			"unit.read": "Read",
 			"unit.update": "Edit",
+			"unit.metadata-only.update": "Change full-content availability",
 			"unit.status.update": "Change status",
 			"unit.history.restore": "Restore history",
 			"unit.access.manage": "Manage access",

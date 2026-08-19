@@ -29,8 +29,6 @@ export type OpenUnitLicenseOffering = PresentedUnitLicenseGrant & {
 	readonly recognitionStatus: LicenseRecognitionStatus;
 };
 
-export type UnitOwnershipMode = "profile_owned" | "community_owned";
-
 function uniqueLicenseIds(ids: readonly string[]): LicenseId[] {
 	const seen = new Set<LicenseId>();
 	const unique: LicenseId[] = [];
@@ -78,14 +76,11 @@ function assertGrantPreconditions(
 	licenseIds: readonly LicenseId[],
 	input: {
 		readonly unitKind: string;
-		readonly ownershipMode: UnitOwnershipMode;
 		readonly grantedByProfileId: string | null;
 	},
 ): void {
 	for (const licenseId of licenseIds) {
 		const definition: LicenseDefinition = LicenseRegistry[licenseId];
-		if (definition.profileOwnedOnly && input.ownershipMode !== "profile_owned")
-			throw new UnitLicenseGrantForbidden();
 		if (
 			definition.applicableUnitKinds !== null &&
 			!definition.applicableUnitKinds.some((kind) => kind === input.unitKind)
@@ -103,7 +98,6 @@ export async function insertLicenseGrants(
 		readonly grantedByProfileId: string;
 		readonly licenseIds: readonly string[];
 		readonly unitKind: string;
-		readonly ownershipMode: UnitOwnershipMode;
 	},
 ): Promise<void> {
 	await lockUnitForLicenseMutation(tx, input.unitId);
@@ -131,7 +125,6 @@ export async function syncLicenseOfferings(
 		readonly actorProfileId: string;
 		readonly desired: readonly string[];
 		readonly unitKind: string;
-		readonly ownershipMode: UnitOwnershipMode;
 	},
 ): Promise<void> {
 	await lockUnitForLicenseMutation(tx, input.unitId);
@@ -171,7 +164,6 @@ export async function syncLicenseOfferings(
 			grantedByProfileId: input.actorProfileId,
 			licenseIds: toGrant,
 			unitKind: input.unitKind,
-			ownershipMode: input.ownershipMode,
 		});
 }
 

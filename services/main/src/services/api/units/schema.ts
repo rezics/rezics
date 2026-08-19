@@ -172,12 +172,23 @@ const CreateUnitFields = {
 	licenses: LifecycleInput.licenses,
 	details: t.Union([
 		t.Object(
-			{ type: t.Literal("book"), releaseStatus: WorkReleaseStatus },
+			{
+				type: t.Literal("book"),
+				releaseStatus: WorkReleaseStatus,
+				metadataOnly: t.Optional(t.Boolean()),
+			},
 			{ additionalProperties: false },
 		),
-		t.Object({ type: t.Literal("software") }, { additionalProperties: false }),
 		t.Object(
-			{ type: t.Literal("media"), releaseStatus: WorkReleaseStatus },
+			{ type: t.Literal("software"), metadataOnly: t.Optional(t.Boolean()) },
+			{ additionalProperties: false },
+		),
+		t.Object(
+			{
+				type: t.Literal("media"),
+				releaseStatus: WorkReleaseStatus,
+				metadataOnly: t.Optional(t.Boolean()),
+			},
 			{ additionalProperties: false },
 		),
 	]),
@@ -215,6 +226,7 @@ const UnitDetailsInput = t.Object(
 		publicationDate: t.Optional(t.Nullable(t.String({ format: "date" }))),
 		pageCount: t.Optional(t.Nullable(t.Integer({ minimum: 1 }))),
 		wordCount: t.Optional(t.Nullable(t.Integer({ minimum: 0 }))),
+		metadataOnly: t.Optional(t.Boolean()),
 		versionLabel: t.Optional(t.Nullable(t.String())),
 		kind: t.Optional(t.String({ minLength: 1 })),
 		runtimeMinutes: t.Optional(t.Nullable(t.Integer({ minimum: 1 }))),

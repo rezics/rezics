@@ -6,7 +6,6 @@ describe("reconcileLicenseSelection", () => {
 	it("preserves a stored ARR and CC combination", () => {
 		expect(
 			reconcileLicenseSelection({
-				allowProfileOwnedOnly: true,
 				initial: ["all-rights-reserved", "cc-by-4.0"],
 				next: ["all-rights-reserved", "cc-by-4.0", "cc0-1.0"],
 				previous: ["all-rights-reserved", "cc-by-4.0"],
@@ -14,21 +13,19 @@ describe("reconcileLicenseSelection", () => {
 		).toEqual(["all-rights-reserved", "cc-by-4.0", "cc0-1.0"]);
 	});
 
-	it("keeps an existing profile-owned-only License during community-owned edits", () => {
+	it("allows the REZICS License to be removed from any Unit ownership mode", () => {
 		expect(
 			reconcileLicenseSelection({
-				allowProfileOwnedOnly: false,
 				initial: ["rezics-unit-content-license-v1", "cc-by-4.0"],
 				next: ["cc-by-4.0"],
 				previous: ["rezics-unit-content-license-v1", "cc-by-4.0"],
 			}),
-		).toEqual(["rezics-unit-content-license-v1", "cc-by-4.0"]);
+		).toEqual(["cc-by-4.0"]);
 	});
 
 	it("applies ARR simplification only when ARR is newly selected", () => {
 		expect(
 			reconcileLicenseSelection({
-				allowProfileOwnedOnly: true,
 				initial: [],
 				next: ["cc-by-4.0", "all-rights-reserved"],
 				previous: ["cc-by-4.0"],

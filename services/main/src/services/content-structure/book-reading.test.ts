@@ -13,10 +13,10 @@ describe("selectReaderChapterLocalization", () => {
 		{ language: "en", content: { type: "root" }, contentStatus: "published" },
 	];
 
-	it("falls back to any readable body before selecting a title-only localization", () => {
+	it("falls back to a presentable body before selecting a title-only localization", () => {
 		expect(
 			selectReaderChapterLocalization(rows, {
-				canReadDraftContent: false,
+				bodyPresentation: "published",
 				localizationLanguages: ["zh"],
 			})?.language,
 		).toBe("en");
@@ -25,18 +25,18 @@ describe("selectReaderChapterLocalization", () => {
 	it("keeps an explicit title-only localization exact", () => {
 		expect(
 			selectReaderChapterLocalization(rows, {
-				canReadDraftContent: false,
+				bodyPresentation: "published",
 				exactLanguage: "zh",
 				localizationLanguages: ["en"],
 			})?.language,
 		).toBe("zh");
 	});
 
-	it("uses the preferred title when no localization has readable content", () => {
+	it("uses the preferred title when no localization has a presentable body", () => {
 		const titleOnly = rows.map((row) => ({ ...row, content: null, contentStatus: null }));
 		expect(
 			selectReaderChapterLocalization(titleOnly, {
-				canReadDraftContent: false,
+				bodyPresentation: "published",
 				localizationLanguages: ["zh"],
 			})?.language,
 		).toBe("zh");
@@ -45,7 +45,7 @@ describe("selectReaderChapterLocalization", () => {
 	it("falls back when an explicitly requested language version does not exist", () => {
 		expect(
 			selectReaderChapterLocalization(rows.slice(0, 1), {
-				canReadDraftContent: false,
+				bodyPresentation: "published",
 				exactLanguage: "en",
 				localizationLanguages: ["zh"],
 			})?.language,
@@ -60,10 +60,19 @@ describe("selectReaderChapterLocalization", () => {
 		}[] = [{ language: "zh", content: {}, contentStatus: "draft" }];
 		expect(
 			selectReaderChapterLocalization(draft, {
-				canReadDraftContent: true,
+				bodyPresentation: "preview",
 				localizationLanguages: ["zh"],
 			}),
 		).toBe(draft[0]);
+	});
+
+	it("selects the preferred title without considering bodies when presentation is omitted", () => {
+		expect(
+			selectReaderChapterLocalization(rows, {
+				bodyPresentation: "omit",
+				localizationLanguages: ["zh"],
+			})?.language,
+		).toBe("zh");
 	});
 });
 

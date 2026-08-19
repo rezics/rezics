@@ -53,6 +53,7 @@ import {
 	WorkOwnershipField,
 } from "./components/work-ownership-field";
 import { WorkReleaseStatusField } from "./components/work-release-status-field";
+import { MetadataOnlyField } from "./components/metadata-only-field";
 import { isWorkReleaseStatus } from "./model/work-release-status";
 import { WorkCreationTagFields } from "@/features/tags/components/curated-creation-tag-fields";
 
@@ -206,6 +207,9 @@ function VariantUnitCreatePage({ type }: { type: VariantUnitType }) {
 	const [searchConfirmed, setSearchConfirmed] = useState(false);
 	const [cover, setCover] = useState<LocalizationImageAssetValue | null>(null);
 	const [ownershipMode, setOwnershipMode] = useState<WorkOwnershipMode>(initialOwnershipMode);
+	const [metadataOnly, setMetadataOnly] = useState(
+		() => initialOwnershipMode === "community_owned",
+	);
 	const [creditAttributions, setCreditAttributions] = useState<readonly CreditAttributionDraft[]>(
 		() => [createCreditAttributionDraft(type)],
 	);
@@ -247,13 +251,17 @@ function VariantUnitCreatePage({ type }: { type: VariantUnitType }) {
 		const details =
 			type === "book"
 				? isWorkReleaseStatus(submittedReleaseStatus)
-					? { type: "book" as const, releaseStatus: submittedReleaseStatus }
+					? {
+							type: "book" as const,
+							releaseStatus: submittedReleaseStatus,
+							metadataOnly,
+						}
 					: undefined
 				: type === "media"
 					? isWorkReleaseStatus(submittedReleaseStatus)
-						? { type: "media" as const, releaseStatus: submittedReleaseStatus }
+						? { type: "media" as const, releaseStatus: submittedReleaseStatus, metadataOnly }
 						: undefined
-					: { type: "software" as const };
+					: { type: "software" as const, metadataOnly };
 		if (!details) return;
 		let request: Parameters<typeof create.mutateAsync>[0] | undefined;
 		try {
@@ -359,6 +367,7 @@ function VariantUnitCreatePage({ type }: { type: VariantUnitType }) {
 						<WorkOwnershipField
 							onChange={(nextOwnershipMode) => {
 								setOwnershipMode(nextOwnershipMode);
+								setMetadataOnly(nextOwnershipMode === "community_owned");
 								setCreditValidationRequested(false);
 							}}
 							value={ownershipMode}
@@ -441,6 +450,12 @@ function VariantUnitCreatePage({ type }: { type: VariantUnitType }) {
 							<LocalizationImageUploadField value={cover} onChange={setCover} role="cover" />
 						</Field>
 						{type === "book" || type === "media" ? <WorkReleaseStatusField /> : null}
+						<MetadataOnlyField
+							confirmFullContent={ownershipMode === "community_owned"}
+							onChange={setMetadataOnly}
+							type={type}
+							value={metadataOnly}
+						/>
 						<Field>
 							<FieldLabel>{t.ui.visibility}</FieldLabel>
 							<NativeSelect defaultValue="public" name="visibility">
@@ -477,7 +492,6 @@ function VariantUnitCreatePage({ type }: { type: VariantUnitType }) {
 							</NativeSelect>
 						</Field>
 						<UnitLicensesField
-							allowProfileOwnedOnly={ownershipMode === "profile_owned"}
 							defaultValue={ownershipMode === "profile_owned" ? [RecommendedLicenseId] : []}
 							key={ownershipMode}
 						/>

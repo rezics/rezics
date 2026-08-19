@@ -23,6 +23,7 @@ const options = {
 		label: `${verbatimTerms.cc.value} Reconocimiento 4.0 Internacional`,
 	},
 	"cc0-1.0": { label: `${verbatimTerms.cc.value}0 1.0 Universal` },
+	"pdm-1.0": { label: `${verbatimTerms.cc.value} ${verbatimTerms.pdm.value} 1.0 Universal` },
 	"rezics-unit-content-license-v1": {
 		label: verbatimTerms.rezicsUnitContentLicenseV1.value,
 	},
@@ -34,9 +35,9 @@ export default {
 	residualRightsNotice:
 		"Reservados todos los derechos cubre solo los derechos que las demás licencias listadas no conceden de forma expresa. No las anula ni las revoca.",
 	viewTerms: `Ver las condiciones de la ${licenseTerms.inline}`,
+	declarationNotice: `Estas opciones solo registran declaraciones. Su efecto jurídico depende de que la persona declarante tenga la autoridad necesaria; ${verbatimTerms.rezics.value} no verifica esa autoridad.`,
 	options,
 	affirmativeAcknowledgement: {
 		confirmationLabel: `He leído y acepto la ${verbatimTerms.rezicsUnitContentLicenseV1.value} y confirmo que tengo autoridad para conceder esta ${esTerminology.license.forms.inline} para este contenido.`,
-		profileOwnedOnlyNotice: `Las obras comunitarias no conceden una ${esTerminology.license.forms.inline} de contenido a ${verbatimTerms.rezics.value} y solo deben incluir información de índice sobre la obra.`,
 	},
 } satisfies typeof import("../zh-Hant/licenses").default;
