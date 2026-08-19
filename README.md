@@ -105,6 +105,9 @@ starts persistent services; `infra:up` additionally performs the idempotent
 RustFS bucket initialization. `task infra:reset` intentionally deletes all
 local PostgreSQL and RustFS state before rebuilding a consistent default database; it requires
 confirmation. Use `task --yes local:reset` to reset and seed only the application database. Use
+`task local:showcase:reseed` to rebuild sibling showcase packs and apply any missing Units; it
+does not reset the database. Pack Unit IDs stay the values in each pack's `ids.json`. Use
+`task --yes local:showcase` when you need a clean Bootstrap and a full reinstall. Use
 `task --yes local:search:rebuild` to rebuild the authoritative PGroonga indexes without resetting
 PostgreSQL.
 

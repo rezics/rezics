@@ -212,6 +212,24 @@ tasks:
                   CLI_ARGS: reindex --yes
             - task: services-main:content-pack:verify
 
+    showcase-packs:build:
+        desc: Rebuild generated toaru-core content in the sibling showcase-packs checkout.
+        internal: true
+        dir: ../rezics-showcase-packs
+        cmds:
+            - npm run toaru-core:build
+
+    local:showcase:reseed:
+        desc: Rebuild sibling showcase packs and apply missing Units. Does not reset the database.
+        cmds:
+            - task: infra:start
+            - task: showcase-packs:build
+            - task: services-main:content-pack:apply
+            - task: services-main:search:index
+              vars:
+                  CLI_ARGS: reindex --yes
+            - task: services-main:content-pack:verify
+
     local:reset:
         desc: Reset and seed the local database; its PGroonga indexes are maintained in-database.
         prompt: This deletes and recreates the local application database. Continue?

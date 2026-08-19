@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { sql } from "drizzle-orm";
+import { and, eq, isNull, sql } from "drizzle-orm";
 import { assertFilterDocument } from "@rezics/filter";
 import { isLicenseId, type LicenseId } from "@rezics/license";
 import { TopLevelSlugNamespaceUnitIds, ZoneHomePageSlug } from "@rezics/slug";
@@ -17,6 +17,7 @@ import type { ContentStructureBatchCommand } from "../content-structure/batch-pl
 import type { DatabaseTransaction } from "../database";
 import {
 	book,
+	contentStructure,
 	collection,
 	collectionItem,
 	creditAttribution,
@@ -41,6 +42,7 @@ import {
 	type CreditAttributionRole,
 	type RealmPageKind,
 	type SubjectAssociationRole,
+	type ContentStructureKind,
 	type UnitKind,
 } from "../database/schema";
 import { insertLicenseGrants } from "../units/license-grants";
@@ -97,7 +99,7 @@ export async function applyContentPack(
 
 	await importRelations(tx, pack, createKeys);
 	await importStructures(tx, pack);
-	await importSlugs(tx, pack);
+	await importSlugs(tx, pack, createKeys);
 
 	for (const object of objects) {
 		await recordUnitRevision(tx, {
@@ -281,15 +283,25 @@ async function insertDetail(
 	}
 }
 
+function touchesCreated(
+	createKeys: ReadonlySet<string>,
+	sourceKeys: readonly (string | null | undefined)[],
+): boolean {
+	return sourceKeys.some((key) => Boolean(key && createKeys.has(key)));
+}
+
 async function importRelations(
 	tx: DatabaseTransaction,
 	pack: LoadedPack,
-	_createKeys: ReadonlySet<string>,
+	createKeys: ReadonlySet<string>,
 ): Promise<void> {
 	const { relations, ids } = pack;
-	if (relations.credits?.length)
+	const credits = (relations.credits ?? []).filter((item) =>
+		touchesCreated(createKeys, [item.sourceUnitSourceKey, item.creditedUnitSourceKey]),
+	);
+	if (credits.length)
 		await tx.insert(creditAttribution).values(
-			relations.credits.map((item) => ({
+			credits.map((item) => ({
 				id: ids.credits?.[item.sourceKey],
 				sourceUnitId: requireId(ids.units, item.sourceUnitSourceKey),
 				creditedUnitId: requireId(ids.units, item.creditedUnitSourceKey),
@@ -297,9 +309,12 @@ async function importRelations(
 				position: item.position,
 			})),
 		);
-	if (relations.subjects?.length)
+	const subjects = (relations.subjects ?? []).filter((item) =>
+		touchesCreated(createKeys, [item.unitSourceKey, item.entitySourceKey, item.contextPostSourceKey]),
+	);
+	if (subjects.length)
 		await tx.insert(subjectAssociation).values(
-			relations.subjects.map((item) => ({
+			subjects.map((item) => ({
 				id: ids.subjects?.[item.sourceKey],
 				unitId: requireId(ids.units, item.unitSourceKey),
 				entityId: requireId(ids.units, item.entitySourceKey),
@@ -310,27 +325,36 @@ async function importRelations(
 				position: item.position,
 			})),
 		);
-	if (relations.seriesReleases?.length)
+	const seriesReleases = (relations.seriesReleases ?? []).filter((item) =>
+		touchesCreated(createKeys, [item.seriesSourceKey, item.releaseUnitSourceKey]),
+	);
+	if (seriesReleases.length)
 		await tx.insert(seriesRelease).values(
-			relations.seriesReleases.map((item) => ({
+			seriesReleases.map((item) => ({
 				seriesId: requireId(ids.units, item.seriesSourceKey),
 				releaseUnitId: requireId(ids.units, item.releaseUnitSourceKey),
 				position: item.position,
 				releasedOn: item.releasedOn,
 			})),
 		);
-	if (relations.collectionItems?.length)
+	const collectionItems = (relations.collectionItems ?? []).filter((item) =>
+		touchesCreated(createKeys, [item.collectionSourceKey, item.unitSourceKey]),
+	);
+	if (collectionItems.length)
 		await tx.insert(collectionItem).values(
-			relations.collectionItems.map((item) => ({
+			collectionItems.map((item) => ({
 				collectionId: requireId(ids.units, item.collectionSourceKey),
 				unitId: requireId(ids.units, item.unitSourceKey),
 				position: item.position,
 				addedByProfileId: ImportOwnerProfileId,
 			})),
 		);
-	if (relations.unitTags?.length)
+	const unitTags = (relations.unitTags ?? []).filter((item) =>
+		touchesCreated(createKeys, [item.unitSourceKey, item.tagSourceKey]),
+	);
+	if (unitTags.length)
 		await tx.insert(unitTag).values(
-			relations.unitTags.map((item) => ({
+			unitTags.map((item) => ({
 				unitId: requireId(ids.units, item.unitSourceKey),
 				tagId: requireId(ids.units, item.tagSourceKey),
 				pinned: item.pinned,
@@ -338,8 +362,11 @@ async function importRelations(
 				createdByProfileId: ImportOwnerProfileId,
 			})),
 		);
-	if (relations.realmUnits?.length) {
-		const rows = relations.realmUnits.map((item) => ({
+	const realmUnits = (relations.realmUnits ?? []).filter((item) =>
+		touchesCreated(createKeys, [item.realmSourceKey, item.unitSourceKey]),
+	);
+	if (realmUnits.length) {
+		const rows = realmUnits.map((item) => ({
 			realmId: requireId(ids.units, item.realmSourceKey),
 			unitId: requireId(ids.units, item.unitSourceKey),
 			status: item.status,
@@ -357,6 +384,15 @@ async function importStructures(tx: DatabaseTransaction, pack: LoadedPack): Prom
 	for (const structure of pack.structures) {
 		const ownerUnitId = requireId(pack.ids.units, structure.ownerUnitSourceKey);
 		const structureId = pack.ids.structures?.[structure.sourceKey];
+		if (
+			await contentStructureAlreadyPresent(
+				tx,
+				ownerUnitId,
+				structure.kind as ContentStructureKind,
+				structureId,
+			)
+		)
+			continue;
 		if (structure.kind === "zone.navigation" || structure.kind === "wiki.navigation") {
 			await createNavigationStructure(tx, {
 				ownerUnitId,
@@ -415,9 +451,42 @@ function navigationDocumentFrom(pack: LoadedPack, structure: PackStructure) {
 	};
 }
 
-async function importSlugs(tx: DatabaseTransaction, pack: LoadedPack): Promise<void> {
+async function contentStructureAlreadyPresent(
+	tx: DatabaseTransaction,
+	ownerUnitId: string,
+	kind: ContentStructureKind,
+	structureId: string | undefined,
+): Promise<boolean> {
+	if (structureId) {
+		const [byId] = await tx
+			.select({ id: contentStructure.id })
+			.from(contentStructure)
+			.where(and(eq(contentStructure.id, structureId), isNull(contentStructure.deletedAt)))
+			.limit(1);
+		if (byId) return true;
+	}
+	const [byOwner] = await tx
+		.select({ id: contentStructure.id })
+		.from(contentStructure)
+		.where(
+			and(
+				eq(contentStructure.ownerUnitId, ownerUnitId),
+				eq(contentStructure.kind, kind),
+				isNull(contentStructure.deletedAt),
+			),
+		)
+		.limit(1);
+	return Boolean(byOwner);
+}
+
+async function importSlugs(
+	tx: DatabaseTransaction,
+	pack: LoadedPack,
+	createKeys: ReadonlySet<string>,
+): Promise<void> {
 	for (const object of pack.objects) {
 		if (object.unit.kind !== "zone_page" || !object.zonePage) continue;
+		if (!createKeys.has(object.sourceKey)) continue;
 		await replaceZonePageSlugAddress(tx, {
 			zoneId: requireId(pack.ids.units, object.zonePage.zoneSourceKey),
 			pageUnitId: requireId(pack.ids.units, object.sourceKey),
@@ -425,6 +494,7 @@ async function importSlugs(tx: DatabaseTransaction, pack: LoadedPack): Promise<v
 		});
 	}
 	for (const slug of pack.relations.slugs ?? []) {
+		if (!createKeys.has(slug.targetSourceKey)) continue;
 		const scopeUnitId = TopLevelSlugNamespaceUnitIds[slug.scope];
 		if (!scopeUnitId) throw new ContentPackInvalid(`Unknown slug scope ${slug.scope}`);
 		await tx.insert(unitSlugAddress).values({

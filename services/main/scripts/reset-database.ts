@@ -15,6 +15,7 @@ const client = new Client({ connectionString: adminDatabaseUrl });
 try {
 	await client.connect();
 	await client.query(`
+		drop publication if exists rezics_search_projection_publication;
 		drop extension if exists approx_count cascade;
 		drop schema if exists approx_count cascade;
 		drop schema if exists "public" cascade;

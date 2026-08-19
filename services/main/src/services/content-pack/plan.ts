@@ -39,26 +39,6 @@ export async function planContentPack(
 
 	const createCount = planned.filter((item) => item.action === "create").length;
 	const noopCount = planned.filter((item) => item.action === "noop").length;
-	if (createCount > 0 && noopCount > 0) {
-		const conflicts = planned
-			.filter((item) => item.action === "create")
-			.map((item) => ({
-				...item,
-				action: "conflict" as const,
-				reason: "pack is only partially present; reset the database before applying again",
-			}));
-		return {
-			packId: pack.manifest.id,
-			version: pack.manifest.version,
-			checksum: pack.checksum,
-			sourceRoot,
-			alreadyInstalled: false,
-			objects: planned,
-			createCount,
-			noopCount,
-			conflicts,
-		};
-	}
 
 	return {
 		packId: pack.manifest.id,
