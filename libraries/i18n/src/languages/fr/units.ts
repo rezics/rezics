@@ -288,7 +288,7 @@ export default {
 				contents: "Parcourez la structure des chapitres et poursuivez votre lecture.",
 				tags: "Consultez les étiquettes globales et les appréciations contextuelles des sources sélectionnées.",
 				associations:
-					"Consultez les sujets du livre et ses relations entre éléments principaux et variantes.",
+					"Consultez les sujets du livre, sa série et ses relations entre éléments principaux et variantes.",
 				reviews: "Lisez ou rédigez des avis de lecteurs avec une note facultative.",
 				collections: "Parcourez les collections publiques qui contiennent ce livre.",
 				discussion: `Parcourez les ${postTerms.plural} qui utilisent ce livre comme sujet.`,
@@ -298,7 +298,7 @@ export default {
 				contents: `Parcourez la structure ${videoTerms.inline} et ${audioTerms.inline} et suivez votre progression d’écoute ou de visionnage.`,
 				tags: "Consultez les étiquettes globales et les appréciations contextuelles des sources sélectionnées.",
 				associations:
-					"Consultez les sujets de cette œuvre et ses relations entre éléments principaux et variantes.",
+					"Consultez les sujets de cette œuvre, sa série et ses relations entre éléments principaux et variantes.",
 				reviews: "Lisez ou rédigez des avis du public.",
 				collections: "Parcourez les collections publiques qui contiennent cette œuvre.",
 				discussion: `Parcourez les ${postTerms.plural} qui utilisent cette œuvre comme sujet.`,
@@ -308,7 +308,7 @@ export default {
 				requirements: "Consultez la configuration requise par plateforme et par niveau.",
 				tags: "Consultez les étiquettes globales et les appréciations contextuelles des sources sélectionnées.",
 				associations:
-					"Consultez les sujets du logiciel et ses relations entre éléments principaux et variantes.",
+					"Consultez les sujets du logiciel, sa série et ses relations entre éléments principaux et variantes.",
 				reviews: "Lisez ou rédigez des avis d’utilisateurs du logiciel.",
 				collections: "Parcourez les collections publiques qui contiennent ce logiciel.",
 				discussion: `Parcourez les ${postTerms.plural} qui utilisent ce logiciel comme sujet.`,
@@ -355,6 +355,7 @@ export default {
 		version: "Variante",
 		noVersions: "Aucune autre version n’est disponible.",
 		noVariants: "Aucune autre variante n’est disponible.",
+		noSeriesMemberships: "Cette œuvre ne fait partie d’aucune série.",
 		noRequirements: "Aucune configuration requise n’est disponible.",
 		requirementTier: "Niveau de configuration",
 		requirementPlatform: "Identifiant de plateforme",

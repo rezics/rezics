@@ -9,6 +9,7 @@ import { FeedOverflowMenu } from "@/features/content-feed/components/feed-card-a
 import { FeedList } from "@/features/content-feed/components/feed-list";
 import { useTranslation } from "@/i18n/client";
 import { UnitDetailSectionFrame } from "../components/unit-detail-section-frame";
+import { UnitSeriesMemberships } from "../components/unit-series-memberships";
 import { UnitSubjectGroups } from "../components/unit-subject-groups";
 import { useUnitDetail } from "../components/unit-detail-workspace";
 import { unitDetailPageCopy } from "../model/unit-detail-copy";
@@ -44,75 +45,76 @@ export function UnitAssociationsPage() {
 					<h2 className="font-heading text-xl font-bold">{t.units.detail.subjectAssociations}</h2>
 				</div>
 				{detail.unit.subjectAssociations.length ? (
-					<Card>
-						<CardContent className="p-5 sm:p-6">
-							<UnitSubjectGroups associations={detail.unit.subjectAssociations} />
-						</CardContent>
-					</Card>
+					<UnitSubjectGroups associations={detail.unit.subjectAssociations} />
 				) : (
 					<p className="text-sm text-muted-foreground">{t.state.empty}</p>
 				)}
 			</section>
 
 			{detail.type === "series" ? null : (
-				<section className="grid gap-3">
-					<div className="grid gap-1">
-						<h2 className="font-heading text-xl font-bold">{t.units.detail.variants}</h2>
-						<p className="text-sm text-muted-foreground">{t.units.detail.variantsDescription}</p>
-					</div>
-					{related.length ? (
-						<FeedList
-							aria-label={t.units.detail.variants}
-							emptyBody={t.units.detail.noVariants}
-							emptyTitle={t.units.detail.noVariants}
-							errorLabel={t.state.error}
-							getItemKey={({ unit }) => unit.id}
-							renderItem={({ relation, unit }, metadata) => (
-								<Card asChild className="gap-0 rounded-none py-0 sm:rounded-2xl">
-									<article aria-posinset={metadata.position} aria-setsize={metadata.setSize}>
-										<CardContent
-											className={
-												unit.cover
-													? "grid grid-cols-[4.5rem_minmax(0,1fr)_auto] gap-4 p-4"
-													: "grid grid-cols-[minmax(0,1fr)_auto] gap-4 p-4"
-											}
-										>
-											{unit.cover ? (
-												<Cover
-													alt={unit.title ?? t.ui.unnamed}
-													className="rounded-lg border border-border-weak"
-													src={unit.cover.url}
-												/>
-											) : null}
-											<div className="flex min-w-0 items-center justify-between gap-3">
-												<div className="grid min-w-0 gap-1">
-													<strong>
-														{unit.title ? (
-															<LocalizedText language={unit.language} value={unit.title} />
-														) : (
-															t.ui.unnamed
-														)}
-													</strong>
-													<span className="text-xs text-muted-foreground">
-														{relation === "main" ? t.units.detail.main : t.units.detail.version}
-													</span>
+				<>
+					<UnitSeriesMemberships unitId={detail.unit.id} />
+					<section className="grid gap-3">
+						<div className="grid gap-1">
+							<h2 className="font-heading text-xl font-bold">{t.units.detail.variants}</h2>
+							<p className="text-sm text-muted-foreground">{t.units.detail.variantsDescription}</p>
+						</div>
+						{related.length ? (
+							<FeedList
+								aria-label={t.units.detail.variants}
+								emptyBody={t.units.detail.noVariants}
+								emptyTitle={t.units.detail.noVariants}
+								errorLabel={t.state.error}
+								getItemKey={({ unit }) => unit.id}
+								renderItem={({ relation, unit }, metadata) => (
+									<Card asChild className="gap-0 rounded-none py-0 sm:rounded-2xl">
+										<article aria-posinset={metadata.position} aria-setsize={metadata.setSize}>
+											<CardContent
+												className={
+													unit.cover
+														? "grid grid-cols-[4.5rem_minmax(0,1fr)_auto] gap-4 p-4"
+														: "grid grid-cols-[minmax(0,1fr)_auto] gap-4 p-4"
+												}
+											>
+												{unit.cover ? (
+													<Cover
+														alt={unit.title ?? t.ui.unnamed}
+														className="rounded-lg border border-border-weak"
+														src={unit.cover.url}
+													/>
+												) : null}
+												<div className="flex min-w-0 items-center justify-between gap-3">
+													<div className="grid min-w-0 gap-1">
+														<strong>
+															{unit.title ? (
+																<LocalizedText language={unit.language} value={unit.title} />
+															) : (
+																t.ui.unnamed
+															)}
+														</strong>
+														<span className="text-xs text-muted-foreground">
+															{relation === "main" ? t.units.detail.main : t.units.detail.version}
+														</span>
+													</div>
+													<Button asChild size="sm" variant="outline">
+														<Link href={`/units/${unit.type}/${unit.id}`}>
+															{t.engagement.select}
+														</Link>
+													</Button>
 												</div>
-												<Button asChild size="sm" variant="outline">
-													<Link href={`/units/${unit.type}/${unit.id}`}>{t.engagement.select}</Link>
-												</Button>
-											</div>
-											<FeedOverflowMenu canExclude={false} itemId={unit.id} />
-										</CardContent>
-									</article>
-								</Card>
-							)}
-							retryLabel={t.actions.retry}
-							state={{ status: "ready", items: related }}
-						/>
-					) : (
-						<p className="text-sm text-muted-foreground">{t.units.detail.noVariants}</p>
-					)}
-				</section>
+												<FeedOverflowMenu canExclude={false} itemId={unit.id} />
+											</CardContent>
+										</article>
+									</Card>
+								)}
+								retryLabel={t.actions.retry}
+								state={{ status: "ready", items: related }}
+							/>
+						) : (
+							<p className="text-sm text-muted-foreground">{t.units.detail.noVariants}</p>
+						)}
+					</section>
+				</>
 			)}
 		</UnitDetailSectionFrame>
 	);

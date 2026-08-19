@@ -286,7 +286,7 @@ export default {
 				contents: "Explora la estructura de capítulos y sigue leyendo.",
 				tags: "Revisa las etiquetas globales y las valoraciones contextuales de las fuentes seleccionadas.",
 				associations:
-					"Revisa los temas del libro y sus relaciones entre elementos principales y variantes.",
+					"Revisa los temas del libro, su serie y sus relaciones entre elementos principales y variantes.",
 				reviews: "Lee o escribe reseñas de lectores con una puntuación opcional.",
 				collections: "Explora las colecciones públicas que incluyen este libro.",
 				discussion: `Explora las ${postTerms.plural} que usan este libro como tema.`,
@@ -297,7 +297,7 @@ export default {
 				contents: `Explora la estructura de ${videoTerms.inline} y ${audioTerms.inline} y registra tu progreso de reproducción.`,
 				tags: "Revisa las etiquetas globales y las valoraciones contextuales de las fuentes seleccionadas.",
 				associations:
-					"Revisa los temas de esta obra y sus relaciones entre elementos principales y variantes.",
+					"Revisa los temas de esta obra, su serie y sus relaciones entre elementos principales y variantes.",
 				reviews: "Lee o escribe reseñas del público.",
 				collections: "Explora las colecciones públicas que incluyen esta obra.",
 				discussion: `Explora las ${postTerms.plural} que usan esta obra como tema.`,
@@ -307,7 +307,7 @@ export default {
 				requirements: "Consulta los requisitos del sistema por plataforma y nivel.",
 				tags: "Revisa las etiquetas globales y las valoraciones contextuales de las fuentes seleccionadas.",
 				associations:
-					"Revisa los temas del software y sus relaciones entre elementos principales y variantes.",
+					"Revisa los temas del software, su serie y sus relaciones entre elementos principales y variantes.",
 				reviews: "Lee o escribe reseñas de usuarios del software.",
 				collections: "Explora las colecciones públicas que incluyen este software.",
 				discussion: `Explora las ${postTerms.plural} que usan este software como tema.`,
@@ -354,6 +354,7 @@ export default {
 		version: "Variante",
 		noVersions: "No hay otras versiones disponibles.",
 		noVariants: "No hay otras variantes disponibles.",
+		noSeriesMemberships: "Esta obra no forma parte de ninguna serie.",
 		noRequirements: "No hay requisitos del sistema disponibles.",
 		requirementTier: "Nivel de requisitos",
 		requirementPlatform: "Identificador de plataforma",

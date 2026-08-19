@@ -289,7 +289,7 @@ export default {
 				contents: "Durchsuche die Kapitelstruktur und lies weiter.",
 				tags: "Prüfe globale Tags und kontextbezogene Bewertungen aus deinen ausgewählten Quellen.",
 				associations:
-					"Prüfe Themen des Buchs sowie Beziehungen zwischen Haupteinträgen und Varianten.",
+					"Prüfe Themen des Buchs, die zugehörige Reihe sowie Beziehungen zwischen Haupteinträgen und Varianten.",
 				reviews: "Lies oder schreibe Leserrezensionen mit optionaler Bewertung.",
 				collections: "Entdecke öffentliche Sammlungen, die dieses Buch enthalten.",
 				discussion: `Durchsuche ${postTerms.pluralLabel}, die dieses Buch als Thema verwenden.`,
@@ -299,7 +299,7 @@ export default {
 				contents: `Durchsuche die ${videoTerms.label}- und ${audioTerms.label}struktur und erfasse deinen Wiedergabefortschritt.`,
 				tags: "Prüfe globale Tags und kontextbezogene Bewertungen aus deinen ausgewählten Quellen.",
 				associations:
-					"Prüfe Themen dieses Werks sowie Beziehungen zwischen Haupteinträgen und Varianten.",
+					"Prüfe Themen dieses Werks, die zugehörige Reihe sowie Beziehungen zwischen Haupteinträgen und Varianten.",
 				reviews: "Lies oder schreibe Publikumsrezensionen.",
 				collections: "Entdecke öffentliche Sammlungen, die dieses Werk enthalten.",
 				discussion: `Durchsuche ${postTerms.pluralLabel}, die dieses Werk als Thema verwenden.`,
@@ -309,7 +309,7 @@ export default {
 				requirements: "Zeige Systemanforderungen nach Plattform und Stufe an.",
 				tags: "Prüfe globale Tags und kontextbezogene Bewertungen aus deinen ausgewählten Quellen.",
 				associations:
-					"Prüfe Themen der Software sowie Beziehungen zwischen Haupteinträgen und Varianten.",
+					"Prüfe Themen der Software, die zugehörige Reihe sowie Beziehungen zwischen Haupteinträgen und Varianten.",
 				reviews: "Lies oder schreibe Rezensionen von Softwarenutzern.",
 				collections: "Entdecke öffentliche Sammlungen, die diese Software enthalten.",
 				discussion: `Durchsuche ${postTerms.pluralLabel}, die diese Software als Thema verwenden.`,
@@ -356,6 +356,7 @@ export default {
 		version: "Variante",
 		noVersions: "Es sind keine weiteren Versionen verfügbar.",
 		noVariants: "Es sind keine weiteren Varianten verfügbar.",
+		noSeriesMemberships: "Dieses Werk gehört zu keiner Reihe.",
 		noRequirements: "Es sind keine Systemanforderungen verfügbar.",
 		requirementTier: "Anforderungsstufe",
 		requirementPlatform: "Plattformkennung",

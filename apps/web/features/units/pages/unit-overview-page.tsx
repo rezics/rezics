@@ -2,14 +2,7 @@
 
 import type { Translation } from "@rezics/i18n";
 import { isLicenseId } from "@rezics/license";
-import {
-	Card,
-	CardContent,
-	DataList,
-	DataListItem,
-	DataListItemLabel,
-	DataListItemValue,
-} from "@rezics/ui";
+import { DataList, DataListItem, DataListItemLabel, DataListItemValue } from "@rezics/ui";
 import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import type { ReactNode } from "react";
 
@@ -27,7 +20,6 @@ import {
 	PrimaryBookAuthorSection,
 } from "../components/unit-attribution-sections";
 import { UnitExternalLinkList } from "../components/unit-external-links";
-import { UnitSubjectGroups } from "../components/unit-subject-groups";
 import { SeriesReleaseFeed } from "../components/series-release-feed";
 import { useUnitDetail } from "../components/unit-detail-workspace";
 import { unitCreditsHref, unitReviewsHref } from "../routing/unit-detail-routes";
@@ -121,22 +113,6 @@ export function UnitOverviewPage() {
 				/>
 
 				<UnitDiscussionSummarySection targetId={unit.id} type={type} />
-
-				{unit.subjectAssociations.length ? (
-					<DetailSection title={t.units.detail.subjectAssociations}>
-						<Card>
-							<CardContent className="grid gap-4 p-5 sm:p-6">
-								<UnitSubjectGroups associations={unit.subjectAssociations.slice(0, 8)} />
-								<Link
-									className="w-fit text-sm font-medium text-link hover:text-link-hover hover:underline"
-									href={`/units/${type}/${unit.id}/associations`}
-								>
-									{t.units.detail.viewAssociations}
-								</Link>
-							</CardContent>
-						</Card>
-					</DetailSection>
-				) : null}
 
 				{type === "series" ? null : (
 					<DetailSection title={t.feed.relatedWorks}>
