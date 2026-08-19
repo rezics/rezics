@@ -77893,7 +77893,6 @@ export type PostApiUnitsByTypeStatus200 = {
 					wordCount: string | number;
 					characterCount: string | number;
 				}[];
-				format: (string | null) | null;
 		  }
 		| {
 				/**
@@ -80802,7 +80801,6 @@ export type GetApiUnitsByTypeByUnitIdStatus200 = {
 					wordCount: string | number;
 					characterCount: string | number;
 				}[];
-				format: (string | null) | null;
 		  }
 		| {
 				/**
@@ -82436,7 +82434,6 @@ export type PatchApiUnitsByTypeByUnitIdStatus200 = {
 					wordCount: string | number;
 					characterCount: string | number;
 				}[];
-				format: (string | null) | null;
 		  }
 		| {
 				/**
@@ -83756,7 +83753,6 @@ export type PatchApiUnitsByTypeByUnitIdBody = {
 		publicationDate?: (string | null) | null;
 		pageCount?: ((string | number) | null) | null;
 		wordCount?: ((string | number) | null) | null;
-		format?: (string | null) | null;
 		versionLabel?: (string | null) | null;
 		/**
 		 * @minLength 1
@@ -84485,7 +84481,6 @@ export type PatchApiUnitsByTypeByUnitIdVariantContextStatus200 = {
 					wordCount: string | number;
 					characterCount: string | number;
 				}[];
-				format: (string | null) | null;
 		  }
 		| {
 				/**
@@ -86380,7 +86375,6 @@ export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200 = {
 					wordCount: string | number;
 					characterCount: string | number;
 				}[];
-				format: (string | null) | null;
 		  }
 		| {
 				/**
@@ -88286,7 +88280,6 @@ export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200 = {
 					wordCount: string | number;
 					characterCount: string | number;
 				}[];
-				format: (string | null) | null;
 		  }
 		| {
 				/**

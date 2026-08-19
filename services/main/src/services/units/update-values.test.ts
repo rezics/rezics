@@ -50,7 +50,6 @@ describe("Unit update values", () => {
 			publicationDate: undefined,
 			pageCount: undefined,
 			wordCount: 120_000,
-			format: undefined,
 		});
 	});
 

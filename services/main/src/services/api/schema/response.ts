@@ -276,7 +276,6 @@ const UnitDetailsResponse = t.Union([
 			/** Editorial metadata; never derived from hosted chapters. */
 			wordCount: t.Nullable(t.Integer({ minimum: 0 })),
 			publishedContentMetrics: t.Array(LocalizedContentMetricResponse),
-			format: NullableText,
 		},
 		{ additionalProperties: false },
 	),

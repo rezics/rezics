@@ -298,6 +298,16 @@ describe("Unit partial update shapes", () => {
 	it("rejects an open-ended Book draft scope", () => {
 		expect(Check(UpdateUnitBody, { updatedAt, bookChapterDraftScope: "all_chapters" })).toBe(false);
 	});
+
+	it("rejects details.format", () => {
+		expect(Check(UpdateUnitBody, { updatedAt, details: { format: "paperback" } })).toBe(false);
+		expect(
+			Check(UpdateUnitBody, {
+				updatedAt,
+				details: { releaseStatus: "ongoing", format: "paperback" },
+			}),
+		).toBe(false);
+	});
 });
 
 describe("Work Unit route types", () => {

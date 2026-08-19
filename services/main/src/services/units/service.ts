@@ -379,7 +379,6 @@ async function getUnitDetails(
 			pageCount: details.pageCount,
 			wordCount: details.wordCount,
 			publishedContentMetrics: await listPublishedBookContentMetrics(database, unitId),
-			format: details.format,
 		};
 	}
 	if (kind === "software") {

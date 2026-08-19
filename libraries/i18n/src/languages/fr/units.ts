@@ -213,7 +213,6 @@ export default {
 		isbn13: verbatimTerms.isbn13.value,
 		publicationDate: "Date d’édition",
 		pageCount: "Nombre de pages",
-		format: "Reliure ou format",
 		releaseStatus: "Statut de parution de l’œuvre",
 		versionLabel: "Libellé de version",
 		mediaKind: "Type de média",

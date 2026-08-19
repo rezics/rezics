@@ -215,7 +215,6 @@ const UnitDetailsInput = t.Object(
 		publicationDate: t.Optional(t.Nullable(t.String({ format: "date" }))),
 		pageCount: t.Optional(t.Nullable(t.Integer({ minimum: 1 }))),
 		wordCount: t.Optional(t.Nullable(t.Integer({ minimum: 0 }))),
-		format: t.Optional(t.Nullable(t.String())),
 		versionLabel: t.Optional(t.Nullable(t.String())),
 		kind: t.Optional(t.String({ minLength: 1 })),
 		runtimeMinutes: t.Optional(t.Nullable(t.Integer({ minimum: 1 }))),

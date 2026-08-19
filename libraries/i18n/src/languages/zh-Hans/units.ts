@@ -192,7 +192,6 @@ export default {
 		isbn13: verbatimTerms.isbn13.value,
 		publicationDate: "出版日期",
 		pageCount: "页数",
-		format: "装帧或格式",
 		releaseStatus: "作品更新状态",
 		versionLabel: "版本名称",
 		mediaKind: "媒体类型",

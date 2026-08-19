@@ -26,7 +26,6 @@ export interface UpdateUnitInput {
 		readonly publicationDate?: string | null;
 		readonly pageCount?: number | null;
 		readonly wordCount?: number | null;
-		readonly format?: string | null;
 		readonly versionLabel?: string | null;
 		readonly kind?: string;
 		readonly runtimeMinutes?: number | null;
@@ -58,7 +57,6 @@ export function toBookUpdateValues(input: UpdateUnitInput) {
 		publicationDate: details.publicationDate === undefined ? releasedOn : details.publicationDate,
 		pageCount: details.pageCount,
 		wordCount: details.wordCount,
-		format: details.format,
 	});
 }
 

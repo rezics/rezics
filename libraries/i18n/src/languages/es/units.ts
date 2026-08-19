@@ -211,7 +211,6 @@ export default {
 		isbn13: verbatimTerms.isbn13.value,
 		publicationDate: "Fecha de edición",
 		pageCount: "Número de páginas",
-		format: "Encuadernación o formato",
 		releaseStatus: "Estado de actualización de la obra",
 		versionLabel: "Etiqueta de versión",
 		mediaKind: "Tipo de contenido multimedia",

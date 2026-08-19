@@ -196,7 +196,6 @@ function getDomainFacts(
 				[t.units.fields.isbn13, detail.unit.details.isbn13],
 				[t.units.fields.publicationDate, formatDate(detail.unit.details.publicationDate, language)],
 				[t.units.fields.pageCount, detail.unit.details.pageCount],
-				[t.units.fields.format, detail.unit.details.format],
 			];
 		case "media":
 			return [

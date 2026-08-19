@@ -97216,8 +97216,7 @@
 														"publicationDate",
 														"pageCount",
 														"wordCount",
-														"publishedContentMetrics",
-														"format"
+														"publishedContentMetrics"
 													],
 													"properties": {
 														"type": { "const": "book", "type": "string" },
@@ -97298,10 +97297,6 @@
 																	}
 																}
 															}
-														},
-														"format": {
-															"nullable": true,
-															"anyOf": [{ "type": "string" }, { "type": "null" }]
 														}
 													}
 												},
@@ -99384,8 +99379,7 @@
 														"publicationDate",
 														"pageCount",
 														"wordCount",
-														"publishedContentMetrics",
-														"format"
+														"publishedContentMetrics"
 													],
 													"properties": {
 														"type": { "const": "book", "type": "string" },
@@ -99466,10 +99460,6 @@
 																	}
 																}
 															}
-														},
-														"format": {
-															"nullable": true,
-															"anyOf": [{ "type": "string" }, { "type": "null" }]
 														}
 													}
 												},
@@ -100835,10 +100825,6 @@
 													{ "type": "null" }
 												]
 											},
-											"format": {
-												"nullable": true,
-												"anyOf": [{ "type": "string" }, { "type": "null" }]
-											},
 											"versionLabel": {
 												"nullable": true,
 												"anyOf": [{ "type": "string" }, { "type": "null" }]
@@ -101329,8 +101315,7 @@
 														"publicationDate",
 														"pageCount",
 														"wordCount",
-														"publishedContentMetrics",
-														"format"
+														"publishedContentMetrics"
 													],
 													"properties": {
 														"type": { "const": "book", "type": "string" },
@@ -101411,10 +101396,6 @@
 																	}
 																}
 															}
-														},
-														"format": {
-															"nullable": true,
-															"anyOf": [{ "type": "string" }, { "type": "null" }]
 														}
 													}
 												},
@@ -103300,8 +103281,7 @@
 														"publicationDate",
 														"pageCount",
 														"wordCount",
-														"publishedContentMetrics",
-														"format"
+														"publishedContentMetrics"
 													],
 													"properties": {
 														"type": { "const": "book", "type": "string" },
@@ -103382,10 +103362,6 @@
 																	}
 																}
 															}
-														},
-														"format": {
-															"nullable": true,
-															"anyOf": [{ "type": "string" }, { "type": "null" }]
 														}
 													}
 												},
@@ -105238,8 +105214,7 @@
 														"publicationDate",
 														"pageCount",
 														"wordCount",
-														"publishedContentMetrics",
-														"format"
+														"publishedContentMetrics"
 													],
 													"properties": {
 														"type": { "const": "book", "type": "string" },
@@ -105320,10 +105295,6 @@
 																	}
 																}
 															}
-														},
-														"format": {
-															"nullable": true,
-															"anyOf": [{ "type": "string" }, { "type": "null" }]
 														}
 													}
 												},
@@ -107431,8 +107402,7 @@
 														"publicationDate",
 														"pageCount",
 														"wordCount",
-														"publishedContentMetrics",
-														"format"
+														"publishedContentMetrics"
 													],
 													"properties": {
 														"type": { "const": "book", "type": "string" },
@@ -107513,10 +107483,6 @@
 																	}
 																}
 															}
-														},
-														"format": {
-															"nullable": true,
-															"anyOf": [{ "type": "string" }, { "type": "null" }]
 														}
 													}
 												},

@@ -137,7 +137,6 @@ export function UnitMetadataEditor({ type, unit }: { type: UnitType; unit: Unit 
 					isbn13: String(form.get("isbn13") ?? "").trim() || null,
 					publicationDate: releasedOn || null,
 					pageCount,
-					format: String(form.get("format") ?? "").trim() || null,
 				};
 			}
 			if (unit.details.type === "software")
@@ -337,10 +336,6 @@ function UnitTypeSpecificFields({ unit }: { unit: Unit }) {
 				<Field>
 					<FieldLabel>{t.units.fields.pageCount}</FieldLabel>
 					<Input defaultValue={details.pageCount ?? ""} min={1} name="pageCount" type="number" />
-				</Field>
-				<Field>
-					<FieldLabel>{t.units.fields.format}</FieldLabel>
-					<Input defaultValue={details.format ?? ""} name="format" />
 				</Field>
 			</>
 		);

@@ -18,6 +18,16 @@ export const book = pgTable(
 		pageCount: integer(),
 		/** Authoritative editorial metadata available to Book Zone filtering. */
 		wordCount: integer(),
+		/**
+		 * Legacy free-text Book format retained for Search compatibility and migration analysis.
+		 *
+		 * @remarks
+		 * Unit CRUD APIs must neither accept nor expose this value. Its replacement is a
+		 * deterministic relation to Tag identities, independent of Tag voting.
+		 *
+		 * @todo Decide whether Book format records `tagId` or `tagIds`, then define validation,
+		 * migration, and Search cutover before removing this column.
+		 */
 		format: text(),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),

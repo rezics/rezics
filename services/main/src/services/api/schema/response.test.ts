@@ -391,6 +391,26 @@ describe("API response values", () => {
 		).toBe(false);
 	});
 
+	it("does not include format in Unit detail responses", () => {
+		const bookDetails = {
+			type: "book" as const,
+			releaseStatus: "ongoing" as const,
+			isbn13: null,
+			publicationDate: null,
+			pageCount: null,
+			wordCount: null,
+			publishedContentMetrics: [],
+		};
+
+		expect(Check(UnitDetailResponse.properties.details, bookDetails)).toBe(true);
+		expect(
+			Check(UnitDetailResponse.properties.details, { ...bookDetails, format: "paperback" }),
+		).toBe(false);
+		expect(
+			UnitDetailResponse.properties.details.anyOf.some((schema) => "format" in schema.properties),
+		).toBe(false);
+	});
+
 	it("uses one vote-backed external-link contract with source presentation on every detail", () => {
 		const unitExternalLink = UnitDetailResponse.properties.externalLinks.items;
 		const entityExternalLink = EntityDetailResponse.properties.externalLinks.items;

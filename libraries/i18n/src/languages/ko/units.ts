@@ -208,7 +208,6 @@ export default {
 		isbn13: verbatimTerms.isbn13.value,
 		publicationDate: "출판 날짜",
 		pageCount: "페이지 수",
-		format: "제본 또는 형식",
 		releaseStatus: "작품 업데이트 상태",
 		versionLabel: "버전 라벨",
 		mediaKind: "미디어 종류",
