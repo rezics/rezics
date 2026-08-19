@@ -7,6 +7,7 @@ const SensitiveKey =
 	/(?:^|[._-])(authorization|body|cookie|credential|email|object.?key|parameters|params|password|query|secret|session|signature|signed.?url|sql|statement|token|unit.?id|user.?id|profile.?id)(?:$|[._-])/i;
 const StackKey = /(?:^|[._-])(stack|stacktrace)(?:$|[._-])/i;
 const UrlKey = /(?:^|[._-])(uri|url)(?:$|[._-])/i;
+const CorrelationKey = /^(requestId|request_id)$/;
 const EmailAddress = /\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/gi;
 const BearerCredential = /\bBearer\s+[A-Za-z0-9._~+/-]+=*/gi;
 const SensitiveAssignment =
@@ -95,6 +96,10 @@ function redactValue(
 			continue;
 		}
 		if (production && StackKey.test(key)) continue;
+		if (CorrelationKey.test(key) && typeof entry === "string") {
+			record[key] = entry.slice(0, 128);
+			continue;
+		}
 		if (UrlKey.test(key) && typeof entry === "string") {
 			record[key] = safeUrl(entry);
 			continue;

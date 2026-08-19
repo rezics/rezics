@@ -24,6 +24,7 @@ import {
 	createDockDocument,
 	createPollContentBlock,
 	createPortableTextDocument,
+	describeDocumentIssues,
 	isDocument,
 	isPortableTextDocument,
 	normalizeWikiPostPortableTextDocument,
@@ -156,6 +157,17 @@ describe("Block document contracts", () => {
 			assertUnitReferencedBlockDocument(document, ZonePageBlockHostPolicy),
 		).not.toThrow();
 		expect([...collectBlockReferences(document).wikiPostIds]).toEqual([postId]);
+	});
+
+	test("describes TypeBox path and message without returning the document", () => {
+		const issues = describeDocumentIssues(UnitReferencedBlockDocument, {
+			_type: "portable-text",
+			_key: "000000000040",
+			content: [],
+		});
+		expect(issues.some((issue) => issue.path === "/_type")).toBe(true);
+		expect(issues.map((issue) => issue.message).join(" ")).toMatch(/block-document/i);
+		expect(JSON.stringify(issues)).not.toContain("portable-text paragraphs");
 	});
 
 	test("requires Zone composition copy to be referenced through localized Units", () => {

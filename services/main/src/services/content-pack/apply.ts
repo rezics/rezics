@@ -51,6 +51,7 @@ import { insertUnit } from "../units/create";
 import { recordInitialRealmUnitPublicationEvents } from "../units/realm-publication";
 import { replaceZonePageSlugAddress } from "../units/slug-address";
 import { ContentPackCollision, ContentPackConflict, ContentPackInvalid } from "./errors";
+import { assertContentPackDocuments } from "./documents";
 import { planContentPack } from "./plan";
 import type { LoadedPack, PackObject, PackStructure } from "./contracts";
 
@@ -74,6 +75,7 @@ export async function applyContentPack(
 	pack: LoadedPack,
 	sourceRoot: string,
 ): Promise<{ readonly status: "created" | "noop"; readonly created: number }> {
+	assertContentPackDocuments(pack);
 	await tx.execute(
 		sql`select pg_advisory_xact_lock(hashtextextended(${`content-pack:${pack.manifest.id}`}::text, 0))`,
 	);
@@ -310,7 +312,11 @@ async function importRelations(
 			})),
 		);
 	const subjects = (relations.subjects ?? []).filter((item) =>
-		touchesCreated(createKeys, [item.unitSourceKey, item.entitySourceKey, item.contextPostSourceKey]),
+		touchesCreated(createKeys, [
+			item.unitSourceKey,
+			item.entitySourceKey,
+			item.contextPostSourceKey,
+		]),
 	);
 	if (subjects.length)
 		await tx.insert(subjectAssociation).values(

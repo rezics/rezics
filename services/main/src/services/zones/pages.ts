@@ -4,12 +4,16 @@ import {
 	UnitReferencedBlockDocument,
 	ZonePageBlockHostPolicy,
 	assertUnitReferencedBlockDocument,
-	parseDocument,
+	describeDocumentIssues,
+	isDocument,
 	walkBlockTree,
 	type UnitReferencedBlockDocument as UnitReferencedBlockDocumentValue,
 } from "@rezics/block";
 import type { ContentLanguage } from "@rezics/i18n";
+import { peekActiveObservability } from "@rezics/observability";
 import { ZoneHomePageSlug } from "@rezics/slug";
+
+import { getAuditRequestContext } from "../audit/context";
 
 import { database, type DatabaseTransaction } from "../database";
 import {
@@ -70,7 +74,7 @@ export interface ZonePagePlacementMutationInput {
 	readonly baseStructureRevisionId?: string;
 }
 
-interface StoredZonePageLocalization {
+export interface StoredZonePageLocalization {
 	readonly language: ContentLanguage;
 	readonly position: string;
 	readonly title: string | null;
@@ -201,15 +205,31 @@ export async function resolveZonePageAddressBySlug(
 	};
 }
 
-function parseLocalization(row: StoredZonePageLocalization) {
-	if (!row.title || !row.content || !row.contentStatus)
-		throw new ContentStructureInvalid("Zone Page Unit localization is incomplete");
-	return {
-		language: row.language,
-		title: row.title,
-		document: parseDocument(UnitReferencedBlockDocument, row.content),
-		contentStatus: row.contentStatus,
-	};
+export function readZonePageLocalization(row: StoredZonePageLocalization) {
+	if (!row.title || !row.content || !row.contentStatus) return null;
+	if (isDocument(UnitReferencedBlockDocument, row.content))
+		return {
+			language: row.language,
+			title: row.title,
+			document: row.content,
+			contentStatus: row.contentStatus,
+		};
+	const issues = describeDocumentIssues(UnitReferencedBlockDocument, row.content);
+	const requestId = getAuditRequestContext()?.requestId;
+	peekActiveObservability()?.logger.error(
+		"Zone Page localization is not a UnitReferencedBlockDocument",
+		{
+			eventName: "zone.page.localization.invalid",
+			errorCode: "ContentStructureInvalid",
+			attributes: {
+				...(requestId ? { requestId } : {}),
+				validationIssues: issues,
+			},
+		},
+	);
+	throw new ContentStructureInvalid(
+		"Zone Page Unit localization is not a UnitReferencedBlockDocument",
+	);
 }
 
 /**
@@ -224,6 +244,39 @@ export async function listZonePageUnits(
 	zoneId: string,
 	localizationLanguages: readonly ContentLanguage[] = [],
 ): Promise<ZonePageProjection[]> {
+	return loadZonePageUnits(tx, zoneId, localizationLanguages);
+}
+
+/**
+ * Loads canonical slugs for the given Page IDs only. Render reference expansion
+ * uses this instead of parsing every Page document in the Zone.
+ */
+export async function listZonePageCanonicalSlugs(
+	tx: DatabaseTransaction,
+	zoneId: string,
+	pageIds: readonly string[],
+): Promise<ReadonlyMap<string, string | null>> {
+	if (!pageIds.length) return new Map();
+	const addresses = await tx
+		.select({ targetUnitId: unitSlugAddress.targetUnitId, slug: unitSlugAddress.slug })
+		.from(unitSlugAddress)
+		.where(
+			and(
+				eq(unitSlugAddress.kind, "canonical"),
+				eq(unitSlugAddress.scopeUnitId, zoneId),
+				inArray(unitSlugAddress.targetUnitId, pageIds),
+			),
+		);
+	return new Map(addresses.map((address) => [address.targetUnitId, address.slug]));
+}
+
+async function loadZonePageUnits(
+	tx: DatabaseTransaction,
+	zoneId: string,
+	localizationLanguages: readonly ContentLanguage[] = [],
+	requestedPageIds?: readonly string[],
+): Promise<ZonePageProjection[]> {
+	if (requestedPageIds && requestedPageIds.length === 0) return [];
 	const pages = await tx
 		.select({
 			id: unit.id,
@@ -236,7 +289,14 @@ export async function listZonePageUnits(
 			post,
 			and(eq(post.id, zonePage.id), eq(post.kind, "page"), eq(post.subjectUnitId, zonePage.zoneId)),
 		)
-		.where(and(eq(zonePage.zoneId, zoneId), eq(unit.kind, "zone_page"), isNull(unit.deletedAt)))
+		.where(
+			and(
+				eq(zonePage.zoneId, zoneId),
+				eq(unit.kind, "zone_page"),
+				isNull(unit.deletedAt),
+				requestedPageIds ? inArray(zonePage.id, requestedPageIds) : undefined,
+			),
+		)
 		.orderBy(asc(unit.createdAt), asc(unit.id));
 	if (!pages.length) return [];
 
@@ -305,7 +365,10 @@ export async function listZonePageUnits(
 		const latestUnitRevisionId = revisionById.get(page.id);
 		const localizations = localizationRows
 			.filter((row) => row.unitId === page.id)
-			.map(parseLocalization);
+			.flatMap((row) => {
+				const localization = readZonePageLocalization(row);
+				return localization ? [localization] : [];
+			});
 		const selected = resolveUnitLocalizationFromOrdered(localizations, localizationLanguages);
 		if (!latestUnitRevisionId || !selected)
 			throw new ContentStructureInvalid("Zone Page Unit is incomplete");
@@ -343,8 +406,10 @@ export async function getZonePageUnitBySlug(
 	slug: string,
 	localizationLanguages: readonly ContentLanguage[] = [],
 ): Promise<ZonePageProjection | null> {
-	const pages = await listZonePageUnits(tx, zoneId, localizationLanguages);
-	return pages.find((page) => page.slug === slug) ?? null;
+	const address = await resolveZonePageAddressBySlug(tx, zoneId, slug);
+	if (!address) return null;
+	const [page] = await loadZonePageUnits(tx, zoneId, localizationLanguages, [address.id]);
+	return page ?? null;
 }
 
 export async function getZonePageUnitById(
@@ -353,8 +418,8 @@ export async function getZonePageUnitById(
 	pageId: string,
 	localizationLanguages: readonly ContentLanguage[] = [],
 ): Promise<ZonePageProjection | null> {
-	const pages = await listZonePageUnits(tx, zoneId, localizationLanguages);
-	return pages.find((page) => page.id === pageId) ?? null;
+	const [page] = await loadZonePageUnits(tx, zoneId, localizationLanguages, [pageId]);
+	return page ?? null;
 }
 
 export async function getZonePageStructureProjection(

@@ -98,6 +98,7 @@ import {
 	getZonePageStructureProjection,
 	getZonePageUnitById,
 	getZonePageUnitBySlug,
+	listZonePageCanonicalSlugs,
 	listZonePageUnits,
 	resolveZonePageAddressBySlug,
 	upsertZonePagePlacement,
@@ -869,10 +870,8 @@ export default new Elysia()
 						[...unitIds],
 						identity.authorization.profileId,
 					);
-					const zonePageSlugs = new Map(
-						(await database.transaction((tx) => listZonePageUnits(tx, params.zoneId))).map(
-							(candidate) => [candidate.id, candidate.slug] as const,
-						),
+					const zonePageSlugs = await database.transaction((tx) =>
+						listZonePageCanonicalSlugs(tx, params.zoneId, [...unitIds]),
 					);
 					const units = [...unitIds].flatMap((id) => {
 						const presented = presentRenderUnit(

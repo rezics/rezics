@@ -1,5 +1,5 @@
 import { type Static, type TSchema } from "@sinclair/typebox";
-import { Check } from "@sinclair/typebox/value";
+import { Check, Value } from "@sinclair/typebox/value";
 import {
 	assertFilterDocument,
 	collectUnitPredicateReferenceIds,
@@ -196,6 +196,23 @@ export function isDocument<TSchemaValue extends TSchema>(
 	value: unknown,
 ): value is Static<TSchemaValue> {
 	return Check(schema, value);
+}
+
+export interface BlockDocumentIssue {
+	readonly path: string;
+	readonly message: string;
+}
+
+const MaximumDocumentIssues = 20;
+
+export function describeDocumentIssues(
+	schema: TSchema,
+	value: unknown,
+): readonly BlockDocumentIssue[] {
+	return [...Value.Errors(schema, value)].slice(0, MaximumDocumentIssues).map((issue) => ({
+		path: issue.path || "/",
+		message: issue.message,
+	}));
 }
 
 export function assertDocument<TSchemaValue extends TSchema>(

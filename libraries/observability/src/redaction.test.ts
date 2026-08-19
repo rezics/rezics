@@ -35,6 +35,16 @@ describe("telemetry redaction", () => {
 		expect(serialized).toContain("[CIRCULAR]");
 	});
 
+	it("preserves request correlation identifiers", () => {
+		const requestId = "3d708872-45bc-4ecf-b31b-7f7301869d7d";
+		const serialized = JSON.stringify(
+			redact({ requestId, attributes: { requestId }, unitId: requestId }, false),
+		);
+
+		expect(serialized).toContain(requestId);
+		expect(serialized).toContain("[REDACTED]");
+	});
+
 	it("removes stack data in production", () => {
 		const serialized = JSON.stringify(redact(new Error("safe failure"), true));
 
