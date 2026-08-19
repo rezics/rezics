@@ -1,6 +1,8 @@
 ---
 name: external-content-value
 description: Audit, write, or revise REZICS user-visible and externally published content so every text unit serves an audience need. Use for UI and localization copy, empty/help/error states, notifications and email, SEO or public metadata, seeded or showcase catalog content, and public API or user documentation. Do not use for internal logs, code comments, tests, or maintainer-only documentation unless their audience value is explicitly under review.
+metadata:
+  version: "1.0.0"
 ---
 
 # External Content Value

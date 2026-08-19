@@ -1,6 +1,8 @@
 ---
 name: typesafe
 description: "Use TypeSafe thinking whenever writing or changing TypeScript. Show all needed values, states, rules, and failures; give every stronger type a proof; allow only safe operations; and keep the type guarantee safe from its source to its final use. Use for implementation, refactoring, API and data-flow design, integration, migration, review, debugging, compiler settings, declarations, and generated types."
+metadata:
+  version: "1.0.0"
 ---
 
 # TypeSafe
