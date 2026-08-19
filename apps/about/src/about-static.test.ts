@@ -145,8 +145,8 @@ describe("public content contract", () => {
 		expect(getUsesPath("en")).toBe("/en/uses/");
 		expect(getProductsPath("en")).toBe("/en/products/");
 		expect(getProductPath("en", "unit")).toBe("/en/products/unit/");
-		expect(getLegalPath("en", "rezics-unit-content-license-v1")).toBe(
-			"/en/legal/rezics-unit-content-license-v1/",
+		expect(getLegalPath("en", "rezics-unit-content-license-v1-1")).toBe(
+			"/en/legal/rezics-unit-content-license-v1-1/",
 		);
 		expect(getDocumentationPath("en", "api/tokens")).toBe("/en/docs/api/tokens/");
 		expect(getContactPath("en")).toBe("/en/contact-us/");

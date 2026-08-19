@@ -24,8 +24,8 @@ const options = {
 	},
 	"cc0-1.0": { label: `${verbatimTerms.cc.value}0 1.0 Universal` },
 	"pdm-1.0": { label: `${verbatimTerms.cc.value} ${verbatimTerms.pdm.value} 1.0 Universal` },
-	"rezics-unit-content-license-v1": {
-		label: verbatimTerms.rezicsUnitContentLicenseV1.value,
+	"rezics-unit-content-license-v1-1": {
+		label: verbatimTerms.rezicsUnitContentLicenseV1_1.value,
 	},
 } satisfies Readonly<Record<LicenseId, LicenseOptionTranslation>>;
 
@@ -38,6 +38,6 @@ export default {
 	declarationNotice: `Estas opciones solo registran declaraciones. Su efecto jurídico depende de que la persona declarante tenga la autoridad necesaria; ${verbatimTerms.rezics.value} no verifica esa autoridad.`,
 	options,
 	affirmativeAcknowledgement: {
-		confirmationLabel: `He leído y acepto la ${verbatimTerms.rezicsUnitContentLicenseV1.value} y confirmo que tengo autoridad para conceder esta ${esTerminology.license.forms.inline} para este contenido.`,
+		confirmationLabel: `He leído y acepto la ${verbatimTerms.rezicsUnitContentLicenseV1_1.value}. Confirmo que tengo autoridad para concederla para este contenido, incluidos los derechos de traducción y de ofrecer conjuntamente mediante pago el original y sus traducciones.`,
 	},
 } satisfies typeof import("../zh-Hant/licenses").default;

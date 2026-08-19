@@ -24,8 +24,8 @@ const options = {
 	},
 	"cc0-1.0": { label: `${verbatimTerms.cc.value}0 1.0 Universell` },
 	"pdm-1.0": { label: `${verbatimTerms.cc.value} ${verbatimTerms.pdm.value} 1.0 Universell` },
-	"rezics-unit-content-license-v1": {
-		label: verbatimTerms.rezicsUnitContentLicenseV1.value,
+	"rezics-unit-content-license-v1-1": {
+		label: verbatimTerms.rezicsUnitContentLicenseV1_1.value,
 	},
 } satisfies Readonly<Record<LicenseId, LicenseOptionTranslation>>;
 
@@ -39,6 +39,6 @@ export default {
 	declarationNotice: `Diese Auswahl erfasst lediglich Erklärungen. Ihre Rechtswirkung hängt davon ab, ob die erklärende Person dazu berechtigt ist; ${verbatimTerms.rezics.value} prüft diese Berechtigung nicht.`,
 	options,
 	affirmativeAcknowledgement: {
-		confirmationLabel: `Ich habe die ${verbatimTerms.rezicsUnitContentLicenseV1.value} gelesen und stimme ihr zu. Ich bestätige außerdem, dass ich berechtigt bin, diese ${deTerminology.license.forms.label} für diesen Inhalt zu erteilen.`,
+		confirmationLabel: `Ich habe die ${verbatimTerms.rezicsUnitContentLicenseV1_1.value} gelesen und stimme ihr zu. Ich bestätige, dass ich berechtigt bin, sie für diesen Inhalt zu erteilen, einschließlich der Rechte zur Übersetzung und zur gemeinsamen entgeltlichen Bereitstellung des Originals und der Übersetzungen.`,
 	},
 } satisfies typeof import("../zh-Hant/licenses").default;

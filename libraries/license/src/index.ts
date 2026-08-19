@@ -7,13 +7,13 @@ export const LicenseIds = [
 	"cc-by-4.0",
 	"cc0-1.0",
 	"pdm-1.0",
-	"rezics-unit-content-license-v1",
+	"rezics-unit-content-license-v1-1",
 ] as const;
 
 export type LicenseId = (typeof LicenseIds)[number];
 
 export const ResidualRightsLicenseId = "all-rights-reserved" satisfies LicenseId;
-export const RecommendedLicenseId = "rezics-unit-content-license-v1" satisfies LicenseId;
+export const RecommendedLicenseId = "rezics-unit-content-license-v1-1" satisfies LicenseId;
 
 export const LicenseLegalFormValues = [
 	"license",
@@ -116,10 +116,10 @@ export const LicenseRegistry = {
 		requiresAffirmativeAcknowledgement: false,
 		applicableUnitKinds: null,
 	},
-	"rezics-unit-content-license-v1": {
-		id: "rezics-unit-content-license-v1",
+	"rezics-unit-content-license-v1-1": {
+		id: "rezics-unit-content-license-v1-1",
 		legalForm: "license",
-		termsUrl: rezicsLicenseTermsUrl("rezics-unit-content-license-v1"),
+		termsUrl: rezicsLicenseTermsUrl("rezics-unit-content-license-v1-1"),
 		spdxId: null,
 		ownerMayEndOffering: true,
 		requiresAffirmativeAcknowledgement: true,

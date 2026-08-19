@@ -1,1 +1,1 @@
-- [x] `unit_content_license` with `rezics-unit-content-license-v1`
+- [x] `unit_license_grant` with `rezics-unit-content-license-v1-1`

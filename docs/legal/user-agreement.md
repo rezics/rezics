@@ -2,7 +2,7 @@
 
 Status: Draft — not effective
 
-Draft date: 2026-08-01
+Draft date: 2026-08-19
 
 > This document is a product-informed legal draft, not a published agreement. It must not be used
 > to obtain user acceptance until the publication blockers below are resolved and qualified counsel
@@ -10,9 +10,8 @@ Draft date: 2026-08-01
 
 ## Publication blockers
 
-- Replace `[OPERATOR LEGAL NAME]`, `[POSTAL ADDRESS]`, `[LEGAL CONTACT]`,
-  `[COPYRIGHT CONTACT]`, `[SECURITY CONTACT]`, and `[ACCOUNT APPEAL CONTACT]` with authorized
-  details and working channels.
+- Replace `[POSTAL ADDRESS]`, `[LEGAL CONTACT]`, `[COPYRIGHT CONTACT]`, `[SECURITY CONTACT]`, and
+  `[ACCOUNT APPEAL CONTACT]` with authorized details and working channels.
 - Decide `[MINIMUM AGE]` and align the product's registration and child-data handling with that
   decision.
 - Adopt community rules, a reporting process, a moderation appeal process, and a copyright or
@@ -32,7 +31,8 @@ Draft date: 2026-08-01
 
 This REZICS User Agreement (the "Agreement") governs your access to and use of REZICS websites,
 applications, application programming interfaces, emails, and related services (collectively, the
-"Service") provided by `[OPERATOR LEGAL NAME]` ("REZICS," "we," "us," or "our").
+"Service") provided by Rezics Inc., a corporation incorporated under the laws of the State of
+Delaware, United States ("REZICS," "we," "us," or "our").
 
 By creating an account or otherwise accepting this Agreement through the Service, you agree to this
 Agreement. You may browse publicly available pages without an account, but Sections that by their
@@ -72,17 +72,19 @@ they govern.
 The following order resolves a conflict:
 
 1. mandatory law;
-2. transaction-specific or feature-specific Additional Terms for the subject they govern;
-3. an expressly selected public license or separately accepted content license for the rights it
-   grants in the relevant content;
+2. an expressly selected public license or separately accepted content license for the rights it
+   grants in the relevant content and for any offering rule it expressly makes non-variable;
+3. transaction-specific or feature-specific Additional Terms for the remaining subjects they
+   govern;
 4. this Agreement; and
 5. community rules, which may be more restrictive within their community but cannot reduce rights
    or duties imposed by the documents above.
 
-For clarity, the [REZICS Unit Content License 1.0](./rezics-unit-content-license-v1.md) governs only
-content and Units to which that license has been affirmatively granted. A Creative Commons license,
-CC0 dedication, rights-reserved selection, or another publication status applies only where the
-Service identifies that selection for the relevant content.
+For clarity, the
+[REZICS Unit Content License 1.1](https://about.rezics.com/en/legal/rezics-unit-content-license-v1-1/)
+governs only content and Units to which that license has been affirmatively granted. A Creative
+Commons license, CC0 dedication, rights-reserved selection, or another publication status applies
+only where the Service identifies that selection for the relevant content.
 
 ## 5. Your account and its security
 
@@ -164,9 +166,16 @@ you have authority to license. Every selection is a separate, simultaneous prior
 no selection cancels, narrows, or overrides another selection.
 
 The REZICS Unit Content License requires your affirmative acknowledgement. Its scope, term,
-monetization boundary, removal effects, and AI-training restriction govern instead of any
-inconsistent baseline provision in this Agreement. Later contributions made after the Service
-gives notice that this License applies are governed as its terms provide.
+translation rights, Post-package rules, monetization boundary, removal effects, and AI-training
+restriction govern instead of any inconsistent baseline provision in this Agreement. Later
+contributions made after the Service gives notice or obtains the affirmative acceptance required
+by that License are governed as its terms provide.
+
+Under version 1.1, REZICS may translate covered content and may allow users with authorized source
+access to submit translations through enabled Service functionality after they accept the
+translation-contribution terms. A translation contributor does not obtain ownership of the source
+content, control of the Unit, or eligibility for a share of Post revenue merely by providing,
+reviewing, or revising a translation.
 
 Each selected License grants rights directly under its identified terms. Ending the current
 offering, closing your account, or removing the Content does not revoke rights that a License or
@@ -337,6 +346,20 @@ recurrence, taxes, payment provider, refund and cancellation rights, entitlement
 chargebacks, and payout rules before the transaction. This Agreement alone does not activate a
 paid offering or require a Unit controller to monetize Content.
 
+When a Post governed by the REZICS Unit Content License 1.1 is offered for one-time purchase, the
+original Post, its revisions, and every published translation are one Post package. One valid
+purchase entitles the purchasing user to the complete package for the disclosed entitlement
+period, including translations added later during that period. REZICS will not require another
+purchase, a price difference, or a translation surcharge solely because the user selects another
+translation or a new translation becomes available.
+
+Translations may not be priced or sold separately from that Post package. Their existence,
+number, language, provider, or use does not by itself increase the platform-fee rate, create an
+additional platform commission, or deduct translation costs from amounts otherwise payable for
+the Post. Providing a translation does not qualify its contributor for creator payout or a share
+of Post proceeds. These rules are subject only to mandatory law and may not be varied by separate
+transaction or monetization terms.
+
 ## 15. Enforcement, suspension, and termination
 
 You may stop using the Service at any time. You may close your account through
@@ -460,7 +483,7 @@ exclusive relationship between you and REZICS.
 
 The Service is provided by:
 
-`[OPERATOR LEGAL NAME]`  
+`Rezics Inc.`<br />
 `[POSTAL ADDRESS]`  
 Legal questions: `[LEGAL CONTACT]`  
 Account appeals: `[ACCOUNT APPEAL CONTACT]`  
@@ -476,4 +499,4 @@ accounts, content, community governance, prohibited conduct, intellectual proper
 liability, changes, and termination—but is written around REZICS's actual architecture. In
 particular, it replaces Reddit's broad perpetual content and AI-training license with REZICS's
 limited baseline operating license and independently selected registered Licenses, including the
-[REZICS Unit Content License 1.0](./rezics-unit-content-license-v1.md).
+[REZICS Unit Content License 1.1](https://about.rezics.com/en/legal/rezics-unit-content-license-v1-1/).

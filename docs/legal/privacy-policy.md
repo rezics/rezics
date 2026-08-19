@@ -2,7 +2,7 @@
 
 Status: Draft — not effective
 
-Draft date: 2026-08-01
+Draft date: 2026-08-19
 
 > This document is a product-informed legal draft, not a published policy. It must not be treated
 > as effective or linked from a production acceptance flow until the publication blockers below
@@ -10,11 +10,11 @@ Draft date: 2026-08-01
 
 ## Publication blockers
 
-- Replace `[OPERATOR LEGAL NAME]`, `[POSTAL ADDRESS]`, `[PRIVACY CONTACT]`,
-  `[PRIVACY APPEAL CONTACT]`, `[PRIVACY REQUEST METHOD]`, `[SECURITY CONTACT]`, and
-  `[DPO OR REPRESENTATIVE CONTACT]` with the data controller's identity and working request
-  channels. The public project contact is currently `Edgecoordinates@gmail.com`; confirm whether
-  it is authorized for any of these roles.
+- Confirm whether Rezics Inc. is the data controller. Replace `[DATA CONTROLLER LEGAL NAME]`,
+  `[POSTAL ADDRESS]`, `[PRIVACY CONTACT]`, `[PRIVACY APPEAL CONTACT]`,
+  `[PRIVACY REQUEST METHOD]`, `[SECURITY CONTACT]`, and `[DPO OR REPRESENTATIVE CONTACT]` with the
+  controller's identity and working request channels. The public project contact is currently
+  `Edgecoordinates@gmail.com`; confirm whether it is authorized for any of these roles.
 - Decide the minimum user age and the process for handling a user below that age. The current
   product does not collect a date of birth or implement an age-verification flow.
 - Confirm every production hosting and processing country, the service-provider register, and the
@@ -33,10 +33,11 @@ Draft date: 2026-08-01
 
 ## 1. Introduction
 
-This Privacy Policy explains how `[OPERATOR LEGAL NAME]`, the operator of REZICS ("REZICS," "we,"
-"us," or "our"), collects, uses, discloses, and retains personal data when you use REZICS websites,
-applications, application programming interfaces, emails, and related services (collectively, the
-"Service") or otherwise communicate with us.
+This Privacy Policy explains how Rezics Inc., a corporation incorporated under the laws of the
+State of Delaware, United States, and the operator of REZICS ("REZICS," "we," "us," or "our"),
+collects, uses, discloses, and retains personal data when you use REZICS websites, applications,
+application programming interfaces, emails, and related services (collectively, the "Service") or
+otherwise communicate with us.
 
 REZICS is a community-driven, cross-language knowledge network for works. People can browse much
 of the Service without an account. An account is required to contribute, interact, save personal
@@ -173,11 +174,12 @@ GDPR requires us to identify one; the correct basis may depend on the feature an
 | Analyze and improve the Service                             | Aggregated usage, redacted diagnostics, recommendation effectiveness, and feature performance                                       | Our legitimate interest in improving the Service; consent where required                                                      |
 
 We do not use content covered by the
-[REZICS Unit Content License 1.0](./rezics-unit-content-license-v1.md) to train a general-purpose
-artificial intelligence or machine-learning model. We also do not use other user content for that
-purpose unless the affected rights holder separately and affirmatively agrees to terms that clearly
-authorize it. Search indexing, recommendations, spam detection, accessibility, and other
-Service-specific analysis are not general-purpose model training.
+[REZICS Unit Content License 1.1](https://about.rezics.com/en/legal/rezics-unit-content-license-v1-1/)
+to train a general-purpose artificial intelligence or machine-learning model. We also do not use
+other user content for that purpose unless the affected rights holder separately and affirmatively
+agrees to terms that clearly authorize it. Search indexing, recommendations, spam detection,
+accessibility, translation, and other Service-specific analysis are not general-purpose model
+training.
 
 ## 6. Personalization and automated processing
 
@@ -342,7 +344,7 @@ law requires consent for a new purpose, notice alone will not replace that conse
 
 The data controller for the Service is:
 
-`[OPERATOR LEGAL NAME]`  
+`[DATA CONTROLLER LEGAL NAME]`<br />
 `[POSTAL ADDRESS]`  
 Privacy requests: `[PRIVACY CONTACT]`  
 Data protection officer or representative, if applicable: `[DPO OR REPRESENTATIVE CONTACT]`

@@ -24,8 +24,8 @@ const options = {
 	},
 	"cc0-1.0": { label: `${verbatimTerms.cc.value}0 1.0 Universel` },
 	"pdm-1.0": { label: `${verbatimTerms.cc.value} ${verbatimTerms.pdm.value} 1.0 universel` },
-	"rezics-unit-content-license-v1": {
-		label: verbatimTerms.rezicsUnitContentLicenseV1.value,
+	"rezics-unit-content-license-v1-1": {
+		label: verbatimTerms.rezicsUnitContentLicenseV1_1.value,
 	},
 } satisfies Readonly<Record<LicenseId, LicenseOptionTranslation>>;
 
@@ -38,6 +38,6 @@ export default {
 	declarationNotice: `Ces choix enregistrent uniquement des déclarations. Leur effet juridique dépend de l’habilitation de leur auteur ; ${verbatimTerms.rezics.value} ne vérifie pas cette habilitation.`,
 	options,
 	affirmativeAcknowledgement: {
-		confirmationLabel: `J’ai lu et j’accepte la ${verbatimTerms.rezicsUnitContentLicenseV1.value}. Je confirme également être habilité à accorder cette ${frTerminology.license.forms.inline} pour ce contenu.`,
+		confirmationLabel: `J’ai lu et j’accepte la ${verbatimTerms.rezicsUnitContentLicenseV1_1.value}. Je confirme être habilité à l’accorder pour ce contenu, y compris les droits de traduction et de mise à disposition payante groupée de l’original et de ses traductions.`,
 	},
 } satisfies typeof import("../zh-Hant/licenses").default;

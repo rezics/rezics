@@ -95,7 +95,7 @@ describe("independent Unit license offerings", () => {
 		expect(
 			Check(CreateUnitBody, {
 				...ownedMainUnit,
-				licenses: ["all-rights-reserved", "cc-by-4.0", "rezics-unit-content-license-v1"],
+				licenses: ["all-rights-reserved", "cc-by-4.0", "rezics-unit-content-license-v1-1"],
 			}),
 		).toBe(true);
 	});

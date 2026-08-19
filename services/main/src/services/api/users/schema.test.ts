@@ -227,7 +227,7 @@ describe("user preference inputs", () => {
 		expect(
 			Check(ReplacePreferencesBody, {
 				...preferences,
-				defaultLicenses: ["cc-by-nc-sa-4.0", "rezics-unit-content-license-v1"],
+				defaultLicenses: ["cc-by-nc-sa-4.0", "rezics-unit-content-license-v1-1"],
 			}),
 		).toBe(true);
 		expect(

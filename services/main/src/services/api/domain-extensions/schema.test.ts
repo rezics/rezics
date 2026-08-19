@@ -26,7 +26,7 @@ const requirement = {
 describe("Series License input", () => {
 	const input = {
 		kind: "franchise",
-		licenses: ["cc-by-4.0", "rezics-unit-content-license-v1"],
+		licenses: ["cc-by-4.0", "rezics-unit-content-license-v1-1"],
 		localization: {
 			language: "en",
 			title: "Example Series",

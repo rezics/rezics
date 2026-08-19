@@ -68,7 +68,7 @@ describe("Cloudflare language redirects", () => {
 	});
 
 	test("prefixes legal pages without inspecting localized content availability", async () => {
-		const requestContext = context("/legal/rezics-unit-content-license-v1?from=test", {
+		const requestContext = context("/legal/rezics-unit-content-license-v1-1?from=test", {
 			headers: { "Accept-Language": "de-DE,de;q=0.9,en;q=0.7" },
 		});
 
@@ -76,7 +76,7 @@ describe("Cloudflare language redirects", () => {
 
 		expect(response.status).toBe(302);
 		expect(response.headers.get("location")).toBe(
-			"https://about.rezics.com/de/legal/rezics-unit-content-license-v1/?from=test",
+			"https://about.rezics.com/de/legal/rezics-unit-content-license-v1-1/?from=test",
 		);
 		expect(response.headers.get("vary")).toBe("Accept-Language");
 	});

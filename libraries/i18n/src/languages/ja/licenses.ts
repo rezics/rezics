@@ -24,8 +24,8 @@ const options = {
 	},
 	"cc0-1.0": { label: `${verbatimTerms.cc.value} 0 1.0 ユニバーサル` },
 	"pdm-1.0": { label: `${verbatimTerms.cc.value} ${verbatimTerms.pdm.value} 1.0 ユニバーサル` },
-	"rezics-unit-content-license-v1": {
-		label: verbatimTerms.rezicsUnitContentLicenseV1.value,
+	"rezics-unit-content-license-v1-1": {
+		label: verbatimTerms.rezicsUnitContentLicenseV1_1.value,
 	},
 } satisfies Readonly<Record<LicenseId, LicenseOptionTranslation>>;
 
@@ -37,6 +37,6 @@ export default {
 	declarationNotice: `これらの選択は申告を記録するだけです。法的効力は申告者に必要な権限があるかどうかに左右され、${verbatimTerms.rezics.value} はその権限を確認しません。`,
 	options,
 	affirmativeAcknowledgement: {
-		confirmationLabel: `${verbatimTerms.rezicsUnitContentLicenseV1.value}を読み、同意したうえで、このコンテンツについてこの${jaTerminology.license.forms.label}を付与する権限があることを確認します。`,
+		confirmationLabel: `${verbatimTerms.rezicsUnitContentLicenseV1_1.value}を読み、同意します。このコンテンツについて、翻訳する権利、および原文と翻訳を一つの有料提供として扱う権利を含む本${licenseTerms.label}を付与する権限があることを確認します。`,
 	},
 } satisfies typeof import("../zh-Hant/licenses").default;

@@ -412,6 +412,7 @@ export function checkMarkdownSource({
 	const errors = [...mdxSource.errors];
 	if (errors.length > 0) return errors;
 	const prose = removeCodeAndLinks(mdxSource.value);
+	const proseWithoutCanonicalTerms = removeNonProse(mdxSource.value, verbatimDefinitions);
 	for (const definition of terminologyDefinitions.forbidden) {
 		if (!shouldCheckMarkdownTerminology(path, definition)) continue;
 		let searchFrom = 0;
@@ -430,7 +431,9 @@ export function checkMarkdownSource({
 	for (const definition of verbatimDefinitions) {
 		const canonical = definition.value;
 		const lowerCanonical = canonical.toLocaleLowerCase("en-US");
-		for (const match of prose.matchAll(/[A-Za-z][A-Za-z0-9]*(?:[-_.][A-Za-z0-9]+)*/g)) {
+		for (const match of proseWithoutCanonicalTerms.matchAll(
+			/[A-Za-z][A-Za-z0-9]*(?:[-_.][A-Za-z0-9]+)*/g,
+		)) {
 			const token = match[0];
 			if (token === canonical || token.toLocaleLowerCase("en-US") !== lowerCanonical) continue;
 			errors.push(

@@ -24,8 +24,8 @@ const options = {
 	},
 	"cc0-1.0": { label: `${verbatimTerms.cc.value} 0 1.0 범용` },
 	"pdm-1.0": { label: `${verbatimTerms.cc.value} ${verbatimTerms.pdm.value} 1.0 범용` },
-	"rezics-unit-content-license-v1": {
-		label: verbatimTerms.rezicsUnitContentLicenseV1.value,
+	"rezics-unit-content-license-v1-1": {
+		label: verbatimTerms.rezicsUnitContentLicenseV1_1.value,
 	},
 } satisfies Readonly<Record<LicenseId, LicenseOptionTranslation>>;
 
@@ -37,6 +37,6 @@ export default {
 	declarationNotice: `이 선택은 선언만 기록합니다. 법적 효력은 선언자에게 필요한 권한이 있는지에 따라 달라지며, ${verbatimTerms.rezics.value}는 그 권한을 확인하지 않습니다.`,
 	options,
 	affirmativeAcknowledgement: {
-		confirmationLabel: `${verbatimTerms.rezicsUnitContentLicenseV1.value}을(를) 읽고 동의했으며, 이 콘텐츠에 이 ${koTerminology.license.forms.label}를 부여할 권한이 있음을 확인합니다.`,
+		confirmationLabel: `${verbatimTerms.rezicsUnitContentLicenseV1_1.value}을 읽고 동의합니다. 이 콘텐츠에 대해 번역할 권리와 원문 및 번역본을 하나의 유료 제공물로 묶어 제공할 권리를 포함한 이 ${licenseTerms.label}를 부여할 권한이 있음을 확인합니다.`,
 	},
 } satisfies typeof import("../zh-Hant/licenses").default;

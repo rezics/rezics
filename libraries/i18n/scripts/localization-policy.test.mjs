@@ -16,7 +16,10 @@ const terminology = {
 	},
 };
 const terminologyDefinitions = flattenTerminology(terminology);
-const verbatimDefinitions = [{ key: "rezics", value: "REZICS" }];
+const verbatimDefinitions = [
+	{ key: "rezicsInc", value: "Rezics Inc." },
+	{ key: "rezics", value: "REZICS" },
+];
 
 function checkTypeScript(source, path = "libraries/i18n/src/languages/zh-Hant/example.ts") {
 	return checkTypeScriptSource({
@@ -40,9 +43,7 @@ describe("localization terminology policy", () => {
 			localeForLocalizationPath("/repo/apps/about/src/content/locales/zh-hans/example.ts"),
 		).toBe("zh-Hans");
 		expect(
-			localeForLocalizationPath(
-				"D:\\repo\\libraries\\i18n\\src\\languages\\zh-Hant\\example.ts",
-			),
+			localeForLocalizationPath("D:\\repo\\libraries\\i18n\\src\\languages\\zh-Hant\\example.ts"),
 		).toBe("zh-Hant");
 		expect(
 			localeForLocalizationPath(
@@ -150,6 +151,18 @@ describe("localization terminology policy", () => {
 		expect(errors).toEqual([
 			expect.stringContaining('use canonical spelling "REZICS" instead of "Rezics"'),
 		]);
+	});
+
+	it("allows a longer canonical legal name that contains a differently cased brand", () => {
+		const errors = checkMarkdownSource({
+			path: "apps/about/src/content/locales/en/legal/example.mdx",
+			source: "Rezics Inc. operates REZICS.",
+			verbatimDefinitions,
+			terminologyDefinitions,
+			rejectUnapprovedTokens: false,
+		});
+
+		expect(errors).toEqual([]);
 	});
 
 	it("allows internal field terminology in about developer and legal references", () => {

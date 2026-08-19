@@ -24,7 +24,7 @@ describe("License registry", () => {
 			"cc-by-4.0",
 			"cc0-1.0",
 			"pdm-1.0",
-			"rezics-unit-content-license-v1",
+			"rezics-unit-content-license-v1-1",
 		]);
 		for (const id of LicenseIds) {
 			const definition = LicenseRegistry[id];

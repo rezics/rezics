@@ -50661,7 +50661,7 @@ export const PostApiSeriesRequestLicensesEnum = {
 	"cc-by-4.0": "cc-by-4.0",
 	"cc0-1.0": "cc0-1.0",
 	"pdm-1.0": "pdm-1.0",
-	"rezics-unit-content-license-v1": "rezics-unit-content-license-v1",
+	"rezics-unit-content-license-v1-1": "rezics-unit-content-license-v1-1",
 } as const;
 
 export type PostApiSeriesRequestLicensesEnum =
@@ -62515,7 +62515,7 @@ export const GetApiUsersMePreferencesStatus200DefaultLicensesEnum = {
 	"cc-by-4.0": "cc-by-4.0",
 	"cc0-1.0": "cc0-1.0",
 	"pdm-1.0": "pdm-1.0",
-	"rezics-unit-content-license-v1": "rezics-unit-content-license-v1",
+	"rezics-unit-content-license-v1-1": "rezics-unit-content-license-v1-1",
 } as const;
 
 export type GetApiUsersMePreferencesStatus200DefaultLicensesEnum =
@@ -62771,7 +62771,7 @@ export const PatchApiUsersMePreferencesStatus200DefaultLicensesEnum = {
 	"cc-by-4.0": "cc-by-4.0",
 	"cc0-1.0": "cc0-1.0",
 	"pdm-1.0": "pdm-1.0",
-	"rezics-unit-content-license-v1": "rezics-unit-content-license-v1",
+	"rezics-unit-content-license-v1-1": "rezics-unit-content-license-v1-1",
 } as const;
 
 export type PatchApiUsersMePreferencesStatus200DefaultLicensesEnum =
@@ -63078,7 +63078,7 @@ export const PutApiUsersMePreferencesStatus200DefaultLicensesEnum = {
 	"cc-by-4.0": "cc-by-4.0",
 	"cc0-1.0": "cc0-1.0",
 	"pdm-1.0": "pdm-1.0",
-	"rezics-unit-content-license-v1": "rezics-unit-content-license-v1",
+	"rezics-unit-content-license-v1-1": "rezics-unit-content-license-v1-1",
 } as const;
 
 export type PutApiUsersMePreferencesStatus200DefaultLicensesEnum =
@@ -63351,7 +63351,7 @@ export const PutApiUsersMePreferencesRequestDefaultLicensesEnum = {
 	"cc-by-4.0": "cc-by-4.0",
 	"cc0-1.0": "cc0-1.0",
 	"pdm-1.0": "pdm-1.0",
-	"rezics-unit-content-license-v1": "rezics-unit-content-license-v1",
+	"rezics-unit-content-license-v1-1": "rezics-unit-content-license-v1-1",
 } as const;
 
 export type PutApiUsersMePreferencesRequestDefaultLicensesEnum =
@@ -77345,7 +77345,7 @@ export const PostApiUnitsByTypeStatus200LicensesLicenseIdEnum = {
 	"cc-by-4.0": "cc-by-4.0",
 	"cc0-1.0": "cc0-1.0",
 	"pdm-1.0": "pdm-1.0",
-	"rezics-unit-content-license-v1": "rezics-unit-content-license-v1",
+	"rezics-unit-content-license-v1-1": "rezics-unit-content-license-v1-1",
 } as const;
 
 export type PostApiUnitsByTypeStatus200LicensesLicenseIdEnum =
@@ -77360,7 +77360,7 @@ export const PostApiUnitsByTypeStatus200LicenseOfferingsLicenseIdEnum = {
 	"cc-by-4.0": "cc-by-4.0",
 	"cc0-1.0": "cc0-1.0",
 	"pdm-1.0": "pdm-1.0",
-	"rezics-unit-content-license-v1": "rezics-unit-content-license-v1",
+	"rezics-unit-content-license-v1-1": "rezics-unit-content-license-v1-1",
 } as const;
 
 export type PostApiUnitsByTypeStatus200LicenseOfferingsLicenseIdEnum =
@@ -79179,7 +79179,7 @@ export const PostApiUnitsByTypeRequestLicensesEnum = {
 	"cc-by-4.0": "cc-by-4.0",
 	"cc0-1.0": "cc0-1.0",
 	"pdm-1.0": "pdm-1.0",
-	"rezics-unit-content-license-v1": "rezics-unit-content-license-v1",
+	"rezics-unit-content-license-v1-1": "rezics-unit-content-license-v1-1",
 } as const;
 
 export type PostApiUnitsByTypeRequestLicensesEnum =
@@ -80296,7 +80296,7 @@ export const GetApiUnitsByTypeByUnitIdStatus200LicensesLicenseIdEnum = {
 	"cc-by-4.0": "cc-by-4.0",
 	"cc0-1.0": "cc0-1.0",
 	"pdm-1.0": "pdm-1.0",
-	"rezics-unit-content-license-v1": "rezics-unit-content-license-v1",
+	"rezics-unit-content-license-v1-1": "rezics-unit-content-license-v1-1",
 } as const;
 
 export type GetApiUnitsByTypeByUnitIdStatus200LicensesLicenseIdEnum =
@@ -80311,7 +80311,7 @@ export const GetApiUnitsByTypeByUnitIdStatus200LicenseOfferingsLicenseIdEnum = {
 	"cc-by-4.0": "cc-by-4.0",
 	"cc0-1.0": "cc0-1.0",
 	"pdm-1.0": "pdm-1.0",
-	"rezics-unit-content-license-v1": "rezics-unit-content-license-v1",
+	"rezics-unit-content-license-v1-1": "rezics-unit-content-license-v1-1",
 } as const;
 
 export type GetApiUnitsByTypeByUnitIdStatus200LicenseOfferingsLicenseIdEnum =
@@ -81947,7 +81947,7 @@ export const PatchApiUnitsByTypeByUnitIdStatus200LicensesLicenseIdEnum = {
 	"cc-by-4.0": "cc-by-4.0",
 	"cc0-1.0": "cc0-1.0",
 	"pdm-1.0": "pdm-1.0",
-	"rezics-unit-content-license-v1": "rezics-unit-content-license-v1",
+	"rezics-unit-content-license-v1-1": "rezics-unit-content-license-v1-1",
 } as const;
 
 export type PatchApiUnitsByTypeByUnitIdStatus200LicensesLicenseIdEnum =
@@ -81962,7 +81962,7 @@ export const PatchApiUnitsByTypeByUnitIdStatus200LicenseOfferingsLicenseIdEnum =
 	"cc-by-4.0": "cc-by-4.0",
 	"cc0-1.0": "cc0-1.0",
 	"pdm-1.0": "pdm-1.0",
-	"rezics-unit-content-license-v1": "rezics-unit-content-license-v1",
+	"rezics-unit-content-license-v1-1": "rezics-unit-content-license-v1-1",
 } as const;
 
 export type PatchApiUnitsByTypeByUnitIdStatus200LicenseOfferingsLicenseIdEnum =
@@ -83781,7 +83781,7 @@ export const PatchApiUnitsByTypeByUnitIdRequestLicensesEnum = {
 	"cc-by-4.0": "cc-by-4.0",
 	"cc0-1.0": "cc0-1.0",
 	"pdm-1.0": "pdm-1.0",
-	"rezics-unit-content-license-v1": "rezics-unit-content-license-v1",
+	"rezics-unit-content-license-v1-1": "rezics-unit-content-license-v1-1",
 } as const;
 
 export type PatchApiUnitsByTypeByUnitIdRequestLicensesEnum =
@@ -84009,7 +84009,7 @@ export const PatchApiUnitsByTypeByUnitIdVariantContextStatus200LicensesLicenseId
 	"cc-by-4.0": "cc-by-4.0",
 	"cc0-1.0": "cc0-1.0",
 	"pdm-1.0": "pdm-1.0",
-	"rezics-unit-content-license-v1": "rezics-unit-content-license-v1",
+	"rezics-unit-content-license-v1-1": "rezics-unit-content-license-v1-1",
 } as const;
 
 export type PatchApiUnitsByTypeByUnitIdVariantContextStatus200LicensesLicenseIdEnum =
@@ -84024,7 +84024,7 @@ export const PatchApiUnitsByTypeByUnitIdVariantContextStatus200LicenseOfferingsL
 	"cc-by-4.0": "cc-by-4.0",
 	"cc0-1.0": "cc0-1.0",
 	"pdm-1.0": "pdm-1.0",
-	"rezics-unit-content-license-v1": "rezics-unit-content-license-v1",
+	"rezics-unit-content-license-v1-1": "rezics-unit-content-license-v1-1",
 } as const;
 
 export type PatchApiUnitsByTypeByUnitIdVariantContextStatus200LicenseOfferingsLicenseIdEnum =
@@ -85915,7 +85915,7 @@ export const PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200LicensesLic
 	"cc-by-4.0": "cc-by-4.0",
 	"cc0-1.0": "cc0-1.0",
 	"pdm-1.0": "pdm-1.0",
-	"rezics-unit-content-license-v1": "rezics-unit-content-license-v1",
+	"rezics-unit-content-license-v1-1": "rezics-unit-content-license-v1-1",
 } as const;
 
 export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200LicensesLicenseIdEnum =
@@ -85931,7 +85931,7 @@ export const PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200LicenseOffe
 		"cc-by-4.0": "cc-by-4.0",
 		"cc0-1.0": "cc0-1.0",
 		"pdm-1.0": "pdm-1.0",
-		"rezics-unit-content-license-v1": "rezics-unit-content-license-v1",
+		"rezics-unit-content-license-v1-1": "rezics-unit-content-license-v1-1",
 	} as const;
 
 export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200LicenseOfferingsLicenseIdEnum =
@@ -87837,7 +87837,7 @@ export const PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200LicensesLi
 	"cc-by-4.0": "cc-by-4.0",
 	"cc0-1.0": "cc0-1.0",
 	"pdm-1.0": "pdm-1.0",
-	"rezics-unit-content-license-v1": "rezics-unit-content-license-v1",
+	"rezics-unit-content-license-v1-1": "rezics-unit-content-license-v1-1",
 } as const;
 
 export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200LicensesLicenseIdEnum =
@@ -87853,7 +87853,7 @@ export const PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200LicenseOff
 		"cc-by-4.0": "cc-by-4.0",
 		"cc0-1.0": "cc0-1.0",
 		"pdm-1.0": "pdm-1.0",
-		"rezics-unit-content-license-v1": "rezics-unit-content-license-v1",
+		"rezics-unit-content-license-v1-1": "rezics-unit-content-license-v1-1",
 	} as const;
 
 export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200LicenseOfferingsLicenseIdEnum =
@@ -178532,7 +178532,7 @@ export const PostApiSearchByIndexRequestLicensesEnum = {
 	"cc-by-4.0": "cc-by-4.0",
 	"cc0-1.0": "cc0-1.0",
 	"pdm-1.0": "pdm-1.0",
-	"rezics-unit-content-license-v1": "rezics-unit-content-license-v1",
+	"rezics-unit-content-license-v1-1": "rezics-unit-content-license-v1-1",
 } as const;
 
 export type PostApiSearchByIndexRequestLicensesEnum =
