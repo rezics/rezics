@@ -35,6 +35,13 @@ STUDY DEEPLY BEFORE ANYTHING, PROACTIVELY RESEARCH ONLINE TO ENSURE BEST PRACTIC
 - Take invariant brands, protocols, formats, and technical identifiers only from [`libraries/i18n/src/verbatim-terms.ts`](./libraries/i18n/src/verbatim-terms.ts). Do not create another allowlist or duplicate their spellings in TypeScript locale resources; keep all other visible wording localized and run the i18n policy check when locale content changes.
 - Take localized product and domain terminology only from the typed termbase under [`libraries/i18n/src/terminology`](./libraries/i18n/src/terminology). Keep complete messages in their owner locale resources, use the termbase's semantic slot that fits the sentence, and do not invent synonyms or duplicate approved forms in TypeScript locale resources. Generated terminology documents are read-only views, not additional sources of truth.
 
+## External content value
+
+- Every user-visible or externally published text unit must serve a named audience need on the surface where it appears. Keep it only when it helps that audience identify or distinguish the subject, answer a real question, complete a task or decision, understand a non-obvious state, consequence, scope, or constraint, or meet a safety, legal, accessibility, rights, provenance, or trust requirement.
+- Omit copy that only restates adjacent labels or visible state, narrates the interface, says that content will appear there, repeats the same fact in different words, or exposes internal data models, storage, implementation, or authoring rationale without a user-visible consequence. Optional content may be absent; do not fill a field merely because it exists.
+- Explanation is allowed when it meets a real need. Put decision-critical detail at the point of action, move optional or specialist detail to progressive disclosure or the appropriate documentation, and keep maintainer rationale in internal documentation.
+- Review copy with its surrounding content and intended audience. If its audience, need, new information, and reason for appearing on that surface cannot be stated, remove or relocate it. Do not use word or sentence-pattern bans as a substitute for this test.
+
 ## Frontend architecture
 
 - Treat `apps/web/app` as a framework adapter layer, not an implementation layer. Keep only App Router special files and narrowly scoped adapters that must run at the routing or request boundary there. A route entry may read and validate framework inputs such as `params`, `searchParams`, headers, and cookies; declare metadata or route configuration; invoke framework control flow such as `redirect` or `notFound`; compose required root providers and boundaries; and then delegate immediately to project-owned code.
