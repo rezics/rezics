@@ -13,7 +13,6 @@ import {
 import { assertFilterDocument, type FilterDocument } from "@rezics/filter";
 import type { Static, TSchema } from "@sinclair/typebox";
 import { type ContentLanguage, ContentLanguageValues, isContentLanguage } from "@rezics/i18n";
-import { PublicationLicenseIds } from "@rezics/license";
 
 import type { DatabaseTransaction } from "../database";
 import type { Authorization } from "../authorization";
@@ -176,21 +175,23 @@ type RuleSnapshot = z.infer<typeof RuleSnapshotSchema>;
 type UnitSnapshot = z.infer<typeof UnitSnapshotSchema>;
 
 const schemaFactory = createSchemaFactory({ coerce: { date: true } });
-const unitStateSchema = schemaFactory
-	.createSelectSchema(unit, {
-		license: z.enum(PublicationLicenseIds).nullable(),
-	})
-	.omit({
-		id: true,
-		kind: true,
-		status: true,
-		visibility: true,
-		moderationStatus: true,
-		publishedAt: true,
-		deletedAt: true,
-		createdAt: true,
-		updatedAt: true,
-	});
+const unitStateSchema = schemaFactory.createSelectSchema(unit).omit({
+	id: true,
+	kind: true,
+	status: true,
+	visibility: true,
+	moderationStatus: true,
+	publishedAt: true,
+	deletedAt: true,
+	createdAt: true,
+	updatedAt: true,
+});
+
+/** Parses a persisted Unit revision row, stripping retired keys such as `license`. @internal */
+export function parsePersistedUnitRevisionState(value: unknown) {
+	return unitStateSchema.parse(value);
+}
+
 const unitLocalizationStateSchema = schemaFactory
 	.createSelectSchema(unitLocalization, {
 		language: z.enum(ContentLanguageValues),

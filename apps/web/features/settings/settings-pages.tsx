@@ -40,7 +40,8 @@ import {
 	toUiLocale,
 	type ContentLanguage,
 } from "@rezics/i18n";
-import { isPublicationLicenseId, PublicationLicenseIds } from "@rezics/license";
+import { UnitLicensesField } from "@/features/units/components/unit-licenses-field";
+import { readSubmittedLicenses } from "@/features/units/model/unit-licenses";
 import { OfficialRealmUnitIds } from "@rezics/slug";
 import { SlugAddressForm } from "@/features/slugs/slug-address-form";
 import {
@@ -445,15 +446,12 @@ export function PreferenceSettings() {
 		const data = new FormData(event.currentTarget);
 		const interfaceLocale = String(data.get("interfaceLocale"));
 		const chineseContentDisplay = String(data.get("chineseContentDisplay"));
-		const submittedDefaultLicense = data.get("defaultLicense");
+		const submittedDefaultLicenses = readSubmittedLicenses(data, "defaultLicenses");
 		if (
 			!contentRatings.length ||
 			!isChineseContentDisplay(chineseContentDisplay) ||
 			!isStoredUiLocale(interfaceLocale) ||
-			!preferredLanguages.length ||
-			(submittedDefaultLicense !== null &&
-				submittedDefaultLicense !== "" &&
-				!isPublicationLicenseId(submittedDefaultLicense))
+			!preferredLanguages.length
 		) {
 			setInvalid(true);
 			return;
@@ -463,9 +461,7 @@ export function PreferenceSettings() {
 				body: {
 					interfaceLocale,
 					chineseContentDisplay,
-					defaultLicense: isPublicationLicenseId(submittedDefaultLicense)
-						? submittedDefaultLicense
-						: null,
+					defaultLicenses: submittedDefaultLicenses,
 					defaultRealmManageMode: data.get("defaultRealmManageMode") === "true",
 					defaultScoreRealmId: defaultScoreRealm.id,
 					collectionConfig: current.collectionConfig,
@@ -613,20 +609,11 @@ export function PreferenceSettings() {
 							</div>
 						) : null}
 					</Field>
-					<Field>
-						<FieldLabel>{t.settings.defaultLicense}</FieldLabel>
-						<NativeSelect
-							name="defaultLicense"
-							defaultValue={preferences.data.defaultLicense ?? ""}
-						>
-							<NativeSelectOption value="">{t.licenses.unspecified}</NativeSelectOption>
-							{PublicationLicenseIds.map((id) => (
-								<NativeSelectOption key={id} value={id}>
-									{t.licenses.options[id].label}
-								</NativeSelectOption>
-							))}
-						</NativeSelect>
-					</Field>
+					<UnitLicensesField
+						defaultValue={preferences.data.defaultLicenses}
+						label={t.settings.defaultLicenses}
+						name="defaultLicenses"
+					/>
 					<Field>
 						<FieldLabel>{t.settings.defaultScoreRealm}</FieldLabel>
 						<EntityPicker

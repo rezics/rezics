@@ -24,7 +24,7 @@ export default {
 	wikiCommunityUnit: "公共條目",
 	wikiPublicDescription: "所有已登入使用者都能編輯，建立者不會取得特殊權限。",
 	wikiRestricted: "有限制",
-	wikiRestrictedDescription: "只有建立者及之後明確授權的人可以編輯。",
+	wikiRestrictedDescription: `只有建立者及之後明確${zhHantTerminology.license.forms.label}的人可以編輯。`,
 	replies: `回覆${postTerms.pluralLabel}`,
 	replyPost: `回覆${postTerms.label}`,
 	signInToReply: "登入後回覆",

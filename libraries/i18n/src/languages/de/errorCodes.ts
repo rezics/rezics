@@ -42,7 +42,10 @@ export default {
 	UnitNotFound: "Dieser Inhalt wurde nicht gefunden.",
 	UnitPermissionForbidden: "Dir fehlt die erforderliche Berechtigung für diesen Inhalt.",
 	UnitAccessRestricted: "Dein Zugriff auf diesen Inhaltsbereich ist eingeschränkt.",
-	UnitContentLicenseGrantForbidden: `Nur Werke in persönlichem Besitz können ${verbatimTerms.rezics.value} eine Lizenz erteilen.`,
+	UnitLicenseGrantForbidden: `Nur Werke in persönlichem Besitz können ${verbatimTerms.rezics.value} eine ${deTerminology.license.forms.label} erteilen.`,
+	UnitLicenseNotApplicable: `Diese ${deTerminology.license.forms.label} kann für diese Art von Inhalt nicht erteilt werden.`,
+	UnitLicenseOfferingEndForbidden: "Dieses Lizenzangebot kann nicht beendet werden.",
+	UnitLicenseGrantConflict: `Für diese ${deTerminology.license.forms.label} besteht bereits ein offenes Angebot zu diesem Inhalt.`,
 	UnitChanged: "Dieser Inhalt wurde geändert. Aktualisiere die Seite und versuche es erneut.",
 	UnitRevisionConflict:
 		"Die Ausgangsversion wurde geändert. Aktualisiere die Seite und versuche es erneut.",

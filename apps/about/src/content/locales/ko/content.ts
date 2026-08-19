@@ -119,7 +119,7 @@ export const koContent = {
 		},
 		open: {
 			title: "큰 서사는 검증 가능한 토대 위에 세워져야 합니다.",
-			body: `${BRAND}는 오픈 소스, 버전 의미론이 있는 콘텐츠 문서, ${koTerminology.publicationLicense.forms.label}, 권한이 부여된 ${API}로 장기적으로 확장 가능한 경계를 만듭니다. 각 제품 페이지는 사용 가능·개발 중·계획됨을 명확히 구분합니다.`,
+			body: `${BRAND}는 오픈 소스, 버전 의미론이 있는 콘텐츠 문서, ${koTerminology.license.forms.label}, 권한이 부여된 ${API}로 장기적으로 확장 가능한 경계를 만듭니다. 각 제품 페이지는 사용 가능·개발 중·계획됨을 명확히 구분합니다.`,
 		},
 		closing: {
 			title: `지금 ${FOLLOW} 중인 웹소설 한 편에서 시작하세요.`,
@@ -136,7 +136,11 @@ export const koContent = {
 				title: "한 연재가 플랫폼, 언어, 번역 제목 때문에 조각나서는 안 됩니다.",
 				body: `독자가 찾는 것은 같은 이야기이지만, 오늘날에는 플랫폼 페이지, 번역 제목 항목, 진행도 도구, 토론 그룹 사이에서 반복해서 확인해야 합니다. ${BRAND}는 먼저 그것들을 하나의 작품 정체성으로 다시 연결합니다.`,
 				sourcesTitle: "플랫폼 간 출처",
-				sources: ["원 연재 플랫폼", "번역 및 라이선스 출처", "출간 및 기타 판본"],
+				sources: [
+					"원 연재 플랫폼",
+					`번역 및 ${koTerminology.license.forms.label} 출처`,
+					"출간 및 기타 판본",
+				],
 				namesTitle: "원제와 번역 제목",
 				originalName: "원제, 로마자 표기, 별칭",
 				translatedName: "언어별 공식 번역 제목과 관용 이름",

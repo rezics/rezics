@@ -5,7 +5,7 @@ import { zhHansTerminology } from "@rezics/i18n/terminology/zh-Hans";
 
 const { forms: realmTerms } = zhHansTerminology.realm;
 const { forms: unitSlugTerms } = zhHansTerminology.unitSlug;
-const { forms: publicationLicenseTerms } = zhHansTerminology.publicationLicense;
+const { forms: licenseTerms } = zhHansTerminology.license;
 const { forms: postTerms } = zhHansTerminology.post;
 
 export default {
@@ -244,7 +244,8 @@ export default {
 		invalidLimits: `请检查限制值、操作 ${verbatimTerms.id.value} 及重复项目。`,
 		resetLimits: "移除令牌专属限制",
 	},
-	defaultLicense: `默认${publicationLicenseTerms.label}`,
+	defaultLicense: `默认${licenseTerms.label}`,
+	defaultLicenses: `默认${licenseTerms.label}选项`,
 	defaultScoreRealm: `默认评分${realmTerms.label}`,
 	defaultScoreRealmHint: `一般页面的评分会记录在这个${realmTerms.label}；在其他${realmTerms.label}内评分时，仍会记录在当前${realmTerms.label}。`,
 	general: "一般",

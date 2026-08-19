@@ -334,7 +334,10 @@ export const AiDisclosureValues = [
 	"machine_generated",
 ] as const;
 export const ModerationStatusValues = ["approved", "pending", "removed"] as const;
-export const UnitContentLicenseStatusValues = ["active", "invalidated"] as const;
+export {
+	LicenseRecognitionStatusValues,
+	type LicenseRecognitionStatus,
+} from "@rezics/license";
 export const ContentStatusValues = ["draft", "published", "archived"] as const;
 export const ImageAssetStatusValues = ["pending", "ready", "failed"] as const;
 export const ImageAssetAccessValues = ["private", "public"] as const;
@@ -458,8 +461,8 @@ export const PlatformUnitModerationCommandValues = [
 	"restore",
 	"lock_post_targeting",
 	"unlock_post_targeting",
-	"invalidate_content_license",
-	"restore_content_license",
+	"invalidate_license",
+	"restore_license",
 	"dismiss",
 	"note",
 ] as const;
@@ -489,8 +492,8 @@ export const ContentGovernanceActionKindValues = [
 	"restore",
 	"lock_post_targeting",
 	"unlock_post_targeting",
-	"invalidate_content_license",
-	"restore_content_license",
+	"invalidate_license",
+	"restore_license",
 	"reverse",
 ] as const;
 
@@ -501,7 +504,7 @@ export const ContentGovernanceRuleBackedActionKindValues = [
 	"restore",
 	"lock_post_targeting",
 	"unlock_post_targeting",
-	"invalidate_content_license",
+	"invalidate_license",
 ] as const satisfies readonly (typeof ContentGovernanceActionKindValues)[number][];
 export const ContentReviewReportCounterBuckets = 256;
 export const AccountEnforcementActionKindValues = ["issue", "revoke"] as const;

@@ -344,24 +344,24 @@ A community-immutable, community-voted ordered path of Tags; platform administra
 | ko | approved | inline | 태그 경로 | Tag structure, Structure tag |
 | ko | approved | plural | 태그 경로 | Tag structure, Structure tag |
 
-## publicationLicense
+## license
 
-The terms under which a Unit's work is made available to the public; this is not an agreement granting rights to REZICS.
+A registered legal instrument or rights statement that a Unit grants independently of every other selected License.
 
 | Locale | Status | Slot | Approved form | Forbidden forms |
 | --- | --- | --- | --- | --- |
-| en | approved | label | Publication license |  |
-| en | approved | inline | publication license |  |
-| zh-Hant | approved | label | 公開授權 | License, 作品 License, 作品授權條款, 授權 REZICS |
-| zh-Hant | approved | inline | 公開授權 | License, 作品 License, 作品授權條款, 授權 REZICS |
-| zh-Hans | approved | label | 公开许可 | License, 作品 License, 作品许可条款, 授权 REZICS |
-| zh-Hans | approved | inline | 公开许可 | License, 作品 License, 作品许可条款, 授权 REZICS |
-| de | approved | label | Veröffentlichungslizenz |  |
-| de | approved | inline | Veröffentlichungslizenz |  |
-| ja | approved | label | 公開ライセンス | Publication license |
-| ja | approved | inline | 公開ライセンス | Publication license |
-| ko | approved | label | 게시 라이선스 | Publication license |
-| ko | approved | inline | 게시 라이선스 | Publication license |
+| en | approved | label | License |  |
+| en | approved | inline | license |  |
+| zh-Hant | approved | label | 授權 | 公開授權, 作品 License, 授權 REZICS |
+| zh-Hant | approved | inline | 授權 | 公開授權, 作品 License, 授權 REZICS |
+| zh-Hans | approved | label | 许可 | 公开许可, 作品 License, 授权 REZICS |
+| zh-Hans | approved | inline | 许可 | 公开许可, 作品 License, 授权 REZICS |
+| de | approved | label | Lizenz |  |
+| de | approved | inline | Lizenz |  |
+| ja | approved | label | ライセンス | Publication license |
+| ja | approved | inline | ライセンス | Publication license |
+| ko | approved | label | 라이선스 | Publication license |
+| ko | approved | inline | 라이선스 | Publication license |
 
 ## entity
 

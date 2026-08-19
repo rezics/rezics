@@ -123,7 +123,7 @@ export const deContent = {
 		},
 		open: {
 			title: "Eine große Erzählung braucht eine überprüfbare Grundlage.",
-			body: `${BRAND} schafft langfristig erweiterbare Grenzen durch Open Source, Inhaltsdokumente mit Versionssemantik, ${deTerminology.publicationLicense.forms.label} und berechtigte ${API}s; die Produktseiten unterscheiden dabei klar zwischen verfügbaren, in Entwicklung befindlichen und geplanten Teilen.`,
+			body: `${BRAND} schafft langfristig erweiterbare Grenzen durch Open Source, Inhaltsdokumente mit Versionssemantik, ${deTerminology.license.forms.label} und berechtigte ${API}s; die Produktseiten unterscheiden dabei klar zwischen verfügbaren, in Entwicklung befindlichen und geplanten Teilen.`,
 		},
 		closing: {
 			title: "Beginne mit einem Webroman, dem du gerade folgst.",

@@ -1,4 +1,4 @@
-export const PublicationLicenseIds = [
+export const LicenseIds = [
 	"cc-by-nc-sa-4.0",
 	"cc-by-sa-4.0",
 	"cc-by-sa-3.0",
@@ -6,99 +6,134 @@ export const PublicationLicenseIds = [
 	"cc-by-nc-4.0",
 	"cc-by-4.0",
 	"cc0-1.0",
+	"rezics-unit-content-license-v1",
 ] as const;
 
-export type PublicationLicenseId = (typeof PublicationLicenseIds)[number];
+export type LicenseId = (typeof LicenseIds)[number];
 
-export const UnitContentLicenseSlugs = ["rezics-unit-content-license-v1"] as const;
-export type UnitContentLicenseSlug = (typeof UnitContentLicenseSlugs)[number];
-export const CurrentUnitContentLicenseSlug = UnitContentLicenseSlugs[0];
+export const ResidualRightsLicenseId = "all-rights-reserved" satisfies LicenseId;
+export const RecommendedLicenseId = "rezics-unit-content-license-v1" satisfies LicenseId;
 
-type LicenseDefinition<Id extends PublicationLicenseId> = {
-	readonly kind: "license";
+export const LicenseLegalFormValues = [
+	"license",
+	"public-domain-dedication",
+	"rights-reservation",
+] as const;
+export type LicenseLegalForm = (typeof LicenseLegalFormValues)[number];
+
+export const LicenseRecognitionStatusValues = ["recognized", "invalidated"] as const;
+export type LicenseRecognitionStatus = (typeof LicenseRecognitionStatusValues)[number];
+
+export type LicenseDefinition<Id extends LicenseId = LicenseId> = {
 	readonly id: Id;
-	readonly url: string;
+	readonly legalForm: LicenseLegalForm;
+	readonly termsUrl: string | null;
 	readonly spdxId: string | null;
+	readonly ownerMayEndOffering: boolean;
+	readonly requiresAffirmativeAcknowledgement: boolean;
+	readonly profileOwnedOnly: boolean;
+	/** `null` means the License applies to every Unit kind. */
+	readonly applicableUnitKinds: readonly string[] | null;
 };
 
-type RightsReservedDefinition = {
-	readonly kind: "rights-reserved";
-	readonly id: "all-rights-reserved";
-	readonly url: null;
-	readonly spdxId: null;
-};
+const RezicsLicenseTermsOrigin = "https://about.rezics.com/en/legal";
 
-export type PublicationLicenseDefinition<Id extends PublicationLicenseId> =
-	Id extends "all-rights-reserved" ? RightsReservedDefinition : LicenseDefinition<Id>;
+export function rezicsLicenseTermsUrl(id: Extract<LicenseId, `rezics-${string}`>): string {
+	return `${RezicsLicenseTermsOrigin}/${id}`;
+}
 
-export const PublicationLicenseRegistry = {
+export const LicenseRegistry = {
 	"cc-by-nc-sa-4.0": {
-		kind: "license",
 		id: "cc-by-nc-sa-4.0",
-		url: "https://creativecommons.org/licenses/by-nc-sa/4.0/",
+		legalForm: "license",
+		termsUrl: "https://creativecommons.org/licenses/by-nc-sa/4.0/",
 		spdxId: "CC-BY-NC-SA-4.0",
+		ownerMayEndOffering: true,
+		requiresAffirmativeAcknowledgement: false,
+		profileOwnedOnly: false,
+		applicableUnitKinds: null,
 	},
 	"cc-by-sa-4.0": {
-		kind: "license",
 		id: "cc-by-sa-4.0",
-		url: "https://creativecommons.org/licenses/by-sa/4.0/",
+		legalForm: "license",
+		termsUrl: "https://creativecommons.org/licenses/by-sa/4.0/",
 		spdxId: "CC-BY-SA-4.0",
+		ownerMayEndOffering: true,
+		requiresAffirmativeAcknowledgement: false,
+		profileOwnedOnly: false,
+		applicableUnitKinds: null,
 	},
 	"cc-by-sa-3.0": {
-		kind: "license",
 		id: "cc-by-sa-3.0",
-		url: "https://creativecommons.org/licenses/by-sa/3.0/",
+		legalForm: "license",
+		termsUrl: "https://creativecommons.org/licenses/by-sa/3.0/",
 		spdxId: "CC-BY-SA-3.0",
+		ownerMayEndOffering: true,
+		requiresAffirmativeAcknowledgement: false,
+		profileOwnedOnly: false,
+		applicableUnitKinds: null,
 	},
 	"all-rights-reserved": {
-		kind: "rights-reserved",
 		id: "all-rights-reserved",
-		url: null,
+		legalForm: "rights-reservation",
+		termsUrl: null,
 		spdxId: null,
+		ownerMayEndOffering: true,
+		requiresAffirmativeAcknowledgement: false,
+		profileOwnedOnly: false,
+		applicableUnitKinds: null,
 	},
 	"cc-by-nc-4.0": {
-		kind: "license",
 		id: "cc-by-nc-4.0",
-		url: "https://creativecommons.org/licenses/by-nc/4.0/",
+		legalForm: "license",
+		termsUrl: "https://creativecommons.org/licenses/by-nc/4.0/",
 		spdxId: "CC-BY-NC-4.0",
+		ownerMayEndOffering: true,
+		requiresAffirmativeAcknowledgement: false,
+		profileOwnedOnly: false,
+		applicableUnitKinds: null,
 	},
 	"cc-by-4.0": {
-		kind: "license",
 		id: "cc-by-4.0",
-		url: "https://creativecommons.org/licenses/by/4.0/",
+		legalForm: "license",
+		termsUrl: "https://creativecommons.org/licenses/by/4.0/",
 		spdxId: "CC-BY-4.0",
+		ownerMayEndOffering: true,
+		requiresAffirmativeAcknowledgement: false,
+		profileOwnedOnly: false,
+		applicableUnitKinds: null,
 	},
 	"cc0-1.0": {
-		kind: "license",
 		id: "cc0-1.0",
-		url: "https://creativecommons.org/publicdomain/zero/1.0/",
+		legalForm: "public-domain-dedication",
+		termsUrl: "https://creativecommons.org/publicdomain/zero/1.0/",
 		spdxId: "CC0-1.0",
+		ownerMayEndOffering: true,
+		requiresAffirmativeAcknowledgement: false,
+		profileOwnedOnly: false,
+		applicableUnitKinds: null,
 	},
-} as const satisfies {
-	readonly [Id in PublicationLicenseId]: PublicationLicenseDefinition<Id>;
-};
+	"rezics-unit-content-license-v1": {
+		id: "rezics-unit-content-license-v1",
+		legalForm: "license",
+		termsUrl: rezicsLicenseTermsUrl("rezics-unit-content-license-v1"),
+		spdxId: null,
+		ownerMayEndOffering: true,
+		requiresAffirmativeAcknowledgement: true,
+		profileOwnedOnly: true,
+		applicableUnitKinds: null,
+	},
+} as const satisfies { readonly [Id in LicenseId]: LicenseDefinition<Id> };
 
-export function isPublicationLicenseId(value: unknown): value is PublicationLicenseId {
-	return typeof value === "string" && Object.hasOwn(PublicationLicenseRegistry, value);
+export function isLicenseId(value: unknown): value is LicenseId {
+	return typeof value === "string" && Object.hasOwn(LicenseRegistry, value);
 }
 
-export function parsePublicationLicenseId(value: unknown): PublicationLicenseId {
-	if (!isPublicationLicenseId(value)) throw new TypeError("Unknown publication license ID");
+export function parseLicenseId(value: unknown): LicenseId {
+	if (!isLicenseId(value)) throw new TypeError("Unknown License ID");
 	return value;
 }
 
-export function parseNullablePublicationLicenseId(value: unknown): PublicationLicenseId | null {
-	return value === null ? null : parsePublicationLicenseId(value);
-}
-
-export function isUnitContentLicenseSlug(value: unknown): value is UnitContentLicenseSlug {
-	return (
-		typeof value === "string" &&
-		UnitContentLicenseSlugs.some((licenseSlug) => licenseSlug === value)
-	);
-}
-
-export function parseUnitContentLicenseSlug(value: unknown): UnitContentLicenseSlug {
-	if (!isUnitContentLicenseSlug(value)) throw new TypeError("Unknown Unit content license slug");
-	return value;
+export function parseNullableLicenseId(value: unknown): LicenseId | null {
+	return value === null ? null : parseLicenseId(value);
 }

@@ -316,18 +316,6 @@ export const CurrentSearchFieldRegistry = {
 		postgres: ["comparison"],
 		residual: false,
 	},
-	"content-license": {
-		categories: ["units"],
-		unitTypes: ["book", "media", "software"],
-		scalar: "boolean",
-		operators: ["equals", "not-equals"],
-		facet: "meili-low-cardinality",
-		sort: "none",
-		documentPath: "contentLicense.active",
-		postgres: ["equality"],
-		residual: false,
-		applicabilityPath: "unitType",
-	},
 	"book-isbn13": {
 		categories: ["units"],
 		unitTypes: ["book"],

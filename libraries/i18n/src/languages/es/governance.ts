@@ -81,7 +81,7 @@ export default {
 		"unit.merge.review": "Revisar fusiones de Units",
 		"unit.merge": "Fusionar Units directamente",
 		"unit.ownership.override": "Reasignar la titularidad de cualquier Unit",
-		"unit.content_license.manage": "Invalidar o restaurar licencias de contenido de Units",
+		"unit.license.manage": `Invalidar o restaurar concesiones de ${esTerminology.license.forms.inline} de Units`,
 		"unit.delete": "Eliminar provisionalmente cualquier Unit",
 		"unit.restore": "Restaurar Units eliminadas provisionalmente",
 		"unit.slug.manage": "Gestionar las direcciones públicas de las Units",

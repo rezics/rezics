@@ -178,7 +178,6 @@ export default {
 		"updated-at": "更新日期",
 		"published-at": "发布日期",
 		"closes-at": "截止日期",
-		"content-license": "内容许可有效",
 		"book-isbn13": verbatimTerms.isbn13.value,
 		"book-publication-date": "出版日期",
 		"book-page-count": "页数",

@@ -2,7 +2,7 @@ import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 import { zhHansTerminology } from "@rezics/i18n/terminology/zh-Hans";
 import { insert } from "native-i18n";
 
-const { forms: publicationLicenseTerms } = zhHansTerminology.publicationLicense;
+const { forms: licenseTerms } = zhHansTerminology.license;
 const { forms: postTerms } = zhHansTerminology.post;
 const { forms: videoTerms } = zhHansTerminology.video;
 const { forms: audioTerms } = zhHansTerminology.audio;
@@ -194,7 +194,6 @@ export default {
 		pageCount: "页数",
 		format: "装帧或格式",
 		releaseStatus: "作品更新状态",
-		contentLicense: `向 ${verbatimTerms.rezics.value} 授权`,
 		versionLabel: "版本名称",
 		mediaKind: "媒体类型",
 		releaseDate: "发行日期",
@@ -311,7 +310,7 @@ export default {
 		viewAssociations: "查看所有关联",
 		aliases: "别名",
 		releasedOn: "发布日期",
-		license: publicationLicenseTerms.label,
+		license: licenseTerms.label,
 		aiDisclosure: `${verbatimTerms.ai.value} 使用揭露`,
 		type: "类型",
 		updatedAt: "最后更新",

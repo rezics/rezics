@@ -7,10 +7,10 @@ import {
 	contentGovernanceActionRequiresRules,
 	getPlatformUnitModerationCommands,
 	getRealmUnitModerationCommands,
-	isContentLicenseModerationCommand,
+	isLicenseModerationCommand,
 	resolvePostTargetingLockState,
 	resolveRealmUnitStatus,
-	resolveUnitContentLicenseStatus,
+	resolveLicenseRecognitionStatus,
 	resolveUnitModerationStatus,
 } from "./content-governance-contract";
 import { fingerprintContentGovernanceAction } from "./content-governance-service";
@@ -22,16 +22,16 @@ describe("content governance contracts", () => {
 			"not valid for this target",
 		);
 		expect(() =>
-			assertContentGovernanceActionCompatible("platform", "invalidate_content_license"),
+			assertContentGovernanceActionCompatible("platform", "invalidate_license"),
 		).not.toThrow();
-		expect(() =>
-			assertContentGovernanceActionCompatible("realm", "invalidate_content_license"),
-		).toThrow("not valid for this target");
-		expect(isContentLicenseModerationCommand("restore_content_license")).toBe(true);
-		expect(isContentLicenseModerationCommand("restore")).toBe(false);
+		expect(() => assertContentGovernanceActionCompatible("realm", "invalidate_license")).toThrow(
+			"not valid for this target",
+		);
+		expect(isLicenseModerationCommand("restore_license")).toBe(true);
+		expect(isLicenseModerationCommand("restore")).toBe(false);
 		expect(contentGovernanceActionRequiresRules("remove")).toBe(true);
 		expect(contentGovernanceActionRequiresRules("restore")).toBe(true);
-		expect(contentGovernanceActionRequiresRules("restore_content_license")).toBe(false);
+		expect(contentGovernanceActionRequiresRules("restore_license")).toBe(false);
 	});
 
 	it("derives strict Realm Unit transitions", () => {
@@ -76,16 +76,16 @@ describe("content governance contracts", () => {
 			"lock_post_targeting",
 			"note",
 		]);
-		expect(getPlatformUnitModerationCommands("approved", true, null, true)).toEqual([
+		expect(getPlatformUnitModerationCommands("approved", true, [], true)).toEqual([
 			"remove",
 			"unlock_post_targeting",
 			"dismiss",
 			"note",
 		]);
-		expect(getPlatformUnitModerationCommands("approved", false, "active")).toEqual([
+		expect(getPlatformUnitModerationCommands("approved", false, ["recognized"])).toEqual([
 			"remove",
 			"lock_post_targeting",
-			"invalidate_content_license",
+			"invalidate_license",
 			"note",
 		]);
 	});
@@ -93,12 +93,8 @@ describe("content governance contracts", () => {
 	it("derives platform and license transitions", () => {
 		expect(resolveUnitModerationStatus("pending", "approve")).toBe("approved");
 		expect(resolveUnitModerationStatus("removed", "restore")).toBe("approved");
-		expect(resolveUnitContentLicenseStatus("active", "invalidate_content_license")).toBe(
-			"invalidated",
-		);
-		expect(resolveUnitContentLicenseStatus("invalidated", "restore_content_license")).toBe(
-			"active",
-		);
+		expect(resolveLicenseRecognitionStatus("recognized", "invalidate_license")).toBe("invalidated");
+		expect(resolveLicenseRecognitionStatus("invalidated", "restore_license")).toBe("recognized");
 	});
 
 	it("rejects lock no-ops", () => {

@@ -12,7 +12,7 @@ import {
 	type PlatformUnitModerationCommandValues,
 	type RealmModerationCommandValues,
 	type RealmUnitStatusValues,
-	type UnitContentLicenseStatusValues,
+	type LicenseRecognitionStatusValues,
 } from "../../database/schema/contract-values";
 
 export type ContentGovernanceActionCommand = CreateContentGovernanceActionBody["kind"];
@@ -22,15 +22,12 @@ export type RealmModerationCommand = (typeof RealmModerationCommandValues)[numbe
 export type ContentReviewCaseState = (typeof ContentReviewCaseStateValues)[number];
 export type UnitModerationStatus = "approved" | "pending" | "removed";
 export type PlatformUnitModerationCommand = (typeof PlatformUnitModerationCommandValues)[number];
-export type UnitContentLicenseStatus = (typeof UnitContentLicenseStatusValues)[number];
+export type LicenseRecognitionStatus = (typeof LicenseRecognitionStatusValues)[number];
 
-export function isContentLicenseModerationCommand(
+export function isLicenseModerationCommand(
 	action: ContentGovernanceActionCommand,
-): action is Extract<
-	ContentGovernanceActionCommand,
-	"invalidate_content_license" | "restore_content_license"
-> {
-	return action === "invalidate_content_license" || action === "restore_content_license";
+): action is Extract<ContentGovernanceActionCommand, "invalidate_license" | "restore_license"> {
+	return action === "invalidate_license" || action === "restore_license";
 }
 
 export function contentGovernanceActionRequiresRules(
@@ -81,22 +78,19 @@ const PlatformUnitStateCommands = {
 export function getPlatformUnitModerationCommands(
 	status: UnitModerationStatus,
 	postTargetingLocked: boolean,
-	contentLicenseStatus: UnitContentLicenseStatus | null = null,
+	recognitionStatuses: readonly LicenseRecognitionStatus[] = [],
 	hasOpenReports = false,
 ): readonly PlatformUnitModerationCommand[] {
 	const reportCommands: readonly PlatformUnitModerationCommand[] = hasOpenReports
 		? ["dismiss"]
 		: [];
-	const contentLicenseCommands: readonly PlatformUnitModerationCommand[] =
-		contentLicenseStatus === "active"
-			? ["invalidate_content_license"]
-			: contentLicenseStatus === "invalidated"
-				? ["restore_content_license"]
-				: [];
+	const licenseCommands: PlatformUnitModerationCommand[] = [];
+	if (recognitionStatuses.includes("recognized")) licenseCommands.push("invalidate_license");
+	if (recognitionStatuses.includes("invalidated")) licenseCommands.push("restore_license");
 	return [
 		...PlatformUnitStateCommands[status],
 		postTargetingLocked ? "unlock_post_targeting" : "lock_post_targeting",
-		...contentLicenseCommands,
+		...licenseCommands,
 		...reportCommands,
 		"note",
 	];
@@ -109,8 +103,8 @@ const ActionsByAuthority = {
 		"restore",
 		"lock_post_targeting",
 		"unlock_post_targeting",
-		"invalidate_content_license",
-		"restore_content_license",
+		"invalidate_license",
+		"restore_license",
 		"reverse",
 	],
 	realm: [
@@ -183,18 +177,15 @@ export function resolvePostTargetingLockState(
 	return next;
 }
 
-export function resolveUnitContentLicenseStatus(
-	current: UnitContentLicenseStatus,
-	action: Extract<
-		ContentGovernanceActionCommand,
-		"invalidate_content_license" | "restore_content_license"
-	>,
-): UnitContentLicenseStatus {
+export function resolveLicenseRecognitionStatus(
+	current: LicenseRecognitionStatus,
+	action: Extract<ContentGovernanceActionCommand, "invalidate_license" | "restore_license">,
+): LicenseRecognitionStatus {
 	switch (action) {
-		case "invalidate_content_license":
-			return resolveStateTransition(current, ["active"], "invalidated");
-		case "restore_content_license":
-			return resolveStateTransition(current, ["invalidated"], "active");
+		case "invalidate_license":
+			return resolveStateTransition(current, ["recognized"], "invalidated");
+		case "restore_license":
+			return resolveStateTransition(current, ["invalidated"], "recognized");
 	}
 	throw new ContentGovernanceActionIncompatible();
 }

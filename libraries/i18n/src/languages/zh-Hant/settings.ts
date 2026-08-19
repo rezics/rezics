@@ -5,7 +5,7 @@ import { zhHantTerminology } from "@rezics/i18n/terminology/zh-Hant";
 
 const { forms: realmTerms } = zhHantTerminology.realm;
 const { forms: unitSlugTerms } = zhHantTerminology.unitSlug;
-const { forms: publicationLicenseTerms } = zhHantTerminology.publicationLicense;
+const { forms: licenseTerms } = zhHantTerminology.license;
 const { forms: postTerms } = zhHantTerminology.post;
 
 export default {
@@ -23,7 +23,7 @@ export default {
 			},
 			preferences: {
 				label: "偏好設定",
-				description: `選擇介面語言、內容語言、內容分級、預設評分${realmTerms.label}與預設授權。`,
+				description: `選擇介面語言、內容語言、內容分級、預設評分${realmTerms.label}與預設${zhHantTerminology.license.forms.label}。`,
 			},
 			privacy: {
 				label: "隱私",
@@ -244,7 +244,8 @@ export default {
 		invalidLimits: `請檢查限制值、操作 ${verbatimTerms.id.value} 及重複項目。`,
 		resetLimits: "移除權杖專屬限制",
 	},
-	defaultLicense: `預設${publicationLicenseTerms.label}`,
+	defaultLicense: `預設${licenseTerms.label}`,
+	defaultLicenses: `預設${licenseTerms.label}選項`,
 	defaultScoreRealm: `預設評分${realmTerms.label}`,
 	defaultScoreRealmHint: `一般頁面的評分會記錄在這個${realmTerms.label}；在其他${realmTerms.label}內評分時，仍會記錄在目前${realmTerms.label}。`,
 	general: "一般",

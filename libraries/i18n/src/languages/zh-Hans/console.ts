@@ -424,8 +424,10 @@ export default {
 		},
 		targetingLocked: `已禁止新的${postTerms.label}指向`,
 		targetingUnlocked: `允许新的${postTerms.label}指向`,
-		contentLicenseActive: "内容授权有效",
-		contentLicenseInvalidated: "内容授权已失效",
+		licenseGrant: "授权授予",
+		chooseLicenseGrant: "选择一笔授权授予",
+		licenseGrantRecognized: "授权授予仍受平台认可",
+		licenseGrantInvalidated: "授权授予的平台认可已失效",
 		openContent: "打开内容",
 	},
 	audit: {

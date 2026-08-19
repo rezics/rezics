@@ -2,7 +2,7 @@ import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 import { jaTerminology } from "@rezics/i18n/terminology/ja";
 import { insert } from "native-i18n";
 
-const { forms: publicationLicenseTerms } = jaTerminology.publicationLicense;
+const { forms: licenseTerms } = jaTerminology.license;
 const { forms: postTerms } = jaTerminology.post;
 const { forms: videoTerms } = jaTerminology.video;
 const { forms: audioTerms } = jaTerminology.audio;
@@ -129,7 +129,7 @@ export default {
 			},
 			metadata: {
 				label: metadataTerms.label,
-				description: `ライフサイクル、表示、評価、ライセンス、およびタイプ別${metadataTerms.inline}を管理。`,
+				description: `ライフサイクル、表示、評価、${jaTerminology.license.forms.label}、およびタイプ別${metadataTerms.inline}を管理。`,
 			},
 			relationships: {
 				label: "ユニット間の関係",
@@ -212,7 +212,6 @@ export default {
 		pageCount: "ページ数",
 		format: "製本または形式",
 		releaseStatus: "作品の更新状況",
-		contentLicense: `${verbatimTerms.rezics.value} へのライセンス付与`,
 		versionLabel: "バージョンラベル",
 		mediaKind: "メディア種類",
 		releaseDate: "リリース日",
@@ -329,7 +328,7 @@ export default {
 		viewAssociations: "すべての関連を表示",
 		aliases: "別名",
 		releasedOn: "リリース日",
-		license: publicationLicenseTerms.label,
+		license: licenseTerms.label,
 		aiDisclosure: `${verbatimTerms.ai.value} 公開`,
 		type: "タイプ",
 		updatedAt: "最終更新",

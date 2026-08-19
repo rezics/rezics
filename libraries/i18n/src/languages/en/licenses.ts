@@ -1,9 +1,9 @@
-import type { PublicationLicenseId, UnitContentLicenseSlug } from "@rezics/license";
+import type { LicenseId } from "@rezics/license";
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 import { enTerminology } from "@rezics/i18n/terminology/en";
 
 type LicenseOptionTranslation = { readonly label: string };
-const { forms: publicationLicenseTerms } = enTerminology.publicationLicense;
+const { forms: licenseTerms } = enTerminology.license;
 
 const options = {
 	"cc-by-nc-sa-4.0": {
@@ -23,35 +23,20 @@ const options = {
 		label: `${verbatimTerms.cc.value} Attribution 4.0 International`,
 	},
 	"cc0-1.0": { label: `${verbatimTerms.cc.value}0 1.0 Universal` },
-} satisfies Readonly<Record<PublicationLicenseId, LicenseOptionTranslation>>;
-
-const unitContentOptions = {
 	"rezics-unit-content-license-v1": {
 		label: verbatimTerms.rezicsUnitContentLicenseV1.value,
 	},
-} satisfies Readonly<Record<UnitContentLicenseSlug, LicenseOptionTranslation>>;
+} satisfies Readonly<Record<LicenseId, LicenseOptionTranslation>>;
 
 export default {
 	unspecified: "Unspecified",
-	viewTerms: `View ${publicationLicenseTerms.inline} terms`,
+	exclusiveSelectionHint: `Choosing All rights reserved clears other ${licenseTerms.inline} you just selected. Combinations already stored for this work are kept.`,
+	residualRightsNotice:
+		"All rights reserved covers only rights not expressly granted by the other licenses listed with it. It does not override or revoke those licenses.",
+	viewTerms: `View ${licenseTerms.inline} terms`,
 	options,
-	unitContent: {
-		none: "None",
-		viewTerms: `View ${verbatimTerms.rezicsUnitContentLicenseV1.value}`,
-		grantNotice:
-			"Once granted, this license cannot be revoked and continues to cover later contributions and ownership transfers.",
-		confirmationLabel: `I have read and agree to the ${verbatimTerms.rezicsUnitContentLicenseV1.value} and confirm that I have authority to grant this license for the content.`,
-		noneNotice:
-			"No content license will be granted. Choose None only when this work is an index entry and will not publish or host the work’s content.",
-		noneConfirmationTitle: `Create without a content license for ${verbatimTerms.rezics.value}?`,
-		noneConfirmationNotice: `If you want to publish or host this work’s content on ${verbatimTerms.rezics.value}, keep the content license. If this entry only indexes the work, no content license is needed. Without one, do not publish the work’s text or other copyrighted content in this entry.`,
-		keepLicense: "Keep license",
-		confirmNone: "Use no license",
-		publicWorkNotice: `Public works do not grant a content license to ${verbatimTerms.rezics.value} and should only contain index information about the work.`,
-		grantedNotice: "This content license has been permanently granted for this content.",
-		contributionNotice: `Content you contribute while this license applies is licensed to ${verbatimTerms.rezics.value} under the same terms; no separate license selection is required.`,
-		cancelGrant: "Cancel",
-		confirmGrant: "Grant license",
-		options: unitContentOptions,
+	affirmativeAcknowledgement: {
+		confirmationLabel: `I have read and agree to the ${verbatimTerms.rezicsUnitContentLicenseV1.value} and confirm that I have authority to grant this ${enTerminology.license.forms.inline} for the content.`,
+		profileOwnedOnlyNotice: `Public works do not grant a content ${enTerminology.license.forms.inline} to ${verbatimTerms.rezics.value} and should only contain index information about the work.`,
 	},
 } satisfies typeof import("../zh-Hant/licenses").default;

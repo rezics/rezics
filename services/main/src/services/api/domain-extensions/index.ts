@@ -60,6 +60,7 @@ import {
 	imageAsset,
 } from "../../database/schema";
 import { UnitNotFound } from "../../units/errors";
+import { insertLicenseGrants } from "../../units/license-grants";
 import { assertExecutableBlockFilterDocuments } from "../../search/block-filter-documents";
 import { resolveFilterDocument } from "../../search/filter-document";
 import type { DatabaseTransaction } from "../../database";
@@ -579,6 +580,13 @@ export default new Elysia()
 							ownerId: profile.unitId,
 						});
 						await tx.insert(series).values({ id: unitId, kind: body.kind });
+						await insertLicenseGrants(tx, {
+							unitId,
+							grantedByProfileId: profile.unitId,
+							licenseIds: body.licenses,
+							unitKind: "series",
+							ownershipMode: "profile_owned",
+						});
 						await recordUnitRevision(tx, {
 							unitId,
 							actorProfileId: profile.unitId,

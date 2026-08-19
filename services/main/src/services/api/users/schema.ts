@@ -1,4 +1,5 @@
 import { type Static, t } from "elysia";
+import { LicenseIds } from "@rezics/license";
 import { Value } from "@sinclair/typebox/value";
 import { PortableTextDocument } from "@rezics/block";
 
@@ -17,7 +18,7 @@ import {
 	FractionalPositionInput,
 	LocalizationLanguageQuery,
 	NonRealmUnitKind,
-	PublicationLicense,
+	License,
 	RevisionContext,
 	ResourceVisibility,
 	StoredUiLocale,
@@ -153,7 +154,7 @@ export const ReplacePreferencesBody = t.Object(
 	{
 		interfaceLocale: StoredUiLocale,
 		chineseContentDisplay: ChineseContentDisplay,
-		defaultLicense: t.Nullable(PublicationLicense),
+		defaultLicenses: t.Array(License, { uniqueItems: true, maxItems: LicenseIds.length }),
 		defaultRealmManageMode: t.Boolean({ default: false }),
 		defaultScoreRealmId: Uuid,
 		collectionConfig: t.Nullable(CollectionConfigV1),

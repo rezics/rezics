@@ -446,12 +446,12 @@ export default {
 			title: String,
 		}),
 		confirmRemoval: "Retirar contenido",
-		confirmLicenseInvalidationTitle: "¿Invalidar esta licencia de contenido?",
+		confirmLicenseInvalidationTitle: `¿Invalidar esta ${esTerminology.license.forms.inline} de contenido?`,
 		confirmLicenseInvalidationDescription: insert(
-			"La licencia de contenido actual de {{title}} quedará invalidada. El registro de concesión se conservará y un administrador de la plataforma podrá restaurarla.",
+			`La ${esTerminology.license.forms.inline} de contenido actual de {{title}} quedará invalidada. El registro de concesión se conservará y un administrador de la plataforma podrá restaurarla.`,
 			{ title: String },
 		),
-		confirmLicenseInvalidation: "Invalidar licencia",
+		confirmLicenseInvalidation: `Invalidar ${esTerminology.license.forms.inline}`,
 		reportCount: insert("{{count}} denuncias", { count: Number }),
 		moderationStatuses: {
 			approved: "Aprobado",
@@ -460,8 +460,11 @@ export default {
 		},
 		targetingLocked: `Nuevas referencias de ${postTerms.plural} bloqueadas`,
 		targetingUnlocked: `Nuevas referencias de ${postTerms.plural} permitidas`,
-		contentLicenseActive: "Licencia de contenido válida",
-		contentLicenseInvalidated: "Licencia de contenido invalidada",
+		licenseGrant: `Concesión de ${esTerminology.license.forms.inline}`,
+		chooseLicenseGrant: `Elegir una concesión de ${esTerminology.license.forms.inline}`,
+		licenseGrantRecognized: `La concesión de ${esTerminology.license.forms.inline} sigue reconocida`,
+		licenseGrantInvalidated:
+			"El reconocimiento de esta concesión por la plataforma está invalidado",
 		openContent: "Abrir contenido",
 	},
 	audit: {

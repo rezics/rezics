@@ -72,67 +72,45 @@ describe("Unit presentation localization", () => {
 	});
 });
 
-describe("Unit publication License inputs", () => {
-	it("accepts registered License IDs and null", () => {
-		expect(Check(CreateUnitBody, { ...publicMainUnit, license: "cc-by-4.0" })).toBe(true);
-		expect(Check(CreateUnitBody, { ...publicMainUnit, license: null })).toBe(true);
+describe("Unit License inputs", () => {
+	it("accepts registered License ID arrays", () => {
+		expect(Check(CreateUnitBody, { ...publicMainUnit, licenses: ["cc-by-4.0"] })).toBe(true);
+		expect(Check(CreateUnitBody, { ...publicMainUnit, licenses: [] })).toBe(true);
 		expect(
 			Check(UpdateUnitBody, {
 				updatedAt: "2026-07-21T00:00:00.000Z",
-				license: "all-rights-reserved",
+				licenses: ["all-rights-reserved"],
 			}),
 		).toBe(true);
 	});
 
 	it("rejects arbitrary text and external identifier casing", () => {
-		expect(Check(CreateUnitBody, { ...publicMainUnit, license: "custom terms" })).toBe(false);
-		expect(Check(CreateUnitBody, { ...publicMainUnit, license: "CC-BY-4.0" })).toBe(false);
+		expect(Check(CreateUnitBody, { ...publicMainUnit, licenses: ["custom terms"] })).toBe(false);
+		expect(Check(CreateUnitBody, { ...publicMainUnit, licenses: ["CC-BY-4.0"] })).toBe(false);
 	});
 });
 
-describe("Unit content License inputs", () => {
-	it("accepts a creation grant only for a Profile-owned work", () => {
-		const contentLicense = {
-			referenceLicenseSlug: "rezics-unit-content-license-v1",
-		} as const;
-		expect(Check(CreateUnitBody, { ...ownedMainUnit, contentLicense })).toBe(true);
-		expect(Check(CreateUnitBody, { ...publicMainUnit, contentLicense })).toBe(false);
-	});
-
-	it("accepts the registered one-time grant and omission", () => {
+describe("independent Unit license offerings", () => {
+	it("accepts residual rights together with other registered licenses", () => {
 		expect(
-			Check(UpdateUnitBody, {
-				updatedAt: "2026-07-31T00:00:00.000Z",
-				details: {
-					contentLicense: {
-						referenceLicenseSlug: "rezics-unit-content-license-v1",
-					},
-				},
-			}),
-		).toBe(true);
-		expect(
-			Check(UpdateUnitBody, {
-				updatedAt: "2026-07-31T00:00:00.000Z",
-				details: {},
+			Check(CreateUnitBody, {
+				...ownedMainUnit,
+				licenses: ["all-rights-reserved", "cc-by-4.0", "rezics-unit-content-license-v1"],
 			}),
 		).toBe(true);
 	});
 
-	it("rejects revocation and unknown License versions", () => {
+	it("rejects unknown license IDs on the shared offering set", () => {
 		expect(
-			Check(UpdateUnitBody, {
-				updatedAt: "2026-07-31T00:00:00.000Z",
-				details: { contentLicense: null },
+			Check(CreateUnitBody, {
+				...ownedMainUnit,
+				licenses: ["rezics-unit-content-license-v2"],
 			}),
 		).toBe(false);
 		expect(
 			Check(UpdateUnitBody, {
 				updatedAt: "2026-07-31T00:00:00.000Z",
-				details: {
-					contentLicense: {
-						referenceLicenseSlug: "rezics-unit-content-license-v2",
-					},
-				},
+				licenses: ["custom terms"],
 			}),
 		).toBe(false);
 	});

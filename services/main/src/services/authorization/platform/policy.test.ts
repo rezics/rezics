@@ -27,7 +27,7 @@ describe("platform authorization policy", () => {
 			"unit.merge.review",
 			"unit.merge",
 			"unit.ownership.override",
-			"unit.content_license.manage",
+			"unit.license.manage",
 			"unit.delete",
 			"unit.restore",
 		]);

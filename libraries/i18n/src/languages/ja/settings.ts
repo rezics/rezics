@@ -5,7 +5,7 @@ import { jaTerminology } from "@rezics/i18n/terminology/ja";
 
 const { forms: realmTerms } = jaTerminology.realm;
 const { forms: unitSlugTerms } = jaTerminology.unitSlug;
-const { forms: publicationLicenseTerms } = jaTerminology.publicationLicense;
+const { forms: licenseTerms } = jaTerminology.license;
 const { forms: metadataTerms } = jaTerminology.metadata;
 const { forms: postTerms } = jaTerminology.post;
 
@@ -24,7 +24,7 @@ export default {
 			},
 			preferences: {
 				label: "設定",
-				description: `インターフェースと言語、評価、デフォルトのスコアリング${realmTerms.label}、デフォルトライセンスを選択します。`,
+				description: `インターフェースと言語、評価、デフォルトのスコアリング${realmTerms.label}、デフォルト${jaTerminology.license.forms.label}を選択します。`,
 			},
 			privacy: {
 				label: "プライバシー",
@@ -252,7 +252,8 @@ export default {
 		invalidLimits: "制限値、操作識別子、重複を確認してください。",
 		resetLimits: "トークン固有の制限を削除",
 	},
-	defaultLicense: `デフォルト${publicationLicenseTerms.inline}`,
+	defaultLicense: `デフォルト${licenseTerms.inline}`,
+	defaultLicenses: `デフォルトの${licenseTerms.inline}の選択`,
 	defaultScoreRealm: `デフォルトのスコア${realmTerms.label}`,
 	defaultScoreRealmHint: `一般ページのスコアはこの${realmTerms.label}に保存されます。別の${realmTerms.label}で作成したスコアは、その${realmTerms.label}に保存されます。`,
 	general: "一般",

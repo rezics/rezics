@@ -450,12 +450,12 @@ export default {
 			title: String,
 		}),
 		confirmRemoval: "Remove content",
-		confirmLicenseInvalidationTitle: "Invalidate this content license?",
+		confirmLicenseInvalidationTitle: `Invalidate this content ${enTerminology.license.forms.inline}?`,
 		confirmLicenseInvalidationDescription: insert(
-			"{{title}}’s current content license will become invalid. The grant record will be retained and can be restored by a platform administrator.",
+			`{{title}}’s current content ${enTerminology.license.forms.inline} will become invalid. The grant record will be retained and can be restored by a platform administrator.`,
 			{ title: String },
 		),
-		confirmLicenseInvalidation: "Invalidate license",
+		confirmLicenseInvalidation: `Invalidate ${enTerminology.license.forms.inline}`,
 		reportCount: insert("{{count}} reports", { count: Number }),
 		moderationStatuses: {
 			approved: "Approved",
@@ -464,8 +464,10 @@ export default {
 		},
 		targetingLocked: `New ${postTerms.label} targeting locked`,
 		targetingUnlocked: `New ${postTerms.label} targeting allowed`,
-		contentLicenseActive: "Content license active",
-		contentLicenseInvalidated: "Content license invalidated",
+		licenseGrant: `${enTerminology.license.forms.label} grant`,
+		chooseLicenseGrant: `Choose a ${enTerminology.license.forms.inline} grant`,
+		licenseGrantRecognized: `${enTerminology.license.forms.label} grant is still recognized`,
+		licenseGrantInvalidated: `Platform recognition of this ${enTerminology.license.forms.inline} grant is invalidated`,
 		openContent: "Open content",
 	},
 	audit: {

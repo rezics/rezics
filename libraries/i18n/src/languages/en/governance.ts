@@ -81,7 +81,7 @@ export default {
 		"unit.merge.review": "Review Unit merges",
 		"unit.merge": "Merge Units directly",
 		"unit.ownership.override": "Override the owner of any Unit",
-		"unit.content_license.manage": "Invalidate or restore Unit content licenses",
+		"unit.license.manage": `Invalidate or restore Unit ${enTerminology.license.forms.inline} grants`,
 		"unit.delete": "Soft-delete any Unit",
 		"unit.restore": "Restore soft-deleted Units",
 		"unit.slug.manage": "Manage Unit public addresses",

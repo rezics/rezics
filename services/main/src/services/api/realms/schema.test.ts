@@ -360,9 +360,9 @@ describe("Realm moderation API contract", () => {
 				previousState: "pending",
 				resultingState: "visible",
 				previousPostTargetingLocked: null,
-				contentLicenseId: null,
-				previousContentLicenseStatus: null,
-				resultingContentLicenseStatus: null,
+				licenseGrantId: null,
+				previousRecognitionStatus: null,
+				resultingRecognitionStatus: null,
 				resultingPostTargetingLocked: null,
 				reversesActionId: null,
 				rules: [

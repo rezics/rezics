@@ -91,12 +91,9 @@ export const deTerminology = defineTerminology("de", {
 		},
 		forbidden: ["Tag structure", "Structure tag"],
 	},
-	publicationLicense: {
+	license: {
 		status: "approved",
-		forms: {
-			label: "Veröffentlichungslizenz",
-			inline: "Veröffentlichungslizenz",
-		},
+		forms: { label: "Lizenz", inline: "Lizenz" },
 		forbidden: [],
 	},
 	entity: {

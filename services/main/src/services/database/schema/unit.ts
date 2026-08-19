@@ -5,8 +5,11 @@ import {
 	type AvatarType,
 	type FontAwesomeIconPrefix,
 } from "@rezics/avatar";
-import { UnitContentLicenseSlugs, type UnitContentLicenseSlug } from "@rezics/license";
-import type { PublicationLicenseId } from "@rezics/license";
+import {
+	LicenseRecognitionStatusValues,
+	type LicenseId,
+	type LicenseRecognitionStatus,
+} from "@rezics/license";
 import { inArray, sql } from "drizzle-orm";
 import {
 	type AnyPgColumn,
@@ -34,7 +37,6 @@ import {
 	ModerationStatusValues,
 	ResourceVisibilityValues,
 	toEnumValues,
-	UnitContentLicenseStatusValues,
 	type UnitReferenceCurationKind,
 	UnitReferenceCurationKindValues,
 	type UnitKind,
@@ -85,8 +87,6 @@ export const unit = pgTable(
 		visibility: resourceVisibility().default("public").notNull(),
 		contentRating: contentRating().default("general").notNull(),
 		aiDisclosure: aiDisclosure().default("unknown").notNull(),
-		/** Public-facing License selected for this Unit's work; never a grant to REZICS. */
-		license: text().$type<PublicationLicenseId>(),
 		moderationStatus: moderationStatus().default("approved").notNull(),
 		/** Rejects creation of new Post relations that target this Unit. */
 		postTargetingLocked: boolean().default(false).notNull(),
@@ -382,42 +382,67 @@ export const unitVariant = pgTable(
 	],
 );
 
-export const unitContentLicenseStatus = pgEnum(
-	"unit_content_license_status",
-	toEnumValues(UnitContentLicenseStatusValues),
+export const unitLicenseRecognitionStatus = pgEnum(
+	"unit_license_recognition_status",
+	toEnumValues(LicenseRecognitionStatusValues),
 );
 
 /**
- * One recorded grant of the referenced REZICS content license for a Unit.
+ * Append-only ledger of independent license grants and rights statements.
  *
- * Grant identity, actor, terms, and time are immutable. Platform governance can
- * reversibly invalidate its recognition of a grant without erasing that
- * historical assertion. At most one grant is active for a Unit.
+ * Grant identity, terms, actor, and time are immutable facts. Ending an
+ * offering records that the Unit no longer currently offers those terms; it
+ * does not erase the grant. Platform recognition is independent of offering.
  */
-export const unitContentLicense = pgTable(
-	"unit_content_license",
+export const unitLicenseGrant = pgTable(
+	"unit_license_grant",
 	{
 		id: createUuidv7PrimaryKey(),
-		unitId: uuid()
-			.notNull()
-			.references(() => unit.id, { onDelete: "restrict" }),
-		grantedByProfileId: uuid()
-			.notNull()
-			.references((): AnyPgColumn => profile.id, { onDelete: "restrict" }),
-		referenceLicenseSlug: text().$type<UnitContentLicenseSlug>().notNull(),
+		unitId: uuid().notNull(),
+		licenseId: text().$type<LicenseId>().notNull(),
+		grantedByProfileId: uuid(),
 		grantedAt: createTimestampMsColumn().defaultNow().notNull(),
-		status: unitContentLicenseStatus().default("active").notNull(),
+		offeringEndedAt: createTimestampMsColumn(),
+		offeringEndedByProfileId: uuid(),
+		recognitionStatus: unitLicenseRecognitionStatus()
+			.$type<LicenseRecognitionStatus>()
+			.default("recognized")
+			.notNull(),
 	},
 	(table) => [
-		uniqueIndex("unit_content_license_active_unit_key")
-			.on(table.unitId)
-			.where(sql`${table.status} = 'active'`),
-		index("unit_content_license_unit_granted_at_idx").on(table.unitId, table.grantedAt.desc()),
-		index("unit_content_license_granted_by_idx").on(table.grantedByProfileId),
-		index("unit_content_license_reference_slug_idx").on(table.referenceLicenseSlug),
+		foreignKey({
+			name: "unit_license_grant_unit_id_unit_id_fkey",
+			columns: [table.unitId],
+			foreignColumns: [unit.id],
+		}).onDelete("restrict"),
+		foreignKey({
+			name: "unit_license_grant_granted_by_profile_id_profile_id_fkey",
+			columns: [table.grantedByProfileId],
+			foreignColumns: [profile.id],
+		}).onDelete("restrict"),
+		foreignKey({
+			name: "unit_license_grant_offering_ended_by_profile_id_profile_id_fkey",
+			columns: [table.offeringEndedByProfileId],
+			foreignColumns: [profile.id],
+		}).onDelete("restrict"),
+		uniqueIndex("unit_license_grant_open_unit_license_key")
+			.on(table.unitId, table.licenseId)
+			.where(sql`${table.offeringEndedAt} is null`),
+		index("unit_license_grant_unit_granted_at_idx").on(table.unitId, table.grantedAt.desc()),
+		index("unit_license_grant_effective_license_unit_idx")
+			.on(table.licenseId, table.unitId)
+			.where(sql`${table.offeringEndedAt} is null and ${table.recognitionStatus} = 'recognized'`),
 		check(
-			"unit_content_license_reference_slug_check",
-			inArray(table.referenceLicenseSlug, UnitContentLicenseSlugs),
+			"unit_license_grant_offering_end_check",
+			sql`(
+				(
+					${table.offeringEndedAt} is null
+					and ${table.offeringEndedByProfileId} is null
+				) or (
+					${table.offeringEndedAt} is not null
+					and ${table.offeringEndedByProfileId} is not null
+				)
+			)`,
 		),
 	],
 );

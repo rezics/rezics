@@ -103,9 +103,9 @@ export const terminologyConcepts = defineTerminologyConcepts({
 		slots: ["label", "pluralLabel", "inline", "plural"] as const,
 		locales: WebTerminologyLocales,
 	},
-	publicationLicense: {
+	license: {
 		definition:
-			"The terms under which a Unit's work is made available to the public; this is not an agreement granting rights to REZICS.",
+			"A registered legal instrument or rights statement that a Unit grants independently of every other selected License.",
 		slots: ["label", "inline"] as const,
 		locales: WebTerminologyLocales,
 	},

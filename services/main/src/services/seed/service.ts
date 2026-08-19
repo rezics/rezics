@@ -14,7 +14,7 @@ import { hashPassword } from "better-auth/crypto";
 import { and, desc, eq, inArray, isNull, sql } from "drizzle-orm";
 import { OfficialRealmUnitIds, ZoneHomePageSlug } from "@rezics/slug";
 import { PlatformCapabilityValues } from "@rezics/access";
-import { CurrentUnitContentLicenseSlug } from "@rezics/license";
+import { RecommendedLicenseId } from "@rezics/license";
 
 import { env } from "../config";
 import { Authorization } from "../authorization";
@@ -35,7 +35,7 @@ import {
 	apikeys,
 	auditEvent,
 	book,
-	unitContentLicense,
+	unitLicenseGrant,
 	platformCapabilityGrant,
 	collection,
 	collectionItem,
@@ -525,7 +525,7 @@ async function seedProfiles(
 			return {
 				profileId: value.id,
 				interfaceLocale,
-				defaultLicense: index % 3 === 0 ? ("cc-by-4.0" as const) : null,
+				defaultLicenses: index % 3 === 0 ? ["cc-by-4.0"] : [],
 				defaultScoreRealmId: OfficialRealmUnitIds.score,
 				scoreVisibility: itemAt(["public", "unlisted", "private"] as const, index),
 				progressVisibility: itemAt(["public", "private", "unlisted"] as const, index),
@@ -540,7 +540,7 @@ async function seedProfiles(
 				},
 				createdAt: value.createdAt,
 				updatedAt: value.createdAt,
-			};
+			} satisfies typeof profilePreference.$inferInsert;
 		}),
 		(batch) => tx.insert(profilePreference).values(batch),
 	);
@@ -817,30 +817,39 @@ async function seedUnitFixtures(
 		[
 			...books
 				.filter((_, index) => index % 3 === 0)
-				.map((value) => ({
-					unitId: value.id,
-					grantedByProfileId: value.ownerProfileId,
-					referenceLicenseSlug: CurrentUnitContentLicenseSlug,
-					grantedAt: value.createdAt,
-				})),
+				.map(
+					(value) =>
+						({
+							unitId: value.id,
+							licenseId: RecommendedLicenseId,
+							grantedByProfileId: value.ownerProfileId,
+							grantedAt: value.createdAt,
+						}) satisfies typeof unitLicenseGrant.$inferInsert,
+				),
 			...softwareUnits
 				.filter((_, index) => index % 4 === 0)
-				.map((value) => ({
-					unitId: value.id,
-					grantedByProfileId: value.ownerProfileId,
-					referenceLicenseSlug: CurrentUnitContentLicenseSlug,
-					grantedAt: value.createdAt,
-				})),
+				.map(
+					(value) =>
+						({
+							unitId: value.id,
+							licenseId: RecommendedLicenseId,
+							grantedByProfileId: value.ownerProfileId,
+							grantedAt: value.createdAt,
+						}) satisfies typeof unitLicenseGrant.$inferInsert,
+				),
 			...mediaItems
 				.filter((_, index) => index % 5 === 0)
-				.map((value) => ({
-					unitId: value.id,
-					grantedByProfileId: value.ownerProfileId,
-					referenceLicenseSlug: CurrentUnitContentLicenseSlug,
-					grantedAt: value.createdAt,
-				})),
+				.map(
+					(value) =>
+						({
+							unitId: value.id,
+							licenseId: RecommendedLicenseId,
+							grantedByProfileId: value.ownerProfileId,
+							grantedAt: value.createdAt,
+						}) satisfies typeof unitLicenseGrant.$inferInsert,
+				),
 		],
-		(batch) => tx.insert(unitContentLicense).values(batch),
+		(batch) => tx.insert(unitLicenseGrant).values(batch),
 	);
 	await writeBatches(
 		seriesItems.map((value, index) => ({
@@ -1141,7 +1150,8 @@ function exampleWikiBody(language: "zh" | "en") {
 				}
 			: {
 					heading: "Welcome to the Example Wiki",
-					intro: "Explore a fictional setting, characters, and works used only as development fixtures.",
+					intro:
+						"Explore a fictional setting, characters, and works used only as development fixtures.",
 					guide: "New here? Start with the reading guide and the overview of the setting.",
 					sections: ["Works and series", "Characters and groups", "Setting and terminology"],
 				};

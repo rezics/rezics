@@ -1,6 +1,6 @@
 import { type Static, t } from "elysia";
 import { SearchContinuationToken } from "@rezics/filter";
-import { PublicationLicenseIds } from "@rezics/license";
+import { LicenseIds } from "@rezics/license";
 
 import { SearchCategories, SearchSorts } from "../../search/schema";
 import { ContentRatingValues } from "../../database/schema/contract-values";
@@ -12,7 +12,7 @@ const SearchSort = t.Union(SearchSorts.map((sort) => t.Literal(sort)));
 
 const SearchStringList = t.Array(t.String({ minLength: 1 }), { maxItems: 50 });
 const SearchLanguageList = t.Array(ContentLanguage, { maxItems: 50 });
-const SearchLicenseList = t.Array(t.UnionEnum(PublicationLicenseIds), { maxItems: 50 });
+const SearchLicenseList = t.Array(t.UnionEnum(LicenseIds), { maxItems: 50 });
 const SearchContentRatingList = t.Array(t.UnionEnum(ContentRatingValues), {
 	maxItems: ContentRatingValues.length,
 	uniqueItems: true,
@@ -29,7 +29,6 @@ export const DomainSearchBody = t.Object(
 		contentRatings: t.Optional(SearchContentRatingList),
 		aiDisclosures: t.Optional(SearchStringList),
 		licenses: t.Optional(SearchLicenseList),
-		contentLicenseActive: t.Optional(t.Boolean()),
 		creditedUnitId: t.Optional(t.String({ minLength: 1 })),
 		realmId: t.Optional(t.String({ minLength: 1 })),
 		realmTagContextRealmId: t.Optional(Uuid),

@@ -54,7 +54,7 @@ export default {
 			pins: { label: "置頂內容", description: "管理置頂與精選內容，以及顯示順序。" },
 			access: {
 				label: "權限",
-				description: "管理授權對象、公共權限與明確限制。",
+				description: `管理${zhHantTerminology.license.forms.label}對象、公共權限與明確限制。`,
 			},
 			moderation: { label: "內容治理", description: "檢視待處理內容並執行治理動作。" },
 			history: { label: "修訂歷史", description: "檢視、比較、撤銷或還原設定修訂。" },
@@ -104,7 +104,7 @@ export default {
 		modes: { post: postTerms.label, wiki: "百科", tagContext: "標籤脈絡" },
 		modeUnavailable: "此內容類型目前無法使用。",
 		communityEditableDescription: `所有已登入使用者都能編輯這篇百科文章；此${realmTerms.label}的存取權管理員可變更權限或鎖定文章。`,
-		restrictedDescription: `只有明確獲得授權的人員能編輯這篇百科文章；此${realmTerms.label}的存取權管理員仍保有治理權限。`,
+		restrictedDescription: `只有明確獲得${zhHantTerminology.license.forms.label}的人員能編輯這篇百科文章；此${realmTerms.label}的存取權管理員仍保有治理權限。`,
 	},
 	scoreContextSettings: {
 		title: "評分準則",
@@ -422,8 +422,8 @@ export default {
 		restore: "恢復",
 		lock_post_targeting: `禁止新的${postTerms.plural}指向此條目`,
 		unlock_post_targeting: `允許新的${postTerms.plural}指向此條目`,
-		invalidate_content_license: "使內容授權失效",
-		restore_content_license: "恢復內容授權",
+		invalidate_license: `使${zhHantTerminology.license.forms.label}授予失效`,
+		restore_license: `恢復${zhHantTerminology.license.forms.label}授予`,
 		warning: "警告",
 		silence: "禁止發言",
 		suspension: "暫停",

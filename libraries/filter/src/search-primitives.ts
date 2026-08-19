@@ -89,7 +89,6 @@ export const SearchScalarFieldValues = [
 	"updated-at",
 	"published-at",
 	"closes-at",
-	"content-license",
 	"book-isbn13",
 	"book-publication-date",
 	"book-page-count",

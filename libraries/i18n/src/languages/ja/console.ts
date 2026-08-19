@@ -429,12 +429,12 @@ export default {
 			{ title: String },
 		),
 		confirmRemoval: "コンテンツを削除",
-		confirmLicenseInvalidationTitle: "このコンテンツライセンスを無効にしますか？",
+		confirmLicenseInvalidationTitle: `このコンテンツ${jaTerminology.license.forms.label}を無効にしますか？`,
 		confirmLicenseInvalidationDescription: insert(
-			"{{title}}の現在のコンテンツライセンスを無効にします。付与記録は保持され、プラットフォーム管理者が復元できます。",
+			`{{title}}の現在のコンテンツ${jaTerminology.license.forms.label}を無効にします。付与記録は保持され、プラットフォーム管理者が復元できます。`,
 			{ title: String },
 		),
-		confirmLicenseInvalidation: "ライセンスを無効化",
+		confirmLicenseInvalidation: `${jaTerminology.license.forms.label}を無効化`,
 		reportCount: insert("報告 {{count}} 件", { count: Number }),
 		moderationStatuses: {
 			approved: "承認済み",
@@ -443,8 +443,10 @@ export default {
 		},
 		targetingLocked: `新しい${postTerms.label}からの参照を禁止`,
 		targetingUnlocked: `新しい${postTerms.label}からの参照を許可`,
-		contentLicenseActive: "コンテンツライセンスは有効",
-		contentLicenseInvalidated: "コンテンツライセンスは無効",
+		licenseGrant: `${jaTerminology.license.forms.label}付与`,
+		chooseLicenseGrant: `${jaTerminology.license.forms.label}付与を選ぶ`,
+		licenseGrantRecognized: `${jaTerminology.license.forms.label}付与は引き続き認められています`,
+		licenseGrantInvalidated: `この${jaTerminology.license.forms.label}付与に対するプラットフォームの承認は無効です`,
 		openContent: "コンテンツを開く",
 	},
 	audit: {

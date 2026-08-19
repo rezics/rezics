@@ -2,7 +2,7 @@ import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 import { zhHantTerminology } from "@rezics/i18n/terminology/zh-Hant";
 import { insert } from "native-i18n";
 
-const { forms: publicationLicenseTerms } = zhHantTerminology.publicationLicense;
+const { forms: licenseTerms } = zhHantTerminology.license;
 const { forms: postTerms } = zhHantTerminology.post;
 const { forms: videoTerms } = zhHantTerminology.video;
 const { forms: audioTerms } = zhHantTerminology.audio;
@@ -122,7 +122,7 @@ export default {
 			},
 			metadata: {
 				label: metadataTerms.label,
-				description: `管理生命週期、可見性、分級、授權與類型專屬${metadataTerms.inline}。`,
+				description: `管理生命週期、可見性、分級、${zhHantTerminology.license.forms.label}與類型專屬${metadataTerms.inline}。`,
 			},
 			relationships: {
 				label: "作品關聯",
@@ -142,7 +142,10 @@ export default {
 				developmentBadge: "開發中",
 			},
 			releases: { label: "系列內容", description: "管理系列內的作品、順序與發布日期。" },
-			access: { label: "權限", description: "管理授權對象、公共權限與明確限制。" },
+			access: {
+				label: "權限",
+				description: `管理${zhHantTerminology.license.forms.label}對象、公共權限與明確限制。`,
+			},
 			history: { label: "修訂歷史", description: "檢視、比較、撤銷或還原內容修訂。" },
 		},
 	},
@@ -194,7 +197,6 @@ export default {
 		pageCount: "頁數",
 		format: "裝幀或格式",
 		releaseStatus: "作品更新狀態",
-		contentLicense: `對 ${verbatimTerms.rezics.value} 授權`,
 		versionLabel: "版本",
 		mediaKind: "媒體類型",
 		releaseDate: "發行日期",
@@ -311,7 +313,7 @@ export default {
 		viewAssociations: "查看所有關聯",
 		aliases: "別名",
 		releasedOn: "發布日期",
-		license: publicationLicenseTerms.label,
+		license: licenseTerms.label,
 		aiDisclosure: `${verbatimTerms.ai.value} 使用揭露`,
 		type: "類型",
 		updatedAt: "最後更新",

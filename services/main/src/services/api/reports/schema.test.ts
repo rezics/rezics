@@ -165,7 +165,7 @@ describe("Unit report API contract", () => {
 			title: "Example",
 			moderationStatus: "pending",
 			postTargetingLocked: false,
-			contentLicense: null,
+			licenseGrants: [],
 			reportCount: 2,
 			allowedCommands: ["approve", "remove", "dismiss", "note"],
 			createdAt: "2026-07-29T10:11:12.345Z",

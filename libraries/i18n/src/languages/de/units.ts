@@ -2,7 +2,7 @@ import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 import { deTerminology } from "@rezics/i18n/terminology/de";
 import { insert } from "native-i18n";
 
-const { forms: publicationLicenseTerms } = deTerminology.publicationLicense;
+const { forms: licenseTerms } = deTerminology.license;
 const { forms: postTerms } = deTerminology.post;
 const { forms: videoTerms } = deTerminology.video;
 const { forms: audioTerms } = deTerminology.audio;
@@ -130,7 +130,7 @@ export default {
 			},
 			metadata: {
 				label: metadataTerms.label,
-				description: `Verwalte Lebenszyklus, Sichtbarkeit, Einstufung, Lizenz und typspezifische ${metadataTerms.inline}.`,
+				description: `Verwalte Lebenszyklus, Sichtbarkeit, Einstufung, ${deTerminology.license.forms.label} und typspezifische ${metadataTerms.inline}.`,
 			},
 			relationships: {
 				label: "Werkbeziehungen",
@@ -216,7 +216,6 @@ export default {
 		pageCount: "Seitenzahl",
 		format: "Einband oder Format",
 		releaseStatus: "Veröffentlichungsstatus des Werks",
-		contentLicense: `Lizenz für ${verbatimTerms.rezics.value}`,
 		versionLabel: "Versionsbezeichnung",
 		mediaKind: "Medienart",
 		releaseDate: "Erscheinungsdatum",
@@ -337,7 +336,7 @@ export default {
 		viewAssociations: "Alle Zuordnungen anzeigen",
 		aliases: "Aliasse",
 		releasedOn: "Veröffentlichungsdatum",
-		license: publicationLicenseTerms.label,
+		license: licenseTerms.label,
 		aiDisclosure: `Hinweis zu ${verbatimTerms.ai.value}`,
 		type: "Typ",
 		updatedAt: "Zuletzt aktualisiert",

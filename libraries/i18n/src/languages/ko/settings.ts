@@ -5,7 +5,7 @@ import { koTerminology } from "@rezics/i18n/terminology/ko";
 
 const { forms: realmTerms } = koTerminology.realm;
 const { forms: unitSlugTerms } = koTerminology.unitSlug;
-const { forms: publicationLicenseTerms } = koTerminology.publicationLicense;
+const { forms: licenseTerms } = koTerminology.license;
 const { forms: metadataTerms } = koTerminology.metadata;
 const { forms: postTerms } = koTerminology.post;
 
@@ -24,7 +24,7 @@ export default {
 			},
 			preferences: {
 				label: "환경 설정",
-				description: `인터페이스 및 콘텐츠 언어, 등급, 기본 점수 ${realmTerms.label} 및 기본 라이선스를 선택하세요.`,
+				description: `인터페이스 및 콘텐츠 언어, 등급, 기본 점수 ${realmTerms.label} 및 기본 ${koTerminology.license.forms.label}를 선택하세요.`,
 			},
 			privacy: {
 				label: "개인정보 보호",
@@ -249,7 +249,8 @@ export default {
 		invalidLimits: "제한 값, 작업 식별자 및 중복 확인",
 		resetLimits: "토큰별 제한 삭제",
 	},
-	defaultLicense: `기본 ${publicationLicenseTerms.inline}`,
+	defaultLicense: `기본 ${licenseTerms.inline}`,
+	defaultLicenses: `기본 ${licenseTerms.inline} 선택`,
 	defaultScoreRealm: `기본 점수 ${realmTerms.label}`,
 	defaultScoreRealmHint: `일반 페이지의 점수는 이 ${realmTerms.label}에 저장됩니다. 다른 ${realmTerms.label}에서 만든 점수는 해당 ${realmTerms.label}에 저장됩니다.`,
 	general: "일반",

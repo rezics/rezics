@@ -7,7 +7,7 @@ import {
 } from "@rezics/avatar";
 import { PortableTextDocument } from "@rezics/block";
 import { SearchContinuationToken } from "@rezics/filter";
-import { UnitContentLicenseSlugs } from "@rezics/license";
+import { LicenseIds, LicenseRecognitionStatusValues } from "@rezics/license";
 import {
 	ChineseContentDisplay,
 	ContentLanguage,
@@ -16,7 +16,7 @@ import {
 	DateTimeString,
 	FractionalPosition,
 	OrdinalPosition,
-	PublicationLicense,
+	License,
 	ResourceVisibility,
 	StoredUiLocale,
 	Uuid,
@@ -244,11 +244,23 @@ const ManageableUnitTypeResponse = t.Union([
 	t.Literal("audio"),
 ]);
 
-const UnitContentLicenseResponse = t.Object(
+const UnitLicenseGrantResponse = t.Object(
 	{
-		referenceLicenseSlug: t.UnionEnum(UnitContentLicenseSlugs),
-		grantedByProfileId: Uuid,
+		id: Uuid,
+		licenseId: t.UnionEnum(LicenseIds),
+		grantedByProfileId: t.Nullable(Uuid),
 		grantedAt: DateTime,
+	},
+	{ additionalProperties: false },
+);
+
+const UnitLicenseOfferingResponse = t.Object(
+	{
+		id: Uuid,
+		licenseId: t.UnionEnum(LicenseIds),
+		grantedByProfileId: t.Nullable(Uuid),
+		grantedAt: DateTime,
+		recognitionStatus: t.UnionEnum(LicenseRecognitionStatusValues),
 	},
 	{ additionalProperties: false },
 );
@@ -265,7 +277,6 @@ const UnitDetailsResponse = t.Union([
 			wordCount: t.Nullable(t.Integer({ minimum: 0 })),
 			publishedContentMetrics: t.Array(LocalizedContentMetricResponse),
 			format: NullableText,
-			contentLicense: t.Nullable(UnitContentLicenseResponse),
 		},
 		{ additionalProperties: false },
 	),
@@ -274,7 +285,6 @@ const UnitDetailsResponse = t.Union([
 			type: t.Literal("software"),
 			releaseDate: t.Nullable(t.String({ format: "date" })),
 			versionLabel: NullableText,
-			contentLicense: t.Nullable(UnitContentLicenseResponse),
 		},
 		{ additionalProperties: false },
 	),
@@ -287,7 +297,6 @@ const UnitDetailsResponse = t.Union([
 			runtimeMinutes: t.Nullable(t.Integer({ minimum: 1 })),
 			episodeCount: t.Nullable(t.Integer({ minimum: 1 })),
 			seasonCount: t.Nullable(t.Integer({ minimum: 1 })),
-			contentLicense: t.Nullable(UnitContentLicenseResponse),
 		},
 		{ additionalProperties: false },
 	),
@@ -386,7 +395,8 @@ export const UnitDetailResponse = t.Object({
 	language: t.Nullable(ContentLanguage),
 	contentRating: t.String(),
 	aiDisclosure: t.String(),
-	license: t.Nullable(PublicationLicense),
+	licenses: t.Array(UnitLicenseGrantResponse),
+	licenseOfferings: t.Array(UnitLicenseOfferingResponse),
 	postTargetingLocked: t.Boolean(),
 	publishedAt: t.Nullable(DateTime),
 	attributions: t.Array(UnitDetailAttributionSummaryResponse),
@@ -816,7 +826,7 @@ export const PreferencesResponse = t.Object({
 	profileId: Uuid,
 	interfaceLocale: StoredUiLocale,
 	chineseContentDisplay: ChineseContentDisplay,
-	defaultLicense: t.Nullable(PublicationLicense),
+	defaultLicenses: t.Array(License),
 	defaultRealmManageMode: t.Boolean(),
 	defaultScoreRealmId: Uuid,
 	scoreVisibility: ResourceVisibility,

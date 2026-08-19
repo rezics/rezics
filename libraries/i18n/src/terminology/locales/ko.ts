@@ -81,9 +81,9 @@ export const koTerminology = defineTerminology("ko", {
 		},
 		forbidden: ["Tag structure", "Structure tag"],
 	},
-	publicationLicense: {
+	license: {
 		status: "approved",
-		forms: { label: "게시 라이선스", inline: "게시 라이선스" },
+		forms: { label: "라이선스", inline: "라이선스" },
 		forbidden: ["Publication license"],
 	},
 	entity: {

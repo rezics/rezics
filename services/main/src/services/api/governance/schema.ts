@@ -10,7 +10,6 @@ import { type Static, t } from "elysia";
 
 import {
 	ContentGovernanceActionKindValues,
-	ContentGovernanceRuleBackedActionKindValues,
 	ContentReviewCaseStateValues,
 	EnforcementKindValues,
 	GovernanceMaxRuleReferences,
@@ -156,9 +155,14 @@ export const GovernanceRuleSourcesResponse = t.Object({
 		{ minItems: 1, maxItems: 2 },
 	),
 });
-const RuleBackedContentGovernanceActionKind = t.Union(
-	ContentGovernanceRuleBackedActionKindValues.map((kind) => t.Literal(kind)),
-);
+const RuleBackedContentGovernanceActionKind = t.Union([
+	t.Literal("approve"),
+	t.Literal("hide"),
+	t.Literal("remove"),
+	t.Literal("restore"),
+	t.Literal("lock_post_targeting"),
+	t.Literal("unlock_post_targeting"),
+]);
 
 export const CreateContentGovernanceActionBody = t.Union([
 	t.Object(
@@ -172,7 +176,16 @@ export const CreateContentGovernanceActionBody = t.Union([
 	t.Object(
 		{
 			...ContentGovernanceActionCommon,
-			kind: t.Literal("restore_content_license"),
+			kind: t.Literal("invalidate_license"),
+			licenseGrantId: Uuid,
+			rules: GovernanceRuleReferences,
+		},
+		{ additionalProperties: false },
+	),
+	t.Object(
+		{
+			...ContentGovernanceActionCommon,
+			kind: t.Literal("restore_license"),
 			reversesActionId: Uuid,
 		},
 		{ additionalProperties: false },
@@ -575,13 +588,9 @@ export const ContentGovernanceActionResponse = t.Object({
 	previousState: t.Nullable(t.String()),
 	resultingState: t.Nullable(t.String()),
 	previousPostTargetingLocked: t.Nullable(t.Boolean()),
-	contentLicenseId: t.Nullable(Uuid),
-	previousContentLicenseStatus: t.Nullable(
-		t.Union([t.Literal("active"), t.Literal("invalidated")]),
-	),
-	resultingContentLicenseStatus: t.Nullable(
-		t.Union([t.Literal("active"), t.Literal("invalidated")]),
-	),
+	licenseGrantId: t.Nullable(Uuid),
+	previousRecognitionStatus: t.Nullable(t.UnionEnum(["recognized", "invalidated"])),
+	resultingRecognitionStatus: t.Nullable(t.UnionEnum(["recognized", "invalidated"])),
 	resultingPostTargetingLocked: t.Nullable(t.Boolean()),
 	reversesActionId: t.Nullable(Uuid),
 	rules: t.Array(GovernanceRuleReference, { maxItems: GovernanceMaxRuleReferences }),

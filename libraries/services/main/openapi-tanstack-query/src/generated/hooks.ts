@@ -3,6 +3,14 @@
  * Do not edit manually.
  */
 
+import type {
+	QueryKey,
+	QueryClient,
+	QueryObserverOptions,
+	UseQueryResult,
+	UseMutationOptions,
+	UseMutationResult,
+} from "@tanstack/react-query";
 import type { RequestConfig, ResponseErrorConfig } from "./.kubb/client";
 import type {
 	AssignCurrentProfileSlugOptions,
@@ -2593,14 +2601,7 @@ import type {
 	DeleteApiImageAssetsByIdStatus429,
 	DeleteApiImageAssetsByIdStatus500,
 } from "./models";
-import type {
-	QueryKey,
-	QueryClient,
-	QueryObserverOptions,
-	UseQueryResult,
-	UseMutationOptions,
-	UseMutationResult,
-} from "@tanstack/react-query";
+import { mutationOptions, queryOptions, useQuery, useMutation } from "@tanstack/react-query";
 import {
 	assignCurrentProfileSlug,
 	deleteApiApiQuotaPoliciesAccountsByUserId,
@@ -2978,7 +2979,6 @@ import {
 	getApiImageAssetsById,
 	deleteApiImageAssetsById,
 } from "./client";
-import { mutationOptions, queryOptions, useQuery, useMutation } from "@tanstack/react-query";
 
 export const getImageAssetsByIdPresentationsByRoleContentQueryKey = ({
 	path,

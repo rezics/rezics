@@ -92,11 +92,13 @@ const UnitCreateForbiddenResponse = toApiErrorResponse([
 	"EmailVerificationRequired",
 	"AccountRestricted",
 	"EntityAssociationRestricted",
+	"UnitLicenseGrantForbidden",
 ]);
 const UnitCreateBadRequestResponse = toApiErrorResponse([
 	"CreditAttributionRoleInvalid",
 	"RevisionCreditEntityInvalid",
 	"RevisionContributionActorRequired",
+	"UnitLicenseNotApplicable",
 ]);
 const UnitCreateConflictResponse = toApiErrorResponse([
 	"CreditAttributionRequestConfirmationRequired",
@@ -105,6 +107,8 @@ const UnitCreateConflictResponse = toApiErrorResponse([
 	"UnitVariantSourceHasVariants",
 	"UnitVariantChanged",
 	"UnitVariantMainUnavailable",
+	"UnitLicenseGrantConflict",
+	"UnitLicenseOfferingEndForbidden",
 ]);
 const UnitLocalizationOrderBadRequestResponse = toApiErrorResponse([
 	"UnitLocalizationOrderInvalid",
@@ -130,11 +134,16 @@ const UnitUpdateForbiddenResponse = toApiErrorResponse([
 	"EmailVerificationRequired",
 	"AccountRestricted",
 	"UnitPermissionForbidden",
-	"UnitContentLicenseGrantForbidden",
+	"UnitLicenseGrantForbidden",
 ]);
 const UnitRevisionContributionBadRequestResponse = toApiErrorResponse([
 	"RevisionCreditEntityInvalid",
 	"RevisionContributionActorRequired",
+]);
+const UnitUpdateBadRequestResponse = toApiErrorResponse([
+	"RevisionCreditEntityInvalid",
+	"RevisionContributionActorRequired",
+	"UnitLicenseNotApplicable",
 ]);
 const UnitAuthorizationForbiddenResponse = toApiErrorResponse([
 	"ApiTokenPermissionRequired",
@@ -143,6 +152,11 @@ const UnitAuthorizationForbiddenResponse = toApiErrorResponse([
 	"UnitPermissionForbidden",
 ]);
 const UnitChangedResponse = toApiErrorResponse(["UnitChanged"]);
+const UnitUpdateConflictResponse = toApiErrorResponse([
+	"UnitChanged",
+	"UnitLicenseGrantConflict",
+	"UnitLicenseOfferingEndForbidden",
+]);
 const UnitRealmPublicationForbiddenResponse = toApiErrorResponse([
 	"ApiTokenPermissionRequired",
 	"EmailVerificationRequired",
@@ -584,10 +598,10 @@ export default new Elysia({ prefix: "/units" })
 				[StatusCodes.OK]: UnitDetailResponse,
 				[StatusCodes.UNAUTHORIZED]: AuthenticationRequiredResponse,
 				[StatusCodes.FORBIDDEN]: UnitUpdateForbiddenResponse,
-				[StatusCodes.BAD_REQUEST]: UnitRevisionContributionBadRequestResponse,
+				[StatusCodes.BAD_REQUEST]: UnitUpdateBadRequestResponse,
 				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["ValidationError"]),
 				[StatusCodes.NOT_FOUND]: UnitMutationNotFoundResponse,
-				[StatusCodes.CONFLICT]: UnitChangedResponse,
+				[StatusCodes.CONFLICT]: UnitUpdateConflictResponse,
 			},
 			detail: { summary: "Update unit", tags: ["Units"] },
 		},

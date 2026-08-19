@@ -3,6 +3,7 @@ import type { ContentLanguage } from "@rezics/i18n";
 
 import {
 	getUnitRevisionSlotContent,
+	parsePersistedUnitRevisionState,
 	parseUnitRevisionSlotIdentity,
 	type UnitRevisionDocuments,
 	undoRevisionDocuments,
@@ -182,5 +183,22 @@ describe("revision slot identity", () => {
 		expect(() =>
 			getUnitRevisionSlotContent(documents, { role: "localization", slotKey: "en" }),
 		).toThrow("Unit localization revision slot en contains zh content");
+	});
+});
+
+describe("legacy Unit revision snapshots", () => {
+	it("strips the retired single-license column instead of restoring it", () => {
+		expect(
+			parsePersistedUnitRevisionState({
+				contentRating: "general",
+				aiDisclosure: "none",
+				license: "cc-by-4.0",
+				postTargetingLocked: false,
+			}),
+		).toEqual({
+			contentRating: "general",
+			aiDisclosure: "none",
+			postTargetingLocked: false,
+		});
 	});
 });

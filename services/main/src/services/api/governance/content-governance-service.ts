@@ -12,7 +12,7 @@ import {
 	realmUnit,
 	realmUnitStatusEvent,
 	unit,
-	unitContentLicense,
+	unitLicenseGrant,
 	unitOwnership,
 } from "../../database/schema";
 import { createGovernanceNotePost, listGovernanceNotes } from "../../governance/note-service";
@@ -38,10 +38,10 @@ import {
 	isActiveContentReviewCaseState,
 	resolvePostTargetingLockState,
 	resolveRealmUnitStatus,
-	resolveUnitContentLicenseStatus,
+	resolveLicenseRecognitionStatus,
 	resolveUnitModerationStatus,
 	type RealmUnitStatus,
-	type UnitContentLicenseStatus,
+	type LicenseRecognitionStatus,
 	type UnitModerationStatus,
 } from "./content-governance-contract";
 import type { CreateContentGovernanceActionBody, ContentGovernanceActionResponse } from "./schema";
@@ -54,9 +54,9 @@ export const contentGovernanceActionSelection = {
 	previousState: contentGovernanceAction.previousState,
 	resultingState: contentGovernanceAction.resultingState,
 	previousPostTargetingLocked: contentGovernanceAction.previousPostTargetingLocked,
-	contentLicenseId: contentGovernanceAction.contentLicenseId,
-	previousContentLicenseStatus: contentGovernanceAction.previousContentLicenseStatus,
-	resultingContentLicenseStatus: contentGovernanceAction.resultingContentLicenseStatus,
+	licenseGrantId: contentGovernanceAction.licenseGrantId,
+	previousRecognitionStatus: contentGovernanceAction.previousRecognitionStatus,
+	resultingRecognitionStatus: contentGovernanceAction.resultingRecognitionStatus,
 	resultingPostTargetingLocked: contentGovernanceAction.resultingPostTargetingLocked,
 	reversesActionId: contentGovernanceAction.reversesActionId,
 	createdAt: contentGovernanceAction.createdAt,
@@ -97,14 +97,14 @@ type LockActionPlan = {
 	resultingPostTargetingLocked: boolean;
 };
 
-type ContentLicenseActionPlan = {
-	type: "unit_content_license_state";
-	contentLicenseId: string;
-	previousContentLicenseStatus: UnitContentLicenseStatus;
-	resultingContentLicenseStatus: UnitContentLicenseStatus;
+type LicenseGrantActionPlan = {
+	type: "unit_license_grant_state";
+	licenseGrantId: string;
+	previousRecognitionStatus: LicenseRecognitionStatus;
+	resultingRecognitionStatus: LicenseRecognitionStatus;
 };
 
-type ContentGovernanceActionPlan = StateActionPlan | LockActionPlan | ContentLicenseActionPlan;
+type ContentGovernanceActionPlan = StateActionPlan | LockActionPlan | LicenseGrantActionPlan;
 
 function canonicalize(value: unknown): unknown {
 	if (Array.isArray(value)) return value.map(canonicalize);
@@ -268,7 +268,7 @@ async function loadPostTargetingLockPlan(
 	};
 }
 
-async function lockContentLicenseTargetUnit(
+async function lockLicenseGrantTargetUnit(
 	tx: DatabaseTransaction,
 	row: ContentReviewCaseRecord,
 ): Promise<void> {
@@ -282,58 +282,60 @@ async function lockContentLicenseTargetUnit(
 	if (!target) throw new ModerationTargetNotFound();
 }
 
-async function loadContentLicenseInvalidationPlan(
+async function loadLicenseGrantInvalidationPlan(
 	tx: DatabaseTransaction,
 	row: ContentReviewCaseRecord,
-): Promise<ContentLicenseActionPlan> {
-	await lockContentLicenseTargetUnit(tx, row);
+	licenseGrantId: string,
+): Promise<LicenseGrantActionPlan> {
+	await lockLicenseGrantTargetUnit(tx, row);
 	const [current] = await tx
 		.select({
-			id: unitContentLicense.id,
-			status: unitContentLicense.status,
+			id: unitLicenseGrant.id,
+			recognitionStatus: unitLicenseGrant.recognitionStatus,
+			offeringEndedAt: unitLicenseGrant.offeringEndedAt,
 		})
-		.from(unitContentLicense)
+		.from(unitLicenseGrant)
 		.where(
-			and(eq(unitContentLicense.unitId, row.targetUnitId), eq(unitContentLicense.status, "active")),
+			and(eq(unitLicenseGrant.id, licenseGrantId), eq(unitLicenseGrant.unitId, row.targetUnitId)),
 		)
 		.for("update")
 		.limit(1);
-	if (!current) throw new ModerationActionNoEffect();
+	if (!current || current.offeringEndedAt) throw new ModerationActionNoEffect();
 	return {
-		type: "unit_content_license_state",
-		contentLicenseId: current.id,
-		previousContentLicenseStatus: current.status,
-		resultingContentLicenseStatus: resolveUnitContentLicenseStatus(
-			current.status,
-			"invalidate_content_license",
+		type: "unit_license_grant_state",
+		licenseGrantId: current.id,
+		previousRecognitionStatus: current.recognitionStatus,
+		resultingRecognitionStatus: resolveLicenseRecognitionStatus(
+			current.recognitionStatus,
+			"invalidate_license",
 		),
 	};
 }
 
-async function loadContentLicenseRestorationPlan(
+async function loadLicenseGrantRestorationPlan(
 	tx: DatabaseTransaction,
 	row: ContentReviewCaseRecord,
 	reversesActionId: string,
-): Promise<ContentLicenseActionPlan> {
-	await lockContentLicenseTargetUnit(tx, row);
+): Promise<LicenseGrantActionPlan> {
+	await lockLicenseGrantTargetUnit(tx, row);
 	const [invalidation] = await tx
 		.select({
 			id: contentGovernanceAction.id,
 			caseId: contentGovernanceAction.caseId,
 			kind: contentGovernanceAction.kind,
-			contentLicenseId: contentGovernanceAction.contentLicenseId,
-			previousContentLicenseStatus: contentGovernanceAction.previousContentLicenseStatus,
-			resultingContentLicenseStatus: contentGovernanceAction.resultingContentLicenseStatus,
+			licenseGrantId: contentGovernanceAction.licenseGrantId,
+			previousRecognitionStatus: contentGovernanceAction.previousRecognitionStatus,
+			resultingRecognitionStatus: contentGovernanceAction.resultingRecognitionStatus,
 		})
 		.from(contentGovernanceAction)
 		.where(eq(contentGovernanceAction.id, reversesActionId))
 		.limit(1);
 	if (
 		!invalidation ||
-		invalidation.kind !== "invalidate_content_license" ||
-		!invalidation.contentLicenseId ||
-		invalidation.previousContentLicenseStatus !== "active" ||
-		invalidation.resultingContentLicenseStatus !== "invalidated"
+		invalidation.kind !== "invalidate_license" ||
+		!invalidation.licenseGrantId ||
+		invalidation.previousRecognitionStatus !== "recognized" ||
+		invalidation.resultingRecognitionStatus !== "invalidated"
 	)
 		throw new ModerationReversedActionInvalid();
 	const [invalidationCase] = await tx
@@ -358,31 +360,25 @@ async function loadContentLicenseRestorationPlan(
 	if (existingRestoration) throw new ModerationReversalUnavailable();
 	const [current] = await tx
 		.select({
-			id: unitContentLicense.id,
-			unitId: unitContentLicense.unitId,
-			status: unitContentLicense.status,
+			id: unitLicenseGrant.id,
+			unitId: unitLicenseGrant.unitId,
+			recognitionStatus: unitLicenseGrant.recognitionStatus,
+			offeringEndedAt: unitLicenseGrant.offeringEndedAt,
 		})
-		.from(unitContentLicense)
-		.where(eq(unitContentLicense.id, invalidation.contentLicenseId))
+		.from(unitLicenseGrant)
+		.where(eq(unitLicenseGrant.id, invalidation.licenseGrantId))
 		.for("update")
 		.limit(1);
 	if (!current || current.unitId !== row.targetUnitId) throw new ModerationReversedActionInvalid();
-	if (current.status !== "invalidated") throw new ModerationReversalUnavailable();
-	const [activeGrant] = await tx
-		.select({ id: unitContentLicense.id })
-		.from(unitContentLicense)
-		.where(
-			and(eq(unitContentLicense.unitId, row.targetUnitId), eq(unitContentLicense.status, "active")),
-		)
-		.limit(1);
-	if (activeGrant) throw new ModerationReversalUnavailable();
+	if (current.offeringEndedAt) throw new ModerationReversalUnavailable();
+	if (current.recognitionStatus !== "invalidated") throw new ModerationReversalUnavailable();
 	return {
-		type: "unit_content_license_state",
-		contentLicenseId: current.id,
-		previousContentLicenseStatus: current.status,
-		resultingContentLicenseStatus: resolveUnitContentLicenseStatus(
-			current.status,
-			"restore_content_license",
+		type: "unit_license_grant_state",
+		licenseGrantId: current.id,
+		previousRecognitionStatus: current.recognitionStatus,
+		resultingRecognitionStatus: resolveLicenseRecognitionStatus(
+			current.recognitionStatus,
+			"restore_license",
 		),
 	};
 }
@@ -510,10 +506,10 @@ async function deriveActionPlan(
 ): Promise<ContentGovernanceActionPlan> {
 	assertContentGovernanceActionCompatible(row.authority, body.kind);
 	if (body.kind === "reverse") return loadReversalPlan(tx, row, body.reversesActionId);
-	if (body.kind === "invalidate_content_license")
-		return loadContentLicenseInvalidationPlan(tx, row);
-	if (body.kind === "restore_content_license")
-		return loadContentLicenseRestorationPlan(tx, row, body.reversesActionId);
+	if (body.kind === "invalidate_license")
+		return loadLicenseGrantInvalidationPlan(tx, row, body.licenseGrantId);
+	if (body.kind === "restore_license")
+		return loadLicenseGrantRestorationPlan(tx, row, body.reversesActionId);
 	if (body.kind === "approve" || body.kind === "remove" || body.kind === "restore") {
 		if (row.authority === "realm") return loadRealmUnitStatePlan(tx, row, body.kind);
 		return loadUnitStatePlan(tx, row, body.kind);
@@ -596,18 +592,18 @@ async function executeActionPlan(
 		if (!updated) throw new ModerationTransitionInvalid();
 		return;
 	}
-	if (plan.type === "unit_content_license_state") {
+	if (plan.type === "unit_license_grant_state") {
 		const [updated] = await tx
-			.update(unitContentLicense)
-			.set({ status: plan.resultingContentLicenseStatus })
+			.update(unitLicenseGrant)
+			.set({ recognitionStatus: plan.resultingRecognitionStatus })
 			.where(
 				and(
-					eq(unitContentLicense.id, plan.contentLicenseId),
-					eq(unitContentLicense.unitId, row.targetUnitId),
-					eq(unitContentLicense.status, plan.previousContentLicenseStatus),
+					eq(unitLicenseGrant.id, plan.licenseGrantId),
+					eq(unitLicenseGrant.unitId, row.targetUnitId),
+					eq(unitLicenseGrant.recognitionStatus, plan.previousRecognitionStatus),
 				),
 			)
-			.returning({ id: unitContentLicense.id });
+			.returning({ id: unitLicenseGrant.id });
 		if (!updated) throw new ModerationTransitionInvalid();
 		return;
 	}
@@ -681,16 +677,12 @@ export async function executeAuthorizedContentGovernanceAction(
 	const resultingPostTargetingLocked = isPostTargetingLockPlan
 		? plan.resultingPostTargetingLocked
 		: null;
-	const isContentLicensePlan = plan.type === "unit_content_license_state";
-	const contentLicenseId = isContentLicensePlan ? plan.contentLicenseId : null;
-	const previousContentLicenseStatus = isContentLicensePlan
-		? plan.previousContentLicenseStatus
-		: null;
-	const resultingContentLicenseStatus = isContentLicensePlan
-		? plan.resultingContentLicenseStatus
-		: null;
+	const isLicenseGrantPlan = plan.type === "unit_license_grant_state";
+	const licenseGrantId = isLicenseGrantPlan ? plan.licenseGrantId : null;
+	const previousRecognitionStatus = isLicenseGrantPlan ? plan.previousRecognitionStatus : null;
+	const resultingRecognitionStatus = isLicenseGrantPlan ? plan.resultingRecognitionStatus : null;
 	let reversedDecisionId: string | undefined;
-	if (input.body.kind === "reverse" || input.body.kind === "restore_content_license") {
+	if (input.body.kind === "reverse" || input.body.kind === "restore_license") {
 		const [reversedAction] = await tx
 			.select({ decisionId: contentGovernanceAction.decisionId })
 			.from(contentGovernanceAction)
@@ -712,7 +704,7 @@ export async function executeAuthorizedContentGovernanceAction(
 		targetUnitId: input.caseRow.targetUnitId,
 		subject: { kind: "content_review_case", id: input.caseRow.id },
 		basis:
-			input.body.kind === "reverse" || input.body.kind === "restore_content_license"
+			input.body.kind === "reverse" || input.body.kind === "restore_license"
 				? { kind: "reversal", reversesDecisionId: reversedDecisionId! }
 				: { kind: "rules", rules: input.body.rules },
 	});
@@ -727,12 +719,12 @@ export async function executeAuthorizedContentGovernanceAction(
 			previousState,
 			resultingState,
 			previousPostTargetingLocked,
-			contentLicenseId,
-			previousContentLicenseStatus,
-			resultingContentLicenseStatus,
+			licenseGrantId,
+			previousRecognitionStatus,
+			resultingRecognitionStatus,
 			resultingPostTargetingLocked,
 			reversesActionId:
-				input.body.kind === "reverse" || input.body.kind === "restore_content_license"
+				input.body.kind === "reverse" || input.body.kind === "restore_license"
 					? input.body.reversesActionId
 					: undefined,
 			idempotencyKey: input.body.idempotencyKey,

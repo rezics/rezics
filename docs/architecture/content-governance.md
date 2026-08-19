@@ -55,6 +55,13 @@ separate facts and are never copied into a generic reason column.
 Account enforcement retains a separate operational action, but its authority,
 Rule basis, and reversal are recorded in the same governance decision ledger.
 
+License invalidation and restoration operate on individual
+`unit_license_grant` rows. `invalidate_license` is rule-backed and names the
+target `licenseGrantId`. `restore_license` remains a reversal of that action.
+`granted` on the ledger is a recorded declaration, not a finding of legal
+validity; invalidation withdraws platform recognition of that declaration.
+See [Unit license grants](./unit-license-grants.md).
+
 ## Concurrency and bounded work
 
 Case creation uses an authority-and-Unit transaction advisory lock only when no

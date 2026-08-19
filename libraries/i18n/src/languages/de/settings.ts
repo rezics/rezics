@@ -5,7 +5,7 @@ import { deTerminology } from "@rezics/i18n/terminology/de";
 
 const { forms: realmTerms } = deTerminology.realm;
 const { forms: unitSlugTerms } = deTerminology.unitSlug;
-const { forms: publicationLicenseTerms } = deTerminology.publicationLicense;
+const { forms: licenseTerms } = deTerminology.license;
 const { forms: metadataTerms } = deTerminology.metadata;
 
 export default {
@@ -260,7 +260,8 @@ export default {
 		invalidLimits: "Prüfe Begrenzungswerte, Aktionskennungen und Duplikate.",
 		resetLimits: "Tokenspezifische Grenzen entfernen",
 	},
-	defaultLicense: `Standard-${publicationLicenseTerms.inline}`,
+	defaultLicense: `Standard-${licenseTerms.inline}`,
+	defaultLicenses: `Standardauswahl der ${licenseTerms.inline}`,
 	defaultScoreRealm: `Standard-${realmTerms.label} für Bewertungen`,
 	defaultScoreRealmHint: `Bewertungen von allgemeinen Seiten werden in diesem ${realmTerms.inline} gespeichert. Bewertungen in einem anderen ${realmTerms.inline} bleiben dort.`,
 	general: "Allgemein",

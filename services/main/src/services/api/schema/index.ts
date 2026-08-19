@@ -8,7 +8,7 @@ import {
 	isSingleEmojiGrapheme,
 } from "@rezics/avatar";
 import { PortableTextDocument } from "@rezics/block";
-import { PublicationLicenseIds } from "@rezics/license";
+import { LicenseIds } from "@rezics/license";
 
 import {
 	AiDisclosureValues,
@@ -97,11 +97,11 @@ export const ResourceVisibility = t.UnionEnum(ResourceVisibilityValues, {
 });
 export type ResourceVisibility = Static<typeof ResourceVisibility>;
 
-/** A REZICS publication License ID accepted and returned by the public API. */
-export const PublicationLicense = t.UnionEnum(PublicationLicenseIds, {
+/** A registered License ID accepted and returned by the public API. */
+export const License = t.UnionEnum(LicenseIds, {
 	default: undefined,
 });
-export type PublicationLicense = Static<typeof PublicationLicense>;
+export type License = Static<typeof License>;
 
 export const DateTimeString = t.String({ format: "date-time" });
 
@@ -241,7 +241,7 @@ export const LifecycleInput = {
 	visibility: t.Optional(ResourceVisibility),
 	contentRating: t.Optional(ContentRating),
 	aiDisclosure: t.Optional(t.Union(AiDisclosureValues.map((value) => t.Literal(value)))),
-	license: t.Optional(t.Nullable(PublicationLicense)),
+	licenses: t.Optional(t.Array(License, { uniqueItems: true, maxItems: LicenseIds.length })),
 };
 export type LifecycleInput = {
 	[K in keyof typeof LifecycleInput]: Static<(typeof LifecycleInput)[K]>;

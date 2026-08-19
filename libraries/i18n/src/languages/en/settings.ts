@@ -5,7 +5,7 @@ import { enTerminology } from "@rezics/i18n/terminology/en";
 
 const { forms: realmTerms } = enTerminology.realm;
 const { forms: unitSlugTerms } = enTerminology.unitSlug;
-const { forms: publicationLicenseTerms } = enTerminology.publicationLicense;
+const { forms: licenseTerms } = enTerminology.license;
 const { forms: metadataTerms } = enTerminology.metadata;
 const { forms: postTerms } = enTerminology.post;
 
@@ -24,7 +24,7 @@ export default {
 			},
 			preferences: {
 				label: "Preferences",
-				description: `Choose interface and content languages, ratings, a default scoring ${realmTerms.label}, and a default license.`,
+				description: `Choose interface and content languages, ratings, a default scoring ${realmTerms.label}, and a default ${enTerminology.license.forms.inline}.`,
 			},
 			privacy: {
 				label: "Privacy",
@@ -253,7 +253,8 @@ export default {
 		invalidLimits: "Check the limit values, operation identifiers, and duplicates.",
 		resetLimits: "Remove token-specific limits",
 	},
-	defaultLicense: `Default ${publicationLicenseTerms.inline}`,
+	defaultLicense: `Default ${licenseTerms.inline}`,
+	defaultLicenses: `Default ${licenseTerms.inline} selections`,
 	defaultScoreRealm: `Default scoring ${realmTerms.label}`,
 	defaultScoreRealmHint: `Scores from general pages use this ${realmTerms.label}. Scores created inside another ${realmTerms.label} stay in that ${realmTerms.label}.`,
 	general: "General",

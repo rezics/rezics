@@ -1,11 +1,7 @@
 "use client";
 
 import type { ContentLanguage } from "@rezics/i18n";
-import {
-	isPublicationLicenseId,
-	isUnitContentLicenseSlug,
-	PublicationLicenseIds,
-} from "@rezics/license";
+import { isLicenseId } from "@rezics/license";
 
 import {
 	type GetApiUnitsByTypeByUnitIdStatus200,
@@ -48,9 +44,10 @@ import {
 } from "@/features/media/components/localization-image-upload-field";
 import { LocalizationMediaFallbackNotice } from "@/features/media/components/localization-media-fallback-notice";
 import { FeedCard } from "@/features/content-feed/components/feed-card";
+import { UnitLicensesField } from "./components/unit-licenses-field";
+import { readSubmittedLicenses } from "./model/unit-licenses";
 import { FeedUnitContent } from "@/features/content-feed/components/feed-unit-content";
 import { isWorkUnitType, type UnitType } from "./unit-types";
-import { UnitContentLicenseField } from "./components/unit-content-license-field";
 import { WorkReleaseStatusField } from "./components/work-release-status-field";
 import { isWorkReleaseStatus } from "./model/work-release-status";
 
@@ -96,6 +93,7 @@ export function UnitMetadataEditor({ type, unit }: { type: UnitType; unit: Unit 
 			onSuccess: async () => invalidateUnitDetail(queryClient, type, unit.id, true),
 		},
 	});
+	const openLicenseIds = unit.licenseOfferings.map((grant) => grant.licenseId).filter(isLicenseId);
 
 	async function submit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
@@ -106,13 +104,7 @@ export function UnitMetadataEditor({ type, unit }: { type: UnitType; unit: Unit 
 		const submittedContentRating = form.get("contentRating");
 		const submittedAiDisclosure = form.get("aiDisclosure");
 		const submittedReleaseStatus = form.get("releaseStatus");
-		const submittedLicense = form.get("license");
-		if (
-			submittedLicense !== null &&
-			submittedLicense !== "" &&
-			!isPublicationLicenseId(submittedLicense)
-		)
-			return;
+		const submittedLicenses = readSubmittedLicenses(form);
 		const submittedUnitStatus =
 			submittedStatus === "published" || submittedStatus === "archived" ? submittedStatus : "draft";
 		const draftsBook =
@@ -135,16 +127,6 @@ export function UnitMetadataEditor({ type, unit }: { type: UnitType; unit: Unit 
 			submittedAiDisclosure === "machine_generated"
 				? submittedAiDisclosure
 				: "unknown";
-		const submittedContentLicense = form.get("contentLicense");
-		if (
-			submittedContentLicense !== null &&
-			submittedContentLicense !== "none" &&
-			!isUnitContentLicenseSlug(submittedContentLicense)
-		)
-			return;
-		const contentLicenseGrant = isUnitContentLicenseSlug(submittedContentLicense)
-			? { referenceLicenseSlug: submittedContentLicense }
-			: undefined;
 		const details = (() => {
 			if (unit.details.type === "book") {
 				if (!isWorkReleaseStatus(submittedReleaseStatus)) return undefined;
@@ -156,13 +138,11 @@ export function UnitMetadataEditor({ type, unit }: { type: UnitType; unit: Unit 
 					publicationDate: releasedOn || null,
 					pageCount,
 					format: String(form.get("format") ?? "").trim() || null,
-					...(contentLicenseGrant ? { contentLicense: contentLicenseGrant } : {}),
 				};
 			}
 			if (unit.details.type === "software")
 				return {
 					versionLabel: String(form.get("versionLabel") ?? "").trim() || null,
-					...(contentLicenseGrant ? { contentLicense: contentLicenseGrant } : {}),
 				};
 			if (unit.details.type === "media") {
 				if (!isWorkReleaseStatus(submittedReleaseStatus)) return undefined;
@@ -179,7 +159,6 @@ export function UnitMetadataEditor({ type, unit }: { type: UnitType; unit: Unit 
 					runtimeMinutes,
 					episodeCount,
 					seasonCount,
-					...(contentLicenseGrant ? { contentLicense: contentLicenseGrant } : {}),
 				};
 			}
 			if (unit.details.type === "video" || unit.details.type === "audio") {
@@ -209,7 +188,7 @@ export function UnitMetadataEditor({ type, unit }: { type: UnitType; unit: Unit 
 					visibility,
 					contentRating,
 					aiDisclosure,
-					license: isPublicationLicenseId(submittedLicense) ? submittedLicense : null,
+					licenses: submittedLicenses,
 					unit: {
 						...(unit.details.type === "series" ||
 						unit.details.type === "video" ||
@@ -324,26 +303,10 @@ export function UnitMetadataEditor({ type, unit }: { type: UnitType; unit: Unit 
 							</Field>
 						) : null}
 						<UnitTypeSpecificFields unit={unit} />
-						{unit.ownershipMode === "profile_owned" &&
-						(unit.details.type === "book" ||
-							unit.details.type === "software" ||
-							unit.details.type === "media") ? (
-							<UnitContentLicenseField
-								context="edit"
-								grantedSlug={unit.details.contentLicense?.referenceLicenseSlug ?? null}
-							/>
-						) : null}
-						<Field>
-							<FieldLabel>{t.units.detail.license}</FieldLabel>
-							<NativeSelect defaultValue={unit.license ?? ""} name="license">
-								<NativeSelectOption value="">{t.licenses.unspecified}</NativeSelectOption>
-								{PublicationLicenseIds.map((id) => (
-									<NativeSelectOption key={id} value={id}>
-										{t.licenses.options[id].label}
-									</NativeSelectOption>
-								))}
-							</NativeSelect>
-						</Field>
+						<UnitLicensesField
+							allowProfileOwnedOnly={unit.ownershipMode === "profile_owned"}
+							defaultValue={openLicenseIds}
+						/>
 						<Button variant="solid" isLoading={update.isPending} type="submit">
 							{t.units.editor.saveSettings}
 						</Button>

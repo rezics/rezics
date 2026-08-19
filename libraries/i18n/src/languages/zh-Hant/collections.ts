@@ -66,7 +66,7 @@ export default {
 			},
 			access: {
 				label: "存取權",
-				description: "管理授權對象、權限與限制。",
+				description: `管理${zhHantTerminology.license.forms.label}對象、權限與限制。`,
 			},
 			history: {
 				label: "版本紀錄",

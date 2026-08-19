@@ -103,7 +103,7 @@ export const zhHantContent = {
 		},
 		open: {
 			title: "宏大的敘事必須建立在可驗證的基礎上。",
-			body: `${BRAND} 以開放原始碼、帶版本語義的內容文件、${zhHantTerminology.publicationLicense.forms.label}與權限化 ${API} 建立長期可延伸的邊界；產品頁則清楚標示已可使用、開發中與規劃中的部分。`,
+			body: `${BRAND} 以開放原始碼、帶版本語義的內容文件、${zhHantTerminology.license.forms.label}與權限化 ${API} 建立長期可延伸的邊界；產品頁則清楚標示已可使用、開發中與規劃中的部分。`,
 		},
 		closing: {
 			title: "從一部你正在追的網路小說開始。",
@@ -120,7 +120,11 @@ export const zhHantContent = {
 				title: "一本連載，不該因平台、語言與譯名而變成碎片。",
 				body: `讀者想找的是同一個故事，今天卻必須在平台頁、譯名條目、進度工具與討論群之間反覆辨認。${BRAND} 先把它們接回同一個作品身份。`,
 				sourcesTitle: "跨平台來源",
-				sources: ["原始連載平台", "翻譯與授權來源", "出版及其他版本"],
+				sources: [
+					"原始連載平台",
+					`翻譯與${zhHantTerminology.license.forms.label}來源`,
+					"出版及其他版本",
+				],
 				namesTitle: "原名與譯名",
 				originalName: "原名、羅馬字與別名",
 				translatedName: "各語言正式譯名與慣用名",

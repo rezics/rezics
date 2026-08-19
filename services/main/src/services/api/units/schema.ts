@@ -1,6 +1,5 @@
 import { type Static, t } from "elysia";
 import { ContentLanguageValues } from "@rezics/i18n";
-import { UnitContentLicenseSlugs } from "@rezics/license";
 import {
 	CreditAttributionRoleValues,
 	UnitOwnershipModeValues,
@@ -160,15 +159,6 @@ export const UnitSeriesMembershipListResponse = t.Object({
 	),
 });
 
-const UnitContentLicenseGrantInput = t.Object(
-	{ referenceLicenseSlug: t.UnionEnum(UnitContentLicenseSlugs) },
-	{
-		additionalProperties: false,
-		description:
-			"One-time Unit content license grant. Omit this field when no new grant is being made.",
-	},
-);
-
 const CreateUnitFields = {
 	initialTagIds: t.Optional(
 		t.Array(Uuid, { maxItems: InitialTagApplicationLimit, uniqueItems: true, default: [] }),
@@ -179,7 +169,7 @@ const CreateUnitFields = {
 	visibility: LifecycleInput.visibility,
 	contentRating: LifecycleInput.contentRating,
 	aiDisclosure: LifecycleInput.aiDisclosure,
-	license: LifecycleInput.license,
+	licenses: LifecycleInput.licenses,
 	details: t.Union([
 		t.Object(
 			{ type: t.Literal("book"), releaseStatus: WorkReleaseStatus },
@@ -197,7 +187,6 @@ export const CreateUnitBody = t.Union([
 	t.Object(
 		{
 			ownershipMode: t.Literal("profile_owned"),
-			contentLicense: t.Optional(UnitContentLicenseGrantInput),
 			creditAttributions: t.Array(CreateUnitCreditAttributionInput, {
 				uniqueItems: true,
 			}),
@@ -227,7 +216,6 @@ const UnitDetailsInput = t.Object(
 		pageCount: t.Optional(t.Nullable(t.Integer({ minimum: 1 }))),
 		wordCount: t.Optional(t.Nullable(t.Integer({ minimum: 0 }))),
 		format: t.Optional(t.Nullable(t.String())),
-		contentLicense: t.Optional(UnitContentLicenseGrantInput),
 		versionLabel: t.Optional(t.Nullable(t.String())),
 		kind: t.Optional(t.String({ minLength: 1 })),
 		runtimeMinutes: t.Optional(t.Nullable(t.Integer({ minimum: 1 }))),

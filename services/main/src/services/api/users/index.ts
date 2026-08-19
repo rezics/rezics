@@ -3,7 +3,7 @@ import { StatusCodes } from "http-status-codes";
 import { and, desc, eq, isNull, or } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import Elysia from "elysia";
-import { parseNullablePublicationLicenseId } from "@rezics/license";
+import { parseLicenseId } from "@rezics/license";
 import { OfficialRealmUnitIds } from "@rezics/slug";
 
 import session, { resolveIdentity } from "../../auth/session";
@@ -101,7 +101,7 @@ function presentPreferences(preference: typeof profilePreference.$inferSelect) {
 		profileId: preference.profileId,
 		interfaceLocale: preference.interfaceLocale,
 		chineseContentDisplay: preference.chineseContentDisplay,
-		defaultLicense: parseNullablePublicationLicenseId(preference.defaultLicense),
+		defaultLicenses: preference.defaultLicenses.map(parseLicenseId),
 		defaultRealmManageMode: preference.defaultRealmManageMode,
 		defaultScoreRealmId: preference.defaultScoreRealmId ?? OfficialRealmUnitIds.score,
 		scoreVisibility: preference.scoreVisibility,
@@ -404,7 +404,7 @@ export default new Elysia({ prefix: "/users" })
 					.set({
 						interfaceLocale: body.interfaceLocale,
 						chineseContentDisplay: body.chineseContentDisplay,
-						defaultLicense: body.defaultLicense,
+						defaultLicenses: body.defaultLicenses,
 						defaultRealmManageMode: body.defaultRealmManageMode,
 						defaultScoreRealmId: body.defaultScoreRealmId,
 						collectionConfig: body.collectionConfig,

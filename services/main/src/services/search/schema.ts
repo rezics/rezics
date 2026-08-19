@@ -8,7 +8,7 @@ import {
 import type { UnitPredicate } from "@rezics/filter";
 import type { PresentedAvatar } from "@rezics/avatar";
 import type { ContentLanguage } from "@rezics/i18n";
-import type { PublicationLicenseId } from "@rezics/license";
+import type { LicenseId } from "@rezics/license";
 import type { PublicSlugAddressValue } from "@rezics/slug";
 
 import type { ContentRatingPolicy } from "../content-rating/policy";
@@ -58,8 +58,7 @@ export interface DomainSearchRequest {
 	kinds?: string[];
 	contentRatings?: string[];
 	aiDisclosures?: string[];
-	licenses?: PublicationLicenseId[];
-	contentLicenseActive?: boolean;
+	licenses?: LicenseId[];
 	creditedUnitId?: string;
 	realmId?: string;
 	realmTagContextRealmId?: string;
@@ -91,7 +90,6 @@ export const SearchFieldByDomainRequestFilter = {
 	contentRating: "content-rating",
 	aiDisclosure: "ai-disclosure",
 	license: "license",
-	contentLicenseActive: "content-license",
 	creditedUnitId: "credit",
 	realmId: "realm",
 	realmTagContextRealmId: "realm-tag-context",

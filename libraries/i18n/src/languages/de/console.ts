@@ -452,7 +452,7 @@ export default {
 			"Die aktuelle Inhaltslizenz von {{title}} wird ungültig. Der Vergabevermerk bleibt erhalten und kann von der Plattformverwaltung wiederhergestellt werden.",
 			{ title: String },
 		),
-		confirmLicenseInvalidation: "Lizenz ungültig machen",
+		confirmLicenseInvalidation: `${deTerminology.license.forms.label} ungültig machen`,
 		reportCount: insert("{{count}} Meldungen", { count: Number }),
 		moderationStatuses: {
 			approved: "Freigegeben",
@@ -461,8 +461,10 @@ export default {
 		},
 		targetingLocked: `Neue ${postTerms.label}-Verweise gesperrt`,
 		targetingUnlocked: `Neue ${postTerms.label}-Verweise erlaubt`,
-		contentLicenseActive: "Inhaltslizenz gültig",
-		contentLicenseInvalidated: "Inhaltslizenz ungültig",
+		licenseGrant: "Lizenzvergabe",
+		chooseLicenseGrant: "Lizenzvergabe auswählen",
+		licenseGrantRecognized: "Lizenzvergabe wird weiterhin anerkannt",
+		licenseGrantInvalidated: "Die Plattformanerkennung dieser Lizenzvergabe ist ungültig",
 		openContent: "Inhalt öffnen",
 	},
 	audit: {

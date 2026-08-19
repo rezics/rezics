@@ -149,7 +149,7 @@ export const PlatformCapabilityValues = [
 	"unit.merge.review",
 	"unit.merge",
 	"unit.ownership.override",
-	"unit.content_license.manage",
+	"unit.license.manage",
 	"unit.delete",
 	"unit.restore",
 	"unit.slug.manage",
@@ -265,11 +265,11 @@ export const PlatformCapabilityDefinitions = {
 		rationale:
 			"Reassigns ownership of any Unit through the platform control plane, independently from per-Unit owner authority.",
 	},
-	"unit.content_license.manage": {
-		resource: "unit.content_license",
+	"unit.license.manage": {
+		resource: "unit.license",
 		action: "manage",
 		rationale:
-			"Invalidates or restores platform recognition of Unit content license grants through audited governance cases.",
+			"Invalidates or restores platform recognition of Unit license grants through audited governance cases.",
 	},
 	"unit.delete": {
 		resource: "unit",
@@ -429,7 +429,7 @@ export const PlatformCapabilityImplications: Partial<
 	"unit.merge.propose": ["unit.governance.read"],
 	"unit.merge.review": ["unit.governance.read"],
 	"unit.merge": ["unit.merge.propose", "unit.merge.review"],
-	"unit.content_license.manage": ["unit.governance.read"],
+	"unit.license.manage": ["unit.governance.read"],
 	"unit.delete": ["unit.governance.read"],
 	"unit.restore": ["unit.governance.read"],
 	"realm.members.manage": ["realm.members.read"],

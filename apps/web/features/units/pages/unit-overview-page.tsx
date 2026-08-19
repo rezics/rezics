@@ -1,7 +1,7 @@
 "use client";
 
 import type { Translation } from "@rezics/i18n";
-import { PublicationLicenseRegistry, type UnitContentLicenseSlug } from "@rezics/license";
+import { isLicenseId } from "@rezics/license";
 import {
 	Card,
 	CardContent,
@@ -31,7 +31,7 @@ import { UnitSubjectGroups } from "../components/unit-subject-groups";
 import { SeriesReleaseFeed } from "../components/series-release-feed";
 import { useUnitDetail } from "../components/unit-detail-workspace";
 import { unitCreditsHref, unitReviewsHref } from "../routing/unit-detail-routes";
-import { unitContentLicenseHref } from "../model/unit-content-license";
+import { presentUnitLicenses } from "../components/present-unit-licenses";
 
 function formatDate(value: string | null, language: string): string | undefined {
 	if (!value) return undefined;
@@ -48,27 +48,11 @@ function DetailSection({ children, title }: { children: ReactNode; title: string
 	);
 }
 
-function presentContentLicense(
-	contentLicense: { readonly referenceLicenseSlug: UnitContentLicenseSlug } | null,
-	t: Pick<Translation, "licenses">,
-): ReactNode {
-	if (!contentLicense) return t.licenses.unitContent.none;
-	return (
-		<a
-			className="text-link hover:text-link-hover hover:underline"
-			href={unitContentLicenseHref(contentLicense.referenceLicenseSlug)}
-		>
-			{t.licenses.unitContent.options[contentLicense.referenceLicenseSlug].label}
-		</a>
-	);
-}
-
 export function UnitOverviewPage() {
 	const detail = useUnitDetail();
 	const { locale, t } = useTranslation(["feed", "licenses", "ui", "units"]);
 	const { type, unit } = detail;
-	const licenseDefinition = unit.license ? PublicationLicenseRegistry[unit.license] : null;
-	const licenseLabel = unit.license ? t.licenses.options[unit.license].label : null;
+	const licenseIds = unit.licenses.map((grant) => grant.licenseId).filter(isLicenseId);
 	const contentRating =
 		unit.contentRating === "r15"
 			? t.units.rating.r15
@@ -87,20 +71,7 @@ export function UnitOverviewPage() {
 					: unit.aiDisclosure === "machine_generated"
 						? t.units.aiDisclosure.machine_generated
 						: t.units.aiDisclosure.unknown;
-	const licenseValue =
-		licenseDefinition?.kind === "license" ? (
-			<a
-				aria-label={`${t.licenses.viewTerms}: ${licenseLabel}`}
-				className="text-link hover:text-link-hover hover:underline"
-				href={licenseDefinition.url}
-				rel="noreferrer"
-				target="_blank"
-			>
-				{licenseLabel}
-			</a>
-		) : (
-			licenseLabel
-		);
+	const licenseValue = presentUnitLicenses(licenseIds, t);
 	const commonFacts = [
 		[t.units.detail.type, t.units.types[type]],
 		[t.ui.contentRating, contentRating],
@@ -217,7 +188,7 @@ export function UnitOverviewPage() {
 function getDomainFacts(
 	detail: ReturnType<typeof useUnitDetail>,
 	language: string,
-	t: Pick<Translation, "licenses" | "units">,
+	t: Pick<Translation, "units">,
 ): readonly (readonly [string, ReactNode])[] {
 	switch (detail.type) {
 		case "book":
@@ -226,10 +197,6 @@ function getDomainFacts(
 				[t.units.fields.publicationDate, formatDate(detail.unit.details.publicationDate, language)],
 				[t.units.fields.pageCount, detail.unit.details.pageCount],
 				[t.units.fields.format, detail.unit.details.format],
-				[
-					t.units.fields.contentLicense,
-					presentContentLicense(detail.unit.details.contentLicense, t),
-				],
 			];
 		case "media":
 			return [
@@ -238,19 +205,11 @@ function getDomainFacts(
 				[t.units.fields.runtimeMinutes, detail.unit.details.runtimeMinutes],
 				[t.units.fields.episodeCount, detail.unit.details.episodeCount],
 				[t.units.fields.seasonCount, detail.unit.details.seasonCount],
-				[
-					t.units.fields.contentLicense,
-					presentContentLicense(detail.unit.details.contentLicense, t),
-				],
 			];
 		case "software":
 			return [
 				[t.units.fields.releaseDate, formatDate(detail.unit.details.releaseDate, language)],
 				[t.units.fields.versionLabel, detail.unit.details.versionLabel],
-				[
-					t.units.fields.contentLicense,
-					presentContentLicense(detail.unit.details.contentLicense, t),
-				],
 			];
 		case "series":
 			return [[t.units.series.kind, detail.unit.details.kind]];

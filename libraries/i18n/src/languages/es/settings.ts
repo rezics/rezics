@@ -5,7 +5,7 @@ import { esTerminology } from "@rezics/i18n/terminology/es";
 
 const { forms: realmTerms } = esTerminology.realm;
 const { forms: unitSlugTerms } = esTerminology.unitSlug;
-const { forms: publicationLicenseTerms } = esTerminology.publicationLicense;
+const { forms: licenseTerms } = esTerminology.license;
 const { forms: metadataTerms } = esTerminology.metadata;
 const { forms: postTerms } = esTerminology.post;
 
@@ -25,7 +25,7 @@ export default {
 			},
 			preferences: {
 				label: "Preferencias",
-				description: `Elige los idiomas de la interfaz y del contenido, las clasificaciones, un ${realmTerms.inline} de puntuación predeterminado y una licencia predeterminada.`,
+				description: `Elige los idiomas de la interfaz y del contenido, las clasificaciones, un ${realmTerms.inline} de puntuación predeterminado y una ${esTerminology.license.forms.inline} predeterminada.`,
 			},
 			privacy: {
 				label: "Privacidad",
@@ -260,7 +260,8 @@ export default {
 			"Revisa los valores de los límites, los identificadores de operación y los duplicados.",
 		resetLimits: "Quitar límites específicos del token",
 	},
-	defaultLicense: `${publicationLicenseTerms.label} predeterminada`,
+	defaultLicense: `${licenseTerms.label} predeterminada`,
+	defaultLicenses: `${licenseTerms.label} predeterminadas`,
 	defaultScoreRealm: `${realmTerms.label} de puntuación predeterminado`,
 	defaultScoreRealmHint: `Las puntuaciones de las páginas generales se guardan en este ${realmTerms.inline}. Las creadas en otro ${realmTerms.inline} permanecen allí.`,
 	general: "General",

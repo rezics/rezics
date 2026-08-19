@@ -1,10 +1,6 @@
 "use client";
 
-import {
-	isPublicationLicenseId,
-	isUnitContentLicenseSlug,
-	PublicationLicenseIds,
-} from "@rezics/license";
+import { RecommendedLicenseId } from "@rezics/license";
 
 import {
 	getApiUnitsByType,
@@ -43,16 +39,14 @@ import {
 	type CreditEntitySearchScope,
 	UnitCreditAttributionEditor,
 } from "./components/unit-credit-attribution-editor";
+import { UnitLicensesField } from "./components/unit-licenses-field";
+import { readSubmittedLicenses } from "./model/unit-licenses";
 import {
 	type CreditAttributionDraft,
 	createCreditAttributionDraft,
 	validateCreditAttributionDrafts,
 } from "./model/credit-attribution-draft";
 import { CreditAttributionRequestConfirmationDialog } from "./components/credit-attribution-request-confirmation-dialog";
-import {
-	PublicWorkContentLicenseField,
-	UnitContentLicenseField,
-} from "./components/unit-content-license-field";
 import {
 	isWorkOwnershipMode,
 	type WorkOwnershipMode,
@@ -143,12 +137,14 @@ function SeriesCreatePage() {
 		const title = String(form.get("title") ?? "").trim();
 		const kind = String(form.get("kind") ?? "").trim();
 		const summary = String(form.get("summary") ?? "").trim();
+		const licenses = readSubmittedLicenses(form);
 		if (!title || !kind) return;
 		const contentLanguage = await language.resolveLanguage(formElement);
 		try {
 			await create.mutateAsync({
 				body: {
 					kind,
+					licenses,
 					localization: {
 						language: contentLanguage,
 						title,
@@ -184,6 +180,7 @@ function SeriesCreatePage() {
 							<FieldLabel>{t.media.roles.cover.title}</FieldLabel>
 							<LocalizationImageUploadField onChange={setCover} role="cover" value={cover} />
 						</Field>
+						<UnitLicensesField defaultValue={[RecommendedLicenseId]} />
 						<RequestFailure error={create.error} fallback={t.ui.retryLater} />
 						<Button variant="solid" isLoading={create.isPending} type="submit">
 							{t.actions.create}
@@ -239,26 +236,13 @@ function VariantUnitCreatePage({ type }: { type: VariantUnitType }) {
 		const form = new FormData(formElement);
 		const submittedTitle = String(form.get("title") ?? "").trim();
 		const summary = String(form.get("summary") ?? "").trim();
-		const submittedLicense = form.get("license");
-		const submittedContentLicense = form.get("contentLicense");
+		const submittedLicenses = readSubmittedLicenses(form);
 		const submittedReleaseStatus = form.get("releaseStatus");
 		const creditValidation = validateCreditAttributionDrafts(type, creditAttributions);
 		setCreditValidationRequested(true);
 		if (!creditValidation.ok) return;
 		if (ownershipMode === "community_owned" && !searchConfirmed) return;
 		if (versionKind === "variant" && !mainVersion) return;
-		if (
-			submittedLicense !== null &&
-			submittedLicense !== "" &&
-			!isPublicationLicenseId(submittedLicense)
-		)
-			return;
-		if (
-			submittedContentLicense !== null &&
-			submittedContentLicense !== "none" &&
-			!isUnitContentLicenseSlug(submittedContentLicense)
-		)
-			return;
 		const contentLanguage = await language.resolveLanguage(formElement);
 		const details =
 			type === "book"
@@ -313,7 +297,7 @@ function VariantUnitCreatePage({ type }: { type: VariantUnitType }) {
 								: form.get("aiDisclosure") === "machine_generated"
 									? ("machine_generated" as const)
 									: ("unknown" as const),
-				license: isPublicationLicenseId(submittedLicense) ? submittedLicense : null,
+				licenses: submittedLicenses,
 			};
 			request = {
 				path: { type },
@@ -323,13 +307,6 @@ function VariantUnitCreatePage({ type }: { type: VariantUnitType }) {
 								ownershipMode,
 								creditAttributions: creditValidation.creditAttributions,
 								creditAttributionRequestConsent: "direct_only",
-								...(isUnitContentLicenseSlug(submittedContentLicense)
-									? {
-											contentLicense: {
-												referenceLicenseSlug: submittedContentLicense,
-											},
-										}
-									: {}),
 								...common,
 							}
 						: {
@@ -499,22 +476,11 @@ function VariantUnitCreatePage({ type }: { type: VariantUnitType }) {
 								</NativeSelectOption>
 							</NativeSelect>
 						</Field>
-						<Field>
-							<FieldLabel>{t.units.detail.license}</FieldLabel>
-							<NativeSelect defaultValue="" name="license">
-								<NativeSelectOption value="">{t.licenses.unspecified}</NativeSelectOption>
-								{PublicationLicenseIds.map((id) => (
-									<NativeSelectOption key={id} value={id}>
-										{t.licenses.options[id].label}
-									</NativeSelectOption>
-								))}
-							</NativeSelect>
-						</Field>
-						{ownershipMode === "profile_owned" ? (
-							<UnitContentLicenseField context="create" />
-						) : (
-							<PublicWorkContentLicenseField />
-						)}
+						<UnitLicensesField
+							allowProfileOwnedOnly={ownershipMode === "profile_owned"}
+							defaultValue={ownershipMode === "profile_owned" ? [RecommendedLicenseId] : []}
+							key={ownershipMode}
+						/>
 						<RequestFailure
 							error={
 								hasErrorCode(create.error, "CreditAttributionRequestConfirmationRequired")

@@ -7,6 +7,7 @@ import {
 	ZoneThemeDocument,
 } from "@rezics/block";
 import { FilterDocument } from "@rezics/filter";
+import { LicenseIds } from "@rezics/license";
 import { type Static, Type } from "@sinclair/typebox";
 import { t } from "elysia";
 
@@ -16,6 +17,7 @@ import {
 	FractionalPositionInput,
 	ContentLanguage,
 	LocalizationLanguageQuery,
+	License,
 	RevisionContext,
 	UnitLocalizationInput,
 	Uuid,
@@ -48,6 +50,7 @@ const NavigationInputDocument = Type.Unsafe<Static<typeof NavigationDocument>>(
 export const CreateSeriesBody = t.Object(
 	{
 		kind: t.String({ minLength: 1, maxLength: 64 }),
+		licenses: t.Array(License, { uniqueItems: true, maxItems: LicenseIds.length }),
 		localization: UnitLocalizationInput,
 		revisionContext: t.Optional(RevisionContext),
 	},

@@ -5,7 +5,7 @@ import { frTerminology } from "@rezics/i18n/terminology/fr";
 
 const { forms: realmTerms } = frTerminology.realm;
 const { forms: unitSlugTerms } = frTerminology.unitSlug;
-const { forms: publicationLicenseTerms } = frTerminology.publicationLicense;
+const { forms: licenseTerms } = frTerminology.license;
 const { forms: metadataTerms } = frTerminology.metadata;
 const { forms: postTerms } = frTerminology.post;
 
@@ -25,7 +25,7 @@ export default {
 			},
 			preferences: {
 				label: "Préférences",
-				description: `Choisissez les langues de l’interface et du contenu, les classifications, un ${realmTerms.inline} de notation par défaut et une licence par défaut.`,
+				description: `Choisissez les langues de l’interface et du contenu, les classifications, un ${realmTerms.inline} de notation par défaut et une ${frTerminology.license.forms.inline} par défaut.`,
 			},
 			privacy: {
 				label: "Confidentialité",
@@ -265,7 +265,8 @@ export default {
 			"Vérifiez les valeurs des limites, les identifiants d’opération et les doublons.",
 		resetLimits: "Supprimer les limites propres au jeton",
 	},
-	defaultLicense: `${publicationLicenseTerms.label} par défaut`,
+	defaultLicense: `${licenseTerms.label} par défaut`,
+	defaultLicenses: `${licenseTerms.label} par défaut (plusieurs choix)`,
 	defaultScoreRealm: `${realmTerms.label} de notation par défaut`,
 	defaultScoreRealmHint: `Les notes des pages générales sont enregistrées dans ce ${realmTerms.inline}. Celles créées dans un autre ${realmTerms.inline} y restent.`,
 	general: "Général",

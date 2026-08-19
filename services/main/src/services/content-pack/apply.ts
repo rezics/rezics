@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import { sql } from "drizzle-orm";
 import { assertFilterDocument } from "@rezics/filter";
-import { isPublicationLicenseId, type PublicationLicenseId } from "@rezics/license";
+import { isLicenseId, type LicenseId } from "@rezics/license";
 import { TopLevelSlugNamespaceUnitIds, ZoneHomePageSlug } from "@rezics/slug";
 import { isContentLanguage } from "@rezics/i18n";
 
@@ -43,6 +43,7 @@ import {
 	type SubjectAssociationRole,
 	type UnitKind,
 } from "../database/schema";
+import { insertLicenseGrants } from "../units/license-grants";
 import { recordUnitRevision } from "../units/history";
 import { insertUnit } from "../units/create";
 import { recordInitialRealmUnitPublicationEvents } from "../units/realm-publication";
@@ -78,11 +79,12 @@ export async function applyContentPack(
 	if (plan.conflicts.length)
 		throw new ContentPackConflict(
 			plan.conflicts
-				.map((item) => `${item.sourceKey}: ${item.action === "conflict" ? item.reason : "conflict"}`)
+				.map(
+					(item) => `${item.sourceKey}: ${item.action === "conflict" ? item.reason : "conflict"}`,
+				)
 				.join("; "),
 		);
-	if (plan.alreadyInstalled || plan.createCount === 0)
-		return { status: "noop", created: 0 };
+	if (plan.alreadyInstalled || plan.createCount === 0) return { status: "noop", created: 0 };
 
 	const createKeys = new Set(
 		plan.objects.filter((item) => item.action === "create").map((item) => item.sourceKey),
@@ -112,11 +114,15 @@ function kindRank(kind: string): number {
 	return index === -1 ? KindOrder.length : index;
 }
 
-async function importUnit(tx: DatabaseTransaction, pack: LoadedPack, object: PackObject): Promise<void> {
+async function importUnit(
+	tx: DatabaseTransaction,
+	pack: LoadedPack,
+	object: PackObject,
+): Promise<void> {
 	const unitId = requireId(pack.ids.units, object.sourceKey);
 	const license =
-		object.unit.license && isPublicationLicenseId(object.unit.license)
-			? (object.unit.license as PublicationLicenseId)
+		object.unit.license && isLicenseId(object.unit.license)
+			? (object.unit.license as LicenseId)
 			: null;
 	await insertUnit(tx, {
 		id: unitId,
@@ -125,7 +131,6 @@ async function importUnit(tx: DatabaseTransaction, pack: LoadedPack, object: Pac
 		visibility: object.unit.visibility,
 		contentRating: object.unit.contentRating,
 		aiDisclosure: object.unit.aiDisclosure as "none",
-		license,
 		moderationStatus: object.unit.moderationStatus,
 		postTargetingLocked: object.unit.postTargetingLocked,
 		publishedAt: object.unit.status === "published" ? new Date() : null,
@@ -134,12 +139,22 @@ async function importUnit(tx: DatabaseTransaction, pack: LoadedPack, object: Pac
 	if (object.import.ownershipMode === "community_owned")
 		await createPublicEditableUnitAccess(tx, unitId, ["unit.update", "unit.status.update"]);
 	else await createProfileOwnedUnitAccess(tx, unitId, ImportOwnerProfileId);
+	if (license)
+		await insertLicenseGrants(tx, {
+			unitId,
+			grantedByProfileId: ImportOwnerProfileId,
+			licenseIds: [license],
+			unitKind: object.unit.kind as UnitKind,
+			ownershipMode: object.import.ownershipMode,
+		});
 
 	await insertDetail(tx, pack, object, unitId);
 	await tx.insert(unitLocalization).values(
 		object.localizations.map((localization, index) => {
 			if (!isContentLanguage(localization.language))
-				throw new ContentPackInvalid(`${object.sourceKey} has invalid language ${localization.language}`);
+				throw new ContentPackInvalid(
+					`${object.sourceKey} has invalid language ${localization.language}`,
+				);
 			return {
 				unitId,
 				language: localization.language,
@@ -391,7 +406,10 @@ function navigationDocumentFrom(pack: LoadedPack, structure: PackStructure) {
 			return {
 				_key: sha256Hex(node.sourceKey).slice(0, 12),
 				labelUnitId: requireId(pack.ids.units, node.contentUnitSourceKey),
-				target: { kind: "unit" as const, unitId: requireId(pack.ids.units, node.targetUnitSourceKey) },
+				target: {
+					kind: "unit" as const,
+					unitId: requireId(pack.ids.units, node.targetUnitSourceKey),
+				},
 			};
 		}),
 	};

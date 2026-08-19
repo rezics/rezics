@@ -69,11 +69,11 @@ type PlatformCommand =
 	| "restore"
 	| "lock_post_targeting"
 	| "unlock_post_targeting"
-	| "invalidate_content_license"
-	| "restore_content_license"
+	| "invalidate_license"
+	| "restore_license"
 	| "dismiss"
 	| "note";
-type ConfirmedCommand = Extract<PlatformCommand, "remove" | "invalidate_content_license">;
+type ConfirmedCommand = Extract<PlatformCommand, "remove" | "invalidate_license">;
 
 const CaseStates = Object.values(GetApiReportsPlatformCasesState);
 function platformGovernanceActionRequiresRules(
@@ -85,7 +85,7 @@ function platformGovernanceActionRequiresRules(
 	| "restore"
 	| "lock_post_targeting"
 	| "unlock_post_targeting"
-	| "invalidate_content_license"
+	| "invalidate_license"
 > {
 	return (
 		command === "approve" ||
@@ -93,7 +93,7 @@ function platformGovernanceActionRequiresRules(
 		command === "restore" ||
 		command === "lock_post_targeting" ||
 		command === "unlock_post_targeting" ||
-		command === "invalidate_content_license"
+		command === "invalidate_license"
 	);
 }
 
@@ -104,8 +104,8 @@ function isPlatformCommand(value: string): value is PlatformCommand {
 		"restore",
 		"lock_post_targeting",
 		"unlock_post_targeting",
-		"invalidate_content_license",
-		"restore_content_license",
+		"invalidate_license",
+		"restore_license",
 		"dismiss",
 		"note",
 	].includes(value);
@@ -154,6 +154,7 @@ export function ConsoleModerationPage() {
 	const [note, setNote] = useState("");
 	const noteLanguage = useDraftContentLanguage(note);
 	const [confirmedCommand, setConfirmedCommand] = useState<ConfirmedCommand | null>(null);
+	const [selectedGrantId, setSelectedGrantId] = useState("");
 
 	const casesQuery = {
 		state,
@@ -294,14 +295,23 @@ export function ConsoleModerationPage() {
 					...(notes ? { notes } : {}),
 				};
 				let body: PostApiGovernanceContentGovernanceActionsBody;
-				if (platformGovernanceActionRequiresRules(command)) {
-					body = { ...common, kind: command, rules: selectedRules };
-				} else if (command === "restore_content_license") {
-					if (selected.contentLicense?.status !== "invalidated") return;
+				const selectedGrant = selected.licenseGrants.find((grant) => grant.id === selectedGrantId);
+				if (command === "invalidate_license") {
+					if (!selectedGrant || selectedGrant.recognitionStatus !== "recognized") return;
 					body = {
 						...common,
-						kind: "restore_content_license",
-						reversesActionId: selected.contentLicense.invalidationActionId,
+						kind: "invalidate_license",
+						licenseGrantId: selectedGrant.id,
+						rules: selectedRules,
+					};
+				} else if (platformGovernanceActionRequiresRules(command)) {
+					body = { ...common, kind: command, rules: selectedRules };
+				} else if (command === "restore_license") {
+					if (!selectedGrant || selectedGrant.recognitionStatus !== "invalidated") return;
+					body = {
+						...common,
+						kind: "restore_license",
+						reversesActionId: selectedGrant.invalidationActionId,
 					};
 				} else return;
 				await actionMutation.mutateAsync({ body });
@@ -319,7 +329,7 @@ export function ConsoleModerationPage() {
 	function submit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
 		if (!noteValid || !rulesValid) return;
-		if (command === "remove" || command === "invalidate_content_license") {
+		if (command === "remove" || command === "invalidate_license") {
 			setConfirmedCommand(command);
 			return;
 		}
@@ -437,6 +447,30 @@ export function ConsoleModerationPage() {
 										))}
 									</NativeSelect>
 								</Field>
+								{command === "invalidate_license" || command === "restore_license" ? (
+									<Field required>
+										<FieldLabel>{t.console.moderation.licenseGrant}</FieldLabel>
+										<NativeSelect
+											onChange={(event) => setSelectedGrantId(event.currentTarget.value)}
+											value={selectedGrantId}
+										>
+											<NativeSelectOption value="">
+												{t.console.moderation.chooseLicenseGrant}
+											</NativeSelectOption>
+											{selected.licenseGrants
+												.filter((grant) =>
+													command === "invalidate_license"
+														? grant.recognitionStatus === "recognized"
+														: grant.recognitionStatus === "invalidated",
+												)
+												.map((grant) => (
+													<NativeSelectOption key={grant.id} value={grant.id}>
+														{`${grant.licenseId} · ${grant.recognitionStatus}`}
+													</NativeSelectOption>
+												))}
+										</NativeSelect>
+									</Field>
+								) : null}
 								{platformGovernanceActionRequiresRules(command) ? (
 									<Field required>
 										<FieldLabel>{t.reports.rule}</FieldLabel>
@@ -485,7 +519,7 @@ export function ConsoleModerationPage() {
 									isLoading={mutationPending}
 									type="submit"
 									variant={
-										command === "remove" || command === "invalidate_content_license"
+										command === "remove" || command === "invalidate_license"
 											? "destructive"
 											: "solid"
 									}
@@ -512,12 +546,12 @@ export function ConsoleModerationPage() {
 				<AlertDialogContent>
 					<AlertDialogHeader>
 						<AlertDialogTitle>
-							{confirmedCommand === "invalidate_content_license"
+							{confirmedCommand === "invalidate_license"
 								? t.console.moderation.confirmLicenseInvalidationTitle
 								: t.console.moderation.confirmRemovalTitle}
 						</AlertDialogTitle>
 						<AlertDialogDescription>
-							{confirmedCommand === "invalidate_content_license"
+							{confirmedCommand === "invalidate_license"
 								? t.console.moderation.confirmLicenseInvalidationDescription({
 										title: selected?.title ?? t.console.moderation.untitled,
 									})
@@ -536,7 +570,7 @@ export function ConsoleModerationPage() {
 							}}
 							variant="destructive"
 						>
-							{confirmedCommand === "invalidate_content_license"
+							{confirmedCommand === "invalidate_license"
 								? t.console.moderation.confirmLicenseInvalidation
 								: t.console.moderation.confirmRemoval}
 						</AlertDialogAction>
@@ -626,13 +660,16 @@ function CaseSnapshot({ item }: { readonly item: PlatformReportCase }) {
 						? t.console.moderation.targetingLocked
 						: t.console.moderation.targetingUnlocked}
 				</Badge>
-				{item.contentLicense ? (
-					<Badge variant={item.contentLicense.status === "invalidated" ? "warning" : "outline"}>
-						{item.contentLicense.status === "invalidated"
-							? t.console.moderation.contentLicenseInvalidated
-							: t.console.moderation.contentLicenseActive}
+				{item.licenseGrants.map((grant) => (
+					<Badge
+						key={grant.id}
+						variant={grant.recognitionStatus === "invalidated" ? "warning" : "outline"}
+					>
+						{grant.recognitionStatus === "invalidated"
+							? t.console.moderation.licenseGrantInvalidated
+							: t.console.moderation.licenseGrantRecognized}
 					</Badge>
-				) : null}
+				))}
 				<Badge variant="outline">{t.reports.caseStates[item.caseState]}</Badge>
 			</div>
 			{href ? (

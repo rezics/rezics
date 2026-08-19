@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 
-import { and, eq, exists, inArray, sql, type SQL } from "drizzle-orm";
+import { and, eq, exists, inArray, isNull, sql, type SQL } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import {
 	readUnitLanguageBoundary,
@@ -12,6 +12,7 @@ import {
 } from "@rezics/filter";
 import { canonicalUnitPredicate } from "@rezics/filter";
 import { isContentLanguage, type ContentLanguage } from "@rezics/i18n";
+import { isLicenseId } from "@rezics/license";
 import { getActiveObservability } from "@rezics/observability";
 
 import { getUnitReadCondition } from "../authorization/unit/query";
@@ -23,7 +24,7 @@ import {
 import { database } from "../database";
 import {
 	book,
-	unitContentLicense,
+	unitLicenseGrant,
 	creditAttribution,
 	contentStructure,
 	contentStructureNode,
@@ -52,7 +53,6 @@ import {
 	unitVariant,
 	type UnitKind,
 	UnitKindValues,
-	VariantCapableUnitKindValues,
 } from "../database/schema";
 import { env } from "../config";
 import { WorkPolicy } from "../performance/policy";
@@ -100,6 +100,7 @@ const facetUnitTag = alias(unitEffectiveTag, "facet_unit_tag");
 const facetRealmUnit = alias(realmUnit, "facet_realm_unit");
 const facetCreditAttribution = alias(creditAttribution, "facet_credit_attribution");
 const facetOwnership = alias(unitOwnership, "facet_ownership");
+const facetLicenseGrant = alias(unitLicenseGrant, "facet_license_grant");
 const scopedRealmTagContextRealm = alias(realm, "scoped_realm_tag_context_realm");
 const scopedRealmTagContextPostUnit = alias(unit, "scoped_realm_tag_context_post_unit");
 const scopedRealmTagContextRealmUnit = alias(realmUnit, "scoped_realm_tag_context_realm_unit");
@@ -144,11 +145,6 @@ function validateRequest(category: SearchCategory, request: DomainSearchRequest)
 			Boolean(request.aiDisclosures?.length),
 		],
 		["licenses", SearchFieldByDomainRequestFilter.license, Boolean(request.licenses?.length)],
-		[
-			"contentLicenseActive",
-			SearchFieldByDomainRequestFilter.contentLicenseActive,
-			request.contentLicenseActive !== undefined,
-		],
 		[
 			"creditedUnitId",
 			SearchFieldByDomainRequestFilter.creditedUnitId,
@@ -234,13 +230,6 @@ function numericColumnCondition(column: SQL, filter: SearchControlPredicate): SQ
 		bounds.push(sql`${column} <= ${filter.upper}`);
 	}
 	return sql`(${sql.join(bounds, sql` and `)})`;
-}
-
-function booleanColumnCondition(column: SQL, filter: SearchControlPredicate): SQL {
-	if (!("value" in filter) || typeof filter.value !== "boolean")
-		throw new InvalidSearch(`${filter.field} requires a boolean value`);
-	const match = sql`${column} = ${filter.value}`;
-	return filter.operator === "not-equals" ? sql`not (${match})` : match;
 }
 
 function softwareRequirementCondition(filter: SearchControlPredicate, column: SQL): SQL {
@@ -331,23 +320,38 @@ function compileFilter(
 		if (filter.operator === "not-equals" || filter.operator === "none-of") return sql`${!matches}`;
 		return sql`${matches}`;
 	}
-	if (filter.field === "content-license") {
-		const condition = and(
-			inArray(unit.kind, VariantCapableUnitKindValues),
-			booleanColumnCondition(
-				exists(
-					database
-						.select({ unitId: unitContentLicense.unitId })
-						.from(unitContentLicense)
-						.where(
-							and(eq(unitContentLicense.unitId, unit.id), eq(unitContentLicense.status, "active")),
-						),
+	if (filter.field === "license") {
+		const anyGrantedLicense = exists(
+			database
+				.select({ unitId: unitLicenseGrant.unitId })
+				.from(unitLicenseGrant)
+				.where(
+					and(
+						eq(unitLicenseGrant.unitId, unit.id),
+						isNull(unitLicenseGrant.offeringEndedAt),
+						eq(unitLicenseGrant.recognitionStatus, "recognized"),
+					),
 				),
-				filter,
-			),
 		);
-		if (!condition) throw new Error("Unit content License filter produced no SQL condition");
-		return condition;
+		if (filter.operator === "exists")
+			return filter.value ? anyGrantedLicense : sql`not ${anyGrantedLicense}`;
+		const values = scalarStrings(searchFilterValues(filter), filter.field).filter(isLicenseId);
+		const grantExists = exists(
+			database
+				.select({ unitId: unitLicenseGrant.unitId })
+				.from(unitLicenseGrant)
+				.where(
+					and(
+						eq(unitLicenseGrant.unitId, unit.id),
+						isNull(unitLicenseGrant.offeringEndedAt),
+						eq(unitLicenseGrant.recognitionStatus, "recognized"),
+						values.length > 0 ? inArray(unitLicenseGrant.licenseId, values) : undefined,
+					),
+				),
+		);
+		if (filter.operator === "not-equals" || filter.operator === "none-of")
+			return sql`not ${grantExists}`;
+		return grantExists;
 	}
 	const typeSpecificScalar: Partial<
 		Record<
@@ -672,7 +676,6 @@ function compileFilter(
 	const directUnitColumnByField: Partial<Record<SearchControlPredicate["field"], SQL>> = {
 		"content-rating": sql`${unit.contentRating}`,
 		"ai-disclosure": sql`${unit.aiDisclosure}`,
-		license: sql`${unit.license}`,
 		"created-at": sql`${unit.createdAt}`,
 		"updated-at": sql`${unit.updatedAt}`,
 		"published-at": sql`${unit.publishedAt}`,
@@ -881,12 +884,6 @@ function buildEffectiveSearchExpression(
 	addValues(SearchFieldByDomainRequestFilter.contentRating, request.contentRatings);
 	addValues(SearchFieldByDomainRequestFilter.aiDisclosure, request.aiDisclosures);
 	addValues(SearchFieldByDomainRequestFilter.license, request.licenses);
-	if (request.contentLicenseActive !== undefined)
-		filters.push({
-			field: SearchFieldByDomainRequestFilter.contentLicenseActive,
-			operator: "equals",
-			value: request.contentLicenseActive,
-		});
 	addValue(SearchFieldByDomainRequestFilter.creditedUnitId, request.creditedUnitId);
 	addValue(SearchFieldByDomainRequestFilter.realmId, request.realmId);
 	addValue(SearchFieldByDomainRequestFilter.realmTagContextRealmId, request.realmTagContextRealmId);
@@ -2495,6 +2492,14 @@ function facetSpec(
 				on ${facetOwnership.unitId} = ${unit.id}
 				and ${facetOwnership.revokedAt} is null`,
 		};
+	if (field === "license")
+		return {
+			value: sql`${facetLicenseGrant.licenseId}`,
+			join: sql`join ${unitLicenseGrant} as ${facetLicenseGrant}
+				on ${facetLicenseGrant.unitId} = ${unit.id}
+				and ${facetLicenseGrant.offeringEndedAt} is null
+				and ${facetLicenseGrant.recognitionStatus} = 'recognized'`,
+		};
 	if (
 		field === "kind" &&
 		(category === "units" ||
@@ -2520,7 +2525,6 @@ function facetSpec(
 	const scalar: Partial<Record<SearchField, SQL>> = {
 		"content-rating": sql`${unit.contentRating}`,
 		"ai-disclosure": sql`${unit.aiDisclosure}`,
-		license: sql`${unit.license}`,
 		"join-policy": sql`(select ${realm.joinPolicy} from ${realm} where ${realm.id} = ${unit.id})`,
 		multiple: sql`(select ${poll.mode} = 'multiple' from ${poll} where ${poll.id} = ${unit.id})`,
 		"results-visibility": sql`(select ${poll.resultVisibility}

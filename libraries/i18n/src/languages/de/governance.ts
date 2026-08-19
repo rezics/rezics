@@ -82,8 +82,7 @@ export default {
 		"unit.merge.review": "Zusammenführungen von Units prüfen",
 		"unit.merge": "Units direkt zusammenführen",
 		"unit.ownership.override": "Eigentümerschaft einer beliebigen Unit neu zuweisen",
-		"unit.content_license.manage":
-			"Inhaltslizenzen von Units ungültig machen oder wiederherstellen",
+		"unit.license.manage": "Lizenzvergaben von Units ungültig machen oder wiederherstellen",
 		"unit.delete": "Beliebige Units vorläufig löschen",
 		"unit.restore": "Vorläufig gelöschte Units wiederherstellen",
 		"unit.slug.manage": "Öffentliche Unit-Adressen verwalten",

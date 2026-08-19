@@ -2,7 +2,7 @@ import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 import { koTerminology } from "@rezics/i18n/terminology/ko";
 import { insert } from "native-i18n";
 
-const { forms: publicationLicenseTerms } = koTerminology.publicationLicense;
+const { forms: licenseTerms } = koTerminology.license;
 const { forms: postTerms } = koTerminology.post;
 const { forms: videoTerms } = koTerminology.video;
 const { forms: audioTerms } = koTerminology.audio;
@@ -128,7 +128,7 @@ export default {
 			},
 			metadata: {
 				label: metadataTerms.label,
-				description: `수명 주기, 가시성, 평가, 라이선스 및 유형별 ${metadataTerms.inline} 관리.`,
+				description: `수명 주기, 가시성, 평가, ${koTerminology.license.forms.label} 및 유형별 ${metadataTerms.inline} 관리.`,
 			},
 			relationships: {
 				label: "유닛 관계",
@@ -210,7 +210,6 @@ export default {
 		pageCount: "페이지 수",
 		format: "제본 또는 형식",
 		releaseStatus: "작품 업데이트 상태",
-		contentLicense: `${verbatimTerms.rezics.value}에 라이선스 부여`,
 		versionLabel: "버전 라벨",
 		mediaKind: "미디어 종류",
 		releaseDate: "출시일",
@@ -327,7 +326,7 @@ export default {
 		viewAssociations: "모든 연관 보기",
 		aliases: "별칭",
 		releasedOn: "출시일",
-		license: publicationLicenseTerms.label,
+		license: licenseTerms.label,
 		aiDisclosure: `${verbatimTerms.ai.value} 공개`,
 		type: "유형",
 		updatedAt: "최종 업데이트",

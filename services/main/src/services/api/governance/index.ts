@@ -75,7 +75,7 @@ import {
 	executeAuthorizedContentGovernanceAction,
 	loadContentReviewCaseForAction,
 } from "./content-governance-service";
-import { isContentLicenseModerationCommand } from "./content-governance-contract";
+import { isLicenseModerationCommand } from "./content-governance-contract";
 
 const CapabilityForbiddenResponse = toApiErrorResponse([
 	"RealmCapabilityRequired",
@@ -496,8 +496,8 @@ export default new Elysia({ prefix: "/governance" })
 				const caseRow = await loadContentReviewCaseForAction(tx, body.caseId);
 				if (!caseRow) throw new ModerationCaseNotFound();
 				await ensureCaseAccess(authorization, caseRow);
-				if (isContentLicenseModerationCommand(body.kind))
-					await authorization.platform.ensureCapability("unit.content_license.manage");
+				if (isLicenseModerationCommand(body.kind))
+					await authorization.platform.ensureCapability("unit.license.manage");
 				return executeAuthorizedContentGovernanceAction(tx, {
 					caseRow,
 					actorProfileId: profile.unitId,

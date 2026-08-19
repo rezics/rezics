@@ -32,12 +32,42 @@ export class UnitAccessRestricted extends Data.TaggedError("UnitAccessRestricted
 	readonly message = "Your access to this Unit scope is restricted";
 }
 
-export class UnitContentLicenseGrantForbidden extends Data.TaggedError(
-	"UnitContentLicenseGrantForbidden",
-) {
+export class UnitLicenseGrantForbidden extends Data.TaggedError("UnitLicenseGrantForbidden") {
 	static readonly status = StatusCodes.FORBIDDEN as const;
-	readonly status = UnitContentLicenseGrantForbidden.status;
-	readonly message = "Only Profile-owned Units can grant a Unit content license";
+	readonly status = UnitLicenseGrantForbidden.status;
+	readonly message = "The requested License cannot be granted by this Unit";
+}
+
+export class UnitLicenseNotApplicable extends Data.TaggedError("UnitLicenseNotApplicable") {
+	static readonly status = StatusCodes.BAD_REQUEST as const;
+	readonly status = UnitLicenseNotApplicable.status;
+	readonly message = "This license cannot be granted on this Unit kind";
+	readonly details: { readonly licenseId: string; readonly unitKind: string };
+
+	constructor(licenseId: string, unitKind: string) {
+		super();
+		this.details = { licenseId, unitKind };
+	}
+}
+
+export class UnitLicenseOfferingEndForbidden extends Data.TaggedError(
+	"UnitLicenseOfferingEndForbidden",
+) {
+	static readonly status = StatusCodes.CONFLICT as const;
+	readonly status = UnitLicenseOfferingEndForbidden.status;
+	readonly message = "This license offering cannot be ended";
+	readonly details: { readonly licenseId: string };
+
+	constructor(licenseId: string) {
+		super();
+		this.details = { licenseId };
+	}
+}
+
+export class UnitLicenseGrantConflict extends Data.TaggedError("UnitLicenseGrantConflict") {
+	static readonly status = StatusCodes.CONFLICT as const;
+	readonly status = UnitLicenseGrantConflict.status;
+	readonly message = "An open offering for this license already exists on the Unit";
 }
 
 export class UnitChanged extends Data.TaggedError("UnitChanged") {
@@ -302,7 +332,10 @@ export const UnitErrors = [
 	UnitNotFound,
 	UnitPermissionForbidden,
 	UnitAccessRestricted,
-	UnitContentLicenseGrantForbidden,
+	UnitLicenseGrantForbidden,
+	UnitLicenseNotApplicable,
+	UnitLicenseOfferingEndForbidden,
+	UnitLicenseGrantConflict,
 	UnitChanged,
 	UnitRealmPublicationNotFound,
 	UnitRealmPublicationAlreadyExists,

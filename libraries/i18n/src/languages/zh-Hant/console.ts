@@ -224,8 +224,7 @@ export default {
 		selectClaim: "選擇一項認領",
 		selectClaimDescription: "從清單開啟申請者、條目與認領依據。",
 		approveTitle: "核准這項所有權認領？",
-		approveDescription:
-			"條目會立即由社群移轉給申請者並改為個人管理作品；原有的公共協作授權會保留，其他待審核認領會自動結束。",
+		approveDescription: `條目會立即由社群移轉給申請者並改為個人管理作品；原有的公共協作${zhHantTerminology.license.forms.label}會保留，其他待審核認領會自動結束。`,
 		rejectTitle: "拒絕這項所有權認領？",
 		rejectDescription: "認領會結束但不會移轉條目所有權；申請者會收到審核結果通知。",
 		internalNote: "內部註解（選填）",
@@ -381,7 +380,7 @@ export default {
 		search: "搜尋",
 		searchResults: "搜尋結果",
 		activeProfiles: "目前擁有平台權限的使用者",
-		noProfiles: "目前沒有有效的平台權限授權。",
+		noProfiles: `目前沒有有效的平台權限${zhHantTerminology.license.forms.label}。`,
 		noSearchResults: "找不到符合條件的使用者。",
 		selectProfile: "請選擇一位使用者，以檢視其平台權限。",
 		capabilityCount: insert("{{count}} 項權限", { count: Number }),
@@ -389,7 +388,7 @@ export default {
 		expiry: "有效期限",
 		expiryFor: insert("「{{capability}}」的有效期限", { capability: String }),
 		noExpiry: "無期限",
-		provenance: "授權來源",
+		provenance: `${zhHantTerminology.license.forms.label}來源`,
 		grantProvenance: insert("由 {{profileId}} 於 {{date}} 授予", {
 			profileId: String,
 			date: String,
@@ -400,8 +399,7 @@ export default {
 		clearAll: "清除全部權限",
 		save: "儲存平台權限",
 		revokeAllTitle: "撤銷這位使用者的全部平台權限？",
-		revokeAllDescription:
-			"這項變更會撤銷每一筆有效授權。若因此移除最後一位無期限的平台存取權管理者，伺服器會拒絕變更。",
+		revokeAllDescription: `這項變更會撤銷每一筆有效${zhHantTerminology.license.forms.label}。若因此移除最後一位無期限的平台存取權管理者，伺服器會拒絕變更。`,
 		confirmRevokeAll: "確認全部撤銷",
 	},
 	moderation: {
@@ -421,12 +419,12 @@ export default {
 			title: String,
 		}),
 		confirmRemoval: "移除內容",
-		confirmLicenseInvalidationTitle: "要使這項內容授權失效嗎？",
+		confirmLicenseInvalidationTitle: `要使這項內容${zhHantTerminology.license.forms.label}失效嗎？`,
 		confirmLicenseInvalidationDescription: insert(
-			"「{{title}}」目前的內容授權將失效；授權紀錄會保留，且可由平台管理員恢復。",
+			`「{{title}}」目前的內容${zhHantTerminology.license.forms.label}將失效；${zhHantTerminology.license.forms.label}紀錄會保留，且可由平台管理員恢復。`,
 			{ title: String },
 		),
-		confirmLicenseInvalidation: "使授權失效",
+		confirmLicenseInvalidation: `使${zhHantTerminology.license.forms.label}失效`,
 		reportCount: insert("{{count}} 則檢舉", { count: Number }),
 		moderationStatuses: {
 			approved: "已核准",
@@ -435,8 +433,10 @@ export default {
 		},
 		targetingLocked: `已禁止新的${postTerms.label}指向`,
 		targetingUnlocked: `允許新的${postTerms.label}指向`,
-		contentLicenseActive: "內容授權有效",
-		contentLicenseInvalidated: "內容授權已失效",
+		licenseGrant: `${zhHantTerminology.license.forms.label}授予`,
+		chooseLicenseGrant: `選擇一筆${zhHantTerminology.license.forms.label}授予`,
+		licenseGrantRecognized: `${zhHantTerminology.license.forms.label}授予仍受平台認可`,
+		licenseGrantInvalidated: `${zhHantTerminology.license.forms.label}授予的平台認可已失效`,
 		openContent: "開啟內容",
 	},
 	audit: {

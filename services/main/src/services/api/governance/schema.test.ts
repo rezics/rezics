@@ -65,14 +65,16 @@ describe("adjacent governance API contracts", () => {
 		expect(
 			Check(CreateContentGovernanceActionBody, {
 				caseId: profileId,
-				kind: "invalidate_content_license",
+				kind: "invalidate_license",
+				licenseGrantId: secondProfileId,
 				rules: [rule],
 			}),
 		).toBe(true);
 		expect(
 			Check(CreateContentGovernanceActionBody, {
 				caseId: profileId,
-				kind: "invalidate_content_license",
+				kind: "invalidate_license",
+				rules: [rule],
 			}),
 		).toBe(false);
 		expect(
@@ -91,14 +93,14 @@ describe("adjacent governance API contracts", () => {
 		expect(
 			Check(CreateContentGovernanceActionBody, {
 				caseId: profileId,
-				kind: "restore_content_license",
+				kind: "restore_license",
 				reversesActionId: secondProfileId,
 			}),
 		).toBe(true);
 		expect(
 			Check(CreateContentGovernanceActionBody, {
 				caseId: profileId,
-				kind: "restore_content_license",
+				kind: "restore_license",
 			}),
 		).toBe(false);
 		expect(

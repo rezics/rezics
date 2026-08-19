@@ -2,7 +2,7 @@ import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 import { enTerminology } from "@rezics/i18n/terminology/en";
 import { insert } from "native-i18n";
 
-const { forms: publicationLicenseTerms } = enTerminology.publicationLicense;
+const { forms: licenseTerms } = enTerminology.license;
 const { forms: postTerms } = enTerminology.post;
 const { forms: videoTerms } = enTerminology.video;
 const { forms: audioTerms } = enTerminology.audio;
@@ -129,7 +129,7 @@ export default {
 			},
 			metadata: {
 				label: metadataTerms.label,
-				description: `Manage lifecycle, visibility, rating, license, and type-specific ${metadataTerms.inline}.`,
+				description: `Manage lifecycle, visibility, rating, ${enTerminology.license.forms.inline}, and type-specific ${metadataTerms.inline}.`,
 			},
 			relationships: {
 				label: "Unit relationships",
@@ -211,7 +211,6 @@ export default {
 		pageCount: "Page count",
 		format: "Binding or format",
 		releaseStatus: "Work release status",
-		contentLicense: `License to ${verbatimTerms.rezics.value}`,
 		versionLabel: "Version label",
 		mediaKind: "Media kind",
 		releaseDate: "Release date",
@@ -328,7 +327,7 @@ export default {
 		viewAssociations: "View all associations",
 		aliases: "Aliases",
 		releasedOn: "Release date",
-		license: publicationLicenseTerms.label,
+		license: licenseTerms.label,
 		aiDisclosure: `${verbatimTerms.ai.value} disclosure`,
 		type: "Type",
 		updatedAt: "Last updated",

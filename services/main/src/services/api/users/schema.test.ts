@@ -210,11 +210,11 @@ describe("user preference inputs", () => {
 		).toBe(false);
 	});
 
-	it("accepts only registered default publication License IDs", () => {
+	it("accepts only registered default License IDs", () => {
 		const preferences = {
 			interfaceLocale: "en",
 			chineseContentDisplay: "original",
-			defaultLicense: "cc-by-nc-sa-4.0",
+			defaultLicenses: ["cc-by-nc-sa-4.0"],
 			defaultRealmManageMode: false,
 			defaultScoreRealmId: "019b76da-a800-7300-8000-000000000002",
 			collectionConfig: null,
@@ -224,9 +224,21 @@ describe("user preference inputs", () => {
 			preferredLanguages: ["en"],
 		};
 		expect(Check(ReplacePreferencesBody, preferences)).toBe(true);
+		expect(
+			Check(ReplacePreferencesBody, {
+				...preferences,
+				defaultLicenses: ["cc-by-nc-sa-4.0", "rezics-unit-content-license-v1"],
+			}),
+		).toBe(true);
+		expect(
+			Check(ReplacePreferencesBody, {
+				...preferences,
+				defaultLicenses: ["cc-by-nc-sa-4.0", "cc-by-nc-sa-4.0"],
+			}),
+		).toBe(false);
 		expect(Check(ReplacePreferencesBody, { ...preferences, contentRatings: [] })).toBe(false);
-		expect(Check(ReplacePreferencesBody, { ...preferences, defaultLicense: "custom terms" })).toBe(
-			false,
-		);
+		expect(
+			Check(ReplacePreferencesBody, { ...preferences, defaultLicenses: ["custom terms"] }),
+		).toBe(false);
 	});
 });

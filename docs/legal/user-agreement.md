@@ -156,18 +156,23 @@ Unless you separately and affirmatively agree, this baseline license does not pe
 Your Content as a standalone dataset, license it for unrelated third-party use, or use it to train a
 general-purpose artificial intelligence or machine-learning model.
 
-### 7.3 Separate content and publication licenses
+### 7.3 Independent License grants
 
-Some Units may be offered under the REZICS Unit Content License. That license is granted
-affirmatively at the Unit level and by later contributions made after the Service gives notice that
-the license applies. Its scope, term, monetization boundary, removal effects, and AI-training
-restriction govern instead of any inconsistent baseline provision in this Agreement.
+You may select one or more registered Licenses or rights statements, including the REZICS Unit
+Content License, supported Creative Commons licenses, CC0, or "All rights reserved," for Content
+you have authority to license. Every selection is a separate, simultaneous prior authorization;
+no selection cancels, narrows, or overrides another selection.
 
-You may also select a public publication license, such as a supported Creative Commons license or
-CC0, for Content you have authority to license. That selection grants rights directly under the
-identified public license; closing your account or removing the Content does not revoke rights that
-the public license makes irrevocable. "All rights reserved" does not remove the baseline license
-REZICS needs to operate the Service.
+The REZICS Unit Content License requires your affirmative acknowledgement. Its scope, term,
+monetization boundary, removal effects, and AI-training restriction govern instead of any
+inconsistent baseline provision in this Agreement. Later contributions made after the Service
+gives notice that this License applies are governed as its terms provide.
+
+Each selected License grants rights directly under its identified terms. Ending the current
+offering, closing your account, or removing the Content does not revoke rights that a License or
+dedication already made irrevocable. When "All rights reserved" appears with another selected
+License, it covers only rights that the other License does not expressly grant. None of these
+selections remove the baseline license REZICS needs to operate the Service.
 
 ### 7.4 Public Content
 
@@ -470,5 +475,5 @@ This draft follows the broad issue coverage of the
 accounts, content, community governance, prohibited conduct, intellectual property, enforcement,
 liability, changes, and termination—but is written around REZICS's actual architecture. In
 particular, it replaces Reddit's broad perpetual content and AI-training license with REZICS's
-limited baseline operating license, optional publication licenses, and the separate
+limited baseline operating license and independently selected registered Licenses, including the
 [REZICS Unit Content License 1.0](./rezics-unit-content-license-v1.md).

@@ -30,7 +30,7 @@ const response = {
 	profileId: "profile-unit-a",
 	interfaceLocale: "zh-Hant" as const,
 	chineseContentDisplay: "original" as const,
-	defaultLicense: null,
+	defaultLicenses: [],
 	defaultRealmManageMode: false,
 	defaultScoreRealmId: "score-realm",
 	scoreVisibility: "public" as const,

@@ -80,7 +80,7 @@ export default {
 		"unit.merge.review": "ユニットの統合を審査する",
 		"unit.merge": "ユニットを直接統合する",
 		"unit.ownership.override": "任意のユニットの所有者を強制変更する",
-		"unit.content_license.manage": "ユニットのコンテンツライセンスを無効化または復元する",
+		"unit.license.manage": `ユニットの${jaTerminology.license.forms.label}付与を無効化または復元する`,
 		"unit.delete": "任意のユニットを論理削除する",
 		"unit.restore": "論理削除されたユニットを復元する",
 		"unit.slug.manage": "ユニットの公開アドレスを管理する",

@@ -1,5 +1,5 @@
 import { StatusCodes } from "http-status-codes";
-import { and, desc, eq, inArray, lt, or, sql } from "drizzle-orm";
+import { and, desc, eq, inArray, isNull, lt, or, sql } from "drizzle-orm";
 import Elysia from "elysia";
 import { OfficialRealmUnitIds } from "@rezics/slug";
 
@@ -23,7 +23,7 @@ import {
 	realmRuleRevision,
 	realmUnit,
 	unit,
-	unitContentLicense,
+	unitLicenseGrant,
 	unitRevisionHead,
 } from "../../database/schema";
 import { UnitNotFound } from "../../units/errors";
@@ -547,9 +547,7 @@ export default new Elysia().use(session).group("", (app) =>
 			"/reports/platform/cases",
 			async ({ query, authorization }) => {
 				await authorization.platform.ensureCapability("platform.moderate");
-				const canManageContentLicenses = await authorization.platform.hasCapability(
-					"unit.content_license.manage",
-				);
+				const canManageLicenses = await authorization.platform.hasCapability("unit.license.manage");
 				const limit = query.limit ?? 50;
 				const cursor = decodeMyReportCursor(query.cursor);
 				const rows = await database
@@ -595,85 +593,97 @@ export default new Elysia().use(session).group("", (app) =>
 					.limit(limit + 1);
 				const page = rows.slice(0, limit);
 				if (!page.length) return { items: [], nextCursor: null };
-				const contentLicenseRows = await database
+				const licenseGrantRows = await database
 					.select({
-						id: unitContentLicense.id,
-						unitId: unitContentLicense.unitId,
-						status: unitContentLicense.status,
-						grantedAt: unitContentLicense.grantedAt,
+						id: unitLicenseGrant.id,
+						unitId: unitLicenseGrant.unitId,
+						licenseId: unitLicenseGrant.licenseId,
+						recognitionStatus: unitLicenseGrant.recognitionStatus,
+						grantedAt: unitLicenseGrant.grantedAt,
 					})
-					.from(unitContentLicense)
+					.from(unitLicenseGrant)
 					.where(
-						inArray(
-							unitContentLicense.unitId,
-							page.map((row) => row.unitId),
+						and(
+							inArray(
+								unitLicenseGrant.unitId,
+								page.map((row) => row.unitId),
+							),
+							isNull(unitLicenseGrant.offeringEndedAt),
 						),
 					)
 					.orderBy(
-						sql`${unitContentLicense.status} = 'active' desc`,
-						desc(unitContentLicense.grantedAt),
-						desc(unitContentLicense.id),
+						sql`${unitLicenseGrant.recognitionStatus} = 'recognized' desc`,
+						desc(unitLicenseGrant.grantedAt),
+						desc(unitLicenseGrant.id),
 					);
-				const contentLicenseByUnit = new Map<string, (typeof contentLicenseRows)[number]>();
-				for (const contentLicense of contentLicenseRows)
-					if (!contentLicenseByUnit.has(contentLicense.unitId))
-						contentLicenseByUnit.set(contentLicense.unitId, contentLicense);
-				const invalidatedContentLicenses = [...contentLicenseByUnit.values()].filter(
-					(contentLicense) => contentLicense.status === "invalidated",
+				const grantsByUnit = new Map<string, (typeof licenseGrantRows)[number][]>();
+				for (const grant of licenseGrantRows) {
+					const existing = grantsByUnit.get(grant.unitId);
+					if (existing) existing.push(grant);
+					else grantsByUnit.set(grant.unitId, [grant]);
+				}
+				const invalidatedGrants = licenseGrantRows.filter(
+					(grant) => grant.recognitionStatus === "invalidated",
 				);
-				const invalidationActions = invalidatedContentLicenses.length
+				const invalidationActions = invalidatedGrants.length
 					? await database
 							.select({
 								id: contentGovernanceAction.id,
-								contentLicenseId: contentGovernanceAction.contentLicenseId,
+								licenseGrantId: contentGovernanceAction.licenseGrantId,
 								createdAt: contentGovernanceAction.createdAt,
 							})
 							.from(contentGovernanceAction)
 							.where(
 								and(
 									inArray(
-										contentGovernanceAction.contentLicenseId,
-										invalidatedContentLicenses.map((license) => license.id),
+										contentGovernanceAction.licenseGrantId,
+										invalidatedGrants.map((grant) => grant.id),
 									),
-									eq(contentGovernanceAction.kind, "invalidate_content_license"),
-									eq(contentGovernanceAction.resultingContentLicenseStatus, "invalidated"),
+									eq(contentGovernanceAction.kind, "invalidate_license"),
+									eq(contentGovernanceAction.resultingRecognitionStatus, "invalidated"),
 								),
 							)
 							.orderBy(desc(contentGovernanceAction.createdAt), desc(contentGovernanceAction.id))
 					: [];
-				const invalidationActionByLicense = new Map<string, string>();
+				const invalidationActionByGrant = new Map<string, string>();
 				for (const action of invalidationActions)
-					if (action.contentLicenseId && !invalidationActionByLicense.has(action.contentLicenseId))
-						invalidationActionByLicense.set(action.contentLicenseId, action.id);
+					if (action.licenseGrantId && !invalidationActionByGrant.has(action.licenseGrantId))
+						invalidationActionByGrant.set(action.licenseGrantId, action.id);
 				const last = page.at(-1);
 				return {
 					items: page.map((row) => {
 						if (!row.language) throw new Error(`Reported Unit ${row.unitId} has no localization`);
-						const license = contentLicenseByUnit.get(row.unitId);
-						const contentLicense = !license
-							? null
-							: license.status === "active"
-								? { id: license.id, status: "active" as const }
-								: {
-										id: license.id,
-										status: "invalidated" as const,
+						const grants = (grantsByUnit.get(row.unitId) ?? []).map((grant) =>
+							grant.recognitionStatus === "invalidated"
+								? {
+										id: grant.id,
+										licenseId: grant.licenseId,
+										recognitionStatus: "invalidated" as const,
+										offeringEnded: false as const,
 										invalidationActionId:
-											invalidationActionByLicense.get(license.id) ??
+											invalidationActionByGrant.get(grant.id) ??
 											(() => {
-												throw new Error(`Invalidated content license ${license.id} has no action`);
+												throw new Error(`Invalidated license grant ${grant.id} has no action`);
 											})(),
-									};
+									}
+								: {
+										id: grant.id,
+										licenseId: grant.licenseId,
+										recognitionStatus: "recognized" as const,
+										offeringEnded: false as const,
+									},
+						);
 						const hasOpenReports = isActiveContentReviewCaseState(row.caseState);
 						return {
 							...row,
 							language: row.language,
-							contentLicense,
+							licenseGrants: grants,
 							reportCount: Number(row.reportCount),
 							allowedCommands: [
 								...getPlatformUnitModerationCommands(
 									row.moderationStatus,
 									row.postTargetingLocked,
-									canManageContentLicenses ? (contentLicense?.status ?? null) : null,
+									canManageLicenses ? grants.map((grant) => grant.recognitionStatus) : [],
 									hasOpenReports,
 								),
 							],

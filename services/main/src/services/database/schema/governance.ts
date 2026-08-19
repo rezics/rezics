@@ -46,7 +46,7 @@ import {
 } from "./columns";
 import { profile } from "./profile";
 import { unit } from "./unit";
-import { unitContentLicense, unitContentLicenseStatus } from "./unit";
+import { unitLicenseGrant, unitLicenseRecognitionStatus } from "./unit";
 import { unitRevision } from "./history";
 import { post } from "./post";
 import { zone } from "./zone";
@@ -494,9 +494,9 @@ export const contentGovernanceAction = pgTable(
 			.references(() => profile.id, { onDelete: "restrict" }),
 		kind: contentGovernanceActionKind().notNull(),
 		resultingPostTargetingLocked: boolean(),
-		contentLicenseId: uuid(),
-		previousContentLicenseStatus: unitContentLicenseStatus(),
-		resultingContentLicenseStatus: unitContentLicenseStatus(),
+		licenseGrantId: uuid(),
+		previousRecognitionStatus: unitLicenseRecognitionStatus(),
+		resultingRecognitionStatus: unitLicenseRecognitionStatus(),
 		reversesActionId: uuid(),
 		previousState: text(),
 		resultingState: text(),
@@ -513,9 +513,9 @@ export const contentGovernanceAction = pgTable(
 			name: "content_governance_action_reverses_fkey",
 		}).onDelete("restrict"),
 		foreignKey({
-			columns: [table.contentLicenseId],
-			foreignColumns: [unitContentLicense.id],
-			name: "content_governance_action_content_license_fkey",
+			columns: [table.licenseGrantId],
+			foreignColumns: [unitLicenseGrant.id],
+			name: "content_governance_action_license_grant_fkey",
 		}).onDelete("restrict"),
 		uniqueIndex("content_governance_action_actor_case_idempotency_key")
 			.on(table.actorProfileId, table.caseId, table.idempotencyKey)
@@ -536,8 +536,8 @@ export const contentGovernanceAction = pgTable(
 		uniqueIndex("content_governance_action_reverses_key")
 			.on(table.reversesActionId)
 			.where(sql`${table.reversesActionId} is not null`),
-		index("content_governance_action_content_license_created_idx").on(
-			table.contentLicenseId,
+		index("content_governance_action_license_grant_created_idx").on(
+			table.licenseGrantId,
 			table.createdAt.desc(),
 			table.id.desc(),
 		),
@@ -554,7 +554,7 @@ export const contentGovernanceAction = pgTable(
 			sql`num_nonnulls(
 				${table.previousState},
 				${table.previousPostTargetingLocked},
-				${table.previousContentLicenseStatus}
+				${table.previousRecognitionStatus}
 			) <= 1`,
 		),
 		check(
@@ -566,8 +566,8 @@ export const contentGovernanceAction = pgTable(
 				${table.kind} in ('lock_post_targeting', 'unlock_post_targeting')
 				and ${table.previousPostTargetingLocked} is not null
 			) or (
-				${table.kind} in ('invalidate_content_license', 'restore_content_license')
-				and ${table.previousContentLicenseStatus} is not null
+				${table.kind} in ('invalidate_license', 'restore_license')
+				and ${table.previousRecognitionStatus} is not null
 			) or (
 				${table.kind} = 'reverse'
 				and num_nonnulls(
@@ -577,29 +577,29 @@ export const contentGovernanceAction = pgTable(
 			)`,
 		),
 		check(
-			"content_governance_action_content_license_transition_check",
+			"content_governance_action_license_grant_transition_check",
 			sql`(
-				${table.kind} = 'invalidate_content_license'
-				and ${table.contentLicenseId} is not null
-				and ${table.previousContentLicenseStatus} is not null
-				and ${table.previousContentLicenseStatus} = 'active'
-				and ${table.resultingContentLicenseStatus} is not null
-				and ${table.resultingContentLicenseStatus} = 'invalidated'
+				${table.kind} = 'invalidate_license'
+				and ${table.licenseGrantId} is not null
+				and ${table.previousRecognitionStatus} is not null
+				and ${table.previousRecognitionStatus} = 'recognized'
+				and ${table.resultingRecognitionStatus} is not null
+				and ${table.resultingRecognitionStatus} = 'invalidated'
 			) or (
-				${table.kind} = 'restore_content_license'
-				and ${table.contentLicenseId} is not null
-				and ${table.previousContentLicenseStatus} is not null
-				and ${table.previousContentLicenseStatus} = 'invalidated'
-				and ${table.resultingContentLicenseStatus} is not null
-				and ${table.resultingContentLicenseStatus} = 'active'
+				${table.kind} = 'restore_license'
+				and ${table.licenseGrantId} is not null
+				and ${table.previousRecognitionStatus} is not null
+				and ${table.previousRecognitionStatus} = 'invalidated'
+				and ${table.resultingRecognitionStatus} is not null
+				and ${table.resultingRecognitionStatus} = 'recognized'
 			) or (
 				${table.kind} not in (
-					'invalidate_content_license',
-					'restore_content_license'
+					'invalidate_license',
+					'restore_license'
 				)
-				and ${table.contentLicenseId} is null
-				and ${table.previousContentLicenseStatus} is null
-				and ${table.resultingContentLicenseStatus} is null
+				and ${table.licenseGrantId} is null
+				and ${table.previousRecognitionStatus} is null
+				and ${table.resultingRecognitionStatus} is null
 			)`,
 		),
 		check(
@@ -612,7 +612,7 @@ export const contentGovernanceAction = pgTable(
 		),
 		check(
 			"content_governance_action_reversal_check",
-			sql`(${table.kind} in ('reverse', 'restore_content_license')) = (${table.reversesActionId} is not null)`,
+			sql`(${table.kind} in ('reverse', 'restore_license')) = (${table.reversesActionId} is not null)`,
 		),
 	],
 );

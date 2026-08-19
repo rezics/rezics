@@ -449,12 +449,12 @@ export default {
 			{ title: String },
 		),
 		confirmRemoval: "Retirer le contenu",
-		confirmLicenseInvalidationTitle: "Invalider cette licence de contenu ?",
+		confirmLicenseInvalidationTitle: `Invalider cette ${frTerminology.license.forms.inline} de contenu ?`,
 		confirmLicenseInvalidationDescription: insert(
-			"La licence de contenu actuelle de {{title}} sera invalidée. La trace de son octroi sera conservée et un administrateur de la plateforme pourra la rétablir.",
+			`La ${frTerminology.license.forms.inline} de contenu actuelle de {{title}} sera invalidée. La trace de son octroi sera conservée et un administrateur de la plateforme pourra la rétablir.`,
 			{ title: String },
 		),
-		confirmLicenseInvalidation: "Invalider la licence",
+		confirmLicenseInvalidation: `Invalider la ${frTerminology.license.forms.inline}`,
 		reportCount: insert("{{count}} signalements", { count: Number }),
 		moderationStatuses: {
 			approved: "Approuvé",
@@ -463,8 +463,10 @@ export default {
 		},
 		targetingLocked: `Nouvelles références de ${postTerms.plural} bloquées`,
 		targetingUnlocked: `Nouvelles références de ${postTerms.plural} autorisées`,
-		contentLicenseActive: "Licence de contenu valide",
-		contentLicenseInvalidated: "Licence de contenu invalidée",
+		licenseGrant: `Octroi de ${frTerminology.license.forms.inline}`,
+		chooseLicenseGrant: `Choisir un octroi de ${frTerminology.license.forms.inline}`,
+		licenseGrantRecognized: `L’octroi de ${frTerminology.license.forms.inline} est toujours reconnu`,
+		licenseGrantInvalidated: `La reconnaissance de cet octroi de ${frTerminology.license.forms.inline} par la plateforme est invalidée`,
 		openContent: "Ouvrir le contenu",
 	},
 	audit: {

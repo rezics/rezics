@@ -1,19 +1,21 @@
 import { describe, expect, it } from "vitest";
 
 import {
-	CurrentUnitContentLicenseSlug,
-	isPublicationLicenseId,
-	isUnitContentLicenseSlug,
-	parseNullablePublicationLicenseId,
-	parseUnitContentLicenseSlug,
-	PublicationLicenseIds,
-	PublicationLicenseRegistry,
-	UnitContentLicenseSlugs,
+	isLicenseId,
+	LicenseIds,
+	LicenseLegalFormValues,
+	LicenseRecognitionStatusValues,
+	LicenseRegistry,
+	parseLicenseId,
+	parseNullableLicenseId,
+	RecommendedLicenseId,
+	ResidualRightsLicenseId,
+	rezicsLicenseTermsUrl,
 } from ".";
 
-describe("publication License registry", () => {
-	it("preserves the product preference order", () => {
-		expect(PublicationLicenseIds).toEqual([
+describe("License registry", () => {
+	it("preserves the product order and maps every ID to one complete definition", () => {
+		expect(LicenseIds).toEqual([
 			"cc-by-nc-sa-4.0",
 			"cc-by-sa-4.0",
 			"cc-by-sa-3.0",
@@ -21,39 +23,56 @@ describe("publication License registry", () => {
 			"cc-by-nc-4.0",
 			"cc-by-4.0",
 			"cc0-1.0",
+			"rezics-unit-content-license-v1",
 		]);
-	});
-
-	it("maps every ID to a matching definition", () => {
-		for (const id of PublicationLicenseIds) expect(PublicationLicenseRegistry[id].id).toBe(id);
-	});
-
-	it("keeps canonical License URLs independent of presentation locale", () => {
-		for (const definition of Object.values(PublicationLicenseRegistry)) {
-			if (definition.kind !== "license") continue;
-			expect(() => new URL(definition.url)).not.toThrow();
-			expect(definition.url).not.toContain("/deed.");
+		for (const id of LicenseIds) {
+			const definition = LicenseRegistry[id];
+			expect(definition.id).toBe(id);
+			expect(LicenseLegalFormValues).toContain(definition.legalForm);
+			expect(typeof definition.ownerMayEndOffering).toBe("boolean");
+			expect(typeof definition.requiresAffirmativeAcknowledgement).toBe("boolean");
+			expect(typeof definition.profileOwnedOnly).toBe("boolean");
+			expect(definition.applicableUnitKinds).toBeNull();
 		}
 	});
 
-	it("accepts only registered IDs", () => {
-		expect(isPublicationLicenseId("cc-by-4.0")).toBe(true);
-		expect(isPublicationLicenseId("CC-BY-4.0")).toBe(false);
-		expect(isPublicationLicenseId("unknown")).toBe(false);
-		expect(() => parseNullablePublicationLicenseId("unknown")).toThrow();
-		expect(parseNullablePublicationLicenseId(null)).toBeNull();
+	it("keeps canonical terms URLs independent of presentation locale", () => {
+		for (const definition of Object.values(LicenseRegistry)) {
+			if (definition.termsUrl === null) continue;
+			expect(() => new URL(definition.termsUrl)).not.toThrow();
+			expect(definition.termsUrl).not.toContain("/deed.");
+		}
+		expect(LicenseRegistry[RecommendedLicenseId].termsUrl).toBe(
+			rezicsLicenseTermsUrl(RecommendedLicenseId),
+		);
+		expect(LicenseRegistry[ResidualRightsLicenseId].termsUrl).toBeNull();
 	});
 
-	it("keeps Unit content license slugs closed and versioned", () => {
-		expect(UnitContentLicenseSlugs).toEqual(["rezics-unit-content-license-v1"]);
-		expect(CurrentUnitContentLicenseSlug).toBe("rezics-unit-content-license-v1");
-		expect(isUnitContentLicenseSlug(CurrentUnitContentLicenseSlug)).toBe(true);
-		expect(isUnitContentLicenseSlug("rezics-unit-content-license-v2")).toBe(false);
-		expect(parseUnitContentLicenseSlug(CurrentUnitContentLicenseSlug)).toBe(
-			CurrentUnitContentLicenseSlug,
-		);
-		expect(() => parseUnitContentLicenseSlug("unknown")).toThrow(
-			"Unknown Unit content license slug",
-		);
+	it("accepts only registered IDs", () => {
+		expect(isLicenseId("cc-by-4.0")).toBe(true);
+		expect(isLicenseId(RecommendedLicenseId)).toBe(true);
+		expect(isLicenseId("CC-BY-4.0")).toBe(false);
+		expect(isLicenseId("unknown")).toBe(false);
+		expect(parseLicenseId("cc0-1.0")).toBe("cc0-1.0");
+		expect(() => parseLicenseId("unknown")).toThrow("Unknown License ID");
+		expect(parseNullableLicenseId(null)).toBeNull();
+		expect(() => parseNullableLicenseId("unknown")).toThrow("Unknown License ID");
+	});
+
+	it("keeps every License independently grantable", () => {
+		for (const id of LicenseIds) {
+			expect(LicenseRegistry[id].ownerMayEndOffering).toBe(true);
+			expect(LicenseRegistry[id].applicableUnitKinds).toBeNull();
+			expect(Object.hasOwn(LicenseRegistry[id], "exclusive")).toBe(false);
+			expect(Object.hasOwn(LicenseRegistry[id], "singletonFamily")).toBe(false);
+		}
+		expect(LicenseRegistry[RecommendedLicenseId].requiresAffirmativeAcknowledgement).toBe(true);
+		expect(LicenseRegistry[RecommendedLicenseId].profileOwnedOnly).toBe(true);
+		expect(LicenseRegistry["cc-by-4.0"].requiresAffirmativeAcknowledgement).toBe(false);
+		expect(LicenseRegistry["cc-by-4.0"].profileOwnedOnly).toBe(false);
+	});
+
+	it("exposes recognition statuses without selection semantics", () => {
+		expect(LicenseRecognitionStatusValues).toEqual(["recognized", "invalidated"]);
 	});
 });

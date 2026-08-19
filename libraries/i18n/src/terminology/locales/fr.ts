@@ -91,9 +91,9 @@ export const frTerminology = defineTerminology("fr", {
 		},
 		forbidden: ["Tag structure", "Structure tag"],
 	},
-	publicationLicense: {
+	license: {
 		status: "approved",
-		forms: { label: "Licence de publication", inline: "licence de publication" },
+		forms: { label: "Licence", inline: "licence" },
 		forbidden: [],
 	},
 	entity: {

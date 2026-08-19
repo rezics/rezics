@@ -80,7 +80,7 @@ export default {
 		"unit.merge.review": "유닛 병합 검토",
 		"unit.merge": "유닛 직접 병합",
 		"unit.ownership.override": "모든 유닛의 소유자 강제 변경",
-		"unit.content_license.manage": "유닛 콘텐츠 라이선스 무효화 또는 복원",
+		"unit.license.manage": `유닛 ${koTerminology.license.forms.label} 부여 무효화 또는 복원`,
 		"unit.delete": "모든 유닛 소프트 삭제",
 		"unit.restore": "소프트 삭제된 유닛 복원",
 		"unit.slug.manage": "유닛 공개 주소 관리",

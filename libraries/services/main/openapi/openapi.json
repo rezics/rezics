@@ -10210,7 +10210,6 @@
 																									{ "const": "updated-at", "type": "string" },
 																									{ "const": "published-at", "type": "string" },
 																									{ "const": "closes-at", "type": "string" },
-																									{ "const": "content-license", "type": "string" },
 																									{ "const": "book-isbn13", "type": "string" },
 																									{
 																										"const": "book-publication-date",
@@ -15036,7 +15035,6 @@
 																					{ "const": "updated-at", "type": "string" },
 																					{ "const": "published-at", "type": "string" },
 																					{ "const": "closes-at", "type": "string" },
-																					{ "const": "content-license", "type": "string" },
 																					{ "const": "book-isbn13", "type": "string" },
 																					{ "const": "book-publication-date", "type": "string" },
 																					{ "const": "book-page-count", "type": "string" },
@@ -20788,7 +20786,6 @@
 																									{ "const": "updated-at", "type": "string" },
 																									{ "const": "published-at", "type": "string" },
 																									{ "const": "closes-at", "type": "string" },
-																									{ "const": "content-license", "type": "string" },
 																									{ "const": "book-isbn13", "type": "string" },
 																									{
 																										"const": "book-publication-date",
@@ -25614,7 +25611,6 @@
 																					{ "const": "updated-at", "type": "string" },
 																					{ "const": "published-at", "type": "string" },
 																					{ "const": "closes-at", "type": "string" },
-																					{ "const": "content-license", "type": "string" },
 																					{ "const": "book-isbn13", "type": "string" },
 																					{ "const": "book-publication-date", "type": "string" },
 																					{ "const": "book-page-count", "type": "string" },
@@ -26036,7 +26032,6 @@
 										"updated-at",
 										"published-at",
 										"closes-at",
-										"content-license",
 										"book-isbn13",
 										"book-publication-date",
 										"book-page-count",
@@ -26390,7 +26385,6 @@
 										"updated-at",
 										"published-at",
 										"closes-at",
-										"content-license",
 										"book-isbn13",
 										"book-publication-date",
 										"book-page-count",
@@ -26566,7 +26560,10 @@
 					"UnitNotFound",
 					"UnitPermissionForbidden",
 					"UnitAccessRestricted",
-					"UnitContentLicenseGrantForbidden",
+					"UnitLicenseGrantForbidden",
+					"UnitLicenseNotApplicable",
+					"UnitLicenseOfferingEndForbidden",
+					"UnitLicenseGrantConflict",
 					"UnitChanged",
 					"UnitRealmPublicationNotFound",
 					"UnitRealmPublicationAlreadyExists",
@@ -29775,8 +29772,8 @@
 																							"restore",
 																							"lock_post_targeting",
 																							"unlock_post_targeting",
-																							"invalidate_content_license",
-																							"restore_content_license",
+																							"invalidate_license",
+																							"restore_license",
 																							"reverse"
 																						]
 																					},
@@ -29807,8 +29804,8 @@
 																							"restore",
 																							"lock_post_targeting",
 																							"unlock_post_targeting",
-																							"invalidate_content_license",
-																							"restore_content_license",
+																							"invalidate_license",
+																							"restore_license",
 																							"reverse"
 																						]
 																					},
@@ -31482,8 +31479,8 @@
 																				"restore",
 																				"lock_post_targeting",
 																				"unlock_post_targeting",
-																				"invalidate_content_license",
-																				"restore_content_license",
+																				"invalidate_license",
+																				"restore_license",
 																				"reverse"
 																			]
 																		},
@@ -31508,8 +31505,8 @@
 																				"restore",
 																				"lock_post_targeting",
 																				"unlock_post_targeting",
-																				"invalidate_content_license",
-																				"restore_content_license",
+																				"invalidate_license",
+																				"restore_license",
 																				"reverse"
 																			]
 																		},
@@ -58059,7 +58056,7 @@
 													"title",
 													"moderationStatus",
 													"postTargetingLocked",
-													"contentLicense",
+													"licenseGrants",
 													"reportCount",
 													"allowedCommands",
 													"createdAt",
@@ -58096,34 +58093,52 @@
 														"enum": ["approved", "pending", "removed"]
 													},
 													"postTargetingLocked": { "type": "boolean" },
-													"contentLicense": {
-														"nullable": true,
-														"anyOf": [
-															{
-																"anyOf": [
-																	{
-																		"additionalProperties": false,
-																		"type": "object",
-																		"required": ["id", "status"],
-																		"properties": {
-																			"id": { "format": "uuid", "type": "string" },
-																			"status": { "const": "active", "type": "string" }
-																		}
-																	},
-																	{
-																		"additionalProperties": false,
-																		"type": "object",
-																		"required": ["id", "status", "invalidationActionId"],
-																		"properties": {
-																			"id": { "format": "uuid", "type": "string" },
-																			"status": { "const": "invalidated", "type": "string" },
-																			"invalidationActionId": { "format": "uuid", "type": "string" }
-																		}
+													"licenseGrants": {
+														"type": "array",
+														"items": {
+															"anyOf": [
+																{
+																	"additionalProperties": false,
+																	"type": "object",
+																	"required": [
+																		"id",
+																		"licenseId",
+																		"recognitionStatus",
+																		"offeringEnded"
+																	],
+																	"properties": {
+																		"id": { "format": "uuid", "type": "string" },
+																		"licenseId": { "minLength": 1, "type": "string" },
+																		"recognitionStatus": {
+																			"const": "recognized",
+																			"type": "string"
+																		},
+																		"offeringEnded": { "const": false, "type": "boolean" }
 																	}
-																]
-															},
-															{ "type": "null" }
-														]
+																},
+																{
+																	"additionalProperties": false,
+																	"type": "object",
+																	"required": [
+																		"id",
+																		"licenseId",
+																		"recognitionStatus",
+																		"offeringEnded",
+																		"invalidationActionId"
+																	],
+																	"properties": {
+																		"id": { "format": "uuid", "type": "string" },
+																		"licenseId": { "minLength": 1, "type": "string" },
+																		"recognitionStatus": {
+																			"const": "invalidated",
+																			"type": "string"
+																		},
+																		"offeringEnded": { "const": false, "type": "boolean" },
+																		"invalidationActionId": { "format": "uuid", "type": "string" }
+																	}
+																}
+															]
+														}
 													},
 													"reportCount": {
 														"minimum": 1,
@@ -58143,8 +58158,8 @@
 																"restore",
 																"lock_post_targeting",
 																"unlock_post_targeting",
-																"invalidate_content_license",
-																"restore_content_license",
+																"invalidate_license",
+																"restore_license",
 																"dismiss",
 																"note"
 															]
@@ -69886,10 +69901,274 @@
 													{ "const": "remove", "type": "string" },
 													{ "const": "restore", "type": "string" },
 													{ "const": "lock_post_targeting", "type": "string" },
-													{ "const": "unlock_post_targeting", "type": "string" },
-													{ "const": "invalidate_content_license", "type": "string" }
+													{ "const": "unlock_post_targeting", "type": "string" }
 												]
 											},
+											"rules": {
+												"minItems": 1,
+												"maxItems": 32,
+												"uniqueItems": true,
+												"type": "array",
+												"items": {
+													"additionalProperties": false,
+													"type": "object",
+													"required": ["sourceRealmId", "revisionId", "ruleId"],
+													"properties": {
+														"sourceRealmId": { "format": "uuid", "type": "string" },
+														"revisionId": { "format": "uuid", "type": "string" },
+														"ruleId": { "format": "uuid", "type": "string" }
+													}
+												}
+											}
+										}
+									},
+									{
+										"additionalProperties": false,
+										"type": "object",
+										"required": ["caseId", "kind", "licenseGrantId", "rules"],
+										"properties": {
+											"caseId": { "format": "uuid", "type": "string" },
+											"notes": {
+												"maxItems": 2,
+												"type": "array",
+												"items": {
+													"additionalProperties": false,
+													"type": "object",
+													"required": ["role", "language", "content"],
+													"properties": {
+														"role": {
+															"anyOf": [
+																{ "const": "internal_note", "type": "string" },
+																{ "const": "public_notice", "type": "string" }
+															]
+														},
+														"language": {
+															"type": "string",
+															"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+														},
+														"content": {
+															"additionalProperties": false,
+															"$id": "PortableTextDocument",
+															"type": "object",
+															"required": ["_type", "_key", "content"],
+															"properties": {
+																"_type": { "const": "portable-text", "type": "string" },
+																"_key": {
+																	"pattern": "^[0-9a-f]{12}$",
+																	"$id": "BlockKey",
+																	"type": "string"
+																},
+																"content": {
+																	"$id": "PortableText",
+																	"type": "array",
+																	"items": {
+																		"$id": "PortableTextBlock",
+																		"anyOf": [
+																			{
+																				"additionalProperties": {
+																					"$id": "#/components/schemas/JsonValue",
+																					"anyOf": [
+																						{ "type": "null" },
+																						{ "type": "boolean" },
+																						{ "type": "number" },
+																						{ "type": "string" },
+																						{
+																							"type": "array",
+																							"items": { "$ref": "#/components/schemas/JsonValue" }
+																						},
+																						{
+																							"type": "object",
+																							"patternProperties": {
+																								"^(.*)$": {
+																									"$ref": "#/components/schemas/JsonValue"
+																								}
+																							}
+																						}
+																					]
+																				},
+																				"$id": "PortableTextTextBlock",
+																				"type": "object",
+																				"required": ["_key", "_type", "children"],
+																				"properties": {
+																					"_key": { "type": "string" },
+																					"_type": { "const": "block", "type": "string" },
+																					"children": {
+																						"type": "array",
+																						"items": {
+																							"$id": "PortableTextChild",
+																							"anyOf": [
+																								{
+																									"additionalProperties": false,
+																									"$id": "PortableTextSpan",
+																									"type": "object",
+																									"required": ["_key", "_type", "text"],
+																									"properties": {
+																										"_key": { "type": "string" },
+																										"_type": { "const": "span", "type": "string" },
+																										"text": { "type": "string" },
+																										"marks": {
+																											"type": "array",
+																											"items": { "type": "string" }
+																										}
+																									}
+																								},
+																								{
+																									"additionalProperties": false,
+																									"$id": "PortableTextUnitMention",
+																									"type": "object",
+																									"required": ["_key", "_type", "unitId"],
+																									"properties": {
+																										"_key": { "type": "string" },
+																										"_type": {
+																											"const": "unit-mention",
+																											"type": "string"
+																										},
+																										"unitId": {
+																											"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																											"type": "string"
+																										}
+																									}
+																								}
+																							]
+																						}
+																					},
+																					"markDefs": {
+																						"type": "array",
+																						"items": {
+																							"additionalProperties": {
+																								"$id": "#/components/schemas/JsonValue",
+																								"anyOf": [
+																									{ "type": "null" },
+																									{ "type": "boolean" },
+																									{ "type": "number" },
+																									{ "type": "string" },
+																									{
+																										"type": "array",
+																										"items": {
+																											"$ref": "#/components/schemas/JsonValue"
+																										}
+																									},
+																									{
+																										"type": "object",
+																										"patternProperties": {
+																											"^(.*)$": {
+																												"$ref": "#/components/schemas/JsonValue"
+																											}
+																										}
+																									}
+																								]
+																							},
+																							"$id": "PortableTextObject",
+																							"type": "object",
+																							"required": ["_key", "_type"],
+																							"properties": {
+																								"_key": { "type": "string" },
+																								"_type": { "type": "string" }
+																							}
+																						}
+																					},
+																					"listItem": { "type": "string" },
+																					"style": { "type": "string" },
+																					"level": { "minimum": 1, "type": "integer" }
+																				}
+																			},
+																			{
+																				"additionalProperties": false,
+																				"$id": "PortableTextImage",
+																				"type": "object",
+																				"required": ["_key", "_type", "assetId"],
+																				"properties": {
+																					"_key": { "type": "string" },
+																					"_type": { "const": "image", "type": "string" },
+																					"assetId": {
+																						"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																						"type": "string"
+																					},
+																					"alt": { "type": "string" },
+																					"caption": { "type": "string" }
+																				}
+																			},
+																			{
+																				"additionalProperties": {
+																					"$id": "#/components/schemas/JsonValue",
+																					"anyOf": [
+																						{ "type": "null" },
+																						{ "type": "boolean" },
+																						{ "type": "number" },
+																						{ "type": "string" },
+																						{
+																							"type": "array",
+																							"items": { "$ref": "#/components/schemas/JsonValue" }
+																						},
+																						{
+																							"type": "object",
+																							"patternProperties": {
+																								"^(.*)$": {
+																									"$ref": "#/components/schemas/JsonValue"
+																								}
+																							}
+																						}
+																					]
+																				},
+																				"type": "object",
+																				"required": ["_key", "_type"],
+																				"properties": {
+																					"_key": { "type": "string" },
+																					"_type": {
+																						"pattern": "^(?!(?:block|image)$).+",
+																						"type": "string"
+																					}
+																				}
+																			}
+																		]
+																	}
+																}
+															}
+														}
+													}
+												}
+											},
+											"idempotencyKey": { "minLength": 1, "maxLength": 256, "type": "string" },
+											"revisionContext": {
+												"additionalProperties": false,
+												"type": "object",
+												"properties": {
+													"contribution": {
+														"anyOf": [
+															{
+																"additionalProperties": false,
+																"type": "object",
+																"required": ["primary"],
+																"properties": { "primary": { "const": "human", "type": "string" } }
+															},
+															{
+																"additionalProperties": false,
+																"type": "object",
+																"required": ["primary"],
+																"properties": {
+																	"primary": { "const": "unattributed", "type": "string" }
+																}
+															},
+															{
+																"additionalProperties": false,
+																"type": "object",
+																"required": ["primary", "creditedEntityId", "role"],
+																"properties": {
+																	"primary": { "const": "ai", "type": "string" },
+																	"creditedEntityId": { "format": "uuid", "type": "string" },
+																	"role": {
+																		"default": "creator",
+																		"type": "string",
+																		"enum": ["creator", "editor", "translator", "researcher"]
+																	}
+																}
+															}
+														]
+													}
+												}
+											},
+											"kind": { "const": "invalidate_license", "type": "string" },
+											"licenseGrantId": { "format": "uuid", "type": "string" },
 											"rules": {
 												"minItems": 1,
 												"maxItems": 32,
@@ -70153,7 +70432,7 @@
 													}
 												}
 											},
-											"kind": { "const": "restore_content_license", "type": "string" },
+											"kind": { "const": "restore_license", "type": "string" },
 											"reversesActionId": { "format": "uuid", "type": "string" }
 										}
 									},
@@ -70427,9 +70706,9 @@
 										"previousState",
 										"resultingState",
 										"previousPostTargetingLocked",
-										"contentLicenseId",
-										"previousContentLicenseStatus",
-										"resultingContentLicenseStatus",
+										"licenseGrantId",
+										"previousRecognitionStatus",
+										"resultingRecognitionStatus",
 										"resultingPostTargetingLocked",
 										"reversesActionId",
 										"rules",
@@ -70450,8 +70729,8 @@
 												"restore",
 												"lock_post_targeting",
 												"unlock_post_targeting",
-												"invalidate_content_license",
-												"restore_content_license",
+												"invalidate_license",
+												"restore_license",
 												"reverse"
 											]
 										},
@@ -70467,30 +70746,28 @@
 											"nullable": true,
 											"anyOf": [{ "type": "boolean" }, { "type": "null" }]
 										},
-										"contentLicenseId": {
+										"licenseGrantId": {
 											"nullable": true,
 											"anyOf": [{ "format": "uuid", "type": "string" }, { "type": "null" }]
 										},
-										"previousContentLicenseStatus": {
+										"previousRecognitionStatus": {
 											"nullable": true,
 											"anyOf": [
 												{
-													"anyOf": [
-														{ "const": "active", "type": "string" },
-														{ "const": "invalidated", "type": "string" }
-													]
+													"default": "recognized",
+													"type": "string",
+													"enum": ["recognized", "invalidated"]
 												},
 												{ "type": "null" }
 											]
 										},
-										"resultingContentLicenseStatus": {
+										"resultingRecognitionStatus": {
 											"nullable": true,
 											"anyOf": [
 												{
-													"anyOf": [
-														{ "const": "active", "type": "string" },
-														{ "const": "invalidated", "type": "string" }
-													]
+													"default": "recognized",
+													"type": "string",
+													"enum": ["recognized", "invalidated"]
 												},
 												{ "type": "null" }
 											]
@@ -71904,9 +72181,27 @@
 							"schema": {
 								"additionalProperties": false,
 								"type": "object",
-								"required": ["kind", "localization"],
+								"required": ["kind", "licenses", "localization"],
 								"properties": {
 									"kind": { "minLength": 1, "maxLength": 64, "type": "string" },
+									"licenses": {
+										"uniqueItems": true,
+										"maxItems": 8,
+										"type": "array",
+										"items": {
+											"type": "string",
+											"enum": [
+												"cc-by-nc-sa-4.0",
+												"cc-by-sa-4.0",
+												"cc-by-sa-3.0",
+												"all-rights-reserved",
+												"cc-by-nc-4.0",
+												"cc-by-4.0",
+												"cc0-1.0",
+												"rezics-unit-content-license-v1"
+											]
+										}
+									},
 									"localization": {
 										"additionalProperties": false,
 										"type": "object",
@@ -80825,7 +81120,7 @@
 															"unit.merge.review",
 															"unit.merge",
 															"unit.ownership.override",
-															"unit.content_license.manage",
+															"unit.license.manage",
 															"unit.delete",
 															"unit.restore",
 															"unit.slug.manage",
@@ -82410,7 +82705,7 @@
 										"profileId",
 										"interfaceLocale",
 										"chineseContentDisplay",
-										"defaultLicense",
+										"defaultLicenses",
 										"defaultRealmManageMode",
 										"defaultScoreRealmId",
 										"scoreVisibility",
@@ -82431,23 +82726,21 @@
 											"type": "string",
 											"enum": ["original", "hant", "hans"]
 										},
-										"defaultLicense": {
-											"nullable": true,
-											"anyOf": [
-												{
-													"type": "string",
-													"enum": [
-														"cc-by-nc-sa-4.0",
-														"cc-by-sa-4.0",
-														"cc-by-sa-3.0",
-														"all-rights-reserved",
-														"cc-by-nc-4.0",
-														"cc-by-4.0",
-														"cc0-1.0"
-													]
-												},
-												{ "type": "null" }
-											]
+										"defaultLicenses": {
+											"type": "array",
+											"items": {
+												"type": "string",
+												"enum": [
+													"cc-by-nc-sa-4.0",
+													"cc-by-sa-4.0",
+													"cc-by-sa-3.0",
+													"all-rights-reserved",
+													"cc-by-nc-4.0",
+													"cc-by-4.0",
+													"cc0-1.0",
+													"rezics-unit-content-license-v1"
+												]
+											}
 										},
 										"defaultRealmManageMode": { "type": "boolean" },
 										"defaultScoreRealmId": { "format": "uuid", "type": "string" },
@@ -82608,7 +82901,7 @@
 										"profileId",
 										"interfaceLocale",
 										"chineseContentDisplay",
-										"defaultLicense",
+										"defaultLicenses",
 										"defaultRealmManageMode",
 										"defaultScoreRealmId",
 										"scoreVisibility",
@@ -82629,23 +82922,21 @@
 											"type": "string",
 											"enum": ["original", "hant", "hans"]
 										},
-										"defaultLicense": {
-											"nullable": true,
-											"anyOf": [
-												{
-													"type": "string",
-													"enum": [
-														"cc-by-nc-sa-4.0",
-														"cc-by-sa-4.0",
-														"cc-by-sa-3.0",
-														"all-rights-reserved",
-														"cc-by-nc-4.0",
-														"cc-by-4.0",
-														"cc0-1.0"
-													]
-												},
-												{ "type": "null" }
-											]
+										"defaultLicenses": {
+											"type": "array",
+											"items": {
+												"type": "string",
+												"enum": [
+													"cc-by-nc-sa-4.0",
+													"cc-by-sa-4.0",
+													"cc-by-sa-3.0",
+													"all-rights-reserved",
+													"cc-by-nc-4.0",
+													"cc-by-4.0",
+													"cc0-1.0",
+													"rezics-unit-content-license-v1"
+												]
+											}
 										},
 										"defaultRealmManageMode": { "type": "boolean" },
 										"defaultScoreRealmId": { "format": "uuid", "type": "string" },
@@ -82796,7 +83087,7 @@
 								"required": [
 									"interfaceLocale",
 									"chineseContentDisplay",
-									"defaultLicense",
+									"defaultLicenses",
 									"defaultRealmManageMode",
 									"defaultScoreRealmId",
 									"collectionConfig",
@@ -82814,23 +83105,23 @@
 										"type": "string",
 										"enum": ["original", "hant", "hans"]
 									},
-									"defaultLicense": {
-										"nullable": true,
-										"anyOf": [
-											{
-												"type": "string",
-												"enum": [
-													"cc-by-nc-sa-4.0",
-													"cc-by-sa-4.0",
-													"cc-by-sa-3.0",
-													"all-rights-reserved",
-													"cc-by-nc-4.0",
-													"cc-by-4.0",
-													"cc0-1.0"
-												]
-											},
-											{ "type": "null" }
-										]
+									"defaultLicenses": {
+										"uniqueItems": true,
+										"maxItems": 8,
+										"type": "array",
+										"items": {
+											"type": "string",
+											"enum": [
+												"cc-by-nc-sa-4.0",
+												"cc-by-sa-4.0",
+												"cc-by-sa-3.0",
+												"all-rights-reserved",
+												"cc-by-nc-4.0",
+												"cc-by-4.0",
+												"cc0-1.0",
+												"rezics-unit-content-license-v1"
+											]
+										}
 									},
 									"defaultRealmManageMode": { "default": false, "type": "boolean" },
 									"defaultScoreRealmId": { "format": "uuid", "type": "string" },
@@ -82886,7 +83177,7 @@
 										"profileId",
 										"interfaceLocale",
 										"chineseContentDisplay",
-										"defaultLicense",
+										"defaultLicenses",
 										"defaultRealmManageMode",
 										"defaultScoreRealmId",
 										"scoreVisibility",
@@ -82907,23 +83198,21 @@
 											"type": "string",
 											"enum": ["original", "hant", "hans"]
 										},
-										"defaultLicense": {
-											"nullable": true,
-											"anyOf": [
-												{
-													"type": "string",
-													"enum": [
-														"cc-by-nc-sa-4.0",
-														"cc-by-sa-4.0",
-														"cc-by-sa-3.0",
-														"all-rights-reserved",
-														"cc-by-nc-4.0",
-														"cc-by-4.0",
-														"cc0-1.0"
-													]
-												},
-												{ "type": "null" }
-											]
+										"defaultLicenses": {
+											"type": "array",
+											"items": {
+												"type": "string",
+												"enum": [
+													"cc-by-nc-sa-4.0",
+													"cc-by-sa-4.0",
+													"cc-by-sa-3.0",
+													"all-rights-reserved",
+													"cc-by-nc-4.0",
+													"cc-by-4.0",
+													"cc0-1.0",
+													"rezics-unit-content-license-v1"
+												]
+											}
 										},
 										"defaultRealmManageMode": { "type": "boolean" },
 										"defaultScoreRealmId": { "format": "uuid", "type": "string" },
@@ -85431,7 +85720,7 @@
 													"unit.merge.review",
 													"unit.merge",
 													"unit.ownership.override",
-													"unit.content_license.manage",
+													"unit.license.manage",
 													"unit.delete",
 													"unit.restore",
 													"unit.slug.manage",
@@ -85586,7 +85875,7 @@
 																		"unit.merge.review",
 																		"unit.merge",
 																		"unit.ownership.override",
-																		"unit.content_license.manage",
+																		"unit.license.manage",
 																		"unit.delete",
 																		"unit.restore",
 																		"unit.slug.manage",
@@ -85743,7 +86032,7 @@
 															"unit.merge.review",
 															"unit.merge",
 															"unit.ownership.override",
-															"unit.content_license.manage",
+															"unit.license.manage",
 															"unit.delete",
 															"unit.restore",
 															"unit.slug.manage",
@@ -85911,7 +86200,7 @@
 														"unit.merge.review",
 														"unit.merge",
 														"unit.ownership.override",
-														"unit.content_license.manage",
+														"unit.license.manage",
 														"unit.delete",
 														"unit.restore",
 														"unit.slug.manage",
@@ -86000,7 +86289,7 @@
 															"unit.merge.review",
 															"unit.merge",
 															"unit.ownership.override",
-															"unit.content_license.manage",
+															"unit.license.manage",
 															"unit.delete",
 															"unit.restore",
 															"unit.slug.manage",
@@ -93555,8 +93844,8 @@
 																			"restore",
 																			"lock_post_targeting",
 																			"unlock_post_targeting",
-																			"invalidate_content_license",
-																			"restore_content_license",
+																			"invalidate_license",
+																			"restore_license",
 																			"reverse"
 																		]
 																	},
@@ -95669,19 +95958,6 @@
 										],
 										"properties": {
 											"ownershipMode": { "const": "profile_owned", "type": "string" },
-											"contentLicense": {
-												"additionalProperties": false,
-												"description": "One-time Unit content license grant. Omit this field when no new grant is being made.",
-												"type": "object",
-												"required": ["referenceLicenseSlug"],
-												"properties": {
-													"referenceLicenseSlug": {
-														"default": "rezics-unit-content-license-v1",
-														"type": "string",
-														"enum": ["rezics-unit-content-license-v1"]
-													}
-												}
-											},
 											"creditAttributions": {
 												"uniqueItems": true,
 												"type": "array",
@@ -96018,23 +96294,23 @@
 													{ "const": "machine_generated", "type": "string" }
 												]
 											},
-											"license": {
-												"nullable": true,
-												"anyOf": [
-													{
-														"type": "string",
-														"enum": [
-															"cc-by-nc-sa-4.0",
-															"cc-by-sa-4.0",
-															"cc-by-sa-3.0",
-															"all-rights-reserved",
-															"cc-by-nc-4.0",
-															"cc-by-4.0",
-															"cc0-1.0"
-														]
-													},
-													{ "type": "null" }
-												]
+											"licenses": {
+												"uniqueItems": true,
+												"maxItems": 8,
+												"type": "array",
+												"items": {
+													"type": "string",
+													"enum": [
+														"cc-by-nc-sa-4.0",
+														"cc-by-sa-4.0",
+														"cc-by-sa-3.0",
+														"all-rights-reserved",
+														"cc-by-nc-4.0",
+														"cc-by-4.0",
+														"cc0-1.0",
+														"rezics-unit-content-license-v1"
+													]
+												}
 											},
 											"details": {
 												"anyOf": [
@@ -96459,23 +96735,23 @@
 													{ "const": "machine_generated", "type": "string" }
 												]
 											},
-											"license": {
-												"nullable": true,
-												"anyOf": [
-													{
-														"type": "string",
-														"enum": [
-															"cc-by-nc-sa-4.0",
-															"cc-by-sa-4.0",
-															"cc-by-sa-3.0",
-															"all-rights-reserved",
-															"cc-by-nc-4.0",
-															"cc-by-4.0",
-															"cc0-1.0"
-														]
-													},
-													{ "type": "null" }
-												]
+											"licenses": {
+												"uniqueItems": true,
+												"maxItems": 8,
+												"type": "array",
+												"items": {
+													"type": "string",
+													"enum": [
+														"cc-by-nc-sa-4.0",
+														"cc-by-sa-4.0",
+														"cc-by-sa-3.0",
+														"all-rights-reserved",
+														"cc-by-nc-4.0",
+														"cc-by-4.0",
+														"cc0-1.0",
+														"rezics-unit-content-license-v1"
+													]
+												}
 											},
 											"details": {
 												"anyOf": [
@@ -96572,7 +96848,8 @@
 										"language",
 										"contentRating",
 										"aiDisclosure",
-										"license",
+										"licenses",
+										"licenseOfferings",
 										"postTargetingLocked",
 										"publishedAt",
 										"attributions",
@@ -96611,23 +96888,76 @@
 										},
 										"contentRating": { "type": "string" },
 										"aiDisclosure": { "type": "string" },
-										"license": {
-											"nullable": true,
-											"anyOf": [
-												{
-													"type": "string",
-													"enum": [
-														"cc-by-nc-sa-4.0",
-														"cc-by-sa-4.0",
-														"cc-by-sa-3.0",
-														"all-rights-reserved",
-														"cc-by-nc-4.0",
-														"cc-by-4.0",
-														"cc0-1.0"
-													]
-												},
-												{ "type": "null" }
-											]
+										"licenses": {
+											"type": "array",
+											"items": {
+												"additionalProperties": false,
+												"type": "object",
+												"required": ["id", "licenseId", "grantedByProfileId", "grantedAt"],
+												"properties": {
+													"id": { "format": "uuid", "type": "string" },
+													"licenseId": {
+														"default": "cc-by-nc-sa-4.0",
+														"type": "string",
+														"enum": [
+															"cc-by-nc-sa-4.0",
+															"cc-by-sa-4.0",
+															"cc-by-sa-3.0",
+															"all-rights-reserved",
+															"cc-by-nc-4.0",
+															"cc-by-4.0",
+															"cc0-1.0",
+															"rezics-unit-content-license-v1"
+														]
+													},
+													"grantedByProfileId": {
+														"nullable": true,
+														"anyOf": [{ "format": "uuid", "type": "string" }, { "type": "null" }]
+													},
+													"grantedAt": { "format": "date-time", "type": "string" }
+												}
+											}
+										},
+										"licenseOfferings": {
+											"type": "array",
+											"items": {
+												"additionalProperties": false,
+												"type": "object",
+												"required": [
+													"id",
+													"licenseId",
+													"grantedByProfileId",
+													"grantedAt",
+													"recognitionStatus"
+												],
+												"properties": {
+													"id": { "format": "uuid", "type": "string" },
+													"licenseId": {
+														"default": "cc-by-nc-sa-4.0",
+														"type": "string",
+														"enum": [
+															"cc-by-nc-sa-4.0",
+															"cc-by-sa-4.0",
+															"cc-by-sa-3.0",
+															"all-rights-reserved",
+															"cc-by-nc-4.0",
+															"cc-by-4.0",
+															"cc0-1.0",
+															"rezics-unit-content-license-v1"
+														]
+													},
+													"grantedByProfileId": {
+														"nullable": true,
+														"anyOf": [{ "format": "uuid", "type": "string" }, { "type": "null" }]
+													},
+													"grantedAt": { "format": "date-time", "type": "string" },
+													"recognitionStatus": {
+														"default": "recognized",
+														"type": "string",
+														"enum": ["recognized", "invalidated"]
+													}
+												}
+											}
 										},
 										"postTargetingLocked": { "type": "boolean" },
 										"publishedAt": {
@@ -96887,8 +97217,7 @@
 														"pageCount",
 														"wordCount",
 														"publishedContentMetrics",
-														"format",
-														"contentLicense"
+														"format"
 													],
 													"properties": {
 														"type": { "const": "book", "type": "string" },
@@ -96973,37 +97302,13 @@
 														"format": {
 															"nullable": true,
 															"anyOf": [{ "type": "string" }, { "type": "null" }]
-														},
-														"contentLicense": {
-															"nullable": true,
-															"anyOf": [
-																{
-																	"additionalProperties": false,
-																	"type": "object",
-																	"required": [
-																		"referenceLicenseSlug",
-																		"grantedByProfileId",
-																		"grantedAt"
-																	],
-																	"properties": {
-																		"referenceLicenseSlug": {
-																			"default": "rezics-unit-content-license-v1",
-																			"type": "string",
-																			"enum": ["rezics-unit-content-license-v1"]
-																		},
-																		"grantedByProfileId": { "format": "uuid", "type": "string" },
-																		"grantedAt": { "format": "date-time", "type": "string" }
-																	}
-																},
-																{ "type": "null" }
-															]
 														}
 													}
 												},
 												{
 													"additionalProperties": false,
 													"type": "object",
-													"required": ["type", "releaseDate", "versionLabel", "contentLicense"],
+													"required": ["type", "releaseDate", "versionLabel"],
 													"properties": {
 														"type": { "const": "software", "type": "string" },
 														"releaseDate": {
@@ -97013,30 +97318,6 @@
 														"versionLabel": {
 															"nullable": true,
 															"anyOf": [{ "type": "string" }, { "type": "null" }]
-														},
-														"contentLicense": {
-															"nullable": true,
-															"anyOf": [
-																{
-																	"additionalProperties": false,
-																	"type": "object",
-																	"required": [
-																		"referenceLicenseSlug",
-																		"grantedByProfileId",
-																		"grantedAt"
-																	],
-																	"properties": {
-																		"referenceLicenseSlug": {
-																			"default": "rezics-unit-content-license-v1",
-																			"type": "string",
-																			"enum": ["rezics-unit-content-license-v1"]
-																		},
-																		"grantedByProfileId": { "format": "uuid", "type": "string" },
-																		"grantedAt": { "format": "date-time", "type": "string" }
-																	}
-																},
-																{ "type": "null" }
-															]
 														}
 													}
 												},
@@ -97050,8 +97331,7 @@
 														"kind",
 														"runtimeMinutes",
 														"episodeCount",
-														"seasonCount",
-														"contentLicense"
+														"seasonCount"
 													],
 													"properties": {
 														"type": { "const": "media", "type": "string" },
@@ -97099,30 +97379,6 @@
 																		{ "format": "integer", "default": 0, "type": "string" },
 																		{ "minimum": 1, "type": "integer" }
 																	]
-																},
-																{ "type": "null" }
-															]
-														},
-														"contentLicense": {
-															"nullable": true,
-															"anyOf": [
-																{
-																	"additionalProperties": false,
-																	"type": "object",
-																	"required": [
-																		"referenceLicenseSlug",
-																		"grantedByProfileId",
-																		"grantedAt"
-																	],
-																	"properties": {
-																		"referenceLicenseSlug": {
-																			"default": "rezics-unit-content-license-v1",
-																			"type": "string",
-																			"enum": ["rezics-unit-content-license-v1"]
-																		},
-																		"grantedByProfileId": { "format": "uuid", "type": "string" },
-																		"grantedAt": { "format": "date-time", "type": "string" }
-																	}
 																},
 																{ "type": "null" }
 															]
@@ -98258,7 +98514,8 @@
 															"enum": [
 																"CreditAttributionRoleInvalid",
 																"RevisionCreditEntityInvalid",
-																"RevisionContributionActorRequired"
+																"RevisionContributionActorRequired",
+																"UnitLicenseNotApplicable"
 															]
 														},
 														"message": { "type": "string" },
@@ -98320,7 +98577,8 @@
 														"ApiTokenPermissionRequired",
 														"EmailVerificationRequired",
 														"AccountRestricted",
-														"EntityAssociationRestricted"
+														"EntityAssociationRestricted",
+														"UnitLicenseGrantForbidden"
 													]
 												},
 												"message": { "type": "string" },
@@ -98386,7 +98644,9 @@
 														"UnitVariantTargetIsVariant",
 														"UnitVariantSourceHasVariants",
 														"UnitVariantChanged",
-														"UnitVariantMainUnavailable"
+														"UnitVariantMainUnavailable",
+														"UnitLicenseGrantConflict",
+														"UnitLicenseOfferingEndForbidden"
 													]
 												},
 												"message": { "type": "string" },
@@ -98756,7 +99016,8 @@
 										"language",
 										"contentRating",
 										"aiDisclosure",
-										"license",
+										"licenses",
+										"licenseOfferings",
 										"postTargetingLocked",
 										"publishedAt",
 										"attributions",
@@ -98795,23 +99056,76 @@
 										},
 										"contentRating": { "type": "string" },
 										"aiDisclosure": { "type": "string" },
-										"license": {
-											"nullable": true,
-											"anyOf": [
-												{
-													"type": "string",
-													"enum": [
-														"cc-by-nc-sa-4.0",
-														"cc-by-sa-4.0",
-														"cc-by-sa-3.0",
-														"all-rights-reserved",
-														"cc-by-nc-4.0",
-														"cc-by-4.0",
-														"cc0-1.0"
-													]
-												},
-												{ "type": "null" }
-											]
+										"licenses": {
+											"type": "array",
+											"items": {
+												"additionalProperties": false,
+												"type": "object",
+												"required": ["id", "licenseId", "grantedByProfileId", "grantedAt"],
+												"properties": {
+													"id": { "format": "uuid", "type": "string" },
+													"licenseId": {
+														"default": "cc-by-nc-sa-4.0",
+														"type": "string",
+														"enum": [
+															"cc-by-nc-sa-4.0",
+															"cc-by-sa-4.0",
+															"cc-by-sa-3.0",
+															"all-rights-reserved",
+															"cc-by-nc-4.0",
+															"cc-by-4.0",
+															"cc0-1.0",
+															"rezics-unit-content-license-v1"
+														]
+													},
+													"grantedByProfileId": {
+														"nullable": true,
+														"anyOf": [{ "format": "uuid", "type": "string" }, { "type": "null" }]
+													},
+													"grantedAt": { "format": "date-time", "type": "string" }
+												}
+											}
+										},
+										"licenseOfferings": {
+											"type": "array",
+											"items": {
+												"additionalProperties": false,
+												"type": "object",
+												"required": [
+													"id",
+													"licenseId",
+													"grantedByProfileId",
+													"grantedAt",
+													"recognitionStatus"
+												],
+												"properties": {
+													"id": { "format": "uuid", "type": "string" },
+													"licenseId": {
+														"default": "cc-by-nc-sa-4.0",
+														"type": "string",
+														"enum": [
+															"cc-by-nc-sa-4.0",
+															"cc-by-sa-4.0",
+															"cc-by-sa-3.0",
+															"all-rights-reserved",
+															"cc-by-nc-4.0",
+															"cc-by-4.0",
+															"cc0-1.0",
+															"rezics-unit-content-license-v1"
+														]
+													},
+													"grantedByProfileId": {
+														"nullable": true,
+														"anyOf": [{ "format": "uuid", "type": "string" }, { "type": "null" }]
+													},
+													"grantedAt": { "format": "date-time", "type": "string" },
+													"recognitionStatus": {
+														"default": "recognized",
+														"type": "string",
+														"enum": ["recognized", "invalidated"]
+													}
+												}
+											}
 										},
 										"postTargetingLocked": { "type": "boolean" },
 										"publishedAt": {
@@ -99071,8 +99385,7 @@
 														"pageCount",
 														"wordCount",
 														"publishedContentMetrics",
-														"format",
-														"contentLicense"
+														"format"
 													],
 													"properties": {
 														"type": { "const": "book", "type": "string" },
@@ -99157,37 +99470,13 @@
 														"format": {
 															"nullable": true,
 															"anyOf": [{ "type": "string" }, { "type": "null" }]
-														},
-														"contentLicense": {
-															"nullable": true,
-															"anyOf": [
-																{
-																	"additionalProperties": false,
-																	"type": "object",
-																	"required": [
-																		"referenceLicenseSlug",
-																		"grantedByProfileId",
-																		"grantedAt"
-																	],
-																	"properties": {
-																		"referenceLicenseSlug": {
-																			"default": "rezics-unit-content-license-v1",
-																			"type": "string",
-																			"enum": ["rezics-unit-content-license-v1"]
-																		},
-																		"grantedByProfileId": { "format": "uuid", "type": "string" },
-																		"grantedAt": { "format": "date-time", "type": "string" }
-																	}
-																},
-																{ "type": "null" }
-															]
 														}
 													}
 												},
 												{
 													"additionalProperties": false,
 													"type": "object",
-													"required": ["type", "releaseDate", "versionLabel", "contentLicense"],
+													"required": ["type", "releaseDate", "versionLabel"],
 													"properties": {
 														"type": { "const": "software", "type": "string" },
 														"releaseDate": {
@@ -99197,30 +99486,6 @@
 														"versionLabel": {
 															"nullable": true,
 															"anyOf": [{ "type": "string" }, { "type": "null" }]
-														},
-														"contentLicense": {
-															"nullable": true,
-															"anyOf": [
-																{
-																	"additionalProperties": false,
-																	"type": "object",
-																	"required": [
-																		"referenceLicenseSlug",
-																		"grantedByProfileId",
-																		"grantedAt"
-																	],
-																	"properties": {
-																		"referenceLicenseSlug": {
-																			"default": "rezics-unit-content-license-v1",
-																			"type": "string",
-																			"enum": ["rezics-unit-content-license-v1"]
-																		},
-																		"grantedByProfileId": { "format": "uuid", "type": "string" },
-																		"grantedAt": { "format": "date-time", "type": "string" }
-																	}
-																},
-																{ "type": "null" }
-															]
 														}
 													}
 												},
@@ -99234,8 +99499,7 @@
 														"kind",
 														"runtimeMinutes",
 														"episodeCount",
-														"seasonCount",
-														"contentLicense"
+														"seasonCount"
 													],
 													"properties": {
 														"type": { "const": "media", "type": "string" },
@@ -99283,30 +99547,6 @@
 																		{ "format": "integer", "default": 0, "type": "string" },
 																		{ "minimum": 1, "type": "integer" }
 																	]
-																},
-																{ "type": "null" }
-															]
-														},
-														"contentLicense": {
-															"nullable": true,
-															"anyOf": [
-																{
-																	"additionalProperties": false,
-																	"type": "object",
-																	"required": [
-																		"referenceLicenseSlug",
-																		"grantedByProfileId",
-																		"grantedAt"
-																	],
-																	"properties": {
-																		"referenceLicenseSlug": {
-																			"default": "rezics-unit-content-license-v1",
-																			"type": "string",
-																			"enum": ["rezics-unit-content-license-v1"]
-																		},
-																		"grantedByProfileId": { "format": "uuid", "type": "string" },
-																		"grantedAt": { "format": "date-time", "type": "string" }
-																	}
 																},
 																{ "type": "null" }
 															]
@@ -100526,23 +100766,23 @@
 										"type": "string",
 										"enum": ["unknown", "none", "ai_assisted", "ai_originated", "machine_generated"]
 									},
-									"license": {
-										"nullable": true,
-										"anyOf": [
-											{
-												"type": "string",
-												"enum": [
-													"cc-by-nc-sa-4.0",
-													"cc-by-sa-4.0",
-													"cc-by-sa-3.0",
-													"all-rights-reserved",
-													"cc-by-nc-4.0",
-													"cc-by-4.0",
-													"cc0-1.0"
-												]
-											},
-											{ "type": "null" }
-										]
+									"licenses": {
+										"uniqueItems": true,
+										"maxItems": 8,
+										"type": "array",
+										"items": {
+											"type": "string",
+											"enum": [
+												"cc-by-nc-sa-4.0",
+												"cc-by-sa-4.0",
+												"cc-by-sa-3.0",
+												"all-rights-reserved",
+												"cc-by-nc-4.0",
+												"cc-by-4.0",
+												"cc0-1.0",
+												"rezics-unit-content-license-v1"
+											]
+										}
 									},
 									"unit": {
 										"additionalProperties": false,
@@ -100598,19 +100838,6 @@
 											"format": {
 												"nullable": true,
 												"anyOf": [{ "type": "string" }, { "type": "null" }]
-											},
-											"contentLicense": {
-												"additionalProperties": false,
-												"description": "One-time Unit content license grant. Omit this field when no new grant is being made.",
-												"type": "object",
-												"required": ["referenceLicenseSlug"],
-												"properties": {
-													"referenceLicenseSlug": {
-														"default": "rezics-unit-content-license-v1",
-														"type": "string",
-														"enum": ["rezics-unit-content-license-v1"]
-													}
-												}
 											},
 											"versionLabel": {
 												"nullable": true,
@@ -100734,7 +100961,8 @@
 										"language",
 										"contentRating",
 										"aiDisclosure",
-										"license",
+										"licenses",
+										"licenseOfferings",
 										"postTargetingLocked",
 										"publishedAt",
 										"attributions",
@@ -100773,23 +101001,76 @@
 										},
 										"contentRating": { "type": "string" },
 										"aiDisclosure": { "type": "string" },
-										"license": {
-											"nullable": true,
-											"anyOf": [
-												{
-													"type": "string",
-													"enum": [
-														"cc-by-nc-sa-4.0",
-														"cc-by-sa-4.0",
-														"cc-by-sa-3.0",
-														"all-rights-reserved",
-														"cc-by-nc-4.0",
-														"cc-by-4.0",
-														"cc0-1.0"
-													]
-												},
-												{ "type": "null" }
-											]
+										"licenses": {
+											"type": "array",
+											"items": {
+												"additionalProperties": false,
+												"type": "object",
+												"required": ["id", "licenseId", "grantedByProfileId", "grantedAt"],
+												"properties": {
+													"id": { "format": "uuid", "type": "string" },
+													"licenseId": {
+														"default": "cc-by-nc-sa-4.0",
+														"type": "string",
+														"enum": [
+															"cc-by-nc-sa-4.0",
+															"cc-by-sa-4.0",
+															"cc-by-sa-3.0",
+															"all-rights-reserved",
+															"cc-by-nc-4.0",
+															"cc-by-4.0",
+															"cc0-1.0",
+															"rezics-unit-content-license-v1"
+														]
+													},
+													"grantedByProfileId": {
+														"nullable": true,
+														"anyOf": [{ "format": "uuid", "type": "string" }, { "type": "null" }]
+													},
+													"grantedAt": { "format": "date-time", "type": "string" }
+												}
+											}
+										},
+										"licenseOfferings": {
+											"type": "array",
+											"items": {
+												"additionalProperties": false,
+												"type": "object",
+												"required": [
+													"id",
+													"licenseId",
+													"grantedByProfileId",
+													"grantedAt",
+													"recognitionStatus"
+												],
+												"properties": {
+													"id": { "format": "uuid", "type": "string" },
+													"licenseId": {
+														"default": "cc-by-nc-sa-4.0",
+														"type": "string",
+														"enum": [
+															"cc-by-nc-sa-4.0",
+															"cc-by-sa-4.0",
+															"cc-by-sa-3.0",
+															"all-rights-reserved",
+															"cc-by-nc-4.0",
+															"cc-by-4.0",
+															"cc0-1.0",
+															"rezics-unit-content-license-v1"
+														]
+													},
+													"grantedByProfileId": {
+														"nullable": true,
+														"anyOf": [{ "format": "uuid", "type": "string" }, { "type": "null" }]
+													},
+													"grantedAt": { "format": "date-time", "type": "string" },
+													"recognitionStatus": {
+														"default": "recognized",
+														"type": "string",
+														"enum": ["recognized", "invalidated"]
+													}
+												}
+											}
 										},
 										"postTargetingLocked": { "type": "boolean" },
 										"publishedAt": {
@@ -101049,8 +101330,7 @@
 														"pageCount",
 														"wordCount",
 														"publishedContentMetrics",
-														"format",
-														"contentLicense"
+														"format"
 													],
 													"properties": {
 														"type": { "const": "book", "type": "string" },
@@ -101135,37 +101415,13 @@
 														"format": {
 															"nullable": true,
 															"anyOf": [{ "type": "string" }, { "type": "null" }]
-														},
-														"contentLicense": {
-															"nullable": true,
-															"anyOf": [
-																{
-																	"additionalProperties": false,
-																	"type": "object",
-																	"required": [
-																		"referenceLicenseSlug",
-																		"grantedByProfileId",
-																		"grantedAt"
-																	],
-																	"properties": {
-																		"referenceLicenseSlug": {
-																			"default": "rezics-unit-content-license-v1",
-																			"type": "string",
-																			"enum": ["rezics-unit-content-license-v1"]
-																		},
-																		"grantedByProfileId": { "format": "uuid", "type": "string" },
-																		"grantedAt": { "format": "date-time", "type": "string" }
-																	}
-																},
-																{ "type": "null" }
-															]
 														}
 													}
 												},
 												{
 													"additionalProperties": false,
 													"type": "object",
-													"required": ["type", "releaseDate", "versionLabel", "contentLicense"],
+													"required": ["type", "releaseDate", "versionLabel"],
 													"properties": {
 														"type": { "const": "software", "type": "string" },
 														"releaseDate": {
@@ -101175,30 +101431,6 @@
 														"versionLabel": {
 															"nullable": true,
 															"anyOf": [{ "type": "string" }, { "type": "null" }]
-														},
-														"contentLicense": {
-															"nullable": true,
-															"anyOf": [
-																{
-																	"additionalProperties": false,
-																	"type": "object",
-																	"required": [
-																		"referenceLicenseSlug",
-																		"grantedByProfileId",
-																		"grantedAt"
-																	],
-																	"properties": {
-																		"referenceLicenseSlug": {
-																			"default": "rezics-unit-content-license-v1",
-																			"type": "string",
-																			"enum": ["rezics-unit-content-license-v1"]
-																		},
-																		"grantedByProfileId": { "format": "uuid", "type": "string" },
-																		"grantedAt": { "format": "date-time", "type": "string" }
-																	}
-																},
-																{ "type": "null" }
-															]
 														}
 													}
 												},
@@ -101212,8 +101444,7 @@
 														"kind",
 														"runtimeMinutes",
 														"episodeCount",
-														"seasonCount",
-														"contentLicense"
+														"seasonCount"
 													],
 													"properties": {
 														"type": { "const": "media", "type": "string" },
@@ -101261,30 +101492,6 @@
 																		{ "format": "integer", "default": 0, "type": "string" },
 																		{ "minimum": 1, "type": "integer" }
 																	]
-																},
-																{ "type": "null" }
-															]
-														},
-														"contentLicense": {
-															"nullable": true,
-															"anyOf": [
-																{
-																	"additionalProperties": false,
-																	"type": "object",
-																	"required": [
-																		"referenceLicenseSlug",
-																		"grantedByProfileId",
-																		"grantedAt"
-																	],
-																	"properties": {
-																		"referenceLicenseSlug": {
-																			"default": "rezics-unit-content-license-v1",
-																			"type": "string",
-																			"enum": ["rezics-unit-content-license-v1"]
-																		},
-																		"grantedByProfileId": { "format": "uuid", "type": "string" },
-																		"grantedAt": { "format": "date-time", "type": "string" }
-																	}
 																},
 																{ "type": "null" }
 															]
@@ -102419,7 +102626,8 @@
 															"type": "string",
 															"enum": [
 																"RevisionCreditEntityInvalid",
-																"RevisionContributionActorRequired"
+																"RevisionContributionActorRequired",
+																"UnitLicenseNotApplicable"
 															]
 														},
 														"message": { "type": "string" },
@@ -102482,7 +102690,7 @@
 														"EmailVerificationRequired",
 														"AccountRestricted",
 														"UnitPermissionForbidden",
-														"UnitContentLicenseGrantForbidden"
+														"UnitLicenseGrantForbidden"
 													]
 												},
 												"message": { "type": "string" },
@@ -102537,7 +102745,11 @@
 												"code": {
 													"default": "UnitChanged",
 													"type": "string",
-													"enum": ["UnitChanged"]
+													"enum": [
+														"UnitChanged",
+														"UnitLicenseGrantConflict",
+														"UnitLicenseOfferingEndForbidden"
+													]
 												},
 												"message": { "type": "string" },
 												"details": {}
@@ -102720,7 +102932,8 @@
 										"language",
 										"contentRating",
 										"aiDisclosure",
-										"license",
+										"licenses",
+										"licenseOfferings",
 										"postTargetingLocked",
 										"publishedAt",
 										"attributions",
@@ -102759,23 +102972,76 @@
 										},
 										"contentRating": { "type": "string" },
 										"aiDisclosure": { "type": "string" },
-										"license": {
-											"nullable": true,
-											"anyOf": [
-												{
-													"type": "string",
-													"enum": [
-														"cc-by-nc-sa-4.0",
-														"cc-by-sa-4.0",
-														"cc-by-sa-3.0",
-														"all-rights-reserved",
-														"cc-by-nc-4.0",
-														"cc-by-4.0",
-														"cc0-1.0"
-													]
-												},
-												{ "type": "null" }
-											]
+										"licenses": {
+											"type": "array",
+											"items": {
+												"additionalProperties": false,
+												"type": "object",
+												"required": ["id", "licenseId", "grantedByProfileId", "grantedAt"],
+												"properties": {
+													"id": { "format": "uuid", "type": "string" },
+													"licenseId": {
+														"default": "cc-by-nc-sa-4.0",
+														"type": "string",
+														"enum": [
+															"cc-by-nc-sa-4.0",
+															"cc-by-sa-4.0",
+															"cc-by-sa-3.0",
+															"all-rights-reserved",
+															"cc-by-nc-4.0",
+															"cc-by-4.0",
+															"cc0-1.0",
+															"rezics-unit-content-license-v1"
+														]
+													},
+													"grantedByProfileId": {
+														"nullable": true,
+														"anyOf": [{ "format": "uuid", "type": "string" }, { "type": "null" }]
+													},
+													"grantedAt": { "format": "date-time", "type": "string" }
+												}
+											}
+										},
+										"licenseOfferings": {
+											"type": "array",
+											"items": {
+												"additionalProperties": false,
+												"type": "object",
+												"required": [
+													"id",
+													"licenseId",
+													"grantedByProfileId",
+													"grantedAt",
+													"recognitionStatus"
+												],
+												"properties": {
+													"id": { "format": "uuid", "type": "string" },
+													"licenseId": {
+														"default": "cc-by-nc-sa-4.0",
+														"type": "string",
+														"enum": [
+															"cc-by-nc-sa-4.0",
+															"cc-by-sa-4.0",
+															"cc-by-sa-3.0",
+															"all-rights-reserved",
+															"cc-by-nc-4.0",
+															"cc-by-4.0",
+															"cc0-1.0",
+															"rezics-unit-content-license-v1"
+														]
+													},
+													"grantedByProfileId": {
+														"nullable": true,
+														"anyOf": [{ "format": "uuid", "type": "string" }, { "type": "null" }]
+													},
+													"grantedAt": { "format": "date-time", "type": "string" },
+													"recognitionStatus": {
+														"default": "recognized",
+														"type": "string",
+														"enum": ["recognized", "invalidated"]
+													}
+												}
+											}
 										},
 										"postTargetingLocked": { "type": "boolean" },
 										"publishedAt": {
@@ -103035,8 +103301,7 @@
 														"pageCount",
 														"wordCount",
 														"publishedContentMetrics",
-														"format",
-														"contentLicense"
+														"format"
 													],
 													"properties": {
 														"type": { "const": "book", "type": "string" },
@@ -103121,37 +103386,13 @@
 														"format": {
 															"nullable": true,
 															"anyOf": [{ "type": "string" }, { "type": "null" }]
-														},
-														"contentLicense": {
-															"nullable": true,
-															"anyOf": [
-																{
-																	"additionalProperties": false,
-																	"type": "object",
-																	"required": [
-																		"referenceLicenseSlug",
-																		"grantedByProfileId",
-																		"grantedAt"
-																	],
-																	"properties": {
-																		"referenceLicenseSlug": {
-																			"default": "rezics-unit-content-license-v1",
-																			"type": "string",
-																			"enum": ["rezics-unit-content-license-v1"]
-																		},
-																		"grantedByProfileId": { "format": "uuid", "type": "string" },
-																		"grantedAt": { "format": "date-time", "type": "string" }
-																	}
-																},
-																{ "type": "null" }
-															]
 														}
 													}
 												},
 												{
 													"additionalProperties": false,
 													"type": "object",
-													"required": ["type", "releaseDate", "versionLabel", "contentLicense"],
+													"required": ["type", "releaseDate", "versionLabel"],
 													"properties": {
 														"type": { "const": "software", "type": "string" },
 														"releaseDate": {
@@ -103161,30 +103402,6 @@
 														"versionLabel": {
 															"nullable": true,
 															"anyOf": [{ "type": "string" }, { "type": "null" }]
-														},
-														"contentLicense": {
-															"nullable": true,
-															"anyOf": [
-																{
-																	"additionalProperties": false,
-																	"type": "object",
-																	"required": [
-																		"referenceLicenseSlug",
-																		"grantedByProfileId",
-																		"grantedAt"
-																	],
-																	"properties": {
-																		"referenceLicenseSlug": {
-																			"default": "rezics-unit-content-license-v1",
-																			"type": "string",
-																			"enum": ["rezics-unit-content-license-v1"]
-																		},
-																		"grantedByProfileId": { "format": "uuid", "type": "string" },
-																		"grantedAt": { "format": "date-time", "type": "string" }
-																	}
-																},
-																{ "type": "null" }
-															]
 														}
 													}
 												},
@@ -103198,8 +103415,7 @@
 														"kind",
 														"runtimeMinutes",
 														"episodeCount",
-														"seasonCount",
-														"contentLicense"
+														"seasonCount"
 													],
 													"properties": {
 														"type": { "const": "media", "type": "string" },
@@ -103247,30 +103463,6 @@
 																		{ "format": "integer", "default": 0, "type": "string" },
 																		{ "minimum": 1, "type": "integer" }
 																	]
-																},
-																{ "type": "null" }
-															]
-														},
-														"contentLicense": {
-															"nullable": true,
-															"anyOf": [
-																{
-																	"additionalProperties": false,
-																	"type": "object",
-																	"required": [
-																		"referenceLicenseSlug",
-																		"grantedByProfileId",
-																		"grantedAt"
-																	],
-																	"properties": {
-																		"referenceLicenseSlug": {
-																			"default": "rezics-unit-content-license-v1",
-																			"type": "string",
-																			"enum": ["rezics-unit-content-license-v1"]
-																		},
-																		"grantedByProfileId": { "format": "uuid", "type": "string" },
-																		"grantedAt": { "format": "date-time", "type": "string" }
-																	}
 																},
 																{ "type": "null" }
 															]
@@ -104678,7 +104870,8 @@
 										"language",
 										"contentRating",
 										"aiDisclosure",
-										"license",
+										"licenses",
+										"licenseOfferings",
 										"postTargetingLocked",
 										"publishedAt",
 										"attributions",
@@ -104717,23 +104910,76 @@
 										},
 										"contentRating": { "type": "string" },
 										"aiDisclosure": { "type": "string" },
-										"license": {
-											"nullable": true,
-											"anyOf": [
-												{
-													"type": "string",
-													"enum": [
-														"cc-by-nc-sa-4.0",
-														"cc-by-sa-4.0",
-														"cc-by-sa-3.0",
-														"all-rights-reserved",
-														"cc-by-nc-4.0",
-														"cc-by-4.0",
-														"cc0-1.0"
-													]
-												},
-												{ "type": "null" }
-											]
+										"licenses": {
+											"type": "array",
+											"items": {
+												"additionalProperties": false,
+												"type": "object",
+												"required": ["id", "licenseId", "grantedByProfileId", "grantedAt"],
+												"properties": {
+													"id": { "format": "uuid", "type": "string" },
+													"licenseId": {
+														"default": "cc-by-nc-sa-4.0",
+														"type": "string",
+														"enum": [
+															"cc-by-nc-sa-4.0",
+															"cc-by-sa-4.0",
+															"cc-by-sa-3.0",
+															"all-rights-reserved",
+															"cc-by-nc-4.0",
+															"cc-by-4.0",
+															"cc0-1.0",
+															"rezics-unit-content-license-v1"
+														]
+													},
+													"grantedByProfileId": {
+														"nullable": true,
+														"anyOf": [{ "format": "uuid", "type": "string" }, { "type": "null" }]
+													},
+													"grantedAt": { "format": "date-time", "type": "string" }
+												}
+											}
+										},
+										"licenseOfferings": {
+											"type": "array",
+											"items": {
+												"additionalProperties": false,
+												"type": "object",
+												"required": [
+													"id",
+													"licenseId",
+													"grantedByProfileId",
+													"grantedAt",
+													"recognitionStatus"
+												],
+												"properties": {
+													"id": { "format": "uuid", "type": "string" },
+													"licenseId": {
+														"default": "cc-by-nc-sa-4.0",
+														"type": "string",
+														"enum": [
+															"cc-by-nc-sa-4.0",
+															"cc-by-sa-4.0",
+															"cc-by-sa-3.0",
+															"all-rights-reserved",
+															"cc-by-nc-4.0",
+															"cc-by-4.0",
+															"cc0-1.0",
+															"rezics-unit-content-license-v1"
+														]
+													},
+													"grantedByProfileId": {
+														"nullable": true,
+														"anyOf": [{ "format": "uuid", "type": "string" }, { "type": "null" }]
+													},
+													"grantedAt": { "format": "date-time", "type": "string" },
+													"recognitionStatus": {
+														"default": "recognized",
+														"type": "string",
+														"enum": ["recognized", "invalidated"]
+													}
+												}
+											}
 										},
 										"postTargetingLocked": { "type": "boolean" },
 										"publishedAt": {
@@ -104993,8 +105239,7 @@
 														"pageCount",
 														"wordCount",
 														"publishedContentMetrics",
-														"format",
-														"contentLicense"
+														"format"
 													],
 													"properties": {
 														"type": { "const": "book", "type": "string" },
@@ -105079,37 +105324,13 @@
 														"format": {
 															"nullable": true,
 															"anyOf": [{ "type": "string" }, { "type": "null" }]
-														},
-														"contentLicense": {
-															"nullable": true,
-															"anyOf": [
-																{
-																	"additionalProperties": false,
-																	"type": "object",
-																	"required": [
-																		"referenceLicenseSlug",
-																		"grantedByProfileId",
-																		"grantedAt"
-																	],
-																	"properties": {
-																		"referenceLicenseSlug": {
-																			"default": "rezics-unit-content-license-v1",
-																			"type": "string",
-																			"enum": ["rezics-unit-content-license-v1"]
-																		},
-																		"grantedByProfileId": { "format": "uuid", "type": "string" },
-																		"grantedAt": { "format": "date-time", "type": "string" }
-																	}
-																},
-																{ "type": "null" }
-															]
 														}
 													}
 												},
 												{
 													"additionalProperties": false,
 													"type": "object",
-													"required": ["type", "releaseDate", "versionLabel", "contentLicense"],
+													"required": ["type", "releaseDate", "versionLabel"],
 													"properties": {
 														"type": { "const": "software", "type": "string" },
 														"releaseDate": {
@@ -105119,30 +105340,6 @@
 														"versionLabel": {
 															"nullable": true,
 															"anyOf": [{ "type": "string" }, { "type": "null" }]
-														},
-														"contentLicense": {
-															"nullable": true,
-															"anyOf": [
-																{
-																	"additionalProperties": false,
-																	"type": "object",
-																	"required": [
-																		"referenceLicenseSlug",
-																		"grantedByProfileId",
-																		"grantedAt"
-																	],
-																	"properties": {
-																		"referenceLicenseSlug": {
-																			"default": "rezics-unit-content-license-v1",
-																			"type": "string",
-																			"enum": ["rezics-unit-content-license-v1"]
-																		},
-																		"grantedByProfileId": { "format": "uuid", "type": "string" },
-																		"grantedAt": { "format": "date-time", "type": "string" }
-																	}
-																},
-																{ "type": "null" }
-															]
 														}
 													}
 												},
@@ -105156,8 +105353,7 @@
 														"kind",
 														"runtimeMinutes",
 														"episodeCount",
-														"seasonCount",
-														"contentLicense"
+														"seasonCount"
 													],
 													"properties": {
 														"type": { "const": "media", "type": "string" },
@@ -105205,30 +105401,6 @@
 																		{ "format": "integer", "default": 0, "type": "string" },
 																		{ "minimum": 1, "type": "integer" }
 																	]
-																},
-																{ "type": "null" }
-															]
-														},
-														"contentLicense": {
-															"nullable": true,
-															"anyOf": [
-																{
-																	"additionalProperties": false,
-																	"type": "object",
-																	"required": [
-																		"referenceLicenseSlug",
-																		"grantedByProfileId",
-																		"grantedAt"
-																	],
-																	"properties": {
-																		"referenceLicenseSlug": {
-																			"default": "rezics-unit-content-license-v1",
-																			"type": "string",
-																			"enum": ["rezics-unit-content-license-v1"]
-																		},
-																		"grantedByProfileId": { "format": "uuid", "type": "string" },
-																		"grantedAt": { "format": "date-time", "type": "string" }
-																	}
 																},
 																{ "type": "null" }
 															]
@@ -106891,7 +107063,8 @@
 										"language",
 										"contentRating",
 										"aiDisclosure",
-										"license",
+										"licenses",
+										"licenseOfferings",
 										"postTargetingLocked",
 										"publishedAt",
 										"attributions",
@@ -106930,23 +107103,76 @@
 										},
 										"contentRating": { "type": "string" },
 										"aiDisclosure": { "type": "string" },
-										"license": {
-											"nullable": true,
-											"anyOf": [
-												{
-													"type": "string",
-													"enum": [
-														"cc-by-nc-sa-4.0",
-														"cc-by-sa-4.0",
-														"cc-by-sa-3.0",
-														"all-rights-reserved",
-														"cc-by-nc-4.0",
-														"cc-by-4.0",
-														"cc0-1.0"
-													]
-												},
-												{ "type": "null" }
-											]
+										"licenses": {
+											"type": "array",
+											"items": {
+												"additionalProperties": false,
+												"type": "object",
+												"required": ["id", "licenseId", "grantedByProfileId", "grantedAt"],
+												"properties": {
+													"id": { "format": "uuid", "type": "string" },
+													"licenseId": {
+														"default": "cc-by-nc-sa-4.0",
+														"type": "string",
+														"enum": [
+															"cc-by-nc-sa-4.0",
+															"cc-by-sa-4.0",
+															"cc-by-sa-3.0",
+															"all-rights-reserved",
+															"cc-by-nc-4.0",
+															"cc-by-4.0",
+															"cc0-1.0",
+															"rezics-unit-content-license-v1"
+														]
+													},
+													"grantedByProfileId": {
+														"nullable": true,
+														"anyOf": [{ "format": "uuid", "type": "string" }, { "type": "null" }]
+													},
+													"grantedAt": { "format": "date-time", "type": "string" }
+												}
+											}
+										},
+										"licenseOfferings": {
+											"type": "array",
+											"items": {
+												"additionalProperties": false,
+												"type": "object",
+												"required": [
+													"id",
+													"licenseId",
+													"grantedByProfileId",
+													"grantedAt",
+													"recognitionStatus"
+												],
+												"properties": {
+													"id": { "format": "uuid", "type": "string" },
+													"licenseId": {
+														"default": "cc-by-nc-sa-4.0",
+														"type": "string",
+														"enum": [
+															"cc-by-nc-sa-4.0",
+															"cc-by-sa-4.0",
+															"cc-by-sa-3.0",
+															"all-rights-reserved",
+															"cc-by-nc-4.0",
+															"cc-by-4.0",
+															"cc0-1.0",
+															"rezics-unit-content-license-v1"
+														]
+													},
+													"grantedByProfileId": {
+														"nullable": true,
+														"anyOf": [{ "format": "uuid", "type": "string" }, { "type": "null" }]
+													},
+													"grantedAt": { "format": "date-time", "type": "string" },
+													"recognitionStatus": {
+														"default": "recognized",
+														"type": "string",
+														"enum": ["recognized", "invalidated"]
+													}
+												}
+											}
 										},
 										"postTargetingLocked": { "type": "boolean" },
 										"publishedAt": {
@@ -107206,8 +107432,7 @@
 														"pageCount",
 														"wordCount",
 														"publishedContentMetrics",
-														"format",
-														"contentLicense"
+														"format"
 													],
 													"properties": {
 														"type": { "const": "book", "type": "string" },
@@ -107292,37 +107517,13 @@
 														"format": {
 															"nullable": true,
 															"anyOf": [{ "type": "string" }, { "type": "null" }]
-														},
-														"contentLicense": {
-															"nullable": true,
-															"anyOf": [
-																{
-																	"additionalProperties": false,
-																	"type": "object",
-																	"required": [
-																		"referenceLicenseSlug",
-																		"grantedByProfileId",
-																		"grantedAt"
-																	],
-																	"properties": {
-																		"referenceLicenseSlug": {
-																			"default": "rezics-unit-content-license-v1",
-																			"type": "string",
-																			"enum": ["rezics-unit-content-license-v1"]
-																		},
-																		"grantedByProfileId": { "format": "uuid", "type": "string" },
-																		"grantedAt": { "format": "date-time", "type": "string" }
-																	}
-																},
-																{ "type": "null" }
-															]
 														}
 													}
 												},
 												{
 													"additionalProperties": false,
 													"type": "object",
-													"required": ["type", "releaseDate", "versionLabel", "contentLicense"],
+													"required": ["type", "releaseDate", "versionLabel"],
 													"properties": {
 														"type": { "const": "software", "type": "string" },
 														"releaseDate": {
@@ -107332,30 +107533,6 @@
 														"versionLabel": {
 															"nullable": true,
 															"anyOf": [{ "type": "string" }, { "type": "null" }]
-														},
-														"contentLicense": {
-															"nullable": true,
-															"anyOf": [
-																{
-																	"additionalProperties": false,
-																	"type": "object",
-																	"required": [
-																		"referenceLicenseSlug",
-																		"grantedByProfileId",
-																		"grantedAt"
-																	],
-																	"properties": {
-																		"referenceLicenseSlug": {
-																			"default": "rezics-unit-content-license-v1",
-																			"type": "string",
-																			"enum": ["rezics-unit-content-license-v1"]
-																		},
-																		"grantedByProfileId": { "format": "uuid", "type": "string" },
-																		"grantedAt": { "format": "date-time", "type": "string" }
-																	}
-																},
-																{ "type": "null" }
-															]
 														}
 													}
 												},
@@ -107369,8 +107546,7 @@
 														"kind",
 														"runtimeMinutes",
 														"episodeCount",
-														"seasonCount",
-														"contentLicense"
+														"seasonCount"
 													],
 													"properties": {
 														"type": { "const": "media", "type": "string" },
@@ -107418,30 +107594,6 @@
 																		{ "format": "integer", "default": 0, "type": "string" },
 																		{ "minimum": 1, "type": "integer" }
 																	]
-																},
-																{ "type": "null" }
-															]
-														},
-														"contentLicense": {
-															"nullable": true,
-															"anyOf": [
-																{
-																	"additionalProperties": false,
-																	"type": "object",
-																	"required": [
-																		"referenceLicenseSlug",
-																		"grantedByProfileId",
-																		"grantedAt"
-																	],
-																	"properties": {
-																		"referenceLicenseSlug": {
-																			"default": "rezics-unit-content-license-v1",
-																			"type": "string",
-																			"enum": ["rezics-unit-content-license-v1"]
-																		},
-																		"grantedByProfileId": { "format": "uuid", "type": "string" },
-																		"grantedAt": { "format": "date-time", "type": "string" }
-																	}
 																},
 																{ "type": "null" }
 															]
@@ -129722,7 +129874,6 @@
 																	"updated-at",
 																	"published-at",
 																	"closes-at",
-																	"content-license",
 																	"book-isbn13",
 																	"book-publication-date",
 																	"book-page-count",
@@ -130066,7 +130217,6 @@
 															"updated-at",
 															"published-at",
 															"closes-at",
-															"content-license",
 															"book-isbn13",
 															"book-publication-date",
 															"book-page-count",
@@ -130334,7 +130484,6 @@
 																				{ "const": "updated-at", "type": "string" },
 																				{ "const": "published-at", "type": "string" },
 																				{ "const": "closes-at", "type": "string" },
-																				{ "const": "content-license", "type": "string" },
 																				{ "const": "book-isbn13", "type": "string" },
 																				{ "const": "book-publication-date", "type": "string" },
 																				{ "const": "book-page-count", "type": "string" },
@@ -130393,7 +130542,6 @@
 																				{ "const": "updated-at", "type": "string" },
 																				{ "const": "published-at", "type": "string" },
 																				{ "const": "closes-at", "type": "string" },
-																				{ "const": "content-license", "type": "string" },
 																				{ "const": "book-isbn13", "type": "string" },
 																				{ "const": "book-publication-date", "type": "string" },
 																				{ "const": "book-page-count", "type": "string" },
@@ -130452,7 +130600,6 @@
 																				{ "const": "updated-at", "type": "string" },
 																				{ "const": "published-at", "type": "string" },
 																				{ "const": "closes-at", "type": "string" },
-																				{ "const": "content-license", "type": "string" },
 																				{ "const": "book-isbn13", "type": "string" },
 																				{ "const": "book-publication-date", "type": "string" },
 																				{ "const": "book-page-count", "type": "string" },
@@ -130524,7 +130671,6 @@
 																						{ "const": "updated-at", "type": "string" },
 																						{ "const": "published-at", "type": "string" },
 																						{ "const": "closes-at", "type": "string" },
-																						{ "const": "content-license", "type": "string" },
 																						{ "const": "book-isbn13", "type": "string" },
 																						{ "const": "book-publication-date", "type": "string" },
 																						{ "const": "book-page-count", "type": "string" },
@@ -130593,7 +130739,6 @@
 																						{ "const": "updated-at", "type": "string" },
 																						{ "const": "published-at", "type": "string" },
 																						{ "const": "closes-at", "type": "string" },
-																						{ "const": "content-license", "type": "string" },
 																						{ "const": "book-isbn13", "type": "string" },
 																						{ "const": "book-publication-date", "type": "string" },
 																						{ "const": "book-page-count", "type": "string" },
@@ -130664,7 +130809,6 @@
 																				{ "const": "updated-at", "type": "string" },
 																				{ "const": "published-at", "type": "string" },
 																				{ "const": "closes-at", "type": "string" },
-																				{ "const": "content-license", "type": "string" },
 																				{ "const": "book-isbn13", "type": "string" },
 																				{ "const": "book-publication-date", "type": "string" },
 																				{ "const": "book-page-count", "type": "string" },
@@ -130841,7 +130985,6 @@
 																					{ "const": "updated-at", "type": "string" },
 																					{ "const": "published-at", "type": "string" },
 																					{ "const": "closes-at", "type": "string" },
-																					{ "const": "content-license", "type": "string" },
 																					{ "const": "book-isbn13", "type": "string" },
 																					{ "const": "book-publication-date", "type": "string" },
 																					{ "const": "book-page-count", "type": "string" },
@@ -130900,7 +131043,6 @@
 																					{ "const": "updated-at", "type": "string" },
 																					{ "const": "published-at", "type": "string" },
 																					{ "const": "closes-at", "type": "string" },
-																					{ "const": "content-license", "type": "string" },
 																					{ "const": "book-isbn13", "type": "string" },
 																					{ "const": "book-publication-date", "type": "string" },
 																					{ "const": "book-page-count", "type": "string" },
@@ -130959,7 +131101,6 @@
 																					{ "const": "updated-at", "type": "string" },
 																					{ "const": "published-at", "type": "string" },
 																					{ "const": "closes-at", "type": "string" },
-																					{ "const": "content-license", "type": "string" },
 																					{ "const": "book-isbn13", "type": "string" },
 																					{ "const": "book-publication-date", "type": "string" },
 																					{ "const": "book-page-count", "type": "string" },
@@ -131031,7 +131172,6 @@
 																							{ "const": "updated-at", "type": "string" },
 																							{ "const": "published-at", "type": "string" },
 																							{ "const": "closes-at", "type": "string" },
-																							{ "const": "content-license", "type": "string" },
 																							{ "const": "book-isbn13", "type": "string" },
 																							{
 																								"const": "book-publication-date",
@@ -131120,7 +131260,6 @@
 																							{ "const": "updated-at", "type": "string" },
 																							{ "const": "published-at", "type": "string" },
 																							{ "const": "closes-at", "type": "string" },
-																							{ "const": "content-license", "type": "string" },
 																							{ "const": "book-isbn13", "type": "string" },
 																							{
 																								"const": "book-publication-date",
@@ -131211,7 +131350,6 @@
 																					{ "const": "updated-at", "type": "string" },
 																					{ "const": "published-at", "type": "string" },
 																					{ "const": "closes-at", "type": "string" },
-																					{ "const": "content-license", "type": "string" },
 																					{ "const": "book-isbn13", "type": "string" },
 																					{ "const": "book-publication-date", "type": "string" },
 																					{ "const": "book-page-count", "type": "string" },
@@ -169521,9 +169659,9 @@
 										"previousState",
 										"resultingState",
 										"previousPostTargetingLocked",
-										"contentLicenseId",
-										"previousContentLicenseStatus",
-										"resultingContentLicenseStatus",
+										"licenseGrantId",
+										"previousRecognitionStatus",
+										"resultingRecognitionStatus",
 										"resultingPostTargetingLocked",
 										"reversesActionId",
 										"rules",
@@ -169545,8 +169683,8 @@
 												"restore",
 												"lock_post_targeting",
 												"unlock_post_targeting",
-												"invalidate_content_license",
-												"restore_content_license",
+												"invalidate_license",
+												"restore_license",
 												"reverse"
 											]
 										},
@@ -169562,30 +169700,28 @@
 											"nullable": true,
 											"anyOf": [{ "type": "boolean" }, { "type": "null" }]
 										},
-										"contentLicenseId": {
+										"licenseGrantId": {
 											"nullable": true,
 											"anyOf": [{ "format": "uuid", "type": "string" }, { "type": "null" }]
 										},
-										"previousContentLicenseStatus": {
+										"previousRecognitionStatus": {
 											"nullable": true,
 											"anyOf": [
 												{
-													"anyOf": [
-														{ "const": "active", "type": "string" },
-														{ "const": "invalidated", "type": "string" }
-													]
+													"default": "recognized",
+													"type": "string",
+													"enum": ["recognized", "invalidated"]
 												},
 												{ "type": "null" }
 											]
 										},
-										"resultingContentLicenseStatus": {
+										"resultingRecognitionStatus": {
 											"nullable": true,
 											"anyOf": [
 												{
-													"anyOf": [
-														{ "const": "active", "type": "string" },
-														{ "const": "invalidated", "type": "string" }
-													]
+													"default": "recognized",
+													"type": "string",
+													"enum": ["recognized", "invalidated"]
 												},
 												{ "type": "null" }
 											]
@@ -169930,8 +170066,8 @@
 															"restore",
 															"lock_post_targeting",
 															"unlock_post_targeting",
-															"invalidate_content_license",
-															"restore_content_license",
+															"invalidate_license",
+															"restore_license",
 															"reverse"
 														]
 													},
@@ -172214,7 +172350,6 @@
 																				{ "const": "updated-at", "type": "string" },
 																				{ "const": "published-at", "type": "string" },
 																				{ "const": "closes-at", "type": "string" },
-																				{ "const": "content-license", "type": "string" },
 																				{ "const": "book-isbn13", "type": "string" },
 																				{ "const": "book-publication-date", "type": "string" },
 																				{ "const": "book-page-count", "type": "string" },
@@ -172273,7 +172408,6 @@
 																				{ "const": "updated-at", "type": "string" },
 																				{ "const": "published-at", "type": "string" },
 																				{ "const": "closes-at", "type": "string" },
-																				{ "const": "content-license", "type": "string" },
 																				{ "const": "book-isbn13", "type": "string" },
 																				{ "const": "book-publication-date", "type": "string" },
 																				{ "const": "book-page-count", "type": "string" },
@@ -172332,7 +172466,6 @@
 																				{ "const": "updated-at", "type": "string" },
 																				{ "const": "published-at", "type": "string" },
 																				{ "const": "closes-at", "type": "string" },
-																				{ "const": "content-license", "type": "string" },
 																				{ "const": "book-isbn13", "type": "string" },
 																				{ "const": "book-publication-date", "type": "string" },
 																				{ "const": "book-page-count", "type": "string" },
@@ -172404,7 +172537,6 @@
 																						{ "const": "updated-at", "type": "string" },
 																						{ "const": "published-at", "type": "string" },
 																						{ "const": "closes-at", "type": "string" },
-																						{ "const": "content-license", "type": "string" },
 																						{ "const": "book-isbn13", "type": "string" },
 																						{ "const": "book-publication-date", "type": "string" },
 																						{ "const": "book-page-count", "type": "string" },
@@ -172473,7 +172605,6 @@
 																						{ "const": "updated-at", "type": "string" },
 																						{ "const": "published-at", "type": "string" },
 																						{ "const": "closes-at", "type": "string" },
-																						{ "const": "content-license", "type": "string" },
 																						{ "const": "book-isbn13", "type": "string" },
 																						{ "const": "book-publication-date", "type": "string" },
 																						{ "const": "book-page-count", "type": "string" },
@@ -172544,7 +172675,6 @@
 																				{ "const": "updated-at", "type": "string" },
 																				{ "const": "published-at", "type": "string" },
 																				{ "const": "closes-at", "type": "string" },
-																				{ "const": "content-license", "type": "string" },
 																				{ "const": "book-isbn13", "type": "string" },
 																				{ "const": "book-publication-date", "type": "string" },
 																				{ "const": "book-page-count", "type": "string" },
@@ -172721,7 +172851,6 @@
 																					{ "const": "updated-at", "type": "string" },
 																					{ "const": "published-at", "type": "string" },
 																					{ "const": "closes-at", "type": "string" },
-																					{ "const": "content-license", "type": "string" },
 																					{ "const": "book-isbn13", "type": "string" },
 																					{ "const": "book-publication-date", "type": "string" },
 																					{ "const": "book-page-count", "type": "string" },
@@ -172780,7 +172909,6 @@
 																					{ "const": "updated-at", "type": "string" },
 																					{ "const": "published-at", "type": "string" },
 																					{ "const": "closes-at", "type": "string" },
-																					{ "const": "content-license", "type": "string" },
 																					{ "const": "book-isbn13", "type": "string" },
 																					{ "const": "book-publication-date", "type": "string" },
 																					{ "const": "book-page-count", "type": "string" },
@@ -172839,7 +172967,6 @@
 																					{ "const": "updated-at", "type": "string" },
 																					{ "const": "published-at", "type": "string" },
 																					{ "const": "closes-at", "type": "string" },
-																					{ "const": "content-license", "type": "string" },
 																					{ "const": "book-isbn13", "type": "string" },
 																					{ "const": "book-publication-date", "type": "string" },
 																					{ "const": "book-page-count", "type": "string" },
@@ -172911,7 +173038,6 @@
 																							{ "const": "updated-at", "type": "string" },
 																							{ "const": "published-at", "type": "string" },
 																							{ "const": "closes-at", "type": "string" },
-																							{ "const": "content-license", "type": "string" },
 																							{ "const": "book-isbn13", "type": "string" },
 																							{
 																								"const": "book-publication-date",
@@ -173000,7 +173126,6 @@
 																							{ "const": "updated-at", "type": "string" },
 																							{ "const": "published-at", "type": "string" },
 																							{ "const": "closes-at", "type": "string" },
-																							{ "const": "content-license", "type": "string" },
 																							{ "const": "book-isbn13", "type": "string" },
 																							{
 																								"const": "book-publication-date",
@@ -173091,7 +173216,6 @@
 																					{ "const": "updated-at", "type": "string" },
 																					{ "const": "published-at", "type": "string" },
 																					{ "const": "closes-at", "type": "string" },
-																					{ "const": "content-license", "type": "string" },
 																					{ "const": "book-isbn13", "type": "string" },
 																					{ "const": "book-publication-date", "type": "string" },
 																					{ "const": "book-page-count", "type": "string" },
@@ -173730,7 +173854,6 @@
 																				{ "const": "updated-at", "type": "string" },
 																				{ "const": "published-at", "type": "string" },
 																				{ "const": "closes-at", "type": "string" },
-																				{ "const": "content-license", "type": "string" },
 																				{ "const": "book-isbn13", "type": "string" },
 																				{ "const": "book-publication-date", "type": "string" },
 																				{ "const": "book-page-count", "type": "string" },
@@ -173789,7 +173912,6 @@
 																				{ "const": "updated-at", "type": "string" },
 																				{ "const": "published-at", "type": "string" },
 																				{ "const": "closes-at", "type": "string" },
-																				{ "const": "content-license", "type": "string" },
 																				{ "const": "book-isbn13", "type": "string" },
 																				{ "const": "book-publication-date", "type": "string" },
 																				{ "const": "book-page-count", "type": "string" },
@@ -173848,7 +173970,6 @@
 																				{ "const": "updated-at", "type": "string" },
 																				{ "const": "published-at", "type": "string" },
 																				{ "const": "closes-at", "type": "string" },
-																				{ "const": "content-license", "type": "string" },
 																				{ "const": "book-isbn13", "type": "string" },
 																				{ "const": "book-publication-date", "type": "string" },
 																				{ "const": "book-page-count", "type": "string" },
@@ -173920,7 +174041,6 @@
 																						{ "const": "updated-at", "type": "string" },
 																						{ "const": "published-at", "type": "string" },
 																						{ "const": "closes-at", "type": "string" },
-																						{ "const": "content-license", "type": "string" },
 																						{ "const": "book-isbn13", "type": "string" },
 																						{ "const": "book-publication-date", "type": "string" },
 																						{ "const": "book-page-count", "type": "string" },
@@ -173989,7 +174109,6 @@
 																						{ "const": "updated-at", "type": "string" },
 																						{ "const": "published-at", "type": "string" },
 																						{ "const": "closes-at", "type": "string" },
-																						{ "const": "content-license", "type": "string" },
 																						{ "const": "book-isbn13", "type": "string" },
 																						{ "const": "book-publication-date", "type": "string" },
 																						{ "const": "book-page-count", "type": "string" },
@@ -174060,7 +174179,6 @@
 																				{ "const": "updated-at", "type": "string" },
 																				{ "const": "published-at", "type": "string" },
 																				{ "const": "closes-at", "type": "string" },
-																				{ "const": "content-license", "type": "string" },
 																				{ "const": "book-isbn13", "type": "string" },
 																				{ "const": "book-publication-date", "type": "string" },
 																				{ "const": "book-page-count", "type": "string" },
@@ -174237,7 +174355,6 @@
 																					{ "const": "updated-at", "type": "string" },
 																					{ "const": "published-at", "type": "string" },
 																					{ "const": "closes-at", "type": "string" },
-																					{ "const": "content-license", "type": "string" },
 																					{ "const": "book-isbn13", "type": "string" },
 																					{ "const": "book-publication-date", "type": "string" },
 																					{ "const": "book-page-count", "type": "string" },
@@ -174296,7 +174413,6 @@
 																					{ "const": "updated-at", "type": "string" },
 																					{ "const": "published-at", "type": "string" },
 																					{ "const": "closes-at", "type": "string" },
-																					{ "const": "content-license", "type": "string" },
 																					{ "const": "book-isbn13", "type": "string" },
 																					{ "const": "book-publication-date", "type": "string" },
 																					{ "const": "book-page-count", "type": "string" },
@@ -174355,7 +174471,6 @@
 																					{ "const": "updated-at", "type": "string" },
 																					{ "const": "published-at", "type": "string" },
 																					{ "const": "closes-at", "type": "string" },
-																					{ "const": "content-license", "type": "string" },
 																					{ "const": "book-isbn13", "type": "string" },
 																					{ "const": "book-publication-date", "type": "string" },
 																					{ "const": "book-page-count", "type": "string" },
@@ -174427,7 +174542,6 @@
 																							{ "const": "updated-at", "type": "string" },
 																							{ "const": "published-at", "type": "string" },
 																							{ "const": "closes-at", "type": "string" },
-																							{ "const": "content-license", "type": "string" },
 																							{ "const": "book-isbn13", "type": "string" },
 																							{
 																								"const": "book-publication-date",
@@ -174516,7 +174630,6 @@
 																							{ "const": "updated-at", "type": "string" },
 																							{ "const": "published-at", "type": "string" },
 																							{ "const": "closes-at", "type": "string" },
-																							{ "const": "content-license", "type": "string" },
 																							{ "const": "book-isbn13", "type": "string" },
 																							{
 																								"const": "book-publication-date",
@@ -174607,7 +174720,6 @@
 																					{ "const": "updated-at", "type": "string" },
 																					{ "const": "published-at", "type": "string" },
 																					{ "const": "closes-at", "type": "string" },
-																					{ "const": "content-license", "type": "string" },
 																					{ "const": "book-isbn13", "type": "string" },
 																					{ "const": "book-publication-date", "type": "string" },
 																					{ "const": "book-page-count", "type": "string" },
@@ -179518,7 +179630,6 @@
 																				{ "const": "updated-at", "type": "string" },
 																				{ "const": "published-at", "type": "string" },
 																				{ "const": "closes-at", "type": "string" },
-																				{ "const": "content-license", "type": "string" },
 																				{ "const": "book-isbn13", "type": "string" },
 																				{ "const": "book-publication-date", "type": "string" },
 																				{ "const": "book-page-count", "type": "string" },
@@ -179577,7 +179688,6 @@
 																				{ "const": "updated-at", "type": "string" },
 																				{ "const": "published-at", "type": "string" },
 																				{ "const": "closes-at", "type": "string" },
-																				{ "const": "content-license", "type": "string" },
 																				{ "const": "book-isbn13", "type": "string" },
 																				{ "const": "book-publication-date", "type": "string" },
 																				{ "const": "book-page-count", "type": "string" },
@@ -179636,7 +179746,6 @@
 																				{ "const": "updated-at", "type": "string" },
 																				{ "const": "published-at", "type": "string" },
 																				{ "const": "closes-at", "type": "string" },
-																				{ "const": "content-license", "type": "string" },
 																				{ "const": "book-isbn13", "type": "string" },
 																				{ "const": "book-publication-date", "type": "string" },
 																				{ "const": "book-page-count", "type": "string" },
@@ -179708,7 +179817,6 @@
 																						{ "const": "updated-at", "type": "string" },
 																						{ "const": "published-at", "type": "string" },
 																						{ "const": "closes-at", "type": "string" },
-																						{ "const": "content-license", "type": "string" },
 																						{ "const": "book-isbn13", "type": "string" },
 																						{ "const": "book-publication-date", "type": "string" },
 																						{ "const": "book-page-count", "type": "string" },
@@ -179777,7 +179885,6 @@
 																						{ "const": "updated-at", "type": "string" },
 																						{ "const": "published-at", "type": "string" },
 																						{ "const": "closes-at", "type": "string" },
-																						{ "const": "content-license", "type": "string" },
 																						{ "const": "book-isbn13", "type": "string" },
 																						{ "const": "book-publication-date", "type": "string" },
 																						{ "const": "book-page-count", "type": "string" },
@@ -179848,7 +179955,6 @@
 																				{ "const": "updated-at", "type": "string" },
 																				{ "const": "published-at", "type": "string" },
 																				{ "const": "closes-at", "type": "string" },
-																				{ "const": "content-license", "type": "string" },
 																				{ "const": "book-isbn13", "type": "string" },
 																				{ "const": "book-publication-date", "type": "string" },
 																				{ "const": "book-page-count", "type": "string" },
@@ -180025,7 +180131,6 @@
 																					{ "const": "updated-at", "type": "string" },
 																					{ "const": "published-at", "type": "string" },
 																					{ "const": "closes-at", "type": "string" },
-																					{ "const": "content-license", "type": "string" },
 																					{ "const": "book-isbn13", "type": "string" },
 																					{ "const": "book-publication-date", "type": "string" },
 																					{ "const": "book-page-count", "type": "string" },
@@ -180084,7 +180189,6 @@
 																					{ "const": "updated-at", "type": "string" },
 																					{ "const": "published-at", "type": "string" },
 																					{ "const": "closes-at", "type": "string" },
-																					{ "const": "content-license", "type": "string" },
 																					{ "const": "book-isbn13", "type": "string" },
 																					{ "const": "book-publication-date", "type": "string" },
 																					{ "const": "book-page-count", "type": "string" },
@@ -180143,7 +180247,6 @@
 																					{ "const": "updated-at", "type": "string" },
 																					{ "const": "published-at", "type": "string" },
 																					{ "const": "closes-at", "type": "string" },
-																					{ "const": "content-license", "type": "string" },
 																					{ "const": "book-isbn13", "type": "string" },
 																					{ "const": "book-publication-date", "type": "string" },
 																					{ "const": "book-page-count", "type": "string" },
@@ -180215,7 +180318,6 @@
 																							{ "const": "updated-at", "type": "string" },
 																							{ "const": "published-at", "type": "string" },
 																							{ "const": "closes-at", "type": "string" },
-																							{ "const": "content-license", "type": "string" },
 																							{ "const": "book-isbn13", "type": "string" },
 																							{
 																								"const": "book-publication-date",
@@ -180304,7 +180406,6 @@
 																							{ "const": "updated-at", "type": "string" },
 																							{ "const": "published-at", "type": "string" },
 																							{ "const": "closes-at", "type": "string" },
-																							{ "const": "content-license", "type": "string" },
 																							{ "const": "book-isbn13", "type": "string" },
 																							{
 																								"const": "book-publication-date",
@@ -180395,7 +180496,6 @@
 																					{ "const": "updated-at", "type": "string" },
 																					{ "const": "published-at", "type": "string" },
 																					{ "const": "closes-at", "type": "string" },
-																					{ "const": "content-license", "type": "string" },
 																					{ "const": "book-isbn13", "type": "string" },
 																					{ "const": "book-publication-date", "type": "string" },
 																					{ "const": "book-page-count", "type": "string" },
@@ -181010,7 +181110,6 @@
 																				{ "const": "updated-at", "type": "string" },
 																				{ "const": "published-at", "type": "string" },
 																				{ "const": "closes-at", "type": "string" },
-																				{ "const": "content-license", "type": "string" },
 																				{ "const": "book-isbn13", "type": "string" },
 																				{ "const": "book-publication-date", "type": "string" },
 																				{ "const": "book-page-count", "type": "string" },
@@ -181069,7 +181168,6 @@
 																				{ "const": "updated-at", "type": "string" },
 																				{ "const": "published-at", "type": "string" },
 																				{ "const": "closes-at", "type": "string" },
-																				{ "const": "content-license", "type": "string" },
 																				{ "const": "book-isbn13", "type": "string" },
 																				{ "const": "book-publication-date", "type": "string" },
 																				{ "const": "book-page-count", "type": "string" },
@@ -181128,7 +181226,6 @@
 																				{ "const": "updated-at", "type": "string" },
 																				{ "const": "published-at", "type": "string" },
 																				{ "const": "closes-at", "type": "string" },
-																				{ "const": "content-license", "type": "string" },
 																				{ "const": "book-isbn13", "type": "string" },
 																				{ "const": "book-publication-date", "type": "string" },
 																				{ "const": "book-page-count", "type": "string" },
@@ -181200,7 +181297,6 @@
 																						{ "const": "updated-at", "type": "string" },
 																						{ "const": "published-at", "type": "string" },
 																						{ "const": "closes-at", "type": "string" },
-																						{ "const": "content-license", "type": "string" },
 																						{ "const": "book-isbn13", "type": "string" },
 																						{ "const": "book-publication-date", "type": "string" },
 																						{ "const": "book-page-count", "type": "string" },
@@ -181269,7 +181365,6 @@
 																						{ "const": "updated-at", "type": "string" },
 																						{ "const": "published-at", "type": "string" },
 																						{ "const": "closes-at", "type": "string" },
-																						{ "const": "content-license", "type": "string" },
 																						{ "const": "book-isbn13", "type": "string" },
 																						{ "const": "book-publication-date", "type": "string" },
 																						{ "const": "book-page-count", "type": "string" },
@@ -181340,7 +181435,6 @@
 																				{ "const": "updated-at", "type": "string" },
 																				{ "const": "published-at", "type": "string" },
 																				{ "const": "closes-at", "type": "string" },
-																				{ "const": "content-license", "type": "string" },
 																				{ "const": "book-isbn13", "type": "string" },
 																				{ "const": "book-publication-date", "type": "string" },
 																				{ "const": "book-page-count", "type": "string" },
@@ -181517,7 +181611,6 @@
 																					{ "const": "updated-at", "type": "string" },
 																					{ "const": "published-at", "type": "string" },
 																					{ "const": "closes-at", "type": "string" },
-																					{ "const": "content-license", "type": "string" },
 																					{ "const": "book-isbn13", "type": "string" },
 																					{ "const": "book-publication-date", "type": "string" },
 																					{ "const": "book-page-count", "type": "string" },
@@ -181576,7 +181669,6 @@
 																					{ "const": "updated-at", "type": "string" },
 																					{ "const": "published-at", "type": "string" },
 																					{ "const": "closes-at", "type": "string" },
-																					{ "const": "content-license", "type": "string" },
 																					{ "const": "book-isbn13", "type": "string" },
 																					{ "const": "book-publication-date", "type": "string" },
 																					{ "const": "book-page-count", "type": "string" },
@@ -181635,7 +181727,6 @@
 																					{ "const": "updated-at", "type": "string" },
 																					{ "const": "published-at", "type": "string" },
 																					{ "const": "closes-at", "type": "string" },
-																					{ "const": "content-license", "type": "string" },
 																					{ "const": "book-isbn13", "type": "string" },
 																					{ "const": "book-publication-date", "type": "string" },
 																					{ "const": "book-page-count", "type": "string" },
@@ -181707,7 +181798,6 @@
 																							{ "const": "updated-at", "type": "string" },
 																							{ "const": "published-at", "type": "string" },
 																							{ "const": "closes-at", "type": "string" },
-																							{ "const": "content-license", "type": "string" },
 																							{ "const": "book-isbn13", "type": "string" },
 																							{
 																								"const": "book-publication-date",
@@ -181796,7 +181886,6 @@
 																							{ "const": "updated-at", "type": "string" },
 																							{ "const": "published-at", "type": "string" },
 																							{ "const": "closes-at", "type": "string" },
-																							{ "const": "content-license", "type": "string" },
 																							{ "const": "book-isbn13", "type": "string" },
 																							{
 																								"const": "book-publication-date",
@@ -181887,7 +181976,6 @@
 																					{ "const": "updated-at", "type": "string" },
 																					{ "const": "published-at", "type": "string" },
 																					{ "const": "closes-at", "type": "string" },
-																					{ "const": "content-license", "type": "string" },
 																					{ "const": "book-isbn13", "type": "string" },
 																					{ "const": "book-publication-date", "type": "string" },
 																					{ "const": "book-page-count", "type": "string" },
@@ -186738,7 +186826,6 @@
 																				{ "const": "updated-at", "type": "string" },
 																				{ "const": "published-at", "type": "string" },
 																				{ "const": "closes-at", "type": "string" },
-																				{ "const": "content-license", "type": "string" },
 																				{ "const": "book-isbn13", "type": "string" },
 																				{ "const": "book-publication-date", "type": "string" },
 																				{ "const": "book-page-count", "type": "string" },
@@ -186797,7 +186884,6 @@
 																				{ "const": "updated-at", "type": "string" },
 																				{ "const": "published-at", "type": "string" },
 																				{ "const": "closes-at", "type": "string" },
-																				{ "const": "content-license", "type": "string" },
 																				{ "const": "book-isbn13", "type": "string" },
 																				{ "const": "book-publication-date", "type": "string" },
 																				{ "const": "book-page-count", "type": "string" },
@@ -186856,7 +186942,6 @@
 																				{ "const": "updated-at", "type": "string" },
 																				{ "const": "published-at", "type": "string" },
 																				{ "const": "closes-at", "type": "string" },
-																				{ "const": "content-license", "type": "string" },
 																				{ "const": "book-isbn13", "type": "string" },
 																				{ "const": "book-publication-date", "type": "string" },
 																				{ "const": "book-page-count", "type": "string" },
@@ -186928,7 +187013,6 @@
 																						{ "const": "updated-at", "type": "string" },
 																						{ "const": "published-at", "type": "string" },
 																						{ "const": "closes-at", "type": "string" },
-																						{ "const": "content-license", "type": "string" },
 																						{ "const": "book-isbn13", "type": "string" },
 																						{ "const": "book-publication-date", "type": "string" },
 																						{ "const": "book-page-count", "type": "string" },
@@ -186997,7 +187081,6 @@
 																						{ "const": "updated-at", "type": "string" },
 																						{ "const": "published-at", "type": "string" },
 																						{ "const": "closes-at", "type": "string" },
-																						{ "const": "content-license", "type": "string" },
 																						{ "const": "book-isbn13", "type": "string" },
 																						{ "const": "book-publication-date", "type": "string" },
 																						{ "const": "book-page-count", "type": "string" },
@@ -187068,7 +187151,6 @@
 																				{ "const": "updated-at", "type": "string" },
 																				{ "const": "published-at", "type": "string" },
 																				{ "const": "closes-at", "type": "string" },
-																				{ "const": "content-license", "type": "string" },
 																				{ "const": "book-isbn13", "type": "string" },
 																				{ "const": "book-publication-date", "type": "string" },
 																				{ "const": "book-page-count", "type": "string" },
@@ -187245,7 +187327,6 @@
 																					{ "const": "updated-at", "type": "string" },
 																					{ "const": "published-at", "type": "string" },
 																					{ "const": "closes-at", "type": "string" },
-																					{ "const": "content-license", "type": "string" },
 																					{ "const": "book-isbn13", "type": "string" },
 																					{ "const": "book-publication-date", "type": "string" },
 																					{ "const": "book-page-count", "type": "string" },
@@ -187304,7 +187385,6 @@
 																					{ "const": "updated-at", "type": "string" },
 																					{ "const": "published-at", "type": "string" },
 																					{ "const": "closes-at", "type": "string" },
-																					{ "const": "content-license", "type": "string" },
 																					{ "const": "book-isbn13", "type": "string" },
 																					{ "const": "book-publication-date", "type": "string" },
 																					{ "const": "book-page-count", "type": "string" },
@@ -187363,7 +187443,6 @@
 																					{ "const": "updated-at", "type": "string" },
 																					{ "const": "published-at", "type": "string" },
 																					{ "const": "closes-at", "type": "string" },
-																					{ "const": "content-license", "type": "string" },
 																					{ "const": "book-isbn13", "type": "string" },
 																					{ "const": "book-publication-date", "type": "string" },
 																					{ "const": "book-page-count", "type": "string" },
@@ -187435,7 +187514,6 @@
 																							{ "const": "updated-at", "type": "string" },
 																							{ "const": "published-at", "type": "string" },
 																							{ "const": "closes-at", "type": "string" },
-																							{ "const": "content-license", "type": "string" },
 																							{ "const": "book-isbn13", "type": "string" },
 																							{
 																								"const": "book-publication-date",
@@ -187524,7 +187602,6 @@
 																							{ "const": "updated-at", "type": "string" },
 																							{ "const": "published-at", "type": "string" },
 																							{ "const": "closes-at", "type": "string" },
-																							{ "const": "content-license", "type": "string" },
 																							{ "const": "book-isbn13", "type": "string" },
 																							{
 																								"const": "book-publication-date",
@@ -187615,7 +187692,6 @@
 																					{ "const": "updated-at", "type": "string" },
 																					{ "const": "published-at", "type": "string" },
 																					{ "const": "closes-at", "type": "string" },
-																					{ "const": "content-license", "type": "string" },
 																					{ "const": "book-isbn13", "type": "string" },
 																					{ "const": "book-publication-date", "type": "string" },
 																					{ "const": "book-page-count", "type": "string" },
@@ -188275,7 +188351,6 @@
 																				{ "const": "updated-at", "type": "string" },
 																				{ "const": "published-at", "type": "string" },
 																				{ "const": "closes-at", "type": "string" },
-																				{ "const": "content-license", "type": "string" },
 																				{ "const": "book-isbn13", "type": "string" },
 																				{ "const": "book-publication-date", "type": "string" },
 																				{ "const": "book-page-count", "type": "string" },
@@ -188334,7 +188409,6 @@
 																				{ "const": "updated-at", "type": "string" },
 																				{ "const": "published-at", "type": "string" },
 																				{ "const": "closes-at", "type": "string" },
-																				{ "const": "content-license", "type": "string" },
 																				{ "const": "book-isbn13", "type": "string" },
 																				{ "const": "book-publication-date", "type": "string" },
 																				{ "const": "book-page-count", "type": "string" },
@@ -188393,7 +188467,6 @@
 																				{ "const": "updated-at", "type": "string" },
 																				{ "const": "published-at", "type": "string" },
 																				{ "const": "closes-at", "type": "string" },
-																				{ "const": "content-license", "type": "string" },
 																				{ "const": "book-isbn13", "type": "string" },
 																				{ "const": "book-publication-date", "type": "string" },
 																				{ "const": "book-page-count", "type": "string" },
@@ -188465,7 +188538,6 @@
 																						{ "const": "updated-at", "type": "string" },
 																						{ "const": "published-at", "type": "string" },
 																						{ "const": "closes-at", "type": "string" },
-																						{ "const": "content-license", "type": "string" },
 																						{ "const": "book-isbn13", "type": "string" },
 																						{ "const": "book-publication-date", "type": "string" },
 																						{ "const": "book-page-count", "type": "string" },
@@ -188534,7 +188606,6 @@
 																						{ "const": "updated-at", "type": "string" },
 																						{ "const": "published-at", "type": "string" },
 																						{ "const": "closes-at", "type": "string" },
-																						{ "const": "content-license", "type": "string" },
 																						{ "const": "book-isbn13", "type": "string" },
 																						{ "const": "book-publication-date", "type": "string" },
 																						{ "const": "book-page-count", "type": "string" },
@@ -188605,7 +188676,6 @@
 																				{ "const": "updated-at", "type": "string" },
 																				{ "const": "published-at", "type": "string" },
 																				{ "const": "closes-at", "type": "string" },
-																				{ "const": "content-license", "type": "string" },
 																				{ "const": "book-isbn13", "type": "string" },
 																				{ "const": "book-publication-date", "type": "string" },
 																				{ "const": "book-page-count", "type": "string" },
@@ -188782,7 +188852,6 @@
 																					{ "const": "updated-at", "type": "string" },
 																					{ "const": "published-at", "type": "string" },
 																					{ "const": "closes-at", "type": "string" },
-																					{ "const": "content-license", "type": "string" },
 																					{ "const": "book-isbn13", "type": "string" },
 																					{ "const": "book-publication-date", "type": "string" },
 																					{ "const": "book-page-count", "type": "string" },
@@ -188841,7 +188910,6 @@
 																					{ "const": "updated-at", "type": "string" },
 																					{ "const": "published-at", "type": "string" },
 																					{ "const": "closes-at", "type": "string" },
-																					{ "const": "content-license", "type": "string" },
 																					{ "const": "book-isbn13", "type": "string" },
 																					{ "const": "book-publication-date", "type": "string" },
 																					{ "const": "book-page-count", "type": "string" },
@@ -188900,7 +188968,6 @@
 																					{ "const": "updated-at", "type": "string" },
 																					{ "const": "published-at", "type": "string" },
 																					{ "const": "closes-at", "type": "string" },
-																					{ "const": "content-license", "type": "string" },
 																					{ "const": "book-isbn13", "type": "string" },
 																					{ "const": "book-publication-date", "type": "string" },
 																					{ "const": "book-page-count", "type": "string" },
@@ -188972,7 +189039,6 @@
 																							{ "const": "updated-at", "type": "string" },
 																							{ "const": "published-at", "type": "string" },
 																							{ "const": "closes-at", "type": "string" },
-																							{ "const": "content-license", "type": "string" },
 																							{ "const": "book-isbn13", "type": "string" },
 																							{
 																								"const": "book-publication-date",
@@ -189061,7 +189127,6 @@
 																							{ "const": "updated-at", "type": "string" },
 																							{ "const": "published-at", "type": "string" },
 																							{ "const": "closes-at", "type": "string" },
-																							{ "const": "content-license", "type": "string" },
 																							{ "const": "book-isbn13", "type": "string" },
 																							{
 																								"const": "book-publication-date",
@@ -189152,7 +189217,6 @@
 																					{ "const": "updated-at", "type": "string" },
 																					{ "const": "published-at", "type": "string" },
 																					{ "const": "closes-at", "type": "string" },
-																					{ "const": "content-license", "type": "string" },
 																					{ "const": "book-isbn13", "type": "string" },
 																					{ "const": "book-publication-date", "type": "string" },
 																					{ "const": "book-page-count", "type": "string" },
@@ -189806,7 +189870,6 @@
 																				{ "const": "updated-at", "type": "string" },
 																				{ "const": "published-at", "type": "string" },
 																				{ "const": "closes-at", "type": "string" },
-																				{ "const": "content-license", "type": "string" },
 																				{ "const": "book-isbn13", "type": "string" },
 																				{ "const": "book-publication-date", "type": "string" },
 																				{ "const": "book-page-count", "type": "string" },
@@ -189865,7 +189928,6 @@
 																				{ "const": "updated-at", "type": "string" },
 																				{ "const": "published-at", "type": "string" },
 																				{ "const": "closes-at", "type": "string" },
-																				{ "const": "content-license", "type": "string" },
 																				{ "const": "book-isbn13", "type": "string" },
 																				{ "const": "book-publication-date", "type": "string" },
 																				{ "const": "book-page-count", "type": "string" },
@@ -189924,7 +189986,6 @@
 																				{ "const": "updated-at", "type": "string" },
 																				{ "const": "published-at", "type": "string" },
 																				{ "const": "closes-at", "type": "string" },
-																				{ "const": "content-license", "type": "string" },
 																				{ "const": "book-isbn13", "type": "string" },
 																				{ "const": "book-publication-date", "type": "string" },
 																				{ "const": "book-page-count", "type": "string" },
@@ -189996,7 +190057,6 @@
 																						{ "const": "updated-at", "type": "string" },
 																						{ "const": "published-at", "type": "string" },
 																						{ "const": "closes-at", "type": "string" },
-																						{ "const": "content-license", "type": "string" },
 																						{ "const": "book-isbn13", "type": "string" },
 																						{ "const": "book-publication-date", "type": "string" },
 																						{ "const": "book-page-count", "type": "string" },
@@ -190065,7 +190125,6 @@
 																						{ "const": "updated-at", "type": "string" },
 																						{ "const": "published-at", "type": "string" },
 																						{ "const": "closes-at", "type": "string" },
-																						{ "const": "content-license", "type": "string" },
 																						{ "const": "book-isbn13", "type": "string" },
 																						{ "const": "book-publication-date", "type": "string" },
 																						{ "const": "book-page-count", "type": "string" },
@@ -190136,7 +190195,6 @@
 																				{ "const": "updated-at", "type": "string" },
 																				{ "const": "published-at", "type": "string" },
 																				{ "const": "closes-at", "type": "string" },
-																				{ "const": "content-license", "type": "string" },
 																				{ "const": "book-isbn13", "type": "string" },
 																				{ "const": "book-publication-date", "type": "string" },
 																				{ "const": "book-page-count", "type": "string" },
@@ -190313,7 +190371,6 @@
 																					{ "const": "updated-at", "type": "string" },
 																					{ "const": "published-at", "type": "string" },
 																					{ "const": "closes-at", "type": "string" },
-																					{ "const": "content-license", "type": "string" },
 																					{ "const": "book-isbn13", "type": "string" },
 																					{ "const": "book-publication-date", "type": "string" },
 																					{ "const": "book-page-count", "type": "string" },
@@ -190372,7 +190429,6 @@
 																					{ "const": "updated-at", "type": "string" },
 																					{ "const": "published-at", "type": "string" },
 																					{ "const": "closes-at", "type": "string" },
-																					{ "const": "content-license", "type": "string" },
 																					{ "const": "book-isbn13", "type": "string" },
 																					{ "const": "book-publication-date", "type": "string" },
 																					{ "const": "book-page-count", "type": "string" },
@@ -190431,7 +190487,6 @@
 																					{ "const": "updated-at", "type": "string" },
 																					{ "const": "published-at", "type": "string" },
 																					{ "const": "closes-at", "type": "string" },
-																					{ "const": "content-license", "type": "string" },
 																					{ "const": "book-isbn13", "type": "string" },
 																					{ "const": "book-publication-date", "type": "string" },
 																					{ "const": "book-page-count", "type": "string" },
@@ -190503,7 +190558,6 @@
 																							{ "const": "updated-at", "type": "string" },
 																							{ "const": "published-at", "type": "string" },
 																							{ "const": "closes-at", "type": "string" },
-																							{ "const": "content-license", "type": "string" },
 																							{ "const": "book-isbn13", "type": "string" },
 																							{
 																								"const": "book-publication-date",
@@ -190592,7 +190646,6 @@
 																							{ "const": "updated-at", "type": "string" },
 																							{ "const": "published-at", "type": "string" },
 																							{ "const": "closes-at", "type": "string" },
-																							{ "const": "content-license", "type": "string" },
 																							{ "const": "book-isbn13", "type": "string" },
 																							{
 																								"const": "book-publication-date",
@@ -190683,7 +190736,6 @@
 																					{ "const": "updated-at", "type": "string" },
 																					{ "const": "published-at", "type": "string" },
 																					{ "const": "closes-at", "type": "string" },
-																					{ "const": "content-license", "type": "string" },
 																					{ "const": "book-isbn13", "type": "string" },
 																					{ "const": "book-publication-date", "type": "string" },
 																					{ "const": "book-page-count", "type": "string" },
@@ -199742,7 +199794,6 @@
 																"updated-at",
 																"published-at",
 																"closes-at",
-																"content-license",
 																"book-isbn13",
 																"book-publication-date",
 																"book-page-count",
@@ -199902,7 +199953,6 @@
 																					{ "const": "updated-at", "type": "string" },
 																					{ "const": "published-at", "type": "string" },
 																					{ "const": "closes-at", "type": "string" },
-																					{ "const": "content-license", "type": "string" },
 																					{ "const": "book-isbn13", "type": "string" },
 																					{ "const": "book-publication-date", "type": "string" },
 																					{ "const": "book-page-count", "type": "string" },
@@ -199961,7 +200011,6 @@
 																					{ "const": "updated-at", "type": "string" },
 																					{ "const": "published-at", "type": "string" },
 																					{ "const": "closes-at", "type": "string" },
-																					{ "const": "content-license", "type": "string" },
 																					{ "const": "book-isbn13", "type": "string" },
 																					{ "const": "book-publication-date", "type": "string" },
 																					{ "const": "book-page-count", "type": "string" },
@@ -200020,7 +200069,6 @@
 																					{ "const": "updated-at", "type": "string" },
 																					{ "const": "published-at", "type": "string" },
 																					{ "const": "closes-at", "type": "string" },
-																					{ "const": "content-license", "type": "string" },
 																					{ "const": "book-isbn13", "type": "string" },
 																					{ "const": "book-publication-date", "type": "string" },
 																					{ "const": "book-page-count", "type": "string" },
@@ -200092,7 +200140,6 @@
 																							{ "const": "updated-at", "type": "string" },
 																							{ "const": "published-at", "type": "string" },
 																							{ "const": "closes-at", "type": "string" },
-																							{ "const": "content-license", "type": "string" },
 																							{ "const": "book-isbn13", "type": "string" },
 																							{
 																								"const": "book-publication-date",
@@ -200181,7 +200228,6 @@
 																							{ "const": "updated-at", "type": "string" },
 																							{ "const": "published-at", "type": "string" },
 																							{ "const": "closes-at", "type": "string" },
-																							{ "const": "content-license", "type": "string" },
 																							{ "const": "book-isbn13", "type": "string" },
 																							{
 																								"const": "book-publication-date",
@@ -200272,7 +200318,6 @@
 																					{ "const": "updated-at", "type": "string" },
 																					{ "const": "published-at", "type": "string" },
 																					{ "const": "closes-at", "type": "string" },
-																					{ "const": "content-license", "type": "string" },
 																					{ "const": "book-isbn13", "type": "string" },
 																					{ "const": "book-publication-date", "type": "string" },
 																					{ "const": "book-page-count", "type": "string" },
@@ -200428,7 +200473,6 @@
 														"updated-at",
 														"published-at",
 														"closes-at",
-														"content-license",
 														"book-isbn13",
 														"book-publication-date",
 														"book-page-count",
@@ -204836,7 +204880,6 @@
 																			"updated-at",
 																			"published-at",
 																			"closes-at",
-																			"content-license",
 																			"book-isbn13",
 																			"book-publication-date",
 																			"book-page-count",
@@ -205006,7 +205049,6 @@
 																								{ "const": "updated-at", "type": "string" },
 																								{ "const": "published-at", "type": "string" },
 																								{ "const": "closes-at", "type": "string" },
-																								{ "const": "content-license", "type": "string" },
 																								{ "const": "book-isbn13", "type": "string" },
 																								{
 																									"const": "book-publication-date",
@@ -205087,7 +205129,6 @@
 																								{ "const": "updated-at", "type": "string" },
 																								{ "const": "published-at", "type": "string" },
 																								{ "const": "closes-at", "type": "string" },
-																								{ "const": "content-license", "type": "string" },
 																								{ "const": "book-isbn13", "type": "string" },
 																								{
 																									"const": "book-publication-date",
@@ -205168,7 +205209,6 @@
 																								{ "const": "updated-at", "type": "string" },
 																								{ "const": "published-at", "type": "string" },
 																								{ "const": "closes-at", "type": "string" },
-																								{ "const": "content-license", "type": "string" },
 																								{ "const": "book-isbn13", "type": "string" },
 																								{
 																									"const": "book-publication-date",
@@ -205271,10 +205311,6 @@
 																										{ "const": "updated-at", "type": "string" },
 																										{ "const": "published-at", "type": "string" },
 																										{ "const": "closes-at", "type": "string" },
-																										{
-																											"const": "content-license",
-																											"type": "string"
-																										},
 																										{ "const": "book-isbn13", "type": "string" },
 																										{
 																											"const": "book-publication-date",
@@ -205390,10 +205426,6 @@
 																										{ "const": "updated-at", "type": "string" },
 																										{ "const": "published-at", "type": "string" },
 																										{ "const": "closes-at", "type": "string" },
-																										{
-																											"const": "content-license",
-																											"type": "string"
-																										},
 																										{ "const": "book-isbn13", "type": "string" },
 																										{
 																											"const": "book-publication-date",
@@ -205502,7 +205534,6 @@
 																								{ "const": "updated-at", "type": "string" },
 																								{ "const": "published-at", "type": "string" },
 																								{ "const": "closes-at", "type": "string" },
-																								{ "const": "content-license", "type": "string" },
 																								{ "const": "book-isbn13", "type": "string" },
 																								{
 																									"const": "book-publication-date",
@@ -205679,7 +205710,6 @@
 																	"updated-at",
 																	"published-at",
 																	"closes-at",
-																	"content-license",
 																	"book-isbn13",
 																	"book-publication-date",
 																	"book-page-count",
@@ -210214,7 +210244,6 @@
 																			"updated-at",
 																			"published-at",
 																			"closes-at",
-																			"content-license",
 																			"book-isbn13",
 																			"book-publication-date",
 																			"book-page-count",
@@ -210384,7 +210413,6 @@
 																								{ "const": "updated-at", "type": "string" },
 																								{ "const": "published-at", "type": "string" },
 																								{ "const": "closes-at", "type": "string" },
-																								{ "const": "content-license", "type": "string" },
 																								{ "const": "book-isbn13", "type": "string" },
 																								{
 																									"const": "book-publication-date",
@@ -210465,7 +210493,6 @@
 																								{ "const": "updated-at", "type": "string" },
 																								{ "const": "published-at", "type": "string" },
 																								{ "const": "closes-at", "type": "string" },
-																								{ "const": "content-license", "type": "string" },
 																								{ "const": "book-isbn13", "type": "string" },
 																								{
 																									"const": "book-publication-date",
@@ -210546,7 +210573,6 @@
 																								{ "const": "updated-at", "type": "string" },
 																								{ "const": "published-at", "type": "string" },
 																								{ "const": "closes-at", "type": "string" },
-																								{ "const": "content-license", "type": "string" },
 																								{ "const": "book-isbn13", "type": "string" },
 																								{
 																									"const": "book-publication-date",
@@ -210649,10 +210675,6 @@
 																										{ "const": "updated-at", "type": "string" },
 																										{ "const": "published-at", "type": "string" },
 																										{ "const": "closes-at", "type": "string" },
-																										{
-																											"const": "content-license",
-																											"type": "string"
-																										},
 																										{ "const": "book-isbn13", "type": "string" },
 																										{
 																											"const": "book-publication-date",
@@ -210768,10 +210790,6 @@
 																										{ "const": "updated-at", "type": "string" },
 																										{ "const": "published-at", "type": "string" },
 																										{ "const": "closes-at", "type": "string" },
-																										{
-																											"const": "content-license",
-																											"type": "string"
-																										},
 																										{ "const": "book-isbn13", "type": "string" },
 																										{
 																											"const": "book-publication-date",
@@ -210880,7 +210898,6 @@
 																								{ "const": "updated-at", "type": "string" },
 																								{ "const": "published-at", "type": "string" },
 																								{ "const": "closes-at", "type": "string" },
-																								{ "const": "content-license", "type": "string" },
 																								{ "const": "book-isbn13", "type": "string" },
 																								{
 																									"const": "book-publication-date",
@@ -211057,7 +211074,6 @@
 																	"updated-at",
 																	"published-at",
 																	"closes-at",
-																	"content-license",
 																	"book-isbn13",
 																	"book-publication-date",
 																	"book-page-count",
@@ -211255,16 +211271,16 @@
 											"type": "string",
 											"enum": [
 												"cc-by-nc-sa-4.0",
-													"cc-by-sa-4.0",
-													"cc-by-sa-3.0",
+												"cc-by-sa-4.0",
+												"cc-by-sa-3.0",
 												"all-rights-reserved",
 												"cc-by-nc-4.0",
 												"cc-by-4.0",
-												"cc0-1.0"
+												"cc0-1.0",
+												"rezics-unit-content-license-v1"
 											]
 										}
 									},
-									"contentLicenseActive": { "type": "boolean" },
 									"creditedUnitId": { "minLength": 1, "type": "string" },
 									"realmId": { "minLength": 1, "type": "string" },
 									"realmTagContextRealmId": { "format": "uuid", "type": "string" },

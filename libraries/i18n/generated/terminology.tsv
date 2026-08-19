@@ -269,18 +269,18 @@ tagStructure	A community-immutable, community-voted ordered path of Tags; platfo
 tagStructure	A community-immutable, community-voted ordered path of Tags; platform administrators may make audited corrections.	ko	approved	pluralLabel	태그 경로	Tag structure | Structure tag
 tagStructure	A community-immutable, community-voted ordered path of Tags; platform administrators may make audited corrections.	ko	approved	inline	태그 경로	Tag structure | Structure tag
 tagStructure	A community-immutable, community-voted ordered path of Tags; platform administrators may make audited corrections.	ko	approved	plural	태그 경로	Tag structure | Structure tag
-publicationLicense	The terms under which a Unit's work is made available to the public; this is not an agreement granting rights to REZICS.	en	approved	label	Publication license	-
-publicationLicense	The terms under which a Unit's work is made available to the public; this is not an agreement granting rights to REZICS.	en	approved	inline	publication license	-
-publicationLicense	The terms under which a Unit's work is made available to the public; this is not an agreement granting rights to REZICS.	zh-Hant	approved	label	公開授權	License | 作品 License | 作品授權條款 | 授權 REZICS
-publicationLicense	The terms under which a Unit's work is made available to the public; this is not an agreement granting rights to REZICS.	zh-Hant	approved	inline	公開授權	License | 作品 License | 作品授權條款 | 授權 REZICS
-publicationLicense	The terms under which a Unit's work is made available to the public; this is not an agreement granting rights to REZICS.	zh-Hans	approved	label	公开许可	License | 作品 License | 作品许可条款 | 授权 REZICS
-publicationLicense	The terms under which a Unit's work is made available to the public; this is not an agreement granting rights to REZICS.	zh-Hans	approved	inline	公开许可	License | 作品 License | 作品许可条款 | 授权 REZICS
-publicationLicense	The terms under which a Unit's work is made available to the public; this is not an agreement granting rights to REZICS.	de	approved	label	Veröffentlichungslizenz	-
-publicationLicense	The terms under which a Unit's work is made available to the public; this is not an agreement granting rights to REZICS.	de	approved	inline	Veröffentlichungslizenz	-
-publicationLicense	The terms under which a Unit's work is made available to the public; this is not an agreement granting rights to REZICS.	ja	approved	label	公開ライセンス	Publication license
-publicationLicense	The terms under which a Unit's work is made available to the public; this is not an agreement granting rights to REZICS.	ja	approved	inline	公開ライセンス	Publication license
-publicationLicense	The terms under which a Unit's work is made available to the public; this is not an agreement granting rights to REZICS.	ko	approved	label	게시 라이선스	Publication license
-publicationLicense	The terms under which a Unit's work is made available to the public; this is not an agreement granting rights to REZICS.	ko	approved	inline	게시 라이선스	Publication license
+license	A registered legal instrument or rights statement that a Unit grants independently of every other selected License.	en	approved	label	License	-
+license	A registered legal instrument or rights statement that a Unit grants independently of every other selected License.	en	approved	inline	license	-
+license	A registered legal instrument or rights statement that a Unit grants independently of every other selected License.	zh-Hant	approved	label	授權	公開授權 | 作品 License | 授權 REZICS
+license	A registered legal instrument or rights statement that a Unit grants independently of every other selected License.	zh-Hant	approved	inline	授權	公開授權 | 作品 License | 授權 REZICS
+license	A registered legal instrument or rights statement that a Unit grants independently of every other selected License.	zh-Hans	approved	label	许可	公开许可 | 作品 License | 授权 REZICS
+license	A registered legal instrument or rights statement that a Unit grants independently of every other selected License.	zh-Hans	approved	inline	许可	公开许可 | 作品 License | 授权 REZICS
+license	A registered legal instrument or rights statement that a Unit grants independently of every other selected License.	de	approved	label	Lizenz	-
+license	A registered legal instrument or rights statement that a Unit grants independently of every other selected License.	de	approved	inline	Lizenz	-
+license	A registered legal instrument or rights statement that a Unit grants independently of every other selected License.	ja	approved	label	ライセンス	Publication license
+license	A registered legal instrument or rights statement that a Unit grants independently of every other selected License.	ja	approved	inline	ライセンス	Publication license
+license	A registered legal instrument or rights statement that a Unit grants independently of every other selected License.	ko	approved	label	라이선스	Publication license
+license	A registered legal instrument or rights statement that a Unit grants independently of every other selected License.	ko	approved	inline	라이선스	Publication license
 entity	A Unit representing a person, organization, or character that can participate in attributions and subject associations.	en	approved	label	Entity	Catalog | catalog
 entity	A Unit representing a person, organization, or character that can participate in attributions and subject associations.	en	approved	pluralLabel	Entities	Catalog | catalog
 entity	A Unit representing a person, organization, or character that can participate in attributions and subject associations.	en	approved	inline	entity	Catalog | catalog

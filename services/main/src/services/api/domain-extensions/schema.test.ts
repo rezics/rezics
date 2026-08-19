@@ -1,7 +1,12 @@
 import { Check } from "@sinclair/typebox/value";
 import { describe, expect, it } from "vitest";
 
-import { SystemRequirementResponse, UpdateZoneBody, ZoneRenderQuery } from "./schema";
+import {
+	CreateSeriesBody,
+	SystemRequirementResponse,
+	UpdateZoneBody,
+	ZoneRenderQuery,
+} from "./schema";
 
 const requirement = {
 	id: "019b76da-a800-7300-8000-000000000001",
@@ -17,6 +22,26 @@ const requirement = {
 	createdAt: "2026-07-23T00:00:00.000Z",
 	updatedAt: "2026-07-23T00:00:00.000Z",
 };
+
+describe("Series License input", () => {
+	const input = {
+		kind: "franchise",
+		licenses: ["cc-by-4.0", "rezics-unit-content-license-v1"],
+		localization: {
+			language: "en",
+			title: "Example Series",
+			coverAssetId: null,
+		},
+	};
+
+	it("uses the same registered License array as every other Unit", () => {
+		expect(Check(CreateSeriesBody, input)).toBe(true);
+		expect(Check(CreateSeriesBody, { ...input, licenses: ["custom terms"] })).toBe(false);
+		expect(Check(CreateSeriesBody, { kind: input.kind, localization: input.localization })).toBe(
+			false,
+		);
+	});
+});
 
 describe("Software system requirement response", () => {
 	it("preserves nested JSON hardware details", () => {

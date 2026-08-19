@@ -5751,7 +5751,6 @@ export type DockDocument = {
 													| "updated-at"
 													| "published-at"
 													| "closes-at"
-													| "content-license"
 													| "book-isbn13"
 													| "book-publication-date"
 													| "book-page-count"
@@ -7988,7 +7987,6 @@ export type DockDocument = {
 										| "updated-at"
 										| "published-at"
 										| "closes-at"
-										| "content-license"
 										| "book-isbn13"
 										| "book-publication-date"
 										| "book-page-count"
@@ -10692,7 +10690,6 @@ export type UnitReferencedBlockDocument = {
 													| "updated-at"
 													| "published-at"
 													| "closes-at"
-													| "content-license"
 													| "book-isbn13"
 													| "book-publication-date"
 													| "book-page-count"
@@ -12929,7 +12926,6 @@ export type UnitReferencedBlockDocument = {
 										| "updated-at"
 										| "published-at"
 										| "closes-at"
-										| "content-license"
 										| "book-isbn13"
 										| "book-publication-date"
 										| "book-page-count"
@@ -13226,7 +13222,6 @@ export const FilterDocumentControlsFieldEnum = {
 	"updated-at": "updated-at",
 	"published-at": "published-at",
 	"closes-at": "closes-at",
-	"content-license": "content-license",
 	"book-isbn13": "book-isbn13",
 	"book-publication-date": "book-publication-date",
 	"book-page-count": "book-page-count",
@@ -13560,7 +13555,6 @@ export const SearchFeatureDefinitionControlsFieldEnum = {
 	"updated-at": "updated-at",
 	"published-at": "published-at",
 	"closes-at": "closes-at",
-	"content-license": "content-license",
 	"book-isbn13": "book-isbn13",
 	"book-publication-date": "book-publication-date",
 	"book-page-count": "book-page-count",
@@ -13808,7 +13802,10 @@ export const ApiErrorCode = {
 	UnitNotFound: "UnitNotFound",
 	UnitPermissionForbidden: "UnitPermissionForbidden",
 	UnitAccessRestricted: "UnitAccessRestricted",
-	UnitContentLicenseGrantForbidden: "UnitContentLicenseGrantForbidden",
+	UnitLicenseGrantForbidden: "UnitLicenseGrantForbidden",
+	UnitLicenseNotApplicable: "UnitLicenseNotApplicable",
+	UnitLicenseOfferingEndForbidden: "UnitLicenseOfferingEndForbidden",
+	UnitLicenseGrantConflict: "UnitLicenseGrantConflict",
 	UnitChanged: "UnitChanged",
 	UnitRealmPublicationNotFound: "UnitRealmPublicationNotFound",
 	UnitRealmPublicationAlreadyExists: "UnitRealmPublicationAlreadyExists",
@@ -16754,8 +16751,8 @@ export const GetApiNotificationsStatus200ItemsContextActionKindEnum = {
 	restore: "restore",
 	lock_post_targeting: "lock_post_targeting",
 	unlock_post_targeting: "unlock_post_targeting",
-	invalidate_content_license: "invalidate_content_license",
-	restore_content_license: "restore_content_license",
+	invalidate_license: "invalidate_license",
+	restore_license: "restore_license",
 	reverse: "reverse",
 } as const;
 
@@ -18181,8 +18178,8 @@ export const GetApiNotificationsByNotificationIdStatus200ContextActionKindEnum =
 	restore: "restore",
 	lock_post_targeting: "lock_post_targeting",
 	unlock_post_targeting: "unlock_post_targeting",
-	invalidate_content_license: "invalidate_content_license",
-	restore_content_license: "restore_content_license",
+	invalidate_license: "invalidate_license",
+	restore_license: "restore_license",
 	reverse: "reverse",
 } as const;
 
@@ -35819,8 +35816,8 @@ export const GetApiReportsPlatformCasesStatus200ItemsAllowedCommandsEnum = {
 	restore: "restore",
 	lock_post_targeting: "lock_post_targeting",
 	unlock_post_targeting: "unlock_post_targeting",
-	invalidate_content_license: "invalidate_content_license",
-	restore_content_license: "restore_content_license",
+	invalidate_license: "invalidate_license",
+	restore_license: "restore_license",
 	dismiss: "dismiss",
 	note: "note",
 } as const;
@@ -35869,43 +35866,59 @@ export type GetApiReportsPlatformCasesStatus200 = {
 		 * @type boolean
 		 */
 		postTargetingLocked: boolean;
-		contentLicense:
-			| (
-					| (
-							| {
-									/**
-									 * @description
-									 * Format: `uuid`
-									 * @type string
-									 */
-									id: string;
-									/**
-									 * @type string
-									 */
-									status: "active";
-							  }
-							| {
-									/**
-									 * @description
-									 * Format: `uuid`
-									 * @type string
-									 */
-									id: string;
-									/**
-									 * @type string
-									 */
-									status: "invalidated";
-									/**
-									 * @description
-									 * Format: `uuid`
-									 * @type string
-									 */
-									invalidationActionId: string;
-							  }
-					  )
-					| null
-			  )
-			| null;
+		/**
+		 * @type array
+		 */
+		licenseGrants: (
+			| {
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					id: string;
+					/**
+					 * @minLength 1
+					 * @type string
+					 */
+					licenseId: string;
+					/**
+					 * @type string
+					 */
+					recognitionStatus: "recognized";
+					/**
+					 * @type boolean
+					 */
+					offeringEnded: false;
+			  }
+			| {
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					id: string;
+					/**
+					 * @minLength 1
+					 * @type string
+					 */
+					licenseId: string;
+					/**
+					 * @type string
+					 */
+					recognitionStatus: "invalidated";
+					/**
+					 * @type boolean
+					 */
+					offeringEnded: false;
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					invalidationActionId: string;
+			  }
+		)[];
 		reportCount: string | number;
 		/**
 		 * @type array
@@ -48053,13 +48066,29 @@ export const PostApiGovernanceContentGovernanceActionsStatus200KindEnum = {
 	restore: "restore",
 	lock_post_targeting: "lock_post_targeting",
 	unlock_post_targeting: "unlock_post_targeting",
-	invalidate_content_license: "invalidate_content_license",
-	restore_content_license: "restore_content_license",
+	invalidate_license: "invalidate_license",
+	restore_license: "restore_license",
 	reverse: "reverse",
 } as const;
 
 export type PostApiGovernanceContentGovernanceActionsStatus200KindEnum =
 	(typeof PostApiGovernanceContentGovernanceActionsStatus200KindEnum)[keyof typeof PostApiGovernanceContentGovernanceActionsStatus200KindEnum];
+
+export const PostApiGovernanceContentGovernanceActionsStatus200PreviousRecognitionStatus = {
+	recognized: "recognized",
+	invalidated: "invalidated",
+} as const;
+
+export type PostApiGovernanceContentGovernanceActionsStatus200PreviousRecognitionStatus =
+	(typeof PostApiGovernanceContentGovernanceActionsStatus200PreviousRecognitionStatus)[keyof typeof PostApiGovernanceContentGovernanceActionsStatus200PreviousRecognitionStatus];
+
+export const PostApiGovernanceContentGovernanceActionsStatus200ResultingRecognitionStatus = {
+	recognized: "recognized",
+	invalidated: "invalidated",
+} as const;
+
+export type PostApiGovernanceContentGovernanceActionsStatus200ResultingRecognitionStatus =
+	(typeof PostApiGovernanceContentGovernanceActionsStatus200ResultingRecognitionStatus)[keyof typeof PostApiGovernanceContentGovernanceActionsStatus200ResultingRecognitionStatus];
 
 export const PostApiGovernanceContentGovernanceActionsStatus200NotesRoleEnum = {
 	evidence: "evidence",
@@ -48100,9 +48129,13 @@ export type PostApiGovernanceContentGovernanceActionsStatus200 = {
 	previousState: (string | null) | null;
 	resultingState: (string | null) | null;
 	previousPostTargetingLocked: (boolean | null) | null;
-	contentLicenseId: (string | null) | null;
-	previousContentLicenseStatus: (("active" | "invalidated") | null) | null;
-	resultingContentLicenseStatus: (("active" | "invalidated") | null) | null;
+	licenseGrantId: (string | null) | null;
+	previousRecognitionStatus:
+		| (PostApiGovernanceContentGovernanceActionsStatus200PreviousRecognitionStatus | null)
+		| null;
+	resultingRecognitionStatus:
+		| (PostApiGovernanceContentGovernanceActionsStatus200ResultingRecognitionStatus | null)
+		| null;
 	resultingPostTargetingLocked: (boolean | null) | null;
 	reversesActionId: (string | null) | null;
 	/**
@@ -48532,8 +48565,7 @@ export type PostApiGovernanceContentGovernanceActionsBody =
 				| "remove"
 				| "restore"
 				| "lock_post_targeting"
-				| "unlock_post_targeting"
-				| "invalidate_content_license";
+				| "unlock_post_targeting";
 			/**
 			 * @type array
 			 */
@@ -48749,7 +48781,229 @@ export type PostApiGovernanceContentGovernanceActionsBody =
 			/**
 			 * @type string
 			 */
-			kind: "restore_content_license";
+			kind: "invalidate_license";
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			licenseGrantId: string;
+			/**
+			 * @type array
+			 */
+			rules: {
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				sourceRealmId: string;
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				revisionId: string;
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				ruleId: string;
+			}[];
+	  }
+	| {
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			caseId: string;
+			/**
+			 * @type array | undefined
+			 */
+			notes?: {
+				role: "internal_note" | "public_notice";
+				/**
+				 * @type string
+				 */
+				language: PostApiGovernanceContentGovernanceActionsRequestNotesLanguageEnum;
+				/**
+				 * @type object
+				 */
+				content: {
+					/**
+					 * @type string
+					 */
+					_type: "portable-text";
+					/**
+					 * @pattern ^[0-9a-f]{12}$
+					 * @type string
+					 */
+					_key: string;
+					/**
+					 * @type array
+					 */
+					content: (
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @type string
+								 */
+								_type: "block";
+								/**
+								 * @type array
+								 */
+								children: (
+									| {
+											/**
+											 * @type string
+											 */
+											_key: string;
+											/**
+											 * @type string
+											 */
+											_type: "span";
+											/**
+											 * @type string
+											 */
+											text: string;
+											/**
+											 * @type array | undefined
+											 */
+											marks?: string[];
+									  }
+									| {
+											/**
+											 * @type string
+											 */
+											_key: string;
+											/**
+											 * @type string
+											 */
+											_type: "unit-mention";
+											/**
+											 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+											 * @type string
+											 */
+											unitId: string;
+									  }
+								)[];
+								/**
+								 * @type array | undefined
+								 */
+								markDefs?: {
+									/**
+									 * @type string
+									 */
+									_key: string;
+									/**
+									 * @type string
+									 */
+									_type: string;
+									[key: string]: unknown;
+								}[];
+								/**
+								 * @type string | undefined
+								 */
+								listItem?: string;
+								/**
+								 * @type string | undefined
+								 */
+								style?: string;
+								/**
+								 * @minLength 1
+								 * @type integer | undefined
+								 */
+								level?: number;
+								[key: string]: unknown;
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @type string
+								 */
+								_type: "image";
+								/**
+								 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+								 * @type string
+								 */
+								assetId: string;
+								/**
+								 * @type string | undefined
+								 */
+								alt?: string;
+								/**
+								 * @type string | undefined
+								 */
+								caption?: string;
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @pattern ^(?!(?:block|image)$).+
+								 * @type string
+								 */
+								_type: string;
+								[key: string]: unknown;
+						  }
+					)[];
+				};
+			}[];
+			/**
+			 * @minLength 1
+			 * @maxLength 256
+			 * @type string | undefined
+			 */
+			idempotencyKey?: string;
+			/**
+			 * @type object | undefined
+			 */
+			revisionContext?: {
+				contribution?:
+					| {
+							/**
+							 * @type string
+							 */
+							primary: "human";
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							primary: "unattributed";
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							primary: "ai";
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							creditedEntityId: string;
+							/**
+							 * @default 'creator'
+							 * @type string
+							 */
+							role: PostApiGovernanceContentGovernanceActionsRequestRevisionContextContributionRoleEnum;
+					  };
+			};
+			/**
+			 * @type string
+			 */
+			kind: "restore_license";
 			/**
 			 * @description
 			 * Format: `uuid`
@@ -50381,6 +50635,20 @@ export type PostApiSeriesStatus429 = {
  */
 export type PostApiSeriesStatus500 = InternalError;
 
+export const PostApiSeriesRequestLicensesEnum = {
+	"cc-by-nc-sa-4.0": "cc-by-nc-sa-4.0",
+	"cc-by-sa-4.0": "cc-by-sa-4.0",
+	"cc-by-sa-3.0": "cc-by-sa-3.0",
+	"all-rights-reserved": "all-rights-reserved",
+	"cc-by-nc-4.0": "cc-by-nc-4.0",
+	"cc-by-4.0": "cc-by-4.0",
+	"cc0-1.0": "cc0-1.0",
+	"rezics-unit-content-license-v1": "rezics-unit-content-license-v1",
+} as const;
+
+export type PostApiSeriesRequestLicensesEnum =
+	(typeof PostApiSeriesRequestLicensesEnum)[keyof typeof PostApiSeriesRequestLicensesEnum];
+
 export const PostApiSeriesRequestLocalizationLanguageEnum = {
 	zh: "zh",
 	en: "en",
@@ -50422,6 +50690,10 @@ export type PostApiSeriesBody = {
 	 * @type string
 	 */
 	kind: string;
+	/**
+	 * @type array
+	 */
+	licenses: PostApiSeriesRequestLicensesEnum[];
 	/**
 	 * @type object
 	 */
@@ -59974,7 +60246,7 @@ export const GetApiUsersMeStatus200PlatformCapabilitiesEnum = {
 	"unit.merge.review": "unit.merge.review",
 	"unit.merge": "unit.merge",
 	"unit.ownership.override": "unit.ownership.override",
-	"unit.content_license.manage": "unit.content_license.manage",
+	"unit.license.manage": "unit.license.manage",
 	"unit.delete": "unit.delete",
 	"unit.restore": "unit.restore",
 	"unit.slug.manage": "unit.slug.manage",
@@ -62216,7 +62488,7 @@ export const GetApiUsersMePreferencesStatus200ChineseContentDisplayEnum = {
 export type GetApiUsersMePreferencesStatus200ChineseContentDisplayEnum =
 	(typeof GetApiUsersMePreferencesStatus200ChineseContentDisplayEnum)[keyof typeof GetApiUsersMePreferencesStatus200ChineseContentDisplayEnum];
 
-export const GetApiUsersMePreferencesStatus200DefaultLicense = {
+export const GetApiUsersMePreferencesStatus200DefaultLicensesEnum = {
 	"cc-by-nc-sa-4.0": "cc-by-nc-sa-4.0",
 	"cc-by-sa-4.0": "cc-by-sa-4.0",
 	"cc-by-sa-3.0": "cc-by-sa-3.0",
@@ -62224,10 +62496,11 @@ export const GetApiUsersMePreferencesStatus200DefaultLicense = {
 	"cc-by-nc-4.0": "cc-by-nc-4.0",
 	"cc-by-4.0": "cc-by-4.0",
 	"cc0-1.0": "cc0-1.0",
+	"rezics-unit-content-license-v1": "rezics-unit-content-license-v1",
 } as const;
 
-export type GetApiUsersMePreferencesStatus200DefaultLicense =
-	(typeof GetApiUsersMePreferencesStatus200DefaultLicense)[keyof typeof GetApiUsersMePreferencesStatus200DefaultLicense];
+export type GetApiUsersMePreferencesStatus200DefaultLicensesEnum =
+	(typeof GetApiUsersMePreferencesStatus200DefaultLicensesEnum)[keyof typeof GetApiUsersMePreferencesStatus200DefaultLicensesEnum];
 
 export const GetApiUsersMePreferencesStatus200ScoreVisibilityEnum = {
 	public: "public",
@@ -62296,7 +62569,10 @@ export type GetApiUsersMePreferencesStatus200 = {
 	 * @type string
 	 */
 	chineseContentDisplay: GetApiUsersMePreferencesStatus200ChineseContentDisplayEnum;
-	defaultLicense: (GetApiUsersMePreferencesStatus200DefaultLicense | null) | null;
+	/**
+	 * @type array
+	 */
+	defaultLicenses: GetApiUsersMePreferencesStatus200DefaultLicensesEnum[];
 	/**
 	 * @type boolean
 	 */
@@ -62467,7 +62743,7 @@ export const PatchApiUsersMePreferencesStatus200ChineseContentDisplayEnum = {
 export type PatchApiUsersMePreferencesStatus200ChineseContentDisplayEnum =
 	(typeof PatchApiUsersMePreferencesStatus200ChineseContentDisplayEnum)[keyof typeof PatchApiUsersMePreferencesStatus200ChineseContentDisplayEnum];
 
-export const PatchApiUsersMePreferencesStatus200DefaultLicense = {
+export const PatchApiUsersMePreferencesStatus200DefaultLicensesEnum = {
 	"cc-by-nc-sa-4.0": "cc-by-nc-sa-4.0",
 	"cc-by-sa-4.0": "cc-by-sa-4.0",
 	"cc-by-sa-3.0": "cc-by-sa-3.0",
@@ -62475,10 +62751,11 @@ export const PatchApiUsersMePreferencesStatus200DefaultLicense = {
 	"cc-by-nc-4.0": "cc-by-nc-4.0",
 	"cc-by-4.0": "cc-by-4.0",
 	"cc0-1.0": "cc0-1.0",
+	"rezics-unit-content-license-v1": "rezics-unit-content-license-v1",
 } as const;
 
-export type PatchApiUsersMePreferencesStatus200DefaultLicense =
-	(typeof PatchApiUsersMePreferencesStatus200DefaultLicense)[keyof typeof PatchApiUsersMePreferencesStatus200DefaultLicense];
+export type PatchApiUsersMePreferencesStatus200DefaultLicensesEnum =
+	(typeof PatchApiUsersMePreferencesStatus200DefaultLicensesEnum)[keyof typeof PatchApiUsersMePreferencesStatus200DefaultLicensesEnum];
 
 export const PatchApiUsersMePreferencesStatus200ScoreVisibilityEnum = {
 	public: "public",
@@ -62547,7 +62824,10 @@ export type PatchApiUsersMePreferencesStatus200 = {
 	 * @type string
 	 */
 	chineseContentDisplay: PatchApiUsersMePreferencesStatus200ChineseContentDisplayEnum;
-	defaultLicense: (PatchApiUsersMePreferencesStatus200DefaultLicense | null) | null;
+	/**
+	 * @type array
+	 */
+	defaultLicenses: PatchApiUsersMePreferencesStatus200DefaultLicensesEnum[];
 	/**
 	 * @type boolean
 	 */
@@ -62769,7 +63049,7 @@ export const PutApiUsersMePreferencesStatus200ChineseContentDisplayEnum = {
 export type PutApiUsersMePreferencesStatus200ChineseContentDisplayEnum =
 	(typeof PutApiUsersMePreferencesStatus200ChineseContentDisplayEnum)[keyof typeof PutApiUsersMePreferencesStatus200ChineseContentDisplayEnum];
 
-export const PutApiUsersMePreferencesStatus200DefaultLicense = {
+export const PutApiUsersMePreferencesStatus200DefaultLicensesEnum = {
 	"cc-by-nc-sa-4.0": "cc-by-nc-sa-4.0",
 	"cc-by-sa-4.0": "cc-by-sa-4.0",
 	"cc-by-sa-3.0": "cc-by-sa-3.0",
@@ -62777,10 +63057,11 @@ export const PutApiUsersMePreferencesStatus200DefaultLicense = {
 	"cc-by-nc-4.0": "cc-by-nc-4.0",
 	"cc-by-4.0": "cc-by-4.0",
 	"cc0-1.0": "cc0-1.0",
+	"rezics-unit-content-license-v1": "rezics-unit-content-license-v1",
 } as const;
 
-export type PutApiUsersMePreferencesStatus200DefaultLicense =
-	(typeof PutApiUsersMePreferencesStatus200DefaultLicense)[keyof typeof PutApiUsersMePreferencesStatus200DefaultLicense];
+export type PutApiUsersMePreferencesStatus200DefaultLicensesEnum =
+	(typeof PutApiUsersMePreferencesStatus200DefaultLicensesEnum)[keyof typeof PutApiUsersMePreferencesStatus200DefaultLicensesEnum];
 
 export const PutApiUsersMePreferencesStatus200ScoreVisibilityEnum = {
 	public: "public",
@@ -62849,7 +63130,10 @@ export type PutApiUsersMePreferencesStatus200 = {
 	 * @type string
 	 */
 	chineseContentDisplay: PutApiUsersMePreferencesStatus200ChineseContentDisplayEnum;
-	defaultLicense: (PutApiUsersMePreferencesStatus200DefaultLicense | null) | null;
+	/**
+	 * @type array
+	 */
+	defaultLicenses: PutApiUsersMePreferencesStatus200DefaultLicensesEnum[];
 	/**
 	 * @type boolean
 	 */
@@ -63037,7 +63321,7 @@ export const PutApiUsersMePreferencesRequestChineseContentDisplayEnum = {
 export type PutApiUsersMePreferencesRequestChineseContentDisplayEnum =
 	(typeof PutApiUsersMePreferencesRequestChineseContentDisplayEnum)[keyof typeof PutApiUsersMePreferencesRequestChineseContentDisplayEnum];
 
-export const PutApiUsersMePreferencesRequestDefaultLicense = {
+export const PutApiUsersMePreferencesRequestDefaultLicensesEnum = {
 	"cc-by-nc-sa-4.0": "cc-by-nc-sa-4.0",
 	"cc-by-sa-4.0": "cc-by-sa-4.0",
 	"cc-by-sa-3.0": "cc-by-sa-3.0",
@@ -63045,10 +63329,11 @@ export const PutApiUsersMePreferencesRequestDefaultLicense = {
 	"cc-by-nc-4.0": "cc-by-nc-4.0",
 	"cc-by-4.0": "cc-by-4.0",
 	"cc0-1.0": "cc0-1.0",
+	"rezics-unit-content-license-v1": "rezics-unit-content-license-v1",
 } as const;
 
-export type PutApiUsersMePreferencesRequestDefaultLicense =
-	(typeof PutApiUsersMePreferencesRequestDefaultLicense)[keyof typeof PutApiUsersMePreferencesRequestDefaultLicense];
+export type PutApiUsersMePreferencesRequestDefaultLicensesEnum =
+	(typeof PutApiUsersMePreferencesRequestDefaultLicensesEnum)[keyof typeof PutApiUsersMePreferencesRequestDefaultLicensesEnum];
 
 export const PutApiUsersMePreferencesRequestCollectionConfigViewEnum = {
 	grid: "grid",
@@ -63093,7 +63378,10 @@ export type PutApiUsersMePreferencesBody = {
 	 * @type string
 	 */
 	chineseContentDisplay: PutApiUsersMePreferencesRequestChineseContentDisplayEnum;
-	defaultLicense: (PutApiUsersMePreferencesRequestDefaultLicense | null) | null;
+	/**
+	 * @type array
+	 */
+	defaultLicenses: PutApiUsersMePreferencesRequestDefaultLicensesEnum[];
 	/**
 	 * @default false
 	 * @type boolean
@@ -65764,7 +66052,7 @@ export const GetApiPlatformAccessPolicyStatus200CapabilitiesEnum = {
 	"unit.merge.review": "unit.merge.review",
 	"unit.merge": "unit.merge",
 	"unit.ownership.override": "unit.ownership.override",
-	"unit.content_license.manage": "unit.content_license.manage",
+	"unit.license.manage": "unit.license.manage",
 	"unit.delete": "unit.delete",
 	"unit.restore": "unit.restore",
 	"unit.slug.manage": "unit.slug.manage",
@@ -65897,7 +66185,7 @@ export const GetApiPlatformAccessProfilesStatus200ItemsGrantsCapabilityEnum = {
 	"unit.merge.review": "unit.merge.review",
 	"unit.merge": "unit.merge",
 	"unit.ownership.override": "unit.ownership.override",
-	"unit.content_license.manage": "unit.content_license.manage",
+	"unit.license.manage": "unit.license.manage",
 	"unit.delete": "unit.delete",
 	"unit.restore": "unit.restore",
 	"unit.slug.manage": "unit.slug.manage",
@@ -66087,7 +66375,7 @@ export const GetApiPlatformAccessProfilesByProfileIdStatus200GrantsCapabilityEnu
 	"unit.merge.review": "unit.merge.review",
 	"unit.merge": "unit.merge",
 	"unit.ownership.override": "unit.ownership.override",
-	"unit.content_license.manage": "unit.content_license.manage",
+	"unit.license.manage": "unit.license.manage",
 	"unit.delete": "unit.delete",
 	"unit.restore": "unit.restore",
 	"unit.slug.manage": "unit.slug.manage",
@@ -66302,7 +66590,7 @@ export const PutApiPlatformAccessProfilesByProfileIdStatus200GrantsCapabilityEnu
 	"unit.merge.review": "unit.merge.review",
 	"unit.merge": "unit.merge",
 	"unit.ownership.override": "unit.ownership.override",
-	"unit.content_license.manage": "unit.content_license.manage",
+	"unit.license.manage": "unit.license.manage",
 	"unit.delete": "unit.delete",
 	"unit.restore": "unit.restore",
 	"unit.slug.manage": "unit.slug.manage",
@@ -66553,7 +66841,7 @@ export const PutApiPlatformAccessProfilesByProfileIdRequestGrantsCapabilityEnum 
 	"unit.merge.review": "unit.merge.review",
 	"unit.merge": "unit.merge",
 	"unit.ownership.override": "unit.ownership.override",
-	"unit.content_license.manage": "unit.content_license.manage",
+	"unit.license.manage": "unit.license.manage",
 	"unit.delete": "unit.delete",
 	"unit.restore": "unit.restore",
 	"unit.slug.manage": "unit.slug.manage",
@@ -74426,8 +74714,8 @@ export const GetApiUnitsByIdByUnitIdRealmPublicationsStatus200ItemsLatestGoverna
 		restore: "restore",
 		lock_post_targeting: "lock_post_targeting",
 		unlock_post_targeting: "unlock_post_targeting",
-		invalidate_content_license: "invalidate_content_license",
-		restore_content_license: "restore_content_license",
+		invalidate_license: "invalidate_license",
+		restore_license: "restore_license",
 		reverse: "reverse",
 	} as const;
 
@@ -77026,7 +77314,7 @@ export const PostApiUnitsByTypeStatus200Language = {
 export type PostApiUnitsByTypeStatus200Language =
 	(typeof PostApiUnitsByTypeStatus200Language)[keyof typeof PostApiUnitsByTypeStatus200Language];
 
-export const PostApiUnitsByTypeStatus200License = {
+export const PostApiUnitsByTypeStatus200LicensesLicenseIdEnum = {
 	"cc-by-nc-sa-4.0": "cc-by-nc-sa-4.0",
 	"cc-by-sa-4.0": "cc-by-sa-4.0",
 	"cc-by-sa-3.0": "cc-by-sa-3.0",
@@ -77034,10 +77322,33 @@ export const PostApiUnitsByTypeStatus200License = {
 	"cc-by-nc-4.0": "cc-by-nc-4.0",
 	"cc-by-4.0": "cc-by-4.0",
 	"cc0-1.0": "cc0-1.0",
+	"rezics-unit-content-license-v1": "rezics-unit-content-license-v1",
 } as const;
 
-export type PostApiUnitsByTypeStatus200License =
-	(typeof PostApiUnitsByTypeStatus200License)[keyof typeof PostApiUnitsByTypeStatus200License];
+export type PostApiUnitsByTypeStatus200LicensesLicenseIdEnum =
+	(typeof PostApiUnitsByTypeStatus200LicensesLicenseIdEnum)[keyof typeof PostApiUnitsByTypeStatus200LicensesLicenseIdEnum];
+
+export const PostApiUnitsByTypeStatus200LicenseOfferingsLicenseIdEnum = {
+	"cc-by-nc-sa-4.0": "cc-by-nc-sa-4.0",
+	"cc-by-sa-4.0": "cc-by-sa-4.0",
+	"cc-by-sa-3.0": "cc-by-sa-3.0",
+	"all-rights-reserved": "all-rights-reserved",
+	"cc-by-nc-4.0": "cc-by-nc-4.0",
+	"cc-by-4.0": "cc-by-4.0",
+	"cc0-1.0": "cc0-1.0",
+	"rezics-unit-content-license-v1": "rezics-unit-content-license-v1",
+} as const;
+
+export type PostApiUnitsByTypeStatus200LicenseOfferingsLicenseIdEnum =
+	(typeof PostApiUnitsByTypeStatus200LicenseOfferingsLicenseIdEnum)[keyof typeof PostApiUnitsByTypeStatus200LicenseOfferingsLicenseIdEnum];
+
+export const PostApiUnitsByTypeStatus200LicenseOfferingsRecognitionStatusEnum = {
+	recognized: "recognized",
+	invalidated: "invalidated",
+} as const;
+
+export type PostApiUnitsByTypeStatus200LicenseOfferingsRecognitionStatusEnum =
+	(typeof PostApiUnitsByTypeStatus200LicenseOfferingsRecognitionStatusEnum)[keyof typeof PostApiUnitsByTypeStatus200LicenseOfferingsRecognitionStatusEnum];
 
 export const PostApiUnitsByTypeStatus200AttributionsRoleEnum = {
 	author: "author",
@@ -77306,7 +77617,57 @@ export type PostApiUnitsByTypeStatus200 = {
 	 * @type string
 	 */
 	aiDisclosure: string;
-	license: (PostApiUnitsByTypeStatus200License | null) | null;
+	/**
+	 * @type array
+	 */
+	licenses: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		id: string;
+		/**
+		 * @default 'cc-by-nc-sa-4.0'
+		 * @type string
+		 */
+		licenseId: PostApiUnitsByTypeStatus200LicensesLicenseIdEnum;
+		grantedByProfileId: (string | null) | null;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		grantedAt: string;
+	}[];
+	/**
+	 * @type array
+	 */
+	licenseOfferings: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		id: string;
+		/**
+		 * @default 'cc-by-nc-sa-4.0'
+		 * @type string
+		 */
+		licenseId: PostApiUnitsByTypeStatus200LicenseOfferingsLicenseIdEnum;
+		grantedByProfileId: (string | null) | null;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		grantedAt: string;
+		/**
+		 * @default 'recognized'
+		 * @type string
+		 */
+		recognitionStatus: PostApiUnitsByTypeStatus200LicenseOfferingsRecognitionStatusEnum;
+	}[];
 	/**
 	 * @type boolean
 	 */
@@ -77533,27 +77894,6 @@ export type PostApiUnitsByTypeStatus200 = {
 					characterCount: string | number;
 				}[];
 				format: (string | null) | null;
-				contentLicense:
-					| ({
-							/**
-							 * @default 'rezics-unit-content-license-v1'
-							 * @type string
-							 */
-							referenceLicenseSlug: "rezics-unit-content-license-v1";
-							/**
-							 * @description
-							 * Format: `uuid`
-							 * @type string
-							 */
-							grantedByProfileId: string;
-							/**
-							 * @description
-							 * Format: `date-time`
-							 * @type string
-							 */
-							grantedAt: string;
-					  } | null)
-					| null;
 		  }
 		| {
 				/**
@@ -77562,27 +77902,6 @@ export type PostApiUnitsByTypeStatus200 = {
 				type: "software";
 				releaseDate: (string | null) | null;
 				versionLabel: (string | null) | null;
-				contentLicense:
-					| ({
-							/**
-							 * @default 'rezics-unit-content-license-v1'
-							 * @type string
-							 */
-							referenceLicenseSlug: "rezics-unit-content-license-v1";
-							/**
-							 * @description
-							 * Format: `uuid`
-							 * @type string
-							 */
-							grantedByProfileId: string;
-							/**
-							 * @description
-							 * Format: `date-time`
-							 * @type string
-							 */
-							grantedAt: string;
-					  } | null)
-					| null;
 		  }
 		| {
 				/**
@@ -77601,27 +77920,6 @@ export type PostApiUnitsByTypeStatus200 = {
 				runtimeMinutes: ((string | number) | null) | null;
 				episodeCount: ((string | number) | null) | null;
 				seasonCount: ((string | number) | null) | null;
-				contentLicense:
-					| ({
-							/**
-							 * @default 'rezics-unit-content-license-v1'
-							 * @type string
-							 */
-							referenceLicenseSlug: "rezics-unit-content-license-v1";
-							/**
-							 * @description
-							 * Format: `uuid`
-							 * @type string
-							 */
-							grantedByProfileId: string;
-							/**
-							 * @description
-							 * Format: `date-time`
-							 * @type string
-							 */
-							grantedAt: string;
-					  } | null)
-					| null;
 		  }
 		| {
 				/**
@@ -78549,6 +78847,7 @@ export const PostApiUnitsByTypeStatus400ErrorCodeEnum = {
 	CreditAttributionRoleInvalid: "CreditAttributionRoleInvalid",
 	RevisionCreditEntityInvalid: "RevisionCreditEntityInvalid",
 	RevisionContributionActorRequired: "RevisionContributionActorRequired",
+	UnitLicenseNotApplicable: "UnitLicenseNotApplicable",
 } as const;
 
 export type PostApiUnitsByTypeStatus400ErrorCodeEnum =
@@ -78614,6 +78913,7 @@ export const PostApiUnitsByTypeStatus403ErrorCodeEnum = {
 	EmailVerificationRequired: "EmailVerificationRequired",
 	AccountRestricted: "AccountRestricted",
 	EntityAssociationRestricted: "EntityAssociationRestricted",
+	UnitLicenseGrantForbidden: "UnitLicenseGrantForbidden",
 } as const;
 
 export type PostApiUnitsByTypeStatus403ErrorCodeEnum =
@@ -78692,6 +78992,8 @@ export const PostApiUnitsByTypeStatus409ErrorCodeEnum = {
 	UnitVariantSourceHasVariants: "UnitVariantSourceHasVariants",
 	UnitVariantChanged: "UnitVariantChanged",
 	UnitVariantMainUnavailable: "UnitVariantMainUnavailable",
+	UnitLicenseGrantConflict: "UnitLicenseGrantConflict",
+	UnitLicenseOfferingEndForbidden: "UnitLicenseOfferingEndForbidden",
 } as const;
 
 export type PostApiUnitsByTypeStatus409ErrorCodeEnum =
@@ -78829,7 +79131,7 @@ export const PostApiUnitsByTypeRequestContentRatingEnum = {
 export type PostApiUnitsByTypeRequestContentRatingEnum =
 	(typeof PostApiUnitsByTypeRequestContentRatingEnum)[keyof typeof PostApiUnitsByTypeRequestContentRatingEnum];
 
-export const PostApiUnitsByTypeRequestLicense = {
+export const PostApiUnitsByTypeRequestLicensesEnum = {
 	"cc-by-nc-sa-4.0": "cc-by-nc-sa-4.0",
 	"cc-by-sa-4.0": "cc-by-sa-4.0",
 	"cc-by-sa-3.0": "cc-by-sa-3.0",
@@ -78837,10 +79139,11 @@ export const PostApiUnitsByTypeRequestLicense = {
 	"cc-by-nc-4.0": "cc-by-nc-4.0",
 	"cc-by-4.0": "cc-by-4.0",
 	"cc0-1.0": "cc0-1.0",
+	"rezics-unit-content-license-v1": "rezics-unit-content-license-v1",
 } as const;
 
-export type PostApiUnitsByTypeRequestLicense =
-	(typeof PostApiUnitsByTypeRequestLicense)[keyof typeof PostApiUnitsByTypeRequestLicense];
+export type PostApiUnitsByTypeRequestLicensesEnum =
+	(typeof PostApiUnitsByTypeRequestLicensesEnum)[keyof typeof PostApiUnitsByTypeRequestLicensesEnum];
 
 export const PostApiUnitsByTypeRequestDetailsReleaseStatusEnum = {
 	ongoing: "ongoing",
@@ -78868,17 +79171,6 @@ export type PostApiUnitsByTypeBody =
 			 * @type string
 			 */
 			ownershipMode: "profile_owned";
-			/**
-			 * @description One-time Unit content license grant. Omit this field when no new grant is being made.
-			 * @type object | undefined
-			 */
-			contentLicense?: {
-				/**
-				 * @default 'rezics-unit-content-license-v1'
-				 * @type string
-				 */
-				referenceLicenseSlug: "rezics-unit-content-license-v1";
-			};
 			/**
 			 * @type array
 			 */
@@ -79157,7 +79449,10 @@ export type PostApiUnitsByTypeBody =
 			 */
 			contentRating?: PostApiUnitsByTypeRequestContentRatingEnum;
 			aiDisclosure?: "unknown" | "none" | "ai_assisted" | "ai_originated" | "machine_generated";
-			license?: (PostApiUnitsByTypeRequestLicense | null) | null;
+			/**
+			 * @type array | undefined
+			 */
+			licenses?: PostApiUnitsByTypeRequestLicensesEnum[];
 			details:
 				| {
 						/**
@@ -79504,7 +79799,10 @@ export type PostApiUnitsByTypeBody =
 			 */
 			contentRating?: PostApiUnitsByTypeRequestContentRatingEnum;
 			aiDisclosure?: "unknown" | "none" | "ai_assisted" | "ai_originated" | "machine_generated";
-			license?: (PostApiUnitsByTypeRequestLicense | null) | null;
+			/**
+			 * @type array | undefined
+			 */
+			licenses?: PostApiUnitsByTypeRequestLicensesEnum[];
 			details:
 				| {
 						/**
@@ -79925,7 +80223,7 @@ export const GetApiUnitsByTypeByUnitIdStatus200Language = {
 export type GetApiUnitsByTypeByUnitIdStatus200Language =
 	(typeof GetApiUnitsByTypeByUnitIdStatus200Language)[keyof typeof GetApiUnitsByTypeByUnitIdStatus200Language];
 
-export const GetApiUnitsByTypeByUnitIdStatus200License = {
+export const GetApiUnitsByTypeByUnitIdStatus200LicensesLicenseIdEnum = {
 	"cc-by-nc-sa-4.0": "cc-by-nc-sa-4.0",
 	"cc-by-sa-4.0": "cc-by-sa-4.0",
 	"cc-by-sa-3.0": "cc-by-sa-3.0",
@@ -79933,10 +80231,33 @@ export const GetApiUnitsByTypeByUnitIdStatus200License = {
 	"cc-by-nc-4.0": "cc-by-nc-4.0",
 	"cc-by-4.0": "cc-by-4.0",
 	"cc0-1.0": "cc0-1.0",
+	"rezics-unit-content-license-v1": "rezics-unit-content-license-v1",
 } as const;
 
-export type GetApiUnitsByTypeByUnitIdStatus200License =
-	(typeof GetApiUnitsByTypeByUnitIdStatus200License)[keyof typeof GetApiUnitsByTypeByUnitIdStatus200License];
+export type GetApiUnitsByTypeByUnitIdStatus200LicensesLicenseIdEnum =
+	(typeof GetApiUnitsByTypeByUnitIdStatus200LicensesLicenseIdEnum)[keyof typeof GetApiUnitsByTypeByUnitIdStatus200LicensesLicenseIdEnum];
+
+export const GetApiUnitsByTypeByUnitIdStatus200LicenseOfferingsLicenseIdEnum = {
+	"cc-by-nc-sa-4.0": "cc-by-nc-sa-4.0",
+	"cc-by-sa-4.0": "cc-by-sa-4.0",
+	"cc-by-sa-3.0": "cc-by-sa-3.0",
+	"all-rights-reserved": "all-rights-reserved",
+	"cc-by-nc-4.0": "cc-by-nc-4.0",
+	"cc-by-4.0": "cc-by-4.0",
+	"cc0-1.0": "cc0-1.0",
+	"rezics-unit-content-license-v1": "rezics-unit-content-license-v1",
+} as const;
+
+export type GetApiUnitsByTypeByUnitIdStatus200LicenseOfferingsLicenseIdEnum =
+	(typeof GetApiUnitsByTypeByUnitIdStatus200LicenseOfferingsLicenseIdEnum)[keyof typeof GetApiUnitsByTypeByUnitIdStatus200LicenseOfferingsLicenseIdEnum];
+
+export const GetApiUnitsByTypeByUnitIdStatus200LicenseOfferingsRecognitionStatusEnum = {
+	recognized: "recognized",
+	invalidated: "invalidated",
+} as const;
+
+export type GetApiUnitsByTypeByUnitIdStatus200LicenseOfferingsRecognitionStatusEnum =
+	(typeof GetApiUnitsByTypeByUnitIdStatus200LicenseOfferingsRecognitionStatusEnum)[keyof typeof GetApiUnitsByTypeByUnitIdStatus200LicenseOfferingsRecognitionStatusEnum];
 
 export const GetApiUnitsByTypeByUnitIdStatus200AttributionsRoleEnum = {
 	author: "author",
@@ -80205,7 +80526,57 @@ export type GetApiUnitsByTypeByUnitIdStatus200 = {
 	 * @type string
 	 */
 	aiDisclosure: string;
-	license: (GetApiUnitsByTypeByUnitIdStatus200License | null) | null;
+	/**
+	 * @type array
+	 */
+	licenses: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		id: string;
+		/**
+		 * @default 'cc-by-nc-sa-4.0'
+		 * @type string
+		 */
+		licenseId: GetApiUnitsByTypeByUnitIdStatus200LicensesLicenseIdEnum;
+		grantedByProfileId: (string | null) | null;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		grantedAt: string;
+	}[];
+	/**
+	 * @type array
+	 */
+	licenseOfferings: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		id: string;
+		/**
+		 * @default 'cc-by-nc-sa-4.0'
+		 * @type string
+		 */
+		licenseId: GetApiUnitsByTypeByUnitIdStatus200LicenseOfferingsLicenseIdEnum;
+		grantedByProfileId: (string | null) | null;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		grantedAt: string;
+		/**
+		 * @default 'recognized'
+		 * @type string
+		 */
+		recognitionStatus: GetApiUnitsByTypeByUnitIdStatus200LicenseOfferingsRecognitionStatusEnum;
+	}[];
 	/**
 	 * @type boolean
 	 */
@@ -80432,27 +80803,6 @@ export type GetApiUnitsByTypeByUnitIdStatus200 = {
 					characterCount: string | number;
 				}[];
 				format: (string | null) | null;
-				contentLicense:
-					| ({
-							/**
-							 * @default 'rezics-unit-content-license-v1'
-							 * @type string
-							 */
-							referenceLicenseSlug: "rezics-unit-content-license-v1";
-							/**
-							 * @description
-							 * Format: `uuid`
-							 * @type string
-							 */
-							grantedByProfileId: string;
-							/**
-							 * @description
-							 * Format: `date-time`
-							 * @type string
-							 */
-							grantedAt: string;
-					  } | null)
-					| null;
 		  }
 		| {
 				/**
@@ -80461,27 +80811,6 @@ export type GetApiUnitsByTypeByUnitIdStatus200 = {
 				type: "software";
 				releaseDate: (string | null) | null;
 				versionLabel: (string | null) | null;
-				contentLicense:
-					| ({
-							/**
-							 * @default 'rezics-unit-content-license-v1'
-							 * @type string
-							 */
-							referenceLicenseSlug: "rezics-unit-content-license-v1";
-							/**
-							 * @description
-							 * Format: `uuid`
-							 * @type string
-							 */
-							grantedByProfileId: string;
-							/**
-							 * @description
-							 * Format: `date-time`
-							 * @type string
-							 */
-							grantedAt: string;
-					  } | null)
-					| null;
 		  }
 		| {
 				/**
@@ -80500,27 +80829,6 @@ export type GetApiUnitsByTypeByUnitIdStatus200 = {
 				runtimeMinutes: ((string | number) | null) | null;
 				episodeCount: ((string | number) | null) | null;
 				seasonCount: ((string | number) | null) | null;
-				contentLicense:
-					| ({
-							/**
-							 * @default 'rezics-unit-content-license-v1'
-							 * @type string
-							 */
-							referenceLicenseSlug: "rezics-unit-content-license-v1";
-							/**
-							 * @description
-							 * Format: `uuid`
-							 * @type string
-							 */
-							grantedByProfileId: string;
-							/**
-							 * @description
-							 * Format: `date-time`
-							 * @type string
-							 */
-							grantedAt: string;
-					  } | null)
-					| null;
 		  }
 		| {
 				/**
@@ -81549,7 +81857,7 @@ export const PatchApiUnitsByTypeByUnitIdStatus200Language = {
 export type PatchApiUnitsByTypeByUnitIdStatus200Language =
 	(typeof PatchApiUnitsByTypeByUnitIdStatus200Language)[keyof typeof PatchApiUnitsByTypeByUnitIdStatus200Language];
 
-export const PatchApiUnitsByTypeByUnitIdStatus200License = {
+export const PatchApiUnitsByTypeByUnitIdStatus200LicensesLicenseIdEnum = {
 	"cc-by-nc-sa-4.0": "cc-by-nc-sa-4.0",
 	"cc-by-sa-4.0": "cc-by-sa-4.0",
 	"cc-by-sa-3.0": "cc-by-sa-3.0",
@@ -81557,10 +81865,33 @@ export const PatchApiUnitsByTypeByUnitIdStatus200License = {
 	"cc-by-nc-4.0": "cc-by-nc-4.0",
 	"cc-by-4.0": "cc-by-4.0",
 	"cc0-1.0": "cc0-1.0",
+	"rezics-unit-content-license-v1": "rezics-unit-content-license-v1",
 } as const;
 
-export type PatchApiUnitsByTypeByUnitIdStatus200License =
-	(typeof PatchApiUnitsByTypeByUnitIdStatus200License)[keyof typeof PatchApiUnitsByTypeByUnitIdStatus200License];
+export type PatchApiUnitsByTypeByUnitIdStatus200LicensesLicenseIdEnum =
+	(typeof PatchApiUnitsByTypeByUnitIdStatus200LicensesLicenseIdEnum)[keyof typeof PatchApiUnitsByTypeByUnitIdStatus200LicensesLicenseIdEnum];
+
+export const PatchApiUnitsByTypeByUnitIdStatus200LicenseOfferingsLicenseIdEnum = {
+	"cc-by-nc-sa-4.0": "cc-by-nc-sa-4.0",
+	"cc-by-sa-4.0": "cc-by-sa-4.0",
+	"cc-by-sa-3.0": "cc-by-sa-3.0",
+	"all-rights-reserved": "all-rights-reserved",
+	"cc-by-nc-4.0": "cc-by-nc-4.0",
+	"cc-by-4.0": "cc-by-4.0",
+	"cc0-1.0": "cc0-1.0",
+	"rezics-unit-content-license-v1": "rezics-unit-content-license-v1",
+} as const;
+
+export type PatchApiUnitsByTypeByUnitIdStatus200LicenseOfferingsLicenseIdEnum =
+	(typeof PatchApiUnitsByTypeByUnitIdStatus200LicenseOfferingsLicenseIdEnum)[keyof typeof PatchApiUnitsByTypeByUnitIdStatus200LicenseOfferingsLicenseIdEnum];
+
+export const PatchApiUnitsByTypeByUnitIdStatus200LicenseOfferingsRecognitionStatusEnum = {
+	recognized: "recognized",
+	invalidated: "invalidated",
+} as const;
+
+export type PatchApiUnitsByTypeByUnitIdStatus200LicenseOfferingsRecognitionStatusEnum =
+	(typeof PatchApiUnitsByTypeByUnitIdStatus200LicenseOfferingsRecognitionStatusEnum)[keyof typeof PatchApiUnitsByTypeByUnitIdStatus200LicenseOfferingsRecognitionStatusEnum];
 
 export const PatchApiUnitsByTypeByUnitIdStatus200AttributionsRoleEnum = {
 	author: "author",
@@ -81829,7 +82160,57 @@ export type PatchApiUnitsByTypeByUnitIdStatus200 = {
 	 * @type string
 	 */
 	aiDisclosure: string;
-	license: (PatchApiUnitsByTypeByUnitIdStatus200License | null) | null;
+	/**
+	 * @type array
+	 */
+	licenses: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		id: string;
+		/**
+		 * @default 'cc-by-nc-sa-4.0'
+		 * @type string
+		 */
+		licenseId: PatchApiUnitsByTypeByUnitIdStatus200LicensesLicenseIdEnum;
+		grantedByProfileId: (string | null) | null;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		grantedAt: string;
+	}[];
+	/**
+	 * @type array
+	 */
+	licenseOfferings: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		id: string;
+		/**
+		 * @default 'cc-by-nc-sa-4.0'
+		 * @type string
+		 */
+		licenseId: PatchApiUnitsByTypeByUnitIdStatus200LicenseOfferingsLicenseIdEnum;
+		grantedByProfileId: (string | null) | null;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		grantedAt: string;
+		/**
+		 * @default 'recognized'
+		 * @type string
+		 */
+		recognitionStatus: PatchApiUnitsByTypeByUnitIdStatus200LicenseOfferingsRecognitionStatusEnum;
+	}[];
 	/**
 	 * @type boolean
 	 */
@@ -82056,27 +82437,6 @@ export type PatchApiUnitsByTypeByUnitIdStatus200 = {
 					characterCount: string | number;
 				}[];
 				format: (string | null) | null;
-				contentLicense:
-					| ({
-							/**
-							 * @default 'rezics-unit-content-license-v1'
-							 * @type string
-							 */
-							referenceLicenseSlug: "rezics-unit-content-license-v1";
-							/**
-							 * @description
-							 * Format: `uuid`
-							 * @type string
-							 */
-							grantedByProfileId: string;
-							/**
-							 * @description
-							 * Format: `date-time`
-							 * @type string
-							 */
-							grantedAt: string;
-					  } | null)
-					| null;
 		  }
 		| {
 				/**
@@ -82085,27 +82445,6 @@ export type PatchApiUnitsByTypeByUnitIdStatus200 = {
 				type: "software";
 				releaseDate: (string | null) | null;
 				versionLabel: (string | null) | null;
-				contentLicense:
-					| ({
-							/**
-							 * @default 'rezics-unit-content-license-v1'
-							 * @type string
-							 */
-							referenceLicenseSlug: "rezics-unit-content-license-v1";
-							/**
-							 * @description
-							 * Format: `uuid`
-							 * @type string
-							 */
-							grantedByProfileId: string;
-							/**
-							 * @description
-							 * Format: `date-time`
-							 * @type string
-							 */
-							grantedAt: string;
-					  } | null)
-					| null;
 		  }
 		| {
 				/**
@@ -82124,27 +82463,6 @@ export type PatchApiUnitsByTypeByUnitIdStatus200 = {
 				runtimeMinutes: ((string | number) | null) | null;
 				episodeCount: ((string | number) | null) | null;
 				seasonCount: ((string | number) | null) | null;
-				contentLicense:
-					| ({
-							/**
-							 * @default 'rezics-unit-content-license-v1'
-							 * @type string
-							 */
-							referenceLicenseSlug: "rezics-unit-content-license-v1";
-							/**
-							 * @description
-							 * Format: `uuid`
-							 * @type string
-							 */
-							grantedByProfileId: string;
-							/**
-							 * @description
-							 * Format: `date-time`
-							 * @type string
-							 */
-							grantedAt: string;
-					  } | null)
-					| null;
 		  }
 		| {
 				/**
@@ -83071,6 +83389,7 @@ export type PatchApiUnitsByTypeByUnitIdStatus200 = {
 export const PatchApiUnitsByTypeByUnitIdStatus400ErrorCodeEnum = {
 	RevisionCreditEntityInvalid: "RevisionCreditEntityInvalid",
 	RevisionContributionActorRequired: "RevisionContributionActorRequired",
+	UnitLicenseNotApplicable: "UnitLicenseNotApplicable",
 } as const;
 
 export type PatchApiUnitsByTypeByUnitIdStatus400ErrorCodeEnum =
@@ -83136,7 +83455,7 @@ export const PatchApiUnitsByTypeByUnitIdStatus403ErrorCodeEnum = {
 	EmailVerificationRequired: "EmailVerificationRequired",
 	AccountRestricted: "AccountRestricted",
 	UnitPermissionForbidden: "UnitPermissionForbidden",
-	UnitContentLicenseGrantForbidden: "UnitContentLicenseGrantForbidden",
+	UnitLicenseGrantForbidden: "UnitLicenseGrantForbidden",
 } as const;
 
 export type PatchApiUnitsByTypeByUnitIdStatus403ErrorCodeEnum =
@@ -83207,6 +83526,15 @@ export type PatchApiUnitsByTypeByUnitIdStatus404 = {
 	requestId: string;
 };
 
+export const PatchApiUnitsByTypeByUnitIdStatus409ErrorCodeEnum = {
+	UnitChanged: "UnitChanged",
+	UnitLicenseGrantConflict: "UnitLicenseGrantConflict",
+	UnitLicenseOfferingEndForbidden: "UnitLicenseOfferingEndForbidden",
+} as const;
+
+export type PatchApiUnitsByTypeByUnitIdStatus409ErrorCodeEnum =
+	(typeof PatchApiUnitsByTypeByUnitIdStatus409ErrorCodeEnum)[keyof typeof PatchApiUnitsByTypeByUnitIdStatus409ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -83219,7 +83547,7 @@ export type PatchApiUnitsByTypeByUnitIdStatus409 = {
 		 * @default 'UnitChanged'
 		 * @type string
 		 */
-		code: "UnitChanged";
+		code: PatchApiUnitsByTypeByUnitIdStatus409ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -83346,7 +83674,7 @@ export const PatchApiUnitsByTypeByUnitIdRequestAiDisclosureEnum = {
 export type PatchApiUnitsByTypeByUnitIdRequestAiDisclosureEnum =
 	(typeof PatchApiUnitsByTypeByUnitIdRequestAiDisclosureEnum)[keyof typeof PatchApiUnitsByTypeByUnitIdRequestAiDisclosureEnum];
 
-export const PatchApiUnitsByTypeByUnitIdRequestLicense = {
+export const PatchApiUnitsByTypeByUnitIdRequestLicensesEnum = {
 	"cc-by-nc-sa-4.0": "cc-by-nc-sa-4.0",
 	"cc-by-sa-4.0": "cc-by-sa-4.0",
 	"cc-by-sa-3.0": "cc-by-sa-3.0",
@@ -83354,10 +83682,11 @@ export const PatchApiUnitsByTypeByUnitIdRequestLicense = {
 	"cc-by-nc-4.0": "cc-by-nc-4.0",
 	"cc-by-4.0": "cc-by-4.0",
 	"cc0-1.0": "cc0-1.0",
+	"rezics-unit-content-license-v1": "rezics-unit-content-license-v1",
 } as const;
 
-export type PatchApiUnitsByTypeByUnitIdRequestLicense =
-	(typeof PatchApiUnitsByTypeByUnitIdRequestLicense)[keyof typeof PatchApiUnitsByTypeByUnitIdRequestLicense];
+export type PatchApiUnitsByTypeByUnitIdRequestLicensesEnum =
+	(typeof PatchApiUnitsByTypeByUnitIdRequestLicensesEnum)[keyof typeof PatchApiUnitsByTypeByUnitIdRequestLicensesEnum];
 
 export const PatchApiUnitsByTypeByUnitIdRequestDetailsReleaseStatusEnum = {
 	ongoing: "ongoing",
@@ -83409,7 +83738,10 @@ export type PatchApiUnitsByTypeByUnitIdBody = {
 	 * @type string | undefined
 	 */
 	aiDisclosure?: PatchApiUnitsByTypeByUnitIdRequestAiDisclosureEnum;
-	license?: (PatchApiUnitsByTypeByUnitIdRequestLicense | null) | null;
+	/**
+	 * @type array | undefined
+	 */
+	licenses?: PatchApiUnitsByTypeByUnitIdRequestLicensesEnum[];
 	/**
 	 * @type object | undefined
 	 */
@@ -83425,17 +83757,6 @@ export type PatchApiUnitsByTypeByUnitIdBody = {
 		pageCount?: ((string | number) | null) | null;
 		wordCount?: ((string | number) | null) | null;
 		format?: (string | null) | null;
-		/**
-		 * @description One-time Unit content license grant. Omit this field when no new grant is being made.
-		 * @type object | undefined
-		 */
-		contentLicense?: {
-			/**
-			 * @default 'rezics-unit-content-license-v1'
-			 * @type string
-			 */
-			referenceLicenseSlug: "rezics-unit-content-license-v1";
-		};
 		versionLabel?: (string | null) | null;
 		/**
 		 * @minLength 1
@@ -83577,7 +83898,7 @@ export const PatchApiUnitsByTypeByUnitIdVariantContextStatus200Language = {
 export type PatchApiUnitsByTypeByUnitIdVariantContextStatus200Language =
 	(typeof PatchApiUnitsByTypeByUnitIdVariantContextStatus200Language)[keyof typeof PatchApiUnitsByTypeByUnitIdVariantContextStatus200Language];
 
-export const PatchApiUnitsByTypeByUnitIdVariantContextStatus200License = {
+export const PatchApiUnitsByTypeByUnitIdVariantContextStatus200LicensesLicenseIdEnum = {
 	"cc-by-nc-sa-4.0": "cc-by-nc-sa-4.0",
 	"cc-by-sa-4.0": "cc-by-sa-4.0",
 	"cc-by-sa-3.0": "cc-by-sa-3.0",
@@ -83585,10 +83906,34 @@ export const PatchApiUnitsByTypeByUnitIdVariantContextStatus200License = {
 	"cc-by-nc-4.0": "cc-by-nc-4.0",
 	"cc-by-4.0": "cc-by-4.0",
 	"cc0-1.0": "cc0-1.0",
+	"rezics-unit-content-license-v1": "rezics-unit-content-license-v1",
 } as const;
 
-export type PatchApiUnitsByTypeByUnitIdVariantContextStatus200License =
-	(typeof PatchApiUnitsByTypeByUnitIdVariantContextStatus200License)[keyof typeof PatchApiUnitsByTypeByUnitIdVariantContextStatus200License];
+export type PatchApiUnitsByTypeByUnitIdVariantContextStatus200LicensesLicenseIdEnum =
+	(typeof PatchApiUnitsByTypeByUnitIdVariantContextStatus200LicensesLicenseIdEnum)[keyof typeof PatchApiUnitsByTypeByUnitIdVariantContextStatus200LicensesLicenseIdEnum];
+
+export const PatchApiUnitsByTypeByUnitIdVariantContextStatus200LicenseOfferingsLicenseIdEnum = {
+	"cc-by-nc-sa-4.0": "cc-by-nc-sa-4.0",
+	"cc-by-sa-4.0": "cc-by-sa-4.0",
+	"cc-by-sa-3.0": "cc-by-sa-3.0",
+	"all-rights-reserved": "all-rights-reserved",
+	"cc-by-nc-4.0": "cc-by-nc-4.0",
+	"cc-by-4.0": "cc-by-4.0",
+	"cc0-1.0": "cc0-1.0",
+	"rezics-unit-content-license-v1": "rezics-unit-content-license-v1",
+} as const;
+
+export type PatchApiUnitsByTypeByUnitIdVariantContextStatus200LicenseOfferingsLicenseIdEnum =
+	(typeof PatchApiUnitsByTypeByUnitIdVariantContextStatus200LicenseOfferingsLicenseIdEnum)[keyof typeof PatchApiUnitsByTypeByUnitIdVariantContextStatus200LicenseOfferingsLicenseIdEnum];
+
+export const PatchApiUnitsByTypeByUnitIdVariantContextStatus200LicenseOfferingsRecognitionStatusEnum =
+	{
+		recognized: "recognized",
+		invalidated: "invalidated",
+	} as const;
+
+export type PatchApiUnitsByTypeByUnitIdVariantContextStatus200LicenseOfferingsRecognitionStatusEnum =
+	(typeof PatchApiUnitsByTypeByUnitIdVariantContextStatus200LicenseOfferingsRecognitionStatusEnum)[keyof typeof PatchApiUnitsByTypeByUnitIdVariantContextStatus200LicenseOfferingsRecognitionStatusEnum];
 
 export const PatchApiUnitsByTypeByUnitIdVariantContextStatus200AttributionsRoleEnum = {
 	author: "author",
@@ -83864,7 +84209,57 @@ export type PatchApiUnitsByTypeByUnitIdVariantContextStatus200 = {
 	 * @type string
 	 */
 	aiDisclosure: string;
-	license: (PatchApiUnitsByTypeByUnitIdVariantContextStatus200License | null) | null;
+	/**
+	 * @type array
+	 */
+	licenses: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		id: string;
+		/**
+		 * @default 'cc-by-nc-sa-4.0'
+		 * @type string
+		 */
+		licenseId: PatchApiUnitsByTypeByUnitIdVariantContextStatus200LicensesLicenseIdEnum;
+		grantedByProfileId: (string | null) | null;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		grantedAt: string;
+	}[];
+	/**
+	 * @type array
+	 */
+	licenseOfferings: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		id: string;
+		/**
+		 * @default 'cc-by-nc-sa-4.0'
+		 * @type string
+		 */
+		licenseId: PatchApiUnitsByTypeByUnitIdVariantContextStatus200LicenseOfferingsLicenseIdEnum;
+		grantedByProfileId: (string | null) | null;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		grantedAt: string;
+		/**
+		 * @default 'recognized'
+		 * @type string
+		 */
+		recognitionStatus: PatchApiUnitsByTypeByUnitIdVariantContextStatus200LicenseOfferingsRecognitionStatusEnum;
+	}[];
 	/**
 	 * @type boolean
 	 */
@@ -84091,27 +84486,6 @@ export type PatchApiUnitsByTypeByUnitIdVariantContextStatus200 = {
 					characterCount: string | number;
 				}[];
 				format: (string | null) | null;
-				contentLicense:
-					| ({
-							/**
-							 * @default 'rezics-unit-content-license-v1'
-							 * @type string
-							 */
-							referenceLicenseSlug: "rezics-unit-content-license-v1";
-							/**
-							 * @description
-							 * Format: `uuid`
-							 * @type string
-							 */
-							grantedByProfileId: string;
-							/**
-							 * @description
-							 * Format: `date-time`
-							 * @type string
-							 */
-							grantedAt: string;
-					  } | null)
-					| null;
 		  }
 		| {
 				/**
@@ -84120,27 +84494,6 @@ export type PatchApiUnitsByTypeByUnitIdVariantContextStatus200 = {
 				type: "software";
 				releaseDate: (string | null) | null;
 				versionLabel: (string | null) | null;
-				contentLicense:
-					| ({
-							/**
-							 * @default 'rezics-unit-content-license-v1'
-							 * @type string
-							 */
-							referenceLicenseSlug: "rezics-unit-content-license-v1";
-							/**
-							 * @description
-							 * Format: `uuid`
-							 * @type string
-							 */
-							grantedByProfileId: string;
-							/**
-							 * @description
-							 * Format: `date-time`
-							 * @type string
-							 */
-							grantedAt: string;
-					  } | null)
-					| null;
 		  }
 		| {
 				/**
@@ -84159,27 +84512,6 @@ export type PatchApiUnitsByTypeByUnitIdVariantContextStatus200 = {
 				runtimeMinutes: ((string | number) | null) | null;
 				episodeCount: ((string | number) | null) | null;
 				seasonCount: ((string | number) | null) | null;
-				contentLicense:
-					| ({
-							/**
-							 * @default 'rezics-unit-content-license-v1'
-							 * @type string
-							 */
-							referenceLicenseSlug: "rezics-unit-content-license-v1";
-							/**
-							 * @description
-							 * Format: `uuid`
-							 * @type string
-							 */
-							grantedByProfileId: string;
-							/**
-							 * @description
-							 * Format: `date-time`
-							 * @type string
-							 */
-							grantedAt: string;
-					  } | null)
-					| null;
 		  }
 		| {
 				/**
@@ -85455,7 +85787,7 @@ export const PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200Language = 
 export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200Language =
 	(typeof PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200Language)[keyof typeof PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200Language];
 
-export const PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200License = {
+export const PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200LicensesLicenseIdEnum = {
 	"cc-by-nc-sa-4.0": "cc-by-nc-sa-4.0",
 	"cc-by-sa-4.0": "cc-by-sa-4.0",
 	"cc-by-sa-3.0": "cc-by-sa-3.0",
@@ -85463,10 +85795,35 @@ export const PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200License = {
 	"cc-by-nc-4.0": "cc-by-nc-4.0",
 	"cc-by-4.0": "cc-by-4.0",
 	"cc0-1.0": "cc0-1.0",
+	"rezics-unit-content-license-v1": "rezics-unit-content-license-v1",
 } as const;
 
-export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200License =
-	(typeof PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200License)[keyof typeof PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200License];
+export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200LicensesLicenseIdEnum =
+	(typeof PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200LicensesLicenseIdEnum)[keyof typeof PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200LicensesLicenseIdEnum];
+
+export const PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200LicenseOfferingsLicenseIdEnum =
+	{
+		"cc-by-nc-sa-4.0": "cc-by-nc-sa-4.0",
+		"cc-by-sa-4.0": "cc-by-sa-4.0",
+		"cc-by-sa-3.0": "cc-by-sa-3.0",
+		"all-rights-reserved": "all-rights-reserved",
+		"cc-by-nc-4.0": "cc-by-nc-4.0",
+		"cc-by-4.0": "cc-by-4.0",
+		"cc0-1.0": "cc0-1.0",
+		"rezics-unit-content-license-v1": "rezics-unit-content-license-v1",
+	} as const;
+
+export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200LicenseOfferingsLicenseIdEnum =
+	(typeof PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200LicenseOfferingsLicenseIdEnum)[keyof typeof PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200LicenseOfferingsLicenseIdEnum];
+
+export const PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200LicenseOfferingsRecognitionStatusEnum =
+	{
+		recognized: "recognized",
+		invalidated: "invalidated",
+	} as const;
+
+export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200LicenseOfferingsRecognitionStatusEnum =
+	(typeof PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200LicenseOfferingsRecognitionStatusEnum)[keyof typeof PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200LicenseOfferingsRecognitionStatusEnum];
 
 export const PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200AttributionsRoleEnum = {
 	author: "author",
@@ -85747,7 +86104,57 @@ export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200 = {
 	 * @type string
 	 */
 	aiDisclosure: string;
-	license: (PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200License | null) | null;
+	/**
+	 * @type array
+	 */
+	licenses: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		id: string;
+		/**
+		 * @default 'cc-by-nc-sa-4.0'
+		 * @type string
+		 */
+		licenseId: PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200LicensesLicenseIdEnum;
+		grantedByProfileId: (string | null) | null;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		grantedAt: string;
+	}[];
+	/**
+	 * @type array
+	 */
+	licenseOfferings: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		id: string;
+		/**
+		 * @default 'cc-by-nc-sa-4.0'
+		 * @type string
+		 */
+		licenseId: PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200LicenseOfferingsLicenseIdEnum;
+		grantedByProfileId: (string | null) | null;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		grantedAt: string;
+		/**
+		 * @default 'recognized'
+		 * @type string
+		 */
+		recognitionStatus: PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200LicenseOfferingsRecognitionStatusEnum;
+	}[];
 	/**
 	 * @type boolean
 	 */
@@ -85974,27 +86381,6 @@ export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200 = {
 					characterCount: string | number;
 				}[];
 				format: (string | null) | null;
-				contentLicense:
-					| ({
-							/**
-							 * @default 'rezics-unit-content-license-v1'
-							 * @type string
-							 */
-							referenceLicenseSlug: "rezics-unit-content-license-v1";
-							/**
-							 * @description
-							 * Format: `uuid`
-							 * @type string
-							 */
-							grantedByProfileId: string;
-							/**
-							 * @description
-							 * Format: `date-time`
-							 * @type string
-							 */
-							grantedAt: string;
-					  } | null)
-					| null;
 		  }
 		| {
 				/**
@@ -86003,27 +86389,6 @@ export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200 = {
 				type: "software";
 				releaseDate: (string | null) | null;
 				versionLabel: (string | null) | null;
-				contentLicense:
-					| ({
-							/**
-							 * @default 'rezics-unit-content-license-v1'
-							 * @type string
-							 */
-							referenceLicenseSlug: "rezics-unit-content-license-v1";
-							/**
-							 * @description
-							 * Format: `uuid`
-							 * @type string
-							 */
-							grantedByProfileId: string;
-							/**
-							 * @description
-							 * Format: `date-time`
-							 * @type string
-							 */
-							grantedAt: string;
-					  } | null)
-					| null;
 		  }
 		| {
 				/**
@@ -86042,27 +86407,6 @@ export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200 = {
 				runtimeMinutes: ((string | number) | null) | null;
 				episodeCount: ((string | number) | null) | null;
 				seasonCount: ((string | number) | null) | null;
-				contentLicense:
-					| ({
-							/**
-							 * @default 'rezics-unit-content-license-v1'
-							 * @type string
-							 */
-							referenceLicenseSlug: "rezics-unit-content-license-v1";
-							/**
-							 * @description
-							 * Format: `uuid`
-							 * @type string
-							 */
-							grantedByProfileId: string;
-							/**
-							 * @description
-							 * Format: `date-time`
-							 * @type string
-							 */
-							grantedAt: string;
-					  } | null)
-					| null;
 		  }
 		| {
 				/**
@@ -87348,7 +87692,7 @@ export const PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200Language =
 export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200Language =
 	(typeof PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200Language)[keyof typeof PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200Language];
 
-export const PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200License = {
+export const PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200LicensesLicenseIdEnum = {
 	"cc-by-nc-sa-4.0": "cc-by-nc-sa-4.0",
 	"cc-by-sa-4.0": "cc-by-sa-4.0",
 	"cc-by-sa-3.0": "cc-by-sa-3.0",
@@ -87356,10 +87700,35 @@ export const PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200License = 
 	"cc-by-nc-4.0": "cc-by-nc-4.0",
 	"cc-by-4.0": "cc-by-4.0",
 	"cc0-1.0": "cc0-1.0",
+	"rezics-unit-content-license-v1": "rezics-unit-content-license-v1",
 } as const;
 
-export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200License =
-	(typeof PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200License)[keyof typeof PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200License];
+export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200LicensesLicenseIdEnum =
+	(typeof PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200LicensesLicenseIdEnum)[keyof typeof PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200LicensesLicenseIdEnum];
+
+export const PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200LicenseOfferingsLicenseIdEnum =
+	{
+		"cc-by-nc-sa-4.0": "cc-by-nc-sa-4.0",
+		"cc-by-sa-4.0": "cc-by-sa-4.0",
+		"cc-by-sa-3.0": "cc-by-sa-3.0",
+		"all-rights-reserved": "all-rights-reserved",
+		"cc-by-nc-4.0": "cc-by-nc-4.0",
+		"cc-by-4.0": "cc-by-4.0",
+		"cc0-1.0": "cc0-1.0",
+		"rezics-unit-content-license-v1": "rezics-unit-content-license-v1",
+	} as const;
+
+export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200LicenseOfferingsLicenseIdEnum =
+	(typeof PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200LicenseOfferingsLicenseIdEnum)[keyof typeof PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200LicenseOfferingsLicenseIdEnum];
+
+export const PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200LicenseOfferingsRecognitionStatusEnum =
+	{
+		recognized: "recognized",
+		invalidated: "invalidated",
+	} as const;
+
+export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200LicenseOfferingsRecognitionStatusEnum =
+	(typeof PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200LicenseOfferingsRecognitionStatusEnum)[keyof typeof PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200LicenseOfferingsRecognitionStatusEnum];
 
 export const PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200AttributionsRoleEnum = {
 	author: "author",
@@ -87641,7 +88010,57 @@ export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200 = {
 	 * @type string
 	 */
 	aiDisclosure: string;
-	license: (PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200License | null) | null;
+	/**
+	 * @type array
+	 */
+	licenses: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		id: string;
+		/**
+		 * @default 'cc-by-nc-sa-4.0'
+		 * @type string
+		 */
+		licenseId: PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200LicensesLicenseIdEnum;
+		grantedByProfileId: (string | null) | null;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		grantedAt: string;
+	}[];
+	/**
+	 * @type array
+	 */
+	licenseOfferings: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		id: string;
+		/**
+		 * @default 'cc-by-nc-sa-4.0'
+		 * @type string
+		 */
+		licenseId: PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200LicenseOfferingsLicenseIdEnum;
+		grantedByProfileId: (string | null) | null;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		grantedAt: string;
+		/**
+		 * @default 'recognized'
+		 * @type string
+		 */
+		recognitionStatus: PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200LicenseOfferingsRecognitionStatusEnum;
+	}[];
 	/**
 	 * @type boolean
 	 */
@@ -87868,27 +88287,6 @@ export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200 = {
 					characterCount: string | number;
 				}[];
 				format: (string | null) | null;
-				contentLicense:
-					| ({
-							/**
-							 * @default 'rezics-unit-content-license-v1'
-							 * @type string
-							 */
-							referenceLicenseSlug: "rezics-unit-content-license-v1";
-							/**
-							 * @description
-							 * Format: `uuid`
-							 * @type string
-							 */
-							grantedByProfileId: string;
-							/**
-							 * @description
-							 * Format: `date-time`
-							 * @type string
-							 */
-							grantedAt: string;
-					  } | null)
-					| null;
 		  }
 		| {
 				/**
@@ -87897,27 +88295,6 @@ export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200 = {
 				type: "software";
 				releaseDate: (string | null) | null;
 				versionLabel: (string | null) | null;
-				contentLicense:
-					| ({
-							/**
-							 * @default 'rezics-unit-content-license-v1'
-							 * @type string
-							 */
-							referenceLicenseSlug: "rezics-unit-content-license-v1";
-							/**
-							 * @description
-							 * Format: `uuid`
-							 * @type string
-							 */
-							grantedByProfileId: string;
-							/**
-							 * @description
-							 * Format: `date-time`
-							 * @type string
-							 */
-							grantedAt: string;
-					  } | null)
-					| null;
 		  }
 		| {
 				/**
@@ -87936,27 +88313,6 @@ export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200 = {
 				runtimeMinutes: ((string | number) | null) | null;
 				episodeCount: ((string | number) | null) | null;
 				seasonCount: ((string | number) | null) | null;
-				contentLicense:
-					| ({
-							/**
-							 * @default 'rezics-unit-content-license-v1'
-							 * @type string
-							 */
-							referenceLicenseSlug: "rezics-unit-content-license-v1";
-							/**
-							 * @description
-							 * Format: `uuid`
-							 * @type string
-							 */
-							grantedByProfileId: string;
-							/**
-							 * @description
-							 * Format: `date-time`
-							 * @type string
-							 */
-							grantedAt: string;
-					  } | null)
-					| null;
 		  }
 		| {
 				/**
@@ -107582,7 +107938,6 @@ export const GetApiProgressSearchFilterStatus200FilterDocumentControlsFieldEnum 
 	"updated-at": "updated-at",
 	"published-at": "published-at",
 	"closes-at": "closes-at",
-	"content-license": "content-license",
 	"book-isbn13": "book-isbn13",
 	"book-publication-date": "book-publication-date",
 	"book-page-count": "book-page-count",
@@ -107797,7 +108152,6 @@ export const GetApiProgressSearchFilterStatus200ControlsFieldEnum = {
 	"updated-at": "updated-at",
 	"published-at": "published-at",
 	"closes-at": "closes-at",
-	"content-license": "content-license",
 	"book-isbn13": "book-isbn13",
 	"book-publication-date": "book-publication-date",
 	"book-page-count": "book-page-count",
@@ -110523,7 +110877,6 @@ export type PostApiProgressSearchBody = {
 							| "updated-at"
 							| "published-at"
 							| "closes-at"
-							| "content-license"
 							| "book-isbn13"
 							| "book-publication-date"
 							| "book-page-count"
@@ -110571,7 +110924,6 @@ export type PostApiProgressSearchBody = {
 							| "updated-at"
 							| "published-at"
 							| "closes-at"
-							| "content-license"
 							| "book-isbn13"
 							| "book-publication-date"
 							| "book-page-count"
@@ -110619,7 +110971,6 @@ export type PostApiProgressSearchBody = {
 							| "updated-at"
 							| "published-at"
 							| "closes-at"
-							| "content-license"
 							| "book-isbn13"
 							| "book-publication-date"
 							| "book-page-count"
@@ -110668,7 +111019,6 @@ export type PostApiProgressSearchBody = {
 									| "updated-at"
 									| "published-at"
 									| "closes-at"
-									| "content-license"
 									| "book-isbn13"
 									| "book-publication-date"
 									| "book-page-count"
@@ -110717,7 +111067,6 @@ export type PostApiProgressSearchBody = {
 									| "updated-at"
 									| "published-at"
 									| "closes-at"
-									| "content-license"
 									| "book-isbn13"
 									| "book-publication-date"
 									| "book-page-count"
@@ -110767,7 +111116,6 @@ export type PostApiProgressSearchBody = {
 							| "updated-at"
 							| "published-at"
 							| "closes-at"
-							| "content-license"
 							| "book-isbn13"
 							| "book-publication-date"
 							| "book-page-count"
@@ -110923,7 +111271,6 @@ export type PostApiProgressSearchBody = {
 									| "updated-at"
 									| "published-at"
 									| "closes-at"
-									| "content-license"
 									| "book-isbn13"
 									| "book-publication-date"
 									| "book-page-count"
@@ -110971,7 +111318,6 @@ export type PostApiProgressSearchBody = {
 									| "updated-at"
 									| "published-at"
 									| "closes-at"
-									| "content-license"
 									| "book-isbn13"
 									| "book-publication-date"
 									| "book-page-count"
@@ -111019,7 +111365,6 @@ export type PostApiProgressSearchBody = {
 									| "updated-at"
 									| "published-at"
 									| "closes-at"
-									| "content-license"
 									| "book-isbn13"
 									| "book-publication-date"
 									| "book-page-count"
@@ -111068,7 +111413,6 @@ export type PostApiProgressSearchBody = {
 											| "updated-at"
 											| "published-at"
 											| "closes-at"
-											| "content-license"
 											| "book-isbn13"
 											| "book-publication-date"
 											| "book-page-count"
@@ -111117,7 +111461,6 @@ export type PostApiProgressSearchBody = {
 											| "updated-at"
 											| "published-at"
 											| "closes-at"
-											| "content-license"
 											| "book-isbn13"
 											| "book-publication-date"
 											| "book-page-count"
@@ -111167,7 +111510,6 @@ export type PostApiProgressSearchBody = {
 									| "updated-at"
 									| "published-at"
 									| "closes-at"
-									| "content-license"
 									| "book-isbn13"
 									| "book-publication-date"
 									| "book-page-count"
@@ -147925,13 +148267,29 @@ export const PatchApiRealmsByRealmIdUnitsByUnitIdStatus200KindEnum = {
 	restore: "restore",
 	lock_post_targeting: "lock_post_targeting",
 	unlock_post_targeting: "unlock_post_targeting",
-	invalidate_content_license: "invalidate_content_license",
-	restore_content_license: "restore_content_license",
+	invalidate_license: "invalidate_license",
+	restore_license: "restore_license",
 	reverse: "reverse",
 } as const;
 
 export type PatchApiRealmsByRealmIdUnitsByUnitIdStatus200KindEnum =
 	(typeof PatchApiRealmsByRealmIdUnitsByUnitIdStatus200KindEnum)[keyof typeof PatchApiRealmsByRealmIdUnitsByUnitIdStatus200KindEnum];
+
+export const PatchApiRealmsByRealmIdUnitsByUnitIdStatus200PreviousRecognitionStatus = {
+	recognized: "recognized",
+	invalidated: "invalidated",
+} as const;
+
+export type PatchApiRealmsByRealmIdUnitsByUnitIdStatus200PreviousRecognitionStatus =
+	(typeof PatchApiRealmsByRealmIdUnitsByUnitIdStatus200PreviousRecognitionStatus)[keyof typeof PatchApiRealmsByRealmIdUnitsByUnitIdStatus200PreviousRecognitionStatus];
+
+export const PatchApiRealmsByRealmIdUnitsByUnitIdStatus200ResultingRecognitionStatus = {
+	recognized: "recognized",
+	invalidated: "invalidated",
+} as const;
+
+export type PatchApiRealmsByRealmIdUnitsByUnitIdStatus200ResultingRecognitionStatus =
+	(typeof PatchApiRealmsByRealmIdUnitsByUnitIdStatus200ResultingRecognitionStatus)[keyof typeof PatchApiRealmsByRealmIdUnitsByUnitIdStatus200ResultingRecognitionStatus];
 
 export const PatchApiRealmsByRealmIdUnitsByUnitIdStatus200NotesRoleEnum = {
 	evidence: "evidence",
@@ -148004,9 +148362,13 @@ export type PatchApiRealmsByRealmIdUnitsByUnitIdStatus200 = {
 	previousState: (string | null) | null;
 	resultingState: (string | null) | null;
 	previousPostTargetingLocked: (boolean | null) | null;
-	contentLicenseId: (string | null) | null;
-	previousContentLicenseStatus: (("active" | "invalidated") | null) | null;
-	resultingContentLicenseStatus: (("active" | "invalidated") | null) | null;
+	licenseGrantId: (string | null) | null;
+	previousRecognitionStatus:
+		| (PatchApiRealmsByRealmIdUnitsByUnitIdStatus200PreviousRecognitionStatus | null)
+		| null;
+	resultingRecognitionStatus:
+		| (PatchApiRealmsByRealmIdUnitsByUnitIdStatus200ResultingRecognitionStatus | null)
+		| null;
 	resultingPostTargetingLocked: (boolean | null) | null;
 	reversesActionId: (string | null) | null;
 	/**
@@ -148590,8 +148952,8 @@ export const GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus200ItemsKindEnum = {
 	restore: "restore",
 	lock_post_targeting: "lock_post_targeting",
 	unlock_post_targeting: "unlock_post_targeting",
-	invalidate_content_license: "invalidate_content_license",
-	restore_content_license: "restore_content_license",
+	invalidate_license: "invalidate_license",
+	restore_license: "restore_license",
 	reverse: "reverse",
 } as const;
 
@@ -151499,7 +151861,6 @@ export type PostApiSearchFilterExecuteBody = {
 							| "updated-at"
 							| "published-at"
 							| "closes-at"
-							| "content-license"
 							| "book-isbn13"
 							| "book-publication-date"
 							| "book-page-count"
@@ -151547,7 +151908,6 @@ export type PostApiSearchFilterExecuteBody = {
 							| "updated-at"
 							| "published-at"
 							| "closes-at"
-							| "content-license"
 							| "book-isbn13"
 							| "book-publication-date"
 							| "book-page-count"
@@ -151595,7 +151955,6 @@ export type PostApiSearchFilterExecuteBody = {
 							| "updated-at"
 							| "published-at"
 							| "closes-at"
-							| "content-license"
 							| "book-isbn13"
 							| "book-publication-date"
 							| "book-page-count"
@@ -151644,7 +152003,6 @@ export type PostApiSearchFilterExecuteBody = {
 									| "updated-at"
 									| "published-at"
 									| "closes-at"
-									| "content-license"
 									| "book-isbn13"
 									| "book-publication-date"
 									| "book-page-count"
@@ -151693,7 +152051,6 @@ export type PostApiSearchFilterExecuteBody = {
 									| "updated-at"
 									| "published-at"
 									| "closes-at"
-									| "content-license"
 									| "book-isbn13"
 									| "book-publication-date"
 									| "book-page-count"
@@ -151743,7 +152100,6 @@ export type PostApiSearchFilterExecuteBody = {
 							| "updated-at"
 							| "published-at"
 							| "closes-at"
-							| "content-license"
 							| "book-isbn13"
 							| "book-publication-date"
 							| "book-page-count"
@@ -151899,7 +152255,6 @@ export type PostApiSearchFilterExecuteBody = {
 									| "updated-at"
 									| "published-at"
 									| "closes-at"
-									| "content-license"
 									| "book-isbn13"
 									| "book-publication-date"
 									| "book-page-count"
@@ -151947,7 +152302,6 @@ export type PostApiSearchFilterExecuteBody = {
 									| "updated-at"
 									| "published-at"
 									| "closes-at"
-									| "content-license"
 									| "book-isbn13"
 									| "book-publication-date"
 									| "book-page-count"
@@ -151995,7 +152349,6 @@ export type PostApiSearchFilterExecuteBody = {
 									| "updated-at"
 									| "published-at"
 									| "closes-at"
-									| "content-license"
 									| "book-isbn13"
 									| "book-publication-date"
 									| "book-page-count"
@@ -152044,7 +152397,6 @@ export type PostApiSearchFilterExecuteBody = {
 											| "updated-at"
 											| "published-at"
 											| "closes-at"
-											| "content-license"
 											| "book-isbn13"
 											| "book-publication-date"
 											| "book-page-count"
@@ -152093,7 +152445,6 @@ export type PostApiSearchFilterExecuteBody = {
 											| "updated-at"
 											| "published-at"
 											| "closes-at"
-											| "content-license"
 											| "book-isbn13"
 											| "book-publication-date"
 											| "book-page-count"
@@ -152143,7 +152494,6 @@ export type PostApiSearchFilterExecuteBody = {
 									| "updated-at"
 									| "published-at"
 									| "closes-at"
-									| "content-license"
 									| "book-isbn13"
 									| "book-publication-date"
 									| "book-page-count"
@@ -155507,7 +155857,6 @@ export type PostApiSearchFilterFeedBody = {
 							| "updated-at"
 							| "published-at"
 							| "closes-at"
-							| "content-license"
 							| "book-isbn13"
 							| "book-publication-date"
 							| "book-page-count"
@@ -155555,7 +155904,6 @@ export type PostApiSearchFilterFeedBody = {
 							| "updated-at"
 							| "published-at"
 							| "closes-at"
-							| "content-license"
 							| "book-isbn13"
 							| "book-publication-date"
 							| "book-page-count"
@@ -155603,7 +155951,6 @@ export type PostApiSearchFilterFeedBody = {
 							| "updated-at"
 							| "published-at"
 							| "closes-at"
-							| "content-license"
 							| "book-isbn13"
 							| "book-publication-date"
 							| "book-page-count"
@@ -155652,7 +155999,6 @@ export type PostApiSearchFilterFeedBody = {
 									| "updated-at"
 									| "published-at"
 									| "closes-at"
-									| "content-license"
 									| "book-isbn13"
 									| "book-publication-date"
 									| "book-page-count"
@@ -155701,7 +156047,6 @@ export type PostApiSearchFilterFeedBody = {
 									| "updated-at"
 									| "published-at"
 									| "closes-at"
-									| "content-license"
 									| "book-isbn13"
 									| "book-publication-date"
 									| "book-page-count"
@@ -155751,7 +156096,6 @@ export type PostApiSearchFilterFeedBody = {
 							| "updated-at"
 							| "published-at"
 							| "closes-at"
-							| "content-license"
 							| "book-isbn13"
 							| "book-publication-date"
 							| "book-page-count"
@@ -155907,7 +156251,6 @@ export type PostApiSearchFilterFeedBody = {
 									| "updated-at"
 									| "published-at"
 									| "closes-at"
-									| "content-license"
 									| "book-isbn13"
 									| "book-publication-date"
 									| "book-page-count"
@@ -155955,7 +156298,6 @@ export type PostApiSearchFilterFeedBody = {
 									| "updated-at"
 									| "published-at"
 									| "closes-at"
-									| "content-license"
 									| "book-isbn13"
 									| "book-publication-date"
 									| "book-page-count"
@@ -156003,7 +156345,6 @@ export type PostApiSearchFilterFeedBody = {
 									| "updated-at"
 									| "published-at"
 									| "closes-at"
-									| "content-license"
 									| "book-isbn13"
 									| "book-publication-date"
 									| "book-page-count"
@@ -156052,7 +156393,6 @@ export type PostApiSearchFilterFeedBody = {
 											| "updated-at"
 											| "published-at"
 											| "closes-at"
-											| "content-license"
 											| "book-isbn13"
 											| "book-publication-date"
 											| "book-page-count"
@@ -156101,7 +156441,6 @@ export type PostApiSearchFilterFeedBody = {
 											| "updated-at"
 											| "published-at"
 											| "closes-at"
-											| "content-license"
 											| "book-isbn13"
 											| "book-publication-date"
 											| "book-page-count"
@@ -156151,7 +156490,6 @@ export type PostApiSearchFilterFeedBody = {
 									| "updated-at"
 									| "published-at"
 									| "closes-at"
-									| "content-license"
 									| "book-isbn13"
 									| "book-publication-date"
 									| "book-page-count"
@@ -156932,7 +157270,6 @@ export type PostApiSearchZonesByZoneIdFilterExecuteBody = {
 							| "updated-at"
 							| "published-at"
 							| "closes-at"
-							| "content-license"
 							| "book-isbn13"
 							| "book-publication-date"
 							| "book-page-count"
@@ -156980,7 +157317,6 @@ export type PostApiSearchZonesByZoneIdFilterExecuteBody = {
 							| "updated-at"
 							| "published-at"
 							| "closes-at"
-							| "content-license"
 							| "book-isbn13"
 							| "book-publication-date"
 							| "book-page-count"
@@ -157028,7 +157364,6 @@ export type PostApiSearchZonesByZoneIdFilterExecuteBody = {
 							| "updated-at"
 							| "published-at"
 							| "closes-at"
-							| "content-license"
 							| "book-isbn13"
 							| "book-publication-date"
 							| "book-page-count"
@@ -157077,7 +157412,6 @@ export type PostApiSearchZonesByZoneIdFilterExecuteBody = {
 									| "updated-at"
 									| "published-at"
 									| "closes-at"
-									| "content-license"
 									| "book-isbn13"
 									| "book-publication-date"
 									| "book-page-count"
@@ -157126,7 +157460,6 @@ export type PostApiSearchZonesByZoneIdFilterExecuteBody = {
 									| "updated-at"
 									| "published-at"
 									| "closes-at"
-									| "content-license"
 									| "book-isbn13"
 									| "book-publication-date"
 									| "book-page-count"
@@ -157176,7 +157509,6 @@ export type PostApiSearchZonesByZoneIdFilterExecuteBody = {
 							| "updated-at"
 							| "published-at"
 							| "closes-at"
-							| "content-license"
 							| "book-isbn13"
 							| "book-publication-date"
 							| "book-page-count"
@@ -157332,7 +157664,6 @@ export type PostApiSearchZonesByZoneIdFilterExecuteBody = {
 									| "updated-at"
 									| "published-at"
 									| "closes-at"
-									| "content-license"
 									| "book-isbn13"
 									| "book-publication-date"
 									| "book-page-count"
@@ -157380,7 +157711,6 @@ export type PostApiSearchZonesByZoneIdFilterExecuteBody = {
 									| "updated-at"
 									| "published-at"
 									| "closes-at"
-									| "content-license"
 									| "book-isbn13"
 									| "book-publication-date"
 									| "book-page-count"
@@ -157428,7 +157758,6 @@ export type PostApiSearchZonesByZoneIdFilterExecuteBody = {
 									| "updated-at"
 									| "published-at"
 									| "closes-at"
-									| "content-license"
 									| "book-isbn13"
 									| "book-publication-date"
 									| "book-page-count"
@@ -157477,7 +157806,6 @@ export type PostApiSearchZonesByZoneIdFilterExecuteBody = {
 											| "updated-at"
 											| "published-at"
 											| "closes-at"
-											| "content-license"
 											| "book-isbn13"
 											| "book-publication-date"
 											| "book-page-count"
@@ -157526,7 +157854,6 @@ export type PostApiSearchZonesByZoneIdFilterExecuteBody = {
 											| "updated-at"
 											| "published-at"
 											| "closes-at"
-											| "content-license"
 											| "book-isbn13"
 											| "book-publication-date"
 											| "book-page-count"
@@ -157576,7 +157903,6 @@ export type PostApiSearchZonesByZoneIdFilterExecuteBody = {
 									| "updated-at"
 									| "published-at"
 									| "closes-at"
-									| "content-license"
 									| "book-isbn13"
 									| "book-publication-date"
 									| "book-page-count"
@@ -160929,7 +161255,6 @@ export type PostApiSearchZonesByZoneIdFilterFeedBody = {
 							| "updated-at"
 							| "published-at"
 							| "closes-at"
-							| "content-license"
 							| "book-isbn13"
 							| "book-publication-date"
 							| "book-page-count"
@@ -160977,7 +161302,6 @@ export type PostApiSearchZonesByZoneIdFilterFeedBody = {
 							| "updated-at"
 							| "published-at"
 							| "closes-at"
-							| "content-license"
 							| "book-isbn13"
 							| "book-publication-date"
 							| "book-page-count"
@@ -161025,7 +161349,6 @@ export type PostApiSearchZonesByZoneIdFilterFeedBody = {
 							| "updated-at"
 							| "published-at"
 							| "closes-at"
-							| "content-license"
 							| "book-isbn13"
 							| "book-publication-date"
 							| "book-page-count"
@@ -161074,7 +161397,6 @@ export type PostApiSearchZonesByZoneIdFilterFeedBody = {
 									| "updated-at"
 									| "published-at"
 									| "closes-at"
-									| "content-license"
 									| "book-isbn13"
 									| "book-publication-date"
 									| "book-page-count"
@@ -161123,7 +161445,6 @@ export type PostApiSearchZonesByZoneIdFilterFeedBody = {
 									| "updated-at"
 									| "published-at"
 									| "closes-at"
-									| "content-license"
 									| "book-isbn13"
 									| "book-publication-date"
 									| "book-page-count"
@@ -161173,7 +161494,6 @@ export type PostApiSearchZonesByZoneIdFilterFeedBody = {
 							| "updated-at"
 							| "published-at"
 							| "closes-at"
-							| "content-license"
 							| "book-isbn13"
 							| "book-publication-date"
 							| "book-page-count"
@@ -161329,7 +161649,6 @@ export type PostApiSearchZonesByZoneIdFilterFeedBody = {
 									| "updated-at"
 									| "published-at"
 									| "closes-at"
-									| "content-license"
 									| "book-isbn13"
 									| "book-publication-date"
 									| "book-page-count"
@@ -161377,7 +161696,6 @@ export type PostApiSearchZonesByZoneIdFilterFeedBody = {
 									| "updated-at"
 									| "published-at"
 									| "closes-at"
-									| "content-license"
 									| "book-isbn13"
 									| "book-publication-date"
 									| "book-page-count"
@@ -161425,7 +161743,6 @@ export type PostApiSearchZonesByZoneIdFilterFeedBody = {
 									| "updated-at"
 									| "published-at"
 									| "closes-at"
-									| "content-license"
 									| "book-isbn13"
 									| "book-publication-date"
 									| "book-page-count"
@@ -161474,7 +161791,6 @@ export type PostApiSearchZonesByZoneIdFilterFeedBody = {
 											| "updated-at"
 											| "published-at"
 											| "closes-at"
-											| "content-license"
 											| "book-isbn13"
 											| "book-publication-date"
 											| "book-page-count"
@@ -161523,7 +161839,6 @@ export type PostApiSearchZonesByZoneIdFilterFeedBody = {
 											| "updated-at"
 											| "published-at"
 											| "closes-at"
-											| "content-license"
 											| "book-isbn13"
 											| "book-publication-date"
 											| "book-page-count"
@@ -161573,7 +161888,6 @@ export type PostApiSearchZonesByZoneIdFilterFeedBody = {
 									| "updated-at"
 									| "published-at"
 									| "closes-at"
-									| "content-license"
 									| "book-isbn13"
 									| "book-publication-date"
 									| "book-page-count"
@@ -162300,7 +162614,6 @@ export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteBody = {
 							| "updated-at"
 							| "published-at"
 							| "closes-at"
-							| "content-license"
 							| "book-isbn13"
 							| "book-publication-date"
 							| "book-page-count"
@@ -162348,7 +162661,6 @@ export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteBody = {
 							| "updated-at"
 							| "published-at"
 							| "closes-at"
-							| "content-license"
 							| "book-isbn13"
 							| "book-publication-date"
 							| "book-page-count"
@@ -162396,7 +162708,6 @@ export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteBody = {
 							| "updated-at"
 							| "published-at"
 							| "closes-at"
-							| "content-license"
 							| "book-isbn13"
 							| "book-publication-date"
 							| "book-page-count"
@@ -162445,7 +162756,6 @@ export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteBody = {
 									| "updated-at"
 									| "published-at"
 									| "closes-at"
-									| "content-license"
 									| "book-isbn13"
 									| "book-publication-date"
 									| "book-page-count"
@@ -162494,7 +162804,6 @@ export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteBody = {
 									| "updated-at"
 									| "published-at"
 									| "closes-at"
-									| "content-license"
 									| "book-isbn13"
 									| "book-publication-date"
 									| "book-page-count"
@@ -162544,7 +162853,6 @@ export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteBody = {
 							| "updated-at"
 							| "published-at"
 							| "closes-at"
-							| "content-license"
 							| "book-isbn13"
 							| "book-publication-date"
 							| "book-page-count"
@@ -162700,7 +163008,6 @@ export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteBody = {
 									| "updated-at"
 									| "published-at"
 									| "closes-at"
-									| "content-license"
 									| "book-isbn13"
 									| "book-publication-date"
 									| "book-page-count"
@@ -162748,7 +163055,6 @@ export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteBody = {
 									| "updated-at"
 									| "published-at"
 									| "closes-at"
-									| "content-license"
 									| "book-isbn13"
 									| "book-publication-date"
 									| "book-page-count"
@@ -162796,7 +163102,6 @@ export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteBody = {
 									| "updated-at"
 									| "published-at"
 									| "closes-at"
-									| "content-license"
 									| "book-isbn13"
 									| "book-publication-date"
 									| "book-page-count"
@@ -162845,7 +163150,6 @@ export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteBody = {
 											| "updated-at"
 											| "published-at"
 											| "closes-at"
-											| "content-license"
 											| "book-isbn13"
 											| "book-publication-date"
 											| "book-page-count"
@@ -162894,7 +163198,6 @@ export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteBody = {
 											| "updated-at"
 											| "published-at"
 											| "closes-at"
-											| "content-license"
 											| "book-isbn13"
 											| "book-publication-date"
 											| "book-page-count"
@@ -162944,7 +163247,6 @@ export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteBody = {
 									| "updated-at"
 									| "published-at"
 									| "closes-at"
-									| "content-license"
 									| "book-isbn13"
 									| "book-publication-date"
 									| "book-page-count"
@@ -163679,7 +163981,6 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteBody =
 							| "updated-at"
 							| "published-at"
 							| "closes-at"
-							| "content-license"
 							| "book-isbn13"
 							| "book-publication-date"
 							| "book-page-count"
@@ -163727,7 +164028,6 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteBody =
 							| "updated-at"
 							| "published-at"
 							| "closes-at"
-							| "content-license"
 							| "book-isbn13"
 							| "book-publication-date"
 							| "book-page-count"
@@ -163775,7 +164075,6 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteBody =
 							| "updated-at"
 							| "published-at"
 							| "closes-at"
-							| "content-license"
 							| "book-isbn13"
 							| "book-publication-date"
 							| "book-page-count"
@@ -163824,7 +164123,6 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteBody =
 									| "updated-at"
 									| "published-at"
 									| "closes-at"
-									| "content-license"
 									| "book-isbn13"
 									| "book-publication-date"
 									| "book-page-count"
@@ -163873,7 +164171,6 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteBody =
 									| "updated-at"
 									| "published-at"
 									| "closes-at"
-									| "content-license"
 									| "book-isbn13"
 									| "book-publication-date"
 									| "book-page-count"
@@ -163923,7 +164220,6 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteBody =
 							| "updated-at"
 							| "published-at"
 							| "closes-at"
-							| "content-license"
 							| "book-isbn13"
 							| "book-publication-date"
 							| "book-page-count"
@@ -164079,7 +164375,6 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteBody =
 									| "updated-at"
 									| "published-at"
 									| "closes-at"
-									| "content-license"
 									| "book-isbn13"
 									| "book-publication-date"
 									| "book-page-count"
@@ -164127,7 +164422,6 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteBody =
 									| "updated-at"
 									| "published-at"
 									| "closes-at"
-									| "content-license"
 									| "book-isbn13"
 									| "book-publication-date"
 									| "book-page-count"
@@ -164175,7 +164469,6 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteBody =
 									| "updated-at"
 									| "published-at"
 									| "closes-at"
-									| "content-license"
 									| "book-isbn13"
 									| "book-publication-date"
 									| "book-page-count"
@@ -164224,7 +164517,6 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteBody =
 											| "updated-at"
 											| "published-at"
 											| "closes-at"
-											| "content-license"
 											| "book-isbn13"
 											| "book-publication-date"
 											| "book-page-count"
@@ -164273,7 +164565,6 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteBody =
 											| "updated-at"
 											| "published-at"
 											| "closes-at"
-											| "content-license"
 											| "book-isbn13"
 											| "book-publication-date"
 											| "book-page-count"
@@ -164323,7 +164614,6 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteBody =
 									| "updated-at"
 									| "published-at"
 									| "closes-at"
-									| "content-license"
 									| "book-isbn13"
 									| "book-publication-date"
 									| "book-page-count"
@@ -167736,7 +168026,6 @@ export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteBody = {
 							| "updated-at"
 							| "published-at"
 							| "closes-at"
-							| "content-license"
 							| "book-isbn13"
 							| "book-publication-date"
 							| "book-page-count"
@@ -167784,7 +168073,6 @@ export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteBody = {
 							| "updated-at"
 							| "published-at"
 							| "closes-at"
-							| "content-license"
 							| "book-isbn13"
 							| "book-publication-date"
 							| "book-page-count"
@@ -167832,7 +168120,6 @@ export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteBody = {
 							| "updated-at"
 							| "published-at"
 							| "closes-at"
-							| "content-license"
 							| "book-isbn13"
 							| "book-publication-date"
 							| "book-page-count"
@@ -167881,7 +168168,6 @@ export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteBody = {
 									| "updated-at"
 									| "published-at"
 									| "closes-at"
-									| "content-license"
 									| "book-isbn13"
 									| "book-publication-date"
 									| "book-page-count"
@@ -167930,7 +168216,6 @@ export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteBody = {
 									| "updated-at"
 									| "published-at"
 									| "closes-at"
-									| "content-license"
 									| "book-isbn13"
 									| "book-publication-date"
 									| "book-page-count"
@@ -167980,7 +168265,6 @@ export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteBody = {
 							| "updated-at"
 							| "published-at"
 							| "closes-at"
-							| "content-license"
 							| "book-isbn13"
 							| "book-publication-date"
 							| "book-page-count"
@@ -168136,7 +168420,6 @@ export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteBody = {
 									| "updated-at"
 									| "published-at"
 									| "closes-at"
-									| "content-license"
 									| "book-isbn13"
 									| "book-publication-date"
 									| "book-page-count"
@@ -168184,7 +168467,6 @@ export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteBody = {
 									| "updated-at"
 									| "published-at"
 									| "closes-at"
-									| "content-license"
 									| "book-isbn13"
 									| "book-publication-date"
 									| "book-page-count"
@@ -168232,7 +168514,6 @@ export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteBody = {
 									| "updated-at"
 									| "published-at"
 									| "closes-at"
-									| "content-license"
 									| "book-isbn13"
 									| "book-publication-date"
 									| "book-page-count"
@@ -168281,7 +168562,6 @@ export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteBody = {
 											| "updated-at"
 											| "published-at"
 											| "closes-at"
-											| "content-license"
 											| "book-isbn13"
 											| "book-publication-date"
 											| "book-page-count"
@@ -168330,7 +168610,6 @@ export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteBody = {
 											| "updated-at"
 											| "published-at"
 											| "closes-at"
-											| "content-license"
 											| "book-isbn13"
 											| "book-publication-date"
 											| "book-page-count"
@@ -168380,7 +168659,6 @@ export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteBody = {
 									| "updated-at"
 									| "published-at"
 									| "closes-at"
-									| "content-license"
 									| "book-isbn13"
 									| "book-publication-date"
 									| "book-page-count"
@@ -169140,7 +169418,6 @@ export const PostApiSearchSharedQueriesStatus201DocumentFilterDocumentControlsFi
 	"updated-at": "updated-at",
 	"published-at": "published-at",
 	"closes-at": "closes-at",
-	"content-license": "content-license",
 	"book-isbn13": "book-isbn13",
 	"book-publication-date": "book-publication-date",
 	"book-page-count": "book-page-count",
@@ -169219,7 +169496,6 @@ export const PostApiSearchSharedQueriesStatus201DocumentSelectionsFieldEnum = {
 	"updated-at": "updated-at",
 	"published-at": "published-at",
 	"closes-at": "closes-at",
-	"content-license": "content-license",
 	"book-isbn13": "book-isbn13",
 	"book-publication-date": "book-publication-date",
 	"book-page-count": "book-page-count",
@@ -171438,7 +171714,6 @@ export type PostApiSearchSharedQueriesStatus201 = {
 										| "updated-at"
 										| "published-at"
 										| "closes-at"
-										| "content-license"
 										| "book-isbn13"
 										| "book-publication-date"
 										| "book-page-count"
@@ -171486,7 +171761,6 @@ export type PostApiSearchSharedQueriesStatus201 = {
 										| "updated-at"
 										| "published-at"
 										| "closes-at"
-										| "content-license"
 										| "book-isbn13"
 										| "book-publication-date"
 										| "book-page-count"
@@ -171534,7 +171808,6 @@ export type PostApiSearchSharedQueriesStatus201 = {
 										| "updated-at"
 										| "published-at"
 										| "closes-at"
-										| "content-license"
 										| "book-isbn13"
 										| "book-publication-date"
 										| "book-page-count"
@@ -171583,7 +171856,6 @@ export type PostApiSearchSharedQueriesStatus201 = {
 												| "updated-at"
 												| "published-at"
 												| "closes-at"
-												| "content-license"
 												| "book-isbn13"
 												| "book-publication-date"
 												| "book-page-count"
@@ -171632,7 +171904,6 @@ export type PostApiSearchSharedQueriesStatus201 = {
 												| "updated-at"
 												| "published-at"
 												| "closes-at"
-												| "content-license"
 												| "book-isbn13"
 												| "book-publication-date"
 												| "book-page-count"
@@ -171682,7 +171953,6 @@ export type PostApiSearchSharedQueriesStatus201 = {
 										| "updated-at"
 										| "published-at"
 										| "closes-at"
-										| "content-license"
 										| "book-isbn13"
 										| "book-publication-date"
 										| "book-page-count"
@@ -171992,7 +172262,6 @@ export const PostApiSearchSharedQueriesRequestFilterDocumentControlsFieldEnum = 
 	"updated-at": "updated-at",
 	"published-at": "published-at",
 	"closes-at": "closes-at",
-	"content-license": "content-license",
 	"book-isbn13": "book-isbn13",
 	"book-publication-date": "book-publication-date",
 	"book-page-count": "book-page-count",
@@ -172071,7 +172340,6 @@ export const PostApiSearchSharedQueriesRequestSelectionsFieldEnum = {
 	"updated-at": "updated-at",
 	"published-at": "published-at",
 	"closes-at": "closes-at",
-	"content-license": "content-license",
 	"book-isbn13": "book-isbn13",
 	"book-publication-date": "book-publication-date",
 	"book-page-count": "book-page-count",
@@ -174280,7 +174548,6 @@ export type PostApiSearchSharedQueriesBody = {
 									| "updated-at"
 									| "published-at"
 									| "closes-at"
-									| "content-license"
 									| "book-isbn13"
 									| "book-publication-date"
 									| "book-page-count"
@@ -174328,7 +174595,6 @@ export type PostApiSearchSharedQueriesBody = {
 									| "updated-at"
 									| "published-at"
 									| "closes-at"
-									| "content-license"
 									| "book-isbn13"
 									| "book-publication-date"
 									| "book-page-count"
@@ -174376,7 +174642,6 @@ export type PostApiSearchSharedQueriesBody = {
 									| "updated-at"
 									| "published-at"
 									| "closes-at"
-									| "content-license"
 									| "book-isbn13"
 									| "book-publication-date"
 									| "book-page-count"
@@ -174425,7 +174690,6 @@ export type PostApiSearchSharedQueriesBody = {
 											| "updated-at"
 											| "published-at"
 											| "closes-at"
-											| "content-license"
 											| "book-isbn13"
 											| "book-publication-date"
 											| "book-page-count"
@@ -174474,7 +174738,6 @@ export type PostApiSearchSharedQueriesBody = {
 											| "updated-at"
 											| "published-at"
 											| "closes-at"
-											| "content-license"
 											| "book-isbn13"
 											| "book-publication-date"
 											| "book-page-count"
@@ -174524,7 +174787,6 @@ export type PostApiSearchSharedQueriesBody = {
 									| "updated-at"
 									| "published-at"
 									| "closes-at"
-									| "content-license"
 									| "book-isbn13"
 									| "book-publication-date"
 									| "book-page-count"
@@ -174775,7 +175037,6 @@ export const GetApiSearchSharedQueriesByIdStatus200DocumentFilterDocumentControl
 	"updated-at": "updated-at",
 	"published-at": "published-at",
 	"closes-at": "closes-at",
-	"content-license": "content-license",
 	"book-isbn13": "book-isbn13",
 	"book-publication-date": "book-publication-date",
 	"book-page-count": "book-page-count",
@@ -174854,7 +175115,6 @@ export const GetApiSearchSharedQueriesByIdStatus200DocumentSelectionsFieldEnum =
 	"updated-at": "updated-at",
 	"published-at": "published-at",
 	"closes-at": "closes-at",
-	"content-license": "content-license",
 	"book-isbn13": "book-isbn13",
 	"book-publication-date": "book-publication-date",
 	"book-page-count": "book-page-count",
@@ -177073,7 +177333,6 @@ export type GetApiSearchSharedQueriesByIdStatus200 = {
 										| "updated-at"
 										| "published-at"
 										| "closes-at"
-										| "content-license"
 										| "book-isbn13"
 										| "book-publication-date"
 										| "book-page-count"
@@ -177121,7 +177380,6 @@ export type GetApiSearchSharedQueriesByIdStatus200 = {
 										| "updated-at"
 										| "published-at"
 										| "closes-at"
-										| "content-license"
 										| "book-isbn13"
 										| "book-publication-date"
 										| "book-page-count"
@@ -177169,7 +177427,6 @@ export type GetApiSearchSharedQueriesByIdStatus200 = {
 										| "updated-at"
 										| "published-at"
 										| "closes-at"
-										| "content-license"
 										| "book-isbn13"
 										| "book-publication-date"
 										| "book-page-count"
@@ -177218,7 +177475,6 @@ export type GetApiSearchSharedQueriesByIdStatus200 = {
 												| "updated-at"
 												| "published-at"
 												| "closes-at"
-												| "content-license"
 												| "book-isbn13"
 												| "book-publication-date"
 												| "book-page-count"
@@ -177267,7 +177523,6 @@ export type GetApiSearchSharedQueriesByIdStatus200 = {
 												| "updated-at"
 												| "published-at"
 												| "closes-at"
-												| "content-license"
 												| "book-isbn13"
 												| "book-publication-date"
 												| "book-page-count"
@@ -177317,7 +177572,6 @@ export type GetApiSearchSharedQueriesByIdStatus200 = {
 										| "updated-at"
 										| "published-at"
 										| "closes-at"
-										| "content-license"
 										| "book-isbn13"
 										| "book-publication-date"
 										| "book-page-count"
@@ -178039,6 +178293,7 @@ export const PostApiSearchByIndexRequestLicensesEnum = {
 	"cc-by-nc-4.0": "cc-by-nc-4.0",
 	"cc-by-4.0": "cc-by-4.0",
 	"cc0-1.0": "cc0-1.0",
+	"rezics-unit-content-license-v1": "rezics-unit-content-license-v1",
 } as const;
 
 export type PostApiSearchByIndexRequestLicensesEnum =
@@ -178113,10 +178368,6 @@ export type PostApiSearchByIndexBody = {
 	 * @type array | undefined
 	 */
 	licenses?: PostApiSearchByIndexRequestLicensesEnum[];
-	/**
-	 * @type boolean | undefined
-	 */
-	contentLicenseActive?: boolean;
 	/**
 	 * @minLength 1
 	 * @type string | undefined

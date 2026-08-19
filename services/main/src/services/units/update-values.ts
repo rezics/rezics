@@ -1,4 +1,4 @@
-import type { PublicationLicenseId, UnitContentLicenseSlug } from "@rezics/license";
+import type { LicenseId } from "@rezics/license";
 
 import type { WorkReleaseStatus } from "../database/schema/contract-values";
 import type { RevisionContributionInput } from "./revision-contribution";
@@ -17,7 +17,7 @@ export interface UpdateUnitInput {
 		| "ai_assisted"
 		| "ai_originated"
 		| "machine_generated";
-	readonly license?: PublicationLicenseId | null;
+	readonly licenses?: readonly LicenseId[];
 	readonly unit?: {
 		readonly releasedOn?: string | null;
 	};
@@ -27,9 +27,6 @@ export interface UpdateUnitInput {
 		readonly pageCount?: number | null;
 		readonly wordCount?: number | null;
 		readonly format?: string | null;
-		readonly contentLicense?: {
-			readonly referenceLicenseSlug: UnitContentLicenseSlug;
-		};
 		readonly versionLabel?: string | null;
 		readonly kind?: string;
 		readonly runtimeMinutes?: number | null;

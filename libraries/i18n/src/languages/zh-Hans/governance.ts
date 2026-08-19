@@ -80,7 +80,7 @@ export default {
 		"unit.merge.review": "审核条目合并",
 		"unit.merge": "直接合并条目",
 		"unit.ownership.override": "强制转移任意条目的所有权",
-		"unit.content_license.manage": "使条目内容授权失效或恢复",
+		"unit.license.manage": "使条目授权授予失效或恢复",
 		"unit.delete": "软删除任意条目",
 		"unit.restore": "还原已软删除的条目",
 		"unit.slug.manage": "管理条目公开网址",

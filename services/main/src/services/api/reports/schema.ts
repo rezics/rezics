@@ -250,18 +250,28 @@ const PlatformModerationCommand = t.Union([
 	t.Literal("restore"),
 	t.Literal("lock_post_targeting"),
 	t.Literal("unlock_post_targeting"),
-	t.Literal("invalidate_content_license"),
-	t.Literal("restore_content_license"),
+	t.Literal("invalidate_license"),
+	t.Literal("restore_license"),
 	t.Literal("dismiss"),
 	t.Literal("note"),
 ]);
 
-const PlatformReportCaseContentLicense = t.Union([
-	t.Object({ id: Uuid, status: t.Literal("active") }, { additionalProperties: false }),
+const PlatformReportCaseLicenseGrant = t.Union([
 	t.Object(
 		{
 			id: Uuid,
-			status: t.Literal("invalidated"),
+			licenseId: t.String({ minLength: 1 }),
+			recognitionStatus: t.Literal("recognized"),
+			offeringEnded: t.Literal(false),
+		},
+		{ additionalProperties: false },
+	),
+	t.Object(
+		{
+			id: Uuid,
+			licenseId: t.String({ minLength: 1 }),
+			recognitionStatus: t.Literal("invalidated"),
+			offeringEnded: t.Literal(false),
 			invalidationActionId: Uuid,
 		},
 		{ additionalProperties: false },
@@ -278,7 +288,7 @@ export const PlatformReportCaseResponse = t.Object(
 		title: t.Nullable(t.String()),
 		moderationStatus: PlatformModerationStatus,
 		postTargetingLocked: t.Boolean(),
-		contentLicense: t.Nullable(PlatformReportCaseContentLicense),
+		licenseGrants: t.Array(PlatformReportCaseLicenseGrant),
 		reportCount: t.Integer({ minimum: 1 }),
 		allowedCommands: t.Array(PlatformModerationCommand, { minItems: 1 }),
 		createdAt: DateTime,

@@ -74,8 +74,8 @@ describe("database integrity boundaries", () => {
 		[emailOutbox, "email_outbox_intent_check", '"email_outbox"."locale" is not null'],
 		[
 			contentGovernanceAction,
-			"content_governance_action_content_license_transition_check",
-			'"content_governance_action"."previous_content_license_status" is not null',
+			"content_governance_action_license_grant_transition_check",
+			'"content_governance_action"."previous_recognition_status" is not null',
 		],
 		[
 			unitOwnershipClaim,

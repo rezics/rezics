@@ -1,6 +1,6 @@
 "use client";
 
-import { PublicationLicenseRegistry } from "@rezics/license";
+import { isLicenseId } from "@rezics/license";
 
 import { useGetApiUnitsByTypeByUnitId } from "@rezics/openapi-tanstack-query";
 import { AudioLines, BookOpen, Gamepad2, LibraryBig, PlaySquare, Video } from "lucide-react";
@@ -23,6 +23,7 @@ import { FavoriteButton } from "@/features/collections/components/favorite-butto
 import { UnitDockRenderer, useDockManagementAccess } from "@/features/docks";
 import { UnitShelf } from "@/features/explore/unit-shelf";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
+import { presentUnitLicenses } from "./components/present-unit-licenses";
 import { BookContents } from "./components/book-contents";
 import type { UnitType } from "./unit-types";
 import { UnitSubjectGroups } from "./components/unit-subject-groups";
@@ -129,22 +130,10 @@ export function UnitDetail({ type, unit }: { type: UnitType; unit: string }) {
 					: item.aiDisclosure === "machine_generated"
 						? t.units.aiDisclosure.machine_generated
 						: t.units.aiDisclosure.unknown;
-	const licenseDefinition = item.license ? PublicationLicenseRegistry[item.license] : null;
-	const licenseLabel = item.license ? t.licenses.options[item.license].label : null;
-	const licenseValue =
-		licenseDefinition?.kind === "license" ? (
-			<a
-				aria-label={`${t.licenses.viewTerms}: ${licenseLabel}`}
-				className="text-link hover:text-link-hover hover:underline"
-				href={licenseDefinition.url}
-				rel="noreferrer"
-				target="_blank"
-			>
-				{licenseLabel}
-			</a>
-		) : (
-			licenseLabel
-		);
+	const licenseValue = presentUnitLicenses(
+		item.licenses.map((grant) => grant.licenseId).filter(isLicenseId),
+		t,
+	);
 	const releaseStatus =
 		item.details.type === "book" || item.details.type === "media"
 			? t.units.releaseStatuses[item.details.releaseStatus]

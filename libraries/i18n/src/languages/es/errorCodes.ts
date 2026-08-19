@@ -44,7 +44,10 @@ export default {
 	UnitNotFound: "No se ha encontrado este contenido.",
 	UnitPermissionForbidden: "No tienes el permiso necesario para este contenido.",
 	UnitAccessRestricted: "Tu acceso a este perímetro de contenido está restringido.",
-	UnitContentLicenseGrantForbidden: `Solo las obras de propiedad personal pueden conceder una licencia a ${verbatimTerms.rezics.value}.`,
+	UnitLicenseGrantForbidden: `Solo las obras de propiedad personal pueden conceder una ${esTerminology.license.forms.inline} a ${verbatimTerms.rezics.value}.`,
+	UnitLicenseNotApplicable: `Esta ${esTerminology.license.forms.inline} no se puede conceder a este tipo de contenido.`,
+	UnitLicenseOfferingEndForbidden: `Esta oferta de ${esTerminology.license.forms.inline} no se puede cerrar.`,
+	UnitLicenseGrantConflict: `Ya existe una oferta abierta de esta ${esTerminology.license.forms.inline} en este contenido.`,
 	UnitChanged: "Este contenido ha cambiado. Actualiza la página e inténtalo de nuevo.",
 	UnitRevisionConflict:
 		"La versión de referencia ha cambiado. Actualiza la página e inténtalo de nuevo.",

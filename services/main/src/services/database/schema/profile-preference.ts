@@ -1,6 +1,6 @@
 import { inArray, sql } from "drizzle-orm";
 import { boolean, check, index, text, uuid } from "drizzle-orm/pg-core";
-import type { PublicationLicenseId } from "@rezics/license";
+import type { LicenseId } from "@rezics/license";
 
 import { pgTable } from "./base";
 import {
@@ -32,7 +32,7 @@ export const profilePreference = pgTable(
 		profileId: uuid()
 			.primaryKey()
 			.references(() => profile.id, { onDelete: "cascade" }),
-		defaultLicense: text().$type<PublicationLicenseId>(),
+		defaultLicenses: text().$type<LicenseId>().array().default(sql`'{}'::text[]`).notNull(),
 		defaultRealmManageMode: boolean().default(false).notNull(),
 		defaultScoreRealmId: uuid().references(() => realm.id, { onDelete: "set null" }),
 		scoreVisibility: resourceVisibility().default(DefaultResourceVisibility).notNull(),
@@ -63,10 +63,6 @@ export const profilePreference = pgTable(
 	},
 	(table) => [
 		index("profile_preference_default_score_realm_idx").on(table.defaultScoreRealmId),
-		check(
-			"profile_preference_default_license_check",
-			sql`${table.defaultLicense} is null or btrim(${table.defaultLicense}) <> ''`,
-		),
 		check(
 			"profile_preference_languages_check",
 			sql`cardinality(${table.preferredLanguages}) > 0

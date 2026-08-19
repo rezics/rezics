@@ -76,9 +76,9 @@ export const jaTerminology = defineTerminology("ja", {
 		},
 		forbidden: ["Tag structure", "Structure tag"],
 	},
-	publicationLicense: {
+	license: {
 		status: "approved",
-		forms: { label: "公開ライセンス", inline: "公開ライセンス" },
+		forms: { label: "ライセンス", inline: "ライセンス" },
 		forbidden: ["Publication license"],
 	},
 	entity: {

@@ -123,7 +123,7 @@ export const enContent = {
 		},
 		open: {
 			title: "A grand narrative must rest on verifiable foundations.",
-			body: `${BRAND} builds boundaries that can extend over time through open source, content documents with version semantics, ${enTerminology.publicationLicense.forms.inline}s, and permissioned ${API}s. Product pages clearly distinguish what is available, in development, and planned.`,
+			body: `${BRAND} builds boundaries that can extend over time through open source, content documents with version semantics, ${enTerminology.license.forms.inline}s, and permissioned ${API}s. Product pages clearly distinguish what is available, in development, and planned.`,
 		},
 		closing: {
 			title: `Start with a web novel you are ${FOLLOW_GERUND}.`,

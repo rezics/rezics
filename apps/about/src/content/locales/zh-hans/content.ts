@@ -112,7 +112,7 @@ export const zhHansContent = {
 		},
 		open: {
 			title: "宏大的叙事必须建立在可验证的基础上。",
-			body: `${BRAND} 以开放源代码、带版本语义的内容文档、${zhHansTerminology.publicationLicense.forms.label}与受权限控制的 ${API} 建立长期可延伸的边界；产品页则明确标示已可使用、开发中与规划中的部分。`,
+			body: `${BRAND} 以开放源代码、带版本语义的内容文档、${zhHansTerminology.license.forms.label}与受权限控制的 ${API} 建立长期可延伸的边界；产品页则明确标示已可使用、开发中与规划中的部分。`,
 		},
 		closing: {
 			title: "从一部你正在追的网络小说开始。",

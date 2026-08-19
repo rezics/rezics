@@ -14,7 +14,7 @@ import {
 	book,
 	apiTokenQuotaBinding,
 	CanonicalPgroongaIndexes,
-	unitContentLicense,
+	unitLicenseGrant,
 	contentStructure,
 	contentStructureNode,
 	unitLocalizationContentMetric,
@@ -245,39 +245,44 @@ describe("database schema contracts", () => {
 		);
 	});
 
-	it("keeps immutable Unit content License facts with one active grant per Unit", () => {
-		const grant = getTableConfig(unitContentLicense);
-		expect(getTableName(unitContentLicense)).toBe("unit_content_license");
+	it("keeps an append-only Unit license grant ledger of independent offerings", () => {
+		const grant = getTableConfig(unitLicenseGrant);
+		expect(getTableName(unitLicenseGrant)).toBe("unit_license_grant");
 		expect(grant.columns.map((column) => column.name)).toEqual(
 			expect.arrayContaining([
 				"id",
 				"unit_id",
+				"license_id",
 				"granted_by_profile_id",
-				"reference_license_slug",
 				"granted_at",
-				"status",
+				"offering_ended_at",
+				"offering_ended_by_profile_id",
+				"recognition_status",
 			]),
 		);
-		expect(grant.indexes.map((index) => index.config.name)).toEqual(
-			expect.arrayContaining([
-				"unit_content_license_active_unit_key",
-				"unit_content_license_unit_granted_at_idx",
-			]),
-		);
+		expect(grant.columns.map((column) => column.name)).not.toContain("role");
+		expect(grant.columns.map((column) => column.name)).not.toContain("status");
+		expect(grant.columns.map((column) => column.name)).not.toContain("withdrawn_at");
+		expect(grant.indexes.map((index) => index.config.name)).toEqual([
+			"unit_license_grant_open_unit_license_key",
+			"unit_license_grant_unit_granted_at_idx",
+			"unit_license_grant_effective_license_unit_idx",
+		]);
 		expect(
-			grant.indexes.find((index) => index.config.name === "unit_content_license_active_unit_key")
-				?.config.where,
+			grant.indexes.find(
+				(index) => index.config.name === "unit_license_grant_open_unit_license_key",
+			)?.config.where,
 		).toBeDefined();
-		expect(unitContentLicense.status.enumValues).toEqual(["active", "invalidated"]);
-		expect(unitContentLicense.status.hasDefault).toBe(true);
+		expect(unitLicenseGrant.recognitionStatus.enumValues).toEqual(["recognized", "invalidated"]);
+		expect(unitLicenseGrant.recognitionStatus.hasDefault).toBe(true);
 		expect(
-			grant.foreignKeys.find((key) => key.getName() === "unit_content_license_unit_id_unit_id_fk")
+			grant.foreignKeys.find((key) => key.getName() === "unit_license_grant_unit_id_unit_id_fkey")
 				?.onDelete,
 		).toBe("restrict");
 		expect(grant.columns.map((column) => column.name)).not.toContain("revoked_at");
-		expect(grant.checks.map((constraint) => constraint.name)).toContain(
-			"unit_content_license_reference_slug_check",
-		);
+		expect(grant.checks.map((constraint) => constraint.name)).toEqual([
+			"unit_license_grant_offering_end_check",
+		]);
 	});
 
 	it("enforces Unit access subject invariants at the database boundary", () => {
@@ -656,16 +661,16 @@ describe("database schema contracts", () => {
 			"content_governance_action_actor_case_idempotency_key",
 		);
 		expect(action.indexes.map((index) => index.config.name)).toContain(
-			"content_governance_action_content_license_created_idx",
+			"content_governance_action_license_grant_created_idx",
 		);
 		expect(action.indexes.map((index) => index.config.name)).toContain(
 			"content_governance_action_reverses_key",
 		);
 		expect(action.columns.map((column) => column.name)).toEqual(
 			expect.arrayContaining([
-				"content_license_id",
-				"previous_content_license_status",
-				"resulting_content_license_status",
+				"license_grant_id",
+				"previous_recognition_status",
+				"resulting_recognition_status",
 			]),
 		);
 		expect(action.checks.map((constraint) => constraint.name)).toEqual(
@@ -674,7 +679,7 @@ describe("database schema contracts", () => {
 				"content_governance_action_post_targeting_lock_outcome_check",
 				"content_governance_action_single_outcome_check",
 				"content_governance_action_kind_outcome_check",
-				"content_governance_action_content_license_transition_check",
+				"content_governance_action_license_grant_transition_check",
 				"content_governance_action_request_fingerprint_check",
 			]),
 		);
@@ -916,7 +921,7 @@ describe("database schema contracts", () => {
 				"entity.associations.override",
 				"unit.governance.read",
 				"unit.ownership.override",
-				"unit.content_license.manage",
+				"unit.license.manage",
 				"unit.delete",
 				"unit.restore",
 				"platform.development_preview.access",
