@@ -1,7 +1,7 @@
 import { Check } from "@sinclair/typebox/value";
 import { describe, expect, it } from "vitest";
 
-import { MaximumAdaptedAudioRelationsPerVideo } from "../../database/schema/contract-values";
+import { MaximumAudioTracksPerVideo } from "../../database/schema/contract-values";
 
 import {
 	CreateBookChapterDraftJobBody,
@@ -348,7 +348,7 @@ describe("Unit partial update shapes", () => {
 
 	it("accepts bounded adapted Audio replacement and clear operations", () => {
 		const audioIds = Array.from(
-			{ length: MaximumAdaptedAudioRelationsPerVideo },
+			{ length: MaximumAudioTracksPerVideo },
 			(_, index) => `019b0000-0000-7000-8000-${String(index).padStart(12, "0")}`,
 		);
 		expect(Check(UpdateUnitBody, { updatedAt, details: { adaptedAudioUnitIds: null } })).toBe(true);

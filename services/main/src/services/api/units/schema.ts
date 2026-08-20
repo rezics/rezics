@@ -5,7 +5,7 @@ import {
 	ContentLanguageEvidenceSourceValues,
 	UnitOwnershipModeValues,
 	ContentGovernanceActionKindValues,
-	MaximumAdaptedAudioRelationsPerVideo,
+	MaximumAudioTracksPerVideo,
 	MaximumContentLanguageEvidencePageSize,
 	RealmUnitPublicationStateValues,
 	RealmUnitStatusValues,
@@ -302,7 +302,7 @@ const UnitDetailsInput = t.Object(
 		adaptedAudioUnitIds: t.Optional(
 			t.Nullable(
 				t.Array(Uuid, {
-					maxItems: MaximumAdaptedAudioRelationsPerVideo,
+					maxItems: MaximumAudioTracksPerVideo,
 					uniqueItems: true,
 				}),
 			),

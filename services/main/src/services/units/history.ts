@@ -30,7 +30,7 @@ import {
 	software,
 	softwareRequirement,
 	media,
-	MaximumAdaptedAudioRelationsPerVideo,
+	MaximumAudioTracksPerVideo,
 	poll,
 	pollOption,
 	PollOptionSourceKindValues,
@@ -51,8 +51,7 @@ import {
 	VariantCapableUnitKindValues,
 	creditAttribution,
 	unitLocalization,
-	unitRelation,
-	UnitRelationKindValues,
+	videoAudioTrack,
 	unitContentLanguageSupport,
 	unitRevision,
 	unitRevisionCreditAttribution,
@@ -109,7 +108,7 @@ import {
 	isContentLanguageSupportUnitKind,
 	replaceUnitContentLanguageSupport,
 } from "./content-language-support";
-import { restoreOwnedUnitRelations } from "./relations";
+import { restoreVideoAudioTracks } from "./video-audio-tracks";
 
 export type UnitRevisionEvent = "create" | "update" | "delete" | "restore";
 
@@ -176,12 +175,14 @@ const RuleSnapshotSchema = z.object({
 		}),
 	),
 });
-const UnitRelationStateSchema = z
-	.object({
-		kind: z.enum(UnitRelationKindValues),
-		targetUnitId: z.string().uuid(),
-	})
-	.strict();
+const VideoAudioTrackStateSchema = z.object({ audioUnitId: z.string().uuid() }).strict();
+const VideoAudioTracksSchema = z
+	.array(VideoAudioTrackStateSchema)
+	.max(MaximumAudioTracksPerVideo)
+	.refine(
+		(values) => new Set(values.map(({ audioUnitId }) => audioUnitId)).size === values.length,
+		"contains duplicate Audio Unit IDs",
+	);
 const UnitSnapshotSchema = z.object({
 	version: z.literal(UnitRevisionSchemaVersion),
 	kind: z.enum(UnitKindValues),
@@ -196,11 +197,8 @@ const UnitSnapshotSchema = z.object({
 		tags: z.array(SnapshotRowSchema),
 		structureApplications: z.array(SnapshotRowSchema),
 		variants: z.array(SnapshotRowSchema),
-		/** Released v1 relation documents without this key represent an empty set. */
-		unitRelations: z
-			.array(UnitRelationStateSchema)
-			.max(MaximumAdaptedAudioRelationsPerVideo)
-			.default([]),
+		/** Released v1 relation documents without this key represent no external Audio tracks. */
+		videoAudioTracks: VideoAudioTracksSchema.default([]),
 		seriesReleases: z.array(SnapshotRowSchema),
 		softwareRequirements: z.array(SnapshotRowSchema),
 		pollOptions: z.array(SnapshotRowSchema),
@@ -501,17 +499,14 @@ async function snapshotUnit(tx: DatabaseTransaction, unitId: string) {
 		.from(unitVariant)
 		.where(eq(unitVariant.variantUnitId, unitId))
 		.orderBy(unitVariant.variantUnitId);
-	const unitRelations = await tx
-		.select({
-			kind: unitRelation.kind,
-			targetUnitId: unitRelation.targetUnitId,
-		})
-		.from(unitRelation)
-		.where(eq(unitRelation.sourceUnitId, unitId))
-		.orderBy(unitRelation.kind, unitRelation.targetUnitId)
-		.limit(MaximumAdaptedAudioRelationsPerVideo + 1);
-	if (unitRelations.length > MaximumAdaptedAudioRelationsPerVideo)
-		throw new Error(`Unit ${unitId} exceeds the outgoing relation snapshot bound`);
+	const videoAudioTracks = await tx
+		.select({ audioUnitId: videoAudioTrack.audioUnitId })
+		.from(videoAudioTrack)
+		.where(eq(videoAudioTrack.videoUnitId, unitId))
+		.orderBy(videoAudioTrack.audioUnitId)
+		.limit(MaximumAudioTracksPerVideo + 1);
+	if (videoAudioTracks.length > MaximumAudioTracksPerVideo)
+		throw new Error(`Video ${unitId} exceeds the Audio track snapshot bound`);
 
 	const empty: SnapshotRow[] = [];
 	const owned: UnitSnapshot["owned"] = {
@@ -520,7 +515,7 @@ async function snapshotUnit(tx: DatabaseTransaction, unitId: string) {
 		tags,
 		structureApplications,
 		variants,
-		unitRelations,
+		videoAudioTracks,
 		seriesReleases:
 			record.kind === "series"
 				? await tx
@@ -862,7 +857,12 @@ export async function restoreUnitSnapshot(
 		await tx
 			.insert(unitVariant)
 			.values(snapshot.owned.variants.map((row) => unitVariantRowSchema.parse(row)));
-	await restoreOwnedUnitRelations(tx, unitId, snapshot.kind, snapshot.owned.unitRelations);
+	await restoreVideoAudioTracks(
+		tx,
+		unitId,
+		snapshot.kind,
+		snapshot.owned.videoAudioTracks.map(({ audioUnitId }) => audioUnitId),
+	);
 
 	if (snapshot.kind === "series") {
 		await tx.delete(seriesRelease).where(eq(seriesRelease.seriesId, unitId));
@@ -957,7 +957,7 @@ function snapshotToDocuments(snapshot: UnitSnapshot): UnitRevisionDocuments {
 				tags: snapshot.owned.tags,
 				structureApplications: snapshot.owned.structureApplications,
 				variants: snapshot.owned.variants,
-				unitRelations: snapshot.owned.unitRelations,
+				videoAudioTracks: snapshot.owned.videoAudioTracks,
 			},
 		},
 		structure: {
@@ -1058,23 +1058,20 @@ export function unitRevisionDocumentsToContentLanguageSupport(
 	return parseContentLanguageSupportSlot(documents);
 }
 
-/** A released v1 relations document without this key represents no outgoing relations. */
-function parseUnitRelationsSlot(documents: UnitRevisionDocuments) {
+/** A released v1 relations document without this key represents no external Audio tracks. */
+function parseVideoAudioTracksSlot(documents: UnitRevisionDocuments) {
 	const document = documents.relations;
 	if (!document) return [];
 	assertSlotDocumentModel("relations", document);
 	const payload = asRecord(document.payload, "relations");
 	if (payload.version !== UnitRevisionSlotSchemaVersions.relations)
 		throw new Error("Unsupported relations Unit revision version");
-	return z
-		.array(UnitRelationStateSchema)
-		.max(MaximumAdaptedAudioRelationsPerVideo)
-		.parse(payload.unitRelations ?? []);
+	return VideoAudioTracksSchema.parse(payload.videoAudioTracks ?? []);
 }
 
-/** Exposes legacy-empty outgoing relation semantics to history readers and tests. @internal */
-export function unitRevisionDocumentsToUnitRelations(documents: UnitRevisionDocuments) {
-	return parseUnitRelationsSlot(documents);
+/** Exposes legacy-empty Video Audio track semantics to history readers and tests. @internal */
+export function unitRevisionDocumentsToVideoAudioTracks(documents: UnitRevisionDocuments) {
+	return parseVideoAudioTracksSlot(documents);
 }
 
 function documentsToSnapshot(documents: UnitRevisionDocuments): UnitSnapshot {
@@ -1096,7 +1093,7 @@ function documentsToSnapshot(documents: UnitRevisionDocuments): UnitSnapshot {
 			tags: relations.tags,
 			structureApplications: relations.structureApplications,
 			variants: relations.variants,
-			unitRelations: parseUnitRelationsSlot(documents),
+			videoAudioTracks: parseVideoAudioTracksSlot(documents),
 			seriesReleases: structure.seriesReleases,
 			softwareRequirements: structure.softwareRequirements,
 			pollOptions: structure.pollOptions,
@@ -1134,7 +1131,7 @@ export function unitRevisionDocumentsToComparisonValue(
 		contentLanguageSupport: parseContentLanguageSupportSlot(documents),
 		relations: {
 			...withoutRevisionDocumentVersion(fixedSlotPayload(documents, "relations")),
-			unitRelations: snapshot.owned.unitRelations,
+			videoAudioTracks: snapshot.owned.videoAudioTracks,
 		},
 		structure: withoutRevisionDocumentVersion(fixedSlotPayload(documents, "structure")),
 		...(documents.rules
@@ -1515,7 +1512,7 @@ function revisionPath(path: string, key: string) {
 }
 
 const StableArrayKeys = [
-	["kind", "targetUnitId"],
+	["audioUnitId"],
 	["id"],
 	["language"],
 	["tagId"],

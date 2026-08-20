@@ -157,24 +157,8 @@ export const UnitMergeOperationPhaseValues = [
 ] as const;
 export type UnitMergeOperationPhase = (typeof UnitMergeOperationPhaseValues)[number];
 export const TimedMediaUnitKindValues = ["video", "audio"] as const;
-/** Generic Unit-to-Unit relation kinds; persisted as text for additive evolution. */
-export const UnitRelationKindValues = ["adapted_audio"] as const;
-export type UnitRelationKind = (typeof UnitRelationKindValues)[number];
-/**
- * Runtime owner of every relation signature.
- *
- * A relation kind cannot acquire a second signature without becoming a new
- * kind because persisted rows use this proof at both API and database
- * boundaries.
- */
-export const UnitRelationSignatures = {
-	adapted_audio: { sourceKind: "video", targetKind: "audio" },
-} as const satisfies Record<
-	UnitRelationKind,
-	{ readonly sourceKind: UnitKind; readonly targetKind: UnitKind }
->;
-/** Request-path bound for replacing or reading adapted Audio relations on one Video. */
-export const MaximumAdaptedAudioRelationsPerVideo = 64;
+/** Request-path bound for replacing or reading external Audio tracks on one Video. */
+export const MaximumAudioTracksPerVideo = 64;
 /** Public Unit-detail preview bound for Tags attached to one associated Entity. */
 export const SubjectAssociationEntityTagPreviewLimit = 4;
 export const UnitOwnershipModeValues = ["profile_owned", "community_owned"] as const;

@@ -1,5 +1,5 @@
 /** Public API upper bound for direct adapted-Audio relations on one Video. */
-export const MaximumAdaptedAudioRelationsPerVideo = 64;
+export const MaximumAudioTracksPerVideo = 64;
 
 export const AdaptedAudioUnitKinds = ["audio"] as const;
 

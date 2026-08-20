@@ -42,7 +42,6 @@ export * from "./studio";
 export * from "./structure";
 export * from "./tag";
 export * from "./unit";
-export * from "./unit-relation";
 export * from "./unit-merge";
 export * from "./follow";
 export * from "./zone";

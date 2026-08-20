@@ -55,7 +55,7 @@ non-authoritative, and never persisted or copied into another Unit:
 | Book | its Main when editing a Variant, and direct Variants of that Main |
 | Software | its Main/direct Variants, and Releases whose direct parent is the edited Software |
 | Media | its Main/direct Variants, and direct Video/Audio occurrences in its own `media.contents` structure |
-| Video | Audio Units reached by one explicit `adapted_audio` Unit relation hop |
+| Video | Audio Units attached through its explicit `video_audio_track` rows |
 | Audio | none |
 | Release | its direct parent Unit |
 
@@ -63,7 +63,7 @@ The evidence endpoint does not calculate a merged answer. It returns each
 related Unit's one authoritative field so the editor can make the final choice.
 It never recursively traverses a Content Structure, follows nested Unit
 relationships, enumerates a complete Main subtree, or treats a Video's tree
-position as an adapted-Audio relationship. Media occurrences are read as a
+position as an adapted-Audio track association. Media occurrences are read as a
 flat, keyset-paginated occurrence range through the owning structure.
 
 Each page contains at most 50 evidence items. A Unit-bound opaque cursor seeks
@@ -74,7 +74,7 @@ the complete source-specific key:
 - Release: `(parent_unit_id, released_on NULLS LAST, id)`; and
 - Media occurrence: `(structure_id, node_id)` after resolving the one active
   `media.contents` structure by `(owner_unit_id, kind)`; and
-- Video adapted Audio: `(source_unit_id, relation_kind, target_unit_id)`.
+- Video adapted Audio: `(video_unit_id, audio_unit_id)`.
 
 The candidate page is hydrated with one bounded Unit presentation query and one
 bounded support query. No offset, count, unbounded `IN` list, N+1 query, GIN
@@ -102,6 +102,43 @@ assumption for sizing, not a product cap. Main Units may be hot and language
 distribution is highly skewed, but row ownership remains uniformly routable by
 UUID `unit_id`; common languages do not create a write hot key because they are
 inside the per-Unit document and have no reverse index.
+
+### Video Audio track cardinality
+
+Let `q` be the Video fraction and `f` the average external Audio tracks per
+Video. The dedicated table has `R = qNf` rows. The API and history bound is 64
+tracks per Video, but capacity planning must not treat `R` as bounded by
+`N`:
+
+| Scenario | Assumptions | 500M Units | 3B Units |
+| --- | --- | ---: | ---: |
+| Typical planning | `q = 0.10`, `f = 2` | 100M rows | 600M rows |
+| Stress planning | `q = 0.20`, `f = 8` | 800M rows | 4.8B rows |
+| Theoretical envelope | every Unit treated as Video, `f = 64` | 32B rows | 192B rows |
+
+The two-UUID heap plus the forward primary key and reverse B-tree is
+provisionally 140–200 bytes per row, excluding free space, bloat, WAL, replicas,
+backups, and maintenance workspace. That places the typical cases at roughly
+14–20 GB and 84–120 GB, and the stress cases at roughly 112–160 GB and
+672–960 GB. Replace this range with production-shaped `pg_column_size` and
+`pg_relation_size` measurements before cutover.
+
+Forward reads and replacements seek the primary-key prefix
+`(video_unit_id, audio_unit_id)` and visit at most 65 rows. Audio deletion and
+future reverse reads use `(audio_unit_id, video_unit_id)`; PostgreSQL therefore
+never scans the heap to enforce the target foreign key. Replacement validates
+and diffs at most 64 targets inside the Video compare-and-swap transaction.
+One hot Video can serialize its own writes, while unrelated Video IDs share no
+row lock. Observe rows per Video, rows changed per replacement, reverse-index
+residency, lock waits, WAL per edge, autovacuum duration, and hot Video/Audio
+skew.
+
+The authoritative partitioning key is a stable hash of `video_unit_id`, which
+keeps one Video's bounded set and history mutation together. At the stress
+scenario, 64 shards average 12.5M rows each at 500M Units and 75M at 3B Units.
+Reverse Audio queries scatter across those source shards; before they become a
+request-path workload, add a target-partitioned derived projection with bounded
+consumers rather than changing edge ownership.
 
 ### Storage sensitivity
 
@@ -192,8 +229,9 @@ scan or introduce another editable field.
 ## Migration and cutover
 
 The generated release migration
-`20260820063101_content_language_support_and_unit_relations.sql` adds the
-revision-slot enum value and creates the empty sparse table. It intentionally
+`20260820063101_content_language_support_and_video_audio_tracks.sql` adds the
+revision-slot enum value and creates the empty content-language and Video Audio
+track tables. It intentionally
 does not backfill from `unit_localization`, `availableLanguages`, a Content
 Structure, Variants, or Releases. Therefore historical-data work is constant
 and no 500M-row validation scan is justified. The typed schema is not a live
@@ -203,8 +241,8 @@ The old binary does not understand the new history slot, so use a coordinated
 cutover:
 
 1. Stop Unit writes or enter the normal maintenance response.
-2. Apply the enum/table DDL and verify the composite Unit-kind foreign key and
-   JSONB root/length check.
+2. Apply the enum/table DDL; verify the content-language kind/value constraints and
+   the Video/Audio subtype foreign keys.
 3. Deploy the new API and workers before allowing a revision with the new slot.
 4. Run schema reconciliation and the production-shaped `EXPLAIN`/benchmark
    matrix above.

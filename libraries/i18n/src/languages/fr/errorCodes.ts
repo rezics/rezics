@@ -1,6 +1,7 @@
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 import { frTerminology } from "@rezics/i18n/terminology/fr";
 
+const { forms: audioTerms } = frTerminology.audio;
 const { forms: dockTerms } = frTerminology.dock;
 const { forms: followTerms } = frTerminology.follow;
 const { forms: postTerms } = frTerminology.post;
@@ -50,8 +51,7 @@ export default {
 	UnitChanged: "Ce contenu a changé. Actualisez la page et réessayez.",
 	UnitContentLanguageSupportInvalid:
 		"Les langues de consommation du contenu n’ont pas pu être enregistrées. Vérifiez les langues et les canaux pris en charge, puis réessayez.",
-	UnitRelationInvalid:
-		"La relation sélectionnée n’a pas pu être enregistrée. Vérifiez les fiches associées, puis réessayez.",
+	VideoAudioTrackInvalid: `Les ${audioTerms.plural} de remplacement sélectionnés n’ont pas pu être enregistrés. Vérifiez la sélection, puis réessayez.`,
 	UnitRevisionConflict: "La version de référence a changé. Actualisez la page et réessayez.",
 	RevisionContributionActorRequired:
 		"Choisissez la personne principalement responsable de cette version.",

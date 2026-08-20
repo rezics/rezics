@@ -150,20 +150,15 @@ CREATE TABLE "unit_content_language_support" (
   CONSTRAINT "unit_content_language_support_value_check" CHECK ((jsonb_typeof(value) = 'array'::text) AND ((jsonb_array_length(value) >= 1) AND (jsonb_array_length(value) <= 64)))
 );
 
--- Create "unit_relation" table
-CREATE TABLE "unit_relation" (
-  "source_unit_id" uuid NOT NULL,
-  "source_unit_kind" text NOT NULL,
-  "kind" text NOT NULL,
-  "target_unit_id" uuid NOT NULL,
-  "target_unit_kind" text NOT NULL,
-  CONSTRAINT "unit_relation_source_kind_target_pkey" PRIMARY KEY ("source_unit_id", "kind", "target_unit_id"),
-  CONSTRAINT "unit_relation_source_unit_kind_fkey" FOREIGN KEY ("source_unit_id", "source_unit_kind") REFERENCES "unit" ("id", "kind") ON UPDATE NO ACTION ON DELETE CASCADE,
-  CONSTRAINT "unit_relation_target_unit_kind_fkey" FOREIGN KEY ("target_unit_id", "target_unit_kind") REFERENCES "unit" ("id", "kind") ON UPDATE NO ACTION ON DELETE RESTRICT,
-  CONSTRAINT "unit_relation_kind_check" CHECK (kind = 'adapted_audio'::text),
-  CONSTRAINT "unit_relation_not_self_check" CHECK (source_unit_id <> target_unit_id),
-  CONSTRAINT "unit_relation_signature_check" CHECK ((kind = 'adapted_audio'::text) AND (source_unit_kind = 'video'::text) AND (target_unit_kind = 'audio'::text))
+-- Create "video_audio_track" table
+CREATE TABLE "video_audio_track" (
+  "video_unit_id" uuid NOT NULL,
+  "audio_unit_id" uuid NOT NULL,
+  CONSTRAINT "video_audio_track_video_audio_pkey" PRIMARY KEY ("video_unit_id", "audio_unit_id"),
+  CONSTRAINT "video_audio_track_video_fkey" FOREIGN KEY ("video_unit_id") REFERENCES "video" ("id") ON UPDATE NO ACTION ON DELETE CASCADE,
+  CONSTRAINT "video_audio_track_audio_fkey" FOREIGN KEY ("audio_unit_id") REFERENCES "audio" ("id") ON UPDATE NO ACTION ON DELETE RESTRICT,
+  CONSTRAINT "video_audio_track_not_self_check" CHECK (video_unit_id <> audio_unit_id)
 );
 
--- Create index "unit_relation_target_kind_source_idx" to table: "unit_relation"
-CREATE INDEX "unit_relation_target_kind_source_idx" ON "unit_relation" ("target_unit_id", "kind", "source_unit_id");
+-- Create index "video_audio_track_audio_video_idx" to table: "video_audio_track"
+CREATE INDEX "video_audio_track_audio_video_idx" ON "video_audio_track" ("audio_unit_id", "video_unit_id");

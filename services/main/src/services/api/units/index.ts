@@ -639,7 +639,7 @@ export default new Elysia({ prefix: "/units" })
 				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse([
 					"ValidationError",
 					"UnitContentLanguageSupportInvalid",
-					"UnitRelationInvalid",
+					"VideoAudioTrackInvalid",
 				]),
 				[StatusCodes.NOT_FOUND]: UnitMutationNotFoundResponse,
 				[StatusCodes.CONFLICT]: UnitUpdateConflictResponse,

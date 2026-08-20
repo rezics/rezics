@@ -13808,7 +13808,7 @@ export const ApiErrorCode = {
 	UnitLicenseGrantConflict: "UnitLicenseGrantConflict",
 	UnitChanged: "UnitChanged",
 	UnitContentLanguageSupportInvalid: "UnitContentLanguageSupportInvalid",
-	UnitRelationInvalid: "UnitRelationInvalid",
+	VideoAudioTrackInvalid: "VideoAudioTrackInvalid",
 	UnitRealmPublicationNotFound: "UnitRealmPublicationNotFound",
 	UnitRealmPublicationAlreadyExists: "UnitRealmPublicationAlreadyExists",
 	UnitRealmPublicationTransitionInvalid: "UnitRealmPublicationTransitionInvalid",
@@ -84408,7 +84408,7 @@ export type PatchApiUnitsByTypeByUnitIdStatus409 = {
 export const PatchApiUnitsByTypeByUnitIdStatus422ErrorCodeEnum = {
 	ValidationError: "ValidationError",
 	UnitContentLanguageSupportInvalid: "UnitContentLanguageSupportInvalid",
-	UnitRelationInvalid: "UnitRelationInvalid",
+	VideoAudioTrackInvalid: "VideoAudioTrackInvalid",
 } as const;
 
 export type PatchApiUnitsByTypeByUnitIdStatus422ErrorCodeEnum =

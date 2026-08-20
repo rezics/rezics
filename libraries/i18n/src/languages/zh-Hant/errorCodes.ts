@@ -1,6 +1,7 @@
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 import { zhHantTerminology } from "@rezics/i18n/terminology/zh-Hant";
 
+const { forms: audioTerms } = zhHantTerminology.audio;
 const { forms: dockTerms } = zhHantTerminology.dock;
 const { forms: followTerms } = zhHantTerminology.follow;
 const { forms: postTerms } = zhHantTerminology.post;
@@ -47,7 +48,7 @@ export default {
 	UnitLicenseGrantConflict: `這項內容已有一份尚未結束的相同${zhHantTerminology.license.forms.label}提供。`,
 	UnitChanged: "內容已變更，請重新整理後再試一次。",
 	UnitContentLanguageSupportInvalid: "無法儲存內容消費語言。請檢查語言和支援管道後再試一次。",
-	UnitRelationInvalid: "無法儲存所選的條目關係。請檢查相關條目後再試一次。",
+	VideoAudioTrackInvalid: `無法儲存所選的替代${audioTerms.inline}。請檢查選取內容後再試一次。`,
 	UnitRevisionConflict: "修訂基礎已變更，請重新整理後再試一次。",
 	RevisionContributionActorRequired: "請指定這次修訂的主要貢獻者。",
 	RevisionCreditEntityInvalid: "所選的修訂貢獻者無效，請重新選擇。",

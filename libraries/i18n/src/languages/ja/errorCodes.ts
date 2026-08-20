@@ -1,6 +1,7 @@
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 import { jaTerminology } from "@rezics/i18n/terminology/ja";
 
+const { forms: audioTerms } = jaTerminology.audio;
 const { forms: dockTerms } = jaTerminology.dock;
 const { forms: followTerms } = jaTerminology.follow;
 const { forms: postTerms } = jaTerminology.post;
@@ -48,8 +49,7 @@ export default {
 	UnitChanged: "このコンテンツは変更されました。更新してもう一度試してください。",
 	UnitContentLanguageSupportInvalid:
 		"コンテンツ利用言語を保存できませんでした。言語と対応チャンネルを確認して、もう一度お試しください。",
-	UnitRelationInvalid:
-		"選択したユニットの関係を保存できませんでした。関連するユニットを確認して、もう一度お試しください。",
+	VideoAudioTrackInvalid: `選択した差し替え用${audioTerms.inline}を保存できませんでした。選択内容を確認して、もう一度お試しください。`,
 	UnitRevisionConflict: "リビジョンの基準が変更されました。更新してもう一度試してください。",
 	RevisionContributionActorRequired: "このリビジョンの主な貢献者を指定してください。",
 	RevisionCreditEntityInvalid: "選択したリビジョン貢献者は無効です。別の貢献者を選択してください。",

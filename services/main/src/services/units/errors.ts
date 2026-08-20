@@ -96,10 +96,10 @@ export class UnitContentLanguageSupportInvalid extends Data.TaggedError(
 	}
 }
 
-export class UnitRelationInvalid extends Data.TaggedError("UnitRelationInvalid") {
+export class VideoAudioTrackInvalid extends Data.TaggedError("VideoAudioTrackInvalid") {
 	static readonly status = StatusCodes.UNPROCESSABLE_ENTITY as const;
-	readonly status = UnitRelationInvalid.status;
-	readonly message = "The Unit relation could not be saved";
+	readonly status = VideoAudioTrackInvalid.status;
+	readonly message = "The selected Audio tracks could not be saved";
 	readonly details: { readonly path: string; readonly reason: string };
 
 	constructor(path: string, reason: string) {
@@ -370,7 +370,7 @@ export const UnitErrors = [
 	UnitLicenseGrantConflict,
 	UnitChanged,
 	UnitContentLanguageSupportInvalid,
-	UnitRelationInvalid,
+	VideoAudioTrackInvalid,
 	UnitRealmPublicationNotFound,
 	UnitRealmPublicationAlreadyExists,
 	UnitRealmPublicationTransitionInvalid,

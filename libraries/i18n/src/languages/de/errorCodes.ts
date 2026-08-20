@@ -1,6 +1,7 @@
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 import { deTerminology } from "@rezics/i18n/terminology/de";
 
+const { forms: audioTerms } = deTerminology.audio;
 const { forms: dockTerms } = deTerminology.dock;
 const { forms: followTerms } = deTerminology.follow;
 const { forms: postTerms } = deTerminology.post;
@@ -49,8 +50,7 @@ export default {
 	UnitChanged: "Dieser Inhalt wurde geändert. Aktualisiere die Seite und versuche es erneut.",
 	UnitContentLanguageSupportInvalid:
 		"Die Sprachen für die Inhaltsnutzung konnten nicht gespeichert werden. Prüfe die Sprachen und unterstützten Kanäle und versuche es erneut.",
-	UnitRelationInvalid:
-		"Die ausgewählte Unit-Beziehung konnte nicht gespeichert werden. Prüfe die verknüpften Units und versuche es erneut.",
+	VideoAudioTrackInvalid: `Die ausgewählten Ersatz-${audioTerms.plural} konnten nicht gespeichert werden. Prüfe die Auswahl und versuche es erneut.`,
 	UnitRevisionConflict:
 		"Die Ausgangsversion wurde geändert. Aktualisiere die Seite und versuche es erneut.",
 	RevisionContributionActorRequired:

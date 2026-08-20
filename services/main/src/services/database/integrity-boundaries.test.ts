@@ -22,12 +22,9 @@ import {
 	unitFollow,
 	unitLocalization,
 	unitOwnershipClaim,
-	unitRelation,
 	unitStructureApplication,
 	unitTag,
 } from "./schema";
-import { UnitRelationSignatures } from "./schema/contract-values";
-
 const dialect = new PgDialect();
 
 function renderedCheck(table: PgTable, name: string) {
@@ -37,16 +34,6 @@ function renderedCheck(table: PgTable, name: string) {
 }
 
 describe("database integrity boundaries", () => {
-	it("renders every generic Unit relation signature from its runtime registry", () => {
-		const rendered = renderedCheck(unitRelation, "unit_relation_signature_check");
-		for (const [kind, signature] of Object.entries(UnitRelationSignatures)) {
-			expect(rendered.sql).toContain(`'${kind}'`);
-			expect(rendered.sql).toContain(`'${signature.sourceKind}'`);
-			expect(rendered.sql).toContain(`'${signature.targetKind}'`);
-		}
-		expect(rendered.params).toEqual([]);
-	});
-
 	it("keeps every indexed fractional position below the PostgreSQL byte ceiling", () => {
 		const constraints = [
 			[unitLocalization, "unit_localization_position_byte_length_check"],

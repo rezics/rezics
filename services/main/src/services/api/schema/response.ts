@@ -29,7 +29,7 @@ import {
 	ContentStructureKindValues,
 	CreditAttributionRoleValues,
 	EntityKindValues,
-	MaximumAdaptedAudioRelationsPerVideo,
+	MaximumAudioTracksPerVideo,
 	ProgressDatePrecisionValues,
 	ProgressEntryKindValues,
 	ProgressStatusValues,
@@ -313,7 +313,7 @@ const UnitDetailsResponse = t.Union([
 			durationSeconds: t.Nullable(t.Integer({ minimum: 1 })),
 			adaptedAudioUnitIds: t.Nullable(
 				t.Array(Uuid, {
-					maxItems: MaximumAdaptedAudioRelationsPerVideo,
+					maxItems: MaximumAudioTracksPerVideo,
 					uniqueItems: true,
 				}),
 			),

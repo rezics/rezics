@@ -77,7 +77,7 @@ import { presentNullablePortableTextDocument } from "../documents/portable-text-
 import {
 	UnitChanged,
 	UnitNotFound,
-	UnitRelationInvalid,
+	VideoAudioTrackInvalid,
 	UnitVariantKindMismatch,
 	UnitVariantMainUnavailable,
 	UnitVariantTargetIsVariant,
@@ -142,8 +142,8 @@ import { getSubjectAssociationEntityTagPreviews } from "./subject-association-ta
 import {
 	listAdaptedAudioUnitIds,
 	normalizeAdaptedAudioUnitIds,
-	replaceAdaptedAudioUnitRelations,
-} from "./relations";
+	replaceAdaptedAudioUnitTracks,
+} from "./video-audio-tracks";
 
 export type VariantUnitKind = "book" | "software" | "media";
 export type WorkUnitKind = VariantUnitKind | "series";
@@ -847,7 +847,7 @@ export async function listUnits(
 function hasAdaptedAudioRelationUpdate(kind: ManageableUnitKind, body: UpdateUnitInput): boolean {
 	const hasUpdate = Object.hasOwn(body.details ?? {}, "adaptedAudioUnitIds");
 	if (hasUpdate && kind !== "video")
-		throw new UnitRelationInvalid(
+		throw new VideoAudioTrackInvalid(
 			"/details/adaptedAudioUnitIds",
 			"is only supported by Video Units",
 		);
@@ -899,7 +899,7 @@ export async function updateUnitInTransaction(
 	if (kind === "audio" && timedMediaUpdate)
 		await tx.update(audio).set(timedMediaUpdate).where(eq(audio.id, unitId));
 	if (kind === "video" && hasAdaptedAudioUpdate)
-		await replaceAdaptedAudioUnitRelations(tx, unitId, body.details?.adaptedAudioUnitIds);
+		await replaceAdaptedAudioUnitTracks(tx, unitId, body.details?.adaptedAudioUnitIds);
 	if (kind === "release") {
 		if (body.details?.versionLabel === null)
 			throw new ValidationError({ details: { versionLabel: "must not be null" } });
@@ -965,7 +965,7 @@ export async function updateUnit(
 		await authorization.unit.ensureCanReadMany(
 			targetIds,
 			() =>
-				new UnitRelationInvalid(
+				new VideoAudioTrackInvalid(
 					"/details/adaptedAudioUnitIds",
 					"contains an unavailable Audio Unit",
 				),

@@ -11,7 +11,7 @@ import {
 	contentStructureNode,
 	release,
 	unit,
-	unitRelation,
+	videoAudioTrack,
 	unitVariant,
 	type ContentLanguageEvidenceSource,
 	ContentLanguageEvidenceSourceValues,
@@ -389,23 +389,20 @@ export async function listContentLanguageEvidence(input: {
 	) {
 		const adaptedAudioCursor = cursor?.source === "adapted_audio" ? cursor : undefined;
 		const rows = await database
-			.select({ unitId: unitRelation.targetUnitId, unitKind: unitRelation.targetUnitKind })
-			.from(unitRelation)
-			.innerJoin(
-				unit,
-				and(eq(unit.id, unitRelation.targetUnitId), eq(unit.kind, unitRelation.targetUnitKind)),
-			)
+			.select({ unitId: videoAudioTrack.audioUnitId, unitKind: unit.kind })
+			.from(videoAudioTrack)
+			.innerJoin(unit, eq(unit.id, videoAudioTrack.audioUnitId))
 			.where(
 				and(
-					eq(unitRelation.sourceUnitId, input.unitId),
-					eq(unitRelation.sourceUnitKind, "video"),
-					eq(unitRelation.kind, "adapted_audio"),
-					eq(unitRelation.targetUnitKind, "audio"),
+					eq(videoAudioTrack.videoUnitId, input.unitId),
+					eq(unit.kind, "audio"),
 					getUnitReadCondition(input.authorization.profileId),
-					adaptedAudioCursor ? gt(unitRelation.targetUnitId, adaptedAudioCursor.unitId) : undefined,
+					adaptedAudioCursor
+						? gt(videoAudioTrack.audioUnitId, adaptedAudioCursor.unitId)
+						: undefined,
 				),
 			)
-			.orderBy(asc(unitRelation.targetUnitId))
+			.orderBy(asc(videoAudioTrack.audioUnitId))
 			.limit(remaining());
 		candidates.push(
 			...rows.map((row): EvidenceCandidate => {

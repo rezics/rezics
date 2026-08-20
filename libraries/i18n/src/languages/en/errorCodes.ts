@@ -1,6 +1,7 @@
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 import { enTerminology } from "@rezics/i18n/terminology/en";
 
+const { forms: audioTerms } = enTerminology.audio;
 const { forms: dockTerms } = enTerminology.dock;
 const { forms: followTerms } = enTerminology.follow;
 const { forms: postTerms } = enTerminology.post;
@@ -48,8 +49,7 @@ export default {
 	UnitChanged: "This content changed. Refresh and try again.",
 	UnitContentLanguageSupportInvalid:
 		"The content consumption languages could not be saved. Check the languages and supported channels, then try again.",
-	UnitRelationInvalid:
-		"The selected Unit relationship could not be saved. Check the related Units and try again.",
+	VideoAudioTrackInvalid: `The selected replacement ${audioTerms.plural} could not be saved. Check the selection and try again.`,
 	UnitRevisionConflict: "The revision base changed. Refresh and try again.",
 	RevisionContributionActorRequired: "Choose the primary contributor for this revision.",
 	RevisionCreditEntityInvalid: "The selected revision contributor is invalid. Choose another one.",

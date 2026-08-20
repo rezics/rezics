@@ -4,7 +4,7 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { MaximumAdaptedAudioRelationsPerVideo } from "../model/adapted-audio";
+import { MaximumAudioTracksPerVideo } from "../model/adapted-audio";
 import { AdaptedAudioField } from "./adapted-audio-field";
 
 const picker = vi.hoisted(() => ({ props: undefined as undefined | Record<string, unknown> }));
@@ -58,7 +58,7 @@ describe("AdaptedAudioField", () => {
 
 		expect(picker.props).toMatchObject({
 			kinds: ["audio"],
-			maxValues: MaximumAdaptedAudioRelationsPerVideo,
+			maxValues: MaximumAudioTracksPerVideo,
 			values: ["existing-audio"],
 		});
 		fireEvent.click(screen.getByRole("button", { name: "Choose audio" }));

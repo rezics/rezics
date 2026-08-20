@@ -7,7 +7,7 @@ import {
 	parseUnitRevisionSlotIdentity,
 	type UnitRevisionDocuments,
 	unitRevisionDocumentsToContentLanguageSupport,
-	unitRevisionDocumentsToUnitRelations,
+	unitRevisionDocumentsToVideoAudioTracks,
 	undoRevisionDocuments,
 } from "./history";
 
@@ -55,9 +55,7 @@ function contentLanguageSupportDocument(
 	} as const;
 }
 
-function relationsDocument(
-	unitRelations?: readonly { readonly kind: "adapted_audio"; readonly targetUnitId: string }[],
-) {
+function relationsDocument(videoAudioTracks?: readonly { readonly audioUnitId: string }[]) {
 	return {
 		model: "rezics.unit.relations.v1",
 		payload: {
@@ -67,7 +65,7 @@ function relationsDocument(
 			tags: [],
 			structureApplications: [],
 			variants: [],
-			...(unitRelations ? { unitRelations } : {}),
+			...(videoAudioTracks ? { videoAudioTracks } : {}),
 		},
 	} as const;
 }
@@ -210,7 +208,7 @@ describe("revision undo merge", () => {
 		]);
 	});
 
-	it("undoes one relation edge without removing a later unrelated edge", () => {
+	it("undoes one Audio track without removing a later track", () => {
 		const firstAudioId = "019b76da-a800-7300-8000-000000000002";
 		const secondAudioId = "019b76da-a800-7300-8000-000000000003";
 		const before: UnitRevisionDocuments = {
@@ -219,19 +217,16 @@ describe("revision undo merge", () => {
 		};
 		const after: UnitRevisionDocuments = {
 			localizations: {},
-			relations: relationsDocument([{ kind: "adapted_audio", targetUnitId: firstAudioId }]),
+			relations: relationsDocument([{ audioUnitId: firstAudioId }]),
 		};
 		const current: UnitRevisionDocuments = {
 			localizations: {},
-			relations: relationsDocument([
-				{ kind: "adapted_audio", targetUnitId: firstAudioId },
-				{ kind: "adapted_audio", targetUnitId: secondAudioId },
-			]),
+			relations: relationsDocument([{ audioUnitId: firstAudioId }, { audioUnitId: secondAudioId }]),
 		};
 		const result = undoRevisionDocuments(before, after, current);
 		expect(result.conflictPaths).toEqual([]);
-		expect(unitRevisionDocumentsToUnitRelations(result.documents)).toEqual([
-			{ kind: "adapted_audio", targetUnitId: secondAudioId },
+		expect(unitRevisionDocumentsToVideoAudioTracks(result.documents)).toEqual([
+			{ audioUnitId: secondAudioId },
 		]);
 	});
 });
@@ -270,9 +265,9 @@ describe("legacy Unit revision snapshots", () => {
 		expect(unitRevisionDocumentsToContentLanguageSupport({ localizations: {} })).toEqual([]);
 	});
 
-	it("reads a v1 relations document without unitRelations as an empty set", () => {
+	it("reads a v1 relations document without Video Audio tracks as an empty set", () => {
 		expect(
-			unitRevisionDocumentsToUnitRelations({
+			unitRevisionDocumentsToVideoAudioTracks({
 				localizations: {},
 				relations: relationsDocument(),
 			}),

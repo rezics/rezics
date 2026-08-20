@@ -4,7 +4,7 @@ const recordUnitRevision = vi.hoisted(() => vi.fn());
 const transitionUnitStatus = vi.hoisted(() => vi.fn());
 const ensureUnitVariantLifecycle = vi.hoisted(() => vi.fn());
 const enqueueBookChapterDraftJobInTransaction = vi.hoisted(() => vi.fn());
-const replaceAdaptedAudioUnitRelations = vi.hoisted(() => vi.fn());
+const replaceAdaptedAudioUnitTracks = vi.hoisted(() => vi.fn());
 
 vi.mock("./history", () => ({ recordUnitRevision }));
 vi.mock("./status", () => ({ transitionUnitStatus }));
@@ -16,9 +16,9 @@ vi.mock("./book-chapter-draft", async (importOriginal) => ({
 	...(await importOriginal<typeof import("./book-chapter-draft")>()),
 	enqueueBookChapterDraftJobInTransaction,
 }));
-vi.mock("./relations", async (importOriginal) => ({
-	...(await importOriginal<typeof import("./relations")>()),
-	replaceAdaptedAudioUnitRelations,
+vi.mock("./video-audio-tracks", async (importOriginal) => ({
+	...(await importOriginal<typeof import("./video-audio-tracks")>()),
+	replaceAdaptedAudioUnitTracks,
 }));
 
 import type { DatabaseTransaction } from "../database";
@@ -68,7 +68,7 @@ describe("Unit update transaction", () => {
 			id: "job-id",
 			state: "pending",
 		});
-		replaceAdaptedAudioUnitRelations.mockReset().mockResolvedValue(undefined);
+		replaceAdaptedAudioUnitTracks.mockReset().mockResolvedValue(undefined);
 	});
 
 	it("publishes with a status-only patch without issuing an empty Book update", async () => {
@@ -208,13 +208,13 @@ describe("Unit update transaction", () => {
 			expectedUpdatedAt: ExpectedUpdatedAt,
 			details: { adaptedAudioUnitIds: [audioId] },
 		});
-		expect(replaceAdaptedAudioUnitRelations).toHaveBeenCalledWith(transaction, UnitId, [audioId]);
+		expect(replaceAdaptedAudioUnitTracks).toHaveBeenCalledWith(transaction, UnitId, [audioId]);
 
-		replaceAdaptedAudioUnitRelations.mockClear();
+		replaceAdaptedAudioUnitTracks.mockClear();
 		await updateUnitInTransaction(transaction, "video", UnitId, ActorProfileId, false, {
 			expectedUpdatedAt: ExpectedUpdatedAt,
 		});
-		expect(replaceAdaptedAudioUnitRelations).not.toHaveBeenCalled();
+		expect(replaceAdaptedAudioUnitTracks).not.toHaveBeenCalled();
 	});
 
 	it("does not replace adapted Audio when the Unit compare-and-swap fails", async () => {
@@ -230,7 +230,7 @@ describe("Unit update transaction", () => {
 				details: { adaptedAudioUnitIds: null },
 			}),
 		).rejects.toMatchObject({ _tag: "UnitChanged" });
-		expect(replaceAdaptedAudioUnitRelations).not.toHaveBeenCalled();
+		expect(replaceAdaptedAudioUnitTracks).not.toHaveBeenCalled();
 	});
 
 	it("rejects adapted Audio replacement for non-Video Units before writing", async () => {
@@ -242,10 +242,10 @@ describe("Unit update transaction", () => {
 				details: { adaptedAudioUnitIds: null },
 			}),
 		).rejects.toMatchObject({
-			_tag: "UnitRelationInvalid",
+			_tag: "VideoAudioTrackInvalid",
 			details: { path: "/details/adaptedAudioUnitIds" },
 		});
 		expect(updates).toEqual([]);
-		expect(replaceAdaptedAudioUnitRelations).not.toHaveBeenCalled();
+		expect(replaceAdaptedAudioUnitTracks).not.toHaveBeenCalled();
 	});
 });

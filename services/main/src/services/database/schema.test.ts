@@ -110,7 +110,7 @@ import {
 	unitRevision,
 	unitRevisionCreditAttribution,
 	unitStatusEvent,
-	unitRelation,
+	videoAudioTrack,
 	unitVariant,
 	imageAssetPresentation,
 	imageObject,
@@ -124,8 +124,6 @@ import {
 	UnitStatusActorKindValues,
 	WorkReleaseStatusValues,
 	UnitKindValues,
-	UnitRelationKindValues,
-	UnitRelationSignatures,
 	UnitOwnershipClaimResolutionValues,
 	VariantCapableUnitKindValues,
 } from "./schema";
@@ -930,41 +928,26 @@ describe("database schema contracts", () => {
 		expect(VariantCapableUnitKindValues).toEqual(["book", "software", "media", "entity"]);
 	});
 
-	it("stores generic Unit relations with kind signatures and bounded lookup indexes", () => {
-		const relation = getTableConfig(unitRelation);
-		expect(UnitRelationKindValues).toEqual(["adapted_audio"]);
-		expect(UnitRelationSignatures.adapted_audio).toEqual({
-			sourceKind: "video",
-			targetKind: "audio",
-		});
-		expect(relation.primaryKeys[0]?.columns.map((column) => column.name)).toEqual([
-			"source_unit_id",
-			"kind",
-			"target_unit_id",
+	it("stores optional Video Audio tracks with subtype foreign keys and reverse lookup", () => {
+		const track = getTableConfig(videoAudioTrack);
+		expect(track.primaryKeys[0]?.columns.map((column) => column.name)).toEqual([
+			"video_unit_id",
+			"audio_unit_id",
 		]);
-		expect(relation.foreignKeys.map((key) => key.getName())).toEqual(
-			expect.arrayContaining([
-				"unit_relation_source_unit_kind_fkey",
-				"unit_relation_target_unit_kind_fkey",
-			]),
+		expect(track.foreignKeys.map((key) => key.getName())).toEqual(
+			expect.arrayContaining(["video_audio_track_video_fkey", "video_audio_track_audio_fkey"]),
 		);
 		expect(
-			relation.foreignKeys.find((key) => key.getName() === "unit_relation_source_unit_kind_fkey")
-				?.onDelete,
+			track.foreignKeys.find((key) => key.getName() === "video_audio_track_video_fkey")?.onDelete,
 		).toBe("cascade");
 		expect(
-			relation.foreignKeys.find((key) => key.getName() === "unit_relation_target_unit_kind_fkey")
-				?.onDelete,
+			track.foreignKeys.find((key) => key.getName() === "video_audio_track_audio_fkey")?.onDelete,
 		).toBe("restrict");
-		expect(relation.indexes.map((index) => index.config.name)).toContain(
-			"unit_relation_target_kind_source_idx",
+		expect(track.indexes.map((index) => index.config.name)).toContain(
+			"video_audio_track_audio_video_idx",
 		);
-		expect(relation.checks.map((constraint) => constraint.name)).toEqual(
-			expect.arrayContaining([
-				"unit_relation_kind_check",
-				"unit_relation_signature_check",
-				"unit_relation_not_self_check",
-			]),
+		expect(track.checks.map((constraint) => constraint.name)).toContain(
+			"video_audio_track_not_self_check",
 		);
 	});
 

@@ -1,6 +1,7 @@
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 import { zhHansTerminology } from "@rezics/i18n/terminology/zh-Hans";
 
+const { forms: audioTerms } = zhHansTerminology.audio;
 const { forms: dockTerms } = zhHansTerminology.dock;
 const { forms: followTerms } = zhHansTerminology.follow;
 const { forms: postTerms } = zhHansTerminology.post;
@@ -47,7 +48,7 @@ export default {
 	UnitLicenseGrantConflict: "这项内容已有一份尚未结束的相同授权提供。",
 	UnitChanged: "内容已变更，请刷新后再试一次。",
 	UnitContentLanguageSupportInvalid: "无法保存内容消费语言。请检查语言和支持渠道后再试一次。",
-	UnitRelationInvalid: "无法保存所选的条目关系。请检查关联条目后再试一次。",
+	VideoAudioTrackInvalid: `无法保存所选的替代${audioTerms.inline}。请检查选择后再试一次。`,
 	UnitRevisionConflict: "修订基础已变更，请刷新后再试一次。",
 	RevisionContributionActorRequired: "请指定这次修订的主要贡献者。",
 	RevisionCreditEntityInvalid: "所选的修订贡献者无效，请重新选择。",

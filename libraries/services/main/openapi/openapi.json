@@ -26566,7 +26566,7 @@
 					"UnitLicenseGrantConflict",
 					"UnitChanged",
 					"UnitContentLanguageSupportInvalid",
-					"UnitRelationInvalid",
+					"VideoAudioTrackInvalid",
 					"UnitRealmPublicationNotFound",
 					"UnitRealmPublicationAlreadyExists",
 					"UnitRealmPublicationTransitionInvalid",
@@ -103808,7 +103808,7 @@
 															"enum": [
 																"ValidationError",
 																"UnitContentLanguageSupportInvalid",
-																"UnitRelationInvalid"
+																"VideoAudioTrackInvalid"
 															]
 														},
 														"message": { "type": "string" },

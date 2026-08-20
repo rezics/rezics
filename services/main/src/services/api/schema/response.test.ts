@@ -4,7 +4,7 @@ import { SearchContinuationToken } from "@rezics/filter";
 import { describe, expect, it, vi } from "vitest";
 
 import {
-	MaximumAdaptedAudioRelationsPerVideo,
+	MaximumAudioTracksPerVideo,
 	SubjectAssociationEntityTagPreviewLimit,
 } from "../../database/schema/contract-values";
 
@@ -444,7 +444,7 @@ describe("API response values", () => {
 			Check(UnitDetailResponse.properties.details, {
 				...videoDetails,
 				adaptedAudioUnitIds: Array.from(
-					{ length: MaximumAdaptedAudioRelationsPerVideo + 1 },
+					{ length: MaximumAudioTracksPerVideo + 1 },
 					(_, index) => `019b0000-0000-7000-8000-${String(index).padStart(12, "0")}`,
 				),
 			}),

@@ -3,10 +3,7 @@
 import { Field, FieldDescription, FieldLabel, UnitMultiPicker } from "@rezics/ui";
 
 import { useTranslation } from "@/i18n/client";
-import {
-	AdaptedAudioUnitKinds,
-	MaximumAdaptedAudioRelationsPerVideo,
-} from "../model/adapted-audio";
+import { AdaptedAudioUnitKinds, MaximumAudioTracksPerVideo } from "../model/adapted-audio";
 
 export function AdaptedAudioField({
 	onChange,
@@ -22,7 +19,7 @@ export function AdaptedAudioField({
 			<UnitMultiPicker
 				ariaLabel={t.units.fields.adaptedAudio}
 				kinds={AdaptedAudioUnitKinds}
-				maxValues={MaximumAdaptedAudioRelationsPerVideo}
+				maxValues={MaximumAudioTracksPerVideo}
 				onValuesChange={onChange}
 				placeholder={t.ui.pickerPlaceholders.unit}
 				removeLabel={t.units.fields.removeAdaptedAudio}
