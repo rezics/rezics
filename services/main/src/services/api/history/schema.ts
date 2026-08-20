@@ -159,6 +159,7 @@ export const RevisionSlotResponse = t.Union([
 	t.Object({
 		role: t.Union([
 			t.Literal("main"),
+			t.Literal("content_language_support"),
 			t.Literal("relations"),
 			t.Literal("structure"),
 			t.Literal("rules"),

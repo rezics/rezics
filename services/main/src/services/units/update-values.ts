@@ -6,6 +6,7 @@ import type { RevisionContributionInput } from "./revision-contribution";
 /** @internal */
 export interface UpdateUnitInput {
 	readonly expectedUpdatedAt: Date;
+	readonly contentLanguageSupport?: unknown;
 	readonly revisionContribution?: RevisionContributionInput;
 	readonly bookChapterDraftScope?: "book_only" | "manageable_published_chapters";
 	readonly status?: "draft" | "published" | "archived";
@@ -33,6 +34,7 @@ export interface UpdateUnitInput {
 		readonly episodeCount?: number | null;
 		readonly seasonCount?: number | null;
 		readonly durationSeconds?: number | null;
+		readonly adaptedAudioUnitIds?: readonly string[] | null;
 		readonly releaseStatus?: WorkReleaseStatus;
 	};
 }
@@ -87,6 +89,14 @@ export function toMediaUpdateValues(input: UpdateUnitInput) {
 /** Maps only timed-media-owned fields supplied by a partial Unit update. @internal */
 export function toTimedMediaUpdateValues(input: UpdateUnitInput) {
 	return whenAnyValueIsDefined({ durationSeconds: input.details?.durationSeconds });
+}
+
+/** Maps only Release-owned fields supplied by a partial Unit update. @internal */
+export function toReleaseUpdateValues(input: UpdateUnitInput) {
+	return whenAnyValueIsDefined({
+		releasedOn: input.unit?.releasedOn,
+		versionLabel: input.details?.versionLabel ?? undefined,
+	});
 }
 
 /** Maps only Series-owned fields supplied by a partial Unit update. @internal */

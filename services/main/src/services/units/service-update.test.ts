@@ -4,6 +4,7 @@ const recordUnitRevision = vi.hoisted(() => vi.fn());
 const transitionUnitStatus = vi.hoisted(() => vi.fn());
 const ensureUnitVariantLifecycle = vi.hoisted(() => vi.fn());
 const enqueueBookChapterDraftJobInTransaction = vi.hoisted(() => vi.fn());
+const replaceAdaptedAudioUnitRelations = vi.hoisted(() => vi.fn());
 
 vi.mock("./history", () => ({ recordUnitRevision }));
 vi.mock("./status", () => ({ transitionUnitStatus }));
@@ -14,6 +15,10 @@ vi.mock("./variant-policy", () => ({
 vi.mock("./book-chapter-draft", async (importOriginal) => ({
 	...(await importOriginal<typeof import("./book-chapter-draft")>()),
 	enqueueBookChapterDraftJobInTransaction,
+}));
+vi.mock("./relations", async (importOriginal) => ({
+	...(await importOriginal<typeof import("./relations")>()),
+	replaceAdaptedAudioUnitRelations,
 }));
 
 import type { DatabaseTransaction } from "../database";
@@ -63,6 +68,7 @@ describe("Unit update transaction", () => {
 			id: "job-id",
 			state: "pending",
 		});
+		replaceAdaptedAudioUnitRelations.mockReset().mockResolvedValue(undefined);
 	});
 
 	it("publishes with a status-only patch without issuing an empty Book update", async () => {
@@ -192,5 +198,54 @@ describe("Unit update transaction", () => {
 		});
 		expect(recordUnitRevision).not.toHaveBeenCalled();
 		expect(transitionUnitStatus).not.toHaveBeenCalled();
+	});
+
+	it("replaces adapted Audio only when the Video property is present", async () => {
+		const audioId = "019b0000-0000-7000-8000-000000000003";
+		const { transaction } = transactionDouble();
+
+		await updateUnitInTransaction(transaction, "video", UnitId, ActorProfileId, false, {
+			expectedUpdatedAt: ExpectedUpdatedAt,
+			details: { adaptedAudioUnitIds: [audioId] },
+		});
+		expect(replaceAdaptedAudioUnitRelations).toHaveBeenCalledWith(transaction, UnitId, [audioId]);
+
+		replaceAdaptedAudioUnitRelations.mockClear();
+		await updateUnitInTransaction(transaction, "video", UnitId, ActorProfileId, false, {
+			expectedUpdatedAt: ExpectedUpdatedAt,
+		});
+		expect(replaceAdaptedAudioUnitRelations).not.toHaveBeenCalled();
+	});
+
+	it("does not replace adapted Audio when the Unit compare-and-swap fails", async () => {
+		const currentUpdatedAt = new Date("2026-08-03T10:00:05.000Z");
+		const { transaction } = transactionDouble({
+			unitUpdateResult: [],
+			currentUnitResult: [{ updatedAt: currentUpdatedAt }],
+		});
+
+		await expect(
+			updateUnitInTransaction(transaction, "video", UnitId, ActorProfileId, false, {
+				expectedUpdatedAt: ExpectedUpdatedAt,
+				details: { adaptedAudioUnitIds: null },
+			}),
+		).rejects.toMatchObject({ _tag: "UnitChanged" });
+		expect(replaceAdaptedAudioUnitRelations).not.toHaveBeenCalled();
+	});
+
+	it("rejects adapted Audio replacement for non-Video Units before writing", async () => {
+		const { transaction, updates } = transactionDouble();
+
+		await expect(
+			updateUnitInTransaction(transaction, "audio", UnitId, ActorProfileId, false, {
+				expectedUpdatedAt: ExpectedUpdatedAt,
+				details: { adaptedAudioUnitIds: null },
+			}),
+		).rejects.toMatchObject({
+			_tag: "UnitRelationInvalid",
+			details: { path: "/details/adaptedAudioUnitIds" },
+		});
+		expect(updates).toEqual([]);
+		expect(replaceAdaptedAudioUnitRelations).not.toHaveBeenCalled();
 	});
 });

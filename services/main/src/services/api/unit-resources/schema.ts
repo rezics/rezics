@@ -2,6 +2,7 @@ import { type Static, t } from "elysia";
 
 import {
 	AliasKindValues,
+	CreditAttributionUnitKindValues,
 	CreditAttributionRoleValues,
 	EntityKindValues,
 	SubjectAssociationRoleValues,
@@ -119,8 +120,12 @@ export type AddUnitExternalLinkBody = Static<typeof AddUnitExternalLinkBody>;
 export const UnitUnitParams = t.Object({ type: WorkUnitType, unitId: Uuid });
 export type UnitUnitParams = Static<typeof UnitUnitParams>;
 
-export const AttributionUnitType = t.Union([WorkUnitType, t.Literal("entity")]);
+export const AttributionUnitType = t.UnionEnum(CreditAttributionUnitKindValues);
 export type AttributionUnitType = Static<typeof AttributionUnitType>;
+
+/** Unit kinds currently exposed through the generic Tag landscape and curation APIs. */
+export const TaggableUnitType = t.Union([WorkUnitType, t.Literal("entity")]);
+export type TaggableUnitType = Static<typeof TaggableUnitType>;
 
 export const AttributionUnitParams = t.Object({
 	type: AttributionUnitType,
@@ -171,7 +176,7 @@ export const UnitExternalLinkParams = t.Object({
 });
 export type UnitExternalLinkParams = Static<typeof UnitExternalLinkParams>;
 
-export const UnitTagParams = t.Object({ type: WorkUnitType, unitId: Uuid, tagId: Uuid });
+export const UnitTagParams = t.Object({ type: TaggableUnitType, unitId: Uuid, tagId: Uuid });
 export type UnitTagParams = Static<typeof UnitTagParams>;
 
 export const TagUnitBody = t.Object({}, { additionalProperties: false });

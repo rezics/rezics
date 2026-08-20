@@ -46,6 +46,10 @@ export default {
 	UnitLicenseOfferingEndForbidden: `This ${enTerminology.license.forms.inline} offering cannot be ended.`,
 	UnitLicenseGrantConflict: `An open offering for this ${enTerminology.license.forms.inline} already exists on this content.`,
 	UnitChanged: "This content changed. Refresh and try again.",
+	UnitContentLanguageSupportInvalid:
+		"The content consumption languages could not be saved. Check the languages and supported channels, then try again.",
+	UnitRelationInvalid:
+		"The selected Unit relationship could not be saved. Check the related Units and try again.",
 	UnitRevisionConflict: "The revision base changed. Refresh and try again.",
 	RevisionContributionActorRequired: "Choose the primary contributor for this revision.",
 	RevisionCreditEntityInvalid: "The selected revision contributor is invalid. Choose another one.",
@@ -212,6 +216,7 @@ export default {
 	UnitVariantKindMismatch: "A Variant and its Main must use the same supported Unit type.",
 	UnitVariantTargetIsVariant: "A Variant must point directly to a Main.",
 	UnitVariantSourceHasVariants: "A Main with Variants cannot become a Variant.",
+	UnitVariantGroupLimitReached: "This Main already has the maximum number of Variants.",
 	UnitVariantChanged: "The Unit's Main relationship changed. Refresh and try again.",
 	UnitVariantMainUnavailable: "The Main is unavailable for this Variant state.",
 	InvalidMessageCursor: "This message page link is invalid or expired.",

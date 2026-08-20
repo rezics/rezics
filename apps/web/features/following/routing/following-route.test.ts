@@ -18,6 +18,7 @@ describe("following routes", () => {
 		expect(followingHref("media", "media-id")).toBe("/units/media/media-id");
 		expect(followingHref("video", "video-id")).toBe("/units/video/video-id");
 		expect(followingHref("audio", "audio-id")).toBe("/units/audio/audio-id");
+		expect(followingHref("release", "release-id")).toBe("/units/release/release-id");
 		expect(followingHref("entity", "entity-id")).toBe("/entities/entity-id");
 		expect(followingHref("tag", "tag-id")).toBe("/tags/tag-id");
 		expect(followingHref("structure", "structure-id")).toBe("/tag-structures/structure-id");
@@ -27,14 +28,7 @@ describe("following routes", () => {
 	});
 
 	it("keeps non-page Unit kinds visible but non-navigable", () => {
-		for (const kind of [
-			"slug_namespace",
-			"release",
-			"label",
-			"series",
-			"realm_rule",
-			"zone_page",
-		] as const)
+		for (const kind of ["slug_namespace", "label", "series", "realm_rule", "zone_page"] as const)
 			expect(followingHref(kind, "unit-id")).toBeUndefined();
 	});
 

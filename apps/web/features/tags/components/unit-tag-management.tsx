@@ -32,7 +32,7 @@ export function UnitTagManagement({
 	readonly canVote: boolean;
 	readonly hasDevelopmentPreviewAccess: boolean;
 	readonly tagCreateTarget: UnitTagVoteCreateTarget;
-	readonly onAddStructure: (structureId: string) => Promise<void>;
+	readonly onAddStructure?: (structureId: string) => Promise<void>;
 	readonly onAddTag: (tagId: string) => Promise<void>;
 }) {
 	const { t } = useTranslation(["tags", "ui"]);
@@ -54,7 +54,8 @@ export function UnitTagManagement({
 		[contextRealmId, searchEntities],
 	);
 	if (!canVote) return null;
-	const showStructureManagement = contextKind === "global" && hasDevelopmentPreviewAccess;
+	const showStructureManagement =
+		contextKind === "global" && hasDevelopmentPreviewAccess && onAddStructure !== undefined;
 	const addCopy = contextKind === "global" ? t.tags.global : t.tags.realms;
 	return (
 		<div className="grid gap-6">
@@ -81,7 +82,7 @@ export function UnitTagManagement({
 							disabled={!selectedStructure}
 							isLoading={addStructurePending}
 							onClick={() => {
-								if (!selectedStructure) return;
+								if (!selectedStructure || !onAddStructure) return;
 								void onAddStructure(selectedStructure.id)
 									.then(() => setSelectedStructure(undefined))
 									.catch(() => undefined);

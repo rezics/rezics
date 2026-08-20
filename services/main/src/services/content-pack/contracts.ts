@@ -44,6 +44,11 @@ export type PackLocalization = {
 	readonly contentStatus?: "draft" | "published" | "archived";
 };
 
+export type PackContentLanguageSupportEntry = {
+	readonly languageTag: string;
+	readonly channels?: readonly string[];
+};
+
 export type PackObject = {
 	readonly sourceKey: string;
 	readonly unit: {
@@ -60,6 +65,8 @@ export type PackObject = {
 		readonly ownershipMode: "profile_owned" | "community_owned";
 		readonly actorKind: "import";
 	};
+	/** One authoritative, user-editable content-consumption language declaration. */
+	readonly contentLanguageSupport?: readonly PackContentLanguageSupportEntry[];
 	readonly entity?: { readonly kind: string; readonly verified: boolean };
 	readonly book?: {
 		readonly releaseStatus: "ongoing" | "hiatus" | "completed" | "cancelled";
@@ -75,6 +82,18 @@ export type PackObject = {
 		readonly seasonCount?: number;
 		readonly runtimeMinutes?: number;
 	};
+	readonly software?: {
+		readonly metadataOnly: boolean;
+		readonly releaseDate?: string;
+		readonly versionLabel?: string;
+	};
+	readonly release?: {
+		readonly parentUnitSourceKey: string;
+		readonly versionLabel: string;
+		readonly releasedOn?: string;
+	};
+	readonly video?: { readonly durationSeconds?: number };
+	readonly audio?: { readonly durationSeconds?: number };
 	readonly series?: { readonly kind: string };
 	readonly realm?: {
 		readonly joinPolicy: "open" | "approval";
@@ -109,6 +128,11 @@ export type PackObject = {
 };
 
 export type PackRelations = {
+	readonly unitVariants?: readonly {
+		readonly mainUnitSourceKey: string;
+		readonly variantUnitSourceKey: string;
+		readonly unitKind: string;
+	}[];
 	readonly credits?: readonly {
 		readonly sourceKey: string;
 		readonly sourceUnitSourceKey: string;
@@ -183,7 +207,12 @@ export type LoadedPack = {
 export type PlannedObject =
 	| { readonly sourceKey: string; readonly unitId: string; readonly action: "create" }
 	| { readonly sourceKey: string; readonly unitId: string; readonly action: "noop" }
-	| { readonly sourceKey: string; readonly unitId: string; readonly action: "conflict"; readonly reason: string };
+	| {
+			readonly sourceKey: string;
+			readonly unitId: string;
+			readonly action: "conflict";
+			readonly reason: string;
+	  };
 
 export type ContentPackPlan = {
 	readonly packId: string;

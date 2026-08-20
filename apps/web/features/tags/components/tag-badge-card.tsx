@@ -23,10 +23,10 @@ import { useRef, useState, type MouseEvent } from "react";
 
 import { useChineseContentText } from "@/features/content-language-display/chinese-content-display-context";
 import { postHref } from "@/features/posts/url";
-import type { UnitDetailUnitType } from "@/features/units/model/unit-detail-section";
 import { useTranslation } from "@/i18n/client";
 import type { TagPresentation } from "../model/tag-presentation";
 import { isModifiedLinkActivation } from "../model/tag-selection";
+import type { TaggableUnitType } from "../model/taggable-unit";
 import { tagDetailHref, tagSearchHref } from "../routing/tag-links";
 import { TagVoteControls } from "./tag-vote-controls";
 
@@ -51,7 +51,7 @@ export function TagBadgeCard({
 	readonly onClearVote: (item: TagPresentation) => void;
 	readonly onToggleSelected: (tagId: string, label: string) => void;
 	readonly onVote: (item: TagPresentation, value: -1 | 1) => void;
-	readonly type: UnitDetailUnitType;
+	readonly type: TaggableUnitType;
 }) {
 	const { t } = useTranslation(["tags"]);
 	const [open, setOpen] = useState(false);

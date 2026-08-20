@@ -5,6 +5,7 @@ export default defineConfig({
 		projects: [
 			"./libraries/access/vitest.config.ts",
 			"./libraries/avatar/vitest.config.ts",
+			"./libraries/content-language/vitest.config.ts",
 			"./libraries/portable-text/vitest.config.ts",
 			"./libraries/observability/vitest.config.ts",
 			"./libraries/license/vitest.config.ts",

@@ -387,6 +387,8 @@ import type {
 	PostApiUnitsByTypeResponses,
 	PostApiUnitsBookByBookIdChapterDraftJobsOptions,
 	PostApiUnitsBookByBookIdChapterDraftJobsResponses,
+	GetApiUnitsByTypeByUnitIdContentLanguageSupportEvidenceOptions,
+	GetApiUnitsByTypeByUnitIdContentLanguageSupportEvidenceResponses,
 	GetApiUnitsByTypeByUnitIdOptions,
 	GetApiUnitsByTypeByUnitIdResponses,
 	PatchApiUnitsByTypeByUnitIdOptions,
@@ -423,6 +425,10 @@ import type {
 	PostApiEntitiesResponses,
 	GetApiEntitiesByUnitIdOptions,
 	GetApiEntitiesByUnitIdResponses,
+	PatchApiEntitiesByUnitIdVariantContextOptions,
+	PatchApiEntitiesByUnitIdVariantContextResponses,
+	PostApiEntitiesByUnitIdVariantContextPromoteOptions,
+	PostApiEntitiesByUnitIdVariantContextPromoteResponses,
 	PutApiEntitiesByUnitIdLocalizationsByLanguageOptions,
 	PutApiEntitiesByUnitIdLocalizationsByLanguageResponses,
 	GetApiTagsOptions,
@@ -4436,6 +4442,32 @@ export function postApiUnitsBookByBookIdChapterDraftJobs<ThrowOnError extends bo
 }
 
 /**
+ * @summary List bounded Unit content language evidence
+ * {@link /api/v1/units/:type/:unitId/content-language-support/evidence}
+ */
+export function getApiUnitsByTypeByUnitIdContentLanguageSupportEvidence<
+	ThrowOnError extends boolean = true,
+>(
+	options: Options<GetApiUnitsByTypeByUnitIdContentLanguageSupportEvidenceOptions, ThrowOnError>,
+): Promise<
+	RequestResult<GetApiUnitsByTypeByUnitIdContentLanguageSupportEvidenceResponses, ThrowOnError>
+> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/v1/units/{type}/{unitId}/content-language-support/evidence",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<
+		RequestResult<GetApiUnitsByTypeByUnitIdContentLanguageSupportEvidenceResponses, ThrowOnError>
+	>;
+}
+
+/**
  * @summary Get unit
  * {@link /api/v1/units/:type/:unitId}
  */
@@ -4779,6 +4811,46 @@ export function getApiEntitiesByUnitId<ThrowOnError extends boolean = true>(
 	return request({ method: "GET", url: "/api/v1/entities/{unitId}", ...config }) as Promise<
 		RequestResult<GetApiEntitiesByUnitIdResponses, ThrowOnError>
 	>;
+}
+
+/**
+ * @summary Update Entity Main relationship
+ * {@link /api/v1/entities/:unitId/variant-context}
+ */
+export function patchApiEntitiesByUnitIdVariantContext<ThrowOnError extends boolean = true>(
+	options: Options<PatchApiEntitiesByUnitIdVariantContextOptions, ThrowOnError>,
+): Promise<RequestResult<PatchApiEntitiesByUnitIdVariantContextResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "PATCH",
+		url: "/api/v1/entities/{unitId}/variant-context",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<PatchApiEntitiesByUnitIdVariantContextResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Promote Entity Variant to Main
+ * {@link /api/v1/entities/:unitId/variant-context/promote}
+ */
+export function postApiEntitiesByUnitIdVariantContextPromote<ThrowOnError extends boolean = true>(
+	options: Options<PostApiEntitiesByUnitIdVariantContextPromoteOptions, ThrowOnError>,
+): Promise<RequestResult<PostApiEntitiesByUnitIdVariantContextPromoteResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/v1/entities/{unitId}/variant-context/promote",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<PostApiEntitiesByUnitIdVariantContextPromoteResponses, ThrowOnError>>;
 }
 
 /**

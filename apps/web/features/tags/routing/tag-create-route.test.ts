@@ -11,6 +11,20 @@ const UnitId = "00000000-0000-7000-8000-000000000001";
 const RealmId = "00000000-0000-7000-8000-000000000002";
 
 describe("Tag creation routes", () => {
+	it("round-trips an Entity Tag-vote continuation", async () => {
+		const href = unitTagVoteCreateHref("character", {
+			type: "entity",
+			unitId: UnitId,
+			context: { kind: "global" },
+		});
+		const url = new URL(href, "https://rezics.example");
+
+		await expect(loadTagCreateRoute(Object.fromEntries(url.searchParams))).resolves.toMatchObject({
+			status: "ready",
+			intent: { kind: "unit-tag-vote", type: "entity", unitId: UnitId },
+		});
+	});
+
 	it("creates and validates a global Unit Tag-vote continuation", async () => {
 		const href = unitTagVoteCreateHref("  science  ", {
 			type: "book",

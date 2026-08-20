@@ -13,6 +13,10 @@ import {
 import { assertFilterDocument, type FilterDocument } from "@rezics/filter";
 import type { Static, TSchema } from "@sinclair/typebox";
 import { type ContentLanguage, ContentLanguageValues, isContentLanguage } from "@rezics/i18n";
+import {
+	type ContentLanguageSupport,
+	normalizeContentLanguageSupport,
+} from "@rezics/content-language";
 
 import type { DatabaseTransaction } from "../database";
 import type { Authorization } from "../authorization";
@@ -26,6 +30,7 @@ import {
 	software,
 	softwareRequirement,
 	media,
+	MaximumAdaptedAudioRelationsPerVideo,
 	poll,
 	pollOption,
 	PollOptionSourceKindValues,
@@ -46,6 +51,9 @@ import {
 	VariantCapableUnitKindValues,
 	creditAttribution,
 	unitLocalization,
+	unitRelation,
+	UnitRelationKindValues,
+	unitContentLanguageSupport,
 	unitRevision,
 	unitRevisionCreditAttribution,
 	unitRevisionHead,
@@ -97,6 +105,11 @@ import {
 } from "../tag-structures/definition";
 import { syncUnitLocalizationContentMetrics } from "../content-metrics/service";
 import { recordProfileResourceParticipation } from "../history/participation";
+import {
+	isContentLanguageSupportUnitKind,
+	replaceUnitContentLanguageSupport,
+} from "./content-language-support";
+import { restoreOwnedUnitRelations } from "./relations";
 
 export type UnitRevisionEvent = "create" | "update" | "delete" | "restore";
 
@@ -134,10 +147,22 @@ export const UnitRevisionSchemaVersion = 1 as const;
 export const UnitRevisionSlotSchemaVersions = {
 	main: 1,
 	localization: 1,
+	content_language_support: 1,
 	relations: 1,
 	structure: 1,
 	rules: 1,
 } as const satisfies Record<(typeof UnitRevisionSlotRoleValues)[number], number>;
+const ContentLanguageSupportSchema = z.unknown().transform((value, context) => {
+	try {
+		return normalizeContentLanguageSupport(value);
+	} catch (error) {
+		context.addIssue({
+			code: "custom",
+			message: error instanceof Error ? error.message : "Invalid content language support",
+		});
+		return z.NEVER;
+	}
+});
 const RuleSnapshotSchema = z.object({
 	acknowledgementMode: z.enum(RealmRuleAcknowledgementModeValues),
 	requireOnJoin: z.boolean(),
@@ -151,11 +176,18 @@ const RuleSnapshotSchema = z.object({
 		}),
 	),
 });
+const UnitRelationStateSchema = z
+	.object({
+		kind: z.enum(UnitRelationKindValues),
+		targetUnitId: z.string().uuid(),
+	})
+	.strict();
 const UnitSnapshotSchema = z.object({
 	version: z.literal(UnitRevisionSchemaVersion),
 	kind: z.enum(UnitKindValues),
 	unit: SnapshotRowSchema,
 	localizations: z.array(SnapshotRowSchema),
+	contentLanguageSupport: ContentLanguageSupportSchema.default([]),
 	extension: SnapshotRowSchema.nullable(),
 	preference: SnapshotRowSchema.nullable(),
 	owned: z.object({
@@ -164,6 +196,11 @@ const UnitSnapshotSchema = z.object({
 		tags: z.array(SnapshotRowSchema),
 		structureApplications: z.array(SnapshotRowSchema),
 		variants: z.array(SnapshotRowSchema),
+		/** Released v1 relation documents without this key represent an empty set. */
+		unitRelations: z
+			.array(UnitRelationStateSchema)
+			.max(MaximumAdaptedAudioRelationsPerVideo)
+			.default([]),
 		seriesReleases: z.array(SnapshotRowSchema),
 		softwareRequirements: z.array(SnapshotRowSchema),
 		pollOptions: z.array(SnapshotRowSchema),
@@ -434,6 +471,11 @@ async function snapshotUnit(tx: DatabaseTransaction, unitId: string) {
 		.from(unitLocalization)
 		.where(eq(unitLocalization.unitId, unitId))
 		.orderBy(unitLocalization.language);
+	const [contentLanguageSupportRow] = await tx
+		.select({ value: unitContentLanguageSupport.value })
+		.from(unitContentLanguageSupport)
+		.where(eq(unitContentLanguageSupport.unitId, unitId))
+		.limit(1);
 	const credits = await tx
 		.select()
 		.from(creditAttribution)
@@ -459,6 +501,17 @@ async function snapshotUnit(tx: DatabaseTransaction, unitId: string) {
 		.from(unitVariant)
 		.where(eq(unitVariant.variantUnitId, unitId))
 		.orderBy(unitVariant.variantUnitId);
+	const unitRelations = await tx
+		.select({
+			kind: unitRelation.kind,
+			targetUnitId: unitRelation.targetUnitId,
+		})
+		.from(unitRelation)
+		.where(eq(unitRelation.sourceUnitId, unitId))
+		.orderBy(unitRelation.kind, unitRelation.targetUnitId)
+		.limit(MaximumAdaptedAudioRelationsPerVideo + 1);
+	if (unitRelations.length > MaximumAdaptedAudioRelationsPerVideo)
+		throw new Error(`Unit ${unitId} exceeds the outgoing relation snapshot bound`);
 
 	const empty: SnapshotRow[] = [];
 	const owned: UnitSnapshot["owned"] = {
@@ -467,6 +520,7 @@ async function snapshotUnit(tx: DatabaseTransaction, unitId: string) {
 		tags,
 		structureApplications,
 		variants,
+		unitRelations,
 		seriesReleases:
 			record.kind === "series"
 				? await tx
@@ -509,6 +563,9 @@ async function snapshotUnit(tx: DatabaseTransaction, unitId: string) {
 		localizations: localizations.map((localization) =>
 			unitLocalizationStateSchema.parse(localization),
 		),
+		contentLanguageSupport: contentLanguageSupportRow
+			? ContentLanguageSupportSchema.parse(contentLanguageSupportRow.value)
+			: [],
 		extension: await snapshotExtension(tx, unitId, record.kind),
 		preference: null,
 		owned,
@@ -764,6 +821,15 @@ export async function restoreUnitSnapshot(
 			});
 	}
 	await tx.update(unit).set(unitStateSchema.parse(snapshot.unit)).where(eq(unit.id, unitId));
+	if (isContentLanguageSupportUnitKind(snapshot.kind))
+		await replaceUnitContentLanguageSupport(
+			tx,
+			unitId,
+			snapshot.kind,
+			snapshot.contentLanguageSupport,
+		);
+	else if (snapshot.contentLanguageSupport.length)
+		throw new Error(`${snapshot.kind} cannot restore content language support`);
 	await tx.delete(unitLocalization).where(eq(unitLocalization.unitId, unitId));
 	if (snapshot.localizations.length)
 		await tx.insert(unitLocalization).values(
@@ -796,6 +862,7 @@ export async function restoreUnitSnapshot(
 		await tx
 			.insert(unitVariant)
 			.values(snapshot.owned.variants.map((row) => unitVariantRowSchema.parse(row)));
+	await restoreOwnedUnitRelations(tx, unitId, snapshot.kind, snapshot.owned.unitRelations);
 
 	if (snapshot.kind === "series") {
 		await tx.delete(seriesRelease).where(eq(seriesRelease.seriesId, unitId));
@@ -842,6 +909,7 @@ type UnitRevisionDocumentSlot = UnitRevisionSlotIdentity & {
 export type UnitRevisionDocuments = {
 	main?: SlotDocument;
 	localizations: Partial<Record<ContentLanguage, SlotDocument>>;
+	content_language_support?: SlotDocument;
 	relations?: SlotDocument;
 	structure?: SlotDocument;
 	rules?: SlotDocument;
@@ -855,6 +923,7 @@ export type UnitRevisionCommitResult = {
 const SlotModels = {
 	main: `rezics.unit.main.v${UnitRevisionSlotSchemaVersions.main}`,
 	localization: `rezics.unit.localization.v${UnitRevisionSlotSchemaVersions.localization}`,
+	content_language_support: `rezics.unit.content-language-support.v${UnitRevisionSlotSchemaVersions.content_language_support}`,
 	relations: `rezics.unit.relations.v${UnitRevisionSlotSchemaVersions.relations}`,
 	structure: `rezics.unit.structure.v${UnitRevisionSlotSchemaVersions.structure}`,
 	rules: `rezics.unit.rules.v${UnitRevisionSlotSchemaVersions.rules}`,
@@ -872,6 +941,13 @@ function snapshotToDocuments(snapshot: UnitSnapshot): UnitRevisionDocuments {
 			},
 		},
 		localizations: {},
+		content_language_support: {
+			model: SlotModels.content_language_support,
+			payload: {
+				version: UnitRevisionSlotSchemaVersions.content_language_support,
+				value: snapshot.contentLanguageSupport,
+			},
+		},
 		relations: {
 			model: SlotModels.relations,
 			payload: {
@@ -881,6 +957,7 @@ function snapshotToDocuments(snapshot: UnitSnapshot): UnitRevisionDocuments {
 				tags: snapshot.owned.tags,
 				structureApplications: snapshot.owned.structureApplications,
 				variants: snapshot.owned.variants,
+				unitRelations: snapshot.owned.unitRelations,
 			},
 		},
 		structure: {
@@ -963,6 +1040,43 @@ function orderedLocalizationStates(documents: UnitRevisionDocuments): UnitLocali
 	);
 }
 
+/** A missing slot is the released v1 legacy representation of an empty field. */
+function parseContentLanguageSupportSlot(documents: UnitRevisionDocuments): ContentLanguageSupport {
+	const document = documents.content_language_support;
+	if (!document) return [];
+	assertSlotDocumentModel("content_language_support", document);
+	const payload = asRecord(document.payload, "content_language_support");
+	if (payload.version !== UnitRevisionSlotSchemaVersions.content_language_support)
+		throw new Error("Unsupported content language support Unit revision version");
+	return ContentLanguageSupportSchema.parse(payload.value);
+}
+
+/** Exposes the legacy-empty slot semantics to history readers and tests. @internal */
+export function unitRevisionDocumentsToContentLanguageSupport(
+	documents: UnitRevisionDocuments,
+): ContentLanguageSupport {
+	return parseContentLanguageSupportSlot(documents);
+}
+
+/** A released v1 relations document without this key represents no outgoing relations. */
+function parseUnitRelationsSlot(documents: UnitRevisionDocuments) {
+	const document = documents.relations;
+	if (!document) return [];
+	assertSlotDocumentModel("relations", document);
+	const payload = asRecord(document.payload, "relations");
+	if (payload.version !== UnitRevisionSlotSchemaVersions.relations)
+		throw new Error("Unsupported relations Unit revision version");
+	return z
+		.array(UnitRelationStateSchema)
+		.max(MaximumAdaptedAudioRelationsPerVideo)
+		.parse(payload.unitRelations ?? []);
+}
+
+/** Exposes legacy-empty outgoing relation semantics to history readers and tests. @internal */
+export function unitRevisionDocumentsToUnitRelations(documents: UnitRevisionDocuments) {
+	return parseUnitRelationsSlot(documents);
+}
+
 function documentsToSnapshot(documents: UnitRevisionDocuments): UnitSnapshot {
 	const main = fixedSlotPayload(documents, "main");
 	const relations = fixedSlotPayload(documents, "relations");
@@ -973,6 +1087,7 @@ function documentsToSnapshot(documents: UnitRevisionDocuments): UnitSnapshot {
 		kind: main.kind,
 		unit: main.unit,
 		localizations: orderedLocalizationStates(documents),
+		contentLanguageSupport: parseContentLanguageSupportSlot(documents),
 		extension: main.extension,
 		preference: null,
 		owned: {
@@ -981,6 +1096,7 @@ function documentsToSnapshot(documents: UnitRevisionDocuments): UnitSnapshot {
 			tags: relations.tags,
 			structureApplications: relations.structureApplications,
 			variants: relations.variants,
+			unitRelations: parseUnitRelationsSlot(documents),
 			seriesReleases: structure.seriesReleases,
 			softwareRequirements: structure.softwareRequirements,
 			pollOptions: structure.pollOptions,
@@ -1006,7 +1122,7 @@ function withoutRevisionDocumentVersion(payload: Record<string, unknown>): Recor
 export function unitRevisionDocumentsToComparisonValue(
 	documents: UnitRevisionDocuments,
 ): Record<string, unknown> {
-	documentsToSnapshot(documents);
+	const snapshot = documentsToSnapshot(documents);
 	const localizations: Partial<Record<ContentLanguage, UnitLocalizationState>> = {};
 	for (const language of ContentLanguageValues) {
 		const document = documents.localizations[language];
@@ -1015,7 +1131,11 @@ export function unitRevisionDocumentsToComparisonValue(
 	return {
 		main: withoutRevisionDocumentVersion(fixedSlotPayload(documents, "main")),
 		localizations,
-		relations: withoutRevisionDocumentVersion(fixedSlotPayload(documents, "relations")),
+		contentLanguageSupport: parseContentLanguageSupportSlot(documents),
+		relations: {
+			...withoutRevisionDocumentVersion(fixedSlotPayload(documents, "relations")),
+			unitRelations: snapshot.owned.unitRelations,
+		},
 		structure: withoutRevisionDocumentVersion(fixedSlotPayload(documents, "structure")),
 		...(documents.rules
 			? {
@@ -1395,6 +1515,7 @@ function revisionPath(path: string, key: string) {
 }
 
 const StableArrayKeys = [
+	["kind", "targetUnitId"],
 	["id"],
 	["language"],
 	["tagId"],

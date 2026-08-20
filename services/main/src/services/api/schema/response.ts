@@ -11,6 +11,7 @@ import { LicenseIds, LicenseRecognitionStatusValues } from "@rezics/license";
 import {
 	ChineseContentDisplay,
 	ContentLanguage,
+	ContentLanguageSupport,
 	ContentRating,
 	DateTime,
 	DateTimeString,
@@ -28,11 +29,13 @@ import {
 	ContentStructureKindValues,
 	CreditAttributionRoleValues,
 	EntityKindValues,
+	MaximumAdaptedAudioRelationsPerVideo,
 	ProgressDatePrecisionValues,
 	ProgressEntryKindValues,
 	ProgressStatusValues,
 	RealmPageKindValues,
 	RealmTagQueryStrategyValues,
+	SubjectAssociationEntityTagPreviewLimit,
 	SubjectAssociationRoleValues,
 	UnitKindValues,
 	UnitOwnershipModeValues,
@@ -202,7 +205,7 @@ export const UnitListResponse = t.Object({
 export const UnitVariantSummaryResponse = t.Object(
 	{
 		id: Uuid,
-		type: t.UnionEnum(["book", "software", "media"]),
+		type: t.UnionEnum(["book", "software", "media", "entity"]),
 		language: ContentLanguage,
 		title: NullableText,
 		cover: ImageAssetResponse,
@@ -242,6 +245,7 @@ const ManageableUnitTypeResponse = t.Union([
 	t.Literal("series"),
 	t.Literal("video"),
 	t.Literal("audio"),
+	t.Literal("release"),
 ]);
 
 const UnitLicenseGrantResponse = t.Object(
@@ -307,6 +311,12 @@ const UnitDetailsResponse = t.Union([
 		{
 			type: t.Literal("video"),
 			durationSeconds: t.Nullable(t.Integer({ minimum: 1 })),
+			adaptedAudioUnitIds: t.Nullable(
+				t.Array(Uuid, {
+					maxItems: MaximumAdaptedAudioRelationsPerVideo,
+					uniqueItems: true,
+				}),
+			),
 		},
 		{ additionalProperties: false },
 	),
@@ -314,6 +324,15 @@ const UnitDetailsResponse = t.Union([
 		{
 			type: t.Literal("audio"),
 			durationSeconds: t.Nullable(t.Integer({ minimum: 1 })),
+		},
+		{ additionalProperties: false },
+	),
+	t.Object(
+		{
+			type: t.Literal("release"),
+			parentUnitId: Uuid,
+			versionLabel: t.String({ minLength: 1 }),
+			releasedOn: t.Nullable(t.String({ format: "date" })),
 		},
 		{ additionalProperties: false },
 	),
@@ -395,6 +414,7 @@ export const UnitDetailResponse = t.Object({
 	status: t.String(),
 	visibility: t.String(),
 	language: t.Nullable(ContentLanguage),
+	contentLanguageSupport: ContentLanguageSupport,
 	contentRating: t.String(),
 	aiDisclosure: t.String(),
 	licenses: t.Array(UnitLicenseGrantResponse),
@@ -414,9 +434,18 @@ export const UnitDetailResponse = t.Object({
 		t.Object({
 			id: Uuid,
 			entityEntryId: Uuid,
+			entityKind: t.UnionEnum(EntityKindValues),
 			role: t.UnionEnum(SubjectAssociationRoleValues),
 			position: FractionalPosition,
+			language: t.Nullable(ContentLanguage),
 			title: NullableText,
+			summary: NullableText,
+			avatar: AvatarResponse,
+			cover: ImageAssetResponse,
+			tags: t.Array(
+				t.Object({ tagId: Uuid, title: NullableText }, { additionalProperties: false }),
+				{ maxItems: SubjectAssociationEntityTagPreviewLimit },
+			),
 			contextPost: t.Nullable(AssociationContextPostResponse),
 		}),
 	),
@@ -1035,9 +1064,12 @@ export const EntityDetailResponse = t.Object({
 	attributions: t.Array(UnitAttributionSummaryResponse),
 	owner: t.Nullable(UnitSummaryResponse),
 	externalLinks: t.Array(UnitDetailExternalLinkResponse),
+	variantContext: UnitVariantContextResponse,
 	capabilities: t.Object({
 		canEdit: t.Boolean(),
 		canEditCreditAttributions: t.Boolean(),
+		canCurateTags: t.Boolean(),
+		canManageVariants: t.Boolean(),
 		canManageAccess: t.Boolean(),
 		canManageCreditAssociations: t.Boolean(),
 		canManageSubjectAssociations: t.Boolean(),

@@ -138,6 +138,20 @@ describe("Unit landing SEO metadata", () => {
 		expect(build(value).metadata.description).toBe("View the Book “Types and Proofs” on REZICS.");
 	});
 
+	it("presents a Release through the shared software work SEO", () => {
+		const document = build(projection({ kind: "release" }), "release");
+
+		expect(document.metadata.title).toBe("Types and Proofs (Release) | REZICS");
+		expect(document.metadata.alternates).toEqual({
+			canonical: `/units/release/${UnitId}`,
+		});
+		expect(document.structuredData).toMatchObject({
+			"@graph": expect.arrayContaining([
+				expect.objectContaining({ "@type": "SoftwareApplication", name: "Types and Proofs" }),
+			]),
+		});
+	});
+
 	it("refuses a projection whose immutable identity or kind does not match the route", () => {
 		const document = build(projection(), "software");
 

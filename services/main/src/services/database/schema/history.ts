@@ -100,6 +100,7 @@ export const profileResourceParticipation = pgTable(
 export const UnitRevisionSlotRoleValues = [
 	"main",
 	"localization",
+	"content_language_support",
 	"relations",
 	"structure",
 	"rules",

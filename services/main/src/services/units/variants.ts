@@ -2,11 +2,13 @@ import { and, asc, eq, inArray, or, sql } from "drizzle-orm";
 import type { ContentLanguage } from "@rezics/i18n";
 
 import { recordAuditEvent } from "../audit";
+import { WorkPolicy } from "../performance/policy";
 import type { UnitAuthorization } from "../authorization/unit/authorization";
 import { getUnitReadCondition } from "../authorization/unit/query";
 import { database, type DatabaseExecutor, type DatabaseTransaction } from "../database";
 import { databaseConstraintName } from "../database/constraint";
 import {
+	entity,
 	series,
 	seriesRelease,
 	unit,
@@ -24,6 +26,7 @@ import {
 import {
 	UnitNotFound,
 	UnitVariantChanged,
+	UnitVariantGroupLimitReached,
 	UnitVariantKindMismatch,
 	UnitVariantMainUnavailable,
 	UnitVariantSourceHasVariants,
@@ -44,6 +47,9 @@ export function toUnitVariantConstraintError(error: unknown) {
 	if (
 		constraint === "unit_variant_variant_kind_fkey" ||
 		constraint === "unit_variant_main_kind_fkey" ||
+		constraint === "unit_variant_entity_kind_mismatch" ||
+		constraint === "entity_variant_kind_change" ||
+		constraint === "entity_variant_delete" ||
 		constraint === "unit_variant_kind_check"
 	)
 		return new UnitVariantKindMismatch();
@@ -103,6 +109,7 @@ export type UnitVariantPromotionResult = {
 type StoredUnit = {
 	readonly id: string;
 	readonly kind: string;
+	readonly entityKind: string | null;
 	readonly status: string;
 	readonly visibility: string;
 	readonly moderationStatus: string;
@@ -115,7 +122,7 @@ async function lockUnits(
 ): Promise<readonly StoredUnit[]> {
 	const ids = [...new Set(unitIds)].sort();
 	if (!ids.length) return [];
-	return tx
+	const locked = await tx
 		.select({
 			id: unit.id,
 			kind: unit.kind,
@@ -128,6 +135,12 @@ async function lockUnits(
 		.where(inArray(unit.id, ids))
 		.orderBy(unit.id)
 		.for("update");
+	const entityRows = await tx
+		.select({ id: entity.id, kind: entity.kind })
+		.from(entity)
+		.where(inArray(entity.id, ids));
+	const entityKindById = new Map(entityRows.map((row) => [row.id, row.kind] as const));
+	return locked.map((row) => ({ ...row, entityKind: entityKindById.get(row.id) ?? null }));
 }
 
 async function lockVariantGroups(
@@ -155,6 +168,8 @@ function requireVariantPair(
 		variant.kind !== expectedKind ||
 		main.kind !== expectedKind
 	)
+		throw new UnitVariantKindMismatch();
+	if (expectedKind === "entity" && (!variant.entityKind || variant.entityKind !== main.entityKind))
 		throw new UnitVariantKindMismatch();
 	return { variant, main };
 }
@@ -232,7 +247,10 @@ export async function getUnitVariantContext(
 		.select()
 		.from(unitVariant)
 		.where(or(eq(unitVariant.variantUnitId, unitId), eq(unitVariant.mainUnitId, unitId)))
-		.orderBy(asc(unitVariant.createdAt), asc(unitVariant.variantUnitId));
+		.orderBy(asc(unitVariant.createdAt), asc(unitVariant.variantUnitId))
+		.limit(WorkPolicy.variant.maxGroupSize + 1);
+	if (relationships.length > WorkPolicy.variant.maxGroupSize)
+		throw new Error("Persisted Unit Variant group exceeds the online bound");
 	const outbound = relationships.find(({ variantUnitId }) => variantUnitId === unitId);
 	if (outbound) {
 		const summaries = await readableSummaries(
@@ -376,6 +394,13 @@ export async function updateUnitVariantContext(input: {
 				.where(eq(unitVariant.variantUnitId, input.mainUnitId))
 				.limit(1);
 			if (targetOutbound) throw new UnitVariantTargetIsVariant();
+			const targetGroup = await tx
+				.select({ variantUnitId: unitVariant.variantUnitId })
+				.from(unitVariant)
+				.where(eq(unitVariant.mainUnitId, input.mainUnitId))
+				.limit(WorkPolicy.variant.maxGroupSize);
+			if (targetGroup.length >= WorkPolicy.variant.maxGroupSize)
+				throw new UnitVariantGroupLimitReached();
 			if (isDiscoverableVariantUnit(pair.variant) && !isDiscoverableVariantUnit(pair.main))
 				throw new UnitVariantMainUnavailable();
 			await tx
@@ -387,7 +412,10 @@ export async function updateUnitVariantContext(input: {
 				})
 				.onConflictDoUpdate({
 					target: unitVariant.variantUnitId,
-					set: { mainUnitId: input.mainUnitId, unitKind: input.kind },
+					set: {
+						mainUnitId: input.mainUnitId,
+						unitKind: input.kind,
+					},
 				});
 		} else {
 			await tx.delete(unitVariant).where(eq(unitVariant.variantUnitId, input.variantUnitId));
@@ -433,7 +461,9 @@ export async function promoteUnitVariantToMain(input: {
 			.select({ variantUnitId: unitVariant.variantUnitId })
 			.from(unitVariant)
 			.where(eq(unitVariant.mainUnitId, input.expectedMainUnitId))
-			.orderBy(unitVariant.variantUnitId);
+			.orderBy(unitVariant.variantUnitId)
+			.limit(WorkPolicy.variant.maxGroupSize + 1);
+		if (group.length > WorkPolicy.variant.maxGroupSize) throw new UnitVariantGroupLimitReached();
 		const siblingIds = group
 			.map(({ variantUnitId }) => variantUnitId)
 			.filter((unitId) => unitId !== input.variantUnitId);

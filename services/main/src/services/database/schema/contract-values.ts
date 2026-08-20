@@ -47,7 +47,28 @@ export const CommunityOwnedUnitKindValues = [
 	"structure",
 ] as const;
 
-export const VariantCapableUnitKindValues = ["book", "software", "media"] as const;
+export const VariantCapableUnitKindValues = ["book", "software", "media", "entity"] as const;
+/** Unit kinds that can make an authoritative content-consumption language declaration. */
+export const ContentLanguageSupportUnitKindValues = [
+	"book",
+	"software",
+	"media",
+	"video",
+	"audio",
+	"release",
+] as const;
+export type ContentLanguageSupportUnitKind = (typeof ContentLanguageSupportUnitKindValues)[number];
+/** Direct, non-recursive evidence lanes exposed to content-language editors. */
+export const ContentLanguageEvidenceSourceValues = [
+	"parent",
+	"main",
+	"variant",
+	"release",
+	"occurrence",
+	"adapted_audio",
+] as const;
+export type ContentLanguageEvidenceSource = (typeof ContentLanguageEvidenceSourceValues)[number];
+export const MaximumContentLanguageEvidencePageSize = 50;
 /** Unit kinds whose content-hosting choice is persisted as descriptive metadata. */
 export const MetadataOnlyUnitKindValues = ["book", "software", "media"] as const;
 export type MetadataOnlyUnitKind = (typeof MetadataOnlyUnitKindValues)[number];
@@ -136,6 +157,26 @@ export const UnitMergeOperationPhaseValues = [
 ] as const;
 export type UnitMergeOperationPhase = (typeof UnitMergeOperationPhaseValues)[number];
 export const TimedMediaUnitKindValues = ["video", "audio"] as const;
+/** Generic Unit-to-Unit relation kinds; persisted as text for additive evolution. */
+export const UnitRelationKindValues = ["adapted_audio"] as const;
+export type UnitRelationKind = (typeof UnitRelationKindValues)[number];
+/**
+ * Runtime owner of every relation signature.
+ *
+ * A relation kind cannot acquire a second signature without becoming a new
+ * kind because persisted rows use this proof at both API and database
+ * boundaries.
+ */
+export const UnitRelationSignatures = {
+	adapted_audio: { sourceKind: "video", targetKind: "audio" },
+} as const satisfies Record<
+	UnitRelationKind,
+	{ readonly sourceKind: UnitKind; readonly targetKind: UnitKind }
+>;
+/** Request-path bound for replacing or reading adapted Audio relations on one Video. */
+export const MaximumAdaptedAudioRelationsPerVideo = 64;
+/** Public Unit-detail preview bound for Tags attached to one associated Entity. */
+export const SubjectAssociationEntityTagPreviewLimit = 4;
 export const UnitOwnershipModeValues = ["profile_owned", "community_owned"] as const;
 export const UnitOwnershipClaimableUnitKindValues = [
 	"entity",
@@ -212,6 +253,32 @@ export const RevisionAttributionAssuranceValues = [
 ] as const;
 export type RevisionAttributionAssurance = (typeof RevisionAttributionAssuranceValues)[number];
 
+export const CreditAttributionUnitKindValues = [
+	"book",
+	"software",
+	"media",
+	"series",
+	"entity",
+	"collection",
+	"release",
+	"video",
+	"audio",
+] as const satisfies readonly UnitKind[];
+export type CreditAttributionUnitKind = (typeof CreditAttributionUnitKindValues)[number];
+
+/** Roles shared by aggregate Media and its concrete timed-media Units. */
+export const MediaCreditAttributionRoleValues = [
+	"director",
+	"producer",
+	"writer",
+	"publisher",
+	"composer",
+	"actor",
+	"narrator",
+	"studio",
+	"distributor",
+] as const satisfies readonly CreditAttributionRole[];
+
 export const CreditAttributionRolesByUnitKind = {
 	book: [
 		"author",
@@ -223,26 +290,26 @@ export const CreditAttributionRolesByUnitKind = {
 		"letterer",
 		"colorist",
 	],
-	software: ["developer", "publisher", "composer", "designer", "director", "producer", "writer"],
-	media: [
+	software: [
+		"developer",
+		"publisher",
+		"composer",
+		"designer",
 		"director",
 		"producer",
 		"writer",
-		"publisher",
-		"composer",
-		"actor",
-		"narrator",
-		"studio",
-		"distributor",
+		"translator",
+		"illustrator",
+		"editor",
 	],
+	media: MediaCreditAttributionRoleValues,
 	series: ["author", "editor", "publisher"],
-	entity: ["publisher"],
+	entity: ["publisher", "actor"],
 	collection: ["publisher"],
-} as const satisfies Record<
-	"book" | "software" | "media" | "series" | "entity" | "collection",
-	readonly CreditAttributionRole[]
->;
-export type CreditAttributionUnitKind = keyof typeof CreditAttributionRolesByUnitKind;
+	release: ["developer", "publisher", "distributor", "translator", "editor", "producer", "studio"],
+	video: MediaCreditAttributionRoleValues,
+	audio: MediaCreditAttributionRoleValues,
+} as const satisfies Record<CreditAttributionUnitKind, readonly CreditAttributionRole[]>;
 
 export const SubjectAssociationRoleValues = [
 	"primary_character",
@@ -266,16 +333,15 @@ export function isCreditAttributionRole(value: string): value is CreditAttributi
 }
 
 export function isCreditAttributionUnitKind(kind: UnitKind): kind is CreditAttributionUnitKind {
-	return Object.hasOwn(CreditAttributionRolesByUnitKind, kind);
+	return CreditAttributionUnitKindValues.some((value) => value === kind);
 }
 
 export function isCreditAttributionRoleForUnitKind(
 	kind: CreditAttributionUnitKind,
 	role: CreditAttributionRole,
 ): boolean {
-	return (CreditAttributionRolesByUnitKind[kind] as readonly CreditAttributionRole[]).includes(
-		role,
-	);
+	const roles: readonly CreditAttributionRole[] = CreditAttributionRolesByUnitKind[kind];
+	return roles.includes(role);
 }
 
 export function isSubjectAssociationRole(value: string): value is SubjectAssociationRole {

@@ -51,6 +51,9 @@ import {
 	BookChapterDraftJobParams,
 	CreateBookChapterDraftJobBody,
 	BookChapterDraftJobResponse,
+	ContentLanguageEvidenceUnitParams,
+	ContentLanguageEvidenceQuery,
+	ContentLanguageEvidenceResponse,
 } from "./schema";
 import {
 	toApiErrorResponse,
@@ -73,6 +76,7 @@ import {
 import { NoContentResponse } from "../schema/action-response";
 import { ValidationError } from "../errors";
 import { enqueueBookChapterDraftJob } from "../../units/book-chapter-draft";
+import { listContentLanguageEvidence } from "../../units/content-language-evidence";
 
 const AuthenticationRequiredResponse = toApiErrorResponse(["AuthenticationRequired"]);
 const UnitReadFailureResponse = toApiErrorResponse(["UnitNotFound"]);
@@ -105,6 +109,7 @@ const UnitCreateConflictResponse = toApiErrorResponse([
 	"UnitVariantKindMismatch",
 	"UnitVariantTargetIsVariant",
 	"UnitVariantSourceHasVariants",
+	"UnitVariantGroupLimitReached",
 	"UnitVariantChanged",
 	"UnitVariantMainUnavailable",
 	"UnitLicenseGrantConflict",
@@ -178,6 +183,7 @@ const UnitVariantConflictResponse = toApiErrorResponse([
 	"UnitVariantKindMismatch",
 	"UnitVariantTargetIsVariant",
 	"UnitVariantSourceHasVariants",
+	"UnitVariantGroupLimitReached",
 	"UnitVariantChanged",
 	"UnitVariantMainUnavailable",
 ]);
@@ -520,7 +526,10 @@ export default new Elysia({ prefix: "/units" })
 			response: {
 				[StatusCodes.OK]: UnitDetailResponse,
 				[StatusCodes.BAD_REQUEST]: UnitCreateBadRequestResponse,
-				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["ValidationError"]),
+				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse([
+					"ValidationError",
+					"UnitContentLanguageSupportInvalid",
+				]),
 				[StatusCodes.UNAUTHORIZED]: AuthenticationRequiredResponse,
 				[StatusCodes.FORBIDDEN]: UnitCreateForbiddenResponse,
 				[StatusCodes.NOT_FOUND]: UnitCreateNotFoundResponse,
@@ -551,6 +560,34 @@ export default new Elysia({ prefix: "/units" })
 				[StatusCodes.CONFLICT]: UnitChangedResponse,
 			},
 			detail: { summary: "Draft Chapters attached to a draft Book", tags: ["Units"] },
+		},
+	)
+	.get(
+		"/:type/:unitId/content-language-support/evidence",
+		async ({ params, query, authorization }) =>
+			listContentLanguageEvidence({
+				unitId: params.unitId,
+				unitKind: params.type,
+				authorization,
+				localizationLanguages: query.localizationLanguages ?? [],
+				cursor: query.cursor,
+				limit: query.limit ?? 20,
+			}),
+		{
+			access: "contribute:unit:update",
+			params: ContentLanguageEvidenceUnitParams,
+			query: ContentLanguageEvidenceQuery,
+			response: {
+				[StatusCodes.OK]: ContentLanguageEvidenceResponse,
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["InvalidPaginationCursor"]),
+				[StatusCodes.UNAUTHORIZED]: AuthenticationRequiredResponse,
+				[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
+				[StatusCodes.NOT_FOUND]: UnitReadFailureResponse,
+			},
+			detail: {
+				summary: "List bounded Unit content language evidence",
+				tags: ["Units"],
+			},
 		},
 	)
 	.get(
@@ -599,7 +636,11 @@ export default new Elysia({ prefix: "/units" })
 				[StatusCodes.UNAUTHORIZED]: AuthenticationRequiredResponse,
 				[StatusCodes.FORBIDDEN]: UnitUpdateForbiddenResponse,
 				[StatusCodes.BAD_REQUEST]: UnitUpdateBadRequestResponse,
-				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["ValidationError"]),
+				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse([
+					"ValidationError",
+					"UnitContentLanguageSupportInvalid",
+					"UnitRelationInvalid",
+				]),
 				[StatusCodes.NOT_FOUND]: UnitMutationNotFoundResponse,
 				[StatusCodes.CONFLICT]: UnitUpdateConflictResponse,
 			},

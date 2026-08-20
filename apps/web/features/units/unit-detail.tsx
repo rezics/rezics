@@ -3,7 +3,15 @@
 import { isLicenseId } from "@rezics/license";
 
 import { useGetApiUnitsByTypeByUnitId } from "@rezics/openapi-tanstack-query";
-import { AudioLines, BookOpen, Gamepad2, LibraryBig, PlaySquare, Video } from "lucide-react";
+import {
+	AudioLines,
+	BookOpen,
+	Gamepad2,
+	LibraryBig,
+	Package,
+	PlaySquare,
+	Video,
+} from "lucide-react";
 import { AppLink as Link } from "@/features/application-shell/components/app-link";
 
 import { Card, CardContent } from "@rezics/ui";
@@ -33,6 +41,7 @@ import { LocalizedText } from "@/features/content-language-display/chinese-conte
 import { toNonNegativeApiInteger } from "@/lib/api-number";
 import { isVariantUnitType } from "./unit-types";
 import { UnitReferenceCandidates } from "./components/unit-reference-candidates";
+import { ContentLanguageSupportDisplay } from "@/features/content-language-support/components/content-language-support-display";
 
 const Icons = {
 	book: BookOpen,
@@ -41,6 +50,7 @@ const Icons = {
 	series: LibraryBig,
 	video: Video,
 	audio: AudioLines,
+	release: Package,
 };
 
 function formatDate(value: string | null, language: string) {
@@ -79,6 +89,7 @@ export function UnitDetail({ type, unit }: { type: UnitType; unit: string }) {
 	const localizationLanguages = useLocalizationLanguages();
 	const { data: session } = useHydratedSession();
 	const timedMedia = type === "video" || type === "audio";
+	const compactNavigation = timedMedia || type === "release";
 	const dockAccess = useDockManagementAccess(unit, type, Boolean(session) && !timedMedia);
 	const { t, locale } = useTranslation([
 		"engagement",
@@ -166,6 +177,14 @@ export function UnitDetail({ type, unit }: { type: UnitType; unit: string }) {
 				? formatDuration(item.details.durationSeconds)
 				: undefined,
 		],
+		[
+			t.units.fields.parentUnit,
+			item.details.type === "release" ? item.details.parentUnitId : undefined,
+		],
+		[
+			t.units.fields.versionLabel,
+			item.details.type === "release" ? item.details.versionLabel : undefined,
+		],
 		[t.units.detail.license, licenseValue],
 		[t.units.detail.updatedAt, formatDate(item.updatedAt, locale.current)],
 	] as const;
@@ -229,7 +248,7 @@ export function UnitDetail({ type, unit }: { type: UnitType; unit: string }) {
 				className="-mt-8 flex gap-1 overflow-x-auto border-b"
 				aria-label={t.units.detail.sections}
 			>
-				{(timedMedia
+				{(compactNavigation
 					? [
 							[t.units.detail.information, "#overview"],
 							...(session ? [[t.units.references.title, "#references"]] : []),
@@ -308,6 +327,16 @@ export function UnitDetail({ type, unit }: { type: UnitType; unit: string }) {
 							</CardContent>
 						</Card>
 					</DetailSection>
+
+					{item.contentLanguageSupport.length > 0 && (
+						<DetailSection title={t.units.contentLanguageSupport.title}>
+							<Card>
+								<CardContent className="p-5">
+									<ContentLanguageSupportDisplay value={item.contentLanguageSupport} />
+								</CardContent>
+							</Card>
+						</DetailSection>
+					)}
 
 					{item.localizations.length > 0 && (
 						<DetailSection title={t.units.detail.contentLanguages}>

@@ -49,6 +49,10 @@ export default {
 	UnitLicenseOfferingEndForbidden: `Esta oferta de ${esTerminology.license.forms.inline} no se puede cerrar.`,
 	UnitLicenseGrantConflict: `Ya existe una oferta abierta de esta ${esTerminology.license.forms.inline} en este contenido.`,
 	UnitChanged: "Este contenido ha cambiado. Actualiza la página e inténtalo de nuevo.",
+	UnitContentLanguageSupportInvalid:
+		"No se han podido guardar los idiomas de consumo del contenido. Revisa los idiomas y los canales compatibles e inténtalo de nuevo.",
+	UnitRelationInvalid:
+		"No se ha podido guardar la relación seleccionada. Revisa las fichas relacionadas e inténtalo de nuevo.",
 	UnitRevisionConflict:
 		"La versión de referencia ha cambiado. Actualiza la página e inténtalo de nuevo.",
 	RevisionContributionActorRequired:
@@ -229,6 +233,7 @@ export default {
 	UnitVariantTargetIsVariant: "Una variante debe apuntar directamente a un elemento principal.",
 	UnitVariantSourceHasVariants:
 		"Un elemento principal con variantes no puede convertirse en una variante.",
+	UnitVariantGroupLimitReached: "Este elemento principal ya tiene el número máximo de variantes.",
 	UnitVariantChanged:
 		"La relación de la Unit con su elemento principal ha cambiado. Actualiza la página e inténtalo de nuevo.",
 	UnitVariantMainUnavailable:

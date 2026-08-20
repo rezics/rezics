@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import { readdir, readFile } from "node:fs/promises";
-import { join } from "node:path";
+import { join, relative } from "node:path";
 
 import { ContentPackInvalid } from "./errors";
 import type {
@@ -34,6 +34,7 @@ export async function loadPack(packsRoot: string, packId: string): Promise<Loade
 	const contentDir = join(packDir, "content");
 	const objects = await readAllObjects(contentDir);
 	const relations = await readOptionalJson<PackRelations>(join(contentDir, "relations.json"), {
+		unitVariants: [],
 		credits: [],
 		subjects: [],
 		seriesReleases: [],
@@ -42,8 +43,11 @@ export async function loadPack(packsRoot: string, packId: string): Promise<Loade
 		realmUnits: [],
 		slugs: [],
 	});
-	const structures = await readOptionalJson<PackStructure[]>(join(contentDir, "structures.json"), []);
-	const checksum = await hashPack(packDir, objects);
+	const structures = await readOptionalJson<PackStructure[]>(
+		join(contentDir, "structures.json"),
+		[],
+	);
+	const checksum = await hashPack(packDir);
 	return { packDir, manifest, checksum, ids, rights, objects, relations, structures };
 }
 
@@ -55,6 +59,10 @@ async function readAllObjects(contentDir: string): Promise<PackObject[]> {
 		"series.json",
 		"books.json",
 		"media.json",
+		"software.json",
+		"releases.json",
+		"video.json",
+		"audio.json",
 		"entities.json",
 		"tags.json",
 		"posts.json",
@@ -78,17 +86,29 @@ async function readAllObjects(contentDir: string): Promise<PackObject[]> {
 	return objects;
 }
 
-async function hashPack(packDir: string, objects: readonly PackObject[]): Promise<string> {
+async function hashPack(packDir: string): Promise<string> {
 	const hash = createHash("sha256");
 	for (const name of ["pack.json", "ids.json", "rights.json", "sources.lock.json"]) {
 		hash.update(name);
 		hash.update(await readFile(join(packDir, name)));
 	}
-	for (const object of objects) {
-		hash.update(object.sourceKey);
-		hash.update(JSON.stringify(object));
+	const contentDir = join(packDir, "content");
+	for (const filePath of await listFilesRecursively(contentDir)) {
+		const name = relative(packDir, filePath).replaceAll("\\", "/");
+		hash.update(name);
+		hash.update(await readFile(filePath));
 	}
 	return hash.digest("hex");
+}
+
+async function listFilesRecursively(directory: string): Promise<string[]> {
+	const files: string[] = [];
+	for (const entry of await readdir(directory, { withFileTypes: true })) {
+		const path = join(directory, entry.name);
+		if (entry.isDirectory()) files.push(...(await listFilesRecursively(path)));
+		else if (entry.isFile()) files.push(path);
+	}
+	return files.sort((left, right) => left.localeCompare(right));
 }
 
 async function readJson<T>(filePath: string): Promise<T> {

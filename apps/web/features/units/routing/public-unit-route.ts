@@ -8,6 +8,26 @@ export interface PublicUnitRouteValue {
 	readonly slugAddress?: PublicSlugAddressValue | null;
 }
 
+export type PublicUnitKind =
+	| "profile"
+	| "realm"
+	| "zone"
+	| "book"
+	| "software"
+	| "media"
+	| "series"
+	| "video"
+	| "audio"
+	| "release"
+	| "entity"
+	| "tag"
+	| "structure"
+	| "collection"
+	| "post"
+	| "poll";
+
+export function publicUnitHref(kind: PublicUnitKind, value: PublicUnitRouteValue): string;
+export function publicUnitHref(kind: string, value: PublicUnitRouteValue): string | undefined;
 export function publicUnitHref(kind: string, value: PublicUnitRouteValue): string | undefined {
 	switch (kind) {
 		case "profile":
@@ -22,6 +42,7 @@ export function publicUnitHref(kind: string, value: PublicUnitRouteValue): strin
 		case "series":
 		case "video":
 		case "audio":
+		case "release":
 			return `/units/${kind}/${value.id}`;
 		case "entity":
 			return `/entities/${value.id}`;

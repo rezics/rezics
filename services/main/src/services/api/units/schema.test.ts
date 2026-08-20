@@ -1,11 +1,15 @@
 import { Check } from "@sinclair/typebox/value";
 import { describe, expect, it } from "vitest";
 
+import { MaximumAdaptedAudioRelationsPerVideo } from "../../database/schema/contract-values";
+
 import {
 	CreateBookChapterDraftJobBody,
+	ContentLanguageEvidenceUnitParams,
 	WorkUnitTypeParams,
 	CreateUnitBody,
 	ManageableUnitTypeParams,
+	PublicUnitSeoResponse,
 	ResolveUnitPresentationsBody,
 	UpdateUnitBody,
 	UnitLocalizationDeleteBody,
@@ -341,6 +345,38 @@ describe("Unit partial update shapes", () => {
 			}),
 		).toBe(false);
 	});
+
+	it("accepts bounded adapted Audio replacement and clear operations", () => {
+		const audioIds = Array.from(
+			{ length: MaximumAdaptedAudioRelationsPerVideo },
+			(_, index) => `019b0000-0000-7000-8000-${String(index).padStart(12, "0")}`,
+		);
+		expect(Check(UpdateUnitBody, { updatedAt, details: { adaptedAudioUnitIds: null } })).toBe(true);
+		expect(Check(UpdateUnitBody, { updatedAt, details: { adaptedAudioUnitIds: [] } })).toBe(true);
+		expect(Check(UpdateUnitBody, { updatedAt, details: { adaptedAudioUnitIds: audioIds } })).toBe(
+			true,
+		);
+		expect(
+			Check(UpdateUnitBody, {
+				updatedAt,
+				details: {
+					adaptedAudioUnitIds: [...audioIds, "019b0000-0000-7000-8000-000000000064"],
+				},
+			}),
+		).toBe(false);
+		expect(
+			Check(UpdateUnitBody, {
+				updatedAt,
+				details: { adaptedAudioUnitIds: [audioIds[0], audioIds[0]] },
+			}),
+		).toBe(false);
+		expect(
+			Check(UpdateUnitBody, {
+				updatedAt,
+				details: { adaptedAudioUnitIds: ["not-an-audio-unit"] },
+			}),
+		).toBe(false);
+	});
 });
 
 describe("Work Unit route types", () => {
@@ -358,6 +394,37 @@ describe("Work Unit route types", () => {
 		expect(Check(ManageableUnitTypeParams, { type: "audio" })).toBe(true);
 		expect(Check(WorkUnitTypeParams, { type: "video" })).toBe(false);
 		expect(Check(WorkUnitTypeParams, { type: "audio" })).toBe(false);
+	});
+
+	it("exposes bounded parent evidence for Release authoring", () => {
+		expect(
+			Check(ContentLanguageEvidenceUnitParams, {
+				type: "release",
+				unitId: "019b0000-0000-7000-8000-000000000001",
+			}),
+		).toBe(true);
+	});
+});
+
+describe("public Unit SEO response", () => {
+	it("accepts a Release through the shared public Unit presentation", () => {
+		expect(
+			Check(PublicUnitSeoResponse, {
+				id: "019b0000-0000-7000-8000-000000000001",
+				kind: "release",
+				contentRating: "general",
+				publishedAt: "2026-08-20T00:00:00.000Z",
+				updatedAt: "2026-08-20T00:00:00.000Z",
+				indexing: { state: "index" },
+				presentation: {
+					language: "en",
+					title: "Version 1.0",
+					description: null,
+					image: null,
+					context: null,
+				},
+			}),
+		).toBe(true);
 	});
 });
 

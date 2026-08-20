@@ -46,6 +46,10 @@ export default {
 	UnitLicenseOfferingEndForbidden: `この${jaTerminology.license.forms.label}の現在の提供は終了できません。`,
 	UnitLicenseGrantConflict: `このコンテンツには、まだ終了していない同じ${jaTerminology.license.forms.label}の提供があります。`,
 	UnitChanged: "このコンテンツは変更されました。更新してもう一度試してください。",
+	UnitContentLanguageSupportInvalid:
+		"コンテンツ利用言語を保存できませんでした。言語と対応チャンネルを確認して、もう一度お試しください。",
+	UnitRelationInvalid:
+		"選択したユニットの関係を保存できませんでした。関連するユニットを確認して、もう一度お試しください。",
 	UnitRevisionConflict: "リビジョンの基準が変更されました。更新してもう一度試してください。",
 	RevisionContributionActorRequired: "このリビジョンの主な貢献者を指定してください。",
 	RevisionCreditEntityInvalid: "選択したリビジョン貢献者は無効です。別の貢献者を選択してください。",
@@ -211,6 +215,7 @@ export default {
 		"バリアントとそのメインは同じサポートされているユニットタイプを使用する必要があります。",
 	UnitVariantTargetIsVariant: "バリアントは直接メインを指す必要があります。",
 	UnitVariantSourceHasVariants: "バリアントを持つメインはバリアントになることはできません。",
+	UnitVariantGroupLimitReached: "このメインはバリアント数の上限に達しています。",
 	UnitVariantChanged: "ユニットのメイン関係が変更されました。更新して再試行してください。",
 	UnitVariantMainUnavailable: "このバリアント状態ではメインは利用できません。",
 	InvalidMessageCursor: "このメッセージページリンクは無効または期限切れです。",

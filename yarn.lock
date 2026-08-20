@@ -5536,6 +5536,7 @@ __metadata:
     "@rezics/avatar": "workspace:*"
     "@rezics/block": "workspace:*"
     "@rezics/brand": "workspace:*"
+    "@rezics/content-language": "workspace:*"
     "@rezics/email": "workspace:*"
     "@rezics/filter": "workspace:*"
     "@rezics/i18n": "workspace:*"
@@ -5594,6 +5595,15 @@ __metadata:
   resolution: "@rezics/brand@workspace:packages/brand"
   dependencies:
     tsx: "npm:4"
+  languageName: unknown
+  linkType: soft
+
+"@rezics/content-language@workspace:*, @rezics/content-language@workspace:libraries/content-language":
+  version: 0.0.0-use.local
+  resolution: "@rezics/content-language@workspace:libraries/content-language"
+  dependencies:
+    typescript: "npm:7"
+    vitest: "npm:4.1.10"
   languageName: unknown
   linkType: soft
 
@@ -5697,6 +5707,7 @@ __metadata:
     "@dnd-kit/utilities": "npm:^3.2.2"
     "@rezics/avatar": "workspace:*"
     "@rezics/block": "workspace:*"
+    "@rezics/content-language": "workspace:*"
     "@rezics/filter": "workspace:*"
     "@rezics/fixture-client": "workspace:*"
     "@rezics/fixture-data": "workspace:*"

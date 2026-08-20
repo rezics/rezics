@@ -42,7 +42,7 @@ export function getUnitManagementSectionIds(
 		capabilities.canManageAssociations ||
 		capabilities.canCurateTags ||
 		capabilities.canManageRealmPublications;
-	if (type === "video" || type === "audio")
+	if (type === "video" || type === "audio" || type === "release")
 		return UnitManagementSectionIds.filter((sectionId) => {
 			if (sectionId === "content" || sectionId === "metadata") return capabilities.canEdit;
 			if (sectionId === "realms") return capabilities.canManageRealmPublications;

@@ -1,11 +1,8 @@
 import { createLoader, createSerializer, parseAsString, parseAsStringLiteral } from "nuqs/server";
 
 import { StudioTagCreateHref } from "@/features/create/model/studio-section";
-import {
-	UnitDetailUnitTypes,
-	type UnitDetailUnitType,
-} from "@/features/units/model/unit-detail-section";
 import { isUnitId } from "@/features/units/model/unit-id";
+import { TaggableUnitTypes, type TaggableUnitType } from "../model/taggable-unit";
 
 const TagCreateIntentValues = ["unit-tag-vote"] as const;
 const TagVoteContextValues = ["global", "realm"] as const;
@@ -16,7 +13,7 @@ const tagCreateRouteParsers = {
 	realmId: parseAsString,
 	title: parseAsString.withDefault(""),
 	unitId: parseAsString,
-	unitType: parseAsStringLiteral(UnitDetailUnitTypes),
+	unitType: parseAsStringLiteral(TaggableUnitTypes),
 };
 
 const loadTagCreateRouteSearchParams = createLoader(tagCreateRouteParsers);
@@ -27,7 +24,7 @@ export type UnitTagVoteContextAddress =
 	| { readonly kind: "realm"; readonly realmId: string };
 
 export interface UnitTagVoteCreateTarget {
-	readonly type: UnitDetailUnitType;
+	readonly type: TaggableUnitType;
 	readonly unitId: string;
 	readonly context: UnitTagVoteContextAddress;
 }

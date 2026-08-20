@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import { and, eq, isNull, sql } from "drizzle-orm";
 import { assertFilterDocument } from "@rezics/filter";
+import { normalizeContentLanguageSupport } from "@rezics/content-language";
 import { isLicenseId, type LicenseId } from "@rezics/license";
 import { TopLevelSlugNamespaceUnitIds, ZoneHomePageSlug } from "@rezics/slug";
 import { isContentLanguage } from "@rezics/i18n";
@@ -16,6 +17,7 @@ import { createNavigationStructure } from "../content-structure/navigation";
 import type { ContentStructureBatchCommand } from "../content-structure/batch-plan";
 import type { DatabaseTransaction } from "../database";
 import {
+	audio,
 	book,
 	contentStructure,
 	collection,
@@ -27,14 +29,19 @@ import {
 	post,
 	realm,
 	realmUnit,
+	release,
 	series,
 	seriesRelease,
+	software,
 	subjectAssociation,
 	tag,
+	unitContentLanguageSupport,
 	unitAlias,
 	unitLocalization,
 	unitSlugAddress,
 	unitTag,
+	unitVariant,
+	video,
 	zone,
 	zonePage,
 	AliasKindValues,
@@ -43,13 +50,18 @@ import {
 	type RealmPageKind,
 	type SubjectAssociationRole,
 	type ContentStructureKind,
+	type ContentLanguageSupportUnitKind,
 	type UnitKind,
+	type VariantCapableUnitKind,
+	ContentLanguageSupportUnitKindValues,
+	VariantCapableUnitKindValues,
 } from "../database/schema";
 import { insertLicenseGrants } from "../units/license-grants";
 import { recordUnitRevision } from "../units/history";
 import { insertUnit } from "../units/create";
 import { recordInitialRealmUnitPublicationEvents } from "../units/realm-publication";
 import { replaceZonePageSlugAddress } from "../units/slug-address";
+import { WorkPolicy } from "../performance/policy";
 import { ContentPackCollision, ContentPackConflict, ContentPackInvalid } from "./errors";
 import { assertContentPackDocuments } from "./documents";
 import { planContentPack } from "./plan";
@@ -63,12 +75,21 @@ const KindOrder: readonly string[] = [
 	"series",
 	"book",
 	"media",
+	"software",
+	"video",
+	"audio",
+	"release",
 	"collection",
 	"realm",
 	"zone",
 	"post",
 	"zone_page",
 ];
+
+const ContentLanguageSupportUnitKindSet: ReadonlySet<string> = new Set(
+	ContentLanguageSupportUnitKindValues,
+);
+const VariantCapableUnitKindSet: ReadonlySet<string> = new Set(VariantCapableUnitKindValues);
 
 export async function applyContentPack(
 	tx: DatabaseTransaction,
@@ -152,6 +173,7 @@ async function importUnit(
 		});
 
 	await insertDetail(tx, pack, object, unitId, object.import.ownershipMode === "community_owned");
+	await insertContentLanguageSupport(tx, object, unitId);
 	await tx.insert(unitLocalization).values(
 		object.localizations.map((localization, index) => {
 			if (!isContentLanguage(localization.language))
@@ -236,6 +258,38 @@ async function insertDetail(
 				runtimeMinutes: object.media.runtimeMinutes ?? null,
 			});
 			return;
+		case "software":
+			if (!object.software) throw new ContentPackInvalid(object.sourceKey + " missing software");
+			await tx.insert(software).values({
+				id: unitId,
+				metadataOnly: object.software.metadataOnly,
+				releaseDate: object.software.releaseDate ?? null,
+				versionLabel: object.software.versionLabel ?? null,
+			});
+			return;
+		case "release":
+			if (!object.release) throw new ContentPackInvalid(object.sourceKey + " missing release");
+			await tx.insert(release).values({
+				id: unitId,
+				parentUnitId: requireId(pack.ids.units, object.release.parentUnitSourceKey),
+				versionLabel: object.release.versionLabel,
+				releasedOn: object.release.releasedOn ?? null,
+			});
+			return;
+		case "video":
+			if (!object.video) throw new ContentPackInvalid(object.sourceKey + " missing video");
+			await tx.insert(video).values({
+				id: unitId,
+				durationSeconds: object.video.durationSeconds ?? null,
+			});
+			return;
+		case "audio":
+			if (!object.audio) throw new ContentPackInvalid(object.sourceKey + " missing audio");
+			await tx.insert(audio).values({
+				id: unitId,
+				durationSeconds: object.audio.durationSeconds ?? null,
+			});
+			return;
 		case "collection":
 			await tx.insert(collection).values({ id: unitId });
 			return;
@@ -287,6 +341,42 @@ async function insertDetail(
 	}
 }
 
+async function insertContentLanguageSupport(
+	tx: DatabaseTransaction,
+	object: PackObject,
+	unitId: string,
+): Promise<void> {
+	if (object.contentLanguageSupport === undefined) return;
+	if (!isContentLanguageSupportUnitKind(object.unit.kind))
+		throw new ContentPackInvalid(
+			object.sourceKey + " cannot declare content-consumption language support",
+		);
+	let value: ReturnType<typeof normalizeContentLanguageSupport>;
+	try {
+		value = normalizeContentLanguageSupport(object.contentLanguageSupport);
+	} catch (error) {
+		throw new ContentPackInvalid(
+			object.sourceKey +
+				" has invalid content language support: " +
+				(error instanceof Error ? error.message : "unknown validation failure"),
+		);
+	}
+	if (!value.length) return;
+	await tx.insert(unitContentLanguageSupport).values({
+		unitId,
+		unitKind: object.unit.kind,
+		value,
+	});
+}
+
+function isContentLanguageSupportUnitKind(kind: string): kind is ContentLanguageSupportUnitKind {
+	return ContentLanguageSupportUnitKindSet.has(kind);
+}
+
+function isVariantCapableUnitKind(kind: string): kind is VariantCapableUnitKind {
+	return VariantCapableUnitKindSet.has(kind);
+}
+
 function touchesCreated(
 	createKeys: ReadonlySet<string>,
 	sourceKeys: readonly (string | null | undefined)[],
@@ -300,6 +390,37 @@ async function importRelations(
 	createKeys: ReadonlySet<string>,
 ): Promise<void> {
 	const { relations, ids } = pack;
+	const objectBySourceKey = new Map(
+		pack.objects.map((object) => [object.sourceKey, object] as const),
+	);
+	const unitVariants = (relations.unitVariants ?? []).filter((item) =>
+		touchesCreated(createKeys, [item.mainUnitSourceKey, item.variantUnitSourceKey]),
+	);
+	if (unitVariants.length) {
+		const variantCountByMain = new Map<string, number>();
+		const rows = unitVariants.map((item) => {
+			if (!isVariantCapableUnitKind(item.unitKind))
+				throw new ContentPackInvalid("Unsupported variant kind " + item.unitKind);
+			const nextCount = (variantCountByMain.get(item.mainUnitSourceKey) ?? 0) + 1;
+			if (nextCount > WorkPolicy.variant.maxGroupSize)
+				throw new ContentPackInvalid("Unit Variant group exceeds the supported size");
+			variantCountByMain.set(item.mainUnitSourceKey, nextCount);
+			const variantObject = objectBySourceKey.get(item.variantUnitSourceKey);
+			const mainObject = objectBySourceKey.get(item.mainUnitSourceKey);
+			if (item.unitKind === "entity") {
+				const variantEntityKind = variantObject?.entity?.kind;
+				const mainEntityKind = mainObject?.entity?.kind;
+				if (!variantEntityKind || variantEntityKind !== mainEntityKind)
+					throw new ContentPackInvalid("Entity variant relations require matching Entity kinds");
+			}
+			return {
+				mainUnitId: requireId(ids.units, item.mainUnitSourceKey),
+				variantUnitId: requireId(ids.units, item.variantUnitSourceKey),
+				unitKind: item.unitKind,
+			};
+		});
+		await tx.insert(unitVariant).values(rows);
+	}
 	const credits = (relations.credits ?? []).filter((item) =>
 		touchesCreated(createKeys, [item.sourceUnitSourceKey, item.creditedUnitSourceKey]),
 	);

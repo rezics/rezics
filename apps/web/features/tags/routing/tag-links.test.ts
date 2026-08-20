@@ -40,6 +40,10 @@ describe("tagSearchHref", () => {
 });
 
 describe("Unit Tag page routes", () => {
+	it("uses the dedicated Entity Tag route", () => {
+		expect(unitTagsHref("entity", UnitId)).toBe(`/entities/${UnitId}/tags`);
+	});
+
 	it("round-trips a Realm context and newly created Tag", async () => {
 		const href = unitTagsHref("book", UnitId, {
 			context: { kind: "realm", realmId: RealmId },

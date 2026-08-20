@@ -51,6 +51,7 @@ describe("public Unit SEO contract", () => {
 			"profile",
 			"book",
 			"software",
+			"release",
 			"media",
 			"video",
 			"audio",
@@ -67,7 +68,7 @@ describe("public Unit SEO contract", () => {
 		] as const)
 			expect(isPublicUnitSeoKind(kind)).toBe(true);
 
-		for (const kind of ["slug_namespace", "release", "label", "realm_rule"] as const)
+		for (const kind of ["slug_namespace", "label", "realm_rule"] as const)
 			expect(isPublicUnitSeoKind(kind)).toBe(false);
 	});
 });

@@ -24,6 +24,7 @@ import { SeriesReleaseFeed } from "../components/series-release-feed";
 import { useUnitDetail } from "../components/unit-detail-workspace";
 import { unitCreditsHref, unitReviewsHref } from "../routing/unit-detail-routes";
 import { presentUnitLicenses } from "../components/present-unit-licenses";
+import { ContentLanguageSupportDisplay } from "@/features/content-language-support/components/content-language-support-display";
 
 function formatDate(value: string | null, language: string): string | undefined {
 	if (!value) return undefined;
@@ -140,6 +141,12 @@ export function UnitOverviewPage() {
 						)}
 					</DataList>
 				</DetailSection>
+
+				{unit.contentLanguageSupport.length ? (
+					<DetailSection title={t.units.contentLanguageSupport.title}>
+						<ContentLanguageSupportDisplay value={unit.contentLanguageSupport} />
+					</DetailSection>
+				) : null}
 
 				{unit.attributions.length ? (
 					<DetailSection title={t.units.detail.credits}>

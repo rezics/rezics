@@ -38,6 +38,7 @@ import type {
 	TagVoteTarget,
 } from "../model/tag-presentation";
 import { InitialTagSelectionState, tagSelectionReducer } from "../model/tag-selection";
+import type { TaggableUnitType } from "../model/taggable-unit";
 import {
 	resolveTagVoteContext,
 	type TagVoteContextRequest,
@@ -78,7 +79,7 @@ export function UnitTagExplorer({
 	readonly highlightedTagId?: string;
 	readonly initialVoteContext?: TagVoteContextRequest;
 	readonly surface: "section" | "page";
-	readonly type: UnitDetailUnitType;
+	readonly type: TaggableUnitType;
 	readonly unitId: string;
 }) {
 	const { data: session } = useHydratedSession();
@@ -87,6 +88,7 @@ export function UnitTagExplorer({
 	const { t } = useTranslation(["tags", "ui"]);
 	const localizationLanguages = useLocalizationLanguages();
 	const queryClient = useQueryClient();
+	const workUnitType: UnitDetailUnitType | null = type === "entity" ? null : type;
 	const [requestedVoteContext, setRequestedVoteContext] =
 		useState<TagVoteContextRequest>(initialVoteContext);
 	const [selection, dispatchSelection] = useReducer(tagSelectionReducer, InitialTagSelectionState);
@@ -184,7 +186,7 @@ export function UnitTagExplorer({
 	const detailContexts = visibleTagDetailContexts(activeVoteContext, realmGroups);
 	const identities = new Map<string, TagIdentity>();
 	for (const item of globalTags) identities.set(item.identity.tagId, item.identity);
-	if (hasDevelopmentPreviewAccess)
+	if (hasDevelopmentPreviewAccess && workUnitType)
 		for (const structure of query.data.structures)
 			for (const item of presentStructureMembers(structure))
 				identities.set(item.identity.tagId, item.identity);
@@ -219,7 +221,7 @@ export function UnitTagExplorer({
 				: { kind: "realm", realmId: context.realm.realmId },
 		);
 	const globalStructureSection =
-		hasDevelopmentPreviewAccess && query.data.structures.length ? (
+		workUnitType && hasDevelopmentPreviewAccess && query.data.structures.length ? (
 			<div className="grid gap-3">
 				{surface === "page" ? (
 					<h3 className="font-semibold">{t.tags.structures.title}</h3>
@@ -236,13 +238,13 @@ export function UnitTagExplorer({
 					}
 					onClearStructureVote={(structureId) =>
 						clearStructureVote.mutate({
-							path: { type, unitId, structureId },
+							path: { type: workUnitType, unitId, structureId },
 						})
 					}
 					onClearTagVote={clearVote}
 					onStructureVote={(structureId, value) =>
 						structureVote.mutate({
-							path: { type, unitId, structureId },
+							path: { type: workUnitType, unitId, structureId },
 							body: { value },
 						})
 					}
@@ -252,7 +254,7 @@ export function UnitTagExplorer({
 					selectionMode={selectionMode}
 					structures={query.data.structures}
 					surface={surface}
-					type={type}
+					type={workUnitType}
 				/>
 			</div>
 		) : null;
@@ -363,7 +365,7 @@ export function UnitTagExplorer({
 							addStructureError={addStructure.error}
 							addStructurePending={addStructure.isPending}
 							canVote={activeVoteContext.kind === "realm" || Boolean(session)}
-							hasDevelopmentPreviewAccess={hasDevelopmentPreviewAccess}
+							hasDevelopmentPreviewAccess={hasDevelopmentPreviewAccess && workUnitType !== null}
 							key={
 								activeVoteContext.kind === "global"
 									? "global"
@@ -380,13 +382,16 @@ export function UnitTagExplorer({
 												realmId: activeVoteContext.realm.realmId,
 											},
 							}}
-							onAddStructure={(structureId) =>
-								addStructure
-									.mutateAsync({
-										path: { type, unitId, structureId },
-										body: {},
-									})
-									.then(() => undefined)
+							onAddStructure={
+								workUnitType
+									? (structureId) =>
+											addStructure
+												.mutateAsync({
+													path: { type: workUnitType, unitId, structureId },
+													body: {},
+												})
+												.then(() => undefined)
+									: undefined
 							}
 							onAddTag={(tagId) =>
 								activeVoteContext.kind === "global"

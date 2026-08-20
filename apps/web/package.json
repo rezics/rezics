@@ -22,6 +22,7 @@
 		"@dnd-kit/utilities": "^3.2.2",
 		"@rezics/avatar": "workspace:*",
 		"@rezics/block": "workspace:*",
+		"@rezics/content-language": "workspace:*",
 		"@rezics/filter": "workspace:*",
 		"@rezics/i18n": "workspace:*",
 		"@rezics/icons": "^0.1.2",

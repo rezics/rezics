@@ -46,6 +46,7 @@ export default {
 		profile: ui.profile,
 		book: units.types.book,
 		software: units.types.software,
+		release: units.types.release,
 		media: units.types.media,
 		video: videoTerms.label,
 		audio: audioTerms.label,

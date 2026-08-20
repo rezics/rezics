@@ -8,6 +8,11 @@ import {
 	isSingleEmojiGrapheme,
 } from "@rezics/avatar";
 import { PortableTextDocument } from "@rezics/block";
+import {
+	ContentLanguageChannelValues,
+	MaximumContentLanguageSupportEntries,
+	MaximumContentLanguageTagLength,
+} from "@rezics/content-language";
 import { LicenseIds } from "@rezics/license";
 
 import {
@@ -36,6 +41,38 @@ FormatRegistry.Set("single-emoji-grapheme", isSingleEmojiGrapheme);
 /** A content-language group accepted by authoring, discovery, and storage. */
 export const ContentLanguage = t.UnionEnum(ContentLanguageValues, { default: undefined });
 export type ContentLanguage = Static<typeof ContentLanguage>;
+
+/** A consumption-language tag; service normalization proves canonical BCP 47 form. */
+export const ContentLanguageTag = t.String({
+	minLength: 1,
+	maxLength: MaximumContentLanguageTagLength,
+	pattern: "^[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?$",
+});
+export type ContentLanguageTag = Static<typeof ContentLanguageTag>;
+
+export const ContentLanguageChannel = t.UnionEnum(ContentLanguageChannelValues);
+export type ContentLanguageChannel = Static<typeof ContentLanguageChannel>;
+
+export const ContentLanguageSupportEntry = t.Object(
+	{
+		languageTag: ContentLanguageTag,
+		channels: t.Optional(
+			t.Array(ContentLanguageChannel, {
+				minItems: 1,
+				maxItems: ContentLanguageChannelValues.length,
+				uniqueItems: true,
+			}),
+		),
+	},
+	{ additionalProperties: false },
+);
+export type ContentLanguageSupportEntry = Static<typeof ContentLanguageSupportEntry>;
+
+/** The single authoritative, bounded content-consumption language field. */
+export const ContentLanguageSupport = t.Array(ContentLanguageSupportEntry, {
+	maxItems: MaximumContentLanguageSupportEntries,
+});
+export type ContentLanguageSupport = Static<typeof ContentLanguageSupport>;
 
 /** A persisted preference controlling presentation-only Chinese script conversion. */
 export const ChineseContentDisplay = t.UnionEnum(ChineseContentDisplayValues, {

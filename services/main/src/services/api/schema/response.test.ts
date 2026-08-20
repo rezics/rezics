@@ -3,6 +3,11 @@ import { getActiveObservability } from "@rezics/observability";
 import { SearchContinuationToken } from "@rezics/filter";
 import { describe, expect, it, vi } from "vitest";
 
+import {
+	MaximumAdaptedAudioRelationsPerVideo,
+	SubjectAssociationEntityTagPreviewLimit,
+} from "../../database/schema/contract-values";
+
 import { DateTime, DateTimeString } from ".";
 import {
 	CollectionContentResponse,
@@ -420,6 +425,51 @@ describe("API response values", () => {
 			expect(details?.required).toContain("metadataOnly");
 		}
 		expect(UnitDetailResponse.properties.capabilities.required).toContain("canUpdateMetadataOnly");
+	});
+
+	it("uses canonical nullable adapted Audio sets on Video details", () => {
+		const videoDetails = {
+			type: "video",
+			durationSeconds: null,
+			adaptedAudioUnitIds: null,
+		} as const;
+		expect(Check(UnitDetailResponse.properties.details, videoDetails)).toBe(true);
+		expect(
+			Check(UnitDetailResponse.properties.details, {
+				...videoDetails,
+				adaptedAudioUnitIds: ["019b0000-0000-7000-8000-000000000001"],
+			}),
+		).toBe(true);
+		expect(
+			Check(UnitDetailResponse.properties.details, {
+				...videoDetails,
+				adaptedAudioUnitIds: Array.from(
+					{ length: MaximumAdaptedAudioRelationsPerVideo + 1 },
+					(_, index) => `019b0000-0000-7000-8000-${String(index).padStart(12, "0")}`,
+				),
+			}),
+		).toBe(false);
+	});
+
+	it("bounds each subject Entity Tag preview at the shared response limit", () => {
+		const tags = UnitDetailResponse.properties.subjectAssociations.items.properties.tags;
+		expect(tags.maxItems).toBe(SubjectAssociationEntityTagPreviewLimit);
+		const tag = {
+			tagId: "019b0000-0000-7000-8000-000000000001",
+			title: "Character",
+		};
+		expect(
+			Check(
+				tags,
+				Array.from({ length: SubjectAssociationEntityTagPreviewLimit }, () => tag),
+			),
+		).toBe(true);
+		expect(
+			Check(
+				tags,
+				Array.from({ length: SubjectAssociationEntityTagPreviewLimit + 1 }, () => tag),
+			),
+		).toBe(false);
 	});
 
 	it("uses one vote-backed external-link contract with source presentation on every detail", () => {

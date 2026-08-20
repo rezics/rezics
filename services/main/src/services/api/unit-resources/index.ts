@@ -85,7 +85,11 @@ import {
 } from "./schema";
 import { checkUnitType, createUnitResource } from "./service";
 import { upsertLocalization } from "../../units/service";
-import { UnitLocalizationBody } from "../units/schema";
+import {
+	PromoteUnitVariantBody,
+	UnitLocalizationBody,
+	UpdateUnitVariantContextBody,
+} from "../units/schema";
 import { recordUnitRevision } from "../../units/history";
 import {
 	ensureWikiAssociationContextPost,
@@ -95,6 +99,11 @@ import {
 	getAttributionSummariesByUnitIds,
 	getPublicUnitSummariesByIds,
 } from "../../units/attribution";
+import {
+	getUnitVariantContext,
+	promoteUnitVariantToMain,
+	updateUnitVariantContext,
+} from "../../units/variants";
 import { ensureDirectCreditAttributionAllowed } from "../../units/attribution-authorization";
 import { presentImageAsset } from "../../units/service";
 import { presentAvatar } from "../../units/avatar";
@@ -536,6 +545,11 @@ export default new Elysia()
 						localizationLanguages,
 						profileId: identity.authorization.profileId,
 					});
+					const variantContext = await getUnitVariantContext(
+						params.unitId,
+						identity.authorization.profileId,
+						localizationLanguages,
+					);
 					const creditAttributions = await database
 						.select({
 							id: creditAttribution.id,
@@ -584,6 +598,8 @@ export default new Elysia()
 					const [
 						canEdit,
 						canEditCreditAttributions,
+						tagCurationDecision,
+						variantDecision,
 						accessDecision,
 						creditDecision,
 						subjectDecision,
@@ -591,6 +607,10 @@ export default new Elysia()
 					] = await Promise.all([
 						identity.authorization.unit.canUpdate(params.unitId, ["localizations"]),
 						identity.authorization.unit.canUpdate(params.unitId, ["credit-attributions"]),
+						identity.authorization.unit.decide(params.unitId, "unit.tag-curation.manage"),
+						identity.authorization.unit.decide(params.unitId, "unit.association.manage", [
+							"variant",
+						]),
 						identity.authorization.unit.decide(params.unitId, "unit.access.manage"),
 						identity.authorization.unit.decide(params.unitId, "unit.association.manage", [
 							"associations",
@@ -630,12 +650,15 @@ export default new Elysia()
 						attributions,
 						owner: ownerSummary,
 						externalLinks,
+						variantContext,
 						ownershipClaim: ownershipClaim
 							? { ...ownershipClaim, state: "pending" as const }
 							: null,
 						capabilities: {
 							canEdit,
 							canEditCreditAttributions,
+							canCurateTags: tagCurationDecision.allowed,
+							canManageVariants: variantDecision.allowed,
 							canManageAccess: accessDecision.allowed,
 							canManageCreditAssociations: creditDecision.allowed,
 							canManageSubjectAssociations: subjectDecision.allowed,
@@ -652,6 +675,83 @@ export default new Elysia()
 						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["EntityEntryNotFound"]),
 					},
 					detail: { summary: "Get entity entry", tags: ["Entity"] },
+				},
+			)
+			.patch(
+				"/:unitId/variant-context",
+				async ({ params, authorization, body }) => {
+					await checkUnitType(params.unitId, "entity");
+					await updateUnitVariantContext({
+						kind: "entity",
+						variantUnitId: params.unitId,
+						mainUnitId: body.mainUnitId,
+						expectedMainUnitId: body.expectedMainUnitId,
+						actorProfileId: authorization.profileId,
+						contribution: body.revisionContext?.contribution,
+						authorization: authorization.unit,
+					});
+					return { id: params.unitId };
+				},
+				{
+					access: "contribute:unit:update",
+					params: UnitIdParams,
+					body: UpdateUnitVariantContextBody,
+					response: {
+						[StatusCodes.OK]: IdResponse,
+						[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
+							"RevisionCreditEntityInvalid",
+							"RevisionContributionActorRequired",
+						]),
+						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
+						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
+						[StatusCodes.CONFLICT]: toApiErrorResponse([
+							"UnitVariantChanged",
+							"UnitVariantKindMismatch",
+							"UnitVariantMainUnavailable",
+							"UnitVariantSourceHasVariants",
+							"UnitVariantGroupLimitReached",
+							"UnitVariantTargetIsVariant",
+						]),
+					},
+					detail: { summary: "Update Entity Main relationship", tags: ["Entity"] },
+				},
+			)
+			.post(
+				"/:unitId/variant-context/promote",
+				async ({ params, authorization, body }) => {
+					await checkUnitType(params.unitId, "entity");
+					await promoteUnitVariantToMain({
+						kind: "entity",
+						variantUnitId: params.unitId,
+						expectedMainUnitId: body.expectedMainUnitId,
+						actorProfileId: authorization.profileId,
+						contribution: body.revisionContext?.contribution,
+						authorization: authorization.unit,
+					});
+					return { id: params.unitId };
+				},
+				{
+					access: "contribute:unit:update",
+					params: UnitIdParams,
+					body: PromoteUnitVariantBody,
+					response: {
+						[StatusCodes.OK]: IdResponse,
+						[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
+							"RevisionCreditEntityInvalid",
+							"RevisionContributionActorRequired",
+						]),
+						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
+						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
+						[StatusCodes.CONFLICT]: toApiErrorResponse([
+							"UnitVariantChanged",
+							"UnitVariantKindMismatch",
+							"UnitVariantMainUnavailable",
+							"UnitVariantSourceHasVariants",
+							"UnitVariantGroupLimitReached",
+							"UnitVariantTargetIsVariant",
+						]),
+					},
+					detail: { summary: "Promote Entity Variant to Main", tags: ["Entity"] },
 				},
 			)
 			.put(

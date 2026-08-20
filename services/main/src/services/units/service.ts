@@ -7,6 +7,7 @@ import type { ContentLanguage } from "@rezics/i18n";
 import { type LicenseId } from "@rezics/license";
 
 import type { Authorization } from "../authorization";
+import { ValidationError } from "../api/errors";
 import { OfficialProfileIds } from "../bootstrap/data";
 import {
 	createProfileOwnedUnitAccess,
@@ -24,6 +25,7 @@ import {
 import {
 	type CreditAttributionRole,
 	isCreditAttributionRoleForUnitKind,
+	isEntityKind,
 	type WorkReleaseStatus,
 } from "../database/schema/contract-values";
 import { ContentStructureSnapshotSchema } from "../content-structure/contracts";
@@ -39,6 +41,7 @@ import {
 	resolvedUnitLocalizationAvatar,
 	resolvedUnitLocalizationImageAssetId,
 	resolvedUnitLocalizationLanguage,
+	resolvedUnitLocalizationSummary,
 	resolvedUnitLocalizationTitle,
 	toUnitLocalizationStorage,
 	unitLocalizationImageAssetReferences,
@@ -53,6 +56,7 @@ import {
 	software,
 	media,
 	profilePreference,
+	release,
 	series,
 	unit,
 	unitOwnership,
@@ -73,6 +77,7 @@ import { presentNullablePortableTextDocument } from "../documents/portable-text-
 import {
 	UnitChanged,
 	UnitNotFound,
+	UnitRelationInvalid,
 	UnitVariantKindMismatch,
 	UnitVariantMainUnavailable,
 	UnitVariantTargetIsVariant,
@@ -88,6 +93,7 @@ import {
 	nextUnitUpdatedAt,
 	toBookUpdateValues,
 	toMediaUpdateValues,
+	toReleaseUpdateValues,
 	toSeriesUpdateValues,
 	toSoftwareUpdateValues,
 	toTimedMediaUpdateValues,
@@ -126,13 +132,31 @@ import {
 	isMetadataOnlyUnitKind,
 	resolveCreatedMetadataOnly,
 } from "./metadata-only";
+import {
+	getUnitContentLanguageSupport,
+	normalizeContentLanguageSupportInput,
+	presentContentLanguageSupport,
+	replaceUnitContentLanguageSupport,
+} from "./content-language-support";
+import { getSubjectAssociationEntityTagPreviews } from "./subject-association-tags";
+import {
+	listAdaptedAudioUnitIds,
+	normalizeAdaptedAudioUnitIds,
+	replaceAdaptedAudioUnitRelations,
+} from "./relations";
 
 export type VariantUnitKind = "book" | "software" | "media";
 export type WorkUnitKind = VariantUnitKind | "series";
 export type TimedMediaUnitKind = "video" | "audio";
-export type ManageableUnitKind = WorkUnitKind | TimedMediaUnitKind;
+export type ManageableUnitKind = WorkUnitKind | TimedMediaUnitKind | "release";
 export type UnitDetail = Static<typeof UnitDetailResponse>;
 type StoredUnitLocalization = typeof unitLocalization.$inferSelect;
+
+function requireEntityKind(value: string) {
+	if (!isEntityKind(value)) throw new Error("Persisted Entity kind is not supported");
+	return value;
+}
+
 const CreditAttributionRequestLifetimeMs = 30 * 24 * 60 * 60 * 1_000;
 
 type CreateUnitAccessInput =
@@ -153,6 +177,7 @@ type CreateUnitAccessInput =
 
 export type CreateUnitInput = CreateUnitAccessInput & {
 	revisionContribution?: RevisionContributionInput;
+	contentLanguageSupport?: unknown;
 	initialTagIds: readonly string[];
 	creditAttributionRequestConsent: CreditAttributionRequestConsent;
 	version: { readonly kind: "main" } | { readonly kind: "variant"; readonly mainUnitId: string };
@@ -228,6 +253,9 @@ export async function createUnit(
 ): Promise<UnitDetail> {
 	const kind = input.details.type;
 	const ownerId = authorization.profileId;
+	const contentLanguageSupport = normalizeContentLanguageSupportInput(
+		input.contentLanguageSupport ?? [],
+	);
 	const unitId = await database.transaction(async (tx) => {
 		await ensureImageAssetsAttachable(
 			tx,
@@ -297,6 +325,8 @@ export async function createUnit(
 			unitId: created.id,
 			...toUnitLocalizationStorage(input.localization),
 		});
+		if (contentLanguageSupport.length)
+			await replaceUnitContentLanguageSupport(tx, created.id, kind, contentLanguageSupport);
 		if (input.ownershipMode === "profile_owned")
 			await createProfileOwnedUnitAccess(tx, created.id, ownerId);
 		else
@@ -431,11 +461,32 @@ async function getUnitDetails(
 			seasonCount: details.seasonCount,
 		};
 	}
-	if (kind === "video" || kind === "audio") {
-		const table = kind === "video" ? video : audio;
-		const [details] = await database.select().from(table).where(eq(table.id, unitId)).limit(1);
+	if (kind === "video") {
+		const [[details], adaptedAudioUnitIds] = await Promise.all([
+			database.select().from(video).where(eq(video.id, unitId)).limit(1),
+			listAdaptedAudioUnitIds(unitId),
+		]);
 		if (!details) throw new UnitNotFound(kind);
-		return { type: kind, durationSeconds: details.durationSeconds };
+		return {
+			type: "video",
+			durationSeconds: details.durationSeconds,
+			adaptedAudioUnitIds: adaptedAudioUnitIds.length ? [...adaptedAudioUnitIds] : null,
+		};
+	}
+	if (kind === "audio") {
+		const [details] = await database.select().from(audio).where(eq(audio.id, unitId)).limit(1);
+		if (!details) throw new UnitNotFound(kind);
+		return { type: "audio", durationSeconds: details.durationSeconds };
+	}
+	if (kind === "release") {
+		const [details] = await database.select().from(release).where(eq(release.id, unitId)).limit(1);
+		if (!details) throw new UnitNotFound(kind);
+		return {
+			type: "release",
+			parentUnitId: details.parentUnitId,
+			versionLabel: details.versionLabel,
+			releasedOn: details.releasedOn,
+		};
 	}
 	const [details] = await database.select().from(series).where(eq(series.id, unitId)).limit(1);
 	if (!details) throw new UnitNotFound(kind);
@@ -476,23 +527,48 @@ export async function getUnit(
 		.select({
 			id: subjectAssociation.id,
 			entityEntryId: subjectAssociation.entityId,
+			entityKind: entity.kind,
 			role: subjectAssociation.role,
 			position: subjectAssociation.position,
+			language: resolvedUnitLocalizationLanguage(
+				subjectAssociation.entityId,
+				localizationLanguages,
+			),
 			title: resolvedUnitLocalizationTitle(subjectAssociation.entityId, localizationLanguages),
+			summary: resolvedUnitLocalizationSummary(subjectAssociation.entityId, localizationLanguages),
+			avatar: resolvedUnitLocalizationAvatar(subjectAssociation.entityId, localizationLanguages),
+			coverAssetId: resolvedUnitLocalizationImageAssetId(
+				subjectAssociation.entityId,
+				"cover",
+				localizationLanguages,
+			),
 		})
 		.from(subjectAssociation)
 		.innerJoin(entity, eq(entity.id, subjectAssociation.entityId))
 		.where(eq(subjectAssociation.unitId, base.id))
 		.orderBy(subjectAssociation.position, subjectAssociation.id);
-	const contextPosts = await getAssociationContextPostsByAssociationIds(
-		subjectAssociationRows.map(({ id }) => id),
-		localizationLanguages,
-		authorization.profileId,
+	const [contextPosts, entityTagPreviews] = await Promise.all([
+		getAssociationContextPostsByAssociationIds(
+			subjectAssociationRows.map(({ id }) => id),
+			localizationLanguages,
+			authorization.profileId,
+		),
+		getSubjectAssociationEntityTagPreviews(
+			subjectAssociationRows.map(({ entityEntryId }) => entityEntryId),
+			localizationLanguages,
+			authorization.profileId,
+		),
+	]);
+	const subjectAssociations = subjectAssociationRows.map(
+		({ avatar, coverAssetId, ...association }) => ({
+			...association,
+			entityKind: requireEntityKind(association.entityKind),
+			avatar: presentAvatar(avatar),
+			cover: presentImageAsset(coverAssetId, "cover"),
+			tags: [...(entityTagPreviews.get(association.entityEntryId) ?? [])],
+			contextPost: contextPosts.get(association.id) ?? null,
+		}),
 	);
-	const subjectAssociations = subjectAssociationRows.map((association) => ({
-		...association,
-		contextPost: contextPosts.get(association.id) ?? null,
-	}));
 	const externalLinks = await getUnitExternalLinkPreviewWithSources({
 		unitId: base.id,
 		localizationLanguages,
@@ -544,7 +620,7 @@ export async function getUnit(
 		return progressCountIsExact ? exactCount(value) : lowerBoundCount(value);
 	};
 	const variantContext: UnitDetail["variantContext"] =
-		kind === "series" || kind === "video" || kind === "audio"
+		kind === "series" || kind === "video" || kind === "audio" || kind === "release"
 			? { role: "standalone" }
 			: await getUnitVariantContext(base.id, authorization.profileId, localizationLanguages);
 	const [
@@ -587,10 +663,11 @@ export async function getUnit(
 			.limit(1)
 			.then(([row]) => row ?? null),
 	]);
-	const [details, licenses, licenseOfferings] = await Promise.all([
+	const [details, licenses, licenseOfferings, contentLanguageSupport] = await Promise.all([
 		getUnitDetails(kind, base.id),
 		listEffectiveUnitLicenses(base.id),
 		listOpenUnitLicenseOfferings(base.id),
+		getUnitContentLanguageSupport(base.id),
 	]);
 	return {
 		id: base.id,
@@ -598,6 +675,7 @@ export async function getUnit(
 		status: base.status,
 		visibility: base.visibility,
 		language: selectedLocalization.language,
+		contentLanguageSupport: presentContentLanguageSupport(contentLanguageSupport),
 		contentRating: base.contentRating,
 		aiDisclosure: base.aiDisclosure,
 		licenses: [...licenses],
@@ -612,7 +690,9 @@ export async function getUnit(
 				? details.publicationDate
 				: details.type === "software" || details.type === "media"
 					? details.releaseDate
-					: null,
+					: details.type === "release"
+						? details.releasedOn
+						: null,
 		details,
 		avatar: presentAvatar(
 			resolveUnitLocalizationAvatarFromOrdered(localizations, localizationLanguages),
@@ -647,7 +727,7 @@ export async function getUnit(
 						backlog: progressCount("backlog"),
 					},
 		versions:
-			kind === "series" || kind === "video" || kind === "audio"
+			kind === "series" || kind === "video" || kind === "audio" || kind === "release"
 				? []
 				: variantContext.role === "standalone"
 					? [{ id: base.id, kind: "primary", canonicalUnitId: null }]
@@ -764,6 +844,16 @@ export async function listUnits(
 	);
 }
 
+function hasAdaptedAudioRelationUpdate(kind: ManageableUnitKind, body: UpdateUnitInput): boolean {
+	const hasUpdate = Object.hasOwn(body.details ?? {}, "adaptedAudioUnitIds");
+	if (hasUpdate && kind !== "video")
+		throw new UnitRelationInvalid(
+			"/details/adaptedAudioUnitIds",
+			"is only supported by Video Units",
+		);
+	return hasUpdate;
+}
+
 /** Executes one authorized Unit aggregate update inside its owning transaction. @internal */
 export async function updateUnitInTransaction(
 	tx: DatabaseTransaction,
@@ -773,6 +863,7 @@ export async function updateUnitInTransaction(
 	statusUpdateAllowed: boolean,
 	body: UpdateUnitInput,
 ): Promise<void> {
+	const hasAdaptedAudioUpdate = hasAdaptedAudioRelationUpdate(kind, body);
 	const updatedAt = nextUnitUpdatedAt(body.expectedUpdatedAt);
 	const [updated] = await tx
 		.update(unit)
@@ -807,6 +898,14 @@ export async function updateUnitInTransaction(
 		await tx.update(video).set(timedMediaUpdate).where(eq(video.id, unitId));
 	if (kind === "audio" && timedMediaUpdate)
 		await tx.update(audio).set(timedMediaUpdate).where(eq(audio.id, unitId));
+	if (kind === "video" && hasAdaptedAudioUpdate)
+		await replaceAdaptedAudioUnitRelations(tx, unitId, body.details?.adaptedAudioUnitIds);
+	if (kind === "release") {
+		if (body.details?.versionLabel === null)
+			throw new ValidationError({ details: { versionLabel: "must not be null" } });
+		const releaseUpdate = toReleaseUpdateValues(body);
+		if (releaseUpdate) await tx.update(release).set(releaseUpdate).where(eq(release.id, unitId));
+	}
 	if (Object.hasOwn(body, "licenses")) {
 		await syncLicenseOfferings(tx, {
 			unitId,
@@ -815,6 +914,8 @@ export async function updateUnitInTransaction(
 			unitKind: kind,
 		});
 	}
+	if (Object.hasOwn(body, "contentLanguageSupport"))
+		await replaceUnitContentLanguageSupport(tx, unitId, kind, body.contentLanguageSupport);
 	const seriesUpdate = kind === "series" ? toSeriesUpdateValues(body) : undefined;
 	if (seriesUpdate) await tx.update(series).set(seriesUpdate).where(eq(series.id, unitId));
 	const revision = await recordUnitRevision(tx, {
@@ -858,6 +959,18 @@ export async function updateUnit(
 	body: UpdateUnitInput,
 ): Promise<UnitDetail> {
 	await authorization.unit.ensureCanUpdate(unitId, [["unit"], [kind]]);
+	const hasAdaptedAudioUpdate = hasAdaptedAudioRelationUpdate(kind, body);
+	if (hasAdaptedAudioUpdate) {
+		const targetIds = normalizeAdaptedAudioUnitIds(body.details?.adaptedAudioUnitIds);
+		await authorization.unit.ensureCanReadMany(
+			targetIds,
+			() =>
+				new UnitRelationInvalid(
+					"/details/adaptedAudioUnitIds",
+					"contains an unavailable Audio Unit",
+				),
+		);
+	}
 	const statusUpdateDecision = body.status
 		? await authorization.unit.decide(unitId, "unit.status.update", ["unit"])
 		: undefined;

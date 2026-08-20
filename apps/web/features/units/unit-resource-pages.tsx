@@ -45,14 +45,12 @@ import { LocalizedDraftGate } from "@/features/content-languages/components/loca
 import {
 	useContentLanguageEditor,
 	useLocalizedDraft,
-	type LocalizedDraftCodec,
 } from "@/features/content-languages/hooks/use-content-language-editor";
+import { PortableTextEditor } from "@/features/editor/portable-text-editor";
 import {
-	decodeDraftAvatar,
-	decodeDraftImageAsset,
-	decodeDraftString,
-	isDraftRecord,
-} from "@/features/content-languages/model/localized-draft-codec";
+	EntityLocalizationDraftCodec,
+	type EntityLocalizationDraft,
+} from "@/features/entities/model/entity-localization-draft";
 import { StudioTagCreateHref } from "@/features/create/model/studio-section";
 import {
 	LocalizationImageUploadField,
@@ -69,30 +67,7 @@ import { LocalizationMediaFallbackNotice } from "@/features/media/components/loc
 import { RequestFailure } from "@/i18n/request-failure";
 import { useTranslation } from "@/i18n/client";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
-
-type EntityLocalizationDraft = {
-	readonly title: string;
-	readonly summary: string;
-	readonly avatar: AvatarFieldValue | null;
-	readonly banner: LocalizationImageAssetValue | null;
-};
-
-const EntityLocalizationDraftCodec: LocalizedDraftCodec<EntityLocalizationDraft> = {
-	version: 1,
-	decode(value) {
-		if (!isDraftRecord(value)) return;
-		const title = decodeDraftString(value.title);
-		const summary = decodeDraftString(value.summary);
-		const avatar = decodeDraftAvatar(value.avatar);
-		const banner = decodeDraftImageAsset(value.banner);
-		return title === undefined ||
-			summary === undefined ||
-			avatar === undefined ||
-			banner === undefined
-			? undefined
-			: { title, summary, avatar, banner };
-	},
-};
+import { readPortableText, writePortableText } from "@/lib/block";
 
 function UnitFrame({
 	title,
@@ -276,6 +251,7 @@ function EntityLocalizationEditor({ entity }: { entity: GetApiEntitiesByUnitIdSt
 function EntityLocalizationForm({ entity }: { entity: GetApiEntitiesByUnitIdStatus200 }) {
 	const { t } = useTranslation([
 		"actions",
+		"cover",
 		"entities",
 		"errors",
 		"governance",
@@ -298,6 +274,11 @@ function EntityLocalizationForm({ entity }: { entity: GetApiEntitiesByUnitIdStat
 			? [{ ...entry.banner, label: t.locale.contentLanguages[entry.language] }]
 			: [],
 	);
+	const coverOptions: LocalizationImageAssetOption[] = entity.localizations.flatMap((entry) =>
+		entry.language !== selectedLanguage && entry.cover
+			? [{ ...entry.cover, label: t.locale.contentLanguages[entry.language] }]
+			: [],
+	);
 	const draft = useLocalizedDraft<EntityLocalizationDraft>({
 		scope: "entity-localization",
 		baseVersion: entity.updatedAt,
@@ -305,8 +286,10 @@ function EntityLocalizationForm({ entity }: { entity: GetApiEntitiesByUnitIdStat
 		createInitialValue: () => ({
 			title: localization?.title ?? "",
 			summary: localization?.summary ?? "",
+			description: readPortableText(localization?.description),
 			avatar: localization?.avatar ?? null,
 			banner: localization?.banner ?? null,
+			cover: localization?.cover ?? null,
 		}),
 	});
 	const { value } = draft;
@@ -320,8 +303,10 @@ function EntityLocalizationForm({ entity }: { entity: GetApiEntitiesByUnitIdStat
 				body: {
 					title: value.title.trim(),
 					summary: value.summary.trim(),
+					description: writePortableText(value.description, localization?.description),
 					avatar: avatarPresentationToInput(value.avatar),
 					bannerAssetId: value.banner?.id ?? null,
+					coverAssetId: value.cover?.id ?? null,
 				},
 			});
 			draft.commit();
@@ -373,6 +358,11 @@ function EntityLocalizationForm({ entity }: { entity: GetApiEntitiesByUnitIdStat
 								value={value.summary}
 							/>
 						</Field>
+						<PortableTextEditor
+							label={t.ui.description}
+							onChange={(description) => draft.setValue((current) => ({ ...current, description }))}
+							value={value.description}
+						/>
 						<Field>
 							<FieldLabel>{t.media.roles.avatar.title}</FieldLabel>
 							<AvatarField
@@ -380,6 +370,16 @@ function EntityLocalizationForm({ entity }: { entity: GetApiEntitiesByUnitIdStat
 								onChange={(avatar) => draft.setValue((current) => ({ ...current, avatar }))}
 								options={avatarOptions}
 								value={value.avatar}
+							/>
+						</Field>
+						<Field>
+							<FieldLabel>{t.cover.title}</FieldLabel>
+							<LocalizationImageUploadField
+								fallback={coverOptions[0] ?? null}
+								onChange={(cover) => draft.setValue((current) => ({ ...current, cover }))}
+								options={coverOptions}
+								role="cover"
+								value={value.cover}
 							/>
 						</Field>
 						<Field>

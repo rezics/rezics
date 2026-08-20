@@ -3,11 +3,13 @@ import { describe, expect, it } from "vitest";
 
 import { EntityKindValues, UnitKindValues } from "../../database/schema/contract-values";
 import {
+	AttributionUnitParams,
 	AddUnitExternalLinkBody,
 	CreateEntityBody,
 	ListEntityEntriesQuery,
 	UnitExternalLinkParams,
 	UnitExternalLinkUnitParams,
+	UnitTagParams,
 	UpdateUnitReferenceCurationBody,
 	UpdateUnitTagCurationBody,
 } from "./schema";
@@ -33,6 +35,42 @@ describe("Unit resource API schemas", () => {
 			}),
 		).toBe(false);
 		expect(Value.Check(ListEntityEntriesQuery, { kind: "platform" })).toBe(false);
+	});
+
+	it("accepts Entity as a generic Tag owner", () => {
+		expect(
+			Value.Check(UnitTagParams, {
+				type: "entity",
+				unitId: "018ff2b7-7c00-7000-8000-000000000001",
+				tagId: "018ff2b7-7c00-7000-8000-000000000002",
+			}),
+		).toBe(true);
+	});
+
+	it("accepts every registered generic credit attribution owner", () => {
+		for (const type of [
+			"book",
+			"software",
+			"media",
+			"series",
+			"entity",
+			"collection",
+			"release",
+			"video",
+			"audio",
+		] as const)
+			expect(
+				Value.Check(AttributionUnitParams, {
+					type,
+					unitId: "018ff2b7-7c00-7000-8000-000000000001",
+				}),
+			).toBe(true);
+		expect(
+			Value.Check(AttributionUnitParams, {
+				type: "profile",
+				unitId: "018ff2b7-7c00-7000-8000-000000000001",
+			}),
+		).toBe(false);
 	});
 
 	it("accepts only direct-permission or public credit Entity searches", () => {

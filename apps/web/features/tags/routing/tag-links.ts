@@ -1,8 +1,8 @@
 import { createLoader, createSerializer, parseAsString, parseAsStringLiteral } from "nuqs/server";
 
-import type { UnitDetailUnitType } from "@/features/units/model/unit-detail-section";
 import { isUnitId } from "@/features/units/model/unit-id";
 import { searchParamsParsers } from "@/lib/search-params";
+import type { TaggableUnitType } from "../model/taggable-unit";
 import type { UnitTagVoteContextAddress } from "./tag-create-route";
 import {
 	isTagDetailSection,
@@ -53,11 +53,11 @@ export async function loadUnitTagsRouteState(
 }
 
 export function unitTagsHref(
-	type: UnitDetailUnitType,
+	type: TaggableUnitType,
 	unitId: string,
 	state?: UnitTagsRouteState,
 ): string {
-	const pathname = `/units/${type}/${unitId}/tags`;
+	const pathname = type === "entity" ? `/entities/${unitId}/tags` : `/units/${type}/${unitId}/tags`;
 	if (!state) return pathname;
 	return `${pathname}${serializeUnitTagsRouteSearchParams({
 		context: state.context.kind,
@@ -66,7 +66,7 @@ export function unitTagsHref(
 	})}`;
 }
 
-export function tagSearchHref(_type: UnitDetailUnitType, tags: readonly TagSearchTarget[]): string {
+export function tagSearchHref(_type: TaggableUnitType, tags: readonly TagSearchTarget[]): string {
 	const unique = new Map(tags.map((tag) => [tag.tagId, tag]));
 	return `/search${serializeSearch({
 		tag: [...unique.values()].map(({ tagId }) => tagId),

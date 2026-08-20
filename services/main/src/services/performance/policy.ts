@@ -53,6 +53,10 @@ export const WorkPolicy = {
 		defaultBatchSize: 500,
 		maxBatchSize: 500,
 	},
+	variant: {
+		/** Includes every direct Variant attached to one Main Unit. */
+		maxGroupSize: 128,
+	},
 } as const;
 
 function assertPolicyInvariants(): void {

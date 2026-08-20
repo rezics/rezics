@@ -16,7 +16,7 @@ export function UnitMetadataPage() {
 				description={t.units.workspace.sections.metadata.description}
 				title={t.units.workspace.sections.metadata.label}
 			/>
-			<UnitMetadataEditor type={type} unit={unit} />
+			<UnitMetadataEditor key={`${unit.id}:${unit.updatedAt}`} type={type} unit={unit} />
 		</section>
 	);
 }

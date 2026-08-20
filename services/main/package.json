@@ -25,6 +25,7 @@
 		"@rezics/avatar": "workspace:*",
 		"@rezics/block": "workspace:*",
 		"@rezics/brand": "workspace:*",
+		"@rezics/content-language": "workspace:*",
 		"@rezics/email": "workspace:*",
 		"@rezics/filter": "workspace:*",
 		"@rezics/i18n": "workspace:*",

@@ -51,6 +51,16 @@ import { isWorkUnitType, type UnitType } from "./unit-types";
 import { WorkReleaseStatusField } from "./components/work-release-status-field";
 import { MetadataOnlyField } from "./components/metadata-only-field";
 import { isWorkReleaseStatus } from "./model/work-release-status";
+import { ContentLanguageSupportField } from "@/features/content-language-support/components/content-language-support-field";
+import { ContentLanguageSupportEvidence } from "@/features/content-language-support/components/content-language-support-evidence";
+import {
+	adoptContentLanguageEvidence,
+	contentLanguageSupportChanged,
+	createContentLanguageSupportDraft,
+	isContentLanguageSupportUnitType,
+} from "@/features/content-language-support/model/content-language-support";
+import { AdaptedAudioField } from "./components/adapted-audio-field";
+import { adaptedAudioUnitIdsChanged } from "./model/adapted-audio";
 
 export type EditableUnit = GetApiUnitsByTypeByUnitIdStatus200;
 type Unit = EditableUnit;
@@ -96,6 +106,13 @@ export function UnitMetadataEditor({ type, unit }: { type: UnitType; unit: Unit 
 				unit.details.type === "media") &&
 			unit.details.metadataOnly,
 	);
+	const [contentLanguageSupportDraft, setContentLanguageSupportDraft] = useState(() =>
+		createContentLanguageSupportDraft(unit.contentLanguageSupport),
+	);
+	const [adaptedAudioUnitIds, setAdaptedAudioUnitIds] = useState<readonly string[]>(() =>
+		unit.details.type === "video" ? (unit.details.adaptedAudioUnitIds ?? []) : [],
+	);
+	const supportsContentLanguage = isContentLanguageSupportUnitType(type);
 	const update = usePatchApiUnitsByTypeByUnitId({
 		mutation: {
 			onSuccess: async () => invalidateUnitDetail(queryClient, type, unit.id, true),
@@ -113,6 +130,12 @@ export function UnitMetadataEditor({ type, unit }: { type: UnitType; unit: Unit 
 		const submittedAiDisclosure = form.get("aiDisclosure");
 		const submittedReleaseStatus = form.get("releaseStatus");
 		const submittedLicenses = readSubmittedLicenses(form);
+		const contentLanguageChanged =
+			supportsContentLanguage &&
+			contentLanguageSupportChanged(unit.contentLanguageSupport, contentLanguageSupportDraft);
+		const adaptedAudioChanged =
+			unit.details.type === "video" &&
+			adaptedAudioUnitIdsChanged(unit.details.adaptedAudioUnitIds ?? [], adaptedAudioUnitIds);
 		const submittedUnitStatus =
 			submittedStatus === "published" || submittedStatus === "archived" ? submittedStatus : "draft";
 		const draftsBook =
@@ -174,7 +197,22 @@ export function UnitMetadataEditor({ type, unit }: { type: UnitType; unit: Unit 
 			if (unit.details.type === "video" || unit.details.type === "audio") {
 				const durationSeconds = readPositiveInteger(form, "durationSeconds");
 				if (durationSeconds === undefined) return undefined;
-				return { durationSeconds };
+				return unit.details.type === "video"
+					? {
+							durationSeconds,
+							...(adaptedAudioChanged
+								? {
+										adaptedAudioUnitIds: adaptedAudioUnitIds.length
+											? [...adaptedAudioUnitIds]
+											: null,
+									}
+								: {}),
+						}
+					: { durationSeconds };
+			}
+			if (unit.details.type === "release") {
+				const versionLabel = String(form.get("versionLabel") ?? "").trim();
+				return versionLabel ? { versionLabel } : undefined;
 			}
 			const kind = String(form.get("kind") ?? "").trim();
 			return kind ? { kind } : undefined;
@@ -186,6 +224,14 @@ export function UnitMetadataEditor({ type, unit }: { type: UnitType; unit: Unit 
 				path: { type, unitId: unit.id },
 				body: {
 					updatedAt: unit.updatedAt,
+					...(contentLanguageChanged
+						? {
+								contentLanguageSupport: contentLanguageSupportDraft.map((entry) => ({
+									languageTag: entry.languageTag,
+									...(entry.channels ? { channels: [...entry.channels] } : {}),
+								})),
+							}
+						: {}),
 					...(draftsBook
 						? {
 								bookChapterDraftScope:
@@ -313,10 +359,30 @@ export function UnitMetadataEditor({ type, unit }: { type: UnitType; unit: Unit 
 							</Field>
 						) : null}
 						<UnitTypeSpecificFields
+							adaptedAudioUnitIds={adaptedAudioUnitIds}
 							metadataOnly={metadataOnly}
+							onAdaptedAudioUnitIdsChange={setAdaptedAudioUnitIds}
 							onMetadataOnlyChange={setMetadataOnly}
 							unit={unit}
 						/>
+						{supportsContentLanguage ? (
+							<>
+								<ContentLanguageSupportField
+									disabled={update.isPending}
+									onChange={setContentLanguageSupportDraft}
+									value={contentLanguageSupportDraft}
+								/>
+								<ContentLanguageSupportEvidence
+									onAdopt={(evidence) =>
+										setContentLanguageSupportDraft((current) =>
+											adoptContentLanguageEvidence(current, evidence),
+										)
+									}
+									type={type}
+									unitId={unit.id}
+								/>
+							</>
+						) : null}
 						<UnitLicensesField defaultValue={openLicenseIds} />
 						<Button variant="solid" isLoading={update.isPending} type="submit">
 							{t.units.editor.saveSettings}
@@ -336,14 +402,18 @@ export function UnitMetadataEditor({ type, unit }: { type: UnitType; unit: Unit 
 
 function UnitTypeSpecificFields({
 	unit,
+	adaptedAudioUnitIds,
 	metadataOnly,
+	onAdaptedAudioUnitIdsChange,
 	onMetadataOnlyChange,
 }: {
 	readonly unit: Unit;
+	readonly adaptedAudioUnitIds: readonly string[];
 	readonly metadataOnly: boolean;
+	readonly onAdaptedAudioUnitIdsChange: (value: readonly string[]) => void;
 	readonly onMetadataOnlyChange: (value: boolean) => void;
 }) {
-	const { t } = useTranslation(["units"]);
+	const { t } = useTranslation(["ui", "units"]);
 	const details = unit.details;
 	if (details.type === "book")
 		return (
@@ -423,7 +493,22 @@ function UnitTypeSpecificFields({
 				</Field>
 			</>
 		);
-	if (details.type === "video" || details.type === "audio")
+	if (details.type === "video")
+		return (
+			<>
+				<Field>
+					<FieldLabel>{t.units.fields.durationSeconds}</FieldLabel>
+					<Input
+						defaultValue={details.durationSeconds ?? ""}
+						min={1}
+						name="durationSeconds"
+						type="number"
+					/>
+				</Field>
+				<AdaptedAudioField onChange={onAdaptedAudioUnitIdsChange} value={adaptedAudioUnitIds} />
+			</>
+		);
+	if (details.type === "audio")
 		return (
 			<Field>
 				<FieldLabel>{t.units.fields.durationSeconds}</FieldLabel>
@@ -434,6 +519,19 @@ function UnitTypeSpecificFields({
 					type="number"
 				/>
 			</Field>
+		);
+	if (details.type === "release")
+		return (
+			<>
+				<Field>
+					<FieldLabel>{t.units.fields.parentUnit}</FieldLabel>
+					<Input readOnly value={details.parentUnitId} />
+				</Field>
+				<Field required>
+					<FieldLabel>{t.units.fields.versionLabel}</FieldLabel>
+					<Input defaultValue={details.versionLabel} name="versionLabel" required />
+				</Field>
+			</>
 		);
 	if ("kind" in details)
 		return (

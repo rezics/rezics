@@ -41,6 +41,7 @@ export const CreditAttributionRolesByUnitType = {
 	],
 	video: [],
 	audio: [],
+	release: [],
 	series: ["author", "editor", "publisher"],
 } as const satisfies Record<UnitType, readonly CreditAttributionRole[]>;
 

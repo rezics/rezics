@@ -47,6 +47,10 @@ export default {
 	UnitLicenseOfferingEndForbidden: "Dieses Lizenzangebot kann nicht beendet werden.",
 	UnitLicenseGrantConflict: `Für diese ${deTerminology.license.forms.label} besteht bereits ein offenes Angebot zu diesem Inhalt.`,
 	UnitChanged: "Dieser Inhalt wurde geändert. Aktualisiere die Seite und versuche es erneut.",
+	UnitContentLanguageSupportInvalid:
+		"Die Sprachen für die Inhaltsnutzung konnten nicht gespeichert werden. Prüfe die Sprachen und unterstützten Kanäle und versuche es erneut.",
+	UnitRelationInvalid:
+		"Die ausgewählte Unit-Beziehung konnte nicht gespeichert werden. Prüfe die verknüpften Units und versuche es erneut.",
 	UnitRevisionConflict:
 		"Die Ausgangsversion wurde geändert. Aktualisiere die Seite und versuche es erneut.",
 	RevisionContributionActorRequired:
@@ -235,6 +239,7 @@ export default {
 	UnitVariantTargetIsVariant: "Eine Variante muss direkt auf einen Haupteintrag verweisen.",
 	UnitVariantSourceHasVariants:
 		"Ein Haupteintrag mit Varianten kann nicht selbst zu einer Variante werden.",
+	UnitVariantGroupLimitReached: "Dieser Haupteintrag hat bereits die Höchstzahl an Varianten.",
 	UnitVariantChanged:
 		"Die Beziehung der Unit zu ihrem Haupteintrag wurde geändert. Aktualisiere die Seite und versuche es erneut.",
 	UnitVariantMainUnavailable: "Der Haupteintrag ist für diesen Variantenstatus nicht verfügbar.",

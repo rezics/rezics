@@ -48,6 +48,10 @@ export default {
 	UnitLicenseOfferingEndForbidden: `Cette offre de ${frTerminology.license.forms.inline} ne peut pas être close.`,
 	UnitLicenseGrantConflict: `Une offre ouverte pour cette ${frTerminology.license.forms.inline} existe déjà sur ce contenu.`,
 	UnitChanged: "Ce contenu a changé. Actualisez la page et réessayez.",
+	UnitContentLanguageSupportInvalid:
+		"Les langues de consommation du contenu n’ont pas pu être enregistrées. Vérifiez les langues et les canaux pris en charge, puis réessayez.",
+	UnitRelationInvalid:
+		"La relation sélectionnée n’a pas pu être enregistrée. Vérifiez les fiches associées, puis réessayez.",
 	UnitRevisionConflict: "La version de référence a changé. Actualisez la page et réessayez.",
 	RevisionContributionActorRequired:
 		"Choisissez la personne principalement responsable de cette version.",
@@ -233,6 +237,8 @@ export default {
 	UnitVariantTargetIsVariant: "Une variante doit pointer directement vers un élément principal.",
 	UnitVariantSourceHasVariants:
 		"Un élément principal possédant des variantes ne peut pas devenir une variante.",
+	UnitVariantGroupLimitReached:
+		"Cet élément principal a déjà atteint le nombre maximal de variantes.",
 	UnitVariantChanged:
 		"La relation entre la Unit et son élément principal a changé. Actualisez la page et réessayez.",
 	UnitVariantMainUnavailable: "L’élément principal n’est pas disponible pour cet état de variante.",

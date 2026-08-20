@@ -10,8 +10,9 @@ import {
 	RevisionContext,
 	Uuid,
 } from "../schema";
-import { WorkUnitType } from "../units/schema";
 import { AvatarResponse } from "../schema/response";
+import { TaggableUnitType } from "../unit-resources/schema";
+import { WorkUnitType } from "../units/schema";
 
 const TagVoteValue = t.Nullable(t.Union([t.Literal(-1), t.Literal(1)]));
 const BinaryVote = t.Union([t.Literal(-1), t.Literal(1)]);
@@ -26,7 +27,7 @@ const LocalizedTagSummary = {
 } as const;
 
 export const UnitTagLandscapeParams = t.Object({
-	type: WorkUnitType,
+	type: TaggableUnitType,
 	unitId: Uuid,
 });
 export type UnitTagLandscapeParams = Static<typeof UnitTagLandscapeParams>;

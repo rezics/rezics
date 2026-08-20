@@ -1,5 +1,5 @@
 const WorkUnitTypes = ["book", "software", "media", "series"] as const;
-const UnitTypes = [...WorkUnitTypes, "video", "audio"] as const;
+const UnitTypes = [...WorkUnitTypes, "video", "audio", "release"] as const;
 const VariantUnitTypes = ["book", "software", "media"] as const;
 
 export type WorkUnitType = (typeof WorkUnitTypes)[number];

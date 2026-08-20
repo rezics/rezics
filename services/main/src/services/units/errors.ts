@@ -82,6 +82,32 @@ export class UnitChanged extends Data.TaggedError("UnitChanged") {
 	}
 }
 
+export class UnitContentLanguageSupportInvalid extends Data.TaggedError(
+	"UnitContentLanguageSupportInvalid",
+) {
+	static readonly status = StatusCodes.UNPROCESSABLE_ENTITY as const;
+	readonly status = UnitContentLanguageSupportInvalid.status;
+	readonly message = "Unit content language support is invalid";
+	readonly details: { readonly path: string; readonly reason: string };
+
+	constructor(path: string, reason: string) {
+		super();
+		this.details = { path, reason };
+	}
+}
+
+export class UnitRelationInvalid extends Data.TaggedError("UnitRelationInvalid") {
+	static readonly status = StatusCodes.UNPROCESSABLE_ENTITY as const;
+	readonly status = UnitRelationInvalid.status;
+	readonly message = "The Unit relation could not be saved";
+	readonly details: { readonly path: string; readonly reason: string };
+
+	constructor(path: string, reason: string) {
+		super();
+		this.details = { path, reason };
+	}
+}
+
 export class UnitRealmPublicationNotFound extends Data.TaggedError("UnitRealmPublicationNotFound") {
 	static readonly status = StatusCodes.NOT_FOUND as const;
 	readonly status = UnitRealmPublicationNotFound.status;
@@ -188,6 +214,12 @@ export class UnitVariantSourceHasVariants extends Data.TaggedError("UnitVariantS
 	static readonly status = StatusCodes.CONFLICT as const;
 	readonly status = UnitVariantSourceHasVariants.status;
 	readonly message = "A Main with Variants cannot become a Variant through this operation";
+}
+
+export class UnitVariantGroupLimitReached extends Data.TaggedError("UnitVariantGroupLimitReached") {
+	static readonly status = StatusCodes.CONFLICT as const;
+	readonly status = UnitVariantGroupLimitReached.status;
+	readonly message = "The Main Unit has reached the supported Variant group size";
 }
 
 export class UnitVariantChanged extends Data.TaggedError("UnitVariantChanged") {
@@ -337,6 +369,8 @@ export const UnitErrors = [
 	UnitLicenseOfferingEndForbidden,
 	UnitLicenseGrantConflict,
 	UnitChanged,
+	UnitContentLanguageSupportInvalid,
+	UnitRelationInvalid,
 	UnitRealmPublicationNotFound,
 	UnitRealmPublicationAlreadyExists,
 	UnitRealmPublicationTransitionInvalid,
@@ -350,6 +384,7 @@ export const UnitErrors = [
 	UnitVariantKindMismatch,
 	UnitVariantTargetIsVariant,
 	UnitVariantSourceHasVariants,
+	UnitVariantGroupLimitReached,
 	UnitVariantChanged,
 	UnitVariantMainUnavailable,
 	InvalidSlug,

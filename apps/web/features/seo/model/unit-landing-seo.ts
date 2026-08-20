@@ -30,6 +30,7 @@ interface BuildUnitLandingSeoDocumentInput extends UnitLandingSeoRoute {
 const WorkKinds = new Set<PublicUnitSeoKind>([
 	"book",
 	"software",
+	"release",
 	"media",
 	"series",
 	"video",
@@ -151,6 +152,7 @@ function structuredMainEntity(
 		case "book":
 			return { "@type": "Book", ...shared };
 		case "software":
+		case "release":
 			return { "@type": "SoftwareApplication", ...shared };
 		case "video":
 			return { "@type": "VideoObject", ...shared };

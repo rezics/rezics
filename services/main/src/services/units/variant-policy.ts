@@ -51,25 +51,30 @@ export async function ensureUnitVariantLifecycle(
 	if (outbound && isDiscoverableVariantUnit(current) && !isDiscoverableVariantUnit(outbound))
 		throw new UnitVariantMainUnavailable();
 
-	const inbound = await tx
-		.select({
-			status: unit.status,
-			visibility: unit.visibility,
-			moderationStatus: unit.moderationStatus,
-			deletedAt: unit.deletedAt,
-		})
+	if (current.deletedAt) {
+		const [remainingVariant] = await tx
+			.select({ id: unitVariant.variantUnitId })
+			.from(unitVariant)
+			.innerJoin(unit, eq(unit.id, unitVariant.variantUnitId))
+			.where(and(eq(unitVariant.mainUnitId, unitId), isNull(unit.deletedAt)))
+			.limit(1);
+		if (remainingVariant) throw new UnitVariantMainUnavailable();
+		return;
+	}
+	if (isDiscoverableVariantUnit(current)) return;
+	const [discoverableVariant] = await tx
+		.select({ id: unitVariant.variantUnitId })
 		.from(unitVariant)
 		.innerJoin(unit, eq(unit.id, unitVariant.variantUnitId))
 		.where(
 			and(
 				eq(unitVariant.mainUnitId, unitId),
-				current.deletedAt ? isNull(unit.deletedAt) : undefined,
+				eq(unit.status, "published"),
+				eq(unit.visibility, "public"),
+				eq(unit.moderationStatus, "approved"),
+				isNull(unit.deletedAt),
 			),
-		);
-	if (
-		current.deletedAt
-			? inbound.length > 0
-			: !isDiscoverableVariantUnit(current) && inbound.some(isDiscoverableVariantUnit)
-	)
-		throw new UnitVariantMainUnavailable();
+		)
+		.limit(1);
+	if (discoverableVariant) throw new UnitVariantMainUnavailable();
 }

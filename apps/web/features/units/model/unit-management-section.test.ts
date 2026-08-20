@@ -55,7 +55,7 @@ describe("unit management section manifest", () => {
 		expect(getUnitManagementSectionIds("media", previewEditor)).toContain("content-structure");
 	});
 
-	it("keeps timed media Units on the standard content, metadata, access, and history template", () => {
+	it("keeps non-Work manageable Units on the standard editable section template", () => {
 		const capabilities = {
 			...denied,
 			canEdit: true,
@@ -70,6 +70,12 @@ describe("unit management section manifest", () => {
 			"history",
 		]);
 		expect(getUnitManagementSectionIds("audio", capabilities)).toEqual([
+			"content",
+			"metadata",
+			"access",
+			"history",
+		]);
+		expect(getUnitManagementSectionIds("release", capabilities)).toEqual([
 			"content",
 			"metadata",
 			"access",

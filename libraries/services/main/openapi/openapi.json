@@ -26565,6 +26565,8 @@
 					"UnitLicenseOfferingEndForbidden",
 					"UnitLicenseGrantConflict",
 					"UnitChanged",
+					"UnitContentLanguageSupportInvalid",
+					"UnitRelationInvalid",
 					"UnitRealmPublicationNotFound",
 					"UnitRealmPublicationAlreadyExists",
 					"UnitRealmPublicationTransitionInvalid",
@@ -26578,6 +26580,7 @@
 					"UnitVariantKindMismatch",
 					"UnitVariantTargetIsVariant",
 					"UnitVariantSourceHasVariants",
+					"UnitVariantGroupLimitReached",
 					"UnitVariantChanged",
 					"UnitVariantMainUnavailable",
 					"InvalidSlug",
@@ -89474,12 +89477,17 @@
 							"anyOf": [
 								{
 									"anyOf": [
-										{ "const": "book", "type": "string" },
-										{ "const": "software", "type": "string" },
-										{ "const": "media", "type": "string" }
+										{
+											"anyOf": [
+												{ "const": "book", "type": "string" },
+												{ "const": "software", "type": "string" },
+												{ "const": "media", "type": "string" }
+											]
+										},
+										{ "const": "series", "type": "string" }
 									]
 								},
-								{ "const": "series", "type": "string" }
+								{ "const": "entity", "type": "string" }
 							]
 						}
 					},
@@ -93211,6 +93219,7 @@
 														"profile",
 														"book",
 														"software",
+														"release",
 														"media",
 														"video",
 														"audio",
@@ -93338,6 +93347,7 @@
 														"profile",
 														"book",
 														"software",
+														"release",
 														"media",
 														"video",
 														"audio",
@@ -93468,6 +93478,7 @@
 														"profile",
 														"book",
 														"software",
+														"release",
 														"media",
 														"video",
 														"audio",
@@ -96304,6 +96315,34 @@
 													}
 												}
 											},
+											"contentLanguageSupport": {
+												"maxItems": 64,
+												"type": "array",
+												"items": {
+													"additionalProperties": false,
+													"type": "object",
+													"required": ["languageTag"],
+													"properties": {
+														"languageTag": {
+															"minLength": 1,
+															"maxLength": 255,
+															"pattern": "^[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?$",
+															"type": "string"
+														},
+														"channels": {
+															"minItems": 1,
+															"maxItems": 4,
+															"uniqueItems": true,
+															"type": "array",
+															"items": {
+																"default": "text",
+																"type": "string",
+																"enum": ["text", "audio", "subtitle", "interface"]
+															}
+														}
+													}
+												}
+											},
 											"visibility": { "type": "string", "enum": ["public", "unlisted", "private"] },
 											"contentRating": {
 												"type": "string",
@@ -96751,6 +96790,34 @@
 													}
 												}
 											},
+											"contentLanguageSupport": {
+												"maxItems": 64,
+												"type": "array",
+												"items": {
+													"additionalProperties": false,
+													"type": "object",
+													"required": ["languageTag"],
+													"properties": {
+														"languageTag": {
+															"minLength": 1,
+															"maxLength": 255,
+															"pattern": "^[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?$",
+															"type": "string"
+														},
+														"channels": {
+															"minItems": 1,
+															"maxItems": 4,
+															"uniqueItems": true,
+															"type": "array",
+															"items": {
+																"default": "text",
+																"type": "string",
+																"enum": ["text", "audio", "subtitle", "interface"]
+															}
+														}
+													}
+												}
+											},
 											"visibility": { "type": "string", "enum": ["public", "unlisted", "private"] },
 											"contentRating": {
 												"type": "string",
@@ -96882,6 +96949,7 @@
 										"status",
 										"visibility",
 										"language",
+										"contentLanguageSupport",
 										"contentRating",
 										"aiDisclosure",
 										"licenses",
@@ -96911,7 +96979,7 @@
 										"id": { "format": "uuid", "type": "string" },
 										"type": {
 											"type": "string",
-											"enum": ["book", "software", "media", "series", "video", "audio"]
+											"enum": ["book", "software", "media", "series", "video", "audio", "release"]
 										},
 										"status": { "type": "string" },
 										"visibility": { "type": "string" },
@@ -96921,6 +96989,34 @@
 												{ "type": "string", "enum": ["zh", "en", "ja", "ko", "de", "fr", "es"] },
 												{ "type": "null" }
 											]
+										},
+										"contentLanguageSupport": {
+											"maxItems": 64,
+											"type": "array",
+											"items": {
+												"additionalProperties": false,
+												"type": "object",
+												"required": ["languageTag"],
+												"properties": {
+													"languageTag": {
+														"minLength": 1,
+														"maxLength": 255,
+														"pattern": "^[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?$",
+														"type": "string"
+													},
+													"channels": {
+														"minItems": 1,
+														"maxItems": 4,
+														"uniqueItems": true,
+														"type": "array",
+														"items": {
+															"default": "text",
+															"type": "string",
+															"enum": ["text", "audio", "subtitle", "interface"]
+														}
+													}
+												}
+											}
 										},
 										"contentRating": { "type": "string" },
 										"aiDisclosure": { "type": "string" },
@@ -97435,7 +97531,7 @@
 												{
 													"additionalProperties": false,
 													"type": "object",
-													"required": ["type", "durationSeconds"],
+													"required": ["type", "durationSeconds", "adaptedAudioUnitIds"],
 													"properties": {
 														"type": { "const": "video", "type": "string" },
 														"durationSeconds": {
@@ -97447,6 +97543,18 @@
 																		{ "format": "integer", "default": 0, "type": "string" },
 																		{ "minimum": 1, "type": "integer" }
 																	]
+																},
+																{ "type": "null" }
+															]
+														},
+														"adaptedAudioUnitIds": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"maxItems": 64,
+																	"uniqueItems": true,
+																	"type": "array",
+																	"items": { "format": "uuid", "type": "string" }
 																},
 																{ "type": "null" }
 															]
@@ -97471,6 +97579,20 @@
 																},
 																{ "type": "null" }
 															]
+														}
+													}
+												},
+												{
+													"additionalProperties": false,
+													"type": "object",
+													"required": ["type", "parentUnitId", "versionLabel", "releasedOn"],
+													"properties": {
+														"type": { "const": "release", "type": "string" },
+														"parentUnitId": { "format": "uuid", "type": "string" },
+														"versionLabel": { "minLength": 1, "type": "string" },
+														"releasedOn": {
+															"nullable": true,
+															"anyOf": [{ "format": "date", "type": "string" }, { "type": "null" }]
 														}
 													}
 												}
@@ -97887,14 +98009,25 @@
 												"required": [
 													"id",
 													"entityEntryId",
+													"entityKind",
 													"role",
 													"position",
+													"language",
 													"title",
+													"summary",
+													"avatar",
+													"cover",
+													"tags",
 													"contextPost"
 												],
 												"properties": {
 													"id": { "format": "uuid", "type": "string" },
 													"entityEntryId": { "format": "uuid", "type": "string" },
+													"entityKind": {
+														"default": "person",
+														"type": "string",
+														"enum": ["person", "organization", "character", "software_agent"]
+													},
 													"role": {
 														"default": "primary_character",
 														"type": "string",
@@ -97915,9 +98048,110 @@
 														"maxLength": 1024,
 														"type": "string"
 													},
+													"language": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"type": "string",
+																"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+															},
+															{ "type": "null" }
+														]
+													},
 													"title": {
 														"nullable": true,
 														"anyOf": [{ "type": "string" }, { "type": "null" }]
+													},
+													"summary": {
+														"nullable": true,
+														"anyOf": [{ "type": "string" }, { "type": "null" }]
+													},
+													"avatar": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"anyOf": [
+																	{
+																		"additionalProperties": false,
+																		"type": "object",
+																		"required": ["type", "image"],
+																		"properties": {
+																			"type": { "const": "image", "type": "string" },
+																			"image": {
+																				"type": "object",
+																				"required": ["id", "url"],
+																				"properties": {
+																					"id": { "format": "uuid", "type": "string" },
+																					"url": { "type": "string" }
+																				}
+																			}
+																		}
+																	},
+																	{
+																		"additionalProperties": false,
+																		"type": "object",
+																		"required": ["type", "emoji"],
+																		"properties": {
+																			"type": { "const": "emoji", "type": "string" },
+																			"emoji": { "maxLength": 64, "type": "string" }
+																		}
+																	},
+																	{
+																		"additionalProperties": false,
+																		"type": "object",
+																		"required": ["type", "icon"],
+																		"properties": {
+																			"type": { "const": "icon", "type": "string" },
+																			"icon": {
+																				"additionalProperties": false,
+																				"type": "object",
+																				"required": ["provider", "prefix", "name"],
+																				"properties": {
+																					"provider": { "const": "font-awesome", "type": "string" },
+																					"prefix": { "type": "string", "enum": ["fas", "fab"] },
+																					"name": {
+																						"pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+																						"maxLength": 128,
+																						"type": "string"
+																					}
+																				}
+																			}
+																		}
+																	}
+																]
+															},
+															{ "type": "null" }
+														]
+													},
+													"cover": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"type": "object",
+																"required": ["id", "url"],
+																"properties": {
+																	"id": { "format": "uuid", "type": "string" },
+																	"url": { "type": "string" }
+																}
+															},
+															{ "type": "null" }
+														]
+													},
+													"tags": {
+														"maxItems": 4,
+														"type": "array",
+														"items": {
+															"additionalProperties": false,
+															"type": "object",
+															"required": ["tagId", "title"],
+															"properties": {
+																"tagId": { "format": "uuid", "type": "string" },
+																"title": {
+																	"nullable": true,
+																	"anyOf": [{ "type": "string" }, { "type": "null" }]
+																}
+															}
+														}
 													},
 													"contextPost": {
 														"nullable": true,
@@ -98382,7 +98616,7 @@
 																	"type": {
 																		"default": "book",
 																		"type": "string",
-																		"enum": ["book", "software", "media"]
+																		"enum": ["book", "software", "media", "entity"]
 																	},
 																	"language": {
 																		"type": "string",
@@ -98435,7 +98669,7 @@
 																				"type": {
 																					"default": "book",
 																					"type": "string",
-																					"enum": ["book", "software", "media"]
+																					"enum": ["book", "software", "media", "entity"]
 																				},
 																				"language": {
 																					"type": "string",
@@ -98683,6 +98917,7 @@
 														"UnitVariantKindMismatch",
 														"UnitVariantTargetIsVariant",
 														"UnitVariantSourceHasVariants",
+														"UnitVariantGroupLimitReached",
 														"UnitVariantChanged",
 														"UnitVariantMainUnavailable",
 														"UnitLicenseGrantConflict",
@@ -98716,7 +98951,7 @@
 														"code": {
 															"default": "ValidationError",
 															"type": "string",
-															"enum": ["ValidationError"]
+															"enum": ["ValidationError", "UnitContentLanguageSupportInvalid"]
 														},
 														"message": { "type": "string" },
 														"details": {}
@@ -98991,6 +99226,376 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
+		"/api/v1/units/{type}/{unitId}/content-language-support/evidence": {
+			"get": {
+				"summary": "List bounded Unit content language evidence",
+				"tags": ["Units"],
+				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "type",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"anyOf": [
+								{
+									"anyOf": [
+										{ "const": "book", "type": "string" },
+										{ "const": "software", "type": "string" },
+										{ "const": "media", "type": "string" }
+									]
+								},
+								{
+									"anyOf": [
+										{ "const": "video", "type": "string" },
+										{ "const": "audio", "type": "string" }
+									]
+								},
+								{ "const": "release", "type": "string" }
+							]
+						}
+					},
+					{
+						"name": "unitId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					},
+					{
+						"name": "localizationLanguages",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"maxItems": 7,
+							"uniqueItems": true,
+							"type": "array",
+							"items": { "type": "string", "enum": ["zh", "en", "ja", "ko", "de", "fr", "es"] }
+						}
+					},
+					{
+						"name": "cursor",
+						"in": "query",
+						"required": false,
+						"schema": { "minLength": 1, "maxLength": 1024, "type": "string" }
+					},
+					{
+						"name": "limit",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"minimum": 1,
+							"maximum": 50,
+							"default": 20,
+							"anyOf": [
+								{ "format": "integer", "default": 0, "type": "string" },
+								{ "minimum": 1, "maximum": 50, "default": 20, "type": "integer" }
+							]
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"additionalProperties": false,
+									"type": "object",
+									"required": ["currentContentLanguageSupport", "items", "nextCursor"],
+									"properties": {
+										"currentContentLanguageSupport": {
+											"maxItems": 64,
+											"type": "array",
+											"items": {
+												"additionalProperties": false,
+												"type": "object",
+												"required": ["languageTag"],
+												"properties": {
+													"languageTag": {
+														"minLength": 1,
+														"maxLength": 255,
+														"pattern": "^[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?$",
+														"type": "string"
+													},
+													"channels": {
+														"minItems": 1,
+														"maxItems": 4,
+														"uniqueItems": true,
+														"type": "array",
+														"items": {
+															"default": "text",
+															"type": "string",
+															"enum": ["text", "audio", "subtitle", "interface"]
+														}
+													}
+												}
+											}
+										},
+										"items": {
+											"type": "array",
+											"items": {
+												"additionalProperties": false,
+												"type": "object",
+												"required": ["source", "unit", "contentLanguageSupport", "occurrence"],
+												"properties": {
+													"source": {
+														"default": "parent",
+														"type": "string",
+														"enum": [
+															"parent",
+															"main",
+															"variant",
+															"release",
+															"occurrence",
+															"adapted_audio"
+														]
+													},
+													"unit": {
+														"additionalProperties": false,
+														"type": "object",
+														"required": ["id", "kind", "language", "title"],
+														"properties": {
+															"id": { "format": "uuid", "type": "string" },
+															"kind": {
+																"default": "book",
+																"type": "string",
+																"enum": ["book", "software", "media", "video", "audio", "release"]
+															},
+															"language": {
+																"nullable": true,
+																"anyOf": [
+																	{
+																		"type": "string",
+																		"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+																	},
+																	{ "type": "null" }
+																]
+															},
+															"title": {
+																"nullable": true,
+																"anyOf": [{ "type": "string" }, { "type": "null" }]
+															}
+														}
+													},
+													"contentLanguageSupport": {
+														"maxItems": 64,
+														"type": "array",
+														"items": {
+															"additionalProperties": false,
+															"type": "object",
+															"required": ["languageTag"],
+															"properties": {
+																"languageTag": {
+																	"minLength": 1,
+																	"maxLength": 255,
+																	"pattern": "^[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?$",
+																	"type": "string"
+																},
+																"channels": {
+																	"minItems": 1,
+																	"maxItems": 4,
+																	"uniqueItems": true,
+																	"type": "array",
+																	"items": {
+																		"default": "text",
+																		"type": "string",
+																		"enum": ["text", "audio", "subtitle", "interface"]
+																	}
+																}
+															}
+														}
+													},
+													"occurrence": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"additionalProperties": false,
+																"type": "object",
+																"required": ["structureId", "nodeId"],
+																"properties": {
+																	"structureId": { "format": "uuid", "type": "string" },
+																	"nodeId": { "format": "uuid", "type": "string" }
+																}
+															},
+															{ "type": "null" }
+														]
+													}
+												}
+											}
+										},
+										"nextCursor": {
+											"nullable": true,
+											"anyOf": [{ "type": "string" }, { "type": "null" }]
+										}
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Response for status 400",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "InvalidPaginationCursor",
+													"type": "string",
+													"enum": ["InvalidPaginationCursor"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Response for status 401",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "AuthenticationRequired",
+													"type": "string",
+													"enum": ["AuthenticationRequired"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "ApiTokenPermissionRequired",
+													"type": "string",
+													"enum": [
+														"ApiTokenPermissionRequired",
+														"EmailVerificationRequired",
+														"AccountRestricted",
+														"UnitPermissionForbidden"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitNotFound",
+													"type": "string",
+													"enum": ["UnitNotFound"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/ValidationError" } }
+						}
+					},
+					"429": {
+						"description": "API quota exceeded",
+						"headers": {
+							"Retry-After": {
+								"description": "Seconds until the limiting window or concurrency lease can be retried",
+								"schema": { "type": "integer", "minimum": 1 }
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"type": "string",
+													"enum": ["ApiQuotaExceeded", "ApiTokenRateLimitExceeded"]
+												},
+												"message": { "type": "string" },
+												"details": { "$ref": "#/components/schemas/JsonValue" }
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/InternalError" } }
+						}
+					}
+				},
+				"operationId": "getApiUnitsByTypeByUnitIdContent-language-supportEvidence",
+				"x-rezics-quota-route-operation-id": "getApiUnitsByTypeByUnitIdContent-language-supportEvidence",
+				"x-rezics-quota-operation-id": "*",
+				"x-rezics-quota-cost-units": 1
+			}
+		},
 		"/api/v1/units/{type}/{unitId}": {
 			"get": {
 				"summary": "Get unit",
@@ -99019,7 +99624,8 @@
 										{ "const": "video", "type": "string" },
 										{ "const": "audio", "type": "string" }
 									]
-								}
+								},
+								{ "const": "release", "type": "string" }
 							]
 						}
 					},
@@ -99054,6 +99660,7 @@
 										"status",
 										"visibility",
 										"language",
+										"contentLanguageSupport",
 										"contentRating",
 										"aiDisclosure",
 										"licenses",
@@ -99083,7 +99690,7 @@
 										"id": { "format": "uuid", "type": "string" },
 										"type": {
 											"type": "string",
-											"enum": ["book", "software", "media", "series", "video", "audio"]
+											"enum": ["book", "software", "media", "series", "video", "audio", "release"]
 										},
 										"status": { "type": "string" },
 										"visibility": { "type": "string" },
@@ -99093,6 +99700,34 @@
 												{ "type": "string", "enum": ["zh", "en", "ja", "ko", "de", "fr", "es"] },
 												{ "type": "null" }
 											]
+										},
+										"contentLanguageSupport": {
+											"maxItems": 64,
+											"type": "array",
+											"items": {
+												"additionalProperties": false,
+												"type": "object",
+												"required": ["languageTag"],
+												"properties": {
+													"languageTag": {
+														"minLength": 1,
+														"maxLength": 255,
+														"pattern": "^[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?$",
+														"type": "string"
+													},
+													"channels": {
+														"minItems": 1,
+														"maxItems": 4,
+														"uniqueItems": true,
+														"type": "array",
+														"items": {
+															"default": "text",
+															"type": "string",
+															"enum": ["text", "audio", "subtitle", "interface"]
+														}
+													}
+												}
+											}
 										},
 										"contentRating": { "type": "string" },
 										"aiDisclosure": { "type": "string" },
@@ -99607,7 +100242,7 @@
 												{
 													"additionalProperties": false,
 													"type": "object",
-													"required": ["type", "durationSeconds"],
+													"required": ["type", "durationSeconds", "adaptedAudioUnitIds"],
 													"properties": {
 														"type": { "const": "video", "type": "string" },
 														"durationSeconds": {
@@ -99619,6 +100254,18 @@
 																		{ "format": "integer", "default": 0, "type": "string" },
 																		{ "minimum": 1, "type": "integer" }
 																	]
+																},
+																{ "type": "null" }
+															]
+														},
+														"adaptedAudioUnitIds": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"maxItems": 64,
+																	"uniqueItems": true,
+																	"type": "array",
+																	"items": { "format": "uuid", "type": "string" }
 																},
 																{ "type": "null" }
 															]
@@ -99643,6 +100290,20 @@
 																},
 																{ "type": "null" }
 															]
+														}
+													}
+												},
+												{
+													"additionalProperties": false,
+													"type": "object",
+													"required": ["type", "parentUnitId", "versionLabel", "releasedOn"],
+													"properties": {
+														"type": { "const": "release", "type": "string" },
+														"parentUnitId": { "format": "uuid", "type": "string" },
+														"versionLabel": { "minLength": 1, "type": "string" },
+														"releasedOn": {
+															"nullable": true,
+															"anyOf": [{ "format": "date", "type": "string" }, { "type": "null" }]
 														}
 													}
 												}
@@ -100059,14 +100720,25 @@
 												"required": [
 													"id",
 													"entityEntryId",
+													"entityKind",
 													"role",
 													"position",
+													"language",
 													"title",
+													"summary",
+													"avatar",
+													"cover",
+													"tags",
 													"contextPost"
 												],
 												"properties": {
 													"id": { "format": "uuid", "type": "string" },
 													"entityEntryId": { "format": "uuid", "type": "string" },
+													"entityKind": {
+														"default": "person",
+														"type": "string",
+														"enum": ["person", "organization", "character", "software_agent"]
+													},
 													"role": {
 														"default": "primary_character",
 														"type": "string",
@@ -100087,9 +100759,110 @@
 														"maxLength": 1024,
 														"type": "string"
 													},
+													"language": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"type": "string",
+																"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+															},
+															{ "type": "null" }
+														]
+													},
 													"title": {
 														"nullable": true,
 														"anyOf": [{ "type": "string" }, { "type": "null" }]
+													},
+													"summary": {
+														"nullable": true,
+														"anyOf": [{ "type": "string" }, { "type": "null" }]
+													},
+													"avatar": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"anyOf": [
+																	{
+																		"additionalProperties": false,
+																		"type": "object",
+																		"required": ["type", "image"],
+																		"properties": {
+																			"type": { "const": "image", "type": "string" },
+																			"image": {
+																				"type": "object",
+																				"required": ["id", "url"],
+																				"properties": {
+																					"id": { "format": "uuid", "type": "string" },
+																					"url": { "type": "string" }
+																				}
+																			}
+																		}
+																	},
+																	{
+																		"additionalProperties": false,
+																		"type": "object",
+																		"required": ["type", "emoji"],
+																		"properties": {
+																			"type": { "const": "emoji", "type": "string" },
+																			"emoji": { "maxLength": 64, "type": "string" }
+																		}
+																	},
+																	{
+																		"additionalProperties": false,
+																		"type": "object",
+																		"required": ["type", "icon"],
+																		"properties": {
+																			"type": { "const": "icon", "type": "string" },
+																			"icon": {
+																				"additionalProperties": false,
+																				"type": "object",
+																				"required": ["provider", "prefix", "name"],
+																				"properties": {
+																					"provider": { "const": "font-awesome", "type": "string" },
+																					"prefix": { "type": "string", "enum": ["fas", "fab"] },
+																					"name": {
+																						"pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+																						"maxLength": 128,
+																						"type": "string"
+																					}
+																				}
+																			}
+																		}
+																	}
+																]
+															},
+															{ "type": "null" }
+														]
+													},
+													"cover": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"type": "object",
+																"required": ["id", "url"],
+																"properties": {
+																	"id": { "format": "uuid", "type": "string" },
+																	"url": { "type": "string" }
+																}
+															},
+															{ "type": "null" }
+														]
+													},
+													"tags": {
+														"maxItems": 4,
+														"type": "array",
+														"items": {
+															"additionalProperties": false,
+															"type": "object",
+															"required": ["tagId", "title"],
+															"properties": {
+																"tagId": { "format": "uuid", "type": "string" },
+																"title": {
+																	"nullable": true,
+																	"anyOf": [{ "type": "string" }, { "type": "null" }]
+																}
+															}
+														}
 													},
 													"contextPost": {
 														"nullable": true,
@@ -100554,7 +101327,7 @@
 																	"type": {
 																		"default": "book",
 																		"type": "string",
-																		"enum": ["book", "software", "media"]
+																		"enum": ["book", "software", "media", "entity"]
 																	},
 																	"language": {
 																		"type": "string",
@@ -100607,7 +101380,7 @@
 																				"type": {
 																					"default": "book",
 																					"type": "string",
-																					"enum": ["book", "software", "media"]
+																					"enum": ["book", "software", "media", "entity"]
 																				},
 																				"language": {
 																					"type": "string",
@@ -100779,7 +101552,8 @@
 										{ "const": "video", "type": "string" },
 										{ "const": "audio", "type": "string" }
 									]
-								}
+								},
+								{ "const": "release", "type": "string" }
 							]
 						}
 					},
@@ -100827,6 +101601,34 @@
 												"pdm-1.0",
 												"rezics-unit-content-license-v1-1"
 											]
+										}
+									},
+									"contentLanguageSupport": {
+										"maxItems": 64,
+										"type": "array",
+										"items": {
+											"additionalProperties": false,
+											"type": "object",
+											"required": ["languageTag"],
+											"properties": {
+												"languageTag": {
+													"minLength": 1,
+													"maxLength": 255,
+													"pattern": "^[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?$",
+													"type": "string"
+												},
+												"channels": {
+													"minItems": 1,
+													"maxItems": 4,
+													"uniqueItems": true,
+													"type": "array",
+													"items": {
+														"default": "text",
+														"type": "string",
+														"enum": ["text", "audio", "subtitle", "interface"]
+													}
+												}
+											}
 										}
 									},
 									"unit": {
@@ -100938,6 +101740,18 @@
 													{ "type": "null" }
 												]
 											},
+											"adaptedAudioUnitIds": {
+												"nullable": true,
+												"anyOf": [
+													{
+														"maxItems": 64,
+														"uniqueItems": true,
+														"type": "array",
+														"items": { "format": "uuid", "type": "string" }
+													},
+													{ "type": "null" }
+												]
+											},
 											"releaseStatus": {
 												"type": "string",
 												"enum": ["ongoing", "hiatus", "completed", "cancelled"]
@@ -101001,6 +101815,7 @@
 										"status",
 										"visibility",
 										"language",
+										"contentLanguageSupport",
 										"contentRating",
 										"aiDisclosure",
 										"licenses",
@@ -101030,7 +101845,7 @@
 										"id": { "format": "uuid", "type": "string" },
 										"type": {
 											"type": "string",
-											"enum": ["book", "software", "media", "series", "video", "audio"]
+											"enum": ["book", "software", "media", "series", "video", "audio", "release"]
 										},
 										"status": { "type": "string" },
 										"visibility": { "type": "string" },
@@ -101040,6 +101855,34 @@
 												{ "type": "string", "enum": ["zh", "en", "ja", "ko", "de", "fr", "es"] },
 												{ "type": "null" }
 											]
+										},
+										"contentLanguageSupport": {
+											"maxItems": 64,
+											"type": "array",
+											"items": {
+												"additionalProperties": false,
+												"type": "object",
+												"required": ["languageTag"],
+												"properties": {
+													"languageTag": {
+														"minLength": 1,
+														"maxLength": 255,
+														"pattern": "^[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?$",
+														"type": "string"
+													},
+													"channels": {
+														"minItems": 1,
+														"maxItems": 4,
+														"uniqueItems": true,
+														"type": "array",
+														"items": {
+															"default": "text",
+															"type": "string",
+															"enum": ["text", "audio", "subtitle", "interface"]
+														}
+													}
+												}
+											}
 										},
 										"contentRating": { "type": "string" },
 										"aiDisclosure": { "type": "string" },
@@ -101554,7 +102397,7 @@
 												{
 													"additionalProperties": false,
 													"type": "object",
-													"required": ["type", "durationSeconds"],
+													"required": ["type", "durationSeconds", "adaptedAudioUnitIds"],
 													"properties": {
 														"type": { "const": "video", "type": "string" },
 														"durationSeconds": {
@@ -101566,6 +102409,18 @@
 																		{ "format": "integer", "default": 0, "type": "string" },
 																		{ "minimum": 1, "type": "integer" }
 																	]
+																},
+																{ "type": "null" }
+															]
+														},
+														"adaptedAudioUnitIds": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"maxItems": 64,
+																	"uniqueItems": true,
+																	"type": "array",
+																	"items": { "format": "uuid", "type": "string" }
 																},
 																{ "type": "null" }
 															]
@@ -101590,6 +102445,20 @@
 																},
 																{ "type": "null" }
 															]
+														}
+													}
+												},
+												{
+													"additionalProperties": false,
+													"type": "object",
+													"required": ["type", "parentUnitId", "versionLabel", "releasedOn"],
+													"properties": {
+														"type": { "const": "release", "type": "string" },
+														"parentUnitId": { "format": "uuid", "type": "string" },
+														"versionLabel": { "minLength": 1, "type": "string" },
+														"releasedOn": {
+															"nullable": true,
+															"anyOf": [{ "format": "date", "type": "string" }, { "type": "null" }]
 														}
 													}
 												}
@@ -102006,14 +102875,25 @@
 												"required": [
 													"id",
 													"entityEntryId",
+													"entityKind",
 													"role",
 													"position",
+													"language",
 													"title",
+													"summary",
+													"avatar",
+													"cover",
+													"tags",
 													"contextPost"
 												],
 												"properties": {
 													"id": { "format": "uuid", "type": "string" },
 													"entityEntryId": { "format": "uuid", "type": "string" },
+													"entityKind": {
+														"default": "person",
+														"type": "string",
+														"enum": ["person", "organization", "character", "software_agent"]
+													},
 													"role": {
 														"default": "primary_character",
 														"type": "string",
@@ -102034,9 +102914,110 @@
 														"maxLength": 1024,
 														"type": "string"
 													},
+													"language": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"type": "string",
+																"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+															},
+															{ "type": "null" }
+														]
+													},
 													"title": {
 														"nullable": true,
 														"anyOf": [{ "type": "string" }, { "type": "null" }]
+													},
+													"summary": {
+														"nullable": true,
+														"anyOf": [{ "type": "string" }, { "type": "null" }]
+													},
+													"avatar": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"anyOf": [
+																	{
+																		"additionalProperties": false,
+																		"type": "object",
+																		"required": ["type", "image"],
+																		"properties": {
+																			"type": { "const": "image", "type": "string" },
+																			"image": {
+																				"type": "object",
+																				"required": ["id", "url"],
+																				"properties": {
+																					"id": { "format": "uuid", "type": "string" },
+																					"url": { "type": "string" }
+																				}
+																			}
+																		}
+																	},
+																	{
+																		"additionalProperties": false,
+																		"type": "object",
+																		"required": ["type", "emoji"],
+																		"properties": {
+																			"type": { "const": "emoji", "type": "string" },
+																			"emoji": { "maxLength": 64, "type": "string" }
+																		}
+																	},
+																	{
+																		"additionalProperties": false,
+																		"type": "object",
+																		"required": ["type", "icon"],
+																		"properties": {
+																			"type": { "const": "icon", "type": "string" },
+																			"icon": {
+																				"additionalProperties": false,
+																				"type": "object",
+																				"required": ["provider", "prefix", "name"],
+																				"properties": {
+																					"provider": { "const": "font-awesome", "type": "string" },
+																					"prefix": { "type": "string", "enum": ["fas", "fab"] },
+																					"name": {
+																						"pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+																						"maxLength": 128,
+																						"type": "string"
+																					}
+																				}
+																			}
+																		}
+																	}
+																]
+															},
+															{ "type": "null" }
+														]
+													},
+													"cover": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"type": "object",
+																"required": ["id", "url"],
+																"properties": {
+																	"id": { "format": "uuid", "type": "string" },
+																	"url": { "type": "string" }
+																}
+															},
+															{ "type": "null" }
+														]
+													},
+													"tags": {
+														"maxItems": 4,
+														"type": "array",
+														"items": {
+															"additionalProperties": false,
+															"type": "object",
+															"required": ["tagId", "title"],
+															"properties": {
+																"tagId": { "format": "uuid", "type": "string" },
+																"title": {
+																	"nullable": true,
+																	"anyOf": [{ "type": "string" }, { "type": "null" }]
+																}
+															}
+														}
 													},
 													"contextPost": {
 														"nullable": true,
@@ -102501,7 +103482,7 @@
 																	"type": {
 																		"default": "book",
 																		"type": "string",
-																		"enum": ["book", "software", "media"]
+																		"enum": ["book", "software", "media", "entity"]
 																	},
 																	"language": {
 																		"type": "string",
@@ -102554,7 +103535,7 @@
 																				"type": {
 																					"default": "book",
 																					"type": "string",
-																					"enum": ["book", "software", "media"]
+																					"enum": ["book", "software", "media", "entity"]
 																				},
 																				"language": {
 																					"type": "string",
@@ -102824,7 +103805,11 @@
 														"code": {
 															"default": "ValidationError",
 															"type": "string",
-															"enum": ["ValidationError"]
+															"enum": [
+																"ValidationError",
+																"UnitContentLanguageSupportInvalid",
+																"UnitRelationInvalid"
+															]
 														},
 														"message": { "type": "string" },
 														"details": {}
@@ -102976,6 +103961,7 @@
 										"status",
 										"visibility",
 										"language",
+										"contentLanguageSupport",
 										"contentRating",
 										"aiDisclosure",
 										"licenses",
@@ -103005,7 +103991,7 @@
 										"id": { "format": "uuid", "type": "string" },
 										"type": {
 											"type": "string",
-											"enum": ["book", "software", "media", "series", "video", "audio"]
+											"enum": ["book", "software", "media", "series", "video", "audio", "release"]
 										},
 										"status": { "type": "string" },
 										"visibility": { "type": "string" },
@@ -103015,6 +104001,34 @@
 												{ "type": "string", "enum": ["zh", "en", "ja", "ko", "de", "fr", "es"] },
 												{ "type": "null" }
 											]
+										},
+										"contentLanguageSupport": {
+											"maxItems": 64,
+											"type": "array",
+											"items": {
+												"additionalProperties": false,
+												"type": "object",
+												"required": ["languageTag"],
+												"properties": {
+													"languageTag": {
+														"minLength": 1,
+														"maxLength": 255,
+														"pattern": "^[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?$",
+														"type": "string"
+													},
+													"channels": {
+														"minItems": 1,
+														"maxItems": 4,
+														"uniqueItems": true,
+														"type": "array",
+														"items": {
+															"default": "text",
+															"type": "string",
+															"enum": ["text", "audio", "subtitle", "interface"]
+														}
+													}
+												}
+											}
 										},
 										"contentRating": { "type": "string" },
 										"aiDisclosure": { "type": "string" },
@@ -103529,7 +104543,7 @@
 												{
 													"additionalProperties": false,
 													"type": "object",
-													"required": ["type", "durationSeconds"],
+													"required": ["type", "durationSeconds", "adaptedAudioUnitIds"],
 													"properties": {
 														"type": { "const": "video", "type": "string" },
 														"durationSeconds": {
@@ -103541,6 +104555,18 @@
 																		{ "format": "integer", "default": 0, "type": "string" },
 																		{ "minimum": 1, "type": "integer" }
 																	]
+																},
+																{ "type": "null" }
+															]
+														},
+														"adaptedAudioUnitIds": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"maxItems": 64,
+																	"uniqueItems": true,
+																	"type": "array",
+																	"items": { "format": "uuid", "type": "string" }
 																},
 																{ "type": "null" }
 															]
@@ -103565,6 +104591,20 @@
 																},
 																{ "type": "null" }
 															]
+														}
+													}
+												},
+												{
+													"additionalProperties": false,
+													"type": "object",
+													"required": ["type", "parentUnitId", "versionLabel", "releasedOn"],
+													"properties": {
+														"type": { "const": "release", "type": "string" },
+														"parentUnitId": { "format": "uuid", "type": "string" },
+														"versionLabel": { "minLength": 1, "type": "string" },
+														"releasedOn": {
+															"nullable": true,
+															"anyOf": [{ "format": "date", "type": "string" }, { "type": "null" }]
 														}
 													}
 												}
@@ -103981,14 +105021,25 @@
 												"required": [
 													"id",
 													"entityEntryId",
+													"entityKind",
 													"role",
 													"position",
+													"language",
 													"title",
+													"summary",
+													"avatar",
+													"cover",
+													"tags",
 													"contextPost"
 												],
 												"properties": {
 													"id": { "format": "uuid", "type": "string" },
 													"entityEntryId": { "format": "uuid", "type": "string" },
+													"entityKind": {
+														"default": "person",
+														"type": "string",
+														"enum": ["person", "organization", "character", "software_agent"]
+													},
 													"role": {
 														"default": "primary_character",
 														"type": "string",
@@ -104009,9 +105060,110 @@
 														"maxLength": 1024,
 														"type": "string"
 													},
+													"language": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"type": "string",
+																"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+															},
+															{ "type": "null" }
+														]
+													},
 													"title": {
 														"nullable": true,
 														"anyOf": [{ "type": "string" }, { "type": "null" }]
+													},
+													"summary": {
+														"nullable": true,
+														"anyOf": [{ "type": "string" }, { "type": "null" }]
+													},
+													"avatar": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"anyOf": [
+																	{
+																		"additionalProperties": false,
+																		"type": "object",
+																		"required": ["type", "image"],
+																		"properties": {
+																			"type": { "const": "image", "type": "string" },
+																			"image": {
+																				"type": "object",
+																				"required": ["id", "url"],
+																				"properties": {
+																					"id": { "format": "uuid", "type": "string" },
+																					"url": { "type": "string" }
+																				}
+																			}
+																		}
+																	},
+																	{
+																		"additionalProperties": false,
+																		"type": "object",
+																		"required": ["type", "emoji"],
+																		"properties": {
+																			"type": { "const": "emoji", "type": "string" },
+																			"emoji": { "maxLength": 64, "type": "string" }
+																		}
+																	},
+																	{
+																		"additionalProperties": false,
+																		"type": "object",
+																		"required": ["type", "icon"],
+																		"properties": {
+																			"type": { "const": "icon", "type": "string" },
+																			"icon": {
+																				"additionalProperties": false,
+																				"type": "object",
+																				"required": ["provider", "prefix", "name"],
+																				"properties": {
+																					"provider": { "const": "font-awesome", "type": "string" },
+																					"prefix": { "type": "string", "enum": ["fas", "fab"] },
+																					"name": {
+																						"pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+																						"maxLength": 128,
+																						"type": "string"
+																					}
+																				}
+																			}
+																		}
+																	}
+																]
+															},
+															{ "type": "null" }
+														]
+													},
+													"cover": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"type": "object",
+																"required": ["id", "url"],
+																"properties": {
+																	"id": { "format": "uuid", "type": "string" },
+																	"url": { "type": "string" }
+																}
+															},
+															{ "type": "null" }
+														]
+													},
+													"tags": {
+														"maxItems": 4,
+														"type": "array",
+														"items": {
+															"additionalProperties": false,
+															"type": "object",
+															"required": ["tagId", "title"],
+															"properties": {
+																"tagId": { "format": "uuid", "type": "string" },
+																"title": {
+																	"nullable": true,
+																	"anyOf": [{ "type": "string" }, { "type": "null" }]
+																}
+															}
+														}
 													},
 													"contextPost": {
 														"nullable": true,
@@ -104476,7 +105628,7 @@
 																	"type": {
 																		"default": "book",
 																		"type": "string",
-																		"enum": ["book", "software", "media"]
+																		"enum": ["book", "software", "media", "entity"]
 																	},
 																	"language": {
 																		"type": "string",
@@ -104529,7 +105681,7 @@
 																				"type": {
 																					"default": "book",
 																					"type": "string",
-																					"enum": ["book", "software", "media"]
+																					"enum": ["book", "software", "media", "entity"]
 																				},
 																				"language": {
 																					"type": "string",
@@ -104768,6 +105920,7 @@
 														"UnitVariantKindMismatch",
 														"UnitVariantTargetIsVariant",
 														"UnitVariantSourceHasVariants",
+														"UnitVariantGroupLimitReached",
 														"UnitVariantChanged",
 														"UnitVariantMainUnavailable"
 													]
@@ -104918,6 +106071,7 @@
 										"status",
 										"visibility",
 										"language",
+										"contentLanguageSupport",
 										"contentRating",
 										"aiDisclosure",
 										"licenses",
@@ -104947,7 +106101,7 @@
 										"id": { "format": "uuid", "type": "string" },
 										"type": {
 											"type": "string",
-											"enum": ["book", "software", "media", "series", "video", "audio"]
+											"enum": ["book", "software", "media", "series", "video", "audio", "release"]
 										},
 										"status": { "type": "string" },
 										"visibility": { "type": "string" },
@@ -104957,6 +106111,34 @@
 												{ "type": "string", "enum": ["zh", "en", "ja", "ko", "de", "fr", "es"] },
 												{ "type": "null" }
 											]
+										},
+										"contentLanguageSupport": {
+											"maxItems": 64,
+											"type": "array",
+											"items": {
+												"additionalProperties": false,
+												"type": "object",
+												"required": ["languageTag"],
+												"properties": {
+													"languageTag": {
+														"minLength": 1,
+														"maxLength": 255,
+														"pattern": "^[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?$",
+														"type": "string"
+													},
+													"channels": {
+														"minItems": 1,
+														"maxItems": 4,
+														"uniqueItems": true,
+														"type": "array",
+														"items": {
+															"default": "text",
+															"type": "string",
+															"enum": ["text", "audio", "subtitle", "interface"]
+														}
+													}
+												}
+											}
 										},
 										"contentRating": { "type": "string" },
 										"aiDisclosure": { "type": "string" },
@@ -105471,7 +106653,7 @@
 												{
 													"additionalProperties": false,
 													"type": "object",
-													"required": ["type", "durationSeconds"],
+													"required": ["type", "durationSeconds", "adaptedAudioUnitIds"],
 													"properties": {
 														"type": { "const": "video", "type": "string" },
 														"durationSeconds": {
@@ -105483,6 +106665,18 @@
 																		{ "format": "integer", "default": 0, "type": "string" },
 																		{ "minimum": 1, "type": "integer" }
 																	]
+																},
+																{ "type": "null" }
+															]
+														},
+														"adaptedAudioUnitIds": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"maxItems": 64,
+																	"uniqueItems": true,
+																	"type": "array",
+																	"items": { "format": "uuid", "type": "string" }
 																},
 																{ "type": "null" }
 															]
@@ -105507,6 +106701,20 @@
 																},
 																{ "type": "null" }
 															]
+														}
+													}
+												},
+												{
+													"additionalProperties": false,
+													"type": "object",
+													"required": ["type", "parentUnitId", "versionLabel", "releasedOn"],
+													"properties": {
+														"type": { "const": "release", "type": "string" },
+														"parentUnitId": { "format": "uuid", "type": "string" },
+														"versionLabel": { "minLength": 1, "type": "string" },
+														"releasedOn": {
+															"nullable": true,
+															"anyOf": [{ "format": "date", "type": "string" }, { "type": "null" }]
 														}
 													}
 												}
@@ -105923,14 +107131,25 @@
 												"required": [
 													"id",
 													"entityEntryId",
+													"entityKind",
 													"role",
 													"position",
+													"language",
 													"title",
+													"summary",
+													"avatar",
+													"cover",
+													"tags",
 													"contextPost"
 												],
 												"properties": {
 													"id": { "format": "uuid", "type": "string" },
 													"entityEntryId": { "format": "uuid", "type": "string" },
+													"entityKind": {
+														"default": "person",
+														"type": "string",
+														"enum": ["person", "organization", "character", "software_agent"]
+													},
 													"role": {
 														"default": "primary_character",
 														"type": "string",
@@ -105951,9 +107170,110 @@
 														"maxLength": 1024,
 														"type": "string"
 													},
+													"language": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"type": "string",
+																"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+															},
+															{ "type": "null" }
+														]
+													},
 													"title": {
 														"nullable": true,
 														"anyOf": [{ "type": "string" }, { "type": "null" }]
+													},
+													"summary": {
+														"nullable": true,
+														"anyOf": [{ "type": "string" }, { "type": "null" }]
+													},
+													"avatar": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"anyOf": [
+																	{
+																		"additionalProperties": false,
+																		"type": "object",
+																		"required": ["type", "image"],
+																		"properties": {
+																			"type": { "const": "image", "type": "string" },
+																			"image": {
+																				"type": "object",
+																				"required": ["id", "url"],
+																				"properties": {
+																					"id": { "format": "uuid", "type": "string" },
+																					"url": { "type": "string" }
+																				}
+																			}
+																		}
+																	},
+																	{
+																		"additionalProperties": false,
+																		"type": "object",
+																		"required": ["type", "emoji"],
+																		"properties": {
+																			"type": { "const": "emoji", "type": "string" },
+																			"emoji": { "maxLength": 64, "type": "string" }
+																		}
+																	},
+																	{
+																		"additionalProperties": false,
+																		"type": "object",
+																		"required": ["type", "icon"],
+																		"properties": {
+																			"type": { "const": "icon", "type": "string" },
+																			"icon": {
+																				"additionalProperties": false,
+																				"type": "object",
+																				"required": ["provider", "prefix", "name"],
+																				"properties": {
+																					"provider": { "const": "font-awesome", "type": "string" },
+																					"prefix": { "type": "string", "enum": ["fas", "fab"] },
+																					"name": {
+																						"pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+																						"maxLength": 128,
+																						"type": "string"
+																					}
+																				}
+																			}
+																		}
+																	}
+																]
+															},
+															{ "type": "null" }
+														]
+													},
+													"cover": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"type": "object",
+																"required": ["id", "url"],
+																"properties": {
+																	"id": { "format": "uuid", "type": "string" },
+																	"url": { "type": "string" }
+																}
+															},
+															{ "type": "null" }
+														]
+													},
+													"tags": {
+														"maxItems": 4,
+														"type": "array",
+														"items": {
+															"additionalProperties": false,
+															"type": "object",
+															"required": ["tagId", "title"],
+															"properties": {
+																"tagId": { "format": "uuid", "type": "string" },
+																"title": {
+																	"nullable": true,
+																	"anyOf": [{ "type": "string" }, { "type": "null" }]
+																}
+															}
+														}
 													},
 													"contextPost": {
 														"nullable": true,
@@ -106418,7 +107738,7 @@
 																	"type": {
 																		"default": "book",
 																		"type": "string",
-																		"enum": ["book", "software", "media"]
+																		"enum": ["book", "software", "media", "entity"]
 																	},
 																	"language": {
 																		"type": "string",
@@ -106471,7 +107791,7 @@
 																				"type": {
 																					"default": "book",
 																					"type": "string",
-																					"enum": ["book", "software", "media"]
+																					"enum": ["book", "software", "media", "entity"]
 																				},
 																				"language": {
 																					"type": "string",
@@ -106710,6 +108030,7 @@
 														"UnitVariantKindMismatch",
 														"UnitVariantTargetIsVariant",
 														"UnitVariantSourceHasVariants",
+														"UnitVariantGroupLimitReached",
 														"UnitVariantChanged",
 														"UnitVariantMainUnavailable"
 													]
@@ -106804,7 +108125,8 @@
 										{ "const": "video", "type": "string" },
 										{ "const": "audio", "type": "string" }
 									]
-								}
+								},
+								{ "const": "release", "type": "string" }
 							]
 						}
 					},
@@ -107115,6 +108437,7 @@
 										"status",
 										"visibility",
 										"language",
+										"contentLanguageSupport",
 										"contentRating",
 										"aiDisclosure",
 										"licenses",
@@ -107144,7 +108467,7 @@
 										"id": { "format": "uuid", "type": "string" },
 										"type": {
 											"type": "string",
-											"enum": ["book", "software", "media", "series", "video", "audio"]
+											"enum": ["book", "software", "media", "series", "video", "audio", "release"]
 										},
 										"status": { "type": "string" },
 										"visibility": { "type": "string" },
@@ -107154,6 +108477,34 @@
 												{ "type": "string", "enum": ["zh", "en", "ja", "ko", "de", "fr", "es"] },
 												{ "type": "null" }
 											]
+										},
+										"contentLanguageSupport": {
+											"maxItems": 64,
+											"type": "array",
+											"items": {
+												"additionalProperties": false,
+												"type": "object",
+												"required": ["languageTag"],
+												"properties": {
+													"languageTag": {
+														"minLength": 1,
+														"maxLength": 255,
+														"pattern": "^[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?$",
+														"type": "string"
+													},
+													"channels": {
+														"minItems": 1,
+														"maxItems": 4,
+														"uniqueItems": true,
+														"type": "array",
+														"items": {
+															"default": "text",
+															"type": "string",
+															"enum": ["text", "audio", "subtitle", "interface"]
+														}
+													}
+												}
+											}
 										},
 										"contentRating": { "type": "string" },
 										"aiDisclosure": { "type": "string" },
@@ -107668,7 +109019,7 @@
 												{
 													"additionalProperties": false,
 													"type": "object",
-													"required": ["type", "durationSeconds"],
+													"required": ["type", "durationSeconds", "adaptedAudioUnitIds"],
 													"properties": {
 														"type": { "const": "video", "type": "string" },
 														"durationSeconds": {
@@ -107680,6 +109031,18 @@
 																		{ "format": "integer", "default": 0, "type": "string" },
 																		{ "minimum": 1, "type": "integer" }
 																	]
+																},
+																{ "type": "null" }
+															]
+														},
+														"adaptedAudioUnitIds": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"maxItems": 64,
+																	"uniqueItems": true,
+																	"type": "array",
+																	"items": { "format": "uuid", "type": "string" }
 																},
 																{ "type": "null" }
 															]
@@ -107704,6 +109067,20 @@
 																},
 																{ "type": "null" }
 															]
+														}
+													}
+												},
+												{
+													"additionalProperties": false,
+													"type": "object",
+													"required": ["type", "parentUnitId", "versionLabel", "releasedOn"],
+													"properties": {
+														"type": { "const": "release", "type": "string" },
+														"parentUnitId": { "format": "uuid", "type": "string" },
+														"versionLabel": { "minLength": 1, "type": "string" },
+														"releasedOn": {
+															"nullable": true,
+															"anyOf": [{ "format": "date", "type": "string" }, { "type": "null" }]
 														}
 													}
 												}
@@ -108120,14 +109497,25 @@
 												"required": [
 													"id",
 													"entityEntryId",
+													"entityKind",
 													"role",
 													"position",
+													"language",
 													"title",
+													"summary",
+													"avatar",
+													"cover",
+													"tags",
 													"contextPost"
 												],
 												"properties": {
 													"id": { "format": "uuid", "type": "string" },
 													"entityEntryId": { "format": "uuid", "type": "string" },
+													"entityKind": {
+														"default": "person",
+														"type": "string",
+														"enum": ["person", "organization", "character", "software_agent"]
+													},
 													"role": {
 														"default": "primary_character",
 														"type": "string",
@@ -108148,9 +109536,110 @@
 														"maxLength": 1024,
 														"type": "string"
 													},
+													"language": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"type": "string",
+																"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+															},
+															{ "type": "null" }
+														]
+													},
 													"title": {
 														"nullable": true,
 														"anyOf": [{ "type": "string" }, { "type": "null" }]
+													},
+													"summary": {
+														"nullable": true,
+														"anyOf": [{ "type": "string" }, { "type": "null" }]
+													},
+													"avatar": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"anyOf": [
+																	{
+																		"additionalProperties": false,
+																		"type": "object",
+																		"required": ["type", "image"],
+																		"properties": {
+																			"type": { "const": "image", "type": "string" },
+																			"image": {
+																				"type": "object",
+																				"required": ["id", "url"],
+																				"properties": {
+																					"id": { "format": "uuid", "type": "string" },
+																					"url": { "type": "string" }
+																				}
+																			}
+																		}
+																	},
+																	{
+																		"additionalProperties": false,
+																		"type": "object",
+																		"required": ["type", "emoji"],
+																		"properties": {
+																			"type": { "const": "emoji", "type": "string" },
+																			"emoji": { "maxLength": 64, "type": "string" }
+																		}
+																	},
+																	{
+																		"additionalProperties": false,
+																		"type": "object",
+																		"required": ["type", "icon"],
+																		"properties": {
+																			"type": { "const": "icon", "type": "string" },
+																			"icon": {
+																				"additionalProperties": false,
+																				"type": "object",
+																				"required": ["provider", "prefix", "name"],
+																				"properties": {
+																					"provider": { "const": "font-awesome", "type": "string" },
+																					"prefix": { "type": "string", "enum": ["fas", "fab"] },
+																					"name": {
+																						"pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+																						"maxLength": 128,
+																						"type": "string"
+																					}
+																				}
+																			}
+																		}
+																	}
+																]
+															},
+															{ "type": "null" }
+														]
+													},
+													"cover": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"type": "object",
+																"required": ["id", "url"],
+																"properties": {
+																	"id": { "format": "uuid", "type": "string" },
+																	"url": { "type": "string" }
+																}
+															},
+															{ "type": "null" }
+														]
+													},
+													"tags": {
+														"maxItems": 4,
+														"type": "array",
+														"items": {
+															"additionalProperties": false,
+															"type": "object",
+															"required": ["tagId", "title"],
+															"properties": {
+																"tagId": { "format": "uuid", "type": "string" },
+																"title": {
+																	"nullable": true,
+																	"anyOf": [{ "type": "string" }, { "type": "null" }]
+																}
+															}
+														}
 													},
 													"contextPost": {
 														"nullable": true,
@@ -108615,7 +110104,7 @@
 																	"type": {
 																		"default": "book",
 																		"type": "string",
-																		"enum": ["book", "software", "media"]
+																		"enum": ["book", "software", "media", "entity"]
 																	},
 																	"language": {
 																		"type": "string",
@@ -108668,7 +110157,7 @@
 																				"type": {
 																					"default": "book",
 																					"type": "string",
-																					"enum": ["book", "software", "media"]
+																					"enum": ["book", "software", "media", "entity"]
 																				},
 																				"language": {
 																					"type": "string",
@@ -109776,6 +111265,7 @@
 																	"role": {
 																		"anyOf": [
 																			{ "const": "main", "type": "string" },
+																			{ "const": "content_language_support", "type": "string" },
 																			{ "const": "relations", "type": "string" },
 																			{ "const": "structure", "type": "string" },
 																			{ "const": "rules", "type": "string" }
@@ -112123,6 +113613,7 @@
 										"attributions",
 										"owner",
 										"externalLinks",
+										"variantContext",
 										"capabilities",
 										"creditAttributions",
 										"subjectAssociations"
@@ -113123,11 +114614,133 @@
 												}
 											}
 										},
+										"variantContext": {
+											"anyOf": [
+												{
+													"additionalProperties": false,
+													"type": "object",
+													"required": ["role"],
+													"properties": { "role": { "const": "standalone", "type": "string" } }
+												},
+												{
+													"additionalProperties": false,
+													"type": "object",
+													"required": ["role", "variants"],
+													"properties": {
+														"role": { "const": "main", "type": "string" },
+														"variants": {
+															"type": "array",
+															"items": {
+																"additionalProperties": false,
+																"type": "object",
+																"required": ["id", "type", "language", "title", "cover"],
+																"properties": {
+																	"id": { "format": "uuid", "type": "string" },
+																	"type": {
+																		"default": "book",
+																		"type": "string",
+																		"enum": ["book", "software", "media", "entity"]
+																	},
+																	"language": {
+																		"type": "string",
+																		"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+																	},
+																	"title": {
+																		"nullable": true,
+																		"anyOf": [{ "type": "string" }, { "type": "null" }]
+																	},
+																	"cover": {
+																		"nullable": true,
+																		"anyOf": [
+																			{
+																				"type": "object",
+																				"required": ["id", "url"],
+																				"properties": {
+																					"id": { "format": "uuid", "type": "string" },
+																					"url": { "type": "string" }
+																				}
+																			},
+																			{ "type": "null" }
+																		]
+																	}
+																}
+															}
+														}
+													}
+												},
+												{
+													"additionalProperties": false,
+													"type": "object",
+													"required": ["role", "relationUpdatedAt", "main"],
+													"properties": {
+														"role": { "const": "variant", "type": "string" },
+														"relationUpdatedAt": { "format": "date-time", "type": "string" },
+														"main": {
+															"anyOf": [
+																{
+																	"additionalProperties": false,
+																	"type": "object",
+																	"required": ["state", "unit"],
+																	"properties": {
+																		"state": { "const": "available", "type": "string" },
+																		"unit": {
+																			"additionalProperties": false,
+																			"type": "object",
+																			"required": ["id", "type", "language", "title", "cover"],
+																			"properties": {
+																				"id": { "format": "uuid", "type": "string" },
+																				"type": {
+																					"default": "book",
+																					"type": "string",
+																					"enum": ["book", "software", "media", "entity"]
+																				},
+																				"language": {
+																					"type": "string",
+																					"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"]
+																				},
+																				"title": {
+																					"nullable": true,
+																					"anyOf": [{ "type": "string" }, { "type": "null" }]
+																				},
+																				"cover": {
+																					"nullable": true,
+																					"anyOf": [
+																						{
+																							"type": "object",
+																							"required": ["id", "url"],
+																							"properties": {
+																								"id": { "format": "uuid", "type": "string" },
+																								"url": { "type": "string" }
+																							}
+																						},
+																						{ "type": "null" }
+																					]
+																				}
+																			}
+																		}
+																	}
+																},
+																{
+																	"additionalProperties": false,
+																	"type": "object",
+																	"required": ["state"],
+																	"properties": {
+																		"state": { "const": "unavailable", "type": "string" }
+																	}
+																}
+															]
+														}
+													}
+												}
+											]
+										},
 										"capabilities": {
 											"type": "object",
 											"required": [
 												"canEdit",
 												"canEditCreditAttributions",
+												"canCurateTags",
+												"canManageVariants",
 												"canManageAccess",
 												"canManageCreditAssociations",
 												"canManageSubjectAssociations"
@@ -113135,6 +114748,8 @@
 											"properties": {
 												"canEdit": { "type": "boolean" },
 												"canEditCreditAttributions": { "type": "boolean" },
+												"canCurateTags": { "type": "boolean" },
+												"canManageVariants": { "type": "boolean" },
 												"canManageAccess": { "type": "boolean" },
 												"canManageCreditAssociations": { "type": "boolean" },
 												"canManageSubjectAssociations": { "type": "boolean" }
@@ -113305,6 +114920,519 @@
 				},
 				"operationId": "getApiEntitiesByUnitId",
 				"x-rezics-quota-route-operation-id": "getApiEntitiesByUnitId",
+				"x-rezics-quota-operation-id": "*",
+				"x-rezics-quota-cost-units": 1
+			}
+		},
+		"/api/v1/entities/{unitId}/variant-context": {
+			"patch": {
+				"summary": "Update Entity Main relationship",
+				"tags": ["Entity"],
+				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "unitId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"additionalProperties": false,
+								"type": "object",
+								"required": ["mainUnitId", "expectedMainUnitId"],
+								"properties": {
+									"mainUnitId": {
+										"nullable": true,
+										"anyOf": [{ "format": "uuid", "type": "string" }, { "type": "null" }]
+									},
+									"expectedMainUnitId": {
+										"nullable": true,
+										"anyOf": [{ "format": "uuid", "type": "string" }, { "type": "null" }]
+									},
+									"revisionContext": {
+										"additionalProperties": false,
+										"type": "object",
+										"properties": {
+											"contribution": {
+												"anyOf": [
+													{
+														"additionalProperties": false,
+														"type": "object",
+														"required": ["primary"],
+														"properties": { "primary": { "const": "human", "type": "string" } }
+													},
+													{
+														"additionalProperties": false,
+														"type": "object",
+														"required": ["primary"],
+														"properties": {
+															"primary": { "const": "unattributed", "type": "string" }
+														}
+													},
+													{
+														"additionalProperties": false,
+														"type": "object",
+														"required": ["primary", "creditedEntityId", "role"],
+														"properties": {
+															"primary": { "const": "ai", "type": "string" },
+															"creditedEntityId": { "format": "uuid", "type": "string" },
+															"role": {
+																"default": "creator",
+																"type": "string",
+																"enum": ["creator", "editor", "translator", "researcher"]
+															}
+														}
+													}
+												]
+											}
+										}
+									}
+								}
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["id"],
+									"properties": { "id": { "format": "uuid", "type": "string" } }
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Response for status 400",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"type": "object",
+											"required": ["error", "requestId"],
+											"properties": {
+												"error": {
+													"type": "object",
+													"required": ["code", "message"],
+													"properties": {
+														"code": {
+															"default": "RevisionCreditEntityInvalid",
+															"type": "string",
+															"enum": [
+																"RevisionCreditEntityInvalid",
+																"RevisionContributionActorRequired"
+															]
+														},
+														"message": { "type": "string" },
+														"details": {}
+													}
+												},
+												"requestId": { "type": "string" }
+											}
+										},
+										{ "$ref": "#/components/schemas/MalformedRequestBody" }
+									]
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitPermissionForbidden",
+													"type": "string",
+													"enum": ["UnitPermissionForbidden", "UnitAccessRestricted"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitNotFound",
+													"type": "string",
+													"enum": ["UnitNotFound"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitVariantChanged",
+													"type": "string",
+													"enum": [
+														"UnitVariantChanged",
+														"UnitVariantKindMismatch",
+														"UnitVariantMainUnavailable",
+														"UnitVariantSourceHasVariants",
+														"UnitVariantGroupLimitReached",
+														"UnitVariantTargetIsVariant"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/ValidationError" } }
+						}
+					},
+					"429": {
+						"description": "API quota exceeded",
+						"headers": {
+							"Retry-After": {
+								"description": "Seconds until the limiting window or concurrency lease can be retried",
+								"schema": { "type": "integer", "minimum": 1 }
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"type": "string",
+													"enum": ["ApiQuotaExceeded", "ApiTokenRateLimitExceeded"]
+												},
+												"message": { "type": "string" },
+												"details": { "$ref": "#/components/schemas/JsonValue" }
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/InternalError" } }
+						}
+					}
+				},
+				"operationId": "patchApiEntitiesByUnitIdVariant-context",
+				"x-rezics-quota-route-operation-id": "patchApiEntitiesByUnitIdVariant-context",
+				"x-rezics-quota-operation-id": "*",
+				"x-rezics-quota-cost-units": 1
+			}
+		},
+		"/api/v1/entities/{unitId}/variant-context/promote": {
+			"post": {
+				"summary": "Promote Entity Variant to Main",
+				"tags": ["Entity"],
+				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "unitId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"additionalProperties": false,
+								"type": "object",
+								"required": ["expectedMainUnitId"],
+								"properties": {
+									"expectedMainUnitId": { "format": "uuid", "type": "string" },
+									"revisionContext": {
+										"additionalProperties": false,
+										"type": "object",
+										"properties": {
+											"contribution": {
+												"anyOf": [
+													{
+														"additionalProperties": false,
+														"type": "object",
+														"required": ["primary"],
+														"properties": { "primary": { "const": "human", "type": "string" } }
+													},
+													{
+														"additionalProperties": false,
+														"type": "object",
+														"required": ["primary"],
+														"properties": {
+															"primary": { "const": "unattributed", "type": "string" }
+														}
+													},
+													{
+														"additionalProperties": false,
+														"type": "object",
+														"required": ["primary", "creditedEntityId", "role"],
+														"properties": {
+															"primary": { "const": "ai", "type": "string" },
+															"creditedEntityId": { "format": "uuid", "type": "string" },
+															"role": {
+																"default": "creator",
+																"type": "string",
+																"enum": ["creator", "editor", "translator", "researcher"]
+															}
+														}
+													}
+												]
+											}
+										}
+									}
+								}
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["id"],
+									"properties": { "id": { "format": "uuid", "type": "string" } }
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Response for status 400",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"type": "object",
+											"required": ["error", "requestId"],
+											"properties": {
+												"error": {
+													"type": "object",
+													"required": ["code", "message"],
+													"properties": {
+														"code": {
+															"default": "RevisionCreditEntityInvalid",
+															"type": "string",
+															"enum": [
+																"RevisionCreditEntityInvalid",
+																"RevisionContributionActorRequired"
+															]
+														},
+														"message": { "type": "string" },
+														"details": {}
+													}
+												},
+												"requestId": { "type": "string" }
+											}
+										},
+										{ "$ref": "#/components/schemas/MalformedRequestBody" }
+									]
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitPermissionForbidden",
+													"type": "string",
+													"enum": ["UnitPermissionForbidden", "UnitAccessRestricted"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitNotFound",
+													"type": "string",
+													"enum": ["UnitNotFound"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitVariantChanged",
+													"type": "string",
+													"enum": [
+														"UnitVariantChanged",
+														"UnitVariantKindMismatch",
+														"UnitVariantMainUnavailable",
+														"UnitVariantSourceHasVariants",
+														"UnitVariantGroupLimitReached",
+														"UnitVariantTargetIsVariant"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/ValidationError" } }
+						}
+					},
+					"429": {
+						"description": "API quota exceeded",
+						"headers": {
+							"Retry-After": {
+								"description": "Seconds until the limiting window or concurrency lease can be retried",
+								"schema": { "type": "integer", "minimum": 1 }
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"type": "string",
+													"enum": ["ApiQuotaExceeded", "ApiTokenRateLimitExceeded"]
+												},
+												"message": { "type": "string" },
+												"details": { "$ref": "#/components/schemas/JsonValue" }
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/InternalError" } }
+						}
+					}
+				},
+				"operationId": "postApiEntitiesByUnitIdVariant-contextPromote",
+				"x-rezics-quota-route-operation-id": "postApiEntitiesByUnitIdVariant-contextPromote",
 				"x-rezics-quota-operation-id": "*",
 				"x-rezics-quota-cost-units": 1
 			}
@@ -116819,20 +118947,18 @@
 						"in": "path",
 						"required": true,
 						"schema": {
-							"anyOf": [
-								{
-									"anyOf": [
-										{
-											"anyOf": [
-												{ "const": "book", "type": "string" },
-												{ "const": "software", "type": "string" },
-												{ "const": "media", "type": "string" }
-											]
-										},
-										{ "const": "series", "type": "string" }
-									]
-								},
-								{ "const": "entity", "type": "string" }
+							"default": "book",
+							"type": "string",
+							"enum": [
+								"book",
+								"software",
+								"media",
+								"series",
+								"entity",
+								"collection",
+								"release",
+								"video",
+								"audio"
 							]
 						}
 					},
@@ -117400,20 +119526,18 @@
 						"in": "path",
 						"required": true,
 						"schema": {
-							"anyOf": [
-								{
-									"anyOf": [
-										{
-											"anyOf": [
-												{ "const": "book", "type": "string" },
-												{ "const": "software", "type": "string" },
-												{ "const": "media", "type": "string" }
-											]
-										},
-										{ "const": "series", "type": "string" }
-									]
-								},
-								{ "const": "entity", "type": "string" }
+							"default": "book",
+							"type": "string",
+							"enum": [
+								"book",
+								"software",
+								"media",
+								"series",
+								"entity",
+								"collection",
+								"release",
+								"video",
+								"audio"
 							]
 						}
 					},
@@ -119776,12 +121900,17 @@
 							"anyOf": [
 								{
 									"anyOf": [
-										{ "const": "book", "type": "string" },
-										{ "const": "software", "type": "string" },
-										{ "const": "media", "type": "string" }
+										{
+											"anyOf": [
+												{ "const": "book", "type": "string" },
+												{ "const": "software", "type": "string" },
+												{ "const": "media", "type": "string" }
+											]
+										},
+										{ "const": "series", "type": "string" }
 									]
 								},
-								{ "const": "series", "type": "string" }
+								{ "const": "entity", "type": "string" }
 							]
 						}
 					},
@@ -119988,12 +122117,17 @@
 							"anyOf": [
 								{
 									"anyOf": [
-										{ "const": "book", "type": "string" },
-										{ "const": "software", "type": "string" },
-										{ "const": "media", "type": "string" }
+										{
+											"anyOf": [
+												{ "const": "book", "type": "string" },
+												{ "const": "software", "type": "string" },
+												{ "const": "media", "type": "string" }
+											]
+										},
+										{ "const": "series", "type": "string" }
 									]
 								},
-								{ "const": "series", "type": "string" }
+								{ "const": "entity", "type": "string" }
 							]
 						}
 					},
@@ -120502,12 +122636,17 @@
 							"anyOf": [
 								{
 									"anyOf": [
-										{ "const": "book", "type": "string" },
-										{ "const": "software", "type": "string" },
-										{ "const": "media", "type": "string" }
+										{
+											"anyOf": [
+												{ "const": "book", "type": "string" },
+												{ "const": "software", "type": "string" },
+												{ "const": "media", "type": "string" }
+											]
+										},
+										{ "const": "series", "type": "string" }
 									]
 								},
-								{ "const": "series", "type": "string" }
+								{ "const": "entity", "type": "string" }
 							]
 						}
 					},
@@ -120595,12 +122734,17 @@
 							"anyOf": [
 								{
 									"anyOf": [
-										{ "const": "book", "type": "string" },
-										{ "const": "software", "type": "string" },
-										{ "const": "media", "type": "string" }
+										{
+											"anyOf": [
+												{ "const": "book", "type": "string" },
+												{ "const": "software", "type": "string" },
+												{ "const": "media", "type": "string" }
+											]
+										},
+										{ "const": "series", "type": "string" }
 									]
 								},
-								{ "const": "series", "type": "string" }
+								{ "const": "entity", "type": "string" }
 							]
 						}
 					},
@@ -120846,12 +122990,17 @@
 							"anyOf": [
 								{
 									"anyOf": [
-										{ "const": "book", "type": "string" },
-										{ "const": "software", "type": "string" },
-										{ "const": "media", "type": "string" }
+										{
+											"anyOf": [
+												{ "const": "book", "type": "string" },
+												{ "const": "software", "type": "string" },
+												{ "const": "media", "type": "string" }
+											]
+										},
+										{ "const": "series", "type": "string" }
 									]
 								},
-								{ "const": "series", "type": "string" }
+								{ "const": "entity", "type": "string" }
 							]
 						}
 					},
@@ -173687,7 +175836,7 @@
 																						"type": {
 																							"default": "book",
 																							"type": "string",
-																							"enum": ["book", "software", "media"]
+																							"enum": ["book", "software", "media", "entity"]
 																						},
 																						"language": {
 																							"type": "string",
@@ -180967,7 +183116,7 @@
 																						"type": {
 																							"default": "book",
 																							"type": "string",
-																							"enum": ["book", "software", "media"]
+																							"enum": ["book", "software", "media", "entity"]
 																						},
 																						"language": {
 																							"type": "string",
@@ -188163,7 +190312,7 @@
 																						"type": {
 																							"default": "book",
 																							"type": "string",
-																							"enum": ["book", "software", "media"]
+																							"enum": ["book", "software", "media", "entity"]
 																						},
 																						"language": {
 																							"type": "string",
@@ -189688,7 +191837,7 @@
 																						"type": {
 																							"default": "book",
 																							"type": "string",
-																							"enum": ["book", "software", "media"]
+																							"enum": ["book", "software", "media", "entity"]
 																						},
 																						"language": {
 																							"type": "string",
@@ -195956,7 +198105,7 @@
 																						"type": {
 																							"default": "book",
 																							"type": "string",
-																							"enum": ["book", "software", "media"]
+																							"enum": ["book", "software", "media", "entity"]
 																						},
 																						"language": {
 																							"type": "string",
@@ -211605,7 +213754,7 @@
 																			"type": {
 																				"default": "book",
 																				"type": "string",
-																				"enum": ["book", "software", "media"]
+																				"enum": ["book", "software", "media", "entity"]
 																			},
 																			"language": {
 																				"type": "string",

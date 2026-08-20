@@ -43,7 +43,6 @@ import {
 	UnitKindValues,
 	UnitStatusValues,
 	type VariantCapableUnitKind,
-	VariantCapableUnitKindValues,
 } from "./contract-values";
 import {
 	createCreatedAtColumn,
@@ -377,7 +376,6 @@ export const unitVariant = pgTable(
 			table.createdAt,
 			table.variantUnitId,
 		),
-		check("unit_variant_kind_check", inArray(table.unitKind, VariantCapableUnitKindValues)),
 		check("unit_variant_not_self_check", sql`${table.variantUnitId} <> ${table.mainUnitId}`),
 	],
 );

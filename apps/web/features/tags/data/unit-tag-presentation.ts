@@ -3,19 +3,19 @@ import type {
 	GetApiUnitsByTypeByUnitIdTagsStatus200,
 } from "@rezics/openapi-tanstack-query";
 
-import type { UnitDetailUnitType } from "@/features/units/model/unit-detail-section";
 import { toFiniteApiNumber, toNonNegativeApiInteger } from "@/lib/api-number";
 import type {
 	RealmTagGroupPresentation,
 	RealmTagVoteContextPresentation,
 	TagPresentation,
 } from "../model/tag-presentation";
+import type { TaggableUnitType } from "../model/taggable-unit";
 
 type UnitTagLandscape = GetApiUnitsByTypeByUnitIdTagsStatus200;
 
 export function presentGlobalTags(input: {
 	readonly data: UnitTagLandscape;
-	readonly type: UnitDetailUnitType;
+	readonly type: TaggableUnitType;
 	readonly unitId: string;
 	readonly signedIn: boolean;
 }): readonly TagPresentation[] {

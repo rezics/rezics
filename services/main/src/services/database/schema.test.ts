@@ -110,6 +110,7 @@ import {
 	unitRevision,
 	unitRevisionCreditAttribution,
 	unitStatusEvent,
+	unitRelation,
 	unitVariant,
 	imageAssetPresentation,
 	imageObject,
@@ -123,6 +124,8 @@ import {
 	UnitStatusActorKindValues,
 	WorkReleaseStatusValues,
 	UnitKindValues,
+	UnitRelationKindValues,
+	UnitRelationSignatures,
 	UnitOwnershipClaimResolutionValues,
 	VariantCapableUnitKindValues,
 } from "./schema";
@@ -516,6 +519,29 @@ describe("database schema contracts", () => {
 		expect(isCreditAttributionRoleForUnitKind("book", "author")).toBe(true);
 		expect(isCreditAttributionRoleForUnitKind("media", "author")).toBe(false);
 		expect(isCreditAttributionRoleForUnitKind("entity", "publisher")).toBe(true);
+		expect(isCreditAttributionRoleForUnitKind("entity", "actor")).toBe(true);
+		expect(isCreditAttributionRoleForUnitKind("software", "translator")).toBe(true);
+		expect(isCreditAttributionRoleForUnitKind("software", "illustrator")).toBe(true);
+		expect(isCreditAttributionRoleForUnitKind("software", "editor")).toBe(true);
+		for (const role of [
+			"developer",
+			"publisher",
+			"distributor",
+			"translator",
+			"editor",
+			"producer",
+			"studio",
+		] as const)
+			expect(isCreditAttributionRoleForUnitKind("release", role)).toBe(true);
+		for (const kind of ["video", "audio"] as const) {
+			expect(isCreditAttributionRoleForUnitKind(kind, "director")).toBe(true);
+			expect(isCreditAttributionRoleForUnitKind(kind, "composer")).toBe(true);
+			expect(isCreditAttributionRoleForUnitKind(kind, "narrator")).toBe(true);
+			expect(isCreditAttributionRoleForUnitKind(kind, "studio")).toBe(true);
+		}
+		expect(isCreditAttributionUnitKind("release")).toBe(true);
+		expect(isCreditAttributionUnitKind("video")).toBe(true);
+		expect(isCreditAttributionUnitKind("audio")).toBe(true);
 		expect(isCreditAttributionUnitKind("entity")).toBe(true);
 		expect(isCreditAttributionUnitKind("profile")).toBe(false);
 		expect(SubjectAssociationRoleValues).toContain("primary_character");
@@ -893,12 +919,53 @@ describe("database schema contracts", () => {
 			expect.arrayContaining(["unit_variant_variant_kind_fkey", "unit_variant_main_kind_fkey"]),
 		);
 		expect(variant.checks.map((constraint) => constraint.name)).toEqual(
-			expect.arrayContaining(["unit_variant_kind_check", "unit_variant_not_self_check"]),
+			expect.arrayContaining(["unit_variant_not_self_check"]),
+		);
+		expect(variant.checks.map((constraint) => constraint.name)).not.toContain(
+			"unit_variant_kind_check",
 		);
 		expect(variant.indexes.map((index) => index.config.name)).toContain(
 			"unit_variant_main_created_at_idx",
 		);
-		expect(VariantCapableUnitKindValues).toEqual(["book", "software", "media"]);
+		expect(VariantCapableUnitKindValues).toEqual(["book", "software", "media", "entity"]);
+	});
+
+	it("stores generic Unit relations with kind signatures and bounded lookup indexes", () => {
+		const relation = getTableConfig(unitRelation);
+		expect(UnitRelationKindValues).toEqual(["adapted_audio"]);
+		expect(UnitRelationSignatures.adapted_audio).toEqual({
+			sourceKind: "video",
+			targetKind: "audio",
+		});
+		expect(relation.primaryKeys[0]?.columns.map((column) => column.name)).toEqual([
+			"source_unit_id",
+			"kind",
+			"target_unit_id",
+		]);
+		expect(relation.foreignKeys.map((key) => key.getName())).toEqual(
+			expect.arrayContaining([
+				"unit_relation_source_unit_kind_fkey",
+				"unit_relation_target_unit_kind_fkey",
+			]),
+		);
+		expect(
+			relation.foreignKeys.find((key) => key.getName() === "unit_relation_source_unit_kind_fkey")
+				?.onDelete,
+		).toBe("cascade");
+		expect(
+			relation.foreignKeys.find((key) => key.getName() === "unit_relation_target_unit_kind_fkey")
+				?.onDelete,
+		).toBe("restrict");
+		expect(relation.indexes.map((index) => index.config.name)).toContain(
+			"unit_relation_target_kind_source_idx",
+		);
+		expect(relation.checks.map((constraint) => constraint.name)).toEqual(
+			expect.arrayContaining([
+				"unit_relation_kind_check",
+				"unit_relation_signature_check",
+				"unit_relation_not_self_check",
+			]),
+		);
 	});
 
 	it("keeps structural, Redirect, and platform capability meanings explicit", () => {

@@ -4,6 +4,7 @@ export const PublicUnitSeoKinds = [
 	"profile",
 	"book",
 	"software",
+	"release",
 	"media",
 	"video",
 	"audio",

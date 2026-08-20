@@ -1,7 +1,7 @@
 import type { PresentedAvatar } from "@rezics/avatar";
 import type { ContentLanguage } from "@rezics/i18n";
 
-import type { UnitDetailUnitType } from "@/features/units/model/unit-detail-section";
+import type { TaggableUnitType } from "./taggable-unit";
 
 export type TagItemKey =
 	| `global:${string}`
@@ -19,7 +19,7 @@ export interface TagIdentity {
 export type TagVoteTarget =
 	| {
 			readonly kind: "global";
-			readonly type: UnitDetailUnitType;
+			readonly type: TaggableUnitType;
 			readonly unitId: string;
 			readonly tagId: string;
 	  }

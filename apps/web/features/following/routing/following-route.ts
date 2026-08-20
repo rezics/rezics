@@ -39,6 +39,7 @@ export function followingHref(
 		case "media":
 		case "video":
 		case "audio":
+		case "release":
 			return `/units/${kind}/${id}`;
 		case "entity":
 			return `/entities/${id}`;
@@ -53,7 +54,6 @@ export function followingHref(
 		case "poll":
 			return `/polls/${id}`;
 		case "slug_namespace":
-		case "release":
 		case "label":
 		case "series":
 		case "realm_rule":

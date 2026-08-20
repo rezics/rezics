@@ -4,7 +4,7 @@ import { isDiscoverableVariantUnit } from "./variant-policy";
 import { isVariantCapableUnitKind, toUnitVariantConstraintError } from "./variants";
 
 describe("Main-Variant rules", () => {
-	it.each(["book", "software", "media"])("accepts the %s Unit kind", (kind) => {
+	it.each(["book", "software", "media", "entity"])("accepts the %s Unit kind", (kind) => {
 		expect(isVariantCapableUnitKind(kind)).toBe(true);
 	});
 
@@ -38,6 +38,18 @@ describe("Main-Variant rules", () => {
 		expect(
 			toUnitVariantConstraintError({ constraint: "unit_variant_main_kind_fkey" }),
 		).toMatchObject({ _tag: "UnitVariantKindMismatch", status: 409 });
+		expect(
+			toUnitVariantConstraintError({
+				constraint: "unit_variant_entity_kind_mismatch",
+			}),
+		).toMatchObject({ _tag: "UnitVariantKindMismatch", status: 409 });
+		expect(
+			toUnitVariantConstraintError({ constraint: "entity_variant_kind_change" }),
+		).toMatchObject({ _tag: "UnitVariantKindMismatch", status: 409 });
+		expect(toUnitVariantConstraintError({ constraint: "entity_variant_delete" })).toMatchObject({
+			_tag: "UnitVariantKindMismatch",
+			status: 409,
+		});
 		expect(toUnitVariantConstraintError(new Error("unrelated"))).toBeUndefined();
 	});
 });

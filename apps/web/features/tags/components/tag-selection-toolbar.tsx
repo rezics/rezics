@@ -4,9 +4,9 @@ import { Button } from "@rezics/ui";
 import { Search, X } from "lucide-react";
 import { AppLink as Link } from "@/features/application-shell/components/app-link";
 
-import type { UnitDetailUnitType } from "@/features/units/model/unit-detail-section";
 import { useTranslation } from "@/i18n/client";
 import type { TagIdentity } from "../model/tag-presentation";
+import type { TaggableUnitType } from "../model/taggable-unit";
 import { tagSearchHref } from "../routing/tag-links";
 
 export function TagSelectionToolbar({
@@ -20,7 +20,7 @@ export function TagSelectionToolbar({
 	readonly identities: ReadonlyMap<string, TagIdentity>;
 	readonly labels: ReadonlyMap<string, string>;
 	readonly selectedTagIds: readonly string[];
-	readonly type: UnitDetailUnitType;
+	readonly type: TaggableUnitType;
 	readonly onClear: () => void;
 	readonly onFinish: () => void;
 }) {

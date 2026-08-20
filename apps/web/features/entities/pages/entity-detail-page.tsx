@@ -6,22 +6,28 @@ import {
 	Button,
 	Card,
 	CardContent,
+	Cover,
 	IdentityAvatar,
 	PageHeading,
 	QueryFailure,
 	QueryPending,
+	ShowMoreContent,
 } from "@rezics/ui";
 
 import { AppLink as Link } from "@/features/application-shell/components/app-link";
+import { LocalizedPortableTextContent } from "@/features/content-language-display/localized-portable-text-content";
 import { useChineseContentText } from "@/features/content-language-display/chinese-content-display-context";
 import { ContentLanguageVersionMenu } from "@/features/content-languages/components/content-language-version-menu";
 import { isCommunityUnitEntityKind } from "@/features/create/model/community-unit-search";
 import { EntityOwnershipClaimButton } from "@/features/ownership-claims/components/unit-ownership-claim-actions";
 import { profileHref } from "@/features/profiles/profile-route";
 import { UnitReportOverflowMenu } from "@/features/reports/components/unit-report-dialog";
+import { UnitTagSummary } from "@/features/tags/components/unit-tag-summary";
+import { UnitVariantList } from "@/features/units/components/unit-variant-list";
 import { useTranslation } from "@/i18n/client";
 import { useLocalizationFallbackToast } from "@/i18n/use-localization-fallback-toast";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
+import { readPortableText } from "@/lib/block";
 import { selectLocalization } from "@/lib/localization";
 import { EntityRelatedFeed } from "../components/entity-related-feed";
 import { EntityExternalLinks } from "../components/entity-external-links";
@@ -68,6 +74,7 @@ export function EntityDetailPage({ id }: { readonly id: string }) {
 
 	const avatar = localization?.avatar ?? query.data.avatar;
 	const banner = localization?.banner ?? query.data.banner;
+	const cover = localization?.cover ?? query.data.cover;
 	const entityKindLabel = isCommunityUnitEntityKind(query.data.kind)
 		? t.ui[query.data.kind]
 		: query.data.kind;
@@ -77,65 +84,92 @@ export function EntityDetailPage({ id }: { readonly id: string }) {
 			<PageHeading title={displayedTitle} />
 			{banner ? <Banner alt="" className="rounded-2xl bg-muted" priority src={banner.url} /> : null}
 			<Card>
-				<CardContent className="grid gap-3 p-5 text-sm">
-					<IdentityAvatar
-						avatar={avatar}
-						className="size-20"
-						fallback={displayedTitle.slice(0, 1).toUpperCase()}
-					/>
-					<p>
-						<span className="text-muted-foreground">{t.entities.kind}</span> {entityKindLabel}
-					</p>
-					<p>
-						<span className="text-muted-foreground">{t.entities.verification}</span>{" "}
-						{query.data.verified ? t.entities.verified : t.entities.unverified}
-					</p>
-					{query.data.owner ? (
-						<p>
-							<span className="text-muted-foreground">{t.entities.owner}</span>{" "}
-							<Link
-								className="underline underline-offset-4"
-								href={profileHref({
-									id: query.data.owner.id,
-									slugAddress: query.data.owner.slugAddress,
-								})}
-							>
-								{displayedOwnerTitle}
-							</Link>
-						</p>
+				<CardContent
+					className={
+						cover
+							? "grid items-start gap-5 p-5 sm:grid-cols-[8rem_minmax(0,1fr)]"
+							: "grid gap-3 p-5"
+					}
+				>
+					{cover ? (
+						<Cover
+							alt={displayedTitle}
+							className="w-28 rounded-xl border border-border-weak shadow-sm/5 sm:w-full"
+							src={cover.url}
+						/>
 					) : null}
-					{displayedSummary ? <p>{displayedSummary}</p> : null}
-					<div className="flex flex-wrap items-center gap-2">
-						<EntityOwnershipClaimButton
-							ownershipMode={query.data.ownershipMode}
-							pendingClaim={query.data.ownershipClaim}
-							unitId={query.data.id}
+					<div className="grid min-w-0 gap-3 text-sm">
+						<IdentityAvatar
+							avatar={avatar}
+							className="size-20"
+							fallback={displayedTitle.slice(0, 1).toUpperCase()}
 						/>
-						{query.data.capabilities.canEdit ? (
-							<Button variant="solid" asChild className="w-fit">
-								<Link href={`/entities/${query.data.id}/edit`}>{t.ui.edit}</Link>
-							</Button>
+						<p>
+							<span className="text-muted-foreground">{t.entities.kind}</span> {entityKindLabel}
+						</p>
+						<p>
+							<span className="text-muted-foreground">{t.entities.verification}</span>{" "}
+							{query.data.verified ? t.entities.verified : t.entities.unverified}
+						</p>
+						{query.data.owner ? (
+							<p>
+								<span className="text-muted-foreground">{t.entities.owner}</span>{" "}
+								<Link
+									className="underline underline-offset-4"
+									href={profileHref({
+										id: query.data.owner.id,
+										slugAddress: query.data.owner.slugAddress,
+									})}
+								>
+									{displayedOwnerTitle}
+								</Link>
+							</p>
 						) : null}
-						{query.data.capabilities.canManageAccess ||
-						query.data.capabilities.canEditCreditAttributions ||
-						query.data.capabilities.canManageCreditAssociations ||
-						query.data.capabilities.canManageSubjectAssociations ? (
-							<Button asChild className="w-fit" variant="outline">
-								<Link href={`/entities/${query.data.id}/governance`}>{t.governance.open}</Link>
-							</Button>
-						) : null}
-						<UnitReportOverflowMenu
-							additionalItems={
-								<ContentLanguageVersionMenu
-									availableLanguages={query.data.localizations.map(({ language }) => language)}
-									currentLanguage={query.data.language}
+						{displayedSummary ? <p>{displayedSummary}</p> : null}
+						{localization?.description ? (
+							<ShowMoreContent showLessLabel={t.ui.showLess} showMoreLabel={t.ui.showMore}>
+								<LocalizedPortableTextContent
+									className="prose-p:my-3 prose-p:leading-6 [&_p:first-child]:mt-0 [&_p:last-child]:mb-0"
+									language={localization.language}
+									value={readPortableText(localization.description)}
+									variant="article"
 								/>
-							}
-							unitId={query.data.id}
-						/>
+							</ShowMoreContent>
+						) : null}
+						<div className="flex flex-wrap items-center gap-2">
+							<EntityOwnershipClaimButton
+								ownershipMode={query.data.ownershipMode}
+								pendingClaim={query.data.ownershipClaim}
+								unitId={query.data.id}
+							/>
+							{query.data.capabilities.canEdit ? (
+								<Button variant="solid" asChild className="w-fit">
+									<Link href={`/entities/${query.data.id}/edit`}>{t.ui.edit}</Link>
+								</Button>
+							) : null}
+							{query.data.capabilities.canManageAccess ||
+							query.data.capabilities.canEditCreditAttributions ||
+							query.data.capabilities.canManageCreditAssociations ||
+							query.data.capabilities.canManageSubjectAssociations ? (
+								<Button asChild className="w-fit" variant="outline">
+									<Link href={`/entities/${query.data.id}/governance`}>{t.governance.open}</Link>
+								</Button>
+							) : null}
+							<UnitReportOverflowMenu
+								additionalItems={
+									<ContentLanguageVersionMenu
+										availableLanguages={query.data.localizations.map(({ language }) => language)}
+										currentLanguage={query.data.language}
+									/>
+								}
+								unitId={query.data.id}
+							/>
+						</div>
 					</div>
 				</CardContent>
 			</Card>
+			<UnitTagSummary type="entity" unitId={query.data.id} />
+			<UnitVariantList context={query.data.variantContext} showEmpty={false} />
 			<EntityExternalLinks
 				entityId={query.data.id}
 				initialExternalLinks={query.data.externalLinks}

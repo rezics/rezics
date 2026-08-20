@@ -13,7 +13,9 @@ describe("publicUnitHref", () => {
 		);
 	});
 
-	it.each(["video", "audio"])("routes top-level timed media Units", (kind) => {
-		expect(publicUnitHref(kind, { id: "timed-media-id" })).toBe(`/units/${kind}/timed-media-id`);
+	it.each(["video", "audio", "release"])("routes top-level manageable Units", (kind) => {
+		expect(publicUnitHref(kind, { id: "manageable-unit-id" })).toBe(
+			`/units/${kind}/manageable-unit-id`,
+		);
 	});
 });

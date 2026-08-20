@@ -45,6 +45,10 @@ export default {
 	UnitLicenseOfferingEndForbidden: `이 ${koTerminology.license.forms.label}의 현재 제공을 종료할 수 없습니다.`,
 	UnitLicenseGrantConflict: `이 콘텐츠에는 아직 종료되지 않은 같은 ${koTerminology.license.forms.label} 제공이 있습니다.`,
 	UnitChanged: "이 콘텐츠가 변경되었습니다. 새로고침하고 다시 시도하세요.",
+	UnitContentLanguageSupportInvalid:
+		"콘텐츠 이용 언어를 저장할 수 없습니다. 언어와 지원 채널을 확인한 후 다시 시도하세요.",
+	UnitRelationInvalid:
+		"선택한 유닛 관계를 저장할 수 없습니다. 관련 유닛을 확인한 후 다시 시도하세요.",
 	UnitRevisionConflict: "수정 기준이 변경되었습니다. 새로고침하고 다시 시도하세요.",
 	RevisionContributionActorRequired: "이 개정의 주요 기여자를 지정하세요.",
 	RevisionCreditEntityInvalid: "선택한 개정 기여자가 유효하지 않습니다. 다른 기여자를 선택하세요.",
@@ -204,6 +208,7 @@ export default {
 	UnitVariantKindMismatch: "변형과 주 버전은 동일한 지원 유닛 유형을 사용해야 합니다.",
 	UnitVariantTargetIsVariant: "변형은 반드시 주 버전을 직접 가리켜야 합니다.",
 	UnitVariantSourceHasVariants: "변형이 있는 주 버전은 변형이 될 수 없습니다.",
+	UnitVariantGroupLimitReached: "이 주 버전의 변형 수가 최대 한도에 도달했습니다.",
 	UnitVariantChanged: "유닛의 주 버전 관계가 변경되었습니다. 새로 고침 후 다시 시도하세요.",
 	UnitVariantMainUnavailable: "이 변형 상태에서는 주 버전을 사용할 수 없습니다.",
 	InvalidMessageCursor: "이 메시지 페이지 링크는 유효하지 않거나 만료되었습니다.",

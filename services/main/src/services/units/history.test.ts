@@ -6,6 +6,8 @@ import {
 	parsePersistedUnitRevisionState,
 	parseUnitRevisionSlotIdentity,
 	type UnitRevisionDocuments,
+	unitRevisionDocumentsToContentLanguageSupport,
+	unitRevisionDocumentsToUnitRelations,
 	undoRevisionDocuments,
 } from "./history";
 
@@ -42,6 +44,32 @@ function localizationDocuments(
 	localizations: Partial<Record<ContentLanguage, ReturnType<typeof localizationDocument>>>,
 ): UnitRevisionDocuments {
 	return { localizations };
+}
+
+function contentLanguageSupportDocument(
+	value: readonly { readonly languageTag: string; readonly channels?: readonly string[] }[],
+) {
+	return {
+		model: "rezics.unit.content-language-support.v1",
+		payload: { version: 1, value },
+	} as const;
+}
+
+function relationsDocument(
+	unitRelations?: readonly { readonly kind: "adapted_audio"; readonly targetUnitId: string }[],
+) {
+	return {
+		model: "rezics.unit.relations.v1",
+		payload: {
+			version: 1,
+			credits: [],
+			subjectAssociations: [],
+			tags: [],
+			structureApplications: [],
+			variants: [],
+			...(unitRelations ? { unitRelations } : {}),
+		},
+	} as const;
 }
 
 describe("revision undo merge", () => {
@@ -155,6 +183,57 @@ describe("revision undo merge", () => {
 
 		expect(result.conflictPaths).toEqual(["/localizations/en/title"]);
 	});
+
+	it("treats content language support as one atomic field", () => {
+		const before: UnitRevisionDocuments = {
+			localizations: {},
+			content_language_support: contentLanguageSupportDocument([{ languageTag: "en" }]),
+		};
+		const after: UnitRevisionDocuments = {
+			localizations: {},
+			content_language_support: contentLanguageSupportDocument([
+				{ languageTag: "ja", channels: ["text"] },
+			]),
+		};
+		const restored = undoRevisionDocuments(before, after, after);
+		expect(restored.conflictPaths).toEqual([]);
+		expect(unitRevisionDocumentsToContentLanguageSupport(restored.documents)).toEqual([
+			{ languageTag: "en" },
+		]);
+
+		const current: UnitRevisionDocuments = {
+			localizations: {},
+			content_language_support: contentLanguageSupportDocument([{ languageTag: "fr" }]),
+		};
+		expect(undoRevisionDocuments(before, after, current).conflictPaths).toEqual([
+			"/content_language_support/payload/value",
+		]);
+	});
+
+	it("undoes one relation edge without removing a later unrelated edge", () => {
+		const firstAudioId = "019b76da-a800-7300-8000-000000000002";
+		const secondAudioId = "019b76da-a800-7300-8000-000000000003";
+		const before: UnitRevisionDocuments = {
+			localizations: {},
+			relations: relationsDocument([]),
+		};
+		const after: UnitRevisionDocuments = {
+			localizations: {},
+			relations: relationsDocument([{ kind: "adapted_audio", targetUnitId: firstAudioId }]),
+		};
+		const current: UnitRevisionDocuments = {
+			localizations: {},
+			relations: relationsDocument([
+				{ kind: "adapted_audio", targetUnitId: firstAudioId },
+				{ kind: "adapted_audio", targetUnitId: secondAudioId },
+			]),
+		};
+		const result = undoRevisionDocuments(before, after, current);
+		expect(result.conflictPaths).toEqual([]);
+		expect(unitRevisionDocumentsToUnitRelations(result.documents)).toEqual([
+			{ kind: "adapted_audio", targetUnitId: secondAudioId },
+		]);
+	});
 });
 
 describe("revision slot identity", () => {
@@ -187,6 +266,19 @@ describe("revision slot identity", () => {
 });
 
 describe("legacy Unit revision snapshots", () => {
+	it("reads a revision without the new slot as empty content language support", () => {
+		expect(unitRevisionDocumentsToContentLanguageSupport({ localizations: {} })).toEqual([]);
+	});
+
+	it("reads a v1 relations document without unitRelations as an empty set", () => {
+		expect(
+			unitRevisionDocumentsToUnitRelations({
+				localizations: {},
+				relations: relationsDocument(),
+			}),
+		).toEqual([]);
+	});
+
 	it("strips the retired single-license column instead of restoring it", () => {
 		expect(
 			parsePersistedUnitRevisionState({
