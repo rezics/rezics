@@ -1,7 +1,7 @@
 import { spawnSync } from "node:child_process";
 
 const expectedAspireVersion = "13.4.6";
-const minimumBunVersion = "1.3.11";
+const minimumBunVersion = "1.4.0";
 const expectedYarnVersion = "4.17.1";
 
 function parseVersion(value, tool) {

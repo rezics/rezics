@@ -1,10 +1,10 @@
 # syntax=docker/dockerfile:1.7
 
 ARG NODE_IMAGE=node:26-bookworm-slim@sha256:9e6f9357d371591e32ab6f2d8a26d63bdd0d17c29eee3f4f3e7e454d9634bf73
-ARG BUN_IMAGE=oven/bun:1.3.11-slim@sha256:478281fdd196871c7e51ba6a820b7803a8ae97042ec86cdbc2e1c6b6626442d9
+ARG BUN_IMAGE=oven/bun:1.4.0-slim@sha256:4c3ac64f41e0a47e28403789a63ecdca7987f322fa811bf5b3cb0f25f18443cc
 ARG POSTGRES_IMAGE=postgres:18.4-trixie@sha256:3a82e1f56c8f0f5616a11103ac3d47e632c3938698946a7ad26da0df1334744a
 ARG COREPACK_VERSION=0.35.0
-ARG BUN_VERSION=1.3.11
+ARG BUN_VERSION=1.4.0
 ARG PGROONGA_VERSION=4.0.8-1
 ARG APPROX_COUNT_COMMIT=341dfa19f73e60d22a8869ccb03bd252d888cec7
 
@@ -43,7 +43,7 @@ FROM ${BUN_IMAGE} AS bun-compiler
 ARG BUN_VERSION
 USER root
 
-ADD --checksum=sha256:8611ba935af886f05a6f38740a15160326c15e5d5d07adef966130b4493607ed \
+ADD --checksum=sha256:2d03fb5fb83ac8b567aca0a281b2ce1a1a19d488f56c2968d88c3f25e92fe452 \
     https://github.com/oven-sh/bun/releases/download/bun-v${BUN_VERSION}/bun-linux-x64.zip \
     /tmp/bun-linux-x64.zip
 

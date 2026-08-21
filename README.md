@@ -51,7 +51,7 @@ Aspire 13.4.6. Compose owns persistent PostgreSQL 18.4 with PGroonga and RustFS.
 Aspire owns the API, recommendation worker,
 web development server, and Dashboard. Use the repository's pinned
 devenv/direnv environment or provide Aspire 13.4.6, Yarn 4.17.1, Go Task 3, and
-Bun 1.3.11 or newer locally.
+Bun 1.4.0 or newer locally.
 
 ```sh
 yarn install --immutable
