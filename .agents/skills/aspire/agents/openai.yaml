@@ -1,0 +1,4 @@
+interface:
+  display_name: "Aspire"
+  short_description: "Operate Aspire AppHosts and resources safely"
+  default_prompt: "Use $aspire to inspect and operate this Aspire application safely."
