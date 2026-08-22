@@ -39,7 +39,10 @@ export type TagVotePresentation =
 			readonly viewerVote: -1 | 1 | null;
 			readonly canVote: boolean;
 	  }
-	| { readonly kind: "not-applicable"; readonly reason: "structure-member" };
+	| {
+			readonly kind: "not-applicable";
+			readonly reason: "read-only-reference" | "structure-member";
+	  };
 
 export type TagContextPresentation =
 	| {

@@ -1,11 +1,10 @@
 "use client";
 
-import { Button, Card, CardContent, Cover } from "@rezics/ui";
-
-import { AppLink as Link } from "@/features/application-shell/components/app-link";
-import { LocalizedText } from "@/features/content-language-display/chinese-content-display-context";
+import { useChineseContentText } from "@/features/content-language-display/chinese-content-display-context";
+import { FeedCard } from "@/features/content-feed/components/feed-card";
 import { FeedOverflowMenu } from "@/features/content-feed/components/feed-card-actions";
 import { FeedList } from "@/features/content-feed/components/feed-list";
+import { FeedUnitContent } from "@/features/content-feed/components/feed-unit-content";
 import { useTranslation } from "@/i18n/client";
 import {
 	presentVariantRelations,
@@ -20,7 +19,7 @@ export function UnitVariantList({
 	readonly context: UnitVariantContext;
 	readonly showEmpty?: boolean;
 }) {
-	const { t } = useTranslation(["actions", "engagement", "state", "ui", "units"]);
+	const { t } = useTranslation(["actions", "state", "units"]);
 	const related = presentVariantRelations(context);
 	if (!showEmpty && !related.length) return null;
 
@@ -38,43 +37,12 @@ export function UnitVariantList({
 					errorLabel={t.state.error}
 					getItemKey={({ unit }) => unit.id}
 					renderItem={({ relation, unit }, metadata) => (
-						<Card asChild className="gap-0 rounded-none py-0 sm:rounded-2xl">
-							<article aria-posinset={metadata.position} aria-setsize={metadata.setSize}>
-								<CardContent
-									className={
-										unit.cover
-											? "grid grid-cols-[4.5rem_minmax(0,1fr)_auto] gap-4 p-4"
-											: "grid grid-cols-[minmax(0,1fr)_auto] gap-4 p-4"
-									}
-								>
-									{unit.cover ? (
-										<Cover
-											alt={unit.title ?? t.ui.unnamed}
-											className="rounded-lg border border-border-weak"
-											src={unit.cover.url}
-										/>
-									) : null}
-									<div className="flex min-w-0 items-center justify-between gap-3">
-										<div className="grid min-w-0 gap-1">
-											<strong>
-												{unit.title ? (
-													<LocalizedText language={unit.language} value={unit.title} />
-												) : (
-													t.ui.unnamed
-												)}
-											</strong>
-											<span className="text-xs text-muted-foreground">
-												{relation === "main" ? t.units.detail.main : t.units.detail.version}
-											</span>
-										</div>
-										<Button asChild size="sm" variant="outline">
-											<Link href={publicUnitHref(unit.type, unit)}>{t.engagement.select}</Link>
-										</Button>
-									</div>
-									<FeedOverflowMenu canExclude={false} itemId={unit.id} />
-								</CardContent>
-							</article>
-						</Card>
+						<UnitVariantCard
+							position={metadata.position}
+							relation={relation}
+							setSize={metadata.setSize}
+							unit={unit}
+						/>
 					)}
 					retryLabel={t.actions.retry}
 					state={{ status: "ready", items: related }}
@@ -83,5 +51,42 @@ export function UnitVariantList({
 				<p className="text-sm text-muted-foreground">{t.units.detail.noVariants}</p>
 			)}
 		</section>
+	);
+}
+
+function UnitVariantCard({
+	position,
+	relation,
+	setSize,
+	unit,
+}: {
+	readonly position: number;
+	readonly relation: "main" | "variant";
+	readonly setSize: number;
+	readonly unit: ReturnType<typeof presentVariantRelations>[number]["unit"];
+}) {
+	const { t } = useTranslation(["feed", "ui", "units"]);
+	const title = useChineseContentText(unit.title ?? t.ui.unnamed, unit.language);
+	const headingId = `unit-variant-${unit.id}`;
+
+	return (
+		<FeedCard aria-labelledby={headingId} aria-posinset={position} aria-setsize={setSize}>
+			<FeedUnitContent
+				action={<FeedOverflowMenu canExclude={false} itemId={unit.id} />}
+				coverUrl={unit.cover?.url}
+				headingId={headingId}
+				headingLevel={3}
+				href={publicUnitHref(unit.type, unit)}
+				kind={unit.type}
+				kindLabel={t.feed.content.kinds[`unit:${unit.type}`]}
+				metadata={
+					<p className="mt-2 text-muted-foreground text-xs">
+						{relation === "main" ? t.units.detail.main : t.units.detail.version}
+					</p>
+				}
+				standalone
+				title={title}
+			/>
+		</FeedCard>
 	);
 }

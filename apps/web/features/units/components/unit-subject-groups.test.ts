@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { subjectAssociationMediaKind } from "../model/subject-association-presentation";
 
 describe("subjectAssociationMediaKind", () => {
-	it("prefers a cover for character roles and falls back to the avatar", () => {
+	it("uses a cover for every Entity kind when one is available", () => {
 		expect(
 			subjectAssociationMediaKind({
 				entityKind: "character",
@@ -14,41 +14,30 @@ describe("subjectAssociationMediaKind", () => {
 		).toBe("cover");
 		expect(
 			subjectAssociationMediaKind({
-				entityKind: "character",
-				role: "featured_character",
-				hasAvatar: true,
-				hasCover: false,
-			}),
-		).toBe("avatar");
-	});
-
-	it("prefers an avatar for other Entities and falls back to the cover", () => {
-		expect(
-			subjectAssociationMediaKind({
 				entityKind: "person",
 				role: "about",
 				hasAvatar: true,
 				hasCover: true,
 			}),
-		).toBe("avatar");
+		).toBe("cover");
+	});
+
+	it("keeps the cover slot instead of using the disabled avatar fallback", () => {
+		expect(
+			subjectAssociationMediaKind({
+				entityKind: "character",
+				role: "featured_character",
+				hasAvatar: true,
+				hasCover: false,
+			}),
+		).toBe("cover");
 		expect(
 			subjectAssociationMediaKind({
 				entityKind: "organization",
 				role: "related_subject",
 				hasAvatar: false,
-				hasCover: true,
+				hasCover: false,
 			}),
 		).toBe("cover");
-	});
-
-	it("uses avatar priority when a Character is linked through a non-character role", () => {
-		expect(
-			subjectAssociationMediaKind({
-				entityKind: "character",
-				role: "about",
-				hasAvatar: true,
-				hasCover: true,
-			}),
-		).toBe("avatar");
 	});
 });

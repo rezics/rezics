@@ -31,6 +31,7 @@ import { tagDetailHref, tagSearchHref } from "../routing/tag-links";
 import { TagVoteControls } from "./tag-vote-controls";
 
 export function TagBadgeCard({
+	displayScore,
 	item,
 	fallbackLabel,
 	highlighted = false,
@@ -42,6 +43,7 @@ export function TagBadgeCard({
 	onVote,
 	type,
 }: {
+	readonly displayScore?: number;
 	readonly item: TagPresentation;
 	readonly fallbackLabel: string;
 	readonly highlighted?: boolean;
@@ -63,7 +65,7 @@ export function TagBadgeCard({
 					realmId: item.context.realmId,
 				})
 			: tagDetailHref(item.identity.tagId);
-	const score = item.vote.kind === "available" ? item.vote.score : undefined;
+	const score = displayScore ?? (item.vote.kind === "available" ? item.vote.score : undefined);
 	const label = useChineseContentText(
 		item.identity.title ?? fallbackLabel,
 		item.identity.title ? item.identity.language : null,

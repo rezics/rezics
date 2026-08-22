@@ -7,6 +7,7 @@ import { AppLink as Link } from "@/features/application-shell/components/app-lin
 import { UnitCoverFallback } from "@/features/units/components/unit-cover-fallback";
 
 export function FeedUnitContent({
+	action,
 	coverUrl,
 	headingId,
 	headingLevel = 2,
@@ -20,6 +21,7 @@ export function FeedUnitContent({
 	summary,
 	title,
 }: {
+	readonly action?: ReactNode;
 	readonly coverUrl?: string;
 	readonly headingId: string;
 	readonly headingLevel?: 2 | 3;
@@ -37,7 +39,10 @@ export function FeedUnitContent({
 	return (
 		<CardContent
 			className={cn(
-				"grid grid-cols-[5rem_minmax(0,1fr)] gap-4 px-4 sm:grid-cols-[7.5rem_minmax(0,1fr)] sm:px-5",
+				"grid gap-4 px-4 sm:px-5",
+				action
+					? "grid-cols-[5rem_minmax(0,1fr)_auto] sm:grid-cols-[7.5rem_minmax(0,1fr)_auto]"
+					: "grid-cols-[5rem_minmax(0,1fr)] sm:grid-cols-[7.5rem_minmax(0,1fr)]",
 				standalone ? "py-5" : "pb-0 pt-3",
 			)}
 		>
@@ -66,6 +71,7 @@ export function FeedUnitContent({
 					{metadata}
 				</FeedUnitContentLink>
 			</div>
+			{action ? <div className="self-start">{action}</div> : null}
 		</CardContent>
 	);
 }
