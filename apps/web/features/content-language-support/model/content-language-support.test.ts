@@ -1,9 +1,11 @@
+import { canonicalizeContentLanguageTag } from "@rezics/content-language";
 import { describe, expect, it } from "vitest";
 
 import {
 	addContentLanguage,
 	adoptContentLanguageEvidence,
 	contentLanguageSupportChanged,
+	ContentLanguageEditorTagValues,
 	createContentLanguageSupportDraft,
 	isContentLanguageSupportUnitType,
 	removeContentLanguage,
@@ -15,17 +17,22 @@ describe("content language support editor model", () => {
 		expect(isContentLanguageSupportUnitType("release")).toBe(true);
 	});
 
-	it("canonicalizes language tags without inventing channel support", () => {
-		expect(addContentLanguage([], "EN-us")).toEqual([{ languageTag: "en-US" }]);
-		expect(() =>
-			addContentLanguage(createContentLanguageSupportDraft([{ languageTag: "en-US" }]), "en_us"),
-		).toThrow();
+	it("offers canonical first-party choices without widening the persistence contract", () => {
+		const english = canonicalizeContentLanguageTag("en");
+		expect(ContentLanguageEditorTagValues).toContain(canonicalizeContentLanguageTag("zh-Hant"));
+		expect(addContentLanguage([], english)).toEqual([{ languageTag: "en" }]);
+		expect(
+			addContentLanguage(createContentLanguageSupportDraft([{ languageTag: "en" }]), english),
+		).toEqual([{ languageTag: "en" }]);
 	});
 
 	it("never represents an unqualified language with an empty channel list", () => {
-		const qualified = toggleContentLanguageChannel([], "ja", "audio");
+		const japanese = canonicalizeContentLanguageTag("ja");
+		const qualified = toggleContentLanguageChannel([], japanese, "audio");
 		expect(qualified).toEqual([{ languageTag: "ja", channels: ["audio"] }]);
-		expect(toggleContentLanguageChannel(qualified, "ja", "audio")).toEqual([{ languageTag: "ja" }]);
+		expect(toggleContentLanguageChannel(qualified, japanese, "audio")).toEqual([
+			{ languageTag: "ja" },
+		]);
 	});
 
 	it("adopts related Unit evidence only through an explicit draft action", () => {
@@ -61,7 +68,7 @@ describe("content language support editor model", () => {
 				{ languageTag: "ja", channels: ["text", "audio"] },
 			]),
 		).toBe(false);
-		expect(removeContentLanguage(draft, "EN")).toEqual([
+		expect(removeContentLanguage(draft, canonicalizeContentLanguageTag("en"))).toEqual([
 			{ languageTag: "ja", channels: ["text", "audio"] },
 		]);
 	});

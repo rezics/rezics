@@ -534,9 +534,8 @@ export default {
 		title: "Langues de consommation du contenu",
 		description:
 			"Indique les langues dans lesquelles le contenu peut être lu, regardé, écouté ou utilisé. Cela ne modifie pas l’accès à la fiche, à la communauté, aux avis ni aux autres fonctionnalités.",
-		languageTag: "Balise de langue",
-		languageTagPlaceholder: "Par exemple : ja ou en-US",
-		invalidLanguageTag: "Saisissez une balise de langue valide.",
+		language: "Langue",
+		languagePlaceholder: "Sélectionner une langue",
 		addLanguage: "Ajouter une langue",
 		removeLanguage: "Retirer la langue",
 		channelLabel: "Canaux pris en charge",

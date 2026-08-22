@@ -8,6 +8,8 @@ const { forms: realmTerms } = jaTerminology.realm;
 const { forms: entityTerms } = jaTerminology.entity;
 const { forms: tagStructureTerms } = jaTerminology.tagStructure;
 const { forms: zoneTerms } = jaTerminology.zone;
+const { forms: videoTerms } = jaTerminology.video;
+const { forms: audioTerms } = jaTerminology.audio;
 
 export default {
 	title: "フィード",
@@ -57,6 +59,8 @@ export default {
 			"unit:book": "書籍",
 			"unit:software": "ソフトウェア",
 			"unit:media": "メディア",
+			"unit:video": videoTerms.label,
+			"unit:audio": audioTerms.label,
 			"unit:release": "リリース",
 			"unit:entity": entityTerms.pluralLabel,
 			"unit:tag": "タグ",

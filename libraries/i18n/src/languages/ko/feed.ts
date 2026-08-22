@@ -8,6 +8,8 @@ const { forms: realmTerms } = koTerminology.realm;
 const { forms: entityTerms } = koTerminology.entity;
 const { forms: tagStructureTerms } = koTerminology.tagStructure;
 const { forms: zoneTerms } = koTerminology.zone;
+const { forms: videoTerms } = koTerminology.video;
+const { forms: audioTerms } = koTerminology.audio;
 
 export default {
 	title: "피드",
@@ -57,6 +59,8 @@ export default {
 			"unit:book": "도서",
 			"unit:software": "소프트웨어",
 			"unit:media": "미디어",
+			"unit:video": videoTerms.label,
+			"unit:audio": audioTerms.label,
 			"unit:release": "발매",
 			"unit:entity": entityTerms.pluralLabel,
 			"unit:tag": "태그",

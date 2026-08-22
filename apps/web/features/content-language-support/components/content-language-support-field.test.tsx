@@ -1,7 +1,7 @@
 /** @vitest-environment jsdom */
 
 import { resources } from "@rezics/i18n/resources";
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { create } from "native-i18n";
 import { useState } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -35,39 +35,41 @@ function FieldHarness({ initial = [] }: { readonly initial?: unknown }) {
 }
 
 describe("ContentLanguageSupportField", () => {
-	it("canonicalizes a language and never emits an empty channel array", async () => {
+	it("adds only a selected language and never emits an empty channel array", async () => {
 		render(<FieldHarness />);
 
-		fireEvent.change(screen.getByRole("textbox", { name: "Language tag" }), {
-			target: { value: "EN-us" },
+		expect(screen.queryByRole("textbox")).toBeNull();
+		const languageSelect = screen.getByRole("combobox", { name: "Language" });
+		expect(screen.getByRole("button", { name: "Add language" }).hasAttribute("disabled")).toBe(
+			true,
+		);
+		fireEvent.change(languageSelect, {
+			target: { value: "zh-Hant" },
 		});
 		fireEvent.click(screen.getByRole("button", { name: "Add language" }));
-		expect(screen.getByTestId("draft").textContent).toBe('[{"languageTag":"en-US"}]');
+		expect(screen.getByTestId("draft").textContent).toBe('[{"languageTag":"zh-Hant"}]');
+		expect(screen.getAllByText("Traditional Chinese").length).toBeGreaterThan(0);
 
 		fireEvent.click(screen.getByText("Text"));
 		await waitFor(() =>
 			expect(screen.getByTestId("draft").textContent).toBe(
-				'[{"languageTag":"en-US","channels":["text"]}]',
+				'[{"languageTag":"zh-Hant","channels":["text"]}]',
 			),
 		);
 
 		fireEvent.click(screen.getByText("Text"));
 		await waitFor(() =>
-			expect(screen.getByTestId("draft").textContent).toBe('[{"languageTag":"en-US"}]'),
+			expect(screen.getByTestId("draft").textContent).toBe('[{"languageTag":"zh-Hant"}]'),
 		);
 		expect(screen.getByText("Channels not specified")).toBeTruthy();
 		expect(screen.getByTestId("draft").textContent).not.toContain('"channels":[]');
 	});
 
-	it("keeps an invalid language out of the controlled value", () => {
+	it("excludes languages that are already in the controlled value", () => {
 		render(<FieldHarness initial={[{ languageTag: "ja" }]} />);
 
-		fireEvent.change(screen.getByRole("textbox", { name: "Language tag" }), {
-			target: { value: "en_US" },
-		});
-		fireEvent.click(screen.getByRole("button", { name: "Add language" }));
-
-		expect(screen.getByRole("alert").textContent).toBe("Enter a valid language tag.");
+		const languageSelect = screen.getByRole("combobox", { name: "Language" });
+		expect(within(languageSelect).queryByRole("option", { name: "Japanese" })).toBeNull();
 		expect(screen.getByTestId("draft").textContent).toBe('[{"languageTag":"ja"}]');
 	});
 });

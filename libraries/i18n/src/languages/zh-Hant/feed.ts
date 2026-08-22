@@ -8,6 +8,8 @@ const { forms: realmTerms } = zhHantTerminology.realm;
 const { forms: entityTerms } = zhHantTerminology.entity;
 const { forms: tagStructureTerms } = zhHantTerminology.tagStructure;
 const { forms: zoneTerms } = zhHantTerminology.zone;
+const { forms: videoTerms } = zhHantTerminology.video;
+const { forms: audioTerms } = zhHantTerminology.audio;
 
 export default {
 	title: "動態",
@@ -57,6 +59,8 @@ export default {
 			"unit:book": "書籍",
 			"unit:software": "軟體",
 			"unit:media": "媒體",
+			"unit:video": videoTerms.label,
+			"unit:audio": audioTerms.label,
 			"unit:release": "發行版本",
 			"unit:entity": entityTerms.pluralLabel,
 			"unit:tag": "標籤",

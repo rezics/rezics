@@ -53,6 +53,32 @@ export type LocalizationFilter = {
 	};
 };
 
+export const ContentLanguageSupportFilterChannelEnum = {
+	text: "text",
+	audio: "audio",
+	subtitle: "subtitle",
+	interface: "interface",
+} as const;
+
+export type ContentLanguageSupportFilterChannelEnum =
+	(typeof ContentLanguageSupportFilterChannelEnum)[keyof typeof ContentLanguageSupportFilterChannelEnum];
+
+/**
+ * @type object
+ */
+export type ContentLanguageSupportFilter = {
+	/**
+	 * @minLength 1
+	 * @maxLength 255
+	 * @type string
+	 */
+	languageTag: string;
+	/**
+	 * @type string | undefined
+	 */
+	channel?: ContentLanguageSupportFilterChannelEnum;
+};
+
 export const RealmPlacementFilterRealmKindInEnum = {
 	slug_namespace: "slug_namespace",
 	profile: "profile",
@@ -1494,6 +1520,35 @@ export type UnitPredicate = {
 						 */
 						in: ("zh" | "en" | "ja" | "ko" | "de" | "fr" | "es")[];
 					};
+				};
+		  };
+	contentLanguageSupport?:
+		| {
+				/**
+				 * @type object
+				 */
+				some: {
+					/**
+					 * @minLength 1
+					 * @maxLength 255
+					 * @type string
+					 */
+					languageTag: string;
+					channel?: "text" | "audio" | "subtitle" | "interface";
+				};
+		  }
+		| {
+				/**
+				 * @type object
+				 */
+				none: {
+					/**
+					 * @minLength 1
+					 * @maxLength 255
+					 * @type string
+					 */
+					languageTag: string;
+					channel?: "text" | "audio" | "subtitle" | "interface";
 				};
 		  };
 	realms?:
@@ -3742,6 +3797,35 @@ export type DockDocument = {
 																};
 															};
 													  };
+												contentLanguageSupport?:
+													| {
+															/**
+															 * @type object
+															 */
+															some: {
+																/**
+																 * @minLength 1
+																 * @maxLength 255
+																 * @type string
+																 */
+																languageTag: string;
+																channel?: "text" | "audio" | "subtitle" | "interface";
+															};
+													  }
+													| {
+															/**
+															 * @type object
+															 */
+															none: {
+																/**
+																 * @minLength 1
+																 * @maxLength 255
+																 * @type string
+																 */
+																languageTag: string;
+																channel?: "text" | "audio" | "subtitle" | "interface";
+															};
+													  };
 												realms?:
 													| {
 															/**
@@ -5976,6 +6060,35 @@ export type DockDocument = {
 														 */
 														in: ("zh" | "en" | "ja" | "ko" | "de" | "fr" | "es")[];
 													};
+												};
+										  };
+									contentLanguageSupport?:
+										| {
+												/**
+												 * @type object
+												 */
+												some: {
+													/**
+													 * @minLength 1
+													 * @maxLength 255
+													 * @type string
+													 */
+													languageTag: string;
+													channel?: "text" | "audio" | "subtitle" | "interface";
+												};
+										  }
+										| {
+												/**
+												 * @type object
+												 */
+												none: {
+													/**
+													 * @minLength 1
+													 * @maxLength 255
+													 * @type string
+													 */
+													languageTag: string;
+													channel?: "text" | "audio" | "subtitle" | "interface";
 												};
 										  };
 									realms?:
@@ -8681,6 +8794,35 @@ export type UnitReferencedBlockDocument = {
 																};
 															};
 													  };
+												contentLanguageSupport?:
+													| {
+															/**
+															 * @type object
+															 */
+															some: {
+																/**
+																 * @minLength 1
+																 * @maxLength 255
+																 * @type string
+																 */
+																languageTag: string;
+																channel?: "text" | "audio" | "subtitle" | "interface";
+															};
+													  }
+													| {
+															/**
+															 * @type object
+															 */
+															none: {
+																/**
+																 * @minLength 1
+																 * @maxLength 255
+																 * @type string
+																 */
+																languageTag: string;
+																channel?: "text" | "audio" | "subtitle" | "interface";
+															};
+													  };
 												realms?:
 													| {
 															/**
@@ -10915,6 +11057,35 @@ export type UnitReferencedBlockDocument = {
 														 */
 														in: ("zh" | "en" | "ja" | "ko" | "de" | "fr" | "es")[];
 													};
+												};
+										  };
+									contentLanguageSupport?:
+										| {
+												/**
+												 * @type object
+												 */
+												some: {
+													/**
+													 * @minLength 1
+													 * @maxLength 255
+													 * @type string
+													 */
+													languageTag: string;
+													channel?: "text" | "audio" | "subtitle" | "interface";
+												};
+										  }
+										| {
+												/**
+												 * @type object
+												 */
+												none: {
+													/**
+													 * @minLength 1
+													 * @maxLength 255
+													 * @type string
+													 */
+													languageTag: string;
+													channel?: "text" | "audio" | "subtitle" | "interface";
 												};
 										  };
 									realms?:
@@ -31547,6 +31718,8 @@ export const PostApiFeedQueryStatus200ItemsUnitKindEnum = {
 	book: "book",
 	software: "software",
 	media: "media",
+	video: "video",
+	audio: "audio",
 	release: "release",
 	entity: "entity",
 	tag: "tag",
@@ -110582,6 +110755,35 @@ export type GetApiProgressSearchFilterStatus200 = {
 							};
 						};
 				  };
+			contentLanguageSupport?:
+				| {
+						/**
+						 * @type object
+						 */
+						some: {
+							/**
+							 * @minLength 1
+							 * @maxLength 255
+							 * @type string
+							 */
+							languageTag: string;
+							channel?: "text" | "audio" | "subtitle" | "interface";
+						};
+				  }
+				| {
+						/**
+						 * @type object
+						 */
+						none: {
+							/**
+							 * @minLength 1
+							 * @maxLength 255
+							 * @type string
+							 */
+							languageTag: string;
+							channel?: "text" | "audio" | "subtitle" | "interface";
+						};
+				  };
 			realms?:
 				| {
 						/**
@@ -118647,6 +118849,8 @@ export const GetApiCollectionsByCollectionIdItemsStatus200ItemsContentUnitKindEn
 	book: "book",
 	software: "software",
 	media: "media",
+	video: "video",
+	audio: "audio",
 	release: "release",
 	entity: "entity",
 	tag: "tag",
@@ -143712,6 +143916,8 @@ export const GetApiRealmsByRealmIdPinsStatus200ContentItemsUnitKindEnum = {
 	book: "book",
 	software: "software",
 	media: "media",
+	video: "video",
+	audio: "audio",
 	release: "release",
 	entity: "entity",
 	tag: "tag",
@@ -155145,6 +155351,8 @@ export const PostApiSearchFilterFeedStatus200ItemsUnitKindEnum = {
 	book: "book",
 	software: "software",
 	media: "media",
+	video: "video",
+	audio: "audio",
 	release: "release",
 	entity: "entity",
 	tag: "tag",
@@ -160571,6 +160779,8 @@ export const PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsUnitKindEnum = {
 	book: "book",
 	software: "software",
 	media: "media",
+	video: "video",
+	audio: "audio",
 	release: "release",
 	entity: "entity",
 	tag: "tag",
@@ -167298,6 +167508,8 @@ export const PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200Items
 	book: "book",
 	software: "software",
 	media: "media",
+	video: "video",
+	audio: "audio",
 	release: "release",
 	entity: "entity",
 	tag: "tag",
@@ -171992,6 +172204,35 @@ export type PostApiSearchSharedQueriesStatus201 = {
 								};
 							};
 					  };
+				contentLanguageSupport?:
+					| {
+							/**
+							 * @type object
+							 */
+							some: {
+								/**
+								 * @minLength 1
+								 * @maxLength 255
+								 * @type string
+								 */
+								languageTag: string;
+								channel?: "text" | "audio" | "subtitle" | "interface";
+							};
+					  }
+					| {
+							/**
+							 * @type object
+							 */
+							none: {
+								/**
+								 * @minLength 1
+								 * @maxLength 255
+								 * @type string
+								 */
+								languageTag: string;
+								channel?: "text" | "audio" | "subtitle" | "interface";
+							};
+					  };
 				realms?:
 					| {
 							/**
@@ -174826,6 +175067,35 @@ export type PostApiSearchSharedQueriesBody = {
 							};
 						};
 				  };
+			contentLanguageSupport?:
+				| {
+						/**
+						 * @type object
+						 */
+						some: {
+							/**
+							 * @minLength 1
+							 * @maxLength 255
+							 * @type string
+							 */
+							languageTag: string;
+							channel?: "text" | "audio" | "subtitle" | "interface";
+						};
+				  }
+				| {
+						/**
+						 * @type object
+						 */
+						none: {
+							/**
+							 * @minLength 1
+							 * @maxLength 255
+							 * @type string
+							 */
+							languageTag: string;
+							channel?: "text" | "audio" | "subtitle" | "interface";
+						};
+				  };
 			realms?:
 				| {
 						/**
@@ -177609,6 +177879,35 @@ export type GetApiSearchSharedQueriesByIdStatus200 = {
 									 */
 									in: ("zh" | "en" | "ja" | "ko" | "de" | "fr" | "es")[];
 								};
+							};
+					  };
+				contentLanguageSupport?:
+					| {
+							/**
+							 * @type object
+							 */
+							some: {
+								/**
+								 * @minLength 1
+								 * @maxLength 255
+								 * @type string
+								 */
+								languageTag: string;
+								channel?: "text" | "audio" | "subtitle" | "interface";
+							};
+					  }
+					| {
+							/**
+							 * @type object
+							 */
+							none: {
+								/**
+								 * @minLength 1
+								 * @maxLength 255
+								 * @type string
+								 */
+								languageTag: string;
+								channel?: "text" | "audio" | "subtitle" | "interface";
 							};
 					  };
 				realms?:

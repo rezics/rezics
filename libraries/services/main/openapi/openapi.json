@@ -52,6 +52,16 @@
 					}
 				}
 			},
+			"ContentLanguageSupportFilter": {
+				"additionalProperties": false,
+				"type": "object",
+				"required": ["languageTag"],
+				"properties": {
+					"languageTag": { "minLength": 1, "maxLength": 255, "type": "string" },
+					"channel": { "type": "string", "enum": ["text", "audio", "subtitle", "interface"] }
+				},
+				"$id": "#/components/schemas/ContentLanguageSupportFilter"
+			},
 			"RealmPlacementFilter": {
 				"$id": "RealmPlacementFilter",
 				"minProperties": 1,
@@ -2038,6 +2048,56 @@
 														}
 													}
 												}
+											}
+										}
+									}
+								}
+							}
+						]
+					},
+					"contentLanguageSupport": {
+						"anyOf": [
+							{
+								"additionalProperties": false,
+								"type": "object",
+								"required": ["some"],
+								"properties": {
+									"some": {
+										"additionalProperties": false,
+										"type": "object",
+										"required": ["languageTag"],
+										"properties": {
+											"languageTag": { "minLength": 1, "maxLength": 255, "type": "string" },
+											"channel": {
+												"anyOf": [
+													{ "const": "text", "type": "string" },
+													{ "const": "audio", "type": "string" },
+													{ "const": "subtitle", "type": "string" },
+													{ "const": "interface", "type": "string" }
+												]
+											}
+										}
+									}
+								}
+							},
+							{
+								"additionalProperties": false,
+								"type": "object",
+								"required": ["none"],
+								"properties": {
+									"none": {
+										"additionalProperties": false,
+										"type": "object",
+										"required": ["languageTag"],
+										"properties": {
+											"languageTag": { "minLength": 1, "maxLength": 255, "type": "string" },
+											"channel": {
+												"anyOf": [
+													{ "const": "text", "type": "string" },
+													{ "const": "audio", "type": "string" },
+													{ "const": "subtitle", "type": "string" },
+													{ "const": "interface", "type": "string" }
+												]
 											}
 										}
 									}
@@ -5414,6 +5474,76 @@
 																															}
 																														}
 																													}
+																												}
+																											}
+																										}
+																									}
+																								}
+																							]
+																						},
+																						"contentLanguageSupport": {
+																							"anyOf": [
+																								{
+																									"additionalProperties": false,
+																									"type": "object",
+																									"required": ["some"],
+																									"properties": {
+																										"some": {
+																											"additionalProperties": false,
+																											"type": "object",
+																											"required": ["languageTag"],
+																											"properties": {
+																												"languageTag": {
+																													"minLength": 1,
+																													"maxLength": 255,
+																													"type": "string"
+																												},
+																												"channel": {
+																													"anyOf": [
+																														{ "const": "text", "type": "string" },
+																														{ "const": "audio", "type": "string" },
+																														{
+																															"const": "subtitle",
+																															"type": "string"
+																														},
+																														{
+																															"const": "interface",
+																															"type": "string"
+																														}
+																													]
+																												}
+																											}
+																										}
+																									}
+																								},
+																								{
+																									"additionalProperties": false,
+																									"type": "object",
+																									"required": ["none"],
+																									"properties": {
+																										"none": {
+																											"additionalProperties": false,
+																											"type": "object",
+																											"required": ["languageTag"],
+																											"properties": {
+																												"languageTag": {
+																													"minLength": 1,
+																													"maxLength": 255,
+																													"type": "string"
+																												},
+																												"channel": {
+																													"anyOf": [
+																														{ "const": "text", "type": "string" },
+																														{ "const": "audio", "type": "string" },
+																														{
+																															"const": "subtitle",
+																															"type": "string"
+																														},
+																														{
+																															"const": "interface",
+																															"type": "string"
+																														}
+																													]
 																												}
 																											}
 																										}
@@ -10593,6 +10723,64 @@
 																											}
 																										}
 																									}
+																								}
+																							}
+																						}
+																					}
+																				}
+																			]
+																		},
+																		"contentLanguageSupport": {
+																			"anyOf": [
+																				{
+																					"additionalProperties": false,
+																					"type": "object",
+																					"required": ["some"],
+																					"properties": {
+																						"some": {
+																							"additionalProperties": false,
+																							"type": "object",
+																							"required": ["languageTag"],
+																							"properties": {
+																								"languageTag": {
+																									"minLength": 1,
+																									"maxLength": 255,
+																									"type": "string"
+																								},
+																								"channel": {
+																									"anyOf": [
+																										{ "const": "text", "type": "string" },
+																										{ "const": "audio", "type": "string" },
+																										{ "const": "subtitle", "type": "string" },
+																										{ "const": "interface", "type": "string" }
+																									]
+																								}
+																							}
+																						}
+																					}
+																				},
+																				{
+																					"additionalProperties": false,
+																					"type": "object",
+																					"required": ["none"],
+																					"properties": {
+																						"none": {
+																							"additionalProperties": false,
+																							"type": "object",
+																							"required": ["languageTag"],
+																							"properties": {
+																								"languageTag": {
+																									"minLength": 1,
+																									"maxLength": 255,
+																									"type": "string"
+																								},
+																								"channel": {
+																									"anyOf": [
+																										{ "const": "text", "type": "string" },
+																										{ "const": "audio", "type": "string" },
+																										{ "const": "subtitle", "type": "string" },
+																										{ "const": "interface", "type": "string" }
+																									]
 																								}
 																							}
 																						}
@@ -15997,6 +16185,76 @@
 																								}
 																							]
 																						},
+																						"contentLanguageSupport": {
+																							"anyOf": [
+																								{
+																									"additionalProperties": false,
+																									"type": "object",
+																									"required": ["some"],
+																									"properties": {
+																										"some": {
+																											"additionalProperties": false,
+																											"type": "object",
+																											"required": ["languageTag"],
+																											"properties": {
+																												"languageTag": {
+																													"minLength": 1,
+																													"maxLength": 255,
+																													"type": "string"
+																												},
+																												"channel": {
+																													"anyOf": [
+																														{ "const": "text", "type": "string" },
+																														{ "const": "audio", "type": "string" },
+																														{
+																															"const": "subtitle",
+																															"type": "string"
+																														},
+																														{
+																															"const": "interface",
+																															"type": "string"
+																														}
+																													]
+																												}
+																											}
+																										}
+																									}
+																								},
+																								{
+																									"additionalProperties": false,
+																									"type": "object",
+																									"required": ["none"],
+																									"properties": {
+																										"none": {
+																											"additionalProperties": false,
+																											"type": "object",
+																											"required": ["languageTag"],
+																											"properties": {
+																												"languageTag": {
+																													"minLength": 1,
+																													"maxLength": 255,
+																													"type": "string"
+																												},
+																												"channel": {
+																													"anyOf": [
+																														{ "const": "text", "type": "string" },
+																														{ "const": "audio", "type": "string" },
+																														{
+																															"const": "subtitle",
+																															"type": "string"
+																														},
+																														{
+																															"const": "interface",
+																															"type": "string"
+																														}
+																													]
+																												}
+																											}
+																										}
+																									}
+																								}
+																							]
+																						},
 																						"realms": {
 																							"anyOf": [
 																								{
@@ -21169,6 +21427,64 @@
 																											}
 																										}
 																									}
+																								}
+																							}
+																						}
+																					}
+																				}
+																			]
+																		},
+																		"contentLanguageSupport": {
+																			"anyOf": [
+																				{
+																					"additionalProperties": false,
+																					"type": "object",
+																					"required": ["some"],
+																					"properties": {
+																						"some": {
+																							"additionalProperties": false,
+																							"type": "object",
+																							"required": ["languageTag"],
+																							"properties": {
+																								"languageTag": {
+																									"minLength": 1,
+																									"maxLength": 255,
+																									"type": "string"
+																								},
+																								"channel": {
+																									"anyOf": [
+																										{ "const": "text", "type": "string" },
+																										{ "const": "audio", "type": "string" },
+																										{ "const": "subtitle", "type": "string" },
+																										{ "const": "interface", "type": "string" }
+																									]
+																								}
+																							}
+																						}
+																					}
+																				},
+																				{
+																					"additionalProperties": false,
+																					"type": "object",
+																					"required": ["none"],
+																					"properties": {
+																						"none": {
+																							"additionalProperties": false,
+																							"type": "object",
+																							"required": ["languageTag"],
+																							"properties": {
+																								"languageTag": {
+																									"minLength": 1,
+																									"maxLength": 255,
+																									"type": "string"
+																								},
+																								"channel": {
+																									"anyOf": [
+																										{ "const": "text", "type": "string" },
+																										{ "const": "audio", "type": "string" },
+																										{ "const": "subtitle", "type": "string" },
+																										{ "const": "interface", "type": "string" }
+																									]
 																								}
 																							}
 																						}
@@ -52850,6 +53166,8 @@
 																	"book",
 																	"software",
 																	"media",
+																	"video",
+																	"audio",
 																	"release",
 																	"entity",
 																	"tag",
@@ -128332,6 +128650,64 @@
 																}
 															]
 														},
+														"contentLanguageSupport": {
+															"anyOf": [
+																{
+																	"additionalProperties": false,
+																	"type": "object",
+																	"required": ["some"],
+																	"properties": {
+																		"some": {
+																			"additionalProperties": false,
+																			"type": "object",
+																			"required": ["languageTag"],
+																			"properties": {
+																				"languageTag": {
+																					"minLength": 1,
+																					"maxLength": 255,
+																					"type": "string"
+																				},
+																				"channel": {
+																					"anyOf": [
+																						{ "const": "text", "type": "string" },
+																						{ "const": "audio", "type": "string" },
+																						{ "const": "subtitle", "type": "string" },
+																						{ "const": "interface", "type": "string" }
+																					]
+																				}
+																			}
+																		}
+																	}
+																},
+																{
+																	"additionalProperties": false,
+																	"type": "object",
+																	"required": ["none"],
+																	"properties": {
+																		"none": {
+																			"additionalProperties": false,
+																			"type": "object",
+																			"required": ["languageTag"],
+																			"properties": {
+																				"languageTag": {
+																					"minLength": 1,
+																					"maxLength": 255,
+																					"type": "string"
+																				},
+																				"channel": {
+																					"anyOf": [
+																						{ "const": "text", "type": "string" },
+																						{ "const": "audio", "type": "string" },
+																						{ "const": "subtitle", "type": "string" },
+																						{ "const": "interface", "type": "string" }
+																					]
+																				}
+																			}
+																		}
+																	}
+																}
+															]
+														},
 														"realms": {
 															"anyOf": [
 																{
@@ -138298,6 +138674,8 @@
 																			"book",
 																			"software",
 																			"media",
+																			"video",
+																			"audio",
 																			"release",
 																			"entity",
 																			"tag",
@@ -164221,6 +164599,8 @@
 																	"book",
 																	"software",
 																	"media",
+																	"video",
+																	"audio",
 																	"release",
 																	"entity",
 																	"tag",
@@ -177610,6 +177990,8 @@
 																	"book",
 																	"software",
 																	"media",
+																	"video",
+																	"audio",
 																	"release",
 																	"entity",
 																	"tag",
@@ -184866,6 +185248,8 @@
 																	"book",
 																	"software",
 																	"media",
+																	"video",
+																	"audio",
 																	"release",
 																	"entity",
 																	"tag",
@@ -193644,6 +194028,8 @@
 																	"book",
 																	"software",
 																	"media",
+																	"video",
+																	"audio",
 																	"release",
 																	"entity",
 																	"tag",
@@ -198525,6 +198911,64 @@
 															}
 														]
 													},
+													"contentLanguageSupport": {
+														"anyOf": [
+															{
+																"additionalProperties": false,
+																"type": "object",
+																"required": ["some"],
+																"properties": {
+																	"some": {
+																		"additionalProperties": false,
+																		"type": "object",
+																		"required": ["languageTag"],
+																		"properties": {
+																			"languageTag": {
+																				"minLength": 1,
+																				"maxLength": 255,
+																				"type": "string"
+																			},
+																			"channel": {
+																				"anyOf": [
+																					{ "const": "text", "type": "string" },
+																					{ "const": "audio", "type": "string" },
+																					{ "const": "subtitle", "type": "string" },
+																					{ "const": "interface", "type": "string" }
+																				]
+																			}
+																		}
+																	}
+																}
+															},
+															{
+																"additionalProperties": false,
+																"type": "object",
+																"required": ["none"],
+																"properties": {
+																	"none": {
+																		"additionalProperties": false,
+																		"type": "object",
+																		"required": ["languageTag"],
+																		"properties": {
+																			"languageTag": {
+																				"minLength": 1,
+																				"maxLength": 255,
+																				"type": "string"
+																			},
+																			"channel": {
+																				"anyOf": [
+																					{ "const": "text", "type": "string" },
+																					{ "const": "audio", "type": "string" },
+																					{ "const": "subtitle", "type": "string" },
+																					{ "const": "interface", "type": "string" }
+																				]
+																			}
+																		}
+																	}
+																}
+															}
+														]
+													},
 													"realms": {
 														"anyOf": [
 															{
@@ -202999,6 +203443,64 @@
 																									}
 																								}
 																							}
+																						}
+																					}
+																				}
+																			}
+																		}
+																	]
+																},
+																"contentLanguageSupport": {
+																	"anyOf": [
+																		{
+																			"additionalProperties": false,
+																			"type": "object",
+																			"required": ["some"],
+																			"properties": {
+																				"some": {
+																					"additionalProperties": false,
+																					"type": "object",
+																					"required": ["languageTag"],
+																					"properties": {
+																						"languageTag": {
+																							"minLength": 1,
+																							"maxLength": 255,
+																							"type": "string"
+																						},
+																						"channel": {
+																							"anyOf": [
+																								{ "const": "text", "type": "string" },
+																								{ "const": "audio", "type": "string" },
+																								{ "const": "subtitle", "type": "string" },
+																								{ "const": "interface", "type": "string" }
+																							]
+																						}
+																					}
+																				}
+																			}
+																		},
+																		{
+																			"additionalProperties": false,
+																			"type": "object",
+																			"required": ["none"],
+																			"properties": {
+																				"none": {
+																					"additionalProperties": false,
+																					"type": "object",
+																					"required": ["languageTag"],
+																					"properties": {
+																						"languageTag": {
+																							"minLength": 1,
+																							"maxLength": 255,
+																							"type": "string"
+																						},
+																						"channel": {
+																							"anyOf": [
+																								{ "const": "text", "type": "string" },
+																								{ "const": "audio", "type": "string" },
+																								{ "const": "subtitle", "type": "string" },
+																								{ "const": "interface", "type": "string" }
+																							]
 																						}
 																					}
 																				}
@@ -208363,6 +208865,64 @@
 																									}
 																								}
 																							}
+																						}
+																					}
+																				}
+																			}
+																		}
+																	]
+																},
+																"contentLanguageSupport": {
+																	"anyOf": [
+																		{
+																			"additionalProperties": false,
+																			"type": "object",
+																			"required": ["some"],
+																			"properties": {
+																				"some": {
+																					"additionalProperties": false,
+																					"type": "object",
+																					"required": ["languageTag"],
+																					"properties": {
+																						"languageTag": {
+																							"minLength": 1,
+																							"maxLength": 255,
+																							"type": "string"
+																						},
+																						"channel": {
+																							"anyOf": [
+																								{ "const": "text", "type": "string" },
+																								{ "const": "audio", "type": "string" },
+																								{ "const": "subtitle", "type": "string" },
+																								{ "const": "interface", "type": "string" }
+																							]
+																						}
+																					}
+																				}
+																			}
+																		},
+																		{
+																			"additionalProperties": false,
+																			"type": "object",
+																			"required": ["none"],
+																			"properties": {
+																				"none": {
+																					"additionalProperties": false,
+																					"type": "object",
+																					"required": ["languageTag"],
+																					"properties": {
+																						"languageTag": {
+																							"minLength": 1,
+																							"maxLength": 255,
+																							"type": "string"
+																						},
+																						"channel": {
+																							"anyOf": [
+																								{ "const": "text", "type": "string" },
+																								{ "const": "audio", "type": "string" },
+																								{ "const": "subtitle", "type": "string" },
+																								{ "const": "interface", "type": "string" }
+																							]
 																						}
 																					}
 																				}

@@ -8,6 +8,8 @@ const { forms: realmTerms } = zhHansTerminology.realm;
 const { forms: entityTerms } = zhHansTerminology.entity;
 const { forms: tagStructureTerms } = zhHansTerminology.tagStructure;
 const { forms: zoneTerms } = zhHansTerminology.zone;
+const { forms: videoTerms } = zhHansTerminology.video;
+const { forms: audioTerms } = zhHansTerminology.audio;
 
 export default {
 	title: "动态",
@@ -57,6 +59,8 @@ export default {
 			"unit:book": "书籍",
 			"unit:software": "软件",
 			"unit:media": "媒体",
+			"unit:video": videoTerms.label,
+			"unit:audio": audioTerms.label,
 			"unit:release": "发行版本",
 			"unit:entity": entityTerms.pluralLabel,
 			"unit:tag": "标签",

@@ -2,11 +2,24 @@ import {
 	type ContentLanguageChannel,
 	type ContentLanguageSupport,
 	type ContentLanguageSupportEntry,
+	type ContentLanguageTag,
 	canonicalizeContentLanguageTag,
 	normalizeContentLanguageSupport,
 } from "@rezics/content-language";
+import { ContentLanguageValues, UiLocaleValues } from "@rezics/i18n";
 
 export type ContentLanguageSupportDraft = ContentLanguageSupport;
+
+/**
+ * Bounded first-party authoring choices. The persistence/API contract remains
+ * open to every canonical BCP 47 tag, including values introduced by imports
+ * or related-Unit evidence.
+ */
+export const ContentLanguageEditorTagValues: readonly ContentLanguageTag[] = Object.freeze(
+	[...new Set([...ContentLanguageValues, ...UiLocaleValues])].map((value) =>
+		canonicalizeContentLanguageTag(value),
+	),
+);
 
 export const ContentLanguageSupportUnitTypes = [
 	"book",
@@ -41,18 +54,16 @@ export function createContentLanguageSupportDraft(value: unknown): ContentLangua
 
 export function addContentLanguage(
 	draft: ContentLanguageSupportDraft,
-	languageTagInput: string,
+	languageTag: ContentLanguageTag,
 ): ContentLanguageSupportDraft {
-	const languageTag = canonicalizeContentLanguageTag(languageTagInput);
 	if (draft.some((entry) => entry.languageTag === languageTag)) return draft;
 	return normalizeContentLanguageSupport([...draft, { languageTag }]);
 }
 
 export function removeContentLanguage(
 	draft: ContentLanguageSupportDraft,
-	languageTagInput: string,
+	languageTag: ContentLanguageTag,
 ): ContentLanguageSupportDraft {
-	const languageTag = canonicalizeContentLanguageTag(languageTagInput);
 	return normalizeContentLanguageSupport(
 		draft.filter((entry) => entry.languageTag !== languageTag),
 	);
@@ -60,10 +71,9 @@ export function removeContentLanguage(
 
 export function toggleContentLanguageChannel(
 	draft: ContentLanguageSupportDraft,
-	languageTagInput: string,
+	languageTag: ContentLanguageTag,
 	channel: ContentLanguageChannel,
 ): ContentLanguageSupportDraft {
-	const languageTag = canonicalizeContentLanguageTag(languageTagInput);
 	const current = draft.find((entry) => entry.languageTag === languageTag);
 	if (!current) return replaceEntry(draft, { languageTag, channels: [channel] });
 	const channels = current.channels ?? [];

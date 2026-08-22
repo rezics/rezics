@@ -15,6 +15,15 @@ empty channel array is invalid. Input is normalized into code-point-sorted
 language order and registry-sorted channel order before storage, revision
 hashing, or response caching.
 
+The first-party web editor does not expose a free-form language-tag input. It
+offers a bounded Select whose nine canonical choices are derived from the
+product's supported content-language groups and UI locales, including `zh`,
+`zh-Hans`, and `zh-Hant`; selected values are rendered with localized language
+names. This authoring catalog is not the persistence validity set. API and
+content-pack boundaries continue to validate and canonicalize any well-formed
+BCP 47 tag, and the editor can preserve or adopt canonical values supplied by
+those boundaries or related-Unit evidence.
+
 This field does not replace, alias, or derive any localization or availability
 contract:
 
@@ -35,8 +44,29 @@ Book, Software, Media, Video, Audio, or Release Unit. PostgreSQL proves only
 the row-local kind and top-level non-empty array bound. The shared runtime
 contract proves canonical BCP 47 tags, exact object keys, supported channels,
 uniqueness after canonicalization, and the 64-entry ceiling on every public
-write and persisted read. There is deliberately no JSONB GIN index: no request
-path searches the corpus through this authoritative document.
+write and persisted read. There is deliberately no JSONB GIN index: discovery
+requests use the trigger-maintained reverse projection described below and
+never scan the authoritative document.
+
+## Search projection
+
+`unit_content_language_search` is a non-authoritative, rebuildable reverse
+projection with one row per `(unit_id, language_tag)`. `channel_mask` uses the
+fixed bits Text = 1, Audio = 2, Subtitle = 4, and Interface = 8; `0` represents
+an authoritative declaration whose channels were omitted. The exact source
+pair is therefore preserved without multiplying one language into four edge
+rows. The projection is maintained in the same transaction by a row trigger on
+`unit_content_language_support`; each source mutation deletes and reinserts at
+most 64 projection rows.
+
+The public Unit Filter exposes this as `contentLanguageSupport.some` with one
+canonical BCP 47 `languageTag` and an optional channel. It remains distinct
+from `localizations.some`. A channel query expands to one fixed eight-value
+mask set, so `(language_tag, channel_mask, unit_id)` supplies equality on the
+two leading columns and streams UUID candidates. A language-only query uses
+the same index's leading column. Search applies the complete Unit predicate
+again after candidate generation; the reverse projection is a bounded seed,
+not an authorization or presentation source.
 
 Unit history owns a separate `content_language_support` slot with model
 `rezics.unit.content-language-support.v1`. New revisions always include the
@@ -169,6 +199,37 @@ ID when this field did not change. A changed field creates one bounded revision
 document. Monitor revisions per Unit and new revision-content bytes per day;
 high-churn Units are the skew risk.
 
+### Search projection sensitivity
+
+Let `r` be the average language declarations on a non-empty Unit. At the
+working estimate `r = 3`, the projection contains `pNr` rows:
+
+| Corpus case | Projection rows |
+| --- | ---: |
+| 500M Units, 10% non-empty | 150M |
+| 500M Units, 100% non-empty | 1.5B |
+| 3B Units, 10% non-empty | 900M |
+| 3B Units, 100% non-empty | 9B |
+
+A provisional 64–96 byte heap row plus 80–160 bytes across the primary and
+reverse B-trees places these cases at roughly 22–38 GB, 216–384 GB, 130–230
+GB, and 1.3–2.3 TB respectively, before free space, bloat, WAL, replicas,
+backups, and maintenance workspace. These are planning ranges, not measured
+promises; replace them with production-shaped `pg_column_size`,
+`pg_relation_size`, and `pg_indexes_size` measurements before cutover.
+
+An ordinary write replaces about three projection rows and two index entries
+per row; the hard envelope is 64. Request candidate generation probes one
+language prefix and either no mask boundary or a fixed eight-mask set. The
+Search execution path stops reverse candidate collection at its configured
+bounded window and reapplies the complete predicate, so CPU, memory, and
+network work do not grow with the whole matching language population. Common
+languages are the skew risk for read traffic and index cache residency; writes
+remain distributed by the trailing UUID. Observe candidates visited, rows
+removed by the complete predicate, p50/p95/p99 latency, buffer reads, index hit
+rate, WAL per source edit, trigger time, lock waits, replica lag, autovacuum,
+and per-language skew.
+
 ### Read, write, concurrency, and network work
 
 - A Unit read adds one primary-key probe. Evidence hydration probes at most 50
@@ -222,27 +283,32 @@ Repartition with bounded UUID keyset copies and backpressure: create the target
 buckets, dual-write one bucket, copy bounded batches, compare counts and
 checksums per bucket, switch reads, stop the old write, and retire the old
 bucket only after the rollback window. Global discovery by language, if later
-required, belongs in a derived search/outbox projection partitioned for that
-query; it must never turn this authoritative JSONB table into a cross-shard
-scan or introduce another editable field.
+required, remains this derived projection. Partition it first by a stable hash
+of `language_tag` so exact-language probes prune partitions; split a hot
+language by a secondary stable hash of `unit_id` and fan out across a bounded,
+configured shard count. At the 9B-row safety envelope it must be treated as a
+distributed index rather than a single-node relation. This projection must
+never become another editable field.
 
 ## Migration and cutover
 
 The generated release migration
 `20260820063101_content_language_support_and_video_audio_tracks.sql` adds the
-revision-slot enum value and creates the empty content-language and Video Audio
-track tables. It intentionally
-does not backfill from `unit_localization`, `availableLanguages`, a Content
-Structure, Variants, or Releases. Therefore historical-data work is constant
-and no 500M-row validation scan is justified. The typed schema is not a live
-database cutover until this migration is applied.
+revision-slot enum value and creates the empty authoritative content-language
+table, its reverse Search projection and same-transaction maintenance trigger,
+and the Video Audio track table. Because this feature has not shipped, the one
+atomic migration intentionally does not backfill from an earlier content-language
+schema, `unit_localization`, `availableLanguages`, a Content Structure,
+Variants, or Releases. Historical-data work is constant and no 500M-row
+validation scan is justified. The typed schema is not a live database cutover
+until this migration is applied.
 
 The old binary does not understand the new history slot, so use a coordinated
 cutover:
 
 1. Stop Unit writes or enter the normal maintenance response.
-2. Apply the enum/table DDL; verify the content-language kind/value constraints and
-   the Video/Audio subtype foreign keys.
+2. Apply the enum/table/trigger DDL; verify the content-language constraints,
+   reverse projection trigger, and Video/Audio subtype foreign keys.
 3. Deploy the new API and workers before allowing a revision with the new slot.
 4. Run schema reconciliation and the production-shaped `EXPLAIN`/benchmark
    matrix above.
@@ -250,6 +316,7 @@ cutover:
    read as `[]` and new revisions contain exactly one slot.
 6. Resume writes while watching database latency, WAL, replica lag, and error
    telemetry.
+
 
 A failed DDL transaction leaves the previous application untouched. After new
 slots are written, rollback requires the new reader or a coordinated database

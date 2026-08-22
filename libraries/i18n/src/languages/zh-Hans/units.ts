@@ -494,9 +494,8 @@ export default {
 		title: "内容消费语言支持",
 		description:
 			"标明可用于阅读、观看、收听或操作内容的语言；不影响条目、社区、评论或其他功能是否可用。",
-		languageTag: "语言标签",
-		languageTagPlaceholder: "例如：语言或语言-地区",
-		invalidLanguageTag: "请输入有效的语言标签。",
+		language: "语言",
+		languagePlaceholder: "选择语言",
 		addLanguage: "添加语言",
 		removeLanguage: "移除语言",
 		channelLabel: "支持渠道",

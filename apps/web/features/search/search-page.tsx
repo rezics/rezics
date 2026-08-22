@@ -22,8 +22,13 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { PageHeading, QueryFailure, QueryPending } from "@rezics/ui";
 import { useQueryState, useQueryStates } from "nuqs";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 
+import { ContentLanguageSearchScope } from "@/features/content-language-support/components/content-language-search-scope";
+import {
+	contentLanguageSearchRouteParsers,
+	createContentLanguageSearchPredicate,
+} from "@/features/content-language-support/routing/content-language-search-route";
 import {
 	SearchFeedResults,
 	type SearchFeedRequest,
@@ -60,6 +65,7 @@ export function SearchSurface({
 	onInjectionsChange,
 	onQueryChange,
 	resolveOptionLabel,
+	toolbarFilters,
 }: {
 	readonly id: string;
 	readonly source: SearchSurfaceSource;
@@ -74,6 +80,7 @@ export function SearchSurface({
 		control: ResolvedSearchControl,
 		value: SearchScalar,
 	) => string | undefined;
+	readonly toolbarFilters?: ReactNode;
 }) {
 	const { t } = useTranslation("search");
 	const filterDocument = source.kind === "filter" ? source.filterDocument : undefined;
@@ -175,6 +182,7 @@ export function SearchSurface({
 			pending={executionPending}
 			resolveOptionLabel={resolveOptionLabel}
 			surface="search"
+			toolbarFilters={toolbarFilters}
 		>
 			{lastRequest ? (
 				<section className="grid gap-4">
@@ -215,6 +223,7 @@ function SearchLayout({
 	onInjectionsChange,
 	onQueryChange,
 	resolveOptionLabel,
+	toolbarFilters,
 	embedded = false,
 }: {
 	readonly id: string;
@@ -230,6 +239,7 @@ function SearchLayout({
 		control: ResolvedSearchControl,
 		value: SearchScalar,
 	) => string | undefined;
+	readonly toolbarFilters?: ReactNode;
 	readonly embedded?: boolean;
 }) {
 	const { t } = useTranslation("search");
@@ -251,6 +261,7 @@ function SearchLayout({
 				onQueryChange={onQueryChange}
 				resolveOptionLabel={resolveOptionLabel}
 				source={source}
+				toolbarFilters={toolbarFilters}
 			/>
 		</>
 	);
@@ -263,8 +274,23 @@ function SearchLayout({
 }
 
 function RouteSearchPage() {
-	const [route, setRoute] = useQueryStates(searchParamsParsers);
+	const [route, setRoute] = useQueryStates({
+		...searchParamsParsers,
+		...contentLanguageSearchRouteParsers,
+	});
 	const labels = new Map(route.tag.map((tagId, index) => [tagId, route.tagLabel[index]] as const));
+	const contentLanguagePredicate =
+		route.content && route.consumptionLanguage
+			? createContentLanguageSearchPredicate({
+					content: route.content,
+					languageTag: route.consumptionLanguage,
+					...(route.consumptionChannel ? { channel: route.consumptionChannel } : {}),
+				})
+			: undefined;
+	const initialFilter = withUnitFilterSearch(
+		contentLanguagePredicate ? { where: contentLanguagePredicate } : undefined,
+		route.q,
+	);
 	const injections: SearchInjection[] = route.tag.map((tagId) => ({
 		source: "tag",
 		removable: true,
@@ -277,8 +303,9 @@ function RouteSearchPage() {
 		<SearchLayout
 			id="global-search"
 			initialQuery={route.q}
+			initialState={initialFilter ? { filter: initialFilter } : undefined}
 			injections={injections}
-			key={`${route.q}:${route.tag.join(",")}`}
+			key={`${route.q}:${route.tag.join(",")}:${route.content ?? ""}:${route.consumptionLanguage ?? ""}:${route.consumptionChannel ?? ""}`}
 			onInjectionsChange={(next) => {
 				const tag = injectedTagIds(next);
 				void setRoute({
@@ -291,6 +318,15 @@ function RouteSearchPage() {
 				control.field === "tag" && typeof value === "string" ? labels.get(value) : undefined
 			}
 			source={{ kind: "filter", filterDocument: {} }}
+			toolbarFilters={
+				route.content && route.consumptionLanguage ? (
+					<ContentLanguageSearchScope
+						content={route.content}
+						languageTag={route.consumptionLanguage}
+						{...(route.consumptionChannel ? { channel: route.consumptionChannel } : {})}
+					/>
+				) : undefined
+			}
 		/>
 	);
 }

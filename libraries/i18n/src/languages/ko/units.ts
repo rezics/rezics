@@ -518,9 +518,8 @@ export default {
 		title: "콘텐츠 이용 언어",
 		description:
 			"콘텐츠를 읽거나 보고 듣고 조작할 수 있는 언어를 지정합니다. 항목, 커뮤니티, 리뷰 등 다른 기능의 이용 가능 여부에는 영향을 주지 않습니다.",
-		languageTag: "언어 태그",
-		languageTagPlaceholder: "예: 언어 또는 언어-지역",
-		invalidLanguageTag: "올바른 언어 태그를 입력하세요.",
+		language: "언어",
+		languagePlaceholder: "언어 선택",
 		addLanguage: "언어 추가",
 		removeLanguage: "언어 삭제",
 		channelLabel: "지원 채널",

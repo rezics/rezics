@@ -538,9 +538,8 @@ export default {
 		title: "Sprachen für die Inhaltsnutzung",
 		description:
 			"Legt fest, in welchen Sprachen der Inhalt gelesen, angesehen, angehört oder bedient werden kann. Dies beeinflusst nicht die Verfügbarkeit des Eintrags, der Community, der Rezensionen oder anderer Funktionen.",
-		languageTag: "Sprach-Tag",
-		languageTagPlaceholder: "Zum Beispiel: ja oder en-US",
-		invalidLanguageTag: "Gib ein gültiges Sprach-Tag ein.",
+		language: "Sprache",
+		languagePlaceholder: "Sprache auswählen",
 		addLanguage: "Sprache hinzufügen",
 		removeLanguage: "Sprache entfernen",
 		channelLabel: "Unterstützte Kanäle",

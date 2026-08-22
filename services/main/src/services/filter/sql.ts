@@ -1,5 +1,6 @@
 import type {
 	CollectionFilter,
+	ContentLanguageSupportFilter,
 	IntegerFilter,
 	LocalizationFilter,
 	PostFilter,
@@ -79,6 +80,30 @@ function localizationCondition(filter: LocalizationFilter): SQL {
 	if (filter.language)
 		conditions.push(valuesCondition(sql`filter_localization.language`, filter.language.in));
 	return conjunction(conditions);
+}
+
+const ContentLanguageChannelMasks = {
+	text: [1, 3, 5, 7, 9, 11, 13, 15],
+	audio: [2, 3, 6, 7, 10, 11, 14, 15],
+	subtitle: [4, 5, 6, 7, 12, 13, 14, 15],
+	interface: [8, 9, 10, 11, 12, 13, 14, 15],
+} as const satisfies Record<
+	NonNullable<ContentLanguageSupportFilter["channel"]>,
+	readonly number[]
+>;
+
+function contentLanguageSupportCondition(filter: ContentLanguageSupportFilter): SQL {
+	return conjunction([
+		sql`filter_content_language.language_tag = ${filter.languageTag}`,
+		...(filter.channel
+			? [
+					valuesCondition(
+						sql`filter_content_language.channel_mask`,
+						ContentLanguageChannelMasks[filter.channel],
+					),
+				]
+			: []),
+	]);
 }
 
 function realmPlacementCondition(filter: RealmPlacementFilter): SQL {
@@ -652,6 +677,10 @@ export function compileUnitPredicateCandidateSet(
 		conjunctiveSets.push(sql`select candidate_unit.id as unit_id
 			from unit candidate_unit
 			where ${valuesCondition(sql`candidate_unit.id`, filter.id.in, true)}`);
+	if (filter.contentLanguageSupport && "some" in filter.contentLanguageSupport)
+		conjunctiveSets.push(sql`select filter_content_language.unit_id
+			from unit_content_language_search filter_content_language
+			where ${contentLanguageSupportCondition(filter.contentLanguageSupport.some)}`);
 	if (filter.realms && "some" in filter.realms) {
 		const realmSet = realmPlacementCandidateSet(filter.realms.some);
 		if (realmSet) conjunctiveSets.push(realmSet);
@@ -726,6 +755,15 @@ export function compileUnitPredicateSql(
 			select 1 from unit_localization filter_localization
 			where filter_localization.unit_id = ${input.unitId}
 				and ${localizationCondition("some" in relation ? relation.some : relation.none)}
+		)`;
+		conditions.push("some" in relation ? exists : sql`not (${exists})`);
+	}
+	if (filter.contentLanguageSupport) {
+		const relation = filter.contentLanguageSupport;
+		const exists = sql`exists (
+			select 1 from unit_content_language_search filter_content_language
+			where filter_content_language.unit_id = ${input.unitId}
+				and ${contentLanguageSupportCondition("some" in relation ? relation.some : relation.none)}
 		)`;
 		conditions.push("some" in relation ? exists : sql`not (${exists})`);
 	}

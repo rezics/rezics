@@ -522,9 +522,8 @@ export default {
 		title: "Content consumption languages",
 		description:
 			"Specify the languages in which the content can be read, watched, heard, or operated. This does not affect access to the entry, community, reviews, or other features.",
-		languageTag: "Language tag",
-		languageTagPlaceholder: "For example: ja or en-US",
-		invalidLanguageTag: "Enter a valid language tag.",
+		language: "Language",
+		languagePlaceholder: "Select a language",
 		addLanguage: "Add language",
 		removeLanguage: "Remove language",
 		channelLabel: "Supported channels",

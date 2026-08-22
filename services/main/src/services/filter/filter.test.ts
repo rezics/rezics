@@ -101,6 +101,40 @@ describe("domain Filter contract", () => {
 		expect(SimpleFeedContentKindValues).not.toContain("post:reply");
 	});
 
+	it("requires canonical BCP 47 tags for content-consumption filters", () => {
+		expect(() =>
+			assertUnitPredicate({
+				contentLanguageSupport: { some: { languageTag: "zh-Hant", channel: "text" } },
+			}),
+		).not.toThrow();
+		expect(() =>
+			assertUnitPredicate({
+				contentLanguageSupport: { some: { languageTag: "zh-hant", channel: "text" } },
+			}),
+		).toThrow("canonical BCP 47 casing");
+	});
+
+	it("compiles content-consumption language and channel through the reverse projection", () => {
+		const filter = {
+			contentLanguageSupport: { some: { languageTag: "zh-Hant", channel: "text" } },
+		} satisfies UnitPredicate;
+		const eligibility = dialect.sqlToQuery(
+			compileUnitPredicateSql(filter, {
+				unitId: sql`candidate.id`,
+				unitKind: sql`candidate.kind`,
+			}),
+		);
+		const candidates = compileUnitPredicateCandidateSet(filter);
+		if (!candidates) throw new Error("Expected content-language candidate projection");
+		const candidateQuery = dialect.sqlToQuery(candidates);
+
+		expect(eligibility.sql).toContain("unit_content_language_search");
+		expect(eligibility.sql).toContain("filter_content_language.channel_mask in");
+		expect(eligibility.params).toEqual(["zh-Hant", 1, 3, 5, 7, 9, 11, 13, 15]);
+		expect(candidateQuery.sql).toContain("unit_content_language_search");
+		expect(candidateQuery.params).toEqual(["zh-Hant", 1, 3, 5, 7, 9, 11, 13, 15]);
+	});
+
 	it("canonicalizes object key order for cursor identity", () => {
 		expect(
 			canonicalUnitPredicate({

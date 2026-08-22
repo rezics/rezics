@@ -1,3 +1,8 @@
+import {
+	canonicalizeContentLanguageTag,
+	ContentLanguageChannelValues,
+	MaximumContentLanguageTagLength,
+} from "@rezics/content-language";
 import { type Static, type TSchema, Type } from "@sinclair/typebox";
 import { Check } from "@sinclair/typebox/value";
 
@@ -150,6 +155,11 @@ export const ContentLanguageFilter = inFilter(
 	FilterContentLanguageValues.length,
 );
 export type ContentLanguageFilter = Static<typeof ContentLanguageFilter>;
+export const ContentLanguageSupportTag = Type.String({
+	minLength: 1,
+	maxLength: MaximumContentLanguageTagLength,
+});
+export const ContentLanguageSupportChannel = stringEnum(ContentLanguageChannelValues);
 export const RealmUnitStatusFilter = inFilter(
 	FilterRealmUnitStatus,
 	FilterRealmUnitStatusValues.length,
@@ -306,6 +316,15 @@ export const LocalizationFilter = Type.Recursive(
 );
 export type LocalizationFilter = Static<typeof LocalizationFilter>;
 
+export const ContentLanguageSupportFilter = Type.Object(
+	{
+		languageTag: ContentLanguageSupportTag,
+		channel: Type.Optional(ContentLanguageSupportChannel),
+	},
+	{ additionalProperties: false },
+);
+export type ContentLanguageSupportFilter = Static<typeof ContentLanguageSupportFilter>;
+
 export const RealmPlacementFilter = Type.Recursive(
 	(This) =>
 		Type.Object(
@@ -421,6 +440,7 @@ export const UnitPredicate = Type.Recursive(
 				id: Type.Optional(UuidFilter),
 				kind: Type.Optional(UnitKindFilter),
 				localizations: Type.Optional(toMany(LocalizationFilter)),
+				contentLanguageSupport: Type.Optional(toMany(ContentLanguageSupportFilter)),
 				realms: Type.Optional(toMany(RealmPlacementFilter)),
 				tags: Type.Optional(toMany(TagAssertionFilter)),
 				creditAttributions: Type.Optional(toMany(UnitReferenceFilter)),
@@ -510,6 +530,7 @@ export function realmTagQueryPredicate(input: {
  */
 export const UnitPredicateSchemaModels = {
 	LocalizationFilter,
+	ContentLanguageSupportFilter,
 	RealmPlacementFilter,
 	TagAssertionFilter,
 	ScoreFilter,
@@ -558,6 +579,11 @@ function visitUnknownFilter(
 	}
 	const record = value as Record<string, unknown>;
 	if ("range" in record) assertRange(record as IntegerFilter | ScoreValueFilter, path);
+	if ("languageTag" in record) {
+		const canonical = canonicalizeContentLanguageTag(record.languageTag);
+		if (record.languageTag !== canonical)
+			throw new TypeError(`${path}.languageTag must use canonical BCP 47 casing`);
+	}
 	for (const [key, child] of Object.entries(record))
 		visitUnknownFilter(child, `${path}.${key}`, depth + 1, budget, limits);
 }

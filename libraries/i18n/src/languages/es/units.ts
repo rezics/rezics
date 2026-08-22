@@ -533,9 +533,8 @@ export default {
 		title: "Idiomas de consumo del contenido",
 		description:
 			"Indica los idiomas en los que el contenido se puede leer, ver, escuchar o utilizar. No afecta a la disponibilidad de la ficha, la comunidad, las reseñas ni otras funciones.",
-		languageTag: "Etiqueta de idioma",
-		languageTagPlaceholder: "Por ejemplo: ja o en-US",
-		invalidLanguageTag: "Introduce una etiqueta de idioma válida.",
+		language: "Idioma",
+		languagePlaceholder: "Selecciona un idioma",
 		addLanguage: "Añadir idioma",
 		removeLanguage: "Quitar idioma",
 		channelLabel: "Canales compatibles",

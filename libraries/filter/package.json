@@ -9,6 +9,7 @@
 		".": "./src/index.ts"
 	},
 	"dependencies": {
+		"@rezics/content-language": "workspace:*",
 		"@sinclair/typebox": "^0.34.41"
 	},
 	"devDependencies": {

@@ -5666,6 +5666,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@rezics/filter@workspace:libraries/filter"
   dependencies:
+    "@rezics/content-language": "workspace:*"
     "@sinclair/typebox": "npm:^0.34.41"
     typescript: "npm:7"
     vitest: "npm:4.1.10"

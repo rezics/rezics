@@ -497,9 +497,8 @@ export default {
 		title: "內容消費語言支援",
 		description:
 			"標示可用於閱讀、觀看、聆聽或操作內容的語言；不影響條目、社群、評論或其他功能是否可用。",
-		languageTag: "語言標籤",
-		languageTagPlaceholder: "例如：語言或語言-地區",
-		invalidLanguageTag: "請輸入有效的語言標籤。",
+		language: "語言",
+		languagePlaceholder: "選擇語言",
 		addLanguage: "加入語言",
 		removeLanguage: "移除語言",
 		channelLabel: "支援管道",

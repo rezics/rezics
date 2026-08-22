@@ -15,6 +15,8 @@ export const FeedUnitKindValues = [
 	"book",
 	"software",
 	"media",
+	"video",
+	"audio",
 	"release",
 	"entity",
 	"tag",
@@ -44,6 +46,8 @@ export type FeedIdentityUnitKind = (typeof FeedIdentityUnitKindValues)[number];
 
 export const FeedGeneralUnitKindValues = [
 	"profile",
+	"video",
+	"audio",
 	"release",
 	"entity",
 	"structure",
@@ -75,6 +79,8 @@ export const FeedContentKindValues = [
 	"unit:book",
 	"unit:software",
 	"unit:media",
+	"unit:video",
+	"unit:audio",
 	"unit:release",
 	"unit:entity",
 	"unit:tag",

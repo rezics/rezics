@@ -8,6 +8,8 @@ const { forms: realmTerms } = esTerminology.realm;
 const { forms: entityTerms } = esTerminology.entity;
 const { forms: tagStructureTerms } = esTerminology.tagStructure;
 const { forms: zoneTerms } = esTerminology.zone;
+const { forms: videoTerms } = esTerminology.video;
+const { forms: audioTerms } = esTerminology.audio;
 
 export default {
 	title: "Novedades",
@@ -57,6 +59,8 @@ export default {
 			"unit:book": "Libros",
 			"unit:software": "Software",
 			"unit:media": "Contenido multimedia",
+			"unit:video": videoTerms.pluralLabel,
+			"unit:audio": audioTerms.label,
 			"unit:release": "Versiones",
 			"unit:entity": entityTerms.pluralLabel,
 			"unit:tag": "Etiquetas",

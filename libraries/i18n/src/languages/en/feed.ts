@@ -8,6 +8,8 @@ const { forms: realmTerms } = enTerminology.realm;
 const { forms: entityTerms } = enTerminology.entity;
 const { forms: tagStructureTerms } = enTerminology.tagStructure;
 const { forms: zoneTerms } = enTerminology.zone;
+const { forms: videoTerms } = enTerminology.video;
+const { forms: audioTerms } = enTerminology.audio;
 
 export default {
 	title: "Feed",
@@ -57,6 +59,8 @@ export default {
 			"unit:book": "Books",
 			"unit:software": "Software",
 			"unit:media": "Media",
+			"unit:video": videoTerms.pluralLabel,
+			"unit:audio": audioTerms.label,
 			"unit:release": "Releases",
 			"unit:entity": entityTerms.pluralLabel,
 			"unit:tag": "Tags",

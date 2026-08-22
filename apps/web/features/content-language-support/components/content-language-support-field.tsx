@@ -3,17 +3,28 @@
 import {
 	ContentLanguageChannelValues,
 	type ContentLanguageChannel,
+	type ContentLanguageTag,
 } from "@rezics/content-language";
-import { Badge, Button, Checkbox, Field, FieldLabel, Input } from "@rezics/ui";
+import {
+	Badge,
+	Button,
+	Checkbox,
+	Field,
+	FieldLabel,
+	NativeSelect,
+	NativeSelectOption,
+} from "@rezics/ui";
 import { useId, useState } from "react";
 
 import { useTranslation } from "@/i18n/client";
 import {
 	addContentLanguage,
+	ContentLanguageEditorTagValues,
 	removeContentLanguage,
 	toggleContentLanguageChannel,
 	type ContentLanguageSupportDraft,
 } from "../model/content-language-support";
+import { formatContentLanguageName } from "../model/content-language-presentation";
 
 export type ContentLanguageSupportFieldProps = {
 	readonly disabled?: boolean;
@@ -26,24 +37,17 @@ export function ContentLanguageSupportField({
 	onChange,
 	value,
 }: ContentLanguageSupportFieldProps) {
-	const { t } = useTranslation(["units"]);
+	const { locale, t } = useTranslation(["units"]);
 	const fieldId = useId();
-	const [languageTagInput, setLanguageTagInput] = useState("");
-	const [languageTagInvalid, setLanguageTagInvalid] = useState(false);
+	const [languageTagSelection, setLanguageTagSelection] = useState<ContentLanguageTag>();
+	const availableLanguageTags = ContentLanguageEditorTagValues.filter(
+		(languageTag) => !value.some((entry) => entry.languageTag === languageTag),
+	);
 
 	function addLanguage() {
-		const candidate = languageTagInput.trim();
-		if (!candidate) {
-			setLanguageTagInvalid(true);
-			return;
-		}
-		try {
-			onChange(addContentLanguage(value, candidate));
-			setLanguageTagInput("");
-			setLanguageTagInvalid(false);
-		} catch {
-			setLanguageTagInvalid(true);
-		}
+		if (!languageTagSelection) return;
+		onChange(addContentLanguage(value, languageTagSelection));
+		setLanguageTagSelection(undefined);
 	}
 
 	return (
@@ -59,45 +63,52 @@ export function ContentLanguageSupportField({
 
 			<Field>
 				<FieldLabel htmlFor={`${fieldId}-language-tag`}>
-					{t.units.contentLanguageSupport.languageTag}
+					{t.units.contentLanguageSupport.language}
 				</FieldLabel>
 				<div className="flex flex-col gap-2 sm:flex-row">
-					<Input
-						aria-describedby={languageTagInvalid ? `${fieldId}-language-tag-error` : undefined}
-						aria-invalid={languageTagInvalid}
-						disabled={disabled}
+					<NativeSelect
+						disabled={disabled || availableLanguageTags.length === 0}
 						id={`${fieldId}-language-tag`}
 						onChange={(event) => {
-							setLanguageTagInput(event.currentTarget.value);
-							setLanguageTagInvalid(false);
+							const languageTag = availableLanguageTags.find(
+								(candidate) => candidate === event.currentTarget.value,
+							);
+							setLanguageTagSelection(languageTag);
 						}}
-						onKeyDown={(event) => {
-							if (event.key !== "Enter") return;
-							event.preventDefault();
-							addLanguage();
-						}}
-						placeholder={t.units.contentLanguageSupport.languageTagPlaceholder}
-						value={languageTagInput}
-					/>
-					<Button disabled={disabled} onClick={addLanguage} type="button" variant="outline">
+						value={languageTagSelection ?? ""}
+					>
+						<NativeSelectOption disabled value="">
+							{t.units.contentLanguageSupport.languagePlaceholder}
+						</NativeSelectOption>
+						{availableLanguageTags.map((languageTag) => (
+							<NativeSelectOption key={languageTag} value={languageTag}>
+								{formatContentLanguageName(locale.current, languageTag)}
+							</NativeSelectOption>
+						))}
+					</NativeSelect>
+					<Button
+						disabled={disabled || !languageTagSelection}
+						onClick={addLanguage}
+						type="button"
+						variant="outline"
+					>
 						{t.units.contentLanguageSupport.addLanguage}
 					</Button>
 				</div>
-				{languageTagInvalid ? (
-					<p className="text-sm text-destructive" id={`${fieldId}-language-tag-error`} role="alert">
-						{t.units.contentLanguageSupport.invalidLanguageTag}
-					</p>
-				) : null}
 			</Field>
 
 			<div className="grid gap-3">
 				{value.map((entry) => (
 					<fieldset className="grid gap-3 rounded-lg bg-muted/32 p-3" key={entry.languageTag}>
-						<legend className="sr-only">{entry.languageTag}</legend>
+						<legend className="sr-only">
+							{formatContentLanguageName(locale.current, entry.languageTag)}
+						</legend>
 						<div className="flex flex-wrap items-center justify-between gap-2">
-							<Badge variant="outline">{entry.languageTag}</Badge>
+							<Badge variant="outline">
+								{formatContentLanguageName(locale.current, entry.languageTag)}
+							</Badge>
 							<Button
-								aria-label={`${t.units.contentLanguageSupport.removeLanguage}: ${entry.languageTag}`}
+								aria-label={`${t.units.contentLanguageSupport.removeLanguage}: ${formatContentLanguageName(locale.current, entry.languageTag)}`}
 								disabled={disabled}
 								onClick={() => onChange(removeContentLanguage(value, entry.languageTag))}
 								type="button"

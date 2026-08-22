@@ -42,6 +42,7 @@ import { toNonNegativeApiInteger } from "@/lib/api-number";
 import { isVariantUnitType } from "./unit-types";
 import { UnitReferenceCandidates } from "./components/unit-reference-candidates";
 import { ContentLanguageSupportDisplay } from "@/features/content-language-support/components/content-language-support-display";
+import { isContentLanguageSupportUnitType } from "@/features/content-language-support/model/content-language-support";
 
 const Icons = {
 	book: BookOpen,
@@ -332,7 +333,10 @@ export function UnitDetail({ type, unit }: { type: UnitType; unit: string }) {
 						<DetailSection title={t.units.contentLanguageSupport.title}>
 							<Card>
 								<CardContent className="p-5">
-									<ContentLanguageSupportDisplay value={item.contentLanguageSupport} />
+									<ContentLanguageSupportDisplay
+										{...(isContentLanguageSupportUnitType(type) ? { searchUnitType: type } : {})}
+										value={item.contentLanguageSupport}
+									/>
 								</CardContent>
 							</Card>
 						</DetailSection>

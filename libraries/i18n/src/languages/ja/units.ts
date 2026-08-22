@@ -520,9 +520,8 @@ export default {
 		title: "コンテンツ利用言語",
 		description:
 			"作品を読んだり、視聴・聴取・操作したりできる言語を指定します。項目やコミュニティ、レビューなどの利用可否には影響しません。",
-		languageTag: "言語タグ",
-		languageTagPlaceholder: "例：言語、または言語-地域",
-		invalidLanguageTag: "有効な言語タグを入力してください。",
+		language: "言語",
+		languagePlaceholder: "言語を選択",
 		addLanguage: "言語を追加",
 		removeLanguage: "言語を削除",
 		channelLabel: "対応チャンネル",
