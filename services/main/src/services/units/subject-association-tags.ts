@@ -64,7 +64,7 @@ export function subjectAssociationEntityTagPreviewStatement(input: {
 						${unitTag.tagId}
 				) as preview_rank
 			from ${unitTag}
-			inner join ${previewTagUnit} on ${previewTagUnit.id} = ${unitTag.tagId}
+			inner join ${unit} as ${previewTagUnit} on ${previewTagUnit.id} = ${unitTag.tagId}
 			left join ${unitTagVoteStat}
 				on ${unitTagVoteStat.unitId} = ${unitTag.unitId}
 				and ${unitTagVoteStat.tagId} = ${unitTag.tagId}

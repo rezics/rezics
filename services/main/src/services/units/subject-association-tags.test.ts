@@ -16,7 +16,10 @@ describe("subject association Entity Tag previews", () => {
 		expect(normalizedSql).toContain("cross join lateral");
 		expect(normalizedSql).toContain("row_number() over");
 		expect(normalizedSql).toContain('"unit_tag"."unit_id" = requested_entity.entity_id');
-		expect(normalizedSql).toContain("subject_association_preview_tag_unit");
+		expect(normalizedSql).toContain(
+			'inner join "unit" as "subject_association_preview_tag_unit" on "subject_association_preview_tag_unit"."id" = "unit_tag"."tag_id"',
+		);
+		expect(normalizedSql).not.toContain('inner join "subject_association_preview_tag_unit" on');
 		expect(normalizedSql).toContain("order by requested_entity.entity_id, ranked.preview_rank");
 		expect(query.params).toContain(SubjectAssociationEntityTagPreviewLimit);
 	});
