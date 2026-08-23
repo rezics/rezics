@@ -43,6 +43,19 @@ describe("database migration transaction mode", () => {
 		).not.toContain("search_path");
 	});
 
+	it("allows only the two vetted pg_catalog Path-correction shard expressions", () => {
+		const preOverlay = [
+			"CREATE INDEX CONCURRENTLY unit_structure_application_correction_shard_idx ON public.unit_structure_application (structure_id, (pg_catalog.get_byte(pg_catalog.uuid_send(unit_id), 15)), unit_id);",
+			"CREATE INDEX CONCURRENTLY unit_structure_application_judgment_positive_correction_shard_idx ON public.unit_structure_application_judgment (structure_id, (pg_catalog.get_byte(pg_catalog.uuid_send(unit_id), 15)), unit_id, profile_id) WHERE fit_vote = 1;",
+		].join("\n");
+		expect(
+			composeMigrationSql({
+				preOverlay,
+				transactionModeNoneReason: "Keep the corpus-scale shard indexes online.",
+			}),
+		).toContain(preOverlay);
+	});
+
 	it.each([
 		"SET search_path TO public;\nCREATE INDEX CONCURRENTLY example_idx ON public.example (id);",
 		"CREATE INDEX CONCURRENTLY example_idx ON example (id);",
@@ -51,6 +64,10 @@ describe("database migration transaction mode", () => {
 		"DROP INDEX public.legacy_example_idx;",
 		"CREATE INDEX CONCURRENTLY public.example_idx ON public.example (id);",
 		"CREATE INDEX CONCURRENTLY example_idx ON public.example ((hostile_fn(id)));",
+		"CREATE INDEX CONCURRENTLY unit_structure_application_correction_shard_idx ON public.unit_structure_application (structure_id, (get_byte(uuid_send(unit_id), 15)), unit_id);",
+		"CREATE INDEX CONCURRENTLY unit_structure_application_correction_shard_idx ON public.unit_structure_application (structure_id, (pg_catalog.get_byte(pg_catalog.uuid_send(unit_id), 14)), unit_id);",
+		"CREATE INDEX CONCURRENTLY unit_structure_application_correction_shard_idx ON public.other_table (structure_id, (pg_catalog.get_byte(pg_catalog.uuid_send(unit_id), 15)), unit_id);",
+		"CREATE INDEX CONCURRENTLY unit_structure_application_judgment_positive_correction_shard_idx ON public.unit_structure_application_judgment (structure_id, (pg_catalog.get_byte(pg_catalog.uuid_send(unit_id), 15)), unit_id, profile_id) WHERE fit_vote = -1;",
 		"CREATE INDEX CONCURRENTLY example_idx ON ONLY public.example (id);",
 	])("rejects session-dependent or ambiguous resumable SQL: %s", (preOverlay) => {
 		expect(() =>
