@@ -5,6 +5,7 @@ import {
 	foreignKey,
 	index,
 	integer,
+	smallint,
 	primaryKey,
 	uniqueIndex,
 	uuid,
@@ -14,6 +15,7 @@ import { pgTable } from "./base";
 import {
 	createCreatedAtColumn,
 	createFractionalIndexPositionByteLengthConstraint,
+	createTimestampMsColumn,
 	createUpdatedAtColumn,
 	fractionalIndexPosition,
 } from "./columns";
@@ -23,13 +25,24 @@ import { post } from "./post";
 import { realm, realmUnit } from "./realm";
 
 /** Marker table proving that a Unit is a Tag. */
-export const tag = pgTable("tag", {
-	id: uuid()
-		.primaryKey()
-		.references(() => unit.id, { onDelete: "cascade" }),
-	createdAt: createCreatedAtColumn(),
-	updatedAt: createUpdatedAtColumn(),
-});
+export const tag = pgTable(
+	"tag",
+	{
+		id: uuid()
+			.primaryKey()
+			.references(() => unit.id, { onDelete: "cascade" }),
+		directlyApplicable: boolean().default(true).notNull(),
+		defaultSpoilerLevel: smallint(),
+		createdAt: createCreatedAtColumn(),
+		updatedAt: createUpdatedAtColumn(),
+	},
+	(table) => [
+		check(
+			"tag_default_spoiler_level_check",
+			sql`${table.defaultSpoilerLevel} is null or ${table.defaultSpoilerLevel} between 0 and 2`,
+		),
+	],
+);
 
 /** Global, community-voted Unit-to-Tag relationship. */
 export const unitTag = pgTable(
@@ -107,19 +120,22 @@ export const profileRealmTagSubscription = pgTable(
 	],
 );
 
-export const unitTagVote = pgTable(
-	"unit_tag_vote",
+export const unitTagJudgment = pgTable(
+	"unit_tag_judgment",
 	{
 		unitId: uuid()
 			.notNull()
-			.references(() => unit.id, { onDelete: "cascade" }),
+			.references(() => unit.id, { onDelete: "restrict" }),
 		tagId: uuid()
 			.notNull()
-			.references(() => tag.id, { onDelete: "cascade" }),
+			.references(() => tag.id, { onDelete: "restrict" }),
 		profileId: uuid()
 			.notNull()
-			.references(() => profile.id, { onDelete: "cascade" }),
-		value: integer().notNull(),
+			.references(() => profile.id, { onDelete: "restrict" }),
+		fitVote: integer(),
+		spoilerLevel: smallint(),
+		fitUpdatedAt: createTimestampMsColumn(),
+		spoilerUpdatedAt: createTimestampMsColumn(),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),
 	},
@@ -128,12 +144,31 @@ export const unitTagVote = pgTable(
 		foreignKey({
 			columns: [table.unitId, table.tagId],
 			foreignColumns: [unitTag.unitId, unitTag.tagId],
-			name: "unit_tag_vote_unit_tag_fkey",
-		}).onDelete("cascade"),
-		index("unit_tag_vote_tag_idx").on(table.tagId),
-		index("unit_tag_vote_profile_idx").on(table.profileId),
-		check("unit_tag_vote_not_self_check", sql`${table.unitId} <> ${table.tagId}`),
-		check("unit_tag_vote_value_check", sql`${table.value} in (-1, 1)`),
+			name: "unit_tag_judgment_unit_tag_fkey",
+		}).onDelete("restrict"),
+		index("unit_tag_judgment_tag_unit_idx").on(table.tagId, table.unitId),
+		index("unit_tag_judgment_profile_unit_tag_idx").on(table.profileId, table.unitId, table.tagId),
+		check("unit_tag_judgment_not_self_check", sql`${table.unitId} <> ${table.tagId}`),
+		check(
+			"unit_tag_judgment_fit_vote_check",
+			sql`${table.fitVote} is null or ${table.fitVote} in (-1, 1)`,
+		),
+		check(
+			"unit_tag_judgment_spoiler_level_check",
+			sql`${table.spoilerLevel} is null or ${table.spoilerLevel} between 0 and 2`,
+		),
+		check(
+			"unit_tag_judgment_sparse_check",
+			sql`${table.fitVote} is not null or ${table.spoilerLevel} is not null`,
+		),
+		check(
+			"unit_tag_judgment_fit_timestamp_check",
+			sql`(${table.fitVote} is null) = (${table.fitUpdatedAt} is null)`,
+		),
+		check(
+			"unit_tag_judgment_spoiler_timestamp_check",
+			sql`(${table.spoilerLevel} is null) = (${table.spoilerUpdatedAt} is null)`,
+		),
 	],
 );
 
@@ -146,7 +181,7 @@ export const realmTagContext = pgTable(
 			.references(() => realm.id, { onDelete: "cascade" }),
 		tagId: uuid()
 			.notNull()
-			.references(() => tag.id, { onDelete: "restrict" }),
+			.references(() => tag.id, { onDelete: "cascade" }),
 		contextPostId: uuid()
 			.notNull()
 			.references(() => post.id, { onDelete: "restrict" }),
@@ -169,16 +204,19 @@ export const realmTagContext = pgTable(
 	],
 );
 
-export const realmTagVote = pgTable(
-	"realm_tag_vote",
+export const realmTagJudgment = pgTable(
+	"realm_tag_judgment",
 	{
 		realmId: uuid().notNull(),
 		unitId: uuid().notNull(),
 		tagId: uuid().notNull(),
 		profileId: uuid()
 			.notNull()
-			.references(() => profile.id, { onDelete: "cascade" }),
-		value: integer().notNull(),
+			.references(() => profile.id, { onDelete: "restrict" }),
+		fitVote: integer(),
+		spoilerLevel: smallint(),
+		fitUpdatedAt: createTimestampMsColumn(),
+		spoilerUpdatedAt: createTimestampMsColumn(),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),
 	},
@@ -189,33 +227,63 @@ export const realmTagVote = pgTable(
 		foreignKey({
 			columns: [table.realmId],
 			foreignColumns: [realm.id],
-			name: "realm_tag_vote_realm_fkey",
-		}).onDelete("cascade"),
+			name: "realm_tag_judgment_realm_fkey",
+		}).onDelete("restrict"),
 		foreignKey({
 			columns: [table.unitId],
 			foreignColumns: [unit.id],
-			name: "realm_tag_vote_unit_fkey",
-		}).onDelete("cascade"),
+			name: "realm_tag_judgment_unit_fkey",
+		}).onDelete("restrict"),
 		foreignKey({
 			columns: [table.tagId],
 			foreignColumns: [tag.id],
-			name: "realm_tag_vote_tag_fkey",
-		}).onDelete("cascade"),
+			name: "realm_tag_judgment_tag_fkey",
+		}).onDelete("restrict"),
 		foreignKey({
 			columns: [table.realmId, table.tagId],
 			foreignColumns: [realmTagContext.realmId, realmTagContext.tagId],
-			name: "realm_tag_vote_context_fkey",
-		}).onDelete("cascade"),
-		index("realm_tag_vote_profile_idx").on(table.profileId),
-		index("realm_tag_vote_realm_tag_unit_idx").on(table.realmId, table.tagId, table.unitId),
-		index("realm_tag_vote_unit_merge_idx").on(
+			name: "realm_tag_judgment_context_fkey",
+		}).onDelete("restrict"),
+		index("realm_tag_judgment_profile_route_idx").on(
+			table.profileId,
+			table.realmId,
+			table.unitId,
+			table.tagId,
+		),
+		index("realm_tag_judgment_realm_tag_unit_idx").on(table.realmId, table.tagId, table.unitId),
+		index("realm_tag_judgment_tag_route_idx").on(
+			table.tagId,
+			table.realmId,
+			table.unitId,
+			table.profileId,
+		),
+		index("realm_tag_judgment_unit_merge_idx").on(
 			table.unitId,
 			table.realmId,
 			table.tagId,
 			table.profileId,
 		),
-		check("realm_tag_vote_not_self_check", sql`${table.unitId} <> ${table.tagId}`),
-		check("realm_tag_vote_value_check", sql`${table.value} in (-1, 1)`),
+		check("realm_tag_judgment_not_self_check", sql`${table.unitId} <> ${table.tagId}`),
+		check(
+			"realm_tag_judgment_fit_vote_check",
+			sql`${table.fitVote} is null or ${table.fitVote} in (-1, 1)`,
+		),
+		check(
+			"realm_tag_judgment_spoiler_level_check",
+			sql`${table.spoilerLevel} is null or ${table.spoilerLevel} between 0 and 2`,
+		),
+		check(
+			"realm_tag_judgment_sparse_check",
+			sql`${table.fitVote} is not null or ${table.spoilerLevel} is not null`,
+		),
+		check(
+			"realm_tag_judgment_fit_timestamp_check",
+			sql`(${table.fitVote} is null) = (${table.fitUpdatedAt} is null)`,
+		),
+		check(
+			"realm_tag_judgment_spoiler_timestamp_check",
+			sql`(${table.spoilerLevel} is null) = (${table.spoilerUpdatedAt} is null)`,
+		),
 	],
 );
 
@@ -243,6 +311,7 @@ export const realmUnitTag = pgTable(
 			name: "realm_unit_tag_realm_unit_fkey",
 		}).onDelete("cascade"),
 		index("realm_unit_tag_tag_idx").on(table.realmId, table.tagId, table.unitId),
+		index("realm_unit_tag_tag_route_idx").on(table.tagId, table.realmId, table.unitId),
 		index("realm_unit_tag_unit_merge_idx").on(table.unitId, table.realmId, table.tagId),
 		check("realm_unit_tag_not_self_check", sql`${table.unitId} <> ${table.tagId}`),
 		createFractionalIndexPositionByteLengthConstraint(

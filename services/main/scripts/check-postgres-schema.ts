@@ -1,26 +1,29 @@
-import { readFile } from "node:fs/promises";
+import { readdir, readFile } from "node:fs/promises";
 import { Client } from "pg";
 
 import {
 	PostgreSqlSchemaFileNames,
 	PostgreSqlSchemaFunctionNames,
+	PostgreSqlSchemaTriggerContracts,
 	PostgreSqlSchemaTriggers,
+	PostgreSqlSchemaViews,
 } from "../src/services/database/schema/postgres/manifest";
 import { adminDatabaseUrl } from "./admin-database";
+import {
+	assertCanonicalPostgreSqlObjectManifest,
+	assertCanonicalPostgreSqlSchemaFiles,
+	assertPostgreSqlDefinitionsComplete,
+} from "./postgres-schema-object-contract";
+import {
+	assertCanonicalPostgreSqlViewDeclarations,
+	assertPostgreSqlViewDefinitionsEqual,
+	assertPostgreSqlViewManifest,
+	decodePostgreSqlViewSnapshots,
+	type PostgreSqlViewCatalogRow,
+	type PostgreSqlViewSnapshot,
+} from "./postgres-schema-view-contract";
 
 type Definition = { readonly key: string; readonly definition: string };
-
-function assertComplete(
-	definitions: readonly Definition[],
-	expectedKeys: ReadonlySet<string>,
-	kind: string,
-): void {
-	const actualKeys = new Set(definitions.map(({ key }) => key));
-	for (const key of expectedKeys)
-		if (!actualKeys.has(key)) throw new Error(`Missing PostgreSQL ${kind} ${key}`);
-	for (const key of actualKeys)
-		if (!expectedKeys.has(key)) throw new Error(`Unexpected PostgreSQL ${kind} ${key}`);
-}
 
 async function readFunctionDefinitions(client: Client): Promise<readonly Definition[]> {
 	const result = await client.query<Definition>(
@@ -52,6 +55,38 @@ async function readTriggerDefinitions(client: Client): Promise<readonly Definiti
 	return result.rows;
 }
 
+async function readViewDefinitions(client: Client): Promise<readonly PostgreSqlViewSnapshot[]> {
+	const result = await client.query<PostgreSqlViewCatalogRow>(
+		`select relation.relname as key,
+		        relation.relkind as "relationKind",
+		        coalesce(
+		          (select array_agg(option order by option)
+		           from unnest(relation.reloptions) option),
+		          array[]::text[]
+		        ) as "relOptions",
+		        coalesce(signature.columns, '[]'::jsonb) as columns,
+		        pg_catalog.pg_get_viewdef(relation.oid, false) as definition
+		 from pg_catalog.pg_class relation
+		 join pg_catalog.pg_namespace namespace on namespace.oid = relation.relnamespace
+		 left join lateral (
+		   select jsonb_agg(
+		            jsonb_build_object(
+		              'name', attribute.attname,
+		              'dataType', pg_catalog.format_type(attribute.atttypid, attribute.atttypmod)
+		            ) order by attribute.attnum
+		          ) as columns
+		   from pg_catalog.pg_attribute attribute
+		   where attribute.attrelid = relation.oid
+		     and attribute.attnum > 0
+		     and not attribute.attisdropped
+		 ) signature on true
+		 where namespace.nspname = 'public'
+		   and left(relation.relname, 8) = 'current_'
+		 order by relation.relname`,
+	);
+	return decodePostgreSqlViewSnapshots(result.rows);
+}
+
 function definitionMap(definitions: readonly Definition[]): ReadonlyMap<string, string> {
 	return new Map(definitions.map(({ key, definition }) => [key, definition] as const));
 }
@@ -68,39 +103,56 @@ function assertDefinitionsEqual(
 }
 
 async function main(): Promise<void> {
+	const schemaDirectory = new URL("../src/services/database/schema/postgres/", import.meta.url);
+	const actualFileNames = (await readdir(schemaDirectory, { withFileTypes: true }))
+		.filter((entry) => entry.isFile() && entry.name.endsWith(".sql"))
+		.map(({ name }) => name);
+	assertCanonicalPostgreSqlSchemaFiles(actualFileNames, PostgreSqlSchemaFileNames);
+	const schemaDefinitions = await Promise.all(
+		PostgreSqlSchemaFileNames.map((fileName) =>
+			readFile(new URL(fileName, schemaDirectory), "utf8"),
+		),
+	);
+	assertCanonicalPostgreSqlObjectManifest(
+		schemaDefinitions,
+		PostgreSqlSchemaFunctionNames,
+		PostgreSqlSchemaTriggers,
+		PostgreSqlSchemaTriggerContracts,
+	);
+
 	const client = new Client({ connectionString: adminDatabaseUrl });
 	await client.connect();
 	try {
-		const expectedFunctions = new Set<string>(PostgreSqlSchemaFunctionNames);
-		const expectedTriggers = new Set(
-			PostgreSqlSchemaTriggers.map(({ table, name }) => `${table}.${name}`),
-		);
+		const expectedTriggers = PostgreSqlSchemaTriggers.map(({ table, name }) => `${table}.${name}`);
 		const functionsBefore = await readFunctionDefinitions(client);
 		const triggersBefore = await readTriggerDefinitions(client);
-		assertComplete(functionsBefore, expectedFunctions, "function");
-		assertComplete(triggersBefore, expectedTriggers, "trigger");
-
-		const schemaDefinitions = await Promise.all(
-			PostgreSqlSchemaFileNames.map((fileName) =>
-				readFile(
-					new URL(`../src/services/database/schema/postgres/${fileName}`, import.meta.url),
-					"utf8",
-				),
-			),
-		);
+		const viewsBefore = await readViewDefinitions(client);
+		assertPostgreSqlDefinitionsComplete(functionsBefore, PostgreSqlSchemaFunctionNames, "function");
+		assertPostgreSqlDefinitionsComplete(triggersBefore, expectedTriggers, "trigger");
+		assertPostgreSqlViewManifest(viewsBefore, PostgreSqlSchemaViews);
+		assertCanonicalPostgreSqlViewDeclarations(schemaDefinitions, PostgreSqlSchemaViews);
 		await client.query("begin");
 		try {
 			for (const definition of schemaDefinitions) await client.query(definition);
 			const functionsAfter = await readFunctionDefinitions(client);
 			const triggersAfter = await readTriggerDefinitions(client);
-			assertComplete(functionsAfter, expectedFunctions, "function");
-			assertComplete(triggersAfter, expectedTriggers, "trigger");
+			const viewsAfter = await readViewDefinitions(client);
+			assertPostgreSqlDefinitionsComplete(
+				functionsAfter,
+				PostgreSqlSchemaFunctionNames,
+				"function",
+			);
+			assertPostgreSqlDefinitionsComplete(triggersAfter, expectedTriggers, "trigger");
+			assertPostgreSqlViewManifest(viewsAfter, PostgreSqlSchemaViews);
 			assertDefinitionsEqual(functionsBefore, functionsAfter, "function");
 			assertDefinitionsEqual(triggersBefore, triggersAfter, "trigger");
+			assertPostgreSqlViewDefinitionsEqual(viewsBefore, viewsAfter);
 		} finally {
 			await client.query("rollback");
 		}
-		console.info("Canonical PostgreSQL functions and triggers match migration replay.");
+		console.info(
+			"Canonical PostgreSQL functions, triggers, and current Structure views match migration replay.",
+		);
 	} finally {
 		await client.end();
 	}

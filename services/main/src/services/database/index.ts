@@ -3,6 +3,7 @@ import { Pool } from "pg";
 import { instrumentPostgresClient, peekActiveObservability } from "@rezics/observability";
 
 import { env } from "../config";
+import { VndbV11BinaryContractConnectionConfig } from "./vndb-v11-contract";
 
 const pool = new Pool({
 	connectionString: env.DATABASE_URL,
@@ -11,6 +12,7 @@ const pool = new Pool({
 	idleTimeoutMillis: env.DATABASE_POOL_IDLE_TIMEOUT_MS,
 	maxLifetimeSeconds: env.DATABASE_POOL_MAX_LIFETIME_SECONDS,
 	statement_timeout: env.DATABASE_STATEMENT_TIMEOUT_MS,
+	...VndbV11BinaryContractConnectionConfig,
 });
 peekActiveObservability()?.metrics.registerDatabasePool(() => ({
 	total: pool.totalCount,

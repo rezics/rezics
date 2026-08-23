@@ -63,3 +63,9 @@ BEGIN
   RETURN NEW;
 END;
 $$;
+
+DROP TRIGGER IF EXISTS unit_license_grant_guard_mutation ON public.unit_license_grant;
+CREATE TRIGGER unit_license_grant_guard_mutation
+    BEFORE DELETE OR UPDATE ON public.unit_license_grant
+    FOR EACH ROW
+    EXECUTE FUNCTION public.guard_unit_license_grant_mutation();

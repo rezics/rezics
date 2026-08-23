@@ -1,0 +1,1 @@
+Install the durable writer fence against the legacy schema before online index construction; the target Drizzle contract must remain unchanged in this preparation stage.

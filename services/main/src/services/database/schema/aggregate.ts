@@ -25,6 +25,7 @@ import { type ContentLanguage, ContentLanguageValues } from "./contract-values";
 import { reactionKind } from "./reaction";
 import { realm } from "./realm";
 import { unitEffectiveTag, unitStructure, unitStructureApplication } from "./structure";
+import { subjectAssociation } from "./entity";
 import { realmTagContext, tag } from "./tag";
 
 const aggregateCount = () => bigint({ mode: "bigint" }).default(0n).notNull();
@@ -110,13 +111,17 @@ export const unitExternalLinkVoteStat = pgTable(
 	],
 );
 
-export const unitTagVoteStat = pgTable(
-	"unit_tag_vote_stat",
+export const unitTagJudgmentStat = pgTable(
+	"unit_tag_judgment_stat",
 	{
 		unitId: uuid().notNull(),
 		tagId: uuid().notNull(),
 		score: bigint({ mode: "bigint" }).default(0n).notNull(),
 		voteCount: aggregateCount(),
+		spoilerVoteCount: aggregateCount(),
+		spoilerNoneCount: aggregateCount(),
+		spoilerMinorCount: aggregateCount(),
+		spoilerMajorCount: aggregateCount(),
 		updatedAt: createUpdatedAtColumn(),
 	},
 	(table) => [
@@ -124,11 +129,26 @@ export const unitTagVoteStat = pgTable(
 		foreignKey({
 			columns: [table.unitId, table.tagId],
 			foreignColumns: [unitEffectiveTag.unitId, unitEffectiveTag.tagId],
-			name: "unit_tag_vote_stat_effective_tag_fkey",
+			name: "unit_tag_judgment_stat_effective_tag_fkey",
 		}).onDelete("cascade"),
-		check("unit_tag_vote_stat_count_check", sql`${table.voteCount} >= 0`),
-		check("unit_tag_vote_stat_score_check", sql`abs(${table.score}) <= ${table.voteCount}`),
-		check("unit_tag_vote_stat_parity_check", sql`(${table.voteCount} + ${table.score}) % 2 = 0`),
+		check("unit_tag_judgment_stat_count_check", sql`${table.voteCount} >= 0`),
+		check("unit_tag_judgment_stat_score_check", sql`abs(${table.score}) <= ${table.voteCount}`),
+		check(
+			"unit_tag_judgment_stat_parity_check",
+			sql`(${table.voteCount} + ${table.score}) % 2 = 0`,
+		),
+		check(
+			"unit_tag_judgment_stat_spoiler_nonnegative_check",
+			sql`${table.spoilerVoteCount} >= 0
+				and ${table.spoilerNoneCount} >= 0
+				and ${table.spoilerMinorCount} >= 0
+				and ${table.spoilerMajorCount} >= 0`,
+		),
+		check(
+			"unit_tag_judgment_stat_spoiler_count_check",
+			sql`${table.spoilerVoteCount} =
+				${table.spoilerNoneCount} + ${table.spoilerMinorCount} + ${table.spoilerMajorCount}`,
+		),
 	],
 );
 
@@ -152,13 +172,17 @@ export const unitStructureVoteStat = pgTable(
 	],
 );
 
-export const unitStructureApplicationVoteStat = pgTable(
-	"unit_structure_application_vote_stat",
+export const unitStructureApplicationJudgmentStat = pgTable(
+	"unit_structure_application_judgment_stat",
 	{
 		unitId: uuid().notNull(),
 		structureId: uuid().notNull(),
 		score: bigint({ mode: "bigint" }).default(0n).notNull(),
 		voteCount: aggregateCount(),
+		spoilerVoteCount: aggregateCount(),
+		spoilerNoneCount: aggregateCount(),
+		spoilerMinorCount: aggregateCount(),
+		spoilerMajorCount: aggregateCount(),
 		updatedAt: createUpdatedAtColumn(),
 	},
 	(table) => [
@@ -166,28 +190,44 @@ export const unitStructureApplicationVoteStat = pgTable(
 		foreignKey({
 			columns: [table.unitId, table.structureId],
 			foreignColumns: [unitStructureApplication.unitId, unitStructureApplication.structureId],
-			name: "unit_structure_application_vote_stat_application_fkey",
+			name: "unit_structure_application_judgment_stat_application_fkey",
 		}).onDelete("cascade"),
-		check("unit_structure_application_vote_stat_count_check", sql`${table.voteCount} >= 0`),
+		check("unit_structure_application_judgment_stat_count_check", sql`${table.voteCount} >= 0`),
 		check(
-			"unit_structure_application_vote_stat_score_check",
+			"unit_structure_application_judgment_stat_score_check",
 			sql`abs(${table.score}) <= ${table.voteCount}`,
 		),
 		check(
-			"unit_structure_application_vote_stat_parity_check",
+			"unit_structure_application_judgment_stat_parity_check",
 			sql`(${table.voteCount} + ${table.score}) % 2 = 0`,
+		),
+		check(
+			"unit_structure_application_judgment_stat_spoiler_nonnegative_check",
+			sql`${table.spoilerVoteCount} >= 0
+				and ${table.spoilerNoneCount} >= 0
+				and ${table.spoilerMinorCount} >= 0
+				and ${table.spoilerMajorCount} >= 0`,
+		),
+		check(
+			"unit_structure_application_judgment_stat_spoiler_count_check",
+			sql`${table.spoilerVoteCount} =
+				${table.spoilerNoneCount} + ${table.spoilerMinorCount} + ${table.spoilerMajorCount}`,
 		),
 	],
 );
 
-export const realmTagVoteStat = pgTable(
-	"realm_tag_vote_stat",
+export const realmTagJudgmentStat = pgTable(
+	"realm_tag_judgment_stat",
 	{
 		realmId: uuid().notNull(),
 		unitId: uuid().notNull(),
 		tagId: uuid().notNull(),
 		score: bigint({ mode: "bigint" }).default(0n).notNull(),
 		voteCount: aggregateCount(),
+		spoilerVoteCount: aggregateCount(),
+		spoilerNoneCount: aggregateCount(),
+		spoilerMinorCount: aggregateCount(),
+		spoilerMajorCount: aggregateCount(),
 		updatedAt: createUpdatedAtColumn(),
 	},
 	(table) => [
@@ -195,27 +235,84 @@ export const realmTagVoteStat = pgTable(
 		foreignKey({
 			columns: [table.realmId],
 			foreignColumns: [realm.id],
-			name: "realm_tag_vote_stat_realm_fkey",
+			name: "realm_tag_judgment_stat_realm_fkey",
 		}).onDelete("cascade"),
 		foreignKey({
 			columns: [table.unitId],
 			foreignColumns: [unit.id],
-			name: "realm_tag_vote_stat_unit_fkey",
+			name: "realm_tag_judgment_stat_unit_fkey",
 		}).onDelete("cascade"),
 		foreignKey({
 			columns: [table.tagId],
 			foreignColumns: [tag.id],
-			name: "realm_tag_vote_stat_tag_fkey",
+			name: "realm_tag_judgment_stat_tag_fkey",
 		}).onDelete("cascade"),
 		foreignKey({
 			columns: [table.realmId, table.tagId],
 			foreignColumns: [realmTagContext.realmId, realmTagContext.tagId],
-			name: "realm_tag_vote_stat_context_fkey",
+			name: "realm_tag_judgment_stat_context_fkey",
 		}).onDelete("cascade"),
-		index("realm_tag_vote_stat_realm_tag_unit_idx").on(table.realmId, table.tagId, table.unitId),
-		check("realm_tag_vote_stat_count_check", sql`${table.voteCount} >= 0`),
-		check("realm_tag_vote_stat_score_check", sql`abs(${table.score}) <= ${table.voteCount}`),
-		check("realm_tag_vote_stat_parity_check", sql`(${table.voteCount} + ${table.score}) % 2 = 0`),
+		index("realm_tag_judgment_stat_realm_tag_unit_idx").on(
+			table.realmId,
+			table.tagId,
+			table.unitId,
+		),
+		index("realm_tag_judgment_stat_unit_realm_tag_idx").on(
+			table.unitId,
+			table.realmId,
+			table.tagId,
+		),
+		index("realm_tag_judgment_stat_tag_realm_unit_idx").on(
+			table.tagId,
+			table.realmId,
+			table.unitId,
+		),
+		check("realm_tag_judgment_stat_count_check", sql`${table.voteCount} >= 0`),
+		check("realm_tag_judgment_stat_score_check", sql`abs(${table.score}) <= ${table.voteCount}`),
+		check(
+			"realm_tag_judgment_stat_parity_check",
+			sql`(${table.voteCount} + ${table.score}) % 2 = 0`,
+		),
+		check(
+			"realm_tag_judgment_stat_spoiler_nonnegative_check",
+			sql`${table.spoilerVoteCount} >= 0
+				and ${table.spoilerNoneCount} >= 0
+				and ${table.spoilerMinorCount} >= 0
+				and ${table.spoilerMajorCount} >= 0`,
+		),
+		check(
+			"realm_tag_judgment_stat_spoiler_count_check",
+			sql`${table.spoilerVoteCount} =
+				${table.spoilerNoneCount} + ${table.spoilerMinorCount} + ${table.spoilerMajorCount}`,
+		),
+	],
+);
+
+export const subjectAssociationJudgmentStat = pgTable(
+	"subject_association_judgment_stat",
+	{
+		associationId: uuid()
+			.primaryKey()
+			.references(() => subjectAssociation.id, { onDelete: "cascade" }),
+		spoilerVoteCount: aggregateCount(),
+		spoilerNoneCount: aggregateCount(),
+		spoilerMinorCount: aggregateCount(),
+		spoilerMajorCount: aggregateCount(),
+		updatedAt: createUpdatedAtColumn(),
+	},
+	(table) => [
+		check(
+			"subject_association_judgment_stat_spoiler_nonnegative_check",
+			sql`${table.spoilerVoteCount} >= 0
+				and ${table.spoilerNoneCount} >= 0
+				and ${table.spoilerMinorCount} >= 0
+				and ${table.spoilerMajorCount} >= 0`,
+		),
+		check(
+			"subject_association_judgment_stat_spoiler_count_check",
+			sql`${table.spoilerVoteCount} =
+				${table.spoilerNoneCount} + ${table.spoilerMinorCount} + ${table.spoilerMajorCount}`,
+		),
 	],
 );
 

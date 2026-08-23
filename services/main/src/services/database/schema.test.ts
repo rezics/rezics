@@ -22,6 +22,7 @@ import {
 	creditAttribution,
 	unitAssociationProposal,
 	subjectAssociation,
+	subjectAssociationJudgmentStat,
 	accountEnforcementAction,
 	contentGovernanceAction,
 	governanceDecision,
@@ -36,9 +37,9 @@ import {
 	unitDock,
 	conversationParticipantStat,
 	notificationRecipientStat,
-	realmTagVoteStat,
+	realmTagJudgmentStat,
 	realmTagContext,
-	realmTagVote,
+	realmTagJudgment,
 	realm,
 	realmScoreContext,
 	realmRuleAcceptance,
@@ -91,12 +92,13 @@ import {
 	unitAliasVoteStat,
 	unitLocalization,
 	unitReactionStat,
-	unitTagVoteStat,
+	unitTagJudgmentStat,
 	unitEffectiveTag,
 	unitEffectiveTagVote,
 	unitStructure,
 	unitStructureApplication,
-	unitStructureApplicationVote,
+	unitStructureApplicationJudgment,
+	unitStructureApplicationJudgmentStat,
 	unitStructureEdge,
 	unitStructureMember,
 	unitStructureVote,
@@ -1000,8 +1002,8 @@ describe("database schema contracts", () => {
 		expect(getTableConfig(unitStructureEdge).name).toBe("unit_structure_edge");
 		expect(getTableConfig(unitStructureVote).name).toBe("unit_structure_vote");
 		expect(getTableConfig(unitStructureApplication).name).toBe("unit_structure_application");
-		expect(getTableConfig(unitStructureApplicationVote).name).toBe(
-			"unit_structure_application_vote",
+		expect(getTableConfig(unitStructureApplicationJudgment).name).toBe(
+			"unit_structure_application_judgment",
 		);
 		expect(getTableConfig(unitEffectiveTag).name).toBe("unit_effective_tag");
 		expect(getTableConfig(unitEffectiveTagVote).name).toBe("unit_effective_tag_vote");
@@ -1025,8 +1027,8 @@ describe("database schema contracts", () => {
 	});
 
 	it("models global and Realm aggregate meanings separately", () => {
-		const globalTag = getTableConfig(unitTagVoteStat);
-		const realmTag = getTableConfig(realmTagVoteStat);
+		const globalTag = getTableConfig(unitTagJudgmentStat);
+		const realmTag = getTableConfig(realmTagJudgmentStat);
 		expect(globalTag.primaryKeys[0]?.columns.map((column) => column.name)).toEqual([
 			"unit_id",
 			"tag_id",
@@ -1038,14 +1040,14 @@ describe("database schema contracts", () => {
 		]);
 		expect(realmTag.foreignKeys.map((key) => key.getName())).toEqual(
 			expect.arrayContaining([
-				"realm_tag_vote_stat_realm_fkey",
-				"realm_tag_vote_stat_unit_fkey",
-				"realm_tag_vote_stat_tag_fkey",
-				"realm_tag_vote_stat_context_fkey",
+				"realm_tag_judgment_stat_realm_fkey",
+				"realm_tag_judgment_stat_unit_fkey",
+				"realm_tag_judgment_stat_tag_fkey",
+				"realm_tag_judgment_stat_context_fkey",
 			]),
 		);
-		expect(getTableConfig(realmTagVote).foreignKeys.map((key) => key.getName())).toContain(
-			"realm_tag_vote_context_fkey",
+		expect(getTableConfig(realmTagJudgment).foreignKeys.map((key) => key.getName())).toContain(
+			"realm_tag_judgment_context_fkey",
 		);
 		const context = getTableConfig(realmTagContext);
 		expect(context.primaryKeys[0]?.columns.map((column) => column.name)).toEqual([
@@ -1059,6 +1061,60 @@ describe("database schema contracts", () => {
 		expect(context.indexes.map((index) => index.config.name)).toContain(
 			"realm_tag_context_tag_realm_idx",
 		);
+	});
+
+	it("constrains spoiler aggregates and indexes selective Realm judgment routes", () => {
+		for (const [table, constraintName] of [
+			[unitTagJudgmentStat, "unit_tag_judgment_stat_spoiler_nonnegative_check"],
+			[
+				unitStructureApplicationJudgmentStat,
+				"unit_structure_application_judgment_stat_spoiler_nonnegative_check",
+			],
+			[realmTagJudgmentStat, "realm_tag_judgment_stat_spoiler_nonnegative_check"],
+			[
+				subjectAssociationJudgmentStat,
+				"subject_association_judgment_stat_spoiler_nonnegative_check",
+			],
+		] as const) {
+			expect(getTableConfig(table).checks.map((constraint) => constraint.name)).toContain(
+				constraintName,
+			);
+			const constraint = getTableConfig(table).checks.find(
+				(candidate) => candidate.name === constraintName,
+			);
+			expect(constraint).toBeDefined();
+			if (!constraint) {
+				throw new Error(`Missing ${constraintName}`);
+			}
+			const constraintSql = dialect.sqlToQuery(constraint.value).sql;
+			for (const columnName of [
+				"spoiler_vote_count",
+				"spoiler_none_count",
+				"spoiler_minor_count",
+				"spoiler_major_count",
+			]) {
+				expect(constraintSql).toContain(`"${columnName}" >= 0`);
+			}
+		}
+
+		const realmStatIndexes = getTableConfig(realmTagJudgmentStat).indexes;
+		expect(
+			realmStatIndexes
+				.find((index) => index.config.name === "realm_tag_judgment_stat_unit_realm_tag_idx")
+				?.config.columns.map((column) => ("name" in column ? column.name : undefined)),
+		).toEqual(["unit_id", "realm_id", "tag_id"]);
+		expect(
+			realmStatIndexes
+				.find((index) => index.config.name === "realm_tag_judgment_stat_tag_realm_unit_idx")
+				?.config.columns.map((column) => ("name" in column ? column.name : undefined)),
+		).toEqual(["tag_id", "realm_id", "unit_id"]);
+
+		const realmJudgmentIndexes = getTableConfig(realmTagJudgment).indexes;
+		expect(
+			realmJudgmentIndexes
+				.find((index) => index.config.name === "realm_tag_judgment_tag_route_idx")
+				?.config.columns.map((column) => ("name" in column ? column.name : undefined)),
+		).toEqual(["tag_id", "realm_id", "unit_id", "profile_id"]);
 	});
 
 	it("stores enabled Realm Pages as one constrained ordered value", () => {
@@ -1111,8 +1167,8 @@ describe("database schema contracts", () => {
 			scoreStat,
 			unitAliasVoteStat,
 			unitExternalLinkVoteStat,
-			unitTagVoteStat,
-			realmTagVoteStat,
+			unitTagJudgmentStat,
+			realmTagJudgmentStat,
 			unitReactionStat,
 			conversationParticipantStat,
 		]) {
