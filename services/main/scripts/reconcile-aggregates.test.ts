@@ -2,6 +2,8 @@ import { readFile } from "node:fs/promises";
 
 import { describe, expect, it } from "vitest";
 
+import { parseAggregateDriftCount } from "./reconcile-aggregates-result";
+
 describe("aggregate reconciliation queries", () => {
 	it("derives Favorites engagement from the current Profile relation", async () => {
 		const source = await readFile(new URL("./reconcile-aggregates.ts", import.meta.url), "utf8");
@@ -26,5 +28,37 @@ describe("aggregate reconciliation queries", () => {
 		expect(source).toContain("notification_recipient_stat read_state");
 		expect(source).toContain("notification.created_at > read_state.read_through_created_at");
 		expect(source).toContain("notification.id > read_state.read_through_id");
+	});
+
+	it("delegates VNDB v11 parity to the durable paused-epoch verifier", async () => {
+		const source = await readFile(new URL("./reconcile-aggregates.ts", import.meta.url), "utf8");
+
+		expect(source).toContain("scripts/vndb-v11-cutover-verification.ts");
+		for (const relation of [
+			"unit_tag_judgment",
+			"unit_structure_application_judgment",
+			"realm_tag_judgment",
+			"subject_association_judgment",
+			"unit_tag_structure_support",
+		])
+			expect(source).not.toContain(relation);
+	});
+});
+
+describe("aggregate reconciliation result parsing", () => {
+	it("accepts exactly one nonnegative text count", () => {
+		expect(parseAggregateDriftCount([{ drift_count: "2" }], "fixture")).toBe(2);
+	});
+
+	it.each([
+		{ rows: [] },
+		{ rows: [{ drift_count: "0" }, { drift_count: "1" }] },
+		{ rows: [{}] },
+		{ rows: [{ drift_count: 0 }] },
+		{ rows: [{ drift_count: "-1" }] },
+	])("fails closed for malformed rows: %j", ({ rows }) => {
+		expect(() => parseAggregateDriftCount(rows, "fixture")).toThrow(
+			/one result row|malformed drift count|negative drift count/,
+		);
 	});
 });

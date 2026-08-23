@@ -1,7 +1,7 @@
 import { sql, type SQL } from "drizzle-orm";
 
 import { database } from "../src/services/database";
-import { toSafeInteger } from "../src/services/database/integer";
+import { parseAggregateDriftCount } from "./reconcile-aggregates-result";
 
 const checks: readonly { name: string; query: SQL }[] = [
 	{
@@ -36,46 +36,6 @@ const checks: readonly { name: string; query: SQL }[] = [
 		`,
 	},
 	{
-		name: "unit_effective_tag_projection",
-		query: sql`
-			with sources as (
-				select unit_id, tag_id, true as direct, 0::bigint as structure_support_count
-				from unit_tag
-				union all
-				select unit_id, tag_id, false, count(*)::bigint
-				from unit_tag_structure_support
-				group by unit_id, tag_id
-			), expected_context as (
-				select unit_id, tag_id, bool_or(direct) as direct,
-					sum(structure_support_count)::bigint as structure_support_count
-				from sources group by unit_id, tag_id
-			), context_drift as (
-				select 1 from expected_context
-				full join unit_effective_tag using (unit_id, tag_id)
-				where expected_context.unit_id is null or unit_effective_tag.unit_id is null
-					or row(expected_context.direct, expected_context.structure_support_count)
-					is distinct from row(unit_effective_tag.direct,
-						unit_effective_tag.structure_support_count)
-			), vote_keys as (
-				select unit_id, tag_id, profile_id from unit_tag_vote
-				union
-				select unit_id, tag_id, profile_id from unit_tag_structure_support
-			), expected_vote as (
-				select vote_keys.unit_id, vote_keys.tag_id, vote_keys.profile_id,
-					coalesce(direct_vote.value, 1) as value
-				from vote_keys
-				left join unit_tag_vote direct_vote using (unit_id, tag_id, profile_id)
-			), vote_drift as (
-				select 1 from expected_vote
-				full join unit_effective_tag_vote using (unit_id, tag_id, profile_id)
-				where expected_vote.unit_id is null or unit_effective_tag_vote.unit_id is null
-					or expected_vote.value is distinct from unit_effective_tag_vote.value
-			)
-			select ((select count(*) from context_drift) +
-				(select count(*) from vote_drift))::text as drift_count
-		`,
-	},
-	{
 		name: "vote_stats",
 		query: sql`
 			with expected as (
@@ -85,18 +45,8 @@ const checks: readonly { name: string; query: SQL }[] = [
 				select 'external_link', external_link_id::text, sum(value), count(*)
 				from unit_external_link_vote group by external_link_id
 				union all
-				select 'unit_tag', unit_id || ':' || tag_id, sum(value), count(*)
-				from unit_effective_tag_vote group by unit_id, tag_id
-				union all
 				select 'unit_structure', structure_id::text, sum(value), count(*)
 				from unit_structure_vote group by structure_id
-				union all
-				select 'unit_structure_application', unit_id || ':' || structure_id,
-					sum(value), count(*)
-				from unit_structure_application_vote group by unit_id, structure_id
-				union all
-				select 'realm_tag', realm_id || ':' || unit_id || ':' || tag_id, sum(value), count(*)
-				from realm_tag_vote group by realm_id, unit_id, tag_id
 			), actual as (
 				select 'alias'::text as kind, alias_id::text as identity, score, vote_count
 				from unit_alias_vote_stat
@@ -104,16 +54,8 @@ const checks: readonly { name: string; query: SQL }[] = [
 				select 'external_link', external_link_id::text, score, vote_count
 				from unit_external_link_vote_stat
 				union all
-				select 'unit_tag', unit_id || ':' || tag_id, score, vote_count from unit_tag_vote_stat
-				union all
 				select 'unit_structure', structure_id::text, score, vote_count
 				from unit_structure_vote_stat
-				union all
-				select 'unit_structure_application', unit_id || ':' || structure_id,
-					score, vote_count from unit_structure_application_vote_stat
-				union all
-				select 'realm_tag', realm_id || ':' || unit_id || ':' || tag_id, score, vote_count
-				from realm_tag_vote_stat
 			)
 			select count(*)::text as drift_count from expected
 			full join actual using (kind, identity)
@@ -496,12 +438,15 @@ const advisoryChecks: readonly { name: string; query: SQL }[] = [
 	},
 ];
 
+console.info(
+	"VNDB v11 judgment and effective-projection parity is owned by the paused-epoch bounded verifier in scripts/vndb-v11-cutover-verification.ts.",
+);
 try {
 	let drifted = false;
 	for (const check of checks) {
 		const startedAt = performance.now();
-		const result = await database.execute<{ drift_count: string }>(check.query);
-		const driftCount = toSafeInteger(result.rows[0]?.drift_count ?? "0", check.name);
+		const result = await database.execute(check.query);
+		const driftCount = parseAggregateDriftCount(result.rows, check.name);
 		console.info(
 			`${check.name}: ${driftCount} drifted rows (${Math.round(performance.now() - startedAt)} ms)`,
 		);
@@ -509,8 +454,8 @@ try {
 	}
 	for (const check of advisoryChecks) {
 		const startedAt = performance.now();
-		const result = await database.execute<{ drift_count: string }>(check.query);
-		const driftCount = toSafeInteger(result.rows[0]?.drift_count ?? "0", check.name);
+		const result = await database.execute(check.query);
+		const driftCount = parseAggregateDriftCount(result.rows, check.name);
 		const message = `${check.name} (advisory): ${driftCount} drifted rows (${Math.round(performance.now() - startedAt)} ms)`;
 		if (driftCount > 0) console.warn(message);
 		else console.info(message);

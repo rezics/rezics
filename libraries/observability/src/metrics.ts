@@ -20,6 +20,21 @@ export type ReadinessFailureCategory =
 	| "timeout"
 	| "overall_timeout";
 
+export type VndbVoteAdmissionFamily =
+	| "unit_tag"
+	| "tag_structure"
+	| "tag_structure_application"
+	| "content_pack"
+	| "unit_merge";
+export type VndbVoteAdmissionAuthority = "global" | "realm";
+export type VndbVoteAdmissionOutcome = "attempted" | "committed" | "backpressured" | "unexpected";
+export type VndbVoteAdmissionEvent =
+	| { readonly outcome: "attempted" }
+	| {
+			readonly durationMilliseconds: number;
+			readonly outcome: Exclude<VndbVoteAdmissionOutcome, "attempted">;
+	  };
+
 export interface DatabasePoolState {
 	readonly total: number;
 	readonly idle: number;
@@ -102,6 +117,8 @@ export class ObservabilityMetrics {
 	readonly #persistedDocumentRepairs: Counter;
 	readonly #fractionalPositionRebalances: Counter;
 	readonly #fractionalPositionRebalanceMembers: Histogram;
+	readonly #vndbVoteAdmissions: Counter;
+	readonly #vndbVoteAdmissionDuration: Histogram;
 	#workerHeartbeatAt: number | undefined;
 	#activeWorkerJobStartedAt: number | undefined;
 	#databasePoolState: (() => DatabasePoolState) | undefined;
@@ -161,6 +178,12 @@ export class ObservabilityMetrics {
 			"rezics.ordering.rebalance.members",
 			{ unit: "{member}" },
 		);
+		this.#vndbVoteAdmissions = meter.createCounter("rezics.vndb.vote.admission", {
+			unit: "{transaction}",
+		});
+		this.#vndbVoteAdmissionDuration = meter.createHistogram("rezics.vndb.vote.admission.duration", {
+			unit: "ms",
+		});
 
 		meter
 			.createObservableGauge("rezics.runtime.memory.rss", { unit: "By" })
@@ -336,5 +359,25 @@ export class ObservabilityMetrics {
 		const attributes = { "ordering.owner": normalizeOperationName(owner) };
 		this.#fractionalPositionRebalances.add(1, attributes);
 		this.#fractionalPositionRebalanceMembers.record(members, attributes);
+	}
+
+	vndbVoteAdmission(
+		family: VndbVoteAdmissionFamily,
+		authority: VndbVoteAdmissionAuthority,
+		event: VndbVoteAdmissionEvent,
+	): void {
+		const attributes = {
+			"vndb.vote.family": family,
+			"vndb.vote.authority": authority,
+			"vndb.vote.outcome": event.outcome,
+		};
+		if (
+			event.outcome !== "attempted" &&
+			(!Number.isFinite(event.durationMilliseconds) || event.durationMilliseconds < 0)
+		)
+			throw new Error("VNDB vote admission duration must be a non-negative finite number");
+		this.#vndbVoteAdmissions.add(1, attributes);
+		if (event.outcome !== "attempted")
+			this.#vndbVoteAdmissionDuration.record(event.durationMilliseconds, attributes);
 	}
 }
