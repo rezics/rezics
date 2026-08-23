@@ -554,7 +554,10 @@ vote-and-reference cutover:
    creates `subject_association_judgment`, installs the content-label
    registry guards (post-kind domain, pinned requirement, judgment
    rejection, platform-row protection), and extends the bootstrap manifest
-   with the three registry Tag Units verified by readiness inspection.
+   with the four registry Tag Units verified by readiness inspection. The
+   additive relations — the Entity measurement table, the Tag policy
+   columns, and the primary display path projection — land in the same
+   release without breaking semantics.
 3. Deploy API and frontend together; old binaries are incompatible with the
    judgment response shapes.
 4. Verify aggregate parity, cursor invalidation, and lock waits; resume
