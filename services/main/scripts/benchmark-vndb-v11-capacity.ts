@@ -178,7 +178,10 @@ const writerFenceLockProofRow = z.object({
 	totalLocks: integerString,
 });
 const activityWaitRow = z.object({
+	applicationName: z.string(),
+	backendType: z.string(),
 	pid: z.number().int().positive(),
+	state: z.string().nullable(),
 	waitEvent: z.string().nullable(),
 	waitEventType: z.string().nullable(),
 });
@@ -317,6 +320,7 @@ type LockWaitMonitor = Readonly<{
 	readCumulativeMilliseconds: (pid: number) => number;
 	stop: () => Promise<
 		Readonly<{
+			competingWalWriterObserved: boolean;
 			episodes: readonly number[];
 			failed: boolean;
 		}>
@@ -327,6 +331,7 @@ type RealHotKeyScenarioSummary = Readonly<{
 	acceptance: Readonly<{
 		attemptAccountingExact: boolean;
 		minimumSuccessfulCommits: boolean;
+		noCompetingWalWriters: boolean;
 		noDeadlocks: boolean;
 		noLockWaitMonitorErrors: boolean;
 		noPartialWrites: boolean;
@@ -352,6 +357,7 @@ type RealHotKeyScenarioSummary = Readonly<{
 	busyDecisionLatency: LatencySummary;
 	deadlocks: number;
 	durationMilliseconds: number;
+	competingWalWriterObserved: boolean;
 	lockWaitEpisodeLatency: LatencySummary;
 	lockWaitMonitorFailed: boolean;
 	logicalRequests: number;
@@ -2622,6 +2628,7 @@ async function runRealHotKeyAttempt(
 function startLockWaitMonitor(client: Client, applicationName: string): LockWaitMonitor {
 	let stopping = false;
 	let failed = false;
+	let competingWalWriterObserved = false;
 	const active = new Map<number, number>();
 	const cumulativeByPid = new Map<number, number>();
 	const episodes: number[] = [];
@@ -2635,14 +2642,33 @@ function startLockWaitMonitor(client: Client, applicationName: string): LockWait
 		try {
 			while (!stopping) {
 				const result = await client.query(
-					'select pid,wait_event_type as "waitEventType",wait_event as "waitEvent" ' +
-						"from pg_stat_activity where application_name=$1 and pid<>pg_backend_pid()",
+					'select pid,application_name as "applicationName",backend_type as "backendType",' +
+						'state,wait_event_type as "waitEventType",wait_event as "waitEvent" ' +
+						"from pg_stat_activity where pid<>pg_backend_pid() and (" +
+						"application_name=$1 or " +
+						"(backend_type='client backend' and state<>'idle') or " +
+						"backend_type in ('autovacuum worker','logical replication worker'))",
 					[applicationName],
 				);
 				const rows = z.array(activityWaitRow).parse(result.rows);
+				if (
+					rows.some(
+						(row) =>
+							row.applicationName !== applicationName &&
+							((row.backendType === "client backend" && row.state !== "idle") ||
+								row.backendType === "autovacuum worker" ||
+								row.backendType === "logical replication worker"),
+					)
+				)
+					competingWalWriterObserved = true;
 				const now = performance.now();
 				const locked = new Set(
-					rows.filter((row) => row.waitEventType === "Lock").map((row) => row.pid),
+					rows
+						.filter(
+							(row) =>
+								row.applicationName === applicationName && row.waitEventType === "Lock",
+						)
+						.map((row) => row.pid),
 				);
 				for (const pid of locked) if (!active.has(pid)) active.set(pid, now);
 				for (const [pid, startedAt] of active)
@@ -2667,7 +2693,7 @@ function startLockWaitMonitor(client: Client, applicationName: string): LockWait
 		stop: async () => {
 			stopping = true;
 			await monitoring;
-			return { episodes, failed };
+			return { competingWalWriterObserved, episodes, failed };
 		},
 	};
 }
@@ -2960,6 +2986,8 @@ async function runRealHotKeyScenario(
 	await pool.end();
 	const lockWaitMonitoring = await monitor.stop();
 	if (lockWaitMonitoring.failed) unexpectedErrorExamples.add("lock-wait-monitor:failed");
+	if (lockWaitMonitoring.competingWalWriterObserved)
+		unexpectedErrorExamples.add("wal-noise:competing-writer");
 	const walEnd = await currentInsertLsn(admin);
 	const countersAfter = await readDatabaseCounters(admin);
 	const parity = await verifyRealHotKeyParity(admin, fixture, expectedValues);
@@ -2998,6 +3026,7 @@ async function runRealHotKeyScenario(
 	const acceptance = {
 		attemptAccountingExact,
 		minimumSuccessfulCommits: succeededRequests >= 100,
+		noCompetingWalWriters: !lockWaitMonitoring.competingWalWriterObserved,
 		noDeadlocks: deadlocks === 0 && countersAfter.deadlocks === countersBefore.deadlocks,
 		noLockWaitMonitorErrors: !lockWaitMonitoring.failed,
 		noPartialWrites: parity.passed,
@@ -3025,6 +3054,7 @@ async function runRealHotKeyScenario(
 		authority: fixture.authority,
 		backpressuredAttempts,
 		busyDecisionLatency: summarizeLatencies(busyDecisionLatencies, 0),
+		competingWalWriterObserved: lockWaitMonitoring.competingWalWriterObserved,
 		deadlocks,
 		durationMilliseconds: Number(durationMilliseconds.toFixed(3)),
 		effectiveServerConnectionCapacity,
