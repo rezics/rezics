@@ -8,9 +8,10 @@ to more specific.
 This document is the canonical architecture for Tag structures. It records the
 implemented storage and governance model, the evidence behind the design
 choices, and the adopted search and interaction design that ships with the
-development preview exit. Proposals that still require their own ADR (the
-spoiler vote dimension, Realm Path authority, structured measurements) and the
-staged exit plan live in the temporary
+development preview exit. The accepted judgment, spoiler, Realm-authority, and
+measurement contracts are recorded in
+[entity-tag-spoiler-and-measurement-decisions.md](./entity-tag-spoiler-and-measurement-decisions.md);
+the staged exit plan lives in the temporary
 [VNDB v11 research report](./vndb-v11-entity-tag-research-report.md).
 
 Sections below marked "Adopted design" describe accepted target behavior that
@@ -252,10 +253,12 @@ target Unit. A positive vote supplies one positive judgment for every member
 Tag. A negative vote rejects the application only; it does not cast negative
 votes on the member Tags.
 
-Realm-scoped definition and application votes are intentionally deferred. They
+Realm-scoped definition and application votes are not implemented yet. They
 must be modeled as separate authorities and aggregates rather than merged into
-the global scores. The proposed Realm authority and the proposed independent
-spoiler dimension are tracked in the
+the global scores; their accepted table shapes, the fallback policy, and the
+independent spoiler dimension are recorded in
+[entity-tag-spoiler-and-measurement-decisions.md](./entity-tag-spoiler-and-measurement-decisions.md)
+and land through the roadmap in the
 [VNDB v11 research report](./vndb-v11-entity-tag-research-report.md).
 
 ## Primary display path
@@ -363,8 +366,9 @@ bounded (at a 32-character cap, at most 31 splits, so at most 62 side
 probes), pair-conjunction probes run only for splits where both sides
 matched, and every probe is a B-tree or PGroonga index seek. Worst-case work
 is a fixed small number of index probes per query, independent of corpus
-size. Exact caps and thresholds are prototype tunables recorded in the
-research report's open decisions.
+size. The initial caps and thresholds are recorded in
+[entity-tag-spoiler-and-measurement-decisions.md](./entity-tag-spoiler-and-measurement-decisions.md)
+and are revised from prototype telemetry.
 
 ## Application interaction
 
@@ -397,8 +401,9 @@ path would assert member Tags the contributor did not choose.
 
 Optional per-application judgments (for example the proposed spoiler level)
 attach after the application as non-blocking affordances; the absence of a
-judgment is the absence of evidence, not a vote. The spoiler dimension itself
-remains a proposal in the research report.
+judgment is the absence of evidence, not a vote. The spoiler judgment
+contract is recorded in
+[entity-tag-spoiler-and-measurement-decisions.md](./entity-tag-spoiler-and-measurement-decisions.md).
 
 Write amplification: a quick-add through a path writes one application row
 (first application only), one application vote, at most L support rows, and
