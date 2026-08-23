@@ -109,11 +109,22 @@ export const UnitMergeGraphActionValues = [
 	"promote_target_from_source",
 ] as const;
 export type UnitMergeGraphAction = (typeof UnitMergeGraphActionValues)[number];
+
+/** Persistent database fence state for the single vndb-v11 binary cutover. */
+export const VndbV11CutoverStateValues = [
+	"precontract_open",
+	"paused",
+	"postcontract_open",
+] as const;
+export type VndbV11CutoverState = (typeof VndbV11CutoverStateValues)[number];
 /**
  * Durable, ordered execution phases. Appending before `finalize` is a persisted
  * contract change; renaming or reordering a released phase requires a cutover.
  */
 export const UnitMergeOperationPhaseValues = [
+	"entity_measurement_preflight",
+	"entity_measurement_entities",
+	"entity_measurement_contexts",
 	"variant_graph",
 	"slug_addresses",
 	"slug_scopes",
@@ -128,7 +139,7 @@ export const UnitMergeOperationPhaseValues = [
 	"scores",
 	"collection_items",
 	"unit_tags",
-	"realm_tag_votes",
+	"realm_tag_judgments",
 	"profile_unit_tags",
 	"realm_pins",
 	"realm_units",

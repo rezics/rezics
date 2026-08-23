@@ -24,6 +24,11 @@ describe("centralized Unit merge policy", () => {
 	});
 
 	it("walks every durable phase exactly once", () => {
+		expect(UnitMergeOperationPhaseValues.slice(0, 3)).toEqual([
+			"entity_measurement_preflight",
+			"entity_measurement_entities",
+			"entity_measurement_contexts",
+		]);
 		for (const [index, phase] of UnitMergeOperationPhaseValues.entries())
 			expect(nextUnitMergePhase(phase)).toBe(UnitMergeOperationPhaseValues[index + 1] ?? null);
 	});

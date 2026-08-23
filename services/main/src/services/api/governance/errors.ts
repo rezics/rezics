@@ -281,6 +281,34 @@ export class UnitMergeRequestConflict extends Data.TaggedError("UnitMergeRequest
 	readonly message = "The source Unit already has an active or completed merge";
 }
 
+export type UnitMergeMeasurementConflictReason =
+	| "differing_collision"
+	| "self_context"
+	| "context_limit";
+
+export class UnitMergeMeasurementConflict extends Data.TaggedError(
+	"UnitMergeMeasurementConflict",
+)<{
+	readonly reason: UnitMergeMeasurementConflictReason;
+	readonly contextualCount?: number;
+}> {
+	static readonly status = StatusCodes.CONFLICT as const;
+	readonly status = UnitMergeMeasurementConflict.status;
+	readonly message = "Unit merge cannot preserve all Entity measurement evidence";
+	readonly details: {
+		readonly reason: UnitMergeMeasurementConflictReason;
+		readonly contextualCount?: number;
+	};
+
+	constructor(details: {
+		readonly reason: UnitMergeMeasurementConflictReason;
+		readonly contextualCount?: number;
+	}) {
+		super(details);
+		this.details = details;
+	}
+}
+
 export class UnitMergeIdempotencyConflict extends Data.TaggedError("UnitMergeIdempotencyConflict") {
 	static readonly status = StatusCodes.CONFLICT as const;
 	readonly status = UnitMergeIdempotencyConflict.status;
@@ -373,6 +401,7 @@ export const GovernanceErrors = [
 	UnitMergeKindIneligible,
 	UnitMergeKindMismatch,
 	UnitMergeRequestConflict,
+	UnitMergeMeasurementConflict,
 	UnitMergeIdempotencyConflict,
 	UnitMergeManifestStale,
 	UnitMergeReviewSelfForbidden,

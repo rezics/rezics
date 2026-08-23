@@ -15,6 +15,7 @@ import {
 import { recordAuditEvent } from "../../audit";
 import { database, type DatabaseExecutor, type DatabaseTransaction } from "../../database";
 import { databaseConstraintName } from "../../database/constraint";
+import { runVndbVoteTransaction } from "../../database/vndb-vote-admission";
 import {
 	unit,
 	governanceDecisionRule,
@@ -39,6 +40,7 @@ import {
 } from "../../governance/decision-service";
 import { firstUnitLocalizationTitle } from "../localization";
 import { UnitNotFound } from "../errors";
+import { isEntityMeasurementMergePhase } from "./entity-measurements";
 import {
 	buildUnitMergeManifest,
 	requireCurrentUnitMergeManifest,
@@ -324,7 +326,10 @@ export async function preflightUnitMerge(input: {
 	readonly sourceUnitId: string;
 	readonly targetUnitId: string;
 }) {
-	const manifest = await database.transaction((tx) => buildUnitMergeManifest(tx, input));
+	const manifest = await runVndbVoteTransaction(
+		{ family: "unit_merge", authority: "global" },
+		(tx) => buildUnitMergeManifest(tx, input),
+	);
 	const rows = await database
 		.select({ id: unit.id, title: firstUnitLocalizationTitle(unit.id) })
 		.from(unit)
@@ -616,51 +621,54 @@ function mapCreateConstraint(error: unknown): never {
 export async function createReviewedUnitMerge(input: CreateMergeInput) {
 	let requestId: string;
 	try {
-		requestId = await database.transaction(async (tx) => {
-			await expirePendingMergeForSource(tx, input.sourceUnitId, new Date());
-			const existing = await existingIdempotentRequest(tx, input, "reviewed");
-			if (existing) return existing;
-			const manifest = await buildUnitMergeManifest(tx, input);
-			const now = new Date();
-			const newRequestId = await generateUuidv7(tx);
-			const decision = await createGovernanceDecision(tx, {
-				action: "unit.merge.propose",
-				actorProfileId: input.proposerProfileId,
-				authority: { kind: "platform" },
-				targetUnitId: manifest.sourceUnitId,
-				subject: { kind: "unit_merge_request", id: newRequestId },
-				basis: { kind: "rules", rules: input.rules },
-			});
-			const [created] = await tx
-				.insert(unitMergeRequest)
-				.values(
-					requestInsertValues(
-						manifest,
-						input,
-						newRequestId,
-						decision.id,
-						"reviewed",
-						"pending_review",
-						now,
-					),
-				)
-				.returning({ id: unitMergeRequest.id });
-			if (!created) throw new Error("Unit merge proposal insertion returned no row");
-			await auditMerge(tx, {
-				action: "unit.merge.propose",
-				actorProfileId: input.proposerProfileId,
-				requestId: created.id,
-				sourceUnitId: manifest.sourceUnitId,
-				targetUnitId: manifest.targetUnitId,
-				governanceDecisionId: decision.id,
-				details: {
-					policyVersion: UnitMergePolicyV1.version,
-					requiredApprovals: UnitMergePolicyV1.requiredApprovals,
-					requestFingerprint: manifest.requestFingerprint,
-				},
-			});
-			return created.id;
-		});
+		requestId = await runVndbVoteTransaction(
+			{ family: "unit_merge", authority: "global" },
+			async (tx) => {
+				await expirePendingMergeForSource(tx, input.sourceUnitId, new Date());
+				const existing = await existingIdempotentRequest(tx, input, "reviewed");
+				if (existing) return existing;
+				const manifest = await buildUnitMergeManifest(tx, input);
+				const now = new Date();
+				const newRequestId = await generateUuidv7(tx);
+				const decision = await createGovernanceDecision(tx, {
+					action: "unit.merge.propose",
+					actorProfileId: input.proposerProfileId,
+					authority: { kind: "platform" },
+					targetUnitId: manifest.sourceUnitId,
+					subject: { kind: "unit_merge_request", id: newRequestId },
+					basis: { kind: "rules", rules: input.rules },
+				});
+				const [created] = await tx
+					.insert(unitMergeRequest)
+					.values(
+						requestInsertValues(
+							manifest,
+							input,
+							newRequestId,
+							decision.id,
+							"reviewed",
+							"pending_review",
+							now,
+						),
+					)
+					.returning({ id: unitMergeRequest.id });
+				if (!created) throw new Error("Unit merge proposal insertion returned no row");
+				await auditMerge(tx, {
+					action: "unit.merge.propose",
+					actorProfileId: input.proposerProfileId,
+					requestId: created.id,
+					sourceUnitId: manifest.sourceUnitId,
+					targetUnitId: manifest.targetUnitId,
+					governanceDecisionId: decision.id,
+					details: {
+						policyVersion: UnitMergePolicyV1.version,
+						requiredApprovals: UnitMergePolicyV1.requiredApprovals,
+						requestFingerprint: manifest.requestFingerprint,
+					},
+				});
+				return created.id;
+			},
+		);
 	} catch (error) {
 		if (databaseConstraintName(error) === "unit_merge_request_proposer_idempotency_key") {
 			const existing = await existingIdempotentRequest(database, input, "reviewed");
@@ -676,68 +684,71 @@ export async function createDirectUnitMerge(
 ) {
 	let requestId: string;
 	try {
-		requestId = await database.transaction(async (tx) => {
-			await expirePendingMergeForSource(tx, input.sourceUnitId, new Date());
-			const existing = await existingIdempotentRequest(tx, input, "privileged_direct");
-			if (existing) return existing;
-			const manifest = await buildUnitMergeManifest(tx, input);
-			if (input.overrideOfRequestId) {
-				const [overridden] = await tx
-					.select({
-						state: unitMergeRequest.state,
-						sourceUnitId: unitMergeRequest.sourceUnitId,
-						targetUnitId: unitMergeRequest.targetUnitId,
+		requestId = await runVndbVoteTransaction(
+			{ family: "unit_merge", authority: "global" },
+			async (tx) => {
+				await expirePendingMergeForSource(tx, input.sourceUnitId, new Date());
+				const existing = await existingIdempotentRequest(tx, input, "privileged_direct");
+				if (existing) return existing;
+				const manifest = await buildUnitMergeManifest(tx, input);
+				if (input.overrideOfRequestId) {
+					const [overridden] = await tx
+						.select({
+							state: unitMergeRequest.state,
+							sourceUnitId: unitMergeRequest.sourceUnitId,
+							targetUnitId: unitMergeRequest.targetUnitId,
+						})
+						.from(unitMergeRequest)
+						.where(eq(unitMergeRequest.id, input.overrideOfRequestId))
+						.limit(1)
+						.for("update");
+					if (
+						!overridden ||
+						overridden.state !== "rejected" ||
+						overridden.sourceUnitId !== input.sourceUnitId ||
+						overridden.targetUnitId !== input.targetUnitId
+					)
+						throw new UnitMergeRequestConflict();
+				}
+				const now = new Date();
+				const newRequestId = await generateUuidv7(tx);
+				const decision = await createGovernanceDecision(tx, {
+					action: "unit.merge.direct",
+					actorProfileId: input.proposerProfileId,
+					authority: { kind: "platform" },
+					targetUnitId: manifest.sourceUnitId,
+					subject: { kind: "unit_merge_request", id: newRequestId },
+					basis: { kind: "rules", rules: input.rules },
+				});
+				const [created] = await tx
+					.insert(unitMergeRequest)
+					.values({
+						...requestInsertValues(
+							manifest,
+							input,
+							newRequestId,
+							decision.id,
+							"privileged_direct",
+							"accepted",
+							now,
+						),
+						overrideOfRequestId: input.overrideOfRequestId,
 					})
-					.from(unitMergeRequest)
-					.where(eq(unitMergeRequest.id, input.overrideOfRequestId))
-					.limit(1)
-					.for("update");
-				if (
-					!overridden ||
-					overridden.state !== "rejected" ||
-					overridden.sourceUnitId !== input.sourceUnitId ||
-					overridden.targetUnitId !== input.targetUnitId
-				)
-					throw new UnitMergeRequestConflict();
-			}
-			const now = new Date();
-			const newRequestId = await generateUuidv7(tx);
-			const decision = await createGovernanceDecision(tx, {
-				action: "unit.merge.direct",
-				actorProfileId: input.proposerProfileId,
-				authority: { kind: "platform" },
-				targetUnitId: manifest.sourceUnitId,
-				subject: { kind: "unit_merge_request", id: newRequestId },
-				basis: { kind: "rules", rules: input.rules },
-			});
-			const [created] = await tx
-				.insert(unitMergeRequest)
-				.values({
-					...requestInsertValues(
-						manifest,
-						input,
-						newRequestId,
-						decision.id,
-						"privileged_direct",
-						"accepted",
-						now,
-					),
-					overrideOfRequestId: input.overrideOfRequestId,
-				})
-				.returning({ id: unitMergeRequest.id });
-			if (!created) throw new Error("Direct Unit merge insertion returned no row");
-			await acceptUnitMerge(tx, {
-				requestId: created.id,
-				sourceUnitId: manifest.sourceUnitId,
-				targetUnitId: manifest.targetUnitId,
-				graphPlan: manifest.graphPlan,
-				actorProfileId: input.proposerProfileId,
-				governanceDecisionId: decision.id,
-				mode: "privileged_direct",
-				now,
-			});
-			return created.id;
-		});
+					.returning({ id: unitMergeRequest.id });
+				if (!created) throw new Error("Direct Unit merge insertion returned no row");
+				await acceptUnitMerge(tx, {
+					requestId: created.id,
+					sourceUnitId: manifest.sourceUnitId,
+					targetUnitId: manifest.targetUnitId,
+					graphPlan: manifest.graphPlan,
+					actorProfileId: input.proposerProfileId,
+					governanceDecisionId: decision.id,
+					mode: "privileged_direct",
+					now,
+				});
+				return created.id;
+			},
+		);
 	} catch (error) {
 		if (databaseConstraintName(error) === "unit_merge_request_proposer_idempotency_key") {
 			const existing = await existingIdempotentRequest(database, input, "privileged_direct");
@@ -773,96 +784,99 @@ export async function reviewUnitMerge(input: {
 }) {
 	let result: ReviewTransactionResult;
 	try {
-		result = await database.transaction(async (tx): Promise<ReviewTransactionResult> => {
-			const [request] = await tx
-				.select()
-				.from(unitMergeRequest)
-				.where(eq(unitMergeRequest.id, input.requestId))
-				.limit(1)
-				.for("update");
-			if (!request) throw new UnitMergeNotFound();
-			if (request.state !== "pending_review" || request.mode !== "reviewed")
-				throw new UnitMergeRequestNotPending();
-			const now = new Date();
-			if (request.expiresAt.getTime() <= now.getTime()) {
-				await tx
-					.update(unitMergeRequest)
-					.set({ state: "expired", updatedAt: now })
-					.where(eq(unitMergeRequest.id, request.id));
-				return { outcome: "expired" };
-			}
-			if (!request.decisionId) {
-				await tx
-					.update(unitMergeRequest)
-					.set({ state: "superseded", supersededAt: now, updatedAt: now })
-					.where(eq(unitMergeRequest.id, request.id));
-				return { outcome: "stale" };
-			}
-			if (request.requestFingerprint !== input.requestFingerprint)
-				throw new UnitMergeReviewFingerprintMismatch();
-			if (request.selfReviewForbidden && request.proposerProfileId === input.reviewerProfileId)
-				throw new UnitMergeReviewSelfForbidden();
+		result = await runVndbVoteTransaction(
+			{ family: "unit_merge", authority: "global" },
+			async (tx): Promise<ReviewTransactionResult> => {
+				const [request] = await tx
+					.select()
+					.from(unitMergeRequest)
+					.where(eq(unitMergeRequest.id, input.requestId))
+					.limit(1)
+					.for("update");
+				if (!request) throw new UnitMergeNotFound();
+				if (request.state !== "pending_review" || request.mode !== "reviewed")
+					throw new UnitMergeRequestNotPending();
+				const now = new Date();
+				if (request.expiresAt.getTime() <= now.getTime()) {
+					await tx
+						.update(unitMergeRequest)
+						.set({ state: "expired", updatedAt: now })
+						.where(eq(unitMergeRequest.id, request.id));
+					return { outcome: "expired" };
+				}
+				if (!request.decisionId) {
+					await tx
+						.update(unitMergeRequest)
+						.set({ state: "superseded", supersededAt: now, updatedAt: now })
+						.where(eq(unitMergeRequest.id, request.id));
+					return { outcome: "stale" };
+				}
+				if (request.requestFingerprint !== input.requestFingerprint)
+					throw new UnitMergeReviewFingerprintMismatch();
+				if (request.selfReviewForbidden && request.proposerProfileId === input.reviewerProfileId)
+					throw new UnitMergeReviewSelfForbidden();
 
-			let manifest: UnitMergeManifestV1;
-			try {
-				manifest = await requireCurrentUnitMergeManifest(tx, {
-					sourceUnitId: request.sourceUnitId,
-					targetUnitId: request.targetUnitId,
-					requestFingerprint: request.requestFingerprint,
+				let manifest: UnitMergeManifestV1;
+				try {
+					manifest = await requireCurrentUnitMergeManifest(tx, {
+						sourceUnitId: request.sourceUnitId,
+						targetUnitId: request.targetUnitId,
+						requestFingerprint: request.requestFingerprint,
+					});
+				} catch (error) {
+					if (!isManifestStaleness(error)) throw error;
+					await tx
+						.update(unitMergeRequest)
+						.set({ state: "superseded", supersededAt: now, updatedAt: now })
+						.where(eq(unitMergeRequest.id, request.id));
+					return { outcome: "stale" };
+				}
+
+				await tx.insert(unitMergeReview).values({
+					requestId: request.id,
+					reviewerProfileId: input.reviewerProfileId,
+					decision: input.decision,
+					note: input.note,
+					requestFingerprint: input.requestFingerprint,
+					createdAt: now,
 				});
-			} catch (error) {
-				if (!isManifestStaleness(error)) throw error;
-				await tx
-					.update(unitMergeRequest)
-					.set({ state: "superseded", supersededAt: now, updatedAt: now })
-					.where(eq(unitMergeRequest.id, request.id));
-				return { outcome: "stale" };
-			}
-
-			await tx.insert(unitMergeReview).values({
-				requestId: request.id,
-				reviewerProfileId: input.reviewerProfileId,
-				decision: input.decision,
-				note: input.note,
-				requestFingerprint: input.requestFingerprint,
-				createdAt: now,
-			});
-			await auditMerge(tx, {
-				action: `unit.merge.review.${input.decision}`,
-				actorProfileId: input.reviewerProfileId,
-				requestId: request.id,
-				sourceUnitId: request.sourceUnitId,
-				targetUnitId: request.targetUnitId,
-				governanceDecisionId: request.decisionId,
-				details: { requestFingerprint: input.requestFingerprint, note: input.note },
-			});
-			if (input.decision === "reject" && request.vetoEnabled) {
-				await tx
-					.update(unitMergeRequest)
-					.set({ state: "rejected", rejectedAt: now, updatedAt: now })
-					.where(eq(unitMergeRequest.id, request.id));
-				return { outcome: "ok", requestId: request.id };
-			}
-			const approvals = await tx
-				.select({ reviewerProfileId: unitMergeReview.reviewerProfileId })
-				.from(unitMergeReview)
-				.where(
-					and(eq(unitMergeReview.requestId, request.id), eq(unitMergeReview.decision, "approve")),
-				)
-				.limit(request.requiredApprovals);
-			if (approvals.length >= request.requiredApprovals)
-				await acceptUnitMerge(tx, {
+				await auditMerge(tx, {
+					action: `unit.merge.review.${input.decision}`,
+					actorProfileId: input.reviewerProfileId,
 					requestId: request.id,
 					sourceUnitId: request.sourceUnitId,
 					targetUnitId: request.targetUnitId,
-					graphPlan: manifest.graphPlan,
-					actorProfileId: input.reviewerProfileId,
 					governanceDecisionId: request.decisionId,
-					mode: "reviewed",
-					now,
+					details: { requestFingerprint: input.requestFingerprint, note: input.note },
 				});
-			return { outcome: "ok", requestId: request.id };
-		});
+				if (input.decision === "reject" && request.vetoEnabled) {
+					await tx
+						.update(unitMergeRequest)
+						.set({ state: "rejected", rejectedAt: now, updatedAt: now })
+						.where(eq(unitMergeRequest.id, request.id));
+					return { outcome: "ok", requestId: request.id };
+				}
+				const approvals = await tx
+					.select({ reviewerProfileId: unitMergeReview.reviewerProfileId })
+					.from(unitMergeReview)
+					.where(
+						and(eq(unitMergeReview.requestId, request.id), eq(unitMergeReview.decision, "approve")),
+					)
+					.limit(request.requiredApprovals);
+				if (approvals.length >= request.requiredApprovals)
+					await acceptUnitMerge(tx, {
+						requestId: request.id,
+						sourceUnitId: request.sourceUnitId,
+						targetUnitId: request.targetUnitId,
+						graphPlan: manifest.graphPlan,
+						actorProfileId: input.reviewerProfileId,
+						governanceDecisionId: request.decisionId,
+						mode: "reviewed",
+						now,
+					});
+				return { outcome: "ok", requestId: request.id };
+			},
+		);
 	} catch (error) {
 		const constraint = databaseConstraintName(error);
 		if (constraint === "unit_merge_review_pkey") throw new UnitMergeReviewDuplicate();
@@ -894,6 +908,12 @@ export async function retryUnitMerge(input: {
 			.update(unitMergeOperation)
 			.set({
 				state: "pending",
+				...(isEntityMeasurementMergePhase(operation.phase)
+					? {
+							phase: "entity_measurement_preflight" as const,
+							measurementPreflightCursorEntityId: null,
+						}
+					: {}),
 				availableAt: now,
 				leaseToken: null,
 				leaseExpiresAt: null,

@@ -1,10 +1,22 @@
 import { inArray, sql } from "drizzle-orm";
-import { boolean, check, index, pgEnum, text, unique, uuid } from "drizzle-orm/pg-core";
+import {
+	boolean,
+	check,
+	index,
+	integer,
+	pgEnum,
+	primaryKey,
+	smallint,
+	text,
+	unique,
+	uuid,
+} from "drizzle-orm/pg-core";
 
 import { pgTable } from "./base";
 import {
 	createCreatedAtColumn,
 	createFractionalIndexPositionByteLengthConstraint,
+	createJsonObjectColumn,
 	createTimestampMsColumn,
 	createUpdatedAtColumn,
 	createUuidv7PrimaryKey,
@@ -206,6 +218,91 @@ export const subjectAssociation = pgTable(
 		createFractionalIndexPositionByteLengthConstraint(
 			"subject_association_position_byte_length_check",
 			table.position,
+		),
+	],
+);
+
+/** One Profile's global spoiler judgment for one subject appearance. */
+export const subjectAssociationJudgment = pgTable(
+	"subject_association_judgment",
+	{
+		associationId: uuid()
+			.notNull()
+			.references(() => subjectAssociation.id, { onDelete: "restrict" }),
+		profileId: uuid()
+			.notNull()
+			.references(() => profile.id, { onDelete: "restrict" }),
+		spoilerLevel: smallint().notNull(),
+		createdAt: createCreatedAtColumn(),
+		updatedAt: createUpdatedAtColumn(),
+	},
+	(table) => [
+		primaryKey({ columns: [table.associationId, table.profileId] }),
+		index("subject_association_judgment_profile_idx").on(table.profileId, table.associationId),
+		check(
+			"subject_association_judgment_spoiler_level_check",
+			sql`${table.spoilerLevel} between 0 and 2`,
+		),
+	],
+);
+
+/**
+ * Canonical or context-specific point measurements for an Entity.
+ *
+ * Cross-row cardinality and context-kind checks are installed by the canonical
+ * PostgreSQL guard: one canonical row plus at most eight contextual rows.
+ */
+export const entityMeasurement = pgTable(
+	"entity_measurement",
+	{
+		entityId: uuid()
+			.notNull()
+			.references(() => entity.id, { onDelete: "restrict" }),
+		contextUnitId: uuid().references(() => unit.id, { onDelete: "restrict" }),
+		heightMillimetres: integer(),
+		weightGrams: integer(),
+		bustMillimetres: integer(),
+		waistMillimetres: integer(),
+		hipsMillimetres: integer(),
+		sourceUrl: text().notNull(),
+		sourceImportedAt: createTimestampMsColumn().notNull(),
+		sourceProvenance: createJsonObjectColumn().notNull(),
+		createdAt: createCreatedAtColumn(),
+		updatedAt: createUpdatedAtColumn(),
+	},
+	(table) => [
+		unique("entity_measurement_entity_context_key")
+			.on(table.entityId, table.contextUnitId)
+			.nullsNotDistinct(),
+		index("entity_measurement_context_idx")
+			.on(table.contextUnitId, table.entityId)
+			.where(sql`${table.contextUnitId} is not null`),
+		check(
+			"entity_measurement_value_present_check",
+			sql`num_nonnulls(
+				${table.heightMillimetres},
+				${table.weightGrams},
+				${table.bustMillimetres},
+				${table.waistMillimetres},
+				${table.hipsMillimetres}
+			) > 0`,
+		),
+		check(
+			"entity_measurement_positive_check",
+			sql`coalesce(${table.heightMillimetres} > 0, true)
+				and coalesce(${table.weightGrams} > 0, true)
+				and coalesce(${table.bustMillimetres} > 0, true)
+				and coalesce(${table.waistMillimetres} > 0, true)
+				and coalesce(${table.hipsMillimetres} > 0, true)`,
+		),
+		check("entity_measurement_source_url_check", sql`btrim(${table.sourceUrl}) <> ''`),
+		check(
+			"entity_measurement_source_provenance_check",
+			sql`jsonb_typeof(${table.sourceProvenance}) = 'object'`,
+		),
+		check(
+			"entity_measurement_context_not_self_check",
+			sql`${table.contextUnitId} is null or ${table.contextUnitId} <> ${table.entityId}`,
 		),
 	],
 );

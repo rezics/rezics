@@ -2,6 +2,8 @@ import { sql } from "drizzle-orm";
 
 import type { DatabaseTransaction } from "../../database";
 import { type UnitMergeOperationPhase, type UnitMergeGraphPlanV1 } from "../../database/schema";
+import { processEntityMeasurementPreflightBatch } from "./entity-measurements";
+import { processEntityMeasurementMergeBatch } from "./entity-measurements";
 
 export type UnitMergePhaseInput = {
 	readonly operationId: string;
@@ -15,6 +17,14 @@ export type UnitMergePhaseResult = {
 	readonly processedRows: number;
 	readonly done: boolean;
 };
+
+export class UnitMergeEvidenceConflict extends Error {
+	readonly _tag = "UnitMergeEvidenceConflict" as const;
+
+	constructor(readonly reason: "subject_self_association") {
+		super("Unit merge cannot preserve source evidence for a self Subject association");
+	}
+}
 
 type BatchRow = { readonly processed: number | string; readonly remaining: boolean };
 
@@ -1021,73 +1031,293 @@ async function unitTagBatch(
 	tx: DatabaseTransaction,
 	input: UnitMergePhaseInput,
 ): Promise<UnitMergePhaseResult> {
-	return runBatch(
+	await tx.execute(sql`
+		with batch as materialized (
+			select tag_id, created_by_profile_id, pinned, position, created_at, updated_at
+			from unit_tag
+			where unit_id = ${input.sourceUnitId}::uuid
+			order by tag_id
+			limit ${input.batchSize}
+			for update skip locked
+		), hot_keys as materialized (
+			select distinct affected.unit_id, batch.tag_id, null::uuid as profile_id
+			from batch
+			cross join (values
+				(${input.sourceUnitId}::uuid),
+				(${input.targetUnitId}::uuid)
+			) as affected(unit_id)
+		), admission as materialized (
+			select public.lock_vndb_vote_hot_keys(
+				coalesce(
+					array_agg(hot_keys.unit_id order by hot_keys.unit_id, hot_keys.tag_id, hot_keys.profile_id),
+					array[]::uuid[]
+				),
+				coalesce(
+					array_agg(hot_keys.tag_id order by hot_keys.unit_id, hot_keys.tag_id, hot_keys.profile_id),
+					array[]::uuid[]
+				),
+				coalesce(
+					array_agg(hot_keys.profile_id order by hot_keys.unit_id, hot_keys.tag_id, hot_keys.profile_id),
+					array[]::uuid[]
+				)
+			) as admitted
+			from hot_keys
+		)
+		insert into unit_tag (
+			unit_id, tag_id, created_by_profile_id, pinned, position,
+			created_at, updated_at
+		)
+		select ${input.targetUnitId}::uuid, batch.tag_id, batch.created_by_profile_id,
+			batch.pinned,
+			case
+				when batch.pinned and exists (
+					select 1 from unit_tag as target_position
+					where target_position.unit_id = ${input.targetUnitId}::uuid
+						and target_position.pinned
+						and target_position.position = batch.position
+						and target_position.tag_id <> batch.tag_id
+				) then 'a0'
+					|| replace(${input.operationId}::text, '-', '')
+					|| replace(${input.sourceUnitId}::text, '-', '')
+					|| replace(batch.tag_id::text, '-', '')
+					|| 'V'
+				else batch.position
+			end,
+			batch.created_at, batch.updated_at
+		from batch
+		cross join admission
+		on conflict (unit_id, tag_id) do nothing
+	`);
+	await tx.execute(sql`
+		with vote_batch as materialized (
+			select vote.tag_id, vote.profile_id,
+				vote.fit_vote, vote.spoiler_level,
+				vote.fit_updated_at, vote.spoiler_updated_at,
+				vote.created_at, vote.updated_at
+			from unit_tag_judgment as vote
+			where vote.unit_id = ${input.sourceUnitId}::uuid
+				and exists (
+					select 1 from unit_tag as target
+					where target.unit_id = ${input.targetUnitId}::uuid
+						and target.tag_id = vote.tag_id
+				)
+			order by vote.tag_id, vote.profile_id
+			limit ${input.batchSize}
+			for update of vote skip locked
+		), hot_keys as materialized (
+			select distinct affected.unit_id, vote_batch.tag_id, vote_batch.profile_id
+			from vote_batch
+			cross join (values
+				(${input.sourceUnitId}::uuid),
+				(${input.targetUnitId}::uuid)
+			) as affected(unit_id)
+		), admission as materialized (
+			select public.lock_vndb_vote_hot_keys(
+				coalesce(
+					array_agg(hot_keys.unit_id order by hot_keys.unit_id, hot_keys.tag_id, hot_keys.profile_id),
+					array[]::uuid[]
+				),
+				coalesce(
+					array_agg(hot_keys.tag_id order by hot_keys.unit_id, hot_keys.tag_id, hot_keys.profile_id),
+					array[]::uuid[]
+				),
+				coalesce(
+					array_agg(hot_keys.profile_id order by hot_keys.unit_id, hot_keys.tag_id, hot_keys.profile_id),
+					array[]::uuid[]
+				)
+			) as admitted
+			from hot_keys
+		)
+		insert into unit_tag_judgment (
+			unit_id, tag_id, profile_id, fit_vote, spoiler_level,
+			fit_updated_at, spoiler_updated_at, created_at, updated_at
+		)
+		select ${input.targetUnitId}::uuid, tag_id, profile_id,
+			fit_vote, spoiler_level, fit_updated_at, spoiler_updated_at,
+			created_at, updated_at
+		from vote_batch
+		cross join admission
+		on conflict (unit_id, tag_id, profile_id) do update
+		set fit_vote = case
+				when excluded.fit_updated_at is not null
+					and (
+						unit_tag_judgment.fit_updated_at is null
+						or excluded.fit_updated_at > unit_tag_judgment.fit_updated_at
+					)
+					then excluded.fit_vote
+				else unit_tag_judgment.fit_vote
+			end,
+			fit_updated_at = greatest(
+				unit_tag_judgment.fit_updated_at,
+				excluded.fit_updated_at
+			),
+			spoiler_level = case
+				when excluded.spoiler_updated_at is not null
+					and (
+						unit_tag_judgment.spoiler_updated_at is null
+						or excluded.spoiler_updated_at > unit_tag_judgment.spoiler_updated_at
+					)
+					then excluded.spoiler_level
+				else unit_tag_judgment.spoiler_level
+			end,
+			spoiler_updated_at = greatest(
+				unit_tag_judgment.spoiler_updated_at,
+				excluded.spoiler_updated_at
+			),
+			created_at = least(unit_tag_judgment.created_at, excluded.created_at),
+			updated_at = greatest(unit_tag_judgment.updated_at, excluded.updated_at)
+	`);
+	const evidenceResult = await tx.execute<{ readonly processed: number | string }>(sql`
+		with batch as materialized (
+			select evidence.import_id, evidence.source_fingerprint
+			from content_pack_unit_tag_evidence as evidence
+			join unit_tag_judgment as target
+				on target.unit_id = ${input.targetUnitId}::uuid
+				and target.tag_id = evidence.tag_id
+				and target.profile_id = evidence.profile_id
+			where evidence.unit_id = ${input.sourceUnitId}::uuid
+			order by evidence.tag_id, evidence.profile_id,
+				evidence.import_id, evidence.source_fingerprint
+			limit ${input.batchSize}
+			for update of evidence skip locked
+		), updated as (
+			update content_pack_unit_tag_evidence as evidence
+			set unit_id = ${input.targetUnitId}::uuid
+			from batch
+			where evidence.import_id = batch.import_id
+				and evidence.source_fingerprint = batch.source_fingerprint
+			returning 1
+		)
+		select cardinality(array(select 1 from updated))::int as processed
+	`);
+	const relationResult = await runBatch(
 		tx,
 		sql`
 			with batch as materialized (
-				select tag_id, created_by_profile_id, created_at, updated_at
-				from unit_tag
-				where unit_id = ${input.sourceUnitId}::uuid
+				select source.tag_id
+				from unit_tag as source
+				where source.unit_id = ${input.sourceUnitId}::uuid
+					and exists (
+						select 1 from unit_tag as target
+						where target.unit_id = ${input.targetUnitId}::uuid
+							and target.tag_id = source.tag_id
+					)
 				order by tag_id
 				limit ${input.batchSize}
-				for update skip locked
-			), ensured_targets as (
-				insert into unit_tag (
-					unit_id, tag_id, created_by_profile_id, pinned, position,
-					created_at, updated_at
-				)
-				select ${input.targetUnitId}::uuid, tag_id, created_by_profile_id,
-					false, null, created_at, updated_at
-				from batch
-				on conflict (unit_id, tag_id) do update
-				set updated_at = greatest(unit_tag.updated_at, excluded.updated_at)
-				returning tag_id
+				for update of source skip locked
 			), tag_to_drain as materialized (
-				select batch.tag_id
-				from batch
-				join ensured_targets using (tag_id)
+				select tag_id from batch
 				order by batch.tag_id
 				limit 1
 			), vote_batch as materialized (
-				select vote.tag_id, vote.profile_id, vote.value, vote.created_at, vote.updated_at
+				select vote.tag_id, vote.profile_id,
+					vote.fit_vote, vote.spoiler_level,
+					vote.fit_updated_at, vote.spoiler_updated_at,
+					vote.created_at, vote.updated_at
 				from tag_to_drain
-				join unit_tag_vote as vote on vote.tag_id = tag_to_drain.tag_id
+				join unit_tag_judgment as vote on vote.tag_id = tag_to_drain.tag_id
 				where vote.unit_id = ${input.sourceUnitId}::uuid
 				order by vote.profile_id
 				limit ${input.batchSize}
 				for update of vote skip locked
+			), hot_keys as materialized (
+				select affected.unit_id, batch.tag_id, null::uuid as profile_id
+				from batch
+				cross join (values
+					(${input.sourceUnitId}::uuid),
+					(${input.targetUnitId}::uuid)
+				) as affected(unit_id)
+				union
+				select affected.unit_id, vote_batch.tag_id, vote_batch.profile_id
+				from vote_batch
+				cross join (values
+					(${input.sourceUnitId}::uuid),
+					(${input.targetUnitId}::uuid)
+				) as affected(unit_id)
+			), admission as materialized (
+				select public.lock_vndb_vote_hot_keys(
+					coalesce(
+						array_agg(hot_keys.unit_id order by hot_keys.unit_id, hot_keys.tag_id, hot_keys.profile_id),
+						array[]::uuid[]
+					),
+					coalesce(
+						array_agg(hot_keys.tag_id order by hot_keys.unit_id, hot_keys.tag_id, hot_keys.profile_id),
+						array[]::uuid[]
+					),
+					coalesce(
+						array_agg(hot_keys.profile_id order by hot_keys.unit_id, hot_keys.tag_id, hot_keys.profile_id),
+						array[]::uuid[]
+					)
+				) as admitted
+				from hot_keys
 			), copied_votes as (
-				insert into unit_tag_vote (
-					unit_id, tag_id, profile_id, value, created_at, updated_at
+				insert into unit_tag_judgment (
+					unit_id, tag_id, profile_id, fit_vote, spoiler_level,
+					fit_updated_at, spoiler_updated_at, created_at, updated_at
 				)
 				select ${input.targetUnitId}::uuid, tag_id, profile_id,
-					value, created_at, updated_at
+					fit_vote, spoiler_level, fit_updated_at, spoiler_updated_at,
+					created_at, updated_at
 				from vote_batch
+				cross join admission
 				on conflict (unit_id, tag_id, profile_id) do update
-				set value = case
-						when excluded.updated_at >= unit_tag_vote.updated_at then excluded.value
-						else unit_tag_vote.value
+				set fit_vote = case
+						when excluded.fit_updated_at is not null
+							and (
+								unit_tag_judgment.fit_updated_at is null
+								or excluded.fit_updated_at > unit_tag_judgment.fit_updated_at
+							)
+							then excluded.fit_vote
+						else unit_tag_judgment.fit_vote
 					end,
-					created_at = least(unit_tag_vote.created_at, excluded.created_at),
-					updated_at = greatest(unit_tag_vote.updated_at, excluded.updated_at)
+					fit_updated_at = greatest(
+						unit_tag_judgment.fit_updated_at,
+						excluded.fit_updated_at
+					),
+					spoiler_level = case
+						when excluded.spoiler_updated_at is not null
+							and (
+								unit_tag_judgment.spoiler_updated_at is null
+								or excluded.spoiler_updated_at > unit_tag_judgment.spoiler_updated_at
+							)
+							then excluded.spoiler_level
+						else unit_tag_judgment.spoiler_level
+					end,
+					spoiler_updated_at = greatest(
+						unit_tag_judgment.spoiler_updated_at,
+						excluded.spoiler_updated_at
+					),
+					created_at = least(unit_tag_judgment.created_at, excluded.created_at),
+					updated_at = greatest(unit_tag_judgment.updated_at, excluded.updated_at)
 				returning 1
 			), deleted_votes as (
-				delete from unit_tag_vote as vote
-				using vote_batch
+				delete from unit_tag_judgment as vote
+				using vote_batch, admission
 				where vote.unit_id = ${input.sourceUnitId}::uuid
 					and vote.tag_id = vote_batch.tag_id
 					and vote.profile_id = vote_batch.profile_id
+					and not exists (
+						select 1 from content_pack_unit_tag_evidence as evidence
+						where evidence.unit_id = ${input.sourceUnitId}::uuid
+							and evidence.tag_id = vote_batch.tag_id
+							and evidence.profile_id = vote_batch.profile_id
+					)
 				returning 1
 			), deleted as (
 				delete from unit_tag as relation
-				using batch
+				using batch, admission
 				where relation.unit_id = ${input.sourceUnitId}::uuid
 					and relation.tag_id = batch.tag_id
 					and not exists (select 1 from vote_batch)
 					and not exists (
-						select 1 from unit_tag_vote
+						select 1 from unit_tag_judgment
 						where unit_id = ${input.sourceUnitId}::uuid
 							and tag_id = batch.tag_id
+					)
+					and not exists (
+						select 1 from content_pack_unit_tag_evidence as evidence
+						where evidence.unit_id = ${input.sourceUnitId}::uuid
+							and evidence.tag_id = batch.tag_id
 					)
 				returning 1
 			)
@@ -1098,9 +1328,13 @@ async function unitTagBatch(
 				exists(select 1 from unit_tag where unit_id = ${input.sourceUnitId}::uuid) as remaining
 		`,
 	);
+	return {
+		processedRows: Number(evidenceResult.rows[0]?.processed ?? 0) + relationResult.processedRows,
+		done: relationResult.done,
+	};
 }
 
-async function realmTagVoteBatch(
+async function realmTagJudgmentBatch(
 	tx: DatabaseTransaction,
 	input: UnitMergePhaseInput,
 ): Promise<UnitMergePhaseResult> {
@@ -1108,30 +1342,80 @@ async function realmTagVoteBatch(
 		tx,
 		sql`
 			with batch as materialized (
-				select realm_id, tag_id, profile_id, value, created_at, updated_at
-				from realm_tag_vote
+				select realm_id, tag_id, profile_id,
+					fit_vote, spoiler_level, fit_updated_at, spoiler_updated_at,
+					created_at, updated_at
+				from realm_tag_judgment
 				where unit_id = ${input.sourceUnitId}::uuid
 				order by realm_id, tag_id, profile_id
 				limit ${input.batchSize}
 				for update skip locked
+			), hot_keys as materialized (
+				select distinct batch.realm_id, affected.unit_id, batch.tag_id
+				from batch
+				cross join (values
+					(${input.sourceUnitId}::uuid),
+					(${input.targetUnitId}::uuid)
+				) as affected(unit_id)
+			), admission as materialized (
+				select public.lock_realm_tag_judgment_keys(
+					coalesce(
+						array_agg(hot_keys.realm_id order by hot_keys.realm_id, hot_keys.unit_id, hot_keys.tag_id),
+						array[]::uuid[]
+					),
+					coalesce(
+						array_agg(hot_keys.unit_id order by hot_keys.realm_id, hot_keys.unit_id, hot_keys.tag_id),
+						array[]::uuid[]
+					),
+					coalesce(
+						array_agg(hot_keys.tag_id order by hot_keys.realm_id, hot_keys.unit_id, hot_keys.tag_id),
+						array[]::uuid[]
+					)
+				) as admitted
+				from hot_keys
 			), copied as (
-				insert into realm_tag_vote (
-					realm_id, unit_id, tag_id, profile_id, value, created_at, updated_at
+				insert into realm_tag_judgment (
+					realm_id, unit_id, tag_id, profile_id, fit_vote, spoiler_level,
+					fit_updated_at, spoiler_updated_at, created_at, updated_at
 				)
 				select realm_id, ${input.targetUnitId}::uuid, tag_id, profile_id,
-					value, created_at, updated_at
+					fit_vote, spoiler_level, fit_updated_at, spoiler_updated_at,
+					created_at, updated_at
 				from batch
+				cross join admission
 				on conflict (realm_id, unit_id, tag_id, profile_id) do update
-				set value = case
-						when excluded.updated_at >= realm_tag_vote.updated_at then excluded.value
-						else realm_tag_vote.value
+				set fit_vote = case
+						when excluded.fit_updated_at is not null
+							and (
+								realm_tag_judgment.fit_updated_at is null
+								or excluded.fit_updated_at > realm_tag_judgment.fit_updated_at
+							)
+							then excluded.fit_vote
+						else realm_tag_judgment.fit_vote
 					end,
-					created_at = least(realm_tag_vote.created_at, excluded.created_at),
-					updated_at = greatest(realm_tag_vote.updated_at, excluded.updated_at)
+					fit_updated_at = greatest(
+						realm_tag_judgment.fit_updated_at,
+						excluded.fit_updated_at
+					),
+					spoiler_level = case
+						when excluded.spoiler_updated_at is not null
+							and (
+								realm_tag_judgment.spoiler_updated_at is null
+								or excluded.spoiler_updated_at > realm_tag_judgment.spoiler_updated_at
+							)
+							then excluded.spoiler_level
+						else realm_tag_judgment.spoiler_level
+					end,
+					spoiler_updated_at = greatest(
+						realm_tag_judgment.spoiler_updated_at,
+						excluded.spoiler_updated_at
+					),
+					created_at = least(realm_tag_judgment.created_at, excluded.created_at),
+					updated_at = greatest(realm_tag_judgment.updated_at, excluded.updated_at)
 				returning 1
 			), deleted as (
-				delete from realm_tag_vote as vote
-				using batch
+				delete from realm_tag_judgment as vote
+				using batch, admission
 				where vote.realm_id = batch.realm_id
 					and vote.unit_id = ${input.sourceUnitId}::uuid
 					and vote.tag_id = batch.tag_id
@@ -1140,7 +1424,7 @@ async function realmTagVoteBatch(
 			)
 			select cardinality(array(select 1 from deleted)) as processed,
 				exists(
-					select 1 from realm_tag_vote where unit_id = ${input.sourceUnitId}::uuid
+					select 1 from realm_tag_judgment where unit_id = ${input.sourceUnitId}::uuid
 				) as remaining
 		`,
 	);
@@ -1160,23 +1444,32 @@ async function profileUnitTagBatch(
 				order by profile_id
 				limit ${input.batchSize}
 				for update skip locked
-			), copied as (
+			), inserted_targets as (
 				insert into profile_unit_tag (
 					profile_id, unit_id, tag_id, position, created_at, updated_at
 				)
 				select profile_id, ${input.targetUnitId}::uuid, tag_id,
 					position, created_at, updated_at
 				from batch
-				on conflict (profile_id, unit_id, tag_id) do update
-				set created_at = least(profile_unit_tag.created_at, excluded.created_at),
-					updated_at = greatest(profile_unit_tag.updated_at, excluded.updated_at)
-				returning 1
+				on conflict (profile_id, unit_id, tag_id) do nothing
+				returning profile_id, tag_id
+			), ensured_targets as materialized (
+				select profile_id, tag_id from inserted_targets
+				union
+				select batch.profile_id, batch.tag_id
+				from batch
+				where exists (
+					select 1 from profile_unit_tag as target
+					where target.profile_id = batch.profile_id
+						and target.unit_id = ${input.targetUnitId}::uuid
+						and target.tag_id = batch.tag_id
+				)
 			), deleted as (
 				delete from profile_unit_tag as relation
-				using batch
-				where relation.profile_id = batch.profile_id
+				using ensured_targets
+				where relation.profile_id = ensured_targets.profile_id
 					and relation.unit_id = ${input.sourceUnitId}::uuid
-					and relation.tag_id = batch.tag_id
+					and relation.tag_id = ensured_targets.tag_id
 				returning 1
 			)
 			select cardinality(array(select 1 from deleted)) as processed,
@@ -1288,23 +1581,32 @@ async function realmUnitTagBatch(
 				order by realm_id, tag_id
 				limit ${input.batchSize}
 				for update skip locked
-			), copied as (
+			), inserted_targets as (
 				insert into realm_unit_tag (
 					realm_id, unit_id, tag_id, position, created_by_profile_id, created_at, updated_at
 				)
 				select realm_id, ${input.targetUnitId}::uuid, tag_id, position,
 					created_by_profile_id, created_at, updated_at
 				from batch
-				on conflict (realm_id, unit_id, tag_id) do update
-				set created_at = least(realm_unit_tag.created_at, excluded.created_at),
-					updated_at = greatest(realm_unit_tag.updated_at, excluded.updated_at)
-				returning 1
+				on conflict (realm_id, unit_id, tag_id) do nothing
+				returning realm_id, tag_id
+			), ensured_targets as materialized (
+				select realm_id, tag_id from inserted_targets
+				union
+				select batch.realm_id, batch.tag_id
+				from batch
+				where exists (
+					select 1 from realm_unit_tag as target
+					where target.realm_id = batch.realm_id
+						and target.unit_id = ${input.targetUnitId}::uuid
+						and target.tag_id = batch.tag_id
+				)
 			), deleted as (
 				delete from realm_unit_tag as relation
-				using batch
-				where relation.realm_id = batch.realm_id
+				using ensured_targets
+				where relation.realm_id = ensured_targets.realm_id
 					and relation.unit_id = ${input.sourceUnitId}::uuid
-					and relation.tag_id = batch.tag_id
+					and relation.tag_id = ensured_targets.tag_id
 				returning 1
 			)
 			select cardinality(array(select 1 from deleted)) as processed,
@@ -1444,59 +1746,210 @@ async function subjectAssociationBatch(
 ): Promise<UnitMergePhaseResult> {
 	const column = sql.identifier(direction);
 	const otherColumn = sql.identifier(direction === "unit_id" ? "entity_id" : "unit_id");
-	return runBatch(
+	const selfEvidence = await tx.execute<{ readonly conflict: boolean }>(sql`
+		select exists (
+			select 1
+			from subject_association as association
+			join content_pack_subject_association_evidence as evidence
+				on evidence.association_id = association.id
+			where association.${column} = ${input.sourceUnitId}::uuid
+				and association.${otherColumn} = ${input.targetUnitId}::uuid
+		) as conflict
+	`);
+	if (selfEvidence.rows[0]?.conflict)
+		throw new UnitMergeEvidenceConflict("subject_self_association");
+
+	await tx.execute(sql`
+		with judgment_batch as materialized (
+			select judgment.association_id, judgment.profile_id,
+				judgment.spoiler_level, judgment.created_at, judgment.updated_at,
+				canonical.id as canonical_id
+			from subject_association as source
+			join subject_association as canonical
+				on canonical.unit_id = case
+					when ${direction} = 'unit_id' then ${input.targetUnitId}::uuid
+					else source.unit_id
+				end
+				and canonical.entity_id = case
+					when ${direction} = 'entity_id' then ${input.targetUnitId}::uuid
+					else source.entity_id
+				end
+				and canonical.role = source.role
+				and canonical.id <> source.id
+			join subject_association_judgment as judgment
+				on judgment.association_id = source.id
+			where source.${column} = ${input.sourceUnitId}::uuid
+			order by source.id, judgment.profile_id
+			limit ${input.batchSize}
+			for update of judgment skip locked
+		)
+		insert into subject_association_judgment (
+			association_id, profile_id, spoiler_level, created_at, updated_at
+		)
+		select canonical_id, profile_id, spoiler_level, created_at, updated_at
+		from judgment_batch
+		on conflict (association_id, profile_id) do update
+		set spoiler_level = case
+				when excluded.updated_at > subject_association_judgment.updated_at
+					then excluded.spoiler_level
+				else subject_association_judgment.spoiler_level
+			end,
+			created_at = least(
+				subject_association_judgment.created_at,
+				excluded.created_at
+			),
+			updated_at = greatest(
+				subject_association_judgment.updated_at,
+				excluded.updated_at
+			)
+	`);
+	const evidenceResult = await tx.execute<{ readonly processed: number | string }>(sql`
+		with batch as materialized (
+			select evidence.import_id, evidence.source_fingerprint,
+				canonical.id as canonical_id
+			from content_pack_subject_association_evidence as evidence
+			join subject_association as source
+				on source.id = evidence.association_id
+			join subject_association as canonical
+				on canonical.unit_id = case
+					when ${direction} = 'unit_id' then ${input.targetUnitId}::uuid
+					else source.unit_id
+				end
+				and canonical.entity_id = case
+					when ${direction} = 'entity_id' then ${input.targetUnitId}::uuid
+					else source.entity_id
+				end
+				and canonical.role = source.role
+				and canonical.id <> source.id
+			join subject_association_judgment as target
+				on target.association_id = canonical.id
+				and target.profile_id = evidence.profile_id
+			where source.${column} = ${input.sourceUnitId}::uuid
+			order by evidence.association_id, evidence.profile_id,
+				evidence.import_id, evidence.source_fingerprint
+			limit ${input.batchSize}
+			for update of evidence skip locked
+		), updated as (
+			update content_pack_subject_association_evidence as evidence
+			set association_id = batch.canonical_id
+			from batch
+			where evidence.import_id = batch.import_id
+				and evidence.source_fingerprint = batch.source_fingerprint
+			returning 1
+		)
+		select cardinality(array(select 1 from updated))::int as processed
+	`);
+	const relationResult = await runBatch(
 		tx,
 		sql`
 			with batch as materialized (
 				select id, unit_id, entity_id, role
 				from subject_association
 				where ${column} = ${input.sourceUnitId}::uuid
+				order by ${otherColumn}, role
 				limit ${input.batchSize}
 				for update skip locked
+			), classified as materialized (
+				select batch.*,
+					canonical.id as canonical_id,
+					batch.${otherColumn} = ${input.targetUnitId}::uuid as becomes_self
+				from batch
+				left join subject_association as canonical
+					on canonical.unit_id = case
+						when ${direction} = 'unit_id' then ${input.targetUnitId}::uuid
+						else batch.unit_id
+					end
+					and canonical.entity_id = case
+						when ${direction} = 'entity_id' then ${input.targetUnitId}::uuid
+						else batch.entity_id
+					end
+					and canonical.role = batch.role
+					and canonical.id <> batch.id
+			), association_to_drain as materialized (
+				select id, canonical_id
+				from classified
+				where becomes_self or canonical_id is not null
+				order by id
+				limit 1
+			), judgment_batch as materialized (
+				select judgment.association_id, judgment.profile_id,
+					judgment.spoiler_level, judgment.created_at, judgment.updated_at,
+					association_to_drain.canonical_id
+				from association_to_drain
+				join subject_association_judgment as judgment
+					on judgment.association_id = association_to_drain.id
+				order by judgment.profile_id
+				limit ${input.batchSize}
+				for update of judgment skip locked
+			), copied_judgments as (
+				insert into subject_association_judgment (
+					association_id, profile_id, spoiler_level, created_at, updated_at
+				)
+				select canonical_id, profile_id, spoiler_level, created_at, updated_at
+				from judgment_batch
+				where canonical_id is not null
+				on conflict (association_id, profile_id) do update
+				set spoiler_level = case
+						when excluded.updated_at > subject_association_judgment.updated_at
+							then excluded.spoiler_level
+						else subject_association_judgment.spoiler_level
+					end,
+					created_at = least(
+						subject_association_judgment.created_at,
+						excluded.created_at
+					),
+					updated_at = greatest(
+						subject_association_judgment.updated_at,
+						excluded.updated_at
+					)
+				returning association_id, profile_id
+			), deleted_judgments as (
+				delete from subject_association_judgment as judgment
+				using judgment_batch
+				where judgment.association_id = judgment_batch.association_id
+					and judgment.profile_id = judgment_batch.profile_id
+					and (
+						judgment_batch.canonical_id is null
+						or exists (
+							select 1
+							from copied_judgments
+							where copied_judgments.association_id = judgment_batch.canonical_id
+								and copied_judgments.profile_id = judgment_batch.profile_id
+						)
+					)
+					and not exists (
+						select 1 from content_pack_subject_association_evidence as evidence
+						where evidence.association_id = judgment_batch.association_id
+							and evidence.profile_id = judgment_batch.profile_id
+					)
+				returning 1
 			), deleted_invalid as (
 				delete from subject_association as association
-				using batch
-				where association.id = batch.id
-					and (
-						batch.${otherColumn} = ${input.targetUnitId}::uuid
-						or exists (
-							select 1 from subject_association as canonical
-							where canonical.unit_id = case
-								when ${direction} = 'unit_id' then ${input.targetUnitId}::uuid
-								else batch.unit_id
-							end
-								and canonical.entity_id = case
-									when ${direction} = 'entity_id' then ${input.targetUnitId}::uuid
-									else batch.entity_id
-								end
-								and canonical.role = batch.role
-								and canonical.id <> batch.id
-						)
+				using classified
+				where association.id = classified.id
+					and (classified.becomes_self or classified.canonical_id is not null)
+					and not exists (
+						select 1
+						from subject_association_judgment
+						where association_id = classified.id
+					)
+					and not exists (
+						select 1 from content_pack_subject_association_evidence as evidence
+						where evidence.association_id = classified.id
 					)
 				returning 1
 			), updated as (
 				update subject_association as association
 				set ${column} = ${input.targetUnitId}::uuid,
 					updated_at = clock_timestamp()
-				from batch
-				where association.id = batch.id
-					and association.${otherColumn} <> ${input.targetUnitId}::uuid
-					and not exists (
-						select 1 from subject_association as canonical
-						where canonical.unit_id = case
-							when ${direction} = 'unit_id' then ${input.targetUnitId}::uuid
-							else batch.unit_id
-						end
-							and canonical.entity_id = case
-								when ${direction} = 'entity_id' then ${input.targetUnitId}::uuid
-								else batch.entity_id
-							end
-							and canonical.role = batch.role
-							and canonical.id <> batch.id
-					)
+				from classified
+				where association.id = classified.id
+					and not classified.becomes_self
+					and classified.canonical_id is null
 				returning 1
 			)
 			select (
+				cardinality(array(select 1 from deleted_judgments)) +
 				cardinality(array(select 1 from deleted_invalid)) +
 				cardinality(array(select 1 from updated))
 			)::int as processed,
@@ -1504,6 +1957,10 @@ async function subjectAssociationBatch(
 				as remaining
 		`,
 	);
+	return {
+		processedRows: Number(evidenceResult.rows[0]?.processed ?? 0) + relationResult.processedRows,
+		done: relationResult.done,
+	};
 }
 
 async function releaseParentBatch(
@@ -1599,7 +2056,115 @@ async function structureApplicationBatch(
 	tx: DatabaseTransaction,
 	input: UnitMergePhaseInput,
 ): Promise<UnitMergePhaseResult> {
-	return runBatch(
+	await tx.execute(sql`
+		with batch as materialized (
+			select structure_id, created_by_profile_id, created_at, updated_at
+			from unit_structure_application
+			where unit_id = ${input.sourceUnitId}::uuid
+			order by structure_id
+			limit ${input.batchSize}
+			for update skip locked
+		)
+		insert into unit_structure_application (
+			unit_id, structure_id, created_by_profile_id, pinned, position,
+			created_at, updated_at
+		)
+		select ${input.targetUnitId}::uuid, structure_id, created_by_profile_id,
+			false, null, created_at, updated_at
+		from batch
+		on conflict (unit_id, structure_id) do update
+		set updated_at = greatest(
+			unit_structure_application.updated_at,
+			excluded.updated_at
+		)
+	`);
+	await tx.execute(sql`
+		with vote_batch as materialized (
+			select vote.structure_id, vote.profile_id,
+				vote.fit_vote, vote.spoiler_level,
+				vote.fit_updated_at, vote.spoiler_updated_at,
+				vote.created_at, vote.updated_at
+			from unit_structure_application_judgment as vote
+			where vote.unit_id = ${input.sourceUnitId}::uuid
+				and exists (
+					select 1 from unit_structure_application as target
+					where target.unit_id = ${input.targetUnitId}::uuid
+						and target.structure_id = vote.structure_id
+				)
+			order by vote.structure_id, vote.profile_id
+			limit ${input.batchSize}
+			for update of vote skip locked
+		)
+		insert into unit_structure_application_judgment (
+			unit_id, structure_id, profile_id, fit_vote, spoiler_level,
+			fit_updated_at, spoiler_updated_at, created_at, updated_at
+		)
+		select ${input.targetUnitId}::uuid, structure_id, profile_id,
+			fit_vote, spoiler_level, fit_updated_at, spoiler_updated_at,
+			created_at, updated_at
+		from vote_batch
+		on conflict (unit_id, structure_id, profile_id) do update
+		set fit_vote = case
+				when excluded.fit_updated_at is not null
+					and (
+						unit_structure_application_judgment.fit_updated_at is null
+						or excluded.fit_updated_at
+							> unit_structure_application_judgment.fit_updated_at
+					)
+					then excluded.fit_vote
+				else unit_structure_application_judgment.fit_vote
+			end,
+			fit_updated_at = greatest(
+				unit_structure_application_judgment.fit_updated_at,
+				excluded.fit_updated_at
+			),
+			spoiler_level = case
+				when excluded.spoiler_updated_at is not null
+					and (
+						unit_structure_application_judgment.spoiler_updated_at is null
+						or excluded.spoiler_updated_at
+							> unit_structure_application_judgment.spoiler_updated_at
+					)
+					then excluded.spoiler_level
+				else unit_structure_application_judgment.spoiler_level
+			end,
+			spoiler_updated_at = greatest(
+				unit_structure_application_judgment.spoiler_updated_at,
+				excluded.spoiler_updated_at
+			),
+			created_at = least(
+				unit_structure_application_judgment.created_at,
+				excluded.created_at
+			),
+			updated_at = greatest(
+				unit_structure_application_judgment.updated_at,
+				excluded.updated_at
+			)
+	`);
+	const evidenceResult = await tx.execute<{ readonly processed: number | string }>(sql`
+		with batch as materialized (
+			select evidence.import_id, evidence.source_fingerprint
+			from content_pack_structure_application_evidence as evidence
+			join unit_structure_application_judgment as target
+				on target.unit_id = ${input.targetUnitId}::uuid
+				and target.structure_id = evidence.structure_id
+				and target.profile_id = evidence.profile_id
+			where evidence.unit_id = ${input.sourceUnitId}::uuid
+			order by evidence.structure_id, evidence.profile_id,
+				evidence.import_id, evidence.source_fingerprint
+			limit ${input.batchSize}
+			for update of evidence skip locked
+		), updated as (
+			update content_pack_structure_application_evidence as evidence
+			set unit_id = ${input.targetUnitId}::uuid
+			from batch
+			where evidence.import_id = batch.import_id
+				and evidence.source_fingerprint = batch.source_fingerprint
+			returning 1
+		)
+		select cardinality(array(select 1 from updated))::int as processed
+	`);
+	const relationResult = await runBatch(
 		tx,
 		sql`
 			with batch as materialized (
@@ -1630,43 +2195,76 @@ async function structureApplicationBatch(
 				order by batch.structure_id
 				limit 1
 			), vote_batch as materialized (
-				select vote.structure_id, vote.profile_id, vote.value,
+				select vote.structure_id, vote.profile_id,
+					vote.fit_vote, vote.spoiler_level,
+					vote.fit_updated_at, vote.spoiler_updated_at,
 					vote.created_at, vote.updated_at
 				from application_to_drain
-				join unit_structure_application_vote as vote
+				join unit_structure_application_judgment as vote
 					on vote.structure_id = application_to_drain.structure_id
 				where vote.unit_id = ${input.sourceUnitId}::uuid
 				order by vote.profile_id
 				limit ${input.batchSize}
 				for update of vote skip locked
 			), copied_votes as (
-				insert into unit_structure_application_vote (
-					unit_id, structure_id, profile_id, value, created_at, updated_at
+				insert into unit_structure_application_judgment (
+					unit_id, structure_id, profile_id, fit_vote, spoiler_level,
+					fit_updated_at, spoiler_updated_at, created_at, updated_at
 				)
 				select ${input.targetUnitId}::uuid, structure_id, profile_id,
-					value, created_at, updated_at
+					fit_vote, spoiler_level, fit_updated_at, spoiler_updated_at,
+					created_at, updated_at
 				from vote_batch
 				on conflict (unit_id, structure_id, profile_id) do update
-				set value = case
-						when excluded.updated_at >= unit_structure_application_vote.updated_at
-							then excluded.value
-						else unit_structure_application_vote.value
+				set fit_vote = case
+						when excluded.fit_updated_at is not null
+							and (
+								unit_structure_application_judgment.fit_updated_at is null
+								or excluded.fit_updated_at
+									> unit_structure_application_judgment.fit_updated_at
+							)
+							then excluded.fit_vote
+						else unit_structure_application_judgment.fit_vote
 					end,
+					fit_updated_at = greatest(
+						unit_structure_application_judgment.fit_updated_at,
+						excluded.fit_updated_at
+					),
+					spoiler_level = case
+						when excluded.spoiler_updated_at is not null
+							and (
+								unit_structure_application_judgment.spoiler_updated_at is null
+								or excluded.spoiler_updated_at
+									> unit_structure_application_judgment.spoiler_updated_at
+							)
+							then excluded.spoiler_level
+						else unit_structure_application_judgment.spoiler_level
+					end,
+					spoiler_updated_at = greatest(
+						unit_structure_application_judgment.spoiler_updated_at,
+						excluded.spoiler_updated_at
+					),
 					created_at = least(
-						unit_structure_application_vote.created_at,
+						unit_structure_application_judgment.created_at,
 						excluded.created_at
 					),
 					updated_at = greatest(
-						unit_structure_application_vote.updated_at,
+						unit_structure_application_judgment.updated_at,
 						excluded.updated_at
 					)
 				returning 1
 			), deleted_votes as (
-				delete from unit_structure_application_vote as vote
+				delete from unit_structure_application_judgment as vote
 				using vote_batch
 				where vote.unit_id = ${input.sourceUnitId}::uuid
 					and vote.structure_id = vote_batch.structure_id
 					and vote.profile_id = vote_batch.profile_id
+					and not exists (
+						select 1 from content_pack_structure_application_evidence as evidence
+						where evidence.unit_id = ${input.sourceUnitId}::uuid
+							and evidence.structure_id = vote_batch.structure_id
+							and evidence.profile_id = vote_batch.profile_id
+					)
 				returning 1
 			), deleted as (
 				delete from unit_structure_application as application
@@ -1675,9 +2273,14 @@ async function structureApplicationBatch(
 					and application.structure_id = batch.structure_id
 					and not exists (select 1 from vote_batch)
 					and not exists (
-						select 1 from unit_structure_application_vote
+						select 1 from unit_structure_application_judgment
 						where unit_id = ${input.sourceUnitId}::uuid
 							and structure_id = batch.structure_id
+					)
+					and not exists (
+						select 1 from content_pack_structure_application_evidence as evidence
+						where evidence.unit_id = ${input.sourceUnitId}::uuid
+							and evidence.structure_id = batch.structure_id
 					)
 				returning 1
 			)
@@ -1691,6 +2294,10 @@ async function structureApplicationBatch(
 				) as remaining
 		`,
 	);
+	return {
+		processedRows: Number(evidenceResult.rows[0]?.processed ?? 0) + relationResult.processedRows,
+		done: relationResult.done,
+	};
 }
 
 async function progressEntryBatch(
@@ -1998,7 +2605,7 @@ const FinalConvergencePhases = [
 	"scores",
 	"collection_items",
 	"unit_tags",
-	"realm_tag_votes",
+	"realm_tag_judgments",
 	"profile_unit_tags",
 	"realm_pins",
 	"realm_units",
@@ -2010,6 +2617,8 @@ const FinalConvergencePhases = [
 	"credit_targets",
 	"subject_sources",
 	"subject_entities",
+	"entity_measurement_entities",
+	"entity_measurement_contexts",
 	"release_parents",
 	"series_releases",
 	"poll_options",
@@ -2045,6 +2654,8 @@ export async function processUnitMergePhase(
 	input: UnitMergePhaseInput,
 ): Promise<UnitMergePhaseResult> {
 	switch (phase) {
+		case "entity_measurement_preflight":
+			return processEntityMeasurementPreflightBatch(tx, input);
 		case "variant_graph":
 			return variantGraphBatch(tx, input);
 		case "slug_addresses":
@@ -2073,8 +2684,8 @@ export async function processUnitMergePhase(
 			return collectionItemBatch(tx, input);
 		case "unit_tags":
 			return unitTagBatch(tx, input);
-		case "realm_tag_votes":
-			return realmTagVoteBatch(tx, input);
+		case "realm_tag_judgments":
+			return realmTagJudgmentBatch(tx, input);
 		case "profile_unit_tags":
 			return profileUnitTagBatch(tx, input);
 		case "realm_pins":
@@ -2101,6 +2712,10 @@ export async function processUnitMergePhase(
 			return subjectAssociationBatch(tx, input, "unit_id");
 		case "subject_entities":
 			return subjectAssociationBatch(tx, input, "entity_id");
+		case "entity_measurement_entities":
+			return processEntityMeasurementMergeBatch(tx, input, "entity_id");
+		case "entity_measurement_contexts":
+			return processEntityMeasurementMergeBatch(tx, input, "context_unit_id");
 		case "release_parents":
 			return releaseParentBatch(tx, input);
 		case "series_releases":

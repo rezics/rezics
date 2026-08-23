@@ -2,6 +2,7 @@ import { and, asc, eq, inArray, lte, or, sql } from "drizzle-orm";
 
 import { recordAuditEvent } from "../../audit";
 import { database, type DatabaseTransaction } from "../../database";
+import { runVndbVoteTransaction } from "../../database/vndb-vote-admission";
 import {
 	unit,
 	unitMergeGraphLock,
@@ -10,6 +11,7 @@ import {
 	type UnitMergeGraphPlanV1,
 	type UnitMergeOperationPhase,
 } from "../../database/schema";
+import { isEntityMeasurementMergePhase } from "./entity-measurements";
 import { processUnitMergePhase } from "./phase-handlers";
 import { nextUnitMergePhase, UnitMergePolicyV1, unitMergeRetryDelayMilliseconds } from "./policy";
 
@@ -104,6 +106,13 @@ type StepResult =
 	| { readonly outcome: "completed" }
 	| { readonly outcome: "lease_lost" };
 
+function vndbVoteAuthorityForPhase(phase: UnitMergeOperationPhase): "global" | "realm" | undefined {
+	if (phase === "realm_tag_judgments") return "realm";
+	if (phase === "unit_tags" || phase === "structure_applications" || phase === "finalize")
+		return "global";
+	return undefined;
+}
+
 async function recordSystemMergeAudit(
 	tx: DatabaseTransaction,
 	input: {
@@ -134,7 +143,7 @@ async function processClaimedStep(
 	claimed: ClaimedUnitMergeOperation,
 	phase: UnitMergeOperationPhase,
 ): Promise<StepResult> {
-	return database.transaction(async (tx): Promise<StepResult> => {
+	const work = async (tx: DatabaseTransaction): Promise<StepResult> => {
 		const [operation] = await tx
 			.select({
 				id: unitMergeOperation.id,
@@ -153,7 +162,10 @@ async function processClaimedStep(
 			operation.phase !== phase
 		)
 			return { outcome: "lease_lost" };
-		await tx.execute(sql`select set_config('rezics.unit_merge_operation_id', ${claimed.id}, true)`);
+		await tx.execute(sql`select
+			set_config('rezics.unit_merge_operation_id', ${claimed.id}, true),
+			set_config('rezics.unit_merge_lease_token', ${claimed.leaseToken}, true)
+		`);
 
 		const result = await processUnitMergePhase(tx, phase, {
 			operationId: claimed.id,
@@ -217,7 +229,11 @@ async function processClaimedStep(
 				),
 			);
 		return { outcome: "continue", phase: nextPhase };
-	});
+	};
+	const authority = vndbVoteAuthorityForPhase(phase);
+	return authority
+		? runVndbVoteTransaction({ family: "unit_merge", authority }, work)
+		: database.transaction(work);
 }
 
 function failureDetails(error: unknown): { code: string; message: string } {
@@ -233,6 +249,71 @@ function failureDetails(error: unknown): { code: string; message: string } {
 					? `database:${constraint}`
 					: "UnitMergeExecutionError",
 		message: (rawMessage.trim() || "Unknown Unit merge execution failure").slice(0, 2_000),
+	};
+}
+
+/** A lossless merge conflict cannot become safe through automatic retries. */
+export function isTerminalUnitMergeExecutionFailure(error: unknown): boolean {
+	const tag = error && typeof error === "object" ? Reflect.get(error, "_tag") : undefined;
+	return Boolean(tag === "UnitMergeMeasurementConflict" || tag === "UnitMergeEvidenceConflict");
+}
+
+type UnitMergeLeaseTransition = {
+	readonly state: "failed" | "pending" | "processing" | "retry_wait";
+	readonly availableAt: Date;
+	readonly leaseToken: string | null;
+	readonly leaseExpiresAt: Date | null;
+	readonly phase?: "entity_measurement_preflight";
+	readonly measurementPreflightCursorEntityId?: null;
+};
+
+export function unitMergeFailureTransition(input: {
+	readonly phase: UnitMergeOperationPhase;
+	readonly terminal: boolean;
+	readonly now: Date;
+	readonly retryAt: Date;
+	readonly leaseToken: string;
+}): UnitMergeLeaseTransition {
+	const measurementPhase = isEntityMeasurementMergePhase(input.phase);
+	if (input.terminal)
+		return {
+			state: "failed",
+			availableAt: input.now,
+			leaseToken: null,
+			leaseExpiresAt: null,
+			...(measurementPhase
+				? {
+						phase: "entity_measurement_preflight" as const,
+						measurementPreflightCursorEntityId: null,
+					}
+				: {}),
+		};
+	if (measurementPhase)
+		return {
+			state: "processing",
+			availableAt: input.retryAt,
+			leaseToken: input.leaseToken,
+			leaseExpiresAt: input.retryAt,
+		};
+	return {
+		state: "retry_wait",
+		availableAt: input.retryAt,
+		leaseToken: null,
+		leaseExpiresAt: null,
+	};
+}
+
+export function unitMergeYieldTransition(input: {
+	readonly phase: UnitMergeOperationPhase;
+	readonly now: Date;
+	readonly leaseToken: string;
+}): UnitMergeLeaseTransition {
+	const preserveMeasurementFreeze = isEntityMeasurementMergePhase(input.phase);
+	return {
+		state: preserveMeasurementFreeze ? "processing" : "pending",
+		availableAt: input.now,
+		leaseToken: preserveMeasurementFreeze ? input.leaseToken : null,
+		leaseExpiresAt: preserveMeasurementFreeze ? input.now : null,
 	};
 }
 
@@ -260,17 +341,24 @@ async function markClaimedFailure(
 		)
 			return;
 		const attemptCount = operation.attemptCount + 1;
-		const terminal = attemptCount >= UnitMergePolicyV1.workerMaximumAutomaticAttempts;
+		const terminal =
+			isTerminalUnitMergeExecutionFailure(error) ||
+			attemptCount >= UnitMergePolicyV1.workerMaximumAutomaticAttempts;
+		const retryAt = new Date(
+			now.getTime() + unitMergeRetryDelayMilliseconds(attemptCount, Math.random()),
+		);
+		const transition = unitMergeFailureTransition({
+			phase: claimed.phase,
+			terminal,
+			now,
+			retryAt,
+			leaseToken: operation.leaseToken,
+		});
 		await tx
 			.update(unitMergeOperation)
 			.set({
-				state: terminal ? "failed" : "retry_wait",
+				...transition,
 				attemptCount,
-				availableAt: terminal
-					? now
-					: new Date(now.getTime() + unitMergeRetryDelayMilliseconds(attemptCount, Math.random())),
-				leaseToken: null,
-				leaseExpiresAt: null,
 				lastErrorCode: failure.code,
 				lastErrorMessage: failure.message,
 				updatedAt: now,
@@ -297,21 +385,27 @@ async function markClaimedFailure(
 	});
 }
 
-async function yieldClaimedOperation(claimed: ClaimedUnitMergeOperation): Promise<void> {
+async function yieldClaimedOperation(
+	claimed: ClaimedUnitMergeOperation,
+	phase: UnitMergeOperationPhase,
+): Promise<void> {
 	const now = new Date();
+	const transition = unitMergeYieldTransition({
+		phase,
+		now,
+		leaseToken: claimed.leaseToken,
+	});
 	await database
 		.update(unitMergeOperation)
 		.set({
-			state: "pending",
-			availableAt: now,
-			leaseToken: null,
-			leaseExpiresAt: null,
+			...transition,
 			updatedAt: now,
 		})
 		.where(
 			and(
 				eq(unitMergeOperation.id, claimed.id),
 				eq(unitMergeOperation.state, "processing"),
+				eq(unitMergeOperation.phase, phase),
 				eq(unitMergeOperation.leaseToken, claimed.leaseToken),
 			),
 		);
@@ -325,7 +419,7 @@ async function drainClaimedOperation(claimed: ClaimedUnitMergeOperation): Promis
 			if (result.outcome !== "continue") return;
 			phase = result.phase;
 		}
-		await yieldClaimedOperation(claimed);
+		await yieldClaimedOperation(claimed, phase);
 	} catch (error) {
 		await markClaimedFailure({ ...claimed, phase }, error);
 	}

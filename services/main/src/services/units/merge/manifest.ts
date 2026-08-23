@@ -8,7 +8,9 @@ import {
 	UnitMergeManifestStale,
 	UnitMergeRequestConflict,
 } from "../../api/governance/errors";
+import { ContentLabelRegistryIds } from "../../bootstrap/data/content-labels";
 import type { DatabaseTransaction } from "../../database";
+import { ContentLabelUnitMergeForbidden } from "../../database/errors";
 import {
 	type UnitMergeEligibleKind,
 	UnitMergeEligibleKindValues,
@@ -19,12 +21,25 @@ import {
 	type UnitMergeGraphPlanV1,
 } from "../../database/schema";
 import { UnitNotFound } from "../errors";
+import { requireEntityMeasurementsMergeable } from "./entity-measurements";
 import { UnitMergePolicyV1 } from "./policy";
 
 const EligibleKinds: ReadonlySet<string> = new Set(UnitMergeEligibleKindValues);
+const ProtectedRegistryUnitIds: ReadonlySet<string> = new Set(ContentLabelRegistryIds);
 
 function isUnitMergeEligibleKind(value: string): value is UnitMergeEligibleKind {
 	return EligibleKinds.has(value);
+}
+
+export function requireUnitMergeRegistryEligibility(input: {
+	readonly sourceUnitId: string;
+	readonly targetUnitId: string;
+}): void {
+	if (
+		ProtectedRegistryUnitIds.has(input.sourceUnitId) ||
+		ProtectedRegistryUnitIds.has(input.targetUnitId)
+	)
+		throw new ContentLabelUnitMergeForbidden();
 }
 
 type LockedMergeUnit = {
@@ -177,11 +192,17 @@ export async function buildUnitMergeManifest(
 		readonly expectedTargetUpdatedAt?: Date;
 	},
 ): Promise<UnitMergeManifestV1> {
+	requireUnitMergeRegistryEligibility(input);
 	const [source, target] = await lockMergeUnits(tx, input.sourceUnitId, input.targetUnitId);
 	await requireUnmergedPair(tx, source.id, target.id);
 	if (!isUnitMergeEligibleKind(source.kind)) throw new UnitMergeKindIneligible();
 	if (!isUnitMergeEligibleKind(target.kind)) throw new UnitMergeKindIneligible();
 	if (source.kind !== target.kind) throw new UnitMergeKindMismatch();
+	await requireEntityMeasurementsMergeable(tx, {
+		sourceUnitId: source.id,
+		targetUnitId: target.id,
+		sourceIsEntity: source.kind === "entity",
+	});
 	if (
 		(input.expectedSourceUpdatedAt &&
 			source.updatedAt.getTime() !== input.expectedSourceUpdatedAt.getTime()) ||

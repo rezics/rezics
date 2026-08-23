@@ -300,9 +300,10 @@ export const unitMergeOperation = pgTable(
 			.notNull()
 			.references(() => unit.id, { onDelete: "restrict" }),
 		state: unitMergeOperationState().default("pending").notNull(),
-		phase: unitMergeOperationPhase().default("variant_graph").notNull(),
+		phase: unitMergeOperationPhase().default("entity_measurement_preflight").notNull(),
 		attemptCount: integer().default(0).notNull(),
 		processedRows: bigint({ mode: "number" }).default(0).notNull(),
+		measurementPreflightCursorEntityId: uuid(),
 		availableAt: createTimestampMsColumn().defaultNow().notNull(),
 		leaseToken: uuid(),
 		leaseExpiresAt: createTimestampMsColumn(),
