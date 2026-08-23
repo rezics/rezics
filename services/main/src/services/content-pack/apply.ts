@@ -1,8 +1,8 @@
 import { createHash } from "node:crypto";
-import { and, eq, isNull, sql } from "drizzle-orm";
+import { and, eq, inArray, isNull, sql } from "drizzle-orm";
 import { assertFilterDocument } from "@rezics/filter";
 import { normalizeContentLanguageSupport } from "@rezics/content-language";
-import { isLicenseId, type LicenseId } from "@rezics/license";
+import { isLicenseId } from "@rezics/license";
 import { TopLevelSlugNamespaceUnitIds, ZoneHomePageSlug } from "@rezics/slug";
 import { isContentLanguage } from "@rezics/i18n";
 
@@ -24,8 +24,15 @@ import {
 	collectionItem,
 	creditAttribution,
 	entity,
+	entityMeasurement,
 	label,
 	media,
+	contentPackImport,
+	contentPackStructureApplicationEvidence,
+	contentPackStructureDefinitionEvidence,
+	contentPackSubjectAssociationEvidence,
+	contentPackTagEvidence,
+	contentPackUnitTagEvidence,
 	post,
 	realm,
 	realmUnit,
@@ -34,24 +41,23 @@ import {
 	seriesRelease,
 	software,
 	subjectAssociation,
+	subjectAssociationJudgment,
 	tag,
+	unit,
 	unitContentLanguageSupport,
 	unitAlias,
 	unitLocalization,
 	unitSlugAddress,
+	unitStructureApplication,
+	unitStructureApplicationJudgment,
 	unitTag,
+	unitTagJudgment,
 	unitVariant,
 	video,
 	zone,
 	zonePage,
-	AliasKindValues,
-	RealmJoinPolicyValues,
-	type CreditAttributionRole,
-	type RealmPageKind,
-	type SubjectAssociationRole,
 	type ContentStructureKind,
 	type ContentLanguageSupportUnitKind,
-	type UnitKind,
 	type VariantCapableUnitKind,
 	ContentLanguageSupportUnitKindValues,
 	VariantCapableUnitKindValues,
@@ -65,7 +71,8 @@ import { WorkPolicy } from "../performance/policy";
 import { ContentPackCollision, ContentPackConflict, ContentPackInvalid } from "./errors";
 import { assertContentPackDocuments } from "./documents";
 import { planContentPack } from "./plan";
-import type { LoadedPack, PackObject, PackStructure } from "./contracts";
+import type { LoadedPack, PackObject, PackRelations, PackStructure } from "./contracts";
+import { createTagStructureInTransaction } from "../tag-structures/service";
 
 const ImportOwnerProfileId = OfficialProfileIds.editorial;
 const KindOrder: readonly string[] = [
@@ -90,6 +97,11 @@ const ContentLanguageSupportUnitKindSet: ReadonlySet<string> = new Set(
 	ContentLanguageSupportUnitKindValues,
 );
 const VariantCapableUnitKindSet: ReadonlySet<string> = new Set(VariantCapableUnitKindValues);
+const ImportReadBatchSize = 500;
+type PackUnitTagRelation = NonNullable<PackRelations["unitTags"]>[number];
+type PackSubjectRelation = NonNullable<PackRelations["subjects"]>[number];
+type PackTagPath = NonNullable<PackRelations["tagPaths"]>[number];
+type PackTagPathApplication = NonNullable<PackRelations["tagPathApplications"]>[number];
 
 export async function applyContentPack(
 	tx: DatabaseTransaction,
@@ -100,6 +112,19 @@ export async function applyContentPack(
 	await tx.execute(
 		sql`select pg_advisory_xact_lock(hashtextextended(${`content-pack:${pack.manifest.id}`}::text, 0))`,
 	);
+	const [existingImport] = await tx
+		.select({ checksum: contentPackImport.checksum })
+		.from(contentPackImport)
+		.where(
+			and(
+				eq(contentPackImport.packId, pack.manifest.id),
+				eq(contentPackImport.version, pack.manifest.version),
+			),
+		)
+		.limit(1);
+	if (existingImport?.checksum === pack.checksum) return { status: "noop", created: 0 };
+	if (existingImport)
+		throw new ContentPackConflict("A different checksum is already recorded for this pack version");
 	const plan = await planContentPack(tx, pack, sourceRoot);
 	if (plan.conflicts.length)
 		throw new ContentPackConflict(
@@ -109,7 +134,9 @@ export async function applyContentPack(
 				)
 				.join("; "),
 		);
-	if (plan.alreadyInstalled || plan.createCount === 0) return { status: "noop", created: 0 };
+	await verifyExistingPackObjects(tx, pack, plan.objects);
+
+	const importId = await insertImportLedger(tx, pack);
 
 	const createKeys = new Set(
 		plan.objects.filter((item) => item.action === "create").map((item) => item.sourceKey),
@@ -120,7 +147,10 @@ export async function applyContentPack(
 
 	for (const object of objects) await importUnit(tx, pack, object);
 
-	await importRelations(tx, pack, createKeys);
+	await importTagEvidence(tx, pack, importId);
+	await importEntityMeasurements(tx, pack);
+	await importRelations(tx, pack, createKeys, importId);
+	await importTagPaths(tx, pack, importId);
 	await importStructures(tx, pack);
 	await importSlugs(tx, pack, createKeys);
 
@@ -134,6 +164,85 @@ export async function applyContentPack(
 	return { status: "created", created: objects.length };
 }
 
+async function insertImportLedger(tx: DatabaseTransaction, pack: LoadedPack): Promise<string> {
+	const [created] = await tx
+		.insert(contentPackImport)
+		.values({
+			packId: pack.manifest.id,
+			version: pack.manifest.version,
+			checksum: pack.checksum,
+			sourceLockKind: pack.sourceLock.kind,
+			manifestSnapshot: pack.manifest,
+			sourceLockSnapshot: pack.sourceLock,
+			rightsSnapshot: [...pack.rights],
+			bindingsSnapshot: [...pack.bindings],
+			importerProfileId: ImportOwnerProfileId,
+		})
+		.returning({ id: contentPackImport.id });
+	if (!created) throw new ContentPackConflict("The content-pack import ledger row was not created");
+	return created.id;
+}
+
+async function verifyExistingPackObjects(
+	tx: DatabaseTransaction,
+	pack: LoadedPack,
+	planned: readonly { readonly sourceKey: string; readonly action: string }[],
+): Promise<void> {
+	const existingSourceKeys = planned
+		.filter((item) => item.action === "noop")
+		.map((item) => item.sourceKey);
+	if (!existingSourceKeys.length) return;
+	const expectedById = new Map(
+		pack.objects
+			.filter((object) => existingSourceKeys.includes(object.sourceKey))
+			.map((object) => [requireId(pack.ids.units, object.sourceKey), object] as const),
+	);
+	const records = [];
+	for (const ids of chunks([...expectedById.keys()], ImportReadBatchSize))
+		records.push(
+			...(await tx
+				.select({
+					id: unit.id,
+					kind: unit.kind,
+					status: unit.status,
+					visibility: unit.visibility,
+					contentRating: unit.contentRating,
+					aiDisclosure: unit.aiDisclosure,
+					moderationStatus: unit.moderationStatus,
+					postTargetingLocked: unit.postTargetingLocked,
+					deletedAt: unit.deletedAt,
+				})
+				.from(unit)
+				.where(inArray(unit.id, ids))),
+		);
+	for (const record of records) {
+		const expected = expectedById.get(record.id);
+		if (!expected) throw new ContentPackCollision(`Unexpected existing Unit ${record.id}`);
+		if (
+			record.kind !== expected.unit.kind ||
+			record.status !== expected.unit.status ||
+			record.visibility !== expected.unit.visibility ||
+			record.contentRating !== expected.unit.contentRating ||
+			record.aiDisclosure !== expected.unit.aiDisclosure ||
+			record.moderationStatus !== expected.unit.moderationStatus ||
+			record.postTargetingLocked !== expected.unit.postTargetingLocked ||
+			record.deletedAt !== null
+		)
+			throw new ContentPackCollision(
+				`${expected.sourceKey} collides with a different existing Unit`,
+			);
+	}
+	if (records.length !== expectedById.size)
+		throw new ContentPackCollision("A planned existing Unit disappeared before import");
+}
+
+function chunks<T>(values: readonly T[], size: number): readonly T[][] {
+	const result: T[][] = [];
+	for (let index = 0; index < values.length; index += size)
+		result.push(values.slice(index, index + size));
+	return result;
+}
+
 function kindRank(kind: string): number {
 	const index = KindOrder.indexOf(kind);
 	return index === -1 ? KindOrder.length : index;
@@ -145,17 +254,16 @@ async function importUnit(
 	object: PackObject,
 ): Promise<void> {
 	const unitId = requireId(pack.ids.units, object.sourceKey);
-	const license =
-		object.unit.license && isLicenseId(object.unit.license)
-			? (object.unit.license as LicenseId)
-			: null;
+	const license = object.unit.license;
+	if (license !== null && !isLicenseId(license))
+		throw new ContentPackInvalid(`${object.sourceKey} has an unknown license identifier`);
 	await insertUnit(tx, {
 		id: unitId,
-		kind: object.unit.kind as UnitKind,
+		kind: object.unit.kind,
 		status: object.unit.status,
 		visibility: object.unit.visibility,
 		contentRating: object.unit.contentRating,
-		aiDisclosure: object.unit.aiDisclosure as "none",
+		aiDisclosure: object.unit.aiDisclosure,
 		moderationStatus: object.unit.moderationStatus,
 		postTargetingLocked: object.unit.postTargetingLocked,
 		publishedAt: object.unit.status === "published" ? new Date() : null,
@@ -169,7 +277,7 @@ async function importUnit(
 			unitId,
 			grantedByProfileId: ImportOwnerProfileId,
 			licenseIds: [license],
-			unitKind: object.unit.kind as UnitKind,
+			unitKind: object.unit.kind,
 		});
 
 	await insertDetail(tx, pack, object, unitId, object.import.ownershipMode === "community_owned");
@@ -200,7 +308,7 @@ async function importUnit(
 				term: alias.term,
 				normalizedTerm: alias.normalizedTerm,
 				language: alias.language && isContentLanguage(alias.language) ? alias.language : null,
-				kind: alias.kind as (typeof AliasKindValues)[number],
+				kind: alias.kind,
 				pinned: alias.pinned,
 				position: alias.pinned ? "a0" : null,
 				createdByProfileId: ImportOwnerProfileId,
@@ -225,7 +333,16 @@ async function insertDetail(
 			});
 			return;
 		case "tag":
-			await tx.insert(tag).values({ id: unitId });
+			if (!object.tag) throw new ContentPackInvalid(`${object.sourceKey} missing tag`);
+			await tx.insert(tag).values(
+				"directlyApplicable" in object.tag
+					? {
+							id: unitId,
+							directlyApplicable: object.tag.directlyApplicable,
+							defaultSpoilerLevel: object.tag.defaultSpoilerLevel,
+						}
+					: { id: unitId },
+			);
 			return;
 		case "label":
 			await tx.insert(label).values({ id: unitId });
@@ -297,9 +414,9 @@ async function insertDetail(
 			if (!object.realm) throw new ContentPackInvalid(`${object.sourceKey} missing realm`);
 			await tx.insert(realm).values({
 				id: unitId,
-				joinPolicy: object.realm.joinPolicy as (typeof RealmJoinPolicyValues)[number],
+				joinPolicy: object.realm.joinPolicy,
 				realmTagVotingEnabled: object.realm.realmTagVotingEnabled,
-				enabledPages: [...object.realm.enabledPages] as RealmPageKind[],
+				enabledPages: [...object.realm.enabledPages],
 			});
 			return;
 		case "zone": {
@@ -318,7 +435,7 @@ async function insertDetail(
 			if (!object.post) throw new ContentPackInvalid(`${object.sourceKey} missing post`);
 			await tx.insert(post).values({
 				id: unitId,
-				kind: object.post.kind as "wiki" | "page" | "chapter",
+				kind: object.post.kind,
 				subjectUnitId: object.post.subjectSourceKey
 					? requireId(pack.ids.units, object.post.subjectSourceKey)
 					: null,
@@ -338,6 +455,112 @@ async function insertDetail(
 		}
 		default:
 			throw new ContentPackInvalid(`Unsupported unit kind ${object.unit.kind}`);
+	}
+}
+
+async function importTagEvidence(
+	tx: DatabaseTransaction,
+	pack: LoadedPack,
+	importId: string,
+): Promise<void> {
+	for (const object of pack.objects) {
+		if (object.unit.kind !== "tag" || !object.tag || !("directlyApplicable" in object.tag))
+			continue;
+		const tagId = requireId(pack.ids.units, object.sourceKey);
+		const [actual] = await tx
+			.select({
+				id: tag.id,
+				directlyApplicable: tag.directlyApplicable,
+				defaultSpoilerLevel: tag.defaultSpoilerLevel,
+			})
+			.from(tag)
+			.where(eq(tag.id, tagId))
+			.limit(1);
+		if (!actual)
+			throw new ContentPackCollision(`${object.sourceKey} does not resolve to an existing Tag`);
+		if (
+			actual.directlyApplicable !== object.tag.directlyApplicable ||
+			actual.defaultSpoilerLevel !== object.tag.defaultSpoilerLevel
+		)
+			throw new ContentPackCollision(
+				`${object.sourceKey} collides with different existing Tag policies`,
+			);
+		await tx.insert(contentPackTagEvidence).values({
+			importId,
+			sourceFingerprint: sourceFingerprint("tag", object.sourceKey),
+			tagId,
+			tagSourceKey: object.sourceKey,
+			directlyApplicable: object.tag.directlyApplicable,
+			defaultSpoilerLevel: object.tag.defaultSpoilerLevel,
+			sourceCategory: object.tag.sourceCategory ?? null,
+			parentSourceKeys: [...object.tag.parentSourceKeys],
+			primaryParentSourceKey: object.tag.primaryParentSourceKey,
+			sourceUrl: object.tag.sourceUrl,
+			sourceImportedAt: sourceDate(object.tag.sourceImportedAt),
+		});
+	}
+}
+
+async function importEntityMeasurements(tx: DatabaseTransaction, pack: LoadedPack): Promise<void> {
+	for (const object of pack.objects) {
+		if (object.unit.kind !== "entity" || !object.entityMeasurements) continue;
+		const entityId = requireId(pack.ids.units, object.sourceKey);
+		for (const measurement of object.entityMeasurements) {
+			const contextUnitId = measurement.contextUnitSourceKey
+				? requireId(pack.ids.units, measurement.contextUnitSourceKey)
+				: null;
+			const sourceImportedAt = sourceDate(measurement.sourceImportedAt);
+			await tx
+				.insert(entityMeasurement)
+				.values({
+					entityId,
+					contextUnitId,
+					heightMillimetres: measurement.heightMillimetres ?? null,
+					weightGrams: measurement.weightGrams ?? null,
+					bustMillimetres: measurement.bustMillimetres ?? null,
+					waistMillimetres: measurement.waistMillimetres ?? null,
+					hipsMillimetres: measurement.hipsMillimetres ?? null,
+					sourceUrl: measurement.sourceUrl,
+					sourceImportedAt,
+					sourceProvenance: measurement.sourceProvenance,
+				})
+				.onConflictDoNothing();
+			const [actual] = await tx
+				.select({
+					heightMillimetres: entityMeasurement.heightMillimetres,
+					weightGrams: entityMeasurement.weightGrams,
+					bustMillimetres: entityMeasurement.bustMillimetres,
+					waistMillimetres: entityMeasurement.waistMillimetres,
+					hipsMillimetres: entityMeasurement.hipsMillimetres,
+					sourceUrl: entityMeasurement.sourceUrl,
+					sourceImportedAt: entityMeasurement.sourceImportedAt,
+					sourceProvenance: entityMeasurement.sourceProvenance,
+				})
+				.from(entityMeasurement)
+				.where(
+					and(
+						eq(entityMeasurement.entityId, entityId),
+						contextUnitId === null
+							? isNull(entityMeasurement.contextUnitId)
+							: eq(entityMeasurement.contextUnitId, contextUnitId),
+					),
+				)
+				.limit(1);
+			if (
+				!actual ||
+				actual.heightMillimetres !== (measurement.heightMillimetres ?? null) ||
+				actual.weightGrams !== (measurement.weightGrams ?? null) ||
+				actual.bustMillimetres !== (measurement.bustMillimetres ?? null) ||
+				actual.waistMillimetres !== (measurement.waistMillimetres ?? null) ||
+				actual.hipsMillimetres !== (measurement.hipsMillimetres ?? null) ||
+				actual.sourceUrl !== measurement.sourceUrl ||
+				actual.sourceImportedAt.getTime() !== sourceImportedAt.getTime() ||
+				stableJson(actual.sourceProvenance) !== stableJson(measurement.sourceProvenance)
+			)
+				throw new ContentPackCollision(
+					`${object.sourceKey} measurement collides with different existing evidence`,
+				);
+		}
 	}
 }
 
@@ -388,6 +611,7 @@ async function importRelations(
 	tx: DatabaseTransaction,
 	pack: LoadedPack,
 	createKeys: ReadonlySet<string>,
+	importId: string,
 ): Promise<void> {
 	const { relations, ids } = pack;
 	const objectBySourceKey = new Map(
@@ -430,30 +654,11 @@ async function importRelations(
 				id: ids.credits?.[item.sourceKey],
 				sourceUnitId: requireId(ids.units, item.sourceUnitSourceKey),
 				creditedUnitId: requireId(ids.units, item.creditedUnitSourceKey),
-				role: item.role as CreditAttributionRole,
+				role: item.role,
 				position: item.position,
 			})),
 		);
-	const subjects = (relations.subjects ?? []).filter((item) =>
-		touchesCreated(createKeys, [
-			item.unitSourceKey,
-			item.entitySourceKey,
-			item.contextPostSourceKey,
-		]),
-	);
-	if (subjects.length)
-		await tx.insert(subjectAssociation).values(
-			subjects.map((item) => ({
-				id: ids.subjects?.[item.sourceKey],
-				unitId: requireId(ids.units, item.unitSourceKey),
-				entityId: requireId(ids.units, item.entitySourceKey),
-				role: item.role as SubjectAssociationRole,
-				contextPostId: item.contextPostSourceKey
-					? requireId(ids.units, item.contextPostSourceKey)
-					: null,
-				position: item.position,
-			})),
-		);
+	await importSubjectRelations(tx, pack, importId);
 	const seriesReleases = (relations.seriesReleases ?? []).filter((item) =>
 		touchesCreated(createKeys, [item.seriesSourceKey, item.releaseUnitSourceKey]),
 	);
@@ -478,19 +683,7 @@ async function importRelations(
 				addedByProfileId: ImportOwnerProfileId,
 			})),
 		);
-	const unitTags = (relations.unitTags ?? []).filter((item) =>
-		touchesCreated(createKeys, [item.unitSourceKey, item.tagSourceKey]),
-	);
-	if (unitTags.length)
-		await tx.insert(unitTag).values(
-			unitTags.map((item) => ({
-				unitId: requireId(ids.units, item.unitSourceKey),
-				tagId: requireId(ids.units, item.tagSourceKey),
-				pinned: item.pinned,
-				position: item.position,
-				createdByProfileId: ImportOwnerProfileId,
-			})),
-		);
+	await importUnitTagRelations(tx, pack, importId);
 	const realmUnits = (relations.realmUnits ?? []).filter((item) =>
 		touchesCreated(createKeys, [item.realmSourceKey, item.unitSourceKey]),
 	);
@@ -509,18 +702,395 @@ async function importRelations(
 	}
 }
 
+async function importUnitTagRelations(
+	tx: DatabaseTransaction,
+	pack: LoadedPack,
+	importId: string,
+): Promise<void> {
+	const relations = pack.relations.unitTags ?? [];
+	if (!relations.length) return;
+	const uniqueTagIds = [
+		...new Set(relations.map((relation) => requireId(pack.ids.units, relation.tagSourceKey))),
+	];
+	const policies = [];
+	for (const ids of chunks(uniqueTagIds, ImportReadBatchSize))
+		policies.push(
+			...(await tx
+				.select({ id: tag.id, directlyApplicable: tag.directlyApplicable })
+				.from(tag)
+				.where(inArray(tag.id, ids))),
+		);
+	const policyById = new Map(policies.map((policy) => [policy.id, policy] as const));
+	for (const tagId of uniqueTagIds) {
+		const policy = policyById.get(tagId);
+		if (!policy) throw new ContentPackInvalid(`Direct Tag target ${tagId} does not exist`);
+		if (!policy.directlyApplicable)
+			throw new ContentPackInvalid(`Tag ${tagId} is not directly applicable`);
+	}
+
+	for (const relation of relations) await importUnitTagRelation(tx, pack, importId, relation);
+}
+
+async function importUnitTagRelation(
+	tx: DatabaseTransaction,
+	pack: LoadedPack,
+	importId: string,
+	relation: PackUnitTagRelation,
+): Promise<void> {
+	const unitId = requireId(pack.ids.units, relation.unitSourceKey);
+	const tagId = requireId(pack.ids.units, relation.tagSourceKey);
+	await tx
+		.insert(unitTag)
+		.values({
+			unitId,
+			tagId,
+			pinned: relation.pinned,
+			position: relation.position,
+			createdByProfileId: ImportOwnerProfileId,
+		})
+		.onConflictDoNothing();
+	const [actualApplication] = await tx
+		.select({ pinned: unitTag.pinned, position: unitTag.position })
+		.from(unitTag)
+		.where(and(eq(unitTag.unitId, unitId), eq(unitTag.tagId, tagId)))
+		.limit(1);
+	if (
+		!actualApplication ||
+		actualApplication.pinned !== relation.pinned ||
+		actualApplication.position !== relation.position
+	)
+		throw new ContentPackCollision(
+			`${relation.unitSourceKey}/${relation.tagSourceKey} collides with a different Tag application`,
+		);
+
+	if (relation.fitVote === undefined) return;
+	if (
+		relation.spoilerLevel === undefined ||
+		relation.sourceUrl === undefined ||
+		relation.sourceImportedAt === undefined ||
+		relation.sourceAggregate === undefined
+	)
+		throw new ContentPackInvalid("Incomplete direct Tag judgment evidence reached the importer");
+	const sourceImportedAt = sourceDate(relation.sourceImportedAt);
+	await tx
+		.insert(unitTagJudgment)
+		.values({
+			unitId,
+			tagId,
+			profileId: ImportOwnerProfileId,
+			fitVote: relation.fitVote,
+			spoilerLevel: relation.spoilerLevel,
+			fitUpdatedAt: sourceImportedAt,
+			spoilerUpdatedAt: relation.spoilerLevel === null ? null : sourceImportedAt,
+			createdAt: sourceImportedAt,
+			updatedAt: sourceImportedAt,
+		})
+		.onConflictDoNothing();
+	const [actualJudgment] = await tx
+		.select({
+			fitVote: unitTagJudgment.fitVote,
+			spoilerLevel: unitTagJudgment.spoilerLevel,
+			fitUpdatedAt: unitTagJudgment.fitUpdatedAt,
+			spoilerUpdatedAt: unitTagJudgment.spoilerUpdatedAt,
+		})
+		.from(unitTagJudgment)
+		.where(
+			and(
+				eq(unitTagJudgment.unitId, unitId),
+				eq(unitTagJudgment.tagId, tagId),
+				eq(unitTagJudgment.profileId, ImportOwnerProfileId),
+			),
+		)
+		.limit(1);
+	if (
+		!actualJudgment ||
+		actualJudgment.fitVote !== relation.fitVote ||
+		actualJudgment.spoilerLevel !== relation.spoilerLevel ||
+		actualJudgment.fitUpdatedAt?.getTime() !== sourceImportedAt.getTime() ||
+		actualJudgment.spoilerUpdatedAt?.getTime() !==
+			(relation.spoilerLevel === null ? undefined : sourceImportedAt.getTime())
+	)
+		throw new ContentPackConflict(
+			`${relation.unitSourceKey}/${relation.tagSourceKey} has a different importer judgment`,
+		);
+	await tx.insert(contentPackUnitTagEvidence).values({
+		importId,
+		sourceFingerprint: sourceFingerprint("unit-tag", relation.unitSourceKey, relation.tagSourceKey),
+		unitId,
+		tagId,
+		profileId: ImportOwnerProfileId,
+		unitSourceKey: relation.unitSourceKey,
+		tagSourceKey: relation.tagSourceKey,
+		sourceFitVote: relation.fitVote,
+		sourceSpoilerLevel: relation.spoilerLevel,
+		sourceUrl: relation.sourceUrl,
+		sourceImportedAt,
+		sourceAggregate: relation.sourceAggregate,
+	});
+}
+
+async function importSubjectRelations(
+	tx: DatabaseTransaction,
+	pack: LoadedPack,
+	importId: string,
+): Promise<void> {
+	for (const relation of pack.relations.subjects ?? [])
+		await importSubjectRelation(tx, pack, importId, relation);
+}
+
+async function importSubjectRelation(
+	tx: DatabaseTransaction,
+	pack: LoadedPack,
+	importId: string,
+	relation: PackSubjectRelation,
+): Promise<void> {
+	const declaredAssociationId = requireId(pack.ids.subjects ?? {}, relation.sourceKey);
+	const unitId = requireId(pack.ids.units, relation.unitSourceKey);
+	const entityId = requireId(pack.ids.units, relation.entitySourceKey);
+	const contextPostId = relation.contextPostSourceKey
+		? requireId(pack.ids.units, relation.contextPostSourceKey)
+		: null;
+	let [actual] = await tx
+		.select()
+		.from(subjectAssociation)
+		.where(eq(subjectAssociation.id, declaredAssociationId))
+		.limit(1);
+	if (!actual)
+		[actual] = await tx
+			.select()
+			.from(subjectAssociation)
+			.where(
+				and(
+					eq(subjectAssociation.unitId, unitId),
+					eq(subjectAssociation.entityId, entityId),
+					eq(subjectAssociation.role, relation.role),
+				),
+			)
+			.limit(1);
+	if (!actual) {
+		await tx
+			.insert(subjectAssociation)
+			.values({
+				id: declaredAssociationId,
+				unitId,
+				entityId,
+				role: relation.role,
+				contextPostId,
+				position: relation.position,
+			})
+			.onConflictDoNothing();
+		[actual] = await tx
+			.select()
+			.from(subjectAssociation)
+			.where(
+				and(
+					eq(subjectAssociation.unitId, unitId),
+					eq(subjectAssociation.entityId, entityId),
+					eq(subjectAssociation.role, relation.role),
+				),
+			)
+			.limit(1);
+	}
+	if (
+		!actual ||
+		actual.unitId !== unitId ||
+		actual.entityId !== entityId ||
+		actual.role !== relation.role ||
+		actual.contextPostId !== contextPostId ||
+		actual.position !== relation.position
+	)
+		throw new ContentPackCollision(`${relation.sourceKey} collides with another subject relation`);
+	if (relation.spoilerLevel === undefined) return;
+	if (relation.sourceUrl === undefined || relation.sourceImportedAt === undefined)
+		throw new ContentPackInvalid("Incomplete subject evidence reached the importer");
+	const sourceImportedAt = sourceDate(relation.sourceImportedAt);
+	await tx
+		.insert(subjectAssociationJudgment)
+		.values({
+			associationId: actual.id,
+			profileId: ImportOwnerProfileId,
+			spoilerLevel: relation.spoilerLevel,
+			createdAt: sourceImportedAt,
+			updatedAt: sourceImportedAt,
+		})
+		.onConflictDoNothing();
+	const [actualJudgment] = await tx
+		.select({ spoilerLevel: subjectAssociationJudgment.spoilerLevel })
+		.from(subjectAssociationJudgment)
+		.where(
+			and(
+				eq(subjectAssociationJudgment.associationId, actual.id),
+				eq(subjectAssociationJudgment.profileId, ImportOwnerProfileId),
+			),
+		)
+		.limit(1);
+	if (actualJudgment?.spoilerLevel !== relation.spoilerLevel)
+		throw new ContentPackConflict(`${relation.sourceKey} has a different importer judgment`);
+	await tx.insert(contentPackSubjectAssociationEvidence).values({
+		importId,
+		sourceFingerprint: sourceFingerprint("subject", relation.sourceKey),
+		associationId: actual.id,
+		profileId: ImportOwnerProfileId,
+		declaredAssociationId,
+		subjectSourceKey: relation.sourceKey,
+		sourceSpoilerLevel: relation.spoilerLevel,
+		sourceUrl: relation.sourceUrl,
+		sourceImportedAt,
+	});
+}
+
+async function importTagPaths(
+	tx: DatabaseTransaction,
+	pack: LoadedPack,
+	importId: string,
+): Promise<void> {
+	const actualStructureIds = new Map<string, string>();
+	for (const path of pack.relations.tagPaths ?? []) {
+		const structureId = await importTagPathDefinition(tx, pack, importId, path);
+		actualStructureIds.set(path.sourceKey, structureId);
+	}
+	for (const application of pack.relations.tagPathApplications ?? [])
+		await importTagPathApplication(tx, pack, importId, application, actualStructureIds);
+}
+
+async function importTagPathDefinition(
+	tx: DatabaseTransaction,
+	pack: LoadedPack,
+	importId: string,
+	path: PackTagPath,
+): Promise<string> {
+	const declaredStructureId = requireId(pack.ids.tagPaths ?? {}, path.sourceKey);
+	const sourceImportedAt = sourceDate(path.sourceImportedAt);
+	const result = await createTagStructureInTransaction(tx, {
+		structureId: declaredStructureId,
+		memberTagIds: path.memberTagSourceKeys.map((sourceKey) => requireId(pack.ids.units, sourceKey)),
+		profileId: ImportOwnerProfileId,
+		createdAt: sourceImportedAt,
+	});
+	await tx.insert(contentPackStructureDefinitionEvidence).values({
+		importId,
+		sourceFingerprint: sourceFingerprint("tag-path", path.sourceKey),
+		structureId: result.structureId,
+		profileId: ImportOwnerProfileId,
+		declaredStructureId,
+		pathSourceKey: path.sourceKey,
+		memberTagSourceKeys: [...path.memberTagSourceKeys],
+		primarySourcePath: path.primary,
+		sourceVote: 1,
+		sourceUrl: path.sourceUrl,
+		sourceImportedAt,
+	});
+	return result.structureId;
+}
+
+async function importTagPathApplication(
+	tx: DatabaseTransaction,
+	pack: LoadedPack,
+	importId: string,
+	application: PackTagPathApplication,
+	actualStructureIds: ReadonlyMap<string, string>,
+): Promise<void> {
+	const unitId = requireId(pack.ids.units, application.unitSourceKey);
+	const declaredStructureId = requireId(pack.ids.tagPaths ?? {}, application.pathSourceKey);
+	const structureId = actualStructureIds.get(application.pathSourceKey);
+	if (!structureId)
+		throw new ContentPackInvalid(
+			`Tag Path application references unknown path ${application.pathSourceKey}`,
+		);
+	const sourceImportedAt = sourceDate(application.sourceImportedAt);
+	await tx
+		.insert(unitStructureApplication)
+		.values({
+			unitId,
+			structureId,
+			createdByProfileId: ImportOwnerProfileId,
+			pinned: false,
+			position: null,
+			createdAt: sourceImportedAt,
+			updatedAt: sourceImportedAt,
+		})
+		.onConflictDoNothing();
+	const [actualApplication] = await tx
+		.select({ unitId: unitStructureApplication.unitId })
+		.from(unitStructureApplication)
+		.where(
+			and(
+				eq(unitStructureApplication.unitId, unitId),
+				eq(unitStructureApplication.structureId, structureId),
+			),
+		)
+		.limit(1);
+	if (!actualApplication)
+		throw new ContentPackCollision(
+			`${application.unitSourceKey}/${application.pathSourceKey} application was not created`,
+		);
+	await tx
+		.insert(unitStructureApplicationJudgment)
+		.values({
+			unitId,
+			structureId,
+			profileId: ImportOwnerProfileId,
+			fitVote: application.fitVote,
+			spoilerLevel: application.spoilerLevel,
+			fitUpdatedAt: sourceImportedAt,
+			spoilerUpdatedAt: application.spoilerLevel === null ? null : sourceImportedAt,
+			createdAt: sourceImportedAt,
+			updatedAt: sourceImportedAt,
+		})
+		.onConflictDoNothing();
+	const [actualJudgment] = await tx
+		.select({
+			fitVote: unitStructureApplicationJudgment.fitVote,
+			spoilerLevel: unitStructureApplicationJudgment.spoilerLevel,
+			fitUpdatedAt: unitStructureApplicationJudgment.fitUpdatedAt,
+			spoilerUpdatedAt: unitStructureApplicationJudgment.spoilerUpdatedAt,
+		})
+		.from(unitStructureApplicationJudgment)
+		.where(
+			and(
+				eq(unitStructureApplicationJudgment.unitId, unitId),
+				eq(unitStructureApplicationJudgment.structureId, structureId),
+				eq(unitStructureApplicationJudgment.profileId, ImportOwnerProfileId),
+			),
+		)
+		.limit(1);
+	if (
+		!actualJudgment ||
+		actualJudgment.fitVote !== application.fitVote ||
+		actualJudgment.spoilerLevel !== application.spoilerLevel ||
+		actualJudgment.fitUpdatedAt?.getTime() !== sourceImportedAt.getTime() ||
+		actualJudgment.spoilerUpdatedAt?.getTime() !==
+			(application.spoilerLevel === null ? undefined : sourceImportedAt.getTime())
+	)
+		throw new ContentPackConflict(
+			`${application.unitSourceKey}/${application.pathSourceKey} has a different importer judgment`,
+		);
+	await tx.insert(contentPackStructureApplicationEvidence).values({
+		importId,
+		sourceFingerprint: sourceFingerprint(
+			"tag-path-application",
+			application.unitSourceKey,
+			application.pathSourceKey,
+		),
+		unitId,
+		structureId,
+		profileId: ImportOwnerProfileId,
+		unitSourceKey: application.unitSourceKey,
+		pathSourceKey: application.pathSourceKey,
+		declaredStructureId,
+		sourceFitVote: application.fitVote,
+		sourceSpoilerLevel: application.spoilerLevel,
+		sourceUrl: application.sourceUrl,
+		sourceImportedAt,
+		sourceAggregate: application.sourceAggregate,
+	});
+}
+
 async function importStructures(tx: DatabaseTransaction, pack: LoadedPack): Promise<void> {
 	for (const structure of pack.structures) {
 		const ownerUnitId = requireId(pack.ids.units, structure.ownerUnitSourceKey);
 		const structureId = pack.ids.structures?.[structure.sourceKey];
-		if (
-			await contentStructureAlreadyPresent(
-				tx,
-				ownerUnitId,
-				structure.kind as ContentStructureKind,
-				structureId,
-			)
-		)
+		if (await contentStructureAlreadyPresent(tx, ownerUnitId, structure.kind, structureId))
 			continue;
 		if (structure.kind === "zone.navigation" || structure.kind === "wiki.navigation") {
 			await createNavigationStructure(tx, {
@@ -535,7 +1105,7 @@ async function importStructures(tx: DatabaseTransaction, pack: LoadedPack): Prom
 		const created = await createContentStructure(tx, {
 			ownerUnitId,
 			structureId,
-			kind: structure.kind as "book.contents" | "page-structure",
+			kind: structure.kind,
 			actorProfileId: ImportOwnerProfileId,
 		});
 		if (!structure.nodes.length) continue;
@@ -643,6 +1213,29 @@ function requireId(map: Record<string, string>, sourceKey: string): string {
 
 function sha256Hex(value: string): string {
 	return createHash("sha256").update(value).digest("hex");
+}
+
+function sourceFingerprint(kind: string, ...sourceKeys: readonly string[]): string {
+	return sha256Hex(stableJson([kind, ...sourceKeys]));
+}
+
+function sourceDate(value: string): Date {
+	const date = new Date(value);
+	if (!Number.isFinite(date.getTime()))
+		throw new ContentPackInvalid(`Invalid source import timestamp ${value}`);
+	return date;
+}
+
+function stableJson(value: unknown): string {
+	const serialized = JSON.stringify(value, (_key, nested) => {
+		if (nested === null || typeof nested !== "object" || Array.isArray(nested)) return nested;
+		return Object.fromEntries(
+			Object.entries(nested).sort(([left], [right]) => left.localeCompare(right)),
+		);
+	});
+	if (serialized === undefined)
+		throw new ContentPackInvalid("A source evidence value cannot be serialized as JSON");
+	return serialized;
 }
 
 function fractionalFromIndex(index: number): string {
