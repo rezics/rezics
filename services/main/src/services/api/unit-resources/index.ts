@@ -1,7 +1,20 @@
 import { StatusCodes } from "http-status-codes";
 import { createHash } from "node:crypto";
 
-import { and, asc, desc, eq, ilike, inArray, isNull, ne, or, sql } from "drizzle-orm";
+import {
+	and,
+	asc,
+	desc,
+	eq,
+	gt,
+	ilike,
+	inArray,
+	isNotNull,
+	isNull,
+	ne,
+	or,
+	sql,
+} from "drizzle-orm";
 import Elysia, { t } from "elysia";
 
 import { RevisionContextBody } from "../schema";
@@ -14,6 +27,7 @@ import { unitOwnershipModeFromOwnerProfileId } from "../../authorization/unit/ow
 import { getUnitPermissionCondition } from "../../authorization/unit/query";
 import { associationTargetScope, unitScope } from "../../authorization/unit/scope";
 import { database } from "../../database";
+import { runVndbVoteTransaction } from "../../database/vndb-vote-admission";
 import {
 	avatarReferenceFromColumns,
 	resolveUnitLocalizationAvatarFromOrdered,
@@ -26,6 +40,7 @@ import {
 import { fractionalPositionBetween } from "../../ordering/position";
 import {
 	creditAttribution,
+	currentUnitTagJudgmentStat as unitTagJudgmentStat,
 	entity,
 	subjectAssociation,
 	tag,
@@ -34,13 +49,12 @@ import {
 	unitAliasVote,
 	unitAliasVoteStat,
 	unitOwnership,
-	unitTagVote,
+	unitTagJudgment,
 	unitExternalLink,
 	unitExternalLinkVote,
 	unitExternalLinkVoteStat,
 	unitReferenceCurationHead,
 	unitTag,
-	unitTagVoteStat,
 	unitLocalization,
 } from "../../database/schema";
 import {
@@ -110,6 +124,7 @@ import { presentAvatar } from "../../units/avatar";
 import { IdResponse, NoContentResponse } from "../schema/action-response";
 import { UnitIdParams } from "../schema";
 import {
+	TagApplicationPolicyResponse,
 	toApiErrorResponse,
 	AliasResponse,
 	AliasCurationResponse,
@@ -126,6 +141,7 @@ import {
 	UnitExternalLinkResponse,
 	UnitExternalLinkCurationResponse,
 	VoteResponse,
+	VndbVoteBackpressureResponse,
 } from "../schema/response";
 import {
 	AliasNotFound,
@@ -356,12 +372,18 @@ async function getExternalLinkReference(externalLinkId: string, viewerProfileId:
 async function getTagVoteSummary(unitId: string, tagId: string, value: -1 | 1 | null) {
 	const [totals] = await database
 		.select({
-			score: unitTagVoteStat.score,
-			voteCount: unitTagVoteStat.voteCount,
-			updatedAt: unitTagVoteStat.updatedAt,
+			score: unitTagJudgmentStat.score,
+			voteCount: unitTagJudgmentStat.voteCount,
+			updatedAt: unitTagJudgmentStat.updatedAt,
 		})
-		.from(unitTagVoteStat)
-		.where(and(eq(unitTagVoteStat.unitId, unitId), eq(unitTagVoteStat.tagId, tagId)));
+		.from(unitTagJudgmentStat)
+		.where(
+			and(
+				eq(unitTagJudgmentStat.unitId, unitId),
+				eq(unitTagJudgmentStat.tagId, tagId),
+				gt(unitTagJudgmentStat.voteCount, 0n),
+			),
+		);
 	return presentBinaryVoteSummary({
 		score: totals?.score ?? 0n,
 		voteCount: totals?.voteCount ?? 0n,
@@ -1838,7 +1860,7 @@ export default new Elysia()
 						.where(eq(tag.id, params.tagId))
 						.limit(1);
 					if (!tagRecord) throw new TagNotFound();
-					await database.transaction(async (tx) => {
+					await runVndbVoteTransaction({ family: "unit_tag", authority: "global" }, async (tx) => {
 						await tx
 							.insert(unitTag)
 							.values({
@@ -1848,16 +1870,17 @@ export default new Elysia()
 							})
 							.onConflictDoNothing();
 						await tx
-							.insert(unitTagVote)
+							.insert(unitTagJudgment)
 							.values({
 								unitId: params.unitId,
 								tagId: params.tagId,
 								profileId: authorization.profileId,
-								value: 1,
+								fitVote: 1,
+								fitUpdatedAt: new Date(),
 							})
 							.onConflictDoUpdate({
-								target: [unitTagVote.unitId, unitTagVote.tagId, unitTagVote.profileId],
-								set: { value: 1, updatedAt: new Date() },
+								target: [unitTagJudgment.unitId, unitTagJudgment.tagId, unitTagJudgment.profileId],
+								set: { fitVote: 1, fitUpdatedAt: new Date(), updatedAt: new Date() },
 							});
 					});
 					const [application] = await database
@@ -1879,12 +1902,18 @@ export default new Elysia()
 					body: TagUnitBody,
 					response: {
 						[StatusCodes.OK]: TagApplicationResponse,
-						[StatusCodes.FORBIDDEN]: UnitInteractionForbiddenResponse,
+						[StatusCodes.FORBIDDEN]: toApiErrorResponse([
+							"UnitAccessRestricted",
+							"UnitPermissionForbidden",
+							"ContentLabelPlatformApplyForbidden",
+						]),
 						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
 							"UnitNotFound",
 							"TagNotFound",
 							"TagApplicationNotFound",
 						]),
+						[StatusCodes.UNPROCESSABLE_ENTITY]: TagApplicationPolicyResponse,
+						[StatusCodes.TOO_MANY_REQUESTS]: VndbVoteBackpressureResponse,
 					},
 					detail: { summary: "Tag unit", tags: ["Units"] },
 				},
@@ -1918,7 +1947,11 @@ export default new Elysia()
 						]),
 						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
 						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "TagApplicationNotFound"]),
-						[StatusCodes.CONFLICT]: toApiErrorResponse(["UnitTagCurationChanged"]),
+						[StatusCodes.CONFLICT]: toApiErrorResponse([
+							"UnitTagCurationChanged",
+							"ContentLabelPlatformIdentityImmutable",
+						]),
+						[StatusCodes.UNPROCESSABLE_ENTITY]: TagApplicationPolicyResponse,
 					},
 					detail: {
 						summary: "Update Unit tag curation",
@@ -1931,7 +1964,7 @@ export default new Elysia()
 				async ({ params, profile, authorization, body }) => {
 					await checkUnitType(params.unitId, params.type);
 					await authorization.unit.ensure(params.unitId, "unit.tag-curation.manage");
-					await database.transaction(async (tx) => {
+					await runVndbVoteTransaction({ family: "unit_tag", authority: "global" }, async (tx) => {
 						const deleted = await tx
 							.delete(unitTag)
 							.where(and(eq(unitTag.unitId, params.unitId), eq(unitTag.tagId, params.tagId)))
@@ -1956,8 +1989,14 @@ export default new Elysia()
 							"RevisionCreditEntityInvalid",
 							"RevisionContributionActorRequired",
 						]),
-						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
+						[StatusCodes.FORBIDDEN]: toApiErrorResponse([
+							"UnitPermissionForbidden",
+							"UnitAccessRestricted",
+							"ContentLabelPlatformRemovalForbidden",
+						]),
+						[StatusCodes.CONFLICT]: toApiErrorResponse(["TagApplicationHasJudgments"]),
 						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "TagApplicationNotFound"]),
+						[StatusCodes.TOO_MANY_REQUESTS]: VndbVoteBackpressureResponse,
 					},
 					detail: {
 						summary: "Remove Unit tag",
@@ -1971,25 +2010,36 @@ export default new Elysia()
 				async ({ params, profile, authorization, body }) => {
 					await checkUnitType(params.unitId, params.type);
 					await authorization.unit.ensureCanRead(params.unitId);
-					const [application] = await database
-						.select({ tagId: unitTag.tagId })
-						.from(unitTag)
-						.where(and(eq(unitTag.unitId, params.unitId), eq(unitTag.tagId, params.tagId)))
-						.limit(1);
-					if (!application) throw new TagApplicationNotFound();
-					await database
-						.insert(unitTagVote)
-						.values({
-							unitId: params.unitId,
-							tagId: application.tagId,
-							profileId: profile.unitId,
-							value: body.value,
-						})
-						.onConflictDoUpdate({
-							target: [unitTagVote.unitId, unitTagVote.tagId, unitTagVote.profileId],
-							set: { value: body.value, updatedAt: new Date() },
-						});
-					return getTagVoteSummary(params.unitId, application.tagId, body.value);
+					const tagId = await runVndbVoteTransaction(
+						{ family: "unit_tag", authority: "global" },
+						async (tx) => {
+							const [application] = await tx
+								.select({ tagId: unitTag.tagId })
+								.from(unitTag)
+								.where(and(eq(unitTag.unitId, params.unitId), eq(unitTag.tagId, params.tagId)))
+								.limit(1);
+							if (!application) throw new TagApplicationNotFound();
+							await tx
+								.insert(unitTagJudgment)
+								.values({
+									unitId: params.unitId,
+									tagId: application.tagId,
+									profileId: profile.unitId,
+									fitVote: body.value,
+									fitUpdatedAt: new Date(),
+								})
+								.onConflictDoUpdate({
+									target: [
+										unitTagJudgment.unitId,
+										unitTagJudgment.tagId,
+										unitTagJudgment.profileId,
+									],
+									set: { fitVote: body.value, fitUpdatedAt: new Date(), updatedAt: new Date() },
+								});
+							return application.tagId;
+						},
+					);
+					return getTagVoteSummary(params.unitId, tagId, body.value);
 				},
 				{
 					access: "contribute:interaction:write",
@@ -1998,8 +2048,12 @@ export default new Elysia()
 					response: {
 						[StatusCodes.OK]: VoteResponse,
 						[StatusCodes.FORBIDDEN]: UnitInteractionForbiddenResponse,
-						[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["InvalidTagStructure"]),
+						[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse([
+							"InvalidTagStructure",
+							"ContentLabelJudgmentForbidden",
+						]),
 						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "TagApplicationNotFound"]),
+						[StatusCodes.TOO_MANY_REQUESTS]: VndbVoteBackpressureResponse,
 					},
 					detail: { summary: "Vote on Unit tag", tags: ["Units"] },
 				},
@@ -2009,22 +2063,31 @@ export default new Elysia()
 				async ({ params, profile, authorization }) => {
 					await checkUnitType(params.unitId, params.type);
 					await authorization.unit.ensureCanRead(params.unitId);
-					const [application] = await database
-						.select({ tagId: unitTag.tagId })
-						.from(unitTag)
-						.where(and(eq(unitTag.unitId, params.unitId), eq(unitTag.tagId, params.tagId)))
-						.limit(1);
-					if (!application) throw new TagApplicationNotFound();
-					await database
-						.delete(unitTagVote)
-						.where(
-							and(
-								eq(unitTagVote.unitId, params.unitId),
-								eq(unitTagVote.tagId, application.tagId),
-								eq(unitTagVote.profileId, profile.unitId),
-							),
-						);
-					return getTagVoteSummary(params.unitId, application.tagId, null);
+					const tagId = await runVndbVoteTransaction(
+						{ family: "unit_tag", authority: "global" },
+						async (tx) => {
+							const [application] = await tx
+								.select({ tagId: unitTag.tagId })
+								.from(unitTag)
+								.where(and(eq(unitTag.unitId, params.unitId), eq(unitTag.tagId, params.tagId)))
+								.limit(1);
+							if (!application) throw new TagApplicationNotFound();
+							const judgmentKey = and(
+								eq(unitTagJudgment.unitId, params.unitId),
+								eq(unitTagJudgment.tagId, application.tagId),
+								eq(unitTagJudgment.profileId, profile.unitId),
+							);
+							await tx
+								.delete(unitTagJudgment)
+								.where(and(judgmentKey, isNull(unitTagJudgment.spoilerLevel)));
+							await tx
+								.update(unitTagJudgment)
+								.set({ fitVote: null, fitUpdatedAt: null, updatedAt: new Date() })
+								.where(and(judgmentKey, isNotNull(unitTagJudgment.spoilerLevel)));
+							return application.tagId;
+						},
+					);
+					return getTagVoteSummary(params.unitId, tagId, null);
 				},
 				{
 					access: "write:interaction:write",
@@ -2033,6 +2096,7 @@ export default new Elysia()
 						[StatusCodes.OK]: VoteResponse,
 						[StatusCodes.FORBIDDEN]: UnitInteractionForbiddenResponse,
 						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "TagApplicationNotFound"]),
+						[StatusCodes.TOO_MANY_REQUESTS]: VndbVoteBackpressureResponse,
 					},
 					detail: { summary: "Remove Unit tag vote", tags: ["Units"] },
 				},

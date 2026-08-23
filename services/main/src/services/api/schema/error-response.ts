@@ -13,3 +13,9 @@ export const toApiErrorResponse = <const Codes extends readonly [ApiErrorCode, .
 		}),
 		requestId: t.String(),
 	});
+
+export const VndbVoteBackpressureResponse = toApiErrorResponse(["VndbVoteHotKeyBusy"]);
+export const TagApplicationPolicyResponse = toApiErrorResponse([
+	"TagNotDirectlyApplicable",
+	"ContentLabelApplicationInvalid",
+]);

@@ -192,6 +192,79 @@ describe("API root", () => {
 		}
 	});
 
+	it("declares hot-key backpressure only on VNDB vote-writing routes", () => {
+		const document = toOpenAPISchema(api);
+		const voteOperation = document.paths["/api/v1/units/{type}/{unitId}/tags/{tagId}/vote"]?.put;
+		const unrelatedOperation =
+			document.paths["/api/v1/units/{type}/{unitId}/aliases/{aliasId}/vote"]?.put;
+
+		expect(voteOperation?.security).toEqual([{ ApiToken: [] }, { SessionCookie: [] }]);
+		expect(unrelatedOperation?.security).toEqual([{ ApiToken: [] }, { SessionCookie: [] }]);
+		expect(JSON.stringify(voteOperation?.responses?.[StatusCodes.TOO_MANY_REQUESTS])).toContain(
+			"VndbVoteHotKeyBusy",
+		);
+		expect(unrelatedOperation?.responses?.[StatusCodes.TOO_MANY_REQUESTS]).toBeUndefined();
+	});
+
+	it("documents Phase 0 VNDB policy failures and correction submission", () => {
+		const document = toOpenAPISchema(api);
+		const unitTag = document.paths["/api/v1/units/{type}/{unitId}/tags/{tagId}"];
+		const unitTagVote = document.paths["/api/v1/units/{type}/{unitId}/tags/{tagId}/vote"];
+		const realmTag = document.paths["/api/v1/realms/{realmId}/units/{unitId}/policy-tags/{tagId}"];
+		const realmTagVote =
+			document.paths["/api/v1/realms/{realmId}/units/{unitId}/tags/{tagId}/vote"];
+		const realmTagContext = document.paths["/api/v1/realms/{realmId}/tags/{tagId}/context"];
+		const unitMergeOperations = [
+			document.paths["/api/v1/governance/platform/unit-merges/preflight"]?.post,
+			document.paths["/api/v1/governance/platform/unit-merges"]?.post,
+			document.paths["/api/v1/governance/platform/unit-merges/direct"]?.post,
+			document.paths["/api/v1/governance/platform/unit-merges/{requestId}/reviews"]?.post,
+		];
+
+		expect(JSON.stringify(unitTag?.put?.responses?.[StatusCodes.UNPROCESSABLE_ENTITY])).toContain(
+			"TagNotDirectlyApplicable",
+		);
+		expect(JSON.stringify(unitTag?.put?.responses?.[StatusCodes.UNPROCESSABLE_ENTITY])).toContain(
+			"ContentLabelApplicationInvalid",
+		);
+		expect(JSON.stringify(unitTag?.put?.responses?.[StatusCodes.FORBIDDEN])).toContain(
+			"ContentLabelPlatformApplyForbidden",
+		);
+		expect(JSON.stringify(unitTag?.patch?.responses?.[StatusCodes.CONFLICT])).toContain(
+			"ContentLabelPlatformIdentityImmutable",
+		);
+		expect(JSON.stringify(unitTag?.delete?.responses?.[StatusCodes.FORBIDDEN])).toContain(
+			"ContentLabelPlatformRemovalForbidden",
+		);
+		expect(JSON.stringify(unitTag?.delete?.responses?.[StatusCodes.CONFLICT])).toContain(
+			"TagApplicationHasJudgments",
+		);
+		expect(JSON.stringify(realmTagContext?.delete?.responses?.[StatusCodes.CONFLICT])).toContain(
+			"RealmTagContextInUse",
+		);
+		expect(
+			JSON.stringify(unitTagVote?.put?.responses?.[StatusCodes.UNPROCESSABLE_ENTITY]),
+		).toContain("ContentLabelJudgmentForbidden");
+		expect(JSON.stringify(realmTag?.put?.responses?.[StatusCodes.UNPROCESSABLE_ENTITY])).toContain(
+			"ContentLabelApplicationInvalid",
+		);
+		expect(
+			JSON.stringify(realmTagVote?.put?.responses?.[StatusCodes.UNPROCESSABLE_ENTITY]),
+		).toContain("ContentLabelJudgmentForbidden");
+
+		for (const operation of unitMergeOperations) {
+			expect(JSON.stringify(operation?.responses?.[StatusCodes.UNPROCESSABLE_ENTITY])).toContain(
+				"ContentLabelUnitMergeForbidden",
+			);
+		}
+
+		const correction = document.paths["/api/v1/tag-structures/{structureId}"]?.put?.responses;
+		expect(correction?.[StatusCodes.OK]).toBeDefined();
+		expect(correction?.[StatusCodes.ACCEPTED]).toBeDefined();
+		expect(JSON.stringify(correction?.[StatusCodes.OK])).toContain('"changed"');
+		expect(JSON.stringify(correction?.[StatusCodes.ACCEPTED])).toContain('"correctionId"');
+	});
+
 	it("documents external-link references for every registered Unit kind", () => {
 		const document = toOpenAPISchema(api);
 		const operations = [
@@ -344,6 +417,7 @@ describe("API root", () => {
 			"POST /api/v1/tag-structures",
 			"GET /api/v1/tag-structures/{structureId}",
 			"PUT /api/v1/tag-structures/{structureId}",
+			"GET /api/v1/tag-structures/{structureId}/corrections/{correctionId}",
 			"DELETE /api/v1/tag-structures/{structureId}/vote",
 			"PUT /api/v1/tag-structures/{structureId}/vote",
 			"DELETE /api/v1/units/{type}/{unitId}/tag-structures/{structureId}",

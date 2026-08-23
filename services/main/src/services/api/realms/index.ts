@@ -1,7 +1,7 @@
 import { DevelopmentPreviewCapability, RealmUnitCreatePermissionValues } from "@rezics/access";
 import type { ContentLanguage } from "@rezics/i18n";
 import { StatusCodes } from "http-status-codes";
-import { and, desc, eq, gt, inArray, isNull, lt, or, sql } from "drizzle-orm";
+import { and, desc, eq, gt, inArray, isNotNull, isNull, lt, or, sql } from "drizzle-orm";
 import Elysia, { t } from "elysia";
 
 import { recordAuditEvent as appendAuditEvent } from "../../audit";
@@ -15,6 +15,7 @@ import {
 	type RealmCapability,
 } from "../../authorization/realm/policy";
 import { database } from "../../database";
+import { runVndbVoteTransaction } from "../../database/vndb-vote-admission";
 import { toSafeInteger } from "../../database/integer";
 import { ContentStructureSnapshotSchema } from "../../content-structure/contracts";
 import { createContentStructureHistory } from "../../content-structure/history";
@@ -57,8 +58,8 @@ import {
 	realmRuleRevision,
 	realmScoreContext,
 	realmTagContext,
-	realmTagVote,
-	realmTagVoteStat,
+	realmTagJudgment,
+	realmTagJudgmentStat,
 	realmUnitTag,
 	tag,
 	unitFollow,
@@ -102,6 +103,7 @@ import {
 } from "../schema/action-response";
 import {
 	toApiErrorResponse,
+	VndbVoteBackpressureResponse,
 	RealmDetailResponse,
 	RealmListResponse,
 	RealmTaxonomyResponse,
@@ -395,28 +397,29 @@ async function getRealmTagVoteSummary(
 	const [[stat], [viewerVote]] = await Promise.all([
 		database
 			.select({
-				score: realmTagVoteStat.score,
-				voteCount: realmTagVoteStat.voteCount,
+				score: realmTagJudgmentStat.score,
+				voteCount: realmTagJudgmentStat.voteCount,
 			})
-			.from(realmTagVoteStat)
+			.from(realmTagJudgmentStat)
 			.where(
 				and(
-					eq(realmTagVoteStat.realmId, realmId),
-					eq(realmTagVoteStat.unitId, unitId),
-					eq(realmTagVoteStat.tagId, tagId),
+					eq(realmTagJudgmentStat.realmId, realmId),
+					eq(realmTagJudgmentStat.unitId, unitId),
+					eq(realmTagJudgmentStat.tagId, tagId),
+					gt(realmTagJudgmentStat.voteCount, 0n),
 				),
 			)
 			.limit(1),
 		profileId
 			? database
-					.select({ value: realmTagVote.value })
-					.from(realmTagVote)
+					.select({ value: realmTagJudgment.fitVote })
+					.from(realmTagJudgment)
 					.where(
 						and(
-							eq(realmTagVote.realmId, realmId),
-							eq(realmTagVote.unitId, unitId),
-							eq(realmTagVote.tagId, tagId),
-							eq(realmTagVote.profileId, profileId),
+							eq(realmTagJudgment.realmId, realmId),
+							eq(realmTagJudgment.unitId, unitId),
+							eq(realmTagJudgment.tagId, tagId),
+							eq(realmTagJudgment.profileId, profileId),
 						),
 					)
 					.limit(1)
@@ -639,78 +642,81 @@ export default new Elysia({ prefix: "/realms" })
 	.post(
 		"",
 		async ({ profile, body }) => {
-			const id = await database.transaction(async (tx) => {
-				await ensureImageAssetsAttachable(
-					tx,
-					profile.unitId,
-					unitLocalizationImageAssetReferences(body.localization),
-				);
-				const created = await insertUnit(tx, {
-					kind: "realm",
-					status: "published",
-					visibility: body.visibility,
-					publishedAt: new Date(),
-					statusActor: { kind: "profile", profileId: profile.unitId },
-				});
-				await tx.insert(realm).values({ id: created.id, joinPolicy: body.joinPolicy });
-				const [taxonomy] = await tx
-					.insert(contentStructure)
-					.values({ ownerUnitId: created.id, kind: "realm.taxonomy" })
-					.returning();
-				if (!taxonomy) throw new Error("Realm taxonomy insertion returned no row");
-				await tx.insert(unitLocalization).values({
-					unitId: created.id,
-					...toUnitLocalizationStorage(body.localization),
-				});
-				await tx.insert(unitOwnership).values({
-					unitId: created.id,
-					profileId: profile.unitId,
-					assignedByProfileId: profile.unitId,
-				});
-				await tx.insert(realmMember).values({
-					realmId: created.id,
-					profileId: profile.unitId,
-				});
-				await tx.insert(unitAccessGrant).values(
-					(["unit.read", "realm.contribute", ...RealmUnitCreatePermissionValues] as const).map(
-						(permission) => ({
-							unitId: created.id,
-							subjectKind: "realm" as const,
-							realmId: created.id,
-							realmRelation: "member" as const,
-							permission,
-							scope: [],
-							grantedByProfileId: profile.unitId,
-						}),
-					),
-				);
-				await tx.insert(unitFollow).values({
-					followerProfileId: profile.unitId,
-					unitId: created.id,
-				});
-				await applyInitialTags(tx, {
-					unitId: created.id,
-					profileId: profile.unitId,
-					tagIds: body.initialTagIds ?? [],
-				});
-				const taxonomySnapshot = ContentStructureSnapshotSchema.parse({
-					version: 1,
-					structure: taxonomy,
-					nodes: [],
-				});
-				await recordUnitRevision(tx, {
-					unitId: created.id,
-					actorProfileId: profile.unitId,
-					contribution: body.revisionContext?.contribution,
-					event: "create",
-				});
-				await createContentStructureHistory(tx, {
-					structureId: taxonomy.id,
-					actorProfileId: profile.unitId,
-					state: taxonomySnapshot,
-				});
-				return created.id;
-			});
+			const id = await runVndbVoteTransaction(
+				{ family: "unit_tag", authority: "global" },
+				async (tx) => {
+					await ensureImageAssetsAttachable(
+						tx,
+						profile.unitId,
+						unitLocalizationImageAssetReferences(body.localization),
+					);
+					const created = await insertUnit(tx, {
+						kind: "realm",
+						status: "published",
+						visibility: body.visibility,
+						publishedAt: new Date(),
+						statusActor: { kind: "profile", profileId: profile.unitId },
+					});
+					await tx.insert(realm).values({ id: created.id, joinPolicy: body.joinPolicy });
+					const [taxonomy] = await tx
+						.insert(contentStructure)
+						.values({ ownerUnitId: created.id, kind: "realm.taxonomy" })
+						.returning();
+					if (!taxonomy) throw new Error("Realm taxonomy insertion returned no row");
+					await tx.insert(unitLocalization).values({
+						unitId: created.id,
+						...toUnitLocalizationStorage(body.localization),
+					});
+					await tx.insert(unitOwnership).values({
+						unitId: created.id,
+						profileId: profile.unitId,
+						assignedByProfileId: profile.unitId,
+					});
+					await tx.insert(realmMember).values({
+						realmId: created.id,
+						profileId: profile.unitId,
+					});
+					await tx.insert(unitAccessGrant).values(
+						(["unit.read", "realm.contribute", ...RealmUnitCreatePermissionValues] as const).map(
+							(permission) => ({
+								unitId: created.id,
+								subjectKind: "realm" as const,
+								realmId: created.id,
+								realmRelation: "member" as const,
+								permission,
+								scope: [],
+								grantedByProfileId: profile.unitId,
+							}),
+						),
+					);
+					await tx.insert(unitFollow).values({
+						followerProfileId: profile.unitId,
+						unitId: created.id,
+					});
+					await applyInitialTags(tx, {
+						unitId: created.id,
+						profileId: profile.unitId,
+						tagIds: body.initialTagIds ?? [],
+					});
+					const taxonomySnapshot = ContentStructureSnapshotSchema.parse({
+						version: 1,
+						structure: taxonomy,
+						nodes: [],
+					});
+					await recordUnitRevision(tx, {
+						unitId: created.id,
+						actorProfileId: profile.unitId,
+						contribution: body.revisionContext?.contribution,
+						event: "create",
+					});
+					await createContentStructureHistory(tx, {
+						structureId: taxonomy.id,
+						actorProfileId: profile.unitId,
+						state: taxonomySnapshot,
+					});
+					return created.id;
+				},
+			);
 			return { id };
 		},
 		{
@@ -723,6 +729,7 @@ export default new Elysia({ prefix: "/realms" })
 					"RevisionContributionActorRequired",
 				]),
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["ImageAssetNotFound", "TagNotFound"]),
+				[StatusCodes.TOO_MANY_REQUESTS]: VndbVoteBackpressureResponse,
 			},
 			detail: { summary: "Create Realm", tags: ["Realms"] },
 		},
@@ -2047,20 +2054,23 @@ export default new Elysia({ prefix: "/realms" })
 		async ({ params, profile, authorization, body }) => {
 			await authorization.realm.ensureUnitCreation([params.realmId], "realm.units.create");
 			if (body.subjectId) await authorization.unit.ensureCanRead(body.subjectId);
-			const id = await database.transaction(async (tx) => {
-				const created = await createWikiPost(tx, {
-					profileId: profile.unitId,
-					authorization,
-					accessMode: body.accessMode ?? "community_owned",
-					title: body.title,
-					body: body.body,
-					language: body.language,
-					publishRealmIds: [params.realmId],
-					governanceRealmId: params.realmId,
-					...(body.subjectId ? { subjectId: body.subjectId } : {}),
-				});
-				return created.id;
-			});
+			const id = await runVndbVoteTransaction(
+				{ family: "unit_tag", authority: "global" },
+				async (tx) => {
+					const created = await createWikiPost(tx, {
+						profileId: profile.unitId,
+						authorization,
+						accessMode: body.accessMode ?? "community_owned",
+						title: body.title,
+						body: body.body,
+						language: body.language,
+						publishRealmIds: [params.realmId],
+						governanceRealmId: params.realmId,
+						...(body.subjectId ? { subjectId: body.subjectId } : {}),
+					});
+					return created.id;
+				},
+			);
 			return { id };
 		},
 		{
@@ -2078,6 +2088,7 @@ export default new Elysia({ prefix: "/realms" })
 					"RealmRulesAcceptanceRequired",
 					"PostTargetingLocked",
 				]),
+				[StatusCodes.TOO_MANY_REQUESTS]: VndbVoteBackpressureResponse,
 			},
 			detail: { summary: "Create Realm-governed Wiki", tags: ["Realms"] },
 		},
@@ -2180,48 +2191,54 @@ export default new Elysia({ prefix: "/realms" })
 				authorization.realm.ensureUnitCreation([params.realmId], "realm.units.create"),
 				authorization.unit.ensureCanRead(body.tagId),
 			]);
-			const contextPostId = await database.transaction(async (tx) => {
-				await tx.execute(
-					sql`select pg_advisory_xact_lock(hashtextextended(${`${params.realmId}:${body.tagId}:realm-tag-context`}::text, 0))`,
-				);
-				await ensureRealmTagVotingEnabled(tx, params.realmId);
-				const [existing] = await tx
-					.select({ contextPostId: realmTagContext.contextPostId })
-					.from(realmTagContext)
-					.where(
-						and(eq(realmTagContext.realmId, params.realmId), eq(realmTagContext.tagId, body.tagId)),
-					)
-					.limit(1);
-				if (existing) throw new RealmTagContextAlreadyExists(existing);
-				const [tagRecord] = await tx
-					.select({ id: tag.id })
-					.from(tag)
-					.where(eq(tag.id, body.tagId))
-					.limit(1);
-				if (!tagRecord) throw new UnitNotFound("Tag");
-				const created = await createWikiPost(tx, {
-					profileId: profile.unitId,
-					authorization,
-					accessMode: body.accessMode ?? "community_owned",
-					title: body.title,
-					summary: body.summary,
-					body: body.body,
-					language: body.language,
-					publishRealmIds: [params.realmId],
-					governanceRealmId: params.realmId,
-				});
-				await tx.insert(realmTagContext).values({
-					realmId: params.realmId,
-					tagId: body.tagId,
-					contextPostId: created.id,
-					createdByProfileId: profile.unitId,
-				});
-				await recordAuditEvent(tx, profile.unitId, "realm.tag-contexts.create", body.tagId, {
-					realmId: params.realmId,
-					contextPostId: created.id,
-				});
-				return created.id;
-			});
+			const contextPostId = await runVndbVoteTransaction(
+				{ family: "unit_tag", authority: "global" },
+				async (tx) => {
+					await tx.execute(
+						sql`select pg_advisory_xact_lock(hashtextextended(${`${params.realmId}:${body.tagId}:realm-tag-context`}::text, 0))`,
+					);
+					await ensureRealmTagVotingEnabled(tx, params.realmId);
+					const [existing] = await tx
+						.select({ contextPostId: realmTagContext.contextPostId })
+						.from(realmTagContext)
+						.where(
+							and(
+								eq(realmTagContext.realmId, params.realmId),
+								eq(realmTagContext.tagId, body.tagId),
+							),
+						)
+						.limit(1);
+					if (existing) throw new RealmTagContextAlreadyExists(existing);
+					const [tagRecord] = await tx
+						.select({ id: tag.id })
+						.from(tag)
+						.where(eq(tag.id, body.tagId))
+						.limit(1);
+					if (!tagRecord) throw new UnitNotFound("Tag");
+					const created = await createWikiPost(tx, {
+						profileId: profile.unitId,
+						authorization,
+						accessMode: body.accessMode ?? "community_owned",
+						title: body.title,
+						summary: body.summary,
+						body: body.body,
+						language: body.language,
+						publishRealmIds: [params.realmId],
+						governanceRealmId: params.realmId,
+					});
+					await tx.insert(realmTagContext).values({
+						realmId: params.realmId,
+						tagId: body.tagId,
+						contextPostId: created.id,
+						createdByProfileId: profile.unitId,
+					});
+					await recordAuditEvent(tx, profile.unitId, "realm.tag-contexts.create", body.tagId, {
+						realmId: params.realmId,
+						contextPostId: created.id,
+					});
+					return created.id;
+				},
+			);
 			const context = await getRealmTagContextSummary(params.realmId, body.tagId);
 			if (context.contextPostId !== contextPostId)
 				throw new Error("Created Realm Tag Context resolved to another Wiki Post");
@@ -2244,6 +2261,7 @@ export default new Elysia({ prefix: "/realms" })
 					"RealmRulesAcceptanceRequired",
 					"PostTargetingLocked",
 				]),
+				[StatusCodes.TOO_MANY_REQUESTS]: VndbVoteBackpressureResponse,
 			},
 			detail: { summary: "Create Realm Tag Context Wiki", tags: ["Realms"] },
 		},
@@ -2291,7 +2309,7 @@ export default new Elysia({ prefix: "/realms" })
 				authorization.unit.ensureCanRead(params.tagId),
 				authorization.unit.ensureCanRead(body.contextPostId, () => new PostNotFound()),
 			]);
-			await database.transaction(async (tx) => {
+			await runVndbVoteTransaction({ family: "unit_tag", authority: "realm" }, async (tx) => {
 				const lockKeys = [
 					`${params.realmId}:${params.tagId}:realm-tag-context`,
 					`${body.contextPostId}:realm-tag-context-post`,
@@ -2368,6 +2386,7 @@ export default new Elysia({ prefix: "/realms" })
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "PostNotFound"]),
 				[StatusCodes.CONFLICT]: toApiErrorResponse(["RealmTagContextPostAlreadyUsed"]),
 				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["RealmTagContextPostNotMounted"]),
+				[StatusCodes.TOO_MANY_REQUESTS]: VndbVoteBackpressureResponse,
 			},
 			detail: { summary: "Set Realm Tag Context", tags: ["Realms"] },
 		},
@@ -2376,7 +2395,7 @@ export default new Elysia({ prefix: "/realms" })
 		"/:realmId/tags/:tagId/context",
 		async ({ params, profile, authorization }) => {
 			await authorization.realm.ensureCapability(params.realmId, "realm.tag-contexts.manage");
-			await database.transaction(async (tx) => {
+			await runVndbVoteTransaction({ family: "unit_tag", authority: "realm" }, async (tx) => {
 				await tx.execute(
 					sql`select pg_advisory_xact_lock(hashtextextended(${`${params.realmId}:${params.tagId}:realm-tag-context`}::text, 0))`,
 				);
@@ -2404,6 +2423,8 @@ export default new Elysia({ prefix: "/realms" })
 				[StatusCodes.NO_CONTENT]: t.Void(),
 				[StatusCodes.FORBIDDEN]: RealmMutationForbiddenResponse,
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["RealmTagContextNotFound"]),
+				[StatusCodes.CONFLICT]: toApiErrorResponse(["RealmTagContextInUse"]),
+				[StatusCodes.TOO_MANY_REQUESTS]: VndbVoteBackpressureResponse,
 			},
 			detail: {
 				summary: "Remove Realm Tag Context relationship",
@@ -2486,7 +2507,11 @@ export default new Elysia({ prefix: "/realms" })
 				[StatusCodes.OK]: RealmPolicyTagResponse,
 				[StatusCodes.FORBIDDEN]: RealmMutationForbiddenResponse,
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["RealmUnitNotFound", "UnitNotFound"]),
-				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["RealmTagSelfReferenceForbidden"]),
+				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse([
+					"RealmTagSelfReferenceForbidden",
+					"TagNotDirectlyApplicable",
+					"ContentLabelApplicationInvalid",
+				]),
 			},
 			detail: { summary: "Apply Realm Policy Tag", tags: ["Realms"] },
 		},
@@ -2575,29 +2600,30 @@ export default new Elysia({ prefix: "/realms" })
 				authorization.unit.ensureCanRead(params.unitId),
 				authorization.unit.ensureCanRead(params.tagId),
 			]);
-			await database.transaction(async (tx) => {
+			await runVndbVoteTransaction({ family: "unit_tag", authority: "realm" }, async (tx) => {
 				await ensureRealmTagVoteEligibility(tx, {
 					realmId: params.realmId,
 					tagId: params.tagId,
 					viewerProfileId: profile.unitId,
 				});
 				await tx
-					.insert(realmTagVote)
+					.insert(realmTagJudgment)
 					.values({
 						realmId: params.realmId,
 						unitId: params.unitId,
 						tagId: params.tagId,
 						profileId: profile.unitId,
-						value: body.value,
+						fitVote: body.value,
+						fitUpdatedAt: new Date(),
 					})
 					.onConflictDoUpdate({
 						target: [
-							realmTagVote.realmId,
-							realmTagVote.unitId,
-							realmTagVote.tagId,
-							realmTagVote.profileId,
+							realmTagJudgment.realmId,
+							realmTagJudgment.unitId,
+							realmTagJudgment.tagId,
+							realmTagJudgment.profileId,
 						],
-						set: { value: body.value, updatedAt: new Date() },
+						set: { fitVote: body.value, fitUpdatedAt: new Date(), updatedAt: new Date() },
 					});
 			});
 			return getRealmTagVoteSummary(params.realmId, params.unitId, params.tagId, profile.unitId);
@@ -2618,7 +2644,9 @@ export default new Elysia({ prefix: "/realms" })
 				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse([
 					"RealmTagContextRequired",
 					"RealmTagSelfReferenceForbidden",
+					"ContentLabelJudgmentForbidden",
 				]),
+				[StatusCodes.TOO_MANY_REQUESTS]: VndbVoteBackpressureResponse,
 			},
 			detail: { summary: "Vote on a Realm-scoped Unit Tag", tags: ["Realms"] },
 		},
@@ -2631,16 +2659,21 @@ export default new Elysia({ prefix: "/realms" })
 				authorization.unit.ensureCanRead(params.unitId),
 				authorization.unit.ensureCanRead(params.tagId),
 			]);
-			await database
-				.delete(realmTagVote)
-				.where(
-					and(
-						eq(realmTagVote.realmId, params.realmId),
-						eq(realmTagVote.unitId, params.unitId),
-						eq(realmTagVote.tagId, params.tagId),
-						eq(realmTagVote.profileId, profile.unitId),
-					),
+			await runVndbVoteTransaction({ family: "unit_tag", authority: "realm" }, async (tx) => {
+				const judgmentKey = and(
+					eq(realmTagJudgment.realmId, params.realmId),
+					eq(realmTagJudgment.unitId, params.unitId),
+					eq(realmTagJudgment.tagId, params.tagId),
+					eq(realmTagJudgment.profileId, profile.unitId),
 				);
+				await tx
+					.delete(realmTagJudgment)
+					.where(and(judgmentKey, isNull(realmTagJudgment.spoilerLevel)));
+				await tx
+					.update(realmTagJudgment)
+					.set({ fitVote: null, fitUpdatedAt: null, updatedAt: new Date() })
+					.where(and(judgmentKey, isNotNull(realmTagJudgment.spoilerLevel)));
+			});
 			return getRealmTagVoteSummary(params.realmId, params.unitId, params.tagId, profile.unitId);
 		},
 		{
@@ -2654,6 +2687,7 @@ export default new Elysia({ prefix: "/realms" })
 					"UnitPermissionForbidden",
 				]),
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
+				[StatusCodes.TOO_MANY_REQUESTS]: VndbVoteBackpressureResponse,
 			},
 			detail: { summary: "Remove a Realm-scoped Unit Tag vote", tags: ["Realms"] },
 		},

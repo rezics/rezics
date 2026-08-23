@@ -50,10 +50,12 @@ import {
 	InternalError,
 	isApiError,
 	MalformedRequestBody,
+	apiErrorRetryAfterSeconds,
 } from "./errors";
 import { toUnitVariantConstraintError } from "../units/variants";
 import { toPostTargetingConstraintError } from "../posts/targeting";
 import { toTagStructureConstraintError } from "../tag-structures/service";
+import { toVndbPolicyConstraintError } from "../database/errors";
 import { classifyValidationFailure } from "./validation-failure";
 
 const { logger } = getActiveObservability();
@@ -98,10 +100,16 @@ export default new Elysia({ normalize: "typebox" })
 	.onError(({ error, code, request, route, set, status }) => {
 		const requestId = getAuditRequestContext()?.requestId ?? crypto.randomUUID();
 		if (isApiError(error)) {
-			if (error._tag === "ApiTokenRateLimitExceeded" || error._tag === "ApiQuotaExceeded")
-				set.headers["Retry-After"] = String(error.retryAfterSeconds);
+			const retryAfterSeconds = apiErrorRetryAfterSeconds(error);
+			if (retryAfterSeconds !== undefined) set.headers["Retry-After"] = String(retryAfterSeconds);
 			return status(error.status, toApiErrorBody(error, requestId));
 		}
+		const vndbPolicyConstraintError = toVndbPolicyConstraintError(error);
+		if (vndbPolicyConstraintError)
+			return status(
+				vndbPolicyConstraintError.status,
+				toApiErrorBody(vndbPolicyConstraintError, requestId),
+			);
 		const variantConstraintError = toUnitVariantConstraintError(error);
 		if (variantConstraintError)
 			return status(

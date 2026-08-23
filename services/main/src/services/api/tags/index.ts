@@ -21,15 +21,18 @@ import {
 	getTagHierarchy,
 	getTagStructure,
 	removeTagStructureApplication,
-	updateTagStructureDefinition,
 	voteTagStructure,
 	voteTagStructureApplication,
 } from "../../tag-structures/service";
+import {
+	getUnitStructureCorrection,
+	submitUnitStructureCorrection,
+} from "../../tag-structures/correction";
 import { UnitNotFound } from "../../units/errors";
 import { checkUnitType } from "../unit-resources/service";
 import { RealmNotFound } from "../realms/errors";
 import { RevisionContextBody } from "../schema";
-import { toApiErrorResponse } from "../schema/response";
+import { toApiErrorResponse, VndbVoteBackpressureResponse } from "../schema/response";
 import {
 	RealmTagSubscriptionListQuery,
 	RealmTagSubscriptionListResponse,
@@ -42,9 +45,12 @@ import {
 	TagHierarchyResponse,
 	TagIdParams,
 	TagStructureApplicationResponse,
+	TagStructureCorrectionParams,
 	TagStructureParams,
 	TagStructureQuery,
 	TagStructureResponse,
+	UnitStructureCorrectionNoChangeResponse,
+	UnitStructureCorrectionJobResponse,
 	UnitTagStructureParams,
 	UnitTagLandscapeParams,
 	UnitTagLandscapeQuery,
@@ -112,6 +118,7 @@ export default new Elysia()
 							"RevisionCreditEntityInvalid",
 							"RevisionContributionActorRequired",
 						]),
+						[StatusCodes.TOO_MANY_REQUESTS]: VndbVoteBackpressureResponse,
 					},
 					detail: {
 						summary: "Create or find and upvote a community-immutable Tag structure",
@@ -145,9 +152,9 @@ export default new Elysia()
 			)
 			.put(
 				"/:structureId",
-				async ({ params, query, body, profile, authorization }) => {
+				async ({ params, body, profile, authorization, status }) => {
 					await authorization.platform.ensureCapability(DevelopmentPreviewCapability);
-					await updateTagStructureDefinition({
+					const correction = await submitUnitStructureCorrection({
 						structureId: params.structureId,
 						memberTagIds: body.memberTagIds,
 						expectedUpdatedAt: body.updatedAt,
@@ -156,11 +163,8 @@ export default new Elysia()
 						authorization: authorization.platform,
 						contribution: body.revisionContext?.contribution,
 					});
-					return getTagStructure({
-						structureId: params.structureId,
-						viewerProfileId: profile.unitId,
-						localizationLanguages: query.localizationLanguages,
-					});
+					if (correction.changed) return status(StatusCodes.ACCEPTED, correction);
+					return status(StatusCodes.OK, correction);
 				},
 				{
 					access: "write:unit:update",
@@ -168,7 +172,8 @@ export default new Elysia()
 					query: TagStructureQuery,
 					body: UpdateTagStructureBody,
 					response: {
-						[StatusCodes.OK]: TagStructureResponse,
+						[StatusCodes.OK]: UnitStructureCorrectionNoChangeResponse,
+						[StatusCodes.ACCEPTED]: UnitStructureCorrectionJobResponse,
 						[StatusCodes.FORBIDDEN]: toApiErrorResponse(["PlatformCapabilityRequired"]),
 						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["TagNotFound", "TagStructureNotFound"]),
 						[StatusCodes.CONFLICT]: toApiErrorResponse([
@@ -180,9 +185,30 @@ export default new Elysia()
 							"RevisionCreditEntityInvalid",
 							"RevisionContributionActorRequired",
 						]),
+						[StatusCodes.TOO_MANY_REQUESTS]: VndbVoteBackpressureResponse,
 					},
 					detail: {
 						summary: "Administratively correct a Tag structure definition",
+						tags: ["Tags"],
+					},
+				},
+			)
+			.get(
+				"/:structureId/corrections/:correctionId",
+				async ({ params, authorization }) => {
+					await authorization.platform.ensureCapability(DevelopmentPreviewCapability);
+					return getUnitStructureCorrection(params.structureId, params.correctionId);
+				},
+				{
+					access: "write:unit:update",
+					params: TagStructureCorrectionParams,
+					response: {
+						[StatusCodes.OK]: UnitStructureCorrectionJobResponse,
+						[StatusCodes.FORBIDDEN]: toApiErrorResponse(["PlatformCapabilityRequired"]),
+						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["TagStructureNotFound"]),
+					},
+					detail: {
+						summary: "Get an administrative Tag structure correction job",
 						tags: ["Tags"],
 					},
 				},
@@ -205,6 +231,7 @@ export default new Elysia()
 						[StatusCodes.OK]: VoteSummaryResponse,
 						[StatusCodes.FORBIDDEN]: toApiErrorResponse(["PlatformCapabilityRequired"]),
 						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["TagStructureNotFound"]),
+						[StatusCodes.TOO_MANY_REQUESTS]: VndbVoteBackpressureResponse,
 					},
 					detail: { summary: "Vote on a Tag structure", tags: ["Tags"] },
 				},
@@ -225,6 +252,7 @@ export default new Elysia()
 						[StatusCodes.OK]: VoteSummaryResponse,
 						[StatusCodes.FORBIDDEN]: toApiErrorResponse(["PlatformCapabilityRequired"]),
 						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["TagStructureNotFound"]),
+						[StatusCodes.TOO_MANY_REQUESTS]: VndbVoteBackpressureResponse,
 					},
 					detail: { summary: "Remove a Tag structure vote", tags: ["Tags"] },
 				},
@@ -291,6 +319,7 @@ export default new Elysia()
 							"RevisionCreditEntityInvalid",
 							"RevisionContributionActorRequired",
 						]),
+						[StatusCodes.TOO_MANY_REQUESTS]: VndbVoteBackpressureResponse,
 					},
 					detail: { summary: "Apply a Tag structure to a Unit", tags: ["Tags"] },
 				},
@@ -328,6 +357,7 @@ export default new Elysia()
 							"RevisionCreditEntityInvalid",
 							"RevisionContributionActorRequired",
 						]),
+						[StatusCodes.TOO_MANY_REQUESTS]: VndbVoteBackpressureResponse,
 					},
 					detail: { summary: "Remove a Tag structure from a Unit", tags: ["Tags"] },
 				},
@@ -357,6 +387,7 @@ export default new Elysia()
 							"UnitNotFound",
 							"TagStructureApplicationNotFound",
 						]),
+						[StatusCodes.TOO_MANY_REQUESTS]: VndbVoteBackpressureResponse,
 					},
 					detail: { summary: "Vote on a Unit Tag structure", tags: ["Tags"] },
 				},
@@ -383,6 +414,7 @@ export default new Elysia()
 							"UnitNotFound",
 							"TagStructureApplicationNotFound",
 						]),
+						[StatusCodes.TOO_MANY_REQUESTS]: VndbVoteBackpressureResponse,
 					},
 					detail: { summary: "Remove a Unit Tag structure vote", tags: ["Tags"] },
 				},

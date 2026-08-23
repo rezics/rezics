@@ -1,6 +1,12 @@
 import { type Static, t } from "elysia";
 
 import {
+	UnitStructureMaximumMembers,
+	UnitStructureMinimumMembers,
+	UnitStructureCorrectionStatusValues,
+	UnitStructureCorrectionWriteRouteValues,
+} from "../../database/schema";
+import {
 	ContentLanguage,
 	LocalizationLanguageQuery,
 	DateTime,
@@ -71,7 +77,10 @@ const UnitTagStructureResponse = t.Object({
 	viewerVote: TagVoteValue,
 	definitionScore: t.Integer(),
 	definitionVoteCount: t.Integer({ minimum: 0 }),
-	members: t.Array(TagStructureMemberResponse, { minItems: 2 }),
+	members: t.Array(TagStructureMemberResponse, {
+		minItems: UnitStructureMinimumMembers,
+		maxItems: UnitStructureMaximumMembers,
+	}),
 	createdAt: DateTime,
 	updatedAt: DateTime,
 });
@@ -192,8 +201,8 @@ export const TagHierarchyResponse = t.Object({
 export const CreateTagStructureBody = t.Object(
 	{
 		memberTagIds: t.Array(Uuid, {
-			minItems: 2,
-			maxItems: 16,
+			minItems: UnitStructureMinimumMembers,
+			maxItems: UnitStructureMaximumMembers,
 			uniqueItems: true,
 		}),
 		revisionContext: t.Optional(RevisionContext),
@@ -205,8 +214,8 @@ export type CreateTagStructureBody = Static<typeof CreateTagStructureBody>;
 export const UpdateTagStructureBody = t.Object(
 	{
 		memberTagIds: t.Array(Uuid, {
-			minItems: 2,
-			maxItems: 16,
+			minItems: UnitStructureMinimumMembers,
+			maxItems: UnitStructureMaximumMembers,
 			uniqueItems: true,
 		}),
 		updatedAt: DateTime,
@@ -225,6 +234,61 @@ export const TagStructureQuery = t.Object(LocalizationLanguageQuery, {
 });
 export type TagStructureQuery = Static<typeof TagStructureQuery>;
 
+export const TagStructureCorrectionParams = t.Object({
+	structureId: Uuid,
+	correctionId: Uuid,
+});
+export type TagStructureCorrectionParams = Static<typeof TagStructureCorrectionParams>;
+
+const UnitStructureCorrectionPathResponse = {
+	structureId: Uuid,
+	sourceProjectionVersion: t.Integer({ minimum: 1 }),
+	targetProjectionVersion: t.Integer({ minimum: 1 }),
+	sourceMemberTagIds: t.Array(Uuid, {
+		minItems: UnitStructureMinimumMembers,
+		maxItems: UnitStructureMaximumMembers,
+		uniqueItems: true,
+	}),
+	targetMemberTagIds: t.Array(Uuid, {
+		minItems: UnitStructureMinimumMembers,
+		maxItems: UnitStructureMaximumMembers,
+		uniqueItems: true,
+	}),
+} as const;
+
+const UnitStructureCorrectionLifecycleResponse = {
+	requestedAt: DateTime,
+	updatedAt: DateTime,
+	lastErrorCode: t.Nullable(t.String()),
+	lastErrorMessage: t.Nullable(t.String()),
+} as const;
+
+export const UnitStructureCorrectionJobResponse = t.Object({
+	...UnitStructureCorrectionPathResponse,
+	...UnitStructureCorrectionLifecycleResponse,
+	correctionId: Uuid,
+	changed: t.Literal(true),
+	status: t.UnionEnum(UnitStructureCorrectionStatusValues),
+	writeRoute: t.UnionEnum(UnitStructureCorrectionWriteRouteValues),
+	activatedAt: t.Nullable(DateTime),
+	completedAt: t.Nullable(DateTime),
+	failedAt: t.Nullable(DateTime),
+	cancelledAt: t.Nullable(DateTime),
+});
+
+export const UnitStructureCorrectionNoChangeResponse = t.Object({
+	...UnitStructureCorrectionPathResponse,
+	...UnitStructureCorrectionLifecycleResponse,
+	correctionId: t.Null(),
+	changed: t.Literal(false),
+	status: t.Literal("completed"),
+	writeRoute: t.Literal("target"),
+	activatedAt: t.Null(),
+	completedAt: DateTime,
+	failedAt: t.Null(),
+	cancelledAt: t.Null(),
+});
+
 export const TagStructureResponse = t.Object({
 	id: Uuid,
 	kind: t.Literal("tag.hierarchy_path"),
@@ -233,7 +297,10 @@ export const TagStructureResponse = t.Object({
 	score: t.Integer(),
 	voteCount: t.Integer({ minimum: 0 }),
 	viewerVote: TagVoteValue,
-	members: t.Array(TagStructureMemberResponse, { minItems: 2 }),
+	members: t.Array(TagStructureMemberResponse, {
+		minItems: UnitStructureMinimumMembers,
+		maxItems: UnitStructureMaximumMembers,
+	}),
 	createdAt: DateTime,
 	updatedAt: DateTime,
 });

@@ -53,7 +53,11 @@ export {
 	presentPortableTextDocument as toPortableTextResponse,
 	type PortableTextPersistenceSource,
 } from "../../documents/portable-text-presentation";
-export { toApiErrorResponse } from "./error-response";
+export {
+	TagApplicationPolicyResponse,
+	toApiErrorResponse,
+	VndbVoteBackpressureResponse,
+} from "./error-response";
 
 const NullableText = t.Nullable(t.String());
 const OrdinaryPostKindResponse = t.Union([t.Literal("post"), t.Literal("reply")]);
