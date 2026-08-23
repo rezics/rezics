@@ -134,6 +134,8 @@ const quickAddCountsRow = z.object({
 const aggregateWriteCountRow = z.object({ count: integerString });
 const realHotKeyReadinessRow = z.object({
 	controlState: z.enum(["paused", "postcontract_open", "precontract_open"]).nullable(),
+	evidenceRetentionForeignKeysExact: z.boolean(),
+	evidenceRetentionIndexesReady: z.boolean(),
 	fenceInventoryExact: z.boolean(),
 	fenceTriggerCount: integerString,
 	functionInstalled: z.boolean(),
@@ -602,6 +604,67 @@ async function readRealHotKeyReadiness(
 				)) like '%vndb_vote_hot_key_batch_too_large%',
 				false
 			) as "realmAdmissionIsBounded",
+			not exists (
+				select 1
+				from (
+					values
+						('public.content_pack_import', 'public.profile', null::name),
+						('public.content_pack_tag_evidence', 'public.tag', null::name),
+						(
+							'public.content_pack_unit_tag_evidence',
+							'public.unit_tag_judgment',
+							'content_pack_unit_tag_evidence_judgment_fkey'::name
+						),
+						(
+							'public.content_pack_structure_definition_evidence',
+							'public.unit_structure_vote',
+							'content_pack_structure_definition_evidence_vote_fkey'::name
+						),
+						(
+							'public.content_pack_structure_application_evidence',
+							'public.unit_structure_application_judgment',
+							'content_pack_structure_application_evidence_judgment_fkey'::name
+						),
+						(
+							'public.content_pack_subject_association_evidence',
+							'public.subject_association_judgment',
+							'content_pack_subject_association_evidence_judgment_fkey'::name
+						)
+				) as required(child_table, parent_table, constraint_name)
+				where not exists (
+					select 1
+					from pg_constraint evidence_constraint
+					where evidence_constraint.contype = 'f'
+						and evidence_constraint.confdeltype = 'r'
+						and evidence_constraint.conrelid =
+							to_regclass(required.child_table)
+						and evidence_constraint.confrelid =
+							to_regclass(required.parent_table)
+						and (
+							required.constraint_name is null
+							or evidence_constraint.conname = required.constraint_name
+						)
+				)
+			) as "evidenceRetentionForeignKeysExact",
+			(
+				select count(*) = 6
+				from pg_index evidence_index
+				join pg_class evidence_index_relation
+					on evidence_index_relation.oid = evidence_index.indexrelid
+				join pg_namespace evidence_index_namespace
+					on evidence_index_namespace.oid = evidence_index_relation.relnamespace
+				where evidence_index_namespace.nspname = 'public'
+					and evidence_index.indisvalid
+					and evidence_index.indisready
+					and evidence_index_relation.relname = any(array[
+						'content_pack_import_profile_applied_idx',
+						'content_pack_tag_evidence_tag_idx',
+						'content_pack_unit_tag_evidence_judgment_idx',
+						'content_pack_structure_definition_evidence_vote_idx',
+						'content_pack_structure_application_evidence_judgment_idx',
+						'content_pack_subject_association_evidence_judgment_idx'
+					]::name[])
+			) as "evidenceRetentionIndexesReady",
 			count(*) filter (
 				where (
 					relation.relname = 'unit_structure_application_judgment'
@@ -729,6 +792,8 @@ async function readRealHotKeyReadiness(
 export function realHotKeySchemaReady(readiness: z.infer<typeof realHotKeyReadinessRow>): boolean {
 	return (
 		readiness.controlState === "postcontract_open" &&
+		readiness.evidenceRetentionForeignKeysExact &&
+		readiness.evidenceRetentionIndexesReady &&
 		readiness.functionInstalled &&
 		readiness.globalAdmissionIsBounded &&
 		readiness.globalAdmissionIsFailFast &&
