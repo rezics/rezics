@@ -4,7 +4,13 @@ import type { ContentLanguage } from "@rezics/i18n";
 
 import { getUnitReadCondition } from "../authorization/unit/query";
 import { database, type DatabaseTransaction } from "../database";
-import { post, subjectAssociation, unit, unitTag, unitTagVoteStat } from "../database/schema";
+import {
+	currentUnitTagJudgmentStat as unitTagJudgmentStat,
+	post,
+	subjectAssociation,
+	unit,
+	unitTag,
+} from "../database/schema";
 import { toSafeInteger } from "../database/integer";
 import { resolvedUnitLocalizationTitle } from "./localization";
 import { AssociationContextPostInvalid } from "./errors";
@@ -88,17 +94,17 @@ export async function getAssociationContextPostsByAssociationIds(
 						postId: unitTag.unitId,
 						tagId: unitTag.tagId,
 						title: resolvedUnitLocalizationTitle(unitTag.tagId, localizationLanguages),
-						score: unitTagVoteStat.score,
-						voteCount: unitTagVoteStat.voteCount,
+						score: unitTagJudgmentStat.score,
+						voteCount: unitTagJudgmentStat.voteCount,
 						pinned: unitTag.pinned,
 					})
 					.from(unitTag)
 					.innerJoin(associationContextTagUnit, eq(associationContextTagUnit.id, unitTag.tagId))
 					.leftJoin(
-						unitTagVoteStat,
+						unitTagJudgmentStat,
 						and(
-							eq(unitTagVoteStat.unitId, unitTag.unitId),
-							eq(unitTagVoteStat.tagId, unitTag.tagId),
+							eq(unitTagJudgmentStat.unitId, unitTag.unitId),
+							eq(unitTagJudgmentStat.tagId, unitTag.tagId),
 						),
 					)
 					.where(

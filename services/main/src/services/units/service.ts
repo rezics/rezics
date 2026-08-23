@@ -1,5 +1,5 @@
 import { DevelopmentPreviewCapability } from "@rezics/access";
-import { and, desc, eq, exists, isNull, lt, not, or, sql } from "drizzle-orm";
+import { and, desc, eq, exists, gt, isNull, lt, not, or, sql } from "drizzle-orm";
 import type { AvatarReference } from "@rezics/avatar";
 import type { PortableTextDocument as PortableTextDocumentValue } from "@rezics/block";
 import type { Static } from "elysia";
@@ -14,6 +14,7 @@ import {
 	createPublicEditableUnitAccess,
 } from "../authorization/unit/ownership";
 import { database, type DatabaseTransaction } from "../database";
+import { runVndbVoteTransaction } from "../database/vndb-vote-admission";
 import { toSafeInteger } from "../database/integer";
 import { exactCount, lowerBoundCount } from "../counts/contract";
 import { WorkPolicy } from "../performance/policy";
@@ -52,6 +53,7 @@ import {
 	audio,
 	contentStructure,
 	creditAttribution,
+	currentUnitTagJudgmentStat as unitTagJudgmentStat,
 	entity,
 	software,
 	media,
@@ -64,7 +66,6 @@ import {
 	unitLocalization,
 	unitProgress,
 	unitTag,
-	unitTagVoteStat,
 	unitVariant,
 	video,
 } from "../database/schema";
@@ -256,7 +257,9 @@ export async function createUnit(
 	const contentLanguageSupport = normalizeContentLanguageSupportInput(
 		input.contentLanguageSupport ?? [],
 	);
-	const unitId = await database.transaction(async (tx) => {
+	const unitId = await runVndbVoteTransaction(
+		{ family: "unit_tag", authority: "global" },
+		async (tx) => {
 		await ensureImageAssetsAttachable(
 			tx,
 			ownerId,
@@ -411,7 +414,8 @@ export async function createUnit(
 				state: structureSnapshot,
 			});
 		return created.id;
-	});
+		},
+	);
 	return getUnit(kind, unitId, authorization);
 }
 
@@ -577,8 +581,8 @@ export async function getUnit(
 	const tags = await database
 		.select({
 			tagId: unitTag.tagId,
-			score: unitTagVoteStat.score,
-			voteCount: unitTagVoteStat.voteCount,
+			score: unitTagJudgmentStat.score,
+			voteCount: unitTagJudgmentStat.voteCount,
 			pinned: unitTag.pinned,
 			position: unitTag.position,
 			title: resolvedUnitLocalizationTitle(unitTag.tagId, localizationLanguages),
@@ -587,16 +591,20 @@ export async function getUnit(
 		})
 		.from(unitTag)
 		.leftJoin(
-			unitTagVoteStat,
-			and(eq(unitTagVoteStat.unitId, unitTag.unitId), eq(unitTagVoteStat.tagId, unitTag.tagId)),
+			unitTagJudgmentStat,
+			and(
+				eq(unitTagJudgmentStat.unitId, unitTag.unitId),
+				eq(unitTagJudgmentStat.tagId, unitTag.tagId),
+				gt(unitTagJudgmentStat.voteCount, 0n),
+			),
 		)
 		.where(eq(unitTag.unitId, base.id))
 		.orderBy(
 			desc(unitTag.pinned),
 			sql`case when ${unitTag.pinned} then ${unitTag.position} end asc nulls last`,
-			desc(wilsonLowerBoundSql(unitTagVoteStat.score, unitTagVoteStat.voteCount)),
-			desc(unitTagVoteStat.score),
-			desc(unitTagVoteStat.voteCount),
+			desc(wilsonLowerBoundSql(unitTagJudgmentStat.score, unitTagJudgmentStat.voteCount)),
+			desc(unitTagJudgmentStat.score),
+			desc(unitTagJudgmentStat.voteCount),
 			unitTag.tagId,
 		);
 	const visibleProgressRows = await database

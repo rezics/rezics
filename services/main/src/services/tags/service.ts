@@ -1,4 +1,4 @@
-import { and, desc, eq, exists, inArray, isNull, lte, notInArray, or, sql } from "drizzle-orm";
+import { and, desc, eq, exists, gt, inArray, isNull, lte, notInArray, or, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import type { ContentLanguage } from "@rezics/i18n";
 import { getRealmContributionCondition } from "../authorization/realm/query";
@@ -6,19 +6,19 @@ import { getUnitReadCondition } from "../authorization/unit/query";
 import { database } from "../database";
 import { toSafeInteger } from "../database/integer";
 import {
+	currentUnitEffectiveTag as unitEffectiveTag,
+	currentUnitEffectiveTagVote as unitEffectiveTagVote,
+	currentUnitTagJudgmentStat as unitTagJudgmentStat,
 	profileRealmTagSubscription,
 	realm,
 	realmMember,
 	realmTagContext,
-	realmTagVote,
-	realmTagVoteStat,
+	realmTagJudgment,
+	realmTagJudgmentStat,
 	realmUnit,
 	tag,
 	unit,
-	unitEffectiveTag,
-	unitEffectiveTagVote,
 	unitTag,
-	unitTagVoteStat,
 } from "../database/schema";
 import { listVisibleUnitTagStructures } from "../tag-structures/service";
 import {
@@ -39,11 +39,11 @@ function presentTagVote(value: number | null): TagVoteValue {
 	throw new Error("Stored Tag vote has an invalid value");
 }
 
-const viewerUnitTagVote = alias(unitEffectiveTagVote, "viewer_unit_tag_vote");
-const viewerRealmTagVote = alias(realmTagVote, "viewer_realm_tag_vote");
+const viewerUnitTagVote = alias(unitEffectiveTagVote, "viewer_unit_tag_judgment");
+const viewerRealmTagVote = alias(realmTagJudgment, "viewer_realm_tag_judgment");
 const globalTagUnit = alias(unit, "global_tag_unit");
 const realmSourceUnit = alias(unit, "realm_tag_source_unit");
-const voteContextRealmUnit = alias(unit, "realm_tag_vote_context_unit");
+const voteContextRealmUnit = alias(unit, "realm_tag_judgment_context_unit");
 const votedTagUnit = alias(unit, "realm_voted_tag_unit");
 const contextPostUnit = alias(unit, "realm_tag_context_post_unit");
 const contextRealmUnit = alias(realmUnit, "realm_tag_context_realm_unit");
@@ -55,39 +55,39 @@ const rankedTagUnit = alias(unit, "ranked_realm_voted_tag_unit");
 const rankedContextPostUnit = alias(unit, "ranked_realm_tag_context_post_unit");
 const rankedContextRealmUnit = alias(realmUnit, "ranked_realm_tag_context_realm_unit");
 const unitTagWilsonConfidence = sql<number>`case
-	when coalesce(${unitTagVoteStat.voteCount}, 0) = 0 then 0
+	when coalesce(${unitTagJudgmentStat.voteCount}, 0) = 0 then 0
 	else (
 		(
 			(
-				(coalesce(${unitTagVoteStat.voteCount}, 0)::numeric
-					+ coalesce(${unitTagVoteStat.score}, 0)::numeric)
-				/ (2 * coalesce(${unitTagVoteStat.voteCount}, 0)::numeric)
+				(coalesce(${unitTagJudgmentStat.voteCount}, 0)::numeric
+					+ coalesce(${unitTagJudgmentStat.score}, 0)::numeric)
+				/ (2 * coalesce(${unitTagJudgmentStat.voteCount}, 0)::numeric)
 			)
-			+ (1.96 * 1.96) / (2 * coalesce(${unitTagVoteStat.voteCount}, 0)::numeric)
+			+ (1.96 * 1.96) / (2 * coalesce(${unitTagJudgmentStat.voteCount}, 0)::numeric)
 			- 1.96 * sqrt(
 				(
 					(
 						(
-							(coalesce(${unitTagVoteStat.voteCount}, 0)::numeric
-								+ coalesce(${unitTagVoteStat.score}, 0)::numeric)
-							/ (2 * coalesce(${unitTagVoteStat.voteCount}, 0)::numeric)
+							(coalesce(${unitTagJudgmentStat.voteCount}, 0)::numeric
+								+ coalesce(${unitTagJudgmentStat.score}, 0)::numeric)
+							/ (2 * coalesce(${unitTagJudgmentStat.voteCount}, 0)::numeric)
 						)
 						* (
 							1 - (
-								(coalesce(${unitTagVoteStat.voteCount}, 0)::numeric
-									+ coalesce(${unitTagVoteStat.score}, 0)::numeric)
-								/ (2 * coalesce(${unitTagVoteStat.voteCount}, 0)::numeric)
+								(coalesce(${unitTagJudgmentStat.voteCount}, 0)::numeric
+									+ coalesce(${unitTagJudgmentStat.score}, 0)::numeric)
+								/ (2 * coalesce(${unitTagJudgmentStat.voteCount}, 0)::numeric)
 							)
 						)
 						+ (1.96 * 1.96)
-							/ (4 * coalesce(${unitTagVoteStat.voteCount}, 0)::numeric)
+							/ (4 * coalesce(${unitTagJudgmentStat.voteCount}, 0)::numeric)
 					)
-					/ coalesce(${unitTagVoteStat.voteCount}, 0)::numeric
+					/ coalesce(${unitTagJudgmentStat.voteCount}, 0)::numeric
 				)
 			)
 		)
 		/ (
-			1 + (1.96 * 1.96) / coalesce(${unitTagVoteStat.voteCount}, 0)::numeric
+			1 + (1.96 * 1.96) / coalesce(${unitTagJudgmentStat.voteCount}, 0)::numeric
 		)
 	)
 end`;
@@ -111,8 +111,8 @@ export async function listGlobalUnitTags(input: {
 			avatar: resolvedUnitLocalizationAvatar(unitEffectiveTag.tagId, input.localizationLanguages),
 			pinned: sql<boolean>`coalesce(${unitTag.pinned}, false)`,
 			position: unitTag.position,
-			score: unitTagVoteStat.score,
-			voteCount: unitTagVoteStat.voteCount,
+			score: unitTagJudgmentStat.score,
+			voteCount: unitTagJudgmentStat.voteCount,
 			viewerVote: viewerUnitTagVote.value,
 			createdAt: unitEffectiveTag.createdAt,
 			updatedAt: unitEffectiveTag.updatedAt,
@@ -125,10 +125,11 @@ export async function listGlobalUnitTags(input: {
 			and(eq(unitTag.unitId, unitEffectiveTag.unitId), eq(unitTag.tagId, unitEffectiveTag.tagId)),
 		)
 		.leftJoin(
-			unitTagVoteStat,
+			unitTagJudgmentStat,
 			and(
-				eq(unitTagVoteStat.unitId, unitEffectiveTag.unitId),
-				eq(unitTagVoteStat.tagId, unitEffectiveTag.tagId),
+				eq(unitTagJudgmentStat.unitId, unitEffectiveTag.unitId),
+				eq(unitTagJudgmentStat.tagId, unitEffectiveTag.tagId),
+				gt(unitTagJudgmentStat.voteCount, 0n),
 			),
 		)
 		.leftJoin(
@@ -152,8 +153,8 @@ export async function listGlobalUnitTags(input: {
 			desc(sql`coalesce(${unitTag.pinned}, false)`),
 			sql`case when ${unitTag.pinned} then ${unitTag.position} end asc nulls last`,
 			desc(unitTagWilsonConfidence),
-			desc(unitTagVoteStat.score),
-			desc(unitTagVoteStat.voteCount),
+			desc(unitTagJudgmentStat.score),
+			desc(unitTagJudgmentStat.voteCount),
 			unitEffectiveTag.tagId,
 		)
 		.limit(input.limit);
@@ -348,31 +349,31 @@ export async function listRealmVotedTags(input: {
 	if (input.realmIds.length === 0) return new Map<string, RealmVotedTag[]>();
 	const rankedVoteStats = database
 		.select({
-			realmId: realmTagVoteStat.realmId,
-			unitId: realmTagVoteStat.unitId,
-			tagId: realmTagVoteStat.tagId,
-			score: realmTagVoteStat.score,
-			voteCount: realmTagVoteStat.voteCount,
-			updatedAt: realmTagVoteStat.updatedAt,
+			realmId: realmTagJudgmentStat.realmId,
+			unitId: realmTagJudgmentStat.unitId,
+			tagId: realmTagJudgmentStat.tagId,
+			score: realmTagJudgmentStat.score,
+			voteCount: realmTagJudgmentStat.voteCount,
+			updatedAt: realmTagJudgmentStat.updatedAt,
 			realmRank: sql<number>`row_number() over (
-				partition by ${realmTagVoteStat.realmId}
+				partition by ${realmTagJudgmentStat.realmId}
 				order by
-					${wilsonLowerBoundSql(realmTagVoteStat.score, realmTagVoteStat.voteCount)} desc,
-					${realmTagVoteStat.score} desc,
-					${realmTagVoteStat.voteCount} desc,
-					${realmTagVoteStat.tagId}
+					${wilsonLowerBoundSql(realmTagJudgmentStat.score, realmTagJudgmentStat.voteCount)} desc,
+					${realmTagJudgmentStat.score} desc,
+					${realmTagJudgmentStat.voteCount} desc,
+					${realmTagJudgmentStat.tagId}
 			)`.as("realm_rank"),
 		})
-		.from(realmTagVoteStat)
-		.innerJoin(rankedContextRealm, eq(rankedContextRealm.id, realmTagVoteStat.realmId))
+		.from(realmTagJudgmentStat)
+		.innerJoin(rankedContextRealm, eq(rankedContextRealm.id, realmTagJudgmentStat.realmId))
 		.innerJoin(
 			realmTagContext,
 			and(
-				eq(realmTagContext.realmId, realmTagVoteStat.realmId),
-				eq(realmTagContext.tagId, realmTagVoteStat.tagId),
+				eq(realmTagContext.realmId, realmTagJudgmentStat.realmId),
+				eq(realmTagContext.tagId, realmTagJudgmentStat.tagId),
 			),
 		)
-		.innerJoin(rankedTagUnit, eq(rankedTagUnit.id, realmTagVoteStat.tagId))
+		.innerJoin(rankedTagUnit, eq(rankedTagUnit.id, realmTagJudgmentStat.tagId))
 		.innerJoin(rankedContextPostUnit, eq(rankedContextPostUnit.id, realmTagContext.contextPostId))
 		.innerJoin(
 			rankedContextRealmUnit,
@@ -383,8 +384,9 @@ export async function listRealmVotedTags(input: {
 		)
 		.where(
 			and(
-				eq(realmTagVoteStat.unitId, input.unitId),
-				inArray(realmTagVoteStat.realmId, [...input.realmIds]),
+				eq(realmTagJudgmentStat.unitId, input.unitId),
+				inArray(realmTagJudgmentStat.realmId, [...input.realmIds]),
+				gt(realmTagJudgmentStat.voteCount, 0n),
 				eq(rankedContextRealm.realmTagVotingEnabled, true),
 				eq(rankedContextRealmUnit.status, "visible"),
 				eq(rankedContextRealmUnit.publicationState, "active"),
@@ -392,7 +394,7 @@ export async function listRealmVotedTags(input: {
 				getUnitReadCondition(input.viewerProfileId, {}, rankedTagUnit),
 			),
 		)
-		.as("ranked_realm_tag_vote_stat");
+		.as("ranked_realm_tag_judgment_stat");
 	const rows = await database
 		.select({
 			realmId: rankedVoteStats.realmId,
@@ -404,7 +406,7 @@ export async function listRealmVotedTags(input: {
 			contextPostId: realmTagContext.contextPostId,
 			score: rankedVoteStats.score,
 			voteCount: rankedVoteStats.voteCount,
-			viewerVote: viewerRealmTagVote.value,
+			viewerVote: viewerRealmTagVote.fitVote,
 			createdAt: realmTagContext.createdAt,
 			// Preserve each column's runtime Date decoder; sql<Date> does not map driver values.
 			contextUpdatedAt: realmTagContext.updatedAt,

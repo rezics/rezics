@@ -24,6 +24,8 @@ import {
 import { database } from "../database";
 import {
 	book,
+	currentUnitEffectiveTag as unitEffectiveTag,
+	currentUnitStructureMember as unitStructureMember,
 	unitLicenseGrant,
 	creditAttribution,
 	contentStructure,
@@ -37,7 +39,7 @@ import {
 	unitFollowStat,
 	realm,
 	realmTagContext,
-	realmTagVoteStat,
+	realmTagJudgmentStat,
 	realmUnit,
 	software,
 	softwareRequirement,
@@ -47,8 +49,6 @@ import {
 	unit,
 	unitOwnership,
 	unitLocalization,
-	unitEffectiveTag,
-	unitStructureMember,
 	unitStructureVoteStat,
 	unitVariant,
 	type UnitKind,
@@ -295,9 +295,10 @@ function compileFilter(
 	}
 	if (filter.field === "realm-tag-vote") {
 		const conditions: SQL[] = [
-			sql`${realmTagVoteStat.unitId} = ${unit.id}`,
-			sql`${realmTagVoteStat.realmId} = ${filter.realmId}::uuid`,
-			sql`${realmTagVoteStat.tagId} = ${filter.tagId}::uuid`,
+			sql`${realmTagJudgmentStat.unitId} = ${unit.id}`,
+			sql`${realmTagJudgmentStat.realmId} = ${filter.realmId}::uuid`,
+			sql`${realmTagJudgmentStat.tagId} = ${filter.tagId}::uuid`,
+			sql`${realmTagJudgmentStat.voteCount} > 0`,
 		];
 		const addBounds = (
 			column: SQL,
@@ -306,11 +307,11 @@ function compileFilter(
 			if (range?.lower !== undefined) conditions.push(sql`${column} >= ${range.lower}`);
 			if (range?.upper !== undefined) conditions.push(sql`${column} <= ${range.upper}`);
 		};
-		addBounds(sql`${realmTagVoteStat.score}`, filter.score);
-		addBounds(sql`${realmTagVoteStat.voteCount}`, filter.voteCount);
+		addBounds(sql`${realmTagJudgmentStat.score}`, filter.score);
+		addBounds(sql`${realmTagJudgmentStat.voteCount}`, filter.voteCount);
 		return sql`exists (
 			select 1
-			from ${realmTagVoteStat}
+			from ${realmTagJudgmentStat}
 			where ${sql.join(conditions, sql` and `)}
 		)`;
 	}

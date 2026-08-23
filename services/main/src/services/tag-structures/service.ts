@@ -1,28 +1,27 @@
-import { and, desc, eq, inArray, isNull, sql } from "drizzle-orm";
+import { and, desc, eq, gt, inArray, isNotNull, isNull, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import type { ContentLanguage } from "@rezics/i18n";
-import type { PlatformAuthorization } from "../authorization/platform/authorization";
-import { recordAuditEvent } from "../audit";
 import { createCommunityOwnedUnitAccess } from "../authorization/unit/ownership";
 import { database, type DatabaseTransaction } from "../database";
 import { databaseConstraintName } from "../database/constraint";
+import { runVndbVoteTransaction } from "../database/vndb-vote-admission";
 import { toSafeInteger } from "../database/integer";
 import {
+	currentUnitStructureEdge,
+	currentUnitStructureMember,
 	tag,
 	unit,
 	unitStructure,
 	unitStructureApplication,
-	unitStructureApplicationVote,
-	unitStructureApplicationVoteStat,
-	unitStructureEdge,
-	unitStructureMember,
+	unitStructureApplicationJudgment,
+	unitStructureApplicationJudgmentStat,
 	unitStructureVote,
 	unitStructureVoteStat,
 	UnitStructureMaximumMembers,
 	UnitStructureMinimumMembers,
 } from "../database/schema";
 import { insertUnit } from "../units/create";
-import { lockUnitHistory, recordUnitRevision } from "../units/history";
+import { recordUnitRevision } from "../units/history";
 import type { RevisionContributionInput } from "../units/revision-contribution";
 import {
 	resolvedUnitLocalizationAvatar,
@@ -36,12 +35,10 @@ import {
 	InvalidTagStructure,
 	TagNotFound,
 	TagStructureApplicationNotFound,
-	TagStructureChanged,
 	TagStructureDefinitionConflict,
 	TagStructureNotFound,
 } from "../api/tags/errors";
 import { wilsonLowerBound, wilsonLowerBoundSql } from "../tags/ranking";
-import { nextUnitStructureDefinitionUpdatedAt, replaceUnitStructureDefinition } from "./definition";
 
 export type BinaryVote = -1 | 1;
 export type OptionalBinaryVote = BinaryVote | null;
@@ -78,12 +75,12 @@ const memberUnit = alias(unit, "tag_structure_member_unit");
 const hierarchyChildUnit = alias(unit, "tag_hierarchy_child_unit");
 const viewerDefinitionVote = alias(unitStructureVote, "viewer_tag_structure_vote");
 const viewerApplicationVote = alias(
-	unitStructureApplicationVote,
+	unitStructureApplicationJudgment,
 	"viewer_tag_structure_application_vote",
 );
 const applicationWilsonConfidence = wilsonLowerBoundSql(
-	unitStructureApplicationVoteStat.score,
-	unitStructureApplicationVoteStat.voteCount,
+	unitStructureApplicationJudgmentStat.score,
+	unitStructureApplicationJudgmentStat.voteCount,
 );
 
 function presentVote(value: number | null): OptionalBinaryVote {
@@ -146,6 +143,7 @@ async function upsertDefinitionVote(
 }
 
 export interface CreateTagStructureInput {
+	readonly structureId?: string;
 	readonly memberTagIds: readonly string[];
 	readonly profileId: string;
 	readonly contribution?: RevisionContributionInput;
@@ -161,6 +159,32 @@ export async function createTagStructureInTransaction(
 		sql`select pg_advisory_xact_lock(hashtextextended(${structurePathKey(input.memberTagIds)}, 0))`,
 	);
 	await ensureCreatableTags(tx, input.memberTagIds);
+	if (input.structureId) {
+		const [declaredIdentity] = await tx
+			.select({
+				id: unit.id,
+				unitKind: unit.kind,
+				structureKind: unitStructure.kind,
+				definitionVersion: unitStructure.definitionVersion,
+				memberUnitIds: unitStructure.memberUnitIds,
+			})
+			.from(unit)
+			.leftJoin(unitStructure, eq(unitStructure.id, unit.id))
+			.where(eq(unit.id, input.structureId))
+			.limit(1);
+		if (declaredIdentity) {
+			if (
+				declaredIdentity.unitKind !== "structure" ||
+				declaredIdentity.structureKind !== "tag.hierarchy_path" ||
+				declaredIdentity.definitionVersion !== 1 ||
+				!declaredIdentity.memberUnitIds ||
+				!sameOrderedIds(declaredIdentity.memberUnitIds, input.memberTagIds)
+			)
+				throw new TagStructureDefinitionConflict(input.structureId);
+			await upsertDefinitionVote(tx, input.structureId, input.profileId, 1, input.createdAt);
+			return { structureId: input.structureId, created: false };
+		}
+	}
 	const [existing] = await tx
 		.select({ id: unitStructure.id })
 		.from(unitStructure)
@@ -179,6 +203,7 @@ export async function createTagStructureInTransaction(
 
 	const createdAt = input.createdAt ?? new Date();
 	const created = await insertUnit(tx, {
+		id: input.structureId,
 		kind: "structure",
 		status: "published",
 		visibility: "public",
@@ -209,86 +234,9 @@ export async function createTagStructureInTransaction(
 export async function createTagStructure(
 	input: CreateTagStructureInput,
 ): Promise<{ readonly structureId: string; readonly created: boolean }> {
-	return database.transaction((tx) => createTagStructureInTransaction(tx, input));
-}
-
-export async function updateTagStructureDefinition(input: {
-	readonly structureId: string;
-	readonly memberTagIds: readonly string[];
-	readonly expectedUpdatedAt: Date;
-	readonly reason: string;
-	readonly actorProfileId: string;
-	readonly authorization: PlatformAuthorization<string>;
-	readonly contribution?: RevisionContributionInput;
-}): Promise<{ readonly changed: boolean; readonly updatedAt: Date }> {
-	validateMemberTagIds(input.memberTagIds);
-	const reason = input.reason.trim();
-	if (!reason) throw new InvalidTagStructure();
-
-	return database.transaction(async (tx) => {
-		await input.authorization.ensureCapability("unit.edit", tx);
-		await lockUnitHistory(tx, input.structureId);
-		const [current] = await tx
-			.select({
-				memberUnitIds: unitStructure.memberUnitIds,
-				updatedAt: unitStructure.updatedAt,
-			})
-			.from(unitStructure)
-			.where(eq(unitStructure.id, input.structureId))
-			.for("update")
-			.limit(1);
-		if (!current) throw new TagStructureNotFound();
-		if (current.updatedAt.getTime() !== input.expectedUpdatedAt.getTime())
-			throw new TagStructureChanged(current.updatedAt);
-		if (sameOrderedIds(current.memberUnitIds, input.memberTagIds))
-			return { changed: false, updatedAt: current.updatedAt };
-
-		await ensureCreatableTags(tx, input.memberTagIds);
-		await tx.execute(
-			sql`select pg_advisory_xact_lock(hashtextextended(${structurePathKey(input.memberTagIds)}, 0))`,
-		);
-		const [conflicting] = await tx
-			.select({ id: unitStructure.id })
-			.from(unitStructure)
-			.where(
-				and(
-					eq(unitStructure.kind, "tag.hierarchy_path"),
-					eq(unitStructure.definitionVersion, 1),
-					eq(unitStructure.memberUnitIds, [...input.memberTagIds]),
-				),
-			)
-			.limit(1);
-		if (conflicting && conflicting.id !== input.structureId)
-			throw new TagStructureDefinitionConflict(conflicting.id);
-
-		const updatedAt = nextUnitStructureDefinitionUpdatedAt(current.updatedAt);
-		await replaceUnitStructureDefinition(tx, {
-			structureId: input.structureId,
-			memberUnitIds: input.memberTagIds,
-			updatedAt,
-		});
-		await recordUnitRevision(tx, {
-			unitId: input.structureId,
-			actorProfileId: input.actorProfileId,
-			contribution: input.contribution,
-			event: "update",
-			message: reason,
-		});
-		await recordAuditEvent(tx, {
-			category: "admin_activity",
-			outcome: "succeeded",
-			actor: { kind: "profile", profileId: input.actorProfileId },
-			authority: { kind: "unit", id: input.structureId },
-			action: "unit.structure.definition.update",
-			target: { kind: "unit", id: input.structureId },
-			details: {
-				beforeMemberUnitIds: current.memberUnitIds,
-				afterMemberUnitIds: [...input.memberTagIds],
-				reason,
-			},
-		});
-		return { changed: true, updatedAt };
-	});
+	return runVndbVoteTransaction({ family: "tag_structure", authority: "global" }, (tx) =>
+		createTagStructureInTransaction(tx, input),
+	);
 }
 
 async function getDefinitionVoteSummary(structureId: string, viewerVote: OptionalBinaryVote) {
@@ -314,16 +262,19 @@ export async function voteTagStructure(input: {
 	readonly profileId: string;
 	readonly value: BinaryVote;
 }) {
-	const updated = await database.transaction(async (tx) => {
-		const [existing] = await tx
-			.select({ id: unitStructure.id })
-			.from(unitStructure)
-			.where(eq(unitStructure.id, input.structureId))
-			.limit(1);
-		if (!existing) throw new TagStructureNotFound();
-		await upsertDefinitionVote(tx, input.structureId, input.profileId, input.value);
-		return input.value;
-	});
+	const updated = await runVndbVoteTransaction(
+		{ family: "tag_structure", authority: "global" },
+		async (tx) => {
+			const [existing] = await tx
+				.select({ id: unitStructure.id })
+				.from(unitStructure)
+				.where(eq(unitStructure.id, input.structureId))
+				.limit(1);
+			if (!existing) throw new TagStructureNotFound();
+			await upsertDefinitionVote(tx, input.structureId, input.profileId, input.value);
+			return input.value;
+		},
+	);
 	return getDefinitionVoteSummary(input.structureId, updated);
 }
 
@@ -331,20 +282,22 @@ export async function deleteTagStructureVote(input: {
 	readonly structureId: string;
 	readonly profileId: string;
 }) {
-	const [existing] = await database
-		.select({ id: unitStructure.id })
-		.from(unitStructure)
-		.where(eq(unitStructure.id, input.structureId))
-		.limit(1);
-	if (!existing) throw new TagStructureNotFound();
-	await database
-		.delete(unitStructureVote)
-		.where(
-			and(
-				eq(unitStructureVote.structureId, input.structureId),
-				eq(unitStructureVote.profileId, input.profileId),
-			),
-		);
+	await runVndbVoteTransaction({ family: "tag_structure", authority: "global" }, async (tx) => {
+		const [existing] = await tx
+			.select({ id: unitStructure.id })
+			.from(unitStructure)
+			.where(eq(unitStructure.id, input.structureId))
+			.limit(1);
+		if (!existing) throw new TagStructureNotFound();
+		await tx
+			.delete(unitStructureVote)
+			.where(
+				and(
+					eq(unitStructureVote.structureId, input.structureId),
+					eq(unitStructureVote.profileId, input.profileId),
+				),
+			);
+	});
 	return getDefinitionVoteSummary(input.structureId, null);
 }
 
@@ -355,18 +308,18 @@ async function listStructureMembers(
 	if (structureIds.length === 0) return new Map<string, TagStructureMember[]>();
 	const rows = await database
 		.select({
-			structureId: unitStructureMember.structureId,
-			ordinal: unitStructureMember.ordinal,
-			tagId: unitStructureMember.memberUnitId,
+			structureId: currentUnitStructureMember.structureId,
+			ordinal: currentUnitStructureMember.ordinal,
+			tagId: currentUnitStructureMember.memberUnitId,
 			language: resolvedUnitLocalizationLanguage(memberUnit.id, localizationLanguages),
 			title: resolvedUnitLocalizationTitle(memberUnit.id, localizationLanguages),
 			summary: resolvedUnitLocalizationSummary(memberUnit.id, localizationLanguages),
 			avatar: resolvedUnitLocalizationAvatar(memberUnit.id, localizationLanguages),
 		})
-		.from(unitStructureMember)
-		.innerJoin(memberUnit, eq(memberUnit.id, unitStructureMember.memberUnitId))
-		.where(inArray(unitStructureMember.structureId, [...structureIds]))
-		.orderBy(unitStructureMember.structureId, unitStructureMember.ordinal);
+		.from(currentUnitStructureMember)
+		.innerJoin(memberUnit, eq(memberUnit.id, currentUnitStructureMember.memberUnitId))
+		.where(inArray(currentUnitStructureMember.structureId, [...structureIds]))
+		.orderBy(currentUnitStructureMember.structureId, currentUnitStructureMember.ordinal);
 	const grouped = new Map<string, TagStructureMember[]>();
 	for (const row of rows) {
 		const items = grouped.get(row.structureId) ?? [];
@@ -430,7 +383,7 @@ export async function getTagStructure(input: {
 				isNull(unit.deletedAt),
 				sql`not exists (
 					select 1
-					from unit_structure_member member
+					from ${currentUnitStructureMember} member
 					join unit member_unit on member_unit.id = member.member_unit_id
 					where member.structure_id = ${unitStructure.id}
 						and (
@@ -486,15 +439,21 @@ async function upsertApplicationVote(
 	},
 ) {
 	await tx
-		.insert(unitStructureApplicationVote)
-		.values(input)
+		.insert(unitStructureApplicationJudgment)
+		.values({
+			unitId: input.unitId,
+			structureId: input.structureId,
+			profileId: input.profileId,
+			fitVote: input.value,
+			fitUpdatedAt: new Date(),
+		})
 		.onConflictDoUpdate({
 			target: [
-				unitStructureApplicationVote.unitId,
-				unitStructureApplicationVote.structureId,
-				unitStructureApplicationVote.profileId,
+				unitStructureApplicationJudgment.unitId,
+				unitStructureApplicationJudgment.structureId,
+				unitStructureApplicationJudgment.profileId,
 			],
-			set: { value: input.value, updatedAt: new Date() },
+			set: { fitVote: input.value, fitUpdatedAt: new Date(), updatedAt: new Date() },
 		});
 }
 
@@ -504,40 +463,43 @@ export async function applyTagStructure(input: {
 	readonly profileId: string;
 	readonly contribution?: RevisionContributionInput;
 }) {
-	return database.transaction(async (tx) => {
-		const [structure] = await tx
-			.select({
-				id: unitStructure.id,
-				memberUnitIds: unitStructure.memberUnitIds,
-			})
-			.from(unitStructure)
-			.where(eq(unitStructure.id, input.structureId))
-			.limit(1);
-		if (!structure) throw new TagStructureNotFound();
-		if (structure.memberUnitIds.includes(input.unitId)) throw new InvalidTagStructure();
-		const inserted = await tx
-			.insert(unitStructureApplication)
-			.values({
+	return runVndbVoteTransaction(
+		{ family: "tag_structure_application", authority: "global" },
+		async (tx) => {
+			const [structure] = await tx
+				.select({
+					id: unitStructure.id,
+					memberUnitIds: unitStructure.memberUnitIds,
+				})
+				.from(unitStructure)
+				.where(eq(unitStructure.id, input.structureId))
+				.limit(1);
+			if (!structure) throw new TagStructureNotFound();
+			if (structure.memberUnitIds.includes(input.unitId)) throw new InvalidTagStructure();
+			const inserted = await tx
+				.insert(unitStructureApplication)
+				.values({
+					unitId: input.unitId,
+					structureId: input.structureId,
+					createdByProfileId: input.profileId,
+				})
+				.onConflictDoNothing()
+				.returning({ structureId: unitStructureApplication.structureId });
+			await upsertApplicationVote(tx, { ...input, value: 1 });
+			if (inserted.length)
+				await recordUnitRevision(tx, {
+					unitId: input.unitId,
+					actorProfileId: input.profileId,
+					contribution: input.contribution,
+					event: "update",
+				});
+			return getApplicationVoteSummary(tx, {
 				unitId: input.unitId,
 				structureId: input.structureId,
-				createdByProfileId: input.profileId,
-			})
-			.onConflictDoNothing()
-			.returning({ structureId: unitStructureApplication.structureId });
-		await upsertApplicationVote(tx, { ...input, value: 1 });
-		if (inserted.length)
-			await recordUnitRevision(tx, {
-				unitId: input.unitId,
-				actorProfileId: input.profileId,
-				contribution: input.contribution,
-				event: "update",
+				viewerVote: 1,
 			});
-		return getApplicationVoteSummary(tx, {
-			unitId: input.unitId,
-			structureId: input.structureId,
-			viewerVote: 1,
-		});
-	});
+		},
+	);
 }
 
 export async function removeTagStructureApplication(input: {
@@ -546,24 +508,27 @@ export async function removeTagStructureApplication(input: {
 	readonly profileId: string;
 	readonly contribution?: RevisionContributionInput;
 }): Promise<void> {
-	await database.transaction(async (tx) => {
-		const deleted = await tx
-			.delete(unitStructureApplication)
-			.where(
-				and(
-					eq(unitStructureApplication.unitId, input.unitId),
-					eq(unitStructureApplication.structureId, input.structureId),
-				),
-			)
-			.returning({ id: unitStructureApplication.structureId });
-		if (!deleted.length) throw new TagStructureApplicationNotFound();
-		await recordUnitRevision(tx, {
-			unitId: input.unitId,
-			actorProfileId: input.profileId,
-			contribution: input.contribution,
-			event: "update",
-		});
-	});
+	await runVndbVoteTransaction(
+		{ family: "tag_structure_application", authority: "global" },
+		async (tx) => {
+			const deleted = await tx
+				.delete(unitStructureApplication)
+				.where(
+					and(
+						eq(unitStructureApplication.unitId, input.unitId),
+						eq(unitStructureApplication.structureId, input.structureId),
+					),
+				)
+				.returning({ id: unitStructureApplication.structureId });
+			if (!deleted.length) throw new TagStructureApplicationNotFound();
+			await recordUnitRevision(tx, {
+				unitId: input.unitId,
+				actorProfileId: input.profileId,
+				contribution: input.contribution,
+				event: "update",
+			});
+		},
+	);
 }
 
 async function getApplicationVoteSummary(
@@ -576,15 +541,15 @@ async function getApplicationVoteSummary(
 ) {
 	const [row] = await tx
 		.select({
-			score: unitStructureApplicationVoteStat.score,
-			voteCount: unitStructureApplicationVoteStat.voteCount,
+			score: unitStructureApplicationJudgmentStat.score,
+			voteCount: unitStructureApplicationJudgmentStat.voteCount,
 		})
 		.from(unitStructureApplication)
 		.leftJoin(
-			unitStructureApplicationVoteStat,
+			unitStructureApplicationJudgmentStat,
 			and(
-				eq(unitStructureApplicationVoteStat.unitId, unitStructureApplication.unitId),
-				eq(unitStructureApplicationVoteStat.structureId, unitStructureApplication.structureId),
+				eq(unitStructureApplicationJudgmentStat.unitId, unitStructureApplication.unitId),
+				eq(unitStructureApplicationJudgmentStat.structureId, unitStructureApplication.structureId),
 			),
 		)
 		.where(
@@ -610,11 +575,14 @@ export async function voteTagStructureApplication(input: {
 	readonly profileId: string;
 	readonly value: BinaryVote;
 }) {
-	return database.transaction(async (tx) => {
-		await ensureStructureApplication(tx, input.unitId, input.structureId);
-		await upsertApplicationVote(tx, input);
-		return getApplicationVoteSummary(tx, { ...input, viewerVote: input.value });
-	});
+	return runVndbVoteTransaction(
+		{ family: "tag_structure_application", authority: "global" },
+		async (tx) => {
+			await ensureStructureApplication(tx, input.unitId, input.structureId);
+			await upsertApplicationVote(tx, input);
+			return getApplicationVoteSummary(tx, { ...input, viewerVote: input.value });
+		},
+	);
 }
 
 export async function deleteTagStructureApplicationVote(input: {
@@ -622,19 +590,25 @@ export async function deleteTagStructureApplicationVote(input: {
 	readonly structureId: string;
 	readonly profileId: string;
 }) {
-	return database.transaction(async (tx) => {
-		await ensureStructureApplication(tx, input.unitId, input.structureId);
-		await tx
-			.delete(unitStructureApplicationVote)
-			.where(
-				and(
-					eq(unitStructureApplicationVote.unitId, input.unitId),
-					eq(unitStructureApplicationVote.structureId, input.structureId),
-					eq(unitStructureApplicationVote.profileId, input.profileId),
-				),
+	return runVndbVoteTransaction(
+		{ family: "tag_structure_application", authority: "global" },
+		async (tx) => {
+			await ensureStructureApplication(tx, input.unitId, input.structureId);
+			const judgmentKey = and(
+				eq(unitStructureApplicationJudgment.unitId, input.unitId),
+				eq(unitStructureApplicationJudgment.structureId, input.structureId),
+				eq(unitStructureApplicationJudgment.profileId, input.profileId),
 			);
-		return getApplicationVoteSummary(tx, { ...input, viewerVote: null });
-	});
+			await tx
+				.delete(unitStructureApplicationJudgment)
+				.where(and(judgmentKey, isNull(unitStructureApplicationJudgment.spoilerLevel)));
+			await tx
+				.update(unitStructureApplicationJudgment)
+				.set({ fitVote: null, fitUpdatedAt: null, updatedAt: new Date() })
+				.where(and(judgmentKey, isNotNull(unitStructureApplicationJudgment.spoilerLevel)));
+			return getApplicationVoteSummary(tx, { ...input, viewerVote: null });
+		},
+	);
 }
 
 export async function listVisibleUnitTagStructures(input: {
@@ -648,9 +622,9 @@ export async function listVisibleUnitTagStructures(input: {
 			structureId: unitStructureApplication.structureId,
 			pinned: unitStructureApplication.pinned,
 			position: unitStructureApplication.position,
-			score: unitStructureApplicationVoteStat.score,
-			voteCount: unitStructureApplicationVoteStat.voteCount,
-			viewerVote: viewerApplicationVote.value,
+			score: unitStructureApplicationJudgmentStat.score,
+			voteCount: unitStructureApplicationJudgmentStat.voteCount,
+			viewerVote: viewerApplicationVote.fitVote,
 			definitionScore: unitStructureVoteStat.score,
 			definitionVoteCount: unitStructureVoteStat.voteCount,
 			createdAt: unitStructureApplication.createdAt,
@@ -660,10 +634,10 @@ export async function listVisibleUnitTagStructures(input: {
 		.innerJoin(unitStructure, eq(unitStructure.id, unitStructureApplication.structureId))
 		.innerJoin(unit, eq(unit.id, unitStructure.id))
 		.innerJoin(
-			unitStructureApplicationVoteStat,
+			unitStructureApplicationJudgmentStat,
 			and(
-				eq(unitStructureApplicationVoteStat.unitId, unitStructureApplication.unitId),
-				eq(unitStructureApplicationVoteStat.structureId, unitStructureApplication.structureId),
+				eq(unitStructureApplicationJudgmentStat.unitId, unitStructureApplication.unitId),
+				eq(unitStructureApplicationJudgmentStat.structureId, unitStructureApplication.structureId),
 			),
 		)
 		.innerJoin(unitStructureVoteStat, eq(unitStructureVoteStat.structureId, unitStructure.id))
@@ -680,15 +654,17 @@ export async function listVisibleUnitTagStructures(input: {
 		.where(
 			and(
 				eq(unitStructureApplication.unitId, input.unitId),
-				sql`${unitStructureApplicationVoteStat.score} > 0`,
+				sql`${unitStructureApplicationJudgmentStat.score} > 0`,
+				gt(unitStructureApplicationJudgmentStat.voteCount, 0n),
 				sql`${unitStructureVoteStat.score} > 0`,
+				gt(unitStructureVoteStat.voteCount, 0n),
 				eq(unit.status, "published"),
 				eq(unit.visibility, "public"),
 				eq(unit.moderationStatus, "approved"),
 				isNull(unit.deletedAt),
 				sql`not exists (
 					select 1
-					from unit_structure_member member
+					from ${currentUnitStructureMember} member
 					join unit member_unit on member_unit.id = member.member_unit_id
 					where member.structure_id = ${unitStructure.id}
 						and (
@@ -705,8 +681,8 @@ export async function listVisibleUnitTagStructures(input: {
 			desc(unitStructureApplication.pinned),
 			sql`case when ${unitStructureApplication.pinned} then ${unitStructureApplication.position} end asc nulls last`,
 			desc(applicationWilsonConfidence),
-			desc(unitStructureApplicationVoteStat.score),
-			desc(unitStructureApplicationVoteStat.voteCount),
+			desc(unitStructureApplicationJudgmentStat.score),
+			desc(unitStructureApplicationJudgmentStat.voteCount),
 			unitStructureApplication.structureId,
 		)
 		.limit(input.limit);
@@ -736,21 +712,22 @@ async function listRankedHierarchyEdges(parentTagIds: readonly string[]): Promis
 	if (parentTagIds.length === 0) return [];
 	const rows = await database
 		.select({
-			parentTagId: unitStructureEdge.parentUnitId,
-			childTagId: unitStructureEdge.childUnitId,
+			parentTagId: currentUnitStructureEdge.parentUnitId,
+			childTagId: currentUnitStructureEdge.childUnitId,
 			score: unitStructureVoteStat.score,
 			voteCount: unitStructureVoteStat.voteCount,
 		})
-		.from(unitStructureEdge)
-		.innerJoin(hierarchyChildUnit, eq(hierarchyChildUnit.id, unitStructureEdge.childUnitId))
+		.from(currentUnitStructureEdge)
+		.innerJoin(hierarchyChildUnit, eq(hierarchyChildUnit.id, currentUnitStructureEdge.childUnitId))
 		.innerJoin(
 			unitStructureVoteStat,
-			eq(unitStructureVoteStat.structureId, unitStructureEdge.structureId),
+			eq(unitStructureVoteStat.structureId, currentUnitStructureEdge.structureId),
 		)
 		.where(
 			and(
-				inArray(unitStructureEdge.parentUnitId, [...parentTagIds]),
+				inArray(currentUnitStructureEdge.parentUnitId, [...parentTagIds]),
 				sql`${unitStructureVoteStat.score} > 0`,
+				gt(unitStructureVoteStat.voteCount, 0n),
 				eq(hierarchyChildUnit.kind, "tag"),
 				eq(hierarchyChildUnit.status, "published"),
 				eq(hierarchyChildUnit.visibility, "public"),

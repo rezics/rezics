@@ -35,6 +35,7 @@ import {
 	resolvedUnitLocalizationTitle,
 } from "../../units/localization";
 import {
+	currentUnitStructureMember as unitStructureMember,
 	post,
 	postScore,
 	postReply,
@@ -53,7 +54,6 @@ import {
 	unitReaction,
 	unitReactionGlobalStat,
 	unitRevisionHead,
-	unitStructureMember,
 	ContentRatingValues,
 } from "../../database/schema";
 import { parseJsonCursor } from "../../pagination";

@@ -341,7 +341,7 @@ describe("feed eligibility SQL", () => {
 			),
 		);
 
-		expect(query.sql).toContain("realm_tag_vote_stat");
+		expect(query.sql).toContain("realm_tag_judgment_stat");
 		expect(query.sql).toContain("post_score filter_post_score");
 		expect(query.sql).toContain("score filter_score");
 		expect(query.params).toEqual(

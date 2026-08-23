@@ -15,6 +15,8 @@ import type {
 } from "@rezics/filter";
 import { sql, type SQL } from "drizzle-orm";
 
+import { currentUnitEffectiveTag, currentUnitTagJudgmentStat } from "../database/schema";
+
 type SqlName = SQL<unknown>;
 
 function conjunction(conditions: readonly SQL[]): SQL {
@@ -146,7 +148,7 @@ function tagAssertionCondition(
 	if (!authority) {
 		conditions.push(sql`exists (
 			select 1
-			from unit_effective_tag filter_effective_tag
+			from ${currentUnitEffectiveTag} filter_effective_tag
 			join unit filter_tag on filter_tag.id = filter_effective_tag.tag_id
 			where filter_effective_tag.unit_id = ${unitId}
 				and ${tagReference(sql`filter_effective_tag.tag_id`, sql`filter_tag.kind`)}
@@ -157,11 +159,11 @@ function tagAssertionCondition(
 		const consensus = authority.view.consensus;
 		conditions.push(sql`exists (
 			select 1
-			from unit_effective_tag filter_effective_tag
+			from ${currentUnitEffectiveTag} filter_effective_tag
 			join unit filter_tag on filter_tag.id = filter_effective_tag.tag_id
 			${
 				consensus
-					? sql`join unit_tag_vote_stat filter_tag_stat
+					? sql`join ${currentUnitTagJudgmentStat} filter_tag_stat
 						on filter_tag_stat.unit_id = filter_effective_tag.unit_id
 						and filter_tag_stat.tag_id = filter_effective_tag.tag_id`
 					: sql``
@@ -170,7 +172,8 @@ function tagAssertionCondition(
 				and ${tagReference(sql`filter_effective_tag.tag_id`, sql`filter_tag.kind`)}
 				${
 					consensus
-						? sql`and ${voteSummaryCondition(
+						? sql`and filter_tag_stat.vote_count > 0
+							and ${voteSummaryCondition(
 								consensus,
 								sql`filter_tag_stat.score`,
 								sql`filter_tag_stat.vote_count`,
@@ -206,7 +209,7 @@ function tagAssertionCondition(
 		const consensus = view.consensus;
 		conditions.push(sql`exists (
 			select 1
-			from realm_tag_vote_stat filter_realm_tag_stat
+			from realm_tag_judgment_stat filter_realm_tag_stat
 			join unit filter_tag on filter_tag.id = filter_realm_tag_stat.tag_id
 			join unit filter_authority_realm
 				on filter_authority_realm.id = filter_realm_tag_stat.realm_id
@@ -217,6 +220,7 @@ function tagAssertionCondition(
 					sql`filter_authority_realm.kind`,
 				)}
 				and ${tagReference(sql`filter_realm_tag_stat.tag_id`, sql`filter_tag.kind`)}
+				and filter_realm_tag_stat.vote_count > 0
 				${
 					consensus
 						? sql`and ${voteSummaryCondition(
@@ -466,7 +470,7 @@ function tagAssertionCandidateSet(
 	if (!authority || (authority.kind === "global" && authority.view.kind === "effective")) {
 		if (tagIds)
 			conjunctiveSets.push(sql`select filter_effective_tag.unit_id
-				from unit_effective_tag filter_effective_tag
+				from ${currentUnitEffectiveTag} filter_effective_tag
 				where ${valuesCondition(sql`filter_effective_tag.tag_id`, tagIds, true)}`);
 	} else if (authority.kind === "global") {
 		if (tagIds)
@@ -486,8 +490,9 @@ function tagAssertionCandidateSet(
 		const realmIds = authority.realm.id?.in;
 		if (realmIds || tagIds)
 			conjunctiveSets.push(sql`select filter_realm_tag_stat.unit_id
-				from realm_tag_vote_stat filter_realm_tag_stat
+				from realm_tag_judgment_stat filter_realm_tag_stat
 				where ${conjunction([
+					sql`filter_realm_tag_stat.vote_count > 0`,
 					realmIds
 						? valuesCondition(sql`filter_realm_tag_stat.realm_id`, realmIds, true)
 						: sql`true`,

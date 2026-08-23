@@ -258,7 +258,7 @@ describe("domain Filter contract", () => {
 						},
 					},
 				},
-				table: "unit_effective_tag",
+				table: "current_unit_effective_tag",
 				column: "filter_effective_tag.tag_id",
 			},
 			{
@@ -303,6 +303,77 @@ describe("domain Filter contract", () => {
 				any: [{ tags: { some: { tag: { id: { in: [TagId] } } } } }, { kind: { in: ["book"] } }],
 			}),
 		).toBeUndefined();
+	});
+
+	it("requires positive fit evidence for aggregate-backed Tag assertions", () => {
+		const cases: readonly {
+			readonly filter: UnitPredicate;
+			readonly voteCountGuard: string;
+		}[] = [
+			{
+				filter: {
+					tags: {
+						some: {
+							tag: { id: { in: [TagId] } },
+							authority: {
+								kind: "global",
+								view: {
+									kind: "effective",
+									consensus: { score: { range: { minimum: 0 } } },
+								},
+							},
+						},
+					},
+				},
+				voteCountGuard: "filter_tag_stat.vote_count > 0",
+			},
+			{
+				filter: {
+					tags: {
+						some: {
+							tag: { id: { in: [TagId] } },
+							authority: {
+								kind: "realm",
+								realm: { id: { in: [RealmId] } },
+								view: { kind: "community" },
+							},
+						},
+					},
+				},
+				voteCountGuard: "filter_realm_tag_stat.vote_count > 0",
+			},
+		];
+
+		for (const { filter, voteCountGuard } of cases) {
+			const query = dialect.sqlToQuery(
+				compileUnitPredicateSql(filter, {
+					unitId: sql`candidate.id`,
+					unitKind: sql`candidate.kind`,
+				}),
+			);
+
+			expect(query.sql).toContain(voteCountGuard);
+		}
+	});
+
+	it("excludes spoiler-only Realm community aggregates from candidate seeds", () => {
+		const candidateSet = compileUnitPredicateCandidateSet({
+			tags: {
+				some: {
+					tag: { id: { in: [TagId] } },
+					authority: {
+						kind: "realm",
+						realm: { id: { in: [RealmId] } },
+						view: { kind: "community" },
+					},
+				},
+			},
+		});
+		if (!candidateSet) throw new Error("Expected a Realm community candidate set");
+		const query = dialect.sqlToQuery(candidateSet);
+
+		expect(query.sql).toContain("filter_realm_tag_stat.vote_count > 0");
+		expect(query.params).toEqual([RealmId, TagId]);
 	});
 
 	it("maps Realm taxonomy query strategies to independent Tag authorities", () => {

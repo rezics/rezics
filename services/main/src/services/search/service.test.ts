@@ -87,8 +87,21 @@ describe("direct PostgreSQL Search", () => {
 		});
 		const query = sqlText(expression);
 		expect(query).toContain('from "realm_unit"');
-		expect(query).toContain('from "realm_tag_vote_stat"');
-		expect(query).toContain('"realm_tag_vote_stat"."score" >=');
+		expect(query).toContain('from "realm_tag_judgment_stat"');
+		expect(query).toContain('"realm_tag_judgment_stat"."score" >=');
+	});
+
+	it("excludes spoiler-only Realm Tag aggregates from legacy vote filters", () => {
+		const query = dialect.sqlToQuery(
+			compilePostgresSearchExpression("units", {
+				field: "realm-tag-vote",
+				operator: "matches",
+				realmId: first,
+				tagId: second,
+			}),
+		);
+
+		expect(query.sql).toContain('"realm_tag_judgment_stat"."vote_count" > 0');
 	});
 
 	it("runs adaptive PGroonga candidates, authorization, filters, and stable ordering in one bounded query", async () => {
@@ -506,7 +519,7 @@ describe("direct PostgreSQL Search", () => {
 		const candidateSql = sqlText(execute.mock.calls[3]![0] as SQL);
 
 		expect(candidateSql).toContain("filter_seed(unit_id) as materialized");
-		expect(seedSql).toContain("from unit_effective_tag filter_effective_tag");
+		expect(seedSql).toContain('from "current_unit_effective_tag" filter_effective_tag');
 		expect(candidateSql).toContain(
 			'inner join filter_seed on filter_seed.unit_id = "unit_best_score"."unit_id"',
 		);
@@ -546,7 +559,7 @@ describe("direct PostgreSQL Search", () => {
 		const candidateSql = sqlText(execute.mock.calls[3]![0] as SQL);
 
 		expect(seedSql).toContain("limit");
-		expect(seedSql).toContain("from unit_effective_tag filter_effective_tag");
+		expect(seedSql).toContain('from "current_unit_effective_tag" filter_effective_tag');
 		expect(candidateSql).not.toContain("filter_seed(unit_id) as materialized");
 		expect(candidateSql).toContain('order by "unit"."updated_at" desc, "unit"."id" desc');
 	});

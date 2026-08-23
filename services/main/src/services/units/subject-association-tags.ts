@@ -5,7 +5,11 @@ import { z } from "zod";
 
 import { getUnitReadCondition } from "../authorization/unit/query";
 import { database } from "../database";
-import { unit, unitTag, unitTagVoteStat } from "../database/schema";
+import {
+	currentUnitTagJudgmentStat as unitTagJudgmentStat,
+	unit,
+	unitTag,
+} from "../database/schema";
 import { SubjectAssociationEntityTagPreviewLimit } from "../database/schema/contract-values";
 import { wilsonLowerBoundSql } from "../tags/ranking";
 import { resolvedUnitLocalizationTitle } from "./localization";
@@ -43,7 +47,7 @@ export function subjectAssociationEntityTagPreviewStatement(input: {
 		entityIds.map((entityId) => sql`(${entityId}::uuid)`),
 		sql`, `,
 	);
-	const confidence = wilsonLowerBoundSql(unitTagVoteStat.score, unitTagVoteStat.voteCount);
+	const confidence = wilsonLowerBoundSql(unitTagJudgmentStat.score, unitTagJudgmentStat.voteCount);
 	return sql<PreviewRow>`
 		with requested_entity(entity_id) as (values ${requestedValues})
 		select
@@ -59,15 +63,16 @@ export function subjectAssociationEntityTagPreviewStatement(input: {
 						${unitTag.pinned} desc,
 						case when ${unitTag.pinned} then ${unitTag.position} end asc nulls last,
 						${confidence} desc,
-						${unitTagVoteStat.score} desc,
-						${unitTagVoteStat.voteCount} desc,
+						${unitTagJudgmentStat.score} desc,
+						${unitTagJudgmentStat.voteCount} desc,
 						${unitTag.tagId}
 				) as preview_rank
 			from ${unitTag}
 			inner join ${unit} as ${previewTagUnit} on ${previewTagUnit.id} = ${unitTag.tagId}
-			left join ${unitTagVoteStat}
-				on ${unitTagVoteStat.unitId} = ${unitTag.unitId}
-				and ${unitTagVoteStat.tagId} = ${unitTag.tagId}
+			left join ${unitTagJudgmentStat}
+				on ${unitTagJudgmentStat.unitId} = ${unitTag.unitId}
+				and ${unitTagJudgmentStat.tagId} = ${unitTag.tagId}
+				and ${unitTagJudgmentStat.voteCount} > 0
 			where
 				${unitTag.unitId} = requested_entity.entity_id
 				and ${getUnitReadCondition(input.profileId, {}, previewTagUnit)}
