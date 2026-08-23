@@ -1161,6 +1161,8 @@ CREATE TABLE public.unit_structure_correction (
 	attempt_count integer DEFAULT 0 NOT NULL,
 	failed_from_status text,
 	activated_at timestamp(3) with time zone,
+	activation_revision_id uuid,
+	activation_audit_recorded_at timestamp(3) with time zone,
 	completed_at timestamp(3) with time zone,
 	failed_at timestamp(3) with time zone,
 	cancelled_at timestamp(3) with time zone,
@@ -1174,6 +1176,9 @@ CREATE TABLE public.unit_structure_correction (
 		FOREIGN KEY (requested_by_profile_id) REFERENCES public.profile(id) ON DELETE RESTRICT,
 	CONSTRAINT unit_structure_correction_credited_entity_id_entity_id_fkey
 		FOREIGN KEY (credited_entity_id) REFERENCES public.entity(id) ON DELETE RESTRICT,
+	CONSTRAINT unit_structure_correction_activation_revision_fkey
+		FOREIGN KEY (activation_revision_id)
+		REFERENCES public.unit_revision(id) ON DELETE RESTRICT,
 	CONSTRAINT unit_structure_correction_status_check CHECK (
 		status IN ('pending', 'preflighting', 'staging', 'reconciling', 'ready',
 			'activating', 'active_overlay', 'compacting', 'route_switching',
@@ -1222,6 +1227,9 @@ CREATE TABLE public.unit_structure_correction (
 			AND expected_positive_judgment_count IS NOT NULL
 			AND expected_target_support_count IS NOT NULL
 			AND required_staging_bytes IS NOT NULL)
+	),
+	CONSTRAINT unit_structure_correction_activation_evidence_shape_check CHECK (
+		(activation_revision_id IS NULL) = (activation_audit_recorded_at IS NULL)
 	),
 	CONSTRAINT unit_structure_correction_failure_shape_check CHECK (
 		(status IN ('failing', 'failed')) = (failed_from_status IS NOT NULL)

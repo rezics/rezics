@@ -5,6 +5,7 @@ import {
 	boolean,
 	check,
 	doublePrecision,
+	foreignKey,
 	index,
 	integer,
 	primaryKey,
@@ -165,9 +166,7 @@ export const unitStructureCorrection = pgTable(
 		attemptCount: integer().default(0).notNull(),
 		failedFromStatus: text().$type<UnitStructureCorrectionStatus>(),
 		activatedAt: createTimestampMsColumn(),
-		activationRevisionId: uuid().references(() => unitRevision.id, {
-			onDelete: "restrict",
-		}),
+		activationRevisionId: uuid(),
 		activationAuditRecordedAt: createTimestampMsColumn(),
 		completedAt: createTimestampMsColumn(),
 		failedAt: createTimestampMsColumn(),
@@ -184,6 +183,11 @@ export const unitStructureCorrection = pgTable(
 		uniqueIndex("unit_structure_correction_structure_open_idx")
 			.on(table.structureId)
 			.where(sql`${table.status} not in ('completed', 'failed', 'cancelled')`),
+		foreignKey({
+			columns: [table.activationRevisionId],
+			foreignColumns: [unitRevision.id],
+			name: "unit_structure_correction_activation_revision_fkey",
+		}).onDelete("restrict"),
 		index("unit_structure_correction_queue_idx").on(
 			table.status,
 			table.availableAt,
