@@ -163,8 +163,11 @@ const cutoverControlEpochRow = cutoverControlStateRow.extend({
 	transitionEpoch: integerString,
 });
 const databaseCounterRow = z.object({
+	activeClientConnections: integerString,
 	deadlocks: integerString,
 	maxConnections: integerString,
+	reservedConnections: integerString,
+	superuserReservedConnections: integerString,
 });
 const backendPidRow = z.object({ pid: z.number().int().positive() });
 const advisoryLockCountRow = z.object({ count: integerString });
@@ -319,15 +322,19 @@ type RealHotKeyScenarioSummary = Readonly<{
 		noUnexpectedErrors: boolean;
 		passed: boolean;
 		poolUtilizationBelowEightyPercent: boolean;
+		serverConnectionCapacityAvailable: boolean;
+		serverConnectionUtilizationBelowEightyPercent: boolean;
 		successfulCommitsPerSecond: boolean;
 		terminalAccountingExact: boolean;
 		terminalP95BelowOneHundredFiftyMilliseconds: boolean;
 		lockWaitP95BelowTwentyFiveMilliseconds: boolean;
 	}>;
+	activeClientConnectionsBefore: number;
 	attemptLatency: LatencySummary;
 	attemptedTransactions: number;
 	authority: RealHotKeyAuthority;
 	backpressuredAttempts: number;
+	effectiveServerConnectionCapacity: number;
 	busyDecisionLatency: LatencySummary;
 	deadlocks: number;
 	durationMilliseconds: number;
@@ -336,6 +343,7 @@ type RealHotKeyScenarioSummary = Readonly<{
 	maximumPoolUtilization: number;
 	maximumPoolConnectionsInUse: number;
 	maximumPoolWaiting: number;
+	maximumServerConnectionUtilization: number;
 	otherErrors: number;
 	poolErrors: number;
 	parity: Readonly<{
@@ -343,6 +351,7 @@ type RealHotKeyScenarioSummary = Readonly<{
 		passed: boolean;
 	}>;
 	pathLength: number;
+	peakServerConnections: number;
 	succeededRequests: number;
 	successfulCommitsPerSecond: number;
 	terminalBackpressuredRequests: number;
@@ -2559,7 +2568,12 @@ async function readDatabaseCounters(client: Client): Promise<z.infer<typeof data
 	return queryOne(
 		client,
 		databaseCounterRow,
-		"select deadlocks::text as deadlocks,current_setting('max_connections') as \"maxConnections\" " +
+		"select deadlocks::text as deadlocks," +
+			"current_setting('max_connections') as \"maxConnections\"," +
+			"current_setting('superuser_reserved_connections') as \"superuserReservedConnections\"," +
+			"coalesce(current_setting('reserved_connections',true),'0') as \"reservedConnections\"," +
+			"(select count(*)::text from pg_stat_activity where backend_type='client backend') " +
+			"as \"activeClientConnections\" " +
 			"from pg_stat_database where datname=current_database()",
 	);
 }
@@ -2842,6 +2856,16 @@ async function runRealHotKeyScenario(
 	const successfulCommitsPerSecond =
 		durationMilliseconds === 0 ? 0 : succeededRequests / (durationMilliseconds / 1000);
 	const maximumPoolUtilization = maximumPoolConnectionsInUse / RealHotKeyPoolCapacity;
+	const effectiveServerConnectionCapacity =
+		countersBefore.maxConnections -
+		countersBefore.reservedConnections -
+		countersBefore.superuserReservedConnections;
+	if (effectiveServerConnectionCapacity < 1)
+		throw new Error("PostgreSQL exposes no non-reserved client connection capacity");
+	const peakServerConnections =
+		countersBefore.activeClientConnections + maximumPoolConnectionsInUse;
+	const maximumServerConnectionUtilization =
+		peakServerConnections / effectiveServerConnectionCapacity;
 	const attemptAccountingExact = realHotKeyAttemptAccountingIsExact({
 		attemptedTransactions,
 		backpressuredAttempts,
@@ -2868,6 +2892,10 @@ async function runRealHotKeyScenario(
 		noTimeouts: timedOutAttempts === 0,
 		noUnexpectedErrors: otherErrors === 0 && poolErrors === 0,
 		poolUtilizationBelowEightyPercent: maximumPoolUtilization < 0.8,
+		serverConnectionCapacityAvailable:
+			countersBefore.activeClientConnections + RealHotKeyConcurrency <=
+			effectiveServerConnectionCapacity,
+		serverConnectionUtilizationBelowEightyPercent: maximumServerConnectionUtilization < 0.8,
 		successfulCommitsPerSecond: successfulCommitsPerSecond >= 100,
 		terminalAccountingExact,
 		terminalP95BelowOneHundredFiftyMilliseconds: terminalLatency.p95Milliseconds < 150,
@@ -2877,6 +2905,7 @@ async function runRealHotKeyScenario(
 	const walBytes = await walBytesBetween(admin, walStart, walEnd);
 	return {
 		acceptance: { ...acceptance, passed },
+		activeClientConnectionsBefore: countersBefore.activeClientConnections,
 		attemptLatency: summarizeLatencies(attemptLatencies, timedOutAttempts),
 		attemptedTransactions,
 		authority: fixture.authority,
@@ -2884,15 +2913,18 @@ async function runRealHotKeyScenario(
 		busyDecisionLatency: summarizeLatencies(busyDecisionLatencies, 0),
 		deadlocks,
 		durationMilliseconds: Number(durationMilliseconds.toFixed(3)),
+		effectiveServerConnectionCapacity,
 		lockWaitEpisodeLatency,
 		logicalRequests,
 		maximumPoolConnectionsInUse,
 		maximumPoolUtilization: Number(maximumPoolUtilization.toFixed(6)),
 		maximumPoolWaiting,
+		maximumServerConnectionUtilization: Number(maximumServerConnectionUtilization.toFixed(6)),
 		otherErrors,
 		poolErrors,
 		parity,
 		pathLength: fixture.pathLength,
+		peakServerConnections,
 		succeededRequests,
 		successfulCommitsPerSecond: Number(successfulCommitsPerSecond.toFixed(3)),
 		terminalBackpressuredRequests,
