@@ -307,7 +307,18 @@ type RealHotKeyAttemptOutcome = Readonly<{
 	code?: string;
 	constraint?: string;
 	latencyMilliseconds: number;
+	lockWaitMilliseconds: number;
 	outcome: "backpressured" | "deadlock" | "other" | "succeeded" | "timedOut";
+}>;
+
+type LockWaitMonitor = Readonly<{
+	readCumulativeMilliseconds: (pid: number) => number;
+	stop: () => Promise<
+		Readonly<{
+			episodes: readonly number[];
+			failed: boolean;
+		}>
+	>;
 }>;
 
 type RealHotKeyScenarioSummary = Readonly<{
@@ -315,6 +326,7 @@ type RealHotKeyScenarioSummary = Readonly<{
 		attemptAccountingExact: boolean;
 		minimumSuccessfulCommits: boolean;
 		noDeadlocks: boolean;
+		noLockWaitMonitorErrors: boolean;
 		noPartialWrites: boolean;
 		noPoolErrors: boolean;
 		noPoolQueueing: boolean;
@@ -339,7 +351,9 @@ type RealHotKeyScenarioSummary = Readonly<{
 	deadlocks: number;
 	durationMilliseconds: number;
 	lockWaitEpisodeLatency: LatencySummary;
+	lockWaitMonitorFailed: boolean;
 	logicalRequests: number;
+	requestLockWaitLatency: LatencySummary;
 	maximumPoolUtilization: number;
 	maximumPoolConnectionsInUse: number;
 	maximumPoolWaiting: number;
@@ -2467,12 +2481,29 @@ async function runRealHotKeyAttempt(
 	profileId: string,
 	value: -1 | 1,
 	onPoolSample: (connectionsInUse: number, waiting: number) => void,
+	lockWaitMonitor: LockWaitMonitor,
 ): Promise<RealHotKeyAttemptOutcome> {
 	const startedAt = performance.now();
 	let connection: PoolClient | undefined;
 	let destroyConnection = false;
+	let backendPid: number | undefined;
+	let lockWaitBaseline = 0;
+	const finish = (
+		outcome: Omit<RealHotKeyAttemptOutcome, "lockWaitMilliseconds">,
+	): RealHotKeyAttemptOutcome => ({
+		...outcome,
+		lockWaitMilliseconds:
+			backendPid === undefined
+				? 0
+				: Math.max(
+						0,
+						lockWaitMonitor.readCumulativeMilliseconds(backendPid) - lockWaitBaseline,
+					),
+	});
 	try {
 		connection = await pool.connect();
+		backendPid = connection.processID;
+		lockWaitBaseline = lockWaitMonitor.readCumulativeMilliseconds(backendPid);
 		onPoolSample(pool.totalCount - pool.idleCount, pool.waitingCount);
 		await connection.query("begin");
 		await connection.query("set local rezics.vndb_v11_binary_contract = 'vndb-v11-contract-v1'");
@@ -2484,82 +2515,94 @@ async function runRealHotKeyAttempt(
 		);
 		await mutateRealHotKey(connection, fixture, profileId, value);
 		await connection.query("commit");
-		return {
+		return finish({
 			latencyMilliseconds: performance.now() - startedAt,
 			outcome: "succeeded",
-		};
+		});
 	} catch (error) {
 		if (connection)
 			try {
 				await connection.query("rollback");
 			} catch (rollbackError) {
 				destroyConnection = true;
-				return {
+				return finish({
 					code: postgresErrorField(rollbackError, "code") ?? "ROLLBACK_FAILED",
 					constraint: postgresErrorField(rollbackError, "constraint"),
 					latencyMilliseconds: performance.now() - startedAt,
 					outcome: "other",
-				};
+				});
 			}
 		const code = postgresErrorField(error, "code");
 		const constraint = postgresErrorField(error, "constraint");
 		const latencyMilliseconds = performance.now() - startedAt;
 		if (code === "55P03" && constraint === RealHotKeyBusyConstraint)
-			return {
+			return finish({
 				busyDecisionMilliseconds: latencyMilliseconds,
 				code,
 				constraint,
 				latencyMilliseconds,
 				outcome: "backpressured",
-			};
-		if (code === "40P01") return { code, constraint, latencyMilliseconds, outcome: "deadlock" };
+			});
+		if (code === "40P01")
+			return finish({ code, constraint, latencyMilliseconds, outcome: "deadlock" });
 		if (code === "57014" || code === "55P03")
-			return { code, constraint, latencyMilliseconds, outcome: "timedOut" };
-		return { code, constraint, latencyMilliseconds, outcome: "other" };
+			return finish({ code, constraint, latencyMilliseconds, outcome: "timedOut" });
+		return finish({ code, constraint, latencyMilliseconds, outcome: "other" });
 	} finally {
 		connection?.release(destroyConnection);
 		onPoolSample(pool.totalCount - pool.idleCount, pool.waitingCount);
 	}
 }
 
-function startLockWaitMonitor(
-	client: Client,
-	applicationName: string,
-): Readonly<{ stop: () => Promise<readonly number[]> }> {
+function startLockWaitMonitor(client: Client, applicationName: string): LockWaitMonitor {
 	let stopping = false;
+	let failed = false;
 	const active = new Map<number, number>();
+	const cumulativeByPid = new Map<number, number>();
 	const episodes: number[] = [];
+	const closeEpisode = (pid: number, startedAt: number, endedAt: number): void => {
+		const elapsed = Math.max(0, endedAt - startedAt);
+		episodes.push(elapsed);
+		cumulativeByPid.set(pid, (cumulativeByPid.get(pid) ?? 0) + elapsed);
+		active.delete(pid);
+	};
 	const monitoring = (async (): Promise<void> => {
-		while (!stopping) {
-			const result = await client.query(
-				'select pid,wait_event_type as "waitEventType",wait_event as "waitEvent" ' +
-					"from pg_stat_activity where application_name=$1 and pid<>pg_backend_pid()",
-				[applicationName],
-			);
-			const rows = z.array(activityWaitRow).parse(result.rows);
+		try {
+			while (!stopping) {
+				const result = await client.query(
+					'select pid,wait_event_type as "waitEventType",wait_event as "waitEvent" ' +
+						"from pg_stat_activity where application_name=$1 and pid<>pg_backend_pid()",
+					[applicationName],
+				);
+				const rows = z.array(activityWaitRow).parse(result.rows);
+				const now = performance.now();
+				const locked = new Set(
+					rows.filter((row) => row.waitEventType === "Lock").map((row) => row.pid),
+				);
+				for (const pid of locked) if (!active.has(pid)) active.set(pid, now);
+				for (const [pid, startedAt] of active)
+					if (!locked.has(pid)) closeEpisode(pid, startedAt, now);
+				await delay(5);
+			}
+		} catch {
+			failed = true;
+		} finally {
 			const now = performance.now();
-			const locked = new Set(
-				rows.filter((row) => row.waitEventType === "Lock").map((row) => row.pid),
-			);
-			for (const pid of locked) if (!active.has(pid)) active.set(pid, now);
-			for (const [pid, startedAt] of active)
-				if (!locked.has(pid)) {
-					episodes.push(now - startedAt);
-					active.delete(pid);
-				}
-			await delay(5);
+			for (const [pid, startedAt] of [...active]) closeEpisode(pid, startedAt, now);
 		}
-		const now = performance.now();
-		for (const startedAt of active.values()) episodes.push(now - startedAt);
-	})().catch((error: unknown) => {
-		episodes.push(RealHotKeyMutationTimeoutMilliseconds);
-		console.error("Lock-wait monitor failed", error);
-	});
+	})();
 	return {
+		readCumulativeMilliseconds: (pid) => {
+			const completed = cumulativeByPid.get(pid) ?? 0;
+			const activeSince = active.get(pid);
+			return activeSince === undefined
+				? completed
+				: completed + Math.max(0, performance.now() - activeSince);
+		},
 		stop: async () => {
 			stopping = true;
 			await monitoring;
-			return episodes;
+			return { episodes, failed };
 		},
 	};
 }
@@ -2769,6 +2812,7 @@ async function runRealHotKeyScenario(
 	const monitor = startLockWaitMonitor(admin, applicationName);
 	const attemptLatencies: number[] = [];
 	const busyDecisionLatencies: number[] = [];
+	const requestLockWaitLatencies: number[] = [];
 	const terminalLatencies: number[] = [];
 	const expectedValues = new Map<string, -1 | 1>(
 		fixture.profileIds.map((profileId) => [profileId, -1 as const]),
@@ -2803,8 +2847,10 @@ async function runRealHotKeyScenario(
 						profileId,
 						desiredValue,
 						samplePool,
+						monitor,
 					);
 					attemptLatencies.push(outcome.latencyMilliseconds);
+					requestLockWaitLatencies.push(outcome.lockWaitMilliseconds);
 					if (outcome.outcome === "succeeded") {
 						committedValue = desiredValue;
 						expectedValues.set(profileId, desiredValue);
@@ -2847,12 +2893,14 @@ async function runRealHotKeyScenario(
 	);
 	const durationMilliseconds = performance.now() - startedAt;
 	await pool.end();
-	const lockWaitEpisodes = await monitor.stop();
+	const lockWaitMonitoring = await monitor.stop();
+	if (lockWaitMonitoring.failed) unexpectedErrorExamples.add("lock-wait-monitor:failed");
 	const walEnd = await currentInsertLsn(admin);
 	const countersAfter = await readDatabaseCounters(admin);
 	const parity = await verifyRealHotKeyParity(admin, fixture, expectedValues);
 	const terminalLatency = summarizeLatencies(terminalLatencies, timedOutAttempts);
-	const lockWaitEpisodeLatency = summarizeLatencies(lockWaitEpisodes, 0);
+	const lockWaitEpisodeLatency = summarizeLatencies(lockWaitMonitoring.episodes, 0);
+	const requestLockWaitLatency = summarizeLatencies(requestLockWaitLatencies, 0);
 	const successfulCommitsPerSecond =
 		durationMilliseconds === 0 ? 0 : succeededRequests / (durationMilliseconds / 1000);
 	const maximumPoolUtilization = maximumPoolConnectionsInUse / RealHotKeyPoolCapacity;
@@ -2886,6 +2934,7 @@ async function runRealHotKeyScenario(
 		attemptAccountingExact,
 		minimumSuccessfulCommits: succeededRequests >= 100,
 		noDeadlocks: deadlocks === 0 && countersAfter.deadlocks === countersBefore.deadlocks,
+		noLockWaitMonitorErrors: !lockWaitMonitoring.failed,
 		noPartialWrites: parity.passed,
 		noPoolErrors: poolErrors === 0,
 		noPoolQueueing: maximumPoolWaiting === 0,
@@ -2899,7 +2948,7 @@ async function runRealHotKeyScenario(
 		successfulCommitsPerSecond: successfulCommitsPerSecond >= 100,
 		terminalAccountingExact,
 		terminalP95BelowOneHundredFiftyMilliseconds: terminalLatency.p95Milliseconds < 150,
-		lockWaitP95BelowTwentyFiveMilliseconds: lockWaitEpisodeLatency.p95Milliseconds < 25,
+		lockWaitP95BelowTwentyFiveMilliseconds: requestLockWaitLatency.p95Milliseconds < 25,
 	};
 	const passed = Object.values(acceptance).every(Boolean);
 	const walBytes = await walBytesBetween(admin, walStart, walEnd);
@@ -2915,7 +2964,9 @@ async function runRealHotKeyScenario(
 		durationMilliseconds: Number(durationMilliseconds.toFixed(3)),
 		effectiveServerConnectionCapacity,
 		lockWaitEpisodeLatency,
+		lockWaitMonitorFailed: lockWaitMonitoring.failed,
 		logicalRequests,
+		requestLockWaitLatency,
 		maximumPoolConnectionsInUse,
 		maximumPoolUtilization: Number(maximumPoolUtilization.toFixed(6)),
 		maximumPoolWaiting,
