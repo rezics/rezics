@@ -19,6 +19,8 @@ export default {
 	ApiTokenPermissionRequired: `Este token de ${verbatimTerms.api.value} no tiene el permiso necesario.`,
 	ApiTokenRateLimitExceeded: `Este token de ${verbatimTerms.api.value} está enviando solicitudes demasiado rápido. Vuelve a intentarlo en unos instantes.`,
 	ApiQuotaExceeded: `Se agotó la cuota de ${verbatimTerms.api.value}. Vuelve a intentarlo después del tiempo indicado.`,
+	VndbVoteHotKeyBusy:
+		"Este objetivo de votación está ocupado. Inténtalo de nuevo en unos instantes.",
 	ApiQuotaPolicyNotFound: `No se encontró la política de cuotas de ${verbatimTerms.api.value} solicitada.`,
 	ApiQuotaPolicyKeyConflict: `Ya existe una política de cuotas de ${verbatimTerms.api.value} con esta clave.`,
 	ApiQuotaPolicyInvalid: `La configuración de la política de cuotas de ${verbatimTerms.api.value} no es válida.`,
@@ -178,6 +180,8 @@ export default {
 	UnitMergeKindIneligible: "Este tipo de Unit no se puede fusionar.",
 	UnitMergeKindMismatch: "Las Units de origen y destino deben ser del mismo tipo.",
 	UnitMergeRequestConflict: "La Unit de origen ya tiene una fusión activa o completada.",
+	UnitMergeMeasurementConflict:
+		"Esta fusión no puede conservar todos los datos de medición y su procedencia. Resuelve primero las mediciones de las Units de origen y destino y vuelve a intentarlo.",
 	UnitMergeIdempotencyConflict: "Esta clave de reintento ya se usó para otra fusión.",
 	UnitMergeManifestStale:
 		"El origen, el destino o el grafo de Variants ha cambiado. Repite la comprobación previa.",
@@ -219,9 +223,23 @@ export default {
 	SubjectAssociationNotFound: "No se ha encontrado esta asociación de tema.",
 	AliasNotFound: "No se ha encontrado este alias.",
 	TagApplicationNotFound: "No se ha encontrado esta aplicación de etiqueta.",
+	TagApplicationHasJudgments:
+		"Esta aplicación de etiqueta no se puede retirar porque hay valoraciones que dependen de ella.",
 	UnitTagCurationChanged:
 		"Esta selección de etiquetas se ha modificado en otro lugar. Se ha cargado el orden más reciente; inténtalo de nuevo.",
 	TagNotFound: "No se ha encontrado esta etiqueta.",
+	TagNotDirectlyApplicable:
+		"Esta etiqueta no se puede aplicar directamente. Elige una etiqueta o ruta más específica.",
+	ContentLabelApplicationInvalid: "Esta etiqueta de contenido no se puede aplicar a esta Unit.",
+	ContentLabelUnitMergeForbidden: "Las etiquetas de contenido integradas no se pueden fusionar.",
+	ContentLabelJudgmentForbidden:
+		"Las etiquetas de contenido se asignan directamente y no admiten valoraciones de la comunidad.",
+	ContentLabelPlatformApplyForbidden:
+		"Esta etiqueta de contenido solo se puede aplicar mediante una corrección de la plataforma autorizada y auditada.",
+	ContentLabelPlatformIdentityImmutable:
+		"Una etiqueta de contenido aplicada por la plataforma no se puede cambiar directamente.",
+	ContentLabelPlatformRemovalForbidden:
+		"Esta etiqueta de contenido aplicada por la plataforma solo se puede retirar mediante una corrección autorizada y auditada.",
 	UnitExternalLinkNotFound: "No se ha encontrado este enlace externo de la obra.",
 	UnitReferenceCurationChanged:
 		"La selección de referencias cambió en otro lugar. Se cargó el orden más reciente; inténtalo de nuevo.",
@@ -290,6 +308,7 @@ export default {
 	RealmScoreContextPostNotMounted: `La ${postTerms.inline} que sirve como contexto de puntuación debe estar incorporada al ${realmTerms.inline}.`,
 	RealmScoreContextPostKindInvalid: `El contexto de puntuación debe usar una ${postTerms.inline} normal o un artículo wiki.`,
 	RealmTagContextNotFound: `No se ha encontrado la explicación de esta etiqueta en el ${realmTerms.inline}.`,
+	RealmTagContextInUse: `La explicación de esta etiqueta en el ${realmTerms.inline} no se puede retirar porque hay valoraciones de etiquetas que dependen de ella.`,
 	RealmTagContextPostNotMounted: `La ${postTerms.inline} usada como explicación de la etiqueta debe estar visible en el ${realmTerms.inline}.`,
 	RealmTagContextAlreadyExists: `Este ${realmTerms.inline} ya tiene una explicación para esa etiqueta.`,
 	RealmTagContextPostAlreadyUsed: `Esa ${postTerms.inline} ya explica otra etiqueta en un ${realmTerms.inline}.`,

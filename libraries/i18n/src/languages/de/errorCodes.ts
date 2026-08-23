@@ -19,6 +19,7 @@ export default {
 	ApiTokenPermissionRequired: `Dieses ${verbatimTerms.api.value}-Token hat nicht die erforderliche Berechtigung.`,
 	ApiTokenRateLimitExceeded: `Dieses ${verbatimTerms.api.value}-Token sendet Anfragen zu schnell. Versuche es gleich noch einmal.`,
 	ApiQuotaExceeded: `Das ${verbatimTerms.api.value}-Kontingent ist aufgebraucht. Versuche es nach der angegebenen Zeit erneut.`,
+	VndbVoteHotKeyBusy: "Dieses Abstimmungsziel ist gerade ausgelastet. Versuche es in Kürze erneut.",
 	ApiQuotaPolicyNotFound: `Die angeforderte ${verbatimTerms.api.value}-Kontingentrichtlinie wurde nicht gefunden.`,
 	ApiQuotaPolicyKeyConflict: `Eine ${verbatimTerms.api.value}-Kontingentrichtlinie verwendet diesen Schlüssel bereits.`,
 	ApiQuotaPolicyInvalid: `Die Konfiguration der ${verbatimTerms.api.value}-Kontingentrichtlinie ist ungültig.`,
@@ -181,6 +182,8 @@ export default {
 	UnitMergeKindMismatch: "Quell- und Ziel-Unit müssen dieselbe Art haben.",
 	UnitMergeRequestConflict:
 		"Für die Quell-Unit besteht bereits eine aktive oder abgeschlossene Zusammenführung.",
+	UnitMergeMeasurementConflict:
+		"Bei dieser Zusammenführung lassen sich nicht alle Messdaten samt Herkunftsnachweisen erhalten. Kläre zuerst die Messdaten der Quell- und Ziel-Unit und versuche es erneut.",
 	UnitMergeIdempotencyConflict:
 		"Dieser Wiederholungsschlüssel wurde bereits für eine andere Zusammenführung verwendet.",
 	UnitMergeManifestStale:
@@ -224,9 +227,25 @@ export default {
 	SubjectAssociationNotFound: "Diese Themenzuordnung wurde nicht gefunden.",
 	AliasNotFound: "Dieser Alias wurde nicht gefunden.",
 	TagApplicationNotFound: "Diese Tag-Verwendung wurde nicht gefunden.",
+	TagApplicationHasJudgments:
+		"Diese Tag-Verwendung kann nicht entfernt werden, da Bewertungen von ihr abhängen.",
 	UnitTagCurationChanged:
 		"Diese Tag-Kuratierung wurde an anderer Stelle geändert. Die neueste Reihenfolge wurde geladen; versuche es erneut.",
 	TagNotFound: "Dieser Tag wurde nicht gefunden.",
+	TagNotDirectlyApplicable:
+		"Dieser Tag kann nicht direkt verwendet werden. Wähle einen spezifischeren Tag oder Pfad.",
+	ContentLabelApplicationInvalid:
+		"Diese Inhaltskennzeichnung kann nicht auf diese Unit angewendet werden.",
+	ContentLabelUnitMergeForbidden:
+		"Integrierte Tags für Inhaltskennzeichnungen können nicht zusammengeführt werden.",
+	ContentLabelJudgmentForbidden:
+		"Inhaltskennzeichnungen werden direkt festgelegt und können nicht von der Community bewertet werden.",
+	ContentLabelPlatformApplyForbidden:
+		"Diese Inhaltskennzeichnung kann nur durch eine autorisierte, protokollierte Plattformkorrektur angewendet werden.",
+	ContentLabelPlatformIdentityImmutable:
+		"Eine von der Plattform angewendete Inhaltskennzeichnung kann nicht direkt geändert werden.",
+	ContentLabelPlatformRemovalForbidden:
+		"Diese von der Plattform angewendete Inhaltskennzeichnung kann nur durch eine autorisierte, protokollierte Plattformkorrektur entfernt werden.",
 	UnitExternalLinkNotFound: "Dieser externe Link des Werks wurde nicht gefunden.",
 	UnitReferenceCurationChanged:
 		"Die Referenzkuratierung wurde an anderer Stelle geändert. Die aktuelle Reihenfolge wurde geladen; bitte erneut versuchen.",
@@ -296,6 +315,7 @@ export default {
 	RealmScoreContextPostNotMounted: `Der als Bewertungskontext verwendete ${postTerms.inline} muss im ${realmTerms.inline} eingebunden sein.`,
 	RealmScoreContextPostKindInvalid: `Für den Bewertungskontext muss ein regulärer ${postTerms.label} oder Wiki-Artikel verwendet werden.`,
 	RealmTagContextNotFound: `Die Tag-Erklärung in diesem ${realmTerms.inline} wurde nicht gefunden.`,
+	RealmTagContextInUse: `Die Tag-Erklärung in diesem ${realmTerms.inline} kann nicht entfernt werden, da Tag-Bewertungen von ihr abhängen.`,
 	RealmTagContextPostNotMounted: `Der ${postTerms.inline} mit der Tag-Erklärung muss im ${realmTerms.inline} sichtbar sein.`,
 	RealmTagContextAlreadyExists: `In diesem ${realmTerms.inline} gibt es bereits eine Erklärung für diesen Tag.`,
 	RealmTagContextPostAlreadyUsed: `Dieser ${postTerms.inline} erklärt bereits einen anderen Tag in einem ${realmTerms.inline}.`,

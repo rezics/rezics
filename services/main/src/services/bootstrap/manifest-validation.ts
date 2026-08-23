@@ -9,7 +9,10 @@ import {
 import {
 	BootstrapEpochIso,
 	BootstrapEpochUnixMilliseconds,
+	ContentLabelRegistryManifest,
+	ContentLabelRegistryMaximumSize,
 	OfficialZoneManifest,
+	OfficialProfileIds,
 	ReservedBootstrapUuidv7s,
 } from "./data";
 
@@ -27,6 +30,23 @@ export function assertBootstrapManifest(): void {
 	for (const id of ReservedBootstrapUuidv7s) {
 		if (uuidv7UnixMilliseconds(id) !== BootstrapEpochUnixMilliseconds)
 			throw new Error(`Bootstrap UUID does not use ${BootstrapEpochIso}: ${id}`);
+	}
+	if (
+		ContentLabelRegistryManifest.length !== 4 ||
+		ContentLabelRegistryManifest.length > ContentLabelRegistryMaximumSize
+	)
+		throw new Error(
+			"Bootstrap content-label registry must contain exactly four bounded identities",
+		);
+	const expectedKinds = ["content_spoiler", "content_spoiler", "content_spoiler", "nsfw"];
+	const expectedSpoilerLevels = [0, 1, 2, null];
+	for (const [index, label] of ContentLabelRegistryManifest.entries()) {
+		if (
+			label.kind !== expectedKinds[index] ||
+			label.spoilerLevel !== expectedSpoilerLevels[index] ||
+			label.ownerProfileId !== OfficialProfileIds.moderation
+		)
+			throw new Error(`Bootstrap content-label registry identity ${label.id} has invalid policy`);
 	}
 	for (const zone of OfficialZoneManifest) {
 		assertDockDocument(zone.mainDockDocument);

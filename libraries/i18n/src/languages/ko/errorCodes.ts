@@ -18,6 +18,7 @@ export default {
 	ApiTokenPermissionRequired: `이 ${verbatimTerms.api.value} 토큰에는 필요한 권한이 없습니다.`,
 	ApiTokenRateLimitExceeded: `이 ${verbatimTerms.api.value} 토큰이 너무 빨리 요청을 보내고 있습니다. 잠시 후 다시 시도하세요.`,
 	ApiQuotaExceeded: `${verbatimTerms.api.value} 할당량을 모두 사용했습니다. 안내된 시간 이후에 다시 시도하세요.`,
+	VndbVoteHotKeyBusy: "이 투표 대상은 현재 요청이 몰리고 있습니다. 잠시 후 다시 시도하세요.",
 	ApiQuotaPolicyNotFound: `요청한 ${verbatimTerms.api.value} 할당량 정책을 찾을 수 없습니다.`,
 	ApiQuotaPolicyKeyConflict: `다른 ${verbatimTerms.api.value} 할당량 정책이 이미 이 키를 사용하고 있습니다.`,
 	ApiQuotaPolicyInvalid: `${verbatimTerms.api.value} 할당량 정책 설정이 올바르지 않습니다.`,
@@ -160,6 +161,8 @@ export default {
 	UnitMergeKindIneligible: "이 종류의 유닛은 병합할 수 없습니다.",
 	UnitMergeKindMismatch: "원본과 대상 유닛의 종류가 같아야 합니다.",
 	UnitMergeRequestConflict: "원본 유닛에 이미 진행 중이거나 완료된 병합이 있습니다.",
+	UnitMergeMeasurementConflict:
+		"이 병합으로는 모든 측정 데이터와 출처 정보를 보존할 수 없습니다. 원본과 대상의 측정 데이터를 정리한 후 다시 시도하세요.",
 	UnitMergeIdempotencyConflict: "이 재시도 키는 다른 병합에 이미 사용되었습니다.",
 	UnitMergeManifestStale:
 		"원본, 대상 또는 변형 관계도가 변경되었습니다. 사전 검사를 다시 실행하세요.",
@@ -196,9 +199,22 @@ export default {
 	SubjectAssociationNotFound: "이 주제 연계를 찾을 수 없습니다.",
 	AliasNotFound: "이 별칭을 찾을 수 없습니다.",
 	TagApplicationNotFound: "이 태그 적용을 찾을 수 없습니다.",
+	TagApplicationHasJudgments: "판단이 연결되어 있어 이 태그 적용을 제거할 수 없습니다.",
 	UnitTagCurationChanged:
 		"이 태그 선별이 다른 곳에서 변경되었습니다. 최신 순서를 불러왔으니 다시 시도하세요.",
 	TagNotFound: "이 태그를 찾을 수 없습니다.",
+	TagNotDirectlyApplicable:
+		"이 태그는 직접 적용할 수 없습니다. 더 구체적인 태그나 경로를 선택하세요.",
+	ContentLabelApplicationInvalid: "이 콘텐츠 레이블은 이 유닛에 적용할 수 없습니다.",
+	ContentLabelUnitMergeForbidden: "기본 제공 콘텐츠 레이블 태그는 병합할 수 없습니다.",
+	ContentLabelJudgmentForbidden:
+		"콘텐츠 레이블은 직접 지정되며 커뮤니티 판단의 대상이 될 수 없습니다.",
+	ContentLabelPlatformApplyForbidden:
+		"이 콘텐츠 레이블은 권한이 있고 감사 기록이 남는 플랫폼 정정을 통해서만 적용할 수 있습니다.",
+	ContentLabelPlatformIdentityImmutable:
+		"플랫폼에서 적용한 콘텐츠 레이블은 해당 자리에서 다른 레이블로 변경할 수 없습니다.",
+	ContentLabelPlatformRemovalForbidden:
+		"플랫폼에서 적용한 콘텐츠 레이블은 권한이 있고 감사 기록이 남는 플랫폼 정정을 통해서만 제거할 수 있습니다.",
 	UnitExternalLinkNotFound: "이 작품의 외부 링크를 찾을 수 없습니다.",
 	UnitReferenceCurationChanged:
 		"참조 정보 선별이 다른 곳에서 변경되었습니다. 최신 순서를 불러왔으니 다시 시도해 주세요.",
@@ -263,6 +279,7 @@ export default {
 	RealmScoreContextPostNotMounted: `점수 컨텍스트 ${postTerms.label}는 ${realmTerms.label}에 장착되어야 합니다.`,
 	RealmScoreContextPostKindInvalid: `점수 컨텍스트에는 일반 ${postTerms.label} 또는 위키 문서를 사용해야 합니다.`,
 	RealmTagContextNotFound: `이 ${realmTerms.label}의 태그 설명을 찾을 수 없습니다.`,
+	RealmTagContextInUse: `태그 판단이 연결되어 있어 이 ${realmTerms.label}의 태그 설명을 제거할 수 없습니다.`,
 	RealmTagContextPostNotMounted: `태그 설명으로 사용하는 ${postTerms.label}는 ${realmTerms.label}에서 보여야 합니다.`,
 	RealmTagContextAlreadyExists: `이 ${realmTerms.label}에는 해당 태그 설명이 이미 있습니다.`,
 	RealmTagContextPostAlreadyUsed: `해당 ${postTerms.label}는 이미 다른 ${realmTerms.label} 태그를 설명하고 있습니다.`,

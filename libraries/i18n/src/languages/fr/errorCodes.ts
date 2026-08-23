@@ -19,6 +19,8 @@ export default {
 	ApiTokenPermissionRequired: `Ce jeton ${verbatimTerms.api.value} ne dispose pas de l’autorisation requise.`,
 	ApiTokenRateLimitExceeded: `Ce jeton ${verbatimTerms.api.value} envoie des requêtes trop rapidement. Réessayez dans un instant.`,
 	ApiQuotaExceeded: `Le quota ${verbatimTerms.api.value} est épuisé. Réessayez après le délai indiqué.`,
+	VndbVoteHotKeyBusy:
+		"Cette cible de vote est momentanément très sollicitée. Réessayez dans un instant.",
 	ApiQuotaPolicyNotFound: `La politique de quota ${verbatimTerms.api.value} demandée est introuvable.`,
 	ApiQuotaPolicyKeyConflict: `Une politique de quota ${verbatimTerms.api.value} utilise déjà cette clé.`,
 	ApiQuotaPolicyInvalid: `La configuration de la politique de quota ${verbatimTerms.api.value} n’est pas valide.`,
@@ -179,6 +181,8 @@ export default {
 	UnitMergeKindIneligible: "Ce type d’Unit ne peut pas être fusionné.",
 	UnitMergeKindMismatch: "Les Units source et cible doivent être du même type.",
 	UnitMergeRequestConflict: "La Unit source possède déjà une fusion active ou terminée.",
+	UnitMergeMeasurementConflict:
+		"Cette fusion ne peut pas conserver toutes les données de mesure et leur provenance. Corrigez d’abord les mesures des Units source et cible, puis réessayez.",
 	UnitMergeIdempotencyConflict:
 		"Cette clé de nouvelle tentative a déjà servi pour une autre fusion.",
 	UnitMergeManifestStale:
@@ -222,9 +226,25 @@ export default {
 	SubjectAssociationNotFound: "Cette association de sujet est introuvable.",
 	AliasNotFound: "Cet alias est introuvable.",
 	TagApplicationNotFound: "Cette utilisation d’étiquette est introuvable.",
+	TagApplicationHasJudgments:
+		"Cette utilisation d’étiquette ne peut pas être retirée, car des évaluations en dépendent.",
 	UnitTagCurationChanged:
 		"Cette sélection d’étiquettes a été modifiée ailleurs. Le dernier ordre a été chargé ; réessayez.",
 	TagNotFound: "Cette étiquette est introuvable.",
+	TagNotDirectlyApplicable:
+		"Cette étiquette ne peut pas être appliquée directement. Choisissez une étiquette ou un chemin plus précis.",
+	ContentLabelApplicationInvalid:
+		"Cette étiquette de contenu ne peut pas être appliquée à cette Unit.",
+	ContentLabelUnitMergeForbidden:
+		"Les étiquettes de contenu intégrées ne peuvent pas être fusionnées.",
+	ContentLabelJudgmentForbidden:
+		"Les étiquettes de contenu sont définies directement et ne peuvent pas faire l’objet d’évaluations communautaires.",
+	ContentLabelPlatformApplyForbidden:
+		"Cette étiquette de contenu ne peut être appliquée que par une correction de plateforme autorisée et consignée.",
+	ContentLabelPlatformIdentityImmutable:
+		"Une étiquette de contenu appliquée par la plateforme ne peut pas être modifiée sur place.",
+	ContentLabelPlatformRemovalForbidden:
+		"Cette étiquette de contenu appliquée par la plateforme ne peut être retirée que par une correction autorisée et consignée.",
 	UnitExternalLinkNotFound: "Ce lien externe de l’œuvre est introuvable.",
 	UnitReferenceCurationChanged:
 		"La sélection des références a été modifiée ailleurs. Le dernier ordre a été chargé ; veuillez réessayer.",
@@ -295,6 +315,7 @@ export default {
 	RealmScoreContextPostNotMounted: `La ${postTerms.inline} servant de contexte de notation doit être rattachée au ${realmTerms.inline}.`,
 	RealmScoreContextPostKindInvalid: `Le contexte de notation doit utiliser une ${postTerms.inline} ordinaire ou un article wiki.`,
 	RealmTagContextNotFound: `L’explication de cette étiquette dans le ${realmTerms.inline} est introuvable.`,
+	RealmTagContextInUse: `L’explication de cette étiquette dans le ${realmTerms.inline} ne peut pas être retirée, car des évaluations d’étiquettes en dépendent.`,
 	RealmTagContextPostNotMounted: `La ${postTerms.inline} utilisée comme explication de l’étiquette doit être visible dans le ${realmTerms.inline}.`,
 	RealmTagContextAlreadyExists: `Ce ${realmTerms.inline} possède déjà une explication pour cette étiquette.`,
 	RealmTagContextPostAlreadyUsed: `Cette ${postTerms.inline} explique déjà une autre étiquette dans un ${realmTerms.inline}.`,

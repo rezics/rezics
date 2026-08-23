@@ -30,9 +30,10 @@ compatibility re-export when an internal module moves; update its callers togeth
 ## Workload and capacity
 
 The current manifest is a strictly bounded control dataset: 5 slug namespaces, 4 platform
-Profiles and Favorites Collections, 7 curated Tag Collections, 3 Realms, 5 Zones, 5 Wiki Posts,
-and 5 home Pages (38 Unit identities total). It also reserves 4 auth users, 4 accounts, 5 page
-structures, 5 navigations, and 2 avatar identities. Manifest values and expected projections are
+Profiles and Favorites Collections, 7 curated Tag Collections, 4 content-label Tags, 3 Realms,
+5 Zones, 5 Wiki Posts, and 5 home Pages (42 Unit identities total). It also reserves 4 auth users,
+4 accounts, 5 page structures, 5 navigations, and 2 avatar identities. Manifest values and
+expected projections are
 well below 1 MiB of process memory.
 
 Ensure writes at most the missing identity subset under one PostgreSQL advisory lock and one

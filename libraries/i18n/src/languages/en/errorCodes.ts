@@ -19,6 +19,7 @@ export default {
 	ApiTokenPermissionRequired: `This ${verbatimTerms.api.value} token does not have the required permission.`,
 	ApiTokenRateLimitExceeded: `This ${verbatimTerms.api.value} token is sending requests too quickly. Try again shortly.`,
 	ApiQuotaExceeded: `The ${verbatimTerms.api.value} quota is exhausted. Try again after the indicated time.`,
+	VndbVoteHotKeyBusy: "This vote target is busy. Try again shortly.",
 	ApiQuotaPolicyNotFound: `The requested ${verbatimTerms.api.value} quota policy was not found.`,
 	ApiQuotaPolicyKeyConflict: `An ${verbatimTerms.api.value} quota policy already uses this key.`,
 	ApiQuotaPolicyInvalid: `The ${verbatimTerms.api.value} quota policy configuration is invalid.`,
@@ -168,6 +169,8 @@ export default {
 	UnitMergeKindIneligible: "This kind of Unit cannot be merged.",
 	UnitMergeKindMismatch: "The source and target Units must have the same kind.",
 	UnitMergeRequestConflict: "The source Unit already has an active or completed merge.",
+	UnitMergeMeasurementConflict:
+		"This merge cannot preserve all measurement data and provenance. Resolve the source and target measurements before trying again.",
 	UnitMergeIdempotencyConflict: "This retry key was already used for a different merge.",
 	UnitMergeManifestStale: "The source, target, or Variant graph changed. Run preflight again.",
 	UnitMergeReviewSelfForbidden: "You cannot review a Unit merge that you proposed.",
@@ -204,9 +207,23 @@ export default {
 	SubjectAssociationNotFound: "This subject association could not be found.",
 	AliasNotFound: "This alias could not be found.",
 	TagApplicationNotFound: "This tag application could not be found.",
+	TagApplicationHasJudgments:
+		"This Tag application cannot be removed because judgments depend on it.",
 	UnitTagCurationChanged:
 		"This Tag curation changed elsewhere. The latest order has been loaded; try again.",
 	TagNotFound: "This Tag could not be found.",
+	TagNotDirectlyApplicable:
+		"This Tag cannot be applied directly. Choose a more specific Tag or Path.",
+	ContentLabelApplicationInvalid: "This content label cannot be applied to this Unit.",
+	ContentLabelUnitMergeForbidden: "Built-in content-label Tags cannot be merged.",
+	ContentLabelJudgmentForbidden:
+		"Content labels are set directly and cannot receive community judgments.",
+	ContentLabelPlatformApplyForbidden:
+		"This content label can only be applied through an authorized, audited platform correction.",
+	ContentLabelPlatformIdentityImmutable:
+		"A platform-applied content label cannot be changed in place.",
+	ContentLabelPlatformRemovalForbidden:
+		"This platform-applied content label can only be removed through an authorized, audited platform correction.",
 	UnitExternalLinkNotFound: "This Unit external link could not be found.",
 	UnitReferenceCurationChanged:
 		"This reference curation changed elsewhere. The latest order has been loaded; try again.",
@@ -271,6 +288,7 @@ export default {
 	RealmScoreContextPostNotMounted: `The Score context ${postTerms.label} must be mounted in the ${realmTerms.label}.`,
 	RealmScoreContextPostKindInvalid: `The Score context must use an ordinary ${postTerms.label} or a Wiki article.`,
 	RealmTagContextNotFound: `This ${realmTerms.label} Tag explanation could not be found.`,
+	RealmTagContextInUse: `This ${realmTerms.label} Tag explanation cannot be removed because Tag judgments depend on it.`,
 	RealmTagContextPostNotMounted: `The ${postTerms.label} used as the Tag explanation must be visible in the ${realmTerms.label}.`,
 	RealmTagContextAlreadyExists: `This ${realmTerms.label} already has an explanation for that Tag.`,
 	RealmTagContextPostAlreadyUsed: `That ${postTerms.label} already explains another Tag in a ${realmTerms.label}.`,

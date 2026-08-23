@@ -19,6 +19,8 @@ export default {
 	ApiTokenPermissionRequired: `この${verbatimTerms.api.value}トークンには必要な権限がありません。`,
 	ApiTokenRateLimitExceeded: `この${verbatimTerms.api.value}トークンはリクエストを送信しすぎています。少し時間を置いて再試行してください。`,
 	ApiQuotaExceeded: `${verbatimTerms.api.value} クォータを使い切りました。指定された時刻以降に再試行してください。`,
+	VndbVoteHotKeyBusy:
+		"この投票対象は現在混み合っています。しばらくしてからもう一度お試しください。",
 	ApiQuotaPolicyNotFound: `指定された ${verbatimTerms.api.value} クォータポリシーが見つかりません。`,
 	ApiQuotaPolicyKeyConflict: `このキーは別の ${verbatimTerms.api.value} クォータポリシーで使用されています。`,
 	ApiQuotaPolicyInvalid: `${verbatimTerms.api.value} クォータポリシーの設定が無効です。`,
@@ -165,6 +167,8 @@ export default {
 	UnitMergeKindIneligible: "この種別のユニットは統合できません。",
 	UnitMergeKindMismatch: "統合元と統合先は同じユニット種別である必要があります。",
 	UnitMergeRequestConflict: "統合元ユニットには有効または完了済みの統合があります。",
+	UnitMergeMeasurementConflict:
+		"この統合では、すべての測定データと出典情報を保持できません。統合元と統合先の測定データを整理してから、もう一度お試しください。",
 	UnitMergeIdempotencyConflict: "この再試行キーは別の統合ですでに使用されています。",
 	UnitMergeManifestStale:
 		"統合元、統合先、または派生関係図が変更されました。事前検証をやり直してください。",
@@ -202,9 +206,22 @@ export default {
 	SubjectAssociationNotFound: "この主題の関連付けは見つかりませんでした。",
 	AliasNotFound: "この別名は見つかりませんでした。",
 	TagApplicationNotFound: "このタグの適用は見つかりませんでした。",
+	TagApplicationHasJudgments: "このタグの適用は、判定が紐づいているため削除できません。",
 	UnitTagCurationChanged:
 		"このタグ選定は他の場所で変更されました。最新の順序を読み込みました。もう一度お試しください。",
 	TagNotFound: "このタグは見つかりませんでした。",
+	TagNotDirectlyApplicable:
+		"このタグは直接適用できません。より具体的なタグまたはパスを選択してください。",
+	ContentLabelApplicationInvalid: "このコンテンツラベルはこのユニットには適用できません。",
+	ContentLabelUnitMergeForbidden: "組み込みのコンテンツラベル用タグはマージできません。",
+	ContentLabelJudgmentForbidden:
+		"コンテンツラベルは直接設定するものであり、コミュニティによる判定の対象にはできません。",
+	ContentLabelPlatformApplyForbidden:
+		"このコンテンツラベルは、権限があり監査記録の残るプラットフォーム修正を通じてのみ適用できます。",
+	ContentLabelPlatformIdentityImmutable:
+		"プラットフォームが適用したコンテンツラベルをその場で別のラベルに変更することはできません。",
+	ContentLabelPlatformRemovalForbidden:
+		"プラットフォームが適用したコンテンツラベルは、権限があり監査記録の残るプラットフォーム修正を通じてのみ削除できます。",
 	UnitExternalLinkNotFound: "この作品の外部リンクは見つかりませんでした。",
 	UnitReferenceCurationChanged:
 		"参照情報の選定が別の場所で変更されました。最新の順序を読み込んだため、もう一度お試しください。",
@@ -271,6 +288,7 @@ export default {
 	RealmScoreContextPostNotMounted: `スコアコンテキスト ${postTerms.label} は ${realmTerms.label} にマウントされている必要があります。`,
 	RealmScoreContextPostKindInvalid: `スコアコンテキストには通常の${postTerms.label}またはウィキ記事を使用してください。`,
 	RealmTagContextNotFound: `この ${realmTerms.label} のタグ説明が見つかりませんでした。`,
+	RealmTagContextInUse: `この ${realmTerms.label} のタグ説明は、タグ判定が紐づいているため削除できません。`,
 	RealmTagContextPostNotMounted: `タグ説明として使われている ${postTerms.label} は ${realmTerms.label} に表示されている必要があります。`,
 	RealmTagContextAlreadyExists: `この ${realmTerms.label} には、そのタグの説明がすでにあります。`,
 	RealmTagContextPostAlreadyUsed: `その ${postTerms.label} は、すでに別の ${realmTerms.label} タグを説明しています。`,

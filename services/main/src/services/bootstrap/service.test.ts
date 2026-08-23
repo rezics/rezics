@@ -5,6 +5,7 @@ const assertPlatformCoreReady = vi.hoisted(() => vi.fn());
 const ensureSlugNamespaces = vi.hoisted(() => vi.fn());
 const ensureBootstrapProfiles = vi.hoisted(() => vi.fn());
 const ensureBootstrapProfileFavorites = vi.hoisted(() => vi.fn());
+const ensureContentLabelRegistry = vi.hoisted(() => vi.fn());
 const ensureCuratedCreationTagCollections = vi.hoisted(() => vi.fn());
 const ensureBootstrapPlatformAccess = vi.hoisted(() => vi.fn());
 const ensureDefaultApiQuotaPolicies = vi.hoisted(() => vi.fn());
@@ -31,6 +32,7 @@ vi.mock("./installation/profiles", () => ({
 	ensureBootstrapProfiles,
 	ensureBootstrapProfileFavorites,
 }));
+vi.mock("./installation/content-labels", () => ({ ensureContentLabelRegistry }));
 vi.mock("./installation/collections", () => ({ ensureCuratedCreationTagCollections }));
 vi.mock("./installation/platform-access", () => ({ ensureBootstrapPlatformAccess }));
 vi.mock("./installation/api-quotas", () => ({ ensureDefaultApiQuotaPolicies }));
@@ -63,6 +65,7 @@ describe("platform identity ensure", () => {
 		ensureBootstrapProfiles.mockReset();
 		ensureBootstrapProfiles.mockResolvedValue([]);
 		ensureBootstrapProfileFavorites.mockReset();
+		ensureContentLabelRegistry.mockReset();
 		ensureCuratedCreationTagCollections.mockReset();
 		ensureBootstrapPlatformAccess.mockReset();
 		ensureDefaultApiQuotaPolicies.mockReset();
@@ -94,6 +97,8 @@ describe("platform identity ensure", () => {
 		expect(ensureOfficialZoneFollows).toHaveBeenCalledWith(Transaction, expect.any(Array), {
 			sequenceIsEmpty: true,
 		});
+		expect(ensureContentLabelRegistry).toHaveBeenCalledOnce();
+		expect(ensureContentLabelRegistry).toHaveBeenCalledWith(Transaction);
 		expect(ensureOfficialZoneExperiences).toHaveBeenCalledWith(Transaction, []);
 	});
 

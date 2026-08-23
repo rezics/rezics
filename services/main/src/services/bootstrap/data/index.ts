@@ -1,9 +1,11 @@
 import { BootstrapProfileManifest, SlugNamespaceManifest } from "./foundation";
 import { CuratedCreationTagCollectionManifest } from "./collections";
+import { ContentLabelRegistryIds } from "./content-labels";
 import { BootstrapRealmManifest, OfficialRealmAvatarAsset } from "./realms";
 import { OfficialZoneManifest } from "./zones";
 
 export * from "./collections";
+export * from "./content-labels";
 export * from "./foundation";
 export * from "./realms";
 export * from "./zones";
@@ -13,6 +15,7 @@ export const BootstrapUnitIds = [
 	...BootstrapProfileManifest.map((profile) => profile.profileId),
 	...BootstrapProfileManifest.map((profile) => profile.favoritesCollectionId),
 	...CuratedCreationTagCollectionManifest.map((collection) => collection.id),
+	...ContentLabelRegistryIds,
 	...BootstrapRealmManifest.map((realm) => realm.id),
 	...OfficialZoneManifest.map((zone) => zone.id),
 	...OfficialZoneManifest.map((zone) => zone.wikiPost.id),

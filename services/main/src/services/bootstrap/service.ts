@@ -13,6 +13,7 @@ import { BootstrapProfileIdValues, BootstrapRealmManifest } from "./data";
 import { ensureOfficialZoneFollows } from "./official-zone-follows";
 import { assertBootstrapManifest } from "./manifest-validation";
 import { ensureDefaultApiQuotaPolicies } from "./installation/api-quotas";
+import { ensureContentLabelRegistry } from "./installation/content-labels";
 import { ensureCuratedCreationTagCollections } from "./installation/collections";
 import { ensureSlugNamespaces } from "./installation/foundation";
 import { ensureBootstrapPlatformAccess } from "./installation/platform-access";
@@ -52,6 +53,7 @@ async function ensurePlatform(): Promise<PlatformInstallationResult> {
 		await ensureSlugNamespaces(tx);
 		const issuedCredentials = await ensureBootstrapProfiles(tx);
 		await ensureBootstrapProfileFavorites(tx);
+		await ensureContentLabelRegistry(tx);
 		await ensureCuratedCreationTagCollections(tx);
 		await ensureBootstrapPlatformAccess(tx);
 		await ensureDefaultApiQuotaPolicies(tx);

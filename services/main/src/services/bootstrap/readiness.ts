@@ -7,6 +7,7 @@ import { avatarReferenceToColumns } from "../units/localization";
 import {
 	BootstrapAccountIds,
 	BootstrapAuthUserIds,
+	ContentLabelRegistryManifest,
 	BootstrapPlatformAccessManifest,
 	BootstrapProfileIdValues,
 	BootstrapProfileManifest,
@@ -19,6 +20,7 @@ import {
 	SlugNamespaceManifest,
 	TopLevelSlugNamespaceUnitIds,
 } from "./data";
+import { isContentLabelRegistryReady } from "./readiness-content-labels";
 import { inspectInitialInstallationBundle } from "./readiness-inspection";
 import { bootstrapValuesEqual } from "./value-comparison";
 
@@ -34,6 +36,11 @@ export async function isInitialInstallationBundleReady(): Promise<boolean> {
 			targetUnitId: bootstrapProfile.profileId,
 			scopeUnitId: TopLevelSlugNamespaceUnitIds.users,
 			slug: bootstrapProfile.slug,
+		})),
+		...ContentLabelRegistryManifest.map((label) => ({
+			targetUnitId: label.id,
+			scopeUnitId: TopLevelSlugNamespaceUnitIds.tags,
+			slug: label.slug,
 		})),
 		...BootstrapRealmManifest.map((bootstrapRealm) => ({
 			targetUnitId: bootstrapRealm.id,
@@ -145,7 +152,9 @@ export async function isInitialInstallationBundleReady(): Promise<boolean> {
 		localizations,
 		defaultApiQuotaPolicies,
 	} = await inspectInitialInstallationBundle();
+	const contentLabelRegistryReady = await isContentLabelRegistryReady();
 	return (
+		contentLabelRegistryReady &&
 		unitCount[0]?.value === BootstrapUnitIds.length &&
 		defaultApiQuotaPolicies.length === Object.keys(DefaultApiQuotaPolicies).length &&
 		Object.values(DefaultApiQuotaPolicies).every((expected) =>

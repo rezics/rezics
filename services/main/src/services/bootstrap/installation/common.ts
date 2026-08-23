@@ -37,7 +37,7 @@ export async function ensureBootstrapAddressedUnit(
 	tx: DatabaseTransaction,
 	input: {
 		readonly id: string;
-		readonly kind: "profile" | "realm" | "zone";
+		readonly kind: "profile" | "realm" | "tag" | "zone";
 		readonly scopeUnitId: string;
 		readonly slug: string;
 	},
