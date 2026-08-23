@@ -137,11 +137,13 @@ const realHotKeyReadinessRow = z.object({
 	fenceInventoryExact: z.boolean(),
 	fenceTriggerCount: integerString,
 	functionInstalled: z.boolean(),
+	globalAdmissionIsBounded: z.boolean(),
 	globalAdmissionIsFailFast: z.boolean(),
 	globalAdmissionTriggerInstalled: z.boolean(),
 	globalFenceTriggerInstalled: z.boolean(),
 	globalTableInstalled: z.boolean(),
 	hotKeyTriggerCount: integerString,
+	realmAdmissionIsBounded: z.boolean(),
 	realmAdmissionIsFailFast: z.boolean(),
 	realmAdmissionTriggerInstalled: z.boolean(),
 	realmFenceTriggerInstalled: z.boolean(),
@@ -552,6 +554,15 @@ async function readRealHotKeyReadiness(
 			) as "globalAdmissionIsFailFast",
 			coalesce(
 				pg_get_functiondef(to_regprocedure(
+					'public.lock_vndb_vote_hot_keys(uuid[],uuid[],uuid[])'
+				)) like '%cardinality(target_unit_ids) > 1024%'
+				and pg_get_functiondef(to_regprocedure(
+					'public.lock_vndb_vote_hot_keys(uuid[],uuid[],uuid[])'
+				)) like '%vndb_vote_hot_key_batch_too_large%',
+				false
+			) as "globalAdmissionIsBounded",
+			coalesce(
+				pg_get_functiondef(to_regprocedure(
 					'public.lock_realm_tag_judgment_keys(uuid[],uuid[],uuid[])'
 				)) like '%pg_try_advisory_xact_lock%'
 				and pg_get_functiondef(to_regprocedure(
@@ -559,6 +570,15 @@ async function readRealHotKeyReadiness(
 				)) like '%vndb_vote_hot_key_busy%',
 				false
 			) as "realmAdmissionIsFailFast",
+			coalesce(
+				pg_get_functiondef(to_regprocedure(
+					'public.lock_realm_tag_judgment_keys(uuid[],uuid[],uuid[])'
+				)) like '%cardinality(target_realm_ids) > 1024%'
+				and pg_get_functiondef(to_regprocedure(
+					'public.lock_realm_tag_judgment_keys(uuid[],uuid[],uuid[])'
+				)) like '%vndb_vote_hot_key_batch_too_large%',
+				false
+			) as "realmAdmissionIsBounded",
 			count(*) filter (
 				where (
 					relation.relname = 'unit_structure_application_judgment'
@@ -687,10 +707,12 @@ export function realHotKeySchemaReady(readiness: z.infer<typeof realHotKeyReadin
 	return (
 		readiness.controlState === "postcontract_open" &&
 		readiness.functionInstalled &&
+		readiness.globalAdmissionIsBounded &&
 		readiness.globalAdmissionIsFailFast &&
 		readiness.globalAdmissionTriggerInstalled &&
 		readiness.globalFenceTriggerInstalled &&
 		readiness.globalTableInstalled &&
+		readiness.realmAdmissionIsBounded &&
 		readiness.realmAdmissionIsFailFast &&
 		readiness.realmAdmissionTriggerInstalled &&
 		readiness.realmFenceTriggerInstalled &&

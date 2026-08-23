@@ -535,6 +535,16 @@ AS $$
 DECLARE
 	hot_key record;
 BEGIN
+	IF cardinality(target_realm_ids) > 1024
+		OR cardinality(target_unit_ids) > 1024
+		OR cardinality(target_tag_ids) > 1024
+	THEN
+		RAISE EXCEPTION 'VNDB Realm judgment hot-key batches cannot exceed 1024 rows'
+			USING
+				ERRCODE = '54000',
+				CONSTRAINT = 'vndb_vote_hot_key_batch_too_large';
+	END IF;
+
 	IF target_realm_ids IS NULL
 		OR target_unit_ids IS NULL
 		OR target_tag_ids IS NULL
@@ -618,6 +628,16 @@ AS $$
 DECLARE
 	hot_key record;
 BEGIN
+	IF cardinality(target_unit_ids) > 1024
+		OR cardinality(target_tag_ids) > 1024
+		OR cardinality(target_profile_ids) > 1024
+	THEN
+		RAISE EXCEPTION 'VNDB vote hot-key batches cannot exceed 1024 rows'
+			USING
+				ERRCODE = '54000',
+				CONSTRAINT = 'vndb_vote_hot_key_batch_too_large';
+	END IF;
+
 	IF target_unit_ids IS NULL
 		OR target_tag_ids IS NULL
 		OR target_profile_ids IS NULL
