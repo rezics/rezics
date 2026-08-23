@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
 	applyOverlayStatements,
+	assertShadowValidationStatements,
 	splitSqlStatements,
 	type MigrationOverlayTransactionMode,
 } from "./apply-database-migration-overlay";
@@ -71,5 +72,26 @@ describe("pre-diff migration overlay execution", () => {
 		["none", 2],
 	])("splits quoted semicolons before %s execution", (_mode, expected) => {
 		expect(splitSqlStatements("SELECT ';'; SELECT 1;")).toHaveLength(expected);
+	});
+});
+
+describe("shadow-only online-validation state", () => {
+	it("allows only public-qualified constraint validation", () => {
+		expect(() =>
+			assertShadowValidationStatements([
+				"ALTER TABLE public.unit_structure VALIDATE CONSTRAINT unit_structure_active_projection_version_check;",
+			]),
+		).not.toThrow();
+	});
+
+	it.each([
+		"ALTER TABLE unit_structure VALIDATE CONSTRAINT unit_structure_active_projection_version_check;",
+		"ALTER TABLE public.unit_structure ADD CONSTRAINT hostile CHECK (true);",
+		"UPDATE pg_catalog.pg_constraint SET convalidated = true;",
+		"DROP TABLE public.unit_structure;",
+	])("rejects non-validation shadow state: %s", (statement) => {
+		expect(() => assertShadowValidationStatements([statement])).toThrow(
+			/only public-qualified ALTER TABLE/,
+		);
 	});
 });

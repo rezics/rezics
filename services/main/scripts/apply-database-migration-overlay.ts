@@ -6,6 +6,7 @@ import { Client } from "pg";
 
 const MigrationOverlayLockKey = 71_011;
 const RequiredDatabaseName = "rezics_atlas";
+const ShadowValidationOverlaySuffix = ".shadow-validated.sql";
 
 export type MigrationOverlayTransactionMode = "file" | "none";
 
@@ -74,6 +75,28 @@ export function splitSqlStatements(source: string): readonly string[] {
 	return statements;
 }
 
+/**
+ * Shadow-only overlays may model only validation work that operators perform
+ * online between generated migrations. They must never become a general way to
+ * mutate the shadow schema or conceal a schema diff.
+ */
+export function assertShadowValidationStatements(statements: readonly string[]): void {
+	const identifier = "[a-z_][a-z0-9_$]*";
+	const validateConstraint = new RegExp(
+		`^\\s*ALTER\\s+TABLE\\s+public\\.${identifier}\\s+VALIDATE\\s+CONSTRAINT\\s+${identifier}\\s*;\\s*$`,
+		"is",
+	);
+	for (const statement of statements) {
+		const code = statement
+			.replace(/^\s*(?:(?:--[^\n]*(?:\n|$))|(?:\/\*[\s\S]*?\*\/\s*))*/, "")
+			.trim();
+		if (!validateConstraint.test(code))
+			throw new Error(
+				"Shadow validation overlays may contain only public-qualified ALTER TABLE ... VALIDATE CONSTRAINT statements",
+			);
+	}
+}
+
 /** @internal */
 export async function applyOverlayStatements(
 	client: OverlayQueryClient,
@@ -140,16 +163,23 @@ async function main(): Promise<void> {
 	);
 	const overlayPath = resolve(requestedPath);
 	const relativePath = relative(overlayRoot, overlayPath);
+	const isPreOverlay = relativePath.endsWith(".pre.sql");
+	const isShadowValidationOverlay = relativePath.endsWith(ShadowValidationOverlaySuffix);
 	if (
 		!relativePath ||
 		relativePath.startsWith("..") ||
 		relativePath.includes(":") ||
-		!relativePath.endsWith(".pre.sql")
+		(!isPreOverlay && !isShadowValidationOverlay)
 	)
-		throw new Error("Migration overlay must be a .pre.sql file inside migration-overlays");
+		throw new Error(
+			`Migration overlay must be a .pre.sql or ${ShadowValidationOverlaySuffix} file inside migration-overlays`,
+		);
+	if (isShadowValidationOverlay && transactionMode !== "file")
+		throw new Error("Shadow validation overlays require transactional file mode");
 
 	const statements = splitSqlStatements(await readFile(overlayPath, "utf8"));
 	if (statements.length === 0) throw new Error("Migration overlay contains no SQL statements");
+	if (isShadowValidationOverlay) assertShadowValidationStatements(statements);
 
 	const client = new Client({
 		connectionString,

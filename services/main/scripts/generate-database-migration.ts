@@ -17,6 +17,7 @@ const MigrationNamePattern = /^[a-z][a-z0-9]*(_[a-z0-9]+)*$/;
 const SyncedMessage = "Schemas are synced, no changes to be made.";
 const OverlayOnlyMarkerSuffix = ".overlay-only";
 const TransactionModeNoneMarkerSuffix = ".txmode-none";
+const ShadowValidationOverlaySuffix = ".shadow-validated.sql";
 
 interface MigrationSqlSections {
 	readonly schemaDiff?: string;
@@ -334,6 +335,10 @@ async function main(): Promise<void> {
 		overlayDirectory,
 		`${migrationName}${TransactionModeNoneMarkerSuffix}`,
 	);
+	const shadowValidationOverlay = join(
+		overlayDirectory,
+		`${migrationName}${ShadowValidationOverlaySuffix}`,
+	);
 	const canonicalFile = join(postgresSchemaDirectory, `${migrationName.replaceAll("_", "-")}.sql`);
 
 	const migrationPort = process.env.POSTGRES_MIGRATION_LOCAL_PORT ?? "5433";
@@ -364,6 +369,7 @@ async function main(): Promise<void> {
 			...(hasOverlayOnlyMarker ? { overlayOnlyReason } : {}),
 		});
 		const hasTransactionModeNoneMarker = await exists(transactionModeNoneMarker);
+		const hasShadowValidationOverlay = await exists(shadowValidationOverlay);
 		const transactionModeNoneReason = hasTransactionModeNoneMarker
 			? (await readFile(transactionModeNoneMarker, "utf8")).trim()
 			: undefined;
@@ -373,6 +379,32 @@ async function main(): Promise<void> {
 			);
 		if (hasTransactionModeNoneMarker && hasPreOverlay)
 			assertTransactionModeNoneIsResumeSafe(await readFile(preOverlay, "utf8"));
+		if (hasShadowValidationOverlay && !generationPlan.runSchemaDiff)
+			throw new Error(
+				`${ShadowValidationOverlaySuffix} requires a schema-diff migration; overlay-only migrations cannot model external validation state`,
+			);
+		if (hasShadowValidationOverlay && hasTransactionModeNoneMarker)
+			throw new Error(
+				`${ShadowValidationOverlaySuffix} cannot be combined with ${TransactionModeNoneMarkerSuffix}`,
+			);
+		if (hasShadowValidationOverlay)
+			await runYarn(
+				[
+					"exec",
+					"tsx",
+					join(serviceRoot, "scripts/apply-database-migration-overlay.ts"),
+					shadowValidationOverlay,
+					"file",
+				],
+				{
+					cwd: serviceRoot,
+					env: {
+						...process.env,
+						DATABASE_ADMIN_URL: shadowUrl,
+						REZICS_DISPOSABLE_MIGRATION_FIXTURE: "1",
+					},
+				},
+			);
 		if (generationPlan.applyPreOverlayToShadow)
 			await runYarn(
 				[
