@@ -18,12 +18,15 @@ Date: 2026-08-23
   surfaces, effective projection, assisted proposals, governance
   observability, and the cost model.
 - [entity-tag-spoiler-and-measurement-decisions.md](./entity-tag-spoiler-and-measurement-decisions.md):
-  the spoiler concept separation, judgment dimensions and co-located storage,
-  spoiler levels and Wilson-based aggregation, propagation and member
-  override, Realm fallback policy and table shapes, Tag vocabulary policy
-  flags, Entity description contract and collapse behavior, structured
-  measurements, compound-search tunables, the pack import contract, and the
-  migration and cutover plan.
+  the spoiler and concealment mechanism separation, judgment dimensions and
+  co-located storage, spoiler levels and Wilson-based aggregation,
+  propagation and member override, association spoiler classification,
+  content spoiler labels and the NSFW display label with their bootstrap
+  registry and guards, Realm fallback policy and table shapes, Tag
+  vocabulary policy flags, Entity
+  description contract and collapse behavior, structured measurements,
+  compound-search tunables, the pack import contract, and the migration and
+  cutover plan.
 
 This report intentionally restates none of it.
 
@@ -59,8 +62,9 @@ relation:
   write amplification (one application vote fans out to at most L support
   rows and L effective upserts, L ≤ 16 and typically 2–4);
 - row and index storage at both required scales for the four spoiler-bearing
-  application scopes (global and Realm, Tag and Path) plus the two
-  Path-definition authorities;
+  application scopes (global and Realm, Tag and Path), the two
+  Path-definition authorities, and the global subject-association judgment
+  relation;
 - aggregate write amplification and WAL/network costs;
 - projection freshness requirements;
 - migration and backfill costs; and
@@ -93,6 +97,9 @@ report; the two permanent documents above are the surviving record.
 - Seed Path definitions from imported hierarchies (primary chains plus
   secondary chains, exact-array deduplication, one importer definition vote
   each).
+- Seed the content-label registry (the three content-spoiler Tag Units and
+  the NSFW display label), create `subject_association_judgment`, and
+  install the registry guards defined in the decisions document.
 
 Exit: migration deployed and verified; the `vndb-v11` pack imports losslessly
 and produces seeded, deduplicated definitions on a disposable fixture; the
@@ -124,6 +131,15 @@ document.
 - Ship the contribution grid with applicability judgments and staged batch
   saves; spoiler columns land in Phase 3.
 - Enforce `directly_applicable` in suggestions and at the API boundary.
+- Ship author content-spoiler labels: composer level chips writing the
+  pinned registry application, warning-card rendering, and suppression of
+  labeled bodies in feed cards, search snippets, embeds, and notification
+  previews.
+- Ship the NSFW display label on the same write paths, with blurred visual
+  surfaces, the account-level always-show preference, and the adult
+  discovery signals defined in the decisions document.
+  `unit.content_rating` keeps its existing age-preference filtering
+  unchanged.
 
 Exit: application writes released to ordinary users; flat `unit_tag` behavior
 for path-less Tags is unchanged; quick-add write amplification is measured
@@ -145,6 +161,9 @@ decisions document if needed.
 - Launch the assisted-proposal layer (candidate definitions, placement and
   alias suggestions, duplicate warnings) feeding the ordinary proposal and
   vote pipelines with provenance.
+- Activate association spoiler judgments (global authority) with
+  appearance-row protection, and open the Realm and platform correction
+  paths for content labels.
 
 Exit: definition governance and spoiler contribution are public; assisted
 proposals are measurably feeding the queues without acceptance authority.
@@ -170,7 +189,13 @@ Explicitly out of scope until real demand or a separate decision:
   versioned asynchronous closure projection described in the tag-structures
   cost model;
 - measurement uncertainty, approximations, and ranges (point values only in
-  the first release); and
+  the first release);
 - asynchronous worker-reliability weighting of spoiler judgments (the
   per-Profile judgment facts retained by the accepted storage make it
-  possible later without a schema change).
+  possible later without a schema change);
+- Realm-scoped subject-association spoiler judgments;
+- content labels on credit attributions and series relations;
+- progress-aware automatic reveal of labeled or protected content;
+- explicit multi-target spoiler scopes on one document; and
+- image-asset-level screening pipelines (the existing content-rating and
+  media governance own that surface).

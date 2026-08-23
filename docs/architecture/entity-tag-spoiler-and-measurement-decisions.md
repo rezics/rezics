@@ -13,23 +13,76 @@ advisory-lock projection refreshes, trigger-enforced bounds, and the
 documented release cutover sequence. And wherever one error direction is
 recoverable and the other is not, the default errs on the recoverable side.
 
-## Two meanings of “spoiler”
+## Spoiler and concealment mechanisms
 
-A spoiler presentation mark is authored inside rich content. It hides or
-reveals a particular span or block, is local to that document, and controls
-presentation only. It does not prove that a Tag–Unit relationship is
-semantically a spoiler, does not receive community votes, and does not
-participate in Realm Tag governance.
+Three mechanisms answer three different questions and never feed each other:
+
+| Mechanism | Declared by | Granularity | Viewer spoiler preference applies |
+| --- | --- | --- | --- |
+| Semantic classification | community judgments | Tag, Path, and association applications | yes |
+| Content spoiler labels | author, Realm curation, platform correction | one authored document | yes |
+| Concealment marks | the author | spans inside rich content | no — always explicit reveal |
 
 A semantic spoiler classification is a community judgment about an
-application relationship — “this Tag or Path applies to this Unit, and knowing
-that association reveals a minor or major spoiler.” It affects discovery,
-filtering, grouped presentation, API results, Realm policy, and
-safe-by-default disclosure.
+application relationship — “this Tag, Path, or appearance applies to this
+Unit, and knowing that association reveals a minor or major spoiler.” It
+affects discovery, filtering, grouped presentation, API results, Realm
+policy, and safe-by-default disclosure.
 
-The two concepts stay separate in data, APIs, documentation, and UI. Spoiler
-protection never depends on presentation state (for example description
-collapse); presentation marks never feed classification aggregates.
+A content spoiler label is a whole-document statement about one authored
+post-kind Unit (“this review reveals major spoilers”), defined in “Content
+spoiler labels” below.
+
+A concealment mark is authored inside rich content and hides one span or
+block until the reader explicitly reveals it. The mark carries two equally
+legitimate uses: concealing a genuine spoiler, and pure presentation effects
+such as punchlines, puzzle answers, easter eggs, and interactive reveals. The
+system does not distinguish, detect, or infer between those uses, which fixes
+the following consequences:
+
+- A mark is never evidence in any direction. Mark presence or density never
+  feeds classification aggregates, never derives a content label, and never
+  appears in search or filter predicates. Imports convert source spoiler
+  markup into marks without producing any spoiler judgment, and the absence
+  of marks proves nothing either.
+- The viewer spoiler preference never auto-reveals marks. Auto-expansion
+  would destroy every stylistic use, so marks require explicit per-span
+  interaction at every preference level.
+- Composition is ordered and one-way: a content label gates the whole
+  document first; a revealed document still conceals each mark individually;
+  revealing either never mutates the other.
+- Accessibility and terminology stay neutral: assistive technology announces
+  a concealed region with a reveal action rather than asserting a spoiler.
+  Product copy may keep the familiar spoiler name; the contract semantics are
+  concealment.
+- Moderation heuristics and telemetry must not treat marks as spoiler or
+  risk signals; stylistic uses make any such signal noise.
+
+Spoiler protection never depends on presentation state (for example
+description collapse), and presentation marks never feed classification
+aggregates.
+
+Two adjacent axes are deliberately not spoiler mechanisms, and not each
+other:
+
+- Age suitability of the subject matter is the existing
+  `unit.content_rating` column (`general`, `r15`, `r18`, `r18g`) with the
+  per-Profile accepted-ratings preference and its existing filtering
+  semantics. A character Unit from an adult work is `r18` because of what it
+  is about, even when everything it renders is inoffensive.
+- Workplace display safety of the rendered surfaces is the NSFW display
+  label defined below. It judges at-a-glance conspicuousness, not semantic
+  explicitness: an `r18` erotic prose post can stay unlabeled because a
+  glance at a page of text reveals nothing, while a far lower-rated image
+  can carry the label because one glance at it is already the problem.
+  The same character Unit is not NSFW while its imagery stays safe. Rating
+  gates who should view the subject; NSFW gates how it renders on a screen
+  and what discovery systems may show. Neither field ever derives the other
+  automatically.
+
+Spoiler status stays contextual (relative to the content's subjects) and
+layered across authorities, which is why spoilers use labels and judgments
+rather than another intrinsic Unit column.
 
 ## Judgment dimensions and storage
 
@@ -40,10 +93,13 @@ collapse); presentation marks never feed classification aggregates.
 | Tag applied to Unit | yes | yes | yes | yes |
 | Path definition | yes | no | yes | yes |
 | Path applied to Unit | yes | yes | yes | yes |
+| Subject association (appearance) | no | yes | yes | deferred |
 
 A Path definition asks whether the ordered semantic path is valid. A Path
 application asks whether that path describes a particular Unit. Spoiler
-status belongs only to the second statement.
+status belongs only to statements about a particular Unit. A subject
+association's existence is consent-curated rather than voted, so it carries
+the spoiler dimension only (see “Association spoiler classification”).
 
 ### Independent judgments in one sparse row
 
@@ -167,6 +223,140 @@ through direct Tag evidence. A Path application is atomic: there is no
 per-member exemption inside it. This keeps definition and application votes
 auditable and matches the existing invariant that a Profile's negative
 direct Tag vote and positive path support cannot coexist.
+
+## Association spoiler classification
+
+“This Entity appears in this work” can itself be the spoiler: a hidden
+antagonist leaks from a character list even when every fact about the
+character is protected. The spoiler-bearing statement is the association,
+not the Entity.
+
+- Storage: `subject_association_judgment` holds one spoiler-only judgment
+  row per Profile and association (`association_id`, `profile_id`,
+  `spoiler_level` 0 | 1 | 2, timestamps), cascading with the association.
+  Association existence is consent-curated, so no applicability dimension
+  exists; this is the degenerate single-dimension form of the shared
+  judgment row.
+- Aggregation, protection, and status reuse the Wilson rules above
+  unchanged. The first release ships the global authority only; Realm-scoped
+  association judgments are deferred.
+- Protection applies when rendering the association, never the Unit. A
+  work's surfaces conceal the protected appearance row — including its role,
+  because “secretly the primary character” is itself a spoiler — behind the
+  viewer preference. The Entity's own page renders normally while its
+  appearance rows toward each work are protected individually. Catalog
+  identity Units never carry an intrinsic spoiler state.
+- Scope: `subject_association` only. Credit attributions and series
+  relations can adopt the same pattern when demand exists.
+
+## Content spoiler labels
+
+A content spoiler label is a whole-document spoiler statement about one
+authored post-kind Unit (post, reply, review, excerpt, wiki page). Its
+implicit scope is the post's `subjectUnitId`; a reply inherits its root
+post's subject. Labels have real consequences — they hide content — so every
+assertion is a deliberate, authorized act. No vote can create or remove one,
+which also removes the vote-brigade path that could strip protection from a
+correctly labeled document.
+
+### Registry
+
+The registry holds four bootstrap Tag Units: the three content-spoiler
+levels (none, minor, major) and the NSFW display label defined in the next
+section. Their fixed identities join the bootstrap manifest beside the
+existing official identities, are owned by official Profiles (which excludes
+ordinary community editing), are excluded from Unit merges, and are verified
+by readiness inspection. Because the identifiers are literal constants,
+database triggers inline them to enforce the guards below. The registry is a
+strictly bounded control set (at most 16 identities).
+
+### Write paths and guards
+
+| Writer | Mechanism | Scope | Authorization |
+| --- | --- | --- | --- |
+| Author | pinned `unit_tag` on their own post | global | Unit ownership |
+| Realm | `realm_unit_tag` | that Realm's surfaces | `realm.tags.manage` |
+| Platform correction | pinned `unit_tag` | global | moderation capability plus a `governance_decision` audit |
+
+- Content-spoiler tags apply only to post-kind Units; a trigger rejects
+  other targets and the API returns a typed error, so catalog Units can
+  never receive a spoiler label. The NSFW label defines its own, wider
+  applicability in its section.
+- Registry `unit_tag` rows must be pinned, and judgment rows on registry
+  tags are rejected: the tag itself is the level, and applicability voting
+  does not exist for labels.
+- Rows created under platform authority require platform authority to modify
+  or remove; `unit.tag-curation.manage` alone is insufficient for them. The
+  database enforces this through the established guarded transaction path,
+  keyed on the literal registry identifiers and official Profile identities.
+  Mislabeling corrections flow report → Realm curation or platform
+  moderation.
+- Registry tags are excluded from ordinary Tag picker suggestions and from
+  the flat Tag landscape. The composer offers a single-select level control
+  that creates, replaces, or removes the author's pinned row, and rendered
+  surfaces present the label as part of the warning treatment.
+
+### Resolution and rendering
+
+```text
+author or platform pinned registry row     → protects at its level
+realm_unit_tag row, inside that Realm      → protects at its level
+effective level = max(active sources); none counts 0
+no row at all = undeclared; renders normally
+```
+
+Label lookup never enumerates a Unit's tags. The author and platform rows
+ride the bounded pinned read (at most 16 rows) that cards already perform;
+Realm rows are keyed probes on the fixed registry identifiers (at most four
+per Unit and context). A capped enumeration is not an acceptable lookup: the
+primary key orders by random Tag UUID, so any truncation window can silently
+miss a registry row. Full tag-list queries, where they exist, may carry a
+defensive internal limit (10,000 rows) as an adversarial bound; label
+resolution never reads them.
+
+The viewer spoiler preference gates labeled documents as warning cards:
+metadata stays visible, and the body and preview reveal per item.
+Enforcement covers every exposure — feed cards, search snippets, quotes and
+embeds, and notification preview text.
+
+## NSFW display label
+
+The fourth registry Tag is the NSFW display label: a single binary flag
+stating that rendering this Unit's surfaces is inappropriate for a work or
+public screen. The criterion is what a glance at the rendered surface
+exposes — the conspicuousness of imagery and presentation — not the semantic
+rating of the content, so highly rated text often carries no label while
+lower-rated imagery often does. Applying it is the judgment of the
+authorized writers below; the platform defines no objective threshold. It is
+orthogonal to `unit.content_rating` (see “Spoiler and concealment
+mechanisms”), never derived from it in either direction, and carries no
+spoiler semantics.
+
+- Applicability: any public content Unit — posts and catalog Units alike.
+  Display safety is an intrinsic property of what a surface renders, so
+  labeling a catalog Unit NSFW does not conflict with the rule that catalog
+  Units carry no intrinsic spoiler state.
+- Write paths and guards reuse the content-label matrix: pinned `unit_tag`
+  under Unit curation authority (the author on their own posts; Unit
+  curators and platform moderation elsewhere, `unit.tag-curation.manage` is
+  deliberately not grantable to all authenticated Profiles), `realm_unit_tag`
+  under `realm.tags.manage` for Realm surfaces, and platform correction with
+  a `governance_decision` audit. The pinned requirement, judgment rejection,
+  and platform-row protection apply unchanged; there is no vote path.
+- Resolution is presence-based: any active source marks the Unit NSFW.
+  Lookup rides the same pinned read and fixed-identifier probes as the
+  spoiler labels.
+- Rendering: visual surfaces — cards, covers, avatars, galleries, preview
+  imagery, embeds — blur with explicit per-item reveal. The viewer NSFW
+  preference defaults to blurred with an account-level always-show opt-in,
+  independent of the spoiler preference.
+- Discovery consequences: the label feeds adult-content signals on public
+  surfaces — SafeSearch-style rating metadata and suppression of social and
+  preview imagery — alongside the existing adult presentation suppression in
+  [unit-landing-seo.md](./unit-landing-seo.md), which already models adult
+  responses as `presentation: null`. Notification previews and search
+  snippets suppress NSFW imagery under the same enforcement rule as spoiler
+  labels.
 
 ## Realm authority
 
@@ -341,6 +531,9 @@ site's community score is provenance, never fabricated votes.
   single importer-Profile `fit` judgment; the source spoiler average rounds
   to one importer spoiler judgment. The source aggregate score is displayed
   as import provenance only.
+- Each imported character appearance creates its subject association plus
+  one importer spoiler judgment taken from the source's per-work character
+  spoiler flag.
 - Import is idempotent, upserting by source identifier and recording source
   URL and import time.
 
@@ -357,7 +550,11 @@ vote-and-reference cutover:
    `realm_tag_vote` → `realm_tag_judgment`. Structure-side rows are small
    inside the development preview; the flat Tag vote copy is the only
    at-scale rewrite. Constraints attach `NOT VALID` with transactional online
-   validation; replacement indexes build concurrently.
+   validation; replacement indexes build concurrently. The same window
+   creates `subject_association_judgment`, installs the content-label
+   registry guards (post-kind domain, pinned requirement, judgment
+   rejection, platform-row protection), and extends the bootstrap manifest
+   with the three registry Tag Units verified by readiness inspection.
 3. Deploy API and frontend together; old binaries are incompatible with the
    judgment response shapes.
 4. Verify aggregate parity, cursor invalidation, and lock waits; resume
