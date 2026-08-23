@@ -197,6 +197,7 @@ const realmFactProfileRow = z.object({
 	fitVote: z.number().int(),
 	profileId: postgresUuidString,
 	rowCount: integerString,
+	tagId: postgresUuidString,
 });
 const globalFactProfileRow = z.object({
 	fitVote: z.number().int(),
@@ -310,6 +311,8 @@ type RealHotKeyScenarioSummary = Readonly<{
 		minimumSuccessfulCommits: boolean;
 		noDeadlocks: boolean;
 		noPartialWrites: boolean;
+		noPoolErrors: boolean;
+		noPoolQueueing: boolean;
 		noTimeouts: boolean;
 		noUnexpectedErrors: boolean;
 		passed: boolean;
@@ -332,6 +335,7 @@ type RealHotKeyScenarioSummary = Readonly<{
 	maximumPoolConnectionsInUse: number;
 	maximumPoolWaiting: number;
 	otherErrors: number;
+	poolErrors: number;
 	parity: Readonly<{
 		detail: string;
 		passed: boolean;
@@ -2435,6 +2439,7 @@ async function runRealHotKeyAttempt(
 ): Promise<RealHotKeyAttemptOutcome> {
 	const startedAt = performance.now();
 	let connection: PoolClient | undefined;
+	let destroyConnection = false;
 	try {
 		connection = await pool.connect();
 		onPoolSample(pool.totalCount - pool.idleCount, pool.waitingCount);
@@ -2453,7 +2458,18 @@ async function runRealHotKeyAttempt(
 			outcome: "succeeded",
 		};
 	} catch (error) {
-		if (connection) await connection.query("rollback").catch(() => undefined);
+		if (connection)
+			try {
+				await connection.query("rollback");
+			} catch (rollbackError) {
+				destroyConnection = true;
+				return {
+					code: postgresErrorField(rollbackError, "code") ?? "ROLLBACK_FAILED",
+					constraint: postgresErrorField(rollbackError, "constraint"),
+					latencyMilliseconds: performance.now() - startedAt,
+					outcome: "other",
+				};
+			}
 		const code = postgresErrorField(error, "code");
 		const constraint = postgresErrorField(error, "constraint");
 		const latencyMilliseconds = performance.now() - startedAt;
@@ -2470,7 +2486,7 @@ async function runRealHotKeyAttempt(
 			return { code, constraint, latencyMilliseconds, outcome: "timedOut" };
 		return { code, constraint, latencyMilliseconds, outcome: "other" };
 	} finally {
-		connection?.release();
+		connection?.release(destroyConnection);
 		onPoolSample(pool.totalCount - pool.idleCount, pool.waitingCount);
 	}
 }
@@ -2621,20 +2637,25 @@ async function verifyRealHotKeyParity(
 		};
 	}
 	const factsResult = await client.query(
-		'select profile_id::text as "profileId",min(fit_vote) as "fitVote",count(*)::text as "rowCount" ' +
+		'select tag_id::text as "tagId",profile_id::text as "profileId",' +
+			'fit_vote as "fitVote",' +
+			'count(*) over (partition by profile_id)::text as "rowCount" ' +
 			"from public.realm_tag_judgment where realm_id=$1 and unit_id=$2 " +
-			"group by profile_id order by profile_id",
+			"order by tag_id,profile_id",
 		[fixture.realmId, fixture.unitId],
 	);
 	const facts = z.array(realmFactProfileRow).parse(factsResult.rows);
-	const exactFacts =
-		facts.length === expectedProfiles.length &&
-		facts.every(
-			(row, index) =>
-				row.profileId === expectedProfiles[index] &&
-				row.fitVote === expectedVoteValues[index] &&
-				row.rowCount === fixture.pathLength,
+	const expectedRealmFacts = [...fixture.tagIds]
+		.sort()
+		.flatMap((tagId) =>
+			expectedProfiles.map((profileId, index) => ({
+				fitVote: expectedVoteValues[index],
+				profileId,
+				rowCount: fixture.pathLength,
+				tagId,
+			})),
 		);
+	const exactFacts = JSON.stringify(facts) === JSON.stringify(expectedRealmFacts);
 	let exactAggregates = true;
 	for (const tagId of fixture.tagIds) {
 		const aggregate = await queryOne(
@@ -2685,12 +2706,24 @@ async function runRealHotKeyScenario(
 	const applicationName = "vndb-v11-capacity-" + fixture.authority + "-l" + fixture.pathLength;
 	const countersBefore = await readDatabaseCounters(admin);
 	const walStart = await currentInsertLsn(admin);
+	const unexpectedErrorExamples = new Set<string>();
+	let poolErrors = 0;
 	const pool = new Pool({
 		application_name: applicationName,
 		connectionString,
+		connectionTimeoutMillis: RealHotKeyMutationTimeoutMilliseconds,
+		idleTimeoutMillis: RealHotKeyMutationTimeoutMilliseconds,
 		max: RealHotKeyPoolCapacity,
 	});
-	pool.on("error", (error) => console.error("Idle benchmark Pool error", error));
+	pool.on("error", (error) => {
+		poolErrors++;
+		unexpectedErrorExamples.add(
+			"pool:" +
+				(postgresErrorField(error, "code") ?? "no-code") +
+				":" +
+				(postgresErrorField(error, "constraint") ?? "no-constraint"),
+		);
+	});
 	let maximumPoolConnectionsInUse = 0;
 	let maximumPoolWaiting = 0;
 	const samplePool = (connectionsInUse: number, waiting: number): void => {
@@ -2701,7 +2734,6 @@ async function runRealHotKeyScenario(
 	const attemptLatencies: number[] = [];
 	const busyDecisionLatencies: number[] = [];
 	const terminalLatencies: number[] = [];
-	const unexpectedErrorExamples = new Set<string>();
 	const expectedValues = new Map<string, -1 | 1>(
 		fixture.profileIds.map((profileId) => [profileId, -1 as const]),
 	);
@@ -2809,8 +2841,10 @@ async function runRealHotKeyScenario(
 		minimumSuccessfulCommits: succeededRequests >= 100,
 		noDeadlocks: deadlocks === 0 && countersAfter.deadlocks === countersBefore.deadlocks,
 		noPartialWrites: parity.passed,
+		noPoolErrors: poolErrors === 0,
+		noPoolQueueing: maximumPoolWaiting === 0,
 		noTimeouts: timedOutAttempts === 0,
-		noUnexpectedErrors: otherErrors === 0,
+		noUnexpectedErrors: otherErrors === 0 && poolErrors === 0,
 		poolUtilizationBelowEightyPercent: maximumPoolUtilization < 0.8,
 		successfulCommitsPerSecond: successfulCommitsPerSecond >= 100,
 		terminalAccountingExact,
@@ -2834,6 +2868,7 @@ async function runRealHotKeyScenario(
 		maximumPoolUtilization: Number(maximumPoolUtilization.toFixed(6)),
 		maximumPoolWaiting,
 		otherErrors,
+		poolErrors,
 		parity,
 		pathLength: fixture.pathLength,
 		succeededRequests,
