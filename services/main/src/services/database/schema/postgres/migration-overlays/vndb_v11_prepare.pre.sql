@@ -1168,8 +1168,6 @@ CREATE TABLE public.unit_structure_correction (
 	last_error_message text,
 	created_at timestamp(3) with time zone DEFAULT now() NOT NULL,
 	updated_at timestamp(3) with time zone DEFAULT now() NOT NULL,
-	CONSTRAINT unit_structure_correction_structure_target_version_key
-		UNIQUE (structure_id, target_projection_version),
 	CONSTRAINT unit_structure_correction_structure_id_unit_structure_id_fkey
 		FOREIGN KEY (structure_id) REFERENCES public.unit_structure(id) ON DELETE RESTRICT,
 	CONSTRAINT "unit_structure_correction_MxCajkuZuAyU_fkey"
@@ -1179,7 +1177,7 @@ CREATE TABLE public.unit_structure_correction (
 	CONSTRAINT unit_structure_correction_status_check CHECK (
 		status IN ('pending', 'preflighting', 'staging', 'reconciling', 'ready',
 			'activating', 'active_overlay', 'compacting', 'route_switching',
-			'cleaning', 'completed', 'failed', 'cancelled')
+			'cleaning', 'completed', 'failing', 'failed', 'cancelled')
 	),
 	CONSTRAINT unit_structure_correction_write_route_check
 		CHECK (write_route IN ('source', 'overlay', 'target')),
@@ -1224,8 +1222,23 @@ CREATE TABLE public.unit_structure_correction (
 			AND expected_positive_judgment_count IS NOT NULL
 			AND expected_target_support_count IS NOT NULL
 			AND required_staging_bytes IS NOT NULL)
+	),
+	CONSTRAINT unit_structure_correction_failure_shape_check CHECK (
+		(status IN ('failing', 'failed')) = (failed_from_status IS NOT NULL)
+		AND (status = 'failed') = (failed_at IS NOT NULL)
+		AND (status = 'completed') = (completed_at IS NOT NULL)
+		AND (status = 'cancelled') = (cancelled_at IS NOT NULL)
+		AND (status IN ('failing', 'failed')) =
+			(last_error_code IS NOT NULL AND last_error_message IS NOT NULL)
+		AND (failed_from_status IS NULL OR failed_from_status
+			NOT IN ('failing', 'failed', 'completed', 'cancelled'))
+		AND (status NOT IN ('completed', 'failed', 'cancelled')
+			OR (lease_owner IS NULL AND lease_token IS NULL AND lease_expires_at IS NULL))
 	)
 );
+CREATE UNIQUE INDEX unit_structure_correction_structure_target_version_completed_idx
+	ON public.unit_structure_correction (structure_id, target_projection_version)
+	WHERE status = 'completed';
 CREATE UNIQUE INDEX unit_structure_correction_structure_open_idx
 	ON public.unit_structure_correction (structure_id)
 	WHERE status NOT IN ('completed', 'failed', 'cancelled');

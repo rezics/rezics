@@ -54,6 +54,7 @@ export const UnitStructureCorrectionStatusValues = [
 	"route_switching",
 	"cleaning",
 	"completed",
+	"failing",
 	"failed",
 	"cancelled",
 ] as const;
@@ -177,10 +178,9 @@ export const unitStructureCorrection = pgTable(
 		updatedAt: createUpdatedAtColumn(),
 	},
 	(table) => [
-		unique("unit_structure_correction_structure_target_version_key").on(
-			table.structureId,
-			table.targetProjectionVersion,
-		),
+		uniqueIndex("unit_structure_correction_structure_target_version_completed_idx")
+			.on(table.structureId, table.targetProjectionVersion)
+			.where(sql`${table.status} = 'completed'`),
 		uniqueIndex("unit_structure_correction_structure_open_idx")
 			.on(table.structureId)
 			.where(sql`${table.status} not in ('completed', 'failed', 'cancelled')`),
@@ -274,6 +274,22 @@ export const unitStructureCorrection = pgTable(
 			"unit_structure_correction_activation_evidence_shape_check",
 			sql`(${table.activationRevisionId} is null) =
 				(${table.activationAuditRecordedAt} is null)`,
+		),
+		check(
+			"unit_structure_correction_failure_shape_check",
+			sql`(${table.status} in ('failing', 'failed')) =
+					(${table.failedFromStatus} is not null)
+				and (${table.status} = 'failed') = (${table.failedAt} is not null)
+				and (${table.status} = 'completed') = (${table.completedAt} is not null)
+				and (${table.status} = 'cancelled') = (${table.cancelledAt} is not null)
+				and (${table.status} in ('failing', 'failed')) =
+					(${table.lastErrorCode} is not null and ${table.lastErrorMessage} is not null)
+				and (${table.failedFromStatus} is null or ${table.failedFromStatus}
+					not in ('failing', 'failed', 'completed', 'cancelled'))
+				and (${table.status} not in ('completed', 'failed', 'cancelled')
+					or (${table.leaseOwner} is null
+						and ${table.leaseToken} is null
+						and ${table.leaseExpiresAt} is null))`,
 		),
 	],
 );
