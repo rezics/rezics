@@ -81,7 +81,7 @@ import {
 	realmRuleRevision,
 	realmScoreContext,
 	realmTagContext,
-	realmTagVote,
+	realmTagJudgment,
 	realmUnitTag,
 	recommendationEvent,
 	recommendationExclusion,
@@ -112,7 +112,7 @@ import {
 	unitRevisionHead,
 	subjectAssociation,
 	unitTag,
-	unitTagVote,
+	unitTagJudgment,
 	unitVariant,
 	users,
 	WorkReleaseStatusValues,
@@ -228,6 +228,78 @@ async function writeBatches<T>(
 	write: (batch: T[]) => Promise<unknown>,
 ): Promise<void> {
 	for (const batch of chunks(values)) await write(batch);
+}
+
+function compareUuidTuple(left: readonly string[], right: readonly string[]): number {
+	for (let index = 0; index < left.length; index += 1) {
+		const leftPart = left[index];
+		const rightPart = right[index];
+		if (leftPart === undefined || rightPart === undefined)
+			throw new Error("VNDB hot-key tuples must have the same width");
+		if (leftPart < rightPart) return -1;
+		if (leftPart > rightPart) return 1;
+	}
+	if (left.length !== right.length) throw new Error("VNDB hot-key tuples must have the same width");
+	return 0;
+}
+
+function sortedDistinctHotKeys<T>(values: readonly T[], key: (value: T) => readonly string[]): T[] {
+	const distinct = new Map<string, T>();
+	for (const value of values) distinct.set(key(value).join(":"), value);
+	return [...distinct.values()].sort((left, right) => compareUuidTuple(key(left), key(right)));
+}
+
+function uuidArray(values: readonly string[]) {
+	return sql`ARRAY[${sql.join(
+		values.map((value) => sql`${value}::uuid`),
+		sql`, `,
+	)}]::uuid[]`;
+}
+
+async function lockUnitTagJudgmentHotKeys(
+	tx: DatabaseTransaction,
+	values: readonly {
+		readonly unitId: string;
+		readonly tagId: string;
+		readonly profileId: string;
+	}[],
+): Promise<void> {
+	const hotKeys = sortedDistinctHotKeys(values, (value) => [
+		value.unitId,
+		value.tagId,
+		value.profileId,
+	]);
+	if (hotKeys.length === 0) return;
+	await tx.execute(sql`
+		select public.lock_vndb_vote_hot_keys(
+			${uuidArray(hotKeys.map((value) => value.unitId))},
+			${uuidArray(hotKeys.map((value) => value.tagId))},
+			${uuidArray(hotKeys.map((value) => value.profileId))}
+		)
+	`);
+}
+
+async function lockRealmTagJudgmentHotKeys(
+	tx: DatabaseTransaction,
+	values: readonly {
+		readonly realmId: string;
+		readonly unitId: string;
+		readonly tagId: string;
+	}[],
+): Promise<void> {
+	const hotKeys = sortedDistinctHotKeys(values, (value) => [
+		value.realmId,
+		value.unitId,
+		value.tagId,
+	]);
+	if (hotKeys.length === 0) return;
+	await tx.execute(sql`
+		select public.lock_realm_tag_judgment_keys(
+			${uuidArray(hotKeys.map((value) => value.realmId))},
+			${uuidArray(hotKeys.map((value) => value.unitId))},
+			${uuidArray(hotKeys.map((value) => value.tagId))}
+		)
+	`);
 }
 
 function createdAtFor(data: SeedData, maximumAgeDays = 730): Date {
@@ -1024,18 +1096,20 @@ async function seedUnitFixtures(
 		position: index % 11 === 0 ? fractionalPositionAt(index) : null,
 	}));
 	await writeBatches(tagRows, (batch) => tx.insert(unitTag).values(batch));
-	await writeBatches(
-		Array.from({ length: SeedPlan.tagVotes }, (_, index) => {
-			const tagged = itemAt(tagRows, Math.floor(index / 2));
-			return {
-				unitId: tagged.unitId,
-				tagId: tagged.tagId,
-				profileId: itemAt(profiles, index + Math.floor(index / 2)).id,
-				value: index % 7 === 0 ? -1 : 1,
-			};
-		}),
-		(batch) => tx.insert(unitTagVote).values(batch),
-	);
+	const tagJudgments = Array.from({ length: SeedPlan.tagVotes }, (_, index) => {
+		const tagged = itemAt(tagRows, Math.floor(index / 2));
+		return {
+			unitId: tagged.unitId,
+			tagId: tagged.tagId,
+			profileId: itemAt(profiles, index + Math.floor(index / 2)).id,
+			fitVote: index % 7 === 0 ? (-1 as const) : (1 as const),
+			fitUpdatedAt: createdAtFor(data),
+		};
+	});
+	await writeBatches(tagJudgments, async (batch) => {
+		await lockUnitTagJudgmentHotKeys(tx, batch);
+		await tx.insert(unitTagJudgment).values(batch);
+	});
 	await writeBatches(
 		Array.from({ length: SeedPlan.variants }, (_, index) => {
 			const groups = [
@@ -3051,13 +3125,14 @@ async function seedCoverageContracts(
 		.update(realm)
 		.set({ realmTagVotingEnabled: true, updatedAt: createdAt })
 		.where(eq(realm.id, targetRealm.id));
-	await tx.insert(realmTagVote).values([
+	const realmTagJudgments = [
 		{
 			realmId: targetRealm.id,
 			unitId: target.id,
 			tagId: secondTag.id,
 			profileId: actor.id,
-			value: 1,
+			fitVote: 1,
+			fitUpdatedAt: createdAt,
 			createdAt,
 			updatedAt: createdAt,
 		},
@@ -3066,11 +3141,14 @@ async function seedCoverageContracts(
 			unitId: target.id,
 			tagId: secondTag.id,
 			profileId: collaborator.id,
-			value: -1,
+			fitVote: -1,
+			fitUpdatedAt: createdAt,
 			createdAt,
 			updatedAt: createdAt,
 		},
-	]);
+	];
+	await lockRealmTagJudgmentHotKeys(tx, realmTagJudgments);
+	await tx.insert(realmTagJudgment).values(realmTagJudgments);
 
 	await createTagStructureInTransaction(tx, {
 		memberTagIds: [targetTag.id, secondTag.id],
