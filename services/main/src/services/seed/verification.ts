@@ -20,7 +20,7 @@ import {
 	recommendationSnapshot,
 	realmScoreContext,
 	realmTagContext,
-	realmTagVote,
+	realmTagJudgment,
 	realmUnitTag,
 	release,
 	sharedSearchQuery,
@@ -116,7 +116,7 @@ export async function verifySeedDatabase(
 		},
 		{
 			name: "Realm Tag vote",
-			query: database.select({ value: count() }).from(realmTagVote),
+			query: database.select({ value: count() }).from(realmTagJudgment),
 		},
 		{
 			name: "Tag structure",

@@ -4,6 +4,7 @@ import * as Data from "effect/Data";
 
 import { AuthErrors } from "../auth/errors";
 import { AuthorizationErrors } from "../authorization/errors";
+import { DatabaseErrors } from "../database/errors";
 import { PaginationErrors } from "../pagination/errors";
 import { SearchErrors } from "../search/errors";
 import { UnitErrors } from "../units/errors";
@@ -62,6 +63,7 @@ export const ApiErrors = [
 	MalformedRequestBody,
 	ValidationError,
 	InternalError,
+	...DatabaseErrors,
 	...AuthErrors,
 	...AuthorizationErrors,
 	...UnitErrors,
@@ -118,6 +120,14 @@ export const isApiErrorCode = (value: unknown): value is ApiErrorCode =>
 
 export const isApiError = (value: unknown): value is ApiTypedError =>
 	value instanceof Error && apiErrorClasses.has(value.constructor);
+
+export const apiErrorRetryAfterSeconds = (error: ApiTypedError): number | undefined => {
+	if (!("retryAfterSeconds" in error)) return undefined;
+	const seconds = error.retryAfterSeconds;
+	return typeof seconds === "number" && Number.isSafeInteger(seconds) && seconds > 0
+		? seconds
+		: undefined;
+};
 
 export type ApiErrorBody<Code extends ApiErrorCode = ApiErrorCode> = {
 	readonly error: {

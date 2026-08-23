@@ -5,6 +5,7 @@ import Elysia from "elysia";
 
 import session, { resolveIdentity } from "../../auth/session";
 import { database } from "../../database";
+import { runVndbVoteTransaction } from "../../database/vndb-vote-admission";
 import { toSafeInteger } from "../../database/integer";
 import { resolvedUnitLocalizationLanguage } from "../../units/localization";
 import {
@@ -49,6 +50,7 @@ import {
 	PostDetailResponse,
 	PostListResponse,
 	toApiErrorResponse,
+	VndbVoteBackpressureResponse,
 } from "../schema/response";
 import {
 	CreateReplyBody,
@@ -331,61 +333,64 @@ export default new Elysia()
 					if (subjectId) {
 						await authorization.unit.ensureCanRead(subjectId);
 					}
-					const id = await database.transaction(async (tx) => {
-						if (subjectId)
-							await authorization.entity.ensureSubjectAssociationAllowedIfEntity(tx, subjectId);
-						const created = await insertUnit(tx, {
-							kind: "post",
-							status: "published",
-							visibility: "public",
-							publishedAt: new Date(),
-							statusActor: { kind: "profile", profileId: profile.unitId },
-						});
-						await ensureSubjectPostTargetingAllowed(tx, {
-							sourcePostId: created.id,
-							subjectUnitId: subjectId,
-							realmIds: body.publishRealmIds,
-						});
-						await tx.insert(post).values({
-							id: created.id,
-							kind: body.postKind,
-							subjectUnitId: subjectId,
-						});
-						await tx.insert(unitLocalization).values({
-							unitId: created.id,
-							language: body.language,
-							title: body.title ?? null,
-							summary: body.summary ?? null,
-							content: body.body,
-							contentStatus: "published",
-						});
-						await applyNewPostTagMentionVotes(tx, {
-							postId: created.id,
-							profileId: profile.unitId,
-							nextBody: body.body,
-						});
-						await tx.insert(unitOwnership).values({
-							unitId: created.id,
-							profileId: profile.unitId,
-							assignedByProfileId: profile.unitId,
-						});
-						await createProfilePublisherAttribution(tx, {
-							sourceUnitId: created.id,
-							profileId: profile.unitId,
-						});
-						await publishPostToRealms(tx, {
-							postId: created.id,
-							realmIds: body.publishRealmIds,
-							actorProfileId: profile.unitId,
-						});
-						await recordUnitRevision(tx, {
-							unitId: created.id,
-							actorProfileId: profile.unitId,
-							contribution: body.revisionContext?.contribution,
-							event: "create",
-						});
-						return created.id;
-					});
+					const id = await runVndbVoteTransaction(
+						{ family: "unit_tag", authority: "global" },
+						async (tx) => {
+							if (subjectId)
+								await authorization.entity.ensureSubjectAssociationAllowedIfEntity(tx, subjectId);
+							const created = await insertUnit(tx, {
+								kind: "post",
+								status: "published",
+								visibility: "public",
+								publishedAt: new Date(),
+								statusActor: { kind: "profile", profileId: profile.unitId },
+							});
+							await ensureSubjectPostTargetingAllowed(tx, {
+								sourcePostId: created.id,
+								subjectUnitId: subjectId,
+								realmIds: body.publishRealmIds,
+							});
+							await tx.insert(post).values({
+								id: created.id,
+								kind: body.postKind,
+								subjectUnitId: subjectId,
+							});
+							await tx.insert(unitLocalization).values({
+								unitId: created.id,
+								language: body.language,
+								title: body.title ?? null,
+								summary: body.summary ?? null,
+								content: body.body,
+								contentStatus: "published",
+							});
+							await applyNewPostTagMentionVotes(tx, {
+								postId: created.id,
+								profileId: profile.unitId,
+								nextBody: body.body,
+							});
+							await tx.insert(unitOwnership).values({
+								unitId: created.id,
+								profileId: profile.unitId,
+								assignedByProfileId: profile.unitId,
+							});
+							await createProfilePublisherAttribution(tx, {
+								sourceUnitId: created.id,
+								profileId: profile.unitId,
+							});
+							await publishPostToRealms(tx, {
+								postId: created.id,
+								realmIds: body.publishRealmIds,
+								actorProfileId: profile.unitId,
+							});
+							await recordUnitRevision(tx, {
+								unitId: created.id,
+								actorProfileId: profile.unitId,
+								contribution: body.revisionContext?.contribution,
+								event: "create",
+							});
+							return created.id;
+						},
+					);
 					return { id };
 				},
 				{
@@ -403,6 +408,7 @@ export default new Elysia()
 							"RealmRulesAcceptanceRequired",
 							"PostTargetingLocked",
 						]),
+						[StatusCodes.TOO_MANY_REQUESTS]: VndbVoteBackpressureResponse,
 					},
 					detail: { summary: "Create post or excerpt", tags: ["Posts"] },
 				},
@@ -415,20 +421,23 @@ export default new Elysia()
 						? await resolveCanonicalUnitId(database, body.subjectId)
 						: undefined;
 					if (subjectId) await authorization.unit.ensureCanRead(subjectId);
-					const id = await database.transaction(async (tx) => {
-						const created = await createWikiPost(tx, {
-							profileId: profile.unitId,
-							authorization,
-							accessMode: body.accessMode,
-							title: body.title,
-							body: body.body,
-							language: body.language,
-							publishRealmIds: body.publishRealmIds,
-							contribution: body.revisionContext?.contribution,
-							...(subjectId ? { subjectId } : {}),
-						});
-						return created.id;
-					});
+					const id = await runVndbVoteTransaction(
+						{ family: "unit_tag", authority: "global" },
+						async (tx) => {
+							const created = await createWikiPost(tx, {
+								profileId: profile.unitId,
+								authorization,
+								accessMode: body.accessMode,
+								title: body.title,
+								body: body.body,
+								language: body.language,
+								publishRealmIds: body.publishRealmIds,
+								contribution: body.revisionContext?.contribution,
+								...(subjectId ? { subjectId } : {}),
+							});
+							return created.id;
+						},
+					);
 					return { id };
 				},
 				{
@@ -446,6 +455,7 @@ export default new Elysia()
 							"RealmRulesAcceptanceRequired",
 							"PostTargetingLocked",
 						]),
+						[StatusCodes.TOO_MANY_REQUESTS]: VndbVoteBackpressureResponse,
 					},
 					detail: { summary: "Create Wiki", tags: ["Posts"] },
 				},
@@ -693,7 +703,7 @@ export default new Elysia()
 					await authorization.unit.ensureCanUpdate(params.postId, [
 						["localizations", body.language],
 					]);
-					await database.transaction(async (tx) => {
+					await runVndbVoteTransaction({ family: "unit_tag", authority: "global" }, async (tx) => {
 						const [current] = await tx
 							.select({
 								content: unitLocalization.content,
@@ -760,6 +770,7 @@ export default new Elysia()
 							"UnitRevisionConflict",
 							"PostTagMentionVoteConflict",
 						]),
+						[StatusCodes.TOO_MANY_REQUESTS]: VndbVoteBackpressureResponse,
 					},
 					detail: { summary: "Update post", tags: ["Posts"] },
 				},
@@ -880,122 +891,125 @@ export default new Elysia()
 						body.realmId ? [body.realmId] : [],
 						"realm.post.replies.create",
 					);
-					const createdReply = await database.transaction(async (tx) => {
-						const [root] = await tx
-							.select({ id: post.id })
-							.from(post)
-							.where(and(eq(post.id, params.postId), ne(post.kind, "reply")))
-							.limit(1);
-						if (!root) throw new PostNotFound();
-						let depth = 0;
-						let recipientUnitId = params.postId;
-						if (body.parentPostId) {
-							const [parent] = await tx
-								.select({
-									rootPostId: postReply.rootPostId,
-									depth: postReply.depth,
-								})
-								.from(postReply)
-								.innerJoin(post, eq(post.id, postReply.postId))
-								.innerJoin(unit, eq(unit.id, postReply.postId))
-								.where(
-									and(
-										eq(postReply.postId, body.parentPostId),
-										isNull(unit.deletedAt),
-										body.realmId
-											? sql`exists(select 1 from realm_unit rc where rc.unit_id = ${postReply.postId} and rc.realm_id = ${body.realmId} and rc.status = 'visible' and rc.publication_state = 'active')`
-											: undefined,
-									),
-								)
+					const createdReply = await runVndbVoteTransaction(
+						{ family: "unit_tag", authority: "global" },
+						async (tx) => {
+							const [root] = await tx
+								.select({ id: post.id })
+								.from(post)
+								.where(and(eq(post.id, params.postId), ne(post.kind, "reply")))
 								.limit(1);
-							if (!parent || parent.rootPostId !== params.postId) throw new ParentReplyNotFound();
-							if (parent.depth >= 64) throw new ReplyDepthExceeded();
-							depth = parent.depth + 1;
-							recipientUnitId = body.parentPostId;
-						}
-						const created = await insertUnit(tx, {
-							kind: "post",
-							status: "published",
-							visibility: "public",
-							publishedAt: new Date(),
-							statusActor: { kind: "profile", profileId: profile.unitId },
-						});
-						await ensureReplyPostTargetingAllowed(tx, {
-							sourcePostId: created.id,
-							rootPostId: params.postId,
-							parentPostId: body.parentPostId,
-							...(body.realmId ? { realmId: body.realmId } : {}),
-						});
-						await tx.insert(post).values({
-							id: created.id,
-							kind: "reply",
-						});
-						await tx.insert(postReply).values({
-							postId: created.id,
-							rootPostId: params.postId,
-							parentPostId: body.parentPostId,
-							depth,
-						});
-						await tx.insert(unitLocalization).values({
-							unitId: created.id,
-							language: body.language,
-							content: body.body,
-							contentStatus: "published",
-						});
-						await applyNewPostTagMentionVotes(tx, {
-							postId: created.id,
-							profileId: profile.unitId,
-							nextBody: body.body,
-						});
-						await tx.insert(unitOwnership).values({
-							unitId: created.id,
-							profileId: profile.unitId,
-							assignedByProfileId: profile.unitId,
-						});
-						await createProfilePublisherAttribution(tx, {
-							sourceUnitId: created.id,
-							profileId: profile.unitId,
-						});
-						if (body.realmId)
-							await publishPostToRealms(tx, {
-								postId: created.id,
-								realmIds: [body.realmId],
-								actorProfileId: profile.unitId,
+							if (!root) throw new PostNotFound();
+							let depth = 0;
+							let recipientUnitId = params.postId;
+							if (body.parentPostId) {
+								const [parent] = await tx
+									.select({
+										rootPostId: postReply.rootPostId,
+										depth: postReply.depth,
+									})
+									.from(postReply)
+									.innerJoin(post, eq(post.id, postReply.postId))
+									.innerJoin(unit, eq(unit.id, postReply.postId))
+									.where(
+										and(
+											eq(postReply.postId, body.parentPostId),
+											isNull(unit.deletedAt),
+											body.realmId
+												? sql`exists(select 1 from realm_unit rc where rc.unit_id = ${postReply.postId} and rc.realm_id = ${body.realmId} and rc.status = 'visible' and rc.publication_state = 'active')`
+												: undefined,
+										),
+									)
+									.limit(1);
+								if (!parent || parent.rootPostId !== params.postId) throw new ParentReplyNotFound();
+								if (parent.depth >= 64) throw new ReplyDepthExceeded();
+								depth = parent.depth + 1;
+								recipientUnitId = body.parentPostId;
+							}
+							const created = await insertUnit(tx, {
+								kind: "post",
+								status: "published",
+								visibility: "public",
+								publishedAt: new Date(),
+								statusActor: { kind: "profile", profileId: profile.unitId },
 							});
-						const revision = await recordUnitRevision(tx, {
-							unitId: created.id,
-							actorProfileId: profile.unitId,
-							contribution: body.revisionContext?.contribution,
-							event: "create",
-						});
-						const recipients = await tx
-							.selectDistinct({ profileId: profileTable.id })
-							.from(creditAttribution)
-							.innerJoin(profileTable, eq(profileTable.id, creditAttribution.creditedUnitId))
-							.where(eq(creditAttribution.sourceUnitId, recipientUnitId));
-						for (const recipient of recipients) {
-							if (!recipient.profileId || recipient.profileId === profile.unitId) continue;
-							await createNotification(tx, {
-								recipientProfileId: recipient.profileId,
-								actorProfileId: profile.unitId,
+							await ensureReplyPostTargetingAllowed(tx, {
+								sourcePostId: created.id,
+								rootPostId: params.postId,
+								parentPostId: body.parentPostId,
+								...(body.realmId ? { realmId: body.realmId } : {}),
+							});
+							await tx.insert(post).values({
+								id: created.id,
 								kind: "reply",
-								subjectUnitId: created.id,
 							});
-						}
-						return {
-							id: created.id,
-							language: body.language,
-							rootPostId: params.postId,
-							parentPostId: body.parentPostId ?? null,
-							depth,
-							body: body.body,
-							moderationStatus: created.moderationStatus,
-							deletedAt: created.deletedAt,
-							latestRevisionId: revision.revisionId,
-							createdAt: created.createdAt,
-							updatedAt: created.updatedAt,
-						};
-					});
+							await tx.insert(postReply).values({
+								postId: created.id,
+								rootPostId: params.postId,
+								parentPostId: body.parentPostId,
+								depth,
+							});
+							await tx.insert(unitLocalization).values({
+								unitId: created.id,
+								language: body.language,
+								content: body.body,
+								contentStatus: "published",
+							});
+							await applyNewPostTagMentionVotes(tx, {
+								postId: created.id,
+								profileId: profile.unitId,
+								nextBody: body.body,
+							});
+							await tx.insert(unitOwnership).values({
+								unitId: created.id,
+								profileId: profile.unitId,
+								assignedByProfileId: profile.unitId,
+							});
+							await createProfilePublisherAttribution(tx, {
+								sourceUnitId: created.id,
+								profileId: profile.unitId,
+							});
+							if (body.realmId)
+								await publishPostToRealms(tx, {
+									postId: created.id,
+									realmIds: [body.realmId],
+									actorProfileId: profile.unitId,
+								});
+							const revision = await recordUnitRevision(tx, {
+								unitId: created.id,
+								actorProfileId: profile.unitId,
+								contribution: body.revisionContext?.contribution,
+								event: "create",
+							});
+							const recipients = await tx
+								.selectDistinct({ profileId: profileTable.id })
+								.from(creditAttribution)
+								.innerJoin(profileTable, eq(profileTable.id, creditAttribution.creditedUnitId))
+								.where(eq(creditAttribution.sourceUnitId, recipientUnitId));
+							for (const recipient of recipients) {
+								if (!recipient.profileId || recipient.profileId === profile.unitId) continue;
+								await createNotification(tx, {
+									recipientProfileId: recipient.profileId,
+									actorProfileId: profile.unitId,
+									kind: "reply",
+									subjectUnitId: created.id,
+								});
+							}
+							return {
+								id: created.id,
+								language: body.language,
+								rootPostId: params.postId,
+								parentPostId: body.parentPostId ?? null,
+								depth,
+								body: body.body,
+								moderationStatus: created.moderationStatus,
+								deletedAt: created.deletedAt,
+								latestRevisionId: revision.revisionId,
+								createdAt: created.createdAt,
+								updatedAt: created.updatedAt,
+							};
+						},
+					);
 					const [attributions, canEdit, lockedTargetIds] = await Promise.all([
 						getAttributionSummariesByUnitIds([createdReply.id]),
 						authorization.unit.canUpdate(createdReply.id),
@@ -1035,6 +1049,7 @@ export default new Elysia()
 							"RealmRulesAcceptanceRequired",
 							"PostTargetingLocked",
 						]),
+						[StatusCodes.TOO_MANY_REQUESTS]: VndbVoteBackpressureResponse,
 					},
 					detail: { summary: "Create reply post", tags: ["Posts"] },
 				},
@@ -1046,7 +1061,7 @@ export default new Elysia()
 					await authorization.unit.ensureCanUpdate(params.replyPostId, [
 						["localizations", body.language],
 					]);
-					await database.transaction(async (tx) => {
+					await runVndbVoteTransaction({ family: "unit_tag", authority: "global" }, async (tx) => {
 						const [current] = await tx
 							.select({ content: unitLocalization.content })
 							.from(unitLocalization)
@@ -1101,6 +1116,7 @@ export default new Elysia()
 							"UnitRevisionConflict",
 							"PostTagMentionVoteConflict",
 						]),
+						[StatusCodes.TOO_MANY_REQUESTS]: VndbVoteBackpressureResponse,
 					},
 					detail: { summary: "Update reply post", tags: ["Posts"] },
 				},

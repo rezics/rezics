@@ -172,7 +172,7 @@ export const CurrentSearchFieldRegistry = {
 		operators: ["matches"],
 		facet: "none",
 		sort: "none",
-		documentPath: "filters.realmTagVoteKeys",
+		documentPath: "filters.realmTagJudgmentKeys",
 		postgres: ["equality"],
 		residual: true,
 	},

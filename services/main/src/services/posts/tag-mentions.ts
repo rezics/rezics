@@ -2,7 +2,7 @@ import { collectPortableTextUnitMentionIds } from "@rezics/portable-text";
 import { and, eq, inArray } from "drizzle-orm";
 
 import type { DatabaseTransaction } from "../database";
-import { tag, unitTag, unitTagVote } from "../database/schema";
+import { tag, unitTag, unitTagJudgment } from "../database/schema";
 import { PostTagMentionVoteConflict } from "./errors";
 
 export function collectNewPostUnitMentionIds(previousBody: unknown, nextBody: unknown): string[] {
@@ -37,6 +37,7 @@ export async function applyNewPostTagMentionVotes(
 	for (const { id: tagId } of mentionedTags.sort((left, right) =>
 		left.id.localeCompare(right.id),
 	)) {
+		const fitUpdatedAt = new Date();
 		await tx
 			.insert(unitTag)
 			.values({
@@ -46,30 +47,44 @@ export async function applyNewPostTagMentionVotes(
 			})
 			.onConflictDoNothing();
 		const [createdVote] = await tx
-			.insert(unitTagVote)
+			.insert(unitTagJudgment)
 			.values({
 				unitId: input.postId,
 				tagId,
 				profileId: input.profileId,
-				value: 1,
+				fitVote: 1,
+				fitUpdatedAt,
 			})
 			.onConflictDoNothing()
-			.returning({ value: unitTagVote.value });
+			.returning({ value: unitTagJudgment.fitVote });
 		if (createdVote) continue;
 
 		const [existingVote] = await tx
-			.select({ value: unitTagVote.value })
-			.from(unitTagVote)
+			.select({ value: unitTagJudgment.fitVote })
+			.from(unitTagJudgment)
 			.where(
 				and(
-					eq(unitTagVote.unitId, input.postId),
-					eq(unitTagVote.tagId, tagId),
-					eq(unitTagVote.profileId, input.profileId),
+					eq(unitTagJudgment.unitId, input.postId),
+					eq(unitTagJudgment.tagId, tagId),
+					eq(unitTagJudgment.profileId, input.profileId),
 				),
 			)
 			.for("update")
 			.limit(1);
 		if (existingVote?.value === -1) throw new PostTagMentionVoteConflict();
+		if (existingVote?.value === null) {
+			await tx
+				.update(unitTagJudgment)
+				.set({ fitVote: 1, fitUpdatedAt })
+				.where(
+					and(
+						eq(unitTagJudgment.unitId, input.postId),
+						eq(unitTagJudgment.tagId, tagId),
+						eq(unitTagJudgment.profileId, input.profileId),
+					),
+				);
+			continue;
+		}
 		if (existingVote?.value !== 1)
 			throw new Error("Tag mention vote conflict did not resolve to a stored vote");
 	}

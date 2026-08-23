@@ -5,6 +5,7 @@ import Elysia, { t } from "elysia";
 import session, { resolveIdentity } from "../../auth/session";
 import { contentRatingPolicyFromAllowlist } from "../../content-rating/policy";
 import { database } from "../../database";
+import { runVndbVoteTransaction } from "../../database/vndb-vote-admission";
 import { toSafeInteger } from "../../database/integer";
 import {
 	isFirstUnitLocalization,
@@ -53,6 +54,7 @@ import {
 } from "../schema/action-response";
 import {
 	toApiErrorResponse,
+	VndbVoteBackpressureResponse,
 	toPortableTextResponse,
 	ReviewDetailResponse,
 	ReviewListResponse,
@@ -363,109 +365,112 @@ export default new Elysia()
 					await authorization.unit.ensureCanRead(targetId);
 					await authorization.realm.ensureUnitCreation(body.publishRealmIds, "realm.units.create");
 					await authorization.realm.ensureParticipation(body.score?.realmId);
-					const id = await database.transaction(async (tx) => {
-						if (body.progressEntryId) {
-							const [progressEntry] = await tx
-								.select({ id: unitProgressEntry.id })
-								.from(unitProgressEntry)
-								.where(
-									and(
-										eq(unitProgressEntry.id, body.progressEntryId),
-										eq(unitProgressEntry.profileId, profile.unitId),
-										eq(unitProgressEntry.unitId, targetId),
-										isNull(unitProgressEntry.deletedAt),
-									),
-								)
-								.limit(1)
-								.for("update");
-							if (!progressEntry)
-								throw new ValidationError({
-									progressEntryId:
-										"Progress entry must belong to the current Profile and Review target",
-								});
-							const [existingBinding] = await tx
-								.select({ postId: postProgressEntry.postId })
-								.from(postProgressEntry)
-								.where(eq(postProgressEntry.progressEntryId, body.progressEntryId))
-								.limit(1);
-							if (existingBinding)
-								throw new ValidationError({
-									progressEntryId: "Progress entry already has a Review",
-								});
-						}
-						await authorization.entity.ensureSubjectAssociationAllowedIfEntity(tx, targetId);
-						const created = await insertUnit(tx, {
-							kind: "post",
-							status: "published",
-							visibility: "public",
-							publishedAt: new Date(),
-							statusActor: { kind: "profile", profileId: profile.unitId },
-						});
-						await ensureSubjectPostTargetingAllowed(tx, {
-							sourcePostId: created.id,
-							subjectUnitId: targetId,
-							realmIds: body.publishRealmIds,
-						});
-						await tx.insert(post).values({
-							id: created.id,
-							subjectUnitId: targetId,
-							kind: "review",
-						});
-						await tx.insert(unitLocalization).values({
-							unitId: created.id,
-							language: body.language,
-							title: body.title ?? null,
-							summary: body.summary ?? null,
-							content: body.body,
-							contentStatus: "published",
-						});
-						await applyNewPostTagMentionVotes(tx, {
-							postId: created.id,
-							profileId: profile.unitId,
-							nextBody: body.body,
-						});
-						await tx.insert(unitOwnership).values({
-							unitId: created.id,
-							profileId: profile.unitId,
-							assignedByProfileId: profile.unitId,
-						});
-						await createProfilePublisherAttribution(tx, {
-							sourceUnitId: created.id,
-							profileId: profile.unitId,
-						});
-						if (body.score) {
-							const storedScore = await upsertScore(
-								tx,
-								profile.unitId,
-								targetId,
-								body.score.realmId,
-								body.score.value,
-							);
-							await tx.insert(postScore).values({
-								postId: created.id,
-								scoreId: storedScore.id,
-								position: fractionalPositionAt(0),
+					const id = await runVndbVoteTransaction(
+						{ family: "unit_tag", authority: "global" },
+						async (tx) => {
+							if (body.progressEntryId) {
+								const [progressEntry] = await tx
+									.select({ id: unitProgressEntry.id })
+									.from(unitProgressEntry)
+									.where(
+										and(
+											eq(unitProgressEntry.id, body.progressEntryId),
+											eq(unitProgressEntry.profileId, profile.unitId),
+											eq(unitProgressEntry.unitId, targetId),
+											isNull(unitProgressEntry.deletedAt),
+										),
+									)
+									.limit(1)
+									.for("update");
+								if (!progressEntry)
+									throw new ValidationError({
+										progressEntryId:
+											"Progress entry must belong to the current Profile and Review target",
+									});
+								const [existingBinding] = await tx
+									.select({ postId: postProgressEntry.postId })
+									.from(postProgressEntry)
+									.where(eq(postProgressEntry.progressEntryId, body.progressEntryId))
+									.limit(1);
+								if (existingBinding)
+									throw new ValidationError({
+										progressEntryId: "Progress entry already has a Review",
+									});
+							}
+							await authorization.entity.ensureSubjectAssociationAllowedIfEntity(tx, targetId);
+							const created = await insertUnit(tx, {
+								kind: "post",
+								status: "published",
+								visibility: "public",
+								publishedAt: new Date(),
+								statusActor: { kind: "profile", profileId: profile.unitId },
 							});
-						}
-						if (body.progressEntryId)
-							await tx.insert(postProgressEntry).values({
-								postId: created.id,
-								progressEntryId: body.progressEntryId,
-								position: fractionalPositionAt(0),
+							await ensureSubjectPostTargetingAllowed(tx, {
+								sourcePostId: created.id,
+								subjectUnitId: targetId,
+								realmIds: body.publishRealmIds,
 							});
-						await publishPostToRealms(tx, {
-							postId: created.id,
-							realmIds: body.publishRealmIds,
-							actorProfileId: profile.unitId,
-						});
-						await recordUnitRevision(tx, {
-							unitId: created.id,
-							actorProfileId: profile.unitId,
-							contribution: body.revisionContext?.contribution,
-							event: "create",
-						});
-						return created.id;
-					});
+							await tx.insert(post).values({
+								id: created.id,
+								subjectUnitId: targetId,
+								kind: "review",
+							});
+							await tx.insert(unitLocalization).values({
+								unitId: created.id,
+								language: body.language,
+								title: body.title ?? null,
+								summary: body.summary ?? null,
+								content: body.body,
+								contentStatus: "published",
+							});
+							await applyNewPostTagMentionVotes(tx, {
+								postId: created.id,
+								profileId: profile.unitId,
+								nextBody: body.body,
+							});
+							await tx.insert(unitOwnership).values({
+								unitId: created.id,
+								profileId: profile.unitId,
+								assignedByProfileId: profile.unitId,
+							});
+							await createProfilePublisherAttribution(tx, {
+								sourceUnitId: created.id,
+								profileId: profile.unitId,
+							});
+							if (body.score) {
+								const storedScore = await upsertScore(
+									tx,
+									profile.unitId,
+									targetId,
+									body.score.realmId,
+									body.score.value,
+								);
+								await tx.insert(postScore).values({
+									postId: created.id,
+									scoreId: storedScore.id,
+									position: fractionalPositionAt(0),
+								});
+							}
+							if (body.progressEntryId)
+								await tx.insert(postProgressEntry).values({
+									postId: created.id,
+									progressEntryId: body.progressEntryId,
+									position: fractionalPositionAt(0),
+								});
+							await publishPostToRealms(tx, {
+								postId: created.id,
+								realmIds: body.publishRealmIds,
+								actorProfileId: profile.unitId,
+							});
+							await recordUnitRevision(tx, {
+								unitId: created.id,
+								actorProfileId: profile.unitId,
+								contribution: body.revisionContext?.contribution,
+								event: "create",
+							});
+							return created.id;
+						},
+					);
 					return { id };
 				},
 				{
@@ -484,6 +489,7 @@ export default new Elysia()
 							"PostTargetingLocked",
 						]),
 						[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["ValidationError"]),
+						[StatusCodes.TOO_MANY_REQUESTS]: VndbVoteBackpressureResponse,
 					},
 					detail: { summary: "Create review", tags: ["Reviews"] },
 				},
@@ -629,7 +635,7 @@ export default new Elysia()
 				"/:reviewId",
 				async ({ params, profile, authorization, body }) => {
 					await authorization.unit.ensureCanUpdate(params.reviewId, [["localizations"]]);
-					await database.transaction(async (tx) => {
+					await runVndbVoteTransaction({ family: "unit_tag", authority: "global" }, async (tx) => {
 						const [current] = await tx
 							.select({ content: unitLocalization.content })
 							.from(unitLocalization)
@@ -685,6 +691,7 @@ export default new Elysia()
 						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
 						[StatusCodes.NOT_FOUND]: UnitReadFailureResponse,
 						[StatusCodes.CONFLICT]: toApiErrorResponse(["PostTagMentionVoteConflict"]),
+						[StatusCodes.TOO_MANY_REQUESTS]: VndbVoteBackpressureResponse,
 					},
 					detail: { summary: "Update review", tags: ["Reviews"] },
 				},

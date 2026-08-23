@@ -14,6 +14,7 @@ import {
 } from "../src/services/auth/api-quota/operation";
 import { RezicsVersion } from "../src/version";
 import { formatWithBiome } from "./format-with-biome";
+import { decorateRetryableResponse } from "./openapi-retryable-response";
 
 const { initializeObservability } = await import("@rezics/observability");
 const observability = initializeObservability({
@@ -49,38 +50,6 @@ const internalErrorResponse = {
 		"application/json": { schema: { $ref: "#/components/schemas/InternalError" } },
 	},
 };
-const apiQuotaExceededResponse = {
-	description: "API quota exceeded",
-	headers: {
-		"Retry-After": {
-			description: "Seconds until the limiting window or concurrency lease can be retried",
-			schema: { type: "integer", minimum: 1 },
-		},
-	},
-	content: {
-		"application/json": {
-			schema: {
-				type: "object",
-				required: ["error", "requestId"],
-				properties: {
-					error: {
-						type: "object",
-						required: ["code", "message"],
-						properties: {
-							code: {
-								type: "string",
-								enum: ["ApiQuotaExceeded", "ApiTokenRateLimitExceeded"],
-							},
-							message: { type: "string" },
-							details: { $ref: "#/components/schemas/JsonValue" },
-						},
-					},
-					requestId: { type: "string" },
-				},
-			},
-		},
-	},
-} satisfies OpenAPIV3.ResponseObject;
 const isResponseObject = (
 	response: OpenAPIV3.ReferenceObject | OpenAPIV3.ResponseObject | undefined,
 ): response is OpenAPIV3.ResponseObject => Boolean(response && !("$ref" in response));
@@ -206,8 +175,12 @@ for (const [pathTemplate, path] of Object.entries(document.paths)) {
 		}
 		if (quotaOperation.scope && !operation.security)
 			operation.security = [{}, { ApiToken: [] }, { SessionCookie: [] }];
-		if (operation.security?.some((requirement) => "ApiToken" in requirement))
-			operation.responses[StatusCodes.TOO_MANY_REQUESTS] ??= apiQuotaExceededResponse;
+		decorateRetryableResponse(operation.responses, {
+			acceptsApiToken: Boolean(
+				operation.security?.some((requirement) => "ApiToken" in requirement),
+			),
+			operation: `${method.toUpperCase()} ${pathTemplate}`,
+		});
 		Object.assign(operation, {
 			operationId: publicOperationId,
 			"x-rezics-quota-route-operation-id": routeOperationId,
