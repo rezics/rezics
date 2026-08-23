@@ -24,10 +24,6 @@ import {
 	voteTagStructure,
 	voteTagStructureApplication,
 } from "../../tag-structures/service";
-import {
-	getUnitStructureCorrection,
-	submitUnitStructureCorrection,
-} from "../../tag-structures/correction";
 import { UnitNotFound } from "../../units/errors";
 import { checkUnitType } from "../unit-resources/service";
 import { RealmNotFound } from "../realms/errors";
@@ -45,17 +41,13 @@ import {
 	TagHierarchyResponse,
 	TagIdParams,
 	TagStructureApplicationResponse,
-	TagStructureCorrectionParams,
 	TagStructureParams,
 	TagStructureQuery,
 	TagStructureResponse,
-	UnitStructureCorrectionNoChangeResponse,
-	UnitStructureCorrectionJobResponse,
 	UnitTagStructureParams,
 	UnitTagLandscapeParams,
 	UnitTagLandscapeQuery,
 	UnitTagLandscapeResponse,
-	UpdateTagStructureBody,
 	UpsertRealmTagSubscriptionBody,
 	VoteBody,
 	VoteSummaryResponse,
@@ -148,69 +140,6 @@ export default new Elysia()
 						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["TagStructureNotFound"]),
 					},
 					detail: { summary: "Get a Tag structure", tags: ["Tags"] },
-				},
-			)
-			.put(
-				"/:structureId",
-				async ({ params, body, profile, authorization, status }) => {
-					await authorization.platform.ensureCapability(DevelopmentPreviewCapability);
-					const correction = await submitUnitStructureCorrection({
-						structureId: params.structureId,
-						memberTagIds: body.memberTagIds,
-						expectedUpdatedAt: body.updatedAt,
-						reason: body.reason,
-						actorProfileId: profile.unitId,
-						authorization: authorization.platform,
-						contribution: body.revisionContext?.contribution,
-					});
-					if (correction.changed) return status(StatusCodes.ACCEPTED, correction);
-					return status(StatusCodes.OK, correction);
-				},
-				{
-					access: "write:unit:update",
-					params: TagStructureParams,
-					query: TagStructureQuery,
-					body: UpdateTagStructureBody,
-					response: {
-						[StatusCodes.OK]: UnitStructureCorrectionNoChangeResponse,
-						[StatusCodes.ACCEPTED]: UnitStructureCorrectionJobResponse,
-						[StatusCodes.FORBIDDEN]: toApiErrorResponse(["PlatformCapabilityRequired"]),
-						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["TagNotFound", "TagStructureNotFound"]),
-						[StatusCodes.CONFLICT]: toApiErrorResponse([
-							"TagStructureChanged",
-							"TagStructureDefinitionConflict",
-						]),
-						[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["InvalidTagStructure"]),
-						[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
-							"RevisionCreditEntityInvalid",
-							"RevisionContributionActorRequired",
-						]),
-						[StatusCodes.TOO_MANY_REQUESTS]: VndbVoteBackpressureResponse,
-					},
-					detail: {
-						summary: "Administratively correct a Tag structure definition",
-						tags: ["Tags"],
-					},
-				},
-			)
-			.get(
-				"/:structureId/corrections/:correctionId",
-				async ({ params, authorization }) => {
-					await authorization.platform.ensureCapability(DevelopmentPreviewCapability);
-					return getUnitStructureCorrection(params.structureId, params.correctionId);
-				},
-				{
-					access: "write:unit:update",
-					params: TagStructureCorrectionParams,
-					response: {
-						[StatusCodes.OK]: UnitStructureCorrectionJobResponse,
-						[StatusCodes.FORBIDDEN]: toApiErrorResponse(["PlatformCapabilityRequired"]),
-						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["TagStructureNotFound"]),
-					},
-					detail: {
-						summary: "Get an administrative Tag structure correction job",
-						tags: ["Tags"],
-					},
 				},
 			)
 			.put(

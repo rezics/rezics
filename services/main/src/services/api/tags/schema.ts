@@ -3,8 +3,6 @@ import { type Static, t } from "elysia";
 import {
 	UnitStructureMaximumMembers,
 	UnitStructureMinimumMembers,
-	UnitStructureCorrectionStatusValues,
-	UnitStructureCorrectionWriteRouteValues,
 } from "../../database/schema";
 import {
 	ContentLanguage,
@@ -211,21 +209,6 @@ export const CreateTagStructureBody = t.Object(
 );
 export type CreateTagStructureBody = Static<typeof CreateTagStructureBody>;
 
-export const UpdateTagStructureBody = t.Object(
-	{
-		memberTagIds: t.Array(Uuid, {
-			minItems: UnitStructureMinimumMembers,
-			maxItems: UnitStructureMaximumMembers,
-			uniqueItems: true,
-		}),
-		updatedAt: DateTime,
-		reason: t.String({ minLength: 1, maxLength: 500 }),
-		revisionContext: t.Optional(RevisionContext),
-	},
-	{ additionalProperties: false },
-);
-export type UpdateTagStructureBody = Static<typeof UpdateTagStructureBody>;
-
 export const TagStructureParams = t.Object({ structureId: Uuid });
 export type TagStructureParams = Static<typeof TagStructureParams>;
 
@@ -233,61 +216,6 @@ export const TagStructureQuery = t.Object(LocalizationLanguageQuery, {
 	additionalProperties: false,
 });
 export type TagStructureQuery = Static<typeof TagStructureQuery>;
-
-export const TagStructureCorrectionParams = t.Object({
-	structureId: Uuid,
-	correctionId: Uuid,
-});
-export type TagStructureCorrectionParams = Static<typeof TagStructureCorrectionParams>;
-
-const UnitStructureCorrectionPathResponse = {
-	structureId: Uuid,
-	sourceProjectionVersion: t.Integer({ minimum: 1 }),
-	targetProjectionVersion: t.Integer({ minimum: 1 }),
-	sourceMemberTagIds: t.Array(Uuid, {
-		minItems: UnitStructureMinimumMembers,
-		maxItems: UnitStructureMaximumMembers,
-		uniqueItems: true,
-	}),
-	targetMemberTagIds: t.Array(Uuid, {
-		minItems: UnitStructureMinimumMembers,
-		maxItems: UnitStructureMaximumMembers,
-		uniqueItems: true,
-	}),
-} as const;
-
-const UnitStructureCorrectionLifecycleResponse = {
-	requestedAt: DateTime,
-	updatedAt: DateTime,
-	lastErrorCode: t.Nullable(t.String()),
-	lastErrorMessage: t.Nullable(t.String()),
-} as const;
-
-export const UnitStructureCorrectionJobResponse = t.Object({
-	...UnitStructureCorrectionPathResponse,
-	...UnitStructureCorrectionLifecycleResponse,
-	correctionId: Uuid,
-	changed: t.Literal(true),
-	status: t.UnionEnum(UnitStructureCorrectionStatusValues),
-	writeRoute: t.UnionEnum(UnitStructureCorrectionWriteRouteValues),
-	activatedAt: t.Nullable(DateTime),
-	completedAt: t.Nullable(DateTime),
-	failedAt: t.Nullable(DateTime),
-	cancelledAt: t.Nullable(DateTime),
-});
-
-export const UnitStructureCorrectionNoChangeResponse = t.Object({
-	...UnitStructureCorrectionPathResponse,
-	...UnitStructureCorrectionLifecycleResponse,
-	correctionId: t.Null(),
-	changed: t.Literal(false),
-	status: t.Literal("completed"),
-	writeRoute: t.Literal("target"),
-	activatedAt: t.Null(),
-	completedAt: DateTime,
-	failedAt: t.Null(),
-	cancelledAt: t.Null(),
-});
 
 export const TagStructureResponse = t.Object({
 	id: Uuid,
