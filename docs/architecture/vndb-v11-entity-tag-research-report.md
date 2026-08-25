@@ -1,201 +1,333 @@
-# VNDB v11 Entity, Tag, Spoiler, and Measurement Research Report
+# VNDB v11 Entity, Tag Path, Spoiler, and Measurement Research Report
 
-Status: temporary execution-tracking report. The canonical Tag-structure
-architecture and evidence live in [tag-structures.md](./tag-structures.md);
-the accepted judgment, spoiler, Realm-authority, and measurement contracts
-live in
-[entity-tag-spoiler-and-measurement-decisions.md](./entity-tag-spoiler-and-measurement-decisions.md).
-This report tracks only the remaining execution: the capacity evidence still
-to be gathered and the staged development-preview exit. Delete this report
-after Phase 4 of the delivery roadmap ships.  
-Date: 2026-08-23
+Status: temporary corrective implementation contract. This report supersedes
+the rejected generic Structure Unit, mutable correction, persisted primary-path,
+and phased preview-exit assumptions in the current Tag-structure documents.
+Delete it only after the complete implementation and permanent-document
+reconciliation ship.
+Date: 2026-08-25
 
-## Where the decisions live
+## Scope and authority
 
-- [tag-structures.md](./tag-structures.md): identity and immutability, the
-  design evidence and rejected alternatives, primary display path, search and
-  indexing, the single-picker application interaction, the three product
-  surfaces, effective projection, assisted proposals, governance
-  observability, and the cost model.
-- [entity-tag-spoiler-and-measurement-decisions.md](./entity-tag-spoiler-and-measurement-decisions.md):
-  the spoiler and concealment mechanism separation, judgment dimensions and
-  co-located storage, spoiler levels and Wilson-based aggregation,
-  propagation and member override, association spoiler classification,
-  content spoiler labels and the NSFW display label with their bootstrap
-  registry and guards, Realm fallback policy and table shapes, Tag
-  vocabulary policy flags, Entity
-  description contract and collapse behavior, structured measurements,
-  compound-search tunables, the pack import contract, and the migration and
-  cutover plan.
+This report defines one continuous implementation chain with no Phase 0–4
+approval pauses and no compatibility period for the rejected preview model.
+Completion covers database, backend, API, generated clients, frontend,
+localization, content-pack import, Realm authority, operations, and permanent
+documentation.
 
-This report intentionally restates none of it.
+[tag-structures.md](./tag-structures.md) remains useful for its research
+evidence, interaction research, and capacity model. Its generic `structure`
+Unit, correction machinery, primary-path projection, and old physical names
+are superseded here. The durable result must replace it with a dedicated Tag
+Path architecture document. The accepted spoiler, content-label, Realm, and
+measurement semantics in
+[entity-tag-spoiler-and-measurement-decisions.md](./entity-tag-spoiler-and-measurement-decisions.md)
+remain authoritative where they do not depend on those superseded contracts.
 
-## Current evidence
+`content_structure` is unrelated. It owns Book and Media outlines and is not
+renamed or removed.
 
-`D:\rezics-repos\rezics-showcase-packs\packs\vndb-v11` version `0.1.0`
-currently declares 8 Software Units, 65 Release Units, 82 Entity Units, and
-589 Tag Units.
+## Corrected domain model
 
-The current Entity records generally contain Unit metadata, Entity kind,
-localized titles, and aliases. They do not carry the full VNDB character
-description or structured measurements. The pack's 1,028 `unitTags` are
-flattened applications containing a Unit key, Tag key, pin, and position; they
-do not preserve applicability evidence, spoiler evidence, hierarchy
-provenance, or direct-versus-derived presentation semantics. This is why the
-association surface can technically find Tag Units while still failing to
-reproduce a complete VNDB-like experience, and it is what Phase 0 fixes at
-the contract level through the accepted pack import contract.
+### Tag Path is a dedicated Unit
 
-## Capacity evidence required before the Phase 0 migration
+A Tag Path is an immutable ordered definition of two to sixteen Tags from a
+broader meaning to a narrower meaning:
 
-The accepted contracts fix the shapes; the migration may land only with the
-capacity evidence the repository baseline requires, recorded against
-500,000,000 rows and estimated at 3,000,000,000 rows per corpus-scale
-relation:
+```text
+发色 → 红色
+人物特征 → 发色 → 红色
+```
 
-- candidate relationship cardinality and distribution;
-- applicability-versus-spoiler vote overlap, validating the co-located
-  judgment row against separate fact tables with representative densities;
-- global and per-Realm read/write rates;
-- hot Unit, Tag, Path, and Realm skew;
-- latency and contribution throughput targets, re-derived from the quick-add
-  write amplification (one application vote fans out to at most L support
-  rows and L effective upserts, L ≤ 16 and typically 2–4);
-- row and index storage at both required scales for the four spoiler-bearing
-  application scopes (global and Realm, Tag and Path), the two
-  Path-definition authorities, and the global subject-association judgment
-  relation;
-- aggregate write amplification and WAL/network costs;
-- projection freshness requirements;
-- migration and backfill costs; and
-- confirmation that the async-aggregation cutover thresholds documented in
-  [vote-and-reference-governance.md](./vote-and-reference-governance.md)
-  remain valid for the widened judgment rows.
+The terminal `红色` Tag and each Path ending at it have different identities.
+A Path therefore has its own UUID, ownership, definition judgments,
+application judgments, source provenance, and history. This follows MeSH's
+separation of one concept from its hierarchy locations and SKOS polyhierarchy.
 
-Risky queries require representative distributions and `EXPLAIN (ANALYZE,
-BUFFERS)`. Toy fixture performance is not evidence for either required scale.
-VNDB's live corpus (about 3.0k tags and 1.86M application votes, observed
-2026-08) is a useful density reference point, not a substitute for the
-required baselines.
+Path is a Tag-domain Unit, not a generic ordered Structure Unit:
 
-## Delivery roadmap: development preview exit
+```text
+unit.kind = tag_path
+tag_path.id → unit.id
+tag_path_member.path_id → tag_path.id
+tag_path_member.tag_id → tag.id
+```
 
-Each phase has an explicit exit condition; a phase must not start before the
-previous phase's exit condition holds. When Phase 4 ships, delete this
-report; the two permanent documents above are the surviving record.
+`services/main/src/services/database/schema/tag-path.ts` replaces and deletes
+`services/main/src/services/database/schema/structure.ts`. TypeScript uses
+`TagPath*`, SQL uses `tag_path*`, and public APIs use `pathId` and
+`/tag-paths`. Remove `unit.kind = structure`, `UnitStructureKindValues`,
+`UnitStructureKind`, `tag.hierarchy_path`, generic `unit_structure*` owners,
+and every Structure Unit route, filter, search, feed, following, SEO, view,
+alias, adapter, and dual write.
 
-### Phase 0 — Contract landing and seeding
+Being a Unit supplies identity and lifecycle, not automatic access to every
+generic Unit capability. Collections are mutable flat orderings,
+`content_structure` is a mutable owned tree, and Tag Path is an immutable
+semantic chain. Their shared ordering does not justify one abstraction.
 
-- Land the accepted judgment contract as the single MAJOR migration defined
-  in the decisions document (table replacements, `NOT VALID` constraint
-  attachment with online validation, concurrent index builds, the documented
-  deploy sequence), backed by the capacity evidence above.
-- Expand the showcase source and catalog contract per the accepted pack
-  import contract: Portable Text descriptions, structured measurements,
-  hierarchy provenance with primary parents, policy flags, and
-  importer-attributed judgments with honest aggregates.
-- Seed Path definitions from imported hierarchies (primary chains plus
-  secondary chains, exact-array deduplication, one importer definition vote
-  each).
-- Seed the content-label registry (the three content-spoiler Tag Units and
-  the NSFW display label), create `subject_association_judgment`, and
-  install the registry guards defined in the decisions document.
+### Definition identity
 
-Exit: migration deployed and verified; the `vndb-v11` pack imports losslessly
-and produces seeded, deduplicated definitions on a disposable fixture; the
-co-location benchmark result is recorded.
+`tag_path` stores:
 
-### Phase 1 — Read-only complete presentation
+```text
+id
+member_tag_ids       uuid[2..16]
+terminal_tag_id
+created_by_profile_id
+created_at
+```
 
-- Build the primary display path projection and the ends-at index.
-- Ship the reading summary (grouped by accepted path root, exact "N more")
-  and the complete exploration surface (grouped hierarchy list replacing the
-  one-Card-per-path layout), with provenance stated in text.
-- Ship Entity descriptions with the accepted collapse behavior and read-only
-  structured measurements.
+The database enforces exact-array uniqueness, distinct members, two to sixteen
+members, `terminal_tag_id` equal to the final member, and active, approved,
+public Tag membership. The definition array and terminal Tag cannot be edited.
+A changed definition is a new Path Unit; there is no `definition_version`,
+projection version, correction bypass, or in-place administrative edit.
 
-Exit: read surfaces released to ordinary users — the development preview
-capability stops gating structure reads; writes remain gated. The prototype
-confirms or amends the four/six-line collapse budgets in the decisions
-document.
+The array is for bounded identity comparison, not member search. Membership,
+reverse lookup, adjacency, and traversal use `tag_path_member` and rebuildable
+projections. PostgreSQL cautions that searchable elements should normally be
+rows rather than an array treated as a set:
+[Arrays](https://www.postgresql.org/docs/current/arrays.html#ARRAYS-SEARCHING).
 
-### Phase 2 — Application contribution
+### Full paths, breadcrumbs, and manual governance merge
 
-- Replace the two pickers in the Unit Tag management flow with the single Tag
-  input component: suggestion breadcrumbs, silent path application when one
-  accepted path ends at the Tag, the inline sense chooser when several do,
-  and the flat fallback when none does. The separate Structure picker is
-  removed from ordinary flows.
-- Ship compound query resolution with the accepted initial tunables, plus the
-  alias enrichment loop for unresolved compounds.
-- Ship the contribution grid with applicability judgments and staged batch
-  saves; spoiler columns land in Phase 3.
-- Enforce `directly_applicable` in suggestions and at the API boundary.
-- Ship author content-spoiler labels: composer level chips writing the
-  pinned registry application, warning-card rendering, and suppression of
-  labeled bodies in feed cards, search snippets, embeds, and notification
-  previews.
-- Ship the NSFW display label on the same write paths, with blurred visual
-  surfaces, the account-level always-show preference, and the adult
-  discovery signals defined in the decisions document.
-  `unit.content_rating` keeps its existing age-preference filtering
-  unchanged.
+Path identity and presentation are separate:
 
-Exit: application writes released to ordinary users; flat `unit_tag` behavior
-for path-less Tags is unchanged; quick-add write amplification is measured
-against the accepted throughput targets; decomposition telemetry (trigger
-rate, hit rate, added latency) is reviewed and the tunables revised in the
-decisions document if needed.
+- store every semantically meaningful hierarchy member;
+- exclude nodes that exist only as visual section headings;
+- ordinary suggestions may render the shortest suffix that disambiguates the
+  terminal Tag; and
+- exploration and provenance expose the complete Path.
 
-### Phase 3 — Definition governance, spoiler dimension, assistance
+If `人物特征 → 发色` is a real broader-to-narrower assertion, the stored Path
+may be `人物特征 → 发色 → 红色` while a compact breadcrumb renders
+`发色 → 红色`. The abbreviation does not create another Path.
 
-- Open Path definition proposals and definition voting to the community in
-  curation surfaces, with the pending-definition queue exposed and
-  time-to-decision tracked (governance observability).
-- Activate the spoiler dimension end to end per the accepted contracts:
-  distribution-preserving aggregates, protection and status derivation,
-  propagation with confident direct override, `default_spoiler_level`
-  pre-highlighting and protection floor, viewer preference defaulting to
-  hide-any, and spoiler columns in the contribution grid with the optional
-  post-add judgment in the picker.
-- Launch the assisted-proposal layer (candidate definitions, placement and
-  alias suggestions, duplicate warnings) feeding the ordinary proposal and
-  vote pipelines with provenance.
-- Activate association spoiler judgments (global authority) with
-  appearance-row protection, and open the Realm and platform correction
-  paths for content labels.
+Exact duplicates are rejected. Prefix, suffix, and extension relationships are
+not automatically duplicates and never trigger an automatic merge. They emit
+a curation warning.
 
-Exit: definition governance and spoiler contribution are public; assisted
-proposals are measurably feeding the queues without acceptance authority.
+Consolidation is an explicit manual governance operation. A proposal names a
+source Path, a target Path, a typed reason, proposer, and provenance. It passes
+the ordinary governance authority; assisted systems may propose but cannot
+accept. Once accepted:
 
-### Phase 4 — Realm authority
+1. source and target remain immutable Units with distinct UUIDs;
+2. the source is unavailable for new applications and ordinary discovery;
+3. resolution returns the target together with merge provenance;
+4. source definition votes and application judgments remain source facts and
+   are not copied, summed, or reinterpreted as target votes;
+5. a target application judgment is new evidence, not a migrated vote;
+6. self-targets and cycles are rejected, and chains resolve with bounded
+   indexed work; and
+7. a later reversal is another auditable governance resolution, never an
+   in-place definition edit.
 
-- Add the Realm tables and projections defined in the decisions document
-  (`realm_structure`, `realm_structure_vote`,
-  `realm_structure_application_judgment`, `realm_tag_judgment`, Realm
-  effective projections) with the `inherit`-by-default fallback policy.
-- Preserve authority and provenance on every API result and rendered surface;
-  global and Realm evidence are never merged.
+This is manual domain governance, not automatic prefix normalization and not a
+compatibility alias.
 
-Exit: the `platform.development_preview.access` gate is removed from every
-structure operation; global and Realm evidence render with full provenance;
-this report is deleted.
+### No primary selection
 
-## Deferred beyond this roadmap
+There is no `tag_primary_path`, `is_primary`, designated-primary vote, manual
+primary selector, or persisted `Tag → primary Path` projection.
 
-Explicitly out of scope until real demand or a separate decision:
+When a read needs one breadcrumb among several accepted Paths ending at a Tag,
+it computes the highest-ranked eligible Path. That result is transient display
+ordering, not canonical identity or governance state. Search relevance still
+ranks title and alias matches first; Path weight chooses a breadcrumb and
+orders otherwise equivalent Path contexts.
 
-- descendant-based filtering for category-only Tags, which depends on the
-  versioned asynchronous closure projection described in the tag-structures
-  cost model;
-- measurement uncertainty, approximations, and ranges (point values only in
-  the first release);
-- asynchronous worker-reliability weighting of spoiler judgments (the
-  per-Profile judgment facts retained by the accepted storage make it
-  possible later without a schema change);
-- Realm-scoped subject-association spoiler judgments;
-- content labels on credit attributions and series relations;
-- progress-aware automatic reveal of labeled or protected content;
-- explicit multi-target spoiler scopes on one document; and
-- image-asset-level screening pipelines (the existing content-rating and
-  media governance own that surface).
+The provisional weight is the accepted active Unit–Path usage count in the
+applicable authority. Higher count ranks first; equal counts use Path UUID only
+for deterministic ordering. Global and Realm counts stay separate.
+
+Usage count is not the final formula: it does not prove confidence,
+specificity, recency, or Realm relevance. Callers must not persist the result,
+expose it as primary, or treat it as authority. The owning exported TypeScript
+ranking boundary must include:
+
+```ts
+/**
+ * Ranks accepted Tag Paths for transient search and display ordering.
+ *
+ * @remarks
+ * The current weight is accepted active usage count only. The result is not a
+ * canonical or manually selected primary Path and must not be persisted as one.
+ *
+ * @todo Replace the provisional usage-count-only weight with the separately
+ * adopted final ranking formula.
+ */
+```
+
+The TODO is a required honesty boundary, not permission to invent an
+undocumented formula.
+
+## Search and ordinary Tag input
+
+Ordinary users search Tags, not Paths. Suggestions contain the localized Tag
+title, a dynamically ranked breadcrumb when useful, and usage evidence. Path
+search remains restricted to curation surfaces.
+
+Do not copy ancestor titles, word-order permutations, or every alias into each
+descendant search document. Resolve compounds as follows:
+
+1. normalize and run direct Tag title/alias search;
+2. when direct results are insufficient, enumerate bounded two-part CJK or
+   spaced-token splits;
+3. resolve each side to a bounded set of Tag IDs through exact title, accepted
+   alias, and prefix matches;
+4. batch candidate pairs into one indexed query over accepted `tag_path` and
+   `tag_path_member` rows;
+5. validate the real broader-before-terminal Path order even if query words are
+   reversed; and
+6. rank exact title above alias, semantic query order above reversed order,
+   then apply the provisional Path weight.
+
+```text
+发色红色   → 发色 | 红色 → 发色 → 红色
+红色发色   → 红色 | 发色 → 发色 → 红色, with lower order score
+红色头发   → 红色 | 头发 → 发色 → 红色, if 头发 aliases 发色
+```
+
+Initial bounds are: fewer than three direct hits; at most 16 unspaced CJK
+characters and 15 cuts; at most six spaced tokens; four Tag candidates per
+side; 32 candidate-pair probes; and five decomposed suggestions. These are
+logical probes, not database round trips. Candidate pairs are submitted in a
+batch. Governed aliases resolve to Tag identities rather than becoming
+unconditional global synonyms, although PGroonga provides the underlying
+indexed expansion primitives:
+[PGroonga query expansion](https://pgroonga.github.io/reference/functions/pgroonga-query-expand.html).
+
+Required access paths include:
+
+```text
+tag_path_member(path_id, ordinal)
+tag_path_member(tag_id, path_id) INCLUDE (ordinal)
+tag_path(terminal_tag_id, id)
+```
+
+Search never scans Unit–Path application facts; ranking reads a bounded
+aggregate by Path and authority. The one ordinary Tag picker behaves as follows:
+
+- no accepted ending Path: save a direct Tag;
+- one accepted ending Path: apply it silently;
+- several: show a sense chooser ordered by computed weight, with no primary
+  marker or manual primary selection; and
+- `directly_applicable = false`: reject direct application while allowing
+  governed hierarchy context.
+
+## Final physical model
+
+| Rejected preview object | Final object |
+| --- | --- |
+| `unit_structure` | `tag_path` |
+| `unit_structure_member` | `tag_path_member` |
+| `unit_structure_edge` | `tag_path_edge` or rebuildable adjacency |
+| `unit_structure_end` | removed; use `tag_path.terminal_tag_id` |
+| `unit_structure_vote` | `tag_path_vote` |
+| `unit_structure_vote_stat` | `tag_path_vote_stat` |
+| primary candidate/projection tables | removed with no replacement |
+| `unit_structure_application` | `unit_tag_path` |
+| application judgment/stat | `unit_tag_path_judgment` / `_stat` |
+| `unit_tag_structure_support` | `unit_tag_path_support` |
+| correction/version machinery | removed |
+| `realm_structure` / `_vote` | `realm_tag_path` / `_vote` |
+| Realm Structure application | `realm_unit_tag_path` judgment/stat/support |
+
+Manual merge governance uses dedicated facts and a bounded active resolution
+projection; it does not restore mutable correction machinery.
+
+Corpus-scale relations choose partition-routing keys from their first release:
+Path facts by `path_id`, global application facts by `unit_id`, Realm facts by
+`(realm_id, unit_id)`, and hierarchy reads by `tag_id`. PostgreSQL declarative
+partitioning can route these keys without whole-corpus scans:
+[Partitioning](https://www.postgresql.org/docs/current/ddl-partitioning.html).
+
+## Measurement facts and evidence
+
+`entity_measurement` stores editable facts keyed by `(entity_id,
+context_unit_id)` with `UNIQUE NULLS NOT DISTINCT`. Import URL, observation
+time, source key, and provenance belong to
+`content_pack_entity_measurement_evidence`, which references the measurement
+and import. Human edits therefore do not require importer evidence. PostgreSQL
+supports the required nullable-key uniqueness directly:
+[Unique constraints](https://www.postgresql.org/docs/current/ddl-constraints.html#DDL-CONSTRAINTS-UNIQUE-CONSTRAINTS).
+
+## Destructive append-only migration
+
+Released migration history remains append-only. A new vendor-neutral breaking
+migration such as `tag_path_entity_semantics` must:
+
+1. assert that every preview Structure/Path table is empty and fail otherwise;
+2. drop rejected tables, functions, triggers, views, and `structure` Unit kind;
+3. create final Tag Path, judgment, merge, Realm, content-label, measurement,
+   and evidence relations;
+4. perform no conversion or backfill;
+5. provide no compatibility view, alias, adapter, or dual write; and
+6. make old binaries fail instead of operating against changed semantics.
+
+`VNDB` remains only in the source pack adapter and this temporary report, never
+in migrations, SQL owners, runtime files, tasks, or contract checkers.
+
+## Capacity evidence
+
+Record workload and storage evidence at 500,000,000 rows and estimate
+3,000,000,000 rows for every corpus-scale Path, member, vote, application,
+support, merge-resolution, aggregate, and Realm relation. Cover distribution,
+read/write rates, Path length (`L ≤ 16`, expected two to four), hot-key skew,
+latency and throughput, row/index storage, WAL/network cost, write
+amplification, freshness, backpressure, partition pruning, maintenance,
+cutover, and the sharding or archival path past one-node limits.
+
+Risky queries require representative distributions and `EXPLAIN` or `EXPLAIN
+ANALYZE`. Compound search must prove bounded candidate work, indexed joins, and
+no corpus scan; toy fixtures alone are not acceptance evidence.
+
+## Continuous implementation chain
+
+1. Remove preview migrations, correction workers/services/SQL, vendor-specific
+   cutover tooling, and every Structure Unit branch except unrelated
+   `content_structure`.
+2. Land the immutable Tag Path, policy flags, votes, provisional usage weight,
+   manual merge governance, fit/spoiler judgments and aggregates, provenance,
+   content labels, measurements/evidence, Realm authority, preferences,
+   partition routing, and bounded indexes.
+3. Replace `/tag-structures`, `structureId`, and `TagStructure*` with
+   `/tag-paths`, `pathId`, and `TagPath*`; add all Path, application, merge,
+   exploration, Realm, spoiler, measurement, label, and preference APIs. Add no
+   primary field or endpoint.
+4. Complete the single Tag picker, compound decomposition, alias resolution,
+   relational Path matching, reversed-order recall, duplicate warnings, and
+   provisional usage weighting. Put the required non-final-formula `@todo` on
+   the owning exported boundary.
+5. Complete grouped reading, hierarchy exploration, Entity descriptions and
+   measurements, fit/spoiler contribution, concealment, content-spoiler and
+   NSFW behavior, preview suppression, governance queues, metrics, and assisted
+   proposals without automatic acceptance.
+6. Complete `inherit | isolate` Realm authority, separate global/Realm
+   aggregates and weights, independent fit/spoiler fallback, provenance, Realm
+   Path governance, and subscription composition without vote merging.
+7. Replace generated clients and frontend terminology, remove Structure Unit
+   routing/follow/feed/SEO and the completed preview gate, and update every
+   typed locale with the approved Tag Path term. Perform no browser or visual
+   QA unless separately requested.
+8. Replace `tag-structures.md` with the permanent vendor-neutral Tag Path
+   architecture, update the judgment document's names and APIs, move durable
+   capacity evidence out of vendor documents, record the actual pack version
+   and completion ledger, then delete this temporary report.
+
+## Completion checks
+
+Run the affected frontend TypeScript check, schema generation and full
+migration replay, OpenAPI and both generated-client drift checks, localization
+policy checks, and representative `EXPLAIN` evidence once at the end. These are
+deterministic contract checks, not browser or visual acceptance.
+
+## Deferred beyond this contract
+
+The final Path ranking formula beyond provisional accepted usage count,
+measurement ranges and uncertainty, Realm subject-association spoiler,
+credit/series content labels, progress-aware reveal, multi-target spoiler, and
+image-asset screening require separate architecture decisions. The ranking
+TSDoc TODO is the explicit boundary for the first item.
