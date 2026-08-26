@@ -1,3 +1,5 @@
+import { insert } from "native-i18n";
+
 import { enTerminology } from "@rezics/i18n/terminology/en";
 
 const { forms: followTerms } = enTerminology.follow;
@@ -16,6 +18,13 @@ export default {
 	edit: "Edit",
 	clear: "Clear",
 	search: "Search",
+	shelf: {
+		label: "Content shelf",
+		previous: "Previous items",
+		next: "Next items",
+		page: insert("Page {{page}} of {{pageCount}}", { page: Number, pageCount: Number }),
+		item: insert("Item {{item}} of {{itemCount}}", { item: Number, itemCount: Number }),
+	},
 	pickerPlaceholders: {
 		unit: "Enter a name or title",
 		entity: `Enter an ${entityTerms.inline} name`,

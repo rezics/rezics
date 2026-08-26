@@ -126,6 +126,16 @@ export const CurrentSearchFieldRegistry = {
 		postgres: ["equality"],
 		residual: false,
 	},
+	collection: {
+		categories: allCategories,
+		scalar: "uuid",
+		operators: equality,
+		facet: "none",
+		sort: "none",
+		documentPath: "filters.collectionIds",
+		postgres: ["equality"],
+		residual: false,
+	},
 	credit: {
 		categories: allCategories,
 		scalar: "uuid",

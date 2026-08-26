@@ -310,6 +310,16 @@ export default {
 	UnitRealmPublicationAlreadyExists: `This content already has a publication relationship with that ${realmTerms.label}.`,
 	UnitRealmPublicationTransitionInvalid:
 		"The publication relationship is already in the requested state.",
+	ZoneThemeNotFound: `This ${zoneTerms.label} theme could not be found.`,
+	ZoneThemeRevisionNotFound: `This ${zoneTerms.label} theme revision could not be found.`,
+	ZoneThemeStylesheetInvalid: `This ${zoneTerms.label} theme stylesheet did not pass automated safety review.`,
+	ZoneThemeAssetsInvalid:
+		"Every theme image must belong to you and remain public, ready, and undeleted.",
+	ZoneThemeAutomatedReviewInvalid:
+		"The automated theme evidence is incomplete or does not meet the release requirements.",
+	ZoneThemeRevisionStateConflict:
+		"This theme revision has already moved to another review state. Reload it before continuing.",
+	ZoneThemeReferenceInvalid: `Choose a currently approved ${zoneTerms.label} theme revision.`,
 	StudioRealmSubjectLimitExceeded:
 		"You belong to too many teams for the workspace to list team-delegated content.",
 } satisfies typeof import("../zh-Hant/errorCodes").default;

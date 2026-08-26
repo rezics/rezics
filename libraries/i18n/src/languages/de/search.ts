@@ -158,6 +158,7 @@ export default {
 		"ai-disclosure": `Hinweis zur Verwendung von ${verbatimTerms.ai.value}`,
 		license: `${deTerminology.license.forms.label}`,
 		tag: "Tag",
+		collection: "Enthält Inhalt",
 		credit: "Mitwirkende",
 		"credited-profile": "Genanntes Profil",
 		realm: realmTerms.label,

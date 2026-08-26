@@ -7,6 +7,7 @@ import {
 	parseDocument,
 	type NavigationItem,
 	type NavigationTarget,
+	type UnitListPresentation,
 	type UnitReferencedBlock,
 } from "@rezics/block";
 import {
@@ -27,13 +28,16 @@ import {
 	TabsContent,
 	TabsList,
 	TabsTrigger,
+	UnitCard,
 	cn,
 } from "@rezics/ui";
+import { Shelf } from "@rezics/ui/custom/shelf";
 import { useQuery } from "@tanstack/react-query";
 import type { CSSProperties, ReactNode } from "react";
 import { useMemo } from "react";
 
 import { AppLink } from "@/features/application-shell/components/app-link";
+import { BlockContractRoot } from "@/features/block-composition/block-contract-root";
 import { FeedItemCard } from "@/features/content-feed/components/feed-item-card";
 import { publicUnitHref } from "@/features/units/routing/public-unit-route";
 import { useTranslation } from "@/i18n/client";
@@ -186,6 +190,22 @@ function DockBlock({
 	readonly navigations: ReadonlyMap<string, Navigation>;
 	readonly units: ReadonlyMap<string, UnitPresentation>;
 }): ReactNode {
+	return (
+		<BlockContractRoot block={block}>
+			<DockBlockContent block={block} navigations={navigations} units={units} />
+		</BlockContractRoot>
+	);
+}
+
+function DockBlockContent({
+	block,
+	navigations,
+	units,
+}: {
+	readonly block: UnitReferencedBlock;
+	readonly navigations: ReadonlyMap<string, Navigation>;
+	readonly units: ReadonlyMap<string, UnitPresentation>;
+}): ReactNode {
 	const { t } = useTranslation(["ui"]);
 	if (block._type === "unit-ref") {
 		const unit = units.get(block.unitId);
@@ -198,6 +218,8 @@ function DockBlock({
 					collectionId={block.source.collectionId}
 					layout={block.layout}
 					limit={block.limit}
+					presentation={block.presentation}
+					units={units}
 				/>
 			);
 		if (block.source.kind !== "units") return null;
@@ -205,12 +227,18 @@ function DockBlock({
 			.map((id) => units.get(id))
 			.filter((unit): unit is UnitPresentation => Boolean(unit))
 			.slice(0, block.limit);
+		const itemHeadingAs =
+			block.presentation?.headingUnitId && units.get(block.presentation.headingUnitId)?.title
+				? "h3"
+				: "h2";
 		return (
-			<div className={unitListClasses(block.layout)}>
+			<DockUnitList layout={block.layout} presentation={block.presentation} units={units}>
 				{items.map((unit) => (
-					<DockUnit appearance="card" key={unit.id} unit={unit} />
+					<div data-part="item" key={unit.id}>
+						<DockUnitCard headingAs={itemHeadingAs} unit={unit} />
+					</div>
 				))}
-			</div>
+			</DockUnitList>
 		);
 	}
 	if (block._type === "menu") {
@@ -227,14 +255,15 @@ function DockBlock({
 	if (block._type === "media") {
 		const alt = units.get(block.altUnitId)?.title ?? "";
 		const image = (
-			<figure className="overflow-hidden rounded-xl border border-border-weak">
+			<figure className="overflow-hidden rounded-xl border border-border-weak" data-part="figure">
 				<img
 					alt={alt}
 					className={cn("h-auto w-full", block.fit === "cover" && "max-h-[36rem] object-cover")}
+					data-part="asset"
 					src={`/image-assets/${encodeURIComponent(block.assetId)}/content`}
 				/>
 				{block.captionUnitId ? (
-					<figcaption className="px-4 py-3 text-muted-foreground text-sm">
+					<figcaption className="px-4 py-3 text-muted-foreground text-sm" data-part="caption">
 						{units.get(block.captionUnitId)?.title}
 					</figcaption>
 				) : null}
@@ -244,6 +273,7 @@ function DockBlock({
 		const href = navigationTargetHref(block.target, units);
 		return href ? (
 			<AppLink
+				data-part="link"
 				href={href}
 				rel={block.target.kind === "external" ? "noopener noreferrer" : undefined}
 				target={block.target.kind === "external" ? "_blank" : undefined}
@@ -256,9 +286,12 @@ function DockBlock({
 	}
 	if (block._type === "divider")
 		return block.style === "space" ? (
-			<div aria-hidden className="h-6" />
+			<div aria-hidden className="h-6" data-part="separator" />
 		) : (
-			<Separator className={cn("my-3 bg-border-weak", block.style === "section" && "h-0.5")} />
+			<Separator
+				className={cn("my-3 bg-border-weak", block.style === "section" && "h-0.5")}
+				data-part="separator"
+			/>
 		);
 	if (block._type === "columns") {
 		const style: CSSProperties & { "--dock-columns": string } = {
@@ -270,7 +303,7 @@ function DockBlock({
 				style={style}
 			>
 				{block.columns.map((column) => (
-					<div className="min-w-0" key={column._key}>
+					<div className="min-w-0" data-part="column" key={column._key}>
 						<DockBlocks blocks={column.blocks} navigations={navigations} units={units} />
 					</div>
 				))}
@@ -286,6 +319,7 @@ function DockBlock({
 					block.layout === "row" && "flex flex-wrap items-start",
 					block.layout === "grid" && "grid sm:grid-cols-2",
 				)}
+				data-part="content"
 			>
 				<DockBlocks blocks={block.blocks} navigations={navigations} units={units} />
 			</div>
@@ -302,9 +336,9 @@ function DockBlock({
 					block.tone === "danger" && "border-s-destructive",
 				)}
 			>
-				<CardContent className="grid gap-3 p-4">
+				<CardContent className="grid gap-3 p-4" data-part="content">
 					{block.labelUnitId ? (
-						<strong>{units.get(block.labelUnitId)?.title ?? t.ui.unnamed}</strong>
+						<strong data-part="title">{units.get(block.labelUnitId)?.title ?? t.ui.unnamed}</strong>
 					) : null}
 					<DockBlocks blocks={block.blocks} navigations={navigations} units={units} />
 				</CardContent>
@@ -316,15 +350,15 @@ function DockBlock({
 		if (!first) return null;
 		return (
 			<Tabs defaultValue={first._key}>
-				<TabsList className="max-w-full overflow-x-auto" variant="underline">
+				<TabsList className="max-w-full overflow-x-auto" data-part="list" variant="underline">
 					{visibleTabs.map((tab) => (
-						<TabsTrigger key={tab._key} value={tab._key}>
+						<TabsTrigger data-part="tab" key={tab._key} value={tab._key}>
 							{units.get(tab.labelUnitId)?.title ?? t.ui.unnamed}
 						</TabsTrigger>
 					))}
 				</TabsList>
 				{visibleTabs.map((tab) => (
-					<TabsContent className="pt-3" key={tab._key} value={tab._key}>
+					<TabsContent className="pt-3" data-part="panel" key={tab._key} value={tab._key}>
 						<DockBlocks blocks={tab.blocks} navigations={navigations} units={units} />
 					</TabsContent>
 				))}
@@ -346,53 +380,162 @@ function DockUnit({
 	const href = publicUnitHref(unit.kind, unit);
 	const content =
 		appearance === "inline" ? (
-			<span className="font-medium">{title}</span>
+			<span className="font-medium" data-part="title">
+				{title}
+			</span>
 		) : (
-			<Card appearance="outlined">
+			<Card appearance="outlined" data-part="card">
 				<CardContent className="flex min-w-0 items-center gap-3 p-4">
 					<IdentityAvatar
 						avatar={unit.avatar}
 						className={appearance === "cover" ? "size-16 rounded-lg" : "size-10"}
+						data-part="cover"
 						fallback={title.slice(0, 1)}
 					/>
-					<p className="min-w-0 truncate font-semibold">{title}</p>
+					<p className="min-w-0 truncate font-semibold" data-part="title">
+						{title}
+					</p>
 				</CardContent>
 			</Card>
 		);
-	return href ? <AppLink href={href}>{content}</AppLink> : content;
+	return href ? (
+		<AppLink data-part="link" href={href}>
+			{content}
+		</AppLink>
+	) : (
+		content
+	);
 }
 
-function unitListClasses(layout: "list" | "grid" | "carousel"): string {
-	return cn(
-		"grid gap-3",
-		layout === "grid" && "sm:grid-cols-2",
-		layout === "carousel" && "grid-flow-col auto-cols-[minmax(14rem,20rem)] overflow-x-auto pb-2",
+function DockUnitCard({
+	headingAs,
+	unit,
+}: {
+	readonly headingAs: "h2" | "h3";
+	readonly unit: UnitPresentation;
+}) {
+	const { t } = useTranslation(["ui"]);
+	const title = unit.title ?? t.ui.unnamed;
+	const href = publicUnitHref(unit.kind, unit);
+	if (!href) return <DockUnit appearance="card" unit={unit} />;
+	return (
+		<UnitCard
+			fallback={
+				<IdentityAvatar
+					avatar={unit.avatar}
+					className="size-full rounded-xl"
+					fallback={title.slice(0, 1)}
+				/>
+			}
+			headingAs={headingAs}
+			href={href}
+			title={title}
+		/>
 	);
+}
+
+function DockUnitList({
+	children,
+	layout,
+	presentation,
+	units,
+}: {
+	readonly children: ReactNode;
+	readonly layout: "list" | "grid" | "carousel";
+	readonly presentation?: UnitListPresentation;
+	readonly units: ReadonlyMap<string, UnitPresentation>;
+}) {
+	const { t } = useTranslation(["feed", "ui"]);
+	const heading = presentation?.headingUnitId
+		? units.get(presentation.headingUnitId)?.title
+		: undefined;
+	const viewAllTarget = presentation?.viewAllTarget;
+	const viewAllHref = viewAllTarget ? navigationTargetHref(viewAllTarget, units) : undefined;
+	const list =
+		layout === "carousel" ? (
+			<div data-part="items">
+				<Shelf
+					itemSize={presentation?.itemSize ?? "md"}
+					labels={heading ? { ...t.ui.shelf, label: heading } : t.ui.shelf}
+				>
+					{children}
+				</Shelf>
+			</div>
+		) : (
+			<div className={unitListClasses(layout)} data-part="items">
+				{children}
+			</div>
+		);
+	if (!heading && !viewAllHref) return list;
+	return (
+		<div className="grid gap-3">
+			<div className="flex min-w-0 items-center justify-between gap-3">
+				{heading ? (
+					<h2 className="min-w-0 truncate font-semibold text-lg" data-part="heading">
+						{heading}
+					</h2>
+				) : null}
+				{viewAllHref && viewAllTarget ? (
+					<AppLink
+						className="ms-auto shrink-0 font-medium text-link text-sm hover:underline"
+						data-part="view-all"
+						href={viewAllHref}
+						rel={viewAllTarget.kind === "external" ? "noopener noreferrer" : undefined}
+						target={viewAllTarget.kind === "external" ? "_blank" : undefined}
+					>
+						{t.feed.viewAll}
+					</AppLink>
+				) : null}
+			</div>
+			{list}
+		</div>
+	);
+}
+
+function unitListClasses(layout: "list" | "grid"): string {
+	return cn("grid gap-3", layout === "grid" && "sm:grid-cols-2");
 }
 
 function DockCollection({
 	collectionId,
 	layout,
 	limit,
+	presentation,
+	units,
 }: {
 	readonly collectionId: string;
 	readonly layout: "list" | "grid" | "carousel";
 	readonly limit: number;
+	readonly presentation?: UnitListPresentation;
+	readonly units: ReadonlyMap<string, UnitPresentation>;
 }) {
+	const { t } = useTranslation(["ui"]);
 	const localizationLanguages = useLocalizationLanguages();
 	const query = useGetApiCollectionsByCollectionIdItems({
 		path: { collectionId },
 		query: { limit, localizationLanguages },
 	});
-	if (query.isPending) return null;
-	if (query.isError) return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
-	if (!query.data) return null;
+	if (query.isPending)
+		return (
+			<p className="text-muted-foreground text-sm" data-part="loading">
+				{t.ui.loading}
+			</p>
+		);
+	if (query.isError)
+		return (
+			<div data-part="error">
+				<QueryFailure error={query.error} retry={() => void query.refetch()} />
+			</div>
+		);
+	if (!query.data || query.data.items.length === 0) return <div data-part="empty" />;
 	return (
-		<div className={unitListClasses(layout)}>
+		<DockUnitList layout={layout} presentation={presentation} units={units}>
 			{query.data.items.map((item) => (
-				<FeedItemCard item={item.content} key={item.membership.targetId} />
+				<div data-part="item" key={item.membership.targetId}>
+					<FeedItemCard item={item.content} />
+				</div>
 			))}
-		</div>
+		</DockUnitList>
 	);
 }
 
@@ -415,6 +558,7 @@ function DockNavigation({
 					"gap-2",
 					orientation === "horizontal" ? "flex flex-wrap items-start" : "grid",
 				)}
+				data-part="list"
 			>
 				{document.items.map((item) => (
 					<DockNavigationItem appearance={appearance} item={item} key={item._key} units={units} />
@@ -439,9 +583,11 @@ function DockNavigationItem({
 	const label = labelUnit.title ?? t.ui.unnamed;
 	if ("children" in item)
 		return (
-			<li className="grid gap-2">
-				<strong className="text-sm">{label}</strong>
-				<ul className="grid gap-1 ps-3">
+			<li className="grid gap-2" data-part="item">
+				<strong className="text-sm" data-part="label">
+					{label}
+				</strong>
+				<ul className="grid gap-1 ps-3" data-part="list">
 					{item.children.map((child) => (
 						<DockNavigationItem
 							appearance={appearance}
@@ -456,7 +602,7 @@ function DockNavigationItem({
 	const href = navigationTargetHref(item.target, units);
 	if (!href) return null;
 	return (
-		<li>
+		<li data-part="item">
 			<AppLink
 				className={cn(
 					"inline-flex min-h-9 items-center rounded-lg px-3 text-sm",
@@ -464,11 +610,12 @@ function DockNavigationItem({
 						? "bg-secondary font-medium text-secondary-foreground"
 						: "text-link hover:underline",
 				)}
+				data-part="link"
 				href={href}
 				rel={item.target.kind === "external" ? "noopener noreferrer" : undefined}
 				target={item.target.kind === "external" ? "_blank" : undefined}
 			>
-				{label}
+				<span data-part="label">{label}</span>
 			</AppLink>
 		</li>
 	);

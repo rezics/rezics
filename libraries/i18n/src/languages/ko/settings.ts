@@ -84,6 +84,9 @@ export default {
 	alwaysShowSpoilersHint: "스포일러로 표시된 콘텐츠를 항목별 확인 없이 표시합니다.",
 	alwaysShowNsfw: `${verbatimTerms.nsfw.value} 미디어 항상 표시`,
 	alwaysShowNsfwHint: `${verbatimTerms.nsfw.value}로 표시된 미디어를 먼저 흐리게 하지 않고 표시합니다.`,
+	customZoneThemes: "존의 사용자 지정 테마 표시",
+	customZoneThemesHint:
+		"끄면 모든 존에 플랫폼 기본 테마가 적용됩니다. 콘텐츠와 배치는 바뀌지 않습니다.",
 	account: "계정",
 	accountDescription: "현재 로그인 세션 관리",
 	security: "보안",

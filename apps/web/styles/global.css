@@ -1,3 +1,46 @@
 @import "@rezics/ui/styles.css";
 
 @source "../../../libraries/ui/src";
+
+@layer rezics-zone-contract-base, rezics-zone-theme;
+
+@layer rezics-zone-contract-base {
+	:where([data-zone-theme-scope]) {
+		color-scheme: inherit;
+	}
+
+	:where([data-zone-theme-content][data-zone-color-scheme="light"] [data-zone-theme-scope]) {
+		color-scheme: light;
+	}
+
+	:where([data-zone-theme-content][data-zone-color-scheme="dark"] [data-zone-theme-scope]) {
+		color-scheme: dark;
+	}
+
+	:where([data-zone-theme-scope] [data-block-type]) {
+		border-radius: var(--rezics-zone-card-radius);
+	}
+
+	:where([data-zone-theme-scope] [data-part="card"], [data-zone-theme-scope] [data-part="cover"]) {
+		border-radius: var(--rezics-zone-card-radius);
+	}
+
+	:where(
+		[data-zone-theme-scope] [data-part="heading"],
+		[data-zone-theme-scope] [data-part="title"]
+	) {
+		font-size: calc(1rem * var(--rezics-zone-heading-font-scale));
+	}
+
+	:where([data-zone-theme-scope] [data-block-type="post-full-view"] [data-part="title"]) {
+		font-size: calc(2rem * var(--rezics-zone-heading-font-scale));
+	}
+
+	:where(
+		[data-zone-theme-scope] [data-block-type="callout"] [data-part="content"],
+		[data-zone-theme-scope] [data-block-type="group"] [data-part="content"],
+		[data-zone-theme-scope] [data-block-type="columns"] [data-part="column"]
+	) {
+		gap: calc(1rem * var(--rezics-zone-density));
+	}
+}

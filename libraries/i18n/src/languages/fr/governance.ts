@@ -7,6 +7,7 @@ import { frTerminology } from "@rezics/i18n/terminology/fr";
 const { forms: realmTerms } = frTerminology.realm;
 const { forms: entityTerms } = frTerminology.entity;
 const { forms: postTerms } = frTerminology.post;
+const { forms: zoneTerms } = frTerminology.zone;
 
 export default {
 	title: "Gouvernance de la Unit",
@@ -96,6 +97,8 @@ export default {
 		"platform.user.api_token.api_quota.update": `Gérer les quotas des jetons ${verbatimTerms.api.value} des utilisateurs`,
 		"platform.moderate": "Modérer les Units de la plateforme",
 		"platform.suppress": "Masquer le contenu et les versions de la plateforme",
+		"platform.zone_theme.review": `Examiner les thèmes personnalisés des ${zoneTerms.plural}`,
+		"platform.zone_theme.kill": `Désactiver en urgence les thèmes personnalisés approuvés des ${zoneTerms.plural}`,
 		"realm.contribute": `Participer à tous les ${realmTerms.plural}`,
 		"realm.units.create": `Créer des Units dans tous les ${realmTerms.plural}`,
 		"realm.post.replies.create": `Créer des réponses dans tous les ${realmTerms.plural}`,
@@ -231,6 +234,8 @@ export default {
 			"unit.tag-curation.manage": "Gérer la sélection des étiquettes",
 			"unit.reference-curation.manage": "Gérer la sélection des références",
 			"unit.realm-publication.manage": `Gérer la diffusion dans ${realmTerms.label}`,
+			"zone.pages.manage": `Gérer les pages et la navigation de l’${zoneTerms.inline}`,
+			"zone.theme.manage": `Gérer l’apparence de l’${zoneTerms.inline}`,
 			"realm.contribute": `Contribuer au ${realmTerms.inline}`,
 			"realm.units.create": "Créer des Units",
 			"realm.post.replies.create": "Créer des réponses",

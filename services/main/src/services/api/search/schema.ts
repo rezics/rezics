@@ -1,10 +1,25 @@
+import {
+	BlockPath,
+	MaxDockQueryBlocks,
+	MaxZoneEagerBlockExecutions,
+	MaxZonePageQueryBlocks,
+} from "@rezics/block";
 import { type Static, t } from "elysia";
-import { SearchContinuationToken } from "@rezics/filter";
+import { SearchContinuationToken, SearchFeatureState } from "@rezics/filter";
 import { LicenseIds } from "@rezics/license";
 
 import { SearchCategories, SearchSorts } from "../../search/schema";
 import { ContentRatingValues } from "../../database/schema/contract-values";
+import { SearchCountResultSchema } from "../../counts/contract";
 import { ContentLanguage, LocalizationLanguageHints, Uuid } from "../schema";
+import {
+	FeedPostItemResponse,
+	FeedUnitItemResponse,
+	SearchFeedResponse,
+	SearchHit,
+	SearchResponse,
+	UnitPresentationResponse,
+} from "../schema/response";
 
 const SearchCategory = t.Union(SearchCategories.map((category) => t.Literal(category)));
 
@@ -61,3 +76,166 @@ export type GroupedSearchBody = Static<typeof GroupedSearchBody>;
 
 export const DomainSearchParams = t.Object({ index: SearchCategory });
 export type DomainSearchParams = Static<typeof DomainSearchParams>;
+
+export const ZonePageAggregateExecutionParams = t.Object(
+	{ zoneId: Uuid, pageId: Uuid },
+	{ additionalProperties: false },
+);
+
+export const ZoneDerivedSelectionSeed = t.String({ minLength: 1, maxLength: 128 });
+
+export const ZonePageAggregateBlockRequest = t.Object(
+	{
+		path: BlockPath,
+		selectionSeed: t.Optional(ZoneDerivedSelectionSeed),
+		state: t.Optional(SearchFeatureState),
+	},
+	{ additionalProperties: false },
+);
+
+export const ZonePageAggregateExecutionBody = t.Object(
+	{
+		pageRevision: t.Optional(Uuid),
+		includeDock: t.Optional(t.Boolean({ default: true })),
+		pageBlocks: t.Optional(
+			t.Array(ZonePageAggregateBlockRequest, {
+				minItems: 1,
+				maxItems: MaxZoneEagerBlockExecutions,
+			}),
+		),
+		dockBlocks: t.Optional(
+			t.Array(ZonePageAggregateBlockRequest, {
+				minItems: 1,
+				maxItems: MaxZoneEagerBlockExecutions,
+			}),
+		),
+		localizationLanguages: t.Optional(LocalizationLanguageHints),
+	},
+	{ additionalProperties: false },
+);
+
+export const ZonePageAggregateExecutionErrorCodeValues = [
+	"InvalidSearch",
+	"SearchTimeout",
+	"SearchUnavailable",
+	"CollectionNotFound",
+	"UnitNotFound",
+] as const;
+
+const ZonePageAggregateFacetResponse = SearchResponse.properties.facets;
+const FeedItemResponse = t.Union([FeedUnitItemResponse, FeedPostItemResponse]);
+const AggregateResultBase = {
+	kind: t.Literal("ok"),
+	nextCursor: t.Optional(SearchContinuationToken),
+	advisory: SearchResponse.properties.advisory,
+	facets: ZonePageAggregateFacetResponse,
+	total: t.Optional(SearchCountResultSchema),
+	selected: t.Optional(UnitPresentationResponse),
+	selectionSeed: t.Optional(ZoneDerivedSelectionSeed),
+} as const;
+
+export const ZonePageAggregateExecutionResult = t.Union([
+	t.Object(
+		{
+			...AggregateResultBase,
+			blockType: t.Literal("unit-list"),
+			itemKind: t.Literal("search-hit"),
+			items: t.Array(SearchHit, { maxItems: 20 }),
+		},
+		{ additionalProperties: false },
+	),
+	t.Object(
+		{
+			...AggregateResultBase,
+			blockType: t.Literal("unit-list"),
+			itemKind: t.Literal("feed-item"),
+			items: t.Array(FeedItemResponse, { maxItems: 20 }),
+		},
+		{ additionalProperties: false },
+	),
+	t.Object(
+		{
+			...AggregateResultBase,
+			blockType: t.Literal("feed"),
+			itemKind: t.Literal("feed-item"),
+			items: t.Array(FeedItemResponse, { maxItems: 20 }),
+		},
+		{ additionalProperties: false },
+	),
+	t.Object(
+		{
+			kind: t.Literal("error"),
+			code: t.UnionEnum(ZonePageAggregateExecutionErrorCodeValues),
+		},
+		{ additionalProperties: false },
+	),
+	t.Object(
+		{
+			kind: t.Literal("skipped"),
+			reason: t.Union([t.Literal("budget"), t.Literal("inactive-tab")]),
+		},
+		{ additionalProperties: false },
+	),
+	t.Object({ kind: t.Literal("hidden") }, { additionalProperties: false }),
+]);
+
+const ZoneDerivedExecutionMetadata = {
+	hidden: t.Optional(t.Boolean()),
+	selected: t.Optional(UnitPresentationResponse),
+	selectionSeed: t.Optional(ZoneDerivedSelectionSeed),
+} as const;
+
+export const ZoneSearchBlockExecutionResponse = t.Object(
+	{
+		...SearchResponse.properties,
+		...ZoneDerivedExecutionMetadata,
+	},
+	{ additionalProperties: false },
+);
+
+export const ZoneFeedBlockExecutionResponse = t.Object(
+	{
+		...SearchFeedResponse.properties,
+		...ZoneDerivedExecutionMetadata,
+	},
+	{ additionalProperties: false },
+);
+
+const ZonePageAggregateExecutionEntry = t.Object(
+	{
+		path: BlockPath,
+		outcome: ZonePageAggregateExecutionResult,
+	},
+	{ additionalProperties: false },
+);
+
+const ZonePageAggregatePageResponse = t.Object(
+	{
+		results: t.Array(ZonePageAggregateExecutionEntry, {
+			maxItems: MaxZonePageQueryBlocks,
+		}),
+	},
+	{ additionalProperties: false },
+);
+
+const ZonePageAggregateDockResponse = t.Object(
+	{
+		results: t.Array(ZonePageAggregateExecutionEntry, {
+			maxItems: MaxDockQueryBlocks,
+		}),
+	},
+	{ additionalProperties: false },
+);
+
+export const ZonePageAggregateExecutionResponse = t.Object(
+	{
+		pageRevision: Uuid,
+		page: ZonePageAggregatePageResponse,
+		dock: t.Optional(ZonePageAggregateDockResponse),
+	},
+	{ additionalProperties: false },
+);
+
+export type ZonePageAggregateExecutionBody = Static<typeof ZonePageAggregateExecutionBody>;
+export type ZonePageAggregateExecutionResult = Static<typeof ZonePageAggregateExecutionResult>;
+export type ZonePageAggregateExecutionEntry = Static<typeof ZonePageAggregateExecutionEntry>;

@@ -47,6 +47,12 @@ export const EntityAssociationPermissionValues = [
 ] as const;
 export type EntityAssociationPermission = (typeof EntityAssociationPermissionValues)[number];
 
+/** Independently delegable operations over a Zone Unit. */
+export const ZonePagesManagePermission = "zone.pages.manage" as const;
+export const ZoneThemeManagePermission = "zone.theme.manage" as const;
+export const ZonePermissionValues = [ZonePagesManagePermission, ZoneThemeManagePermission] as const;
+export type ZonePermission = (typeof ZonePermissionValues)[number];
+
 /**
  * Atomic permissions that may be granted on a Unit access root.
  *
@@ -64,6 +70,7 @@ export const UnitPermissionValues = [
 	"unit.tag-curation.manage",
 	"unit.reference-curation.manage",
 	"unit.realm-publication.manage",
+	...ZonePermissionValues,
 	...RealmPermissionValues,
 	...EntityAssociationPermissionValues,
 ] as const;
@@ -124,6 +131,8 @@ export function isUnitPermissionOwnerOnly(
  * @alpha
  */
 export const DevelopmentPreviewCapability = "platform.development_preview.access" as const;
+export const ZoneThemeReviewCapability = "platform.zone_theme.review" as const;
+export const ZoneThemeKillCapability = "platform.zone_theme.kill" as const;
 
 /**
  * Platform-wide capabilities assignable to Profiles.
@@ -145,6 +154,8 @@ export const PlatformCapabilityValues = [
 	"entity.associations.override",
 	"unit.edit",
 	DevelopmentPreviewCapability,
+	ZoneThemeReviewCapability,
+	ZoneThemeKillCapability,
 	"unit.governance.read",
 	"unit.merge.propose",
 	"unit.merge.review",
@@ -235,6 +246,18 @@ export const PlatformCapabilityDefinitions = {
 		action: "access",
 		rationale:
 			"Controls entry to unreleased product surfaces without granting their domain operations.",
+	},
+	[ZoneThemeReviewCapability]: {
+		resource: "platform.zone_theme",
+		action: "review",
+		rationale:
+			"Accepts automated review evidence and makes human publication decisions for reusable custom Zone theme revisions.",
+	},
+	[ZoneThemeKillCapability]: {
+		resource: "platform.zone_theme",
+		action: "kill",
+		rationale:
+			"Immediately disables an approved custom Zone theme revision across every Zone that references it.",
 	},
 	"unit.governance.read": {
 		resource: "unit.governance",
@@ -457,7 +480,7 @@ export function expandPlatformCapabilities(
 export const StandardPermissionActionValues = ["read", "create", "update", "delete"] as const;
 export type StandardPermissionAction = (typeof StandardPermissionActionValues)[number];
 
-export type PermissionResourceKind = "unit" | "realm" | "entity";
+export type PermissionResourceKind = "unit" | "realm" | "entity" | "zone";
 
 type StandardPermissionDefinition = {
 	readonly kind: "standard";
@@ -567,6 +590,22 @@ export const UnitPermissionDefinitions = {
 		action: "manage",
 		rationale:
 			"Realm publication independently governs where a global Unit is mounted, withdrawn, or republished without granting Realm-side approval authority.",
+	},
+	[ZonePagesManagePermission]: {
+		kind: "domain",
+		target: "zone",
+		resource: "zone.pages",
+		action: "manage",
+		rationale:
+			"Zone page composition and navigation are independently delegable without granting theme management, general Unit editing, or lifecycle authority.",
+	},
+	[ZoneThemeManagePermission]: {
+		kind: "domain",
+		target: "zone",
+		resource: "zone.theme",
+		action: "manage",
+		rationale:
+			"Zone theme management is independently delegable without granting page composition, navigation, general Unit editing, or lifecycle authority.",
 	},
 	"realm.contribute": {
 		kind: "domain",
@@ -706,6 +745,8 @@ export const UnitPermissionImplications: Partial<
 	"unit.tag-curation.manage": ["unit.read"],
 	"unit.reference-curation.manage": ["unit.read"],
 	"unit.realm-publication.manage": ["unit.read"],
+	[ZonePagesManagePermission]: ["unit.read"],
+	[ZoneThemeManagePermission]: ["unit.read"],
 	"realm.contribute": ["unit.read"],
 	"realm.units.create": ["unit.read"],
 	"realm.post.replies.create": ["unit.read"],

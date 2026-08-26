@@ -26,6 +26,7 @@ import {
 	apiRouteOperationId,
 	resolveApiQuotaOperation,
 	resolveApiQuotaOperationById,
+	scaleApiQuotaOperationCost,
 } from "./api-quota/operation";
 import {
 	getApiTokenQuotaOverride,
@@ -64,6 +65,10 @@ export type ApiKeyIdentity = BaseIdentity & {
 	session: undefined;
 };
 
+type UnadmittedApiKeyIdentity = Omit<ApiKeyIdentity, "credential"> & {
+	credential: Omit<ApiKeyIdentity["credential"], "quotaLease">;
+};
+
 export type AuthenticatedIdentity = BaseIdentity & {
 	credential: SessionIdentity["credential"] | ApiKeyIdentity["credential"];
 	session: SessionIdentity["session"] | undefined;
@@ -100,6 +105,11 @@ const requestQuotaLeases = new WeakMap<Request, ApiQuotaLease[]>();
 type OpenApiSecurity = NonNullable<DocumentDecoration["security"]>;
 
 const ApiTokenOrSessionSecurity: OpenApiSecurity = [{ ApiToken: [] }, { SessionCookie: [] }];
+/** Public request with optional API-token or session personalization. */
+export const OptionalApiTokenOrSessionSecurity: OpenApiSecurity = [
+	{},
+	...ApiTokenOrSessionSecurity,
+];
 const ApiTokenOnlySecurity: OpenApiSecurity = [{ ApiToken: [] }];
 const SessionOnlySecurity: OpenApiSecurity = [{ SessionCookie: [] }];
 
@@ -172,13 +182,12 @@ function rateLimitRetryAfter(error: unknown) {
 		: 60;
 }
 
-async function resolveApiKey(
+async function resolveApiKeyIdentity(
 	key: string,
 	requiredPermission: ApiPermission | undefined,
 	operationId: string,
-	operation = resolveApiQuotaOperation(operationId),
 	accountAccess?: "authenticated" | "write" | "contribute",
-): Promise<ApiKeyIdentity> {
+): Promise<UnadmittedApiKeyIdentity> {
 	const verified = await auth.api.verifyApiKey({
 		body: { key },
 	});
@@ -209,36 +218,52 @@ async function resolveApiKey(
 		resolveApiTokenQuotaPolicy(verified.key.id),
 		getApiTokenQuotaOverride(verified.key.id),
 	]);
-	const quotaLease = await enforceApiQuota({
-		accountUserId: user.id,
-		tokenId: verified.key.id,
-		operation,
-		accountPolicy: accountQuotaPolicy,
-		tokenPolicy: tokenQuotaPolicy,
-		tokenSafeguard: tokenQuotaRecord?.configurationOverride,
-	});
+	return {
+		user,
+		session: undefined,
+		profile,
+		authorization,
+		credential: {
+			kind: "apiKey",
+			id: verified.key.id,
+			permissions,
+			operationId,
+			accountQuotaPolicy,
+			tokenQuotaPolicy,
+			tokenQuotaOverride: tokenQuotaRecord,
+		},
+	};
+}
 
-	try {
-		return {
-			user,
-			session: undefined,
-			profile,
-			authorization,
-			credential: {
-				kind: "apiKey",
-				id: verified.key.id,
-				permissions,
-				operationId,
-				accountQuotaPolicy,
-				tokenQuotaPolicy,
-				tokenQuotaOverride: tokenQuotaRecord,
-				quotaLease,
-			},
-		};
-	} catch (error) {
-		await quotaLease.release();
-		throw error;
-	}
+async function admitApiKeyQuota(
+	identity: UnadmittedApiKeyIdentity,
+	operation: Parameters<typeof enforceApiQuota>[0]["operation"],
+): Promise<ApiKeyIdentity> {
+	const quotaLease = await enforceApiQuota({
+		accountUserId: identity.user.id,
+		tokenId: identity.credential.id,
+		operation,
+		accountPolicy: identity.credential.accountQuotaPolicy,
+		tokenPolicy: identity.credential.tokenQuotaPolicy,
+		tokenSafeguard: identity.credential.tokenQuotaOverride?.configurationOverride,
+	});
+	return {
+		...identity,
+		credential: { ...identity.credential, quotaLease },
+	};
+}
+
+async function resolveApiKey(
+	key: string,
+	requiredPermission: ApiPermission | undefined,
+	operationId: string,
+	operation = resolveApiQuotaOperation(operationId),
+	accountAccess?: "authenticated" | "write" | "contribute",
+): Promise<ApiKeyIdentity> {
+	return admitApiKeyQuota(
+		await resolveApiKeyIdentity(key, requiredPermission, operationId, accountAccess),
+		operation,
+	);
 }
 
 async function requireAccess(
@@ -309,6 +334,59 @@ export async function resolveIdentity(
 	if (identity.credential.kind === "apiKey")
 		trackRequestLimitLease(request, identity.credential.quotaLease);
 	return { profile: identity.profile, authorization: identity.authorization };
+}
+
+export type DynamicApiQuotaIdentity = ResolvedIdentity & {
+	/** Admits this request exactly once with the validated executable-child count. */
+	admitApiQuota(executionCount: number): Promise<void>;
+};
+
+/**
+ * Resolves authentication and authorization before an aggregate request knows
+ * its exact cost, then admits the resulting cost without authenticating again.
+ */
+export async function resolveIdentityWithDynamicApiQuota(
+	request: Request,
+	permission: ApiPermission,
+	quotaOperationId: ApiQuotaOperationId,
+	maximumExecutionCount: number,
+): Promise<DynamicApiQuotaIdentity> {
+	const operation = resolveApiQuotaOperationById(quotaOperationId);
+	const token = bearerToken(request.headers);
+	let apiKeyIdentity: UnadmittedApiKeyIdentity | undefined;
+	let identity: UnadmittedApiKeyIdentity | SessionIdentity | undefined;
+	if (token) {
+		apiKeyIdentity = await resolveApiKeyIdentity(token, permission, quotaOperationId);
+		identity = apiKeyIdentity;
+	} else identity = await resolveInteractiveSession(request.headers);
+	const resolved: ResolvedIdentity = identity
+		? { profile: identity.profile, authorization: identity.authorization }
+		: { profile: undefined, authorization: new Authorization(undefined) };
+	let admissionState: "pending" | "admitting" | "admitted" | "failed" = "pending";
+
+	return {
+		...resolved,
+		async admitApiQuota(executionCount: number) {
+			const chargedOperation = scaleApiQuotaOperationCost(
+				operation,
+				executionCount,
+				maximumExecutionCount,
+			);
+			if (admissionState !== "pending")
+				throw new Error(`API quota admission is already ${admissionState}`);
+			admissionState = "admitting";
+			try {
+				if (apiKeyIdentity) {
+					const admitted = await admitApiKeyQuota(apiKeyIdentity, chargedOperation);
+					trackRequestLimitLease(request, admitted.credential.quotaLease);
+				}
+				admissionState = "admitted";
+			} catch (error) {
+				admissionState = "failed";
+				throw error;
+			}
+		},
+	};
 }
 
 export default new Elysia({ name: "session-context" })

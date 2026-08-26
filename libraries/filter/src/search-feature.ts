@@ -395,7 +395,7 @@ export function assertSearchFeatureInput(value: unknown): asserts value is Searc
 	if (!Check(SearchFeatureInput, [UnitPredicateSchema, UnitFilter], value))
 		throw new TypeError("Invalid Search Feature input");
 	assertFilterDocument(value.filterDocument);
-	if (value.state.filter) assertUnitFilter(value.state.filter);
+	assertSearchFeatureState(value.state);
 	if (!unique(value.contexts.map((context) => context.kind)))
 		throw new TypeError("Search Feature contexts must have unique kinds");
 	for (const [index, injection] of value.injections.entries()) {
@@ -403,8 +403,14 @@ export function assertSearchFeatureInput(value: unknown): asserts value is Searc
 		if (injection.source === "tag" && injection.value.filter.field !== "tag")
 			throw new TypeError(`injections[${index}] tag source must target a tag control`);
 	}
-	if (value.state.expression)
-		visitControlExpression(value.state.expression, (item, path) =>
+}
+
+export function assertSearchFeatureState(value: unknown): asserts value is SearchFeatureState {
+	if (!Check(SearchFeatureState, [UnitPredicateSchema, UnitFilter], value))
+		throw new TypeError("Invalid Search Feature state");
+	if (value.filter) assertUnitFilter(value.filter);
+	if (value.expression)
+		visitControlExpression(value.expression, (item, path) =>
 			assertFilterShape(item.filter, `${path}.filter`),
 		);
 }
@@ -421,6 +427,11 @@ export function createFilterDocument(value: FilterDocument = {}): FilterDocument
 
 export function parseSearchFeatureInput(value: unknown): SearchFeatureInput {
 	assertSearchFeatureInput(value);
+	return value;
+}
+
+export function parseSearchFeatureState(value: unknown): SearchFeatureState {
+	assertSearchFeatureState(value);
 	return value;
 }
 

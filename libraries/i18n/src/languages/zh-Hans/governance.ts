@@ -7,6 +7,7 @@ import { zhHansTerminology } from "@rezics/i18n/terminology/zh-Hans";
 const { forms: realmTerms } = zhHansTerminology.realm;
 const { forms: entityTerms } = zhHansTerminology.entity;
 const { forms: postTerms } = zhHansTerminology.post;
+const { forms: zoneTerms } = zhHansTerminology.zone;
 
 export default {
 	title: "条目治理",
@@ -94,6 +95,8 @@ export default {
 		"platform.user.api_token.api_quota.update": `管理用户 ${verbatimTerms.api.value} 令牌配额`,
 		"platform.moderate": "运行平台内容治理",
 		"platform.suppress": "隐藏平台内容与修订",
+		"platform.zone_theme.review": `审核自定义${zoneTerms.label}主题样式`,
+		"platform.zone_theme.kill": `紧急停用已核准的自定义${zoneTerms.label}主题样式`,
 		"realm.contribute": `参与所有${realmTerms.pluralLabel}`,
 		"realm.units.create": `在所有${realmTerms.pluralLabel}创建条目`,
 		"realm.post.replies.create": `在所有${realmTerms.pluralLabel}创建回复`,
@@ -225,6 +228,8 @@ export default {
 			"unit.tag-curation.manage": "管理标签精选",
 			"unit.reference-curation.manage": "管理参考资料精选",
 			"unit.realm-publication.manage": `管理${realmTerms.label}发布`,
+			"zone.pages.manage": `管理${zoneTerms.label}页面与导航`,
+			"zone.theme.manage": `管理${zoneTerms.label}外观`,
 			"realm.contribute": `参与${realmTerms.label}`,
 			"realm.units.create": "创建条目",
 			"realm.post.replies.create": "创建回复",

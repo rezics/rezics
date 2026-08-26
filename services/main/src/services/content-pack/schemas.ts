@@ -1,4 +1,10 @@
-import { isPortableTextDocument, type PortableTextDocument } from "@rezics/block";
+import {
+	ZoneThemeDocument,
+	isDocument,
+	isPortableTextDocument,
+	type PortableTextDocument,
+	type ZoneThemeDocument as ZoneThemeDocumentValue,
+} from "@rezics/block";
 import {
 	ContentLanguageChannelValues,
 	MaximumContentLanguageSupportEntries,
@@ -81,6 +87,10 @@ const JsonObject = z.record(z.string(), JsonValue);
 const PortableTextDocumentSchema = z.custom<PortableTextDocument>(isPortableTextDocument, {
 	error: "Expected a Portable Text document",
 });
+const ZoneThemeDocumentSchema = z.custom<ZoneThemeDocumentValue>(
+	(value): value is ZoneThemeDocumentValue => isDocument(ZoneThemeDocument, value),
+	{ error: "Expected a ZoneThemeDocument" },
+);
 const SpoilerLevel = z.union([z.literal(0), z.literal(1), z.literal(2)]);
 const FitVote = z.union([z.literal(-1), z.literal(1)]);
 const PositivePostgresInteger = z.number().int().positive().max(MaximumPostgresInteger);
@@ -182,9 +192,12 @@ const CitedSourceLockSchema = z
 					.object({
 						sourceId: NonEmptyString,
 						url: Url,
+						exportUrl: Url.optional(),
 						title: NonEmptyString,
 						role: NonEmptyString,
 						retrievedAt: CalendarDate,
+						sha256: Sha256.optional(),
+						byteLength: z.number().int().positive().safe().optional(),
 					})
 					.strict(),
 			)
@@ -501,7 +514,7 @@ const PackObjectBaseSchema = z
 			.object({
 				slug: Slug,
 				filterDocument: JsonValue,
-				themeDocument: JsonValue,
+				themeDocument: ZoneThemeDocumentSchema,
 				localRuleRealmSourceKey: NonEmptyString,
 			})
 			.strict()

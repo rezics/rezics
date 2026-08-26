@@ -4,6 +4,7 @@ export const ZoneManagementSectionIds = [
 	"search",
 	"navigation",
 	"layout",
+	"theme",
 ] as const;
 export type ZoneManagementSectionId = (typeof ZoneManagementSectionIds)[number];
 

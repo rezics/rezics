@@ -5,12 +5,14 @@ import { unit } from "../database/schema";
 import { assertContentPackDocuments } from "./documents";
 import { ContentPackInvalid } from "./errors";
 import type { LoadedPack } from "./contracts";
+import { assertContentPackThemeAssets } from "./theme-assets";
 
 export async function verifyContentPack(
 	tx: DatabaseTransaction,
 	pack: LoadedPack,
 ): Promise<{ readonly ok: true; readonly present: number }> {
 	assertContentPackDocuments(pack);
+	await assertContentPackThemeAssets(tx, pack);
 	const unitIds = pack.objects.map((object) => pack.ids.units[object.sourceKey]!);
 	const existing = await tx.select({ id: unit.id }).from(unit).where(inArray(unit.id, unitIds));
 	if (existing.length !== unitIds.length)

@@ -2,12 +2,14 @@ export const ApiQuotaOperationIds = ["search.execute", "image.upload"] as const;
 
 export type ApiQuotaOperationId = (typeof ApiQuotaOperationIds)[number];
 
+export type ResolvedScopedApiQuotaOperation = {
+	readonly scope: ApiQuotaOperationId;
+	readonly costUnits: number;
+};
+
 export type ResolvedApiQuotaOperation =
 	| { readonly scope: null; readonly costUnits: 1 }
-	| {
-			readonly scope: ApiQuotaOperationId;
-			readonly costUnits: number;
-	  };
+	| ResolvedScopedApiQuotaOperation;
 
 export const ApiQuotaOperationDefinitions = [
 	{ id: "search.execute", costUnits: 5 },
@@ -46,9 +48,10 @@ const QuotaScopeByRouteOperationId = {
 	postApiSearchZonesByZoneIdFeatureExecute: "search.execute",
 	postApiSearchZonesByZoneIdFeatureFeed: "search.execute",
 	"postApiSearchUnitsByUnitIdContent-structuresByStructureIdNodesByNodeIdExecute": "search.execute",
-	postApiSearchZonesByZoneIdDockBlocksByBlockKeyExecute: "search.execute",
-	postApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecute: "search.execute",
-	"postApiSearchZonesByZoneIdFeed-blocksByBlockKeyExecute": "search.execute",
+	"postApiSearchZonesByZoneIdDockBlock-executions": "search.execute",
+	"postApiSearchZonesByZoneIdPagesByPageIdBlock-executions": "search.execute",
+	"postApiSearchZonesByZoneIdDockFeed-block-executions": "search.execute",
+	"postApiSearchZonesByZoneIdPagesByPageIdFeed-block-executions": "search.execute",
 	"postApiImage-assets": "image.upload",
 } as const satisfies Readonly<Record<string, ApiQuotaOperationId>>;
 
@@ -64,8 +67,34 @@ export function resolveApiQuotaOperation(routeOperationId: string): ResolvedApiQ
 
 export function resolveApiQuotaOperationById(
 	scope: ApiQuotaOperationId,
-): ResolvedApiQuotaOperation {
+): ResolvedScopedApiQuotaOperation {
 	const definition = definitionById.get(scope);
 	if (!definition) throw new Error(`Missing API quota operation definition: ${scope}`);
 	return { scope, costUnits: definition.costUnits };
+}
+
+/**
+ * Resolves one scoped quota charge for a bounded aggregate operation.
+ * Request-rate and concurrency admission still happen once; only daily cost
+ * scales with the number of executable children.
+ */
+export function scaleApiQuotaOperationCost(
+	operation: ResolvedScopedApiQuotaOperation,
+	executionCount: number,
+	maximumExecutionCount: number,
+): ResolvedScopedApiQuotaOperation {
+	if (!Number.isSafeInteger(maximumExecutionCount) || maximumExecutionCount < 1)
+		throw new TypeError("API quota maximum execution count must be a positive safe integer");
+	if (
+		!Number.isSafeInteger(executionCount) ||
+		executionCount < 0 ||
+		executionCount > maximumExecutionCount
+	)
+		throw new RangeError(
+			`API quota execution count must be a safe integer between 0 and ${maximumExecutionCount}`,
+		);
+	const costUnits = operation.costUnits * executionCount;
+	if (!Number.isSafeInteger(costUnits))
+		throw new RangeError("API quota aggregate cost exceeds the safe integer range");
+	return { scope: operation.scope, costUnits };
 }

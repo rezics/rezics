@@ -337,6 +337,16 @@ export default {
 	UnitRealmPublicationAlreadyExists: `Für diesen Inhalt besteht bereits eine Veröffentlichungsrelation mit diesem ${realmTerms.label}.`,
 	UnitRealmPublicationTransitionInvalid:
 		"Die Veröffentlichungsrelation befindet sich bereits im angeforderten Status.",
+	ZoneThemeNotFound: `Dieses Design für ${zoneTerms.plural} wurde nicht gefunden.`,
+	ZoneThemeRevisionNotFound: `Diese Version des Designs für ${zoneTerms.plural} wurde nicht gefunden.`,
+	ZoneThemeStylesheetInvalid: `Das Stylesheet dieses Designs für ${zoneTerms.plural} hat die automatische Sicherheitsprüfung nicht bestanden.`,
+	ZoneThemeAssetsInvalid:
+		"Jedes Designbild muss dir gehören und weiterhin öffentlich, einsatzbereit und nicht gelöscht sein.",
+	ZoneThemeAutomatedReviewInvalid:
+		"Die automatischen Prüfnachweise sind unvollständig oder erfüllen die Freigabeanforderungen nicht.",
+	ZoneThemeRevisionStateConflict:
+		"Diese Designversion befindet sich bereits in einem anderen Prüfstatus. Lade sie neu, bevor du fortfährst.",
+	ZoneThemeReferenceInvalid: `Wähle eine derzeit freigegebene Designversion für ${zoneTerms.plural}.`,
 	StudioRealmSubjectLimitExceeded:
 		"Du gehörst zu zu vielen Teams, um teamdelegierte Inhalte im Arbeitsbereich aufzulisten.",
 } satisfies typeof import("../zh-Hant/errorCodes").default;

@@ -40,6 +40,47 @@ export default {
 	searchFailed: "検索は一時的に利用できません。後でもう一度お試しください。",
 	untitledResult: "タイトルなしコンテンツ",
 	contentList: "コンテンツ一覧",
+	loadSection: "このセクションを読み込む",
+	theme: {
+		viewerDefault: "プラットフォームの標準テーマを使う",
+		viewerDefaultScope: `すべての${zoneTerms.label}でカスタムテーマが無効になります。設定から再び有効にできます。`,
+		viewerDefaultFailed:
+			"標準テーマに切り替えられませんでした。しばらくしてから再試行してください。",
+		basicsTitle: "基本の外観",
+		detailsTitle: "テーマの詳細",
+		accent: "アクセントカラー",
+		colorScheme: "カラースキーム",
+		colorSchemes: { system: "デバイス設定を使用", light: "ライト", dark: "ダーク" },
+		density: "レイアウト密度",
+		densities: { comfortable: "ゆったり", compact: "コンパクト" },
+		gallery: {
+			title: "テーマプリセット",
+			consequence: "プリセットを適用すると、メイン画像を含む現在の外観設定がすべて置き換わります。",
+			options: {
+				clean: {
+					label: "クリーン",
+					description: "ニュートラルな表面と均整の取れた余白で、幅広い内容を見やすくします。",
+				},
+				editorial: {
+					label: "エディトリアル",
+					description: "暖色、小さな角丸、目立つ見出しで記事を引き立てます。",
+				},
+				vibrant: {
+					label: "ビビッド",
+					description: "暗い表面、鮮やかな差し色、大きな曲線で活気のある印象にします。",
+				},
+			},
+		},
+		hero: "メイン画像",
+		cardRadius: "カードの角丸",
+		cardRadii: { sm: "小", md: "中", lg: "大" },
+		headingFontScale: "見出しの大きさ",
+		headingFontScales: { sm: "小", md: "中", lg: "大" },
+		surfaceTint: "表面の色合い",
+		surfaceTints: { none: "なし", subtle: "控えめ", accent: "アクセントカラー" },
+		save: "テーマを保存",
+		saveFailed: "テーマを保存できませんでした。後でもう一度お試しください。",
+	},
 	ruleRealm: {
 		label: `ローカルルールの${realmTerms.label}`,
 		description: `この${zoneTerms.inline}のローカルガバナンスで現在のルールを使用する${realmTerms.label}を選択します。プラットフォームの公式ルールは常に利用できます。`,
@@ -85,6 +126,10 @@ export default {
 			layout: {
 				label: "レイアウト",
 				description: "共有コンテンツエリアとそのブロックを編集します。",
+			},
+			theme: {
+				label: "テーマ",
+				description: `${zoneTerms.inline}の色、レイアウトの細部、メイン画像を設定します。`,
 			},
 		},
 		profile: {

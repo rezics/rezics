@@ -76,6 +76,7 @@ export default {
 			tag: "Étiquette",
 			series: "Série",
 			zone: zoneTerms.label,
+			zone_theme: `Thème de ${zoneTerms.inline}`,
 			zone_page: `Page d’${zoneTerms.inline}`,
 			collection: "Collection",
 			post: postTerms.label,

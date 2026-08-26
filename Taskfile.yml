@@ -82,6 +82,7 @@ tasks:
             - task: libraries:access:test
             - task: libraries:avatar:test
             - task: libraries:portable-text:test
+            - task: libraries:block:test
             - task: libraries:license:test
             - task: libraries:i18n:test
             - task: libraries:email:test

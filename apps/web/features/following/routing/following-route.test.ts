@@ -27,7 +27,14 @@ describe("following routes", () => {
 	});
 
 	it("keeps non-page Unit kinds visible but non-navigable", () => {
-		for (const kind of ["slug_namespace", "label", "series", "realm_rule", "zone_page"] as const)
+		for (const kind of [
+			"slug_namespace",
+			"label",
+			"series",
+			"realm_rule",
+			"zone_page",
+			"zone_theme",
+		] as const)
 			expect(followingHref(kind, "unit-id")).toBeUndefined();
 	});
 
@@ -47,6 +54,7 @@ describe("following routes", () => {
 			"series",
 			"zone",
 			"zone_page",
+			"zone_theme",
 			"collection",
 			"post",
 			"poll",

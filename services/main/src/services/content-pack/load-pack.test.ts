@@ -1,6 +1,7 @@
 import { mkdtemp, mkdir, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { UnitReferencedBlockDocument, isDocument } from "@rezics/block";
 import { describe, expect, it } from "vitest";
 
 import { ContentPackInvalid, ContentPackSourceNotFound } from "./errors";
@@ -339,7 +340,7 @@ describe("loadPack", () => {
 
 		expect(vndb.relations.tagPaths?.length ?? 0).toBeGreaterThan(0);
 		expect(vndb.relations.tagPathApplications?.length ?? 0).toBeGreaterThan(0);
-		expect(vndb.manifest.version).toBe("0.2.0");
+		expect(vndb.manifest.version).toBe("1.0.0");
 		if (vndb.sourceLock.kind !== "snapshot-provenance")
 			throw new Error("vndb-v11 must use snapshot provenance");
 		expect(vndb.sourceLock.rightsExceptions).toEqual([
@@ -356,6 +357,36 @@ describe("loadPack", () => {
 		});
 		expect(vndb.objects.some((object) => (object.entityMeasurements?.length ?? 0) > 0)).toBe(true);
 	}, 20_000);
+
+	it.each([
+		["hongloumeng", "hongloumeng:zone", "hongloumeng:zone-page:home"],
+		["light-novel", "light-novel:zone", "light-novel:zone-page:home"],
+		["vndb-v11", "vndb:v11:zone:catalog", "vndb:v11:zone-page:home"],
+	] as const)(
+		"loads %s with a compiled theme and Unit-referenced home Page",
+		async (packId, zoneSourceKey, pageSourceKey) => {
+			let sourceRoot: string;
+			try {
+				sourceRoot = resolveShowcasePacksDir({});
+			} catch (error) {
+				if (error instanceof ContentPackSourceNotFound) return;
+				throw error;
+			}
+			const pack = await loadPack(sourceRoot, packId);
+			const zone = pack.objects.find(({ sourceKey }) => sourceKey === zoneSourceKey);
+			const page = pack.objects.find(({ sourceKey }) => sourceKey === pageSourceKey);
+
+			expect(zone?.compiledZone?.themeDocument._type).toBe("zone-theme");
+			expect(zone?.zone?.homePageSourceKey).toBe(pageSourceKey);
+			expect(page?.zonePage?.zoneSourceKey).toBe(zoneSourceKey);
+			expect(
+				page?.localizations.every(({ content }) =>
+					isDocument(UnitReferencedBlockDocument, content),
+				),
+			).toBe(true);
+			expect(pack.checksum).toMatch(/^[0-9a-f]{64}$/);
+		},
+	);
 });
 
 async function createFixture() {

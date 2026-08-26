@@ -17,7 +17,7 @@ export function ZonePage({
 }) {
 	const { t } = useTranslation(["zones"]);
 	return (
-		<ZoneSurface baseHref={baseHref} id={id} selection={selection}>
+		<ZoneSurface aggregatePage baseHref={baseHref} id={id} selection={selection}>
 			{(projection) => (
 				<main className={cn(ZoneSurfaceContainerClassName, "py-8 sm:py-12")}>
 					{projection.page ? (

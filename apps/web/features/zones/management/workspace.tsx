@@ -12,7 +12,7 @@ import {
 	QueryFailure,
 	QueryPending,
 } from "@rezics/ui";
-import { Blocks, Files, LayoutDashboard, ListTree, Search } from "lucide-react";
+import { Blocks, Files, LayoutDashboard, ListTree, Palette, Search } from "lucide-react";
 import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import { usePathname } from "next/navigation";
 import { createContext, useContext, type ReactNode } from "react";
@@ -108,6 +108,13 @@ function ZoneManagementWorkspaceContent({
 			label: labels.layout.label,
 			description: labels.layout.description,
 			icon: Blocks,
+		},
+		{
+			id: "theme",
+			href: zoneManagementSectionHref(zoneId, "theme"),
+			label: labels.theme.label,
+			description: labels.theme.description,
+			icon: Palette,
 		},
 	];
 	const localization = selectLocalization(

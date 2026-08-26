@@ -156,6 +156,7 @@ export default {
 		"ai-disclosure": `${verbatimTerms.ai.value} 使用揭露`,
 		license: `${zhHantTerminology.license.forms.label}`,
 		tag: "標籤",
+		collection: "包含的內容",
 		credit: "署名",
 		"credited-profile": "署名個人檔案",
 		realm: realmTerms.label,

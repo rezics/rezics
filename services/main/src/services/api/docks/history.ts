@@ -1,5 +1,10 @@
 import { and, desc, eq, sql } from "drizzle-orm";
-import { DockDocument, parseDocument } from "@rezics/block";
+import {
+	DockBlockHostPolicy,
+	DockDocument,
+	assertBlockQueryBudget,
+	parseDocument,
+} from "@rezics/block";
 
 import type { DatabaseTransaction } from "../../database";
 import { dockRevision, dockRevisionHead, revisionContent, unitDock } from "../../database/schema";
@@ -273,7 +278,8 @@ export async function restoreDockRevision(
 	} else {
 		if (state.dock.unitId !== current.unitId || state.dock.kind !== current.kind)
 			throw new TypeError("Dock restore cannot change its owner or kind");
-		await input.validateDocument?.(state.dock.document);
+		if (input.validateDocument) await input.validateDocument(state.dock.document);
+		else assertBlockQueryBudget(state.dock.document, DockBlockHostPolicy);
 		const [restored] = await tx
 			.update(unitDock)
 			.set({ document: state.dock.document, deletedAt: null, updatedAt: new Date() })

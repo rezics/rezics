@@ -1,3 +1,5 @@
+import { insert } from "native-i18n";
+
 import { zhHansTerminology } from "@rezics/i18n/terminology/zh-Hans";
 
 const { forms: followTerms } = zhHansTerminology.follow;
@@ -16,6 +18,13 @@ export default {
 	edit: "编辑",
 	clear: "清除",
 	search: "搜索",
+	shelf: {
+		label: "内容轮播区",
+		previous: "上一组内容",
+		next: "下一组内容",
+		page: insert("第 {{page}} 页，共 {{pageCount}} 页", { page: Number, pageCount: Number }),
+		item: insert("第 {{item}} 项，共 {{itemCount}} 项", { item: Number, itemCount: Number }),
+	},
 	pickerPlaceholders: {
 		unit: "输入名称或标题",
 		entity: `输入${entityTerms.label}名称`,

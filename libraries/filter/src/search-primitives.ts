@@ -61,8 +61,8 @@ export function isSearchSortAvailable(sort: SearchSort, query: string): boolean 
 	return sort !== "relevance" || query.trim().length > 0;
 }
 
-/** Engine-independent scalar fields that a product surface may expose. */
-export const SearchScalarFieldValues = [
+/** Scalar fields that retain the general operator/value grammar. */
+const SearchGenericScalarFieldValues = [
 	"category",
 	"kind",
 	"language",
@@ -103,8 +103,13 @@ export const SearchScalarFieldValues = [
 	"software-platform",
 	"software-requirement-tier",
 ] as const;
+
+/** Engine-independent scalar fields that a product surface may expose. */
+export const SearchScalarFieldValues = [...SearchGenericScalarFieldValues, "collection"] as const;
 export type SearchScalarField = (typeof SearchScalarFieldValues)[number];
 export const SearchScalarField = stringEnum(SearchScalarFieldValues);
+
+const SearchGenericScalarField = stringEnum(SearchGenericScalarFieldValues);
 
 /** Engine-independent fields that a product surface may expose. */
 export const SearchFieldValues = [...SearchScalarFieldValues, "realm-tag-vote"] as const;
@@ -178,19 +183,57 @@ export const SearchRealmTagVoteFilter = Type.Object(
 );
 export type SearchRealmTagVoteFilter = Static<typeof SearchRealmTagVoteFilter>;
 
-export const SearchControlPredicate = Type.Union(
+/**
+ * Tests whether the candidate Unit is an item of one or more Collections.
+ *
+ * This field is intentionally separate from `UnitPredicate.collection`,
+ * which describes a candidate Unit that is itself a Collection. Collection
+ * identifiers are proven as UUIDs at the public Search input boundary.
+ */
+export const SearchCollectionMembershipFilter = Type.Union(
 	[
 		Type.Object(
-			{ field: SearchScalarField, operator: Type.Literal("equals"), value: SearchScalar },
-			{ additionalProperties: false },
-		),
-		Type.Object(
-			{ field: SearchScalarField, operator: Type.Literal("not-equals"), value: SearchScalar },
+			{
+				field: Type.Literal("collection"),
+				operator: Type.Union([Type.Literal("equals"), Type.Literal("not-equals")]),
+				value: SearchUuid,
+			},
 			{ additionalProperties: false },
 		),
 		Type.Object(
 			{
-				field: SearchScalarField,
+				field: Type.Literal("collection"),
+				operator: Type.Union([
+					Type.Literal("any-of"),
+					Type.Literal("all-of"),
+					Type.Literal("none-of"),
+				]),
+				values: Type.Array(SearchUuid, { minItems: 1, maxItems: 50, uniqueItems: true }),
+			},
+			{ additionalProperties: false },
+		),
+	],
+	{ $id: "SearchCollectionMembershipFilter" },
+);
+export type SearchCollectionMembershipFilter = Static<typeof SearchCollectionMembershipFilter>;
+
+export const SearchControlPredicate = Type.Union(
+	[
+		Type.Object(
+			{ field: SearchGenericScalarField, operator: Type.Literal("equals"), value: SearchScalar },
+			{ additionalProperties: false },
+		),
+		Type.Object(
+			{
+				field: SearchGenericScalarField,
+				operator: Type.Literal("not-equals"),
+				value: SearchScalar,
+			},
+			{ additionalProperties: false },
+		),
+		Type.Object(
+			{
+				field: SearchGenericScalarField,
 				operator: Type.Union([
 					Type.Literal("any-of"),
 					Type.Literal("all-of"),
@@ -203,7 +246,7 @@ export const SearchControlPredicate = Type.Union(
 		Type.Union([
 			Type.Object(
 				{
-					field: SearchScalarField,
+					field: SearchGenericScalarField,
 					operator: Type.Literal("range"),
 					lower: SearchScalar,
 					upper: Type.Optional(SearchScalar),
@@ -212,7 +255,7 @@ export const SearchControlPredicate = Type.Union(
 			),
 			Type.Object(
 				{
-					field: SearchScalarField,
+					field: SearchGenericScalarField,
 					operator: Type.Literal("range"),
 					lower: Type.Optional(SearchScalar),
 					upper: SearchScalar,
@@ -221,9 +264,14 @@ export const SearchControlPredicate = Type.Union(
 			),
 		]),
 		Type.Object(
-			{ field: SearchScalarField, operator: Type.Literal("exists"), value: Type.Boolean() },
+			{
+				field: SearchGenericScalarField,
+				operator: Type.Literal("exists"),
+				value: Type.Boolean(),
+			},
 			{ additionalProperties: false },
 		),
+		SearchCollectionMembershipFilter,
 		SearchRealmTagVoteFilter,
 	],
 	{ $id: "SearchControlPredicate" },

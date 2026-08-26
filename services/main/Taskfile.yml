@@ -75,6 +75,10 @@ tasks:
         desc: Qualify bounded Tag Path plans and hot-key writes only on disposable rezics_atlas.
         cmds:
             - yarn exec tsx scripts/benchmark-tag-path-capacity.ts {{.CLI_ARGS}}
+    zone-composition:capacity:
+        desc: Benchmark bounded Zone selectors and theme review paths only on disposable rezics_atlas.
+        cmds:
+            - yarn exec tsx scripts/benchmark-zone-composition-capacity.ts {{.CLI_ARGS}}
 
     filter-documents:migrate:
         desc: Rewrite preview Search/Zone documents to sparse FilterDocuments in bounded batches.

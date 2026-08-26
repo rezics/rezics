@@ -8,6 +8,7 @@ const { forms: unitSlugTerms } = enTerminology.unitSlug;
 const { forms: licenseTerms } = enTerminology.license;
 const { forms: metadataTerms } = enTerminology.metadata;
 const { forms: postTerms } = enTerminology.post;
+const { forms: zoneTerms } = enTerminology.zone;
 
 export default {
 	workspace: {
@@ -86,6 +87,8 @@ export default {
 	alwaysShowSpoilersHint: "Show spoiler-labelled content without requiring an individual reveal.",
 	alwaysShowNsfw: `Always show ${verbatimTerms.nsfw.value} media`,
 	alwaysShowNsfwHint: `Show ${verbatimTerms.nsfw.value}-labelled media without blurring it first.`,
+	customZoneThemes: `Show custom ${zoneTerms.label} themes`,
+	customZoneThemesHint: `When off, every ${zoneTerms.label} uses the platform default theme. Content and layout are unchanged.`,
 	account: "Account",
 	accountDescription: "Manage the current signed-in session.",
 	security: "Security",

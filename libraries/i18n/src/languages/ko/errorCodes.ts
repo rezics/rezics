@@ -300,6 +300,16 @@ export default {
 	UnitRealmPublicationNotFound: `이 콘텐츠와 ${realmTerms.label}의 게시 관계를 찾을 수 없습니다.`,
 	UnitRealmPublicationAlreadyExists: `이 콘텐츠에는 이미 ${realmTerms.label} 게시 관계가 있습니다.`,
 	UnitRealmPublicationTransitionInvalid: "게시 관계가 이미 요청한 상태입니다.",
+	ZoneThemeNotFound: `이 ${zoneTerms.label} 테마를 찾을 수 없습니다.`,
+	ZoneThemeRevisionNotFound: `이 ${zoneTerms.label} 테마 수정본을 찾을 수 없습니다.`,
+	ZoneThemeStylesheetInvalid: `이 ${zoneTerms.label} 테마 스타일시트가 자동 안전 검토를 통과하지 못했습니다.`,
+	ZoneThemeAssetsInvalid:
+		"모든 테마 이미지는 본인 소유이며 공개 상태로 준비되어 있고 삭제되지 않아야 합니다.",
+	ZoneThemeAutomatedReviewInvalid:
+		"테마 자동 검토 증거가 불완전하거나 공개 요건을 충족하지 않습니다.",
+	ZoneThemeRevisionStateConflict:
+		"이 테마 수정본은 이미 다른 검토 상태로 변경되었습니다. 새로 고친 뒤 계속하세요.",
+	ZoneThemeReferenceInvalid: `현재 승인된 ${zoneTerms.label} 테마 수정본을 선택하세요.`,
 	StudioRealmSubjectLimitExceeded:
 		"소속된 팀이 너무 많아 작업 공간에서 팀이 위임한 콘텐츠를 표시할 수 없습니다.",
 } satisfies typeof import("../zh-Hant/errorCodes").default;

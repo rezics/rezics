@@ -91,6 +91,9 @@ export default {
 	alwaysShowSpoilersHint: "Afficher directement le contenu signalé comme divulgâcheur.",
 	alwaysShowNsfw: "Toujours afficher les médias sensibles",
 	alwaysShowNsfwHint: "Afficher les médias signalés comme sensibles sans les flouter au préalable.",
+	customZoneThemes: "Afficher les thèmes personnalisés des zones",
+	customZoneThemesHint:
+		"Lorsque cette option est désactivée, toutes les zones utilisent le thème par défaut de la plateforme. Le contenu et la disposition ne changent pas.",
 	account: "Compte",
 	accountDescription: "Gérez la session actuellement connectée.",
 	security: "Sécurité",

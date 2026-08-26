@@ -76,6 +76,7 @@ export default {
 			series: "シリーズ",
 			zone: zoneTerms.label,
 			zone_page: `${zoneTerms.label} ページ`,
+			zone_theme: `${zoneTerms.label} テーマ`,
 			collection: "コレクション",
 			post: postTerms.label,
 			poll: "投票",

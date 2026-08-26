@@ -281,5 +281,12 @@ export default {
 	UnitRealmPublicationNotFound: `找不到这项内容与该${realmTerms.label}的发布关系。`,
 	UnitRealmPublicationAlreadyExists: `这项内容已与该${realmTerms.label}建立发布关系。`,
 	UnitRealmPublicationTransitionInvalid: "这项发布关系已经处于要求的状态。",
+	ZoneThemeNotFound: `找不到这个${zoneTerms.label}主题样式。`,
+	ZoneThemeRevisionNotFound: `找不到这个${zoneTerms.label}主题样式修订。`,
+	ZoneThemeStylesheetInvalid: `这个${zoneTerms.label}主题样式表未通过自动安全审核。`,
+	ZoneThemeAssetsInvalid: "所有主题图片都必须归你所有，并且仍处于公开、可用且未删除状态。",
+	ZoneThemeAutomatedReviewInvalid: "主题的自动审核凭证不完整，或未达到发布要求。",
+	ZoneThemeRevisionStateConflict: "这个主题修订已进入其他审核状态，请重新加载后再继续。",
+	ZoneThemeReferenceInvalid: `请选择当前已核准的${zoneTerms.label}主题样式修订。`,
 	StudioRealmSubjectLimitExceeded: "你所属的团队过多，工作空间暂时无法列出团队委派内容。",
 } satisfies typeof import("../zh-Hant/errorCodes").default;

@@ -336,6 +336,16 @@ export default {
 	UnitRealmPublicationNotFound: `Ce contenu n’a aucune relation d’inclusion avec ce ${realmTerms.label}.`,
 	UnitRealmPublicationAlreadyExists: `Ce contenu possède déjà une relation d’inclusion avec ce ${realmTerms.label}.`,
 	UnitRealmPublicationTransitionInvalid: "La relation d’inclusion est déjà dans l’état demandé.",
+	ZoneThemeNotFound: `Ce thème de ${zoneTerms.plural} est introuvable.`,
+	ZoneThemeRevisionNotFound: `Cette version du thème de ${zoneTerms.plural} est introuvable.`,
+	ZoneThemeStylesheetInvalid: `La feuille de style de ce thème de ${zoneTerms.plural} a échoué au contrôle de sécurité automatique.`,
+	ZoneThemeAssetsInvalid:
+		"Chaque image du thème doit vous appartenir et rester publique, prête et non supprimée.",
+	ZoneThemeAutomatedReviewInvalid:
+		"Les preuves automatiques du thème sont incomplètes ou ne satisfont pas les conditions de validation.",
+	ZoneThemeRevisionStateConflict:
+		"Cette version du thème est déjà passée à un autre état de contrôle. Rechargez-la avant de continuer.",
+	ZoneThemeReferenceInvalid: `Choisissez une version du thème de ${zoneTerms.plural} actuellement approuvée.`,
 	StudioRealmSubjectLimitExceeded:
 		"Vous appartenez à trop d’équipes pour afficher les contenus délégués dans votre environnement de travail.",
 } satisfies typeof import("../zh-Hant/errorCodes").default;

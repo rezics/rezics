@@ -2,29 +2,25 @@
 
 import type { PresentedAvatar } from "@rezics/avatar";
 import type { ReactNode } from "react";
-import { ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon, PinIcon } from "lucide-react";
+import { ChevronDownIcon, PinIcon } from "lucide-react";
 import { AppLink as Link } from "@/features/application-shell/components/app-link";
-import { useId, useRef, useState } from "react";
+import { useId, useState } from "react";
 
 import {
 	Button,
 	Card,
 	CardContent,
 	CardMedia,
-	Carousel,
-	CarouselControl,
-	CarouselContent,
-	CarouselItem,
 	cn,
 	IdentityAvatar,
+	Shelf,
 	Skeleton,
-	useCarousel,
-	useIsMobile,
 } from "@rezics/ui";
 import { readPortableText } from "@/lib/block";
 import type { ContentLanguage } from "@rezics/i18n";
 import { LocalizedPortableTextContent } from "@/features/content-language-display/localized-portable-text-content";
 import { LocalizedText } from "@/features/content-language-display/chinese-content-display-context";
+import { useTranslation } from "@/i18n/client";
 
 export interface RealmPinnedContentItem {
 	readonly id: string;
@@ -127,109 +123,23 @@ function RealmPinnedCarousel({
 	readonly title: string;
 	readonly untitledLabel: string;
 }) {
-	const isMobile = useIsMobile();
-	const pointerStartRef = useRef<{
-		readonly pointerId: number;
-		readonly x: number;
-		readonly y: number;
-	} | null>(null);
-	const suppressClickUntilRef = useRef(0);
-	const slidesPerPage = Math.min(items.length, isMobile ? 1.15 : 3);
+	const { t } = useTranslation(["ui"]);
 
 	return (
-		<Carousel
-			allowMouseDrag
-			aria-label={title}
-			className="min-w-0"
-			slideCount={items.length}
-			slidesPerMove={1}
-			slidesPerPage={slidesPerPage}
-			spacing="12px"
+		<Shelf
+			itemClassName="[&_img]:rounded-none"
+			labels={{
+				label: title,
+				next: nextLabel,
+				previous: previousLabel,
+				page: ({ page, pageCount }) => t.ui.shelf.page({ page, pageCount }),
+				item: ({ item, itemCount }) => t.ui.shelf.item({ item, itemCount }),
+			}}
 		>
-			<CarouselContent
-				onClickCapture={(event) => {
-					if (Date.now() >= suppressClickUntilRef.current) return;
-					event.preventDefault();
-					event.stopPropagation();
-					suppressClickUntilRef.current = 0;
-				}}
-				onPointerCancelCapture={() => {
-					pointerStartRef.current = null;
-					suppressClickUntilRef.current = 0;
-				}}
-				onPointerDownCapture={(event) => {
-					if (!event.isPrimary) return;
-					pointerStartRef.current = {
-						pointerId: event.pointerId,
-						x: event.clientX,
-						y: event.clientY,
-					};
-					event.currentTarget.setPointerCapture?.(event.pointerId);
-				}}
-				onPointerMoveCapture={(event) => {
-					const start = pointerStartRef.current;
-					if (!start || start.pointerId !== event.pointerId) return;
-					if (Math.hypot(event.clientX - start.x, event.clientY - start.y) < 6) return;
-					suppressClickUntilRef.current = Number.POSITIVE_INFINITY;
-				}}
-				onPointerUpCapture={(event) => {
-					const start = pointerStartRef.current;
-					if (!start || start.pointerId !== event.pointerId) return;
-					pointerStartRef.current = null;
-					if (suppressClickUntilRef.current === Number.POSITIVE_INFINITY) {
-						suppressClickUntilRef.current = Date.now() + 250;
-					}
-				}}
-			>
-				{items.map((item, index) => (
-					<CarouselItem className="[&_img]:rounded-none" index={index} key={item.id}>
-						<RealmPinnedItemCard item={item} untitledLabel={untitledLabel} />
-					</CarouselItem>
-				))}
-			</CarouselContent>
-			{items.length > slidesPerPage ? (
-				<RealmPinnedCarouselControls nextLabel={nextLabel} previousLabel={previousLabel} />
-			) : null}
-		</Carousel>
-	);
-}
-
-function RealmPinnedCarouselControls({
-	nextLabel,
-	previousLabel,
-}: {
-	readonly nextLabel: string;
-	readonly previousLabel: string;
-}) {
-	const carousel = useCarousel();
-
-	return (
-		<CarouselControl className="pointer-events-none absolute inset-x-2 top-1/2 -translate-y-1/2">
-			<Button
-				aria-label={previousLabel}
-				className="pointer-events-auto"
-				clickEffect={false}
-				disabled={!carousel.canScrollPrev}
-				onClick={() => carousel.scrollPrev()}
-				pill
-				size="icon-md"
-				variant="secondary"
-			>
-				<ChevronLeftIcon aria-hidden />
-			</Button>
-			<Button
-				aria-label={nextLabel}
-				className="pointer-events-auto"
-				clickEffect={false}
-				disabled={!carousel.canScrollNext}
-				onClick={() => carousel.scrollNext()}
-				pill
-				size="icon-md"
-				variant="secondary"
-			>
-				<ChevronRightIcon aria-hidden />
-			</Button>
-		</CarouselControl>
+			{items.map((item) => (
+				<RealmPinnedItemCard item={item} key={item.id} untitledLabel={untitledLabel} />
+			))}
+		</Shelf>
 	);
 }
 

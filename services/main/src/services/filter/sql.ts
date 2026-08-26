@@ -1,4 +1,5 @@
 import type {
+	BookFilter,
 	CollectionFilter,
 	ContentLanguageSupportFilter,
 	IntegerFilter,
@@ -81,6 +82,13 @@ function localizationCondition(filter: LocalizationFilter): SQL {
 	const conditions = logicConditions(filter, localizationCondition);
 	if (filter.language)
 		conditions.push(valuesCondition(sql`filter_localization.language`, filter.language.in));
+	return conjunction(conditions);
+}
+
+function bookCondition(filter: BookFilter): SQL {
+	const conditions = logicConditions(filter, bookCondition);
+	if (filter.releaseStatus)
+		conditions.push(valuesCondition(sql`filter_book.release_status`, filter.releaseStatus.in));
 	return conjunction(conditions);
 }
 
@@ -743,6 +751,10 @@ export function compileUnitPredicateCandidateSet(
 		const collectionSet = collectionCandidateSet(filter.collection.is);
 		if (collectionSet) conjunctiveSets.push(collectionSet);
 	}
+	if (filter.book && "is" in filter.book)
+		conjunctiveSets.push(sql`select filter_book.id as unit_id
+			from book filter_book
+			where ${bookCondition(filter.book.is)}`);
 	return combineCandidateSets(conjunctiveSets, "intersect");
 }
 
@@ -922,6 +934,16 @@ export function compileUnitPredicateSql(
 					select 1 from collection filter_collection
 					where filter_collection.id = ${input.unitId}
 				)`,
+		);
+	if (filter.book)
+		conditions.push(
+			"is" in filter.book
+				? sql`exists (
+					select 1 from book filter_book
+					where filter_book.id = ${input.unitId}
+						and ${bookCondition(filter.book.is)}
+				)`
+				: sql`not exists (select 1 from book filter_book where filter_book.id = ${input.unitId})`,
 		);
 	return conjunction(conditions);
 }

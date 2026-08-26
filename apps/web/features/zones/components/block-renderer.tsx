@@ -2,8 +2,11 @@
 
 import {
 	Block as BlockContract,
+	appendBlockPath,
 	isDocument,
 	type Block,
+	type BlockPath,
+	type BlockPathSegment,
 	type NavigationItem,
 	type NavigationTarget,
 	type SearchFeatureSource,
@@ -14,17 +17,15 @@ import {
 	parseSearchFeatureDefinition,
 	type FilterDocument,
 	type SearchControlValue,
-	type SearchFeatureSurface,
+	type SearchSort,
 	type SimpleFeedContentKind,
 } from "@rezics/filter";
 import {
-	postApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecute,
+	postApiSearchZonesByZoneIdDockFeedBlockExecutions,
+	postApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutions,
 	postApiSearchFilterDefinition,
-	useGetApiCollectionsByCollectionIdItems,
 	useGetApiSearchZonesByZoneIdFilter,
-	usePostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecute,
-	usePostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecute,
-	type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200,
+	type PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus200,
 } from "@rezics/openapi-tanstack-query";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import {
@@ -45,9 +46,11 @@ import {
 } from "@rezics/ui";
 import { ChevronDown, ExternalLink } from "lucide-react";
 import {
+	Component,
 	createContext,
 	useContext,
 	useEffect,
+	useId,
 	useMemo,
 	useRef,
 	useState,
@@ -57,6 +60,8 @@ import {
 import { normalizePortableText } from "@rezics/portable-text";
 
 import { AppLink } from "@/features/application-shell/components/app-link";
+import { BlockContractRoot } from "@/features/block-composition/block-contract-root";
+import { useApplicationRouter } from "@/features/application-shell/hooks/use-application-router";
 import { FeedItemCard, type FeedItem } from "@/features/content-feed/components/feed-item-card";
 import { LocalizedPortableTextContent } from "@/features/content-language-display/localized-portable-text-content";
 import {
@@ -74,51 +79,48 @@ import { useTranslation } from "@/i18n/client";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { getNextItemPageParam } from "@/lib/infinite-query";
 import { workZoneFeedContentKinds } from "../model/work-zone-feed";
+import { useZoneThemeScopeStyle } from "./zone-theme-content";
 import type { ZoneRenderNavigation, ZoneRenderProjection } from "../model/zone-render";
+import type {
+	ZoneAggregateFeedItemResult,
+	ZoneAggregateSelectedUnit,
+	ZoneAggregateSortAdvisory,
+} from "../model/zone-page-aggregate";
+import { zoneSearchEntryHref } from "../model/zone-search-entry";
+import {
+	ZoneUnitListBlock,
+	type ZoneUnitListRenderUnit,
+	type ZoneUnitListSearchFacet,
+	type ZoneUnitListSearchFeatureProps,
+	type ZoneUnitListSurface,
+} from "./unit-list-block";
+import { useZoneAggregateBlockState, useZoneAggregateStatus } from "./zone-page-aggregate-provider";
 
 type RenderUnit = ZoneRenderProjection["references"]["units"][number];
 type RenderAsset = ZoneRenderProjection["references"]["assets"][number];
-type ZoneBlockSurface =
-	| { readonly kind: "dock" }
-	| { readonly kind: "page"; readonly pageId: string };
+type ZoneBlockSurface = ZoneUnitListSurface;
 type ZoneNavigationLayout = "horizontal" | "vertical";
 type NavigationLeafItem = Extract<NavigationItem, { target: unknown }>;
 type NavigationGroupItem = Extract<NavigationItem, { children: unknown }>;
-type SearchResult = {
-	readonly id: string;
-	readonly category: string;
-	readonly kind: string;
-	readonly title: string | null;
-	readonly name?: string | null;
-	readonly summary: string | null;
-};
-type SearchPresentation = {
-	readonly results: "list" | "grid" | "compact";
-	readonly showResultCount: boolean;
-};
 type FeedPresentation = Extract<Block, { readonly _type: "feed" }>["presentation"];
-type SearchFacet = {
-	readonly controlKey?: string;
-	readonly field: string;
-	readonly options: readonly { readonly value: string }[];
-};
+type SearchFacet = ZoneUnitListSearchFacet;
 type SearchCountResult = {
 	readonly value: number;
 	readonly kind: "exact" | "lower-bound";
 };
-const ExactZeroSearchTotal: SearchCountResult = { kind: "exact", value: 0 };
-type SearchPage = {
-	readonly facets?: readonly SearchFacet[];
-	readonly results: readonly SearchResult[];
-	readonly nextCursor?: string;
-	readonly total: SearchCountResult;
+type ZoneFeedExecutionResponse = PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus200 & {
+	readonly advisory?: ZoneAggregateSortAdvisory;
+	readonly hidden?: boolean;
+	readonly selected?: ZoneAggregateSelectedUnit;
+	readonly selectionSeed?: string;
 };
-type ZoneFeedExecutionResponse = PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200;
 type ZoneFeedRequest = SearchFeatureRequest;
 type ZoneFeedPage = {
+	readonly advisory?: ZoneAggregateSortAdvisory;
 	readonly facets?: readonly SearchFacet[];
 	readonly items: readonly FeedItem[];
 	readonly nextCursor?: SearchFeedContinuationToken;
+	readonly selectionSeed?: string;
 	readonly total: SearchCountResult;
 };
 
@@ -143,6 +145,11 @@ function useZoneBlocks() {
 function unitHref(unit: RenderUnit, context?: ZoneBlockContextValue): string | null {
 	if (unit.kind === "post" && context)
 		return postHref(unit.id, { kind: "zone", zone: context.projection.zone });
+	if (unit.kind === "zone_page" && context)
+		return zonePageHref(context.projection.zone, {
+			id: unit.id,
+			slug: unit.zonePageSlug,
+		});
 	return unitIdHref(unit.kind, unit.id);
 }
 
@@ -173,13 +180,7 @@ function ReferencedUnit({ unit, appearance }: { unit: RenderUnit; appearance: st
 	const context = useZoneBlocks();
 	const title = useChineseContentText(unit.title ?? "", unit.language);
 	const summary = useChineseContentText(unit.summary ?? "", unit.language);
-	const href =
-		unit.kind === "zone_page"
-			? zonePageHref(context.projection.zone, {
-					id: unit.id,
-					slug: unit.zonePageSlug,
-				})
-			: unitHref(unit, context);
+	const href = unitHref(unit, context);
 	const avatar =
 		appearance === "cover"
 			? unit.cover
@@ -192,23 +193,39 @@ function ReferencedUnit({ unit, appearance }: { unit: RenderUnit; appearance: st
 				"flex min-w-0 items-center gap-3",
 				appearance !== "inline" && "rounded-xl border border-border-weak bg-card p-4",
 			)}
+			data-part="card"
 		>
 			{avatar ? (
 				<IdentityAvatar
 					avatar={avatar}
 					className={appearance === "cover" ? "size-16 rounded-lg" : "size-10"}
+					data-part="cover"
 					fallback={title.slice(0, 1)}
 				/>
 			) : null}
 			<div className="min-w-0">
-				<p className="truncate font-semibold">{title}</p>
+				<p className="truncate font-semibold" data-part="title">
+					{title}
+				</p>
 				{appearance !== "inline" && summary ? (
-					<p className="mt-1 line-clamp-2 text-muted-foreground text-sm">{summary}</p>
+					<p className="mt-1 line-clamp-2 text-muted-foreground text-sm" data-part="summary">
+						{summary}
+					</p>
 				) : null}
 			</div>
 		</div>
 	);
-	return href ? <AppLink href={href}>{content}</AppLink> : content;
+	return href ? (
+		<AppLink data-part="link" href={href}>
+			{content}
+		</AppLink>
+	) : (
+		content
+	);
+}
+
+function ReferencedUnitCard({ unit }: { readonly unit: ZoneUnitListRenderUnit }) {
+	return <ReferencedUnit appearance="card" unit={unit} />;
 }
 
 const RootMenuPositioning = { placement: "bottom-start", gutter: 4 } as const;
@@ -236,11 +253,12 @@ function NavigationLeaf({ item }: { item: NavigationLeafItem }) {
 				"inline-flex min-h-10 items-center gap-1.5 whitespace-nowrap rounded-lg px-3 font-medium text-sm transition-colors hover:bg-accent hover:text-accent-foreground",
 				layout === "vertical" && "w-full",
 			)}
+			data-part="link"
 			href={href}
 			rel={external ? "noopener noreferrer" : undefined}
 			target={external ? "_blank" : undefined}
 		>
-			{label}
+			<span data-part="label">{label}</span>
 			{external ? <ExternalLink aria-hidden className="size-3.5" /> : null}
 		</AppLink>
 	);
@@ -261,11 +279,12 @@ function NavigationMenuLeaf({ item }: { item: NavigationLeafItem }) {
 	return (
 		<MenuItem asChild value={item._key}>
 			<AppLink
+				data-part="link"
 				href={href}
 				rel={external ? "noopener noreferrer" : undefined}
 				target={external ? "_blank" : undefined}
 			>
-				{label}
+				<span data-part="label">{label}</span>
 				{external ? <ExternalLink aria-hidden className="ms-auto size-3.5" /> : null}
 			</AppLink>
 		</MenuItem>
@@ -285,7 +304,7 @@ function NavigationSubmenu({
 	if (!label) return null;
 	return (
 		<MenuSub positioning={NestedMenuPositioning}>
-			<MenuSubTrigger>{label}</MenuSubTrigger>
+			<MenuSubTrigger data-part="label">{label}</MenuSubTrigger>
 			<MenuSubContent
 				className="min-w-52"
 				onPointerEnter={hoverBoundary.onPointerEnter}
@@ -344,6 +363,7 @@ function NavigationDropdown({
 				)}
 				onPointerEnter={hoverBoundary.onPointerEnter}
 				onPointerLeave={hoverBoundary.onPointerLeave}
+				data-part="label"
 			>
 				{label}
 				<ChevronDown aria-hidden className="size-3.5" />
@@ -401,26 +421,33 @@ export function ZoneNavigationMenu({ navigationId }: { navigationId: string }) {
 				"min-w-0 gap-1",
 				layout === "horizontal" ? "flex shrink-0 items-center" : "grid",
 			)}
+			data-part="list"
 		>
 			{navigation.document.items.map((item) => {
-				if ("target" in item) return <NavigationLeaf item={item} key={item._key} />;
+				if ("target" in item)
+					return (
+						<div data-part="item" key={item._key}>
+							<NavigationLeaf item={item} />
+						</div>
+					);
 				const hoverBoundary = {
 					onPointerEnter: () => openGroup(item._key),
 					onPointerLeave: scheduleClose,
 				};
 				return (
-					<NavigationDropdown
-						hoverBoundary={hoverBoundary}
-						item={item}
-						key={item._key}
-						onOpenChange={(open) => {
-							cancelScheduledClose();
-							setOpenGroupKey((current) =>
-								open ? item._key : current === item._key ? null : current,
-							);
-						}}
-						open={openGroupKey === item._key}
-					/>
+					<div data-part="item" key={item._key}>
+						<NavigationDropdown
+							hoverBoundary={hoverBoundary}
+							item={item}
+							onOpenChange={(open) => {
+								cancelScheduledClose();
+								setOpenGroupKey((current) =>
+									open ? item._key : current === item._key ? null : current,
+								);
+							}}
+							open={openGroupKey === item._key}
+						/>
+					</div>
 				);
 			})}
 		</nav>
@@ -429,7 +456,7 @@ export function ZoneNavigationMenu({ navigationId }: { navigationId: string }) {
 
 function EmbeddedPortableTextBlock({ value }: { value: unknown }) {
 	if (!isDocument(BlockContract, value)) return null;
-	return <ZoneBlock block={value} />;
+	return <IsolatedZoneBlock block={value} path={[{ slot: "blocks", key: value._key }]} />;
 }
 
 const portableTextBlockTypes = {
@@ -471,115 +498,90 @@ export function ZoneWikiPostContent({
 	return <WikiPortableText language={language} value={value} />;
 }
 
-function ZoneBlocks({ blocks }: { blocks: readonly Block[] }) {
+function ZoneBlocks({
+	blocks,
+	parentPath = [],
+}: {
+	readonly blocks: readonly Block[];
+	readonly parentPath?: readonly BlockPathSegment[];
+}) {
 	return (
 		<>
-			{blocks.map((block) => (
-				<ZoneBlock block={block} key={block._key} />
-			))}
+			{blocks.map((block) => {
+				const path = appendBlockPath(parentPath, "blocks", block._key);
+				return <IsolatedZoneBlock block={block} key={block._key} path={path} />;
+			})}
 		</>
 	);
 }
 
-function SearchResults({
-	results,
-	presentation,
-	total,
-	unitListLayout,
-}: {
-	results: readonly SearchResult[];
-	presentation: Pick<SearchPresentation, "results" | "showResultCount">;
-	total: SearchCountResult;
-	unitListLayout?: UnitListLayout;
-}) {
-	const context = useZoneBlocks();
+function IsolatedZoneBlock({ block, path }: { readonly block: Block; readonly path: BlockPath }) {
 	const { t } = useTranslation("zones");
-	const { t: search } = useTranslation("search");
-	if (results.length === 0)
-		return <p className="mt-4 text-muted-foreground text-sm">{t.searchEmpty}</p>;
+	const context = useZoneBlocks();
+	const aggregateStatus = useZoneAggregateStatus();
+	const resetKey = `${context.projection.page?.latestUnitRevisionId ?? "no-page"}:${aggregateStatus}`;
 	return (
-		<div className="mt-4 grid gap-3">
-			{presentation.showResultCount ? (
-				<p className="text-muted-foreground text-sm">
-					{total.kind === "exact"
-						? search.resultCount({ count: total.value })
-						: search.atLeastResultCount({ count: total.value })}
-				</p>
-			) : null}
-			<ul
-				aria-label={t.searchResults}
-				className={cn(
-					"grid gap-2",
-					presentation.results === "grid" && "sm:grid-cols-2 lg:grid-cols-3",
-					unitListLayout === "carousel" &&
-						"grid-flow-col auto-cols-[minmax(16rem,22rem)] overflow-x-auto pb-3 sm:grid-cols-none lg:grid-cols-none",
-				)}
+		<BlockContractRoot block={block}>
+			<ZoneBlockErrorBoundary
+				fallback={
+					<p className="my-4 text-destructive text-sm" data-part="error">
+						{t.searchFailed}
+					</p>
+				}
+				resetKey={resetKey}
 			>
-				{results.map((result) => {
-					const href =
-						result.category === "posts" || result.category === "reviews"
-							? postHref(result.id, {
-									kind: "zone",
-									zone: context.projection.zone,
-								})
-							: unitIdHref(result.kind, result.id);
-					const title = result.title ?? result.name ?? t.untitledResult;
-					const content = (
-						<div className="rounded-lg border border-border-weak px-3 py-2 transition-colors hover:bg-accent">
-							<p className="font-medium text-sm">{title}</p>
-							{result.summary ? (
-								<p className="mt-1 line-clamp-2 text-muted-foreground text-xs">{result.summary}</p>
-							) : null}
-						</div>
-					);
-					return (
-						<li key={`${result.kind}:${result.id}`}>
-							{href ? <AppLink href={href}>{content}</AppLink> : content}
-						</li>
-					);
-				})}
-			</ul>
-		</div>
+				<ZoneBlock block={block} path={path} />
+			</ZoneBlockErrorBoundary>
+		</BlockContractRoot>
 	);
 }
 
+class ZoneBlockErrorBoundary extends Component<
+	{ readonly children: ReactNode; readonly fallback: ReactNode; readonly resetKey: string },
+	{ readonly failed: boolean }
+> {
+	state = { failed: false };
+
+	static getDerivedStateFromError() {
+		return { failed: true };
+	}
+
+	componentDidUpdate(previous: Readonly<{ readonly resetKey: string }>) {
+		if (this.state.failed && previous.resetKey !== this.props.resetKey)
+			this.setState({ failed: false });
+	}
+
+	render() {
+		return this.state.failed ? this.props.fallback : this.props.children;
+	}
+}
+
 function ZoneSearchFeature({
-	blockKey,
+	children,
 	feature,
 	onExecute,
 	pending,
 	error,
 	facets,
-	results,
-	presentation,
-	total = ExactZeroSearchTotal,
 	autoExecute = false,
-	unitListLayout,
 	initialPageSize,
+	initialSort,
 	appearance = "page",
 	surface,
 	initialValues = [],
+	showSortControl = true,
 	renderToolbarFilters,
-}: {
-	blockKey: string;
-	feature: SearchFeatureSource;
-	onExecute: (request: SearchFeatureRequest) => void;
-	pending: boolean;
-	error: boolean;
-	facets?: readonly SearchFacet[];
-	results?: readonly SearchResult[];
-	presentation: Pick<SearchPresentation, "results" | "showResultCount">;
-	total?: SearchCountResult;
-	autoExecute?: boolean;
-	unitListLayout?: UnitListLayout;
-	initialPageSize?: number;
+	contract,
+}: ZoneUnitListSearchFeatureProps & {
 	appearance?: "feed" | "page";
-	surface: SearchFeatureSurface;
+	initialSort?: SearchSort;
 	initialValues?: readonly SearchControlValue[];
 	renderToolbarFilters?: (filterDocument: FilterDocument) => ReactNode;
+	contract?: "feed" | "search";
 }) {
 	const { t } = useTranslation("zones");
 	const context = useZoneBlocks();
+	const searchId = useId();
 	const embeddedFilterDocument =
 		feature.kind === "global"
 			? ({} satisfies FilterDocument)
@@ -610,21 +612,31 @@ function ZoneSearchFeature({
 		return {
 			...(expression ? { expression } : {}),
 			...(initialPageSize ? { pageSize: initialPageSize } : {}),
+			...(initialSort ? { sort: initialSort } : {}),
 		};
-	}, [initialPageSize, initialValues, rawDefinition]);
+	}, [initialPageSize, initialSort, initialValues, rawDefinition]);
 	const autoExecuted = useRef(false);
+	const automaticState = useMemo(() => {
+		if (!initialState || !initialSort) return initialState;
+		const { sort: _persistedInitialSort, ...state } = initialState;
+		return state;
+	}, [initialSort, initialState]);
 	useEffect(() => {
-		if (!autoExecute || !initialState || autoExecuted.current) return;
+		if (!autoExecute || !automaticState || autoExecuted.current) return;
 		autoExecuted.current = true;
 		onExecute({
 			injections: [],
-			state: initialState,
+			state: automaticState,
 		});
-	}, [autoExecute, initialState, onExecute]);
+	}, [autoExecute, automaticState, onExecute]);
 	if (feature.kind === "zone" ? zone.isError : embedded.isError)
-		return <p className="my-4 text-destructive text-sm">{t.searchFailed}</p>;
+		return (
+			<p className="my-4 text-destructive text-sm" data-part={contract ? "error" : undefined}>
+				{t.searchFailed}
+			</p>
+		);
 	if ((feature.kind === "zone" ? zone.isPending : embedded.isPending) || !rawDefinition)
-		return null;
+		return <div aria-busy="true" data-part={contract ? "loading" : undefined} />;
 	const definition = parseSearchFeatureDefinition(rawDefinition);
 	return (
 		<SearchFeature
@@ -632,52 +644,45 @@ function ZoneSearchFeature({
 			definition={definition}
 			error={error}
 			facets={facets}
-			id={`zone-search-${blockKey}`}
+			id={`zone-search-${searchId}`}
 			initialState={initialState}
 			onExecute={onExecute}
 			pending={pending}
+			parts={
+				contract === "search"
+					? { filters: "filters", form: "form", query: "query", submit: "submit" }
+					: contract === "feed"
+						? { toolbar: "toolbar" }
+						: undefined
+			}
 			resolveLabel={(unitId) => context.units.get(unitId)?.title ?? undefined}
 			resolveOptionLabel={(_control, value) =>
 				typeof value === "string" ? (context.units.get(value)?.title ?? undefined) : undefined
 			}
+			showSortControl={showSortControl}
 			surface={surface}
 			toolbarFilters={renderToolbarFilters?.(definition.filterDocument)}
 		>
-			{results ? (
-				<SearchResults
-					presentation={presentation}
-					results={results}
-					total={total}
-					unitListLayout={unitListLayout}
-				/>
-			) : null}
+			{children}
 		</SearchFeature>
 	);
 }
 
-interface SearchExecutionResponse {
-	readonly nextCursor?: string;
-	readonly facets?: readonly SearchFacet[];
-	readonly groups: readonly {
-		readonly hits: readonly SearchResult[];
-		readonly total: {
-			readonly value: string | number;
-			readonly kind: "exact" | "lower-bound";
-		};
-	}[];
-}
-
-function toSearchPage(value: SearchExecutionResponse): SearchPage {
-	const totals = value.groups.map((group) => group.total);
-	return {
-		facets: value.facets,
-		results: value.groups.flatMap((group) => group.hits),
-		nextCursor: value.nextCursor,
-		total: {
-			kind: totals.some((total) => total.kind === "lower-bound") ? "lower-bound" : "exact",
-			value: totals.reduce((total, current) => total + Number(current.value), 0),
-		},
-	};
+function ZoneSearchBlock({ block }: { readonly block: Extract<Block, { _type: "search" }> }) {
+	const context = useZoneBlocks();
+	const router = useApplicationRouter();
+	return (
+		<section className="my-6">
+			<ZoneSearchFeature
+				contract="search"
+				error={false}
+				feature={block.feature}
+				onExecute={(request) => router.push(zoneSearchEntryHref(context.baseHref, request))}
+				pending={false}
+				surface="search"
+			/>
+		</section>
+	);
 }
 
 function toZoneFeedPage(
@@ -686,14 +691,27 @@ function toZoneFeedPage(
 ): ZoneFeedPage {
 	const nextCursor = getNextItemPageParam(value, [], currentCursor);
 	return {
+		...(value.advisory ? { advisory: value.advisory } : {}),
 		facets: value.facets,
 		items: value.items,
 		// The successful Feed endpoint response is the proof for this route-specific brand.
 		nextCursor: nextCursor as SearchFeedContinuationToken | undefined,
+		...(value.selectionSeed ? { selectionSeed: value.selectionSeed } : {}),
 		total: {
 			kind: value.total.kind,
 			value: Number(value.total.value),
 		},
+	};
+}
+
+function toAggregateFeedPage(result: ZoneAggregateFeedItemResult): ZoneFeedPage {
+	return {
+		...(result.advisory ? { advisory: result.advisory } : {}),
+		facets: result.facets,
+		items: result.items,
+		nextCursor: result.nextCursor as SearchFeedContinuationToken | undefined,
+		...(result.selectionSeed ? { selectionSeed: result.selectionSeed } : {}),
+		total: result.total ?? { kind: "exact", value: result.items.length },
 	};
 }
 
@@ -702,9 +720,11 @@ function appendZoneFeedPage(current: ZoneFeedPage | undefined, next: ZoneFeedPag
 	const items = new Map(current.items.map((item) => [item.id, item]));
 	for (const item of next.items) items.set(item.id, item);
 	return {
+		advisory: next.advisory ?? current.advisory,
 		facets: next.facets?.length ? next.facets : current.facets,
 		items: [...items.values()],
 		nextCursor: next.nextCursor,
+		selectionSeed: next.selectionSeed ?? current.selectionSeed,
 		total: current.total,
 	};
 }
@@ -737,30 +757,66 @@ function withContentKindFilter(
 }
 
 function ZoneFeedBlock({
-	blockKey,
+	blockPath,
 	execute,
 	feature,
 	pending,
 	error,
+	initialSort,
 	presentation,
+	surface,
 	maxResults,
 }: {
-	blockKey: string;
-	execute: (request: ZoneFeedRequest, signal: AbortSignal) => Promise<ZoneFeedExecutionResponse>;
+	blockPath: BlockPath;
+	execute: (
+		request: ZoneFeedRequest,
+		signal: AbortSignal,
+		selectionSeed?: string,
+	) => Promise<ZoneFeedExecutionResponse>;
 	feature: SearchFeatureSource;
 	pending: boolean;
 	error: boolean;
+	initialSort?: SearchSort;
 	presentation: FeedPresentation;
+	surface: ZoneBlockSurface;
 	maxResults?: number;
 }) {
 	const context = useZoneBlocks();
 	const { t } = useTranslation(["actions", "feed", "state"]);
+	const aggregate = useZoneAggregateBlockState(surface.kind, blockPath);
 	const [request, setRequest] = useState<ZoneFeedRequest>();
 	const [contentKinds, setContentKinds] = useState<readonly SimpleFeedContentKind[]>([]);
 	const [page, setPage] = useState<ZoneFeedPage>();
+	const aggregatePage =
+		aggregate.kind === "ok" && aggregate.blockType === "feed" && aggregate.itemKind === "feed-item"
+			? toAggregateFeedPage(aggregate)
+			: undefined;
+	const aggregateContractError =
+		aggregate.kind === "ok" &&
+		(aggregate.blockType !== "feed" || aggregate.itemKind !== "feed-item");
+	const aggregatePending = aggregate.kind === "pending";
+	const aggregateError = aggregate.kind === "error" || aggregateContractError;
+	const displayedPage = page ?? aggregatePage;
+	const effectiveInitialSort =
+		request?.state.sort ?? displayedPage?.advisory?.resolvedSort ?? initialSort;
+	const aggregateRequest = useMemo<ZoneFeedRequest>(
+		() => ({
+			injections: [],
+			state: {
+				...(maxResults && maxResults <= 20 ? { pageSize: maxResults } : {}),
+				...(effectiveInitialSort ? { sort: effectiveInitialSort } : {}),
+			},
+		}),
+		[effectiveInitialSort, maxResults],
+	);
+	const effectiveRequest =
+		request ?? (aggregatePage || aggregateError ? aggregateRequest : undefined);
+	const effectivePending = pending || aggregatePending;
+	const effectiveError = error || aggregateError;
 	const executionSequence = useRef(0);
 	const executionController = useRef<AbortController | undefined>(undefined);
 	useEffect(() => () => executionController.current?.abort(), []);
+	if (aggregate.kind === "hidden") return null;
 	const run = (
 		nextRequest: ZoneFeedRequest,
 		nextContentKinds: readonly SimpleFeedContentKind[],
@@ -774,50 +830,62 @@ function ZoneFeedBlock({
 			setRequest(nextRequest);
 			setPage(undefined);
 		}
-		void execute(withContentKindFilter(nextRequest, nextContentKinds), controller.signal).then(
+		void execute(
+			withContentKindFilter(nextRequest, nextContentKinds),
+			controller.signal,
+			displayedPage?.selectionSeed,
+		).then(
 			(result) => {
 				if (sequence !== executionSequence.current) return;
 				const nextPage = toZoneFeedPage(
 					result,
 					nextRequest.state.cursor as SearchFeedContinuationToken | undefined,
 				);
-				setPage((current) => (append ? appendZoneFeedPage(current, nextPage) : nextPage));
+				setPage((current) =>
+					append ? appendZoneFeedPage(current ?? aggregatePage, nextPage) : nextPage,
+				);
 			},
 			() => undefined,
 		);
 	};
 	const loadMore = () => {
-		if (!request || !page?.nextCursor || pending) return;
-		run(requestWithCursor(request, page.nextCursor), contentKinds, true);
+		if (!effectiveRequest || !displayedPage?.nextCursor || effectivePending) return;
+		run(requestWithCursor(effectiveRequest, displayedPage.nextCursor), contentKinds, true);
 	};
 	const selectContentKinds = (nextContentKinds: readonly SimpleFeedContentKind[]) => {
 		setContentKinds(nextContentKinds);
-		if (!request) return;
-		run(requestWithoutCursor(request), nextContentKinds, false);
+		if (!effectiveRequest) return;
+		run(requestWithoutCursor(effectiveRequest), nextContentKinds, false);
 	};
-	const canLoadMore = Boolean(page?.nextCursor && (!maxResults || page.items.length < maxResults));
+	const canLoadMore = Boolean(
+		displayedPage?.nextCursor && (!maxResults || displayedPage.items.length < maxResults),
+	);
 	const continuationState: FeedContinuationState = !canLoadMore
 		? { status: "exhausted" }
-		: pending
+		: effectivePending
 			? { status: "loading" }
-			: error
+			: effectiveError
 				? { status: "error", retry: loadMore }
 				: { status: "ready", loadNext: loadMore };
 	return (
 		<>
 			<ZoneSearchFeature
 				appearance="feed"
-				autoExecute
-				blockKey={blockKey}
-				error={error}
-				facets={page?.facets}
+				autoExecute={
+					request === undefined &&
+					(aggregate.kind === "legacy" ||
+						(aggregate.kind === "skipped" && aggregate.reason === "inactive-tab"))
+				}
+				contract="feed"
+				error={effectiveError}
+				facets={displayedPage?.facets}
 				feature={feature}
 				initialPageSize={maxResults && maxResults <= 20 ? maxResults : undefined}
+				initialSort={effectiveInitialSort}
+				key={effectiveInitialSort ?? "default"}
 				onExecute={(nextRequest) => run(nextRequest, contentKinds, false)}
-				pending={pending}
-				presentation={{ results: "list", showResultCount: presentation.showResultCount }}
+				pending={effectivePending}
 				surface="feed"
-				total={page?.total}
 				renderToolbarFilters={(filterDocument) => {
 					const options = workZoneFeedContentKinds(filterDocument);
 					return options ? (
@@ -836,6 +904,14 @@ function ZoneFeedBlock({
 				emptyTitle={t.feed.emptyTitle}
 				errorLabel={t.state.error}
 				getItemKey={(item) => item.id}
+				parts={{
+					continuation: "continuation",
+					empty: "empty",
+					error: "error",
+					item: "item",
+					items: "items",
+					loading: "loading",
+				}}
 				renderItem={(item, metadata) => (
 					<FeedItemCard
 						item={item}
@@ -846,18 +922,18 @@ function ZoneFeedBlock({
 				)}
 				retryLabel={t.actions.retry}
 				state={
-					!page && pending
+					!displayedPage && effectivePending
 						? { status: "pending" }
-						: !page && error
+						: !displayedPage && effectiveError
 							? {
 									status: "error",
-									retry: () => request && run(request, contentKinds, false),
+									retry: () => effectiveRequest && run(effectiveRequest, contentKinds, false),
 								}
 							: {
 									status: "ready",
 									items: maxResults
-										? (page?.items.slice(0, maxResults) ?? [])
-										: (page?.items ?? []),
+										? (displayedPage?.items.slice(0, maxResults) ?? [])
+										: (displayedPage?.items ?? []),
 								}
 				}
 			/>
@@ -865,212 +941,99 @@ function ZoneFeedBlock({
 	);
 }
 
-function useZoneFeedBlockExecution(blockKey: string, surface: ZoneBlockSurface) {
+function useZoneFeedBlockExecution(blockPath: BlockPath, surface: ZoneBlockSurface) {
 	const context = useZoneBlocks();
 	const localizationLanguages = useLocalizationLanguages();
 	return useMutation({
-		mutationFn: async ({ request, signal }: { request: ZoneFeedRequest; signal: AbortSignal }) => {
-			const { data } = await postApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecute({
-				body: { ...request, localizationLanguages, surface },
-				path: { blockKey, zoneId: context.projection.zone.id },
+		mutationFn: async ({
+			request,
+			selectionSeed,
+			signal,
+		}: {
+			request: ZoneFeedRequest;
+			selectionSeed?: string;
+			signal: AbortSignal;
+		}) => {
+			const input = {
+				body: {
+					state: request.state,
+					...(selectionSeed ? { selectionSeed } : {}),
+					localizationLanguages,
+					path: [...blockPath],
+				},
 				signal,
-			});
+			};
+			const { data } =
+				surface.kind === "dock"
+					? await postApiSearchZonesByZoneIdDockFeedBlockExecutions({
+							...input,
+							path: { zoneId: context.projection.zone.id },
+						})
+					: await postApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutions({
+							...input,
+							path: { pageId: surface.pageId, zoneId: context.projection.zone.id },
+						});
 			return data;
 		},
 	});
 }
 
 function DockFeedBlock({
-	blockKey,
+	blockPath,
 	feature,
+	initialSort,
 	presentation,
 }: {
-	blockKey: string;
+	blockPath: BlockPath;
 	feature: SearchFeatureSource;
+	initialSort?: SearchSort;
 	presentation: FeedPresentation;
 }) {
-	const mutation = useZoneFeedBlockExecution(blockKey, { kind: "dock" });
+	const surface = { kind: "dock" } as const;
+	const mutation = useZoneFeedBlockExecution(blockPath, surface);
 	return (
 		<ZoneFeedBlock
-			blockKey={blockKey}
+			blockPath={blockPath}
 			error={mutation.isError}
-			execute={(request, signal) => mutation.mutateAsync({ request, signal })}
+			execute={(request, signal, selectionSeed) =>
+				mutation.mutateAsync({ request, selectionSeed, signal })
+			}
 			feature={feature}
+			initialSort={initialSort}
 			pending={mutation.isPending}
 			presentation={presentation}
+			surface={surface}
 		/>
 	);
 }
 
 function PageFeedBlock({
-	blockKey,
+	blockPath,
 	feature,
+	initialSort,
 	pageId,
 	presentation,
 }: {
-	blockKey: string;
+	blockPath: BlockPath;
 	feature: SearchFeatureSource;
+	initialSort?: SearchSort;
 	pageId: string;
 	presentation: FeedPresentation;
 }) {
-	const mutation = useZoneFeedBlockExecution(blockKey, { kind: "page", pageId });
+	const surface = { kind: "page", pageId } as const;
+	const mutation = useZoneFeedBlockExecution(blockPath, surface);
 	return (
 		<ZoneFeedBlock
-			blockKey={blockKey}
+			blockPath={blockPath}
 			error={mutation.isError}
-			execute={(request, signal) => mutation.mutateAsync({ request, signal })}
-			feature={feature}
-			pending={mutation.isPending}
-			presentation={presentation}
-		/>
-	);
-}
-
-type UnitListBlock = Extract<Block, { readonly _type: "unit-list" }>;
-type UnitListLayout = UnitListBlock["layout"];
-
-function unitListClasses(layout: UnitListLayout): string {
-	return cn(
-		"my-6 grid gap-4",
-		layout === "grid" && "sm:grid-cols-2 lg:grid-cols-3",
-		layout === "carousel" && "grid-flow-col auto-cols-[minmax(16rem,22rem)] overflow-x-auto pb-3",
-	);
-}
-
-function CollectionUnitList({
-	collectionId,
-	layout,
-	limit,
-}: {
-	collectionId: string;
-	layout: UnitListLayout;
-	limit: number;
-}) {
-	const context = useZoneBlocks();
-	const { t } = useTranslation("zones");
-	const localizationLanguages = useLocalizationLanguages();
-	const query = useGetApiCollectionsByCollectionIdItems({
-		path: { collectionId },
-		query: { limit, localizationLanguages },
-	});
-	if (query.isPending) return null;
-	if (query.isError) return <p className="my-4 text-destructive text-sm">{t.searchFailed}</p>;
-	const items = query.data?.items ?? [];
-	if (items.length === 0)
-		return <p className="my-4 text-muted-foreground text-sm">{t.searchEmpty}</p>;
-	return (
-		<ul aria-label={t.contentList} className={unitListClasses(layout)}>
-			{items.map((item) => (
-				<li key={item.membership.targetId}>
-					<FeedItemCard
-						item={item.content}
-						postContext={{ kind: "zone", zone: context.projection.zone }}
-					/>
-				</li>
-			))}
-		</ul>
-	);
-}
-
-function ZoneSearchUnitListBlock({
-	blockKey,
-	error,
-	execute,
-	feature,
-	layout,
-	limit,
-	pending,
-	presentation,
-}: {
-	readonly blockKey: string;
-	readonly error: boolean;
-	readonly execute: (request: SearchFeatureRequest) => Promise<SearchExecutionResponse>;
-	readonly feature: SearchFeatureSource;
-	readonly layout: UnitListLayout;
-	readonly limit: number;
-	readonly pending: boolean;
-	readonly presentation: SearchPresentation;
-}) {
-	const [page, setPage] = useState<SearchPage>();
-	return (
-		<ZoneSearchFeature
-			autoExecute
-			blockKey={blockKey}
-			error={error}
-			facets={page?.facets}
-			feature={feature}
-			initialPageSize={Math.min(limit, 50)}
-			onExecute={(request) => {
-				void execute(request).then(
-					(response) => setPage(toSearchPage(response)),
-					() => undefined,
-				);
-			}}
-			pending={pending}
-			presentation={presentation}
-			results={page?.results.slice(0, limit)}
-			surface="search"
-			total={page?.total}
-			unitListLayout={layout}
-		/>
-	);
-}
-
-function SearchUnitList({
-	blockKey,
-	feature,
-	layout,
-	limit,
-	pageId,
-}: {
-	blockKey: string;
-	feature: SearchFeatureSource;
-	layout: UnitListLayout;
-	limit: number;
-	pageId?: string;
-}) {
-	const context = useZoneBlocks();
-	const localizationLanguages = useLocalizationLanguages();
-	const dockMutation = usePostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecute();
-	const pageMutation = usePostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecute();
-	const presentation = {
-		results: layout === "grid" || layout === "carousel" ? "grid" : "list",
-		pagination: "load-more",
-		showResultCount: false,
-	} as const;
-	if (pageId === undefined)
-		return (
-			<ZoneSearchUnitListBlock
-				blockKey={blockKey}
-				error={dockMutation.isError}
-				execute={(body) =>
-					dockMutation.mutateAsync({
-						body: { ...body, localizationLanguages },
-						path: { blockKey, zoneId: context.projection.zone.id },
-					})
-				}
-				feature={feature}
-				layout={layout}
-				limit={limit}
-				pending={dockMutation.isPending}
-				presentation={presentation}
-			/>
-		);
-	return (
-		<ZoneSearchUnitListBlock
-			blockKey={blockKey}
-			error={pageMutation.isError}
-			execute={(body) =>
-				pageMutation.mutateAsync({
-					body: { ...body, localizationLanguages },
-					path: { blockKey, pageId, zoneId: context.projection.zone.id },
-				})
+			execute={(request, signal, selectionSeed) =>
+				mutation.mutateAsync({ request, selectionSeed, signal })
 			}
 			feature={feature}
-			layout={layout}
-			limit={limit}
-			pending={pageMutation.isPending}
+			initialSort={initialSort}
+			pending={mutation.isPending}
 			presentation={presentation}
+			surface={surface}
 		/>
 	);
 }
@@ -1087,14 +1050,18 @@ function ZoneMediaBlock({ block }: { readonly block: Extract<Block, { _type: "me
 	const alt = useChineseContentText(altUnit?.title ?? "", altUnit?.language);
 	if (!asset) return null;
 	const image = (
-		<figure className="my-6 overflow-hidden rounded-xl border border-border-weak">
+		<figure
+			className="my-6 overflow-hidden rounded-xl border border-border-weak"
+			data-part="figure"
+		>
 			<img
 				alt={alt}
 				className={cn("h-auto w-full", block.fit === "cover" && "max-h-[36rem] object-cover")}
+				data-part="asset"
 				src={asset.url}
 			/>
 			{captionUnit ? (
-				<figcaption className="px-4 py-3 text-muted-foreground text-sm">
+				<figcaption className="px-4 py-3 text-muted-foreground text-sm" data-part="caption">
 					<RenderUnitTitle unit={captionUnit} />
 				</figcaption>
 			) : null}
@@ -1102,33 +1069,48 @@ function ZoneMediaBlock({ block }: { readonly block: Extract<Block, { _type: "me
 	);
 	if (!block.target) return image;
 	const href = navigationHref(block.target, context);
-	return href ? <AppLink href={href}>{image}</AppLink> : image;
+	return href ? (
+		<AppLink data-part="link" href={href}>
+			{image}
+		</AppLink>
+	) : (
+		image
+	);
 }
 
-function ZoneBlock({ block }: { block: Block }) {
+function ZoneBlock({ block, path }: { block: Block; path: BlockPath }) {
 	const { t } = useTranslation(["ui", "zones"]);
 	const context = useZoneBlocks();
 	const surface = useContext(ZoneBlockSurfaceContext);
 	if (block._type === "portable-text")
-		return <WikiPortableText language={context.projection.zone.language} value={block.content} />;
+		return (
+			<div data-part="content">
+				<WikiPortableText language={context.projection.zone.language} value={block.content} />
+			</div>
+		);
 	if (block._type === "post-full-view") {
 		const wikiPost = context.projection.references.wikiPosts.find(
 			(candidate) => candidate.id === block.postId,
 		);
 		if (!wikiPost) return null;
 		return (
-			<article>
-				<header className="mb-8 border-b border-border-weak pb-6">
-					<h1 className="font-serif font-bold text-3xl tracking-tight sm:text-4xl">
+			<article data-part="content">
+				<header className="mb-8 border-b border-border-weak pb-6" data-part="header">
+					<h1
+						className="font-serif font-bold text-3xl tracking-tight sm:text-4xl"
+						data-part="title"
+					>
 						<LocalizedText language={wikiPost.language} value={wikiPost.title ?? t.ui.unnamed} />
 					</h1>
 					{wikiPost.summary ? (
-						<p className="mt-3 max-w-3xl text-muted-foreground leading-7">
+						<p className="mt-3 max-w-3xl text-muted-foreground leading-7" data-part="summary">
 							<LocalizedText language={wikiPost.language} value={wikiPost.summary} />
 						</p>
 					) : null}
 				</header>
-				<WikiPortableText language={wikiPost.language} value={wikiPost.body.content} />
+				<div data-part="content">
+					<WikiPortableText language={wikiPost.language} value={wikiPost.body.content} />
+				</div>
 			</article>
 		);
 	}
@@ -1142,8 +1124,11 @@ function ZoneBlock({ block }: { block: Block }) {
 				style={style}
 			>
 				{block.columns.map((column) => (
-					<div className="min-w-0" key={column._key}>
-						<ZoneBlocks blocks={column.blocks} />
+					<div className="min-w-0" data-part="column" key={column._key}>
+						<ZoneBlocks
+							blocks={column.blocks}
+							parentPath={appendBlockPath(path, "columns", column._key)}
+						/>
 					</div>
 				))}
 			</div>
@@ -1154,50 +1139,41 @@ function ZoneBlock({ block }: { block: Block }) {
 		return referenced ? <ReferencedUnit appearance={block.appearance} unit={referenced} /> : null;
 	}
 	if (block._type === "unit-list") {
-		if (block.source.kind === "collection")
-			return (
-				<CollectionUnitList
-					collectionId={block.source.collectionId}
-					layout={block.layout}
-					limit={block.limit}
-				/>
-			);
-		if (block.source.kind === "search") {
-			if (!surface) return null;
-			return (
-				<SearchUnitList
-					blockKey={block._key}
-					feature={block.source.feature}
-					layout={block.layout}
-					limit={block.limit}
-					pageId={surface.kind === "page" ? surface.pageId : undefined}
-				/>
-			);
-		}
-		const units = block.source.unitIds
-			.map((id) => context.units.get(id))
-			.filter((unit): unit is RenderUnit => Boolean(unit))
-			.slice(0, block.limit);
 		return (
-			<div aria-label={t.zones.contentList} className={unitListClasses(block.layout)}>
-				{units.map((unit) => (
-					<ReferencedUnit appearance="card" key={unit.id} unit={unit} />
-				))}
-			</div>
+			<ZoneUnitListBlock
+				ReferencedUnitComponent={ReferencedUnitCard}
+				SearchFeatureComponent={ZoneSearchFeature}
+				block={block}
+				blockPath={path}
+				resolveNavigationHref={(target) => navigationHref(target, context)}
+				resolveSearchResultHref={(result) => unitIdHref(result.kind, result.id)}
+				resolveUnitHref={(unit) => unitHref(unit, context)}
+				surface={surface}
+				units={context.units}
+				zone={context.projection.zone}
+			/>
 		);
 	}
+	if (block._type === "search") return <ZoneSearchBlock block={block} />;
 	if (block._type === "feed") {
 		if (!surface) return null;
+		const feature = block.feature.kind === "derived" ? block.feature.query.feature : block.feature;
+		const initialSort =
+			block.feature.kind === "derived"
+				? (block.feature.query.sort ?? block.initialSort)
+				: block.initialSort;
 		return surface.kind === "dock" ? (
 			<DockFeedBlock
-				blockKey={block._key}
-				feature={block.feature}
+				blockPath={path}
+				feature={feature}
+				initialSort={initialSort}
 				presentation={block.presentation}
 			/>
 		) : (
 			<PageFeedBlock
-				blockKey={block._key}
-				feature={block.feature}
+				blockPath={path}
+				feature={feature}
+				initialSort={initialSort}
 				pageId={surface.pageId}
 				presentation={block.presentation}
 			/>
@@ -1207,9 +1183,12 @@ function ZoneBlock({ block }: { block: Block }) {
 	if (block._type === "media") return <ZoneMediaBlock block={block} />;
 	if (block._type === "divider")
 		return block.style === "space" ? (
-			<div aria-hidden className="h-8" />
+			<div aria-hidden className="h-8" data-part="separator" />
 		) : (
-			<Separator className={cn("my-8 bg-border-weak", block.style === "section" && "h-0.5")} />
+			<Separator
+				className={cn("my-8 bg-border-weak", block.style === "section" && "h-0.5")}
+				data-part="separator"
+			/>
 		);
 	if (block._type === "group")
 		return (
@@ -1220,8 +1199,9 @@ function ZoneBlock({ block }: { block: Block }) {
 					block.layout === "row" && "flex flex-wrap items-start",
 					block.layout === "grid" && "grid sm:grid-cols-2 lg:grid-cols-3",
 				)}
+				data-part="content"
 			>
-				<ZoneBlocks blocks={block.blocks} />
+				<ZoneBlocks blocks={block.blocks} parentPath={path} />
 			</div>
 		);
 	if (block._type === "callout")
@@ -1236,11 +1216,13 @@ function ZoneBlock({ block }: { block: Block }) {
 				)}
 			>
 				{block.labelUnitId ? (
-					<h2 className="mb-3 font-semibold">
+					<h2 className="mb-3 font-semibold" data-part="title">
 						<RenderUnitTitle unit={context.units.get(block.labelUnitId)} />
 					</h2>
 				) : null}
-				<ZoneBlocks blocks={block.blocks} />
+				<div data-part="content">
+					<ZoneBlocks blocks={block.blocks} parentPath={path} />
+				</div>
 			</aside>
 		);
 	if (block._type === "tabs") {
@@ -1248,16 +1230,16 @@ function ZoneBlock({ block }: { block: Block }) {
 		if (!first) return null;
 		return (
 			<Tabs className="my-6" defaultValue={first._key}>
-				<TabsList className="max-w-full overflow-x-auto" variant="underline">
+				<TabsList className="max-w-full overflow-x-auto" data-part="list" variant="underline">
 					{block.tabs.map((tab) => (
-						<TabsTrigger key={tab._key} value={tab._key}>
+						<TabsTrigger data-part="tab" key={tab._key} value={tab._key}>
 							<RenderUnitTitle unit={context.units.get(tab.labelUnitId)} />
 						</TabsTrigger>
 					))}
 				</TabsList>
 				{block.tabs.map((tab) => (
-					<TabsContent key={tab._key} value={tab._key}>
-						<ZoneBlocks blocks={tab.blocks} />
+					<TabsContent data-part="panel" key={tab._key} value={tab._key}>
+						<ZoneBlocks blocks={tab.blocks} parentPath={appendBlockPath(path, "tabs", tab._key)} />
 					</TabsContent>
 				))}
 			</Tabs>
@@ -1297,11 +1279,20 @@ export function ZoneDocument({
 	navigationLayout?: ZoneNavigationLayout;
 	surface: ZoneBlockSurface;
 }) {
+	const themeStyle = useZoneThemeScopeStyle();
 	return (
-		<ZoneBlockSurfaceContext value={surface}>
-			<ZoneNavigationLayoutContext value={navigationLayout}>
-				<ZoneBlocks blocks={blocks} />
-			</ZoneNavigationLayoutContext>
-		</ZoneBlockSurfaceContext>
+		<div
+			className="min-w-0"
+			data-zone-theme-scope=""
+			style={{ ...themeStyle, contain: "paint", isolation: "isolate" }}
+		>
+			<div data-zone-surface={surface.kind}>
+				<ZoneBlockSurfaceContext value={surface}>
+					<ZoneNavigationLayoutContext value={navigationLayout}>
+						<ZoneBlocks blocks={blocks} />
+					</ZoneNavigationLayoutContext>
+				</ZoneBlockSurfaceContext>
+			</div>
+		</div>
 	);
 }

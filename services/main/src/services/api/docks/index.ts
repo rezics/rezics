@@ -1,7 +1,9 @@
 import { StatusCodes } from "http-status-codes";
 import {
 	DockDocument,
+	DockBlockHostPolicy,
 	UnresolvedBlockReferenceError,
+	assertBlockQueryBudget,
 	assertDockDocument,
 	assertResolvedBlockReferences,
 	parseDocument,
@@ -75,6 +77,7 @@ function ensureSupported(owner: Awaited<ReturnType<typeof getDockOwner>>, kind: 
 function ensureDocument(value: unknown): asserts value is typeof DockDocument.static {
 	try {
 		assertDockDocument(value);
+		assertBlockQueryBudget(value, DockBlockHostPolicy);
 		assertExecutableBlockFilterDocuments(value, true);
 	} catch {
 		throw new DockDocumentInvalid();
@@ -306,12 +309,14 @@ export default new Elysia({ prefix: "/units/by-id" })
 					sourceRevisionId: params.revisionId,
 					baseRevisionId: body.baseRevisionId,
 					actorProfileId: profile.unitId,
-					validateDocument: (document) =>
-						ensureResolvedDockReferences(tx, {
+					validateDocument: async (document) => {
+						ensureDocument(document);
+						await ensureResolvedDockReferences(tx, {
 							document,
 							owner,
 							profileId: profile.unitId,
-						}),
+						});
+					},
 				});
 				return { updated: true as const, latestRevisionId: revision.revisionId };
 			});

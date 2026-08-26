@@ -38,6 +38,8 @@ export const profilePreference = pgTable(
 		scoreVisibility: resourceVisibility().default(DefaultResourceVisibility).notNull(),
 		progressVisibility: resourceVisibility().default(DefaultResourceVisibility).notNull(),
 		personalizedFeed: boolean().default(true).notNull(),
+		/** Viewer-sovereignty switch: false forces every Zone to its token-only fallback. */
+		customZoneThemesEnabled: boolean().default(true).notNull(),
 		filterFeedByPreferredLanguages: boolean().default(false).notNull(),
 		alwaysShowSpoilers: boolean().default(false).notNull(),
 		alwaysShowNsfw: boolean().default(false).notNull(),

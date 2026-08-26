@@ -6,7 +6,7 @@ import {
 	FontAwesomeProvider,
 } from "@rezics/avatar";
 import { PortableTextDocument } from "@rezics/block";
-import { SearchContinuationToken } from "@rezics/filter";
+import { SearchContinuationToken, SearchSort as SearchSortSchema } from "@rezics/filter";
 import { LicenseIds, LicenseRecognitionStatusValues } from "@rezics/license";
 import {
 	ChineseContentDisplay,
@@ -505,7 +505,7 @@ export const UnitDetailResponse = t.Object({
 	}),
 });
 
-const SearchHit = t.Object({
+export const SearchHit = t.Object({
 	id: Uuid,
 	slugAddress: NullablePublicSlugAddressResponse,
 	category: t.String(),
@@ -528,9 +528,19 @@ const SearchHit = t.Object({
 	name: t.Optional(NullableText),
 	summary: NullableText,
 });
+export const PersistedSortUnavailableAdvisoryResponse = t.Object(
+	{
+		code: t.Literal("PersistedSortUnavailable"),
+		requestedSort: SearchSortSchema,
+		resolvedSort: SearchSortSchema,
+	},
+	{ additionalProperties: false },
+);
+
 export const SearchResponse = t.Object({
 	query: t.String(),
 	nextCursor: t.Optional(SearchContinuationToken),
+	advisory: t.Optional(PersistedSortUnavailableAdvisoryResponse),
 	facets: t.Optional(
 		t.Array(
 			t.Object({
@@ -839,6 +849,7 @@ export const FeedResponse = t.Object({
 export const SearchFeedResponse = t.Object({
 	items: t.Array(t.Union([FeedUnitItemResponse, FeedPostItemResponse])),
 	nextCursor: t.Optional(SearchContinuationToken),
+	advisory: t.Optional(PersistedSortUnavailableAdvisoryResponse),
 	facets: SearchResponse.properties.facets,
 	total: SearchCountResultSchema,
 });
@@ -896,6 +907,7 @@ export const PreferencesResponse = t.Object({
 	progressVisibility: ResourceVisibility,
 	collectionConfig: t.Nullable(CollectionConfigV1),
 	personalizedFeed: t.Boolean(),
+	customZoneThemesEnabled: t.Boolean(),
 	filterFeedByPreferredLanguages: t.Boolean(),
 	alwaysShowSpoilers: t.Boolean(),
 	alwaysShowNsfw: t.Boolean(),

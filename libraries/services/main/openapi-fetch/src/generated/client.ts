@@ -297,6 +297,24 @@ import type {
 	PutApiUsersByIdBlockResponses,
 	DeleteApiUsersByIdBlockOptions,
 	DeleteApiUsersByIdBlockResponses,
+	PostApiZoneThemesOptions,
+	PostApiZoneThemesResponses,
+	PutApiZoneThemesByThemeUnitIdLocalizationsByLanguageOptions,
+	PutApiZoneThemesByThemeUnitIdLocalizationsByLanguageResponses,
+	GetApiZoneThemesReviewQueueOptions,
+	GetApiZoneThemesReviewQueueResponses,
+	PostApiZoneThemesRevalidationOptions,
+	PostApiZoneThemesRevalidationResponses,
+	GetApiZoneThemesByThemeUnitIdRevisionsOptions,
+	GetApiZoneThemesByThemeUnitIdRevisionsResponses,
+	PostApiZoneThemesByThemeUnitIdRevisionsOptions,
+	PostApiZoneThemesByThemeUnitIdRevisionsResponses,
+	PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewOptions,
+	PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewResponses,
+	PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionOptions,
+	PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionResponses,
+	PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillOptions,
+	PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillResponses,
 	GetApiPlatformAccessPolicyOptions,
 	GetApiPlatformAccessPolicyResponses,
 	GetApiPlatformAccessProfilesOptions,
@@ -773,12 +791,16 @@ import type {
 	PostApiSearchZonesByZoneIdFilterExecuteResponses,
 	PostApiSearchZonesByZoneIdFilterFeedOptions,
 	PostApiSearchZonesByZoneIdFilterFeedResponses,
-	PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteOptions,
-	PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteResponses,
-	PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteOptions,
-	PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteResponses,
-	PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteOptions,
-	PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteResponses,
+	PostApiSearchZonesByZoneIdDockBlockExecutionsOptions,
+	PostApiSearchZonesByZoneIdDockBlockExecutionsResponses,
+	PostApiSearchZonesByZoneIdPagesByPageIdExecuteOptions,
+	PostApiSearchZonesByZoneIdPagesByPageIdExecuteResponses,
+	PostApiSearchZonesByZoneIdPagesByPageIdBlockExecutionsOptions,
+	PostApiSearchZonesByZoneIdPagesByPageIdBlockExecutionsResponses,
+	PostApiSearchZonesByZoneIdDockFeedBlockExecutionsOptions,
+	PostApiSearchZonesByZoneIdDockFeedBlockExecutionsResponses,
+	PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsOptions,
+	PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsResponses,
 	PostApiSearchOptions,
 	PostApiSearchResponses,
 	PostApiSearchSharedQueriesOptions,
@@ -3595,6 +3617,225 @@ export function deleteApiUsersByIdBlock<ThrowOnError extends boolean = true>(
 		],
 		...config,
 	}) as Promise<RequestResult<DeleteApiUsersByIdBlockResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Create a custom Zone theme Unit
+ * {@link /api/v1/zone-themes/}
+ */
+export function postApiZoneThemes<ThrowOnError extends boolean = true>(
+	options: Options<PostApiZoneThemesOptions, ThrowOnError>,
+): Promise<RequestResult<PostApiZoneThemesResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/v1/zone-themes/",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<PostApiZoneThemesResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Create or replace a Zone theme localization
+ * {@link /api/v1/zone-themes/:themeUnitId/localizations/:language}
+ */
+export function putApiZoneThemesByThemeUnitIdLocalizationsByLanguage<
+	ThrowOnError extends boolean = true,
+>(
+	options: Options<PutApiZoneThemesByThemeUnitIdLocalizationsByLanguageOptions, ThrowOnError>,
+): Promise<
+	RequestResult<PutApiZoneThemesByThemeUnitIdLocalizationsByLanguageResponses, ThrowOnError>
+> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "PUT",
+		url: "/api/v1/zone-themes/{themeUnitId}/localizations/{language}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<
+		RequestResult<PutApiZoneThemesByThemeUnitIdLocalizationsByLanguageResponses, ThrowOnError>
+	>;
+}
+
+/**
+ * @summary List the bounded Zone theme review queue
+ * {@link /api/v1/zone-themes/review-queue}
+ */
+export function getApiZoneThemesReviewQueue<ThrowOnError extends boolean = true>(
+	options: Options<GetApiZoneThemesReviewQueueOptions, ThrowOnError> = {},
+): Promise<RequestResult<GetApiZoneThemesReviewQueueResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/v1/zone-themes/review-queue",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<GetApiZoneThemesReviewQueueResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Schedule a keyset batch for Zone theme contract revalidation
+ * {@link /api/v1/zone-themes/revalidation}
+ */
+export function postApiZoneThemesRevalidation<ThrowOnError extends boolean = true>(
+	options: Options<PostApiZoneThemesRevalidationOptions, ThrowOnError>,
+): Promise<RequestResult<PostApiZoneThemesRevalidationResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/v1/zone-themes/revalidation",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<PostApiZoneThemesRevalidationResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary List immutable Zone theme revisions
+ * {@link /api/v1/zone-themes/:themeUnitId/revisions}
+ */
+export function getApiZoneThemesByThemeUnitIdRevisions<ThrowOnError extends boolean = true>(
+	options: Options<GetApiZoneThemesByThemeUnitIdRevisionsOptions, ThrowOnError>,
+): Promise<RequestResult<GetApiZoneThemesByThemeUnitIdRevisionsResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/v1/zone-themes/{themeUnitId}/revisions",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<GetApiZoneThemesByThemeUnitIdRevisionsResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Submit an immutable Zone theme revision
+ * {@link /api/v1/zone-themes/:themeUnitId/revisions}
+ */
+export function postApiZoneThemesByThemeUnitIdRevisions<ThrowOnError extends boolean = true>(
+	options: Options<PostApiZoneThemesByThemeUnitIdRevisionsOptions, ThrowOnError>,
+): Promise<RequestResult<PostApiZoneThemesByThemeUnitIdRevisionsResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/v1/zone-themes/{themeUnitId}/revisions",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<PostApiZoneThemesByThemeUnitIdRevisionsResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Record Zone theme render-farm and AI review
+ * {@link /api/v1/zone-themes/:themeUnitId/revisions/:revisionId/automated-review}
+ */
+export function postApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReview<
+	ThrowOnError extends boolean = true,
+>(
+	options: Options<
+		PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewOptions,
+		ThrowOnError
+	>,
+): Promise<
+	RequestResult<
+		PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewResponses,
+		ThrowOnError
+	>
+> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/v1/zone-themes/{themeUnitId}/revisions/{revisionId}/automated-review",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<
+		RequestResult<
+			PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewResponses,
+			ThrowOnError
+		>
+	>;
+}
+
+/**
+ * @summary Approve or reject a Zone theme revision
+ * {@link /api/v1/zone-themes/:themeUnitId/revisions/:revisionId/decision}
+ */
+export function postApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecision<
+	ThrowOnError extends boolean = true,
+>(
+	options: Options<
+		PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionOptions,
+		ThrowOnError
+	>,
+): Promise<
+	RequestResult<PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionResponses, ThrowOnError>
+> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/v1/zone-themes/{themeUnitId}/revisions/{revisionId}/decision",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<
+		RequestResult<
+			PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionResponses,
+			ThrowOnError
+		>
+	>;
+}
+
+/**
+ * @summary Kill an approved Zone theme revision globally
+ * {@link /api/v1/zone-themes/:themeUnitId/revisions/:revisionId/kill}
+ */
+export function postApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKill<
+	ThrowOnError extends boolean = true,
+>(
+	options: Options<PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillOptions, ThrowOnError>,
+): Promise<
+	RequestResult<PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillResponses, ThrowOnError>
+> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/v1/zone-themes/{themeUnitId}/revisions/{revisionId}/kill",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<
+		RequestResult<PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillResponses, ThrowOnError>
+	>;
 }
 
 /**
@@ -8362,88 +8603,123 @@ export function postApiSearchZonesByZoneIdFilterFeed<ThrowOnError extends boolea
 
 /**
  * @summary Execute a trusted Zone Dock Search Block
- * {@link /api/v1/search/zones/:zoneId/dock/blocks/:blockKey/execute}
+ * {@link /api/v1/search/zones/:zoneId/dock/block-executions}
  */
-export function postApiSearchZonesByZoneIdDockBlocksByBlockKeyExecute<
-	ThrowOnError extends boolean = true,
->(
-	options: Options<PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteOptions, ThrowOnError>,
-): Promise<
-	RequestResult<PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteResponses, ThrowOnError>
-> {
+export function postApiSearchZonesByZoneIdDockBlockExecutions<ThrowOnError extends boolean = true>(
+	options: Options<PostApiSearchZonesByZoneIdDockBlockExecutionsOptions, ThrowOnError>,
+): Promise<RequestResult<PostApiSearchZonesByZoneIdDockBlockExecutionsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "POST",
-		url: "/api/v1/search/zones/{zoneId}/dock/blocks/{blockKey}/execute",
+		url: "/api/v1/search/zones/{zoneId}/dock/block-executions",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
 		],
 		...config,
 	}) as Promise<
-		RequestResult<PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteResponses, ThrowOnError>
+		RequestResult<PostApiSearchZonesByZoneIdDockBlockExecutionsResponses, ThrowOnError>
+	>;
+}
+
+/**
+ * @summary Execute persisted query Blocks for a Zone Page surface
+ * {@link /api/v1/search/zones/:zoneId/pages/:pageId/execute}
+ */
+export function postApiSearchZonesByZoneIdPagesByPageIdExecute<ThrowOnError extends boolean = true>(
+	options: Options<PostApiSearchZonesByZoneIdPagesByPageIdExecuteOptions, ThrowOnError>,
+): Promise<RequestResult<PostApiSearchZonesByZoneIdPagesByPageIdExecuteResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/v1/search/zones/{zoneId}/pages/{pageId}/execute",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<
+		RequestResult<PostApiSearchZonesByZoneIdPagesByPageIdExecuteResponses, ThrowOnError>
 	>;
 }
 
 /**
  * @summary Execute a trusted Zone Page Search Block
- * {@link /api/v1/search/zones/:zoneId/pages/:pageId/blocks/:blockKey/execute}
+ * {@link /api/v1/search/zones/:zoneId/pages/:pageId/block-executions}
  */
-export function postApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecute<
+export function postApiSearchZonesByZoneIdPagesByPageIdBlockExecutions<
 	ThrowOnError extends boolean = true,
 >(
-	options: Options<
-		PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteOptions,
-		ThrowOnError
-	>,
+	options: Options<PostApiSearchZonesByZoneIdPagesByPageIdBlockExecutionsOptions, ThrowOnError>,
 ): Promise<
-	RequestResult<
-		PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteResponses,
-		ThrowOnError
-	>
+	RequestResult<PostApiSearchZonesByZoneIdPagesByPageIdBlockExecutionsResponses, ThrowOnError>
 > {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "POST",
-		url: "/api/v1/search/zones/{zoneId}/pages/{pageId}/blocks/{blockKey}/execute",
+		url: "/api/v1/search/zones/{zoneId}/pages/{pageId}/block-executions",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
 		],
 		...config,
 	}) as Promise<
-		RequestResult<
-			PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteResponses,
-			ThrowOnError
-		>
+		RequestResult<PostApiSearchZonesByZoneIdPagesByPageIdBlockExecutionsResponses, ThrowOnError>
 	>;
 }
 
 /**
- * @summary Execute a trusted Zone Feed Block
- * {@link /api/v1/search/zones/:zoneId/feed-blocks/:blockKey/execute}
+ * @summary Execute a trusted Zone Dock Feed Block
+ * {@link /api/v1/search/zones/:zoneId/dock/feed-block-executions}
  */
-export function postApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecute<
+export function postApiSearchZonesByZoneIdDockFeedBlockExecutions<
 	ThrowOnError extends boolean = true,
 >(
-	options: Options<PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteOptions, ThrowOnError>,
+	options: Options<PostApiSearchZonesByZoneIdDockFeedBlockExecutionsOptions, ThrowOnError>,
 ): Promise<
-	RequestResult<PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteResponses, ThrowOnError>
+	RequestResult<PostApiSearchZonesByZoneIdDockFeedBlockExecutionsResponses, ThrowOnError>
 > {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "POST",
-		url: "/api/v1/search/zones/{zoneId}/feed-blocks/{blockKey}/execute",
+		url: "/api/v1/search/zones/{zoneId}/dock/feed-block-executions",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
 		],
 		...config,
 	}) as Promise<
-		RequestResult<PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteResponses, ThrowOnError>
+		RequestResult<PostApiSearchZonesByZoneIdDockFeedBlockExecutionsResponses, ThrowOnError>
+	>;
+}
+
+/**
+ * @summary Execute a trusted Zone Page Feed Block
+ * {@link /api/v1/search/zones/:zoneId/pages/:pageId/feed-block-executions}
+ */
+export function postApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutions<
+	ThrowOnError extends boolean = true,
+>(
+	options: Options<PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsOptions, ThrowOnError>,
+): Promise<
+	RequestResult<PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsResponses, ThrowOnError>
+> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/v1/search/zones/{zoneId}/pages/{pageId}/feed-block-executions",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<
+		RequestResult<PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsResponses, ThrowOnError>
 	>;
 }
 

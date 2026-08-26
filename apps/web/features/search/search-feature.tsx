@@ -58,6 +58,14 @@ export interface SearchFeatureShareRequest {
 	readonly selections: readonly SharedSearchQuerySelection[];
 }
 
+export interface SearchFeatureParts {
+	readonly filters?: "filters";
+	readonly form?: "form";
+	readonly query?: "query";
+	readonly submit?: "submit";
+	readonly toolbar?: "toolbar";
+}
+
 function expressionFromClauses(
 	clauses: readonly SearchControlExpression[],
 ): SearchControlExpression | undefined {
@@ -262,6 +270,8 @@ export function SearchFeature({
 	toolbarFilters,
 	queryLabel,
 	queryPlaceholder,
+	showSortControl = true,
+	parts,
 }: {
 	readonly id: string;
 	readonly definition: SearchFeatureDefinition;
@@ -286,6 +296,8 @@ export function SearchFeature({
 	readonly toolbarFilters?: ReactNode;
 	readonly queryLabel?: string;
 	readonly queryPlaceholder?: string;
+	readonly showSortControl?: boolean;
+	readonly parts?: SearchFeatureParts;
 }) {
 	const { t } = useTranslation("search");
 	const { t: localeCopy } = useTranslation("locale");
@@ -521,6 +533,12 @@ export function SearchFeature({
 
 	function resetFilters() {
 		const defaultQuery = "";
+		const resetSort =
+			initialState?.sort &&
+			sortConfiguration.options.includes(initialState.sort) &&
+			isSearchSortAvailable(initialState.sort, defaultQuery)
+				? initialState.sort
+				: undefined;
 		const preferredLanguages =
 			appearance === "feed" && languageControl && preferences.data?.filterFeedByPreferredLanguages
 				? (preferences.data?.preferredLanguages ?? [])
@@ -545,12 +563,13 @@ export function SearchFeature({
 		setRealms([]);
 		setAdvanced(undefined);
 		setAdvancedSelections([]);
-		setSortOverride(undefined);
+		setSortOverride(resetSort);
 		onExecute({
 			injections: [...injections],
 			state: {
 				...(filter ? { filter } : {}),
 				...(languageDefault ? { expression: languageDefault } : {}),
+				...(resetSort ? { sort: resetSort } : {}),
 			},
 		});
 	}
@@ -615,6 +634,7 @@ export function SearchFeature({
 							className="absolute start-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
 						/>
 						<Input
+							data-part={parts?.query}
 							aria-label={queryLabel ?? t.query}
 							className="h-12 ps-10 text-base"
 							id={`${id}-query`}
@@ -626,7 +646,13 @@ export function SearchFeature({
 							value={query}
 						/>
 					</div>
-					<Button className="h-12 shrink-0 px-5" isLoading={pending} type="submit" variant="solid">
+					<Button
+						className="h-12 shrink-0 px-5"
+						data-part={parts?.submit}
+						isLoading={pending}
+						type="submit"
+						variant="solid"
+					>
 						<Search aria-hidden />
 						<span className="max-sm:sr-only">{t.submit}</span>
 					</Button>
@@ -634,7 +660,11 @@ export function SearchFeature({
 			) : null}
 
 			{categoryControl || tagControl || realmControl || languageControl ? (
-				<div aria-label={t.commonFilters} className="grid gap-4 sm:grid-cols-2">
+				<div
+					aria-label={t.commonFilters}
+					className="grid gap-4 sm:grid-cols-2"
+					data-part={parts?.filters}
+				>
 					{categoryControl ? (
 						<Field>
 							<FieldLabel>{t.contentCategory}</FieldLabel>
@@ -805,19 +835,21 @@ export function SearchFeature({
 	return (
 		<>
 			{appearance === "feed" ? (
-				<div className="border-b border-border-weak pb-4">
+				<div className="border-b border-border-weak pb-4" data-part={parts?.toolbar}>
 					<div aria-label={t.filters} className="flex flex-wrap items-center gap-2" role="group">
-						<ChoiceSelect
-							ariaLabel={t.sort}
-							onValueChange={([nextSort]) => {
-								if (!nextSort) return;
-								setSortOverride(nextSort);
-								execute(advanced, nextSort);
-							}}
-							options={sortOptions}
-							placeholder={t.sort}
-							value={[sort]}
-						/>
+						{showSortControl ? (
+							<ChoiceSelect
+								ariaLabel={t.sort}
+								onValueChange={([nextSort]) => {
+									if (!nextSort) return;
+									setSortOverride(nextSort);
+									execute(advanced, nextSort);
+								}}
+								options={sortOptions}
+								placeholder={t.sort}
+								value={[sort]}
+							/>
+						) : null}
 						{toolbarFilters}
 						<Button onClick={() => setFilterOpen(true)} type="button" variant="outline">
 							<SlidersHorizontal aria-hidden />
@@ -828,7 +860,12 @@ export function SearchFeature({
 						<DialogContent size="3xl">
 							<DialogHeader title={t.filters} />
 							<DialogBody>
-								<form className="grid gap-5" id={`${id}-feed-filters`} onSubmit={submit}>
+								<form
+									className="grid gap-5"
+									data-part={parts?.form}
+									id={`${id}-feed-filters`}
+									onSubmit={submit}
+								>
 									{editor}
 								</form>
 							</DialogBody>
@@ -849,20 +886,22 @@ export function SearchFeature({
 					</Dialog>
 				</div>
 			) : (
-				<form className="grid gap-5" onSubmit={submit}>
-					<div className="flex justify-end">
-						<ChoiceSelect
-							ariaLabel={t.sort}
-							onValueChange={([nextSort]) => {
-								if (!nextSort) return;
-								setSortOverride(nextSort);
-								execute(advanced, nextSort);
-							}}
-							options={sortOptions}
-							placeholder={t.sort}
-							value={[sort]}
-						/>
-					</div>
+				<form className="grid gap-5" data-part={parts?.form} onSubmit={submit}>
+					{showSortControl ? (
+						<div className="flex justify-end">
+							<ChoiceSelect
+								ariaLabel={t.sort}
+								onValueChange={([nextSort]) => {
+									if (!nextSort) return;
+									setSortOverride(nextSort);
+									execute(advanced, nextSort);
+								}}
+								options={sortOptions}
+								placeholder={t.sort}
+								value={[sort]}
+							/>
+						</div>
+					) : null}
 					{editor}
 				</form>
 			)}

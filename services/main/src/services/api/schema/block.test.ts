@@ -272,6 +272,15 @@ describe("Block document contracts", () => {
 				},
 				DockBlockHostPolicy,
 			),
+		).not.toThrow();
+		expect(() =>
+			assertBlockDocument(
+				{
+					...document,
+					blocks: [document.blocks[0], { ...document.blocks[0] }],
+				},
+				DockBlockHostPolicy,
+			),
 		).toThrow("Duplicate Block key");
 	});
 
@@ -324,6 +333,7 @@ describe("Block document contracts", () => {
 
 		expect(() => assertBlockDocument(document)).not.toThrow();
 		expect([...collectBlockReferences(document).unitIds]).toEqual([relationId, labelId, tagId]);
+		expect([...collectBlockReferences(document).labelUnitIds]).toEqual([labelId]);
 		expect(() =>
 			assertBlockDocument({
 				...document,
@@ -392,6 +402,9 @@ describe("Block document contracts", () => {
 			"019b0000-0000-7000-8000-000000000001",
 			"019b0000-0000-7000-8000-000000000002",
 		]);
+		expect([...collectNavigationReferences(navigation).labelUnitIds]).toEqual([
+			"019b0000-0000-7000-8000-000000000001",
+		]);
 		expect(() => assertBlockDocument(document)).not.toThrow();
 		expect([...collectBlockReferences(document).navigationIds]).toEqual([
 			"019b0000-0000-7000-8000-000000000002",
@@ -437,6 +450,117 @@ describe("Block document contracts", () => {
 		).toBe(false);
 	});
 
+	test("validates additive Unit List presentation hints without persisting renderer defaults", () => {
+		const collectionId = "019b0000-0000-7000-8000-000000000001";
+		const headingUnitId = "019b0000-0000-7000-8000-000000000002";
+		const targetUnitId = "019b0000-0000-7000-8000-000000000003";
+		const legacyDocument = {
+			_type: "block-document",
+			_key: "000000000034",
+			blocks: [
+				{
+					_type: "unit-list",
+					_key: "000000000035",
+					source: { kind: "collection", collectionId },
+					layout: "carousel",
+					limit: 20,
+				},
+			],
+		} satisfies BlockDocumentValue;
+		const presentedDocument = {
+			_type: "block-document",
+			_key: "000000000034",
+			blocks: [
+				{
+					_type: "unit-list",
+					_key: "000000000035",
+					source: { kind: "collection", collectionId },
+					layout: "carousel",
+					limit: 20,
+					presentation: {
+						headingUnitId,
+						viewAllTarget: { kind: "unit", unitId: targetUnitId },
+					},
+				},
+			],
+		} satisfies BlockDocumentValue;
+
+		expect(() => assertBlockDocument(legacyDocument)).not.toThrow();
+		expect(() => assertBlockDocument(presentedDocument)).not.toThrow();
+		expect(presentedDocument.blocks[0]?.presentation).not.toHaveProperty("itemSize");
+		expect([...collectBlockReferences(presentedDocument).unitIds]).toEqual([
+			collectionId,
+			headingUnitId,
+			targetUnitId,
+		]);
+		expect([...collectBlockReferences(presentedDocument).labelUnitIds]).toEqual([headingUnitId]);
+		expect(
+			isDocument(BlockDocument, {
+				_type: "block-document",
+				_key: "000000000034",
+				blocks: [
+					{
+						_type: "unit-list",
+						_key: "000000000035",
+						source: { kind: "collection", collectionId },
+						layout: "carousel",
+						limit: 20,
+						presentation: { itemSize: "xl" },
+					},
+				],
+			}),
+		).toBe(false);
+	});
+
+	test("applies the host external-navigation policy to every Block navigation target", () => {
+		const unitListDocument = {
+			_type: "block-document",
+			_key: "000000000036",
+			blocks: [
+				{
+					_type: "unit-list",
+					_key: "000000000037",
+					source: {
+						kind: "units",
+						unitIds: ["019b0000-0000-7000-8000-000000000001"],
+					},
+					layout: "carousel",
+					limit: 20,
+					presentation: {
+						itemSize: "md",
+						viewAllTarget: { kind: "external", url: "https://example.com/all" },
+					},
+				},
+			],
+		} satisfies BlockDocumentValue;
+		const mediaDocument = {
+			_type: "block-document",
+			_key: "000000000038",
+			blocks: [
+				{
+					_type: "media",
+					_key: "000000000039",
+					assetId: "019b0000-0000-7000-8000-000000000002",
+					altUnitId: "019b0000-0000-7000-8000-000000000003",
+					target: { kind: "external", url: "https://example.com/media" },
+					appearance: "content",
+					fit: "contain",
+				},
+			],
+		} satisfies BlockDocumentValue;
+		const externalPolicy = { ...DefaultBlockHostPolicy, allowExternalNavigation: true };
+
+		expect(() => assertBlockDocument(unitListDocument)).toThrow(
+			"External navigation is not allowed",
+		);
+		expect(() => assertBlockDocument(mediaDocument)).toThrow("External navigation is not allowed");
+		expect(() => assertBlockDocument(unitListDocument, externalPolicy)).not.toThrow();
+		expect(() => assertBlockDocument(mediaDocument, externalPolicy)).not.toThrow();
+		expect([...collectBlockReferences(unitListDocument).externalUrls]).toEqual([
+			"https://example.com/all",
+		]);
+	});
+
 	test("rejects structurally valid documents whose host references do not resolve", async () => {
 		const unitId = "019b0000-0000-7000-8000-000000000001";
 		const document = {
@@ -478,6 +602,55 @@ describe("Block document contracts", () => {
 				resolver,
 			),
 		).rejects.toThrow("Unresolved unit Block reference");
+	});
+
+	test("proves display-copy references resolve to readable Label Units", async () => {
+		const headingUnitId = "019b0000-0000-7000-8000-000000000001";
+		const targetUnitId = "019b0000-0000-7000-8000-000000000002";
+		const document = {
+			_type: "block-document",
+			_key: "000000000044",
+			blocks: [
+				{
+					_type: "unit-list",
+					_key: "000000000045",
+					source: { kind: "units", unitIds: [targetUnitId] },
+					layout: "carousel",
+					limit: 20,
+					presentation: { headingUnitId },
+				},
+			],
+		} satisfies BlockDocumentValue;
+		const navigation = {
+			_type: "navigation-document",
+			_key: "000000000046",
+			items: [
+				{
+					_key: "000000000047",
+					labelUnitId: headingUnitId,
+					target: { kind: "unit", unitId: targetUnitId },
+				},
+			],
+		} satisfies typeof NavigationDocument.static;
+		const wrongKindResolver = {
+			resolve: async (kind: string, identifiers: readonly string[]) =>
+				new Set(kind === "unit" ? identifiers : []),
+		};
+		const labelResolver = {
+			resolve: async (kind: string, identifiers: readonly string[]) =>
+				new Set(kind === "unit" || kind === "label" ? identifiers : []),
+		};
+
+		await expect(assertResolvedBlockReferences(document, wrongKindResolver)).rejects.toThrow(
+			"Unresolved label Block reference",
+		);
+		await expect(assertResolvedNavigationReferences(navigation, wrongKindResolver)).rejects.toThrow(
+			"Unresolved label Block reference",
+		);
+		await expect(assertResolvedBlockReferences(document, labelResolver)).resolves.toBeUndefined();
+		await expect(
+			assertResolvedNavigationReferences(navigation, labelResolver),
+		).resolves.toBeUndefined();
 	});
 });
 

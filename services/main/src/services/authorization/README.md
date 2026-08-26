@@ -28,6 +28,12 @@ descendants. Permission implications are expanded by policy; clients never infer
 labels or roles. Profile invitations contain an explicit permission list and have no effect until
 accepted.
 
+Zone-specific permissions are applicable only when the target Unit kind is `zone`.
+`zone.theme.manage` delegates token and preset management without granting page, navigation,
+general Unit-update, or lifecycle mutations. Level 1 and preset mutations additionally pass the
+platform development-preview gate through the Zone authorizer; ownership and platform Unit-edit
+authority remain the ordinary recovery boundaries but do not bypass that release gate.
+
 For an existing Unit, access precedence is platform `unit.edit`, current direct Profile ownership,
 matching Profile or Realm restriction, then matching authenticated, Realm, or Profile grants.
 Platform authority and ownership are recovery boundaries and deliberately override restrictions.

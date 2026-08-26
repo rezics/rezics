@@ -993,6 +993,77 @@ import type {
 	DeleteApiUsersByIdBlockStatus422,
 	DeleteApiUsersByIdBlockStatus429,
 	DeleteApiUsersByIdBlockStatus500,
+	PostApiZoneThemesOptions,
+	PostApiZoneThemesStatus200,
+	PostApiZoneThemesStatus400,
+	PostApiZoneThemesStatus403,
+	PostApiZoneThemesStatus404,
+	PostApiZoneThemesStatus422,
+	PostApiZoneThemesStatus429,
+	PostApiZoneThemesStatus500,
+	PutApiZoneThemesByThemeUnitIdLocalizationsByLanguageOptions,
+	PutApiZoneThemesByThemeUnitIdLocalizationsByLanguageStatus204,
+	PutApiZoneThemesByThemeUnitIdLocalizationsByLanguageStatus400,
+	PutApiZoneThemesByThemeUnitIdLocalizationsByLanguageStatus403,
+	PutApiZoneThemesByThemeUnitIdLocalizationsByLanguageStatus404,
+	PutApiZoneThemesByThemeUnitIdLocalizationsByLanguageStatus422,
+	PutApiZoneThemesByThemeUnitIdLocalizationsByLanguageStatus429,
+	PutApiZoneThemesByThemeUnitIdLocalizationsByLanguageStatus500,
+	GetApiZoneThemesReviewQueueOptions,
+	GetApiZoneThemesReviewQueueStatus200,
+	GetApiZoneThemesReviewQueueStatus403,
+	GetApiZoneThemesReviewQueueStatus422,
+	GetApiZoneThemesReviewQueueStatus429,
+	GetApiZoneThemesReviewQueueStatus500,
+	PostApiZoneThemesRevalidationOptions,
+	PostApiZoneThemesRevalidationStatus200,
+	PostApiZoneThemesRevalidationStatus400,
+	PostApiZoneThemesRevalidationStatus403,
+	PostApiZoneThemesRevalidationStatus422,
+	PostApiZoneThemesRevalidationStatus429,
+	PostApiZoneThemesRevalidationStatus500,
+	GetApiZoneThemesByThemeUnitIdRevisionsOptions,
+	GetApiZoneThemesByThemeUnitIdRevisionsStatus200,
+	GetApiZoneThemesByThemeUnitIdRevisionsStatus403,
+	GetApiZoneThemesByThemeUnitIdRevisionsStatus404,
+	GetApiZoneThemesByThemeUnitIdRevisionsStatus422,
+	GetApiZoneThemesByThemeUnitIdRevisionsStatus429,
+	GetApiZoneThemesByThemeUnitIdRevisionsStatus500,
+	PostApiZoneThemesByThemeUnitIdRevisionsOptions,
+	PostApiZoneThemesByThemeUnitIdRevisionsStatus200,
+	PostApiZoneThemesByThemeUnitIdRevisionsStatus400,
+	PostApiZoneThemesByThemeUnitIdRevisionsStatus403,
+	PostApiZoneThemesByThemeUnitIdRevisionsStatus404,
+	PostApiZoneThemesByThemeUnitIdRevisionsStatus422,
+	PostApiZoneThemesByThemeUnitIdRevisionsStatus429,
+	PostApiZoneThemesByThemeUnitIdRevisionsStatus500,
+	PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewOptions,
+	PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewStatus200,
+	PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewStatus400,
+	PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewStatus403,
+	PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewStatus404,
+	PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewStatus409,
+	PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewStatus422,
+	PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewStatus429,
+	PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewStatus500,
+	PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionOptions,
+	PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus200,
+	PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus400,
+	PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus403,
+	PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus404,
+	PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus409,
+	PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus422,
+	PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus429,
+	PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus500,
+	PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillOptions,
+	PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillStatus200,
+	PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillStatus400,
+	PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillStatus403,
+	PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillStatus404,
+	PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillStatus409,
+	PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillStatus422,
+	PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillStatus429,
+	PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillStatus500,
 	GetApiPlatformAccessPolicyStatus200,
 	GetApiPlatformAccessPolicyStatus403,
 	GetApiPlatformAccessPolicyStatus500,
@@ -2642,30 +2713,46 @@ import type {
 	PostApiSearchZonesByZoneIdFilterFeedStatus422,
 	PostApiSearchZonesByZoneIdFilterFeedStatus500,
 	PostApiSearchZonesByZoneIdFilterFeedStatus503,
-	PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteOptions,
-	PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus200,
-	PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus400,
-	PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus404,
-	PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus422,
-	PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus429,
-	PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus500,
-	PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus503,
-	PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteOptions,
-	PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus200,
-	PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus400,
-	PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus404,
-	PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus422,
-	PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus429,
-	PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus500,
-	PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus503,
-	PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteOptions,
-	PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200,
-	PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus400,
-	PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus404,
-	PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus422,
-	PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus429,
-	PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus500,
-	PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus503,
+	PostApiSearchZonesByZoneIdDockBlockExecutionsOptions,
+	PostApiSearchZonesByZoneIdDockBlockExecutionsStatus200,
+	PostApiSearchZonesByZoneIdDockBlockExecutionsStatus400,
+	PostApiSearchZonesByZoneIdDockBlockExecutionsStatus404,
+	PostApiSearchZonesByZoneIdDockBlockExecutionsStatus422,
+	PostApiSearchZonesByZoneIdDockBlockExecutionsStatus429,
+	PostApiSearchZonesByZoneIdDockBlockExecutionsStatus500,
+	PostApiSearchZonesByZoneIdDockBlockExecutionsStatus503,
+	PostApiSearchZonesByZoneIdPagesByPageIdExecuteOptions,
+	PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200,
+	PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus400,
+	PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus404,
+	PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus409,
+	PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus422,
+	PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus429,
+	PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus500,
+	PostApiSearchZonesByZoneIdPagesByPageIdBlockExecutionsOptions,
+	PostApiSearchZonesByZoneIdPagesByPageIdBlockExecutionsStatus200,
+	PostApiSearchZonesByZoneIdPagesByPageIdBlockExecutionsStatus400,
+	PostApiSearchZonesByZoneIdPagesByPageIdBlockExecutionsStatus404,
+	PostApiSearchZonesByZoneIdPagesByPageIdBlockExecutionsStatus422,
+	PostApiSearchZonesByZoneIdPagesByPageIdBlockExecutionsStatus429,
+	PostApiSearchZonesByZoneIdPagesByPageIdBlockExecutionsStatus500,
+	PostApiSearchZonesByZoneIdPagesByPageIdBlockExecutionsStatus503,
+	PostApiSearchZonesByZoneIdDockFeedBlockExecutionsOptions,
+	PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus200,
+	PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus400,
+	PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus404,
+	PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus422,
+	PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus429,
+	PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus500,
+	PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus503,
+	PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsOptions,
+	PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus200,
+	PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus400,
+	PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus404,
+	PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus422,
+	PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus429,
+	PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus500,
+	PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus503,
 	PostApiSearchOptions,
 	PostApiSearchStatus200,
 	PostApiSearchStatus400,
@@ -2882,6 +2969,15 @@ import {
 	getApiUsersMeBlocks,
 	putApiUsersByIdBlock,
 	deleteApiUsersByIdBlock,
+	postApiZoneThemes,
+	putApiZoneThemesByThemeUnitIdLocalizationsByLanguage,
+	getApiZoneThemesReviewQueue,
+	postApiZoneThemesRevalidation,
+	getApiZoneThemesByThemeUnitIdRevisions,
+	postApiZoneThemesByThemeUnitIdRevisions,
+	postApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReview,
+	postApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecision,
+	postApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKill,
 	getApiPlatformAccessPolicy,
 	getApiPlatformAccessProfiles,
 	getApiPlatformAccessProfilesByProfileId,
@@ -3120,9 +3216,11 @@ import {
 	getApiSearchZonesByZoneIdFilter,
 	postApiSearchZonesByZoneIdFilterExecute,
 	postApiSearchZonesByZoneIdFilterFeed,
-	postApiSearchZonesByZoneIdDockBlocksByBlockKeyExecute,
-	postApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecute,
-	postApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecute,
+	postApiSearchZonesByZoneIdDockBlockExecutions,
+	postApiSearchZonesByZoneIdPagesByPageIdExecute,
+	postApiSearchZonesByZoneIdPagesByPageIdBlockExecutions,
+	postApiSearchZonesByZoneIdDockFeedBlockExecutions,
+	postApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutions,
 	postApiSearch,
 	postApiSearchSharedQueries,
 	getApiSearchSharedQueriesById,
@@ -18058,6 +18156,987 @@ export function useDeleteApiUsersByIdBlock<TContext>(
 			| DeleteApiUsersByIdBlockStatus500
 		>,
 		DeleteApiUsersByIdBlockOptions,
+		TContext
+	>;
+}
+
+export const postApiZoneThemesMutationKey = () => [{ url: "/api/v1/zone-themes/" }] as const;
+
+export function postApiZoneThemesMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = postApiZoneThemesMutationKey();
+	return mutationOptions<
+		PostApiZoneThemesStatus200,
+		ResponseErrorConfig<
+			| PostApiZoneThemesStatus400
+			| PostApiZoneThemesStatus403
+			| PostApiZoneThemesStatus404
+			| PostApiZoneThemesStatus422
+			| PostApiZoneThemesStatus429
+			| PostApiZoneThemesStatus500
+		>,
+		PostApiZoneThemesOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ body }) => {
+			const { data } = await postApiZoneThemes({ ...config, body, throwOnError: true });
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Create a custom Zone theme Unit
+ * {@link /api/v1/zone-themes/}
+ */
+export function usePostApiZoneThemes<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			PostApiZoneThemesStatus200,
+			ResponseErrorConfig<
+				| PostApiZoneThemesStatus400
+				| PostApiZoneThemesStatus403
+				| PostApiZoneThemesStatus404
+				| PostApiZoneThemesStatus422
+				| PostApiZoneThemesStatus429
+				| PostApiZoneThemesStatus500
+			>,
+			PostApiZoneThemesOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? postApiZoneThemesMutationKey();
+
+	const baseOptions = postApiZoneThemesMutationOptions(config) as UseMutationOptions<
+		PostApiZoneThemesStatus200,
+		ResponseErrorConfig<
+			| PostApiZoneThemesStatus400
+			| PostApiZoneThemesStatus403
+			| PostApiZoneThemesStatus404
+			| PostApiZoneThemesStatus422
+			| PostApiZoneThemesStatus429
+			| PostApiZoneThemesStatus500
+		>,
+		PostApiZoneThemesOptions,
+		TContext
+	>;
+
+	return useMutation<
+		PostApiZoneThemesStatus200,
+		ResponseErrorConfig<
+			| PostApiZoneThemesStatus400
+			| PostApiZoneThemesStatus403
+			| PostApiZoneThemesStatus404
+			| PostApiZoneThemesStatus422
+			| PostApiZoneThemesStatus429
+			| PostApiZoneThemesStatus500
+		>,
+		PostApiZoneThemesOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PostApiZoneThemesStatus200,
+		ResponseErrorConfig<
+			| PostApiZoneThemesStatus400
+			| PostApiZoneThemesStatus403
+			| PostApiZoneThemesStatus404
+			| PostApiZoneThemesStatus422
+			| PostApiZoneThemesStatus429
+			| PostApiZoneThemesStatus500
+		>,
+		PostApiZoneThemesOptions,
+		TContext
+	>;
+}
+
+export const putApiZoneThemesByThemeUnitIdLocalizationsByLanguageMutationKey = () =>
+	[{ url: "/api/v1/zone-themes/:themeUnitId/localizations/:language" }] as const;
+
+export function putApiZoneThemesByThemeUnitIdLocalizationsByLanguageMutationOptions<
+	TContext = unknown,
+>(config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {}) {
+	const mutationKey = putApiZoneThemesByThemeUnitIdLocalizationsByLanguageMutationKey();
+	return mutationOptions<
+		PutApiZoneThemesByThemeUnitIdLocalizationsByLanguageStatus204,
+		ResponseErrorConfig<
+			| PutApiZoneThemesByThemeUnitIdLocalizationsByLanguageStatus400
+			| PutApiZoneThemesByThemeUnitIdLocalizationsByLanguageStatus403
+			| PutApiZoneThemesByThemeUnitIdLocalizationsByLanguageStatus404
+			| PutApiZoneThemesByThemeUnitIdLocalizationsByLanguageStatus422
+			| PutApiZoneThemesByThemeUnitIdLocalizationsByLanguageStatus429
+			| PutApiZoneThemesByThemeUnitIdLocalizationsByLanguageStatus500
+		>,
+		PutApiZoneThemesByThemeUnitIdLocalizationsByLanguageOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			const { data } = await putApiZoneThemesByThemeUnitIdLocalizationsByLanguage({
+				...config,
+				path,
+				body,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Create or replace a Zone theme localization
+ * {@link /api/v1/zone-themes/:themeUnitId/localizations/:language}
+ */
+export function usePutApiZoneThemesByThemeUnitIdLocalizationsByLanguage<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			PutApiZoneThemesByThemeUnitIdLocalizationsByLanguageStatus204,
+			ResponseErrorConfig<
+				| PutApiZoneThemesByThemeUnitIdLocalizationsByLanguageStatus400
+				| PutApiZoneThemesByThemeUnitIdLocalizationsByLanguageStatus403
+				| PutApiZoneThemesByThemeUnitIdLocalizationsByLanguageStatus404
+				| PutApiZoneThemesByThemeUnitIdLocalizationsByLanguageStatus422
+				| PutApiZoneThemesByThemeUnitIdLocalizationsByLanguageStatus429
+				| PutApiZoneThemesByThemeUnitIdLocalizationsByLanguageStatus500
+			>,
+			PutApiZoneThemesByThemeUnitIdLocalizationsByLanguageOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ??
+		putApiZoneThemesByThemeUnitIdLocalizationsByLanguageMutationKey();
+
+	const baseOptions = putApiZoneThemesByThemeUnitIdLocalizationsByLanguageMutationOptions(
+		config,
+	) as UseMutationOptions<
+		PutApiZoneThemesByThemeUnitIdLocalizationsByLanguageStatus204,
+		ResponseErrorConfig<
+			| PutApiZoneThemesByThemeUnitIdLocalizationsByLanguageStatus400
+			| PutApiZoneThemesByThemeUnitIdLocalizationsByLanguageStatus403
+			| PutApiZoneThemesByThemeUnitIdLocalizationsByLanguageStatus404
+			| PutApiZoneThemesByThemeUnitIdLocalizationsByLanguageStatus422
+			| PutApiZoneThemesByThemeUnitIdLocalizationsByLanguageStatus429
+			| PutApiZoneThemesByThemeUnitIdLocalizationsByLanguageStatus500
+		>,
+		PutApiZoneThemesByThemeUnitIdLocalizationsByLanguageOptions,
+		TContext
+	>;
+
+	return useMutation<
+		PutApiZoneThemesByThemeUnitIdLocalizationsByLanguageStatus204,
+		ResponseErrorConfig<
+			| PutApiZoneThemesByThemeUnitIdLocalizationsByLanguageStatus400
+			| PutApiZoneThemesByThemeUnitIdLocalizationsByLanguageStatus403
+			| PutApiZoneThemesByThemeUnitIdLocalizationsByLanguageStatus404
+			| PutApiZoneThemesByThemeUnitIdLocalizationsByLanguageStatus422
+			| PutApiZoneThemesByThemeUnitIdLocalizationsByLanguageStatus429
+			| PutApiZoneThemesByThemeUnitIdLocalizationsByLanguageStatus500
+		>,
+		PutApiZoneThemesByThemeUnitIdLocalizationsByLanguageOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PutApiZoneThemesByThemeUnitIdLocalizationsByLanguageStatus204,
+		ResponseErrorConfig<
+			| PutApiZoneThemesByThemeUnitIdLocalizationsByLanguageStatus400
+			| PutApiZoneThemesByThemeUnitIdLocalizationsByLanguageStatus403
+			| PutApiZoneThemesByThemeUnitIdLocalizationsByLanguageStatus404
+			| PutApiZoneThemesByThemeUnitIdLocalizationsByLanguageStatus422
+			| PutApiZoneThemesByThemeUnitIdLocalizationsByLanguageStatus429
+			| PutApiZoneThemesByThemeUnitIdLocalizationsByLanguageStatus500
+		>,
+		PutApiZoneThemesByThemeUnitIdLocalizationsByLanguageOptions,
+		TContext
+	>;
+}
+
+export const getApiZoneThemesReviewQueueQueryKey = ({
+	query,
+}: Omit<GetApiZoneThemesReviewQueueOptions, "headers"> = {}) =>
+	[{ url: "/api/v1/zone-themes/review-queue" }, ...(query ? [query] : [])] as const;
+
+type GetApiZoneThemesReviewQueueQueryKey = ReturnType<typeof getApiZoneThemesReviewQueueQueryKey>;
+
+export function getApiZoneThemesReviewQueueQueryOptions(
+	{ query }: GetApiZoneThemesReviewQueueOptions = {},
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = getApiZoneThemesReviewQueueQueryKey({ query });
+	return queryOptions<
+		GetApiZoneThemesReviewQueueStatus200,
+		ResponseErrorConfig<
+			| GetApiZoneThemesReviewQueueStatus403
+			| GetApiZoneThemesReviewQueueStatus422
+			| GetApiZoneThemesReviewQueueStatus429
+			| GetApiZoneThemesReviewQueueStatus500
+		>,
+		GetApiZoneThemesReviewQueueStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			const { data } = await getApiZoneThemesReviewQueue({
+				...config,
+				query,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary List the bounded Zone theme review queue
+ * {@link /api/v1/zone-themes/review-queue}
+ */
+export function useGetApiZoneThemesReviewQueue<
+	TData = GetApiZoneThemesReviewQueueStatus200,
+	TQueryData = GetApiZoneThemesReviewQueueStatus200,
+	TQueryKey extends QueryKey = GetApiZoneThemesReviewQueueQueryKey,
+>(
+	{
+		query,
+	}: {
+		query?:
+			| GetApiZoneThemesReviewQueueOptions["query"]
+			| (() => GetApiZoneThemesReviewQueueOptions["query"]);
+	} = {},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				GetApiZoneThemesReviewQueueStatus200,
+				ResponseErrorConfig<
+					| GetApiZoneThemesReviewQueueStatus403
+					| GetApiZoneThemesReviewQueueStatus422
+					| GetApiZoneThemesReviewQueueStatus429
+					| GetApiZoneThemesReviewQueueStatus500
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = { query: typeof query === "function" ? query() : query };
+	const queryKey = resolvedOptions?.queryKey ?? getApiZoneThemesReviewQueueQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...getApiZoneThemesReviewQueueQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			| GetApiZoneThemesReviewQueueStatus403
+			| GetApiZoneThemesReviewQueueStatus422
+			| GetApiZoneThemesReviewQueueStatus429
+			| GetApiZoneThemesReviewQueueStatus500
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const postApiZoneThemesRevalidationMutationKey = () =>
+	[{ url: "/api/v1/zone-themes/revalidation" }] as const;
+
+export function postApiZoneThemesRevalidationMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = postApiZoneThemesRevalidationMutationKey();
+	return mutationOptions<
+		PostApiZoneThemesRevalidationStatus200,
+		ResponseErrorConfig<
+			| PostApiZoneThemesRevalidationStatus400
+			| PostApiZoneThemesRevalidationStatus403
+			| PostApiZoneThemesRevalidationStatus422
+			| PostApiZoneThemesRevalidationStatus429
+			| PostApiZoneThemesRevalidationStatus500
+		>,
+		PostApiZoneThemesRevalidationOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ body }) => {
+			const { data } = await postApiZoneThemesRevalidation({ ...config, body, throwOnError: true });
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Schedule a keyset batch for Zone theme contract revalidation
+ * {@link /api/v1/zone-themes/revalidation}
+ */
+export function usePostApiZoneThemesRevalidation<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			PostApiZoneThemesRevalidationStatus200,
+			ResponseErrorConfig<
+				| PostApiZoneThemesRevalidationStatus400
+				| PostApiZoneThemesRevalidationStatus403
+				| PostApiZoneThemesRevalidationStatus422
+				| PostApiZoneThemesRevalidationStatus429
+				| PostApiZoneThemesRevalidationStatus500
+			>,
+			PostApiZoneThemesRevalidationOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? postApiZoneThemesRevalidationMutationKey();
+
+	const baseOptions = postApiZoneThemesRevalidationMutationOptions(config) as UseMutationOptions<
+		PostApiZoneThemesRevalidationStatus200,
+		ResponseErrorConfig<
+			| PostApiZoneThemesRevalidationStatus400
+			| PostApiZoneThemesRevalidationStatus403
+			| PostApiZoneThemesRevalidationStatus422
+			| PostApiZoneThemesRevalidationStatus429
+			| PostApiZoneThemesRevalidationStatus500
+		>,
+		PostApiZoneThemesRevalidationOptions,
+		TContext
+	>;
+
+	return useMutation<
+		PostApiZoneThemesRevalidationStatus200,
+		ResponseErrorConfig<
+			| PostApiZoneThemesRevalidationStatus400
+			| PostApiZoneThemesRevalidationStatus403
+			| PostApiZoneThemesRevalidationStatus422
+			| PostApiZoneThemesRevalidationStatus429
+			| PostApiZoneThemesRevalidationStatus500
+		>,
+		PostApiZoneThemesRevalidationOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PostApiZoneThemesRevalidationStatus200,
+		ResponseErrorConfig<
+			| PostApiZoneThemesRevalidationStatus400
+			| PostApiZoneThemesRevalidationStatus403
+			| PostApiZoneThemesRevalidationStatus422
+			| PostApiZoneThemesRevalidationStatus429
+			| PostApiZoneThemesRevalidationStatus500
+		>,
+		PostApiZoneThemesRevalidationOptions,
+		TContext
+	>;
+}
+
+export const getApiZoneThemesByThemeUnitIdRevisionsQueryKey = ({
+	path,
+	query,
+}: Omit<GetApiZoneThemesByThemeUnitIdRevisionsOptions, "headers">) =>
+	[
+		{ url: "/api/v1/zone-themes/:themeUnitId/revisions", params: path },
+		...(query ? [query] : []),
+	] as const;
+
+type GetApiZoneThemesByThemeUnitIdRevisionsQueryKey = ReturnType<
+	typeof getApiZoneThemesByThemeUnitIdRevisionsQueryKey
+>;
+
+export function getApiZoneThemesByThemeUnitIdRevisionsQueryOptions(
+	{ path, query }: GetApiZoneThemesByThemeUnitIdRevisionsOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = getApiZoneThemesByThemeUnitIdRevisionsQueryKey({ path, query });
+	return queryOptions<
+		GetApiZoneThemesByThemeUnitIdRevisionsStatus200,
+		ResponseErrorConfig<
+			| GetApiZoneThemesByThemeUnitIdRevisionsStatus403
+			| GetApiZoneThemesByThemeUnitIdRevisionsStatus404
+			| GetApiZoneThemesByThemeUnitIdRevisionsStatus422
+			| GetApiZoneThemesByThemeUnitIdRevisionsStatus429
+			| GetApiZoneThemesByThemeUnitIdRevisionsStatus500
+		>,
+		GetApiZoneThemesByThemeUnitIdRevisionsStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			const { data } = await getApiZoneThemesByThemeUnitIdRevisions({
+				...config,
+				path,
+				query,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary List immutable Zone theme revisions
+ * {@link /api/v1/zone-themes/:themeUnitId/revisions}
+ */
+export function useGetApiZoneThemesByThemeUnitIdRevisions<
+	TData = GetApiZoneThemesByThemeUnitIdRevisionsStatus200,
+	TQueryData = GetApiZoneThemesByThemeUnitIdRevisionsStatus200,
+	TQueryKey extends QueryKey = GetApiZoneThemesByThemeUnitIdRevisionsQueryKey,
+>(
+	{
+		path,
+		query,
+	}: {
+		path:
+			| GetApiZoneThemesByThemeUnitIdRevisionsOptions["path"]
+			| (() => GetApiZoneThemesByThemeUnitIdRevisionsOptions["path"]);
+		query?:
+			| GetApiZoneThemesByThemeUnitIdRevisionsOptions["query"]
+			| (() => GetApiZoneThemesByThemeUnitIdRevisionsOptions["query"]);
+	},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				GetApiZoneThemesByThemeUnitIdRevisionsStatus200,
+				ResponseErrorConfig<
+					| GetApiZoneThemesByThemeUnitIdRevisionsStatus403
+					| GetApiZoneThemesByThemeUnitIdRevisionsStatus404
+					| GetApiZoneThemesByThemeUnitIdRevisionsStatus422
+					| GetApiZoneThemesByThemeUnitIdRevisionsStatus429
+					| GetApiZoneThemesByThemeUnitIdRevisionsStatus500
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = {
+		path: typeof path === "function" ? path() : path,
+		query: typeof query === "function" ? query() : query,
+	};
+	const queryKey =
+		resolvedOptions?.queryKey ?? getApiZoneThemesByThemeUnitIdRevisionsQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...getApiZoneThemesByThemeUnitIdRevisionsQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			| GetApiZoneThemesByThemeUnitIdRevisionsStatus403
+			| GetApiZoneThemesByThemeUnitIdRevisionsStatus404
+			| GetApiZoneThemesByThemeUnitIdRevisionsStatus422
+			| GetApiZoneThemesByThemeUnitIdRevisionsStatus429
+			| GetApiZoneThemesByThemeUnitIdRevisionsStatus500
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const postApiZoneThemesByThemeUnitIdRevisionsMutationKey = () =>
+	[{ url: "/api/v1/zone-themes/:themeUnitId/revisions" }] as const;
+
+export function postApiZoneThemesByThemeUnitIdRevisionsMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = postApiZoneThemesByThemeUnitIdRevisionsMutationKey();
+	return mutationOptions<
+		PostApiZoneThemesByThemeUnitIdRevisionsStatus200,
+		ResponseErrorConfig<
+			| PostApiZoneThemesByThemeUnitIdRevisionsStatus400
+			| PostApiZoneThemesByThemeUnitIdRevisionsStatus403
+			| PostApiZoneThemesByThemeUnitIdRevisionsStatus404
+			| PostApiZoneThemesByThemeUnitIdRevisionsStatus422
+			| PostApiZoneThemesByThemeUnitIdRevisionsStatus429
+			| PostApiZoneThemesByThemeUnitIdRevisionsStatus500
+		>,
+		PostApiZoneThemesByThemeUnitIdRevisionsOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			const { data } = await postApiZoneThemesByThemeUnitIdRevisions({
+				...config,
+				path,
+				body,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Submit an immutable Zone theme revision
+ * {@link /api/v1/zone-themes/:themeUnitId/revisions}
+ */
+export function usePostApiZoneThemesByThemeUnitIdRevisions<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			PostApiZoneThemesByThemeUnitIdRevisionsStatus200,
+			ResponseErrorConfig<
+				| PostApiZoneThemesByThemeUnitIdRevisionsStatus400
+				| PostApiZoneThemesByThemeUnitIdRevisionsStatus403
+				| PostApiZoneThemesByThemeUnitIdRevisionsStatus404
+				| PostApiZoneThemesByThemeUnitIdRevisionsStatus422
+				| PostApiZoneThemesByThemeUnitIdRevisionsStatus429
+				| PostApiZoneThemesByThemeUnitIdRevisionsStatus500
+			>,
+			PostApiZoneThemesByThemeUnitIdRevisionsOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ?? postApiZoneThemesByThemeUnitIdRevisionsMutationKey();
+
+	const baseOptions = postApiZoneThemesByThemeUnitIdRevisionsMutationOptions(
+		config,
+	) as UseMutationOptions<
+		PostApiZoneThemesByThemeUnitIdRevisionsStatus200,
+		ResponseErrorConfig<
+			| PostApiZoneThemesByThemeUnitIdRevisionsStatus400
+			| PostApiZoneThemesByThemeUnitIdRevisionsStatus403
+			| PostApiZoneThemesByThemeUnitIdRevisionsStatus404
+			| PostApiZoneThemesByThemeUnitIdRevisionsStatus422
+			| PostApiZoneThemesByThemeUnitIdRevisionsStatus429
+			| PostApiZoneThemesByThemeUnitIdRevisionsStatus500
+		>,
+		PostApiZoneThemesByThemeUnitIdRevisionsOptions,
+		TContext
+	>;
+
+	return useMutation<
+		PostApiZoneThemesByThemeUnitIdRevisionsStatus200,
+		ResponseErrorConfig<
+			| PostApiZoneThemesByThemeUnitIdRevisionsStatus400
+			| PostApiZoneThemesByThemeUnitIdRevisionsStatus403
+			| PostApiZoneThemesByThemeUnitIdRevisionsStatus404
+			| PostApiZoneThemesByThemeUnitIdRevisionsStatus422
+			| PostApiZoneThemesByThemeUnitIdRevisionsStatus429
+			| PostApiZoneThemesByThemeUnitIdRevisionsStatus500
+		>,
+		PostApiZoneThemesByThemeUnitIdRevisionsOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PostApiZoneThemesByThemeUnitIdRevisionsStatus200,
+		ResponseErrorConfig<
+			| PostApiZoneThemesByThemeUnitIdRevisionsStatus400
+			| PostApiZoneThemesByThemeUnitIdRevisionsStatus403
+			| PostApiZoneThemesByThemeUnitIdRevisionsStatus404
+			| PostApiZoneThemesByThemeUnitIdRevisionsStatus422
+			| PostApiZoneThemesByThemeUnitIdRevisionsStatus429
+			| PostApiZoneThemesByThemeUnitIdRevisionsStatus500
+		>,
+		PostApiZoneThemesByThemeUnitIdRevisionsOptions,
+		TContext
+	>;
+}
+
+export const postApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewMutationKey = () =>
+	[{ url: "/api/v1/zone-themes/:themeUnitId/revisions/:revisionId/automated-review" }] as const;
+
+export function postApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewMutationOptions<
+	TContext = unknown,
+>(config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {}) {
+	const mutationKey =
+		postApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewMutationKey();
+	return mutationOptions<
+		PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewStatus200,
+		ResponseErrorConfig<
+			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewStatus400
+			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewStatus403
+			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewStatus404
+			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewStatus409
+			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewStatus422
+			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewStatus429
+			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewStatus500
+		>,
+		PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			const { data } = await postApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReview({
+				...config,
+				path,
+				body,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Record Zone theme render-farm and AI review
+ * {@link /api/v1/zone-themes/:themeUnitId/revisions/:revisionId/automated-review}
+ */
+export function usePostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReview<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewStatus200,
+			ResponseErrorConfig<
+				| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewStatus400
+				| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewStatus403
+				| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewStatus404
+				| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewStatus409
+				| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewStatus422
+				| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewStatus429
+				| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewStatus500
+			>,
+			PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ??
+		postApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewMutationKey();
+
+	const baseOptions =
+		postApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewMutationOptions(
+			config,
+		) as UseMutationOptions<
+			PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewStatus200,
+			ResponseErrorConfig<
+				| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewStatus400
+				| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewStatus403
+				| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewStatus404
+				| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewStatus409
+				| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewStatus422
+				| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewStatus429
+				| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewStatus500
+			>,
+			PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewOptions,
+			TContext
+		>;
+
+	return useMutation<
+		PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewStatus200,
+		ResponseErrorConfig<
+			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewStatus400
+			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewStatus403
+			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewStatus404
+			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewStatus409
+			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewStatus422
+			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewStatus429
+			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewStatus500
+		>,
+		PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewStatus200,
+		ResponseErrorConfig<
+			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewStatus400
+			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewStatus403
+			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewStatus404
+			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewStatus409
+			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewStatus422
+			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewStatus429
+			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewStatus500
+		>,
+		PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewOptions,
+		TContext
+	>;
+}
+
+export const postApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionMutationKey = () =>
+	[{ url: "/api/v1/zone-themes/:themeUnitId/revisions/:revisionId/decision" }] as const;
+
+export function postApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionMutationOptions<
+	TContext = unknown,
+>(config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {}) {
+	const mutationKey = postApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionMutationKey();
+	return mutationOptions<
+		PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus200,
+		ResponseErrorConfig<
+			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus400
+			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus403
+			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus404
+			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus409
+			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus422
+			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus429
+			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus500
+		>,
+		PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			const { data } = await postApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecision({
+				...config,
+				path,
+				body,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Approve or reject a Zone theme revision
+ * {@link /api/v1/zone-themes/:themeUnitId/revisions/:revisionId/decision}
+ */
+export function usePostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecision<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus200,
+			ResponseErrorConfig<
+				| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus400
+				| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus403
+				| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus404
+				| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus409
+				| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus422
+				| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus429
+				| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus500
+			>,
+			PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ??
+		postApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionMutationKey();
+
+	const baseOptions = postApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionMutationOptions(
+		config,
+	) as UseMutationOptions<
+		PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus200,
+		ResponseErrorConfig<
+			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus400
+			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus403
+			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus404
+			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus409
+			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus422
+			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus429
+			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus500
+		>,
+		PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionOptions,
+		TContext
+	>;
+
+	return useMutation<
+		PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus200,
+		ResponseErrorConfig<
+			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus400
+			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus403
+			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus404
+			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus409
+			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus422
+			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus429
+			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus500
+		>,
+		PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus200,
+		ResponseErrorConfig<
+			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus400
+			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus403
+			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus404
+			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus409
+			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus422
+			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus429
+			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus500
+		>,
+		PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionOptions,
+		TContext
+	>;
+}
+
+export const postApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillMutationKey = () =>
+	[{ url: "/api/v1/zone-themes/:themeUnitId/revisions/:revisionId/kill" }] as const;
+
+export function postApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillMutationOptions<
+	TContext = unknown,
+>(config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {}) {
+	const mutationKey = postApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillMutationKey();
+	return mutationOptions<
+		PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillStatus200,
+		ResponseErrorConfig<
+			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillStatus400
+			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillStatus403
+			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillStatus404
+			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillStatus409
+			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillStatus422
+			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillStatus429
+			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillStatus500
+		>,
+		PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			const { data } = await postApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKill({
+				...config,
+				path,
+				body,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Kill an approved Zone theme revision globally
+ * {@link /api/v1/zone-themes/:themeUnitId/revisions/:revisionId/kill}
+ */
+export function usePostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKill<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillStatus200,
+			ResponseErrorConfig<
+				| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillStatus400
+				| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillStatus403
+				| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillStatus404
+				| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillStatus409
+				| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillStatus422
+				| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillStatus429
+				| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillStatus500
+			>,
+			PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ??
+		postApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillMutationKey();
+
+	const baseOptions = postApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillMutationOptions(
+		config,
+	) as UseMutationOptions<
+		PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillStatus200,
+		ResponseErrorConfig<
+			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillStatus400
+			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillStatus403
+			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillStatus404
+			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillStatus409
+			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillStatus422
+			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillStatus429
+			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillStatus500
+		>,
+		PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillOptions,
+		TContext
+	>;
+
+	return useMutation<
+		PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillStatus200,
+		ResponseErrorConfig<
+			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillStatus400
+			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillStatus403
+			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillStatus404
+			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillStatus409
+			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillStatus422
+			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillStatus429
+			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillStatus500
+		>,
+		PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillStatus200,
+		ResponseErrorConfig<
+			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillStatus400
+			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillStatus403
+			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillStatus404
+			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillStatus409
+			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillStatus422
+			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillStatus429
+			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillStatus500
+		>,
+		PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillOptions,
 		TContext
 	>;
 }
@@ -42911,29 +43990,29 @@ export function usePostApiSearchZonesByZoneIdFilterFeed<TContext>(
 	>;
 }
 
-export const postApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteMutationKey = () =>
-	[{ url: "/api/v1/search/zones/:zoneId/dock/blocks/:blockKey/execute" }] as const;
+export const postApiSearchZonesByZoneIdDockBlockExecutionsMutationKey = () =>
+	[{ url: "/api/v1/search/zones/:zoneId/dock/block-executions" }] as const;
 
-export function postApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteMutationOptions<
-	TContext = unknown,
->(config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {}) {
-	const mutationKey = postApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteMutationKey();
+export function postApiSearchZonesByZoneIdDockBlockExecutionsMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = postApiSearchZonesByZoneIdDockBlockExecutionsMutationKey();
 	return mutationOptions<
-		PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus200,
+		PostApiSearchZonesByZoneIdDockBlockExecutionsStatus200,
 		ResponseErrorConfig<
-			| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus400
-			| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus404
-			| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus422
-			| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus429
-			| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus500
-			| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus503
+			| PostApiSearchZonesByZoneIdDockBlockExecutionsStatus400
+			| PostApiSearchZonesByZoneIdDockBlockExecutionsStatus404
+			| PostApiSearchZonesByZoneIdDockBlockExecutionsStatus422
+			| PostApiSearchZonesByZoneIdDockBlockExecutionsStatus429
+			| PostApiSearchZonesByZoneIdDockBlockExecutionsStatus500
+			| PostApiSearchZonesByZoneIdDockBlockExecutionsStatus503
 		>,
-		PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteOptions,
+		PostApiSearchZonesByZoneIdDockBlockExecutionsOptions,
 		TContext
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await postApiSearchZonesByZoneIdDockBlocksByBlockKeyExecute({
+			const { data } = await postApiSearchZonesByZoneIdDockBlockExecutions({
 				...config,
 				path,
 				body,
@@ -42946,21 +44025,21 @@ export function postApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteMutationOpt
 
 /**
  * @summary Execute a trusted Zone Dock Search Block
- * {@link /api/v1/search/zones/:zoneId/dock/blocks/:blockKey/execute}
+ * {@link /api/v1/search/zones/:zoneId/dock/block-executions}
  */
-export function usePostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecute<TContext>(
+export function usePostApiSearchZonesByZoneIdDockBlockExecutions<TContext>(
 	options: {
 		mutation?: UseMutationOptions<
-			PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus200,
+			PostApiSearchZonesByZoneIdDockBlockExecutionsStatus200,
 			ResponseErrorConfig<
-				| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus400
-				| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus404
-				| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus422
-				| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus429
-				| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus500
-				| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus503
+				| PostApiSearchZonesByZoneIdDockBlockExecutionsStatus400
+				| PostApiSearchZonesByZoneIdDockBlockExecutionsStatus404
+				| PostApiSearchZonesByZoneIdDockBlockExecutionsStatus422
+				| PostApiSearchZonesByZoneIdDockBlockExecutionsStatus429
+				| PostApiSearchZonesByZoneIdDockBlockExecutionsStatus500
+				| PostApiSearchZonesByZoneIdDockBlockExecutionsStatus503
 			>,
-			PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteOptions,
+			PostApiSearchZonesByZoneIdDockBlockExecutionsOptions,
 			TContext
 		> & { client?: QueryClient };
 		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
@@ -42969,36 +44048,35 @@ export function usePostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecute<TContex
 	const { mutation = {}, client: config = {} } = options ?? {};
 	const { client: queryClient, ...mutationOptions } = mutation;
 	const mutationKey =
-		mutationOptions.mutationKey ??
-		postApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteMutationKey();
+		mutationOptions.mutationKey ?? postApiSearchZonesByZoneIdDockBlockExecutionsMutationKey();
 
-	const baseOptions = postApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteMutationOptions(
+	const baseOptions = postApiSearchZonesByZoneIdDockBlockExecutionsMutationOptions(
 		config,
 	) as UseMutationOptions<
-		PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus200,
+		PostApiSearchZonesByZoneIdDockBlockExecutionsStatus200,
 		ResponseErrorConfig<
-			| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus400
-			| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus404
-			| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus422
-			| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus429
-			| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus500
-			| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus503
+			| PostApiSearchZonesByZoneIdDockBlockExecutionsStatus400
+			| PostApiSearchZonesByZoneIdDockBlockExecutionsStatus404
+			| PostApiSearchZonesByZoneIdDockBlockExecutionsStatus422
+			| PostApiSearchZonesByZoneIdDockBlockExecutionsStatus429
+			| PostApiSearchZonesByZoneIdDockBlockExecutionsStatus500
+			| PostApiSearchZonesByZoneIdDockBlockExecutionsStatus503
 		>,
-		PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteOptions,
+		PostApiSearchZonesByZoneIdDockBlockExecutionsOptions,
 		TContext
 	>;
 
 	return useMutation<
-		PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus200,
+		PostApiSearchZonesByZoneIdDockBlockExecutionsStatus200,
 		ResponseErrorConfig<
-			| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus400
-			| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus404
-			| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus422
-			| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus429
-			| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus500
-			| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus503
+			| PostApiSearchZonesByZoneIdDockBlockExecutionsStatus400
+			| PostApiSearchZonesByZoneIdDockBlockExecutionsStatus404
+			| PostApiSearchZonesByZoneIdDockBlockExecutionsStatus422
+			| PostApiSearchZonesByZoneIdDockBlockExecutionsStatus429
+			| PostApiSearchZonesByZoneIdDockBlockExecutionsStatus500
+			| PostApiSearchZonesByZoneIdDockBlockExecutionsStatus503
 		>,
-		PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteOptions,
+		PostApiSearchZonesByZoneIdDockBlockExecutionsOptions,
 		TContext
 	>(
 		{
@@ -43008,43 +44086,153 @@ export function usePostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecute<TContex
 		},
 		queryClient,
 	) as UseMutationResult<
-		PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus200,
+		PostApiSearchZonesByZoneIdDockBlockExecutionsStatus200,
 		ResponseErrorConfig<
-			| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus400
-			| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus404
-			| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus422
-			| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus429
-			| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus500
-			| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus503
+			| PostApiSearchZonesByZoneIdDockBlockExecutionsStatus400
+			| PostApiSearchZonesByZoneIdDockBlockExecutionsStatus404
+			| PostApiSearchZonesByZoneIdDockBlockExecutionsStatus422
+			| PostApiSearchZonesByZoneIdDockBlockExecutionsStatus429
+			| PostApiSearchZonesByZoneIdDockBlockExecutionsStatus500
+			| PostApiSearchZonesByZoneIdDockBlockExecutionsStatus503
 		>,
-		PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteOptions,
+		PostApiSearchZonesByZoneIdDockBlockExecutionsOptions,
 		TContext
 	>;
 }
 
-export const postApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteMutationKey = () =>
-	[{ url: "/api/v1/search/zones/:zoneId/pages/:pageId/blocks/:blockKey/execute" }] as const;
+export const postApiSearchZonesByZoneIdPagesByPageIdExecuteMutationKey = () =>
+	[{ url: "/api/v1/search/zones/:zoneId/pages/:pageId/execute" }] as const;
 
-export function postApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteMutationOptions<
-	TContext = unknown,
->(config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {}) {
-	const mutationKey = postApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteMutationKey();
+export function postApiSearchZonesByZoneIdPagesByPageIdExecuteMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = postApiSearchZonesByZoneIdPagesByPageIdExecuteMutationKey();
 	return mutationOptions<
-		PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus200,
+		PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200,
 		ResponseErrorConfig<
-			| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus400
-			| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus404
-			| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus422
-			| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus429
-			| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus500
-			| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus503
+			| PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus400
+			| PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus404
+			| PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus409
+			| PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus422
+			| PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus429
+			| PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus500
 		>,
-		PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteOptions,
+		PostApiSearchZonesByZoneIdPagesByPageIdExecuteOptions,
 		TContext
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await postApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecute({
+			const { data } = await postApiSearchZonesByZoneIdPagesByPageIdExecute({
+				...config,
+				path,
+				body,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Execute persisted query Blocks for a Zone Page surface
+ * {@link /api/v1/search/zones/:zoneId/pages/:pageId/execute}
+ */
+export function usePostApiSearchZonesByZoneIdPagesByPageIdExecute<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200,
+			ResponseErrorConfig<
+				| PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus400
+				| PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus404
+				| PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus409
+				| PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus422
+				| PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus429
+				| PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus500
+			>,
+			PostApiSearchZonesByZoneIdPagesByPageIdExecuteOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ?? postApiSearchZonesByZoneIdPagesByPageIdExecuteMutationKey();
+
+	const baseOptions = postApiSearchZonesByZoneIdPagesByPageIdExecuteMutationOptions(
+		config,
+	) as UseMutationOptions<
+		PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200,
+		ResponseErrorConfig<
+			| PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus400
+			| PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus404
+			| PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus409
+			| PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus422
+			| PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus429
+			| PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus500
+		>,
+		PostApiSearchZonesByZoneIdPagesByPageIdExecuteOptions,
+		TContext
+	>;
+
+	return useMutation<
+		PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200,
+		ResponseErrorConfig<
+			| PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus400
+			| PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus404
+			| PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus409
+			| PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus422
+			| PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus429
+			| PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus500
+		>,
+		PostApiSearchZonesByZoneIdPagesByPageIdExecuteOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200,
+		ResponseErrorConfig<
+			| PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus400
+			| PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus404
+			| PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus409
+			| PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus422
+			| PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus429
+			| PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus500
+		>,
+		PostApiSearchZonesByZoneIdPagesByPageIdExecuteOptions,
+		TContext
+	>;
+}
+
+export const postApiSearchZonesByZoneIdPagesByPageIdBlockExecutionsMutationKey = () =>
+	[{ url: "/api/v1/search/zones/:zoneId/pages/:pageId/block-executions" }] as const;
+
+export function postApiSearchZonesByZoneIdPagesByPageIdBlockExecutionsMutationOptions<
+	TContext = unknown,
+>(config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {}) {
+	const mutationKey = postApiSearchZonesByZoneIdPagesByPageIdBlockExecutionsMutationKey();
+	return mutationOptions<
+		PostApiSearchZonesByZoneIdPagesByPageIdBlockExecutionsStatus200,
+		ResponseErrorConfig<
+			| PostApiSearchZonesByZoneIdPagesByPageIdBlockExecutionsStatus400
+			| PostApiSearchZonesByZoneIdPagesByPageIdBlockExecutionsStatus404
+			| PostApiSearchZonesByZoneIdPagesByPageIdBlockExecutionsStatus422
+			| PostApiSearchZonesByZoneIdPagesByPageIdBlockExecutionsStatus429
+			| PostApiSearchZonesByZoneIdPagesByPageIdBlockExecutionsStatus500
+			| PostApiSearchZonesByZoneIdPagesByPageIdBlockExecutionsStatus503
+		>,
+		PostApiSearchZonesByZoneIdPagesByPageIdBlockExecutionsOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			const { data } = await postApiSearchZonesByZoneIdPagesByPageIdBlockExecutions({
 				...config,
 				path,
 				body,
@@ -43057,21 +44245,21 @@ export function postApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteMu
 
 /**
  * @summary Execute a trusted Zone Page Search Block
- * {@link /api/v1/search/zones/:zoneId/pages/:pageId/blocks/:blockKey/execute}
+ * {@link /api/v1/search/zones/:zoneId/pages/:pageId/block-executions}
  */
-export function usePostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecute<TContext>(
+export function usePostApiSearchZonesByZoneIdPagesByPageIdBlockExecutions<TContext>(
 	options: {
 		mutation?: UseMutationOptions<
-			PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus200,
+			PostApiSearchZonesByZoneIdPagesByPageIdBlockExecutionsStatus200,
 			ResponseErrorConfig<
-				| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus400
-				| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus404
-				| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus422
-				| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus429
-				| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus500
-				| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus503
+				| PostApiSearchZonesByZoneIdPagesByPageIdBlockExecutionsStatus400
+				| PostApiSearchZonesByZoneIdPagesByPageIdBlockExecutionsStatus404
+				| PostApiSearchZonesByZoneIdPagesByPageIdBlockExecutionsStatus422
+				| PostApiSearchZonesByZoneIdPagesByPageIdBlockExecutionsStatus429
+				| PostApiSearchZonesByZoneIdPagesByPageIdBlockExecutionsStatus500
+				| PostApiSearchZonesByZoneIdPagesByPageIdBlockExecutionsStatus503
 			>,
-			PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteOptions,
+			PostApiSearchZonesByZoneIdPagesByPageIdBlockExecutionsOptions,
 			TContext
 		> & { client?: QueryClient };
 		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
@@ -43081,35 +44269,35 @@ export function usePostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecut
 	const { client: queryClient, ...mutationOptions } = mutation;
 	const mutationKey =
 		mutationOptions.mutationKey ??
-		postApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteMutationKey();
+		postApiSearchZonesByZoneIdPagesByPageIdBlockExecutionsMutationKey();
 
-	const baseOptions = postApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteMutationOptions(
+	const baseOptions = postApiSearchZonesByZoneIdPagesByPageIdBlockExecutionsMutationOptions(
 		config,
 	) as UseMutationOptions<
-		PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus200,
+		PostApiSearchZonesByZoneIdPagesByPageIdBlockExecutionsStatus200,
 		ResponseErrorConfig<
-			| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus400
-			| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus404
-			| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus422
-			| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus429
-			| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus500
-			| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus503
+			| PostApiSearchZonesByZoneIdPagesByPageIdBlockExecutionsStatus400
+			| PostApiSearchZonesByZoneIdPagesByPageIdBlockExecutionsStatus404
+			| PostApiSearchZonesByZoneIdPagesByPageIdBlockExecutionsStatus422
+			| PostApiSearchZonesByZoneIdPagesByPageIdBlockExecutionsStatus429
+			| PostApiSearchZonesByZoneIdPagesByPageIdBlockExecutionsStatus500
+			| PostApiSearchZonesByZoneIdPagesByPageIdBlockExecutionsStatus503
 		>,
-		PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteOptions,
+		PostApiSearchZonesByZoneIdPagesByPageIdBlockExecutionsOptions,
 		TContext
 	>;
 
 	return useMutation<
-		PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus200,
+		PostApiSearchZonesByZoneIdPagesByPageIdBlockExecutionsStatus200,
 		ResponseErrorConfig<
-			| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus400
-			| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus404
-			| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus422
-			| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus429
-			| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus500
-			| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus503
+			| PostApiSearchZonesByZoneIdPagesByPageIdBlockExecutionsStatus400
+			| PostApiSearchZonesByZoneIdPagesByPageIdBlockExecutionsStatus404
+			| PostApiSearchZonesByZoneIdPagesByPageIdBlockExecutionsStatus422
+			| PostApiSearchZonesByZoneIdPagesByPageIdBlockExecutionsStatus429
+			| PostApiSearchZonesByZoneIdPagesByPageIdBlockExecutionsStatus500
+			| PostApiSearchZonesByZoneIdPagesByPageIdBlockExecutionsStatus503
 		>,
-		PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteOptions,
+		PostApiSearchZonesByZoneIdPagesByPageIdBlockExecutionsOptions,
 		TContext
 	>(
 		{
@@ -43119,43 +44307,43 @@ export function usePostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecut
 		},
 		queryClient,
 	) as UseMutationResult<
-		PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus200,
+		PostApiSearchZonesByZoneIdPagesByPageIdBlockExecutionsStatus200,
 		ResponseErrorConfig<
-			| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus400
-			| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus404
-			| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus422
-			| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus429
-			| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus500
-			| PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteStatus503
+			| PostApiSearchZonesByZoneIdPagesByPageIdBlockExecutionsStatus400
+			| PostApiSearchZonesByZoneIdPagesByPageIdBlockExecutionsStatus404
+			| PostApiSearchZonesByZoneIdPagesByPageIdBlockExecutionsStatus422
+			| PostApiSearchZonesByZoneIdPagesByPageIdBlockExecutionsStatus429
+			| PostApiSearchZonesByZoneIdPagesByPageIdBlockExecutionsStatus500
+			| PostApiSearchZonesByZoneIdPagesByPageIdBlockExecutionsStatus503
 		>,
-		PostApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecuteOptions,
+		PostApiSearchZonesByZoneIdPagesByPageIdBlockExecutionsOptions,
 		TContext
 	>;
 }
 
-export const postApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteMutationKey = () =>
-	[{ url: "/api/v1/search/zones/:zoneId/feed-blocks/:blockKey/execute" }] as const;
+export const postApiSearchZonesByZoneIdDockFeedBlockExecutionsMutationKey = () =>
+	[{ url: "/api/v1/search/zones/:zoneId/dock/feed-block-executions" }] as const;
 
-export function postApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteMutationOptions<
+export function postApiSearchZonesByZoneIdDockFeedBlockExecutionsMutationOptions<
 	TContext = unknown,
 >(config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {}) {
-	const mutationKey = postApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteMutationKey();
+	const mutationKey = postApiSearchZonesByZoneIdDockFeedBlockExecutionsMutationKey();
 	return mutationOptions<
-		PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200,
+		PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus200,
 		ResponseErrorConfig<
-			| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus400
-			| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus404
-			| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus422
-			| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus429
-			| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus500
-			| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus503
+			| PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus400
+			| PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus404
+			| PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus422
+			| PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus429
+			| PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus500
+			| PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus503
 		>,
-		PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteOptions,
+		PostApiSearchZonesByZoneIdDockFeedBlockExecutionsOptions,
 		TContext
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await postApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecute({
+			const { data } = await postApiSearchZonesByZoneIdDockFeedBlockExecutions({
 				...config,
 				path,
 				body,
@@ -43167,22 +44355,22 @@ export function postApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteMutationOpt
 }
 
 /**
- * @summary Execute a trusted Zone Feed Block
- * {@link /api/v1/search/zones/:zoneId/feed-blocks/:blockKey/execute}
+ * @summary Execute a trusted Zone Dock Feed Block
+ * {@link /api/v1/search/zones/:zoneId/dock/feed-block-executions}
  */
-export function usePostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecute<TContext>(
+export function usePostApiSearchZonesByZoneIdDockFeedBlockExecutions<TContext>(
 	options: {
 		mutation?: UseMutationOptions<
-			PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200,
+			PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus200,
 			ResponseErrorConfig<
-				| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus400
-				| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus404
-				| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus422
-				| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus429
-				| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus500
-				| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus503
+				| PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus400
+				| PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus404
+				| PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus422
+				| PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus429
+				| PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus500
+				| PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus503
 			>,
-			PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteOptions,
+			PostApiSearchZonesByZoneIdDockFeedBlockExecutionsOptions,
 			TContext
 		> & { client?: QueryClient };
 		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
@@ -43191,36 +44379,35 @@ export function usePostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecute<TContex
 	const { mutation = {}, client: config = {} } = options ?? {};
 	const { client: queryClient, ...mutationOptions } = mutation;
 	const mutationKey =
-		mutationOptions.mutationKey ??
-		postApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteMutationKey();
+		mutationOptions.mutationKey ?? postApiSearchZonesByZoneIdDockFeedBlockExecutionsMutationKey();
 
-	const baseOptions = postApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteMutationOptions(
+	const baseOptions = postApiSearchZonesByZoneIdDockFeedBlockExecutionsMutationOptions(
 		config,
 	) as UseMutationOptions<
-		PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200,
+		PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus200,
 		ResponseErrorConfig<
-			| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus400
-			| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus404
-			| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus422
-			| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus429
-			| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus500
-			| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus503
+			| PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus400
+			| PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus404
+			| PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus422
+			| PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus429
+			| PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus500
+			| PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus503
 		>,
-		PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteOptions,
+		PostApiSearchZonesByZoneIdDockFeedBlockExecutionsOptions,
 		TContext
 	>;
 
 	return useMutation<
-		PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200,
+		PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus200,
 		ResponseErrorConfig<
-			| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus400
-			| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus404
-			| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus422
-			| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus429
-			| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus500
-			| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus503
+			| PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus400
+			| PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus404
+			| PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus422
+			| PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus429
+			| PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus500
+			| PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus503
 		>,
-		PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteOptions,
+		PostApiSearchZonesByZoneIdDockFeedBlockExecutionsOptions,
 		TContext
 	>(
 		{
@@ -43230,16 +44417,127 @@ export function usePostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecute<TContex
 		},
 		queryClient,
 	) as UseMutationResult<
-		PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200,
+		PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus200,
 		ResponseErrorConfig<
-			| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus400
-			| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus404
-			| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus422
-			| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus429
-			| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus500
-			| PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus503
+			| PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus400
+			| PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus404
+			| PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus422
+			| PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus429
+			| PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus500
+			| PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus503
 		>,
-		PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteOptions,
+		PostApiSearchZonesByZoneIdDockFeedBlockExecutionsOptions,
+		TContext
+	>;
+}
+
+export const postApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsMutationKey = () =>
+	[{ url: "/api/v1/search/zones/:zoneId/pages/:pageId/feed-block-executions" }] as const;
+
+export function postApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsMutationOptions<
+	TContext = unknown,
+>(config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {}) {
+	const mutationKey = postApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsMutationKey();
+	return mutationOptions<
+		PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus200,
+		ResponseErrorConfig<
+			| PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus400
+			| PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus404
+			| PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus422
+			| PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus429
+			| PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus500
+			| PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus503
+		>,
+		PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			const { data } = await postApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutions({
+				...config,
+				path,
+				body,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Execute a trusted Zone Page Feed Block
+ * {@link /api/v1/search/zones/:zoneId/pages/:pageId/feed-block-executions}
+ */
+export function usePostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutions<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus200,
+			ResponseErrorConfig<
+				| PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus400
+				| PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus404
+				| PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus422
+				| PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus429
+				| PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus500
+				| PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus503
+			>,
+			PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ??
+		postApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsMutationKey();
+
+	const baseOptions = postApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsMutationOptions(
+		config,
+	) as UseMutationOptions<
+		PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus200,
+		ResponseErrorConfig<
+			| PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus400
+			| PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus404
+			| PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus422
+			| PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus429
+			| PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus500
+			| PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus503
+		>,
+		PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsOptions,
+		TContext
+	>;
+
+	return useMutation<
+		PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus200,
+		ResponseErrorConfig<
+			| PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus400
+			| PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus404
+			| PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus422
+			| PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus429
+			| PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus500
+			| PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus503
+		>,
+		PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus200,
+		ResponseErrorConfig<
+			| PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus400
+			| PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus404
+			| PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus422
+			| PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus429
+			| PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus500
+			| PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus503
+		>,
+		PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsOptions,
 		TContext
 	>;
 }

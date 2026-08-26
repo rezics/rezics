@@ -1,6 +1,6 @@
 {
 	"name": "@rezics/api",
-	"version": "1.9.0",
+	"version": "1.11.0",
 	"description": "Type-safe REZICS API client generated from the public OpenAPI contract.",
 	"keywords": [
 		"rezics",

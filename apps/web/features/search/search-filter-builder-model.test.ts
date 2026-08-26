@@ -27,6 +27,14 @@ const controls = [
 		disclosure: "hidden",
 	},
 	{
+		key: "collection",
+		field: "collection",
+		component: "multi-select",
+		operators: ["equals", "not-equals", "any-of", "all-of", "none-of"],
+		enabled: true,
+		disclosure: "hidden",
+	},
+	{
 		key: "realm-tag-vote",
 		field: "realm-tag-vote",
 		component: "realm-tag-vote",
@@ -157,5 +165,51 @@ describe("advanced Search filter builder model", () => {
 
 		expect(compileDraftSearch(draft, controls)).toEqual({ ok: true, expression });
 		expect(sharedSelectionsFromDraft(draft, controls)).toEqual(selections);
+	});
+
+	it("compiles Collection membership only from string identifiers", () => {
+		const root: DraftSearchGroup = {
+			id: "root",
+			kind: "group",
+			operator: "all",
+			clauses: [
+				{
+					id: "collection-condition",
+					kind: "condition",
+					controlKey: "collection",
+					operator: "equals",
+					values: [
+						{
+							value: "019b0000-0000-7000-8000-000000000001",
+							label: "Curated collection",
+						},
+					],
+				},
+			],
+		};
+
+		expect(compileDraftSearch(root, controls)).toEqual({
+			ok: true,
+			expression: {
+				controlKey: "collection",
+				filter: {
+					field: "collection",
+					operator: "equals",
+					value: "019b0000-0000-7000-8000-000000000001",
+				},
+			},
+		});
+		const collectionClause = root.clauses[0];
+		if (!collectionClause || "clauses" in collectionClause)
+			throw new Error("Expected a collection predicate fixture");
+		expect(
+			compileDraftSearch(
+				{
+					...root,
+					clauses: [{ ...collectionClause, values: [{ value: true, label: "Invalid" }] }],
+				},
+				controls,
+			),
+		).toMatchObject({ ok: false });
 	});
 });

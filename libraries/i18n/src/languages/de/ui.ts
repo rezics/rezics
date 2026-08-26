@@ -1,3 +1,5 @@
+import { insert } from "native-i18n";
+
 import { deTerminology } from "@rezics/i18n/terminology/de";
 
 const { forms: followTerms } = deTerminology.follow;
@@ -16,6 +18,13 @@ export default {
 	edit: "Bearbeiten",
 	clear: "Leeren",
 	search: "Suchen",
+	shelf: {
+		label: "Inhaltskarussell",
+		previous: "Vorherige Elemente",
+		next: "Nächste Elemente",
+		page: insert("Seite {{page}} von {{pageCount}}", { page: Number, pageCount: Number }),
+		item: insert("Element {{item}} von {{itemCount}}", { item: Number, itemCount: Number }),
+	},
 	pickerPlaceholders: {
 		unit: "Name oder Titel eingeben",
 		entity: `Namen der ${entityTerms.inline} eingeben`,

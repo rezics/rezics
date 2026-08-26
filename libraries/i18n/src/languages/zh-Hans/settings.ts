@@ -82,6 +82,8 @@ export default {
 	alwaysShowSpoilersHint: "直接显示标有剧透的内容，无需逐项确认。",
 	alwaysShowNsfw: "始终显示不宜在工作场合查看的媒体",
 	alwaysShowNsfwHint: "直接显示相应媒体，不先进行模糊处理。",
+	customZoneThemes: "显示自定义空间主题",
+	customZoneThemesHint: "关闭后，所有空间都会改用平台默认主题；内容和布局不受影响。",
 	account: "账户",
 	accountDescription: "管理当前登录会话。",
 	security: "安全性",

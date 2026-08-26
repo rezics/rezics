@@ -1,3 +1,5 @@
+import { insert } from "native-i18n";
+
 import { jaTerminology } from "@rezics/i18n/terminology/ja";
 
 const { forms: followTerms } = jaTerminology.follow;
@@ -16,6 +18,13 @@ export default {
 	edit: "編集",
 	clear: "クリア",
 	search: "検索",
+	shelf: {
+		label: "コンテンツカルーセル",
+		previous: "前の項目",
+		next: "次の項目",
+		page: insert("{{pageCount}}ページ中{{page}}ページ目", { page: Number, pageCount: Number }),
+		item: insert("{{itemCount}}件中{{item}}件目", { item: Number, itemCount: Number }),
+	},
 	pickerPlaceholders: {
 		unit: "名前またはタイトルを入力",
 		entity: `${entityTerms.label}名を入力`,

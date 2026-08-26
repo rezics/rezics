@@ -14,6 +14,7 @@ import {
 	type Block,
 	type BlockDocument as BlockDocumentValue,
 	type BlockType,
+	type DerivedSearchFeatureSource,
 	DockDocument,
 	type DockDocument as DockDocumentValue,
 	PortableTextDocument,
@@ -32,6 +33,7 @@ export interface BlockHostPolicy {
 	readonly allowedChildTypes: Readonly<Partial<Record<BlockParentType, readonly BlockType[]>>>;
 	readonly maxDepth: number;
 	readonly maxBlocks: number;
+	readonly maxQueryBlocks: number;
 	readonly allowExternalNavigation: boolean;
 }
 
@@ -65,6 +67,10 @@ const WikiPostChildTypes = [
 	"tabs",
 ] as const satisfies readonly BlockType[];
 
+export const MaxZonePageQueryBlocks = 24;
+export const MaxDockQueryBlocks = 6;
+export const MaxWikiPostQueryBlocks = 6;
+
 export const DefaultBlockHostPolicy: BlockHostPolicy = {
 	allowedRootTypes: AllBlockTypes,
 	allowedChildTypes: {
@@ -76,6 +82,7 @@ export const DefaultBlockHostPolicy: BlockHostPolicy = {
 	},
 	maxDepth: 4,
 	maxBlocks: 250,
+	maxQueryBlocks: MaxZonePageQueryBlocks,
 	allowExternalNavigation: false,
 };
 
@@ -109,6 +116,7 @@ export const DockBlockHostPolicy: BlockHostPolicy = {
 	},
 	maxDepth: 2,
 	maxBlocks: 40,
+	maxQueryBlocks: MaxDockQueryBlocks,
 	allowExternalNavigation: false,
 };
 
@@ -173,6 +181,7 @@ export const ZonePageBlockHostPolicy: BlockHostPolicy = {
 	},
 	maxDepth: 4,
 	maxBlocks: 250,
+	maxQueryBlocks: MaxZonePageQueryBlocks,
 	allowExternalNavigation: false,
 };
 
@@ -188,6 +197,7 @@ export const WikiPostBlockHostPolicy: BlockHostPolicy = {
 	},
 	maxDepth: 6,
 	maxBlocks: 500,
+	maxQueryBlocks: MaxWikiPostQueryBlocks,
 	allowExternalNavigation: false,
 };
 
@@ -323,14 +333,21 @@ function childBlockGroups(block: Block): readonly BlockChildGroup[] {
 }
 
 function inlineFilterDocument(block: Block): FilterDocument | undefined {
-	if (block._type === "feed" && block.feature.kind === "inline")
+	if (block._type === "search" && block.feature.kind === "inline")
 		return block.feature.filterDocument;
-	if (
-		block._type === "unit-list" &&
-		block.source.kind === "search" &&
-		block.source.feature.kind === "inline"
-	)
-		return block.source.feature.filterDocument;
+	if (block._type === "feed") {
+		const feature = block.feature.kind === "derived" ? block.feature.query.feature : block.feature;
+		if (feature.kind === "inline") return feature.filterDocument;
+	}
+	if (block._type === "unit-list") {
+		const feature =
+			block.source.kind === "search"
+				? block.source.feature
+				: block.source.kind === "derived"
+					? block.source.query.feature
+					: undefined;
+		if (feature?.kind === "inline") return feature.filterDocument;
+	}
 	return undefined;
 }
 
@@ -348,16 +365,69 @@ export function walkBlockTree(
 	for (const block of document.blocks) visit(block, { depth: 1 });
 }
 
+/** Count persisted Blocks that execute inline Search or Feed work. */
+export function countQueryBlocks(document: BlockContainerDocument): number {
+	let count = 0;
+	walkBlockTree(document, (block) => {
+		if (block._type === "feed" || (block._type === "unit-list" && block.source.kind !== "units"))
+			count += 1;
+	});
+	return count;
+}
+
+/** Apply query-work limits only at write boundaries, preserving existing persisted documents. */
+export function assertBlockQueryBudget(
+	document: BlockContainerDocument,
+	policy: Pick<BlockHostPolicy, "maxQueryBlocks">,
+): void {
+	const actual = countQueryBlocks(document);
+	if (actual > policy.maxQueryBlocks)
+		throw new TypeError(
+			`Block document contains ${actual} query Blocks; the host maximum is ${policy.maxQueryBlocks}`,
+		);
+}
+
 function assertBlockTree(value: BlockContainerDocument, policy: BlockHostPolicy): void {
-	const keys = new Set<string>(value._key ? [value._key] : []);
+	const assertUniqueKeys = (
+		items: readonly { readonly _key: string }[],
+		kind: "Block" | "column" | "tab",
+	): void => {
+		const keys = new Set<string>();
+		for (const item of items) {
+			if (keys.has(item._key)) throw new TypeError(`Duplicate ${kind} key ${item._key}`);
+			keys.add(item._key);
+		}
+	};
+	const assertLocalKeyScopes = (blocks: readonly Block[]): void => {
+		assertUniqueKeys(blocks, "Block");
+		for (const block of blocks) {
+			if (block._type === "portable-text") {
+				const children = portableTextChildBlocks(block);
+				assertLocalKeyScopes(children);
+				continue;
+			}
+			if (block._type === "columns") {
+				assertUniqueKeys(block.columns, "column");
+				for (const column of block.columns) assertLocalKeyScopes(column.blocks);
+				continue;
+			}
+			if (block._type === "group" || block._type === "callout") {
+				assertLocalKeyScopes(block.blocks);
+				continue;
+			}
+			if (block._type === "tabs") {
+				assertUniqueKeys(block.tabs, "tab");
+				for (const tab of block.tabs) assertLocalKeyScopes(tab.blocks);
+			}
+		}
+	};
+	assertLocalKeyScopes(value.blocks);
 	let count = 0;
 
 	walkBlockTree(value, (block, { depth, parentType }) => {
 		count += 1;
 		if (count > policy.maxBlocks) throw new TypeError("Block document exceeds host block limit");
 		if (depth > policy.maxDepth) throw new TypeError("Block document exceeds host depth limit");
-		if (keys.has(block._key)) throw new TypeError(`Duplicate Block key ${block._key}`);
-		keys.add(block._key);
 		const allowed = parentType
 			? (policy.allowedChildTypes[parentType] ?? [])
 			: policy.allowedRootTypes;
@@ -369,14 +439,45 @@ function assertBlockTree(value: BlockContainerDocument, policy: BlockHostPolicy)
 			new Set(block.source.unitIds).size !== block.source.unitIds.length
 		)
 			throw new TypeError("Unit List Block contains duplicate Unit references");
+		if (
+			(block._type === "feed" && block.initialSort === "relevance") ||
+			(block._type === "feed" &&
+				block.feature.kind === "derived" &&
+				block.feature.query.sort === "relevance") ||
+			(block._type === "unit-list" &&
+				block.source.kind === "search" &&
+				block.source.sort === "relevance") ||
+			(block._type === "unit-list" &&
+				block.source.kind === "derived" &&
+				block.source.query.sort === "relevance")
+		)
+			throw new TypeError(
+				`Block ${block._key} cannot persist the relevance sort without query text`,
+			);
+		if (
+			block._type === "unit-list" &&
+			block.presentation?.headingUnitId === "selected" &&
+			block.source.kind !== "derived"
+		)
+			throw new TypeError(
+				`Block ${block._key} can use the selected heading only with a derived source`,
+			);
+		if (
+			block._type === "unit-list" &&
+			block.presentation?.headingPrefixUnitId &&
+			block.presentation.headingUnitId !== "selected"
+		)
+			throw new TypeError(
+				`Block ${block._key} can use a heading prefix only with the selected heading`,
+			);
+		if (
+			!policy.allowExternalNavigation &&
+			((block._type === "media" && block.target?.kind === "external") ||
+				(block._type === "unit-list" && block.presentation?.viewAllTarget?.kind === "external"))
+		)
+			throw new TypeError("External navigation is not allowed");
 		const filterDocument = inlineFilterDocument(block);
 		if (filterDocument) assertFilterDocument(filterDocument);
-		for (const group of childBlockGroups(block)) {
-			if (!group.containerKey) continue;
-			if (keys.has(group.containerKey))
-				throw new TypeError(`Duplicate Block key ${group.containerKey}`);
-			keys.add(group.containerKey);
-		}
 	});
 }
 
@@ -431,6 +532,7 @@ export function normalizeWikiPostPortableTextDocument(
 
 export interface BlockReferences {
 	readonly unitIds: ReadonlySet<string>;
+	readonly labelUnitIds: ReadonlySet<string>;
 	readonly wikiPostIds: ReadonlySet<string>;
 	readonly assetIds: ReadonlySet<string>;
 	readonly navigationIds: ReadonlySet<string>;
@@ -440,17 +542,37 @@ export interface BlockReferences {
 /** Collect references for semantic resolution, authorization, cache tags, and link previews. */
 export function collectBlockReferences(document: BlockContainerDocument): BlockReferences {
 	const unitIds = new Set<string>();
+	const labelUnitIds = new Set<string>();
 	const wikiPostIds = new Set<string>();
 	const assetIds = new Set<string>();
 	const navigationIds = new Set<string>();
 	const externalUrls = new Set<string>();
+	const addLabelUnitId = (identifier: string): void => {
+		unitIds.add(identifier);
+		labelUnitIds.add(identifier);
+	};
+	const addDerivedSourceReferences = (source: DerivedSearchFeatureSource): void => {
+		if (source.select.from.kind === "collection") unitIds.add(source.select.from.collectionId);
+		if (source.fallback.kind === "collection") unitIds.add(source.fallback.collectionId);
+	};
 	walkBlockTree(document, (block) => {
 		if (block._type === "post-full-view") wikiPostIds.add(block.postId);
 		if (block._type === "unit-ref") unitIds.add(block.unitId);
 		if (block._type === "unit-list") {
 			if (block.source.kind === "units") block.source.unitIds.forEach((id) => unitIds.add(id));
 			if (block.source.kind === "collection") unitIds.add(block.source.collectionId);
+			if (block.source.kind === "derived") addDerivedSourceReferences(block.source);
+			if (block.presentation?.headingUnitId && block.presentation.headingUnitId !== "selected")
+				addLabelUnitId(block.presentation.headingUnitId);
+			if (block.presentation?.headingPrefixUnitId)
+				addLabelUnitId(block.presentation.headingPrefixUnitId);
+			if (block.presentation?.viewAllTarget?.kind === "unit")
+				unitIds.add(block.presentation.viewAllTarget.unitId);
+			if (block.presentation?.viewAllTarget?.kind === "external")
+				externalUrls.add(block.presentation.viewAllTarget.url);
 		}
+		if (block._type === "feed" && block.feature.kind === "derived")
+			addDerivedSourceReferences(block.feature);
 		if (block._type === "menu") navigationIds.add(block.navigationId);
 		if (block._type === "media") {
 			assetIds.add(block.assetId);
@@ -459,15 +581,15 @@ export function collectBlockReferences(document: BlockContainerDocument): BlockR
 			if (block.target?.kind === "unit") unitIds.add(block.target.unitId);
 			if (block.target?.kind === "external") externalUrls.add(block.target.url);
 		}
-		if (block._type === "callout" && block.labelUnitId) unitIds.add(block.labelUnitId);
-		if (block._type === "tabs") for (const tab of block.tabs) unitIds.add(tab.labelUnitId);
+		if (block._type === "callout" && block.labelUnitId) addLabelUnitId(block.labelUnitId);
+		if (block._type === "tabs") for (const tab of block.tabs) addLabelUnitId(tab.labelUnitId);
 		const filterDocument = inlineFilterDocument(block);
 		if (filterDocument) {
 			assertFilterDocument(filterDocument);
 			if (filterDocument.where)
 				for (const id of collectUnitPredicateReferenceIds(filterDocument.where)) unitIds.add(id);
 			for (const control of filterDocument.controls ?? []) {
-				if (control.labelUnitId) unitIds.add(control.labelUnitId);
+				if (control.labelUnitId) addLabelUnitId(control.labelUnitId);
 				if (
 					filterDocumentControlField(control) === "tag" &&
 					control.optionPolicy &&
@@ -478,15 +600,16 @@ export function collectBlockReferences(document: BlockContainerDocument): BlockR
 			}
 		}
 	});
-	return { unitIds, wikiPostIds, assetIds, navigationIds, externalUrls };
+	return { unitIds, labelUnitIds, wikiPostIds, assetIds, navigationIds, externalUrls };
 }
 
 export interface NavigationReferences {
 	readonly unitIds: ReadonlySet<string>;
+	readonly labelUnitIds: ReadonlySet<string>;
 	readonly externalUrls: ReadonlySet<string>;
 }
 
-export type BlockReferenceKind = "unit" | "wiki-post" | "asset" | "navigation";
+export type BlockReferenceKind = "unit" | "label" | "wiki-post" | "asset" | "navigation";
 
 export interface BlockReferenceResolver {
 	/** Return only identifiers that are valid and readable in the current host context. */
@@ -522,6 +645,7 @@ export async function assertResolvedBlockReferences(
 	const references = collectBlockReferences(document);
 	await Promise.all([
 		assertReferenceSet("unit", references.unitIds, resolver),
+		assertReferenceSet("label", references.labelUnitIds, resolver),
 		assertReferenceSet("wiki-post", references.wikiPostIds, resolver),
 		assertReferenceSet("asset", references.assetIds, resolver),
 		assertReferenceSet("navigation", references.navigationIds, resolver),
@@ -533,25 +657,30 @@ export function assertNavigationDocument(
 	options: { readonly allowExternalNavigation?: boolean } = {},
 ): asserts value is NavigationDocumentValue {
 	assertDocument(NavigationDocument, value);
-	const keys = new Set<string>([value._key]);
-	const visit = (item: NavigationItem, depth: number): void => {
+	const visit = (items: readonly NavigationItem[], depth: number): void => {
 		if (depth > 3) throw new TypeError("Navigation document exceeds depth limit");
-		if (keys.has(item._key)) throw new TypeError(`Duplicate Block key ${item._key}`);
-		keys.add(item._key);
-		if ("target" in item && item.target.kind === "external" && !options.allowExternalNavigation)
-			throw new TypeError("External navigation is not allowed");
-		if ("children" in item) item.children.forEach((child) => visit(child, depth + 1));
+		const siblingKeys = new Set<string>();
+		for (const item of items) {
+			if (siblingKeys.has(item._key))
+				throw new TypeError(`Duplicate navigation item key ${item._key}`);
+			siblingKeys.add(item._key);
+			if ("target" in item && item.target.kind === "external" && !options.allowExternalNavigation)
+				throw new TypeError("External navigation is not allowed");
+			if ("children" in item) visit(item.children, depth + 1);
+		}
 	};
-	value.items.forEach((item) => visit(item, 1));
+	visit(value.items, 1);
 }
 
 export function collectNavigationReferences(
 	document: NavigationDocumentValue,
 ): NavigationReferences {
 	const unitIds = new Set<string>();
+	const labelUnitIds = new Set<string>();
 	const externalUrls = new Set<string>();
 	const visit = (item: NavigationItem): void => {
 		unitIds.add(item.labelUnitId);
+		labelUnitIds.add(item.labelUnitId);
 		if ("target" in item) {
 			if (item.target.kind === "unit") unitIds.add(item.target.unitId);
 			if (item.target.kind === "external") externalUrls.add(item.target.url);
@@ -559,7 +688,7 @@ export function collectNavigationReferences(
 		if ("children" in item) item.children.forEach(visit);
 	};
 	document.items.forEach(visit);
-	return { unitIds, externalUrls };
+	return { unitIds, labelUnitIds, externalUrls };
 }
 
 export async function assertResolvedNavigationReferences(
@@ -567,5 +696,8 @@ export async function assertResolvedNavigationReferences(
 	resolver: BlockReferenceResolver,
 ): Promise<void> {
 	const references = collectNavigationReferences(document);
-	await Promise.all([assertReferenceSet("unit", references.unitIds, resolver)]);
+	await Promise.all([
+		assertReferenceSet("unit", references.unitIds, resolver),
+		assertReferenceSet("label", references.labelUnitIds, resolver),
+	]);
 }

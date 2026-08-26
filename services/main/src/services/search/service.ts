@@ -25,6 +25,8 @@ import { database } from "../database";
 import {
 	book,
 	unitEffectiveTag,
+	collection,
+	collectionItem,
 	unitLicenseGrant,
 	creditAttribution,
 	contentStructure,
@@ -90,8 +92,10 @@ import {
 import { expandSearchQuery, type ExpandedSearchQuery } from "./query-expansion";
 import { getPublicCanonicalUnitSlugAddresses } from "../units/slug-address";
 import { compileUnitPredicateCandidateSet, compileUnitPredicateSql } from "../filter/sql";
+import { boundedSearchStatementTimeout } from "./statement-timeout";
 
 const subjectUnit = alias(unit, "subject_unit");
+const searchFilterCollectionUnit = alias(unit, "search_filter_collection_unit");
 const boundedSearchDocument = alias(unitSearchDocument, "bounded_search_document");
 const facetLocalization = alias(unitLocalization, "facet_unit_localization");
 const facetUnitTag = alias(unitEffectiveTag, "facet_unit_tag");
@@ -187,6 +191,40 @@ function scalarStrings(values: readonly SearchScalar[], field: string): string[]
 		strings.push(value);
 	}
 	return strings;
+}
+
+function collectionMembershipValues(
+	filter: Extract<SearchControlPredicate, { readonly field: "collection" }>,
+): readonly string[] {
+	return [...new Set("value" in filter ? [filter.value] : filter.values)];
+}
+
+function collectionMembershipCondition(
+	filter: Extract<SearchControlPredicate, { readonly field: "collection" }>,
+): SQL {
+	const collectionIds = collectionMembershipValues(filter);
+	const matches =
+		filter.operator === "all-of"
+			? sql`(${sql.join(
+					collectionIds.map(
+						(collectionId) => sql`exists (
+							select 1
+							from ${collectionItem} search_collection_membership
+							where search_collection_membership.unit_id = ${unit.id}
+								and search_collection_membership.collection_id = ${collectionId}::uuid
+						)`,
+					),
+					sql` and `,
+				)})`
+			: sql`exists (
+				select 1
+				from ${collectionItem} search_collection_membership
+				where search_collection_membership.unit_id = ${unit.id}
+					and search_collection_membership.collection_id = any(${toUuidArray(collectionIds)})
+			)`;
+	return filter.operator === "not-equals" || filter.operator === "none-of"
+		? sql`not (${matches})`
+		: matches;
 }
 
 function scalarColumnCondition(column: SQL, filter: SearchControlPredicate): SQL {
@@ -611,6 +649,7 @@ function compileFilter(
 			? sql`not (${match})`
 			: match;
 	}
+	if (filter.field === "collection") return collectionMembershipCondition(filter);
 	if (filter.field === "realm") {
 		const values = scalarStrings(searchFilterValues(filter), filter.field);
 		const match =
@@ -778,6 +817,101 @@ export function compilePostgresSearchExpression(
 	return sql`(${sql.join(clauses, expression.operator === "all" ? sql` and ` : sql` or `)})`;
 }
 
+function collectionSearchCandidateSet(
+	filter: Extract<SearchControlPredicate, { readonly field: "collection" }>,
+): SQL | undefined {
+	if (filter.operator === "not-equals" || filter.operator === "none-of") return undefined;
+	const collectionIds = collectionMembershipValues(filter);
+	return combineCandidateSets(
+		filter.operator === "all-of" ? "intersect" : "union",
+		collectionIds.map(
+			(collectionId) => sql`select search_collection_seed.unit_id
+				from ${collectionItem} search_collection_seed
+				where search_collection_seed.collection_id = ${collectionId}::uuid`,
+		),
+	);
+}
+
+function combineCandidateSets(
+	operator: "intersect" | "union",
+	sets: readonly SQL[],
+): SQL | undefined {
+	if (!sets.length) return undefined;
+	if (sets.length === 1) return sets[0];
+	return sql`${sql.join(
+		sets.map((candidate) => sql`(${candidate})`),
+		operator === "intersect" ? sql` intersect ` : sql` union `,
+	)}`;
+}
+
+/**
+ * Produces a safe candidate superset for collection predicates.
+ *
+ * Conjunctions can use any bounded child. Disjunctions can be seeded only
+ * when every branch has a candidate set; negation cannot seed a corpus query.
+ */
+function compileSearchExpressionCandidateSet(expression: SearchExpression): SQL | undefined {
+	if ("field" in expression)
+		return expression.field === "collection" ? collectionSearchCandidateSet(expression) : undefined;
+	if (expression.operator === "not") return undefined;
+	const candidates = expression.clauses.map(compileSearchExpressionCandidateSet);
+	if (expression.operator === "any") {
+		if (candidates.some((candidate) => candidate === undefined)) return undefined;
+		return combineCandidateSets("union", candidates as SQL[]);
+	}
+	return combineCandidateSets(
+		"intersect",
+		candidates.filter((candidate): candidate is SQL => candidate !== undefined),
+	);
+}
+
+function hasCollectionCandidateSet(expression: SearchExpression | undefined): boolean {
+	return expression !== undefined && compileSearchExpressionCandidateSet(expression) !== undefined;
+}
+
+function searchCollectionIds(expression: SearchExpression | undefined): string[] {
+	if (!expression) return [];
+	if ("field" in expression)
+		return expression.field === "collection" ? [...collectionMembershipValues(expression)] : [];
+	return expression.operator === "not"
+		? searchCollectionIds(expression.clause)
+		: expression.clauses.flatMap(searchCollectionIds);
+}
+
+async function authorizeSearchCollections(
+	expression: SearchExpression | undefined,
+	profileId?: string,
+): Promise<void> {
+	const collectionIds = [...new Set(searchCollectionIds(expression))];
+	if (!collectionIds.length) return;
+	const readable = await database
+		.select({ id: collection.id })
+		.from(collection)
+		.innerJoin(searchFilterCollectionUnit, eq(searchFilterCollectionUnit.id, collection.id))
+		.where(
+			and(
+				inArray(collection.id, collectionIds),
+				getUnitReadCondition(profileId, {}, searchFilterCollectionUnit),
+			),
+		);
+	if (new Set(readable.map(({ id }) => id)).size !== collectionIds.length)
+		throw new InvalidSearch("A referenced Search Collection is unavailable");
+}
+
+function searchCandidateSet(
+	expression: SearchExpression | undefined,
+	domainFilter: DomainSearchRequest["domainFilter"],
+	profileId?: string,
+): SQL | undefined {
+	return combineCandidateSets(
+		"intersect",
+		[
+			expression ? compileSearchExpressionCandidateSet(expression) : undefined,
+			domainFilter ? compileUnitPredicateCandidateSet(domainFilter, profileId) : undefined,
+		].filter((candidate): candidate is SQL => candidate !== undefined),
+	);
+}
+
 function buildCommonSearchConditions(request: DomainSearchRequest): SQL[] {
 	const readCondition = getUnitReadCondition(request.profileId, { discoverableOnly: true });
 	if (!readCondition) throw new Error("Unit read policy produced no SQL condition");
@@ -850,13 +984,14 @@ function buildEffectiveSearchExpression(
 	request: DomainSearchRequest,
 ): SearchExpression | undefined {
 	const filters: SearchControlPredicate[] = [];
-	const addValues = (field: SearchScalarField, values: readonly string[] | undefined) => {
+	type DomainRequestScalarField = Exclude<SearchScalarField, "collection">;
+	const addValues = (field: DomainRequestScalarField, values: readonly string[] | undefined) => {
 		if (values?.length) filters.push({ field, operator: "any-of", values: [...values] });
 	};
-	const addValue = (field: SearchScalarField, value: string | undefined) => {
+	const addValue = (field: DomainRequestScalarField, value: string | undefined) => {
 		if (value) filters.push({ field, operator: "equals", value });
 	};
-	const addBoolean = (field: SearchScalarField, value: boolean | undefined) => {
+	const addBoolean = (field: DomainRequestScalarField, value: boolean | undefined) => {
 		if (value !== undefined) filters.push({ field, operator: "equals", value });
 	};
 	addValues(SearchFieldByDomainRequestFilter.Languages, request.Languages);
@@ -1732,7 +1867,7 @@ function currentSearchSources(
 
 async function searchCandidateBatch(input: {
 	readonly branches: readonly PreparedSearchBranch[];
-	readonly candidateSet?: SQL;
+	readonly candidateSet?: Readonly<{ statement: SQL; materialized: boolean }>;
 	readonly commonConditions?: readonly SQL[];
 	readonly query: ExpandedSearchQuery;
 	readonly sort: SearchSort;
@@ -1782,12 +1917,14 @@ async function searchCandidateBatch(input: {
 			: sql`true`;
 	const result = await database.transaction(async (tx) => {
 		await tx.execute(
-			sql`select set_config('statement_timeout', ${String(env.SEARCH_STATEMENT_TIMEOUT_MS)}, true)`,
+			sql`select set_config('statement_timeout', ${String(boundedSearchStatementTimeout(env.SEARCH_STATEMENT_TIMEOUT_MS))}, true)`,
 		);
 		return tx.execute<SearchCandidateDatabaseRow>(sql`
 			with ${
 				input.candidateSet
-					? sql`filter_seed(unit_id) as materialized (${input.candidateSet}),`
+					? input.candidateSet.materialized
+						? sql`filter_seed(unit_id) as materialized (${input.candidateSet.statement}),`
+						: sql`filter_seed(unit_id) as not materialized (${input.candidateSet.statement}),`
 					: sql``
 			} ordered_source as materialized (
 				${source.statement}
@@ -1917,12 +2054,15 @@ async function searchCandidateBatch(input: {
 	return readSearchCandidatePage(result.rows);
 }
 
-async function resolveSparseCandidateSet(candidateSet: SQL | undefined): Promise<SQL | undefined> {
+async function resolveSparseCandidateSet(
+	candidateSet: SQL | undefined,
+	retainLargeCollectionSeed: boolean,
+): Promise<Readonly<{ statement: SQL; materialized: boolean }> | undefined> {
 	if (!candidateSet) return undefined;
 	const maximumCandidates = WorkPolicy.search.maxCandidatesScanned;
 	const result = await database.transaction(async (tx) => {
 		await tx.execute(
-			sql`select set_config('statement_timeout', ${String(env.SEARCH_STATEMENT_TIMEOUT_MS)}, true)`,
+			sql`select set_config('statement_timeout', ${String(boundedSearchStatementTimeout(env.SEARCH_STATEMENT_TIMEOUT_MS))}, true)`,
 		);
 		return tx.execute<{ id: string }>(sql`
 			select candidate_seed.unit_id::text as id
@@ -1930,15 +2070,20 @@ async function resolveSparseCandidateSet(candidateSet: SQL | undefined): Promise
 			limit ${maximumCandidates + 1}
 		`);
 	});
-	if (result.rows.length > maximumCandidates) return undefined;
+	if (result.rows.length > maximumCandidates)
+		return retainLargeCollectionSeed ? { statement: candidateSet, materialized: false } : undefined;
 	const ids = [...new Set(result.rows.map(({ id }) => id))];
-	return sql`select bounded_seed.unit_id
-		from unnest(${toUuidArray(ids)}) as bounded_seed(unit_id)`;
+	return {
+		statement: sql`select bounded_seed.unit_id
+			from unnest(${toUuidArray(ids)}) as bounded_seed(unit_id)`,
+		materialized: true,
+	};
 }
 
 async function searchCandidatePage(input: {
 	readonly branches: readonly PreparedSearchBranch[];
 	readonly candidateSet?: SQL;
+	readonly retainLargeCollectionSeed?: boolean;
 	readonly commonConditions?: readonly SQL[];
 	readonly query: ExpandedSearchQuery;
 	readonly sort: SearchSort;
@@ -1948,7 +2093,10 @@ async function searchCandidatePage(input: {
 }): Promise<SearchCandidatePage> {
 	if (!input.branches.length)
 		return { rows: [], hasMore: false, scannedCount: 0, boundedTextFallback: false };
-	const candidateSet = await resolveSparseCandidateSet(input.candidateSet);
+	const candidateSet = await resolveSparseCandidateSet(
+		input.candidateSet,
+		input.retainLargeCollectionSeed === true,
+	);
 	const maximumScan = WorkPolicy.search.maxCandidatesScanned;
 	const rows: SearchCandidateRow[] = [];
 	let position = input.position;
@@ -2090,6 +2238,7 @@ async function searchDomainScan(
 > {
 	const startedAt = performance.now();
 	const searchExpression = buildEffectiveSearchExpression(request);
+	await authorizeSearchCollections(searchExpression, request.profileId);
 	const presentationLanguages = [
 		...new Set(
 			[
@@ -2150,11 +2299,8 @@ async function searchDomainScan(
 				sourceUnitKinds: resolveSourceUnitKinds(category, request.kinds),
 			},
 		],
-		...(request.domainFilter
-			? {
-					candidateSet: compileUnitPredicateCandidateSet(request.domainFilter, request.profileId),
-				}
-			: {}),
+		candidateSet: searchCandidateSet(searchExpression, request.domainFilter, request.profileId),
+		retainLargeCollectionSeed: hasCollectionCandidateSet(searchExpression),
 		query: expandedQuery,
 		sort,
 		position: cursorPosition,
@@ -2296,6 +2442,7 @@ interface PreparedGlobalSearchRequest {
 	readonly query: ExpandedSearchQuery;
 	readonly commonConditions: readonly SQL[];
 	readonly candidateSet?: SQL;
+	readonly retainLargeCollectionSeed: boolean;
 }
 
 async function prepareGlobalSearchRequest(
@@ -2323,6 +2470,32 @@ async function prepareGlobalSearchRequest(
 			...(searchExpression ? { searchExpression } : {}),
 		};
 	});
+	await authorizeSearchCollections(
+		combineSearchExpressions(
+			"any",
+			preparedBranches.flatMap(({ searchExpression }) =>
+				searchExpression ? [searchExpression] : [],
+			),
+		),
+		request.profileId,
+	);
+	const branchCandidateSets = preparedBranches.map(({ searchExpression }) =>
+		searchExpression ? compileSearchExpressionCandidateSet(searchExpression) : undefined,
+	);
+	const expressionCandidateSet = branchCandidateSets.every(
+		(candidate): candidate is SQL => candidate !== undefined,
+	)
+		? combineCandidateSets("union", branchCandidateSets)
+		: undefined;
+	const candidateSet = combineCandidateSets(
+		"intersect",
+		[
+			expressionCandidateSet,
+			request.domainFilter
+				? compileUnitPredicateCandidateSet(request.domainFilter, request.profileId)
+				: undefined,
+		].filter((candidate): candidate is SQL => candidate !== undefined),
+	);
 	const languageBoundary = [
 		...new Set(
 			[
@@ -2339,11 +2512,8 @@ async function prepareGlobalSearchRequest(
 		limit: request.limit ?? 20,
 		initialOffset: request.offset ?? 0,
 		commonConditions: [...buildCommonSearchConditions(commonRequest), ...additionalConditions],
-		...(request.domainFilter
-			? {
-					candidateSet: compileUnitPredicateCandidateSet(request.domainFilter, request.profileId),
-				}
-			: {}),
+		...(candidateSet ? { candidateSet } : {}),
+		retainLargeCollectionSeed: expressionCandidateSet !== undefined,
 		languageBoundary,
 		query: await expandSearchQuery(request.query ?? "", languageBoundary),
 	};
@@ -2407,6 +2577,7 @@ export async function searchGlobalIdentifiers(
 	const page = await searchCandidatePage({
 		branches: prepared.branches,
 		candidateSet: prepared.candidateSet,
+		retainLargeCollectionSeed: prepared.retainLargeCollectionSeed,
 		commonConditions: prepared.commonConditions,
 		query: prepared.query,
 		sort: prepared.sort,
@@ -2569,6 +2740,7 @@ export async function searchDomainFacets(
 ): Promise<SearchFacet[]> {
 	if (!fields.length) return [];
 	const searchExpression = buildEffectiveSearchExpression(request);
+	await authorizeSearchCollections(searchExpression, request.profileId);
 	const conditions = buildSearchConditions(category, request, searchExpression);
 	const candidateLimit = env.SEARCH_FACET_SCAN_LIMIT;
 	const languageBoundary = [
@@ -2588,11 +2760,8 @@ export async function searchDomainFacets(
 				sourceUnitKinds: resolveSourceUnitKinds(category, request.kinds),
 			},
 		],
-		...(request.domainFilter
-			? {
-					candidateSet: compileUnitPredicateCandidateSet(request.domainFilter, request.profileId),
-				}
-			: {}),
+		candidateSet: searchCandidateSet(searchExpression, request.domainFilter, request.profileId),
+		retainLargeCollectionSeed: hasCollectionCandidateSet(searchExpression),
 		query: expandedQuery,
 		sort: request.sort ?? (request.query?.trim() ? "relevance" : "best"),
 		limit: candidateLimit,
@@ -2705,14 +2874,25 @@ export async function searchGlobalFacets(
 			conditions: buildSearchConditions(category, request, searchExpression),
 		};
 	});
+	const first = preparedBranches[0];
+	if (!first) return [];
+	if (preparedBranches.some(({ request }) => request.profileId !== first.request.profileId))
+		throw new InvalidSearch("Global Search facet branches must share one viewer");
+	await authorizeSearchCollections(
+		combineSearchExpressions(
+			"any",
+			preparedBranches.flatMap(({ searchExpression }) =>
+				searchExpression ? [searchExpression] : [],
+			),
+		),
+		first.request.profileId,
+	);
 	if (
 		!preparedBranches.some((branch) =>
 			branch.fields.some((field) => facetSpec(branch.category, field)),
 		)
 	)
 		return [];
-	const first = preparedBranches[0];
-	if (!first) return [];
 	const languageBoundary = [
 		...new Set(
 			[
@@ -2726,6 +2906,25 @@ export async function searchGlobalFacets(
 	const expandedQuery = await expandSearchQuery(first.request.query ?? "", languageBoundary);
 	const candidates = await searchCandidatePage({
 		branches: preparedBranches,
+		candidateSet: preparedBranches.every(
+			({ searchExpression, request }) =>
+				searchCandidateSet(searchExpression, request.domainFilter, request.profileId) !== undefined,
+		)
+			? combineCandidateSets(
+					"union",
+					preparedBranches.flatMap(({ searchExpression, request }) => {
+						const candidate = searchCandidateSet(
+							searchExpression,
+							request.domainFilter,
+							request.profileId,
+						);
+						return candidate ? [candidate] : [];
+					}),
+				)
+			: undefined,
+		retainLargeCollectionSeed: preparedBranches.every(({ searchExpression }) =>
+			hasCollectionCandidateSet(searchExpression),
+		),
 		query: expandedQuery,
 		sort: first.request.sort ?? (first.request.query?.trim() ? "relevance" : "best"),
 		limit: env.SEARCH_FACET_SCAN_LIMIT,
@@ -2772,6 +2971,7 @@ export async function searchGlobalIdentifiersWithFacets(
 	const candidates = await searchCandidatePage({
 		branches: prepared.branches,
 		candidateSet: prepared.candidateSet,
+		retainLargeCollectionSeed: prepared.retainLargeCollectionSeed,
 		commonConditions: prepared.commonConditions,
 		query: prepared.query,
 		sort: prepared.sort,

@@ -315,6 +315,8 @@ export async function enforceApiQuota(input: {
 	tokenSafeguard?: ApiTokenQuotaOverride;
 	now?: Date;
 }): Promise<ApiQuotaLease> {
+	if (!Number.isSafeInteger(input.operation.costUnits) || input.operation.costUnits < 0)
+		throw new TypeError("API quota cost must be a non-negative safe integer");
 	const now = input.now ?? new Date();
 	const constraints = buildApiQuotaConstraints(input);
 	const requestId = crypto.randomUUID();

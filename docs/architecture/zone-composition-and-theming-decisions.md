@@ -1,6 +1,6 @@
 # Zone composition, aggregation, and theming decisions
 
-Status: Proposed — prepared for maintainer review
+Status: Accepted — implementation in progress
 
 Owner: Domain
 
@@ -37,18 +37,24 @@ no new composition paradigm.
 3. **Display copy is always a Unit reference.** Every new block member
    that carries user-visible text is a `labelUnitId`-style reference; no
    inline strings (existing `tabs`/`callout`/`media` discipline).
-4. **Budgets are contract, not runtime surprises.** Query-block counts,
-   depths, and page budgets live in host policies and are enforced at
-   write time.
-5. **Cacheability is a static property of a source.** Whether a block's
+4. **Local validity stays local.** Depth, total Block count, and query-Block
+   count live in each host policy and are enforced when that document is
+   written. A document never becomes invalid because another independently
+   stored surface is mounted beside it. Cross-surface work limits belong to
+   the runtime compositor.
+5. **Identity follows the narrowest useful scope.** A Block `_key` is
+   stable and unique only among siblings in its containing array. Database
+   resource IDs remain outside canonical document JSON. Execution uses a
+   typed structural path, while theming uses explicit semantic hooks.
+6. **Cacheability is a static property of a source.** Whether a block's
    result may be shared across viewers must be decidable from the persisted
    document alone; randomness is seeded so it caches (DPL `randomcount`
    evidence).
-6. **Block-level fault isolation.** One failing query never fails a
+7. **Block-level fault isolation.** One failing query never fails a
    surface (Netflix row bulkhead).
-7. **Canonical JSON storage; renderers evolve freely.** No stored render
+8. **Canonical JSON storage; renderers evolve freely.** No stored render
    output, no byte-compare validation (Gutenberg evidence).
-8. **Customization is declarative data; scripts never run in the host
+9. **Customization is declarative data; scripts never run in the host
    page.** Style-sheet customization is allowed only under the containment
    and review regime of §6.
 
@@ -134,8 +140,11 @@ Semantics:
   selector considers at most the first 1,000 candidates in stable keyset
   order; larger sets sample within that window. Selectors never execute
   against corpus-scale relations.
-- **Seeded randomness.** `time-bucket` derives the pick from
-  `hash(zoneId, blockKey, bucket)`: deterministic within the bucket,
+- **Seeded randomness.** `time-bucket` derives the pick from the
+  server-owned resource context, canonical `BlockPath`, and bucket. For a
+  Page this context already includes the route's Page Unit ID; for the main
+  Dock it includes the Zone Unit ID and Dock slot. These values remain
+  outside document JSON. The pick is deterministic within the bucket,
   reproducible, and shareable across viewers, so the block stays cacheable
   (this is the direct answer to the DPL `randomcount` prohibition).
   `request` re-samples per request and marks the block uncacheable; a
@@ -197,6 +206,53 @@ existing capability safe rather than newly granting it. Existing
 persisted documents are not retroactively invalidated; the budget applies
 on the next write.
 
+### 3.8 Block identity and execution addressing
+
+`_key` is an array-member identity, following the same locality as a
+renderer list key:
+
+- every `blocks[]` requires unique Block keys among its direct children;
+- every `columns[]` and `tabs[]` requires unique container keys among
+  its own direct children;
+- different arrays, nesting levels, documents, and mounted surfaces may
+  reuse the same key;
+- a document key, container key, and Block key never share an implicit
+  global namespace.
+
+Executable Blocks are addressed inside one loaded document by a typed,
+keyed structural path rather than a bare Block key or array indexes:
+
+```
+BlockPath =
+  [{ slot: "blocks", key: BlockKey },
+   { slot: "columns" | "tabs", key: ContainerKey },
+   ...,
+   { slot: "blocks", key: BlockKey }]
+```
+
+Keyed paths survive sibling reordering. Moving a Block to another container
+changes its path, which is a document revision change and is already covered
+by revision binding. Page Unit IDs, Zone Unit IDs, and Dock ownership remain
+in database rows and request context; they are never copied into Page or Dock
+JSON. A renderer may carry that ownership in an in-memory envelope for
+authorization, logging, cache partitioning, or seeded execution.
+
+### 3.9 Ownership context is not Block identity
+
+The aggregate and continuation routes obtain the owning Zone and Page from
+their URL path and load the main Dock through that Zone. A request names an
+executable Block only by its `BlockPath` inside that already selected document.
+There is therefore no persisted or request-level
+`{ documentKind, documentId, blockKey }` identity tuple, and no document UUID is
+injected into Page or Dock JSON.
+
+Page, Dock, Wiki, comment, and future recommendation documents validate their
+own sibling arrays independently. Mounting them together does not cause a
+second write validation. The runtime compositor may load Page and Dock together
+to allocate a bounded execution budget and return results in separate `page`
+and `dock` branches; that is scheduling, not cross-document identity or
+validity. Comments remain a separate renderer and do not enter this aggregate.
+
 ## 4. Page aggregate execution
 
 ### 4.1 Contract
@@ -207,29 +263,44 @@ request:
 ```
 POST /search/zones/:zoneId/pages/:pageId/execute
 body: { pageRevision?, includeDock?: boolean = true,
-        blocks?: [{ blockKey, state? }] }
+        pageBlocks?: [{ path: BlockPath, state? }],
+        dockBlocks?: [{ path: BlockPath, state? }] }
 → { pageRevision,
-    results: { [blockKey]:
-        { kind: "ok", items, nextCursor?, selected? }
-      | { kind: "error", code }
-      | { kind: "skipped" } } }
+    page: { results: [{ path,
+        outcome:
+          { kind: "ok", items, nextCursor?, selected? }
+        | { kind: "error", code }
+        | { kind: "skipped", reason: "budget" | "inactive-tab" } }] },
+    dock?: { results: [{ path, outcome }] } }
 ```
 
 - **Persisted-query semantics.** The server resolves every executed query
-  from the stored page/dock document; the request may only name block keys
-  and per-block continuation state. Clients cannot inject queries, so the
-  endpoint adds no new query attack surface and inherits each block's
+  from the stored Page or Dock document; the request may only name a
+  runtime-validated path inside the corresponding response branch and
+  per-Block continuation state. Clients cannot inject queries, so the
+  endpoint adds no new query attack surface and inherits each Block's
   existing authorization (hosting-Zone context enforced, viewer-relative
   predicates require the viewer).
-- Omitted `blocks` means the default eager set: all non-tab query blocks
-  plus the default tab's (§3.4). An explicit `blocks` list serves tab
-  activation and refresh.
+- Omitted per-surface Block selections mean the default automatic candidates:
+  all non-tab query Blocks plus the default tab's (§3.4). Explicit path lists
+  serve tab activation and refresh.
+- The Zone mounts the independently stored Dock as two presentation regions:
+  top-level menu Blocks in the Zone header (including its mobile portal), and
+  every other top-level Dock Block in a separate Dock composition region before
+  Page content. Both regions retain `surface = dock`; they do not become Page
+  Blocks and are not revalidated against the Page.
 - `pageRevision` binds results to the document revision the client
   rendered; a mismatch returns the current revision so the client refetches
   the projection. `GET /zones/:zoneId/render` is unchanged and remains the
   cache-friendly projection read.
 - **Dual cursors.** Each block result carries its own opaque `nextCursor`;
-  in-block paging continues on the existing per-block execute endpoints.
+  in-block paging continues on the surface-owned routes
+  `/search/zones/:zoneId/dock/block-executions`,
+  `/search/zones/:zoneId/pages/:pageId/block-executions`, and their
+  `feed-block-executions` counterparts. Those bodies contain only `path`,
+  continuation `state`, an optional derived-selection seed, and localization
+  hints. They contain neither a document discriminator nor client-supplied
+  Filter injections.
   Derived blocks echo the `selected` reference (hydrated with the standard
   presentation projection).
 
@@ -239,9 +310,27 @@ The server fans out block executions in parallel with a bounded
 concurrency and a per-block timeout (initial tunables: concurrency 4,
 timeout 2 s). A block failure or timeout yields that block's `error`
 entry; the surface response itself succeeds whenever the document resolves
-(Netflix row-bulkhead behavior). Initial eager budget: at most 8 query
-blocks execute per aggregate call; documents whose eager set exceeds the
-budget fail validation at write time, not at render time.
+(Netflix row-bulkhead behavior).
+
+The runtime compositor, not a cross-document write validator, owns the
+initial automatic-execution budget of eight. It collects independently valid
+Page and Dock candidates, selects at most eight in stable tree order under a
+deterministic Page/Dock fairness policy, and executes at concurrency four.
+Unused allocation may be borrowed by the other surface; non-selected
+candidates return `skipped` and remain available through explicit path
+execution. API quota charges the selected count. Service admission is bounded
+against database-pool headroom, and every underlying Search, Collection, and
+hydration query consumes the same server-side deadline.
+
+`inactive-tab` work starts automatically only when the lazy tab is activated.
+`budget` work never starts automatically after the aggregate response: Search
+and Feed retain their ordinary submit controls, while a Collection-backed list
+shows an explicit load action. This preserves the eight-query request-path cap
+instead of merely moving excess automatic work into follow-up requests.
+
+Adding comments, recommendations, or another renderer therefore adds another
+runtime contributor; it never creates a new persisted Page/Dock compatibility
+invariant.
 
 ### 4.3 Caching posture
 
@@ -271,19 +360,93 @@ corpus-scale relation, with 3,000,000,000-row estimates.
   candidates in keyset order — O(cap) index-only work independent of
   corpus scale. No `ORDER BY random()` over corpus relations exists or is
   introduced.
-- **Write amplification.** None: the program adds no persisted write path
-  beyond ordinary document edits; aggregate execution is read-only.
+- **Write amplification.** Aggregate execution adds no persisted write path
+  beyond ordinary document edits. In particular, there is no Zone-wide
+  Block-key or eager-count projection and a Dock write never scans or
+  revalidates the Zone's Pages.
 - **Failure modes.** Per-block timeout/error degrades one block to a
   client-rendered empty/fallback state; the page never 5xxs for one block.
-  Backpressure inherits the existing API quota system; the aggregate
-  endpoint counts as one quota unit per executed block (initial tunable)
-  so it cannot undercut per-block quota accounting.
+  API quota counts one unit per selected Block (initial tunable), while a
+  separate service-wide admission gate prevents authenticated interactive
+  traffic from exhausting the database pool.
 - **Skew.** Popular Zones concentrate identical non-personalized block
   queries; the seeded determinism of §3.3 makes those results shareable
   the moment a shared cache is added, which is the designated relief valve
   if hot-Zone load becomes measurable. Thresholds: sustained p95 aggregate
   latency > 500 ms or a single Zone exceeding 100 aggregate calls/s
   triggers the caching decision.
+
+### 5.1 Theme-control-plane capacity
+
+Theme revisions are control-plane data, but they are not assumed to have a
+fixed global bound. Capacity therefore covers both the expected paid-program
+shape and the repository's 500 M/3 B corpus-scale baselines.
+
+- **Cardinality and distribution.** The planning workload assumes one custom
+  theme per 10,000 Units and 20 retained revisions per theme: 1 M revisions at
+  500 M Units and 6 M at 3 B. The qualification fixture deliberately used a
+  less favorable 100 revisions per theme: 100,000 revisions across 1,000
+  themes, 3% in the active review queue, 10% approved across two contract
+  versions, 87% terminal, and one asset binding for every approved revision.
+  Collection and followed-Tag selector fixtures each contained 10,000
+  candidates although execution returns at most 1,000. Collection membership
+  additionally included a second 5,000-item overlapping Collection and
+  100,000 background membership rows to qualify the `all-of` intersection
+  under selective rather than toy-table conditions.
+- **Reads and concurrency.** Viewer rendering is one revision-primary-key
+  lookup plus a negative asset-validity probe bounded by the submission limit
+  of 16 assets. Theme history and the human queue use UUID keyset pagination
+  (queue response at most 100); contract revalidation uses keyset batches of at
+  most 1,000, default 250. No offset or corpus scan is in a request or recurring
+  path. Review workers must claim bounded queue pages and cap concurrent
+  render jobs; the aggregate Page executor separately caps database work at
+  four concurrent Blocks and reserves pool capacity for non-aggregate traffic.
+- **Measured plans.** On 2026-08-26, PostgreSQL against disposable
+  `rezics_atlas` with the distribution above used
+  `collection_item_pkey` and `unit_follow_pkey` for the two 1,000-row
+  selector reads (1.10 ms and 1.01 ms), and the Collection primary key on both
+  sides of a 4,097-row bounded `all-of` intersection (2.91 ms). It used the
+  partial review-queue index for 101
+  rows (0.15 ms), the approved-contract index for a 100-row revalidation page
+  (0.12 ms), the theme/history index for 100 rows (0.22 ms), and the revision
+  asset primary key for a 100-revision batch (0.08 ms). These are warm-cache
+  qualification numbers, not production latency promises. The reproducible
+  `services-main:zone-composition:capacity` task requires both an explicit
+  flag and a database named `rezics_atlas`, loads the skew, runs
+  `EXPLAIN (ANALYZE, BUFFERS)`, and fails if any required index disappears.
+- **Storage and write amplification.** With short fixture CSS, the revision
+  heap measured 327.68 bytes/row and its required indexes 110.84 bytes/row.
+  That fixed portion extrapolates to 219.3 GB at 500 M revisions and 1.316 TB
+  at 3 B. Source plus transformed CSS is bounded at 128 KiB/revision; without
+  compression, a 16 KiB combined working average adds 8.19 TB/49.15 TB at the
+  two baselines, while the absolute CSS ceiling adds 65.54 TB/393.22 TB.
+  Render evidence stores asset IDs and bounded findings, never screenshots
+  inline. A submission inserts the heap row and the primary, theme, and one
+  state-partial index entry, plus 0–16 asset rows with primary and
+  reverse indexes. Three reviewer/audit indexes with no read path were removed
+  after qualification; a future audit filter must justify and measure its own
+  selective index.
+- **Rates, skew, and backpressure.** The preview planning envelope is 100
+  submissions/s globally at burst, including up to 12.5 MiB/s of maximum-size
+  CSS before WAL and indexes. Sustained queue depth above 10,000, oldest-item
+  age above 15 minutes, database-pool wait p95 above 50 ms, or review-query p95
+  above 50 ms closes submission admission before workers or the database can
+  be saturated. UUIDv7 keeps queue scans append/keyset friendly, but the newest
+  B-tree leaf is a possible hot key; sustained write rate above 1,000
+  revisions/s triggers the sharding cutover below rather than unbounded worker
+  concurrency.
+- **Maintenance and scale-out path.** The expected 1 M/6 M revision cases are
+  roughly 16.8 GB/101 GB at the 16 KiB CSS average plus measured fixed bytes.
+  Before any of 50 M live revisions, 2 TB table-plus-TOAST size, six-hour
+  vacuum/backup maintenance, or the latency thresholds above is reached, move
+  immutable source/transformed CSS to content-addressed object storage and keep
+  hashes, contract/state, and bounded review metadata in PostgreSQL. Then hash
+  shard revision/history rows by `theme_unit_id` and maintain a separate,
+  bounded review-work relation keyed by state and UUIDv7 so global queue reads
+  do not fan out across theme shards. Terminal rejected/killed payloads move
+  through the same archival path. This cutover preserves point lookup and
+  keyset complexity at 500 M and 3 B rows rather than relying on one
+  single-node, multi-hundred-terabyte relation.
 
 ## 6. Theming ladder
 
@@ -312,39 +475,66 @@ remains the always-available baseline.
   and Discord's structured cosmetics. Most Zones are expected to stay at
   this level permanently.
 
+The hero token references an ordinary platform image asset that is `ready`,
+`public`, undeleted, and has a banner presentation. It is not a private asset
+and it does not pass the custom-theme human review queue. Public visibility is
+required because a public Zone must be renderable without borrowing the
+operator's authorization. The Zone write validates this one reference with an
+indexed asset lookup; it does not inspect another composition document.
+
 ### 6.3 Level 2 — Zone Pro: reviewed custom style sheets
 
-The block model makes contract-stable styling hooks possible: `_key` is a
-locally unique instance anchor and `_type` a class anchor. The design
-turns that observation into an explicit, versioned contract rather than
-exposing renderer internals.
+The Block model makes contract-stable semantic styling hooks possible.
+`_type` is a class anchor; optional bounded `styleRoles` are author-owned
+semantic selectors analogous to class tokens. Structural `_key` values are
+editor/renderer identities and are deliberately excluded from the public
+styling contract.
 
 **Styling contract.** A published, semver-versioned document defines the
-complete selector surface: `data-block-type` and `data-block-key` on every
-block root; named parts per block type (`data-part="title" | "cover" |
-"meta" | …`), aligning with the `data-scope`/`data-part` anatomy SharkUI's
-Ark base already emits; state attributes (`data-appearance`,
-`data-layout`, `data-item-size`); and the published CSS custom properties
-that carry the level-0/1 tokens. Everything outside the contract is
+complete selector surface: `data-block-type` and optional
+`data-style-role` tokens on every Block root; named parts per Block type
+(`data-part="title" | "cover" | "meta" | …`), aligning with the
+`data-scope`/`data-part` anatomy SharkUI's Ark base already emits; state
+attributes (`data-appearance`, `data-layout`, `data-item-size`); optional
+renderer-owned surface roles such as `data-zone-surface="page" | "dock"`;
+and the published CSS custom properties that carry the level-0/1 tokens.
+Style roles may intentionally match multiple Blocks and have no uniqueness
+meaning. Everything outside the contract is
 implementation detail and may change without notice. Renderer changes that
 preserve the exported surface are contract-minor; removals or renames are
-contract-major and trigger automatic revalidation of every approved theme
-with an author grace period. Platform base styles move behind
+contract-major and trigger automatic revalidation of every approved theme.
+An old-contract revision stops rendering immediately and falls back to level-1
+tokens. The author grace period is a remediation and resubmission window, never
+permission to keep stale CSS active. Platform base styles move behind
 `@layer`/`:where()` so contract-compliant overrides need no specificity
 escalation.
 
 **Containment (architectural, before any review).**
 
 - Theme style sheets are parsed to an AST at submission; every selector is
-  scope-transformed under the Zone theme root
-  (`[data-zone-theme-scope]`). Platform chrome — navigation, auth state,
+  scope-transformed under a Zone composition root
+  (`[data-zone-theme-scope]`). Page and Dock each receive their own paint-
+  contained root, including Dock content rendered through a portal. Only
+  Zone-authored Page and Dock composition is inside custom-selector reach.
+  Comments, the hero, the viewer override, and platform chrome —
+  navigation, auth state,
   report and moderation affordances, content-rating and content-label
-  markers, trust badges — renders outside that root and is structurally
+  markers, trust badges — render outside those roots and are structurally
   unreachable.
+- Document-global CSS mechanisms are not containment-safe. Theme CSS may nest
+  ordinary scoped rules in `@media`, `@supports`, and `@container`; cascade-
+  layer declarations, keyframes, imports, fonts, and other global at-rules are
+  rejected. Each selector is recursively inspected, so functional pseudo-
+  classes cannot smuggle private class, ID, type, or attribute selectors.
 - `url()` may reference only platform-hosted theme assets uploaded with
   the theme revision. No external origins: this removes third-party
   visitor tracking, attribute-probe exfiltration channels, and unmoderated
   imagery in one rule.
+
+Here too, "theme asset" means a ready, public, undeleted asset owned by the
+theme submitter and explicitly declared on that immutable revision. Human
+approval applies to the complete theme revision and its rendered evidence; it
+does not convert a private hero into a special platform-approved asset class.
 - `content` string values are restricted (empty/none/counters); any other
   use is rejected or escalated to human review.
 - Static accessibility lints reject focus-outline removal without a
@@ -437,16 +627,17 @@ on flagship examples before broadening access):
 ## 9. Versioning
 
 The new persisted contracts and public API (`presentation`, pinned
-sorts, `derived`, `maxQueryBlocks`, the aggregate endpoint, the
+sorts, `derived`, `maxQueryBlocks`, sibling-local keys and `BlockPath`
+execution, the aggregate endpoint, semantic `styleRoles`, the
 `search` block completion, the `collection` membership field, the
 `zone_theme` Unit kind, and the theme review pipeline) are significant
 public-API and persisted-contract changes and therefore land in a
 second-segment (MAJOR) RomVer release; purely internal steps (renderer
 refactors, the shared shelf component) may ride third-segment releases.
-Everything is additive — nothing removes or rewrites an existing persisted
-contract — so the release needs release-note documentation but no data
-migration or cutover plan. Content-pack `minRezicsVersion` on the new
-packs pins the first supporting release.
+Persisted document members are additive, but database enum/constraint
+changes, generated API clients, and the aggregate protocol require an
+explicit migration and coordinated cutover plan. Content-pack
+`minRezicsVersion` on the new packs pins the first supporting release.
 
 ## 10. Relationship to Tag Path
 
@@ -476,11 +667,13 @@ schema tests pass.
 ### Phase Z1 — aggregate execution
 
 The `execute` endpoint, per-block isolation, `pageRevision` binding,
-eager-set rules, tabs `skipped` semantics, frontend adoption, per-block
-quota accounting.
+typed `BlockPath` addressing over sibling-local keys, runtime compositor
+budgets, tabs `skipped` semantics, frontend adoption, per-Block quota
+accounting.
 Exit: the default Zone surface renders from one render call plus one
 aggregate call; fault-injection tests show per-block degradation without
-surface failure.
+surface failure; duplicate keys in independent Page, Dock, and nested sibling
+collections neither overwrite results nor trigger cross-document writes.
 
 ### Phase Z2 — query vocabulary
 
@@ -494,8 +687,9 @@ errors.
 
 ### Phase Z3 — theming levels 0–1 and the styling contract
 
-Extended tokens, the preset gallery, `data-block-*`/`data-part` export
-across block renderers, and the published styling contract v1.
+Extended tokens, the preset gallery, semantic
+`data-block-type`/`data-style-role`/`data-part` export across Block
+renderers, and the published styling contract v1.
 Exit: a preset applies end to end in preview; the contract document is
 versioned and its exported surface is asserted by renderer tests.
 

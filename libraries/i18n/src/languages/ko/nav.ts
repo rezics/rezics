@@ -76,6 +76,7 @@ export default {
 			series: "시리즈",
 			zone: zoneTerms.label,
 			zone_page: `${zoneTerms.label} 페이지`,
+			zone_theme: `${zoneTerms.label} 테마`,
 			collection: "컬렉션",
 			post: postTerms.label,
 			poll: "설문",

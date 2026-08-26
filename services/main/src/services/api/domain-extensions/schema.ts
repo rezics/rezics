@@ -256,10 +256,18 @@ export const ZoneResponse = t.Object({
 	),
 	filterDocument: FilterResponseDocument,
 	themeDocument: ZoneThemeResponseDocument,
+	themeHero: ImageAssetResponse,
 	startsAt: t.Nullable(DateTime),
 	endsAt: t.Nullable(DateTime),
 	localRuleRealmId: t.Nullable(Uuid),
-	capabilities: t.Object({ canManage: t.Boolean() }),
+	capabilities: t.Object(
+		{
+			canManage: t.Boolean(),
+			canManageTheme: t.Boolean(),
+			hasDevelopmentPreviewAccess: t.Boolean(),
+		},
+		{ additionalProperties: false },
+	),
 	createdAt: DateTime,
 	updatedAt: DateTime,
 });
@@ -328,6 +336,12 @@ export const ZoneRenderWikiPostResponse = t.Object({
 });
 export const ZoneRenderResponse = t.Object({
 	zone: ZoneResponse,
+	customThemeStylesheet: t.Nullable(
+		t.Object(
+			{ revisionId: Uuid, sha256: t.String(), css: t.String({ maxLength: 65_536 }) },
+			{ additionalProperties: false },
+		),
+	),
 	page: t.Nullable(ZonePageResponse),
 	dock: t.Nullable(
 		t.Object({

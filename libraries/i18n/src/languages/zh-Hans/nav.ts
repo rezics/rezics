@@ -76,6 +76,7 @@ export default {
 			series: "系列",
 			zone: zoneTerms.label,
 			zone_page: `${zoneTerms.label}页面`,
+			zone_theme: `${zoneTerms.label}主题`,
 			collection: "收藏集",
 			post: postTerms.label,
 			poll: "投票",

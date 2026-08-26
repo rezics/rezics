@@ -76,6 +76,7 @@ export default {
 			series: "Reihe",
 			zone: zoneTerms.label,
 			zone_page: `${zoneTerms.label}-Seite`,
+			zone_theme: `${zoneTerms.label}-Design`,
 			collection: "Sammlung",
 			post: postTerms.label,
 			poll: "Umfrage",

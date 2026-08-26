@@ -44,6 +44,7 @@ export function unitPermissionsForKind(kind: UnitKind): UnitPermission[] {
 function permissionTargetForUnitKind(kind: UnitKind): PermissionResourceKind {
 	if (kind === "realm") return "realm";
 	if (kind === "entity") return "entity";
+	if (kind === "zone") return "zone";
 	return "unit";
 }
 

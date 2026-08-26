@@ -7,6 +7,7 @@ export default defineConfig({
 			"./libraries/avatar/vitest.config.ts",
 			"./libraries/content-language/vitest.config.ts",
 			"./libraries/portable-text/vitest.config.ts",
+			"./libraries/block/vitest.config.ts",
 			"./libraries/observability/vitest.config.ts",
 			"./libraries/license/vitest.config.ts",
 			"./libraries/i18n/vitest.config.ts",

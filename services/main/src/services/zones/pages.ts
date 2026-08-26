@@ -3,6 +3,7 @@ import { and, asc, desc, eq, inArray, isNull, sql } from "drizzle-orm";
 import {
 	UnitReferencedBlockDocument,
 	ZonePageBlockHostPolicy,
+	assertBlockQueryBudget,
 	assertUnitReferencedBlockDocument,
 	describeDocumentIssues,
 	isDocument,
@@ -20,8 +21,8 @@ import {
 	contentStructureNode,
 	post,
 	unit,
-	unitOwnership,
 	unitLocalization,
+	unitOwnership,
 	unitRevisionHead,
 	unitSlugAddress,
 	zonePage,
@@ -468,8 +469,17 @@ async function nodeForPageId(tx: DatabaseTransaction, structureId: string, pageI
 	)[0];
 }
 
+function assertZonePageDocument(document: UnitReferencedBlockDocumentValue): void {
+	try {
+		assertUnitReferencedBlockDocument(document, ZonePageBlockHostPolicy);
+		assertBlockQueryBudget(document, ZonePageBlockHostPolicy);
+	} catch {
+		throw new ContentStructureInvalid("Zone Page document violates its composition limits");
+	}
+}
+
 export async function upsertZonePageUnit(input: ZonePageMutationInput) {
-	assertUnitReferencedBlockDocument(input.localization.document, ZonePageBlockHostPolicy);
+	assertZonePageDocument(input.localization.document);
 	return database.transaction(async (tx) => {
 		await tx.execute(
 			sql`select pg_advisory_xact_lock(hashtextextended(${`zone-graph:${input.zoneId}`}::text, 0))`,

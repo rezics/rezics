@@ -3,9 +3,14 @@ import { createSchemaFactory } from "drizzle-orm/zod";
 import { z } from "zod";
 import { AvatarTypeValues, FontAwesomeIconPrefixValues } from "@rezics/avatar";
 import {
+	WikiPostBlockHostPolicy,
 	PollContentBlock,
 	UnitReferencedBlockDocument,
+	ZonePageBlockHostPolicy,
 	ZoneThemeDocument,
+	assertBlockQueryBudget,
+	assertUnitReferencedBlockDocument,
+	assertWikiPostPortableTextDocument,
 	isDocument,
 	isPortableTextDocument,
 	type PortableTextDocument as PortableTextDocumentValue,
@@ -103,6 +108,8 @@ import {
 	replaceUnitContentLanguageSupport,
 } from "./content-language-support";
 import { restoreVideoAudioTracks } from "./video-audio-tracks";
+import { ensurePublicZoneThemeHeroAsset } from "../api/image-assets/service";
+import { ensureApprovedZoneThemeReference } from "../zone-themes/service";
 
 export type UnitRevisionEvent = "create" | "update" | "delete" | "restore";
 
@@ -285,6 +292,34 @@ const zoneStateSchema = schemaFactory
 	})
 	.omit({ id: true, createdAt: true, updatedAt: true });
 const collectionStateSchema = z.object({});
+
+class UnitSnapshotBlockDocumentInvalid extends TypeError {}
+
+function assertUnitSnapshotBlockWriteBudgets(snapshot: UnitSnapshot): void {
+	try {
+		if (snapshot.kind === "zone_page") {
+			for (const localization of snapshot.localizations) {
+				if (localization.content === null) continue;
+				assertUnitReferencedBlockDocument(localization.content, ZonePageBlockHostPolicy);
+				assertBlockQueryBudget(localization.content, ZonePageBlockHostPolicy);
+			}
+			return;
+		}
+		if (snapshot.kind !== "post" || !snapshot.extension) return;
+		const postState = postStateSchema.parse(snapshot.extension);
+		if (postState.kind !== "wiki") return;
+		for (const localization of snapshot.localizations) {
+			if (localization.content === null) continue;
+			assertWikiPostPortableTextDocument(localization.content);
+			assertBlockQueryBudget({ blocks: [localization.content] }, WikiPostBlockHostPolicy);
+		}
+	} catch (cause) {
+		throw new UnitSnapshotBlockDocumentInvalid(
+			"Unit snapshot Block document violates its host limits",
+			{ cause },
+		);
+	}
+}
 const pollStateSchema = schemaFactory
 	.createSelectSchema(poll)
 	.omit({ id: true, closedAt: true, createdAt: true, updatedAt: true });
@@ -414,6 +449,7 @@ async function snapshotExtension(
 		case "realm_rule":
 		case "slug_namespace":
 		case "zone_page":
+		case "zone_theme":
 			return null;
 	}
 }
@@ -682,18 +718,43 @@ export async function restoreUnitSnapshot(
 	const result = UnitSnapshotSchema.safeParse(value);
 	if (!result.success) throw new Error("Unsupported Unit snapshot", { cause: result.error });
 	const snapshot = result.data;
+	assertUnitSnapshotBlockWriteBudgets(snapshot);
 	const credits = snapshot.owned.credits.map((row) => creditAttributionRowSchema.parse(row));
 	const subjectAssociations = snapshot.owned.subjectAssociations.map((row) =>
 		subjectAssociationRowSchema.parse(row),
 	);
 	await lockUnitHistory(tx, unitId);
 	const [current] = await tx
-		.select({ kind: unit.kind, subjectUnitId: post.subjectUnitId })
+		.select({
+			kind: unit.kind,
+			subjectUnitId: post.subjectUnitId,
+			zoneThemeDocument: zone.themeDocument,
+		})
 		.from(unit)
 		.leftJoin(post, eq(post.id, unit.id))
+		.leftJoin(zone, eq(zone.id, unit.id))
 		.where(eq(unit.id, unitId))
 		.limit(1);
 	if (!current || current.kind !== snapshot.kind) throw new Error("Unit snapshot kind mismatch");
+	if (snapshot.kind === "zone" && snapshot.extension) {
+		const currentTheme = ZoneThemeDocumentSchema.parse(current.zoneThemeDocument);
+		const restoredTheme = zoneStateSchema.parse(snapshot.extension).themeDocument;
+		if (canonicalJson(currentTheme) !== canonicalJson(restoredTheme)) {
+			const level1Changed =
+				currentTheme.heroAssetId !== restoredTheme.heroAssetId ||
+				currentTheme.cardRadius !== restoredTheme.cardRadius ||
+				currentTheme.headingFontScale !== restoredTheme.headingFontScale ||
+				currentTheme.surfaceTint !== restoredTheme.surfaceTint ||
+				currentTheme.custom?.themeUnitId !== restoredTheme.custom?.themeUnitId ||
+				currentTheme.custom?.revisionId !== restoredTheme.custom?.revisionId;
+			await authorization.zone.ensureThemeMutation(
+				unitId,
+				level1Changed ? "development_preview" : "released",
+			);
+			await ensurePublicZoneThemeHeroAsset(tx, restoredTheme.heroAssetId);
+			await ensureApprovedZoneThemeReference(tx, restoredTheme.custom);
+		}
+	}
 	if (snapshot.kind === "book" && snapshot.extension)
 		await ensureMetadataOnlyChangeAllowed(
 			tx,
@@ -1438,7 +1499,18 @@ export async function restoreUnitRevision(
 		throw new UnitRevisionConflict(head.revisionId, ["/"]);
 	const documents = await getUnitRevisionDocuments(tx, input.sourceRevisionId);
 	if (!documents.main) throw new Error("Unit revision not found");
-	await restoreUnitSnapshot(tx, input.unitId, documentsToSnapshot(documents), input.authorization);
+	try {
+		await restoreUnitSnapshot(
+			tx,
+			input.unitId,
+			documentsToSnapshot(documents),
+			input.authorization,
+		);
+	} catch (cause) {
+		if (cause instanceof UnitSnapshotBlockDocumentInvalid)
+			throw new UnitRevisionConflict(head.revisionId, ["/localizations"]);
+		throw cause;
+	}
 	return recordUnitRevision(tx, {
 		unitId: input.unitId,
 		actorProfileId: input.actorProfileId,
@@ -1672,12 +1744,18 @@ export async function undoUnitRevision(
 	const result = undoRevisionDocuments(before, after, current);
 	if (result.conflictPaths.length)
 		throw new UnitRevisionConflict(head.revisionId, result.conflictPaths);
-	await restoreUnitSnapshot(
-		tx,
-		input.unitId,
-		documentsToSnapshot(result.documents),
-		input.authorization,
-	);
+	try {
+		await restoreUnitSnapshot(
+			tx,
+			input.unitId,
+			documentsToSnapshot(result.documents),
+			input.authorization,
+		);
+	} catch (cause) {
+		if (cause instanceof UnitSnapshotBlockDocumentInvalid)
+			throw new UnitRevisionConflict(head.revisionId, ["/localizations"]);
+		throw cause;
+	}
 	return recordUnitRevision(tx, {
 		unitId: input.unitId,
 		actorProfileId: input.actorProfileId,

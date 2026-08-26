@@ -25,7 +25,7 @@ describe("API quota operation identity", () => {
 			costUnits: 5,
 		});
 		expect(
-			resolveApiQuotaOperation("postApiSearchZonesByZoneIdPagesByPageIdBlocksByBlockKeyExecute"),
+			resolveApiQuotaOperation("postApiSearchZonesByZoneIdPagesByPageIdBlock-executions"),
 		).toEqual({ scope: "search.execute", costUnits: 5 });
 		expect(resolveApiQuotaOperation("postApiImage-assets")).toEqual({
 			scope: "image.upload",

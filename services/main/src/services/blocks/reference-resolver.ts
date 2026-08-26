@@ -20,6 +20,19 @@ export function createUnitBlockReferenceResolver(
 	return {
 		async resolve(kind, identifiers) {
 			if (!identifiers.length) return new Set<string>();
+			if (kind === "label") {
+				const rows = await tx
+					.select({ id: unit.id })
+					.from(unit)
+					.where(
+						and(
+							inArray(unit.id, [...identifiers]),
+							eq(unit.kind, "label"),
+							getUnitReadCondition(input.profileId),
+						),
+					);
+				return new Set(rows.map((row) => row.id));
+			}
 			if (kind === "unit") {
 				const rows = await tx
 					.select({ id: unit.id })

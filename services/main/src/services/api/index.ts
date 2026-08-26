@@ -40,6 +40,7 @@ import tokens from "./tokens";
 import tokenInfo from "./token-info";
 import quotaPolicies from "./quota-policies";
 import users from "./users";
+import zoneThemes from "./zone-themes";
 import units from "./units";
 import { auth } from "../auth";
 import session from "../auth/session";
@@ -185,6 +186,7 @@ export default new Elysia({ normalize: "typebox" })
 				.use(domainExtensions)
 				.use(docks)
 				.use(users)
+				.use(zoneThemes)
 				.use(platformAccess)
 				.use(platformUsers)
 				.use(tags)

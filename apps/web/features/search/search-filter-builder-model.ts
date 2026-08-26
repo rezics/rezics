@@ -219,7 +219,19 @@ export function compileDraftSearch(
 		const values = node.values.map((value) => value.value);
 		let filter: SearchControlPredicate | undefined;
 		const field = control.field;
-		if (field === "realm-tag-vote" && node.operator === "matches") {
+		if (field === "collection") {
+			if (
+				(node.operator === "equals" || node.operator === "not-equals") &&
+				typeof values[0] === "string"
+			)
+				filter = { field, operator: node.operator, value: values[0] };
+			else if (
+				(node.operator === "any-of" || node.operator === "all-of" || node.operator === "none-of") &&
+				values.length > 0 &&
+				values.every((value): value is string => typeof value === "string")
+			)
+				filter = { field, operator: node.operator, values };
+		} else if (field === "realm-tag-vote" && node.operator === "matches") {
 			const realmId = node.realmTagVote?.realm?.value;
 			const tagId = node.realmTagVote?.tag?.value;
 			const { scoreLower, scoreUpper, voteCountLower, voteCountUpper } = node.realmTagVote ?? {};

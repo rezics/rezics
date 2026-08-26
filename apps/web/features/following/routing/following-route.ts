@@ -56,6 +56,7 @@ export function followingHref(
 		case "series":
 		case "realm_rule":
 		case "zone_page":
+		case "zone_theme":
 			return undefined;
 	}
 }

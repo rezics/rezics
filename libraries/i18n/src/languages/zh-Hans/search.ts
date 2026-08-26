@@ -156,6 +156,7 @@ export default {
 		"ai-disclosure": `${verbatimTerms.ai.value} 使用揭露`,
 		license: "授权",
 		tag: "标签",
+		collection: "包含内容",
 		credit: "署名",
 		"credited-profile": "署名个人资料",
 		realm: realmTerms.label,

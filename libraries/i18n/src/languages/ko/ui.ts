@@ -1,3 +1,5 @@
+import { insert } from "native-i18n";
+
 import { koTerminology } from "@rezics/i18n/terminology/ko";
 
 const { forms: followTerms } = koTerminology.follow;
@@ -16,6 +18,13 @@ export default {
 	edit: "편집",
 	clear: "지우기",
 	search: "검색",
+	shelf: {
+		label: "콘텐츠 캐러셀",
+		previous: "이전 항목",
+		next: "다음 항목",
+		page: insert("{{pageCount}}페이지 중 {{page}}페이지", { page: Number, pageCount: Number }),
+		item: insert("{{itemCount}}개 중 {{item}}번째 항목", { item: Number, itemCount: Number }),
+	},
 	pickerPlaceholders: {
 		unit: "이름 또는 제목 입력",
 		entity: `${entityTerms.label} 이름 입력`,

@@ -1,6 +1,9 @@
 import {
 	UnitReferencedBlockDocument,
+	WikiPostBlockHostPolicy,
 	ZonePageBlockHostPolicy,
+	ZoneThemeDocument,
+	assertBlockQueryBudget,
 	assertUnitReferencedBlockDocument,
 	assertWikiPostPortableTextDocument,
 	describeDocumentIssues,
@@ -15,6 +18,13 @@ export function assertContentPackDocuments(pack: LoadedPack): void {
 }
 
 export function assertPackObjectDocuments(object: PackObject): void {
+	if (object.unit.kind === "zone") {
+		const themeDocument = object.compiledZone?.themeDocument;
+		if (!isDocument(ZoneThemeDocument, themeDocument))
+			throw new ContentPackInvalid(
+				`${object.sourceKey} compiled Zone theme is not a ZoneThemeDocument`,
+			);
+	}
 	if (object.unit.kind === "zone_page") {
 		for (const localization of object.localizations)
 			assertZonePageLocalization(object, localization);
@@ -25,6 +35,7 @@ export function assertPackObjectDocuments(object: PackObject): void {
 		if (localization.content === undefined) continue;
 		try {
 			assertWikiPostPortableTextDocument(localization.content);
+			assertBlockQueryBudget({ blocks: [localization.content] }, WikiPostBlockHostPolicy);
 		} catch {
 			throw new ContentPackInvalid(
 				`${object.sourceKey}.${localization.language} wiki content is not a Wiki Post Portable Text document`,
@@ -50,6 +61,7 @@ function assertZonePageLocalization(
 	}
 	try {
 		assertUnitReferencedBlockDocument(localization.content, ZonePageBlockHostPolicy);
+		assertBlockQueryBudget(localization.content, ZonePageBlockHostPolicy);
 	} catch {
 		throw new ContentPackInvalid(`${label} zone page content violates ZonePageBlockHostPolicy`);
 	}

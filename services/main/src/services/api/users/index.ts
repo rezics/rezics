@@ -108,6 +108,7 @@ function presentPreferences(preference: typeof profilePreference.$inferSelect) {
 		progressVisibility: preference.progressVisibility,
 		collectionConfig: parseCollectionConfig(preference.collectionConfig),
 		personalizedFeed: preference.personalizedFeed,
+		customZoneThemesEnabled: preference.customZoneThemesEnabled,
 		filterFeedByPreferredLanguages: preference.filterFeedByPreferredLanguages,
 		alwaysShowSpoilers: preference.alwaysShowSpoilers,
 		alwaysShowNsfw: preference.alwaysShowNsfw,
@@ -383,6 +384,9 @@ export default new Elysia({ prefix: "/users" })
 						? {}
 						: { alwaysShowSpoilers: body.alwaysShowSpoilers }),
 					...(body.alwaysShowNsfw === undefined ? {} : { alwaysShowNsfw: body.alwaysShowNsfw }),
+					...(body.customZoneThemesEnabled === undefined
+						? {}
+						: { customZoneThemesEnabled: body.customZoneThemesEnabled }),
 				})
 				.where(eq(profilePreference.profileId, profile.unitId))
 				.returning();
@@ -415,6 +419,7 @@ export default new Elysia({ prefix: "/users" })
 						defaultScoreRealmId: body.defaultScoreRealmId,
 						collectionConfig: body.collectionConfig,
 						personalizedFeed: body.personalizedFeed,
+						customZoneThemesEnabled: body.customZoneThemesEnabled,
 						filterFeedByPreferredLanguages: body.filterFeedByPreferredLanguages,
 						alwaysShowSpoilers: body.alwaysShowSpoilers,
 						alwaysShowNsfw: body.alwaysShowNsfw,

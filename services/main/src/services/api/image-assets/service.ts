@@ -1,4 +1,4 @@
-import { and, eq, isNull, or, sql } from "drizzle-orm";
+import { and, eq, inArray, isNull, or, sql } from "drizzle-orm";
 import { fileTypeFromBuffer } from "file-type";
 import sharp from "sharp";
 
@@ -363,6 +363,63 @@ export async function getOwnedImageAsset(profileId: string, assetId: string) {
 export interface ImageAssetPresentationReference {
 	readonly assetId: string | null | undefined;
 	readonly role: ImageAssetPresentationRole;
+}
+
+/**
+ * Resolve a Zone hero only when the persisted asset is safe for every viewer of
+ * the Zone. Theme documents retain the stable asset UUID; API projections carry
+ * this canonical, revision-bound presentation URL.
+ */
+export async function findPublicZoneThemeHeroAsset(
+	tx: DatabaseTransaction,
+	assetId: string | null | undefined,
+): Promise<{ readonly id: string; readonly url: string } | null> {
+	if (!assetId) return null;
+	return (await findPublicZoneThemeHeroAssets(tx, [assetId])).get(assetId) ?? null;
+}
+
+/** Resolve a bounded set of public, ready Zone hero banner presentations in one query. */
+export async function findPublicZoneThemeHeroAssets(
+	tx: DatabaseTransaction,
+	assetIds: readonly string[],
+): Promise<ReadonlyMap<string, { readonly id: string; readonly url: string }>> {
+	const uniqueAssetIds = [...new Set(assetIds)];
+	if (!uniqueAssetIds.length) return new Map();
+	const assets = await tx
+		.select({
+			id: imageAsset.id,
+			revision: imageAssetPresentation.revision,
+		})
+		.from(imageAsset)
+		.innerJoin(imageAssetPresentation, eq(imageAssetPresentation.assetId, imageAsset.id))
+		.where(
+			and(
+				inArray(imageAsset.id, uniqueAssetIds),
+				eq(imageAsset.status, "ready"),
+				eq(imageAsset.access, "public"),
+				isNull(imageAsset.deletedAt),
+				eq(imageAssetPresentation.role, "banner"),
+			),
+		);
+	return new Map(
+		assets.map((asset) => [
+			asset.id,
+			{
+				id: asset.id,
+				url: imageAssetPresentationContentUrl(asset.id, "banner", asset.revision),
+			},
+		]),
+	);
+}
+
+/** Validate a persisted Zone hero reference while holding its asset row stable. */
+export async function ensurePublicZoneThemeHeroAsset(
+	tx: DatabaseTransaction,
+	assetId: string | null | undefined,
+): Promise<void> {
+	if (!assetId) return;
+	const hero = await findPublicZoneThemeHeroAsset(tx, assetId);
+	if (!hero) throw new ImageAssetNotFound();
 }
 
 /** Validate localization images, including their role presentation, in one ownership query. */

@@ -40,6 +40,48 @@ export default {
 	searchFailed: "Search is temporarily unavailable. Please try again later.",
 	untitledResult: "Untitled content",
 	contentList: "Content list",
+	loadSection: "Load this section",
+	theme: {
+		viewerDefault: "Use platform default theme",
+		viewerDefaultScope: `This turns off custom themes for every ${zoneTerms.label}. You can turn them back on in Preferences.`,
+		viewerDefaultFailed: "The platform default theme could not be applied. Please try again later.",
+		basicsTitle: "Basic appearance",
+		detailsTitle: "Theme details",
+		accent: "Accent color",
+		colorScheme: "Color scheme",
+		colorSchemes: { system: "Use device setting", light: "Light", dark: "Dark" },
+		density: "Layout density",
+		densities: { comfortable: "Comfortable", compact: "Compact" },
+		gallery: {
+			title: "Theme presets",
+			consequence:
+				"Applying a preset replaces every current appearance setting, including the hero image.",
+			options: {
+				clean: {
+					label: "Clean",
+					description: "Neutral surfaces and balanced spacing suit a broad range of content.",
+				},
+				editorial: {
+					label: "Editorial",
+					description: "Warm color, tighter corners, and prominent headings emphasize articles.",
+				},
+				vibrant: {
+					label: "Vibrant",
+					description:
+						"Dark surfaces, saturated accents, and generous curves create an energetic look.",
+				},
+			},
+		},
+		hero: "Hero image",
+		cardRadius: "Card corners",
+		cardRadii: { sm: "Small", md: "Medium", lg: "Large" },
+		headingFontScale: "Heading size",
+		headingFontScales: { sm: "Small", md: "Medium", lg: "Large" },
+		surfaceTint: "Surface tint",
+		surfaceTints: { none: "None", subtle: "Subtle", accent: "Accent color" },
+		save: "Save theme",
+		saveFailed: "The theme could not be saved. Please try again later.",
+	},
 	ruleRealm: {
 		label: `Local Rule ${realmTerms.label}`,
 		description: `Select a ${realmTerms.label} whose current rules this ${zoneTerms.inline} may use for local governance. Official platform rules always remain available.`,
@@ -85,6 +127,10 @@ export default {
 			layout: {
 				label: "Layout",
 				description: "Edit the shared content area and its blocks.",
+			},
+			theme: {
+				label: "Theme",
+				description: `Set the ${zoneTerms.inline}'s colors, layout details, and hero image.`,
 			},
 		},
 		profile: {

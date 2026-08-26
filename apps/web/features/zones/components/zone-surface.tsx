@@ -1,8 +1,11 @@
 "use client";
 
-import { useGetZoneRenderProjection } from "@rezics/openapi-tanstack-query";
+import {
+	useGetZoneRenderProjection,
+	usePatchApiUsersMePreferences,
+} from "@rezics/openapi-tanstack-query";
 import { QueryFailure, QueryPending } from "@rezics/ui";
-import { useMemo, type ReactNode } from "react";
+import { useCallback, useMemo, type ReactNode } from "react";
 
 import { useHeaderSearchOverride } from "@/features/application-shell/header-search";
 import { useTranslation } from "@/i18n/client";
@@ -11,7 +14,10 @@ import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { selectLocalization } from "@/lib/localization";
 import { parseZoneRenderProjection, type ZoneRenderProjection } from "../model/zone-render";
 import { ZoneBlockProvider } from "./block-renderer";
+import { ZoneDockContent } from "./zone-dock-content";
 import { ZoneHeader } from "./zone-header";
+import { ZonePageAggregateProvider } from "./zone-page-aggregate-provider";
+import { ZoneThemeContent } from "./zone-theme-content";
 
 export type ZonePageSelection =
 	| { readonly by: "home" }
@@ -19,12 +25,14 @@ export type ZonePageSelection =
 	| { readonly by: "id"; readonly pageId: string };
 
 export function ZoneSurface({
+	aggregatePage = false,
 	baseHref,
 	children,
 	id,
 	postId,
 	selection = { by: "home" },
 }: {
+	readonly aggregatePage?: boolean;
 	readonly baseHref: string;
 	readonly children: (projection: ZoneRenderProjection) => ReactNode;
 	readonly id: string;
@@ -51,6 +59,10 @@ export function ZoneSurface({
 		() => (query.data ? parseZoneRenderProjection(query.data) : null),
 		[query.data],
 	);
+	const refetchProjection = useCallback(() => void query.refetch(), [query.refetch]);
+	const useDefaultTheme = usePatchApiUsersMePreferences({
+		mutation: { onSuccess: () => void query.refetch() },
+	});
 	const headerSearch = useMemo(() => {
 		if (!projection) return undefined;
 		const localization = selectLocalization(
@@ -79,10 +91,34 @@ export function ZoneSurface({
 	const title = localization?.title ?? t.ui.unnamed;
 	const avatar = localization?.avatar ?? projection.zone.avatar;
 
-	return (
+	const surface = (
 		<ZoneBlockProvider baseHref={baseHref} projection={projection}>
-			<ZoneHeader avatar={avatar} projection={projection} title={title} />
-			{children(projection)}
+			<ZoneThemeContent
+				hero={projection.zone.themeHero}
+				theme={projection.zone.themeDocument}
+				stylesheet={projection.customThemeStylesheet}
+				onUseDefaultTheme={() =>
+					useDefaultTheme.mutate({ body: { customZoneThemesEnabled: false } })
+				}
+				useDefaultThemeFailed={useDefaultTheme.isError}
+				useDefaultThemePending={useDefaultTheme.isPending}
+			>
+				<ZoneHeader avatar={avatar} projection={projection} title={title} />
+				<ZoneDockContent projection={projection} />
+				{children(projection)}
+			</ZoneThemeContent>
 		</ZoneBlockProvider>
+	);
+	return aggregatePage && projection.page ? (
+		<ZonePageAggregateProvider
+			localizationLanguages={localizationLanguages}
+			onRevisionConflict={refetchProjection}
+			page={projection.page}
+			zoneId={projection.zone.id}
+		>
+			{surface}
+		</ZonePageAggregateProvider>
+	) : (
+		surface
 	);
 }

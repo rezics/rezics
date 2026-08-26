@@ -10,8 +10,6 @@ import {
 	FieldGroup,
 	FieldLabel,
 	Input,
-	NativeSelect,
-	NativeSelectOption,
 	PageHeading,
 	Textarea,
 	UnitPicker,
@@ -25,6 +23,7 @@ import { useFormDraftContentLanguage } from "@/features/content-languages/hooks/
 import { DevelopmentPreviewBoundary } from "@/features/preview-access/components/development-preview-boundary";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
+import { ZoneThemeFields, type ZoneThemeEditorValue } from "./management/theme-fields";
 import { toApiDateTime } from "./model/zone-form";
 
 function ZoneCreateContent() {
@@ -32,9 +31,10 @@ function ZoneCreateContent() {
 	const router = useApplicationRouter();
 	const create = usePostApiZones();
 	const [categories, setCategories] = useState<readonly SearchCategory[]>([]);
-	const [accent, setAccent] = useState("#2563eb");
-	const [colorScheme, setColorScheme] = useState<"system" | "light" | "dark">("system");
-	const [density, setDensity] = useState<"comfortable" | "compact">("comfortable");
+	const [theme, setTheme] = useState<ZoneThemeEditorValue>(() => ({
+		theme: createZoneThemeDocument({ accent: "#2563eb" }),
+		hero: null,
+	}));
 	const [startsAt, setStartsAt] = useState("");
 	const [endsAt, setEndsAt] = useState("");
 	const [localRuleRealmId, setLocalRuleRealmId] = useState("");
@@ -59,11 +59,7 @@ function ZoneCreateContent() {
 					filterDocument: createFilterDocument(
 						categories.length ? { categories: [...categories] } : {},
 					),
-					themeDocument: createZoneThemeDocument({
-						accent,
-						colorScheme,
-						density,
-					}),
+					themeDocument: theme.theme,
 					startsAt: toApiDateTime(startsAt),
 					endsAt: toApiDateTime(endsAt),
 					localRuleRealmId: localRuleRealmId || null,
@@ -125,47 +121,7 @@ function ZoneCreateContent() {
 							/>
 							<p className="text-muted-foreground text-sm">{t.zones.ruleRealm.description}</p>
 						</Field>
-						<Field>
-							<FieldLabel>{t.zones.create.accent}</FieldLabel>
-							<Input
-								onChange={(event) => setAccent(event.currentTarget.value)}
-								type="color"
-								value={accent}
-							/>
-						</Field>
-						<Field>
-							<FieldLabel>{t.zones.create.colorScheme}</FieldLabel>
-							<NativeSelect
-								onChange={(event) => {
-									const value = event.currentTarget.value;
-									if (value === "system" || value === "light" || value === "dark")
-										setColorScheme(value);
-								}}
-								value={colorScheme}
-							>
-								{(["system", "light", "dark"] as const).map((value) => (
-									<NativeSelectOption key={value} value={value}>
-										{t.zones.create.colorSchemes[value]}
-									</NativeSelectOption>
-								))}
-							</NativeSelect>
-						</Field>
-						<Field>
-							<FieldLabel>{t.zones.create.density}</FieldLabel>
-							<NativeSelect
-								onChange={(event) => {
-									const value = event.currentTarget.value;
-									if (value === "comfortable" || value === "compact") setDensity(value);
-								}}
-								value={density}
-							>
-								{(["comfortable", "compact"] as const).map((value) => (
-									<NativeSelectOption key={value} value={value}>
-										{t.zones.create.densities[value]}
-									</NativeSelectOption>
-								))}
-							</NativeSelect>
-						</Field>
+						<ZoneThemeFields level1Enabled onChange={setTheme} value={theme} />
 						<Field>
 							<FieldLabel>{t.zones.create.startsAt}</FieldLabel>
 							<Input

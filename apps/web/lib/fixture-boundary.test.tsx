@@ -9,6 +9,7 @@ const ProductionLocaleRoot = new URL("../../../libraries/i18n/src/languages/", i
 const SourceExtensions = new Set([".ts", ".tsx"]);
 const IgnoredDirectories = new Set(["node_modules", ".next", ".vinext", "dist"]);
 const FixturePackageSpecifiers = ["@rezics/fixture-client", "@rezics/fixture-data"] as const;
+const RepositoryScanTimeoutMs = 15_000;
 
 async function collectSourceFiles(directory: URL): Promise<URL[]> {
 	const entries = await readdir(directory, { withFileTypes: true });
@@ -59,32 +60,40 @@ describe("fixture package boundaries", () => {
 		);
 	});
 
-	it("keeps fixture packages out of production frontend modules", async () => {
-		const violations: string[] = [];
-		for (const path of await collectSourceFiles(FrontendRoot)) {
-			if (isFixtureDevelopmentSurface(path)) continue;
-			const source = await readFile(path, "utf8");
-			for (const specifier of FixturePackageSpecifiers) {
-				if (source.includes(specifier)) {
-					violations.push(
-						`${repoRelativePath(FrontendRoot.pathname, path.pathname)} imports ${specifier}`,
-					);
+	it(
+		"keeps fixture packages out of production frontend modules",
+		async () => {
+			const violations: string[] = [];
+			for (const path of await collectSourceFiles(FrontendRoot)) {
+				if (isFixtureDevelopmentSurface(path)) continue;
+				const source = await readFile(path, "utf8");
+				for (const specifier of FixturePackageSpecifiers) {
+					if (source.includes(specifier)) {
+						violations.push(
+							`${repoRelativePath(FrontendRoot.pathname, path.pathname)} imports ${specifier}`,
+						);
+					}
 				}
 			}
-		}
 
-		expect(violations).toEqual([]);
-	});
+			expect(violations).toEqual([]);
+		},
+		RepositoryScanTimeoutMs,
+	);
 
-	it("keeps fixture-only keys out of production locale resources", async () => {
-		const violations: string[] = [];
-		for (const path of await collectSourceFiles(ProductionLocaleRoot)) {
-			const source = await readFile(path, "utf8");
-			if (/\bfixture\s*:/.test(source)) {
-				violations.push(repoRelativePath(ProductionLocaleRoot.pathname, path.pathname));
+	it(
+		"keeps fixture-only keys out of production locale resources",
+		async () => {
+			const violations: string[] = [];
+			for (const path of await collectSourceFiles(ProductionLocaleRoot)) {
+				const source = await readFile(path, "utf8");
+				if (/\bfixture\s*:/.test(source)) {
+					violations.push(repoRelativePath(ProductionLocaleRoot.pathname, path.pathname));
+				}
 			}
-		}
 
-		expect(violations).toEqual([]);
-	});
+			expect(violations).toEqual([]);
+		},
+		RepositoryScanTimeoutMs,
+	);
 });

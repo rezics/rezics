@@ -15,6 +15,7 @@ describe("presentation preferences", () => {
 				filterFeedByPreferredLanguages: true,
 				alwaysShowSpoilers: false,
 				alwaysShowNsfw: true,
+				customZoneThemesEnabled: false,
 				preferredLanguages: ["en", "zh"],
 				unrelatedPreference: "ignored",
 			}),
@@ -25,6 +26,7 @@ describe("presentation preferences", () => {
 			filterFeedByPreferredLanguages: true,
 			alwaysShowSpoilers: false,
 			alwaysShowNsfw: true,
+			customZoneThemesEnabled: false,
 			preferredLanguages: ["en", "zh"],
 		});
 	});
@@ -37,6 +39,7 @@ describe("presentation preferences", () => {
 			filterFeedByPreferredLanguages: false,
 			alwaysShowSpoilers: false,
 			alwaysShowNsfw: false,
+			customZoneThemesEnabled: true,
 		};
 
 		expect(parsePresentationPreferences({ ...base, preferredLanguages: ["pt"] })).toBeUndefined();

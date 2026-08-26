@@ -91,6 +91,9 @@ export default {
 	alwaysShowSpoilersHint: "Als Spoiler gekennzeichnete Inhalte ohne einzelne Freigabe anzeigen.",
 	alwaysShowNsfw: `${verbatimTerms.nsfw.value}-Medien immer anzeigen`,
 	alwaysShowNsfwHint: `Als ${verbatimTerms.nsfw.value} gekennzeichnete Medien ohne vorherige Unschärfe anzeigen.`,
+	customZoneThemes: "Benutzerdefinierte Zonen-Designs anzeigen",
+	customZoneThemesHint:
+		"Wenn diese Option aus ist, verwenden alle Zonen das Plattform-Standarddesign. Inhalt und Anordnung bleiben unverändert.",
 	account: "Konto",
 	accountDescription: "Verwalte die aktuell angemeldete Sitzung.",
 	security: "Sicherheit",

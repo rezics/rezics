@@ -293,6 +293,15 @@ function validateControlValue(
 function normalizeFilterExpression(filter: SearchControlPredicate): SearchExpression {
 	if (filter.operator !== "all-of" && filter.operator !== "any-of" && filter.operator !== "none-of")
 		return filter;
+	if (filter.field === "collection") {
+		const clauses: SearchControlPredicate[] = filter.values.map((value) =>
+			filter.operator === "none-of"
+				? { field: "collection", operator: "not-equals", value }
+				: { field: "collection", operator: "equals", value },
+		);
+		if (clauses.length === 1) return clauses[0]!;
+		return combineSearchExpressions(filter.operator === "any-of" ? "any" : "all", clauses)!;
+	}
 	const clauses = filter.values.map((value): SearchControlPredicate => {
 		if (filter.operator === "none-of")
 			return { field: filter.field, operator: "not-equals", value };
@@ -414,6 +423,7 @@ export interface CompiledSearchFeature<
 	readonly plan: ValidatedSearchPlan<Request>;
 	readonly enforcedZoneId?: string;
 	readonly inputIdentity: string;
+	readonly advisory?: PersistedSortUnavailableAdvisory;
 	readonly facetBindings: readonly {
 		readonly controlKey: string;
 		readonly field: SearchField;
@@ -430,8 +440,48 @@ export interface CompiledSearchFeature<
 export interface SearchExecutionPolicy {
 	readonly sortProfile: SearchFeatureSurface;
 	readonly pageBudget: "per-category" | "global";
+	readonly persistedSort?: Readonly<{
+		readonly sort: SearchSort;
+		readonly behavior: "authoritative" | "initial";
+	}>;
 	/** Optional endpoint-specific narrowing; it can never add fields or sorts to the global enums. */
 	readonly endpoint?: SearchEndpointPolicy;
+}
+
+export interface PersistedSortUnavailableAdvisory {
+	readonly code: "PersistedSortUnavailable";
+	readonly requestedSort: SearchSort;
+	readonly resolvedSort: SearchSort;
+}
+
+function resolveExecutionSort(input: {
+	readonly configuration: SearchSortConfiguration;
+	readonly query: string;
+	readonly runtimeSort?: SearchSort;
+	readonly persistedSort?: SearchExecutionPolicy["persistedSort"];
+}): { readonly sort: SearchSort; readonly advisory?: PersistedSortUnavailableAdvisory } {
+	const fallback = defaultSearchSort(input.configuration, input.query);
+	const persistedAvailable =
+		input.persistedSort !== undefined &&
+		input.configuration.options.includes(input.persistedSort.sort) &&
+		isSearchSortAvailable(input.persistedSort.sort, input.query);
+	const advisory =
+		input.persistedSort && !persistedAvailable
+			? ({
+					code: "PersistedSortUnavailable",
+					requestedSort: input.persistedSort.sort,
+					resolvedSort: fallback,
+				} as const)
+			: undefined;
+	if (input.persistedSort?.behavior === "authoritative" && input.runtimeSort !== undefined)
+		throw new InvalidSearch("Pinned Unit List sort does not accept a runtime sort override");
+	const persistedDefault = persistedAvailable ? input.persistedSort?.sort : fallback;
+	const sort = input.runtimeSort ?? persistedDefault ?? fallback;
+	if (!input.configuration.options.includes(sort))
+		throw new InvalidSearch(`Search sort ${sort} is unavailable`);
+	if (!isSearchSortAvailable(sort, input.query))
+		throw new InvalidSearch(`Search sort ${sort} requires a text query`);
+	return { sort, ...(advisory ? { advisory } : {}) };
 }
 
 export interface GroupedSearchExecutionPolicy extends SearchExecutionPolicy {
@@ -475,11 +525,12 @@ export function compileSearchFeatureInput(
 		throw new InvalidSearch("This Filter does not accept a query");
 	if (resolved.query.required && !query.trim()) throw new InvalidSearch("Search query is required");
 	const sortConfiguration: SearchSortConfiguration = resolved.sort[execution.sortProfile];
-	const sort = input.state.sort ?? defaultSearchSort(sortConfiguration, query);
-	if (!sortConfiguration.options.includes(sort))
-		throw new InvalidSearch(`Search sort ${sort} is unavailable`);
-	if (!isSearchSortAvailable(sort, query))
-		throw new InvalidSearch(`Search sort ${sort} requires a text query`);
+	const { sort, advisory } = resolveExecutionSort({
+		configuration: sortConfiguration,
+		query,
+		runtimeSort: input.state.sort,
+		persistedSort: execution.persistedSort,
+	});
 	const requestedPageSize = input.state.pageSize ?? 20;
 	if (requestedPageSize > WorkPolicy.search.maxPageSize)
 		throw new InvalidSearch("Search page size exceeds the server maximum");
@@ -564,9 +615,11 @@ export function compileSearchFeatureInput(
 			injections: input.injections.length,
 		}),
 		...(context.enforcedZoneId ? { enforcedZoneId: context.enforcedZoneId } : {}),
-		inputIdentity: `${execution.sortProfile}:${execution.pageBudget}:${JSON.stringify(
-			execution.endpoint ?? {},
-		)}:${canonicalSearchFeatureInput(withoutCursor(input))}`,
+		inputIdentity: `${execution.sortProfile}:${execution.pageBudget}:${JSON.stringify({
+			endpoint: execution.endpoint ?? {},
+			persistedSort: execution.persistedSort,
+		})}:${canonicalSearchFeatureInput(withoutCursor(input))}`,
+		...(advisory ? { advisory } : {}),
 		facetBindings: facets,
 	};
 }
@@ -613,6 +666,7 @@ export async function executeSearchFeatureInput(
 	);
 	return {
 		...result,
+		...(compiled.advisory ? { advisory: compiled.advisory } : {}),
 		facets: mapSearchFeatureFacets(result.facets, compiled.facetBindings),
 	};
 }
@@ -636,6 +690,7 @@ export async function executeSearchFeatureFeedInput(
 	);
 	return {
 		...result,
+		...(compiled.advisory ? { advisory: compiled.advisory } : {}),
 		facets: mapSearchFeatureFacets(result.facets, compiled.facetBindings),
 	};
 }

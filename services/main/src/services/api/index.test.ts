@@ -306,6 +306,7 @@ describe("API root", () => {
 		);
 
 		expect(previewProtectedZoneOperations.toSorted()).toEqual([
+			"PATCH /api/v1/zones/{zoneId}",
 			"POST /api/v1/zones",
 			"POST /api/v1/zones/{zoneId}/pages",
 			"PUT /api/v1/zones/{zoneId}/pages/{pageId}",

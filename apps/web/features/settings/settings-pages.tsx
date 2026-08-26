@@ -466,6 +466,7 @@ export function PreferenceSettings() {
 					defaultScoreRealmId: defaultScoreRealm.id,
 					collectionConfig: current.collectionConfig,
 					personalizedFeed: data.get("personalizedFeed") === "true",
+					customZoneThemesEnabled: data.get("customZoneThemesEnabled") === "true",
 					filterFeedByPreferredLanguages: data.get("filterFeedByPreferredLanguages") === "true",
 					alwaysShowSpoilers: data.get("alwaysShowSpoilers") === "true",
 					alwaysShowNsfw: data.get("alwaysShowNsfw") === "true",
@@ -644,6 +645,17 @@ export function PreferenceSettings() {
 							<NativeSelectOption value="false">{t.settings.off}</NativeSelectOption>
 							<NativeSelectOption value="true">{t.settings.on}</NativeSelectOption>
 						</NativeSelect>
+					</Field>
+					<Field>
+						<FieldLabel>{t.settings.customZoneThemes}</FieldLabel>
+						<NativeSelect
+							name="customZoneThemesEnabled"
+							defaultValue={String(preferences.data.customZoneThemesEnabled)}
+						>
+							<NativeSelectOption value="false">{t.settings.off}</NativeSelectOption>
+							<NativeSelectOption value="true">{t.settings.on}</NativeSelectOption>
+						</NativeSelect>
+						<p className="text-sm text-muted-foreground">{t.settings.customZoneThemesHint}</p>
 					</Field>
 					<Field>
 						<FieldLabel>{t.settings.filterFeedByPreferredLanguages}</FieldLabel>

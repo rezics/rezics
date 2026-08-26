@@ -1,11 +1,12 @@
-import type { Block, SearchFeatureSource } from "@rezics/block";
+import type { BlockPath, SearchFeatureSource, UnitReferencedBlock } from "@rezics/block";
 import { describe, expect, it } from "vitest";
 
 import { findFeedBlock, findSearchFeatureSource } from "./block-source";
 
-const BlockKey = "seed-search-block";
+const BlockKey = "000000000001";
+const Path = [{ slot: "blocks", key: BlockKey }] satisfies BlockPath;
 
-function document(block: Block) {
+function document(block: UnitReferencedBlock) {
 	return { blocks: [block] };
 }
 
@@ -24,7 +25,7 @@ describe("Zone Block Search source resolution", () => {
 					layout: "grid",
 					limit: 12,
 				}),
-				BlockKey,
+				Path,
 			),
 		).toEqual(feature);
 	});
@@ -42,7 +43,7 @@ describe("Zone Block Search source resolution", () => {
 						showResultCount: false,
 					},
 				}),
-				BlockKey,
+				Path,
 			),
 		).toMatchObject({ _type: "feed", feature });
 	});
@@ -60,7 +61,7 @@ describe("Zone Block Search source resolution", () => {
 					layout: "list",
 					limit: 10,
 				}),
-				BlockKey,
+				Path,
 			),
 		).toThrow("does not use Search Feature");
 	});

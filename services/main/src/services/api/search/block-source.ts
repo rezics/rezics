@@ -1,34 +1,46 @@
-import { walkBlockTree, type Block, type SearchFeatureSource } from "@rezics/block";
+import {
+	resolveBlockPath,
+	type Block,
+	type BlockPath,
+	type SearchFeatureSource,
+	type UnitReferencedBlock,
+} from "@rezics/block";
 
 import { InvalidSearch } from "../../search/errors";
 
-export function findSearchFeatureSource(
-	document: { readonly blocks: readonly Block[] },
-	blockKey: string,
-): SearchFeatureSource {
-	let found: SearchFeatureSource | undefined;
-	walkBlockTree(document, (block) => {
-		if (block._key !== blockKey) return;
-		if (block._type === "unit-list" && block.source.kind === "search") {
-			found = block.source.feature;
-			return;
-		}
+export function findSearchUnitListBlock(
+	document: { readonly blocks: readonly UnitReferencedBlock[] },
+	path: BlockPath,
+): Extract<Block, { readonly _type: "unit-list" }> & {
+	readonly source: Extract<
+		Extract<Block, { readonly _type: "unit-list" }>["source"],
+		{ kind: "search" | "derived" }
+	>;
+} {
+	const block = resolveBlockPath(document, path);
+	if (!block) throw new InvalidSearch("Search-backed Block path does not exist in this surface");
+	if (
+		block._type !== "unit-list" ||
+		(block.source.kind !== "search" && block.source.kind !== "derived")
+	)
 		throw new InvalidSearch("The selected Block does not use Search Feature");
-	});
-	if (!found) throw new InvalidSearch("Search-backed Block does not exist in this surface");
-	return found;
+	return { ...block, source: block.source };
+}
+
+export function findSearchFeatureSource(
+	document: { readonly blocks: readonly UnitReferencedBlock[] },
+	path: BlockPath,
+): SearchFeatureSource {
+	const source = findSearchUnitListBlock(document, path).source;
+	return source.kind === "search" ? source.feature : source;
 }
 
 export function findFeedBlock(
-	document: { readonly blocks: readonly Block[] },
-	blockKey: string,
+	document: { readonly blocks: readonly UnitReferencedBlock[] },
+	path: BlockPath,
 ): Extract<Block, { readonly _type: "feed" }> {
-	let found: Extract<Block, { readonly _type: "feed" }> | undefined;
-	walkBlockTree(document, (block) => {
-		if (block._key !== blockKey) return;
-		if (block._type !== "feed") throw new InvalidSearch("The selected Block is not a Feed block");
-		found = block;
-	});
-	if (!found) throw new InvalidSearch("Feed block does not exist in this surface");
-	return found;
+	const block = resolveBlockPath(document, path);
+	if (!block) throw new InvalidSearch("Feed Block path does not exist in this surface");
+	if (block._type !== "feed") throw new InvalidSearch("The selected Block is not a Feed Block");
+	return block;
 }

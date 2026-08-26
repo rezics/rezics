@@ -8,6 +8,7 @@ const { forms: unitSlugTerms } = esTerminology.unitSlug;
 const { forms: licenseTerms } = esTerminology.license;
 const { forms: metadataTerms } = esTerminology.metadata;
 const { forms: postTerms } = esTerminology.post;
+const { forms: zoneTerms } = esTerminology.zone;
 
 export default {
 	workspace: {
@@ -90,6 +91,8 @@ export default {
 	alwaysShowSpoilersHint: "Mostrar el contenido marcado como destripe sin revelarlo uno por uno.",
 	alwaysShowNsfw: `Mostrar siempre el contenido ${verbatimTerms.nsfw.value}`,
 	alwaysShowNsfwHint: `Mostrar los medios marcados como ${verbatimTerms.nsfw.value} sin desenfocarlos primero.`,
+	customZoneThemes: `Mostrar temas personalizados de las ${zoneTerms.plural}`,
+	customZoneThemesHint: `Si desactivas esta opción, todas las ${zoneTerms.plural} usarán el tema predeterminado de la plataforma. El contenido y el diseño no cambian.`,
 	account: "Cuenta",
 	accountDescription: "Gestiona la sesión iniciada actualmente.",
 	security: "Seguridad",

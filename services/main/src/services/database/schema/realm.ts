@@ -71,6 +71,8 @@ const platformCapabilityStorageValues = toEnumValues([
 	"entity.associations.override",
 	"unit.edit",
 	"platform.development_preview.access",
+	"platform.zone_theme.review",
+	"platform.zone_theme.kill",
 	"unit.ownership.transfer",
 	"unit.delete",
 	"unit.restore",

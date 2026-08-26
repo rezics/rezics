@@ -5546,11 +5546,13 @@ __metadata:
     "@rezics/slug": "workspace:*"
     "@sinclair/typebox": "npm:^0.34.41"
     "@t3-oss/env-core": "npm:^0.13.11"
+    "@types/css-tree": "npm:^3"
     "@types/node": "npm:26"
     "@types/pg": "npm:^8"
     better-auth: "npm:1.7.0-rc.1"
     better-call: "npm:1.3.7"
     cookie: "npm:^1.1.1"
+    css-tree: "npm:3.2.1"
     dotenv: "npm:^17.4.2"
     drizzle-kit: "npm:1.0.0-rc.4"
     drizzle-orm: "npm:1.0.0-rc.4"
@@ -5587,6 +5589,7 @@ __metadata:
     "@rezics/portable-text": "workspace:*"
     "@sinclair/typebox": "npm:^0.34.41"
     typescript: "npm:7"
+    vitest: "npm:4.1.10"
   languageName: unknown
   linkType: soft
 
@@ -7117,6 +7120,13 @@ __metadata:
     "@types/deep-eql": "npm:*"
     assertion-error: "npm:^2.0.1"
   checksum: 10c0/e0ef1de3b6f8045a5e473e867c8565788c444271409d155588504840ad1a53611011f85072188c2833941189400228c1745d78323dac13fcede9c2b28bacfb2f
+  languageName: node
+  linkType: hard
+
+"@types/css-tree@npm:^3":
+  version: 3.2.0
+  resolution: "@types/css-tree@npm:3.2.0"
+  checksum: 10c0/b95968d165f1e38022837565430f1cce580be713c11de560a1154bc64d083f862214c0aeb274c00d3fbe5f94a980a95d771a5b2916162c472e45ea64dda4a528
   languageName: node
   linkType: hard
 
@@ -10162,7 +10172,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"css-tree@npm:^3.0.0, css-tree@npm:^3.0.1, css-tree@npm:^3.1.0, css-tree@npm:^3.2.1":
+"css-tree@npm:3.2.1, css-tree@npm:^3.0.0, css-tree@npm:^3.0.1, css-tree@npm:^3.1.0, css-tree@npm:^3.2.1":
   version: 3.2.1
   resolution: "css-tree@npm:3.2.1"
   dependencies:

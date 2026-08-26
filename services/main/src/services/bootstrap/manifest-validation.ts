@@ -1,9 +1,12 @@
 import {
 	assertDockDocument,
+	assertBlockQueryBudget,
 	assertNavigationDocument,
 	assertUnitReferencedBlockDocument,
 	assertWikiPostPortableTextDocument,
 	ZonePageBlockHostPolicy,
+	DockBlockHostPolicy,
+	WikiPostBlockHostPolicy,
 } from "@rezics/block";
 
 import {
@@ -50,9 +53,13 @@ export function assertBootstrapManifest(): void {
 	}
 	for (const zone of OfficialZoneManifest) {
 		assertDockDocument(zone.mainDockDocument);
+		assertBlockQueryBudget(zone.mainDockDocument, DockBlockHostPolicy);
 		assertNavigationDocument(zone.navigation.document);
 		assertUnitReferencedBlockDocument(zone.homePage.document, ZonePageBlockHostPolicy);
-		for (const localization of zone.wikiPost.localizations)
+		assertBlockQueryBudget(zone.homePage.document, ZonePageBlockHostPolicy);
+		for (const localization of zone.wikiPost.localizations) {
 			assertWikiPostPortableTextDocument(localization.body);
+			assertBlockQueryBudget({ blocks: [localization.body] }, WikiPostBlockHostPolicy);
+		}
 	}
 }

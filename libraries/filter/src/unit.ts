@@ -29,6 +29,7 @@ export const FilterUnitKindValues = [
 	"series",
 	"zone",
 	"zone_page",
+	"zone_theme",
 	"collection",
 	"post",
 	"poll",
@@ -130,6 +131,15 @@ export const FilterRealmUnitPublicationState = stringEnum(FilterRealmUnitPublica
 export const FilterContentLanguageValues = ["zh", "en", "ja", "ko", "de", "fr", "es"] as const;
 export type FilterContentLanguage = (typeof FilterContentLanguageValues)[number];
 export const FilterContentLanguage = stringEnum(FilterContentLanguageValues);
+
+export const FilterWorkReleaseStatusValues = [
+	"ongoing",
+	"hiatus",
+	"completed",
+	"cancelled",
+] as const;
+export type FilterWorkReleaseStatus = (typeof FilterWorkReleaseStatusValues)[number];
+export const FilterWorkReleaseStatus = stringEnum(FilterWorkReleaseStatusValues);
 
 export const FilterUuid = Type.String({
 	pattern:
@@ -385,6 +395,19 @@ export const RealmTagContextFilter = Type.Object(
 );
 export type RealmTagContextFilter = Static<typeof RealmTagContextFilter>;
 
+export const BookFilter = Type.Recursive(
+	(This) =>
+		Type.Object(
+			{
+				...logicFields(This),
+				releaseStatus: Type.Optional(inFilter(FilterWorkReleaseStatus, 4)),
+			},
+			{ minProperties: 1, additionalProperties: false },
+		),
+	{ $id: "BookFilter" },
+);
+export type BookFilter = Static<typeof BookFilter>;
+
 function toMany<Schema extends TSchema>(schema: Schema) {
 	return Type.Union([
 		Type.Object({ some: schema }, { additionalProperties: false }),
@@ -463,6 +486,12 @@ export const UnitPredicate = Type.Recursive(
 						Type.Object({ absent: Type.Literal(true) }, { additionalProperties: false }),
 					]),
 				),
+				book: Type.Optional(
+					Type.Union([
+						Type.Object({ is: BookFilter }, { additionalProperties: false }),
+						Type.Object({ absent: Type.Literal(true) }, { additionalProperties: false }),
+					]),
+				),
 			},
 			{ minProperties: 1, additionalProperties: false },
 		),
@@ -536,6 +565,7 @@ export const UnitPredicateSchemaModels = {
 	PostFilter,
 	RealmTagContextFilter,
 	CollectionFilter,
+	BookFilter,
 	UnitPredicate,
 } as const;
 

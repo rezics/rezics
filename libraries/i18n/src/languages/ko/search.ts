@@ -157,6 +157,7 @@ export default {
 		"ai-disclosure": `${verbatimTerms.ai.value} 사용 공개`,
 		license: `${koTerminology.license.forms.label}`,
 		tag: "태그",
+		collection: "포함된 항목",
 		credit: "크레딧",
 		"credited-profile": "크레딧 프로필",
 		realm: realmTerms.label,

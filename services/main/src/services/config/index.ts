@@ -42,7 +42,8 @@ export const env = createEnv({
 		PORT: z.coerce.number().int().min(1).max(65_535).default(3001),
 		REZICS_RELEASE: release.default("development"),
 		DATABASE_URL: z.url(),
-		DATABASE_POOL_MAX: z.coerce.number().int().min(1).max(50).default(10),
+		// Aggregate Zone execution reserves two connections for ordinary traffic.
+		DATABASE_POOL_MAX: z.coerce.number().int().min(3).max(50).default(10),
 		DATABASE_POOL_CONNECTION_TIMEOUT_MS: z.coerce
 			.number()
 			.int()

@@ -40,6 +40,54 @@ export default {
 	searchFailed: "La búsqueda no está disponible temporalmente. Inténtalo de nuevo más tarde.",
 	untitledResult: "Contenido sin título",
 	contentList: "Lista de contenido",
+	loadSection: "Cargar esta sección",
+	theme: {
+		viewerDefault: "Usar el tema predeterminado de la plataforma",
+		viewerDefaultScope: `Esto desactiva los temas personalizados en todas las ${zoneTerms.plural}. Puedes volver a activarlos en Preferencias.`,
+		viewerDefaultFailed: "No se pudo aplicar el tema predeterminado. Inténtalo de nuevo más tarde.",
+		basicsTitle: "Apariencia básica",
+		detailsTitle: "Detalles del tema",
+		accent: "Color de realce",
+		colorScheme: "Esquema de color",
+		colorSchemes: {
+			system: "Usar la configuración del dispositivo",
+			light: "Claro",
+			dark: "Oscuro",
+		},
+		density: "Densidad del diseño",
+		densities: { comfortable: "Cómodo", compact: "Compacto" },
+		gallery: {
+			title: "Ajustes de tema predefinidos",
+			consequence:
+				"Al aplicar un ajuste predefinido se sustituyen todos los ajustes de apariencia actuales, incluida la imagen principal.",
+			options: {
+				clean: {
+					label: "Limpio",
+					description:
+						"Las superficies neutras y el espaciado equilibrado se adaptan a contenidos variados.",
+				},
+				editorial: {
+					label: "Editorial",
+					description:
+						"Los tonos cálidos, las esquinas discretas y los títulos destacados realzan los artículos.",
+				},
+				vibrant: {
+					label: "Vibrante",
+					description:
+						"Las superficies oscuras, los realces intensos y las curvas amplias crean un aspecto enérgico.",
+				},
+			},
+		},
+		hero: "Imagen principal",
+		cardRadius: "Redondeo de las tarjetas",
+		cardRadii: { sm: "Pequeño", md: "Mediano", lg: "Grande" },
+		headingFontScale: "Tamaño de los títulos",
+		headingFontScales: { sm: "Pequeño", md: "Mediano", lg: "Grande" },
+		surfaceTint: "Matiz de las superficies",
+		surfaceTints: { none: "Ninguno", subtle: "Sutil", accent: "Color de realce" },
+		save: "Guardar tema",
+		saveFailed: "No se ha podido guardar el tema. Inténtalo de nuevo más tarde.",
+	},
 	ruleRealm: {
 		label: `${realmTerms.label} de reglas locales`,
 		description: `Selecciona un ${realmTerms.label} cuyas reglas vigentes pueda usar esta ${zoneTerms.inline} para la gobernanza local. Las reglas oficiales de la plataforma siempre estarán disponibles.`,
@@ -90,6 +138,10 @@ export default {
 			layout: {
 				label: "Diseño",
 				description: "Edita el área de contenido compartido y sus bloques.",
+			},
+			theme: {
+				label: "Tema",
+				description: `Configura los colores, los detalles del diseño y la imagen principal de la ${zoneTerms.inline}.`,
 			},
 		},
 		profile: {

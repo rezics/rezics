@@ -1,4 +1,4 @@
-h1:forl6ffc6MuedcViDtOJ129fPZa89CpHywTbvkreTo0=
+h1:9wZRvY8ciuGKjk60U/ytm3exP0MWDKqTjQkA00sWCXU=
 20260801000000_v1_baseline.sql h1:RkSyDwLRpFOPI7iqWg+WlFc5TAshnB4gsRkBpsTMjGY=
 20260807000000_search_ordered_candidates.sql h1:rPOS8iAdRmWOfc9lpyCNNsFWjduRV1e27Q1Mc1QpTFc=
 20260807000001_backfill_search_best_score.sql h1:lmLn+kpWiNWEPlk40W4QRIGsqpWezY//UsNaaZ8FToc=
@@ -29,3 +29,4 @@ h1:forl6ffc6MuedcViDtOJ129fPZa89CpHywTbvkreTo0=
 20260819120000_metadata_only_policy.sql h1:dU3Scl+f0oiMi9zlpJHo57xPm61IHwyh+6/wbDQeBmk=
 20260820063101_content_language_support_and_video_audio_tracks.sql h1:oeqk8yDtlHOBIeAF0jakaOjRPQo/jr/sDszTQXXVdj8=
 20260825152820_tag_path_entity_semantics.sql h1:o0vRiWntNBBBsWeqWm8yy5J2zLkc8oNIpF//yMtONCU=
+20260826093708_zone_theme_review_pipeline.sql h1:DkrmHiDxdINwqI4GBDt+7SafB5bSYKF2Qwvd8n6dbv4=

@@ -281,5 +281,12 @@ export default {
 	UnitRealmPublicationNotFound: `找不到這項內容與該${realmTerms.label}的發布關係。`,
 	UnitRealmPublicationAlreadyExists: `這項內容已與該${realmTerms.label}建立發布關係。`,
 	UnitRealmPublicationTransitionInvalid: "這項發布關係已經處於要求的狀態。",
+	ZoneThemeNotFound: `找不到這個${zoneTerms.label}主題樣式。`,
+	ZoneThemeRevisionNotFound: `找不到這個${zoneTerms.label}主題樣式修訂。`,
+	ZoneThemeStylesheetInvalid: `這個${zoneTerms.label}主題樣式表未通過自動安全審查。`,
+	ZoneThemeAssetsInvalid: "所有主題圖片都必須歸你所有，並且仍處於公開、可用且未刪除狀態。",
+	ZoneThemeAutomatedReviewInvalid: "主題的自動審查憑證不完整，或未達到發布要求。",
+	ZoneThemeRevisionStateConflict: "這個主題修訂已進入其他審查狀態，請重新載入後再繼續。",
+	ZoneThemeReferenceInvalid: `請選擇目前已核准的${zoneTerms.label}主題樣式修訂。`,
 	StudioRealmSubjectLimitExceeded: "你所屬的團隊過多，工作空間暫時無法列出團隊委派內容。",
 };

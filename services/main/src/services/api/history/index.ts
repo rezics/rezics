@@ -431,6 +431,7 @@ export default new Elysia({ prefix: "/history" })
 				[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
 					"RevisionCreditEntityInvalid",
 					"RevisionContributionActorRequired",
+					"ZoneThemeReferenceInvalid",
 				]),
 				[StatusCodes.FORBIDDEN]: toApiErrorResponse([
 					"UnitPermissionForbidden",
@@ -441,6 +442,7 @@ export default new Elysia({ prefix: "/history" })
 					"UnitNotFound",
 					"UnitRevisionNotFound",
 					"EntityEntryNotFound",
+					"ImageAssetNotFound",
 				]),
 				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["InvalidTagPath"]),
 				[StatusCodes.TOO_MANY_REQUESTS]: VoteBackpressureResponse,
@@ -486,6 +488,7 @@ export default new Elysia({ prefix: "/history" })
 				[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
 					"RevisionCreditEntityInvalid",
 					"RevisionContributionActorRequired",
+					"ZoneThemeReferenceInvalid",
 				]),
 				[StatusCodes.FORBIDDEN]: toApiErrorResponse([
 					"UnitPermissionForbidden",
@@ -496,6 +499,7 @@ export default new Elysia({ prefix: "/history" })
 					"UnitNotFound",
 					"UnitRevisionNotFound",
 					"EntityEntryNotFound",
+					"ImageAssetNotFound",
 				]),
 				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["InvalidTagPath"]),
 				[StatusCodes.TOO_MANY_REQUESTS]: VoteBackpressureResponse,

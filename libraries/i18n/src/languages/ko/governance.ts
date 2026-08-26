@@ -7,6 +7,7 @@ import { koTerminology } from "@rezics/i18n/terminology/ko";
 const { forms: realmTerms } = koTerminology.realm;
 const { forms: entityTerms } = koTerminology.entity;
 const { forms: postTerms } = koTerminology.post;
+const { forms: zoneTerms } = koTerminology.zone;
 
 export default {
 	title: "유닛 관리",
@@ -94,6 +95,8 @@ export default {
 		"platform.user.api_token.api_quota.update": `사용자 ${verbatimTerms.api.value} 토큰 할당량 관리`,
 		"platform.moderate": "플랫폼 유닛 중재",
 		"platform.suppress": "플랫폼 콘텐츠 및 수정 사항 숨기기",
+		"platform.zone_theme.review": `사용자 지정 ${zoneTerms.label} 테마 검토`,
+		"platform.zone_theme.kill": `승인된 사용자 지정 ${zoneTerms.label} 테마 긴급 중지`,
 		"realm.contribute": `모든 ${realmTerms.label} 참여`,
 		"realm.units.create": `모든 ${realmTerms.label}에 유닛 생성`,
 		"realm.post.replies.create": `모든 ${realmTerms.label}에 답글 생성`,
@@ -226,6 +229,8 @@ export default {
 			"unit.tag-curation.manage": "태그 선별 관리",
 			"unit.reference-curation.manage": "참조 정보 선별 관리",
 			"unit.realm-publication.manage": `${realmTerms.label} 게시 관리`,
+			"zone.pages.manage": `${zoneTerms.label} 페이지와 탐색 메뉴 관리`,
+			"zone.theme.manage": `${zoneTerms.label} 모양 관리`,
 			"realm.contribute": `${realmTerms.label}에 기여`,
 			"realm.units.create": "유닛 생성",
 			"realm.post.replies.create": "답글 생성",

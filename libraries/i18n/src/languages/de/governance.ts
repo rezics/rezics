@@ -7,6 +7,7 @@ import { deTerminology } from "@rezics/i18n/terminology/de";
 const { forms: realmTerms } = deTerminology.realm;
 const { forms: entityTerms } = deTerminology.entity;
 const { forms: postTerms } = deTerminology.post;
+const { forms: zoneTerms } = deTerminology.zone;
 
 export default {
 	title: "Unit-Governance",
@@ -96,6 +97,8 @@ export default {
 		"platform.user.api_token.api_quota.update": `${verbatimTerms.api.value}-Token-Kontingente von Benutzern verwalten`,
 		"platform.moderate": "Plattform-Units moderieren",
 		"platform.suppress": "Plattforminhalte und Versionen unterdrücken",
+		"platform.zone_theme.review": `Benutzerdefinierte Designs für ${zoneTerms.plural} prüfen`,
+		"platform.zone_theme.kill": `Freigegebene benutzerdefinierte Designs für ${zoneTerms.plural} im Notfall deaktivieren`,
 		"realm.contribute": `An jedem ${realmTerms.inline} teilnehmen`,
 		"realm.units.create": `Units in jedem ${realmTerms.inline} erstellen`,
 		"realm.post.replies.create": `Antworten in jedem ${realmTerms.inline} erstellen`,
@@ -229,6 +232,8 @@ export default {
 			"unit.tag-curation.manage": "Tag-Kuratierung verwalten",
 			"unit.reference-curation.manage": "Referenzkuratierung verwalten",
 			"unit.realm-publication.manage": `Veröffentlichung in ${realmTerms.label} verwalten`,
+			"zone.pages.manage": `${zoneTerms.label}-Seiten und Navigation verwalten`,
+			"zone.theme.manage": `${zoneTerms.label}-Darstellung verwalten`,
 			"realm.contribute": `Zum ${realmTerms.inline} beitragen`,
 			"realm.units.create": "Units erstellen",
 			"realm.post.replies.create": "Antworten erstellen",

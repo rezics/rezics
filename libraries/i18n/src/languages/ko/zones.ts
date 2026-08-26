@@ -40,6 +40,46 @@ export default {
 	searchFailed: "검색을 일시적으로 사용할 수 없습니다. 나중에 다시 시도해주세요.",
 	untitledResult: "제목 없는 콘텐츠",
 	contentList: "콘텐츠 목록",
+	loadSection: "이 섹션 불러오기",
+	theme: {
+		viewerDefault: "플랫폼 기본 테마 사용",
+		viewerDefaultScope: "모든 존의 사용자 지정 테마가 꺼집니다. 환경 설정에서 다시 켤 수 있습니다.",
+		viewerDefaultFailed: "기본 테마로 전환하지 못했습니다. 잠시 후 다시 시도해 주세요.",
+		basicsTitle: "기본 모양",
+		detailsTitle: "테마 세부 설정",
+		accent: "강조 색상",
+		colorScheme: "색상 구성",
+		colorSchemes: { system: "기기 설정 사용", light: "밝게", dark: "어둡게" },
+		density: "레이아웃 밀도",
+		densities: { comfortable: "여유롭게", compact: "조밀하게" },
+		gallery: {
+			title: "테마 사전 설정",
+			consequence: "사전 설정을 적용하면 대표 이미지를 포함한 현재 모양 설정이 모두 바뀝니다.",
+			options: {
+				clean: {
+					label: "깔끔하게",
+					description: "중립적인 바탕과 균형 잡힌 간격으로 다양한 콘텐츠를 또렷하게 보여 줍니다.",
+				},
+				editorial: {
+					label: "편집 디자인",
+					description: "따뜻한 색상과 작은 모서리, 눈에 띄는 제목으로 글을 강조합니다.",
+				},
+				vibrant: {
+					label: "선명하게",
+					description: "어두운 바탕과 선명한 강조색, 큰 곡선으로 활기찬 인상을 만듭니다.",
+				},
+			},
+		},
+		hero: "대표 이미지",
+		cardRadius: "카드 모서리",
+		cardRadii: { sm: "작게", md: "보통", lg: "크게" },
+		headingFontScale: "제목 크기",
+		headingFontScales: { sm: "작게", md: "보통", lg: "크게" },
+		surfaceTint: "바탕 색조",
+		surfaceTints: { none: "없음", subtle: "은은하게", accent: "강조 색상" },
+		save: "테마 저장",
+		saveFailed: "테마를 저장할 수 없습니다. 나중에 다시 시도해 주세요.",
+	},
 	ruleRealm: {
 		label: `로컬 규칙 ${realmTerms.label}`,
 		description: `이 존의 로컬 거버넌스에 현재 규칙을 사용할 ${realmTerms.label}을 선택하세요. 플랫폼 공식 규칙은 항상 사용할 수 있습니다.`,
@@ -85,6 +125,10 @@ export default {
 			layout: {
 				label: "레이아웃",
 				description: "공유 콘텐츠 섹션 및 블록 편집",
+			},
+			theme: {
+				label: "테마",
+				description: `${zoneTerms.inline}의 색상, 레이아웃 세부 설정, 대표 이미지를 지정합니다.`,
 			},
 		},
 		profile: {

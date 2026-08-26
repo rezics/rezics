@@ -1,3 +1,5 @@
+import { insert } from "native-i18n";
+
 import { frTerminology } from "@rezics/i18n/terminology/fr";
 
 const { forms: followTerms } = frTerminology.follow;
@@ -16,6 +18,13 @@ export default {
 	edit: "Modifier",
 	clear: "Effacer",
 	search: "Rechercher",
+	shelf: {
+		label: "Carrousel de contenus",
+		previous: "Éléments précédents",
+		next: "Éléments suivants",
+		page: insert("Page {{page}} sur {{pageCount}}", { page: Number, pageCount: Number }),
+		item: insert("Élément {{item}} sur {{itemCount}}", { item: Number, itemCount: Number }),
+	},
 	pickerPlaceholders: {
 		unit: "Saisir un nom ou un titre",
 		entity: `Saisir le nom d’une ${entityTerms.inline}`,

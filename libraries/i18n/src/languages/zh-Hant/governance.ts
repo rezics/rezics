@@ -7,6 +7,7 @@ import { zhHantTerminology } from "@rezics/i18n/terminology/zh-Hant";
 const { forms: realmTerms } = zhHantTerminology.realm;
 const { forms: entityTerms } = zhHantTerminology.entity;
 const { forms: postTerms } = zhHantTerminology.post;
+const { forms: zoneTerms } = zhHantTerminology.zone;
 
 export default {
 	title: "條目治理",
@@ -94,6 +95,8 @@ export default {
 		"platform.user.api_token.api_quota.update": `管理使用者 ${verbatimTerms.api.value} 權杖配額`,
 		"platform.moderate": "執行平台內容治理",
 		"platform.suppress": "隱藏平台內容與修訂",
+		"platform.zone_theme.review": `審查自訂${zoneTerms.label}主題樣式`,
+		"platform.zone_theme.kill": `緊急停用已核准的自訂${zoneTerms.label}主題樣式`,
 		"realm.contribute": `參與所有${realmTerms.pluralLabel}`,
 		"realm.units.create": `在所有${realmTerms.pluralLabel}建立條目`,
 		"realm.post.replies.create": `在所有${realmTerms.pluralLabel}建立回覆`,
@@ -225,6 +228,8 @@ export default {
 			"unit.tag-curation.manage": "管理標籤精選",
 			"unit.reference-curation.manage": "管理參考資料精選",
 			"unit.realm-publication.manage": `管理${realmTerms.label}發布`,
+			"zone.pages.manage": `管理${zoneTerms.label}頁面與導覽`,
+			"zone.theme.manage": `管理${zoneTerms.label}外觀`,
 			"realm.contribute": `參與${realmTerms.label}`,
 			"realm.units.create": "建立條目",
 			"realm.post.replies.create": "建立回覆",

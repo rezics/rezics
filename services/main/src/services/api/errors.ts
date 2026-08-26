@@ -32,6 +32,7 @@ import { TagErrors } from "./tags/errors";
 import { TokenErrors } from "./tokens/errors";
 import { ApiQuotaPolicyErrors } from "./quota-policies/errors";
 import { UserErrors } from "./users/errors";
+import { ZoneThemeErrors } from "./zone-themes/errors";
 
 export class MalformedRequestBody extends Data.TaggedError("MalformedRequestBody") {
 	static readonly status = StatusCodes.BAD_REQUEST as const;
@@ -93,6 +94,7 @@ export const ApiErrors = [
 	...RealmErrors,
 	...FeedErrors,
 	...HistoryErrors,
+	...ZoneThemeErrors,
 ] as const;
 
 export type ApiTypedError = InstanceType<(typeof ApiErrors)[number]>;

@@ -41,6 +41,8 @@ unit.status.update
 realm.units.create
 realm.post.replies.create
 realm.rules.update
+zone.pages.manage
+zone.theme.manage
 ```
 
 Use `read`, `create`, `update`, and `delete` by default. A domain action such as `restore`,
@@ -64,6 +66,13 @@ Split two permission keys only when the product needs to grant the operations in
   `realm.units.create` and `realm.post.replies.create`.
 - Updating Realm rules appends an immutable revision, but the logical operation remains
   `realm.rules.update`. Append-only storage does not create a separate publish permission.
+- Managing a Zone's Page composition, Page placement, and navigation is independently delegable
+  through `zone.pages.manage`. It does not grant theme management, general Unit editing, or
+  lifecycle authority.
+- Managing a Zone's tokens and curated appearance preset is independently delegable through
+  `zone.theme.manage`. It does not grant page composition, navigation, general Unit editing, or
+  lifecycle authority. Unreleased theme vocabulary also requires the separate platform development
+  preview capability.
 
 A permission makes an actor eligible to attempt an operation. Domain validation still rejects
 invalid values, illegal state transitions, stale revisions, and broken invariants.

@@ -66,6 +66,8 @@ const unitPermissionStorageValues = toEnumValues([
 	"unit.tag-curation.manage",
 	"unit.reference-curation.manage",
 	"unit.realm-publication.manage",
+	"zone.pages.manage",
+	"zone.theme.manage",
 	"unit.delete",
 	"realm.contribute",
 	"realm.units.create",

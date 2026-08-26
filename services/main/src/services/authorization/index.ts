@@ -4,6 +4,7 @@ import { EntityAuthorization } from "./entity/authorization";
 import { PlatformAuthorization } from "./platform/authorization";
 import { RealmAuthorization } from "./realm/authorization";
 import { UnitAuthorization } from "./unit/authorization";
+import { ZoneAuthorization } from "./zone/authorization";
 
 /** Request-scoped authorization for one profile, including anonymous requests. */
 export class Authorization<ProfileId extends string | undefined = string | undefined> {
@@ -13,12 +14,14 @@ export class Authorization<ProfileId extends string | undefined = string | undef
 	readonly platform: PlatformAuthorization<ProfileId>;
 	readonly realm: RealmAuthorization<ProfileId>;
 	readonly unit: UnitAuthorization<ProfileId>;
+	readonly zone: ZoneAuthorization<ProfileId>;
 
 	constructor(readonly profileId: ProfileId) {
 		this.account = new AccountAuthorization(profileId);
 		this.collection = new CollectionAuthorization(profileId);
 		this.platform = new PlatformAuthorization(profileId);
 		this.unit = new UnitAuthorization(profileId, this.platform);
+		this.zone = new ZoneAuthorization(this.platform, this.unit);
 		this.entity = new EntityAuthorization(profileId, this.platform, this.unit);
 		this.realm = new RealmAuthorization(profileId, this.platform, this.unit);
 	}

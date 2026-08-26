@@ -157,6 +157,7 @@ export default {
 		"ai-disclosure": `${verbatimTerms.ai.value} use disclosure`,
 		license: `${enTerminology.license.forms.label}`,
 		tag: "Tag",
+		collection: "Contains item",
 		credit: "Credit",
 		"credited-profile": "Credited Profile",
 		realm: realmTerms.label,

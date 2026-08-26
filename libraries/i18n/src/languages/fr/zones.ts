@@ -40,6 +40,55 @@ export default {
 	searchFailed: "La recherche est temporairement indisponible. Veuillez réessayer plus tard.",
 	untitledResult: "Contenu sans titre",
 	contentList: "Liste de contenu",
+	loadSection: "Charger cette section",
+	theme: {
+		viewerDefault: "Utiliser le thème par défaut de la plateforme",
+		viewerDefaultScope:
+			"Cette action désactive les thèmes personnalisés pour toutes les zones. Vous pourrez les réactiver dans les préférences.",
+		viewerDefaultFailed: "Impossible d'appliquer le thème par défaut. Réessayez plus tard.",
+		basicsTitle: "Apparence de base",
+		detailsTitle: "Détails du thème",
+		accent: "Couleur d’accentuation",
+		colorScheme: "Thème de couleurs",
+		colorSchemes: {
+			system: "Utiliser le réglage de l’appareil",
+			light: "Clair",
+			dark: "Sombre",
+		},
+		density: "Densité de la disposition",
+		densities: { comfortable: "Confortable", compact: "Compacte" },
+		gallery: {
+			title: "Modèles de thème",
+			consequence:
+				"L’application d’un modèle remplace tous les réglages d’apparence actuels, y compris l’image principale.",
+			options: {
+				clean: {
+					label: "Épuré",
+					description:
+						"Des surfaces neutres et des espacements équilibrés conviennent à de nombreux contenus.",
+				},
+				editorial: {
+					label: "Éditorial",
+					description:
+						"Des tons chauds, de petits arrondis et des titres marqués mettent les articles en valeur.",
+				},
+				vibrant: {
+					label: "Vif",
+					description:
+						"Des surfaces sombres, des accents saturés et de larges arrondis créent une apparence dynamique.",
+				},
+			},
+		},
+		hero: "Image principale",
+		cardRadius: "Arrondi des cartes",
+		cardRadii: { sm: "Petit", md: "Moyen", lg: "Grand" },
+		headingFontScale: "Taille des titres",
+		headingFontScales: { sm: "Petite", md: "Moyenne", lg: "Grande" },
+		surfaceTint: "Teinte des surfaces",
+		surfaceTints: { none: "Aucune", subtle: "Discrète", accent: "Couleur d’accentuation" },
+		save: "Enregistrer le thème",
+		saveFailed: "Le thème n’a pas pu être enregistré. Veuillez réessayer plus tard.",
+	},
 	ruleRealm: {
 		label: `${realmTerms.label} de règles locales`,
 		description: `Sélectionnez un ${realmTerms.label} dont les règles actuelles pourront servir à la gouvernance locale de cet ${zoneTerms.inline}. Les règles officielles de la plateforme restent toujours disponibles.`,
@@ -90,6 +139,10 @@ export default {
 			layout: {
 				label: "Disposition",
 				description: "Modifiez la zone de contenu partagé et ses blocs.",
+			},
+			theme: {
+				label: "Thème",
+				description: `Définissez les couleurs, les détails de disposition et l’image principale de l’${zoneTerms.inline}.`,
 			},
 		},
 		profile: {

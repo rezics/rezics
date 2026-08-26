@@ -7,6 +7,7 @@ import { jaTerminology } from "@rezics/i18n/terminology/ja";
 const { forms: realmTerms } = jaTerminology.realm;
 const { forms: entityTerms } = jaTerminology.entity;
 const { forms: postTerms } = jaTerminology.post;
+const { forms: zoneTerms } = jaTerminology.zone;
 
 export default {
 	title: "ユニットガバナンス",
@@ -94,6 +95,8 @@ export default {
 		"platform.user.api_token.api_quota.update": `ユーザーの ${verbatimTerms.api.value} トークンクォータを管理する`,
 		"platform.moderate": "プラットフォームユニットを管理する",
 		"platform.suppress": "プラットフォームのコンテンツと改訂を抑制する",
+		"platform.zone_theme.review": `カスタム${zoneTerms.label}テーマを審査する`,
+		"platform.zone_theme.kill": `承認済みカスタム${zoneTerms.label}テーマを緊急停止する`,
 		"realm.contribute": `すべての ${realmTerms.label} に参加する`,
 		"realm.units.create": `すべての ${realmTerms.label} にユニットを作成する`,
 		"realm.post.replies.create": `すべての ${realmTerms.label} に返信を作成する`,
@@ -226,6 +229,8 @@ export default {
 			"unit.tag-curation.manage": "タグ選定を管理",
 			"unit.reference-curation.manage": "参照情報の選定を管理",
 			"unit.realm-publication.manage": `${realmTerms.label}への公開を管理`,
+			"zone.pages.manage": `${zoneTerms.label}のページとナビゲーションを管理`,
+			"zone.theme.manage": `${zoneTerms.label}の外観を管理`,
 			"realm.contribute": `${realmTerms.label} に貢献`,
 			"realm.units.create": "ユニット作成",
 			"realm.post.replies.create": "返信作成",

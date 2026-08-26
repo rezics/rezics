@@ -7,6 +7,7 @@ import { enTerminology } from "@rezics/i18n/terminology/en";
 const { forms: realmTerms } = enTerminology.realm;
 const { forms: entityTerms } = enTerminology.entity;
 const { forms: postTerms } = enTerminology.post;
+const { forms: zoneTerms } = enTerminology.zone;
 
 export default {
 	title: "Unit governance",
@@ -95,6 +96,8 @@ export default {
 		"platform.user.api_token.api_quota.update": `Manage user ${verbatimTerms.api.value} token quotas`,
 		"platform.moderate": "Moderate platform Units",
 		"platform.suppress": "Suppress platform content and revisions",
+		"platform.zone_theme.review": `Review custom ${zoneTerms.label} themes`,
+		"platform.zone_theme.kill": `Emergency-disable approved custom ${zoneTerms.label} themes`,
 		"realm.contribute": `Participate in every ${realmTerms.label}`,
 		"realm.units.create": `Create Units in every ${realmTerms.label}`,
 		"realm.post.replies.create": `Create replies in every ${realmTerms.label}`,
@@ -229,6 +232,8 @@ export default {
 			"unit.tag-curation.manage": "Manage Tag curation",
 			"unit.reference-curation.manage": "Manage reference curation",
 			"unit.realm-publication.manage": `Manage ${realmTerms.label} publication`,
+			"zone.pages.manage": `Manage ${zoneTerms.label} pages and navigation`,
+			"zone.theme.manage": `Manage ${zoneTerms.label} appearance`,
 			"realm.contribute": `Contribute to ${realmTerms.label}`,
 			"realm.units.create": "Create Units",
 			"realm.post.replies.create": "Create replies",

@@ -1,4 +1,9 @@
-import type { PortableTextDocument } from "@rezics/block";
+import {
+	WikiPostBlockHostPolicy,
+	assertBlockQueryBudget,
+	assertWikiPostPortableTextDocument,
+	type PortableTextDocument,
+} from "@rezics/block";
 import type { ContentLanguage } from "@rezics/i18n";
 
 import type { Authorization } from "../authorization";
@@ -33,6 +38,12 @@ export type CreateWikiPostInput = {
 	readonly subjectId?: string;
 };
 
+/** Validate the Wiki Portable Text host contract at an actual persistence boundary. */
+export function assertWikiPostWriteDocument(value: unknown): asserts value is PortableTextDocument {
+	assertWikiPostPortableTextDocument(value);
+	assertBlockQueryBudget({ blocks: [value] }, WikiPostBlockHostPolicy);
+}
+
 /**
  * Creates a Wiki and all of its owned records inside the caller's transaction.
  *
@@ -46,6 +57,7 @@ export async function createWikiPost(
 	tx: DatabaseTransaction,
 	input: CreateWikiPostInput,
 ): Promise<{ readonly id: string; readonly revisionId: string }> {
+	assertWikiPostWriteDocument(input.body);
 	const subjectId = input.subjectId ? await resolveCanonicalUnitId(tx, input.subjectId) : undefined;
 	if (subjectId)
 		await input.authorization.entity.ensureSubjectAssociationAllowedIfEntity(tx, subjectId);

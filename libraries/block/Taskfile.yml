@@ -4,3 +4,8 @@ tasks:
     typecheck:
         cmds:
             - yarn exec tsc --noEmit -p tsconfig.json
+
+    test:
+        desc: Test Block identity, validation, and execution planning.
+        cmds:
+            - yarn exec vitest run --config vitest.config.ts

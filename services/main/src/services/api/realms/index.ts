@@ -203,12 +203,20 @@ import { replaceRealmSlugAddress } from "../../units/slug-address";
 import { resolveRecommendationViewer } from "../../recommendations/context";
 import { hydrateFeedItems } from "../feed";
 import { FeedContentKindValues } from "../feed/schema";
-import { createWikiPost } from "../../posts/wiki";
+import { assertWikiPostWriteDocument, createWikiPost } from "../../posts/wiki";
 import { getContentStructureRevision } from "../../content-structure/service";
 import { RealmUnitTagVoteListQuery, RealmUnitTagVoteListResponse } from "../tags/schema";
 import { ValidationError } from "../errors";
 import { RevisionContextBody } from "../schema";
 import { planRealmPinMove } from "./pin-ordering";
+
+function ensureWikiPostWriteDocument(value: unknown): void {
+	try {
+		assertWikiPostWriteDocument(value);
+	} catch {
+		throw new ValidationError();
+	}
+}
 
 const RealmNotFoundResponse = toApiErrorResponse(["RealmNotFound"]);
 const RealmMutationNotFoundResponse = toApiErrorResponse(["RealmNotFound", "ImageAssetNotFound"]);
@@ -2052,6 +2060,7 @@ export default new Elysia({ prefix: "/realms" })
 	.post(
 		"/:realmId/wikis",
 		async ({ params, profile, authorization, body }) => {
+			ensureWikiPostWriteDocument(body.body);
 			await authorization.realm.ensureUnitCreation([params.realmId], "realm.units.create");
 			if (body.subjectId) await authorization.unit.ensureCanRead(body.subjectId);
 			const id = await runVoteTransaction(
@@ -2079,6 +2088,7 @@ export default new Elysia({ prefix: "/realms" })
 			body: CreateRealmWikiBody,
 			response: {
 				[StatusCodes.OK]: IdResponse,
+				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["ValidationError"]),
 				[StatusCodes.FORBIDDEN]: toApiErrorResponse([
 					"RealmCapabilityRequired",
 					"EntityAssociationRestricted",
@@ -2186,6 +2196,7 @@ export default new Elysia({ prefix: "/realms" })
 	.post(
 		"/:realmId/tag-contexts",
 		async ({ params, body, profile, authorization }) => {
+			ensureWikiPostWriteDocument(body.body);
 			await Promise.all([
 				authorization.realm.ensureCapability(params.realmId, "realm.tag-contexts.manage"),
 				authorization.realm.ensureUnitCreation([params.realmId], "realm.units.create"),
@@ -2250,6 +2261,7 @@ export default new Elysia({ prefix: "/realms" })
 			body: CreateRealmTagContextBody,
 			response: {
 				[StatusCodes.OK]: RealmTagContextResponse,
+				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["ValidationError"]),
 				[StatusCodes.FORBIDDEN]: toApiErrorResponse([
 					"RealmCapabilityRequired",
 					"UnitAccessRestricted",

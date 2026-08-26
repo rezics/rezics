@@ -40,6 +40,51 @@ export default {
 	searchFailed: "Die Suche ist vorübergehend nicht verfügbar. Bitte versuche es später erneut.",
 	untitledResult: "Inhalt ohne Titel",
 	contentList: "Inhaltsliste",
+	loadSection: "Diesen Abschnitt laden",
+	theme: {
+		viewerDefault: "Plattform-Standarddesign verwenden",
+		viewerDefaultScope:
+			"Dadurch werden benutzerdefinierte Designs für alle Zonen deaktiviert. In den Voreinstellungen können sie wieder aktiviert werden.",
+		viewerDefaultFailed:
+			"Das Standarddesign konnte nicht angewendet werden. Bitte später erneut versuchen.",
+		basicsTitle: "Grundlegendes Erscheinungsbild",
+		detailsTitle: "Designdetails",
+		accent: "Akzentfarbe",
+		colorScheme: "Farbschema",
+		colorSchemes: { system: "Geräteeinstellung verwenden", light: "Hell", dark: "Dunkel" },
+		density: "Layoutdichte",
+		densities: { comfortable: "Großzügig", compact: "Kompakt" },
+		gallery: {
+			title: "Designvorlagen",
+			consequence:
+				"Beim Anwenden einer Vorlage werden alle aktuellen Darstellungseinstellungen einschließlich des Titelbilds ersetzt.",
+			options: {
+				clean: {
+					label: "Klar",
+					description:
+						"Neutrale Flächen und ausgewogene Abstände eignen sich für viele Inhaltsarten.",
+				},
+				editorial: {
+					label: "Redaktionell",
+					description: "Warme Farben, kleine Rundungen und markante Überschriften betonen Artikel.",
+				},
+				vibrant: {
+					label: "Lebendig",
+					description:
+						"Dunkle Flächen, satte Akzente und große Rundungen sorgen für einen lebhaften Auftritt.",
+				},
+			},
+		},
+		hero: "Titelbild",
+		cardRadius: "Kartenrundung",
+		cardRadii: { sm: "Klein", md: "Mittel", lg: "Groß" },
+		headingFontScale: "Überschriftengröße",
+		headingFontScales: { sm: "Klein", md: "Mittel", lg: "Groß" },
+		surfaceTint: "Flächentönung",
+		surfaceTints: { none: "Keine", subtle: "Dezent", accent: "Akzentfarbe" },
+		save: "Design speichern",
+		saveFailed: "Das Design konnte nicht gespeichert werden. Bitte versuche es später erneut.",
+	},
 	ruleRealm: {
 		label: `Lokaler Regel-${realmTerms.label}`,
 		description: `Wähle einen ${realmTerms.label}, dessen aktuelle Regeln dieser ${zoneTerms.inline} für die lokale Governance verwenden darf. Offizielle Plattformregeln bleiben immer verfügbar.`,
@@ -86,6 +131,10 @@ export default {
 			layout: {
 				label: "Layout",
 				description: "Bearbeite den geteilten Inhaltsbereich und seine Blöcke.",
+			},
+			theme: {
+				label: "Design",
+				description: `Farben, Layoutdetails und Titelbild des ${zoneTerms.inline}s festlegen.`,
 			},
 		},
 		profile: {

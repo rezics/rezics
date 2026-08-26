@@ -158,6 +158,7 @@ export default {
 		"ai-disclosure": `Declaración de uso de ${verbatimTerms.ai.value}`,
 		license: `${esTerminology.license.forms.label}`,
 		tag: "Etiqueta",
+		collection: "Contiene contenido",
 		credit: "Crédito",
 		"credited-profile": "Perfil acreditado",
 		realm: realmTerms.label,

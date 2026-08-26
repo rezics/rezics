@@ -308,6 +308,16 @@ export default {
 	UnitRealmPublicationNotFound: `このコンテンツと${realmTerms.label}の公開関係が見つかりません。`,
 	UnitRealmPublicationAlreadyExists: `このコンテンツには既に${realmTerms.label}との公開関係があります。`,
 	UnitRealmPublicationTransitionInvalid: "公開関係は既に要求された状態です。",
+	ZoneThemeNotFound: `この${zoneTerms.label}テーマが見つかりません。`,
+	ZoneThemeRevisionNotFound: `この${zoneTerms.label}テーマの改訂が見つかりません。`,
+	ZoneThemeStylesheetInvalid: `この${zoneTerms.label}テーマのスタイルシートは自動安全審査に合格しませんでした。`,
+	ZoneThemeAssetsInvalid:
+		"テーマ画像は本人が所有し、公開済みかつ使用可能で、削除されていない必要があります。",
+	ZoneThemeAutomatedReviewInvalid:
+		"テーマの自動審査資料が不足しているか、公開要件を満たしていません。",
+	ZoneThemeRevisionStateConflict:
+		"このテーマ改訂はすでに別の審査状態に移行しました。再読み込みしてから続行してください。",
+	ZoneThemeReferenceInvalid: `現在承認されている${zoneTerms.label}テーマ改訂を選択してください。`,
 	StudioRealmSubjectLimitExceeded:
 		"所属するチームが多すぎるため、ワークスペースにチームから委任されたコンテンツを表示できません。",
 } satisfies typeof import("../zh-Hant/errorCodes").default;

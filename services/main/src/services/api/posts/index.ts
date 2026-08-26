@@ -47,6 +47,7 @@ import {
 	type UnitAttributionSummary,
 } from "../../units/attribution";
 import { IdResponse } from "../schema/action-response";
+import { ValidationError } from "../errors";
 import {
 	ReplyListResponse,
 	ReplyResponse,
@@ -82,7 +83,7 @@ import {
 } from "./errors";
 import { selectReplyTree } from "./reply-tree-query";
 import { applyNewPostTagMentionVotes } from "../../posts/tag-mentions";
-import { createWikiPost } from "../../posts/wiki";
+import { assertWikiPostWriteDocument, createWikiPost } from "../../posts/wiki";
 import { resolveCanonicalUnitId } from "../../units/merge/canonical";
 import { selectReaderChapterLocalization } from "../../content-structure/book-reading";
 
@@ -91,6 +92,14 @@ const RevisionContributionBadRequestResponse = toApiErrorResponse([
 	"RevisionCreditEntityInvalid",
 	"RevisionContributionActorRequired",
 ]);
+
+function ensureWikiPostWriteDocument(value: unknown): void {
+	try {
+		assertWikiPostWriteDocument(value);
+	} catch {
+		throw new ValidationError();
+	}
+}
 const ordinaryPostKind = sql<"post" | "reply">`${post.kind}::text`;
 const interactivePostKind = sql<
 	"post" | "reply" | "excerpt" | "review" | "wiki" | "chapter"
@@ -533,6 +542,7 @@ export default new Elysia()
 			.post(
 				"/wiki",
 				async ({ profile, authorization, body }) => {
+					ensureWikiPostWriteDocument(body.body);
 					await authorization.realm.ensureUnitCreation(body.publishRealmIds, "realm.units.create");
 					const subjectId = body.subjectId
 						? await resolveCanonicalUnitId(database, body.subjectId)
@@ -563,6 +573,7 @@ export default new Elysia()
 					response: {
 						[StatusCodes.OK]: IdResponse,
 						[StatusCodes.BAD_REQUEST]: RevisionContributionBadRequestResponse,
+						[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["ValidationError"]),
 						[StatusCodes.FORBIDDEN]: toApiErrorResponse([
 							"RealmCapabilityRequired",
 							"EntityAssociationRestricted",
@@ -854,7 +865,8 @@ export default new Elysia()
 			.patch(
 				"/:postId",
 				async ({ params, profile, authorization, body }) => {
-					await ensureSharedPostLocalizationTarget(params.postId);
+					const postKind = await ensureSharedPostLocalizationTarget(params.postId);
+					if (postKind === "wiki") ensureWikiPostWriteDocument(body.body);
 					await authorization.unit.ensureCanUpdate(params.postId, [
 						["localizations", body.language],
 					]);
@@ -927,6 +939,7 @@ export default new Elysia()
 					response: {
 						[StatusCodes.OK]: IdResponse,
 						[StatusCodes.BAD_REQUEST]: RevisionContributionBadRequestResponse,
+						[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["ValidationError"]),
 						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
 						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
 							"UnitNotFound",
@@ -1333,4 +1346,5 @@ async function ensureSharedPostLocalizationTarget(postId: string) {
 		.where(eq(post.id, postId))
 		.limit(1);
 	if (!row || !usesSharedPostLocalizationRoute(row.kind)) throw new PostNotFound();
+	return row.kind;
 }

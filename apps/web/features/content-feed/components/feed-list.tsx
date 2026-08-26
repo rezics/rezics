@@ -44,6 +44,14 @@ interface FeedListProps<Item> {
 	readonly semantic?: "feed" | "list";
 	readonly setSize?: number;
 	readonly state: FeedListState<Item>;
+	readonly parts?: {
+		readonly continuation?: "continuation";
+		readonly empty?: "empty";
+		readonly error?: "error";
+		readonly item?: "item";
+		readonly items?: "items";
+		readonly loading?: "loading";
+	};
 }
 
 /**
@@ -67,10 +75,16 @@ export function FeedList<Item>({
 	semantic = "feed",
 	setSize,
 	state,
+	parts,
 }: FeedListProps<Item>) {
 	if (state.status === "pending")
 		return (
-			<div aria-busy="true" aria-label={ariaLabel} className="grid gap-2 p-3 sm:p-4">
+			<div
+				aria-busy="true"
+				aria-label={ariaLabel}
+				className="grid gap-2 p-3 sm:p-4"
+				data-part={parts?.loading}
+			>
 				{Array.from({ length: 4 }, (_, index) => (
 					<FeedSkeleton key={index} />
 				))}
@@ -79,7 +93,7 @@ export function FeedList<Item>({
 
 	if (state.status === "error")
 		return (
-			<Alert className="m-3 sm:m-4" variant="destructive">
+			<Alert className="m-3 sm:m-4" data-part={parts?.error} variant="destructive">
 				<AlertDescription>{errorLabel}</AlertDescription>
 				<AlertAction>
 					<Button onClick={state.retry} size="sm" variant="quiet">
@@ -90,12 +104,14 @@ export function FeedList<Item>({
 		);
 
 	const continuationContent = continuation ? (
-		<FeedContinuation mode={continuation.mode} state={continuation.state} />
+		<div data-part={parts?.continuation}>
+			<FeedContinuation mode={continuation.mode} state={continuation.state} />
+		</div>
 	) : null;
 	if (state.items.length === 0)
 		return (
 			<>
-				<FeedEmptyState body={emptyBody} title={emptyTitle} />
+				<FeedEmptyState body={emptyBody} part={parts?.empty} title={emptyTitle} />
 				{continuationContent}
 				{footer}
 			</>
@@ -109,14 +125,24 @@ export function FeedList<Item>({
 				aria-busy={continuationBusy}
 				aria-label={ariaLabel}
 				className={className}
+				data-part={parts?.items}
 				semantic={semantic}
 			>
 				{state.items.map((item, index) => (
 					<Fragment key={getItemKey(item)}>
-						{renderItem(item, {
-							position: index + 1,
-							setSize: setSize ?? state.items.length,
-						})}
+						{parts?.item ? (
+							<div data-part={parts.item}>
+								{renderItem(item, {
+									position: index + 1,
+									setSize: setSize ?? state.items.length,
+								})}
+							</div>
+						) : (
+							renderItem(item, {
+								position: index + 1,
+								setSize: setSize ?? state.items.length,
+							})
+						)}
 					</Fragment>
 				))}
 			</FeedListItems>
@@ -146,9 +172,17 @@ export function FeedListItems({
 	);
 }
 
-function FeedEmptyState({ body, title }: { readonly body: string; readonly title: string }) {
+function FeedEmptyState({
+	body,
+	part,
+	title,
+}: {
+	readonly body: string;
+	readonly part?: "empty";
+	readonly title: string;
+}) {
 	return (
-		<div className="grid min-h-56 place-items-center p-8 text-center">
+		<div className="grid min-h-56 place-items-center p-8 text-center" data-part={part}>
 			<div>
 				<p className="font-heading font-bold">{title}</p>
 				<p className="mt-1 text-muted-foreground text-sm">{body}</p>

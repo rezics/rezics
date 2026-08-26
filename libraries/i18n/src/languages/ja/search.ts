@@ -157,6 +157,7 @@ export default {
 		"ai-disclosure": `${verbatimTerms.ai.value} 開示を使用`,
 		license: `${jaTerminology.license.forms.label}`,
 		tag: "タグ",
+		collection: "含まれる項目",
 		credit: "クレジット",
 		"credited-profile": "クレジット対象プロフィール",
 		realm: realmTerms.label,

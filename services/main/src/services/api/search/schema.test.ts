@@ -1,7 +1,12 @@
 import { Check } from "@sinclair/typebox/value";
 import { describe, expect, it } from "vitest";
 
-import { DomainSearchBody, GroupedSearchBody } from "./schema";
+import {
+	DomainSearchBody,
+	GroupedSearchBody,
+	ZonePageAggregateBlockRequest,
+	ZonePageAggregateExecutionBody,
+} from "./schema";
 
 describe("Search presentation localization", () => {
 	it.each([DomainSearchBody, GroupedSearchBody])(
@@ -48,5 +53,59 @@ describe("Search presentation localization", () => {
 				contentRatings: ["adult"],
 			}),
 		).toBe(false);
+	});
+});
+
+describe("Zone Block execution request identity", () => {
+	const path = [{ slot: "blocks", key: "100000000001" }];
+
+	it("accepts only a structural BlockPath plus execution state", () => {
+		expect(
+			Check(ZonePageAggregateBlockRequest, {
+				path,
+				selectionSeed: "continuation-a",
+				state: { pageSize: 12 },
+			}),
+		).toBe(true);
+		expect(
+			Check(ZonePageAggregateExecutionBody, {
+				pageRevision: "019b0000-0000-7000-8000-000000000001",
+				includeDock: true,
+				pageBlocks: [{ path }],
+				dockBlocks: [{ path }],
+				localizationLanguages: ["zh", "en"],
+			}),
+		).toBe(true);
+	});
+
+	it.each([
+		["document kind", { path, documentKind: "page" }],
+		["document id", { path, documentId: "019b0000-0000-7000-8000-000000000001" }],
+		["surface", { path, surface: "dock" }],
+		["client injections", { path, injections: [] }],
+	] as const)("rejects client-owned %s", (_name, body) => {
+		expect(Check(ZonePageAggregateBlockRequest, body)).toBe(false);
+	});
+
+	it("rejects malformed or ambiguous path segments", () => {
+		expect(
+			Check(ZonePageAggregateBlockRequest, {
+				path: [{ slot: "blocks", key: "not-a-block-key" }],
+			}),
+		).toBe(false);
+		expect(
+			Check(ZonePageAggregateBlockRequest, {
+				path: [{ slot: "comments", key: "100000000001" }],
+			}),
+		).toBe(false);
+		expect(
+			Check(ZonePageAggregateBlockRequest, {
+				path: [{ slot: "blocks", key: "100000000001", index: 0 }],
+			}),
+		).toBe(false);
+	});
+
+	it("rejects unknown aggregate-body fields", () => {
+		expect(Check(ZonePageAggregateExecutionBody, { documentId: "page-a" })).toBe(false);
 	});
 });

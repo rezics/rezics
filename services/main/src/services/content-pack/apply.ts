@@ -74,6 +74,7 @@ import { assertContentPackDocuments } from "./documents";
 import { planContentPack } from "./plan";
 import type { LoadedPack, PackObject, PackRelations, PackStructure } from "./contracts";
 import { createTagPathInTransaction } from "../tag-paths/service";
+import { assertContentPackThemeAssets } from "./theme-assets";
 
 const ImportOwnerProfileId = OfficialProfileIds.editorial;
 const KindOrder: readonly string[] = [
@@ -110,6 +111,7 @@ export async function applyContentPack(
 	sourceRoot: string,
 ): Promise<{ readonly status: "created" | "noop"; readonly created: number }> {
 	assertContentPackDocuments(pack);
+	await assertContentPackThemeAssets(tx, pack);
 	await tx.execute(
 		sql`select pg_advisory_xact_lock(hashtextextended(${`content-pack:${pack.manifest.id}`}::text, 0))`,
 	);

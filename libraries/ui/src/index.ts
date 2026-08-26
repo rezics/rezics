@@ -107,6 +107,7 @@ export * from "./custom/permission-matrix";
 export * from "./custom/portable-text-content";
 export * from "./custom/query-state";
 export * from "./custom/show-more-content";
+export * from "./custom/shelf";
 export * from "./custom/thread-branch";
 export * from "./custom/tree-editor";
 export * from "./custom/unit-mention";
