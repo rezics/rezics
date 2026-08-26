@@ -4,7 +4,7 @@ const { forms: followTerms } = koTerminology.follow;
 const { forms: postTerms } = koTerminology.post;
 const { forms: realmTerms } = koTerminology.realm;
 const { forms: zoneTerms } = koTerminology.zone;
-const { forms: tagStructureTerms } = koTerminology.tagStructure;
+const { forms: tagPathTerms } = koTerminology.tagPath;
 const { forms: entityTerms } = koTerminology.entity;
 
 export default {
@@ -20,7 +20,7 @@ export default {
 		unit: "이름 또는 제목 입력",
 		entity: `${entityTerms.label} 이름 입력`,
 		tag: "태그 이름 입력",
-		tagStructure: `${tagStructureTerms.label} 이름 입력`,
+		tagPath: `${tagPathTerms.label} 이름 입력`,
 		post: `${postTerms.label} 제목 또는 키워드 입력`,
 		realm: `${realmTerms.label} 이름 입력`,
 		user: "사용자 이름 입력",

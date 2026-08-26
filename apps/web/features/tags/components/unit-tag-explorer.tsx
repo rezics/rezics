@@ -2,15 +2,20 @@
 
 import {
 	getApiRealmsByRealmIdUnitsByUnitIdTagsQueryKey,
+	getApiRealmsByRealmIdTagPathsQueryKey,
 	getApiUnitsByTypeByUnitIdTagsQueryKey,
 	useDeleteApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVote,
-	useDeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVote,
+	useDeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgment,
+	useDeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgment,
 	useDeleteApiUnitsByTypeByUnitIdTagsByTagIdVote,
 	useGetApiRealmsByRealmIdUnitsByUnitIdTags,
+	useGetApiRealmsByRealmIdTagPaths,
 	useGetApiUnitsByTypeByUnitIdTags,
 	usePutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVote,
-	usePutApiUnitsByTypeByUnitIdTagStructuresByStructureId,
-	usePutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVote,
+	usePutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathId,
+	usePutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgment,
+	usePutApiUnitsByTypeByUnitIdTagPathsByPathId,
+	usePutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgment,
 	usePutApiUnitsByTypeByUnitIdTagsByTagId,
 	usePutApiUnitsByTypeByUnitIdTagsByTagIdVote,
 } from "@rezics/openapi-tanstack-query";
@@ -20,7 +25,6 @@ import { AppLink as Link } from "@/features/application-shell/components/app-lin
 import { useReducer, useRef, useState } from "react";
 
 import type { UnitDetailUnitType } from "@/features/units/model/unit-detail-section";
-import { useDevelopmentPreviewAccess } from "@/features/preview-access/components/development-preview-boundary";
 import { useTranslation } from "@/i18n/client";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { RequestFailure } from "@/i18n/request-failure";
@@ -48,20 +52,20 @@ import { unitTagsHref } from "../routing/tag-links";
 import { TagContextSection } from "./tag-context-section";
 import { RealmTagContextHeading } from "./realm-tag-context-heading";
 import { TagSelectionToolbar } from "./tag-selection-toolbar";
-import { presentStructureMembers, TagStructureList } from "./tag-structure-list";
+import { presentPathMembers, TagPathList } from "./tag-path-list";
 import { TagVoteContextSelector } from "./tag-vote-context-selector";
 import { UnitTagManagement } from "./unit-tag-management";
 
 const SurfaceLimits = {
 	section: {
 		globalLimit: 8,
-		structureLimit: 4,
+		pathLimit: 4,
 		sourceLimit: 3,
 		perRealmLimit: 4,
 	},
 	page: {
 		globalLimit: 100,
-		structureLimit: 50,
+		pathLimit: 50,
 		sourceLimit: 30,
 		perRealmLimit: 50,
 	},
@@ -83,8 +87,6 @@ export function UnitTagExplorer({
 	readonly unitId: string;
 }) {
 	const { data: session } = useHydratedSession();
-	const developmentPreview = useDevelopmentPreviewAccess();
-	const hasDevelopmentPreviewAccess = developmentPreview.state === "allowed";
 	const { t } = useTranslation(["tags", "ui"]);
 	const localizationLanguages = useLocalizationLanguages();
 	const queryClient = useQueryClient();
@@ -118,6 +120,21 @@ export function UnitTagExplorer({
 			},
 		},
 	);
+	const activeRealmPathsQuery = useGetApiRealmsByRealmIdTagPaths(
+		{
+			path: { realmId: activeRealmId },
+			query: {
+				unitId,
+				localizationLanguages,
+				limit: SurfaceLimits.page.pathLimit,
+			},
+		},
+		{
+			query: {
+				enabled: surface === "page" && activeVoteContext.kind === "realm",
+			},
+		},
+	);
 	const invalidateLandscape = () =>
 		queryClient.invalidateQueries({
 			queryKey: getApiUnitsByTypeByUnitIdTagsQueryKey({
@@ -133,16 +150,25 @@ export function UnitTagExplorer({
 				}),
 			}),
 		]);
+	const invalidateRealmPaths = (realmId: string) =>
+		Promise.all([
+			invalidateRealm(realmId),
+			queryClient.invalidateQueries({
+				queryKey: getApiRealmsByRealmIdTagPathsQueryKey({
+					path: { realmId },
+				}),
+			}),
+		]);
 	const add = usePutApiUnitsByTypeByUnitIdTagsByTagId({
 		mutation: { onSuccess: invalidateLandscape },
 	});
-	const addStructure = usePutApiUnitsByTypeByUnitIdTagStructuresByStructureId({
+	const addPath = usePutApiUnitsByTypeByUnitIdTagPathsByPathId({
 		mutation: { onSuccess: invalidateLandscape },
 	});
-	const structureVote = usePutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVote({
+	const pathJudgment = usePutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgment({
 		mutation: { onSuccess: invalidateLandscape },
 	});
-	const clearStructureVote = useDeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVote({
+	const clearPathJudgment = useDeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgment({
 		mutation: { onSuccess: invalidateLandscape },
 	});
 	const globalVote = usePutApiUnitsByTypeByUnitIdTagsByTagIdVote({
@@ -161,6 +187,21 @@ export function UnitTagExplorer({
 			onSuccess: (_data, variables) => invalidateRealm(variables.path.realmId),
 		},
 	});
+	const applyRealmPath = usePutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathId({
+		mutation: {
+			onSuccess: (_data, variables) => invalidateRealmPaths(variables.path.realmId),
+		},
+	});
+	const realmPathJudgment = usePutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgment({
+		mutation: {
+			onSuccess: (_data, variables) => invalidateRealmPaths(variables.path.realmId),
+		},
+	});
+	const clearRealmPathJudgment = useDeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgment({
+		mutation: {
+			onSuccess: (_data, variables) => invalidateRealmPaths(variables.path.realmId),
+		},
+	});
 
 	if (query.isPending) return <QueryPending />;
 	if (query.isError || !query.data)
@@ -172,6 +213,13 @@ export function UnitTagExplorer({
 		unitId,
 		signedIn: Boolean(session),
 	});
+	const compactHiddenCount = Math.max(
+		0,
+		query.data.totals.paths +
+			query.data.totals.global -
+			query.data.paths.length -
+			globalTags.length,
+	);
 	const realmGroups = presentRealmTagGroups({ data: query.data, unitId });
 	const activeTags =
 		activeVoteContext.kind === "global"
@@ -186,9 +234,9 @@ export function UnitTagExplorer({
 	const detailContexts = visibleTagDetailContexts(activeVoteContext, realmGroups);
 	const identities = new Map<string, TagIdentity>();
 	for (const item of globalTags) identities.set(item.identity.tagId, item.identity);
-	if (hasDevelopmentPreviewAccess && workUnitType)
-		for (const structure of query.data.structures)
-			for (const item of presentStructureMembers(structure))
+	if (workUnitType)
+		for (const path of query.data.paths)
+			for (const item of presentPathMembers(path))
 				identities.set(item.identity.tagId, item.identity);
 	for (const group of realmGroups)
 		for (const item of group.tags) identities.set(item.identity.tagId, item.identity);
@@ -220,42 +268,163 @@ export function UnitTagExplorer({
 				? { kind: "global" }
 				: { kind: "realm", realmId: context.realm.realmId },
 		);
-	const globalStructureSection =
-		workUnitType && hasDevelopmentPreviewAccess && query.data.structures.length ? (
+	const globalPathSection =
+		workUnitType && query.data.paths.length ? (
 			<div className="grid gap-3">
 				{surface === "page" ? (
-					<h3 className="font-semibold">{t.tags.structures.title}</h3>
+					<h3 className="font-semibold">{t.tags.paths.title}</h3>
 				) : (
-					<h4 className="font-semibold">{t.tags.structures.title}</h4>
+					<h4 className="font-semibold">{t.tags.paths.title}</h4>
 				)}
-				<TagStructureList
+				<TagPathList
 					canVote={Boolean(session)}
-					isPending={(structureId) =>
-						(structureVote.isPending &&
-							structureVote.variables?.path.structureId === structureId) ||
-						(clearStructureVote.isPending &&
-							clearStructureVote.variables?.path.structureId === structureId)
+					isPending={(pathId) =>
+						(pathJudgment.isPending && pathJudgment.variables?.path.pathId === pathId) ||
+						(clearPathJudgment.isPending && clearPathJudgment.variables?.path.pathId === pathId)
 					}
-					onClearStructureVote={(structureId) =>
-						clearStructureVote.mutate({
-							path: { type: workUnitType, unitId, structureId },
+					onClearPathJudgment={(pathId) =>
+						clearPathJudgment.mutate({
+							path: { type: workUnitType, unitId, pathId },
 						})
 					}
 					onClearTagVote={clearVote}
-					onStructureVote={(structureId, value) =>
-						structureVote.mutate({
-							path: { type: workUnitType, unitId, structureId },
-							body: { value },
+					onPathJudgment={(pathId, body) =>
+						pathJudgment.mutate({
+							path: { type: workUnitType, unitId, pathId },
+							body,
 						})
 					}
 					onTagVote={vote}
 					onToggleSelected={toggleSelected}
 					selectedTagIds={selectedTagIds}
 					selectionMode={selectionMode}
-					structures={query.data.structures}
+					paths={query.data.paths}
 					surface={surface}
 					type={workUnitType}
 				/>
+			</div>
+		) : null;
+	const realmPathApplications =
+		activeRealmPathsQuery.data?.items.flatMap((item) => {
+			const application = item.application;
+			return application
+				? [
+						{
+							pathId: item.pathId,
+							pinned: false,
+							position: null,
+							score: application.fit.score,
+							voteCount: application.fit.voteCount,
+							viewerVote: application.fit.viewerVote,
+							spoilerVoteCount: application.spoiler.voteCount,
+							spoilerDistribution: application.spoiler.distribution,
+							viewerSpoilerLevel: application.spoiler.viewerLevel,
+							definitionScore: item.definition.score,
+							definitionVoteCount: item.definition.voteCount,
+							usageCount: item.definition.usageCount,
+							members: item.members,
+							createdAt: item.createdAt,
+							updatedAt: item.createdAt,
+						},
+					]
+				: [];
+		}) ?? [];
+	const realmPathById = new Map(
+		activeRealmPathsQuery.data?.items.map((item) => [item.pathId, item] as const) ?? [],
+	);
+	const realmPathSection =
+		activeVoteContext.kind === "realm" && workUnitType ? (
+			<div className="grid gap-3">
+				<h3 className="font-semibold">{t.tags.realms.pathsTitle}</h3>
+				{activeRealmPathsQuery.isPending ? (
+					<QueryPending />
+				) : activeRealmPathsQuery.isError ? (
+					<QueryFailure
+						error={activeRealmPathsQuery.error}
+						retry={() => void activeRealmPathsQuery.refetch()}
+					/>
+				) : (
+					<>
+						<TagPathList
+							canVote={Boolean(session)}
+							isPending={(pathId) =>
+								(realmPathJudgment.isPending &&
+									realmPathJudgment.variables?.path.pathId === pathId) ||
+								(clearRealmPathJudgment.isPending &&
+									clearRealmPathJudgment.variables?.path.pathId === pathId)
+							}
+							onClearPathJudgment={(pathId) =>
+								clearRealmPathJudgment.mutate({
+									path: {
+										realmId: activeVoteContext.realm.realmId,
+										unitId,
+										pathId,
+									},
+								})
+							}
+							onClearTagVote={clearVote}
+							onPathJudgment={(pathId, body) =>
+								realmPathJudgment.mutate({
+									path: {
+										realmId: activeVoteContext.realm.realmId,
+										unitId,
+										pathId,
+									},
+									body,
+								})
+							}
+							onTagVote={vote}
+							onToggleSelected={toggleSelected}
+							paths={realmPathApplications}
+							renderMeta={(pathId) => {
+								const application = realmPathById.get(pathId)?.application;
+								if (!application) return null;
+								return (
+									<p className="text-xs text-muted-foreground">
+										{t.tags.realms.pathAuthority({
+											fit: t.tags.realms.authority[application.fit.authority],
+											spoiler: t.tags.realms.authority[application.spoiler.authority],
+										})}
+									</p>
+								);
+							}}
+							selectedTagIds={selectedTagIds}
+							selectionMode={selectionMode}
+							surface="page"
+							type={workUnitType}
+						/>
+						{activeRealmPathsQuery.data?.items
+							.filter(({ application }) => !application)
+							.map((item) => (
+								<div
+									className="flex flex-wrap items-center justify-between gap-3 rounded-xl border p-4"
+									key={item.pathId}
+								>
+									<span>
+										{item.members.map((member) => member.title ?? t.tags.unnamedTag).join(" › ")}
+									</span>
+									<Button
+										isLoading={
+											applyRealmPath.isPending &&
+											applyRealmPath.variables?.path.pathId === item.pathId
+										}
+										onClick={() =>
+											applyRealmPath.mutate({
+												path: {
+													realmId: activeVoteContext.realm.realmId,
+													unitId,
+													pathId: item.pathId,
+												},
+											})
+										}
+										size="sm"
+									>
+										{t.tags.realms.applyPath}
+									</Button>
+								</div>
+							))}
+					</>
+				)}
 			</div>
 		) : null;
 
@@ -303,7 +472,7 @@ export function UnitTagExplorer({
 
 						{activeVoteContext.kind === "global" ? (
 							<>
-								{globalStructureSection}
+								{globalPathSection}
 								<TagContextSection
 									description={t.tags.global.description}
 									empty={t.tags.global.empty}
@@ -329,43 +498,45 @@ export function UnitTagExplorer({
 								retry={() => void activeRealmTagsQuery.refetch()}
 							/>
 						) : (
-							<TagContextSection
-								description={activeVoteContext.realm.summary}
-								descriptionLanguage={
-									activeVoteContext.realm.summary ? activeVoteContext.realm.language : null
-								}
-								empty={t.tags.realms.empty}
-								fallbackLabel={t.tags.unnamedTag}
-								heading={
-									<RealmTagContextHeading
-										fallbackTitle={t.tags.unnamedRealm}
-										realm={activeVoteContext.realm}
-									/>
-								}
-								headingLevel="h3"
-								highlightedTagId={highlightedTagId}
-								items={activeTags}
-								onClearVote={clearVote}
-								onToggleSelected={toggleSelected}
-								onVote={vote}
-								pendingItemKey={pendingItemKey}
-								selectedTagIds={selectedTagIds}
-								selectionMode={selectionMode}
-								title={activeVoteContext.realm.title ?? t.tags.unnamedRealm}
-								titleLanguage={
-									activeVoteContext.realm.title ? activeVoteContext.realm.language : null
-								}
-								type={type}
-							/>
+							<>
+								{realmPathSection}
+								<TagContextSection
+									description={activeVoteContext.realm.summary}
+									descriptionLanguage={
+										activeVoteContext.realm.summary ? activeVoteContext.realm.language : null
+									}
+									empty={t.tags.realms.empty}
+									fallbackLabel={t.tags.unnamedTag}
+									heading={
+										<RealmTagContextHeading
+											fallbackTitle={t.tags.unnamedRealm}
+											realm={activeVoteContext.realm}
+										/>
+									}
+									headingLevel="h3"
+									highlightedTagId={highlightedTagId}
+									items={activeTags}
+									onClearVote={clearVote}
+									onToggleSelected={toggleSelected}
+									onVote={vote}
+									pendingItemKey={pendingItemKey}
+									selectedTagIds={selectedTagIds}
+									selectionMode={selectionMode}
+									title={activeVoteContext.realm.title ?? t.tags.unnamedRealm}
+									titleLanguage={
+										activeVoteContext.realm.title ? activeVoteContext.realm.language : null
+									}
+									type={type}
+								/>
+							</>
 						)}
 
 						<UnitTagManagement
 							addError={activeVoteContext.kind === "global" ? add.error : realmVote.error}
 							addPending={activeVoteContext.kind === "global" ? add.isPending : realmVote.isPending}
-							addStructureError={addStructure.error}
-							addStructurePending={addStructure.isPending}
+							addPathError={addPath.error}
+							addPathPending={addPath.isPending}
 							canVote={activeVoteContext.kind === "realm" || Boolean(session)}
-							hasDevelopmentPreviewAccess={hasDevelopmentPreviewAccess && workUnitType !== null}
 							key={
 								activeVoteContext.kind === "global"
 									? "global"
@@ -382,13 +553,12 @@ export function UnitTagExplorer({
 												realmId: activeVoteContext.realm.realmId,
 											},
 							}}
-							onAddStructure={
+							onAddPath={
 								workUnitType
-									? (structureId) =>
-											addStructure
+									? (pathId) =>
+											addPath
 												.mutateAsync({
-													path: { type: workUnitType, unitId, structureId },
-													body: {},
+													path: { type: workUnitType, unitId, pathId },
 												})
 												.then(() => undefined)
 									: undefined
@@ -424,7 +594,7 @@ export function UnitTagExplorer({
 						</div>
 						{detailContexts.showGlobal ? (
 							<div className="grid gap-5">
-								{globalStructureSection}
+								{globalPathSection}
 								<TagContextSection
 									description={t.tags.global.description}
 									empty={t.tags.global.empty}
@@ -477,7 +647,7 @@ export function UnitTagExplorer({
 				<>
 					<section className="grid gap-5">
 						<h3 className="font-heading text-lg font-bold">{t.tags.basic.title}</h3>
-						{globalStructureSection}
+						{globalPathSection}
 						<TagContextSection
 							empty={t.tags.global.empty}
 							fallbackLabel={t.tags.unnamedTag}
@@ -492,6 +662,13 @@ export function UnitTagExplorer({
 							title={t.tags.global.title}
 							type={type}
 						/>
+						{compactHiddenCount > 0 ? (
+							<Button asChild className="w-fit" size="sm" variant="quiet">
+								<Link href={unitTagsHref(type, unitId)}>
+									{t.tags.page.more({ count: compactHiddenCount })}
+								</Link>
+							</Button>
+						) : null}
 					</section>
 
 					{realmGroups.length ? (
@@ -529,8 +706,11 @@ export function UnitTagExplorer({
 
 			<RequestFailure
 				error={
-					structureVote.error ??
-					clearStructureVote.error ??
+					pathJudgment.error ??
+					clearPathJudgment.error ??
+					applyRealmPath.error ??
+					realmPathJudgment.error ??
+					clearRealmPathJudgment.error ??
 					globalVote.error ??
 					clearGlobalVote.error ??
 					realmVote.error ??

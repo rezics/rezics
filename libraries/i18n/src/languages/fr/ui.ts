@@ -4,7 +4,7 @@ const { forms: followTerms } = frTerminology.follow;
 const { forms: postTerms } = frTerminology.post;
 const { forms: realmTerms } = frTerminology.realm;
 const { forms: zoneTerms } = frTerminology.zone;
-const { forms: tagStructureTerms } = frTerminology.tagStructure;
+const { forms: tagPathTerms } = frTerminology.tagPath;
 const { forms: entityTerms } = frTerminology.entity;
 
 export default {
@@ -20,7 +20,7 @@ export default {
 		unit: "Saisir un nom ou un titre",
 		entity: `Saisir le nom d’une ${entityTerms.inline}`,
 		tag: "Saisir le nom d’une étiquette",
-		tagStructure: `Saisir le nom d’un ${tagStructureTerms.inline}`,
+		tagPath: `Saisir le nom d’un ${tagPathTerms.inline}`,
 		post: `Saisir le titre ou un mot-clé d’une ${postTerms.inline}`,
 		realm: `Saisir le nom d’un ${realmTerms.inline}`,
 		user: "Saisir un nom d’utilisateur",

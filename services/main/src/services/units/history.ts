@@ -61,8 +61,6 @@ import {
 	CreditAttributionRoleValues,
 	SubjectAssociationRoleValues,
 	unitRevisionTag,
-	unitStructure,
-	unitStructureApplication,
 	unitTag,
 	unitVariant,
 	video,
@@ -98,10 +96,6 @@ import { finalizeInitialUnitStatusRevision } from "./status";
 import { ensureUnitVariantLifecycle } from "./variant-policy";
 import { ensureDirectCreditAttributionAllowed } from "./attribution-authorization";
 import { ensureSubjectPostTargetingAllowed } from "../posts/targeting";
-import {
-	nextUnitStructureDefinitionUpdatedAt,
-	replaceUnitStructureDefinition,
-} from "../tag-structures/definition";
 import { syncUnitLocalizationContentMetrics } from "../content-metrics/service";
 import { recordProfileResourceParticipation } from "../history/participation";
 import {
@@ -195,7 +189,6 @@ const UnitSnapshotSchema = z.object({
 		credits: z.array(SnapshotRowSchema),
 		subjectAssociations: z.array(SnapshotRowSchema),
 		tags: z.array(SnapshotRowSchema),
-		structureApplications: z.array(SnapshotRowSchema),
 		variants: z.array(SnapshotRowSchema),
 		/** Released v1 relation documents without this key represent no external Audio tracks. */
 		videoAudioTracks: VideoAudioTracksSchema.default([]),
@@ -286,9 +279,6 @@ const collectionStateSchema = z.object({});
 const pollStateSchema = schemaFactory
 	.createSelectSchema(poll)
 	.omit({ id: true, closedAt: true, createdAt: true, updatedAt: true });
-const unitStructureStateSchema = schemaFactory
-	.createSelectSchema(unitStructure)
-	.omit({ id: true, createdAt: true, updatedAt: true });
 const creditAttributionRowSchema = schemaFactory.createSelectSchema(creditAttribution, {
 	position: FractionalPositionSchema,
 	role: z.enum(CreditAttributionRoleValues),
@@ -300,10 +290,6 @@ const subjectAssociationRowSchema = schemaFactory.createSelectSchema(subjectAsso
 const unitTagRowSchema = schemaFactory.createSelectSchema(unitTag, {
 	position: FractionalPositionSchema.nullable(),
 });
-const unitStructureApplicationRowSchema = schemaFactory.createSelectSchema(
-	unitStructureApplication,
-	{ position: FractionalPositionSchema.nullable() },
-);
 const unitVariantRowSchema = schemaFactory.createSelectSchema(unitVariant, {
 	unitKind: z.enum(VariantCapableUnitKindValues),
 });
@@ -414,12 +400,8 @@ async function snapshotExtension(
 				pollStateSchema,
 				(await tx.select().from(poll).where(eq(poll.id, unitId)).limit(1))[0],
 			);
-		case "structure":
-			return parseSnapshotState(
-				unitStructureStateSchema,
-				(await tx.select().from(unitStructure).where(eq(unitStructure.id, unitId)).limit(1))[0],
-			);
 		case "tag":
+		case "tag_path":
 		case "label":
 		case "realm_rule":
 		case "slug_namespace":
@@ -489,11 +471,6 @@ async function snapshotUnit(tx: DatabaseTransaction, unitId: string) {
 		.from(unitTag)
 		.where(eq(unitTag.unitId, unitId))
 		.orderBy(unitTag.tagId);
-	const structureApplications = await tx
-		.select()
-		.from(unitStructureApplication)
-		.where(eq(unitStructureApplication.unitId, unitId))
-		.orderBy(unitStructureApplication.structureId);
 	const variants = await tx
 		.select()
 		.from(unitVariant)
@@ -513,7 +490,6 @@ async function snapshotUnit(tx: DatabaseTransaction, unitId: string) {
 		credits,
 		subjectAssociations,
 		tags,
-		structureApplications,
 		variants,
 		videoAudioTracks,
 		seriesReleases:
@@ -575,6 +551,7 @@ async function restoreExtension(
 ) {
 	if (
 		kind === "tag" ||
+		kind === "tag_path" ||
 		kind === "label" ||
 		kind === "realm_rule" ||
 		kind === "slug_namespace" ||
@@ -628,28 +605,6 @@ async function restoreExtension(
 		case "poll":
 			await tx.update(poll).set(pollStateSchema.parse(value)).where(eq(poll.id, unitId));
 			break;
-		case "structure": {
-			const expected = unitStructureStateSchema.parse(value);
-			const [current] = await tx
-				.select()
-				.from(unitStructure)
-				.where(eq(unitStructure.id, unitId))
-				.limit(1);
-			if (!current) throw new Error("Unit Structure definition is missing");
-			if (
-				current.kind !== expected.kind ||
-				current.definitionVersion !== expected.definitionVersion ||
-				current.createdByProfileId !== expected.createdByProfileId
-			)
-				throw new Error("Unit Structure identity does not match its snapshot");
-			if (canonicalJson(current.memberUnitIds) !== canonicalJson(expected.memberUnitIds))
-				await replaceUnitStructureDefinition(tx, {
-					structureId: unitId,
-					memberUnitIds: expected.memberUnitIds,
-					updatedAt: nextUnitStructureDefinitionUpdatedAt(current.updatedAt),
-				});
-			break;
-		}
 	}
 }
 
@@ -806,7 +761,6 @@ export async function restoreUnitSnapshot(
 				postState.subjectUnitId,
 			);
 	}
-	if (snapshot.kind === "structure") await authorization.platform.ensureCapability("unit.edit", tx);
 	if (snapshot.kind === "post" && snapshot.extension) {
 		const postState = postStateSchema.parse(snapshot.extension);
 		if (postState.subjectUnitId !== current.subjectUnitId)
@@ -839,20 +793,11 @@ export async function restoreUnitSnapshot(
 	await tx.delete(creditAttribution).where(eq(creditAttribution.sourceUnitId, unitId));
 	await tx.delete(subjectAssociation).where(eq(subjectAssociation.unitId, unitId));
 	await tx.delete(unitTag).where(eq(unitTag.unitId, unitId));
-	await tx.delete(unitStructureApplication).where(eq(unitStructureApplication.unitId, unitId));
 	await tx.delete(unitVariant).where(eq(unitVariant.variantUnitId, unitId));
 	if (snapshot.owned.credits.length) await tx.insert(creditAttribution).values(credits);
 	if (subjectAssociations.length) await tx.insert(subjectAssociation).values(subjectAssociations);
 	if (snapshot.owned.tags.length)
 		await tx.insert(unitTag).values(snapshot.owned.tags.map((row) => unitTagRowSchema.parse(row)));
-	if (snapshot.owned.structureApplications.length)
-		await tx
-			.insert(unitStructureApplication)
-			.values(
-				snapshot.owned.structureApplications.map((row) =>
-					unitStructureApplicationRowSchema.parse(row),
-				),
-			);
 	if (snapshot.owned.variants.length)
 		await tx
 			.insert(unitVariant)
@@ -955,7 +900,6 @@ function snapshotToDocuments(snapshot: UnitSnapshot): UnitRevisionDocuments {
 				credits: snapshot.owned.credits,
 				subjectAssociations: snapshot.owned.subjectAssociations,
 				tags: snapshot.owned.tags,
-				structureApplications: snapshot.owned.structureApplications,
 				variants: snapshot.owned.variants,
 				videoAudioTracks: snapshot.owned.videoAudioTracks,
 			},
@@ -1091,7 +1035,6 @@ function documentsToSnapshot(documents: UnitRevisionDocuments): UnitSnapshot {
 			credits: relations.credits,
 			subjectAssociations: relations.subjectAssociations,
 			tags: relations.tags,
-			structureApplications: relations.structureApplications,
 			variants: relations.variants,
 			videoAudioTracks: parseVideoAudioTracksSlot(documents),
 			seriesReleases: structure.seriesReleases,

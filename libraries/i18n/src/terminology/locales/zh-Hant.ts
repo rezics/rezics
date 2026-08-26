@@ -66,7 +66,7 @@ export const zhHantTerminology = defineTerminology("zh-Hant", {
 		},
 		forbidden: [],
 	},
-	tagStructure: {
+	tagPath: {
 		status: "approved",
 		forms: {
 			label: "標籤路徑",

@@ -13,6 +13,13 @@ export default {
 	untitled: `未命名${postTerms.label}`,
 	titleOptional: "標題（選填）",
 	summaryOptional: "摘要（選填）",
+	contentSpoilerLabel: "內容劇透程度",
+	contentSpoilerNone: "無劇透",
+	contentSpoilerMinor: "輕微劇透",
+	contentSpoilerMajor: "重大劇透",
+	contentNsfwLabel: "不宜公開顯示",
+	contentNsfwDescription: "標示可能不適合在公共場合顯示的內容。",
+	revealNsfw: "顯示不宜公開顯示的內容",
 	reviewFallbackTitle: insert("{{author}}對《{{subject}}》的評論", {
 		author: String,
 		subject: String,

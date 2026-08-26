@@ -13,7 +13,7 @@ vi.mock("@rezics/openapi-tanstack-query", () => ({
 		users: "users",
 		entities: "entities",
 		tags: "tags",
-		"tag-structures": "tag-structures",
+		"tag-paths": "tag-paths",
 		posts: "posts",
 		realms: "realms",
 		collections: "collections",

@@ -5,11 +5,7 @@ import { z } from "zod";
 
 import { getUnitReadCondition } from "../authorization/unit/query";
 import { database } from "../database";
-import {
-	currentUnitTagJudgmentStat as unitTagJudgmentStat,
-	unit,
-	unitTag,
-} from "../database/schema";
+import { unitTagJudgmentStat, unit, unitTag } from "../database/schema";
 import { SubjectAssociationEntityTagPreviewLimit } from "../database/schema/contract-values";
 import { wilsonLowerBoundSql } from "../tags/ranking";
 import { resolvedUnitLocalizationTitle } from "./localization";

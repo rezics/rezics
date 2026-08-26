@@ -134,7 +134,6 @@ describe("loadPack", () => {
 					{
 						sourceKey: "fixture:path",
 						memberTagSourceKeys: ["fixture:software", "fixture:release"],
-						primary: true,
 						sourceUrl: "https://example.com/path",
 						sourceImportedAt: "2026-08-24T00:00:00Z",
 					},
@@ -340,6 +339,7 @@ describe("loadPack", () => {
 
 		expect(vndb.relations.tagPaths?.length ?? 0).toBeGreaterThan(0);
 		expect(vndb.relations.tagPathApplications?.length ?? 0).toBeGreaterThan(0);
+		expect(vndb.manifest.version).toBe("0.2.0");
 		if (vndb.sourceLock.kind !== "snapshot-provenance")
 			throw new Error("vndb-v11 must use snapshot provenance");
 		expect(vndb.sourceLock.rightsExceptions).toEqual([

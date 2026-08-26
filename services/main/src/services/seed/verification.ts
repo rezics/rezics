@@ -32,7 +32,7 @@ import {
 	unitAssociationProposal,
 	unitLocalization,
 	unitLocalizationContentMetric,
-	unitStructure,
+	tagPath,
 	users,
 } from "../database/schema";
 import { includesSeedScenario, type SeedRunOptions } from "./contracts";
@@ -119,8 +119,8 @@ export async function verifySeedDatabase(
 			query: database.select({ value: count() }).from(realmTagJudgment),
 		},
 		{
-			name: "Tag structure",
-			query: database.select({ value: count() }).from(unitStructure),
+			name: "Tag Path",
+			query: database.select({ value: count() }).from(tagPath),
 		},
 		{
 			name: "Post Score",

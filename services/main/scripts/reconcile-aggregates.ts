@@ -45,8 +45,8 @@ const checks: readonly { name: string; query: SQL }[] = [
 				select 'external_link', external_link_id::text, sum(value), count(*)
 				from unit_external_link_vote group by external_link_id
 				union all
-				select 'unit_structure', structure_id::text, sum(value), count(*)
-				from unit_structure_vote group by structure_id
+				select 'tag_path', path_id::text, sum(value), count(*)
+				from tag_path_vote group by path_id
 			), actual as (
 				select 'alias'::text as kind, alias_id::text as identity, score, vote_count
 				from unit_alias_vote_stat
@@ -54,8 +54,8 @@ const checks: readonly { name: string; query: SQL }[] = [
 				select 'external_link', external_link_id::text, score, vote_count
 				from unit_external_link_vote_stat
 				union all
-				select 'unit_structure', structure_id::text, score, vote_count
-				from unit_structure_vote_stat
+				select 'tag_path', path_id::text, score, vote_count
+				from tag_path_vote_stat
 			)
 			select count(*)::text as drift_count from expected
 			full join actual using (kind, identity)
@@ -438,9 +438,6 @@ const advisoryChecks: readonly { name: string; query: SQL }[] = [
 	},
 ];
 
-console.info(
-	"VNDB v11 judgment and effective-projection parity is owned by the paused-epoch bounded verifier in scripts/vndb-v11-cutover-verification.ts.",
-);
 try {
 	let drifted = false;
 	for (const check of checks) {

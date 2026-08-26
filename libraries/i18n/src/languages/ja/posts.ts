@@ -13,6 +13,13 @@ export default {
 	untitled: `タイトル未設定の ${postTerms.inline}`,
 	titleOptional: "タイトル（任意）",
 	summaryOptional: "概要（任意）",
+	contentSpoilerLabel: "内容のネタバレ度",
+	contentSpoilerNone: "ネタバレなし",
+	contentSpoilerMinor: "軽微なネタバレ",
+	contentSpoilerMajor: "重大なネタバレ",
+	contentNsfwLabel: "公共の場での表示に不適切",
+	contentNsfwDescription: "公共の場での表示に適さない可能性がある内容として設定します。",
+	revealNsfw: "センシティブな内容を表示",
 	reviewFallbackTitle: insert("{{author}}による「{{subject}}」のレビュー", {
 		author: String,
 		subject: String,

@@ -13,6 +13,13 @@ export default {
 	untitled: `Untitled ${postTerms.inline}`,
 	titleOptional: "Title (optional)",
 	summaryOptional: "Summary (optional)",
+	contentSpoilerLabel: "Content spoiler level",
+	contentSpoilerNone: "No spoilers",
+	contentSpoilerMinor: "Minor spoilers",
+	contentSpoilerMajor: "Major spoilers",
+	contentNsfwLabel: "Sensitive content",
+	contentNsfwDescription: "Mark content that may be unsuitable for display in public settings.",
+	revealNsfw: "Show sensitive content",
 	reviewFallbackTitle: insert("Review of {{subject}} by {{author}}", {
 		author: String,
 		subject: String,

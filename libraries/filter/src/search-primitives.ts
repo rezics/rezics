@@ -24,7 +24,6 @@ export const SearchCategoryValues = [
 	"users",
 	"entities",
 	"tags",
-	"tag-structures",
 	"posts",
 	"realms",
 	"collections",

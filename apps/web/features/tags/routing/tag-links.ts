@@ -112,6 +112,6 @@ export function parseTagManagementSection(
 	return !suffix.includes("/") && isTagManagementSection(suffix) ? suffix : undefined;
 }
 
-export function tagStructureHref(structureId: string): string {
-	return `/tag-structures/${structureId}`;
+export function tagPathHref(pathId: string): string {
+	return `/tag-paths/${pathId}`;
 }

@@ -121,12 +121,11 @@ Posts, chapter Posts, Entities, Tags, Labels, Collections, relations
 (including subject associations with spoiler evidence), and top-level
 slugs. Existing packs: `toaru-core` (catalog with two Zones and wiki),
 `xu-zhimo` (EPUB → Portable Text chapters, 23 books, 389 chapters),
-`vndb-v11` (visual-novel catalog; no Zone yet). Known apply gaps —
-`tagPaths`, `tagPathApplications`, judgment evidence on `unitTags`, and
-`entityMeasurements` are validated but not persisted — are owned by the
-VNDB v11 program
-([vndb-v11-entity-tag-research-report.md](./vndb-v11-entity-tag-research-report.md),
-[entity-tag-spoiler-and-measurement-decisions.md](./entity-tag-spoiler-and-measurement-decisions.md)).
+`vndb-v11` (visual-novel catalog; no Zone yet). `tagPaths`,
+`tagPathApplications`, judgment evidence on `unitTags`, and
+`entityMeasurements` are now persisted by the dedicated contracts in
+[tag-paths.md](./tag-paths.md) and
+[entity-tag-spoiler-and-measurement-decisions.md](./entity-tag-spoiler-and-measurement-decisions.md).
 
 ### 1.6 Gating
 

@@ -9,7 +9,6 @@ export const CurrentSearchUnitKindsByCategory = {
 	users: ["profile"],
 	entities: ["entity"],
 	tags: ["tag"],
-	"tag-structures": ["structure"],
 	posts: ["post"],
 	realms: ["realm"],
 	collections: ["collection"],

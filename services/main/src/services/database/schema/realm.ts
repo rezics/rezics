@@ -22,6 +22,7 @@ import {
 	RealmPageKindValues,
 	RealmPinKindValues,
 	RealmRuleAcknowledgementModeValues,
+	RealmTagFallbackPolicyValues,
 	RealmUnitPublicationStateValues,
 	RealmUnitStatusValues,
 	toEnumValues,
@@ -45,6 +46,10 @@ export const realmPinKind = pgEnum("realm_pin_kind", toEnumValues(RealmPinKindVa
 export const realmRuleAcknowledgementMode = pgEnum(
 	"realm_rule_acknowledgement_mode",
 	toEnumValues(RealmRuleAcknowledgementModeValues),
+);
+export const realmTagFallbackPolicy = pgEnum(
+	"realm_tag_fallback_policy",
+	toEnumValues(RealmTagFallbackPolicyValues),
 );
 export const realmUnitStatus = pgEnum("realm_unit_status", toEnumValues(RealmUnitStatusValues));
 export const realmUnitPublicationState = pgEnum(
@@ -112,6 +117,12 @@ export const realm = pgTable(
 			.references(() => unit.id, { onDelete: "cascade" }),
 		joinPolicy: realmJoinPolicy().default("open").notNull(),
 		realmTagVotingEnabled: boolean("realm_tag_voting_enabled").default(false).notNull(),
+		tagFitFallbackPolicy: realmTagFallbackPolicy("tag_fit_fallback_policy")
+			.default("inherit")
+			.notNull(),
+		tagSpoilerFallbackPolicy: realmTagFallbackPolicy("tag_spoiler_fallback_policy")
+			.default("inherit")
+			.notNull(),
 		enabledPages: realmPageKind("enabled_pages")
 			.array()
 			.default(sql`array['main']::realm_page_kind[]`)

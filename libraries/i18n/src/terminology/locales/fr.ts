@@ -81,7 +81,7 @@ export const frTerminology = defineTerminology("fr", {
 		},
 		forbidden: [],
 	},
-	tagStructure: {
+	tagPath: {
 		status: "approved",
 		forms: {
 			label: "Chemin d’étiquettes",

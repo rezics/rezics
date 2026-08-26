@@ -27,7 +27,7 @@ export const UnitKindValues = [
 	"entity",
 	"label",
 	"tag",
-	"structure",
+	"tag_path",
 	"series",
 	"zone",
 	"zone_page",
@@ -44,7 +44,7 @@ export const CommunityOwnedUnitKindValues = [
 	"media",
 	"series",
 	"tag",
-	"structure",
+	"tag_path",
 ] as const;
 
 export const VariantCapableUnitKindValues = ["book", "software", "media", "entity"] as const;
@@ -110,13 +110,6 @@ export const UnitMergeGraphActionValues = [
 ] as const;
 export type UnitMergeGraphAction = (typeof UnitMergeGraphActionValues)[number];
 
-/** Persistent database fence state for the single vndb-v11 binary cutover. */
-export const VndbV11CutoverStateValues = [
-	"precontract_open",
-	"paused",
-	"postcontract_open",
-] as const;
-export type VndbV11CutoverState = (typeof VndbV11CutoverStateValues)[number];
 /**
  * Durable, ordered execution phases. Appending before `finalize` is a persisted
  * contract change; renaming or reordering a released phase requires a cutover.
@@ -156,10 +149,7 @@ export const UnitMergeOperationPhaseValues = [
 	"poll_options",
 	"content_nodes_content",
 	"content_nodes_target",
-	"structure_members",
-	"structure_edges_parent",
-	"structure_edges_child",
-	"structure_applications",
+	"tag_path_applications",
 	"progress_entries",
 	"progress_snapshots",
 	"notification_subjects",
@@ -343,15 +333,6 @@ export function isSubjectAssociationRole(value: string): value is SubjectAssocia
 	return (SubjectAssociationRoleValues as readonly string[]).includes(value);
 }
 
-/**
- * Persisted semantic contracts for community-immutable ordered Unit structures.
- *
- * The storage primitive is generic; each kind defines which member Unit kinds
- * and which interpretation of adjacency are valid.
- */
-export const UnitStructureKindValues = ["tag.hierarchy_path"] as const;
-export type UnitStructureKind = (typeof UnitStructureKindValues)[number];
-
 export const DockKindValues = ["main", "wiki"] as const;
 export type DockKind = (typeof DockKindValues)[number];
 export const DockOwnerUnitKindValues = ["book", "software", "media", "zone", "realm"] as const;
@@ -478,6 +459,8 @@ export const EnforcementKindValues = [
 	"trust_restriction",
 ] as const;
 export const RealmJoinPolicyValues = ["open", "approval"] as const;
+export const RealmTagFallbackPolicyValues = ["inherit", "isolate"] as const;
+export type RealmTagFallbackPolicy = (typeof RealmTagFallbackPolicyValues)[number];
 export const RealmRuleAcknowledgementModeValues = ["explicit", "implicit_on_follow"] as const;
 
 /**

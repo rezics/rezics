@@ -1,1 +1,0 @@
-Required because PostgreSQL concurrent index creation cannot run inside Atlas's default file transaction.

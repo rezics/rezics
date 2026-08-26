@@ -22,7 +22,6 @@ import { RequireSession } from "@/features/auth/require-session";
 import { DraftContentLanguageField } from "@/features/content-languages/components/draft-content-language-field";
 import { useFormDraftContentLanguage } from "@/features/content-languages/hooks/use-form-draft-content-language";
 import { portableTextDraftContentLanguageSample } from "@/features/content-languages/model/draft-content-language-sample";
-import { useDevelopmentPreviewAccess } from "@/features/preview-access/components/development-preview-boundary";
 import { RealmRulesAcknowledgementPrompt } from "@/features/realms/components/realm-rules-acknowledgement-prompt";
 import { useRealmRulesAcknowledgement } from "@/features/realms/hooks/use-realm-rules-acknowledgement";
 import { useTranslation } from "@/i18n/client";
@@ -40,13 +39,13 @@ export function PostCreatePage({ defaultRealmId }: { defaultRealmId?: string }) 
 	const router = useApplicationRouter();
 	const queryClient = useQueryClient();
 	const create = usePostApiPosts();
-	const developmentPreview = useDevelopmentPreviewAccess();
-	const hasDevelopmentPreviewAccess = developmentPreview.state === "allowed";
 	const [publishRealmIds, setPublishRealmIds] = useState<readonly string[]>(() =>
 		defaultRealmId ? [defaultRealmId] : [],
 	);
 	const [subject, setSubject] = useState<PickedEntity>();
 	const [body, setBody] = useState<PortableTextValue>([]);
+	const [contentSpoilerLevel, setContentSpoilerLevel] = useState<0 | 1 | 2>(0);
+	const [contentNsfw, setContentNsfw] = useState(false);
 	const language = useFormDraftContentLanguage(
 		["title", "summary"],
 		portableTextDraftContentLanguageSample(body),
@@ -62,7 +61,7 @@ export function PostCreatePage({ defaultRealmId }: { defaultRealmId?: string }) 
 		if (!body.length) return;
 		const contentLanguage = await language.resolveLanguage(formElement);
 		const selectedPublishRealmIds = [...publishRealmIds];
-		const selectedSubject = hasDevelopmentPreviewAccess ? subject : undefined;
+		const selectedSubject = subject;
 		try {
 			await rulesAcknowledgement.run(async () => {
 				const post = await create.mutateAsync({
@@ -72,6 +71,8 @@ export function PostCreatePage({ defaultRealmId }: { defaultRealmId?: string }) 
 						postKind: "post",
 						language: contentLanguage,
 						body: writePortableText(body),
+						contentSpoilerLevel,
+						contentNsfw,
 						publishRealmIds: selectedPublishRealmIds,
 						...(selectedSubject ? { subjectId: selectedSubject.id } : {}),
 					},
@@ -122,33 +123,35 @@ export function PostCreatePage({ defaultRealmId }: { defaultRealmId?: string }) 
 								{t.posts.publishRealmsHint} {t.posts.publishRealmsLimit}
 							</FieldDescription>
 						</Field>
-						{hasDevelopmentPreviewAccess ? (
-							<Field>
-								<FieldLabel>{t.posts.subject}</FieldLabel>
-								<EntityPicker
-									ariaLabel={t.posts.subject}
-									index="units"
-									onChange={setSubject}
-									placeholder={t.ui.pickerPlaceholders.unit}
-									value={subject}
-								/>
-								{subject ? (
-									<Button
-										onClick={() => setSubject(undefined)}
-										size="xs"
-										type="button"
-										variant="quiet"
-									>
-										{t.posts.clearSubject}
-									</Button>
-								) : null}
-							</Field>
-						) : null}
+						<Field>
+							<FieldLabel>{t.posts.subject}</FieldLabel>
+							<EntityPicker
+								ariaLabel={t.posts.subject}
+								index="units"
+								onChange={setSubject}
+								placeholder={t.ui.pickerPlaceholders.unit}
+								value={subject}
+							/>
+							{subject ? (
+								<Button
+									onClick={() => setSubject(undefined)}
+									size="xs"
+									type="button"
+									variant="quiet"
+								>
+									{t.posts.clearSubject}
+								</Button>
+							) : null}
+						</Field>
 						<DraftContentLanguageField controller={language.controller} />
 						<PostEditorFields
 							body={body}
+							contentSpoilerLevel={contentSpoilerLevel}
+							contentNsfw={contentNsfw}
 							error={create.error}
 							onBodyChange={setBody}
+							onContentSpoilerLevelChange={setContentSpoilerLevel}
+							onContentNsfwChange={setContentNsfw}
 							pending={create.isPending}
 							submitLabel={t.posts.publish}
 						/>

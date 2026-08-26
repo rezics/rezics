@@ -26,7 +26,6 @@ export const FilterUnitKindValues = [
 	"entity",
 	"label",
 	"tag",
-	"structure",
 	"series",
 	"zone",
 	"zone_page",

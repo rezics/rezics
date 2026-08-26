@@ -9,7 +9,7 @@ import session, { resolveIdentity } from "../../auth/session";
 import type { Authorization } from "../../authorization";
 import { PlatformCapabilityRequired } from "../../authorization/errors";
 import { database, type DatabaseTransaction } from "../../database";
-import { runVndbVoteTransaction } from "../../database/vndb-vote-admission";
+import { runVoteTransaction } from "../../database/vote-admission";
 import { resolvedUnitLocalizationLanguage } from "../../units/localization";
 import {
 	contentStructure,
@@ -89,7 +89,7 @@ import {
 	listContentStructureRevisions,
 	restoreContentStructureRevision,
 } from "../../content-structure/history";
-import { toApiErrorResponse, VndbVoteBackpressureResponse } from "../schema/response";
+import { toApiErrorResponse, VoteBackpressureResponse } from "../schema/response";
 import { getUnitLocalizationContentMetric } from "../../content-metrics/service";
 import { applyNewPostTagMentionVotes } from "../../posts/tag-mentions";
 import {
@@ -846,7 +846,7 @@ export default new Elysia()
 		"/units/book/:unitId/content-structure",
 		async ({ params, profile, authorization, body }) => {
 			await authorization.unit.ensureCanUpdate(params.unitId, [["content-structure"]]);
-			return runVndbVoteTransaction({ family: "unit_tag", authority: "global" }, async (tx) => {
+			return runVoteTransaction({ family: "unit_tag", authority: "global" }, async (tx) => {
 				const attachedContentUnitIds = [
 					...new Set(
 						body.nodes.flatMap((node) => (node.state === "attached" ? [node.contentUnitId] : [])),
@@ -890,7 +890,7 @@ export default new Elysia()
 					"ContentStructureRevisionConflict",
 				]),
 				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["ContentStructureInvalid"]),
-				[StatusCodes.TOO_MANY_REQUESTS]: VndbVoteBackpressureResponse,
+				[StatusCodes.TOO_MANY_REQUESTS]: VoteBackpressureResponse,
 			},
 			detail: {
 				summary: "Save a complete Book Content Structure draft",
@@ -1109,7 +1109,7 @@ export default new Elysia()
 			await authorization.unit.ensureCanUpdate(params.chapterId, [
 				["localizations", params.language],
 			]);
-			await runVndbVoteTransaction({ family: "unit_tag", authority: "global" }, async (tx) => {
+			await runVoteTransaction({ family: "unit_tag", authority: "global" }, async (tx) => {
 				const [current] = await tx
 					.select({ content: unitLocalization.content })
 					.from(unitLocalization)
@@ -1170,7 +1170,7 @@ export default new Elysia()
 					"UnitRevisionConflict",
 					"PostTagMentionVoteConflict",
 				]),
-				[StatusCodes.TOO_MANY_REQUESTS]: VndbVoteBackpressureResponse,
+				[StatusCodes.TOO_MANY_REQUESTS]: VoteBackpressureResponse,
 			},
 			detail: { summary: "Create or replace chapter content", tags: ["Books"] },
 		},

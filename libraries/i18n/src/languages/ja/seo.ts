@@ -9,7 +9,7 @@ const { forms: entityTerms } = jaTerminology.entity;
 const { forms: metadataTerms } = jaTerminology.metadata;
 const { forms: postTerms } = jaTerminology.post;
 const { forms: realmTerms } = jaTerminology.realm;
-const { forms: tagStructureTerms } = jaTerminology.tagStructure;
+const { forms: tagPathTerms } = jaTerminology.tagPath;
 const { forms: videoTerms } = jaTerminology.video;
 const { forms: zoneTerms } = jaTerminology.zone;
 
@@ -53,7 +53,7 @@ export default {
 		audio: audioTerms.label,
 		entity: entityTerms.label,
 		tag: "タグ",
-		structure: tagStructureTerms.label,
+		structure: tagPathTerms.label,
 		series: units.types.series,
 		zone: zoneTerms.label,
 		zone_page: `${zoneTerms.label}ページ`,

@@ -16,7 +16,6 @@ import { pgTable } from "./base";
 import {
 	createCreatedAtColumn,
 	createFractionalIndexPositionByteLengthConstraint,
-	createJsonObjectColumn,
 	createTimestampMsColumn,
 	createUpdatedAtColumn,
 	createUuidv7PrimaryKey,
@@ -255,18 +254,16 @@ export const subjectAssociationJudgment = pgTable(
 export const entityMeasurement = pgTable(
 	"entity_measurement",
 	{
+		id: createUuidv7PrimaryKey(),
 		entityId: uuid()
 			.notNull()
-			.references(() => entity.id, { onDelete: "restrict" }),
+			.references(() => entity.id, { onDelete: "cascade" }),
 		contextUnitId: uuid().references(() => unit.id, { onDelete: "restrict" }),
 		heightMillimetres: integer(),
 		weightGrams: integer(),
 		bustMillimetres: integer(),
 		waistMillimetres: integer(),
 		hipsMillimetres: integer(),
-		sourceUrl: text().notNull(),
-		sourceImportedAt: createTimestampMsColumn().notNull(),
-		sourceProvenance: createJsonObjectColumn().notNull(),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),
 	},
@@ -294,11 +291,6 @@ export const entityMeasurement = pgTable(
 				and coalesce(${table.bustMillimetres} > 0, true)
 				and coalesce(${table.waistMillimetres} > 0, true)
 				and coalesce(${table.hipsMillimetres} > 0, true)`,
-		),
-		check("entity_measurement_source_url_check", sql`btrim(${table.sourceUrl}) <> ''`),
-		check(
-			"entity_measurement_source_provenance_check",
-			sql`jsonb_typeof(${table.sourceProvenance}) = 'object'`,
 		),
 		check(
 			"entity_measurement_context_not_self_check",

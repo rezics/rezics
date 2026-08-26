@@ -5,7 +5,6 @@ import { insert } from "native-i18n";
 const { forms: postTerms } = jaTerminology.post;
 const { forms: realmTerms } = jaTerminology.realm;
 const { forms: zoneTerms } = jaTerminology.zone;
-const { forms: tagStructureTerms } = jaTerminology.tagStructure;
 const { forms: entityTerms } = jaTerminology.entity;
 const { forms: followTerms } = jaTerminology.follow;
 
@@ -46,7 +45,6 @@ export default {
 		users: "ユーザー",
 		entities: entityTerms.pluralLabel,
 		tags: "タグ",
-		"tag-structures": tagStructureTerms.pluralLabel,
 		posts: postTerms.plural,
 		realms: realmTerms.plural,
 		collections: "コレクション",
@@ -58,7 +56,6 @@ export default {
 		users: "ユーザー",
 		entities: entityTerms.pluralLabel,
 		tags: "タグ",
-		"tag-structures": tagStructureTerms.pluralLabel,
 		posts: postTerms.plural,
 		realms: realmTerms.plural,
 		collections: "コレクション",

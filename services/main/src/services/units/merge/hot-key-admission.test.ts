@@ -61,9 +61,7 @@ function requireStatement(
 }
 
 function expectGlobalAdmission(statement: RenderedStatement): void {
-	expect(statement.sql).toContain(
-		"admission as materialized ( select public.lock_vndb_vote_hot_keys(",
-	);
+	expect(statement.sql).toContain("admission as materialized ( select public.lock_vote_hot_keys(");
 	for (const column of ["unit_id", "tag_id", "profile_id"] as const) {
 		expect(statement.sql).toContain(
 			`array_agg(hot_keys.${column} order by hot_keys.unit_id, hot_keys.tag_id, hot_keys.profile_id)`,
@@ -75,7 +73,7 @@ function expectGlobalAdmission(statement: RenderedStatement): void {
 	expect(statement.params).toContain(TargetUnitId);
 }
 
-describe("Unit merge VNDB hot-key pre-admission", () => {
+describe("Unit merge hot-key pre-admission", () => {
 	it("pre-admits every bounded global source and target key before Tag and judgment mutations", async () => {
 		const captured = await capturePhase("unit_tags");
 		const unitTagCopy = requireStatement(captured.statements, "insert into unit_tag (");

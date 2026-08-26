@@ -6,14 +6,15 @@ import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 const { forms: realmTerms } = jaTerminology.realm;
 const { forms: followTerms } = jaTerminology.follow;
 const { forms: postTerms } = jaTerminology.post;
-const { forms: tagStructureTerms } = jaTerminology.tagStructure;
+const { forms: tagPathTerms } = jaTerminology.tagPath;
 
 export default {
 	page: {
 		title: "タグ",
 		description: "選択したタグ情報源によるグローバルタグと文脈に基づいた判定を確認",
 		viewAll: "タグページ全体を表示",
-		manageOnTagPage: `専用タグページでタグと ${tagStructureTerms.pluralLabel} を追加すると、投票コンテキストを表示したままにできます。`,
+		more: insert("ほか {{count}} 件", { count: Number }),
+		manageOnTagPage: `専用タグページでタグと ${tagPathTerms.pluralLabel} を追加すると、投票コンテキストを表示したままにできます。`,
 	},
 	card: {
 		open: insert("{{tag}} タグカードを開く ({{context}})", {
@@ -22,7 +23,7 @@ export default {
 		}),
 		close: "タグカードを閉じる",
 		globalContext: "グローバル文脈",
-		structureContext: tagStructureTerms.label,
+		pathContext: tagPathTerms.label,
 		policy: `${realmTerms.label}-セット`,
 		search: "このタグを検索",
 		details: "タグの詳細を表示",
@@ -40,7 +41,7 @@ export default {
 	},
 	basic: {
 		title: "基本タグ",
-		description: `グローバルタグおよび${tagStructureTerms.pluralLabel}、いかなる${realmTerms.label}による文脈判断なし。`,
+		description: `グローバルタグおよび${tagPathTerms.pluralLabel}、いかなる${realmTerms.label}による文脈判断なし。`,
 	},
 	voteContext: {
 		title: "文脈ごとに投票",
@@ -52,17 +53,27 @@ export default {
 		description: `グローバルタグと選択した${realmTerms.label}の情報源は、それぞれの文脈を保ちます。現在の投票文脈はここには重複表示されません。`,
 		empty: "ほかのタグ情報源は選択されていません。",
 	},
-	structures: {
-		title: tagStructureTerms.pluralLabel,
-		description: `${tagStructureTerms.pluralLabel}は意味のある階層を保持し、フラットタグの前に表示されます。`,
-		addTitle: `${tagStructureTerms.inline}を追加`,
-		addDescription: `まず承認された${tagStructureTerms.plural}を検索します。追加することでパスおよびその上のすべてのタグをサポートします。`,
-		add: `${tagStructureTerms.label}を追加`,
-		create: `${tagStructureTerms.label} を作成`,
-		details: `${tagStructureTerms.label}を見る`,
-		empty: `この作品にはまだ承認された${tagStructureTerms.plural}がありません。`,
+	paths: {
+		title: tagPathTerms.pluralLabel,
+		description: `${tagPathTerms.pluralLabel}は意味のある階層を保持し、フラットタグの前に表示されます。`,
+		addTitle: `${tagPathTerms.inline}を追加`,
+		addDescription: `まず承認された${tagPathTerms.plural}を検索します。追加することでパスおよびその上のすべてのタグをサポートします。`,
+		add: `${tagPathTerms.label}を追加`,
+		create: `${tagPathTerms.label} を作成`,
+		details: `${tagPathTerms.label}を見る`,
+		empty: `この作品にはまだ承認された${tagPathTerms.plural}がありません。`,
 		memberFallback: "名前のないタグ",
-		pathLabel: `順序付き${tagStructureTerms.label}`,
+		pathLabel: `順序付き${tagPathTerms.label}`,
+		fitLabel: "適合度",
+		spoilerLabel: "ネタバレ度",
+		spoilerNone: "なし",
+		spoilerMinor: "軽微",
+		spoilerMajor: "重大",
+		spoilerSummary: insert("投票：なし {{none}} · 軽微 {{minor}} · 重大 {{major}}", {
+			none: Number,
+			minor: Number,
+			major: Number,
+		}),
 	},
 	detail: {
 		sections: "タグ詳細タブ",
@@ -70,7 +81,7 @@ export default {
 			overview: "概要",
 			discussion: "ディスカッション",
 			content: "関連コンテンツ",
-			structure: "階層",
+			paths: "階層",
 		},
 		overviewTitle: "タグ本文",
 		overviewDescription:
@@ -80,22 +91,22 @@ export default {
 		discussionDescription: `このタグを主題に${postTerms.label}を作成し、既存のディスカッションに参加できます。`,
 		contentTitle: "関連コンテンツ",
 		contentDescription: "このタグが付けられた作品やその他のコンテンツを表示します。",
-		structureTitle: "タグ階層",
-		structureDescription: "コミュニティで承認されたタグ構造内での位置を確認できます。",
+		pathsTitle: "タグ階層",
+		pathsDescription: "コミュニティで承認されたタグ構造内での位置を確認できます。",
 		editTitle: "タグの内容を編集",
 		editDescription: "現在のコンテンツ言語のタイトル、要約、本文を更新します。",
 		editNavigation: "タグ内容の管理",
 		backToTag: "タグに戻る",
 		backToEditOverview: "編集の概要に戻る",
 		childrenTitle: "直接の子タグ",
-		childrenDescription: `これらの関係は、承認されたコミュニティロック中の${tagStructureTerms.pluralLabel}から来ています。各子は自身の直接の子を表示します。`,
+		childrenDescription: `これらの関係は、承認されたコミュニティロック中の${tagPathTerms.pluralLabel}から来ています。各子は自身の直接の子を表示します。`,
 		noChildren: "このタグにはまだ承認された直接の子タグがありません。",
 		grandchildrenTitle: "直接の子",
 	},
-	createStructure: {
-		title: `${tagStructureTerms.label} を作成`,
+	createPath: {
+		title: `${tagPathTerms.label} を作成`,
 		description:
-			"より広範なタグからより具体的なタグへの順序付きパスを作成します。作成後、コミュニティメンバーは編集できません；プラットフォーム管理者は監査された修正を行うことがあります。",
+			"より広いタグからより具体的なタグへ並ぶパスを作成します。定義は作成後に編集できません。変更する場合は新しいパスを作成し、手動ガバナンスの提案を提出してください。",
 		pick: "次のタグを選択",
 		addMember: "パスに追加",
 		removeMember: "パスから削除",
@@ -103,15 +114,11 @@ export default {
 		moveLater: "後に移動",
 		preview: "コミュニティロック中のパスプレビュー",
 		minimum: "少なくとも2つ以上の異なるタグを追加してください。",
-		submit: `${tagStructureTerms.label}を作成して投票する`,
-	},
-	adminEditStructure: {
-		title: `${tagStructureTerms.label}を修正する`,
-		description:
-			"プラットフォームの管理者はメンバーや順序を修正できます。ユニットの識別、投票、申請は保持され、修正は履歴に記録されます。",
-		reasonLabel: "修正理由",
-		reasonPlaceholder: "この管理者による修正が必要な理由を説明してください。",
-		submit: "監査された修正を保存する",
+		submit: `${tagPathTerms.label}を作成して投票する`,
+		relatedTitle: "関連する承認済みパスを確認",
+		relatedDescription:
+			"同じタグで終わるパスがすでにあります。自動的に重複とは扱われません。別の不変な定義を作成する前に意味を確認してください。",
+		continueDistinct: "別のパスとして作成",
 	},
 	create: {
 		noResults: insert("「{{query}}」に一致するタグは見つかりませんでした。", {
@@ -185,6 +192,13 @@ export default {
 		noRanked: "注目タグにできる他のグローバルタグはありません。",
 	},
 	realms: {
+		pathsTitle: `${realmTerms.label}のタグパス`,
+		applyPath: "パスを適用",
+		authority: { realm: `この${realmTerms.label}`, global: "グローバル" },
+		pathAuthority: insert("適合度：{{fit}} · ネタバレ：{{spoiler}}", {
+			fit: String,
+			spoiler: String,
+		}),
 		title: `${realmTerms.label} タグの文脈`,
 		description: `各${realmTerms.inline}は独立した文脈です。その判断はグローバルタグや他の${realmTerms.inline}と統合されることはありません。`,
 		addTitle: `この${realmTerms.label}でタグ投票を追加`,
@@ -220,5 +234,5 @@ export default {
 	},
 	unnamedTag: "名前のないタグ",
 	unnamedRealm: `名前なし ${realmTerms.label}`,
-	unnamedStructure: `名前なし ${tagStructureTerms.label}`,
+	unnamedPath: `名前なし ${tagPathTerms.label}`,
 } satisfies typeof import("../zh-Hant/tags").default;

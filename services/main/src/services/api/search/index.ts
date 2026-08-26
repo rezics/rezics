@@ -1,4 +1,3 @@
-import { DevelopmentPreviewCapability } from "@rezics/access";
 import { StatusCodes } from "http-status-codes";
 import Elysia from "elysia";
 import {
@@ -34,7 +33,6 @@ import {
 	resolveContentRatingPolicy,
 } from "../../content-rating/policy";
 import { resolveRecommendationViewer } from "../../recommendations/context";
-import { AuthenticationRequired } from "../../auth/errors";
 import { InvalidSearch, SearchUnavailable, SharedSearchQueryNotFound } from "../../search/errors";
 import { SearchCategories } from "../../search/schema";
 import { searchDomain, searchGrouped } from "../../search/service";
@@ -719,12 +717,7 @@ export default new Elysia({ prefix: "/search" })
 		async ({ body, request }) => {
 			try {
 				const identity = await resolveIdentity(request, "unit:read", "search.execute");
-				const hasDevelopmentPreviewAccess = await identity.authorization.platform.hasCapability(
-					DevelopmentPreviewCapability,
-				);
-				const indexes = (body.indexes ?? [...SearchCategories]).filter(
-					(index) => hasDevelopmentPreviewAccess || index !== "tag-structures",
-				);
+				const indexes = body.indexes ?? [...SearchCategories];
 				const viewer = await resolveRecommendationViewer(identity.authorization.profileId, false);
 				return await searchGrouped({
 					...body,
@@ -793,10 +786,6 @@ export default new Elysia({ prefix: "/search" })
 		"/:index",
 		async ({ params, body, request }) => {
 			const identity = await resolveIdentity(request, "unit:read", "search.execute");
-			if (params.index === "tag-structures") {
-				if (!identity.profile) throw new AuthenticationRequired();
-				await identity.authorization.platform.ensureCapability(DevelopmentPreviewCapability);
-			}
 			try {
 				const viewer = await resolveRecommendationViewer(identity.authorization.profileId, false);
 				return await searchDomain(params.index, {
@@ -818,8 +807,6 @@ export default new Elysia({ prefix: "/search" })
 			body: DomainSearchBody,
 			response: {
 				[StatusCodes.OK]: DomainSearchResponse,
-				[StatusCodes.UNAUTHORIZED]: toApiErrorResponse(["AuthenticationRequired"]),
-				[StatusCodes.FORBIDDEN]: toApiErrorResponse(["PlatformCapabilityRequired"]),
 				[StatusCodes.UNPROCESSABLE_ENTITY]: InvalidSearchResponse,
 				[StatusCodes.SERVICE_UNAVAILABLE]: SearchUnavailableResponse,
 			},

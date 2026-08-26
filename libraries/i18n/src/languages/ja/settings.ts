@@ -80,6 +80,10 @@ export default {
 	filterFeedByPreferredLanguages: "優先言語でフィードを絞り込み",
 	filterFeedByPreferredLanguagesHint:
 		"有効にすると、フィードには少なくとも1つの優先言語で利用可能なコンテンツのみが含まれます。他のリストは、言語フォールバックで一致するすべてのコンテンツを引き続き表示します。",
+	alwaysShowSpoilers: "ネタバレを常に表示",
+	alwaysShowSpoilersHint: "ネタバレ指定の内容を個別に確認せず表示します。",
+	alwaysShowNsfw: "NSFW メディアを常に表示",
+	alwaysShowNsfwHint: "NSFW 指定のメディアを最初からぼかさず表示します。",
 	account: "アカウント",
 	accountDescription: "現在のサインイン中セッションを管理",
 	security: "セキュリティ",

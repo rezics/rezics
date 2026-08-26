@@ -5,7 +5,7 @@ import Elysia, { t } from "elysia";
 import session, { resolveIdentity } from "../../auth/session";
 import { contentRatingPolicyFromAllowlist } from "../../content-rating/policy";
 import { database } from "../../database";
-import { runVndbVoteTransaction } from "../../database/vndb-vote-admission";
+import { runVoteTransaction } from "../../database/vote-admission";
 import { toSafeInteger } from "../../database/integer";
 import {
 	isFirstUnitLocalization,
@@ -54,7 +54,7 @@ import {
 } from "../schema/action-response";
 import {
 	toApiErrorResponse,
-	VndbVoteBackpressureResponse,
+	VoteBackpressureResponse,
 	toPortableTextResponse,
 	ReviewDetailResponse,
 	ReviewListResponse,
@@ -365,7 +365,7 @@ export default new Elysia()
 					await authorization.unit.ensureCanRead(targetId);
 					await authorization.realm.ensureUnitCreation(body.publishRealmIds, "realm.units.create");
 					await authorization.realm.ensureParticipation(body.score?.realmId);
-					const id = await runVndbVoteTransaction(
+					const id = await runVoteTransaction(
 						{ family: "unit_tag", authority: "global" },
 						async (tx) => {
 							if (body.progressEntryId) {
@@ -489,7 +489,7 @@ export default new Elysia()
 							"PostTargetingLocked",
 						]),
 						[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["ValidationError"]),
-						[StatusCodes.TOO_MANY_REQUESTS]: VndbVoteBackpressureResponse,
+						[StatusCodes.TOO_MANY_REQUESTS]: VoteBackpressureResponse,
 					},
 					detail: { summary: "Create review", tags: ["Reviews"] },
 				},
@@ -635,7 +635,7 @@ export default new Elysia()
 				"/:reviewId",
 				async ({ params, profile, authorization, body }) => {
 					await authorization.unit.ensureCanUpdate(params.reviewId, [["localizations"]]);
-					await runVndbVoteTransaction({ family: "unit_tag", authority: "global" }, async (tx) => {
+					await runVoteTransaction({ family: "unit_tag", authority: "global" }, async (tx) => {
 						const [current] = await tx
 							.select({ content: unitLocalization.content })
 							.from(unitLocalization)
@@ -691,7 +691,7 @@ export default new Elysia()
 						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
 						[StatusCodes.NOT_FOUND]: UnitReadFailureResponse,
 						[StatusCodes.CONFLICT]: toApiErrorResponse(["PostTagMentionVoteConflict"]),
-						[StatusCodes.TOO_MANY_REQUESTS]: VndbVoteBackpressureResponse,
+						[StatusCodes.TOO_MANY_REQUESTS]: VoteBackpressureResponse,
 					},
 					detail: { summary: "Update review", tags: ["Reviews"] },
 				},

@@ -1,7 +1,8 @@
 "use client";
 
 import type { GetApiUnitsByTypeByUnitIdStatus200 } from "@rezics/openapi-tanstack-query";
-import { CardContent, Cover, IdentityAvatar, ItemMedia } from "@rezics/ui";
+import { Button, CardContent, Cover, IdentityAvatar, ItemMedia } from "@rezics/ui";
+import { useState } from "react";
 
 import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import { useChineseContentText } from "@/features/content-language-display/chinese-content-display-context";
@@ -39,7 +40,8 @@ export function UnitSubjectGroups({
 }
 
 function SubjectAssociationCard({ association }: { readonly association: SubjectAssociation }) {
-	const { t } = useTranslation(["ui", "units"]);
+	const { t } = useTranslation(["editor", "ui", "units"]);
+	const [revealed, setRevealed] = useState(false);
 	const title = useChineseContentText(
 		association.title ?? t.ui.unnamed,
 		association.title ? association.language : null,
@@ -53,6 +55,16 @@ function SubjectAssociationCard({ association }: { readonly association: Subject
 		hasAvatar: association.avatar !== null,
 		hasCover: association.cover !== null,
 	});
+	if (association.spoiler.concealed && !revealed)
+		return (
+			<FeedCard>
+				<CardContent className="flex min-h-28 items-center justify-center p-5">
+					<Button onClick={() => setRevealed(true)} type="button" variant="outline">
+						{t.editor.showSpoiler}
+					</Button>
+				</CardContent>
+			</FeedCard>
+		);
 
 	return (
 		<FeedCard aria-labelledby={headingId}>

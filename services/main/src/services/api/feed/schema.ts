@@ -20,7 +20,6 @@ export const FeedUnitKindValues = [
 	"release",
 	"entity",
 	"tag",
-	"structure",
 	"series",
 	"zone",
 	"collection",
@@ -50,7 +49,6 @@ export const FeedGeneralUnitKindValues = [
 	"audio",
 	"release",
 	"entity",
-	"structure",
 	"collection",
 	"poll",
 ] as const satisfies readonly Exclude<FeedUnitKind, FeedRatedWorkUnitKind | FeedIdentityUnitKind>[];
@@ -84,7 +82,6 @@ export const FeedContentKindValues = [
 	"unit:release",
 	"unit:entity",
 	"unit:tag",
-	"unit:structure",
 	"unit:series",
 	"unit:zone",
 	"unit:collection",

@@ -235,11 +235,6 @@ function assertPackReferences(
 
 	const pathsBySourceKey = new Map<string, NonNullable<PackRelations["tagPaths"]>[number]>();
 	const definitionKeys = new Set<string>();
-	const primaryCountsByLeaf = new Map<string, { paths: number; primary: number }>();
-	const rankedPathsByLeaf = new Map<
-		string,
-		{ readonly id: string; readonly primary: boolean; readonly sourceKey: string }[]
-	>();
 	const declaredPathIds = new Set<string>();
 	for (const path of relations.tagPaths ?? []) {
 		if (pathsBySourceKey.has(path.sourceKey))
@@ -265,33 +260,6 @@ function assertPackReferences(
 		if (definitionKeys.has(definitionKey))
 			throw new ContentPackInvalid(`Duplicate exact Tag Path definition: ${path.sourceKey}`);
 		definitionKeys.add(definitionKey);
-		const leaf = path.memberTagSourceKeys.at(-1);
-		if (!leaf) throw new ContentPackInvalid(`${path.sourceKey} has no leaf Tag`);
-		const counts = primaryCountsByLeaf.get(leaf) ?? { paths: 0, primary: 0 };
-		primaryCountsByLeaf.set(leaf, {
-			paths: counts.paths + 1,
-			primary: counts.primary + (path.primary ? 1 : 0),
-		});
-		const rankedPaths = rankedPathsByLeaf.get(leaf) ?? [];
-		rankedPaths.push({ id: declaredPathId, primary: path.primary, sourceKey: path.sourceKey });
-		rankedPathsByLeaf.set(leaf, rankedPaths);
-	}
-	for (const [leaf, counts] of primaryCountsByLeaf)
-		if (counts.primary !== 1)
-			throw new ContentPackInvalid(
-				`Tag ${leaf} must have exactly one primary Path among its ${counts.paths} definitions`,
-			);
-	for (const [leaf, paths] of rankedPathsByLeaf) {
-		const primary = paths.find((path) => path.primary);
-		if (!primary) continue;
-		const outrankingSecondary = paths.find(
-			(path) =>
-				!path.primary && path.id.toLowerCase().localeCompare(primary.id.toLowerCase(), "en") < 0,
-		);
-		if (outrankingSecondary)
-			throw new ContentPackInvalid(
-				`Primary Path ${primary.sourceKey} for ${leaf} must sort before tied secondary ${outrankingSecondary.sourceKey}`,
-			);
 	}
 
 	const pathApplicationKeys = new Set<string>();

@@ -87,6 +87,10 @@ export default {
 	filterFeedByPreferredLanguages: "Feed nach bevorzugten Sprachen filtern",
 	filterFeedByPreferredLanguagesHint:
 		"Wenn diese Option aktiviert ist, enthält der Feed nur Inhalte, die in mindestens einer bevorzugten Sprache verfügbar sind. Andere Listen zeigen weiterhin alle passenden Inhalte mit Sprachersatz an.",
+	alwaysShowSpoilers: "Spoiler immer anzeigen",
+	alwaysShowSpoilersHint: "Als Spoiler gekennzeichnete Inhalte ohne einzelne Freigabe anzeigen.",
+	alwaysShowNsfw: "NSFW-Medien immer anzeigen",
+	alwaysShowNsfwHint: "Als NSFW gekennzeichnete Medien ohne vorherige Unschärfe anzeigen.",
 	account: "Konto",
 	accountDescription: "Verwalte die aktuell angemeldete Sitzung.",
 	security: "Sicherheit",

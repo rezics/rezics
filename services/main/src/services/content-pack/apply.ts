@@ -27,9 +27,10 @@ import {
 	entityMeasurement,
 	label,
 	media,
+	contentPackEntityMeasurementEvidence,
 	contentPackImport,
-	contentPackStructureApplicationEvidence,
-	contentPackStructureDefinitionEvidence,
+	contentPackTagPathDefinitionEvidence,
+	contentPackUnitTagPathEvidence,
 	contentPackSubjectAssociationEvidence,
 	contentPackTagEvidence,
 	contentPackUnitTagEvidence,
@@ -48,8 +49,8 @@ import {
 	unitAlias,
 	unitLocalization,
 	unitSlugAddress,
-	unitStructureApplication,
-	unitStructureApplicationJudgment,
+	unitTagPath,
+	unitTagPathJudgment,
 	unitTag,
 	unitTagJudgment,
 	unitVariant,
@@ -72,7 +73,7 @@ import { ContentPackCollision, ContentPackConflict, ContentPackInvalid } from ".
 import { assertContentPackDocuments } from "./documents";
 import { planContentPack } from "./plan";
 import type { LoadedPack, PackObject, PackRelations, PackStructure } from "./contracts";
-import { createTagStructureInTransaction } from "../tag-structures/service";
+import { createTagPathInTransaction } from "../tag-paths/service";
 
 const ImportOwnerProfileId = OfficialProfileIds.editorial;
 const KindOrder: readonly string[] = [
@@ -148,7 +149,7 @@ export async function applyContentPack(
 	for (const object of objects) await importUnit(tx, pack, object);
 
 	await importTagEvidence(tx, pack, importId);
-	await importEntityMeasurements(tx, pack);
+	await importEntityMeasurements(tx, pack, imported.id);
 	await importRelations(tx, pack, createKeys, importId);
 	await importTagPaths(tx, pack, importId);
 	await importStructures(tx, pack);
@@ -501,7 +502,11 @@ async function importTagEvidence(
 	}
 }
 
-async function importEntityMeasurements(tx: DatabaseTransaction, pack: LoadedPack): Promise<void> {
+async function importEntityMeasurements(
+	tx: DatabaseTransaction,
+	pack: LoadedPack,
+	importId: string,
+): Promise<void> {
 	for (const object of pack.objects) {
 		if (object.unit.kind !== "entity" || !object.entityMeasurements) continue;
 		const entityId = requireId(pack.ids.units, object.sourceKey);
@@ -520,21 +525,16 @@ async function importEntityMeasurements(tx: DatabaseTransaction, pack: LoadedPac
 					bustMillimetres: measurement.bustMillimetres ?? null,
 					waistMillimetres: measurement.waistMillimetres ?? null,
 					hipsMillimetres: measurement.hipsMillimetres ?? null,
-					sourceUrl: measurement.sourceUrl,
-					sourceImportedAt,
-					sourceProvenance: measurement.sourceProvenance,
 				})
 				.onConflictDoNothing();
 			const [actual] = await tx
 				.select({
+					id: entityMeasurement.id,
 					heightMillimetres: entityMeasurement.heightMillimetres,
 					weightGrams: entityMeasurement.weightGrams,
 					bustMillimetres: entityMeasurement.bustMillimetres,
 					waistMillimetres: entityMeasurement.waistMillimetres,
 					hipsMillimetres: entityMeasurement.hipsMillimetres,
-					sourceUrl: entityMeasurement.sourceUrl,
-					sourceImportedAt: entityMeasurement.sourceImportedAt,
-					sourceProvenance: entityMeasurement.sourceProvenance,
 				})
 				.from(entityMeasurement)
 				.where(
@@ -552,14 +552,25 @@ async function importEntityMeasurements(tx: DatabaseTransaction, pack: LoadedPac
 				actual.weightGrams !== (measurement.weightGrams ?? null) ||
 				actual.bustMillimetres !== (measurement.bustMillimetres ?? null) ||
 				actual.waistMillimetres !== (measurement.waistMillimetres ?? null) ||
-				actual.hipsMillimetres !== (measurement.hipsMillimetres ?? null) ||
-				actual.sourceUrl !== measurement.sourceUrl ||
-				actual.sourceImportedAt.getTime() !== sourceImportedAt.getTime() ||
-				stableJson(actual.sourceProvenance) !== stableJson(measurement.sourceProvenance)
+				actual.hipsMillimetres !== (measurement.hipsMillimetres ?? null)
 			)
 				throw new ContentPackCollision(
-					`${object.sourceKey} measurement collides with different existing evidence`,
+					`${object.sourceKey} measurement collides with different existing facts`,
 				);
+			await tx.insert(contentPackEntityMeasurementEvidence).values({
+				importId,
+				sourceFingerprint: sourceFingerprint(
+					"entity-measurement",
+					object.sourceKey,
+					measurement.contextUnitSourceKey ?? "",
+				),
+				measurementId: actual.id,
+				entitySourceKey: object.sourceKey,
+				contextUnitSourceKey: measurement.contextUnitSourceKey ?? null,
+				sourceUrl: measurement.sourceUrl,
+				sourceObservedAt: sourceImportedAt,
+				provenance: measurement.sourceProvenance,
+			});
 		}
 	}
 }
@@ -944,13 +955,13 @@ async function importTagPaths(
 	pack: LoadedPack,
 	importId: string,
 ): Promise<void> {
-	const actualStructureIds = new Map<string, string>();
+	const actualPathIds = new Map<string, string>();
 	for (const path of pack.relations.tagPaths ?? []) {
-		const structureId = await importTagPathDefinition(tx, pack, importId, path);
-		actualStructureIds.set(path.sourceKey, structureId);
+		const pathId = await importTagPathDefinition(tx, pack, importId, path);
+		actualPathIds.set(path.sourceKey, pathId);
 	}
 	for (const application of pack.relations.tagPathApplications ?? [])
-		await importTagPathApplication(tx, pack, importId, application, actualStructureIds);
+		await importTagPathApplication(tx, pack, importId, application, actualPathIds);
 }
 
 async function importTagPathDefinition(
@@ -959,28 +970,27 @@ async function importTagPathDefinition(
 	importId: string,
 	path: PackTagPath,
 ): Promise<string> {
-	const declaredStructureId = requireId(pack.ids.tagPaths ?? {}, path.sourceKey);
+	const declaredPathId = requireId(pack.ids.tagPaths ?? {}, path.sourceKey);
 	const sourceImportedAt = sourceDate(path.sourceImportedAt);
-	const result = await createTagStructureInTransaction(tx, {
-		structureId: declaredStructureId,
+	const result = await createTagPathInTransaction(tx, {
+		pathId: declaredPathId,
 		memberTagIds: path.memberTagSourceKeys.map((sourceKey) => requireId(pack.ids.units, sourceKey)),
 		profileId: ImportOwnerProfileId,
 		createdAt: sourceImportedAt,
 	});
-	await tx.insert(contentPackStructureDefinitionEvidence).values({
+	await tx.insert(contentPackTagPathDefinitionEvidence).values({
 		importId,
 		sourceFingerprint: sourceFingerprint("tag-path", path.sourceKey),
-		structureId: result.structureId,
+		pathId: result.pathId,
 		profileId: ImportOwnerProfileId,
-		declaredStructureId,
+		declaredPathId,
 		pathSourceKey: path.sourceKey,
 		memberTagSourceKeys: [...path.memberTagSourceKeys],
-		primarySourcePath: path.primary,
 		sourceVote: 1,
 		sourceUrl: path.sourceUrl,
 		sourceImportedAt,
 	});
-	return result.structureId;
+	return result.pathId;
 }
 
 async function importTagPathApplication(
@@ -988,21 +998,21 @@ async function importTagPathApplication(
 	pack: LoadedPack,
 	importId: string,
 	application: PackTagPathApplication,
-	actualStructureIds: ReadonlyMap<string, string>,
+	actualPathIds: ReadonlyMap<string, string>,
 ): Promise<void> {
 	const unitId = requireId(pack.ids.units, application.unitSourceKey);
-	const declaredStructureId = requireId(pack.ids.tagPaths ?? {}, application.pathSourceKey);
-	const structureId = actualStructureIds.get(application.pathSourceKey);
-	if (!structureId)
+	const declaredPathId = requireId(pack.ids.tagPaths ?? {}, application.pathSourceKey);
+	const pathId = actualPathIds.get(application.pathSourceKey);
+	if (!pathId)
 		throw new ContentPackInvalid(
 			`Tag Path application references unknown path ${application.pathSourceKey}`,
 		);
 	const sourceImportedAt = sourceDate(application.sourceImportedAt);
 	await tx
-		.insert(unitStructureApplication)
+		.insert(unitTagPath)
 		.values({
 			unitId,
-			structureId,
+			pathId,
 			createdByProfileId: ImportOwnerProfileId,
 			pinned: false,
 			position: null,
@@ -1011,24 +1021,19 @@ async function importTagPathApplication(
 		})
 		.onConflictDoNothing();
 	const [actualApplication] = await tx
-		.select({ unitId: unitStructureApplication.unitId })
-		.from(unitStructureApplication)
-		.where(
-			and(
-				eq(unitStructureApplication.unitId, unitId),
-				eq(unitStructureApplication.structureId, structureId),
-			),
-		)
+		.select({ unitId: unitTagPath.unitId })
+		.from(unitTagPath)
+		.where(and(eq(unitTagPath.unitId, unitId), eq(unitTagPath.pathId, pathId)))
 		.limit(1);
 	if (!actualApplication)
 		throw new ContentPackCollision(
 			`${application.unitSourceKey}/${application.pathSourceKey} application was not created`,
 		);
 	await tx
-		.insert(unitStructureApplicationJudgment)
+		.insert(unitTagPathJudgment)
 		.values({
 			unitId,
-			structureId,
+			pathId,
 			profileId: ImportOwnerProfileId,
 			fitVote: application.fitVote,
 			spoilerLevel: application.spoilerLevel,
@@ -1040,17 +1045,17 @@ async function importTagPathApplication(
 		.onConflictDoNothing();
 	const [actualJudgment] = await tx
 		.select({
-			fitVote: unitStructureApplicationJudgment.fitVote,
-			spoilerLevel: unitStructureApplicationJudgment.spoilerLevel,
-			fitUpdatedAt: unitStructureApplicationJudgment.fitUpdatedAt,
-			spoilerUpdatedAt: unitStructureApplicationJudgment.spoilerUpdatedAt,
+			fitVote: unitTagPathJudgment.fitVote,
+			spoilerLevel: unitTagPathJudgment.spoilerLevel,
+			fitUpdatedAt: unitTagPathJudgment.fitUpdatedAt,
+			spoilerUpdatedAt: unitTagPathJudgment.spoilerUpdatedAt,
 		})
-		.from(unitStructureApplicationJudgment)
+		.from(unitTagPathJudgment)
 		.where(
 			and(
-				eq(unitStructureApplicationJudgment.unitId, unitId),
-				eq(unitStructureApplicationJudgment.structureId, structureId),
-				eq(unitStructureApplicationJudgment.profileId, ImportOwnerProfileId),
+				eq(unitTagPathJudgment.unitId, unitId),
+				eq(unitTagPathJudgment.pathId, pathId),
+				eq(unitTagPathJudgment.profileId, ImportOwnerProfileId),
 			),
 		)
 		.limit(1);
@@ -1065,7 +1070,7 @@ async function importTagPathApplication(
 		throw new ContentPackConflict(
 			`${application.unitSourceKey}/${application.pathSourceKey} has a different importer judgment`,
 		);
-	await tx.insert(contentPackStructureApplicationEvidence).values({
+	await tx.insert(contentPackUnitTagPathEvidence).values({
 		importId,
 		sourceFingerprint: sourceFingerprint(
 			"tag-path-application",
@@ -1073,11 +1078,11 @@ async function importTagPathApplication(
 			application.pathSourceKey,
 		),
 		unitId,
-		structureId,
+		pathId,
 		profileId: ImportOwnerProfileId,
 		unitSourceKey: application.unitSourceKey,
 		pathSourceKey: application.pathSourceKey,
-		declaredStructureId,
+		declaredPathId,
 		sourceFitVote: application.fitVote,
 		sourceSpoilerLevel: application.spoilerLevel,
 		sourceUrl: application.sourceUrl,

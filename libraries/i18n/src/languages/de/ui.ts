@@ -4,7 +4,7 @@ const { forms: followTerms } = deTerminology.follow;
 const { forms: postTerms } = deTerminology.post;
 const { forms: realmTerms } = deTerminology.realm;
 const { forms: zoneTerms } = deTerminology.zone;
-const { forms: tagStructureTerms } = deTerminology.tagStructure;
+const { forms: tagPathTerms } = deTerminology.tagPath;
 const { forms: entityTerms } = deTerminology.entity;
 
 export default {
@@ -20,7 +20,7 @@ export default {
 		unit: "Name oder Titel eingeben",
 		entity: `Namen der ${entityTerms.inline} eingeben`,
 		tag: "Tag-Namen eingeben",
-		tagStructure: `Namen des ${tagStructureTerms.inline}es eingeben`,
+		tagPath: `Namen des ${tagPathTerms.inline}es eingeben`,
 		post: `Titel oder Suchbegriff des ${postTerms.inline}s eingeben`,
 		realm: `Namen des ${realmTerms.inline}s eingeben`,
 		user: "Benutzernamen eingeben",

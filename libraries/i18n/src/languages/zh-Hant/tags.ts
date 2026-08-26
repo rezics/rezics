@@ -6,14 +6,15 @@ import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 const { forms: realmTerms } = zhHantTerminology.realm;
 const { forms: followTerms } = zhHantTerminology.follow;
 const { forms: postTerms } = zhHantTerminology.post;
-const { forms: tagStructureTerms } = zhHantTerminology.tagStructure;
+const { forms: tagPathTerms } = zhHantTerminology.tagPath;
 
 export default {
 	page: {
 		title: "標籤",
 		description: `檢視全域情境中的標籤，以及你所選標籤來源對這個作品的${realmTerms.label}情境判斷。`,
 		viewAll: "查看完整標籤頁",
-		manageOnTagPage: `請在專用標籤頁加入標籤或${tagStructureTerms.label}，以保留清楚的投票情境。`,
+		more: insert("另有 {{count}} 項", { count: Number }),
+		manageOnTagPage: `請在專用標籤頁加入標籤或${tagPathTerms.label}，以保留清楚的投票情境。`,
 	},
 	card: {
 		open: insert("開啟「{{tag}}」標籤卡片（{{context}}）", {
@@ -22,7 +23,7 @@ export default {
 		}),
 		close: "關閉標籤卡片",
 		globalContext: "全域情境",
-		structureContext: tagStructureTerms.label,
+		pathContext: tagPathTerms.label,
 		policy: `${realmTerms.label}設定`,
 		search: "搜尋此標籤",
 		details: "查看標籤詳情",
@@ -40,7 +41,7 @@ export default {
 	},
 	basic: {
 		title: "基本標籤",
-		description: `由全域情境中的標籤與${tagStructureTerms.pluralLabel}組成，不帶入任何${realmTerms.label}的情境判斷。`,
+		description: `由全域情境中的標籤與${tagPathTerms.pluralLabel}組成，不帶入任何${realmTerms.label}的情境判斷。`,
 	},
 	voteContext: {
 		title: "依情境投票",
@@ -52,21 +53,31 @@ export default {
 		description: `全域情境中的標籤與你${followTerms.action}的${realmTerms.label}標籤各自保留原本情境；目前投票情境不會在這裡重複顯示。`,
 		empty: "尚未選擇其他標籤來源。",
 	},
-	structures: {
-		title: tagStructureTerms.pluralLabel,
-		description: `${tagStructureTerms.pluralLabel}會保留有意義的階層，並優先於扁平標籤顯示。`,
-		addTitle: `加入${tagStructureTerms.inline}`,
-		addDescription: `請先搜尋已通過的${tagStructureTerms.plural}；加入時會支持整條路徑及路徑上的每個標籤。`,
-		add: `加入${tagStructureTerms.label}`,
-		create: `建立${tagStructureTerms.label}`,
-		details: `查看${tagStructureTerms.label}`,
-		empty: `這個作品還沒有通過的${tagStructureTerms.plural}。`,
+	paths: {
+		title: tagPathTerms.pluralLabel,
+		description: `${tagPathTerms.pluralLabel}會保留有意義的階層，並優先於扁平標籤顯示。`,
+		addTitle: `加入${tagPathTerms.inline}`,
+		addDescription: `請先搜尋已通過的${tagPathTerms.plural}；加入時會支持整條路徑及路徑上的每個標籤。`,
+		add: `加入${tagPathTerms.label}`,
+		create: `建立${tagPathTerms.label}`,
+		details: `查看${tagPathTerms.label}`,
+		empty: `這個作品還沒有通過的${tagPathTerms.plural}。`,
 		memberFallback: "未命名標籤",
-		pathLabel: `依序排列的${tagStructureTerms.label}`,
+		pathLabel: `依序排列的${tagPathTerms.label}`,
+		fitLabel: "是否符合",
+		spoilerLabel: "劇透程度",
+		spoilerNone: "無劇透",
+		spoilerMinor: "輕微劇透",
+		spoilerMajor: "重大劇透",
+		spoilerSummary: insert("投票：無 {{none}} · 輕微 {{minor}} · 重大 {{major}}", {
+			none: Number,
+			minor: Number,
+			major: Number,
+		}),
 	},
 	detail: {
 		sections: "標籤詳情頁籤",
-		tabs: { overview: "總覽", discussion: "討論", content: "相關內容", structure: "階層" },
+		tabs: { overview: "總覽", discussion: "討論", content: "相關內容", paths: "階層" },
 		overviewTitle: "標籤正文",
 		overviewDescription: "閱讀這個標籤的完整說明；摘要仍用於卡片及快速瀏覽。",
 		bodyEmpty: "這個標籤尚未填寫正文。",
@@ -74,22 +85,22 @@ export default {
 		discussionDescription: `建立以這個標籤為主題的${postTerms.label}，並參與既有討論。`,
 		contentTitle: "相關內容",
 		contentDescription: "瀏覽套用這個標籤的作品與其他內容。",
-		structureTitle: "標籤階層",
-		structureDescription: "檢視這個標籤在社群通過之標籤結構中的位置。",
+		pathsTitle: "標籤階層",
+		pathsDescription: "檢視這個標籤在社群通過之標籤結構中的位置。",
 		editTitle: "編輯標籤內容",
 		editDescription: "更新目前內容語言的標題、摘要與正文。",
 		editNavigation: "標籤內容管理",
 		backToTag: "返回標籤",
 		backToEditOverview: "返回編輯總覽",
 		childrenTitle: "直接子標籤",
-		childrenDescription: `這些關係來自通過投票且由社群鎖定的${tagStructureTerms.label}；每個子標籤下方會顯示其直接子標籤。`,
+		childrenDescription: `這些關係來自通過投票且由社群鎖定的${tagPathTerms.label}；每個子標籤下方會顯示其直接子標籤。`,
 		noChildren: "這個標籤目前沒有通過的直接子標籤。",
 		grandchildrenTitle: "直接子標籤",
 	},
-	createStructure: {
-		title: `建立${tagStructureTerms.label}`,
+	createPath: {
+		title: `建立${tagPathTerms.label}`,
 		description:
-			"請依「較廣泛」到「較具體」的順序建立路徑。建立後社群成員不能編輯；平台管理員可進行留有稽核紀錄的修正。",
+			"請依「較廣泛」到「較具體」的順序建立路徑。定義建立後不可編輯；如需調整，請建立新路徑並提交人工治理提案。",
 		pick: "選擇下一個標籤",
 		addMember: "加入路徑",
 		removeMember: "從路徑移除",
@@ -97,15 +108,11 @@ export default {
 		moveLater: "向後移",
 		preview: "社群鎖定路徑預覽",
 		minimum: "請加入至少兩個不同的標籤。",
-		submit: `建立${tagStructureTerms.label}並投票`,
-	},
-	adminEditStructure: {
-		title: `修正${tagStructureTerms.label}`,
-		description:
-			"平台管理員可以修正成員或順序；條目身分、既有投票與所有套用關係都會保留，修正內容也會寫入歷史紀錄。",
-		reasonLabel: "修正理由",
-		reasonPlaceholder: "說明為何需要進行這項管理修正。",
-		submit: "儲存並記錄修正",
+		submit: `建立${tagPathTerms.label}並投票`,
+		relatedTitle: "檢查相關的已接受路徑",
+		relatedDescription:
+			"這些路徑已經終止於同一標籤，但不會被自動視為重複。請先核對語意，再建立獨立且不可變的定義。",
+		continueDistinct: "建立獨立路徑",
 	},
 	create: {
 		noResults: insert("找不到符合「{{query}}」的標籤。", { query: String }),
@@ -172,6 +179,13 @@ export default {
 		noRanked: "全域情境中沒有其他可設為精選的標籤。",
 	},
 	realms: {
+		pathsTitle: `${realmTerms.label}標籤路徑`,
+		applyPath: "套用路徑",
+		authority: { realm: `此${realmTerms.label}`, global: "全域" },
+		pathAuthority: insert("適合度：{{fit}} · 劇透：{{spoiler}}", {
+			fit: String,
+			spoiler: String,
+		}),
 		title: `${realmTerms.label}標籤情境`,
 		description: `各${realmTerms.inline}的判斷彼此獨立，不會與全域情境或其他${realmTerms.inline}合併計分。`,
 		addTitle: `在這個${realmTerms.label}中新增標籤投票`,
@@ -207,5 +221,5 @@ export default {
 	},
 	unnamedTag: "未命名標籤",
 	unnamedRealm: `未命名${realmTerms.label}`,
-	unnamedStructure: `未命名${tagStructureTerms.label}`,
+	unnamedPath: `未命名${tagPathTerms.label}`,
 };

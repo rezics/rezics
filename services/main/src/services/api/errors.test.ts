@@ -1,7 +1,7 @@
 import { StatusCodes } from "http-status-codes";
 import { describe, expect, it } from "vitest";
 
-import { VndbVoteHotKeyBusy } from "../database/errors";
+import { VoteHotKeyBusy } from "../database/errors";
 import { SearchUnavailable } from "../search/errors";
 import { UnitPermissionForbidden } from "../units/errors";
 import { RealmRuleRevisionChanged } from "./realms/errors";
@@ -63,12 +63,12 @@ describe("API errors", () => {
 			requestId: "request-2",
 		});
 
-		const busy = new VndbVoteHotKeyBusy(new Error("database diagnostic"));
+		const busy = new VoteHotKeyBusy(new Error("database diagnostic"));
 		expect(busy.status).toBe(StatusCodes.TOO_MANY_REQUESTS);
 		expect(apiErrorRetryAfterSeconds(busy)).toBe(1);
 		expect(toApiErrorBody(busy, "request-3")).toEqual({
 			error: {
-				code: "VndbVoteHotKeyBusy",
+				code: "VoteHotKeyBusy",
 				message: "The vote target is busy; retry shortly",
 			},
 			requestId: "request-3",

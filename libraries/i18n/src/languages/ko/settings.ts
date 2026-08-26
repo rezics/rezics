@@ -80,6 +80,10 @@ export default {
 	filterFeedByPreferredLanguages: "선호하는 언어로 피드 필터링",
 	filterFeedByPreferredLanguagesHint:
 		"활성화하면 피드에는 최소한 하나의 선호 언어로 제공되는 콘텐츠만 포함됩니다. 다른 목록은 계속해서 모든 일치하는 콘텐츠를 언어 대체 기능과 함께 표시합니다.",
+	alwaysShowSpoilers: "스포일러 항상 표시",
+	alwaysShowSpoilersHint: "스포일러로 표시된 콘텐츠를 항목별 확인 없이 표시합니다.",
+	alwaysShowNsfw: "NSFW 미디어 항상 표시",
+	alwaysShowNsfwHint: "NSFW로 표시된 미디어를 먼저 흐리게 하지 않고 표시합니다.",
 	account: "계정",
 	accountDescription: "현재 로그인 세션 관리",
 	security: "보안",

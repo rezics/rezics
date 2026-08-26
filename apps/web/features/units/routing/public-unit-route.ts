@@ -21,7 +21,6 @@ export type PublicUnitKind =
 	| "release"
 	| "entity"
 	| "tag"
-	| "structure"
 	| "collection"
 	| "post"
 	| "poll";
@@ -48,8 +47,6 @@ export function publicUnitHref(kind: string, value: PublicUnitRouteValue): strin
 			return `/entities/${value.id}`;
 		case "tag":
 			return `/tags/${value.id}`;
-		case "structure":
-			return `/tag-structures/${value.id}`;
 		case "collection":
 			return `/collections/${value.id}`;
 		case "post":

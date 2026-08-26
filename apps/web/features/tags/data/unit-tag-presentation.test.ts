@@ -8,7 +8,7 @@ const UnitId = "019b76da-a800-7300-8000-000000000001";
 
 function landscape(): GetApiUnitsByTypeByUnitIdTagsStatus200 {
 	return {
-		structures: [],
+		paths: [],
 		global: [
 			{
 				tagId: "global-tag",

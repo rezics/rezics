@@ -13,6 +13,13 @@ export default {
 	untitled: `${postTerms.label} sans titre`,
 	titleOptional: "Titre (facultatif)",
 	summaryOptional: "Résumé (facultatif)",
+	contentSpoilerLabel: "Niveau de divulgâcheur",
+	contentSpoilerNone: "Aucun divulgâcheur",
+	contentSpoilerMinor: "Divulgâcheurs mineurs",
+	contentSpoilerMajor: "Divulgâcheurs importants",
+	contentNsfwLabel: "Contenu sensible",
+	contentNsfwDescription: "Signale un contenu qui peut ne pas convenir à un affichage en public.",
+	revealNsfw: "Afficher le contenu sensible",
 	reviewFallbackTitle: insert("Avis de {{author}} sur {{subject}}", {
 		author: String,
 		subject: String,

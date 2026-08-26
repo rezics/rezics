@@ -6,7 +6,7 @@ const { forms: dockTerms } = esTerminology.dock;
 const { forms: followTerms } = esTerminology.follow;
 const { forms: postTerms } = esTerminology.post;
 const { forms: realmTerms } = esTerminology.realm;
-const { forms: tagStructureTerms } = esTerminology.tagStructure;
+const { forms: tagPathTerms } = esTerminology.tagPath;
 const { forms: unitSlugTerms } = esTerminology.unitSlug;
 const { forms: zoneTerms } = esTerminology.zone;
 const { forms: entityTerms } = esTerminology.entity;
@@ -19,8 +19,7 @@ export default {
 	ApiTokenPermissionRequired: `Este token de ${verbatimTerms.api.value} no tiene el permiso necesario.`,
 	ApiTokenRateLimitExceeded: `Este token de ${verbatimTerms.api.value} está enviando solicitudes demasiado rápido. Vuelve a intentarlo en unos instantes.`,
 	ApiQuotaExceeded: `Se agotó la cuota de ${verbatimTerms.api.value}. Vuelve a intentarlo después del tiempo indicado.`,
-	VndbVoteHotKeyBusy:
-		"Este objetivo de votación está ocupado. Inténtalo de nuevo en unos instantes.",
+	VoteHotKeyBusy: "Este objetivo de votación está ocupado. Inténtalo de nuevo en unos instantes.",
 	ApiQuotaPolicyNotFound: `No se encontró la política de cuotas de ${verbatimTerms.api.value} solicitada.`,
 	ApiQuotaPolicyKeyConflict: `Ya existe una política de cuotas de ${verbatimTerms.api.value} con esta clave.`,
 	ApiQuotaPolicyInvalid: `La configuración de la política de cuotas de ${verbatimTerms.api.value} no es válida.`,
@@ -316,11 +315,11 @@ export default {
 	RealmTagContextRequired: `Este ${realmTerms.inline} debe proporcionar primero una explicación formal y actualmente visible de la etiqueta.`,
 	RealmTagSelfReferenceForbidden: "Una etiqueta no se puede aplicar a sí misma.",
 	SharedSearchQueryNotFound: "No se ha encontrado esta consulta de búsqueda compartida.",
-	InvalidTagStructure: `Esta ${tagStructureTerms.inline} no es válida.`,
-	TagStructureNotFound: `No se ha encontrado esta ${tagStructureTerms.inline}.`,
-	TagStructureApplicationNotFound: `Esta Unit no tiene esa ${tagStructureTerms.inline}.`,
-	TagStructureChanged: `Esta ${tagStructureTerms.inline} se ha modificado en otro lugar. Actualiza la página e inténtalo de nuevo.`,
-	TagStructureDefinitionConflict: `Ya existe una ${tagStructureTerms.inline} idéntica.`,
+	InvalidTagPath: `Esta ${tagPathTerms.inline} no es válida.`,
+	TagPathNotFound: `No se ha encontrado esta ${tagPathTerms.inline}.`,
+	TagPathApplicationNotFound: `Esta Unit no tiene esa ${tagPathTerms.inline}.`,
+	TagPathChanged: `Esta ${tagPathTerms.inline} se ha modificado en otro lugar. Actualiza la página e inténtalo de nuevo.`,
+	TagPathDefinitionConflict: `Ya existe una ${tagPathTerms.inline} idéntica.`,
 	AssociationContextPostInvalid: `El contexto de la relación debe ser una ${postTerms.inline} de wiki.`,
 	ProgressEntryNotFound: "No se ha encontrado este evento de progreso.",
 	PostTagMentionVoteConflict: `Esta mención de etiqueta entra en conflicto con tu voto negativo actual en la ${postTerms.inline}.`,

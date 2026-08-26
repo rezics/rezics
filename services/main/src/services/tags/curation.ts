@@ -3,7 +3,7 @@ import { and, desc, eq, sql } from "drizzle-orm";
 import { TagApplicationNotFound, UnitTagCurationChanged } from "../api/unit-resources/errors";
 import { database } from "../database";
 import { toSafeInteger } from "../database/integer";
-import { currentUnitTagJudgmentStat as unitTagJudgmentStat, unitTag } from "../database/schema";
+import { unitTagJudgmentStat, unitTag } from "../database/schema";
 import { lockUnitHistory, recordUnitRevision } from "../units/history";
 import type { RevisionContributionInput } from "../units/revision-contribution";
 

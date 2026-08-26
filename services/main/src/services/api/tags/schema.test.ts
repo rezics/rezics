@@ -2,14 +2,14 @@ import { Value } from "@sinclair/typebox/value";
 import { describe, expect, it } from "vitest";
 
 import {
-	CreateTagStructureBody,
+	CreateTagPathBody,
 	RealmTagSubscriptionResponse,
 	RealmUnitTagVoteListResponse,
 	RealmUnitTagVoteListQuery,
 	UnitTagLandscapeQuery,
 	UnitTagLandscapeParams,
 	UnitTagLandscapeResponse,
-	UpdateTagStructureBody,
+	UpdateTagPathBody,
 	UpsertRealmTagSubscriptionBody,
 } from "./schema";
 
@@ -27,7 +27,7 @@ describe("Tag API schemas", () => {
 		expect(
 			Value.Check(UnitTagLandscapeQuery, {
 				globalLimit: 100,
-				structureLimit: 50,
+				pathLimit: 50,
 				sourceLimit: 30,
 				perRealmLimit: 50,
 			}),
@@ -45,18 +45,18 @@ describe("Tag API schemas", () => {
 	it("requires a community-immutable ordered path of distinct Tag ids", () => {
 		const first = "018f2f3a-7ac0-7000-8000-000000000001";
 		const second = "018f2f3a-7ac0-7000-8000-000000000002";
-		expect(Value.Check(CreateTagStructureBody, { memberTagIds: [first, second] })).toBe(true);
-		expect(Value.Check(CreateTagStructureBody, { memberTagIds: [first] })).toBe(false);
-		expect(Value.Check(CreateTagStructureBody, { memberTagIds: [first, first] })).toBe(false);
+		expect(Value.Check(CreateTagPathBody, { memberTagIds: [first, second] })).toBe(true);
+		expect(Value.Check(CreateTagPathBody, { memberTagIds: [first] })).toBe(false);
+		expect(Value.Check(CreateTagPathBody, { memberTagIds: [first, first] })).toBe(false);
 		expect(
-			Value.Check(UpdateTagStructureBody, {
+			Value.Check(UpdateTagPathBody, {
 				memberTagIds: [second, first],
 				updatedAt: "2026-07-23T12:00:00.000Z",
 				reason: "Correct the hierarchy order.",
 			}),
 		).toBe(true);
 		expect(
-			Value.Check(UpdateTagStructureBody, {
+			Value.Check(UpdateTagPathBody, {
 				memberTagIds: [second, first],
 				updatedAt: "2026-07-23T12:00:00.000Z",
 				reason: "",
@@ -87,7 +87,7 @@ describe("Tag API schemas", () => {
 		);
 		expect(
 			Value.Check(UnitTagLandscapeResponse, {
-				structures: [],
+				paths: [],
 				global: [],
 				realms: [{ ...subscription, canVote: false, votedTags: [] }],
 				voteRealms: [],

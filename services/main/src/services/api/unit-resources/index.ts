@@ -27,7 +27,7 @@ import { unitOwnershipModeFromOwnerProfileId } from "../../authorization/unit/ow
 import { getUnitPermissionCondition } from "../../authorization/unit/query";
 import { associationTargetScope, unitScope } from "../../authorization/unit/scope";
 import { database } from "../../database";
-import { runVndbVoteTransaction } from "../../database/vndb-vote-admission";
+import { runVoteTransaction } from "../../database/vote-admission";
 import {
 	avatarReferenceFromColumns,
 	resolveUnitLocalizationAvatarFromOrdered,
@@ -40,9 +40,12 @@ import {
 import { fractionalPositionBetween } from "../../ordering/position";
 import {
 	creditAttribution,
-	currentUnitTagJudgmentStat as unitTagJudgmentStat,
+	unitTagJudgmentStat,
 	entity,
+	entityMeasurement,
 	subjectAssociation,
+	subjectAssociationJudgment,
+	subjectAssociationJudgmentStat,
 	tag,
 	unit,
 	unitAlias,
@@ -70,6 +73,7 @@ import {
 	AddUnitAliasBody,
 	AddUnitCreditBody,
 	AddUnitSubjectAssociationBody,
+	SubjectAssociationSpoilerBody,
 	AddUnitExternalLinkBody,
 	AttributionAssociationParams,
 	AttributionUnitParams,
@@ -77,6 +81,7 @@ import {
 	CreateEntityBody,
 	EntityDetailQuery,
 	EntityLocalizationParams,
+	UpsertEntityMeasurementBody,
 	ListEntityEntriesQuery,
 	ListTagsQuery,
 	TagDetailParams,
@@ -131,8 +136,10 @@ import {
 	AliasListResponse,
 	CreditAttributionResponse,
 	EntityDetailResponse,
+	EntityMeasurementResponse,
 	EntityListResponse,
 	SubjectAssociationResponse,
+	SubjectAssociationSpoilerResponse,
 	TagApplicationResponse,
 	TagDetailResponse,
 	TagListResponse,
@@ -141,7 +148,7 @@ import {
 	UnitExternalLinkResponse,
 	UnitExternalLinkCurationResponse,
 	VoteResponse,
-	VndbVoteBackpressureResponse,
+	VoteBackpressureResponse,
 } from "../schema/response";
 import {
 	AliasNotFound,
@@ -393,6 +400,61 @@ async function getTagVoteSummary(unitId: string, tagId: string, value: -1 | 1 | 
 	});
 }
 
+async function getSubjectAssociationSpoilerSummary(associationId: string, profileId: string) {
+	const [[association], [stat], [viewer]] = await Promise.all([
+		database
+			.select({ id: subjectAssociation.id })
+			.from(subjectAssociation)
+			.where(eq(subjectAssociation.id, associationId))
+			.limit(1),
+		database
+			.select()
+			.from(subjectAssociationJudgmentStat)
+			.where(eq(subjectAssociationJudgmentStat.associationId, associationId))
+			.limit(1),
+		database
+			.select({ spoilerLevel: subjectAssociationJudgment.spoilerLevel })
+			.from(subjectAssociationJudgment)
+			.where(
+				and(
+					eq(subjectAssociationJudgment.associationId, associationId),
+					eq(subjectAssociationJudgment.profileId, profileId),
+				),
+			)
+			.limit(1),
+	]);
+	if (!association) throw new SubjectAssociationNotFound();
+	const voteCount = toSafeInteger(
+		stat?.spoilerVoteCount ?? 0n,
+		"Subject association spoiler vote count",
+	);
+	const none = toSafeInteger(stat?.spoilerNoneCount ?? 0n, "Subject association no-spoiler count");
+	const minor = toSafeInteger(
+		stat?.spoilerMinorCount ?? 0n,
+		"Subject association minor-spoiler count",
+	);
+	const major = toSafeInteger(
+		stat?.spoilerMajorCount ?? 0n,
+		"Subject association major-spoiler count",
+	);
+	const level =
+		major * 2 >= voteCount && voteCount > 0
+			? 2
+			: (minor + major) * 2 >= voteCount && voteCount > 0
+				? 1
+				: 0;
+	const viewerLevel = viewer?.spoilerLevel ?? null;
+	if (viewerLevel !== null && viewerLevel !== 0 && viewerLevel !== 1 && viewerLevel !== 2)
+		throw new Error("Subject association spoiler judgment is invalid");
+	return {
+		associationId,
+		level,
+		voteCount,
+		distribution: { none, minor, major },
+		viewerLevel,
+	};
+}
+
 export default new Elysia()
 	.use(session)
 	.group("/entities", (app) =>
@@ -572,6 +634,15 @@ export default new Elysia()
 						identity.authorization.profileId,
 						localizationLanguages,
 					);
+					const measurements = await database
+						.select()
+						.from(entityMeasurement)
+						.where(eq(entityMeasurement.entityId, params.unitId))
+						.orderBy(
+							sql`case when ${entityMeasurement.contextUnitId} is null then 0 else 1 end`,
+							entityMeasurement.contextUnitId,
+							entityMeasurement.id,
+						);
 					const creditAttributions = await database
 						.select({
 							id: creditAttribution.id,
@@ -673,6 +744,7 @@ export default new Elysia()
 						owner: ownerSummary,
 						externalLinks,
 						variantContext,
+						measurements,
 						ownershipClaim: ownershipClaim
 							? { ...ownershipClaim, state: "pending" as const }
 							: null,
@@ -697,6 +769,54 @@ export default new Elysia()
 						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["EntityEntryNotFound"]),
 					},
 					detail: { summary: "Get entity entry", tags: ["Entity"] },
+				},
+			)
+			.put(
+				"/:unitId/measurements",
+				async ({ params, body, authorization }) => {
+					await checkUnitType(params.unitId, "entity");
+					await authorization.unit.ensureCanUpdate(params.unitId, [["measurements"]]);
+					if (body.contextUnitId) await authorization.unit.ensureCanRead(body.contextUnitId);
+					const { revisionContext, contextUnitId = null, ...values } = body;
+					if (Object.values(values).every((value) => value === null))
+						throw new ValidationError("At least one measurement value is required");
+					return database.transaction(async (tx) => {
+						const [measurement] = await tx
+							.insert(entityMeasurement)
+							.values({ entityId: params.unitId, contextUnitId, ...values })
+							.onConflictDoUpdate({
+								target: [entityMeasurement.entityId, entityMeasurement.contextUnitId],
+								set: { ...values, updatedAt: new Date() },
+							})
+							.returning();
+						if (!measurement) throw new Error("Entity measurement upsert returned no row");
+						await recordUnitRevision(tx, {
+							unitId: params.unitId,
+							actorProfileId: authorization.profileId,
+							contribution: revisionContext?.contribution,
+							event: "update",
+						});
+						return measurement;
+					});
+				},
+				{
+					access: "contribute:unit:update",
+					params: UnitIdParams,
+					body: UpsertEntityMeasurementBody,
+					response: {
+						[StatusCodes.OK]: EntityMeasurementResponse,
+						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
+						[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
+						[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["ValidationError"]),
+						[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
+							"RevisionCreditEntityInvalid",
+							"RevisionContributionActorRequired",
+						]),
+					},
+					detail: {
+						summary: "Create or replace a canonical Entity measurement set",
+						tags: ["Entity"],
+					},
 				},
 			)
 			.patch(
@@ -1457,6 +1577,97 @@ export default new Elysia()
 					detail: { summary: "Add Unit subject association", tags: ["Units"] },
 				},
 			)
+			.put(
+				"/subject-associations/:associationId/spoiler",
+				async ({ params, body, profile, authorization }) => {
+					await checkUnitType(params.unitId, params.type);
+					await authorization.unit.ensureCanRead(params.unitId);
+					const [association] = await database
+						.select({ id: subjectAssociation.id })
+						.from(subjectAssociation)
+						.where(
+							and(
+								eq(subjectAssociation.id, params.associationId),
+								eq(subjectAssociation.unitId, params.unitId),
+							),
+						)
+						.limit(1);
+					if (!association) throw new SubjectAssociationNotFound();
+					await runVoteTransaction({ family: "unit_tag", authority: "global" }, (tx) =>
+						tx
+							.insert(subjectAssociationJudgment)
+							.values({
+								associationId: params.associationId,
+								profileId: profile.unitId,
+								spoilerLevel: body.spoilerLevel,
+							})
+							.onConflictDoUpdate({
+								target: [
+									subjectAssociationJudgment.associationId,
+									subjectAssociationJudgment.profileId,
+								],
+								set: {
+									spoilerLevel: body.spoilerLevel,
+									updatedAt: new Date(),
+								},
+							}),
+					);
+					return getSubjectAssociationSpoilerSummary(params.associationId, profile.unitId);
+				},
+				{
+					access: "contribute:interaction:write",
+					params: UnitAssociationParams,
+					body: SubjectAssociationSpoilerBody,
+					response: {
+						[StatusCodes.OK]: SubjectAssociationSpoilerResponse,
+						[StatusCodes.FORBIDDEN]: UnitInteractionForbiddenResponse,
+						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
+							"UnitNotFound",
+							"SubjectAssociationNotFound",
+						]),
+						[StatusCodes.TOO_MANY_REQUESTS]: VoteBackpressureResponse,
+					},
+					detail: {
+						summary: "Judge the spoiler level of a subject association",
+						tags: ["Units"],
+					},
+				},
+			)
+			.delete(
+				"/subject-associations/:associationId/spoiler",
+				async ({ params, profile, authorization }) => {
+					await checkUnitType(params.unitId, params.type);
+					await authorization.unit.ensureCanRead(params.unitId);
+					await runVoteTransaction({ family: "unit_tag", authority: "global" }, (tx) =>
+						tx
+							.delete(subjectAssociationJudgment)
+							.where(
+								and(
+									eq(subjectAssociationJudgment.associationId, params.associationId),
+									eq(subjectAssociationJudgment.profileId, profile.unitId),
+								),
+							),
+					);
+					return getSubjectAssociationSpoilerSummary(params.associationId, profile.unitId);
+				},
+				{
+					access: "write:interaction:write",
+					params: UnitAssociationParams,
+					response: {
+						[StatusCodes.OK]: SubjectAssociationSpoilerResponse,
+						[StatusCodes.FORBIDDEN]: UnitInteractionForbiddenResponse,
+						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
+							"UnitNotFound",
+							"SubjectAssociationNotFound",
+						]),
+						[StatusCodes.TOO_MANY_REQUESTS]: VoteBackpressureResponse,
+					},
+					detail: {
+						summary: "Clear a subject-association spoiler judgment",
+						tags: ["Units"],
+					},
+				},
+			)
 			.delete(
 				"/subject-associations/:associationId",
 				async ({ params, profile, authorization, body }) => {
@@ -1860,7 +2071,7 @@ export default new Elysia()
 						.where(eq(tag.id, params.tagId))
 						.limit(1);
 					if (!tagRecord) throw new TagNotFound();
-					await runVndbVoteTransaction({ family: "unit_tag", authority: "global" }, async (tx) => {
+					await runVoteTransaction({ family: "unit_tag", authority: "global" }, async (tx) => {
 						await tx
 							.insert(unitTag)
 							.values({
@@ -1913,7 +2124,7 @@ export default new Elysia()
 							"TagApplicationNotFound",
 						]),
 						[StatusCodes.UNPROCESSABLE_ENTITY]: TagApplicationPolicyResponse,
-						[StatusCodes.TOO_MANY_REQUESTS]: VndbVoteBackpressureResponse,
+						[StatusCodes.TOO_MANY_REQUESTS]: VoteBackpressureResponse,
 					},
 					detail: { summary: "Tag unit", tags: ["Units"] },
 				},
@@ -1964,7 +2175,7 @@ export default new Elysia()
 				async ({ params, profile, authorization, body }) => {
 					await checkUnitType(params.unitId, params.type);
 					await authorization.unit.ensure(params.unitId, "unit.tag-curation.manage");
-					await runVndbVoteTransaction({ family: "unit_tag", authority: "global" }, async (tx) => {
+					await runVoteTransaction({ family: "unit_tag", authority: "global" }, async (tx) => {
 						const deleted = await tx
 							.delete(unitTag)
 							.where(and(eq(unitTag.unitId, params.unitId), eq(unitTag.tagId, params.tagId)))
@@ -1996,7 +2207,7 @@ export default new Elysia()
 						]),
 						[StatusCodes.CONFLICT]: toApiErrorResponse(["TagApplicationHasJudgments"]),
 						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "TagApplicationNotFound"]),
-						[StatusCodes.TOO_MANY_REQUESTS]: VndbVoteBackpressureResponse,
+						[StatusCodes.TOO_MANY_REQUESTS]: VoteBackpressureResponse,
 					},
 					detail: {
 						summary: "Remove Unit tag",
@@ -2010,7 +2221,7 @@ export default new Elysia()
 				async ({ params, profile, authorization, body }) => {
 					await checkUnitType(params.unitId, params.type);
 					await authorization.unit.ensureCanRead(params.unitId);
-					const tagId = await runVndbVoteTransaction(
+					const tagId = await runVoteTransaction(
 						{ family: "unit_tag", authority: "global" },
 						async (tx) => {
 							const [application] = await tx
@@ -2049,11 +2260,11 @@ export default new Elysia()
 						[StatusCodes.OK]: VoteResponse,
 						[StatusCodes.FORBIDDEN]: UnitInteractionForbiddenResponse,
 						[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse([
-							"InvalidTagStructure",
+							"InvalidTagPath",
 							"ContentLabelJudgmentForbidden",
 						]),
 						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "TagApplicationNotFound"]),
-						[StatusCodes.TOO_MANY_REQUESTS]: VndbVoteBackpressureResponse,
+						[StatusCodes.TOO_MANY_REQUESTS]: VoteBackpressureResponse,
 					},
 					detail: { summary: "Vote on Unit tag", tags: ["Units"] },
 				},
@@ -2063,7 +2274,7 @@ export default new Elysia()
 				async ({ params, profile, authorization }) => {
 					await checkUnitType(params.unitId, params.type);
 					await authorization.unit.ensureCanRead(params.unitId);
-					const tagId = await runVndbVoteTransaction(
+					const tagId = await runVoteTransaction(
 						{ family: "unit_tag", authority: "global" },
 						async (tx) => {
 							const [application] = await tx
@@ -2096,7 +2307,7 @@ export default new Elysia()
 						[StatusCodes.OK]: VoteResponse,
 						[StatusCodes.FORBIDDEN]: UnitInteractionForbiddenResponse,
 						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "TagApplicationNotFound"]),
-						[StatusCodes.TOO_MANY_REQUESTS]: VndbVoteBackpressureResponse,
+						[StatusCodes.TOO_MANY_REQUESTS]: VoteBackpressureResponse,
 					},
 					detail: { summary: "Remove Unit tag vote", tags: ["Units"] },
 				},

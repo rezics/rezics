@@ -6,7 +6,7 @@ const { forms: followTerms } = deTerminology.follow;
 const { forms: postTerms } = deTerminology.post;
 const { forms: realmTerms } = deTerminology.realm;
 const { forms: entityTerms } = deTerminology.entity;
-const { forms: tagStructureTerms } = deTerminology.tagStructure;
+const { forms: tagPathTerms } = deTerminology.tagPath;
 const { forms: zoneTerms } = deTerminology.zone;
 const { forms: videoTerms } = deTerminology.video;
 const { forms: audioTerms } = deTerminology.audio;
@@ -64,7 +64,7 @@ export default {
 			"unit:release": "Veröffentlichungen",
 			"unit:entity": entityTerms.pluralLabel,
 			"unit:tag": "Tags",
-			"unit:structure": tagStructureTerms.pluralLabel,
+			"unit:structure": tagPathTerms.pluralLabel,
 			"unit:series": "Reihen",
 			"unit:zone": zoneTerms.pluralLabel,
 			"unit:collection": "Sammlungen",

@@ -26,6 +26,7 @@ const OptionalPostTitle = t.Optional(t.String({ minLength: 1, maxLength: 500 }))
 const OptionalPostSummary = t.Optional(t.String({ minLength: 1, maxLength: 2_000 }));
 const NullablePostTitle = t.Nullable(t.String({ minLength: 1, maxLength: 500 }));
 const NullablePostSummary = t.Nullable(t.String({ minLength: 1, maxLength: 2_000 }));
+const ContentSpoilerLevel = t.Union([t.Literal(0), t.Literal(1), t.Literal(2)]);
 
 export const MaximumPostPublishRealmCount = 10;
 export const PostPublishRealmIds = t.Array(Uuid, {
@@ -39,6 +40,8 @@ const CreatePostFields = {
 	body: PortableTextDocument,
 	language: ContentLanguage,
 	publishRealmIds: PostPublishRealmIds,
+	contentSpoilerLevel: t.Optional(ContentSpoilerLevel),
+	contentNsfw: t.Optional(t.Boolean()),
 } as const;
 
 export const CreatePostBody = t.Union([
@@ -116,6 +119,8 @@ export const UpdatePostBody = t.Object({
 	baseRevisionId: Uuid,
 	editSummary: t.Optional(t.String({ maxLength: 500 })),
 	minor: t.Optional(t.Boolean()),
+	contentSpoilerLevel: t.Optional(ContentSpoilerLevel),
+	contentNsfw: t.Optional(t.Boolean()),
 	revisionContext: t.Optional(RevisionContext),
 });
 export type UpdatePostBody = Static<typeof UpdatePostBody>;

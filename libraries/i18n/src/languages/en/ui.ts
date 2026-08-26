@@ -4,7 +4,7 @@ const { forms: followTerms } = enTerminology.follow;
 const { forms: postTerms } = enTerminology.post;
 const { forms: realmTerms } = enTerminology.realm;
 const { forms: zoneTerms } = enTerminology.zone;
-const { forms: tagStructureTerms } = enTerminology.tagStructure;
+const { forms: tagPathTerms } = enTerminology.tagPath;
 const { forms: entityTerms } = enTerminology.entity;
 
 export default {
@@ -20,7 +20,7 @@ export default {
 		unit: "Enter a name or title",
 		entity: `Enter an ${entityTerms.inline} name`,
 		tag: "Enter a tag name",
-		tagStructure: `Enter a ${tagStructureTerms.inline} name`,
+		tagPath: `Enter a ${tagPathTerms.inline} name`,
 		post: `Enter a ${postTerms.inline} title or keyword`,
 		realm: `Enter a ${realmTerms.inline} name`,
 		user: "Enter a user name",

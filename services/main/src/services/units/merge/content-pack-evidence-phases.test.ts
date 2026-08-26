@@ -33,7 +33,7 @@ function render(statement: SQL): string {
 async function capturePhase(
 	phase: Extract<
 		UnitMergeOperationPhase,
-		"unit_tags" | "structure_applications" | "subject_sources" | "subject_entities"
+		"unit_tags" | "tag_path_applications" | "subject_sources" | "subject_entities"
 	>,
 	evidenceProcessed = 1,
 ): Promise<{ readonly result: UnitMergePhaseResult; readonly statements: readonly string[] }> {
@@ -47,17 +47,13 @@ async function capturePhase(
 		if (query.includes(" as remaining")) return { rows: [{ processed: 0, remaining: false }] };
 		return { rows: [] };
 	});
-	const result = await processUnitMergePhase(
-		{ execute } as unknown as DatabaseTransaction,
-		phase,
-		{
-			operationId: OperationId,
-			sourceUnitId: SourceUnitId,
-			targetUnitId: TargetUnitId,
-			graphPlan: GraphPlan,
-			batchSize: BatchSize,
-		},
-	);
+	const result = await processUnitMergePhase({ execute } as unknown as DatabaseTransaction, phase, {
+		operationId: OperationId,
+		sourceUnitId: SourceUnitId,
+		targetUnitId: TargetUnitId,
+		graphPlan: GraphPlan,
+		batchSize: BatchSize,
+	});
 	return { result, statements };
 }
 
@@ -95,17 +91,17 @@ describe("Content-pack evidence convergence during Unit merge", () => {
 		expect(allSql).not.toContain("set source_aggregate =");
 	});
 
-	it("retargets Structure-application evidence after the target judgment", async () => {
-		const captured = await capturePhase("structure_applications");
+	it("retargets Unit–Tag Path evidence after the target judgment", async () => {
+		const captured = await capturePhase("tag_path_applications");
 		expect(captured.result).toEqual({ processedRows: 1, done: true });
 		expectOrdered(
 			captured.statements,
-			"insert into unit_structure_application_judgment",
-			"update content_pack_structure_application_evidence as evidence set unit_id =",
-			"delete from unit_structure_application_judgment as vote",
+			"insert into unit_tag_path_judgment",
+			"update content_pack_unit_tag_path_evidence as evidence set unit_id =",
+			"delete from unit_tag_path_judgment as vote",
 		);
 		expect(captured.statements.join(" ")).toContain(
-			"not exists ( select 1 from content_pack_structure_application_evidence as evidence",
+			"not exists ( select 1 from content_pack_unit_tag_path_evidence as evidence",
 		);
 	});
 
@@ -140,17 +136,13 @@ describe("Content-pack evidence convergence during Unit merge", () => {
 			return { rows: [{ conflict: true }] };
 		});
 		await expect(
-			processUnitMergePhase(
-				{ execute } as unknown as DatabaseTransaction,
-				"subject_sources",
-				{
-					operationId: OperationId,
-					sourceUnitId: SourceUnitId,
-					targetUnitId: TargetUnitId,
-					graphPlan: GraphPlan,
-					batchSize: BatchSize,
-				},
-			),
+			processUnitMergePhase({ execute } as unknown as DatabaseTransaction, "subject_sources", {
+				operationId: OperationId,
+				sourceUnitId: SourceUnitId,
+				targetUnitId: TargetUnitId,
+				graphPlan: GraphPlan,
+				batchSize: BatchSize,
+			}),
 		).rejects.toMatchObject({
 			_tag: "UnitMergeEvidenceConflict",
 			reason: "subject_self_association",

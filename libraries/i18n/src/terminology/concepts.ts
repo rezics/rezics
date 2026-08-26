@@ -97,7 +97,7 @@ export const terminologyConcepts = defineTerminologyConcepts({
 		slots: ["label", "pluralLabel", "inline", "plural"] as const,
 		locales: WebTerminologyLocales,
 	},
-	tagStructure: {
+	tagPath: {
 		definition:
 			"A community-immutable, community-voted ordered path of Tags; platform administrators may make audited corrections.",
 		slots: ["label", "pluralLabel", "inline", "plural"] as const,

@@ -24,8 +24,7 @@ import {
 import { database } from "../database";
 import {
 	book,
-	currentUnitEffectiveTag as unitEffectiveTag,
-	currentUnitStructureMember as unitStructureMember,
+	unitEffectiveTag,
 	unitLicenseGrant,
 	creditAttribution,
 	contentStructure,
@@ -49,7 +48,6 @@ import {
 	unit,
 	unitOwnership,
 	unitLocalization,
-	unitStructureVoteStat,
 	unitVariant,
 	type UnitKind,
 	UnitKindValues,
@@ -837,25 +835,6 @@ function buildSearchConditions(
 			select 1 from ${post}
 			where ${post.id} = ${unit.id} and ${post.kind} = 'review'::post_kind
 		)`);
-	if (category === "tag-structures")
-		conditions.push(sql`exists (
-			select 1 from ${unitStructureVoteStat}
-			where ${unitStructureVoteStat.structureId} = ${unit.id}
-				and ${unitStructureVoteStat.score} > 0
-		) and not exists (
-			select 1
-			from ${unitStructureMember} member
-			join ${unit} member_unit on member_unit.id = member.member_unit_id
-			where member.structure_id = ${unit.id}
-				and (
-					member_unit.kind <> 'tag'
-					or member_unit.status <> 'published'
-					or member_unit.visibility <> 'public'
-					or member_unit.moderation_status <> 'approved'
-					or member_unit.deleted_at is not null
-				)
-		)`);
-
 	const query = request.query?.trim() ?? "";
 	if (category === "units" && !query)
 		conditions.push(sql`not exists (

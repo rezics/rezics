@@ -192,7 +192,7 @@ describe("API root", () => {
 		}
 	});
 
-	it("declares hot-key backpressure only on VNDB vote-writing routes", () => {
+	it("declares hot-key backpressure only on Vote-writing routes", () => {
 		const document = toOpenAPISchema(api);
 		const voteOperation = document.paths["/api/v1/units/{type}/{unitId}/tags/{tagId}/vote"]?.put;
 		const unrelatedOperation =
@@ -201,12 +201,12 @@ describe("API root", () => {
 		expect(voteOperation?.security).toEqual([{ ApiToken: [] }, { SessionCookie: [] }]);
 		expect(unrelatedOperation?.security).toEqual([{ ApiToken: [] }, { SessionCookie: [] }]);
 		expect(JSON.stringify(voteOperation?.responses?.[StatusCodes.TOO_MANY_REQUESTS])).toContain(
-			"VndbVoteHotKeyBusy",
+			"VoteHotKeyBusy",
 		);
 		expect(unrelatedOperation?.responses?.[StatusCodes.TOO_MANY_REQUESTS]).toBeUndefined();
 	});
 
-	it("documents Phase 0 VNDB policy failures and correction submission", () => {
+	it("documents Phase 0 Tag policy failures and correction submission", () => {
 		const document = toOpenAPISchema(api);
 		const unitTag = document.paths["/api/v1/units/{type}/{unitId}/tags/{tagId}"];
 		const unitTagVote = document.paths["/api/v1/units/{type}/{unitId}/tags/{tagId}/vote"];
@@ -258,7 +258,7 @@ describe("API root", () => {
 			);
 		}
 
-		const correction = document.paths["/api/v1/tag-structures/{structureId}"]?.put?.responses;
+		const correction = document.paths["/api/v1/tag-paths/{structureId}"]?.put?.responses;
 		expect(correction?.[StatusCodes.OK]).toBeDefined();
 		expect(correction?.[StatusCodes.ACCEPTED]).toBeDefined();
 		expect(JSON.stringify(correction?.[StatusCodes.OK])).toContain('"changed"');
@@ -401,8 +401,8 @@ describe("API root", () => {
 		const methods = ["delete", "get", "post", "put"] as const;
 		const previewProtectedOperations = Object.entries(document.paths).flatMap(([path, item]) =>
 			path === "/api/v1/tags/{tagId}/hierarchy" ||
-			path.startsWith("/api/v1/tag-structures") ||
-			path.includes("/tag-structures/")
+			path.startsWith("/api/v1/tag-paths") ||
+			path.includes("/tag-paths/")
 				? methods.flatMap((method) => {
 						const forbidden = item?.[method]?.responses?.[StatusCodes.FORBIDDEN];
 						return forbidden && JSON.stringify(forbidden).includes("PlatformCapabilityRequired")
@@ -414,22 +414,22 @@ describe("API root", () => {
 
 		expect(previewProtectedOperations).toEqual([
 			"GET /api/v1/tags/{tagId}/hierarchy",
-			"POST /api/v1/tag-structures",
-			"GET /api/v1/tag-structures/{structureId}",
-			"PUT /api/v1/tag-structures/{structureId}",
-			"GET /api/v1/tag-structures/{structureId}/corrections/{correctionId}",
-			"DELETE /api/v1/tag-structures/{structureId}/vote",
-			"PUT /api/v1/tag-structures/{structureId}/vote",
-			"DELETE /api/v1/units/{type}/{unitId}/tag-structures/{structureId}",
-			"PUT /api/v1/units/{type}/{unitId}/tag-structures/{structureId}",
-			"DELETE /api/v1/units/{type}/{unitId}/tag-structures/{structureId}/vote",
-			"PUT /api/v1/units/{type}/{unitId}/tag-structures/{structureId}/vote",
+			"POST /api/v1/tag-paths",
+			"GET /api/v1/tag-paths/{structureId}",
+			"PUT /api/v1/tag-paths/{structureId}",
+			"GET /api/v1/tag-paths/{structureId}/corrections/{correctionId}",
+			"DELETE /api/v1/tag-paths/{structureId}/vote",
+			"PUT /api/v1/tag-paths/{structureId}/vote",
+			"DELETE /api/v1/units/{type}/{unitId}/tag-paths/{structureId}",
+			"PUT /api/v1/units/{type}/{unitId}/tag-paths/{structureId}",
+			"DELETE /api/v1/units/{type}/{unitId}/tag-paths/{structureId}/vote",
+			"PUT /api/v1/units/{type}/{unitId}/tag-paths/{structureId}/vote",
 		]);
 	});
 
 	it("requires authentication before checking the Tag-path search preview capability", async () => {
 		const response = await api.handle(
-			new Request("http://localhost/api/v1/search/tag-structures", {
+			new Request("http://localhost/api/v1/search/tag-paths", {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({ localizationLanguages: ["en"] }),

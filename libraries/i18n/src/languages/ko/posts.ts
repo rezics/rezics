@@ -13,6 +13,13 @@ export default {
 	untitled: `제목 없는 ${postTerms.inline}`,
 	titleOptional: "제목(선택 사항)",
 	summaryOptional: "요약(선택 사항)",
+	contentSpoilerLabel: "내용 스포일러 수준",
+	contentSpoilerNone: "스포일러 없음",
+	contentSpoilerMinor: "가벼운 스포일러",
+	contentSpoilerMajor: "중대한 스포일러",
+	contentNsfwLabel: "공공장소에 부적절한 콘텐츠",
+	contentNsfwDescription: "공공장소에서 표시하기에 부적절할 수 있는 콘텐츠로 표시합니다.",
+	revealNsfw: "민감한 콘텐츠 보기",
 	reviewFallbackTitle: insert("{{author}}님의 {{subject}} 리뷰", {
 		author: String,
 		subject: String,

@@ -6,7 +6,7 @@ const { forms: dockTerms } = jaTerminology.dock;
 const { forms: followTerms } = jaTerminology.follow;
 const { forms: postTerms } = jaTerminology.post;
 const { forms: realmTerms } = jaTerminology.realm;
-const { forms: tagStructureTerms } = jaTerminology.tagStructure;
+const { forms: tagPathTerms } = jaTerminology.tagPath;
 const { forms: unitSlugTerms } = jaTerminology.unitSlug;
 const { forms: zoneTerms } = jaTerminology.zone;
 const { forms: entityTerms } = jaTerminology.entity;
@@ -19,8 +19,7 @@ export default {
 	ApiTokenPermissionRequired: `この${verbatimTerms.api.value}トークンには必要な権限がありません。`,
 	ApiTokenRateLimitExceeded: `この${verbatimTerms.api.value}トークンはリクエストを送信しすぎています。少し時間を置いて再試行してください。`,
 	ApiQuotaExceeded: `${verbatimTerms.api.value} クォータを使い切りました。指定された時刻以降に再試行してください。`,
-	VndbVoteHotKeyBusy:
-		"この投票対象は現在混み合っています。しばらくしてからもう一度お試しください。",
+	VoteHotKeyBusy: "この投票対象は現在混み合っています。しばらくしてからもう一度お試しください。",
 	ApiQuotaPolicyNotFound: `指定された ${verbatimTerms.api.value} クォータポリシーが見つかりません。`,
 	ApiQuotaPolicyKeyConflict: `このキーは別の ${verbatimTerms.api.value} クォータポリシーで使用されています。`,
 	ApiQuotaPolicyInvalid: `${verbatimTerms.api.value} クォータポリシーの設定が無効です。`,
@@ -296,11 +295,11 @@ export default {
 	RealmTagContextRequired: `この ${realmTerms.label} には、現在表示できるタグの正式な説明が先に必要です。`,
 	RealmTagSelfReferenceForbidden: "タグをそのタグ自身に適用することはできません。",
 	SharedSearchQueryNotFound: "この共有検索クエリが見つかりませんでした。",
-	InvalidTagStructure: `この ${tagStructureTerms.inline} は無効です。`,
-	TagStructureNotFound: `この ${tagStructureTerms.inline} は見つかりませんでした。`,
-	TagStructureApplicationNotFound: `このユニットにはその ${tagStructureTerms.inline} がありません。`,
-	TagStructureChanged: `この ${tagStructureTerms.inline} は他の場所で変更されました。更新して再試行してください。`,
-	TagStructureDefinitionConflict: `同一の ${tagStructureTerms.inline} が既に存在します。`,
+	InvalidTagPath: `この ${tagPathTerms.inline} は無効です。`,
+	TagPathNotFound: `この ${tagPathTerms.inline} は見つかりませんでした。`,
+	TagPathApplicationNotFound: `このユニットにはその ${tagPathTerms.inline} がありません。`,
+	TagPathChanged: `この ${tagPathTerms.inline} は他の場所で変更されました。更新して再試行してください。`,
+	TagPathDefinitionConflict: `同一の ${tagPathTerms.inline} が既に存在します。`,
 	AssociationContextPostInvalid: `関係コンテキストはウィキの ${postTerms.label} である必要があります。`,
 	ProgressEntryNotFound: "この進捗イベントが見つかりませんでした。",
 	PostTagMentionVoteConflict: `このタグメンションは既存の ${postTerms.label} へのダウンボートと競合しています。`,

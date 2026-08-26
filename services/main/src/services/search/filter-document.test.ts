@@ -151,8 +151,8 @@ describe("sparse Filter documents", () => {
 	});
 
 	it("removes preview-only categories from the resolved capability", () => {
-		expect(resolveFilterDocument({}, false).categories).not.toContain("tag-structures");
-		expect(() => resolveFilterDocument({ categories: ["tag-structures"] }, false)).toThrow(
+		expect(resolveFilterDocument({}, false).categories).not.toContain("tag-paths");
+		expect(() => resolveFilterDocument({ categories: ["tag-paths"] }, false)).toThrow(
 			"no available categories",
 		);
 	});

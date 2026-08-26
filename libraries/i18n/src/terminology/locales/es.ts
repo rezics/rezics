@@ -76,7 +76,7 @@ export const esTerminology = defineTerminology("es", {
 		},
 		forbidden: [],
 	},
-	tagStructure: {
+	tagPath: {
 		status: "approved",
 		forms: {
 			label: "Ruta de etiquetas",

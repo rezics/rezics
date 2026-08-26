@@ -1,11 +1,9 @@
 # VNDB v11 Entity, Tag Path, Spoiler, and Measurement Research Report
 
-Status: temporary corrective implementation contract. This report supersedes
-the rejected generic Structure Unit, mutable correction, persisted primary-path,
-and phased preview-exit assumptions in the current Tag-structure documents.
-Delete it only after the complete implementation and permanent-document
-reconciliation ship.
-Date: 2026-08-25
+Status: temporary completion ledger; implementation complete, deterministic
+validation pending. The permanent architecture has been reconciled. Delete
+this report after the final validation-and-fix commit.
+Date: 2026-08-26
 
 ## Scope and authority
 
@@ -15,17 +13,24 @@ Completion covers database, backend, API, generated clients, frontend,
 localization, content-pack import, Realm authority, operations, and permanent
 documentation.
 
-[tag-structures.md](./tag-structures.md) remains useful for its research
-evidence, interaction research, and capacity model. Its generic `structure`
-Unit, correction machinery, primary-path projection, and old physical names
-are superseded here. The durable result must replace it with a dedicated Tag
-Path architecture document. The accepted spoiler, content-label, Realm, and
-measurement semantics in
+[tag-paths.md](./tag-paths.md) is now the permanent dedicated-domain
+architecture, and [tag-path-capacity.md](./tag-path-capacity.md) owns the
+vendor-neutral 500-million/3-billion-row capacity contract. The accepted
+spoiler, content-label, Realm, and measurement semantics in
 [entity-tag-spoiler-and-measurement-decisions.md](./entity-tag-spoiler-and-measurement-decisions.md)
-remain authoritative where they do not depend on those superseded contracts.
+have been reconciled to the final physical names and remain authoritative.
 
 `content_structure` is unrelated. It owns Book and Media outlines and is not
 renamed or removed.
+
+## Content-pack state
+
+The external showcase source adapter remains `vndb-v11` and its implemented
+manifest version is `0.2.0`. It emits dedicated `tagPaths` and
+`tagPathApplications`, structured Entity measurements, and immutable source
+evidence. The repository loader contract asserts that version whenever the
+showcase pack source is available. VNDB-specific names remain confined to that
+source adapter, its source-lock test, and this temporary report.
 
 ## Corrected domain model
 
@@ -284,45 +289,28 @@ Risky queries require representative distributions and `EXPLAIN` or `EXPLAIN
 ANALYZE`. Compound search must prove bounded candidate work, indexed joins, and
 no corpus scan; toy fixtures alone are not acceptance evidence.
 
-## Continuous implementation chain
+## Completion ledger
 
-1. Remove preview migrations, correction workers/services/SQL, vendor-specific
-   cutover tooling, and every Structure Unit branch except unrelated
-   `content_structure`.
-2. Land the immutable Tag Path, policy flags, votes, provisional usage weight,
-   manual merge governance, fit/spoiler judgments and aggregates, provenance,
-   content labels, measurements/evidence, Realm authority, preferences,
-   partition routing, and bounded indexes.
-3. Replace `/tag-structures`, `structureId`, and `TagStructure*` with
-   `/tag-paths`, `pathId`, and `TagPath*`; add all Path, application, merge,
-   exploration, Realm, spoiler, measurement, label, and preference APIs. Add no
-   primary field or endpoint.
-4. Complete the single Tag picker, compound decomposition, alias resolution,
-   relational Path matching, reversed-order recall, duplicate warnings, and
-   provisional usage weighting. Put the required non-final-formula `@todo` on
-   the owning exported boundary.
-5. Complete grouped reading, hierarchy exploration, Entity descriptions and
-   measurements, fit/spoiler contribution, concealment, content-spoiler and
-   NSFW behavior, preview suppression, governance queues, metrics, and assisted
-   proposals without automatic acceptance.
-6. Complete `inherit | isolate` Realm authority, separate global/Realm
-   aggregates and weights, independent fit/spoiler fallback, provenance, Realm
-   Path governance, and subscription composition without vote merging.
-7. Replace generated clients and frontend terminology, remove Structure Unit
-   routing/follow/feed/SEO and the completed preview gate, and update every
-   typed locale with the approved Tag Path term. Perform no browser or visual
-   QA unless separately requested.
-8. Replace `tag-structures.md` with the permanent vendor-neutral Tag Path
-   architecture, update the judgment document's names and APIs, move durable
-   capacity evidence out of vendor documents, record the actual pack version
-   and completion ledger, then delete this temporary report.
+| Area | Implemented contract | State before final validation |
+| --- | --- | --- |
+| Preview removal | unpublished vendor migration/tooling, correction/version machinery, generic Structure Unit branches, routes, filters, feed/follow/SEO, aliases, and dual-write assumptions removed; `content_structure` preserved | complete |
+| Database | immutable `tag_path` Unit, projections, judgments, distribution-preserving aggregates, effective provenance, subject spoilers, labels, measurements/evidence, manual merge governance, Realm authority, preferences, bounded indexes, and vendor-neutral breaking migration | complete |
+| Governance | manual merge queue and decision latency; human/assisted proposal source is typed and immutable; assisted candidates have no review or acceptance authority | complete |
+| API/backend | dedicated creation/read/vote/application/exploration/merge, Realm, spoiler, measurement, label, preference, and curation-search contracts; no primary field or old route | complete |
+| Search/input | ordinary Tag-only suggestions, bounded CJK/spaced decomposition, title/alias resolution, semantic/reversed-order ranking, curation-only Path search, and provisional accepted-usage weighting with the required exported `@todo` | complete |
+| Reading/contribution | grouped summaries, exact remaining counts, Entity description collapse, measurements, fit/spoiler grids, subject concealment, authored content-spoiler and NSFW preference behavior | complete |
+| Realm | `inherit \| isolate`, separate definition/application aggregates and weights, independent fit/spoiler fallback, explicit authority/resolution/provenance, subscription composition without vote merging | complete |
+| Frontend/i18n | `TagPath*` and `/tag-paths` replacement, typed termbase usage, natural copy in every supported locale, generated API consumers updated | complete |
+| Permanent docs/capacity | dedicated architecture and vendor-neutral capacity documents plus reconciled spoiler/measurement decisions | complete |
+| Deterministic validation | migration hash/replay, PostgreSQL owner checks, OpenAPI drift, TypeScript, i18n, tests, representative `EXPLAIN` and capacity evidence | pending final validation commit |
 
 ## Completion checks
 
 Run the affected frontend TypeScript check, schema generation and full
 migration replay, OpenAPI and both generated-client drift checks, localization
 policy checks, and representative `EXPLAIN` evidence once at the end. These are
-deterministic contract checks, not browser or visual acceptance.
+deterministic contract checks, not browser or visual acceptance. Delete this
+temporary report only after all failures are repaired and committed.
 
 ## Deferred beyond this contract
 

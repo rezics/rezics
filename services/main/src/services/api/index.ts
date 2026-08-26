@@ -54,8 +54,8 @@ import {
 } from "./errors";
 import { toUnitVariantConstraintError } from "../units/variants";
 import { toPostTargetingConstraintError } from "../posts/targeting";
-import { toTagStructureConstraintError } from "../tag-structures/service";
-import { toVndbPolicyConstraintError } from "../database/errors";
+import { toTagPathConstraintError } from "../tag-paths/service";
+import { toTagPolicyConstraintError } from "../database/errors";
 import { classifyValidationFailure } from "./validation-failure";
 
 const { logger } = getActiveObservability();
@@ -104,11 +104,11 @@ export default new Elysia({ normalize: "typebox" })
 			if (retryAfterSeconds !== undefined) set.headers["Retry-After"] = String(retryAfterSeconds);
 			return status(error.status, toApiErrorBody(error, requestId));
 		}
-		const vndbPolicyConstraintError = toVndbPolicyConstraintError(error);
-		if (vndbPolicyConstraintError)
+		const tagPolicyConstraintError = toTagPolicyConstraintError(error);
+		if (tagPolicyConstraintError)
 			return status(
-				vndbPolicyConstraintError.status,
-				toApiErrorBody(vndbPolicyConstraintError, requestId),
+				tagPolicyConstraintError.status,
+				toApiErrorBody(tagPolicyConstraintError, requestId),
 			);
 		const variantConstraintError = toUnitVariantConstraintError(error);
 		if (variantConstraintError)
@@ -122,11 +122,11 @@ export default new Elysia({ normalize: "typebox" })
 				postTargetingConstraintError.status,
 				toApiErrorBody(postTargetingConstraintError, requestId),
 			);
-		const tagStructureConstraintError = toTagStructureConstraintError(error);
-		if (tagStructureConstraintError)
+		const tagPathConstraintError = toTagPathConstraintError(error);
+		if (tagPathConstraintError)
 			return status(
-				tagStructureConstraintError.status,
-				toApiErrorBody(tagStructureConstraintError, requestId),
+				tagPathConstraintError.status,
+				toApiErrorBody(tagPathConstraintError, requestId),
 			);
 		if (code === "PARSE") {
 			const malformedRequestBody = new MalformedRequestBody();

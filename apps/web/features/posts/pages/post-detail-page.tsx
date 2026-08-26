@@ -257,6 +257,8 @@ export function PostDetailPage({
 							titleLanguage: title?.language ?? null,
 							summary: post.summary,
 							body: post.body,
+							contentSpoiler: post.contentSpoiler,
+							contentNsfw: post.contentNsfw,
 							createdAt: post.createdAt,
 						}}
 						replyCount={Number(post.replyCount)}

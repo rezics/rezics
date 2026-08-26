@@ -82,6 +82,10 @@ export default {
 	filterFeedByPreferredLanguages: "Filter the Feed by preferred languages",
 	filterFeedByPreferredLanguagesHint:
 		"When enabled, the Feed only includes content available in at least one preferred language. Other lists continue to show all matching content with language fallback.",
+	alwaysShowSpoilers: "Always show spoilers",
+	alwaysShowSpoilersHint: "Show spoiler-labelled content without requiring an individual reveal.",
+	alwaysShowNsfw: "Always show NSFW media",
+	alwaysShowNsfwHint: "Show NSFW-labelled media without blurring it first.",
 	account: "Account",
 	accountDescription: "Manage the current signed-in session.",
 	security: "Security",

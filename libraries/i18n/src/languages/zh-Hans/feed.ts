@@ -6,7 +6,7 @@ const { forms: followTerms } = zhHansTerminology.follow;
 const { forms: postTerms } = zhHansTerminology.post;
 const { forms: realmTerms } = zhHansTerminology.realm;
 const { forms: entityTerms } = zhHansTerminology.entity;
-const { forms: tagStructureTerms } = zhHansTerminology.tagStructure;
+const { forms: tagPathTerms } = zhHansTerminology.tagPath;
 const { forms: zoneTerms } = zhHansTerminology.zone;
 const { forms: videoTerms } = zhHansTerminology.video;
 const { forms: audioTerms } = zhHansTerminology.audio;
@@ -64,7 +64,7 @@ export default {
 			"unit:release": "发行版本",
 			"unit:entity": entityTerms.pluralLabel,
 			"unit:tag": "标签",
-			"unit:structure": tagStructureTerms.pluralLabel,
+			"unit:structure": tagPathTerms.pluralLabel,
 			"unit:series": "系列",
 			"unit:zone": zoneTerms.pluralLabel,
 			"unit:collection": "收藏集",

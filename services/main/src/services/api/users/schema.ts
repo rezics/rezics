@@ -136,6 +136,8 @@ export const UpdateDisplayPreferencesBody = t.Object(
 	{
 		interfaceLocale: t.Optional(StoredUiLocale),
 		chineseContentDisplay: t.Optional(ChineseContentDisplay),
+		alwaysShowSpoilers: t.Optional(t.Boolean()),
+		alwaysShowNsfw: t.Optional(t.Boolean()),
 	},
 	{ additionalProperties: false, minProperties: 1 },
 );
@@ -160,6 +162,8 @@ export const ReplacePreferencesBody = t.Object(
 		collectionConfig: t.Nullable(CollectionConfigV1),
 		personalizedFeed: t.Boolean({ default: true }),
 		filterFeedByPreferredLanguages: t.Boolean({ default: false }),
+		alwaysShowSpoilers: t.Boolean({ default: false }),
+		alwaysShowNsfw: t.Boolean({ default: false }),
 		contentRatings: t.Array(ContentRating, {
 			minItems: 1,
 			uniqueItems: true,

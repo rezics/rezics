@@ -6,7 +6,7 @@ import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 const { forms: realmTerms } = esTerminology.realm;
 const { forms: followTerms } = esTerminology.follow;
 const { forms: postTerms } = esTerminology.post;
-const { forms: tagStructureTerms } = esTerminology.tagStructure;
+const { forms: tagPathTerms } = esTerminology.tagPath;
 
 export default {
 	page: {
@@ -14,7 +14,8 @@ export default {
 		description:
 			"Revisa las etiquetas globales y las valoraciones contextuales de las fuentes de etiquetas que hayas seleccionado.",
 		viewAll: "Ver la página completa de la etiqueta",
-		manageOnTagPage: `Añade etiquetas y ${tagStructureTerms.plural} en la página específica de etiquetas para que su contexto de votación siga visible.`,
+		more: insert("{{count}} más", { count: Number }),
+		manageOnTagPage: `Añade etiquetas y ${tagPathTerms.plural} en la página específica de etiquetas para que su contexto de votación siga visible.`,
 	},
 	card: {
 		open: insert("Abrir la tarjeta de la etiqueta {{tag}} ({{context}})", {
@@ -23,7 +24,7 @@ export default {
 		}),
 		close: "Cerrar la tarjeta de la etiqueta",
 		globalContext: "Contexto global",
-		structureContext: tagStructureTerms.label,
+		pathContext: tagPathTerms.label,
 		policy: `Definida por el ${realmTerms.inline}`,
 		search: "Buscar esta etiqueta",
 		details: "Ver detalles de la etiqueta",
@@ -41,7 +42,7 @@ export default {
 	},
 	basic: {
 		title: "Etiquetas básicas",
-		description: `Etiquetas globales y ${tagStructureTerms.plural}, sin valoraciones contextuales de ningún ${realmTerms.inline}.`,
+		description: `Etiquetas globales y ${tagPathTerms.plural}, sin valoraciones contextuales de ningún ${realmTerms.inline}.`,
 	},
 	voteContext: {
 		title: "Votar por contexto",
@@ -53,17 +54,27 @@ export default {
 		description: `Las etiquetas globales y tus fuentes de ${realmTerms.label} conservan sus propios contextos. El contexto de votación activo no se repite aquí.`,
 		empty: "No hay otras fuentes de etiquetas seleccionadas.",
 	},
-	structures: {
-		title: tagStructureTerms.pluralLabel,
-		description: `Las ${tagStructureTerms.plural} conservan una jerarquía con significado y se muestran antes que las etiquetas sin jerarquía.`,
-		addTitle: `Añadir una ${tagStructureTerms.inline}`,
-		addDescription: `Busca primero ${tagStructureTerms.plural} aceptadas. Añadir una respalda la ruta y todas sus etiquetas.`,
-		add: `Añadir ${tagStructureTerms.inline}`,
-		create: `Crear ${tagStructureTerms.inline}`,
-		details: `Ver ${tagStructureTerms.inline}`,
-		empty: `Esta obra todavía no tiene ninguna ${tagStructureTerms.inline} aceptada.`,
+	paths: {
+		title: tagPathTerms.pluralLabel,
+		description: `Las ${tagPathTerms.plural} conservan una jerarquía con significado y se muestran antes que las etiquetas sin jerarquía.`,
+		addTitle: `Añadir una ${tagPathTerms.inline}`,
+		addDescription: `Busca primero ${tagPathTerms.plural} aceptadas. Añadir una respalda la ruta y todas sus etiquetas.`,
+		add: `Añadir ${tagPathTerms.inline}`,
+		create: `Crear ${tagPathTerms.inline}`,
+		details: `Ver ${tagPathTerms.inline}`,
+		empty: `Esta obra todavía no tiene ninguna ${tagPathTerms.inline} aceptada.`,
 		memberFallback: "Etiqueta sin nombre",
-		pathLabel: `${tagStructureTerms.label} ordenada`,
+		pathLabel: `${tagPathTerms.label} ordenada`,
+		fitLabel: "Adecuación",
+		spoilerLabel: "Nivel de destripes",
+		spoilerNone: "Ninguno",
+		spoilerMinor: "Leve",
+		spoilerMajor: "Importante",
+		spoilerSummary: insert("Votos: {{none}} ninguno · {{minor}} leve · {{major}} importante", {
+			none: Number,
+			minor: Number,
+			major: Number,
+		}),
 	},
 	detail: {
 		sections: "Pestañas de detalles de la etiqueta",
@@ -71,7 +82,7 @@ export default {
 			overview: "Resumen",
 			discussion: "Debate",
 			content: "Contenido relacionado",
-			structure: "Jerarquía",
+			paths: "Jerarquía",
 		},
 		overviewTitle: "Descripción de la etiqueta",
 		overviewDescription:
@@ -81,8 +92,8 @@ export default {
 		discussionDescription: `Crea ${postTerms.plural} sobre esta etiqueta y participa en los debates existentes.`,
 		contentTitle: "Contenido relacionado",
 		contentDescription: "Explora obras y otros contenidos que usan esta etiqueta.",
-		structureTitle: "Jerarquía de la etiqueta",
-		structureDescription:
+		pathsTitle: "Jerarquía de la etiqueta",
+		pathsDescription:
 			"Consulta dónde aparece esta etiqueta en estructuras aprobadas por la comunidad.",
 		editTitle: "Editar el contenido de la etiqueta",
 		editDescription:
@@ -91,14 +102,14 @@ export default {
 		backToTag: "Volver a la etiqueta",
 		backToEditOverview: "Volver al resumen de edición",
 		childrenTitle: "Etiquetas subordinadas directas",
-		childrenDescription: `Estas relaciones proceden de ${tagStructureTerms.plural} aceptadas y bloqueadas por la comunidad. Cada elemento subordinado muestra sus propios elementos subordinados directos.`,
+		childrenDescription: `Estas relaciones proceden de ${tagPathTerms.plural} aceptadas y bloqueadas por la comunidad. Cada elemento subordinado muestra sus propios elementos subordinados directos.`,
 		noChildren: "Esta etiqueta todavía no tiene elementos subordinados directos aceptados.",
 		grandchildrenTitle: "Elementos subordinados directos",
 	},
-	createStructure: {
-		title: `Crear ${tagStructureTerms.inline}`,
+	createPath: {
+		title: `Crear ${tagPathTerms.inline}`,
 		description:
-			"Crea una ruta ordenada desde las etiquetas más generales hasta las más específicas. Los miembros de la comunidad no podrán editarla después de crearla; los administradores de la plataforma podrán realizar correcciones auditadas.",
+			"Crea una ruta ordenada desde las etiquetas más generales hasta las más específicas. Las definiciones no se pueden editar después de crearlas; crea otra ruta y presenta una propuesta de gobernanza manual.",
 		pick: "Elegir la siguiente etiqueta",
 		addMember: "Añadir a la ruta",
 		removeMember: "Quitar de la ruta",
@@ -106,15 +117,11 @@ export default {
 		moveLater: "Mover hacia el final",
 		preview: "Vista previa de la ruta bloqueada por la comunidad",
 		minimum: "Añade al menos dos etiquetas distintas.",
-		submit: `Crear ${tagStructureTerms.inline} y votar`,
-	},
-	adminEditStructure: {
-		title: `Corregir ${tagStructureTerms.inline}`,
-		description:
-			"Los administradores de la plataforma pueden corregir los elementos o su orden. Se conservan la identidad de la Unit, los votos y los usos, y la corrección queda registrada en el historial.",
-		reasonLabel: "Motivo de la corrección",
-		reasonPlaceholder: "Explica por qué es necesaria esta corrección administrativa.",
-		submit: "Guardar la corrección auditada",
+		submit: `Crear ${tagPathTerms.inline} y votar`,
+		relatedTitle: "Revisar rutas aceptadas relacionadas",
+		relatedDescription:
+			"Estas rutas ya terminan en la misma etiqueta. No son duplicados automáticos; revisa su significado antes de crear una definición inmutable distinta.",
+		continueDistinct: "Crear una ruta distinta",
 	},
 	create: {
 		noResults: insert("No se encontró ninguna etiqueta que coincida con «{{query}}».", {
@@ -194,6 +201,13 @@ export default {
 		noRanked: "No hay más etiquetas globales que destacar.",
 	},
 	realms: {
+		pathsTitle: `Rutas de etiquetas del ${realmTerms.label}`,
+		applyPath: "Aplicar ruta",
+		authority: { realm: `Este ${realmTerms.label}`, global: "Global" },
+		pathAuthority: insert("Adecuación: {{fit}} · destripes: {{spoiler}}", {
+			fit: String,
+			spoiler: String,
+		}),
 		title: `Contextos de etiquetas de los ${realmTerms.plural}`,
 		description: `Cada ${realmTerms.inline} es un contexto independiente. Sus valoraciones nunca se combinan con las etiquetas globales ni con otro ${realmTerms.inline}.`,
 		addTitle: `Añadir un voto de etiqueta en este ${realmTerms.label}`,
@@ -229,5 +243,5 @@ export default {
 	},
 	unnamedTag: "Etiqueta sin nombre",
 	unnamedRealm: `${realmTerms.label} sin nombre`,
-	unnamedStructure: `${tagStructureTerms.label} sin nombre`,
+	unnamedPath: `${tagPathTerms.label} sin nombre`,
 } satisfies typeof import("../zh-Hant/tags").default;

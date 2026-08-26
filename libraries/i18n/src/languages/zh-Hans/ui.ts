@@ -4,7 +4,7 @@ const { forms: followTerms } = zhHansTerminology.follow;
 const { forms: postTerms } = zhHansTerminology.post;
 const { forms: realmTerms } = zhHansTerminology.realm;
 const { forms: zoneTerms } = zhHansTerminology.zone;
-const { forms: tagStructureTerms } = zhHansTerminology.tagStructure;
+const { forms: tagPathTerms } = zhHansTerminology.tagPath;
 const { forms: entityTerms } = zhHansTerminology.entity;
 
 export default {
@@ -20,7 +20,7 @@ export default {
 		unit: "输入名称或标题",
 		entity: `输入${entityTerms.label}名称`,
 		tag: "输入标签名称",
-		tagStructure: `输入${tagStructureTerms.label}名称`,
+		tagPath: `输入${tagPathTerms.label}名称`,
 		post: `输入${postTerms.label}标题或关键词`,
 		realm: `输入${realmTerms.label}名称`,
 		user: "输入用户名",

@@ -6,7 +6,7 @@ const { forms: followTerms } = jaTerminology.follow;
 const { forms: postTerms } = jaTerminology.post;
 const { forms: realmTerms } = jaTerminology.realm;
 const { forms: entityTerms } = jaTerminology.entity;
-const { forms: tagStructureTerms } = jaTerminology.tagStructure;
+const { forms: tagPathTerms } = jaTerminology.tagPath;
 const { forms: zoneTerms } = jaTerminology.zone;
 const { forms: videoTerms } = jaTerminology.video;
 const { forms: audioTerms } = jaTerminology.audio;
@@ -64,7 +64,7 @@ export default {
 			"unit:release": "リリース",
 			"unit:entity": entityTerms.pluralLabel,
 			"unit:tag": "タグ",
-			"unit:structure": tagStructureTerms.pluralLabel,
+			"unit:structure": tagPathTerms.pluralLabel,
 			"unit:series": "シリーズ",
 			"unit:zone": zoneTerms.pluralLabel,
 			"unit:collection": "コレクション",

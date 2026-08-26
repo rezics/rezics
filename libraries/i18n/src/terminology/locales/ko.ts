@@ -71,7 +71,7 @@ export const koTerminology = defineTerminology("ko", {
 		},
 		forbidden: [],
 	},
-	tagStructure: {
+	tagPath: {
 		status: "approved",
 		forms: {
 			label: "태그 경로",

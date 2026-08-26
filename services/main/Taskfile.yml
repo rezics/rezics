@@ -164,112 +164,8 @@ tasks:
             - test -n "${DATABASE_ADMIN_URL:-}"
             - yarn exec tsx scripts/validate-integrity-constraints.ts {{.CLI_ARGS}}
 
-    db:vndb-v11:preflight:
-        desc: Classify the v11 migration phase and block unsafe partial or invalid-index recovery.
-        cmds:
-            - test -n "${DATABASE_ADMIN_URL:-}"
-            - yarn exec tsx scripts/migrate-vndb-v11-judgments.ts --mode preflight {{.CLI_ARGS}}
-
-    db:vndb-v11:prepare:
-        desc: Apply only the additive transactional v11 prepare migration, reconcile control privileges, and validate its four online checks.
-        cmds:
-            - test -n "${DATABASE_ADMIN_URL:-}"
-            - test "{{.CLI_ARGS}}" = "--yes"
-            - yarn exec tsx scripts/migrate-vndb-v11-judgments.ts --mode preflight --expect-state legacy
-            - >-
-                PGOPTIONS='-c search_path=public,pg_catalog -c lock_timeout=5s -c statement_timeout=30min -c idle_in_transaction_session_timeout=60s'
-                yarn exec atlas migrate apply 1 --env main --url "${DATABASE_ADMIN_URL}"
-                --lock-timeout 5s
-            - yarn exec tsx scripts/ensure-database-privileges.ts
-            - yarn exec tsx scripts/migrate-vndb-v11-judgments.ts --mode validate-prepare --yes
-            - yarn exec tsx scripts/migrate-vndb-v11-judgments.ts --mode preflight --expect-state prepared
-
-    db:vndb-v11:primary-path-backfill:
-        desc: With legacy writers live, keyset-backfill the versioned primary-path projection and drain its durable delta queue.
-        cmds:
-            - test -n "${DATABASE_ADMIN_URL:-}"
-            - yarn exec tsx scripts/migrate-vndb-v11-judgments.ts --mode primary-path-backfill {{.CLI_ARGS}}
-
-    db:vndb-v11:preindex:
-        desc: With legacy writers live, apply exactly the v11 concurrent-index migration and prove preindexed state.
-        cmds:
-            - test -n "${DATABASE_ADMIN_URL:-}"
-            - test "{{.CLI_ARGS}}" = "--yes"
-            - yarn exec tsx scripts/migrate-vndb-v11-judgments.ts --mode preflight --expect-state prepared
-            - yarn exec tsx scripts/migrate-vndb-v11-judgments.ts --mode primary-path-backfill --yes
-            - >-
-                PGOPTIONS='-c search_path=public,pg_catalog -c lock_timeout=5s -c statement_timeout=30min -c idle_in_transaction_session_timeout=60s'
-                yarn exec atlas migrate apply 1 --env main --url "${DATABASE_ADMIN_URL}"
-                --lock-timeout 5s
-            - yarn exec tsx scripts/migrate-vndb-v11-judgments.ts --mode preflight --expect-state preindexed
-
-    db:vndb-v11:pause:
-        desc: Close the durable advisory writer fence and prove all merge and correction work drained before contract.
-        cmds:
-            - test -n "${DATABASE_ADMIN_URL:-}"
-            - test -n "{{.CLI_ARGS}}"
-            - yarn exec tsx scripts/migrate-vndb-v11-judgments.ts --mode pause {{.CLI_ARGS}}
-
-    db:vndb-v11:primary-path-verify:
-        desc: Under the paused durable fence, drain primary-path deltas and seal projection parity for the current transition epoch.
-        cmds:
-            - test -n "${DATABASE_ADMIN_URL:-}"
-            - yarn exec tsx scripts/migrate-vndb-v11-judgments.ts --mode primary-path-verify {{.CLI_ARGS}}
-
-    db:vndb-v11:contract:
-        desc: After all judgment and Unit-merge work is paused, drained, and lease-fenced, apply exactly the transactional v11 contract.
-        cmds:
-            - test -n "${DATABASE_ADMIN_URL:-}"
-            - test "{{.CLI_ARGS}}" = "--yes"
-            - >-
-                yarn exec tsx scripts/migrate-vndb-v11-judgments.ts --mode preflight
-                --expect-state preindexed --require-drained
-            - yarn exec tsx scripts/migrate-vndb-v11-judgments.ts --mode primary-path-verify --yes
-            - >-
-                PGOPTIONS='-c search_path=public,pg_catalog -c lock_timeout=5s -c statement_timeout=30min -c idle_in_transaction_session_timeout=60s -c rezics.vndb_v11_writers=paused-and-drained -c rezics.vndb_v11_binary_contract=vndb-v11-contract-v1'
-                yarn exec atlas migrate apply 1 --env main --url "${DATABASE_ADMIN_URL}"
-                --lock-timeout 5s
-            - yarn exec tsx scripts/migrate-vndb-v11-judgments.ts --mode preflight --expect-state final
-
-    db:vndb-v11:migrate-guard:
-        internal: true
-        cmds:
-            - test -n "${DATABASE_ADMIN_URL:-}"
-            - yarn exec tsx scripts/migrate-vndb-v11-judgments.ts --mode migrate-guard
-
-    db:vndb-v11:backfill:
-        desc: While judgment and Unit-merge writers/workers remain paused, backfill v11 timestamps in bounded resumable batches.
-        cmds:
-            - test -n "${DATABASE_ADMIN_URL:-}"
-            - yarn exec tsx scripts/migrate-vndb-v11-judgments.ts --mode backfill {{.CLI_ARGS}}
-
-    db:vndb-v11:validate:
-        desc: Validate staged v11 constraints online after matching binaries deploy and before writers resume.
-        cmds:
-            - test -n "${DATABASE_ADMIN_URL:-}"
-            - yarn exec tsx scripts/migrate-vndb-v11-judgments.ts --mode validate {{.CLI_ARGS}}
-
-    db:vndb-v11:verify:
-        desc: Before resuming writers, verify v11 timestamps, constraints, and all judgment aggregate projections.
-        cmds:
-            - test -n "${DATABASE_ADMIN_URL:-}"
-            - yarn exec tsx scripts/migrate-vndb-v11-judgments.ts --mode verify {{.CLI_ARGS}}
-
-    db:vndb-v11:resume:
-        desc: Recheck the exact paused-epoch proof and reopen writes only for matching v11 binaries.
-        cmds:
-            - test -n "${DATABASE_ADMIN_URL:-}"
-            - test -n "{{.CLI_ARGS}}"
-            - yarn exec tsx scripts/migrate-vndb-v11-judgments.ts --mode resume {{.CLI_ARGS}}
-
-    db:vndb-v11:check:
-        desc: Verify v11 persistence invariants against a disposable localhost rezics_atlas database.
-        cmds:
-            - test -n "${DATABASE_ADMIN_URL:-}"
-            - REZICS_DISPOSABLE_MIGRATION_FIXTURE=1 yarn exec tsx scripts/check-vndb-v11-contract.ts
-
     db:postgres-schema:
-        desc: Verify migration-owned PostgreSQL functions, triggers, and current Structure views against canonical SQL.
+        desc: Verify migration-owned PostgreSQL functions, triggers, and canonical domain objects against canonical SQL.
         cmds:
             - test -n "${DATABASE_ADMIN_URL:-}"
             - yarn exec tsx scripts/check-postgres-schema.ts
@@ -344,10 +240,7 @@ tasks:
                 REZICS_DISPOSABLE_MIGRATION_FIXTURE=1
                 DATABASE_ADMIN_URL="postgres://postgres:postgres@localhost:${POSTGRES_MIGRATION_LOCAL_PORT:-5433}/rezics_atlas?sslmode=disable"
                 yarn exec tsx scripts/check-revision-primary-contribution.ts
-            - >-
-                REZICS_DISPOSABLE_MIGRATION_FIXTURE=1
-                DATABASE_ADMIN_URL="postgres://postgres:postgres@localhost:${POSTGRES_MIGRATION_LOCAL_PORT:-5433}/rezics_atlas?sslmode=disable"
-                yarn exec tsx scripts/check-vndb-v11-contract.ts
+
             - >-
                 DATABASE_ADMIN_URL="postgres://postgres:postgres@localhost:${POSTGRES_MIGRATION_LOCAL_PORT:-5433}/rezics_atlas?sslmode=disable"
                 yarn exec tsx scripts/check-postgres-schema.ts
@@ -372,7 +265,6 @@ tasks:
         cmds:
             - task: db:atlas:check
             - test -n "${DATABASE_ADMIN_URL:-}"
-            - task: db:vndb-v11:migrate-guard
             - task: filter-documents:migrate
               vars:
                   CLI_ARGS: --yes

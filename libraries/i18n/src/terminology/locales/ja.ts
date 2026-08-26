@@ -66,7 +66,7 @@ export const jaTerminology = defineTerminology("ja", {
 		},
 		forbidden: [],
 	},
-	tagStructure: {
+	tagPath: {
 		status: "approved",
 		forms: {
 			label: "タグパス",

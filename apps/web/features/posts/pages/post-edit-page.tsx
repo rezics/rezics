@@ -20,7 +20,7 @@ import {
 } from "@rezics/ui";
 import { useQueryClient } from "@tanstack/react-query";
 import { useApplicationRouter } from "@/features/application-shell/hooks/use-application-router";
-import { type FormEvent } from "react";
+import { type FormEvent, useState } from "react";
 
 import {
 	PortableTextEditor,
@@ -253,6 +253,10 @@ function PostContentEditForm({ post }: { post: RootPostContent }) {
 	const router = useApplicationRouter();
 	const queryClient = useQueryClient();
 	const update = usePatchApiPostsByPostId();
+	const [contentSpoilerLevel, setContentSpoilerLevel] = useState<0 | 1 | 2>(
+		post.contentSpoiler.level,
+	);
+	const [contentNsfw, setContentNsfw] = useState(post.contentNsfw.labelled);
 	const { selectedLanguage, selectedLanguageIsPending, languagesChanged } =
 		useContentLanguageEditor();
 	const draft = useLocalizedDraft<PostLocalizationDraft>({
@@ -279,6 +283,8 @@ function PostContentEditForm({ post }: { post: RootPostContent }) {
 					title: nullablePostLocalizationText(form, "title"),
 					summary: nullablePostLocalizationText(form, "summary"),
 					body: writePortableText(value.body, selectedLanguageIsPending ? undefined : post.body),
+					contentSpoilerLevel,
+					contentNsfw,
 					baseRevisionId: post.latestRevisionId,
 				},
 			},
@@ -327,8 +333,12 @@ function PostContentEditForm({ post }: { post: RootPostContent }) {
 					</Field>
 					<PostEditorFields
 						body={value.body}
+						contentSpoilerLevel={contentSpoilerLevel}
+						contentNsfw={contentNsfw}
 						error={update.error}
 						onBodyChange={(body) => draft.setValue((current) => ({ ...current, body }))}
+						onContentSpoilerLevelChange={setContentSpoilerLevel}
+						onContentNsfwChange={setContentNsfw}
 						pending={update.isPending}
 						submitLabel={t.ui.save}
 					/>

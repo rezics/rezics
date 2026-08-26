@@ -81,7 +81,7 @@ export const deTerminology = defineTerminology("de", {
 		},
 		forbidden: [],
 	},
-	tagStructure: {
+	tagPath: {
 		status: "approved",
 		forms: {
 			label: "Tag-Pfad",

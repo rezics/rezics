@@ -1,11 +1,10 @@
 # Entity, Tag, spoiler, and measurement decisions
 
-This document records the accepted design decisions that resolved the
-`vndb-v11` research discussion. The Tag-structure architecture and the
-evidence behind these choices live in [tag-structures.md](./tag-structures.md);
-implementation is tracked by the staged roadmap in the temporary
-[research report](./vndb-v11-entity-tag-research-report.md). These decisions
-bind implementation; changing one requires updating this document.
+This document records the accepted Entity, Tag Path, spoiler, and measurement
+decisions. The dedicated Tag Path domain contract lives in
+[tag-paths.md](./tag-paths.md), and its capacity envelope lives in
+[tag-path-capacity.md](./tag-path-capacity.md). These decisions bind
+implementation; changing one requires updating this document.
 
 Two principles run through every decision below. Existing mechanisms are
 reused instead of invented: Wilson confidence, the `voteSummary` contract,
@@ -121,29 +120,29 @@ vote value, so abstentions cannot dilute evidence. A Profile may classify the
 spoiler level without casting an applicability vote, provided the candidate
 application relationship exists.
 
-Co-location is the accepted layout, not separate per-dimension fact tables:
-VNDB stores applicability and spoiler in one `tags_vn` row per user and
-target ([live schema](https://query.vndb.org/schema)), which is production
-evidence that the two vote populations overlap heavily, and co-location
-avoids duplicating the wide composite key and its indexes. The planning row
+Co-location is the accepted layout, not separate per-dimension fact tables.
+The imported source contract stores applicability and spoiler together per
+user and target, which is production evidence that the two vote populations
+overlap heavily, and co-location avoids duplicating the wide composite key
+and its indexes. The planning row
 width grows from 144 to roughly 160 bytes: about 80 GB at 500,000,000 rows
 and 480 GB at 3,000,000,000 rows before free space, WAL, replicas, and
-secondary indexes — within the documented vote-relation envelope. Phase 0
-validates this layout against separate tables with representative vote
-densities before the migration lands.
+secondary indexes — within the documented vote-relation envelope. The
+capacity harness validates this layout with representative vote densities and
+records the 500-million-row baseline plus 3-billion-row estimate.
 
 Table naming follows the widened semantics: `unit_tag_judgment`,
-`unit_structure_application_judgment`, and `realm_tag_judgment` replace the
-`*_vote` names for spoiler-bearing targets. `unit_structure_vote` (Path
-definition validity) stays a pure binary vote with no spoiler dimension.
+`unit_tag_path_judgment`, and `realm_tag_judgment` own spoiler-bearing
+targets. `tag_path_vote` (Path definition validity) stays a pure binary vote
+with no spoiler dimension.
 Direct permission-gated relations (`realm_unit_tag`) and private relations
 (`profile_unit_tag`) stay outside the judgment contract.
 
 ## Spoiler levels, aggregation, and confidence
 
 Spoiler classification uses exactly three levels: `0 notSpoiler`,
-`1 minorSpoiler`, `2 majorSpoiler`. Three levels match the granularity VNDB
-has sustained in production; finer scales sharpen the adjacent-class
+`1 minorSpoiler`, `2 majorSpoiler`. Three levels match the imported source
+granularity sustained in production; finer scales sharpen the adjacent-class
 confusion that ordinal aggregation research documents.
 
 Aggregates preserve the evidence distribution per authority —
@@ -392,26 +391,21 @@ Tags, and APIs and UI preserve authority and provenance on every result. Path
 Units remain public identities: a Realm contextualizes a Path, it does not
 clone the Path or its member Tags.
 
-Realm-scoped storage uses typed tables that mirror the existing
-`realm_tag_context` gating pattern, not a generic semantic-context table, so
-foreign keys prove that a referenced Unit is the required Tag or Structure
-kind:
+Realm-scoped storage uses dedicated typed relations:
 
-- `realm_structure` — the Realm's adoption row for one Path definition
-  (primary key `(realm_id, structure_id)`, optional Realm-bound context
-  post, permission-gated creation);
-- `realm_structure_vote` — Realm definition acceptance votes, gated by the
-  adoption row;
-- `realm_structure_application_judgment` — `(realm_id, unit_id,
-  structure_id, profile_id)` with the sparse two-dimension judgment row,
-  gated by the adoption row and referencing the Unit directly, mirroring how
-  `realm_tag_vote` references Units today;
-- `realm_tag_judgment` — replaces `realm_tag_vote`, keeping the
-  `realm_tag_context` gate; and
-- Realm effective projections (`realm_unit_effective_tag` and its support
-  rows) — the same incremental machinery as the global tables, in separate
-  relations, partitioned by the documented `hash(realm_id, unit_id)` routing
-  key.
+- `realm_tag_path` adopts one global immutable Path definition, keyed by
+  `(realm_id, path_id)`;
+- `realm_tag_path_vote` records Realm definition judgments and is gated by
+  that adoption;
+- `realm_unit_tag_path` applies the adopted Path to a Realm Unit;
+- `realm_unit_tag_path_judgment` stores the sparse fit/spoiler judgment row;
+- `realm_tag_judgment` stores direct Tag fit/spoiler judgments; and
+- `realm_unit_effective_tag` plus `realm_unit_tag_path_support` preserve
+  effective membership and complete source provenance separately from global
+  projections.
+
+The routing key for Realm corpus facts is `(realm_id, unit_id)`. No generic
+semantic-context or Structure-kind relation is involved.
 
 ## Tag vocabulary policy flags
 
@@ -420,17 +414,17 @@ are vocabulary policy set through curation capabilities — low-volume
 editorial decisions, not community votes.
 
 `directly_applicable boolean default true` marks whether a Tag may be applied
-to Units directly (the equivalent of VNDB's `applicable`). Category-only
+to Units directly (the source adapter maps its `applicable` field here). Category-only
 Tags with `false` are excluded from application suggestions — the picker
 offers to browse into their children and paths instead — and the API rejects
 direct application with a typed error. Path membership is unaffected:
 interior classification nodes are exactly what the flag exists for.
-Filtering by a category Tag through its descendants depends on the deferred
-closure projection described in the tag-structures cost model and is decided
-together with it.
+Filtering by a category Tag through descendants uses the bounded hierarchy
+projection and routing contract described in
+[tag-path-capacity.md](./tag-path-capacity.md).
 
-`default_spoiler_level smallint` (nullable; 0, 1, or 2) is the equivalent of
-VNDB's `defaultspoil`. It pre-highlights the suggested chip when a
+`default_spoiler_level smallint` (nullable; 0, 1, or 2) receives the source
+adapter's `defaultspoil` value. It pre-highlights the suggested chip when a
 contributor opens the optional spoiler judgment, and it serves as the
 protection floor while a target has zero spoiler evidence. It is never
 written as a vote and never enters aggregate counts.
@@ -456,8 +450,7 @@ purely visual: assistive technology reads the full document, stored Portable
 Text blocks are never truncated or sliced, and search indexing, APIs,
 exports, and editing always use the full description. Spoiler presentation
 marks hide and reveal independently of collapse state, so spoiler protection
-never depends on the clamp. The four/six-line budgets are confirmed by the
-Phase 1 prototype.
+never depends on the clamp.
 
 ## Structured measurements
 
@@ -472,7 +465,8 @@ weight_grams        nullable
 bust_millimetres    nullable
 waist_millimetres   nullable
 hips_millimetres    nullable
-source and provenance fields
+created_at
+updated_at
 ```
 
 - Cardinality is bounded and trigger-enforced: one canonical set
@@ -486,15 +480,19 @@ source and provenance fields
   means unknown. The first release stores point values only; uncertainty,
   approximations, and ranges stay unmodeled until real demand exists.
 - Governance is direct editing with Unit revision and audit history, not
-  votes — the model VNDB's trait system sustains across millions of
-  applications. The UI localizes units and formats the bust–waist–hips
+  votes — the imported source's trait system sustains this model across
+  millions of applications. The UI localizes units and formats the bust–waist–hips
   sequence; import decodes source HTML entities before validation; Portable
   Text never owns or parses these values.
+- Import evidence is immutable and separate:
+  `content_pack_entity_measurement_evidence` references `measurement_id` and
+  records the import, source keys, URL, observation time, and typed
+  provenance. Human-created or edited facts do not require source metadata.
 
 ## Compound-search decomposition tunables
 
 Initial values for the staged resolution defined in
-[tag-structures.md](./tag-structures.md), kept in one configuration constant
+[tag-paths.md](./tag-paths.md), kept in one configuration constant
 set and revised from prototype telemetry (decomposition trigger rate, hit
 rate, added latency):
 
@@ -515,18 +513,20 @@ rate, added latency):
 One principle governs imported evidence: aggregates start honest. A source
 site's community score is provenance, never fabricated votes.
 
-- Entity descriptions convert VNDB formatting codes to Portable Text, with
+- Entity descriptions convert source formatting codes to Portable Text, with
   source spoiler codes becoming presentation marks; unconvertible markup is
   rejected explicitly.
 - Measurements import into the structured relation with source HTML entities
   decoded before validation.
-- Tag records carry parent arrays (first element primary), `applicable` and
-  `searchable` mapping to `directly_applicable`, `defaultspoil` mapping to
-  `default_spoiler_level`, and the source category as a root-grouping seed.
-- Hierarchy seeds Path definitions: the primary parent chain per applied Tag
-  becomes the primary candidate definition, secondary parent chains become
-  additional candidates, exact-array deduplication is left to the database,
-  and each definition receives one attributed importer definition vote.
+- Tag records carry parent arrays, with `applicable` mapping to
+  `directly_applicable` and `defaultspoil` mapping to
+  `default_spoiler_level`. Source ordering is retained as evidence and never
+  creates a REZICS primary Path.
+- Every semantically supported hierarchy chain may seed an immutable Path
+  definition. Exact-array deduplication is left to the database, each
+  definition receives one attributed importer definition vote, and
+  `content_pack_tag_path_definition_evidence` retains its source chain, URL,
+  observation time, and import identity.
 - Each imported Unit–Tag application creates the application row plus a
   single importer-Profile `fit` judgment; the source spoiler average rounds
   to one importer spoiler judgment. The source aggregate score is displayed
@@ -539,34 +539,24 @@ site's community score is provenance, never fabricated votes.
 
 ## Migration and cutover
 
-The judgment contract lands in a single MAJOR RomVer release with no
-compatibility aliases, following the deployment sequence established by the
-vote-and-reference cutover:
+The contract lands in the vendor-neutral
+`tag_path_entity_semantics` breaking migration. Released history remains
+append-only, but the rejected preview contract receives no compatibility:
 
-1. Drain or pause writes on the affected paths.
-2. Replace tables in one migration window: `unit_tag_vote` →
-   `unit_tag_judgment` (copy `value` to `fit_vote`, `spoiler_level` null),
-   `unit_structure_application_vote` → `unit_structure_application_judgment`,
-   `realm_tag_vote` → `realm_tag_judgment`. Structure-side rows are small
-   inside the development preview; the flat Tag vote copy is the only
-   at-scale rewrite. Constraints attach `NOT VALID` with transactional online
-   validation; replacement indexes build concurrently. The same window
-   creates `subject_association_judgment`, installs the content-label
-   registry guards (post-kind domain, pinned requirement, judgment
-   rejection, platform-row protection), and extends the bootstrap manifest
-   with the four registry Tag Units verified by readiness inspection. The
-   additive relations — the Entity measurement table, the Tag policy
-   columns, and the primary display path projection — land in the same
-   release without breaking semantics.
-3. Deploy API and frontend together; old binaries are incompatible with the
-   judgment response shapes.
-4. Verify aggregate parity, cursor invalidation, and lock waits; resume
-   writes. Rollback is the previous binary plus a database restore.
+1. bounded `EXISTS` assertions fail when any preview Structure/Tag-vote fact
+   or incompatible merge operation exists;
+2. the migration removes old tables, functions, triggers, views, enum labels,
+   and `unit.kind = structure` without conversion or backfill;
+3. it creates the dedicated Tag Path, global/Realm judgments, projections,
+   labels, preferences, measurements, and immutable evidence relations;
+4. canonical PostgreSQL owners install incremental aggregates, immutable
+   definition and provenance guards, bounded governance chains, and content
+   policy enforcement; and
+5. API, generated clients, and frontend deploy together. Old binaries are
+   intentionally incompatible.
 
-Spoiler aggregates backfill by full recomputation at cutover time — spoiler
-evidence is import-scale when the contract lands — while the aggregation
-machinery itself is implemented incrementally for corpus scale.
-Asynchronous-aggregation cutover invents nothing new: spoiler and fit
-aggregates share the partitioned vote-event outbox design and the exact
-observable thresholds documented in
-[vote-and-reference-governance.md](./vote-and-reference-governance.md).
+Rollback requires a database restore plus the previous binary. Aggregate
+parity, migration replay, lock waits, and representative query plans are
+release gates. The asynchronous outbox cutover described in
+[vote-and-reference-governance.md](./vote-and-reference-governance.md)
+remains the explicit scale path when hot-key or WAL thresholds are crossed.

@@ -7,57 +7,54 @@ export class TagNotFound extends Data.TaggedError("TagNotFound") {
 	readonly message = "Tag not found";
 }
 
-export class TagStructureNotFound extends Data.TaggedError("TagStructureNotFound") {
+export class TagPathNotFound extends Data.TaggedError("TagPathNotFound") {
 	static readonly status = StatusCodes.NOT_FOUND as const;
-	readonly status = TagStructureNotFound.status;
-	readonly message = "Tag structure not found";
+	readonly status = TagPathNotFound.status;
+	readonly message = "Tag Path not found";
 }
 
-export class TagStructureApplicationNotFound extends Data.TaggedError(
-	"TagStructureApplicationNotFound",
-) {
+export class TagPathApplicationNotFound extends Data.TaggedError("TagPathApplicationNotFound") {
 	static readonly status = StatusCodes.NOT_FOUND as const;
-	readonly status = TagStructureApplicationNotFound.status;
-	readonly message = "Tag structure application not found";
+	readonly status = TagPathApplicationNotFound.status;
+	readonly message = "Tag Path application not found";
 }
 
-export class InvalidTagStructure extends Data.TaggedError("InvalidTagStructure") {
+export class InvalidTagPath extends Data.TaggedError("InvalidTagPath") {
 	static readonly status = StatusCodes.UNPROCESSABLE_ENTITY as const;
-	readonly status = InvalidTagStructure.status;
-	readonly message = "Invalid Tag structure";
+	readonly status = InvalidTagPath.status;
+	readonly message = "Invalid Tag Path";
 }
 
-export class TagStructureChanged extends Data.TaggedError("TagStructureChanged") {
+export class TagPathDefinitionConflict extends Data.TaggedError("TagPathDefinitionConflict") {
 	static readonly status = StatusCodes.CONFLICT as const;
-	readonly status = TagStructureChanged.status;
-	readonly message = "Tag structure has changed";
-	readonly details: { readonly updatedAt: string };
+	readonly status = TagPathDefinitionConflict.status;
+	readonly message = "Tag Path definition already exists";
+	readonly details: { readonly pathId: string };
 
-	constructor(updatedAt: Date) {
+	constructor(pathId: string) {
 		super();
-		this.details = { updatedAt: updatedAt.toISOString() };
+		this.details = { pathId };
 	}
 }
 
-export class TagStructureDefinitionConflict extends Data.TaggedError(
-	"TagStructureDefinitionConflict",
-) {
-	static readonly status = StatusCodes.CONFLICT as const;
-	readonly status = TagStructureDefinitionConflict.status;
-	readonly message = "Tag structure definition already exists";
-	readonly details: { readonly structureId: string };
+export class TagPathMergeNotFound extends Data.TaggedError("TagPathMergeNotFound") {
+	static readonly status = StatusCodes.NOT_FOUND as const;
+	readonly status = TagPathMergeNotFound.status;
+	readonly message = "Tag Path merge proposal not found";
+}
 
-	constructor(structureId: string) {
-		super();
-		this.details = { structureId };
-	}
+export class InvalidTagPathMerge extends Data.TaggedError("InvalidTagPathMerge") {
+	static readonly status = StatusCodes.UNPROCESSABLE_ENTITY as const;
+	readonly status = InvalidTagPathMerge.status;
+	readonly message = "Invalid Tag Path merge";
 }
 
 export const TagErrors = [
 	TagNotFound,
-	TagStructureNotFound,
-	TagStructureApplicationNotFound,
-	InvalidTagStructure,
-	TagStructureChanged,
-	TagStructureDefinitionConflict,
+	TagPathNotFound,
+	TagPathApplicationNotFound,
+	InvalidTagPath,
+	TagPathDefinitionConflict,
+	TagPathMergeNotFound,
+	InvalidTagPathMerge,
 ] as const;

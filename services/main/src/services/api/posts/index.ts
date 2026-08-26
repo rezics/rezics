@@ -5,7 +5,7 @@ import Elysia from "elysia";
 
 import session, { resolveIdentity } from "../../auth/session";
 import { database } from "../../database";
-import { runVndbVoteTransaction } from "../../database/vndb-vote-admission";
+import { runVoteTransaction } from "../../database/vote-admission";
 import { toSafeInteger } from "../../database/integer";
 import { resolvedUnitLocalizationLanguage } from "../../units/localization";
 import {
@@ -18,11 +18,14 @@ import {
 	score,
 	unit,
 	unitOwnership,
+	unitTag,
 	unitLocalization,
 	unitRevisionHead,
+	profilePreference,
 } from "../../database/schema";
+import { ContentSpoilerLabelManifest, NsfwContentLabelId } from "../../bootstrap/data";
 import { createNotification } from "../../notifications/service";
-import { fractionalPositionAt } from "../../ordering/position";
+import { fractionalPositionAt, fractionalPositionBetween } from "../../ordering/position";
 import { usesSharedPostLocalizationRoute } from "../../posts/localization-route";
 import { UnitNotFound } from "../../units/errors";
 import { recordUnitRevision } from "../../units/history";
@@ -50,7 +53,7 @@ import {
 	PostDetailResponse,
 	PostListResponse,
 	toApiErrorResponse,
-	VndbVoteBackpressureResponse,
+	VoteBackpressureResponse,
 } from "../schema/response";
 import {
 	CreateReplyBody,
@@ -91,6 +94,61 @@ const ordinaryPostKind = sql<"post" | "reply">`${post.kind}::text`;
 const interactivePostKind = sql<
 	"post" | "reply" | "excerpt" | "review" | "wiki" | "chapter"
 >`${post.kind}::text`;
+
+async function replaceContentSpoilerLabel(
+	tx: Parameters<Parameters<typeof database.transaction>[0]>[0],
+	input: { readonly postId: string; readonly profileId: string; readonly level: 0 | 1 | 2 },
+) {
+	const label = ContentSpoilerLabelManifest.find(
+		(candidate) => candidate.spoilerLevel === input.level,
+	);
+	if (!label) throw new Error("Content spoiler label manifest is incomplete");
+	await tx.delete(unitTag).where(
+		and(
+			eq(unitTag.unitId, input.postId),
+			inArray(
+				unitTag.tagId,
+				ContentSpoilerLabelManifest.map(({ id }) => id),
+			),
+		),
+	);
+	const [lastPinned] = await tx
+		.select({ position: unitTag.position })
+		.from(unitTag)
+		.where(and(eq(unitTag.unitId, input.postId), eq(unitTag.pinned, true)))
+		.orderBy(desc(unitTag.position))
+		.limit(1);
+	await tx.insert(unitTag).values({
+		unitId: input.postId,
+		tagId: label.id,
+		createdByProfileId: input.profileId,
+		pinned: true,
+		position: fractionalPositionBetween(lastPinned?.position, null),
+	});
+}
+
+async function replaceNsfwContentLabel(
+	tx: Parameters<Parameters<typeof database.transaction>[0]>[0],
+	input: { readonly postId: string; readonly profileId: string; readonly enabled: boolean },
+) {
+	await tx
+		.delete(unitTag)
+		.where(and(eq(unitTag.unitId, input.postId), eq(unitTag.tagId, NsfwContentLabelId)));
+	if (!input.enabled) return;
+	const [lastPinned] = await tx
+		.select({ position: unitTag.position })
+		.from(unitTag)
+		.where(and(eq(unitTag.unitId, input.postId), eq(unitTag.pinned, true)))
+		.orderBy(desc(unitTag.position))
+		.limit(1);
+	await tx.insert(unitTag).values({
+		unitId: input.postId,
+		tagId: NsfwContentLabelId,
+		createdByProfileId: input.profileId,
+		pinned: true,
+		position: fractionalPositionBetween(lastPinned?.position, null),
+	});
+}
 
 const replyCount = sql<unknown>`coalesce(case when ${post.kind} = 'reply'::post_kind
 	then ${postReplyStat.undeletedDirectCount}
@@ -256,7 +314,8 @@ export default new Elysia()
 			)
 			.get(
 				"",
-				async ({ query }) => {
+				async ({ query, request }) => {
+					const identity = await resolveIdentity(request, "unit:read");
 					const localizationLanguages = query.localizationLanguages ?? [];
 					const rows = await database
 						.select({
@@ -273,6 +332,22 @@ export default new Elysia()
 							latestRevisionId: unitRevisionHead.revisionId,
 							createdAt: unit.createdAt,
 							updatedAt: unit.updatedAt,
+							contentSpoilerLevel: sql<number>`coalesce((
+								select manifest.spoiler_level
+								from (values
+									('019b76da-a800-7370-8000-000000000001'::uuid, 0),
+									('019b76da-a800-7370-8000-000000000002'::uuid, 1),
+									('019b76da-a800-7370-8000-000000000003'::uuid, 2)
+								) manifest(tag_id, spoiler_level)
+								join public.unit_tag content_label
+									on content_label.tag_id = manifest.tag_id
+									and content_label.unit_id = ${post.id}
+							), 0)`,
+							contentNsfw: sql<boolean>`exists(
+								select 1 from ${unitTag} content_label
+								where content_label.unit_id = ${post.id}
+									and content_label.tag_id = ${NsfwContentLabelId}::uuid
+							)`,
 						})
 						.from(post)
 						.innerJoin(unit, eq(unit.id, post.id))
@@ -307,13 +382,44 @@ export default new Elysia()
 						rows.map(({ id }) => id),
 						localizationLanguages,
 					);
+					const [viewerDisplayPreference] = identity.profile
+						? await database
+								.select({
+									alwaysShowSpoilers: profilePreference.alwaysShowSpoilers,
+									alwaysShowNsfw: profilePreference.alwaysShowNsfw,
+								})
+								.from(profilePreference)
+								.where(eq(profilePreference.profileId, identity.profile.unitId))
+								.limit(1)
+						: [];
 					return {
 						items: rows.map((item) => ({
 							...item,
 							realmId: query.realmId ?? null,
 							attributions: attributions.get(item.id) ?? [],
 							replyCount: toSafeInteger(item.replyCount, "reply count"),
-							body: toPortableTextResponse(item.body, "post.body"),
+							body:
+								(item.contentSpoilerLevel > 0 && !viewerDisplayPreference?.alwaysShowSpoilers) ||
+								(item.contentNsfw && !viewerDisplayPreference?.alwaysShowNsfw)
+									? null
+									: toPortableTextResponse(item.body, "post.body"),
+							summary:
+								(item.contentSpoilerLevel > 0 && !viewerDisplayPreference?.alwaysShowSpoilers) ||
+								(item.contentNsfw && !viewerDisplayPreference?.alwaysShowNsfw)
+									? null
+									: item.summary,
+							contentSpoiler: {
+								level:
+									item.contentSpoilerLevel === 1 || item.contentSpoilerLevel === 2
+										? item.contentSpoilerLevel
+										: 0,
+								concealed:
+									item.contentSpoilerLevel > 0 && !viewerDisplayPreference?.alwaysShowSpoilers,
+							},
+							contentNsfw: {
+								labelled: item.contentNsfw,
+								concealed: item.contentNsfw && !viewerDisplayPreference?.alwaysShowNsfw,
+							},
 						})),
 					};
 				},
@@ -333,7 +439,7 @@ export default new Elysia()
 					if (subjectId) {
 						await authorization.unit.ensureCanRead(subjectId);
 					}
-					const id = await runVndbVoteTransaction(
+					const id = await runVoteTransaction(
 						{ family: "unit_tag", authority: "global" },
 						async (tx) => {
 							if (subjectId)
@@ -367,6 +473,16 @@ export default new Elysia()
 								postId: created.id,
 								profileId: profile.unitId,
 								nextBody: body.body,
+							});
+							await replaceContentSpoilerLabel(tx, {
+								postId: created.id,
+								profileId: profile.unitId,
+								level: body.contentSpoilerLevel ?? 0,
+							});
+							await replaceNsfwContentLabel(tx, {
+								postId: created.id,
+								profileId: profile.unitId,
+								enabled: body.contentNsfw ?? false,
 							});
 							await tx.insert(unitOwnership).values({
 								unitId: created.id,
@@ -408,7 +524,7 @@ export default new Elysia()
 							"RealmRulesAcceptanceRequired",
 							"PostTargetingLocked",
 						]),
-						[StatusCodes.TOO_MANY_REQUESTS]: VndbVoteBackpressureResponse,
+						[StatusCodes.TOO_MANY_REQUESTS]: VoteBackpressureResponse,
 					},
 					detail: { summary: "Create post or excerpt", tags: ["Posts"] },
 				},
@@ -421,7 +537,7 @@ export default new Elysia()
 						? await resolveCanonicalUnitId(database, body.subjectId)
 						: undefined;
 					if (subjectId) await authorization.unit.ensureCanRead(subjectId);
-					const id = await runVndbVoteTransaction(
+					const id = await runVoteTransaction(
 						{ family: "unit_tag", authority: "global" },
 						async (tx) => {
 							const created = await createWikiPost(tx, {
@@ -455,7 +571,7 @@ export default new Elysia()
 							"RealmRulesAcceptanceRequired",
 							"PostTargetingLocked",
 						]),
-						[StatusCodes.TOO_MANY_REQUESTS]: VndbVoteBackpressureResponse,
+						[StatusCodes.TOO_MANY_REQUESTS]: VoteBackpressureResponse,
 					},
 					detail: { summary: "Create Wiki", tags: ["Posts"] },
 				},
@@ -483,6 +599,22 @@ export default new Elysia()
 							latestRevisionId: unitRevisionHead.revisionId,
 							createdAt: unit.createdAt,
 							updatedAt: unit.updatedAt,
+							contentSpoilerLevel: sql<number>`coalesce((
+								select manifest.spoiler_level
+								from (values
+									('019b76da-a800-7370-8000-000000000001'::uuid, 0),
+									('019b76da-a800-7370-8000-000000000002'::uuid, 1),
+									('019b76da-a800-7370-8000-000000000003'::uuid, 2)
+								) manifest(tag_id, spoiler_level)
+								join public.unit_tag content_label
+									on content_label.tag_id = manifest.tag_id
+									and content_label.unit_id = ${post.id}
+							), 0)`,
+							contentNsfw: sql<boolean>`exists(
+								select 1 from ${unitTag} content_label
+								where content_label.unit_id = ${post.id}
+									and content_label.tag_id = ${NsfwContentLabelId}::uuid
+							)`,
 						})
 						.from(post)
 						.innerJoin(unit, eq(unit.id, post.id))
@@ -540,6 +672,7 @@ export default new Elysia()
 						replyCreationDecision,
 						targetingLock,
 						canManageScores,
+						viewerDisplayPreference,
 					] = await Promise.all([
 						database
 							.select({
@@ -585,6 +718,17 @@ export default new Elysia()
 						row.postKind === "review"
 							? authorization.unit.canUpdate(row.id, ["relations", "scores"])
 							: Promise.resolve(false),
+						viewerProfileId
+							? database
+									.select({
+										alwaysShowSpoilers: profilePreference.alwaysShowSpoilers,
+										alwaysShowNsfw: profilePreference.alwaysShowNsfw,
+									})
+									.from(profilePreference)
+									.where(eq(profilePreference.profileId, viewerProfileId))
+									.limit(1)
+									.then(([value]) => value)
+							: Promise.resolve(undefined),
 					]);
 					const chapterLocalization =
 						row.postKind === "chapter"
@@ -608,6 +752,18 @@ export default new Elysia()
 						updatedAt: row.updatedAt,
 						subject,
 						scores,
+						contentSpoiler: {
+							level:
+								row.contentSpoilerLevel === 1 || row.contentSpoilerLevel === 2
+									? row.contentSpoilerLevel
+									: 0,
+							concealed:
+								row.contentSpoilerLevel > 0 && !viewerDisplayPreference?.alwaysShowSpoilers,
+						},
+						contentNsfw: {
+							labelled: row.contentNsfw,
+							concealed: row.contentNsfw && !viewerDisplayPreference?.alwaysShowNsfw,
+						},
 						replyCount: toSafeInteger(row.replyCount, "reply count"),
 					};
 					if (row.postKind === "chapter") {
@@ -703,7 +859,7 @@ export default new Elysia()
 					await authorization.unit.ensureCanUpdate(params.postId, [
 						["localizations", body.language],
 					]);
-					await runVndbVoteTransaction({ family: "unit_tag", authority: "global" }, async (tx) => {
+					await runVoteTransaction({ family: "unit_tag", authority: "global" }, async (tx) => {
 						const [current] = await tx
 							.select({
 								content: unitLocalization.content,
@@ -741,6 +897,18 @@ export default new Elysia()
 							previousBody: current?.content,
 							nextBody: body.body,
 						});
+						if (body.contentSpoilerLevel !== undefined)
+							await replaceContentSpoilerLabel(tx, {
+								postId: params.postId,
+								profileId: profile.unitId,
+								level: body.contentSpoilerLevel,
+							});
+						if (body.contentNsfw !== undefined)
+							await replaceNsfwContentLabel(tx, {
+								postId: params.postId,
+								profileId: profile.unitId,
+								enabled: body.contentNsfw,
+							});
 						await recordUnitRevision(tx, {
 							unitId: params.postId,
 							actorProfileId: profile.unitId,
@@ -770,7 +938,7 @@ export default new Elysia()
 							"UnitRevisionConflict",
 							"PostTagMentionVoteConflict",
 						]),
-						[StatusCodes.TOO_MANY_REQUESTS]: VndbVoteBackpressureResponse,
+						[StatusCodes.TOO_MANY_REQUESTS]: VoteBackpressureResponse,
 					},
 					detail: { summary: "Update post", tags: ["Posts"] },
 				},
@@ -891,7 +1059,7 @@ export default new Elysia()
 						body.realmId ? [body.realmId] : [],
 						"realm.post.replies.create",
 					);
-					const createdReply = await runVndbVoteTransaction(
+					const createdReply = await runVoteTransaction(
 						{ family: "unit_tag", authority: "global" },
 						async (tx) => {
 							const [root] = await tx
@@ -1049,7 +1217,7 @@ export default new Elysia()
 							"RealmRulesAcceptanceRequired",
 							"PostTargetingLocked",
 						]),
-						[StatusCodes.TOO_MANY_REQUESTS]: VndbVoteBackpressureResponse,
+						[StatusCodes.TOO_MANY_REQUESTS]: VoteBackpressureResponse,
 					},
 					detail: { summary: "Create reply post", tags: ["Posts"] },
 				},
@@ -1061,7 +1229,7 @@ export default new Elysia()
 					await authorization.unit.ensureCanUpdate(params.replyPostId, [
 						["localizations", body.language],
 					]);
-					await runVndbVoteTransaction({ family: "unit_tag", authority: "global" }, async (tx) => {
+					await runVoteTransaction({ family: "unit_tag", authority: "global" }, async (tx) => {
 						const [current] = await tx
 							.select({ content: unitLocalization.content })
 							.from(unitLocalization)
@@ -1116,7 +1284,7 @@ export default new Elysia()
 							"UnitRevisionConflict",
 							"PostTagMentionVoteConflict",
 						]),
-						[StatusCodes.TOO_MANY_REQUESTS]: VndbVoteBackpressureResponse,
+						[StatusCodes.TOO_MANY_REQUESTS]: VoteBackpressureResponse,
 					},
 					detail: { summary: "Update reply post", tags: ["Posts"] },
 				},

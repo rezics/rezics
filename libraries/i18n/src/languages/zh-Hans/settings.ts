@@ -78,6 +78,10 @@ export default {
 	filterFeedByPreferredLanguages: "依偏好语言筛选动态消息",
 	filterFeedByPreferredLanguagesHint:
 		"打开后，动态消息只会收录至少有一种偏好语言的内容；其他列表仍会显示所有符合条件的内容，并应用语言回退。",
+	alwaysShowSpoilers: "始终显示剧透",
+	alwaysShowSpoilersHint: "直接显示标有剧透的内容，无需逐项确认。",
+	alwaysShowNsfw: "始终显示不宜在工作场合查看的媒体",
+	alwaysShowNsfwHint: "直接显示相应媒体，不先进行模糊处理。",
 	account: "账户",
 	accountDescription: "管理当前登录会话。",
 	security: "安全性",

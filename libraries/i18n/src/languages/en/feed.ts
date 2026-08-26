@@ -6,7 +6,7 @@ const { forms: followTerms } = enTerminology.follow;
 const { forms: postTerms } = enTerminology.post;
 const { forms: realmTerms } = enTerminology.realm;
 const { forms: entityTerms } = enTerminology.entity;
-const { forms: tagStructureTerms } = enTerminology.tagStructure;
+const { forms: tagPathTerms } = enTerminology.tagPath;
 const { forms: zoneTerms } = enTerminology.zone;
 const { forms: videoTerms } = enTerminology.video;
 const { forms: audioTerms } = enTerminology.audio;
@@ -64,7 +64,7 @@ export default {
 			"unit:release": "Releases",
 			"unit:entity": entityTerms.pluralLabel,
 			"unit:tag": "Tags",
-			"unit:structure": tagStructureTerms.pluralLabel,
+			"unit:structure": tagPathTerms.pluralLabel,
 			"unit:series": "Series",
 			"unit:zone": zoneTerms.pluralLabel,
 			"unit:collection": "Collections",

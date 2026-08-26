@@ -11,6 +11,9 @@ export const SearchQueryExpansionPolicyVersion = "opencc-wasm-0.13.0-s2twp-tw2sp
 const MaxSearchQueryVariants = 3 as const;
 const MaxSearchQueryVariantLength = 512 as const;
 const MaxSearchQueryVariantsTotalLength = 1536 as const;
+const MaxTagCompoundLength = 16 as const;
+const MaxTagCompoundParts = 4 as const;
+const MaxTagCompoundDecompositions = 32 as const;
 
 type NonEmptyStringTuple = readonly [string, ...string[]];
 
@@ -20,6 +23,10 @@ export interface ExpandedSearchQuery {
 	/** Original query followed by at most one result from each OpenCC direction. */
 	readonly variants: NonEmptyStringTuple;
 	readonly policyVersion: typeof SearchQueryExpansionPolicyVersion;
+}
+
+export interface TagCompoundDecomposition {
+	readonly parts: readonly [string, string, ...string[]];
 }
 
 const SearchQueryExpansionConfigs = {
@@ -55,6 +62,74 @@ function hasHan(query: string): boolean {
 
 function hasKanaOrHangul(query: string): boolean {
 	return /[\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}]/u.test(query);
+}
+
+function addTagCompoundDecomposition(
+	result: TagCompoundDecomposition[],
+	parts: readonly string[],
+): void {
+	if (
+		result.length >= MaxTagCompoundDecompositions ||
+		parts.length < 2 ||
+		parts.length > MaxTagCompoundParts ||
+		parts.some((part) => !part)
+	)
+		return;
+	const key = parts.join("\u0000");
+	if (result.some((item) => item.parts.join("\u0000") === key)) return;
+	result.push({
+		parts: [parts[0]!, parts[1]!, ...parts.slice(2)],
+	});
+}
+
+/**
+ * Produces a bounded set of Tag-sized interpretations for a compound query.
+ *
+ * Explicit separators win. Unseparated Han input is split only into 2–4 parts
+ * of at least two code points, avoiding one-character posting explosions.
+ */
+export function decomposeTagCompoundQuery(input: string): readonly TagCompoundDecomposition[] {
+	const query = input.trim().normalize("NFC");
+	if (!query || [...query].length > MaxTagCompoundLength) return [];
+	const explicit = query
+		.split(/[\s:：→>›/／]+/u)
+		.map((part) => part.trim())
+		.filter(Boolean);
+	if (explicit.length > 1) {
+		const result: TagCompoundDecomposition[] = [];
+		addTagCompoundDecomposition(result, explicit);
+		return result;
+	}
+	if (!/^\p{Script=Han}+$/u.test(query) || hasKanaOrHangul(query)) return [];
+	const codePoints = [...query];
+	const result: TagCompoundDecomposition[] = [];
+	const visit = (start: number, parts: string[]) => {
+		if (result.length >= MaxTagCompoundDecompositions) return;
+		if (start === codePoints.length) {
+			addTagCompoundDecomposition(result, parts);
+			return;
+		}
+		if (parts.length >= MaxTagCompoundParts) return;
+		const remainingSlots = MaxTagCompoundParts - parts.length;
+		for (
+			let end = start + 2;
+			end <= codePoints.length && codePoints.length - end >= 2 * Math.max(0, 1 - parts.length);
+			end += 1
+		) {
+			const remaining = codePoints.length - end;
+			if (remaining > 0 && remaining < 2) continue;
+			if (remaining > remainingSlots * MaxTagCompoundLength) continue;
+			visit(end, [...parts, codePoints.slice(start, end).join("")]);
+		}
+	};
+	visit(0, []);
+	return result.toSorted(
+		(left, right) =>
+			left.parts.length - right.parts.length ||
+			Math.max(...left.parts.map((part) => [...part].length)) -
+				Math.max(...right.parts.map((part) => [...part].length)) ||
+			left.parts.join("\u0000").localeCompare(right.parts.join("\u0000")),
+	);
 }
 
 function isChineseExpansionEligible(

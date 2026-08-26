@@ -773,7 +773,6 @@ export const PackRelationsSchema = z
 							.refine((members) => new Set(members).size === members.length, {
 								message: "A Tag Path cannot contain the same Tag more than once",
 							}),
-						primary: z.boolean(),
 						...ProvenanceFields,
 					})
 					.strict(),

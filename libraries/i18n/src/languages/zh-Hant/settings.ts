@@ -78,6 +78,10 @@ export default {
 	filterFeedByPreferredLanguages: "依偏好語言篩選動態消息",
 	filterFeedByPreferredLanguagesHint:
 		"開啟後，動態消息只會收錄至少有一種偏好語言的內容；其他清單仍會顯示所有符合條件的內容，並套用語言回退。",
+	alwaysShowSpoilers: "一律顯示劇透",
+	alwaysShowSpoilersHint: "直接顯示標示為劇透的內容，不必逐項確認。",
+	alwaysShowNsfw: "一律顯示不宜在工作場合瀏覽的媒體",
+	alwaysShowNsfwHint: "直接顯示相應媒體，不先套用模糊效果。",
 	account: "帳戶",
 	accountDescription: "管理目前的登入階段。",
 	security: "安全性",

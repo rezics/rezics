@@ -467,6 +467,8 @@ export function PreferenceSettings() {
 					collectionConfig: current.collectionConfig,
 					personalizedFeed: data.get("personalizedFeed") === "true",
 					filterFeedByPreferredLanguages: data.get("filterFeedByPreferredLanguages") === "true",
+					alwaysShowSpoilers: data.get("alwaysShowSpoilers") === "true",
+					alwaysShowNsfw: data.get("alwaysShowNsfw") === "true",
 					contentRatings,
 					preferredLanguages,
 				},
@@ -665,6 +667,28 @@ export function PreferenceSettings() {
 							<NativeSelectOption value="false">{t.settings.off}</NativeSelectOption>
 							<NativeSelectOption value="true">{t.settings.on}</NativeSelectOption>
 						</NativeSelect>
+					</Field>
+					<Field>
+						<FieldLabel>{t.settings.alwaysShowSpoilers}</FieldLabel>
+						<NativeSelect
+							name="alwaysShowSpoilers"
+							defaultValue={String(preferences.data.alwaysShowSpoilers)}
+						>
+							<NativeSelectOption value="false">{t.settings.off}</NativeSelectOption>
+							<NativeSelectOption value="true">{t.settings.on}</NativeSelectOption>
+						</NativeSelect>
+						<p className="text-sm text-muted-foreground">{t.settings.alwaysShowSpoilersHint}</p>
+					</Field>
+					<Field>
+						<FieldLabel>{t.settings.alwaysShowNsfw}</FieldLabel>
+						<NativeSelect
+							name="alwaysShowNsfw"
+							defaultValue={String(preferences.data.alwaysShowNsfw)}
+						>
+							<NativeSelectOption value="false">{t.settings.off}</NativeSelectOption>
+							<NativeSelectOption value="true">{t.settings.on}</NativeSelectOption>
+						</NativeSelect>
+						<p className="text-sm text-muted-foreground">{t.settings.alwaysShowNsfwHint}</p>
 					</Field>
 					<RequestFailure error={update.error} fallback={t.ui.retryLater} />
 					{saved && <p className="text-success-foreground text-sm">{t.ui.saved}</p>}

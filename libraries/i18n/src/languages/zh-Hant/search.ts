@@ -5,7 +5,6 @@ import { insert } from "native-i18n";
 const { forms: postTerms } = zhHantTerminology.post;
 const { forms: realmTerms } = zhHantTerminology.realm;
 const { forms: zoneTerms } = zhHantTerminology.zone;
-const { forms: tagStructureTerms } = zhHantTerminology.tagStructure;
 const { forms: entityTerms } = zhHantTerminology.entity;
 const { forms: followTerms } = zhHantTerminology.follow;
 
@@ -46,7 +45,6 @@ export default {
 		users: "使用者",
 		entities: entityTerms.pluralLabel,
 		tags: "標籤",
-		"tag-structures": tagStructureTerms.pluralLabel,
 		posts: postTerms.plural,
 		realms: realmTerms.plural,
 		collections: "收藏集",
@@ -58,7 +56,6 @@ export default {
 		users: "使用者",
 		entities: entityTerms.pluralLabel,
 		tags: "標籤",
-		"tag-structures": tagStructureTerms.pluralLabel,
 		posts: postTerms.plural,
 		realms: realmTerms.plural,
 		collections: "收藏集",

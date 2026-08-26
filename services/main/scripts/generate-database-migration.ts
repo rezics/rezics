@@ -185,25 +185,11 @@ function assertTransactionModeNoneIsResumeSafe(source: string): void {
 			`^CREATE\\s+(?:UNIQUE\\s+)?INDEX\\s+CONCURRENTLY\\s+(?!IF\\s+NOT\\s+EXISTS\\b)${identifier}\\s+ON\\s+public\\.${identifier}(?:\\s+USING\\s+btree)?\\s+${indexElements}${include}${predicate}\\s*;\\s*$`,
 			"is",
 		);
-		const vettedPathCorrectionShardIndexes = [
-			new RegExp(
-				"^CREATE\\s+INDEX\\s+CONCURRENTLY\\s+unit_structure_application_correction_shard_idx\\s+ON\\s+public\\.unit_structure_application(?:\\s+USING\\s+btree)?\\s+\\(\\s*structure_id\\s*,\\s*\\(\\s*pg_catalog\\.get_byte\\(\\s*pg_catalog\\.uuid_send\\(\\s*unit_id\\s*\\)\\s*,\\s*15\\s*\\)\\s*\\)\\s*,\\s*unit_id\\s*\\)\\s*;\\s*$",
-				"is",
-			),
-			new RegExp(
-				"^CREATE\\s+INDEX\\s+CONCURRENTLY\\s+unit_structure_application_judgment_positive_correction_shard_idx\\s+ON\\s+public\\.unit_structure_application_judgment(?:\\s+USING\\s+btree)?\\s+\\(\\s*structure_id\\s*,\\s*\\(\\s*pg_catalog\\.get_byte\\(\\s*pg_catalog\\.uuid_send\\(\\s*unit_id\\s*\\)\\s*,\\s*15\\s*\\)\\s*\\)\\s*,\\s*unit_id\\s*,\\s*profile_id\\s*\\)\\s+WHERE\\s+fit_vote\\s*=\\s*1\\s*;\\s*$",
-				"is",
-			),
-		];
 		const dropIndex =
 			/^DROP\s+INDEX\s+CONCURRENTLY\s+(?:IF\s+EXISTS\s+)?public\.[a-z_][a-z0-9_$]*\s*;\s*$/is;
-		if (
-			!createIndex.test(code) &&
-			!vettedPathCorrectionShardIndexes.some((pattern) => pattern.test(code)) &&
-			!dropIndex.test(code)
-		)
+		if (!createIndex.test(code) && !dropIndex.test(code))
 			throw new Error(
-				"Transaction-mode-none migrations may contain only dependency-free, schema-anchored CREATE/DROP INDEX CONCURRENTLY statements; CREATE must use simple columns or one of the two vetted pg_catalog-only Path-correction shard expressions on a public-qualified table and omit IF NOT EXISTS, while DROP must qualify its public index",
+				"Transaction-mode-none migrations may contain only dependency-free, schema-anchored CREATE/DROP INDEX CONCURRENTLY statements; CREATE must use simple columns on a public-qualified table and omit IF NOT EXISTS, while DROP must qualify its public index",
 			);
 	}
 }

@@ -6,7 +6,7 @@ const { forms: dockTerms } = enTerminology.dock;
 const { forms: followTerms } = enTerminology.follow;
 const { forms: postTerms } = enTerminology.post;
 const { forms: realmTerms } = enTerminology.realm;
-const { forms: tagStructureTerms } = enTerminology.tagStructure;
+const { forms: tagPathTerms } = enTerminology.tagPath;
 const { forms: unitSlugTerms } = enTerminology.unitSlug;
 const { forms: zoneTerms } = enTerminology.zone;
 const { forms: entityTerms } = enTerminology.entity;
@@ -19,7 +19,7 @@ export default {
 	ApiTokenPermissionRequired: `This ${verbatimTerms.api.value} token does not have the required permission.`,
 	ApiTokenRateLimitExceeded: `This ${verbatimTerms.api.value} token is sending requests too quickly. Try again shortly.`,
 	ApiQuotaExceeded: `The ${verbatimTerms.api.value} quota is exhausted. Try again after the indicated time.`,
-	VndbVoteHotKeyBusy: "This vote target is busy. Try again shortly.",
+	VoteHotKeyBusy: "This vote target is busy. Try again shortly.",
 	ApiQuotaPolicyNotFound: `The requested ${verbatimTerms.api.value} quota policy was not found.`,
 	ApiQuotaPolicyKeyConflict: `An ${verbatimTerms.api.value} quota policy already uses this key.`,
 	ApiQuotaPolicyInvalid: `The ${verbatimTerms.api.value} quota policy configuration is invalid.`,
@@ -296,11 +296,11 @@ export default {
 	RealmTagContextRequired: `This ${realmTerms.label} must first provide a currently visible formal explanation for the Tag.`,
 	RealmTagSelfReferenceForbidden: "A Tag cannot be applied to itself.",
 	SharedSearchQueryNotFound: "This shared search query could not be found.",
-	InvalidTagStructure: `This ${tagStructureTerms.inline} is invalid.`,
-	TagStructureNotFound: `This ${tagStructureTerms.inline} could not be found.`,
-	TagStructureApplicationNotFound: `This Unit does not have that ${tagStructureTerms.inline}.`,
-	TagStructureChanged: `This ${tagStructureTerms.inline} changed elsewhere. Refresh and try again.`,
-	TagStructureDefinitionConflict: `An identical ${tagStructureTerms.inline} already exists.`,
+	InvalidTagPath: `This ${tagPathTerms.inline} is invalid.`,
+	TagPathNotFound: `This ${tagPathTerms.inline} could not be found.`,
+	TagPathApplicationNotFound: `This Unit does not have that ${tagPathTerms.inline}.`,
+	TagPathChanged: `This ${tagPathTerms.inline} changed elsewhere. Refresh and try again.`,
+	TagPathDefinitionConflict: `An identical ${tagPathTerms.inline} already exists.`,
 	AssociationContextPostInvalid: `The relationship context must be a wiki ${postTerms.label}.`,
 	ProgressEntryNotFound: "This progress event could not be found.",
 	PostTagMentionVoteConflict: `This Tag mention conflicts with your existing downvote on the ${postTerms.label}.`,

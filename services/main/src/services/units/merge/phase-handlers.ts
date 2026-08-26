@@ -1047,7 +1047,7 @@ async function unitTagBatch(
 				(${input.targetUnitId}::uuid)
 			) as affected(unit_id)
 		), admission as materialized (
-			select public.lock_vndb_vote_hot_keys(
+			select public.lock_vote_hot_keys(
 				coalesce(
 					array_agg(hot_keys.unit_id order by hot_keys.unit_id, hot_keys.tag_id, hot_keys.profile_id),
 					array[]::uuid[]
@@ -1112,7 +1112,7 @@ async function unitTagBatch(
 				(${input.targetUnitId}::uuid)
 			) as affected(unit_id)
 		), admission as materialized (
-			select public.lock_vndb_vote_hot_keys(
+			select public.lock_vote_hot_keys(
 				coalesce(
 					array_agg(hot_keys.unit_id order by hot_keys.unit_id, hot_keys.tag_id, hot_keys.profile_id),
 					array[]::uuid[]
@@ -1235,7 +1235,7 @@ async function unitTagBatch(
 					(${input.targetUnitId}::uuid)
 				) as affected(unit_id)
 			), admission as materialized (
-				select public.lock_vndb_vote_hot_keys(
+				select public.lock_vote_hot_keys(
 					coalesce(
 						array_agg(hot_keys.unit_id order by hot_keys.unit_id, hot_keys.tag_id, hot_keys.profile_id),
 						array[]::uuid[]
@@ -2052,110 +2052,110 @@ async function seriesReleaseBatch(
 	);
 }
 
-async function structureApplicationBatch(
+async function tagPathApplicationBatch(
 	tx: DatabaseTransaction,
 	input: UnitMergePhaseInput,
 ): Promise<UnitMergePhaseResult> {
 	await tx.execute(sql`
 		with batch as materialized (
-			select structure_id, created_by_profile_id, created_at, updated_at
-			from unit_structure_application
+			select path_id, created_by_profile_id, created_at, updated_at
+			from unit_tag_path
 			where unit_id = ${input.sourceUnitId}::uuid
-			order by structure_id
+			order by path_id
 			limit ${input.batchSize}
 			for update skip locked
 		)
-		insert into unit_structure_application (
-			unit_id, structure_id, created_by_profile_id, pinned, position,
+		insert into unit_tag_path (
+			unit_id, path_id, created_by_profile_id, pinned, position,
 			created_at, updated_at
 		)
-		select ${input.targetUnitId}::uuid, structure_id, created_by_profile_id,
+		select ${input.targetUnitId}::uuid, path_id, created_by_profile_id,
 			false, null, created_at, updated_at
 		from batch
-		on conflict (unit_id, structure_id) do update
+		on conflict (unit_id, path_id) do update
 		set updated_at = greatest(
-			unit_structure_application.updated_at,
+			unit_tag_path.updated_at,
 			excluded.updated_at
 		)
 	`);
 	await tx.execute(sql`
 		with vote_batch as materialized (
-			select vote.structure_id, vote.profile_id,
+			select vote.path_id, vote.profile_id,
 				vote.fit_vote, vote.spoiler_level,
 				vote.fit_updated_at, vote.spoiler_updated_at,
 				vote.created_at, vote.updated_at
-			from unit_structure_application_judgment as vote
+			from unit_tag_path_judgment as vote
 			where vote.unit_id = ${input.sourceUnitId}::uuid
 				and exists (
-					select 1 from unit_structure_application as target
+					select 1 from unit_tag_path as target
 					where target.unit_id = ${input.targetUnitId}::uuid
-						and target.structure_id = vote.structure_id
+						and target.path_id = vote.path_id
 				)
-			order by vote.structure_id, vote.profile_id
+			order by vote.path_id, vote.profile_id
 			limit ${input.batchSize}
 			for update of vote skip locked
 		)
-		insert into unit_structure_application_judgment (
-			unit_id, structure_id, profile_id, fit_vote, spoiler_level,
+		insert into unit_tag_path_judgment (
+			unit_id, path_id, profile_id, fit_vote, spoiler_level,
 			fit_updated_at, spoiler_updated_at, created_at, updated_at
 		)
-		select ${input.targetUnitId}::uuid, structure_id, profile_id,
+		select ${input.targetUnitId}::uuid, path_id, profile_id,
 			fit_vote, spoiler_level, fit_updated_at, spoiler_updated_at,
 			created_at, updated_at
 		from vote_batch
-		on conflict (unit_id, structure_id, profile_id) do update
+		on conflict (unit_id, path_id, profile_id) do update
 		set fit_vote = case
 				when excluded.fit_updated_at is not null
 					and (
-						unit_structure_application_judgment.fit_updated_at is null
+						unit_tag_path_judgment.fit_updated_at is null
 						or excluded.fit_updated_at
-							> unit_structure_application_judgment.fit_updated_at
+							> unit_tag_path_judgment.fit_updated_at
 					)
 					then excluded.fit_vote
-				else unit_structure_application_judgment.fit_vote
+				else unit_tag_path_judgment.fit_vote
 			end,
 			fit_updated_at = greatest(
-				unit_structure_application_judgment.fit_updated_at,
+				unit_tag_path_judgment.fit_updated_at,
 				excluded.fit_updated_at
 			),
 			spoiler_level = case
 				when excluded.spoiler_updated_at is not null
 					and (
-						unit_structure_application_judgment.spoiler_updated_at is null
+						unit_tag_path_judgment.spoiler_updated_at is null
 						or excluded.spoiler_updated_at
-							> unit_structure_application_judgment.spoiler_updated_at
+							> unit_tag_path_judgment.spoiler_updated_at
 					)
 					then excluded.spoiler_level
-				else unit_structure_application_judgment.spoiler_level
+				else unit_tag_path_judgment.spoiler_level
 			end,
 			spoiler_updated_at = greatest(
-				unit_structure_application_judgment.spoiler_updated_at,
+				unit_tag_path_judgment.spoiler_updated_at,
 				excluded.spoiler_updated_at
 			),
 			created_at = least(
-				unit_structure_application_judgment.created_at,
+				unit_tag_path_judgment.created_at,
 				excluded.created_at
 			),
 			updated_at = greatest(
-				unit_structure_application_judgment.updated_at,
+				unit_tag_path_judgment.updated_at,
 				excluded.updated_at
 			)
 	`);
 	const evidenceResult = await tx.execute<{ readonly processed: number | string }>(sql`
 		with batch as materialized (
 			select evidence.import_id, evidence.source_fingerprint
-			from content_pack_structure_application_evidence as evidence
-			join unit_structure_application_judgment as target
+			from content_pack_unit_tag_path_evidence as evidence
+			join unit_tag_path_judgment as target
 				on target.unit_id = ${input.targetUnitId}::uuid
-				and target.structure_id = evidence.structure_id
+				and target.path_id = evidence.path_id
 				and target.profile_id = evidence.profile_id
 			where evidence.unit_id = ${input.sourceUnitId}::uuid
-			order by evidence.structure_id, evidence.profile_id,
+			order by evidence.path_id, evidence.profile_id,
 				evidence.import_id, evidence.source_fingerprint
 			limit ${input.batchSize}
 			for update of evidence skip locked
 		), updated as (
-			update content_pack_structure_application_evidence as evidence
+			update content_pack_unit_tag_path_evidence as evidence
 			set unit_id = ${input.targetUnitId}::uuid
 			from batch
 			where evidence.import_id = batch.import_id
@@ -2168,119 +2168,119 @@ async function structureApplicationBatch(
 		tx,
 		sql`
 			with batch as materialized (
-				select structure_id, created_by_profile_id, created_at, updated_at
-				from unit_structure_application
+				select path_id, created_by_profile_id, created_at, updated_at
+				from unit_tag_path
 				where unit_id = ${input.sourceUnitId}::uuid
-				order by structure_id
+				order by path_id
 				limit ${input.batchSize}
 				for update skip locked
 			), ensured_targets as (
-				insert into unit_structure_application (
-					unit_id, structure_id, created_by_profile_id, pinned, position,
+				insert into unit_tag_path (
+					unit_id, path_id, created_by_profile_id, pinned, position,
 					created_at, updated_at
 				)
-				select ${input.targetUnitId}::uuid, structure_id, created_by_profile_id,
+				select ${input.targetUnitId}::uuid, path_id, created_by_profile_id,
 					false, null, created_at, updated_at
 				from batch
-				on conflict (unit_id, structure_id) do update
+				on conflict (unit_id, path_id) do update
 				set updated_at = greatest(
-					unit_structure_application.updated_at,
+					unit_tag_path.updated_at,
 					excluded.updated_at
 				)
-				returning structure_id
+				returning path_id
 			), application_to_drain as materialized (
-				select batch.structure_id
+				select batch.path_id
 				from batch
-				join ensured_targets using (structure_id)
-				order by batch.structure_id
+				join ensured_targets using (path_id)
+				order by batch.path_id
 				limit 1
 			), vote_batch as materialized (
-				select vote.structure_id, vote.profile_id,
+				select vote.path_id, vote.profile_id,
 					vote.fit_vote, vote.spoiler_level,
 					vote.fit_updated_at, vote.spoiler_updated_at,
 					vote.created_at, vote.updated_at
 				from application_to_drain
-				join unit_structure_application_judgment as vote
-					on vote.structure_id = application_to_drain.structure_id
+				join unit_tag_path_judgment as vote
+					on vote.path_id = application_to_drain.path_id
 				where vote.unit_id = ${input.sourceUnitId}::uuid
 				order by vote.profile_id
 				limit ${input.batchSize}
 				for update of vote skip locked
 			), copied_votes as (
-				insert into unit_structure_application_judgment (
-					unit_id, structure_id, profile_id, fit_vote, spoiler_level,
+				insert into unit_tag_path_judgment (
+					unit_id, path_id, profile_id, fit_vote, spoiler_level,
 					fit_updated_at, spoiler_updated_at, created_at, updated_at
 				)
-				select ${input.targetUnitId}::uuid, structure_id, profile_id,
+				select ${input.targetUnitId}::uuid, path_id, profile_id,
 					fit_vote, spoiler_level, fit_updated_at, spoiler_updated_at,
 					created_at, updated_at
 				from vote_batch
-				on conflict (unit_id, structure_id, profile_id) do update
+				on conflict (unit_id, path_id, profile_id) do update
 				set fit_vote = case
 						when excluded.fit_updated_at is not null
 							and (
-								unit_structure_application_judgment.fit_updated_at is null
+								unit_tag_path_judgment.fit_updated_at is null
 								or excluded.fit_updated_at
-									> unit_structure_application_judgment.fit_updated_at
+									> unit_tag_path_judgment.fit_updated_at
 							)
 							then excluded.fit_vote
-						else unit_structure_application_judgment.fit_vote
+						else unit_tag_path_judgment.fit_vote
 					end,
 					fit_updated_at = greatest(
-						unit_structure_application_judgment.fit_updated_at,
+						unit_tag_path_judgment.fit_updated_at,
 						excluded.fit_updated_at
 					),
 					spoiler_level = case
 						when excluded.spoiler_updated_at is not null
 							and (
-								unit_structure_application_judgment.spoiler_updated_at is null
+								unit_tag_path_judgment.spoiler_updated_at is null
 								or excluded.spoiler_updated_at
-									> unit_structure_application_judgment.spoiler_updated_at
+									> unit_tag_path_judgment.spoiler_updated_at
 							)
 							then excluded.spoiler_level
-						else unit_structure_application_judgment.spoiler_level
+						else unit_tag_path_judgment.spoiler_level
 					end,
 					spoiler_updated_at = greatest(
-						unit_structure_application_judgment.spoiler_updated_at,
+						unit_tag_path_judgment.spoiler_updated_at,
 						excluded.spoiler_updated_at
 					),
 					created_at = least(
-						unit_structure_application_judgment.created_at,
+						unit_tag_path_judgment.created_at,
 						excluded.created_at
 					),
 					updated_at = greatest(
-						unit_structure_application_judgment.updated_at,
+						unit_tag_path_judgment.updated_at,
 						excluded.updated_at
 					)
 				returning 1
 			), deleted_votes as (
-				delete from unit_structure_application_judgment as vote
+				delete from unit_tag_path_judgment as vote
 				using vote_batch
 				where vote.unit_id = ${input.sourceUnitId}::uuid
-					and vote.structure_id = vote_batch.structure_id
+					and vote.path_id = vote_batch.path_id
 					and vote.profile_id = vote_batch.profile_id
 					and not exists (
-						select 1 from content_pack_structure_application_evidence as evidence
+						select 1 from content_pack_unit_tag_path_evidence as evidence
 						where evidence.unit_id = ${input.sourceUnitId}::uuid
-							and evidence.structure_id = vote_batch.structure_id
+							and evidence.path_id = vote_batch.path_id
 							and evidence.profile_id = vote_batch.profile_id
 					)
 				returning 1
 			), deleted as (
-				delete from unit_structure_application as application
+				delete from unit_tag_path as application
 				using batch
 				where application.unit_id = ${input.sourceUnitId}::uuid
-					and application.structure_id = batch.structure_id
+					and application.path_id = batch.path_id
 					and not exists (select 1 from vote_batch)
 					and not exists (
-						select 1 from unit_structure_application_judgment
+						select 1 from unit_tag_path_judgment
 						where unit_id = ${input.sourceUnitId}::uuid
-							and structure_id = batch.structure_id
+							and path_id = batch.path_id
 					)
 					and not exists (
-						select 1 from content_pack_structure_application_evidence as evidence
+						select 1 from content_pack_unit_tag_path_evidence as evidence
 						where evidence.unit_id = ${input.sourceUnitId}::uuid
-							and evidence.structure_id = batch.structure_id
+							and evidence.path_id = batch.path_id
 					)
 				returning 1
 			)
@@ -2289,7 +2289,7 @@ async function structureApplicationBatch(
 				cardinality(array(select 1 from deleted))
 			)::int as processed,
 				exists(
-					select 1 from unit_structure_application
+					select 1 from unit_tag_path
 					where unit_id = ${input.sourceUnitId}::uuid
 				) as remaining
 		`,
@@ -2624,7 +2624,7 @@ const FinalConvergencePhases = [
 	"poll_options",
 	"content_nodes_content",
 	"content_nodes_target",
-	"structure_applications",
+	"tag_path_applications",
 	"progress_entries",
 	"progress_snapshots",
 	"notification_subjects",
@@ -2738,13 +2738,8 @@ export async function processUnitMergePhase(
 				idColumn: "id",
 				unitColumn: "target_unit_id",
 			});
-		case "structure_members":
-		case "structure_edges_parent":
-		case "structure_edges_child":
-			// Released Structures only admit Tag members; merge policy v1 excludes Tag Units.
-			return { processedRows: 0, done: true };
-		case "structure_applications":
-			return structureApplicationBatch(tx, input);
+		case "tag_path_applications":
+			return tagPathApplicationBatch(tx, input);
 		case "progress_entries":
 			return progressEntryBatch(tx, input);
 		case "progress_snapshots":

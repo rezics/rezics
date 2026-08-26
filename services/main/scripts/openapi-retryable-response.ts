@@ -95,7 +95,7 @@ export function decorateRetryableResponse(
 	}
 
 	const retryable = responses["429"];
-	if (!retryable || !containsJsonValue(retryable, "VndbVoteHotKeyBusy")) return;
+	if (!retryable || !containsJsonValue(retryable, "VoteHotKeyBusy")) return;
 	if (!isResponseObject(retryable))
 		throw new Error(`Cannot add Retry-After to referenced 429 response for ${options.operation}`);
 	responses["429"] = withRetryAfterHeader(retryable);

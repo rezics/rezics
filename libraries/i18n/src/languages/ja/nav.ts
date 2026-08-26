@@ -8,7 +8,7 @@ const { forms: videoTerms } = jaTerminology.video;
 const { forms: audioTerms } = jaTerminology.audio;
 const { forms: realmTerms } = jaTerminology.realm;
 const { forms: entityTerms } = jaTerminology.entity;
-const { forms: tagStructureTerms } = jaTerminology.tagStructure;
+const { forms: tagPathTerms } = jaTerminology.tagPath;
 const { forms: unitSlugTerms } = jaTerminology.unitSlug;
 const { forms: zoneTerms } = jaTerminology.zone;
 
@@ -74,7 +74,7 @@ export default {
 			entity: entityTerms.label,
 			label: labelTerms.label,
 			tag: "タグ",
-			structure: tagStructureTerms.label,
+			structure: tagPathTerms.label,
 			series: "シリーズ",
 			zone: zoneTerms.label,
 			zone_page: `${zoneTerms.label} ページ`,

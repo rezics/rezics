@@ -92,7 +92,7 @@ export function TagBadgeCard({
 			? t.tags.card.globalContext
 			: item.context.kind === "realm"
 				? realmTitle
-				: t.tags.card.structureContext;
+				: t.tags.card.pathContext;
 	const avatarFallback = label.trim().slice(0, 1).toUpperCase() || "#";
 
 	return (

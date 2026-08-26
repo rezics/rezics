@@ -44,7 +44,7 @@ describe("category Search expression specialization", () => {
 		});
 	});
 
-	it.each(["units", "users", "tags", "tag-structures", "realms", "polls"] as const)(
+	it.each(["units", "users", "tags", "tag-paths", "realms", "polls"] as const)(
 		"proves the Profile content expression cannot match %s",
 		(category) => {
 			expect(specializeSearchExpressionForCategory(category, ProfileContentExpression)).toEqual({

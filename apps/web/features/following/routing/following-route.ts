@@ -45,8 +45,6 @@ export function followingHref(
 			return `/entities/${id}`;
 		case "tag":
 			return `/tags/${id}`;
-		case "structure":
-			return `/tag-structures/${id}`;
 		case "collection":
 			return `/collections/${id}`;
 		case "post":
@@ -56,6 +54,7 @@ export function followingHref(
 		case "slug_namespace":
 		case "label":
 		case "series":
+		case "tag_path":
 		case "realm_rule":
 		case "zone_page":
 			return undefined;

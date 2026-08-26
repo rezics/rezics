@@ -10,7 +10,7 @@ literature, and rights verification) lives in
 and is not restated here. This document builds on the accepted contracts in
 [filter-feed-and-zone-experience.md](./filter-feed-and-zone-experience.md)
 and [filter-documents.md](./filter-documents.md) and changes none of their
-invariants. Relationship to the VNDB v11 program: §10.
+invariants. Relationship to the dedicated Tag Path contract: §10.
 
 ## 1. Scope and positioning
 
@@ -430,9 +430,9 @@ on flagship examples before broadening access):
    pack.
 3. **`vndb-v11` Zone extension** (database catalog archetype). Adds the
    Zone definition, home composition (developer/staff Entity rails,
-   era-sliced lists), and structures to the existing pack. Tag-hierarchy
-   browsing blocks wait for the VNDB v11 program's import landing (§10);
-   the Zone ships without them first.
+   era-sliced lists), and content navigation to the existing source pack.
+   Tag-hierarchy browsing consumes the implemented dedicated Tag Path
+   contract described below.
 
 ## 9. Versioning
 
@@ -448,20 +448,15 @@ contract — so the release needs release-note documentation but no data
 migration or cutover plan. Content-pack `minRezicsVersion` on the new
 packs pins the first supporting release.
 
-## 10. Relationship to the VNDB v11 program
+## 10. Relationship to Tag Path
 
-This program and the VNDB v11 entity/tag program
-([vndb-v11-entity-tag-research-report.md](./vndb-v11-entity-tag-research-report.md))
-are independent workstreams sharing no schema changes. Zone composition,
-aggregation, derived sources, theming, and the `hongloumeng` and
-`light-novel` packs depend only on public contracts that exist today
-(Tags as Units, the `tag` Search field over the effective-tag projection,
-Collections, follows, content-pack Zone import); the VNDB program's
-physical reshaping of tag storage preserves those contracts. The single ordering constraint: the
-`vndb-v11` Zone's tag-hierarchy browsing blocks consume Tag Paths and
-judgment evidence, which land with VNDB v11 Phase 0–1; that Zone ships
-its non-hierarchy surfaces first and adds hierarchy blocks after that
-landing. No phase below blocks on, or is blocked by, the VNDB roadmap.
+Zone composition and the dedicated Tag Path domain are independent
+workstreams. Zone aggregation, derived sources, theming, and showcase packs
+depend on stable Unit, effective-Tag, Collection, follow, and content-pack
+contracts. Tag-hierarchy blocks consume the final Tag Path and judgment
+contracts documented in [tag-paths.md](./tag-paths.md) and preserve their
+authority and provenance. They do not depend on a preview gate, legacy
+Structure Unit, or vendor-specific migration.
 
 ## 11. Delivery roadmap
 

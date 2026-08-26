@@ -6,7 +6,7 @@ const { forms: followTerms } = koTerminology.follow;
 const { forms: postTerms } = koTerminology.post;
 const { forms: realmTerms } = koTerminology.realm;
 const { forms: entityTerms } = koTerminology.entity;
-const { forms: tagStructureTerms } = koTerminology.tagStructure;
+const { forms: tagPathTerms } = koTerminology.tagPath;
 const { forms: zoneTerms } = koTerminology.zone;
 const { forms: videoTerms } = koTerminology.video;
 const { forms: audioTerms } = koTerminology.audio;
@@ -64,7 +64,7 @@ export default {
 			"unit:release": "발매",
 			"unit:entity": entityTerms.pluralLabel,
 			"unit:tag": "태그",
-			"unit:structure": tagStructureTerms.pluralLabel,
+			"unit:structure": tagPathTerms.pluralLabel,
 			"unit:series": "시리즈",
 			"unit:zone": zoneTerms.pluralLabel,
 			"unit:collection": "컬렉션",

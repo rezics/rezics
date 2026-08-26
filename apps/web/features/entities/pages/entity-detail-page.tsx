@@ -78,6 +78,56 @@ export function EntityDetailPage({ id }: { readonly id: string }) {
 	const entityKindLabel = isCommunityUnitEntityKind(query.data.kind)
 		? t.ui[query.data.kind]
 		: query.data.kind;
+	const canonicalMeasurement = query.data.measurements.find(
+		(measurement) => measurement.contextUnitId === null,
+	);
+	const measurementNumber = new Intl.NumberFormat(undefined, {
+		maximumFractionDigits: 1,
+	});
+	const measurements = canonicalMeasurement
+		? [
+				canonicalMeasurement.heightMillimetres === null
+					? null
+					: {
+							label: t.entities.height,
+							value: `${measurementNumber.format(
+								canonicalMeasurement.heightMillimetres / 10,
+							)} ${t.entities.centimetreUnit}`,
+						},
+				canonicalMeasurement.weightGrams === null
+					? null
+					: {
+							label: t.entities.weight,
+							value: `${measurementNumber.format(
+								canonicalMeasurement.weightGrams / 1_000,
+							)} ${t.entities.kilogramUnit}`,
+						},
+				canonicalMeasurement.bustMillimetres === null
+					? null
+					: {
+							label: t.entities.bust,
+							value: `${measurementNumber.format(
+								canonicalMeasurement.bustMillimetres / 10,
+							)} ${t.entities.centimetreUnit}`,
+						},
+				canonicalMeasurement.waistMillimetres === null
+					? null
+					: {
+							label: t.entities.waist,
+							value: `${measurementNumber.format(
+								canonicalMeasurement.waistMillimetres / 10,
+							)} ${t.entities.centimetreUnit}`,
+						},
+				canonicalMeasurement.hipsMillimetres === null
+					? null
+					: {
+							label: t.entities.hips,
+							value: `${measurementNumber.format(
+								canonicalMeasurement.hipsMillimetres / 10,
+							)} ${t.entities.centimetreUnit}`,
+						},
+			].filter((item): item is { readonly label: string; readonly value: string } => item !== null)
+		: [];
 
 	return (
 		<main className="mx-auto flex w-full max-w-5xl flex-col gap-8 px-4 py-10 sm:px-6">
@@ -127,7 +177,11 @@ export function EntityDetailPage({ id }: { readonly id: string }) {
 						) : null}
 						{displayedSummary ? <p>{displayedSummary}</p> : null}
 						{localization?.description ? (
-							<ShowMoreContent showLessLabel={t.ui.showLess} showMoreLabel={t.ui.showMore}>
+							<ShowMoreContent
+								collapsedClassName="max-h-24 sm:max-h-36"
+								showLessLabel={t.ui.showLess}
+								showMoreLabel={t.ui.showMore}
+							>
 								<LocalizedPortableTextContent
 									className="prose-p:my-3 prose-p:leading-6 [&_p:first-child]:mt-0 [&_p:last-child]:mb-0"
 									language={localization.language}
@@ -168,6 +222,21 @@ export function EntityDetailPage({ id }: { readonly id: string }) {
 					</div>
 				</CardContent>
 			</Card>
+			{measurements.length ? (
+				<Card>
+					<CardContent className="grid gap-4 p-5">
+						<h2 className="font-semibold">{t.entities.measurements}</h2>
+						<dl className="grid gap-x-8 gap-y-3 sm:grid-cols-2">
+							{measurements.map((measurement) => (
+								<div className="flex items-baseline justify-between gap-4" key={measurement.label}>
+									<dt className="text-sm text-muted-foreground">{measurement.label}</dt>
+									<dd className="font-medium tabular-nums">{measurement.value}</dd>
+								</div>
+							))}
+						</dl>
+					</CardContent>
+				</Card>
+			) : null}
 			<UnitTagSummary type="entity" unitId={query.data.id} />
 			<UnitVariantList context={query.data.variantContext} showEmpty={false} />
 			<EntityExternalLinks

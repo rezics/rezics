@@ -4,7 +4,7 @@ const { forms: followTerms } = esTerminology.follow;
 const { forms: postTerms } = esTerminology.post;
 const { forms: realmTerms } = esTerminology.realm;
 const { forms: zoneTerms } = esTerminology.zone;
-const { forms: tagStructureTerms } = esTerminology.tagStructure;
+const { forms: tagPathTerms } = esTerminology.tagPath;
 const { forms: entityTerms } = esTerminology.entity;
 
 export default {
@@ -20,7 +20,7 @@ export default {
 		unit: "Introduce un nombre o título",
 		entity: `Introduce el nombre de una ${entityTerms.inline}`,
 		tag: "Introduce el nombre de una etiqueta",
-		tagStructure: `Introduce el nombre de una ${tagStructureTerms.inline}`,
+		tagPath: `Introduce el nombre de una ${tagPathTerms.inline}`,
 		post: `Introduce el título o una palabra clave de una ${postTerms.inline}`,
 		realm: `Introduce el nombre de un ${realmTerms.inline}`,
 		user: "Introduce un nombre de usuario",

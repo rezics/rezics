@@ -87,6 +87,10 @@ export default {
 	filterFeedByPreferredLanguages: "Filtrer le fil selon les langues préférées",
 	filterFeedByPreferredLanguagesHint:
 		"Lorsque cette option est activée, le fil comprend uniquement du contenu disponible dans au moins une langue préférée. Les autres listes continuent d’afficher tout le contenu correspondant avec une langue de remplacement.",
+	alwaysShowSpoilers: "Toujours afficher les divulgâcheurs",
+	alwaysShowSpoilersHint: "Afficher directement le contenu signalé comme divulgâcheur.",
+	alwaysShowNsfw: "Toujours afficher les médias sensibles",
+	alwaysShowNsfwHint: "Afficher les médias signalés comme sensibles sans les flouter au préalable.",
 	account: "Compte",
 	accountDescription: "Gérez la session actuellement connectée.",
 	security: "Sécurité",

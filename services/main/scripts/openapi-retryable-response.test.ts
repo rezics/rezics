@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import { decorateRetryableResponse } from "./openapi-retryable-response";
 
 const hotKeyResponse = {
-	description: "VNDB vote target is busy",
+	description: "Vote target is busy",
 	content: {
 		"application/json": {
 			schema: {
@@ -13,7 +13,7 @@ const hotKeyResponse = {
 					error: {
 						type: "object",
 						properties: {
-							code: { type: "string", enum: ["VndbVoteHotKeyBusy"] },
+							code: { type: "string", enum: ["VoteHotKeyBusy"] },
 						},
 					},
 				},
@@ -44,7 +44,7 @@ describe("OpenAPI retryable responses", () => {
 		});
 
 		const serialized = serialized429(responses);
-		expect(serialized).toContain("VndbVoteHotKeyBusy");
+		expect(serialized).toContain("VoteHotKeyBusy");
 		expect(serialized).toContain("ApiQuotaExceeded");
 		expect(serialized).toContain("ApiTokenRateLimitExceeded");
 		expectRetryAfter(responses);
@@ -63,7 +63,7 @@ describe("OpenAPI retryable responses", () => {
 		const serialized = serialized429(responses);
 		expect(serialized).toContain("ApiQuotaExceeded");
 		expect(serialized).toContain("ApiTokenRateLimitExceeded");
-		expect(serialized).not.toContain("VndbVoteHotKeyBusy");
+		expect(serialized).not.toContain("VoteHotKeyBusy");
 		expectRetryAfter(responses);
 	});
 

@@ -1,4 +1,4 @@
-export const TagDetailSections = ["overview", "discussion", "content", "structure"] as const;
+export const TagDetailSections = ["overview", "discussion", "content", "paths"] as const;
 
 export type TagDetailSectionId = (typeof TagDetailSections)[number];
 

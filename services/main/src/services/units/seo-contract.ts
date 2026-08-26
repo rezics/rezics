@@ -10,7 +10,6 @@ export const PublicUnitSeoKinds = [
 	"audio",
 	"entity",
 	"tag",
-	"structure",
 	"series",
 	"zone",
 	"zone_page",

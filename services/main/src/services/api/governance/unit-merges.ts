@@ -41,7 +41,7 @@ const MergeRuleConflictResponse = toApiErrorResponse([
 	"UnitMergeManifestStale",
 	"GovernanceRuleChanged",
 ]);
-const VoteBackpressureResponse = toApiErrorResponse(["VndbVoteHotKeyBusy"]);
+const VoteBackpressureResponse = toApiErrorResponse(["VoteHotKeyBusy"]);
 const MergeEligibilityResponse = toApiErrorResponse([
 	"UnitMergeKindIneligible",
 	"ContentLabelUnitMergeForbidden",

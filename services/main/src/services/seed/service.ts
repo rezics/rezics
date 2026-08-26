@@ -142,7 +142,7 @@ import { replaceZonePageSlugAddress } from "../units/slug-address";
 import { ensureOfficialZoneFollows } from "../bootstrap/official-zone-follows";
 import { replaceApiTokenQuotaOverride } from "../auth/api-quota/policy-service";
 import { createSharedSearchQuery } from "../search/shared-queries";
-import { createTagStructureInTransaction } from "../tag-structures/service";
+import { createTagPathInTransaction } from "../tag-paths/service";
 import {
 	assertLocalDatabaseUrl,
 	chunks,
@@ -235,11 +235,11 @@ function compareUuidTuple(left: readonly string[], right: readonly string[]): nu
 		const leftPart = left[index];
 		const rightPart = right[index];
 		if (leftPart === undefined || rightPart === undefined)
-			throw new Error("VNDB hot-key tuples must have the same width");
+			throw new Error("Seed hot-key tuples must have the same width");
 		if (leftPart < rightPart) return -1;
 		if (leftPart > rightPart) return 1;
 	}
-	if (left.length !== right.length) throw new Error("VNDB hot-key tuples must have the same width");
+	if (left.length !== right.length) throw new Error("Seed hot-key tuples must have the same width");
 	return 0;
 }
 
@@ -271,7 +271,7 @@ async function lockUnitTagJudgmentHotKeys(
 	]);
 	if (hotKeys.length === 0) return;
 	await tx.execute(sql`
-		select public.lock_vndb_vote_hot_keys(
+		select public.lock_vote_hot_keys(
 			${uuidArray(hotKeys.map((value) => value.unitId))},
 			${uuidArray(hotKeys.map((value) => value.tagId))},
 			${uuidArray(hotKeys.map((value) => value.profileId))}
@@ -3150,7 +3150,7 @@ async function seedCoverageContracts(
 	await lockRealmTagJudgmentHotKeys(tx, realmTagJudgments);
 	await tx.insert(realmTagJudgment).values(realmTagJudgments);
 
-	await createTagStructureInTransaction(tx, {
+	await createTagPathInTransaction(tx, {
 		memberTagIds: [targetTag.id, secondTag.id],
 		profileId: actor.id,
 		createdAt,

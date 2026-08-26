@@ -6,7 +6,7 @@ import type { TaggableUnitType } from "./taggable-unit";
 export type TagItemKey =
 	| `global:${string}`
 	| `realm:${string}:${string}`
-	| `structure:${string}:${string}`;
+	| `path:${string}:${string}`;
 
 export interface TagIdentity {
 	readonly tagId: string;
@@ -41,7 +41,7 @@ export type TagVotePresentation =
 	  }
 	| {
 			readonly kind: "not-applicable";
-			readonly reason: "read-only-reference" | "structure-member";
+			readonly reason: "read-only-reference" | "path-member";
 	  };
 
 export type TagContextPresentation =
@@ -57,8 +57,8 @@ export type TagContextPresentation =
 			readonly contextPostId: string | null;
 	  }
 	| {
-			readonly kind: "structure";
-			readonly structureId: string;
+			readonly kind: "path";
+			readonly pathId: string;
 	  };
 
 export interface TagPresentation {

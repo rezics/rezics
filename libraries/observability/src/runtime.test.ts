@@ -154,13 +154,13 @@ describe("observability runtime", () => {
 		active?.metrics.workerHeartbeat(Date.now() - 1_000);
 		active?.metrics.persistedDocumentRepaired("unit_localization.content");
 		active?.metrics.fractionalPositionRebalanced("content-structure", 12);
-		active?.metrics.vndbVoteAdmission("unit_tag", "global", { outcome: "attempted" });
-		active?.metrics.vndbVoteAdmission("unit_tag", "global", {
+		active?.metrics.voteAdmission("unit_tag", "global", { outcome: "attempted" });
+		active?.metrics.voteAdmission("unit_tag", "global", {
 			outcome: "committed",
 			durationMilliseconds: 12,
 		});
 		expect(() =>
-			active?.metrics.vndbVoteAdmission("unit_tag", "global", {
+			active?.metrics.voteAdmission("unit_tag", "global", {
 				outcome: "unexpected",
 				durationMilliseconds: Number.NaN,
 			}),
@@ -178,9 +178,9 @@ describe("observability runtime", () => {
 		expect(serialized).toContain("rezics.ordering.rebalances");
 		expect(serialized).toContain("rezics.ordering.rebalance.members");
 		expect(serialized).toContain("content-structure");
-		expect(serialized).toContain("rezics.vndb.vote.admission");
-		expect(serialized).toContain("rezics.vndb.vote.admission.duration");
-		expect(serialized).toContain("vndb.vote.family");
+		expect(serialized).toContain("rezics.vote.admission");
+		expect(serialized).toContain("rezics.vote.admission.duration");
+		expect(serialized).toContain("vote.family");
 		expect(serialized).toContain("unit_tag");
 		expect(serialized).toContain("global");
 		expect(serialized).toContain("committed");

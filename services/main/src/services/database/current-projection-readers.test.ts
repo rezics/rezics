@@ -6,9 +6,9 @@ import { describe, expect, it } from "vitest";
 const serviceRoot = new URL("../", import.meta.url);
 const productionReaders = [
 	{
-		path: "tag-structures/service.ts",
-		currentExports: ["currentUnitStructureMember", "currentUnitStructureEdge"],
-		baseExports: ["unitStructureMember", "unitStructureEdge"],
+		path: "tag-paths/service.ts",
+		currentExports: ["currentTagPathMember", "currentTagPathEdge"],
+		baseExports: ["tagPathMember", "tagPathEdge"],
 	},
 	{
 		path: "tags/service.ts",
@@ -26,8 +26,8 @@ const productionReaders = [
 	},
 	{
 		path: "search/service.ts",
-		currentExports: ["currentUnitEffectiveTag", "currentUnitStructureMember"],
-		baseExports: ["unitEffectiveTag", "unitStructureMember"],
+		currentExports: ["currentUnitEffectiveTag", "currentTagPathMember"],
+		baseExports: ["unitEffectiveTag", "tagPathMember"],
 	},
 	{
 		path: "filter/sql.ts",
@@ -51,8 +51,8 @@ const productionReaders = [
 	},
 	{
 		path: "api/feed/index.ts",
-		currentExports: ["currentUnitStructureMember"],
-		baseExports: ["unitStructureMember"],
+		currentExports: ["currentTagPathMember"],
+		baseExports: ["tagPathMember"],
 	},
 	{
 		path: "api/unit-resources/index.ts",
@@ -62,7 +62,7 @@ const productionReaders = [
 ] as const;
 
 const rawBaseProjectionRead =
-	/\b(?:from|join)\s+(?:public\.)?(?:unit_structure_(?:member|edge|end|primary_path_candidate)|unit_tag_structure_support|unit_effective_tag(?:_vote)?|unit_tag_judgment_stat|tag_primary_display_path)\b/i;
+	/\b(?:from|join)\s+(?:public\.)?(?:tag_path_(?:member|edge)|unit_tag_path_support|unit_effective_tag(?:_vote)?|unit_tag_judgment_stat)\b/i;
 
 function schemaImportBlocks(source: string): readonly string[] {
 	return Array.from(
@@ -71,7 +71,7 @@ function schemaImportBlocks(source: string): readonly string[] {
 	);
 }
 
-describe("VNDB v11 production projection readers", () => {
+describe("Tag judgment projection readers", () => {
 	for (const reader of productionReaders) {
 		it(`${reader.path} reads through typed current views`, () => {
 			const source = readFileSync(fileURLToPath(new URL(reader.path, serviceRoot)), "utf8");

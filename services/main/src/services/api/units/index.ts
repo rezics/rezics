@@ -57,7 +57,7 @@ import {
 } from "./schema";
 import {
 	toApiErrorResponse,
-	VndbVoteBackpressureResponse,
+	VoteBackpressureResponse,
 	UnitDetailResponse,
 	UnitListResponse,
 	UnitPresentationListResponse,
@@ -535,7 +535,7 @@ export default new Elysia({ prefix: "/units" })
 				[StatusCodes.FORBIDDEN]: UnitCreateForbiddenResponse,
 				[StatusCodes.NOT_FOUND]: UnitCreateNotFoundResponse,
 				[StatusCodes.CONFLICT]: UnitCreateConflictResponse,
-				[StatusCodes.TOO_MANY_REQUESTS]: VndbVoteBackpressureResponse,
+				[StatusCodes.TOO_MANY_REQUESTS]: VoteBackpressureResponse,
 			},
 			detail: { summary: "Create unit", tags: ["Units"] },
 		},

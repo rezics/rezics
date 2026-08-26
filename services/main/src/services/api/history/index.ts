@@ -6,7 +6,7 @@ import Elysia, { t, type Static } from "elysia";
 import { recordAuditEvent } from "../../audit";
 import session, { resolveIdentity } from "../../auth/session";
 import { database, type DatabaseExecutor } from "../../database";
-import { runVndbVoteTransaction } from "../../database/vndb-vote-admission";
+import { runVoteTransaction } from "../../database/vote-admission";
 import { firstUnitLocalizationTitle } from "../../units/localization";
 import {
 	revisionContent,
@@ -41,7 +41,7 @@ import {
 	unitRevisionDocumentsToComparisonValue,
 } from "../../units/history";
 import { presentStoredRevisionPrimaryContribution } from "../../units/revision-contribution";
-import { toApiErrorResponse, VndbVoteBackpressureResponse } from "../schema/response";
+import { toApiErrorResponse, VoteBackpressureResponse } from "../schema/response";
 import { DevelopmentPreviewCapability } from "@rezics/access";
 import { listCurrentProfileContributionResources } from "../../history/contribution-resources";
 import {
@@ -263,15 +263,11 @@ export default new Elysia({ prefix: "/history" })
 		async ({ params, query, request }) => {
 			const { authorization } = await resolveIdentity(request, "unit:read");
 			await authorization.unit.ensureCanRead(params.unitId);
-			const [access, restoreDecision, [targetUnit]] = await Promise.all([
+			const [access, restoreDecision] = await Promise.all([
 				getVisibilityAccess(authorization),
 				authorization.unit.decide(params.unitId, "unit.history.restore"),
-				database.select({ kind: unit.kind }).from(unit).where(eq(unit.id, params.unitId)).limit(1),
 			]);
-			const canRestore =
-				restoreDecision.allowed &&
-				(targetUnit?.kind !== "structure" ||
-					(await authorization.platform.hasCapability("unit.edit")));
+			const canRestore = restoreDecision.allowed;
 			const scope = `unit:${params.unitId}`;
 			const cursor = decodeCursor(query.cursor, scope);
 			const limit = query.limit ?? 30;
@@ -411,19 +407,17 @@ export default new Elysia({ prefix: "/history" })
 			const access = await getVisibilityAccess(authorization);
 			if (!canViewRevisionField(revisionVisibilityFromStorage(source), "content", access))
 				throw new UnitRevisionNotFound();
-			const result = await runVndbVoteTransaction(
-				{ family: "unit_tag", authority: "global" },
-				(tx) =>
-					restoreUnitRevision(tx, {
-						unitId: params.unitId,
-						sourceRevisionId: params.revisionId,
-						baseRevisionId: body.baseRevisionId,
-						actorProfileId: profile.unitId,
-						contribution: body.revisionContext?.contribution,
-						message: body.editSummary,
-						minor: body.minor,
-						authorization,
-					}),
+			const result = await runVoteTransaction({ family: "unit_tag", authority: "global" }, (tx) =>
+				restoreUnitRevision(tx, {
+					unitId: params.unitId,
+					sourceRevisionId: params.revisionId,
+					baseRevisionId: body.baseRevisionId,
+					actorProfileId: profile.unitId,
+					contribution: body.revisionContext?.contribution,
+					message: body.editSummary,
+					minor: body.minor,
+					authorization,
+				}),
 			);
 			return { unitId: params.unitId, ...result };
 		},
@@ -448,8 +442,8 @@ export default new Elysia({ prefix: "/history" })
 					"UnitRevisionNotFound",
 					"EntityEntryNotFound",
 				]),
-				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["InvalidTagStructure"]),
-				[StatusCodes.TOO_MANY_REQUESTS]: VndbVoteBackpressureResponse,
+				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["InvalidTagPath"]),
+				[StatusCodes.TOO_MANY_REQUESTS]: VoteBackpressureResponse,
 			},
 			detail: { summary: "Restore Unit revision", tags: ["History"] },
 		},
@@ -468,19 +462,17 @@ export default new Elysia({ prefix: "/history" })
 				if (!canViewRevisionField(revisionVisibilityFromStorage(parent), "content", access))
 					throw new UnitRevisionNotFound();
 			}
-			const result = await runVndbVoteTransaction(
-				{ family: "unit_tag", authority: "global" },
-				(tx) =>
-					undoUnitRevision(tx, {
-						unitId: params.unitId,
-						targetRevisionId: params.revisionId,
-						baseRevisionId: body.baseRevisionId,
-						actorProfileId: profile.unitId,
-						contribution: body.revisionContext?.contribution,
-						message: body.editSummary,
-						minor: body.minor,
-						authorization,
-					}),
+			const result = await runVoteTransaction({ family: "unit_tag", authority: "global" }, (tx) =>
+				undoUnitRevision(tx, {
+					unitId: params.unitId,
+					targetRevisionId: params.revisionId,
+					baseRevisionId: body.baseRevisionId,
+					actorProfileId: profile.unitId,
+					contribution: body.revisionContext?.contribution,
+					message: body.editSummary,
+					minor: body.minor,
+					authorization,
+				}),
 			);
 			return { unitId: params.unitId, ...result };
 		},
@@ -505,8 +497,8 @@ export default new Elysia({ prefix: "/history" })
 					"UnitRevisionNotFound",
 					"EntityEntryNotFound",
 				]),
-				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["InvalidTagStructure"]),
-				[StatusCodes.TOO_MANY_REQUESTS]: VndbVoteBackpressureResponse,
+				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["InvalidTagPath"]),
+				[StatusCodes.TOO_MANY_REQUESTS]: VoteBackpressureResponse,
 			},
 			detail: { summary: "Undo Unit revision", tags: ["History"] },
 		},

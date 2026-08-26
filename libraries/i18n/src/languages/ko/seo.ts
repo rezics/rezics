@@ -9,7 +9,7 @@ const { forms: entityTerms } = koTerminology.entity;
 const { forms: metadataTerms } = koTerminology.metadata;
 const { forms: postTerms } = koTerminology.post;
 const { forms: realmTerms } = koTerminology.realm;
-const { forms: tagStructureTerms } = koTerminology.tagStructure;
+const { forms: tagPathTerms } = koTerminology.tagPath;
 const { forms: videoTerms } = koTerminology.video;
 const { forms: zoneTerms } = koTerminology.zone;
 
@@ -53,7 +53,7 @@ export default {
 		audio: audioTerms.label,
 		entity: entityTerms.label,
 		tag: "태그",
-		structure: tagStructureTerms.label,
+		structure: tagPathTerms.label,
 		series: units.types.series,
 		zone: zoneTerms.label,
 		zone_page: `${zoneTerms.label} 페이지`,

@@ -1,0 +1,12 @@
+DROP FUNCTION IF EXISTS public.reject_conflicting_structure_application_vote();
+DROP FUNCTION IF EXISTS public.reject_conflicting_direct_tag_vote();
+DROP FUNCTION IF EXISTS public.protect_immutable_unit_structure();
+DROP FUNCTION IF EXISTS public.project_unit_structure_definition();
+DROP FUNCTION IF EXISTS public.prepare_unit_structure_definition();
+DROP FUNCTION IF EXISTS public.maintain_unit_structure_vote_stat();
+DROP FUNCTION IF EXISTS public.maintain_unit_structure_application_vote_stat();
+DROP FUNCTION IF EXISTS public.maintain_structure_application_support();
+DROP FUNCTION IF EXISTS public.maintain_effective_tag_from_structure_support();
+DROP FUNCTION IF EXISTS public.refresh_unit_structure_vote_stat(uuid);
+DROP FUNCTION IF EXISTS public.refresh_unit_structure_application_vote_stat(uuid, uuid);
+DROP FUNCTION IF EXISTS public.lock_unit_structure_definition_key(uuid);

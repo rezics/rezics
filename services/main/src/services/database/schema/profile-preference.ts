@@ -39,6 +39,8 @@ export const profilePreference = pgTable(
 		progressVisibility: resourceVisibility().default(DefaultResourceVisibility).notNull(),
 		personalizedFeed: boolean().default(true).notNull(),
 		filterFeedByPreferredLanguages: boolean().default(false).notNull(),
+		alwaysShowSpoilers: boolean().default(false).notNull(),
+		alwaysShowNsfw: boolean().default(false).notNull(),
 		collectionConfig: createJsonObjectColumn(),
 		interfaceLocale: text().$type<StoredUiLocale>().default(DefaultStoredUiLocale).notNull(),
 		chineseContentDisplay: text()

@@ -29,20 +29,6 @@ describe("aggregate reconciliation queries", () => {
 		expect(source).toContain("notification.created_at > read_state.read_through_created_at");
 		expect(source).toContain("notification.id > read_state.read_through_id");
 	});
-
-	it("delegates VNDB v11 parity to the durable paused-epoch verifier", async () => {
-		const source = await readFile(new URL("./reconcile-aggregates.ts", import.meta.url), "utf8");
-
-		expect(source).toContain("scripts/vndb-v11-cutover-verification.ts");
-		for (const relation of [
-			"unit_tag_judgment",
-			"unit_structure_application_judgment",
-			"realm_tag_judgment",
-			"subject_association_judgment",
-			"unit_tag_structure_support",
-		])
-			expect(source).not.toContain(relation);
-	});
 });
 
 describe("aggregate reconciliation result parsing", () => {

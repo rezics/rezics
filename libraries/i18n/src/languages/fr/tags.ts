@@ -6,7 +6,7 @@ import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 const { forms: realmTerms } = frTerminology.realm;
 const { forms: followTerms } = frTerminology.follow;
 const { forms: postTerms } = frTerminology.post;
-const { forms: tagStructureTerms } = frTerminology.tagStructure;
+const { forms: tagPathTerms } = frTerminology.tagPath;
 
 export default {
 	page: {
@@ -14,7 +14,8 @@ export default {
 		description:
 			"Consultez les étiquettes globales et les appréciations contextuelles formulées par les sources d’étiquettes que vous avez choisies.",
 		viewAll: "Afficher la page complète de l’étiquette",
-		manageOnTagPage: `Ajoutez des étiquettes et des ${tagStructureTerms.plural} sur la page dédiée afin que leur contexte de vote reste visible.`,
+		more: insert("{{count}} de plus", { count: Number }),
+		manageOnTagPage: `Ajoutez des étiquettes et des ${tagPathTerms.plural} sur la page dédiée afin que leur contexte de vote reste visible.`,
 	},
 	card: {
 		open: insert("Ouvrir la fiche de l’étiquette {{tag}} ({{context}})", {
@@ -23,7 +24,7 @@ export default {
 		}),
 		close: "Fermer la fiche de l’étiquette",
 		globalContext: "Contexte global",
-		structureContext: tagStructureTerms.label,
+		pathContext: tagPathTerms.label,
 		policy: `Définie par le ${realmTerms.inline}`,
 		search: "Rechercher cette étiquette",
 		details: "Afficher les détails de l’étiquette",
@@ -41,7 +42,7 @@ export default {
 	},
 	basic: {
 		title: "Étiquettes de base",
-		description: `Étiquettes globales et ${tagStructureTerms.plural}, sans appréciation contextuelle d’un ${realmTerms.inline}.`,
+		description: `Étiquettes globales et ${tagPathTerms.plural}, sans appréciation contextuelle d’un ${realmTerms.inline}.`,
 	},
 	voteContext: {
 		title: "Voter par contexte",
@@ -53,17 +54,27 @@ export default {
 		description: `Les étiquettes globales et vos sources de ${realmTerms.label} conservent leur propre contexte. Le contexte de vote actif n’est pas répété ici.`,
 		empty: "Aucune autre source d’étiquettes n’est sélectionnée.",
 	},
-	structures: {
-		title: tagStructureTerms.pluralLabel,
-		description: `Les ${tagStructureTerms.plural} préservent une hiérarchie porteuse de sens et apparaissent avant les étiquettes non hiérarchisées.`,
-		addTitle: `Ajouter un ${tagStructureTerms.inline}`,
-		addDescription: `Recherchez d’abord les ${tagStructureTerms.plural} acceptés. En ajouter un soutient le chemin et chaque étiquette qui le compose.`,
-		add: `Ajouter le ${tagStructureTerms.inline}`,
-		create: `Créer un ${tagStructureTerms.inline}`,
-		details: `Afficher le ${tagStructureTerms.inline}`,
-		empty: `Cette œuvre ne possède encore aucun ${tagStructureTerms.inline} accepté.`,
+	paths: {
+		title: tagPathTerms.pluralLabel,
+		description: `Les ${tagPathTerms.plural} préservent une hiérarchie porteuse de sens et apparaissent avant les étiquettes non hiérarchisées.`,
+		addTitle: `Ajouter un ${tagPathTerms.inline}`,
+		addDescription: `Recherchez d’abord les ${tagPathTerms.plural} acceptés. En ajouter un soutient le chemin et chaque étiquette qui le compose.`,
+		add: `Ajouter le ${tagPathTerms.inline}`,
+		create: `Créer un ${tagPathTerms.inline}`,
+		details: `Afficher le ${tagPathTerms.inline}`,
+		empty: `Cette œuvre ne possède encore aucun ${tagPathTerms.inline} accepté.`,
 		memberFallback: "Étiquette sans nom",
-		pathLabel: `${tagStructureTerms.label} ordonné`,
+		pathLabel: `${tagPathTerms.label} ordonné`,
+		fitLabel: "Pertinence",
+		spoilerLabel: "Niveau de divulgâcheur",
+		spoilerNone: "Aucun",
+		spoilerMinor: "Mineur",
+		spoilerMajor: "Important",
+		spoilerSummary: insert("Votes : {{none}} aucun · {{minor}} mineur · {{major}} important", {
+			none: Number,
+			minor: Number,
+			major: Number,
+		}),
 	},
 	detail: {
 		sections: "Onglets des détails du tag",
@@ -71,7 +82,7 @@ export default {
 			overview: "Vue d’ensemble",
 			discussion: "Discussion",
 			content: "Contenu associé",
-			structure: "Hiérarchie",
+			paths: "Hiérarchie",
 		},
 		overviewTitle: "Description du tag",
 		overviewDescription:
@@ -81,9 +92,8 @@ export default {
 		discussionDescription: `Créez des ${postTerms.plural} sur ce tag et participez aux discussions existantes.`,
 		contentTitle: "Contenu associé",
 		contentDescription: "Parcourez les œuvres et autres contenus qui utilisent ce tag.",
-		structureTitle: "Hiérarchie du tag",
-		structureDescription:
-			"Repérez ce tag dans les structures de tags approuvées par la communauté.",
+		pathsTitle: "Hiérarchie du tag",
+		pathsDescription: "Repérez ce tag dans les structures de tags approuvées par la communauté.",
 		editTitle: "Modifier le contenu du tag",
 		editDescription:
 			"Mettez à jour le titre, le résumé et la description dans la langue de contenu actuelle.",
@@ -91,14 +101,14 @@ export default {
 		backToTag: "Retour au tag",
 		backToEditOverview: "Retour à la vue d’ensemble de l’édition",
 		childrenTitle: "Étiquettes enfants directes",
-		childrenDescription: `Ces relations proviennent de ${tagStructureTerms.plural} acceptés et verrouillés par la communauté. Chaque enfant affiche ses propres enfants directs.`,
+		childrenDescription: `Ces relations proviennent de ${tagPathTerms.plural} acceptés et verrouillés par la communauté. Chaque enfant affiche ses propres enfants directs.`,
 		noChildren: "Cette étiquette ne possède encore aucun enfant direct accepté.",
 		grandchildrenTitle: "Enfants directs",
 	},
-	createStructure: {
-		title: `Créer un ${tagStructureTerms.inline}`,
+	createPath: {
+		title: `Créer un ${tagPathTerms.inline}`,
 		description:
-			"Construisez un chemin ordonné des étiquettes les plus générales aux plus précises. Les membres de la communauté ne peuvent plus le modifier après sa création ; les administrateurs de la plateforme peuvent effectuer des corrections consignées.",
+			"Construisez un chemin ordonné des étiquettes les plus générales aux plus précises. Une définition ne peut plus être modifiée après sa création ; créez un nouveau chemin et soumettez une proposition de gouvernance manuelle.",
 		pick: "Choisir l’étiquette suivante",
 		addMember: "Ajouter au chemin",
 		removeMember: "Retirer du chemin",
@@ -106,15 +116,11 @@ export default {
 		moveLater: "Déplacer vers la fin",
 		preview: "Aperçu du chemin verrouillé par la communauté",
 		minimum: "Ajoutez au moins deux étiquettes distinctes.",
-		submit: `Créer le ${tagStructureTerms.inline} et voter`,
-	},
-	adminEditStructure: {
-		title: `Corriger le ${tagStructureTerms.inline}`,
-		description:
-			"Les administrateurs de la plateforme peuvent corriger les éléments ou leur ordre. L’identité de la Unit, les votes et les utilisations sont préservés, et la correction est consignée dans l’historique.",
-		reasonLabel: "Motif de la correction",
-		reasonPlaceholder: "Expliquez pourquoi cette correction administrative est nécessaire.",
-		submit: "Enregistrer la correction consignée",
+		submit: `Créer le ${tagPathTerms.inline} et voter`,
+		relatedTitle: "Examiner les chemins acceptés associés",
+		relatedDescription:
+			"Ces chemins aboutissent déjà à la même étiquette. Ils ne sont pas automatiquement des doublons ; vérifiez leur sens avant de créer une définition immuable distincte.",
+		continueDistinct: "Créer un chemin distinct",
 	},
 	create: {
 		noResults: insert("Aucune étiquette ne correspond à « {{query}} ».", {
@@ -194,6 +200,13 @@ export default {
 		noRanked: "Aucune autre étiquette globale ne peut être mise en avant.",
 	},
 	realms: {
+		pathsTitle: `Chemins d’étiquettes du ${realmTerms.label}`,
+		applyPath: "Appliquer le chemin",
+		authority: { realm: `Ce ${realmTerms.label}`, global: "Global" },
+		pathAuthority: insert("Adéquation : {{fit}} · divulgâcheurs : {{spoiler}}", {
+			fit: String,
+			spoiler: String,
+		}),
 		title: `Contextes d’étiquettes des ${realmTerms.plural}`,
 		description: `Chaque ${realmTerms.inline} constitue un contexte indépendant. Ses appréciations ne sont jamais fusionnées avec les étiquettes globales ni avec un autre ${realmTerms.inline}.`,
 		addTitle: `Ajouter un vote d’étiquette dans ce ${realmTerms.label}`,
@@ -229,5 +242,5 @@ export default {
 	},
 	unnamedTag: "Étiquette sans nom",
 	unnamedRealm: `${realmTerms.label} sans nom`,
-	unnamedStructure: `${tagStructureTerms.label} sans nom`,
+	unnamedPath: `${tagPathTerms.label} sans nom`,
 } satisfies typeof import("../zh-Hant/tags").default;

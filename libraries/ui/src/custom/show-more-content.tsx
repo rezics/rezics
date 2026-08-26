@@ -10,12 +10,14 @@ export function ShowMoreContent({
 	children,
 	className,
 	contentClassName,
+	collapsedClassName = "max-h-32",
 	showLessLabel,
 	showMoreLabel,
 }: {
 	children: ReactNode;
 	className?: string;
 	contentClassName?: string;
+	collapsedClassName?: string;
 	showLessLabel: string;
 	showMoreLabel: string;
 }) {
@@ -47,7 +49,7 @@ export function ShowMoreContent({
 				<div
 					className={cn(
 						"overflow-hidden",
-						isExpanded ? "max-h-none" : "max-h-32",
+						isExpanded ? "max-h-none" : collapsedClassName,
 						contentClassName,
 					)}
 					id={contentId}

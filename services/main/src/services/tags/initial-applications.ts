@@ -24,7 +24,7 @@ async function lockInitialTagHotKeys(
 ): Promise<void> {
 	const tagIds = [...new Set(input.tagIds)].sort();
 	await tx.execute(sql`
-		select public.lock_vndb_vote_hot_keys(
+		select public.lock_vote_hot_keys(
 			${uuidArray(tagIds.map(() => input.unitId))},
 			${uuidArray(tagIds)},
 			${uuidArray(tagIds.map(() => input.profileId))}

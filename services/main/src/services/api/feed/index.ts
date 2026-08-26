@@ -35,7 +35,6 @@ import {
 	resolvedUnitLocalizationTitle,
 } from "../../units/localization";
 import {
-	currentUnitStructureMember as unitStructureMember,
 	post,
 	postScore,
 	postReply,
@@ -55,6 +54,7 @@ import {
 	unitReactionGlobalStat,
 	unitRevisionHead,
 	ContentRatingValues,
+	unitTag,
 } from "../../database/schema";
 import { parseJsonCursor } from "../../pagination";
 import {
@@ -190,7 +190,6 @@ const FeedContentDefinitions = {
 	"unit:release": { itemType: "unit", unitKind: "release" },
 	"unit:entity": { itemType: "unit", unitKind: "entity" },
 	"unit:tag": { itemType: "unit", unitKind: "tag" },
-	"unit:structure": { itemType: "unit", unitKind: "structure" },
 	"unit:series": { itemType: "unit", unitKind: "series" },
 	"unit:zone": { itemType: "unit", unitKind: "zone" },
 	"unit:collection": { itemType: "unit", unitKind: "collection" },
@@ -280,7 +279,6 @@ const FeedSearchCategoryByContentKind = {
 	"unit:release": "units",
 	"unit:entity": "entities",
 	"unit:tag": "tags",
-	"unit:structure": "tag-structures",
 	"unit:series": "units",
 	"unit:zone": "units",
 	"unit:collection": "collections",
@@ -837,24 +835,7 @@ export async function hydrateFeedItems(
 			parentPostId: postReply.parentPostId,
 			language: resolvedUnitLocalizationLanguage(unit.id, displayLanguages, allowedLanguages),
 			body: unitLocalization.content,
-			title: sql<string | null>`case
-				when ${unit.kind} = 'structure' then (
-					select string_agg(
-						coalesce(
-							${resolvedUnitLocalizationTitle(
-								unitStructureMember.memberUnitId,
-								displayLanguages,
-								allowedLanguages,
-							)},
-							${unitStructureMember.memberUnitId}::text
-						),
-						' › ' order by ${unitStructureMember.ordinal}
-					)
-					from ${unitStructureMember}
-					where ${unitStructureMember.structureId} = ${unit.id}
-				)
-				else ${unitLocalization.title}
-			end`,
+			title: unitLocalization.title,
 			summary: unitLocalization.summary,
 			coverAssetId: resolvedUnitLocalizationImageAssetId(
 				unit.id,
@@ -872,6 +853,22 @@ export async function hydrateFeedItems(
 			latestRevisionId: unitRevisionHead.revisionId,
 			createdAt: unit.createdAt,
 			updatedAt: unit.updatedAt,
+			contentSpoilerLevel: sql<number>`coalesce((
+				select manifest.spoiler_level
+				from (values
+					('019b76da-a800-7370-8000-000000000001'::uuid, 0),
+					('019b76da-a800-7370-8000-000000000002'::uuid, 1),
+					('019b76da-a800-7370-8000-000000000003'::uuid, 2)
+				) manifest(tag_id, spoiler_level)
+				join ${unitTag} content_label
+					on content_label.tag_id = manifest.tag_id
+					and content_label.unit_id = ${unit.id}
+			), 0)`,
+			contentNsfw: sql<boolean>`exists(
+				select 1 from ${unitTag} content_label
+				where content_label.unit_id = ${unit.id}
+					and content_label.tag_id = '019b76da-a800-7370-8000-000000000004'::uuid
+			)`,
 		})
 		.from(unit)
 		.leftJoin(post, eq(post.id, unit.id))
@@ -889,6 +886,16 @@ export async function hydrateFeedItems(
 		)
 		.where(and(inArray(unit.id, pageIds), getFeedEligibilityCondition(viewer, scope, asOf)));
 	if (!rows.length) return [];
+	const [viewerDisplayPreference] = viewer.profileId
+		? await database
+				.select({
+					alwaysShowSpoilers: profilePreference.alwaysShowSpoilers,
+					alwaysShowNsfw: profilePreference.alwaysShowNsfw,
+				})
+				.from(profilePreference)
+				.where(eq(profilePreference.profileId, viewer.profileId))
+				.limit(1)
+		: [];
 	const validIds = rows.map(({ id }) => id);
 	const rootPostIds = rows
 		.filter(({ unitKind, postKind }) => unitKind === "post" && postKind !== "reply")
@@ -1394,12 +1401,33 @@ export async function hydrateFeedItems(
 			...common,
 			itemType: "post" as const,
 			unitKind: "post" as const,
-			summary: row.summary,
+			summary:
+				(row.contentSpoilerLevel > 0 && !viewerDisplayPreference?.alwaysShowSpoilers) ||
+				(row.contentNsfw && !viewerDisplayPreference?.alwaysShowNsfw)
+					? null
+					: row.summary,
 			cover: presentImageAsset(row.coverAssetId, "cover"),
 			subjectId: row.subjectId,
 			rootPostId: row.rootPostId,
 			parentPostId: row.parentPostId,
-			body: row.body === null ? null : toPortableTextResponse(row.body, "post.body"),
+			body:
+				(row.contentSpoilerLevel > 0 && !viewerDisplayPreference?.alwaysShowSpoilers) ||
+				(row.contentNsfw && !viewerDisplayPreference?.alwaysShowNsfw)
+					? null
+					: row.body === null
+						? null
+						: toPortableTextResponse(row.body, "post.body"),
+			contentSpoiler: {
+				level:
+					row.contentSpoilerLevel === 1 || row.contentSpoilerLevel === 2
+						? row.contentSpoilerLevel
+						: 0,
+				concealed: row.contentSpoilerLevel > 0 && !viewerDisplayPreference?.alwaysShowSpoilers,
+			},
+			contentNsfw: {
+				labelled: row.contentNsfw,
+				concealed: row.contentNsfw && !viewerDisplayPreference?.alwaysShowNsfw,
+			},
 			replyCount:
 				row.postKind === "reply" ? (childCount.get(row.id) ?? 0) : (rootCount.get(row.id) ?? 0),
 			title: row.title,

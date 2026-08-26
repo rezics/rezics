@@ -8,12 +8,12 @@ import {
 	currentTagPrimaryDisplayPath,
 	currentUnitEffectiveTag,
 	currentUnitEffectiveTagVote,
-	currentUnitStructureEdge,
-	currentUnitStructureEnd,
-	currentUnitStructureMember,
-	currentUnitStructurePrimaryPathCandidate,
+	currentTagPathEdge,
+	currentTagPathEnd,
+	currentTagPathMember,
+	currentTagPathPrimaryPathCandidate,
 	currentUnitTagJudgmentStat,
-	currentUnitTagStructureSupport,
+	currentUnitTagPathSupport,
 } from "../src/services/database/schema/structure-correction";
 import {
 	PostgreSqlSchemaFileNames,
@@ -47,11 +47,11 @@ const ExampleManifest = [
 ] as const;
 
 const TypedCurrentViews = [
-	currentUnitStructureMember,
-	currentUnitStructureEdge,
-	currentUnitStructureEnd,
-	currentUnitStructurePrimaryPathCandidate,
-	currentUnitTagStructureSupport,
+	currentTagPathMember,
+	currentTagPathEdge,
+	currentTagPathEnd,
+	currentTagPathPrimaryPathCandidate,
+	currentUnitTagPathSupport,
 	currentUnitEffectiveTag,
 	currentUnitEffectiveTagVote,
 	currentUnitTagJudgmentStat,

@@ -6,9 +6,9 @@ import { getUnitReadCondition } from "../authorization/unit/query";
 import { database } from "../database";
 import { toSafeInteger } from "../database/integer";
 import {
-	currentUnitEffectiveTag as unitEffectiveTag,
-	currentUnitEffectiveTagVote as unitEffectiveTagVote,
-	currentUnitTagJudgmentStat as unitTagJudgmentStat,
+	unitEffectiveTag as unitEffectiveTag,
+	unitEffectiveTagVote as unitEffectiveTagVote,
+	unitTagJudgmentStat,
 	profileRealmTagSubscription,
 	realm,
 	realmMember,
@@ -20,7 +20,7 @@ import {
 	unit,
 	unitTag,
 } from "../database/schema";
-import { listVisibleUnitTagStructures } from "../tag-structures/service";
+import { listVisibleUnitTagPaths } from "../tag-paths/service";
 import {
 	resolvedUnitLocalizationLanguage,
 	resolvedUnitLocalizationAvatar,
@@ -116,6 +116,7 @@ export async function listGlobalUnitTags(input: {
 			viewerVote: viewerUnitTagVote.value,
 			createdAt: unitEffectiveTag.createdAt,
 			updatedAt: unitEffectiveTag.updatedAt,
+			totalCount: sql<bigint>`count(*) over()`,
 		})
 		.from(unitEffectiveTag)
 		.innerJoin(tag, eq(tag.id, unitEffectiveTag.tagId))
@@ -159,15 +160,18 @@ export async function listGlobalUnitTags(input: {
 		)
 		.limit(input.limit);
 
-	return rows.map((row) => ({
-		...row,
-		avatar: presentAvatar(row.avatar),
-		score: toSafeInteger(row.score ?? 0n, "Unit Tag score"),
-		voteCount: toSafeInteger(row.voteCount ?? 0n, "Unit Tag vote count"),
-		viewerVote: presentTagVote(row.viewerVote),
-		createdAt: row.createdAt.toISOString(),
-		updatedAt: row.updatedAt.toISOString(),
-	}));
+	return {
+		totalCount: toSafeInteger(rows[0]?.totalCount ?? 0n, "Unit Tag total count"),
+		items: rows.map(({ totalCount: _totalCount, ...row }) => ({
+			...row,
+			avatar: presentAvatar(row.avatar),
+			score: toSafeInteger(row.score ?? 0n, "Unit Tag score"),
+			voteCount: toSafeInteger(row.voteCount ?? 0n, "Unit Tag vote count"),
+			viewerVote: presentTagVote(row.viewerVote),
+			createdAt: row.createdAt.toISOString(),
+			updatedAt: row.updatedAt.toISOString(),
+		})),
+	};
 }
 
 export async function listRealmTagSubscriptions(input: {
@@ -489,40 +493,42 @@ export async function getUnitTagLandscape(input: {
 	readonly viewerProfileId?: string;
 	readonly localizationLanguages?: LocalizationLanguageQuery;
 	readonly globalLimit: number;
-	readonly includeStructures: boolean;
-	readonly structureLimit: number;
+	readonly includePaths: boolean;
+	readonly pathLimit: number;
 	readonly sourceLimit: number;
 	readonly perRealmLimit: number;
 }) {
 	if (!input.viewerProfileId) {
-		const structures = input.includeStructures
-			? await listVisibleUnitTagStructures({
+		const paths = input.includePaths
+			? await listVisibleUnitTagPaths({
 					unitId: input.unitId,
 					localizationLanguages: input.localizationLanguages,
-					limit: input.structureLimit,
+					limit: input.pathLimit,
 				})
-			: [];
+			: { items: [], totalCount: 0 };
+		const global = await listGlobalUnitTags({
+			unitId: input.unitId,
+			localizationLanguages: input.localizationLanguages,
+			limit: input.globalLimit,
+			excludedTagIds: paths.items.flatMap(({ members }) => members.map(({ tagId }) => tagId)),
+		});
 		return {
-			structures,
-			global: await listGlobalUnitTags({
-				unitId: input.unitId,
-				localizationLanguages: input.localizationLanguages,
-				limit: input.globalLimit,
-				excludedTagIds: structures.flatMap(({ members }) => members.map(({ tagId }) => tagId)),
-			}),
+			paths: paths.items,
+			global: global.items,
+			totals: { paths: paths.totalCount, global: global.totalCount },
 			realms: [],
 			voteRealms: [],
 		};
 	}
-	const [structures, allSubscriptions, voteRealms] = await Promise.all([
-		input.includeStructures
-			? listVisibleUnitTagStructures({
+	const [paths, allSubscriptions, voteRealms] = await Promise.all([
+		input.includePaths
+			? listVisibleUnitTagPaths({
 					unitId: input.unitId,
 					viewerProfileId: input.viewerProfileId,
 					localizationLanguages: input.localizationLanguages,
-					limit: input.structureLimit,
+					limit: input.pathLimit,
 				})
-			: Promise.resolve([]),
+			: Promise.resolve({ items: [], totalCount: 0 }),
 		listRealmTagSubscriptions({
 			profileId: input.viewerProfileId,
 			localizationLanguages: input.localizationLanguages,
@@ -537,7 +543,7 @@ export async function getUnitTagLandscape(input: {
 		viewerProfileId: input.viewerProfileId,
 		localizationLanguages: input.localizationLanguages,
 		limit: input.globalLimit,
-		excludedTagIds: structures.flatMap(({ members }) => members.map(({ tagId }) => tagId)),
+		excludedTagIds: paths.items.flatMap(({ members }) => members.map(({ tagId }) => tagId)),
 	});
 	const realmIds = allSubscriptions.map(({ realmId }) => realmId);
 	const votedTags = await listRealmVotedTags({
@@ -548,8 +554,9 @@ export async function getUnitTagLandscape(input: {
 		perRealmLimit: input.perRealmLimit,
 	});
 	return {
-		structures,
-		global,
+		paths: paths.items,
+		global: global.items,
+		totals: { paths: paths.totalCount, global: global.totalCount },
 		realms: selectRealmTagSources({
 			sources: allSubscriptions,
 			votedTags,

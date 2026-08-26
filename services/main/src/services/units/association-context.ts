@@ -4,13 +4,7 @@ import type { ContentLanguage } from "@rezics/i18n";
 
 import { getUnitReadCondition } from "../authorization/unit/query";
 import { database, type DatabaseTransaction } from "../database";
-import {
-	currentUnitTagJudgmentStat as unitTagJudgmentStat,
-	post,
-	subjectAssociation,
-	unit,
-	unitTag,
-} from "../database/schema";
+import { unitTagJudgmentStat, post, subjectAssociation, unit, unitTag } from "../database/schema";
 import { toSafeInteger } from "../database/integer";
 import { resolvedUnitLocalizationTitle } from "./localization";
 import { AssociationContextPostInvalid } from "./errors";

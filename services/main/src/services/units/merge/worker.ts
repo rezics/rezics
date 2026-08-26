@@ -2,7 +2,7 @@ import { and, asc, eq, inArray, lte, or, sql } from "drizzle-orm";
 
 import { recordAuditEvent } from "../../audit";
 import { database, type DatabaseTransaction } from "../../database";
-import { runVndbVoteTransaction } from "../../database/vndb-vote-admission";
+import { runVoteTransaction } from "../../database/vote-admission";
 import {
 	unit,
 	unitMergeGraphLock,
@@ -106,9 +106,9 @@ type StepResult =
 	| { readonly outcome: "completed" }
 	| { readonly outcome: "lease_lost" };
 
-function vndbVoteAuthorityForPhase(phase: UnitMergeOperationPhase): "global" | "realm" | undefined {
+function voteAuthorityForPhase(phase: UnitMergeOperationPhase): "global" | "realm" | undefined {
 	if (phase === "realm_tag_judgments") return "realm";
-	if (phase === "unit_tags" || phase === "structure_applications" || phase === "finalize")
+	if (phase === "unit_tags" || phase === "tag_path_applications" || phase === "finalize")
 		return "global";
 	return undefined;
 }
@@ -230,9 +230,9 @@ async function processClaimedStep(
 			);
 		return { outcome: "continue", phase: nextPhase };
 	};
-	const authority = vndbVoteAuthorityForPhase(phase);
+	const authority = voteAuthorityForPhase(phase);
 	return authority
-		? runVndbVoteTransaction({ family: "unit_merge", authority }, work)
+		? runVoteTransaction({ family: "unit_merge", authority }, work)
 		: database.transaction(work);
 }
 

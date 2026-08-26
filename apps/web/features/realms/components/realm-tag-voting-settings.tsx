@@ -4,7 +4,14 @@ import {
 	type GetApiRealmsByRealmIdStatus200,
 	getApiRealmsByRealmIdTagContexts,
 	getApiRealmsByRealmIdTagContextsQueryKey,
+	getApiRealmsByRealmIdTagPathsQueryKey,
+	getApiTagPathsSearch,
+	useDeleteApiRealmsByRealmIdTagPathsByPathIdVote,
 	useDeleteApiRealmsByRealmIdTagsByTagIdContext,
+	useGetApiRealmsByRealmIdTagPaths,
+	usePutApiRealmsByRealmIdTagPathPolicy,
+	usePutApiRealmsByRealmIdTagPathsByPathId,
+	usePutApiRealmsByRealmIdTagPathsByPathIdVote,
 	usePutApiRealmsByRealmIdTagVoting,
 } from "@rezics/openapi-tanstack-query";
 import {
@@ -27,24 +34,38 @@ import {
 	FieldContent,
 	FieldDescription,
 	FieldLabel,
+	EntityPicker,
+	NativeSelect,
+	NativeSelectOption,
 	QueryFailure,
 	QueryPending,
 	Switch,
+	type EntitySearch,
 } from "@rezics/ui";
 import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { ArrowRightIcon, BookOpenTextIcon, PlusIcon, TagsIcon, Trash2Icon } from "lucide-react";
+import {
+	ArrowRightIcon,
+	BookOpenTextIcon,
+	ChevronRightIcon,
+	PlusIcon,
+	TagsIcon,
+	Trash2Icon,
+} from "lucide-react";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 
 import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import { postHref } from "@/features/posts/url";
 import { tagDetailHref } from "@/features/tags/routing/tag-links";
+import { tagPathHref } from "@/features/tags/routing/tag-links";
+import { TagVoteControls } from "@/features/tags/components/tag-vote-controls";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { isRealmTagContextComposerAvailable } from "../model/realm-content-composer";
 import { invalidateRealmDetails } from "../query";
 import { realmContentCreateHref } from "../routing/realm-content-create-route";
+import { toFiniteApiNumber, toNonNegativeApiInteger } from "@/lib/api-number";
 
 export function RealmTagVotingSettings({
 	realm,
@@ -92,10 +113,204 @@ export function RealmTagVotingSettings({
 				/>
 			</Field>
 			<RequestFailure error={update.error} />
+			<RealmTagPathAuthority realm={realm} />
 			{realm.capabilities.canManageTagContexts ? (
 				<RealmTagContextRelationshipList createHref={tagContextCreateHref} realmId={realm.id} />
 			) : null}
 		</div>
+	);
+}
+
+function RealmTagPathAuthority({ realm }: { readonly realm: GetApiRealmsByRealmIdStatus200 }) {
+	const { t } = useTranslation(["realms", "tags", "ui"]);
+	const queryClient = useQueryClient();
+	const localizationLanguages = useLocalizationLanguages();
+	const [selectedPath, setSelectedPath] = useState<{ id: string; label: string }>();
+	const queryInput = {
+		path: { realmId: realm.id },
+		query: { localizationLanguages, limit: 100 },
+	} as const;
+	const query = useGetApiRealmsByRealmIdTagPaths(queryInput);
+	const adopt = usePutApiRealmsByRealmIdTagPathsByPathId();
+	const vote = usePutApiRealmsByRealmIdTagPathsByPathIdVote();
+	const clearVote = useDeleteApiRealmsByRealmIdTagPathsByPathIdVote();
+	const updatePolicy = usePutApiRealmsByRealmIdTagPathPolicy();
+	const invalidate = () =>
+		queryClient.invalidateQueries({
+			queryKey: getApiRealmsByRealmIdTagPathsQueryKey({ path: { realmId: realm.id } }),
+		});
+	const pathSearch = useMemo<EntitySearch>(
+		() => async (_index, searchQuery, signal) => {
+			const response = await getApiTagPathsSearch({
+				query: { q: searchQuery, limit: 20, localizationLanguages },
+				signal,
+				throwOnError: true,
+			});
+			return response.data.items.flatMap((item) =>
+				item.selection === "path"
+					? [
+							{
+								id: item.pathId,
+								label: item.members.map((member) => member.title ?? t.tags.unnamedTag).join(" › "),
+								avatar: item.avatar,
+							},
+						]
+					: [],
+			);
+		},
+		[localizationLanguages, t.tags.unnamedTag],
+	);
+	const policy = updatePolicy.variables?.body ?? query.data?.policy;
+
+	async function setPolicy(
+		dimension: "fitFallback" | "spoilerFallback",
+		value: "inherit" | "isolate",
+	) {
+		if (!policy || !realm.capabilities.canUpdateTagVoting) return;
+		await updatePolicy.mutateAsync({
+			path: { realmId: realm.id },
+			body: { ...policy, [dimension]: value },
+		});
+		await invalidate();
+	}
+
+	async function adoptSelectedPath() {
+		if (!selectedPath) return;
+		await adopt.mutateAsync({
+			path: { realmId: realm.id, pathId: selectedPath.id },
+		});
+		setSelectedPath(undefined);
+		await invalidate();
+	}
+
+	return (
+		<Card appearance="outlined">
+			<CardHeader>
+				<CardTitle>{t.realms.tagVotingSettings.pathAuthorityTitle}</CardTitle>
+				<CardDescription>{t.realms.tagVotingSettings.pathAuthorityDescription}</CardDescription>
+			</CardHeader>
+			<CardContent className="grid gap-5">
+				{query.isPending ? <QueryPending /> : null}
+				{query.isError ? (
+					<QueryFailure error={query.error} retry={() => void query.refetch()} />
+				) : null}
+				{policy ? (
+					<div className="grid gap-4 sm:grid-cols-2">
+						<Field>
+							<FieldLabel>{t.realms.tagVotingSettings.fitFallback}</FieldLabel>
+							<NativeSelect
+								disabled={!realm.capabilities.canUpdateTagVoting || updatePolicy.isPending}
+								onChange={(event) => {
+									const value = event.currentTarget.value;
+									if (value === "inherit" || value === "isolate")
+										void setPolicy("fitFallback", value);
+								}}
+								value={policy.fitFallback}
+							>
+								<NativeSelectOption value="inherit">
+									{t.realms.tagVotingSettings.fallbackInherit}
+								</NativeSelectOption>
+								<NativeSelectOption value="isolate">
+									{t.realms.tagVotingSettings.fallbackIsolate}
+								</NativeSelectOption>
+							</NativeSelect>
+						</Field>
+						<Field>
+							<FieldLabel>{t.realms.tagVotingSettings.spoilerFallback}</FieldLabel>
+							<NativeSelect
+								disabled={!realm.capabilities.canUpdateTagVoting || updatePolicy.isPending}
+								onChange={(event) => {
+									const value = event.currentTarget.value;
+									if (value === "inherit" || value === "isolate")
+										void setPolicy("spoilerFallback", value);
+								}}
+								value={policy.spoilerFallback}
+							>
+								<NativeSelectOption value="inherit">
+									{t.realms.tagVotingSettings.fallbackInherit}
+								</NativeSelectOption>
+								<NativeSelectOption value="isolate">
+									{t.realms.tagVotingSettings.fallbackIsolate}
+								</NativeSelectOption>
+							</NativeSelect>
+						</Field>
+					</div>
+				) : null}
+				{realm.capabilities.canManageTags ? (
+					<div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto]">
+						<EntityPicker
+							ariaLabel={t.realms.tagVotingSettings.adoptPath}
+							index="tags"
+							maxLength={500}
+							onChange={setSelectedPath}
+							placeholder={t.realms.tagVotingSettings.adoptPath}
+							search={pathSearch}
+							value={selectedPath}
+						/>
+						<Button
+							disabled={!selectedPath}
+							isLoading={adopt.isPending}
+							onClick={() => void adoptSelectedPath()}
+						>
+							{t.realms.tagVotingSettings.adoptPath}
+						</Button>
+					</div>
+				) : null}
+				{query.data?.items.length === 0 ? (
+					<p className="text-sm text-muted-foreground">{t.realms.tagVotingSettings.pathsEmpty}</p>
+				) : (
+					<div className="grid gap-3">
+						{query.data?.items.map((item) => (
+							<div className="grid gap-3 rounded-xl border p-4" key={item.pathId}>
+								<ol className="flex flex-wrap items-center gap-1.5">
+									{item.members.map((member, index) => (
+										<li className="contents" key={member.tagId}>
+											{index ? <ChevronRightIcon className="size-4 text-muted-foreground" /> : null}
+											<Link href={tagDetailHref(member.tagId)}>
+												{member.title ?? t.tags.unnamedTag}
+											</Link>
+										</li>
+									))}
+								</ol>
+								<div className="flex flex-wrap items-center justify-between gap-3">
+									<TagVoteControls
+										canVote
+										isPending={
+											(vote.isPending && vote.variables?.path.pathId === item.pathId) ||
+											(clearVote.isPending && clearVote.variables?.path.pathId === item.pathId)
+										}
+										onClear={() =>
+											clearVote.mutate(
+												{ path: { realmId: realm.id, pathId: item.pathId } },
+												{ onSuccess: () => void invalidate() },
+											)
+										}
+										onVote={(value) =>
+											vote.mutate(
+												{
+													path: { realmId: realm.id, pathId: item.pathId },
+													body: { value },
+												},
+												{ onSuccess: () => void invalidate() },
+											)
+										}
+										score={toFiniteApiNumber(item.definition.score) ?? 0}
+										viewerVote={item.definition.viewerVote}
+										voteCount={toNonNegativeApiInteger(item.definition.voteCount)}
+									/>
+									<Button asChild size="sm" variant="quiet">
+										<Link href={tagPathHref(item.pathId)}>{t.tags.paths.details}</Link>
+									</Button>
+								</div>
+							</div>
+						))}
+					</div>
+				)}
+				<RequestFailure
+					error={adopt.error ?? vote.error ?? clearVote.error ?? updatePolicy.error}
+				/>
+			</CardContent>
+		</Card>
 	);
 }
 

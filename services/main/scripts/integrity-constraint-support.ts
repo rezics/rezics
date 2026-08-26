@@ -17,10 +17,7 @@ export const IntegrityConstraints = [
 	{ table: "unit_localization", name: "unit_localization_position_byte_length_check" },
 	{ table: "unit_alias", name: "unit_alias_position_byte_length_check" },
 	{ table: "unit_external_link", name: "unit_external_link_position_byte_length_check" },
-	{
-		table: "unit_structure_application",
-		name: "unit_structure_application_position_byte_length_check",
-	},
+	{ table: "unit_tag_path", name: "unit_tag_path_position_byte_length_check" },
 	{ table: "realm_pin", name: "realm_pin_position_byte_length_check" },
 	{ table: "unit_follow", name: "unit_follow_position_byte_length_check" },
 	{

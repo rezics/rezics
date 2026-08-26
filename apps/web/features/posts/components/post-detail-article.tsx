@@ -3,9 +3,9 @@
 import type { PostApiFeedQueryStatus200 } from "@rezics/openapi-tanstack-query";
 import type { PortableTextDocument } from "@rezics/block";
 import type { ContentLanguage } from "@rezics/i18n";
-import type { ReactNode } from "react";
+import { type ReactNode, useState } from "react";
 
-import { Card, CardContent, CardHeader } from "@rezics/ui";
+import { Button, Card, CardContent, CardHeader } from "@rezics/ui";
 import { LocalizedPortableTextContent } from "@/features/content-language-display/localized-portable-text-content";
 import { useChineseContentText } from "@/features/content-language-display/chinese-content-display-context";
 import { ConnectedFeedEngagementBar } from "@/features/content-feed/components/feed-card-actions";
@@ -40,6 +40,8 @@ export interface PostDetailArticleValue {
 	readonly summary?: string | null;
 	readonly body: PortableTextDocument | null;
 	readonly createdAt: string;
+	readonly contentSpoiler: { readonly level: 0 | 1 | 2; readonly concealed: boolean };
+	readonly contentNsfw: { readonly labelled: boolean; readonly concealed: boolean };
 }
 
 export function PostDetailArticle({
@@ -60,6 +62,8 @@ export function PostDetailArticle({
 	readonly variant?: "card" | "thread";
 }) {
 	const { locale, t } = useTranslation(["feed", "posts"]);
+	const [revealed, setRevealed] = useState(false);
+	const concealContent = (post.contentSpoiler.concealed || post.contentNsfw.concealed) && !revealed;
 	const displayedTitle = useChineseContentText(post.title ?? "", post.titleLanguage);
 	const displayedSummary = useChineseContentText(post.summary ?? "", post.language);
 	const content = (
@@ -75,10 +79,18 @@ export function PostDetailArticle({
 					{displayedTitle}
 				</h1>
 			) : null}
-			{post.summary ? (
+			{!concealContent && post.summary ? (
 				<p className="mt-4 text-muted-foreground text-lg leading-7">{displayedSummary}</p>
 			) : null}
-			{bodyContent !== undefined ? (
+			{concealContent ? (
+				<Button onClick={() => setRevealed(true)} type="button" variant="outline">
+					{post.contentNsfw.concealed
+						? t.posts.revealNsfw
+						: post.contentSpoiler.level === 2
+							? t.posts.contentSpoilerMajor
+							: t.posts.contentSpoilerMinor}
+				</Button>
+			) : bodyContent !== undefined ? (
 				<div className="prose mt-5 max-w-none">{bodyContent}</div>
 			) : post.body ? (
 				<div className="prose mt-5 max-w-none">

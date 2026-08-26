@@ -95,16 +95,15 @@ import {
 	unitTagJudgmentStat,
 	unitEffectiveTag,
 	unitEffectiveTagVote,
-	unitStructure,
-	unitStructureApplication,
-	unitStructureApplicationJudgment,
-	unitStructureApplicationJudgmentStat,
-	unitStructureEdge,
-	unitStructureMember,
-	unitStructureVote,
+	tagPath,
+	unitTagPath,
+	unitTagPathJudgment,
+	unitTagPathJudgmentStat,
+	tagPathEdge,
+	tagPathMember,
+	tagPathVote,
 	unitMergeRequest,
 	userAccountState,
-	UnitStructureKindValues,
 	sharedSearchQuery,
 	unitSearchDocument,
 	unitSlugAddress,
@@ -992,19 +991,18 @@ describe("database schema contracts", () => {
 		expect(unitSlugAddress.kind.getSQLType()).toBe("text");
 	});
 
-	it("models immutable generic Unit structures and rebuildable effective Tags separately", () => {
-		expect(UnitStructureKindValues).toEqual(["tag.hierarchy_path"]);
-		expect(getTableConfig(unitStructure).name).toBe("unit_structure");
+	it("models immutable dedicated Tag Paths and rebuildable effective Tags separately", () => {
+		expect(UnitKindValues).toContain("tag_path");
+		expect(UnitKindValues).not.toContain("structure");
+		expect(getTableConfig(tagPath).name).toBe("tag_path");
 		expect(
-			getTableConfig(unitStructure).uniqueConstraints.map((constraint) => constraint.name),
-		).toContain("unit_structure_definition_key");
-		expect(getTableConfig(unitStructureMember).name).toBe("unit_structure_member");
-		expect(getTableConfig(unitStructureEdge).name).toBe("unit_structure_edge");
-		expect(getTableConfig(unitStructureVote).name).toBe("unit_structure_vote");
-		expect(getTableConfig(unitStructureApplication).name).toBe("unit_structure_application");
-		expect(getTableConfig(unitStructureApplicationJudgment).name).toBe(
-			"unit_structure_application_judgment",
-		);
+			getTableConfig(tagPath).uniqueConstraints.map((constraint) => constraint.name),
+		).toContain("tag_path_definition_key");
+		expect(getTableConfig(tagPathMember).name).toBe("tag_path_member");
+		expect(getTableConfig(tagPathEdge).name).toBe("tag_path_edge");
+		expect(getTableConfig(tagPathVote).name).toBe("tag_path_vote");
+		expect(getTableConfig(unitTagPath).name).toBe("unit_tag_path");
+		expect(getTableConfig(unitTagPathJudgment).name).toBe("unit_tag_path_judgment");
 		expect(getTableConfig(unitEffectiveTag).name).toBe("unit_effective_tag");
 		expect(getTableConfig(unitEffectiveTagVote).name).toBe("unit_effective_tag_vote");
 	});
@@ -1066,10 +1064,7 @@ describe("database schema contracts", () => {
 	it("constrains spoiler aggregates and indexes selective Realm judgment routes", () => {
 		for (const [table, constraintName] of [
 			[unitTagJudgmentStat, "unit_tag_judgment_stat_spoiler_nonnegative_check"],
-			[
-				unitStructureApplicationJudgmentStat,
-				"unit_structure_application_judgment_stat_spoiler_nonnegative_check",
-			],
+			[unitTagPathJudgmentStat, "unit_tag_path_judgment_stat_spoiler_nonnegative_check"],
 			[realmTagJudgmentStat, "realm_tag_judgment_stat_spoiler_nonnegative_check"],
 			[
 				subjectAssociationJudgmentStat,

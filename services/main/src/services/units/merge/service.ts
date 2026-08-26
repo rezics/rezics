@@ -15,7 +15,7 @@ import {
 import { recordAuditEvent } from "../../audit";
 import { database, type DatabaseExecutor, type DatabaseTransaction } from "../../database";
 import { databaseConstraintName } from "../../database/constraint";
-import { runVndbVoteTransaction } from "../../database/vndb-vote-admission";
+import { runVoteTransaction } from "../../database/vote-admission";
 import {
 	unit,
 	governanceDecisionRule,
@@ -326,9 +326,8 @@ export async function preflightUnitMerge(input: {
 	readonly sourceUnitId: string;
 	readonly targetUnitId: string;
 }) {
-	const manifest = await runVndbVoteTransaction(
-		{ family: "unit_merge", authority: "global" },
-		(tx) => buildUnitMergeManifest(tx, input),
+	const manifest = await runVoteTransaction({ family: "unit_merge", authority: "global" }, (tx) =>
+		buildUnitMergeManifest(tx, input),
 	);
 	const rows = await database
 		.select({ id: unit.id, title: firstUnitLocalizationTitle(unit.id) })
@@ -621,7 +620,7 @@ function mapCreateConstraint(error: unknown): never {
 export async function createReviewedUnitMerge(input: CreateMergeInput) {
 	let requestId: string;
 	try {
-		requestId = await runVndbVoteTransaction(
+		requestId = await runVoteTransaction(
 			{ family: "unit_merge", authority: "global" },
 			async (tx) => {
 				await expirePendingMergeForSource(tx, input.sourceUnitId, new Date());
@@ -684,7 +683,7 @@ export async function createDirectUnitMerge(
 ) {
 	let requestId: string;
 	try {
-		requestId = await runVndbVoteTransaction(
+		requestId = await runVoteTransaction(
 			{ family: "unit_merge", authority: "global" },
 			async (tx) => {
 				await expirePendingMergeForSource(tx, input.sourceUnitId, new Date());
@@ -784,7 +783,7 @@ export async function reviewUnitMerge(input: {
 }) {
 	let result: ReviewTransactionResult;
 	try {
-		result = await runVndbVoteTransaction(
+		result = await runVoteTransaction(
 			{ family: "unit_merge", authority: "global" },
 			async (tx): Promise<ReviewTransactionResult> => {
 				const [request] = await tx

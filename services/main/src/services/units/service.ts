@@ -14,7 +14,7 @@ import {
 	createPublicEditableUnitAccess,
 } from "../authorization/unit/ownership";
 import { database, type DatabaseTransaction } from "../database";
-import { runVndbVoteTransaction } from "../database/vndb-vote-admission";
+import { runVoteTransaction } from "../database/vote-admission";
 import { toSafeInteger } from "../database/integer";
 import { exactCount, lowerBoundCount } from "../counts/contract";
 import { WorkPolicy } from "../performance/policy";
@@ -53,7 +53,7 @@ import {
 	audio,
 	contentStructure,
 	creditAttribution,
-	currentUnitTagJudgmentStat as unitTagJudgmentStat,
+	unitTagJudgmentStat,
 	entity,
 	software,
 	media,
@@ -63,6 +63,8 @@ import {
 	unit,
 	unitOwnership,
 	subjectAssociation,
+	subjectAssociationJudgment,
+	subjectAssociationJudgmentStat,
 	unitLocalization,
 	unitProgress,
 	unitTag,
@@ -257,163 +259,163 @@ export async function createUnit(
 	const contentLanguageSupport = normalizeContentLanguageSupportInput(
 		input.contentLanguageSupport ?? [],
 	);
-	const unitId = await runVndbVoteTransaction(
+	const unitId = await runVoteTransaction(
 		{ family: "unit_tag", authority: "global" },
 		async (tx) => {
-		await ensureImageAssetsAttachable(
-			tx,
-			ownerId,
-			unitLocalizationImageAssetReferences(input.localization),
-		);
-		const resolvedCreditAttributions: {
-			readonly entityId: string;
-			readonly role: CreditAttributionRole;
-			readonly creationMode: EntityCreditAttributionCreationMode;
-		}[] = [];
-		for (const attribution of input.creditAttributions) {
-			if (!isCreditAttributionRoleForUnitKind(kind, attribution.role))
-				throw new CreditAttributionRoleInvalid(kind, attribution.role);
-			resolvedCreditAttributions.push({
-				...attribution,
-				creationMode: await resolveEntityCreditAttributionCreationMode(
-					authorization,
-					tx,
-					attribution.entityId,
-				),
+			await ensureImageAssetsAttachable(
+				tx,
+				ownerId,
+				unitLocalizationImageAssetReferences(input.localization),
+			);
+			const resolvedCreditAttributions: {
+				readonly entityId: string;
+				readonly role: CreditAttributionRole;
+				readonly creationMode: EntityCreditAttributionCreationMode;
+			}[] = [];
+			for (const attribution of input.creditAttributions) {
+				if (!isCreditAttributionRoleForUnitKind(kind, attribution.role))
+					throw new CreditAttributionRoleInvalid(kind, attribution.role);
+				resolvedCreditAttributions.push({
+					...attribution,
+					creationMode: await resolveEntityCreditAttributionCreationMode(
+						authorization,
+						tx,
+						attribution.entityId,
+					),
+				});
+			}
+			ensureCreditAttributionRequestsConfirmed(
+				input.creditAttributionRequestConsent,
+				resolvedCreditAttributions,
+			);
+			const created = await insertUnit(tx, {
+				kind,
+				visibility: input.visibility ?? "public",
+				contentRating: input.contentRating ?? "general",
+				aiDisclosure: input.aiDisclosure ?? "unknown",
+				statusActor: { kind: "profile", profileId: ownerId },
 			});
-		}
-		ensureCreditAttributionRequestsConfirmed(
-			input.creditAttributionRequestConsent,
-			resolvedCreditAttributions,
-		);
-		const created = await insertUnit(tx, {
-			kind,
-			visibility: input.visibility ?? "public",
-			contentRating: input.contentRating ?? "general",
-			aiDisclosure: input.aiDisclosure ?? "unknown",
-			statusActor: { kind: "profile", profileId: ownerId },
-		});
-		let createdStructure: typeof contentStructure.$inferSelect | undefined;
-		if (input.details.type === "book") {
-			await tx.insert(book).values({
-				id: created.id,
-				releaseStatus: input.details.releaseStatus,
-				metadataOnly: resolveCreatedMetadataOnly(input.ownershipMode, input.details.metadataOnly),
-			});
-			[createdStructure] = await tx
-				.insert(contentStructure)
-				.values({ ownerUnitId: created.id, kind: "book.contents" })
-				.returning();
-			if (!createdStructure) throw new Error("Book Content Structure insertion returned no row");
-		}
-		if (input.details.type === "software")
-			await tx.insert(software).values({
-				id: created.id,
-				metadataOnly: resolveCreatedMetadataOnly(input.ownershipMode, input.details.metadataOnly),
-			});
-		if (input.details.type === "media") {
-			await tx.insert(media).values({
-				id: created.id,
-				kind: "other",
-				releaseStatus: input.details.releaseStatus,
-				metadataOnly: resolveCreatedMetadataOnly(input.ownershipMode, input.details.metadataOnly),
-			});
-			[createdStructure] = await tx
-				.insert(contentStructure)
-				.values({ ownerUnitId: created.id, kind: "media.contents" })
-				.returning();
-			if (!createdStructure) throw new Error("Media Content Structure insertion returned no row");
-		}
-		await tx.insert(unitLocalization).values({
-			unitId: created.id,
-			...toUnitLocalizationStorage(input.localization),
-		});
-		if (contentLanguageSupport.length)
-			await replaceUnitContentLanguageSupport(tx, created.id, kind, contentLanguageSupport);
-		if (input.ownershipMode === "profile_owned")
-			await createProfileOwnedUnitAccess(tx, created.id, ownerId);
-		else
-			await createPublicEditableUnitAccess(tx, created.id, ["unit.update", "unit.status.update"]);
-		if (input.licenses?.length)
-			await insertLicenseGrants(tx, {
+			let createdStructure: typeof contentStructure.$inferSelect | undefined;
+			if (input.details.type === "book") {
+				await tx.insert(book).values({
+					id: created.id,
+					releaseStatus: input.details.releaseStatus,
+					metadataOnly: resolveCreatedMetadataOnly(input.ownershipMode, input.details.metadataOnly),
+				});
+				[createdStructure] = await tx
+					.insert(contentStructure)
+					.values({ ownerUnitId: created.id, kind: "book.contents" })
+					.returning();
+				if (!createdStructure) throw new Error("Book Content Structure insertion returned no row");
+			}
+			if (input.details.type === "software")
+				await tx.insert(software).values({
+					id: created.id,
+					metadataOnly: resolveCreatedMetadataOnly(input.ownershipMode, input.details.metadataOnly),
+				});
+			if (input.details.type === "media") {
+				await tx.insert(media).values({
+					id: created.id,
+					kind: "other",
+					releaseStatus: input.details.releaseStatus,
+					metadataOnly: resolveCreatedMetadataOnly(input.ownershipMode, input.details.metadataOnly),
+				});
+				[createdStructure] = await tx
+					.insert(contentStructure)
+					.values({ ownerUnitId: created.id, kind: "media.contents" })
+					.returning();
+				if (!createdStructure) throw new Error("Media Content Structure insertion returned no row");
+			}
+			await tx.insert(unitLocalization).values({
 				unitId: created.id,
-				grantedByProfileId: ownerId,
-				licenseIds: input.licenses,
-				unitKind: kind,
+				...toUnitLocalizationStorage(input.localization),
 			});
-		await applyInitialTags(tx, {
-			unitId: created.id,
-			profileId: ownerId,
-			tagIds: input.initialTagIds,
-		});
-		if (input.version.kind === "variant") {
-			const [main] = await tx
-				.select({
-					id: unit.id,
-					kind: unit.kind,
-					status: unit.status,
-					visibility: unit.visibility,
-					moderationStatus: unit.moderationStatus,
-					deletedAt: unit.deletedAt,
-					parentMainUnitId: unitVariant.mainUnitId,
-				})
-				.from(unit)
-				.leftJoin(unitVariant, eq(unitVariant.variantUnitId, unit.id))
-				.where(eq(unit.id, input.version.mainUnitId))
-				.limit(1);
-			if (!main || main.deletedAt) throw new UnitVariantMainUnavailable();
-			if (main.kind !== kind) throw new UnitVariantKindMismatch();
-			if (main.parentMainUnitId) throw new UnitVariantTargetIsVariant();
-			const decision = await authorization.unit.decideInTransaction(tx, main.id, "unit.read");
-			if (!decision.allowed) throw new UnitVariantMainUnavailable();
-			if (isDiscoverableVariantUnit(created) && !isDiscoverableVariantUnit(main))
-				throw new UnitVariantMainUnavailable();
-			await tx.insert(unitVariant).values({
-				variantUnitId: created.id,
-				mainUnitId: main.id,
-				unitKind: kind,
-			});
-		}
-		let lastCreditAttributionPosition: string | undefined;
-		for (const attribution of resolvedCreditAttributions) {
-			const position = fractionalPositionBetween(lastCreditAttributionPosition, null);
-			lastCreditAttributionPosition = position;
-			if (attribution.creationMode === "direct")
-				await tx.insert(creditAttribution).values({
-					sourceUnitId: created.id,
-					creditedUnitId: attribution.entityId,
-					role: attribution.role,
-					position,
-				});
+			if (contentLanguageSupport.length)
+				await replaceUnitContentLanguageSupport(tx, created.id, kind, contentLanguageSupport);
+			if (input.ownershipMode === "profile_owned")
+				await createProfileOwnedUnitAccess(tx, created.id, ownerId);
 			else
-				await createAssociationRequestInTransaction(tx, authorization, ownerId, {
-					sourceUnitId: created.id,
-					targetUnitId: attribution.entityId,
-					kind: "credit",
-					role: attribution.role,
-					expiresAt: new Date(Date.now() + CreditAttributionRequestLifetimeMs),
+				await createPublicEditableUnitAccess(tx, created.id, ["unit.update", "unit.status.update"]);
+			if (input.licenses?.length)
+				await insertLicenseGrants(tx, {
+					unitId: created.id,
+					grantedByProfileId: ownerId,
+					licenseIds: input.licenses,
+					unitKind: kind,
 				});
-		}
-		const structureSnapshot = createdStructure
-			? ContentStructureSnapshotSchema.parse({
-					version: 1,
-					structure: createdStructure,
-					nodes: [],
-				})
-			: null;
-		await recordUnitRevision(tx, {
-			unitId: created.id,
-			actorProfileId: ownerId,
-			contribution: input.revisionContribution,
-			event: "create",
-		});
-		if (structureSnapshot)
-			await createContentStructureHistory(tx, {
-				structureId: structureSnapshot.structure.id,
-				actorProfileId: ownerId,
-				state: structureSnapshot,
+			await applyInitialTags(tx, {
+				unitId: created.id,
+				profileId: ownerId,
+				tagIds: input.initialTagIds,
 			});
-		return created.id;
+			if (input.version.kind === "variant") {
+				const [main] = await tx
+					.select({
+						id: unit.id,
+						kind: unit.kind,
+						status: unit.status,
+						visibility: unit.visibility,
+						moderationStatus: unit.moderationStatus,
+						deletedAt: unit.deletedAt,
+						parentMainUnitId: unitVariant.mainUnitId,
+					})
+					.from(unit)
+					.leftJoin(unitVariant, eq(unitVariant.variantUnitId, unit.id))
+					.where(eq(unit.id, input.version.mainUnitId))
+					.limit(1);
+				if (!main || main.deletedAt) throw new UnitVariantMainUnavailable();
+				if (main.kind !== kind) throw new UnitVariantKindMismatch();
+				if (main.parentMainUnitId) throw new UnitVariantTargetIsVariant();
+				const decision = await authorization.unit.decideInTransaction(tx, main.id, "unit.read");
+				if (!decision.allowed) throw new UnitVariantMainUnavailable();
+				if (isDiscoverableVariantUnit(created) && !isDiscoverableVariantUnit(main))
+					throw new UnitVariantMainUnavailable();
+				await tx.insert(unitVariant).values({
+					variantUnitId: created.id,
+					mainUnitId: main.id,
+					unitKind: kind,
+				});
+			}
+			let lastCreditAttributionPosition: string | undefined;
+			for (const attribution of resolvedCreditAttributions) {
+				const position = fractionalPositionBetween(lastCreditAttributionPosition, null);
+				lastCreditAttributionPosition = position;
+				if (attribution.creationMode === "direct")
+					await tx.insert(creditAttribution).values({
+						sourceUnitId: created.id,
+						creditedUnitId: attribution.entityId,
+						role: attribution.role,
+						position,
+					});
+				else
+					await createAssociationRequestInTransaction(tx, authorization, ownerId, {
+						sourceUnitId: created.id,
+						targetUnitId: attribution.entityId,
+						kind: "credit",
+						role: attribution.role,
+						expiresAt: new Date(Date.now() + CreditAttributionRequestLifetimeMs),
+					});
+			}
+			const structureSnapshot = createdStructure
+				? ContentStructureSnapshotSchema.parse({
+						version: 1,
+						structure: createdStructure,
+						nodes: [],
+					})
+				: null;
+			await recordUnitRevision(tx, {
+				unitId: created.id,
+				actorProfileId: ownerId,
+				contribution: input.revisionContribution,
+				event: "create",
+			});
+			if (structureSnapshot)
+				await createContentStructureHistory(tx, {
+					structureId: structureSnapshot.structure.id,
+					actorProfileId: ownerId,
+					state: structureSnapshot,
+				});
+			return created.id;
 		},
 	);
 	return getUnit(kind, unitId, authorization);
@@ -527,6 +529,13 @@ export async function getUnit(
 		(await getAttributionSummariesWithStatisticsByUnitIds([base.id], localizationLanguages)).get(
 			base.id,
 		) ?? [];
+	const [viewerDisplayPreference] = authorization.profileId
+		? await database
+				.select({ alwaysShowSpoilers: profilePreference.alwaysShowSpoilers })
+				.from(profilePreference)
+				.where(eq(profilePreference.profileId, authorization.profileId))
+				.limit(1)
+		: [];
 	const subjectAssociationRows = await database
 		.select({
 			id: subjectAssociation.id,
@@ -546,9 +555,25 @@ export async function getUnit(
 				"cover",
 				localizationLanguages,
 			),
+			spoilerVoteCount: subjectAssociationJudgmentStat.spoilerVoteCount,
+			spoilerNoneCount: subjectAssociationJudgmentStat.spoilerNoneCount,
+			spoilerMinorCount: subjectAssociationJudgmentStat.spoilerMinorCount,
+			spoilerMajorCount: subjectAssociationJudgmentStat.spoilerMajorCount,
+			viewerSpoilerLevel: authorization.profileId
+				? sql<number | null>`(
+						select judgment.spoiler_level
+						from ${subjectAssociationJudgment} judgment
+						where judgment.association_id = ${subjectAssociation.id}
+							and judgment.profile_id = ${authorization.profileId}::uuid
+					)`
+				: sql<number | null>`null`,
 		})
 		.from(subjectAssociation)
 		.innerJoin(entity, eq(entity.id, subjectAssociation.entityId))
+		.leftJoin(
+			subjectAssociationJudgmentStat,
+			eq(subjectAssociationJudgmentStat.associationId, subjectAssociation.id),
+		)
 		.where(eq(subjectAssociation.unitId, base.id))
 		.orderBy(subjectAssociation.position, subjectAssociation.id);
 	const [contextPosts, entityTagPreviews] = await Promise.all([
@@ -564,14 +589,58 @@ export async function getUnit(
 		),
 	]);
 	const subjectAssociations = subjectAssociationRows.map(
-		({ avatar, coverAssetId, ...association }) => ({
-			...association,
-			entityKind: requireEntityKind(association.entityKind),
-			avatar: presentAvatar(avatar),
-			cover: presentImageAsset(coverAssetId, "cover"),
-			tags: [...(entityTagPreviews.get(association.entityEntryId) ?? [])],
-			contextPost: contextPosts.get(association.id) ?? null,
-		}),
+		({
+			avatar,
+			coverAssetId,
+			spoilerVoteCount,
+			spoilerNoneCount,
+			spoilerMinorCount,
+			spoilerMajorCount,
+			viewerSpoilerLevel,
+			...association
+		}) => {
+			const voteCount = toSafeInteger(
+				spoilerVoteCount ?? 0n,
+				"Subject association spoiler vote count",
+			);
+			const none = toSafeInteger(spoilerNoneCount ?? 0n, "Subject association no-spoiler count");
+			const minor = toSafeInteger(
+				spoilerMinorCount ?? 0n,
+				"Subject association minor-spoiler count",
+			);
+			const major = toSafeInteger(
+				spoilerMajorCount ?? 0n,
+				"Subject association major-spoiler count",
+			);
+			const level =
+				major * 2 >= voteCount && voteCount > 0
+					? 2
+					: (minor + major) * 2 >= voteCount && voteCount > 0
+						? 1
+						: 0;
+			if (
+				viewerSpoilerLevel !== null &&
+				viewerSpoilerLevel !== 0 &&
+				viewerSpoilerLevel !== 1 &&
+				viewerSpoilerLevel !== 2
+			)
+				throw new Error("Subject association viewer spoiler level is invalid");
+			return {
+				...association,
+				entityKind: requireEntityKind(association.entityKind),
+				avatar: presentAvatar(avatar),
+				cover: presentImageAsset(coverAssetId, "cover"),
+				tags: [...(entityTagPreviews.get(association.entityEntryId) ?? [])],
+				contextPost: contextPosts.get(association.id) ?? null,
+				spoiler: {
+					level,
+					concealed: level > 0 && !viewerDisplayPreference?.alwaysShowSpoilers,
+					voteCount,
+					distribution: { none, minor, major },
+					viewerLevel: viewerSpoilerLevel,
+				},
+			};
+		},
 	);
 	const externalLinks = await getUnitExternalLinkPreviewWithSources({
 		unitId: base.id,

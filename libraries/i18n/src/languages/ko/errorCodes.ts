@@ -6,7 +6,7 @@ const { forms: dockTerms } = koTerminology.dock;
 const { forms: followTerms } = koTerminology.follow;
 const { forms: postTerms } = koTerminology.post;
 const { forms: realmTerms } = koTerminology.realm;
-const { forms: tagStructureTerms } = koTerminology.tagStructure;
+const { forms: tagPathTerms } = koTerminology.tagPath;
 const { forms: unitSlugTerms } = koTerminology.unitSlug;
 const { forms: zoneTerms } = koTerminology.zone;
 
@@ -18,7 +18,7 @@ export default {
 	ApiTokenPermissionRequired: `이 ${verbatimTerms.api.value} 토큰에는 필요한 권한이 없습니다.`,
 	ApiTokenRateLimitExceeded: `이 ${verbatimTerms.api.value} 토큰이 너무 빨리 요청을 보내고 있습니다. 잠시 후 다시 시도하세요.`,
 	ApiQuotaExceeded: `${verbatimTerms.api.value} 할당량을 모두 사용했습니다. 안내된 시간 이후에 다시 시도하세요.`,
-	VndbVoteHotKeyBusy: "이 투표 대상은 현재 요청이 몰리고 있습니다. 잠시 후 다시 시도하세요.",
+	VoteHotKeyBusy: "이 투표 대상은 현재 요청이 몰리고 있습니다. 잠시 후 다시 시도하세요.",
 	ApiQuotaPolicyNotFound: `요청한 ${verbatimTerms.api.value} 할당량 정책을 찾을 수 없습니다.`,
 	ApiQuotaPolicyKeyConflict: `다른 ${verbatimTerms.api.value} 할당량 정책이 이미 이 키를 사용하고 있습니다.`,
 	ApiQuotaPolicyInvalid: `${verbatimTerms.api.value} 할당량 정책 설정이 올바르지 않습니다.`,
@@ -287,11 +287,11 @@ export default {
 	RealmTagContextRequired: `이 ${realmTerms.label}에는 현재 볼 수 있는 태그의 공식 설명이 먼저 필요합니다.`,
 	RealmTagSelfReferenceForbidden: "태그를 자기 자신에게 적용할 수 없습니다.",
 	SharedSearchQueryNotFound: "이 공유 검색 쿼리를 찾을 수 없습니다.",
-	InvalidTagStructure: `이 ${tagStructureTerms.inline}는 유효하지 않습니다.`,
-	TagStructureNotFound: `이 ${tagStructureTerms.inline}를 찾을 수 없습니다.`,
-	TagStructureApplicationNotFound: `이 유닛에는 해당 ${tagStructureTerms.inline}가 없습니다.`,
-	TagStructureChanged: `이 ${tagStructureTerms.inline}가 다른 곳에서 변경되었습니다. 새로고침하고 다시 시도하십시오.`,
-	TagStructureDefinitionConflict: `동일한 ${tagStructureTerms.inline}가 이미 존재합니다.`,
+	InvalidTagPath: `이 ${tagPathTerms.inline}는 유효하지 않습니다.`,
+	TagPathNotFound: `이 ${tagPathTerms.inline}를 찾을 수 없습니다.`,
+	TagPathApplicationNotFound: `이 유닛에는 해당 ${tagPathTerms.inline}가 없습니다.`,
+	TagPathChanged: `이 ${tagPathTerms.inline}가 다른 곳에서 변경되었습니다. 새로고침하고 다시 시도하십시오.`,
+	TagPathDefinitionConflict: `동일한 ${tagPathTerms.inline}가 이미 존재합니다.`,
 	AssociationContextPostInvalid: `관계 컨텍스트는 위키 ${postTerms.label}여야 합니다.`,
 	ProgressEntryNotFound: "이 진행 이벤트를 찾을 수 없습니다.",
 	PostTagMentionVoteConflict: `이 태그 언급은 ${postTerms.label}에 대한 기존 반대 투표와 충돌합니다.`,

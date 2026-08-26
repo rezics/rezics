@@ -6,7 +6,7 @@ import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 const { forms: realmTerms } = deTerminology.realm;
 const { forms: followTerms } = deTerminology.follow;
 const { forms: postTerms } = deTerminology.post;
-const { forms: tagStructureTerms } = deTerminology.tagStructure;
+const { forms: tagPathTerms } = deTerminology.tagPath;
 
 export default {
 	page: {
@@ -14,7 +14,8 @@ export default {
 		description:
 			"Prüfe globale Tags und die kontextbezogenen Bewertungen der von dir ausgewählten Tag-Quellen.",
 		viewAll: "Vollständige Tag-Seite anzeigen",
-		manageOnTagPage: `Füge Tags und ${tagStructureTerms.pluralLabel} auf der eigenen Tag-Seite hinzu, damit der Abstimmungskontext sichtbar bleibt.`,
+		more: insert("{{count}} weitere", { count: Number }),
+		manageOnTagPage: `Füge Tags und ${tagPathTerms.pluralLabel} auf der eigenen Tag-Seite hinzu, damit der Abstimmungskontext sichtbar bleibt.`,
 	},
 	card: {
 		open: insert("Tag-Karte für {{tag}} öffnen ({{context}})", {
@@ -23,7 +24,7 @@ export default {
 		}),
 		close: "Tag-Karte schließen",
 		globalContext: "Globaler Kontext",
-		structureContext: tagStructureTerms.label,
+		pathContext: tagPathTerms.label,
 		policy: `Vom ${realmTerms.inline} festgelegt`,
 		search: "Diesen Tag durchsuchen",
 		details: "Tag-Details anzeigen",
@@ -41,7 +42,7 @@ export default {
 	},
 	basic: {
 		title: "Einfache Tags",
-		description: `Globale Tags und ${tagStructureTerms.pluralLabel} ohne kontextbezogene Bewertungen eines ${realmTerms.inline}s.`,
+		description: `Globale Tags und ${tagPathTerms.pluralLabel} ohne kontextbezogene Bewertungen eines ${realmTerms.inline}s.`,
 	},
 	voteContext: {
 		title: "Nach Kontext abstimmen",
@@ -53,17 +54,27 @@ export default {
 		description: `Globale Tags und deine ausgewählten ${realmTerms.label}-Quellen behalten ihren eigenen Kontext. Der aktive Abstimmungskontext wird hier nicht wiederholt.`,
 		empty: "Keine weiteren Tag-Quellen ausgewählt.",
 	},
-	structures: {
-		title: tagStructureTerms.pluralLabel,
-		description: `${tagStructureTerms.pluralLabel} bewahren sinnvolle Hierarchien und werden vor ungeordneten Tags angezeigt.`,
-		addTitle: `${tagStructureTerms.label} hinzufügen`,
-		addDescription: `Suche zuerst nach angenommenen ${tagStructureTerms.plural}. Das Hinzufügen unterstützt den Pfad und jeden enthaltenen Tag.`,
-		add: `${tagStructureTerms.label} hinzufügen`,
-		create: `${tagStructureTerms.label} erstellen`,
-		details: `${tagStructureTerms.label} anzeigen`,
-		empty: `Für dieses Werk gibt es noch keine angenommenen ${tagStructureTerms.plural}.`,
+	paths: {
+		title: tagPathTerms.pluralLabel,
+		description: `${tagPathTerms.pluralLabel} bewahren sinnvolle Hierarchien und werden vor ungeordneten Tags angezeigt.`,
+		addTitle: `${tagPathTerms.label} hinzufügen`,
+		addDescription: `Suche zuerst nach angenommenen ${tagPathTerms.plural}. Das Hinzufügen unterstützt den Pfad und jeden enthaltenen Tag.`,
+		add: `${tagPathTerms.label} hinzufügen`,
+		create: `${tagPathTerms.label} erstellen`,
+		details: `${tagPathTerms.label} anzeigen`,
+		empty: `Für dieses Werk gibt es noch keine angenommenen ${tagPathTerms.plural}.`,
 		memberFallback: "Tag ohne Namen",
-		pathLabel: `Geordneter ${tagStructureTerms.label}`,
+		pathLabel: `Geordneter ${tagPathTerms.label}`,
+		fitLabel: "Passgenauigkeit",
+		spoilerLabel: "Spoilergrad",
+		spoilerNone: "Keine",
+		spoilerMinor: "Leicht",
+		spoilerMajor: "Erheblich",
+		spoilerSummary: insert("Stimmen: {{none}} keine · {{minor}} leicht · {{major}} erheblich", {
+			none: Number,
+			minor: Number,
+			major: Number,
+		}),
 	},
 	detail: {
 		sections: "Registerkarten der Tag-Details",
@@ -71,7 +82,7 @@ export default {
 			overview: "Übersicht",
 			discussion: "Diskussion",
 			content: "Verwandte Inhalte",
-			structure: "Hierarchie",
+			paths: "Hierarchie",
 		},
 		overviewTitle: "Tag-Beschreibung",
 		overviewDescription:
@@ -81,8 +92,8 @@ export default {
 		discussionDescription: `Erstelle ${postTerms.pluralLabel} zu diesem Tag und beteilige dich an Diskussionen.`,
 		contentTitle: "Verwandte Inhalte",
 		contentDescription: "Durchsuche Werke und andere Inhalte, die diesen Tag verwenden.",
-		structureTitle: "Tag-Hierarchie",
-		structureDescription:
+		pathsTitle: "Tag-Hierarchie",
+		pathsDescription:
 			"Sieh, wo dieser Tag in von der Community angenommenen Tag-Strukturen vorkommt.",
 		editTitle: "Tag-Inhalt bearbeiten",
 		editDescription:
@@ -91,14 +102,14 @@ export default {
 		backToTag: "Zurück zum Tag",
 		backToEditOverview: "Zurück zur Bearbeitungsübersicht",
 		childrenTitle: "Direkt untergeordnete Tags",
-		childrenDescription: `Diese Beziehungen stammen aus angenommenen und von der Community gesperrten ${tagStructureTerms.pluralLabel}. Für jedes untergeordnete Element werden seine direkten Unterelemente angezeigt.`,
+		childrenDescription: `Diese Beziehungen stammen aus angenommenen und von der Community gesperrten ${tagPathTerms.pluralLabel}. Für jedes untergeordnete Element werden seine direkten Unterelemente angezeigt.`,
 		noChildren: "Dieser Tag hat noch keine angenommenen direkten Unterelemente.",
 		grandchildrenTitle: "Direkte Unterelemente",
 	},
-	createStructure: {
-		title: `${tagStructureTerms.label} erstellen`,
+	createPath: {
+		title: `${tagPathTerms.label} erstellen`,
 		description:
-			"Erstelle einen geordneten Pfad von allgemeineren zu spezifischeren Tags. Community-Mitglieder können ihn nach dem Erstellen nicht ändern; Plattformadministratoren dürfen protokollierte Korrekturen vornehmen.",
+			"Erstelle einen geordneten Pfad von allgemeineren zu spezifischeren Tags. Definitionen sind nach der Erstellung unveränderlich; erstelle stattdessen einen neuen Pfad und reiche einen manuellen Governance-Vorschlag ein.",
 		pick: "Nächsten Tag auswählen",
 		addMember: "Zum Pfad hinzufügen",
 		removeMember: "Aus dem Pfad entfernen",
@@ -106,15 +117,11 @@ export default {
 		moveLater: "Nach hinten verschieben",
 		preview: "Vorschau des von der Community gesperrten Pfads",
 		minimum: "Füge mindestens zwei verschiedene Tags hinzu.",
-		submit: `${tagStructureTerms.label} erstellen und abstimmen`,
-	},
-	adminEditStructure: {
-		title: `${tagStructureTerms.label} korrigieren`,
-		description:
-			"Plattformadministratoren können Elemente oder Reihenfolge korrigieren. Unit-Identität, Stimmen und Verwendungen bleiben erhalten, und die Korrektur wird im Verlauf protokolliert.",
-		reasonLabel: "Grund der Korrektur",
-		reasonPlaceholder: "Erkläre, warum diese administrative Korrektur erforderlich ist.",
-		submit: "Protokollierte Korrektur speichern",
+		submit: `${tagPathTerms.label} erstellen und abstimmen`,
+		relatedTitle: "Verwandte akzeptierte Pfade prüfen",
+		relatedDescription:
+			"Diese Pfade enden bereits beim selben Tag. Sie sind nicht automatisch Duplikate; prüfe ihre Bedeutung, bevor du eine eigenständige unveränderliche Definition erstellst.",
+		continueDistinct: "Eigenständigen Pfad erstellen",
 	},
 	create: {
 		noResults: insert("Kein Tag stimmt mit „{{query}}“ überein.", { query: String }),
@@ -192,6 +199,13 @@ export default {
 		noRanked: "Es gibt keine weiteren globalen Tags zum Hervorheben.",
 	},
 	realms: {
+		pathsTitle: `Tag-Pfade im ${realmTerms.label}`,
+		applyPath: "Pfad anwenden",
+		authority: { realm: `Dieser ${realmTerms.label}`, global: "Global" },
+		pathAuthority: insert("Eignung: {{fit}} · Spoiler: {{spoiler}}", {
+			fit: String,
+			spoiler: String,
+		}),
 		title: `${realmTerms.label}-Tag-Kontexte`,
 		description: `Jeder ${realmTerms.inline} ist ein unabhängiger Kontext. Seine Bewertungen werden nie mit globalen Tags oder einem anderen ${realmTerms.inline} zusammengeführt.`,
 		addTitle: `Tag-Stimme in diesem ${realmTerms.label} hinzufügen`,
@@ -227,5 +241,5 @@ export default {
 	},
 	unnamedTag: "Tag ohne Namen",
 	unnamedRealm: `${realmTerms.label} ohne Namen`,
-	unnamedStructure: `${tagStructureTerms.label} ohne Namen`,
+	unnamedPath: `${tagPathTerms.label} ohne Namen`,
 } satisfies typeof import("../zh-Hant/tags").default;

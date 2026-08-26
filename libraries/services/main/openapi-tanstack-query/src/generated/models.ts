@@ -91,7 +91,6 @@ export const RealmPlacementFilterRealmKindInEnum = {
 	entity: "entity",
 	label: "label",
 	tag: "tag",
-	structure: "structure",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -194,7 +193,6 @@ export const TagAssertionFilterTagKindInEnum = {
 	entity: "entity",
 	label: "label",
 	tag: "tag",
-	structure: "structure",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -369,7 +367,6 @@ export type TagAssertionFilter = {
 							| "entity"
 							| "label"
 							| "tag"
-							| "structure"
 							| "series"
 							| "zone"
 							| "zone_page"
@@ -489,7 +486,6 @@ export const ScoreFilterRealmKindInEnum = {
 	entity: "entity",
 	label: "label",
 	tag: "tag",
-	structure: "structure",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -515,7 +511,6 @@ export const ScoreFilterTargetKindInEnum = {
 	entity: "entity",
 	label: "label",
 	tag: "tag",
-	structure: "structure",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -679,7 +674,6 @@ export const PostFilterExplainsRealmTagRealmKindInEnum = {
 	entity: "entity",
 	label: "label",
 	tag: "tag",
-	structure: "structure",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -705,7 +699,6 @@ export const PostFilterExplainsRealmTagTagKindInEnum = {
 	entity: "entity",
 	label: "label",
 	tag: "tag",
-	structure: "structure",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -778,7 +771,6 @@ export type PostFilter = {
 							| "entity"
 							| "label"
 							| "tag"
-							| "structure"
 							| "series"
 							| "zone"
 							| "zone_page"
@@ -889,7 +881,6 @@ export type PostFilter = {
 									| "entity"
 									| "label"
 									| "tag"
-									| "structure"
 									| "series"
 									| "zone"
 									| "zone_page"
@@ -933,7 +924,6 @@ export type PostFilter = {
 									| "entity"
 									| "label"
 									| "tag"
-									| "structure"
 									| "series"
 									| "zone"
 									| "zone_page"
@@ -1056,7 +1046,6 @@ export type PostFilter = {
 									| "entity"
 									| "label"
 									| "tag"
-									| "structure"
 									| "series"
 									| "zone"
 									| "zone_page"
@@ -1100,7 +1089,6 @@ export type PostFilter = {
 									| "entity"
 									| "label"
 									| "tag"
-									| "structure"
 									| "series"
 									| "zone"
 									| "zone_page"
@@ -1202,7 +1190,6 @@ export const RealmTagContextFilterRealmKindInEnum = {
 	entity: "entity",
 	label: "label",
 	tag: "tag",
-	structure: "structure",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -1228,7 +1215,6 @@ export const RealmTagContextFilterTagKindInEnum = {
 	entity: "entity",
 	label: "label",
 	tag: "tag",
-	structure: "structure",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -1344,7 +1330,6 @@ export type CollectionFilter = {
 							| "entity"
 							| "label"
 							| "tag"
-							| "structure"
 							| "series"
 							| "zone"
 							| "zone_page"
@@ -1390,7 +1375,6 @@ export type CollectionFilter = {
 							| "entity"
 							| "label"
 							| "tag"
-							| "structure"
 							| "series"
 							| "zone"
 							| "zone_page"
@@ -1417,7 +1401,6 @@ export const UnitPredicateKindInEnum = {
 	entity: "entity",
 	label: "label",
 	tag: "tag",
-	structure: "structure",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -1601,7 +1584,6 @@ export type UnitPredicate = {
 								| "entity"
 								| "label"
 								| "tag"
-								| "structure"
 								| "series"
 								| "zone"
 								| "zone_page"
@@ -1682,7 +1664,6 @@ export type UnitPredicate = {
 								| "entity"
 								| "label"
 								| "tag"
-								| "structure"
 								| "series"
 								| "zone"
 								| "zone_page"
@@ -1764,7 +1745,6 @@ export type UnitPredicate = {
 								| "entity"
 								| "label"
 								| "tag"
-								| "structure"
 								| "series"
 								| "zone"
 								| "zone_page"
@@ -1898,7 +1878,6 @@ export type UnitPredicate = {
 											| "entity"
 											| "label"
 											| "tag"
-											| "structure"
 											| "series"
 											| "zone"
 											| "zone_page"
@@ -2055,7 +2034,6 @@ export type UnitPredicate = {
 								| "entity"
 								| "label"
 								| "tag"
-								| "structure"
 								| "series"
 								| "zone"
 								| "zone_page"
@@ -2189,7 +2167,6 @@ export type UnitPredicate = {
 											| "entity"
 											| "label"
 											| "tag"
-											| "structure"
 											| "series"
 											| "zone"
 											| "zone_page"
@@ -2331,7 +2308,6 @@ export type UnitPredicate = {
 							| "entity"
 							| "label"
 							| "tag"
-							| "structure"
 							| "series"
 							| "zone"
 							| "zone_page"
@@ -2377,7 +2353,6 @@ export type UnitPredicate = {
 							| "entity"
 							| "label"
 							| "tag"
-							| "structure"
 							| "series"
 							| "zone"
 							| "zone_page"
@@ -2424,7 +2399,6 @@ export type UnitPredicate = {
 							| "entity"
 							| "label"
 							| "tag"
-							| "structure"
 							| "series"
 							| "zone"
 							| "zone_page"
@@ -2470,7 +2444,6 @@ export type UnitPredicate = {
 							| "entity"
 							| "label"
 							| "tag"
-							| "structure"
 							| "series"
 							| "zone"
 							| "zone_page"
@@ -2624,7 +2597,6 @@ export type UnitPredicate = {
 									| "entity"
 									| "label"
 									| "tag"
-									| "structure"
 									| "series"
 									| "zone"
 									| "zone_page"
@@ -2668,7 +2640,6 @@ export type UnitPredicate = {
 									| "entity"
 									| "label"
 									| "tag"
-									| "structure"
 									| "series"
 									| "zone"
 									| "zone_page"
@@ -2791,7 +2762,6 @@ export type UnitPredicate = {
 									| "entity"
 									| "label"
 									| "tag"
-									| "structure"
 									| "series"
 									| "zone"
 									| "zone_page"
@@ -2835,7 +2805,6 @@ export type UnitPredicate = {
 									| "entity"
 									| "label"
 									| "tag"
-									| "structure"
 									| "series"
 									| "zone"
 									| "zone_page"
@@ -2943,7 +2912,6 @@ export type UnitPredicate = {
 											| "entity"
 											| "label"
 											| "tag"
-											| "structure"
 											| "series"
 											| "zone"
 											| "zone_page"
@@ -3054,7 +3022,6 @@ export type UnitPredicate = {
 													| "entity"
 													| "label"
 													| "tag"
-													| "structure"
 													| "series"
 													| "zone"
 													| "zone_page"
@@ -3098,7 +3065,6 @@ export type UnitPredicate = {
 													| "entity"
 													| "label"
 													| "tag"
-													| "structure"
 													| "series"
 													| "zone"
 													| "zone_page"
@@ -3221,7 +3187,6 @@ export type UnitPredicate = {
 													| "entity"
 													| "label"
 													| "tag"
-													| "structure"
 													| "series"
 													| "zone"
 													| "zone_page"
@@ -3265,7 +3230,6 @@ export type UnitPredicate = {
 													| "entity"
 													| "label"
 													| "tag"
-													| "structure"
 													| "series"
 													| "zone"
 													| "zone_page"
@@ -3338,7 +3302,6 @@ export type UnitPredicate = {
 									| "entity"
 									| "label"
 									| "tag"
-									| "structure"
 									| "series"
 									| "zone"
 									| "zone_page"
@@ -3382,7 +3345,6 @@ export type UnitPredicate = {
 									| "entity"
 									| "label"
 									| "tag"
-									| "structure"
 									| "series"
 									| "zone"
 									| "zone_page"
@@ -3455,7 +3417,6 @@ export type UnitPredicate = {
 											| "entity"
 											| "label"
 											| "tag"
-											| "structure"
 											| "series"
 											| "zone"
 											| "zone_page"
@@ -3501,7 +3462,6 @@ export type UnitPredicate = {
 											| "entity"
 											| "label"
 											| "tag"
-											| "structure"
 											| "series"
 											| "zone"
 											| "zone_page"
@@ -3678,7 +3638,6 @@ export type DockDocument = {
 												| "users"
 												| "entities"
 												| "tags"
-												| "tag-structures"
 												| "posts"
 												| "realms"
 												| "collections"
@@ -3729,7 +3688,6 @@ export type DockDocument = {
 														| "entity"
 														| "label"
 														| "tag"
-														| "structure"
 														| "series"
 														| "zone"
 														| "zone_page"
@@ -3876,7 +3834,6 @@ export type DockDocument = {
 																			| "entity"
 																			| "label"
 																			| "tag"
-																			| "structure"
 																			| "series"
 																			| "zone"
 																			| "zone_page"
@@ -3957,7 +3914,6 @@ export type DockDocument = {
 																			| "entity"
 																			| "label"
 																			| "tag"
-																			| "structure"
 																			| "series"
 																			| "zone"
 																			| "zone_page"
@@ -4039,7 +3995,6 @@ export type DockDocument = {
 																			| "entity"
 																			| "label"
 																			| "tag"
-																			| "structure"
 																			| "series"
 																			| "zone"
 																			| "zone_page"
@@ -4173,7 +4128,6 @@ export type DockDocument = {
 																						| "entity"
 																						| "label"
 																						| "tag"
-																						| "structure"
 																						| "series"
 																						| "zone"
 																						| "zone_page"
@@ -4330,7 +4284,6 @@ export type DockDocument = {
 																			| "entity"
 																			| "label"
 																			| "tag"
-																			| "structure"
 																			| "series"
 																			| "zone"
 																			| "zone_page"
@@ -4464,7 +4417,6 @@ export type DockDocument = {
 																						| "entity"
 																						| "label"
 																						| "tag"
-																						| "structure"
 																						| "series"
 																						| "zone"
 																						| "zone_page"
@@ -4606,7 +4558,6 @@ export type DockDocument = {
 																		| "entity"
 																		| "label"
 																		| "tag"
-																		| "structure"
 																		| "series"
 																		| "zone"
 																		| "zone_page"
@@ -4652,7 +4603,6 @@ export type DockDocument = {
 																		| "entity"
 																		| "label"
 																		| "tag"
-																		| "structure"
 																		| "series"
 																		| "zone"
 																		| "zone_page"
@@ -4699,7 +4649,6 @@ export type DockDocument = {
 																		| "entity"
 																		| "label"
 																		| "tag"
-																		| "structure"
 																		| "series"
 																		| "zone"
 																		| "zone_page"
@@ -4745,7 +4694,6 @@ export type DockDocument = {
 																		| "entity"
 																		| "label"
 																		| "tag"
-																		| "structure"
 																		| "series"
 																		| "zone"
 																		| "zone_page"
@@ -4899,7 +4847,6 @@ export type DockDocument = {
 																				| "entity"
 																				| "label"
 																				| "tag"
-																				| "structure"
 																				| "series"
 																				| "zone"
 																				| "zone_page"
@@ -4943,7 +4890,6 @@ export type DockDocument = {
 																				| "entity"
 																				| "label"
 																				| "tag"
-																				| "structure"
 																				| "series"
 																				| "zone"
 																				| "zone_page"
@@ -5066,7 +5012,6 @@ export type DockDocument = {
 																				| "entity"
 																				| "label"
 																				| "tag"
-																				| "structure"
 																				| "series"
 																				| "zone"
 																				| "zone_page"
@@ -5110,7 +5055,6 @@ export type DockDocument = {
 																				| "entity"
 																				| "label"
 																				| "tag"
-																				| "structure"
 																				| "series"
 																				| "zone"
 																				| "zone_page"
@@ -5218,7 +5162,6 @@ export type DockDocument = {
 																						| "entity"
 																						| "label"
 																						| "tag"
-																						| "structure"
 																						| "series"
 																						| "zone"
 																						| "zone_page"
@@ -5329,7 +5272,6 @@ export type DockDocument = {
 																								| "entity"
 																								| "label"
 																								| "tag"
-																								| "structure"
 																								| "series"
 																								| "zone"
 																								| "zone_page"
@@ -5373,7 +5315,6 @@ export type DockDocument = {
 																								| "entity"
 																								| "label"
 																								| "tag"
-																								| "structure"
 																								| "series"
 																								| "zone"
 																								| "zone_page"
@@ -5496,7 +5437,6 @@ export type DockDocument = {
 																								| "entity"
 																								| "label"
 																								| "tag"
-																								| "structure"
 																								| "series"
 																								| "zone"
 																								| "zone_page"
@@ -5540,7 +5480,6 @@ export type DockDocument = {
 																								| "entity"
 																								| "label"
 																								| "tag"
-																								| "structure"
 																								| "series"
 																								| "zone"
 																								| "zone_page"
@@ -5613,7 +5552,6 @@ export type DockDocument = {
 																				| "entity"
 																				| "label"
 																				| "tag"
-																				| "structure"
 																				| "series"
 																				| "zone"
 																				| "zone_page"
@@ -5657,7 +5595,6 @@ export type DockDocument = {
 																				| "entity"
 																				| "label"
 																				| "tag"
-																				| "structure"
 																				| "series"
 																				| "zone"
 																				| "zone_page"
@@ -5730,7 +5667,6 @@ export type DockDocument = {
 																						| "entity"
 																						| "label"
 																						| "tag"
-																						| "structure"
 																						| "series"
 																						| "zone"
 																						| "zone_page"
@@ -5776,7 +5712,6 @@ export type DockDocument = {
 																						| "entity"
 																						| "label"
 																						| "tag"
-																						| "structure"
 																						| "series"
 																						| "zone"
 																						| "zone_page"
@@ -5943,7 +5878,6 @@ export type DockDocument = {
 									| "users"
 									| "entities"
 									| "tags"
-									| "tag-structures"
 									| "posts"
 									| "realms"
 									| "collections"
@@ -5994,7 +5928,6 @@ export type DockDocument = {
 											| "entity"
 											| "label"
 											| "tag"
-											| "structure"
 											| "series"
 											| "zone"
 											| "zone_page"
@@ -6141,7 +6074,6 @@ export type DockDocument = {
 																| "entity"
 																| "label"
 																| "tag"
-																| "structure"
 																| "series"
 																| "zone"
 																| "zone_page"
@@ -6222,7 +6154,6 @@ export type DockDocument = {
 																| "entity"
 																| "label"
 																| "tag"
-																| "structure"
 																| "series"
 																| "zone"
 																| "zone_page"
@@ -6304,7 +6235,6 @@ export type DockDocument = {
 																| "entity"
 																| "label"
 																| "tag"
-																| "structure"
 																| "series"
 																| "zone"
 																| "zone_page"
@@ -6438,7 +6368,6 @@ export type DockDocument = {
 																			| "entity"
 																			| "label"
 																			| "tag"
-																			| "structure"
 																			| "series"
 																			| "zone"
 																			| "zone_page"
@@ -6595,7 +6524,6 @@ export type DockDocument = {
 																| "entity"
 																| "label"
 																| "tag"
-																| "structure"
 																| "series"
 																| "zone"
 																| "zone_page"
@@ -6729,7 +6657,6 @@ export type DockDocument = {
 																			| "entity"
 																			| "label"
 																			| "tag"
-																			| "structure"
 																			| "series"
 																			| "zone"
 																			| "zone_page"
@@ -6871,7 +6798,6 @@ export type DockDocument = {
 															| "entity"
 															| "label"
 															| "tag"
-															| "structure"
 															| "series"
 															| "zone"
 															| "zone_page"
@@ -6917,7 +6843,6 @@ export type DockDocument = {
 															| "entity"
 															| "label"
 															| "tag"
-															| "structure"
 															| "series"
 															| "zone"
 															| "zone_page"
@@ -6964,7 +6889,6 @@ export type DockDocument = {
 															| "entity"
 															| "label"
 															| "tag"
-															| "structure"
 															| "series"
 															| "zone"
 															| "zone_page"
@@ -7010,7 +6934,6 @@ export type DockDocument = {
 															| "entity"
 															| "label"
 															| "tag"
-															| "structure"
 															| "series"
 															| "zone"
 															| "zone_page"
@@ -7164,7 +7087,6 @@ export type DockDocument = {
 																	| "entity"
 																	| "label"
 																	| "tag"
-																	| "structure"
 																	| "series"
 																	| "zone"
 																	| "zone_page"
@@ -7208,7 +7130,6 @@ export type DockDocument = {
 																	| "entity"
 																	| "label"
 																	| "tag"
-																	| "structure"
 																	| "series"
 																	| "zone"
 																	| "zone_page"
@@ -7331,7 +7252,6 @@ export type DockDocument = {
 																	| "entity"
 																	| "label"
 																	| "tag"
-																	| "structure"
 																	| "series"
 																	| "zone"
 																	| "zone_page"
@@ -7375,7 +7295,6 @@ export type DockDocument = {
 																	| "entity"
 																	| "label"
 																	| "tag"
-																	| "structure"
 																	| "series"
 																	| "zone"
 																	| "zone_page"
@@ -7483,7 +7402,6 @@ export type DockDocument = {
 																			| "entity"
 																			| "label"
 																			| "tag"
-																			| "structure"
 																			| "series"
 																			| "zone"
 																			| "zone_page"
@@ -7594,7 +7512,6 @@ export type DockDocument = {
 																					| "entity"
 																					| "label"
 																					| "tag"
-																					| "structure"
 																					| "series"
 																					| "zone"
 																					| "zone_page"
@@ -7638,7 +7555,6 @@ export type DockDocument = {
 																					| "entity"
 																					| "label"
 																					| "tag"
-																					| "structure"
 																					| "series"
 																					| "zone"
 																					| "zone_page"
@@ -7761,7 +7677,6 @@ export type DockDocument = {
 																					| "entity"
 																					| "label"
 																					| "tag"
-																					| "structure"
 																					| "series"
 																					| "zone"
 																					| "zone_page"
@@ -7805,7 +7720,6 @@ export type DockDocument = {
 																					| "entity"
 																					| "label"
 																					| "tag"
-																					| "structure"
 																					| "series"
 																					| "zone"
 																					| "zone_page"
@@ -7878,7 +7792,6 @@ export type DockDocument = {
 																	| "entity"
 																	| "label"
 																	| "tag"
-																	| "structure"
 																	| "series"
 																	| "zone"
 																	| "zone_page"
@@ -7922,7 +7835,6 @@ export type DockDocument = {
 																	| "entity"
 																	| "label"
 																	| "tag"
-																	| "structure"
 																	| "series"
 																	| "zone"
 																	| "zone_page"
@@ -7995,7 +7907,6 @@ export type DockDocument = {
 																			| "entity"
 																			| "label"
 																			| "tag"
-																			| "structure"
 																			| "series"
 																			| "zone"
 																			| "zone_page"
@@ -8041,7 +7952,6 @@ export type DockDocument = {
 																			| "entity"
 																			| "label"
 																			| "tag"
-																			| "structure"
 																			| "series"
 																			| "zone"
 																			| "zone_page"
@@ -8675,7 +8585,6 @@ export type UnitReferencedBlockDocument = {
 												| "users"
 												| "entities"
 												| "tags"
-												| "tag-structures"
 												| "posts"
 												| "realms"
 												| "collections"
@@ -8726,7 +8635,6 @@ export type UnitReferencedBlockDocument = {
 														| "entity"
 														| "label"
 														| "tag"
-														| "structure"
 														| "series"
 														| "zone"
 														| "zone_page"
@@ -8873,7 +8781,6 @@ export type UnitReferencedBlockDocument = {
 																			| "entity"
 																			| "label"
 																			| "tag"
-																			| "structure"
 																			| "series"
 																			| "zone"
 																			| "zone_page"
@@ -8954,7 +8861,6 @@ export type UnitReferencedBlockDocument = {
 																			| "entity"
 																			| "label"
 																			| "tag"
-																			| "structure"
 																			| "series"
 																			| "zone"
 																			| "zone_page"
@@ -9036,7 +8942,6 @@ export type UnitReferencedBlockDocument = {
 																			| "entity"
 																			| "label"
 																			| "tag"
-																			| "structure"
 																			| "series"
 																			| "zone"
 																			| "zone_page"
@@ -9170,7 +9075,6 @@ export type UnitReferencedBlockDocument = {
 																						| "entity"
 																						| "label"
 																						| "tag"
-																						| "structure"
 																						| "series"
 																						| "zone"
 																						| "zone_page"
@@ -9327,7 +9231,6 @@ export type UnitReferencedBlockDocument = {
 																			| "entity"
 																			| "label"
 																			| "tag"
-																			| "structure"
 																			| "series"
 																			| "zone"
 																			| "zone_page"
@@ -9461,7 +9364,6 @@ export type UnitReferencedBlockDocument = {
 																						| "entity"
 																						| "label"
 																						| "tag"
-																						| "structure"
 																						| "series"
 																						| "zone"
 																						| "zone_page"
@@ -9603,7 +9505,6 @@ export type UnitReferencedBlockDocument = {
 																		| "entity"
 																		| "label"
 																		| "tag"
-																		| "structure"
 																		| "series"
 																		| "zone"
 																		| "zone_page"
@@ -9649,7 +9550,6 @@ export type UnitReferencedBlockDocument = {
 																		| "entity"
 																		| "label"
 																		| "tag"
-																		| "structure"
 																		| "series"
 																		| "zone"
 																		| "zone_page"
@@ -9696,7 +9596,6 @@ export type UnitReferencedBlockDocument = {
 																		| "entity"
 																		| "label"
 																		| "tag"
-																		| "structure"
 																		| "series"
 																		| "zone"
 																		| "zone_page"
@@ -9742,7 +9641,6 @@ export type UnitReferencedBlockDocument = {
 																		| "entity"
 																		| "label"
 																		| "tag"
-																		| "structure"
 																		| "series"
 																		| "zone"
 																		| "zone_page"
@@ -9896,7 +9794,6 @@ export type UnitReferencedBlockDocument = {
 																				| "entity"
 																				| "label"
 																				| "tag"
-																				| "structure"
 																				| "series"
 																				| "zone"
 																				| "zone_page"
@@ -9940,7 +9837,6 @@ export type UnitReferencedBlockDocument = {
 																				| "entity"
 																				| "label"
 																				| "tag"
-																				| "structure"
 																				| "series"
 																				| "zone"
 																				| "zone_page"
@@ -10063,7 +9959,6 @@ export type UnitReferencedBlockDocument = {
 																				| "entity"
 																				| "label"
 																				| "tag"
-																				| "structure"
 																				| "series"
 																				| "zone"
 																				| "zone_page"
@@ -10107,7 +10002,6 @@ export type UnitReferencedBlockDocument = {
 																				| "entity"
 																				| "label"
 																				| "tag"
-																				| "structure"
 																				| "series"
 																				| "zone"
 																				| "zone_page"
@@ -10215,7 +10109,6 @@ export type UnitReferencedBlockDocument = {
 																						| "entity"
 																						| "label"
 																						| "tag"
-																						| "structure"
 																						| "series"
 																						| "zone"
 																						| "zone_page"
@@ -10326,7 +10219,6 @@ export type UnitReferencedBlockDocument = {
 																								| "entity"
 																								| "label"
 																								| "tag"
-																								| "structure"
 																								| "series"
 																								| "zone"
 																								| "zone_page"
@@ -10370,7 +10262,6 @@ export type UnitReferencedBlockDocument = {
 																								| "entity"
 																								| "label"
 																								| "tag"
-																								| "structure"
 																								| "series"
 																								| "zone"
 																								| "zone_page"
@@ -10493,7 +10384,6 @@ export type UnitReferencedBlockDocument = {
 																								| "entity"
 																								| "label"
 																								| "tag"
-																								| "structure"
 																								| "series"
 																								| "zone"
 																								| "zone_page"
@@ -10537,7 +10427,6 @@ export type UnitReferencedBlockDocument = {
 																								| "entity"
 																								| "label"
 																								| "tag"
-																								| "structure"
 																								| "series"
 																								| "zone"
 																								| "zone_page"
@@ -10610,7 +10499,6 @@ export type UnitReferencedBlockDocument = {
 																				| "entity"
 																				| "label"
 																				| "tag"
-																				| "structure"
 																				| "series"
 																				| "zone"
 																				| "zone_page"
@@ -10654,7 +10542,6 @@ export type UnitReferencedBlockDocument = {
 																				| "entity"
 																				| "label"
 																				| "tag"
-																				| "structure"
 																				| "series"
 																				| "zone"
 																				| "zone_page"
@@ -10727,7 +10614,6 @@ export type UnitReferencedBlockDocument = {
 																						| "entity"
 																						| "label"
 																						| "tag"
-																						| "structure"
 																						| "series"
 																						| "zone"
 																						| "zone_page"
@@ -10773,7 +10659,6 @@ export type UnitReferencedBlockDocument = {
 																						| "entity"
 																						| "label"
 																						| "tag"
-																						| "structure"
 																						| "series"
 																						| "zone"
 																						| "zone_page"
@@ -10940,7 +10825,6 @@ export type UnitReferencedBlockDocument = {
 									| "users"
 									| "entities"
 									| "tags"
-									| "tag-structures"
 									| "posts"
 									| "realms"
 									| "collections"
@@ -10991,7 +10875,6 @@ export type UnitReferencedBlockDocument = {
 											| "entity"
 											| "label"
 											| "tag"
-											| "structure"
 											| "series"
 											| "zone"
 											| "zone_page"
@@ -11138,7 +11021,6 @@ export type UnitReferencedBlockDocument = {
 																| "entity"
 																| "label"
 																| "tag"
-																| "structure"
 																| "series"
 																| "zone"
 																| "zone_page"
@@ -11219,7 +11101,6 @@ export type UnitReferencedBlockDocument = {
 																| "entity"
 																| "label"
 																| "tag"
-																| "structure"
 																| "series"
 																| "zone"
 																| "zone_page"
@@ -11301,7 +11182,6 @@ export type UnitReferencedBlockDocument = {
 																| "entity"
 																| "label"
 																| "tag"
-																| "structure"
 																| "series"
 																| "zone"
 																| "zone_page"
@@ -11435,7 +11315,6 @@ export type UnitReferencedBlockDocument = {
 																			| "entity"
 																			| "label"
 																			| "tag"
-																			| "structure"
 																			| "series"
 																			| "zone"
 																			| "zone_page"
@@ -11592,7 +11471,6 @@ export type UnitReferencedBlockDocument = {
 																| "entity"
 																| "label"
 																| "tag"
-																| "structure"
 																| "series"
 																| "zone"
 																| "zone_page"
@@ -11726,7 +11604,6 @@ export type UnitReferencedBlockDocument = {
 																			| "entity"
 																			| "label"
 																			| "tag"
-																			| "structure"
 																			| "series"
 																			| "zone"
 																			| "zone_page"
@@ -11868,7 +11745,6 @@ export type UnitReferencedBlockDocument = {
 															| "entity"
 															| "label"
 															| "tag"
-															| "structure"
 															| "series"
 															| "zone"
 															| "zone_page"
@@ -11914,7 +11790,6 @@ export type UnitReferencedBlockDocument = {
 															| "entity"
 															| "label"
 															| "tag"
-															| "structure"
 															| "series"
 															| "zone"
 															| "zone_page"
@@ -11961,7 +11836,6 @@ export type UnitReferencedBlockDocument = {
 															| "entity"
 															| "label"
 															| "tag"
-															| "structure"
 															| "series"
 															| "zone"
 															| "zone_page"
@@ -12007,7 +11881,6 @@ export type UnitReferencedBlockDocument = {
 															| "entity"
 															| "label"
 															| "tag"
-															| "structure"
 															| "series"
 															| "zone"
 															| "zone_page"
@@ -12161,7 +12034,6 @@ export type UnitReferencedBlockDocument = {
 																	| "entity"
 																	| "label"
 																	| "tag"
-																	| "structure"
 																	| "series"
 																	| "zone"
 																	| "zone_page"
@@ -12205,7 +12077,6 @@ export type UnitReferencedBlockDocument = {
 																	| "entity"
 																	| "label"
 																	| "tag"
-																	| "structure"
 																	| "series"
 																	| "zone"
 																	| "zone_page"
@@ -12328,7 +12199,6 @@ export type UnitReferencedBlockDocument = {
 																	| "entity"
 																	| "label"
 																	| "tag"
-																	| "structure"
 																	| "series"
 																	| "zone"
 																	| "zone_page"
@@ -12372,7 +12242,6 @@ export type UnitReferencedBlockDocument = {
 																	| "entity"
 																	| "label"
 																	| "tag"
-																	| "structure"
 																	| "series"
 																	| "zone"
 																	| "zone_page"
@@ -12480,7 +12349,6 @@ export type UnitReferencedBlockDocument = {
 																			| "entity"
 																			| "label"
 																			| "tag"
-																			| "structure"
 																			| "series"
 																			| "zone"
 																			| "zone_page"
@@ -12591,7 +12459,6 @@ export type UnitReferencedBlockDocument = {
 																					| "entity"
 																					| "label"
 																					| "tag"
-																					| "structure"
 																					| "series"
 																					| "zone"
 																					| "zone_page"
@@ -12635,7 +12502,6 @@ export type UnitReferencedBlockDocument = {
 																					| "entity"
 																					| "label"
 																					| "tag"
-																					| "structure"
 																					| "series"
 																					| "zone"
 																					| "zone_page"
@@ -12758,7 +12624,6 @@ export type UnitReferencedBlockDocument = {
 																					| "entity"
 																					| "label"
 																					| "tag"
-																					| "structure"
 																					| "series"
 																					| "zone"
 																					| "zone_page"
@@ -12802,7 +12667,6 @@ export type UnitReferencedBlockDocument = {
 																					| "entity"
 																					| "label"
 																					| "tag"
-																					| "structure"
 																					| "series"
 																					| "zone"
 																					| "zone_page"
@@ -12875,7 +12739,6 @@ export type UnitReferencedBlockDocument = {
 																	| "entity"
 																	| "label"
 																	| "tag"
-																	| "structure"
 																	| "series"
 																	| "zone"
 																	| "zone_page"
@@ -12919,7 +12782,6 @@ export type UnitReferencedBlockDocument = {
 																	| "entity"
 																	| "label"
 																	| "tag"
-																	| "structure"
 																	| "series"
 																	| "zone"
 																	| "zone_page"
@@ -12992,7 +12854,6 @@ export type UnitReferencedBlockDocument = {
 																			| "entity"
 																			| "label"
 																			| "tag"
-																			| "structure"
 																			| "series"
 																			| "zone"
 																			| "zone_page"
@@ -13038,7 +12899,6 @@ export type UnitReferencedBlockDocument = {
 																			| "entity"
 																			| "label"
 																			| "tag"
-																			| "structure"
 																			| "series"
 																			| "zone"
 																			| "zone_page"
@@ -13356,7 +13216,6 @@ export const FilterDocumentCategoriesEnum = {
 	users: "users",
 	entities: "entities",
 	tags: "tags",
-	"tag-structures": "tag-structures",
 	posts: "posts",
 	realms: "realms",
 	collections: "collections",
@@ -13545,7 +13404,6 @@ export const SearchFeatureDefinitionCategoriesEnum = {
 	users: "users",
 	entities: "entities",
 	tags: "tags",
-	"tag-structures": "tag-structures",
 	posts: "posts",
 	realms: "realms",
 	collections: "collections",
@@ -13953,6 +13811,16 @@ export const ApiErrorCode = {
 	MalformedRequestBody: "MalformedRequestBody",
 	ValidationError: "ValidationError",
 	InternalError: "InternalError",
+	VoteHotKeyBusy: "VoteHotKeyBusy",
+	TagNotDirectlyApplicable: "TagNotDirectlyApplicable",
+	ContentLabelApplicationInvalid: "ContentLabelApplicationInvalid",
+	ContentLabelJudgmentForbidden: "ContentLabelJudgmentForbidden",
+	ContentLabelUnitMergeForbidden: "ContentLabelUnitMergeForbidden",
+	TagApplicationHasJudgments: "TagApplicationHasJudgments",
+	RealmTagContextInUse: "RealmTagContextInUse",
+	ContentLabelPlatformApplyForbidden: "ContentLabelPlatformApplyForbidden",
+	ContentLabelPlatformIdentityImmutable: "ContentLabelPlatformIdentityImmutable",
+	ContentLabelPlatformRemovalForbidden: "ContentLabelPlatformRemovalForbidden",
 	AuthenticationRequired: "AuthenticationRequired",
 	ApiTokenPermissionRequired: "ApiTokenPermissionRequired",
 	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
@@ -14041,11 +13909,12 @@ export const ApiErrorCode = {
 	ApiAccountQuotaRevisionConflict: "ApiAccountQuotaRevisionConflict",
 	ApiTokenQuotaRevisionConflict: "ApiTokenQuotaRevisionConflict",
 	TagNotFound: "TagNotFound",
-	TagStructureNotFound: "TagStructureNotFound",
-	TagStructureApplicationNotFound: "TagStructureApplicationNotFound",
-	InvalidTagStructure: "InvalidTagStructure",
-	TagStructureChanged: "TagStructureChanged",
-	TagStructureDefinitionConflict: "TagStructureDefinitionConflict",
+	TagPathNotFound: "TagPathNotFound",
+	TagPathApplicationNotFound: "TagPathApplicationNotFound",
+	InvalidTagPath: "InvalidTagPath",
+	TagPathDefinitionConflict: "TagPathDefinitionConflict",
+	TagPathMergeNotFound: "TagPathMergeNotFound",
+	InvalidTagPathMerge: "InvalidTagPathMerge",
 	InvalidSearch: "InvalidSearch",
 	SearchUnavailable: "SearchUnavailable",
 	SharedSearchQueryNotFound: "SharedSearchQueryNotFound",
@@ -14133,6 +14002,7 @@ export const ApiErrorCode = {
 	UnitMergeKindIneligible: "UnitMergeKindIneligible",
 	UnitMergeKindMismatch: "UnitMergeKindMismatch",
 	UnitMergeRequestConflict: "UnitMergeRequestConflict",
+	UnitMergeMeasurementConflict: "UnitMergeMeasurementConflict",
 	UnitMergeIdempotencyConflict: "UnitMergeIdempotencyConflict",
 	UnitMergeManifestStale: "UnitMergeManifestStale",
 	UnitMergeReviewSelfForbidden: "UnitMergeReviewSelfForbidden",
@@ -16904,7 +16774,7 @@ export const GetApiNotificationsStatus200ItemsSubjectKindEnum = {
 	entity: "entity",
 	label: "label",
 	tag: "tag",
-	structure: "structure",
+	tag_path: "tag_path",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -16957,7 +16827,7 @@ export const GetApiNotificationsStatus200ItemsDestinationUnitKindEnum = {
 	entity: "entity",
 	label: "label",
 	tag: "tag",
-	structure: "structure",
+	tag_path: "tag_path",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -18331,7 +18201,7 @@ export const GetApiNotificationsByNotificationIdStatus200SubjectKindEnum = {
 	entity: "entity",
 	label: "label",
 	tag: "tag",
-	structure: "structure",
+	tag_path: "tag_path",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -18384,7 +18254,7 @@ export const GetApiNotificationsByNotificationIdStatus200DestinationUnitKindEnum
 	entity: "entity",
 	label: "label",
 	tag: "tag",
-	structure: "structure",
+	tag_path: "tag_path",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -20696,7 +20566,7 @@ export const GetApiRecommendationsPostsByPostIdStatus200ItemsAttributionsCredite
 	entity: "entity",
 	label: "label",
 	tag: "tag",
-	structure: "structure",
+	tag_path: "tag_path",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -20815,7 +20685,7 @@ export const GetApiRecommendationsPostsByPostIdStatus200ItemsReplyContextAttribu
 		entity: "entity",
 		label: "label",
 		tag: "tag",
-		structure: "structure",
+		tag_path: "tag_path",
 		series: "series",
 		zone: "zone",
 		zone_page: "zone_page",
@@ -21361,6 +21231,29 @@ export type GetApiRecommendationsPostsByPostIdStatus200 = {
 							)[];
 					  } | null)
 					| null;
+				/**
+				 * @type object
+				 */
+				contentSpoiler: {
+					level: 0 | 1 | 2;
+					/**
+					 * @type boolean
+					 */
+					concealed: boolean;
+				};
+				/**
+				 * @type object
+				 */
+				contentNsfw: {
+					/**
+					 * @type boolean
+					 */
+					labelled: boolean;
+					/**
+					 * @type boolean
+					 */
+					concealed: boolean;
+				};
 				replyCount: string | number;
 				latestRevisionId: (string | null) | null;
 				replyContext:
@@ -22032,6 +21925,29 @@ export type GetApiRecommendationsPostsByPostIdStatus200 = {
 							)[];
 					  } | null)
 					| null;
+				/**
+				 * @type object
+				 */
+				contentSpoiler: {
+					level: 0 | 1 | 2;
+					/**
+					 * @type boolean
+					 */
+					concealed: boolean;
+				};
+				/**
+				 * @type object
+				 */
+				contentNsfw: {
+					/**
+					 * @type boolean
+					 */
+					labelled: boolean;
+					/**
+					 * @type boolean
+					 */
+					concealed: boolean;
+				};
 				replyCount: string | number;
 				latestRevisionId: (string | null) | null;
 				replyContext:
@@ -22721,6 +22637,29 @@ export type GetApiRecommendationsPostsByPostIdStatus200 = {
 							)[];
 					  } | null)
 					| null;
+				/**
+				 * @type object
+				 */
+				contentSpoiler: {
+					level: 0 | 1 | 2;
+					/**
+					 * @type boolean
+					 */
+					concealed: boolean;
+				};
+				/**
+				 * @type object
+				 */
+				contentNsfw: {
+					/**
+					 * @type boolean
+					 */
+					labelled: boolean;
+					/**
+					 * @type boolean
+					 */
+					concealed: boolean;
+				};
 				replyCount: string | number;
 				latestRevisionId: (string | null) | null;
 				replyContext:
@@ -31633,7 +31572,7 @@ export const PostApiFeedQueryStatus200ItemsAttributionsCreditedUnitKindEnum = {
 	entity: "entity",
 	label: "label",
 	tag: "tag",
-	structure: "structure",
+	tag_path: "tag_path",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -31723,7 +31662,6 @@ export const PostApiFeedQueryStatus200ItemsUnitKindEnum = {
 	release: "release",
 	entity: "entity",
 	tag: "tag",
-	structure: "structure",
 	series: "series",
 	zone: "zone",
 	collection: "collection",
@@ -31791,7 +31729,7 @@ export const PostApiFeedQueryStatus200ItemsReplyContextAttributionsCreditedUnitK
 	entity: "entity",
 	label: "label",
 	tag: "tag",
-	structure: "structure",
+	tag_path: "tag_path",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -32817,6 +32755,29 @@ export type PostApiFeedQueryStatus200 = {
 									)[];
 							  } | null)
 							| null;
+						/**
+						 * @type object
+						 */
+						contentSpoiler: {
+							level: 0 | 1 | 2;
+							/**
+							 * @type boolean
+							 */
+							concealed: boolean;
+						};
+						/**
+						 * @type object
+						 */
+						contentNsfw: {
+							/**
+							 * @type boolean
+							 */
+							labelled: boolean;
+							/**
+							 * @type boolean
+							 */
+							concealed: boolean;
+						};
 						replyCount: string | number;
 						latestRevisionId: (string | null) | null;
 						replyContext:
@@ -33488,6 +33449,29 @@ export type PostApiFeedQueryStatus200 = {
 									)[];
 							  } | null)
 							| null;
+						/**
+						 * @type object
+						 */
+						contentSpoiler: {
+							level: 0 | 1 | 2;
+							/**
+							 * @type boolean
+							 */
+							concealed: boolean;
+						};
+						/**
+						 * @type object
+						 */
+						contentNsfw: {
+							/**
+							 * @type boolean
+							 */
+							labelled: boolean;
+							/**
+							 * @type boolean
+							 */
+							concealed: boolean;
+						};
 						replyCount: string | number;
 						latestRevisionId: (string | null) | null;
 						replyContext:
@@ -34177,6 +34161,29 @@ export type PostApiFeedQueryStatus200 = {
 									)[];
 							  } | null)
 							| null;
+						/**
+						 * @type object
+						 */
+						contentSpoiler: {
+							level: 0 | 1 | 2;
+							/**
+							 * @type boolean
+							 */
+							concealed: boolean;
+						};
+						/**
+						 * @type object
+						 */
+						contentNsfw: {
+							/**
+							 * @type boolean
+							 */
+							labelled: boolean;
+							/**
+							 * @type boolean
+							 */
+							concealed: boolean;
+						};
 						replyCount: string | number;
 						latestRevisionId: (string | null) | null;
 						replyContext:
@@ -34744,7 +34751,7 @@ export const GetApiReportsMeStatus200ItemsTargetUnitKindEnum = {
 	entity: "entity",
 	label: "label",
 	tag: "tag",
-	structure: "structure",
+	tag_path: "tag_path",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -40034,7 +40041,7 @@ export const GetApiGovernancePlatformUnitsStatus200ItemsKindEnum = {
 	entity: "entity",
 	label: "label",
 	tag: "tag",
-	structure: "structure",
+	tag_path: "tag_path",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -40199,7 +40206,7 @@ export const GetApiGovernancePlatformUnitsByUnitIdStatus200KindEnum = {
 	entity: "entity",
 	label: "label",
 	tag: "tag",
-	structure: "structure",
+	tag_path: "tag_path",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -40797,7 +40804,7 @@ export const PostApiGovernancePlatformUnitsByUnitIdDeleteStatus200KindEnum = {
 	entity: "entity",
 	label: "label",
 	tag: "tag",
-	structure: "structure",
+	tag_path: "tag_path",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -41168,7 +41175,7 @@ export const PostApiGovernancePlatformUnitsByUnitIdRestoreStatus200KindEnum = {
 	entity: "entity",
 	label: "label",
 	tag: "tag",
-	structure: "structure",
+	tag_path: "tag_path",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -41606,6 +41613,9 @@ export type GetApiGovernancePlatformUnitMergesStatus200ItemsOperationStateEnum =
 	(typeof GetApiGovernancePlatformUnitMergesStatus200ItemsOperationStateEnum)[keyof typeof GetApiGovernancePlatformUnitMergesStatus200ItemsOperationStateEnum];
 
 export const GetApiGovernancePlatformUnitMergesStatus200ItemsOperationPhaseEnum = {
+	entity_measurement_preflight: "entity_measurement_preflight",
+	entity_measurement_entities: "entity_measurement_entities",
+	entity_measurement_contexts: "entity_measurement_contexts",
 	variant_graph: "variant_graph",
 	slug_addresses: "slug_addresses",
 	slug_scopes: "slug_scopes",
@@ -41620,7 +41630,7 @@ export const GetApiGovernancePlatformUnitMergesStatus200ItemsOperationPhaseEnum 
 	scores: "scores",
 	collection_items: "collection_items",
 	unit_tags: "unit_tags",
-	realm_tag_votes: "realm_tag_votes",
+	realm_tag_judgments: "realm_tag_judgments",
 	profile_unit_tags: "profile_unit_tags",
 	realm_pins: "realm_pins",
 	realm_units: "realm_units",
@@ -41637,10 +41647,7 @@ export const GetApiGovernancePlatformUnitMergesStatus200ItemsOperationPhaseEnum 
 	poll_options: "poll_options",
 	content_nodes_content: "content_nodes_content",
 	content_nodes_target: "content_nodes_target",
-	structure_members: "structure_members",
-	structure_edges_parent: "structure_edges_parent",
-	structure_edges_child: "structure_edges_child",
-	structure_applications: "structure_applications",
+	tag_path_applications: "tag_path_applications",
 	progress_entries: "progress_entries",
 	progress_snapshots: "progress_snapshots",
 	notification_subjects: "notification_subjects",
@@ -41851,7 +41858,7 @@ export type GetApiGovernancePlatformUnitMergesStatus200 = {
 					 */
 					state: GetApiGovernancePlatformUnitMergesStatus200ItemsOperationStateEnum;
 					/**
-					 * @default 'variant_graph'
+					 * @default 'entity_measurement_preflight'
 					 * @type string
 					 */
 					phase: GetApiGovernancePlatformUnitMergesStatus200ItemsOperationPhaseEnum;
@@ -42044,6 +42051,9 @@ export type PostApiGovernancePlatformUnitMergesStatus200OperationStateEnum =
 	(typeof PostApiGovernancePlatformUnitMergesStatus200OperationStateEnum)[keyof typeof PostApiGovernancePlatformUnitMergesStatus200OperationStateEnum];
 
 export const PostApiGovernancePlatformUnitMergesStatus200OperationPhaseEnum = {
+	entity_measurement_preflight: "entity_measurement_preflight",
+	entity_measurement_entities: "entity_measurement_entities",
+	entity_measurement_contexts: "entity_measurement_contexts",
 	variant_graph: "variant_graph",
 	slug_addresses: "slug_addresses",
 	slug_scopes: "slug_scopes",
@@ -42058,7 +42068,7 @@ export const PostApiGovernancePlatformUnitMergesStatus200OperationPhaseEnum = {
 	scores: "scores",
 	collection_items: "collection_items",
 	unit_tags: "unit_tags",
-	realm_tag_votes: "realm_tag_votes",
+	realm_tag_judgments: "realm_tag_judgments",
 	profile_unit_tags: "profile_unit_tags",
 	realm_pins: "realm_pins",
 	realm_units: "realm_units",
@@ -42075,10 +42085,7 @@ export const PostApiGovernancePlatformUnitMergesStatus200OperationPhaseEnum = {
 	poll_options: "poll_options",
 	content_nodes_content: "content_nodes_content",
 	content_nodes_target: "content_nodes_target",
-	structure_members: "structure_members",
-	structure_edges_parent: "structure_edges_parent",
-	structure_edges_child: "structure_edges_child",
-	structure_applications: "structure_applications",
+	tag_path_applications: "tag_path_applications",
 	progress_entries: "progress_entries",
 	progress_snapshots: "progress_snapshots",
 	notification_subjects: "notification_subjects",
@@ -42285,7 +42292,7 @@ export type PostApiGovernancePlatformUnitMergesStatus200 = {
 				 */
 				state: PostApiGovernancePlatformUnitMergesStatus200OperationStateEnum;
 				/**
-				 * @default 'variant_graph'
+				 * @default 'entity_measurement_preflight'
 				 * @type string
 				 */
 				phase: PostApiGovernancePlatformUnitMergesStatus200OperationPhaseEnum;
@@ -42438,6 +42445,7 @@ export type PostApiGovernancePlatformUnitMergesStatus404 = {
 export const PostApiGovernancePlatformUnitMergesStatus409ErrorCodeEnum = {
 	UnitMergeKindMismatch: "UnitMergeKindMismatch",
 	UnitMergeRequestConflict: "UnitMergeRequestConflict",
+	UnitMergeMeasurementConflict: "UnitMergeMeasurementConflict",
 	UnitMergeIdempotencyConflict: "UnitMergeIdempotencyConflict",
 	UnitMergeManifestStale: "UnitMergeManifestStale",
 	GovernanceRuleChanged: "GovernanceRuleChanged",
@@ -42474,6 +42482,14 @@ export type PostApiGovernancePlatformUnitMergesStatus409 = {
 	requestId: string;
 };
 
+export const PostApiGovernancePlatformUnitMergesStatus422ErrorCodeEnum = {
+	UnitMergeKindIneligible: "UnitMergeKindIneligible",
+	ContentLabelUnitMergeForbidden: "ContentLabelUnitMergeForbidden",
+} as const;
+
+export type PostApiGovernancePlatformUnitMergesStatus422ErrorCodeEnum =
+	(typeof PostApiGovernancePlatformUnitMergesStatus422ErrorCodeEnum)[keyof typeof PostApiGovernancePlatformUnitMergesStatus422ErrorCodeEnum];
+
 export type PostApiGovernancePlatformUnitMergesStatus422 =
 	| {
 			/**
@@ -42484,7 +42500,7 @@ export type PostApiGovernancePlatformUnitMergesStatus422 =
 				 * @default 'UnitMergeKindIneligible'
 				 * @type string
 				 */
-				code: "UnitMergeKindIneligible";
+				code: PostApiGovernancePlatformUnitMergesStatus422ErrorCodeEnum;
 				/**
 				 * @type string
 				 */
@@ -42500,6 +42516,34 @@ export type PostApiGovernancePlatformUnitMergesStatus422 =
 			requestId: string;
 	  }
 	| ValidationError;
+
+/**
+ * @type object
+ */
+export type PostApiGovernancePlatformUnitMergesStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'VoteHotKeyBusy'
+		 * @type string
+		 */
+		code: "VoteHotKeyBusy";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
 
 /**
  * @type object
@@ -42603,6 +42647,7 @@ export type PostApiGovernancePlatformUnitMergesResponses = {
 	"404": PostApiGovernancePlatformUnitMergesStatus404;
 	"409": PostApiGovernancePlatformUnitMergesStatus409;
 	"422": PostApiGovernancePlatformUnitMergesStatus422;
+	"429": PostApiGovernancePlatformUnitMergesStatus429;
 	"500": PostApiGovernancePlatformUnitMergesStatus500;
 };
 
@@ -42616,6 +42661,7 @@ export type PostApiGovernancePlatformUnitMergesResponse =
 	| PostApiGovernancePlatformUnitMergesStatus404
 	| PostApiGovernancePlatformUnitMergesStatus409
 	| PostApiGovernancePlatformUnitMergesStatus422
+	| PostApiGovernancePlatformUnitMergesStatus429
 	| PostApiGovernancePlatformUnitMergesStatus500;
 
 /**
@@ -42713,6 +42759,9 @@ export type GetApiGovernancePlatformUnitMergesByRequestIdStatus200OperationState
 	(typeof GetApiGovernancePlatformUnitMergesByRequestIdStatus200OperationStateEnum)[keyof typeof GetApiGovernancePlatformUnitMergesByRequestIdStatus200OperationStateEnum];
 
 export const GetApiGovernancePlatformUnitMergesByRequestIdStatus200OperationPhaseEnum = {
+	entity_measurement_preflight: "entity_measurement_preflight",
+	entity_measurement_entities: "entity_measurement_entities",
+	entity_measurement_contexts: "entity_measurement_contexts",
 	variant_graph: "variant_graph",
 	slug_addresses: "slug_addresses",
 	slug_scopes: "slug_scopes",
@@ -42727,7 +42776,7 @@ export const GetApiGovernancePlatformUnitMergesByRequestIdStatus200OperationPhas
 	scores: "scores",
 	collection_items: "collection_items",
 	unit_tags: "unit_tags",
-	realm_tag_votes: "realm_tag_votes",
+	realm_tag_judgments: "realm_tag_judgments",
 	profile_unit_tags: "profile_unit_tags",
 	realm_pins: "realm_pins",
 	realm_units: "realm_units",
@@ -42744,10 +42793,7 @@ export const GetApiGovernancePlatformUnitMergesByRequestIdStatus200OperationPhas
 	poll_options: "poll_options",
 	content_nodes_content: "content_nodes_content",
 	content_nodes_target: "content_nodes_target",
-	structure_members: "structure_members",
-	structure_edges_parent: "structure_edges_parent",
-	structure_edges_child: "structure_edges_child",
-	structure_applications: "structure_applications",
+	tag_path_applications: "tag_path_applications",
 	progress_entries: "progress_entries",
 	progress_snapshots: "progress_snapshots",
 	notification_subjects: "notification_subjects",
@@ -42954,7 +43000,7 @@ export type GetApiGovernancePlatformUnitMergesByRequestIdStatus200 = {
 				 */
 				state: GetApiGovernancePlatformUnitMergesByRequestIdStatus200OperationStateEnum;
 				/**
-				 * @default 'variant_graph'
+				 * @default 'entity_measurement_preflight'
 				 * @type string
 				 */
 				phase: GetApiGovernancePlatformUnitMergesByRequestIdStatus200OperationPhaseEnum;
@@ -43312,6 +43358,7 @@ export type PostApiGovernancePlatformUnitMergesPreflightStatus404 = {
 export const PostApiGovernancePlatformUnitMergesPreflightStatus409ErrorCodeEnum = {
 	UnitMergeKindMismatch: "UnitMergeKindMismatch",
 	UnitMergeRequestConflict: "UnitMergeRequestConflict",
+	UnitMergeMeasurementConflict: "UnitMergeMeasurementConflict",
 	UnitMergeIdempotencyConflict: "UnitMergeIdempotencyConflict",
 	UnitMergeManifestStale: "UnitMergeManifestStale",
 } as const;
@@ -43347,6 +43394,14 @@ export type PostApiGovernancePlatformUnitMergesPreflightStatus409 = {
 	requestId: string;
 };
 
+export const PostApiGovernancePlatformUnitMergesPreflightStatus422ErrorCodeEnum = {
+	UnitMergeKindIneligible: "UnitMergeKindIneligible",
+	ContentLabelUnitMergeForbidden: "ContentLabelUnitMergeForbidden",
+} as const;
+
+export type PostApiGovernancePlatformUnitMergesPreflightStatus422ErrorCodeEnum =
+	(typeof PostApiGovernancePlatformUnitMergesPreflightStatus422ErrorCodeEnum)[keyof typeof PostApiGovernancePlatformUnitMergesPreflightStatus422ErrorCodeEnum];
+
 export type PostApiGovernancePlatformUnitMergesPreflightStatus422 =
 	| {
 			/**
@@ -43357,7 +43412,7 @@ export type PostApiGovernancePlatformUnitMergesPreflightStatus422 =
 				 * @default 'UnitMergeKindIneligible'
 				 * @type string
 				 */
-				code: "UnitMergeKindIneligible";
+				code: PostApiGovernancePlatformUnitMergesPreflightStatus422ErrorCodeEnum;
 				/**
 				 * @type string
 				 */
@@ -43373,6 +43428,34 @@ export type PostApiGovernancePlatformUnitMergesPreflightStatus422 =
 			requestId: string;
 	  }
 	| ValidationError;
+
+/**
+ * @type object
+ */
+export type PostApiGovernancePlatformUnitMergesPreflightStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'VoteHotKeyBusy'
+		 * @type string
+		 */
+		code: "VoteHotKeyBusy";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
 
 /**
  * @type object
@@ -43417,6 +43500,7 @@ export type PostApiGovernancePlatformUnitMergesPreflightResponses = {
 	"404": PostApiGovernancePlatformUnitMergesPreflightStatus404;
 	"409": PostApiGovernancePlatformUnitMergesPreflightStatus409;
 	"422": PostApiGovernancePlatformUnitMergesPreflightStatus422;
+	"429": PostApiGovernancePlatformUnitMergesPreflightStatus429;
 	"500": PostApiGovernancePlatformUnitMergesPreflightStatus500;
 };
 
@@ -43430,6 +43514,7 @@ export type PostApiGovernancePlatformUnitMergesPreflightResponse =
 	| PostApiGovernancePlatformUnitMergesPreflightStatus404
 	| PostApiGovernancePlatformUnitMergesPreflightStatus409
 	| PostApiGovernancePlatformUnitMergesPreflightStatus422
+	| PostApiGovernancePlatformUnitMergesPreflightStatus429
 	| PostApiGovernancePlatformUnitMergesPreflightStatus500;
 
 export const PostApiGovernancePlatformUnitMergesDirectStatus200UnitKindEnum = {
@@ -43513,6 +43598,9 @@ export type PostApiGovernancePlatformUnitMergesDirectStatus200OperationStateEnum
 	(typeof PostApiGovernancePlatformUnitMergesDirectStatus200OperationStateEnum)[keyof typeof PostApiGovernancePlatformUnitMergesDirectStatus200OperationStateEnum];
 
 export const PostApiGovernancePlatformUnitMergesDirectStatus200OperationPhaseEnum = {
+	entity_measurement_preflight: "entity_measurement_preflight",
+	entity_measurement_entities: "entity_measurement_entities",
+	entity_measurement_contexts: "entity_measurement_contexts",
 	variant_graph: "variant_graph",
 	slug_addresses: "slug_addresses",
 	slug_scopes: "slug_scopes",
@@ -43527,7 +43615,7 @@ export const PostApiGovernancePlatformUnitMergesDirectStatus200OperationPhaseEnu
 	scores: "scores",
 	collection_items: "collection_items",
 	unit_tags: "unit_tags",
-	realm_tag_votes: "realm_tag_votes",
+	realm_tag_judgments: "realm_tag_judgments",
 	profile_unit_tags: "profile_unit_tags",
 	realm_pins: "realm_pins",
 	realm_units: "realm_units",
@@ -43544,10 +43632,7 @@ export const PostApiGovernancePlatformUnitMergesDirectStatus200OperationPhaseEnu
 	poll_options: "poll_options",
 	content_nodes_content: "content_nodes_content",
 	content_nodes_target: "content_nodes_target",
-	structure_members: "structure_members",
-	structure_edges_parent: "structure_edges_parent",
-	structure_edges_child: "structure_edges_child",
-	structure_applications: "structure_applications",
+	tag_path_applications: "tag_path_applications",
 	progress_entries: "progress_entries",
 	progress_snapshots: "progress_snapshots",
 	notification_subjects: "notification_subjects",
@@ -43754,7 +43839,7 @@ export type PostApiGovernancePlatformUnitMergesDirectStatus200 = {
 				 */
 				state: PostApiGovernancePlatformUnitMergesDirectStatus200OperationStateEnum;
 				/**
-				 * @default 'variant_graph'
+				 * @default 'entity_measurement_preflight'
 				 * @type string
 				 */
 				phase: PostApiGovernancePlatformUnitMergesDirectStatus200OperationPhaseEnum;
@@ -43907,6 +43992,7 @@ export type PostApiGovernancePlatformUnitMergesDirectStatus404 = {
 export const PostApiGovernancePlatformUnitMergesDirectStatus409ErrorCodeEnum = {
 	UnitMergeKindMismatch: "UnitMergeKindMismatch",
 	UnitMergeRequestConflict: "UnitMergeRequestConflict",
+	UnitMergeMeasurementConflict: "UnitMergeMeasurementConflict",
 	UnitMergeIdempotencyConflict: "UnitMergeIdempotencyConflict",
 	UnitMergeManifestStale: "UnitMergeManifestStale",
 	GovernanceRuleChanged: "GovernanceRuleChanged",
@@ -43943,6 +44029,14 @@ export type PostApiGovernancePlatformUnitMergesDirectStatus409 = {
 	requestId: string;
 };
 
+export const PostApiGovernancePlatformUnitMergesDirectStatus422ErrorCodeEnum = {
+	UnitMergeKindIneligible: "UnitMergeKindIneligible",
+	ContentLabelUnitMergeForbidden: "ContentLabelUnitMergeForbidden",
+} as const;
+
+export type PostApiGovernancePlatformUnitMergesDirectStatus422ErrorCodeEnum =
+	(typeof PostApiGovernancePlatformUnitMergesDirectStatus422ErrorCodeEnum)[keyof typeof PostApiGovernancePlatformUnitMergesDirectStatus422ErrorCodeEnum];
+
 export type PostApiGovernancePlatformUnitMergesDirectStatus422 =
 	| {
 			/**
@@ -43953,7 +44047,7 @@ export type PostApiGovernancePlatformUnitMergesDirectStatus422 =
 				 * @default 'UnitMergeKindIneligible'
 				 * @type string
 				 */
-				code: "UnitMergeKindIneligible";
+				code: PostApiGovernancePlatformUnitMergesDirectStatus422ErrorCodeEnum;
 				/**
 				 * @type string
 				 */
@@ -43969,6 +44063,34 @@ export type PostApiGovernancePlatformUnitMergesDirectStatus422 =
 			requestId: string;
 	  }
 	| ValidationError;
+
+/**
+ * @type object
+ */
+export type PostApiGovernancePlatformUnitMergesDirectStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'VoteHotKeyBusy'
+		 * @type string
+		 */
+		code: "VoteHotKeyBusy";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
 
 /**
  * @type object
@@ -44078,6 +44200,7 @@ export type PostApiGovernancePlatformUnitMergesDirectResponses = {
 	"404": PostApiGovernancePlatformUnitMergesDirectStatus404;
 	"409": PostApiGovernancePlatformUnitMergesDirectStatus409;
 	"422": PostApiGovernancePlatformUnitMergesDirectStatus422;
+	"429": PostApiGovernancePlatformUnitMergesDirectStatus429;
 	"500": PostApiGovernancePlatformUnitMergesDirectStatus500;
 };
 
@@ -44091,6 +44214,7 @@ export type PostApiGovernancePlatformUnitMergesDirectResponse =
 	| PostApiGovernancePlatformUnitMergesDirectStatus404
 	| PostApiGovernancePlatformUnitMergesDirectStatus409
 	| PostApiGovernancePlatformUnitMergesDirectStatus422
+	| PostApiGovernancePlatformUnitMergesDirectStatus429
 	| PostApiGovernancePlatformUnitMergesDirectStatus500;
 
 /**
@@ -44189,6 +44313,9 @@ export type PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus200Operat
 	(typeof PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus200OperationStateEnum)[keyof typeof PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus200OperationStateEnum];
 
 export const PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus200OperationPhaseEnum = {
+	entity_measurement_preflight: "entity_measurement_preflight",
+	entity_measurement_entities: "entity_measurement_entities",
+	entity_measurement_contexts: "entity_measurement_contexts",
 	variant_graph: "variant_graph",
 	slug_addresses: "slug_addresses",
 	slug_scopes: "slug_scopes",
@@ -44203,7 +44330,7 @@ export const PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus200Opera
 	scores: "scores",
 	collection_items: "collection_items",
 	unit_tags: "unit_tags",
-	realm_tag_votes: "realm_tag_votes",
+	realm_tag_judgments: "realm_tag_judgments",
 	profile_unit_tags: "profile_unit_tags",
 	realm_pins: "realm_pins",
 	realm_units: "realm_units",
@@ -44220,10 +44347,7 @@ export const PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus200Opera
 	poll_options: "poll_options",
 	content_nodes_content: "content_nodes_content",
 	content_nodes_target: "content_nodes_target",
-	structure_members: "structure_members",
-	structure_edges_parent: "structure_edges_parent",
-	structure_edges_child: "structure_edges_child",
-	structure_applications: "structure_applications",
+	tag_path_applications: "tag_path_applications",
 	progress_entries: "progress_entries",
 	progress_snapshots: "progress_snapshots",
 	notification_subjects: "notification_subjects",
@@ -44430,7 +44554,7 @@ export type PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus200 = {
 				 */
 				state: PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus200OperationStateEnum;
 				/**
-				 * @default 'variant_graph'
+				 * @default 'entity_measurement_preflight'
 				 * @type string
 				 */
 				phase: PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus200OperationPhaseEnum;
@@ -44546,6 +44670,7 @@ export type PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus404 = {
 export const PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus409ErrorCodeEnum = {
 	UnitMergeManifestStale: "UnitMergeManifestStale",
 	UnitMergeRequestConflict: "UnitMergeRequestConflict",
+	UnitMergeMeasurementConflict: "UnitMergeMeasurementConflict",
 	UnitMergeReviewDuplicate: "UnitMergeReviewDuplicate",
 	UnitMergeReviewFingerprintMismatch: "UnitMergeReviewFingerprintMismatch",
 	UnitMergeRequestNotPending: "UnitMergeRequestNotPending",
@@ -44584,10 +44709,60 @@ export type PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus409 = {
 	requestId: string;
 };
 
+export type PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus422 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'ContentLabelUnitMergeForbidden'
+				 * @type string
+				 */
+				code: "ContentLabelUnitMergeForbidden";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| ValidationError;
+
 /**
  * @type object
  */
-export type PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus422 = ValidationError;
+export type PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'VoteHotKeyBusy'
+		 * @type string
+		 */
+		code: "VoteHotKeyBusy";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
 
 /**
  * @type object
@@ -44644,6 +44819,7 @@ export type PostApiGovernancePlatformUnitMergesByRequestIdReviewsResponses = {
 	"404": PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus404;
 	"409": PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus409;
 	"422": PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus422;
+	"429": PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus429;
 	"500": PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus500;
 };
 
@@ -44657,6 +44833,7 @@ export type PostApiGovernancePlatformUnitMergesByRequestIdReviewsResponse =
 	| PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus404
 	| PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus409
 	| PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus422
+	| PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus429
 	| PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus500;
 
 /**
@@ -44755,6 +44932,9 @@ export type PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus200Operatio
 	(typeof PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus200OperationStateEnum)[keyof typeof PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus200OperationStateEnum];
 
 export const PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus200OperationPhaseEnum = {
+	entity_measurement_preflight: "entity_measurement_preflight",
+	entity_measurement_entities: "entity_measurement_entities",
+	entity_measurement_contexts: "entity_measurement_contexts",
 	variant_graph: "variant_graph",
 	slug_addresses: "slug_addresses",
 	slug_scopes: "slug_scopes",
@@ -44769,7 +44949,7 @@ export const PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus200Operati
 	scores: "scores",
 	collection_items: "collection_items",
 	unit_tags: "unit_tags",
-	realm_tag_votes: "realm_tag_votes",
+	realm_tag_judgments: "realm_tag_judgments",
 	profile_unit_tags: "profile_unit_tags",
 	realm_pins: "realm_pins",
 	realm_units: "realm_units",
@@ -44786,10 +44966,7 @@ export const PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus200Operati
 	poll_options: "poll_options",
 	content_nodes_content: "content_nodes_content",
 	content_nodes_target: "content_nodes_target",
-	structure_members: "structure_members",
-	structure_edges_parent: "structure_edges_parent",
-	structure_edges_child: "structure_edges_child",
-	structure_applications: "structure_applications",
+	tag_path_applications: "tag_path_applications",
 	progress_entries: "progress_entries",
 	progress_snapshots: "progress_snapshots",
 	notification_subjects: "notification_subjects",
@@ -44996,7 +45173,7 @@ export type PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus200 = {
 				 */
 				state: PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus200OperationStateEnum;
 				/**
-				 * @default 'variant_graph'
+				 * @default 'entity_measurement_preflight'
 				 * @type string
 				 */
 				phase: PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus200OperationPhaseEnum;
@@ -45147,6 +45324,34 @@ export type PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus422 = Valid
 /**
  * @type object
  */
+export type PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'VoteHotKeyBusy'
+		 * @type string
+		 */
+		code: "VoteHotKeyBusy";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus500 = InternalError;
 
 /**
@@ -45168,6 +45373,7 @@ export type PostApiGovernancePlatformUnitMergesByRequestIdRetryResponses = {
 	"404": PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus404;
 	"409": PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus409;
 	"422": PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus422;
+	"429": PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus429;
 	"500": PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus500;
 };
 
@@ -45180,6 +45386,7 @@ export type PostApiGovernancePlatformUnitMergesByRequestIdRetryResponse =
 	| PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus404
 	| PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus409
 	| PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus422
+	| PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus429
 	| PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus500;
 
 export const GetApiGovernancePlatformOwnershipClaimsState = {
@@ -45225,7 +45432,7 @@ export const GetApiGovernancePlatformOwnershipClaimsStatus200ItemsUnitKindEnum =
 	entity: "entity",
 	label: "label",
 	tag: "tag",
-	structure: "structure",
+	tag_path: "tag_path",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -62812,6 +63019,14 @@ export type GetApiUsersMePreferencesStatus200 = {
 	 */
 	filterFeedByPreferredLanguages: boolean;
 	/**
+	 * @type boolean
+	 */
+	alwaysShowSpoilers: boolean;
+	/**
+	 * @type boolean
+	 */
+	alwaysShowNsfw: boolean;
+	/**
 	 * @type array
 	 */
 	contentRatings: GetApiUsersMePreferencesStatus200ContentRatingsEnum[];
@@ -63068,6 +63283,14 @@ export type PatchApiUsersMePreferencesStatus200 = {
 	 */
 	filterFeedByPreferredLanguages: boolean;
 	/**
+	 * @type boolean
+	 */
+	alwaysShowSpoilers: boolean;
+	/**
+	 * @type boolean
+	 */
+	alwaysShowNsfw: boolean;
+	/**
 	 * @type array
 	 */
 	contentRatings: PatchApiUsersMePreferencesStatus200ContentRatingsEnum[];
@@ -63187,6 +63410,14 @@ export type PatchApiUsersMePreferencesBody = {
 	 * @type string | undefined
 	 */
 	chineseContentDisplay?: PatchApiUsersMePreferencesRequestChineseContentDisplayEnum;
+	/**
+	 * @type boolean | undefined
+	 */
+	alwaysShowSpoilers?: boolean;
+	/**
+	 * @type boolean | undefined
+	 */
+	alwaysShowNsfw?: boolean;
 };
 
 /**
@@ -63374,6 +63605,14 @@ export type PutApiUsersMePreferencesStatus200 = {
 	 * @type boolean
 	 */
 	filterFeedByPreferredLanguages: boolean;
+	/**
+	 * @type boolean
+	 */
+	alwaysShowSpoilers: boolean;
+	/**
+	 * @type boolean
+	 */
+	alwaysShowNsfw: boolean;
 	/**
 	 * @type array
 	 */
@@ -63619,6 +63858,16 @@ export type PutApiUsersMePreferencesBody = {
 	 */
 	filterFeedByPreferredLanguages: boolean;
 	/**
+	 * @default false
+	 * @type boolean
+	 */
+	alwaysShowSpoilers: boolean;
+	/**
+	 * @default false
+	 * @type boolean
+	 */
+	alwaysShowNsfw: boolean;
+	/**
 	 * @type array
 	 */
 	contentRatings: PutApiUsersMePreferencesRequestContentRatingsEnum[];
@@ -63843,7 +64092,7 @@ export const GetApiUsersMeFollowingKind = {
 	entity: "entity",
 	label: "label",
 	tag: "tag",
-	structure: "structure",
+	tag_path: "tag_path",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -63905,7 +64154,7 @@ export const GetApiUsersMeFollowingStatus200ItemsKindEnum = {
 	entity: "entity",
 	label: "label",
 	tag: "tag",
-	structure: "structure",
+	tag_path: "tag_path",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -64212,7 +64461,7 @@ export const GetApiUsersMeFollowingByUnitIdStatus200KindEnum = {
 	entity: "entity",
 	label: "label",
 	tag: "tag",
-	structure: "structure",
+	tag_path: "tag_path",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -64886,7 +65135,7 @@ export const PutApiUsersMeFollowingByUnitIdSettingsStatus200KindEnum = {
 	entity: "entity",
 	label: "label",
 	tag: "tag",
-	structure: "structure",
+	tag_path: "tag_path",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -65128,7 +65377,7 @@ export const PutApiUsersMeFollowingByUnitIdSettingsRequestKindEnum = {
 	entity: "entity",
 	label: "label",
 	tag: "tag",
-	structure: "structure",
+	tag_path: "tag_path",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -65257,7 +65506,7 @@ export const GetUserProfileActivityStatus200ScoresUnitKindEnum = {
 	entity: "entity",
 	label: "label",
 	tag: "tag",
-	structure: "structure",
+	tag_path: "tag_path",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -65305,7 +65554,7 @@ export const GetUserProfileActivityStatus200ProgressUnitKindEnum = {
 	entity: "entity",
 	label: "label",
 	tag: "tag",
-	structure: "structure",
+	tag_path: "tag_path",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -68610,6 +68859,400 @@ export type DeleteApiPlatformUsersByUserIdSessionsBySessionIdResponse =
 	| DeleteApiPlatformUsersByUserIdSessionsBySessionIdStatus422
 	| DeleteApiPlatformUsersByUserIdSessionsBySessionIdStatus500;
 
+export const GetApiTagsSuggestionsLocalizationLanguagesEnum = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetApiTagsSuggestionsLocalizationLanguagesEnum =
+	(typeof GetApiTagsSuggestionsLocalizationLanguagesEnum)[keyof typeof GetApiTagsSuggestionsLocalizationLanguagesEnum];
+
+/**
+ * @type object
+ */
+export type GetApiTagsSuggestionsQuery = {
+	/**
+	 * @minLength 1
+	 * @maxLength 16
+	 * @type string
+	 */
+	q: string;
+	/**
+	 * @type array | undefined
+	 */
+	localizationLanguages?: GetApiTagsSuggestionsLocalizationLanguagesEnum[];
+	/**
+	 * @default 10
+	 */
+	limit?: string | number;
+};
+
+export const GetApiTagsSuggestionsStatus200ItemsLanguage = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetApiTagsSuggestionsStatus200ItemsLanguage =
+	(typeof GetApiTagsSuggestionsStatus200ItemsLanguage)[keyof typeof GetApiTagsSuggestionsStatus200ItemsLanguage];
+
+export const GetApiTagsSuggestionsStatus200ItemsAvatarIconPrefixEnum = {
+	fas: "fas",
+	fab: "fab",
+} as const;
+
+export type GetApiTagsSuggestionsStatus200ItemsAvatarIconPrefixEnum =
+	(typeof GetApiTagsSuggestionsStatus200ItemsAvatarIconPrefixEnum)[keyof typeof GetApiTagsSuggestionsStatus200ItemsAvatarIconPrefixEnum];
+
+export const GetApiTagsSuggestionsStatus200ItemsMembersLanguage = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetApiTagsSuggestionsStatus200ItemsMembersLanguage =
+	(typeof GetApiTagsSuggestionsStatus200ItemsMembersLanguage)[keyof typeof GetApiTagsSuggestionsStatus200ItemsMembersLanguage];
+
+export const GetApiTagsSuggestionsStatus200ItemsMembersAvatarIconPrefixEnum = {
+	fas: "fas",
+	fab: "fab",
+} as const;
+
+export type GetApiTagsSuggestionsStatus200ItemsMembersAvatarIconPrefixEnum =
+	(typeof GetApiTagsSuggestionsStatus200ItemsMembersAvatarIconPrefixEnum)[keyof typeof GetApiTagsSuggestionsStatus200ItemsMembersAvatarIconPrefixEnum];
+
+/**
+ * @type object
+ */
+export type GetApiTagsSuggestionsStatus200 = {
+	/**
+	 * @type array
+	 */
+	items: (
+		| {
+				/**
+				 * @type string
+				 */
+				selection: "path";
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				tagId: string;
+				language: (GetApiTagsSuggestionsStatus200ItemsLanguage | null) | null;
+				title: (string | null) | null;
+				summary: (string | null) | null;
+				avatar:
+					| (
+							| (
+									| {
+											/**
+											 * @type string
+											 */
+											type: "image";
+											/**
+											 * @type object
+											 */
+											image: {
+												/**
+												 * @description
+												 * Format: `uuid`
+												 * @type string
+												 */
+												id: string;
+												/**
+												 * @type string
+												 */
+												url: string;
+											};
+									  }
+									| {
+											/**
+											 * @type string
+											 */
+											type: "emoji";
+											/**
+											 * @maxLength 64
+											 * @type string
+											 */
+											emoji: string;
+									  }
+									| {
+											/**
+											 * @type string
+											 */
+											type: "icon";
+											/**
+											 * @type object
+											 */
+											icon: {
+												/**
+												 * @type string
+												 */
+												provider: "font-awesome";
+												/**
+												 * @type string
+												 */
+												prefix: GetApiTagsSuggestionsStatus200ItemsAvatarIconPrefixEnum;
+												/**
+												 * @maxLength 128
+												 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+												 * @type string
+												 */
+												name: string;
+											};
+									  }
+							  )
+							| null
+					  )
+					| null;
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				pathId: string;
+				/**
+				 * @type array
+				 */
+				members: {
+					ordinal: string | number;
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					tagId: string;
+					language: (GetApiTagsSuggestionsStatus200ItemsMembersLanguage | null) | null;
+					title: (string | null) | null;
+					summary: (string | null) | null;
+					avatar:
+						| (
+								| (
+										| {
+												/**
+												 * @type string
+												 */
+												type: "image";
+												/**
+												 * @type object
+												 */
+												image: {
+													/**
+													 * @description
+													 * Format: `uuid`
+													 * @type string
+													 */
+													id: string;
+													/**
+													 * @type string
+													 */
+													url: string;
+												};
+										  }
+										| {
+												/**
+												 * @type string
+												 */
+												type: "emoji";
+												/**
+												 * @maxLength 64
+												 * @type string
+												 */
+												emoji: string;
+										  }
+										| {
+												/**
+												 * @type string
+												 */
+												type: "icon";
+												/**
+												 * @type object
+												 */
+												icon: {
+													/**
+													 * @type string
+													 */
+													provider: "font-awesome";
+													/**
+													 * @type string
+													 */
+													prefix: GetApiTagsSuggestionsStatus200ItemsMembersAvatarIconPrefixEnum;
+													/**
+													 * @maxLength 128
+													 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+													 * @type string
+													 */
+													name: string;
+												};
+										  }
+								  )
+								| null
+						  )
+						| null;
+				}[];
+				matchDirection: "forward" | "reverse";
+				usageCount: string | number;
+				score: string | number;
+				voteCount: string | number;
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				selection: "direct";
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				tagId: string;
+				language: (GetApiTagsSuggestionsStatus200ItemsLanguage | null) | null;
+				title: (string | null) | null;
+				summary: (string | null) | null;
+				avatar:
+					| (
+							| (
+									| {
+											/**
+											 * @type string
+											 */
+											type: "image";
+											/**
+											 * @type object
+											 */
+											image: {
+												/**
+												 * @description
+												 * Format: `uuid`
+												 * @type string
+												 */
+												id: string;
+												/**
+												 * @type string
+												 */
+												url: string;
+											};
+									  }
+									| {
+											/**
+											 * @type string
+											 */
+											type: "emoji";
+											/**
+											 * @maxLength 64
+											 * @type string
+											 */
+											emoji: string;
+									  }
+									| {
+											/**
+											 * @type string
+											 */
+											type: "icon";
+											/**
+											 * @type object
+											 */
+											icon: {
+												/**
+												 * @type string
+												 */
+												provider: "font-awesome";
+												/**
+												 * @type string
+												 */
+												prefix: GetApiTagsSuggestionsStatus200ItemsAvatarIconPrefixEnum;
+												/**
+												 * @maxLength 128
+												 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+												 * @type string
+												 */
+												name: string;
+											};
+									  }
+							  )
+							| null
+					  )
+					| null;
+				/**
+				 * @type null
+				 */
+				pathId: null;
+				/**
+				 * @type array
+				 */
+				members: [];
+				/**
+				 * @type null
+				 */
+				matchDirection: null;
+				/**
+				 * @type number
+				 */
+				usageCount: 0;
+				/**
+				 * @type number
+				 */
+				score: 0;
+				/**
+				 * @type number
+				 */
+				voteCount: 0;
+		  }
+	)[];
+};
+
+/**
+ * @type object
+ */
+export type GetApiTagsSuggestionsStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type GetApiTagsSuggestionsStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type GetApiTagsSuggestionsOptions = {
+	body?: never;
+	path?: never;
+	query: GetApiTagsSuggestionsQuery;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type GetApiTagsSuggestionsResponses = {
+	"200": GetApiTagsSuggestionsStatus200;
+	"422": GetApiTagsSuggestionsStatus422;
+	"500": GetApiTagsSuggestionsStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type GetApiTagsSuggestionsResponse =
+	| GetApiTagsSuggestionsStatus200
+	| GetApiTagsSuggestionsStatus422
+	| GetApiTagsSuggestionsStatus500;
+
 /**
  * @type object
  */
@@ -68742,62 +69385,6 @@ export type GetApiTagsByTagIdHierarchyStatus200 = {
 /**
  * @type object
  */
-export type GetApiTagsByTagIdHierarchyStatus401 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'AuthenticationRequired'
-		 * @type string
-		 */
-		code: "AuthenticationRequired";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type GetApiTagsByTagIdHierarchyStatus403 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'PlatformCapabilityRequired'
-		 * @type string
-		 */
-		code: "PlatformCapabilityRequired";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
 export type GetApiTagsByTagIdHierarchyStatus404 = {
 	/**
 	 * @type object
@@ -68828,38 +69415,6 @@ export type GetApiTagsByTagIdHierarchyStatus404 = {
  */
 export type GetApiTagsByTagIdHierarchyStatus422 = ValidationError;
 
-export const GetApiTagsByTagIdHierarchyStatus429ErrorCodeEnum = {
-	ApiQuotaExceeded: "ApiQuotaExceeded",
-	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
-} as const;
-
-export type GetApiTagsByTagIdHierarchyStatus429ErrorCodeEnum =
-	(typeof GetApiTagsByTagIdHierarchyStatus429ErrorCodeEnum)[keyof typeof GetApiTagsByTagIdHierarchyStatus429ErrorCodeEnum];
-
-/**
- * @type object
- */
-export type GetApiTagsByTagIdHierarchyStatus429 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @type string
-		 */
-		code: GetApiTagsByTagIdHierarchyStatus429ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		details?: JsonValue;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
 /**
  * @type object
  */
@@ -68880,11 +69435,8 @@ export type GetApiTagsByTagIdHierarchyOptions = {
  */
 export type GetApiTagsByTagIdHierarchyResponses = {
 	"200": GetApiTagsByTagIdHierarchyStatus200;
-	"401": GetApiTagsByTagIdHierarchyStatus401;
-	"403": GetApiTagsByTagIdHierarchyStatus403;
 	"404": GetApiTagsByTagIdHierarchyStatus404;
 	"422": GetApiTagsByTagIdHierarchyStatus422;
-	"429": GetApiTagsByTagIdHierarchyStatus429;
 	"500": GetApiTagsByTagIdHierarchyStatus500;
 };
 
@@ -68893,48 +69445,353 @@ export type GetApiTagsByTagIdHierarchyResponses = {
  */
 export type GetApiTagsByTagIdHierarchyResponse =
 	| GetApiTagsByTagIdHierarchyStatus200
-	| GetApiTagsByTagIdHierarchyStatus401
-	| GetApiTagsByTagIdHierarchyStatus403
 	| GetApiTagsByTagIdHierarchyStatus404
 	| GetApiTagsByTagIdHierarchyStatus422
-	| GetApiTagsByTagIdHierarchyStatus429
 	| GetApiTagsByTagIdHierarchyStatus500;
 
 /**
  * @type object
  */
-export type PostApiTagStructuresStatus200 = {
+export type GetApiTagsByTagIdPathsPath = {
 	/**
 	 * @description
 	 * Format: `uuid`
 	 * @type string
 	 */
-	structureId: string;
-	/**
-	 * @type boolean
-	 */
-	created: boolean;
+	tagId: string;
 };
 
-export const PostApiTagStructuresStatus400ErrorCodeEnum = {
-	RevisionCreditEntityInvalid: "RevisionCreditEntityInvalid",
-	RevisionContributionActorRequired: "RevisionContributionActorRequired",
+export const GetApiTagsByTagIdPathsLocalizationLanguagesEnum = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
 } as const;
 
-export type PostApiTagStructuresStatus400ErrorCodeEnum =
-	(typeof PostApiTagStructuresStatus400ErrorCodeEnum)[keyof typeof PostApiTagStructuresStatus400ErrorCodeEnum];
+export type GetApiTagsByTagIdPathsLocalizationLanguagesEnum =
+	(typeof GetApiTagsByTagIdPathsLocalizationLanguagesEnum)[keyof typeof GetApiTagsByTagIdPathsLocalizationLanguagesEnum];
 
-export type PostApiTagStructuresStatus400 =
+/**
+ * @type object
+ */
+export type GetApiTagsByTagIdPathsQuery = {
+	/**
+	 * @type array | undefined
+	 */
+	localizationLanguages?: GetApiTagsByTagIdPathsLocalizationLanguagesEnum[];
+	/**
+	 * @default 5
+	 */
+	limit?: string | number;
+};
+
+export const GetApiTagsByTagIdPathsStatus200ItemsMembersLanguage = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetApiTagsByTagIdPathsStatus200ItemsMembersLanguage =
+	(typeof GetApiTagsByTagIdPathsStatus200ItemsMembersLanguage)[keyof typeof GetApiTagsByTagIdPathsStatus200ItemsMembersLanguage];
+
+export const GetApiTagsByTagIdPathsStatus200ItemsMembersAvatarIconPrefixEnum = {
+	fas: "fas",
+	fab: "fab",
+} as const;
+
+export type GetApiTagsByTagIdPathsStatus200ItemsMembersAvatarIconPrefixEnum =
+	(typeof GetApiTagsByTagIdPathsStatus200ItemsMembersAvatarIconPrefixEnum)[keyof typeof GetApiTagsByTagIdPathsStatus200ItemsMembersAvatarIconPrefixEnum];
+
+/**
+ * @type object
+ */
+export type GetApiTagsByTagIdPathsStatus200 = {
+	/**
+	 * @type array
+	 */
+	items: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		pathId: string;
+		usageCount: string | number;
+		score: string | number;
+		voteCount: string | number;
+		/**
+		 * @type array
+		 */
+		members: {
+			ordinal: string | number;
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			tagId: string;
+			language: (GetApiTagsByTagIdPathsStatus200ItemsMembersLanguage | null) | null;
+			title: (string | null) | null;
+			summary: (string | null) | null;
+			avatar:
+				| (
+						| (
+								| {
+										/**
+										 * @type string
+										 */
+										type: "image";
+										/**
+										 * @type object
+										 */
+										image: {
+											/**
+											 * @description
+											 * Format: `uuid`
+											 * @type string
+											 */
+											id: string;
+											/**
+											 * @type string
+											 */
+											url: string;
+										};
+								  }
+								| {
+										/**
+										 * @type string
+										 */
+										type: "emoji";
+										/**
+										 * @maxLength 64
+										 * @type string
+										 */
+										emoji: string;
+								  }
+								| {
+										/**
+										 * @type string
+										 */
+										type: "icon";
+										/**
+										 * @type object
+										 */
+										icon: {
+											/**
+											 * @type string
+											 */
+											provider: "font-awesome";
+											/**
+											 * @type string
+											 */
+											prefix: GetApiTagsByTagIdPathsStatus200ItemsMembersAvatarIconPrefixEnum;
+											/**
+											 * @maxLength 128
+											 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+											 * @type string
+											 */
+											name: string;
+										};
+								  }
+						  )
+						| null
+				  )
+				| null;
+		}[];
+	}[];
+};
+
+/**
+ * @type object
+ */
+export type GetApiTagsByTagIdPathsStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type GetApiTagsByTagIdPathsStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type GetApiTagsByTagIdPathsOptions = {
+	body?: never;
+	path: GetApiTagsByTagIdPathsPath;
+	query?: GetApiTagsByTagIdPathsQuery;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type GetApiTagsByTagIdPathsResponses = {
+	"200": GetApiTagsByTagIdPathsStatus200;
+	"422": GetApiTagsByTagIdPathsStatus422;
+	"500": GetApiTagsByTagIdPathsStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type GetApiTagsByTagIdPathsResponse =
+	| GetApiTagsByTagIdPathsStatus200
+	| GetApiTagsByTagIdPathsStatus422
+	| GetApiTagsByTagIdPathsStatus500;
+
+export const PostApiTagPathsDefinitionWarningsStatus200ItemsRelationEnum = {
+	existing_shorter_suffix: "existing_shorter_suffix",
+	existing_longer_extension: "existing_longer_extension",
+	same_terminal: "same_terminal",
+} as const;
+
+export type PostApiTagPathsDefinitionWarningsStatus200ItemsRelationEnum =
+	(typeof PostApiTagPathsDefinitionWarningsStatus200ItemsRelationEnum)[keyof typeof PostApiTagPathsDefinitionWarningsStatus200ItemsRelationEnum];
+
+export const PostApiTagPathsDefinitionWarningsStatus200ItemsMembersLanguage = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type PostApiTagPathsDefinitionWarningsStatus200ItemsMembersLanguage =
+	(typeof PostApiTagPathsDefinitionWarningsStatus200ItemsMembersLanguage)[keyof typeof PostApiTagPathsDefinitionWarningsStatus200ItemsMembersLanguage];
+
+export const PostApiTagPathsDefinitionWarningsStatus200ItemsMembersAvatarIconPrefixEnum = {
+	fas: "fas",
+	fab: "fab",
+} as const;
+
+export type PostApiTagPathsDefinitionWarningsStatus200ItemsMembersAvatarIconPrefixEnum =
+	(typeof PostApiTagPathsDefinitionWarningsStatus200ItemsMembersAvatarIconPrefixEnum)[keyof typeof PostApiTagPathsDefinitionWarningsStatus200ItemsMembersAvatarIconPrefixEnum];
+
+/**
+ * @type object
+ */
+export type PostApiTagPathsDefinitionWarningsStatus200 = {
+	/**
+	 * @type array
+	 */
+	items: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		pathId: string;
+		/**
+		 * @type string
+		 */
+		relation: PostApiTagPathsDefinitionWarningsStatus200ItemsRelationEnum;
+		usageCount: string | number;
+		/**
+		 * @type array
+		 */
+		members: {
+			ordinal: string | number;
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			tagId: string;
+			language: (PostApiTagPathsDefinitionWarningsStatus200ItemsMembersLanguage | null) | null;
+			title: (string | null) | null;
+			summary: (string | null) | null;
+			avatar:
+				| (
+						| (
+								| {
+										/**
+										 * @type string
+										 */
+										type: "image";
+										/**
+										 * @type object
+										 */
+										image: {
+											/**
+											 * @description
+											 * Format: `uuid`
+											 * @type string
+											 */
+											id: string;
+											/**
+											 * @type string
+											 */
+											url: string;
+										};
+								  }
+								| {
+										/**
+										 * @type string
+										 */
+										type: "emoji";
+										/**
+										 * @maxLength 64
+										 * @type string
+										 */
+										emoji: string;
+								  }
+								| {
+										/**
+										 * @type string
+										 */
+										type: "icon";
+										/**
+										 * @type object
+										 */
+										icon: {
+											/**
+											 * @type string
+											 */
+											provider: "font-awesome";
+											/**
+											 * @type string
+											 */
+											prefix: PostApiTagPathsDefinitionWarningsStatus200ItemsMembersAvatarIconPrefixEnum;
+											/**
+											 * @maxLength 128
+											 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+											 * @type string
+											 */
+											name: string;
+										};
+								  }
+						  )
+						| null
+				  )
+				| null;
+		}[];
+	}[];
+};
+
+/**
+ * @type object
+ */
+export type PostApiTagPathsDefinitionWarningsStatus400 = MalformedRequestBody;
+
+export type PostApiTagPathsDefinitionWarningsStatus422 =
 	| {
 			/**
 			 * @type object
 			 */
 			error: {
 				/**
-				 * @default 'RevisionCreditEntityInvalid'
+				 * @default 'InvalidTagPath'
 				 * @type string
 				 */
-				code: PostApiTagStructuresStatus400ErrorCodeEnum;
+				code: "InvalidTagPath";
 				/**
 				 * @type string
 				 */
@@ -68949,29 +69806,33 @@ export type PostApiTagStructuresStatus400 =
 			 */
 			requestId: string;
 	  }
-	| MalformedRequestBody;
+	| ValidationError;
+
+export const PostApiTagPathsDefinitionWarningsStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PostApiTagPathsDefinitionWarningsStatus429ErrorCodeEnum =
+	(typeof PostApiTagPathsDefinitionWarningsStatus429ErrorCodeEnum)[keyof typeof PostApiTagPathsDefinitionWarningsStatus429ErrorCodeEnum];
 
 /**
  * @type object
  */
-export type PostApiTagStructuresStatus403 = {
+export type PostApiTagPathsDefinitionWarningsStatus429 = {
 	/**
 	 * @type object
 	 */
 	error: {
 		/**
-		 * @default 'PlatformCapabilityRequired'
 		 * @type string
 		 */
-		code: "PlatformCapabilityRequired";
+		code: PostApiTagPathsDefinitionWarningsStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
 		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
+		details?: JsonValue;
 	};
 	/**
 	 * @type string
@@ -68982,7 +69843,489 @@ export type PostApiTagStructuresStatus403 = {
 /**
  * @type object
  */
-export type PostApiTagStructuresStatus404 = {
+export type PostApiTagPathsDefinitionWarningsStatus500 = InternalError;
+
+export const PostApiTagPathsDefinitionWarningsRequestLocalizationLanguagesEnum = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type PostApiTagPathsDefinitionWarningsRequestLocalizationLanguagesEnum =
+	(typeof PostApiTagPathsDefinitionWarningsRequestLocalizationLanguagesEnum)[keyof typeof PostApiTagPathsDefinitionWarningsRequestLocalizationLanguagesEnum];
+
+/**
+ * @type object
+ */
+export type PostApiTagPathsDefinitionWarningsBody = {
+	/**
+	 * @type array
+	 */
+	memberTagIds: string[];
+	/**
+	 * @type array | undefined
+	 */
+	localizationLanguages?: PostApiTagPathsDefinitionWarningsRequestLocalizationLanguagesEnum[];
+	/**
+	 * @default 10
+	 */
+	limit?: string | number;
+};
+
+/**
+ * @type object
+ */
+export type PostApiTagPathsDefinitionWarningsOptions = {
+	body: PostApiTagPathsDefinitionWarningsBody;
+	path?: never;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PostApiTagPathsDefinitionWarningsResponses = {
+	"200": PostApiTagPathsDefinitionWarningsStatus200;
+	"400": PostApiTagPathsDefinitionWarningsStatus400;
+	"422": PostApiTagPathsDefinitionWarningsStatus422;
+	"429": PostApiTagPathsDefinitionWarningsStatus429;
+	"500": PostApiTagPathsDefinitionWarningsStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PostApiTagPathsDefinitionWarningsResponse =
+	| PostApiTagPathsDefinitionWarningsStatus200
+	| PostApiTagPathsDefinitionWarningsStatus400
+	| PostApiTagPathsDefinitionWarningsStatus422
+	| PostApiTagPathsDefinitionWarningsStatus429
+	| PostApiTagPathsDefinitionWarningsStatus500;
+
+export const GetApiTagPathsSearchLocalizationLanguagesEnum = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetApiTagPathsSearchLocalizationLanguagesEnum =
+	(typeof GetApiTagPathsSearchLocalizationLanguagesEnum)[keyof typeof GetApiTagPathsSearchLocalizationLanguagesEnum];
+
+/**
+ * @type object
+ */
+export type GetApiTagPathsSearchQuery = {
+	/**
+	 * @minLength 1
+	 * @maxLength 16
+	 * @type string
+	 */
+	q: string;
+	/**
+	 * @type array | undefined
+	 */
+	localizationLanguages?: GetApiTagPathsSearchLocalizationLanguagesEnum[];
+	/**
+	 * @default 10
+	 */
+	limit?: string | number;
+};
+
+export const GetApiTagPathsSearchStatus200ItemsLanguage = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetApiTagPathsSearchStatus200ItemsLanguage =
+	(typeof GetApiTagPathsSearchStatus200ItemsLanguage)[keyof typeof GetApiTagPathsSearchStatus200ItemsLanguage];
+
+export const GetApiTagPathsSearchStatus200ItemsAvatarIconPrefixEnum = {
+	fas: "fas",
+	fab: "fab",
+} as const;
+
+export type GetApiTagPathsSearchStatus200ItemsAvatarIconPrefixEnum =
+	(typeof GetApiTagPathsSearchStatus200ItemsAvatarIconPrefixEnum)[keyof typeof GetApiTagPathsSearchStatus200ItemsAvatarIconPrefixEnum];
+
+export const GetApiTagPathsSearchStatus200ItemsMembersLanguage = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetApiTagPathsSearchStatus200ItemsMembersLanguage =
+	(typeof GetApiTagPathsSearchStatus200ItemsMembersLanguage)[keyof typeof GetApiTagPathsSearchStatus200ItemsMembersLanguage];
+
+export const GetApiTagPathsSearchStatus200ItemsMembersAvatarIconPrefixEnum = {
+	fas: "fas",
+	fab: "fab",
+} as const;
+
+export type GetApiTagPathsSearchStatus200ItemsMembersAvatarIconPrefixEnum =
+	(typeof GetApiTagPathsSearchStatus200ItemsMembersAvatarIconPrefixEnum)[keyof typeof GetApiTagPathsSearchStatus200ItemsMembersAvatarIconPrefixEnum];
+
+/**
+ * @type object
+ */
+export type GetApiTagPathsSearchStatus200 = {
+	/**
+	 * @type array
+	 */
+	items: (
+		| {
+				/**
+				 * @type string
+				 */
+				selection: "path";
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				tagId: string;
+				language: (GetApiTagPathsSearchStatus200ItemsLanguage | null) | null;
+				title: (string | null) | null;
+				summary: (string | null) | null;
+				avatar:
+					| (
+							| (
+									| {
+											/**
+											 * @type string
+											 */
+											type: "image";
+											/**
+											 * @type object
+											 */
+											image: {
+												/**
+												 * @description
+												 * Format: `uuid`
+												 * @type string
+												 */
+												id: string;
+												/**
+												 * @type string
+												 */
+												url: string;
+											};
+									  }
+									| {
+											/**
+											 * @type string
+											 */
+											type: "emoji";
+											/**
+											 * @maxLength 64
+											 * @type string
+											 */
+											emoji: string;
+									  }
+									| {
+											/**
+											 * @type string
+											 */
+											type: "icon";
+											/**
+											 * @type object
+											 */
+											icon: {
+												/**
+												 * @type string
+												 */
+												provider: "font-awesome";
+												/**
+												 * @type string
+												 */
+												prefix: GetApiTagPathsSearchStatus200ItemsAvatarIconPrefixEnum;
+												/**
+												 * @maxLength 128
+												 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+												 * @type string
+												 */
+												name: string;
+											};
+									  }
+							  )
+							| null
+					  )
+					| null;
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				pathId: string;
+				/**
+				 * @type array
+				 */
+				members: {
+					ordinal: string | number;
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					tagId: string;
+					language: (GetApiTagPathsSearchStatus200ItemsMembersLanguage | null) | null;
+					title: (string | null) | null;
+					summary: (string | null) | null;
+					avatar:
+						| (
+								| (
+										| {
+												/**
+												 * @type string
+												 */
+												type: "image";
+												/**
+												 * @type object
+												 */
+												image: {
+													/**
+													 * @description
+													 * Format: `uuid`
+													 * @type string
+													 */
+													id: string;
+													/**
+													 * @type string
+													 */
+													url: string;
+												};
+										  }
+										| {
+												/**
+												 * @type string
+												 */
+												type: "emoji";
+												/**
+												 * @maxLength 64
+												 * @type string
+												 */
+												emoji: string;
+										  }
+										| {
+												/**
+												 * @type string
+												 */
+												type: "icon";
+												/**
+												 * @type object
+												 */
+												icon: {
+													/**
+													 * @type string
+													 */
+													provider: "font-awesome";
+													/**
+													 * @type string
+													 */
+													prefix: GetApiTagPathsSearchStatus200ItemsMembersAvatarIconPrefixEnum;
+													/**
+													 * @maxLength 128
+													 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+													 * @type string
+													 */
+													name: string;
+												};
+										  }
+								  )
+								| null
+						  )
+						| null;
+				}[];
+				matchDirection: "forward" | "reverse";
+				usageCount: string | number;
+				score: string | number;
+				voteCount: string | number;
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				selection: "direct";
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				tagId: string;
+				language: (GetApiTagPathsSearchStatus200ItemsLanguage | null) | null;
+				title: (string | null) | null;
+				summary: (string | null) | null;
+				avatar:
+					| (
+							| (
+									| {
+											/**
+											 * @type string
+											 */
+											type: "image";
+											/**
+											 * @type object
+											 */
+											image: {
+												/**
+												 * @description
+												 * Format: `uuid`
+												 * @type string
+												 */
+												id: string;
+												/**
+												 * @type string
+												 */
+												url: string;
+											};
+									  }
+									| {
+											/**
+											 * @type string
+											 */
+											type: "emoji";
+											/**
+											 * @maxLength 64
+											 * @type string
+											 */
+											emoji: string;
+									  }
+									| {
+											/**
+											 * @type string
+											 */
+											type: "icon";
+											/**
+											 * @type object
+											 */
+											icon: {
+												/**
+												 * @type string
+												 */
+												provider: "font-awesome";
+												/**
+												 * @type string
+												 */
+												prefix: GetApiTagPathsSearchStatus200ItemsAvatarIconPrefixEnum;
+												/**
+												 * @maxLength 128
+												 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+												 * @type string
+												 */
+												name: string;
+											};
+									  }
+							  )
+							| null
+					  )
+					| null;
+				/**
+				 * @type null
+				 */
+				pathId: null;
+				/**
+				 * @type array
+				 */
+				members: [];
+				/**
+				 * @type null
+				 */
+				matchDirection: null;
+				/**
+				 * @type number
+				 */
+				usageCount: 0;
+				/**
+				 * @type number
+				 */
+				score: 0;
+				/**
+				 * @type number
+				 */
+				voteCount: 0;
+		  }
+	)[];
+};
+
+/**
+ * @type object
+ */
+export type GetApiTagPathsSearchStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type GetApiTagPathsSearchStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type GetApiTagPathsSearchOptions = {
+	body?: never;
+	path?: never;
+	query: GetApiTagPathsSearchQuery;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type GetApiTagPathsSearchResponses = {
+	"200": GetApiTagPathsSearchStatus200;
+	"422": GetApiTagPathsSearchStatus422;
+	"500": GetApiTagPathsSearchStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type GetApiTagPathsSearchResponse =
+	| GetApiTagPathsSearchStatus200
+	| GetApiTagPathsSearchStatus422
+	| GetApiTagPathsSearchStatus500;
+
+/**
+ * @type object
+ */
+export type PostApiTagPathsStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	pathId: string;
+	/**
+	 * @type boolean
+	 */
+	created: boolean;
+};
+
+/**
+ * @type object
+ */
+export type PostApiTagPathsStatus400 = MalformedRequestBody;
+
+/**
+ * @type object
+ */
+export type PostApiTagPathsStatus404 = {
 	/**
 	 * @type object
 	 */
@@ -69007,17 +70350,17 @@ export type PostApiTagStructuresStatus404 = {
 	requestId: string;
 };
 
-export type PostApiTagStructuresStatus422 =
+export type PostApiTagPathsStatus422 =
 	| {
 			/**
 			 * @type object
 			 */
 			error: {
 				/**
-				 * @default 'InvalidTagStructure'
+				 * @default 'InvalidTagPath'
 				 * @type string
 				 */
-				code: "InvalidTagStructure";
+				code: "InvalidTagPath";
 				/**
 				 * @type string
 				 */
@@ -69034,103 +70377,80 @@ export type PostApiTagStructuresStatus422 =
 	  }
 	| ValidationError;
 
-export const PostApiTagStructuresStatus429ErrorCodeEnum = {
+export const PostApiTagPathsStatus429ErrorCodeEnum = {
 	ApiQuotaExceeded: "ApiQuotaExceeded",
 	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
 } as const;
 
-export type PostApiTagStructuresStatus429ErrorCodeEnum =
-	(typeof PostApiTagStructuresStatus429ErrorCodeEnum)[keyof typeof PostApiTagStructuresStatus429ErrorCodeEnum];
+export type PostApiTagPathsStatus429ErrorCodeEnum =
+	(typeof PostApiTagPathsStatus429ErrorCodeEnum)[keyof typeof PostApiTagPathsStatus429ErrorCodeEnum];
+
+export type PostApiTagPathsStatus429 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'VoteHotKeyBusy'
+				 * @type string
+				 */
+				code: "VoteHotKeyBusy";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @type string
+				 */
+				code: PostApiTagPathsStatus429ErrorCodeEnum;
+				/**
+				 * @type string
+				 */
+				message: string;
+				details?: JsonValue;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  };
 
 /**
  * @type object
  */
-export type PostApiTagStructuresStatus429 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @type string
-		 */
-		code: PostApiTagStructuresStatus429ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		details?: JsonValue;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
+export type PostApiTagPathsStatus500 = InternalError;
 
 /**
  * @type object
  */
-export type PostApiTagStructuresStatus500 = InternalError;
-
-export const PostApiTagStructuresRequestRevisionContextContributionRoleEnum = {
-	creator: "creator",
-	editor: "editor",
-	translator: "translator",
-	researcher: "researcher",
-} as const;
-
-export type PostApiTagStructuresRequestRevisionContextContributionRoleEnum =
-	(typeof PostApiTagStructuresRequestRevisionContextContributionRoleEnum)[keyof typeof PostApiTagStructuresRequestRevisionContextContributionRoleEnum];
-
-/**
- * @type object
- */
-export type PostApiTagStructuresBody = {
+export type PostApiTagPathsBody = {
 	/**
 	 * @type array
 	 */
 	memberTagIds: string[];
-	/**
-	 * @type object | undefined
-	 */
-	revisionContext?: {
-		contribution?:
-			| {
-					/**
-					 * @type string
-					 */
-					primary: "human";
-			  }
-			| {
-					/**
-					 * @type string
-					 */
-					primary: "unattributed";
-			  }
-			| {
-					/**
-					 * @type string
-					 */
-					primary: "ai";
-					/**
-					 * @description
-					 * Format: `uuid`
-					 * @type string
-					 */
-					creditedEntityId: string;
-					/**
-					 * @default 'creator'
-					 * @type string
-					 */
-					role: PostApiTagStructuresRequestRevisionContextContributionRoleEnum;
-			  };
-	};
 };
 
 /**
  * @type object
  */
-export type PostApiTagStructuresOptions = {
-	body: PostApiTagStructuresBody;
+export type PostApiTagPathsOptions = {
+	body: PostApiTagPathsBody;
 	path?: never;
 	query?: never;
 	headers?: never;
@@ -69139,41 +70459,39 @@ export type PostApiTagStructuresOptions = {
 /**
  * @type object
  */
-export type PostApiTagStructuresResponses = {
-	"200": PostApiTagStructuresStatus200;
-	"400": PostApiTagStructuresStatus400;
-	"403": PostApiTagStructuresStatus403;
-	"404": PostApiTagStructuresStatus404;
-	"422": PostApiTagStructuresStatus422;
-	"429": PostApiTagStructuresStatus429;
-	"500": PostApiTagStructuresStatus500;
+export type PostApiTagPathsResponses = {
+	"200": PostApiTagPathsStatus200;
+	"400": PostApiTagPathsStatus400;
+	"404": PostApiTagPathsStatus404;
+	"422": PostApiTagPathsStatus422;
+	"429": PostApiTagPathsStatus429;
+	"500": PostApiTagPathsStatus500;
 };
 
 /**
  * @description Union of all possible responses
  */
-export type PostApiTagStructuresResponse =
-	| PostApiTagStructuresStatus200
-	| PostApiTagStructuresStatus400
-	| PostApiTagStructuresStatus403
-	| PostApiTagStructuresStatus404
-	| PostApiTagStructuresStatus422
-	| PostApiTagStructuresStatus429
-	| PostApiTagStructuresStatus500;
+export type PostApiTagPathsResponse =
+	| PostApiTagPathsStatus200
+	| PostApiTagPathsStatus400
+	| PostApiTagPathsStatus404
+	| PostApiTagPathsStatus422
+	| PostApiTagPathsStatus429
+	| PostApiTagPathsStatus500;
 
 /**
  * @type object
  */
-export type GetApiTagStructuresByStructureIdPath = {
+export type GetApiTagPathsByPathIdPath = {
 	/**
 	 * @description
 	 * Format: `uuid`
 	 * @type string
 	 */
-	structureId: string;
+	pathId: string;
 };
 
-export const GetApiTagStructuresByStructureIdLocalizationLanguagesEnum = {
+export const GetApiTagPathsByPathIdLocalizationLanguagesEnum = {
 	zh: "zh",
 	en: "en",
 	ja: "ja",
@@ -69183,20 +70501,20 @@ export const GetApiTagStructuresByStructureIdLocalizationLanguagesEnum = {
 	es: "es",
 } as const;
 
-export type GetApiTagStructuresByStructureIdLocalizationLanguagesEnum =
-	(typeof GetApiTagStructuresByStructureIdLocalizationLanguagesEnum)[keyof typeof GetApiTagStructuresByStructureIdLocalizationLanguagesEnum];
+export type GetApiTagPathsByPathIdLocalizationLanguagesEnum =
+	(typeof GetApiTagPathsByPathIdLocalizationLanguagesEnum)[keyof typeof GetApiTagPathsByPathIdLocalizationLanguagesEnum];
 
 /**
  * @type object
  */
-export type GetApiTagStructuresByStructureIdQuery = {
+export type GetApiTagPathsByPathIdQuery = {
 	/**
 	 * @type array | undefined
 	 */
-	localizationLanguages?: GetApiTagStructuresByStructureIdLocalizationLanguagesEnum[];
+	localizationLanguages?: GetApiTagPathsByPathIdLocalizationLanguagesEnum[];
 };
 
-export const GetApiTagStructuresByStructureIdStatus200MembersLanguage = {
+export const GetApiTagPathsByPathIdStatus200MembersLanguage = {
 	zh: "zh",
 	en: "en",
 	ja: "ja",
@@ -69206,21 +70524,21 @@ export const GetApiTagStructuresByStructureIdStatus200MembersLanguage = {
 	es: "es",
 } as const;
 
-export type GetApiTagStructuresByStructureIdStatus200MembersLanguage =
-	(typeof GetApiTagStructuresByStructureIdStatus200MembersLanguage)[keyof typeof GetApiTagStructuresByStructureIdStatus200MembersLanguage];
+export type GetApiTagPathsByPathIdStatus200MembersLanguage =
+	(typeof GetApiTagPathsByPathIdStatus200MembersLanguage)[keyof typeof GetApiTagPathsByPathIdStatus200MembersLanguage];
 
-export const GetApiTagStructuresByStructureIdStatus200MembersAvatarIconPrefixEnum = {
+export const GetApiTagPathsByPathIdStatus200MembersAvatarIconPrefixEnum = {
 	fas: "fas",
 	fab: "fab",
 } as const;
 
-export type GetApiTagStructuresByStructureIdStatus200MembersAvatarIconPrefixEnum =
-	(typeof GetApiTagStructuresByStructureIdStatus200MembersAvatarIconPrefixEnum)[keyof typeof GetApiTagStructuresByStructureIdStatus200MembersAvatarIconPrefixEnum];
+export type GetApiTagPathsByPathIdStatus200MembersAvatarIconPrefixEnum =
+	(typeof GetApiTagPathsByPathIdStatus200MembersAvatarIconPrefixEnum)[keyof typeof GetApiTagPathsByPathIdStatus200MembersAvatarIconPrefixEnum];
 
 /**
  * @type object
  */
-export type GetApiTagStructuresByStructureIdStatus200 = {
+export type GetApiTagPathsByPathIdStatus200 = {
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -69228,13 +70546,11 @@ export type GetApiTagStructuresByStructureIdStatus200 = {
 	 */
 	id: string;
 	/**
+	 * @description
+	 * Format: `uuid`
 	 * @type string
 	 */
-	kind: "tag.hierarchy_path";
-	/**
-	 * @type number
-	 */
-	definitionVersion: 1;
+	terminalTagId: string;
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -69243,7 +70559,9 @@ export type GetApiTagStructuresByStructureIdStatus200 = {
 	createdByProfileId: string;
 	score: string | number;
 	voteCount: string | number;
+	usageCount: string | number;
 	viewerVote: ((-1 | 1) | null) | null;
+	mergedIntoPathId: (string | null) | null;
 	/**
 	 * @type array
 	 */
@@ -69255,7 +70573,7 @@ export type GetApiTagStructuresByStructureIdStatus200 = {
 		 * @type string
 		 */
 		tagId: string;
-		language: (GetApiTagStructuresByStructureIdStatus200MembersLanguage | null) | null;
+		language: (GetApiTagPathsByPathIdStatus200MembersLanguage | null) | null;
 		title: (string | null) | null;
 		summary: (string | null) | null;
 		avatar:
@@ -69309,7 +70627,7 @@ export type GetApiTagStructuresByStructureIdStatus200 = {
 										/**
 										 * @type string
 										 */
-										prefix: GetApiTagStructuresByStructureIdStatus200MembersAvatarIconPrefixEnum;
+										prefix: GetApiTagPathsByPathIdStatus200MembersAvatarIconPrefixEnum;
 										/**
 										 * @maxLength 128
 										 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
@@ -69340,16 +70658,16 @@ export type GetApiTagStructuresByStructureIdStatus200 = {
 /**
  * @type object
  */
-export type GetApiTagStructuresByStructureIdStatus401 = {
+export type GetApiTagPathsByPathIdStatus404 = {
 	/**
 	 * @type object
 	 */
 	error: {
 		/**
-		 * @default 'AuthenticationRequired'
+		 * @default 'TagPathNotFound'
 		 * @type string
 		 */
-		code: "AuthenticationRequired";
+		code: "TagPathNotFound";
 		/**
 		 * @type string
 		 */
@@ -69368,331 +70686,120 @@ export type GetApiTagStructuresByStructureIdStatus401 = {
 /**
  * @type object
  */
-export type GetApiTagStructuresByStructureIdStatus403 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'PlatformCapabilityRequired'
-		 * @type string
-		 */
-		code: "PlatformCapabilityRequired";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
+export type GetApiTagPathsByPathIdStatus422 = ValidationError;
 
 /**
  * @type object
  */
-export type GetApiTagStructuresByStructureIdStatus404 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'TagStructureNotFound'
-		 * @type string
-		 */
-		code: "TagStructureNotFound";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
+export type GetApiTagPathsByPathIdStatus500 = InternalError;
 
 /**
  * @type object
  */
-export type GetApiTagStructuresByStructureIdStatus422 = ValidationError;
-
-export const GetApiTagStructuresByStructureIdStatus429ErrorCodeEnum = {
-	ApiQuotaExceeded: "ApiQuotaExceeded",
-	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
-} as const;
-
-export type GetApiTagStructuresByStructureIdStatus429ErrorCodeEnum =
-	(typeof GetApiTagStructuresByStructureIdStatus429ErrorCodeEnum)[keyof typeof GetApiTagStructuresByStructureIdStatus429ErrorCodeEnum];
-
-/**
- * @type object
- */
-export type GetApiTagStructuresByStructureIdStatus429 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @type string
-		 */
-		code: GetApiTagStructuresByStructureIdStatus429ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		details?: JsonValue;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type GetApiTagStructuresByStructureIdStatus500 = InternalError;
-
-/**
- * @type object
- */
-export type GetApiTagStructuresByStructureIdOptions = {
+export type GetApiTagPathsByPathIdOptions = {
 	body?: never;
-	path: GetApiTagStructuresByStructureIdPath;
-	query?: GetApiTagStructuresByStructureIdQuery;
+	path: GetApiTagPathsByPathIdPath;
+	query?: GetApiTagPathsByPathIdQuery;
 	headers?: never;
 };
 
 /**
  * @type object
  */
-export type GetApiTagStructuresByStructureIdResponses = {
-	"200": GetApiTagStructuresByStructureIdStatus200;
-	"401": GetApiTagStructuresByStructureIdStatus401;
-	"403": GetApiTagStructuresByStructureIdStatus403;
-	"404": GetApiTagStructuresByStructureIdStatus404;
-	"422": GetApiTagStructuresByStructureIdStatus422;
-	"429": GetApiTagStructuresByStructureIdStatus429;
-	"500": GetApiTagStructuresByStructureIdStatus500;
+export type GetApiTagPathsByPathIdResponses = {
+	"200": GetApiTagPathsByPathIdStatus200;
+	"404": GetApiTagPathsByPathIdStatus404;
+	"422": GetApiTagPathsByPathIdStatus422;
+	"500": GetApiTagPathsByPathIdStatus500;
 };
 
 /**
  * @description Union of all possible responses
  */
-export type GetApiTagStructuresByStructureIdResponse =
-	| GetApiTagStructuresByStructureIdStatus200
-	| GetApiTagStructuresByStructureIdStatus401
-	| GetApiTagStructuresByStructureIdStatus403
-	| GetApiTagStructuresByStructureIdStatus404
-	| GetApiTagStructuresByStructureIdStatus422
-	| GetApiTagStructuresByStructureIdStatus429
-	| GetApiTagStructuresByStructureIdStatus500;
+export type GetApiTagPathsByPathIdResponse =
+	| GetApiTagPathsByPathIdStatus200
+	| GetApiTagPathsByPathIdStatus404
+	| GetApiTagPathsByPathIdStatus422
+	| GetApiTagPathsByPathIdStatus500;
 
 /**
  * @type object
  */
-export type PutApiTagStructuresByStructureIdPath = {
+export type PutApiTagPathsByPathIdVotePath = {
 	/**
 	 * @description
 	 * Format: `uuid`
 	 * @type string
 	 */
-	structureId: string;
+	pathId: string;
 };
 
-export const PutApiTagStructuresByStructureIdLocalizationLanguagesEnum = {
-	zh: "zh",
-	en: "en",
-	ja: "ja",
-	ko: "ko",
-	de: "de",
-	fr: "fr",
-	es: "es",
-} as const;
-
-export type PutApiTagStructuresByStructureIdLocalizationLanguagesEnum =
-	(typeof PutApiTagStructuresByStructureIdLocalizationLanguagesEnum)[keyof typeof PutApiTagStructuresByStructureIdLocalizationLanguagesEnum];
-
 /**
  * @type object
  */
-export type PutApiTagStructuresByStructureIdQuery = {
-	/**
-	 * @type array | undefined
-	 */
-	localizationLanguages?: PutApiTagStructuresByStructureIdLocalizationLanguagesEnum[];
-};
-
-export const PutApiTagStructuresByStructureIdStatus200MembersLanguage = {
-	zh: "zh",
-	en: "en",
-	ja: "ja",
-	ko: "ko",
-	de: "de",
-	fr: "fr",
-	es: "es",
-} as const;
-
-export type PutApiTagStructuresByStructureIdStatus200MembersLanguage =
-	(typeof PutApiTagStructuresByStructureIdStatus200MembersLanguage)[keyof typeof PutApiTagStructuresByStructureIdStatus200MembersLanguage];
-
-export const PutApiTagStructuresByStructureIdStatus200MembersAvatarIconPrefixEnum = {
-	fas: "fas",
-	fab: "fab",
-} as const;
-
-export type PutApiTagStructuresByStructureIdStatus200MembersAvatarIconPrefixEnum =
-	(typeof PutApiTagStructuresByStructureIdStatus200MembersAvatarIconPrefixEnum)[keyof typeof PutApiTagStructuresByStructureIdStatus200MembersAvatarIconPrefixEnum];
-
-/**
- * @type object
- */
-export type PutApiTagStructuresByStructureIdStatus200 = {
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	id: string;
-	/**
-	 * @type string
-	 */
-	kind: "tag.hierarchy_path";
-	/**
-	 * @type number
-	 */
-	definitionVersion: 1;
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	createdByProfileId: string;
+export type PutApiTagPathsByPathIdVoteStatus200 = {
 	score: string | number;
 	voteCount: string | number;
 	viewerVote: ((-1 | 1) | null) | null;
-	/**
-	 * @type array
-	 */
-	members: {
-		ordinal: string | number;
-		/**
-		 * @description
-		 * Format: `uuid`
-		 * @type string
-		 */
-		tagId: string;
-		language: (PutApiTagStructuresByStructureIdStatus200MembersLanguage | null) | null;
-		title: (string | null) | null;
-		summary: (string | null) | null;
-		avatar:
-			| (
-					| (
-							| {
-									/**
-									 * @type string
-									 */
-									type: "image";
-									/**
-									 * @type object
-									 */
-									image: {
-										/**
-										 * @description
-										 * Format: `uuid`
-										 * @type string
-										 */
-										id: string;
-										/**
-										 * @type string
-										 */
-										url: string;
-									};
-							  }
-							| {
-									/**
-									 * @type string
-									 */
-									type: "emoji";
-									/**
-									 * @maxLength 64
-									 * @type string
-									 */
-									emoji: string;
-							  }
-							| {
-									/**
-									 * @type string
-									 */
-									type: "icon";
-									/**
-									 * @type object
-									 */
-									icon: {
-										/**
-										 * @type string
-										 */
-										provider: "font-awesome";
-										/**
-										 * @type string
-										 */
-										prefix: PutApiTagStructuresByStructureIdStatus200MembersAvatarIconPrefixEnum;
-										/**
-										 * @maxLength 128
-										 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
-										 * @type string
-										 */
-										name: string;
-									};
-							  }
-					  )
-					| null
-			  )
-			| null;
-	}[];
-	/**
-	 * @description
-	 * Format: `date-time`
-	 * @type string
-	 */
-	createdAt: string;
-	/**
-	 * @description
-	 * Format: `date-time`
-	 * @type string
-	 */
-	updatedAt: string;
 };
 
-export const PutApiTagStructuresByStructureIdStatus400ErrorCodeEnum = {
-	RevisionCreditEntityInvalid: "RevisionCreditEntityInvalid",
-	RevisionContributionActorRequired: "RevisionContributionActorRequired",
+/**
+ * @type object
+ */
+export type PutApiTagPathsByPathIdVoteStatus400 = MalformedRequestBody;
+
+/**
+ * @type object
+ */
+export type PutApiTagPathsByPathIdVoteStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'TagPathNotFound'
+		 * @type string
+		 */
+		code: "TagPathNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiTagPathsByPathIdVoteStatus422 = ValidationError;
+
+export const PutApiTagPathsByPathIdVoteStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
 } as const;
 
-export type PutApiTagStructuresByStructureIdStatus400ErrorCodeEnum =
-	(typeof PutApiTagStructuresByStructureIdStatus400ErrorCodeEnum)[keyof typeof PutApiTagStructuresByStructureIdStatus400ErrorCodeEnum];
+export type PutApiTagPathsByPathIdVoteStatus429ErrorCodeEnum =
+	(typeof PutApiTagPathsByPathIdVoteStatus429ErrorCodeEnum)[keyof typeof PutApiTagPathsByPathIdVoteStatus429ErrorCodeEnum];
 
-export type PutApiTagStructuresByStructureIdStatus400 =
+export type PutApiTagPathsByPathIdVoteStatus429 =
 	| {
 			/**
 			 * @type object
 			 */
 			error: {
 				/**
-				 * @default 'RevisionCreditEntityInvalid'
+				 * @default 'VoteHotKeyBusy'
 				 * @type string
 				 */
-				code: PutApiTagStructuresByStructureIdStatus400ErrorCodeEnum;
+				code: "VoteHotKeyBusy";
 				/**
 				 * @type string
 				 */
@@ -69707,12 +70814,312 @@ export type PutApiTagStructuresByStructureIdStatus400 =
 			 */
 			requestId: string;
 	  }
-	| MalformedRequestBody;
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @type string
+				 */
+				code: PutApiTagPathsByPathIdVoteStatus429ErrorCodeEnum;
+				/**
+				 * @type string
+				 */
+				message: string;
+				details?: JsonValue;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  };
 
 /**
  * @type object
  */
-export type PutApiTagStructuresByStructureIdStatus403 = {
+export type PutApiTagPathsByPathIdVoteStatus500 = InternalError;
+
+export const PutApiTagPathsByPathIdVoteRequestValueEnum = {
+	"-1": -1,
+	"1": 1,
+} as const;
+
+export type PutApiTagPathsByPathIdVoteRequestValueEnum =
+	(typeof PutApiTagPathsByPathIdVoteRequestValueEnum)[keyof typeof PutApiTagPathsByPathIdVoteRequestValueEnum];
+
+/**
+ * @type object
+ */
+export type PutApiTagPathsByPathIdVoteBody = {
+	/**
+	 * @type string
+	 */
+	value: PutApiTagPathsByPathIdVoteRequestValueEnum;
+};
+
+/**
+ * @type object
+ */
+export type PutApiTagPathsByPathIdVoteOptions = {
+	body: PutApiTagPathsByPathIdVoteBody;
+	path: PutApiTagPathsByPathIdVotePath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PutApiTagPathsByPathIdVoteResponses = {
+	"200": PutApiTagPathsByPathIdVoteStatus200;
+	"400": PutApiTagPathsByPathIdVoteStatus400;
+	"404": PutApiTagPathsByPathIdVoteStatus404;
+	"422": PutApiTagPathsByPathIdVoteStatus422;
+	"429": PutApiTagPathsByPathIdVoteStatus429;
+	"500": PutApiTagPathsByPathIdVoteStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PutApiTagPathsByPathIdVoteResponse =
+	| PutApiTagPathsByPathIdVoteStatus200
+	| PutApiTagPathsByPathIdVoteStatus400
+	| PutApiTagPathsByPathIdVoteStatus404
+	| PutApiTagPathsByPathIdVoteStatus422
+	| PutApiTagPathsByPathIdVoteStatus429
+	| PutApiTagPathsByPathIdVoteStatus500;
+
+/**
+ * @type object
+ */
+export type DeleteApiTagPathsByPathIdVotePath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	pathId: string;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiTagPathsByPathIdVoteStatus200 = {
+	score: string | number;
+	voteCount: string | number;
+	viewerVote: ((-1 | 1) | null) | null;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiTagPathsByPathIdVoteStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'TagPathNotFound'
+		 * @type string
+		 */
+		code: "TagPathNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiTagPathsByPathIdVoteStatus422 = ValidationError;
+
+export const DeleteApiTagPathsByPathIdVoteStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type DeleteApiTagPathsByPathIdVoteStatus429ErrorCodeEnum =
+	(typeof DeleteApiTagPathsByPathIdVoteStatus429ErrorCodeEnum)[keyof typeof DeleteApiTagPathsByPathIdVoteStatus429ErrorCodeEnum];
+
+export type DeleteApiTagPathsByPathIdVoteStatus429 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'VoteHotKeyBusy'
+				 * @type string
+				 */
+				code: "VoteHotKeyBusy";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @type string
+				 */
+				code: DeleteApiTagPathsByPathIdVoteStatus429ErrorCodeEnum;
+				/**
+				 * @type string
+				 */
+				message: string;
+				details?: JsonValue;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  };
+
+/**
+ * @type object
+ */
+export type DeleteApiTagPathsByPathIdVoteStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type DeleteApiTagPathsByPathIdVoteOptions = {
+	body?: never;
+	path: DeleteApiTagPathsByPathIdVotePath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiTagPathsByPathIdVoteResponses = {
+	"200": DeleteApiTagPathsByPathIdVoteStatus200;
+	"404": DeleteApiTagPathsByPathIdVoteStatus404;
+	"422": DeleteApiTagPathsByPathIdVoteStatus422;
+	"429": DeleteApiTagPathsByPathIdVoteStatus429;
+	"500": DeleteApiTagPathsByPathIdVoteStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type DeleteApiTagPathsByPathIdVoteResponse =
+	| DeleteApiTagPathsByPathIdVoteStatus200
+	| DeleteApiTagPathsByPathIdVoteStatus404
+	| DeleteApiTagPathsByPathIdVoteStatus422
+	| DeleteApiTagPathsByPathIdVoteStatus429
+	| DeleteApiTagPathsByPathIdVoteStatus500;
+
+export const PostApiTagPathsMergesStatus200StatusEnum = {
+	proposed: "proposed",
+	accepted: "accepted",
+	rejected: "rejected",
+	reversed: "reversed",
+} as const;
+
+export type PostApiTagPathsMergesStatus200StatusEnum =
+	(typeof PostApiTagPathsMergesStatus200StatusEnum)[keyof typeof PostApiTagPathsMergesStatus200StatusEnum];
+
+/**
+ * @type object
+ */
+export type PostApiTagPathsMergesStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	id: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	sourcePathId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	targetPathId: string;
+	/**
+	 * @type string
+	 */
+	status: PostApiTagPathsMergesStatus200StatusEnum;
+	proposalSource:
+		| {
+				/**
+				 * @type string
+				 */
+				kind: "human";
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				kind: "assisted";
+				/**
+				 * @type string
+				 */
+				system: string;
+				/**
+				 * @type string
+				 */
+				runId: string;
+				/**
+				 * @type string | undefined
+				 */
+				model?: string;
+				/**
+				 * @minLength 0
+				 * @maxLength 1
+				 * @type number | undefined
+				 */
+				confidence?: number;
+		  };
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string | undefined
+	 */
+	createdAt?: string;
+	resolvedAt?: (string | null) | null;
+};
+
+/**
+ * @type object
+ */
+export type PostApiTagPathsMergesStatus400 = MalformedRequestBody;
+
+/**
+ * @type object
+ */
+export type PostApiTagPathsMergesStatus403 = {
 	/**
 	 * @type object
 	 */
@@ -69737,27 +71144,19 @@ export type PutApiTagStructuresByStructureIdStatus403 = {
 	requestId: string;
 };
 
-export const PutApiTagStructuresByStructureIdStatus404ErrorCodeEnum = {
-	TagNotFound: "TagNotFound",
-	TagStructureNotFound: "TagStructureNotFound",
-} as const;
-
-export type PutApiTagStructuresByStructureIdStatus404ErrorCodeEnum =
-	(typeof PutApiTagStructuresByStructureIdStatus404ErrorCodeEnum)[keyof typeof PutApiTagStructuresByStructureIdStatus404ErrorCodeEnum];
-
 /**
  * @type object
  */
-export type PutApiTagStructuresByStructureIdStatus404 = {
+export type PostApiTagPathsMergesStatus404 = {
 	/**
 	 * @type object
 	 */
 	error: {
 		/**
-		 * @default 'TagNotFound'
+		 * @default 'TagPathNotFound'
 		 * @type string
 		 */
-		code: PutApiTagStructuresByStructureIdStatus404ErrorCodeEnum;
+		code: "TagPathNotFound";
 		/**
 		 * @type string
 		 */
@@ -69773,53 +71172,17 @@ export type PutApiTagStructuresByStructureIdStatus404 = {
 	requestId: string;
 };
 
-export const PutApiTagStructuresByStructureIdStatus409ErrorCodeEnum = {
-	TagStructureChanged: "TagStructureChanged",
-	TagStructureDefinitionConflict: "TagStructureDefinitionConflict",
-} as const;
-
-export type PutApiTagStructuresByStructureIdStatus409ErrorCodeEnum =
-	(typeof PutApiTagStructuresByStructureIdStatus409ErrorCodeEnum)[keyof typeof PutApiTagStructuresByStructureIdStatus409ErrorCodeEnum];
-
-/**
- * @type object
- */
-export type PutApiTagStructuresByStructureIdStatus409 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'TagStructureChanged'
-		 * @type string
-		 */
-		code: PutApiTagStructuresByStructureIdStatus409ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-export type PutApiTagStructuresByStructureIdStatus422 =
+export type PostApiTagPathsMergesStatus422 =
 	| {
 			/**
 			 * @type object
 			 */
 			error: {
 				/**
-				 * @default 'InvalidTagStructure'
+				 * @default 'InvalidTagPathMerge'
 				 * @type string
 				 */
-				code: "InvalidTagStructure";
+				code: "InvalidTagPathMerge";
 				/**
 				 * @type string
 				 */
@@ -69836,177 +71199,417 @@ export type PutApiTagStructuresByStructureIdStatus422 =
 	  }
 	| ValidationError;
 
-export const PutApiTagStructuresByStructureIdStatus429ErrorCodeEnum = {
-	ApiQuotaExceeded: "ApiQuotaExceeded",
-	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
-} as const;
-
-export type PutApiTagStructuresByStructureIdStatus429ErrorCodeEnum =
-	(typeof PutApiTagStructuresByStructureIdStatus429ErrorCodeEnum)[keyof typeof PutApiTagStructuresByStructureIdStatus429ErrorCodeEnum];
+/**
+ * @type object
+ */
+export type PostApiTagPathsMergesStatus500 = InternalError;
 
 /**
  * @type object
  */
-export type PutApiTagStructuresByStructureIdStatus429 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @type string
-		 */
-		code: PutApiTagStructuresByStructureIdStatus429ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		details?: JsonValue;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type PutApiTagStructuresByStructureIdStatus500 = InternalError;
-
-export const PutApiTagStructuresByStructureIdRequestRevisionContextContributionRoleEnum = {
-	creator: "creator",
-	editor: "editor",
-	translator: "translator",
-	researcher: "researcher",
-} as const;
-
-export type PutApiTagStructuresByStructureIdRequestRevisionContextContributionRoleEnum =
-	(typeof PutApiTagStructuresByStructureIdRequestRevisionContextContributionRoleEnum)[keyof typeof PutApiTagStructuresByStructureIdRequestRevisionContextContributionRoleEnum];
-
-/**
- * @type object
- */
-export type PutApiTagStructuresByStructureIdBody = {
-	/**
-	 * @type array
-	 */
-	memberTagIds: string[];
+export type PostApiTagPathsMergesBody = {
 	/**
 	 * @description
-	 * Format: `date-time`
+	 * Format: `uuid`
 	 * @type string
 	 */
-	updatedAt: string;
+	sourcePathId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	targetPathId: string;
 	/**
 	 * @minLength 1
-	 * @maxLength 500
+	 * @maxLength 2000
 	 * @type string
 	 */
 	reason: string;
+	proposalSource:
+		| {
+				/**
+				 * @type string
+				 */
+				kind: "human";
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				kind: "assisted";
+				/**
+				 * @minLength 1
+				 * @maxLength 128
+				 * @type string
+				 */
+				system: string;
+				/**
+				 * @minLength 1
+				 * @maxLength 256
+				 * @type string
+				 */
+				runId: string;
+				/**
+				 * @minLength 1
+				 * @maxLength 128
+				 * @type string | undefined
+				 */
+				model?: string;
+				/**
+				 * @minLength 0
+				 * @maxLength 1
+				 * @type number | undefined
+				 */
+				confidence?: number;
+		  };
+};
+
+/**
+ * @type object
+ */
+export type PostApiTagPathsMergesOptions = {
+	body: PostApiTagPathsMergesBody;
+	path?: never;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PostApiTagPathsMergesResponses = {
+	"200": PostApiTagPathsMergesStatus200;
+	"400": PostApiTagPathsMergesStatus400;
+	"403": PostApiTagPathsMergesStatus403;
+	"404": PostApiTagPathsMergesStatus404;
+	"422": PostApiTagPathsMergesStatus422;
+	"500": PostApiTagPathsMergesStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PostApiTagPathsMergesResponse =
+	| PostApiTagPathsMergesStatus200
+	| PostApiTagPathsMergesStatus400
+	| PostApiTagPathsMergesStatus403
+	| PostApiTagPathsMergesStatus404
+	| PostApiTagPathsMergesStatus422
+	| PostApiTagPathsMergesStatus500;
+
+export const GetApiTagPathsMergesPendingLocalizationLanguagesEnum = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetApiTagPathsMergesPendingLocalizationLanguagesEnum =
+	(typeof GetApiTagPathsMergesPendingLocalizationLanguagesEnum)[keyof typeof GetApiTagPathsMergesPendingLocalizationLanguagesEnum];
+
+/**
+ * @type object
+ */
+export type GetApiTagPathsMergesPendingQuery = {
 	/**
-	 * @type object | undefined
+	 * @type array | undefined
 	 */
-	revisionContext?: {
-		contribution?:
+	localizationLanguages?: GetApiTagPathsMergesPendingLocalizationLanguagesEnum[];
+	/**
+	 * @default 50
+	 */
+	limit?: string | number;
+};
+
+export const GetApiTagPathsMergesPendingStatus200ItemsSourceMembersLanguage = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetApiTagPathsMergesPendingStatus200ItemsSourceMembersLanguage =
+	(typeof GetApiTagPathsMergesPendingStatus200ItemsSourceMembersLanguage)[keyof typeof GetApiTagPathsMergesPendingStatus200ItemsSourceMembersLanguage];
+
+export const GetApiTagPathsMergesPendingStatus200ItemsSourceMembersAvatarIconPrefixEnum = {
+	fas: "fas",
+	fab: "fab",
+} as const;
+
+export type GetApiTagPathsMergesPendingStatus200ItemsSourceMembersAvatarIconPrefixEnum =
+	(typeof GetApiTagPathsMergesPendingStatus200ItemsSourceMembersAvatarIconPrefixEnum)[keyof typeof GetApiTagPathsMergesPendingStatus200ItemsSourceMembersAvatarIconPrefixEnum];
+
+export const GetApiTagPathsMergesPendingStatus200ItemsTargetMembersLanguage = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetApiTagPathsMergesPendingStatus200ItemsTargetMembersLanguage =
+	(typeof GetApiTagPathsMergesPendingStatus200ItemsTargetMembersLanguage)[keyof typeof GetApiTagPathsMergesPendingStatus200ItemsTargetMembersLanguage];
+
+export const GetApiTagPathsMergesPendingStatus200ItemsTargetMembersAvatarIconPrefixEnum = {
+	fas: "fas",
+	fab: "fab",
+} as const;
+
+export type GetApiTagPathsMergesPendingStatus200ItemsTargetMembersAvatarIconPrefixEnum =
+	(typeof GetApiTagPathsMergesPendingStatus200ItemsTargetMembersAvatarIconPrefixEnum)[keyof typeof GetApiTagPathsMergesPendingStatus200ItemsTargetMembersAvatarIconPrefixEnum];
+
+/**
+ * @type object
+ */
+export type GetApiTagPathsMergesPendingStatus200 = {
+	/**
+	 * @type array
+	 */
+	items: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		id: string;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		sourcePathId: string;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		targetPathId: string;
+		/**
+		 * @type array
+		 */
+		sourceMembers: {
+			ordinal: string | number;
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			tagId: string;
+			language: (GetApiTagPathsMergesPendingStatus200ItemsSourceMembersLanguage | null) | null;
+			title: (string | null) | null;
+			summary: (string | null) | null;
+			avatar:
+				| (
+						| (
+								| {
+										/**
+										 * @type string
+										 */
+										type: "image";
+										/**
+										 * @type object
+										 */
+										image: {
+											/**
+											 * @description
+											 * Format: `uuid`
+											 * @type string
+											 */
+											id: string;
+											/**
+											 * @type string
+											 */
+											url: string;
+										};
+								  }
+								| {
+										/**
+										 * @type string
+										 */
+										type: "emoji";
+										/**
+										 * @maxLength 64
+										 * @type string
+										 */
+										emoji: string;
+								  }
+								| {
+										/**
+										 * @type string
+										 */
+										type: "icon";
+										/**
+										 * @type object
+										 */
+										icon: {
+											/**
+											 * @type string
+											 */
+											provider: "font-awesome";
+											/**
+											 * @type string
+											 */
+											prefix: GetApiTagPathsMergesPendingStatus200ItemsSourceMembersAvatarIconPrefixEnum;
+											/**
+											 * @maxLength 128
+											 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+											 * @type string
+											 */
+											name: string;
+										};
+								  }
+						  )
+						| null
+				  )
+				| null;
+		}[];
+		/**
+		 * @type array
+		 */
+		targetMembers: {
+			ordinal: string | number;
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			tagId: string;
+			language: (GetApiTagPathsMergesPendingStatus200ItemsTargetMembersLanguage | null) | null;
+			title: (string | null) | null;
+			summary: (string | null) | null;
+			avatar:
+				| (
+						| (
+								| {
+										/**
+										 * @type string
+										 */
+										type: "image";
+										/**
+										 * @type object
+										 */
+										image: {
+											/**
+											 * @description
+											 * Format: `uuid`
+											 * @type string
+											 */
+											id: string;
+											/**
+											 * @type string
+											 */
+											url: string;
+										};
+								  }
+								| {
+										/**
+										 * @type string
+										 */
+										type: "emoji";
+										/**
+										 * @maxLength 64
+										 * @type string
+										 */
+										emoji: string;
+								  }
+								| {
+										/**
+										 * @type string
+										 */
+										type: "icon";
+										/**
+										 * @type object
+										 */
+										icon: {
+											/**
+											 * @type string
+											 */
+											provider: "font-awesome";
+											/**
+											 * @type string
+											 */
+											prefix: GetApiTagPathsMergesPendingStatus200ItemsTargetMembersAvatarIconPrefixEnum;
+											/**
+											 * @maxLength 128
+											 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+											 * @type string
+											 */
+											name: string;
+										};
+								  }
+						  )
+						| null
+				  )
+				| null;
+		}[];
+		/**
+		 * @type string
+		 */
+		reason: string;
+		proposalSource:
 			| {
 					/**
 					 * @type string
 					 */
-					primary: "human";
+					kind: "human";
 			  }
 			| {
 					/**
 					 * @type string
 					 */
-					primary: "unattributed";
-			  }
-			| {
+					kind: "assisted";
 					/**
 					 * @type string
 					 */
-					primary: "ai";
+					system: string;
 					/**
-					 * @description
-					 * Format: `uuid`
 					 * @type string
 					 */
-					creditedEntityId: string;
+					runId: string;
 					/**
-					 * @default 'creator'
-					 * @type string
+					 * @type string | undefined
 					 */
-					role: PutApiTagStructuresByStructureIdRequestRevisionContextContributionRoleEnum;
+					model?: string;
+					/**
+					 * @minLength 0
+					 * @maxLength 1
+					 * @type number | undefined
+					 */
+					confidence?: number;
 			  };
-	};
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		proposedByProfileId: string;
+		/**
+		 * @type string
+		 */
+		status: "proposed";
+		ageSeconds: string | number;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		createdAt: string;
+	}[];
 };
 
 /**
  * @type object
  */
-export type PutApiTagStructuresByStructureIdOptions = {
-	body: PutApiTagStructuresByStructureIdBody;
-	path: PutApiTagStructuresByStructureIdPath;
-	query?: PutApiTagStructuresByStructureIdQuery;
-	headers?: never;
-};
-
-/**
- * @type object
- */
-export type PutApiTagStructuresByStructureIdResponses = {
-	"200": PutApiTagStructuresByStructureIdStatus200;
-	"400": PutApiTagStructuresByStructureIdStatus400;
-	"403": PutApiTagStructuresByStructureIdStatus403;
-	"404": PutApiTagStructuresByStructureIdStatus404;
-	"409": PutApiTagStructuresByStructureIdStatus409;
-	"422": PutApiTagStructuresByStructureIdStatus422;
-	"429": PutApiTagStructuresByStructureIdStatus429;
-	"500": PutApiTagStructuresByStructureIdStatus500;
-};
-
-/**
- * @description Union of all possible responses
- */
-export type PutApiTagStructuresByStructureIdResponse =
-	| PutApiTagStructuresByStructureIdStatus200
-	| PutApiTagStructuresByStructureIdStatus400
-	| PutApiTagStructuresByStructureIdStatus403
-	| PutApiTagStructuresByStructureIdStatus404
-	| PutApiTagStructuresByStructureIdStatus409
-	| PutApiTagStructuresByStructureIdStatus422
-	| PutApiTagStructuresByStructureIdStatus429
-	| PutApiTagStructuresByStructureIdStatus500;
-
-/**
- * @type object
- */
-export type PutApiTagStructuresByStructureIdVotePath = {
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	structureId: string;
-};
-
-/**
- * @type object
- */
-export type PutApiTagStructuresByStructureIdVoteStatus200 = {
-	score: string | number;
-	voteCount: string | number;
-	viewerVote: ((-1 | 1) | null) | null;
-};
-
-/**
- * @type object
- */
-export type PutApiTagStructuresByStructureIdVoteStatus400 = MalformedRequestBody;
-
-/**
- * @type object
- */
-export type PutApiTagStructuresByStructureIdVoteStatus403 = {
+export type GetApiTagPathsMergesPendingStatus403 = {
 	/**
 	 * @type object
 	 */
@@ -70034,251 +71637,248 @@ export type PutApiTagStructuresByStructureIdVoteStatus403 = {
 /**
  * @type object
  */
-export type PutApiTagStructuresByStructureIdVoteStatus404 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'TagStructureNotFound'
-		 * @type string
-		 */
-		code: "TagStructureNotFound";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
+export type GetApiTagPathsMergesPendingStatus422 = ValidationError;
 
 /**
  * @type object
  */
-export type PutApiTagStructuresByStructureIdVoteStatus422 = ValidationError;
-
-export const PutApiTagStructuresByStructureIdVoteStatus429ErrorCodeEnum = {
-	ApiQuotaExceeded: "ApiQuotaExceeded",
-	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
-} as const;
-
-export type PutApiTagStructuresByStructureIdVoteStatus429ErrorCodeEnum =
-	(typeof PutApiTagStructuresByStructureIdVoteStatus429ErrorCodeEnum)[keyof typeof PutApiTagStructuresByStructureIdVoteStatus429ErrorCodeEnum];
+export type GetApiTagPathsMergesPendingStatus500 = InternalError;
 
 /**
  * @type object
  */
-export type PutApiTagStructuresByStructureIdVoteStatus429 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @type string
-		 */
-		code: PutApiTagStructuresByStructureIdVoteStatus429ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		details?: JsonValue;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type PutApiTagStructuresByStructureIdVoteStatus500 = InternalError;
-
-export const PutApiTagStructuresByStructureIdVoteRequestValueEnum = {
-	"-1": -1,
-	"1": 1,
-} as const;
-
-export type PutApiTagStructuresByStructureIdVoteRequestValueEnum =
-	(typeof PutApiTagStructuresByStructureIdVoteRequestValueEnum)[keyof typeof PutApiTagStructuresByStructureIdVoteRequestValueEnum];
-
-/**
- * @type object
- */
-export type PutApiTagStructuresByStructureIdVoteBody = {
-	/**
-	 * @type string
-	 */
-	value: PutApiTagStructuresByStructureIdVoteRequestValueEnum;
-};
-
-/**
- * @type object
- */
-export type PutApiTagStructuresByStructureIdVoteOptions = {
-	body: PutApiTagStructuresByStructureIdVoteBody;
-	path: PutApiTagStructuresByStructureIdVotePath;
-	query?: never;
-	headers?: never;
-};
-
-/**
- * @type object
- */
-export type PutApiTagStructuresByStructureIdVoteResponses = {
-	"200": PutApiTagStructuresByStructureIdVoteStatus200;
-	"400": PutApiTagStructuresByStructureIdVoteStatus400;
-	"403": PutApiTagStructuresByStructureIdVoteStatus403;
-	"404": PutApiTagStructuresByStructureIdVoteStatus404;
-	"422": PutApiTagStructuresByStructureIdVoteStatus422;
-	"429": PutApiTagStructuresByStructureIdVoteStatus429;
-	"500": PutApiTagStructuresByStructureIdVoteStatus500;
-};
-
-/**
- * @description Union of all possible responses
- */
-export type PutApiTagStructuresByStructureIdVoteResponse =
-	| PutApiTagStructuresByStructureIdVoteStatus200
-	| PutApiTagStructuresByStructureIdVoteStatus400
-	| PutApiTagStructuresByStructureIdVoteStatus403
-	| PutApiTagStructuresByStructureIdVoteStatus404
-	| PutApiTagStructuresByStructureIdVoteStatus422
-	| PutApiTagStructuresByStructureIdVoteStatus429
-	| PutApiTagStructuresByStructureIdVoteStatus500;
-
-/**
- * @type object
- */
-export type DeleteApiTagStructuresByStructureIdVotePath = {
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	structureId: string;
-};
-
-/**
- * @type object
- */
-export type DeleteApiTagStructuresByStructureIdVoteStatus200 = {
-	score: string | number;
-	voteCount: string | number;
-	viewerVote: ((-1 | 1) | null) | null;
-};
-
-/**
- * @type object
- */
-export type DeleteApiTagStructuresByStructureIdVoteStatus403 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'PlatformCapabilityRequired'
-		 * @type string
-		 */
-		code: "PlatformCapabilityRequired";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type DeleteApiTagStructuresByStructureIdVoteStatus404 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'TagStructureNotFound'
-		 * @type string
-		 */
-		code: "TagStructureNotFound";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type DeleteApiTagStructuresByStructureIdVoteStatus422 = ValidationError;
-
-export const DeleteApiTagStructuresByStructureIdVoteStatus429ErrorCodeEnum = {
-	ApiQuotaExceeded: "ApiQuotaExceeded",
-	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
-} as const;
-
-export type DeleteApiTagStructuresByStructureIdVoteStatus429ErrorCodeEnum =
-	(typeof DeleteApiTagStructuresByStructureIdVoteStatus429ErrorCodeEnum)[keyof typeof DeleteApiTagStructuresByStructureIdVoteStatus429ErrorCodeEnum];
-
-/**
- * @type object
- */
-export type DeleteApiTagStructuresByStructureIdVoteStatus429 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @type string
-		 */
-		code: DeleteApiTagStructuresByStructureIdVoteStatus429ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		details?: JsonValue;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type DeleteApiTagStructuresByStructureIdVoteStatus500 = InternalError;
-
-/**
- * @type object
- */
-export type DeleteApiTagStructuresByStructureIdVoteOptions = {
+export type GetApiTagPathsMergesPendingOptions = {
 	body?: never;
-	path: DeleteApiTagStructuresByStructureIdVotePath;
+	path?: never;
+	query?: GetApiTagPathsMergesPendingQuery;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type GetApiTagPathsMergesPendingResponses = {
+	"200": GetApiTagPathsMergesPendingStatus200;
+	"403": GetApiTagPathsMergesPendingStatus403;
+	"422": GetApiTagPathsMergesPendingStatus422;
+	"500": GetApiTagPathsMergesPendingStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type GetApiTagPathsMergesPendingResponse =
+	| GetApiTagPathsMergesPendingStatus200
+	| GetApiTagPathsMergesPendingStatus403
+	| GetApiTagPathsMergesPendingStatus422
+	| GetApiTagPathsMergesPendingStatus500;
+
+/**
+ * @type object
+ */
+export type PutApiTagPathsMergesByMergeIdResolutionPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	mergeId: string;
+};
+
+export const PutApiTagPathsMergesByMergeIdResolutionStatus200StatusEnum = {
+	proposed: "proposed",
+	accepted: "accepted",
+	rejected: "rejected",
+	reversed: "reversed",
+} as const;
+
+export type PutApiTagPathsMergesByMergeIdResolutionStatus200StatusEnum =
+	(typeof PutApiTagPathsMergesByMergeIdResolutionStatus200StatusEnum)[keyof typeof PutApiTagPathsMergesByMergeIdResolutionStatus200StatusEnum];
+
+/**
+ * @type object
+ */
+export type PutApiTagPathsMergesByMergeIdResolutionStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	id: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	sourcePathId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	targetPathId: string;
+	/**
+	 * @type string
+	 */
+	status: PutApiTagPathsMergesByMergeIdResolutionStatus200StatusEnum;
+	proposalSource:
+		| {
+				/**
+				 * @type string
+				 */
+				kind: "human";
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				kind: "assisted";
+				/**
+				 * @type string
+				 */
+				system: string;
+				/**
+				 * @type string
+				 */
+				runId: string;
+				/**
+				 * @type string | undefined
+				 */
+				model?: string;
+				/**
+				 * @minLength 0
+				 * @maxLength 1
+				 * @type number | undefined
+				 */
+				confidence?: number;
+		  };
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string | undefined
+	 */
+	createdAt?: string;
+	resolvedAt?: (string | null) | null;
+};
+
+/**
+ * @type object
+ */
+export type PutApiTagPathsMergesByMergeIdResolutionStatus400 = MalformedRequestBody;
+
+/**
+ * @type object
+ */
+export type PutApiTagPathsMergesByMergeIdResolutionStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'PlatformCapabilityRequired'
+		 * @type string
+		 */
+		code: "PlatformCapabilityRequired";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiTagPathsMergesByMergeIdResolutionStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'TagPathMergeNotFound'
+		 * @type string
+		 */
+		code: "TagPathMergeNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export type PutApiTagPathsMergesByMergeIdResolutionStatus422 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'InvalidTagPathMerge'
+				 * @type string
+				 */
+				code: "InvalidTagPathMerge";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| ValidationError;
+
+/**
+ * @type object
+ */
+export type PutApiTagPathsMergesByMergeIdResolutionStatus500 = InternalError;
+
+export const PutApiTagPathsMergesByMergeIdResolutionRequestResolutionEnum = {
+	accepted: "accepted",
+	rejected: "rejected",
+	reversed: "reversed",
+} as const;
+
+export type PutApiTagPathsMergesByMergeIdResolutionRequestResolutionEnum =
+	(typeof PutApiTagPathsMergesByMergeIdResolutionRequestResolutionEnum)[keyof typeof PutApiTagPathsMergesByMergeIdResolutionRequestResolutionEnum];
+
+/**
+ * @type object
+ */
+export type PutApiTagPathsMergesByMergeIdResolutionBody = {
+	/**
+	 * @type string
+	 */
+	resolution: PutApiTagPathsMergesByMergeIdResolutionRequestResolutionEnum;
+};
+
+/**
+ * @type object
+ */
+export type PutApiTagPathsMergesByMergeIdResolutionOptions = {
+	body: PutApiTagPathsMergesByMergeIdResolutionBody;
+	path: PutApiTagPathsMergesByMergeIdResolutionPath;
 	query?: never;
 	headers?: never;
 };
@@ -70286,25 +71886,25 @@ export type DeleteApiTagStructuresByStructureIdVoteOptions = {
 /**
  * @type object
  */
-export type DeleteApiTagStructuresByStructureIdVoteResponses = {
-	"200": DeleteApiTagStructuresByStructureIdVoteStatus200;
-	"403": DeleteApiTagStructuresByStructureIdVoteStatus403;
-	"404": DeleteApiTagStructuresByStructureIdVoteStatus404;
-	"422": DeleteApiTagStructuresByStructureIdVoteStatus422;
-	"429": DeleteApiTagStructuresByStructureIdVoteStatus429;
-	"500": DeleteApiTagStructuresByStructureIdVoteStatus500;
+export type PutApiTagPathsMergesByMergeIdResolutionResponses = {
+	"200": PutApiTagPathsMergesByMergeIdResolutionStatus200;
+	"400": PutApiTagPathsMergesByMergeIdResolutionStatus400;
+	"403": PutApiTagPathsMergesByMergeIdResolutionStatus403;
+	"404": PutApiTagPathsMergesByMergeIdResolutionStatus404;
+	"422": PutApiTagPathsMergesByMergeIdResolutionStatus422;
+	"500": PutApiTagPathsMergesByMergeIdResolutionStatus500;
 };
 
 /**
  * @description Union of all possible responses
  */
-export type DeleteApiTagStructuresByStructureIdVoteResponse =
-	| DeleteApiTagStructuresByStructureIdVoteStatus200
-	| DeleteApiTagStructuresByStructureIdVoteStatus403
-	| DeleteApiTagStructuresByStructureIdVoteStatus404
-	| DeleteApiTagStructuresByStructureIdVoteStatus422
-	| DeleteApiTagStructuresByStructureIdVoteStatus429
-	| DeleteApiTagStructuresByStructureIdVoteStatus500;
+export type PutApiTagPathsMergesByMergeIdResolutionResponse =
+	| PutApiTagPathsMergesByMergeIdResolutionStatus200
+	| PutApiTagPathsMergesByMergeIdResolutionStatus400
+	| PutApiTagPathsMergesByMergeIdResolutionStatus403
+	| PutApiTagPathsMergesByMergeIdResolutionStatus404
+	| PutApiTagPathsMergesByMergeIdResolutionStatus422
+	| PutApiTagPathsMergesByMergeIdResolutionStatus500;
 
 /**
  * @type object
@@ -70347,7 +71947,7 @@ export type GetApiUnitsByTypeByUnitIdTagsQuery = {
 	/**
 	 * @default 20
 	 */
-	structureLimit?: string | number;
+	pathLimit?: string | number;
 	/**
 	 * @default 10
 	 */
@@ -70358,7 +71958,7 @@ export type GetApiUnitsByTypeByUnitIdTagsQuery = {
 	perRealmLimit?: string | number;
 };
 
-export const GetApiUnitsByTypeByUnitIdTagsStatus200StructuresMembersLanguage = {
+export const GetApiUnitsByTypeByUnitIdTagsStatus200PathsMembersLanguage = {
 	zh: "zh",
 	en: "en",
 	ja: "ja",
@@ -70368,16 +71968,16 @@ export const GetApiUnitsByTypeByUnitIdTagsStatus200StructuresMembersLanguage = {
 	es: "es",
 } as const;
 
-export type GetApiUnitsByTypeByUnitIdTagsStatus200StructuresMembersLanguage =
-	(typeof GetApiUnitsByTypeByUnitIdTagsStatus200StructuresMembersLanguage)[keyof typeof GetApiUnitsByTypeByUnitIdTagsStatus200StructuresMembersLanguage];
+export type GetApiUnitsByTypeByUnitIdTagsStatus200PathsMembersLanguage =
+	(typeof GetApiUnitsByTypeByUnitIdTagsStatus200PathsMembersLanguage)[keyof typeof GetApiUnitsByTypeByUnitIdTagsStatus200PathsMembersLanguage];
 
-export const GetApiUnitsByTypeByUnitIdTagsStatus200StructuresMembersAvatarIconPrefixEnum = {
+export const GetApiUnitsByTypeByUnitIdTagsStatus200PathsMembersAvatarIconPrefixEnum = {
 	fas: "fas",
 	fab: "fab",
 } as const;
 
-export type GetApiUnitsByTypeByUnitIdTagsStatus200StructuresMembersAvatarIconPrefixEnum =
-	(typeof GetApiUnitsByTypeByUnitIdTagsStatus200StructuresMembersAvatarIconPrefixEnum)[keyof typeof GetApiUnitsByTypeByUnitIdTagsStatus200StructuresMembersAvatarIconPrefixEnum];
+export type GetApiUnitsByTypeByUnitIdTagsStatus200PathsMembersAvatarIconPrefixEnum =
+	(typeof GetApiUnitsByTypeByUnitIdTagsStatus200PathsMembersAvatarIconPrefixEnum)[keyof typeof GetApiUnitsByTypeByUnitIdTagsStatus200PathsMembersAvatarIconPrefixEnum];
 
 export const GetApiUnitsByTypeByUnitIdTagsStatus200GlobalLanguage = {
 	zh: "zh",
@@ -70470,13 +72070,13 @@ export type GetApiUnitsByTypeByUnitIdTagsStatus200 = {
 	/**
 	 * @type array
 	 */
-	structures: {
+	paths: {
 		/**
 		 * @description
 		 * Format: `uuid`
 		 * @type string
 		 */
-		structureId: string;
+		pathId: string;
 		/**
 		 * @type boolean
 		 */
@@ -70485,8 +72085,19 @@ export type GetApiUnitsByTypeByUnitIdTagsStatus200 = {
 		score: string | number;
 		voteCount: string | number;
 		viewerVote: ((-1 | 1) | null) | null;
+		spoilerVoteCount: string | number;
+		/**
+		 * @type object
+		 */
+		spoilerDistribution: {
+			none: string | number;
+			minor: string | number;
+			major: string | number;
+		};
+		viewerSpoilerLevel: ((0 | 1 | 2) | null) | null;
 		definitionScore: string | number;
 		definitionVoteCount: string | number;
+		usageCount: string | number;
 		/**
 		 * @type array
 		 */
@@ -70498,7 +72109,7 @@ export type GetApiUnitsByTypeByUnitIdTagsStatus200 = {
 			 * @type string
 			 */
 			tagId: string;
-			language: (GetApiUnitsByTypeByUnitIdTagsStatus200StructuresMembersLanguage | null) | null;
+			language: (GetApiUnitsByTypeByUnitIdTagsStatus200PathsMembersLanguage | null) | null;
 			title: (string | null) | null;
 			summary: (string | null) | null;
 			avatar:
@@ -70552,7 +72163,7 @@ export type GetApiUnitsByTypeByUnitIdTagsStatus200 = {
 											/**
 											 * @type string
 											 */
-											prefix: GetApiUnitsByTypeByUnitIdTagsStatus200StructuresMembersAvatarIconPrefixEnum;
+											prefix: GetApiUnitsByTypeByUnitIdTagsStatus200PathsMembersAvatarIconPrefixEnum;
 											/**
 											 * @maxLength 128
 											 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
@@ -70677,6 +72288,13 @@ export type GetApiUnitsByTypeByUnitIdTagsStatus200 = {
 		voteCount: string | number;
 		viewerVote: ((-1 | 1) | null) | null;
 	}[];
+	/**
+	 * @type object
+	 */
+	totals: {
+		paths: string | number;
+		global: string | number;
+	};
 	/**
 	 * @type array
 	 */
@@ -71034,7 +72652,7 @@ export type GetApiUnitsByTypeByUnitIdTagsResponse =
 /**
  * @type object
  */
-export type PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdPath = {
+export type PutApiUnitsByTypeByUnitIdTagPathsByPathIdPath = {
 	type: ("book" | "software" | "media") | "series";
 	/**
 	 * @description
@@ -71047,13 +72665,13 @@ export type PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdPath = {
 	 * Format: `uuid`
 	 * @type string
 	 */
-	structureId: string;
+	pathId: string;
 };
 
 /**
  * @type object
  */
-export type PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus200 = {
+export type PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus200 = {
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -71065,51 +72683,26 @@ export type PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus200 = {
 	 * Format: `uuid`
 	 * @type string
 	 */
-	structureId: string;
+	pathId: string;
 	score: string | number;
 	voteCount: string | number;
 	viewerVote: ((-1 | 1) | null) | null;
+	spoilerVoteCount: string | number;
+	/**
+	 * @type object
+	 */
+	spoilerDistribution: {
+		none: string | number;
+		minor: string | number;
+		major: string | number;
+	};
+	viewerSpoilerLevel: ((0 | 1 | 2) | null) | null;
 };
-
-export const PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus400ErrorCodeEnum = {
-	RevisionCreditEntityInvalid: "RevisionCreditEntityInvalid",
-	RevisionContributionActorRequired: "RevisionContributionActorRequired",
-} as const;
-
-export type PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus400ErrorCodeEnum =
-	(typeof PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus400ErrorCodeEnum)[keyof typeof PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus400ErrorCodeEnum];
-
-export type PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus400 =
-	| {
-			/**
-			 * @type object
-			 */
-			error: {
-				/**
-				 * @default 'RevisionCreditEntityInvalid'
-				 * @type string
-				 */
-				code: PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus400ErrorCodeEnum;
-				/**
-				 * @type string
-				 */
-				message: string;
-				/**
-				 * @type void | undefined
-				 */
-				details?: void;
-			};
-			/**
-			 * @type string
-			 */
-			requestId: string;
-	  }
-	| MalformedRequestBody;
 
 /**
  * @type object
  */
-export type PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus403 = {
+export type PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus403 = {
 	/**
 	 * @type object
 	 */
@@ -71134,18 +72727,18 @@ export type PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus403 = {
 	requestId: string;
 };
 
-export const PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus404ErrorCodeEnum = {
+export const PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus404ErrorCodeEnum = {
 	UnitNotFound: "UnitNotFound",
-	TagStructureNotFound: "TagStructureNotFound",
+	TagPathNotFound: "TagPathNotFound",
 } as const;
 
-export type PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus404ErrorCodeEnum =
-	(typeof PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus404ErrorCodeEnum)[keyof typeof PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus404ErrorCodeEnum];
+export type PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus404ErrorCodeEnum =
+	(typeof PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus404ErrorCodeEnum)[keyof typeof PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus404ErrorCodeEnum];
 
 /**
  * @type object
  */
-export type PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus404 = {
+export type PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus404 = {
 	/**
 	 * @type object
 	 */
@@ -71154,7 +72747,7 @@ export type PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus404 = {
 		 * @default 'UnitNotFound'
 		 * @type string
 		 */
-		code: PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus404ErrorCodeEnum;
+		code: PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus404ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -71170,17 +72763,17 @@ export type PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus404 = {
 	requestId: string;
 };
 
-export type PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus422 =
+export type PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus422 =
 	| {
 			/**
 			 * @type object
 			 */
 			error: {
 				/**
-				 * @default 'InvalidTagStructure'
+				 * @default 'InvalidTagPath'
 				 * @type string
 				 */
-				code: "InvalidTagStructure";
+				code: "InvalidTagPath";
 				/**
 				 * @type string
 				 */
@@ -71197,101 +72790,71 @@ export type PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus422 =
 	  }
 	| ValidationError;
 
-export const PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus429ErrorCodeEnum = {
+export const PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus429ErrorCodeEnum = {
 	ApiQuotaExceeded: "ApiQuotaExceeded",
 	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
 } as const;
 
-export type PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus429ErrorCodeEnum =
-	(typeof PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus429ErrorCodeEnum)[keyof typeof PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus429ErrorCodeEnum];
+export type PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus429ErrorCodeEnum =
+	(typeof PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus429ErrorCodeEnum)[keyof typeof PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus429ErrorCodeEnum];
+
+export type PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus429 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'VoteHotKeyBusy'
+				 * @type string
+				 */
+				code: "VoteHotKeyBusy";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @type string
+				 */
+				code: PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus429ErrorCodeEnum;
+				/**
+				 * @type string
+				 */
+				message: string;
+				details?: JsonValue;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  };
 
 /**
  * @type object
  */
-export type PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus429 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @type string
-		 */
-		code: PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus429ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		details?: JsonValue;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
+export type PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus500 = InternalError;
 
 /**
  * @type object
  */
-export type PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus500 = InternalError;
-
-export const PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdRequestRevisionContextContributionRoleEnum =
-	{
-		creator: "creator",
-		editor: "editor",
-		translator: "translator",
-		researcher: "researcher",
-	} as const;
-
-export type PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdRequestRevisionContextContributionRoleEnum =
-	(typeof PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdRequestRevisionContextContributionRoleEnum)[keyof typeof PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdRequestRevisionContextContributionRoleEnum];
-
-/**
- * @type object
- */
-export type PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdBody = {
-	/**
-	 * @type object | undefined
-	 */
-	revisionContext?: {
-		contribution?:
-			| {
-					/**
-					 * @type string
-					 */
-					primary: "human";
-			  }
-			| {
-					/**
-					 * @type string
-					 */
-					primary: "unattributed";
-			  }
-			| {
-					/**
-					 * @type string
-					 */
-					primary: "ai";
-					/**
-					 * @description
-					 * Format: `uuid`
-					 * @type string
-					 */
-					creditedEntityId: string;
-					/**
-					 * @default 'creator'
-					 * @type string
-					 */
-					role: PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdRequestRevisionContextContributionRoleEnum;
-			  };
-	};
-};
-
-/**
- * @type object
- */
-export type PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdOptions = {
-	body: PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdBody;
-	path: PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdPath;
+export type PutApiUnitsByTypeByUnitIdTagPathsByPathIdOptions = {
+	body?: never;
+	path: PutApiUnitsByTypeByUnitIdTagPathsByPathIdPath;
 	query?: never;
 	headers?: never;
 };
@@ -71299,32 +72862,30 @@ export type PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdOptions = {
 /**
  * @type object
  */
-export type PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdResponses = {
-	"200": PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus200;
-	"400": PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus400;
-	"403": PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus403;
-	"404": PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus404;
-	"422": PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus422;
-	"429": PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus429;
-	"500": PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus500;
+export type PutApiUnitsByTypeByUnitIdTagPathsByPathIdResponses = {
+	"200": PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus200;
+	"403": PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus403;
+	"404": PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus404;
+	"422": PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus422;
+	"429": PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus429;
+	"500": PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus500;
 };
 
 /**
  * @description Union of all possible responses
  */
-export type PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdResponse =
-	| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus200
-	| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus400
-	| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus403
-	| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus404
-	| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus422
-	| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus429
-	| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus500;
+export type PutApiUnitsByTypeByUnitIdTagPathsByPathIdResponse =
+	| PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus200
+	| PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus403
+	| PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus404
+	| PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus422
+	| PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus429
+	| PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus500;
 
 /**
  * @type object
  */
-export type DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdPath = {
+export type DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdPath = {
 	type: ("book" | "software" | "media") | "series";
 	/**
 	 * @description
@@ -71337,33 +72898,111 @@ export type DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdPath = {
 	 * Format: `uuid`
 	 * @type string
 	 */
-	structureId: string;
+	pathId: string;
 };
 
 /**
  * @type void
  */
-export type DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus204 = void;
+export type DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus204 = void;
 
-export const DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus400ErrorCodeEnum = {
-	RevisionCreditEntityInvalid: "RevisionCreditEntityInvalid",
-	RevisionContributionActorRequired: "RevisionContributionActorRequired",
+export const DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus403ErrorCodeEnum = {
+	PlatformCapabilityRequired: "PlatformCapabilityRequired",
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+	UnitAccessRestricted: "UnitAccessRestricted",
 } as const;
 
-export type DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus400ErrorCodeEnum =
-	(typeof DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus400ErrorCodeEnum)[keyof typeof DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus400ErrorCodeEnum];
+export type DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus403ErrorCodeEnum =
+	(typeof DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus403ErrorCodeEnum)[keyof typeof DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus403ErrorCodeEnum];
 
-export type DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus400 =
+/**
+ * @type object
+ */
+export type DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'PlatformCapabilityRequired'
+		 * @type string
+		 */
+		code: DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus404ErrorCodeEnum = {
+	UnitNotFound: "UnitNotFound",
+	TagPathApplicationNotFound: "TagPathApplicationNotFound",
+} as const;
+
+export type DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus404ErrorCodeEnum =
+	(typeof DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus404ErrorCodeEnum)[keyof typeof DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus404ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus404ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus422 = ValidationError;
+
+export const DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus429ErrorCodeEnum =
+	(typeof DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus429ErrorCodeEnum)[keyof typeof DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus429ErrorCodeEnum];
+
+export type DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus429 =
 	| {
 			/**
 			 * @type object
 			 */
 			error: {
 				/**
-				 * @default 'RevisionCreditEntityInvalid'
+				 * @default 'VoteHotKeyBusy'
 				 * @type string
 				 */
-				code: DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus400ErrorCodeEnum;
+				code: "VoteHotKeyBusy";
 				/**
 				 * @type string
 				 */
@@ -71378,181 +73017,38 @@ export type DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus400 =
 			 */
 			requestId: string;
 	  }
-	| MalformedRequestBody;
-
-export const DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus403ErrorCodeEnum = {
-	PlatformCapabilityRequired: "PlatformCapabilityRequired",
-	UnitPermissionForbidden: "UnitPermissionForbidden",
-	UnitAccessRestricted: "UnitAccessRestricted",
-} as const;
-
-export type DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus403ErrorCodeEnum =
-	(typeof DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus403ErrorCodeEnum)[keyof typeof DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus403ErrorCodeEnum];
-
-/**
- * @type object
- */
-export type DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus403 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'PlatformCapabilityRequired'
-		 * @type string
-		 */
-		code: DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus403ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-export const DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus404ErrorCodeEnum = {
-	UnitNotFound: "UnitNotFound",
-	TagStructureApplicationNotFound: "TagStructureApplicationNotFound",
-} as const;
-
-export type DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus404ErrorCodeEnum =
-	(typeof DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus404ErrorCodeEnum)[keyof typeof DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus404ErrorCodeEnum];
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @type string
+				 */
+				code: DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus429ErrorCodeEnum;
+				/**
+				 * @type string
+				 */
+				message: string;
+				details?: JsonValue;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  };
 
 /**
  * @type object
  */
-export type DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus404 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'UnitNotFound'
-		 * @type string
-		 */
-		code: DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus404ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
+export type DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus500 = InternalError;
 
 /**
  * @type object
  */
-export type DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus422 = ValidationError;
-
-export const DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus429ErrorCodeEnum = {
-	ApiQuotaExceeded: "ApiQuotaExceeded",
-	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
-} as const;
-
-export type DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus429ErrorCodeEnum =
-	(typeof DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus429ErrorCodeEnum)[keyof typeof DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus429ErrorCodeEnum];
-
-/**
- * @type object
- */
-export type DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus429 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @type string
-		 */
-		code: DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus429ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		details?: JsonValue;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus500 = InternalError;
-
-export const DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdRequestRevisionContextContributionRoleEnum =
-	{
-		creator: "creator",
-		editor: "editor",
-		translator: "translator",
-		researcher: "researcher",
-	} as const;
-
-export type DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdRequestRevisionContextContributionRoleEnum =
-	(typeof DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdRequestRevisionContextContributionRoleEnum)[keyof typeof DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdRequestRevisionContextContributionRoleEnum];
-
-/**
- * @type object
- */
-export type DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdBody = {
-	/**
-	 * @type object | undefined
-	 */
-	revisionContext?: {
-		contribution?:
-			| {
-					/**
-					 * @type string
-					 */
-					primary: "human";
-			  }
-			| {
-					/**
-					 * @type string
-					 */
-					primary: "unattributed";
-			  }
-			| {
-					/**
-					 * @type string
-					 */
-					primary: "ai";
-					/**
-					 * @description
-					 * Format: `uuid`
-					 * @type string
-					 */
-					creditedEntityId: string;
-					/**
-					 * @default 'creator'
-					 * @type string
-					 */
-					role: DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdRequestRevisionContextContributionRoleEnum;
-			  };
-	};
-};
-
-/**
- * @type object
- */
-export type DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdOptions = {
-	body: DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdBody;
-	path: DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdPath;
+export type DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdOptions = {
+	body?: never;
+	path: DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdPath;
 	query?: never;
 	headers?: never;
 };
@@ -71560,32 +73056,30 @@ export type DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdOptions = {
 /**
  * @type object
  */
-export type DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdResponses = {
-	"204": DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus204;
-	"400": DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus400;
-	"403": DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus403;
-	"404": DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus404;
-	"422": DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus422;
-	"429": DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus429;
-	"500": DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus500;
+export type DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdResponses = {
+	"204": DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus204;
+	"403": DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus403;
+	"404": DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus404;
+	"422": DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus422;
+	"429": DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus429;
+	"500": DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus500;
 };
 
 /**
  * @description Union of all possible responses
  */
-export type DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdResponse =
-	| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus204
-	| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus400
-	| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus403
-	| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus404
-	| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus422
-	| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus429
-	| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus500;
+export type DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdResponse =
+	| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus204
+	| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus403
+	| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus404
+	| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus422
+	| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus429
+	| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus500;
 
 /**
  * @type object
  */
-export type PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVotePath = {
+export type PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentPath = {
 	type: ("book" | "software" | "media") | "series";
 	/**
 	 * @description
@@ -71598,13 +73092,13 @@ export type PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVotePath = {
 	 * Format: `uuid`
 	 * @type string
 	 */
-	structureId: string;
+	pathId: string;
 };
 
 /**
  * @type object
  */
-export type PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus200 = {
+export type PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus200 = {
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -71616,21 +73110,31 @@ export type PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus200 = {
 	 * Format: `uuid`
 	 * @type string
 	 */
-	structureId: string;
+	pathId: string;
 	score: string | number;
 	voteCount: string | number;
 	viewerVote: ((-1 | 1) | null) | null;
+	spoilerVoteCount: string | number;
+	/**
+	 * @type object
+	 */
+	spoilerDistribution: {
+		none: string | number;
+		minor: string | number;
+		major: string | number;
+	};
+	viewerSpoilerLevel: ((0 | 1 | 2) | null) | null;
 };
 
 /**
  * @type object
  */
-export type PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus400 = MalformedRequestBody;
+export type PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus400 = MalformedRequestBody;
 
 /**
  * @type object
  */
-export type PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus403 = {
+export type PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus403 = {
 	/**
 	 * @type object
 	 */
@@ -71655,18 +73159,18 @@ export type PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus403 = {
 	requestId: string;
 };
 
-export const PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus404ErrorCodeEnum = {
+export const PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus404ErrorCodeEnum = {
 	UnitNotFound: "UnitNotFound",
-	TagStructureApplicationNotFound: "TagStructureApplicationNotFound",
+	TagPathApplicationNotFound: "TagPathApplicationNotFound",
 } as const;
 
-export type PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus404ErrorCodeEnum =
-	(typeof PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus404ErrorCodeEnum)[keyof typeof PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus404ErrorCodeEnum];
+export type PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus404ErrorCodeEnum =
+	(typeof PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus404ErrorCodeEnum)[keyof typeof PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus404ErrorCodeEnum];
 
 /**
  * @type object
  */
-export type PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus404 = {
+export type PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus404 = {
 	/**
 	 * @type object
 	 */
@@ -71675,7 +73179,7 @@ export type PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus404 = {
 		 * @default 'UnitNotFound'
 		 * @type string
 		 */
-		code: PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus404ErrorCodeEnum;
+		code: PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus404ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -71691,17 +73195,17 @@ export type PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus404 = {
 	requestId: string;
 };
 
-export type PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus422 =
+export type PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus422 =
 	| {
 			/**
 			 * @type object
 			 */
 			error: {
 				/**
-				 * @default 'InvalidTagStructure'
+				 * @default 'InvalidTagPath'
 				 * @type string
 				 */
-				code: "InvalidTagStructure";
+				code: "InvalidTagPath";
 				/**
 				 * @type string
 				 */
@@ -71718,67 +73222,102 @@ export type PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus422 =
 	  }
 	| ValidationError;
 
-export const PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus429ErrorCodeEnum = {
+export const PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus429ErrorCodeEnum = {
 	ApiQuotaExceeded: "ApiQuotaExceeded",
 	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
 } as const;
 
-export type PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus429ErrorCodeEnum =
-	(typeof PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus429ErrorCodeEnum)[keyof typeof PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus429ErrorCodeEnum];
+export type PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus429ErrorCodeEnum =
+	(typeof PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus429ErrorCodeEnum)[keyof typeof PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus429ErrorCodeEnum];
+
+export type PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus429 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'VoteHotKeyBusy'
+				 * @type string
+				 */
+				code: "VoteHotKeyBusy";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @type string
+				 */
+				code: PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus429ErrorCodeEnum;
+				/**
+				 * @type string
+				 */
+				message: string;
+				details?: JsonValue;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  };
 
 /**
  * @type object
  */
-export type PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus429 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @type string
-		 */
-		code: PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus429ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		details?: JsonValue;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
+export type PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus500 = InternalError;
 
-/**
- * @type object
- */
-export type PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus500 = InternalError;
-
-export const PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteRequestValueEnum = {
+export const PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentRequestFitVoteEnum = {
 	"-1": -1,
 	"1": 1,
 } as const;
 
-export type PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteRequestValueEnum =
-	(typeof PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteRequestValueEnum)[keyof typeof PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteRequestValueEnum];
+export type PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentRequestFitVoteEnum =
+	(typeof PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentRequestFitVoteEnum)[keyof typeof PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentRequestFitVoteEnum];
+
+export const PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentRequestSpoilerLevelEnum = {
+	"0": 0,
+	"1": 1,
+	"2": 2,
+} as const;
+
+export type PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentRequestSpoilerLevelEnum =
+	(typeof PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentRequestSpoilerLevelEnum)[keyof typeof PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentRequestSpoilerLevelEnum];
 
 /**
  * @type object
  */
-export type PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteBody = {
+export type PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentBody = {
 	/**
-	 * @type string
+	 * @type string | undefined
 	 */
-	value: PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteRequestValueEnum;
+	fitVote?: PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentRequestFitVoteEnum;
+	/**
+	 * @type string | undefined
+	 */
+	spoilerLevel?: PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentRequestSpoilerLevelEnum;
 };
 
 /**
  * @type object
  */
-export type PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteOptions = {
-	body: PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteBody;
-	path: PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVotePath;
+export type PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentOptions = {
+	body: PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentBody;
+	path: PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentPath;
 	query?: never;
 	headers?: never;
 };
@@ -71786,32 +73325,32 @@ export type PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteOptions = {
 /**
  * @type object
  */
-export type PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteResponses = {
-	"200": PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus200;
-	"400": PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus400;
-	"403": PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus403;
-	"404": PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus404;
-	"422": PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus422;
-	"429": PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus429;
-	"500": PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus500;
+export type PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentResponses = {
+	"200": PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus200;
+	"400": PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus400;
+	"403": PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus403;
+	"404": PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus404;
+	"422": PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus422;
+	"429": PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus429;
+	"500": PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus500;
 };
 
 /**
  * @description Union of all possible responses
  */
-export type PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteResponse =
-	| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus200
-	| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus400
-	| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus403
-	| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus404
-	| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus422
-	| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus429
-	| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus500;
+export type PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentResponse =
+	| PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus200
+	| PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus400
+	| PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus403
+	| PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus404
+	| PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus422
+	| PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus429
+	| PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus500;
 
 /**
  * @type object
  */
-export type DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVotePath = {
+export type DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentPath = {
 	type: ("book" | "software" | "media") | "series";
 	/**
 	 * @description
@@ -71824,13 +73363,13 @@ export type DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVotePath = {
 	 * Format: `uuid`
 	 * @type string
 	 */
-	structureId: string;
+	pathId: string;
 };
 
 /**
  * @type object
  */
-export type DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus200 = {
+export type DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus200 = {
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -71842,16 +73381,26 @@ export type DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus200 
 	 * Format: `uuid`
 	 * @type string
 	 */
-	structureId: string;
+	pathId: string;
 	score: string | number;
 	voteCount: string | number;
 	viewerVote: ((-1 | 1) | null) | null;
+	spoilerVoteCount: string | number;
+	/**
+	 * @type object
+	 */
+	spoilerDistribution: {
+		none: string | number;
+		minor: string | number;
+		major: string | number;
+	};
+	viewerSpoilerLevel: ((0 | 1 | 2) | null) | null;
 };
 
 /**
  * @type object
  */
-export type DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus403 = {
+export type DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus403 = {
 	/**
 	 * @type object
 	 */
@@ -71876,18 +73425,18 @@ export type DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus403 
 	requestId: string;
 };
 
-export const DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus404ErrorCodeEnum = {
+export const DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus404ErrorCodeEnum = {
 	UnitNotFound: "UnitNotFound",
-	TagStructureApplicationNotFound: "TagStructureApplicationNotFound",
+	TagPathApplicationNotFound: "TagPathApplicationNotFound",
 } as const;
 
-export type DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus404ErrorCodeEnum =
-	(typeof DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus404ErrorCodeEnum)[keyof typeof DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus404ErrorCodeEnum];
+export type DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus404ErrorCodeEnum =
+	(typeof DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus404ErrorCodeEnum)[keyof typeof DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus404ErrorCodeEnum];
 
 /**
  * @type object
  */
-export type DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus404 = {
+export type DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus404 = {
 	/**
 	 * @type object
 	 */
@@ -71896,7 +73445,7 @@ export type DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus404 
 		 * @default 'UnitNotFound'
 		 * @type string
 		 */
-		code: DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus404ErrorCodeEnum;
+		code: DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus404ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -71915,20 +73464,1994 @@ export type DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus404 
 /**
  * @type object
  */
-export type DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus422 = ValidationError;
+export type DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus422 = ValidationError;
 
-export const DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus429ErrorCodeEnum = {
+export const DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus429ErrorCodeEnum = {
 	ApiQuotaExceeded: "ApiQuotaExceeded",
 	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
 } as const;
 
-export type DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus429ErrorCodeEnum =
-	(typeof DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus429ErrorCodeEnum)[keyof typeof DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus429ErrorCodeEnum];
+export type DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus429ErrorCodeEnum =
+	(typeof DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus429ErrorCodeEnum)[keyof typeof DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus429ErrorCodeEnum];
+
+export type DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus429 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'VoteHotKeyBusy'
+				 * @type string
+				 */
+				code: "VoteHotKeyBusy";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @type string
+				 */
+				code: DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus429ErrorCodeEnum;
+				/**
+				 * @type string
+				 */
+				message: string;
+				details?: JsonValue;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  };
 
 /**
  * @type object
  */
-export type DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus429 = {
+export type DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentOptions = {
+	body?: never;
+	path: DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentResponses = {
+	"200": DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus200;
+	"403": DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus403;
+	"404": DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus404;
+	"422": DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus422;
+	"429": DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus429;
+	"500": DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentResponse =
+	| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus200
+	| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus403
+	| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus404
+	| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus422
+	| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus429
+	| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus500;
+
+/**
+ * @type object
+ */
+export type GetApiRealmsByRealmIdTagPathsPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	realmId: string;
+};
+
+export const GetApiRealmsByRealmIdTagPathsLocalizationLanguagesEnum = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetApiRealmsByRealmIdTagPathsLocalizationLanguagesEnum =
+	(typeof GetApiRealmsByRealmIdTagPathsLocalizationLanguagesEnum)[keyof typeof GetApiRealmsByRealmIdTagPathsLocalizationLanguagesEnum];
+
+/**
+ * @type object
+ */
+export type GetApiRealmsByRealmIdTagPathsQuery = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string | undefined
+	 */
+	unitId?: string;
+	/**
+	 * @type array | undefined
+	 */
+	localizationLanguages?: GetApiRealmsByRealmIdTagPathsLocalizationLanguagesEnum[];
+	/**
+	 * @default 50
+	 */
+	limit?: string | number;
+};
+
+export const GetApiRealmsByRealmIdTagPathsStatus200PolicyFitFallbackEnum = {
+	inherit: "inherit",
+	isolate: "isolate",
+} as const;
+
+export type GetApiRealmsByRealmIdTagPathsStatus200PolicyFitFallbackEnum =
+	(typeof GetApiRealmsByRealmIdTagPathsStatus200PolicyFitFallbackEnum)[keyof typeof GetApiRealmsByRealmIdTagPathsStatus200PolicyFitFallbackEnum];
+
+export const GetApiRealmsByRealmIdTagPathsStatus200PolicySpoilerFallbackEnum = {
+	inherit: "inherit",
+	isolate: "isolate",
+} as const;
+
+export type GetApiRealmsByRealmIdTagPathsStatus200PolicySpoilerFallbackEnum =
+	(typeof GetApiRealmsByRealmIdTagPathsStatus200PolicySpoilerFallbackEnum)[keyof typeof GetApiRealmsByRealmIdTagPathsStatus200PolicySpoilerFallbackEnum];
+
+export const GetApiRealmsByRealmIdTagPathsStatus200ItemsMembersLanguage = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetApiRealmsByRealmIdTagPathsStatus200ItemsMembersLanguage =
+	(typeof GetApiRealmsByRealmIdTagPathsStatus200ItemsMembersLanguage)[keyof typeof GetApiRealmsByRealmIdTagPathsStatus200ItemsMembersLanguage];
+
+export const GetApiRealmsByRealmIdTagPathsStatus200ItemsMembersAvatarIconPrefixEnum = {
+	fas: "fas",
+	fab: "fab",
+} as const;
+
+export type GetApiRealmsByRealmIdTagPathsStatus200ItemsMembersAvatarIconPrefixEnum =
+	(typeof GetApiRealmsByRealmIdTagPathsStatus200ItemsMembersAvatarIconPrefixEnum)[keyof typeof GetApiRealmsByRealmIdTagPathsStatus200ItemsMembersAvatarIconPrefixEnum];
+
+/**
+ * @type object
+ */
+export type GetApiRealmsByRealmIdTagPathsStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	realmId: string;
+	/**
+	 * @type object
+	 */
+	policy: {
+		/**
+		 * @type string
+		 */
+		fitFallback: GetApiRealmsByRealmIdTagPathsStatus200PolicyFitFallbackEnum;
+		/**
+		 * @type string
+		 */
+		spoilerFallback: GetApiRealmsByRealmIdTagPathsStatus200PolicySpoilerFallbackEnum;
+	};
+	/**
+	 * @type array
+	 */
+	items: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		pathId: string;
+		/**
+		 * @type array
+		 */
+		members: {
+			ordinal: string | number;
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			tagId: string;
+			language: (GetApiRealmsByRealmIdTagPathsStatus200ItemsMembersLanguage | null) | null;
+			title: (string | null) | null;
+			summary: (string | null) | null;
+			avatar:
+				| (
+						| (
+								| {
+										/**
+										 * @type string
+										 */
+										type: "image";
+										/**
+										 * @type object
+										 */
+										image: {
+											/**
+											 * @description
+											 * Format: `uuid`
+											 * @type string
+											 */
+											id: string;
+											/**
+											 * @type string
+											 */
+											url: string;
+										};
+								  }
+								| {
+										/**
+										 * @type string
+										 */
+										type: "emoji";
+										/**
+										 * @maxLength 64
+										 * @type string
+										 */
+										emoji: string;
+								  }
+								| {
+										/**
+										 * @type string
+										 */
+										type: "icon";
+										/**
+										 * @type object
+										 */
+										icon: {
+											/**
+											 * @type string
+											 */
+											provider: "font-awesome";
+											/**
+											 * @type string
+											 */
+											prefix: GetApiRealmsByRealmIdTagPathsStatus200ItemsMembersAvatarIconPrefixEnum;
+											/**
+											 * @maxLength 128
+											 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+											 * @type string
+											 */
+											name: string;
+										};
+								  }
+						  )
+						| null
+				  )
+				| null;
+		}[];
+		/**
+		 * @type object
+		 */
+		definition: {
+			/**
+			 * @type string
+			 */
+			authority: "realm";
+			score: string | number;
+			voteCount: string | number;
+			usageCount: string | number;
+			viewerVote: ((-1 | 1) | null) | null;
+			/**
+			 * @type object
+			 */
+			provenance: {
+				/**
+				 * @type string
+				 */
+				authority: "realm";
+				/**
+				 * @type string
+				 */
+				relation: "realm_tag_path_vote_stat";
+			};
+		};
+		application:
+			| ({
+					/**
+					 * @type object
+					 */
+					fit: {
+						authority: "realm" | "global";
+						resolutionState: "decided" | "inherited" | "unresolved";
+						/**
+						 * @type object
+						 */
+						provenance: {
+							authority: "realm" | "global";
+							relation: "realm_unit_tag_path_judgment_stat" | "unit_tag_path_judgment_stat";
+							dimension: "fit" | "spoiler";
+						};
+						score: string | number;
+						voteCount: string | number;
+						viewerVote: ((-1 | 1) | null) | null;
+					};
+					/**
+					 * @type object
+					 */
+					spoiler: {
+						authority: "realm" | "global";
+						resolutionState: "decided" | "inherited" | "unresolved";
+						/**
+						 * @type object
+						 */
+						provenance: {
+							authority: "realm" | "global";
+							relation: "realm_unit_tag_path_judgment_stat" | "unit_tag_path_judgment_stat";
+							dimension: "fit" | "spoiler";
+						};
+						voteCount: string | number;
+						/**
+						 * @type object
+						 */
+						distribution: {
+							none: string | number;
+							minor: string | number;
+							major: string | number;
+						};
+						viewerLevel: ((0 | 1 | 2) | null) | null;
+					};
+			  } | null)
+			| null;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		createdAt: string;
+	}[];
+};
+
+export const GetApiRealmsByRealmIdTagPathsStatus404ErrorCodeEnum = {
+	RealmNotFound: "RealmNotFound",
+	UnitNotFound: "UnitNotFound",
+} as const;
+
+export type GetApiRealmsByRealmIdTagPathsStatus404ErrorCodeEnum =
+	(typeof GetApiRealmsByRealmIdTagPathsStatus404ErrorCodeEnum)[keyof typeof GetApiRealmsByRealmIdTagPathsStatus404ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type GetApiRealmsByRealmIdTagPathsStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'RealmNotFound'
+		 * @type string
+		 */
+		code: GetApiRealmsByRealmIdTagPathsStatus404ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiRealmsByRealmIdTagPathsStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type GetApiRealmsByRealmIdTagPathsStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type GetApiRealmsByRealmIdTagPathsOptions = {
+	body?: never;
+	path: GetApiRealmsByRealmIdTagPathsPath;
+	query?: GetApiRealmsByRealmIdTagPathsQuery;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type GetApiRealmsByRealmIdTagPathsResponses = {
+	"200": GetApiRealmsByRealmIdTagPathsStatus200;
+	"404": GetApiRealmsByRealmIdTagPathsStatus404;
+	"422": GetApiRealmsByRealmIdTagPathsStatus422;
+	"500": GetApiRealmsByRealmIdTagPathsStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type GetApiRealmsByRealmIdTagPathsResponse =
+	| GetApiRealmsByRealmIdTagPathsStatus200
+	| GetApiRealmsByRealmIdTagPathsStatus404
+	| GetApiRealmsByRealmIdTagPathsStatus422
+	| GetApiRealmsByRealmIdTagPathsStatus500;
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdTagPathsByPathIdPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	realmId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	pathId: string;
+};
+
+export const PutApiRealmsByRealmIdTagPathsByPathIdStatus200ViewerVoteEnum = {
+	"-1": -1,
+	"1": 1,
+} as const;
+
+export type PutApiRealmsByRealmIdTagPathsByPathIdStatus200ViewerVoteEnum =
+	(typeof PutApiRealmsByRealmIdTagPathsByPathIdStatus200ViewerVoteEnum)[keyof typeof PutApiRealmsByRealmIdTagPathsByPathIdStatus200ViewerVoteEnum];
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdTagPathsByPathIdStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	realmId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	pathId: string;
+	/**
+	 * @type string | undefined
+	 */
+	viewerVote?: PutApiRealmsByRealmIdTagPathsByPathIdStatus200ViewerVoteEnum;
+};
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdTagPathsByPathIdStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'RealmCapabilityRequired'
+		 * @type string
+		 */
+		code: "RealmCapabilityRequired";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdTagPathsByPathIdStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'TagPathNotFound'
+		 * @type string
+		 */
+		code: "TagPathNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdTagPathsByPathIdStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdTagPathsByPathIdStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'VoteHotKeyBusy'
+		 * @type string
+		 */
+		code: "VoteHotKeyBusy";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdTagPathsByPathIdStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdTagPathsByPathIdOptions = {
+	body?: never;
+	path: PutApiRealmsByRealmIdTagPathsByPathIdPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdTagPathsByPathIdResponses = {
+	"200": PutApiRealmsByRealmIdTagPathsByPathIdStatus200;
+	"403": PutApiRealmsByRealmIdTagPathsByPathIdStatus403;
+	"404": PutApiRealmsByRealmIdTagPathsByPathIdStatus404;
+	"422": PutApiRealmsByRealmIdTagPathsByPathIdStatus422;
+	"429": PutApiRealmsByRealmIdTagPathsByPathIdStatus429;
+	"500": PutApiRealmsByRealmIdTagPathsByPathIdStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PutApiRealmsByRealmIdTagPathsByPathIdResponse =
+	| PutApiRealmsByRealmIdTagPathsByPathIdStatus200
+	| PutApiRealmsByRealmIdTagPathsByPathIdStatus403
+	| PutApiRealmsByRealmIdTagPathsByPathIdStatus404
+	| PutApiRealmsByRealmIdTagPathsByPathIdStatus422
+	| PutApiRealmsByRealmIdTagPathsByPathIdStatus429
+	| PutApiRealmsByRealmIdTagPathsByPathIdStatus500;
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdTagPathsByPathIdVotePath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	realmId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	pathId: string;
+};
+
+export const PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus200ViewerVoteEnum = {
+	"-1": -1,
+	"1": 1,
+} as const;
+
+export type PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus200ViewerVoteEnum =
+	(typeof PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus200ViewerVoteEnum)[keyof typeof PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus200ViewerVoteEnum];
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	realmId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	pathId: string;
+	/**
+	 * @type string | undefined
+	 */
+	viewerVote?: PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus200ViewerVoteEnum;
+};
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus400 = MalformedRequestBody;
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'RealmCapabilityRequired'
+		 * @type string
+		 */
+		code: "RealmCapabilityRequired";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'TagPathNotFound'
+		 * @type string
+		 */
+		code: "TagPathNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus422 = ValidationError;
+
+export const PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus429ErrorCodeEnum =
+	(typeof PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus429ErrorCodeEnum)[keyof typeof PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus429ErrorCodeEnum];
+
+export type PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus429 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'VoteHotKeyBusy'
+				 * @type string
+				 */
+				code: "VoteHotKeyBusy";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @type string
+				 */
+				code: PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus429ErrorCodeEnum;
+				/**
+				 * @type string
+				 */
+				message: string;
+				details?: JsonValue;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  };
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus500 = InternalError;
+
+export const PutApiRealmsByRealmIdTagPathsByPathIdVoteRequestValueEnum = {
+	"-1": -1,
+	"1": 1,
+} as const;
+
+export type PutApiRealmsByRealmIdTagPathsByPathIdVoteRequestValueEnum =
+	(typeof PutApiRealmsByRealmIdTagPathsByPathIdVoteRequestValueEnum)[keyof typeof PutApiRealmsByRealmIdTagPathsByPathIdVoteRequestValueEnum];
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdTagPathsByPathIdVoteBody = {
+	/**
+	 * @type string
+	 */
+	value: PutApiRealmsByRealmIdTagPathsByPathIdVoteRequestValueEnum;
+};
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdTagPathsByPathIdVoteOptions = {
+	body: PutApiRealmsByRealmIdTagPathsByPathIdVoteBody;
+	path: PutApiRealmsByRealmIdTagPathsByPathIdVotePath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdTagPathsByPathIdVoteResponses = {
+	"200": PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus200;
+	"400": PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus400;
+	"403": PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus403;
+	"404": PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus404;
+	"422": PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus422;
+	"429": PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus429;
+	"500": PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PutApiRealmsByRealmIdTagPathsByPathIdVoteResponse =
+	| PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus200
+	| PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus400
+	| PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus403
+	| PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus404
+	| PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus422
+	| PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus429
+	| PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus500;
+
+/**
+ * @type object
+ */
+export type DeleteApiRealmsByRealmIdTagPathsByPathIdVotePath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	realmId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	pathId: string;
+};
+
+export const DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus200ViewerVoteEnum = {
+	"-1": -1,
+	"1": 1,
+} as const;
+
+export type DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus200ViewerVoteEnum =
+	(typeof DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus200ViewerVoteEnum)[keyof typeof DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus200ViewerVoteEnum];
+
+/**
+ * @type object
+ */
+export type DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	realmId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	pathId: string;
+	/**
+	 * @type string | undefined
+	 */
+	viewerVote?: DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus200ViewerVoteEnum;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'RealmCapabilityRequired'
+		 * @type string
+		 */
+		code: "RealmCapabilityRequired";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'TagPathNotFound'
+		 * @type string
+		 */
+		code: "TagPathNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus422 = ValidationError;
+
+export const DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus429ErrorCodeEnum =
+	(typeof DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus429ErrorCodeEnum)[keyof typeof DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus429ErrorCodeEnum];
+
+export type DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus429 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'VoteHotKeyBusy'
+				 * @type string
+				 */
+				code: "VoteHotKeyBusy";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @type string
+				 */
+				code: DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus429ErrorCodeEnum;
+				/**
+				 * @type string
+				 */
+				message: string;
+				details?: JsonValue;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  };
+
+/**
+ * @type object
+ */
+export type DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type DeleteApiRealmsByRealmIdTagPathsByPathIdVoteOptions = {
+	body?: never;
+	path: DeleteApiRealmsByRealmIdTagPathsByPathIdVotePath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiRealmsByRealmIdTagPathsByPathIdVoteResponses = {
+	"200": DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus200;
+	"403": DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus403;
+	"404": DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus404;
+	"422": DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus422;
+	"429": DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus429;
+	"500": DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type DeleteApiRealmsByRealmIdTagPathsByPathIdVoteResponse =
+	| DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus200
+	| DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus403
+	| DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus404
+	| DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus422
+	| DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus429
+	| DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus500;
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	realmId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	pathId: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	realmId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	pathId: string;
+	viewerFitVote?: ((-1 | 1) | null) | null;
+	viewerSpoilerLevel?: ((0 | 1 | 2) | null) | null;
+};
+
+export const PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus403ErrorCodeEnum = {
+	RealmCapabilityRequired: "RealmCapabilityRequired",
+	UnitAccessRestricted: "UnitAccessRestricted",
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+} as const;
+
+export type PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus403ErrorCodeEnum =
+	(typeof PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus403ErrorCodeEnum)[keyof typeof PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'RealmCapabilityRequired'
+		 * @type string
+		 */
+		code: PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus404ErrorCodeEnum = {
+	TagPathApplicationNotFound: "TagPathApplicationNotFound",
+	TagPathNotFound: "TagPathNotFound",
+} as const;
+
+export type PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus404ErrorCodeEnum =
+	(typeof PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus404ErrorCodeEnum)[keyof typeof PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus404ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'TagPathApplicationNotFound'
+		 * @type string
+		 */
+		code: PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus404ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'VoteHotKeyBusy'
+		 * @type string
+		 */
+		code: "VoteHotKeyBusy";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdOptions = {
+	body?: never;
+	path: PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdResponses = {
+	"200": PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus200;
+	"403": PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus403;
+	"404": PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus404;
+	"422": PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus422;
+	"429": PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus429;
+	"500": PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdResponse =
+	| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus200
+	| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus403
+	| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus404
+	| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus422
+	| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus429
+	| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus500;
+
+/**
+ * @type object
+ */
+export type DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	realmId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	pathId: string;
+};
+
+/**
+ * @type void
+ */
+export type DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus204 = void;
+
+export const DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus403ErrorCodeEnum = {
+	RealmCapabilityRequired: "RealmCapabilityRequired",
+	UnitAccessRestricted: "UnitAccessRestricted",
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+} as const;
+
+export type DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus403ErrorCodeEnum =
+	(typeof DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus403ErrorCodeEnum)[keyof typeof DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'RealmCapabilityRequired'
+		 * @type string
+		 */
+		code: DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'TagPathApplicationNotFound'
+		 * @type string
+		 */
+		code: "TagPathApplicationNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'VoteHotKeyBusy'
+		 * @type string
+		 */
+		code: "VoteHotKeyBusy";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdOptions = {
+	body?: never;
+	path: DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdResponses = {
+	"204": DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus204;
+	"403": DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus403;
+	"404": DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus404;
+	"422": DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus422;
+	"429": DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus429;
+	"500": DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdResponse =
+	| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus204
+	| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus403
+	| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus404
+	| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus422
+	| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus429
+	| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus500;
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	realmId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	pathId: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	realmId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	pathId: string;
+	viewerFitVote?: ((-1 | 1) | null) | null;
+	viewerSpoilerLevel?: ((0 | 1 | 2) | null) | null;
+};
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus400 =
+	MalformedRequestBody;
+
+export const PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus403ErrorCodeEnum = {
+	RealmCapabilityRequired: "RealmCapabilityRequired",
+	UnitAccessRestricted: "UnitAccessRestricted",
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+} as const;
+
+export type PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus403ErrorCodeEnum =
+	(typeof PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus403ErrorCodeEnum)[keyof typeof PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'RealmCapabilityRequired'
+		 * @type string
+		 */
+		code: PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'TagPathApplicationNotFound'
+		 * @type string
+		 */
+		code: "TagPathApplicationNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export type PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus422 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'InvalidTagPath'
+				 * @type string
+				 */
+				code: "InvalidTagPath";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| ValidationError;
+
+export const PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus429ErrorCodeEnum =
+	(typeof PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus429ErrorCodeEnum)[keyof typeof PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus429ErrorCodeEnum];
+
+export type PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus429 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'VoteHotKeyBusy'
+				 * @type string
+				 */
+				code: "VoteHotKeyBusy";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @type string
+				 */
+				code: PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus429ErrorCodeEnum;
+				/**
+				 * @type string
+				 */
+				message: string;
+				details?: JsonValue;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  };
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus500 = InternalError;
+
+export const PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentRequestFitVoteEnum = {
+	"-1": -1,
+	"1": 1,
+} as const;
+
+export type PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentRequestFitVoteEnum =
+	(typeof PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentRequestFitVoteEnum)[keyof typeof PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentRequestFitVoteEnum];
+
+export const PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentRequestSpoilerLevelEnum = {
+	"0": 0,
+	"1": 1,
+	"2": 2,
+} as const;
+
+export type PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentRequestSpoilerLevelEnum =
+	(typeof PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentRequestSpoilerLevelEnum)[keyof typeof PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentRequestSpoilerLevelEnum];
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentBody = {
+	/**
+	 * @type string | undefined
+	 */
+	fitVote?: PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentRequestFitVoteEnum;
+	/**
+	 * @type string | undefined
+	 */
+	spoilerLevel?: PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentRequestSpoilerLevelEnum;
+};
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentOptions = {
+	body: PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentBody;
+	path: PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentResponses = {
+	"200": PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus200;
+	"400": PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus400;
+	"403": PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus403;
+	"404": PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus404;
+	"422": PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus422;
+	"429": PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus429;
+	"500": PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentResponse =
+	| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus200
+	| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus400
+	| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus403
+	| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus404
+	| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus422
+	| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus429
+	| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus500;
+
+/**
+ * @type object
+ */
+export type DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	realmId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	pathId: string;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	realmId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	pathId: string;
+	viewerFitVote?: ((-1 | 1) | null) | null;
+	viewerSpoilerLevel?: ((0 | 1 | 2) | null) | null;
+};
+
+export const DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus403ErrorCodeEnum = {
+	RealmCapabilityRequired: "RealmCapabilityRequired",
+	UnitAccessRestricted: "UnitAccessRestricted",
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+} as const;
+
+export type DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus403ErrorCodeEnum =
+	(typeof DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus403ErrorCodeEnum)[keyof typeof DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'RealmCapabilityRequired'
+		 * @type string
+		 */
+		code: DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus422 =
+	ValidationError;
+
+export const DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus429ErrorCodeEnum =
+	(typeof DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus429ErrorCodeEnum)[keyof typeof DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus429ErrorCodeEnum];
+
+export type DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus429 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'VoteHotKeyBusy'
+				 * @type string
+				 */
+				code: "VoteHotKeyBusy";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @type string
+				 */
+				code: DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus429ErrorCodeEnum;
+				/**
+				 * @type string
+				 */
+				message: string;
+				details?: JsonValue;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  };
+
+/**
+ * @type object
+ */
+export type DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentOptions = {
+	body?: never;
+	path: DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentResponses = {
+	"200": DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus200;
+	"403": DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus403;
+	"422": DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus422;
+	"429": DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus429;
+	"500": DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentResponse =
+	| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus200
+	| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus403
+	| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus422
+	| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus429
+	| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus500;
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdTagPathPolicyPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	realmId: string;
+};
+
+export const PutApiRealmsByRealmIdTagPathPolicyStatus200FitFallbackEnum = {
+	inherit: "inherit",
+	isolate: "isolate",
+} as const;
+
+export type PutApiRealmsByRealmIdTagPathPolicyStatus200FitFallbackEnum =
+	(typeof PutApiRealmsByRealmIdTagPathPolicyStatus200FitFallbackEnum)[keyof typeof PutApiRealmsByRealmIdTagPathPolicyStatus200FitFallbackEnum];
+
+export const PutApiRealmsByRealmIdTagPathPolicyStatus200SpoilerFallbackEnum = {
+	inherit: "inherit",
+	isolate: "isolate",
+} as const;
+
+export type PutApiRealmsByRealmIdTagPathPolicyStatus200SpoilerFallbackEnum =
+	(typeof PutApiRealmsByRealmIdTagPathPolicyStatus200SpoilerFallbackEnum)[keyof typeof PutApiRealmsByRealmIdTagPathPolicyStatus200SpoilerFallbackEnum];
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdTagPathPolicyStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	realmId: string;
+	/**
+	 * @type string
+	 */
+	fitFallback: PutApiRealmsByRealmIdTagPathPolicyStatus200FitFallbackEnum;
+	/**
+	 * @type string
+	 */
+	spoilerFallback: PutApiRealmsByRealmIdTagPathPolicyStatus200SpoilerFallbackEnum;
+};
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdTagPathPolicyStatus400 = MalformedRequestBody;
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdTagPathPolicyStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'RealmCapabilityRequired'
+		 * @type string
+		 */
+		code: "RealmCapabilityRequired";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdTagPathPolicyStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'RealmNotFound'
+		 * @type string
+		 */
+		code: "RealmNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdTagPathPolicyStatus422 = ValidationError;
+
+export const PutApiRealmsByRealmIdTagPathPolicyStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PutApiRealmsByRealmIdTagPathPolicyStatus429ErrorCodeEnum =
+	(typeof PutApiRealmsByRealmIdTagPathPolicyStatus429ErrorCodeEnum)[keyof typeof PutApiRealmsByRealmIdTagPathPolicyStatus429ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdTagPathPolicyStatus429 = {
 	/**
 	 * @type object
 	 */
@@ -71936,7 +75459,7 @@ export type DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus429 
 		/**
 		 * @type string
 		 */
-		code: DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus429ErrorCodeEnum;
+		code: PutApiRealmsByRealmIdTagPathPolicyStatus429ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -71952,14 +75475,44 @@ export type DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus429 
 /**
  * @type object
  */
-export type DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus500 = InternalError;
+export type PutApiRealmsByRealmIdTagPathPolicyStatus500 = InternalError;
+
+export const PutApiRealmsByRealmIdTagPathPolicyRequestFitFallbackEnum = {
+	inherit: "inherit",
+	isolate: "isolate",
+} as const;
+
+export type PutApiRealmsByRealmIdTagPathPolicyRequestFitFallbackEnum =
+	(typeof PutApiRealmsByRealmIdTagPathPolicyRequestFitFallbackEnum)[keyof typeof PutApiRealmsByRealmIdTagPathPolicyRequestFitFallbackEnum];
+
+export const PutApiRealmsByRealmIdTagPathPolicyRequestSpoilerFallbackEnum = {
+	inherit: "inherit",
+	isolate: "isolate",
+} as const;
+
+export type PutApiRealmsByRealmIdTagPathPolicyRequestSpoilerFallbackEnum =
+	(typeof PutApiRealmsByRealmIdTagPathPolicyRequestSpoilerFallbackEnum)[keyof typeof PutApiRealmsByRealmIdTagPathPolicyRequestSpoilerFallbackEnum];
 
 /**
  * @type object
  */
-export type DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteOptions = {
-	body?: never;
-	path: DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVotePath;
+export type PutApiRealmsByRealmIdTagPathPolicyBody = {
+	/**
+	 * @type string
+	 */
+	fitFallback: PutApiRealmsByRealmIdTagPathPolicyRequestFitFallbackEnum;
+	/**
+	 * @type string
+	 */
+	spoilerFallback: PutApiRealmsByRealmIdTagPathPolicyRequestSpoilerFallbackEnum;
+};
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdTagPathPolicyOptions = {
+	body: PutApiRealmsByRealmIdTagPathPolicyBody;
+	path: PutApiRealmsByRealmIdTagPathPolicyPath;
 	query?: never;
 	headers?: never;
 };
@@ -71967,25 +75520,27 @@ export type DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteOptions = 
 /**
  * @type object
  */
-export type DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteResponses = {
-	"200": DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus200;
-	"403": DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus403;
-	"404": DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus404;
-	"422": DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus422;
-	"429": DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus429;
-	"500": DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus500;
+export type PutApiRealmsByRealmIdTagPathPolicyResponses = {
+	"200": PutApiRealmsByRealmIdTagPathPolicyStatus200;
+	"400": PutApiRealmsByRealmIdTagPathPolicyStatus400;
+	"403": PutApiRealmsByRealmIdTagPathPolicyStatus403;
+	"404": PutApiRealmsByRealmIdTagPathPolicyStatus404;
+	"422": PutApiRealmsByRealmIdTagPathPolicyStatus422;
+	"429": PutApiRealmsByRealmIdTagPathPolicyStatus429;
+	"500": PutApiRealmsByRealmIdTagPathPolicyStatus500;
 };
 
 /**
  * @description Union of all possible responses
  */
-export type DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteResponse =
-	| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus200
-	| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus403
-	| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus404
-	| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus422
-	| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus429
-	| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus500;
+export type PutApiRealmsByRealmIdTagPathPolicyResponse =
+	| PutApiRealmsByRealmIdTagPathPolicyStatus200
+	| PutApiRealmsByRealmIdTagPathPolicyStatus400
+	| PutApiRealmsByRealmIdTagPathPolicyStatus403
+	| PutApiRealmsByRealmIdTagPathPolicyStatus404
+	| PutApiRealmsByRealmIdTagPathPolicyStatus422
+	| PutApiRealmsByRealmIdTagPathPolicyStatus429
+	| PutApiRealmsByRealmIdTagPathPolicyStatus500;
 
 export const GetApiUsersMeTagRealmSubscriptionsLocalizationLanguagesEnum = {
 	zh: "zh",
@@ -72594,7 +76149,7 @@ export const ResolveUnitSlugAddressStatus200KindEnum = {
 	entity: "entity",
 	label: "label",
 	tag: "tag",
-	structure: "structure",
+	tag_path: "tag_path",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -72927,7 +76482,7 @@ export const ResolveScopedUnitSlugAddressKind = {
 	entity: "entity",
 	label: "label",
 	tag: "tag",
-	structure: "structure",
+	tag_path: "tag_path",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -72963,7 +76518,7 @@ export const ResolveScopedUnitSlugAddressStatus200KindEnum = {
 	entity: "entity",
 	label: "label",
 	tag: "tag",
-	structure: "structure",
+	tag_path: "tag_path",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -74239,7 +77794,6 @@ export const GetPublicUnitSeoProjectionStatus200KindEnum = {
 	audio: "audio",
 	entity: "entity",
 	tag: "tag",
-	structure: "structure",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -74600,7 +78154,7 @@ export const PostApiUnitsPresentationsStatus200ItemsKindEnum = {
 	entity: "entity",
 	label: "label",
 	tag: "tag",
-	structure: "structure",
+	tag_path: "tag_path",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -77095,7 +80649,7 @@ export const GetApiUnitsByTypeStatus200ItemsAttributionsCreditedUnitKindEnum = {
 	entity: "entity",
 	label: "label",
 	tag: "tag",
-	structure: "structure",
+	tag_path: "tag_path",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -77598,7 +81152,7 @@ export const PostApiUnitsByTypeStatus200AttributionsCreditedUnitKindEnum = {
 	entity: "entity",
 	label: "label",
 	tag: "tag",
-	structure: "structure",
+	tag_path: "tag_path",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -77730,6 +81284,15 @@ export const PostApiUnitsByTypeStatus200SubjectAssociationsAvatarIconPrefixEnum 
 export type PostApiUnitsByTypeStatus200SubjectAssociationsAvatarIconPrefixEnum =
 	(typeof PostApiUnitsByTypeStatus200SubjectAssociationsAvatarIconPrefixEnum)[keyof typeof PostApiUnitsByTypeStatus200SubjectAssociationsAvatarIconPrefixEnum];
 
+export const PostApiUnitsByTypeStatus200SubjectAssociationsSpoilerLevelEnum = {
+	"0": 0,
+	"1": 1,
+	"2": 2,
+} as const;
+
+export type PostApiUnitsByTypeStatus200SubjectAssociationsSpoilerLevelEnum =
+	(typeof PostApiUnitsByTypeStatus200SubjectAssociationsSpoilerLevelEnum)[keyof typeof PostApiUnitsByTypeStatus200SubjectAssociationsSpoilerLevelEnum];
+
 export const PostApiUnitsByTypeStatus200ExternalLinksSourceEntityKindEnum = {
 	slug_namespace: "slug_namespace",
 	profile: "profile",
@@ -77742,7 +81305,7 @@ export const PostApiUnitsByTypeStatus200ExternalLinksSourceEntityKindEnum = {
 	entity: "entity",
 	label: "label",
 	tag: "tag",
-	structure: "structure",
+	tag_path: "tag_path",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -78743,6 +82306,29 @@ export type PostApiUnitsByTypeStatus200 = {
 					}[];
 			  } | null)
 			| null;
+		/**
+		 * @type object
+		 */
+		spoiler: {
+			/**
+			 * @type string
+			 */
+			level: PostApiUnitsByTypeStatus200SubjectAssociationsSpoilerLevelEnum;
+			/**
+			 * @type boolean
+			 */
+			concealed: boolean;
+			voteCount: string | number;
+			/**
+			 * @type object
+			 */
+			distribution: {
+				none: string | number;
+				minor: string | number;
+				major: string | number;
+			};
+			viewerLevel: ((0 | 1 | 2) | null) | null;
+		};
 	}[];
 	/**
 	 * @type array
@@ -79463,29 +83049,51 @@ export const PostApiUnitsByTypeStatus429ErrorCodeEnum = {
 export type PostApiUnitsByTypeStatus429ErrorCodeEnum =
 	(typeof PostApiUnitsByTypeStatus429ErrorCodeEnum)[keyof typeof PostApiUnitsByTypeStatus429ErrorCodeEnum];
 
-/**
- * @type object
- */
-export type PostApiUnitsByTypeStatus429 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @type string
-		 */
-		code: PostApiUnitsByTypeStatus429ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		details?: JsonValue;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
+export type PostApiUnitsByTypeStatus429 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'VoteHotKeyBusy'
+				 * @type string
+				 */
+				code: "VoteHotKeyBusy";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @type string
+				 */
+				code: PostApiUnitsByTypeStatus429ErrorCodeEnum;
+				/**
+				 * @type string
+				 */
+				message: string;
+				details?: JsonValue;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  };
 
 /**
  * @type object
@@ -81167,7 +84775,7 @@ export const GetApiUnitsByTypeByUnitIdStatus200AttributionsCreditedUnitKindEnum 
 	entity: "entity",
 	label: "label",
 	tag: "tag",
-	structure: "structure",
+	tag_path: "tag_path",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -81299,6 +84907,15 @@ export const GetApiUnitsByTypeByUnitIdStatus200SubjectAssociationsAvatarIconPref
 export type GetApiUnitsByTypeByUnitIdStatus200SubjectAssociationsAvatarIconPrefixEnum =
 	(typeof GetApiUnitsByTypeByUnitIdStatus200SubjectAssociationsAvatarIconPrefixEnum)[keyof typeof GetApiUnitsByTypeByUnitIdStatus200SubjectAssociationsAvatarIconPrefixEnum];
 
+export const GetApiUnitsByTypeByUnitIdStatus200SubjectAssociationsSpoilerLevelEnum = {
+	"0": 0,
+	"1": 1,
+	"2": 2,
+} as const;
+
+export type GetApiUnitsByTypeByUnitIdStatus200SubjectAssociationsSpoilerLevelEnum =
+	(typeof GetApiUnitsByTypeByUnitIdStatus200SubjectAssociationsSpoilerLevelEnum)[keyof typeof GetApiUnitsByTypeByUnitIdStatus200SubjectAssociationsSpoilerLevelEnum];
+
 export const GetApiUnitsByTypeByUnitIdStatus200ExternalLinksSourceEntityKindEnum = {
 	slug_namespace: "slug_namespace",
 	profile: "profile",
@@ -81311,7 +84928,7 @@ export const GetApiUnitsByTypeByUnitIdStatus200ExternalLinksSourceEntityKindEnum
 	entity: "entity",
 	label: "label",
 	tag: "tag",
-	structure: "structure",
+	tag_path: "tag_path",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -82312,6 +85929,29 @@ export type GetApiUnitsByTypeByUnitIdStatus200 = {
 					}[];
 			  } | null)
 			| null;
+		/**
+		 * @type object
+		 */
+		spoiler: {
+			/**
+			 * @type string
+			 */
+			level: GetApiUnitsByTypeByUnitIdStatus200SubjectAssociationsSpoilerLevelEnum;
+			/**
+			 * @type boolean
+			 */
+			concealed: boolean;
+			voteCount: string | number;
+			/**
+			 * @type object
+			 */
+			distribution: {
+				none: string | number;
+				minor: string | number;
+				major: string | number;
+			};
+			viewerLevel: ((0 | 1 | 2) | null) | null;
+		};
 	}[];
 	/**
 	 * @type array
@@ -82994,7 +86634,7 @@ export const PatchApiUnitsByTypeByUnitIdStatus200AttributionsCreditedUnitKindEnu
 	entity: "entity",
 	label: "label",
 	tag: "tag",
-	structure: "structure",
+	tag_path: "tag_path",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -83126,6 +86766,15 @@ export const PatchApiUnitsByTypeByUnitIdStatus200SubjectAssociationsAvatarIconPr
 export type PatchApiUnitsByTypeByUnitIdStatus200SubjectAssociationsAvatarIconPrefixEnum =
 	(typeof PatchApiUnitsByTypeByUnitIdStatus200SubjectAssociationsAvatarIconPrefixEnum)[keyof typeof PatchApiUnitsByTypeByUnitIdStatus200SubjectAssociationsAvatarIconPrefixEnum];
 
+export const PatchApiUnitsByTypeByUnitIdStatus200SubjectAssociationsSpoilerLevelEnum = {
+	"0": 0,
+	"1": 1,
+	"2": 2,
+} as const;
+
+export type PatchApiUnitsByTypeByUnitIdStatus200SubjectAssociationsSpoilerLevelEnum =
+	(typeof PatchApiUnitsByTypeByUnitIdStatus200SubjectAssociationsSpoilerLevelEnum)[keyof typeof PatchApiUnitsByTypeByUnitIdStatus200SubjectAssociationsSpoilerLevelEnum];
+
 export const PatchApiUnitsByTypeByUnitIdStatus200ExternalLinksSourceEntityKindEnum = {
 	slug_namespace: "slug_namespace",
 	profile: "profile",
@@ -83138,7 +86787,7 @@ export const PatchApiUnitsByTypeByUnitIdStatus200ExternalLinksSourceEntityKindEn
 	entity: "entity",
 	label: "label",
 	tag: "tag",
-	structure: "structure",
+	tag_path: "tag_path",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -84139,6 +87788,29 @@ export type PatchApiUnitsByTypeByUnitIdStatus200 = {
 					}[];
 			  } | null)
 			| null;
+		/**
+		 * @type object
+		 */
+		spoiler: {
+			/**
+			 * @type string
+			 */
+			level: PatchApiUnitsByTypeByUnitIdStatus200SubjectAssociationsSpoilerLevelEnum;
+			/**
+			 * @type boolean
+			 */
+			concealed: boolean;
+			voteCount: string | number;
+			/**
+			 * @type object
+			 */
+			distribution: {
+				none: string | number;
+				minor: string | number;
+				major: string | number;
+			};
+			viewerLevel: ((0 | 1 | 2) | null) | null;
+		};
 	}[];
 	/**
 	 * @type array
@@ -85270,7 +88942,7 @@ export const PatchApiUnitsByTypeByUnitIdVariantContextStatus200AttributionsCredi
 	entity: "entity",
 	label: "label",
 	tag: "tag",
-	structure: "structure",
+	tag_path: "tag_path",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -85406,6 +89078,16 @@ export const PatchApiUnitsByTypeByUnitIdVariantContextStatus200SubjectAssociatio
 export type PatchApiUnitsByTypeByUnitIdVariantContextStatus200SubjectAssociationsAvatarIconPrefixEnum =
 	(typeof PatchApiUnitsByTypeByUnitIdVariantContextStatus200SubjectAssociationsAvatarIconPrefixEnum)[keyof typeof PatchApiUnitsByTypeByUnitIdVariantContextStatus200SubjectAssociationsAvatarIconPrefixEnum];
 
+export const PatchApiUnitsByTypeByUnitIdVariantContextStatus200SubjectAssociationsSpoilerLevelEnum =
+	{
+		"0": 0,
+		"1": 1,
+		"2": 2,
+	} as const;
+
+export type PatchApiUnitsByTypeByUnitIdVariantContextStatus200SubjectAssociationsSpoilerLevelEnum =
+	(typeof PatchApiUnitsByTypeByUnitIdVariantContextStatus200SubjectAssociationsSpoilerLevelEnum)[keyof typeof PatchApiUnitsByTypeByUnitIdVariantContextStatus200SubjectAssociationsSpoilerLevelEnum];
+
 export const PatchApiUnitsByTypeByUnitIdVariantContextStatus200ExternalLinksSourceEntityKindEnum = {
 	slug_namespace: "slug_namespace",
 	profile: "profile",
@@ -85418,7 +89100,7 @@ export const PatchApiUnitsByTypeByUnitIdVariantContextStatus200ExternalLinksSour
 	entity: "entity",
 	label: "label",
 	tag: "tag",
-	structure: "structure",
+	tag_path: "tag_path",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -86425,6 +90107,29 @@ export type PatchApiUnitsByTypeByUnitIdVariantContextStatus200 = {
 					}[];
 			  } | null)
 			| null;
+		/**
+		 * @type object
+		 */
+		spoiler: {
+			/**
+			 * @type string
+			 */
+			level: PatchApiUnitsByTypeByUnitIdVariantContextStatus200SubjectAssociationsSpoilerLevelEnum;
+			/**
+			 * @type boolean
+			 */
+			concealed: boolean;
+			voteCount: string | number;
+			/**
+			 * @type object
+			 */
+			distribution: {
+				none: string | number;
+				minor: string | number;
+				major: string | number;
+			};
+			viewerLevel: ((0 | 1 | 2) | null) | null;
+		};
 	}[];
 	/**
 	 * @type array
@@ -87359,7 +91064,7 @@ export const PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200Attribution
 		entity: "entity",
 		label: "label",
 		tag: "tag",
-		structure: "structure",
+		tag_path: "tag_path",
 		series: "series",
 		zone: "zone",
 		zone_page: "zone_page",
@@ -87497,6 +91202,16 @@ export const PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200SubjectAsso
 export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200SubjectAssociationsAvatarIconPrefixEnum =
 	(typeof PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200SubjectAssociationsAvatarIconPrefixEnum)[keyof typeof PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200SubjectAssociationsAvatarIconPrefixEnum];
 
+export const PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200SubjectAssociationsSpoilerLevelEnum =
+	{
+		"0": 0,
+		"1": 1,
+		"2": 2,
+	} as const;
+
+export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200SubjectAssociationsSpoilerLevelEnum =
+	(typeof PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200SubjectAssociationsSpoilerLevelEnum)[keyof typeof PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200SubjectAssociationsSpoilerLevelEnum];
+
 export const PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200ExternalLinksSourceEntityKindEnum =
 	{
 		slug_namespace: "slug_namespace",
@@ -87510,7 +91225,7 @@ export const PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200ExternalLin
 		entity: "entity",
 		label: "label",
 		tag: "tag",
-		structure: "structure",
+		tag_path: "tag_path",
 		series: "series",
 		zone: "zone",
 		zone_page: "zone_page",
@@ -88519,6 +92234,29 @@ export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200 = {
 					}[];
 			  } | null)
 			| null;
+		/**
+		 * @type object
+		 */
+		spoiler: {
+			/**
+			 * @type string
+			 */
+			level: PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200SubjectAssociationsSpoilerLevelEnum;
+			/**
+			 * @type boolean
+			 */
+			concealed: boolean;
+			voteCount: string | number;
+			/**
+			 * @type object
+			 */
+			distribution: {
+				none: string | number;
+				minor: string | number;
+				major: string | number;
+			};
+			viewerLevel: ((0 | 1 | 2) | null) | null;
+		};
 	}[];
 	/**
 	 * @type array
@@ -89463,7 +93201,7 @@ export const PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200Attributio
 		entity: "entity",
 		label: "label",
 		tag: "tag",
-		structure: "structure",
+		tag_path: "tag_path",
 		series: "series",
 		zone: "zone",
 		zone_page: "zone_page",
@@ -89603,6 +93341,16 @@ export const PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200SubjectAss
 export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200SubjectAssociationsAvatarIconPrefixEnum =
 	(typeof PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200SubjectAssociationsAvatarIconPrefixEnum)[keyof typeof PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200SubjectAssociationsAvatarIconPrefixEnum];
 
+export const PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200SubjectAssociationsSpoilerLevelEnum =
+	{
+		"0": 0,
+		"1": 1,
+		"2": 2,
+	} as const;
+
+export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200SubjectAssociationsSpoilerLevelEnum =
+	(typeof PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200SubjectAssociationsSpoilerLevelEnum)[keyof typeof PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200SubjectAssociationsSpoilerLevelEnum];
+
 export const PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200ExternalLinksSourceEntityKindEnum =
 	{
 		slug_namespace: "slug_namespace",
@@ -89616,7 +93364,7 @@ export const PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200ExternalLi
 		entity: "entity",
 		label: "label",
 		tag: "tag",
-		structure: "structure",
+		tag_path: "tag_path",
 		series: "series",
 		zone: "zone",
 		zone_page: "zone_page",
@@ -90625,6 +94373,29 @@ export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200 = {
 					}[];
 			  } | null)
 			| null;
+		/**
+		 * @type object
+		 */
+		spoiler: {
+			/**
+			 * @type string
+			 */
+			level: PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200SubjectAssociationsSpoilerLevelEnum;
+			/**
+			 * @type boolean
+			 */
+			concealed: boolean;
+			voteCount: string | number;
+			/**
+			 * @type object
+			 */
+			distribution: {
+				none: string | number;
+				minor: string | number;
+				major: string | number;
+			};
+			viewerLevel: ((0 | 1 | 2) | null) | null;
+		};
 	}[];
 	/**
 	 * @type array
@@ -92842,10 +96613,10 @@ export type PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus422 =
 			 */
 			error: {
 				/**
-				 * @default 'InvalidTagStructure'
+				 * @default 'InvalidTagPath'
 				 * @type string
 				 */
-				code: "InvalidTagStructure";
+				code: "InvalidTagPath";
 				/**
 				 * @type string
 				 */
@@ -92870,29 +96641,51 @@ export const PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus429Err
 export type PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus429ErrorCodeEnum =
 	(typeof PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus429ErrorCodeEnum)[keyof typeof PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus429ErrorCodeEnum];
 
-/**
- * @type object
- */
-export type PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus429 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @type string
-		 */
-		code: PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus429ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		details?: JsonValue;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
+export type PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus429 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'VoteHotKeyBusy'
+				 * @type string
+				 */
+				code: "VoteHotKeyBusy";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @type string
+				 */
+				code: PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus429ErrorCodeEnum;
+				/**
+				 * @type string
+				 */
+				message: string;
+				details?: JsonValue;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  };
 
 /**
  * @type object
@@ -93188,10 +96981,10 @@ export type PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus422 =
 			 */
 			error: {
 				/**
-				 * @default 'InvalidTagStructure'
+				 * @default 'InvalidTagPath'
 				 * @type string
 				 */
-				code: "InvalidTagStructure";
+				code: "InvalidTagPath";
 				/**
 				 * @type string
 				 */
@@ -93216,29 +97009,51 @@ export const PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus429ErrorC
 export type PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus429ErrorCodeEnum =
 	(typeof PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus429ErrorCodeEnum)[keyof typeof PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus429ErrorCodeEnum];
 
-/**
- * @type object
- */
-export type PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus429 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @type string
-		 */
-		code: PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus429ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		details?: JsonValue;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
+export type PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus429 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'VoteHotKeyBusy'
+				 * @type string
+				 */
+				code: "VoteHotKeyBusy";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @type string
+				 */
+				code: PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus429ErrorCodeEnum;
+				/**
+				 * @type string
+				 */
+				message: string;
+				details?: JsonValue;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  };
 
 /**
  * @type object
@@ -95089,7 +98904,7 @@ export const GetApiEntitiesByUnitIdStatus200AttributionsCreditedUnitKindEnum = {
 	entity: "entity",
 	label: "label",
 	tag: "tag",
-	structure: "structure",
+	tag_path: "tag_path",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -95136,7 +98951,7 @@ export const GetApiEntitiesByUnitIdStatus200OwnerKindEnum = {
 	entity: "entity",
 	label: "label",
 	tag: "tag",
-	structure: "structure",
+	tag_path: "tag_path",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -95183,7 +98998,7 @@ export const GetApiEntitiesByUnitIdStatus200ExternalLinksSourceEntityKindEnum = 
 	entity: "entity",
 	label: "label",
 	tag: "tag",
-	structure: "structure",
+	tag_path: "tag_path",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -96208,6 +100023,35 @@ export type GetApiEntitiesByUnitIdStatus200 = {
 					  };
 		  };
 	/**
+	 * @type array
+	 */
+	measurements: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		id: string;
+		contextUnitId: (string | null) | null;
+		heightMillimetres: ((string | number) | null) | null;
+		weightGrams: ((string | number) | null) | null;
+		bustMillimetres: ((string | number) | null) | null;
+		waistMillimetres: ((string | number) | null) | null;
+		hipsMillimetres: ((string | number) | null) | null;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		createdAt: string;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		updatedAt: string;
+	}[];
+	/**
 	 * @type object
 	 */
 	capabilities: {
@@ -96382,6 +100226,303 @@ export type GetApiEntitiesByUnitIdResponse =
 	| GetApiEntitiesByUnitIdStatus404
 	| GetApiEntitiesByUnitIdStatus422
 	| GetApiEntitiesByUnitIdStatus500;
+
+/**
+ * @type object
+ */
+export type PutApiEntitiesByUnitIdMeasurementsPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiEntitiesByUnitIdMeasurementsStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	id: string;
+	contextUnitId: (string | null) | null;
+	heightMillimetres: ((string | number) | null) | null;
+	weightGrams: ((string | number) | null) | null;
+	bustMillimetres: ((string | number) | null) | null;
+	waistMillimetres: ((string | number) | null) | null;
+	hipsMillimetres: ((string | number) | null) | null;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	createdAt: string;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	updatedAt: string;
+};
+
+export const PutApiEntitiesByUnitIdMeasurementsStatus400ErrorCodeEnum = {
+	RevisionCreditEntityInvalid: "RevisionCreditEntityInvalid",
+	RevisionContributionActorRequired: "RevisionContributionActorRequired",
+} as const;
+
+export type PutApiEntitiesByUnitIdMeasurementsStatus400ErrorCodeEnum =
+	(typeof PutApiEntitiesByUnitIdMeasurementsStatus400ErrorCodeEnum)[keyof typeof PutApiEntitiesByUnitIdMeasurementsStatus400ErrorCodeEnum];
+
+export type PutApiEntitiesByUnitIdMeasurementsStatus400 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'RevisionCreditEntityInvalid'
+				 * @type string
+				 */
+				code: PutApiEntitiesByUnitIdMeasurementsStatus400ErrorCodeEnum;
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| MalformedRequestBody;
+
+export const PutApiEntitiesByUnitIdMeasurementsStatus403ErrorCodeEnum = {
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+	UnitAccessRestricted: "UnitAccessRestricted",
+} as const;
+
+export type PutApiEntitiesByUnitIdMeasurementsStatus403ErrorCodeEnum =
+	(typeof PutApiEntitiesByUnitIdMeasurementsStatus403ErrorCodeEnum)[keyof typeof PutApiEntitiesByUnitIdMeasurementsStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PutApiEntitiesByUnitIdMeasurementsStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitPermissionForbidden'
+		 * @type string
+		 */
+		code: PutApiEntitiesByUnitIdMeasurementsStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiEntitiesByUnitIdMeasurementsStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: "UnitNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export type PutApiEntitiesByUnitIdMeasurementsStatus422 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'ValidationError'
+				 * @type string
+				 */
+				code: "ValidationError";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| ValidationError;
+
+export const PutApiEntitiesByUnitIdMeasurementsStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PutApiEntitiesByUnitIdMeasurementsStatus429ErrorCodeEnum =
+	(typeof PutApiEntitiesByUnitIdMeasurementsStatus429ErrorCodeEnum)[keyof typeof PutApiEntitiesByUnitIdMeasurementsStatus429ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PutApiEntitiesByUnitIdMeasurementsStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: PutApiEntitiesByUnitIdMeasurementsStatus429ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiEntitiesByUnitIdMeasurementsStatus500 = InternalError;
+
+export const PutApiEntitiesByUnitIdMeasurementsRequestRevisionContextContributionRoleEnum = {
+	creator: "creator",
+	editor: "editor",
+	translator: "translator",
+	researcher: "researcher",
+} as const;
+
+export type PutApiEntitiesByUnitIdMeasurementsRequestRevisionContextContributionRoleEnum =
+	(typeof PutApiEntitiesByUnitIdMeasurementsRequestRevisionContextContributionRoleEnum)[keyof typeof PutApiEntitiesByUnitIdMeasurementsRequestRevisionContextContributionRoleEnum];
+
+/**
+ * @type object
+ */
+export type PutApiEntitiesByUnitIdMeasurementsBody = {
+	contextUnitId?: (string | null) | null;
+	heightMillimetres: ((string | number) | null) | null;
+	weightGrams: ((string | number) | null) | null;
+	bustMillimetres: ((string | number) | null) | null;
+	waistMillimetres: ((string | number) | null) | null;
+	hipsMillimetres: ((string | number) | null) | null;
+	/**
+	 * @type object | undefined
+	 */
+	revisionContext?: {
+		contribution?:
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "human";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "unattributed";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "ai";
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					creditedEntityId: string;
+					/**
+					 * @default 'creator'
+					 * @type string
+					 */
+					role: PutApiEntitiesByUnitIdMeasurementsRequestRevisionContextContributionRoleEnum;
+			  };
+	};
+};
+
+/**
+ * @type object
+ */
+export type PutApiEntitiesByUnitIdMeasurementsOptions = {
+	body: PutApiEntitiesByUnitIdMeasurementsBody;
+	path: PutApiEntitiesByUnitIdMeasurementsPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PutApiEntitiesByUnitIdMeasurementsResponses = {
+	"200": PutApiEntitiesByUnitIdMeasurementsStatus200;
+	"400": PutApiEntitiesByUnitIdMeasurementsStatus400;
+	"403": PutApiEntitiesByUnitIdMeasurementsStatus403;
+	"404": PutApiEntitiesByUnitIdMeasurementsStatus404;
+	"422": PutApiEntitiesByUnitIdMeasurementsStatus422;
+	"429": PutApiEntitiesByUnitIdMeasurementsStatus429;
+	"500": PutApiEntitiesByUnitIdMeasurementsStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PutApiEntitiesByUnitIdMeasurementsResponse =
+	| PutApiEntitiesByUnitIdMeasurementsStatus200
+	| PutApiEntitiesByUnitIdMeasurementsStatus400
+	| PutApiEntitiesByUnitIdMeasurementsStatus403
+	| PutApiEntitiesByUnitIdMeasurementsStatus404
+	| PutApiEntitiesByUnitIdMeasurementsStatus422
+	| PutApiEntitiesByUnitIdMeasurementsStatus429
+	| PutApiEntitiesByUnitIdMeasurementsStatus500;
 
 /**
  * @type object
@@ -98981,7 +103122,7 @@ export const GetApiUnitsByTypeByUnitIdAliasesType = {
 	entity: "entity",
 	label: "label",
 	tag: "tag",
-	structure: "structure",
+	tag_path: "tag_path",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -99207,7 +103348,7 @@ export const PostApiUnitsByTypeByUnitIdAliasesType = {
 	entity: "entity",
 	label: "label",
 	tag: "tag",
-	structure: "structure",
+	tag_path: "tag_path",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -99539,7 +103680,7 @@ export const PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteType = {
 	entity: "entity",
 	label: "label",
 	tag: "tag",
-	structure: "structure",
+	tag_path: "tag_path",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -99771,7 +103912,7 @@ export const DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteType = {
 	entity: "entity",
 	label: "label",
 	tag: "tag",
-	structure: "structure",
+	tag_path: "tag_path",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -99978,7 +104119,7 @@ export const PatchApiUnitsByTypeByUnitIdAliasesByAliasIdType = {
 	entity: "entity",
 	label: "label",
 	tag: "tag",
-	structure: "structure",
+	tag_path: "tag_path",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -100312,7 +104453,7 @@ export const DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdType = {
 	entity: "entity",
 	label: "label",
 	tag: "tag",
-	structure: "structure",
+	tag_path: "tag_path",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -100605,7 +104746,7 @@ export const PostApiUnitsByTypeByUnitIdCreditAttributionsStatus200CreditedUnitKi
 	entity: "entity",
 	label: "label",
 	tag: "tag",
-	structure: "structure",
+	tag_path: "tag_path",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -101689,6 +105830,492 @@ export type PostApiUnitsByTypeByUnitIdSubjectAssociationsResponse =
 /**
  * @type object
  */
+export type PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerPath = {
+	type: ("book" | "software" | "media") | "series";
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	associationId: string;
+};
+
+export const PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus200LevelEnum =
+	{
+		"0": 0,
+		"1": 1,
+		"2": 2,
+	} as const;
+
+export type PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus200LevelEnum =
+	(typeof PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus200LevelEnum)[keyof typeof PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus200LevelEnum];
+
+/**
+ * @type object
+ */
+export type PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	associationId: string;
+	/**
+	 * @type string
+	 */
+	level: PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus200LevelEnum;
+	voteCount: string | number;
+	/**
+	 * @type object
+	 */
+	distribution: {
+		none: string | number;
+		minor: string | number;
+		major: string | number;
+	};
+	viewerLevel: ((0 | 1 | 2) | null) | null;
+};
+
+/**
+ * @type object
+ */
+export type PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus400 =
+	MalformedRequestBody;
+
+export const PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus403ErrorCodeEnum =
+	{
+		UnitAccessRestricted: "UnitAccessRestricted",
+		UnitPermissionForbidden: "UnitPermissionForbidden",
+	} as const;
+
+export type PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus403ErrorCodeEnum =
+	(typeof PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus403ErrorCodeEnum)[keyof typeof PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitAccessRestricted'
+		 * @type string
+		 */
+		code: PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus404ErrorCodeEnum =
+	{
+		UnitNotFound: "UnitNotFound",
+		SubjectAssociationNotFound: "SubjectAssociationNotFound",
+	} as const;
+
+export type PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus404ErrorCodeEnum =
+	(typeof PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus404ErrorCodeEnum)[keyof typeof PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus404ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus404ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus422 =
+	ValidationError;
+
+export const PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus429ErrorCodeEnum =
+	{
+		ApiQuotaExceeded: "ApiQuotaExceeded",
+		ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+	} as const;
+
+export type PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus429ErrorCodeEnum =
+	(typeof PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus429ErrorCodeEnum)[keyof typeof PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus429ErrorCodeEnum];
+
+export type PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus429 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'VoteHotKeyBusy'
+				 * @type string
+				 */
+				code: "VoteHotKeyBusy";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @type string
+				 */
+				code: PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus429ErrorCodeEnum;
+				/**
+				 * @type string
+				 */
+				message: string;
+				details?: JsonValue;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  };
+
+/**
+ * @type object
+ */
+export type PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus500 =
+	InternalError;
+
+export const PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerRequestSpoilerLevelEnum =
+	{
+		"0": 0,
+		"1": 1,
+		"2": 2,
+	} as const;
+
+export type PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerRequestSpoilerLevelEnum =
+	(typeof PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerRequestSpoilerLevelEnum)[keyof typeof PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerRequestSpoilerLevelEnum];
+
+/**
+ * @type object
+ */
+export type PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerBody = {
+	/**
+	 * @type string
+	 */
+	spoilerLevel: PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerRequestSpoilerLevelEnum;
+};
+
+/**
+ * @type object
+ */
+export type PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerOptions = {
+	body: PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerBody;
+	path: PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerResponses = {
+	"200": PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus200;
+	"400": PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus400;
+	"403": PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus403;
+	"404": PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus404;
+	"422": PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus422;
+	"429": PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus429;
+	"500": PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerResponse =
+	| PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus200
+	| PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus400
+	| PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus403
+	| PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus404
+	| PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus422
+	| PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus429
+	| PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus500;
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerPath = {
+	type: ("book" | "software" | "media") | "series";
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	associationId: string;
+};
+
+export const DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus200LevelEnum =
+	{
+		"0": 0,
+		"1": 1,
+		"2": 2,
+	} as const;
+
+export type DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus200LevelEnum =
+	(typeof DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus200LevelEnum)[keyof typeof DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus200LevelEnum];
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	associationId: string;
+	/**
+	 * @type string
+	 */
+	level: DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus200LevelEnum;
+	voteCount: string | number;
+	/**
+	 * @type object
+	 */
+	distribution: {
+		none: string | number;
+		minor: string | number;
+		major: string | number;
+	};
+	viewerLevel: ((0 | 1 | 2) | null) | null;
+};
+
+export const DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus403ErrorCodeEnum =
+	{
+		UnitAccessRestricted: "UnitAccessRestricted",
+		UnitPermissionForbidden: "UnitPermissionForbidden",
+	} as const;
+
+export type DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus403ErrorCodeEnum =
+	(typeof DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus403ErrorCodeEnum)[keyof typeof DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitAccessRestricted'
+		 * @type string
+		 */
+		code: DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus404ErrorCodeEnum =
+	{
+		UnitNotFound: "UnitNotFound",
+		SubjectAssociationNotFound: "SubjectAssociationNotFound",
+	} as const;
+
+export type DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus404ErrorCodeEnum =
+	(typeof DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus404ErrorCodeEnum)[keyof typeof DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus404ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus404ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus422 =
+	ValidationError;
+
+export const DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus429ErrorCodeEnum =
+	{
+		ApiQuotaExceeded: "ApiQuotaExceeded",
+		ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+	} as const;
+
+export type DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus429ErrorCodeEnum =
+	(typeof DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus429ErrorCodeEnum)[keyof typeof DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus429ErrorCodeEnum];
+
+export type DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus429 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'VoteHotKeyBusy'
+				 * @type string
+				 */
+				code: "VoteHotKeyBusy";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @type string
+				 */
+				code: DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus429ErrorCodeEnum;
+				/**
+				 * @type string
+				 */
+				message: string;
+				details?: JsonValue;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  };
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus500 =
+	InternalError;
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerOptions = {
+	body?: never;
+	path: DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerResponses = {
+	"200": DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus200;
+	"403": DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus403;
+	"404": DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus404;
+	"422": DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus422;
+	"429": DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus429;
+	"500": DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerResponse =
+	| DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus200
+	| DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus403
+	| DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus404
+	| DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus422
+	| DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus429
+	| DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus500;
+
+/**
+ * @type object
+ */
 export type DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdPath = {
 	type: ("book" | "software" | "media") | "series";
 	/**
@@ -101963,7 +106590,7 @@ export const GetApiUnitsByTypeByUnitIdExternalLinksType = {
 	entity: "entity",
 	label: "label",
 	tag: "tag",
-	structure: "structure",
+	tag_path: "tag_path",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -102038,7 +106665,7 @@ export const GetApiUnitsByTypeByUnitIdExternalLinksStatus200ItemsSourceEntityKin
 	entity: "entity",
 	label: "label",
 	tag: "tag",
-	structure: "structure",
+	tag_path: "tag_path",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -102375,7 +107002,7 @@ export const PostApiUnitsByTypeByUnitIdExternalLinksType = {
 	entity: "entity",
 	label: "label",
 	tag: "tag",
-	structure: "structure",
+	tag_path: "tag_path",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -102692,7 +107319,7 @@ export const PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteType = {
 	entity: "entity",
 	label: "label",
 	tag: "tag",
-	structure: "structure",
+	tag_path: "tag_path",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -102925,7 +107552,7 @@ export const DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteType =
 	entity: "entity",
 	label: "label",
 	tag: "tag",
-	structure: "structure",
+	tag_path: "tag_path",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -103133,7 +107760,7 @@ export const PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdType = {
 	entity: "entity",
 	label: "label",
 	tag: "tag",
-	structure: "structure",
+	tag_path: "tag_path",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -103473,7 +108100,7 @@ export const DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdType = {
 	entity: "entity",
 	label: "label",
 	tag: "tag",
-	structure: "structure",
+	tag_path: "tag_path",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -103763,6 +108390,7 @@ export type PutApiUnitsByTypeByUnitIdTagsByTagIdStatus400 = MalformedRequestBody
 export const PutApiUnitsByTypeByUnitIdTagsByTagIdStatus403ErrorCodeEnum = {
 	UnitAccessRestricted: "UnitAccessRestricted",
 	UnitPermissionForbidden: "UnitPermissionForbidden",
+	ContentLabelPlatformApplyForbidden: "ContentLabelPlatformApplyForbidden",
 } as const;
 
 export type PutApiUnitsByTypeByUnitIdTagsByTagIdStatus403ErrorCodeEnum =
@@ -103833,10 +108461,40 @@ export type PutApiUnitsByTypeByUnitIdTagsByTagIdStatus404 = {
 	requestId: string;
 };
 
-/**
- * @type object
- */
-export type PutApiUnitsByTypeByUnitIdTagsByTagIdStatus422 = ValidationError;
+export const PutApiUnitsByTypeByUnitIdTagsByTagIdStatus422ErrorCodeEnum = {
+	TagNotDirectlyApplicable: "TagNotDirectlyApplicable",
+	ContentLabelApplicationInvalid: "ContentLabelApplicationInvalid",
+} as const;
+
+export type PutApiUnitsByTypeByUnitIdTagsByTagIdStatus422ErrorCodeEnum =
+	(typeof PutApiUnitsByTypeByUnitIdTagsByTagIdStatus422ErrorCodeEnum)[keyof typeof PutApiUnitsByTypeByUnitIdTagsByTagIdStatus422ErrorCodeEnum];
+
+export type PutApiUnitsByTypeByUnitIdTagsByTagIdStatus422 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'TagNotDirectlyApplicable'
+				 * @type string
+				 */
+				code: PutApiUnitsByTypeByUnitIdTagsByTagIdStatus422ErrorCodeEnum;
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| ValidationError;
 
 export const PutApiUnitsByTypeByUnitIdTagsByTagIdStatus429ErrorCodeEnum = {
 	ApiQuotaExceeded: "ApiQuotaExceeded",
@@ -103846,29 +108504,51 @@ export const PutApiUnitsByTypeByUnitIdTagsByTagIdStatus429ErrorCodeEnum = {
 export type PutApiUnitsByTypeByUnitIdTagsByTagIdStatus429ErrorCodeEnum =
 	(typeof PutApiUnitsByTypeByUnitIdTagsByTagIdStatus429ErrorCodeEnum)[keyof typeof PutApiUnitsByTypeByUnitIdTagsByTagIdStatus429ErrorCodeEnum];
 
-/**
- * @type object
- */
-export type PutApiUnitsByTypeByUnitIdTagsByTagIdStatus429 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @type string
-		 */
-		code: PutApiUnitsByTypeByUnitIdTagsByTagIdStatus429ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		details?: JsonValue;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
+export type PutApiUnitsByTypeByUnitIdTagsByTagIdStatus429 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'VoteHotKeyBusy'
+				 * @type string
+				 */
+				code: "VoteHotKeyBusy";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @type string
+				 */
+				code: PutApiUnitsByTypeByUnitIdTagsByTagIdStatus429ErrorCodeEnum;
+				/**
+				 * @type string
+				 */
+				message: string;
+				details?: JsonValue;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  };
 
 /**
  * @type object
@@ -104079,6 +108759,14 @@ export type PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus404 = {
 	requestId: string;
 };
 
+export const PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus409ErrorCodeEnum = {
+	UnitTagCurationChanged: "UnitTagCurationChanged",
+	ContentLabelPlatformIdentityImmutable: "ContentLabelPlatformIdentityImmutable",
+} as const;
+
+export type PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus409ErrorCodeEnum =
+	(typeof PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus409ErrorCodeEnum)[keyof typeof PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus409ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -104091,7 +108779,7 @@ export type PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus409 = {
 		 * @default 'UnitTagCurationChanged'
 		 * @type string
 		 */
-		code: "UnitTagCurationChanged";
+		code: PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus409ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -104107,10 +108795,40 @@ export type PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus409 = {
 	requestId: string;
 };
 
-/**
- * @type object
- */
-export type PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus422 = ValidationError;
+export const PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus422ErrorCodeEnum = {
+	TagNotDirectlyApplicable: "TagNotDirectlyApplicable",
+	ContentLabelApplicationInvalid: "ContentLabelApplicationInvalid",
+} as const;
+
+export type PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus422ErrorCodeEnum =
+	(typeof PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus422ErrorCodeEnum)[keyof typeof PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus422ErrorCodeEnum];
+
+export type PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus422 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'TagNotDirectlyApplicable'
+				 * @type string
+				 */
+				code: PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus422ErrorCodeEnum;
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| ValidationError;
 
 export const PatchApiUnitsByTypeByUnitIdTagsByTagIdStatus429ErrorCodeEnum = {
 	ApiQuotaExceeded: "ApiQuotaExceeded",
@@ -104374,6 +109092,7 @@ export type DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus400 =
 export const DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus403ErrorCodeEnum = {
 	UnitPermissionForbidden: "UnitPermissionForbidden",
 	UnitAccessRestricted: "UnitAccessRestricted",
+	ContentLabelPlatformRemovalForbidden: "ContentLabelPlatformRemovalForbidden",
 } as const;
 
 export type DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus403ErrorCodeEnum =
@@ -104446,6 +109165,34 @@ export type DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus404 = {
 /**
  * @type object
  */
+export type DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'TagApplicationHasJudgments'
+		 * @type string
+		 */
+		code: "TagApplicationHasJudgments";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus422 = ValidationError;
 
 export const DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus429ErrorCodeEnum = {
@@ -104456,29 +109203,51 @@ export const DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus429ErrorCodeEnum = {
 export type DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus429ErrorCodeEnum =
 	(typeof DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus429ErrorCodeEnum)[keyof typeof DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus429ErrorCodeEnum];
 
-/**
- * @type object
- */
-export type DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus429 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @type string
-		 */
-		code: DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus429ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		details?: JsonValue;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
+export type DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus429 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'VoteHotKeyBusy'
+				 * @type string
+				 */
+				code: "VoteHotKeyBusy";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @type string
+				 */
+				code: DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus429ErrorCodeEnum;
+				/**
+				 * @type string
+				 */
+				message: string;
+				details?: JsonValue;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  };
 
 /**
  * @type object
@@ -104554,6 +109323,7 @@ export type DeleteApiUnitsByTypeByUnitIdTagsByTagIdResponses = {
 	"400": DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus400;
 	"403": DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus403;
 	"404": DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus404;
+	"409": DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus409;
 	"422": DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus422;
 	"429": DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus429;
 	"500": DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus500;
@@ -104567,6 +109337,7 @@ export type DeleteApiUnitsByTypeByUnitIdTagsByTagIdResponse =
 	| DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus400
 	| DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus403
 	| DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus404
+	| DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus409
 	| DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus422
 	| DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus429
 	| DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus500;
@@ -104679,6 +109450,14 @@ export type PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus404 = {
 	requestId: string;
 };
 
+export const PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus422ErrorCodeEnum = {
+	InvalidTagPath: "InvalidTagPath",
+	ContentLabelJudgmentForbidden: "ContentLabelJudgmentForbidden",
+} as const;
+
+export type PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus422ErrorCodeEnum =
+	(typeof PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus422ErrorCodeEnum)[keyof typeof PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus422ErrorCodeEnum];
+
 export type PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus422 =
 	| {
 			/**
@@ -104686,10 +109465,10 @@ export type PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus422 =
 			 */
 			error: {
 				/**
-				 * @default 'InvalidTagStructure'
+				 * @default 'InvalidTagPath'
 				 * @type string
 				 */
-				code: "InvalidTagStructure";
+				code: PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus422ErrorCodeEnum;
 				/**
 				 * @type string
 				 */
@@ -104714,29 +109493,51 @@ export const PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus429ErrorCodeEnum = {
 export type PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus429ErrorCodeEnum =
 	(typeof PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus429ErrorCodeEnum)[keyof typeof PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus429ErrorCodeEnum];
 
-/**
- * @type object
- */
-export type PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus429 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @type string
-		 */
-		code: PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus429ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		details?: JsonValue;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
+export type PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus429 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'VoteHotKeyBusy'
+				 * @type string
+				 */
+				code: "VoteHotKeyBusy";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @type string
+				 */
+				code: PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus429ErrorCodeEnum;
+				/**
+				 * @type string
+				 */
+				message: string;
+				details?: JsonValue;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  };
 
 /**
  * @type object
@@ -104912,29 +109713,51 @@ export const DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus429ErrorCodeEnum =
 export type DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus429ErrorCodeEnum =
 	(typeof DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus429ErrorCodeEnum)[keyof typeof DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus429ErrorCodeEnum];
 
-/**
- * @type object
- */
-export type DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus429 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @type string
-		 */
-		code: DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus429ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		details?: JsonValue;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
+export type DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus429 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'VoteHotKeyBusy'
+				 * @type string
+				 */
+				code: "VoteHotKeyBusy";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @type string
+				 */
+				code: DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus429ErrorCodeEnum;
+				/**
+				 * @type string
+				 */
+				message: string;
+				details?: JsonValue;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  };
 
 /**
  * @type object
@@ -108467,29 +113290,51 @@ export const PutApiUnitsBookByUnitIdContentStructureStatus429ErrorCodeEnum = {
 export type PutApiUnitsBookByUnitIdContentStructureStatus429ErrorCodeEnum =
 	(typeof PutApiUnitsBookByUnitIdContentStructureStatus429ErrorCodeEnum)[keyof typeof PutApiUnitsBookByUnitIdContentStructureStatus429ErrorCodeEnum];
 
-/**
- * @type object
- */
-export type PutApiUnitsBookByUnitIdContentStructureStatus429 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @type string
-		 */
-		code: PutApiUnitsBookByUnitIdContentStructureStatus429ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		details?: JsonValue;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
+export type PutApiUnitsBookByUnitIdContentStructureStatus429 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'VoteHotKeyBusy'
+				 * @type string
+				 */
+				code: "VoteHotKeyBusy";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @type string
+				 */
+				code: PutApiUnitsBookByUnitIdContentStructureStatus429ErrorCodeEnum;
+				/**
+				 * @type string
+				 */
+				message: string;
+				details?: JsonValue;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  };
 
 /**
  * @type object
@@ -110073,29 +114918,51 @@ export const PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus429Err
 export type PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus429ErrorCodeEnum =
 	(typeof PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus429ErrorCodeEnum)[keyof typeof PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus429ErrorCodeEnum];
 
-/**
- * @type object
- */
-export type PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus429 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @type string
-		 */
-		code: PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus429ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		details?: JsonValue;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
+export type PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus429 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'VoteHotKeyBusy'
+				 * @type string
+				 */
+				code: "VoteHotKeyBusy";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @type string
+				 */
+				code: PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus429ErrorCodeEnum;
+				/**
+				 * @type string
+				 */
+				message: string;
+				details?: JsonValue;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  };
 
 /**
  * @type object
@@ -110551,7 +115418,6 @@ export const GetApiProgressSearchFilterStatus200FilterDocumentCategoriesEnum = {
 	users: "users",
 	entities: "entities",
 	tags: "tags",
-	"tag-structures": "tag-structures",
 	posts: "posts",
 	realms: "realms",
 	collections: "collections",
@@ -110574,7 +115440,6 @@ export const GetApiProgressSearchFilterStatus200FilterDocumentWhereKindInEnum = 
 	entity: "entity",
 	label: "label",
 	tag: "tag",
-	structure: "structure",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -110647,7 +115512,6 @@ export const GetApiProgressSearchFilterStatus200CategoriesEnum = {
 	users: "users",
 	entities: "entities",
 	tags: "tags",
-	"tag-structures": "tag-structures",
 	posts: "posts",
 	realms: "realms",
 	collections: "collections",
@@ -111064,7 +115928,6 @@ export type GetApiProgressSearchFilterStatus200 = {
 										| "entity"
 										| "label"
 										| "tag"
-										| "structure"
 										| "series"
 										| "zone"
 										| "zone_page"
@@ -111145,7 +116008,6 @@ export type GetApiProgressSearchFilterStatus200 = {
 										| "entity"
 										| "label"
 										| "tag"
-										| "structure"
 										| "series"
 										| "zone"
 										| "zone_page"
@@ -111227,7 +116089,6 @@ export type GetApiProgressSearchFilterStatus200 = {
 										| "entity"
 										| "label"
 										| "tag"
-										| "structure"
 										| "series"
 										| "zone"
 										| "zone_page"
@@ -111361,7 +116222,6 @@ export type GetApiProgressSearchFilterStatus200 = {
 													| "entity"
 													| "label"
 													| "tag"
-													| "structure"
 													| "series"
 													| "zone"
 													| "zone_page"
@@ -111518,7 +116378,6 @@ export type GetApiProgressSearchFilterStatus200 = {
 										| "entity"
 										| "label"
 										| "tag"
-										| "structure"
 										| "series"
 										| "zone"
 										| "zone_page"
@@ -111652,7 +116511,6 @@ export type GetApiProgressSearchFilterStatus200 = {
 													| "entity"
 													| "label"
 													| "tag"
-													| "structure"
 													| "series"
 													| "zone"
 													| "zone_page"
@@ -111794,7 +116652,6 @@ export type GetApiProgressSearchFilterStatus200 = {
 									| "entity"
 									| "label"
 									| "tag"
-									| "structure"
 									| "series"
 									| "zone"
 									| "zone_page"
@@ -111840,7 +116697,6 @@ export type GetApiProgressSearchFilterStatus200 = {
 									| "entity"
 									| "label"
 									| "tag"
-									| "structure"
 									| "series"
 									| "zone"
 									| "zone_page"
@@ -111887,7 +116743,6 @@ export type GetApiProgressSearchFilterStatus200 = {
 									| "entity"
 									| "label"
 									| "tag"
-									| "structure"
 									| "series"
 									| "zone"
 									| "zone_page"
@@ -111933,7 +116788,6 @@ export type GetApiProgressSearchFilterStatus200 = {
 									| "entity"
 									| "label"
 									| "tag"
-									| "structure"
 									| "series"
 									| "zone"
 									| "zone_page"
@@ -112087,7 +116941,6 @@ export type GetApiProgressSearchFilterStatus200 = {
 											| "entity"
 											| "label"
 											| "tag"
-											| "structure"
 											| "series"
 											| "zone"
 											| "zone_page"
@@ -112131,7 +116984,6 @@ export type GetApiProgressSearchFilterStatus200 = {
 											| "entity"
 											| "label"
 											| "tag"
-											| "structure"
 											| "series"
 											| "zone"
 											| "zone_page"
@@ -112254,7 +117106,6 @@ export type GetApiProgressSearchFilterStatus200 = {
 											| "entity"
 											| "label"
 											| "tag"
-											| "structure"
 											| "series"
 											| "zone"
 											| "zone_page"
@@ -112298,7 +117149,6 @@ export type GetApiProgressSearchFilterStatus200 = {
 											| "entity"
 											| "label"
 											| "tag"
-											| "structure"
 											| "series"
 											| "zone"
 											| "zone_page"
@@ -112406,7 +117256,6 @@ export type GetApiProgressSearchFilterStatus200 = {
 													| "entity"
 													| "label"
 													| "tag"
-													| "structure"
 													| "series"
 													| "zone"
 													| "zone_page"
@@ -112517,7 +117366,6 @@ export type GetApiProgressSearchFilterStatus200 = {
 															| "entity"
 															| "label"
 															| "tag"
-															| "structure"
 															| "series"
 															| "zone"
 															| "zone_page"
@@ -112561,7 +117409,6 @@ export type GetApiProgressSearchFilterStatus200 = {
 															| "entity"
 															| "label"
 															| "tag"
-															| "structure"
 															| "series"
 															| "zone"
 															| "zone_page"
@@ -112684,7 +117531,6 @@ export type GetApiProgressSearchFilterStatus200 = {
 															| "entity"
 															| "label"
 															| "tag"
-															| "structure"
 															| "series"
 															| "zone"
 															| "zone_page"
@@ -112728,7 +117574,6 @@ export type GetApiProgressSearchFilterStatus200 = {
 															| "entity"
 															| "label"
 															| "tag"
-															| "structure"
 															| "series"
 															| "zone"
 															| "zone_page"
@@ -112801,7 +117646,6 @@ export type GetApiProgressSearchFilterStatus200 = {
 											| "entity"
 											| "label"
 											| "tag"
-											| "structure"
 											| "series"
 											| "zone"
 											| "zone_page"
@@ -112845,7 +117689,6 @@ export type GetApiProgressSearchFilterStatus200 = {
 											| "entity"
 											| "label"
 											| "tag"
-											| "structure"
 											| "series"
 											| "zone"
 											| "zone_page"
@@ -112918,7 +117761,6 @@ export type GetApiProgressSearchFilterStatus200 = {
 													| "entity"
 													| "label"
 													| "tag"
-													| "structure"
 													| "series"
 													| "zone"
 													| "zone_page"
@@ -112964,7 +117806,6 @@ export type GetApiProgressSearchFilterStatus200 = {
 													| "entity"
 													| "label"
 													| "tag"
-													| "structure"
 													| "series"
 													| "zone"
 													| "zone_page"
@@ -117109,7 +121950,7 @@ export const GetApiCollectionsStatus200ItemsAttributionsCreditedUnitKindEnum = {
 	entity: "entity",
 	label: "label",
 	tag: "tag",
-	structure: "structure",
+	tag_path: "tag_path",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -117469,7 +122310,7 @@ export const PostApiCollectionsStatus200AttributionsCreditedUnitKindEnum = {
 	entity: "entity",
 	label: "label",
 	tag: "tag",
-	structure: "structure",
+	tag_path: "tag_path",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -118389,7 +123230,7 @@ export const GetApiCollectionsFavoritesStatus200AttributionsCreditedUnitKindEnum
 	entity: "entity",
 	label: "label",
 	tag: "tag",
-	structure: "structure",
+	tag_path: "tag_path",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -118992,7 +123833,7 @@ export const GetApiCollectionsByCollectionIdItemsStatus200ItemsContentAttributio
 		entity: "entity",
 		label: "label",
 		tag: "tag",
-		structure: "structure",
+		tag_path: "tag_path",
 		series: "series",
 		zone: "zone",
 		zone_page: "zone_page",
@@ -119084,7 +123925,6 @@ export const GetApiCollectionsByCollectionIdItemsStatus200ItemsContentUnitKindEn
 	release: "release",
 	entity: "entity",
 	tag: "tag",
-	structure: "structure",
 	series: "series",
 	zone: "zone",
 	collection: "collection",
@@ -119156,7 +123996,7 @@ export const GetApiCollectionsByCollectionIdItemsStatus200ItemsContentReplyConte
 		entity: "entity",
 		label: "label",
 		tag: "tag",
-		structure: "structure",
+		tag_path: "tag_path",
 		series: "series",
 		zone: "zone",
 		zone_page: "zone_page",
@@ -120217,6 +125057,29 @@ export type GetApiCollectionsByCollectionIdItemsStatus200 = {
 										)[];
 								  } | null)
 								| null;
+							/**
+							 * @type object
+							 */
+							contentSpoiler: {
+								level: 0 | 1 | 2;
+								/**
+								 * @type boolean
+								 */
+								concealed: boolean;
+							};
+							/**
+							 * @type object
+							 */
+							contentNsfw: {
+								/**
+								 * @type boolean
+								 */
+								labelled: boolean;
+								/**
+								 * @type boolean
+								 */
+								concealed: boolean;
+							};
 							replyCount: string | number;
 							latestRevisionId: (string | null) | null;
 							replyContext:
@@ -120890,6 +125753,29 @@ export type GetApiCollectionsByCollectionIdItemsStatus200 = {
 										)[];
 								  } | null)
 								| null;
+							/**
+							 * @type object
+							 */
+							contentSpoiler: {
+								level: 0 | 1 | 2;
+								/**
+								 * @type boolean
+								 */
+								concealed: boolean;
+							};
+							/**
+							 * @type object
+							 */
+							contentNsfw: {
+								/**
+								 * @type boolean
+								 */
+								labelled: boolean;
+								/**
+								 * @type boolean
+								 */
+								concealed: boolean;
+							};
 							replyCount: string | number;
 							latestRevisionId: (string | null) | null;
 							replyContext:
@@ -121581,6 +126467,29 @@ export type GetApiCollectionsByCollectionIdItemsStatus200 = {
 										)[];
 								  } | null)
 								| null;
+							/**
+							 * @type object
+							 */
+							contentSpoiler: {
+								level: 0 | 1 | 2;
+								/**
+								 * @type boolean
+								 */
+								concealed: boolean;
+							};
+							/**
+							 * @type object
+							 */
+							contentNsfw: {
+								/**
+								 * @type boolean
+								 */
+								labelled: boolean;
+								/**
+								 * @type boolean
+								 */
+								concealed: boolean;
+							};
 							replyCount: string | number;
 							latestRevisionId: (string | null) | null;
 							replyContext:
@@ -122080,7 +126989,7 @@ export const GetApiCollectionsByCollectionIdStatus200AttributionsCreditedUnitKin
 	entity: "entity",
 	label: "label",
 	tag: "tag",
-	structure: "structure",
+	tag_path: "tag_path",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -122612,7 +127521,7 @@ export const PatchApiCollectionsByCollectionIdStatus200AttributionsCreditedUnitK
 	entity: "entity",
 	label: "label",
 	tag: "tag",
-	structure: "structure",
+	tag_path: "tag_path",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -126028,7 +130937,7 @@ export const GetApiReviewsStatus200ItemsAttributionsCreditedUnitKindEnum = {
 	entity: "entity",
 	label: "label",
 	tag: "tag",
-	structure: "structure",
+	tag_path: "tag_path",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -126108,6 +131017,15 @@ export const GetApiReviewsStatus200ItemsTrackingSurfaceEnum = {
 export type GetApiReviewsStatus200ItemsTrackingSurfaceEnum =
 	(typeof GetApiReviewsStatus200ItemsTrackingSurfaceEnum)[keyof typeof GetApiReviewsStatus200ItemsTrackingSurfaceEnum];
 
+export const GetApiReviewsStatus200ItemsContentSpoilerLevelEnum = {
+	"0": 0,
+	"1": 1,
+	"2": 2,
+} as const;
+
+export type GetApiReviewsStatus200ItemsContentSpoilerLevelEnum =
+	(typeof GetApiReviewsStatus200ItemsContentSpoilerLevelEnum)[keyof typeof GetApiReviewsStatus200ItemsContentSpoilerLevelEnum];
+
 export const GetApiReviewsStatus200ItemsReplyContextAttributionsRoleEnum = {
 	author: "author",
 	"co-author": "co-author",
@@ -126144,7 +131062,7 @@ export const GetApiReviewsStatus200ItemsReplyContextAttributionsCreditedUnitKind
 	entity: "entity",
 	label: "label",
 	tag: "tag",
-	structure: "structure",
+	tag_path: "tag_path",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -126676,6 +131594,32 @@ export type GetApiReviewsStatus200 = {
 					)[];
 			  } | null)
 			| null;
+		/**
+		 * @type object
+		 */
+		contentSpoiler: {
+			/**
+			 * @type string
+			 */
+			level: GetApiReviewsStatus200ItemsContentSpoilerLevelEnum;
+			/**
+			 * @type boolean
+			 */
+			concealed: boolean;
+		};
+		/**
+		 * @type object
+		 */
+		contentNsfw: {
+			/**
+			 * @type boolean
+			 */
+			labelled: boolean;
+			/**
+			 * @type boolean
+			 */
+			concealed: boolean;
+		};
 		replyCount: string | number;
 		latestRevisionId: (string | null) | null;
 		replyContext:
@@ -127197,29 +132141,51 @@ export const PostApiReviewsStatus429ErrorCodeEnum = {
 export type PostApiReviewsStatus429ErrorCodeEnum =
 	(typeof PostApiReviewsStatus429ErrorCodeEnum)[keyof typeof PostApiReviewsStatus429ErrorCodeEnum];
 
-/**
- * @type object
- */
-export type PostApiReviewsStatus429 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @type string
-		 */
-		code: PostApiReviewsStatus429ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		details?: JsonValue;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
+export type PostApiReviewsStatus429 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'VoteHotKeyBusy'
+				 * @type string
+				 */
+				code: "VoteHotKeyBusy";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @type string
+				 */
+				code: PostApiReviewsStatus429ErrorCodeEnum;
+				/**
+				 * @type string
+				 */
+				message: string;
+				details?: JsonValue;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  };
 
 /**
  * @type object
@@ -127591,7 +132557,7 @@ export const GetApiReviewsByReviewIdStatus200AttributionsCreditedUnitKindEnum = 
 	entity: "entity",
 	label: "label",
 	tag: "tag",
-	structure: "structure",
+	tag_path: "tag_path",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -127638,6 +132604,15 @@ export const GetApiReviewsByReviewIdStatus200LanguageEnum = {
 
 export type GetApiReviewsByReviewIdStatus200LanguageEnum =
 	(typeof GetApiReviewsByReviewIdStatus200LanguageEnum)[keyof typeof GetApiReviewsByReviewIdStatus200LanguageEnum];
+
+export const GetApiReviewsByReviewIdStatus200ContentSpoilerLevelEnum = {
+	"0": 0,
+	"1": 1,
+	"2": 2,
+} as const;
+
+export type GetApiReviewsByReviewIdStatus200ContentSpoilerLevelEnum =
+	(typeof GetApiReviewsByReviewIdStatus200ContentSpoilerLevelEnum)[keyof typeof GetApiReviewsByReviewIdStatus200ContentSpoilerLevelEnum];
 
 export const GetApiReviewsByReviewIdStatus200SubjectLanguageEnum = {
 	zh: "zh",
@@ -127973,6 +132948,32 @@ export type GetApiReviewsByReviewIdStatus200 = {
 				)[];
 		  } | null)
 		| null;
+	/**
+	 * @type object
+	 */
+	contentSpoiler: {
+		/**
+		 * @type string
+		 */
+		level: GetApiReviewsByReviewIdStatus200ContentSpoilerLevelEnum;
+		/**
+		 * @type boolean
+		 */
+		concealed: boolean;
+	};
+	/**
+	 * @type object
+	 */
+	contentNsfw: {
+		/**
+		 * @type boolean
+		 */
+		labelled: boolean;
+		/**
+		 * @type boolean
+		 */
+		concealed: boolean;
+	};
 	replyCount: string | number;
 	latestRevisionId: (string | null) | null;
 	/**
@@ -128335,29 +133336,51 @@ export const PatchApiReviewsByReviewIdStatus429ErrorCodeEnum = {
 export type PatchApiReviewsByReviewIdStatus429ErrorCodeEnum =
 	(typeof PatchApiReviewsByReviewIdStatus429ErrorCodeEnum)[keyof typeof PatchApiReviewsByReviewIdStatus429ErrorCodeEnum];
 
-/**
- * @type object
- */
-export type PatchApiReviewsByReviewIdStatus429 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @type string
-		 */
-		code: PatchApiReviewsByReviewIdStatus429ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		details?: JsonValue;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
+export type PatchApiReviewsByReviewIdStatus429 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'VoteHotKeyBusy'
+				 * @type string
+				 */
+				code: "VoteHotKeyBusy";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @type string
+				 */
+				code: PatchApiReviewsByReviewIdStatus429ErrorCodeEnum;
+				/**
+				 * @type string
+				 */
+				message: string;
+				details?: JsonValue;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  };
 
 /**
  * @type object
@@ -131352,7 +136375,7 @@ export const GetApiPostsStatus200ItemsAttributionsCreditedUnitKindEnum = {
 	entity: "entity",
 	label: "label",
 	tag: "tag",
-	structure: "structure",
+	tag_path: "tag_path",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -131386,6 +136409,15 @@ export const GetApiPostsStatus200ItemsAttributionsCreditedUnitAvatarIconPrefixEn
 
 export type GetApiPostsStatus200ItemsAttributionsCreditedUnitAvatarIconPrefixEnum =
 	(typeof GetApiPostsStatus200ItemsAttributionsCreditedUnitAvatarIconPrefixEnum)[keyof typeof GetApiPostsStatus200ItemsAttributionsCreditedUnitAvatarIconPrefixEnum];
+
+export const GetApiPostsStatus200ItemsContentSpoilerLevelEnum = {
+	"0": 0,
+	"1": 1,
+	"2": 2,
+} as const;
+
+export type GetApiPostsStatus200ItemsContentSpoilerLevelEnum =
+	(typeof GetApiPostsStatus200ItemsContentSpoilerLevelEnum)[keyof typeof GetApiPostsStatus200ItemsContentSpoilerLevelEnum];
 
 /**
  * @type object
@@ -131544,135 +136576,160 @@ export type GetApiPostsStatus200 = {
 		subjectId: (string | null) | null;
 		rootPostId: (string | null) | null;
 		parentPostId: (string | null) | null;
+		body:
+			| ({
+					/**
+					 * @type string
+					 */
+					_type: "portable-text";
+					/**
+					 * @pattern ^[0-9a-f]{12}$
+					 * @type string
+					 */
+					_key: string;
+					/**
+					 * @type array
+					 */
+					content: (
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @type string
+								 */
+								_type: "block";
+								/**
+								 * @type array
+								 */
+								children: (
+									| {
+											/**
+											 * @type string
+											 */
+											_key: string;
+											/**
+											 * @type string
+											 */
+											_type: "span";
+											/**
+											 * @type string
+											 */
+											text: string;
+											/**
+											 * @type array | undefined
+											 */
+											marks?: string[];
+									  }
+									| {
+											/**
+											 * @type string
+											 */
+											_key: string;
+											/**
+											 * @type string
+											 */
+											_type: "unit-mention";
+											/**
+											 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+											 * @type string
+											 */
+											unitId: string;
+									  }
+								)[];
+								/**
+								 * @type array | undefined
+								 */
+								markDefs?: {
+									/**
+									 * @type string
+									 */
+									_key: string;
+									/**
+									 * @type string
+									 */
+									_type: string;
+									[key: string]: unknown;
+								}[];
+								/**
+								 * @type string | undefined
+								 */
+								listItem?: string;
+								/**
+								 * @type string | undefined
+								 */
+								style?: string;
+								/**
+								 * @minLength 1
+								 * @type integer | undefined
+								 */
+								level?: number;
+								[key: string]: unknown;
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @type string
+								 */
+								_type: "image";
+								/**
+								 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+								 * @type string
+								 */
+								assetId: string;
+								/**
+								 * @type string | undefined
+								 */
+								alt?: string;
+								/**
+								 * @type string | undefined
+								 */
+								caption?: string;
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @pattern ^(?!(?:block|image)$).+
+								 * @type string
+								 */
+								_type: string;
+								[key: string]: unknown;
+						  }
+					)[];
+			  } | null)
+			| null;
 		/**
 		 * @type object
 		 */
-		body: {
+		contentSpoiler: {
 			/**
 			 * @type string
 			 */
-			_type: "portable-text";
+			level: GetApiPostsStatus200ItemsContentSpoilerLevelEnum;
 			/**
-			 * @pattern ^[0-9a-f]{12}$
-			 * @type string
+			 * @type boolean
 			 */
-			_key: string;
+			concealed: boolean;
+		};
+		/**
+		 * @type object
+		 */
+		contentNsfw: {
 			/**
-			 * @type array
+			 * @type boolean
 			 */
-			content: (
-				| {
-						/**
-						 * @type string
-						 */
-						_key: string;
-						/**
-						 * @type string
-						 */
-						_type: "block";
-						/**
-						 * @type array
-						 */
-						children: (
-							| {
-									/**
-									 * @type string
-									 */
-									_key: string;
-									/**
-									 * @type string
-									 */
-									_type: "span";
-									/**
-									 * @type string
-									 */
-									text: string;
-									/**
-									 * @type array | undefined
-									 */
-									marks?: string[];
-							  }
-							| {
-									/**
-									 * @type string
-									 */
-									_key: string;
-									/**
-									 * @type string
-									 */
-									_type: "unit-mention";
-									/**
-									 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
-									 * @type string
-									 */
-									unitId: string;
-							  }
-						)[];
-						/**
-						 * @type array | undefined
-						 */
-						markDefs?: {
-							/**
-							 * @type string
-							 */
-							_key: string;
-							/**
-							 * @type string
-							 */
-							_type: string;
-							[key: string]: unknown;
-						}[];
-						/**
-						 * @type string | undefined
-						 */
-						listItem?: string;
-						/**
-						 * @type string | undefined
-						 */
-						style?: string;
-						/**
-						 * @minLength 1
-						 * @type integer | undefined
-						 */
-						level?: number;
-						[key: string]: unknown;
-				  }
-				| {
-						/**
-						 * @type string
-						 */
-						_key: string;
-						/**
-						 * @type string
-						 */
-						_type: "image";
-						/**
-						 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
-						 * @type string
-						 */
-						assetId: string;
-						/**
-						 * @type string | undefined
-						 */
-						alt?: string;
-						/**
-						 * @type string | undefined
-						 */
-						caption?: string;
-				  }
-				| {
-						/**
-						 * @type string
-						 */
-						_key: string;
-						/**
-						 * @pattern ^(?!(?:block|image)$).+
-						 * @type string
-						 */
-						_type: string;
-						[key: string]: unknown;
-				  }
-			)[];
+			labelled: boolean;
+			/**
+			 * @type boolean
+			 */
+			concealed: boolean;
 		};
 		replyCount: string | number;
 		title: (string | null) | null;
@@ -131898,29 +136955,51 @@ export const PostApiPostsStatus429ErrorCodeEnum = {
 export type PostApiPostsStatus429ErrorCodeEnum =
 	(typeof PostApiPostsStatus429ErrorCodeEnum)[keyof typeof PostApiPostsStatus429ErrorCodeEnum];
 
-/**
- * @type object
- */
-export type PostApiPostsStatus429 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @type string
-		 */
-		code: PostApiPostsStatus429ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		details?: JsonValue;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
+export type PostApiPostsStatus429 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'VoteHotKeyBusy'
+				 * @type string
+				 */
+				code: "VoteHotKeyBusy";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @type string
+				 */
+				code: PostApiPostsStatus429ErrorCodeEnum;
+				/**
+				 * @type string
+				 */
+				message: string;
+				details?: JsonValue;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  };
 
 /**
  * @type object
@@ -132102,6 +137181,11 @@ export type PostApiPostsBody =
 			 * @type array
 			 */
 			publishRealmIds: string[];
+			contentSpoilerLevel?: 0 | 1 | 2;
+			/**
+			 * @type boolean | undefined
+			 */
+			contentNsfw?: boolean;
 			/**
 			 * @type string
 			 */
@@ -132299,6 +137383,11 @@ export type PostApiPostsBody =
 			 * @type array
 			 */
 			publishRealmIds: string[];
+			contentSpoilerLevel?: 0 | 1 | 2;
+			/**
+			 * @type boolean | undefined
+			 */
+			contentNsfw?: boolean;
 			/**
 			 * @type string
 			 */
@@ -132551,29 +137640,51 @@ export const PostApiPostsWikiStatus429ErrorCodeEnum = {
 export type PostApiPostsWikiStatus429ErrorCodeEnum =
 	(typeof PostApiPostsWikiStatus429ErrorCodeEnum)[keyof typeof PostApiPostsWikiStatus429ErrorCodeEnum];
 
-/**
- * @type object
- */
-export type PostApiPostsWikiStatus429 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @type string
-		 */
-		code: PostApiPostsWikiStatus429ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		details?: JsonValue;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
+export type PostApiPostsWikiStatus429 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'VoteHotKeyBusy'
+				 * @type string
+				 */
+				code: "VoteHotKeyBusy";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @type string
+				 */
+				code: PostApiPostsWikiStatus429ErrorCodeEnum;
+				/**
+				 * @type string
+				 */
+				message: string;
+				details?: JsonValue;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  };
 
 /**
  * @type object
@@ -132933,7 +138044,7 @@ export const GetApiPostsByPostIdStatus200AttributionsCreditedUnitKindEnum = {
 	entity: "entity",
 	label: "label",
 	tag: "tag",
-	structure: "structure",
+	tag_path: "tag_path",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -133317,6 +138428,29 @@ export type GetApiPostsByPostIdStatus200 =
 					  }
 				)[];
 			};
+			/**
+			 * @type object
+			 */
+			contentSpoiler: {
+				level: 0 | 1 | 2;
+				/**
+				 * @type boolean
+				 */
+				concealed: boolean;
+			};
+			/**
+			 * @type object
+			 */
+			contentNsfw: {
+				/**
+				 * @type boolean
+				 */
+				labelled: boolean;
+				/**
+				 * @type boolean
+				 */
+				concealed: boolean;
+			};
 			latestRevisionId: (string | null) | null;
 			/**
 			 * @description
@@ -133695,6 +138829,29 @@ export type GetApiPostsByPostIdStatus200 =
 							[key: string]: unknown;
 					  }
 				)[];
+			};
+			/**
+			 * @type object
+			 */
+			contentSpoiler: {
+				level: 0 | 1 | 2;
+				/**
+				 * @type boolean
+				 */
+				concealed: boolean;
+			};
+			/**
+			 * @type object
+			 */
+			contentNsfw: {
+				/**
+				 * @type boolean
+				 */
+				labelled: boolean;
+				/**
+				 * @type boolean
+				 */
+				concealed: boolean;
 			};
 			latestRevisionId: (string | null) | null;
 			/**
@@ -134075,6 +139232,29 @@ export type GetApiPostsByPostIdStatus200 =
 					  }
 				)[];
 			};
+			/**
+			 * @type object
+			 */
+			contentSpoiler: {
+				level: 0 | 1 | 2;
+				/**
+				 * @type boolean
+				 */
+				concealed: boolean;
+			};
+			/**
+			 * @type object
+			 */
+			contentNsfw: {
+				/**
+				 * @type boolean
+				 */
+				labelled: boolean;
+				/**
+				 * @type boolean
+				 */
+				concealed: boolean;
+			};
 			latestRevisionId: (string | null) | null;
 			/**
 			 * @description
@@ -134453,6 +139633,29 @@ export type GetApiPostsByPostIdStatus200 =
 						)[];
 				  } | null)
 				| null;
+			/**
+			 * @type object
+			 */
+			contentSpoiler: {
+				level: 0 | 1 | 2;
+				/**
+				 * @type boolean
+				 */
+				concealed: boolean;
+			};
+			/**
+			 * @type object
+			 */
+			contentNsfw: {
+				/**
+				 * @type boolean
+				 */
+				labelled: boolean;
+				/**
+				 * @type boolean
+				 */
+				concealed: boolean;
+			};
 			latestRevisionId: (string | null) | null;
 			/**
 			 * @description
@@ -134838,6 +140041,29 @@ export type GetApiPostsByPostIdStatus200 =
 						)[];
 				  } | null)
 				| null;
+			/**
+			 * @type object
+			 */
+			contentSpoiler: {
+				level: 0 | 1 | 2;
+				/**
+				 * @type boolean
+				 */
+				concealed: boolean;
+			};
+			/**
+			 * @type object
+			 */
+			contentNsfw: {
+				/**
+				 * @type boolean
+				 */
+				labelled: boolean;
+				/**
+				 * @type boolean
+				 */
+				concealed: boolean;
+			};
 			replyCount: string | number;
 			latestRevisionId: (string | null) | null;
 			/**
@@ -135251,6 +140477,29 @@ export type GetApiPostsByPostIdStatus200 =
 					  }
 				)[];
 			};
+			/**
+			 * @type object
+			 */
+			contentSpoiler: {
+				level: 0 | 1 | 2;
+				/**
+				 * @type boolean
+				 */
+				concealed: boolean;
+			};
+			/**
+			 * @type object
+			 */
+			contentNsfw: {
+				/**
+				 * @type boolean
+				 */
+				labelled: boolean;
+				/**
+				 * @type boolean
+				 */
+				concealed: boolean;
+			};
 			latestRevisionId: (string | null) | null;
 			/**
 			 * @description
@@ -135597,29 +140846,51 @@ export const PatchApiPostsByPostIdStatus429ErrorCodeEnum = {
 export type PatchApiPostsByPostIdStatus429ErrorCodeEnum =
 	(typeof PatchApiPostsByPostIdStatus429ErrorCodeEnum)[keyof typeof PatchApiPostsByPostIdStatus429ErrorCodeEnum];
 
-/**
- * @type object
- */
-export type PatchApiPostsByPostIdStatus429 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @type string
-		 */
-		code: PatchApiPostsByPostIdStatus429ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		details?: JsonValue;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
+export type PatchApiPostsByPostIdStatus429 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'VoteHotKeyBusy'
+				 * @type string
+				 */
+				code: "VoteHotKeyBusy";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @type string
+				 */
+				code: PatchApiPostsByPostIdStatus429ErrorCodeEnum;
+				/**
+				 * @type string
+				 */
+				message: string;
+				details?: JsonValue;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  };
 
 /**
  * @type object
@@ -135638,6 +140909,15 @@ export const PatchApiPostsByPostIdRequestLanguageEnum = {
 
 export type PatchApiPostsByPostIdRequestLanguageEnum =
 	(typeof PatchApiPostsByPostIdRequestLanguageEnum)[keyof typeof PatchApiPostsByPostIdRequestLanguageEnum];
+
+export const PatchApiPostsByPostIdRequestContentSpoilerLevelEnum = {
+	"0": 0,
+	"1": 1,
+	"2": 2,
+} as const;
+
+export type PatchApiPostsByPostIdRequestContentSpoilerLevelEnum =
+	(typeof PatchApiPostsByPostIdRequestContentSpoilerLevelEnum)[keyof typeof PatchApiPostsByPostIdRequestContentSpoilerLevelEnum];
 
 export const PatchApiPostsByPostIdRequestRevisionContextContributionRoleEnum = {
 	creator: "creator",
@@ -135804,6 +141084,14 @@ export type PatchApiPostsByPostIdBody = {
 	 * @type boolean | undefined
 	 */
 	minor?: boolean;
+	/**
+	 * @type string | undefined
+	 */
+	contentSpoilerLevel?: PatchApiPostsByPostIdRequestContentSpoilerLevelEnum;
+	/**
+	 * @type boolean | undefined
+	 */
+	contentNsfw?: boolean;
 	/**
 	 * @type object | undefined
 	 */
@@ -135996,7 +141284,7 @@ export const GetApiPostsByPostIdRepliesStatus200ItemsAttributionsCreditedUnitKin
 	entity: "entity",
 	label: "label",
 	tag: "tag",
-	structure: "structure",
+	tag_path: "tag_path",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -136545,7 +141833,7 @@ export const PostApiPostsByPostIdRepliesStatus200AttributionsCreditedUnitKindEnu
 	entity: "entity",
 	label: "label",
 	tag: "tag",
-	structure: "structure",
+	tag_path: "tag_path",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -137065,29 +142353,51 @@ export const PostApiPostsByPostIdRepliesStatus429ErrorCodeEnum = {
 export type PostApiPostsByPostIdRepliesStatus429ErrorCodeEnum =
 	(typeof PostApiPostsByPostIdRepliesStatus429ErrorCodeEnum)[keyof typeof PostApiPostsByPostIdRepliesStatus429ErrorCodeEnum];
 
-/**
- * @type object
- */
-export type PostApiPostsByPostIdRepliesStatus429 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @type string
-		 */
-		code: PostApiPostsByPostIdRepliesStatus429ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		details?: JsonValue;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
+export type PostApiPostsByPostIdRepliesStatus429 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'VoteHotKeyBusy'
+				 * @type string
+				 */
+				code: "VoteHotKeyBusy";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @type string
+				 */
+				code: PostApiPostsByPostIdRepliesStatus429ErrorCodeEnum;
+				/**
+				 * @type string
+				 */
+				message: string;
+				details?: JsonValue;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  };
 
 /**
  * @type object
@@ -137519,29 +142829,51 @@ export const PatchApiPostsByPostIdRepliesByReplyPostIdStatus429ErrorCodeEnum = {
 export type PatchApiPostsByPostIdRepliesByReplyPostIdStatus429ErrorCodeEnum =
 	(typeof PatchApiPostsByPostIdRepliesByReplyPostIdStatus429ErrorCodeEnum)[keyof typeof PatchApiPostsByPostIdRepliesByReplyPostIdStatus429ErrorCodeEnum];
 
-/**
- * @type object
- */
-export type PatchApiPostsByPostIdRepliesByReplyPostIdStatus429 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @type string
-		 */
-		code: PatchApiPostsByPostIdRepliesByReplyPostIdStatus429ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		details?: JsonValue;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
+export type PatchApiPostsByPostIdRepliesByReplyPostIdStatus429 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'VoteHotKeyBusy'
+				 * @type string
+				 */
+				code: "VoteHotKeyBusy";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @type string
+				 */
+				code: PatchApiPostsByPostIdRepliesByReplyPostIdStatus429ErrorCodeEnum;
+				/**
+				 * @type string
+				 */
+				message: string;
+				details?: JsonValue;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  };
 
 /**
  * @type object
@@ -138132,29 +143464,51 @@ export const PostApiRealmsStatus429ErrorCodeEnum = {
 export type PostApiRealmsStatus429ErrorCodeEnum =
 	(typeof PostApiRealmsStatus429ErrorCodeEnum)[keyof typeof PostApiRealmsStatus429ErrorCodeEnum];
 
-/**
- * @type object
- */
-export type PostApiRealmsStatus429 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @type string
-		 */
-		code: PostApiRealmsStatus429ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		details?: JsonValue;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
+export type PostApiRealmsStatus429 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'VoteHotKeyBusy'
+				 * @type string
+				 */
+				code: "VoteHotKeyBusy";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @type string
+				 */
+				code: PostApiRealmsStatus429ErrorCodeEnum;
+				/**
+				 * @type string
+				 */
+				message: string;
+				details?: JsonValue;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  };
 
 /**
  * @type object
@@ -144060,7 +149414,7 @@ export const GetApiRealmsByRealmIdPinsStatus200ContentItemsAttributionsCreditedU
 	entity: "entity",
 	label: "label",
 	tag: "tag",
-	structure: "structure",
+	tag_path: "tag_path",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -144151,7 +149505,6 @@ export const GetApiRealmsByRealmIdPinsStatus200ContentItemsUnitKindEnum = {
 	release: "release",
 	entity: "entity",
 	tag: "tag",
-	structure: "structure",
 	series: "series",
 	zone: "zone",
 	collection: "collection",
@@ -144220,7 +149573,7 @@ export const GetApiRealmsByRealmIdPinsStatus200ContentItemsReplyContextAttributi
 		entity: "entity",
 		label: "label",
 		tag: "tag",
-		structure: "structure",
+		tag_path: "tag_path",
 		series: "series",
 		zone: "zone",
 		zone_page: "zone_page",
@@ -145292,6 +150645,29 @@ export type GetApiRealmsByRealmIdPinsStatus200 = {
 									)[];
 							  } | null)
 							| null;
+						/**
+						 * @type object
+						 */
+						contentSpoiler: {
+							level: 0 | 1 | 2;
+							/**
+							 * @type boolean
+							 */
+							concealed: boolean;
+						};
+						/**
+						 * @type object
+						 */
+						contentNsfw: {
+							/**
+							 * @type boolean
+							 */
+							labelled: boolean;
+							/**
+							 * @type boolean
+							 */
+							concealed: boolean;
+						};
 						replyCount: string | number;
 						latestRevisionId: (string | null) | null;
 						replyContext:
@@ -145963,6 +151339,29 @@ export type GetApiRealmsByRealmIdPinsStatus200 = {
 									)[];
 							  } | null)
 							| null;
+						/**
+						 * @type object
+						 */
+						contentSpoiler: {
+							level: 0 | 1 | 2;
+							/**
+							 * @type boolean
+							 */
+							concealed: boolean;
+						};
+						/**
+						 * @type object
+						 */
+						contentNsfw: {
+							/**
+							 * @type boolean
+							 */
+							labelled: boolean;
+							/**
+							 * @type boolean
+							 */
+							concealed: boolean;
+						};
 						replyCount: string | number;
 						latestRevisionId: (string | null) | null;
 						replyContext:
@@ -146652,6 +152051,29 @@ export type GetApiRealmsByRealmIdPinsStatus200 = {
 									)[];
 							  } | null)
 							| null;
+						/**
+						 * @type object
+						 */
+						contentSpoiler: {
+							level: 0 | 1 | 2;
+							/**
+							 * @type boolean
+							 */
+							concealed: boolean;
+						};
+						/**
+						 * @type object
+						 */
+						contentNsfw: {
+							/**
+							 * @type boolean
+							 */
+							labelled: boolean;
+							/**
+							 * @type boolean
+							 */
+							concealed: boolean;
+						};
 						replyCount: string | number;
 						latestRevisionId: (string | null) | null;
 						replyContext:
@@ -148016,29 +153438,51 @@ export const PostApiRealmsByRealmIdWikisStatus429ErrorCodeEnum = {
 export type PostApiRealmsByRealmIdWikisStatus429ErrorCodeEnum =
 	(typeof PostApiRealmsByRealmIdWikisStatus429ErrorCodeEnum)[keyof typeof PostApiRealmsByRealmIdWikisStatus429ErrorCodeEnum];
 
-/**
- * @type object
- */
-export type PostApiRealmsByRealmIdWikisStatus429 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @type string
-		 */
-		code: PostApiRealmsByRealmIdWikisStatus429ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		details?: JsonValue;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
+export type PostApiRealmsByRealmIdWikisStatus429 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'VoteHotKeyBusy'
+				 * @type string
+				 */
+				code: "VoteHotKeyBusy";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @type string
+				 */
+				code: PostApiRealmsByRealmIdWikisStatus429ErrorCodeEnum;
+				/**
+				 * @type string
+				 */
+				message: string;
+				details?: JsonValue;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  };
 
 /**
  * @type object
@@ -148621,29 +154065,51 @@ export const PostApiRealmsByRealmIdTagContextsStatus429ErrorCodeEnum = {
 export type PostApiRealmsByRealmIdTagContextsStatus429ErrorCodeEnum =
 	(typeof PostApiRealmsByRealmIdTagContextsStatus429ErrorCodeEnum)[keyof typeof PostApiRealmsByRealmIdTagContextsStatus429ErrorCodeEnum];
 
-/**
- * @type object
- */
-export type PostApiRealmsByRealmIdTagContextsStatus429 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @type string
-		 */
-		code: PostApiRealmsByRealmIdTagContextsStatus429ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		details?: JsonValue;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
+export type PostApiRealmsByRealmIdTagContextsStatus429 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'VoteHotKeyBusy'
+				 * @type string
+				 */
+				code: "VoteHotKeyBusy";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @type string
+				 */
+				code: PostApiRealmsByRealmIdTagContextsStatus429ErrorCodeEnum;
+				/**
+				 * @type string
+				 */
+				message: string;
+				details?: JsonValue;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  };
 
 /**
  * @type object
@@ -149192,6 +154658,34 @@ export type PutApiRealmsByRealmIdTagsByTagIdContextStatus422 =
 /**
  * @type object
  */
+export type PutApiRealmsByRealmIdTagsByTagIdContextStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'VoteHotKeyBusy'
+		 * @type string
+		 */
+		code: "VoteHotKeyBusy";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type PutApiRealmsByRealmIdTagsByTagIdContextStatus500 = InternalError;
 
 /**
@@ -149226,6 +154720,7 @@ export type PutApiRealmsByRealmIdTagsByTagIdContextResponses = {
 	"404": PutApiRealmsByRealmIdTagsByTagIdContextStatus404;
 	"409": PutApiRealmsByRealmIdTagsByTagIdContextStatus409;
 	"422": PutApiRealmsByRealmIdTagsByTagIdContextStatus422;
+	"429": PutApiRealmsByRealmIdTagsByTagIdContextStatus429;
 	"500": PutApiRealmsByRealmIdTagsByTagIdContextStatus500;
 };
 
@@ -149239,6 +154734,7 @@ export type PutApiRealmsByRealmIdTagsByTagIdContextResponse =
 	| PutApiRealmsByRealmIdTagsByTagIdContextStatus404
 	| PutApiRealmsByRealmIdTagsByTagIdContextStatus409
 	| PutApiRealmsByRealmIdTagsByTagIdContextStatus422
+	| PutApiRealmsByRealmIdTagsByTagIdContextStatus429
 	| PutApiRealmsByRealmIdTagsByTagIdContextStatus500;
 
 /**
@@ -149323,6 +154819,34 @@ export type DeleteApiRealmsByRealmIdTagsByTagIdContextStatus404 = {
 /**
  * @type object
  */
+export type DeleteApiRealmsByRealmIdTagsByTagIdContextStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'RealmTagContextInUse'
+		 * @type string
+		 */
+		code: "RealmTagContextInUse";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type DeleteApiRealmsByRealmIdTagsByTagIdContextStatus422 = ValidationError;
 
 export const DeleteApiRealmsByRealmIdTagsByTagIdContextStatus429ErrorCodeEnum = {
@@ -149333,29 +154857,51 @@ export const DeleteApiRealmsByRealmIdTagsByTagIdContextStatus429ErrorCodeEnum = 
 export type DeleteApiRealmsByRealmIdTagsByTagIdContextStatus429ErrorCodeEnum =
 	(typeof DeleteApiRealmsByRealmIdTagsByTagIdContextStatus429ErrorCodeEnum)[keyof typeof DeleteApiRealmsByRealmIdTagsByTagIdContextStatus429ErrorCodeEnum];
 
-/**
- * @type object
- */
-export type DeleteApiRealmsByRealmIdTagsByTagIdContextStatus429 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @type string
-		 */
-		code: DeleteApiRealmsByRealmIdTagsByTagIdContextStatus429ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		details?: JsonValue;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
+export type DeleteApiRealmsByRealmIdTagsByTagIdContextStatus429 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'VoteHotKeyBusy'
+				 * @type string
+				 */
+				code: "VoteHotKeyBusy";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @type string
+				 */
+				code: DeleteApiRealmsByRealmIdTagsByTagIdContextStatus429ErrorCodeEnum;
+				/**
+				 * @type string
+				 */
+				message: string;
+				details?: JsonValue;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  };
 
 /**
  * @type object
@@ -149379,6 +154925,7 @@ export type DeleteApiRealmsByRealmIdTagsByTagIdContextResponses = {
 	"204": DeleteApiRealmsByRealmIdTagsByTagIdContextStatus204;
 	"403": DeleteApiRealmsByRealmIdTagsByTagIdContextStatus403;
 	"404": DeleteApiRealmsByRealmIdTagsByTagIdContextStatus404;
+	"409": DeleteApiRealmsByRealmIdTagsByTagIdContextStatus409;
 	"422": DeleteApiRealmsByRealmIdTagsByTagIdContextStatus422;
 	"429": DeleteApiRealmsByRealmIdTagsByTagIdContextStatus429;
 	"500": DeleteApiRealmsByRealmIdTagsByTagIdContextStatus500;
@@ -149391,6 +154938,7 @@ export type DeleteApiRealmsByRealmIdTagsByTagIdContextResponse =
 	| DeleteApiRealmsByRealmIdTagsByTagIdContextStatus204
 	| DeleteApiRealmsByRealmIdTagsByTagIdContextStatus403
 	| DeleteApiRealmsByRealmIdTagsByTagIdContextStatus404
+	| DeleteApiRealmsByRealmIdTagsByTagIdContextStatus409
 	| DeleteApiRealmsByRealmIdTagsByTagIdContextStatus422
 	| DeleteApiRealmsByRealmIdTagsByTagIdContextStatus429
 	| DeleteApiRealmsByRealmIdTagsByTagIdContextStatus500;
@@ -149538,6 +155086,15 @@ export type PutApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdStatus404 = {
 	requestId: string;
 };
 
+export const PutApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdStatus422ErrorCodeEnum = {
+	RealmTagSelfReferenceForbidden: "RealmTagSelfReferenceForbidden",
+	TagNotDirectlyApplicable: "TagNotDirectlyApplicable",
+	ContentLabelApplicationInvalid: "ContentLabelApplicationInvalid",
+} as const;
+
+export type PutApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdStatus422ErrorCodeEnum =
+	(typeof PutApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdStatus422ErrorCodeEnum)[keyof typeof PutApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdStatus422ErrorCodeEnum];
+
 export type PutApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdStatus422 =
 	| {
 			/**
@@ -149548,7 +155105,7 @@ export type PutApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdStatus422 =
 				 * @default 'RealmTagSelfReferenceForbidden'
 				 * @type string
 				 */
-				code: "RealmTagSelfReferenceForbidden";
+				code: PutApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdStatus422ErrorCodeEnum;
 				/**
 				 * @type string
 				 */
@@ -150188,6 +155745,7 @@ export type PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus409 = {
 export const PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus422ErrorCodeEnum = {
 	RealmTagContextRequired: "RealmTagContextRequired",
 	RealmTagSelfReferenceForbidden: "RealmTagSelfReferenceForbidden",
+	ContentLabelJudgmentForbidden: "ContentLabelJudgmentForbidden",
 } as const;
 
 export type PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus422ErrorCodeEnum =
@@ -150228,29 +155786,51 @@ export const PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus429ErrorCode
 export type PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus429ErrorCodeEnum =
 	(typeof PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus429ErrorCodeEnum)[keyof typeof PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus429ErrorCodeEnum];
 
-/**
- * @type object
- */
-export type PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus429 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @type string
-		 */
-		code: PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus429ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		details?: JsonValue;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
+export type PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus429 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'VoteHotKeyBusy'
+				 * @type string
+				 */
+				code: "VoteHotKeyBusy";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @type string
+				 */
+				code: PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus429ErrorCodeEnum;
+				/**
+				 * @type string
+				 */
+				message: string;
+				details?: JsonValue;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  };
 
 /**
  * @type object
@@ -150441,29 +156021,51 @@ export const DeleteApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus429ErrorC
 export type DeleteApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus429ErrorCodeEnum =
 	(typeof DeleteApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus429ErrorCodeEnum)[keyof typeof DeleteApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus429ErrorCodeEnum];
 
-/**
- * @type object
- */
-export type DeleteApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus429 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @type string
-		 */
-		code: DeleteApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus429ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		details?: JsonValue;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
+export type DeleteApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus429 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'VoteHotKeyBusy'
+				 * @type string
+				 */
+				code: "VoteHotKeyBusy";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @type string
+				 */
+				code: DeleteApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus429ErrorCodeEnum;
+				/**
+				 * @type string
+				 */
+				message: string;
+				details?: JsonValue;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  };
 
 /**
  * @type object
@@ -155496,7 +161098,7 @@ export const PostApiSearchFilterFeedStatus200ItemsAttributionsCreditedUnitKindEn
 	entity: "entity",
 	label: "label",
 	tag: "tag",
-	structure: "structure",
+	tag_path: "tag_path",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -155586,7 +161188,6 @@ export const PostApiSearchFilterFeedStatus200ItemsUnitKindEnum = {
 	release: "release",
 	entity: "entity",
 	tag: "tag",
-	structure: "structure",
 	series: "series",
 	zone: "zone",
 	collection: "collection",
@@ -155654,7 +161255,7 @@ export const PostApiSearchFilterFeedStatus200ItemsReplyContextAttributionsCredit
 	entity: "entity",
 	label: "label",
 	tag: "tag",
-	structure: "structure",
+	tag_path: "tag_path",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -156683,6 +162284,29 @@ export type PostApiSearchFilterFeedStatus200 = {
 									)[];
 							  } | null)
 							| null;
+						/**
+						 * @type object
+						 */
+						contentSpoiler: {
+							level: 0 | 1 | 2;
+							/**
+							 * @type boolean
+							 */
+							concealed: boolean;
+						};
+						/**
+						 * @type object
+						 */
+						contentNsfw: {
+							/**
+							 * @type boolean
+							 */
+							labelled: boolean;
+							/**
+							 * @type boolean
+							 */
+							concealed: boolean;
+						};
 						replyCount: string | number;
 						latestRevisionId: (string | null) | null;
 						replyContext:
@@ -157354,6 +162978,29 @@ export type PostApiSearchFilterFeedStatus200 = {
 									)[];
 							  } | null)
 							| null;
+						/**
+						 * @type object
+						 */
+						contentSpoiler: {
+							level: 0 | 1 | 2;
+							/**
+							 * @type boolean
+							 */
+							concealed: boolean;
+						};
+						/**
+						 * @type object
+						 */
+						contentNsfw: {
+							/**
+							 * @type boolean
+							 */
+							labelled: boolean;
+							/**
+							 * @type boolean
+							 */
+							concealed: boolean;
+						};
 						replyCount: string | number;
 						latestRevisionId: (string | null) | null;
 						replyContext:
@@ -158043,6 +163690,29 @@ export type PostApiSearchFilterFeedStatus200 = {
 									)[];
 							  } | null)
 							| null;
+						/**
+						 * @type object
+						 */
+						contentSpoiler: {
+							level: 0 | 1 | 2;
+							/**
+							 * @type boolean
+							 */
+							concealed: boolean;
+						};
+						/**
+						 * @type object
+						 */
+						contentNsfw: {
+							/**
+							 * @type boolean
+							 */
+							labelled: boolean;
+							/**
+							 * @type boolean
+							 */
+							concealed: boolean;
+						};
 						replyCount: string | number;
 						latestRevisionId: (string | null) | null;
 						replyContext:
@@ -160922,7 +166592,7 @@ export const PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsAttributionsCredi
 	entity: "entity",
 	label: "label",
 	tag: "tag",
-	structure: "structure",
+	tag_path: "tag_path",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -161014,7 +166684,6 @@ export const PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsUnitKindEnum = {
 	release: "release",
 	entity: "entity",
 	tag: "tag",
-	structure: "structure",
 	series: "series",
 	zone: "zone",
 	collection: "collection",
@@ -161084,7 +166753,7 @@ export const PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsReplyContextAttri
 		entity: "entity",
 		label: "label",
 		tag: "tag",
-		structure: "structure",
+		tag_path: "tag_path",
 		series: "series",
 		zone: "zone",
 		zone_page: "zone_page",
@@ -162114,6 +167783,29 @@ export type PostApiSearchZonesByZoneIdFilterFeedStatus200 = {
 									)[];
 							  } | null)
 							| null;
+						/**
+						 * @type object
+						 */
+						contentSpoiler: {
+							level: 0 | 1 | 2;
+							/**
+							 * @type boolean
+							 */
+							concealed: boolean;
+						};
+						/**
+						 * @type object
+						 */
+						contentNsfw: {
+							/**
+							 * @type boolean
+							 */
+							labelled: boolean;
+							/**
+							 * @type boolean
+							 */
+							concealed: boolean;
+						};
 						replyCount: string | number;
 						latestRevisionId: (string | null) | null;
 						replyContext:
@@ -162785,6 +168477,29 @@ export type PostApiSearchZonesByZoneIdFilterFeedStatus200 = {
 									)[];
 							  } | null)
 							| null;
+						/**
+						 * @type object
+						 */
+						contentSpoiler: {
+							level: 0 | 1 | 2;
+							/**
+							 * @type boolean
+							 */
+							concealed: boolean;
+						};
+						/**
+						 * @type object
+						 */
+						contentNsfw: {
+							/**
+							 * @type boolean
+							 */
+							labelled: boolean;
+							/**
+							 * @type boolean
+							 */
+							concealed: boolean;
+						};
 						replyCount: string | number;
 						latestRevisionId: (string | null) | null;
 						replyContext:
@@ -163474,6 +169189,29 @@ export type PostApiSearchZonesByZoneIdFilterFeedStatus200 = {
 									)[];
 							  } | null)
 							| null;
+						/**
+						 * @type object
+						 */
+						contentSpoiler: {
+							level: 0 | 1 | 2;
+							/**
+							 * @type boolean
+							 */
+							concealed: boolean;
+						};
+						/**
+						 * @type object
+						 */
+						contentNsfw: {
+							/**
+							 * @type boolean
+							 */
+							labelled: boolean;
+							/**
+							 * @type boolean
+							 */
+							concealed: boolean;
+						};
 						replyCount: string | number;
 						latestRevisionId: (string | null) | null;
 						replyContext:
@@ -167647,7 +173385,7 @@ export const PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200Items
 		entity: "entity",
 		label: "label",
 		tag: "tag",
-		structure: "structure",
+		tag_path: "tag_path",
 		series: "series",
 		zone: "zone",
 		zone_page: "zone_page",
@@ -167743,7 +173481,6 @@ export const PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200Items
 	release: "release",
 	entity: "entity",
 	tag: "tag",
-	structure: "structure",
 	series: "series",
 	zone: "zone",
 	collection: "collection",
@@ -167815,7 +173552,7 @@ export const PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200Items
 		entity: "entity",
 		label: "label",
 		tag: "tag",
-		structure: "structure",
+		tag_path: "tag_path",
 		series: "series",
 		zone: "zone",
 		zone_page: "zone_page",
@@ -168851,6 +174588,29 @@ export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200 = {
 									)[];
 							  } | null)
 							| null;
+						/**
+						 * @type object
+						 */
+						contentSpoiler: {
+							level: 0 | 1 | 2;
+							/**
+							 * @type boolean
+							 */
+							concealed: boolean;
+						};
+						/**
+						 * @type object
+						 */
+						contentNsfw: {
+							/**
+							 * @type boolean
+							 */
+							labelled: boolean;
+							/**
+							 * @type boolean
+							 */
+							concealed: boolean;
+						};
 						replyCount: string | number;
 						latestRevisionId: (string | null) | null;
 						replyContext:
@@ -169524,6 +175284,29 @@ export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200 = {
 									)[];
 							  } | null)
 							| null;
+						/**
+						 * @type object
+						 */
+						contentSpoiler: {
+							level: 0 | 1 | 2;
+							/**
+							 * @type boolean
+							 */
+							concealed: boolean;
+						};
+						/**
+						 * @type object
+						 */
+						contentNsfw: {
+							/**
+							 * @type boolean
+							 */
+							labelled: boolean;
+							/**
+							 * @type boolean
+							 */
+							concealed: boolean;
+						};
 						replyCount: string | number;
 						latestRevisionId: (string | null) | null;
 						replyContext:
@@ -170215,6 +175998,29 @@ export type PostApiSearchZonesByZoneIdFeedBlocksByBlockKeyExecuteStatus200 = {
 									)[];
 							  } | null)
 							| null;
+						/**
+						 * @type object
+						 */
+						contentSpoiler: {
+							level: 0 | 1 | 2;
+							/**
+							 * @type boolean
+							 */
+							concealed: boolean;
+						};
+						/**
+						 * @type object
+						 */
+						contentNsfw: {
+							/**
+							 * @type boolean
+							 */
+							labelled: boolean;
+							/**
+							 * @type boolean
+							 */
+							concealed: boolean;
+						};
 						replyCount: string | number;
 						latestRevisionId: (string | null) | null;
 						replyContext:
@@ -172057,7 +177863,6 @@ export const PostApiSearchRequestIndexesEnum = {
 	users: "users",
 	entities: "entities",
 	tags: "tags",
-	"tag-structures": "tag-structures",
 	posts: "posts",
 	realms: "realms",
 	collections: "collections",
@@ -172160,7 +177965,6 @@ export const PostApiSearchSharedQueriesStatus201DocumentFilterDocumentCategories
 	users: "users",
 	entities: "entities",
 	tags: "tags",
-	"tag-structures": "tag-structures",
 	posts: "posts",
 	realms: "realms",
 	collections: "collections",
@@ -172183,7 +177987,6 @@ export const PostApiSearchSharedQueriesStatus201DocumentFilterDocumentWhereKindI
 	entity: "entity",
 	label: "label",
 	tag: "tag",
-	structure: "structure",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -172513,7 +178316,6 @@ export type PostApiSearchSharedQueriesStatus201 = {
 											| "entity"
 											| "label"
 											| "tag"
-											| "structure"
 											| "series"
 											| "zone"
 											| "zone_page"
@@ -172594,7 +178396,6 @@ export type PostApiSearchSharedQueriesStatus201 = {
 											| "entity"
 											| "label"
 											| "tag"
-											| "structure"
 											| "series"
 											| "zone"
 											| "zone_page"
@@ -172676,7 +178477,6 @@ export type PostApiSearchSharedQueriesStatus201 = {
 											| "entity"
 											| "label"
 											| "tag"
-											| "structure"
 											| "series"
 											| "zone"
 											| "zone_page"
@@ -172810,7 +178610,6 @@ export type PostApiSearchSharedQueriesStatus201 = {
 														| "entity"
 														| "label"
 														| "tag"
-														| "structure"
 														| "series"
 														| "zone"
 														| "zone_page"
@@ -172967,7 +178766,6 @@ export type PostApiSearchSharedQueriesStatus201 = {
 											| "entity"
 											| "label"
 											| "tag"
-											| "structure"
 											| "series"
 											| "zone"
 											| "zone_page"
@@ -173101,7 +178899,6 @@ export type PostApiSearchSharedQueriesStatus201 = {
 														| "entity"
 														| "label"
 														| "tag"
-														| "structure"
 														| "series"
 														| "zone"
 														| "zone_page"
@@ -173243,7 +179040,6 @@ export type PostApiSearchSharedQueriesStatus201 = {
 										| "entity"
 										| "label"
 										| "tag"
-										| "structure"
 										| "series"
 										| "zone"
 										| "zone_page"
@@ -173289,7 +179085,6 @@ export type PostApiSearchSharedQueriesStatus201 = {
 										| "entity"
 										| "label"
 										| "tag"
-										| "structure"
 										| "series"
 										| "zone"
 										| "zone_page"
@@ -173336,7 +179131,6 @@ export type PostApiSearchSharedQueriesStatus201 = {
 										| "entity"
 										| "label"
 										| "tag"
-										| "structure"
 										| "series"
 										| "zone"
 										| "zone_page"
@@ -173382,7 +179176,6 @@ export type PostApiSearchSharedQueriesStatus201 = {
 										| "entity"
 										| "label"
 										| "tag"
-										| "structure"
 										| "series"
 										| "zone"
 										| "zone_page"
@@ -173536,7 +179329,6 @@ export type PostApiSearchSharedQueriesStatus201 = {
 												| "entity"
 												| "label"
 												| "tag"
-												| "structure"
 												| "series"
 												| "zone"
 												| "zone_page"
@@ -173580,7 +179372,6 @@ export type PostApiSearchSharedQueriesStatus201 = {
 												| "entity"
 												| "label"
 												| "tag"
-												| "structure"
 												| "series"
 												| "zone"
 												| "zone_page"
@@ -173703,7 +179494,6 @@ export type PostApiSearchSharedQueriesStatus201 = {
 												| "entity"
 												| "label"
 												| "tag"
-												| "structure"
 												| "series"
 												| "zone"
 												| "zone_page"
@@ -173747,7 +179537,6 @@ export type PostApiSearchSharedQueriesStatus201 = {
 												| "entity"
 												| "label"
 												| "tag"
-												| "structure"
 												| "series"
 												| "zone"
 												| "zone_page"
@@ -173855,7 +179644,6 @@ export type PostApiSearchSharedQueriesStatus201 = {
 														| "entity"
 														| "label"
 														| "tag"
-														| "structure"
 														| "series"
 														| "zone"
 														| "zone_page"
@@ -173966,7 +179754,6 @@ export type PostApiSearchSharedQueriesStatus201 = {
 																| "entity"
 																| "label"
 																| "tag"
-																| "structure"
 																| "series"
 																| "zone"
 																| "zone_page"
@@ -174010,7 +179797,6 @@ export type PostApiSearchSharedQueriesStatus201 = {
 																| "entity"
 																| "label"
 																| "tag"
-																| "structure"
 																| "series"
 																| "zone"
 																| "zone_page"
@@ -174133,7 +179919,6 @@ export type PostApiSearchSharedQueriesStatus201 = {
 																| "entity"
 																| "label"
 																| "tag"
-																| "structure"
 																| "series"
 																| "zone"
 																| "zone_page"
@@ -174177,7 +179962,6 @@ export type PostApiSearchSharedQueriesStatus201 = {
 																| "entity"
 																| "label"
 																| "tag"
-																| "structure"
 																| "series"
 																| "zone"
 																| "zone_page"
@@ -174250,7 +180034,6 @@ export type PostApiSearchSharedQueriesStatus201 = {
 												| "entity"
 												| "label"
 												| "tag"
-												| "structure"
 												| "series"
 												| "zone"
 												| "zone_page"
@@ -174294,7 +180077,6 @@ export type PostApiSearchSharedQueriesStatus201 = {
 												| "entity"
 												| "label"
 												| "tag"
-												| "structure"
 												| "series"
 												| "zone"
 												| "zone_page"
@@ -174367,7 +180149,6 @@ export type PostApiSearchSharedQueriesStatus201 = {
 														| "entity"
 														| "label"
 														| "tag"
-														| "structure"
 														| "series"
 														| "zone"
 														| "zone_page"
@@ -174413,7 +180194,6 @@ export type PostApiSearchSharedQueriesStatus201 = {
 														| "entity"
 														| "label"
 														| "tag"
-														| "structure"
 														| "series"
 														| "zone"
 														| "zone_page"
@@ -175033,7 +180813,6 @@ export const PostApiSearchSharedQueriesRequestFilterDocumentCategoriesEnum = {
 	users: "users",
 	entities: "entities",
 	tags: "tags",
-	"tag-structures": "tag-structures",
 	posts: "posts",
 	realms: "realms",
 	collections: "collections",
@@ -175056,7 +180835,6 @@ export const PostApiSearchSharedQueriesRequestFilterDocumentWhereKindInEnum = {
 	entity: "entity",
 	label: "label",
 	tag: "tag",
-	structure: "structure",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -175376,7 +181154,6 @@ export type PostApiSearchSharedQueriesBody = {
 										| "entity"
 										| "label"
 										| "tag"
-										| "structure"
 										| "series"
 										| "zone"
 										| "zone_page"
@@ -175457,7 +181234,6 @@ export type PostApiSearchSharedQueriesBody = {
 										| "entity"
 										| "label"
 										| "tag"
-										| "structure"
 										| "series"
 										| "zone"
 										| "zone_page"
@@ -175539,7 +181315,6 @@ export type PostApiSearchSharedQueriesBody = {
 										| "entity"
 										| "label"
 										| "tag"
-										| "structure"
 										| "series"
 										| "zone"
 										| "zone_page"
@@ -175673,7 +181448,6 @@ export type PostApiSearchSharedQueriesBody = {
 													| "entity"
 													| "label"
 													| "tag"
-													| "structure"
 													| "series"
 													| "zone"
 													| "zone_page"
@@ -175830,7 +181604,6 @@ export type PostApiSearchSharedQueriesBody = {
 										| "entity"
 										| "label"
 										| "tag"
-										| "structure"
 										| "series"
 										| "zone"
 										| "zone_page"
@@ -175964,7 +181737,6 @@ export type PostApiSearchSharedQueriesBody = {
 													| "entity"
 													| "label"
 													| "tag"
-													| "structure"
 													| "series"
 													| "zone"
 													| "zone_page"
@@ -176106,7 +181878,6 @@ export type PostApiSearchSharedQueriesBody = {
 									| "entity"
 									| "label"
 									| "tag"
-									| "structure"
 									| "series"
 									| "zone"
 									| "zone_page"
@@ -176152,7 +181923,6 @@ export type PostApiSearchSharedQueriesBody = {
 									| "entity"
 									| "label"
 									| "tag"
-									| "structure"
 									| "series"
 									| "zone"
 									| "zone_page"
@@ -176199,7 +181969,6 @@ export type PostApiSearchSharedQueriesBody = {
 									| "entity"
 									| "label"
 									| "tag"
-									| "structure"
 									| "series"
 									| "zone"
 									| "zone_page"
@@ -176245,7 +182014,6 @@ export type PostApiSearchSharedQueriesBody = {
 									| "entity"
 									| "label"
 									| "tag"
-									| "structure"
 									| "series"
 									| "zone"
 									| "zone_page"
@@ -176399,7 +182167,6 @@ export type PostApiSearchSharedQueriesBody = {
 											| "entity"
 											| "label"
 											| "tag"
-											| "structure"
 											| "series"
 											| "zone"
 											| "zone_page"
@@ -176443,7 +182210,6 @@ export type PostApiSearchSharedQueriesBody = {
 											| "entity"
 											| "label"
 											| "tag"
-											| "structure"
 											| "series"
 											| "zone"
 											| "zone_page"
@@ -176566,7 +182332,6 @@ export type PostApiSearchSharedQueriesBody = {
 											| "entity"
 											| "label"
 											| "tag"
-											| "structure"
 											| "series"
 											| "zone"
 											| "zone_page"
@@ -176610,7 +182375,6 @@ export type PostApiSearchSharedQueriesBody = {
 											| "entity"
 											| "label"
 											| "tag"
-											| "structure"
 											| "series"
 											| "zone"
 											| "zone_page"
@@ -176718,7 +182482,6 @@ export type PostApiSearchSharedQueriesBody = {
 													| "entity"
 													| "label"
 													| "tag"
-													| "structure"
 													| "series"
 													| "zone"
 													| "zone_page"
@@ -176829,7 +182592,6 @@ export type PostApiSearchSharedQueriesBody = {
 															| "entity"
 															| "label"
 															| "tag"
-															| "structure"
 															| "series"
 															| "zone"
 															| "zone_page"
@@ -176873,7 +182635,6 @@ export type PostApiSearchSharedQueriesBody = {
 															| "entity"
 															| "label"
 															| "tag"
-															| "structure"
 															| "series"
 															| "zone"
 															| "zone_page"
@@ -176996,7 +182757,6 @@ export type PostApiSearchSharedQueriesBody = {
 															| "entity"
 															| "label"
 															| "tag"
-															| "structure"
 															| "series"
 															| "zone"
 															| "zone_page"
@@ -177040,7 +182800,6 @@ export type PostApiSearchSharedQueriesBody = {
 															| "entity"
 															| "label"
 															| "tag"
-															| "structure"
 															| "series"
 															| "zone"
 															| "zone_page"
@@ -177113,7 +182872,6 @@ export type PostApiSearchSharedQueriesBody = {
 											| "entity"
 											| "label"
 											| "tag"
-											| "structure"
 											| "series"
 											| "zone"
 											| "zone_page"
@@ -177157,7 +182915,6 @@ export type PostApiSearchSharedQueriesBody = {
 											| "entity"
 											| "label"
 											| "tag"
-											| "structure"
 											| "series"
 											| "zone"
 											| "zone_page"
@@ -177230,7 +182987,6 @@ export type PostApiSearchSharedQueriesBody = {
 													| "entity"
 													| "label"
 													| "tag"
-													| "structure"
 													| "series"
 													| "zone"
 													| "zone_page"
@@ -177276,7 +183032,6 @@ export type PostApiSearchSharedQueriesBody = {
 													| "entity"
 													| "label"
 													| "tag"
-													| "structure"
 													| "series"
 													| "zone"
 													| "zone_page"
@@ -177837,7 +183592,6 @@ export const GetApiSearchSharedQueriesByIdStatus200DocumentFilterDocumentCategor
 	users: "users",
 	entities: "entities",
 	tags: "tags",
-	"tag-structures": "tag-structures",
 	posts: "posts",
 	realms: "realms",
 	collections: "collections",
@@ -177860,7 +183614,6 @@ export const GetApiSearchSharedQueriesByIdStatus200DocumentFilterDocumentWhereKi
 	entity: "entity",
 	label: "label",
 	tag: "tag",
-	structure: "structure",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -178190,7 +183943,6 @@ export type GetApiSearchSharedQueriesByIdStatus200 = {
 											| "entity"
 											| "label"
 											| "tag"
-											| "structure"
 											| "series"
 											| "zone"
 											| "zone_page"
@@ -178271,7 +184023,6 @@ export type GetApiSearchSharedQueriesByIdStatus200 = {
 											| "entity"
 											| "label"
 											| "tag"
-											| "structure"
 											| "series"
 											| "zone"
 											| "zone_page"
@@ -178353,7 +184104,6 @@ export type GetApiSearchSharedQueriesByIdStatus200 = {
 											| "entity"
 											| "label"
 											| "tag"
-											| "structure"
 											| "series"
 											| "zone"
 											| "zone_page"
@@ -178487,7 +184237,6 @@ export type GetApiSearchSharedQueriesByIdStatus200 = {
 														| "entity"
 														| "label"
 														| "tag"
-														| "structure"
 														| "series"
 														| "zone"
 														| "zone_page"
@@ -178644,7 +184393,6 @@ export type GetApiSearchSharedQueriesByIdStatus200 = {
 											| "entity"
 											| "label"
 											| "tag"
-											| "structure"
 											| "series"
 											| "zone"
 											| "zone_page"
@@ -178778,7 +184526,6 @@ export type GetApiSearchSharedQueriesByIdStatus200 = {
 														| "entity"
 														| "label"
 														| "tag"
-														| "structure"
 														| "series"
 														| "zone"
 														| "zone_page"
@@ -178920,7 +184667,6 @@ export type GetApiSearchSharedQueriesByIdStatus200 = {
 										| "entity"
 										| "label"
 										| "tag"
-										| "structure"
 										| "series"
 										| "zone"
 										| "zone_page"
@@ -178966,7 +184712,6 @@ export type GetApiSearchSharedQueriesByIdStatus200 = {
 										| "entity"
 										| "label"
 										| "tag"
-										| "structure"
 										| "series"
 										| "zone"
 										| "zone_page"
@@ -179013,7 +184758,6 @@ export type GetApiSearchSharedQueriesByIdStatus200 = {
 										| "entity"
 										| "label"
 										| "tag"
-										| "structure"
 										| "series"
 										| "zone"
 										| "zone_page"
@@ -179059,7 +184803,6 @@ export type GetApiSearchSharedQueriesByIdStatus200 = {
 										| "entity"
 										| "label"
 										| "tag"
-										| "structure"
 										| "series"
 										| "zone"
 										| "zone_page"
@@ -179213,7 +184956,6 @@ export type GetApiSearchSharedQueriesByIdStatus200 = {
 												| "entity"
 												| "label"
 												| "tag"
-												| "structure"
 												| "series"
 												| "zone"
 												| "zone_page"
@@ -179257,7 +184999,6 @@ export type GetApiSearchSharedQueriesByIdStatus200 = {
 												| "entity"
 												| "label"
 												| "tag"
-												| "structure"
 												| "series"
 												| "zone"
 												| "zone_page"
@@ -179380,7 +185121,6 @@ export type GetApiSearchSharedQueriesByIdStatus200 = {
 												| "entity"
 												| "label"
 												| "tag"
-												| "structure"
 												| "series"
 												| "zone"
 												| "zone_page"
@@ -179424,7 +185164,6 @@ export type GetApiSearchSharedQueriesByIdStatus200 = {
 												| "entity"
 												| "label"
 												| "tag"
-												| "structure"
 												| "series"
 												| "zone"
 												| "zone_page"
@@ -179532,7 +185271,6 @@ export type GetApiSearchSharedQueriesByIdStatus200 = {
 														| "entity"
 														| "label"
 														| "tag"
-														| "structure"
 														| "series"
 														| "zone"
 														| "zone_page"
@@ -179643,7 +185381,6 @@ export type GetApiSearchSharedQueriesByIdStatus200 = {
 																| "entity"
 																| "label"
 																| "tag"
-																| "structure"
 																| "series"
 																| "zone"
 																| "zone_page"
@@ -179687,7 +185424,6 @@ export type GetApiSearchSharedQueriesByIdStatus200 = {
 																| "entity"
 																| "label"
 																| "tag"
-																| "structure"
 																| "series"
 																| "zone"
 																| "zone_page"
@@ -179810,7 +185546,6 @@ export type GetApiSearchSharedQueriesByIdStatus200 = {
 																| "entity"
 																| "label"
 																| "tag"
-																| "structure"
 																| "series"
 																| "zone"
 																| "zone_page"
@@ -179854,7 +185589,6 @@ export type GetApiSearchSharedQueriesByIdStatus200 = {
 																| "entity"
 																| "label"
 																| "tag"
-																| "structure"
 																| "series"
 																| "zone"
 																| "zone_page"
@@ -179927,7 +185661,6 @@ export type GetApiSearchSharedQueriesByIdStatus200 = {
 												| "entity"
 												| "label"
 												| "tag"
-												| "structure"
 												| "series"
 												| "zone"
 												| "zone_page"
@@ -179971,7 +185704,6 @@ export type GetApiSearchSharedQueriesByIdStatus200 = {
 												| "entity"
 												| "label"
 												| "tag"
-												| "structure"
 												| "series"
 												| "zone"
 												| "zone_page"
@@ -180044,7 +185776,6 @@ export type GetApiSearchSharedQueriesByIdStatus200 = {
 														| "entity"
 														| "label"
 														| "tag"
-														| "structure"
 														| "series"
 														| "zone"
 														| "zone_page"
@@ -180090,7 +185821,6 @@ export type GetApiSearchSharedQueriesByIdStatus200 = {
 														| "entity"
 														| "label"
 														| "tag"
-														| "structure"
 														| "series"
 														| "zone"
 														| "zone_page"
@@ -180702,7 +186432,6 @@ export const PostApiSearchByIndexIndex = {
 	users: "users",
 	entities: "entities",
 	tags: "tags",
-	"tag-structures": "tag-structures",
 	posts: "posts",
 	realms: "realms",
 	collections: "collections",
@@ -180993,62 +186722,6 @@ export type PostApiSearchByIndexStatus200 = {
  * @type object
  */
 export type PostApiSearchByIndexStatus400 = MalformedRequestBody;
-
-/**
- * @type object
- */
-export type PostApiSearchByIndexStatus401 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'AuthenticationRequired'
-		 * @type string
-		 */
-		code: "AuthenticationRequired";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type PostApiSearchByIndexStatus403 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'PlatformCapabilityRequired'
-		 * @type string
-		 */
-		code: "PlatformCapabilityRequired";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
 
 export type PostApiSearchByIndexStatus422 =
 	| {
@@ -181341,8 +187014,6 @@ export type PostApiSearchByIndexOptions = {
 export type PostApiSearchByIndexResponses = {
 	"200": PostApiSearchByIndexStatus200;
 	"400": PostApiSearchByIndexStatus400;
-	"401": PostApiSearchByIndexStatus401;
-	"403": PostApiSearchByIndexStatus403;
 	"422": PostApiSearchByIndexStatus422;
 	"429": PostApiSearchByIndexStatus429;
 	"500": PostApiSearchByIndexStatus500;
@@ -181355,8 +187026,6 @@ export type PostApiSearchByIndexResponses = {
 export type PostApiSearchByIndexResponse =
 	| PostApiSearchByIndexStatus200
 	| PostApiSearchByIndexStatus400
-	| PostApiSearchByIndexStatus401
-	| PostApiSearchByIndexStatus403
 	| PostApiSearchByIndexStatus422
 	| PostApiSearchByIndexStatus429
 	| PostApiSearchByIndexStatus500

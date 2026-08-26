@@ -521,6 +521,7 @@ import type {
 	PostApiGovernancePlatformUnitMergesStatus404,
 	PostApiGovernancePlatformUnitMergesStatus409,
 	PostApiGovernancePlatformUnitMergesStatus422,
+	PostApiGovernancePlatformUnitMergesStatus429,
 	PostApiGovernancePlatformUnitMergesStatus500,
 	GetApiGovernancePlatformUnitMergesByRequestIdOptions,
 	GetApiGovernancePlatformUnitMergesByRequestIdStatus200,
@@ -535,6 +536,7 @@ import type {
 	PostApiGovernancePlatformUnitMergesPreflightStatus404,
 	PostApiGovernancePlatformUnitMergesPreflightStatus409,
 	PostApiGovernancePlatformUnitMergesPreflightStatus422,
+	PostApiGovernancePlatformUnitMergesPreflightStatus429,
 	PostApiGovernancePlatformUnitMergesPreflightStatus500,
 	PostApiGovernancePlatformUnitMergesDirectOptions,
 	PostApiGovernancePlatformUnitMergesDirectStatus200,
@@ -543,6 +545,7 @@ import type {
 	PostApiGovernancePlatformUnitMergesDirectStatus404,
 	PostApiGovernancePlatformUnitMergesDirectStatus409,
 	PostApiGovernancePlatformUnitMergesDirectStatus422,
+	PostApiGovernancePlatformUnitMergesDirectStatus429,
 	PostApiGovernancePlatformUnitMergesDirectStatus500,
 	PostApiGovernancePlatformUnitMergesByRequestIdReviewsOptions,
 	PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus200,
@@ -551,6 +554,7 @@ import type {
 	PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus404,
 	PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus409,
 	PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus422,
+	PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus429,
 	PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus500,
 	PostApiGovernancePlatformUnitMergesByRequestIdRetryOptions,
 	PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus200,
@@ -558,6 +562,7 @@ import type {
 	PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus404,
 	PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus409,
 	PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus422,
+	PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus429,
 	PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus500,
 	GetApiGovernancePlatformOwnershipClaimsOptions,
 	GetApiGovernancePlatformOwnershipClaimsStatus200,
@@ -1054,90 +1059,170 @@ import type {
 	DeleteApiPlatformUsersByUserIdSessionsBySessionIdStatus404,
 	DeleteApiPlatformUsersByUserIdSessionsBySessionIdStatus422,
 	DeleteApiPlatformUsersByUserIdSessionsBySessionIdStatus500,
+	GetApiTagsSuggestionsOptions,
+	GetApiTagsSuggestionsStatus200,
+	GetApiTagsSuggestionsStatus422,
+	GetApiTagsSuggestionsStatus500,
 	GetApiTagsByTagIdHierarchyOptions,
 	GetApiTagsByTagIdHierarchyStatus200,
-	GetApiTagsByTagIdHierarchyStatus401,
-	GetApiTagsByTagIdHierarchyStatus403,
 	GetApiTagsByTagIdHierarchyStatus404,
 	GetApiTagsByTagIdHierarchyStatus422,
-	GetApiTagsByTagIdHierarchyStatus429,
 	GetApiTagsByTagIdHierarchyStatus500,
-	PostApiTagStructuresOptions,
-	PostApiTagStructuresStatus200,
-	PostApiTagStructuresStatus400,
-	PostApiTagStructuresStatus403,
-	PostApiTagStructuresStatus404,
-	PostApiTagStructuresStatus422,
-	PostApiTagStructuresStatus429,
-	PostApiTagStructuresStatus500,
-	GetApiTagStructuresByStructureIdOptions,
-	GetApiTagStructuresByStructureIdStatus200,
-	GetApiTagStructuresByStructureIdStatus401,
-	GetApiTagStructuresByStructureIdStatus403,
-	GetApiTagStructuresByStructureIdStatus404,
-	GetApiTagStructuresByStructureIdStatus422,
-	GetApiTagStructuresByStructureIdStatus429,
-	GetApiTagStructuresByStructureIdStatus500,
-	PutApiTagStructuresByStructureIdOptions,
-	PutApiTagStructuresByStructureIdStatus200,
-	PutApiTagStructuresByStructureIdStatus400,
-	PutApiTagStructuresByStructureIdStatus403,
-	PutApiTagStructuresByStructureIdStatus404,
-	PutApiTagStructuresByStructureIdStatus409,
-	PutApiTagStructuresByStructureIdStatus422,
-	PutApiTagStructuresByStructureIdStatus429,
-	PutApiTagStructuresByStructureIdStatus500,
-	PutApiTagStructuresByStructureIdVoteOptions,
-	PutApiTagStructuresByStructureIdVoteStatus200,
-	PutApiTagStructuresByStructureIdVoteStatus400,
-	PutApiTagStructuresByStructureIdVoteStatus403,
-	PutApiTagStructuresByStructureIdVoteStatus404,
-	PutApiTagStructuresByStructureIdVoteStatus422,
-	PutApiTagStructuresByStructureIdVoteStatus429,
-	PutApiTagStructuresByStructureIdVoteStatus500,
-	DeleteApiTagStructuresByStructureIdVoteOptions,
-	DeleteApiTagStructuresByStructureIdVoteStatus200,
-	DeleteApiTagStructuresByStructureIdVoteStatus403,
-	DeleteApiTagStructuresByStructureIdVoteStatus404,
-	DeleteApiTagStructuresByStructureIdVoteStatus422,
-	DeleteApiTagStructuresByStructureIdVoteStatus429,
-	DeleteApiTagStructuresByStructureIdVoteStatus500,
+	GetApiTagsByTagIdPathsOptions,
+	GetApiTagsByTagIdPathsStatus200,
+	GetApiTagsByTagIdPathsStatus422,
+	GetApiTagsByTagIdPathsStatus500,
+	PostApiTagPathsDefinitionWarningsOptions,
+	PostApiTagPathsDefinitionWarningsStatus200,
+	PostApiTagPathsDefinitionWarningsStatus400,
+	PostApiTagPathsDefinitionWarningsStatus422,
+	PostApiTagPathsDefinitionWarningsStatus429,
+	PostApiTagPathsDefinitionWarningsStatus500,
+	GetApiTagPathsSearchOptions,
+	GetApiTagPathsSearchStatus200,
+	GetApiTagPathsSearchStatus422,
+	GetApiTagPathsSearchStatus500,
+	PostApiTagPathsOptions,
+	PostApiTagPathsStatus200,
+	PostApiTagPathsStatus400,
+	PostApiTagPathsStatus404,
+	PostApiTagPathsStatus422,
+	PostApiTagPathsStatus429,
+	PostApiTagPathsStatus500,
+	GetApiTagPathsByPathIdOptions,
+	GetApiTagPathsByPathIdStatus200,
+	GetApiTagPathsByPathIdStatus404,
+	GetApiTagPathsByPathIdStatus422,
+	GetApiTagPathsByPathIdStatus500,
+	PutApiTagPathsByPathIdVoteOptions,
+	PutApiTagPathsByPathIdVoteStatus200,
+	PutApiTagPathsByPathIdVoteStatus400,
+	PutApiTagPathsByPathIdVoteStatus404,
+	PutApiTagPathsByPathIdVoteStatus422,
+	PutApiTagPathsByPathIdVoteStatus429,
+	PutApiTagPathsByPathIdVoteStatus500,
+	DeleteApiTagPathsByPathIdVoteOptions,
+	DeleteApiTagPathsByPathIdVoteStatus200,
+	DeleteApiTagPathsByPathIdVoteStatus404,
+	DeleteApiTagPathsByPathIdVoteStatus422,
+	DeleteApiTagPathsByPathIdVoteStatus429,
+	DeleteApiTagPathsByPathIdVoteStatus500,
+	PostApiTagPathsMergesOptions,
+	PostApiTagPathsMergesStatus200,
+	PostApiTagPathsMergesStatus400,
+	PostApiTagPathsMergesStatus403,
+	PostApiTagPathsMergesStatus404,
+	PostApiTagPathsMergesStatus422,
+	PostApiTagPathsMergesStatus500,
+	GetApiTagPathsMergesPendingOptions,
+	GetApiTagPathsMergesPendingStatus200,
+	GetApiTagPathsMergesPendingStatus403,
+	GetApiTagPathsMergesPendingStatus422,
+	GetApiTagPathsMergesPendingStatus500,
+	PutApiTagPathsMergesByMergeIdResolutionOptions,
+	PutApiTagPathsMergesByMergeIdResolutionStatus200,
+	PutApiTagPathsMergesByMergeIdResolutionStatus400,
+	PutApiTagPathsMergesByMergeIdResolutionStatus403,
+	PutApiTagPathsMergesByMergeIdResolutionStatus404,
+	PutApiTagPathsMergesByMergeIdResolutionStatus422,
+	PutApiTagPathsMergesByMergeIdResolutionStatus500,
 	GetApiUnitsByTypeByUnitIdTagsOptions,
 	GetApiUnitsByTypeByUnitIdTagsStatus200,
 	GetApiUnitsByTypeByUnitIdTagsStatus404,
 	GetApiUnitsByTypeByUnitIdTagsStatus422,
 	GetApiUnitsByTypeByUnitIdTagsStatus500,
-	PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdOptions,
-	PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus200,
-	PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus400,
-	PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus403,
-	PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus404,
-	PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus422,
-	PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus429,
-	PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus500,
-	DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdOptions,
-	DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus204,
-	DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus400,
-	DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus403,
-	DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus404,
-	DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus422,
-	DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus429,
-	DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus500,
-	PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteOptions,
-	PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus200,
-	PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus400,
-	PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus403,
-	PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus404,
-	PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus422,
-	PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus429,
-	PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus500,
-	DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteOptions,
-	DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus200,
-	DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus403,
-	DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus404,
-	DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus422,
-	DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus429,
-	DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus500,
+	PutApiUnitsByTypeByUnitIdTagPathsByPathIdOptions,
+	PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus200,
+	PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus403,
+	PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus404,
+	PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus422,
+	PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus429,
+	PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus500,
+	DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdOptions,
+	DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus204,
+	DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus403,
+	DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus404,
+	DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus422,
+	DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus429,
+	DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus500,
+	PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentOptions,
+	PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus200,
+	PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus400,
+	PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus403,
+	PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus404,
+	PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus422,
+	PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus429,
+	PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus500,
+	DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentOptions,
+	DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus200,
+	DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus403,
+	DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus404,
+	DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus422,
+	DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus429,
+	DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus500,
+	GetApiRealmsByRealmIdTagPathsOptions,
+	GetApiRealmsByRealmIdTagPathsStatus200,
+	GetApiRealmsByRealmIdTagPathsStatus404,
+	GetApiRealmsByRealmIdTagPathsStatus422,
+	GetApiRealmsByRealmIdTagPathsStatus500,
+	PutApiRealmsByRealmIdTagPathsByPathIdOptions,
+	PutApiRealmsByRealmIdTagPathsByPathIdStatus200,
+	PutApiRealmsByRealmIdTagPathsByPathIdStatus403,
+	PutApiRealmsByRealmIdTagPathsByPathIdStatus404,
+	PutApiRealmsByRealmIdTagPathsByPathIdStatus422,
+	PutApiRealmsByRealmIdTagPathsByPathIdStatus429,
+	PutApiRealmsByRealmIdTagPathsByPathIdStatus500,
+	PutApiRealmsByRealmIdTagPathsByPathIdVoteOptions,
+	PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus200,
+	PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus400,
+	PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus403,
+	PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus404,
+	PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus422,
+	PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus429,
+	PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus500,
+	DeleteApiRealmsByRealmIdTagPathsByPathIdVoteOptions,
+	DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus200,
+	DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus403,
+	DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus404,
+	DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus422,
+	DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus429,
+	DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus500,
+	PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdOptions,
+	PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus200,
+	PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus403,
+	PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus404,
+	PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus422,
+	PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus429,
+	PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus500,
+	DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdOptions,
+	DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus204,
+	DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus403,
+	DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus404,
+	DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus422,
+	DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus429,
+	DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus500,
+	PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentOptions,
+	PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus200,
+	PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus400,
+	PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus403,
+	PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus404,
+	PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus422,
+	PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus429,
+	PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus500,
+	DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentOptions,
+	DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus200,
+	DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus403,
+	DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus422,
+	DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus429,
+	DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus500,
+	PutApiRealmsByRealmIdTagPathPolicyOptions,
+	PutApiRealmsByRealmIdTagPathPolicyStatus200,
+	PutApiRealmsByRealmIdTagPathPolicyStatus400,
+	PutApiRealmsByRealmIdTagPathPolicyStatus403,
+	PutApiRealmsByRealmIdTagPathPolicyStatus404,
+	PutApiRealmsByRealmIdTagPathPolicyStatus422,
+	PutApiRealmsByRealmIdTagPathPolicyStatus429,
+	PutApiRealmsByRealmIdTagPathPolicyStatus500,
 	GetApiUsersMeTagRealmSubscriptionsOptions,
 	GetApiUsersMeTagRealmSubscriptionsStatus200,
 	GetApiUsersMeTagRealmSubscriptionsStatus422,
@@ -1442,6 +1527,14 @@ import type {
 	GetApiEntitiesByUnitIdStatus404,
 	GetApiEntitiesByUnitIdStatus422,
 	GetApiEntitiesByUnitIdStatus500,
+	PutApiEntitiesByUnitIdMeasurementsOptions,
+	PutApiEntitiesByUnitIdMeasurementsStatus200,
+	PutApiEntitiesByUnitIdMeasurementsStatus400,
+	PutApiEntitiesByUnitIdMeasurementsStatus403,
+	PutApiEntitiesByUnitIdMeasurementsStatus404,
+	PutApiEntitiesByUnitIdMeasurementsStatus422,
+	PutApiEntitiesByUnitIdMeasurementsStatus429,
+	PutApiEntitiesByUnitIdMeasurementsStatus500,
 	PatchApiEntitiesByUnitIdVariantContextOptions,
 	PatchApiEntitiesByUnitIdVariantContextStatus200,
 	PatchApiEntitiesByUnitIdVariantContextStatus400,
@@ -1562,6 +1655,21 @@ import type {
 	PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus422,
 	PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus429,
 	PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus500,
+	PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerOptions,
+	PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus200,
+	PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus400,
+	PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus403,
+	PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus404,
+	PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus422,
+	PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus429,
+	PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus500,
+	DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerOptions,
+	DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus200,
+	DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus403,
+	DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus404,
+	DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus422,
+	DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus429,
+	DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus500,
 	DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdOptions,
 	DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus204,
 	DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus400,
@@ -1640,6 +1748,7 @@ import type {
 	DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus400,
 	DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus403,
 	DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus404,
+	DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus409,
 	DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus422,
 	DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus429,
 	DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus500,
@@ -2375,11 +2484,13 @@ import type {
 	PutApiRealmsByRealmIdTagsByTagIdContextStatus404,
 	PutApiRealmsByRealmIdTagsByTagIdContextStatus409,
 	PutApiRealmsByRealmIdTagsByTagIdContextStatus422,
+	PutApiRealmsByRealmIdTagsByTagIdContextStatus429,
 	PutApiRealmsByRealmIdTagsByTagIdContextStatus500,
 	DeleteApiRealmsByRealmIdTagsByTagIdContextOptions,
 	DeleteApiRealmsByRealmIdTagsByTagIdContextStatus204,
 	DeleteApiRealmsByRealmIdTagsByTagIdContextStatus403,
 	DeleteApiRealmsByRealmIdTagsByTagIdContextStatus404,
+	DeleteApiRealmsByRealmIdTagsByTagIdContextStatus409,
 	DeleteApiRealmsByRealmIdTagsByTagIdContextStatus422,
 	DeleteApiRealmsByRealmIdTagsByTagIdContextStatus429,
 	DeleteApiRealmsByRealmIdTagsByTagIdContextStatus500,
@@ -2580,8 +2691,6 @@ import type {
 	PostApiSearchByIndexOptions,
 	PostApiSearchByIndexStatus200,
 	PostApiSearchByIndexStatus400,
-	PostApiSearchByIndexStatus401,
-	PostApiSearchByIndexStatus403,
 	PostApiSearchByIndexStatus422,
 	PostApiSearchByIndexStatus429,
 	PostApiSearchByIndexStatus500,
@@ -2786,17 +2895,32 @@ import {
 	getApiPlatformUsersByUserIdSessions,
 	deleteApiPlatformUsersByUserIdSessions,
 	deleteApiPlatformUsersByUserIdSessionsBySessionId,
+	getApiTagsSuggestions,
 	getApiTagsByTagIdHierarchy,
-	postApiTagStructures,
-	getApiTagStructuresByStructureId,
-	putApiTagStructuresByStructureId,
-	putApiTagStructuresByStructureIdVote,
-	deleteApiTagStructuresByStructureIdVote,
+	getApiTagsByTagIdPaths,
+	postApiTagPathsDefinitionWarnings,
+	getApiTagPathsSearch,
+	postApiTagPaths,
+	getApiTagPathsByPathId,
+	putApiTagPathsByPathIdVote,
+	deleteApiTagPathsByPathIdVote,
+	postApiTagPathsMerges,
+	getApiTagPathsMergesPending,
+	putApiTagPathsMergesByMergeIdResolution,
 	getApiUnitsByTypeByUnitIdTags,
-	putApiUnitsByTypeByUnitIdTagStructuresByStructureId,
-	deleteApiUnitsByTypeByUnitIdTagStructuresByStructureId,
-	putApiUnitsByTypeByUnitIdTagStructuresByStructureIdVote,
-	deleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVote,
+	putApiUnitsByTypeByUnitIdTagPathsByPathId,
+	deleteApiUnitsByTypeByUnitIdTagPathsByPathId,
+	putApiUnitsByTypeByUnitIdTagPathsByPathIdJudgment,
+	deleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgment,
+	getApiRealmsByRealmIdTagPaths,
+	putApiRealmsByRealmIdTagPathsByPathId,
+	putApiRealmsByRealmIdTagPathsByPathIdVote,
+	deleteApiRealmsByRealmIdTagPathsByPathIdVote,
+	putApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathId,
+	deleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathId,
+	putApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgment,
+	deleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgment,
+	putApiRealmsByRealmIdTagPathPolicy,
 	getApiUsersMeTagRealmSubscriptions,
 	putApiUsersMeTagRealmSubscriptionsByRealmId,
 	deleteApiUsersMeTagRealmSubscriptionsByRealmId,
@@ -2840,6 +2964,7 @@ import {
 	getApiEntities,
 	postApiEntities,
 	getApiEntitiesByUnitId,
+	putApiEntitiesByUnitIdMeasurements,
 	patchApiEntitiesByUnitIdVariantContext,
 	postApiEntitiesByUnitIdVariantContextPromote,
 	putApiEntitiesByUnitIdLocalizationsByLanguage,
@@ -2856,6 +2981,8 @@ import {
 	postApiUnitsByTypeByUnitIdCreditAttributions,
 	deleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationId,
 	postApiUnitsByTypeByUnitIdSubjectAssociations,
+	putApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoiler,
+	deleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoiler,
 	deleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationId,
 	getApiUnitsByTypeByUnitIdExternalLinks,
 	postApiUnitsByTypeByUnitIdExternalLinks,
@@ -10757,6 +10884,7 @@ export function postApiGovernancePlatformUnitMergesMutationOptions<TContext = un
 			| PostApiGovernancePlatformUnitMergesStatus404
 			| PostApiGovernancePlatformUnitMergesStatus409
 			| PostApiGovernancePlatformUnitMergesStatus422
+			| PostApiGovernancePlatformUnitMergesStatus429
 			| PostApiGovernancePlatformUnitMergesStatus500
 		>,
 		PostApiGovernancePlatformUnitMergesOptions,
@@ -10788,6 +10916,7 @@ export function usePostApiGovernancePlatformUnitMerges<TContext>(
 				| PostApiGovernancePlatformUnitMergesStatus404
 				| PostApiGovernancePlatformUnitMergesStatus409
 				| PostApiGovernancePlatformUnitMergesStatus422
+				| PostApiGovernancePlatformUnitMergesStatus429
 				| PostApiGovernancePlatformUnitMergesStatus500
 			>,
 			PostApiGovernancePlatformUnitMergesOptions,
@@ -10811,6 +10940,7 @@ export function usePostApiGovernancePlatformUnitMerges<TContext>(
 			| PostApiGovernancePlatformUnitMergesStatus404
 			| PostApiGovernancePlatformUnitMergesStatus409
 			| PostApiGovernancePlatformUnitMergesStatus422
+			| PostApiGovernancePlatformUnitMergesStatus429
 			| PostApiGovernancePlatformUnitMergesStatus500
 		>,
 		PostApiGovernancePlatformUnitMergesOptions,
@@ -10825,6 +10955,7 @@ export function usePostApiGovernancePlatformUnitMerges<TContext>(
 			| PostApiGovernancePlatformUnitMergesStatus404
 			| PostApiGovernancePlatformUnitMergesStatus409
 			| PostApiGovernancePlatformUnitMergesStatus422
+			| PostApiGovernancePlatformUnitMergesStatus429
 			| PostApiGovernancePlatformUnitMergesStatus500
 		>,
 		PostApiGovernancePlatformUnitMergesOptions,
@@ -10844,6 +10975,7 @@ export function usePostApiGovernancePlatformUnitMerges<TContext>(
 			| PostApiGovernancePlatformUnitMergesStatus404
 			| PostApiGovernancePlatformUnitMergesStatus409
 			| PostApiGovernancePlatformUnitMergesStatus422
+			| PostApiGovernancePlatformUnitMergesStatus429
 			| PostApiGovernancePlatformUnitMergesStatus500
 		>,
 		PostApiGovernancePlatformUnitMergesOptions,
@@ -10967,6 +11099,7 @@ export function postApiGovernancePlatformUnitMergesPreflightMutationOptions<TCon
 			| PostApiGovernancePlatformUnitMergesPreflightStatus404
 			| PostApiGovernancePlatformUnitMergesPreflightStatus409
 			| PostApiGovernancePlatformUnitMergesPreflightStatus422
+			| PostApiGovernancePlatformUnitMergesPreflightStatus429
 			| PostApiGovernancePlatformUnitMergesPreflightStatus500
 		>,
 		PostApiGovernancePlatformUnitMergesPreflightOptions,
@@ -10998,6 +11131,7 @@ export function usePostApiGovernancePlatformUnitMergesPreflight<TContext>(
 				| PostApiGovernancePlatformUnitMergesPreflightStatus404
 				| PostApiGovernancePlatformUnitMergesPreflightStatus409
 				| PostApiGovernancePlatformUnitMergesPreflightStatus422
+				| PostApiGovernancePlatformUnitMergesPreflightStatus429
 				| PostApiGovernancePlatformUnitMergesPreflightStatus500
 			>,
 			PostApiGovernancePlatformUnitMergesPreflightOptions,
@@ -11021,6 +11155,7 @@ export function usePostApiGovernancePlatformUnitMergesPreflight<TContext>(
 			| PostApiGovernancePlatformUnitMergesPreflightStatus404
 			| PostApiGovernancePlatformUnitMergesPreflightStatus409
 			| PostApiGovernancePlatformUnitMergesPreflightStatus422
+			| PostApiGovernancePlatformUnitMergesPreflightStatus429
 			| PostApiGovernancePlatformUnitMergesPreflightStatus500
 		>,
 		PostApiGovernancePlatformUnitMergesPreflightOptions,
@@ -11035,6 +11170,7 @@ export function usePostApiGovernancePlatformUnitMergesPreflight<TContext>(
 			| PostApiGovernancePlatformUnitMergesPreflightStatus404
 			| PostApiGovernancePlatformUnitMergesPreflightStatus409
 			| PostApiGovernancePlatformUnitMergesPreflightStatus422
+			| PostApiGovernancePlatformUnitMergesPreflightStatus429
 			| PostApiGovernancePlatformUnitMergesPreflightStatus500
 		>,
 		PostApiGovernancePlatformUnitMergesPreflightOptions,
@@ -11054,6 +11190,7 @@ export function usePostApiGovernancePlatformUnitMergesPreflight<TContext>(
 			| PostApiGovernancePlatformUnitMergesPreflightStatus404
 			| PostApiGovernancePlatformUnitMergesPreflightStatus409
 			| PostApiGovernancePlatformUnitMergesPreflightStatus422
+			| PostApiGovernancePlatformUnitMergesPreflightStatus429
 			| PostApiGovernancePlatformUnitMergesPreflightStatus500
 		>,
 		PostApiGovernancePlatformUnitMergesPreflightOptions,
@@ -11076,6 +11213,7 @@ export function postApiGovernancePlatformUnitMergesDirectMutationOptions<TContex
 			| PostApiGovernancePlatformUnitMergesDirectStatus404
 			| PostApiGovernancePlatformUnitMergesDirectStatus409
 			| PostApiGovernancePlatformUnitMergesDirectStatus422
+			| PostApiGovernancePlatformUnitMergesDirectStatus429
 			| PostApiGovernancePlatformUnitMergesDirectStatus500
 		>,
 		PostApiGovernancePlatformUnitMergesDirectOptions,
@@ -11107,6 +11245,7 @@ export function usePostApiGovernancePlatformUnitMergesDirect<TContext>(
 				| PostApiGovernancePlatformUnitMergesDirectStatus404
 				| PostApiGovernancePlatformUnitMergesDirectStatus409
 				| PostApiGovernancePlatformUnitMergesDirectStatus422
+				| PostApiGovernancePlatformUnitMergesDirectStatus429
 				| PostApiGovernancePlatformUnitMergesDirectStatus500
 			>,
 			PostApiGovernancePlatformUnitMergesDirectOptions,
@@ -11130,6 +11269,7 @@ export function usePostApiGovernancePlatformUnitMergesDirect<TContext>(
 			| PostApiGovernancePlatformUnitMergesDirectStatus404
 			| PostApiGovernancePlatformUnitMergesDirectStatus409
 			| PostApiGovernancePlatformUnitMergesDirectStatus422
+			| PostApiGovernancePlatformUnitMergesDirectStatus429
 			| PostApiGovernancePlatformUnitMergesDirectStatus500
 		>,
 		PostApiGovernancePlatformUnitMergesDirectOptions,
@@ -11144,6 +11284,7 @@ export function usePostApiGovernancePlatformUnitMergesDirect<TContext>(
 			| PostApiGovernancePlatformUnitMergesDirectStatus404
 			| PostApiGovernancePlatformUnitMergesDirectStatus409
 			| PostApiGovernancePlatformUnitMergesDirectStatus422
+			| PostApiGovernancePlatformUnitMergesDirectStatus429
 			| PostApiGovernancePlatformUnitMergesDirectStatus500
 		>,
 		PostApiGovernancePlatformUnitMergesDirectOptions,
@@ -11163,6 +11304,7 @@ export function usePostApiGovernancePlatformUnitMergesDirect<TContext>(
 			| PostApiGovernancePlatformUnitMergesDirectStatus404
 			| PostApiGovernancePlatformUnitMergesDirectStatus409
 			| PostApiGovernancePlatformUnitMergesDirectStatus422
+			| PostApiGovernancePlatformUnitMergesDirectStatus429
 			| PostApiGovernancePlatformUnitMergesDirectStatus500
 		>,
 		PostApiGovernancePlatformUnitMergesDirectOptions,
@@ -11185,6 +11327,7 @@ export function postApiGovernancePlatformUnitMergesByRequestIdReviewsMutationOpt
 			| PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus404
 			| PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus409
 			| PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus422
+			| PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus429
 			| PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus500
 		>,
 		PostApiGovernancePlatformUnitMergesByRequestIdReviewsOptions,
@@ -11217,6 +11360,7 @@ export function usePostApiGovernancePlatformUnitMergesByRequestIdReviews<TContex
 				| PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus404
 				| PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus409
 				| PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus422
+				| PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus429
 				| PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus500
 			>,
 			PostApiGovernancePlatformUnitMergesByRequestIdReviewsOptions,
@@ -11241,6 +11385,7 @@ export function usePostApiGovernancePlatformUnitMergesByRequestIdReviews<TContex
 			| PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus404
 			| PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus409
 			| PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus422
+			| PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus429
 			| PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus500
 		>,
 		PostApiGovernancePlatformUnitMergesByRequestIdReviewsOptions,
@@ -11255,6 +11400,7 @@ export function usePostApiGovernancePlatformUnitMergesByRequestIdReviews<TContex
 			| PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus404
 			| PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus409
 			| PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus422
+			| PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus429
 			| PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus500
 		>,
 		PostApiGovernancePlatformUnitMergesByRequestIdReviewsOptions,
@@ -11274,6 +11420,7 @@ export function usePostApiGovernancePlatformUnitMergesByRequestIdReviews<TContex
 			| PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus404
 			| PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus409
 			| PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus422
+			| PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus429
 			| PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus500
 		>,
 		PostApiGovernancePlatformUnitMergesByRequestIdReviewsOptions,
@@ -11295,6 +11442,7 @@ export function postApiGovernancePlatformUnitMergesByRequestIdRetryMutationOptio
 			| PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus404
 			| PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus409
 			| PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus422
+			| PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus429
 			| PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus500
 		>,
 		PostApiGovernancePlatformUnitMergesByRequestIdRetryOptions,
@@ -11325,6 +11473,7 @@ export function usePostApiGovernancePlatformUnitMergesByRequestIdRetry<TContext>
 				| PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus404
 				| PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus409
 				| PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus422
+				| PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus429
 				| PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus500
 			>,
 			PostApiGovernancePlatformUnitMergesByRequestIdRetryOptions,
@@ -11347,6 +11496,7 @@ export function usePostApiGovernancePlatformUnitMergesByRequestIdRetry<TContext>
 			| PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus404
 			| PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus409
 			| PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus422
+			| PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus429
 			| PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus500
 		>,
 		PostApiGovernancePlatformUnitMergesByRequestIdRetryOptions,
@@ -11360,6 +11510,7 @@ export function usePostApiGovernancePlatformUnitMergesByRequestIdRetry<TContext>
 			| PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus404
 			| PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus409
 			| PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus422
+			| PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus429
 			| PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus500
 		>,
 		PostApiGovernancePlatformUnitMergesByRequestIdRetryOptions,
@@ -11378,6 +11529,7 @@ export function usePostApiGovernancePlatformUnitMergesByRequestIdRetry<TContext>
 			| PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus404
 			| PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus409
 			| PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus422
+			| PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus429
 			| PostApiGovernancePlatformUnitMergesByRequestIdRetryStatus500
 		>,
 		PostApiGovernancePlatformUnitMergesByRequestIdRetryOptions,
@@ -18914,6 +19066,86 @@ export function useDeleteApiPlatformUsersByUserIdSessionsBySessionId<TContext>(
 	>;
 }
 
+export const getApiTagsSuggestionsQueryKey = ({
+	query,
+}: Omit<GetApiTagsSuggestionsOptions, "headers">) =>
+	[{ url: "/api/v1/tags/suggestions" }, ...(query ? [query] : [])] as const;
+
+type GetApiTagsSuggestionsQueryKey = ReturnType<typeof getApiTagsSuggestionsQueryKey>;
+
+export function getApiTagsSuggestionsQueryOptions(
+	{ query }: GetApiTagsSuggestionsOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = getApiTagsSuggestionsQueryKey({ query });
+	return queryOptions<
+		GetApiTagsSuggestionsStatus200,
+		ResponseErrorConfig<GetApiTagsSuggestionsStatus422 | GetApiTagsSuggestionsStatus500>,
+		GetApiTagsSuggestionsStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			const { data } = await getApiTagsSuggestions({
+				...config,
+				query,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Suggest terminal Tags from a compound Tag query
+ * {@link /api/v1/tags/suggestions}
+ */
+export function useGetApiTagsSuggestions<
+	TData = GetApiTagsSuggestionsStatus200,
+	TQueryData = GetApiTagsSuggestionsStatus200,
+	TQueryKey extends QueryKey = GetApiTagsSuggestionsQueryKey,
+>(
+	{
+		query,
+	}: {
+		query: GetApiTagsSuggestionsOptions["query"] | (() => GetApiTagsSuggestionsOptions["query"]);
+	},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				GetApiTagsSuggestionsStatus200,
+				ResponseErrorConfig<GetApiTagsSuggestionsStatus422 | GetApiTagsSuggestionsStatus500>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = { query: typeof query === "function" ? query() : query };
+	const queryKey = resolvedOptions?.queryKey ?? getApiTagsSuggestionsQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...getApiTagsSuggestionsQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<GetApiTagsSuggestionsStatus422 | GetApiTagsSuggestionsStatus500>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
 export const getApiTagsByTagIdHierarchyQueryKey = ({
 	path,
 	query,
@@ -18930,11 +19162,8 @@ export function getApiTagsByTagIdHierarchyQueryOptions(
 	return queryOptions<
 		GetApiTagsByTagIdHierarchyStatus200,
 		ResponseErrorConfig<
-			| GetApiTagsByTagIdHierarchyStatus401
-			| GetApiTagsByTagIdHierarchyStatus403
 			| GetApiTagsByTagIdHierarchyStatus404
 			| GetApiTagsByTagIdHierarchyStatus422
-			| GetApiTagsByTagIdHierarchyStatus429
 			| GetApiTagsByTagIdHierarchyStatus500
 		>,
 		GetApiTagsByTagIdHierarchyStatus200,
@@ -18979,11 +19208,8 @@ export function useGetApiTagsByTagIdHierarchy<
 			QueryObserverOptions<
 				GetApiTagsByTagIdHierarchyStatus200,
 				ResponseErrorConfig<
-					| GetApiTagsByTagIdHierarchyStatus401
-					| GetApiTagsByTagIdHierarchyStatus403
 					| GetApiTagsByTagIdHierarchyStatus404
 					| GetApiTagsByTagIdHierarchyStatus422
-					| GetApiTagsByTagIdHierarchyStatus429
 					| GetApiTagsByTagIdHierarchyStatus500
 				>,
 				TData,
@@ -19012,11 +19238,8 @@ export function useGetApiTagsByTagIdHierarchy<
 	) as UseQueryResult<
 		TData,
 		ResponseErrorConfig<
-			| GetApiTagsByTagIdHierarchyStatus401
-			| GetApiTagsByTagIdHierarchyStatus403
 			| GetApiTagsByTagIdHierarchyStatus404
 			| GetApiTagsByTagIdHierarchyStatus422
-			| GetApiTagsByTagIdHierarchyStatus429
 			| GetApiTagsByTagIdHierarchyStatus500
 		>
 	> & { queryKey: TQueryKey };
@@ -19026,141 +19249,28 @@ export function useGetApiTagsByTagIdHierarchy<
 	return queryResult;
 }
 
-export const postApiTagStructuresMutationKey = () => [{ url: "/api/v1/tag-structures" }] as const;
-
-export function postApiTagStructuresMutationOptions<TContext = unknown>(
-	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
-) {
-	const mutationKey = postApiTagStructuresMutationKey();
-	return mutationOptions<
-		PostApiTagStructuresStatus200,
-		ResponseErrorConfig<
-			| PostApiTagStructuresStatus400
-			| PostApiTagStructuresStatus403
-			| PostApiTagStructuresStatus404
-			| PostApiTagStructuresStatus422
-			| PostApiTagStructuresStatus429
-			| PostApiTagStructuresStatus500
-		>,
-		PostApiTagStructuresOptions,
-		TContext
-	>({
-		mutationKey,
-		mutationFn: async ({ body }) => {
-			const { data } = await postApiTagStructures({ ...config, body, throwOnError: true });
-			return data;
-		},
-	});
-}
-
-/**
- * @summary Create or find and upvote a community-immutable Tag structure
- * {@link /api/v1/tag-structures}
- */
-export function usePostApiTagStructures<TContext>(
-	options: {
-		mutation?: UseMutationOptions<
-			PostApiTagStructuresStatus200,
-			ResponseErrorConfig<
-				| PostApiTagStructuresStatus400
-				| PostApiTagStructuresStatus403
-				| PostApiTagStructuresStatus404
-				| PostApiTagStructuresStatus422
-				| PostApiTagStructuresStatus429
-				| PostApiTagStructuresStatus500
-			>,
-			PostApiTagStructuresOptions,
-			TContext
-		> & { client?: QueryClient };
-		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
-	} = {},
-) {
-	const { mutation = {}, client: config = {} } = options ?? {};
-	const { client: queryClient, ...mutationOptions } = mutation;
-	const mutationKey = mutationOptions.mutationKey ?? postApiTagStructuresMutationKey();
-
-	const baseOptions = postApiTagStructuresMutationOptions(config) as UseMutationOptions<
-		PostApiTagStructuresStatus200,
-		ResponseErrorConfig<
-			| PostApiTagStructuresStatus400
-			| PostApiTagStructuresStatus403
-			| PostApiTagStructuresStatus404
-			| PostApiTagStructuresStatus422
-			| PostApiTagStructuresStatus429
-			| PostApiTagStructuresStatus500
-		>,
-		PostApiTagStructuresOptions,
-		TContext
-	>;
-
-	return useMutation<
-		PostApiTagStructuresStatus200,
-		ResponseErrorConfig<
-			| PostApiTagStructuresStatus400
-			| PostApiTagStructuresStatus403
-			| PostApiTagStructuresStatus404
-			| PostApiTagStructuresStatus422
-			| PostApiTagStructuresStatus429
-			| PostApiTagStructuresStatus500
-		>,
-		PostApiTagStructuresOptions,
-		TContext
-	>(
-		{
-			...baseOptions,
-			mutationKey,
-			...mutationOptions,
-		},
-		queryClient,
-	) as UseMutationResult<
-		PostApiTagStructuresStatus200,
-		ResponseErrorConfig<
-			| PostApiTagStructuresStatus400
-			| PostApiTagStructuresStatus403
-			| PostApiTagStructuresStatus404
-			| PostApiTagStructuresStatus422
-			| PostApiTagStructuresStatus429
-			| PostApiTagStructuresStatus500
-		>,
-		PostApiTagStructuresOptions,
-		TContext
-	>;
-}
-
-export const getApiTagStructuresByStructureIdQueryKey = ({
+export const getApiTagsByTagIdPathsQueryKey = ({
 	path,
 	query,
-}: Omit<GetApiTagStructuresByStructureIdOptions, "headers">) =>
-	[
-		{ url: "/api/v1/tag-structures/:structureId", params: path },
-		...(query ? [query] : []),
-	] as const;
+}: Omit<GetApiTagsByTagIdPathsOptions, "headers">) =>
+	[{ url: "/api/v1/tags/:tagId/paths", params: path }, ...(query ? [query] : [])] as const;
 
-type GetApiTagStructuresByStructureIdQueryKey = ReturnType<
-	typeof getApiTagStructuresByStructureIdQueryKey
->;
+type GetApiTagsByTagIdPathsQueryKey = ReturnType<typeof getApiTagsByTagIdPathsQueryKey>;
 
-export function getApiTagStructuresByStructureIdQueryOptions(
-	{ path, query }: GetApiTagStructuresByStructureIdOptions,
+export function getApiTagsByTagIdPathsQueryOptions(
+	{ path, query }: GetApiTagsByTagIdPathsOptions,
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
 ) {
-	const queryKey = getApiTagStructuresByStructureIdQueryKey({ path, query });
+	const queryKey = getApiTagsByTagIdPathsQueryKey({ path, query });
 	return queryOptions<
-		GetApiTagStructuresByStructureIdStatus200,
-		ResponseErrorConfig<
-			| GetApiTagStructuresByStructureIdStatus401
-			| GetApiTagStructuresByStructureIdStatus403
-			| GetApiTagStructuresByStructureIdStatus404
-			| GetApiTagStructuresByStructureIdStatus422
-			| GetApiTagStructuresByStructureIdStatus429
-			| GetApiTagStructuresByStructureIdStatus500
-		>,
-		GetApiTagStructuresByStructureIdStatus200,
+		GetApiTagsByTagIdPathsStatus200,
+		ResponseErrorConfig<GetApiTagsByTagIdPathsStatus422 | GetApiTagsByTagIdPathsStatus500>,
+		GetApiTagsByTagIdPathsStatus200,
 		typeof queryKey
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiTagStructuresByStructureId({
+			const { data } = await getApiTagsByTagIdPaths({
 				...config,
 				path,
 				query,
@@ -19173,36 +19283,392 @@ export function getApiTagStructuresByStructureIdQueryOptions(
 }
 
 /**
- * @summary Get a Tag structure
- * {@link /api/v1/tag-structures/:structureId}
+ * @summary List accepted Tag Paths ending at a Tag
+ * {@link /api/v1/tags/:tagId/paths}
  */
-export function useGetApiTagStructuresByStructureId<
-	TData = GetApiTagStructuresByStructureIdStatus200,
-	TQueryData = GetApiTagStructuresByStructureIdStatus200,
-	TQueryKey extends QueryKey = GetApiTagStructuresByStructureIdQueryKey,
+export function useGetApiTagsByTagIdPaths<
+	TData = GetApiTagsByTagIdPathsStatus200,
+	TQueryData = GetApiTagsByTagIdPathsStatus200,
+	TQueryKey extends QueryKey = GetApiTagsByTagIdPathsQueryKey,
 >(
 	{
 		path,
 		query,
 	}: {
-		path:
-			| GetApiTagStructuresByStructureIdOptions["path"]
-			| (() => GetApiTagStructuresByStructureIdOptions["path"]);
-		query?:
-			| GetApiTagStructuresByStructureIdOptions["query"]
-			| (() => GetApiTagStructuresByStructureIdOptions["query"]);
+		path: GetApiTagsByTagIdPathsOptions["path"] | (() => GetApiTagsByTagIdPathsOptions["path"]);
+		query?: GetApiTagsByTagIdPathsOptions["query"] | (() => GetApiTagsByTagIdPathsOptions["query"]);
 	},
 	options: {
 		query?: Partial<
 			QueryObserverOptions<
-				GetApiTagStructuresByStructureIdStatus200,
+				GetApiTagsByTagIdPathsStatus200,
+				ResponseErrorConfig<GetApiTagsByTagIdPathsStatus422 | GetApiTagsByTagIdPathsStatus500>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = {
+		path: typeof path === "function" ? path() : path,
+		query: typeof query === "function" ? query() : query,
+	};
+	const queryKey = resolvedOptions?.queryKey ?? getApiTagsByTagIdPathsQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...getApiTagsByTagIdPathsQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<GetApiTagsByTagIdPathsStatus422 | GetApiTagsByTagIdPathsStatus500>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const postApiTagPathsDefinitionWarningsMutationKey = () =>
+	[{ url: "/api/v1/tag-paths/definition-warnings" }] as const;
+
+export function postApiTagPathsDefinitionWarningsMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = postApiTagPathsDefinitionWarningsMutationKey();
+	return mutationOptions<
+		PostApiTagPathsDefinitionWarningsStatus200,
+		ResponseErrorConfig<
+			| PostApiTagPathsDefinitionWarningsStatus400
+			| PostApiTagPathsDefinitionWarningsStatus422
+			| PostApiTagPathsDefinitionWarningsStatus429
+			| PostApiTagPathsDefinitionWarningsStatus500
+		>,
+		PostApiTagPathsDefinitionWarningsOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ body }) => {
+			const { data } = await postApiTagPathsDefinitionWarnings({
+				...config,
+				body,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary List related accepted definitions before creating a Tag Path
+ * {@link /api/v1/tag-paths/definition-warnings}
+ */
+export function usePostApiTagPathsDefinitionWarnings<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			PostApiTagPathsDefinitionWarningsStatus200,
+			ResponseErrorConfig<
+				| PostApiTagPathsDefinitionWarningsStatus400
+				| PostApiTagPathsDefinitionWarningsStatus422
+				| PostApiTagPathsDefinitionWarningsStatus429
+				| PostApiTagPathsDefinitionWarningsStatus500
+			>,
+			PostApiTagPathsDefinitionWarningsOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? postApiTagPathsDefinitionWarningsMutationKey();
+
+	const baseOptions = postApiTagPathsDefinitionWarningsMutationOptions(
+		config,
+	) as UseMutationOptions<
+		PostApiTagPathsDefinitionWarningsStatus200,
+		ResponseErrorConfig<
+			| PostApiTagPathsDefinitionWarningsStatus400
+			| PostApiTagPathsDefinitionWarningsStatus422
+			| PostApiTagPathsDefinitionWarningsStatus429
+			| PostApiTagPathsDefinitionWarningsStatus500
+		>,
+		PostApiTagPathsDefinitionWarningsOptions,
+		TContext
+	>;
+
+	return useMutation<
+		PostApiTagPathsDefinitionWarningsStatus200,
+		ResponseErrorConfig<
+			| PostApiTagPathsDefinitionWarningsStatus400
+			| PostApiTagPathsDefinitionWarningsStatus422
+			| PostApiTagPathsDefinitionWarningsStatus429
+			| PostApiTagPathsDefinitionWarningsStatus500
+		>,
+		PostApiTagPathsDefinitionWarningsOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PostApiTagPathsDefinitionWarningsStatus200,
+		ResponseErrorConfig<
+			| PostApiTagPathsDefinitionWarningsStatus400
+			| PostApiTagPathsDefinitionWarningsStatus422
+			| PostApiTagPathsDefinitionWarningsStatus429
+			| PostApiTagPathsDefinitionWarningsStatus500
+		>,
+		PostApiTagPathsDefinitionWarningsOptions,
+		TContext
+	>;
+}
+
+export const getApiTagPathsSearchQueryKey = ({
+	query,
+}: Omit<GetApiTagPathsSearchOptions, "headers">) =>
+	[{ url: "/api/v1/tag-paths/search" }, ...(query ? [query] : [])] as const;
+
+type GetApiTagPathsSearchQueryKey = ReturnType<typeof getApiTagPathsSearchQueryKey>;
+
+export function getApiTagPathsSearchQueryOptions(
+	{ query }: GetApiTagPathsSearchOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = getApiTagPathsSearchQueryKey({ query });
+	return queryOptions<
+		GetApiTagPathsSearchStatus200,
+		ResponseErrorConfig<GetApiTagPathsSearchStatus422 | GetApiTagPathsSearchStatus500>,
+		GetApiTagPathsSearchStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			const { data } = await getApiTagPathsSearch({
+				...config,
+				query,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Search accepted Tag Paths for curation
+ * {@link /api/v1/tag-paths/search}
+ */
+export function useGetApiTagPathsSearch<
+	TData = GetApiTagPathsSearchStatus200,
+	TQueryData = GetApiTagPathsSearchStatus200,
+	TQueryKey extends QueryKey = GetApiTagPathsSearchQueryKey,
+>(
+	{
+		query,
+	}: { query: GetApiTagPathsSearchOptions["query"] | (() => GetApiTagPathsSearchOptions["query"]) },
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				GetApiTagPathsSearchStatus200,
+				ResponseErrorConfig<GetApiTagPathsSearchStatus422 | GetApiTagPathsSearchStatus500>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = { query: typeof query === "function" ? query() : query };
+	const queryKey = resolvedOptions?.queryKey ?? getApiTagPathsSearchQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...getApiTagPathsSearchQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<GetApiTagPathsSearchStatus422 | GetApiTagPathsSearchStatus500>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const postApiTagPathsMutationKey = () => [{ url: "/api/v1/tag-paths" }] as const;
+
+export function postApiTagPathsMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = postApiTagPathsMutationKey();
+	return mutationOptions<
+		PostApiTagPathsStatus200,
+		ResponseErrorConfig<
+			| PostApiTagPathsStatus400
+			| PostApiTagPathsStatus404
+			| PostApiTagPathsStatus422
+			| PostApiTagPathsStatus429
+			| PostApiTagPathsStatus500
+		>,
+		PostApiTagPathsOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ body }) => {
+			const { data } = await postApiTagPaths({ ...config, body, throwOnError: true });
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Create or find and upvote an immutable Tag Path
+ * {@link /api/v1/tag-paths}
+ */
+export function usePostApiTagPaths<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			PostApiTagPathsStatus200,
+			ResponseErrorConfig<
+				| PostApiTagPathsStatus400
+				| PostApiTagPathsStatus404
+				| PostApiTagPathsStatus422
+				| PostApiTagPathsStatus429
+				| PostApiTagPathsStatus500
+			>,
+			PostApiTagPathsOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? postApiTagPathsMutationKey();
+
+	const baseOptions = postApiTagPathsMutationOptions(config) as UseMutationOptions<
+		PostApiTagPathsStatus200,
+		ResponseErrorConfig<
+			| PostApiTagPathsStatus400
+			| PostApiTagPathsStatus404
+			| PostApiTagPathsStatus422
+			| PostApiTagPathsStatus429
+			| PostApiTagPathsStatus500
+		>,
+		PostApiTagPathsOptions,
+		TContext
+	>;
+
+	return useMutation<
+		PostApiTagPathsStatus200,
+		ResponseErrorConfig<
+			| PostApiTagPathsStatus400
+			| PostApiTagPathsStatus404
+			| PostApiTagPathsStatus422
+			| PostApiTagPathsStatus429
+			| PostApiTagPathsStatus500
+		>,
+		PostApiTagPathsOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PostApiTagPathsStatus200,
+		ResponseErrorConfig<
+			| PostApiTagPathsStatus400
+			| PostApiTagPathsStatus404
+			| PostApiTagPathsStatus422
+			| PostApiTagPathsStatus429
+			| PostApiTagPathsStatus500
+		>,
+		PostApiTagPathsOptions,
+		TContext
+	>;
+}
+
+export const getApiTagPathsByPathIdQueryKey = ({
+	path,
+	query,
+}: Omit<GetApiTagPathsByPathIdOptions, "headers">) =>
+	[{ url: "/api/v1/tag-paths/:pathId", params: path }, ...(query ? [query] : [])] as const;
+
+type GetApiTagPathsByPathIdQueryKey = ReturnType<typeof getApiTagPathsByPathIdQueryKey>;
+
+export function getApiTagPathsByPathIdQueryOptions(
+	{ path, query }: GetApiTagPathsByPathIdOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = getApiTagPathsByPathIdQueryKey({ path, query });
+	return queryOptions<
+		GetApiTagPathsByPathIdStatus200,
+		ResponseErrorConfig<
+			| GetApiTagPathsByPathIdStatus404
+			| GetApiTagPathsByPathIdStatus422
+			| GetApiTagPathsByPathIdStatus500
+		>,
+		GetApiTagPathsByPathIdStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			const { data } = await getApiTagPathsByPathId({
+				...config,
+				path,
+				query,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Get a Tag Path
+ * {@link /api/v1/tag-paths/:pathId}
+ */
+export function useGetApiTagPathsByPathId<
+	TData = GetApiTagPathsByPathIdStatus200,
+	TQueryData = GetApiTagPathsByPathIdStatus200,
+	TQueryKey extends QueryKey = GetApiTagPathsByPathIdQueryKey,
+>(
+	{
+		path,
+		query,
+	}: {
+		path: GetApiTagPathsByPathIdOptions["path"] | (() => GetApiTagPathsByPathIdOptions["path"]);
+		query?: GetApiTagPathsByPathIdOptions["query"] | (() => GetApiTagPathsByPathIdOptions["query"]);
+	},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				GetApiTagPathsByPathIdStatus200,
 				ResponseErrorConfig<
-					| GetApiTagStructuresByStructureIdStatus401
-					| GetApiTagStructuresByStructureIdStatus403
-					| GetApiTagStructuresByStructureIdStatus404
-					| GetApiTagStructuresByStructureIdStatus422
-					| GetApiTagStructuresByStructureIdStatus429
-					| GetApiTagStructuresByStructureIdStatus500
+					| GetApiTagPathsByPathIdStatus404
+					| GetApiTagPathsByPathIdStatus422
+					| GetApiTagPathsByPathIdStatus500
 				>,
 				TData,
 				TQueryData,
@@ -19218,12 +19684,11 @@ export function useGetApiTagStructuresByStructureId<
 		path: typeof path === "function" ? path() : path,
 		query: typeof query === "function" ? query() : query,
 	};
-	const queryKey =
-		resolvedOptions?.queryKey ?? getApiTagStructuresByStructureIdQueryKey(resolvedParams);
+	const queryKey = resolvedOptions?.queryKey ?? getApiTagPathsByPathIdQueryKey(resolvedParams);
 
 	const queryResult = useQuery(
 		{
-			...getApiTagStructuresByStructureIdQueryOptions(resolvedParams, config),
+			...getApiTagPathsByPathIdQueryOptions(resolvedParams, config),
 			...resolvedOptions,
 			queryKey,
 		} as unknown as QueryObserverOptions,
@@ -19231,12 +19696,9 @@ export function useGetApiTagStructuresByStructureId<
 	) as UseQueryResult<
 		TData,
 		ResponseErrorConfig<
-			| GetApiTagStructuresByStructureIdStatus401
-			| GetApiTagStructuresByStructureIdStatus403
-			| GetApiTagStructuresByStructureIdStatus404
-			| GetApiTagStructuresByStructureIdStatus422
-			| GetApiTagStructuresByStructureIdStatus429
-			| GetApiTagStructuresByStructureIdStatus500
+			| GetApiTagPathsByPathIdStatus404
+			| GetApiTagPathsByPathIdStatus422
+			| GetApiTagPathsByPathIdStatus500
 		>
 	> & { queryKey: TQueryKey };
 
@@ -19245,142 +19707,28 @@ export function useGetApiTagStructuresByStructureId<
 	return queryResult;
 }
 
-export const putApiTagStructuresByStructureIdMutationKey = () =>
-	[{ url: "/api/v1/tag-structures/:structureId" }] as const;
+export const putApiTagPathsByPathIdVoteMutationKey = () =>
+	[{ url: "/api/v1/tag-paths/:pathId/vote" }] as const;
 
-export function putApiTagStructuresByStructureIdMutationOptions<TContext = unknown>(
+export function putApiTagPathsByPathIdVoteMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
 ) {
-	const mutationKey = putApiTagStructuresByStructureIdMutationKey();
+	const mutationKey = putApiTagPathsByPathIdVoteMutationKey();
 	return mutationOptions<
-		PutApiTagStructuresByStructureIdStatus200,
+		PutApiTagPathsByPathIdVoteStatus200,
 		ResponseErrorConfig<
-			| PutApiTagStructuresByStructureIdStatus400
-			| PutApiTagStructuresByStructureIdStatus403
-			| PutApiTagStructuresByStructureIdStatus404
-			| PutApiTagStructuresByStructureIdStatus409
-			| PutApiTagStructuresByStructureIdStatus422
-			| PutApiTagStructuresByStructureIdStatus429
-			| PutApiTagStructuresByStructureIdStatus500
+			| PutApiTagPathsByPathIdVoteStatus400
+			| PutApiTagPathsByPathIdVoteStatus404
+			| PutApiTagPathsByPathIdVoteStatus422
+			| PutApiTagPathsByPathIdVoteStatus429
+			| PutApiTagPathsByPathIdVoteStatus500
 		>,
-		PutApiTagStructuresByStructureIdOptions,
-		TContext
-	>({
-		mutationKey,
-		mutationFn: async ({ path, query, body }) => {
-			const { data } = await putApiTagStructuresByStructureId({
-				...config,
-				path,
-				query,
-				body,
-				throwOnError: true,
-			});
-			return data;
-		},
-	});
-}
-
-/**
- * @summary Administratively correct a Tag structure definition
- * {@link /api/v1/tag-structures/:structureId}
- */
-export function usePutApiTagStructuresByStructureId<TContext>(
-	options: {
-		mutation?: UseMutationOptions<
-			PutApiTagStructuresByStructureIdStatus200,
-			ResponseErrorConfig<
-				| PutApiTagStructuresByStructureIdStatus400
-				| PutApiTagStructuresByStructureIdStatus403
-				| PutApiTagStructuresByStructureIdStatus404
-				| PutApiTagStructuresByStructureIdStatus409
-				| PutApiTagStructuresByStructureIdStatus422
-				| PutApiTagStructuresByStructureIdStatus429
-				| PutApiTagStructuresByStructureIdStatus500
-			>,
-			PutApiTagStructuresByStructureIdOptions,
-			TContext
-		> & { client?: QueryClient };
-		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
-	} = {},
-) {
-	const { mutation = {}, client: config = {} } = options ?? {};
-	const { client: queryClient, ...mutationOptions } = mutation;
-	const mutationKey = mutationOptions.mutationKey ?? putApiTagStructuresByStructureIdMutationKey();
-
-	const baseOptions = putApiTagStructuresByStructureIdMutationOptions(config) as UseMutationOptions<
-		PutApiTagStructuresByStructureIdStatus200,
-		ResponseErrorConfig<
-			| PutApiTagStructuresByStructureIdStatus400
-			| PutApiTagStructuresByStructureIdStatus403
-			| PutApiTagStructuresByStructureIdStatus404
-			| PutApiTagStructuresByStructureIdStatus409
-			| PutApiTagStructuresByStructureIdStatus422
-			| PutApiTagStructuresByStructureIdStatus429
-			| PutApiTagStructuresByStructureIdStatus500
-		>,
-		PutApiTagStructuresByStructureIdOptions,
-		TContext
-	>;
-
-	return useMutation<
-		PutApiTagStructuresByStructureIdStatus200,
-		ResponseErrorConfig<
-			| PutApiTagStructuresByStructureIdStatus400
-			| PutApiTagStructuresByStructureIdStatus403
-			| PutApiTagStructuresByStructureIdStatus404
-			| PutApiTagStructuresByStructureIdStatus409
-			| PutApiTagStructuresByStructureIdStatus422
-			| PutApiTagStructuresByStructureIdStatus429
-			| PutApiTagStructuresByStructureIdStatus500
-		>,
-		PutApiTagStructuresByStructureIdOptions,
-		TContext
-	>(
-		{
-			...baseOptions,
-			mutationKey,
-			...mutationOptions,
-		},
-		queryClient,
-	) as UseMutationResult<
-		PutApiTagStructuresByStructureIdStatus200,
-		ResponseErrorConfig<
-			| PutApiTagStructuresByStructureIdStatus400
-			| PutApiTagStructuresByStructureIdStatus403
-			| PutApiTagStructuresByStructureIdStatus404
-			| PutApiTagStructuresByStructureIdStatus409
-			| PutApiTagStructuresByStructureIdStatus422
-			| PutApiTagStructuresByStructureIdStatus429
-			| PutApiTagStructuresByStructureIdStatus500
-		>,
-		PutApiTagStructuresByStructureIdOptions,
-		TContext
-	>;
-}
-
-export const putApiTagStructuresByStructureIdVoteMutationKey = () =>
-	[{ url: "/api/v1/tag-structures/:structureId/vote" }] as const;
-
-export function putApiTagStructuresByStructureIdVoteMutationOptions<TContext = unknown>(
-	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
-) {
-	const mutationKey = putApiTagStructuresByStructureIdVoteMutationKey();
-	return mutationOptions<
-		PutApiTagStructuresByStructureIdVoteStatus200,
-		ResponseErrorConfig<
-			| PutApiTagStructuresByStructureIdVoteStatus400
-			| PutApiTagStructuresByStructureIdVoteStatus403
-			| PutApiTagStructuresByStructureIdVoteStatus404
-			| PutApiTagStructuresByStructureIdVoteStatus422
-			| PutApiTagStructuresByStructureIdVoteStatus429
-			| PutApiTagStructuresByStructureIdVoteStatus500
-		>,
-		PutApiTagStructuresByStructureIdVoteOptions,
+		PutApiTagPathsByPathIdVoteOptions,
 		TContext
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await putApiTagStructuresByStructureIdVote({
+			const { data } = await putApiTagPathsByPathIdVote({
 				...config,
 				path,
 				body,
@@ -19392,22 +19740,21 @@ export function putApiTagStructuresByStructureIdVoteMutationOptions<TContext = u
 }
 
 /**
- * @summary Vote on a Tag structure
- * {@link /api/v1/tag-structures/:structureId/vote}
+ * @summary Vote on a Tag Path definition
+ * {@link /api/v1/tag-paths/:pathId/vote}
  */
-export function usePutApiTagStructuresByStructureIdVote<TContext>(
+export function usePutApiTagPathsByPathIdVote<TContext>(
 	options: {
 		mutation?: UseMutationOptions<
-			PutApiTagStructuresByStructureIdVoteStatus200,
+			PutApiTagPathsByPathIdVoteStatus200,
 			ResponseErrorConfig<
-				| PutApiTagStructuresByStructureIdVoteStatus400
-				| PutApiTagStructuresByStructureIdVoteStatus403
-				| PutApiTagStructuresByStructureIdVoteStatus404
-				| PutApiTagStructuresByStructureIdVoteStatus422
-				| PutApiTagStructuresByStructureIdVoteStatus429
-				| PutApiTagStructuresByStructureIdVoteStatus500
+				| PutApiTagPathsByPathIdVoteStatus400
+				| PutApiTagPathsByPathIdVoteStatus404
+				| PutApiTagPathsByPathIdVoteStatus422
+				| PutApiTagPathsByPathIdVoteStatus429
+				| PutApiTagPathsByPathIdVoteStatus500
 			>,
-			PutApiTagStructuresByStructureIdVoteOptions,
+			PutApiTagPathsByPathIdVoteOptions,
 			TContext
 		> & { client?: QueryClient };
 		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
@@ -19415,36 +19762,31 @@ export function usePutApiTagStructuresByStructureIdVote<TContext>(
 ) {
 	const { mutation = {}, client: config = {} } = options ?? {};
 	const { client: queryClient, ...mutationOptions } = mutation;
-	const mutationKey =
-		mutationOptions.mutationKey ?? putApiTagStructuresByStructureIdVoteMutationKey();
+	const mutationKey = mutationOptions.mutationKey ?? putApiTagPathsByPathIdVoteMutationKey();
 
-	const baseOptions = putApiTagStructuresByStructureIdVoteMutationOptions(
-		config,
-	) as UseMutationOptions<
-		PutApiTagStructuresByStructureIdVoteStatus200,
+	const baseOptions = putApiTagPathsByPathIdVoteMutationOptions(config) as UseMutationOptions<
+		PutApiTagPathsByPathIdVoteStatus200,
 		ResponseErrorConfig<
-			| PutApiTagStructuresByStructureIdVoteStatus400
-			| PutApiTagStructuresByStructureIdVoteStatus403
-			| PutApiTagStructuresByStructureIdVoteStatus404
-			| PutApiTagStructuresByStructureIdVoteStatus422
-			| PutApiTagStructuresByStructureIdVoteStatus429
-			| PutApiTagStructuresByStructureIdVoteStatus500
+			| PutApiTagPathsByPathIdVoteStatus400
+			| PutApiTagPathsByPathIdVoteStatus404
+			| PutApiTagPathsByPathIdVoteStatus422
+			| PutApiTagPathsByPathIdVoteStatus429
+			| PutApiTagPathsByPathIdVoteStatus500
 		>,
-		PutApiTagStructuresByStructureIdVoteOptions,
+		PutApiTagPathsByPathIdVoteOptions,
 		TContext
 	>;
 
 	return useMutation<
-		PutApiTagStructuresByStructureIdVoteStatus200,
+		PutApiTagPathsByPathIdVoteStatus200,
 		ResponseErrorConfig<
-			| PutApiTagStructuresByStructureIdVoteStatus400
-			| PutApiTagStructuresByStructureIdVoteStatus403
-			| PutApiTagStructuresByStructureIdVoteStatus404
-			| PutApiTagStructuresByStructureIdVoteStatus422
-			| PutApiTagStructuresByStructureIdVoteStatus429
-			| PutApiTagStructuresByStructureIdVoteStatus500
+			| PutApiTagPathsByPathIdVoteStatus400
+			| PutApiTagPathsByPathIdVoteStatus404
+			| PutApiTagPathsByPathIdVoteStatus422
+			| PutApiTagPathsByPathIdVoteStatus429
+			| PutApiTagPathsByPathIdVoteStatus500
 		>,
-		PutApiTagStructuresByStructureIdVoteOptions,
+		PutApiTagPathsByPathIdVoteOptions,
 		TContext
 	>(
 		{
@@ -19454,44 +19796,236 @@ export function usePutApiTagStructuresByStructureIdVote<TContext>(
 		},
 		queryClient,
 	) as UseMutationResult<
-		PutApiTagStructuresByStructureIdVoteStatus200,
+		PutApiTagPathsByPathIdVoteStatus200,
 		ResponseErrorConfig<
-			| PutApiTagStructuresByStructureIdVoteStatus400
-			| PutApiTagStructuresByStructureIdVoteStatus403
-			| PutApiTagStructuresByStructureIdVoteStatus404
-			| PutApiTagStructuresByStructureIdVoteStatus422
-			| PutApiTagStructuresByStructureIdVoteStatus429
-			| PutApiTagStructuresByStructureIdVoteStatus500
+			| PutApiTagPathsByPathIdVoteStatus400
+			| PutApiTagPathsByPathIdVoteStatus404
+			| PutApiTagPathsByPathIdVoteStatus422
+			| PutApiTagPathsByPathIdVoteStatus429
+			| PutApiTagPathsByPathIdVoteStatus500
 		>,
-		PutApiTagStructuresByStructureIdVoteOptions,
+		PutApiTagPathsByPathIdVoteOptions,
 		TContext
 	>;
 }
 
-export const deleteApiTagStructuresByStructureIdVoteMutationKey = () =>
-	[{ url: "/api/v1/tag-structures/:structureId/vote" }] as const;
+export const deleteApiTagPathsByPathIdVoteMutationKey = () =>
+	[{ url: "/api/v1/tag-paths/:pathId/vote" }] as const;
 
-export function deleteApiTagStructuresByStructureIdVoteMutationOptions<TContext = unknown>(
+export function deleteApiTagPathsByPathIdVoteMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
 ) {
-	const mutationKey = deleteApiTagStructuresByStructureIdVoteMutationKey();
+	const mutationKey = deleteApiTagPathsByPathIdVoteMutationKey();
 	return mutationOptions<
-		DeleteApiTagStructuresByStructureIdVoteStatus200,
+		DeleteApiTagPathsByPathIdVoteStatus200,
 		ResponseErrorConfig<
-			| DeleteApiTagStructuresByStructureIdVoteStatus403
-			| DeleteApiTagStructuresByStructureIdVoteStatus404
-			| DeleteApiTagStructuresByStructureIdVoteStatus422
-			| DeleteApiTagStructuresByStructureIdVoteStatus429
-			| DeleteApiTagStructuresByStructureIdVoteStatus500
+			| DeleteApiTagPathsByPathIdVoteStatus404
+			| DeleteApiTagPathsByPathIdVoteStatus422
+			| DeleteApiTagPathsByPathIdVoteStatus429
+			| DeleteApiTagPathsByPathIdVoteStatus500
 		>,
-		DeleteApiTagStructuresByStructureIdVoteOptions,
+		DeleteApiTagPathsByPathIdVoteOptions,
 		TContext
 	>({
 		mutationKey,
 		mutationFn: async ({ path }) => {
-			const { data } = await deleteApiTagStructuresByStructureIdVote({
+			const { data } = await deleteApiTagPathsByPathIdVote({ ...config, path, throwOnError: true });
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Remove a Tag Path definition vote
+ * {@link /api/v1/tag-paths/:pathId/vote}
+ */
+export function useDeleteApiTagPathsByPathIdVote<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			DeleteApiTagPathsByPathIdVoteStatus200,
+			ResponseErrorConfig<
+				| DeleteApiTagPathsByPathIdVoteStatus404
+				| DeleteApiTagPathsByPathIdVoteStatus422
+				| DeleteApiTagPathsByPathIdVoteStatus429
+				| DeleteApiTagPathsByPathIdVoteStatus500
+			>,
+			DeleteApiTagPathsByPathIdVoteOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? deleteApiTagPathsByPathIdVoteMutationKey();
+
+	const baseOptions = deleteApiTagPathsByPathIdVoteMutationOptions(config) as UseMutationOptions<
+		DeleteApiTagPathsByPathIdVoteStatus200,
+		ResponseErrorConfig<
+			| DeleteApiTagPathsByPathIdVoteStatus404
+			| DeleteApiTagPathsByPathIdVoteStatus422
+			| DeleteApiTagPathsByPathIdVoteStatus429
+			| DeleteApiTagPathsByPathIdVoteStatus500
+		>,
+		DeleteApiTagPathsByPathIdVoteOptions,
+		TContext
+	>;
+
+	return useMutation<
+		DeleteApiTagPathsByPathIdVoteStatus200,
+		ResponseErrorConfig<
+			| DeleteApiTagPathsByPathIdVoteStatus404
+			| DeleteApiTagPathsByPathIdVoteStatus422
+			| DeleteApiTagPathsByPathIdVoteStatus429
+			| DeleteApiTagPathsByPathIdVoteStatus500
+		>,
+		DeleteApiTagPathsByPathIdVoteOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		DeleteApiTagPathsByPathIdVoteStatus200,
+		ResponseErrorConfig<
+			| DeleteApiTagPathsByPathIdVoteStatus404
+			| DeleteApiTagPathsByPathIdVoteStatus422
+			| DeleteApiTagPathsByPathIdVoteStatus429
+			| DeleteApiTagPathsByPathIdVoteStatus500
+		>,
+		DeleteApiTagPathsByPathIdVoteOptions,
+		TContext
+	>;
+}
+
+export const postApiTagPathsMergesMutationKey = () =>
+	[{ url: "/api/v1/tag-paths/merges" }] as const;
+
+export function postApiTagPathsMergesMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = postApiTagPathsMergesMutationKey();
+	return mutationOptions<
+		PostApiTagPathsMergesStatus200,
+		ResponseErrorConfig<
+			| PostApiTagPathsMergesStatus400
+			| PostApiTagPathsMergesStatus403
+			| PostApiTagPathsMergesStatus404
+			| PostApiTagPathsMergesStatus422
+			| PostApiTagPathsMergesStatus500
+		>,
+		PostApiTagPathsMergesOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ body }) => {
+			const { data } = await postApiTagPathsMerges({ ...config, body, throwOnError: true });
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Propose a manually governed Tag Path merge
+ * {@link /api/v1/tag-paths/merges}
+ */
+export function usePostApiTagPathsMerges<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			PostApiTagPathsMergesStatus200,
+			ResponseErrorConfig<
+				| PostApiTagPathsMergesStatus400
+				| PostApiTagPathsMergesStatus403
+				| PostApiTagPathsMergesStatus404
+				| PostApiTagPathsMergesStatus422
+				| PostApiTagPathsMergesStatus500
+			>,
+			PostApiTagPathsMergesOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? postApiTagPathsMergesMutationKey();
+
+	const baseOptions = postApiTagPathsMergesMutationOptions(config) as UseMutationOptions<
+		PostApiTagPathsMergesStatus200,
+		ResponseErrorConfig<
+			| PostApiTagPathsMergesStatus400
+			| PostApiTagPathsMergesStatus403
+			| PostApiTagPathsMergesStatus404
+			| PostApiTagPathsMergesStatus422
+			| PostApiTagPathsMergesStatus500
+		>,
+		PostApiTagPathsMergesOptions,
+		TContext
+	>;
+
+	return useMutation<
+		PostApiTagPathsMergesStatus200,
+		ResponseErrorConfig<
+			| PostApiTagPathsMergesStatus400
+			| PostApiTagPathsMergesStatus403
+			| PostApiTagPathsMergesStatus404
+			| PostApiTagPathsMergesStatus422
+			| PostApiTagPathsMergesStatus500
+		>,
+		PostApiTagPathsMergesOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PostApiTagPathsMergesStatus200,
+		ResponseErrorConfig<
+			| PostApiTagPathsMergesStatus400
+			| PostApiTagPathsMergesStatus403
+			| PostApiTagPathsMergesStatus404
+			| PostApiTagPathsMergesStatus422
+			| PostApiTagPathsMergesStatus500
+		>,
+		PostApiTagPathsMergesOptions,
+		TContext
+	>;
+}
+
+export const getApiTagPathsMergesPendingQueryKey = ({
+	query,
+}: Omit<GetApiTagPathsMergesPendingOptions, "headers"> = {}) =>
+	[{ url: "/api/v1/tag-paths/merges/pending" }, ...(query ? [query] : [])] as const;
+
+type GetApiTagPathsMergesPendingQueryKey = ReturnType<typeof getApiTagPathsMergesPendingQueryKey>;
+
+export function getApiTagPathsMergesPendingQueryOptions(
+	{ query }: GetApiTagPathsMergesPendingOptions = {},
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = getApiTagPathsMergesPendingQueryKey({ query });
+	return queryOptions<
+		GetApiTagPathsMergesPendingStatus200,
+		ResponseErrorConfig<
+			| GetApiTagPathsMergesPendingStatus403
+			| GetApiTagPathsMergesPendingStatus422
+			| GetApiTagPathsMergesPendingStatus500
+		>,
+		GetApiTagPathsMergesPendingStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			const { data } = await getApiTagPathsMergesPending({
 				...config,
-				path,
+				query,
+				signal: config.signal ?? signal,
 				throwOnError: true,
 			});
 			return data;
@@ -19500,21 +20034,112 @@ export function deleteApiTagStructuresByStructureIdVoteMutationOptions<TContext 
 }
 
 /**
- * @summary Remove a Tag structure vote
- * {@link /api/v1/tag-structures/:structureId/vote}
+ * @summary List pending manual Tag Path merge proposals
+ * {@link /api/v1/tag-paths/merges/pending}
  */
-export function useDeleteApiTagStructuresByStructureIdVote<TContext>(
+export function useGetApiTagPathsMergesPending<
+	TData = GetApiTagPathsMergesPendingStatus200,
+	TQueryData = GetApiTagPathsMergesPendingStatus200,
+	TQueryKey extends QueryKey = GetApiTagPathsMergesPendingQueryKey,
+>(
+	{
+		query,
+	}: {
+		query?:
+			| GetApiTagPathsMergesPendingOptions["query"]
+			| (() => GetApiTagPathsMergesPendingOptions["query"]);
+	} = {},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				GetApiTagPathsMergesPendingStatus200,
+				ResponseErrorConfig<
+					| GetApiTagPathsMergesPendingStatus403
+					| GetApiTagPathsMergesPendingStatus422
+					| GetApiTagPathsMergesPendingStatus500
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = { query: typeof query === "function" ? query() : query };
+	const queryKey = resolvedOptions?.queryKey ?? getApiTagPathsMergesPendingQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...getApiTagPathsMergesPendingQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			| GetApiTagPathsMergesPendingStatus403
+			| GetApiTagPathsMergesPendingStatus422
+			| GetApiTagPathsMergesPendingStatus500
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const putApiTagPathsMergesByMergeIdResolutionMutationKey = () =>
+	[{ url: "/api/v1/tag-paths/merges/:mergeId/resolution" }] as const;
+
+export function putApiTagPathsMergesByMergeIdResolutionMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = putApiTagPathsMergesByMergeIdResolutionMutationKey();
+	return mutationOptions<
+		PutApiTagPathsMergesByMergeIdResolutionStatus200,
+		ResponseErrorConfig<
+			| PutApiTagPathsMergesByMergeIdResolutionStatus400
+			| PutApiTagPathsMergesByMergeIdResolutionStatus403
+			| PutApiTagPathsMergesByMergeIdResolutionStatus404
+			| PutApiTagPathsMergesByMergeIdResolutionStatus422
+			| PutApiTagPathsMergesByMergeIdResolutionStatus500
+		>,
+		PutApiTagPathsMergesByMergeIdResolutionOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			const { data } = await putApiTagPathsMergesByMergeIdResolution({
+				...config,
+				path,
+				body,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Resolve a Tag Path merge proposal
+ * {@link /api/v1/tag-paths/merges/:mergeId/resolution}
+ */
+export function usePutApiTagPathsMergesByMergeIdResolution<TContext>(
 	options: {
 		mutation?: UseMutationOptions<
-			DeleteApiTagStructuresByStructureIdVoteStatus200,
+			PutApiTagPathsMergesByMergeIdResolutionStatus200,
 			ResponseErrorConfig<
-				| DeleteApiTagStructuresByStructureIdVoteStatus403
-				| DeleteApiTagStructuresByStructureIdVoteStatus404
-				| DeleteApiTagStructuresByStructureIdVoteStatus422
-				| DeleteApiTagStructuresByStructureIdVoteStatus429
-				| DeleteApiTagStructuresByStructureIdVoteStatus500
+				| PutApiTagPathsMergesByMergeIdResolutionStatus400
+				| PutApiTagPathsMergesByMergeIdResolutionStatus403
+				| PutApiTagPathsMergesByMergeIdResolutionStatus404
+				| PutApiTagPathsMergesByMergeIdResolutionStatus422
+				| PutApiTagPathsMergesByMergeIdResolutionStatus500
 			>,
-			DeleteApiTagStructuresByStructureIdVoteOptions,
+			PutApiTagPathsMergesByMergeIdResolutionOptions,
 			TContext
 		> & { client?: QueryClient };
 		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
@@ -19523,33 +20148,33 @@ export function useDeleteApiTagStructuresByStructureIdVote<TContext>(
 	const { mutation = {}, client: config = {} } = options ?? {};
 	const { client: queryClient, ...mutationOptions } = mutation;
 	const mutationKey =
-		mutationOptions.mutationKey ?? deleteApiTagStructuresByStructureIdVoteMutationKey();
+		mutationOptions.mutationKey ?? putApiTagPathsMergesByMergeIdResolutionMutationKey();
 
-	const baseOptions = deleteApiTagStructuresByStructureIdVoteMutationOptions(
+	const baseOptions = putApiTagPathsMergesByMergeIdResolutionMutationOptions(
 		config,
 	) as UseMutationOptions<
-		DeleteApiTagStructuresByStructureIdVoteStatus200,
+		PutApiTagPathsMergesByMergeIdResolutionStatus200,
 		ResponseErrorConfig<
-			| DeleteApiTagStructuresByStructureIdVoteStatus403
-			| DeleteApiTagStructuresByStructureIdVoteStatus404
-			| DeleteApiTagStructuresByStructureIdVoteStatus422
-			| DeleteApiTagStructuresByStructureIdVoteStatus429
-			| DeleteApiTagStructuresByStructureIdVoteStatus500
+			| PutApiTagPathsMergesByMergeIdResolutionStatus400
+			| PutApiTagPathsMergesByMergeIdResolutionStatus403
+			| PutApiTagPathsMergesByMergeIdResolutionStatus404
+			| PutApiTagPathsMergesByMergeIdResolutionStatus422
+			| PutApiTagPathsMergesByMergeIdResolutionStatus500
 		>,
-		DeleteApiTagStructuresByStructureIdVoteOptions,
+		PutApiTagPathsMergesByMergeIdResolutionOptions,
 		TContext
 	>;
 
 	return useMutation<
-		DeleteApiTagStructuresByStructureIdVoteStatus200,
+		PutApiTagPathsMergesByMergeIdResolutionStatus200,
 		ResponseErrorConfig<
-			| DeleteApiTagStructuresByStructureIdVoteStatus403
-			| DeleteApiTagStructuresByStructureIdVoteStatus404
-			| DeleteApiTagStructuresByStructureIdVoteStatus422
-			| DeleteApiTagStructuresByStructureIdVoteStatus429
-			| DeleteApiTagStructuresByStructureIdVoteStatus500
+			| PutApiTagPathsMergesByMergeIdResolutionStatus400
+			| PutApiTagPathsMergesByMergeIdResolutionStatus403
+			| PutApiTagPathsMergesByMergeIdResolutionStatus404
+			| PutApiTagPathsMergesByMergeIdResolutionStatus422
+			| PutApiTagPathsMergesByMergeIdResolutionStatus500
 		>,
-		DeleteApiTagStructuresByStructureIdVoteOptions,
+		PutApiTagPathsMergesByMergeIdResolutionOptions,
 		TContext
 	>(
 		{
@@ -19559,15 +20184,15 @@ export function useDeleteApiTagStructuresByStructureIdVote<TContext>(
 		},
 		queryClient,
 	) as UseMutationResult<
-		DeleteApiTagStructuresByStructureIdVoteStatus200,
+		PutApiTagPathsMergesByMergeIdResolutionStatus200,
 		ResponseErrorConfig<
-			| DeleteApiTagStructuresByStructureIdVoteStatus403
-			| DeleteApiTagStructuresByStructureIdVoteStatus404
-			| DeleteApiTagStructuresByStructureIdVoteStatus422
-			| DeleteApiTagStructuresByStructureIdVoteStatus429
-			| DeleteApiTagStructuresByStructureIdVoteStatus500
+			| PutApiTagPathsMergesByMergeIdResolutionStatus400
+			| PutApiTagPathsMergesByMergeIdResolutionStatus403
+			| PutApiTagPathsMergesByMergeIdResolutionStatus404
+			| PutApiTagPathsMergesByMergeIdResolutionStatus422
+			| PutApiTagPathsMergesByMergeIdResolutionStatus500
 		>,
-		DeleteApiTagStructuresByStructureIdVoteOptions,
+		PutApiTagPathsMergesByMergeIdResolutionOptions,
 		TContext
 	>;
 }
@@ -19678,360 +20303,28 @@ export function useGetApiUnitsByTypeByUnitIdTags<
 	return queryResult;
 }
 
-export const putApiUnitsByTypeByUnitIdTagStructuresByStructureIdMutationKey = () =>
-	[{ url: "/api/v1/units/:type/:unitId/tag-structures/:structureId" }] as const;
+export const putApiUnitsByTypeByUnitIdTagPathsByPathIdMutationKey = () =>
+	[{ url: "/api/v1/units/:type/:unitId/tag-paths/:pathId" }] as const;
 
-export function putApiUnitsByTypeByUnitIdTagStructuresByStructureIdMutationOptions<
-	TContext = unknown,
->(config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {}) {
-	const mutationKey = putApiUnitsByTypeByUnitIdTagStructuresByStructureIdMutationKey();
-	return mutationOptions<
-		PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus200,
-		ResponseErrorConfig<
-			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus400
-			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus403
-			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus404
-			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus422
-			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus429
-			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus500
-		>,
-		PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdOptions,
-		TContext
-	>({
-		mutationKey,
-		mutationFn: async ({ path, body }) => {
-			const { data } = await putApiUnitsByTypeByUnitIdTagStructuresByStructureId({
-				...config,
-				path,
-				body,
-				throwOnError: true,
-			});
-			return data;
-		},
-	});
-}
-
-/**
- * @summary Apply a Tag structure to a Unit
- * {@link /api/v1/units/:type/:unitId/tag-structures/:structureId}
- */
-export function usePutApiUnitsByTypeByUnitIdTagStructuresByStructureId<TContext>(
-	options: {
-		mutation?: UseMutationOptions<
-			PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus200,
-			ResponseErrorConfig<
-				| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus400
-				| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus403
-				| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus404
-				| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus422
-				| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus429
-				| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus500
-			>,
-			PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdOptions,
-			TContext
-		> & { client?: QueryClient };
-		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
-	} = {},
+export function putApiUnitsByTypeByUnitIdTagPathsByPathIdMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
 ) {
-	const { mutation = {}, client: config = {} } = options ?? {};
-	const { client: queryClient, ...mutationOptions } = mutation;
-	const mutationKey =
-		mutationOptions.mutationKey ?? putApiUnitsByTypeByUnitIdTagStructuresByStructureIdMutationKey();
-
-	const baseOptions = putApiUnitsByTypeByUnitIdTagStructuresByStructureIdMutationOptions(
-		config,
-	) as UseMutationOptions<
-		PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus200,
-		ResponseErrorConfig<
-			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus400
-			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus403
-			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus404
-			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus422
-			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus429
-			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus500
-		>,
-		PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdOptions,
-		TContext
-	>;
-
-	return useMutation<
-		PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus200,
-		ResponseErrorConfig<
-			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus400
-			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus403
-			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus404
-			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus422
-			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus429
-			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus500
-		>,
-		PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdOptions,
-		TContext
-	>(
-		{
-			...baseOptions,
-			mutationKey,
-			...mutationOptions,
-		},
-		queryClient,
-	) as UseMutationResult<
-		PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus200,
-		ResponseErrorConfig<
-			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus400
-			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus403
-			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus404
-			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus422
-			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus429
-			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus500
-		>,
-		PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdOptions,
-		TContext
-	>;
-}
-
-export const deleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdMutationKey = () =>
-	[{ url: "/api/v1/units/:type/:unitId/tag-structures/:structureId" }] as const;
-
-export function deleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdMutationOptions<
-	TContext = unknown,
->(config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {}) {
-	const mutationKey = deleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdMutationKey();
+	const mutationKey = putApiUnitsByTypeByUnitIdTagPathsByPathIdMutationKey();
 	return mutationOptions<
-		DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus204,
+		PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus200,
 		ResponseErrorConfig<
-			| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus400
-			| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus403
-			| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus404
-			| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus422
-			| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus429
-			| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus500
+			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus403
+			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus404
+			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus422
+			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus429
+			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus500
 		>,
-		DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdOptions,
-		TContext
-	>({
-		mutationKey,
-		mutationFn: async ({ path, body }) => {
-			const { data } = await deleteApiUnitsByTypeByUnitIdTagStructuresByStructureId({
-				...config,
-				path,
-				body,
-				throwOnError: true,
-			});
-			return data;
-		},
-	});
-}
-
-/**
- * @summary Remove a Tag structure from a Unit
- * {@link /api/v1/units/:type/:unitId/tag-structures/:structureId}
- */
-export function useDeleteApiUnitsByTypeByUnitIdTagStructuresByStructureId<TContext>(
-	options: {
-		mutation?: UseMutationOptions<
-			DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus204,
-			ResponseErrorConfig<
-				| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus400
-				| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus403
-				| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus404
-				| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus422
-				| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus429
-				| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus500
-			>,
-			DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdOptions,
-			TContext
-		> & { client?: QueryClient };
-		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
-	} = {},
-) {
-	const { mutation = {}, client: config = {} } = options ?? {};
-	const { client: queryClient, ...mutationOptions } = mutation;
-	const mutationKey =
-		mutationOptions.mutationKey ??
-		deleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdMutationKey();
-
-	const baseOptions = deleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdMutationOptions(
-		config,
-	) as UseMutationOptions<
-		DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus204,
-		ResponseErrorConfig<
-			| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus400
-			| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus403
-			| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus404
-			| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus422
-			| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus429
-			| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus500
-		>,
-		DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdOptions,
-		TContext
-	>;
-
-	return useMutation<
-		DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus204,
-		ResponseErrorConfig<
-			| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus400
-			| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus403
-			| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus404
-			| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus422
-			| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus429
-			| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus500
-		>,
-		DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdOptions,
-		TContext
-	>(
-		{
-			...baseOptions,
-			mutationKey,
-			...mutationOptions,
-		},
-		queryClient,
-	) as UseMutationResult<
-		DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus204,
-		ResponseErrorConfig<
-			| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus400
-			| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus403
-			| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus404
-			| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus422
-			| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus429
-			| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdStatus500
-		>,
-		DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdOptions,
-		TContext
-	>;
-}
-
-export const putApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteMutationKey = () =>
-	[{ url: "/api/v1/units/:type/:unitId/tag-structures/:structureId/vote" }] as const;
-
-export function putApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteMutationOptions<
-	TContext = unknown,
->(config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {}) {
-	const mutationKey = putApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteMutationKey();
-	return mutationOptions<
-		PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus200,
-		ResponseErrorConfig<
-			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus400
-			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus403
-			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus404
-			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus422
-			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus429
-			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus500
-		>,
-		PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteOptions,
-		TContext
-	>({
-		mutationKey,
-		mutationFn: async ({ path, body }) => {
-			const { data } = await putApiUnitsByTypeByUnitIdTagStructuresByStructureIdVote({
-				...config,
-				path,
-				body,
-				throwOnError: true,
-			});
-			return data;
-		},
-	});
-}
-
-/**
- * @summary Vote on a Unit Tag structure
- * {@link /api/v1/units/:type/:unitId/tag-structures/:structureId/vote}
- */
-export function usePutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVote<TContext>(
-	options: {
-		mutation?: UseMutationOptions<
-			PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus200,
-			ResponseErrorConfig<
-				| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus400
-				| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus403
-				| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus404
-				| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus422
-				| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus429
-				| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus500
-			>,
-			PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteOptions,
-			TContext
-		> & { client?: QueryClient };
-		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
-	} = {},
-) {
-	const { mutation = {}, client: config = {} } = options ?? {};
-	const { client: queryClient, ...mutationOptions } = mutation;
-	const mutationKey =
-		mutationOptions.mutationKey ??
-		putApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteMutationKey();
-
-	const baseOptions = putApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteMutationOptions(
-		config,
-	) as UseMutationOptions<
-		PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus200,
-		ResponseErrorConfig<
-			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus400
-			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus403
-			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus404
-			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus422
-			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus429
-			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus500
-		>,
-		PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteOptions,
-		TContext
-	>;
-
-	return useMutation<
-		PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus200,
-		ResponseErrorConfig<
-			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus400
-			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus403
-			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus404
-			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus422
-			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus429
-			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus500
-		>,
-		PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteOptions,
-		TContext
-	>(
-		{
-			...baseOptions,
-			mutationKey,
-			...mutationOptions,
-		},
-		queryClient,
-	) as UseMutationResult<
-		PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus200,
-		ResponseErrorConfig<
-			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus400
-			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus403
-			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus404
-			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus422
-			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus429
-			| PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus500
-		>,
-		PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteOptions,
-		TContext
-	>;
-}
-
-export const deleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteMutationKey = () =>
-	[{ url: "/api/v1/units/:type/:unitId/tag-structures/:structureId/vote" }] as const;
-
-export function deleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteMutationOptions<
-	TContext = unknown,
->(config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {}) {
-	const mutationKey = deleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteMutationKey();
-	return mutationOptions<
-		DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus200,
-		ResponseErrorConfig<
-			| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus403
-			| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus404
-			| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus422
-			| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus429
-			| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus500
-		>,
-		DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteOptions,
+		PutApiUnitsByTypeByUnitIdTagPathsByPathIdOptions,
 		TContext
 	>({
 		mutationKey,
 		mutationFn: async ({ path }) => {
-			const { data } = await deleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVote({
+			const { data } = await putApiUnitsByTypeByUnitIdTagPathsByPathId({
 				...config,
 				path,
 				throwOnError: true,
@@ -20042,21 +20335,21 @@ export function deleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteMutati
 }
 
 /**
- * @summary Remove a Unit Tag structure vote
- * {@link /api/v1/units/:type/:unitId/tag-structures/:structureId/vote}
+ * @summary Apply a Tag Path to a Unit
+ * {@link /api/v1/units/:type/:unitId/tag-paths/:pathId}
  */
-export function useDeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVote<TContext>(
+export function usePutApiUnitsByTypeByUnitIdTagPathsByPathId<TContext>(
 	options: {
 		mutation?: UseMutationOptions<
-			DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus200,
+			PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus200,
 			ResponseErrorConfig<
-				| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus403
-				| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus404
-				| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus422
-				| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus429
-				| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus500
+				| PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus403
+				| PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus404
+				| PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus422
+				| PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus429
+				| PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus500
 			>,
-			DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteOptions,
+			PutApiUnitsByTypeByUnitIdTagPathsByPathIdOptions,
 			TContext
 		> & { client?: QueryClient };
 		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
@@ -20065,34 +20358,33 @@ export function useDeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVote<TC
 	const { mutation = {}, client: config = {} } = options ?? {};
 	const { client: queryClient, ...mutationOptions } = mutation;
 	const mutationKey =
-		mutationOptions.mutationKey ??
-		deleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteMutationKey();
+		mutationOptions.mutationKey ?? putApiUnitsByTypeByUnitIdTagPathsByPathIdMutationKey();
 
-	const baseOptions = deleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteMutationOptions(
+	const baseOptions = putApiUnitsByTypeByUnitIdTagPathsByPathIdMutationOptions(
 		config,
 	) as UseMutationOptions<
-		DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus200,
+		PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus200,
 		ResponseErrorConfig<
-			| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus403
-			| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus404
-			| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus422
-			| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus429
-			| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus500
+			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus403
+			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus404
+			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus422
+			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus429
+			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus500
 		>,
-		DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteOptions,
+		PutApiUnitsByTypeByUnitIdTagPathsByPathIdOptions,
 		TContext
 	>;
 
 	return useMutation<
-		DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus200,
+		PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus200,
 		ResponseErrorConfig<
-			| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus403
-			| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus404
-			| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus422
-			| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus429
-			| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus500
+			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus403
+			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus404
+			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus422
+			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus429
+			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus500
 		>,
-		DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteOptions,
+		PutApiUnitsByTypeByUnitIdTagPathsByPathIdOptions,
 		TContext
 	>(
 		{
@@ -20102,15 +20394,1288 @@ export function useDeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVote<TC
 		},
 		queryClient,
 	) as UseMutationResult<
-		DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus200,
+		PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus200,
 		ResponseErrorConfig<
-			| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus403
-			| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus404
-			| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus422
-			| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus429
-			| DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteStatus500
+			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus403
+			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus404
+			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus422
+			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus429
+			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus500
 		>,
-		DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteOptions,
+		PutApiUnitsByTypeByUnitIdTagPathsByPathIdOptions,
+		TContext
+	>;
+}
+
+export const deleteApiUnitsByTypeByUnitIdTagPathsByPathIdMutationKey = () =>
+	[{ url: "/api/v1/units/:type/:unitId/tag-paths/:pathId" }] as const;
+
+export function deleteApiUnitsByTypeByUnitIdTagPathsByPathIdMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = deleteApiUnitsByTypeByUnitIdTagPathsByPathIdMutationKey();
+	return mutationOptions<
+		DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus204,
+		ResponseErrorConfig<
+			| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus403
+			| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus404
+			| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus422
+			| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus429
+			| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus500
+		>,
+		DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path }) => {
+			const { data } = await deleteApiUnitsByTypeByUnitIdTagPathsByPathId({
+				...config,
+				path,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Remove a Tag Path from a Unit
+ * {@link /api/v1/units/:type/:unitId/tag-paths/:pathId}
+ */
+export function useDeleteApiUnitsByTypeByUnitIdTagPathsByPathId<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus204,
+			ResponseErrorConfig<
+				| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus403
+				| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus404
+				| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus422
+				| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus429
+				| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus500
+			>,
+			DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ?? deleteApiUnitsByTypeByUnitIdTagPathsByPathIdMutationKey();
+
+	const baseOptions = deleteApiUnitsByTypeByUnitIdTagPathsByPathIdMutationOptions(
+		config,
+	) as UseMutationOptions<
+		DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus204,
+		ResponseErrorConfig<
+			| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus403
+			| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus404
+			| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus422
+			| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus429
+			| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus500
+		>,
+		DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdOptions,
+		TContext
+	>;
+
+	return useMutation<
+		DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus204,
+		ResponseErrorConfig<
+			| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus403
+			| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus404
+			| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus422
+			| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus429
+			| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus500
+		>,
+		DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus204,
+		ResponseErrorConfig<
+			| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus403
+			| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus404
+			| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus422
+			| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus429
+			| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus500
+		>,
+		DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdOptions,
+		TContext
+	>;
+}
+
+export const putApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentMutationKey = () =>
+	[{ url: "/api/v1/units/:type/:unitId/tag-paths/:pathId/judgment" }] as const;
+
+export function putApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentMutationOptions<
+	TContext = unknown,
+>(config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {}) {
+	const mutationKey = putApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentMutationKey();
+	return mutationOptions<
+		PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus200,
+		ResponseErrorConfig<
+			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus400
+			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus403
+			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus404
+			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus422
+			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus429
+			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus500
+		>,
+		PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			const { data } = await putApiUnitsByTypeByUnitIdTagPathsByPathIdJudgment({
+				...config,
+				path,
+				body,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Judge Tag Path fit or spoiler for a Unit
+ * {@link /api/v1/units/:type/:unitId/tag-paths/:pathId/judgment}
+ */
+export function usePutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgment<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus200,
+			ResponseErrorConfig<
+				| PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus400
+				| PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus403
+				| PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus404
+				| PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus422
+				| PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus429
+				| PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus500
+			>,
+			PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ?? putApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentMutationKey();
+
+	const baseOptions = putApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentMutationOptions(
+		config,
+	) as UseMutationOptions<
+		PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus200,
+		ResponseErrorConfig<
+			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus400
+			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus403
+			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus404
+			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus422
+			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus429
+			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus500
+		>,
+		PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentOptions,
+		TContext
+	>;
+
+	return useMutation<
+		PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus200,
+		ResponseErrorConfig<
+			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus400
+			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus403
+			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus404
+			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus422
+			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus429
+			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus500
+		>,
+		PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus200,
+		ResponseErrorConfig<
+			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus400
+			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus403
+			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus404
+			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus422
+			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus429
+			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus500
+		>,
+		PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentOptions,
+		TContext
+	>;
+}
+
+export const deleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentMutationKey = () =>
+	[{ url: "/api/v1/units/:type/:unitId/tag-paths/:pathId/judgment" }] as const;
+
+export function deleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentMutationOptions<
+	TContext = unknown,
+>(config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {}) {
+	const mutationKey = deleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentMutationKey();
+	return mutationOptions<
+		DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus200,
+		ResponseErrorConfig<
+			| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus403
+			| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus404
+			| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus422
+			| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus429
+			| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus500
+		>,
+		DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path }) => {
+			const { data } = await deleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgment({
+				...config,
+				path,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Remove a Unit Tag Path judgment
+ * {@link /api/v1/units/:type/:unitId/tag-paths/:pathId/judgment}
+ */
+export function useDeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgment<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus200,
+			ResponseErrorConfig<
+				| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus403
+				| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus404
+				| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus422
+				| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus429
+				| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus500
+			>,
+			DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ??
+		deleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentMutationKey();
+
+	const baseOptions = deleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentMutationOptions(
+		config,
+	) as UseMutationOptions<
+		DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus200,
+		ResponseErrorConfig<
+			| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus403
+			| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus404
+			| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus422
+			| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus429
+			| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus500
+		>,
+		DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentOptions,
+		TContext
+	>;
+
+	return useMutation<
+		DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus200,
+		ResponseErrorConfig<
+			| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus403
+			| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus404
+			| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus422
+			| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus429
+			| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus500
+		>,
+		DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus200,
+		ResponseErrorConfig<
+			| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus403
+			| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus404
+			| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus422
+			| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus429
+			| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus500
+		>,
+		DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentOptions,
+		TContext
+	>;
+}
+
+export const getApiRealmsByRealmIdTagPathsQueryKey = ({
+	path,
+	query,
+}: Omit<GetApiRealmsByRealmIdTagPathsOptions, "headers">) =>
+	[{ url: "/api/v1/realms/:realmId/tag-paths", params: path }, ...(query ? [query] : [])] as const;
+
+type GetApiRealmsByRealmIdTagPathsQueryKey = ReturnType<
+	typeof getApiRealmsByRealmIdTagPathsQueryKey
+>;
+
+export function getApiRealmsByRealmIdTagPathsQueryOptions(
+	{ path, query }: GetApiRealmsByRealmIdTagPathsOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = getApiRealmsByRealmIdTagPathsQueryKey({ path, query });
+	return queryOptions<
+		GetApiRealmsByRealmIdTagPathsStatus200,
+		ResponseErrorConfig<
+			| GetApiRealmsByRealmIdTagPathsStatus404
+			| GetApiRealmsByRealmIdTagPathsStatus422
+			| GetApiRealmsByRealmIdTagPathsStatus500
+		>,
+		GetApiRealmsByRealmIdTagPathsStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			const { data } = await getApiRealmsByRealmIdTagPaths({
+				...config,
+				path,
+				query,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary List Realm Tag Paths with independent authority resolution
+ * {@link /api/v1/realms/:realmId/tag-paths}
+ */
+export function useGetApiRealmsByRealmIdTagPaths<
+	TData = GetApiRealmsByRealmIdTagPathsStatus200,
+	TQueryData = GetApiRealmsByRealmIdTagPathsStatus200,
+	TQueryKey extends QueryKey = GetApiRealmsByRealmIdTagPathsQueryKey,
+>(
+	{
+		path,
+		query,
+	}: {
+		path:
+			| GetApiRealmsByRealmIdTagPathsOptions["path"]
+			| (() => GetApiRealmsByRealmIdTagPathsOptions["path"]);
+		query?:
+			| GetApiRealmsByRealmIdTagPathsOptions["query"]
+			| (() => GetApiRealmsByRealmIdTagPathsOptions["query"]);
+	},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				GetApiRealmsByRealmIdTagPathsStatus200,
+				ResponseErrorConfig<
+					| GetApiRealmsByRealmIdTagPathsStatus404
+					| GetApiRealmsByRealmIdTagPathsStatus422
+					| GetApiRealmsByRealmIdTagPathsStatus500
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = {
+		path: typeof path === "function" ? path() : path,
+		query: typeof query === "function" ? query() : query,
+	};
+	const queryKey =
+		resolvedOptions?.queryKey ?? getApiRealmsByRealmIdTagPathsQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...getApiRealmsByRealmIdTagPathsQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			| GetApiRealmsByRealmIdTagPathsStatus404
+			| GetApiRealmsByRealmIdTagPathsStatus422
+			| GetApiRealmsByRealmIdTagPathsStatus500
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const putApiRealmsByRealmIdTagPathsByPathIdMutationKey = () =>
+	[{ url: "/api/v1/realms/:realmId/tag-paths/:pathId" }] as const;
+
+export function putApiRealmsByRealmIdTagPathsByPathIdMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = putApiRealmsByRealmIdTagPathsByPathIdMutationKey();
+	return mutationOptions<
+		PutApiRealmsByRealmIdTagPathsByPathIdStatus200,
+		ResponseErrorConfig<
+			| PutApiRealmsByRealmIdTagPathsByPathIdStatus403
+			| PutApiRealmsByRealmIdTagPathsByPathIdStatus404
+			| PutApiRealmsByRealmIdTagPathsByPathIdStatus422
+			| PutApiRealmsByRealmIdTagPathsByPathIdStatus429
+			| PutApiRealmsByRealmIdTagPathsByPathIdStatus500
+		>,
+		PutApiRealmsByRealmIdTagPathsByPathIdOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path }) => {
+			const { data } = await putApiRealmsByRealmIdTagPathsByPathId({
+				...config,
+				path,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Adopt a Tag Path in a Realm
+ * {@link /api/v1/realms/:realmId/tag-paths/:pathId}
+ */
+export function usePutApiRealmsByRealmIdTagPathsByPathId<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			PutApiRealmsByRealmIdTagPathsByPathIdStatus200,
+			ResponseErrorConfig<
+				| PutApiRealmsByRealmIdTagPathsByPathIdStatus403
+				| PutApiRealmsByRealmIdTagPathsByPathIdStatus404
+				| PutApiRealmsByRealmIdTagPathsByPathIdStatus422
+				| PutApiRealmsByRealmIdTagPathsByPathIdStatus429
+				| PutApiRealmsByRealmIdTagPathsByPathIdStatus500
+			>,
+			PutApiRealmsByRealmIdTagPathsByPathIdOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ?? putApiRealmsByRealmIdTagPathsByPathIdMutationKey();
+
+	const baseOptions = putApiRealmsByRealmIdTagPathsByPathIdMutationOptions(
+		config,
+	) as UseMutationOptions<
+		PutApiRealmsByRealmIdTagPathsByPathIdStatus200,
+		ResponseErrorConfig<
+			| PutApiRealmsByRealmIdTagPathsByPathIdStatus403
+			| PutApiRealmsByRealmIdTagPathsByPathIdStatus404
+			| PutApiRealmsByRealmIdTagPathsByPathIdStatus422
+			| PutApiRealmsByRealmIdTagPathsByPathIdStatus429
+			| PutApiRealmsByRealmIdTagPathsByPathIdStatus500
+		>,
+		PutApiRealmsByRealmIdTagPathsByPathIdOptions,
+		TContext
+	>;
+
+	return useMutation<
+		PutApiRealmsByRealmIdTagPathsByPathIdStatus200,
+		ResponseErrorConfig<
+			| PutApiRealmsByRealmIdTagPathsByPathIdStatus403
+			| PutApiRealmsByRealmIdTagPathsByPathIdStatus404
+			| PutApiRealmsByRealmIdTagPathsByPathIdStatus422
+			| PutApiRealmsByRealmIdTagPathsByPathIdStatus429
+			| PutApiRealmsByRealmIdTagPathsByPathIdStatus500
+		>,
+		PutApiRealmsByRealmIdTagPathsByPathIdOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PutApiRealmsByRealmIdTagPathsByPathIdStatus200,
+		ResponseErrorConfig<
+			| PutApiRealmsByRealmIdTagPathsByPathIdStatus403
+			| PutApiRealmsByRealmIdTagPathsByPathIdStatus404
+			| PutApiRealmsByRealmIdTagPathsByPathIdStatus422
+			| PutApiRealmsByRealmIdTagPathsByPathIdStatus429
+			| PutApiRealmsByRealmIdTagPathsByPathIdStatus500
+		>,
+		PutApiRealmsByRealmIdTagPathsByPathIdOptions,
+		TContext
+	>;
+}
+
+export const putApiRealmsByRealmIdTagPathsByPathIdVoteMutationKey = () =>
+	[{ url: "/api/v1/realms/:realmId/tag-paths/:pathId/vote" }] as const;
+
+export function putApiRealmsByRealmIdTagPathsByPathIdVoteMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = putApiRealmsByRealmIdTagPathsByPathIdVoteMutationKey();
+	return mutationOptions<
+		PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus200,
+		ResponseErrorConfig<
+			| PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus400
+			| PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus403
+			| PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus404
+			| PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus422
+			| PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus429
+			| PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus500
+		>,
+		PutApiRealmsByRealmIdTagPathsByPathIdVoteOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			const { data } = await putApiRealmsByRealmIdTagPathsByPathIdVote({
+				...config,
+				path,
+				body,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Vote on a Realm Tag Path definition
+ * {@link /api/v1/realms/:realmId/tag-paths/:pathId/vote}
+ */
+export function usePutApiRealmsByRealmIdTagPathsByPathIdVote<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus200,
+			ResponseErrorConfig<
+				| PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus400
+				| PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus403
+				| PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus404
+				| PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus422
+				| PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus429
+				| PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus500
+			>,
+			PutApiRealmsByRealmIdTagPathsByPathIdVoteOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ?? putApiRealmsByRealmIdTagPathsByPathIdVoteMutationKey();
+
+	const baseOptions = putApiRealmsByRealmIdTagPathsByPathIdVoteMutationOptions(
+		config,
+	) as UseMutationOptions<
+		PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus200,
+		ResponseErrorConfig<
+			| PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus400
+			| PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus403
+			| PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus404
+			| PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus422
+			| PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus429
+			| PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus500
+		>,
+		PutApiRealmsByRealmIdTagPathsByPathIdVoteOptions,
+		TContext
+	>;
+
+	return useMutation<
+		PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus200,
+		ResponseErrorConfig<
+			| PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus400
+			| PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus403
+			| PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus404
+			| PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus422
+			| PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus429
+			| PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus500
+		>,
+		PutApiRealmsByRealmIdTagPathsByPathIdVoteOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus200,
+		ResponseErrorConfig<
+			| PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus400
+			| PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus403
+			| PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus404
+			| PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus422
+			| PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus429
+			| PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus500
+		>,
+		PutApiRealmsByRealmIdTagPathsByPathIdVoteOptions,
+		TContext
+	>;
+}
+
+export const deleteApiRealmsByRealmIdTagPathsByPathIdVoteMutationKey = () =>
+	[{ url: "/api/v1/realms/:realmId/tag-paths/:pathId/vote" }] as const;
+
+export function deleteApiRealmsByRealmIdTagPathsByPathIdVoteMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = deleteApiRealmsByRealmIdTagPathsByPathIdVoteMutationKey();
+	return mutationOptions<
+		DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus200,
+		ResponseErrorConfig<
+			| DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus403
+			| DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus404
+			| DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus422
+			| DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus429
+			| DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus500
+		>,
+		DeleteApiRealmsByRealmIdTagPathsByPathIdVoteOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path }) => {
+			const { data } = await deleteApiRealmsByRealmIdTagPathsByPathIdVote({
+				...config,
+				path,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Remove a Realm Tag Path definition vote
+ * {@link /api/v1/realms/:realmId/tag-paths/:pathId/vote}
+ */
+export function useDeleteApiRealmsByRealmIdTagPathsByPathIdVote<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus200,
+			ResponseErrorConfig<
+				| DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus403
+				| DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus404
+				| DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus422
+				| DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus429
+				| DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus500
+			>,
+			DeleteApiRealmsByRealmIdTagPathsByPathIdVoteOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ?? deleteApiRealmsByRealmIdTagPathsByPathIdVoteMutationKey();
+
+	const baseOptions = deleteApiRealmsByRealmIdTagPathsByPathIdVoteMutationOptions(
+		config,
+	) as UseMutationOptions<
+		DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus200,
+		ResponseErrorConfig<
+			| DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus403
+			| DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus404
+			| DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus422
+			| DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus429
+			| DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus500
+		>,
+		DeleteApiRealmsByRealmIdTagPathsByPathIdVoteOptions,
+		TContext
+	>;
+
+	return useMutation<
+		DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus200,
+		ResponseErrorConfig<
+			| DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus403
+			| DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus404
+			| DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus422
+			| DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus429
+			| DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus500
+		>,
+		DeleteApiRealmsByRealmIdTagPathsByPathIdVoteOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus200,
+		ResponseErrorConfig<
+			| DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus403
+			| DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus404
+			| DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus422
+			| DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus429
+			| DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus500
+		>,
+		DeleteApiRealmsByRealmIdTagPathsByPathIdVoteOptions,
+		TContext
+	>;
+}
+
+export const putApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdMutationKey = () =>
+	[{ url: "/api/v1/realms/:realmId/units/:unitId/tag-paths/:pathId" }] as const;
+
+export function putApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdMutationOptions<
+	TContext = unknown,
+>(config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {}) {
+	const mutationKey = putApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdMutationKey();
+	return mutationOptions<
+		PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus200,
+		ResponseErrorConfig<
+			| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus403
+			| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus404
+			| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus422
+			| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus429
+			| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus500
+		>,
+		PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path }) => {
+			const { data } = await putApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathId({
+				...config,
+				path,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Apply an adopted Tag Path to a Realm Unit
+ * {@link /api/v1/realms/:realmId/units/:unitId/tag-paths/:pathId}
+ */
+export function usePutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathId<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus200,
+			ResponseErrorConfig<
+				| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus403
+				| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus404
+				| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus422
+				| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus429
+				| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus500
+			>,
+			PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ?? putApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdMutationKey();
+
+	const baseOptions = putApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdMutationOptions(
+		config,
+	) as UseMutationOptions<
+		PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus200,
+		ResponseErrorConfig<
+			| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus403
+			| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus404
+			| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus422
+			| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus429
+			| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus500
+		>,
+		PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdOptions,
+		TContext
+	>;
+
+	return useMutation<
+		PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus200,
+		ResponseErrorConfig<
+			| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus403
+			| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus404
+			| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus422
+			| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus429
+			| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus500
+		>,
+		PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus200,
+		ResponseErrorConfig<
+			| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus403
+			| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus404
+			| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus422
+			| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus429
+			| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus500
+		>,
+		PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdOptions,
+		TContext
+	>;
+}
+
+export const deleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdMutationKey = () =>
+	[{ url: "/api/v1/realms/:realmId/units/:unitId/tag-paths/:pathId" }] as const;
+
+export function deleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdMutationOptions<
+	TContext = unknown,
+>(config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {}) {
+	const mutationKey = deleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdMutationKey();
+	return mutationOptions<
+		DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus204,
+		ResponseErrorConfig<
+			| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus403
+			| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus404
+			| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus422
+			| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus429
+			| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus500
+		>,
+		DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path }) => {
+			const { data } = await deleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathId({
+				...config,
+				path,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Remove a Tag Path application from a Realm Unit
+ * {@link /api/v1/realms/:realmId/units/:unitId/tag-paths/:pathId}
+ */
+export function useDeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathId<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus204,
+			ResponseErrorConfig<
+				| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus403
+				| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus404
+				| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus422
+				| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus429
+				| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus500
+			>,
+			DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ??
+		deleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdMutationKey();
+
+	const baseOptions = deleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdMutationOptions(
+		config,
+	) as UseMutationOptions<
+		DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus204,
+		ResponseErrorConfig<
+			| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus403
+			| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus404
+			| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus422
+			| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus429
+			| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus500
+		>,
+		DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdOptions,
+		TContext
+	>;
+
+	return useMutation<
+		DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus204,
+		ResponseErrorConfig<
+			| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus403
+			| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus404
+			| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus422
+			| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus429
+			| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus500
+		>,
+		DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus204,
+		ResponseErrorConfig<
+			| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus403
+			| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus404
+			| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus422
+			| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus429
+			| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus500
+		>,
+		DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdOptions,
+		TContext
+	>;
+}
+
+export const putApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentMutationKey = () =>
+	[{ url: "/api/v1/realms/:realmId/units/:unitId/tag-paths/:pathId/judgment" }] as const;
+
+export function putApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentMutationOptions<
+	TContext = unknown,
+>(config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {}) {
+	const mutationKey = putApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentMutationKey();
+	return mutationOptions<
+		PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus200,
+		ResponseErrorConfig<
+			| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus400
+			| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus403
+			| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus404
+			| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus422
+			| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus429
+			| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus500
+		>,
+		PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			const { data } = await putApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgment({
+				...config,
+				path,
+				body,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Judge Realm-local Tag Path fit or spoiler
+ * {@link /api/v1/realms/:realmId/units/:unitId/tag-paths/:pathId/judgment}
+ */
+export function usePutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgment<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus200,
+			ResponseErrorConfig<
+				| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus400
+				| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus403
+				| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus404
+				| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus422
+				| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus429
+				| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus500
+			>,
+			PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ??
+		putApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentMutationKey();
+
+	const baseOptions = putApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentMutationOptions(
+		config,
+	) as UseMutationOptions<
+		PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus200,
+		ResponseErrorConfig<
+			| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus400
+			| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus403
+			| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus404
+			| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus422
+			| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus429
+			| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus500
+		>,
+		PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentOptions,
+		TContext
+	>;
+
+	return useMutation<
+		PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus200,
+		ResponseErrorConfig<
+			| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus400
+			| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus403
+			| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus404
+			| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus422
+			| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus429
+			| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus500
+		>,
+		PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus200,
+		ResponseErrorConfig<
+			| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus400
+			| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus403
+			| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus404
+			| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus422
+			| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus429
+			| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus500
+		>,
+		PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentOptions,
+		TContext
+	>;
+}
+
+export const deleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentMutationKey = () =>
+	[{ url: "/api/v1/realms/:realmId/units/:unitId/tag-paths/:pathId/judgment" }] as const;
+
+export function deleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentMutationOptions<
+	TContext = unknown,
+>(config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {}) {
+	const mutationKey = deleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentMutationKey();
+	return mutationOptions<
+		DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus200,
+		ResponseErrorConfig<
+			| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus403
+			| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus422
+			| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus429
+			| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus500
+		>,
+		DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path }) => {
+			const { data } = await deleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgment({
+				...config,
+				path,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Clear a Realm-local Tag Path judgment
+ * {@link /api/v1/realms/:realmId/units/:unitId/tag-paths/:pathId/judgment}
+ */
+export function useDeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgment<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus200,
+			ResponseErrorConfig<
+				| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus403
+				| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus422
+				| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus429
+				| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus500
+			>,
+			DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ??
+		deleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentMutationKey();
+
+	const baseOptions = deleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentMutationOptions(
+		config,
+	) as UseMutationOptions<
+		DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus200,
+		ResponseErrorConfig<
+			| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus403
+			| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus422
+			| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus429
+			| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus500
+		>,
+		DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentOptions,
+		TContext
+	>;
+
+	return useMutation<
+		DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus200,
+		ResponseErrorConfig<
+			| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus403
+			| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus422
+			| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus429
+			| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus500
+		>,
+		DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus200,
+		ResponseErrorConfig<
+			| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus403
+			| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus422
+			| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus429
+			| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus500
+		>,
+		DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentOptions,
+		TContext
+	>;
+}
+
+export const putApiRealmsByRealmIdTagPathPolicyMutationKey = () =>
+	[{ url: "/api/v1/realms/:realmId/tag-path-policy" }] as const;
+
+export function putApiRealmsByRealmIdTagPathPolicyMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = putApiRealmsByRealmIdTagPathPolicyMutationKey();
+	return mutationOptions<
+		PutApiRealmsByRealmIdTagPathPolicyStatus200,
+		ResponseErrorConfig<
+			| PutApiRealmsByRealmIdTagPathPolicyStatus400
+			| PutApiRealmsByRealmIdTagPathPolicyStatus403
+			| PutApiRealmsByRealmIdTagPathPolicyStatus404
+			| PutApiRealmsByRealmIdTagPathPolicyStatus422
+			| PutApiRealmsByRealmIdTagPathPolicyStatus429
+			| PutApiRealmsByRealmIdTagPathPolicyStatus500
+		>,
+		PutApiRealmsByRealmIdTagPathPolicyOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			const { data } = await putApiRealmsByRealmIdTagPathPolicy({
+				...config,
+				path,
+				body,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Update independent Realm Tag Path fallback policies
+ * {@link /api/v1/realms/:realmId/tag-path-policy}
+ */
+export function usePutApiRealmsByRealmIdTagPathPolicy<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			PutApiRealmsByRealmIdTagPathPolicyStatus200,
+			ResponseErrorConfig<
+				| PutApiRealmsByRealmIdTagPathPolicyStatus400
+				| PutApiRealmsByRealmIdTagPathPolicyStatus403
+				| PutApiRealmsByRealmIdTagPathPolicyStatus404
+				| PutApiRealmsByRealmIdTagPathPolicyStatus422
+				| PutApiRealmsByRealmIdTagPathPolicyStatus429
+				| PutApiRealmsByRealmIdTagPathPolicyStatus500
+			>,
+			PutApiRealmsByRealmIdTagPathPolicyOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ?? putApiRealmsByRealmIdTagPathPolicyMutationKey();
+
+	const baseOptions = putApiRealmsByRealmIdTagPathPolicyMutationOptions(
+		config,
+	) as UseMutationOptions<
+		PutApiRealmsByRealmIdTagPathPolicyStatus200,
+		ResponseErrorConfig<
+			| PutApiRealmsByRealmIdTagPathPolicyStatus400
+			| PutApiRealmsByRealmIdTagPathPolicyStatus403
+			| PutApiRealmsByRealmIdTagPathPolicyStatus404
+			| PutApiRealmsByRealmIdTagPathPolicyStatus422
+			| PutApiRealmsByRealmIdTagPathPolicyStatus429
+			| PutApiRealmsByRealmIdTagPathPolicyStatus500
+		>,
+		PutApiRealmsByRealmIdTagPathPolicyOptions,
+		TContext
+	>;
+
+	return useMutation<
+		PutApiRealmsByRealmIdTagPathPolicyStatus200,
+		ResponseErrorConfig<
+			| PutApiRealmsByRealmIdTagPathPolicyStatus400
+			| PutApiRealmsByRealmIdTagPathPolicyStatus403
+			| PutApiRealmsByRealmIdTagPathPolicyStatus404
+			| PutApiRealmsByRealmIdTagPathPolicyStatus422
+			| PutApiRealmsByRealmIdTagPathPolicyStatus429
+			| PutApiRealmsByRealmIdTagPathPolicyStatus500
+		>,
+		PutApiRealmsByRealmIdTagPathPolicyOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PutApiRealmsByRealmIdTagPathPolicyStatus200,
+		ResponseErrorConfig<
+			| PutApiRealmsByRealmIdTagPathPolicyStatus400
+			| PutApiRealmsByRealmIdTagPathPolicyStatus403
+			| PutApiRealmsByRealmIdTagPathPolicyStatus404
+			| PutApiRealmsByRealmIdTagPathPolicyStatus422
+			| PutApiRealmsByRealmIdTagPathPolicyStatus429
+			| PutApiRealmsByRealmIdTagPathPolicyStatus500
+		>,
+		PutApiRealmsByRealmIdTagPathPolicyOptions,
 		TContext
 	>;
 }
@@ -24706,6 +26271,116 @@ export function useGetApiEntitiesByUnitId<
 	return queryResult;
 }
 
+export const putApiEntitiesByUnitIdMeasurementsMutationKey = () =>
+	[{ url: "/api/v1/entities/:unitId/measurements" }] as const;
+
+export function putApiEntitiesByUnitIdMeasurementsMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = putApiEntitiesByUnitIdMeasurementsMutationKey();
+	return mutationOptions<
+		PutApiEntitiesByUnitIdMeasurementsStatus200,
+		ResponseErrorConfig<
+			| PutApiEntitiesByUnitIdMeasurementsStatus400
+			| PutApiEntitiesByUnitIdMeasurementsStatus403
+			| PutApiEntitiesByUnitIdMeasurementsStatus404
+			| PutApiEntitiesByUnitIdMeasurementsStatus422
+			| PutApiEntitiesByUnitIdMeasurementsStatus429
+			| PutApiEntitiesByUnitIdMeasurementsStatus500
+		>,
+		PutApiEntitiesByUnitIdMeasurementsOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			const { data } = await putApiEntitiesByUnitIdMeasurements({
+				...config,
+				path,
+				body,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Create or replace a canonical Entity measurement set
+ * {@link /api/v1/entities/:unitId/measurements}
+ */
+export function usePutApiEntitiesByUnitIdMeasurements<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			PutApiEntitiesByUnitIdMeasurementsStatus200,
+			ResponseErrorConfig<
+				| PutApiEntitiesByUnitIdMeasurementsStatus400
+				| PutApiEntitiesByUnitIdMeasurementsStatus403
+				| PutApiEntitiesByUnitIdMeasurementsStatus404
+				| PutApiEntitiesByUnitIdMeasurementsStatus422
+				| PutApiEntitiesByUnitIdMeasurementsStatus429
+				| PutApiEntitiesByUnitIdMeasurementsStatus500
+			>,
+			PutApiEntitiesByUnitIdMeasurementsOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ?? putApiEntitiesByUnitIdMeasurementsMutationKey();
+
+	const baseOptions = putApiEntitiesByUnitIdMeasurementsMutationOptions(
+		config,
+	) as UseMutationOptions<
+		PutApiEntitiesByUnitIdMeasurementsStatus200,
+		ResponseErrorConfig<
+			| PutApiEntitiesByUnitIdMeasurementsStatus400
+			| PutApiEntitiesByUnitIdMeasurementsStatus403
+			| PutApiEntitiesByUnitIdMeasurementsStatus404
+			| PutApiEntitiesByUnitIdMeasurementsStatus422
+			| PutApiEntitiesByUnitIdMeasurementsStatus429
+			| PutApiEntitiesByUnitIdMeasurementsStatus500
+		>,
+		PutApiEntitiesByUnitIdMeasurementsOptions,
+		TContext
+	>;
+
+	return useMutation<
+		PutApiEntitiesByUnitIdMeasurementsStatus200,
+		ResponseErrorConfig<
+			| PutApiEntitiesByUnitIdMeasurementsStatus400
+			| PutApiEntitiesByUnitIdMeasurementsStatus403
+			| PutApiEntitiesByUnitIdMeasurementsStatus404
+			| PutApiEntitiesByUnitIdMeasurementsStatus422
+			| PutApiEntitiesByUnitIdMeasurementsStatus429
+			| PutApiEntitiesByUnitIdMeasurementsStatus500
+		>,
+		PutApiEntitiesByUnitIdMeasurementsOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PutApiEntitiesByUnitIdMeasurementsStatus200,
+		ResponseErrorConfig<
+			| PutApiEntitiesByUnitIdMeasurementsStatus400
+			| PutApiEntitiesByUnitIdMeasurementsStatus403
+			| PutApiEntitiesByUnitIdMeasurementsStatus404
+			| PutApiEntitiesByUnitIdMeasurementsStatus422
+			| PutApiEntitiesByUnitIdMeasurementsStatus429
+			| PutApiEntitiesByUnitIdMeasurementsStatus500
+		>,
+		PutApiEntitiesByUnitIdMeasurementsOptions,
+		TContext
+	>;
+}
+
 export const patchApiEntitiesByUnitIdVariantContextMutationKey = () =>
 	[{ url: "/api/v1/entities/:unitId/variant-context" }] as const;
 
@@ -26394,6 +28069,227 @@ export function usePostApiUnitsByTypeByUnitIdSubjectAssociations<TContext>(
 	>;
 }
 
+export const putApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerMutationKey = () =>
+	[{ url: "/api/v1/units/:type/:unitId/subject-associations/:associationId/spoiler" }] as const;
+
+export function putApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerMutationOptions<
+	TContext = unknown,
+>(config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {}) {
+	const mutationKey =
+		putApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerMutationKey();
+	return mutationOptions<
+		PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus200,
+		ResponseErrorConfig<
+			| PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus400
+			| PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus403
+			| PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus404
+			| PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus422
+			| PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus429
+			| PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus500
+		>,
+		PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			const { data } = await putApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoiler({
+				...config,
+				path,
+				body,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Judge the spoiler level of a subject association
+ * {@link /api/v1/units/:type/:unitId/subject-associations/:associationId/spoiler}
+ */
+export function usePutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoiler<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus200,
+			ResponseErrorConfig<
+				| PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus400
+				| PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus403
+				| PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus404
+				| PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus422
+				| PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus429
+				| PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus500
+			>,
+			PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ??
+		putApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerMutationKey();
+
+	const baseOptions =
+		putApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerMutationOptions(
+			config,
+		) as UseMutationOptions<
+			PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus200,
+			ResponseErrorConfig<
+				| PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus400
+				| PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus403
+				| PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus404
+				| PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus422
+				| PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus429
+				| PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus500
+			>,
+			PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerOptions,
+			TContext
+		>;
+
+	return useMutation<
+		PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus200,
+		ResponseErrorConfig<
+			| PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus400
+			| PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus403
+			| PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus404
+			| PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus422
+			| PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus429
+			| PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus500
+		>,
+		PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus200,
+		ResponseErrorConfig<
+			| PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus400
+			| PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus403
+			| PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus404
+			| PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus422
+			| PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus429
+			| PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus500
+		>,
+		PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerOptions,
+		TContext
+	>;
+}
+
+export const deleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerMutationKey =
+	() =>
+		[{ url: "/api/v1/units/:type/:unitId/subject-associations/:associationId/spoiler" }] as const;
+
+export function deleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerMutationOptions<
+	TContext = unknown,
+>(config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {}) {
+	const mutationKey =
+		deleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerMutationKey();
+	return mutationOptions<
+		DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus200,
+		ResponseErrorConfig<
+			| DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus403
+			| DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus404
+			| DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus422
+			| DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus429
+			| DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus500
+		>,
+		DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path }) => {
+			const { data } = await deleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoiler({
+				...config,
+				path,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Clear a subject-association spoiler judgment
+ * {@link /api/v1/units/:type/:unitId/subject-associations/:associationId/spoiler}
+ */
+export function useDeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoiler<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus200,
+			ResponseErrorConfig<
+				| DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus403
+				| DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus404
+				| DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus422
+				| DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus429
+				| DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus500
+			>,
+			DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ??
+		deleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerMutationKey();
+
+	const baseOptions =
+		deleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerMutationOptions(
+			config,
+		) as UseMutationOptions<
+			DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus200,
+			ResponseErrorConfig<
+				| DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus403
+				| DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus404
+				| DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus422
+				| DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus429
+				| DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus500
+			>,
+			DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerOptions,
+			TContext
+		>;
+
+	return useMutation<
+		DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus200,
+		ResponseErrorConfig<
+			| DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus403
+			| DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus404
+			| DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus422
+			| DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus429
+			| DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus500
+		>,
+		DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus200,
+		ResponseErrorConfig<
+			| DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus403
+			| DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus404
+			| DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus422
+			| DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus429
+			| DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus500
+		>,
+		DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerOptions,
+		TContext
+	>;
+}
+
 export const deleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdMutationKey = () =>
 	[{ url: "/api/v1/units/:type/:unitId/subject-associations/:associationId" }] as const;
 
@@ -27416,6 +29312,7 @@ export function deleteApiUnitsByTypeByUnitIdTagsByTagIdMutationOptions<TContext 
 			| DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus400
 			| DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus403
 			| DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus404
+			| DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus409
 			| DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus422
 			| DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus429
 			| DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus500
@@ -27448,6 +29345,7 @@ export function useDeleteApiUnitsByTypeByUnitIdTagsByTagId<TContext>(
 				| DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus400
 				| DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus403
 				| DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus404
+				| DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus409
 				| DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus422
 				| DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus429
 				| DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus500
@@ -27471,6 +29369,7 @@ export function useDeleteApiUnitsByTypeByUnitIdTagsByTagId<TContext>(
 			| DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus400
 			| DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus403
 			| DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus404
+			| DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus409
 			| DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus422
 			| DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus429
 			| DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus500
@@ -27485,6 +29384,7 @@ export function useDeleteApiUnitsByTypeByUnitIdTagsByTagId<TContext>(
 			| DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus400
 			| DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus403
 			| DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus404
+			| DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus409
 			| DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus422
 			| DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus429
 			| DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus500
@@ -27504,6 +29404,7 @@ export function useDeleteApiUnitsByTypeByUnitIdTagsByTagId<TContext>(
 			| DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus400
 			| DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus403
 			| DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus404
+			| DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus409
 			| DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus422
 			| DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus429
 			| DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus500
@@ -38519,6 +40420,7 @@ export function putApiRealmsByRealmIdTagsByTagIdContextMutationOptions<TContext 
 			| PutApiRealmsByRealmIdTagsByTagIdContextStatus404
 			| PutApiRealmsByRealmIdTagsByTagIdContextStatus409
 			| PutApiRealmsByRealmIdTagsByTagIdContextStatus422
+			| PutApiRealmsByRealmIdTagsByTagIdContextStatus429
 			| PutApiRealmsByRealmIdTagsByTagIdContextStatus500
 		>,
 		PutApiRealmsByRealmIdTagsByTagIdContextOptions,
@@ -38551,6 +40453,7 @@ export function usePutApiRealmsByRealmIdTagsByTagIdContext<TContext>(
 				| PutApiRealmsByRealmIdTagsByTagIdContextStatus404
 				| PutApiRealmsByRealmIdTagsByTagIdContextStatus409
 				| PutApiRealmsByRealmIdTagsByTagIdContextStatus422
+				| PutApiRealmsByRealmIdTagsByTagIdContextStatus429
 				| PutApiRealmsByRealmIdTagsByTagIdContextStatus500
 			>,
 			PutApiRealmsByRealmIdTagsByTagIdContextOptions,
@@ -38574,6 +40477,7 @@ export function usePutApiRealmsByRealmIdTagsByTagIdContext<TContext>(
 			| PutApiRealmsByRealmIdTagsByTagIdContextStatus404
 			| PutApiRealmsByRealmIdTagsByTagIdContextStatus409
 			| PutApiRealmsByRealmIdTagsByTagIdContextStatus422
+			| PutApiRealmsByRealmIdTagsByTagIdContextStatus429
 			| PutApiRealmsByRealmIdTagsByTagIdContextStatus500
 		>,
 		PutApiRealmsByRealmIdTagsByTagIdContextOptions,
@@ -38588,6 +40492,7 @@ export function usePutApiRealmsByRealmIdTagsByTagIdContext<TContext>(
 			| PutApiRealmsByRealmIdTagsByTagIdContextStatus404
 			| PutApiRealmsByRealmIdTagsByTagIdContextStatus409
 			| PutApiRealmsByRealmIdTagsByTagIdContextStatus422
+			| PutApiRealmsByRealmIdTagsByTagIdContextStatus429
 			| PutApiRealmsByRealmIdTagsByTagIdContextStatus500
 		>,
 		PutApiRealmsByRealmIdTagsByTagIdContextOptions,
@@ -38607,6 +40512,7 @@ export function usePutApiRealmsByRealmIdTagsByTagIdContext<TContext>(
 			| PutApiRealmsByRealmIdTagsByTagIdContextStatus404
 			| PutApiRealmsByRealmIdTagsByTagIdContextStatus409
 			| PutApiRealmsByRealmIdTagsByTagIdContextStatus422
+			| PutApiRealmsByRealmIdTagsByTagIdContextStatus429
 			| PutApiRealmsByRealmIdTagsByTagIdContextStatus500
 		>,
 		PutApiRealmsByRealmIdTagsByTagIdContextOptions,
@@ -38626,6 +40532,7 @@ export function deleteApiRealmsByRealmIdTagsByTagIdContextMutationOptions<TConte
 		ResponseErrorConfig<
 			| DeleteApiRealmsByRealmIdTagsByTagIdContextStatus403
 			| DeleteApiRealmsByRealmIdTagsByTagIdContextStatus404
+			| DeleteApiRealmsByRealmIdTagsByTagIdContextStatus409
 			| DeleteApiRealmsByRealmIdTagsByTagIdContextStatus422
 			| DeleteApiRealmsByRealmIdTagsByTagIdContextStatus429
 			| DeleteApiRealmsByRealmIdTagsByTagIdContextStatus500
@@ -38656,6 +40563,7 @@ export function useDeleteApiRealmsByRealmIdTagsByTagIdContext<TContext>(
 			ResponseErrorConfig<
 				| DeleteApiRealmsByRealmIdTagsByTagIdContextStatus403
 				| DeleteApiRealmsByRealmIdTagsByTagIdContextStatus404
+				| DeleteApiRealmsByRealmIdTagsByTagIdContextStatus409
 				| DeleteApiRealmsByRealmIdTagsByTagIdContextStatus422
 				| DeleteApiRealmsByRealmIdTagsByTagIdContextStatus429
 				| DeleteApiRealmsByRealmIdTagsByTagIdContextStatus500
@@ -38678,6 +40586,7 @@ export function useDeleteApiRealmsByRealmIdTagsByTagIdContext<TContext>(
 		ResponseErrorConfig<
 			| DeleteApiRealmsByRealmIdTagsByTagIdContextStatus403
 			| DeleteApiRealmsByRealmIdTagsByTagIdContextStatus404
+			| DeleteApiRealmsByRealmIdTagsByTagIdContextStatus409
 			| DeleteApiRealmsByRealmIdTagsByTagIdContextStatus422
 			| DeleteApiRealmsByRealmIdTagsByTagIdContextStatus429
 			| DeleteApiRealmsByRealmIdTagsByTagIdContextStatus500
@@ -38691,6 +40600,7 @@ export function useDeleteApiRealmsByRealmIdTagsByTagIdContext<TContext>(
 		ResponseErrorConfig<
 			| DeleteApiRealmsByRealmIdTagsByTagIdContextStatus403
 			| DeleteApiRealmsByRealmIdTagsByTagIdContextStatus404
+			| DeleteApiRealmsByRealmIdTagsByTagIdContextStatus409
 			| DeleteApiRealmsByRealmIdTagsByTagIdContextStatus422
 			| DeleteApiRealmsByRealmIdTagsByTagIdContextStatus429
 			| DeleteApiRealmsByRealmIdTagsByTagIdContextStatus500
@@ -38709,6 +40619,7 @@ export function useDeleteApiRealmsByRealmIdTagsByTagIdContext<TContext>(
 		ResponseErrorConfig<
 			| DeleteApiRealmsByRealmIdTagsByTagIdContextStatus403
 			| DeleteApiRealmsByRealmIdTagsByTagIdContextStatus404
+			| DeleteApiRealmsByRealmIdTagsByTagIdContextStatus409
 			| DeleteApiRealmsByRealmIdTagsByTagIdContextStatus422
 			| DeleteApiRealmsByRealmIdTagsByTagIdContextStatus429
 			| DeleteApiRealmsByRealmIdTagsByTagIdContextStatus500
@@ -41651,8 +43562,6 @@ export function postApiSearchByIndexMutationOptions<TContext = unknown>(
 		PostApiSearchByIndexStatus200,
 		ResponseErrorConfig<
 			| PostApiSearchByIndexStatus400
-			| PostApiSearchByIndexStatus401
-			| PostApiSearchByIndexStatus403
 			| PostApiSearchByIndexStatus422
 			| PostApiSearchByIndexStatus429
 			| PostApiSearchByIndexStatus500
@@ -41679,8 +43588,6 @@ export function usePostApiSearchByIndex<TContext>(
 			PostApiSearchByIndexStatus200,
 			ResponseErrorConfig<
 				| PostApiSearchByIndexStatus400
-				| PostApiSearchByIndexStatus401
-				| PostApiSearchByIndexStatus403
 				| PostApiSearchByIndexStatus422
 				| PostApiSearchByIndexStatus429
 				| PostApiSearchByIndexStatus500
@@ -41700,8 +43607,6 @@ export function usePostApiSearchByIndex<TContext>(
 		PostApiSearchByIndexStatus200,
 		ResponseErrorConfig<
 			| PostApiSearchByIndexStatus400
-			| PostApiSearchByIndexStatus401
-			| PostApiSearchByIndexStatus403
 			| PostApiSearchByIndexStatus422
 			| PostApiSearchByIndexStatus429
 			| PostApiSearchByIndexStatus500
@@ -41715,8 +43620,6 @@ export function usePostApiSearchByIndex<TContext>(
 		PostApiSearchByIndexStatus200,
 		ResponseErrorConfig<
 			| PostApiSearchByIndexStatus400
-			| PostApiSearchByIndexStatus401
-			| PostApiSearchByIndexStatus403
 			| PostApiSearchByIndexStatus422
 			| PostApiSearchByIndexStatus429
 			| PostApiSearchByIndexStatus500
@@ -41735,8 +43638,6 @@ export function usePostApiSearchByIndex<TContext>(
 		PostApiSearchByIndexStatus200,
 		ResponseErrorConfig<
 			| PostApiSearchByIndexStatus400
-			| PostApiSearchByIndexStatus401
-			| PostApiSearchByIndexStatus403
 			| PostApiSearchByIndexStatus422
 			| PostApiSearchByIndexStatus429
 			| PostApiSearchByIndexStatus500

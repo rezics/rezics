@@ -1,0 +1,287 @@
+-- Global direct/effective Tag judgments and subject-association spoiler totals.
+-- All mutations lock and update one indexed fact key; no corpus-wide refresh is used.
+
+CREATE OR REPLACE FUNCTION public.lock_vote_hot_keys(
+	target_unit_ids uuid[],
+	target_tag_ids uuid[],
+	target_profile_ids uuid[]
+)
+RETURNS void
+LANGUAGE plpgsql
+AS $$
+DECLARE
+	hot_key record;
+BEGIN
+	IF target_unit_ids IS NULL OR target_tag_ids IS NULL OR target_profile_ids IS NULL
+		OR cardinality(target_unit_ids) > 1024
+		OR cardinality(target_unit_ids) <> cardinality(target_tag_ids)
+		OR cardinality(target_unit_ids) <> cardinality(target_profile_ids)
+		OR EXISTS (
+			SELECT 1 FROM unnest(target_unit_ids, target_tag_ids) AS key(unit_id, tag_id)
+			WHERE key.unit_id IS NULL OR key.tag_id IS NULL
+		) THEN
+		RAISE EXCEPTION 'Vote hot-key arrays must contain at most 1024 aligned, non-null Unit/Tag keys'
+			USING ERRCODE = '22023', CONSTRAINT = 'vote_hot_key_batch_invalid';
+	END IF;
+	FOR hot_key IN
+		SELECT DISTINCT key.unit_id, key.tag_id
+		FROM unnest(target_unit_ids, target_tag_ids) AS key(unit_id, tag_id)
+		ORDER BY key.unit_id, key.tag_id
+	LOOP
+		IF NOT pg_try_advisory_xact_lock(hashtextextended(hot_key.unit_id::text || ':' || hot_key.tag_id::text, 71001)) THEN
+			RAISE EXCEPTION 'Vote aggregate key is busy'
+				USING ERRCODE = '55P03', CONSTRAINT = 'vote_hot_key_busy';
+		END IF;
+	END LOOP;
+	FOR hot_key IN
+		SELECT DISTINCT key.unit_id, key.tag_id, key.profile_id
+		FROM unnest(target_unit_ids, target_tag_ids, target_profile_ids)
+			AS key(unit_id, tag_id, profile_id)
+		WHERE key.profile_id IS NOT NULL
+		ORDER BY key.unit_id, key.tag_id, key.profile_id
+	LOOP
+		IF NOT pg_try_advisory_xact_lock(hashtextextended(
+			hot_key.unit_id::text || ':' || hot_key.tag_id::text || ':' || hot_key.profile_id::text, 71002
+		)) THEN
+			RAISE EXCEPTION 'Per-Profile vote key is busy'
+				USING ERRCODE = '55P03', CONSTRAINT = 'vote_hot_key_busy';
+		END IF;
+	END LOOP;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.refresh_unit_effective_tag_context(
+	key_unit uuid,
+	key_tag uuid
+)
+RETURNS void
+LANGUAGE plpgsql
+SET search_path = pg_catalog, public
+AS $$
+DECLARE
+	direct_exists boolean;
+	support_count bigint;
+BEGIN
+	PERFORM public.lock_vote_hot_key('unit_effective_tag:' || key_unit::text || ':' || key_tag::text, 0);
+	SELECT EXISTS(SELECT 1 FROM public.unit_tag WHERE unit_id = key_unit AND tag_id = key_tag)
+	INTO direct_exists;
+	SELECT count(*) FROM public.unit_tag_path_support
+	WHERE unit_id = key_unit AND tag_id = key_tag INTO support_count;
+	IF direct_exists OR support_count > 0 THEN
+		INSERT INTO public.unit_effective_tag(unit_id, tag_id, direct, path_support_count, updated_at)
+		VALUES (key_unit, key_tag, direct_exists, support_count, clock_timestamp())
+		ON CONFLICT (unit_id, tag_id) DO UPDATE SET
+			direct = EXCLUDED.direct,
+			path_support_count = EXCLUDED.path_support_count,
+			updated_at = EXCLUDED.updated_at;
+	ELSE
+		DELETE FROM public.unit_effective_tag WHERE unit_id = key_unit AND tag_id = key_tag;
+	END IF;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.maintain_unit_effective_tag_from_direct()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+BEGIN
+	PERFORM public.refresh_unit_effective_tag_context(
+		CASE WHEN TG_OP = 'DELETE' THEN OLD.unit_id ELSE NEW.unit_id END,
+		CASE WHEN TG_OP = 'DELETE' THEN OLD.tag_id ELSE NEW.tag_id END
+	);
+	RETURN NULL;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.refresh_unit_effective_tag_vote(
+	key_unit uuid,
+	key_tag uuid,
+	key_profile uuid
+)
+RETURNS void
+LANGUAGE plpgsql
+SET search_path = pg_catalog, public
+AS $$
+DECLARE
+	effective_value integer;
+BEGIN
+	PERFORM public.lock_vote_hot_key(
+		'unit_effective_tag_vote:' || key_unit::text || ':' || key_tag::text || ':' || key_profile::text,
+		0
+	);
+	SELECT judgment.fit_vote INTO effective_value
+	FROM public.unit_tag_judgment AS judgment
+	WHERE judgment.unit_id = key_unit AND judgment.tag_id = key_tag
+		AND judgment.profile_id = key_profile AND judgment.fit_vote IS NOT NULL;
+	IF effective_value IS NULL AND EXISTS (
+		SELECT 1 FROM public.unit_tag_path_support
+		WHERE unit_id = key_unit AND tag_id = key_tag AND profile_id = key_profile
+	) THEN
+		effective_value := 1;
+	END IF;
+	IF effective_value IS NULL THEN
+		DELETE FROM public.unit_effective_tag_vote
+		WHERE unit_id = key_unit AND tag_id = key_tag AND profile_id = key_profile;
+	ELSE
+		INSERT INTO public.unit_effective_tag_vote(unit_id, tag_id, profile_id, value, updated_at)
+		VALUES (key_unit, key_tag, key_profile, effective_value, clock_timestamp())
+		ON CONFLICT (unit_id, tag_id, profile_id) DO UPDATE SET
+			value = EXCLUDED.value, updated_at = EXCLUDED.updated_at;
+	END IF;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.maintain_unit_effective_tag_vote_from_direct()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+BEGIN
+	PERFORM public.refresh_unit_effective_tag_vote(
+		CASE WHEN TG_OP = 'DELETE' THEN OLD.unit_id ELSE NEW.unit_id END,
+		CASE WHEN TG_OP = 'DELETE' THEN OLD.tag_id ELSE NEW.tag_id END,
+		CASE WHEN TG_OP = 'DELETE' THEN OLD.profile_id ELSE NEW.profile_id END
+	);
+	RETURN NULL;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.maintain_unit_effective_tag_vote_from_path()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+BEGIN
+	PERFORM public.refresh_unit_effective_tag_vote(
+		CASE WHEN TG_OP = 'DELETE' THEN OLD.unit_id ELSE NEW.unit_id END,
+		CASE WHEN TG_OP = 'DELETE' THEN OLD.tag_id ELSE NEW.tag_id END,
+		CASE WHEN TG_OP = 'DELETE' THEN OLD.profile_id ELSE NEW.profile_id END
+	);
+	RETURN NULL;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.maintain_unit_tag_fit_stat()
+RETURNS trigger
+LANGUAGE plpgsql
+SET search_path = pg_catalog, public
+AS $$
+DECLARE
+	key_unit uuid := CASE WHEN TG_OP = 'DELETE' THEN OLD.unit_id ELSE NEW.unit_id END;
+	key_tag uuid := CASE WHEN TG_OP = 'DELETE' THEN OLD.tag_id ELSE NEW.tag_id END;
+	score_delta bigint := 0;
+	count_delta bigint := 0;
+BEGIN
+	PERFORM public.lock_vote_hot_key('unit_tag_stat:' || key_unit::text || ':' || key_tag::text, 0);
+	IF TG_OP <> 'INSERT' THEN score_delta := score_delta - OLD.value; count_delta := count_delta - 1; END IF;
+	IF TG_OP <> 'DELETE' THEN score_delta := score_delta + NEW.value; count_delta := count_delta + 1; END IF;
+	INSERT INTO public.unit_tag_judgment_stat(unit_id, tag_id, score, vote_count, updated_at)
+	VALUES (key_unit, key_tag, score_delta, count_delta, clock_timestamp())
+	ON CONFLICT (unit_id, tag_id) DO UPDATE SET
+		score = unit_tag_judgment_stat.score + EXCLUDED.score,
+		vote_count = unit_tag_judgment_stat.vote_count + EXCLUDED.vote_count,
+		updated_at = EXCLUDED.updated_at;
+	RETURN NULL;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.maintain_unit_tag_spoiler_stat()
+RETURNS trigger
+LANGUAGE plpgsql
+SET search_path = pg_catalog, public
+AS $$
+DECLARE
+	key_unit uuid := CASE WHEN TG_OP = 'DELETE' THEN OLD.unit_id ELSE NEW.unit_id END;
+	key_tag uuid := CASE WHEN TG_OP = 'DELETE' THEN OLD.tag_id ELSE NEW.tag_id END;
+	count_delta bigint := 0;
+	none_delta bigint := 0;
+	minor_delta bigint := 0;
+	major_delta bigint := 0;
+BEGIN
+	PERFORM public.lock_vote_hot_key('unit_tag_stat:' || key_unit::text || ':' || key_tag::text, 0);
+	IF TG_OP <> 'INSERT' AND OLD.spoiler_level IS NOT NULL THEN
+		count_delta := count_delta - 1;
+		IF OLD.spoiler_level = 0 THEN none_delta := none_delta - 1;
+		ELSIF OLD.spoiler_level = 1 THEN minor_delta := minor_delta - 1;
+		ELSE major_delta := major_delta - 1; END IF;
+	END IF;
+	IF TG_OP <> 'DELETE' AND NEW.spoiler_level IS NOT NULL THEN
+		count_delta := count_delta + 1;
+		IF NEW.spoiler_level = 0 THEN none_delta := none_delta + 1;
+		ELSIF NEW.spoiler_level = 1 THEN minor_delta := minor_delta + 1;
+		ELSE major_delta := major_delta + 1; END IF;
+	END IF;
+	INSERT INTO public.unit_tag_judgment_stat(
+		unit_id, tag_id, spoiler_vote_count, spoiler_none_count,
+		spoiler_minor_count, spoiler_major_count, updated_at
+	) VALUES (key_unit, key_tag, count_delta, none_delta, minor_delta, major_delta, clock_timestamp())
+	ON CONFLICT (unit_id, tag_id) DO UPDATE SET
+		spoiler_vote_count = unit_tag_judgment_stat.spoiler_vote_count + EXCLUDED.spoiler_vote_count,
+		spoiler_none_count = unit_tag_judgment_stat.spoiler_none_count + EXCLUDED.spoiler_none_count,
+		spoiler_minor_count = unit_tag_judgment_stat.spoiler_minor_count + EXCLUDED.spoiler_minor_count,
+		spoiler_major_count = unit_tag_judgment_stat.spoiler_major_count + EXCLUDED.spoiler_major_count,
+		updated_at = EXCLUDED.updated_at;
+	RETURN NULL;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.maintain_subject_association_judgment_stat()
+RETURNS trigger
+LANGUAGE plpgsql
+SET search_path = pg_catalog, public
+AS $$
+DECLARE
+	key_id uuid := CASE WHEN TG_OP = 'DELETE' THEN OLD.association_id ELSE NEW.association_id END;
+	count_delta bigint := 0;
+	none_delta bigint := 0;
+	minor_delta bigint := 0;
+	major_delta bigint := 0;
+BEGIN
+	PERFORM public.lock_vote_hot_key('subject_spoiler:' || key_id::text, 0);
+	IF TG_OP <> 'INSERT' THEN
+		count_delta := count_delta - 1;
+		IF OLD.spoiler_level = 0 THEN none_delta := none_delta - 1;
+		ELSIF OLD.spoiler_level = 1 THEN minor_delta := minor_delta - 1;
+		ELSE major_delta := major_delta - 1; END IF;
+	END IF;
+	IF TG_OP <> 'DELETE' THEN
+		count_delta := count_delta + 1;
+		IF NEW.spoiler_level = 0 THEN none_delta := none_delta + 1;
+		ELSIF NEW.spoiler_level = 1 THEN minor_delta := minor_delta + 1;
+		ELSE major_delta := major_delta + 1; END IF;
+	END IF;
+	INSERT INTO public.subject_association_judgment_stat(
+		association_id, spoiler_vote_count, spoiler_none_count,
+		spoiler_minor_count, spoiler_major_count, updated_at
+	) VALUES (key_id, count_delta, none_delta, minor_delta, major_delta, clock_timestamp())
+	ON CONFLICT (association_id) DO UPDATE SET
+		spoiler_vote_count = subject_association_judgment_stat.spoiler_vote_count + EXCLUDED.spoiler_vote_count,
+		spoiler_none_count = subject_association_judgment_stat.spoiler_none_count + EXCLUDED.spoiler_none_count,
+		spoiler_minor_count = subject_association_judgment_stat.spoiler_minor_count + EXCLUDED.spoiler_minor_count,
+		spoiler_major_count = subject_association_judgment_stat.spoiler_major_count + EXCLUDED.spoiler_major_count,
+		updated_at = EXCLUDED.updated_at;
+	RETURN NULL;
+END;
+$$;
+
+CREATE TRIGGER unit_tag_effective_context_maintain
+AFTER INSERT OR DELETE ON public.unit_tag
+FOR EACH ROW EXECUTE FUNCTION public.maintain_unit_effective_tag_from_direct();
+
+CREATE TRIGGER unit_tag_judgment_effective_vote_maintain
+AFTER INSERT OR UPDATE OR DELETE ON public.unit_tag_judgment
+FOR EACH ROW EXECUTE FUNCTION public.maintain_unit_effective_tag_vote_from_direct();
+
+CREATE TRIGGER unit_tag_path_support_effective_vote_maintain
+AFTER INSERT OR DELETE ON public.unit_tag_path_support
+FOR EACH ROW EXECUTE FUNCTION public.maintain_unit_effective_tag_vote_from_path();
+
+CREATE TRIGGER unit_effective_tag_vote_fit_stat_maintain
+AFTER INSERT OR UPDATE OR DELETE ON public.unit_effective_tag_vote
+FOR EACH ROW EXECUTE FUNCTION public.maintain_unit_tag_fit_stat();
+
+CREATE TRIGGER unit_tag_judgment_spoiler_stat_maintain
+AFTER INSERT OR UPDATE OR DELETE ON public.unit_tag_judgment
+FOR EACH ROW EXECUTE FUNCTION public.maintain_unit_tag_spoiler_stat();
+
+CREATE TRIGGER subject_association_judgment_stat_maintain
+AFTER INSERT OR UPDATE OR DELETE ON public.subject_association_judgment
+FOR EACH ROW EXECUTE FUNCTION public.maintain_subject_association_judgment_stat();

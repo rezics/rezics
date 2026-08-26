@@ -6,7 +6,7 @@ const { forms: dockTerms } = zhHantTerminology.dock;
 const { forms: followTerms } = zhHantTerminology.follow;
 const { forms: postTerms } = zhHantTerminology.post;
 const { forms: realmTerms } = zhHantTerminology.realm;
-const { forms: tagStructureTerms } = zhHantTerminology.tagStructure;
+const { forms: tagPathTerms } = zhHantTerminology.tagPath;
 const { forms: unitSlugTerms } = zhHantTerminology.unitSlug;
 const { forms: zoneTerms } = zhHantTerminology.zone;
 const { forms: entityTerms } = zhHantTerminology.entity;
@@ -19,7 +19,7 @@ export default {
 	ApiTokenPermissionRequired: `這個 ${verbatimTerms.api.value} 權杖沒有執行該操作所需的權限。`,
 	ApiTokenRateLimitExceeded: `這個 ${verbatimTerms.api.value} 權杖的請求太頻繁，請稍後再試。`,
 	ApiQuotaExceeded: `${verbatimTerms.api.value} 配額已用盡，請在可重試時間後再試。`,
-	VndbVoteHotKeyBusy: "這個投票目標目前忙碌，請稍後再試。",
+	VoteHotKeyBusy: "這個投票目標目前忙碌，請稍後再試。",
 	ApiQuotaPolicyNotFound: `找不到指定的 ${verbatimTerms.api.value} 配額政策。`,
 	ApiQuotaPolicyKeyConflict: `已有 ${verbatimTerms.api.value} 配額政策使用這個識別碼。`,
 	ApiQuotaPolicyInvalid: `${verbatimTerms.api.value} 配額政策設定無效。`,
@@ -268,11 +268,11 @@ export default {
 	RealmTagContextRequired: `此${realmTerms.inline}必須先為該標籤建立目前可見的正式說明。`,
 	RealmTagSelfReferenceForbidden: "不能將標籤套用到該標籤本身。",
 	SharedSearchQueryNotFound: "找不到這個分享搜尋查詢。",
-	InvalidTagStructure: `這個${tagStructureTerms.inline}無效。`,
-	TagStructureNotFound: `找不到這個${tagStructureTerms.inline}。`,
-	TagStructureApplicationNotFound: `這個內容沒有套用該${tagStructureTerms.inline}。`,
-	TagStructureChanged: `這個${tagStructureTerms.inline}已在其他地方變更，請重新整理後再試一次。`,
-	TagStructureDefinitionConflict: `已有內容完全相同的${tagStructureTerms.inline}。`,
+	InvalidTagPath: `這個${tagPathTerms.inline}無效。`,
+	TagPathNotFound: `找不到這個${tagPathTerms.inline}。`,
+	TagPathApplicationNotFound: `這個內容沒有套用該${tagPathTerms.inline}。`,
+	TagPathChanged: `這個${tagPathTerms.inline}已在其他地方變更，請重新整理後再試一次。`,
+	TagPathDefinitionConflict: `已有內容完全相同的${tagPathTerms.inline}。`,
 	AssociationContextPostInvalid: `關聯脈絡必須是知識型${postTerms.inline}。`,
 	ProgressEntryNotFound: "找不到這筆進度事件。",
 	PostTagMentionVoteConflict: `這個標籤提及與你對該${postTerms.inline}的既有負票衝突。`,

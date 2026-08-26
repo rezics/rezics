@@ -17,7 +17,7 @@ vi.mock("@/i18n/client", () => ({
 	useTranslation: () => ({
 		t: {
 			tags: {
-				structures: {
+				paths: {
 					addTitle: "Add a Tag path",
 					addDescription: "Choose a path.",
 					create: "Create a Tag path",
@@ -40,7 +40,7 @@ vi.mock("@/i18n/client", () => ({
 			ui: {
 				pickerPlaceholders: {
 					tag: "Enter a tag name",
-					tagStructure: "Enter a Tag path name",
+					tagPath: "Enter a Tag path name",
 				},
 				retryLater: "Try again later",
 			},
@@ -83,10 +83,10 @@ import { UnitTagManagement } from "./unit-tag-management";
 const baseProps = {
 	addError: null,
 	addPending: false,
-	addStructureError: null,
-	addStructurePending: false,
+	addPathError: null,
+	addPathPending: false,
 	canVote: true,
-	onAddStructure: vi.fn(async () => undefined),
+	onAddPath: vi.fn(async () => undefined),
 	onAddTag: vi.fn(async () => undefined),
 	tagCreateTarget: {
 		type: "book",
@@ -106,7 +106,7 @@ describe("UnitTagManagement", () => {
 		render(<UnitTagManagement {...baseProps} hasDevelopmentPreviewAccess={false} />);
 
 		expect(screen.queryByText("Create a Tag path")).toBeNull();
-		expect(screen.queryByTestId("picker-tag-structures")).toBeNull();
+		expect(screen.queryByTestId("picker-tag-paths")).toBeNull();
 		expect(screen.getByTestId("picker-tags")).toBeTruthy();
 		expect(screen.getByTestId("picker-tags").dataset.searchOnOpen).toBe("false");
 	});
@@ -115,7 +115,7 @@ describe("UnitTagManagement", () => {
 		render(<UnitTagManagement {...baseProps} hasDevelopmentPreviewAccess />);
 
 		expect(screen.getByText("Create a Tag path")).toBeTruthy();
-		expect(screen.getByTestId("picker-tag-structures")).toBeTruthy();
+		expect(screen.getByTestId("picker-tag-paths")).toBeTruthy();
 	});
 
 	it("preloads only the selected Realm's available Tags", async () => {
@@ -134,7 +134,7 @@ describe("UnitTagManagement", () => {
 			/>,
 		);
 
-		expect(screen.queryByTestId("picker-tag-structures")).toBeNull();
+		expect(screen.queryByTestId("picker-tag-paths")).toBeNull();
 		expect(screen.getByText("Add a Realm Tag vote")).toBeTruthy();
 		expect(screen.getByTestId("picker-tags").dataset.hasScopedSearch).toBe("true");
 		expect(screen.getByTestId("picker-tags").dataset.searchOnOpen).toBe("true");
@@ -152,7 +152,7 @@ describe("UnitTagManagement", () => {
 		render(<UnitTagManagement {...baseProps} canVote={false} hasDevelopmentPreviewAccess />);
 
 		expect(screen.queryByTestId("picker-tags")).toBeNull();
-		expect(screen.queryByTestId("picker-tag-structures")).toBeNull();
+		expect(screen.queryByTestId("picker-tag-paths")).toBeNull();
 	});
 
 	it("shows the contextual Tag creator without waiting for a search", () => {

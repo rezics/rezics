@@ -317,28 +317,58 @@ import type {
 	DeleteApiPlatformUsersByUserIdSessionsResponses,
 	DeleteApiPlatformUsersByUserIdSessionsBySessionIdOptions,
 	DeleteApiPlatformUsersByUserIdSessionsBySessionIdResponses,
+	GetApiTagsSuggestionsOptions,
+	GetApiTagsSuggestionsResponses,
 	GetApiTagsByTagIdHierarchyOptions,
 	GetApiTagsByTagIdHierarchyResponses,
-	PostApiTagStructuresOptions,
-	PostApiTagStructuresResponses,
-	GetApiTagStructuresByStructureIdOptions,
-	GetApiTagStructuresByStructureIdResponses,
-	PutApiTagStructuresByStructureIdOptions,
-	PutApiTagStructuresByStructureIdResponses,
-	PutApiTagStructuresByStructureIdVoteOptions,
-	PutApiTagStructuresByStructureIdVoteResponses,
-	DeleteApiTagStructuresByStructureIdVoteOptions,
-	DeleteApiTagStructuresByStructureIdVoteResponses,
+	GetApiTagsByTagIdPathsOptions,
+	GetApiTagsByTagIdPathsResponses,
+	PostApiTagPathsDefinitionWarningsOptions,
+	PostApiTagPathsDefinitionWarningsResponses,
+	GetApiTagPathsSearchOptions,
+	GetApiTagPathsSearchResponses,
+	PostApiTagPathsOptions,
+	PostApiTagPathsResponses,
+	GetApiTagPathsByPathIdOptions,
+	GetApiTagPathsByPathIdResponses,
+	PutApiTagPathsByPathIdVoteOptions,
+	PutApiTagPathsByPathIdVoteResponses,
+	DeleteApiTagPathsByPathIdVoteOptions,
+	DeleteApiTagPathsByPathIdVoteResponses,
+	PostApiTagPathsMergesOptions,
+	PostApiTagPathsMergesResponses,
+	GetApiTagPathsMergesPendingOptions,
+	GetApiTagPathsMergesPendingResponses,
+	PutApiTagPathsMergesByMergeIdResolutionOptions,
+	PutApiTagPathsMergesByMergeIdResolutionResponses,
 	GetApiUnitsByTypeByUnitIdTagsOptions,
 	GetApiUnitsByTypeByUnitIdTagsResponses,
-	PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdOptions,
-	PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdResponses,
-	DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdOptions,
-	DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdResponses,
-	PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteOptions,
-	PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteResponses,
-	DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteOptions,
-	DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteResponses,
+	PutApiUnitsByTypeByUnitIdTagPathsByPathIdOptions,
+	PutApiUnitsByTypeByUnitIdTagPathsByPathIdResponses,
+	DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdOptions,
+	DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdResponses,
+	PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentOptions,
+	PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentResponses,
+	DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentOptions,
+	DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentResponses,
+	GetApiRealmsByRealmIdTagPathsOptions,
+	GetApiRealmsByRealmIdTagPathsResponses,
+	PutApiRealmsByRealmIdTagPathsByPathIdOptions,
+	PutApiRealmsByRealmIdTagPathsByPathIdResponses,
+	PutApiRealmsByRealmIdTagPathsByPathIdVoteOptions,
+	PutApiRealmsByRealmIdTagPathsByPathIdVoteResponses,
+	DeleteApiRealmsByRealmIdTagPathsByPathIdVoteOptions,
+	DeleteApiRealmsByRealmIdTagPathsByPathIdVoteResponses,
+	PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdOptions,
+	PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdResponses,
+	DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdOptions,
+	DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdResponses,
+	PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentOptions,
+	PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentResponses,
+	DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentOptions,
+	DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentResponses,
+	PutApiRealmsByRealmIdTagPathPolicyOptions,
+	PutApiRealmsByRealmIdTagPathPolicyResponses,
 	GetApiUsersMeTagRealmSubscriptionsOptions,
 	GetApiUsersMeTagRealmSubscriptionsResponses,
 	PutApiUsersMeTagRealmSubscriptionsByRealmIdOptions,
@@ -423,6 +453,8 @@ import type {
 	PostApiEntitiesResponses,
 	GetApiEntitiesByUnitIdOptions,
 	GetApiEntitiesByUnitIdResponses,
+	PutApiEntitiesByUnitIdMeasurementsOptions,
+	PutApiEntitiesByUnitIdMeasurementsResponses,
 	PatchApiEntitiesByUnitIdVariantContextOptions,
 	PatchApiEntitiesByUnitIdVariantContextResponses,
 	PostApiEntitiesByUnitIdVariantContextPromoteOptions,
@@ -455,6 +487,10 @@ import type {
 	DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdResponses,
 	PostApiUnitsByTypeByUnitIdSubjectAssociationsOptions,
 	PostApiUnitsByTypeByUnitIdSubjectAssociationsResponses,
+	PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerOptions,
+	PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerResponses,
+	DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerOptions,
+	DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerResponses,
 	DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdOptions,
 	DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdResponses,
 	GetApiUnitsByTypeByUnitIdExternalLinksOptions,
@@ -3718,6 +3754,20 @@ export function deleteApiPlatformUsersByUserIdSessionsBySessionId<
 }
 
 /**
+ * @summary Suggest terminal Tags from a compound Tag query
+ * {@link /api/v1/tags/suggestions}
+ */
+export function getApiTagsSuggestions<ThrowOnError extends boolean = true>(
+	options: Options<GetApiTagsSuggestionsOptions, ThrowOnError>,
+): Promise<RequestResult<GetApiTagsSuggestionsResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({ method: "GET", url: "/api/v1/tags/suggestions", ...config }) as Promise<
+		RequestResult<GetApiTagsSuggestionsResponses, ThrowOnError>
+	>;
+}
+
+/**
  * @summary Get a Tag with direct children and grandchildren
  * {@link /api/v1/tags/:tagId/hierarchy}
  */
@@ -3726,115 +3776,185 @@ export function getApiTagsByTagIdHierarchy<ThrowOnError extends boolean = true>(
 ): Promise<RequestResult<GetApiTagsByTagIdHierarchyResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/tags/{tagId}/hierarchy",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<GetApiTagsByTagIdHierarchyResponses, ThrowOnError>>;
+	return request({ method: "GET", url: "/api/v1/tags/{tagId}/hierarchy", ...config }) as Promise<
+		RequestResult<GetApiTagsByTagIdHierarchyResponses, ThrowOnError>
+	>;
 }
 
 /**
- * @summary Create or find and upvote a community-immutable Tag structure
- * {@link /api/v1/tag-structures}
+ * @summary List accepted Tag Paths ending at a Tag
+ * {@link /api/v1/tags/:tagId/paths}
  */
-export function postApiTagStructures<ThrowOnError extends boolean = true>(
-	options: Options<PostApiTagStructuresOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiTagStructuresResponses, ThrowOnError>> {
+export function getApiTagsByTagIdPaths<ThrowOnError extends boolean = true>(
+	options: Options<GetApiTagsByTagIdPathsOptions, ThrowOnError>,
+): Promise<RequestResult<GetApiTagsByTagIdPathsResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({ method: "GET", url: "/api/v1/tags/{tagId}/paths", ...config }) as Promise<
+		RequestResult<GetApiTagsByTagIdPathsResponses, ThrowOnError>
+	>;
+}
+
+/**
+ * @summary List related accepted definitions before creating a Tag Path
+ * {@link /api/v1/tag-paths/definition-warnings}
+ */
+export function postApiTagPathsDefinitionWarnings<ThrowOnError extends boolean = true>(
+	options: Options<PostApiTagPathsDefinitionWarningsOptions, ThrowOnError>,
+): Promise<RequestResult<PostApiTagPathsDefinitionWarningsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "POST",
-		url: "/api/v1/tag-structures",
+		url: "/api/v1/tag-paths/definition-warnings",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
 		],
 		...config,
-	}) as Promise<RequestResult<PostApiTagStructuresResponses, ThrowOnError>>;
+	}) as Promise<RequestResult<PostApiTagPathsDefinitionWarningsResponses, ThrowOnError>>;
 }
 
 /**
- * @summary Get a Tag structure
- * {@link /api/v1/tag-structures/:structureId}
+ * @summary Search accepted Tag Paths for curation
+ * {@link /api/v1/tag-paths/search}
  */
-export function getApiTagStructuresByStructureId<ThrowOnError extends boolean = true>(
-	options: Options<GetApiTagStructuresByStructureIdOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiTagStructuresByStructureIdResponses, ThrowOnError>> {
+export function getApiTagPathsSearch<ThrowOnError extends boolean = true>(
+	options: Options<GetApiTagPathsSearchOptions, ThrowOnError>,
+): Promise<RequestResult<GetApiTagPathsSearchResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "GET",
-		url: "/api/v1/tag-structures/{structureId}",
+		url: "/api/v1/tag-paths/search",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<RequestResult<GetApiTagPathsSearchResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Create or find and upvote an immutable Tag Path
+ * {@link /api/v1/tag-paths}
+ */
+export function postApiTagPaths<ThrowOnError extends boolean = true>(
+	options: Options<PostApiTagPathsOptions, ThrowOnError>,
+): Promise<RequestResult<PostApiTagPathsResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/v1/tag-paths",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
 		],
 		...config,
-	}) as Promise<RequestResult<GetApiTagStructuresByStructureIdResponses, ThrowOnError>>;
+	}) as Promise<RequestResult<PostApiTagPathsResponses, ThrowOnError>>;
 }
 
 /**
- * @summary Administratively correct a Tag structure definition
- * {@link /api/v1/tag-structures/:structureId}
+ * @summary Get a Tag Path
+ * {@link /api/v1/tag-paths/:pathId}
  */
-export function putApiTagStructuresByStructureId<ThrowOnError extends boolean = true>(
-	options: Options<PutApiTagStructuresByStructureIdOptions, ThrowOnError>,
-): Promise<RequestResult<PutApiTagStructuresByStructureIdResponses, ThrowOnError>> {
+export function getApiTagPathsByPathId<ThrowOnError extends boolean = true>(
+	options: Options<GetApiTagPathsByPathIdOptions, ThrowOnError>,
+): Promise<RequestResult<GetApiTagPathsByPathIdResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({ method: "GET", url: "/api/v1/tag-paths/{pathId}", ...config }) as Promise<
+		RequestResult<GetApiTagPathsByPathIdResponses, ThrowOnError>
+	>;
+}
+
+/**
+ * @summary Vote on a Tag Path definition
+ * {@link /api/v1/tag-paths/:pathId/vote}
+ */
+export function putApiTagPathsByPathIdVote<ThrowOnError extends boolean = true>(
+	options: Options<PutApiTagPathsByPathIdVoteOptions, ThrowOnError>,
+): Promise<RequestResult<PutApiTagPathsByPathIdVoteResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "PUT",
-		url: "/api/v1/tag-structures/{structureId}",
+		url: "/api/v1/tag-paths/{pathId}/vote",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
 		],
 		...config,
-	}) as Promise<RequestResult<PutApiTagStructuresByStructureIdResponses, ThrowOnError>>;
+	}) as Promise<RequestResult<PutApiTagPathsByPathIdVoteResponses, ThrowOnError>>;
 }
 
 /**
- * @summary Vote on a Tag structure
- * {@link /api/v1/tag-structures/:structureId/vote}
+ * @summary Remove a Tag Path definition vote
+ * {@link /api/v1/tag-paths/:pathId/vote}
  */
-export function putApiTagStructuresByStructureIdVote<ThrowOnError extends boolean = true>(
-	options: Options<PutApiTagStructuresByStructureIdVoteOptions, ThrowOnError>,
-): Promise<RequestResult<PutApiTagStructuresByStructureIdVoteResponses, ThrowOnError>> {
-	const { client: request = client, ...config } = options;
-
-	return request({
-		method: "PUT",
-		url: "/api/v1/tag-structures/{structureId}/vote",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PutApiTagStructuresByStructureIdVoteResponses, ThrowOnError>>;
-}
-
-/**
- * @summary Remove a Tag structure vote
- * {@link /api/v1/tag-structures/:structureId/vote}
- */
-export function deleteApiTagStructuresByStructureIdVote<ThrowOnError extends boolean = true>(
-	options: Options<DeleteApiTagStructuresByStructureIdVoteOptions, ThrowOnError>,
-): Promise<RequestResult<DeleteApiTagStructuresByStructureIdVoteResponses, ThrowOnError>> {
+export function deleteApiTagPathsByPathIdVote<ThrowOnError extends boolean = true>(
+	options: Options<DeleteApiTagPathsByPathIdVoteOptions, ThrowOnError>,
+): Promise<RequestResult<DeleteApiTagPathsByPathIdVoteResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "DELETE",
-		url: "/api/v1/tag-structures/{structureId}/vote",
+		url: "/api/v1/tag-paths/{pathId}/vote",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
 		],
 		...config,
-	}) as Promise<RequestResult<DeleteApiTagStructuresByStructureIdVoteResponses, ThrowOnError>>;
+	}) as Promise<RequestResult<DeleteApiTagPathsByPathIdVoteResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Propose a manually governed Tag Path merge
+ * {@link /api/v1/tag-paths/merges}
+ */
+export function postApiTagPathsMerges<ThrowOnError extends boolean = true>(
+	options: Options<PostApiTagPathsMergesOptions, ThrowOnError>,
+): Promise<RequestResult<PostApiTagPathsMergesResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/v1/tag-paths/merges",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<RequestResult<PostApiTagPathsMergesResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary List pending manual Tag Path merge proposals
+ * {@link /api/v1/tag-paths/merges/pending}
+ */
+export function getApiTagPathsMergesPending<ThrowOnError extends boolean = true>(
+	options: Options<GetApiTagPathsMergesPendingOptions, ThrowOnError> = {},
+): Promise<RequestResult<GetApiTagPathsMergesPendingResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/v1/tag-paths/merges/pending",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<RequestResult<GetApiTagPathsMergesPendingResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Resolve a Tag Path merge proposal
+ * {@link /api/v1/tag-paths/merges/:mergeId/resolution}
+ */
+export function putApiTagPathsMergesByMergeIdResolution<ThrowOnError extends boolean = true>(
+	options: Options<PutApiTagPathsMergesByMergeIdResolutionOptions, ThrowOnError>,
+): Promise<RequestResult<PutApiTagPathsMergesByMergeIdResolutionResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "PUT",
+		url: "/api/v1/tag-paths/merges/{mergeId}/resolution",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<RequestResult<PutApiTagPathsMergesByMergeIdResolutionResponses, ThrowOnError>>;
 }
 
 /**
@@ -3854,107 +3974,295 @@ export function getApiUnitsByTypeByUnitIdTags<ThrowOnError extends boolean = tru
 }
 
 /**
- * @summary Apply a Tag structure to a Unit
- * {@link /api/v1/units/:type/:unitId/tag-structures/:structureId}
+ * @summary Apply a Tag Path to a Unit
+ * {@link /api/v1/units/:type/:unitId/tag-paths/:pathId}
  */
-export function putApiUnitsByTypeByUnitIdTagStructuresByStructureId<
+export function putApiUnitsByTypeByUnitIdTagPathsByPathId<ThrowOnError extends boolean = true>(
+	options: Options<PutApiUnitsByTypeByUnitIdTagPathsByPathIdOptions, ThrowOnError>,
+): Promise<RequestResult<PutApiUnitsByTypeByUnitIdTagPathsByPathIdResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "PUT",
+		url: "/api/v1/units/{type}/{unitId}/tag-paths/{pathId}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<PutApiUnitsByTypeByUnitIdTagPathsByPathIdResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Remove a Tag Path from a Unit
+ * {@link /api/v1/units/:type/:unitId/tag-paths/:pathId}
+ */
+export function deleteApiUnitsByTypeByUnitIdTagPathsByPathId<ThrowOnError extends boolean = true>(
+	options: Options<DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdOptions, ThrowOnError>,
+): Promise<RequestResult<DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "DELETE",
+		url: "/api/v1/units/{type}/{unitId}/tag-paths/{pathId}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Judge Tag Path fit or spoiler for a Unit
+ * {@link /api/v1/units/:type/:unitId/tag-paths/:pathId/judgment}
+ */
+export function putApiUnitsByTypeByUnitIdTagPathsByPathIdJudgment<
 	ThrowOnError extends boolean = true,
 >(
-	options: Options<PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdOptions, ThrowOnError>,
+	options: Options<PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentOptions, ThrowOnError>,
 ): Promise<
-	RequestResult<PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdResponses, ThrowOnError>
+	RequestResult<PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentResponses, ThrowOnError>
 > {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "PUT",
-		url: "/api/v1/units/{type}/{unitId}/tag-structures/{structureId}",
+		url: "/api/v1/units/{type}/{unitId}/tag-paths/{pathId}/judgment",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
 		],
 		...config,
 	}) as Promise<
-		RequestResult<PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdResponses, ThrowOnError>
+		RequestResult<PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentResponses, ThrowOnError>
 	>;
 }
 
 /**
- * @summary Remove a Tag structure from a Unit
- * {@link /api/v1/units/:type/:unitId/tag-structures/:structureId}
+ * @summary Remove a Unit Tag Path judgment
+ * {@link /api/v1/units/:type/:unitId/tag-paths/:pathId/judgment}
  */
-export function deleteApiUnitsByTypeByUnitIdTagStructuresByStructureId<
+export function deleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgment<
 	ThrowOnError extends boolean = true,
 >(
-	options: Options<DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdOptions, ThrowOnError>,
+	options: Options<DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentOptions, ThrowOnError>,
 ): Promise<
-	RequestResult<DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdResponses, ThrowOnError>
+	RequestResult<DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentResponses, ThrowOnError>
 > {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "DELETE",
-		url: "/api/v1/units/{type}/{unitId}/tag-structures/{structureId}",
+		url: "/api/v1/units/{type}/{unitId}/tag-paths/{pathId}/judgment",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
 		],
 		...config,
 	}) as Promise<
-		RequestResult<DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdResponses, ThrowOnError>
+		RequestResult<DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentResponses, ThrowOnError>
 	>;
 }
 
 /**
- * @summary Vote on a Unit Tag structure
- * {@link /api/v1/units/:type/:unitId/tag-structures/:structureId/vote}
+ * @summary List Realm Tag Paths with independent authority resolution
+ * {@link /api/v1/realms/:realmId/tag-paths}
  */
-export function putApiUnitsByTypeByUnitIdTagStructuresByStructureIdVote<
+export function getApiRealmsByRealmIdTagPaths<ThrowOnError extends boolean = true>(
+	options: Options<GetApiRealmsByRealmIdTagPathsOptions, ThrowOnError>,
+): Promise<RequestResult<GetApiRealmsByRealmIdTagPathsResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/v1/realms/{realmId}/tag-paths",
+		...config,
+	}) as Promise<RequestResult<GetApiRealmsByRealmIdTagPathsResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Adopt a Tag Path in a Realm
+ * {@link /api/v1/realms/:realmId/tag-paths/:pathId}
+ */
+export function putApiRealmsByRealmIdTagPathsByPathId<ThrowOnError extends boolean = true>(
+	options: Options<PutApiRealmsByRealmIdTagPathsByPathIdOptions, ThrowOnError>,
+): Promise<RequestResult<PutApiRealmsByRealmIdTagPathsByPathIdResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "PUT",
+		url: "/api/v1/realms/{realmId}/tag-paths/{pathId}",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<RequestResult<PutApiRealmsByRealmIdTagPathsByPathIdResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Vote on a Realm Tag Path definition
+ * {@link /api/v1/realms/:realmId/tag-paths/:pathId/vote}
+ */
+export function putApiRealmsByRealmIdTagPathsByPathIdVote<ThrowOnError extends boolean = true>(
+	options: Options<PutApiRealmsByRealmIdTagPathsByPathIdVoteOptions, ThrowOnError>,
+): Promise<RequestResult<PutApiRealmsByRealmIdTagPathsByPathIdVoteResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "PUT",
+		url: "/api/v1/realms/{realmId}/tag-paths/{pathId}/vote",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<PutApiRealmsByRealmIdTagPathsByPathIdVoteResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Remove a Realm Tag Path definition vote
+ * {@link /api/v1/realms/:realmId/tag-paths/:pathId/vote}
+ */
+export function deleteApiRealmsByRealmIdTagPathsByPathIdVote<ThrowOnError extends boolean = true>(
+	options: Options<DeleteApiRealmsByRealmIdTagPathsByPathIdVoteOptions, ThrowOnError>,
+): Promise<RequestResult<DeleteApiRealmsByRealmIdTagPathsByPathIdVoteResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "DELETE",
+		url: "/api/v1/realms/{realmId}/tag-paths/{pathId}/vote",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<DeleteApiRealmsByRealmIdTagPathsByPathIdVoteResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Apply an adopted Tag Path to a Realm Unit
+ * {@link /api/v1/realms/:realmId/units/:unitId/tag-paths/:pathId}
+ */
+export function putApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathId<
 	ThrowOnError extends boolean = true,
 >(
-	options: Options<PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteOptions, ThrowOnError>,
+	options: Options<PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdOptions, ThrowOnError>,
 ): Promise<
-	RequestResult<PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteResponses, ThrowOnError>
+	RequestResult<PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdResponses, ThrowOnError>
 > {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "PUT",
-		url: "/api/v1/units/{type}/{unitId}/tag-structures/{structureId}/vote",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
+		url: "/api/v1/realms/{realmId}/units/{unitId}/tag-paths/{pathId}",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<
-		RequestResult<PutApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteResponses, ThrowOnError>
+		RequestResult<PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdResponses, ThrowOnError>
 	>;
 }
 
 /**
- * @summary Remove a Unit Tag structure vote
- * {@link /api/v1/units/:type/:unitId/tag-structures/:structureId/vote}
+ * @summary Remove a Tag Path application from a Realm Unit
+ * {@link /api/v1/realms/:realmId/units/:unitId/tag-paths/:pathId}
  */
-export function deleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVote<
+export function deleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathId<
 	ThrowOnError extends boolean = true,
 >(
-	options: Options<DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteOptions, ThrowOnError>,
+	options: Options<DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdOptions, ThrowOnError>,
 ): Promise<
-	RequestResult<DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteResponses, ThrowOnError>
+	RequestResult<DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdResponses, ThrowOnError>
 > {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "DELETE",
-		url: "/api/v1/units/{type}/{unitId}/tag-structures/{structureId}/vote",
+		url: "/api/v1/realms/{realmId}/units/{unitId}/tag-paths/{pathId}",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<
+		RequestResult<DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdResponses, ThrowOnError>
+	>;
+}
+
+/**
+ * @summary Judge Realm-local Tag Path fit or spoiler
+ * {@link /api/v1/realms/:realmId/units/:unitId/tag-paths/:pathId/judgment}
+ */
+export function putApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgment<
+	ThrowOnError extends boolean = true,
+>(
+	options: Options<PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentOptions, ThrowOnError>,
+): Promise<
+	RequestResult<PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentResponses, ThrowOnError>
+> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "PUT",
+		url: "/api/v1/realms/{realmId}/units/{unitId}/tag-paths/{pathId}/judgment",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
 		],
 		...config,
 	}) as Promise<
-		RequestResult<DeleteApiUnitsByTypeByUnitIdTagStructuresByStructureIdVoteResponses, ThrowOnError>
+		RequestResult<PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentResponses, ThrowOnError>
 	>;
+}
+
+/**
+ * @summary Clear a Realm-local Tag Path judgment
+ * {@link /api/v1/realms/:realmId/units/:unitId/tag-paths/:pathId/judgment}
+ */
+export function deleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgment<
+	ThrowOnError extends boolean = true,
+>(
+	options: Options<
+		DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentOptions,
+		ThrowOnError
+	>,
+): Promise<
+	RequestResult<
+		DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentResponses,
+		ThrowOnError
+	>
+> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "DELETE",
+		url: "/api/v1/realms/{realmId}/units/{unitId}/tag-paths/{pathId}/judgment",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<
+		RequestResult<
+			DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentResponses,
+			ThrowOnError
+		>
+	>;
+}
+
+/**
+ * @summary Update independent Realm Tag Path fallback policies
+ * {@link /api/v1/realms/:realmId/tag-path-policy}
+ */
+export function putApiRealmsByRealmIdTagPathPolicy<ThrowOnError extends boolean = true>(
+	options: Options<PutApiRealmsByRealmIdTagPathPolicyOptions, ThrowOnError>,
+): Promise<RequestResult<PutApiRealmsByRealmIdTagPathPolicyResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "PUT",
+		url: "/api/v1/realms/{realmId}/tag-path-policy",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<PutApiRealmsByRealmIdTagPathPolicyResponses, ThrowOnError>>;
 }
 
 /**
@@ -4794,6 +5102,26 @@ export function getApiEntitiesByUnitId<ThrowOnError extends boolean = true>(
 }
 
 /**
+ * @summary Create or replace a canonical Entity measurement set
+ * {@link /api/v1/entities/:unitId/measurements}
+ */
+export function putApiEntitiesByUnitIdMeasurements<ThrowOnError extends boolean = true>(
+	options: Options<PutApiEntitiesByUnitIdMeasurementsOptions, ThrowOnError>,
+): Promise<RequestResult<PutApiEntitiesByUnitIdMeasurementsResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "PUT",
+		url: "/api/v1/entities/{unitId}/measurements",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<PutApiEntitiesByUnitIdMeasurementsResponses, ThrowOnError>>;
+}
+
+/**
  * @summary Update Entity Main relationship
  * {@link /api/v1/entities/:unitId/variant-context}
  */
@@ -5123,6 +5451,76 @@ export function postApiUnitsByTypeByUnitIdSubjectAssociations<ThrowOnError exten
 		...config,
 	}) as Promise<
 		RequestResult<PostApiUnitsByTypeByUnitIdSubjectAssociationsResponses, ThrowOnError>
+	>;
+}
+
+/**
+ * @summary Judge the spoiler level of a subject association
+ * {@link /api/v1/units/:type/:unitId/subject-associations/:associationId/spoiler}
+ */
+export function putApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoiler<
+	ThrowOnError extends boolean = true,
+>(
+	options: Options<
+		PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerOptions,
+		ThrowOnError
+	>,
+): Promise<
+	RequestResult<
+		PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerResponses,
+		ThrowOnError
+	>
+> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "PUT",
+		url: "/api/v1/units/{type}/{unitId}/subject-associations/{associationId}/spoiler",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<
+		RequestResult<
+			PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerResponses,
+			ThrowOnError
+		>
+	>;
+}
+
+/**
+ * @summary Clear a subject-association spoiler judgment
+ * {@link /api/v1/units/:type/:unitId/subject-associations/:associationId/spoiler}
+ */
+export function deleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoiler<
+	ThrowOnError extends boolean = true,
+>(
+	options: Options<
+		DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerOptions,
+		ThrowOnError
+	>,
+): Promise<
+	RequestResult<
+		DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerResponses,
+		ThrowOnError
+	>
+> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "DELETE",
+		url: "/api/v1/units/{type}/{unitId}/subject-associations/{associationId}/spoiler",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<
+		RequestResult<
+			DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerResponses,
+			ThrowOnError
+		>
 	>;
 }
 

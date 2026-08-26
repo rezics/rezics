@@ -73,11 +73,11 @@ describe("content-pack import PostgreSQL guard contract", () => {
 			judgmentTable: "unit_tag_judgment",
 		},
 		{
-			table: "content_pack_structure_application_evidence",
-			functionName: "guard_content_pack_structure_application_evidence_retarget",
+			table: "content_pack_unit_tag_path_evidence",
+			functionName: "guard_content_pack_unit_tag_path_evidence_retarget",
 			allowedKey: "unit_id",
-			phase: "structure_applications",
-			judgmentTable: "unit_structure_application_judgment",
+			phase: "tag_path_applications",
+			judgmentTable: "unit_tag_path_judgment",
 		},
 	])(
 		"permits only $allowedKey retargets for $table during $phase/finalize",

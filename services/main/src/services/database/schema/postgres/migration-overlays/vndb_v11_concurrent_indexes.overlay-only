@@ -1,1 +1,0 @@
-Isolate concurrent index creation from the legacy-to-v11 schema cutover while Drizzle already describes the target contract.

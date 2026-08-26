@@ -8,7 +8,7 @@ const { forms: audioTerms } = zhHantTerminology.audio;
 const { forms: entityTerms } = zhHantTerminology.entity;
 const { forms: postTerms } = zhHantTerminology.post;
 const { forms: realmTerms } = zhHantTerminology.realm;
-const { forms: tagStructureTerms } = zhHantTerminology.tagStructure;
+const { forms: tagPathTerms } = zhHantTerminology.tagPath;
 const { forms: videoTerms } = zhHantTerminology.video;
 const { forms: zoneTerms } = zhHantTerminology.zone;
 
@@ -52,7 +52,7 @@ export default {
 		audio: audioTerms.label,
 		entity: entityTerms.label,
 		tag: "標籤",
-		structure: tagStructureTerms.label,
+		structure: tagPathTerms.label,
 		series: units.types.series,
 		zone: zoneTerms.label,
 		zone_page: `${zoneTerms.label}頁面`,

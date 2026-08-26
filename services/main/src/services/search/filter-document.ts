@@ -214,10 +214,7 @@ export function resolveFilterDocument(
 	} catch (cause) {
 		throw new InvalidSearch(cause instanceof Error ? cause.message : "Invalid Filter document");
 	}
-	const configuredCategories = filterDocument.categories ?? SearchCategories;
-	const categories = configuredCategories.filter(
-		(category) => hasDevelopmentPreviewAccess || category !== "tag-structures",
-	);
+	const categories = filterDocument.categories ?? SearchCategories;
 	if (!categories.length) throw new InvalidSearch("Filter document has no available categories");
 	const allowedFields = policy.fields ?? SearchFieldValues;
 	const overrideByKey = new Map(

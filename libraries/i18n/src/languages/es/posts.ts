@@ -13,6 +13,13 @@ export default {
 	untitled: `${postTerms.label} sin título`,
 	titleOptional: "Título (opcional)",
 	summaryOptional: "Resumen (opcional)",
+	contentSpoilerLabel: "Nivel de destripes",
+	contentSpoilerNone: "Sin destripes",
+	contentSpoilerMinor: "Destripes leves",
+	contentSpoilerMajor: "Destripes importantes",
+	contentNsfwLabel: "Contenido sensible",
+	contentNsfwDescription: "Marca contenido que puede no ser adecuado para mostrar en público.",
+	revealNsfw: "Mostrar contenido sensible",
 	reviewFallbackTitle: insert("Reseña de {{author}} sobre {{subject}}", {
 		author: String,
 		subject: String,

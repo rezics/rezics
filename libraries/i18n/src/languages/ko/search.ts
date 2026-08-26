@@ -5,7 +5,6 @@ import { insert } from "native-i18n";
 const { forms: postTerms } = koTerminology.post;
 const { forms: realmTerms } = koTerminology.realm;
 const { forms: zoneTerms } = koTerminology.zone;
-const { forms: tagStructureTerms } = koTerminology.tagStructure;
 const { forms: entityTerms } = koTerminology.entity;
 const { forms: followTerms } = koTerminology.follow;
 
@@ -46,7 +45,6 @@ export default {
 		users: "사용자",
 		entities: entityTerms.pluralLabel,
 		tags: "태그",
-		"tag-structures": tagStructureTerms.pluralLabel,
 		posts: postTerms.plural,
 		realms: realmTerms.plural,
 		collections: "컬렉션",
@@ -58,7 +56,6 @@ export default {
 		users: "사용자",
 		entities: entityTerms.pluralLabel,
 		tags: "태그",
-		"tag-structures": tagStructureTerms.pluralLabel,
 		posts: postTerms.plural,
 		realms: realmTerms.plural,
 		collections: "컬렉션",

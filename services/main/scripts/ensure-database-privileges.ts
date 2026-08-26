@@ -55,12 +55,6 @@ try {
 				sql.raw(`revoke all privileges on table public.atlas_schema_revisions from ${role}`),
 			);
 			await transaction.execute(
-				sql.raw(`revoke insert, update, delete, truncate on table public.vndb_v11_cutover_control from ${role}`),
-			);
-			await transaction.execute(
-				sql.raw(`grant select on table public.vndb_v11_cutover_control to ${role}`),
-			);
-			await transaction.execute(
 				sql.raw(`grant usage, select on all sequences in schema public to ${role}`),
 			);
 			await transaction.execute(
@@ -114,8 +108,6 @@ try {
 					readonly canRunApproximateWriter: boolean;
 					readonly canRunPgroongaCommand: boolean;
 					readonly canRunSearchText: boolean;
-					readonly canReadCutoverControl: boolean;
-					readonly canWriteCutoverControl: boolean;
 					readonly canWriteApproximateMetrics: boolean;
 				}
 			>(sql`
@@ -148,15 +140,6 @@ try {
 						'EXECUTE'
 					) as "canRunSearchText",
 					has_table_privilege(
-						${applicationRole}, 'public.vndb_v11_cutover_control', 'SELECT'
-					) as "canReadCutoverControl",
-					(
-						has_table_privilege(${applicationRole}, 'public.vndb_v11_cutover_control', 'INSERT')
-						or has_table_privilege(${applicationRole}, 'public.vndb_v11_cutover_control', 'UPDATE')
-						or has_table_privilege(${applicationRole}, 'public.vndb_v11_cutover_control', 'DELETE')
-						or has_table_privilege(${applicationRole}, 'public.vndb_v11_cutover_control', 'TRUNCATE')
-					) as "canWriteCutoverControl",
-					has_table_privilege(
 						${applicationRole},
 						'approx_count.metrics',
 						'INSERT,UPDATE,DELETE,TRUNCATE'
@@ -166,12 +149,10 @@ try {
 			if (
 				!proof?.canReadEstimate ||
 				!proof.canReadApproximateMetrics ||
-				!proof.canReadCutoverControl ||
 				!proof.canRunSearchText ||
 				proof.canMaintainUnit ||
 				proof.canRunApproximateWriter ||
 				proof.canRunPgroongaCommand ||
-				proof.canWriteCutoverControl ||
 				proof.canWriteApproximateMetrics
 			)
 				throw new Error("Application database privilege proof failed");

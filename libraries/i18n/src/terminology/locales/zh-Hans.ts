@@ -66,7 +66,7 @@ export const zhHansTerminology = defineTerminology("zh-Hans", {
 		},
 		forbidden: [],
 	},
-	tagStructure: {
+	tagPath: {
 		status: "approved",
 		forms: {
 			label: "标签路径",

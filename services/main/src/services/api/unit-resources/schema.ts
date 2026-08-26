@@ -59,6 +59,22 @@ export const EntityDetailQuery = t.Object(LocalizationLanguageQuery, {
 });
 export type EntityDetailQuery = Static<typeof EntityDetailQuery>;
 
+const MeasurementValue = t.Nullable(t.Integer({ minimum: 1, maximum: 2_147_483_647 }));
+
+export const UpsertEntityMeasurementBody = t.Object(
+	{
+		contextUnitId: t.Optional(t.Nullable(Uuid)),
+		heightMillimetres: MeasurementValue,
+		weightGrams: MeasurementValue,
+		bustMillimetres: MeasurementValue,
+		waistMillimetres: MeasurementValue,
+		hipsMillimetres: MeasurementValue,
+		revisionContext: t.Optional(RevisionContext),
+	},
+	{ additionalProperties: false },
+);
+export type UpsertEntityMeasurementBody = Static<typeof UpsertEntityMeasurementBody>;
+
 export const EntityLocalizationParams = t.Object({ unitId: Uuid, language: ContentLanguage });
 export type EntityLocalizationParams = Static<typeof EntityLocalizationParams>;
 
@@ -104,6 +120,12 @@ export const AddUnitSubjectAssociationBody = t.Object(
 	{ additionalProperties: false },
 );
 export type AddUnitSubjectAssociationBody = Static<typeof AddUnitSubjectAssociationBody>;
+
+export const SubjectAssociationSpoilerBody = t.Object(
+	{ spoilerLevel: t.Union([t.Literal(0), t.Literal(1), t.Literal(2)]) },
+	{ additionalProperties: false },
+);
+export type SubjectAssociationSpoilerBody = Static<typeof SubjectAssociationSpoilerBody>;
 
 export const AddUnitExternalLinkBody = t.Object(
 	{

@@ -6,14 +6,15 @@ import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 const { forms: realmTerms } = zhHansTerminology.realm;
 const { forms: followTerms } = zhHansTerminology.follow;
 const { forms: postTerms } = zhHansTerminology.post;
-const { forms: tagStructureTerms } = zhHansTerminology.tagStructure;
+const { forms: tagPathTerms } = zhHansTerminology.tagPath;
 
 export default {
 	page: {
 		title: "标签",
 		description: `查看全局语境中的标签，以及你所选标签来源对这个作品的${realmTerms.label}上下文判断。`,
 		viewAll: "查看完整标签页",
-		manageOnTagPage: `请在专用标签页加入标签或${tagStructureTerms.label}，以保留清楚的投票上下文。`,
+		more: insert("另有 {{count}} 项", { count: Number }),
+		manageOnTagPage: `请在专用标签页加入标签或${tagPathTerms.label}，以保留清楚的投票上下文。`,
 	},
 	card: {
 		open: insert("打开「{{tag}}」标签卡片（{{context}}）", {
@@ -22,7 +23,7 @@ export default {
 		}),
 		close: "关闭标签卡片",
 		globalContext: "全局语境",
-		structureContext: tagStructureTerms.label,
+		pathContext: tagPathTerms.label,
 		policy: `${realmTerms.label}设置`,
 		search: "搜索此标签",
 		details: "查看标签详情",
@@ -40,7 +41,7 @@ export default {
 	},
 	basic: {
 		title: "基本标签",
-		description: `由全局语境中的标签与${tagStructureTerms.pluralLabel}组成，不带入任何${realmTerms.label}的上下文判断。`,
+		description: `由全局语境中的标签与${tagPathTerms.pluralLabel}组成，不带入任何${realmTerms.label}的上下文判断。`,
 	},
 	voteContext: {
 		title: "按语境投票",
@@ -52,21 +53,31 @@ export default {
 		description: `全局语境中的标签与你${followTerms.action}的${realmTerms.label}标签分别保留原有语境；当前投票语境不会在这里重复显示。`,
 		empty: "尚未选择其他标签来源。",
 	},
-	structures: {
-		title: tagStructureTerms.pluralLabel,
-		description: `${tagStructureTerms.pluralLabel}会保留有意义的阶层，并优先于扁平标签显示。`,
-		addTitle: `加入${tagStructureTerms.inline}`,
-		addDescription: `请先搜索已通过的${tagStructureTerms.plural}；加入时会支持整条路径及路径上的每个标签。`,
-		add: `加入${tagStructureTerms.label}`,
-		create: `创建${tagStructureTerms.label}`,
-		details: `查看${tagStructureTerms.label}`,
-		empty: `这个作品还没有通过的${tagStructureTerms.plural}。`,
+	paths: {
+		title: tagPathTerms.pluralLabel,
+		description: `${tagPathTerms.pluralLabel}会保留有意义的阶层，并优先于扁平标签显示。`,
+		addTitle: `加入${tagPathTerms.inline}`,
+		addDescription: `请先搜索已通过的${tagPathTerms.plural}；加入时会支持整条路径及路径上的每个标签。`,
+		add: `加入${tagPathTerms.label}`,
+		create: `创建${tagPathTerms.label}`,
+		details: `查看${tagPathTerms.label}`,
+		empty: `这个作品还没有通过的${tagPathTerms.plural}。`,
 		memberFallback: "未命名标签",
-		pathLabel: `依序排列的${tagStructureTerms.label}`,
+		pathLabel: `依序排列的${tagPathTerms.label}`,
+		fitLabel: "是否符合",
+		spoilerLabel: "剧透程度",
+		spoilerNone: "无剧透",
+		spoilerMinor: "轻微剧透",
+		spoilerMajor: "重大剧透",
+		spoilerSummary: insert("投票：无 {{none}} · 轻微 {{minor}} · 重大 {{major}}", {
+			none: Number,
+			minor: Number,
+			major: Number,
+		}),
 	},
 	detail: {
 		sections: "标签详情页签",
-		tabs: { overview: "总览", discussion: "讨论", content: "相关内容", structure: "层级" },
+		tabs: { overview: "总览", discussion: "讨论", content: "相关内容", paths: "层级" },
 		overviewTitle: "标签正文",
 		overviewDescription: "阅读这个标签的完整说明；摘要仍用于卡片和快速浏览。",
 		bodyEmpty: "这个标签尚未填写正文。",
@@ -74,22 +85,22 @@ export default {
 		discussionDescription: `创建以这个标签为主题的${postTerms.label}，并参与已有讨论。`,
 		contentTitle: "相关内容",
 		contentDescription: "浏览应用了这个标签的作品和其他内容。",
-		structureTitle: "标签层级",
-		structureDescription: "查看这个标签在社区通过的标签结构中的位置。",
+		pathsTitle: "标签层级",
+		pathsDescription: "查看这个标签在社区通过的标签结构中的位置。",
 		editTitle: "编辑标签内容",
 		editDescription: "更新当前内容语言的标题、摘要和正文。",
 		editNavigation: "标签内容管理",
 		backToTag: "返回标签",
 		backToEditOverview: "返回编辑总览",
 		childrenTitle: "直接子标签",
-		childrenDescription: `这些关系来自通过投票且由社区锁定的${tagStructureTerms.label}；每个子标签下方会显示其直接子标签。`,
+		childrenDescription: `这些关系来自通过投票且由社区锁定的${tagPathTerms.label}；每个子标签下方会显示其直接子标签。`,
 		noChildren: "这个标签当前没有通过的直接子标签。",
 		grandchildrenTitle: "直接子标签",
 	},
-	createStructure: {
-		title: `创建${tagStructureTerms.label}`,
+	createPath: {
+		title: `创建${tagPathTerms.label}`,
 		description:
-			"请依「较广泛」到「较具体」的顺序创建路径。创建后社区成员不能编辑；平台管理员可进行留有审计记录的修正。",
+			"请依“较广泛”到“较具体”的顺序创建路径。定义创建后不可编辑；如需调整，请创建新路径并提交人工治理提案。",
 		pick: "选择下一个标签",
 		addMember: "加入路径",
 		removeMember: "从路径移除",
@@ -97,15 +108,11 @@ export default {
 		moveLater: "向后移",
 		preview: "社区锁定路径预览",
 		minimum: "请加入至少两个不同的标签。",
-		submit: `创建${tagStructureTerms.label}并投票`,
-	},
-	adminEditStructure: {
-		title: `修正${tagStructureTerms.label}`,
-		description:
-			"平台管理员可以修正成员或顺序；条目身份、既有投票与所有应用关系都会保留，修正内容也会写入历史记录。",
-		reasonLabel: "修正理由",
-		reasonPlaceholder: "说明为何需要进行这项管理修正。",
-		submit: "保存并记录修正",
+		submit: `创建${tagPathTerms.label}并投票`,
+		relatedTitle: "检查相关的已接受路径",
+		relatedDescription:
+			"这些路径已经终止于同一标签，但不会被自动视为重复。请先核对语义，再创建独立的不可变定义。",
+		continueDistinct: "创建独立路径",
 	},
 	create: {
 		noResults: insert("找不到符合“{{query}}”的标签。", { query: String }),
@@ -172,6 +179,13 @@ export default {
 		noRanked: "全局语境中没有其他可设为精选的标签。",
 	},
 	realms: {
+		pathsTitle: `${realmTerms.label}标签路径`,
+		applyPath: "应用路径",
+		authority: { realm: `此${realmTerms.label}`, global: "全局" },
+		pathAuthority: insert("契合度：{{fit}} · 剧透：{{spoiler}}", {
+			fit: String,
+			spoiler: String,
+		}),
 		title: `${realmTerms.label}标签上下文`,
 		description: `各${realmTerms.inline}的判断彼此独立，不会与全局语境或其他${realmTerms.inline}合并计分。`,
 		addTitle: `在这个${realmTerms.label}中添加标签投票`,
@@ -207,5 +221,5 @@ export default {
 	},
 	unnamedTag: "未命名标签",
 	unnamedRealm: `未命名${realmTerms.label}`,
-	unnamedStructure: `未命名${tagStructureTerms.label}`,
+	unnamedPath: `未命名${tagPathTerms.label}`,
 } satisfies typeof import("../zh-Hant/tags").default;

@@ -21,10 +21,10 @@ export type {
 	ReadinessState,
 	RequestMethod,
 	StatusClass,
-	VndbVoteAdmissionAuthority,
-	VndbVoteAdmissionEvent,
-	VndbVoteAdmissionFamily,
-	VndbVoteAdmissionOutcome,
+	VoteAdmissionAuthority,
+	VoteAdmissionEvent,
+	VoteAdmissionFamily,
+	VoteAdmissionOutcome,
 } from "./metrics";
 export { normalizeOperationName, normalizeRequestMethod, normalizeRouteTemplate } from "./metrics";
 export {

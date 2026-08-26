@@ -20,19 +20,19 @@ export type ReadinessFailureCategory =
 	| "timeout"
 	| "overall_timeout";
 
-export type VndbVoteAdmissionFamily =
+export type VoteAdmissionFamily =
 	| "unit_tag"
-	| "tag_structure"
-	| "tag_structure_application"
+	| "tag_path"
+	| "tag_path_application"
 	| "content_pack"
 	| "unit_merge";
-export type VndbVoteAdmissionAuthority = "global" | "realm";
-export type VndbVoteAdmissionOutcome = "attempted" | "committed" | "backpressured" | "unexpected";
-export type VndbVoteAdmissionEvent =
+export type VoteAdmissionAuthority = "global" | "realm";
+export type VoteAdmissionOutcome = "attempted" | "committed" | "backpressured" | "unexpected";
+export type VoteAdmissionEvent =
 	| { readonly outcome: "attempted" }
 	| {
 			readonly durationMilliseconds: number;
-			readonly outcome: Exclude<VndbVoteAdmissionOutcome, "attempted">;
+			readonly outcome: Exclude<VoteAdmissionOutcome, "attempted">;
 	  };
 
 export interface DatabasePoolState {
@@ -117,8 +117,9 @@ export class ObservabilityMetrics {
 	readonly #persistedDocumentRepairs: Counter;
 	readonly #fractionalPositionRebalances: Counter;
 	readonly #fractionalPositionRebalanceMembers: Histogram;
-	readonly #vndbVoteAdmissions: Counter;
-	readonly #vndbVoteAdmissionDuration: Histogram;
+	readonly #voteAdmissions: Counter;
+	readonly #voteAdmissionDuration: Histogram;
+	readonly #tagPathGovernanceDecisionLatency: Histogram;
 	#workerHeartbeatAt: number | undefined;
 	#activeWorkerJobStartedAt: number | undefined;
 	#databasePoolState: (() => DatabasePoolState) | undefined;
@@ -178,12 +179,16 @@ export class ObservabilityMetrics {
 			"rezics.ordering.rebalance.members",
 			{ unit: "{member}" },
 		);
-		this.#vndbVoteAdmissions = meter.createCounter("rezics.vndb.vote.admission", {
+		this.#voteAdmissions = meter.createCounter("rezics.vote.admission", {
 			unit: "{transaction}",
 		});
-		this.#vndbVoteAdmissionDuration = meter.createHistogram("rezics.vndb.vote.admission.duration", {
+		this.#voteAdmissionDuration = meter.createHistogram("rezics.vote.admission.duration", {
 			unit: "ms",
 		});
+		this.#tagPathGovernanceDecisionLatency = meter.createHistogram(
+			"rezics.tag_path.governance.decision_latency",
+			{ unit: "ms" },
+		);
 
 		meter
 			.createObservableGauge("rezics.runtime.memory.rss", { unit: "By" })
@@ -361,23 +366,32 @@ export class ObservabilityMetrics {
 		this.#fractionalPositionRebalanceMembers.record(members, attributes);
 	}
 
-	vndbVoteAdmission(
-		family: VndbVoteAdmissionFamily,
-		authority: VndbVoteAdmissionAuthority,
-		event: VndbVoteAdmissionEvent,
+	voteAdmission(
+		family: VoteAdmissionFamily,
+		authority: VoteAdmissionAuthority,
+		event: VoteAdmissionEvent,
 	): void {
 		const attributes = {
-			"vndb.vote.family": family,
-			"vndb.vote.authority": authority,
-			"vndb.vote.outcome": event.outcome,
+			"vote.family": family,
+			"vote.authority": authority,
+			"vote.outcome": event.outcome,
 		};
 		if (
 			event.outcome !== "attempted" &&
 			(!Number.isFinite(event.durationMilliseconds) || event.durationMilliseconds < 0)
 		)
-			throw new Error("VNDB vote admission duration must be a non-negative finite number");
-		this.#vndbVoteAdmissions.add(1, attributes);
+			throw new Error("Vote admission duration must be a non-negative finite number");
+		this.#voteAdmissions.add(1, attributes);
 		if (event.outcome !== "attempted")
-			this.#vndbVoteAdmissionDuration.record(event.durationMilliseconds, attributes);
+			this.#voteAdmissionDuration.record(event.durationMilliseconds, attributes);
+	}
+
+	tagPathGovernanceDecisionLatency(
+		durationMilliseconds: number,
+		resolution: "accepted" | "rejected" | "reversed",
+	): void {
+		if (!Number.isFinite(durationMilliseconds) || durationMilliseconds < 0)
+			throw new Error("Tag Path governance decision latency must be non-negative and finite");
+		this.#tagPathGovernanceDecisionLatency.record(durationMilliseconds, { resolution });
 	}
 }

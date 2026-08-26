@@ -3,9 +3,9 @@ import * as Data from "effect/Data";
 
 import { databaseErrorMatches } from "./constraint";
 
-export class VndbVoteHotKeyBusy extends Data.TaggedError("VndbVoteHotKeyBusy") {
+export class VoteHotKeyBusy extends Data.TaggedError("VoteHotKeyBusy") {
 	static readonly status = StatusCodes.TOO_MANY_REQUESTS as const;
-	readonly status = VndbVoteHotKeyBusy.status;
+	readonly status = VoteHotKeyBusy.status;
 	readonly message = "The vote target is busy; retry shortly";
 	readonly retryAfterSeconds = 1;
 
@@ -96,7 +96,7 @@ export class ContentLabelPlatformRemovalForbidden extends Data.TaggedError(
 }
 
 export const DatabaseErrors = [
-	VndbVoteHotKeyBusy,
+	VoteHotKeyBusy,
 	TagNotDirectlyApplicable,
 	ContentLabelApplicationInvalid,
 	ContentLabelJudgmentForbidden,
@@ -108,9 +108,9 @@ export const DatabaseErrors = [
 	ContentLabelPlatformRemovalForbidden,
 ] as const;
 
-type VndbPolicyConstraintError = Exclude<
+type TagPolicyConstraintError = Exclude<
 	InstanceType<(typeof DatabaseErrors)[number]>,
-	VndbVoteHotKeyBusy
+	VoteHotKeyBusy
 >;
 
 const contentLabelApplicationConstraints = {
@@ -122,7 +122,7 @@ const contentLabelApplicationConstraints = {
 } as const satisfies Record<string, ContentLabelApplicationInvalidReason>;
 
 /** Translates only exact, canonical PostgreSQL policy identities into public API errors. */
-export function toVndbPolicyConstraintError(error: unknown): VndbPolicyConstraintError | undefined {
+export function toTagPolicyConstraintError(error: unknown): TagPolicyConstraintError | undefined {
 	if (databaseErrorMatches(error, { code: "23514", constraint: "tag_directly_applicable" }))
 		return new TagNotDirectlyApplicable();
 

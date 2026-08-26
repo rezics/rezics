@@ -4,7 +4,7 @@ import { join } from "node:path";
 import { env } from "../config";
 import { assertLocalDatabaseUrl } from "../seed/data";
 import { database } from "../database";
-import { runVndbVoteTransaction } from "../database/vndb-vote-admission";
+import { runVoteTransaction } from "../database/vote-admission";
 import {
 	DefaultContentPackBundleId,
 	parseContentPackRunOptions,
@@ -43,7 +43,7 @@ export class ContentPackService {
 				console.info("Content pack verified", { packId, ...verified });
 				continue;
 			}
-			const result = await runVndbVoteTransaction(
+			const result = await runVoteTransaction(
 				{ family: "content_pack", authority: "global" },
 				(tx) => applyContentPack(tx, pack, sourceRoot),
 			);

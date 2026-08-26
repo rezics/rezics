@@ -6,7 +6,7 @@ const { forms: dockTerms } = frTerminology.dock;
 const { forms: followTerms } = frTerminology.follow;
 const { forms: postTerms } = frTerminology.post;
 const { forms: realmTerms } = frTerminology.realm;
-const { forms: tagStructureTerms } = frTerminology.tagStructure;
+const { forms: tagPathTerms } = frTerminology.tagPath;
 const { forms: unitSlugTerms } = frTerminology.unitSlug;
 const { forms: zoneTerms } = frTerminology.zone;
 const { forms: entityTerms } = frTerminology.entity;
@@ -19,7 +19,7 @@ export default {
 	ApiTokenPermissionRequired: `Ce jeton ${verbatimTerms.api.value} ne dispose pas de l’autorisation requise.`,
 	ApiTokenRateLimitExceeded: `Ce jeton ${verbatimTerms.api.value} envoie des requêtes trop rapidement. Réessayez dans un instant.`,
 	ApiQuotaExceeded: `Le quota ${verbatimTerms.api.value} est épuisé. Réessayez après le délai indiqué.`,
-	VndbVoteHotKeyBusy:
+	VoteHotKeyBusy:
 		"Cette cible de vote est momentanément très sollicitée. Réessayez dans un instant.",
 	ApiQuotaPolicyNotFound: `La politique de quota ${verbatimTerms.api.value} demandée est introuvable.`,
 	ApiQuotaPolicyKeyConflict: `Une politique de quota ${verbatimTerms.api.value} utilise déjà cette clé.`,
@@ -323,11 +323,11 @@ export default {
 	RealmTagContextRequired: `Ce ${realmTerms.inline} doit d’abord fournir une explication officielle et actuellement visible de cette étiquette.`,
 	RealmTagSelfReferenceForbidden: "Un Tag ne peut pas être appliqué à lui-même.",
 	SharedSearchQueryNotFound: "Cette requête de recherche partagée est introuvable.",
-	InvalidTagStructure: `Ce ${tagStructureTerms.inline} n’est pas valide.`,
-	TagStructureNotFound: `Ce ${tagStructureTerms.inline} est introuvable.`,
-	TagStructureApplicationNotFound: `Cette Unit ne possède pas ce ${tagStructureTerms.inline}.`,
-	TagStructureChanged: `Ce ${tagStructureTerms.inline} a été modifié ailleurs. Actualisez la page et réessayez.`,
-	TagStructureDefinitionConflict: `Un ${tagStructureTerms.inline} identique existe déjà.`,
+	InvalidTagPath: `Ce ${tagPathTerms.inline} n’est pas valide.`,
+	TagPathNotFound: `Ce ${tagPathTerms.inline} est introuvable.`,
+	TagPathApplicationNotFound: `Cette Unit ne possède pas ce ${tagPathTerms.inline}.`,
+	TagPathChanged: `Ce ${tagPathTerms.inline} a été modifié ailleurs. Actualisez la page et réessayez.`,
+	TagPathDefinitionConflict: `Un ${tagPathTerms.inline} identique existe déjà.`,
 	AssociationContextPostInvalid: `Le contexte de la relation doit être une ${postTerms.inline} de wiki.`,
 	ProgressEntryNotFound: "Cet événement de progression est introuvable.",
 	PostTagMentionVoteConflict: `Cette mention d’étiquette entre en conflit avec votre vote négatif existant sur la ${postTerms.inline}.`,

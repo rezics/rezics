@@ -15,7 +15,7 @@ import type {
 } from "@rezics/filter";
 import { sql, type SQL } from "drizzle-orm";
 
-import { currentUnitEffectiveTag, currentUnitTagJudgmentStat } from "../database/schema";
+import { unitEffectiveTag, unitTagJudgmentStat } from "../database/schema";
 
 type SqlName = SQL<unknown>;
 
@@ -148,7 +148,7 @@ function tagAssertionCondition(
 	if (!authority) {
 		conditions.push(sql`exists (
 			select 1
-			from ${currentUnitEffectiveTag} filter_effective_tag
+			from ${unitEffectiveTag} filter_effective_tag
 			join unit filter_tag on filter_tag.id = filter_effective_tag.tag_id
 			where filter_effective_tag.unit_id = ${unitId}
 				and ${tagReference(sql`filter_effective_tag.tag_id`, sql`filter_tag.kind`)}
@@ -159,11 +159,11 @@ function tagAssertionCondition(
 		const consensus = authority.view.consensus;
 		conditions.push(sql`exists (
 			select 1
-			from ${currentUnitEffectiveTag} filter_effective_tag
+			from ${unitEffectiveTag} filter_effective_tag
 			join unit filter_tag on filter_tag.id = filter_effective_tag.tag_id
 			${
 				consensus
-					? sql`join ${currentUnitTagJudgmentStat} filter_tag_stat
+					? sql`join ${unitTagJudgmentStat} filter_tag_stat
 						on filter_tag_stat.unit_id = filter_effective_tag.unit_id
 						and filter_tag_stat.tag_id = filter_effective_tag.tag_id`
 					: sql``
@@ -470,7 +470,7 @@ function tagAssertionCandidateSet(
 	if (!authority || (authority.kind === "global" && authority.view.kind === "effective")) {
 		if (tagIds)
 			conjunctiveSets.push(sql`select filter_effective_tag.unit_id
-				from ${currentUnitEffectiveTag} filter_effective_tag
+				from ${unitEffectiveTag} filter_effective_tag
 				where ${valuesCondition(sql`filter_effective_tag.tag_id`, tagIds, true)}`);
 	} else if (authority.kind === "global") {
 		if (tagIds)

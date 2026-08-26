@@ -12,6 +12,8 @@ export interface PresentationPreferences {
 	readonly interfaceLocale: StoredUiLocale;
 	readonly chineseContentDisplay: ChineseContentDisplay;
 	readonly filterFeedByPreferredLanguages: boolean;
+	readonly alwaysShowSpoilers: boolean;
+	readonly alwaysShowNsfw: boolean;
 	readonly preferredLanguages: readonly ContentLanguage[];
 }
 
@@ -35,6 +37,8 @@ export function parsePresentationPreferences(value: unknown): PresentationPrefer
 		typeof value.chineseContentDisplay !== "string" ||
 		!isChineseContentDisplay(value.chineseContentDisplay) ||
 		typeof value.filterFeedByPreferredLanguages !== "boolean" ||
+		typeof value.alwaysShowSpoilers !== "boolean" ||
+		typeof value.alwaysShowNsfw !== "boolean" ||
 		!Array.isArray(preferredLanguages) ||
 		!preferredLanguages.every(
 			(language): language is ContentLanguage =>
@@ -49,6 +53,8 @@ export function parsePresentationPreferences(value: unknown): PresentationPrefer
 		interfaceLocale: value.interfaceLocale,
 		chineseContentDisplay: value.chineseContentDisplay,
 		filterFeedByPreferredLanguages: value.filterFeedByPreferredLanguages,
+		alwaysShowSpoilers: value.alwaysShowSpoilers,
+		alwaysShowNsfw: value.alwaysShowNsfw,
 		preferredLanguages: [...preferredLanguages],
 	};
 }

@@ -56,7 +56,7 @@ export {
 export {
 	TagApplicationPolicyResponse,
 	toApiErrorResponse,
-	VndbVoteBackpressureResponse,
+	VoteBackpressureResponse,
 } from "./error-response";
 
 const NullableText = t.Nullable(t.String());
@@ -451,6 +451,17 @@ export const UnitDetailResponse = t.Object({
 				{ maxItems: SubjectAssociationEntityTagPreviewLimit },
 			),
 			contextPost: t.Nullable(AssociationContextPostResponse),
+			spoiler: t.Object({
+				level: t.Union([t.Literal(0), t.Literal(1), t.Literal(2)]),
+				concealed: t.Boolean(),
+				voteCount: t.Integer({ minimum: 0 }),
+				distribution: t.Object({
+					none: t.Integer({ minimum: 0 }),
+					minor: t.Integer({ minimum: 0 }),
+					major: t.Integer({ minimum: 0 }),
+				}),
+				viewerLevel: t.Nullable(t.Union([t.Literal(0), t.Literal(1), t.Literal(2)])),
+			}),
 		}),
 	),
 	externalLinks: t.Array(UnitDetailExternalLinkResponse),
@@ -630,7 +641,15 @@ export const PostListResponse = t.Object({
 			subjectId: t.Nullable(Uuid),
 			rootPostId: t.Nullable(Uuid),
 			parentPostId: t.Nullable(Uuid),
-			body: PortableTextDocument,
+			body: t.Nullable(PortableTextDocument),
+			contentSpoiler: t.Object({
+				level: t.Union([t.Literal(0), t.Literal(1), t.Literal(2)]),
+				concealed: t.Boolean(),
+			}),
+			contentNsfw: t.Object({
+				labelled: t.Boolean(),
+				concealed: t.Boolean(),
+			}),
 			replyCount: t.Integer(),
 			title: NullableText,
 			summary: NullableText,
@@ -746,6 +765,14 @@ const FeedPostItemFields = {
 	rootPostId: t.Nullable(Uuid),
 	parentPostId: t.Nullable(Uuid),
 	body: t.Nullable(PortableTextDocument),
+	contentSpoiler: t.Object({
+		level: t.Union([t.Literal(0), t.Literal(1), t.Literal(2)]),
+		concealed: t.Boolean(),
+	}),
+	contentNsfw: t.Object({
+		labelled: t.Boolean(),
+		concealed: t.Boolean(),
+	}),
 	replyCount: t.Integer(),
 	latestRevisionId: t.Nullable(Uuid),
 	replyContext: t.Nullable(
@@ -870,6 +897,8 @@ export const PreferencesResponse = t.Object({
 	collectionConfig: t.Nullable(CollectionConfigV1),
 	personalizedFeed: t.Boolean(),
 	filterFeedByPreferredLanguages: t.Boolean(),
+	alwaysShowSpoilers: t.Boolean(),
+	alwaysShowNsfw: t.Boolean(),
 	contentRatings: t.Array(ContentRating, {
 		minItems: 1,
 		uniqueItems: true,
@@ -1069,6 +1098,19 @@ export const EntityDetailResponse = t.Object({
 	owner: t.Nullable(UnitSummaryResponse),
 	externalLinks: t.Array(UnitDetailExternalLinkResponse),
 	variantContext: UnitVariantContextResponse,
+	measurements: t.Array(
+		t.Object({
+			id: Uuid,
+			contextUnitId: t.Nullable(Uuid),
+			heightMillimetres: t.Nullable(t.Integer({ minimum: 1 })),
+			weightGrams: t.Nullable(t.Integer({ minimum: 1 })),
+			bustMillimetres: t.Nullable(t.Integer({ minimum: 1 })),
+			waistMillimetres: t.Nullable(t.Integer({ minimum: 1 })),
+			hipsMillimetres: t.Nullable(t.Integer({ minimum: 1 })),
+			createdAt: DateTime,
+			updatedAt: DateTime,
+		}),
+	),
 	capabilities: t.Object({
 		canEdit: t.Boolean(),
 		canEditCreditAttributions: t.Boolean(),
@@ -1094,6 +1136,8 @@ export const EntityDetailResponse = t.Object({
 		}),
 	),
 });
+
+export const EntityMeasurementResponse = EntityDetailResponse.properties.measurements.items;
 export const CollectionDetailResponse = t.Object({
 	id: Uuid,
 	status: t.String(),
@@ -1208,6 +1252,14 @@ const PostThreadDetailFields = {
 	title: NullableText,
 	summary: NullableText,
 	body: PortableTextDocument,
+	contentSpoiler: t.Object({
+		level: t.Union([t.Literal(0), t.Literal(1), t.Literal(2)]),
+		concealed: t.Boolean(),
+	}),
+	contentNsfw: t.Object({
+		labelled: t.Boolean(),
+		concealed: t.Boolean(),
+	}),
 	latestRevisionId: t.Nullable(Uuid),
 	createdAt: DateTime,
 	updatedAt: DateTime,
@@ -1254,6 +1306,14 @@ export const ReviewDetailResponse = t.Object({
 	summary: NullableText,
 	language: ContentLanguage,
 	body: t.Nullable(PortableTextDocument),
+	contentSpoiler: t.Object({
+		level: t.Union([t.Literal(0), t.Literal(1), t.Literal(2)]),
+		concealed: t.Boolean(),
+	}),
+	contentNsfw: t.Object({
+		labelled: t.Boolean(),
+		concealed: t.Boolean(),
+	}),
 	replyCount: t.Integer(),
 	latestRevisionId: t.Nullable(Uuid),
 	createdAt: DateTime,
@@ -1473,6 +1533,17 @@ export const SubjectAssociationResponse = t.Object({
 	position: FractionalPosition,
 	createdAt: DateTime,
 	updatedAt: DateTime,
+});
+export const SubjectAssociationSpoilerResponse = t.Object({
+	associationId: Uuid,
+	level: t.Union([t.Literal(0), t.Literal(1), t.Literal(2)]),
+	voteCount: t.Integer({ minimum: 0 }),
+	distribution: t.Object({
+		none: t.Integer({ minimum: 0 }),
+		minor: t.Integer({ minimum: 0 }),
+		major: t.Integer({ minimum: 0 }),
+	}),
+	viewerLevel: t.Nullable(t.Union([t.Literal(0), t.Literal(1), t.Literal(2)])),
 });
 export const UnitExternalLinkResponse = t.Object(
 	{

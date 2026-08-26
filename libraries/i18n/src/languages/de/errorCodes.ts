@@ -6,7 +6,7 @@ const { forms: dockTerms } = deTerminology.dock;
 const { forms: followTerms } = deTerminology.follow;
 const { forms: postTerms } = deTerminology.post;
 const { forms: realmTerms } = deTerminology.realm;
-const { forms: tagStructureTerms } = deTerminology.tagStructure;
+const { forms: tagPathTerms } = deTerminology.tagPath;
 const { forms: unitSlugTerms } = deTerminology.unitSlug;
 const { forms: zoneTerms } = deTerminology.zone;
 const { forms: entityTerms } = deTerminology.entity;
@@ -19,7 +19,7 @@ export default {
 	ApiTokenPermissionRequired: `Dieses ${verbatimTerms.api.value}-Token hat nicht die erforderliche Berechtigung.`,
 	ApiTokenRateLimitExceeded: `Dieses ${verbatimTerms.api.value}-Token sendet Anfragen zu schnell. Versuche es gleich noch einmal.`,
 	ApiQuotaExceeded: `Das ${verbatimTerms.api.value}-Kontingent ist aufgebraucht. Versuche es nach der angegebenen Zeit erneut.`,
-	VndbVoteHotKeyBusy: "Dieses Abstimmungsziel ist gerade ausgelastet. Versuche es in Kürze erneut.",
+	VoteHotKeyBusy: "Dieses Abstimmungsziel ist gerade ausgelastet. Versuche es in Kürze erneut.",
 	ApiQuotaPolicyNotFound: `Die angeforderte ${verbatimTerms.api.value}-Kontingentrichtlinie wurde nicht gefunden.`,
 	ApiQuotaPolicyKeyConflict: `Eine ${verbatimTerms.api.value}-Kontingentrichtlinie verwendet diesen Schlüssel bereits.`,
 	ApiQuotaPolicyInvalid: `Die Konfiguration der ${verbatimTerms.api.value}-Kontingentrichtlinie ist ungültig.`,
@@ -323,11 +323,11 @@ export default {
 	RealmTagContextRequired: `Dieses ${realmTerms.inline} muss den Tag zuerst in einer derzeit sichtbaren offiziellen Erklärung beschreiben.`,
 	RealmTagSelfReferenceForbidden: "Ein Tag kann nicht auf sich selbst angewendet werden.",
 	SharedSearchQueryNotFound: "Diese geteilte Suchanfrage wurde nicht gefunden.",
-	InvalidTagStructure: `Dieser ${tagStructureTerms.inline} ist ungültig.`,
-	TagStructureNotFound: `Dieser ${tagStructureTerms.inline} wurde nicht gefunden.`,
-	TagStructureApplicationNotFound: `Diese Unit hat diesen ${tagStructureTerms.inline} nicht.`,
-	TagStructureChanged: `Dieser ${tagStructureTerms.inline} wurde an anderer Stelle geändert. Aktualisiere die Seite und versuche es erneut.`,
-	TagStructureDefinitionConflict: `Ein identischer ${tagStructureTerms.inline} ist bereits vorhanden.`,
+	InvalidTagPath: `Dieser ${tagPathTerms.inline} ist ungültig.`,
+	TagPathNotFound: `Dieser ${tagPathTerms.inline} wurde nicht gefunden.`,
+	TagPathApplicationNotFound: `Diese Unit hat diesen ${tagPathTerms.inline} nicht.`,
+	TagPathChanged: `Dieser ${tagPathTerms.inline} wurde an anderer Stelle geändert. Aktualisiere die Seite und versuche es erneut.`,
+	TagPathDefinitionConflict: `Ein identischer ${tagPathTerms.inline} ist bereits vorhanden.`,
 	AssociationContextPostInvalid: `Der Beziehungskontext muss ein Wiki-${postTerms.inline} sein.`,
 	ProgressEntryNotFound: "Dieses Fortschrittsereignis wurde nicht gefunden.",
 	PostTagMentionVoteConflict: `Diese Tag-Erwähnung steht im Konflikt mit deiner vorhandenen Gegenstimme für den ${postTerms.inline}.`,
