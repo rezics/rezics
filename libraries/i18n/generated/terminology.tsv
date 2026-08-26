@@ -245,30 +245,30 @@ label	A lightweight localized-title Unit used as a structural heading or taxonom
 label	A lightweight localized-title Unit used as a structural heading or taxonomy entry; this is distinct from an assignable Tag.	ko	approved	pluralLabel	분류 항목	-
 label	A lightweight localized-title Unit used as a structural heading or taxonomy entry; this is distinct from an assignable Tag.	ko	approved	inline	분류 항목	-
 label	A lightweight localized-title Unit used as a structural heading or taxonomy entry; this is distinct from an assignable Tag.	ko	approved	plural	분류 항목	-
-tagStructure	A community-immutable, community-voted ordered path of Tags; platform administrators may make audited corrections.	en	approved	label	Tag path	Tag structure | Structure tag
-tagStructure	A community-immutable, community-voted ordered path of Tags; platform administrators may make audited corrections.	en	approved	pluralLabel	Tag paths	Tag structure | Structure tag
-tagStructure	A community-immutable, community-voted ordered path of Tags; platform administrators may make audited corrections.	en	approved	inline	tag path	Tag structure | Structure tag
-tagStructure	A community-immutable, community-voted ordered path of Tags; platform administrators may make audited corrections.	en	approved	plural	tag paths	Tag structure | Structure tag
-tagStructure	A community-immutable, community-voted ordered path of Tags; platform administrators may make audited corrections.	zh-Hant	approved	label	標籤路徑	Tag structure | Structure tag | 結構標籤
-tagStructure	A community-immutable, community-voted ordered path of Tags; platform administrators may make audited corrections.	zh-Hant	approved	pluralLabel	標籤路徑	Tag structure | Structure tag | 結構標籤
-tagStructure	A community-immutable, community-voted ordered path of Tags; platform administrators may make audited corrections.	zh-Hant	approved	inline	標籤路徑	Tag structure | Structure tag | 結構標籤
-tagStructure	A community-immutable, community-voted ordered path of Tags; platform administrators may make audited corrections.	zh-Hant	approved	plural	標籤路徑	Tag structure | Structure tag | 結構標籤
-tagStructure	A community-immutable, community-voted ordered path of Tags; platform administrators may make audited corrections.	zh-Hans	approved	label	标签路径	Tag structure | Structure tag | 结构标签
-tagStructure	A community-immutable, community-voted ordered path of Tags; platform administrators may make audited corrections.	zh-Hans	approved	pluralLabel	标签路径	Tag structure | Structure tag | 结构标签
-tagStructure	A community-immutable, community-voted ordered path of Tags; platform administrators may make audited corrections.	zh-Hans	approved	inline	标签路径	Tag structure | Structure tag | 结构标签
-tagStructure	A community-immutable, community-voted ordered path of Tags; platform administrators may make audited corrections.	zh-Hans	approved	plural	标签路径	Tag structure | Structure tag | 结构标签
-tagStructure	A community-immutable, community-voted ordered path of Tags; platform administrators may make audited corrections.	de	approved	label	Tag-Pfad	Tag structure | Structure tag
-tagStructure	A community-immutable, community-voted ordered path of Tags; platform administrators may make audited corrections.	de	approved	pluralLabel	Tag-Pfade	Tag structure | Structure tag
-tagStructure	A community-immutable, community-voted ordered path of Tags; platform administrators may make audited corrections.	de	approved	inline	Tag-Pfad	Tag structure | Structure tag
-tagStructure	A community-immutable, community-voted ordered path of Tags; platform administrators may make audited corrections.	de	approved	plural	Tag-Pfade	Tag structure | Structure tag
-tagStructure	A community-immutable, community-voted ordered path of Tags; platform administrators may make audited corrections.	ja	approved	label	タグパス	Tag structure | Structure tag
-tagStructure	A community-immutable, community-voted ordered path of Tags; platform administrators may make audited corrections.	ja	approved	pluralLabel	タグパス	Tag structure | Structure tag
-tagStructure	A community-immutable, community-voted ordered path of Tags; platform administrators may make audited corrections.	ja	approved	inline	タグパス	Tag structure | Structure tag
-tagStructure	A community-immutable, community-voted ordered path of Tags; platform administrators may make audited corrections.	ja	approved	plural	タグパス	Tag structure | Structure tag
-tagStructure	A community-immutable, community-voted ordered path of Tags; platform administrators may make audited corrections.	ko	approved	label	태그 경로	Tag structure | Structure tag
-tagStructure	A community-immutable, community-voted ordered path of Tags; platform administrators may make audited corrections.	ko	approved	pluralLabel	태그 경로	Tag structure | Structure tag
-tagStructure	A community-immutable, community-voted ordered path of Tags; platform administrators may make audited corrections.	ko	approved	inline	태그 경로	Tag structure | Structure tag
-tagStructure	A community-immutable, community-voted ordered path of Tags; platform administrators may make audited corrections.	ko	approved	plural	태그 경로	Tag structure | Structure tag
+tagPath	A community-immutable, community-voted ordered path of Tags; platform administrators may make audited corrections.	en	approved	label	Tag path	Tag structure | Structure tag
+tagPath	A community-immutable, community-voted ordered path of Tags; platform administrators may make audited corrections.	en	approved	pluralLabel	Tag paths	Tag structure | Structure tag
+tagPath	A community-immutable, community-voted ordered path of Tags; platform administrators may make audited corrections.	en	approved	inline	tag path	Tag structure | Structure tag
+tagPath	A community-immutable, community-voted ordered path of Tags; platform administrators may make audited corrections.	en	approved	plural	tag paths	Tag structure | Structure tag
+tagPath	A community-immutable, community-voted ordered path of Tags; platform administrators may make audited corrections.	zh-Hant	approved	label	標籤路徑	Tag structure | Structure tag | 結構標籤
+tagPath	A community-immutable, community-voted ordered path of Tags; platform administrators may make audited corrections.	zh-Hant	approved	pluralLabel	標籤路徑	Tag structure | Structure tag | 結構標籤
+tagPath	A community-immutable, community-voted ordered path of Tags; platform administrators may make audited corrections.	zh-Hant	approved	inline	標籤路徑	Tag structure | Structure tag | 結構標籤
+tagPath	A community-immutable, community-voted ordered path of Tags; platform administrators may make audited corrections.	zh-Hant	approved	plural	標籤路徑	Tag structure | Structure tag | 結構標籤
+tagPath	A community-immutable, community-voted ordered path of Tags; platform administrators may make audited corrections.	zh-Hans	approved	label	标签路径	Tag structure | Structure tag | 结构标签
+tagPath	A community-immutable, community-voted ordered path of Tags; platform administrators may make audited corrections.	zh-Hans	approved	pluralLabel	标签路径	Tag structure | Structure tag | 结构标签
+tagPath	A community-immutable, community-voted ordered path of Tags; platform administrators may make audited corrections.	zh-Hans	approved	inline	标签路径	Tag structure | Structure tag | 结构标签
+tagPath	A community-immutable, community-voted ordered path of Tags; platform administrators may make audited corrections.	zh-Hans	approved	plural	标签路径	Tag structure | Structure tag | 结构标签
+tagPath	A community-immutable, community-voted ordered path of Tags; platform administrators may make audited corrections.	de	approved	label	Tag-Pfad	Tag structure | Structure tag
+tagPath	A community-immutable, community-voted ordered path of Tags; platform administrators may make audited corrections.	de	approved	pluralLabel	Tag-Pfade	Tag structure | Structure tag
+tagPath	A community-immutable, community-voted ordered path of Tags; platform administrators may make audited corrections.	de	approved	inline	Tag-Pfad	Tag structure | Structure tag
+tagPath	A community-immutable, community-voted ordered path of Tags; platform administrators may make audited corrections.	de	approved	plural	Tag-Pfade	Tag structure | Structure tag
+tagPath	A community-immutable, community-voted ordered path of Tags; platform administrators may make audited corrections.	ja	approved	label	タグパス	Tag structure | Structure tag
+tagPath	A community-immutable, community-voted ordered path of Tags; platform administrators may make audited corrections.	ja	approved	pluralLabel	タグパス	Tag structure | Structure tag
+tagPath	A community-immutable, community-voted ordered path of Tags; platform administrators may make audited corrections.	ja	approved	inline	タグパス	Tag structure | Structure tag
+tagPath	A community-immutable, community-voted ordered path of Tags; platform administrators may make audited corrections.	ja	approved	plural	タグパス	Tag structure | Structure tag
+tagPath	A community-immutable, community-voted ordered path of Tags; platform administrators may make audited corrections.	ko	approved	label	태그 경로	Tag structure | Structure tag
+tagPath	A community-immutable, community-voted ordered path of Tags; platform administrators may make audited corrections.	ko	approved	pluralLabel	태그 경로	Tag structure | Structure tag
+tagPath	A community-immutable, community-voted ordered path of Tags; platform administrators may make audited corrections.	ko	approved	inline	태그 경로	Tag structure | Structure tag
+tagPath	A community-immutable, community-voted ordered path of Tags; platform administrators may make audited corrections.	ko	approved	plural	태그 경로	Tag structure | Structure tag
 license	A registered legal instrument or rights statement that a Unit grants independently of every other selected License.	en	approved	label	License	-
 license	A registered legal instrument or rights statement that a Unit grants independently of every other selected License.	en	approved	inline	license	-
 license	A registered legal instrument or rights statement that a Unit grants independently of every other selected License.	zh-Hant	approved	label	授權	公開授權 | 作品 License | 授權 REZICS

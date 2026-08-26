@@ -54,7 +54,6 @@ export function followingHref(
 		case "slug_namespace":
 		case "label":
 		case "series":
-		case "tag_path":
 		case "realm_rule":
 		case "zone_page":
 			return undefined;

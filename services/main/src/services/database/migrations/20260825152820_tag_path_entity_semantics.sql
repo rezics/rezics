@@ -699,7 +699,7 @@ CREATE TABLE "tag_path_merge" (
   CONSTRAINT "tag_path_merge_target_path_id_tag_path_id_fkey" FOREIGN KEY ("target_path_id") REFERENCES "tag_path" ("id") ON UPDATE NO ACTION ON DELETE RESTRICT,
   CONSTRAINT "tag_path_merge_distinct_check" CHECK (source_path_id <> target_path_id),
   CONSTRAINT "tag_path_merge_proposal_provenance_object_check" CHECK ((proposal_provenance IS NULL) OR (jsonb_typeof(proposal_provenance) = 'object'::text)),
-  CONSTRAINT "tag_path_merge_proposal_provenance_check" CHECK (((proposal_source_kind = 'human'::text) AND (proposal_provenance IS NULL)) OR ((proposal_source_kind = 'assisted'::text) AND ((proposal_provenance ->> 'kind'::text) = 'assisted'::text) AND (jsonb_typeof((proposal_provenance -> 'system'::text)) = 'string'::text) AND (btrim((proposal_provenance ->> 'system'::text)) <> ''::text) AND (jsonb_typeof((proposal_provenance -> 'runId'::text)) = 'string'::text) AND (btrim((proposal_provenance ->> 'runId'::text)) <> ''::text) AND ((NOT (proposal_provenance ? 'model'::text)) OR (jsonb_typeof((proposal_provenance -> 'model'::text)) = 'string'::text)) AND ((NOT (proposal_provenance ? 'confidence'::text)) OR ((jsonb_typeof((proposal_provenance -> 'confidence'::text)) = 'number'::text) AND (((proposal_provenance ->> 'confidence'::text))::numeric >= (0)::numeric) AND (((proposal_provenance ->> 'confidence'::text))::numeric <= (1)::numeric)))))),
+  CONSTRAINT "tag_path_merge_proposal_provenance_check" CHECK (((proposal_source_kind = 'human'::text) AND (proposal_provenance IS NULL)) OR ((proposal_source_kind = 'assisted'::text) AND ((proposal_provenance ->> 'kind'::text) = 'assisted'::text) AND (jsonb_typeof((proposal_provenance -> 'system'::text)) = 'string'::text) AND (btrim((proposal_provenance ->> 'system'::text)) <> ''::text) AND (jsonb_typeof((proposal_provenance -> 'runId'::text)) = 'string'::text) AND (btrim((proposal_provenance ->> 'runId'::text)) <> ''::text) AND ((NOT (proposal_provenance ? 'model'::text)) OR (jsonb_typeof((proposal_provenance -> 'model'::text)) = 'string'::text)) AND ((NOT (proposal_provenance ? 'confidence'::text)) OR ((jsonb_typeof((proposal_provenance -> 'confidence'::text)) = 'number'::text) AND (((proposal_provenance ->> 'confidence'::text))::numeric >= (0)::numeric) AND (((proposal_provenance ->> 'confidence'::text))::numeric <= (1)::numeric))))),
   CONSTRAINT "tag_path_merge_proposal_source_kind_check" CHECK (proposal_source_kind = ANY (ARRAY['human'::text, 'assisted'::text])),
   CONSTRAINT "tag_path_merge_reason_check" CHECK (btrim(reason) <> ''::text),
   CONSTRAINT "tag_path_merge_resolution_check" CHECK ((status = 'proposed'::text) = ((resolved_at IS NULL) AND (resolved_by_profile_id IS NULL))),
@@ -714,6 +714,7 @@ CREATE INDEX "tag_path_merge_target_status_idx" ON "tag_path_merge" ("target_pat
 -- Create "tag_path_vote_stat" table
 CREATE TABLE "tag_path_vote_stat" (
   "path_id" uuid NOT NULL,
+  "terminal_tag_id" uuid NOT NULL,
   "score" bigint NOT NULL DEFAULT 0,
   "vote_count" bigint NOT NULL DEFAULT 0,
   "usage_count" bigint NOT NULL DEFAULT 0,
@@ -726,7 +727,9 @@ CREATE TABLE "tag_path_vote_stat" (
   CONSTRAINT "tag_path_vote_stat_usage_count_check" CHECK (usage_count >= 0)
 );
 -- Create index "tag_path_vote_stat_usage_idx" to table: "tag_path_vote_stat"
-CREATE INDEX "tag_path_vote_stat_usage_idx" ON "tag_path_vote_stat" ("usage_count" DESC NULLS LAST, "path_id");
+CREATE INDEX "tag_path_vote_stat_usage_idx" ON "tag_path_vote_stat" ("usage_count" DESC NULLS LAST, "path_id") WHERE ((score > 0) AND (vote_count > 0));
+-- Create index "tag_path_vote_stat_terminal_usage_idx" to table: "tag_path_vote_stat"
+CREATE INDEX "tag_path_vote_stat_terminal_usage_idx" ON "tag_path_vote_stat" ("terminal_tag_id", "usage_count" DESC NULLS LAST, "path_id") WHERE ((score > 0) AND (vote_count > 0));
 -- Modify "unit_effective_tag" table
 ALTER TABLE "unit_effective_tag" DROP CONSTRAINT "unit_effective_tag_structure_count_check", DROP CONSTRAINT "unit_effective_tag_source_check", ADD CONSTRAINT "unit_effective_tag_source_check" CHECK (direct OR (path_support_count > 0)), ADD CONSTRAINT "unit_effective_tag_path_count_check" CHECK (path_support_count >= 0), DROP COLUMN "structure_support_count", ADD COLUMN "path_support_count" bigint NOT NULL DEFAULT 0;
 -- Create "unit_tag_judgment_stat" table
@@ -789,6 +792,10 @@ CREATE INDEX "unit_tag_path_support_path_idx" ON "unit_tag_path_support" ("path_
 DROP TABLE "realm_tag_vote";
 -- Drop "realm_tag_vote_stat" table
 DROP TABLE "realm_tag_vote_stat";
+-- Replace the released direct-Tag projection trigger with the final Tag Path-aware owner.
+DROP TRIGGER IF EXISTS unit_tag_effective_context_maintain ON public.unit_tag;
+DROP TRIGGER IF EXISTS unit_tag_vote_stat_maintain ON public.unit_effective_tag_vote;
+DROP FUNCTION IF EXISTS public.maintain_unit_tag_vote_stat();
 -- Drop "unit_tag_vote" table
 DROP TABLE "unit_tag_vote";
 -- Drop "unit_tag_vote_stat" table
@@ -887,8 +894,22 @@ BEGIN
 		NEW.member_tag_ids[member.ordinality + 1]
 	FROM generate_series(1, cardinality(NEW.member_tag_ids) - 1) AS member(ordinality);
 
-	INSERT INTO public.tag_path_vote_stat(path_id) VALUES (NEW.id);
+	INSERT INTO public.tag_path_vote_stat(path_id, terminal_tag_id)
+	VALUES (NEW.id, NEW.terminal_tag_id);
 	RETURN NULL;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.guard_tag_path_vote_stat_projection()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+BEGIN
+	IF pg_trigger_depth() < 2 THEN
+		RAISE EXCEPTION 'tag_path_vote_stat is a trigger-owned Tag Path ranking projection'
+			USING ERRCODE = '23514', CONSTRAINT = 'tag_path_vote_stat_projection_only';
+	END IF;
+	RETURN CASE WHEN TG_OP = 'DELETE' THEN OLD ELSE NEW END;
 END;
 $$;
 
@@ -955,8 +976,12 @@ BEGIN
 		score_delta := score_delta + NEW.value;
 		count_delta := count_delta + 1;
 	END IF;
-	INSERT INTO public.tag_path_vote_stat(path_id, score, vote_count, updated_at)
-	VALUES (key_id, score_delta, count_delta, clock_timestamp())
+	INSERT INTO public.tag_path_vote_stat(
+		path_id, terminal_tag_id, score, vote_count, updated_at
+	)
+	SELECT key_id, path.terminal_tag_id, score_delta, count_delta, clock_timestamp()
+	FROM public.tag_path AS path
+	WHERE path.id = key_id
 	ON CONFLICT (path_id) DO UPDATE SET
 		score = tag_path_vote_stat.score + EXCLUDED.score,
 		vote_count = tag_path_vote_stat.vote_count + EXCLUDED.vote_count,
@@ -1171,6 +1196,10 @@ CREATE TRIGGER tag_path_vote_stat_maintain
 AFTER INSERT OR UPDATE OR DELETE ON public.tag_path_vote
 FOR EACH ROW EXECUTE FUNCTION public.maintain_tag_path_vote_stat();
 
+CREATE TRIGGER tag_path_vote_stat_projection_guard
+BEFORE INSERT OR UPDATE OR DELETE ON public.tag_path_vote_stat
+FOR EACH ROW EXECUTE FUNCTION public.guard_tag_path_vote_stat_projection();
+
 CREATE TRIGGER unit_tag_path_judgment_identity_guard
 BEFORE UPDATE ON public.unit_tag_path_judgment
 FOR EACH ROW EXECUTE FUNCTION public.protect_unit_tag_path_judgment_identity();
@@ -1288,9 +1317,9 @@ END;
 $$;
 
 CREATE OR REPLACE FUNCTION public.refresh_unit_effective_tag_vote(
-	key_unit uuid,
-	key_tag uuid,
-	key_profile uuid
+	target_unit_id uuid,
+	target_tag_id uuid,
+	target_profile_id uuid
 )
 RETURNS void
 LANGUAGE plpgsql
@@ -1300,25 +1329,25 @@ DECLARE
 	effective_value integer;
 BEGIN
 	PERFORM public.lock_vote_hot_key(
-		'unit_effective_tag_vote:' || key_unit::text || ':' || key_tag::text || ':' || key_profile::text,
+		'unit_effective_tag_vote:' || target_unit_id::text || ':' || target_tag_id::text || ':' || target_profile_id::text,
 		0
 	);
 	SELECT judgment.fit_vote INTO effective_value
 	FROM public.unit_tag_judgment AS judgment
-	WHERE judgment.unit_id = key_unit AND judgment.tag_id = key_tag
-		AND judgment.profile_id = key_profile AND judgment.fit_vote IS NOT NULL;
+	WHERE judgment.unit_id = target_unit_id AND judgment.tag_id = target_tag_id
+		AND judgment.profile_id = target_profile_id AND judgment.fit_vote IS NOT NULL;
 	IF effective_value IS NULL AND EXISTS (
 		SELECT 1 FROM public.unit_tag_path_support
-		WHERE unit_id = key_unit AND tag_id = key_tag AND profile_id = key_profile
+		WHERE unit_id = target_unit_id AND tag_id = target_tag_id AND profile_id = target_profile_id
 	) THEN
 		effective_value := 1;
 	END IF;
 	IF effective_value IS NULL THEN
 		DELETE FROM public.unit_effective_tag_vote
-		WHERE unit_id = key_unit AND tag_id = key_tag AND profile_id = key_profile;
+		WHERE unit_id = target_unit_id AND tag_id = target_tag_id AND profile_id = target_profile_id;
 	ELSE
 		INSERT INTO public.unit_effective_tag_vote(unit_id, tag_id, profile_id, value, updated_at)
-		VALUES (key_unit, key_tag, key_profile, effective_value, clock_timestamp())
+		VALUES (target_unit_id, target_tag_id, target_profile_id, effective_value, clock_timestamp())
 		ON CONFLICT (unit_id, tag_id, profile_id) DO UPDATE SET
 			value = EXCLUDED.value, updated_at = EXCLUDED.updated_at;
 	END IF;
@@ -2091,3 +2120,1384 @@ FOR EACH ROW EXECUTE FUNCTION public.reject_content_pack_entity_measurement_evid
 CREATE TRIGGER realm_tag_judgment_content_label_reject
 BEFORE INSERT OR UPDATE ON public.realm_tag_judgment
 FOR EACH ROW EXECUTE FUNCTION public.reject_content_label_judgment();
+
+-- Reinstall the final content-pack evidence owners after the destructive Structure cutover.
+-- Content-pack imports are append-only provenance. Unit merges may move only
+-- the evidence pointer that identifies the surviving runtime judgment; the
+-- imported payload itself remains immutable.
+
+CREATE OR REPLACE FUNCTION public.reject_content_pack_import_evidence_mutation()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+BEGIN
+	RAISE EXCEPTION '% history is append-only', TG_TABLE_NAME
+		USING ERRCODE = '23514',
+			CONSTRAINT = TG_TABLE_NAME || '_immutable';
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.require_content_pack_evidence_merge_operation(
+	allowed_phases public.unit_merge_operation_phase[]
+)
+RETURNS public.unit_merge_operation
+LANGUAGE plpgsql
+SET search_path = pg_catalog, public
+AS $$
+DECLARE
+	operation_id_setting text := nullif(
+		current_setting('rezics.unit_merge_operation_id', true),
+		''
+	);
+	lease_token_setting text := nullif(
+		current_setting('rezics.unit_merge_lease_token', true),
+		''
+	);
+	active_operation_id uuid;
+	active_lease_token uuid;
+	active_operation public.unit_merge_operation%ROWTYPE;
+BEGIN
+	IF operation_id_setting IS NULL OR lease_token_setting IS NULL THEN
+		RAISE EXCEPTION 'Content-pack evidence may move only inside a leased Unit merge'
+			USING ERRCODE = '23514',
+				CONSTRAINT = 'content_pack_evidence_merge_context';
+	END IF;
+
+	BEGIN
+		active_operation_id := operation_id_setting::uuid;
+		active_lease_token := lease_token_setting::uuid;
+	EXCEPTION
+		WHEN invalid_text_representation THEN
+			RAISE EXCEPTION 'Content-pack evidence Unit-merge settings must be UUIDs'
+				USING ERRCODE = '23514',
+					CONSTRAINT = 'content_pack_evidence_merge_context';
+	END;
+
+	SELECT operation.*
+	INTO active_operation
+	FROM public.unit_merge_operation AS operation
+	WHERE operation.id = active_operation_id
+		AND operation.state = 'processing'::public.unit_merge_operation_state
+		AND operation.lease_token = active_lease_token
+		AND operation.lease_expires_at > clock_timestamp();
+
+	IF NOT FOUND OR NOT (active_operation.phase = ANY(allowed_phases)) THEN
+		RAISE EXCEPTION 'Content-pack evidence Unit-merge context is not active for this phase'
+			USING ERRCODE = '23514',
+				CONSTRAINT = 'content_pack_evidence_merge_context';
+	END IF;
+
+	RETURN active_operation;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.guard_content_pack_unit_tag_evidence_retarget()
+RETURNS trigger
+LANGUAGE plpgsql
+SET search_path = pg_catalog, public
+AS $$
+DECLARE
+	active_operation public.unit_merge_operation%ROWTYPE;
+BEGIN
+	active_operation := public.require_content_pack_evidence_merge_operation(
+		ARRAY[
+			'unit_tags'::public.unit_merge_operation_phase,
+			'finalize'::public.unit_merge_operation_phase
+		]
+	);
+
+	IF EXISTS (
+		SELECT 1
+		FROM old_evidence AS old_row
+		FULL JOIN new_evidence AS new_row
+			USING (import_id, source_fingerprint)
+		WHERE old_row.import_id IS NULL
+			OR new_row.import_id IS NULL
+			OR (
+				to_jsonb(old_row) - 'unit_id'
+			) IS DISTINCT FROM (
+				to_jsonb(new_row) - 'unit_id'
+			)
+	) THEN
+		RAISE EXCEPTION 'Content-pack UnitTag evidence payload is immutable'
+			USING ERRCODE = '23514',
+				CONSTRAINT = 'content_pack_unit_tag_evidence_retarget_guard';
+	END IF;
+
+	IF EXISTS (
+		SELECT 1
+		FROM old_evidence AS old_row
+		JOIN new_evidence AS new_row
+			USING (import_id, source_fingerprint)
+		WHERE old_row.unit_id <> active_operation.source_unit_id
+			OR new_row.unit_id <> active_operation.target_unit_id
+			OR NOT EXISTS (
+				SELECT 1
+				FROM public.unit_tag_judgment AS source_judgment
+				WHERE source_judgment.unit_id = old_row.unit_id
+					AND source_judgment.tag_id = old_row.tag_id
+					AND source_judgment.profile_id = old_row.profile_id
+			)
+			OR NOT EXISTS (
+				SELECT 1
+				FROM public.unit_tag_judgment AS target_judgment
+				WHERE target_judgment.unit_id = new_row.unit_id
+					AND target_judgment.tag_id = new_row.tag_id
+					AND target_judgment.profile_id = new_row.profile_id
+			)
+	) THEN
+		RAISE EXCEPTION 'Content-pack UnitTag evidence retarget does not match the active Unit merge'
+			USING ERRCODE = '23514',
+				CONSTRAINT = 'content_pack_unit_tag_evidence_retarget_guard';
+	END IF;
+
+	RETURN NULL;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.guard_content_pack_unit_tag_path_evidence_retarget()
+RETURNS trigger
+LANGUAGE plpgsql
+SET search_path = pg_catalog, public
+AS $$
+DECLARE
+	active_operation public.unit_merge_operation%ROWTYPE;
+BEGIN
+	active_operation := public.require_content_pack_evidence_merge_operation(
+		ARRAY[
+			'tag_path_applications'::public.unit_merge_operation_phase,
+			'finalize'::public.unit_merge_operation_phase
+		]
+	);
+
+	IF EXISTS (
+		SELECT 1
+		FROM old_evidence AS old_row
+		FULL JOIN new_evidence AS new_row
+			USING (import_id, source_fingerprint)
+		WHERE old_row.import_id IS NULL
+			OR new_row.import_id IS NULL
+			OR (
+				to_jsonb(old_row) - 'unit_id'
+			) IS DISTINCT FROM (
+				to_jsonb(new_row) - 'unit_id'
+			)
+	) THEN
+		RAISE EXCEPTION 'Content-pack Unit–Tag Path evidence payload is immutable'
+			USING ERRCODE = '23514',
+				CONSTRAINT = 'content_pack_unit_tag_path_evidence_retarget_guard';
+	END IF;
+
+	IF EXISTS (
+		SELECT 1
+		FROM old_evidence AS old_row
+		JOIN new_evidence AS new_row
+			USING (import_id, source_fingerprint)
+		WHERE old_row.unit_id <> active_operation.source_unit_id
+			OR new_row.unit_id <> active_operation.target_unit_id
+			OR NOT EXISTS (
+				SELECT 1
+				FROM public.unit_tag_path_judgment AS source_judgment
+				WHERE source_judgment.unit_id = old_row.unit_id
+					AND source_judgment.path_id = old_row.path_id
+					AND source_judgment.profile_id = old_row.profile_id
+			)
+			OR NOT EXISTS (
+				SELECT 1
+				FROM public.unit_tag_path_judgment AS target_judgment
+				WHERE target_judgment.unit_id = new_row.unit_id
+					AND target_judgment.path_id = new_row.path_id
+					AND target_judgment.profile_id = new_row.profile_id
+			)
+	) THEN
+		RAISE EXCEPTION 'Content-pack Unit–Tag Path evidence retarget does not match the active Unit merge'
+			USING ERRCODE = '23514',
+				CONSTRAINT = 'content_pack_unit_tag_path_evidence_retarget_guard';
+	END IF;
+
+	RETURN NULL;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.guard_content_pack_subject_association_evidence_retarget()
+RETURNS trigger
+LANGUAGE plpgsql
+SET search_path = pg_catalog, public
+AS $$
+DECLARE
+	active_operation public.unit_merge_operation%ROWTYPE;
+BEGIN
+	active_operation := public.require_content_pack_evidence_merge_operation(
+		ARRAY[
+			'subject_sources'::public.unit_merge_operation_phase,
+			'subject_entities'::public.unit_merge_operation_phase,
+			'finalize'::public.unit_merge_operation_phase
+		]
+	);
+
+	IF EXISTS (
+		SELECT 1
+		FROM old_evidence AS old_row
+		FULL JOIN new_evidence AS new_row
+			USING (import_id, source_fingerprint)
+		WHERE old_row.import_id IS NULL
+			OR new_row.import_id IS NULL
+			OR (
+				to_jsonb(old_row) - 'association_id'
+			) IS DISTINCT FROM (
+				to_jsonb(new_row) - 'association_id'
+			)
+	) THEN
+		RAISE EXCEPTION 'Content-pack Subject-association evidence payload is immutable'
+			USING ERRCODE = '23514',
+				CONSTRAINT = 'content_pack_subject_association_evidence_retarget_guard';
+	END IF;
+
+	IF EXISTS (
+		SELECT 1
+		FROM old_evidence AS old_row
+		JOIN new_evidence AS new_row
+			USING (import_id, source_fingerprint)
+		LEFT JOIN public.subject_association AS source_association
+			ON source_association.id = old_row.association_id
+		LEFT JOIN public.subject_association AS target_association
+			ON target_association.id = new_row.association_id
+		WHERE source_association.id IS NULL
+			OR target_association.id IS NULL
+			OR old_row.association_id = new_row.association_id
+			OR NOT (
+				(
+					active_operation.phase IN (
+						'subject_sources'::public.unit_merge_operation_phase,
+						'finalize'::public.unit_merge_operation_phase
+					)
+					AND source_association.unit_id = active_operation.source_unit_id
+					AND target_association.unit_id = active_operation.target_unit_id
+					AND source_association.entity_id = target_association.entity_id
+					AND source_association.role = target_association.role
+				)
+				OR (
+					active_operation.phase IN (
+						'subject_entities'::public.unit_merge_operation_phase,
+						'finalize'::public.unit_merge_operation_phase
+					)
+					AND source_association.entity_id = active_operation.source_unit_id
+					AND target_association.entity_id = active_operation.target_unit_id
+					AND source_association.unit_id = target_association.unit_id
+					AND source_association.role = target_association.role
+				)
+			)
+			OR NOT EXISTS (
+				SELECT 1
+				FROM public.subject_association_judgment AS source_judgment
+				WHERE source_judgment.association_id = old_row.association_id
+					AND source_judgment.profile_id = old_row.profile_id
+			)
+			OR NOT EXISTS (
+				SELECT 1
+				FROM public.subject_association_judgment AS target_judgment
+				WHERE target_judgment.association_id = new_row.association_id
+					AND target_judgment.profile_id = new_row.profile_id
+			)
+	) THEN
+		RAISE EXCEPTION 'Content-pack Subject-association evidence retarget does not match the active Unit merge'
+			USING ERRCODE = '23514',
+				CONSTRAINT = 'content_pack_subject_association_evidence_retarget_guard';
+	END IF;
+
+	RETURN NULL;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS content_pack_import_immutable
+ON public.content_pack_import;
+CREATE TRIGGER content_pack_import_immutable
+BEFORE UPDATE OR DELETE OR TRUNCATE ON public.content_pack_import
+FOR EACH STATEMENT
+EXECUTE FUNCTION public.reject_content_pack_import_evidence_mutation();
+
+DROP TRIGGER IF EXISTS content_pack_tag_evidence_immutable
+ON public.content_pack_tag_evidence;
+CREATE TRIGGER content_pack_tag_evidence_immutable
+BEFORE UPDATE OR DELETE OR TRUNCATE ON public.content_pack_tag_evidence
+FOR EACH STATEMENT
+EXECUTE FUNCTION public.reject_content_pack_import_evidence_mutation();
+
+DROP TRIGGER IF EXISTS content_pack_tag_path_definition_evidence_immutable
+ON public.content_pack_tag_path_definition_evidence;
+CREATE TRIGGER content_pack_tag_path_definition_evidence_immutable
+BEFORE UPDATE OR DELETE OR TRUNCATE ON public.content_pack_tag_path_definition_evidence
+FOR EACH STATEMENT
+EXECUTE FUNCTION public.reject_content_pack_import_evidence_mutation();
+
+DROP TRIGGER IF EXISTS content_pack_unit_tag_evidence_delete_guard
+ON public.content_pack_unit_tag_evidence;
+CREATE TRIGGER content_pack_unit_tag_evidence_delete_guard
+BEFORE DELETE OR TRUNCATE ON public.content_pack_unit_tag_evidence
+FOR EACH STATEMENT
+EXECUTE FUNCTION public.reject_content_pack_import_evidence_mutation();
+
+DROP TRIGGER IF EXISTS content_pack_unit_tag_path_evidence_delete_guard
+ON public.content_pack_unit_tag_path_evidence;
+CREATE TRIGGER content_pack_unit_tag_path_evidence_delete_guard
+BEFORE DELETE OR TRUNCATE ON public.content_pack_unit_tag_path_evidence
+FOR EACH STATEMENT
+EXECUTE FUNCTION public.reject_content_pack_import_evidence_mutation();
+
+DROP TRIGGER IF EXISTS content_pack_subject_association_evidence_delete_guard
+ON public.content_pack_subject_association_evidence;
+CREATE TRIGGER content_pack_subject_association_evidence_delete_guard
+BEFORE DELETE OR TRUNCATE ON public.content_pack_subject_association_evidence
+FOR EACH STATEMENT
+EXECUTE FUNCTION public.reject_content_pack_import_evidence_mutation();
+
+DROP TRIGGER IF EXISTS content_pack_unit_tag_evidence_retarget_guard
+ON public.content_pack_unit_tag_evidence;
+CREATE TRIGGER content_pack_unit_tag_evidence_retarget_guard
+AFTER UPDATE ON public.content_pack_unit_tag_evidence
+REFERENCING OLD TABLE AS old_evidence NEW TABLE AS new_evidence
+FOR EACH STATEMENT
+EXECUTE FUNCTION public.guard_content_pack_unit_tag_evidence_retarget();
+
+DROP TRIGGER IF EXISTS content_pack_unit_tag_path_evidence_retarget_guard
+ON public.content_pack_unit_tag_path_evidence;
+CREATE TRIGGER content_pack_unit_tag_path_evidence_retarget_guard
+AFTER UPDATE ON public.content_pack_unit_tag_path_evidence
+REFERENCING OLD TABLE AS old_evidence NEW TABLE AS new_evidence
+FOR EACH STATEMENT
+EXECUTE FUNCTION public.guard_content_pack_unit_tag_path_evidence_retarget();
+
+DROP TRIGGER IF EXISTS content_pack_subject_association_evidence_retarget_guard
+ON public.content_pack_subject_association_evidence;
+CREATE TRIGGER content_pack_subject_association_evidence_retarget_guard
+AFTER UPDATE ON public.content_pack_subject_association_evidence
+REFERENCING OLD TABLE AS old_evidence NEW TABLE AS new_evidence
+FOR EACH STATEMENT
+EXECUTE FUNCTION public.guard_content_pack_subject_association_evidence_retarget();
+
+-- Keep the final catalog expression trees identical to the typed Drizzle contract.
+ALTER TABLE public.tag_path_merge
+	DROP CONSTRAINT tag_path_merge_proposal_provenance_check,
+	ADD CONSTRAINT tag_path_merge_proposal_provenance_check CHECK (
+		((proposal_source_kind = 'human'::text) AND (proposal_provenance IS NULL))
+		OR (
+			(proposal_source_kind = 'assisted'::text)
+			AND ((proposal_provenance ->> 'kind'::text) = 'assisted'::text)
+			AND (jsonb_typeof((proposal_provenance -> 'system'::text)) = 'string'::text)
+			AND (btrim((proposal_provenance ->> 'system'::text)) <> ''::text)
+			AND (jsonb_typeof((proposal_provenance -> 'runId'::text)) = 'string'::text)
+			AND (btrim((proposal_provenance ->> 'runId'::text)) <> ''::text)
+			AND (
+				(NOT (proposal_provenance ? 'model'::text))
+				OR (jsonb_typeof((proposal_provenance -> 'model'::text)) = 'string'::text)
+			)
+			AND (
+				(NOT (proposal_provenance ? 'confidence'::text))
+				OR (
+					(jsonb_typeof((proposal_provenance -> 'confidence'::text)) = 'number'::text)
+					AND (
+						(((proposal_provenance ->> 'confidence'::text))::numeric >= (0)::numeric)
+						AND (((proposal_provenance ->> 'confidence'::text))::numeric <= (1)::numeric)
+					)
+				)
+			)
+		)
+	);
+
+ALTER TABLE public.realm_tag_path_vote
+	DROP CONSTRAINT realm_tag_path_vote_adoption_fkey,
+	ADD CONSTRAINT realm_tag_path_vote_adoption_fkey
+		FOREIGN KEY (realm_id, path_id)
+		REFERENCES public.realm_tag_path(realm_id, path_id)
+		ON DELETE CASCADE;
+
+-- Reinstall the final update-first Tag Path owner.
+-- Immutable Tag Path definitions, bounded member projections, global judgments,
+-- effective-Tag provenance, and audited manual merge governance.
+
+CREATE OR REPLACE FUNCTION public.guard_tag_path_definition()
+RETURNS trigger
+LANGUAGE plpgsql
+SET search_path = pg_catalog, public
+AS $$
+DECLARE
+	eligible_count integer;
+	distinct_count integer;
+BEGIN
+	IF TG_OP <> 'INSERT' THEN
+		RAISE EXCEPTION 'Tag Path definitions are immutable'
+			USING ERRCODE = '23514', CONSTRAINT = 'tag_path_definition_immutable';
+	END IF;
+
+	SELECT count(DISTINCT member_id), count(*)
+	INTO distinct_count, eligible_count
+	FROM unnest(NEW.member_tag_ids) AS member_id
+	JOIN public.tag ON tag.id = member_id
+	JOIN public.unit ON unit.id = member_id
+	WHERE unit.kind = 'tag'
+		AND unit.status = 'published'::public.unit_status
+		AND unit.visibility = 'public'::public.resource_visibility
+		AND unit.moderation_status = 'approved'::public.moderation_status
+		AND unit.deleted_at IS NULL;
+
+	IF eligible_count <> cardinality(NEW.member_tag_ids)
+		OR distinct_count <> cardinality(NEW.member_tag_ids) THEN
+		RAISE EXCEPTION 'Every Tag Path member must be a distinct active, approved, public Tag'
+			USING ERRCODE = '23514', CONSTRAINT = 'tag_path_member_eligibility';
+	END IF;
+
+	IF NOT EXISTS (
+		SELECT 1 FROM public.unit
+		WHERE id = NEW.id AND kind = 'tag_path'
+	) THEN
+		RAISE EXCEPTION 'Tag Path identity must reference a tag_path Unit'
+			USING ERRCODE = '23514', CONSTRAINT = 'tag_path_unit_kind';
+	END IF;
+
+	RETURN NEW;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.project_tag_path_definition()
+RETURNS trigger
+LANGUAGE plpgsql
+SET search_path = pg_catalog, public
+AS $$
+BEGIN
+	INSERT INTO public.tag_path_member(path_id, ordinal, tag_id)
+	SELECT NEW.id, member.ordinality - 1, member.tag_id
+	FROM unnest(NEW.member_tag_ids) WITH ORDINALITY AS member(tag_id, ordinality);
+
+	INSERT INTO public.tag_path_edge(path_id, ordinal, parent_tag_id, child_tag_id)
+	SELECT NEW.id, member.ordinality - 1, NEW.member_tag_ids[member.ordinality],
+		NEW.member_tag_ids[member.ordinality + 1]
+	FROM generate_series(1, cardinality(NEW.member_tag_ids) - 1) AS member(ordinality);
+
+	INSERT INTO public.tag_path_vote_stat(path_id, terminal_tag_id)
+	VALUES (NEW.id, NEW.terminal_tag_id);
+	RETURN NULL;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.guard_tag_path_vote_stat_projection()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+BEGIN
+	IF pg_trigger_depth() < 2 THEN
+		RAISE EXCEPTION 'tag_path_vote_stat is a trigger-owned Tag Path ranking projection'
+			USING ERRCODE = '23514', CONSTRAINT = 'tag_path_vote_stat_projection_only';
+	END IF;
+	RETURN CASE WHEN TG_OP = 'DELETE' THEN OLD ELSE NEW END;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.guard_tag_path_projection()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+BEGIN
+	IF pg_trigger_depth() < 2 THEN
+		RAISE EXCEPTION '% is a rebuildable Tag Path projection', TG_TABLE_NAME
+			USING ERRCODE = '23514', CONSTRAINT = TG_TABLE_NAME || '_projection_only';
+	END IF;
+	RETURN CASE WHEN TG_OP = 'DELETE' THEN OLD ELSE NEW END;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.guard_tag_path_member_lifecycle()
+RETURNS trigger
+LANGUAGE plpgsql
+SET search_path = pg_catalog, public
+AS $$
+BEGIN
+	IF TG_OP = 'DELETE' THEN
+		IF OLD.kind = 'tag' AND EXISTS (
+			SELECT 1 FROM public.tag_path_member WHERE tag_id = OLD.id LIMIT 1
+		) THEN
+			RAISE EXCEPTION 'A Tag used by a Tag Path cannot be deleted'
+				USING ERRCODE = '23514', CONSTRAINT = 'tag_path_member_lifecycle';
+		END IF;
+		RETURN OLD;
+	END IF;
+	IF OLD.kind = 'tag' AND EXISTS (
+		SELECT 1 FROM public.tag_path_member WHERE tag_id = OLD.id LIMIT 1
+	) AND (
+		NEW.kind <> 'tag'
+		OR NEW.status <> 'published'::public.unit_status
+		OR NEW.visibility <> 'public'::public.resource_visibility
+		OR NEW.moderation_status <> 'approved'::public.moderation_status
+		OR NEW.deleted_at IS NOT NULL
+	) THEN
+		RAISE EXCEPTION 'A Tag used by a Tag Path must remain active, approved, and public'
+			USING ERRCODE = '23514', CONSTRAINT = 'tag_path_member_lifecycle';
+	END IF;
+	RETURN NEW;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.maintain_tag_path_vote_stat()
+RETURNS trigger
+LANGUAGE plpgsql
+SET search_path = pg_catalog, public
+AS $$
+DECLARE
+	key_id uuid := CASE WHEN TG_OP = 'DELETE' THEN OLD.path_id ELSE NEW.path_id END;
+	score_delta bigint := 0;
+	count_delta bigint := 0;
+BEGIN
+	PERFORM public.lock_vote_hot_key('tag_path_vote:' || key_id::text, 0);
+	IF TG_OP <> 'INSERT' THEN
+		score_delta := score_delta - OLD.value;
+		count_delta := count_delta - 1;
+	END IF;
+	IF TG_OP <> 'DELETE' THEN
+		score_delta := score_delta + NEW.value;
+		count_delta := count_delta + 1;
+	END IF;
+	UPDATE public.tag_path_vote_stat
+	SET score = score + score_delta,
+		vote_count = vote_count + count_delta,
+		updated_at = clock_timestamp()
+	WHERE path_id = key_id;
+	IF NOT FOUND THEN
+		INSERT INTO public.tag_path_vote_stat(
+			path_id, terminal_tag_id, score, vote_count, updated_at
+		)
+		SELECT key_id, path.terminal_tag_id, score_delta, count_delta, clock_timestamp()
+		FROM public.tag_path AS path
+		WHERE path.id = key_id;
+	END IF;
+	RETURN NULL;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.maintain_unit_tag_path_judgment_stat()
+RETURNS trigger
+LANGUAGE plpgsql
+SET search_path = pg_catalog, public
+AS $$
+DECLARE
+	key_unit uuid := CASE WHEN TG_OP = 'DELETE' THEN OLD.unit_id ELSE NEW.unit_id END;
+	key_path uuid := CASE WHEN TG_OP = 'DELETE' THEN OLD.path_id ELSE NEW.path_id END;
+	score_delta bigint := 0;
+	count_delta bigint := 0;
+	spoiler_delta bigint := 0;
+	none_delta bigint := 0;
+	minor_delta bigint := 0;
+	major_delta bigint := 0;
+	old_accepted boolean;
+	new_accepted boolean;
+	current_score bigint;
+	current_count bigint;
+BEGIN
+	PERFORM public.lock_vote_hot_key('unit_tag_path:' || key_unit::text || ':' || key_path::text, 0);
+	SELECT score > 0 AND vote_count > 0, score, vote_count
+	INTO old_accepted, current_score, current_count
+	FROM public.unit_tag_path_judgment_stat
+	WHERE unit_id = key_unit AND path_id = key_path;
+	old_accepted := coalesce(old_accepted, false);
+	current_score := coalesce(current_score, 0);
+	current_count := coalesce(current_count, 0);
+
+	IF TG_OP <> 'INSERT' THEN
+		IF OLD.fit_vote IS NOT NULL THEN score_delta := score_delta - OLD.fit_vote; count_delta := count_delta - 1; END IF;
+		IF OLD.spoiler_level IS NOT NULL THEN
+			spoiler_delta := spoiler_delta - 1;
+			IF OLD.spoiler_level = 0 THEN none_delta := none_delta - 1;
+			ELSIF OLD.spoiler_level = 1 THEN minor_delta := minor_delta - 1;
+			ELSE major_delta := major_delta - 1; END IF;
+		END IF;
+	END IF;
+	IF TG_OP <> 'DELETE' THEN
+		IF NEW.fit_vote IS NOT NULL THEN score_delta := score_delta + NEW.fit_vote; count_delta := count_delta + 1; END IF;
+		IF NEW.spoiler_level IS NOT NULL THEN
+			spoiler_delta := spoiler_delta + 1;
+			IF NEW.spoiler_level = 0 THEN none_delta := none_delta + 1;
+			ELSIF NEW.spoiler_level = 1 THEN minor_delta := minor_delta + 1;
+			ELSE major_delta := major_delta + 1; END IF;
+		END IF;
+	END IF;
+
+	UPDATE public.unit_tag_path_judgment_stat
+	SET score = score + score_delta,
+		vote_count = vote_count + count_delta,
+		spoiler_vote_count = spoiler_vote_count + spoiler_delta,
+		spoiler_none_count = spoiler_none_count + none_delta,
+		spoiler_minor_count = spoiler_minor_count + minor_delta,
+		spoiler_major_count = spoiler_major_count + major_delta,
+		updated_at = clock_timestamp()
+	WHERE unit_id = key_unit AND path_id = key_path;
+	IF NOT FOUND THEN
+		INSERT INTO public.unit_tag_path_judgment_stat(
+			unit_id, path_id, score, vote_count, spoiler_vote_count,
+			spoiler_none_count, spoiler_minor_count, spoiler_major_count, updated_at
+		) VALUES (
+			key_unit, key_path, score_delta, count_delta, spoiler_delta,
+			none_delta, minor_delta, major_delta, clock_timestamp()
+		);
+	END IF;
+
+	new_accepted := current_score + score_delta > 0 AND current_count + count_delta > 0;
+	IF old_accepted <> new_accepted THEN
+		UPDATE public.tag_path_vote_stat
+		SET usage_count = usage_count + CASE WHEN new_accepted THEN 1 ELSE -1 END,
+			updated_at = clock_timestamp()
+		WHERE path_id = key_path;
+	END IF;
+	RETURN NULL;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.maintain_unit_tag_path_support()
+RETURNS trigger
+LANGUAGE plpgsql
+SET search_path = pg_catalog, public
+AS $$
+DECLARE
+	old_unit uuid := CASE WHEN TG_OP = 'INSERT' THEN NULL ELSE OLD.unit_id END;
+	old_path uuid := CASE WHEN TG_OP = 'INSERT' THEN NULL ELSE OLD.path_id END;
+	old_profile uuid := CASE WHEN TG_OP = 'INSERT' THEN NULL ELSE OLD.profile_id END;
+BEGIN
+	IF TG_OP <> 'INSERT' THEN
+		DELETE FROM public.unit_tag_path_support
+		WHERE unit_id = old_unit AND path_id = old_path AND profile_id = old_profile;
+	END IF;
+	IF TG_OP <> 'DELETE' AND NEW.fit_vote = 1 THEN
+		INSERT INTO public.unit_tag_path_support(unit_id, tag_id, profile_id, path_id)
+		SELECT NEW.unit_id, member.tag_id, NEW.profile_id, NEW.path_id
+		FROM public.tag_path_member AS member
+		WHERE member.path_id = NEW.path_id
+		ON CONFLICT DO NOTHING;
+	END IF;
+	RETURN NULL;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.refresh_unit_effective_tag_from_path_support()
+RETURNS trigger
+LANGUAGE plpgsql
+SET search_path = pg_catalog, public
+AS $$
+DECLARE
+	key_unit uuid := CASE WHEN TG_OP = 'DELETE' THEN OLD.unit_id ELSE NEW.unit_id END;
+	key_tag uuid := CASE WHEN TG_OP = 'DELETE' THEN OLD.tag_id ELSE NEW.tag_id END;
+	support_count bigint;
+	direct_exists boolean;
+BEGIN
+	PERFORM public.lock_vote_hot_key('unit_effective_tag:' || key_unit::text || ':' || key_tag::text, 0);
+	SELECT count(*) INTO support_count FROM public.unit_tag_path_support
+	WHERE unit_id = key_unit AND tag_id = key_tag;
+	SELECT EXISTS(SELECT 1 FROM public.unit_tag WHERE unit_id = key_unit AND tag_id = key_tag)
+	INTO direct_exists;
+	IF direct_exists OR support_count > 0 THEN
+		INSERT INTO public.unit_effective_tag(unit_id, tag_id, direct, path_support_count, updated_at)
+		VALUES (key_unit, key_tag, direct_exists, support_count, clock_timestamp())
+		ON CONFLICT (unit_id, tag_id) DO UPDATE SET
+			direct = EXCLUDED.direct,
+			path_support_count = EXCLUDED.path_support_count,
+			updated_at = EXCLUDED.updated_at;
+	ELSE
+		DELETE FROM public.unit_effective_tag WHERE unit_id = key_unit AND tag_id = key_tag;
+	END IF;
+	RETURN NULL;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.protect_unit_tag_path_judgment_identity()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+BEGIN
+	IF (OLD.unit_id, OLD.path_id, OLD.profile_id) IS DISTINCT FROM
+		(NEW.unit_id, NEW.path_id, NEW.profile_id) THEN
+		RAISE EXCEPTION 'Unit–Tag Path judgment identity is immutable'
+			USING ERRCODE = '23514', CONSTRAINT = 'unit_tag_path_judgment_identity_immutable';
+	END IF;
+	RETURN NEW;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.guard_tag_path_merge()
+RETURNS trigger
+LANGUAGE plpgsql
+SET search_path = pg_catalog, public
+AS $$
+BEGIN
+	IF TG_OP = 'DELETE' THEN
+		RAISE EXCEPTION 'Tag Path merge history is append-only'
+			USING ERRCODE = '23514', CONSTRAINT = 'tag_path_merge_append_only';
+	END IF;
+	IF TG_OP = 'UPDATE' THEN
+		IF (OLD.source_path_id, OLD.target_path_id, OLD.reason, OLD.proposal_source_kind,
+				OLD.proposal_provenance, OLD.proposed_by_profile_id, OLD.created_at)
+			IS DISTINCT FROM
+			(NEW.source_path_id, NEW.target_path_id, NEW.reason, NEW.proposal_source_kind,
+				NEW.proposal_provenance, NEW.proposed_by_profile_id, NEW.created_at)
+			OR NOT ((OLD.status = 'proposed' AND NEW.status IN ('accepted', 'rejected'))
+				OR (OLD.status = 'accepted' AND NEW.status = 'reversed')) THEN
+			RAISE EXCEPTION 'Invalid Tag Path merge transition'
+				USING ERRCODE = '23514', CONSTRAINT = 'tag_path_merge_transition';
+		END IF;
+	END IF;
+	IF NEW.status = 'accepted' AND EXISTS (
+		WITH RECURSIVE chain(path_id, depth) AS (
+			SELECT NEW.target_path_id, 0
+			UNION ALL
+			SELECT merge.target_path_id, chain.depth + 1
+			FROM chain JOIN public.tag_path_merge AS merge
+				ON merge.source_path_id = chain.path_id AND merge.status = 'accepted'
+			WHERE chain.depth < 64
+		)
+		SELECT 1 FROM chain WHERE path_id = NEW.source_path_id OR depth = 64
+	) THEN
+		RAISE EXCEPTION 'Tag Path merges cannot form a cycle or unbounded chain'
+			USING ERRCODE = '23514', CONSTRAINT = 'tag_path_merge_acyclic';
+	END IF;
+	RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS tag_path_definition_guard ON public.tag_path;
+CREATE TRIGGER tag_path_definition_guard
+BEFORE INSERT OR UPDATE OR DELETE ON public.tag_path
+FOR EACH ROW EXECUTE FUNCTION public.guard_tag_path_definition();
+
+DROP TRIGGER IF EXISTS tag_path_definition_project ON public.tag_path;
+CREATE TRIGGER tag_path_definition_project
+AFTER INSERT ON public.tag_path
+FOR EACH ROW EXECUTE FUNCTION public.project_tag_path_definition();
+
+DROP TRIGGER IF EXISTS tag_path_member_projection_guard ON public.tag_path_member;
+CREATE TRIGGER tag_path_member_projection_guard
+BEFORE INSERT OR UPDATE OR DELETE ON public.tag_path_member
+FOR EACH ROW EXECUTE FUNCTION public.guard_tag_path_projection();
+
+DROP TRIGGER IF EXISTS tag_path_edge_projection_guard ON public.tag_path_edge;
+CREATE TRIGGER tag_path_edge_projection_guard
+BEFORE INSERT OR UPDATE OR DELETE ON public.tag_path_edge
+FOR EACH ROW EXECUTE FUNCTION public.guard_tag_path_projection();
+
+DROP TRIGGER IF EXISTS tag_path_member_unit_lifecycle_guard ON public.unit;
+CREATE TRIGGER tag_path_member_unit_lifecycle_guard
+BEFORE UPDATE OR DELETE ON public.unit
+FOR EACH ROW EXECUTE FUNCTION public.guard_tag_path_member_lifecycle();
+
+DROP TRIGGER IF EXISTS tag_path_vote_stat_maintain ON public.tag_path_vote;
+CREATE TRIGGER tag_path_vote_stat_maintain
+AFTER INSERT OR UPDATE OR DELETE ON public.tag_path_vote
+FOR EACH ROW EXECUTE FUNCTION public.maintain_tag_path_vote_stat();
+
+DROP TRIGGER IF EXISTS tag_path_vote_stat_projection_guard ON public.tag_path_vote_stat;
+CREATE TRIGGER tag_path_vote_stat_projection_guard
+BEFORE INSERT OR UPDATE OR DELETE ON public.tag_path_vote_stat
+FOR EACH ROW EXECUTE FUNCTION public.guard_tag_path_vote_stat_projection();
+
+DROP TRIGGER IF EXISTS unit_tag_path_judgment_identity_guard ON public.unit_tag_path_judgment;
+CREATE TRIGGER unit_tag_path_judgment_identity_guard
+BEFORE UPDATE ON public.unit_tag_path_judgment
+FOR EACH ROW EXECUTE FUNCTION public.protect_unit_tag_path_judgment_identity();
+
+DROP TRIGGER IF EXISTS unit_tag_path_judgment_stat_maintain ON public.unit_tag_path_judgment;
+CREATE TRIGGER unit_tag_path_judgment_stat_maintain
+AFTER INSERT OR UPDATE OR DELETE ON public.unit_tag_path_judgment
+FOR EACH ROW EXECUTE FUNCTION public.maintain_unit_tag_path_judgment_stat();
+
+DROP TRIGGER IF EXISTS unit_tag_path_support_maintain ON public.unit_tag_path_judgment;
+CREATE TRIGGER unit_tag_path_support_maintain
+AFTER INSERT OR UPDATE OR DELETE ON public.unit_tag_path_judgment
+FOR EACH ROW EXECUTE FUNCTION public.maintain_unit_tag_path_support();
+
+DROP TRIGGER IF EXISTS unit_tag_path_support_effective_maintain ON public.unit_tag_path_support;
+CREATE TRIGGER unit_tag_path_support_effective_maintain
+AFTER INSERT OR DELETE ON public.unit_tag_path_support
+FOR EACH ROW EXECUTE FUNCTION public.refresh_unit_effective_tag_from_path_support();
+
+DROP TRIGGER IF EXISTS tag_path_merge_guard ON public.tag_path_merge;
+CREATE TRIGGER tag_path_merge_guard
+BEFORE INSERT OR UPDATE OR DELETE ON public.tag_path_merge
+FOR EACH ROW EXECUTE FUNCTION public.guard_tag_path_merge();
+
+-- End canonical tag-path owner.
+
+-- Reinstall the final update-first Tag judgment aggregate owner.
+-- Global direct/effective Tag judgments and subject-association spoiler totals.
+-- All mutations lock and update one indexed fact key; no corpus-wide refresh is used.
+
+CREATE OR REPLACE FUNCTION public.lock_vote_hot_keys(
+	target_unit_ids uuid[],
+	target_tag_ids uuid[],
+	target_profile_ids uuid[]
+)
+RETURNS void
+LANGUAGE plpgsql
+AS $$
+DECLARE
+	hot_key record;
+BEGIN
+	IF target_unit_ids IS NULL OR target_tag_ids IS NULL OR target_profile_ids IS NULL
+		OR cardinality(target_unit_ids) > 1024
+		OR cardinality(target_unit_ids) <> cardinality(target_tag_ids)
+		OR cardinality(target_unit_ids) <> cardinality(target_profile_ids)
+		OR EXISTS (
+			SELECT 1 FROM unnest(target_unit_ids, target_tag_ids) AS key(unit_id, tag_id)
+			WHERE key.unit_id IS NULL OR key.tag_id IS NULL
+		) THEN
+		RAISE EXCEPTION 'Vote hot-key arrays must contain at most 1024 aligned, non-null Unit/Tag keys'
+			USING ERRCODE = '22023', CONSTRAINT = 'vote_hot_key_batch_invalid';
+	END IF;
+	FOR hot_key IN
+		SELECT DISTINCT key.unit_id, key.tag_id
+		FROM unnest(target_unit_ids, target_tag_ids) AS key(unit_id, tag_id)
+		ORDER BY key.unit_id, key.tag_id
+	LOOP
+		IF NOT pg_try_advisory_xact_lock(hashtextextended(hot_key.unit_id::text || ':' || hot_key.tag_id::text, 71001)) THEN
+			RAISE EXCEPTION 'Vote aggregate key is busy'
+				USING ERRCODE = '55P03', CONSTRAINT = 'vote_hot_key_busy';
+		END IF;
+	END LOOP;
+	FOR hot_key IN
+		SELECT DISTINCT key.unit_id, key.tag_id, key.profile_id
+		FROM unnest(target_unit_ids, target_tag_ids, target_profile_ids)
+			AS key(unit_id, tag_id, profile_id)
+		WHERE key.profile_id IS NOT NULL
+		ORDER BY key.unit_id, key.tag_id, key.profile_id
+	LOOP
+		IF NOT pg_try_advisory_xact_lock(hashtextextended(
+			hot_key.unit_id::text || ':' || hot_key.tag_id::text || ':' || hot_key.profile_id::text, 71002
+		)) THEN
+			RAISE EXCEPTION 'Per-Profile vote key is busy'
+				USING ERRCODE = '55P03', CONSTRAINT = 'vote_hot_key_busy';
+		END IF;
+	END LOOP;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.refresh_unit_effective_tag_context(
+	key_unit uuid,
+	key_tag uuid
+)
+RETURNS void
+LANGUAGE plpgsql
+SET search_path = pg_catalog, public
+AS $$
+DECLARE
+	direct_exists boolean;
+	support_count bigint;
+BEGIN
+	PERFORM public.lock_vote_hot_key('unit_effective_tag:' || key_unit::text || ':' || key_tag::text, 0);
+	SELECT EXISTS(SELECT 1 FROM public.unit_tag WHERE unit_id = key_unit AND tag_id = key_tag)
+	INTO direct_exists;
+	SELECT count(*) FROM public.unit_tag_path_support
+	WHERE unit_id = key_unit AND tag_id = key_tag INTO support_count;
+	IF direct_exists OR support_count > 0 THEN
+		INSERT INTO public.unit_effective_tag(unit_id, tag_id, direct, path_support_count, updated_at)
+		VALUES (key_unit, key_tag, direct_exists, support_count, clock_timestamp())
+		ON CONFLICT (unit_id, tag_id) DO UPDATE SET
+			direct = EXCLUDED.direct,
+			path_support_count = EXCLUDED.path_support_count,
+			updated_at = EXCLUDED.updated_at;
+	ELSE
+		DELETE FROM public.unit_effective_tag WHERE unit_id = key_unit AND tag_id = key_tag;
+	END IF;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.maintain_unit_effective_tag_from_direct()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+BEGIN
+	PERFORM public.refresh_unit_effective_tag_context(
+		CASE WHEN TG_OP = 'DELETE' THEN OLD.unit_id ELSE NEW.unit_id END,
+		CASE WHEN TG_OP = 'DELETE' THEN OLD.tag_id ELSE NEW.tag_id END
+	);
+	RETURN NULL;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.refresh_unit_effective_tag_vote(
+	target_unit_id uuid,
+	target_tag_id uuid,
+	target_profile_id uuid
+)
+RETURNS void
+LANGUAGE plpgsql
+SET search_path = pg_catalog, public
+AS $$
+DECLARE
+	effective_value integer;
+BEGIN
+	PERFORM public.lock_vote_hot_key(
+		'unit_effective_tag_vote:' || target_unit_id::text || ':' || target_tag_id::text || ':' || target_profile_id::text,
+		0
+	);
+	SELECT judgment.fit_vote INTO effective_value
+	FROM public.unit_tag_judgment AS judgment
+	WHERE judgment.unit_id = target_unit_id AND judgment.tag_id = target_tag_id
+		AND judgment.profile_id = target_profile_id AND judgment.fit_vote IS NOT NULL;
+	IF effective_value IS NULL AND EXISTS (
+		SELECT 1 FROM public.unit_tag_path_support
+		WHERE unit_id = target_unit_id AND tag_id = target_tag_id AND profile_id = target_profile_id
+	) THEN
+		effective_value := 1;
+	END IF;
+	IF effective_value IS NULL THEN
+		DELETE FROM public.unit_effective_tag_vote
+		WHERE unit_id = target_unit_id AND tag_id = target_tag_id AND profile_id = target_profile_id;
+	ELSE
+		INSERT INTO public.unit_effective_tag_vote(unit_id, tag_id, profile_id, value, updated_at)
+		VALUES (target_unit_id, target_tag_id, target_profile_id, effective_value, clock_timestamp())
+		ON CONFLICT (unit_id, tag_id, profile_id) DO UPDATE SET
+			value = EXCLUDED.value, updated_at = EXCLUDED.updated_at;
+	END IF;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.maintain_unit_effective_tag_vote_from_direct()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+BEGIN
+	PERFORM public.refresh_unit_effective_tag_vote(
+		CASE WHEN TG_OP = 'DELETE' THEN OLD.unit_id ELSE NEW.unit_id END,
+		CASE WHEN TG_OP = 'DELETE' THEN OLD.tag_id ELSE NEW.tag_id END,
+		CASE WHEN TG_OP = 'DELETE' THEN OLD.profile_id ELSE NEW.profile_id END
+	);
+	RETURN NULL;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.maintain_unit_effective_tag_vote_from_path()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+BEGIN
+	PERFORM public.refresh_unit_effective_tag_vote(
+		CASE WHEN TG_OP = 'DELETE' THEN OLD.unit_id ELSE NEW.unit_id END,
+		CASE WHEN TG_OP = 'DELETE' THEN OLD.tag_id ELSE NEW.tag_id END,
+		CASE WHEN TG_OP = 'DELETE' THEN OLD.profile_id ELSE NEW.profile_id END
+	);
+	RETURN NULL;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.maintain_unit_tag_fit_stat()
+RETURNS trigger
+LANGUAGE plpgsql
+SET search_path = pg_catalog, public
+AS $$
+DECLARE
+	key_unit uuid := CASE WHEN TG_OP = 'DELETE' THEN OLD.unit_id ELSE NEW.unit_id END;
+	key_tag uuid := CASE WHEN TG_OP = 'DELETE' THEN OLD.tag_id ELSE NEW.tag_id END;
+	score_delta bigint := 0;
+	count_delta bigint := 0;
+BEGIN
+	PERFORM public.lock_vote_hot_key('unit_tag_stat:' || key_unit::text || ':' || key_tag::text, 0);
+	IF TG_OP <> 'INSERT' THEN score_delta := score_delta - OLD.value; count_delta := count_delta - 1; END IF;
+	IF TG_OP <> 'DELETE' THEN score_delta := score_delta + NEW.value; count_delta := count_delta + 1; END IF;
+	UPDATE public.unit_tag_judgment_stat
+	SET score = score + score_delta,
+		vote_count = vote_count + count_delta,
+		updated_at = clock_timestamp()
+	WHERE unit_id = key_unit AND tag_id = key_tag;
+	IF NOT FOUND THEN
+		INSERT INTO public.unit_tag_judgment_stat(unit_id, tag_id, score, vote_count, updated_at)
+		VALUES (key_unit, key_tag, score_delta, count_delta, clock_timestamp());
+	END IF;
+	RETURN NULL;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.maintain_unit_tag_spoiler_stat()
+RETURNS trigger
+LANGUAGE plpgsql
+SET search_path = pg_catalog, public
+AS $$
+DECLARE
+	key_unit uuid := CASE WHEN TG_OP = 'DELETE' THEN OLD.unit_id ELSE NEW.unit_id END;
+	key_tag uuid := CASE WHEN TG_OP = 'DELETE' THEN OLD.tag_id ELSE NEW.tag_id END;
+	count_delta bigint := 0;
+	none_delta bigint := 0;
+	minor_delta bigint := 0;
+	major_delta bigint := 0;
+BEGIN
+	PERFORM public.lock_vote_hot_key('unit_tag_stat:' || key_unit::text || ':' || key_tag::text, 0);
+	IF TG_OP <> 'INSERT' AND OLD.spoiler_level IS NOT NULL THEN
+		count_delta := count_delta - 1;
+		IF OLD.spoiler_level = 0 THEN none_delta := none_delta - 1;
+		ELSIF OLD.spoiler_level = 1 THEN minor_delta := minor_delta - 1;
+		ELSE major_delta := major_delta - 1; END IF;
+	END IF;
+	IF TG_OP <> 'DELETE' AND NEW.spoiler_level IS NOT NULL THEN
+		count_delta := count_delta + 1;
+		IF NEW.spoiler_level = 0 THEN none_delta := none_delta + 1;
+		ELSIF NEW.spoiler_level = 1 THEN minor_delta := minor_delta + 1;
+		ELSE major_delta := major_delta + 1; END IF;
+	END IF;
+	UPDATE public.unit_tag_judgment_stat
+	SET spoiler_vote_count = spoiler_vote_count + count_delta,
+		spoiler_none_count = spoiler_none_count + none_delta,
+		spoiler_minor_count = spoiler_minor_count + minor_delta,
+		spoiler_major_count = spoiler_major_count + major_delta,
+		updated_at = clock_timestamp()
+	WHERE unit_id = key_unit AND tag_id = key_tag;
+	IF NOT FOUND THEN
+		INSERT INTO public.unit_tag_judgment_stat(
+			unit_id, tag_id, spoiler_vote_count, spoiler_none_count,
+			spoiler_minor_count, spoiler_major_count, updated_at
+		) VALUES (
+			key_unit, key_tag, count_delta, none_delta, minor_delta, major_delta, clock_timestamp()
+		);
+	END IF;
+	RETURN NULL;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.maintain_subject_association_judgment_stat()
+RETURNS trigger
+LANGUAGE plpgsql
+SET search_path = pg_catalog, public
+AS $$
+DECLARE
+	key_id uuid := CASE WHEN TG_OP = 'DELETE' THEN OLD.association_id ELSE NEW.association_id END;
+	count_delta bigint := 0;
+	none_delta bigint := 0;
+	minor_delta bigint := 0;
+	major_delta bigint := 0;
+BEGIN
+	PERFORM public.lock_vote_hot_key('subject_spoiler:' || key_id::text, 0);
+	IF TG_OP <> 'INSERT' THEN
+		count_delta := count_delta - 1;
+		IF OLD.spoiler_level = 0 THEN none_delta := none_delta - 1;
+		ELSIF OLD.spoiler_level = 1 THEN minor_delta := minor_delta - 1;
+		ELSE major_delta := major_delta - 1; END IF;
+	END IF;
+	IF TG_OP <> 'DELETE' THEN
+		count_delta := count_delta + 1;
+		IF NEW.spoiler_level = 0 THEN none_delta := none_delta + 1;
+		ELSIF NEW.spoiler_level = 1 THEN minor_delta := minor_delta + 1;
+		ELSE major_delta := major_delta + 1; END IF;
+	END IF;
+	UPDATE public.subject_association_judgment_stat
+	SET spoiler_vote_count = spoiler_vote_count + count_delta,
+		spoiler_none_count = spoiler_none_count + none_delta,
+		spoiler_minor_count = spoiler_minor_count + minor_delta,
+		spoiler_major_count = spoiler_major_count + major_delta,
+		updated_at = clock_timestamp()
+	WHERE association_id = key_id;
+	IF NOT FOUND THEN
+		INSERT INTO public.subject_association_judgment_stat(
+			association_id, spoiler_vote_count, spoiler_none_count,
+			spoiler_minor_count, spoiler_major_count, updated_at
+		) VALUES (key_id, count_delta, none_delta, minor_delta, major_delta, clock_timestamp());
+	END IF;
+	RETURN NULL;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS unit_tag_effective_context_maintain ON public.unit_tag;
+CREATE TRIGGER unit_tag_effective_context_maintain
+AFTER INSERT OR DELETE ON public.unit_tag
+FOR EACH ROW EXECUTE FUNCTION public.maintain_unit_effective_tag_from_direct();
+
+DROP TRIGGER IF EXISTS unit_tag_judgment_effective_vote_maintain ON public.unit_tag_judgment;
+CREATE TRIGGER unit_tag_judgment_effective_vote_maintain
+AFTER INSERT OR UPDATE OR DELETE ON public.unit_tag_judgment
+FOR EACH ROW EXECUTE FUNCTION public.maintain_unit_effective_tag_vote_from_direct();
+
+DROP TRIGGER IF EXISTS unit_tag_path_support_effective_vote_maintain ON public.unit_tag_path_support;
+CREATE TRIGGER unit_tag_path_support_effective_vote_maintain
+AFTER INSERT OR DELETE ON public.unit_tag_path_support
+FOR EACH ROW EXECUTE FUNCTION public.maintain_unit_effective_tag_vote_from_path();
+
+DROP TRIGGER IF EXISTS unit_effective_tag_vote_fit_stat_maintain ON public.unit_effective_tag_vote;
+CREATE TRIGGER unit_effective_tag_vote_fit_stat_maintain
+AFTER INSERT OR UPDATE OR DELETE ON public.unit_effective_tag_vote
+FOR EACH ROW EXECUTE FUNCTION public.maintain_unit_tag_fit_stat();
+
+DROP TRIGGER IF EXISTS unit_tag_judgment_spoiler_stat_maintain ON public.unit_tag_judgment;
+CREATE TRIGGER unit_tag_judgment_spoiler_stat_maintain
+AFTER INSERT OR UPDATE OR DELETE ON public.unit_tag_judgment
+FOR EACH ROW EXECUTE FUNCTION public.maintain_unit_tag_spoiler_stat();
+
+DROP TRIGGER IF EXISTS subject_association_judgment_stat_maintain ON public.subject_association_judgment;
+CREATE TRIGGER subject_association_judgment_stat_maintain
+AFTER INSERT OR UPDATE OR DELETE ON public.subject_association_judgment
+FOR EACH ROW EXECUTE FUNCTION public.maintain_subject_association_judgment_stat();
+
+-- End canonical tag-judgment aggregate owner.
+
+-- Reinstall the final update-first Realm Tag authority owner.
+-- Realm-local Tag and Tag Path authority. Global and Realm votes remain separate;
+-- fallback policy is resolved by readers and never merges aggregate populations.
+
+CREATE OR REPLACE FUNCTION public.lock_vote_hot_key(lock_key text, lock_seed bigint)
+RETURNS void
+LANGUAGE plpgsql
+AS $$
+BEGIN
+	IF lock_key IS NULL OR lock_seed IS NULL THEN
+		RAISE EXCEPTION 'Vote hot key must be non-null'
+			USING ERRCODE = '22023', CONSTRAINT = 'vote_hot_key_invalid';
+	END IF;
+	IF NOT pg_try_advisory_xact_lock(hashtextextended(lock_key, lock_seed)) THEN
+		RAISE EXCEPTION 'Vote aggregate key is busy'
+			USING ERRCODE = '55P03', CONSTRAINT = 'vote_hot_key_busy';
+	END IF;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.maintain_realm_tag_path_vote_stat()
+RETURNS trigger
+LANGUAGE plpgsql
+SET search_path = pg_catalog, public
+AS $$
+DECLARE
+	key_realm uuid := CASE WHEN TG_OP = 'DELETE' THEN OLD.realm_id ELSE NEW.realm_id END;
+	key_path uuid := CASE WHEN TG_OP = 'DELETE' THEN OLD.path_id ELSE NEW.path_id END;
+	score_delta bigint := 0;
+	count_delta bigint := 0;
+BEGIN
+	PERFORM public.lock_vote_hot_key('realm_tag_path_vote:' || key_realm::text || ':' || key_path::text, 0);
+	IF TG_OP <> 'INSERT' THEN score_delta := score_delta - OLD.value; count_delta := count_delta - 1; END IF;
+	IF TG_OP <> 'DELETE' THEN score_delta := score_delta + NEW.value; count_delta := count_delta + 1; END IF;
+	UPDATE public.realm_tag_path_vote_stat
+	SET score = score + score_delta,
+		vote_count = vote_count + count_delta,
+		updated_at = clock_timestamp()
+	WHERE realm_id = key_realm AND path_id = key_path;
+	IF NOT FOUND THEN
+		INSERT INTO public.realm_tag_path_vote_stat(realm_id, path_id, score, vote_count, updated_at)
+		VALUES (key_realm, key_path, score_delta, count_delta, clock_timestamp());
+	END IF;
+	RETURN NULL;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.maintain_realm_unit_tag_path_judgment_stat()
+RETURNS trigger
+LANGUAGE plpgsql
+SET search_path = pg_catalog, public
+AS $$
+DECLARE
+	key_realm uuid := CASE WHEN TG_OP = 'DELETE' THEN OLD.realm_id ELSE NEW.realm_id END;
+	key_unit uuid := CASE WHEN TG_OP = 'DELETE' THEN OLD.unit_id ELSE NEW.unit_id END;
+	key_path uuid := CASE WHEN TG_OP = 'DELETE' THEN OLD.path_id ELSE NEW.path_id END;
+	score_delta bigint := 0;
+	count_delta bigint := 0;
+	spoiler_delta bigint := 0;
+	none_delta bigint := 0;
+	minor_delta bigint := 0;
+	major_delta bigint := 0;
+	old_accepted boolean;
+	current_score bigint;
+	current_count bigint;
+	new_accepted boolean;
+BEGIN
+	PERFORM public.lock_vote_hot_key('realm_unit_tag_path:' || key_realm::text || ':' || key_unit::text || ':' || key_path::text, 0);
+	SELECT score > 0 AND vote_count > 0, score, vote_count
+	INTO old_accepted, current_score, current_count
+	FROM public.realm_unit_tag_path_judgment_stat
+	WHERE realm_id = key_realm AND unit_id = key_unit AND path_id = key_path;
+	old_accepted := coalesce(old_accepted, false);
+	current_score := coalesce(current_score, 0);
+	current_count := coalesce(current_count, 0);
+	IF TG_OP <> 'INSERT' THEN
+		IF OLD.fit_vote IS NOT NULL THEN score_delta := score_delta - OLD.fit_vote; count_delta := count_delta - 1; END IF;
+		IF OLD.spoiler_level IS NOT NULL THEN
+			spoiler_delta := spoiler_delta - 1;
+			IF OLD.spoiler_level = 0 THEN none_delta := none_delta - 1;
+			ELSIF OLD.spoiler_level = 1 THEN minor_delta := minor_delta - 1;
+			ELSE major_delta := major_delta - 1; END IF;
+		END IF;
+	END IF;
+	IF TG_OP <> 'DELETE' THEN
+		IF NEW.fit_vote IS NOT NULL THEN score_delta := score_delta + NEW.fit_vote; count_delta := count_delta + 1; END IF;
+		IF NEW.spoiler_level IS NOT NULL THEN
+			spoiler_delta := spoiler_delta + 1;
+			IF NEW.spoiler_level = 0 THEN none_delta := none_delta + 1;
+			ELSIF NEW.spoiler_level = 1 THEN minor_delta := minor_delta + 1;
+			ELSE major_delta := major_delta + 1; END IF;
+		END IF;
+	END IF;
+	UPDATE public.realm_unit_tag_path_judgment_stat
+	SET score = score + score_delta,
+		vote_count = vote_count + count_delta,
+		spoiler_vote_count = spoiler_vote_count + spoiler_delta,
+		spoiler_none_count = spoiler_none_count + none_delta,
+		spoiler_minor_count = spoiler_minor_count + minor_delta,
+		spoiler_major_count = spoiler_major_count + major_delta,
+		updated_at = clock_timestamp()
+	WHERE realm_id = key_realm AND unit_id = key_unit AND path_id = key_path;
+	IF NOT FOUND THEN
+		INSERT INTO public.realm_unit_tag_path_judgment_stat(
+			realm_id, unit_id, path_id, score, vote_count, spoiler_vote_count,
+			spoiler_none_count, spoiler_minor_count, spoiler_major_count, updated_at
+		) VALUES (
+			key_realm, key_unit, key_path, score_delta, count_delta, spoiler_delta,
+			none_delta, minor_delta, major_delta, clock_timestamp()
+		);
+	END IF;
+	new_accepted := current_score + score_delta > 0 AND current_count + count_delta > 0;
+	IF old_accepted <> new_accepted THEN
+		UPDATE public.realm_tag_path_vote_stat
+		SET usage_count = usage_count + CASE WHEN new_accepted THEN 1 ELSE -1 END,
+			updated_at = clock_timestamp()
+		WHERE realm_id = key_realm AND path_id = key_path;
+	END IF;
+	RETURN NULL;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.maintain_realm_unit_tag_path_support()
+RETURNS trigger
+LANGUAGE plpgsql
+SET search_path = pg_catalog, public
+AS $$
+BEGIN
+	IF TG_OP <> 'INSERT' THEN
+		DELETE FROM public.realm_unit_tag_path_support
+		WHERE realm_id = OLD.realm_id AND unit_id = OLD.unit_id
+			AND path_id = OLD.path_id AND profile_id = OLD.profile_id;
+	END IF;
+	IF TG_OP <> 'DELETE' AND NEW.fit_vote = 1 THEN
+		INSERT INTO public.realm_unit_tag_path_support(realm_id, unit_id, tag_id, profile_id, path_id)
+		SELECT NEW.realm_id, NEW.unit_id, member.tag_id, NEW.profile_id, NEW.path_id
+		FROM public.tag_path_member AS member WHERE member.path_id = NEW.path_id
+		ON CONFLICT DO NOTHING;
+	END IF;
+	RETURN NULL;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.refresh_realm_unit_effective_tag()
+RETURNS trigger
+LANGUAGE plpgsql
+SET search_path = pg_catalog, public
+AS $$
+DECLARE
+	key_realm uuid := CASE WHEN TG_OP = 'DELETE' THEN OLD.realm_id ELSE NEW.realm_id END;
+	key_unit uuid := CASE WHEN TG_OP = 'DELETE' THEN OLD.unit_id ELSE NEW.unit_id END;
+	key_tag uuid := CASE WHEN TG_OP = 'DELETE' THEN OLD.tag_id ELSE NEW.tag_id END;
+	direct_exists boolean;
+	support_count bigint;
+BEGIN
+	PERFORM public.lock_vote_hot_key('realm_effective_tag:' || key_realm::text || ':' || key_unit::text || ':' || key_tag::text, 0);
+	SELECT EXISTS(SELECT 1 FROM public.realm_unit_tag
+		WHERE realm_id = key_realm AND unit_id = key_unit AND tag_id = key_tag)
+	INTO direct_exists;
+	SELECT count(*) FROM public.realm_unit_tag_path_support
+	WHERE realm_id = key_realm AND unit_id = key_unit AND tag_id = key_tag
+	INTO support_count;
+	IF direct_exists OR support_count > 0 THEN
+		INSERT INTO public.realm_unit_effective_tag(realm_id, unit_id, tag_id, direct, path_support_count, updated_at)
+		VALUES (key_realm, key_unit, key_tag, direct_exists, support_count, clock_timestamp())
+		ON CONFLICT (realm_id, unit_id, tag_id) DO UPDATE SET
+			direct = EXCLUDED.direct, path_support_count = EXCLUDED.path_support_count,
+			updated_at = EXCLUDED.updated_at;
+	ELSE
+		DELETE FROM public.realm_unit_effective_tag
+		WHERE realm_id = key_realm AND unit_id = key_unit AND tag_id = key_tag;
+	END IF;
+	RETURN NULL;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.maintain_realm_tag_judgment_stat()
+RETURNS trigger
+LANGUAGE plpgsql
+SET search_path = pg_catalog, public
+AS $$
+DECLARE
+	key_realm uuid := CASE WHEN TG_OP = 'DELETE' THEN OLD.realm_id ELSE NEW.realm_id END;
+	key_unit uuid := CASE WHEN TG_OP = 'DELETE' THEN OLD.unit_id ELSE NEW.unit_id END;
+	key_tag uuid := CASE WHEN TG_OP = 'DELETE' THEN OLD.tag_id ELSE NEW.tag_id END;
+	score_delta bigint := 0; count_delta bigint := 0; spoiler_delta bigint := 0;
+	none_delta bigint := 0; minor_delta bigint := 0; major_delta bigint := 0;
+BEGIN
+	PERFORM public.lock_vote_hot_key('realm_tag_stat:' || key_realm::text || ':' || key_unit::text || ':' || key_tag::text, 0);
+	IF TG_OP <> 'INSERT' THEN
+		IF OLD.fit_vote IS NOT NULL THEN score_delta := score_delta - OLD.fit_vote; count_delta := count_delta - 1; END IF;
+		IF OLD.spoiler_level IS NOT NULL THEN spoiler_delta := spoiler_delta - 1;
+			IF OLD.spoiler_level = 0 THEN none_delta := none_delta - 1;
+			ELSIF OLD.spoiler_level = 1 THEN minor_delta := minor_delta - 1;
+			ELSE major_delta := major_delta - 1; END IF; END IF;
+	END IF;
+	IF TG_OP <> 'DELETE' THEN
+		IF NEW.fit_vote IS NOT NULL THEN score_delta := score_delta + NEW.fit_vote; count_delta := count_delta + 1; END IF;
+		IF NEW.spoiler_level IS NOT NULL THEN spoiler_delta := spoiler_delta + 1;
+			IF NEW.spoiler_level = 0 THEN none_delta := none_delta + 1;
+			ELSIF NEW.spoiler_level = 1 THEN minor_delta := minor_delta + 1;
+			ELSE major_delta := major_delta + 1; END IF; END IF;
+	END IF;
+	UPDATE public.realm_tag_judgment_stat
+	SET score = score + score_delta,
+		vote_count = vote_count + count_delta,
+		spoiler_vote_count = spoiler_vote_count + spoiler_delta,
+		spoiler_none_count = spoiler_none_count + none_delta,
+		spoiler_minor_count = spoiler_minor_count + minor_delta,
+		spoiler_major_count = spoiler_major_count + major_delta,
+		updated_at = clock_timestamp()
+	WHERE realm_id = key_realm AND unit_id = key_unit AND tag_id = key_tag;
+	IF NOT FOUND THEN
+		INSERT INTO public.realm_tag_judgment_stat(
+			realm_id, unit_id, tag_id, score, vote_count, spoiler_vote_count,
+			spoiler_none_count, spoiler_minor_count, spoiler_major_count, updated_at
+		) VALUES (
+			key_realm, key_unit, key_tag, score_delta, count_delta, spoiler_delta,
+			none_delta, minor_delta, major_delta, clock_timestamp()
+		);
+	END IF;
+	RETURN NULL;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.protect_realm_tag_path_judgment_identity()
+RETURNS trigger LANGUAGE plpgsql AS $$
+BEGIN
+	IF (OLD.realm_id, OLD.unit_id, OLD.path_id, OLD.profile_id) IS DISTINCT FROM
+		(NEW.realm_id, NEW.unit_id, NEW.path_id, NEW.profile_id) THEN
+		RAISE EXCEPTION 'Realm Unit–Tag Path judgment identity is immutable'
+			USING ERRCODE = '23514', CONSTRAINT = 'realm_unit_tag_path_judgment_identity_immutable';
+	END IF;
+	RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS realm_tag_path_vote_stat_maintain ON public.realm_tag_path_vote;
+CREATE TRIGGER realm_tag_path_vote_stat_maintain
+AFTER INSERT OR UPDATE OR DELETE ON public.realm_tag_path_vote
+FOR EACH ROW EXECUTE FUNCTION public.maintain_realm_tag_path_vote_stat();
+
+DROP TRIGGER IF EXISTS realm_unit_tag_path_judgment_identity_guard ON public.realm_unit_tag_path_judgment;
+CREATE TRIGGER realm_unit_tag_path_judgment_identity_guard
+BEFORE UPDATE ON public.realm_unit_tag_path_judgment
+FOR EACH ROW EXECUTE FUNCTION public.protect_realm_tag_path_judgment_identity();
+
+DROP TRIGGER IF EXISTS realm_unit_tag_path_judgment_stat_maintain ON public.realm_unit_tag_path_judgment;
+CREATE TRIGGER realm_unit_tag_path_judgment_stat_maintain
+AFTER INSERT OR UPDATE OR DELETE ON public.realm_unit_tag_path_judgment
+FOR EACH ROW EXECUTE FUNCTION public.maintain_realm_unit_tag_path_judgment_stat();
+
+DROP TRIGGER IF EXISTS realm_unit_tag_path_support_maintain ON public.realm_unit_tag_path_judgment;
+CREATE TRIGGER realm_unit_tag_path_support_maintain
+AFTER INSERT OR UPDATE OR DELETE ON public.realm_unit_tag_path_judgment
+FOR EACH ROW EXECUTE FUNCTION public.maintain_realm_unit_tag_path_support();
+
+DROP TRIGGER IF EXISTS realm_unit_tag_path_support_effective_maintain ON public.realm_unit_tag_path_support;
+CREATE TRIGGER realm_unit_tag_path_support_effective_maintain
+AFTER INSERT OR DELETE ON public.realm_unit_tag_path_support
+FOR EACH ROW EXECUTE FUNCTION public.refresh_realm_unit_effective_tag();
+
+DROP TRIGGER IF EXISTS realm_unit_tag_effective_maintain ON public.realm_unit_tag;
+CREATE TRIGGER realm_unit_tag_effective_maintain
+AFTER INSERT OR DELETE ON public.realm_unit_tag
+FOR EACH ROW EXECUTE FUNCTION public.refresh_realm_unit_effective_tag();
+
+DROP TRIGGER IF EXISTS realm_tag_judgment_stat_maintain ON public.realm_tag_judgment;
+CREATE TRIGGER realm_tag_judgment_stat_maintain
+AFTER INSERT OR UPDATE OR DELETE ON public.realm_tag_judgment
+FOR EACH ROW EXECUTE FUNCTION public.maintain_realm_tag_judgment_stat();
+
+-- End canonical Realm Tag authority owner.

@@ -22,6 +22,7 @@ import {
 	contentRatingPolicyFromAllowlist,
 	getContentRatingCondition,
 } from "../../content-rating/policy";
+import { requireContentSpoilerLevel } from "../../content-labels/presentation";
 import { getProfileActivityReadCondition } from "../../authorization/profile-activity/query";
 import { getUnitReadCondition } from "../../authorization/unit/query";
 import { database } from "../../database";
@@ -1397,6 +1398,7 @@ export async function hydrateFeedItems(
 		if (row.unitKind !== "post" || !isFeedPostKind(row.postKind)) return [];
 		const subject = row.subjectId ? subjects.get(row.subjectId) : undefined;
 		if (row.postKind === "excerpt" && !subject) return [];
+		const contentSpoilerLevel = requireContentSpoilerLevel(row.contentSpoilerLevel);
 		const postItem = {
 			...common,
 			itemType: "post" as const,
@@ -1418,10 +1420,7 @@ export async function hydrateFeedItems(
 						? null
 						: toPortableTextResponse(row.body, "post.body"),
 			contentSpoiler: {
-				level:
-					row.contentSpoilerLevel === 1 || row.contentSpoilerLevel === 2
-						? row.contentSpoilerLevel
-						: 0,
+				level: contentSpoilerLevel,
 				concealed: row.contentSpoilerLevel > 0 && !viewerDisplayPreference?.alwaysShowSpoilers,
 			},
 			contentNsfw: {

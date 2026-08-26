@@ -188,7 +188,7 @@ export default {
 		noRanked: "추천으로 설정할 다른 글로벌 태그가 없습니다.",
 	},
 	realms: {
-		pathsTitle: `${realmTerms.label} 태그 경로`,
+		pathsTitle: `${realmTerms.label} ${tagPathTerms.label}`,
 		applyPath: "경로 적용",
 		authority: { realm: `이 ${realmTerms.label}`, global: "전역" },
 		pathAuthority: insert("적합도: {{fit}} · 스포일러: {{spoiler}}", {

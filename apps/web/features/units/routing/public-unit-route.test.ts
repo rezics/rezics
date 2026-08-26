@@ -7,8 +7,8 @@ describe("publicUnitHref", () => {
 		expect(publicUnitHref("tag", { id: "tag-id" })).toBe("/tags/tag-id");
 	});
 
-	it("routes a Tag structure returned through the mixed Search Feed", () => {
-		expect(publicUnitHref("structure", { id: "structure-id" })).toBe("/tag-paths/structure-id");
+	it("does not expose dedicated Tag Path Units through generic public routing", () => {
+		expect(publicUnitHref("tag_path", { id: "path-id" })).toBeUndefined();
 	});
 
 	it.each(["video", "audio", "release"])("routes top-level manageable Units", (kind) => {

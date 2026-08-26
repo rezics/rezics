@@ -6,6 +6,7 @@ import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 const { forms: followTerms } = jaTerminology.follow;
 const { forms: postTerms } = jaTerminology.post;
 const { forms: realmTerms } = jaTerminology.realm;
+const { forms: tagPathTerms } = jaTerminology.tagPath;
 const { forms: unitSlugTerms } = jaTerminology.unitSlug;
 
 export default {
@@ -97,14 +98,14 @@ export default {
 		description: `この機能は${realmTerms.label}の管理者が明示的に有効にする必要があります。有効にすると、メンバーはこの${realmTerms.label}が正式に説明しているタグにのみ投票できます。`,
 		enabled: `${realmTerms.label}のタグ投票を有効にする`,
 		enabledDescription: `検索と投票には、この${realmTerms.label}で現在表示できる説明があるタグだけが表示されます。`,
-		pathAuthorityTitle: "タグパスの権限",
-		pathAuthorityDescription: `この${realmTerms.label}で使うタグパスを採用し、未決の適合度とネタバレ判定をグローバル結果から継承するか個別に設定します。`,
+		pathAuthorityTitle: `${tagPathTerms.label}の権限`,
+		pathAuthorityDescription: `この${realmTerms.label}で使う${tagPathTerms.label}を採用し、未決の適合度とネタバレ判定をグローバル結果から継承するか個別に設定します。`,
 		fitFallback: "適合度のフォールバック",
 		spoilerFallback: "ネタバレのフォールバック",
 		fallbackInherit: "グローバル結果を継承",
 		fallbackIsolate: `この${realmTerms.label}では未決のままにする`,
-		adoptPath: "タグパスを採用",
-		pathsEmpty: `この${realmTerms.label}ではタグパスを採用していません。`,
+		adoptPath: `${tagPathTerms.label}を採用`,
+		pathsEmpty: `この${realmTerms.label}では${tagPathTerms.label}を採用していません。`,
 		relationshipsTitle: "タグコンテキスト関連付け",
 		relationshipsDescription: `タグ分類とは別に、この${realmTerms.label}にあるタグとウィキ記事の関連付けをすべて表示します。`,
 		relationshipsListLabel: "タグコンテキスト関連付け",

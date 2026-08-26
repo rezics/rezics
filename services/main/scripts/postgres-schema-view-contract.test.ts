@@ -1,20 +1,7 @@
 import { readFile } from "node:fs/promises";
 
-import { is } from "drizzle-orm";
-import { getViewConfig, PgColumn } from "drizzle-orm/pg-core";
 import { describe, expect, it } from "vitest";
 
-import {
-	currentTagPrimaryDisplayPath,
-	currentUnitEffectiveTag,
-	currentUnitEffectiveTagVote,
-	currentTagPathEdge,
-	currentTagPathEnd,
-	currentTagPathMember,
-	currentTagPathPrimaryPathCandidate,
-	currentUnitTagJudgmentStat,
-	currentUnitTagPathSupport,
-} from "../src/services/database/schema/structure-correction";
 import {
 	PostgreSqlSchemaFileNames,
 	PostgreSqlSchemaViews,
@@ -46,48 +33,9 @@ const ExampleManifest = [
 	},
 ] as const;
 
-const TypedCurrentViews = [
-	currentTagPathMember,
-	currentTagPathEdge,
-	currentTagPathEnd,
-	currentTagPathPrimaryPathCandidate,
-	currentUnitTagPathSupport,
-	currentUnitEffectiveTag,
-	currentUnitEffectiveTagVote,
-	currentUnitTagJudgmentStat,
-	currentTagPrimaryDisplayPath,
-] as const;
-
-function toCatalogDataType(sqlType: string): string {
-	return sqlType.replace(/^timestamp \(/u, "timestamp(");
-}
-
-describe("canonical PostgreSQL current Structure view contract", () => {
-	it("manifests every typed current view with its exact ordered column signature", () => {
-		const typedViews = TypedCurrentViews.map((view) => {
-			const config = getViewConfig(view);
-			return {
-				name: config.name,
-				columns: Object.values(config.selectedFields).map((field) => {
-					if (!is(field, PgColumn))
-						throw new TypeError(`View ${config.name} contains a non-column field`);
-					return {
-						name: field.name,
-						dataType: toCatalogDataType(field.getSQLType()),
-					};
-				}),
-			};
-		}).sort((left, right) => left.name.localeCompare(right.name));
-		const manifestViews = PostgreSqlSchemaViews.map(({ name, columns, relOptions }) => ({
-			name,
-			columns,
-			relOptions,
-		})).sort((left, right) => left.name.localeCompare(right.name));
-
-		expect(manifestViews.map(({ name, columns }) => ({ name, columns }))).toEqual(typedViews);
-		expect(manifestViews).toHaveLength(9);
-		for (const { relOptions } of manifestViews)
-			expect(relOptions).toEqual(["security_barrier=true"]);
+describe("canonical PostgreSQL view contract", () => {
+	it("does not restore legacy mutable-projection current views", () => {
+		expect(PostgreSqlSchemaViews).toEqual([]);
 	});
 
 	it("requires one canonical CREATE OR REPLACE declaration for every current view", async () => {

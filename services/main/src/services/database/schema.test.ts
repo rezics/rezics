@@ -962,7 +962,7 @@ describe("database schema contracts", () => {
 			"media",
 			"series",
 			"tag",
-			"structure",
+			"tag_path",
 		]);
 		expect(PlatformCapabilityValues).toEqual(
 			expect.arrayContaining([

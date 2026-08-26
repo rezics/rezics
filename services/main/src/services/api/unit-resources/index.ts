@@ -27,6 +27,7 @@ import { unitOwnershipModeFromOwnerProfileId } from "../../authorization/unit/ow
 import { getUnitPermissionCondition } from "../../authorization/unit/query";
 import { associationTargetScope, unitScope } from "../../authorization/unit/scope";
 import { database } from "../../database";
+import { toSafeInteger } from "../../database/integer";
 import { runVoteTransaction } from "../../database/vote-admission";
 import {
 	avatarReferenceFromColumns,
@@ -128,6 +129,7 @@ import { presentImageAsset } from "../../units/service";
 import { presentAvatar } from "../../units/avatar";
 import { IdResponse, NoContentResponse } from "../schema/action-response";
 import { UnitIdParams } from "../schema";
+import { ValidationError } from "../errors";
 import {
 	TagApplicationPolicyResponse,
 	toApiErrorResponse,
@@ -437,7 +439,7 @@ async function getSubjectAssociationSpoilerSummary(associationId: string, profil
 		stat?.spoilerMajorCount ?? 0n,
 		"Subject association major-spoiler count",
 	);
-	const level =
+	const level: 0 | 1 | 2 =
 		major * 2 >= voteCount && voteCount > 0
 			? 2
 			: (minor + major) * 2 >= voteCount && voteCount > 0
@@ -446,12 +448,13 @@ async function getSubjectAssociationSpoilerSummary(associationId: string, profil
 	const viewerLevel = viewer?.spoilerLevel ?? null;
 	if (viewerLevel !== null && viewerLevel !== 0 && viewerLevel !== 1 && viewerLevel !== 2)
 		throw new Error("Subject association spoiler judgment is invalid");
+	const normalizedViewerLevel: 0 | 1 | 2 | null = viewerLevel;
 	return {
 		associationId,
 		level,
 		voteCount,
 		distribution: { none, minor, major },
-		viewerLevel,
+		viewerLevel: normalizedViewerLevel,
 	};
 }
 

@@ -1,4 +1,5 @@
 import { koTerminology } from "@rezics/i18n/terminology/ko";
+import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 
 const { forms: entityTerms } = koTerminology.entity;
 
@@ -16,8 +17,8 @@ export default {
 	bust: "가슴둘레",
 	waist: "허리둘레",
 	hips: "엉덩이둘레",
-	centimetreUnit: "cm",
-	kilogramUnit: "kg",
+	centimetreUnit: verbatimTerms.centimetreUnitSymbol.value,
+	kilogramUnit: verbatimTerms.kilogramUnitSymbol.value,
 	newEntity: `새 ${entityTerms.label}`,
 	newTag: "새 태그",
 	externalLinksDescription: `이 ${entityTerms.inline}에 관한 정보를 뒷받침하는 공개 페이지입니다.`,

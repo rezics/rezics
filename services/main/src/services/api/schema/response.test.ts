@@ -91,6 +91,8 @@ describe("API response values", () => {
 			latestRevisionId: null,
 			replyContext: null,
 			subject: null,
+			contentSpoiler: { level: 0 as const, concealed: false },
+			contentNsfw: { labelled: false, concealed: false },
 		};
 		const contents = [
 			{

@@ -39,10 +39,12 @@ BEGIN
 END;
 $$;
 
+DROP TRIGGER IF EXISTS entity_measurement_guard ON public.entity_measurement;
 CREATE TRIGGER entity_measurement_guard
 BEFORE INSERT OR UPDATE OR DELETE ON public.entity_measurement
 FOR EACH ROW EXECUTE FUNCTION public.guard_entity_measurement();
 
+DROP TRIGGER IF EXISTS content_pack_entity_measurement_evidence_immutable ON public.content_pack_entity_measurement_evidence;
 CREATE TRIGGER content_pack_entity_measurement_evidence_immutable
 BEFORE UPDATE OR DELETE ON public.content_pack_entity_measurement_evidence
 FOR EACH ROW EXECUTE FUNCTION public.reject_content_pack_entity_measurement_evidence_mutation();

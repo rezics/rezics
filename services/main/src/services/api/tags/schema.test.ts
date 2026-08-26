@@ -9,7 +9,6 @@ import {
 	UnitTagLandscapeQuery,
 	UnitTagLandscapeParams,
 	UnitTagLandscapeResponse,
-	UpdateTagPathBody,
 	UpsertRealmTagSubscriptionBody,
 } from "./schema";
 
@@ -49,17 +48,10 @@ describe("Tag API schemas", () => {
 		expect(Value.Check(CreateTagPathBody, { memberTagIds: [first] })).toBe(false);
 		expect(Value.Check(CreateTagPathBody, { memberTagIds: [first, first] })).toBe(false);
 		expect(
-			Value.Check(UpdateTagPathBody, {
+			Value.Check(CreateTagPathBody, {
 				memberTagIds: [second, first],
 				updatedAt: "2026-07-23T12:00:00.000Z",
 				reason: "Correct the hierarchy order.",
-			}),
-		).toBe(true);
-		expect(
-			Value.Check(UpdateTagPathBody, {
-				memberTagIds: [second, first],
-				updatedAt: "2026-07-23T12:00:00.000Z",
-				reason: "",
 			}),
 		).toBe(false);
 	});
@@ -89,6 +81,7 @@ describe("Tag API schemas", () => {
 			Value.Check(UnitTagLandscapeResponse, {
 				paths: [],
 				global: [],
+				totals: { paths: 0, global: 0 },
 				realms: [{ ...subscription, canVote: false, votedTags: [] }],
 				voteRealms: [],
 			}),

@@ -28,6 +28,7 @@ import { useTranslation } from "@/i18n/client";
 import { useLocalizationFallbackToast } from "@/i18n/use-localization-fallback-toast";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { readPortableText } from "@/lib/block";
+import { toFiniteApiNumber } from "@/lib/api-number";
 import { selectLocalization } from "@/lib/localization";
 import { EntityRelatedFeed } from "../components/entity-related-feed";
 import { EntityExternalLinks } from "../components/entity-external-links";
@@ -84,48 +85,52 @@ export function EntityDetailPage({ id }: { readonly id: string }) {
 	const measurementNumber = new Intl.NumberFormat(undefined, {
 		maximumFractionDigits: 1,
 	});
+	const presentMeasurement = (
+		label: string,
+		value: string | number | null | undefined,
+		divisor: number,
+		unit: string,
+	) => {
+		const numericValue = toFiniteApiNumber(value);
+		return numericValue === undefined
+			? null
+			: {
+					label,
+					value: `${measurementNumber.format(numericValue / divisor)} ${unit}`,
+				};
+	};
 	const measurements = canonicalMeasurement
 		? [
-				canonicalMeasurement.heightMillimetres === null
-					? null
-					: {
-							label: t.entities.height,
-							value: `${measurementNumber.format(
-								canonicalMeasurement.heightMillimetres / 10,
-							)} ${t.entities.centimetreUnit}`,
-						},
-				canonicalMeasurement.weightGrams === null
-					? null
-					: {
-							label: t.entities.weight,
-							value: `${measurementNumber.format(
-								canonicalMeasurement.weightGrams / 1_000,
-							)} ${t.entities.kilogramUnit}`,
-						},
-				canonicalMeasurement.bustMillimetres === null
-					? null
-					: {
-							label: t.entities.bust,
-							value: `${measurementNumber.format(
-								canonicalMeasurement.bustMillimetres / 10,
-							)} ${t.entities.centimetreUnit}`,
-						},
-				canonicalMeasurement.waistMillimetres === null
-					? null
-					: {
-							label: t.entities.waist,
-							value: `${measurementNumber.format(
-								canonicalMeasurement.waistMillimetres / 10,
-							)} ${t.entities.centimetreUnit}`,
-						},
-				canonicalMeasurement.hipsMillimetres === null
-					? null
-					: {
-							label: t.entities.hips,
-							value: `${measurementNumber.format(
-								canonicalMeasurement.hipsMillimetres / 10,
-							)} ${t.entities.centimetreUnit}`,
-						},
+				presentMeasurement(
+					t.entities.height,
+					canonicalMeasurement.heightMillimetres,
+					10,
+					t.entities.centimetreUnit,
+				),
+				presentMeasurement(
+					t.entities.weight,
+					canonicalMeasurement.weightGrams,
+					1_000,
+					t.entities.kilogramUnit,
+				),
+				presentMeasurement(
+					t.entities.bust,
+					canonicalMeasurement.bustMillimetres,
+					10,
+					t.entities.centimetreUnit,
+				),
+				presentMeasurement(
+					t.entities.waist,
+					canonicalMeasurement.waistMillimetres,
+					10,
+					t.entities.centimetreUnit,
+				),
+				presentMeasurement(
+					t.entities.hips,
+					canonicalMeasurement.hipsMillimetres,
+					10,
+					t.entities.centimetreUnit,
+				),
 			].filter((item): item is { readonly label: string; readonly value: string } => item !== null)
 		: [];
 

@@ -313,7 +313,7 @@ A lightweight localized-title Unit used as a structural heading or taxonomy entr
 | ko | approved | inline | 분류 항목 |  |
 | ko | approved | plural | 분류 항목 |  |
 
-## tagStructure
+## tagPath
 
 A community-immutable, community-voted ordered path of Tags; platform administrators may make audited corrections.
 

@@ -1,4 +1,4 @@
-import { and, desc, eq, gt, inArray, isNotNull, isNull, sql } from "drizzle-orm";
+import { and, desc, eq, gt, inArray, isNull, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import type { ContentLanguage } from "@rezics/i18n";
 import { createCommunityOwnedUnitAccess } from "../authorization/unit/ownership";
@@ -279,7 +279,7 @@ export async function listTagPathDefinitionWarnings(input: {
 				)`,
 			),
 		)
-		.orderBy(desc(tagPathVoteStat.usageCount), tagPath.id)
+		.orderBy(sql`${tagPathVoteStat.usageCount} desc nulls last`, tagPath.id)
 		.limit(input.limit);
 	const distinctRows = rows.filter((row) => !sameOrderedIds(row.memberTagIds, input.memberTagIds));
 	const members = await listPathMembers(
@@ -398,6 +398,34 @@ export type TagPathMember = {
 	readonly summary: string | null;
 	readonly avatar: ReturnType<typeof presentAvatar>;
 };
+
+type TagSuggestionBase = {
+	readonly tagId: string;
+	readonly language: ContentLanguage | null;
+	readonly title: string | null;
+	readonly summary: string | null;
+	readonly avatar: ReturnType<typeof presentAvatar>;
+};
+
+export type TagSuggestion =
+	| (TagSuggestionBase & {
+			readonly selection: "path";
+			readonly pathId: string;
+			readonly members: TagPathMember[];
+			readonly matchDirection: "forward" | "reverse";
+			readonly usageCount: number;
+			readonly score: number;
+			readonly voteCount: number;
+	  })
+	| (TagSuggestionBase & {
+			readonly selection: "direct";
+			readonly pathId: null;
+			readonly members: [];
+			readonly matchDirection: null;
+			readonly usageCount: 0;
+			readonly score: 0;
+			readonly voteCount: 0;
+	  });
 
 export async function getTagPath(input: {
 	readonly pathId: string;
@@ -695,16 +723,16 @@ export async function listRankedTagPathsEndingAt(input: {
 }) {
 	const rows = await database
 		.select({
-			pathId: tagPath.id,
+			pathId: tagPathVoteStat.pathId,
 			usageCount: tagPathVoteStat.usageCount,
 			score: tagPathVoteStat.score,
 			voteCount: tagPathVoteStat.voteCount,
 		})
-		.from(tagPath)
-		.innerJoin(tagPathVoteStat, eq(tagPathVoteStat.pathId, tagPath.id))
+		.from(tagPathVoteStat)
+		.innerJoin(tagPath, eq(tagPath.id, tagPathVoteStat.pathId))
 		.where(
 			and(
-				eq(tagPath.terminalTagId, input.tagId),
+				eq(tagPathVoteStat.terminalTagId, input.tagId),
 				gt(tagPathVoteStat.score, 0n),
 				gt(tagPathVoteStat.voteCount, 0n),
 				sql`not exists (
@@ -713,7 +741,7 @@ export async function listRankedTagPathsEndingAt(input: {
 				)`,
 			),
 		)
-		.orderBy(desc(tagPathVoteStat.usageCount), tagPath.id)
+		.orderBy(sql`${tagPathVoteStat.usageCount} desc nulls last`, tagPathVoteStat.pathId)
 		.limit(input.limit);
 	const members = await listPathMembers(
 		rows.map(({ pathId }) => pathId),
@@ -780,14 +808,15 @@ export async function suggestTagsFromCompoundPath(input: {
 	});
 	if (!viable.length) return [];
 	const branch = (item: (typeof viable)[number], direction: "forward" | "reverse") => {
-		const anchorIds = item.ids[0]!;
-		const memberConditions = item.ids.slice(1).map(
+		const firstIds = item.ids[0]!;
+		const secondIds = item.ids[1]!;
+		const memberConditions = item.ids.slice(2).map(
 			(ids, offset) => sql`exists (
 				select 1
 				from ${tagPathMember} matched_member
 				where matched_member.path_id = anchor.path_id
 					and matched_member.ordinal = anchor.ordinal
-						${direction === "forward" ? sql`+ ${offset + 1}` : sql`- ${offset + 1}`}
+						${direction === "forward" ? sql`+ ${offset + 2}` : sql`- ${offset + 1}`}
 					and matched_member.tag_id = any(${ids}::uuid[])
 			)`,
 		);
@@ -799,18 +828,26 @@ export async function suggestTagsFromCompoundPath(input: {
 				${tagPathVoteStat.usageCount} as "usageCount",
 				${tagPathVoteStat.score} as score,
 				${tagPathVoteStat.voteCount} as "voteCount"
-			from ${tagPathMember} anchor
+			from ${tagPathEdge} anchor
 			inner join ${tagPath} on ${tagPath.id} = anchor.path_id
 			inner join ${unit} path_unit on path_unit.id = ${tagPath.id}
 			inner join ${tagPathVoteStat} on ${tagPathVoteStat.pathId} = ${tagPath.id}
-			where anchor.tag_id = any(${anchorIds}::uuid[])
+			where ${
+				direction === "forward"
+					? sql`anchor.parent_tag_id = any(${firstIds}::uuid[])
+						and anchor.child_tag_id = any(${secondIds}::uuid[])`
+					: sql`anchor.child_tag_id = any(${firstIds}::uuid[])
+						and anchor.parent_tag_id = any(${secondIds}::uuid[])`
+			}
 				and ${tagPathVoteStat.score} > 0
 				and ${tagPathVoteStat.voteCount} > 0
 				and path_unit.status = 'published'
 				and path_unit.visibility = 'public'
 				and path_unit.moderation_status = 'approved'
 				and path_unit.deleted_at is null
-				and ${sql.join(memberConditions, sql` and `)}
+				${
+					memberConditions.length ? sql`and ${sql.join(memberConditions, sql` and `)}` : sql.raw("")
+				}
 				and not exists (
 					select 1 from ${tagPathMerge} merge
 					where merge.source_path_id = ${tagPath.id}
@@ -891,7 +928,7 @@ export async function suggestTags(input: {
 	readonly query: string;
 	readonly localizationLanguages?: readonly ContentLanguage[];
 	readonly limit: number;
-}) {
+}): Promise<TagSuggestion[]> {
 	const compound = await suggestTagsFromCompoundPath(input);
 	if (compound.length) return compound.map((item) => ({ ...item, selection: "path" as const }));
 
@@ -949,19 +986,19 @@ export async function suggestTags(input: {
 			ranked.score,
 			ranked.vote_count as "voteCount"
 		from (
-			select path.id as path_id,
-				path.terminal_tag_id,
+			select stat.path_id,
+				stat.terminal_tag_id,
 				stat.usage_count,
 				stat.score,
 				stat.vote_count,
 				row_number() over (
-					partition by path.terminal_tag_id
-					order by stat.usage_count desc, path.id
+					partition by stat.terminal_tag_id
+					order by stat.usage_count desc nulls last, stat.path_id
 				) as sense_rank
-			from ${tagPath} path
-			join ${tagPathVoteStat} stat on stat.path_id = path.id
+			from ${tagPathVoteStat} stat
+			join ${tagPath} path on path.id = stat.path_id
 			join ${unit} path_unit on path_unit.id = path.id
-			where path.terminal_tag_id = any(${candidateIds}::uuid[])
+			where stat.terminal_tag_id = any(${candidateIds}::uuid[])
 				and stat.score > 0
 				and stat.vote_count > 0
 				and path_unit.status = 'published'
@@ -974,7 +1011,7 @@ export async function suggestTags(input: {
 				)
 		) ranked
 		where ranked.sense_rank <= 5
-		order by ranked.usage_count desc, ranked.path_id
+		order by ranked.usage_count desc nulls last, ranked.path_id
 	`);
 	const members = await listPathMembers(
 		rankedPaths.rows.map(({ pathId }) => pathId),
@@ -987,7 +1024,7 @@ export async function suggestTags(input: {
 		pathsByTerminal.set(path.terminalTagId, paths);
 	}
 	return candidateIds
-		.flatMap((tagId) => {
+		.flatMap<TagSuggestion>((tagId) => {
 			const terminal = directById.get(tagId);
 			if (!terminal) return [];
 			const paths = pathsByTerminal.get(tagId) ?? [];
@@ -1576,7 +1613,7 @@ export async function listRealmTagPaths(input: {
 				gt(realmTagPathVoteStat.voteCount, 0n),
 			),
 		)
-		.orderBy(desc(realmTagPathVoteStat.usageCount), realmTagPath.pathId)
+		.orderBy(sql`${realmTagPathVoteStat.usageCount} desc nulls last`, realmTagPath.pathId)
 		.limit(input.limit);
 	const pathIds = definitions.map(({ pathId }) => pathId);
 	const members = await listPathMembers(pathIds, input.localizationLanguages);
@@ -1822,7 +1859,15 @@ export async function applyRealmTagPath(input: {
 			.where(and(eq(realmUnit.realmId, input.realmId), eq(realmUnit.unitId, input.unitId)))
 			.limit(1);
 		if (!mounted) throw new TagPathApplicationNotFound();
-		await tx.insert(realmUnitTagPath).values(input).onConflictDoNothing();
+		await tx
+			.insert(realmUnitTagPath)
+			.values({
+				realmId: input.realmId,
+				unitId: input.unitId,
+				pathId: input.pathId,
+				createdByProfileId: input.profileId,
+			})
+			.onConflictDoNothing();
 		const now = new Date();
 		await tx
 			.insert(realmUnitTagPathJudgment)

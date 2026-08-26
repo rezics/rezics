@@ -179,7 +179,7 @@ export default {
 		noRanked: "全域情境中沒有其他可設為精選的標籤。",
 	},
 	realms: {
-		pathsTitle: `${realmTerms.label}標籤路徑`,
+		pathsTitle: `${realmTerms.label}${tagPathTerms.label}`,
 		applyPath: "套用路徑",
 		authority: { realm: `此${realmTerms.label}`, global: "全域" },
 		pathAuthority: insert("適合度：{{fit}} · 劇透：{{spoiler}}", {

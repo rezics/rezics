@@ -301,6 +301,8 @@ export default {
 	TagPathApplicationNotFound: `This Unit does not have that ${tagPathTerms.inline}.`,
 	TagPathChanged: `This ${tagPathTerms.inline} changed elsewhere. Refresh and try again.`,
 	TagPathDefinitionConflict: `An identical ${tagPathTerms.inline} already exists.`,
+	InvalidTagPathMerge: `This ${tagPathTerms.inline} merge is invalid.`,
+	TagPathMergeNotFound: `This ${tagPathTerms.inline} merge proposal could not be found.`,
 	AssociationContextPostInvalid: `The relationship context must be a wiki ${postTerms.label}.`,
 	ProgressEntryNotFound: "This progress event could not be found.",
 	PostTagMentionVoteConflict: `This Tag mention conflicts with your existing downvote on the ${postTerms.label}.`,

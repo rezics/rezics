@@ -6,6 +6,7 @@ import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 const { forms: followTerms } = deTerminology.follow;
 const { forms: postTerms } = deTerminology.post;
 const { forms: realmTerms } = deTerminology.realm;
+const { forms: tagPathTerms } = deTerminology.tagPath;
 const { forms: unitSlugTerms } = deTerminology.unitSlug;
 
 export default {
@@ -101,14 +102,14 @@ export default {
 		description: `Diese Funktion muss von der Verwaltung des ${realmTerms.inline} ausdrücklich aktiviert werden. Danach können Mitglieder nur über Tags abstimmen, die in diesem ${realmTerms.inline} offiziell erklärt werden.`,
 		enabled: "Tag-Abstimmungen aktivieren",
 		enabledDescription: `Suche und Abstimmung zeigen nur Tags mit einer derzeit sichtbaren Erklärung aus diesem ${realmTerms.inline}.`,
-		pathAuthorityTitle: "Zuständigkeit für Tag-Pfade",
-		pathAuthorityDescription: `Übernimmt Tag-Pfade für diesen ${realmTerms.inline} und legt getrennt fest, ob offene Eignungs- und Spoilerurteile das globale Ergebnis übernehmen.`,
+		pathAuthorityTitle: `Zuständigkeit für ${tagPathTerms.pluralLabel}`,
+		pathAuthorityDescription: `Übernimmt ${tagPathTerms.plural} für diesen ${realmTerms.inline} und legt getrennt fest, ob offene Eignungs- und Spoilerurteile das globale Ergebnis übernehmen.`,
 		fitFallback: "Rückfall für Eignung",
 		spoilerFallback: "Rückfall für Spoiler",
 		fallbackInherit: "Globales Ergebnis übernehmen",
 		fallbackIsolate: `In diesem ${realmTerms.inline} offen lassen`,
-		adoptPath: "Tag-Pfad übernehmen",
-		pathsEmpty: `Dieser ${realmTerms.inline} hat keine Tag-Pfade übernommen.`,
+		adoptPath: `${tagPathTerms.label} übernehmen`,
+		pathsEmpty: `Dieser ${realmTerms.inline} hat keine ${tagPathTerms.plural} übernommen.`,
 		relationshipsTitle: "Tag-Kontext-Verknüpfungen",
 		relationshipsDescription: `Alle Verknüpfungen zwischen Tags und Wiki-Artikeln in diesem ${realmTerms.inline}, unabhängig von der Tag-Taxonomie.`,
 		relationshipsListLabel: "Tag-Kontext-Verknüpfungen",

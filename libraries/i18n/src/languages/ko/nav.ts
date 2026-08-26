@@ -8,7 +8,6 @@ const { forms: videoTerms } = koTerminology.video;
 const { forms: audioTerms } = koTerminology.audio;
 const { forms: realmTerms } = koTerminology.realm;
 const { forms: entityTerms } = koTerminology.entity;
-const { forms: tagPathTerms } = koTerminology.tagPath;
 const { forms: unitSlugTerms } = koTerminology.unitSlug;
 const { forms: zoneTerms } = koTerminology.zone;
 
@@ -74,7 +73,6 @@ export default {
 			entity: entityTerms.label,
 			label: labelTerms.label,
 			tag: "태그",
-			structure: tagPathTerms.label,
 			series: "시리즈",
 			zone: zoneTerms.label,
 			zone_page: `${zoneTerms.label} 페이지`,

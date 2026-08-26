@@ -206,7 +206,7 @@ describe("API root", () => {
 		expect(unrelatedOperation?.responses?.[StatusCodes.TOO_MANY_REQUESTS]).toBeUndefined();
 	});
 
-	it("documents Phase 0 Tag policy failures and correction submission", () => {
+	it("documents final Tag policy failures without mutable Path corrections", () => {
 		const document = toOpenAPISchema(api);
 		const unitTag = document.paths["/api/v1/units/{type}/{unitId}/tags/{tagId}"];
 		const unitTagVote = document.paths["/api/v1/units/{type}/{unitId}/tags/{tagId}/vote"];
@@ -258,11 +258,8 @@ describe("API root", () => {
 			);
 		}
 
-		const correction = document.paths["/api/v1/tag-paths/{structureId}"]?.put?.responses;
-		expect(correction?.[StatusCodes.OK]).toBeDefined();
-		expect(correction?.[StatusCodes.ACCEPTED]).toBeDefined();
-		expect(JSON.stringify(correction?.[StatusCodes.OK])).toContain('"changed"');
-		expect(JSON.stringify(correction?.[StatusCodes.ACCEPTED])).toContain('"correctionId"');
+		expect(document.paths["/api/v1/tag-paths/{pathId}"]?.put).toBeUndefined();
+		expect(document.paths["/api/v1/tag-paths/{pathId}/corrections/{correctionId}"]).toBeUndefined();
 	});
 
 	it("documents external-link references for every registered Unit kind", () => {
@@ -351,16 +348,11 @@ describe("API root", () => {
 		});
 	});
 
-	it("requires authentication before checking the Tag hierarchy preview capability", async () => {
-		const response = await api.handle(
-			new Request("http://localhost/api/v1/tags/00000000-0000-7000-8000-000000000001/hierarchy"),
-		);
-
-		expect(response.status).toBe(StatusCodes.UNAUTHORIZED);
-		expect((await readErrorBody(response)).error).toEqual({
-			code: "AuthenticationRequired",
-			message: "Authentication required",
-		});
+	it("publishes Tag hierarchy as a public read", () => {
+		const document = toOpenAPISchema(api);
+		const operation = document.paths["/api/v1/tags/{tagId}/hierarchy"]?.get;
+		expect(operation).toBeDefined();
+		expect(operation?.security).toBeUndefined();
 	});
 
 	it("requires authentication before checking the Wiki navigation preview capability", async () => {
@@ -396,48 +388,42 @@ describe("API root", () => {
 		}
 	});
 
-	it("documents the development preview gate on every dedicated Tag-path operation", () => {
+	it("publishes the final dedicated Tag Path contract without a preview gate", () => {
 		const document = toOpenAPISchema(api);
-		const methods = ["delete", "get", "post", "put"] as const;
-		const previewProtectedOperations = Object.entries(document.paths).flatMap(([path, item]) =>
-			path === "/api/v1/tags/{tagId}/hierarchy" ||
-			path.startsWith("/api/v1/tag-paths") ||
-			path.includes("/tag-paths/")
-				? methods.flatMap((method) => {
-						const forbidden = item?.[method]?.responses?.[StatusCodes.FORBIDDEN];
-						return forbidden && JSON.stringify(forbidden).includes("PlatformCapabilityRequired")
-							? [`${method.toUpperCase()} ${path}`]
-							: [];
-					})
-				: [],
-		);
+		const finalOperations = [
+			document.paths["/api/v1/tags/{tagId}/hierarchy"]?.get,
+			document.paths["/api/v1/tag-paths"]?.post,
+			document.paths["/api/v1/tag-paths/{pathId}"]?.get,
+			document.paths["/api/v1/tag-paths/{pathId}/vote"]?.put,
+			document.paths["/api/v1/tag-paths/{pathId}/vote"]?.delete,
+			document.paths["/api/v1/units/{type}/{unitId}/tag-paths/{pathId}"]?.put,
+			document.paths["/api/v1/units/{type}/{unitId}/tag-paths/{pathId}"]?.delete,
+			document.paths["/api/v1/units/{type}/{unitId}/tag-paths/{pathId}/judgment"]?.put,
+			document.paths["/api/v1/units/{type}/{unitId}/tag-paths/{pathId}/judgment"]?.delete,
+		];
 
-		expect(previewProtectedOperations).toEqual([
-			"GET /api/v1/tags/{tagId}/hierarchy",
-			"POST /api/v1/tag-paths",
-			"GET /api/v1/tag-paths/{structureId}",
-			"PUT /api/v1/tag-paths/{structureId}",
-			"GET /api/v1/tag-paths/{structureId}/corrections/{correctionId}",
-			"DELETE /api/v1/tag-paths/{structureId}/vote",
-			"PUT /api/v1/tag-paths/{structureId}/vote",
-			"DELETE /api/v1/units/{type}/{unitId}/tag-paths/{structureId}",
-			"PUT /api/v1/units/{type}/{unitId}/tag-paths/{structureId}",
-			"DELETE /api/v1/units/{type}/{unitId}/tag-paths/{structureId}/vote",
-			"PUT /api/v1/units/{type}/{unitId}/tag-paths/{structureId}/vote",
-		]);
+		for (const operation of finalOperations) {
+			expect(operation).toBeDefined();
+			expect(operation?.description ?? "").not.toContain("Development preview");
+			expect(JSON.stringify(operation?.responses?.[StatusCodes.FORBIDDEN]) ?? "").not.toContain(
+				"PlatformCapabilityRequired",
+			);
+		}
+		expect(Object.keys(document.paths)).not.toContain("/api/v1/tag-structures");
+		expect(
+			Object.keys(document.paths)
+				.filter((path) => path.includes("tag-paths"))
+				.some((path) => path.includes("{structureId}")),
+		).toBe(false);
 	});
 
-	it("requires authentication before checking the Tag-path search preview capability", async () => {
+	it("requires a session before searching Tag Paths for curation", async () => {
 		const response = await api.handle(
-			new Request("http://localhost/api/v1/search/tag-paths", {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ localizationLanguages: ["en"] }),
-			}),
+			new Request("http://localhost/api/v1/tag-paths/search?q=hair&localizationLanguages=en"),
 		);
 
 		expect(response.status).toBe(StatusCodes.UNAUTHORIZED);
-		expect((await readErrorBody(response)).error.code).toBe("AuthenticationRequired");
+		expect((await readErrorBody(response)).error.code).toBe("InteractiveSessionRequired");
 	});
 
 	it("documents untracked progress as a successful state", () => {

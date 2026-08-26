@@ -15,14 +15,14 @@ import {
 	ContentLanguage,
 	ContentRating,
 	DateTime,
+	FollowableUnitKind,
 	FractionalPositionInput,
 	LocalizationLanguageQuery,
-	NonRealmUnitKind,
+	NonRealmFollowableUnitKind,
 	License,
 	RevisionContext,
 	ResourceVisibility,
 	StoredUiLocale,
-	UnitKind,
 	Uuid,
 } from "../schema";
 import { ResourceSectionValues, type ResourceSection } from "../../units/resource-section";
@@ -203,7 +203,7 @@ export type FollowingUnitParams = Static<typeof FollowingUnitParams>;
 
 export const FollowingListQuery = t.Object(
 	{
-		kind: t.Optional(UnitKind),
+		kind: t.Optional(FollowableUnitKind),
 		...LocalizationLanguageQuery,
 		cursor: t.Optional(t.String({ maxLength: 1_024 })),
 		limit: t.Optional(t.Integer({ minimum: 1, maximum: 100, default: 30 })),
@@ -236,7 +236,7 @@ export const ReplaceFollowingSettingsBody = t.Union([
 	),
 	t.Object(
 		{
-			kind: NonRealmUnitKind,
+			kind: NonRealmFollowableUnitKind,
 			...FollowingNotificationSettings,
 			realmTagSourceSubscribed: t.Null(),
 		},

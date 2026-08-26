@@ -98,30 +98,37 @@ BEGIN
 END;
 $$;
 
+DROP TRIGGER IF EXISTS tag_directly_applicable_transition_guard ON public.tag;
 CREATE TRIGGER tag_directly_applicable_transition_guard
 BEFORE UPDATE OF directly_applicable ON public.tag
 FOR EACH ROW EXECUTE FUNCTION public.guard_tag_directly_applicable_transition();
 
+DROP TRIGGER IF EXISTS unit_merge_operation_content_label_guard ON public.unit_merge_operation;
 CREATE TRIGGER unit_merge_operation_content_label_guard
 BEFORE INSERT OR UPDATE OF source_unit_id, target_unit_id ON public.unit_merge_operation
 FOR EACH ROW EXECUTE FUNCTION public.guard_content_label_unit_merge();
 
+DROP TRIGGER IF EXISTS unit_tag_application_policy_guard ON public.unit_tag;
 CREATE TRIGGER unit_tag_application_policy_guard
 BEFORE INSERT OR UPDATE ON public.unit_tag
 FOR EACH ROW EXECUTE FUNCTION public.guard_direct_tag_application_policy();
 
+DROP TRIGGER IF EXISTS realm_unit_tag_application_policy_guard ON public.realm_unit_tag;
 CREATE TRIGGER realm_unit_tag_application_policy_guard
 BEFORE INSERT OR UPDATE ON public.realm_unit_tag
 FOR EACH ROW EXECUTE FUNCTION public.guard_direct_tag_application_policy();
 
+DROP TRIGGER IF EXISTS profile_unit_tag_application_policy_guard ON public.profile_unit_tag;
 CREATE TRIGGER profile_unit_tag_application_policy_guard
 BEFORE INSERT OR UPDATE ON public.profile_unit_tag
 FOR EACH ROW EXECUTE FUNCTION public.guard_direct_tag_application_policy();
 
+DROP TRIGGER IF EXISTS unit_tag_judgment_content_label_reject ON public.unit_tag_judgment;
 CREATE TRIGGER unit_tag_judgment_content_label_reject
 BEFORE INSERT OR UPDATE ON public.unit_tag_judgment
 FOR EACH ROW EXECUTE FUNCTION public.reject_content_label_judgment();
 
+DROP TRIGGER IF EXISTS realm_tag_judgment_content_label_reject ON public.realm_tag_judgment;
 CREATE TRIGGER realm_tag_judgment_content_label_reject
 BEFORE INSERT OR UPDATE ON public.realm_tag_judgment
 FOR EACH ROW EXECUTE FUNCTION public.reject_content_label_judgment();

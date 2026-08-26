@@ -20,7 +20,9 @@ import {
 	ChineseContentDisplayValues,
 	ContentLanguageValues,
 	ContentRatingValues,
+	FollowableUnitKindValues,
 	NonRealmUnitKindValues,
+	NonRealmFollowableUnitKindValues,
 	ResourceVisibilityValues,
 	RevisionAttributionAssuranceValues,
 	RevisionContributionRoleValues,
@@ -119,6 +121,16 @@ export type StoredUiLocale = Static<typeof StoredUiLocale>;
 /** A persisted Unit discriminator accepted and returned by the public API. */
 export const UnitKind = t.UnionEnum(UnitKindValues, { default: undefined });
 export type UnitKind = Static<typeof UnitKind>;
+
+/** A Unit discriminator admitted by generic Following surfaces. */
+export const FollowableUnitKind = t.UnionEnum(FollowableUnitKindValues, { default: undefined });
+export type FollowableUnitKind = Static<typeof FollowableUnitKind>;
+
+/** A followable Unit discriminator excluding Realm-only settings branches. */
+export const NonRealmFollowableUnitKind = t.UnionEnum(NonRealmFollowableUnitKindValues, {
+	default: undefined,
+});
+export type NonRealmFollowableUnitKind = Static<typeof NonRealmFollowableUnitKind>;
 
 /** The release lifecycle of a Book or Media work, independent of Unit publication. */
 export const WorkReleaseStatus = t.UnionEnum(WorkReleaseStatusValues, { default: undefined });

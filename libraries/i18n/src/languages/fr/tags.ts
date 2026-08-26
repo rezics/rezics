@@ -200,7 +200,7 @@ export default {
 		noRanked: "Aucune autre étiquette globale ne peut être mise en avant.",
 	},
 	realms: {
-		pathsTitle: `Chemins d’étiquettes du ${realmTerms.label}`,
+		pathsTitle: `${tagPathTerms.pluralLabel} du ${realmTerms.label}`,
 		applyPath: "Appliquer le chemin",
 		authority: { realm: `Ce ${realmTerms.label}`, global: "Global" },
 		pathAuthority: insert("Adéquation : {{fit}} · divulgâcheurs : {{spoiler}}", {

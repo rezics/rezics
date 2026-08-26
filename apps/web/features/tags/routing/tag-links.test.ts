@@ -75,7 +75,7 @@ describe("Tag detail routes", () => {
 			{ id: "overview", href: `/tags/${TagId}` },
 			{ id: "discussion", href: `/tags/${TagId}/discussion` },
 			{ id: "content", href: `/tags/${TagId}/content` },
-			{ id: "structure", href: `/tags/${TagId}/structure` },
+			{ id: "paths", href: `/tags/${TagId}/paths` },
 		]);
 	});
 

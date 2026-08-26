@@ -4,6 +4,7 @@ import { and, desc, eq, inArray, isNull, ne, or, sql } from "drizzle-orm";
 import Elysia from "elysia";
 
 import session, { resolveIdentity } from "../../auth/session";
+import { requireContentSpoilerLevel } from "../../content-labels/presentation";
 import { database } from "../../database";
 import { runVoteTransaction } from "../../database/vote-admission";
 import { toSafeInteger } from "../../database/integer";
@@ -393,34 +394,34 @@ export default new Elysia()
 								.limit(1)
 						: [];
 					return {
-						items: rows.map((item) => ({
-							...item,
-							realmId: query.realmId ?? null,
-							attributions: attributions.get(item.id) ?? [],
-							replyCount: toSafeInteger(item.replyCount, "reply count"),
-							body:
-								(item.contentSpoilerLevel > 0 && !viewerDisplayPreference?.alwaysShowSpoilers) ||
-								(item.contentNsfw && !viewerDisplayPreference?.alwaysShowNsfw)
-									? null
-									: toPortableTextResponse(item.body, "post.body"),
-							summary:
-								(item.contentSpoilerLevel > 0 && !viewerDisplayPreference?.alwaysShowSpoilers) ||
-								(item.contentNsfw && !viewerDisplayPreference?.alwaysShowNsfw)
-									? null
-									: item.summary,
-							contentSpoiler: {
-								level:
-									item.contentSpoilerLevel === 1 || item.contentSpoilerLevel === 2
-										? item.contentSpoilerLevel
-										: 0,
-								concealed:
-									item.contentSpoilerLevel > 0 && !viewerDisplayPreference?.alwaysShowSpoilers,
-							},
-							contentNsfw: {
-								labelled: item.contentNsfw,
-								concealed: item.contentNsfw && !viewerDisplayPreference?.alwaysShowNsfw,
-							},
-						})),
+						items: rows.map((item) => {
+							const contentSpoilerLevel = requireContentSpoilerLevel(item.contentSpoilerLevel);
+							return {
+								...item,
+								realmId: query.realmId ?? null,
+								attributions: attributions.get(item.id) ?? [],
+								replyCount: toSafeInteger(item.replyCount, "reply count"),
+								body:
+									(item.contentSpoilerLevel > 0 && !viewerDisplayPreference?.alwaysShowSpoilers) ||
+									(item.contentNsfw && !viewerDisplayPreference?.alwaysShowNsfw)
+										? null
+										: toPortableTextResponse(item.body, "post.body"),
+								summary:
+									(item.contentSpoilerLevel > 0 && !viewerDisplayPreference?.alwaysShowSpoilers) ||
+									(item.contentNsfw && !viewerDisplayPreference?.alwaysShowNsfw)
+										? null
+										: item.summary,
+								contentSpoiler: {
+									level: contentSpoilerLevel,
+									concealed:
+										item.contentSpoilerLevel > 0 && !viewerDisplayPreference?.alwaysShowSpoilers,
+								},
+								contentNsfw: {
+									labelled: item.contentNsfw,
+									concealed: item.contentNsfw && !viewerDisplayPreference?.alwaysShowNsfw,
+								},
+							};
+						}),
 					};
 				},
 				{
@@ -740,6 +741,7 @@ export default new Elysia()
 					if (row.postKind === "chapter" && !chapterLocalization)
 						throw new PostLocalizationNotFound();
 					const presentedLocalization = chapterLocalization ?? initialLocalization;
+					const contentSpoilerLevel = requireContentSpoilerLevel(row.contentSpoilerLevel);
 					const common = {
 						id: row.id,
 						language: presentedLocalization.language,
@@ -753,10 +755,7 @@ export default new Elysia()
 						subject,
 						scores,
 						contentSpoiler: {
-							level:
-								row.contentSpoilerLevel === 1 || row.contentSpoilerLevel === 2
-									? row.contentSpoilerLevel
-									: 0,
+							level: contentSpoilerLevel,
 							concealed:
 								row.contentSpoilerLevel > 0 && !viewerDisplayPreference?.alwaysShowSpoilers,
 						},

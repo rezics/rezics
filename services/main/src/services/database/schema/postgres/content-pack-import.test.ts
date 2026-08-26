@@ -31,7 +31,7 @@ describe("content-pack import PostgreSQL guard contract", () => {
 		for (const table of [
 			"content_pack_import",
 			"content_pack_tag_evidence",
-			"content_pack_structure_definition_evidence",
+			"content_pack_tag_path_definition_evidence",
 		]) {
 			const trigger = triggerSource(`${table}_immutable`);
 			expect(trigger).toContain(`BEFORE UPDATE OR DELETE OR TRUNCATE ON public.${table}`);
@@ -45,7 +45,7 @@ describe("content-pack import PostgreSQL guard contract", () => {
 	it("makes movable evidence append-only outside guarded updates", () => {
 		for (const table of [
 			"content_pack_unit_tag_evidence",
-			"content_pack_structure_application_evidence",
+			"content_pack_unit_tag_path_evidence",
 			"content_pack_subject_association_evidence",
 		]) {
 			const trigger = triggerSource(`${table}_delete_guard`);

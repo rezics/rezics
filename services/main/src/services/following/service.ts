@@ -1,4 +1,4 @@
-import { and, desc, eq, gt, or } from "drizzle-orm";
+import { and, desc, eq, gt, ne, or } from "drizzle-orm";
 import type { ContentLanguage } from "@rezics/i18n";
 
 import type { UnitAuthorization } from "../authorization/unit/authorization";
@@ -11,7 +11,11 @@ import {
 	unitFollow,
 	unitFollowNotificationPreference,
 } from "../database/schema";
-import type { UnitKind } from "../database/schema/contract-values";
+import type {
+	FollowableUnitKind,
+	NonRealmFollowableUnitKind,
+	UnitKind,
+} from "../database/schema/contract-values";
 import {
 	DefaultContentRatingPolicy,
 	getContentRatingCondition,
@@ -38,10 +42,15 @@ import { FollowingTargetKindMismatch, UserFollowBlocked, UserSelfFollowForbidden
 
 type FollowTarget = {
 	readonly id: string;
-	readonly kind: UnitKind;
+	readonly kind: FollowableUnitKind;
 };
 
 type FollowAuthorization = Pick<UnitAuthorization<string>, "ensureCanRead">;
+
+function requireFollowableUnitKind(kind: UnitKind): FollowableUnitKind {
+	if (kind === "tag_path") throw new Error("Tag Path Units cannot enter generic Following");
+	return kind;
+}
 
 type ReplaceFollowingSettings =
 	| {
@@ -50,14 +59,14 @@ type ReplaceFollowingSettings =
 			readonly realmTagSourceSubscribed: boolean;
 	  }
 	| {
-			readonly kind: Exclude<UnitKind, "realm">;
+			readonly kind: NonRealmFollowableUnitKind;
 			readonly inAppNotificationsEnabled: boolean;
 			readonly realmTagSourceSubscribed: null;
 	  };
 
 type ListFollowingInput = {
 	readonly followerProfileId: string;
-	readonly kind?: UnitKind;
+	readonly kind?: FollowableUnitKind;
 	readonly localizationLanguages?: readonly ContentLanguage[];
 	readonly cursor?: string;
 	readonly limit: number;
@@ -105,6 +114,7 @@ export async function listFollowing(input: ListFollowingInput) {
 		.where(
 			and(
 				eq(unitFollow.followerProfileId, input.followerProfileId),
+				ne(unit.kind, "tag_path"),
 				input.kind ? eq(unit.kind, input.kind) : undefined,
 				getUnitReadCondition(input.followerProfileId),
 				getContentRatingCondition(contentRatingPolicy),
@@ -120,6 +130,7 @@ export async function listFollowing(input: ListFollowingInput) {
 	return {
 		items: items.map(({ avatar, coverAssetId, ...record }) => ({
 			...record,
+			kind: requireFollowableUnitKind(record.kind),
 			slugAddress: slugAddresses.get(record.id) ?? null,
 			avatar: presentAvatar(avatar),
 			cover: presentImageAsset(coverAssetId, "cover"),
@@ -154,7 +165,8 @@ async function resolveFollowTarget(
 		.where(eq(unit.id, unitId))
 		.limit(1);
 	if (!target) throw new UnitNotFound();
-	return target;
+	if (target.kind === "tag_path") throw new UnitNotFound();
+	return { id: target.id, kind: target.kind };
 }
 
 export async function followUnit(input: {

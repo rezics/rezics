@@ -93,7 +93,7 @@ const baseProps = {
 		unitId: "00000000-0000-7000-8000-000000000001",
 		context: { kind: "global" },
 	},
-} satisfies Omit<ComponentProps<typeof UnitTagManagement>, "hasDevelopmentPreviewAccess">;
+} satisfies ComponentProps<typeof UnitTagManagement>;
 
 describe("UnitTagManagement", () => {
 	afterEach(() => {
@@ -102,20 +102,13 @@ describe("UnitTagManagement", () => {
 		uiMocks.tagSearch = undefined;
 	});
 
-	it("omits every Tag-path control outside development preview", () => {
-		render(<UnitTagManagement {...baseProps} hasDevelopmentPreviewAccess={false} />);
+	it("uses one Tag picker for direct Tags and eligible Tag Paths", () => {
+		render(<UnitTagManagement {...baseProps} />);
 
-		expect(screen.queryByText("Create a Tag path")).toBeNull();
+		expect(screen.getByText("Create a Tag path")).toBeTruthy();
 		expect(screen.queryByTestId("picker-tag-paths")).toBeNull();
 		expect(screen.getByTestId("picker-tags")).toBeTruthy();
 		expect(screen.getByTestId("picker-tags").dataset.searchOnOpen).toBe("false");
-	});
-
-	it("shows Tag-path controls with development preview access", () => {
-		render(<UnitTagManagement {...baseProps} hasDevelopmentPreviewAccess />);
-
-		expect(screen.getByText("Create a Tag path")).toBeTruthy();
-		expect(screen.getByTestId("picker-tag-paths")).toBeTruthy();
 	});
 
 	it("preloads only the selected Realm's available Tags", async () => {
@@ -123,7 +116,6 @@ describe("UnitTagManagement", () => {
 		render(
 			<UnitTagManagement
 				{...baseProps}
-				hasDevelopmentPreviewAccess
 				tagCreateTarget={{
 					...baseProps.tagCreateTarget,
 					context: {
@@ -149,14 +141,14 @@ describe("UnitTagManagement", () => {
 	});
 
 	it("renders no add controls without vote permission", () => {
-		render(<UnitTagManagement {...baseProps} canVote={false} hasDevelopmentPreviewAccess />);
+		render(<UnitTagManagement {...baseProps} canVote={false} />);
 
 		expect(screen.queryByTestId("picker-tags")).toBeNull();
 		expect(screen.queryByTestId("picker-tag-paths")).toBeNull();
 	});
 
 	it("shows the contextual Tag creator without waiting for a search", () => {
-		render(<UnitTagManagement {...baseProps} hasDevelopmentPreviewAccess={false} />);
+		render(<UnitTagManagement {...baseProps} />);
 
 		const link = screen.getByRole("link", { name: "Create a Tag" });
 		const url = new URL(link.getAttribute("href") ?? "", "https://rezics.example");
@@ -175,7 +167,6 @@ describe("UnitTagManagement", () => {
 		render(
 			<UnitTagManagement
 				{...baseProps}
-				hasDevelopmentPreviewAccess={false}
 				tagCreateTarget={{
 					...baseProps.tagCreateTarget,
 					context: {

@@ -292,6 +292,8 @@ export default {
 	TagPathApplicationNotFound: `이 유닛에는 해당 ${tagPathTerms.inline}가 없습니다.`,
 	TagPathChanged: `이 ${tagPathTerms.inline}가 다른 곳에서 변경되었습니다. 새로고침하고 다시 시도하십시오.`,
 	TagPathDefinitionConflict: `동일한 ${tagPathTerms.inline}가 이미 존재합니다.`,
+	InvalidTagPathMerge: `이 ${tagPathTerms.inline} 병합은 유효하지 않습니다.`,
+	TagPathMergeNotFound: `이 ${tagPathTerms.inline} 병합 제안을 찾을 수 없습니다.`,
 	AssociationContextPostInvalid: `관계 컨텍스트는 위키 ${postTerms.label}여야 합니다.`,
 	ProgressEntryNotFound: "이 진행 이벤트를 찾을 수 없습니다.",
 	PostTagMentionVoteConflict: `이 태그 언급은 ${postTerms.label}에 대한 기존 반대 투표와 충돌합니다.`,

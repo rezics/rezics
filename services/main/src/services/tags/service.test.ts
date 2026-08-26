@@ -11,7 +11,7 @@ vi.mock("../authorization/unit/query", () => ({
 	getUnitReadCondition: () => sql`true`,
 }));
 
-import { currentUnitTagJudgmentStat } from "../database/schema";
+import { unitTagJudgmentStat } from "../database/schema";
 import { listGlobalUnitTags, listRealmVotedTags } from "./service";
 
 interface JoinCapture {
@@ -88,9 +88,9 @@ describe("Tag judgment-stat fit consumers", () => {
 			limit: 20,
 		});
 
-		const statJoin = query?.joins.find(({ table }) => table === currentUnitTagJudgmentStat);
+		const statJoin = query?.joins.find(({ table }) => table === unitTagJudgmentStat);
 		const rendered = renderCondition(statJoin?.condition);
-		expect(rendered.sql).toContain('"current_unit_tag_judgment_stat"."vote_count" >');
+		expect(rendered.sql).toContain('"unit_tag_judgment_stat"."vote_count" >');
 		expect(rendered.sql).not.toContain("spoiler_vote_count");
 		expect(rendered.params).toContain(0n);
 	});

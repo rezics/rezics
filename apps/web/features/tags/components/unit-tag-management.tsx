@@ -107,6 +107,7 @@ export function UnitTagManagement({
 						onChange={setSelectedTag}
 						placeholder={t.ui.pickerPlaceholders.tag}
 						search={tagSearch}
+						searchOnOpen={Boolean(contextRealmId)}
 						value={selectedTag}
 					/>
 					<Button

@@ -131,9 +131,9 @@ export function TagPathList({
 										</div>
 										<p className="text-xs text-muted-foreground">
 											{t.tags.paths.spoilerSummary({
-												none: path.spoilerDistribution.none,
-												minor: path.spoilerDistribution.minor,
-												major: path.spoilerDistribution.major,
+												none: toNonNegativeApiInteger(path.spoilerDistribution.none),
+												minor: toNonNegativeApiInteger(path.spoilerDistribution.minor),
+												major: toNonNegativeApiInteger(path.spoilerDistribution.major),
 											})}
 										</p>
 									</RadioGroup>

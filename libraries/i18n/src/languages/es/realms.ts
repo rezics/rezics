@@ -6,6 +6,7 @@ import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 const { forms: followTerms } = esTerminology.follow;
 const { forms: postTerms } = esTerminology.post;
 const { forms: realmTerms } = esTerminology.realm;
+const { forms: tagPathTerms } = esTerminology.tagPath;
 const { forms: unitSlugTerms } = esTerminology.unitSlug;
 
 export default {
@@ -101,14 +102,14 @@ export default {
 		description: `La administración del ${realmTerms.inline} debe activar expresamente esta función. Después, los miembros solo podrán votar etiquetas que este ${realmTerms.inline} explique formalmente.`,
 		enabled: "Activar la votación de etiquetas",
 		enabledDescription: `La búsqueda y la votación solo muestran etiquetas con una explicación actualmente visible en este ${realmTerms.inline}.`,
-		pathAuthorityTitle: "Autoridad de rutas de etiquetas",
-		pathAuthorityDescription: `Adopta las rutas usadas en este ${realmTerms.inline} y decide por separado si los juicios pendientes de adecuación y destripes heredan el resultado global.`,
+		pathAuthorityTitle: `Autoridad de ${tagPathTerms.plural}`,
+		pathAuthorityDescription: `Adopta las ${tagPathTerms.plural} usadas en este ${realmTerms.inline} y decide por separado si los juicios pendientes de adecuación y destripes heredan el resultado global.`,
 		fitFallback: "Alternativa de adecuación",
 		spoilerFallback: "Alternativa de destripes",
 		fallbackInherit: "Heredar el resultado global",
 		fallbackIsolate: `Mantener sin resolver en este ${realmTerms.inline}`,
-		adoptPath: "Adoptar una ruta de etiquetas",
-		pathsEmpty: `Este ${realmTerms.inline} no ha adoptado ninguna ruta de etiquetas.`,
+		adoptPath: `Adoptar una ${tagPathTerms.inline}`,
+		pathsEmpty: `Este ${realmTerms.inline} no ha adoptado ninguna ${tagPathTerms.inline}.`,
 		relationshipsTitle: "Relaciones de contexto de etiqueta",
 		relationshipsDescription: `Todas las relaciones entre etiquetas y artículos de la wiki de este ${realmTerms.inline}, al margen de la taxonomía.`,
 		relationshipsListLabel: "Relaciones de contexto de etiqueta",

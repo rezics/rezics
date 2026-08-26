@@ -5,10 +5,7 @@ import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/re
 import type { ComponentProps, ReactNode } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-const { developmentPreviewState, invalidatePostQueries, mutateAsync, push } = vi.hoisted(() => ({
-	developmentPreviewState: {
-		current: "denied" as "pending" | "denied" | "allowed" | "error",
-	},
+const { invalidatePostQueries, mutateAsync, push } = vi.hoisted(() => ({
 	invalidatePostQueries: vi.fn(async (_queryClient: unknown, _postId: string) => undefined),
 	mutateAsync: vi.fn(async (_variables: unknown) => ({ id: "post-1" })),
 	push: vi.fn((_href: string) => undefined),
@@ -85,12 +82,6 @@ vi.mock("@/features/content-languages/hooks/use-form-draft-content-language", ()
 
 vi.mock("@/features/content-languages/model/draft-content-language-sample", () => ({
 	portableTextDraftContentLanguageSample: () => undefined,
-}));
-
-vi.mock("@/features/preview-access/components/development-preview-boundary", () => ({
-	useDevelopmentPreviewAccess: () => ({
-		state: developmentPreviewState.current,
-	}),
 }));
 
 vi.mock("@/features/realms/components/realm-rules-acknowledgement-prompt", () => ({
@@ -178,36 +169,20 @@ import { PostCreatePage } from "./post-create-page";
 
 afterEach(() => {
 	cleanup();
-	developmentPreviewState.current = "denied";
 	invalidatePostQueries.mockClear();
 	mutateAsync.mockClear();
 	push.mockClear();
 });
 
 describe("PostCreatePage", () => {
-	it.each(["pending", "denied", "error"] as const)(
-		"omits direct subject search when development preview access is %s",
-		(state) => {
-			developmentPreviewState.current = state;
-
-			render(<PostCreatePage />);
-
-			expect(screen.queryByText("Discussion subject")).toBeNull();
-			expect(screen.queryByRole("button", { name: "Choose discussion subject" })).toBeNull();
-		},
-	);
-
-	it("shows direct subject search with development preview access", () => {
-		developmentPreviewState.current = "allowed";
-
+	it("shows direct subject search without a development-preview gate", () => {
 		render(<PostCreatePage />);
 
 		expect(screen.getByText("Discussion subject")).toBeTruthy();
 		expect(screen.getByRole("button", { name: "Choose discussion subject" })).toBeTruthy();
 	});
 
-	it("submits a selected subject with development preview access", async () => {
-		developmentPreviewState.current = "allowed";
+	it("submits a selected subject", async () => {
 		render(<PostCreatePage />);
 		fireEvent.click(screen.getByRole("button", { name: "Choose discussion subject" }));
 		fireEvent.click(screen.getByRole("button", { name: "Enter body" }));
@@ -219,13 +194,10 @@ describe("PostCreatePage", () => {
 		});
 	});
 
-	it("does not submit a selected subject after development preview access is lost", async () => {
-		developmentPreviewState.current = "allowed";
-		const { rerender } = render(<PostCreatePage />);
+	it("does not submit a selected subject after it is cleared", async () => {
+		render(<PostCreatePage />);
 		fireEvent.click(screen.getByRole("button", { name: "Choose discussion subject" }));
-
-		developmentPreviewState.current = "denied";
-		rerender(<PostCreatePage />);
+		fireEvent.click(screen.getByRole("button", { name: "Clear subject" }));
 		fireEvent.click(screen.getByRole("button", { name: "Enter body" }));
 		fireEvent.click(screen.getByRole("button", { name: "Publish" }));
 

@@ -1,4 +1,5 @@
 import { jaTerminology } from "@rezics/i18n/terminology/ja";
+import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 
 const { forms: entityTerms } = jaTerminology.entity;
 
@@ -16,8 +17,8 @@ export default {
 	bust: "バスト",
 	waist: "ウエスト",
 	hips: "ヒップ",
-	centimetreUnit: "cm",
-	kilogramUnit: "kg",
+	centimetreUnit: verbatimTerms.centimetreUnitSymbol.value,
+	kilogramUnit: verbatimTerms.kilogramUnitSymbol.value,
 	newEntity: `新しい${entityTerms.label}`,
 	newTag: "新しいタグ",
 	externalLinksDescription: `${entityTerms.inline}に関する情報の根拠となる公開ページです。`,

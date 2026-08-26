@@ -9,7 +9,6 @@ const { forms: entityTerms } = frTerminology.entity;
 const { forms: metadataTerms } = frTerminology.metadata;
 const { forms: postTerms } = frTerminology.post;
 const { forms: realmTerms } = frTerminology.realm;
-const { forms: tagPathTerms } = frTerminology.tagPath;
 const { forms: videoTerms } = frTerminology.video;
 const { forms: zoneTerms } = frTerminology.zone;
 
@@ -54,7 +53,6 @@ export default {
 		audio: audioTerms.label,
 		entity: entityTerms.label,
 		tag: "étiquette",
-		structure: tagPathTerms.label,
 		series: units.types.series,
 		zone: zoneTerms.label,
 		zone_page: `page de ${zoneTerms.inline}`,

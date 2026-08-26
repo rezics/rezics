@@ -8,7 +8,6 @@ const { forms: videoTerms } = zhHansTerminology.video;
 const { forms: audioTerms } = zhHansTerminology.audio;
 const { forms: realmTerms } = zhHansTerminology.realm;
 const { forms: entityTerms } = zhHansTerminology.entity;
-const { forms: tagPathTerms } = zhHansTerminology.tagPath;
 const { forms: unitSlugTerms } = zhHansTerminology.unitSlug;
 const { forms: zoneTerms } = zhHansTerminology.zone;
 
@@ -74,7 +73,6 @@ export default {
 			entity: entityTerms.label,
 			label: labelTerms.label,
 			tag: "标签",
-			structure: tagPathTerms.label,
 			series: "系列",
 			zone: zoneTerms.label,
 			zone_page: `${zoneTerms.label}页面`,

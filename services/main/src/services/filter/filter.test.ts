@@ -34,8 +34,8 @@ const TagId = "00000000-0000-4000-8000-000000000002";
 const dialect = new PgDialect();
 
 describe("domain Filter contract", () => {
-	it("stays aligned with the canonical Unit, Post, and language vocabularies", () => {
-		expect(FilterUnitKindValues).toEqual(UnitKindValues);
+	it("keeps non-searchable Tag Paths out of the otherwise canonical vocabularies", () => {
+		expect(FilterUnitKindValues).toEqual(UnitKindValues.filter((kind) => kind !== "tag_path"));
 		expect(FilterPostKindValues).toEqual(PostKindValues);
 		expect(FilterContentLanguageValues).toEqual(ContentLanguageValues);
 		expect(FilterRealmUnitStatusValues).toEqual(RealmUnitStatusValues);
@@ -258,7 +258,7 @@ describe("domain Filter contract", () => {
 						},
 					},
 				},
-				table: "current_unit_effective_tag",
+				table: "unit_effective_tag",
 				column: "filter_effective_tag.tag_id",
 			},
 			{

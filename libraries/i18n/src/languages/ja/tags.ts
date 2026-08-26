@@ -192,7 +192,7 @@ export default {
 		noRanked: "注目タグにできる他のグローバルタグはありません。",
 	},
 	realms: {
-		pathsTitle: `${realmTerms.label}のタグパス`,
+		pathsTitle: `${realmTerms.label}の${tagPathTerms.label}`,
 		applyPath: "パスを適用",
 		authority: { realm: `この${realmTerms.label}`, global: "グローバル" },
 		pathAuthority: insert("適合度：{{fit}} · ネタバレ：{{spoiler}}", {

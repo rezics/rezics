@@ -182,6 +182,33 @@ export type UnitOwnershipMode = (typeof UnitOwnershipModeValues)[number];
 export type UnitOwnershipClaimableUnitKind = (typeof UnitOwnershipClaimableUnitKindValues)[number];
 export type UnitOwnershipClaimResolution = (typeof UnitOwnershipClaimResolutionValues)[number];
 export type NonRealmUnitKind = Exclude<UnitKind, "realm">;
+export type FollowableUnitKind = Exclude<UnitKind, "tag_path">;
+export type NonRealmFollowableUnitKind = Exclude<FollowableUnitKind, "realm">;
+
+function deriveFollowableUnitKindValues(): readonly [FollowableUnitKind, ...FollowableUnitKind[]] {
+	const values = UnitKindValues.filter(
+		(value): value is FollowableUnitKind => value !== "tag_path",
+	);
+	const [first, ...rest] = values;
+	if (!first) throw new Error("UnitKindValues must contain a followable kind");
+	return [first, ...rest];
+}
+
+export const FollowableUnitKindValues = deriveFollowableUnitKindValues();
+
+function deriveNonRealmFollowableUnitKindValues(): readonly [
+	NonRealmFollowableUnitKind,
+	...NonRealmFollowableUnitKind[],
+] {
+	const values = FollowableUnitKindValues.filter(
+		(value): value is NonRealmFollowableUnitKind => value !== "realm",
+	);
+	const [first, ...rest] = values;
+	if (!first) throw new Error("FollowableUnitKindValues must contain a non-Realm kind");
+	return [first, ...rest];
+}
+
+export const NonRealmFollowableUnitKindValues = deriveNonRealmFollowableUnitKindValues();
 
 function deriveNonRealmUnitKindValues(): readonly [NonRealmUnitKind, ...NonRealmUnitKind[]] {
 	const values = UnitKindValues.filter((value): value is NonRealmUnitKind => value !== "realm");

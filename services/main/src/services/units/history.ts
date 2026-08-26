@@ -177,9 +177,18 @@ const VideoAudioTracksSchema = z
 		(values) => new Set(values.map(({ audioUnitId }) => audioUnitId)).size === values.length,
 		"contains duplicate Audio Unit IDs",
 	);
+type UnitRevisionKind = Exclude<(typeof UnitKindValues)[number], "tag_path">;
+function deriveUnitRevisionKindValues(): [UnitRevisionKind, ...UnitRevisionKind[]] {
+	const values = UnitKindValues.filter((value): value is UnitRevisionKind => value !== "tag_path");
+	const [first, ...rest] = values;
+	if (!first) throw new Error("UnitKindValues must contain a revision-capable kind");
+	return [first, ...rest];
+}
+const UnitRevisionKindValues = deriveUnitRevisionKindValues();
+
 const UnitSnapshotSchema = z.object({
 	version: z.literal(UnitRevisionSchemaVersion),
-	kind: z.enum(UnitKindValues),
+	kind: z.enum(UnitRevisionKindValues),
 	unit: SnapshotRowSchema,
 	localizations: z.array(SnapshotRowSchema),
 	contentLanguageSupport: ContentLanguageSupportSchema.default([]),
@@ -401,7 +410,6 @@ async function snapshotExtension(
 				(await tx.select().from(poll).where(eq(poll.id, unitId)).limit(1))[0],
 			);
 		case "tag":
-		case "tag_path":
 		case "label":
 		case "realm_rule":
 		case "slug_namespace":
@@ -446,6 +454,8 @@ async function snapshotRealmRules(tx: DatabaseTransaction, realmId: string) {
 async function snapshotUnit(tx: DatabaseTransaction, unitId: string) {
 	const [record] = await tx.select().from(unit).where(eq(unit.id, unitId)).limit(1);
 	if (!record) throw new Error(`Cannot snapshot missing Unit ${unitId}`);
+	if (record.kind === "tag_path")
+		throw new Error("Tag Path Units use immutable definitions and do not support Unit revisions");
 	const localizations = await tx
 		.select()
 		.from(unitLocalization)
@@ -551,7 +561,6 @@ async function restoreExtension(
 ) {
 	if (
 		kind === "tag" ||
-		kind === "tag_path" ||
 		kind === "label" ||
 		kind === "realm_rule" ||
 		kind === "slug_namespace" ||

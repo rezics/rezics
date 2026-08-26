@@ -6,7 +6,7 @@ import {
 	useGetApiTagPathsByPathId,
 	usePutApiTagPathsByPathIdVote,
 } from "@rezics/openapi-tanstack-query";
-import { Button, Card, CardContent, PageHeading, QueryFailure, QueryPending } from "@rezics/ui";
+import { Card, CardContent, PageHeading, QueryFailure, QueryPending } from "@rezics/ui";
 import { useQueryClient } from "@tanstack/react-query";
 
 import { useTranslation } from "@/i18n/client";

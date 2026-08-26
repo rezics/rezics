@@ -179,7 +179,7 @@ export default {
 		noRanked: "全局语境中没有其他可设为精选的标签。",
 	},
 	realms: {
-		pathsTitle: `${realmTerms.label}标签路径`,
+		pathsTitle: `${realmTerms.label}${tagPathTerms.label}`,
 		applyPath: "应用路径",
 		authority: { realm: `此${realmTerms.label}`, global: "全局" },
 		pathAuthority: insert("契合度：{{fit}} · 剧透：{{spoiler}}", {

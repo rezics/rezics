@@ -53,7 +53,6 @@ function getUnitActionPolicy(kind: PostApiFeedQueryStatus200ItemsUnitKindEnum): 
 		case "audio":
 		case "release":
 		case "entity":
-		case "structure":
 			return { discussion: "none", primary: "collect" };
 		default:
 			return assertNever(kind);

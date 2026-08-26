@@ -149,7 +149,7 @@ export async function applyContentPack(
 	for (const object of objects) await importUnit(tx, pack, object);
 
 	await importTagEvidence(tx, pack, importId);
-	await importEntityMeasurements(tx, pack, imported.id);
+	await importEntityMeasurements(tx, pack, importId);
 	await importRelations(tx, pack, createKeys, importId);
 	await importTagPaths(tx, pack, importId);
 	await importStructures(tx, pack);

@@ -13,6 +13,8 @@ describe("presentation preferences", () => {
 				interfaceLocale: "zh-Hant",
 				chineseContentDisplay: "original",
 				filterFeedByPreferredLanguages: true,
+				alwaysShowSpoilers: false,
+				alwaysShowNsfw: true,
 				preferredLanguages: ["en", "zh"],
 				unrelatedPreference: "ignored",
 			}),
@@ -21,6 +23,8 @@ describe("presentation preferences", () => {
 			interfaceLocale: "zh-Hant",
 			chineseContentDisplay: "original",
 			filterFeedByPreferredLanguages: true,
+			alwaysShowSpoilers: false,
+			alwaysShowNsfw: true,
 			preferredLanguages: ["en", "zh"],
 		});
 	});
@@ -31,6 +35,8 @@ describe("presentation preferences", () => {
 			interfaceLocale: "en",
 			chineseContentDisplay: "original",
 			filterFeedByPreferredLanguages: false,
+			alwaysShowSpoilers: false,
+			alwaysShowNsfw: false,
 		};
 
 		expect(parsePresentationPreferences({ ...base, preferredLanguages: ["pt"] })).toBeUndefined();

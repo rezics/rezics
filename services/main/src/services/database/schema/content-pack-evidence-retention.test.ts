@@ -13,6 +13,10 @@ const EvidenceTables = [
 	subjectAssociationJudgment,
 	entityMeasurement,
 ] as const;
+const ContextOwnedCascadeForeignKeys = new Set([
+	"entity_measurement_entity_id_entity_id_fk",
+	"unit_tag_path_judgment_application_fkey",
+]);
 
 function indexedColumnSequences(table: PgTable): readonly (readonly string[])[] {
 	const config = getTableConfig(table);
@@ -30,14 +34,17 @@ function indexedColumnSequences(table: PgTable): readonly (readonly string[])[] 
 }
 
 describe("content-pack evidence retention", () => {
-	it("uses strict non-deferrable deletion for every independent evidence owner", () => {
+	it("retains evidence roots while contextual Path judgments follow their application", () => {
 		for (const table of EvidenceTables) {
 			const config = getTableConfig(table);
 			expect(
 				config.foreignKeys.length,
 				`${config.name} must retain its evidence roots`,
 			).toBeGreaterThan(0);
-			for (const key of config.foreignKeys) expect(key.onDelete, key.getName()).toBe("restrict");
+			for (const key of config.foreignKeys) {
+				const expected = ContextOwnedCascadeForeignKeys.has(key.getName()) ? "cascade" : "restrict";
+				expect(key.onDelete, key.getName()).toBe(expected);
+			}
 		}
 
 		expect(
@@ -54,7 +61,7 @@ describe("content-pack evidence retention", () => {
 			getTableConfig(unitTagPathJudgment).foreignKeys.find(
 				(key) => key.getName() === "unit_tag_path_judgment_application_fkey",
 			)?.onDelete,
-		).toBe("restrict");
+		).toBe("cascade");
 	});
 
 	it("left-prefix indexes every strict referencing column set", () => {

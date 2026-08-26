@@ -178,6 +178,7 @@ const entity = {
 	attributions: [],
 	owner: null,
 	externalLinks: [],
+	measurements: [],
 	variantContext: {
 		role: "main",
 		variants: [

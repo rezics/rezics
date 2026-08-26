@@ -1,5 +1,6 @@
 import { StatusCodes } from "http-status-codes";
 import Elysia from "elysia";
+import { DevelopmentPreviewCapability } from "@rezics/access";
 import {
 	BlockKey,
 	DockDocument,
@@ -28,6 +29,7 @@ import { and, eq, isNull } from "drizzle-orm";
 import { t } from "elysia";
 
 import { resolveIdentity } from "../../auth/session";
+import { AuthenticationRequired } from "../../auth/errors";
 import {
 	contentRatingPolicyFromAllowlist,
 	resolveContentRatingPolicy,

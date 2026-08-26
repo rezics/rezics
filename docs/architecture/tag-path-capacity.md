@@ -117,7 +117,9 @@ Binding indexes are:
 - tag_path_member(tag_id, path_id, ordinal);
 - tag_path_edge(parent_tag_id, child_tag_id, path_id);
 - tag_path_edge(child_tag_id, parent_tag_id, path_id);
-- tag_path_vote_stat(usage_count DESC, path_id);
+- tag_path_vote_stat(usage_count DESC, path_id) for accepted global curation;
+- tag_path_vote_stat(terminal_tag_id, usage_count DESC, path_id) for accepted
+  ending-Tag senses;
 - unit_tag_path(unit_id, pinned, position, path_id);
 - unit_tag_path_judgment(unit_id, path_id, profile_id);
 - unit_tag_path_support(unit_id, tag_id, profile_id);
@@ -156,6 +158,46 @@ sustained for five minutes:
 - terminal mutation p95 exceeds 150 ms while pool utilization exceeds 80%;
 - primary WAL exceeds its approved budget; or
 - replica replay lag breaches its SLO.
+
+## Accepted local qualification
+
+The 2026-08-26 qualification used PostgreSQL 18.4 with 128 MiB
+`shared_buffers`, 4 MiB `work_mem`, 1,000 Units, 1,000 Paths, 257 Profiles,
+one Realm, Path lengths 2/4/16, and a deliberately hot terminal Tag and
+Unit–Path key. Judgment fixture construction used bounded 25-Unit
+transactions so transaction-scoped advisory locks did not grow with the
+fixture. The final qualification reused that fixture and therefore does not
+claim a fixture-load latency.
+
+| Workload | Commits | Attempts | Immediate backpressure | Throughput | Terminal p95 | Backpressure-decision p95 | WAL |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| Global Unit–Path | 86 | 671 | 585 | 113.245/s | 78.442 ms | 9.383 ms | 2,872,960 B |
+| Realm Unit–Path | 98 | 661 | 563 | 130.355/s | 77.602 ms | 6.188 ms | 2,694,200 B |
+
+Both workloads completed without deadlocks, statement timeouts, or unexpected
+database errors. Fact/aggregate, definition projection, vote projection,
+effective-Tag, support, usage, and manual-merge parity checks all returned
+zero mismatches. Pool utilization was 25%; the lock API waited zero
+milliseconds because contention became immediate retryable backpressure.
+
+All nine inspected read paths used bounded indexes with no corpus sequential
+scan or sort. Warm execution time/shared blocks were: children 0.017 ms/3,
+parents 0.031 ms/44, ending senses 0.022 ms/4, viewer judgment 0.012 ms/3,
+application keyset 0.030 ms/3, merge queue 0.041 ms/5, forward and reverse
+compound pair probes 0.011 ms/3 each, and Realm viewer judgment 0.012 ms/5.
+The ending-sense plan used
+`tag_path_vote_stat_terminal_usage_idx` as an index-only scan.
+
+Observed heap-plus-index totals after repeated hot-key mutations were
+951.084 B/row for `unit_tag_path_judgment`, 449.475 B/row for
+`unit_tag_path_support`, 525.258 B/row for
+`realm_unit_tag_path_judgment`, and 507.256 B/row for
+`realm_unit_tag_path_support`. Straight-line 500M/3B estimates are
+475.54 GB/2.85 TB, 224.74 GB/1.35 TB, 262.63 GB/1.58 TB, and
+253.63 GB/1.52 TB respectively, before operating headroom and replicas.
+These small-fixture totals include page and update-bloat effects and are
+conservative corroboration, not replacements for the shape proxies and shard
+thresholds above.
 
 ## Validation contract
 

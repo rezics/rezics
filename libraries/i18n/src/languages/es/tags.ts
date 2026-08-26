@@ -201,7 +201,7 @@ export default {
 		noRanked: "No hay más etiquetas globales que destacar.",
 	},
 	realms: {
-		pathsTitle: `Rutas de etiquetas del ${realmTerms.label}`,
+		pathsTitle: `${tagPathTerms.pluralLabel} del ${realmTerms.label}`,
 		applyPath: "Aplicar ruta",
 		authority: { realm: `Este ${realmTerms.label}`, global: "Global" },
 		pathAuthority: insert("Adecuación: {{fit}} · destripes: {{spoiler}}", {

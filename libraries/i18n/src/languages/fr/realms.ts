@@ -6,6 +6,7 @@ import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 const { forms: followTerms } = frTerminology.follow;
 const { forms: postTerms } = frTerminology.post;
 const { forms: realmTerms } = frTerminology.realm;
+const { forms: tagPathTerms } = frTerminology.tagPath;
 const { forms: unitSlugTerms } = frTerminology.unitSlug;
 
 export default {
@@ -100,14 +101,14 @@ export default {
 		description: `La gestion du ${realmTerms.inline} doit activer explicitement cette fonctionnalité. Les membres ne peuvent ensuite voter que pour les étiquettes officiellement expliquées par ce ${realmTerms.inline}.`,
 		enabled: "Activer le vote sur les étiquettes",
 		enabledDescription: `La recherche et le vote n’affichent que les étiquettes dont l’explication est actuellement visible dans ce ${realmTerms.inline}.`,
-		pathAuthorityTitle: "Autorité des chemins d’étiquettes",
-		pathAuthorityDescription: `Adopte les chemins utilisés dans ce ${realmTerms.inline} et décide séparément si les jugements d’adéquation et de divulgâcheur non résolus héritent du résultat global.`,
+		pathAuthorityTitle: `Autorité des ${tagPathTerms.plural}`,
+		pathAuthorityDescription: `Adopte les ${tagPathTerms.plural} utilisés dans ce ${realmTerms.inline} et décide séparément si les jugements d’adéquation et de divulgâcheur non résolus héritent du résultat global.`,
 		fitFallback: "Repli d’adéquation",
 		spoilerFallback: "Repli de divulgâcheur",
 		fallbackInherit: "Hériter du résultat global",
 		fallbackIsolate: `Laisser non résolu dans ce ${realmTerms.inline}`,
-		adoptPath: "Adopter un chemin d’étiquettes",
-		pathsEmpty: `Ce ${realmTerms.inline} n’a adopté aucun chemin d’étiquettes.`,
+		adoptPath: `Adopter un ${tagPathTerms.inline}`,
+		pathsEmpty: `Ce ${realmTerms.inline} n’a adopté aucun ${tagPathTerms.inline}.`,
 		relationshipsTitle: "Liens de contexte d’étiquette",
 		relationshipsDescription: `Tous les liens entre étiquettes et articles wiki de ce ${realmTerms.inline}, indépendamment de la taxonomie.`,
 		relationshipsListLabel: "Liens de contexte d’étiquette",

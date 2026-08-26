@@ -9,7 +9,6 @@ const { forms: entityTerms } = deTerminology.entity;
 const { forms: metadataTerms } = deTerminology.metadata;
 const { forms: postTerms } = deTerminology.post;
 const { forms: realmTerms } = deTerminology.realm;
-const { forms: tagPathTerms } = deTerminology.tagPath;
 const { forms: videoTerms } = deTerminology.video;
 const { forms: zoneTerms } = deTerminology.zone;
 
@@ -54,7 +53,6 @@ export default {
 		audio: audioTerms.label,
 		entity: entityTerms.label,
 		tag: "Tag",
-		structure: tagPathTerms.label,
 		series: units.types.series,
 		zone: zoneTerms.label,
 		zone_page: `${zoneTerms.label}-Seite`,

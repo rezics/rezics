@@ -8,7 +8,6 @@ const { forms: videoTerms } = deTerminology.video;
 const { forms: audioTerms } = deTerminology.audio;
 const { forms: realmTerms } = deTerminology.realm;
 const { forms: entityTerms } = deTerminology.entity;
-const { forms: tagPathTerms } = deTerminology.tagPath;
 const { forms: unitSlugTerms } = deTerminology.unitSlug;
 const { forms: zoneTerms } = deTerminology.zone;
 
@@ -74,7 +73,6 @@ export default {
 			entity: entityTerms.label,
 			label: labelTerms.label,
 			tag: "Tag",
-			structure: tagPathTerms.label,
 			series: "Reihe",
 			zone: zoneTerms.label,
 			zone_page: `${zoneTerms.label}-Seite`,

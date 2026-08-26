@@ -158,13 +158,26 @@ export const tagPathVoteStat = pgTable(
 		pathId: uuid()
 			.primaryKey()
 			.references(() => tagPath.id, { onDelete: "cascade" }),
+		/**
+		 * Immutable terminal-Tag routing projection.
+		 *
+		 * This is copied from `tag_path` only by PostgreSQL owner triggers so
+		 * accepted ending Paths can be read in provisional weight order without
+		 * sorting every Path that ends at a popular Tag.
+		 */
+		terminalTagId: uuid().notNull(),
 		score: bigint({ mode: "bigint" }).default(0n).notNull(),
 		voteCount: aggregateCount(),
 		usageCount: aggregateCount(),
 		updatedAt: createUpdatedAtColumn(),
 	},
 	(table) => [
-		index("tag_path_vote_stat_usage_idx").on(table.usageCount.desc(), table.pathId),
+		index("tag_path_vote_stat_usage_idx")
+			.on(table.usageCount.desc(), table.pathId)
+			.where(sql`${table.score} > 0 and ${table.voteCount} > 0`),
+		index("tag_path_vote_stat_terminal_usage_idx")
+			.on(table.terminalTagId, table.usageCount.desc(), table.pathId)
+			.where(sql`${table.score} > 0 and ${table.voteCount} > 0`),
 		check("tag_path_vote_stat_count_check", sql`${table.voteCount} >= 0`),
 		check("tag_path_vote_stat_usage_count_check", sql`${table.usageCount} >= 0`),
 		check("tag_path_vote_stat_score_check", sql`abs(${table.score}) <= ${table.voteCount}`),

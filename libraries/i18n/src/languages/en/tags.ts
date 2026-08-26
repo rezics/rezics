@@ -194,7 +194,7 @@ export default {
 		noRanked: "There are no other global Tags to feature.",
 	},
 	realms: {
-		pathsTitle: `${realmTerms.label} tag paths`,
+		pathsTitle: `${realmTerms.label} ${tagPathTerms.plural}`,
 		applyPath: "Apply path",
 		authority: { realm: `This ${realmTerms.label}`, global: "Global" },
 		pathAuthority: insert("Fit: {{fit}} · spoilers: {{spoiler}}", {

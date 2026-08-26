@@ -172,6 +172,8 @@ const contextualReview = {
 	rootPostId: null,
 	parentPostId: null,
 	body: null,
+	contentSpoiler: { level: 0, concealed: false },
+	contentNsfw: { labelled: false, concealed: false },
 	replyCount: 3,
 	latestRevisionId: null,
 	replyContext: null,

@@ -8,7 +8,6 @@ const { forms: videoTerms } = enTerminology.video;
 const { forms: audioTerms } = enTerminology.audio;
 const { forms: realmTerms } = enTerminology.realm;
 const { forms: entityTerms } = enTerminology.entity;
-const { forms: tagPathTerms } = enTerminology.tagPath;
 const { forms: unitSlugTerms } = enTerminology.unitSlug;
 const { forms: zoneTerms } = enTerminology.zone;
 
@@ -74,7 +73,6 @@ export default {
 			entity: entityTerms.label,
 			label: labelTerms.label,
 			tag: "Tag",
-			structure: tagPathTerms.label,
 			series: "Series",
 			zone: zoneTerms.label,
 			zone_page: `${zoneTerms.label} page`,

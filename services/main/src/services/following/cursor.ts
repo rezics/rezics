@@ -3,8 +3,8 @@ import { t } from "elysia";
 import {
 	ContentRatingValues,
 	ContentLanguageValues,
-	type UnitKind,
-	UnitKindValues,
+	type FollowableUnitKind,
+	FollowableUnitKindValues,
 } from "../database/schema/contract-values";
 import type { ContentLanguage } from "@rezics/i18n";
 import { InvalidPaginationCursor } from "../pagination/errors";
@@ -14,7 +14,7 @@ import { isStorageSafeFractionalPosition } from "../ordering/position";
 const FollowingCursor = t.Object(
 	{
 		v: t.Literal(3),
-		kind: t.Nullable(t.UnionEnum(UnitKindValues)),
+		kind: t.Nullable(t.UnionEnum(FollowableUnitKindValues)),
 		localizationLanguages: t.Array(t.UnionEnum(ContentLanguageValues), {
 			uniqueItems: true,
 		}),
@@ -33,7 +33,7 @@ export type FollowingCursorBoundary = {
 };
 
 export function encodeFollowingCursor(
-	kind: UnitKind | undefined,
+	kind: FollowableUnitKind | undefined,
 	localizationLanguages: readonly ContentLanguage[],
 	contentRatings: readonly (typeof ContentRatingValues)[number][],
 	boundary: FollowingCursorBoundary,
@@ -51,7 +51,7 @@ export function encodeFollowingCursor(
 
 export function decodeFollowingCursor(
 	value: string | undefined,
-	kind: UnitKind | undefined,
+	kind: FollowableUnitKind | undefined,
 	localizationLanguages: readonly ContentLanguage[],
 	contentRatings: readonly (typeof ContentRatingValues)[number][],
 ): FollowingCursorBoundary | undefined {

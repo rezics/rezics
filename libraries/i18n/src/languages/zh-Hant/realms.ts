@@ -6,6 +6,7 @@ import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 const { forms: followTerms } = zhHantTerminology.follow;
 const { forms: postTerms } = zhHantTerminology.post;
 const { forms: realmTerms } = zhHantTerminology.realm;
+const { forms: tagPathTerms } = zhHantTerminology.tagPath;
 const { forms: unitSlugTerms } = zhHantTerminology.unitSlug;
 
 export default {
@@ -81,14 +82,14 @@ export default {
 		description: `這是必須由${realmTerms.label}管理者明確開啟的功能。開啟後，成員只能對此${realmTerms.label}已正式說明的標籤投票。`,
 		enabled: `開啟${realmTerms.label}標籤投票`,
 		enabledDescription: `搜尋與投票只會顯示此${realmTerms.label}已有標籤解釋，且解釋目前可見的標籤。`,
-		pathAuthorityTitle: "標籤路徑權限",
-		pathAuthorityDescription: `採用此${realmTerms.label}使用的標籤路徑，並分別決定未定案的適合度與劇透判斷是否沿用全域結果。`,
+		pathAuthorityTitle: `${tagPathTerms.label}權限`,
+		pathAuthorityDescription: `採用此${realmTerms.label}使用的${tagPathTerms.label}，並分別決定未定案的適合度與劇透判斷是否沿用全域結果。`,
 		fitFallback: "適合度備援",
 		spoilerFallback: "劇透備援",
 		fallbackInherit: "沿用全域結果",
 		fallbackIsolate: `在此${realmTerms.label}維持未定案`,
-		adoptPath: "採用標籤路徑",
-		pathsEmpty: `此${realmTerms.label}尚未採用標籤路徑。`,
+		adoptPath: `採用${tagPathTerms.label}`,
+		pathsEmpty: `此${realmTerms.label}尚未採用${tagPathTerms.label}。`,
 		relationshipsTitle: "標籤脈絡關聯",
 		relationshipsDescription: `此${realmTerms.label}的所有標籤與百科文章關聯；這些關聯不屬於標籤分類。`,
 		relationshipsListLabel: "標籤脈絡關聯",

@@ -28,6 +28,7 @@ import type { UnitDetailUnitType } from "@/features/units/model/unit-detail-sect
 import { useTranslation } from "@/i18n/client";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { RequestFailure } from "@/i18n/request-failure";
+import { toNonNegativeApiInteger } from "@/lib/api-number";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
 import {
 	presentGlobalTags,
@@ -215,8 +216,8 @@ export function UnitTagExplorer({
 	});
 	const compactHiddenCount = Math.max(
 		0,
-		query.data.totals.paths +
-			query.data.totals.global -
+		toNonNegativeApiInteger(query.data.totals.paths) +
+			toNonNegativeApiInteger(query.data.totals.global) -
 			query.data.paths.length -
 			globalTags.length,
 	);

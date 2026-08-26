@@ -437,7 +437,7 @@ try {
 		`);
 		await client.query(`
 			insert into public.unit_effective_tag (
-				unit_id, tag_id, direct, structure_support_count
+				unit_id, tag_id, direct, path_support_count
 			)
 			select candidate.unit_id, tag.unit_id, true, 0
 			from public.search_capacity_fixture_v1 candidate

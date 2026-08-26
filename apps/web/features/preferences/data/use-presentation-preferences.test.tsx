@@ -38,6 +38,8 @@ const response = {
 	collectionConfig: null,
 	personalizedFeed: true,
 	filterFeedByPreferredLanguages: false,
+	alwaysShowSpoilers: false,
+	alwaysShowNsfw: false,
 	contentRatings: ["general" as const],
 	preferredLanguages: ["en" as const],
 } satisfies GetApiUsersMePreferencesStatus200;
@@ -47,6 +49,8 @@ const preferences = {
 	interfaceLocale: response.interfaceLocale,
 	chineseContentDisplay: response.chineseContentDisplay,
 	filterFeedByPreferredLanguages: response.filterFeedByPreferredLanguages,
+	alwaysShowSpoilers: response.alwaysShowSpoilers,
+	alwaysShowNsfw: response.alwaysShowNsfw,
 	preferredLanguages: response.preferredLanguages,
 };
 

@@ -1,4 +1,5 @@
 import { frTerminology } from "@rezics/i18n/terminology/fr";
+import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 
 const { forms: entityTerms } = frTerminology.entity;
 
@@ -16,8 +17,8 @@ export default {
 	bust: "Tour de poitrine",
 	waist: "Tour de taille",
 	hips: "Tour de hanches",
-	centimetreUnit: "cm",
-	kilogramUnit: "kg",
+	centimetreUnit: verbatimTerms.centimetreUnitSymbol.value,
+	kilogramUnit: verbatimTerms.kilogramUnitSymbol.value,
 	newEntity: `Nouvelle ${entityTerms.inline}`,
 	newTag: "Nouveau tag",
 	externalLinksDescription: `Pages publiques étayant les informations sur cette ${entityTerms.inline}.`,

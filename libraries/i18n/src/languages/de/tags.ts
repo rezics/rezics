@@ -199,7 +199,7 @@ export default {
 		noRanked: "Es gibt keine weiteren globalen Tags zum Hervorheben.",
 	},
 	realms: {
-		pathsTitle: `Tag-Pfade im ${realmTerms.label}`,
+		pathsTitle: `${tagPathTerms.pluralLabel} im ${realmTerms.label}`,
 		applyPath: "Pfad anwenden",
 		authority: { realm: `Dieser ${realmTerms.label}`, global: "Global" },
 		pathAuthority: insert("Eignung: {{fit}} · Spoiler: {{spoiler}}", {

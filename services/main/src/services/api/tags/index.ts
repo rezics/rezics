@@ -30,7 +30,6 @@ import {
 	removeTagPathApplication,
 	removeRealmTagPathApplication,
 	resolveTagPathMerge,
-	suggestTagsFromCompoundPath,
 	suggestTags,
 	searchTagPathsForCuration,
 	judgeRealmTagPathApplication,
@@ -390,7 +389,6 @@ export default new Elysia()
 					params: UnitTagPathParams,
 					response: {
 						[StatusCodes.OK]: TagPathApplicationResponse,
-						[StatusCodes.FORBIDDEN]: toApiErrorResponse(["PlatformCapabilityRequired"]),
 						[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["InvalidTagPath"]),
 						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "TagPathNotFound"]),
 						[StatusCodes.TOO_MANY_REQUESTS]: VoteBackpressureResponse,
@@ -416,7 +414,6 @@ export default new Elysia()
 					response: {
 						[StatusCodes.NO_CONTENT]: t.Void(),
 						[StatusCodes.FORBIDDEN]: toApiErrorResponse([
-							"PlatformCapabilityRequired",
 							"UnitPermissionForbidden",
 							"UnitAccessRestricted",
 						]),
@@ -448,7 +445,6 @@ export default new Elysia()
 					body: TagPathApplicationJudgmentBody,
 					response: {
 						[StatusCodes.OK]: TagPathApplicationResponse,
-						[StatusCodes.FORBIDDEN]: toApiErrorResponse(["PlatformCapabilityRequired"]),
 						[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["InvalidTagPath"]),
 						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
 							"UnitNotFound",
@@ -475,7 +471,6 @@ export default new Elysia()
 					params: UnitTagPathParams,
 					response: {
 						[StatusCodes.OK]: TagPathApplicationResponse,
-						[StatusCodes.FORBIDDEN]: toApiErrorResponse(["PlatformCapabilityRequired"]),
 						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
 							"UnitNotFound",
 							"TagPathApplicationNotFound",

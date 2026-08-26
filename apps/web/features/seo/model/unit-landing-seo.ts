@@ -189,8 +189,6 @@ function structuredMainEntity(
 			return { "@type": "Question", ...shared };
 		case "tag":
 			return { "@type": "DefinedTerm", ...shared };
-		case "structure":
-			return { "@type": "DefinedTermSet", ...shared };
 		case "collection":
 		case "realm":
 		case "zone":

@@ -56,6 +56,8 @@ describe("PostDetailArticle", () => {
 						titleLanguage: "zh",
 						summary: "不暴雷的摘要",
 						body,
+						contentSpoiler: { level: 0, concealed: false },
+						contentNsfw: { labelled: false, concealed: false },
 						createdAt: "2026-07-25T04:00:00.000Z",
 					}}
 				/>
@@ -100,6 +102,8 @@ describe("PostDetailArticle", () => {
 						title: "開放式貼文",
 						titleLanguage: "zh",
 						body: null,
+						contentSpoiler: { level: 0, concealed: false },
+						contentNsfw: { labelled: false, concealed: false },
 						createdAt: "2026-07-25T04:00:00.000Z",
 					}}
 					variant="thread"
@@ -127,6 +131,8 @@ describe("PostDetailArticle", () => {
 						titleLanguage: null,
 						summary: "沒有標題也要保留的摘要",
 						body: null,
+						contentSpoiler: { level: 0, concealed: false },
+						contentNsfw: { labelled: false, concealed: false },
 						createdAt: "2026-07-25T04:00:00.000Z",
 					}}
 					variant="thread"

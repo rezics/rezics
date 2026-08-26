@@ -21,7 +21,8 @@ vi.mock("../database", () => ({
 vi.mock("../realms/service", () => ({ acknowledgeCurrentRealmRulesOnFollow }));
 vi.mock("../notifications/service", () => ({ createNotification }));
 
-import { UnitKindValues } from "../database/schema/contract-values";
+import { FollowableUnitKindValues } from "../database/schema/contract-values";
+import { UnitNotFound } from "../units/errors";
 import { UserFollowBlocked, UserSelfFollowForbidden } from "./errors";
 import { followUnit } from "./service";
 
@@ -75,7 +76,7 @@ describe("followUnit", () => {
 		createNotification.mockResolvedValue(undefined);
 	});
 
-	it.each(UnitKindValues)("follows a readable %s Unit without a kind gate", async (kind) => {
+	it.each(FollowableUnitKindValues)("follows a readable %s Unit", async (kind) => {
 		targetLimit.mockResolvedValue([{ id: TargetUnitId, kind }]);
 
 		await expect(
@@ -109,6 +110,19 @@ describe("followUnit", () => {
 				dedupeKey: `new-follower:${FollowerProfileId}:${TargetUnitId}`,
 			});
 		else expect(createNotification).not.toHaveBeenCalled();
+	});
+
+	it("rejects Tag Path Units at the generic Following boundary", async () => {
+		targetLimit.mockResolvedValue([{ id: TargetUnitId, kind: "tag_path" }]);
+
+		await expect(
+			followUnit({
+				followerProfileId: FollowerProfileId,
+				unitId: TargetUnitId,
+				authorization: { ensureCanRead },
+			}),
+		).rejects.toBeInstanceOf(UnitNotFound);
+		expect(transaction).not.toHaveBeenCalled();
 	});
 
 	it("does not notify again when the follow already exists", async () => {

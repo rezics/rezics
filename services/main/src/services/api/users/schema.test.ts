@@ -40,6 +40,7 @@ describe("following API contracts", () => {
 			}),
 		).toBe(true);
 		expect(Check(FollowingListQuery, { kind: "unknown" })).toBe(false);
+		expect(Check(FollowingListQuery, { kind: "tag_path" })).toBe(false);
 		expect(Check(FollowingListQuery, { language: "zh" })).toBe(false);
 		expect(Check(FollowingListQuery, { localizationLanguages: ["zh-Hant"] })).toBe(false);
 		expect(Check(FollowingListQuery, { limit: 101 })).toBe(false);
@@ -96,6 +97,13 @@ describe("following API contracts", () => {
 				realmTagSourceSubscribed: true,
 			}),
 		).toBe(true);
+		expect(
+			Check(ReplaceFollowingSettingsBody, {
+				kind: "tag_path",
+				inAppNotificationsEnabled: true,
+				realmTagSourceSubscribed: null,
+			}),
+		).toBe(false);
 		expect(
 			Check(ReplaceFollowingSettingsBody, {
 				kind: "book",
@@ -220,6 +228,8 @@ describe("user preference inputs", () => {
 			collectionConfig: null,
 			personalizedFeed: true,
 			filterFeedByPreferredLanguages: false,
+			alwaysShowSpoilers: false,
+			alwaysShowNsfw: false,
 			contentRatings: ["general"],
 			preferredLanguages: ["en"],
 		};

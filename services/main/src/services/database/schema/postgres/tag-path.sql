@@ -59,8 +59,22 @@ BEGIN
 		NEW.member_tag_ids[member.ordinality + 1]
 	FROM generate_series(1, cardinality(NEW.member_tag_ids) - 1) AS member(ordinality);
 
-	INSERT INTO public.tag_path_vote_stat(path_id) VALUES (NEW.id);
+	INSERT INTO public.tag_path_vote_stat(path_id, terminal_tag_id)
+	VALUES (NEW.id, NEW.terminal_tag_id);
 	RETURN NULL;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.guard_tag_path_vote_stat_projection()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+BEGIN
+	IF pg_trigger_depth() < 2 THEN
+		RAISE EXCEPTION 'tag_path_vote_stat is a trigger-owned Tag Path ranking projection'
+			USING ERRCODE = '23514', CONSTRAINT = 'tag_path_vote_stat_projection_only';
+	END IF;
+	RETURN CASE WHEN TG_OP = 'DELETE' THEN OLD ELSE NEW END;
 END;
 $$;
 
@@ -127,12 +141,19 @@ BEGIN
 		score_delta := score_delta + NEW.value;
 		count_delta := count_delta + 1;
 	END IF;
-	INSERT INTO public.tag_path_vote_stat(path_id, score, vote_count, updated_at)
-	VALUES (key_id, score_delta, count_delta, clock_timestamp())
-	ON CONFLICT (path_id) DO UPDATE SET
-		score = tag_path_vote_stat.score + EXCLUDED.score,
-		vote_count = tag_path_vote_stat.vote_count + EXCLUDED.vote_count,
-		updated_at = EXCLUDED.updated_at;
+	UPDATE public.tag_path_vote_stat
+	SET score = score + score_delta,
+		vote_count = vote_count + count_delta,
+		updated_at = clock_timestamp()
+	WHERE path_id = key_id;
+	IF NOT FOUND THEN
+		INSERT INTO public.tag_path_vote_stat(
+			path_id, terminal_tag_id, score, vote_count, updated_at
+		)
+		SELECT key_id, path.terminal_tag_id, score_delta, count_delta, clock_timestamp()
+		FROM public.tag_path AS path
+		WHERE path.id = key_id;
+	END IF;
 	RETURN NULL;
 END;
 $$;
@@ -184,20 +205,24 @@ BEGIN
 		END IF;
 	END IF;
 
-	INSERT INTO public.unit_tag_path_judgment_stat(
-		unit_id, path_id, score, vote_count, spoiler_vote_count,
-		spoiler_none_count, spoiler_minor_count, spoiler_major_count, updated_at
-	) VALUES (
-		key_unit, key_path, score_delta, count_delta, spoiler_delta,
-		none_delta, minor_delta, major_delta, clock_timestamp()
-	) ON CONFLICT (unit_id, path_id) DO UPDATE SET
-		score = unit_tag_path_judgment_stat.score + EXCLUDED.score,
-		vote_count = unit_tag_path_judgment_stat.vote_count + EXCLUDED.vote_count,
-		spoiler_vote_count = unit_tag_path_judgment_stat.spoiler_vote_count + EXCLUDED.spoiler_vote_count,
-		spoiler_none_count = unit_tag_path_judgment_stat.spoiler_none_count + EXCLUDED.spoiler_none_count,
-		spoiler_minor_count = unit_tag_path_judgment_stat.spoiler_minor_count + EXCLUDED.spoiler_minor_count,
-		spoiler_major_count = unit_tag_path_judgment_stat.spoiler_major_count + EXCLUDED.spoiler_major_count,
-		updated_at = EXCLUDED.updated_at;
+	UPDATE public.unit_tag_path_judgment_stat
+	SET score = score + score_delta,
+		vote_count = vote_count + count_delta,
+		spoiler_vote_count = spoiler_vote_count + spoiler_delta,
+		spoiler_none_count = spoiler_none_count + none_delta,
+		spoiler_minor_count = spoiler_minor_count + minor_delta,
+		spoiler_major_count = spoiler_major_count + major_delta,
+		updated_at = clock_timestamp()
+	WHERE unit_id = key_unit AND path_id = key_path;
+	IF NOT FOUND THEN
+		INSERT INTO public.unit_tag_path_judgment_stat(
+			unit_id, path_id, score, vote_count, spoiler_vote_count,
+			spoiler_none_count, spoiler_minor_count, spoiler_major_count, updated_at
+		) VALUES (
+			key_unit, key_path, score_delta, count_delta, spoiler_delta,
+			none_delta, minor_delta, major_delta, clock_timestamp()
+		);
+	END IF;
 
 	new_accepted := current_score + score_delta > 0 AND current_count + count_delta > 0;
 	IF old_accepted <> new_accepted THEN
@@ -319,46 +344,62 @@ BEGIN
 END;
 $$;
 
+DROP TRIGGER IF EXISTS tag_path_definition_guard ON public.tag_path;
 CREATE TRIGGER tag_path_definition_guard
 BEFORE INSERT OR UPDATE OR DELETE ON public.tag_path
 FOR EACH ROW EXECUTE FUNCTION public.guard_tag_path_definition();
 
+DROP TRIGGER IF EXISTS tag_path_definition_project ON public.tag_path;
 CREATE TRIGGER tag_path_definition_project
 AFTER INSERT ON public.tag_path
 FOR EACH ROW EXECUTE FUNCTION public.project_tag_path_definition();
 
+DROP TRIGGER IF EXISTS tag_path_member_projection_guard ON public.tag_path_member;
 CREATE TRIGGER tag_path_member_projection_guard
 BEFORE INSERT OR UPDATE OR DELETE ON public.tag_path_member
 FOR EACH ROW EXECUTE FUNCTION public.guard_tag_path_projection();
 
+DROP TRIGGER IF EXISTS tag_path_edge_projection_guard ON public.tag_path_edge;
 CREATE TRIGGER tag_path_edge_projection_guard
 BEFORE INSERT OR UPDATE OR DELETE ON public.tag_path_edge
 FOR EACH ROW EXECUTE FUNCTION public.guard_tag_path_projection();
 
+DROP TRIGGER IF EXISTS tag_path_member_unit_lifecycle_guard ON public.unit;
 CREATE TRIGGER tag_path_member_unit_lifecycle_guard
 BEFORE UPDATE OR DELETE ON public.unit
 FOR EACH ROW EXECUTE FUNCTION public.guard_tag_path_member_lifecycle();
 
+DROP TRIGGER IF EXISTS tag_path_vote_stat_maintain ON public.tag_path_vote;
 CREATE TRIGGER tag_path_vote_stat_maintain
 AFTER INSERT OR UPDATE OR DELETE ON public.tag_path_vote
 FOR EACH ROW EXECUTE FUNCTION public.maintain_tag_path_vote_stat();
 
+DROP TRIGGER IF EXISTS tag_path_vote_stat_projection_guard ON public.tag_path_vote_stat;
+CREATE TRIGGER tag_path_vote_stat_projection_guard
+BEFORE INSERT OR UPDATE OR DELETE ON public.tag_path_vote_stat
+FOR EACH ROW EXECUTE FUNCTION public.guard_tag_path_vote_stat_projection();
+
+DROP TRIGGER IF EXISTS unit_tag_path_judgment_identity_guard ON public.unit_tag_path_judgment;
 CREATE TRIGGER unit_tag_path_judgment_identity_guard
 BEFORE UPDATE ON public.unit_tag_path_judgment
 FOR EACH ROW EXECUTE FUNCTION public.protect_unit_tag_path_judgment_identity();
 
+DROP TRIGGER IF EXISTS unit_tag_path_judgment_stat_maintain ON public.unit_tag_path_judgment;
 CREATE TRIGGER unit_tag_path_judgment_stat_maintain
 AFTER INSERT OR UPDATE OR DELETE ON public.unit_tag_path_judgment
 FOR EACH ROW EXECUTE FUNCTION public.maintain_unit_tag_path_judgment_stat();
 
+DROP TRIGGER IF EXISTS unit_tag_path_support_maintain ON public.unit_tag_path_judgment;
 CREATE TRIGGER unit_tag_path_support_maintain
 AFTER INSERT OR UPDATE OR DELETE ON public.unit_tag_path_judgment
 FOR EACH ROW EXECUTE FUNCTION public.maintain_unit_tag_path_support();
 
+DROP TRIGGER IF EXISTS unit_tag_path_support_effective_maintain ON public.unit_tag_path_support;
 CREATE TRIGGER unit_tag_path_support_effective_maintain
 AFTER INSERT OR DELETE ON public.unit_tag_path_support
 FOR EACH ROW EXECUTE FUNCTION public.refresh_unit_effective_tag_from_path_support();
 
+DROP TRIGGER IF EXISTS tag_path_merge_guard ON public.tag_path_merge;
 CREATE TRIGGER tag_path_merge_guard
 BEFORE INSERT OR UPDATE OR DELETE ON public.tag_path_merge
 FOR EACH ROW EXECUTE FUNCTION public.guard_tag_path_merge();

@@ -205,7 +205,7 @@ function resolveSortConfiguration(
 /** Resolves a sparse Filter document against the one server-owned capability ceiling. */
 export function resolveFilterDocument(
 	documentValue: unknown,
-	hasDevelopmentPreviewAccess: boolean,
+	_hasDevelopmentPreviewAccess: boolean,
 	policy: SearchEndpointPolicy = {},
 ) {
 	let filterDocument: FilterDocument;
@@ -214,7 +214,7 @@ export function resolveFilterDocument(
 	} catch (cause) {
 		throw new InvalidSearch(cause instanceof Error ? cause.message : "Invalid Filter document");
 	}
-	const categories = filterDocument.categories ?? SearchCategories;
+	const categories = filterDocument.categories ?? [...SearchCategories];
 	if (!categories.length) throw new InvalidSearch("Filter document has no available categories");
 	const allowedFields = policy.fields ?? SearchFieldValues;
 	const overrideByKey = new Map(

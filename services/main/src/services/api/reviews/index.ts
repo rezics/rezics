@@ -3,6 +3,8 @@ import { and, asc, desc, eq, inArray, isNull, sql } from "drizzle-orm";
 import Elysia, { t } from "elysia";
 
 import session, { resolveIdentity } from "../../auth/session";
+import { NsfwContentLabelId } from "../../bootstrap/data";
+import { requireContentSpoilerLevel } from "../../content-labels/presentation";
 import { contentRatingPolicyFromAllowlist } from "../../content-rating/policy";
 import { database } from "../../database";
 import { runVoteTransaction } from "../../database/vote-admission";
@@ -24,6 +26,8 @@ import {
 	unitLocalization,
 	unitRevisionHead,
 	unitProgressEntry,
+	unitTag,
+	profilePreference,
 	ContentRatingValues,
 } from "../../database/schema";
 import { UnitNotFound } from "../../units/errors";
@@ -514,6 +518,22 @@ export default new Elysia()
 							latestRevisionId: unitRevisionHead.revisionId,
 							createdAt: unit.createdAt,
 							updatedAt: unit.updatedAt,
+							contentSpoilerLevel: sql<number>`coalesce((
+								select manifest.spoiler_level
+								from (values
+									('019b76da-a800-7370-8000-000000000001'::uuid, 0),
+									('019b76da-a800-7370-8000-000000000002'::uuid, 1),
+									('019b76da-a800-7370-8000-000000000003'::uuid, 2)
+								) manifest(tag_id, spoiler_level)
+								join public.unit_tag content_label
+									on content_label.tag_id = manifest.tag_id
+									and content_label.unit_id = ${post.id}
+							), 0)`,
+							contentNsfw: sql<boolean>`exists(
+								select 1 from ${unitTag} content_label
+								where content_label.unit_id = ${post.id}
+									and content_label.tag_id = ${NsfwContentLabelId}::uuid
+							)`,
 						})
 						.from(post)
 						.innerJoin(unit, eq(unit.id, post.id))
@@ -559,6 +579,7 @@ export default new Elysia()
 						canManageRealmPublications,
 						replyCreationDecision,
 						targetingLock,
+						viewerDisplayPreference,
 					] = await Promise.all([
 						database
 							.select({ language: unitLocalization.language })
@@ -588,7 +609,19 @@ export default new Elysia()
 							targets: [{ relation: "root", unitId: review.id }],
 							...(query.realmId ? { realmId: query.realmId } : {}),
 						}),
+						viewerProfileId
+							? database
+									.select({
+										alwaysShowSpoilers: profilePreference.alwaysShowSpoilers,
+										alwaysShowNsfw: profilePreference.alwaysShowNsfw,
+									})
+									.from(profilePreference)
+									.where(eq(profilePreference.profileId, viewerProfileId))
+									.limit(1)
+									.then(([value]) => value)
+							: Promise.resolve(undefined),
 					]);
+					const contentSpoilerLevel = requireContentSpoilerLevel(review.contentSpoilerLevel);
 					return {
 						...review,
 						availableLanguages: availableLanguageRows.map(({ language }) => language),
@@ -597,6 +630,14 @@ export default new Elysia()
 						attributions: attributionMap.get(review.id) ?? [],
 						targetId,
 						body: review.body === null ? null : toPortableTextResponse(review.body, "post.body"),
+						contentSpoiler: {
+							level: contentSpoilerLevel,
+							concealed: contentSpoilerLevel > 0 && !viewerDisplayPreference?.alwaysShowSpoilers,
+						},
+						contentNsfw: {
+							labelled: review.contentNsfw,
+							concealed: review.contentNsfw && !viewerDisplayPreference?.alwaysShowNsfw,
+						},
 						replyCount: toSafeInteger(review.replyCount, "reply count"),
 						subject,
 						scores,

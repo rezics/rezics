@@ -63862,7 +63862,6 @@ export const GetApiUsersMeFollowingKind = {
 	entity: "entity",
 	label: "label",
 	tag: "tag",
-	tag_path: "tag_path",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -63924,7 +63923,6 @@ export const GetApiUsersMeFollowingStatus200ItemsKindEnum = {
 	entity: "entity",
 	label: "label",
 	tag: "tag",
-	tag_path: "tag_path",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -64231,7 +64229,6 @@ export const GetApiUsersMeFollowingByUnitIdStatus200KindEnum = {
 	entity: "entity",
 	label: "label",
 	tag: "tag",
-	tag_path: "tag_path",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -64905,7 +64902,6 @@ export const PutApiUsersMeFollowingByUnitIdSettingsStatus200KindEnum = {
 	entity: "entity",
 	label: "label",
 	tag: "tag",
-	tag_path: "tag_path",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -65147,7 +65143,6 @@ export const PutApiUsersMeFollowingByUnitIdSettingsRequestKindEnum = {
 	entity: "entity",
 	label: "label",
 	tag: "tag",
-	tag_path: "tag_path",
 	series: "series",
 	zone: "zone",
 	zone_page: "zone_page",
@@ -72469,34 +72464,6 @@ export type PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus200 = {
 	viewerSpoilerLevel: ((0 | 1 | 2) | null) | null;
 };
 
-/**
- * @type object
- */
-export type PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus403 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'PlatformCapabilityRequired'
-		 * @type string
-		 */
-		code: "PlatformCapabilityRequired";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
 export const PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus404ErrorCodeEnum = {
 	UnitNotFound: "UnitNotFound",
 	TagPathNotFound: "TagPathNotFound",
@@ -72634,7 +72601,6 @@ export type PutApiUnitsByTypeByUnitIdTagPathsByPathIdOptions = {
  */
 export type PutApiUnitsByTypeByUnitIdTagPathsByPathIdResponses = {
 	"200": PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus200;
-	"403": PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus403;
 	"404": PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus404;
 	"422": PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus422;
 	"429": PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus429;
@@ -72646,7 +72612,6 @@ export type PutApiUnitsByTypeByUnitIdTagPathsByPathIdResponses = {
  */
 export type PutApiUnitsByTypeByUnitIdTagPathsByPathIdResponse =
 	| PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus200
-	| PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus403
 	| PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus404
 	| PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus422
 	| PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus429
@@ -72677,7 +72642,6 @@ export type DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdPath = {
 export type DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus204 = void;
 
 export const DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus403ErrorCodeEnum = {
-	PlatformCapabilityRequired: "PlatformCapabilityRequired",
 	UnitPermissionForbidden: "UnitPermissionForbidden",
 	UnitAccessRestricted: "UnitAccessRestricted",
 } as const;
@@ -72694,7 +72658,7 @@ export type DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus403 = {
 	 */
 	error: {
 		/**
-		 * @default 'PlatformCapabilityRequired'
+		 * @default 'UnitPermissionForbidden'
 		 * @type string
 		 */
 		code: DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus403ErrorCodeEnum;
@@ -72901,34 +72865,6 @@ export type PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus200 = {
  */
 export type PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus400 = MalformedRequestBody;
 
-/**
- * @type object
- */
-export type PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus403 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'PlatformCapabilityRequired'
-		 * @type string
-		 */
-		code: "PlatformCapabilityRequired";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
 export const PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus404ErrorCodeEnum = {
 	UnitNotFound: "UnitNotFound",
 	TagPathApplicationNotFound: "TagPathApplicationNotFound",
@@ -73098,7 +73034,6 @@ export type PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentOptions = {
 export type PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentResponses = {
 	"200": PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus200;
 	"400": PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus400;
-	"403": PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus403;
 	"404": PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus404;
 	"422": PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus422;
 	"429": PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus429;
@@ -73111,7 +73046,6 @@ export type PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentResponses = {
 export type PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentResponse =
 	| PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus200
 	| PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus400
-	| PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus403
 	| PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus404
 	| PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus422
 	| PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus429
@@ -73165,34 +73099,6 @@ export type DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus200 = {
 		major: string | number;
 	};
 	viewerSpoilerLevel: ((0 | 1 | 2) | null) | null;
-};
-
-/**
- * @type object
- */
-export type DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus403 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'PlatformCapabilityRequired'
-		 * @type string
-		 */
-		code: "PlatformCapabilityRequired";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
 };
 
 export const DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus404ErrorCodeEnum = {
@@ -73310,7 +73216,6 @@ export type DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentOptions = {
  */
 export type DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentResponses = {
 	"200": DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus200;
-	"403": DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus403;
 	"404": DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus404;
 	"422": DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus422;
 	"429": DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus429;
@@ -73322,7 +73227,6 @@ export type DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentResponses = {
  */
 export type DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentResponse =
 	| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus200
-	| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus403
 	| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus404
 	| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus422
 	| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus429

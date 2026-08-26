@@ -79,16 +79,16 @@ describe("shadow-only online-validation state", () => {
 	it("allows only public-qualified constraint validation", () => {
 		expect(() =>
 			assertShadowValidationStatements([
-				"ALTER TABLE public.unit_structure VALIDATE CONSTRAINT unit_structure_active_projection_version_check;",
+				"ALTER TABLE public.tag_path VALIDATE CONSTRAINT tag_path_member_count_check;",
 			]),
 		).not.toThrow();
 	});
 
 	it.each([
-		"ALTER TABLE unit_structure VALIDATE CONSTRAINT unit_structure_active_projection_version_check;",
-		"ALTER TABLE public.unit_structure ADD CONSTRAINT hostile CHECK (true);",
+		"ALTER TABLE tag_path VALIDATE CONSTRAINT tag_path_member_count_check;",
+		"ALTER TABLE public.tag_path ADD CONSTRAINT hostile CHECK (true);",
 		"UPDATE pg_catalog.pg_constraint SET convalidated = true;",
-		"DROP TABLE public.unit_structure;",
+		"DROP TABLE public.tag_path;",
 	])("rejects non-validation shadow state: %s", (statement) => {
 		expect(() => assertShadowValidationStatements([statement])).toThrow(
 			/only public-qualified ALTER TABLE/,

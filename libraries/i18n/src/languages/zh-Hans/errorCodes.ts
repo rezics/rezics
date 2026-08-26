@@ -273,6 +273,8 @@ export default {
 	TagPathApplicationNotFound: `这个内容没有应用该${tagPathTerms.inline}。`,
 	TagPathChanged: `这个${tagPathTerms.inline}已在其他地方变更，请刷新后再试一次。`,
 	TagPathDefinitionConflict: `已有内容完全相同的${tagPathTerms.inline}。`,
+	InvalidTagPathMerge: `这个${tagPathTerms.inline}合并方案无效。`,
+	TagPathMergeNotFound: `找不到这个${tagPathTerms.inline}合并提案。`,
 	AssociationContextPostInvalid: `关联脉络必须是知识型${postTerms.inline}。`,
 	ProgressEntryNotFound: "找不到这条进度事件。",
 	PostTagMentionVoteConflict: `这个标签提及与你对该${postTerms.inline}的既有负票冲突。`,

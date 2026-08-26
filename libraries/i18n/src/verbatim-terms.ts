@@ -167,6 +167,21 @@ export const verbatimTerms = {
 		category: "identifier",
 		rationale: "Stable identifier label used in technical interfaces.",
 	},
+	centimetreUnitSymbol: {
+		value: "cm",
+		category: "identifier",
+		rationale: "International unit symbol shown beside canonical centimetre measurements.",
+	},
+	kilogramUnitSymbol: {
+		value: "kg",
+		category: "identifier",
+		rationale: "International unit symbol shown beside canonical kilogram measurements.",
+	},
+	nsfw: {
+		value: "NSFW",
+		category: "domain-identifier",
+		rationale: "Canonical interoperable label for the media-safety display preference.",
+	},
 	profileSlugPrefix: {
 		value: "u/",
 		category: "identifier",

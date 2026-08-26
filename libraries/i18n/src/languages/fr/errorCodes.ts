@@ -328,6 +328,8 @@ export default {
 	TagPathApplicationNotFound: `Cette Unit ne possède pas ce ${tagPathTerms.inline}.`,
 	TagPathChanged: `Ce ${tagPathTerms.inline} a été modifié ailleurs. Actualisez la page et réessayez.`,
 	TagPathDefinitionConflict: `Un ${tagPathTerms.inline} identique existe déjà.`,
+	InvalidTagPathMerge: `La fusion de ce ${tagPathTerms.inline} n’est pas valide.`,
+	TagPathMergeNotFound: `La proposition de fusion de ce ${tagPathTerms.inline} est introuvable.`,
 	AssociationContextPostInvalid: `Le contexte de la relation doit être une ${postTerms.inline} de wiki.`,
 	ProgressEntryNotFound: "Cet événement de progression est introuvable.",
 	PostTagMentionVoteConflict: `Cette mention d’étiquette entre en conflit avec votre vote négatif existant sur la ${postTerms.inline}.`,

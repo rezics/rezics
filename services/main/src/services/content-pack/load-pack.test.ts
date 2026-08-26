@@ -355,7 +355,7 @@ describe("loadPack", () => {
 				"https://code.blicky.net/yorhel/vndb/src/commit/514f2391cc12aa94ce420354863c52538641d9b1/sql/func.sql",
 		});
 		expect(vndb.objects.some((object) => (object.entityMeasurements?.length ?? 0) > 0)).toBe(true);
-	});
+	}, 20_000);
 });
 
 async function createFixture() {

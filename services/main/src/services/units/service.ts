@@ -612,7 +612,7 @@ export async function getUnit(
 				spoilerMajorCount ?? 0n,
 				"Subject association major-spoiler count",
 			);
-			const level =
+			const level: 0 | 1 | 2 =
 				major * 2 >= voteCount && voteCount > 0
 					? 2
 					: (minor + major) * 2 >= voteCount && voteCount > 0
@@ -625,6 +625,7 @@ export async function getUnit(
 				viewerSpoilerLevel !== 2
 			)
 				throw new Error("Subject association viewer spoiler level is invalid");
+			const normalizedViewerSpoilerLevel: 0 | 1 | 2 | null = viewerSpoilerLevel;
 			return {
 				...association,
 				entityKind: requireEntityKind(association.entityKind),
@@ -637,7 +638,7 @@ export async function getUnit(
 					concealed: level > 0 && !viewerDisplayPreference?.alwaysShowSpoilers,
 					voteCount,
 					distribution: { none, minor, major },
-					viewerLevel: viewerSpoilerLevel,
+					viewerLevel: normalizedViewerSpoilerLevel,
 				},
 			};
 		},

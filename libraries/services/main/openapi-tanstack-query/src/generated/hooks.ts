@@ -1133,7 +1133,6 @@ import type {
 	GetApiUnitsByTypeByUnitIdTagsStatus500,
 	PutApiUnitsByTypeByUnitIdTagPathsByPathIdOptions,
 	PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus200,
-	PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus403,
 	PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus404,
 	PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus422,
 	PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus429,
@@ -1148,14 +1147,12 @@ import type {
 	PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentOptions,
 	PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus200,
 	PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus400,
-	PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus403,
 	PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus404,
 	PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus422,
 	PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus429,
 	PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus500,
 	DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentOptions,
 	DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus200,
-	DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus403,
 	DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus404,
 	DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus422,
 	DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus429,
@@ -20313,7 +20310,6 @@ export function putApiUnitsByTypeByUnitIdTagPathsByPathIdMutationOptions<TContex
 	return mutationOptions<
 		PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus200,
 		ResponseErrorConfig<
-			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus403
 			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus404
 			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus422
 			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus429
@@ -20343,7 +20339,6 @@ export function usePutApiUnitsByTypeByUnitIdTagPathsByPathId<TContext>(
 		mutation?: UseMutationOptions<
 			PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus200,
 			ResponseErrorConfig<
-				| PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus403
 				| PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus404
 				| PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus422
 				| PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus429
@@ -20365,7 +20360,6 @@ export function usePutApiUnitsByTypeByUnitIdTagPathsByPathId<TContext>(
 	) as UseMutationOptions<
 		PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus200,
 		ResponseErrorConfig<
-			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus403
 			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus404
 			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus422
 			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus429
@@ -20378,7 +20372,6 @@ export function usePutApiUnitsByTypeByUnitIdTagPathsByPathId<TContext>(
 	return useMutation<
 		PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus200,
 		ResponseErrorConfig<
-			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus403
 			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus404
 			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus422
 			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus429
@@ -20396,7 +20389,6 @@ export function usePutApiUnitsByTypeByUnitIdTagPathsByPathId<TContext>(
 	) as UseMutationResult<
 		PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus200,
 		ResponseErrorConfig<
-			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus403
 			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus404
 			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus422
 			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus429
@@ -20522,7 +20514,6 @@ export function putApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentMutationOptions
 		PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus200,
 		ResponseErrorConfig<
 			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus400
-			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus403
 			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus404
 			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus422
 			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus429
@@ -20554,7 +20545,6 @@ export function usePutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgment<TContext>(
 			PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus200,
 			ResponseErrorConfig<
 				| PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus400
-				| PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus403
 				| PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus404
 				| PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus422
 				| PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus429
@@ -20577,7 +20567,6 @@ export function usePutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgment<TContext>(
 		PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus200,
 		ResponseErrorConfig<
 			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus400
-			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus403
 			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus404
 			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus422
 			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus429
@@ -20591,7 +20580,6 @@ export function usePutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgment<TContext>(
 		PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus200,
 		ResponseErrorConfig<
 			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus400
-			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus403
 			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus404
 			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus422
 			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus429
@@ -20610,7 +20598,6 @@ export function usePutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgment<TContext>(
 		PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus200,
 		ResponseErrorConfig<
 			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus400
-			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus403
 			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus404
 			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus422
 			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus429
@@ -20631,7 +20618,6 @@ export function deleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentMutationOpti
 	return mutationOptions<
 		DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus200,
 		ResponseErrorConfig<
-			| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus403
 			| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus404
 			| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus422
 			| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus429
@@ -20661,7 +20647,6 @@ export function useDeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgment<TContext
 		mutation?: UseMutationOptions<
 			DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus200,
 			ResponseErrorConfig<
-				| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus403
 				| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus404
 				| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus422
 				| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus429
@@ -20684,7 +20669,6 @@ export function useDeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgment<TContext
 	) as UseMutationOptions<
 		DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus200,
 		ResponseErrorConfig<
-			| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus403
 			| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus404
 			| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus422
 			| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus429
@@ -20697,7 +20681,6 @@ export function useDeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgment<TContext
 	return useMutation<
 		DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus200,
 		ResponseErrorConfig<
-			| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus403
 			| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus404
 			| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus422
 			| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus429
@@ -20715,7 +20698,6 @@ export function useDeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgment<TContext
 	) as UseMutationResult<
 		DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus200,
 		ResponseErrorConfig<
-			| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus403
 			| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus404
 			| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus422
 			| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus429

@@ -1,4 +1,5 @@
 import { esTerminology } from "@rezics/i18n/terminology/es";
+import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 
 const { forms: entityTerms } = esTerminology.entity;
 
@@ -16,8 +17,8 @@ export default {
 	bust: "Busto",
 	waist: "Cintura",
 	hips: "Cadera",
-	centimetreUnit: "cm",
-	kilogramUnit: "kg",
+	centimetreUnit: verbatimTerms.centimetreUnitSymbol.value,
+	kilogramUnit: verbatimTerms.kilogramUnitSymbol.value,
 	newEntity: `Nueva ${entityTerms.inline}`,
 	newTag: "Nuevo tag",
 	externalLinksDescription: `Páginas públicas que respaldan la información sobre esta ${entityTerms.inline}.`,

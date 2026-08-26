@@ -20,7 +20,7 @@ describe("subject association Entity Tag previews", () => {
 			'inner join "unit" as "subject_association_preview_tag_unit" on "subject_association_preview_tag_unit"."id" = "unit_tag"."tag_id"',
 		);
 		expect(normalizedSql).not.toContain('inner join "subject_association_preview_tag_unit" on');
-		expect(normalizedSql).toContain('"current_unit_tag_judgment_stat"."vote_count" > 0');
+		expect(normalizedSql).toContain('"unit_tag_judgment_stat"."vote_count" > 0');
 		expect(normalizedSql).not.toContain("spoiler_vote_count");
 		expect(normalizedSql).toContain("order by requested_entity.entity_id, ranked.preview_rank");
 		expect(query.params).toContain(SubjectAssociationEntityTagPreviewLimit);

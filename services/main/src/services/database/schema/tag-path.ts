@@ -354,9 +354,8 @@ export const tagPathMerge = pgTable(
 		),
 		check(
 			"tag_path_merge_proposal_provenance_check",
-			sql`(
-				${table.proposalSourceKind} = 'human' and ${table.proposalProvenance} is null
-			) or (
+			sql`${table.proposalSourceKind} = 'human' and ${table.proposalProvenance} is null
+			or (
 				${table.proposalSourceKind} = 'assisted'
 				and ${table.proposalProvenance}->>'kind' = 'assisted'
 				and jsonb_typeof(${table.proposalProvenance}->'system') = 'string'

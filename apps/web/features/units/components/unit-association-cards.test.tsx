@@ -1,7 +1,7 @@
 /** @vitest-environment jsdom */
 
 import { resources } from "@rezics/i18n/resources";
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { create } from "native-i18n";
 import type { ComponentProps, ReactNode } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -74,6 +74,13 @@ const subjectAssociation = {
 		},
 	],
 	contextPost: null,
+	spoiler: {
+		level: 0,
+		concealed: false,
+		voteCount: 0,
+		distribution: { none: 0, minor: 0, major: 0 },
+		viewerLevel: null,
+	},
 } satisfies SubjectAssociation;
 
 function renderWithTranslation(children: ReactNode) {
@@ -84,9 +91,11 @@ function renderWithTranslation(children: ReactNode) {
 
 describe("Unit association cards", () => {
 	it("links both an Entity cover and title and opens each Tag card independently", async () => {
-		renderWithTranslation(<UnitSubjectGroups associations={[subjectAssociation]} />);
+		await act(async () => {
+			renderWithTranslation(<UnitSubjectGroups associations={[subjectAssociation]} />);
+		});
 
-		const entityLinks = screen.getAllByRole("link", { name: subjectAssociation.title });
+		const entityLinks = await screen.findAllByRole("link", { name: subjectAssociation.title });
 		expect(entityLinks).toHaveLength(2);
 		for (const link of entityLinks)
 			expect(link.getAttribute("href")).toBe(`/entities/${subjectAssociation.entityEntryId}`);
@@ -102,12 +111,12 @@ describe("Unit association cards", () => {
 		expect(tagTitleLink.getAttribute("href")).toBe(`/tags/${subjectAssociationTagId}`);
 	});
 
-	it("keeps an empty linked Cover when an Entity has no cover source", () => {
+	it("keeps an empty linked Cover when an Entity has no cover source", async () => {
 		renderWithTranslation(
 			<UnitSubjectGroups associations={[{ ...subjectAssociation, cover: null }]} />,
 		);
 
-		expect(screen.getByRole("img", { name: subjectAssociation.title })).toBeTruthy();
+		expect(await screen.findByRole("img", { name: subjectAssociation.title })).toBeTruthy();
 		expect(screen.getAllByRole("link", { name: subjectAssociation.title })).toHaveLength(2);
 		expect(screen.queryByText("E")).toBeNull();
 	});

@@ -104,6 +104,8 @@ const excerpt = {
 			},
 		],
 	},
+	contentSpoiler: { level: 0, concealed: false },
+	contentNsfw: { labelled: false, concealed: false },
 	replyCount: 0,
 	latestRevisionId: null,
 	replyContext: null,

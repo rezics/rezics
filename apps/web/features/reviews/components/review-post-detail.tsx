@@ -63,6 +63,8 @@ export function ReviewPostDetail({ review }: { readonly review: ReviewPost }) {
 					titleLanguage: title.language ?? null,
 					summary: review.summary,
 					body: review.body,
+					contentSpoiler: review.contentSpoiler,
+					contentNsfw: review.contentNsfw,
 					createdAt: review.createdAt,
 				}}
 				replyCount={Number(review.replyCount)}

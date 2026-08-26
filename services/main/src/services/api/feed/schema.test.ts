@@ -13,9 +13,9 @@ const RealmId = "00000000-0000-4000-8000-000000000001";
 const checkFeedRequest = (value: unknown) => Check(FeedRequest, [UnitPredicate, UnitFilter], value);
 
 describe("Feed API contract", () => {
-	it("can hydrate every Unit category exposed by mixed Search", () => {
-		expect(FeedUnitKindValues).toContain("structure");
-		expect(FeedContentKindValues).toContain("unit:structure");
+	it("does not expose dedicated Tag Path Units through mixed Feed", () => {
+		expect(FeedUnitKindValues).not.toContain("tag_path");
+		expect(FeedContentKindValues).not.toContain("unit:tag_path");
 	});
 
 	it("presents a Series through the rated-work feed contract", () => {

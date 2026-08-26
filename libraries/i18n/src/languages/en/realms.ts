@@ -6,6 +6,7 @@ import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 const { forms: followTerms } = enTerminology.follow;
 const { forms: postTerms } = enTerminology.post;
 const { forms: realmTerms } = enTerminology.realm;
+const { forms: tagPathTerms } = enTerminology.tagPath;
 const { forms: unitSlugTerms } = enTerminology.unitSlug;
 
 export default {
@@ -99,15 +100,14 @@ export default {
 		description: `A ${realmTerms.label} manager must explicitly enable this feature. Members can then vote only on Tags that this ${realmTerms.label} formally explains.`,
 		enabled: `Enable ${realmTerms.label} Tag voting`,
 		enabledDescription: `Search and voting show only Tags with a currently visible explanation from this ${realmTerms.label}.`,
-		pathAuthorityTitle: "Tag path authority",
-		pathAuthorityDescription:
-			"Adopt paths for this Realm and choose independently whether unresolved fit and spoiler judgments inherit the global result.",
+		pathAuthorityTitle: `${tagPathTerms.label} authority`,
+		pathAuthorityDescription: `Adopt ${tagPathTerms.plural} for this ${realmTerms.label} and choose independently whether unresolved fit and spoiler judgments inherit the global result.`,
 		fitFallback: "Fit fallback",
 		spoilerFallback: "Spoiler fallback",
 		fallbackInherit: "Inherit the global result",
-		fallbackIsolate: "Leave unresolved in this Realm",
-		adoptPath: "Adopt a tag path",
-		pathsEmpty: "This Realm has not adopted any tag paths.",
+		fallbackIsolate: `Leave unresolved in this ${realmTerms.label}`,
+		adoptPath: `Adopt a ${tagPathTerms.inline}`,
+		pathsEmpty: `This ${realmTerms.label} has not adopted any ${tagPathTerms.plural}.`,
 		relationshipsTitle: "Tag Context relationships",
 		relationshipsDescription: `All Tag-to-Wiki relationships in this ${realmTerms.inline}, independent of the Tag taxonomy.`,
 		relationshipsListLabel: "Tag Context relationships",

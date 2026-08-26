@@ -300,6 +300,8 @@ export default {
 	TagPathApplicationNotFound: `このユニットにはその ${tagPathTerms.inline} がありません。`,
 	TagPathChanged: `この ${tagPathTerms.inline} は他の場所で変更されました。更新して再試行してください。`,
 	TagPathDefinitionConflict: `同一の ${tagPathTerms.inline} が既に存在します。`,
+	InvalidTagPathMerge: `この ${tagPathTerms.inline} の統合は無効です。`,
+	TagPathMergeNotFound: `この ${tagPathTerms.inline} の統合提案は見つかりませんでした。`,
 	AssociationContextPostInvalid: `関係コンテキストはウィキの ${postTerms.label} である必要があります。`,
 	ProgressEntryNotFound: "この進捗イベントが見つかりませんでした。",
 	PostTagMentionVoteConflict: `このタグメンションは既存の ${postTerms.label} へのダウンボートと競合しています。`,

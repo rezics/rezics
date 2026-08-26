@@ -1,10 +1,5 @@
-import { DevelopmentPreviewBoundary } from "@/features/preview-access/components/development-preview-boundary";
-import { TagPathPage } from "@/features/tags/pages/tag-structure-page";
+import { TagPathPage } from "@/features/tags/pages/tag-path-page";
 
 export default function Page() {
-	return (
-		<DevelopmentPreviewBoundary>
-			<TagPathPage />
-		</DevelopmentPreviewBoundary>
-	);
+	return <TagPathPage />;
 }

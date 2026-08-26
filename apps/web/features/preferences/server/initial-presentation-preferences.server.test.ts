@@ -12,6 +12,8 @@ const payload = {
 	interfaceLocale: "zh-Hant",
 	chineseContentDisplay: "original",
 	filterFeedByPreferredLanguages: false,
+	alwaysShowSpoilers: false,
+	alwaysShowNsfw: false,
 	preferredLanguages: ["en"],
 } as const;
 

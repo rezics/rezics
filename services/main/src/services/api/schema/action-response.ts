@@ -4,12 +4,12 @@ import { PortableTextDocument } from "@rezics/block";
 import {
 	ContentLanguage,
 	DateTime,
+	FollowableUnitKind,
 	FractionalPosition,
 	LocalizationLanguageField,
-	NonRealmUnitKind,
+	NonRealmFollowableUnitKind,
 	OrdinalPosition,
 	ResourceVisibility,
-	UnitKind,
 	Uuid,
 	localizationSet,
 } from ".";
@@ -86,7 +86,7 @@ export const FollowingStatusResponse = t.Union([
 	}),
 	t.Object({
 		following: t.Literal(true),
-		kind: NonRealmUnitKind,
+		kind: NonRealmFollowableUnitKind,
 		favorite: t.Boolean(),
 		position: FractionalPosition,
 		inAppNotificationsEnabled: t.Boolean(),
@@ -102,7 +102,7 @@ export const FollowingStatusResponse = t.Union([
 	}),
 	t.Object({
 		following: t.Literal(false),
-		kind: NonRealmUnitKind,
+		kind: NonRealmFollowableUnitKind,
 		favorite: t.Null(),
 		position: t.Null(),
 		inAppNotificationsEnabled: t.Null(),
@@ -114,7 +114,7 @@ export const FollowingListResponse = t.Object({
 		t.Object({
 			id: Uuid,
 			slugAddress: NullablePublicSlugAddressResponse,
-			kind: UnitKind,
+			kind: FollowableUnitKind,
 			language: t.Nullable(ContentLanguage),
 			title: t.Nullable(t.String()),
 			avatar: AvatarResponse,

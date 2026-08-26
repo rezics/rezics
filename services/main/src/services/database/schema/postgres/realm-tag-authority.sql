@@ -31,12 +31,15 @@ BEGIN
 	PERFORM public.lock_vote_hot_key('realm_tag_path_vote:' || key_realm::text || ':' || key_path::text, 0);
 	IF TG_OP <> 'INSERT' THEN score_delta := score_delta - OLD.value; count_delta := count_delta - 1; END IF;
 	IF TG_OP <> 'DELETE' THEN score_delta := score_delta + NEW.value; count_delta := count_delta + 1; END IF;
-	INSERT INTO public.realm_tag_path_vote_stat(realm_id, path_id, score, vote_count, updated_at)
-	VALUES (key_realm, key_path, score_delta, count_delta, clock_timestamp())
-	ON CONFLICT (realm_id, path_id) DO UPDATE SET
-		score = realm_tag_path_vote_stat.score + EXCLUDED.score,
-		vote_count = realm_tag_path_vote_stat.vote_count + EXCLUDED.vote_count,
-		updated_at = EXCLUDED.updated_at;
+	UPDATE public.realm_tag_path_vote_stat
+	SET score = score + score_delta,
+		vote_count = vote_count + count_delta,
+		updated_at = clock_timestamp()
+	WHERE realm_id = key_realm AND path_id = key_path;
+	IF NOT FOUND THEN
+		INSERT INTO public.realm_tag_path_vote_stat(realm_id, path_id, score, vote_count, updated_at)
+		VALUES (key_realm, key_path, score_delta, count_delta, clock_timestamp());
+	END IF;
 	RETURN NULL;
 END;
 $$;
@@ -87,20 +90,24 @@ BEGIN
 			ELSE major_delta := major_delta + 1; END IF;
 		END IF;
 	END IF;
-	INSERT INTO public.realm_unit_tag_path_judgment_stat(
-		realm_id, unit_id, path_id, score, vote_count, spoiler_vote_count,
-		spoiler_none_count, spoiler_minor_count, spoiler_major_count, updated_at
-	) VALUES (
-		key_realm, key_unit, key_path, score_delta, count_delta, spoiler_delta,
-		none_delta, minor_delta, major_delta, clock_timestamp()
-	) ON CONFLICT (realm_id, unit_id, path_id) DO UPDATE SET
-		score = realm_unit_tag_path_judgment_stat.score + EXCLUDED.score,
-		vote_count = realm_unit_tag_path_judgment_stat.vote_count + EXCLUDED.vote_count,
-		spoiler_vote_count = realm_unit_tag_path_judgment_stat.spoiler_vote_count + EXCLUDED.spoiler_vote_count,
-		spoiler_none_count = realm_unit_tag_path_judgment_stat.spoiler_none_count + EXCLUDED.spoiler_none_count,
-		spoiler_minor_count = realm_unit_tag_path_judgment_stat.spoiler_minor_count + EXCLUDED.spoiler_minor_count,
-		spoiler_major_count = realm_unit_tag_path_judgment_stat.spoiler_major_count + EXCLUDED.spoiler_major_count,
-		updated_at = EXCLUDED.updated_at;
+	UPDATE public.realm_unit_tag_path_judgment_stat
+	SET score = score + score_delta,
+		vote_count = vote_count + count_delta,
+		spoiler_vote_count = spoiler_vote_count + spoiler_delta,
+		spoiler_none_count = spoiler_none_count + none_delta,
+		spoiler_minor_count = spoiler_minor_count + minor_delta,
+		spoiler_major_count = spoiler_major_count + major_delta,
+		updated_at = clock_timestamp()
+	WHERE realm_id = key_realm AND unit_id = key_unit AND path_id = key_path;
+	IF NOT FOUND THEN
+		INSERT INTO public.realm_unit_tag_path_judgment_stat(
+			realm_id, unit_id, path_id, score, vote_count, spoiler_vote_count,
+			spoiler_none_count, spoiler_minor_count, spoiler_major_count, updated_at
+		) VALUES (
+			key_realm, key_unit, key_path, score_delta, count_delta, spoiler_delta,
+			none_delta, minor_delta, major_delta, clock_timestamp()
+		);
+	END IF;
 	new_accepted := current_score + score_delta > 0 AND current_count + count_delta > 0;
 	IF old_accepted <> new_accepted THEN
 		UPDATE public.realm_tag_path_vote_stat
@@ -193,19 +200,24 @@ BEGIN
 			ELSIF NEW.spoiler_level = 1 THEN minor_delta := minor_delta + 1;
 			ELSE major_delta := major_delta + 1; END IF; END IF;
 	END IF;
-	INSERT INTO public.realm_tag_judgment_stat(
-		realm_id, unit_id, tag_id, score, vote_count, spoiler_vote_count,
-		spoiler_none_count, spoiler_minor_count, spoiler_major_count, updated_at
-	) VALUES (key_realm, key_unit, key_tag, score_delta, count_delta, spoiler_delta,
-		none_delta, minor_delta, major_delta, clock_timestamp())
-	ON CONFLICT (realm_id, unit_id, tag_id) DO UPDATE SET
-		score = realm_tag_judgment_stat.score + EXCLUDED.score,
-		vote_count = realm_tag_judgment_stat.vote_count + EXCLUDED.vote_count,
-		spoiler_vote_count = realm_tag_judgment_stat.spoiler_vote_count + EXCLUDED.spoiler_vote_count,
-		spoiler_none_count = realm_tag_judgment_stat.spoiler_none_count + EXCLUDED.spoiler_none_count,
-		spoiler_minor_count = realm_tag_judgment_stat.spoiler_minor_count + EXCLUDED.spoiler_minor_count,
-		spoiler_major_count = realm_tag_judgment_stat.spoiler_major_count + EXCLUDED.spoiler_major_count,
-		updated_at = EXCLUDED.updated_at;
+	UPDATE public.realm_tag_judgment_stat
+	SET score = score + score_delta,
+		vote_count = vote_count + count_delta,
+		spoiler_vote_count = spoiler_vote_count + spoiler_delta,
+		spoiler_none_count = spoiler_none_count + none_delta,
+		spoiler_minor_count = spoiler_minor_count + minor_delta,
+		spoiler_major_count = spoiler_major_count + major_delta,
+		updated_at = clock_timestamp()
+	WHERE realm_id = key_realm AND unit_id = key_unit AND tag_id = key_tag;
+	IF NOT FOUND THEN
+		INSERT INTO public.realm_tag_judgment_stat(
+			realm_id, unit_id, tag_id, score, vote_count, spoiler_vote_count,
+			spoiler_none_count, spoiler_minor_count, spoiler_major_count, updated_at
+		) VALUES (
+			key_realm, key_unit, key_tag, score_delta, count_delta, spoiler_delta,
+			none_delta, minor_delta, major_delta, clock_timestamp()
+		);
+	END IF;
 	RETURN NULL;
 END;
 $$;
@@ -222,30 +234,37 @@ BEGIN
 END;
 $$;
 
+DROP TRIGGER IF EXISTS realm_tag_path_vote_stat_maintain ON public.realm_tag_path_vote;
 CREATE TRIGGER realm_tag_path_vote_stat_maintain
 AFTER INSERT OR UPDATE OR DELETE ON public.realm_tag_path_vote
 FOR EACH ROW EXECUTE FUNCTION public.maintain_realm_tag_path_vote_stat();
 
+DROP TRIGGER IF EXISTS realm_unit_tag_path_judgment_identity_guard ON public.realm_unit_tag_path_judgment;
 CREATE TRIGGER realm_unit_tag_path_judgment_identity_guard
 BEFORE UPDATE ON public.realm_unit_tag_path_judgment
 FOR EACH ROW EXECUTE FUNCTION public.protect_realm_tag_path_judgment_identity();
 
+DROP TRIGGER IF EXISTS realm_unit_tag_path_judgment_stat_maintain ON public.realm_unit_tag_path_judgment;
 CREATE TRIGGER realm_unit_tag_path_judgment_stat_maintain
 AFTER INSERT OR UPDATE OR DELETE ON public.realm_unit_tag_path_judgment
 FOR EACH ROW EXECUTE FUNCTION public.maintain_realm_unit_tag_path_judgment_stat();
 
+DROP TRIGGER IF EXISTS realm_unit_tag_path_support_maintain ON public.realm_unit_tag_path_judgment;
 CREATE TRIGGER realm_unit_tag_path_support_maintain
 AFTER INSERT OR UPDATE OR DELETE ON public.realm_unit_tag_path_judgment
 FOR EACH ROW EXECUTE FUNCTION public.maintain_realm_unit_tag_path_support();
 
+DROP TRIGGER IF EXISTS realm_unit_tag_path_support_effective_maintain ON public.realm_unit_tag_path_support;
 CREATE TRIGGER realm_unit_tag_path_support_effective_maintain
 AFTER INSERT OR DELETE ON public.realm_unit_tag_path_support
 FOR EACH ROW EXECUTE FUNCTION public.refresh_realm_unit_effective_tag();
 
+DROP TRIGGER IF EXISTS realm_unit_tag_effective_maintain ON public.realm_unit_tag;
 CREATE TRIGGER realm_unit_tag_effective_maintain
 AFTER INSERT OR DELETE ON public.realm_unit_tag
 FOR EACH ROW EXECUTE FUNCTION public.refresh_realm_unit_effective_tag();
 
+DROP TRIGGER IF EXISTS realm_tag_judgment_stat_maintain ON public.realm_tag_judgment;
 CREATE TRIGGER realm_tag_judgment_stat_maintain
 AFTER INSERT OR UPDATE OR DELETE ON public.realm_tag_judgment
 FOR EACH ROW EXECUTE FUNCTION public.maintain_realm_tag_judgment_stat();

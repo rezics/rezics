@@ -150,10 +150,10 @@ describe("sparse Filter documents", () => {
 		expect(compiled.request.domainFilter).toBeUndefined();
 	});
 
-	it("removes preview-only categories from the resolved capability", () => {
+	it("rejects Tag Paths as an ordinary Search category", () => {
 		expect(resolveFilterDocument({}, false).categories).not.toContain("tag-paths");
 		expect(() => resolveFilterDocument({ categories: ["tag-paths"] }, false)).toThrow(
-			"no available categories",
+			"Invalid Filter document",
 		);
 	});
 });

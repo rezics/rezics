@@ -1,4 +1,5 @@
 import { deTerminology } from "@rezics/i18n/terminology/de";
+import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 
 const { forms: entityTerms } = deTerminology.entity;
 
@@ -16,8 +17,8 @@ export default {
 	bust: "Brustumfang",
 	waist: "Taillenumfang",
 	hips: "Hüftumfang",
-	centimetreUnit: "cm",
-	kilogramUnit: "kg",
+	centimetreUnit: verbatimTerms.centimetreUnitSymbol.value,
+	kilogramUnit: verbatimTerms.kilogramUnitSymbol.value,
 	newEntity: `Neue ${entityTerms.label}`,
 	newTag: "Neuer Tag",
 	externalLinksDescription: `Öffentliche Seiten, die Angaben zu dieser ${entityTerms.inline} belegen.`,

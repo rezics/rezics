@@ -83833,7 +83833,6 @@
 								"entity",
 								"label",
 								"tag",
-								"tag_path",
 								"series",
 								"zone",
 								"zone_page",
@@ -83950,7 +83949,6 @@
 															"entity",
 															"label",
 															"tag",
-															"tag_path",
 															"series",
 															"zone",
 															"zone_page",
@@ -84215,7 +84213,6 @@
 														"entity",
 														"label",
 														"tag",
-														"tag_path",
 														"series",
 														"zone",
 														"zone_page",
@@ -84281,7 +84278,6 @@
 														"entity",
 														"label",
 														"tag",
-														"tag_path",
 														"series",
 														"zone",
 														"zone_page",
@@ -84771,7 +84767,6 @@
 													"entity",
 													"label",
 													"tag",
-													"tag_path",
 													"series",
 													"zone",
 													"zone_page",
@@ -84848,7 +84843,6 @@
 														"entity",
 														"label",
 														"tag",
-														"tag_path",
 														"series",
 														"zone",
 														"zone_page",
@@ -84914,7 +84908,6 @@
 														"entity",
 														"label",
 														"tag",
-														"tag_path",
 														"series",
 														"zone",
 														"zone_page",
@@ -92157,33 +92150,6 @@
 							}
 						}
 					},
-					"403": {
-						"description": "Response for status 403",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
-											"type": "object",
-											"required": ["code", "message"],
-											"properties": {
-												"code": {
-													"default": "PlatformCapabilityRequired",
-													"type": "string",
-													"enum": ["PlatformCapabilityRequired"]
-												},
-												"message": { "type": "string" },
-												"details": {}
-											}
-										},
-										"requestId": { "type": "string" }
-									}
-								}
-							}
-						}
-					},
 					"404": {
 						"description": "Response for status 404",
 						"content": {
@@ -92361,13 +92327,9 @@
 											"required": ["code", "message"],
 											"properties": {
 												"code": {
-													"default": "PlatformCapabilityRequired",
+													"default": "UnitPermissionForbidden",
 													"type": "string",
-													"enum": [
-														"PlatformCapabilityRequired",
-														"UnitPermissionForbidden",
-														"UnitAccessRestricted"
-													]
+													"enum": ["UnitPermissionForbidden", "UnitAccessRestricted"]
 												},
 												"message": { "type": "string" },
 												"details": {}
@@ -92638,33 +92600,6 @@
 							}
 						}
 					},
-					"403": {
-						"description": "Response for status 403",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
-											"type": "object",
-											"required": ["code", "message"],
-											"properties": {
-												"code": {
-													"default": "PlatformCapabilityRequired",
-													"type": "string",
-													"enum": ["PlatformCapabilityRequired"]
-												},
-												"message": { "type": "string" },
-												"details": {}
-											}
-										},
-										"requestId": { "type": "string" }
-									}
-								}
-							}
-						}
-					},
 					"404": {
 						"description": "Response for status 404",
 						"content": {
@@ -92919,33 +92854,6 @@
 												{ "type": "null" }
 											]
 										}
-									}
-								}
-							}
-						}
-					},
-					"403": {
-						"description": "Response for status 403",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
-											"type": "object",
-											"required": ["code", "message"],
-											"properties": {
-												"code": {
-													"default": "PlatformCapabilityRequired",
-													"type": "string",
-													"enum": ["PlatformCapabilityRequired"]
-												},
-												"message": { "type": "string" },
-												"details": {}
-											}
-										},
-										"requestId": { "type": "string" }
 									}
 								}
 							}

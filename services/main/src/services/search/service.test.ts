@@ -519,7 +519,7 @@ describe("direct PostgreSQL Search", () => {
 		const candidateSql = sqlText(execute.mock.calls[3]![0] as SQL);
 
 		expect(candidateSql).toContain("filter_seed(unit_id) as materialized");
-		expect(seedSql).toContain('from "current_unit_effective_tag" filter_effective_tag');
+		expect(seedSql).toContain('from "unit_effective_tag" filter_effective_tag');
 		expect(candidateSql).toContain(
 			'inner join filter_seed on filter_seed.unit_id = "unit_best_score"."unit_id"',
 		);
@@ -559,7 +559,7 @@ describe("direct PostgreSQL Search", () => {
 		const candidateSql = sqlText(execute.mock.calls[3]![0] as SQL);
 
 		expect(seedSql).toContain("limit");
-		expect(seedSql).toContain('from "current_unit_effective_tag" filter_effective_tag');
+		expect(seedSql).toContain('from "unit_effective_tag" filter_effective_tag');
 		expect(candidateSql).not.toContain("filter_seed(unit_id) as materialized");
 		expect(candidateSql).toContain('order by "unit"."updated_at" desc, "unit"."id" desc');
 	});
