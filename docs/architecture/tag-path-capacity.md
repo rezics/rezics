@@ -199,6 +199,43 @@ These small-fixture totals include page and update-bloat effects and are
 conservative corroboration, not replacements for the shape proxies and shard
 thresholds above.
 
+### Local showcase import envelope
+
+`task local:showcase` is a bounded local-development workload, not a
+corpus-scale ingestion path. Each pack and its immutable import ledger row are
+committed in one transaction. Transaction-level advisory locks acquired while
+creating Tag judgments and Tag Path applications therefore remain allocated
+until that pack commits. The largest pack in the fixed `showcase-real-v1`
+bundle, `vndb-v11`, currently contains 1,642 direct Unit–Tag relations, 840
+Paths with 3,123 members, 1,781 Path applications expanding to 6,239 applied
+members, and 1,189 Realm–Unit relations. Imports are serialized from a sibling
+checkout over loopback; they are not a request-path or recurring background
+workload.
+
+The local and migration-replay PostgreSQL containers use
+`max_locks_per_transaction = 256`, `max_connections = 100`, and zero prepared
+transactions. PostgreSQL sizes the shared regular/advisory lock pool from
+these settings, so this provides an average allocation basis of 25,600 lock
+objects. It is not a per-transaction hard limit, as documented in PostgreSQL's
+[lock management](https://www.postgresql.org/docs/current/runtime-config-locks.html)
+and [advisory lock](https://www.postgresql.org/docs/current/explicit-locking.html#ADVISORY-LOCKS)
+references. Raising the previous default of 64 multiplies this lock-table
+allocation by four; the exact byte cost is PostgreSQL-version dependent and is
+paid as server shared memory, while the import's network cost remains
+loopback-only. The 2026-08-27 local qualification installed all five official
+packs and verified `vndb-v11`'s 1,200 declared objects without lock exhaustion.
+
+This configuration is not the scale path for arbitrary packs. Even a lower
+bound of one retained lock per affected fact would make a 500-million-row
+transaction about 19,531 times larger than the configured shared-pool basis;
+at 3 billion rows it would be about 117,188 times larger. Before admitting a
+pack beyond the verified official-bundle shape, replace the single transaction
+with an idempotent, resumable state machine: immutable staging, keyset-ordered
+batches with at most 1,024 hot keys per transaction, persisted progress,
+bounded concurrency and backpressure, then an atomic ledger promotion after
+parity verification. A larger `max_locks_per_transaction` value alone is not
+an accepted remedy.
+
 ## Validation contract
 
 The deterministic capacity harness must:

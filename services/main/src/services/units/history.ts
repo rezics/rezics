@@ -1,4 +1,4 @@
-import { and, desc, eq, inArray, isNull, max, sql } from "drizzle-orm";
+import { and, desc, eq, inArray, isNull, max, notInArray, sql } from "drizzle-orm";
 import { createSchemaFactory } from "drizzle-orm/zod";
 import { z } from "zod";
 import { AvatarTypeValues, FontAwesomeIconPrefixValues } from "@rezics/avatar";
@@ -709,6 +709,46 @@ async function restoreRealmRules(
 	}
 }
 
+async function restoreUnitTags(
+	tx: DatabaseTransaction,
+	unitId: string,
+	rows: readonly SnapshotRow[],
+): Promise<void> {
+	const tags = rows.map((row) => unitTagRowSchema.parse(row));
+	if (tags.some((row) => row.unitId !== unitId))
+		throw new Error("Unit Tag snapshot owner mismatch");
+	const tagIds = tags.map(({ tagId }) => tagId);
+	if (new Set(tagIds).size !== tagIds.length)
+		throw new Error("Unit Tag snapshot contains duplicate identities");
+
+	// Judgments and import evidence intentionally RESTRICT deletion. Keep stable
+	// identities for retained Tags so unrelated restores do not discard those facts.
+	if (tagIds.length) {
+		await tx
+			.delete(unitTag)
+			.where(and(eq(unitTag.unitId, unitId), notInArray(unitTag.tagId, tagIds)));
+		await tx
+			.update(unitTag)
+			.set({ pinned: false, position: null })
+			.where(and(eq(unitTag.unitId, unitId), inArray(unitTag.tagId, tagIds)));
+	} else await tx.delete(unitTag).where(eq(unitTag.unitId, unitId));
+
+	if (tags.length)
+		await tx
+			.insert(unitTag)
+			.values(tags)
+			.onConflictDoUpdate({
+				target: [unitTag.unitId, unitTag.tagId],
+				set: {
+					createdByProfileId: sql`excluded.created_by_profile_id`,
+					pinned: sql`excluded.pinned`,
+					position: sql`excluded.position`,
+					createdAt: sql`excluded.created_at`,
+					updatedAt: sql`excluded.updated_at`,
+				},
+			});
+}
+
 export async function restoreUnitSnapshot(
 	tx: DatabaseTransaction,
 	unitId: string,
@@ -862,12 +902,10 @@ export async function restoreUnitSnapshot(
 		await tx.delete(softwareRequirement).where(eq(softwareRequirement.softwareId, unitId));
 	await tx.delete(creditAttribution).where(eq(creditAttribution.sourceUnitId, unitId));
 	await tx.delete(subjectAssociation).where(eq(subjectAssociation.unitId, unitId));
-	await tx.delete(unitTag).where(eq(unitTag.unitId, unitId));
 	await tx.delete(unitVariant).where(eq(unitVariant.variantUnitId, unitId));
 	if (snapshot.owned.credits.length) await tx.insert(creditAttribution).values(credits);
 	if (subjectAssociations.length) await tx.insert(subjectAssociation).values(subjectAssociations);
-	if (snapshot.owned.tags.length)
-		await tx.insert(unitTag).values(snapshot.owned.tags.map((row) => unitTagRowSchema.parse(row)));
+	await restoreUnitTags(tx, unitId, snapshot.owned.tags);
 	if (snapshot.owned.variants.length)
 		await tx
 			.insert(unitVariant)

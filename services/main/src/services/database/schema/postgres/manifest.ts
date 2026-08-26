@@ -31,6 +31,7 @@ export const PostgreSqlSchemaFunctionNames = [
 	"guard_tag_path_projection",
 	"guard_tag_path_vote_stat_projection",
 	"guard_unit_license_grant_mutation",
+	"lock_realm_tag_judgment_keys",
 	"lock_vote_hot_keys",
 	"lock_vote_hot_key",
 	"maintain_book_chapter_from_node",

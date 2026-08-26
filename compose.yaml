@@ -25,6 +25,10 @@ services:
             - -c
             - max_worker_processes=12
             - -c
+            # One official showcase pack is one atomic transaction and retains
+            # its transaction advisory locks until commit. See Tag Path capacity.
+            - max_locks_per_transaction=256
+            - -c
             - track_io_timing=on
             - -c
             - track_wal_io_timing=on
@@ -107,6 +111,9 @@ services:
                 "min_wal_size=4GB",
                 "-c",
                 "max_worker_processes=12",
+                "-c",
+                # Keep migration-replay PostgreSQL aligned with local development.
+                "max_locks_per_transaction=256",
                 "-c",
                 "track_io_timing=on",
                 "-c",
