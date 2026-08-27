@@ -32120,11 +32120,11 @@
 								},
 								{
 									"additionalProperties": false,
-									"$id": "MediaBlock",
+									"$id": "ImageBlock",
 									"type": "object",
-									"required": ["_type", "_key", "assetId", "altUnitId", "appearance", "fit"],
+									"required": ["_type", "_key", "assetId"],
 									"properties": {
-										"_type": { "const": "media", "type": "string" },
+										"_type": { "const": "image", "type": "string" },
 										"_key": { "pattern": "^[0-9a-f]{12}$", "$id": "BlockKey", "type": "string" },
 										"styleRoles": {
 											"maxItems": 8,
@@ -32141,58 +32141,37 @@
 											"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
 											"type": "string"
 										},
-										"altUnitId": {
-											"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+										"alt": { "type": "string" },
+										"caption": { "type": "string" }
+									}
+								},
+								{
+									"additionalProperties": false,
+									"$id": "UrlImageBlock",
+									"type": "object",
+									"required": ["_type", "_key", "url"],
+									"properties": {
+										"_type": { "const": "url-image", "type": "string" },
+										"_key": { "pattern": "^[0-9a-f]{12}$", "$id": "BlockKey", "type": "string" },
+										"styleRoles": {
+											"maxItems": 8,
+											"uniqueItems": true,
+											"type": "array",
+											"items": {
+												"minLength": 1,
+												"maxLength": 48,
+												"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+												"type": "string"
+											}
+										},
+										"url": {
+											"minLength": 1,
+											"maxLength": 2000,
+											"pattern": "^https://",
 											"type": "string"
 										},
-										"captionUnitId": {
-											"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
-											"type": "string"
-										},
-										"target": {
-											"anyOf": [
-												{
-													"additionalProperties": false,
-													"type": "object",
-													"required": ["kind", "unitId"],
-													"properties": {
-														"kind": { "const": "unit", "type": "string" },
-														"unitId": {
-															"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
-															"type": "string"
-														}
-													}
-												},
-												{
-													"additionalProperties": false,
-													"type": "object",
-													"required": ["kind", "url"],
-													"properties": {
-														"kind": { "const": "external", "type": "string" },
-														"url": {
-															"minLength": 1,
-															"maxLength": 2000,
-															"pattern": "^https://",
-															"type": "string"
-														}
-													}
-												}
-											]
-										},
-										"appearance": {
-											"anyOf": [
-												{ "const": "content", "type": "string" },
-												{ "const": "cover", "type": "string" },
-												{ "const": "banner", "type": "string" },
-												{ "const": "avatar", "type": "string" }
-											]
-										},
-										"fit": {
-											"anyOf": [
-												{ "const": "contain", "type": "string" },
-												{ "const": "cover", "type": "string" }
-											]
-										}
+										"alt": { "type": "string" },
+										"caption": { "type": "string" }
 									}
 								},
 								{
@@ -59554,11 +59533,11 @@
 								},
 								{
 									"additionalProperties": false,
-									"$id": "MediaBlock",
+									"$id": "ImageBlock",
 									"type": "object",
-									"required": ["_type", "_key", "assetId", "altUnitId", "appearance", "fit"],
+									"required": ["_type", "_key", "assetId"],
 									"properties": {
-										"_type": { "const": "media", "type": "string" },
+										"_type": { "const": "image", "type": "string" },
 										"_key": { "pattern": "^[0-9a-f]{12}$", "$id": "BlockKey", "type": "string" },
 										"styleRoles": {
 											"maxItems": 8,
@@ -59575,58 +59554,37 @@
 											"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
 											"type": "string"
 										},
-										"altUnitId": {
-											"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+										"alt": { "type": "string" },
+										"caption": { "type": "string" }
+									}
+								},
+								{
+									"additionalProperties": false,
+									"$id": "UrlImageBlock",
+									"type": "object",
+									"required": ["_type", "_key", "url"],
+									"properties": {
+										"_type": { "const": "url-image", "type": "string" },
+										"_key": { "pattern": "^[0-9a-f]{12}$", "$id": "BlockKey", "type": "string" },
+										"styleRoles": {
+											"maxItems": 8,
+											"uniqueItems": true,
+											"type": "array",
+											"items": {
+												"minLength": 1,
+												"maxLength": 48,
+												"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+												"type": "string"
+											}
+										},
+										"url": {
+											"minLength": 1,
+											"maxLength": 2000,
+											"pattern": "^https://",
 											"type": "string"
 										},
-										"captionUnitId": {
-											"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
-											"type": "string"
-										},
-										"target": {
-											"anyOf": [
-												{
-													"additionalProperties": false,
-													"type": "object",
-													"required": ["kind", "unitId"],
-													"properties": {
-														"kind": { "const": "unit", "type": "string" },
-														"unitId": {
-															"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
-															"type": "string"
-														}
-													}
-												},
-												{
-													"additionalProperties": false,
-													"type": "object",
-													"required": ["kind", "url"],
-													"properties": {
-														"kind": { "const": "external", "type": "string" },
-														"url": {
-															"minLength": 1,
-															"maxLength": 2000,
-															"pattern": "^https://",
-															"type": "string"
-														}
-													}
-												}
-											]
-										},
-										"appearance": {
-											"anyOf": [
-												{ "const": "content", "type": "string" },
-												{ "const": "cover", "type": "string" },
-												{ "const": "banner", "type": "string" },
-												{ "const": "avatar", "type": "string" }
-											]
-										},
-										"fit": {
-											"anyOf": [
-												{ "const": "contain", "type": "string" },
-												{ "const": "cover", "type": "string" }
-											]
-										}
+										"alt": { "type": "string" },
+										"caption": { "type": "string" }
 									}
 								},
 								{

@@ -28,22 +28,22 @@ Zone as an enforced execution scope
 
 - Zone Pages are Units (`zone_page`) whose localization `content` is a
   `UnitReferencedBlockDocument`; inline Portable Text is rejected at the
-  root so every display string is a Unit reference
+  root so reusable display strings are Unit references
   (`services/main/src/services/content-pack/documents.ts`,
   `libraries/block/src/validation.ts`).
 - The shared block vocabulary (`libraries/block/src/blocks.ts`) defines:
   `portable-text`, `post-full-view`, `unit-ref` (appearance
-  `inline | card | cover`), `unit-list`, `feed`, `menu`, `media`, `divider`,
+  `inline | card | cover`), `unit-list`, `feed`, `menu`, `image`, `url-image`, `divider`,
   and the containers `columns`, `group`, `callout`, `tabs`.
 - `unit-list` already separates data from presentation: `source` is
   `units | collection | search` and `layout` is `list | grid | carousel`,
   plus a `limit` of 1–100. The `search` source wraps a
   `SearchFeatureSource` (`global | zone | inline{filterDocument}`).
 - `tabs` items and `callout` already reference display copy through
-  `labelUnitId`; `media` requires `altUnitId`. Localized copy for
-  user-composed surfaces is uniformly carried by Label Units
+  `labelUnitId`. Ordinary localized copy for user-composed surfaces is carried by Label Units
   (`services/main/src/services/database/schema/label.ts`) resolved through
-  `unit_localization` and the ordered `localizationLanguages` preference.
+  `unit_localization` and the ordered `localizationLanguages` preference. Image-local
+  alternative text and captions remain inline with their image Block.
 - Host policies (`libraries/block/src/validation.ts`): Zone Pages allow all
   referenced block types at the root with `maxDepth 4` and `maxBlocks 250`;
   Docks allow a narrower set with `maxDepth 2` and `maxBlocks 40`; Wiki Post

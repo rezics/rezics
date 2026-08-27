@@ -1,7 +1,7 @@
 import { type BlockType, BlockTypeValues } from "./blocks";
 
 /** Styling-contract SemVer is independent from the REZICS product RomVer. */
-export const ZoneStylingContractVersion = "1.0.0" as const;
+export const ZoneStylingContractVersion = "2.0.0" as const;
 
 export const ZoneStylingContractRootAttributeValues = [
 	"data-block-type",
@@ -75,11 +75,13 @@ export const ZoneBlockStylingContractRegistry = {
 			"data-appearance": ["links", "buttons", "tabs", "drawer"],
 		},
 	},
-	media: {
-		parts: ["figure", "asset", "caption", "link"],
-		stateAttributes: {
-			"data-appearance": ["content", "cover", "banner", "avatar"],
-		},
+	image: {
+		parts: ["figure", "asset", "caption"],
+		stateAttributes: {},
+	},
+	"url-image": {
+		parts: ["figure", "asset", "caption"],
+		stateAttributes: {},
 	},
 	divider: {
 		parts: ["separator"],

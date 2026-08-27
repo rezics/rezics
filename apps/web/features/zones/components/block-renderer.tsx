@@ -463,7 +463,7 @@ const portableTextBlockTypes = {
 	"portable-text": EmbeddedPortableTextBlock,
 	"unit-ref": EmbeddedPortableTextBlock,
 	"unit-list": EmbeddedPortableTextBlock,
-	media: EmbeddedPortableTextBlock,
+	"url-image": EmbeddedPortableTextBlock,
 	divider: EmbeddedPortableTextBlock,
 	columns: EmbeddedPortableTextBlock,
 	group: EmbeddedPortableTextBlock,
@@ -1042,39 +1042,29 @@ function RenderUnitTitle({ unit }: { readonly unit: RenderUnit | undefined }) {
 	return unit?.title ? <LocalizedText language={unit.language} value={unit.title} /> : null;
 }
 
-function ZoneMediaBlock({ block }: { readonly block: Extract<Block, { _type: "media" }> }) {
+function ZoneImageBlock({
+	block,
+}: {
+	readonly block: Extract<Block, { _type: "image" | "url-image" }>;
+}) {
 	const context = useZoneBlocks();
-	const asset = context.assets.get(block.assetId);
-	const altUnit = context.units.get(block.altUnitId);
-	const captionUnit = block.captionUnitId ? context.units.get(block.captionUnitId) : undefined;
-	const alt = useChineseContentText(altUnit?.title ?? "", altUnit?.language);
-	if (!asset) return null;
-	const image = (
+	const language = context.projection.zone.language;
+	const alt = useChineseContentText(block.alt ?? "", language);
+	const caption = useChineseContentText(block.caption ?? "", language);
+	const src = block._type === "image" ? context.assets.get(block.assetId)?.url : block.url;
+	if (!src) return null;
+	return (
 		<figure
 			className="my-6 overflow-hidden rounded-xl border border-border-weak"
 			data-part="figure"
 		>
-			<img
-				alt={alt}
-				className={cn("h-auto w-full", block.fit === "cover" && "max-h-[36rem] object-cover")}
-				data-part="asset"
-				src={asset.url}
-			/>
-			{captionUnit ? (
+			<img alt={alt} className="h-auto w-full" data-part="asset" src={src} />
+			{caption ? (
 				<figcaption className="px-4 py-3 text-muted-foreground text-sm" data-part="caption">
-					<RenderUnitTitle unit={captionUnit} />
+					{caption}
 				</figcaption>
 			) : null}
 		</figure>
-	);
-	if (!block.target) return image;
-	const href = navigationHref(block.target, context);
-	return href ? (
-		<AppLink data-part="link" href={href}>
-			{image}
-		</AppLink>
-	) : (
-		image
 	);
 }
 
@@ -1180,7 +1170,8 @@ function ZoneBlock({ block, path }: { block: Block; path: BlockPath }) {
 		);
 	}
 	if (block._type === "menu") return <ZoneNavigationMenu navigationId={block.navigationId} />;
-	if (block._type === "media") return <ZoneMediaBlock block={block} />;
+	if (block._type === "image" || block._type === "url-image")
+		return <ZoneImageBlock block={block} />;
 	if (block._type === "divider")
 		return block.style === "space" ? (
 			<div aria-hidden className="h-8" data-part="separator" />

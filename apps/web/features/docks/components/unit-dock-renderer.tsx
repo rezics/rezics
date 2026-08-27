@@ -252,36 +252,20 @@ function DockBlockContent({
 			/>
 		) : null;
 	}
-	if (block._type === "media") {
-		const alt = units.get(block.altUnitId)?.title ?? "";
-		const image = (
+	if (block._type === "image" || block._type === "url-image") {
+		const src =
+			block._type === "image"
+				? `/image-assets/${encodeURIComponent(block.assetId)}/content`
+				: block.url;
+		return (
 			<figure className="overflow-hidden rounded-xl border border-border-weak" data-part="figure">
-				<img
-					alt={alt}
-					className={cn("h-auto w-full", block.fit === "cover" && "max-h-[36rem] object-cover")}
-					data-part="asset"
-					src={`/image-assets/${encodeURIComponent(block.assetId)}/content`}
-				/>
-				{block.captionUnitId ? (
+				<img alt={block.alt ?? ""} className="h-auto w-full" data-part="asset" src={src} />
+				{block.caption ? (
 					<figcaption className="px-4 py-3 text-muted-foreground text-sm" data-part="caption">
-						{units.get(block.captionUnitId)?.title}
+						{block.caption}
 					</figcaption>
 				) : null}
 			</figure>
-		);
-		if (!block.target) return image;
-		const href = navigationTargetHref(block.target, units);
-		return href ? (
-			<AppLink
-				data-part="link"
-				href={href}
-				rel={block.target.kind === "external" ? "noopener noreferrer" : undefined}
-				target={block.target.kind === "external" ? "_blank" : undefined}
-			>
-				{image}
-			</AppLink>
-		) : (
-			image
 		);
 	}
 	if (block._type === "divider")

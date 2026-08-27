@@ -38,7 +38,7 @@ describe("Zone theme stylesheet review", () => {
 
 		expect(first.transformedCss).toContain('[data-zone-theme-scope] [data-block-type="unit-list"]');
 		expect(first.automatedReview).toMatchObject({
-			contractVersion: "1.0.0",
+			contractVersion: "2.0.0",
 			ruleCount: 2,
 			selectorCount: 2,
 			declarationCount: 4,
@@ -65,12 +65,12 @@ describe("Zone theme stylesheet review", () => {
 		["at-rule", '@import url("https://example.com/theme.css");', "unsupported_at_rule"],
 		[
 			"unapproved external URL",
-			'[data-block-type="media"] { background: url("https://example.com/a.png") }',
+			'[data-block-type="url-image"] { background: url("https://example.com/a.png") }',
 			"unapproved_url",
 		],
 		[
 			"undeclared platform asset",
-			`[data-block-type="media"] { background: url("/image-assets/${AssetId}/content") }`,
+			`[data-block-type="image"] { background: url("/image-assets/${AssetId}/content") }`,
 			"unapproved_url",
 		],
 		[

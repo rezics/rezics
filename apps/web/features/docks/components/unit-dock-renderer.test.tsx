@@ -287,4 +287,37 @@ describe("UnitDockRenderer unit-list presentation", () => {
 		expect(card.getAttribute("data-heading-as")).toBe("h2");
 		expect(card.closest('[data-part="items"]')?.className).toContain("sm:grid-cols-2");
 	});
+
+	it("renders managed and URL images from their distinct sources", () => {
+		const assetId = "019f9000-0000-7000-8000-000000000006";
+		fixtures.document = {
+			_key: "000000000007",
+			_type: "dock-document",
+			blocks: [
+				{
+					_key: "000000000008",
+					_type: "image",
+					alt: "Managed cover",
+					assetId,
+					caption: "Managed caption",
+				},
+				{
+					_key: "000000000009",
+					_type: "url-image",
+					alt: "Remote artwork",
+					url: "https://images.example/random",
+				},
+			],
+		};
+
+		renderDock();
+
+		expect(screen.getByRole("img", { name: "Managed cover" }).getAttribute("src")).toBe(
+			`/image-assets/${assetId}/content`,
+		);
+		expect(screen.getByText("Managed caption")).toBeTruthy();
+		expect(screen.getByRole("img", { name: "Remote artwork" }).getAttribute("src")).toBe(
+			"https://images.example/random",
+		);
+	});
 });

@@ -1,4 +1,5 @@
 import {
+	Block,
 	BlockKey,
 	BlockDocument,
 	type BlockDocument as BlockDocumentValue,
@@ -8,6 +9,7 @@ import {
 	NavigationDocument,
 	PollContentBlock,
 	PortableTextDocument,
+	UnitImageBlock,
 	UnitReferencedBlockDocument,
 	ZonePageBlockHostPolicy,
 	assertDockDocument,
@@ -411,7 +413,8 @@ describe("Block document contracts", () => {
 		]);
 	});
 
-	test("requires unique explicit Unit references and localized media alternative text", () => {
+	test("validates managed and HTTPS image sources", () => {
+		const assetId = "019b0000-0000-7000-8000-000000000003";
 		const duplicateList = {
 			_type: "block-document",
 			_key: "000000000030",
@@ -431,21 +434,75 @@ describe("Block document contracts", () => {
 				},
 			],
 		} satisfies BlockDocumentValue;
+		const imageDocument = {
+			_type: "block-document",
+			_key: "000000000032",
+			blocks: [
+				{
+					_type: "image",
+					_key: "000000000033",
+					assetId,
+					alt: "Book cover",
+				},
+				{
+					_type: "url-image",
+					_key: "000000000034",
+					url: "https://images.example/random",
+				},
+			],
+		} satisfies BlockDocumentValue;
+		const portableTextImageDocument = {
+			_type: "block-document",
+			_key: "000000000035",
+			blocks: [
+				createPortableTextDocument(
+					[{ _type: "image", _key: "portable-image", assetId }],
+					"000000000036",
+				),
+			],
+		} satisfies BlockDocumentValue;
 
 		expect(() => assertBlockDocument(duplicateList)).toThrow("duplicate Unit references");
+		expect(() => assertBlockDocument(imageDocument)).not.toThrow();
+		expect([...collectBlockReferences(imageDocument).assetIds]).toEqual([assetId]);
+		expect([...collectBlockReferences(portableTextImageDocument).assetIds]).toEqual([assetId]);
 		expect(
 			isDocument(BlockDocument, {
 				_type: "block-document",
-				_key: "000000000032",
+				_key: "000000000037",
 				blocks: [
 					{
-						_type: "media",
-						_key: "000000000033",
-						assetId: "019b0000-0000-7000-8000-000000000003",
-						appearance: "content",
-						fit: "contain",
+						_type: "url-image",
+						_key: "000000000038",
+						url: "http://images.example/insecure",
 					},
 				],
+			}),
+		).toBe(false);
+		expect(
+			isDocument(BlockDocument, {
+				_type: "block-document",
+				_key: "000000000039",
+				blocks: [{ _type: "media", _key: "00000000003a", assetId }],
+			}),
+		).toBe(false);
+	});
+
+	test("keeps the Unit image draft outside active Block contracts", () => {
+		const draft = {
+			_type: "unit-image",
+			_key: "00000000003b",
+			unitId: "019b0000-0000-7000-8000-000000000001",
+			slot: "cover",
+		};
+
+		expect(isDocument(UnitImageBlock, draft)).toBe(true);
+		expect(isDocument(Block, draft)).toBe(false);
+		expect(
+			isDocument(UnitReferencedBlockDocument, {
+				_type: "block-document",
+				_key: "00000000003c",
+				blocks: [draft],
 			}),
 		).toBe(false);
 	});
@@ -533,29 +590,12 @@ describe("Block document contracts", () => {
 				},
 			],
 		} satisfies BlockDocumentValue;
-		const mediaDocument = {
-			_type: "block-document",
-			_key: "000000000038",
-			blocks: [
-				{
-					_type: "media",
-					_key: "000000000039",
-					assetId: "019b0000-0000-7000-8000-000000000002",
-					altUnitId: "019b0000-0000-7000-8000-000000000003",
-					target: { kind: "external", url: "https://example.com/media" },
-					appearance: "content",
-					fit: "contain",
-				},
-			],
-		} satisfies BlockDocumentValue;
 		const externalPolicy = { ...DefaultBlockHostPolicy, allowExternalNavigation: true };
 
 		expect(() => assertBlockDocument(unitListDocument)).toThrow(
 			"External navigation is not allowed",
 		);
-		expect(() => assertBlockDocument(mediaDocument)).toThrow("External navigation is not allowed");
 		expect(() => assertBlockDocument(unitListDocument, externalPolicy)).not.toThrow();
-		expect(() => assertBlockDocument(mediaDocument, externalPolicy)).not.toThrow();
 		expect([...collectBlockReferences(unitListDocument).externalUrls]).toEqual([
 			"https://example.com/all",
 		]);

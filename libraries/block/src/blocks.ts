@@ -252,27 +252,52 @@ export const MenuBlock = Type.Object(
 );
 export type MenuBlock = Static<typeof MenuBlock>;
 
-export const MediaBlock = Type.Object(
+export const ImageBlock = Type.Object(
 	{
-		_type: Type.Literal("media"),
+		_type: Type.Literal("image"),
 		_key: BlockKey,
 		...BlockStyleFields,
 		assetId: Uuid,
-		/** Required localized alternative text is represented by a Unit. */
-		altUnitId: Uuid,
-		captionUnitId: Type.Optional(Uuid),
-		target: Type.Optional(NavigationTarget),
-		appearance: Type.Union([
-			Type.Literal("content"),
-			Type.Literal("cover"),
-			Type.Literal("banner"),
-			Type.Literal("avatar"),
-		]),
-		fit: Type.Union([Type.Literal("contain"), Type.Literal("cover")]),
+		alt: Type.Optional(Type.String()),
+		caption: Type.Optional(Type.String()),
 	},
-	{ additionalProperties: false, $id: "MediaBlock" },
+	{ additionalProperties: false, $id: "ImageBlock" },
 );
-export type MediaBlock = Static<typeof MediaBlock>;
+export type ImageBlock = Static<typeof ImageBlock>;
+
+export const UrlImageBlock = Type.Object(
+	{
+		_type: Type.Literal("url-image"),
+		_key: BlockKey,
+		...BlockStyleFields,
+		url: Type.String({ minLength: 1, maxLength: 2_000, pattern: "^https://" }),
+		alt: Type.Optional(Type.String()),
+		caption: Type.Optional(Type.String()),
+	},
+	{ additionalProperties: false, $id: "UrlImageBlock" },
+);
+export type UrlImageBlock = Static<typeof UrlImageBlock>;
+
+/**
+ * Draft contract for rendering a Unit-owned localized image slot.
+ *
+ * @remarks
+ * This schema is intentionally excluded from every active Block union and host
+ * policy until resolution, missing-image, and accessibility behavior is approved.
+ *
+ * @alpha
+ */
+export const UnitImageBlock = Type.Object(
+	{
+		_type: Type.Literal("unit-image"),
+		_key: BlockKey,
+		...BlockStyleFields,
+		unitId: Uuid,
+		slot: Type.Union([Type.Literal("avatar"), Type.Literal("banner"), Type.Literal("cover")]),
+	},
+	{ additionalProperties: false, $id: "UnitImageBlock" },
+);
+export type UnitImageBlock = Static<typeof UnitImageBlock>;
 
 export const DividerBlock = Type.Object(
 	{
@@ -292,7 +317,8 @@ const ReferencedAtomicBlocks = [
 	SearchBlock,
 	FeedBlock,
 	MenuBlock,
-	MediaBlock,
+	ImageBlock,
+	UrlImageBlock,
 	DividerBlock,
 ] as const;
 
@@ -373,7 +399,7 @@ export const Block = Type.Recursive(
 );
 export type Block = Static<typeof Block>;
 
-/** Composition-only Block variant whose display copy must be referenced through Units. */
+/** Composition-only Block variant that excludes inline Portable Text documents. */
 export const UnitReferencedBlock = Type.Recursive(
 	(This) => Type.Union([...ReferencedAtomicBlocks, ...createContainerBlocks(This)]),
 	{ $id: "UnitReferencedBlock" },
@@ -440,7 +466,8 @@ export const BlockTypeValues = [
 	"search",
 	"feed",
 	"menu",
-	"media",
+	"image",
+	"url-image",
 	"divider",
 	"columns",
 	"group",

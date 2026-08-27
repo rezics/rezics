@@ -47,7 +47,8 @@ const AllBlockTypes = [
 	"search",
 	"feed",
 	"menu",
-	"media",
+	"image",
+	"url-image",
 	"divider",
 	"columns",
 	"group",
@@ -59,7 +60,8 @@ const WikiPostChildTypes = [
 	"portable-text",
 	"unit-ref",
 	"unit-list",
-	"media",
+	"image",
+	"url-image",
 	"divider",
 	"columns",
 	"group",
@@ -77,7 +79,16 @@ export const DefaultBlockHostPolicy: BlockHostPolicy = {
 		"portable-text": AllBlockTypes,
 		columns: AllBlockTypes,
 		group: AllBlockTypes,
-		callout: ["portable-text", "unit-ref", "unit-list", "media", "divider", "columns", "group"],
+		callout: [
+			"portable-text",
+			"unit-ref",
+			"unit-list",
+			"image",
+			"url-image",
+			"divider",
+			"columns",
+			"group",
+		],
 		tabs: AllBlockTypes,
 	},
 	maxDepth: 4,
@@ -93,26 +104,38 @@ export const DockBlockHostPolicy: BlockHostPolicy = {
 		"search",
 		"feed",
 		"menu",
-		"media",
+		"image",
+		"url-image",
 		"divider",
 		"columns",
 		"group",
 		"callout",
 	],
 	allowedChildTypes: {
-		columns: ["unit-ref", "unit-list", "search", "feed", "menu", "media", "divider", "callout"],
+		columns: [
+			"unit-ref",
+			"unit-list",
+			"search",
+			"feed",
+			"menu",
+			"image",
+			"url-image",
+			"divider",
+			"callout",
+		],
 		group: [
 			"unit-ref",
 			"unit-list",
 			"search",
 			"feed",
 			"menu",
-			"media",
+			"image",
+			"url-image",
 			"divider",
 			"columns",
 			"callout",
 		],
-		callout: ["unit-ref", "unit-list", "media", "divider"],
+		callout: ["unit-ref", "unit-list", "image", "url-image", "divider"],
 	},
 	maxDepth: 2,
 	maxBlocks: 40,
@@ -128,7 +151,8 @@ export const ZonePageBlockHostPolicy: BlockHostPolicy = {
 		"search",
 		"feed",
 		"menu",
-		"media",
+		"image",
+		"url-image",
 		"divider",
 		"columns",
 		"group",
@@ -143,7 +167,8 @@ export const ZonePageBlockHostPolicy: BlockHostPolicy = {
 			"search",
 			"feed",
 			"menu",
-			"media",
+			"image",
+			"url-image",
 			"divider",
 			"columns",
 			"group",
@@ -157,14 +182,15 @@ export const ZonePageBlockHostPolicy: BlockHostPolicy = {
 			"search",
 			"feed",
 			"menu",
-			"media",
+			"image",
+			"url-image",
 			"divider",
 			"columns",
 			"group",
 			"callout",
 			"tabs",
 		],
-		callout: ["unit-ref", "unit-list", "media", "divider", "columns", "group"],
+		callout: ["unit-ref", "unit-list", "image", "url-image", "divider", "columns", "group"],
 		tabs: [
 			"post-full-view",
 			"unit-ref",
@@ -172,7 +198,8 @@ export const ZonePageBlockHostPolicy: BlockHostPolicy = {
 			"search",
 			"feed",
 			"menu",
-			"media",
+			"image",
+			"url-image",
 			"divider",
 			"columns",
 			"group",
@@ -192,7 +219,16 @@ export const WikiPostBlockHostPolicy: BlockHostPolicy = {
 		"portable-text": WikiPostChildTypes,
 		columns: WikiPostChildTypes,
 		group: WikiPostChildTypes,
-		callout: ["portable-text", "unit-ref", "unit-list", "media", "divider", "columns", "group"],
+		callout: [
+			"portable-text",
+			"unit-ref",
+			"unit-list",
+			"image",
+			"url-image",
+			"divider",
+			"columns",
+			"group",
+		],
 		tabs: WikiPostChildTypes,
 	},
 	maxDepth: 6,
@@ -472,8 +508,8 @@ function assertBlockTree(value: BlockContainerDocument, policy: BlockHostPolicy)
 			);
 		if (
 			!policy.allowExternalNavigation &&
-			((block._type === "media" && block.target?.kind === "external") ||
-				(block._type === "unit-list" && block.presentation?.viewAllTarget?.kind === "external"))
+			block._type === "unit-list" &&
+			block.presentation?.viewAllTarget?.kind === "external"
 		)
 			throw new TypeError("External navigation is not allowed");
 		const filterDocument = inlineFilterDocument(block);
@@ -556,6 +592,10 @@ export function collectBlockReferences(document: BlockContainerDocument): BlockR
 		if (source.fallback.kind === "collection") unitIds.add(source.fallback.collectionId);
 	};
 	walkBlockTree(document, (block) => {
+		if (block._type === "portable-text")
+			for (const item of block.content)
+				if (item._type === "image" && "assetId" in item && typeof item.assetId === "string")
+					assetIds.add(item.assetId);
 		if (block._type === "post-full-view") wikiPostIds.add(block.postId);
 		if (block._type === "unit-ref") unitIds.add(block.unitId);
 		if (block._type === "unit-list") {
@@ -574,12 +614,8 @@ export function collectBlockReferences(document: BlockContainerDocument): BlockR
 		if (block._type === "feed" && block.feature.kind === "derived")
 			addDerivedSourceReferences(block.feature);
 		if (block._type === "menu") navigationIds.add(block.navigationId);
-		if (block._type === "media") {
+		if (block._type === "image") {
 			assetIds.add(block.assetId);
-			unitIds.add(block.altUnitId);
-			if (block.captionUnitId) unitIds.add(block.captionUnitId);
-			if (block.target?.kind === "unit") unitIds.add(block.target.unitId);
-			if (block.target?.kind === "external") externalUrls.add(block.target.url);
 		}
 		if (block._type === "callout" && block.labelUnitId) addLabelUnitId(block.labelUnitId);
 		if (block._type === "tabs") for (const tab of block.tabs) addLabelUnitId(tab.labelUnitId);

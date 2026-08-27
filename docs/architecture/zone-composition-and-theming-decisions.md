@@ -34,9 +34,9 @@ no new composition paradigm.
 2. **Closed, non-Turing configuration.** Query capability stays inside the
    sparse `FilterDocument` / `SearchFeatureInput` contracts; no chained
    pipelines, no expression language (SMW/DPL evidence).
-3. **Display copy is always a Unit reference.** Every new block member
-   that carries user-visible text is a `labelUnitId`-style reference; no
-   inline strings (existing `tabs`/`callout`/`media` discipline).
+3. **Reusable display copy is a Unit reference.** Block members that carry reusable
+   user-visible text use a `labelUnitId`-style reference. Image-local alternative text and
+   captions are the narrow inline exception because they describe that image instance.
 4. **Local validity stays local.** Depth, total Block count, and query-Block
    count live in each host policy and are enforced when that document is
    written. A document never becomes invalid because another independently

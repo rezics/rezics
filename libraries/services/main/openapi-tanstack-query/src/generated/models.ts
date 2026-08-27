@@ -15467,7 +15467,7 @@ export type DockDocument = {
 				/**
 				 * @type string
 				 */
-				_type: "media";
+				_type: "image";
 				/**
 				 * @pattern ^[0-9a-f]{12}$
 				 * @type string
@@ -15483,42 +15483,43 @@ export type DockDocument = {
 				 */
 				assetId: string;
 				/**
-				 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
-				 * @type string
-				 */
-				altUnitId: string;
-				/**
-				 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
 				 * @type string | undefined
 				 */
-				captionUnitId?: string;
-				target?:
-					| {
-							/**
-							 * @type string
-							 */
-							kind: "unit";
-							/**
-							 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
-							 * @type string
-							 */
-							unitId: string;
-					  }
-					| {
-							/**
-							 * @type string
-							 */
-							kind: "external";
-							/**
-							 * @minLength 1
-							 * @maxLength 2000
-							 * @pattern ^https://
-							 * @type string
-							 */
-							url: string;
-					  };
-				appearance: "content" | "cover" | "banner" | "avatar";
-				fit: "contain" | "cover";
+				alt?: string;
+				/**
+				 * @type string | undefined
+				 */
+				caption?: string;
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				_type: "url-image";
+				/**
+				 * @pattern ^[0-9a-f]{12}$
+				 * @type string
+				 */
+				_key: string;
+				/**
+				 * @type array | undefined
+				 */
+				styleRoles?: string[];
+				/**
+				 * @minLength 1
+				 * @maxLength 2000
+				 * @pattern ^https://
+				 * @type string
+				 */
+				url: string;
+				/**
+				 * @type string | undefined
+				 */
+				alt?: string;
+				/**
+				 * @type string | undefined
+				 */
+				caption?: string;
 		  }
 		| {
 				/**
@@ -27695,7 +27696,7 @@ export type UnitReferencedBlockDocument = {
 				/**
 				 * @type string
 				 */
-				_type: "media";
+				_type: "image";
 				/**
 				 * @pattern ^[0-9a-f]{12}$
 				 * @type string
@@ -27711,42 +27712,43 @@ export type UnitReferencedBlockDocument = {
 				 */
 				assetId: string;
 				/**
-				 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
-				 * @type string
-				 */
-				altUnitId: string;
-				/**
-				 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
 				 * @type string | undefined
 				 */
-				captionUnitId?: string;
-				target?:
-					| {
-							/**
-							 * @type string
-							 */
-							kind: "unit";
-							/**
-							 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
-							 * @type string
-							 */
-							unitId: string;
-					  }
-					| {
-							/**
-							 * @type string
-							 */
-							kind: "external";
-							/**
-							 * @minLength 1
-							 * @maxLength 2000
-							 * @pattern ^https://
-							 * @type string
-							 */
-							url: string;
-					  };
-				appearance: "content" | "cover" | "banner" | "avatar";
-				fit: "contain" | "cover";
+				alt?: string;
+				/**
+				 * @type string | undefined
+				 */
+				caption?: string;
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				_type: "url-image";
+				/**
+				 * @pattern ^[0-9a-f]{12}$
+				 * @type string
+				 */
+				_key: string;
+				/**
+				 * @type array | undefined
+				 */
+				styleRoles?: string[];
+				/**
+				 * @minLength 1
+				 * @maxLength 2000
+				 * @pattern ^https://
+				 * @type string
+				 */
+				url: string;
+				/**
+				 * @type string | undefined
+				 */
+				alt?: string;
+				/**
+				 * @type string | undefined
+				 */
+				caption?: string;
 		  }
 		| {
 				/**
