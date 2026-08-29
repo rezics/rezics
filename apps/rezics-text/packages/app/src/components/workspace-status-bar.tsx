@@ -1,3 +1,11 @@
+import { Button } from "@rezics/ui/ui/button";
+import {
+	Popover,
+	PopoverBody,
+	PopoverContent,
+	PopoverHeader,
+	PopoverTrigger,
+} from "@rezics/ui/ui/popover";
 import CodeIcon from "lucide-react/dist/esm/icons/code.mjs";
 import PanelLeftIcon from "lucide-react/dist/esm/icons/panel-left.mjs";
 import type { ReactElement } from "react";
@@ -11,8 +19,11 @@ export function WorkspaceStatusBar({
 	messages,
 	operation,
 	dirty,
+	stored,
 	mode,
 	sidebarOpen,
+	sidebarShortcut,
+	sidebarShortcutAria,
 	onToggleSidebar,
 	onToggleMode,
 	cursor,
@@ -21,8 +32,11 @@ export function WorkspaceStatusBar({
 	readonly messages: RezicsTextMessages;
 	readonly operation: MarkdownWorkspaceOperation;
 	readonly dirty: boolean;
+	readonly stored: boolean;
 	readonly mode: MarkdownEditingMode;
 	readonly sidebarOpen: boolean;
+	readonly sidebarShortcut: string;
+	readonly sidebarShortcutAria: string;
 	readonly onToggleSidebar: () => void;
 	readonly onToggleMode: () => void;
 	readonly cursor: MarkdownEditorCursor;
@@ -34,18 +48,25 @@ export function WorkspaceStatusBar({
 			: operation.kind === "saving"
 				? messages.status.saving
 				: undefined;
+	const saveStateLabel = dirty
+		? messages.status.unsaved
+		: stored
+			? messages.status.saved
+			: undefined;
+	const statusLabel = operationLabel ?? saveStateLabel;
 
 	return (
 		<footer
 			aria-label={messages.labels.statusBar}
-			aria-live="polite"
-			className="flex h-7 shrink-0 items-center gap-2 overflow-x-auto border-border border-t bg-muted/80 px-1.5 text-[11px] text-muted-foreground"
+			className="flex h-8 shrink-0 items-center gap-1 overflow-x-auto border-border-weak border-t bg-surface-container px-1.5 text-[11px] text-muted-foreground"
 		>
 			<TooltipButton
+				aria-keyshortcuts={sidebarShortcutAria}
 				aria-pressed={sidebarOpen}
 				className={sidebarOpen ? "text-foreground" : undefined}
 				label={sidebarOpen ? messages.actions.hideSidebar : messages.actions.showSidebar}
 				onClick={onToggleSidebar}
+				shortcut={sidebarShortcut}
 				size="icon-xs"
 				variant="ghost"
 			>
@@ -61,20 +82,41 @@ export function WorkspaceStatusBar({
 			>
 				<CodeIcon />
 			</TooltipButton>
-			<span className="ms-1">
-				{operationLabel ?? (dirty ? messages.status.unsaved : messages.status.saved)}
-			</span>
-			<span>
+			{statusLabel ? (
+				<span aria-live="polite" className="ms-1 whitespace-nowrap">
+					{statusLabel}
+				</span>
+			) : null}
+			<span className="whitespace-nowrap">
 				{mode === "source" ? messages.labels.sourceMode : messages.labels.livePreviewMode}
 			</span>
-			<span className="ms-auto tabular-nums">
+			<span className="ms-auto whitespace-nowrap tabular-nums">
 				{messages.status.cursor(cursor.line, cursor.column)}
 			</span>
-			<span className="tabular-nums">{messages.status.words(analysis.words)}</span>
-			<span className="tabular-nums">{messages.status.characters(analysis.characters)}</span>
-			<span className="tabular-nums">{messages.status.lines(analysis.lines)}</span>
-			<span className="tabular-nums">{messages.status.headings(analysis.headings)}</span>
-			<span>{messages.status.readingTime(analysis.readingMinutes)}</span>
+			<Popover positioning={{ placement: "top-end" }}>
+				<PopoverTrigger asChild>
+					<Button
+						aria-label={messages.labels.documentStatistics}
+						className="whitespace-nowrap px-1.5 font-normal text-muted-foreground text-xs tabular-nums"
+						size="xs"
+						variant="ghost"
+					>
+						{messages.status.words(analysis.words)}
+					</Button>
+				</PopoverTrigger>
+				<PopoverContent className="w-64">
+					<PopoverHeader>{messages.labels.documentStatistics}</PopoverHeader>
+					<PopoverBody>
+						<ul className="flex flex-col gap-2 text-sm tabular-nums">
+							<li>{messages.status.words(analysis.words)}</li>
+							<li>{messages.status.characters(analysis.characters)}</li>
+							<li>{messages.status.lines(analysis.lines)}</li>
+							<li>{messages.status.headings(analysis.headings)}</li>
+							<li>{messages.status.readingTime(analysis.readingMinutes)}</li>
+						</ul>
+					</PopoverBody>
+				</PopoverContent>
+			</Popover>
 		</footer>
 	);
 }

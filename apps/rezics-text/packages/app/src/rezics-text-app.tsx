@@ -1,3 +1,4 @@
+import { Resizable, ResizablePanel, ResizableResizeTrigger } from "@rezics/ui/ui/resizable";
 import XIcon from "lucide-react/dist/esm/icons/x.mjs";
 import {
 	lazy,
@@ -22,7 +23,11 @@ import type {
 	RezicsTextApplicationCommand,
 	RezicsTextNativeMenuHost,
 } from "./domain/application-menu";
-import { applicationCommandFromShortcut } from "./domain/application-shortcuts";
+import {
+	applicationCommandFromShortcut,
+	applicationCommandShortcutLabel,
+	platformUsesCommandModifier,
+} from "./domain/application-shortcuts";
 import type { MarkdownPreferenceSection } from "./domain/preferences";
 import { activeOutlineOrdinal, analyzeMarkdownDocument } from "./domain/document-analysis";
 import { toggleMarkdownEditingMode, type MarkdownSidebarTab } from "./domain/workspace-chrome";
@@ -41,6 +46,13 @@ const MarkdownEditor = lazy(async () => {
 	const module = await import("./components/source-editor");
 	return { default: module.MarkdownEditor };
 });
+
+const workspacePanels = [
+	{ id: "sidebar", minSize: "220px", maxSize: "360px" },
+	{ id: "editor", minSize: "320px" },
+];
+const editorOnlyPanel = [{ id: "editor", minSize: "320px" }];
+const workspaceDefaultSize = ["256px"];
 
 export interface RezicsTextAppProps {
 	readonly storage: MarkdownDocumentStorage;
@@ -70,6 +82,9 @@ export function RezicsTextApp({
 	const [sidebarOpen, setSidebarOpen] = useState(true);
 	const [sidebarTab, setSidebarTab] = useState<MarkdownSidebarTab>("files");
 	const [selectedFolderId, setSelectedFolderId] = useState<string | undefined>(undefined);
+	const [selectedSidebarItemId, setSelectedSidebarItemId] = useState(active.id);
+	const [workspacePanelSize, setWorkspacePanelSize] =
+		useState<(number | string)[]>(workspaceDefaultSize);
 	const [aboutOpen, setAboutOpen] = useState(false);
 	const [preferencesOpen, setPreferencesOpen] = useState(false);
 	const [preferenceSection, setPreferenceSection] = useState<MarkdownPreferenceSection>("general");
@@ -101,7 +116,10 @@ export function RezicsTextApp({
 				return;
 			case "new-folder": {
 				const folderId = actionRef.current.newFolder();
-				if (folderId) setSelectedFolderId(folderId);
+				if (folderId) {
+					setSelectedFolderId(folderId);
+					setSelectedSidebarItemId(folderId);
+				}
 				setSidebarTab("files");
 				setSidebarOpen(true);
 				return;
@@ -148,6 +166,11 @@ export function RezicsTextApp({
 		document.documentElement.lang = locale;
 		document.title = messages.documentTitle(active.file.name, active.dirty);
 	}, [active.dirty, active.file.name, locale, messages]);
+
+	useEffect(() => {
+		setSelectedSidebarItemId(active.id);
+		setSelectedFolderId(active.folderId);
+	}, [active.folderId, active.id]);
 
 	useEffect(() => {
 		if (!nativeMenu) return;
@@ -197,6 +220,11 @@ export function RezicsTextApp({
 			: messages.notices.storageErrors[state.notice.code]
 		: undefined;
 	const noticeIsError = state.notice?.kind !== "saved";
+	const commandModifier = platformUsesCommandModifier(
+		typeof navigator === "undefined" ? undefined : navigator.platform,
+	);
+	const sidebarShortcut =
+		applicationCommandShortcutLabel("toggle-sidebar", commandModifier) ?? "Ctrl+Shift+L";
 
 	if (preferencesOpen) {
 		return (
@@ -223,97 +251,113 @@ export function RezicsTextApp({
 			role="application"
 		>
 			{nativeMenu ? null : <ApplicationMenuBar messages={messages} onCommand={runCommand} />}
-			<div className="relative flex min-h-0 min-w-0 flex-1">
-				<div
-					aria-hidden={!sidebarOpen}
-					className={
-						sidebarOpen
-							? "w-60 shrink-0 overflow-hidden border-border border-e transition-[width] duration-200 ease-out motion-reduce:transition-none"
-							: "w-0 shrink-0 overflow-hidden border-border border-e-0 transition-[width] duration-200 ease-out motion-reduce:transition-none"
-					}
-				>
-					<WorkspaceSidebar
-						activeId={active.id}
-						activeOutline={activeHeading}
-						analysis={analysis}
-						busy={busy}
-						documents={state.documents}
-						folders={state.folders}
-						messages={messages}
-						onActivate={actions.activateDocument}
-						onNewDocument={() => actions.newDocument(selectedFolderId)}
-						onNewFolder={() => {
-							const folderId = actions.newFolder();
-							if (folderId) setSelectedFolderId(folderId);
-						}}
-						onReveal={(item) => editorRef.current?.revealOffset(item.from)}
-						onSelectFolder={setSelectedFolderId}
-						onTabChange={setSidebarTab}
-						onToggleFolder={actions.toggleFolder}
-						selectedFolderId={selectedFolderId}
-						tab={sidebarTab}
-					/>
-				</div>
-
-				<main className="flex min-w-0 flex-1 flex-col">
-					<DocumentTabBar
-						activeId={active.id}
-						documents={state.documents}
-						messages={messages}
-						onActivate={actions.activateDocument}
-						onClose={actions.closeDocument}
-					/>
-
-					{notice ? (
-						<div
-							className={
-								noticeIsError
-									? "flex items-center gap-3 border-destructive/20 border-b bg-destructive/8 px-3 py-1.5 text-destructive text-[13px]"
-									: "flex items-center gap-3 border-primary/20 border-b bg-primary/8 px-3 py-1.5 text-[13px]"
-							}
-							role={noticeIsError ? "alert" : "status"}
-						>
-							<p className="min-w-0 flex-1">{notice}</p>
-							<TooltipButton
-								label={messages.actions.dismiss}
-								onClick={actions.clearNotice}
-								size="icon-xs"
-								variant="ghost"
-							>
-								<XIcon />
-							</TooltipButton>
-						</div>
-					) : null}
-
-					<section
-						aria-label={
-							state.mode === "source"
-								? messages.labels.sourceEditor
-								: messages.labels.livePreviewEditor
-						}
-						className="flex min-h-0 min-w-0 flex-1 flex-col bg-background"
-					>
-						<Suspense
-							fallback={
-								<div className="m-auto text-muted-foreground text-sm">
-									{messages.status.editorLoading}
-								</div>
-							}
-						>
-							<MarkdownEditor
-								documentId={active.id}
+			<Resizable
+				className="min-h-0 min-w-0 flex-1"
+				defaultSize={sidebarOpen ? workspacePanelSize : undefined}
+				key={sidebarOpen ? "workspace-with-sidebar" : "workspace-editor-only"}
+				onResizeEnd={(details) => {
+					if (sidebarOpen) setWorkspacePanelSize(details.size);
+				}}
+				panels={sidebarOpen ? workspacePanels : editorOnlyPanel}
+			>
+				{sidebarOpen ? (
+					<>
+						<ResizablePanel className="min-w-0 overflow-hidden" id="sidebar">
+							<WorkspaceSidebar
+								activeOutline={activeHeading}
+								analysis={analysis}
+								busy={busy}
+								documents={state.documents}
+								folders={state.folders}
 								messages={messages}
-								mode={state.mode}
-								onChange={actions.edit}
-								onCursorChange={setCursor}
-								readOnly={state.operation.kind === "opening"}
-								ref={editorRef}
-								value={active.source}
+								onActivate={actions.activateDocument}
+								onNewDocument={() => actions.newDocument(selectedFolderId)}
+								onNewFolder={() => {
+									const folderId = actions.newFolder();
+									if (folderId) {
+										setSelectedFolderId(folderId);
+										setSelectedSidebarItemId(folderId);
+									}
+								}}
+								onOpen={() => void actions.openDocument()}
+								onReveal={(item) => editorRef.current?.revealOffset(item.from)}
+								onSelectFolder={setSelectedFolderId}
+								onSelectItem={setSelectedSidebarItemId}
+								onTabChange={setSidebarTab}
+								onToggleFolder={actions.toggleFolder}
+								selectedItemId={selectedSidebarItemId}
+								tab={sidebarTab}
 							/>
-						</Suspense>
-					</section>
-				</main>
-			</div>
+						</ResizablePanel>
+						<ResizableResizeTrigger
+							aria-label={messages.labels.resizeSidebar}
+							className="hover:bg-primary/50"
+							id="sidebar:editor"
+						/>
+					</>
+				) : null}
+
+				<ResizablePanel className="min-w-0 overflow-hidden" id="editor">
+					<main className="flex size-full min-w-0 flex-col">
+						<DocumentTabBar
+							activeId={active.id}
+							documents={state.documents}
+							messages={messages}
+							onActivate={actions.activateDocument}
+							onClose={actions.closeDocument}
+						/>
+
+						{notice ? (
+							<div
+								className={
+									noticeIsError
+										? "flex items-center gap-3 border-destructive/20 border-b bg-destructive/8 px-3 py-1.5 text-destructive text-[13px]"
+										: "flex items-center gap-3 border-primary/20 border-b bg-primary/8 px-3 py-1.5 text-[13px]"
+								}
+								role={noticeIsError ? "alert" : "status"}
+							>
+								<p className="min-w-0 flex-1">{notice}</p>
+								<TooltipButton
+									label={messages.actions.dismiss}
+									onClick={actions.clearNotice}
+									size="icon-xs"
+									variant="ghost"
+								>
+									<XIcon />
+								</TooltipButton>
+							</div>
+						) : null}
+
+						<section
+							aria-label={
+								state.mode === "source"
+									? messages.labels.sourceEditor
+									: messages.labels.livePreviewEditor
+							}
+							className="flex min-h-0 min-w-0 flex-1 flex-col bg-background"
+						>
+							<Suspense
+								fallback={
+									<div className="m-auto text-muted-foreground text-sm">
+										{messages.status.editorLoading}
+									</div>
+								}
+							>
+								<MarkdownEditor
+									documentId={active.id}
+									messages={messages}
+									mode={state.mode}
+									onChange={actions.edit}
+									onCursorChange={setCursor}
+									readOnly={state.operation.kind === "opening"}
+									ref={editorRef}
+									value={active.source}
+								/>
+							</Suspense>
+						</section>
+					</main>
+				</ResizablePanel>
+			</Resizable>
 
 			<AboutDialog messages={messages} onOpenChange={setAboutOpen} open={aboutOpen} />
 			<WorkspaceStatusBar
@@ -325,7 +369,10 @@ export function RezicsTextApp({
 				onToggleMode={() => actions.setMode(toggleMarkdownEditingMode(state.mode))}
 				onToggleSidebar={() => setSidebarOpen((open) => !open)}
 				operation={state.operation}
+				sidebarShortcut={sidebarShortcut}
+				sidebarShortcutAria={commandModifier ? "Meta+Shift+L" : "Control+Shift+L"}
 				sidebarOpen={sidebarOpen}
+				stored={active.file.kind === "stored"}
 			/>
 		</div>
 	);

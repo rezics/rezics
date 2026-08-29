@@ -1,3 +1,4 @@
+import { Button } from "@rezics/ui/ui/button";
 import XIcon from "lucide-react/dist/esm/icons/x.mjs";
 import type { ReactElement } from "react";
 import type { MarkdownOpenDocument } from "../domain/workspace-state";
@@ -20,7 +21,7 @@ export function DocumentTabBar({
 	return (
 		<header
 			aria-label={messages.labels.documentTabs}
-			className="flex h-8 shrink-0 items-stretch border-border border-b bg-muted/55"
+			className="flex h-10 shrink-0 items-stretch border-border-weak border-b bg-surface-container"
 		>
 			<div className="flex min-w-0 flex-1 overflow-x-auto">
 				{documents.map((document) => {
@@ -30,22 +31,22 @@ export function DocumentTabBar({
 							key={document.id}
 							className={
 								selected
-									? "group flex max-w-56 min-w-32 shrink-0 items-center gap-1 border-border border-e bg-background px-2"
-									: "group flex max-w-56 min-w-32 shrink-0 items-center gap-1 border-border border-e bg-transparent px-2 hover:bg-accent/60"
+									? "group flex max-w-56 min-w-32 shrink-0 items-center gap-0.5 border-border-weak border-e bg-background px-1"
+									: "group flex max-w-56 min-w-32 shrink-0 items-center gap-0.5 border-border-weak border-e px-1 hover:bg-muted"
 							}
 						>
-							<button
-								type="button"
+							<Button
 								aria-current={selected ? "page" : undefined}
-								className={
-									selected
-										? "min-w-0 flex-1 truncate text-start text-[13px] text-foreground"
-										: "min-w-0 flex-1 truncate text-start text-[13px] text-muted-foreground"
-								}
+								className="h-full min-w-0 flex-1 justify-start overflow-hidden px-1.5 font-normal text-xs"
 								onClick={() => onActivate(document.id)}
+								size="sm"
+								variant="ghost"
 							>
-								{document.dirty ? `• ${document.file.name}` : document.file.name}
-							</button>
+								{document.dirty ? (
+									<span aria-hidden className="size-1.5 shrink-0 rounded-full bg-current" />
+								) : null}
+								<span className="min-w-0 truncate">{document.file.name}</span>
+							</Button>
 							<TooltipButton
 								className={
 									document.dirty

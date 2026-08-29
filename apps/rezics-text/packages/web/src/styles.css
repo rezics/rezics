@@ -5,13 +5,18 @@
 @source "../../../../../libraries/ui/src/ui/dialog.tsx";
 @source "../../../../../libraries/ui/src/ui/field.tsx";
 @source "../../../../../libraries/ui/src/ui/input.tsx";
+@source "../../../../../libraries/ui/src/ui/kbd.tsx";
 @source "../../../../../libraries/ui/src/ui/menu.tsx";
+@source "../../../../../libraries/ui/src/ui/popover.tsx";
+@source "../../../../../libraries/ui/src/ui/resizable.tsx";
 @source "../../../../../libraries/ui/src/ui/select.tsx";
 @source "../../../../../libraries/ui/src/ui/separator.tsx";
 @source "../../../../../libraries/ui/src/ui/sheet.tsx";
 @source "../../../../../libraries/ui/src/ui/scroll-area.tsx";
 @source "../../../../../libraries/ui/src/ui/spinner.tsx";
+@source "../../../../../libraries/ui/src/ui/tabs.tsx";
 @source "../../../../../libraries/ui/src/ui/tooltip.tsx";
+@source "../../../../../libraries/ui/src/ui/tree-view.tsx";
 @source "../../app/src";
 @source "./";
 
@@ -52,6 +57,11 @@ body {
 
 .rezics-code-editor .cm-line {
 	padding-inline: 0.125rem;
+}
+
+.rezics-code-editor .cm-placeholder {
+	color: var(--muted-foreground);
+	font-style: normal;
 }
 
 .rezics-markdown-source {
@@ -105,13 +115,13 @@ body {
 }
 
 .rezics-markdown-live-preview {
-	--rezics-editor-padding: clamp(1.25rem, 4vw, 3rem) clamp(1.25rem, 5vw, 4rem);
+	--rezics-editor-padding: clamp(2rem, 6vh, 4.5rem) clamp(1.5rem, 5vw, 4rem);
 }
 
 .rezics-markdown-live-preview .cm-content {
 	box-sizing: border-box;
 	width: 100%;
-	max-width: 64rem;
+	max-width: 52rem;
 	margin-inline: auto;
 	font-size: 1rem;
 }

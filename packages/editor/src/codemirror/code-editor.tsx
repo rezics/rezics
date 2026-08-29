@@ -1,5 +1,5 @@
 import { Annotation, Compartment, EditorState, type Extension } from "@codemirror/state";
-import { EditorView } from "@codemirror/view";
+import { EditorView, placeholder as editorPlaceholder } from "@codemirror/view";
 import { basicSetup } from "codemirror";
 import {
 	forwardRef,
@@ -27,6 +27,7 @@ export interface CodeEditorProps {
 	readonly extensions?: readonly Extension[];
 	readonly readOnly?: boolean;
 	readonly autoFocus?: boolean;
+	readonly placeholder?: string;
 	readonly className?: string;
 	readonly style?: CSSProperties;
 }
@@ -44,6 +45,7 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(function
 		extensions = emptyExtensions,
 		readOnly = false,
 		autoFocus = false,
+		placeholder,
 		className,
 		style,
 	},
@@ -56,6 +58,7 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(function
 	const extensionsCompartmentRef = useRef(new Compartment());
 	const editableCompartmentRef = useRef(new Compartment());
 	const accessibilityCompartmentRef = useRef(new Compartment());
+	const placeholderCompartmentRef = useRef(new Compartment());
 
 	onChangeRef.current = onChange;
 	valueRef.current = value;
@@ -88,6 +91,7 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(function
 					accessibilityCompartmentRef.current.of(
 						EditorView.contentAttributes.of({ "aria-label": ariaLabel }),
 					),
+					placeholderCompartmentRef.current.of(placeholder ? editorPlaceholder(placeholder) : []),
 					EditorView.updateListener.of((update) => {
 						if (
 							update.docChanged &&
@@ -139,6 +143,16 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(function
 			),
 		});
 	}, [ariaLabel]);
+
+	useEffect(() => {
+		const view = viewRef.current;
+		if (!view) return;
+		view.dispatch({
+			effects: placeholderCompartmentRef.current.reconfigure(
+				placeholder ? editorPlaceholder(placeholder) : [],
+			),
+		});
+	}, [placeholder]);
 
 	useEffect(() => {
 		const view = viewRef.current;

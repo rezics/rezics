@@ -15,7 +15,7 @@ export function useMarkdownWorkspace(
 	messages: RezicsTextMessages,
 ) {
 	const [state, dispatch] = useReducer(markdownWorkspaceReducer, undefined, () =>
-		createMarkdownWorkspaceState(messages.untitledName, messages.welcomeDocument),
+		createMarkdownWorkspaceState(messages.untitledName, ""),
 	);
 	const storageOperationRef = useRef(false);
 	const nextDocumentSerialRef = useRef(1);

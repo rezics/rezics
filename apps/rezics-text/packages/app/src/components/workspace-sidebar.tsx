@@ -1,250 +1,301 @@
+import { Button } from "@rezics/ui/ui/button";
 import { ScrollArea } from "@rezics/ui/ui/scroll-area";
-import ChevronDownIcon from "lucide-react/dist/esm/icons/chevron-down.mjs";
-import ChevronRightIcon from "lucide-react/dist/esm/icons/chevron-right.mjs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@rezics/ui/ui/tabs";
+import {
+	createTreeCollection,
+	TreeView,
+	TreeViewBranch,
+	TreeViewBranchContent,
+	TreeViewBranchItem,
+	TreeViewContent,
+	TreeViewItem,
+	TreeViewLabel,
+	TreeViewNode,
+	TreeViewTree,
+	type TreeNodeType,
+} from "@rezics/ui/ui/tree-view";
 import FilePlusIcon from "lucide-react/dist/esm/icons/file-plus.mjs";
 import FileTextIcon from "lucide-react/dist/esm/icons/file-text.mjs";
-import FolderIcon from "lucide-react/dist/esm/icons/folder.mjs";
+import FolderOpenIcon from "lucide-react/dist/esm/icons/folder-open.mjs";
 import FolderPlusIcon from "lucide-react/dist/esm/icons/folder-plus.mjs";
-import type { ReactElement } from "react";
+import { useMemo, type ReactElement } from "react";
 import type { MarkdownDocumentAnalysis, MarkdownOutlineItem } from "../domain/document-analysis";
 import type { MarkdownSidebarTab } from "../domain/workspace-chrome";
 import type { MarkdownOpenDocument, MarkdownWorkspaceFolder } from "../domain/workspace-state";
 import type { RezicsTextMessages } from "../i18n/messages";
 import { TooltipButton } from "./tooltip-button";
 
+interface WorkspaceTreeNode extends TreeNodeType {
+	readonly kind: "document" | "folder";
+	readonly document?: MarkdownOpenDocument;
+	readonly folderId?: string;
+	readonly childrenCount?: number;
+	readonly children?: WorkspaceTreeNode[];
+}
+
 export function WorkspaceSidebar({
 	messages,
 	tab,
 	documents,
 	folders,
-	activeId,
-	selectedFolderId,
+	selectedItemId,
 	busy,
 	analysis,
 	activeOutline,
 	onTabChange,
 	onActivate,
+	onSelectItem,
 	onSelectFolder,
 	onToggleFolder,
 	onNewDocument,
 	onNewFolder,
+	onOpen,
 	onReveal,
 }: {
 	readonly messages: RezicsTextMessages;
 	readonly tab: MarkdownSidebarTab;
 	readonly documents: readonly MarkdownOpenDocument[];
 	readonly folders: readonly MarkdownWorkspaceFolder[];
-	readonly activeId: string;
-	readonly selectedFolderId: string | undefined;
+	readonly selectedItemId: string;
 	readonly busy: boolean;
 	readonly analysis: MarkdownDocumentAnalysis;
 	readonly activeOutline: number | undefined;
 	readonly onTabChange: (tab: MarkdownSidebarTab) => void;
 	readonly onActivate: (id: string) => void;
+	readonly onSelectItem: (id: string) => void;
 	readonly onSelectFolder: (id: string | undefined) => void;
 	readonly onToggleFolder: (id: string) => void;
 	readonly onNewDocument: () => void;
 	readonly onNewFolder: () => void;
+	readonly onOpen: () => void;
 	readonly onReveal: (item: MarkdownOutlineItem) => void;
 }): ReactElement {
-	const rootDocuments = documents.filter((document) => document.folderId === undefined);
+	const { collection, nodesById } = useMemo(() => {
+		const nodes: WorkspaceTreeNode[] = [
+			...folders.map((folder): WorkspaceTreeNode => {
+				const children = documents
+					.filter((document) => document.folderId === folder.id)
+					.map((document) => documentNode(document, folder.id));
+				return {
+					id: folder.id,
+					kind: "folder",
+					name: folder.name,
+					children,
+					childrenCount: children.length,
+				};
+			}),
+			...documents
+				.filter((document) => document.folderId === undefined)
+				.map((document) => documentNode(document)),
+		];
+		const nodesById = new Map<string, WorkspaceTreeNode>();
+		for (const node of nodes) {
+			nodesById.set(node.id, node);
+			for (const child of node.children ?? []) nodesById.set(child.id, child);
+		}
+		return {
+			collection: createTreeCollection<WorkspaceTreeNode>({
+				rootNode: { id: "workspace-root", kind: "folder", name: "", children: nodes },
+			}),
+			nodesById,
+		};
+	}, [documents, folders]);
+	const expandedValue = useMemo(
+		() => folders.filter((folder) => folder.expanded).map((folder) => folder.id),
+		[folders],
+	);
+
 	return (
 		<aside
 			aria-label={tab === "files" ? messages.labels.files : messages.labels.outline}
-			className="flex h-full w-60 shrink-0 flex-col bg-muted/35"
+			className="size-full min-w-0 bg-surface-container"
 		>
-			<div className="flex h-8 shrink-0 items-center border-border border-b px-1">
-				<div className="flex min-w-0 flex-1" role="tablist" aria-label={messages.labels.sidebar}>
-					<SidebarTab
-						selected={tab === "files"}
-						label={messages.labels.files}
-						onSelect={() => onTabChange("files")}
-					/>
-					<SidebarTab
-						selected={tab === "outline"}
-						label={messages.labels.outline}
-						onSelect={() => onTabChange("outline")}
-					/>
-				</div>
-				{tab === "files" ? (
-					<div className="flex shrink-0 items-center">
-						<TooltipButton
-							disabled={busy}
-							label={messages.actions.newDocument}
-							onClick={onNewDocument}
-							size="icon-xs"
-							variant="ghost"
+			<Tabs
+				className="size-full min-h-0 gap-0"
+				onValueChange={(details) => onTabChange(details.value as MarkdownSidebarTab)}
+				value={tab}
+			>
+				<header className="flex h-10 shrink-0 items-center border-border-weak border-b px-1.5">
+					<TabsList
+						aria-label={messages.labels.sidebar}
+						className="h-full min-w-0 flex-1"
+						variant="underline"
+					>
+						<TabsTrigger className="h-full px-2.5 text-xs" value="files">
+							{messages.labels.files}
+						</TabsTrigger>
+						<TabsTrigger className="h-full px-2.5 text-xs" value="outline">
+							{messages.labels.outline}
+						</TabsTrigger>
+					</TabsList>
+					{tab === "files" ? (
+						<div className="flex shrink-0 items-center gap-0.5">
+							<TooltipButton
+								disabled={busy}
+								label={messages.actions.open}
+								onClick={onOpen}
+								size="icon-xs"
+								variant="ghost"
+							>
+								<FolderOpenIcon />
+							</TooltipButton>
+							<TooltipButton
+								disabled={busy}
+								label={messages.actions.newDocument}
+								onClick={onNewDocument}
+								size="icon-xs"
+								variant="ghost"
+							>
+								<FilePlusIcon />
+							</TooltipButton>
+							<TooltipButton
+								disabled={busy}
+								label={messages.actions.newFolder}
+								onClick={onNewFolder}
+								size="icon-xs"
+								variant="ghost"
+							>
+								<FolderPlusIcon />
+							</TooltipButton>
+						</div>
+					) : null}
+				</header>
+
+				<TabsContent className="min-h-0 overflow-hidden" value="files">
+					<ScrollArea className="size-full">
+						<TreeView
+							className="gap-0 p-1.5 [--item-gap:--spacing(1.5)] [--padding-block:--spacing(1)] [--padding-inline:--spacing(2)]"
+							collection={collection}
+							expandOnClick
+							expandedValue={expandedValue}
+							onExpandedChange={(details) => {
+								for (const folder of folders) {
+									if (details.expandedValue.includes(folder.id) !== folder.expanded) {
+										onToggleFolder(folder.id);
+									}
+								}
+							}}
+							onSelectionChange={(details) => {
+								const id = details.selectedValue.at(-1);
+								if (!id) return;
+								const node = nodesById.get(id);
+								if (!node) return;
+								onSelectItem(id);
+								if (node.kind === "folder") {
+									onSelectFolder(node.id);
+									return;
+								}
+								onSelectFolder(node.folderId);
+								onActivate(node.id);
+							}}
+							selectedValue={[selectedItemId]}
+							selectionMode="single"
 						>
-							<FilePlusIcon />
-						</TooltipButton>
-						<TooltipButton
-							disabled={busy}
-							label={messages.actions.newFolder}
-							onClick={onNewFolder}
-							size="icon-xs"
-							variant="ghost"
-						>
-							<FolderPlusIcon />
-						</TooltipButton>
-					</div>
-				) : null}
-			</div>
-			<ScrollArea className="min-h-0 flex-1">
-				{tab === "files" ? (
-					<ul className="flex flex-col py-1">
-						{folders.map((folder) => {
-							const children = documents.filter((document) => document.folderId === folder.id);
-							const selected = selectedFolderId === folder.id;
-							return (
-								<li key={folder.id}>
-									<button
-										type="button"
-										aria-expanded={folder.expanded}
-										className={
-											selected
-												? "flex w-full items-center gap-1.5 px-2 py-1 text-start text-[13px] text-foreground bg-accent"
-												: "flex w-full items-center gap-1.5 px-2 py-1 text-start text-[13px] text-muted-foreground hover:bg-accent/70 hover:text-foreground"
-										}
-										onClick={() => {
-											onSelectFolder(folder.id);
-											onToggleFolder(folder.id);
-										}}
-									>
-										{folder.expanded ? (
-											<ChevronDownIcon className="size-3.5 shrink-0" />
-										) : (
-											<ChevronRightIcon className="size-3.5 shrink-0" />
-										)}
-										<FolderIcon className="size-3.5 shrink-0" />
-										<span className="min-w-0 flex-1 truncate">{folder.name}</span>
-									</button>
-									{folder.expanded ? (
-										children.length === 0 ? (
-											<p className="px-8 py-1 text-[12px] text-muted-foreground">
-												{messages.labels.emptyFolder}
-											</p>
-										) : (
-											<ul>
-												{children.map((document) => (
-													<DocumentRow
-														key={document.id}
-														document={document}
-														indented
-														selected={document.id === activeId}
-														onActivate={() => {
-															onSelectFolder(folder.id);
-															onActivate(document.id);
-														}}
-													/>
-												))}
-											</ul>
-										)
-									) : null}
-								</li>
-							);
-						})}
-						{rootDocuments.map((document) => (
-							<DocumentRow
-								key={document.id}
-								document={document}
-								selected={document.id === activeId}
-								onActivate={() => {
-									onSelectFolder(undefined);
-									onActivate(document.id);
-								}}
-							/>
-						))}
-					</ul>
-				) : analysis.outline.length === 0 ? (
-					<p className="px-3 py-4 text-muted-foreground text-xs leading-relaxed">
-						{messages.labels.noOutline}
-					</p>
-				) : (
-					<ol className="flex flex-col py-1">
-						{analysis.outline.map((item) => {
-							const selected = item.ordinal === activeOutline;
-							return (
-								<li key={`${item.ordinal}-${item.line}`}>
-									<button
-										type="button"
-										aria-current={selected ? "location" : undefined}
-										className={
-											selected
-												? "w-full truncate py-1 pe-3 text-start text-[13px] text-foreground bg-accent"
-												: "w-full truncate py-1 pe-3 text-start text-[13px] text-muted-foreground hover:bg-accent/70 hover:text-foreground"
-										}
-										style={{ paddingInlineStart: `${0.75 + (item.level - 1) * 0.7}rem` }}
-										title={item.title}
-										onClick={() => onReveal(item)}
-									>
-										{item.title}
-									</button>
-								</li>
-							);
-						})}
-					</ol>
-				)}
-			</ScrollArea>
+							<TreeViewLabel className="sr-only">{messages.labels.files}</TreeViewLabel>
+							<TreeViewTree>
+								{collection.rootNode.children?.map((node, index) => (
+									<WorkspaceTreeEntry
+										indexPath={[index]}
+										key={node.id}
+										messages={messages}
+										node={node}
+									/>
+								))}
+							</TreeViewTree>
+						</TreeView>
+					</ScrollArea>
+				</TabsContent>
+
+				<TabsContent className="min-h-0 overflow-hidden" value="outline">
+					<ScrollArea className="size-full">
+						{analysis.outline.length === 0 ? (
+							<p className="px-3 py-4 text-muted-foreground text-xs leading-relaxed">
+								{messages.labels.noOutline}
+							</p>
+						) : (
+							<ol className="flex flex-col gap-0.5 p-1.5">
+								{analysis.outline.map((item) => {
+									const selected = item.ordinal === activeOutline;
+									return (
+										<li key={`${item.ordinal}-${item.line}`}>
+											<Button
+												aria-current={selected ? "location" : undefined}
+												className="w-full justify-start px-2 text-start font-normal text-xs"
+												onClick={() => onReveal(item)}
+												size="sm"
+												title={item.title}
+												variant={selected ? "secondary" : "ghost"}
+											>
+												<span
+													className="min-w-0 truncate"
+													style={{ marginInlineStart: `${(item.level - 1) * 0.7}rem` }}
+												>
+													{item.title}
+												</span>
+											</Button>
+										</li>
+									);
+								})}
+							</ol>
+						)}
+					</ScrollArea>
+				</TabsContent>
+			</Tabs>
 		</aside>
 	);
 }
 
-function DocumentRow({
-	document,
-	selected,
-	indented = false,
-	onActivate,
-}: {
-	readonly document: MarkdownOpenDocument;
-	readonly selected: boolean;
-	readonly indented?: boolean;
-	readonly onActivate: () => void;
-}): ReactElement {
-	return (
-		<li>
-			<button
-				type="button"
-				aria-current={selected ? "page" : undefined}
-				className={
-					selected
-						? "flex w-full items-center gap-2 py-1 pe-3 text-start text-[13px] text-foreground bg-accent"
-						: "flex w-full items-center gap-2 py-1 pe-3 text-start text-[13px] text-muted-foreground hover:bg-accent/70 hover:text-foreground"
-				}
-				style={{ paddingInlineStart: indented ? "1.75rem" : "0.75rem" }}
-				onClick={onActivate}
-			>
-				<FileTextIcon className="size-3.5 shrink-0" />
-				<span className="min-w-0 flex-1 truncate">{document.file.name}</span>
-				{document.dirty ? (
-					<span aria-hidden className="size-1.5 shrink-0 rounded-full bg-foreground/70" />
-				) : null}
-			</button>
-		</li>
-	);
+function documentNode(document: MarkdownOpenDocument, folderId?: string): WorkspaceTreeNode {
+	return {
+		document,
+		folderId,
+		id: document.id,
+		kind: "document",
+		name: document.file.name,
+	};
 }
 
-function SidebarTab({
-	selected,
-	label,
-	onSelect,
+function WorkspaceTreeEntry({
+	node,
+	indexPath,
+	messages,
 }: {
-	readonly selected: boolean;
-	readonly label: string;
-	readonly onSelect: () => void;
+	readonly node: WorkspaceTreeNode;
+	readonly indexPath: number[];
+	readonly messages: RezicsTextMessages;
 }): ReactElement {
 	return (
-		<button
-			type="button"
-			role="tab"
-			aria-selected={selected}
-			className={
-				selected
-					? "h-8 px-2 font-medium text-[11px] text-foreground uppercase tracking-[0.08em]"
-					: "h-8 px-2 font-medium text-[11px] text-muted-foreground uppercase tracking-[0.08em] hover:text-foreground"
-			}
-			onClick={onSelect}
-		>
-			{label}
-		</button>
+		<TreeViewNode indexPath={indexPath} node={node}>
+			{node.kind === "folder" ? (
+				<TreeViewBranch>
+					<TreeViewBranchItem>{node.name}</TreeViewBranchItem>
+					<TreeViewBranchContent>
+						{node.children?.length ? (
+							node.children.map((child, index) => (
+								<WorkspaceTreeEntry
+									indexPath={[...indexPath, index]}
+									key={child.id}
+									messages={messages}
+									node={child}
+								/>
+							))
+						) : (
+							<p className="py-1 pe-2 ps-10 text-muted-foreground text-xs">
+								{messages.labels.emptyFolder}
+							</p>
+						)}
+					</TreeViewBranchContent>
+				</TreeViewBranch>
+			) : (
+				<TreeViewContent>
+					<TreeViewItem icon={FileTextIcon}>
+						<span className="min-w-0 flex-1 truncate">{node.name}</span>
+						{node.document?.dirty ? (
+							<span aria-hidden className="size-1.5 shrink-0 rounded-full bg-current" />
+						) : null}
+					</TreeViewItem>
+				</TreeViewContent>
+			)}
+		</TreeViewNode>
 	);
 }

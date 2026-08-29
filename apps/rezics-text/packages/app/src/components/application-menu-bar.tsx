@@ -1,7 +1,10 @@
 import { Menu, MenuContent, MenuItem, MenuSeparator, MenuTrigger } from "@rezics/ui/ui/menu";
 import type { ReactElement, ReactNode } from "react";
 import type { RezicsTextApplicationCommand } from "../domain/application-menu";
-import { applicationCommandShortcutLabel } from "../domain/application-shortcuts";
+import {
+	applicationCommandShortcutLabel,
+	platformUsesCommandModifier,
+} from "../domain/application-shortcuts";
 import type { RezicsTextMessages } from "../i18n/messages";
 
 export function ApplicationMenuBar({
@@ -11,7 +14,9 @@ export function ApplicationMenuBar({
 	readonly messages: RezicsTextMessages;
 	readonly onCommand: (command: RezicsTextApplicationCommand) => void;
 }): ReactElement {
-	const commandModifier = usesCommandModifier();
+	const commandModifier = platformUsesCommandModifier(
+		typeof navigator === "undefined" ? undefined : navigator.platform,
+	);
 	const shortcut = (command: RezicsTextApplicationCommand): string | undefined =>
 		applicationCommandShortcutLabel(command, commandModifier);
 	return (
@@ -152,10 +157,6 @@ function CommandItem({
 			) : null}
 		</MenuItem>
 	);
-}
-
-function usesCommandModifier(): boolean {
-	return typeof navigator !== "undefined" && /Mac|iPhone|iPad/u.test(navigator.platform);
 }
 
 function runBrowserEdit(command: "undo" | "redo" | "cut" | "copy" | "paste" | "selectAll"): void {

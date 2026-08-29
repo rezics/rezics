@@ -3,6 +3,7 @@ import {
 	applicationCommandAccelerator,
 	applicationCommandFromShortcut,
 	applicationCommandShortcutLabel,
+	platformUsesCommandModifier,
 	type RezicsTextShortcutEvent,
 } from "./application-shortcuts";
 
@@ -65,5 +66,12 @@ describe("application shortcuts", () => {
 		expect(applicationCommandShortcutLabel("toggle-sidebar", false)).toBe("Ctrl+Shift+L");
 		expect(applicationCommandShortcutLabel("toggle-sidebar", true)).toBe("⇧⌘L");
 		expect(applicationCommandAccelerator("new-folder")).toBeUndefined();
+	});
+
+	it("uses platform-appropriate visible modifier labels", () => {
+		expect(platformUsesCommandModifier("MacIntel")).toBe(true);
+		expect(platformUsesCommandModifier("iPad")).toBe(true);
+		expect(platformUsesCommandModifier("Win32")).toBe(false);
+		expect(platformUsesCommandModifier(undefined)).toBe(false);
 	});
 });

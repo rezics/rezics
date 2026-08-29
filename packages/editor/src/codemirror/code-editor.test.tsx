@@ -101,4 +101,32 @@ describe("CodeEditor extension reconfiguration", () => {
 
 		act(() => root.unmount());
 	});
+
+	it("updates localized placeholder guidance without recreating the editor", () => {
+		const root = createRoot(container);
+		const editorRef = createRef<CodeEditorHandle>();
+		const render = (placeholder: string): void => {
+			act(() => {
+				root.render(
+					<CodeEditor
+						ariaLabel="Markdown editor"
+						onChange={() => undefined}
+						placeholder={placeholder}
+						ref={editorRef}
+						value=""
+					/>,
+				);
+			});
+		};
+
+		render("Start writing…");
+		const view = editorRef.current?.getView();
+		expect(container.querySelector(".cm-placeholder")?.textContent).toBe("Start writing…");
+
+		render("开始写作……");
+		expect(editorRef.current?.getView()).toBe(view);
+		expect(container.querySelector(".cm-placeholder")?.textContent).toBe("开始写作……");
+
+		act(() => root.unmount());
+	});
 });

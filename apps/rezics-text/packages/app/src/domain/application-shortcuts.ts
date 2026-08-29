@@ -68,3 +68,7 @@ export function applicationCommandShortcutLabel(
 	if (usesCommandModifier) return `${shortcut.shiftKey ? "⇧" : ""}⌘${key}`;
 	return `Ctrl+${shortcut.shiftKey ? "Shift+" : ""}${key}`;
 }
+
+export function platformUsesCommandModifier(platform: string | undefined): boolean {
+	return platform !== undefined && /Mac|iPhone|iPad/u.test(platform);
+}

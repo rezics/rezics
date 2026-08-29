@@ -15,7 +15,6 @@ export interface RezicsTextMessages {
 	readonly documentTitle: (name: string, dirty: boolean) => string;
 	readonly untitledName: string;
 	readonly newFolderName: string;
-	readonly welcomeDocument: string;
 	readonly labels: {
 		readonly application: string;
 		readonly menuBar: string;
@@ -24,6 +23,9 @@ export interface RezicsTextMessages {
 		readonly outline: string;
 		readonly noOutline: string;
 		readonly emptyFolder: string;
+		readonly editorPlaceholder: string;
+		readonly resizeSidebar: string;
+		readonly documentStatistics: string;
 		readonly statusBar: string;
 		readonly documentTabs: string;
 		readonly sourceEditor: string;
@@ -123,7 +125,6 @@ const en: RezicsTextMessages = {
 	documentTitle: (name, dirty) => `${dirty ? "• " : ""}${name} — ${productName}`,
 	untitledName: `Untitled${mdFileExtension}`,
 	newFolderName: "New Folder",
-	welcomeDocument: `# ${productName}\n\nA focused local editor with a source-backed live preview. Move the cursor into formatted text to reveal and edit its ${markdown} markers.\n\n## Start here\n\nOpen a local file or begin writing. Your document stays on this device.`,
 	labels: {
 		application: `${productName} application`,
 		menuBar: "Application menu",
@@ -132,6 +133,9 @@ const en: RezicsTextMessages = {
 		outline: "Outline",
 		noOutline: "Add a heading to build the outline.",
 		emptyFolder: "Empty folder",
+		editorPlaceholder: "Start writing…",
+		resizeSidebar: "Resize sidebar",
+		documentStatistics: "Document statistics",
 		statusBar: "Status",
 		documentTabs: "Open documents",
 		sourceEditor: `${markdown} source editor`,
@@ -236,7 +240,6 @@ const zhHans: RezicsTextMessages = {
 	documentTitle: (name, dirty) => `${dirty ? "• " : ""}${name} — ${productName}`,
 	untitledName: `未命名${mdFileExtension}`,
 	newFolderName: "新建文件夹",
-	welcomeDocument: `# ${productName}\n\n一款专注于本地写作的编辑器，提供以源码为唯一内容来源的实时预览。将光标移入带格式的文字，即可显示并直接编辑 ${markdown} 标记。\n\n## 从这里开始\n\n打开本地文件或直接开始写作。文档只保留在这台设备上。`,
 	labels: {
 		application: `${productName} 应用`,
 		menuBar: "应用菜单",
@@ -245,6 +248,9 @@ const zhHans: RezicsTextMessages = {
 		outline: "大纲",
 		noOutline: "添加标题后将在这里生成大纲。",
 		emptyFolder: "空文件夹",
+		editorPlaceholder: "开始写作……",
+		resizeSidebar: "调整侧边栏宽度",
+		documentStatistics: "文档统计",
 		statusBar: "状态栏",
 		documentTabs: "已打开的文档",
 		sourceEditor: `${markdown} 源码编辑器`,
@@ -345,7 +351,6 @@ const zhHant: RezicsTextMessages = {
 	documentTitle: (name, dirty) => `${dirty ? "• " : ""}${name} — ${productName}`,
 	untitledName: `未命名${mdFileExtension}`,
 	newFolderName: "新增資料夾",
-	welcomeDocument: `# ${productName}\n\n一款專注於本機寫作的編輯器，提供以原始碼為唯一內容來源的即時預覽。將游標移入帶格式的文字，即會顯示並可直接編輯 ${markdown} 標記。\n\n## 從這裡開始\n\n開啟本機檔案或直接開始寫作。文件只會留在這台裝置上。`,
 	labels: {
 		application: `${productName} 應用程式`,
 		menuBar: "應用程式選單",
@@ -354,6 +359,9 @@ const zhHant: RezicsTextMessages = {
 		outline: "大綱",
 		noOutline: "加入標題後，這裡會建立大綱。",
 		emptyFolder: "空資料夾",
+		editorPlaceholder: "開始寫作……",
+		resizeSidebar: "調整側邊欄寬度",
+		documentStatistics: "文件統計",
 		statusBar: "狀態列",
 		documentTabs: "已開啟的文件",
 		sourceEditor: `${markdown} 原始碼編輯器`,

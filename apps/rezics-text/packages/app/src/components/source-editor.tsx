@@ -104,6 +104,7 @@ export const MarkdownEditor = forwardRef<
 			}
 			extensions={extensions}
 			onChange={onChange}
+			placeholder={messages.labels.editorPlaceholder}
 			ref={editorRef}
 			readOnly={readOnly}
 			value={value}
