@@ -41,10 +41,10 @@ export type MarkdownWorkspaceNotice =
 	| { readonly kind: "storage-error"; readonly code: MarkdownStorageErrorCode };
 
 export interface MarkdownWorkspaceState {
-	/** Open session documents. Always contains at least the active document. */
-	readonly documents: readonly [MarkdownOpenDocument, ...MarkdownOpenDocument[]];
+	/** Open session documents. Empty after the final document is closed. */
+	readonly documents: readonly MarkdownOpenDocument[];
 	readonly folders: readonly MarkdownWorkspaceFolder[];
-	readonly activeId: string;
+	readonly activeId: string | undefined;
 	readonly mode: MarkdownEditingMode;
 	readonly operation: MarkdownWorkspaceOperation;
 	readonly notice?: MarkdownWorkspaceNotice;
@@ -63,15 +63,8 @@ export type MarkdownWorkspaceAction =
 	| { readonly type: "edit"; readonly source: string }
 	| { readonly type: "set-mode"; readonly mode: MarkdownEditingMode }
 	| { readonly type: "activate"; readonly id: string }
-	| {
-			readonly type: "close";
-			readonly id: string;
-			readonly empty: { readonly id: string; readonly name: string; readonly source: string };
-	  }
-	| {
-			readonly type: "close-all";
-			readonly empty: { readonly id: string; readonly name: string; readonly source: string };
-	  }
+	| { readonly type: "close"; readonly id: string }
+	| { readonly type: "close-all" }
 	| { readonly type: "operation-started"; readonly operation: MarkdownWorkspaceOperation }
 	| {
 			readonly type: "opened";
@@ -120,8 +113,10 @@ export function createMarkdownWorkspaceState(
 	};
 }
 
-export function activeMarkdownDocument(state: MarkdownWorkspaceState): MarkdownOpenDocument {
-	return state.documents.find((document) => document.id === state.activeId) ?? state.documents[0];
+export function activeMarkdownDocument(
+	state: MarkdownWorkspaceState,
+): MarkdownOpenDocument | undefined {
+	return state.documents.find((document) => document.id === state.activeId);
 }
 
 export function markdownWorkspaceIsDirty(state: MarkdownWorkspaceState): boolean {
@@ -169,23 +164,12 @@ function documentFromOpened(
 	};
 }
 
-function withOpenDocuments(
-	documents: readonly MarkdownOpenDocument[],
-	fallback: MarkdownOpenDocument,
-): readonly [MarkdownOpenDocument, ...MarkdownOpenDocument[]] {
-	const first = documents[0];
-	return first ? [first, ...documents.slice(1)] : [fallback];
-}
-
 function mapOpenDocument(
-	documents: readonly [MarkdownOpenDocument, ...MarkdownOpenDocument[]],
+	documents: readonly MarkdownOpenDocument[],
 	id: string,
 	update: (document: MarkdownOpenDocument) => MarkdownOpenDocument,
-): readonly [MarkdownOpenDocument, ...MarkdownOpenDocument[]] {
-	return withOpenDocuments(
-		documents.map((document) => (document.id === id ? update(document) : document)),
-		documents[0],
-	);
+): readonly MarkdownOpenDocument[] {
+	return documents.map((document) => (document.id === id ? update(document) : document));
 }
 
 export function markdownWorkspaceReducer(
@@ -202,7 +186,7 @@ export function markdownWorkspaceReducer(
 			);
 			return {
 				...state,
-				documents: withOpenDocuments([...state.documents, document], document),
+				documents: [...state.documents, document],
 				folders: action.folderId
 					? state.folders.map((folder) =>
 							folder.id === action.folderId ? { ...folder, expanded: true } : folder,
@@ -231,6 +215,7 @@ export function markdownWorkspaceReducer(
 		}
 		case "edit": {
 			const active = activeMarkdownDocument(state);
+			if (!active) return state;
 			if (action.source === active.source) return state;
 			return {
 				...state,
@@ -252,47 +237,22 @@ export function markdownWorkspaceReducer(
 			if (!state.documents.some((document) => document.id === action.id)) return state;
 			return { ...state, activeId: action.id, notice: undefined };
 		case "close": {
-			const remaining = state.documents.filter((document) => document.id !== action.id);
-			const first = remaining[0];
-			if (!first) {
-				const empty = createMarkdownOpenDocument(
-					action.empty.id,
-					action.empty.name,
-					action.empty.source,
-				);
-				return {
-					...state,
-					documents: [empty],
-					activeId: empty.id,
-					notice: undefined,
-				};
-			}
 			const closedIndex = state.documents.findIndex((document) => document.id === action.id);
 			if (closedIndex < 0) return state;
+			const remaining = state.documents.filter((document) => document.id !== action.id);
 			const nextActive =
 				state.activeId === action.id
-					? (remaining[closedIndex] ?? remaining[closedIndex - 1] ?? first).id
+					? (remaining[closedIndex] ?? remaining[closedIndex - 1])?.id
 					: state.activeId;
 			return {
 				...state,
-				documents: withOpenDocuments(remaining, first),
+				documents: remaining,
 				activeId: nextActive,
 				notice: undefined,
 			};
 		}
-		case "close-all": {
-			const empty = createMarkdownOpenDocument(
-				action.empty.id,
-				action.empty.name,
-				action.empty.source,
-			);
-			return {
-				...state,
-				documents: [empty],
-				activeId: empty.id,
-				notice: undefined,
-			};
-		}
+		case "close-all":
+			return { ...state, documents: [], activeId: undefined, notice: undefined };
 		case "operation-started":
 			return { ...state, operation: action.operation, notice: undefined };
 		case "opened": {
@@ -309,7 +269,7 @@ export function markdownWorkspaceReducer(
 				};
 			}
 			const opened = documentFromOpened(action.id, action.opened, action.folderId);
-			if (action.replaceActive) {
+			if (action.replaceActive && state.activeId !== undefined) {
 				return {
 					...state,
 					documents: mapOpenDocument(state.documents, state.activeId, () => opened),
@@ -319,7 +279,7 @@ export function markdownWorkspaceReducer(
 			}
 			return {
 				...state,
-				documents: withOpenDocuments([...state.documents, opened], opened),
+				documents: [...state.documents, opened],
 				activeId: opened.id,
 				operation: { kind: "idle" },
 			};

@@ -15,7 +15,7 @@ export function useMarkdownWorkspace(
 	messages: RezicsTextMessages,
 ) {
 	const [state, dispatch] = useReducer(markdownWorkspaceReducer, undefined, () =>
-		createMarkdownWorkspaceState(messages.untitledName, ""),
+		createMarkdownWorkspaceState(messages.untitledName, messages.sampleDocument),
 	);
 	const storageOperationRef = useRef(false);
 	const nextDocumentSerialRef = useRef(1);
@@ -93,7 +93,7 @@ export function useMarkdownWorkspace(
 				replaceActive:
 					current.documents.length === 1 &&
 					current.folders.length === 0 &&
-					active.file.kind === "untitled" &&
+					active?.file.kind === "untitled" &&
 					!active.dirty,
 			});
 		} catch {
@@ -106,8 +106,9 @@ export function useMarkdownWorkspace(
 	const saveDocument = useCallback(
 		async (forceSaveAs = false) => {
 			if (storageOperationRef.current) return;
-			storageOperationRef.current = true;
 			const target = activeMarkdownDocument(state);
+			if (!target) return;
+			storageOperationRef.current = true;
 			const saveRevision = target.revision;
 			const canSaveExisting =
 				!forceSaveAs && target.file.kind === "stored" && target.file.canOverwrite;
@@ -160,15 +161,8 @@ export function useMarkdownWorkspace(
 	const closeAllDocuments = useCallback(() => {
 		if (storageOperationRef.current) return;
 		if (markdownWorkspaceIsDirty(state) && !window.confirm(messages.prompts.discardChanges)) return;
-		dispatch({
-			type: "close-all",
-			empty: {
-				id: allocateDocumentId(),
-				name: messages.untitledName,
-				source: "",
-			},
-		});
-	}, [allocateDocumentId, messages.prompts.discardChanges, messages.untitledName, state]);
+		dispatch({ type: "close-all" });
+	}, [messages.prompts.discardChanges, state]);
 
 	const closeDocument = useCallback(
 		(id: string) => {
@@ -176,17 +170,9 @@ export function useMarkdownWorkspace(
 			const target = state.documents.find((document) => document.id === id);
 			if (!target) return;
 			if (target.dirty && !window.confirm(messages.prompts.discardChanges)) return;
-			dispatch({
-				type: "close",
-				id,
-				empty: {
-					id: allocateDocumentId(),
-					name: messages.untitledName,
-					source: "",
-				},
-			});
+			dispatch({ type: "close", id });
 		},
-		[allocateDocumentId, messages.prompts.discardChanges, messages.untitledName, state.documents],
+		[messages.prompts.discardChanges, state.documents],
 	);
 
 	const edit = useCallback((source: string) => {

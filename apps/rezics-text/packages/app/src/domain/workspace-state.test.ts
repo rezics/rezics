@@ -1,11 +1,19 @@
 import { describe, expect, it } from "vitest";
 import {
-	activeMarkdownDocument,
+	activeMarkdownDocument as findActiveMarkdownDocument,
 	allocateUntitledName,
 	createMarkdownWorkspaceState,
 	markdownWorkspaceIsDirty,
 	markdownWorkspaceReducer,
+	type MarkdownOpenDocument,
+	type MarkdownWorkspaceState,
 } from "./workspace-state";
+
+function activeMarkdownDocument(state: MarkdownWorkspaceState): MarkdownOpenDocument {
+	const document = findActiveMarkdownDocument(state);
+	if (!document) throw new Error("Expected an active Markdown document");
+	return document;
+}
 
 const stored = {
 	storageId: "opaque-1",
@@ -134,7 +142,7 @@ describe("Markdown workspace state", () => {
 		);
 	});
 
-	it("closes the last document into an empty untitled replacement", () => {
+	it("closes the last document without creating a replacement tab", () => {
 		const initial = markdownWorkspaceReducer(createMarkdownWorkspaceState("note.md", "text"), {
 			type: "edit",
 			source: "changed",
@@ -142,13 +150,30 @@ describe("Markdown workspace state", () => {
 		const closed = markdownWorkspaceReducer(initial, {
 			type: "close",
 			id: activeMarkdownDocument(initial).id,
-			empty: { id: "document-empty", name: "Untitled.md", source: "" },
 		});
 
-		expect(closed.documents).toHaveLength(1);
-		expect(closed.activeId).toBe("document-empty");
-		expect(activeMarkdownDocument(closed).source).toBe("");
-		expect(activeMarkdownDocument(closed).dirty).toBe(false);
+		expect(closed.documents).toHaveLength(0);
+		expect(closed.activeId).toBeUndefined();
+		expect(findActiveMarkdownDocument(closed)).toBeUndefined();
+	});
+
+	it("creates and edits a new document after the workspace becomes empty", () => {
+		const initial = createMarkdownWorkspaceState("note.md", "text");
+		const empty = markdownWorkspaceReducer(initial, {
+			type: "close",
+			id: activeMarkdownDocument(initial).id,
+		});
+		const created = markdownWorkspaceReducer(empty, {
+			type: "new",
+			id: "document-1",
+			name: "Untitled.md",
+			source: "",
+		});
+		const edited = markdownWorkspaceReducer(created, { type: "edit", source: "new note" });
+
+		expect(created.documents).toHaveLength(1);
+		expect(created.activeId).toBe("document-1");
+		expect(activeMarkdownDocument(edited).source).toBe("new note");
 	});
 
 	it("activates a neighbor when a middle document is closed", () => {
@@ -169,7 +194,6 @@ describe("Markdown workspace state", () => {
 		const closed = markdownWorkspaceReducer(state, {
 			type: "close",
 			id: "document-1",
-			empty: { id: "unused", name: "Untitled.md", source: "" },
 		});
 
 		expect(closed.documents.map((document) => document.id)).toEqual(["document-0", "document-2"]);
@@ -230,7 +254,7 @@ describe("Markdown workspace state", () => {
 		expect(collapsed.folders[0]?.expanded).toBe(false);
 	});
 
-	it("closes every document into one empty untitled replacement", () => {
+	it("closes every document without leaving a replacement tab", () => {
 		let state = createMarkdownWorkspaceState("one.md", "one");
 		state = markdownWorkspaceReducer(state, {
 			type: "new",
@@ -238,13 +262,10 @@ describe("Markdown workspace state", () => {
 			name: "two.md",
 			source: "two",
 		});
-		const closed = markdownWorkspaceReducer(state, {
-			type: "close-all",
-			empty: { id: "document-empty", name: "Untitled.md", source: "" },
-		});
-		expect(closed.documents).toHaveLength(1);
-		expect(closed.activeId).toBe("document-empty");
-		expect(activeMarkdownDocument(closed).source).toBe("");
+		const closed = markdownWorkspaceReducer(state, { type: "close-all" });
+		expect(closed.documents).toHaveLength(0);
+		expect(closed.activeId).toBeUndefined();
+		expect(findActiveMarkdownDocument(closed)).toBeUndefined();
 	});
 
 	it("allocates numbered untitled names without rewriting an unused base", () => {

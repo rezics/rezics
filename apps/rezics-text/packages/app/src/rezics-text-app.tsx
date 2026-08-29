@@ -82,7 +82,7 @@ export function RezicsTextApp({
 	const [sidebarOpen, setSidebarOpen] = useState(true);
 	const [sidebarTab, setSidebarTab] = useState<MarkdownSidebarTab>("files");
 	const [selectedFolderId, setSelectedFolderId] = useState<string | undefined>(undefined);
-	const [selectedSidebarItemId, setSelectedSidebarItemId] = useState(active.id);
+	const [selectedSidebarItemId, setSelectedSidebarItemId] = useState(active?.id);
 	const [workspacePanelSize, setWorkspacePanelSize] =
 		useState<(number | string)[]>(workspaceDefaultSize);
 	const [aboutOpen, setAboutOpen] = useState(false);
@@ -90,8 +90,8 @@ export function RezicsTextApp({
 	const [preferenceSection, setPreferenceSection] = useState<MarkdownPreferenceSection>("general");
 	const [cursor, setCursor] = useState({ line: 1, column: 1 });
 	const analysis = useMemo(
-		() => analyzeMarkdownDocument(active.source, locale),
-		[locale, active.source],
+		() => analyzeMarkdownDocument(active?.source ?? "", locale),
+		[locale, active?.source],
 	);
 	const activeHeading = useMemo(
 		() => activeOutlineOrdinal(analysis.outline, cursor.line),
@@ -100,11 +100,11 @@ export function RezicsTextApp({
 	const editorRef = useRef<MarkdownEditorHandle>(null);
 	const actionRef = useRef(actions);
 	const dirtyRef = useRef(false);
-	const activeIdRef = useRef(active.id);
+	const activeIdRef = useRef(active?.id);
 	const selectedFolderIdRef = useRef(selectedFolderId);
 	actionRef.current = actions;
 	dirtyRef.current = markdownWorkspaceIsDirty(state);
-	activeIdRef.current = active.id;
+	activeIdRef.current = active?.id;
 	selectedFolderIdRef.current = selectedFolderId;
 
 	const runCommand = useCallback((command: RezicsTextApplicationCommand): void => {
@@ -134,7 +134,7 @@ export function RezicsTextApp({
 				void actionRef.current.saveDocument(true);
 				return;
 			case "close":
-				actionRef.current.closeDocument(activeIdRef.current);
+				if (activeIdRef.current) actionRef.current.closeDocument(activeIdRef.current);
 				return;
 			case "close-all":
 				actionRef.current.closeAllDocuments();
@@ -164,13 +164,15 @@ export function RezicsTextApp({
 
 	useEffect(() => {
 		document.documentElement.lang = locale;
-		document.title = messages.documentTitle(active.file.name, active.dirty);
-	}, [active.dirty, active.file.name, locale, messages]);
+		document.title = active
+			? messages.documentTitle(active.file.name, active.dirty)
+			: messages.productName;
+	}, [active?.dirty, active?.file.name, locale, messages]);
 
 	useEffect(() => {
-		setSelectedSidebarItemId(active.id);
-		setSelectedFolderId(active.folderId);
-	}, [active.folderId, active.id]);
+		setSelectedSidebarItemId(active?.id);
+		setSelectedFolderId(active?.folderId);
+	}, [active?.folderId, active?.id]);
 
 	useEffect(() => {
 		if (!nativeMenu) return;
@@ -300,7 +302,7 @@ export function RezicsTextApp({
 				<ResizablePanel className="min-w-0 overflow-hidden" id="editor">
 					<main className="flex size-full min-w-0 flex-col">
 						<DocumentTabBar
-							activeId={active.id}
+							activeId={active?.id}
 							documents={state.documents}
 							messages={messages}
 							onActivate={actions.activateDocument}
@@ -328,33 +330,37 @@ export function RezicsTextApp({
 							</div>
 						) : null}
 
-						<section
-							aria-label={
-								state.mode === "source"
-									? messages.labels.sourceEditor
-									: messages.labels.livePreviewEditor
-							}
-							className="flex min-h-0 min-w-0 flex-1 flex-col bg-background"
-						>
-							<Suspense
-								fallback={
-									<div className="m-auto text-muted-foreground text-sm">
-										{messages.status.editorLoading}
-									</div>
+						{active ? (
+							<section
+								aria-label={
+									state.mode === "source"
+										? messages.labels.sourceEditor
+										: messages.labels.livePreviewEditor
 								}
+								className="flex min-h-0 min-w-0 flex-1 flex-col bg-background"
 							>
-								<MarkdownEditor
-									documentId={active.id}
-									messages={messages}
-									mode={state.mode}
-									onChange={actions.edit}
-									onCursorChange={setCursor}
-									readOnly={state.operation.kind === "opening"}
-									ref={editorRef}
-									value={active.source}
-								/>
-							</Suspense>
-						</section>
+								<Suspense
+									fallback={
+										<div className="m-auto text-muted-foreground text-sm">
+											{messages.status.editorLoading}
+										</div>
+									}
+								>
+									<MarkdownEditor
+										documentId={active.id}
+										messages={messages}
+										mode={state.mode}
+										onChange={actions.edit}
+										onCursorChange={setCursor}
+										readOnly={state.operation.kind === "opening"}
+										ref={editorRef}
+										value={active.source}
+									/>
+								</Suspense>
+							</section>
+						) : (
+							<div className="min-h-0 flex-1 bg-background" />
+						)}
 					</main>
 				</ResizablePanel>
 			</Resizable>
@@ -363,7 +369,8 @@ export function RezicsTextApp({
 			<WorkspaceStatusBar
 				analysis={analysis}
 				cursor={cursor}
-				dirty={active.dirty}
+				documentOpen={active !== undefined}
+				dirty={active?.dirty ?? false}
 				messages={messages}
 				mode={state.mode}
 				onToggleMode={() => actions.setMode(toggleMarkdownEditingMode(state.mode))}
@@ -372,7 +379,7 @@ export function RezicsTextApp({
 				sidebarShortcut={sidebarShortcut}
 				sidebarShortcutAria={commandModifier ? "Meta+Shift+L" : "Control+Shift+L"}
 				sidebarOpen={sidebarOpen}
-				stored={active.file.kind === "stored"}
+				stored={active?.file.kind === "stored"}
 			/>
 		</div>
 	);

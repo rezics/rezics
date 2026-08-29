@@ -14,7 +14,7 @@ export function DocumentTabBar({
 }: {
 	readonly messages: RezicsTextMessages;
 	readonly documents: readonly MarkdownOpenDocument[];
-	readonly activeId: string;
+	readonly activeId: string | undefined;
 	readonly onActivate: (id: string) => void;
 	readonly onClose: (id: string) => void;
 }): ReactElement {

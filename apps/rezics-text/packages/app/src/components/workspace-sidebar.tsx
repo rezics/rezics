@@ -56,7 +56,7 @@ export function WorkspaceSidebar({
 	readonly tab: MarkdownSidebarTab;
 	readonly documents: readonly MarkdownOpenDocument[];
 	readonly folders: readonly MarkdownWorkspaceFolder[];
-	readonly selectedItemId: string;
+	readonly selectedItemId: string | undefined;
 	readonly busy: boolean;
 	readonly analysis: MarkdownDocumentAnalysis;
 	readonly activeOutline: number | undefined;
@@ -188,7 +188,7 @@ export function WorkspaceSidebar({
 								onSelectFolder(node.folderId);
 								onActivate(node.id);
 							}}
-							selectedValue={[selectedItemId]}
+							selectedValue={selectedItemId ? [selectedItemId] : []}
 							selectionMode="single"
 						>
 							<TreeViewLabel className="sr-only">{messages.labels.files}</TreeViewLabel>

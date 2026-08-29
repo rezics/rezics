@@ -1,6 +1,7 @@
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 import type { RezicsTextThemePreference } from "../domain/appearance";
 import type { MarkdownStorageErrorCode } from "../storage";
+import { rezicsTextSampleDocuments } from "./sample-documents";
 
 export const rezicsTextLocales = ["en", "zh-Hans", "zh-Hant"] as const;
 export type RezicsTextLocale = (typeof rezicsTextLocales)[number];
@@ -15,6 +16,7 @@ export interface RezicsTextMessages {
 	readonly documentTitle: (name: string, dirty: boolean) => string;
 	readonly untitledName: string;
 	readonly newFolderName: string;
+	readonly sampleDocument: string;
 	readonly labels: {
 		readonly application: string;
 		readonly menuBar: string;
@@ -125,6 +127,7 @@ const en: RezicsTextMessages = {
 	documentTitle: (name, dirty) => `${dirty ? "• " : ""}${name} — ${productName}`,
 	untitledName: `Untitled${mdFileExtension}`,
 	newFolderName: "New Folder",
+	sampleDocument: rezicsTextSampleDocuments.en,
 	labels: {
 		application: `${productName} application`,
 		menuBar: "Application menu",
@@ -240,6 +243,7 @@ const zhHans: RezicsTextMessages = {
 	documentTitle: (name, dirty) => `${dirty ? "• " : ""}${name} — ${productName}`,
 	untitledName: `未命名${mdFileExtension}`,
 	newFolderName: "新建文件夹",
+	sampleDocument: rezicsTextSampleDocuments["zh-Hans"],
 	labels: {
 		application: `${productName} 应用`,
 		menuBar: "应用菜单",
@@ -351,6 +355,7 @@ const zhHant: RezicsTextMessages = {
 	documentTitle: (name, dirty) => `${dirty ? "• " : ""}${name} — ${productName}`,
 	untitledName: `未命名${mdFileExtension}`,
 	newFolderName: "新增資料夾",
+	sampleDocument: rezicsTextSampleDocuments["zh-Hant"],
 	labels: {
 		application: `${productName} 應用程式`,
 		menuBar: "應用程式選單",
