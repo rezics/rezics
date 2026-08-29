@@ -2,8 +2,7 @@ export const PostgreSqlSchemaFileNames = [
 	"book-chapter-progress.sql",
 	"content-label-policy.sql",
 	"content-language-search.sql",
-	"content-pack-import.sql",
-	"entity-measurement-evidence.sql",
+	"entity-measurement.sql",
 	"realm-tag-authority.sql",
 	"tag-judgment-aggregates.sql",
 	"tag-path.sql",
@@ -18,9 +17,6 @@ export const PostgreSqlSchemaFunctionNames = [
 	"enforce_unit_variant_star",
 	"enqueue_tag_expression_projection_rebuild",
 	"guard_content_label_unit_merge",
-	"guard_content_pack_subject_association_evidence_retarget",
-	"guard_content_pack_unit_tag_evidence_retarget",
-	"guard_content_pack_unit_tag_path_application_evidence_retarget",
 	"guard_direct_tag_application_policy",
 	"guard_entity_measurement",
 	"guard_entity_variant_delete",
@@ -75,60 +71,10 @@ export const PostgreSqlSchemaFunctionNames = [
 	"refresh_unit_effective_tags",
 	"refresh_unit_expression_assertion",
 	"reject_content_label_judgment",
-	"reject_content_pack_entity_measurement_evidence_mutation",
-	"reject_content_pack_import_evidence_mutation",
-	"require_content_pack_evidence_merge_operation",
 	"search_text_candidates",
 ] as const;
 
 export const PostgreSqlSchemaTriggers = [
-	{
-		table: "content_pack_entity_measurement_evidence",
-		name: "content_pack_entity_measurement_evidence_immutable",
-	},
-	{ table: "content_pack_import", name: "content_pack_import_immutable" },
-	{
-		table: "content_pack_subject_association_evidence",
-		name: "content_pack_subject_association_evidence_delete_guard",
-	},
-	{
-		table: "content_pack_subject_association_evidence",
-		name: "content_pack_subject_association_evidence_retarget_guard",
-	},
-	{ table: "content_pack_tag_evidence", name: "content_pack_tag_evidence_immutable" },
-	{
-		table: "content_pack_guide_node_evidence",
-		name: "content_pack_guide_node_evidence_immutable",
-	},
-	{
-		table: "content_pack_tag_relation_evidence",
-		name: "content_pack_tag_relation_evidence_immutable",
-	},
-	{
-		table: "content_pack_tag_expression_evidence",
-		name: "content_pack_tag_expression_evidence_immutable",
-	},
-	{
-		table: "content_pack_tag_path_definition_evidence",
-		name: "content_pack_tag_path_definition_evidence_immutable",
-	},
-	{
-		table: "content_pack_tag_path_sense_evidence",
-		name: "content_pack_tag_path_sense_evidence_immutable",
-	},
-	{ table: "content_pack_unit_tag_evidence", name: "content_pack_unit_tag_evidence_delete_guard" },
-	{
-		table: "content_pack_unit_tag_evidence",
-		name: "content_pack_unit_tag_evidence_retarget_guard",
-	},
-	{
-		table: "content_pack_unit_tag_path_application_evidence",
-		name: "content_pack_unit_tag_path_application_evidence_delete_guard",
-	},
-	{
-		table: "content_pack_unit_tag_path_application_evidence",
-		name: "content_pack_unit_tag_path_application_evidence_retarget_guard",
-	},
 	{ table: "content_structure", name: "book_chapter_structure_stat_maintain" },
 	{ table: "content_structure_node", name: "book_chapter_node_stat_maintain" },
 	{ table: "content_structure_node_progress", name: "book_chapter_progress_stat_maintain" },

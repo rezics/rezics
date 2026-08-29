@@ -374,25 +374,25 @@ tasks:
             - test -n "${DATABASE_ADMIN_URL:-}"
             - yarn exec atlas migrate status --env main --url "${DATABASE_ADMIN_URL}"
 
-    content-pack:apply:
-        desc: Idempotent replay of showcase packs from a sibling checkout or --from directory.
+    showcase-fixtures:apply:
+        desc: Load disposable showcase fixtures into an empty local database; reset before reloading changed fixtures.
         cmds:
-            - yarn exec tsx scripts/content-pack.ts apply {{.CLI_ARGS}}
+            - yarn exec tsx scripts/showcase-fixtures.ts apply {{.CLI_ARGS}}
 
-    content-pack:plan:
-        desc: Preview showcase pack installation without writing Units.
+    showcase-fixtures:plan:
+        desc: Preview local showcase fixture loading without writing canonical rows.
         cmds:
-            - yarn exec tsx scripts/content-pack.ts plan {{.CLI_ARGS}}
+            - yarn exec tsx scripts/showcase-fixtures.ts plan {{.CLI_ARGS}}
 
-    content-pack:verify:
-        desc: Verify an installed showcase pack against the local checkout.
+    showcase-fixtures:verify:
+        desc: Verify local showcase fixture rows against the sibling checkout.
         cmds:
-            - yarn exec tsx scripts/content-pack.ts verify {{.CLI_ARGS}}
+            - yarn exec tsx scripts/showcase-fixtures.ts verify {{.CLI_ARGS}}
 
-    content-pack:status:
-        desc: List installed showcase packs.
+    showcase-fixtures:status:
+        desc: Compare local showcase fixtures with the current local database.
         cmds:
-            - yarn exec tsx scripts/content-pack.ts status {{.CLI_ARGS}}
+            - yarn exec tsx scripts/showcase-fixtures.ts status {{.CLI_ARGS}}
 
     db:reset-bootstrap:
         desc: Reset the local database and install Bootstrap only (no Seed, no showcase packs).

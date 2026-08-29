@@ -24,7 +24,7 @@ export type VoteAdmissionFamily =
 	| "unit_tag"
 	| "tag_path"
 	| "tag_path_application"
-	| "content_pack"
+	| "showcase_fixture"
 	| "unit_merge";
 export type VoteAdmissionAuthority = "global" | "realm";
 export type VoteAdmissionOutcome = "attempted" | "committed" | "backpressured" | "unexpected";

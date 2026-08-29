@@ -9,7 +9,6 @@ export * from "./book-chapter-draft";
 export * from "./collection";
 export * from "./collection-structure-history";
 export * from "./communication";
-export * from "./content-pack-import";
 export * from "./content-metric";
 export * from "./content-language";
 export * from "./content-structure";

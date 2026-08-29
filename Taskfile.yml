@@ -209,15 +209,15 @@ tasks:
             - task build
 
     local:showcase:
-        desc: Idempotent replay of sibling showcase packs.
+        desc: Load disposable sibling showcase fixtures into a freshly reset local database.
         cmds:
             - task: infra:start
             - task: showcase-packs:build
-            - task: services-main:content-pack:apply
+            - task: services-main:showcase-fixtures:apply
             - task: services-main:search:index
               vars:
                   CLI_ARGS: reindex --yes
-            - task: services-main:content-pack:verify
+            - task: services-main:showcase-fixtures:verify
 
     local:reset:
         desc: Reset and seed the local database; its PGroonga indexes are maintained in-database.

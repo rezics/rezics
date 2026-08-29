@@ -1,9 +1,98 @@
 SET search_path TO public;
 
+-- Deliberately fail with an invalid integer cast when any retired fact exists.
+-- Every EXISTS stops at its first row, so the cutover check is bounded even for
+-- corpus-scale relations.
+SELECT CASE
+	WHEN EXISTS (SELECT 1 FROM public.unit_structure)
+		OR EXISTS (SELECT 1 FROM public.unit_structure_member)
+		OR EXISTS (SELECT 1 FROM public.unit_structure_edge)
+		OR EXISTS (SELECT 1 FROM public.unit_structure_vote)
+		OR EXISTS (SELECT 1 FROM public.unit_structure_vote_stat)
+		OR EXISTS (SELECT 1 FROM public.unit_structure_application)
+		OR EXISTS (SELECT 1 FROM public.unit_structure_application_vote)
+		OR EXISTS (SELECT 1 FROM public.unit_structure_application_vote_stat)
+		OR EXISTS (SELECT 1 FROM public.unit_tag_structure_support)
+		OR EXISTS (SELECT 1 FROM public.unit_tag_vote)
+		OR EXISTS (SELECT 1 FROM public.unit_tag_vote_stat)
+		OR EXISTS (SELECT 1 FROM public.realm_tag_vote)
+		OR EXISTS (SELECT 1 FROM public.realm_tag_vote_stat)
+		OR EXISTS (SELECT 1 FROM public.unit WHERE kind = 'structure')
+	THEN 'Tag Path cutover rejected: legacy Structure or Tag-vote data exists'
+	ELSE '1'
+END::integer;
+
+SELECT CASE
+	WHEN EXISTS (
+		SELECT 1
+		FROM public.unit_merge_operation
+		WHERE phase::text IN (
+			'realm_tag_votes',
+			'structure_members',
+			'structure_edges_parent',
+			'structure_edges_child',
+			'structure_applications'
+		)
+	)
+	THEN 'Tag Path cutover rejected: a Unit merge uses a retired phase'
+	ELSE '1'
+END::integer;
+
+ALTER TABLE public.unit_merge_operation
+	ALTER COLUMN phase DROP DEFAULT;
+ALTER TYPE public.unit_merge_operation_phase
+	RENAME TO unit_merge_operation_phase_retired_20260825;
+CREATE TYPE public.unit_merge_operation_phase AS ENUM (
+	'entity_measurement_preflight',
+	'entity_measurement_entities',
+	'entity_measurement_contexts',
+	'variant_graph',
+	'slug_addresses',
+	'slug_scopes',
+	'aliases',
+	'external_links',
+	'external_link_sources',
+	'software_requirements',
+	'software_requirement_platforms',
+	'unit_reactions',
+	'unit_shares',
+	'unit_follows',
+	'scores',
+	'collection_items',
+	'unit_tags',
+	'realm_tag_judgments',
+	'profile_unit_tags',
+	'realm_pins',
+	'realm_units',
+	'realm_unit_tags',
+	'post_subjects',
+	'association_proposal_sources',
+	'association_proposal_targets',
+	'credit_sources',
+	'credit_targets',
+	'subject_sources',
+	'subject_entities',
+	'release_parents',
+	'series_releases',
+	'poll_options',
+	'content_nodes_content',
+	'content_nodes_target',
+	'tag_path_applications',
+	'progress_entries',
+	'progress_snapshots',
+	'notification_subjects',
+	'derived_state',
+	'finalize'
+);
+ALTER TABLE public.unit_merge_operation
+	ALTER COLUMN phase TYPE public.unit_merge_operation_phase
+	USING phase::text::public.unit_merge_operation_phase;
+ALTER TABLE public.unit_merge_operation
+	ALTER COLUMN phase SET DEFAULT 'entity_measurement_preflight'::public.unit_merge_operation_phase;
+DROP TYPE public.unit_merge_operation_phase_retired_20260825;
+
 -- Tag Path was an unreleased development preview. Remove its source facts and
 -- projections rather than guessing semantic Expressions for legacy routes.
-DROP TABLE IF EXISTS public.content_pack_unit_tag_path_evidence CASCADE;
-DROP TABLE IF EXISTS public.content_pack_tag_path_definition_evidence CASCADE;
 DROP TABLE IF EXISTS public.realm_unit_tag_path_support CASCADE;
 DROP TABLE IF EXISTS public.realm_unit_tag_path_judgment_stat CASCADE;
 DROP TABLE IF EXISTS public.realm_unit_tag_path_judgment CASCADE;
@@ -29,9 +118,7 @@ DELETE FROM public.unit WHERE kind = 'tag_path';
 
 -- Preserve only released direct evidence in rebuildable effective projections.
 DELETE FROM public.unit_effective_tag WHERE NOT direct;
-UPDATE public.unit_effective_tag SET path_support_count = 0 WHERE direct;
-DELETE FROM public.realm_unit_effective_tag WHERE NOT direct;
-UPDATE public.realm_unit_effective_tag SET path_support_count = 0 WHERE direct;
+UPDATE public.unit_effective_tag SET structure_support_count = 0 WHERE direct;
 
 -- Existing Tags become concept vocabulary nodes before the new composite
 -- foreign key is installed. Guide nodes deliberately have no Unit identity.
@@ -53,7 +140,6 @@ ALTER TABLE public.tag
 
 -- Remove obsolete preview/effective-fan-out routines. Canonical SQL later in
 -- this migration installs only the semantic-model routines.
-DROP FUNCTION IF EXISTS public.guard_content_pack_unit_tag_path_evidence_retarget() CASCADE;
 DROP FUNCTION IF EXISTS public.guard_tag_path_member_lifecycle() CASCADE;
 DROP FUNCTION IF EXISTS public.maintain_realm_unit_tag_path_judgment_stat() CASCADE;
 DROP FUNCTION IF EXISTS public.maintain_realm_unit_tag_path_support() CASCADE;
@@ -76,12 +162,50 @@ DROP FUNCTION IF EXISTS public.maintain_effective_tag_from_direct_context() CASC
 DROP FUNCTION IF EXISTS public.maintain_effective_tag_from_direct_vote() CASCADE;
 DROP FUNCTION IF EXISTS public.refresh_unit_effective_tag(uuid, uuid) CASCADE;
 
--- Modify "realm_unit_effective_tag" table
-ALTER TABLE "realm_unit_effective_tag" DROP CONSTRAINT "realm_unit_effective_tag_path_count_check", DROP CONSTRAINT "realm_unit_effective_tag_source_check", ADD CONSTRAINT "realm_unit_effective_tag_source_check" CHECK (direct OR (primary_expression_count > 0) OR (entailed_expression_count > 0) OR (retrieval_expression_count > 0)), ADD CONSTRAINT "realm_unit_effective_tag_count_check" CHECK ((primary_expression_count >= 0) AND (entailed_expression_count >= 0) AND (retrieval_expression_count >= 0)), DROP COLUMN "path_support_count", ADD COLUMN "primary_expression_count" bigint NOT NULL DEFAULT 0, ADD COLUMN "entailed_expression_count" bigint NOT NULL DEFAULT 0, ADD COLUMN "retrieval_expression_count" bigint NOT NULL DEFAULT 0;
--- Create index "realm_unit_effective_tag_unit_route_idx" to table: "realm_unit_effective_tag"
-CREATE INDEX "realm_unit_effective_tag_unit_route_idx" ON "realm_unit_effective_tag" ("unit_id", "realm_id", "tag_id");
--- Modify "unit_effective_tag" table
-ALTER TABLE "unit_effective_tag" DROP CONSTRAINT "unit_effective_tag_path_count_check", DROP CONSTRAINT "unit_effective_tag_source_check", ADD CONSTRAINT "unit_effective_tag_source_check" CHECK (direct OR (primary_expression_count > 0) OR (entailed_expression_count > 0) OR (retrieval_expression_count > 0)), ADD CONSTRAINT "unit_effective_tag_count_check" CHECK ((primary_expression_count >= 0) AND (entailed_expression_count >= 0) AND (retrieval_expression_count >= 0)), DROP COLUMN "path_support_count", ADD COLUMN "primary_expression_count" bigint NOT NULL DEFAULT 0, ADD COLUMN "entailed_expression_count" bigint NOT NULL DEFAULT 0, ADD COLUMN "retrieval_expression_count" bigint NOT NULL DEFAULT 0;
+-- Add value to enum type: "platform_capability"
+ALTER TYPE "platform_capability" ADD VALUE 'platform.zone_theme.review' AFTER 'platform.development_preview.access';
+-- Add value to enum type: "platform_capability"
+ALTER TYPE "platform_capability" ADD VALUE 'platform.zone_theme.kill' AFTER 'platform.zone_theme.review';
+-- Add value to enum type: "unit_permission"
+ALTER TYPE "unit_permission" ADD VALUE 'zone.pages.manage' AFTER 'unit.realm-publication.manage';
+-- Add value to enum type: "unit_permission"
+ALTER TYPE "unit_permission" ADD VALUE 'zone.theme.manage' AFTER 'zone.pages.manage';
+-- Create enum type "realm_tag_fallback_policy"
+CREATE TYPE "realm_tag_fallback_policy" AS ENUM ('inherit', 'isolate');
+-- Create index "book_release_status_id_idx" to table: "book"
+CREATE INDEX "book_release_status_id_idx" ON "book" ("release_status", "id");
+-- Modify "profile_preference" table
+ALTER TABLE "profile_preference" ADD COLUMN "custom_zone_themes_enabled" boolean NOT NULL DEFAULT true, ADD COLUMN "always_show_spoilers" boolean NOT NULL DEFAULT false, ADD COLUMN "always_show_nsfw" boolean NOT NULL DEFAULT false;
+-- Create index "realm_unit_tag_tag_route_idx" to table: "realm_unit_tag"
+CREATE INDEX "realm_unit_tag_tag_route_idx" ON "realm_unit_tag" ("tag_id", "realm_id", "unit_id");
+-- Modify "unit" table
+ALTER TABLE "unit" DROP CONSTRAINT "unit_kind_check", ADD CONSTRAINT "unit_kind_check" CHECK (kind = ANY (ARRAY['slug_namespace'::text, 'profile'::text, 'book'::text, 'software'::text, 'media'::text, 'video'::text, 'audio'::text, 'release'::text, 'entity'::text, 'label'::text, 'tag'::text, 'tag_path'::text, 'series'::text, 'zone'::text, 'zone_page'::text, 'zone_theme'::text, 'collection'::text, 'post'::text, 'poll'::text, 'realm'::text, 'realm_rule'::text]));
+-- Modify "unit_access_invitation" table
+ALTER TABLE "unit_access_invitation" DROP CONSTRAINT "unit_access_invitation_permissions_check", ADD CONSTRAINT "unit_access_invitation_permissions_check" CHECK (((cardinality(permissions) >= 1) AND (cardinality(permissions) <= 28)) AND (array_position(permissions, 'unit.ownership.transfer'::unit_permission) IS NULL) AND (array_position(permissions, 'unit.delete'::unit_permission) IS NULL));
+-- Modify "unit_merge_operation" table
+ALTER TABLE "unit_merge_operation" ADD COLUMN "measurement_preflight_cursor_entity_id" uuid NULL;
+-- Create "entity_measurement" table
+CREATE TABLE "entity_measurement" (
+  "id" uuid NOT NULL DEFAULT uuidv7(),
+  "entity_id" uuid NOT NULL,
+  "context_unit_id" uuid NULL,
+  "height_millimetres" integer NULL,
+  "weight_grams" integer NULL,
+  "bust_millimetres" integer NULL,
+  "waist_millimetres" integer NULL,
+  "hips_millimetres" integer NULL,
+  "created_at" timestamptz(3) NOT NULL DEFAULT now(),
+  "updated_at" timestamptz(3) NOT NULL DEFAULT now(),
+  PRIMARY KEY ("id"),
+  CONSTRAINT "entity_measurement_entity_context_key" UNIQUE NULLS NOT DISTINCT ("entity_id", "context_unit_id"),
+  CONSTRAINT "entity_measurement_context_unit_id_unit_id_fkey" FOREIGN KEY ("context_unit_id") REFERENCES "unit" ("id") ON UPDATE NO ACTION ON DELETE RESTRICT,
+  CONSTRAINT "entity_measurement_entity_id_entity_id_fkey" FOREIGN KEY ("entity_id") REFERENCES "entity" ("id") ON UPDATE NO ACTION ON DELETE CASCADE,
+  CONSTRAINT "entity_measurement_context_not_self_check" CHECK ((context_unit_id IS NULL) OR (context_unit_id <> entity_id)),
+  CONSTRAINT "entity_measurement_positive_check" CHECK (COALESCE((height_millimetres > 0), true) AND COALESCE((weight_grams > 0), true) AND COALESCE((bust_millimetres > 0), true) AND COALESCE((waist_millimetres > 0), true) AND COALESCE((hips_millimetres > 0), true)),
+  CONSTRAINT "entity_measurement_value_present_check" CHECK (num_nonnulls(height_millimetres, weight_grams, bust_millimetres, waist_millimetres, hips_millimetres) > 0)
+);
+-- Create index "entity_measurement_context_idx" to table: "entity_measurement"
+CREATE INDEX "entity_measurement_context_idx" ON "entity_measurement" ("context_unit_id", "entity_id") WHERE (context_unit_id IS NOT NULL);
 -- Modify "vocabulary_node" table
 ALTER TABLE "vocabulary_node" ADD CONSTRAINT "vocabulary_node_kind_check" CHECK (kind = ANY (ARRAY['concept'::text, 'guide'::text])), ADD CONSTRAINT "vocabulary_node_retirement_check" CHECK (((status = 'active'::text) AND (retired_at IS NULL)) OR ((status = 'retired'::text) AND (retired_at IS NOT NULL))), ADD CONSTRAINT "vocabulary_node_status_check" CHECK (status = ANY (ARRAY['active'::text, 'retired'::text])), ADD CONSTRAINT "vocabulary_node_id_kind_key" UNIQUE ("id", "kind"), ADD CONSTRAINT "vocabulary_node_created_by_profile_id_profile_id_fkey" FOREIGN KEY ("created_by_profile_id") REFERENCES "profile" ("id") ON UPDATE NO ACTION ON DELETE SET NULL;
 -- Create index "vocabulary_node_kind_status_idx" to table: "vocabulary_node"
@@ -94,68 +218,88 @@ CREATE TABLE "guide_node" (
   PRIMARY KEY ("id"),
   CONSTRAINT "guide_node_id_vocabulary_node_id_fkey" FOREIGN KEY ("id") REFERENCES "vocabulary_node" ("id") ON UPDATE NO ACTION ON DELETE CASCADE
 );
--- Create "content_pack_guide_node_evidence" table
-CREATE TABLE "content_pack_guide_node_evidence" (
-  "import_id" uuid NOT NULL,
-  "source_fingerprint" text NOT NULL,
+-- Create "guide_node_localization" table
+CREATE TABLE "guide_node_localization" (
   "node_id" uuid NOT NULL,
-  "node_source_key" text NOT NULL,
-  "source_url" text NOT NULL,
-  "source_imported_at" timestamptz(3) NOT NULL,
+  "language" text NOT NULL,
+  "title" text NOT NULL,
   "created_at" timestamptz(3) NOT NULL DEFAULT now(),
-  PRIMARY KEY ("import_id", "source_fingerprint"),
-  CONSTRAINT "content_pack_guide_node_evidence_import_fkey" FOREIGN KEY ("import_id") REFERENCES "content_pack_import" ("id") ON UPDATE NO ACTION ON DELETE CASCADE,
-  CONSTRAINT "content_pack_guide_node_evidence_node_id_guide_node_id_fkey" FOREIGN KEY ("node_id") REFERENCES "guide_node" ("id") ON UPDATE NO ACTION ON DELETE RESTRICT,
-  CONSTRAINT "content_pack_guide_node_evidence_fingerprint_check" CHECK (source_fingerprint ~ '^[0-9a-f]{64}$'::text),
-  CONSTRAINT "content_pack_guide_node_evidence_source_key_check" CHECK (btrim(node_source_key) <> ''::text)
+  "updated_at" timestamptz(3) NOT NULL DEFAULT now(),
+  PRIMARY KEY ("node_id", "language"),
+  CONSTRAINT "guide_node_localization_node_id_guide_node_id_fkey" FOREIGN KEY ("node_id") REFERENCES "guide_node" ("id") ON UPDATE NO ACTION ON DELETE CASCADE,
+  CONSTRAINT "guide_node_localization_language_check" CHECK (language = ANY (ARRAY['zh'::text, 'en'::text, 'ja'::text, 'ko'::text, 'de'::text, 'fr'::text, 'es'::text])),
+  CONSTRAINT "guide_node_localization_title_check" CHECK ((btrim(title) <> ''::text) AND (octet_length(title) <= 512))
 );
--- Create index "content_pack_guide_node_evidence_node_idx" to table: "content_pack_guide_node_evidence"
-CREATE INDEX "content_pack_guide_node_evidence_node_idx" ON "content_pack_guide_node_evidence" ("node_id", "import_id");
+-- Create index "guide_node_localization_language_node_idx" to table: "guide_node_localization"
+CREATE INDEX "guide_node_localization_language_node_idx" ON "guide_node_localization" ("language", "node_id");
 -- Modify "tag" table
-ALTER TABLE "tag" ADD CONSTRAINT "tag_node_kind_check" CHECK (node_kind = 'concept'::text), ADD CONSTRAINT "tag_vocabulary_node_fkey" FOREIGN KEY ("id", "node_kind") REFERENCES "vocabulary_node" ("id", "kind") ON UPDATE NO ACTION ON DELETE CASCADE;
--- Create "tag_expression" table
-CREATE TABLE "tag_expression" (
-  "id" uuid NOT NULL DEFAULT uuidv7(),
-  "expression_kind" text NOT NULL,
-  "canonical_claim_key" text NOT NULL,
-  "focus_tag_id" uuid NOT NULL,
-  "status" text NOT NULL DEFAULT 'active',
-  "created_by_profile_id" uuid NULL,
+ALTER TABLE "tag" ADD CONSTRAINT "tag_default_spoiler_level_check" CHECK ((default_spoiler_level IS NULL) OR ((default_spoiler_level >= 0) AND (default_spoiler_level <= 2))), ADD CONSTRAINT "tag_node_kind_check" CHECK (node_kind = 'concept'::text), ADD COLUMN "directly_applicable" boolean NOT NULL DEFAULT true, ADD COLUMN "default_spoiler_level" smallint NULL, ADD CONSTRAINT "tag_vocabulary_node_fkey" FOREIGN KEY ("id", "node_kind") REFERENCES "vocabulary_node" ("id", "kind") ON UPDATE NO ACTION ON DELETE CASCADE;
+-- Modify "realm_tag_context" table
+ALTER TABLE "realm_tag_context" DROP CONSTRAINT "realm_tag_context_tag_id_tag_id_fkey", ADD CONSTRAINT "realm_tag_context_tag_id_tag_id_fkey" FOREIGN KEY ("tag_id") REFERENCES "tag" ("id") ON UPDATE NO ACTION ON DELETE CASCADE;
+-- Modify "realm" table
+ALTER TABLE "realm" ADD COLUMN "tag_fit_fallback_policy" "realm_tag_fallback_policy" NOT NULL DEFAULT 'inherit', ADD COLUMN "tag_spoiler_fallback_policy" "realm_tag_fallback_policy" NOT NULL DEFAULT 'inherit';
+-- Create "realm_tag_judgment" table
+CREATE TABLE "realm_tag_judgment" (
+  "realm_id" uuid NOT NULL,
+  "unit_id" uuid NOT NULL,
+  "tag_id" uuid NOT NULL,
+  "profile_id" uuid NOT NULL,
+  "fit_vote" integer NULL,
+  "spoiler_level" smallint NULL,
+  "fit_updated_at" timestamptz(3) NULL,
+  "spoiler_updated_at" timestamptz(3) NULL,
   "created_at" timestamptz(3) NOT NULL DEFAULT now(),
-  "sealed_at" timestamptz(3) NULL,
-  "retired_at" timestamptz(3) NULL,
-  PRIMARY KEY ("id"),
-  CONSTRAINT "tag_expression_claim_key" UNIQUE ("canonical_claim_key"),
-  CONSTRAINT "tag_expression_created_by_profile_id_profile_id_fkey" FOREIGN KEY ("created_by_profile_id") REFERENCES "profile" ("id") ON UPDATE NO ACTION ON DELETE SET NULL,
-  CONSTRAINT "tag_expression_focus_tag_id_tag_id_fkey" FOREIGN KEY ("focus_tag_id") REFERENCES "tag" ("id") ON UPDATE NO ACTION ON DELETE RESTRICT,
-  CONSTRAINT "tag_expression_claim_key_check" CHECK ((btrim(canonical_claim_key) <> ''::text) AND (octet_length(canonical_claim_key) <= 2048)),
-  CONSTRAINT "tag_expression_kind_check" CHECK (expression_kind = ANY (ARRAY['simple'::text, 'facet_value'::text, 'relation'::text])),
-  CONSTRAINT "tag_expression_retirement_check" CHECK (((status = 'active'::text) AND (retired_at IS NULL)) OR ((status = 'retired'::text) AND (retired_at IS NOT NULL))),
-  CONSTRAINT "tag_expression_status_check" CHECK (status = ANY (ARRAY['active'::text, 'retired'::text]))
+  "updated_at" timestamptz(3) NOT NULL DEFAULT now(),
+  PRIMARY KEY ("realm_id", "unit_id", "tag_id", "profile_id"),
+  CONSTRAINT "realm_tag_judgment_context_fkey" FOREIGN KEY ("realm_id", "tag_id") REFERENCES "realm_tag_context" ("realm_id", "tag_id") ON UPDATE NO ACTION ON DELETE RESTRICT,
+  CONSTRAINT "realm_tag_judgment_profile_id_profile_id_fkey" FOREIGN KEY ("profile_id") REFERENCES "profile" ("id") ON UPDATE NO ACTION ON DELETE RESTRICT,
+  CONSTRAINT "realm_tag_judgment_realm_fkey" FOREIGN KEY ("realm_id") REFERENCES "realm" ("id") ON UPDATE NO ACTION ON DELETE RESTRICT,
+  CONSTRAINT "realm_tag_judgment_tag_fkey" FOREIGN KEY ("tag_id") REFERENCES "tag" ("id") ON UPDATE NO ACTION ON DELETE RESTRICT,
+  CONSTRAINT "realm_tag_judgment_unit_fkey" FOREIGN KEY ("unit_id") REFERENCES "unit" ("id") ON UPDATE NO ACTION ON DELETE RESTRICT,
+  CONSTRAINT "realm_tag_judgment_fit_timestamp_check" CHECK ((fit_vote IS NULL) = (fit_updated_at IS NULL)),
+  CONSTRAINT "realm_tag_judgment_fit_vote_check" CHECK ((fit_vote IS NULL) OR (fit_vote = ANY (ARRAY['-1'::integer, 1]))),
+  CONSTRAINT "realm_tag_judgment_not_self_check" CHECK (unit_id <> tag_id),
+  CONSTRAINT "realm_tag_judgment_sparse_check" CHECK ((fit_vote IS NOT NULL) OR (spoiler_level IS NOT NULL)),
+  CONSTRAINT "realm_tag_judgment_spoiler_level_check" CHECK ((spoiler_level IS NULL) OR ((spoiler_level >= 0) AND (spoiler_level <= 2))),
+  CONSTRAINT "realm_tag_judgment_spoiler_timestamp_check" CHECK ((spoiler_level IS NULL) = (spoiler_updated_at IS NULL))
 );
--- Create index "tag_expression_focus_status_idx" to table: "tag_expression"
-CREATE INDEX "tag_expression_focus_status_idx" ON "tag_expression" ("focus_tag_id", "status", "expression_kind", "id");
--- Create index "tag_expression_simple_focus_key" to table: "tag_expression"
-CREATE UNIQUE INDEX "tag_expression_simple_focus_key" ON "tag_expression" ("focus_tag_id") WHERE (expression_kind = 'simple'::text);
--- Create "content_pack_tag_expression_evidence" table
-CREATE TABLE "content_pack_tag_expression_evidence" (
-  "import_id" uuid NOT NULL,
-  "source_fingerprint" text NOT NULL,
-  "expression_id" uuid NOT NULL,
-  "declared_expression_id" uuid NOT NULL,
-  "expression_source_key" text NOT NULL,
-  "canonical_claim_key" text NOT NULL,
-  "source_url" text NOT NULL,
-  "source_imported_at" timestamptz(3) NOT NULL,
-  "created_at" timestamptz(3) NOT NULL DEFAULT now(),
-  PRIMARY KEY ("import_id", "source_fingerprint"),
-  CONSTRAINT "content_pack_tag_expression_evidence_UwjHshAFH0j6_fkey" FOREIGN KEY ("expression_id") REFERENCES "tag_expression" ("id") ON UPDATE NO ACTION ON DELETE RESTRICT,
-  CONSTRAINT "content_pack_tag_expression_evidence_import_fkey" FOREIGN KEY ("import_id") REFERENCES "content_pack_import" ("id") ON UPDATE NO ACTION ON DELETE CASCADE,
-  CONSTRAINT "content_pack_tag_expression_evidence_fingerprint_check" CHECK (source_fingerprint ~ '^[0-9a-f]{64}$'::text),
-  CONSTRAINT "content_pack_tag_expression_evidence_source_key_check" CHECK ((btrim(expression_source_key) <> ''::text) AND (btrim(canonical_claim_key) <> ''::text))
+-- Create index "realm_tag_judgment_profile_route_idx" to table: "realm_tag_judgment"
+CREATE INDEX "realm_tag_judgment_profile_route_idx" ON "realm_tag_judgment" ("profile_id", "realm_id", "unit_id", "tag_id");
+-- Create index "realm_tag_judgment_realm_tag_unit_idx" to table: "realm_tag_judgment"
+CREATE INDEX "realm_tag_judgment_realm_tag_unit_idx" ON "realm_tag_judgment" ("realm_id", "tag_id", "unit_id");
+-- Create index "realm_tag_judgment_tag_route_idx" to table: "realm_tag_judgment"
+CREATE INDEX "realm_tag_judgment_tag_route_idx" ON "realm_tag_judgment" ("tag_id", "realm_id", "unit_id", "profile_id");
+-- Create index "realm_tag_judgment_unit_merge_idx" to table: "realm_tag_judgment"
+CREATE INDEX "realm_tag_judgment_unit_merge_idx" ON "realm_tag_judgment" ("unit_id", "realm_id", "tag_id", "profile_id");
+-- Create "realm_tag_judgment_stat" table
+CREATE TABLE "realm_tag_judgment_stat" (
+  "realm_id" uuid NOT NULL,
+  "unit_id" uuid NOT NULL,
+  "tag_id" uuid NOT NULL,
+  "score" bigint NOT NULL DEFAULT 0,
+  "vote_count" bigint NOT NULL DEFAULT 0,
+  "spoiler_vote_count" bigint NOT NULL DEFAULT 0,
+  "spoiler_none_count" bigint NOT NULL DEFAULT 0,
+  "spoiler_minor_count" bigint NOT NULL DEFAULT 0,
+  "spoiler_major_count" bigint NOT NULL DEFAULT 0,
+  "updated_at" timestamptz(3) NOT NULL DEFAULT now(),
+  PRIMARY KEY ("realm_id", "unit_id", "tag_id"),
+  CONSTRAINT "realm_tag_judgment_stat_context_fkey" FOREIGN KEY ("realm_id", "tag_id") REFERENCES "realm_tag_context" ("realm_id", "tag_id") ON UPDATE NO ACTION ON DELETE CASCADE,
+  CONSTRAINT "realm_tag_judgment_stat_realm_fkey" FOREIGN KEY ("realm_id") REFERENCES "realm" ("id") ON UPDATE NO ACTION ON DELETE CASCADE,
+  CONSTRAINT "realm_tag_judgment_stat_tag_fkey" FOREIGN KEY ("tag_id") REFERENCES "tag" ("id") ON UPDATE NO ACTION ON DELETE CASCADE,
+  CONSTRAINT "realm_tag_judgment_stat_unit_fkey" FOREIGN KEY ("unit_id") REFERENCES "unit" ("id") ON UPDATE NO ACTION ON DELETE CASCADE,
+  CONSTRAINT "realm_tag_judgment_stat_count_check" CHECK (vote_count >= 0),
+  CONSTRAINT "realm_tag_judgment_stat_parity_check" CHECK (((vote_count + score) % (2)::bigint) = 0),
+  CONSTRAINT "realm_tag_judgment_stat_score_check" CHECK (abs(score) <= vote_count),
+  CONSTRAINT "realm_tag_judgment_stat_spoiler_count_check" CHECK (spoiler_vote_count = ((spoiler_none_count + spoiler_minor_count) + spoiler_major_count)),
+  CONSTRAINT "realm_tag_judgment_stat_spoiler_nonnegative_check" CHECK ((spoiler_vote_count >= 0) AND (spoiler_none_count >= 0) AND (spoiler_minor_count >= 0) AND (spoiler_major_count >= 0))
 );
--- Create index "content_pack_tag_expression_evidence_expression_idx" to table: "content_pack_tag_expression_evidence"
-CREATE INDEX "content_pack_tag_expression_evidence_expression_idx" ON "content_pack_tag_expression_evidence" ("expression_id", "import_id");
+-- Create index "realm_tag_judgment_stat_realm_tag_unit_idx" to table: "realm_tag_judgment_stat"
+CREATE INDEX "realm_tag_judgment_stat_realm_tag_unit_idx" ON "realm_tag_judgment_stat" ("realm_id", "tag_id", "unit_id");
+-- Create index "realm_tag_judgment_stat_tag_realm_unit_idx" to table: "realm_tag_judgment_stat"
+CREATE INDEX "realm_tag_judgment_stat_tag_realm_unit_idx" ON "realm_tag_judgment_stat" ("tag_id", "realm_id", "unit_id");
+-- Create index "realm_tag_judgment_stat_unit_realm_tag_idx" to table: "realm_tag_judgment_stat"
+CREATE INDEX "realm_tag_judgment_stat_unit_realm_tag_idx" ON "realm_tag_judgment_stat" ("unit_id", "realm_id", "tag_id");
 -- Create "tag_path" table
 CREATE TABLE "tag_path" (
   "id" uuid NOT NULL,
@@ -183,47 +327,43 @@ CREATE TABLE "tag_path" (
 CREATE INDEX "tag_path_created_by_idx" ON "tag_path" ("created_by_profile_id", "created_at", "id");
 -- Create index "tag_path_terminal_usage_idx" to table: "tag_path"
 CREATE INDEX "tag_path_terminal_usage_idx" ON "tag_path" ("terminal_node_id", "id");
--- Create "tag_path_vote" table
-CREATE TABLE "tag_path_vote" (
+-- Create "realm_tag_path" table
+CREATE TABLE "realm_tag_path" (
+  "realm_id" uuid NOT NULL,
   "path_id" uuid NOT NULL,
-  "profile_id" uuid NOT NULL,
-  "value" integer NOT NULL,
+  "created_by_profile_id" uuid NOT NULL,
   "created_at" timestamptz(3) NOT NULL DEFAULT now(),
-  "updated_at" timestamptz(3) NOT NULL DEFAULT now(),
-  PRIMARY KEY ("path_id", "profile_id"),
-  CONSTRAINT "tag_path_vote_path_id_tag_path_id_fkey" FOREIGN KEY ("path_id") REFERENCES "tag_path" ("id") ON UPDATE NO ACTION ON DELETE RESTRICT,
-  CONSTRAINT "tag_path_vote_profile_id_profile_id_fkey" FOREIGN KEY ("profile_id") REFERENCES "profile" ("id") ON UPDATE NO ACTION ON DELETE RESTRICT,
-  CONSTRAINT "tag_path_vote_value_check" CHECK (value = ANY (ARRAY['-1'::integer, 1]))
+  PRIMARY KEY ("realm_id", "path_id"),
+  CONSTRAINT "realm_tag_path_created_by_profile_id_profile_id_fkey" FOREIGN KEY ("created_by_profile_id") REFERENCES "profile" ("id") ON UPDATE NO ACTION ON DELETE RESTRICT,
+  CONSTRAINT "realm_tag_path_path_id_tag_path_id_fkey" FOREIGN KEY ("path_id") REFERENCES "tag_path" ("id") ON UPDATE NO ACTION ON DELETE RESTRICT,
+  CONSTRAINT "realm_tag_path_realm_id_realm_id_fkey" FOREIGN KEY ("realm_id") REFERENCES "realm" ("id") ON UPDATE NO ACTION ON DELETE CASCADE
 );
--- Create index "tag_path_vote_profile_idx" to table: "tag_path_vote"
-CREATE INDEX "tag_path_vote_profile_idx" ON "tag_path_vote" ("profile_id", "path_id");
--- Create "content_pack_tag_path_definition_evidence" table
-CREATE TABLE "content_pack_tag_path_definition_evidence" (
-  "import_id" uuid NOT NULL,
-  "source_fingerprint" text NOT NULL,
-  "path_id" uuid NOT NULL,
-  "profile_id" uuid NOT NULL,
-  "declared_path_id" uuid NOT NULL,
-  "path_source_key" text NOT NULL,
-  "member_node_source_keys" text[] NOT NULL,
-  "relation_source_keys" text[] NOT NULL,
-  "source_vote" integer NOT NULL,
-  "source_url" text NOT NULL,
-  "source_imported_at" timestamptz(3) NOT NULL,
+-- Create index "realm_tag_path_path_realm_idx" to table: "realm_tag_path"
+CREATE INDEX "realm_tag_path_path_realm_idx" ON "realm_tag_path" ("path_id", "realm_id");
+-- Create "tag_expression" table
+CREATE TABLE "tag_expression" (
+  "id" uuid NOT NULL DEFAULT uuidv7(),
+  "expression_kind" text NOT NULL,
+  "canonical_claim_key" text NOT NULL,
+  "focus_tag_id" uuid NOT NULL,
+  "status" text NOT NULL DEFAULT 'active',
+  "created_by_profile_id" uuid NULL,
   "created_at" timestamptz(3) NOT NULL DEFAULT now(),
-  PRIMARY KEY ("import_id", "source_fingerprint"),
-  CONSTRAINT "content_pack_tag_path_definition_evidence_import_profile_fkey" FOREIGN KEY ("import_id", "profile_id") REFERENCES "content_pack_import" ("id", "importer_profile_id") ON UPDATE CASCADE ON DELETE CASCADE,
-  CONSTRAINT "content_pack_tag_path_definition_evidence_vote_fkey" FOREIGN KEY ("path_id", "profile_id") REFERENCES "tag_path_vote" ("path_id", "profile_id") ON UPDATE CASCADE ON DELETE RESTRICT,
-  CONSTRAINT "content_pack_tag_path_definition_evidence_member_count_check" CHECK ((cardinality(member_node_source_keys) >= 2) AND (cardinality(member_node_source_keys) <= 16)),
-  CONSTRAINT "content_pack_tag_path_definition_evidence_member_null_check" CHECK (array_position(member_node_source_keys, NULL::text) IS NULL),
-  CONSTRAINT "content_pack_tag_path_definition_evidence_relation_check" CHECK ((cardinality(relation_source_keys) = (cardinality(member_node_source_keys) - 1)) AND (array_position(relation_source_keys, NULL::text) IS NULL)),
-  CONSTRAINT "content_pack_tag_path_definition_evidence_source_fingerprint_ch" CHECK (source_fingerprint ~ '^[0-9a-f]{64}$'::text),
-  CONSTRAINT "content_pack_tag_path_definition_evidence_source_key_check" CHECK (btrim(path_source_key) <> ''::text),
-  CONSTRAINT "content_pack_tag_path_definition_evidence_source_url_check" CHECK ((btrim(source_url) <> ''::text) AND (source_url ~ '^https?://'::text)),
-  CONSTRAINT "content_pack_tag_path_definition_evidence_vote_check" CHECK (source_vote = 1)
+  "sealed_at" timestamptz(3) NULL,
+  "retired_at" timestamptz(3) NULL,
+  PRIMARY KEY ("id"),
+  CONSTRAINT "tag_expression_claim_key" UNIQUE ("canonical_claim_key"),
+  CONSTRAINT "tag_expression_created_by_profile_id_profile_id_fkey" FOREIGN KEY ("created_by_profile_id") REFERENCES "profile" ("id") ON UPDATE NO ACTION ON DELETE SET NULL,
+  CONSTRAINT "tag_expression_focus_tag_id_tag_id_fkey" FOREIGN KEY ("focus_tag_id") REFERENCES "tag" ("id") ON UPDATE NO ACTION ON DELETE RESTRICT,
+  CONSTRAINT "tag_expression_claim_key_check" CHECK ((btrim(canonical_claim_key) <> ''::text) AND (octet_length(canonical_claim_key) <= 2048)),
+  CONSTRAINT "tag_expression_kind_check" CHECK (expression_kind = ANY (ARRAY['simple'::text, 'facet_value'::text, 'relation'::text])),
+  CONSTRAINT "tag_expression_retirement_check" CHECK (((status = 'active'::text) AND (retired_at IS NULL)) OR ((status = 'retired'::text) AND (retired_at IS NOT NULL))),
+  CONSTRAINT "tag_expression_status_check" CHECK (status = ANY (ARRAY['active'::text, 'retired'::text]))
 );
--- Create index "content_pack_tag_path_definition_evidence_vote_idx" to table: "content_pack_tag_path_definition_evidence"
-CREATE INDEX "content_pack_tag_path_definition_evidence_vote_idx" ON "content_pack_tag_path_definition_evidence" ("path_id", "profile_id", "import_id");
+-- Create index "tag_expression_focus_status_idx" to table: "tag_expression"
+CREATE INDEX "tag_expression_focus_status_idx" ON "tag_expression" ("focus_tag_id", "status", "expression_kind", "id");
+-- Create index "tag_expression_simple_focus_key" to table: "tag_expression"
+CREATE UNIQUE INDEX "tag_expression_simple_focus_key" ON "tag_expression" ("focus_tag_id") WHERE (expression_kind = 'simple'::text);
 -- Create "tag_path_sense" table
 CREATE TABLE "tag_path_sense" (
   "id" uuid NOT NULL DEFAULT uuidv7(),
@@ -261,176 +401,6 @@ CREATE INDEX "tag_path_sense_path_route_idx" ON "tag_path_sense" ("path_id", "st
 CREATE UNIQUE INDEX "tag_path_sense_realm_identity_key" ON "tag_path_sense" ("realm_id", "path_id", "expression_id", "binding_signature") WHERE (scope = 'realm'::text);
 -- Create index "tag_path_sense_realm_route_idx" to table: "tag_path_sense"
 CREATE INDEX "tag_path_sense_realm_route_idx" ON "tag_path_sense" ("realm_id", "status", "path_id", "id");
--- Create "content_pack_tag_path_sense_evidence" table
-CREATE TABLE "content_pack_tag_path_sense_evidence" (
-  "import_id" uuid NOT NULL,
-  "source_fingerprint" text NOT NULL,
-  "sense_id" uuid NOT NULL,
-  "declared_sense_id" uuid NOT NULL,
-  "sense_source_key" text NOT NULL,
-  "path_source_key" text NOT NULL,
-  "expression_source_key" text NOT NULL,
-  "source_url" text NOT NULL,
-  "source_imported_at" timestamptz(3) NOT NULL,
-  "created_at" timestamptz(3) NOT NULL DEFAULT now(),
-  PRIMARY KEY ("import_id", "source_fingerprint"),
-  CONSTRAINT "content_pack_tag_path_sense_evidence_iFsItajkIA0q_fkey" FOREIGN KEY ("sense_id") REFERENCES "tag_path_sense" ("id") ON UPDATE NO ACTION ON DELETE RESTRICT,
-  CONSTRAINT "content_pack_tag_path_sense_evidence_import_fkey" FOREIGN KEY ("import_id") REFERENCES "content_pack_import" ("id") ON UPDATE NO ACTION ON DELETE CASCADE,
-  CONSTRAINT "content_pack_tag_path_sense_evidence_fingerprint_check" CHECK (source_fingerprint ~ '^[0-9a-f]{64}$'::text),
-  CONSTRAINT "content_pack_tag_path_sense_evidence_source_keys_check" CHECK ((btrim(sense_source_key) <> ''::text) AND (btrim(path_source_key) <> ''::text) AND (btrim(expression_source_key) <> ''::text))
-);
--- Create index "content_pack_tag_path_sense_evidence_sense_idx" to table: "content_pack_tag_path_sense_evidence"
-CREATE INDEX "content_pack_tag_path_sense_evidence_sense_idx" ON "content_pack_tag_path_sense_evidence" ("sense_id", "import_id");
--- Create "tag_relation" table
-CREATE TABLE "tag_relation" (
-  "id" uuid NOT NULL DEFAULT uuidv7(),
-  "parent_node_id" uuid NOT NULL,
-  "child_node_id" uuid NOT NULL,
-  "relation_kind" text NOT NULL,
-  "revision" integer NOT NULL DEFAULT 1,
-  "status" text NOT NULL DEFAULT 'active',
-  "provenance" jsonb NULL,
-  "created_by_profile_id" uuid NULL,
-  "created_at" timestamptz(3) NOT NULL DEFAULT now(),
-  "retired_at" timestamptz(3) NULL,
-  PRIMARY KEY ("id"),
-  CONSTRAINT "tag_relation_revision_key" UNIQUE ("parent_node_id", "child_node_id", "relation_kind", "revision"),
-  CONSTRAINT "tag_relation_child_node_id_vocabulary_node_id_fkey" FOREIGN KEY ("child_node_id") REFERENCES "vocabulary_node" ("id") ON UPDATE NO ACTION ON DELETE RESTRICT,
-  CONSTRAINT "tag_relation_created_by_profile_id_profile_id_fkey" FOREIGN KEY ("created_by_profile_id") REFERENCES "profile" ("id") ON UPDATE NO ACTION ON DELETE SET NULL,
-  CONSTRAINT "tag_relation_parent_node_id_vocabulary_node_id_fkey" FOREIGN KEY ("parent_node_id") REFERENCES "vocabulary_node" ("id") ON UPDATE NO ACTION ON DELETE RESTRICT,
-  CONSTRAINT "tag_relation_distinct_check" CHECK (parent_node_id <> child_node_id),
-  CONSTRAINT "tag_relation_kind_check" CHECK (relation_kind = ANY (ARRAY['generic'::text, 'partitive'::text, 'instance'::text, 'organizational'::text, 'facet_value'::text])),
-  CONSTRAINT "tag_relation_provenance_object_check" CHECK ((provenance IS NULL) OR (jsonb_typeof(provenance) = 'object'::text)),
-  CONSTRAINT "tag_relation_retirement_check" CHECK (((status = 'active'::text) AND (retired_at IS NULL)) OR ((status = 'retired'::text) AND (retired_at IS NOT NULL))),
-  CONSTRAINT "tag_relation_revision_check" CHECK (revision >= 1),
-  CONSTRAINT "tag_relation_status_check" CHECK (status = ANY (ARRAY['active'::text, 'retired'::text]))
-);
--- Create index "tag_relation_active_key" to table: "tag_relation"
-CREATE UNIQUE INDEX "tag_relation_active_key" ON "tag_relation" ("parent_node_id", "child_node_id", "relation_kind") WHERE (status = 'active'::text);
--- Create index "tag_relation_child_route_idx" to table: "tag_relation"
-CREATE INDEX "tag_relation_child_route_idx" ON "tag_relation" ("child_node_id", "status", "relation_kind", "parent_node_id", "id");
--- Create index "tag_relation_parent_route_idx" to table: "tag_relation"
-CREATE INDEX "tag_relation_parent_route_idx" ON "tag_relation" ("parent_node_id", "status", "relation_kind", "child_node_id", "id");
--- Create "content_pack_tag_relation_evidence" table
-CREATE TABLE "content_pack_tag_relation_evidence" (
-  "import_id" uuid NOT NULL,
-  "source_fingerprint" text NOT NULL,
-  "relation_id" uuid NOT NULL,
-  "relation_source_key" text NOT NULL,
-  "source_url" text NOT NULL,
-  "source_imported_at" timestamptz(3) NOT NULL,
-  "created_at" timestamptz(3) NOT NULL DEFAULT now(),
-  PRIMARY KEY ("import_id", "source_fingerprint"),
-  CONSTRAINT "content_pack_tag_relation_evidence_6hqQbFoHYnwy_fkey" FOREIGN KEY ("relation_id") REFERENCES "tag_relation" ("id") ON UPDATE NO ACTION ON DELETE RESTRICT,
-  CONSTRAINT "content_pack_tag_relation_evidence_import_fkey" FOREIGN KEY ("import_id") REFERENCES "content_pack_import" ("id") ON UPDATE NO ACTION ON DELETE CASCADE,
-  CONSTRAINT "content_pack_tag_relation_evidence_fingerprint_check" CHECK (source_fingerprint ~ '^[0-9a-f]{64}$'::text),
-  CONSTRAINT "content_pack_tag_relation_evidence_source_key_check" CHECK (btrim(relation_source_key) <> ''::text)
-);
--- Create index "content_pack_tag_relation_evidence_relation_idx" to table: "content_pack_tag_relation_evidence"
-CREATE INDEX "content_pack_tag_relation_evidence_relation_idx" ON "content_pack_tag_relation_evidence" ("relation_id", "import_id");
--- Create "unit_tag_path_application" table
-CREATE TABLE "unit_tag_path_application" (
-  "id" uuid NOT NULL DEFAULT uuidv7(),
-  "unit_id" uuid NOT NULL,
-  "sense_id" uuid NOT NULL,
-  "created_by_profile_id" uuid NULL,
-  "pinned" boolean NOT NULL DEFAULT false,
-  "position" text NULL COLLATE "C",
-  "created_at" timestamptz(3) NOT NULL DEFAULT now(),
-  "updated_at" timestamptz(3) NOT NULL DEFAULT now(),
-  PRIMARY KEY ("id"),
-  CONSTRAINT "unit_tag_path_application_unit_sense_key" UNIQUE ("unit_id", "sense_id"),
-  CONSTRAINT "unit_tag_path_application_created_by_profile_id_profile_id_fkey" FOREIGN KEY ("created_by_profile_id") REFERENCES "profile" ("id") ON UPDATE NO ACTION ON DELETE SET NULL,
-  CONSTRAINT "unit_tag_path_application_sense_id_tag_path_sense_id_fkey" FOREIGN KEY ("sense_id") REFERENCES "tag_path_sense" ("id") ON UPDATE NO ACTION ON DELETE RESTRICT,
-  CONSTRAINT "unit_tag_path_application_unit_id_unit_id_fkey" FOREIGN KEY ("unit_id") REFERENCES "unit" ("id") ON UPDATE NO ACTION ON DELETE CASCADE,
-  CONSTRAINT "unit_tag_path_application_pinned_position_check" CHECK ((pinned AND ("position" IS NOT NULL)) OR ((NOT pinned) AND ("position" IS NULL))),
-  CONSTRAINT "unit_tag_path_application_position_byte_length_check" CHECK (octet_length("position") <= 1024)
-);
--- Create index "unit_tag_path_application_sense_idx" to table: "unit_tag_path_application"
-CREATE INDEX "unit_tag_path_application_sense_idx" ON "unit_tag_path_application" ("sense_id", "unit_id", "id");
--- Create index "unit_tag_path_application_unit_position_idx" to table: "unit_tag_path_application"
-CREATE INDEX "unit_tag_path_application_unit_position_idx" ON "unit_tag_path_application" ("unit_id", "pinned", "position", "id");
--- Create "unit_tag_path_application_judgment" table
-CREATE TABLE "unit_tag_path_application_judgment" (
-  "application_id" uuid NOT NULL,
-  "profile_id" uuid NOT NULL,
-  "fit_vote" integer NULL,
-  "spoiler_level" smallint NULL,
-  "fit_updated_at" timestamptz(3) NULL,
-  "spoiler_updated_at" timestamptz(3) NULL,
-  "created_at" timestamptz(3) NOT NULL DEFAULT now(),
-  "updated_at" timestamptz(3) NOT NULL DEFAULT now(),
-  PRIMARY KEY ("application_id", "profile_id"),
-  CONSTRAINT "unit_tag_path_application_judgment_DBkK2znxXfkd_fkey" FOREIGN KEY ("application_id") REFERENCES "unit_tag_path_application" ("id") ON UPDATE NO ACTION ON DELETE CASCADE,
-  CONSTRAINT "unit_tag_path_application_judgment_profile_id_profile_id_fkey" FOREIGN KEY ("profile_id") REFERENCES "profile" ("id") ON UPDATE NO ACTION ON DELETE RESTRICT,
-  CONSTRAINT "unit_tag_path_application_judgment_fit_timestamp_check" CHECK ((fit_vote IS NULL) = (fit_updated_at IS NULL)),
-  CONSTRAINT "unit_tag_path_application_judgment_fit_vote_check" CHECK ((fit_vote IS NULL) OR (fit_vote = ANY (ARRAY['-1'::integer, 1]))),
-  CONSTRAINT "unit_tag_path_application_judgment_sparse_check" CHECK ((fit_vote IS NOT NULL) OR (spoiler_level IS NOT NULL)),
-  CONSTRAINT "unit_tag_path_application_judgment_spoiler_level_check" CHECK ((spoiler_level IS NULL) OR ((spoiler_level >= 0) AND (spoiler_level <= 2))),
-  CONSTRAINT "unit_tag_path_application_judgment_spoiler_timestamp_check" CHECK ((spoiler_level IS NULL) = (spoiler_updated_at IS NULL))
-);
--- Create index "unit_tag_path_application_judgment_positive_idx" to table: "unit_tag_path_application_judgment"
-CREATE INDEX "unit_tag_path_application_judgment_positive_idx" ON "unit_tag_path_application_judgment" ("application_id", "profile_id") WHERE (fit_vote = 1);
--- Create index "unit_tag_path_application_judgment_profile_idx" to table: "unit_tag_path_application_judgment"
-CREATE INDEX "unit_tag_path_application_judgment_profile_idx" ON "unit_tag_path_application_judgment" ("profile_id", "application_id");
--- Create "content_pack_unit_tag_path_application_evidence" table
-CREATE TABLE "content_pack_unit_tag_path_application_evidence" (
-  "import_id" uuid NOT NULL,
-  "source_fingerprint" text NOT NULL,
-  "application_id" uuid NOT NULL,
-  "unit_id" uuid NOT NULL,
-  "sense_id" uuid NOT NULL,
-  "profile_id" uuid NOT NULL,
-  "unit_source_key" text NOT NULL,
-  "sense_source_key" text NOT NULL,
-  "declared_sense_id" uuid NOT NULL,
-  "source_fit_vote" integer NOT NULL,
-  "source_spoiler_level" smallint NULL,
-  "source_url" text NOT NULL,
-  "source_imported_at" timestamptz(3) NOT NULL,
-  "source_aggregate" jsonb NULL,
-  "created_at" timestamptz(3) NOT NULL DEFAULT now(),
-  PRIMARY KEY ("import_id", "source_fingerprint"),
-  CONSTRAINT "content_pack_unit_tag_path_application_evidence_import_profile_" FOREIGN KEY ("import_id", "profile_id") REFERENCES "content_pack_import" ("id", "importer_profile_id") ON UPDATE CASCADE ON DELETE CASCADE,
-  CONSTRAINT "content_pack_unit_tag_path_application_evidence_judgment_fkey" FOREIGN KEY ("application_id", "profile_id") REFERENCES "unit_tag_path_application_judgment" ("application_id", "profile_id") ON UPDATE CASCADE ON DELETE RESTRICT,
-  CONSTRAINT "content_pack_unit_tag_path_application_evidence_fit_vote_check" CHECK (source_fit_vote = ANY (ARRAY['-1'::integer, 1])),
-  CONSTRAINT "content_pack_unit_tag_path_application_evidence_source_aggregat" CHECK ((source_aggregate IS NULL) OR (jsonb_typeof(source_aggregate) = 'object'::text)),
-  CONSTRAINT "content_pack_unit_tag_path_application_evidence_source_fingerpr" CHECK (source_fingerprint ~ '^[0-9a-f]{64}$'::text),
-  CONSTRAINT "content_pack_unit_tag_path_application_evidence_source_keys_che" CHECK ((btrim(unit_source_key) <> ''::text) AND (btrim(sense_source_key) <> ''::text)),
-  CONSTRAINT "content_pack_unit_tag_path_application_evidence_source_url_chec" CHECK ((btrim(source_url) <> ''::text) AND (source_url ~ '^https?://'::text)),
-  CONSTRAINT "content_pack_unit_tag_path_application_evidence_spoiler_level_c" CHECK ((source_spoiler_level IS NULL) OR ((source_spoiler_level >= 0) AND (source_spoiler_level <= 2)))
-);
--- Create index "content_pack_unit_tag_path_application_evidence_judgment_idx" to table: "content_pack_unit_tag_path_application_evidence"
-CREATE INDEX "content_pack_unit_tag_path_application_evidence_judgment_idx" ON "content_pack_unit_tag_path_application_evidence" ("application_id", "profile_id", "import_id");
--- Create index "content_pack_unit_tag_path_application_evidence_source_idx" to table: "content_pack_unit_tag_path_application_evidence"
-CREATE INDEX "content_pack_unit_tag_path_application_evidence_source_idx" ON "content_pack_unit_tag_path_application_evidence" ("unit_id", "sense_id", "import_id");
--- Create "guide_node_localization" table
-CREATE TABLE "guide_node_localization" (
-  "node_id" uuid NOT NULL,
-  "language" text NOT NULL,
-  "title" text NOT NULL,
-  "created_at" timestamptz(3) NOT NULL DEFAULT now(),
-  "updated_at" timestamptz(3) NOT NULL DEFAULT now(),
-  PRIMARY KEY ("node_id", "language"),
-  CONSTRAINT "guide_node_localization_node_id_guide_node_id_fkey" FOREIGN KEY ("node_id") REFERENCES "guide_node" ("id") ON UPDATE NO ACTION ON DELETE CASCADE,
-  CONSTRAINT "guide_node_localization_language_check" CHECK (language = ANY (ARRAY['zh'::text, 'en'::text, 'ja'::text, 'ko'::text, 'de'::text, 'fr'::text, 'es'::text])),
-  CONSTRAINT "guide_node_localization_title_check" CHECK ((btrim(title) <> ''::text) AND (octet_length(title) <= 512))
-);
--- Create index "guide_node_localization_language_node_idx" to table: "guide_node_localization"
-CREATE INDEX "guide_node_localization_language_node_idx" ON "guide_node_localization" ("language", "node_id");
--- Create "realm_tag_path" table
-CREATE TABLE "realm_tag_path" (
-  "realm_id" uuid NOT NULL,
-  "path_id" uuid NOT NULL,
-  "created_by_profile_id" uuid NOT NULL,
-  "created_at" timestamptz(3) NOT NULL DEFAULT now(),
-  PRIMARY KEY ("realm_id", "path_id"),
-  CONSTRAINT "realm_tag_path_created_by_profile_id_profile_id_fkey" FOREIGN KEY ("created_by_profile_id") REFERENCES "profile" ("id") ON UPDATE NO ACTION ON DELETE RESTRICT,
-  CONSTRAINT "realm_tag_path_path_id_tag_path_id_fkey" FOREIGN KEY ("path_id") REFERENCES "tag_path" ("id") ON UPDATE NO ACTION ON DELETE RESTRICT,
-  CONSTRAINT "realm_tag_path_realm_id_realm_id_fkey" FOREIGN KEY ("realm_id") REFERENCES "realm" ("id") ON UPDATE NO ACTION ON DELETE CASCADE
-);
--- Create index "realm_tag_path_path_realm_idx" to table: "realm_tag_path"
-CREATE INDEX "realm_tag_path_path_realm_idx" ON "realm_tag_path" ("path_id", "realm_id");
 -- Create "realm_tag_path_sense" table
 CREATE TABLE "realm_tag_path_sense" (
   "realm_id" uuid NOT NULL,
@@ -480,6 +450,27 @@ CREATE TABLE "realm_tag_path_vote_stat" (
 );
 -- Create index "realm_tag_path_vote_stat_usage_idx" to table: "realm_tag_path_vote_stat"
 CREATE INDEX "realm_tag_path_vote_stat_usage_idx" ON "realm_tag_path_vote_stat" ("realm_id", "usage_count" DESC NULLS LAST, "path_id");
+-- Create "realm_unit_effective_tag" table
+CREATE TABLE "realm_unit_effective_tag" (
+  "realm_id" uuid NOT NULL,
+  "unit_id" uuid NOT NULL,
+  "tag_id" uuid NOT NULL,
+  "direct" boolean NOT NULL DEFAULT false,
+  "primary_expression_count" bigint NOT NULL DEFAULT 0,
+  "entailed_expression_count" bigint NOT NULL DEFAULT 0,
+  "retrieval_expression_count" bigint NOT NULL DEFAULT 0,
+  "created_at" timestamptz(3) NOT NULL DEFAULT now(),
+  "updated_at" timestamptz(3) NOT NULL DEFAULT now(),
+  PRIMARY KEY ("realm_id", "unit_id", "tag_id"),
+  CONSTRAINT "realm_unit_effective_tag_realm_unit_fkey" FOREIGN KEY ("realm_id", "unit_id") REFERENCES "realm_unit" ("realm_id", "unit_id") ON UPDATE NO ACTION ON DELETE CASCADE,
+  CONSTRAINT "realm_unit_effective_tag_tag_id_tag_id_fkey" FOREIGN KEY ("tag_id") REFERENCES "tag" ("id") ON UPDATE NO ACTION ON DELETE CASCADE,
+  CONSTRAINT "realm_unit_effective_tag_count_check" CHECK ((primary_expression_count >= 0) AND (entailed_expression_count >= 0) AND (retrieval_expression_count >= 0)),
+  CONSTRAINT "realm_unit_effective_tag_source_check" CHECK (direct OR (primary_expression_count > 0) OR (entailed_expression_count > 0) OR (retrieval_expression_count > 0))
+);
+-- Create index "realm_unit_effective_tag_tag_idx" to table: "realm_unit_effective_tag"
+CREATE INDEX "realm_unit_effective_tag_tag_idx" ON "realm_unit_effective_tag" ("tag_id", "realm_id", "unit_id");
+-- Create index "realm_unit_effective_tag_unit_route_idx" to table: "realm_unit_effective_tag"
+CREATE INDEX "realm_unit_effective_tag_unit_route_idx" ON "realm_unit_effective_tag" ("unit_id", "realm_id", "tag_id");
 -- Create "realm_unit_expression_assertion" table
 CREATE TABLE "realm_unit_expression_assertion" (
   "realm_id" uuid NOT NULL,
@@ -558,6 +549,33 @@ CREATE TABLE "realm_unit_tag_path_application_judgment_stat" (
   CONSTRAINT "realm_unit_tag_path_application_judgment_stat_score_check" CHECK (abs(score) <= vote_count),
   CONSTRAINT "realm_unit_tag_path_application_judgment_stat_spoiler_count_che" CHECK (spoiler_vote_count = ((spoiler_none_count + spoiler_minor_count) + spoiler_major_count)),
   CONSTRAINT "realm_unit_tag_path_application_judgment_stat_spoiler_nonnegati" CHECK ((spoiler_vote_count >= 0) AND (spoiler_none_count >= 0) AND (spoiler_minor_count >= 0) AND (spoiler_major_count >= 0))
+);
+-- Create "subject_association_judgment" table
+CREATE TABLE "subject_association_judgment" (
+  "association_id" uuid NOT NULL,
+  "profile_id" uuid NOT NULL,
+  "spoiler_level" smallint NOT NULL,
+  "created_at" timestamptz(3) NOT NULL DEFAULT now(),
+  "updated_at" timestamptz(3) NOT NULL DEFAULT now(),
+  PRIMARY KEY ("association_id", "profile_id"),
+  CONSTRAINT "subject_association_judgment_profile_id_profile_id_fkey" FOREIGN KEY ("profile_id") REFERENCES "profile" ("id") ON UPDATE NO ACTION ON DELETE RESTRICT,
+  CONSTRAINT "subject_association_judgment_uo93BqITkQjw_fkey" FOREIGN KEY ("association_id") REFERENCES "subject_association" ("id") ON UPDATE NO ACTION ON DELETE RESTRICT,
+  CONSTRAINT "subject_association_judgment_spoiler_level_check" CHECK ((spoiler_level >= 0) AND (spoiler_level <= 2))
+);
+-- Create index "subject_association_judgment_profile_idx" to table: "subject_association_judgment"
+CREATE INDEX "subject_association_judgment_profile_idx" ON "subject_association_judgment" ("profile_id", "association_id");
+-- Create "subject_association_judgment_stat" table
+CREATE TABLE "subject_association_judgment_stat" (
+  "association_id" uuid NOT NULL,
+  "spoiler_vote_count" bigint NOT NULL DEFAULT 0,
+  "spoiler_none_count" bigint NOT NULL DEFAULT 0,
+  "spoiler_minor_count" bigint NOT NULL DEFAULT 0,
+  "spoiler_major_count" bigint NOT NULL DEFAULT 0,
+  "updated_at" timestamptz(3) NOT NULL DEFAULT now(),
+  PRIMARY KEY ("association_id"),
+  CONSTRAINT "subject_association_judgment_stat_9yJeuJ2l9fWh_fkey" FOREIGN KEY ("association_id") REFERENCES "subject_association" ("id") ON UPDATE NO ACTION ON DELETE CASCADE,
+  CONSTRAINT "subject_association_judgment_stat_spoiler_count_check" CHECK (spoiler_vote_count = ((spoiler_none_count + spoiler_minor_count) + spoiler_major_count)),
+  CONSTRAINT "subject_association_judgment_stat_spoiler_nonnegative_check" CHECK ((spoiler_vote_count >= 0) AND (spoiler_none_count >= 0) AND (spoiler_minor_count >= 0) AND (spoiler_major_count >= 0))
 );
 -- Create "tag_expression_argument" table
 CREATE TABLE "tag_expression_argument" (
@@ -678,6 +696,57 @@ CREATE TABLE "tag_expression_label_component" (
 );
 -- Create index "tag_expression_label_component_tag_idx" to table: "tag_expression_label_component"
 CREATE INDEX "tag_expression_label_component_tag_idx" ON "tag_expression_label_component" ("tag_id", "presentation_revision_id");
+-- Create "tag_expression_projection_rebuild" table
+CREATE TABLE "tag_expression_projection_rebuild" (
+  "expression_id" uuid NOT NULL,
+  "global_cursor_unit_id" uuid NULL,
+  "global_complete" boolean NOT NULL DEFAULT false,
+  "realm_cursor_realm_id" uuid NULL,
+  "realm_cursor_unit_id" uuid NULL,
+  "realm_complete" boolean NOT NULL DEFAULT false,
+  "attempt_count" integer NOT NULL DEFAULT 0,
+  "available_at" timestamptz(3) NOT NULL DEFAULT now(),
+  "last_error_message" text NULL,
+  "requested_at" timestamptz(3) NOT NULL DEFAULT now(),
+  "updated_at" timestamptz(3) NOT NULL DEFAULT now(),
+  PRIMARY KEY ("expression_id"),
+  CONSTRAINT "tag_expression_projection_rebuild_wI8F4kdKOrA4_fkey" FOREIGN KEY ("expression_id") REFERENCES "tag_expression" ("id") ON UPDATE NO ACTION ON DELETE CASCADE,
+  CONSTRAINT "tag_expression_projection_rebuild_attempt_check" CHECK (attempt_count >= 0),
+  CONSTRAINT "tag_expression_projection_rebuild_incomplete_check" CHECK (NOT (global_complete AND realm_complete)),
+  CONSTRAINT "tag_expression_projection_rebuild_realm_cursor_check" CHECK ((realm_cursor_realm_id IS NULL) = (realm_cursor_unit_id IS NULL))
+);
+-- Create index "tag_expression_projection_rebuild_claim_idx" to table: "tag_expression_projection_rebuild"
+CREATE INDEX "tag_expression_projection_rebuild_claim_idx" ON "tag_expression_projection_rebuild" ("available_at", "requested_at", "expression_id");
+-- Create "tag_relation" table
+CREATE TABLE "tag_relation" (
+  "id" uuid NOT NULL DEFAULT uuidv7(),
+  "parent_node_id" uuid NOT NULL,
+  "child_node_id" uuid NOT NULL,
+  "relation_kind" text NOT NULL,
+  "revision" integer NOT NULL DEFAULT 1,
+  "status" text NOT NULL DEFAULT 'active',
+  "provenance" jsonb NULL,
+  "created_by_profile_id" uuid NULL,
+  "created_at" timestamptz(3) NOT NULL DEFAULT now(),
+  "retired_at" timestamptz(3) NULL,
+  PRIMARY KEY ("id"),
+  CONSTRAINT "tag_relation_revision_key" UNIQUE ("parent_node_id", "child_node_id", "relation_kind", "revision"),
+  CONSTRAINT "tag_relation_child_node_id_vocabulary_node_id_fkey" FOREIGN KEY ("child_node_id") REFERENCES "vocabulary_node" ("id") ON UPDATE NO ACTION ON DELETE RESTRICT,
+  CONSTRAINT "tag_relation_created_by_profile_id_profile_id_fkey" FOREIGN KEY ("created_by_profile_id") REFERENCES "profile" ("id") ON UPDATE NO ACTION ON DELETE SET NULL,
+  CONSTRAINT "tag_relation_parent_node_id_vocabulary_node_id_fkey" FOREIGN KEY ("parent_node_id") REFERENCES "vocabulary_node" ("id") ON UPDATE NO ACTION ON DELETE RESTRICT,
+  CONSTRAINT "tag_relation_distinct_check" CHECK (parent_node_id <> child_node_id),
+  CONSTRAINT "tag_relation_kind_check" CHECK (relation_kind = ANY (ARRAY['generic'::text, 'partitive'::text, 'instance'::text, 'organizational'::text, 'facet_value'::text])),
+  CONSTRAINT "tag_relation_provenance_object_check" CHECK ((provenance IS NULL) OR (jsonb_typeof(provenance) = 'object'::text)),
+  CONSTRAINT "tag_relation_retirement_check" CHECK (((status = 'active'::text) AND (retired_at IS NULL)) OR ((status = 'retired'::text) AND (retired_at IS NOT NULL))),
+  CONSTRAINT "tag_relation_revision_check" CHECK (revision >= 1),
+  CONSTRAINT "tag_relation_status_check" CHECK (status = ANY (ARRAY['active'::text, 'retired'::text]))
+);
+-- Create index "tag_relation_active_key" to table: "tag_relation"
+CREATE UNIQUE INDEX "tag_relation_active_key" ON "tag_relation" ("parent_node_id", "child_node_id", "relation_kind") WHERE (status = 'active'::text);
+-- Create index "tag_relation_child_route_idx" to table: "tag_relation"
+CREATE INDEX "tag_relation_child_route_idx" ON "tag_relation" ("child_node_id", "status", "relation_kind", "parent_node_id", "id");
+-- Create index "tag_relation_parent_route_idx" to table: "tag_relation"
+CREATE INDEX "tag_relation_parent_route_idx" ON "tag_relation" ("parent_node_id", "status", "relation_kind", "child_node_id", "id");
 -- Create "tag_path_member" table
 CREATE TABLE "tag_path_member" (
   "path_id" uuid NOT NULL,
@@ -744,6 +813,20 @@ CREATE TABLE "tag_path_sense_binding" (
 );
 -- Create index "tag_path_sense_binding_member_idx" to table: "tag_path_sense_binding"
 CREATE INDEX "tag_path_sense_binding_member_idx" ON "tag_path_sense_binding" ("member_ordinal", "sense_id", "argument_role");
+-- Create "tag_path_vote" table
+CREATE TABLE "tag_path_vote" (
+  "path_id" uuid NOT NULL,
+  "profile_id" uuid NOT NULL,
+  "value" integer NOT NULL,
+  "created_at" timestamptz(3) NOT NULL DEFAULT now(),
+  "updated_at" timestamptz(3) NOT NULL DEFAULT now(),
+  PRIMARY KEY ("path_id", "profile_id"),
+  CONSTRAINT "tag_path_vote_path_id_tag_path_id_fkey" FOREIGN KEY ("path_id") REFERENCES "tag_path" ("id") ON UPDATE NO ACTION ON DELETE RESTRICT,
+  CONSTRAINT "tag_path_vote_profile_id_profile_id_fkey" FOREIGN KEY ("profile_id") REFERENCES "profile" ("id") ON UPDATE NO ACTION ON DELETE RESTRICT,
+  CONSTRAINT "tag_path_vote_value_check" CHECK (value = ANY (ARRAY['-1'::integer, 1]))
+);
+-- Create index "tag_path_vote_profile_idx" to table: "tag_path_vote"
+CREATE INDEX "tag_path_vote_profile_idx" ON "tag_path_vote" ("profile_id", "path_id");
 -- Create "tag_path_vote_stat" table
 CREATE TABLE "tag_path_vote_stat" (
   "path_id" uuid NOT NULL,
@@ -779,6 +862,99 @@ CREATE TABLE "unit_expression_assertion" (
 );
 -- Create index "unit_expression_assertion_expression_idx" to table: "unit_expression_assertion"
 CREATE INDEX "unit_expression_assertion_expression_idx" ON "unit_expression_assertion" ("expression_id", "unit_id");
+-- Create "unit_tag_judgment" table
+CREATE TABLE "unit_tag_judgment" (
+  "unit_id" uuid NOT NULL,
+  "tag_id" uuid NOT NULL,
+  "profile_id" uuid NOT NULL,
+  "fit_vote" integer NULL,
+  "spoiler_level" smallint NULL,
+  "fit_updated_at" timestamptz(3) NULL,
+  "spoiler_updated_at" timestamptz(3) NULL,
+  "created_at" timestamptz(3) NOT NULL DEFAULT now(),
+  "updated_at" timestamptz(3) NOT NULL DEFAULT now(),
+  PRIMARY KEY ("unit_id", "tag_id", "profile_id"),
+  CONSTRAINT "unit_tag_judgment_profile_id_profile_id_fkey" FOREIGN KEY ("profile_id") REFERENCES "profile" ("id") ON UPDATE NO ACTION ON DELETE RESTRICT,
+  CONSTRAINT "unit_tag_judgment_tag_id_tag_id_fkey" FOREIGN KEY ("tag_id") REFERENCES "tag" ("id") ON UPDATE NO ACTION ON DELETE RESTRICT,
+  CONSTRAINT "unit_tag_judgment_unit_id_unit_id_fkey" FOREIGN KEY ("unit_id") REFERENCES "unit" ("id") ON UPDATE NO ACTION ON DELETE RESTRICT,
+  CONSTRAINT "unit_tag_judgment_unit_tag_fkey" FOREIGN KEY ("unit_id", "tag_id") REFERENCES "unit_tag" ("unit_id", "tag_id") ON UPDATE NO ACTION ON DELETE RESTRICT,
+  CONSTRAINT "unit_tag_judgment_fit_timestamp_check" CHECK ((fit_vote IS NULL) = (fit_updated_at IS NULL)),
+  CONSTRAINT "unit_tag_judgment_fit_vote_check" CHECK ((fit_vote IS NULL) OR (fit_vote = ANY (ARRAY['-1'::integer, 1]))),
+  CONSTRAINT "unit_tag_judgment_not_self_check" CHECK (unit_id <> tag_id),
+  CONSTRAINT "unit_tag_judgment_sparse_check" CHECK ((fit_vote IS NOT NULL) OR (spoiler_level IS NOT NULL)),
+  CONSTRAINT "unit_tag_judgment_spoiler_level_check" CHECK ((spoiler_level IS NULL) OR ((spoiler_level >= 0) AND (spoiler_level <= 2))),
+  CONSTRAINT "unit_tag_judgment_spoiler_timestamp_check" CHECK ((spoiler_level IS NULL) = (spoiler_updated_at IS NULL))
+);
+-- Create index "unit_tag_judgment_profile_unit_tag_idx" to table: "unit_tag_judgment"
+CREATE INDEX "unit_tag_judgment_profile_unit_tag_idx" ON "unit_tag_judgment" ("profile_id", "unit_id", "tag_id");
+-- Create index "unit_tag_judgment_tag_unit_idx" to table: "unit_tag_judgment"
+CREATE INDEX "unit_tag_judgment_tag_unit_idx" ON "unit_tag_judgment" ("tag_id", "unit_id");
+-- Modify "unit_effective_tag" table
+ALTER TABLE "unit_effective_tag" DROP CONSTRAINT "unit_effective_tag_structure_count_check", DROP CONSTRAINT "unit_effective_tag_source_check", ADD CONSTRAINT "unit_effective_tag_source_check" CHECK (direct OR (primary_expression_count > 0) OR (entailed_expression_count > 0) OR (retrieval_expression_count > 0)), ADD CONSTRAINT "unit_effective_tag_count_check" CHECK ((primary_expression_count >= 0) AND (entailed_expression_count >= 0) AND (retrieval_expression_count >= 0)), DROP COLUMN "structure_support_count", ADD COLUMN "primary_expression_count" bigint NOT NULL DEFAULT 0, ADD COLUMN "entailed_expression_count" bigint NOT NULL DEFAULT 0, ADD COLUMN "retrieval_expression_count" bigint NOT NULL DEFAULT 0;
+-- Create "unit_tag_judgment_stat" table
+CREATE TABLE "unit_tag_judgment_stat" (
+  "unit_id" uuid NOT NULL,
+  "tag_id" uuid NOT NULL,
+  "score" bigint NOT NULL DEFAULT 0,
+  "vote_count" bigint NOT NULL DEFAULT 0,
+  "spoiler_vote_count" bigint NOT NULL DEFAULT 0,
+  "spoiler_none_count" bigint NOT NULL DEFAULT 0,
+  "spoiler_minor_count" bigint NOT NULL DEFAULT 0,
+  "spoiler_major_count" bigint NOT NULL DEFAULT 0,
+  "updated_at" timestamptz(3) NOT NULL DEFAULT now(),
+  PRIMARY KEY ("unit_id", "tag_id"),
+  CONSTRAINT "unit_tag_judgment_stat_effective_tag_fkey" FOREIGN KEY ("unit_id", "tag_id") REFERENCES "unit_effective_tag" ("unit_id", "tag_id") ON UPDATE NO ACTION ON DELETE CASCADE,
+  CONSTRAINT "unit_tag_judgment_stat_count_check" CHECK (vote_count >= 0),
+  CONSTRAINT "unit_tag_judgment_stat_parity_check" CHECK (((vote_count + score) % (2)::bigint) = 0),
+  CONSTRAINT "unit_tag_judgment_stat_score_check" CHECK (abs(score) <= vote_count),
+  CONSTRAINT "unit_tag_judgment_stat_spoiler_count_check" CHECK (spoiler_vote_count = ((spoiler_none_count + spoiler_minor_count) + spoiler_major_count)),
+  CONSTRAINT "unit_tag_judgment_stat_spoiler_nonnegative_check" CHECK ((spoiler_vote_count >= 0) AND (spoiler_none_count >= 0) AND (spoiler_minor_count >= 0) AND (spoiler_major_count >= 0))
+);
+-- Create "unit_tag_path_application" table
+CREATE TABLE "unit_tag_path_application" (
+  "id" uuid NOT NULL DEFAULT uuidv7(),
+  "unit_id" uuid NOT NULL,
+  "sense_id" uuid NOT NULL,
+  "created_by_profile_id" uuid NULL,
+  "pinned" boolean NOT NULL DEFAULT false,
+  "position" text NULL COLLATE "C",
+  "created_at" timestamptz(3) NOT NULL DEFAULT now(),
+  "updated_at" timestamptz(3) NOT NULL DEFAULT now(),
+  PRIMARY KEY ("id"),
+  CONSTRAINT "unit_tag_path_application_unit_sense_key" UNIQUE ("unit_id", "sense_id"),
+  CONSTRAINT "unit_tag_path_application_created_by_profile_id_profile_id_fkey" FOREIGN KEY ("created_by_profile_id") REFERENCES "profile" ("id") ON UPDATE NO ACTION ON DELETE SET NULL,
+  CONSTRAINT "unit_tag_path_application_sense_id_tag_path_sense_id_fkey" FOREIGN KEY ("sense_id") REFERENCES "tag_path_sense" ("id") ON UPDATE NO ACTION ON DELETE RESTRICT,
+  CONSTRAINT "unit_tag_path_application_unit_id_unit_id_fkey" FOREIGN KEY ("unit_id") REFERENCES "unit" ("id") ON UPDATE NO ACTION ON DELETE CASCADE,
+  CONSTRAINT "unit_tag_path_application_pinned_position_check" CHECK ((pinned AND ("position" IS NOT NULL)) OR ((NOT pinned) AND ("position" IS NULL))),
+  CONSTRAINT "unit_tag_path_application_position_byte_length_check" CHECK (octet_length("position") <= 1024)
+);
+-- Create index "unit_tag_path_application_sense_idx" to table: "unit_tag_path_application"
+CREATE INDEX "unit_tag_path_application_sense_idx" ON "unit_tag_path_application" ("sense_id", "unit_id", "id");
+-- Create index "unit_tag_path_application_unit_position_idx" to table: "unit_tag_path_application"
+CREATE INDEX "unit_tag_path_application_unit_position_idx" ON "unit_tag_path_application" ("unit_id", "pinned", "position", "id");
+-- Create "unit_tag_path_application_judgment" table
+CREATE TABLE "unit_tag_path_application_judgment" (
+  "application_id" uuid NOT NULL,
+  "profile_id" uuid NOT NULL,
+  "fit_vote" integer NULL,
+  "spoiler_level" smallint NULL,
+  "fit_updated_at" timestamptz(3) NULL,
+  "spoiler_updated_at" timestamptz(3) NULL,
+  "created_at" timestamptz(3) NOT NULL DEFAULT now(),
+  "updated_at" timestamptz(3) NOT NULL DEFAULT now(),
+  PRIMARY KEY ("application_id", "profile_id"),
+  CONSTRAINT "unit_tag_path_application_judgment_DBkK2znxXfkd_fkey" FOREIGN KEY ("application_id") REFERENCES "unit_tag_path_application" ("id") ON UPDATE NO ACTION ON DELETE CASCADE,
+  CONSTRAINT "unit_tag_path_application_judgment_profile_id_profile_id_fkey" FOREIGN KEY ("profile_id") REFERENCES "profile" ("id") ON UPDATE NO ACTION ON DELETE RESTRICT,
+  CONSTRAINT "unit_tag_path_application_judgment_fit_timestamp_check" CHECK ((fit_vote IS NULL) = (fit_updated_at IS NULL)),
+  CONSTRAINT "unit_tag_path_application_judgment_fit_vote_check" CHECK ((fit_vote IS NULL) OR (fit_vote = ANY (ARRAY['-1'::integer, 1]))),
+  CONSTRAINT "unit_tag_path_application_judgment_sparse_check" CHECK ((fit_vote IS NOT NULL) OR (spoiler_level IS NOT NULL)),
+  CONSTRAINT "unit_tag_path_application_judgment_spoiler_level_check" CHECK ((spoiler_level IS NULL) OR ((spoiler_level >= 0) AND (spoiler_level <= 2))),
+  CONSTRAINT "unit_tag_path_application_judgment_spoiler_timestamp_check" CHECK ((spoiler_level IS NULL) = (spoiler_updated_at IS NULL))
+);
+-- Create index "unit_tag_path_application_judgment_positive_idx" to table: "unit_tag_path_application_judgment"
+CREATE INDEX "unit_tag_path_application_judgment_positive_idx" ON "unit_tag_path_application_judgment" ("application_id", "profile_id") WHERE (fit_vote = 1);
+-- Create index "unit_tag_path_application_judgment_profile_idx" to table: "unit_tag_path_application_judgment"
+CREATE INDEX "unit_tag_path_application_judgment_profile_idx" ON "unit_tag_path_application_judgment" ("profile_id", "application_id");
 -- Create "unit_tag_path_application_judgment_stat" table
 CREATE TABLE "unit_tag_path_application_judgment_stat" (
   "application_id" uuid NOT NULL,
@@ -797,6 +973,91 @@ CREATE TABLE "unit_tag_path_application_judgment_stat" (
   CONSTRAINT "unit_tag_path_application_judgment_stat_spoiler_count_check" CHECK (spoiler_vote_count = ((spoiler_none_count + spoiler_minor_count) + spoiler_major_count)),
   CONSTRAINT "unit_tag_path_application_judgment_stat_spoiler_nonnegative_che" CHECK ((spoiler_vote_count >= 0) AND (spoiler_none_count >= 0) AND (spoiler_minor_count >= 0) AND (spoiler_major_count >= 0))
 );
+-- Create "zone_theme" table
+CREATE TABLE "zone_theme" (
+  "id" uuid NOT NULL,
+  "created_at" timestamptz(3) NOT NULL DEFAULT now(),
+  "updated_at" timestamptz(3) NOT NULL DEFAULT now(),
+  PRIMARY KEY ("id"),
+  CONSTRAINT "zone_theme_id_unit_id_fkey" FOREIGN KEY ("id") REFERENCES "unit" ("id") ON UPDATE NO ACTION ON DELETE CASCADE
+);
+-- Create "zone_theme_revision" table
+CREATE TABLE "zone_theme_revision" (
+  "id" uuid NOT NULL DEFAULT uuidv7(),
+  "theme_unit_id" uuid NOT NULL,
+  "contract_version" text NOT NULL,
+  "source_css" text NOT NULL,
+  "transformed_css" text NOT NULL,
+  "sha256" text NOT NULL,
+  "state" text NOT NULL DEFAULT 'pending_automated',
+  "automated_review" jsonb NOT NULL,
+  "render_review" jsonb NULL,
+  "ai_review" jsonb NULL,
+  "submitted_by_profile_id" uuid NOT NULL,
+  "human_reviewed_by_profile_id" uuid NULL,
+  "human_reviewed_at" timestamptz(3) NULL,
+  "decision_reason" text NULL,
+  "killed_by_profile_id" uuid NULL,
+  "killed_at" timestamptz(3) NULL,
+  "created_at" timestamptz(3) NOT NULL DEFAULT now(),
+  "updated_at" timestamptz(3) NOT NULL DEFAULT now(),
+  PRIMARY KEY ("id"),
+  CONSTRAINT "zone_theme_revision_CE0z2L81XT9c_fkey" FOREIGN KEY ("human_reviewed_by_profile_id") REFERENCES "profile" ("id") ON UPDATE NO ACTION ON DELETE RESTRICT,
+  CONSTRAINT "zone_theme_revision_killed_by_profile_id_profile_id_fkey" FOREIGN KEY ("killed_by_profile_id") REFERENCES "profile" ("id") ON UPDATE NO ACTION ON DELETE RESTRICT,
+  CONSTRAINT "zone_theme_revision_submitted_by_profile_id_profile_id_fkey" FOREIGN KEY ("submitted_by_profile_id") REFERENCES "profile" ("id") ON UPDATE NO ACTION ON DELETE RESTRICT,
+  CONSTRAINT "zone_theme_revision_theme_unit_id_zone_theme_id_fkey" FOREIGN KEY ("theme_unit_id") REFERENCES "zone_theme" ("id") ON UPDATE NO ACTION ON DELETE CASCADE,
+  CONSTRAINT "zone_theme_revision_ai_review_json_object_check" CHECK ((ai_review IS NULL) OR (jsonb_typeof(ai_review) = 'object'::text)),
+  CONSTRAINT "zone_theme_revision_human_review_shape_check" CHECK ((human_reviewed_at IS NULL) = (human_reviewed_by_profile_id IS NULL)),
+  CONSTRAINT "zone_theme_revision_kill_shape_check" CHECK ((killed_at IS NULL) = (killed_by_profile_id IS NULL)),
+  CONSTRAINT "zone_theme_revision_render_review_json_object_check" CHECK ((render_review IS NULL) OR (jsonb_typeof(render_review) = 'object'::text)),
+  CONSTRAINT "zone_theme_revision_sha256_check" CHECK (sha256 ~ '^[0-9a-f]{64}$'::text),
+  CONSTRAINT "zone_theme_revision_source_size_check" CHECK (octet_length(source_css) <= 65536),
+  CONSTRAINT "zone_theme_revision_state_check" CHECK (state = ANY (ARRAY['pending_automated'::text, 'pending_human'::text, 'approved'::text, 'rejected'::text, 'killed'::text, 'revalidation_required'::text])),
+  CONSTRAINT "zone_theme_revision_transformed_size_check" CHECK (octet_length(transformed_css) <= 65536)
+);
+-- Create index "zone_theme_revision_approved_contract_id_idx" to table: "zone_theme_revision"
+CREATE INDEX "zone_theme_revision_approved_contract_id_idx" ON "zone_theme_revision" ("contract_version", "id") WHERE (state = 'approved'::text);
+-- Create index "zone_theme_revision_review_queue_idx" to table: "zone_theme_revision"
+CREATE INDEX "zone_theme_revision_review_queue_idx" ON "zone_theme_revision" ("id") WHERE (state = ANY (ARRAY['pending_automated'::text, 'pending_human'::text, 'revalidation_required'::text]));
+-- Create index "zone_theme_revision_theme_id_idx" to table: "zone_theme_revision"
+CREATE INDEX "zone_theme_revision_theme_id_idx" ON "zone_theme_revision" ("theme_unit_id", "id");
+-- Create "zone_theme_revision_asset" table
+CREATE TABLE "zone_theme_revision_asset" (
+  "revision_id" uuid NOT NULL,
+  "asset_id" uuid NOT NULL,
+  "created_at" timestamptz(3) NOT NULL DEFAULT now(),
+  PRIMARY KEY ("revision_id", "asset_id"),
+  CONSTRAINT "zone_theme_revision_asset_asset_id_image_asset_id_fkey" FOREIGN KEY ("asset_id") REFERENCES "image_asset" ("id") ON UPDATE NO ACTION ON DELETE RESTRICT,
+  CONSTRAINT "zone_theme_revision_asset_qw0FLvzGu7k2_fkey" FOREIGN KEY ("revision_id") REFERENCES "zone_theme_revision" ("id") ON UPDATE NO ACTION ON DELETE CASCADE
+);
+-- Create index "zone_theme_revision_asset_asset_idx" to table: "zone_theme_revision_asset"
+CREATE INDEX "zone_theme_revision_asset_asset_idx" ON "zone_theme_revision_asset" ("asset_id", "revision_id");
+-- Drop "realm_tag_vote" table
+DROP TABLE "realm_tag_vote";
+-- Drop "realm_tag_vote_stat" table
+DROP TABLE "realm_tag_vote_stat";
+-- Drop "unit_tag_vote" table
+DROP TABLE "unit_tag_vote";
+-- Drop "unit_tag_vote_stat" table
+DROP TABLE "unit_tag_vote_stat";
+-- Drop "unit_tag_structure_support" table
+DROP TABLE "unit_tag_structure_support";
+-- Drop "unit_structure_application_vote" table
+DROP TABLE "unit_structure_application_vote";
+-- Drop "unit_structure_application_vote_stat" table
+DROP TABLE "unit_structure_application_vote_stat";
+-- Drop "unit_structure_application" table
+DROP TABLE "unit_structure_application";
+-- Drop "unit_structure_edge" table
+DROP TABLE "unit_structure_edge";
+-- Drop "unit_structure_member" table
+DROP TABLE "unit_structure_member";
+-- Drop "unit_structure_vote" table
+DROP TABLE "unit_structure_vote";
+-- Drop "unit_structure_vote_stat" table
+DROP TABLE "unit_structure_vote_stat";
+-- Drop "unit_structure" table
+DROP TABLE "unit_structure";
 
 -- Every released Tag has a sealed simple Expression. The claim key is semantic
 -- data; localized titles continue to be resolved from Tag localizations.
@@ -879,3 +1140,16 @@ ON CONFLICT (realm_id, unit_id, expression_id) DO UPDATE SET
 		public.realm_unit_expression_assertion.updated_at,
 		EXCLUDED.updated_at
 	);
+
+DROP FUNCTION IF EXISTS public.reject_conflicting_structure_application_vote();
+DROP FUNCTION IF EXISTS public.reject_conflicting_direct_tag_vote();
+DROP FUNCTION IF EXISTS public.protect_immutable_unit_structure();
+DROP FUNCTION IF EXISTS public.project_unit_structure_definition();
+DROP FUNCTION IF EXISTS public.prepare_unit_structure_definition();
+DROP FUNCTION IF EXISTS public.maintain_unit_structure_vote_stat();
+DROP FUNCTION IF EXISTS public.maintain_unit_structure_application_vote_stat();
+DROP FUNCTION IF EXISTS public.maintain_structure_application_support();
+DROP FUNCTION IF EXISTS public.maintain_effective_tag_from_structure_support();
+DROP FUNCTION IF EXISTS public.refresh_unit_structure_vote_stat(uuid);
+DROP FUNCTION IF EXISTS public.refresh_unit_structure_application_vote_stat(uuid, uuid);
+DROP FUNCTION IF EXISTS public.lock_unit_structure_definition_key(uuid);

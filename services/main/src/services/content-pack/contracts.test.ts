@@ -1,10 +1,18 @@
 import { describe, expect, it } from "vitest";
 
-import { parseContentPackRunOptions } from "./contracts";
+import { parseShowcaseFixtureRunOptions } from "./contracts";
 
-describe("parseContentPackRunOptions", () => {
+describe("parseShowcaseFixtureRunOptions", () => {
 	it("parses apply with an explicit source directory", () => {
-		expect(parseContentPackRunOptions(["apply", "--from", "../rezics-showcase-packs", "--pack", "toaru-core"])).toEqual({
+		expect(
+			parseShowcaseFixtureRunOptions([
+				"apply",
+				"--from",
+				"../rezics-showcase-packs",
+				"--pack",
+				"toaru-core",
+			]),
+		).toEqual({
 			command: "apply",
 			from: "../rezics-showcase-packs",
 			packId: "toaru-core",
@@ -12,6 +20,8 @@ describe("parseContentPackRunOptions", () => {
 	});
 
 	it("rejects seed-like extra flags", () => {
-		expect(() => parseContentPackRunOptions(["apply", "--profile", "demo"])).toThrow(/Unknown argument/);
+		expect(() => parseShowcaseFixtureRunOptions(["apply", "--profile", "demo"])).toThrow(
+			/Unknown argument/,
+		);
 	});
 });

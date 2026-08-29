@@ -18,14 +18,6 @@ export type UnitMergePhaseResult = {
 	readonly done: boolean;
 };
 
-export class UnitMergeEvidenceConflict extends Error {
-	readonly _tag = "UnitMergeEvidenceConflict" as const;
-
-	constructor(readonly reason: "subject_self_association") {
-		super("Unit merge cannot preserve source evidence for a self Subject association");
-	}
-}
-
 type BatchRow = { readonly processed: number | string; readonly remaining: boolean };
 
 function presentBatch(row: BatchRow | undefined): UnitMergePhaseResult {
@@ -1167,29 +1159,6 @@ async function unitTagBatch(
 			created_at = least(unit_tag_judgment.created_at, excluded.created_at),
 			updated_at = greatest(unit_tag_judgment.updated_at, excluded.updated_at)
 	`);
-	const evidenceResult = await tx.execute<{ readonly processed: number | string }>(sql`
-		with batch as materialized (
-			select evidence.import_id, evidence.source_fingerprint
-			from content_pack_unit_tag_evidence as evidence
-			join unit_tag_judgment as target
-				on target.unit_id = ${input.targetUnitId}::uuid
-				and target.tag_id = evidence.tag_id
-				and target.profile_id = evidence.profile_id
-			where evidence.unit_id = ${input.sourceUnitId}::uuid
-			order by evidence.tag_id, evidence.profile_id,
-				evidence.import_id, evidence.source_fingerprint
-			limit ${input.batchSize}
-			for update of evidence skip locked
-		), updated as (
-			update content_pack_unit_tag_evidence as evidence
-			set unit_id = ${input.targetUnitId}::uuid
-			from batch
-			where evidence.import_id = batch.import_id
-				and evidence.source_fingerprint = batch.source_fingerprint
-			returning 1
-		)
-		select cardinality(array(select 1 from updated))::int as processed
-	`);
 	const relationResult = await runBatch(
 		tx,
 		sql`
@@ -1296,12 +1265,6 @@ async function unitTagBatch(
 				where vote.unit_id = ${input.sourceUnitId}::uuid
 					and vote.tag_id = vote_batch.tag_id
 					and vote.profile_id = vote_batch.profile_id
-					and not exists (
-						select 1 from content_pack_unit_tag_evidence as evidence
-						where evidence.unit_id = ${input.sourceUnitId}::uuid
-							and evidence.tag_id = vote_batch.tag_id
-							and evidence.profile_id = vote_batch.profile_id
-					)
 				returning 1
 			), deleted as (
 				delete from unit_tag as relation
@@ -1314,11 +1277,6 @@ async function unitTagBatch(
 						where unit_id = ${input.sourceUnitId}::uuid
 							and tag_id = batch.tag_id
 					)
-					and not exists (
-						select 1 from content_pack_unit_tag_evidence as evidence
-						where evidence.unit_id = ${input.sourceUnitId}::uuid
-							and evidence.tag_id = batch.tag_id
-					)
 				returning 1
 			)
 			select (
@@ -1328,10 +1286,7 @@ async function unitTagBatch(
 				exists(select 1 from unit_tag where unit_id = ${input.sourceUnitId}::uuid) as remaining
 		`,
 	);
-	return {
-		processedRows: Number(evidenceResult.rows[0]?.processed ?? 0) + relationResult.processedRows,
-		done: relationResult.done,
-	};
+	return relationResult;
 }
 
 async function realmTagJudgmentBatch(
@@ -1746,19 +1701,6 @@ async function subjectAssociationBatch(
 ): Promise<UnitMergePhaseResult> {
 	const column = sql.identifier(direction);
 	const otherColumn = sql.identifier(direction === "unit_id" ? "entity_id" : "unit_id");
-	const selfEvidence = await tx.execute<{ readonly conflict: boolean }>(sql`
-		select exists (
-			select 1
-			from subject_association as association
-			join content_pack_subject_association_evidence as evidence
-				on evidence.association_id = association.id
-			where association.${column} = ${input.sourceUnitId}::uuid
-				and association.${otherColumn} = ${input.targetUnitId}::uuid
-		) as conflict
-	`);
-	if (selfEvidence.rows[0]?.conflict)
-		throw new UnitMergeEvidenceConflict("subject_self_association");
-
 	await tx.execute(sql`
 		with judgment_batch as materialized (
 			select judgment.association_id, judgment.profile_id,
@@ -1802,42 +1744,6 @@ async function subjectAssociationBatch(
 				subject_association_judgment.updated_at,
 				excluded.updated_at
 			)
-	`);
-	const evidenceResult = await tx.execute<{ readonly processed: number | string }>(sql`
-		with batch as materialized (
-			select evidence.import_id, evidence.source_fingerprint,
-				canonical.id as canonical_id
-			from content_pack_subject_association_evidence as evidence
-			join subject_association as source
-				on source.id = evidence.association_id
-			join subject_association as canonical
-				on canonical.unit_id = case
-					when ${direction} = 'unit_id' then ${input.targetUnitId}::uuid
-					else source.unit_id
-				end
-				and canonical.entity_id = case
-					when ${direction} = 'entity_id' then ${input.targetUnitId}::uuid
-					else source.entity_id
-				end
-				and canonical.role = source.role
-				and canonical.id <> source.id
-			join subject_association_judgment as target
-				on target.association_id = canonical.id
-				and target.profile_id = evidence.profile_id
-			where source.${column} = ${input.sourceUnitId}::uuid
-			order by evidence.association_id, evidence.profile_id,
-				evidence.import_id, evidence.source_fingerprint
-			limit ${input.batchSize}
-			for update of evidence skip locked
-		), updated as (
-			update content_pack_subject_association_evidence as evidence
-			set association_id = batch.canonical_id
-			from batch
-			where evidence.import_id = batch.import_id
-				and evidence.source_fingerprint = batch.source_fingerprint
-			returning 1
-		)
-		select cardinality(array(select 1 from updated))::int as processed
 	`);
 	const relationResult = await runBatch(
 		tx,
@@ -1917,11 +1823,6 @@ async function subjectAssociationBatch(
 								and copied_judgments.profile_id = judgment_batch.profile_id
 						)
 					)
-					and not exists (
-						select 1 from content_pack_subject_association_evidence as evidence
-						where evidence.association_id = judgment_batch.association_id
-							and evidence.profile_id = judgment_batch.profile_id
-					)
 				returning 1
 			), deleted_invalid as (
 				delete from subject_association as association
@@ -1932,10 +1833,6 @@ async function subjectAssociationBatch(
 						select 1
 						from subject_association_judgment
 						where association_id = classified.id
-					)
-					and not exists (
-						select 1 from content_pack_subject_association_evidence as evidence
-						where evidence.association_id = classified.id
 					)
 				returning 1
 			), updated as (
@@ -1957,10 +1854,7 @@ async function subjectAssociationBatch(
 				as remaining
 		`,
 	);
-	return {
-		processedRows: Number(evidenceResult.rows[0]?.processed ?? 0) + relationResult.processedRows,
-		done: relationResult.done,
-	};
+	return relationResult;
 }
 
 async function releaseParentBatch(
@@ -2141,35 +2035,6 @@ async function tagPathApplicationBatch(
 				excluded.updated_at
 			)
 	`);
-	const evidenceResult = await tx.execute<{ readonly processed: number | string }>(sql`
-		with batch as materialized (
-			select evidence.import_id, evidence.source_fingerprint,
-				target.id as target_application_id
-			from content_pack_unit_tag_path_application_evidence as evidence
-			join unit_tag_path_application as source
-				on source.id = evidence.application_id
-			join unit_tag_path_application as target
-				on target.unit_id = ${input.targetUnitId}::uuid
-				and target.sense_id = source.sense_id
-			join unit_tag_path_application_judgment as target_vote
-				on target_vote.application_id = target.id
-				and target_vote.profile_id = evidence.profile_id
-			where evidence.unit_id = ${input.sourceUnitId}::uuid
-			order by evidence.sense_id, evidence.profile_id,
-				evidence.import_id, evidence.source_fingerprint
-			limit ${input.batchSize}
-			for update of evidence skip locked
-		), updated as (
-			update content_pack_unit_tag_path_application_evidence as evidence
-			set unit_id = ${input.targetUnitId}::uuid,
-				application_id = batch.target_application_id
-			from batch
-			where evidence.import_id = batch.import_id
-				and evidence.source_fingerprint = batch.source_fingerprint
-			returning 1
-		)
-		select cardinality(array(select 1 from updated))::int as processed
-	`);
 	const globalResult = await runBatch(
 		tx,
 		sql`
@@ -2182,12 +2047,6 @@ async function tagPathApplicationBatch(
 					on target.unit_id = ${input.targetUnitId}::uuid
 					and target.sense_id = source.sense_id
 				where source.unit_id = ${input.sourceUnitId}::uuid
-					and not exists (
-						select 1
-						from content_pack_unit_tag_path_application_evidence as evidence
-						where evidence.application_id = vote.application_id
-							and evidence.profile_id = vote.profile_id
-					)
 				order by source.sense_id, vote.profile_id
 				limit ${input.batchSize}
 				for update of vote skip locked
@@ -2204,11 +2063,6 @@ async function tagPathApplicationBatch(
 					and not exists (
 						select 1 from unit_tag_path_application_judgment as vote
 						where vote.application_id = source.id
-					)
-					and not exists (
-						select 1
-						from content_pack_unit_tag_path_application_evidence as evidence
-						where evidence.application_id = source.id
 					)
 				order by source.sense_id
 				limit ${input.batchSize}
@@ -2343,10 +2197,7 @@ async function tagPathApplicationBatch(
 		`,
 	);
 	return {
-		processedRows:
-			Number(evidenceResult.rows[0]?.processed ?? 0) +
-			globalResult.processedRows +
-			realmResult.processedRows,
+		processedRows: globalResult.processedRows + realmResult.processedRows,
 		done: globalResult.done && realmResult.done,
 	};
 }

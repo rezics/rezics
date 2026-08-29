@@ -111,21 +111,24 @@ Zone as an enforced execution scope
   Postgres-backed. HTTP caching is limited to assets and one documentation
   route.
 
-### 1.5 Content-pack support and gaps
+### 1.5 Local showcase-fixture support and gaps
 
-The content-pack pipeline (`services/main/src/services/content-pack/`)
-imports Zones (`compiledZone` with `filterDocument`, `themeDocument`,
+The local-only fixture loader (`services/main/src/services/content-pack/`)
+loads Zones (`compiledZone` with `filterDocument`, `themeDocument`,
 slug, optional local Rule Realm), Zone Pages (block documents validated
 against the Zone Page host policy), page and navigation structures, wiki
 Posts, chapter Posts, Entities, Tags, Labels, Collections, relations
-(including subject associations with spoiler evidence), and top-level
-slugs. Existing packs: `toaru-core` (catalog with two Zones and wiki),
+(including subject associations with spoiler judgments), and top-level
+slugs. Existing fixtures: `toaru-core` (catalog with two Zones and wiki),
 `xu-zhimo` (EPUB → Portable Text chapters, 23 books, 389 chapters),
 `vndb-v11` (visual-novel catalog; no Zone yet). `tagPaths`,
-`tagPathApplications`, judgment evidence on `unitTags`, and
+`tagPathApplications`, judgments on `unitTags`, and
 `entityMeasurements` are now persisted by the dedicated contracts in
 [tag-paths.md](./tag-paths.md) and
 [entity-tag-spoiler-and-measurement-decisions.md](./entity-tag-spoiler-and-measurement-decisions.md).
+The loader targets freshly reset local databases only. Once loaded, REZICS
+canonical rows are authoritative; fixture files are not production provenance
+or a synchronization source.
 
 ### 1.6 Gating
 

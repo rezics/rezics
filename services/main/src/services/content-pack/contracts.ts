@@ -22,13 +22,13 @@ export type {
 	SourceLock,
 } from "./schemas";
 
-export const ContentPackCommandValues = ["plan", "apply", "verify", "status"] as const;
-export type ContentPackCommand = (typeof ContentPackCommandValues)[number];
+export const ShowcaseFixtureCommandValues = ["plan", "apply", "verify", "status"] as const;
+export type ShowcaseFixtureCommand = (typeof ShowcaseFixtureCommandValues)[number];
 
-export const DefaultContentPackBundleId = "showcase-real-v1";
+export const DefaultShowcaseBundleId = "showcase-real-v1";
 
-export type ContentPackRunOptions = {
-	readonly command: ContentPackCommand;
+export type ShowcaseFixtureRunOptions = {
+	readonly command: ShowcaseFixtureCommand;
 	readonly from?: string;
 	readonly packId?: string;
 	readonly bundleId?: string;
@@ -69,11 +69,13 @@ export type ContentPackPlan = {
 	readonly conflicts: readonly PlannedObject[];
 };
 
-export function parseContentPackRunOptions(arguments_: readonly string[]): ContentPackRunOptions {
+export function parseShowcaseFixtureRunOptions(
+	arguments_: readonly string[],
+): ShowcaseFixtureRunOptions {
 	const [command, ...rest] = arguments_;
-	if (!isContentPackCommand(command))
+	if (!isShowcaseFixtureCommand(command))
 		throw new TypeError(
-			"Usage: content-pack.ts <plan|apply|verify|status> [--from DIR] [--pack ID] [--bundle ID]",
+			"Usage: showcase-fixtures.ts <plan|apply|verify|status> [--from DIR] [--pack ID] [--bundle ID]",
 		);
 	let from: string | undefined;
 	let packId: string | undefined;
@@ -109,6 +111,6 @@ export function parseContentPackRunOptions(arguments_: readonly string[]): Conte
 	};
 }
 
-function isContentPackCommand(value: string | undefined): value is ContentPackCommand {
-	return ContentPackCommandValues.some((candidate) => candidate === value);
+function isShowcaseFixtureCommand(value: string | undefined): value is ShowcaseFixtureCommand {
+	return ShowcaseFixtureCommandValues.some((candidate) => candidate === value);
 }

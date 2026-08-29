@@ -482,14 +482,12 @@ updated_at
   means unknown. The first release stores point values only; uncertainty,
   approximations, and ranges stay unmodeled until real demand exists.
 - Governance is direct editing with Unit revision and audit history, not
-  votes — the imported source's trait system sustains this model across
-  millions of applications. The UI localizes units and formats the bust–waist–hips
-  sequence; import decodes source HTML entities before validation; Portable
-  Text never owns or parses these values.
-- Import evidence is immutable and separate:
-  `content_pack_entity_measurement_evidence` references `measurement_id` and
-  records the import, source keys, URL, observation time, and typed
-  provenance. Human-created or edited facts do not require source metadata.
+  votes. The UI localizes units and formats the bust–waist–hips sequence; the
+  local fixture loader decodes source HTML entities before validation;
+  Portable Text never owns or parses these values.
+- The canonical measurement row and REZICS-owned revision/audit history are
+  the only persisted authority. Local fixture source metadata is build-time
+  validation input and is not stored as a parallel production evidence chain.
 
 ## Compound-search decomposition tunables
 
@@ -510,10 +508,13 @@ rate, added latency):
 - budget: roughly 62 indexed seeks worst case, with an added-latency target
   below 30 ms at p95 on a warm cache.
 
-## Pack import contract
+## Local showcase fixture contract
 
-One principle governs imported evidence: aggregates start honest. A source
-site's community score is provenance, never fabricated votes.
+Showcase packs are disposable development fixtures loaded only into a freshly
+reset local database. They are not production import inputs or a second source
+of truth. One principle governs fixture translation: aggregates start honest.
+A source site's community score is validation context, never fabricated votes
+or persisted parallel provenance.
 
 - Entity descriptions convert source formatting codes to Portable Text, with
   source spoiler codes becoming presentation marks; unconvertible markup is
@@ -522,27 +523,25 @@ site's community score is provenance, never fabricated votes.
   decoded before validation.
 - Tag records carry parent arrays, with `applicable` mapping to
   `directly_applicable` and `defaultspoil` mapping to
-  `default_spoiler_level`. Source ordering is retained as evidence and never
-  creates a REZICS primary Path.
+  `default_spoiler_level`. Source ordering is fixture-generation input and
+  never creates a REZICS primary Path.
 - Every semantically supported hierarchy chain may seed an immutable Path
-  definition. Exact-array deduplication is left to the database, each
-  definition receives one attributed importer definition vote, and
-  `content_pack_tag_path_definition_evidence` retains its source chain, URL,
-  observation time, and import identity.
+  definition. Exact-array deduplication is left to the database, and each
+  accepted definition becomes a canonical REZICS fact.
 - Each imported Unit–Tag application creates the application row plus a
   single importer-Profile `fit` judgment; the source spoiler average rounds
-  to one importer spoiler judgment. The source aggregate score is displayed
-  as import provenance only.
+  to one importer spoiler judgment. Source aggregate values are not stored as
+  authoritative production evidence.
 - Each imported character appearance creates its subject association plus
   one importer spoiler judgment taken from the source's per-work character
   spoiler flag.
-- Import is idempotent, upserting by source identifier and recording source
-  URL and import time.
+- Loading rejects a partially populated database. Fixture changes require a
+  local reset and full reload; there is no reconciliation or production sync.
 
 ## Migration and cutover
 
 The contract lands in the vendor-neutral
-`tag_path_entity_semantics` breaking migration. Released history remains
+`tag_path_semantic_model` breaking migration. Released history remains
 append-only, but the rejected preview contract receives no compatibility:
 
 1. bounded `EXISTS` assertions fail when any preview Structure/Tag-vote fact
@@ -550,9 +549,9 @@ append-only, but the rejected preview contract receives no compatibility:
 2. the migration removes old tables, functions, triggers, views, enum labels,
    and `unit.kind = structure` without conversion or backfill;
 3. it creates the dedicated Tag Path, global/Realm judgments, projections,
-   labels, preferences, measurements, and immutable evidence relations;
+   labels, preferences, and measurements;
 4. canonical PostgreSQL owners install incremental aggregates, immutable
-   definition and provenance guards, bounded governance chains, and content
+   definition guards, bounded governance chains, and content
    policy enforcement; and
 5. API, generated clients, and frontend deploy together. Old binaries are
    intentionally incompatible.

@@ -6,8 +6,8 @@ import { assertLocalDatabaseUrl } from "../seed/data";
 import { database } from "../database";
 import { runVoteTransaction } from "../database/vote-admission";
 import {
-	DefaultContentPackBundleId,
-	parseContentPackRunOptions,
+	DefaultShowcaseBundleId,
+	parseShowcaseFixtureRunOptions,
 	type ContentPackPlan,
 } from "./contracts";
 import { loadPack, listPackIds } from "./load-pack";
@@ -17,17 +17,17 @@ import { verifyContentPack } from "./verify";
 import { listContentPackStatus } from "./status";
 import { resolveShowcasePacksDir } from "./resolve-source";
 
-export class ContentPackService {
+export class ShowcaseFixtureService {
 	async run(arguments_: readonly string[]): Promise<void> {
 		assertLocalDatabaseUrl(env.DATABASE_URL);
-		const options = parseContentPackRunOptions(arguments_);
+		const options = parseShowcaseFixtureRunOptions(arguments_);
 		const sourceRoot = resolveShowcasePacksDir({ from: options.from });
 		const packIds = await resolvePackIds(sourceRoot, options.packId, options.bundleId);
 
 		if (options.command === "status") {
 			const packs = await Promise.all(packIds.map((packId) => loadPack(sourceRoot, packId)));
 			const status = await database.transaction((tx) => listContentPackStatus(tx, packs));
-			console.info("Content pack status", { sourceRoot, packs: status });
+			console.info("Local showcase fixture status", { sourceRoot, packs: status });
 			return;
 		}
 
@@ -40,14 +40,18 @@ export class ContentPackService {
 			}
 			if (options.command === "verify") {
 				const verified = await database.transaction((tx) => verifyContentPack(tx, pack));
-				console.info("Content pack verified", { packId, ...verified });
+				console.info("Local showcase fixture verified", { packId, ...verified });
 				continue;
 			}
 			const result = await runVoteTransaction(
-				{ family: "content_pack", authority: "global" },
+				{ family: "showcase_fixture", authority: "global" },
 				(tx) => applyContentPack(tx, pack, sourceRoot),
 			);
-			console.info("Content pack apply", { packId, version: pack.manifest.version, ...result });
+			console.info("Local showcase fixture applied", {
+				packId,
+				version: pack.manifest.version,
+				...result,
+			});
 		}
 	}
 }
@@ -58,7 +62,7 @@ async function resolvePackIds(
 	bundleId: string | undefined,
 ): Promise<string[]> {
 	if (packId) return [packId];
-	const requestedBundle = bundleId ?? DefaultContentPackBundleId;
+	const requestedBundle = bundleId ?? DefaultShowcaseBundleId;
 	try {
 		const raw = await readFile(join(sourceRoot, "bundles", `${requestedBundle}.yaml`), "utf8");
 		const packs = [...raw.matchAll(/^\s*-\s+id:\s+(\S+)/gm)].map((match) => match[1]!);
@@ -71,7 +75,7 @@ async function resolvePackIds(
 }
 
 function printPlan(plan: ContentPackPlan): void {
-	console.info("Content pack plan", {
+	console.info("Local showcase fixture plan", {
 		packId: plan.packId,
 		version: plan.version,
 		checksum: plan.checksum,
@@ -84,4 +88,4 @@ function printPlan(plan: ContentPackPlan): void {
 	});
 }
 
-export const contentPackService = new ContentPackService();
+export const showcaseFixtureService = new ShowcaseFixtureService();

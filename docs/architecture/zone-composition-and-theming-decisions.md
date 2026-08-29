@@ -618,9 +618,10 @@ Zones never own members; Realms never own page composition.
 
 ## 8. Showcase program
 
-Three packs in `rezics-showcase-packs` prove the vocabulary, one per Zone
-archetype (the Reddit migration evidence motivates proving expressiveness
-on flagship examples before broadening access):
+Three disposable local fixture packs in `rezics-showcase-packs` prove the
+vocabulary, one per Zone archetype (the Reddit migration evidence motivates
+proving expressiveness on flagship examples before broadening access). They
+are acceptance fixtures, not deployment artifacts or a second content source:
 
 1. **`hongloumeng` — full-corpus literary Zone** (replaces the earlier
    One Hundred Years of Solitude idea, which rights verification rules
@@ -657,15 +658,15 @@ second-segment (MAJOR) RomVer release; purely internal steps (renderer
 refactors, the shared shelf component) may ride third-segment releases.
 Persisted document members are additive, but database enum/constraint
 changes, generated API clients, and the aggregate protocol require an
-explicit migration and coordinated cutover plan. Content-pack
-`minRezicsVersion` on the new packs pins the first supporting release.
+explicit migration and coordinated cutover plan. Local fixture
+`minRezicsVersion` values pin the first REZICS version that can load them.
 
 ## 10. Relationship to Tag Path
 
 Zone composition and the dedicated Tag Path domain are independent
-workstreams. Zone aggregation, derived sources, theming, and showcase packs
-depend on stable Unit, effective-Tag, Collection, follow, and content-pack
-contracts. Tag-hierarchy blocks consume the final Tag Path and judgment
+workstreams. Zone aggregation, derived sources, theming, and local showcase
+fixtures depend on stable Unit, effective-Tag, Collection, follow, and fixture
+validation contracts. Tag-hierarchy blocks consume the final Tag Path and judgment
 contracts documented in [tag-paths.md](./tag-paths.md) and preserve their
 authority and provenance. They do not depend on a preview gate, legacy
 Structure Unit, or vendor-specific migration.
@@ -724,12 +725,12 @@ Exit: a custom theme passes the pipeline and renders on a preview Zone
 end to end. Explicit non-exit: general availability requires the separate
 §6.4 decision.
 
-### Phase Z5 — showcase packs
+### Phase Z5 — local showcase fixtures
 
 `hongloumeng`, `light-novel`, and the `vndb-v11` Zone extension, plus
 bundle updates.
-Exit: the bundle applies losslessly on a disposable fixture; each Zone
-renders its complete composed surface through the aggregate path; i18n
+Exit: after a database reset, the bundle loads losslessly into a disposable
+local database; each Zone renders its complete composed surface through the aggregate path; i18n
 policy checks pass for all pack Label Units.
 
 ## 12. Deferred

@@ -39,10 +39,6 @@ async function renderSubjectAssociationPhase(
 			.sql.toLowerCase()
 			.replaceAll(/\s+/g, " ");
 		if (rendered.includes("as conflict")) return { rows: [{ conflict: false }] };
-		if (
-			rendered.includes("update content_pack_subject_association_evidence as evidence")
-		)
-			return { rows: [{ processed: 0 }] };
 		if (rendered.includes("exists(select 1 from subject_association"))
 			return { rows: [responses[responseIndex++] ?? responses.at(-1)] };
 		return { rows: [] };
@@ -64,9 +60,7 @@ async function renderSubjectAssociationPhase(
 	return {
 		execute,
 		results,
-		sql: rendered
-			.map((statement) => statement.sql.replace(/\s+/g, " ").trim())
-			.join(" "),
+		sql: rendered.map((statement) => statement.sql.replace(/\s+/g, " ").trim()).join(" "),
 		params: rendered.flatMap((statement) => statement.params),
 	};
 }
@@ -124,15 +118,15 @@ describe("Unit merge subject-association judgments", () => {
 			{ processedRows: 2, done: false },
 			{ processedRows: 0, done: true },
 		]);
-		expect(query.execute).toHaveBeenCalledTimes(8);
+		expect(query.execute).toHaveBeenCalledTimes(4);
 		expect(query.sql).toContain("order by id limit");
 		expect(query.sql).toContain("order by judgment.profile_id limit");
 		expect(query.sql).toContain("for update of judgment skip locked");
 		expect(query.sql).toContain(
 			"and not exists ( select 1 from subject_association_judgment where association_id = classified.id )",
 		);
-		expect(query.params.filter((parameter) => parameter === batchSize).length).toBeGreaterThanOrEqual(
-			4,
-		);
+		expect(
+			query.params.filter((parameter) => parameter === batchSize).length,
+		).toBeGreaterThanOrEqual(4);
 	});
 });

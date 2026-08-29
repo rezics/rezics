@@ -114,8 +114,8 @@ Changing Path structure creates a Path. Changing a proposition creates an
 Expression/Sense. Changing a synonymous label signature creates a presentation
 revision. Renderer punctuation or abbreviation is policy and creates neither.
 
-Each Tag receives a sealed simple Expression during bootstrap, seed, and
-content-pack ingestion. Qualified Expressions remain distinct from that simple
+Each Tag receives a sealed simple Expression during bootstrap, seed, and local
+showcase-fixture loading. Qualified Expressions remain distinct from that simple
 claim. A negative judgment on bare `Red` therefore does not conflict with a
 positive Application of `Hair Color = Red`; they have different claim keys and
 source identities.
@@ -263,16 +263,17 @@ only. Direct content mode explicitly filters source direct Tags; semantic mode
 uses primary, entailed, and retrieval evidence. Match explanations preserve the
 evidence kind that caused retrieval.
 
-## Governance, import, and ownership
+## Governance, fixtures, and ownership
 
 Path merges govern structural convergence only. Source and target IDs, votes,
 Applications, and judgments remain historical facts and are not copied or
 summed. Expression and inference governance remain separate from Path merges.
 
-Content packs and seed/bootstrap flows declare guide nodes, typed relations,
-Expressions, Senses, Applications, and immutable evidence explicitly. They do
-not infer Senses from old member arrays. Merge evidence retargeting remains
-bounded and audited.
+Seed/bootstrap flows and local showcase fixtures may declare guide nodes,
+typed relations, Expressions, Senses, and Applications explicitly. They do not
+infer Senses from old member arrays. After insertion, those canonical REZICS
+facts and their REZICS-owned history are authoritative; fixture files are not
+persisted as parallel evidence and never participate in production merges.
 
 Primary implementation owners are:
 

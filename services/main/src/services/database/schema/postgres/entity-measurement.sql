@@ -1,5 +1,5 @@
--- Canonical Entity measurement facts are editable independently of immutable
--- content-pack provenance. Cross-row contextual cardinality stays bounded.
+-- Canonical Entity measurement facts have immutable identity while their
+-- values remain editable. Cross-row contextual cardinality stays bounded.
 
 CREATE OR REPLACE FUNCTION public.guard_entity_measurement()
 RETURNS trigger
@@ -30,21 +30,7 @@ BEGIN
 END;
 $$;
 
-CREATE OR REPLACE FUNCTION public.reject_content_pack_entity_measurement_evidence_mutation()
-RETURNS trigger LANGUAGE plpgsql AS $$
-BEGIN
-	RAISE EXCEPTION 'Content-pack Entity measurement evidence is append-only'
-		USING ERRCODE = '23514',
-			CONSTRAINT = 'content_pack_entity_measurement_evidence_immutable';
-END;
-$$;
-
 DROP TRIGGER IF EXISTS entity_measurement_guard ON public.entity_measurement;
 CREATE TRIGGER entity_measurement_guard
 BEFORE INSERT OR UPDATE OR DELETE ON public.entity_measurement
 FOR EACH ROW EXECUTE FUNCTION public.guard_entity_measurement();
-
-DROP TRIGGER IF EXISTS content_pack_entity_measurement_evidence_immutable ON public.content_pack_entity_measurement_evidence;
-CREATE TRIGGER content_pack_entity_measurement_evidence_immutable
-BEFORE UPDATE OR DELETE ON public.content_pack_entity_measurement_evidence
-FOR EACH ROW EXECUTE FUNCTION public.reject_content_pack_entity_measurement_evidence_mutation();

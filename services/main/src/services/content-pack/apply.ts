@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+
 import { and, eq, inArray, isNull, sql } from "drizzle-orm";
 import { assertFilterDocument } from "@rezics/filter";
 import { normalizeContentLanguageSupport } from "@rezics/content-language";
@@ -27,17 +28,6 @@ import {
 	entityMeasurement,
 	label,
 	media,
-	contentPackEntityMeasurementEvidence,
-	contentPackImport,
-	contentPackGuideNodeEvidence,
-	contentPackTagExpressionEvidence,
-	contentPackTagPathDefinitionEvidence,
-	contentPackTagPathSenseEvidence,
-	contentPackTagRelationEvidence,
-	contentPackUnitTagPathApplicationEvidence,
-	contentPackSubjectAssociationEvidence,
-	contentPackTagEvidence,
-	contentPackUnitTagEvidence,
 	post,
 	realm,
 	realmUnit,
@@ -80,7 +70,13 @@ import { WorkPolicy } from "../performance/policy";
 import { ContentPackCollision, ContentPackConflict, ContentPackInvalid } from "./errors";
 import { assertContentPackDocuments } from "./documents";
 import { planContentPack } from "./plan";
-import type { LoadedPack, PackObject, PackRelations, PackStructure } from "./contracts";
+import type {
+	ContentPackPlan,
+	LoadedPack,
+	PackObject,
+	PackRelations,
+	PackStructure,
+} from "./contracts";
 import { createTagPathInTransaction, createTagPathSenseInTransaction } from "../tag-paths/service";
 import {
 	createTagExpressionInferenceRuleInTransaction,
@@ -128,21 +124,8 @@ export async function applyContentPack(
 	assertContentPackDocuments(pack);
 	await assertContentPackThemeAssets(tx, pack);
 	await tx.execute(
-		sql`select pg_advisory_xact_lock(hashtextextended(${`content-pack:${pack.manifest.id}`}::text, 0))`,
+		sql`select pg_advisory_xact_lock(hashtextextended(${`showcase-fixture:${pack.manifest.id}`}::text, 0))`,
 	);
-	const [existingImport] = await tx
-		.select({ checksum: contentPackImport.checksum })
-		.from(contentPackImport)
-		.where(
-			and(
-				eq(contentPackImport.packId, pack.manifest.id),
-				eq(contentPackImport.version, pack.manifest.version),
-			),
-		)
-		.limit(1);
-	if (existingImport?.checksum === pack.checksum) return { status: "noop", created: 0 };
-	if (existingImport)
-		throw new ContentPackConflict("A different checksum is already recorded for this pack version");
 	const plan = await planContentPack(tx, pack, sourceRoot);
 	if (plan.conflicts.length)
 		throw new ContentPackConflict(
@@ -152,9 +135,9 @@ export async function applyContentPack(
 				)
 				.join("; "),
 		);
+	assertShowcaseFixtureInstallState(plan);
 	await verifyExistingPackObjects(tx, pack, plan.objects);
-
-	const importId = await insertImportLedger(tx, pack);
+	if (plan.alreadyInstalled || plan.createCount === 0) return { status: "noop", created: 0 };
 
 	const createKeys = new Set(
 		plan.objects.filter((item) => item.action === "create").map((item) => item.sourceKey),
@@ -165,10 +148,9 @@ export async function applyContentPack(
 
 	for (const object of objects) await importUnit(tx, pack, object);
 
-	await importTagEvidence(tx, pack, importId);
-	await importEntityMeasurements(tx, pack, importId);
-	await importVocabularyDefinitions(tx, pack, importId);
-	await importRelations(tx, pack, createKeys, importId);
+	await importEntityMeasurements(tx, pack);
+	await importVocabularyDefinitions(tx, pack);
+	await importRelations(tx, pack, createKeys);
 	await importStructures(tx, pack);
 	await importSlugs(tx, pack, createKeys);
 
@@ -182,23 +164,13 @@ export async function applyContentPack(
 	return { status: "created", created: objects.length };
 }
 
-async function insertImportLedger(tx: DatabaseTransaction, pack: LoadedPack): Promise<string> {
-	const [created] = await tx
-		.insert(contentPackImport)
-		.values({
-			packId: pack.manifest.id,
-			version: pack.manifest.version,
-			checksum: pack.checksum,
-			sourceLockKind: pack.sourceLock.kind,
-			manifestSnapshot: pack.manifest,
-			sourceLockSnapshot: pack.sourceLock,
-			rightsSnapshot: [...pack.rights],
-			bindingsSnapshot: [...pack.bindings],
-			importerProfileId: ImportOwnerProfileId,
-		})
-		.returning({ id: contentPackImport.id });
-	if (!created) throw new ContentPackConflict("The content-pack import ledger row was not created");
-	return created.id;
+export function assertShowcaseFixtureInstallState(
+	plan: Pick<ContentPackPlan, "createCount" | "noopCount">,
+): void {
+	if (plan.createCount > 0 && plan.noopCount > 0)
+		throw new ContentPackConflict(
+			"A showcase fixture cannot update a partially populated database; reset the local database and load it again",
+		);
 }
 
 async function verifyExistingPackObjects(
@@ -481,54 +453,7 @@ async function insertDetail(
 	}
 }
 
-async function importTagEvidence(
-	tx: DatabaseTransaction,
-	pack: LoadedPack,
-	importId: string,
-): Promise<void> {
-	for (const object of pack.objects) {
-		if (object.unit.kind !== "tag" || !object.tag || !("directlyApplicable" in object.tag))
-			continue;
-		const tagId = requireId(pack.ids.units, object.sourceKey);
-		const [actual] = await tx
-			.select({
-				id: tag.id,
-				directlyApplicable: tag.directlyApplicable,
-				defaultSpoilerLevel: tag.defaultSpoilerLevel,
-			})
-			.from(tag)
-			.where(eq(tag.id, tagId))
-			.limit(1);
-		if (!actual)
-			throw new ContentPackCollision(`${object.sourceKey} does not resolve to an existing Tag`);
-		if (
-			actual.directlyApplicable !== object.tag.directlyApplicable ||
-			actual.defaultSpoilerLevel !== object.tag.defaultSpoilerLevel
-		)
-			throw new ContentPackCollision(
-				`${object.sourceKey} collides with different existing Tag policies`,
-			);
-		await tx.insert(contentPackTagEvidence).values({
-			importId,
-			sourceFingerprint: sourceFingerprint("tag", object.sourceKey),
-			tagId,
-			tagSourceKey: object.sourceKey,
-			directlyApplicable: object.tag.directlyApplicable,
-			defaultSpoilerLevel: object.tag.defaultSpoilerLevel,
-			sourceCategory: object.tag.sourceCategory ?? null,
-			parentSourceKeys: [...object.tag.parentSourceKeys],
-			primaryParentSourceKey: object.tag.primaryParentSourceKey,
-			sourceUrl: object.tag.sourceUrl,
-			sourceImportedAt: sourceDate(object.tag.sourceImportedAt),
-		});
-	}
-}
-
-async function importEntityMeasurements(
-	tx: DatabaseTransaction,
-	pack: LoadedPack,
-	importId: string,
-): Promise<void> {
+async function importEntityMeasurements(tx: DatabaseTransaction, pack: LoadedPack): Promise<void> {
 	for (const object of pack.objects) {
 		if (object.unit.kind !== "entity" || !object.entityMeasurements) continue;
 		const entityId = requireId(pack.ids.units, object.sourceKey);
@@ -536,7 +461,6 @@ async function importEntityMeasurements(
 			const contextUnitId = measurement.contextUnitSourceKey
 				? requireId(pack.ids.units, measurement.contextUnitSourceKey)
 				: null;
-			const sourceImportedAt = sourceDate(measurement.sourceImportedAt);
 			await tx
 				.insert(entityMeasurement)
 				.values({
@@ -579,20 +503,6 @@ async function importEntityMeasurements(
 				throw new ContentPackCollision(
 					`${object.sourceKey} measurement collides with different existing facts`,
 				);
-			await tx.insert(contentPackEntityMeasurementEvidence).values({
-				importId,
-				sourceFingerprint: sourceFingerprint(
-					"entity-measurement",
-					object.sourceKey,
-					measurement.contextUnitSourceKey ?? "",
-				),
-				measurementId: actual.id,
-				entitySourceKey: object.sourceKey,
-				contextUnitSourceKey: measurement.contextUnitSourceKey ?? null,
-				sourceUrl: measurement.sourceUrl,
-				sourceObservedAt: sourceImportedAt,
-				provenance: measurement.sourceProvenance,
-			});
 		}
 	}
 }
@@ -644,7 +554,6 @@ async function importRelations(
 	tx: DatabaseTransaction,
 	pack: LoadedPack,
 	createKeys: ReadonlySet<string>,
-	importId: string,
 ): Promise<void> {
 	const { relations, ids } = pack;
 	const objectBySourceKey = new Map(
@@ -691,7 +600,7 @@ async function importRelations(
 				position: item.position,
 			})),
 		);
-	await importSubjectRelations(tx, pack, importId);
+	await importSubjectRelations(tx, pack);
 	const seriesReleases = (relations.seriesReleases ?? []).filter((item) =>
 		touchesCreated(createKeys, [item.seriesSourceKey, item.releaseUnitSourceKey]),
 	);
@@ -716,7 +625,7 @@ async function importRelations(
 				addedByProfileId: ImportOwnerProfileId,
 			})),
 		);
-	await importUnitTagRelations(tx, pack, importId);
+	await importUnitTagRelations(tx, pack);
 	const realmUnits = (relations.realmUnits ?? []).filter((item) =>
 		touchesCreated(createKeys, [item.realmSourceKey, item.unitSourceKey]),
 	);
@@ -735,11 +644,7 @@ async function importRelations(
 	}
 }
 
-async function importUnitTagRelations(
-	tx: DatabaseTransaction,
-	pack: LoadedPack,
-	importId: string,
-): Promise<void> {
+async function importUnitTagRelations(tx: DatabaseTransaction, pack: LoadedPack): Promise<void> {
 	const relations = pack.relations.unitTags ?? [];
 	if (!relations.length) return;
 	const uniqueTagIds = [
@@ -761,13 +666,12 @@ async function importUnitTagRelations(
 			throw new ContentPackInvalid(`Tag ${tagId} is not directly applicable`);
 	}
 
-	for (const relation of relations) await importUnitTagRelation(tx, pack, importId, relation);
+	for (const relation of relations) await importUnitTagRelation(tx, pack, relation);
 }
 
 async function importUnitTagRelation(
 	tx: DatabaseTransaction,
 	pack: LoadedPack,
-	importId: string,
 	relation: PackUnitTagRelation,
 ): Promise<void> {
 	const unitId = requireId(pack.ids.units, relation.unitSourceKey);
@@ -797,13 +701,8 @@ async function importUnitTagRelation(
 		);
 
 	if (relation.fitVote === undefined) return;
-	if (
-		relation.spoilerLevel === undefined ||
-		relation.sourceUrl === undefined ||
-		relation.sourceImportedAt === undefined ||
-		relation.sourceAggregate === undefined
-	)
-		throw new ContentPackInvalid("Incomplete direct Tag judgment evidence reached the importer");
+	if (relation.spoilerLevel === undefined || relation.sourceImportedAt === undefined)
+		throw new ContentPackInvalid("Incomplete direct Tag judgment reached the showcase loader");
 	const sourceImportedAt = sourceDate(relation.sourceImportedAt);
 	await tx
 		.insert(unitTagJudgment)
@@ -844,37 +743,18 @@ async function importUnitTagRelation(
 			(relation.spoilerLevel === null ? undefined : sourceImportedAt.getTime())
 	)
 		throw new ContentPackConflict(
-			`${relation.unitSourceKey}/${relation.tagSourceKey} has a different importer judgment`,
+			`${relation.unitSourceKey}/${relation.tagSourceKey} has a different showcase judgment`,
 		);
-	await tx.insert(contentPackUnitTagEvidence).values({
-		importId,
-		sourceFingerprint: sourceFingerprint("unit-tag", relation.unitSourceKey, relation.tagSourceKey),
-		unitId,
-		tagId,
-		profileId: ImportOwnerProfileId,
-		unitSourceKey: relation.unitSourceKey,
-		tagSourceKey: relation.tagSourceKey,
-		sourceFitVote: relation.fitVote,
-		sourceSpoilerLevel: relation.spoilerLevel,
-		sourceUrl: relation.sourceUrl,
-		sourceImportedAt,
-		sourceAggregate: relation.sourceAggregate,
-	});
 }
 
-async function importSubjectRelations(
-	tx: DatabaseTransaction,
-	pack: LoadedPack,
-	importId: string,
-): Promise<void> {
+async function importSubjectRelations(tx: DatabaseTransaction, pack: LoadedPack): Promise<void> {
 	for (const relation of pack.relations.subjects ?? [])
-		await importSubjectRelation(tx, pack, importId, relation);
+		await importSubjectRelation(tx, pack, relation);
 }
 
 async function importSubjectRelation(
 	tx: DatabaseTransaction,
 	pack: LoadedPack,
-	importId: string,
 	relation: PackSubjectRelation,
 ): Promise<void> {
 	const declaredAssociationId = requireId(pack.ids.subjects ?? {}, relation.sourceKey);
@@ -934,8 +814,8 @@ async function importSubjectRelation(
 	)
 		throw new ContentPackCollision(`${relation.sourceKey} collides with another subject relation`);
 	if (relation.spoilerLevel === undefined) return;
-	if (relation.sourceUrl === undefined || relation.sourceImportedAt === undefined)
-		throw new ContentPackInvalid("Incomplete subject evidence reached the importer");
+	if (relation.sourceImportedAt === undefined)
+		throw new ContentPackInvalid("Incomplete subject judgment reached the showcase loader");
 	const sourceImportedAt = sourceDate(relation.sourceImportedAt);
 	await tx
 		.insert(subjectAssociationJudgment)
@@ -958,18 +838,7 @@ async function importSubjectRelation(
 		)
 		.limit(1);
 	if (actualJudgment?.spoilerLevel !== relation.spoilerLevel)
-		throw new ContentPackConflict(`${relation.sourceKey} has a different importer judgment`);
-	await tx.insert(contentPackSubjectAssociationEvidence).values({
-		importId,
-		sourceFingerprint: sourceFingerprint("subject", relation.sourceKey),
-		associationId: actual.id,
-		profileId: ImportOwnerProfileId,
-		declaredAssociationId,
-		subjectSourceKey: relation.sourceKey,
-		sourceSpoilerLevel: relation.spoilerLevel,
-		sourceUrl: relation.sourceUrl,
-		sourceImportedAt,
-	});
+		throw new ContentPackConflict(`${relation.sourceKey} has a different showcase judgment`);
 }
 
 function requireVocabularyNodeId(pack: LoadedPack, sourceKey: string): string {
@@ -979,11 +848,10 @@ function requireVocabularyNodeId(pack: LoadedPack, sourceKey: string): string {
 async function importVocabularyDefinitions(
 	tx: DatabaseTransaction,
 	pack: LoadedPack,
-	importId: string,
 ): Promise<void> {
-	await importGuideNodes(tx, pack, importId);
-	const actualRelationIds = await importTagRelations(tx, pack, importId);
-	const actualExpressionIds = await importTagExpressions(tx, pack, importId);
+	await importGuideNodes(tx, pack);
+	const actualRelationIds = await importTagRelations(tx, pack);
+	const actualExpressionIds = await importTagExpressions(tx, pack);
 	for (const object of pack.objects)
 		if (object.unit.kind === "tag")
 			await ensureSimpleTagExpressionInTransaction(tx, {
@@ -992,19 +860,12 @@ async function importVocabularyDefinitions(
 			});
 	const actualPathIds = new Map<string, string>();
 	for (const path of pack.relations.tagPaths ?? []) {
-		const pathId = await importTagPathDefinition(tx, pack, importId, path, actualRelationIds);
+		const pathId = await importTagPathDefinition(tx, pack, path, actualRelationIds);
 		actualPathIds.set(path.sourceKey, pathId);
 	}
 	const actualSenseIds = new Map<string, string>();
 	for (const sense of pack.relations.tagPathSenses ?? []) {
-		const senseId = await importTagPathSense(
-			tx,
-			pack,
-			importId,
-			sense,
-			actualPathIds,
-			actualExpressionIds,
-		);
+		const senseId = await importTagPathSense(tx, pack, sense, actualPathIds, actualExpressionIds);
 		actualSenseIds.set(sense.sourceKey, senseId);
 	}
 	for (const rule of pack.relations.tagExpressionInferenceRules ?? []) {
@@ -1031,14 +892,10 @@ async function importVocabularyDefinitions(
 		});
 	}
 	for (const application of pack.relations.tagPathApplications ?? [])
-		await importTagPathApplication(tx, pack, importId, application, actualSenseIds);
+		await importTagPathApplication(tx, pack, application, actualSenseIds);
 }
 
-async function importGuideNodes(
-	tx: DatabaseTransaction,
-	pack: LoadedPack,
-	importId: string,
-): Promise<void> {
+async function importGuideNodes(tx: DatabaseTransaction, pack: LoadedPack): Promise<void> {
 	for (const definition of pack.relations.guideNodes ?? []) {
 		const nodeId = requireId(pack.ids.guideNodes ?? {}, definition.sourceKey);
 		await tx
@@ -1061,21 +918,12 @@ async function importGuideNodes(
 				})),
 			)
 			.onConflictDoNothing();
-		await tx.insert(contentPackGuideNodeEvidence).values({
-			importId,
-			sourceFingerprint: sourceFingerprint("guide-node", definition.sourceKey),
-			nodeId,
-			nodeSourceKey: definition.sourceKey,
-			sourceUrl: definition.sourceUrl,
-			sourceImportedAt: sourceDate(definition.sourceImportedAt),
-		});
 	}
 }
 
 async function importTagRelations(
 	tx: DatabaseTransaction,
 	pack: LoadedPack,
-	importId: string,
 ): Promise<Map<string, string>> {
 	const actualIds = new Map<string, string>();
 	for (const definition of pack.relations.tagRelations ?? []) {
@@ -1118,14 +966,6 @@ async function importTagRelations(
 		}
 		if (!relationId) throw new ContentPackCollision(`Tag relation ${definition.sourceKey} failed`);
 		actualIds.set(definition.sourceKey, relationId);
-		await tx.insert(contentPackTagRelationEvidence).values({
-			importId,
-			sourceFingerprint: sourceFingerprint("tag-relation", definition.sourceKey),
-			relationId,
-			relationSourceKey: definition.sourceKey,
-			sourceUrl: definition.sourceUrl,
-			sourceImportedAt: sourceDate(definition.sourceImportedAt),
-		});
 	}
 	return actualIds;
 }
@@ -1133,11 +973,10 @@ async function importTagRelations(
 async function importTagExpressions(
 	tx: DatabaseTransaction,
 	pack: LoadedPack,
-	importId: string,
 ): Promise<Map<string, string>> {
 	const actualIds = new Map<string, string>();
 	for (const definition of pack.relations.tagExpressions ?? []) {
-		const expressionId = await importTagExpression(tx, pack, importId, definition);
+		const expressionId = await importTagExpression(tx, pack, definition);
 		actualIds.set(definition.sourceKey, expressionId);
 	}
 	return actualIds;
@@ -1146,7 +985,6 @@ async function importTagExpressions(
 async function importTagExpression(
 	tx: DatabaseTransaction,
 	pack: LoadedPack,
-	importId: string,
 	definition: PackTagExpression,
 ): Promise<string> {
 	const declaredExpressionId = requireId(pack.ids.tagExpressions ?? {}, definition.sourceKey);
@@ -1174,23 +1012,12 @@ async function importTagExpression(
 		profileId: ImportOwnerProfileId,
 		createdAt: sourceDate(definition.sourceImportedAt),
 	});
-	await tx.insert(contentPackTagExpressionEvidence).values({
-		importId,
-		sourceFingerprint: sourceFingerprint("tag-expression", definition.sourceKey),
-		expressionId: result.expressionId,
-		declaredExpressionId,
-		expressionSourceKey: definition.sourceKey,
-		canonicalClaimKey: definition.canonicalClaimKey,
-		sourceUrl: definition.sourceUrl,
-		sourceImportedAt: sourceDate(definition.sourceImportedAt),
-	});
 	return result.expressionId;
 }
 
 async function importTagPathDefinition(
 	tx: DatabaseTransaction,
 	pack: LoadedPack,
-	importId: string,
 	path: PackTagPath,
 	actualRelationIds: ReadonlyMap<string, string>,
 ): Promise<string> {
@@ -1209,26 +1036,12 @@ async function importTagPathDefinition(
 		profileId: ImportOwnerProfileId,
 		createdAt: sourceImportedAt,
 	});
-	await tx.insert(contentPackTagPathDefinitionEvidence).values({
-		importId,
-		sourceFingerprint: sourceFingerprint("tag-path", path.sourceKey),
-		pathId: result.pathId,
-		profileId: ImportOwnerProfileId,
-		declaredPathId,
-		pathSourceKey: path.sourceKey,
-		memberNodeSourceKeys: [...path.memberNodeSourceKeys],
-		relationSourceKeys: [...path.relationSourceKeys],
-		sourceVote: 1,
-		sourceUrl: path.sourceUrl,
-		sourceImportedAt,
-	});
 	return result.pathId;
 }
 
 async function importTagPathSense(
 	tx: DatabaseTransaction,
 	pack: LoadedPack,
-	importId: string,
 	sense: PackTagPathSense,
 	actualPathIds: ReadonlyMap<string, string>,
 	actualExpressionIds: ReadonlyMap<string, string>,
@@ -1251,29 +1064,16 @@ async function importTagPathSense(
 		profileId: ImportOwnerProfileId,
 		createdAt: sourceDate(sense.sourceImportedAt),
 	});
-	await tx.insert(contentPackTagPathSenseEvidence).values({
-		importId,
-		sourceFingerprint: sourceFingerprint("tag-path-sense", sense.sourceKey),
-		senseId: result.senseId,
-		declaredSenseId,
-		senseSourceKey: sense.sourceKey,
-		pathSourceKey: sense.pathSourceKey,
-		expressionSourceKey: sense.expressionSourceKey,
-		sourceUrl: sense.sourceUrl,
-		sourceImportedAt: sourceDate(sense.sourceImportedAt),
-	});
 	return result.senseId;
 }
 
 async function importTagPathApplication(
 	tx: DatabaseTransaction,
 	pack: LoadedPack,
-	importId: string,
 	application: PackTagPathApplication,
 	actualSenseIds: ReadonlyMap<string, string>,
 ): Promise<void> {
 	const unitId = requireId(pack.ids.units, application.unitSourceKey);
-	const declaredSenseId = requireId(pack.ids.tagPathSenses ?? {}, application.senseSourceKey);
 	const senseId = actualSenseIds.get(application.senseSourceKey);
 	if (!senseId)
 		throw new ContentPackInvalid(
@@ -1341,28 +1141,8 @@ async function importTagPathApplication(
 			(application.spoilerLevel === null ? undefined : sourceImportedAt.getTime())
 	)
 		throw new ContentPackConflict(
-			`${application.unitSourceKey}/${application.senseSourceKey} has a different importer judgment`,
+			`${application.unitSourceKey}/${application.senseSourceKey} has a different showcase judgment`,
 		);
-	await tx.insert(contentPackUnitTagPathApplicationEvidence).values({
-		importId,
-		sourceFingerprint: sourceFingerprint(
-			"tag-path-application",
-			application.unitSourceKey,
-			application.senseSourceKey,
-		),
-		applicationId: actualApplication.id,
-		unitId,
-		senseId,
-		profileId: ImportOwnerProfileId,
-		unitSourceKey: application.unitSourceKey,
-		senseSourceKey: application.senseSourceKey,
-		declaredSenseId,
-		sourceFitVote: application.fitVote,
-		sourceSpoilerLevel: application.spoilerLevel,
-		sourceUrl: application.sourceUrl,
-		sourceImportedAt,
-		sourceAggregate: application.sourceAggregate,
-	});
 }
 
 async function importStructures(tx: DatabaseTransaction, pack: LoadedPack): Promise<void> {
@@ -1429,6 +1209,10 @@ function navigationDocumentFrom(pack: LoadedPack, structure: PackStructure) {
 	};
 }
 
+function sha256Hex(value: string): string {
+	return createHash("sha256").update(value).digest("hex");
+}
+
 async function contentStructureAlreadyPresent(
 	tx: DatabaseTransaction,
 	ownerUnitId: string,
@@ -1490,31 +1274,11 @@ function requireId(map: Record<string, string>, sourceKey: string): string {
 	return id;
 }
 
-function sha256Hex(value: string): string {
-	return createHash("sha256").update(value).digest("hex");
-}
-
-function sourceFingerprint(kind: string, ...sourceKeys: readonly string[]): string {
-	return sha256Hex(stableJson([kind, ...sourceKeys]));
-}
-
 function sourceDate(value: string): Date {
 	const date = new Date(value);
 	if (!Number.isFinite(date.getTime()))
 		throw new ContentPackInvalid(`Invalid source import timestamp ${value}`);
 	return date;
-}
-
-function stableJson(value: unknown): string {
-	const serialized = JSON.stringify(value, (_key, nested) => {
-		if (nested === null || typeof nested !== "object" || Array.isArray(nested)) return nested;
-		return Object.fromEntries(
-			Object.entries(nested).sort(([left], [right]) => left.localeCompare(right)),
-		);
-	});
-	if (serialized === undefined)
-		throw new ContentPackInvalid("A source evidence value cannot be serialized as JSON");
-	return serialized;
 }
 
 function fractionalFromIndex(index: number): string {

@@ -20,9 +20,10 @@ offers a bounded Select whose nine canonical choices are derived from the
 product's supported content-language groups and UI locales, including `zh`,
 `zh-Hans`, and `zh-Hant`; selected values are rendered with localized language
 names. This authoring catalog is not the persistence validity set. API and
-content-pack boundaries continue to validate and canonicalize any well-formed
+local showcase-fixture boundaries validate and canonicalize any well-formed
 BCP 47 tag, and the editor can preserve or adopt canonical values supplied by
-those boundaries or related-Unit evidence.
+those boundaries or related-Unit evidence. Once stored, the REZICS Unit value
+is authoritative; a fixture file is not a continuing source.
 
 This field does not replace, alias, or derive any localization or availability
 contract:

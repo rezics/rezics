@@ -105,9 +105,23 @@ starts persistent services; `infra:up` additionally performs the idempotent
 RustFS bucket initialization. `task infra:reset` intentionally deletes all
 local PostgreSQL and RustFS state before rebuilding a consistent default database; it requires
 confirmation. Use `task --yes local:reset` to reset and seed only the application database. Use
-`task local:showcase` to replay sibling showcase packs. Use
+`task local:showcase` only after a local reset to load disposable fixtures from the sibling
+`rezics-showcase-packs` checkout. Use
 `task --yes local:search:rebuild` to rebuild the authoritative PGroonga indexes without resetting
 PostgreSQL.
+
+### Data authority and showcase fixtures
+
+REZICS itself is the sole source of truth for production content. Canonical database rows and
+their REZICS-owned revision, governance, and audit history are authoritative after creation.
+There is no production content-pack import ledger, provenance mirror, synchronization path, or
+second catalog whose state can override REZICS.
+
+`rezics-showcase-packs` is a development and demo fixture repository only. Its files may populate
+a freshly reset local database for UI and integration work; they are not a production deploy
+input, backup, migration source, or continuing authority. Do not load showcase packs in staging
+or production. When a fixture changes, reset the disposable local database and load it again
+instead of attempting to reconcile it with existing REZICS data.
 
 The main checks are:
 

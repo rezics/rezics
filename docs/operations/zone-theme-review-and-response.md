@@ -14,8 +14,9 @@ operator changes revision state instead of editing an accepted submission.
 - Theme authors need the development-preview capability and ordinary update
   permission on the `zone_theme` Unit. They cannot approve or kill revisions.
 
-Do not grant either platform capability to a content-pack importer or a Zone
-manager. Zone managers select only a currently approved revision.
+Do not grant either platform capability to a local fixture loader or a Zone
+manager. Zone managers select only a currently approved revision, and showcase
+fixtures must never run against staging or production.
 
 ## Normal review
 

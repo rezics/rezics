@@ -255,7 +255,7 @@ function failureDetails(error: unknown): { code: string; message: string } {
 /** A lossless merge conflict cannot become safe through automatic retries. */
 export function isTerminalUnitMergeExecutionFailure(error: unknown): boolean {
 	const tag = error && typeof error === "object" ? Reflect.get(error, "_tag") : undefined;
-	return Boolean(tag === "UnitMergeMeasurementConflict" || tag === "UnitMergeEvidenceConflict");
+	return tag === "UnitMergeMeasurementConflict";
 }
 
 type UnitMergeLeaseTransition = {
