@@ -25,7 +25,9 @@ The capability-specific Custom Theme endpoints expose only Profile selection
 fields and the `platform.custom_theme.external_live.access` lifecycle. Their
 management capability cannot call the arbitrary whole-Profile replacement
 endpoint, cannot target the actor, and never implies execution access. Active
-grants expire within 90 days; renewal revokes and replaces rather than editing
-history. See
+ordinary grants expire within 90 days; renewal revokes and replaces rather than
+editing history. The reserved Bootstrap platform administrator alone holds a
+permanent, self-issued grant as part of its complete Bootstrap policy, and the
+service reports that lifecycle state explicitly as `permanent`. See
 [`docs/operations/custom-theme-external-live-access.md`](../../../../../docs/operations/custom-theme-external-live-access.md)
 for admission, recertification, and revocation procedure.

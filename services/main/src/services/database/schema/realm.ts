@@ -356,18 +356,5 @@ export const platformCapabilityGrant = pgTable(
 			"platform_capability_grant_expiry_check",
 			sql`${table.expiresAt} is null or ${table.expiresAt} > ${table.createdAt}`,
 		),
-		check(
-			"platform_capability_grant_custom_theme_external_live_expiry_check",
-			sql`${table.capability} <> 'platform.custom_theme.external_live.access'::platform_capability
-				or (
-					${table.expiresAt} is not null
-					and ${table.expiresAt} <= ${table.createdAt} + interval '90 days'
-				)`,
-		),
-		check(
-			"platform_capability_grant_custom_theme_external_live_non_self_check",
-			sql`${table.capability} <> 'platform.custom_theme.external_live.access'::platform_capability
-				or ${table.profileId} <> ${table.grantedByProfileId}`,
-		),
 	],
 );

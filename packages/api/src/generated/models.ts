@@ -111848,43 +111848,82 @@ export type GetApiPlatformAccessCustomThemeExternalLiveProfilesStatus200 = {
 		 */
 		email: string;
 		grant:
-			| ({
-					/**
-					 * @description
-					 * Format: `uuid`
-					 * @type string
-					 */
-					id: string;
-					/**
-					 * @default 'granted'
-					 * @type string
-					 */
-					state: GetApiPlatformAccessCustomThemeExternalLiveProfilesStatus200ItemsGrantStateEnum;
-					/**
-					 * @description
-					 * Format: `uuid`
-					 * @type string
-					 */
-					grantedByProfileId: string;
-					/**
-					 * @description
-					 * Format: `date-time`
-					 * @type string
-					 */
-					expiresAt: string;
-					/**
-					 * @description
-					 * Format: `date-time`
-					 * @type string
-					 */
-					createdAt: string;
-					/**
-					 * @description
-					 * Format: `date-time`
-					 * @type string
-					 */
-					updatedAt: string;
-			  } | null)
+			| (
+					| (
+							| {
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									id: string;
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									grantedByProfileId: string;
+									/**
+									 * @description
+									 * Format: `date-time`
+									 * @type string
+									 */
+									createdAt: string;
+									/**
+									 * @description
+									 * Format: `date-time`
+									 * @type string
+									 */
+									updatedAt: string;
+									/**
+									 * @type string
+									 */
+									state: "permanent";
+									/**
+									 * @type null
+									 */
+									expiresAt: null;
+							  }
+							| {
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									id: string;
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									grantedByProfileId: string;
+									/**
+									 * @description
+									 * Format: `date-time`
+									 * @type string
+									 */
+									createdAt: string;
+									/**
+									 * @description
+									 * Format: `date-time`
+									 * @type string
+									 */
+									updatedAt: string;
+									/**
+									 * @default 'granted'
+									 * @type string
+									 */
+									state: GetApiPlatformAccessCustomThemeExternalLiveProfilesStatus200ItemsGrantStateEnum;
+									/**
+									 * @description
+									 * Format: `date-time`
+									 * @type string
+									 */
+									expiresAt: string;
+							  }
+					  )
+					| null
+			  )
 			| null;
 		/**
 		 * @minLength 1
@@ -112000,43 +112039,82 @@ export type GetApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccess
 	 */
 	email: string;
 	grant:
-		| ({
-				/**
-				 * @description
-				 * Format: `uuid`
-				 * @type string
-				 */
-				id: string;
-				/**
-				 * @default 'granted'
-				 * @type string
-				 */
-				state: GetApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus200GrantStateEnum;
-				/**
-				 * @description
-				 * Format: `uuid`
-				 * @type string
-				 */
-				grantedByProfileId: string;
-				/**
-				 * @description
-				 * Format: `date-time`
-				 * @type string
-				 */
-				expiresAt: string;
-				/**
-				 * @description
-				 * Format: `date-time`
-				 * @type string
-				 */
-				createdAt: string;
-				/**
-				 * @description
-				 * Format: `date-time`
-				 * @type string
-				 */
-				updatedAt: string;
-		  } | null)
+		| (
+				| (
+						| {
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								id: string;
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								grantedByProfileId: string;
+								/**
+								 * @description
+								 * Format: `date-time`
+								 * @type string
+								 */
+								createdAt: string;
+								/**
+								 * @description
+								 * Format: `date-time`
+								 * @type string
+								 */
+								updatedAt: string;
+								/**
+								 * @type string
+								 */
+								state: "permanent";
+								/**
+								 * @type null
+								 */
+								expiresAt: null;
+						  }
+						| {
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								id: string;
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								grantedByProfileId: string;
+								/**
+								 * @description
+								 * Format: `date-time`
+								 * @type string
+								 */
+								createdAt: string;
+								/**
+								 * @description
+								 * Format: `date-time`
+								 * @type string
+								 */
+								updatedAt: string;
+								/**
+								 * @default 'granted'
+								 * @type string
+								 */
+								state: GetApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus200GrantStateEnum;
+								/**
+								 * @description
+								 * Format: `date-time`
+								 * @type string
+								 */
+								expiresAt: string;
+						  }
+				  )
+				| null
+		  )
 		| null;
 	/**
 	 * @minLength 1
@@ -112183,43 +112261,82 @@ export type PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccess
 	 */
 	email: string;
 	grant:
-		| ({
-				/**
-				 * @description
-				 * Format: `uuid`
-				 * @type string
-				 */
-				id: string;
-				/**
-				 * @default 'granted'
-				 * @type string
-				 */
-				state: PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus200GrantStateEnum;
-				/**
-				 * @description
-				 * Format: `uuid`
-				 * @type string
-				 */
-				grantedByProfileId: string;
-				/**
-				 * @description
-				 * Format: `date-time`
-				 * @type string
-				 */
-				expiresAt: string;
-				/**
-				 * @description
-				 * Format: `date-time`
-				 * @type string
-				 */
-				createdAt: string;
-				/**
-				 * @description
-				 * Format: `date-time`
-				 * @type string
-				 */
-				updatedAt: string;
-		  } | null)
+		| (
+				| (
+						| {
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								id: string;
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								grantedByProfileId: string;
+								/**
+								 * @description
+								 * Format: `date-time`
+								 * @type string
+								 */
+								createdAt: string;
+								/**
+								 * @description
+								 * Format: `date-time`
+								 * @type string
+								 */
+								updatedAt: string;
+								/**
+								 * @type string
+								 */
+								state: "permanent";
+								/**
+								 * @type null
+								 */
+								expiresAt: null;
+						  }
+						| {
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								id: string;
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								grantedByProfileId: string;
+								/**
+								 * @description
+								 * Format: `date-time`
+								 * @type string
+								 */
+								createdAt: string;
+								/**
+								 * @description
+								 * Format: `date-time`
+								 * @type string
+								 */
+								updatedAt: string;
+								/**
+								 * @default 'granted'
+								 * @type string
+								 */
+								state: PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus200GrantStateEnum;
+								/**
+								 * @description
+								 * Format: `date-time`
+								 * @type string
+								 */
+								expiresAt: string;
+						  }
+				  )
+				| null
+		  )
 		| null;
 	/**
 	 * @minLength 1

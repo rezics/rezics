@@ -99,8 +99,12 @@ platform.custom_theme.kill
 narrow capability implies neither execution nor general platform access reads
 or writes. Its API cannot name an arbitrary capability, cannot target the
 actor, and returns only Profile selection fields plus the external-live grant.
-Every active grant expires within 90 days. Renewal revokes the old immutable
-lifecycle row and inserts a new row in the same audited transaction.
+Ordinary active grants expire within 90 days. The one reserved Bootstrap
+platform administrator instead holds a permanent, self-issued grant as part of
+the complete Bootstrap platform policy; this exception does not apply to other
+Profiles holding `platform.access.manage`. Renewal of an ordinary grant revokes
+the old immutable lifecycle row and inserts a new row in the same audited
+transaction.
 
 “Core trusted member” is the human admission and recertification standard. It
 is never inferred by the renderer and is not an authorization fact. See

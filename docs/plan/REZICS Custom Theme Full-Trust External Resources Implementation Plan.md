@@ -240,7 +240,7 @@ type SetCustomThemeExternalLiveAccessBody =
     };
 ```
 
-The server hard-codes `CustomThemeExternalLiveAccessCapability`, parses the discriminated body, verifies optimistic concurrency, and records grant, renewal, or revocation atomically with an audit event. An enabled grant must expire no later than 90 days after creation. Renewal revokes the old lifecycle row and creates a new expiring row; it never extends stored history in place.
+The server hard-codes `CustomThemeExternalLiveAccessCapability`, parses the discriminated body, verifies optimistic concurrency, and records grant, renewal, or revocation atomically with an audit event. An ordinary enabled grant must expire no later than 90 days after creation. The reserved Bootstrap platform administrator alone holds a permanent, self-issued grant installed with the complete Bootstrap policy. Renewal of an ordinary grant revokes the old lifecycle row and creates a new expiring row; it never extends stored history in place.
 
 ### 7.4 Governance policy
 
@@ -252,7 +252,7 @@ Core trusted member status remains the admission standard for the initial cohort
 - acknowledgement of safe mode, incident reporting, and credential/data-handling duties;
 - the approving access manager and the recertification deadline.
 
-External-live access managers are a smaller governance subset selected for access-administration judgment and accountability. Core trusted member classification alone does not authorize access management, and an access manager must not approve their own execution eligibility.
+External-live access managers are a smaller governance subset selected for access-administration judgment and accountability. Core trusted member classification alone does not authorize access management, and an access manager must not approve their own execution eligibility. The reserved Bootstrap platform administrator is a system-installation exception, not a precedent for delegated access managers.
 
 Recertification occurs at least as often as the 90-day access-grant lifetime. Leaving the cohort, losing the operational need, failing review obligations, or creating an incident risk requires prompt capability revocation. Governance records explain why a grant should exist; only the active capability grant proves runtime access.
 
@@ -590,15 +590,16 @@ This table is evidence and monitoring state, not an artifact-closure guarantee. 
 
 Reuse the existing `platform_capability_grant` lifecycle instead of creating a Custom Theme membership table. Add the two canonical enum values and definitions through `@rezics/access`, the database migration, API schemas, generated clients, localization, bootstrap policy, and tests.
 
-The external-live access capability has stricter grant invariants than ordinary platform capabilities:
+The external-live access capability has stricter service policy than ordinary platform capabilities:
 
-- `expires_at` is required and is no later than `created_at + interval '90 days'`;
-- `profile_id` differs from `granted_by_profile_id`, preventing self-grant through both narrow and root workflows;
+- ordinary grants require `expires_at` no later than 90 days after the service mutation;
+- ordinary grants require `profile_id` to differ from `granted_by_profile_id` through both narrow and root workflows;
+- the reserved Bootstrap platform administrator alone may hold a permanent, self-issued grant installed by the trusted Bootstrap path;
 - only one active row exists for `(profile_id, capability)` under the existing partial unique index;
 - renewal revokes the current row and inserts a new row in the same transaction;
 - expiry or revocation makes the next server-side authorization decision deny access.
 
-Enforce the expiry and self-grant invariants in both the database and the capability grant policy so imports, bootstrap paths, and future APIs cannot bypass the narrow endpoint. The management capability uses the ordinary platform grant lifecycle but does not imply external-live access.
+Enforce the ordinary expiry and self-grant invariants in the capability grant service. Parse the exact Bootstrap exception as a distinct `permanent` state and reject any other null-expiry external-live row at the service boundary. The management capability uses the ordinary platform grant lifecycle but does not imply external-live access.
 
 The request-path lookup remains the existing indexed active-grant query by Profile and capability. Capability-decision caching must be request-local, or otherwise invalidated on grant changes; a cached HTML or API projection containing theme resources must be partitioned by the complete authorization result and must never be shared with a denied viewer. Revocation cannot undo code already executed in an open document, so incident response still uses revision kill, global disable, and safe navigation.
 
@@ -1026,7 +1027,7 @@ No current approval is inherited automatically because the execution capability 
 
 - Add the external-live access and access-management capabilities; retain the shared development-preview gate and generic Custom Theme review/kill capabilities.
 - Add the narrow Profile lookup and external-live access mutation without exposing whole-Profile platform access replacement.
-- Enforce non-self-grant, mandatory expiry of at most 90 days, optimistic concurrency, fresh-session mutation, audit history, and root access-manager compatibility.
+- Enforce ordinary non-self-grant, mandatory expiry of at most 90 days, the explicit permanent Bootstrap administrator exception, optimistic concurrency, fresh-session mutation, audit history, and root access-manager compatibility.
 - Use ordinary Unit authorization for authoring and host installation, conjunctively with external-live eligibility.
 - Implement allowed and denied paths for every operation and access-management transition.
 - Replace Zone-specific APIs and regenerate clients.
@@ -1067,7 +1068,7 @@ There is no self-hosting implementation step in this plan. Likewise, `zone_page`
 - Prove `platform.access.manage` implies external-live access management, while external-live access management implies neither whole-platform access reads/management nor external-live execution access.
 - Prove an external-live access manager cannot target itself, grant its own management capability, name another capability, read the target's unrelated capabilities, or call the whole-Profile replacement endpoint.
 - Prove grant, renewal, revocation, expiry, stale-revision conflict, and fresh-session enforcement.
-- Prove enabled access grants require an expiry no more than 90 days after creation.
+- Prove ordinary enabled access grants require an expiry no more than 90 days after mutation, while only the reserved Bootstrap administrator can hold the permanent self-issued state.
 - Prove a Zone manager without external-live access cannot install, and an external-live holder without host theme-management permission cannot install.
 - Prove an author cannot approve their own revision.
 - Prove a development-preview viewer without external-live access receives fallback.
@@ -1081,7 +1082,7 @@ There is no self-hosting implementation step in this plan. Likewise, `zone_page`
 
 - Check exact-revision and target-contract foreign keys.
 - Check the single resource-mode literal and host-scoped approval constraints.
-- Check capability-specific non-self-grant and 90-day maximum-expiry constraints through every write path.
+- Check service-level non-self-grant and 90-day maximum-expiry policy through every ordinary write path, plus the exact permanent Bootstrap administrator exception.
 - Check renewal revokes the prior lifecycle row before inserting its replacement and preserves a single unrevoked row.
 - Check kill and revalidation resolution without installation scans.
 - Replay migrations with the repository's production-equivalent workflow.
@@ -1156,7 +1157,7 @@ The implementation is complete only when:
 - core trusted member status is documented as an admission and recertification governance standard, never as runtime authorization;
 - external-live eligibility and delegated administration use the two canonical Profile capabilities, while operation-specific Unit and control-plane authorization remains independent;
 - the management capability can affect only the external-live access grant, cannot target its holder, and does not imply execution or general platform access management;
-- external-live grants have a database-enforced maximum 90-day lifetime, immutable lifecycle history, fresh-session mutation, and audited grant/renew/revoke transitions;
+- ordinary external-live grants have a service-enforced maximum 90-day lifetime, while the reserved Bootstrap administrator has the only permanent self-issued exception; lifecycle history remains immutable and ordinary mutations require a fresh session and audited grant/renew/revoke transitions;
 - only authenticated viewers holding both the development-preview release gate and active external-live access can receive or execute external-live resources;
 - only top-level Zones activate the contract;
 - Header/Footer are generic Unit document-flow regions, not Docks;
@@ -1211,7 +1212,8 @@ External-live access governance and enforcement
 ├── platform.custom_theme.external_live.access.manage
 │   └── grants/renews/revokes, never for the acting Profile
 └── platform.custom_theme.external_live.access
-    └── active for at most 90 days; runtime eligibility proof
+    ├── ordinary grant: active for at most 90 days; runtime eligibility proof
+    └── Bootstrap administrator: permanent self-issued installation exception
 
 Phase 1 adapter registry
 └── zone only

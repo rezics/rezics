@@ -16,6 +16,7 @@ import { preservesPermanentAccessManager } from "../authorization/platform/polic
 import { recordAuditEvent } from "../audit";
 import { CapabilityGrantExpiryInvalid } from "../api/governance/errors";
 import { ProfileNotFound } from "../api/users/errors";
+import { BootstrapPlatformAdministratorProfile } from "../bootstrap/data/foundation";
 import type { DatabaseExecutor, DatabaseTransaction } from "../database";
 import { platformCapabilityGrant, profile, users } from "../database/schema";
 import { firstUnitLocalizationTitle } from "../units/localization";
@@ -49,14 +50,18 @@ export interface DesiredPlatformAccessGrant {
 	readonly expiresAt: Date | null;
 }
 
-export interface CustomThemeExternalLiveAccessGrant {
+interface CustomThemeExternalLiveAccessGrantFields {
 	readonly id: string;
-	readonly state: "granted" | "expired";
 	readonly grantedByProfileId: string;
-	readonly expiresAt: Date;
 	readonly createdAt: Date;
 	readonly updatedAt: Date;
 }
+
+export type CustomThemeExternalLiveAccessGrant = CustomThemeExternalLiveAccessGrantFields &
+	(
+		| { readonly state: "permanent"; readonly expiresAt: null }
+		| { readonly state: "granted" | "expired"; readonly expiresAt: Date }
+	);
 
 export interface CustomThemeExternalLiveAccessProfile {
 	readonly profileId: string;
@@ -75,6 +80,45 @@ export function isCustomThemeExternalLiveExpiryValid(
 			expiresAt > now &&
 			expiresAt.getTime() <= now.getTime() + MaximumCustomThemeExternalLiveAccessGrantMilliseconds,
 	);
+}
+
+export function isPermanentBootstrapCustomThemeExternalLiveAccessGrant(input: {
+	readonly profileId: string;
+	readonly grantedByProfileId: string;
+	readonly expiresAt: Date | null;
+}): boolean {
+	return (
+		input.profileId === BootstrapPlatformAdministratorProfile.profileId &&
+		input.grantedByProfileId === BootstrapPlatformAdministratorProfile.profileId &&
+		input.expiresAt === null
+	);
+}
+
+export function classifyCustomThemeExternalLiveAccessGrant(
+	row: CustomThemeExternalLiveAccessGrantFields & {
+		readonly profileId: string;
+		readonly expiresAt: Date | null;
+	},
+	now: Date,
+): CustomThemeExternalLiveAccessGrant {
+	const fields = {
+		id: row.id,
+		grantedByProfileId: row.grantedByProfileId,
+		createdAt: row.createdAt,
+		updatedAt: row.updatedAt,
+	};
+	if (row.expiresAt === null) {
+		if (!isPermanentBootstrapCustomThemeExternalLiveAccessGrant(row))
+			throw new Error(
+				"Only the Bootstrap platform administrator may hold permanent external-live access",
+			);
+		return { ...fields, state: "permanent", expiresAt: null };
+	}
+	return {
+		...fields,
+		state: row.expiresAt > now ? "granted" : "expired",
+		expiresAt: row.expiresAt,
+	};
 }
 
 export type CustomThemePlatformAccessCapacityReason =
@@ -349,7 +393,15 @@ export async function replacePlatformAccess(
 	const requestedExternalLiveAccess = input.grants.find(
 		({ capability }) => capability === CustomThemeExternalLiveAccessCapability,
 	);
-	if (requestedExternalLiveAccess)
+	const requestedExternalLiveAccessIsPermanentBootstrapGrant = Boolean(
+		requestedExternalLiveAccess &&
+			isPermanentBootstrapCustomThemeExternalLiveAccessGrant({
+				profileId: input.targetProfileId,
+				grantedByProfileId: input.actorProfileId,
+				expiresAt: requestedExternalLiveAccess.expiresAt,
+			}),
+	);
+	if (requestedExternalLiveAccess && !requestedExternalLiveAccessIsPermanentBootstrapGrant)
 		ensureCustomThemeExternalLiveExpiry(requestedExternalLiveAccess.expiresAt, now);
 	await lockPlatformAccess(tx);
 	const beforeProfile = await getPlatformAccessProfile(tx, input.targetProfileId);
@@ -393,10 +445,15 @@ export async function replacePlatformAccess(
 	const currentExternalLiveAccess = currentRows.find(
 		({ capability }) => capability === CustomThemeExternalLiveAccessCapability,
 	);
-	const externalLiveAccessChanges =
-		requestedExternalLiveAccess?.expiresAt?.getTime() !==
-		currentExternalLiveAccess?.expiresAt?.getTime();
-	if (externalLiveAccessChanges && input.actorProfileId === input.targetProfileId)
+	const externalLiveAccessChanges = requestedExternalLiveAccess
+		? !currentExternalLiveAccess ||
+			!sameExpiry(requestedExternalLiveAccess.expiresAt, currentExternalLiveAccess.expiresAt)
+		: currentExternalLiveAccess !== undefined;
+	if (
+		externalLiveAccessChanges &&
+		input.actorProfileId === input.targetProfileId &&
+		!requestedExternalLiveAccessIsPermanentBootstrapGrant
+	)
 		throw new CustomThemeExternalLiveAccessSelfMutationForbidden();
 	const keptCapabilities = new Set<PlatformCapability>();
 	const revokeIds: string[] = [];
@@ -486,18 +543,8 @@ async function loadCurrentCustomThemeExternalLiveAccessGrants(
 			),
 		);
 	const grants = new Map<string, CustomThemeExternalLiveAccessGrant>();
-	for (const row of rows) {
-		if (!row.expiresAt)
-			throw new Error("External-live access grant violates its mandatory expiry invariant");
-		grants.set(row.profileId, {
-			id: row.id,
-			state: row.expiresAt > now ? "granted" : "expired",
-			grantedByProfileId: row.grantedByProfileId,
-			expiresAt: row.expiresAt,
-			createdAt: row.createdAt,
-			updatedAt: row.updatedAt,
-		});
-	}
+	for (const row of rows)
+		grants.set(row.profileId, classifyCustomThemeExternalLiveAccessGrant(row, now));
 	return grants;
 }
 
@@ -573,16 +620,28 @@ export async function setCustomThemeExternalLiveAccess(
 		readonly expiresAt?: Date;
 	},
 ): Promise<CustomThemeExternalLiveAccessProfile> {
-	if (input.actorProfileId === input.targetProfileId)
-		throw new CustomThemeExternalLiveAccessSelfMutationForbidden();
 	const now = new Date();
 	const expiresAt = input.state === "granted" ? (input.expiresAt ?? null) : null;
-	if (input.state === "granted") ensureCustomThemeExternalLiveExpiry(expiresAt, now);
+	if (input.state === "granted") {
+		const permanentBootstrapGrant = isPermanentBootstrapCustomThemeExternalLiveAccessGrant({
+			profileId: input.targetProfileId,
+			grantedByProfileId: input.actorProfileId,
+			expiresAt,
+		});
+		if (!permanentBootstrapGrant) {
+			if (input.actorProfileId === input.targetProfileId)
+				throw new CustomThemeExternalLiveAccessSelfMutationForbidden();
+			ensureCustomThemeExternalLiveExpiry(expiresAt, now);
+		}
+	} else if (input.actorProfileId === input.targetProfileId) {
+		throw new CustomThemeExternalLiveAccessSelfMutationForbidden();
+	}
 	await lockPlatformAccess(tx);
 	const before = await getCustomThemeExternalLiveAccessProfile(tx, input.targetProfileId);
 	if (before.revision !== input.expectedRevision) throw new PlatformAccessRevisionConflict();
 	await ensureCustomThemePlatformAccessCapacity(tx, {
-		addingAccessGrant: input.state === "granted" && before.grant?.state !== "granted",
+		addingAccessGrant:
+			input.state === "granted" && (before.grant === null || before.grant.state === "expired"),
 		addingAccessManager: false,
 	});
 	const [current] = await tx

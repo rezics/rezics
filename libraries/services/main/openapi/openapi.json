@@ -183076,27 +183076,50 @@
 														"nullable": true,
 														"anyOf": [
 															{
-																"type": "object",
-																"required": [
-																	"id",
-																	"state",
-																	"grantedByProfileId",
-																	"expiresAt",
-																	"createdAt",
-																	"updatedAt"
-																],
-																"properties": {
-																	"id": { "format": "uuid", "type": "string" },
-																	"state": {
-																		"default": "granted",
-																		"type": "string",
-																		"enum": ["granted", "expired"]
+																"anyOf": [
+																	{
+																		"type": "object",
+																		"required": [
+																			"id",
+																			"grantedByProfileId",
+																			"createdAt",
+																			"updatedAt",
+																			"state",
+																			"expiresAt"
+																		],
+																		"properties": {
+																			"id": { "format": "uuid", "type": "string" },
+																			"grantedByProfileId": { "format": "uuid", "type": "string" },
+																			"createdAt": { "format": "date-time", "type": "string" },
+																			"updatedAt": { "format": "date-time", "type": "string" },
+																			"state": { "const": "permanent", "type": "string" },
+																			"expiresAt": { "type": "null" }
+																		}
 																	},
-																	"grantedByProfileId": { "format": "uuid", "type": "string" },
-																	"expiresAt": { "format": "date-time", "type": "string" },
-																	"createdAt": { "format": "date-time", "type": "string" },
-																	"updatedAt": { "format": "date-time", "type": "string" }
-																}
+																	{
+																		"type": "object",
+																		"required": [
+																			"id",
+																			"grantedByProfileId",
+																			"createdAt",
+																			"updatedAt",
+																			"state",
+																			"expiresAt"
+																		],
+																		"properties": {
+																			"id": { "format": "uuid", "type": "string" },
+																			"grantedByProfileId": { "format": "uuid", "type": "string" },
+																			"createdAt": { "format": "date-time", "type": "string" },
+																			"updatedAt": { "format": "date-time", "type": "string" },
+																			"state": {
+																				"default": "granted",
+																				"type": "string",
+																				"enum": ["granted", "expired"]
+																			},
+																			"expiresAt": { "format": "date-time", "type": "string" }
+																		}
+																	}
+																]
 															},
 															{ "type": "null" }
 														]
@@ -183188,27 +183211,50 @@
 											"nullable": true,
 											"anyOf": [
 												{
-													"type": "object",
-													"required": [
-														"id",
-														"state",
-														"grantedByProfileId",
-														"expiresAt",
-														"createdAt",
-														"updatedAt"
-													],
-													"properties": {
-														"id": { "format": "uuid", "type": "string" },
-														"state": {
-															"default": "granted",
-															"type": "string",
-															"enum": ["granted", "expired"]
+													"anyOf": [
+														{
+															"type": "object",
+															"required": [
+																"id",
+																"grantedByProfileId",
+																"createdAt",
+																"updatedAt",
+																"state",
+																"expiresAt"
+															],
+															"properties": {
+																"id": { "format": "uuid", "type": "string" },
+																"grantedByProfileId": { "format": "uuid", "type": "string" },
+																"createdAt": { "format": "date-time", "type": "string" },
+																"updatedAt": { "format": "date-time", "type": "string" },
+																"state": { "const": "permanent", "type": "string" },
+																"expiresAt": { "type": "null" }
+															}
 														},
-														"grantedByProfileId": { "format": "uuid", "type": "string" },
-														"expiresAt": { "format": "date-time", "type": "string" },
-														"createdAt": { "format": "date-time", "type": "string" },
-														"updatedAt": { "format": "date-time", "type": "string" }
-													}
+														{
+															"type": "object",
+															"required": [
+																"id",
+																"grantedByProfileId",
+																"createdAt",
+																"updatedAt",
+																"state",
+																"expiresAt"
+															],
+															"properties": {
+																"id": { "format": "uuid", "type": "string" },
+																"grantedByProfileId": { "format": "uuid", "type": "string" },
+																"createdAt": { "format": "date-time", "type": "string" },
+																"updatedAt": { "format": "date-time", "type": "string" },
+																"state": {
+																	"default": "granted",
+																	"type": "string",
+																	"enum": ["granted", "expired"]
+																},
+																"expiresAt": { "format": "date-time", "type": "string" }
+															}
+														}
+													]
 												},
 												{ "type": "null" }
 											]
@@ -183352,27 +183398,50 @@
 											"nullable": true,
 											"anyOf": [
 												{
-													"type": "object",
-													"required": [
-														"id",
-														"state",
-														"grantedByProfileId",
-														"expiresAt",
-														"createdAt",
-														"updatedAt"
-													],
-													"properties": {
-														"id": { "format": "uuid", "type": "string" },
-														"state": {
-															"default": "granted",
-															"type": "string",
-															"enum": ["granted", "expired"]
+													"anyOf": [
+														{
+															"type": "object",
+															"required": [
+																"id",
+																"grantedByProfileId",
+																"createdAt",
+																"updatedAt",
+																"state",
+																"expiresAt"
+															],
+															"properties": {
+																"id": { "format": "uuid", "type": "string" },
+																"grantedByProfileId": { "format": "uuid", "type": "string" },
+																"createdAt": { "format": "date-time", "type": "string" },
+																"updatedAt": { "format": "date-time", "type": "string" },
+																"state": { "const": "permanent", "type": "string" },
+																"expiresAt": { "type": "null" }
+															}
 														},
-														"grantedByProfileId": { "format": "uuid", "type": "string" },
-														"expiresAt": { "format": "date-time", "type": "string" },
-														"createdAt": { "format": "date-time", "type": "string" },
-														"updatedAt": { "format": "date-time", "type": "string" }
-													}
+														{
+															"type": "object",
+															"required": [
+																"id",
+																"grantedByProfileId",
+																"createdAt",
+																"updatedAt",
+																"state",
+																"expiresAt"
+															],
+															"properties": {
+																"id": { "format": "uuid", "type": "string" },
+																"grantedByProfileId": { "format": "uuid", "type": "string" },
+																"createdAt": { "format": "date-time", "type": "string" },
+																"updatedAt": { "format": "date-time", "type": "string" },
+																"state": {
+																	"default": "granted",
+																	"type": "string",
+																	"enum": ["granted", "expired"]
+																},
+																"expiresAt": { "format": "date-time", "type": "string" }
+															}
+														}
+													]
 												},
 												{ "type": "null" }
 											]

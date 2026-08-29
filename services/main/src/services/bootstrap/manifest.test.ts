@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { CustomThemeExternalLiveAccessCapability } from "@rezics/access";
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 
 import { generateBootstrapPassword } from "./credentials";
@@ -102,6 +103,9 @@ describe("database bootstrap manifest", () => {
 		);
 		expect(new Set(BootstrapPlatformAdministratorProfile.capabilities).size).toBe(
 			BootstrapPlatformAdministratorProfile.capabilities.length,
+		);
+		expect(BootstrapPlatformAdministratorProfile.capabilities).toContain(
+			CustomThemeExternalLiveAccessCapability,
 		);
 		expect(BootstrapPlatformAccessManifest).toContainEqual(
 			expect.objectContaining({ capabilities: ["platform.moderate"] }),

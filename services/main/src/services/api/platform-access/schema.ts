@@ -40,14 +40,25 @@ export const PlatformAccessProfilesQuery = t.Object(
 
 export const PlatformAccessProfileParams = t.Object({ profileId: Uuid });
 
-export const CustomThemeExternalLiveAccessGrantResponse = t.Object({
+const CustomThemeExternalLiveAccessGrantResponseFields = {
 	id: Uuid,
-	state: t.UnionEnum(["granted", "expired"] as const),
 	grantedByProfileId: Uuid,
-	expiresAt: DateTime,
 	createdAt: DateTime,
 	updatedAt: DateTime,
-});
+} as const;
+
+export const CustomThemeExternalLiveAccessGrantResponse = t.Union([
+	t.Object({
+		...CustomThemeExternalLiveAccessGrantResponseFields,
+		state: t.Literal("permanent"),
+		expiresAt: t.Null(),
+	}),
+	t.Object({
+		...CustomThemeExternalLiveAccessGrantResponseFields,
+		state: t.UnionEnum(["granted", "expired"] as const),
+		expiresAt: DateTime,
+	}),
+]);
 
 export const CustomThemeExternalLiveAccessProfileResponse = t.Object({
 	profileId: Uuid,

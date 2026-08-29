@@ -15,13 +15,17 @@ exist; only the active server-side capability grant authorizes execution.
   access reads/writes, review, installation, or kill authority.
 - An access manager cannot modify their own external-live eligibility. A
   different manager performs that action.
+- The reserved Bootstrap platform administrator has one permanent, self-issued
+  external-live grant installed with the complete Bootstrap platform policy.
+  It is not part of the delegated cohort, is reported as `permanent`, and does
+  not make any other access manager eligible for the same exception.
 - Admission permits at most 1,000 active external-live access grants and 100
   effective access managers, including Profiles whose broad platform-access
   management capability implies the narrow manager capability. Revoke or let
   grants expire before requesting expansion; raising either limit requires a
   new capacity review.
-- Every mutation requires a fresh session, an optimistic revision, and an
-  expiry no more than 90 days after the mutation.
+- Every ordinary mutation requires a fresh session, an optimistic revision,
+  and an expiry no more than 90 days after the mutation.
 
 Use only:
 

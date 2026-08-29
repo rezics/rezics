@@ -2,8 +2,6 @@ SET search_path TO public;
 
 -- Create index "book_release_status_id_idx" to table: "book"
 CREATE INDEX "book_release_status_id_idx" ON "book" ("release_status", "id");
--- Modify "platform_capability_grant" table
-ALTER TABLE "platform_capability_grant" ADD CONSTRAINT "platform_capability_grant_custom_theme_external_live_expiry_che" CHECK ((capability <> 'platform.custom_theme.external_live.access'::platform_capability) OR ((expires_at IS NOT NULL) AND (expires_at <= (created_at + '90 days'::interval)))), ADD CONSTRAINT "platform_capability_grant_custom_theme_external_live_non_self_c" CHECK ((capability <> 'platform.custom_theme.external_live.access'::platform_capability) OR (profile_id <> granted_by_profile_id));
 -- Create index "platform_capability_grant_active_capability_expiry_idx" to table: "platform_capability_grant"
 CREATE INDEX "platform_capability_grant_active_capability_expiry_idx" ON "platform_capability_grant" ("capability", "expires_at", "profile_id") WHERE (revoked_at IS NULL);
 -- Modify "profile_preference" table
