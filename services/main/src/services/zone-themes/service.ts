@@ -5,7 +5,7 @@ import {
 	type ZoneCustomThemeReference,
 } from "@rezics/block";
 import type { ContentLanguage } from "@rezics/i18n";
-import { and, asc, eq, gt, inArray, isNotNull, isNull, ne, notExists, or } from "drizzle-orm";
+import { and, asc, eq, gt, inArray, isNotNull, isNull, ne, notExists, or, sql } from "drizzle-orm";
 
 import { createProfileOwnedUnitAccess } from "../authorization/unit/ownership";
 import { database, type DatabaseTransaction } from "../database";
@@ -75,9 +75,20 @@ function toStoredAutomatedReview(review: ZoneThemeAutomatedReview): StoredZoneTh
 		contractVersion: review.contractVersion,
 		declarationCount: review.declarationCount,
 		minifiedBytes: review.minifiedBytes,
+		rendererVersion: review.rendererVersion,
 		ruleCount: review.ruleCount,
 		selectorCount: review.selectorCount,
+		sourceSha256: review.sourceSha256,
+		transformedSha256: review.transformedSha256,
 	};
+}
+
+async function generateZoneThemeRevisionId(): Promise<string> {
+	type GeneratedUuidRow = { readonly id: string };
+	const generated = await database.execute<GeneratedUuidRow>(sql`select uuidv7() as id`);
+	const id = generated.rows[0]?.id;
+	if (!id) throw new Error("Zone theme revision UUIDv7 generation returned no id");
+	return id;
 }
 
 async function ensureThemeExists(tx: DatabaseTransaction, themeUnitId: string): Promise<void> {
@@ -192,9 +203,14 @@ export async function submitZoneThemeRevision(input: {
 	readonly profileId: string;
 	readonly themeUnitId: string;
 }) {
+	const revisionId = await generateZoneThemeRevisionId();
 	let reviewed: ReturnType<typeof reviewZoneThemeStylesheet>;
 	try {
-		reviewed = reviewZoneThemeStylesheet({ css: input.css, assetIds: input.assetIds });
+		reviewed = reviewZoneThemeStylesheet({
+			css: input.css,
+			assetIds: input.assetIds,
+			revisionId,
+		});
 	} catch (cause) {
 		if (cause instanceof ZoneThemeStylesheetRejected)
 			throw new ZoneThemeStylesheetInvalid(
@@ -213,6 +229,7 @@ export async function submitZoneThemeRevision(input: {
 		const [revision] = await tx
 			.insert(zoneThemeRevision)
 			.values({
+				id: revisionId,
 				themeUnitId: input.themeUnitId,
 				contractVersion: ZoneStylingContract.version,
 				sourceCss: input.css,
@@ -510,6 +527,7 @@ export async function scheduleZoneThemeContractRevalidation(input: {
 					reviewed = reviewZoneThemeStylesheet({
 						css: candidate.sourceCss,
 						assetIds: assets.map(({ assetId }) => assetId),
+						revisionId: candidate.id,
 					});
 				} catch (cause) {
 					if (!(cause instanceof ZoneThemeStylesheetRejected)) throw cause;

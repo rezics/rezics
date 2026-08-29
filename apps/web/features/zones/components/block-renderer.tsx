@@ -1270,11 +1270,12 @@ export function ZoneDocument({
 	navigationLayout?: ZoneNavigationLayout;
 	surface: ZoneBlockSurface;
 }) {
+	const { projection } = useZoneBlocks();
 	const themeStyle = useZoneThemeScopeStyle();
 	return (
 		<div
 			className="min-w-0"
-			data-zone-theme-scope=""
+			data-zone-theme-scope={projection.customThemeStylesheet?.revisionId ?? ""}
 			style={{ ...themeStyle, contain: "paint", isolation: "isolate" }}
 		>
 			<div data-zone-surface={surface.kind}>

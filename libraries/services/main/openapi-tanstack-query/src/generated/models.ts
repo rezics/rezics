@@ -3663,7 +3663,7 @@ export type DockDocument = {
 				/**
 				 * @type array | undefined
 				 */
-				styleRoles?: string[];
+				classNames?: string[];
 				/**
 				 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
 				 * @type string
@@ -3683,7 +3683,7 @@ export type DockDocument = {
 				/**
 				 * @type array | undefined
 				 */
-				styleRoles?: string[];
+				classNames?: string[];
 				/**
 				 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
 				 * @type string
@@ -3704,7 +3704,7 @@ export type DockDocument = {
 				/**
 				 * @type array | undefined
 				 */
-				styleRoles?: string[];
+				classNames?: string[];
 				source:
 					| {
 							/**
@@ -8461,7 +8461,7 @@ export type DockDocument = {
 				/**
 				 * @type array | undefined
 				 */
-				styleRoles?: string[];
+				classNames?: string[];
 				feature:
 					| {
 							/**
@@ -10757,7 +10757,7 @@ export type DockDocument = {
 				/**
 				 * @type array | undefined
 				 */
-				styleRoles?: string[];
+				classNames?: string[];
 				feature:
 					| (
 							| {
@@ -15454,7 +15454,7 @@ export type DockDocument = {
 				/**
 				 * @type array | undefined
 				 */
-				styleRoles?: string[];
+				classNames?: string[];
 				/**
 				 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
 				 * @type string
@@ -15476,7 +15476,7 @@ export type DockDocument = {
 				/**
 				 * @type array | undefined
 				 */
-				styleRoles?: string[];
+				classNames?: string[];
 				/**
 				 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
 				 * @type string
@@ -15504,7 +15504,7 @@ export type DockDocument = {
 				/**
 				 * @type array | undefined
 				 */
-				styleRoles?: string[];
+				classNames?: string[];
 				/**
 				 * @minLength 1
 				 * @maxLength 2000
@@ -15534,7 +15534,7 @@ export type DockDocument = {
 				/**
 				 * @type array | undefined
 				 */
-				styleRoles?: string[];
+				classNames?: string[];
 				style: "line" | "space" | "section";
 		  }
 		| {
@@ -15550,7 +15550,7 @@ export type DockDocument = {
 				/**
 				 * @type array | undefined
 				 */
-				styleRoles?: string[];
+				classNames?: string[];
 				/**
 				 * @type array
 				 */
@@ -15585,7 +15585,7 @@ export type DockDocument = {
 				/**
 				 * @type array | undefined
 				 */
-				styleRoles?: string[];
+				classNames?: string[];
 				layout: "stack" | "row" | "grid";
 				/**
 				 * @type array
@@ -15605,7 +15605,7 @@ export type DockDocument = {
 				/**
 				 * @type array | undefined
 				 */
-				styleRoles?: string[];
+				classNames?: string[];
 				tone: "neutral" | "info" | "success" | "warning" | "danger";
 				/**
 				 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
@@ -15630,7 +15630,7 @@ export type DockDocument = {
 				/**
 				 * @type array | undefined
 				 */
-				styleRoles?: string[];
+				classNames?: string[];
 				/**
 				 * @type array
 				 */
@@ -15743,7 +15743,7 @@ export type PortableTextDocument = {
 	/**
 	 * @type array | undefined
 	 */
-	styleRoles?: string[];
+	classNames?: string[];
 	/**
 	 * @type array
 	 */
@@ -15892,7 +15892,7 @@ export type UnitReferencedBlockDocument = {
 				/**
 				 * @type array | undefined
 				 */
-				styleRoles?: string[];
+				classNames?: string[];
 				/**
 				 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
 				 * @type string
@@ -15912,7 +15912,7 @@ export type UnitReferencedBlockDocument = {
 				/**
 				 * @type array | undefined
 				 */
-				styleRoles?: string[];
+				classNames?: string[];
 				/**
 				 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
 				 * @type string
@@ -15933,7 +15933,7 @@ export type UnitReferencedBlockDocument = {
 				/**
 				 * @type array | undefined
 				 */
-				styleRoles?: string[];
+				classNames?: string[];
 				source:
 					| {
 							/**
@@ -20690,7 +20690,7 @@ export type UnitReferencedBlockDocument = {
 				/**
 				 * @type array | undefined
 				 */
-				styleRoles?: string[];
+				classNames?: string[];
 				feature:
 					| {
 							/**
@@ -22986,7 +22986,7 @@ export type UnitReferencedBlockDocument = {
 				/**
 				 * @type array | undefined
 				 */
-				styleRoles?: string[];
+				classNames?: string[];
 				feature:
 					| (
 							| {
@@ -27683,7 +27683,7 @@ export type UnitReferencedBlockDocument = {
 				/**
 				 * @type array | undefined
 				 */
-				styleRoles?: string[];
+				classNames?: string[];
 				/**
 				 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
 				 * @type string
@@ -27705,7 +27705,7 @@ export type UnitReferencedBlockDocument = {
 				/**
 				 * @type array | undefined
 				 */
-				styleRoles?: string[];
+				classNames?: string[];
 				/**
 				 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
 				 * @type string
@@ -27733,7 +27733,7 @@ export type UnitReferencedBlockDocument = {
 				/**
 				 * @type array | undefined
 				 */
-				styleRoles?: string[];
+				classNames?: string[];
 				/**
 				 * @minLength 1
 				 * @maxLength 2000
@@ -27763,7 +27763,7 @@ export type UnitReferencedBlockDocument = {
 				/**
 				 * @type array | undefined
 				 */
-				styleRoles?: string[];
+				classNames?: string[];
 				style: "line" | "space" | "section";
 		  }
 		| {
@@ -27779,7 +27779,7 @@ export type UnitReferencedBlockDocument = {
 				/**
 				 * @type array | undefined
 				 */
-				styleRoles?: string[];
+				classNames?: string[];
 				/**
 				 * @type array
 				 */
@@ -27814,7 +27814,7 @@ export type UnitReferencedBlockDocument = {
 				/**
 				 * @type array | undefined
 				 */
-				styleRoles?: string[];
+				classNames?: string[];
 				layout: "stack" | "row" | "grid";
 				/**
 				 * @type array
@@ -27834,7 +27834,7 @@ export type UnitReferencedBlockDocument = {
 				/**
 				 * @type array | undefined
 				 */
-				styleRoles?: string[];
+				classNames?: string[];
 				tone: "neutral" | "info" | "success" | "warning" | "danger";
 				/**
 				 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
@@ -27859,7 +27859,7 @@ export type UnitReferencedBlockDocument = {
 				/**
 				 * @type array | undefined
 				 */
-				styleRoles?: string[];
+				classNames?: string[];
 				/**
 				 * @type array
 				 */
@@ -35862,7 +35862,7 @@ export type GetApiRecommendationsPostsByPostIdStatus200 = {
 							/**
 							 * @type array | undefined
 							 */
-							styleRoles?: string[];
+							classNames?: string[];
 							/**
 							 * @type array
 							 */
@@ -36560,7 +36560,7 @@ export type GetApiRecommendationsPostsByPostIdStatus200 = {
 							/**
 							 * @type array | undefined
 							 */
-							styleRoles?: string[];
+							classNames?: string[];
 							/**
 							 * @type array
 							 */
@@ -37276,7 +37276,7 @@ export type GetApiRecommendationsPostsByPostIdStatus200 = {
 							/**
 							 * @type array | undefined
 							 */
-							styleRoles?: string[];
+							classNames?: string[];
 							/**
 							 * @type array
 							 */
@@ -47400,7 +47400,7 @@ export type PostApiFeedQueryStatus200 = {
 									/**
 									 * @type array | undefined
 									 */
-									styleRoles?: string[];
+									classNames?: string[];
 									/**
 									 * @type array
 									 */
@@ -48098,7 +48098,7 @@ export type PostApiFeedQueryStatus200 = {
 									/**
 									 * @type array | undefined
 									 */
-									styleRoles?: string[];
+									classNames?: string[];
 									/**
 									 * @type array
 									 */
@@ -48814,7 +48814,7 @@ export type PostApiFeedQueryStatus200 = {
 									/**
 									 * @type array | undefined
 									 */
-									styleRoles?: string[];
+									classNames?: string[];
 									/**
 									 * @type array
 									 */
@@ -61097,7 +61097,7 @@ export type GetApiGovernanceNotesByPostIdStatus200 = {
 		/**
 		 * @type array | undefined
 		 */
-		styleRoles?: string[];
+		classNames?: string[];
 		/**
 		 * @type array
 		 */
@@ -61365,7 +61365,7 @@ export type PatchApiGovernanceNotesByPostIdStatus200 = {
 		/**
 		 * @type array | undefined
 		 */
-		styleRoles?: string[];
+		classNames?: string[];
 		/**
 		 * @type array
 		 */
@@ -61713,7 +61713,7 @@ export type PatchApiGovernanceNotesByPostIdBody = {
 		/**
 		 * @type array | undefined
 		 */
-		styleRoles?: string[];
+		classNames?: string[];
 		/**
 		 * @type array
 		 */
@@ -62066,7 +62066,7 @@ export type GetApiGovernanceContentReviewCasesStatus200 = {
 				/**
 				 * @type array | undefined
 				 */
-				styleRoles?: string[];
+				classNames?: string[];
 				/**
 				 * @type array
 				 */
@@ -62406,7 +62406,7 @@ export type GetApiGovernanceContentReviewCasesByCaseIdStatus200 = {
 			/**
 			 * @type array | undefined
 			 */
-			styleRoles?: string[];
+			classNames?: string[];
 			/**
 			 * @type array
 			 */
@@ -62813,7 +62813,7 @@ export type PatchApiGovernanceContentReviewCasesByCaseIdStatus200 = {
 			/**
 			 * @type array | undefined
 			 */
-			styleRoles?: string[];
+			classNames?: string[];
 			/**
 			 * @type array
 			 */
@@ -63110,7 +63110,7 @@ export type PatchApiGovernanceContentReviewCasesByCaseIdBody = {
 			/**
 			 * @type array | undefined
 			 */
-			styleRoles?: string[];
+			classNames?: string[];
 			/**
 			 * @type array
 			 */
@@ -63643,7 +63643,7 @@ export type PostApiGovernanceContentGovernanceActionsBody =
 					/**
 					 * @type array | undefined
 					 */
-					styleRoles?: string[];
+					classNames?: string[];
 					/**
 					 * @type array
 					 */
@@ -63866,7 +63866,7 @@ export type PostApiGovernanceContentGovernanceActionsBody =
 					/**
 					 * @type array | undefined
 					 */
-					styleRoles?: string[];
+					classNames?: string[];
 					/**
 					 * @type array
 					 */
@@ -64092,7 +64092,7 @@ export type PostApiGovernanceContentGovernanceActionsBody =
 					/**
 					 * @type array | undefined
 					 */
-					styleRoles?: string[];
+					classNames?: string[];
 					/**
 					 * @type array
 					 */
@@ -64295,7 +64295,7 @@ export type PostApiGovernanceContentGovernanceActionsBody =
 					/**
 					 * @type array | undefined
 					 */
-					styleRoles?: string[];
+					classNames?: string[];
 					/**
 					 * @type array
 					 */
@@ -64802,7 +64802,7 @@ export type PostApiGovernanceAccountEnforcementsBody = {
 			/**
 			 * @type array | undefined
 			 */
-			styleRoles?: string[];
+			classNames?: string[];
 			/**
 			 * @type array
 			 */
@@ -65274,7 +65274,7 @@ export type PostApiGovernanceAccountEnforcementsByEnforcementIdRevokeBody = {
 			/**
 			 * @type array | undefined
 			 */
-			styleRoles?: string[];
+			classNames?: string[];
 			/**
 			 * @type array
 			 */
@@ -65994,7 +65994,7 @@ export type PostApiSeriesBody = {
 			/**
 			 * @type array | undefined
 			 */
-			styleRoles?: string[];
+			classNames?: string[];
 			/**
 			 * @type array
 			 */
@@ -67710,7 +67710,7 @@ export type PatchApiZonesByZoneIdBody = {
 			/**
 			 * @type array | undefined
 			 */
-			styleRoles?: string[];
+			classNames?: string[];
 			/**
 			 * @type array
 			 */
@@ -72954,7 +72954,7 @@ export type PostApiZonesBody = {
 			/**
 			 * @type array | undefined
 			 */
-			styleRoles?: string[];
+			classNames?: string[];
 			/**
 			 * @type array
 			 */
@@ -75785,7 +75785,7 @@ export type GetApiUsersMeStatus200 = {
 				/**
 				 * @type array | undefined
 				 */
-				styleRoles?: string[];
+				classNames?: string[];
 				/**
 				 * @type array
 				 */
@@ -75971,7 +75971,7 @@ export type GetApiUsersMeStatus200 = {
 					/**
 					 * @type array | undefined
 					 */
-					styleRoles?: string[];
+					classNames?: string[];
 					/**
 					 * @type array
 					 */
@@ -76460,7 +76460,7 @@ export type PatchApiUsersMeStatus200 = {
 				/**
 				 * @type array | undefined
 				 */
-				styleRoles?: string[];
+				classNames?: string[];
 				/**
 				 * @type array
 				 */
@@ -76901,7 +76901,7 @@ export type PatchApiUsersMeBody = {
 		/**
 		 * @type array | undefined
 		 */
-		styleRoles?: string[];
+		classNames?: string[];
 		/**
 		 * @type array
 		 */
@@ -80961,7 +80961,7 @@ export type GetApiUsersByIdStatus200 = {
 				/**
 				 * @type array | undefined
 				 */
-				styleRoles?: string[];
+				classNames?: string[];
 				/**
 				 * @type array
 				 */
@@ -81694,7 +81694,7 @@ export type PostApiZoneThemesBody = {
 			/**
 			 * @type array | undefined
 			 */
-			styleRoles?: string[];
+			classNames?: string[];
 			/**
 			 * @type array
 			 */
@@ -82117,7 +82117,7 @@ export type PutApiZoneThemesByThemeUnitIdLocalizationsByLanguageBody = {
 		/**
 		 * @type array | undefined
 		 */
-		styleRoles?: string[];
+		classNames?: string[];
 		/**
 		 * @type array
 		 */
@@ -82451,8 +82451,24 @@ export type GetApiZoneThemesReviewQueueStatus200 = {
 			contractVersion: string;
 			declarationCount: string | number;
 			minifiedBytes: string | number;
+			/**
+			 * @minLength 1
+			 * @maxLength 32
+			 * @type string
+			 */
+			rendererVersion: string;
 			ruleCount: string | number;
 			selectorCount: string | number;
+			/**
+			 * @pattern ^[0-9a-f]{64}$
+			 * @type string
+			 */
+			sourceSha256: string;
+			/**
+			 * @pattern ^[0-9a-f]{64}$
+			 * @type string
+			 */
+			transformedSha256: string;
 		};
 		renderReview:
 			| ({
@@ -82868,8 +82884,24 @@ export type GetApiZoneThemesByThemeUnitIdRevisionsStatus200 = {
 			contractVersion: string;
 			declarationCount: string | number;
 			minifiedBytes: string | number;
+			/**
+			 * @minLength 1
+			 * @maxLength 32
+			 * @type string
+			 */
+			rendererVersion: string;
 			ruleCount: string | number;
 			selectorCount: string | number;
+			/**
+			 * @pattern ^[0-9a-f]{64}$
+			 * @type string
+			 */
+			sourceSha256: string;
+			/**
+			 * @pattern ^[0-9a-f]{64}$
+			 * @type string
+			 */
+			transformedSha256: string;
 		};
 		renderReview:
 			| ({
@@ -83136,8 +83168,24 @@ export type PostApiZoneThemesByThemeUnitIdRevisionsStatus200 = {
 		contractVersion: string;
 		declarationCount: string | number;
 		minifiedBytes: string | number;
+		/**
+		 * @minLength 1
+		 * @maxLength 32
+		 * @type string
+		 */
+		rendererVersion: string;
 		ruleCount: string | number;
 		selectorCount: string | number;
+		/**
+		 * @pattern ^[0-9a-f]{64}$
+		 * @type string
+		 */
+		sourceSha256: string;
+		/**
+		 * @pattern ^[0-9a-f]{64}$
+		 * @type string
+		 */
+		transformedSha256: string;
 	};
 	renderReview:
 		| ({
@@ -83471,8 +83519,24 @@ export type PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewSt
 		contractVersion: string;
 		declarationCount: string | number;
 		minifiedBytes: string | number;
+		/**
+		 * @minLength 1
+		 * @maxLength 32
+		 * @type string
+		 */
+		rendererVersion: string;
 		ruleCount: string | number;
 		selectorCount: string | number;
+		/**
+		 * @pattern ^[0-9a-f]{64}$
+		 * @type string
+		 */
+		sourceSha256: string;
+		/**
+		 * @pattern ^[0-9a-f]{64}$
+		 * @type string
+		 */
+		transformedSha256: string;
 	};
 	renderReview:
 		| ({
@@ -83881,8 +83945,24 @@ export type PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus200
 		contractVersion: string;
 		declarationCount: string | number;
 		minifiedBytes: string | number;
+		/**
+		 * @minLength 1
+		 * @maxLength 32
+		 * @type string
+		 */
+		rendererVersion: string;
 		ruleCount: string | number;
 		selectorCount: string | number;
+		/**
+		 * @pattern ^[0-9a-f]{64}$
+		 * @type string
+		 */
+		sourceSha256: string;
+		/**
+		 * @pattern ^[0-9a-f]{64}$
+		 * @type string
+		 */
+		transformedSha256: string;
 	};
 	renderReview:
 		| ({
@@ -84239,8 +84319,24 @@ export type PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillStatus200 = {
 		contractVersion: string;
 		declarationCount: string | number;
 		minifiedBytes: string | number;
+		/**
+		 * @minLength 1
+		 * @maxLength 32
+		 * @type string
+		 */
+		rendererVersion: string;
 		ruleCount: string | number;
 		selectorCount: string | number;
+		/**
+		 * @pattern ^[0-9a-f]{64}$
+		 * @type string
+		 */
+		sourceSha256: string;
+		/**
+		 * @pattern ^[0-9a-f]{64}$
+		 * @type string
+		 */
+		transformedSha256: string;
 	};
 	renderReview:
 		| ({
@@ -99854,7 +99950,7 @@ export type PostApiUnitsByTypeStatus200 = {
 					/**
 					 * @type array | undefined
 					 */
-					styleRoles?: string[];
+					classNames?: string[];
 					/**
 					 * @type array
 					 */
@@ -101210,7 +101306,7 @@ export type PostApiUnitsByTypeBody =
 					/**
 					 * @type array | undefined
 					 */
-					styleRoles?: string[];
+					classNames?: string[];
 					/**
 					 * @type array
 					 */
@@ -101592,7 +101688,7 @@ export type PostApiUnitsByTypeBody =
 					/**
 					 * @type array | undefined
 					 */
-					styleRoles?: string[];
+					classNames?: string[];
 					/**
 					 * @type array
 					 */
@@ -103491,7 +103587,7 @@ export type GetApiUnitsByTypeByUnitIdStatus200 = {
 					/**
 					 * @type array | undefined
 					 */
-					styleRoles?: string[];
+					classNames?: string[];
 					/**
 					 * @type array
 					 */
@@ -105356,7 +105452,7 @@ export type PatchApiUnitsByTypeByUnitIdStatus200 = {
 					/**
 					 * @type array | undefined
 					 */
-					styleRoles?: string[];
+					classNames?: string[];
 					/**
 					 * @type array
 					 */
@@ -107679,7 +107775,7 @@ export type PatchApiUnitsByTypeByUnitIdVariantContextStatus200 = {
 					/**
 					 * @type array | undefined
 					 */
-					styleRoles?: string[];
+					classNames?: string[];
 					/**
 					 * @type array
 					 */
@@ -109812,7 +109908,7 @@ export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200 = {
 					/**
 					 * @type array | undefined
 					 */
-					styleRoles?: string[];
+					classNames?: string[];
 					/**
 					 * @type array
 					 */
@@ -111957,7 +112053,7 @@ export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200 = {
 					/**
 					 * @type array | undefined
 					 */
-					styleRoles?: string[];
+					classNames?: string[];
 					/**
 					 * @type array
 					 */
@@ -113085,7 +113181,7 @@ export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageBody = {
 		/**
 		 * @type array | undefined
 		 */
-		styleRoles?: string[];
+		classNames?: string[];
 		/**
 		 * @type array
 		 */
@@ -116499,7 +116595,7 @@ export type PostApiEntitiesBody = {
 			/**
 			 * @type array | undefined
 			 */
-			styleRoles?: string[];
+			classNames?: string[];
 			/**
 			 * @type array
 			 */
@@ -117289,7 +117385,7 @@ export type GetApiEntitiesByUnitIdStatus200 = {
 					/**
 					 * @type array | undefined
 					 */
-					styleRoles?: string[];
+					classNames?: string[];
 					/**
 					 * @type array
 					 */
@@ -119345,7 +119441,7 @@ export type PutApiEntitiesByUnitIdLocalizationsByLanguageBody = {
 		/**
 		 * @type array | undefined
 		 */
-		styleRoles?: string[];
+		classNames?: string[];
 		/**
 		 * @type array
 		 */
@@ -119861,7 +119957,7 @@ export type PostApiTagsBody = {
 			/**
 			 * @type array | undefined
 			 */
-			styleRoles?: string[];
+			classNames?: string[];
 			/**
 			 * @type array
 			 */
@@ -120317,7 +120413,7 @@ export type GetApiTagsByTagIdStatus200 = {
 					/**
 					 * @type array | undefined
 					 */
-					styleRoles?: string[];
+					classNames?: string[];
 					/**
 					 * @type array
 					 */
@@ -120858,7 +120954,7 @@ export type PutApiTagsByTagIdLocalizationsByLanguageBody = {
 		/**
 		 * @type array | undefined
 		 */
-		styleRoles?: string[];
+		classNames?: string[];
 		/**
 		 * @type array
 		 */
@@ -131528,7 +131624,7 @@ export type PutApiUnitsBookByUnitIdContentStructureBody = {
 					/**
 					 * @type array | undefined
 					 */
-					styleRoles?: string[];
+					classNames?: string[];
 					/**
 					 * @type array
 					 */
@@ -132543,7 +132639,7 @@ export type GetApiBooksByBookIdContentNodesByNodeIdStatus200 = {
 				/**
 				 * @type array | undefined
 				 */
-				styleRoles?: string[];
+				classNames?: string[];
 				/**
 				 * @type array
 				 */
@@ -133039,7 +133135,7 @@ export type PutApiChaptersByChapterIdLocalizationsByLanguageContentBody = {
 		/**
 		 * @type array | undefined
 		 */
-		styleRoles?: string[];
+		classNames?: string[];
 		/**
 		 * @type array
 		 */
@@ -141038,7 +141134,7 @@ export type PostApiCollectionsBody = {
 			/**
 			 * @type array | undefined
 			 */
-			styleRoles?: string[];
+			classNames?: string[];
 			/**
 			 * @type array
 			 */
@@ -143090,7 +143186,7 @@ export type GetApiCollectionsByCollectionIdItemsStatus200 = {
 										/**
 										 * @type array | undefined
 										 */
-										styleRoles?: string[];
+										classNames?: string[];
 										/**
 										 * @type array
 										 */
@@ -143790,7 +143886,7 @@ export type GetApiCollectionsByCollectionIdItemsStatus200 = {
 										/**
 										 * @type array | undefined
 										 */
-										styleRoles?: string[];
+										classNames?: string[];
 										/**
 										 * @type array
 										 */
@@ -144508,7 +144604,7 @@ export type GetApiCollectionsByCollectionIdItemsStatus200 = {
 										/**
 										 * @type array | undefined
 										 */
-										styleRoles?: string[];
+										classNames?: string[];
 										/**
 										 * @type array
 										 */
@@ -146380,7 +146476,7 @@ export type PatchApiCollectionsByCollectionIdBody = {
 			/**
 			 * @type array | undefined
 			 */
-			styleRoles?: string[];
+			classNames?: string[];
 			/**
 			 * @type array
 			 */
@@ -149647,7 +149743,7 @@ export type GetApiReviewsStatus200 = {
 					/**
 					 * @type array | undefined
 					 */
-					styleRoles?: string[];
+					classNames?: string[];
 					/**
 					 * @type array
 					 */
@@ -150451,7 +150547,7 @@ export type PostApiReviewsBody = {
 		/**
 		 * @type array | undefined
 		 */
-		styleRoles?: string[];
+		classNames?: string[];
 		/**
 		 * @type array
 		 */
@@ -151010,7 +151106,7 @@ export type GetApiReviewsByReviewIdStatus200 = {
 				/**
 				 * @type array | undefined
 				 */
-				styleRoles?: string[];
+				classNames?: string[];
 				/**
 				 * @type array
 				 */
@@ -151617,7 +151713,7 @@ export type PatchApiReviewsByReviewIdBody = {
 		/**
 		 * @type array | undefined
 		 */
-		styleRoles?: string[];
+		classNames?: string[];
 		/**
 		 * @type array
 		 */
@@ -154776,7 +154872,7 @@ export type GetApiPostsStatus200 = {
 					/**
 					 * @type array | undefined
 					 */
-					styleRoles?: string[];
+					classNames?: string[];
 					/**
 					 * @type array
 					 */
@@ -155249,7 +155345,7 @@ export type PostApiPostsBody =
 				/**
 				 * @type array | undefined
 				 */
-				styleRoles?: string[];
+				classNames?: string[];
 				/**
 				 * @type array
 				 */
@@ -155455,7 +155551,7 @@ export type PostApiPostsBody =
 				/**
 				 * @type array | undefined
 				 */
-				styleRoles?: string[];
+				classNames?: string[];
 				/**
 				 * @type array
 				 */
@@ -155972,7 +156068,7 @@ export type PostApiPostsWikiBody = {
 		/**
 		 * @type array | undefined
 		 */
-		styleRoles?: string[];
+		classNames?: string[];
 		/**
 		 * @type array
 		 */
@@ -156539,7 +156635,7 @@ export type GetApiPostsByPostIdStatus200 =
 				/**
 				 * @type array | undefined
 				 */
-				styleRoles?: string[];
+				classNames?: string[];
 				/**
 				 * @type array
 				 */
@@ -156945,7 +157041,7 @@ export type GetApiPostsByPostIdStatus200 =
 				/**
 				 * @type array | undefined
 				 */
-				styleRoles?: string[];
+				classNames?: string[];
 				/**
 				 * @type array
 				 */
@@ -157351,7 +157447,7 @@ export type GetApiPostsByPostIdStatus200 =
 				/**
 				 * @type array | undefined
 				 */
-				styleRoles?: string[];
+				classNames?: string[];
 				/**
 				 * @type array
 				 */
@@ -157755,7 +157851,7 @@ export type GetApiPostsByPostIdStatus200 =
 						/**
 						 * @type array | undefined
 						 */
-						styleRoles?: string[];
+						classNames?: string[];
 						/**
 						 * @type array
 						 */
@@ -158167,7 +158263,7 @@ export type GetApiPostsByPostIdStatus200 =
 						/**
 						 * @type array | undefined
 						 */
-						styleRoles?: string[];
+						classNames?: string[];
 						/**
 						 * @type array
 						 */
@@ -158608,7 +158704,7 @@ export type GetApiPostsByPostIdStatus200 =
 				/**
 				 * @type array | undefined
 				 */
-				styleRoles?: string[];
+				classNames?: string[];
 				/**
 				 * @type array
 				 */
@@ -159226,7 +159322,7 @@ export type PatchApiPostsByPostIdBody = {
 		/**
 		 * @type array | undefined
 		 */
-		styleRoles?: string[];
+		classNames?: string[];
 		/**
 		 * @type array
 		 */
@@ -159777,7 +159873,7 @@ export type GetApiPostsByPostIdRepliesStatus200 = {
 			/**
 			 * @type array | undefined
 			 */
-			styleRoles?: string[];
+			classNames?: string[];
 			/**
 			 * @type array
 			 */
@@ -160326,7 +160422,7 @@ export type PostApiPostsByPostIdRepliesStatus200 = {
 		/**
 		 * @type array | undefined
 		 */
-		styleRoles?: string[];
+		classNames?: string[];
 		/**
 		 * @type array
 		 */
@@ -160748,7 +160844,7 @@ export type PostApiPostsByPostIdRepliesBody = {
 		/**
 		 * @type array | undefined
 		 */
-		styleRoles?: string[];
+		classNames?: string[];
 		/**
 		 * @type array
 		 */
@@ -161216,7 +161312,7 @@ export type PatchApiPostsByPostIdRepliesByReplyPostIdBody = {
 		/**
 		 * @type array | undefined
 		 */
-		styleRoles?: string[];
+		classNames?: string[];
 		/**
 		 * @type array
 		 */
@@ -161900,7 +161996,7 @@ export type PostApiRealmsBody = {
 			/**
 			 * @type array | undefined
 			 */
-			styleRoles?: string[];
+			classNames?: string[];
 			/**
 			 * @type array
 			 */
@@ -163222,7 +163318,7 @@ export type PatchApiRealmsByRealmIdBody = {
 			/**
 			 * @type array | undefined
 			 */
-			styleRoles?: string[];
+			classNames?: string[];
 			/**
 			 * @type array
 			 */
@@ -166669,7 +166765,7 @@ export type PutApiRealmsByRealmIdRulesBody = {
 				/**
 				 * @type array | undefined
 				 */
-				styleRoles?: string[];
+				classNames?: string[];
 				/**
 				 * @type array
 				 */
@@ -166936,7 +167032,7 @@ export type GetApiRealmsByRealmIdRulesStatus200 = {
 			/**
 			 * @type array | undefined
 			 */
-			styleRoles?: string[];
+			classNames?: string[];
 			/**
 			 * @type array
 			 */
@@ -167215,7 +167311,7 @@ export type GetApiRealmsByRealmIdRulesAuthoringStatus200 = {
 				/**
 				 * @type array | undefined
 				 */
-				styleRoles?: string[];
+				classNames?: string[];
 				/**
 				 * @type array
 				 */
@@ -168845,7 +168941,7 @@ export type GetApiRealmsByRealmIdPinsStatus200 = {
 									/**
 									 * @type array | undefined
 									 */
-									styleRoles?: string[];
+									classNames?: string[];
 									/**
 									 * @type array
 									 */
@@ -169543,7 +169639,7 @@ export type GetApiRealmsByRealmIdPinsStatus200 = {
 									/**
 									 * @type array | undefined
 									 */
-									styleRoles?: string[];
+									classNames?: string[];
 									/**
 									 * @type array
 									 */
@@ -170259,7 +170355,7 @@ export type GetApiRealmsByRealmIdPinsStatus200 = {
 									/**
 									 * @type array | undefined
 									 */
-									styleRoles?: string[];
+									classNames?: string[];
 									/**
 									 * @type array
 									 */
@@ -171889,7 +171985,7 @@ export type PostApiRealmsByRealmIdWikisBody = {
 		/**
 		 * @type array | undefined
 		 */
-		styleRoles?: string[];
+		classNames?: string[];
 		/**
 		 * @type array
 		 */
@@ -172554,7 +172650,7 @@ export type PostApiRealmsByRealmIdTagContextsBody = {
 		/**
 		 * @type array | undefined
 		 */
-		styleRoles?: string[];
+		classNames?: string[];
 		/**
 		 * @type array
 		 */
@@ -175538,7 +175634,7 @@ export type PatchApiRealmsByRealmIdUnitsByUnitIdBody = {
 			/**
 			 * @type array | undefined
 			 */
-			styleRoles?: string[];
+			classNames?: string[];
 			/**
 			 * @type array
 			 */
@@ -175879,7 +175975,7 @@ export type GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus200 = {
 				/**
 				 * @type array | undefined
 				 */
-				styleRoles?: string[];
+				classNames?: string[];
 				/**
 				 * @type array
 				 */
@@ -176441,7 +176537,7 @@ export type PostApiRealmsByRealmIdUnitsByUnitIdReviewBody =
 					/**
 					 * @type array | undefined
 					 */
-					styleRoles?: string[];
+					classNames?: string[];
 					/**
 					 * @type array
 					 */
@@ -176626,7 +176722,7 @@ export type PostApiRealmsByRealmIdUnitsByUnitIdReviewBody =
 					/**
 					 * @type array | undefined
 					 */
-					styleRoles?: string[];
+					classNames?: string[];
 					/**
 					 * @type array
 					 */
@@ -180729,7 +180825,7 @@ export type PostApiSearchFilterFeedStatus200 = {
 									/**
 									 * @type array | undefined
 									 */
-									styleRoles?: string[];
+									classNames?: string[];
 									/**
 									 * @type array
 									 */
@@ -181427,7 +181523,7 @@ export type PostApiSearchFilterFeedStatus200 = {
 									/**
 									 * @type array | undefined
 									 */
-									styleRoles?: string[];
+									classNames?: string[];
 									/**
 									 * @type array
 									 */
@@ -182143,7 +182239,7 @@ export type PostApiSearchFilterFeedStatus200 = {
 									/**
 									 * @type array | undefined
 									 */
-									styleRoles?: string[];
+									classNames?: string[];
 									/**
 									 * @type array
 									 */
@@ -186472,7 +186568,7 @@ export type PostApiSearchZonesByZoneIdFilterFeedStatus200 = {
 									/**
 									 * @type array | undefined
 									 */
-									styleRoles?: string[];
+									classNames?: string[];
 									/**
 									 * @type array
 									 */
@@ -187170,7 +187266,7 @@ export type PostApiSearchZonesByZoneIdFilterFeedStatus200 = {
 									/**
 									 * @type array | undefined
 									 */
-									styleRoles?: string[];
+									classNames?: string[];
 									/**
 									 * @type array
 									 */
@@ -187886,7 +187982,7 @@ export type PostApiSearchZonesByZoneIdFilterFeedStatus200 = {
 									/**
 									 * @type array | undefined
 									 */
-									styleRoles?: string[];
+									classNames?: string[];
 									/**
 									 * @type array
 									 */
@@ -193095,7 +193191,7 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200 = {
 														/**
 														 * @type array | undefined
 														 */
-														styleRoles?: string[];
+														classNames?: string[];
 														/**
 														 * @type array
 														 */
@@ -193795,7 +193891,7 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200 = {
 														/**
 														 * @type array | undefined
 														 */
-														styleRoles?: string[];
+														classNames?: string[];
 														/**
 														 * @type array
 														 */
@@ -194513,7 +194609,7 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200 = {
 														/**
 														 * @type array | undefined
 														 */
-														styleRoles?: string[];
+														classNames?: string[];
 														/**
 														 * @type array
 														 */
@@ -196022,7 +196118,7 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200 = {
 														/**
 														 * @type array | undefined
 														 */
-														styleRoles?: string[];
+														classNames?: string[];
 														/**
 														 * @type array
 														 */
@@ -196722,7 +196818,7 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200 = {
 														/**
 														 * @type array | undefined
 														 */
-														styleRoles?: string[];
+														classNames?: string[];
 														/**
 														 * @type array
 														 */
@@ -197440,7 +197536,7 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200 = {
 														/**
 														 * @type array | undefined
 														 */
-														styleRoles?: string[];
+														classNames?: string[];
 														/**
 														 * @type array
 														 */
@@ -199398,7 +199494,7 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200 = {
 														/**
 														 * @type array | undefined
 														 */
-														styleRoles?: string[];
+														classNames?: string[];
 														/**
 														 * @type array
 														 */
@@ -200098,7 +200194,7 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200 = {
 														/**
 														 * @type array | undefined
 														 */
-														styleRoles?: string[];
+														classNames?: string[];
 														/**
 														 * @type array
 														 */
@@ -200816,7 +200912,7 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200 = {
 														/**
 														 * @type array | undefined
 														 */
-														styleRoles?: string[];
+														classNames?: string[];
 														/**
 														 * @type array
 														 */
@@ -202325,7 +202421,7 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200 = {
 														/**
 														 * @type array | undefined
 														 */
-														styleRoles?: string[];
+														classNames?: string[];
 														/**
 														 * @type array
 														 */
@@ -203025,7 +203121,7 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200 = {
 														/**
 														 * @type array | undefined
 														 */
-														styleRoles?: string[];
+														classNames?: string[];
 														/**
 														 * @type array
 														 */
@@ -203743,7 +203839,7 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200 = {
 														/**
 														 * @type array | undefined
 														 */
-														styleRoles?: string[];
+														classNames?: string[];
 														/**
 														 * @type array
 														 */
@@ -207895,7 +207991,7 @@ export type PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus200 = {
 									/**
 									 * @type array | undefined
 									 */
-									styleRoles?: string[];
+									classNames?: string[];
 									/**
 									 * @type array
 									 */
@@ -208595,7 +208691,7 @@ export type PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus200 = {
 									/**
 									 * @type array | undefined
 									 */
-									styleRoles?: string[];
+									classNames?: string[];
 									/**
 									 * @type array
 									 */
@@ -209313,7 +209409,7 @@ export type PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus200 = {
 									/**
 									 * @type array | undefined
 									 */
-									styleRoles?: string[];
+									classNames?: string[];
 									/**
 									 * @type array
 									 */
@@ -211902,7 +211998,7 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus200 
 									/**
 									 * @type array | undefined
 									 */
-									styleRoles?: string[];
+									classNames?: string[];
 									/**
 									 * @type array
 									 */
@@ -212602,7 +212698,7 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus200 
 									/**
 									 * @type array | undefined
 									 */
-									styleRoles?: string[];
+									classNames?: string[];
 									/**
 									 * @type array
 									 */
@@ -213320,7 +213416,7 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus200 
 									/**
 									 * @type array | undefined
 									 */
-									styleRoles?: string[];
+									classNames?: string[];
 									/**
 									 * @type array
 									 */

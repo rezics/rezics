@@ -1,12 +1,15 @@
 import {
 	Block,
+	BlockClassName,
 	BlockKey,
 	BlockDocument,
+	BlockTypeValues,
 	type BlockDocument as BlockDocumentValue,
 	DefaultBlockHostPolicy,
 	DockBlockHostPolicy,
 	DockDocument,
 	NavigationDocument,
+	MaximumBlockClassNamesPerDocument,
 	PollContentBlock,
 	PortableTextDocument,
 	UnitImageBlock,
@@ -42,6 +45,148 @@ import {
 import { describe, expect, test } from "vitest";
 
 describe("Block document contracts", () => {
+	test("accepts only bounded reserved class hooks and removes the pre-release style-role field", () => {
+		const valid = ["rezics-theme-featured", "rezics-theme-cassette--hero", "rezics-theme-v2_grid"];
+		for (const className of valid) expect(isDocument(BlockClassName, className)).toBe(true);
+		for (const className of [
+			"hidden",
+			"fixed",
+			"md:grid",
+			"text-red-500",
+			"rezics-theme-",
+			"rezics-theme-has space",
+			"rezics-theme-escaped\\name",
+			"rezics-theme-bracket[name]",
+			`rezics-theme-${"a".repeat(52)}`,
+		])
+			expect(isDocument(BlockClassName, className)).toBe(false);
+
+		const block = {
+			_type: "unit-ref",
+			_key: "000000000001",
+			unitId: "019b0000-0000-7000-8000-000000000001",
+			appearance: "card",
+			classNames: valid,
+		} as const;
+		expect(isDocument(Block, block)).toBe(true);
+		expect(isDocument(Block, { ...block, classNames: [valid[0], valid[0]] })).toBe(false);
+		expect(isDocument(Block, { ...block, classNames: valid.concat(valid, valid) })).toBe(false);
+		expect(isDocument(Block, { ...block, styleRoles: ["featured"] })).toBe(false);
+	});
+
+	test("publishes classNames on every active Block variant without opening extra properties", () => {
+		const unitId = "019b0000-0000-7000-8000-000000000001";
+		const child = (key: string) => ({
+			_type: "unit-ref" as const,
+			_key: key,
+			unitId,
+			appearance: "card" as const,
+		});
+		const fixtures = [
+			{ _type: "portable-text", _key: "000000000001", content: [] },
+			{ _type: "post-full-view", _key: "000000000002", postId: unitId },
+			child("000000000003"),
+			{
+				_type: "unit-list",
+				_key: "000000000004",
+				source: { kind: "units", unitIds: [unitId] },
+				layout: "list",
+				limit: 1,
+			},
+			{ _type: "search", _key: "000000000005", feature: { kind: "global" } },
+			{
+				_type: "feed",
+				_key: "000000000006",
+				feature: { kind: "global" },
+				presentation: { pagination: "load-more", showResultCount: true },
+			},
+			{
+				_type: "menu",
+				_key: "000000000007",
+				navigationId: unitId,
+				orientation: "horizontal",
+				appearance: "links",
+			},
+			{ _type: "image", _key: "000000000008", assetId: unitId },
+			{ _type: "url-image", _key: "000000000009", url: "https://example.com/image" },
+			{ _type: "divider", _key: "00000000000a", style: "line" },
+			{
+				_type: "columns",
+				_key: "00000000000b",
+				columns: [
+					{ _key: "00000000000c", weight: 1, blocks: [child("00000000000d")] },
+					{ _key: "00000000000e", weight: 1, blocks: [child("00000000000f")] },
+				],
+			},
+			{
+				_type: "group",
+				_key: "000000000010",
+				layout: "stack",
+				blocks: [child("000000000011")],
+			},
+			{
+				_type: "callout",
+				_key: "000000000012",
+				tone: "info",
+				blocks: [child("000000000013")],
+			},
+			{
+				_type: "tabs",
+				_key: "000000000014",
+				tabs: [
+					{ _key: "000000000015", labelUnitId: unitId, blocks: [child("000000000016")] },
+					{ _key: "000000000017", labelUnitId: unitId, blocks: [child("000000000018")] },
+				],
+			},
+		] as const;
+
+		expect(fixtures.map(({ _type }) => _type)).toEqual(BlockTypeValues);
+		for (const fixture of fixtures) {
+			const themed = { ...fixture, classNames: ["rezics-theme-contract-test"] };
+			expect(isDocument(Block, themed)).toBe(true);
+			expect(isDocument(Block, { ...themed, privateField: true })).toBe(false);
+		}
+	});
+
+	test("enforces the document-wide class-token budget and host support", () => {
+		const classNames = Array.from({ length: 8 }, (_, index) => `rezics-theme-hook-${index}`);
+		const blocks = Array.from({ length: 32 }, (_, index) => ({
+			_type: "unit-ref" as const,
+			_key: index.toString(16).padStart(12, "0"),
+			unitId: "019b0000-0000-7000-8000-000000000001",
+			appearance: "card" as const,
+			classNames,
+		}));
+		const atLimit = {
+			_type: "block-document" as const,
+			_key: "ffffffffffff",
+			blocks,
+		};
+		expect(blocks.length * classNames.length).toBe(MaximumBlockClassNamesPerDocument);
+		expect(() => assertBlockDocument(atLimit)).not.toThrow();
+		expect(() =>
+			assertBlockDocument({
+				...atLimit,
+				blocks: [
+					...blocks,
+					{
+						...blocks[0]!,
+						_key: "000000000020",
+						classNames: ["rezics-theme-over-budget"],
+					},
+				],
+			}),
+		).toThrow("custom class-name limit");
+		expect(() =>
+			assertWikiPostPortableTextDocument({
+				_type: "portable-text",
+				_key: "000000000021",
+				content: [],
+				classNames: ["rezics-theme-outside-zone"],
+			}),
+		).toThrow("custom class-name limit");
+	});
+
 	test("creates document-local twelve-character hexadecimal keys", () => {
 		const keys = Array.from({ length: 32 }, () => createBlockKey());
 

@@ -364,6 +364,17 @@ corpus-scale relation, with 3,000,000,000-row estimates.
   beyond ordinary document edits. In particular, there is no Zone-wide
   Block-key or eager-count projection and a Dock write never scans or
   revalidates the Zone's Pages.
+- **Custom class hooks.** A Block carries at most 8 class tokens and a
+  Composition document at most 256, each at most 64 ASCII characters.
+  Validation and rendering are `O(Blocks + tokens)` with no lookup, join, or
+  per-token entitlement call. Assuming 5 styled Blocks × 2 tokens and about 32
+  JSON bytes/token, the raw incremental payload averages about 320 bytes per
+  adopted document: 160 GB at 500 M documents and 960 GB at 3 B. The hard
+  per-document ceiling is roughly 17 KiB. Classes are never indexed because
+  the only read path loads the complete document by Composition identity;
+  indexing them would add corpus-scale write amplification without serving a
+  request path. Track adoption, bytes and tokens per document at mean/p95/p99,
+  budget rejection rate, and stylesheet selector cost.
 - **Failure modes.** Per-block timeout/error degrades one block to a
   client-rendered empty/fallback state; the page never 5xxs for one block.
   API quota counts one unit per selected Block (initial tunable), while a
@@ -485,36 +496,43 @@ indexed asset lookup; it does not inspect another composition document.
 ### 6.3 Level 2 — Zone Pro: reviewed custom style sheets
 
 The Block model makes contract-stable semantic styling hooks possible.
-`_type` is a class anchor; optional bounded `styleRoles` are author-owned
-semantic selectors analogous to class tokens. Structural `_key` values are
-editor/renderer identities and are deliberately excluded from the public
-styling contract.
+`_type` publishes `data-block-type`; optional bounded `classNames` are
+author-owned, native class hooks in the reserved `rezics-theme-` namespace.
+They address an instance or group while declarations remain in the reviewed
+theme revision. Structural `_key` values are editor/renderer identities and
+are deliberately excluded from the public styling contract. Block-persisted
+CSS, utility tokens, or declaration maps are a separate, deferred capability.
 
 **Styling contract.** A published, semver-versioned document defines the
-complete selector surface: `data-block-type` and optional
-`data-style-role` tokens on every Block root; named parts per Block type
+complete selector surface: `data-block-type` and optional `rezics-theme-*`
+classes on every Block root; named parts per Block type
 (`data-part="title" | "cover" | "meta" | …`), aligning with the
 `data-scope`/`data-part` anatomy SharkUI's Ark base already emits; state
 attributes (`data-appearance`, `data-layout`, `data-item-size`); optional
 renderer-owned surface roles such as `data-zone-surface="page" | "dock"`;
-and the published CSS custom properties that carry the level-0/1 tokens.
-Style roles may intentionally match multiple Blocks and have no uniqueness
-meaning. Everything outside the contract is
+the presence-only `data-portable-text` boundary and its semantic element
+vocabulary; and the published CSS custom properties that carry the level-0/1
+tokens. Author classes may intentionally match multiple Blocks and have no
+uniqueness meaning. Everything outside the contract is
 implementation detail and may change without notice. Renderer changes that
 preserve the exported surface are contract-minor; removals or renames are
 contract-major and trigger automatic revalidation of every approved theme.
 An old-contract revision stops rendering immediately and falls back to level-1
 tokens. The author grace period is a remediation and resubmission window, never
-permission to keep stale CSS active. Platform base styles move behind
-`@layer`/`:where()` so contract-compliant overrides need no specificity
-escalation.
+permission to keep stale CSS active. Reviewed theme CSS stays unlayered, while
+platform base styles use native layers and low-specificity `:where()` rules.
+Normal theme declarations therefore outrank normal platform layer declarations
+without specificity escalation. Important declarations reverse layer order;
+platform renderers avoid important utility classes inside themed scopes.
 
 **Containment (architectural, before any review).**
 
 - Theme style sheets are parsed to an AST at submission; every selector is
-  scope-transformed under a Zone composition root
-  (`[data-zone-theme-scope]`). Page and Dock each receive their own paint-
-  contained root, including Dock content rendered through a portal. Only
+  scope-transformed under the exact immutable revision root
+  (`[data-zone-theme-scope="<revision-id>"]`). The renderer emits the same
+  value, so two revisions mounted in one document cannot select each other's
+  scope. Page and Dock each receive their own paint-contained root, including
+  Dock content rendered through a portal. Only
   Zone-authored Page and Dock composition is inside custom-selector reach.
   Comments, the hero, the viewer override, and platform chrome —
   navigation, auth state,
@@ -524,8 +542,11 @@ escalation.
 - Document-global CSS mechanisms are not containment-safe. Theme CSS may nest
   ordinary scoped rules in `@media`, `@supports`, and `@container`; cascade-
   layer declarations, keyframes, imports, fonts, and other global at-rules are
-  rejected. Each selector is recursively inspected, so functional pseudo-
-  classes cannot smuggle private class, ID, type, or attribute selectors.
+  rejected. Selector grammar remains ordinary CSS, but every name must bind to
+  a published attribute, a `rezics-theme-*` class, or a rich-text element
+  anchored after `[data-portable-text]`. IDs, universal selectors, private
+  classes and unanchored type selectors are rejected. Functional pseudo-
+  classes are recursively inspected so they cannot smuggle private names.
 - `url()` may reference only platform-hosted theme assets uploaded with
   the theme revision. No external origins: this removes third-party
   visitor tracking, attribute-probe exfiltration channels, and unmoderated
@@ -628,7 +649,7 @@ on flagship examples before broadening access):
 
 The new persisted contracts and public API (`presentation`, pinned
 sorts, `derived`, `maxQueryBlocks`, sibling-local keys and `BlockPath`
-execution, the aggregate endpoint, semantic `styleRoles`, the
+execution, the aggregate endpoint, reserved `classNames` hooks, the
 `search` block completion, the `collection` membership field, the
 `zone_theme` Unit kind, and the theme review pipeline) are significant
 public-API and persisted-contract changes and therefore land in a
@@ -688,8 +709,9 @@ errors.
 ### Phase Z3 — theming levels 0–1 and the styling contract
 
 Extended tokens, the preset gallery, semantic
-`data-block-type`/`data-style-role`/`data-part` export across Block
-renderers, and the published styling contract v1.
+`data-block-type`/`rezics-theme-*`/`data-part` export across Block
+renderers, the rich-text selector vocabulary, revision-bound scoping, and the
+published styling contract 3.0.0.
 Exit: a preset applies end to end in preview; the contract document is
 versioned and its exported surface is asserted by renderer tests.
 

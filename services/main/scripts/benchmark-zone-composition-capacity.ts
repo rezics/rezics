@@ -1,5 +1,7 @@
 import { Client } from "pg";
 
+import { reviewZoneThemeStylesheet } from "../src/services/zone-themes/stylesheet";
+
 type PlanNode = Readonly<Record<string, unknown>>;
 
 type ExplainResult = readonly [
@@ -22,6 +24,69 @@ type PlanSummary = Readonly<{
 const ProfileId = "00000000-0000-4000-8000-000000000001";
 const CollectionId = "00000000-0000-4000-8000-000000000002";
 const SecondCollectionId = "00000000-0000-4000-8000-000000000004";
+const BenchmarkThemeRevisionId = "019b0000-0000-7000-8000-000000000001";
+
+function benchmarkStylesheetReview(css: string): Readonly<{
+	iterations: number;
+	maxMilliseconds: number;
+	meanMilliseconds: number;
+	p95Milliseconds: number;
+	sourceBytes: number;
+}> {
+	const iterations = 25;
+	for (let index = 0; index < 3; index += 1)
+		reviewZoneThemeStylesheet({ css, revisionId: BenchmarkThemeRevisionId });
+	const samples: number[] = [];
+	for (let index = 0; index < iterations; index += 1) {
+		const startedAt = performance.now();
+		reviewZoneThemeStylesheet({ css, revisionId: BenchmarkThemeRevisionId });
+		samples.push(performance.now() - startedAt);
+	}
+	samples.sort((left, right) => left - right);
+	return {
+		iterations,
+		maxMilliseconds: Number(samples.at(-1)!.toFixed(3)),
+		meanMilliseconds: Number(
+			(samples.reduce((total, sample) => total + sample, 0) / samples.length).toFixed(3),
+		),
+		p95Milliseconds: Number(samples[Math.ceil(samples.length * 0.95) - 1]!.toFixed(3)),
+		sourceBytes: Buffer.byteLength(css, "utf8"),
+	};
+}
+
+const MaximumCountStylesheet = Array.from(
+	{ length: 256 },
+	(_, index) => `.rezics-theme-capacity-${index}:has(>.rezics-theme-child-${index}){color:#111111}`,
+).join("");
+const MaximumComponentPseudoClasses = [
+	"first-child",
+	"last-child",
+	"hover",
+	"focus",
+	"focus-visible",
+	"active",
+	"enabled",
+	"checked",
+	"disabled",
+	"empty",
+	"only-child",
+	"first-of-type",
+	"last-of-type",
+	"only-of-type",
+	"first-child",
+	"last-child",
+	"hover",
+	"focus",
+	"focus-visible",
+	"active",
+	"enabled",
+	"checked",
+] as const;
+const MaximumComponentStylesheet = Array.from(
+	{ length: 128 },
+	(_, index) =>
+		`.rezics-theme-complex-${index}:has(>.rezics-theme-child-${index}:has(>.rezics-theme-grandchild-${index}:has(>.rezics-theme-leaf-${index}${MaximumComponentPseudoClasses.map((name) => `:${name}`).join("")}))){color:#111111}`,
+).join("");
 
 function readPositiveIntegerFlag(name: string, fallback: number, maximum: number): number {
 	const position = process.argv.indexOf(name);
@@ -176,9 +241,9 @@ try {
 		)
 		select md5('rezics-zone-capacity-revision:' || ordinal)::uuid,
 			md5('rezics-zone-capacity-theme:' || (1 + ((ordinal - 1) % $2::integer)))::uuid,
-			case when ordinal % 100 between 3 and 7 then '0.9.0' else '1.0.0' end,
+			case when ordinal % 100 between 3 and 7 then '2.0.0' else '3.0.0' end,
 			'[data-block-type="unit-list"]{color:var(--zone-accent)}',
-			'[data-zone-theme-scope] [data-block-type="unit-list"]{color:var(--zone-accent)}',
+			'[data-zone-theme-scope="' || md5('rezics-zone-capacity-revision:' || ordinal)::uuid::text || '"] [data-block-type="unit-list"]{color:var(--zone-accent)}',
 			repeat('a', 64),
 			case
 				when ordinal % 100 = 0 then 'pending_automated'
@@ -187,7 +252,16 @@ try {
 				when ordinal % 100 between 3 and 12 then 'approved'
 				else 'rejected'
 			end,
-			'{}'::jsonb,
+			jsonb_build_object(
+				'contractVersion', case when ordinal % 100 between 3 and 7 then '2.0.0' else '3.0.0' end,
+				'declarationCount', 1,
+				'minifiedBytes', 150,
+				'rendererVersion', '1.10.0',
+				'ruleCount', 1,
+				'selectorCount', 1,
+				'sourceSha256', repeat('b', 64),
+				'transformedSha256', repeat('a', 64)
+			),
 			$3::uuid
 		from generate_series(1, $1::integer) ordinal`,
 		[revisionCount, themeCount, ProfileId],
@@ -234,7 +308,7 @@ try {
 	);
 	const revalidationCursor = await client.query<{ readonly id: string }>(
 		`select id from public.zone_theme_revision
-		 where state = 'approved' and contract_version = '0.9.0'
+		 where state = 'approved' and contract_version = '2.0.0'
 		 order by id offset 1000 limit 1`,
 	);
 	const selectedTheme = await client.query<{ readonly id: string }>(
@@ -280,7 +354,7 @@ try {
 		),
 		revalidation: await explain(
 			`select id, source_css from public.zone_theme_revision
-			 where state = 'approved' and contract_version = '0.9.0'
+			 where state = 'approved' and contract_version = '2.0.0'
 			 and id > $1::uuid order by id limit 100`,
 			[revalidationCursor.rows[0]?.id],
 		),
@@ -328,6 +402,10 @@ try {
 			{
 				fixture: { candidateCount, revisionCount, themeCount },
 				plans,
+				stylesheetReview: {
+					maximumComponents: benchmarkStylesheetReview(MaximumComponentStylesheet),
+					maximumRulesAndSelectors: benchmarkStylesheetReview(MaximumCountStylesheet),
+				},
 				storage: {
 					revisionBytes: Number(size.revisionBytes),
 					revisionBytesPerRow: Number(size.revisionBytes) / Number(size.revisionRows),

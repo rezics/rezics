@@ -47,8 +47,11 @@ const AutomatedStaticReview = t.Object(
 		contractVersion: t.String(),
 		declarationCount: t.Integer({ minimum: 0 }),
 		minifiedBytes: t.Integer({ minimum: 0, maximum: 65_536 }),
+		rendererVersion: t.String({ minLength: 1, maxLength: 32 }),
 		ruleCount: t.Integer({ minimum: 0 }),
 		selectorCount: t.Integer({ minimum: 0 }),
+		sourceSha256: t.String({ pattern: "^[0-9a-f]{64}$" }),
+		transformedSha256: t.String({ pattern: "^[0-9a-f]{64}$" }),
 	},
 	{ additionalProperties: false },
 );

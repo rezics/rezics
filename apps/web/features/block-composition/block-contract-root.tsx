@@ -29,14 +29,17 @@ export function BlockContractRoot({
 	readonly children: ReactNode;
 	readonly className?: string;
 }) {
+	const internalClassName = cn("min-w-0", className);
+	const rootClassName = block.classNames?.length
+		? `${internalClassName} ${block.classNames.join(" ")}`
+		: internalClassName;
 	return (
 		<div
-			className={cn("min-w-0", className)}
+			className={rootClassName}
 			data-appearance={blockAppearance(block)}
 			data-block-type={block._type}
 			data-item-size={block._type === "unit-list" ? unitListItemSize(block) : undefined}
 			data-layout={blockLayout(block)}
-			data-style-role={block.styleRoles?.join(" ")}
 		>
 			{children}
 		</div>

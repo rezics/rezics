@@ -3,6 +3,8 @@ import { createHash } from "node:crypto";
 import {
 	ZoneBlockStylingContractRegistry,
 	ZoneStylingContract,
+	ZoneStylingContractRichTextBoundaryAttribute,
+	ZoneStylingContractRichTextElementValues,
 	ZoneStylingContractStateAttributeValues,
 } from "@rezics/block";
 import {
@@ -17,16 +19,18 @@ import {
 	type Selector,
 } from "css-tree";
 
+import { RezicsVersion } from "../../version";
+
 export const MaximumZoneThemeStylesheetBytes = 64 * 1_024;
 export const MaximumZoneThemeRules = 256;
 export const MaximumZoneThemeSelectors = 512;
 export const MaximumZoneThemeDeclarations = 2_048;
 export const MaximumZoneThemeSelectorComponents = 32;
 
-const ThemeScopeSelector = "[data-zone-theme-scope]";
 const ThemeAssetUrl =
 	/^\/image-assets\/([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})\/content$/;
-const StyleRolePattern = /^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/;
+const RevisionIdPattern =
+	/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/;
 // Cascade layers and keyframe names have document-global effects, so they are
 // excluded even though every ordinary selector is scope-prefixed.
 const AllowedAtRules = new Set(["container", "media", "supports"]);
@@ -36,23 +40,49 @@ const AllowedPseudoClasses = new Set([
 	"disabled",
 	"empty",
 	"first-child",
+	"first-of-type",
 	"focus",
 	"focus-visible",
 	"focus-within",
+	"has",
 	"hover",
+	"is",
 	"last-child",
+	"last-of-type",
+	"not",
 	"nth-child",
 	"nth-last-child",
+	"nth-last-of-type",
+	"nth-of-type",
+	"only-of-type",
 	"only-child",
+	"enabled",
+	"any-link",
+	"placeholder-shown",
+	"required",
+	"optional",
+	"where",
 ]);
-const AllowedPseudoElements = new Set(["after", "before"]);
+const AllowedPseudoElements = new Set([
+	"after",
+	"before",
+	"first-letter",
+	"first-line",
+	"marker",
+	"placeholder",
+	"selection",
+]);
 const AllowedAttributeNames = new Set([
 	...ZoneStylingContract.rootAttributes,
 	...ZoneStylingContractStateAttributeValues,
 	"data-part",
+	ZoneStylingContractRichTextBoundaryAttribute,
 	"data-zone-surface",
 ]);
 const AllowedBlockTypes: ReadonlySet<string> = new Set(ZoneStylingContract.blockTypes);
+const AllowedRichTextElements: ReadonlySet<string> = new Set(
+	ZoneStylingContractRichTextElementValues,
+);
 const AllowedParts: ReadonlySet<string> = new Set(
 	Object.values(ZoneBlockStylingContractRegistry).flatMap(({ parts }) => parts),
 );
@@ -75,8 +105,11 @@ export interface ZoneThemeAutomatedReview {
 	readonly contractVersion: typeof ZoneStylingContract.version;
 	readonly declarationCount: number;
 	readonly minifiedBytes: number;
+	readonly rendererVersion: typeof RezicsVersion;
 	readonly ruleCount: number;
 	readonly selectorCount: number;
+	readonly sourceSha256: string;
+	readonly transformedSha256: string;
 }
 
 export interface ReviewedZoneThemeStylesheet {
@@ -114,28 +147,28 @@ function validateContractAttribute(
 	node: AttributeSelector,
 	issues: ZoneThemeStylesheetIssue[],
 ): void {
-	const name = node.name.name;
+	const name = node.name.name.toLowerCase();
 	if (!AllowedAttributeNames.has(name)) {
 		issue(issues, "unsupported_attribute", "Selector uses an unpublished attribute", node);
 		return;
 	}
 	if (node.flags)
 		issue(issues, "attribute_flags", "Case-insensitive attribute matching is not allowed", node);
-	if (
-		node.matcher &&
-		(name === "data-style-role"
-			? node.matcher !== "=" && node.matcher !== "~="
-			: node.matcher !== "=")
-	)
+	if (node.matcher && node.matcher !== "=")
 		issue(issues, "attribute_matcher", "Selector uses an unsupported attribute matcher", node);
 	const value = attributeValue(node);
+	if (name === ZoneStylingContractRichTextBoundaryAttribute && (node.matcher || value))
+		issue(
+			issues,
+			"private_rich_text_variant",
+			"The rich-text boundary publishes presence only, not internal variant values",
+			node,
+		);
 	if (!value) return;
 	if (name === "data-block-type" && !AllowedBlockTypes.has(value))
 		issue(issues, "unsupported_block_type", "Selector uses an unknown Block type", node);
 	if (name === "data-part" && !AllowedParts.has(value))
 		issue(issues, "unsupported_part", "Selector uses an unpublished Block part", node);
-	if (name === "data-style-role" && !StyleRolePattern.test(value))
-		issue(issues, "invalid_style_role", "Selector uses an invalid semantic style role", node);
 	if (name === "data-zone-surface" && value !== "page" && value !== "dock")
 		issue(issues, "invalid_surface", "Selector uses an unknown Zone surface", node);
 	const stateValues = AllowedStateValues.get(name);
@@ -143,40 +176,101 @@ function validateContractAttribute(
 		issue(issues, "unsupported_state", "Selector uses an unpublished Block state", node);
 }
 
+function richTextAnchoredTypeSelectors(selector: Selector): ReadonlySet<CssNode> {
+	const anchored = new Set<CssNode>();
+	const mark = (candidate: Selector, inheritedBoundary: boolean): void => {
+		const compounds: CssNode[][] = [[]];
+		candidate.children.forEach((node) => {
+			if (node.type === "Combinator") compounds.push([]);
+			else compounds.at(-1)!.push(node);
+		});
+		let hasPrecedingBoundary = inheritedBoundary;
+		for (const compound of compounds) {
+			const hasBoundary = compound.some(
+				(node) =>
+					node.type === "AttributeSelector" &&
+					node.name.name.toLowerCase() === ZoneStylingContractRichTextBoundaryAttribute &&
+					!node.matcher,
+			);
+			for (const node of compound) {
+				if (node.type === "TypeSelector" && hasPrecedingBoundary) anchored.add(node);
+				if (node.type !== "PseudoClassSelector" || !node.children) continue;
+				const nestedBoundary =
+					hasPrecedingBoundary || (node.name.toLowerCase() === "has" && hasBoundary);
+				walk(node, (nested) => {
+					if (nested.type !== "Selector") return;
+					mark(nested, nestedBoundary);
+					return walk.skip;
+				});
+			}
+			hasPrecedingBoundary ||= hasBoundary;
+		}
+	};
+	mark(selector, false);
+	return anchored;
+}
+
 function validateSelector(selector: Selector, issues: ZoneThemeStylesheetIssue[]): void {
+	let classAnchors = 0;
 	let components = 0;
 	let usesBlockPartOrState = false;
 	const blockTypes = new Set<string>();
 	const partNodes: AttributeSelector[] = [];
 	const stateNodes: AttributeSelector[] = [];
+	const richTextAnchors = richTextAnchoredTypeSelectors(selector);
 	walk(selector, (node) => {
 		if (node.type !== "Selector" && node.type !== "SelectorList") components += 1;
-		if (
-			node.type === "ClassSelector" ||
-			node.type === "IdSelector" ||
-			(node.type === "TypeSelector" && node.name !== "*")
-		)
-			issue(
-				issues,
-				"private_selector",
-				"Theme selectors must use only the published semantic data contract",
-				node,
-			);
+		if (node.type === "ClassSelector") {
+			if (node.name.startsWith(ZoneStylingContract.customClassNamePrefix)) classAnchors += 1;
+			else
+				issue(
+					issues,
+					"unpublished_class",
+					"Class selectors must use the reserved Zone-theme namespace",
+					node,
+				);
+		}
+		if (node.type === "IdSelector")
+			issue(issues, "id_selector", "ID selectors are not published theme surfaces", node);
+		if (node.type === "TypeSelector") {
+			if (node.name === "*")
+				issue(issues, "universal_selector", "Universal selectors are not allowed", node);
+			else if (!AllowedRichTextElements.has(node.name.toLowerCase()))
+				issue(
+					issues,
+					"unsupported_type_selector",
+					"Type selector is outside the published rich-text vocabulary",
+					node,
+				);
+			else if (!richTextAnchors.has(node))
+				issue(
+					issues,
+					"unanchored_type_selector",
+					"Published element selectors require a preceding rich-text boundary",
+					node,
+				);
+		}
 		if (node.type === "AttributeSelector") {
 			validateContractAttribute(node, issues);
+			const name = node.name.name.toLowerCase();
 			const value = attributeValue(node);
-			if (node.name.name === "data-block-type" && value && AllowedBlockTypes.has(value))
+			if (
+				name === "data-block-type" &&
+				node.matcher === "=" &&
+				value &&
+				AllowedBlockTypes.has(value)
+			)
 				blockTypes.add(value);
-			if (node.name.name === "data-part") partNodes.push(node);
-			if (AllowedStateValues.has(node.name.name)) stateNodes.push(node);
-			usesBlockPartOrState ||=
-				node.name.name === "data-part" || AllowedStateValues.has(node.name.name);
+			if (name === "data-part") partNodes.push(node);
+			if (AllowedStateValues.has(name)) stateNodes.push(node);
+			usesBlockPartOrState ||= name === "data-part" || AllowedStateValues.has(name);
 		}
-		if (node.type === "TypeSelector" && node.name === "*")
-			issue(issues, "universal_selector", "Universal selectors are not allowed", node);
-		if (node.type === "PseudoClassSelector" && !AllowedPseudoClasses.has(node.name))
+		if (node.type === "PseudoClassSelector" && !AllowedPseudoClasses.has(node.name.toLowerCase()))
 			issue(issues, "unsupported_pseudo_class", "Selector uses an unsupported pseudo-class", node);
-		if (node.type === "PseudoElementSelector" && !AllowedPseudoElements.has(node.name))
+		if (
+			node.type === "PseudoElementSelector" &&
+			!AllowedPseudoElements.has(node.name.toLowerCase())
+		)
 			issue(
 				issues,
 				"unsupported_pseudo_element",
@@ -186,24 +280,19 @@ function validateSelector(selector: Selector, issues: ZoneThemeStylesheetIssue[]
 	});
 	if (components > MaximumZoneThemeSelectorComponents)
 		issue(issues, "selector_too_complex", "Selector exceeds the component limit", selector);
-	if (usesBlockPartOrState && blockTypes.size !== 1)
+	if (usesBlockPartOrState && blockTypes.size !== 1 && classAnchors === 0)
 		issue(
 			issues,
 			"unanchored_block_part",
-			"Block parts and states require exactly one explicit data-block-type value",
+			"Block parts and states require one explicit Block type or a reserved class hook",
 			selector,
 		);
 	if (blockTypes.size === 1) {
+		const blockType = [...blockTypes][0]! as keyof typeof ZoneBlockStylingContractRegistry;
+		const contract = ZoneBlockStylingContractRegistry[blockType];
 		for (const partNode of partNodes) {
 			const part = attributeValue(partNode);
-			if (
-				part &&
-				![...blockTypes].some((blockType) =>
-					ZoneBlockStylingContractRegistry[
-						blockType as keyof typeof ZoneBlockStylingContractRegistry
-					].parts.includes(part as never),
-				)
-			)
+			if (part && !contract.parts.includes(part as never))
 				issue(
 					issues,
 					"part_block_mismatch",
@@ -212,21 +301,12 @@ function validateSelector(selector: Selector, issues: ZoneThemeStylesheetIssue[]
 				);
 		}
 		for (const stateNode of stateNodes) {
-			const state = stateNode.name.name;
+			const state = stateNode.name.name.toLowerCase();
 			const value = attributeValue(stateNode);
-			if (
-				value &&
-				![...blockTypes].some((blockType) => {
-					const contract =
-						ZoneBlockStylingContractRegistry[
-							blockType as keyof typeof ZoneBlockStylingContractRegistry
-						];
-					const values = contract.stateAttributes[state as keyof typeof contract.stateAttributes] as
-						| readonly string[]
-						| undefined;
-					return values?.includes(value) ?? false;
-				})
-			)
+			const values = contract.stateAttributes[state as keyof typeof contract.stateAttributes] as
+				| readonly string[]
+				| undefined;
+			if (value && !values?.includes(value))
 				issue(
 					issues,
 					"state_block_mismatch",
@@ -364,7 +444,11 @@ function validateDeclaration(
 	});
 }
 
-function scopeRules(root: CssNode): void {
+function scopeRules(root: CssNode, revisionId: string): void {
+	const scope = parse(`[data-zone-theme-scope="${revisionId}"]`, { context: "selector" });
+	if (scope.type !== "Selector")
+		throw new TypeError("Zone theme revision scope did not parse as a selector");
+	const themeScopeSelector = generate(scope);
 	walk(root, {
 		visit: "Rule",
 		enter(node) {
@@ -372,7 +456,7 @@ function scopeRules(root: CssNode): void {
 			if (node.prelude.type !== "SelectorList") return;
 			const selectors: string[] = [];
 			node.prelude.children.forEach((selector) => {
-				selectors.push(ThemeScopeSelector + " " + generate(selector));
+				selectors.push(themeScopeSelector + " " + generate(selector));
 			});
 			const scoped = parse(selectors.join(","), { context: "selectorList" });
 			if (scoped.type !== "SelectorList")
@@ -386,7 +470,10 @@ function scopeRules(root: CssNode): void {
 export function reviewZoneThemeStylesheet(input: {
 	readonly assetIds?: readonly string[];
 	readonly css: string;
+	readonly revisionId: string;
 }): ReviewedZoneThemeStylesheet {
+	if (!RevisionIdPattern.test(input.revisionId))
+		throw new TypeError("Zone theme review requires a platform-generated revision UUID");
 	const issues: ZoneThemeStylesheetIssue[] = [];
 	if (Buffer.byteLength(input.css, "utf8") > MaximumZoneThemeStylesheetBytes)
 		issue(issues, "stylesheet_too_large", "Stylesheet exceeds the 64 KiB source limit");
@@ -412,11 +499,12 @@ export function reviewZoneThemeStylesheet(input: {
 		if (node.type === "Rule") {
 			ruleCount += 1;
 			validateRuleAccessibility(node, issues);
+			if (node.prelude.type === "SelectorList")
+				node.prelude.children.forEach((selector) => {
+					if (selector.type === "Selector") validateSelector(selector, issues);
+				});
 		}
-		if (node.type === "Selector") {
-			selectorCount += 1;
-			validateSelector(node, issues);
-		}
+		if (node.type === "Selector") selectorCount += 1;
 		if (node.type === "Declaration") {
 			declarationCount += 1;
 			validateDeclaration(node, root, allowedAssetIds, issues);
@@ -430,7 +518,7 @@ export function reviewZoneThemeStylesheet(input: {
 		issue(issues, "too_many_declarations", "Stylesheet exceeds the declaration limit");
 	if (issues.length) throw new ZoneThemeStylesheetRejected(issues);
 
-	scopeRules(root);
+	scopeRules(root, input.revisionId);
 	const transformedCss = generate(root);
 	const minifiedBytes = Buffer.byteLength(transformedCss, "utf8");
 	if (minifiedBytes > MaximumZoneThemeStylesheetBytes)
@@ -440,15 +528,20 @@ export function reviewZoneThemeStylesheet(input: {
 				message: "Scoped stylesheet exceeds the 64 KiB output limit",
 			},
 		]);
+	const sourceSha256 = createHash("sha256").update(input.css).digest("hex");
+	const transformedSha256 = createHash("sha256").update(transformedCss).digest("hex");
 	return {
 		automatedReview: {
 			contractVersion: ZoneStylingContract.version,
 			declarationCount,
 			minifiedBytes,
+			rendererVersion: RezicsVersion,
 			ruleCount,
 			selectorCount,
+			sourceSha256,
+			transformedSha256,
 		},
-		sha256: createHash("sha256").update(transformedCss).digest("hex"),
+		sha256: transformedSha256,
 		transformedCss,
 	};
 }

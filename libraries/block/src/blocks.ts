@@ -9,29 +9,40 @@ const Uuid = Type.String({
 		"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
 });
 
-/** Reusable semantic styling hook. It is intentionally not an identity. */
-export const BlockStyleRole = Type.String({
-	minLength: 1,
-	maxLength: 48,
-	pattern: "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
-});
-export type BlockStyleRole = Static<typeof BlockStyleRole>;
+export const BlockClassNamePrefix = "rezics-theme-" as const;
+export const MaximumBlockClassNames = 8;
+export const MaximumBlockClassNameLength = 64;
 
-export const BlockStyleRoles = Type.Array(BlockStyleRole, {
-	maxItems: 8,
+/**
+ * An author-owned class hook emitted unchanged on a Block contract root.
+ *
+ * @remarks
+ * The reserved prefix keeps hooks inert until reviewed theme CSS targets them.
+ * This contract intentionally carries addressing only: persisted CSS
+ * declarations, utility tokens, and style-attribute maps are not supported.
+ */
+export const BlockClassName = Type.String({
+	minLength: BlockClassNamePrefix.length + 1,
+	maxLength: MaximumBlockClassNameLength,
+	pattern: `^${BlockClassNamePrefix}[A-Za-z0-9_-]+$`,
+});
+export type BlockClassName = Static<typeof BlockClassName>;
+
+export const BlockClassNames = Type.Array(BlockClassName, {
+	maxItems: MaximumBlockClassNames,
 	uniqueItems: true,
 });
-export type BlockStyleRoles = Static<typeof BlockStyleRoles>;
+export type BlockClassNames = Static<typeof BlockClassNames>;
 
-const BlockStyleFields = {
-	styleRoles: Type.Optional(BlockStyleRoles),
+const BlockClassFields = {
+	classNames: Type.Optional(BlockClassNames),
 };
 
 export const PortableTextDocument = Type.Object(
 	{
 		_type: Type.Literal("portable-text"),
 		_key: BlockKey,
-		...BlockStyleFields,
+		...BlockClassFields,
 		content: PortableText,
 	},
 	{ additionalProperties: false, $id: "PortableTextDocument" },
@@ -42,7 +53,7 @@ export const UnitRefBlock = Type.Object(
 	{
 		_type: Type.Literal("unit-ref"),
 		_key: BlockKey,
-		...BlockStyleFields,
+		...BlockClassFields,
 		unitId: Uuid,
 		appearance: Type.Union([Type.Literal("inline"), Type.Literal("card"), Type.Literal("cover")]),
 	},
@@ -55,7 +66,7 @@ export const PostFullViewBlock = Type.Object(
 	{
 		_type: Type.Literal("post-full-view"),
 		_key: BlockKey,
-		...BlockStyleFields,
+		...BlockClassFields,
 		postId: Uuid,
 	},
 	{ additionalProperties: false, $id: "PostFullViewBlock" },
@@ -186,7 +197,7 @@ export const UnitListBlock = Type.Object(
 	{
 		_type: Type.Literal("unit-list"),
 		_key: BlockKey,
-		...BlockStyleFields,
+		...BlockClassFields,
 		source: UnitListSource,
 		layout: Type.Union([Type.Literal("list"), Type.Literal("grid"), Type.Literal("carousel")]),
 		limit: Type.Integer({ minimum: 1, maximum: 100 }),
@@ -201,7 +212,7 @@ export const SearchBlock = Type.Object(
 	{
 		_type: Type.Literal("search"),
 		_key: BlockKey,
-		...BlockStyleFields,
+		...BlockClassFields,
 		feature: DirectSearchFeatureSource,
 	},
 	{ additionalProperties: false, $id: "SearchBlock" },
@@ -216,7 +227,7 @@ export const FeedBlock = Type.Object(
 	{
 		_type: Type.Literal("feed"),
 		_key: BlockKey,
-		...BlockStyleFields,
+		...BlockClassFields,
 		feature: SearchFeatureSource,
 		initialSort: Type.Optional(SearchSort),
 		presentation: Type.Object(
@@ -238,7 +249,7 @@ export const MenuBlock = Type.Object(
 	{
 		_type: Type.Literal("menu"),
 		_key: BlockKey,
-		...BlockStyleFields,
+		...BlockClassFields,
 		navigationId: Uuid,
 		orientation: Type.Union([Type.Literal("horizontal"), Type.Literal("vertical")]),
 		appearance: Type.Union([
@@ -256,7 +267,7 @@ export const ImageBlock = Type.Object(
 	{
 		_type: Type.Literal("image"),
 		_key: BlockKey,
-		...BlockStyleFields,
+		...BlockClassFields,
 		assetId: Uuid,
 		alt: Type.Optional(Type.String()),
 		caption: Type.Optional(Type.String()),
@@ -269,7 +280,7 @@ export const UrlImageBlock = Type.Object(
 	{
 		_type: Type.Literal("url-image"),
 		_key: BlockKey,
-		...BlockStyleFields,
+		...BlockClassFields,
 		url: Type.String({ minLength: 1, maxLength: 2_000, pattern: "^https://" }),
 		alt: Type.Optional(Type.String()),
 		caption: Type.Optional(Type.String()),
@@ -291,7 +302,7 @@ export const UnitImageBlock = Type.Object(
 	{
 		_type: Type.Literal("unit-image"),
 		_key: BlockKey,
-		...BlockStyleFields,
+		...BlockClassFields,
 		unitId: Uuid,
 		slot: Type.Union([Type.Literal("avatar"), Type.Literal("banner"), Type.Literal("cover")]),
 	},
@@ -303,7 +314,7 @@ export const DividerBlock = Type.Object(
 	{
 		_type: Type.Literal("divider"),
 		_key: BlockKey,
-		...BlockStyleFields,
+		...BlockClassFields,
 		style: Type.Union([Type.Literal("line"), Type.Literal("space"), Type.Literal("section")]),
 	},
 	{ additionalProperties: false, $id: "DividerBlock" },
@@ -328,7 +339,7 @@ function createContainerBlocks<ThisSchema extends TSchema>(This: ThisSchema) {
 			{
 				_type: Type.Literal("columns"),
 				_key: BlockKey,
-				...BlockStyleFields,
+				...BlockClassFields,
 				columns: Type.Array(
 					Type.Object(
 						{
@@ -347,7 +358,7 @@ function createContainerBlocks<ThisSchema extends TSchema>(This: ThisSchema) {
 			{
 				_type: Type.Literal("group"),
 				_key: BlockKey,
-				...BlockStyleFields,
+				...BlockClassFields,
 				layout: Type.Union([Type.Literal("stack"), Type.Literal("row"), Type.Literal("grid")]),
 				blocks: Type.Array(This, { minItems: 1, maxItems: 50 }),
 			},
@@ -357,7 +368,7 @@ function createContainerBlocks<ThisSchema extends TSchema>(This: ThisSchema) {
 			{
 				_type: Type.Literal("callout"),
 				_key: BlockKey,
-				...BlockStyleFields,
+				...BlockClassFields,
 				tone: Type.Union([
 					Type.Literal("neutral"),
 					Type.Literal("info"),
@@ -374,7 +385,7 @@ function createContainerBlocks<ThisSchema extends TSchema>(This: ThisSchema) {
 			{
 				_type: Type.Literal("tabs"),
 				_key: BlockKey,
-				...BlockStyleFields,
+				...BlockClassFields,
 				tabs: Type.Array(
 					Type.Object(
 						{

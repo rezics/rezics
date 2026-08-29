@@ -1,35 +1,100 @@
-# Zone styling contract 1.0.0
+# Zone styling contract 3.0.0
 
-This document defines the complete public styling surface for Zone Blocks under
-styling-contract version `1.0.0`. The machine-readable source of truth is
+This document is the authoring reference for custom Zone themes under styling
+contract `3.0.0`. The machine-readable source of truth is
 `ZoneStylingContract` from `@rezics/block`.
 
 The styling contract uses Semantic Versioning independently from REZICS product
-RomVer. Adding a compatible hook is a contract-minor change. Removing a hook,
-renaming it, or changing its meaning is a contract-major change and requires
-approved custom themes to be revalidated.
+RomVer. Adding a compatible hook is a contract-minor change. Removing, renaming,
+or changing a hook's meaning is contract-major and requires approved themes to
+be revalidated.
 
 ## Scope and Block roots
 
-Theme rules apply only inside platform-owned `[data-zone-theme-scope]`
-containment roots. Page and Dock are independently stored and independently
-scoped; a theme never needs either document identity or globally unique Block
-keys. Each scope uses paint containment, and every Block root publishes:
+The platform binds every reviewed stylesheet to its immutable revision and
+prefixes every ordinary selector with the exact revision scope. Theme authors
+do not write or depend on `data-zone-theme-scope` values. Page and Dock each
+have a paint-contained root carrying the revision ID; selectors cannot cross
+into another revision's scope.
 
-- `data-block-type` contains one of the Block types listed below.
-- `data-style-role`, when present, contains the Block's bounded,
-  author-assigned semantic role tokens.
+Every Block contract root publishes:
 
-Structural `_key` values are unique only among siblings in their containing
-array. They are editor and renderer identities, not theme selectors, and are
-not part of this public contract. Style roles have class-like semantics: one
-role may intentionally match multiple Blocks and has no uniqueness guarantee.
+- `data-block-type`, with one of the Block types below;
+- zero to eight author-owned `rezics-theme-*` class names, emitted unchanged.
 
-Nested Blocks publish their own roots. A named part belongs to the Block root
-that renders it; authors should qualify part selectors with the intended
-`data-block-type` or `data-style-role` root.
+Custom class names are selectors, not style declarations. They do not generate
+Tailwind CSS, have no platform-defined meaning, and are inert unless the active
+reviewed stylesheet targets them. A Composition document may carry at most 256
+custom class tokens. Tokens are unique per Block, at most 64 ASCII characters,
+and must match `^rezics-theme-[A-Za-z0-9_-]+$`. Theme publishers should add a
+theme-specific namespace, such as `rezics-theme-cassette--hero`.
 
-## Stable Block parts and state
+Structural `_key` values are sibling-local editor identities, not selectors.
+Nested Blocks publish their own contract roots.
+
+## Selector policy
+
+Theme CSS uses ordinary combinators and selector lists, with names bound to the
+published contract:
+
+- Class selectors must begin with `rezics-theme-`. Other classes, IDs, and the
+  universal selector are rejected.
+- Attribute selectors may use `data-block-type`, `data-part`, the state
+  attributes in the table, `data-zone-surface="page" | "dock"`, and the
+  presence-only `[data-portable-text]` boundary. Private boundary values are
+  not published.
+- A selector using a Block part or state must contain exactly one explicit
+  `data-block-type` value or at least one reserved class hook. Explicit Block
+  types enable part/state consistency checking.
+- Supported pseudo-classes are `:active`, `:any-link`, `:checked`, `:disabled`,
+  `:empty`, `:enabled`, `:first-child`, `:first-of-type`, `:focus`,
+  `:focus-visible`, `:focus-within`, `:has()`, `:hover`, `:is()`,
+  `:last-child`, `:last-of-type`, `:not()`, `:nth-child()`,
+  `:nth-last-child()`, `:nth-last-of-type()`, `:nth-of-type()`,
+  `:only-child`, `:only-of-type`, `:optional`, `:placeholder-shown`,
+  `:required`, and `:where()`. Functional selectors are checked recursively.
+- Supported pseudo-elements are `::after`, `::before`, `::first-letter`,
+  `::first-line`, `::marker`, `::placeholder`, and `::selection`.
+
+The reviewer admits nested ordinary rules only in `@container`, `@media`, and
+`@supports`. It rejects imports and document-global names such as layers,
+keyframes, fonts, and custom-property registrations. URLs may reference only
+ready, public platform image assets declared by that immutable theme revision.
+
+For example:
+
+```css
+.rezics-theme-cassette--hero > [data-part="content"] {
+  min-block-size: 70svh;
+}
+
+[data-block-type="unit-list"][data-layout="grid"] [data-part="item"] {
+  border-radius: var(--rezics-zone-card-radius);
+}
+```
+
+## Rich-text elements
+
+Type selectors are published only for semantic Portable Text output and only
+after a preceding `[data-portable-text]` compound. The vocabulary is `p`, `h2`,
+`h3`, `blockquote`, `ul`, `ol`, `li`, `a`, `figure`, `img`, and `figcaption`.
+
+```css
+[data-portable-text] > h2:first-of-type {
+  font-size: calc(1.5rem * var(--rezics-zone-heading-font-scale));
+}
+
+[data-portable-text] li::marker {
+  color: var(--rezics-zone-accent);
+}
+```
+
+Portable Text can embed Blocks. A broad descendant selector such as
+`[data-portable-text] p` can therefore also match a paragraph in an embedded
+Block's private markup. Use child combinators or custom class hooks when that
+distinction matters.
+
+## Stable Block parts and states
 
 | Block type | Stable `data-part` values | Stable state attributes and values |
 | --- | --- | --- |
@@ -40,55 +105,35 @@ that renders it; authors should qualify part selectors with the intended
 | `search` | `form`, `query`, `submit`, `filters` | — |
 | `feed` | `toolbar`, `items`, `item`, `continuation`, `loading`, `empty`, `error` | — |
 | `menu` | `list`, `item`, `label`, `link` | `data-appearance`: `links`, `buttons`, `tabs`, `drawer` |
-| `media` | `figure`, `asset`, `caption`, `link` | `data-appearance`: `content`, `cover`, `banner`, `avatar` |
+| `image` | `figure`, `asset`, `caption` | — |
+| `url-image` | `figure`, `asset`, `caption` | — |
 | `divider` | `separator` | — |
 | `columns` | `column` | — |
 | `group` | `content` | `data-layout`: `stack`, `row`, `grid` |
 | `callout` | `title`, `content` | — |
 | `tabs` | `list`, `tab`, `panel` | — |
 
-Parts may be omitted when the corresponding content or state is absent. An
-`empty` or `error` part appears only for that outcome. Their presence is stable;
-their element type and location in the private DOM tree are not.
+Parts may be absent when their content or state is absent. Their element type,
+position, and private wrappers are not stable.
 
-Selectors are recursively validated. A selector using a Block part or state
-must name exactly one explicit `data-block-type`; functional selector pseudo-
-classes, private classes/IDs/type selectors, and document-global at-rules such
-as `@layer` and `@keyframes` are not part of the authoring contract.
+## Published custom properties and cascade
 
-## Published custom properties
+The scope publishes `--rezics-zone-accent`,
+`--rezics-zone-accent-foreground`, `--rezics-zone-density`,
+`--rezics-zone-card-radius`, `--rezics-zone-heading-font-scale`, and
+`--rezics-zone-surface-tint`.
 
-The Zone theme root publishes these CSS custom properties:
-
-- `--rezics-zone-accent`
-- `--rezics-zone-accent-foreground`
-- `--rezics-zone-density`
-- `--rezics-zone-card-radius`
-- `--rezics-zone-heading-font-scale`
-- `--rezics-zone-surface-tint`
-
-The platform owns token resolution, including the accessible accent foreground
-and the concrete CSS values represented by the bounded density, radius, font
-scale, and tint tokens. A hero asset is rendered as platform-owned image markup;
-it is not exposed as a CSS URL custom property.
+Reviewed theme CSS is injected unlayered. Normal unlayered declarations outrank
+normal declarations in the application's native cascade layers, so themes do
+not need artificial specificity. Layered application declarations marked
+`!important` still outrank unlayered normal declarations; platform components
+inside Zone scopes avoid important utilities for that reason.
 
 ## Private implementation details
 
-Only the attributes, parts, state values, and custom properties listed in this
-document are public. In particular, the following remain private and may change
-without a styling-contract version bump:
-
-- DOM element names, nesting, sibling order, and incidental wrappers
-- CSS class names and generated utility classes
-- structural Block/container `_key` values and any private
-  `data-block-key` diagnostics
-- SharkUI and Ark UI internals, including their `data-scope`, `data-part`, and
-  `data-state` attributes
-- React component boundaries, keys, and hydration details
-- every node outside a `[data-zone-theme-scope]`; portaled Dock content creates
-  its own scope and receives the same resolved theme tokens
-- platform navigation, authentication, moderation, reporting, trust, rating,
-  labeling, and management controls
-
-Custom themes must not select private surfaces. JavaScript is never part of the
-Zone styling contract and never executes as part of a Zone theme.
+DOM element names outside the rich-text vocabulary, DOM nesting, internal CSS
+classes, utility and recipe classes, Block keys, private diagnostics, SharkUI
+and Ark UI attributes, React boundaries, and every node outside a Zone theme
+scope are private. Platform navigation, authentication, moderation, reporting,
+trust, rating, labeling, and management controls remain outside selector reach.
+JavaScript never executes as part of a Zone theme.

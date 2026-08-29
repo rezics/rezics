@@ -229,10 +229,12 @@ function unit(id: string, kind: string, title: string, cover: RenderUnit["cover"
 	} satisfies RenderUnit;
 }
 
-function projection(units: readonly RenderUnit[]) {
+function projection(units: readonly RenderUnit[], themeRevisionId?: string) {
 	return {
 		dock: null,
-		customThemeStylesheet: null,
+		customThemeStylesheet: themeRevisionId
+			? { revisionId: themeRevisionId, sha256: "a".repeat(64), css: "" }
+			: null,
 		navigations: [],
 		page: null,
 		references: { assets: [], units: [...units], wikiPosts: [] },
@@ -267,9 +269,9 @@ function projection(units: readonly RenderUnit[]) {
 	} satisfies ZoneRenderProjection;
 }
 
-function renderZone(block: Block, units: readonly RenderUnit[] = []) {
+function renderZone(block: Block, units: readonly RenderUnit[] = [], themeRevisionId?: string) {
 	return render(
-		<ZoneBlockProvider baseHref="/zone/test" projection={projection(units)}>
+		<ZoneBlockProvider baseHref="/zone/test" projection={projection(units, themeRevisionId)}>
 			<ZoneDocument blocks={[block]} surface={{ kind: "dock" }} />
 		</ZoneBlockProvider>,
 	);
@@ -310,6 +312,20 @@ describe("Zone unit-list presentation", () => {
 		const card = screen.getByTestId("unit-card");
 		expect(card.getAttribute("data-cover")).toBe("/cover.jpg");
 		expect(card.getAttribute("href")).toBe(`/units/book/${ItemId}`);
+	});
+
+	it("binds the rendered scope to the loaded custom-theme revision", () => {
+		const revisionId = "019f9000-0000-7000-8000-000000000007";
+		const block = {
+			_key: "000000000009",
+			_type: "divider",
+			style: "line",
+		} satisfies Block;
+		const { container } = renderZone(block, [], revisionId);
+
+		expect(
+			container.querySelector("[data-zone-theme-scope]")?.getAttribute("data-zone-theme-scope"),
+		).toBe(revisionId);
 	});
 
 	it("renders collection items through Shelf with explicit density", () => {

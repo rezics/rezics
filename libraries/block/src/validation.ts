@@ -33,6 +33,7 @@ export interface BlockHostPolicy {
 	readonly allowedChildTypes: Readonly<Partial<Record<BlockParentType, readonly BlockType[]>>>;
 	readonly maxDepth: number;
 	readonly maxBlocks: number;
+	readonly maxClassNames: number;
 	readonly maxQueryBlocks: number;
 	readonly allowExternalNavigation: boolean;
 }
@@ -72,6 +73,7 @@ const WikiPostChildTypes = [
 export const MaxZonePageQueryBlocks = 24;
 export const MaxDockQueryBlocks = 6;
 export const MaxWikiPostQueryBlocks = 6;
+export const MaximumBlockClassNamesPerDocument = 256;
 
 export const DefaultBlockHostPolicy: BlockHostPolicy = {
 	allowedRootTypes: AllBlockTypes,
@@ -93,6 +95,7 @@ export const DefaultBlockHostPolicy: BlockHostPolicy = {
 	},
 	maxDepth: 4,
 	maxBlocks: 250,
+	maxClassNames: MaximumBlockClassNamesPerDocument,
 	maxQueryBlocks: MaxZonePageQueryBlocks,
 	allowExternalNavigation: false,
 };
@@ -139,6 +142,7 @@ export const DockBlockHostPolicy: BlockHostPolicy = {
 	},
 	maxDepth: 2,
 	maxBlocks: 40,
+	maxClassNames: MaximumBlockClassNamesPerDocument,
 	maxQueryBlocks: MaxDockQueryBlocks,
 	allowExternalNavigation: false,
 };
@@ -208,6 +212,7 @@ export const ZonePageBlockHostPolicy: BlockHostPolicy = {
 	},
 	maxDepth: 4,
 	maxBlocks: 250,
+	maxClassNames: MaximumBlockClassNamesPerDocument,
 	maxQueryBlocks: MaxZonePageQueryBlocks,
 	allowExternalNavigation: false,
 };
@@ -233,6 +238,7 @@ export const WikiPostBlockHostPolicy: BlockHostPolicy = {
 	},
 	maxDepth: 6,
 	maxBlocks: 500,
+	maxClassNames: 0,
 	maxQueryBlocks: MaxWikiPostQueryBlocks,
 	allowExternalNavigation: false,
 };
@@ -459,10 +465,14 @@ function assertBlockTree(value: BlockContainerDocument, policy: BlockHostPolicy)
 	};
 	assertLocalKeyScopes(value.blocks);
 	let count = 0;
+	let classNameCount = 0;
 
 	walkBlockTree(value, (block, { depth, parentType }) => {
 		count += 1;
 		if (count > policy.maxBlocks) throw new TypeError("Block document exceeds host block limit");
+		classNameCount += block.classNames?.length ?? 0;
+		if (classNameCount > policy.maxClassNames)
+			throw new TypeError("Block document exceeds host custom class-name limit");
 		if (depth > policy.maxDepth) throw new TypeError("Block document exceeds host depth limit");
 		const allowed = parentType
 			? (policy.allowedChildTypes[parentType] ?? [])

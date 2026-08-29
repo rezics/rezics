@@ -19,8 +19,11 @@ export interface StoredZoneThemeAutomatedReview extends Record<string, unknown> 
 	readonly contractVersion: string;
 	readonly declarationCount: number;
 	readonly minifiedBytes: number;
+	readonly rendererVersion: string;
 	readonly ruleCount: number;
 	readonly selectorCount: number;
+	readonly sourceSha256: string;
+	readonly transformedSha256: string;
 }
 
 export interface StoredZoneThemeRenderReview extends Record<string, unknown> {

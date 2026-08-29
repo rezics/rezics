@@ -1,12 +1,9 @@
-import { type BlockType, BlockTypeValues } from "./blocks";
+import { BlockClassNamePrefix, type BlockType, BlockTypeValues } from "./blocks";
 
 /** Styling-contract SemVer is independent from the REZICS product RomVer. */
-export const ZoneStylingContractVersion = "2.0.0" as const;
+export const ZoneStylingContractVersion = "3.0.0" as const;
 
-export const ZoneStylingContractRootAttributeValues = [
-	"data-block-type",
-	"data-style-role",
-] as const;
+export const ZoneStylingContractRootAttributeValues = ["data-block-type"] as const;
 export type ZoneStylingContractRootAttribute =
 	(typeof ZoneStylingContractRootAttributeValues)[number];
 
@@ -27,6 +24,23 @@ export const ZoneStylingContractCssVariableValues = [
 	"--rezics-zone-surface-tint",
 ] as const;
 export type ZoneStylingContractCssVariable = (typeof ZoneStylingContractCssVariableValues)[number];
+
+export const ZoneStylingContractRichTextBoundaryAttribute = "data-portable-text" as const;
+export const ZoneStylingContractRichTextElementValues = [
+	"p",
+	"h2",
+	"h3",
+	"blockquote",
+	"ul",
+	"ol",
+	"li",
+	"a",
+	"figure",
+	"img",
+	"figcaption",
+] as const;
+export type ZoneStylingContractRichTextElement =
+	(typeof ZoneStylingContractRichTextElementValues)[number];
 
 export interface ZoneBlockStylingContract {
 	readonly parts: readonly string[];
@@ -110,7 +124,12 @@ export const ZoneBlockStylingContractRegistry = {
 export const ZoneStylingContract = {
 	version: ZoneStylingContractVersion,
 	blockTypes: BlockTypeValues,
+	customClassNamePrefix: BlockClassNamePrefix,
 	rootAttributes: ZoneStylingContractRootAttributeValues,
 	blocks: ZoneBlockStylingContractRegistry,
 	cssVariables: ZoneStylingContractCssVariableValues,
+	richText: {
+		boundaryAttribute: ZoneStylingContractRichTextBoundaryAttribute,
+		elements: ZoneStylingContractRichTextElementValues,
+	},
 } as const;

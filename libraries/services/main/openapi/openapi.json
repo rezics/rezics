@@ -1,6 +1,6 @@
 {
 	"openapi": "3.2.0",
-	"info": { "title": "REZICS API", "version": "1.9.0" },
+	"info": { "title": "REZICS API", "version": "1.10.0" },
 	"components": {
 		"schemas": {
 			"JsonValue": {
@@ -5220,14 +5220,14 @@
 									"properties": {
 										"_type": { "const": "post-full-view", "type": "string" },
 										"_key": { "pattern": "^[0-9a-f]{12}$", "$id": "BlockKey", "type": "string" },
-										"styleRoles": {
+										"classNames": {
 											"maxItems": 8,
 											"uniqueItems": true,
 											"type": "array",
 											"items": {
-												"minLength": 1,
-												"maxLength": 48,
-												"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+												"minLength": 14,
+												"maxLength": 64,
+												"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 												"type": "string"
 											}
 										},
@@ -5245,14 +5245,14 @@
 									"properties": {
 										"_type": { "const": "unit-ref", "type": "string" },
 										"_key": { "pattern": "^[0-9a-f]{12}$", "$id": "BlockKey", "type": "string" },
-										"styleRoles": {
+										"classNames": {
 											"maxItems": 8,
 											"uniqueItems": true,
 											"type": "array",
 											"items": {
-												"minLength": 1,
-												"maxLength": 48,
-												"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+												"minLength": 14,
+												"maxLength": 64,
+												"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 												"type": "string"
 											}
 										},
@@ -5277,14 +5277,14 @@
 									"properties": {
 										"_type": { "const": "unit-list", "type": "string" },
 										"_key": { "pattern": "^[0-9a-f]{12}$", "$id": "BlockKey", "type": "string" },
-										"styleRoles": {
+										"classNames": {
 											"maxItems": 8,
 											"uniqueItems": true,
 											"type": "array",
 											"items": {
-												"minLength": 1,
-												"maxLength": 48,
-												"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+												"minLength": 14,
+												"maxLength": 64,
+												"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 												"type": "string"
 											}
 										},
@@ -16360,14 +16360,14 @@
 									"properties": {
 										"_type": { "const": "search", "type": "string" },
 										"_key": { "pattern": "^[0-9a-f]{12}$", "$id": "BlockKey", "type": "string" },
-										"styleRoles": {
+										"classNames": {
 											"maxItems": 8,
 											"uniqueItems": true,
 											"type": "array",
 											"items": {
-												"minLength": 1,
-												"maxLength": 48,
-												"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+												"minLength": 14,
+												"maxLength": 64,
+												"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 												"type": "string"
 											}
 										},
@@ -21282,14 +21282,14 @@
 									"properties": {
 										"_type": { "const": "feed", "type": "string" },
 										"_key": { "pattern": "^[0-9a-f]{12}$", "$id": "BlockKey", "type": "string" },
-										"styleRoles": {
+										"classNames": {
 											"maxItems": 8,
 											"uniqueItems": true,
 											"type": "array",
 											"items": {
-												"minLength": 1,
-												"maxLength": 48,
-												"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+												"minLength": 14,
+												"maxLength": 64,
+												"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 												"type": "string"
 											}
 										},
@@ -32087,14 +32087,14 @@
 									"properties": {
 										"_type": { "const": "menu", "type": "string" },
 										"_key": { "pattern": "^[0-9a-f]{12}$", "$id": "BlockKey", "type": "string" },
-										"styleRoles": {
+										"classNames": {
 											"maxItems": 8,
 											"uniqueItems": true,
 											"type": "array",
 											"items": {
-												"minLength": 1,
-												"maxLength": 48,
-												"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+												"minLength": 14,
+												"maxLength": 64,
+												"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 												"type": "string"
 											}
 										},
@@ -32126,14 +32126,14 @@
 									"properties": {
 										"_type": { "const": "image", "type": "string" },
 										"_key": { "pattern": "^[0-9a-f]{12}$", "$id": "BlockKey", "type": "string" },
-										"styleRoles": {
+										"classNames": {
 											"maxItems": 8,
 											"uniqueItems": true,
 											"type": "array",
 											"items": {
-												"minLength": 1,
-												"maxLength": 48,
-												"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+												"minLength": 14,
+												"maxLength": 64,
+												"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 												"type": "string"
 											}
 										},
@@ -32153,14 +32153,14 @@
 									"properties": {
 										"_type": { "const": "url-image", "type": "string" },
 										"_key": { "pattern": "^[0-9a-f]{12}$", "$id": "BlockKey", "type": "string" },
-										"styleRoles": {
+										"classNames": {
 											"maxItems": 8,
 											"uniqueItems": true,
 											"type": "array",
 											"items": {
-												"minLength": 1,
-												"maxLength": 48,
-												"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+												"minLength": 14,
+												"maxLength": 64,
+												"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 												"type": "string"
 											}
 										},
@@ -32182,14 +32182,14 @@
 									"properties": {
 										"_type": { "const": "divider", "type": "string" },
 										"_key": { "pattern": "^[0-9a-f]{12}$", "$id": "BlockKey", "type": "string" },
-										"styleRoles": {
+										"classNames": {
 											"maxItems": 8,
 											"uniqueItems": true,
 											"type": "array",
 											"items": {
-												"minLength": 1,
-												"maxLength": 48,
-												"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+												"minLength": 14,
+												"maxLength": 64,
+												"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 												"type": "string"
 											}
 										},
@@ -32209,14 +32209,14 @@
 									"properties": {
 										"_type": { "const": "columns", "type": "string" },
 										"_key": { "pattern": "^[0-9a-f]{12}$", "$id": "BlockKey", "type": "string" },
-										"styleRoles": {
+										"classNames": {
 											"maxItems": 8,
 											"uniqueItems": true,
 											"type": "array",
 											"items": {
-												"minLength": 1,
-												"maxLength": 48,
-												"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+												"minLength": 14,
+												"maxLength": 64,
+												"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 												"type": "string"
 											}
 										},
@@ -32253,14 +32253,14 @@
 									"properties": {
 										"_type": { "const": "group", "type": "string" },
 										"_key": { "pattern": "^[0-9a-f]{12}$", "$id": "BlockKey", "type": "string" },
-										"styleRoles": {
+										"classNames": {
 											"maxItems": 8,
 											"uniqueItems": true,
 											"type": "array",
 											"items": {
-												"minLength": 1,
-												"maxLength": 48,
-												"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+												"minLength": 14,
+												"maxLength": 64,
+												"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 												"type": "string"
 											}
 										},
@@ -32286,14 +32286,14 @@
 									"properties": {
 										"_type": { "const": "callout", "type": "string" },
 										"_key": { "pattern": "^[0-9a-f]{12}$", "$id": "BlockKey", "type": "string" },
-										"styleRoles": {
+										"classNames": {
 											"maxItems": 8,
 											"uniqueItems": true,
 											"type": "array",
 											"items": {
-												"minLength": 1,
-												"maxLength": 48,
-												"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+												"minLength": 14,
+												"maxLength": 64,
+												"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 												"type": "string"
 											}
 										},
@@ -32325,14 +32325,14 @@
 									"properties": {
 										"_type": { "const": "tabs", "type": "string" },
 										"_key": { "pattern": "^[0-9a-f]{12}$", "$id": "BlockKey", "type": "string" },
-										"styleRoles": {
+										"classNames": {
 											"maxItems": 8,
 											"uniqueItems": true,
 											"type": "array",
 											"items": {
-												"minLength": 1,
-												"maxLength": 48,
-												"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+												"minLength": 14,
+												"maxLength": 64,
+												"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 												"type": "string"
 											}
 										},
@@ -32456,14 +32456,14 @@
 				"properties": {
 					"_type": { "const": "portable-text", "type": "string" },
 					"_key": { "pattern": "^[0-9a-f]{12}$", "$id": "BlockKey", "type": "string" },
-					"styleRoles": {
+					"classNames": {
 						"maxItems": 8,
 						"uniqueItems": true,
 						"type": "array",
 						"items": {
-							"minLength": 1,
-							"maxLength": 48,
-							"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+							"minLength": 14,
+							"maxLength": 64,
+							"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 							"type": "string"
 						}
 					},
@@ -32633,14 +32633,14 @@
 									"properties": {
 										"_type": { "const": "post-full-view", "type": "string" },
 										"_key": { "pattern": "^[0-9a-f]{12}$", "$id": "BlockKey", "type": "string" },
-										"styleRoles": {
+										"classNames": {
 											"maxItems": 8,
 											"uniqueItems": true,
 											"type": "array",
 											"items": {
-												"minLength": 1,
-												"maxLength": 48,
-												"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+												"minLength": 14,
+												"maxLength": 64,
+												"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 												"type": "string"
 											}
 										},
@@ -32658,14 +32658,14 @@
 									"properties": {
 										"_type": { "const": "unit-ref", "type": "string" },
 										"_key": { "pattern": "^[0-9a-f]{12}$", "$id": "BlockKey", "type": "string" },
-										"styleRoles": {
+										"classNames": {
 											"maxItems": 8,
 											"uniqueItems": true,
 											"type": "array",
 											"items": {
-												"minLength": 1,
-												"maxLength": 48,
-												"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+												"minLength": 14,
+												"maxLength": 64,
+												"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 												"type": "string"
 											}
 										},
@@ -32690,14 +32690,14 @@
 									"properties": {
 										"_type": { "const": "unit-list", "type": "string" },
 										"_key": { "pattern": "^[0-9a-f]{12}$", "$id": "BlockKey", "type": "string" },
-										"styleRoles": {
+										"classNames": {
 											"maxItems": 8,
 											"uniqueItems": true,
 											"type": "array",
 											"items": {
-												"minLength": 1,
-												"maxLength": 48,
-												"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+												"minLength": 14,
+												"maxLength": 64,
+												"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 												"type": "string"
 											}
 										},
@@ -43773,14 +43773,14 @@
 									"properties": {
 										"_type": { "const": "search", "type": "string" },
 										"_key": { "pattern": "^[0-9a-f]{12}$", "$id": "BlockKey", "type": "string" },
-										"styleRoles": {
+										"classNames": {
 											"maxItems": 8,
 											"uniqueItems": true,
 											"type": "array",
 											"items": {
-												"minLength": 1,
-												"maxLength": 48,
-												"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+												"minLength": 14,
+												"maxLength": 64,
+												"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 												"type": "string"
 											}
 										},
@@ -48695,14 +48695,14 @@
 									"properties": {
 										"_type": { "const": "feed", "type": "string" },
 										"_key": { "pattern": "^[0-9a-f]{12}$", "$id": "BlockKey", "type": "string" },
-										"styleRoles": {
+										"classNames": {
 											"maxItems": 8,
 											"uniqueItems": true,
 											"type": "array",
 											"items": {
-												"minLength": 1,
-												"maxLength": 48,
-												"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+												"minLength": 14,
+												"maxLength": 64,
+												"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 												"type": "string"
 											}
 										},
@@ -59500,14 +59500,14 @@
 									"properties": {
 										"_type": { "const": "menu", "type": "string" },
 										"_key": { "pattern": "^[0-9a-f]{12}$", "$id": "BlockKey", "type": "string" },
-										"styleRoles": {
+										"classNames": {
 											"maxItems": 8,
 											"uniqueItems": true,
 											"type": "array",
 											"items": {
-												"minLength": 1,
-												"maxLength": 48,
-												"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+												"minLength": 14,
+												"maxLength": 64,
+												"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 												"type": "string"
 											}
 										},
@@ -59539,14 +59539,14 @@
 									"properties": {
 										"_type": { "const": "image", "type": "string" },
 										"_key": { "pattern": "^[0-9a-f]{12}$", "$id": "BlockKey", "type": "string" },
-										"styleRoles": {
+										"classNames": {
 											"maxItems": 8,
 											"uniqueItems": true,
 											"type": "array",
 											"items": {
-												"minLength": 1,
-												"maxLength": 48,
-												"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+												"minLength": 14,
+												"maxLength": 64,
+												"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 												"type": "string"
 											}
 										},
@@ -59566,14 +59566,14 @@
 									"properties": {
 										"_type": { "const": "url-image", "type": "string" },
 										"_key": { "pattern": "^[0-9a-f]{12}$", "$id": "BlockKey", "type": "string" },
-										"styleRoles": {
+										"classNames": {
 											"maxItems": 8,
 											"uniqueItems": true,
 											"type": "array",
 											"items": {
-												"minLength": 1,
-												"maxLength": 48,
-												"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+												"minLength": 14,
+												"maxLength": 64,
+												"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 												"type": "string"
 											}
 										},
@@ -59595,14 +59595,14 @@
 									"properties": {
 										"_type": { "const": "divider", "type": "string" },
 										"_key": { "pattern": "^[0-9a-f]{12}$", "$id": "BlockKey", "type": "string" },
-										"styleRoles": {
+										"classNames": {
 											"maxItems": 8,
 											"uniqueItems": true,
 											"type": "array",
 											"items": {
-												"minLength": 1,
-												"maxLength": 48,
-												"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+												"minLength": 14,
+												"maxLength": 64,
+												"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 												"type": "string"
 											}
 										},
@@ -59622,14 +59622,14 @@
 									"properties": {
 										"_type": { "const": "columns", "type": "string" },
 										"_key": { "pattern": "^[0-9a-f]{12}$", "$id": "BlockKey", "type": "string" },
-										"styleRoles": {
+										"classNames": {
 											"maxItems": 8,
 											"uniqueItems": true,
 											"type": "array",
 											"items": {
-												"minLength": 1,
-												"maxLength": 48,
-												"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+												"minLength": 14,
+												"maxLength": 64,
+												"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 												"type": "string"
 											}
 										},
@@ -59666,14 +59666,14 @@
 									"properties": {
 										"_type": { "const": "group", "type": "string" },
 										"_key": { "pattern": "^[0-9a-f]{12}$", "$id": "BlockKey", "type": "string" },
-										"styleRoles": {
+										"classNames": {
 											"maxItems": 8,
 											"uniqueItems": true,
 											"type": "array",
 											"items": {
-												"minLength": 1,
-												"maxLength": 48,
-												"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+												"minLength": 14,
+												"maxLength": 64,
+												"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 												"type": "string"
 											}
 										},
@@ -59699,14 +59699,14 @@
 									"properties": {
 										"_type": { "const": "callout", "type": "string" },
 										"_key": { "pattern": "^[0-9a-f]{12}$", "$id": "BlockKey", "type": "string" },
-										"styleRoles": {
+										"classNames": {
 											"maxItems": 8,
 											"uniqueItems": true,
 											"type": "array",
 											"items": {
-												"minLength": 1,
-												"maxLength": 48,
-												"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+												"minLength": 14,
+												"maxLength": 64,
+												"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 												"type": "string"
 											}
 										},
@@ -59738,14 +59738,14 @@
 									"properties": {
 										"_type": { "const": "tabs", "type": "string" },
 										"_key": { "pattern": "^[0-9a-f]{12}$", "$id": "BlockKey", "type": "string" },
-										"styleRoles": {
+										"classNames": {
 											"maxItems": 8,
 											"uniqueItems": true,
 											"type": "array",
 											"items": {
-												"minLength": 1,
-												"maxLength": 48,
-												"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+												"minLength": 14,
+												"maxLength": 64,
+												"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 												"type": "string"
 											}
 										},
@@ -67618,14 +67618,14 @@
 																				"$id": "BlockKey",
 																				"type": "string"
 																			},
-																			"styleRoles": {
+																			"classNames": {
 																				"maxItems": 8,
 																				"uniqueItems": true,
 																				"type": "array",
 																				"items": {
-																					"minLength": 1,
-																					"maxLength": 48,
-																					"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+																					"minLength": 14,
+																					"maxLength": 64,
+																					"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 																					"type": "string"
 																				}
 																			},
@@ -68776,14 +68776,14 @@
 																				"$id": "BlockKey",
 																				"type": "string"
 																			},
-																			"styleRoles": {
+																			"classNames": {
 																				"maxItems": 8,
 																				"uniqueItems": true,
 																				"type": "array",
 																				"items": {
-																					"minLength": 1,
-																					"maxLength": 48,
-																					"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+																					"minLength": 14,
+																					"maxLength": 64,
+																					"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 																					"type": "string"
 																				}
 																			},
@@ -69953,14 +69953,14 @@
 																				"$id": "BlockKey",
 																				"type": "string"
 																			},
-																			"styleRoles": {
+																			"classNames": {
 																				"maxItems": 8,
 																				"uniqueItems": true,
 																				"type": "array",
 																				"items": {
-																					"minLength": 1,
-																					"maxLength": 48,
-																					"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+																					"minLength": 14,
+																					"maxLength": 64,
+																					"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 																					"type": "string"
 																				}
 																			},
@@ -87727,14 +87727,14 @@
 																						"$id": "BlockKey",
 																						"type": "string"
 																					},
-																					"styleRoles": {
+																					"classNames": {
 																						"maxItems": 8,
 																						"uniqueItems": true,
 																						"type": "array",
 																						"items": {
-																							"minLength": 1,
-																							"maxLength": 48,
-																							"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+																							"minLength": 14,
+																							"maxLength": 64,
+																							"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 																							"type": "string"
 																						}
 																					},
@@ -88934,14 +88934,14 @@
 																						"$id": "BlockKey",
 																						"type": "string"
 																					},
-																					"styleRoles": {
+																					"classNames": {
 																						"maxItems": 8,
 																						"uniqueItems": true,
 																						"type": "array",
 																						"items": {
-																							"minLength": 1,
-																							"maxLength": 48,
-																							"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+																							"minLength": 14,
+																							"maxLength": 64,
+																							"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 																							"type": "string"
 																						}
 																					},
@@ -90160,14 +90160,14 @@
 																						"$id": "BlockKey",
 																						"type": "string"
 																					},
-																					"styleRoles": {
+																					"classNames": {
 																						"maxItems": 8,
 																						"uniqueItems": true,
 																						"type": "array",
 																						"items": {
-																							"minLength": 1,
-																							"maxLength": 48,
-																							"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+																							"minLength": 14,
+																							"maxLength": 64,
+																							"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 																							"type": "string"
 																						}
 																					},
@@ -101824,14 +101824,14 @@
 													"$id": "BlockKey",
 													"type": "string"
 												},
-												"styleRoles": {
+												"classNames": {
 													"maxItems": 8,
 													"uniqueItems": true,
 													"type": "array",
 													"items": {
-														"minLength": 1,
-														"maxLength": 48,
-														"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+														"minLength": 14,
+														"maxLength": 64,
+														"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 														"type": "string"
 													}
 												},
@@ -102075,14 +102075,14 @@
 										"properties": {
 											"_type": { "const": "portable-text", "type": "string" },
 											"_key": { "pattern": "^[0-9a-f]{12}$", "$id": "BlockKey", "type": "string" },
-											"styleRoles": {
+											"classNames": {
 												"maxItems": 8,
 												"uniqueItems": true,
 												"type": "array",
 												"items": {
-													"minLength": 1,
-													"maxLength": 48,
-													"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+													"minLength": 14,
+													"maxLength": 64,
+													"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 													"type": "string"
 												}
 											},
@@ -102328,14 +102328,14 @@
 													"$id": "BlockKey",
 													"type": "string"
 												},
-												"styleRoles": {
+												"classNames": {
 													"maxItems": 8,
 													"uniqueItems": true,
 													"type": "array",
 													"items": {
-														"minLength": 1,
-														"maxLength": 48,
-														"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+														"minLength": 14,
+														"maxLength": 64,
+														"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 														"type": "string"
 													}
 												},
@@ -102812,14 +102812,14 @@
 																			"$id": "BlockKey",
 																			"type": "string"
 																		},
-																		"styleRoles": {
+																		"classNames": {
 																			"maxItems": 8,
 																			"uniqueItems": true,
 																			"type": "array",
 																			"items": {
-																				"minLength": 1,
-																				"maxLength": 48,
-																				"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+																				"minLength": 14,
+																				"maxLength": 64,
+																				"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 																				"type": "string"
 																			}
 																		},
@@ -103159,14 +103159,14 @@
 																"$id": "BlockKey",
 																"type": "string"
 															},
-															"styleRoles": {
+															"classNames": {
 																"maxItems": 8,
 																"uniqueItems": true,
 																"type": "array",
 																"items": {
-																	"minLength": 1,
-																	"maxLength": 48,
-																	"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+																	"minLength": 14,
+																	"maxLength": 64,
+																	"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 																	"type": "string"
 																}
 															},
@@ -103510,14 +103510,14 @@
 														"$id": "BlockKey",
 														"type": "string"
 													},
-													"styleRoles": {
+													"classNames": {
 														"maxItems": 8,
 														"uniqueItems": true,
 														"type": "array",
 														"items": {
-															"minLength": 1,
-															"maxLength": 48,
-															"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+															"minLength": 14,
+															"maxLength": 64,
+															"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 															"type": "string"
 														}
 													},
@@ -103816,14 +103816,14 @@
 																"$id": "BlockKey",
 																"type": "string"
 															},
-															"styleRoles": {
+															"classNames": {
 																"maxItems": 8,
 																"uniqueItems": true,
 																"type": "array",
 																"items": {
-																	"minLength": 1,
-																	"maxLength": 48,
-																	"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+																	"minLength": 14,
+																	"maxLength": 64,
+																	"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 																	"type": "string"
 																}
 															},
@@ -104129,14 +104129,14 @@
 																	"$id": "BlockKey",
 																	"type": "string"
 																},
-																"styleRoles": {
+																"classNames": {
 																	"maxItems": 8,
 																	"uniqueItems": true,
 																	"type": "array",
 																	"items": {
-																		"minLength": 1,
-																		"maxLength": 48,
-																		"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+																		"minLength": 14,
+																		"maxLength": 64,
+																		"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 																		"type": "string"
 																	}
 																},
@@ -104413,14 +104413,14 @@
 																	"$id": "BlockKey",
 																	"type": "string"
 																},
-																"styleRoles": {
+																"classNames": {
 																	"maxItems": 8,
 																	"uniqueItems": true,
 																	"type": "array",
 																	"items": {
-																		"minLength": 1,
-																		"maxLength": 48,
-																		"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+																		"minLength": 14,
+																		"maxLength": 64,
+																		"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 																		"type": "string"
 																	}
 																},
@@ -104689,14 +104689,14 @@
 																	"$id": "BlockKey",
 																	"type": "string"
 																},
-																"styleRoles": {
+																"classNames": {
 																	"maxItems": 8,
 																	"uniqueItems": true,
 																	"type": "array",
 																	"items": {
-																		"minLength": 1,
-																		"maxLength": 48,
-																		"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+																		"minLength": 14,
+																		"maxLength": 64,
+																		"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 																		"type": "string"
 																	}
 																},
@@ -104949,14 +104949,14 @@
 																	"$id": "BlockKey",
 																	"type": "string"
 																},
-																"styleRoles": {
+																"classNames": {
 																	"maxItems": 8,
 																	"uniqueItems": true,
 																	"type": "array",
 																	"items": {
-																		"minLength": 1,
-																		"maxLength": 48,
-																		"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+																		"minLength": 14,
+																		"maxLength": 64,
+																		"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 																		"type": "string"
 																	}
 																},
@@ -105516,14 +105516,14 @@
 															"$id": "BlockKey",
 															"type": "string"
 														},
-														"styleRoles": {
+														"classNames": {
 															"maxItems": 8,
 															"uniqueItems": true,
 															"type": "array",
 															"items": {
-																"minLength": 1,
-																"maxLength": 48,
-																"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+																"minLength": 14,
+																"maxLength": 64,
+																"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 																"type": "string"
 															}
 														},
@@ -105962,14 +105962,14 @@
 															"$id": "BlockKey",
 															"type": "string"
 														},
-														"styleRoles": {
+														"classNames": {
 															"maxItems": 8,
 															"uniqueItems": true,
 															"type": "array",
 															"items": {
-																"minLength": 1,
-																"maxLength": 48,
-																"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+																"minLength": 14,
+																"maxLength": 64,
+																"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 																"type": "string"
 															}
 														},
@@ -106736,14 +106736,14 @@
 														"$id": "BlockKey",
 														"type": "string"
 													},
-													"styleRoles": {
+													"classNames": {
 														"maxItems": 8,
 														"uniqueItems": true,
 														"type": "array",
 														"items": {
-															"minLength": 1,
-															"maxLength": 48,
-															"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+															"minLength": 14,
+															"maxLength": 64,
+															"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 															"type": "string"
 														}
 													},
@@ -107992,14 +107992,14 @@
 														"$id": "BlockKey",
 														"type": "string"
 													},
-													"styleRoles": {
+													"classNames": {
 														"maxItems": 8,
 														"uniqueItems": true,
 														"type": "array",
 														"items": {
-															"minLength": 1,
-															"maxLength": 48,
-															"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+															"minLength": 14,
+															"maxLength": 64,
+															"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 															"type": "string"
 														}
 													},
@@ -112632,14 +112632,14 @@
 														"$id": "BlockKey",
 														"type": "string"
 													},
-													"styleRoles": {
+													"classNames": {
 														"maxItems": 8,
 														"uniqueItems": true,
 														"type": "array",
 														"items": {
-															"minLength": 1,
-															"maxLength": 48,
-															"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+															"minLength": 14,
+															"maxLength": 64,
+															"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 															"type": "string"
 														}
 													},
@@ -115218,14 +115218,14 @@
 																	"$id": "BlockKey",
 																	"type": "string"
 																},
-																"styleRoles": {
+																"classNames": {
 																	"maxItems": 8,
 																	"uniqueItems": true,
 																	"type": "array",
 																	"items": {
-																		"minLength": 1,
-																		"maxLength": 48,
-																		"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+																		"minLength": 14,
+																		"maxLength": 64,
+																		"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 																		"type": "string"
 																	}
 																},
@@ -115469,14 +115469,14 @@
 																				"$id": "BlockKey",
 																				"type": "string"
 																			},
-																			"styleRoles": {
+																			"classNames": {
 																				"maxItems": 8,
 																				"uniqueItems": true,
 																				"type": "array",
 																				"items": {
-																					"minLength": 1,
-																					"maxLength": 48,
-																					"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+																					"minLength": 14,
+																					"maxLength": 64,
+																					"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 																					"type": "string"
 																				}
 																			},
@@ -115979,14 +115979,14 @@
 										"properties": {
 											"_type": { "const": "portable-text", "type": "string" },
 											"_key": { "pattern": "^[0-9a-f]{12}$", "$id": "BlockKey", "type": "string" },
-											"styleRoles": {
+											"classNames": {
 												"maxItems": 8,
 												"uniqueItems": true,
 												"type": "array",
 												"items": {
-													"minLength": 1,
-													"maxLength": 48,
-													"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+													"minLength": 14,
+													"maxLength": 64,
+													"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 													"type": "string"
 												}
 											},
@@ -116341,14 +116341,14 @@
 															"$id": "BlockKey",
 															"type": "string"
 														},
-														"styleRoles": {
+														"classNames": {
 															"maxItems": 8,
 															"uniqueItems": true,
 															"type": "array",
 															"items": {
-																"minLength": 1,
-																"maxLength": 48,
-																"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+																"minLength": 14,
+																"maxLength": 64,
+																"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 																"type": "string"
 															}
 														},
@@ -119891,14 +119891,14 @@
 															"$id": "BlockKey",
 															"type": "string"
 														},
-														"styleRoles": {
+														"classNames": {
 															"maxItems": 8,
 															"uniqueItems": true,
 															"type": "array",
 															"items": {
-																"minLength": 1,
-																"maxLength": 48,
-																"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+																"minLength": 14,
+																"maxLength": 64,
+																"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 																"type": "string"
 															}
 														},
@@ -120443,14 +120443,14 @@
 														"$id": "BlockKey",
 														"type": "string"
 													},
-													"styleRoles": {
+													"classNames": {
 														"maxItems": 8,
 														"uniqueItems": true,
 														"type": "array",
 														"items": {
-															"minLength": 1,
-															"maxLength": 48,
-															"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+															"minLength": 14,
+															"maxLength": 64,
+															"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 															"type": "string"
 														}
 													},
@@ -120969,14 +120969,14 @@
 										"properties": {
 											"_type": { "const": "portable-text", "type": "string" },
 											"_key": { "pattern": "^[0-9a-f]{12}$", "$id": "BlockKey", "type": "string" },
-											"styleRoles": {
+											"classNames": {
 												"maxItems": 8,
 												"uniqueItems": true,
 												"type": "array",
 												"items": {
-													"minLength": 1,
-													"maxLength": 48,
-													"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+													"minLength": 14,
+													"maxLength": 64,
+													"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 													"type": "string"
 												}
 											},
@@ -121329,8 +121329,11 @@
 																	"contractVersion",
 																	"declarationCount",
 																	"minifiedBytes",
+																	"rendererVersion",
 																	"ruleCount",
-																	"selectorCount"
+																	"selectorCount",
+																	"sourceSha256",
+																	"transformedSha256"
 																],
 																"properties": {
 																	"contractVersion": { "type": "string" },
@@ -121349,6 +121352,11 @@
 																			{ "minimum": 0, "maximum": 65536, "type": "integer" }
 																		]
 																	},
+																	"rendererVersion": {
+																		"minLength": 1,
+																		"maxLength": 32,
+																		"type": "string"
+																	},
 																	"ruleCount": {
 																		"minimum": 0,
 																		"anyOf": [
@@ -121362,6 +121370,11 @@
 																			{ "format": "integer", "default": 0, "type": "string" },
 																			{ "minimum": 0, "type": "integer" }
 																		]
+																	},
+																	"sourceSha256": { "pattern": "^[0-9a-f]{64}$", "type": "string" },
+																	"transformedSha256": {
+																		"pattern": "^[0-9a-f]{64}$",
+																		"type": "string"
 																	}
 																}
 															},
@@ -121796,8 +121809,11 @@
 															"contractVersion",
 															"declarationCount",
 															"minifiedBytes",
+															"rendererVersion",
 															"ruleCount",
-															"selectorCount"
+															"selectorCount",
+															"sourceSha256",
+															"transformedSha256"
 														],
 														"properties": {
 															"contractVersion": { "type": "string" },
@@ -121816,6 +121832,11 @@
 																	{ "minimum": 0, "maximum": 65536, "type": "integer" }
 																]
 															},
+															"rendererVersion": {
+																"minLength": 1,
+																"maxLength": 32,
+																"type": "string"
+															},
 															"ruleCount": {
 																"minimum": 0,
 																"anyOf": [
@@ -121829,7 +121850,9 @@
 																	{ "format": "integer", "default": 0, "type": "string" },
 																	{ "minimum": 0, "type": "integer" }
 																]
-															}
+															},
+															"sourceSha256": { "pattern": "^[0-9a-f]{64}$", "type": "string" },
+															"transformedSha256": { "pattern": "^[0-9a-f]{64}$", "type": "string" }
 														}
 													},
 													"renderReview": {
@@ -122104,8 +122127,11 @@
 												"contractVersion",
 												"declarationCount",
 												"minifiedBytes",
+												"rendererVersion",
 												"ruleCount",
-												"selectorCount"
+												"selectorCount",
+												"sourceSha256",
+												"transformedSha256"
 											],
 											"properties": {
 												"contractVersion": { "type": "string" },
@@ -122124,6 +122150,7 @@
 														{ "minimum": 0, "maximum": 65536, "type": "integer" }
 													]
 												},
+												"rendererVersion": { "minLength": 1, "maxLength": 32, "type": "string" },
 												"ruleCount": {
 													"minimum": 0,
 													"anyOf": [
@@ -122137,7 +122164,9 @@
 														{ "format": "integer", "default": 0, "type": "string" },
 														{ "minimum": 0, "type": "integer" }
 													]
-												}
+												},
+												"sourceSha256": { "pattern": "^[0-9a-f]{64}$", "type": "string" },
+												"transformedSha256": { "pattern": "^[0-9a-f]{64}$", "type": "string" }
 											}
 										},
 										"renderReview": {
@@ -122493,8 +122522,11 @@
 												"contractVersion",
 												"declarationCount",
 												"minifiedBytes",
+												"rendererVersion",
 												"ruleCount",
-												"selectorCount"
+												"selectorCount",
+												"sourceSha256",
+												"transformedSha256"
 											],
 											"properties": {
 												"contractVersion": { "type": "string" },
@@ -122513,6 +122545,7 @@
 														{ "minimum": 0, "maximum": 65536, "type": "integer" }
 													]
 												},
+												"rendererVersion": { "minLength": 1, "maxLength": 32, "type": "string" },
 												"ruleCount": {
 													"minimum": 0,
 													"anyOf": [
@@ -122526,7 +122559,9 @@
 														{ "format": "integer", "default": 0, "type": "string" },
 														{ "minimum": 0, "type": "integer" }
 													]
-												}
+												},
+												"sourceSha256": { "pattern": "^[0-9a-f]{64}$", "type": "string" },
+												"transformedSha256": { "pattern": "^[0-9a-f]{64}$", "type": "string" }
 											}
 										},
 										"renderReview": {
@@ -122868,8 +122903,11 @@
 												"contractVersion",
 												"declarationCount",
 												"minifiedBytes",
+												"rendererVersion",
 												"ruleCount",
-												"selectorCount"
+												"selectorCount",
+												"sourceSha256",
+												"transformedSha256"
 											],
 											"properties": {
 												"contractVersion": { "type": "string" },
@@ -122888,6 +122926,7 @@
 														{ "minimum": 0, "maximum": 65536, "type": "integer" }
 													]
 												},
+												"rendererVersion": { "minLength": 1, "maxLength": 32, "type": "string" },
 												"ruleCount": {
 													"minimum": 0,
 													"anyOf": [
@@ -122901,7 +122940,9 @@
 														{ "format": "integer", "default": 0, "type": "string" },
 														{ "minimum": 0, "type": "integer" }
 													]
-												}
+												},
+												"sourceSha256": { "pattern": "^[0-9a-f]{64}$", "type": "string" },
+												"transformedSha256": { "pattern": "^[0-9a-f]{64}$", "type": "string" }
 											}
 										},
 										"renderReview": {
@@ -123229,8 +123270,11 @@
 												"contractVersion",
 												"declarationCount",
 												"minifiedBytes",
+												"rendererVersion",
 												"ruleCount",
-												"selectorCount"
+												"selectorCount",
+												"sourceSha256",
+												"transformedSha256"
 											],
 											"properties": {
 												"contractVersion": { "type": "string" },
@@ -123249,6 +123293,7 @@
 														{ "minimum": 0, "maximum": 65536, "type": "integer" }
 													]
 												},
+												"rendererVersion": { "minLength": 1, "maxLength": 32, "type": "string" },
 												"ruleCount": {
 													"minimum": 0,
 													"anyOf": [
@@ -123262,7 +123307,9 @@
 														{ "format": "integer", "default": 0, "type": "string" },
 														{ "minimum": 0, "type": "integer" }
 													]
-												}
+												},
+												"sourceSha256": { "pattern": "^[0-9a-f]{64}$", "type": "string" },
+												"transformedSha256": { "pattern": "^[0-9a-f]{64}$", "type": "string" }
 											}
 										},
 										"renderReview": {
@@ -137241,14 +137288,14 @@
 																"$id": "BlockKey",
 																"type": "string"
 															},
-															"styleRoles": {
+															"classNames": {
 																"maxItems": 8,
 																"uniqueItems": true,
 																"type": "array",
 																"items": {
-																	"minLength": 1,
-																	"maxLength": 48,
-																	"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+																	"minLength": 14,
+																	"maxLength": 64,
+																	"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 																	"type": "string"
 																}
 															},
@@ -137727,14 +137774,14 @@
 																"$id": "BlockKey",
 																"type": "string"
 															},
-															"styleRoles": {
+															"classNames": {
 																"maxItems": 8,
 																"uniqueItems": true,
 																"type": "array",
 																"items": {
-																	"minLength": 1,
-																	"maxLength": 48,
-																	"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+																	"minLength": 14,
+																	"maxLength": 64,
+																	"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 																	"type": "string"
 																}
 															},
@@ -138917,14 +138964,14 @@
 																		"$id": "BlockKey",
 																		"type": "string"
 																	},
-																	"styleRoles": {
+																	"classNames": {
 																		"maxItems": 8,
 																		"uniqueItems": true,
 																		"type": "array",
 																		"items": {
-																			"minLength": 1,
-																			"maxLength": 48,
-																			"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+																			"minLength": 14,
+																			"maxLength": 64,
+																			"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 																			"type": "string"
 																		}
 																	},
@@ -141727,14 +141774,14 @@
 																		"$id": "BlockKey",
 																		"type": "string"
 																	},
-																	"styleRoles": {
+																	"classNames": {
 																		"maxItems": 8,
 																		"uniqueItems": true,
 																		"type": "array",
 																		"items": {
-																			"minLength": 1,
-																			"maxLength": 48,
-																			"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+																			"minLength": 14,
+																			"maxLength": 64,
+																			"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 																			"type": "string"
 																		}
 																	},
@@ -143957,14 +144004,14 @@
 																		"$id": "BlockKey",
 																		"type": "string"
 																	},
-																	"styleRoles": {
+																	"classNames": {
 																		"maxItems": 8,
 																		"uniqueItems": true,
 																		"type": "array",
 																		"items": {
-																			"minLength": 1,
-																			"maxLength": 48,
-																			"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+																			"minLength": 14,
+																			"maxLength": 64,
+																			"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 																			"type": "string"
 																		}
 																	},
@@ -146178,14 +146225,14 @@
 																		"$id": "BlockKey",
 																		"type": "string"
 																	},
-																	"styleRoles": {
+																	"classNames": {
 																		"maxItems": 8,
 																		"uniqueItems": true,
 																		"type": "array",
 																		"items": {
-																			"minLength": 1,
-																			"maxLength": 48,
-																			"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+																			"minLength": 14,
+																			"maxLength": 64,
+																			"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 																			"type": "string"
 																		}
 																	},
@@ -148363,14 +148410,14 @@
 																		"$id": "BlockKey",
 																		"type": "string"
 																	},
-																	"styleRoles": {
+																	"classNames": {
 																		"maxItems": 8,
 																		"uniqueItems": true,
 																		"type": "array",
 																		"items": {
-																			"minLength": 1,
-																			"maxLength": 48,
-																			"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+																			"minLength": 14,
+																			"maxLength": 64,
+																			"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 																			"type": "string"
 																		}
 																	},
@@ -149741,14 +149788,14 @@
 										"properties": {
 											"_type": { "const": "portable-text", "type": "string" },
 											"_key": { "pattern": "^[0-9a-f]{12}$", "$id": "BlockKey", "type": "string" },
-											"styleRoles": {
+											"classNames": {
 												"maxItems": 8,
 												"uniqueItems": true,
 												"type": "array",
 												"items": {
-													"minLength": 1,
-													"maxLength": 48,
-													"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+													"minLength": 14,
+													"maxLength": 64,
+													"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 													"type": "string"
 												}
 											},
@@ -150815,14 +150862,14 @@
 																		"$id": "BlockKey",
 																		"type": "string"
 																	},
-																	"styleRoles": {
+																	"classNames": {
 																		"maxItems": 8,
 																		"uniqueItems": true,
 																		"type": "array",
 																		"items": {
-																			"minLength": 1,
-																			"maxLength": 48,
-																			"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+																			"minLength": 14,
+																			"maxLength": 64,
+																			"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 																			"type": "string"
 																		}
 																	},
@@ -154892,14 +154939,14 @@
 														"$id": "BlockKey",
 														"type": "string"
 													},
-													"styleRoles": {
+													"classNames": {
 														"maxItems": 8,
 														"uniqueItems": true,
 														"type": "array",
 														"items": {
-															"minLength": 1,
-															"maxLength": 48,
-															"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+															"minLength": 14,
+															"maxLength": 64,
+															"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 															"type": "string"
 														}
 													},
@@ -155531,14 +155578,14 @@
 																		"$id": "BlockKey",
 																		"type": "string"
 																	},
-																	"styleRoles": {
+																	"classNames": {
 																		"maxItems": 8,
 																		"uniqueItems": true,
 																		"type": "array",
 																		"items": {
-																			"minLength": 1,
-																			"maxLength": 48,
-																			"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+																			"minLength": 14,
+																			"maxLength": 64,
+																			"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 																			"type": "string"
 																		}
 																	},
@@ -157724,14 +157771,14 @@
 										"properties": {
 											"_type": { "const": "portable-text", "type": "string" },
 											"_key": { "pattern": "^[0-9a-f]{12}$", "$id": "BlockKey", "type": "string" },
-											"styleRoles": {
+											"classNames": {
 												"maxItems": 8,
 												"uniqueItems": true,
 												"type": "array",
 												"items": {
-													"minLength": 1,
-													"maxLength": 48,
-													"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+													"minLength": 14,
+													"maxLength": 64,
+													"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 													"type": "string"
 												}
 											},
@@ -158272,14 +158319,14 @@
 														"$id": "BlockKey",
 														"type": "string"
 													},
-													"styleRoles": {
+													"classNames": {
 														"maxItems": 8,
 														"uniqueItems": true,
 														"type": "array",
 														"items": {
-															"minLength": 1,
-															"maxLength": 48,
-															"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+															"minLength": 14,
+															"maxLength": 64,
+															"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 															"type": "string"
 														}
 													},
@@ -158814,14 +158861,14 @@
 																		"$id": "BlockKey",
 																		"type": "string"
 																	},
-																	"styleRoles": {
+																	"classNames": {
 																		"maxItems": 8,
 																		"uniqueItems": true,
 																		"type": "array",
 																		"items": {
-																			"minLength": 1,
-																			"maxLength": 48,
-																			"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+																			"minLength": 14,
+																			"maxLength": 64,
+																			"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 																			"type": "string"
 																		}
 																	},
@@ -159185,14 +159232,14 @@
 										"properties": {
 											"_type": { "const": "portable-text", "type": "string" },
 											"_key": { "pattern": "^[0-9a-f]{12}$", "$id": "BlockKey", "type": "string" },
-											"styleRoles": {
+											"classNames": {
 												"maxItems": 8,
 												"uniqueItems": true,
 												"type": "array",
 												"items": {
-													"minLength": 1,
-													"maxLength": 48,
-													"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+													"minLength": 14,
+													"maxLength": 64,
+													"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 													"type": "string"
 												}
 											},
@@ -169041,14 +169088,14 @@
 																	"$id": "BlockKey",
 																	"type": "string"
 																},
-																"styleRoles": {
+																"classNames": {
 																	"maxItems": 8,
 																	"uniqueItems": true,
 																	"type": "array",
 																	"items": {
-																		"minLength": 1,
-																		"maxLength": 48,
-																		"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+																		"minLength": 14,
+																		"maxLength": 64,
+																		"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 																		"type": "string"
 																	}
 																},
@@ -170262,14 +170309,14 @@
 															"$id": "BlockKey",
 															"type": "string"
 														},
-														"styleRoles": {
+														"classNames": {
 															"maxItems": 8,
 															"uniqueItems": true,
 															"type": "array",
 															"items": {
-																"minLength": 1,
-																"maxLength": 48,
-																"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+																"minLength": 14,
+																"maxLength": 64,
+																"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 																"type": "string"
 															}
 														},
@@ -170577,14 +170624,14 @@
 										"properties": {
 											"_type": { "const": "portable-text", "type": "string" },
 											"_key": { "pattern": "^[0-9a-f]{12}$", "$id": "BlockKey", "type": "string" },
-											"styleRoles": {
+											"classNames": {
 												"maxItems": 8,
 												"uniqueItems": true,
 												"type": "array",
 												"items": {
-													"minLength": 1,
-													"maxLength": 48,
-													"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+													"minLength": 14,
+													"maxLength": 64,
+													"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 													"type": "string"
 												}
 											},
@@ -179749,14 +179796,14 @@
 														"$id": "BlockKey",
 														"type": "string"
 													},
-													"styleRoles": {
+													"classNames": {
 														"maxItems": 8,
 														"uniqueItems": true,
 														"type": "array",
 														"items": {
-															"minLength": 1,
-															"maxLength": 48,
-															"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+															"minLength": 14,
+															"maxLength": 64,
+															"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 															"type": "string"
 														}
 													},
@@ -182534,14 +182581,14 @@
 																								"$id": "BlockKey",
 																								"type": "string"
 																							},
-																							"styleRoles": {
+																							"classNames": {
 																								"maxItems": 8,
 																								"uniqueItems": true,
 																								"type": "array",
 																								"items": {
-																									"minLength": 1,
-																									"maxLength": 48,
-																									"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+																									"minLength": 14,
+																									"maxLength": 64,
+																									"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 																									"type": "string"
 																								}
 																							},
@@ -183799,14 +183846,14 @@
 																								"$id": "BlockKey",
 																								"type": "string"
 																							},
-																							"styleRoles": {
+																							"classNames": {
 																								"maxItems": 8,
 																								"uniqueItems": true,
 																								"type": "array",
 																								"items": {
-																									"minLength": 1,
-																									"maxLength": 48,
-																									"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+																									"minLength": 14,
+																									"maxLength": 64,
+																									"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 																									"type": "string"
 																								}
 																							},
@@ -185087,14 +185134,14 @@
 																								"$id": "BlockKey",
 																								"type": "string"
 																							},
-																							"styleRoles": {
+																							"classNames": {
 																								"maxItems": 8,
 																								"uniqueItems": true,
 																								"type": "array",
 																								"items": {
-																									"minLength": 1,
-																									"maxLength": 48,
-																									"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+																									"minLength": 14,
+																									"maxLength": 64,
+																									"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 																									"type": "string"
 																								}
 																							},
@@ -186452,14 +186499,14 @@
 														"$id": "BlockKey",
 														"type": "string"
 													},
-													"styleRoles": {
+													"classNames": {
 														"maxItems": 8,
 														"uniqueItems": true,
 														"type": "array",
 														"items": {
-															"minLength": 1,
-															"maxLength": 48,
-															"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+															"minLength": 14,
+															"maxLength": 64,
+															"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 															"type": "string"
 														}
 													},
@@ -189972,14 +190019,14 @@
 																		"$id": "BlockKey",
 																		"type": "string"
 																	},
-																	"styleRoles": {
+																	"classNames": {
 																		"maxItems": 8,
 																		"uniqueItems": true,
 																		"type": "array",
 																		"items": {
-																			"minLength": 1,
-																			"maxLength": 48,
-																			"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+																			"minLength": 14,
+																			"maxLength": 64,
+																			"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 																			"type": "string"
 																		}
 																	},
@@ -190719,14 +190766,14 @@
 										"properties": {
 											"_type": { "const": "portable-text", "type": "string" },
 											"_key": { "pattern": "^[0-9a-f]{12}$", "$id": "BlockKey", "type": "string" },
-											"styleRoles": {
+											"classNames": {
 												"maxItems": 8,
 												"uniqueItems": true,
 												"type": "array",
 												"items": {
-													"minLength": 1,
-													"maxLength": 48,
-													"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+													"minLength": 14,
+													"maxLength": 64,
+													"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 													"type": "string"
 												}
 											},
@@ -191446,14 +191493,14 @@
 															"$id": "BlockKey",
 															"type": "string"
 														},
-														"styleRoles": {
+														"classNames": {
 															"maxItems": 8,
 															"uniqueItems": true,
 															"type": "array",
 															"items": {
-																"minLength": 1,
-																"maxLength": 48,
-																"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+																"minLength": 14,
+																"maxLength": 64,
+																"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 																"type": "string"
 															}
 														},
@@ -191880,14 +191927,14 @@
 										"properties": {
 											"_type": { "const": "portable-text", "type": "string" },
 											"_key": { "pattern": "^[0-9a-f]{12}$", "$id": "BlockKey", "type": "string" },
-											"styleRoles": {
+											"classNames": {
 												"maxItems": 8,
 												"uniqueItems": true,
 												"type": "array",
 												"items": {
-													"minLength": 1,
-													"maxLength": 48,
-													"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+													"minLength": 14,
+													"maxLength": 64,
+													"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 													"type": "string"
 												}
 											},
@@ -194848,14 +194895,14 @@
 																		"$id": "BlockKey",
 																		"type": "string"
 																	},
-																	"styleRoles": {
+																	"classNames": {
 																		"maxItems": 8,
 																		"uniqueItems": true,
 																		"type": "array",
 																		"items": {
-																			"minLength": 1,
-																			"maxLength": 48,
-																			"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+																			"minLength": 14,
+																			"maxLength": 64,
+																			"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 																			"type": "string"
 																		}
 																	},
@@ -195126,14 +195173,14 @@
 														"$id": "BlockKey",
 														"type": "string"
 													},
-													"styleRoles": {
+													"classNames": {
 														"maxItems": 8,
 														"uniqueItems": true,
 														"type": "array",
 														"items": {
-															"minLength": 1,
-															"maxLength": 48,
-															"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+															"minLength": 14,
+															"maxLength": 64,
+															"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 															"type": "string"
 														}
 													},
@@ -195377,14 +195424,14 @@
 														"$id": "BlockKey",
 														"type": "string"
 													},
-													"styleRoles": {
+													"classNames": {
 														"maxItems": 8,
 														"uniqueItems": true,
 														"type": "array",
 														"items": {
-															"minLength": 1,
-															"maxLength": 48,
-															"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+															"minLength": 14,
+															"maxLength": 64,
+															"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 															"type": "string"
 														}
 													},
@@ -195842,14 +195889,14 @@
 										"properties": {
 											"_type": { "const": "portable-text", "type": "string" },
 											"_key": { "pattern": "^[0-9a-f]{12}$", "$id": "BlockKey", "type": "string" },
-											"styleRoles": {
+											"classNames": {
 												"maxItems": 8,
 												"uniqueItems": true,
 												"type": "array",
 												"items": {
-													"minLength": 1,
-													"maxLength": 48,
-													"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+													"minLength": 14,
+													"maxLength": 64,
+													"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 													"type": "string"
 												}
 											},
@@ -196596,14 +196643,14 @@
 															"$id": "BlockKey",
 															"type": "string"
 														},
-														"styleRoles": {
+														"classNames": {
 															"maxItems": 8,
 															"uniqueItems": true,
 															"type": "array",
 															"items": {
-																"minLength": 1,
-																"maxLength": 48,
-																"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+																"minLength": 14,
+																"maxLength": 64,
+																"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 																"type": "string"
 															}
 														},
@@ -197150,14 +197197,14 @@
 															"$id": "BlockKey",
 															"type": "string"
 														},
-														"styleRoles": {
+														"classNames": {
 															"maxItems": 8,
 															"uniqueItems": true,
 															"type": "array",
 															"items": {
-																"minLength": 1,
-																"maxLength": 48,
-																"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+																"minLength": 14,
+																"maxLength": 64,
+																"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 																"type": "string"
 															}
 														},
@@ -197704,14 +197751,14 @@
 															"$id": "BlockKey",
 															"type": "string"
 														},
-														"styleRoles": {
+														"classNames": {
 															"maxItems": 8,
 															"uniqueItems": true,
 															"type": "array",
 															"items": {
-																"minLength": 1,
-																"maxLength": 48,
-																"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+																"minLength": 14,
+																"maxLength": 64,
+																"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 																"type": "string"
 															}
 														},
@@ -198262,14 +198309,14 @@
 																	"$id": "BlockKey",
 																	"type": "string"
 																},
-																"styleRoles": {
+																"classNames": {
 																	"maxItems": 8,
 																	"uniqueItems": true,
 																	"type": "array",
 																	"items": {
-																		"minLength": 1,
-																		"maxLength": 48,
-																		"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+																		"minLength": 14,
+																		"maxLength": 64,
+																		"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 																		"type": "string"
 																	}
 																},
@@ -198820,14 +198867,14 @@
 																	"$id": "BlockKey",
 																	"type": "string"
 																},
-																"styleRoles": {
+																"classNames": {
 																	"maxItems": 8,
 																	"uniqueItems": true,
 																	"type": "array",
 																	"items": {
-																		"minLength": 1,
-																		"maxLength": 48,
-																		"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+																		"minLength": 14,
+																		"maxLength": 64,
+																		"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 																		"type": "string"
 																	}
 																},
@@ -199440,14 +199487,14 @@
 															"$id": "BlockKey",
 															"type": "string"
 														},
-														"styleRoles": {
+														"classNames": {
 															"maxItems": 8,
 															"uniqueItems": true,
 															"type": "array",
 															"items": {
-																"minLength": 1,
-																"maxLength": 48,
-																"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+																"minLength": 14,
+																"maxLength": 64,
+																"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 																"type": "string"
 															}
 														},
@@ -199820,14 +199867,14 @@
 										"properties": {
 											"_type": { "const": "portable-text", "type": "string" },
 											"_key": { "pattern": "^[0-9a-f]{12}$", "$id": "BlockKey", "type": "string" },
-											"styleRoles": {
+											"classNames": {
 												"maxItems": 8,
 												"uniqueItems": true,
 												"type": "array",
 												"items": {
-													"minLength": 1,
-													"maxLength": 48,
-													"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+													"minLength": 14,
+													"maxLength": 64,
+													"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 													"type": "string"
 												}
 											},
@@ -200575,14 +200622,14 @@
 																"$id": "BlockKey",
 																"type": "string"
 															},
-															"styleRoles": {
+															"classNames": {
 																"maxItems": 8,
 																"uniqueItems": true,
 																"type": "array",
 																"items": {
-																	"minLength": 1,
-																	"maxLength": 48,
-																	"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+																	"minLength": 14,
+																	"maxLength": 64,
+																	"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 																	"type": "string"
 																}
 															},
@@ -200886,14 +200933,14 @@
 										"properties": {
 											"_type": { "const": "portable-text", "type": "string" },
 											"_key": { "pattern": "^[0-9a-f]{12}$", "$id": "BlockKey", "type": "string" },
-											"styleRoles": {
+											"classNames": {
 												"maxItems": 8,
 												"uniqueItems": true,
 												"type": "array",
 												"items": {
-													"minLength": 1,
-													"maxLength": 48,
-													"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+													"minLength": 14,
+													"maxLength": 64,
+													"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 													"type": "string"
 												}
 											},
@@ -201345,14 +201392,14 @@
 													"$id": "BlockKey",
 													"type": "string"
 												},
-												"styleRoles": {
+												"classNames": {
 													"maxItems": 8,
 													"uniqueItems": true,
 													"type": "array",
 													"items": {
-														"minLength": 1,
-														"maxLength": 48,
-														"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+														"minLength": 14,
+														"maxLength": 64,
+														"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 														"type": "string"
 													}
 												},
@@ -201766,14 +201813,14 @@
 										"properties": {
 											"_type": { "const": "portable-text", "type": "string" },
 											"_key": { "pattern": "^[0-9a-f]{12}$", "$id": "BlockKey", "type": "string" },
-											"styleRoles": {
+											"classNames": {
 												"maxItems": 8,
 												"uniqueItems": true,
 												"type": "array",
 												"items": {
-													"minLength": 1,
-													"maxLength": 48,
-													"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+													"minLength": 14,
+													"maxLength": 64,
+													"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 													"type": "string"
 												}
 											},
@@ -202446,14 +202493,14 @@
 														"$id": "BlockKey",
 														"type": "string"
 													},
-													"styleRoles": {
+													"classNames": {
 														"maxItems": 8,
 														"uniqueItems": true,
 														"type": "array",
 														"items": {
-															"minLength": 1,
-															"maxLength": 48,
-															"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+															"minLength": 14,
+															"maxLength": 64,
+															"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 															"type": "string"
 														}
 													},
@@ -203599,14 +203646,14 @@
 														"$id": "BlockKey",
 														"type": "string"
 													},
-													"styleRoles": {
+													"classNames": {
 														"maxItems": 8,
 														"uniqueItems": true,
 														"type": "array",
 														"items": {
-															"minLength": 1,
-															"maxLength": 48,
-															"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+															"minLength": 14,
+															"maxLength": 64,
+															"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 															"type": "string"
 														}
 													},
@@ -206628,14 +206675,14 @@
 																		"$id": "BlockKey",
 																		"type": "string"
 																	},
-																	"styleRoles": {
+																	"classNames": {
 																		"maxItems": 8,
 																		"uniqueItems": true,
 																		"type": "array",
 																		"items": {
-																			"minLength": 1,
-																			"maxLength": 48,
-																			"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+																			"minLength": 14,
+																			"maxLength": 64,
+																			"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 																			"type": "string"
 																		}
 																	},
@@ -207103,14 +207150,14 @@
 																"$id": "BlockKey",
 																"type": "string"
 															},
-															"styleRoles": {
+															"classNames": {
 																"maxItems": 8,
 																"uniqueItems": true,
 																"type": "array",
 																"items": {
-																	"minLength": 1,
-																	"maxLength": 48,
-																	"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+																	"minLength": 14,
+																	"maxLength": 64,
+																	"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 																	"type": "string"
 																}
 															},
@@ -207422,14 +207469,14 @@
 																			"$id": "BlockKey",
 																			"type": "string"
 																		},
-																		"styleRoles": {
+																		"classNames": {
 																			"maxItems": 8,
 																			"uniqueItems": true,
 																			"type": "array",
 																			"items": {
-																				"minLength": 1,
-																				"maxLength": 48,
-																				"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+																				"minLength": 14,
+																				"maxLength": 64,
+																				"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 																				"type": "string"
 																			}
 																		},
@@ -209273,14 +209320,14 @@
 																						"$id": "BlockKey",
 																						"type": "string"
 																					},
-																					"styleRoles": {
+																					"classNames": {
 																						"maxItems": 8,
 																						"uniqueItems": true,
 																						"type": "array",
 																						"items": {
-																							"minLength": 1,
-																							"maxLength": 48,
-																							"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+																							"minLength": 14,
+																							"maxLength": 64,
+																							"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 																							"type": "string"
 																						}
 																					},
@@ -210480,14 +210527,14 @@
 																						"$id": "BlockKey",
 																						"type": "string"
 																					},
-																					"styleRoles": {
+																					"classNames": {
 																						"maxItems": 8,
 																						"uniqueItems": true,
 																						"type": "array",
 																						"items": {
-																							"minLength": 1,
-																							"maxLength": 48,
-																							"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+																							"minLength": 14,
+																							"maxLength": 64,
+																							"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 																							"type": "string"
 																						}
 																					},
@@ -211706,14 +211753,14 @@
 																						"$id": "BlockKey",
 																						"type": "string"
 																					},
-																					"styleRoles": {
+																					"classNames": {
 																						"maxItems": 8,
 																						"uniqueItems": true,
 																						"type": "array",
 																						"items": {
-																							"minLength": 1,
-																							"maxLength": 48,
-																							"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+																							"minLength": 14,
+																							"maxLength": 64,
+																							"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 																							"type": "string"
 																						}
 																					},
@@ -213257,14 +213304,14 @@
 										"properties": {
 											"_type": { "const": "portable-text", "type": "string" },
 											"_key": { "pattern": "^[0-9a-f]{12}$", "$id": "BlockKey", "type": "string" },
-											"styleRoles": {
+											"classNames": {
 												"maxItems": 8,
 												"uniqueItems": true,
 												"type": "array",
 												"items": {
-													"minLength": 1,
-													"maxLength": 48,
-													"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+													"minLength": 14,
+													"maxLength": 64,
+													"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 													"type": "string"
 												}
 											},
@@ -213835,14 +213882,14 @@
 										"properties": {
 											"_type": { "const": "portable-text", "type": "string" },
 											"_key": { "pattern": "^[0-9a-f]{12}$", "$id": "BlockKey", "type": "string" },
-											"styleRoles": {
+											"classNames": {
 												"maxItems": 8,
 												"uniqueItems": true,
 												"type": "array",
 												"items": {
-													"minLength": 1,
-													"maxLength": 48,
-													"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+													"minLength": 14,
+													"maxLength": 64,
+													"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 													"type": "string"
 												}
 											},
@@ -216287,14 +216334,14 @@
 														"$id": "BlockKey",
 														"type": "string"
 													},
-													"styleRoles": {
+													"classNames": {
 														"maxItems": 8,
 														"uniqueItems": true,
 														"type": "array",
 														"items": {
-															"minLength": 1,
-															"maxLength": 48,
-															"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+															"minLength": 14,
+															"maxLength": 64,
+															"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 															"type": "string"
 														}
 													},
@@ -216987,14 +217034,14 @@
 																			"$id": "BlockKey",
 																			"type": "string"
 																		},
-																		"styleRoles": {
+																		"classNames": {
 																			"maxItems": 8,
 																			"uniqueItems": true,
 																			"type": "array",
 																			"items": {
-																				"minLength": 1,
-																				"maxLength": 48,
-																				"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+																				"minLength": 14,
+																				"maxLength": 64,
+																				"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 																				"type": "string"
 																			}
 																		},
@@ -217316,14 +217363,14 @@
 																"$id": "BlockKey",
 																"type": "string"
 															},
-															"styleRoles": {
+															"classNames": {
 																"maxItems": 8,
 																"uniqueItems": true,
 																"type": "array",
 																"items": {
-																	"minLength": 1,
-																	"maxLength": 48,
-																	"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+																	"minLength": 14,
+																	"maxLength": 64,
+																	"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 																	"type": "string"
 																}
 															},
@@ -217565,14 +217612,14 @@
 																"$id": "BlockKey",
 																"type": "string"
 															},
-															"styleRoles": {
+															"classNames": {
 																"maxItems": 8,
 																"uniqueItems": true,
 																"type": "array",
 																"items": {
-																	"minLength": 1,
-																	"maxLength": 48,
-																	"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+																	"minLength": 14,
+																	"maxLength": 64,
+																	"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 																	"type": "string"
 																}
 															},
@@ -223327,14 +223374,14 @@
 																						"$id": "BlockKey",
 																						"type": "string"
 																					},
-																					"styleRoles": {
+																					"classNames": {
 																						"maxItems": 8,
 																						"uniqueItems": true,
 																						"type": "array",
 																						"items": {
-																							"minLength": 1,
-																							"maxLength": 48,
-																							"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+																							"minLength": 14,
+																							"maxLength": 64,
+																							"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 																							"type": "string"
 																						}
 																					},
@@ -224534,14 +224581,14 @@
 																						"$id": "BlockKey",
 																						"type": "string"
 																					},
-																					"styleRoles": {
+																					"classNames": {
 																						"maxItems": 8,
 																						"uniqueItems": true,
 																						"type": "array",
 																						"items": {
-																							"minLength": 1,
-																							"maxLength": 48,
-																							"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+																							"minLength": 14,
+																							"maxLength": 64,
+																							"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 																							"type": "string"
 																						}
 																					},
@@ -225760,14 +225807,14 @@
 																						"$id": "BlockKey",
 																						"type": "string"
 																					},
-																					"styleRoles": {
+																					"classNames": {
 																						"maxItems": 8,
 																						"uniqueItems": true,
 																						"type": "array",
 																						"items": {
-																							"minLength": 1,
-																							"maxLength": 48,
-																							"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+																							"minLength": 14,
+																							"maxLength": 64,
+																							"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 																							"type": "string"
 																						}
 																					},
@@ -230996,14 +231043,14 @@
 																						"$id": "BlockKey",
 																						"type": "string"
 																					},
-																					"styleRoles": {
+																					"classNames": {
 																						"maxItems": 8,
 																						"uniqueItems": true,
 																						"type": "array",
 																						"items": {
-																							"minLength": 1,
-																							"maxLength": 48,
-																							"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+																							"minLength": 14,
+																							"maxLength": 64,
+																							"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 																							"type": "string"
 																						}
 																					},
@@ -232203,14 +232250,14 @@
 																						"$id": "BlockKey",
 																						"type": "string"
 																					},
-																					"styleRoles": {
+																					"classNames": {
 																						"maxItems": 8,
 																						"uniqueItems": true,
 																						"type": "array",
 																						"items": {
-																							"minLength": 1,
-																							"maxLength": 48,
-																							"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+																							"minLength": 14,
+																							"maxLength": 64,
+																							"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 																							"type": "string"
 																						}
 																					},
@@ -233429,14 +233476,14 @@
 																						"$id": "BlockKey",
 																						"type": "string"
 																					},
-																					"styleRoles": {
+																					"classNames": {
 																						"maxItems": 8,
 																						"uniqueItems": true,
 																						"type": "array",
 																						"items": {
-																							"minLength": 1,
-																							"maxLength": 48,
-																							"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+																							"minLength": 14,
+																							"maxLength": 64,
+																							"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 																							"type": "string"
 																						}
 																					},
@@ -239916,14 +239963,14 @@
 																															"$id": "BlockKey",
 																															"type": "string"
 																														},
-																														"styleRoles": {
+																														"classNames": {
 																															"maxItems": 8,
 																															"uniqueItems": true,
 																															"type": "array",
 																															"items": {
-																																"minLength": 1,
-																																"maxLength": 48,
-																																"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+																																"minLength": 14,
+																																"maxLength": 64,
+																																"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 																																"type": "string"
 																															}
 																														},
@@ -241380,14 +241427,14 @@
 																															"$id": "BlockKey",
 																															"type": "string"
 																														},
-																														"styleRoles": {
+																														"classNames": {
 																															"maxItems": 8,
 																															"uniqueItems": true,
 																															"type": "array",
 																															"items": {
-																																"minLength": 1,
-																																"maxLength": 48,
-																																"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+																																"minLength": 14,
+																																"maxLength": 64,
+																																"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 																																"type": "string"
 																															}
 																														},
@@ -242882,14 +242929,14 @@
 																															"$id": "BlockKey",
 																															"type": "string"
 																														},
-																														"styleRoles": {
+																														"classNames": {
 																															"maxItems": 8,
 																															"uniqueItems": true,
 																															"type": "array",
 																															"items": {
-																																"minLength": 1,
-																																"maxLength": 48,
-																																"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+																																"minLength": 14,
+																																"maxLength": 64,
+																																"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 																																"type": "string"
 																															}
 																														},
@@ -245783,14 +245830,14 @@
 																															"$id": "BlockKey",
 																															"type": "string"
 																														},
-																														"styleRoles": {
+																														"classNames": {
 																															"maxItems": 8,
 																															"uniqueItems": true,
 																															"type": "array",
 																															"items": {
-																																"minLength": 1,
-																																"maxLength": 48,
-																																"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+																																"minLength": 14,
+																																"maxLength": 64,
+																																"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 																																"type": "string"
 																															}
 																														},
@@ -247247,14 +247294,14 @@
 																															"$id": "BlockKey",
 																															"type": "string"
 																														},
-																														"styleRoles": {
+																														"classNames": {
 																															"maxItems": 8,
 																															"uniqueItems": true,
 																															"type": "array",
 																															"items": {
-																																"minLength": 1,
-																																"maxLength": 48,
-																																"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+																																"minLength": 14,
+																																"maxLength": 64,
+																																"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 																																"type": "string"
 																															}
 																														},
@@ -248749,14 +248796,14 @@
 																															"$id": "BlockKey",
 																															"type": "string"
 																														},
-																														"styleRoles": {
+																														"classNames": {
 																															"maxItems": 8,
 																															"uniqueItems": true,
 																															"type": "array",
 																															"items": {
-																																"minLength": 1,
-																																"maxLength": 48,
-																																"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+																																"minLength": 14,
+																																"maxLength": 64,
+																																"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 																																"type": "string"
 																															}
 																														},
@@ -252287,14 +252334,14 @@
 																															"$id": "BlockKey",
 																															"type": "string"
 																														},
-																														"styleRoles": {
+																														"classNames": {
 																															"maxItems": 8,
 																															"uniqueItems": true,
 																															"type": "array",
 																															"items": {
-																																"minLength": 1,
-																																"maxLength": 48,
-																																"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+																																"minLength": 14,
+																																"maxLength": 64,
+																																"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 																																"type": "string"
 																															}
 																														},
@@ -253751,14 +253798,14 @@
 																															"$id": "BlockKey",
 																															"type": "string"
 																														},
-																														"styleRoles": {
+																														"classNames": {
 																															"maxItems": 8,
 																															"uniqueItems": true,
 																															"type": "array",
 																															"items": {
-																																"minLength": 1,
-																																"maxLength": 48,
-																																"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+																																"minLength": 14,
+																																"maxLength": 64,
+																																"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 																																"type": "string"
 																															}
 																														},
@@ -255253,14 +255300,14 @@
 																															"$id": "BlockKey",
 																															"type": "string"
 																														},
-																														"styleRoles": {
+																														"classNames": {
 																															"maxItems": 8,
 																															"uniqueItems": true,
 																															"type": "array",
 																															"items": {
-																																"minLength": 1,
-																																"maxLength": 48,
-																																"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+																																"minLength": 14,
+																																"maxLength": 64,
+																																"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 																																"type": "string"
 																															}
 																														},
@@ -258154,14 +258201,14 @@
 																															"$id": "BlockKey",
 																															"type": "string"
 																														},
-																														"styleRoles": {
+																														"classNames": {
 																															"maxItems": 8,
 																															"uniqueItems": true,
 																															"type": "array",
 																															"items": {
-																																"minLength": 1,
-																																"maxLength": 48,
-																																"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+																																"minLength": 14,
+																																"maxLength": 64,
+																																"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 																																"type": "string"
 																															}
 																														},
@@ -259618,14 +259665,14 @@
 																															"$id": "BlockKey",
 																															"type": "string"
 																														},
-																														"styleRoles": {
+																														"classNames": {
 																															"maxItems": 8,
 																															"uniqueItems": true,
 																															"type": "array",
 																															"items": {
-																																"minLength": 1,
-																																"maxLength": 48,
-																																"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+																																"minLength": 14,
+																																"maxLength": 64,
+																																"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 																																"type": "string"
 																															}
 																														},
@@ -261120,14 +261167,14 @@
 																															"$id": "BlockKey",
 																															"type": "string"
 																														},
-																														"styleRoles": {
+																														"classNames": {
 																															"maxItems": 8,
 																															"uniqueItems": true,
 																															"type": "array",
 																															"items": {
-																																"minLength": 1,
-																																"maxLength": 48,
-																																"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+																																"minLength": 14,
+																																"maxLength": 64,
+																																"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 																																"type": "string"
 																															}
 																														},
@@ -265538,14 +265585,14 @@
 																						"$id": "BlockKey",
 																						"type": "string"
 																					},
-																					"styleRoles": {
+																					"classNames": {
 																						"maxItems": 8,
 																						"uniqueItems": true,
 																						"type": "array",
 																						"items": {
-																							"minLength": 1,
-																							"maxLength": 48,
-																							"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+																							"minLength": 14,
+																							"maxLength": 64,
+																							"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 																							"type": "string"
 																						}
 																					},
@@ -266745,14 +266792,14 @@
 																						"$id": "BlockKey",
 																						"type": "string"
 																					},
-																					"styleRoles": {
+																					"classNames": {
 																						"maxItems": 8,
 																						"uniqueItems": true,
 																						"type": "array",
 																						"items": {
-																							"minLength": 1,
-																							"maxLength": 48,
-																							"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+																							"minLength": 14,
+																							"maxLength": 64,
+																							"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 																							"type": "string"
 																						}
 																					},
@@ -267971,14 +268018,14 @@
 																						"$id": "BlockKey",
 																						"type": "string"
 																					},
-																					"styleRoles": {
+																					"classNames": {
 																						"maxItems": 8,
 																						"uniqueItems": true,
 																						"type": "array",
 																						"items": {
-																							"minLength": 1,
-																							"maxLength": 48,
-																							"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+																							"minLength": 14,
+																							"maxLength": 64,
+																							"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 																							"type": "string"
 																						}
 																					},
@@ -271152,14 +271199,14 @@
 																						"$id": "BlockKey",
 																						"type": "string"
 																					},
-																					"styleRoles": {
+																					"classNames": {
 																						"maxItems": 8,
 																						"uniqueItems": true,
 																						"type": "array",
 																						"items": {
-																							"minLength": 1,
-																							"maxLength": 48,
-																							"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+																							"minLength": 14,
+																							"maxLength": 64,
+																							"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 																							"type": "string"
 																						}
 																					},
@@ -272359,14 +272406,14 @@
 																						"$id": "BlockKey",
 																						"type": "string"
 																					},
-																					"styleRoles": {
+																					"classNames": {
 																						"maxItems": 8,
 																						"uniqueItems": true,
 																						"type": "array",
 																						"items": {
-																							"minLength": 1,
-																							"maxLength": 48,
-																							"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+																							"minLength": 14,
+																							"maxLength": 64,
+																							"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 																							"type": "string"
 																						}
 																					},
@@ -273585,14 +273632,14 @@
 																						"$id": "BlockKey",
 																						"type": "string"
 																					},
-																					"styleRoles": {
+																					"classNames": {
 																						"maxItems": 8,
 																						"uniqueItems": true,
 																						"type": "array",
 																						"items": {
-																							"minLength": 1,
-																							"maxLength": 48,
-																							"pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+																							"minLength": 14,
+																							"maxLength": 64,
+																							"pattern": "^rezics-theme-[A-Za-z0-9_-]+$",
 																							"type": "string"
 																						}
 																					},

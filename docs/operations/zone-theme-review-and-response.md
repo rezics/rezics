@@ -43,6 +43,14 @@ Deploy the renderer and new styling contract before changing revision state.
 Old-contract CSS is fail-closed as soon as the deployed contract version
 changes; the author grace period is only time to remediate and resubmit.
 
+Before the 3.0.0 cutover, run
+`task services-main:zone-theme-class-names:cutover-check` against staging and
+production. The check is read-only and keyset-scans current localizations,
+Docks, revision content, and theme source in batches. It must report no
+`styleRoles` keys and no `data-style-role` selectors. If it finds any, stop the
+deployment and prepare a one-time mapping to reviewed `rezics-theme-*` names;
+do not add a compatibility alias.
+
 Call `POST /zone-themes/revalidation` with the exact previous
 `sourceContractVersion` and a batch limit no larger than 1,000 (250 is the
 operational default). Continue from `nextCursor` until it is null. A static pass

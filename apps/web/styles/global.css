@@ -2,7 +2,7 @@
 
 @source "../../../libraries/ui/src";
 
-@layer rezics-zone-contract-base, rezics-zone-theme;
+@layer rezics-zone-contract-base;
 
 @layer rezics-zone-contract-base {
 	:where([data-zone-theme-scope]) {

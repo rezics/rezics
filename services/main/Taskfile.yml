@@ -80,6 +80,12 @@ tasks:
         cmds:
             - yarn exec tsx scripts/benchmark-zone-composition-capacity.ts {{.CLI_ARGS}}
 
+    zone-theme-class-names:cutover-check:
+        desc: Read-only inventory for legacy styleRoles documents and data-style-role theme CSS.
+        cmds:
+            - test -n "${DATABASE_ADMIN_URL:-}"
+            - yarn exec tsx scripts/check-zone-theme-class-name-cutover.ts {{.CLI_ARGS}}
+
     filter-documents:migrate:
         desc: Rewrite preview Search/Zone documents to sparse FilterDocuments in bounded batches.
         cmds:
