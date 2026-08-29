@@ -40,7 +40,7 @@ const response = {
 	filterFeedByPreferredLanguages: false,
 	alwaysShowSpoilers: false,
 	alwaysShowNsfw: false,
-	customZoneThemesEnabled: false,
+	customThemesEnabled: false,
 	contentRatings: ["general" as const],
 	preferredLanguages: ["en" as const],
 } satisfies GetApiUsersMePreferencesStatus200;
@@ -52,7 +52,7 @@ const preferences = {
 	filterFeedByPreferredLanguages: response.filterFeedByPreferredLanguages,
 	alwaysShowSpoilers: response.alwaysShowSpoilers,
 	alwaysShowNsfw: response.alwaysShowNsfw,
-	customZoneThemesEnabled: response.customZoneThemesEnabled,
+	customThemesEnabled: response.customThemesEnabled,
 	preferredLanguages: response.preferredLanguages,
 };
 

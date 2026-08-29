@@ -2,15 +2,20 @@ import {
 	DockDocument,
 	NavigationDocument,
 	UnitReferencedBlockDocument,
-	ZoneThemeDocument,
+	ZoneAppearanceDocument,
 	assertWikiPostPortableTextDocument,
 	parseDocument,
 	type NavigationDocument as NavigationDocumentValue,
 	type PortableTextDocument,
 	type UnitReferencedBlockDocument as UnitReferencedBlockDocumentValue,
-	type ZoneThemeDocument as ZoneThemeDocumentValue,
+	type ZoneAppearanceDocument as ZoneAppearanceDocumentValue,
 } from "@rezics/block";
 import type { GetZoneRenderProjectionStatus200 } from "@rezics/openapi-tanstack-query";
+
+import {
+	parseResolvedUnitPresentation,
+	type ResolvedUnitPresentation,
+} from "@/features/presentation/model/resolved-presentation";
 
 type RawProjection = GetZoneRenderProjectionStatus200;
 type RawPage = NonNullable<RawProjection["page"]>;
@@ -35,13 +40,17 @@ export interface ZoneRenderWikiPost extends Omit<RawWikiPost, "body"> {
 }
 
 export interface ZoneRenderProjection
-	extends Omit<RawProjection, "zone" | "page" | "dock" | "navigations" | "references"> {
-	readonly zone: Omit<RawProjection["zone"], "themeDocument"> & {
-		readonly themeDocument: ZoneThemeDocumentValue;
+	extends Omit<
+		RawProjection,
+		"zone" | "page" | "dock" | "navigations" | "references" | "resolvedPresentation"
+	> {
+	readonly zone: Omit<RawProjection["zone"], "appearanceDocument"> & {
+		readonly appearanceDocument: ZoneAppearanceDocumentValue;
 	};
 	readonly page: ZoneRenderPage | null;
 	readonly dock: ZoneRenderDock | null;
 	readonly navigations: readonly ZoneRenderNavigation[];
+	readonly resolvedPresentation: ResolvedUnitPresentation;
 	readonly references: Omit<RawProjection["references"], "wikiPosts"> & {
 		readonly wikiPosts: readonly ZoneRenderWikiPost[];
 	};
@@ -50,9 +59,10 @@ export interface ZoneRenderProjection
 export function parseZoneRenderProjection(raw: RawProjection): ZoneRenderProjection {
 	return {
 		...raw,
+		resolvedPresentation: parseResolvedUnitPresentation(raw.resolvedPresentation),
 		zone: {
 			...raw.zone,
-			themeDocument: parseDocument(ZoneThemeDocument, raw.zone.themeDocument),
+			appearanceDocument: parseDocument(ZoneAppearanceDocument, raw.zone.appearanceDocument),
 		},
 		page: raw.page
 			? {

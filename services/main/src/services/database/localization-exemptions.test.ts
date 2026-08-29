@@ -39,6 +39,10 @@ const reviewedExemptions = [
 		rationale: "Authored point-in-time edit summary, never interface copy.",
 	},
 	{
+		file: "src/services/database/schema/custom-theme.ts",
+		rationale: "Display copy is referenced through localized Units.",
+	},
+	{
 		file: "src/services/database/schema/dock-history.ts",
 		rationale: "Authored point-in-time edit summary, never interface copy.",
 	},
@@ -64,7 +68,7 @@ const reviewedExemptions = [
 	},
 	{
 		file: "src/services/database/schema/zone.ts",
-		rationale: "Structured contract: theme contains only color and density tokens.",
+		rationale: "Structured fallback appearance contains no display copy.",
 	},
 ] as const;
 

@@ -21,6 +21,16 @@ export const enTerminology = defineTerminology("en", {
 		forms: { label: "Zone", pluralLabel: "Zones", inline: "zone", plural: "zones" },
 		forbidden: [],
 	},
+	customTheme: {
+		status: "approved",
+		forms: {
+			label: "Custom Theme",
+			pluralLabel: "Custom Themes",
+			inline: "custom theme",
+			plural: "custom themes",
+		},
+		forbidden: [],
+	},
 	realm: {
 		status: "approved",
 		forms: { label: "Realm", pluralLabel: "Realms", inline: "realm", plural: "realms" },

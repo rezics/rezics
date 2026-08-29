@@ -8,6 +8,7 @@ const { forms: realmTerms } = enTerminology.realm;
 const { forms: entityTerms } = enTerminology.entity;
 const { forms: postTerms } = enTerminology.post;
 const { forms: zoneTerms } = enTerminology.zone;
+const { forms: customThemeTerms } = enTerminology.customTheme;
 
 export default {
 	title: "Unit governance",
@@ -96,8 +97,10 @@ export default {
 		"platform.user.api_token.api_quota.update": `Manage user ${verbatimTerms.api.value} token quotas`,
 		"platform.moderate": "Moderate platform Units",
 		"platform.suppress": "Suppress platform content and revisions",
-		"platform.zone_theme.review": `Review custom ${zoneTerms.label} themes`,
-		"platform.zone_theme.kill": `Emergency-disable approved custom ${zoneTerms.label} themes`,
+		"platform.custom_theme.external_live.access": `Use external-live resources in ${customThemeTerms.pluralLabel}`,
+		"platform.custom_theme.external_live.access.manage": `Manage external-live access for ${customThemeTerms.pluralLabel}`,
+		"platform.custom_theme.review": `Review ${customThemeTerms.pluralLabel}`,
+		"platform.custom_theme.kill": `Emergency-disable approved ${customThemeTerms.pluralLabel}`,
 		"realm.contribute": `Participate in every ${realmTerms.label}`,
 		"realm.units.create": `Create Units in every ${realmTerms.label}`,
 		"realm.post.replies.create": `Create replies in every ${realmTerms.label}`,

@@ -3,6 +3,7 @@ import { koTerminology } from "@rezics/i18n/terminology/ko";
 
 const { forms: audioTerms } = koTerminology.audio;
 const { forms: dockTerms } = koTerminology.dock;
+const { forms: customThemeTerms } = koTerminology.customTheme;
 const { forms: followTerms } = koTerminology.follow;
 const { forms: postTerms } = koTerminology.post;
 const { forms: realmTerms } = koTerminology.realm;
@@ -72,7 +73,8 @@ export default {
 		"플랫폼은 만료되지 않는 액세스 관리자를 최소한 하나 이상 유지해야 합니다.",
 	PlatformAccessRevisionConflict:
 		"플랫폼 액세스가 다른 곳에서 변경되었습니다. 다시 시도하기 전에 새로고침하십시오.",
-	PlatformAccessConfigurationInvalid: "각 플랫폼 기능은 한 번만 나타날 수 있습니다.",
+	PlatformAccessConfigurationInvalid:
+		"요청한 플랫폼 액세스가 고유성 또는 용량 한도를 초과했습니다.",
 	CollectionOwnershipRequired: "이 컬렉션을 소유하지 않습니다.",
 	ProfileNotFound: "이 프로필을 찾을 수 없습니다.",
 	ProfileChanged: "이 프로필이 변경되었습니다. 새로고침하고 다시 시도하십시오.",
@@ -300,16 +302,20 @@ export default {
 	UnitRealmPublicationNotFound: `이 콘텐츠와 ${realmTerms.label}의 게시 관계를 찾을 수 없습니다.`,
 	UnitRealmPublicationAlreadyExists: `이 콘텐츠에는 이미 ${realmTerms.label} 게시 관계가 있습니다.`,
 	UnitRealmPublicationTransitionInvalid: "게시 관계가 이미 요청한 상태입니다.",
-	ZoneThemeNotFound: `이 ${zoneTerms.label} 테마를 찾을 수 없습니다.`,
-	ZoneThemeRevisionNotFound: `이 ${zoneTerms.label} 테마 수정본을 찾을 수 없습니다.`,
-	ZoneThemeStylesheetInvalid: `이 ${zoneTerms.label} 테마 스타일시트가 자동 안전 검토를 통과하지 못했습니다.`,
-	ZoneThemeAssetsInvalid:
-		"모든 테마 이미지는 본인 소유이며 공개 상태로 준비되어 있고 삭제되지 않아야 합니다.",
-	ZoneThemeAutomatedReviewInvalid:
-		"테마 자동 검토 증거가 불완전하거나 공개 요건을 충족하지 않습니다.",
-	ZoneThemeRevisionStateConflict:
-		"이 테마 수정본은 이미 다른 검토 상태로 변경되었습니다. 새로 고친 뒤 계속하세요.",
-	ZoneThemeReferenceInvalid: `현재 승인된 ${zoneTerms.label} 테마 수정본을 선택하세요.`,
+	CustomThemeExternalLiveAccessSelfMutationForbidden:
+		"외부 리소스를 사용하는 테마에 대한 본인의 접근 권한은 부여, 변경 또는 취소할 수 없습니다.",
+	CustomThemeNotFound: `이 ${customThemeTerms.inline}를 찾을 수 없습니다.`,
+	CustomThemeRevisionNotFound: `이 ${customThemeTerms.inline} 수정본을 찾을 수 없습니다.`,
+	CustomThemePackageInvalid: `이 ${customThemeTerms.inline} 패키지가 유효하지 않습니다.`,
+	CustomThemeSubmissionBackpressure: `대기 중인 검토가 처리될 때까지 이 ${customThemeTerms.inline} 제출이 일시 중지됩니다.`,
+	CustomThemeExternalResourceInvalid: `이 ${customThemeTerms.inline}의 외부 리소스를 안전하게 검토할 수 없습니다.`,
+	CustomThemeReviewEvidenceInvalid: `이 ${customThemeTerms.inline}의 검토 자료가 불완전합니다.`,
+	CustomThemeRevisionStateConflict: `이 ${customThemeTerms.inline} 수정본의 검토 상태가 변경되었습니다. 새로 고친 뒤 계속하세요.`,
+	CustomThemeReviewerSeparationRequired: `이 ${customThemeTerms.inline} 수정본을 제출한 사람은 검토를 결정할 수 없습니다.`,
+	CustomThemeInstallationInvalid: `이 호스트에 현재 승인된 ${customThemeTerms.inline} 수정본을 선택하세요.`,
+	UnitPresentationHostUnsupported: "이 유닛 유형은 사용자 지정 화면을 지원하지 않습니다.",
+	UnitPresentationRevisionConflict:
+		"유닛 화면이 다른 곳에서 변경되었습니다. 새로 고친 뒤 저장하세요.",
 	StudioRealmSubjectLimitExceeded:
 		"소속된 팀이 너무 많아 작업 공간에서 팀이 위임한 콘텐츠를 표시할 수 없습니다.",
 } satisfies typeof import("../zh-Hant/errorCodes").default;

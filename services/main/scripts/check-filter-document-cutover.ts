@@ -42,7 +42,7 @@ const BoundaryDocument = {
 	categories: [...WorkCategories],
 	filter: BookWhere,
 } as const;
-const ThemeDocument = {
+const AppearanceDocument = {
 	_type: "zone-theme",
 	_key: "b00757a70002",
 	colorScheme: "system",
@@ -173,7 +173,7 @@ async function seed(client: Client): Promise<void> {
 		version: 1,
 		kind: "zone",
 		unit: {},
-		extension: { boundaryDocument: BoundaryDocument, themeDocument: ThemeDocument },
+		extension: { boundaryDocument: BoundaryDocument, appearanceDocument: AppearanceDocument },
 	});
 	const localizationContent = contentFixture(LocalizationContentId, "rezics.unit.localization.v1", {
 		version: 1,
@@ -203,7 +203,7 @@ async function seed(client: Client): Promise<void> {
 		await client.query(
 			`insert into public.zone (id, boundary_document, theme_document)
 			values ($1, $2::jsonb, $3::jsonb)`,
-			[ZoneId, JSON.stringify(BoundaryDocument), JSON.stringify(ThemeDocument)],
+			[ZoneId, JSON.stringify(BoundaryDocument), JSON.stringify(AppearanceDocument)],
 		);
 		await client.query(
 			`insert into public.search_document (id, document)
@@ -407,7 +407,7 @@ async function verifyAndClean(client: Client): Promise<void> {
 			kind: "zone",
 			unit: {},
 			extension: {
-				themeDocument: ThemeDocument,
+				appearanceDocument: AppearanceDocument,
 				filterDocument: {
 					categories: [...WorkCategories],
 					where: BookWhere,

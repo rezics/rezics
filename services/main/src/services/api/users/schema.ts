@@ -138,7 +138,7 @@ export const UpdateDisplayPreferencesBody = t.Object(
 		chineseContentDisplay: t.Optional(ChineseContentDisplay),
 		alwaysShowSpoilers: t.Optional(t.Boolean()),
 		alwaysShowNsfw: t.Optional(t.Boolean()),
-		customZoneThemesEnabled: t.Optional(t.Boolean()),
+		customThemesEnabled: t.Optional(t.Boolean()),
 	},
 	{ additionalProperties: false, minProperties: 1 },
 );
@@ -162,7 +162,7 @@ export const ReplacePreferencesBody = t.Object(
 		defaultScoreRealmId: Uuid,
 		collectionConfig: t.Nullable(CollectionConfigV1),
 		personalizedFeed: t.Boolean({ default: true }),
-		customZoneThemesEnabled: t.Boolean({ default: true }),
+		customThemesEnabled: t.Boolean({ default: true }),
 		filterFeedByPreferredLanguages: t.Boolean({ default: false }),
 		alwaysShowSpoilers: t.Boolean({ default: false }),
 		alwaysShowNsfw: t.Boolean({ default: false }),

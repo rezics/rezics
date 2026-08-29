@@ -421,7 +421,7 @@ async function insertDetail(
 			await tx.insert(zone).values({
 				id: unitId,
 				filterDocument: compiled.filterDocument,
-				themeDocument: compiled.themeDocument,
+				appearanceDocument: compiled.appearanceDocument,
 				localRuleRealmId: requireId(pack.ids.units, compiled.localRuleRealmSourceKey),
 			});
 			return;

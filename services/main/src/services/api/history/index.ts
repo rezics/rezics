@@ -431,7 +431,6 @@ export default new Elysia({ prefix: "/history" })
 				[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
 					"RevisionCreditEntityInvalid",
 					"RevisionContributionActorRequired",
-					"ZoneThemeReferenceInvalid",
 				]),
 				[StatusCodes.FORBIDDEN]: toApiErrorResponse([
 					"UnitPermissionForbidden",
@@ -488,7 +487,6 @@ export default new Elysia({ prefix: "/history" })
 				[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
 					"RevisionCreditEntityInvalid",
 					"RevisionContributionActorRequired",
-					"ZoneThemeReferenceInvalid",
 				]),
 				[StatusCodes.FORBIDDEN]: toApiErrorResponse([
 					"UnitPermissionForbidden",

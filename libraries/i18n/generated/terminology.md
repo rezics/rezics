@@ -96,6 +96,37 @@ The REZICS Zone product concept.
 | ko | approved | inline | 구역 | Zone, Zones |
 | ko | approved | plural | 구역 | Zone, Zones |
 
+## customTheme
+
+A reusable full-trust Unit presentation package; distinct from a Zone's built-in appearance settings.
+
+| Locale | Status | Slot | Approved form | Forbidden forms |
+| --- | --- | --- | --- | --- |
+| en | approved | label | Custom Theme |  |
+| en | approved | pluralLabel | Custom Themes |  |
+| en | approved | inline | custom theme |  |
+| en | approved | plural | custom themes |  |
+| zh-Hant | approved | label | 自訂主題 |  |
+| zh-Hant | approved | pluralLabel | 自訂主題 |  |
+| zh-Hant | approved | inline | 自訂主題 |  |
+| zh-Hant | approved | plural | 自訂主題 |  |
+| zh-Hans | approved | label | 自定义主题 |  |
+| zh-Hans | approved | pluralLabel | 自定义主题 |  |
+| zh-Hans | approved | inline | 自定义主题 |  |
+| zh-Hans | approved | plural | 自定义主题 |  |
+| de | approved | label | Benutzerdefiniertes Design |  |
+| de | approved | pluralLabel | Benutzerdefinierte Designs |  |
+| de | approved | inline | benutzerdefiniertes Design |  |
+| de | approved | plural | benutzerdefinierte Designs |  |
+| ja | approved | label | カスタムテーマ |  |
+| ja | approved | pluralLabel | カスタムテーマ |  |
+| ja | approved | inline | カスタムテーマ |  |
+| ja | approved | plural | カスタムテーマ |  |
+| ko | approved | label | 사용자 지정 테마 |  |
+| ko | approved | pluralLabel | 사용자 지정 테마 |  |
+| ko | approved | inline | 사용자 지정 테마 |  |
+| ko | approved | plural | 사용자 지정 테마 |  |
+
 ## realm
 
 The REZICS Realm product concept.

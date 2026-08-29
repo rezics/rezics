@@ -1,6 +1,6 @@
 "use client";
 
-import { createZoneThemeDocument } from "@rezics/block";
+import { createZoneAppearanceDocument } from "@rezics/block";
 import { createFilterDocument, SearchCategoryValues, type SearchCategory } from "@rezics/filter";
 import { usePostApiZones } from "@rezics/openapi-tanstack-query";
 import {
@@ -32,7 +32,7 @@ function ZoneCreateContent() {
 	const create = usePostApiZones();
 	const [categories, setCategories] = useState<readonly SearchCategory[]>([]);
 	const [theme, setTheme] = useState<ZoneThemeEditorValue>(() => ({
-		theme: createZoneThemeDocument({ accent: "#2563eb" }),
+		theme: createZoneAppearanceDocument({ accent: "#2563eb" }),
 		hero: null,
 	}));
 	const [startsAt, setStartsAt] = useState("");
@@ -59,7 +59,7 @@ function ZoneCreateContent() {
 					filterDocument: createFilterDocument(
 						categories.length ? { categories: [...categories] } : {},
 					),
-					themeDocument: theme.theme,
+					appearanceDocument: theme.theme,
 					startsAt: toApiDateTime(startsAt),
 					endsAt: toApiDateTime(endsAt),
 					localRuleRealmId: localRuleRealmId || null,

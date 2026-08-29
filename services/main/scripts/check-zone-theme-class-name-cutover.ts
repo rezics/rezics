@@ -2,7 +2,7 @@ import { Client } from "pg";
 
 type Finding = Readonly<{
 	id: string;
-	surface: "dock" | "localization" | "revision-content" | "theme-css";
+	surface: "dock" | "localization" | "revision-content";
 }>;
 
 const connectionString = process.env.DATABASE_ADMIN_URL;
@@ -67,7 +67,7 @@ try {
 	}
 
 	const scanUuidKeyedSurface = async (
-		surface: "dock" | "revision-content" | "theme-css",
+		surface: "dock" | "revision-content",
 		firstSql: string,
 		nextSql: string,
 	): Promise<void> => {
@@ -102,14 +102,6 @@ try {
 		`select id::text, payload::text like '%"styleRoles"%' as found
 		 from public.revision_content where id > $1::uuid order by id limit $2`,
 	);
-	await scanUuidKeyedSurface(
-		"theme-css",
-		`select id::text, source_css ilike '%data-style-role%' as found
-		 from public.zone_theme_revision order by id limit $1`,
-		`select id::text, source_css ilike '%data-style-role%' as found
-		 from public.zone_theme_revision where id > $1::uuid order by id limit $2`,
-	);
-
 	console.log(JSON.stringify({ findings, scannedRows }, null, 2));
 	if (findings.length > 0)
 		throw new Error(

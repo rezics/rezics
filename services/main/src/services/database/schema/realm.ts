@@ -71,8 +71,10 @@ const platformCapabilityStorageValues = toEnumValues([
 	"entity.associations.override",
 	"unit.edit",
 	"platform.development_preview.access",
-	"platform.zone_theme.review",
-	"platform.zone_theme.kill",
+	"platform.custom_theme.external_live.access",
+	"platform.custom_theme.external_live.access.manage",
+	"platform.custom_theme.review",
+	"platform.custom_theme.kill",
 	"unit.ownership.transfer",
 	"unit.delete",
 	"unit.restore",
@@ -337,6 +339,9 @@ export const platformCapabilityGrant = pgTable(
 			.on(table.profileId, table.capability)
 			.where(sql`${table.revokedAt} is null`),
 		index("platform_capability_grant_profile_expiry_idx").on(table.profileId, table.expiresAt),
+		index("platform_capability_grant_active_capability_expiry_idx")
+			.on(table.capability, table.expiresAt, table.profileId)
+			.where(sql`${table.revokedAt} is null`),
 		index("platform_capability_grant_granted_by_idx").on(table.grantedByProfileId),
 		index("platform_capability_grant_revoked_by_idx").on(table.revokedByProfileId),
 		check(
@@ -350,6 +355,19 @@ export const platformCapabilityGrant = pgTable(
 		check(
 			"platform_capability_grant_expiry_check",
 			sql`${table.expiresAt} is null or ${table.expiresAt} > ${table.createdAt}`,
+		),
+		check(
+			"platform_capability_grant_custom_theme_external_live_expiry_check",
+			sql`${table.capability} <> 'platform.custom_theme.external_live.access'::platform_capability
+				or (
+					${table.expiresAt} is not null
+					and ${table.expiresAt} <= ${table.createdAt} + interval '90 days'
+				)`,
+		),
+		check(
+			"platform_capability_grant_custom_theme_external_live_non_self_check",
+			sql`${table.capability} <> 'platform.custom_theme.external_live.access'::platform_capability
+				or ${table.profileId} <> ${table.grantedByProfileId}`,
 		),
 	],
 );

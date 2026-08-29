@@ -10,6 +10,7 @@ const { forms: realmTerms } = enTerminology.realm;
 const { forms: entityTerms } = enTerminology.entity;
 const { forms: unitSlugTerms } = enTerminology.unitSlug;
 const { forms: zoneTerms } = enTerminology.zone;
+const { forms: customThemeTerms } = enTerminology.customTheme;
 
 export default {
 	home: "Home",
@@ -76,7 +77,7 @@ export default {
 			series: "Series",
 			zone: zoneTerms.label,
 			zone_page: `${zoneTerms.label} page`,
-			zone_theme: `${zoneTerms.label} theme`,
+			custom_theme: customThemeTerms.label,
 			collection: "Collection",
 			post: postTerms.label,
 			poll: "Poll",

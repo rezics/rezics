@@ -227,7 +227,7 @@ describe("user preference inputs", () => {
 			defaultScoreRealmId: "019b76da-a800-7300-8000-000000000002",
 			collectionConfig: null,
 			personalizedFeed: true,
-			customZoneThemesEnabled: true,
+			customThemesEnabled: true,
 			filterFeedByPreferredLanguages: false,
 			alwaysShowSpoilers: false,
 			alwaysShowNsfw: false,

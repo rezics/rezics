@@ -81,12 +81,12 @@ tasks:
         cmds:
             - yarn exec tsx scripts/benchmark-tag-path-capacity.ts {{.CLI_ARGS}}
     zone-composition:capacity:
-        desc: Benchmark bounded Zone selectors and theme review paths only on disposable rezics_atlas.
+        desc: Benchmark bounded Zone selectors and generic Custom Theme control paths only on disposable rezics_atlas.
         cmds:
             - yarn exec tsx scripts/benchmark-zone-composition-capacity.ts {{.CLI_ARGS}}
 
     zone-theme-class-names:cutover-check:
-        desc: Read-only inventory for legacy styleRoles documents and data-style-role theme CSS.
+        desc: Read-only inventory for legacy styleRoles Block documents.
         cmds:
             - test -n "${DATABASE_ADMIN_URL:-}"
             - yarn exec tsx scripts/check-zone-theme-class-name-cutover.ts {{.CLI_ARGS}}

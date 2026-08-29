@@ -20,3 +20,12 @@ prevents duplicate current grants. A replacement command:
 The `/api/v1/platform-access` endpoints expose policy, Profile discovery, current grants, provenance,
 and optimistic replacement. UI access to `/console` is derived from the same capabilities; the
 route name does not grant authority.
+
+The capability-specific Custom Theme endpoints expose only Profile selection
+fields and the `platform.custom_theme.external_live.access` lifecycle. Their
+management capability cannot call the arbitrary whole-Profile replacement
+endpoint, cannot target the actor, and never implies execution access. Active
+grants expire within 90 days; renewal revokes and replaces rather than editing
+history. See
+[`docs/operations/custom-theme-external-live-access.md`](../../../../../docs/operations/custom-theme-external-live-access.md)
+for admission, recertification, and revocation procedure.

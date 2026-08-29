@@ -993,77 +993,141 @@ import type {
 	DeleteApiUsersByIdBlockStatus422,
 	DeleteApiUsersByIdBlockStatus429,
 	DeleteApiUsersByIdBlockStatus500,
-	PostApiZoneThemesOptions,
-	PostApiZoneThemesStatus200,
-	PostApiZoneThemesStatus400,
-	PostApiZoneThemesStatus403,
-	PostApiZoneThemesStatus404,
-	PostApiZoneThemesStatus422,
-	PostApiZoneThemesStatus429,
-	PostApiZoneThemesStatus500,
-	PutApiZoneThemesByThemeUnitIdLocalizationsByLanguageOptions,
-	PutApiZoneThemesByThemeUnitIdLocalizationsByLanguageStatus204,
-	PutApiZoneThemesByThemeUnitIdLocalizationsByLanguageStatus400,
-	PutApiZoneThemesByThemeUnitIdLocalizationsByLanguageStatus403,
-	PutApiZoneThemesByThemeUnitIdLocalizationsByLanguageStatus404,
-	PutApiZoneThemesByThemeUnitIdLocalizationsByLanguageStatus422,
-	PutApiZoneThemesByThemeUnitIdLocalizationsByLanguageStatus429,
-	PutApiZoneThemesByThemeUnitIdLocalizationsByLanguageStatus500,
-	GetApiZoneThemesReviewQueueOptions,
-	GetApiZoneThemesReviewQueueStatus200,
-	GetApiZoneThemesReviewQueueStatus403,
-	GetApiZoneThemesReviewQueueStatus422,
-	GetApiZoneThemesReviewQueueStatus429,
-	GetApiZoneThemesReviewQueueStatus500,
-	PostApiZoneThemesRevalidationOptions,
-	PostApiZoneThemesRevalidationStatus200,
-	PostApiZoneThemesRevalidationStatus400,
-	PostApiZoneThemesRevalidationStatus403,
-	PostApiZoneThemesRevalidationStatus422,
-	PostApiZoneThemesRevalidationStatus429,
-	PostApiZoneThemesRevalidationStatus500,
-	GetApiZoneThemesByThemeUnitIdRevisionsOptions,
-	GetApiZoneThemesByThemeUnitIdRevisionsStatus200,
-	GetApiZoneThemesByThemeUnitIdRevisionsStatus403,
-	GetApiZoneThemesByThemeUnitIdRevisionsStatus404,
-	GetApiZoneThemesByThemeUnitIdRevisionsStatus422,
-	GetApiZoneThemesByThemeUnitIdRevisionsStatus429,
-	GetApiZoneThemesByThemeUnitIdRevisionsStatus500,
-	PostApiZoneThemesByThemeUnitIdRevisionsOptions,
-	PostApiZoneThemesByThemeUnitIdRevisionsStatus200,
-	PostApiZoneThemesByThemeUnitIdRevisionsStatus400,
-	PostApiZoneThemesByThemeUnitIdRevisionsStatus403,
-	PostApiZoneThemesByThemeUnitIdRevisionsStatus404,
-	PostApiZoneThemesByThemeUnitIdRevisionsStatus422,
-	PostApiZoneThemesByThemeUnitIdRevisionsStatus429,
-	PostApiZoneThemesByThemeUnitIdRevisionsStatus500,
-	PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewOptions,
-	PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewStatus200,
-	PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewStatus400,
-	PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewStatus403,
-	PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewStatus404,
-	PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewStatus409,
-	PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewStatus422,
-	PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewStatus429,
-	PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewStatus500,
-	PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionOptions,
-	PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus200,
-	PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus400,
-	PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus403,
-	PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus404,
-	PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus409,
-	PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus422,
-	PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus429,
-	PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus500,
-	PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillOptions,
-	PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillStatus200,
-	PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillStatus400,
-	PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillStatus403,
-	PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillStatus404,
-	PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillStatus409,
-	PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillStatus422,
-	PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillStatus429,
-	PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillStatus500,
+	GetApiCustomThemesExecutionControlStatus200,
+	GetApiCustomThemesExecutionControlStatus403,
+	GetApiCustomThemesExecutionControlStatus500,
+	PutApiCustomThemesExecutionControlOptions,
+	PutApiCustomThemesExecutionControlStatus200,
+	PutApiCustomThemesExecutionControlStatus400,
+	PutApiCustomThemesExecutionControlStatus403,
+	PutApiCustomThemesExecutionControlStatus422,
+	PutApiCustomThemesExecutionControlStatus500,
+	PostApiCustomThemesOptions,
+	PostApiCustomThemesStatus200,
+	PostApiCustomThemesStatus400,
+	PostApiCustomThemesStatus403,
+	PostApiCustomThemesStatus404,
+	PostApiCustomThemesStatus422,
+	PostApiCustomThemesStatus429,
+	PostApiCustomThemesStatus500,
+	PutApiCustomThemesByThemeUnitIdLocalizationsByLanguageOptions,
+	PutApiCustomThemesByThemeUnitIdLocalizationsByLanguageStatus204,
+	PutApiCustomThemesByThemeUnitIdLocalizationsByLanguageStatus400,
+	PutApiCustomThemesByThemeUnitIdLocalizationsByLanguageStatus403,
+	PutApiCustomThemesByThemeUnitIdLocalizationsByLanguageStatus404,
+	PutApiCustomThemesByThemeUnitIdLocalizationsByLanguageStatus422,
+	PutApiCustomThemesByThemeUnitIdLocalizationsByLanguageStatus429,
+	PutApiCustomThemesByThemeUnitIdLocalizationsByLanguageStatus500,
+	GetApiCustomThemesReviewQueueOptions,
+	GetApiCustomThemesReviewQueueStatus200,
+	GetApiCustomThemesReviewQueueStatus403,
+	GetApiCustomThemesReviewQueueStatus422,
+	GetApiCustomThemesReviewQueueStatus500,
+	GetApiCustomThemesByThemeUnitIdRevisionsOptions,
+	GetApiCustomThemesByThemeUnitIdRevisionsStatus200,
+	GetApiCustomThemesByThemeUnitIdRevisionsStatus403,
+	GetApiCustomThemesByThemeUnitIdRevisionsStatus404,
+	GetApiCustomThemesByThemeUnitIdRevisionsStatus422,
+	GetApiCustomThemesByThemeUnitIdRevisionsStatus429,
+	GetApiCustomThemesByThemeUnitIdRevisionsStatus500,
+	PostApiCustomThemesByThemeUnitIdRevisionsOptions,
+	PostApiCustomThemesByThemeUnitIdRevisionsStatus200,
+	PostApiCustomThemesByThemeUnitIdRevisionsStatus400,
+	PostApiCustomThemesByThemeUnitIdRevisionsStatus403,
+	PostApiCustomThemesByThemeUnitIdRevisionsStatus404,
+	PostApiCustomThemesByThemeUnitIdRevisionsStatus422,
+	PostApiCustomThemesByThemeUnitIdRevisionsStatus429,
+	PostApiCustomThemesByThemeUnitIdRevisionsStatus500,
+	PostApiCustomThemesByThemeUnitIdRevisionsStatus503,
+	PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdDecisionOptions,
+	PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus200,
+	PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus400,
+	PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus403,
+	PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus404,
+	PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus409,
+	PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus422,
+	PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus500,
+	PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdKillOptions,
+	PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdKillStatus200,
+	PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdKillStatus400,
+	PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdKillStatus403,
+	PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdKillStatus404,
+	PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdKillStatus409,
+	PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdKillStatus422,
+	PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdKillStatus500,
+	GetApiCustomThemesByThemeUnitIdRevisionsByRevisionIdReferenceRenderArtifactsByScreenshotAssetIdOptions,
+	GetApiCustomThemesByThemeUnitIdRevisionsByRevisionIdReferenceRenderArtifactsByScreenshotAssetIdResponse,
+	GetApiCustomThemesByThemeUnitIdRevisionsByRevisionIdReferenceRenderArtifactsByScreenshotAssetIdStatus403,
+	GetApiCustomThemesByThemeUnitIdRevisionsByRevisionIdReferenceRenderArtifactsByScreenshotAssetIdStatus404,
+	GetApiCustomThemesByThemeUnitIdRevisionsByRevisionIdReferenceRenderArtifactsByScreenshotAssetIdStatus422,
+	GetApiCustomThemesByThemeUnitIdRevisionsByRevisionIdReferenceRenderArtifactsByScreenshotAssetIdStatus500,
+	GetApiCustomThemesByThemeUnitIdRevisionsByRevisionIdFileOptions,
+	GetApiCustomThemesByThemeUnitIdRevisionsByRevisionIdFileStatus200,
+	GetApiCustomThemesByThemeUnitIdRevisionsByRevisionIdFileStatus403,
+	GetApiCustomThemesByThemeUnitIdRevisionsByRevisionIdFileStatus422,
+	GetApiCustomThemesByThemeUnitIdRevisionsByRevisionIdFileStatus500,
+	GetApiUnitsByIdByUnitIdPresentationOptions,
+	GetApiUnitsByIdByUnitIdPresentationStatus200,
+	GetApiUnitsByIdByUnitIdPresentationStatus404,
+	GetApiUnitsByIdByUnitIdPresentationStatus422,
+	GetApiUnitsByIdByUnitIdPresentationStatus429,
+	GetApiUnitsByIdByUnitIdPresentationStatus500,
+	PutApiUnitsByIdByUnitIdPresentationOptions,
+	PutApiUnitsByIdByUnitIdPresentationStatus200,
+	PutApiUnitsByIdByUnitIdPresentationStatus400,
+	PutApiUnitsByIdByUnitIdPresentationStatus403,
+	PutApiUnitsByIdByUnitIdPresentationStatus404,
+	PutApiUnitsByIdByUnitIdPresentationStatus409,
+	PutApiUnitsByIdByUnitIdPresentationStatus422,
+	PutApiUnitsByIdByUnitIdPresentationStatus429,
+	PutApiUnitsByIdByUnitIdPresentationStatus500,
+	GetApiUnitsByIdByUnitIdPresentationPolicyOptions,
+	GetApiUnitsByIdByUnitIdPresentationPolicyStatus200,
+	GetApiUnitsByIdByUnitIdPresentationPolicyStatus404,
+	GetApiUnitsByIdByUnitIdPresentationPolicyStatus422,
+	GetApiUnitsByIdByUnitIdPresentationPolicyStatus429,
+	GetApiUnitsByIdByUnitIdPresentationPolicyStatus500,
+	GetApiUnitsByIdByUnitIdPresentationDocumentOptions,
+	GetApiUnitsByIdByUnitIdPresentationDocumentStatus200,
+	GetApiUnitsByIdByUnitIdPresentationDocumentStatus403,
+	GetApiUnitsByIdByUnitIdPresentationDocumentStatus404,
+	GetApiUnitsByIdByUnitIdPresentationDocumentStatus422,
+	GetApiUnitsByIdByUnitIdPresentationDocumentStatus429,
+	GetApiUnitsByIdByUnitIdPresentationDocumentStatus500,
+	PutApiUnitsByIdByUnitIdCustomThemeInstallationOptions,
+	PutApiUnitsByIdByUnitIdCustomThemeInstallationStatus200,
+	PutApiUnitsByIdByUnitIdCustomThemeInstallationStatus400,
+	PutApiUnitsByIdByUnitIdCustomThemeInstallationStatus403,
+	PutApiUnitsByIdByUnitIdCustomThemeInstallationStatus404,
+	PutApiUnitsByIdByUnitIdCustomThemeInstallationStatus422,
+	PutApiUnitsByIdByUnitIdCustomThemeInstallationStatus429,
+	PutApiUnitsByIdByUnitIdCustomThemeInstallationStatus500,
+	DeleteApiUnitsByIdByUnitIdCustomThemeInstallationOptions,
+	DeleteApiUnitsByIdByUnitIdCustomThemeInstallationStatus204,
+	DeleteApiUnitsByIdByUnitIdCustomThemeInstallationStatus403,
+	DeleteApiUnitsByIdByUnitIdCustomThemeInstallationStatus404,
+	DeleteApiUnitsByIdByUnitIdCustomThemeInstallationStatus422,
+	DeleteApiUnitsByIdByUnitIdCustomThemeInstallationStatus429,
+	DeleteApiUnitsByIdByUnitIdCustomThemeInstallationStatus500,
+	GetApiPlatformAccessCustomThemeExternalLiveProfilesOptions,
+	GetApiPlatformAccessCustomThemeExternalLiveProfilesStatus200,
+	GetApiPlatformAccessCustomThemeExternalLiveProfilesStatus403,
+	GetApiPlatformAccessCustomThemeExternalLiveProfilesStatus422,
+	GetApiPlatformAccessCustomThemeExternalLiveProfilesStatus500,
+	GetApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessOptions,
+	GetApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus200,
+	GetApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus403,
+	GetApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus404,
+	GetApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus422,
+	GetApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus500,
+	PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessOptions,
+	PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus200,
+	PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus400,
+	PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus403,
+	PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus404,
+	PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus409,
+	PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus422,
+	PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus500,
 	GetApiPlatformAccessPolicyStatus200,
 	GetApiPlatformAccessPolicyStatus403,
 	GetApiPlatformAccessPolicyStatus500,
@@ -3005,15 +3069,26 @@ import {
 	getApiUsersMeBlocks,
 	putApiUsersByIdBlock,
 	deleteApiUsersByIdBlock,
-	postApiZoneThemes,
-	putApiZoneThemesByThemeUnitIdLocalizationsByLanguage,
-	getApiZoneThemesReviewQueue,
-	postApiZoneThemesRevalidation,
-	getApiZoneThemesByThemeUnitIdRevisions,
-	postApiZoneThemesByThemeUnitIdRevisions,
-	postApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReview,
-	postApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecision,
-	postApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKill,
+	getApiCustomThemesExecutionControl,
+	putApiCustomThemesExecutionControl,
+	postApiCustomThemes,
+	putApiCustomThemesByThemeUnitIdLocalizationsByLanguage,
+	getApiCustomThemesReviewQueue,
+	getApiCustomThemesByThemeUnitIdRevisions,
+	postApiCustomThemesByThemeUnitIdRevisions,
+	postApiCustomThemesByThemeUnitIdRevisionsByRevisionIdDecision,
+	postApiCustomThemesByThemeUnitIdRevisionsByRevisionIdKill,
+	getApiCustomThemesByThemeUnitIdRevisionsByRevisionIdReferenceRenderArtifactsByScreenshotAssetId,
+	getApiCustomThemesByThemeUnitIdRevisionsByRevisionIdFile,
+	getApiUnitsByIdByUnitIdPresentation,
+	putApiUnitsByIdByUnitIdPresentation,
+	getApiUnitsByIdByUnitIdPresentationPolicy,
+	getApiUnitsByIdByUnitIdPresentationDocument,
+	putApiUnitsByIdByUnitIdCustomThemeInstallation,
+	deleteApiUnitsByIdByUnitIdCustomThemeInstallation,
+	getApiPlatformAccessCustomThemeExternalLiveProfiles,
+	getApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccess,
+	putApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccess,
 	getApiPlatformAccessPolicy,
 	getApiPlatformAccessProfiles,
 	getApiPlatformAccessProfilesByProfileId,
@@ -18204,50 +18279,129 @@ export function useDeleteApiUsersByIdBlock<TContext>(
 	>;
 }
 
-export const postApiZoneThemesMutationKey = () => [{ url: "/api/v1/zone-themes/" }] as const;
+export const getApiCustomThemesExecutionControlQueryKey = () =>
+	[{ url: "/api/v1/custom-themes/execution-control" }] as const;
 
-export function postApiZoneThemesMutationOptions<TContext = unknown>(
+type GetApiCustomThemesExecutionControlQueryKey = ReturnType<
+	typeof getApiCustomThemesExecutionControlQueryKey
+>;
+
+export function getApiCustomThemesExecutionControlQueryOptions(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
 ) {
-	const mutationKey = postApiZoneThemesMutationKey();
-	return mutationOptions<
-		PostApiZoneThemesStatus200,
+	const queryKey = getApiCustomThemesExecutionControlQueryKey();
+	return queryOptions<
+		GetApiCustomThemesExecutionControlStatus200,
 		ResponseErrorConfig<
-			| PostApiZoneThemesStatus400
-			| PostApiZoneThemesStatus403
-			| PostApiZoneThemesStatus404
-			| PostApiZoneThemesStatus422
-			| PostApiZoneThemesStatus429
-			| PostApiZoneThemesStatus500
+			GetApiCustomThemesExecutionControlStatus403 | GetApiCustomThemesExecutionControlStatus500
 		>,
-		PostApiZoneThemesOptions,
-		TContext
+		GetApiCustomThemesExecutionControlStatus200,
+		typeof queryKey
 	>({
-		mutationKey,
-		mutationFn: async ({ body }) => {
-			const { data } = await postApiZoneThemes({ ...config, body, throwOnError: true });
+		queryKey,
+		queryFn: async ({ signal }) => {
+			const { data } = await getApiCustomThemesExecutionControl({
+				...config,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			});
 			return data;
 		},
 	});
 }
 
 /**
- * @summary Create a custom Zone theme Unit
- * {@link /api/v1/zone-themes/}
+ * @summary Get the Custom Theme execution kill switch
+ * {@link /api/v1/custom-themes/execution-control}
  */
-export function usePostApiZoneThemes<TContext>(
+export function useGetApiCustomThemesExecutionControl<
+	TData = GetApiCustomThemesExecutionControlStatus200,
+	TQueryData = GetApiCustomThemesExecutionControlStatus200,
+	TQueryKey extends QueryKey = GetApiCustomThemesExecutionControlQueryKey,
+>(
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				GetApiCustomThemesExecutionControlStatus200,
+				ResponseErrorConfig<
+					GetApiCustomThemesExecutionControlStatus403 | GetApiCustomThemesExecutionControlStatus500
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const queryKey = resolvedOptions?.queryKey ?? getApiCustomThemesExecutionControlQueryKey();
+
+	const queryResult = useQuery(
+		{
+			...getApiCustomThemesExecutionControlQueryOptions(config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			GetApiCustomThemesExecutionControlStatus403 | GetApiCustomThemesExecutionControlStatus500
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const putApiCustomThemesExecutionControlMutationKey = () =>
+	[{ url: "/api/v1/custom-themes/execution-control" }] as const;
+
+export function putApiCustomThemesExecutionControlMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = putApiCustomThemesExecutionControlMutationKey();
+	return mutationOptions<
+		PutApiCustomThemesExecutionControlStatus200,
+		ResponseErrorConfig<
+			| PutApiCustomThemesExecutionControlStatus400
+			| PutApiCustomThemesExecutionControlStatus403
+			| PutApiCustomThemesExecutionControlStatus422
+			| PutApiCustomThemesExecutionControlStatus500
+		>,
+		PutApiCustomThemesExecutionControlOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ body }) => {
+			const { data } = await putApiCustomThemesExecutionControl({
+				...config,
+				body,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Set the Custom Theme execution kill switch
+ * {@link /api/v1/custom-themes/execution-control}
+ */
+export function usePutApiCustomThemesExecutionControl<TContext>(
 	options: {
 		mutation?: UseMutationOptions<
-			PostApiZoneThemesStatus200,
+			PutApiCustomThemesExecutionControlStatus200,
 			ResponseErrorConfig<
-				| PostApiZoneThemesStatus400
-				| PostApiZoneThemesStatus403
-				| PostApiZoneThemesStatus404
-				| PostApiZoneThemesStatus422
-				| PostApiZoneThemesStatus429
-				| PostApiZoneThemesStatus500
+				| PutApiCustomThemesExecutionControlStatus400
+				| PutApiCustomThemesExecutionControlStatus403
+				| PutApiCustomThemesExecutionControlStatus422
+				| PutApiCustomThemesExecutionControlStatus500
 			>,
-			PostApiZoneThemesOptions,
+			PutApiCustomThemesExecutionControlOptions,
 			TContext
 		> & { client?: QueryClient };
 		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
@@ -18255,33 +18409,32 @@ export function usePostApiZoneThemes<TContext>(
 ) {
 	const { mutation = {}, client: config = {} } = options ?? {};
 	const { client: queryClient, ...mutationOptions } = mutation;
-	const mutationKey = mutationOptions.mutationKey ?? postApiZoneThemesMutationKey();
+	const mutationKey =
+		mutationOptions.mutationKey ?? putApiCustomThemesExecutionControlMutationKey();
 
-	const baseOptions = postApiZoneThemesMutationOptions(config) as UseMutationOptions<
-		PostApiZoneThemesStatus200,
+	const baseOptions = putApiCustomThemesExecutionControlMutationOptions(
+		config,
+	) as UseMutationOptions<
+		PutApiCustomThemesExecutionControlStatus200,
 		ResponseErrorConfig<
-			| PostApiZoneThemesStatus400
-			| PostApiZoneThemesStatus403
-			| PostApiZoneThemesStatus404
-			| PostApiZoneThemesStatus422
-			| PostApiZoneThemesStatus429
-			| PostApiZoneThemesStatus500
+			| PutApiCustomThemesExecutionControlStatus400
+			| PutApiCustomThemesExecutionControlStatus403
+			| PutApiCustomThemesExecutionControlStatus422
+			| PutApiCustomThemesExecutionControlStatus500
 		>,
-		PostApiZoneThemesOptions,
+		PutApiCustomThemesExecutionControlOptions,
 		TContext
 	>;
 
 	return useMutation<
-		PostApiZoneThemesStatus200,
+		PutApiCustomThemesExecutionControlStatus200,
 		ResponseErrorConfig<
-			| PostApiZoneThemesStatus400
-			| PostApiZoneThemesStatus403
-			| PostApiZoneThemesStatus404
-			| PostApiZoneThemesStatus422
-			| PostApiZoneThemesStatus429
-			| PostApiZoneThemesStatus500
+			| PutApiCustomThemesExecutionControlStatus400
+			| PutApiCustomThemesExecutionControlStatus403
+			| PutApiCustomThemesExecutionControlStatus422
+			| PutApiCustomThemesExecutionControlStatus500
 		>,
-		PostApiZoneThemesOptions,
+		PutApiCustomThemesExecutionControlOptions,
 		TContext
 	>(
 		{
@@ -18291,43 +18444,142 @@ export function usePostApiZoneThemes<TContext>(
 		},
 		queryClient,
 	) as UseMutationResult<
-		PostApiZoneThemesStatus200,
+		PutApiCustomThemesExecutionControlStatus200,
 		ResponseErrorConfig<
-			| PostApiZoneThemesStatus400
-			| PostApiZoneThemesStatus403
-			| PostApiZoneThemesStatus404
-			| PostApiZoneThemesStatus422
-			| PostApiZoneThemesStatus429
-			| PostApiZoneThemesStatus500
+			| PutApiCustomThemesExecutionControlStatus400
+			| PutApiCustomThemesExecutionControlStatus403
+			| PutApiCustomThemesExecutionControlStatus422
+			| PutApiCustomThemesExecutionControlStatus500
 		>,
-		PostApiZoneThemesOptions,
+		PutApiCustomThemesExecutionControlOptions,
 		TContext
 	>;
 }
 
-export const putApiZoneThemesByThemeUnitIdLocalizationsByLanguageMutationKey = () =>
-	[{ url: "/api/v1/zone-themes/:themeUnitId/localizations/:language" }] as const;
+export const postApiCustomThemesMutationKey = () => [{ url: "/api/v1/custom-themes/" }] as const;
 
-export function putApiZoneThemesByThemeUnitIdLocalizationsByLanguageMutationOptions<
+export function postApiCustomThemesMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = postApiCustomThemesMutationKey();
+	return mutationOptions<
+		PostApiCustomThemesStatus200,
+		ResponseErrorConfig<
+			| PostApiCustomThemesStatus400
+			| PostApiCustomThemesStatus403
+			| PostApiCustomThemesStatus404
+			| PostApiCustomThemesStatus422
+			| PostApiCustomThemesStatus429
+			| PostApiCustomThemesStatus500
+		>,
+		PostApiCustomThemesOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ body }) => {
+			const { data } = await postApiCustomThemes({ ...config, body, throwOnError: true });
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Create a Custom Theme Unit
+ * {@link /api/v1/custom-themes/}
+ */
+export function usePostApiCustomThemes<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			PostApiCustomThemesStatus200,
+			ResponseErrorConfig<
+				| PostApiCustomThemesStatus400
+				| PostApiCustomThemesStatus403
+				| PostApiCustomThemesStatus404
+				| PostApiCustomThemesStatus422
+				| PostApiCustomThemesStatus429
+				| PostApiCustomThemesStatus500
+			>,
+			PostApiCustomThemesOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? postApiCustomThemesMutationKey();
+
+	const baseOptions = postApiCustomThemesMutationOptions(config) as UseMutationOptions<
+		PostApiCustomThemesStatus200,
+		ResponseErrorConfig<
+			| PostApiCustomThemesStatus400
+			| PostApiCustomThemesStatus403
+			| PostApiCustomThemesStatus404
+			| PostApiCustomThemesStatus422
+			| PostApiCustomThemesStatus429
+			| PostApiCustomThemesStatus500
+		>,
+		PostApiCustomThemesOptions,
+		TContext
+	>;
+
+	return useMutation<
+		PostApiCustomThemesStatus200,
+		ResponseErrorConfig<
+			| PostApiCustomThemesStatus400
+			| PostApiCustomThemesStatus403
+			| PostApiCustomThemesStatus404
+			| PostApiCustomThemesStatus422
+			| PostApiCustomThemesStatus429
+			| PostApiCustomThemesStatus500
+		>,
+		PostApiCustomThemesOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PostApiCustomThemesStatus200,
+		ResponseErrorConfig<
+			| PostApiCustomThemesStatus400
+			| PostApiCustomThemesStatus403
+			| PostApiCustomThemesStatus404
+			| PostApiCustomThemesStatus422
+			| PostApiCustomThemesStatus429
+			| PostApiCustomThemesStatus500
+		>,
+		PostApiCustomThemesOptions,
+		TContext
+	>;
+}
+
+export const putApiCustomThemesByThemeUnitIdLocalizationsByLanguageMutationKey = () =>
+	[{ url: "/api/v1/custom-themes/:themeUnitId/localizations/:language" }] as const;
+
+export function putApiCustomThemesByThemeUnitIdLocalizationsByLanguageMutationOptions<
 	TContext = unknown,
 >(config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {}) {
-	const mutationKey = putApiZoneThemesByThemeUnitIdLocalizationsByLanguageMutationKey();
+	const mutationKey = putApiCustomThemesByThemeUnitIdLocalizationsByLanguageMutationKey();
 	return mutationOptions<
-		PutApiZoneThemesByThemeUnitIdLocalizationsByLanguageStatus204,
+		PutApiCustomThemesByThemeUnitIdLocalizationsByLanguageStatus204,
 		ResponseErrorConfig<
-			| PutApiZoneThemesByThemeUnitIdLocalizationsByLanguageStatus400
-			| PutApiZoneThemesByThemeUnitIdLocalizationsByLanguageStatus403
-			| PutApiZoneThemesByThemeUnitIdLocalizationsByLanguageStatus404
-			| PutApiZoneThemesByThemeUnitIdLocalizationsByLanguageStatus422
-			| PutApiZoneThemesByThemeUnitIdLocalizationsByLanguageStatus429
-			| PutApiZoneThemesByThemeUnitIdLocalizationsByLanguageStatus500
+			| PutApiCustomThemesByThemeUnitIdLocalizationsByLanguageStatus400
+			| PutApiCustomThemesByThemeUnitIdLocalizationsByLanguageStatus403
+			| PutApiCustomThemesByThemeUnitIdLocalizationsByLanguageStatus404
+			| PutApiCustomThemesByThemeUnitIdLocalizationsByLanguageStatus422
+			| PutApiCustomThemesByThemeUnitIdLocalizationsByLanguageStatus429
+			| PutApiCustomThemesByThemeUnitIdLocalizationsByLanguageStatus500
 		>,
-		PutApiZoneThemesByThemeUnitIdLocalizationsByLanguageOptions,
+		PutApiCustomThemesByThemeUnitIdLocalizationsByLanguageOptions,
 		TContext
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await putApiZoneThemesByThemeUnitIdLocalizationsByLanguage({
+			const { data } = await putApiCustomThemesByThemeUnitIdLocalizationsByLanguage({
 				...config,
 				path,
 				body,
@@ -18339,22 +18591,22 @@ export function putApiZoneThemesByThemeUnitIdLocalizationsByLanguageMutationOpti
 }
 
 /**
- * @summary Create or replace a Zone theme localization
- * {@link /api/v1/zone-themes/:themeUnitId/localizations/:language}
+ * @summary Create or replace a Custom Theme localization
+ * {@link /api/v1/custom-themes/:themeUnitId/localizations/:language}
  */
-export function usePutApiZoneThemesByThemeUnitIdLocalizationsByLanguage<TContext>(
+export function usePutApiCustomThemesByThemeUnitIdLocalizationsByLanguage<TContext>(
 	options: {
 		mutation?: UseMutationOptions<
-			PutApiZoneThemesByThemeUnitIdLocalizationsByLanguageStatus204,
+			PutApiCustomThemesByThemeUnitIdLocalizationsByLanguageStatus204,
 			ResponseErrorConfig<
-				| PutApiZoneThemesByThemeUnitIdLocalizationsByLanguageStatus400
-				| PutApiZoneThemesByThemeUnitIdLocalizationsByLanguageStatus403
-				| PutApiZoneThemesByThemeUnitIdLocalizationsByLanguageStatus404
-				| PutApiZoneThemesByThemeUnitIdLocalizationsByLanguageStatus422
-				| PutApiZoneThemesByThemeUnitIdLocalizationsByLanguageStatus429
-				| PutApiZoneThemesByThemeUnitIdLocalizationsByLanguageStatus500
+				| PutApiCustomThemesByThemeUnitIdLocalizationsByLanguageStatus400
+				| PutApiCustomThemesByThemeUnitIdLocalizationsByLanguageStatus403
+				| PutApiCustomThemesByThemeUnitIdLocalizationsByLanguageStatus404
+				| PutApiCustomThemesByThemeUnitIdLocalizationsByLanguageStatus422
+				| PutApiCustomThemesByThemeUnitIdLocalizationsByLanguageStatus429
+				| PutApiCustomThemesByThemeUnitIdLocalizationsByLanguageStatus500
 			>,
-			PutApiZoneThemesByThemeUnitIdLocalizationsByLanguageOptions,
+			PutApiCustomThemesByThemeUnitIdLocalizationsByLanguageOptions,
 			TContext
 		> & { client?: QueryClient };
 		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
@@ -18364,35 +18616,35 @@ export function usePutApiZoneThemesByThemeUnitIdLocalizationsByLanguage<TContext
 	const { client: queryClient, ...mutationOptions } = mutation;
 	const mutationKey =
 		mutationOptions.mutationKey ??
-		putApiZoneThemesByThemeUnitIdLocalizationsByLanguageMutationKey();
+		putApiCustomThemesByThemeUnitIdLocalizationsByLanguageMutationKey();
 
-	const baseOptions = putApiZoneThemesByThemeUnitIdLocalizationsByLanguageMutationOptions(
+	const baseOptions = putApiCustomThemesByThemeUnitIdLocalizationsByLanguageMutationOptions(
 		config,
 	) as UseMutationOptions<
-		PutApiZoneThemesByThemeUnitIdLocalizationsByLanguageStatus204,
+		PutApiCustomThemesByThemeUnitIdLocalizationsByLanguageStatus204,
 		ResponseErrorConfig<
-			| PutApiZoneThemesByThemeUnitIdLocalizationsByLanguageStatus400
-			| PutApiZoneThemesByThemeUnitIdLocalizationsByLanguageStatus403
-			| PutApiZoneThemesByThemeUnitIdLocalizationsByLanguageStatus404
-			| PutApiZoneThemesByThemeUnitIdLocalizationsByLanguageStatus422
-			| PutApiZoneThemesByThemeUnitIdLocalizationsByLanguageStatus429
-			| PutApiZoneThemesByThemeUnitIdLocalizationsByLanguageStatus500
+			| PutApiCustomThemesByThemeUnitIdLocalizationsByLanguageStatus400
+			| PutApiCustomThemesByThemeUnitIdLocalizationsByLanguageStatus403
+			| PutApiCustomThemesByThemeUnitIdLocalizationsByLanguageStatus404
+			| PutApiCustomThemesByThemeUnitIdLocalizationsByLanguageStatus422
+			| PutApiCustomThemesByThemeUnitIdLocalizationsByLanguageStatus429
+			| PutApiCustomThemesByThemeUnitIdLocalizationsByLanguageStatus500
 		>,
-		PutApiZoneThemesByThemeUnitIdLocalizationsByLanguageOptions,
+		PutApiCustomThemesByThemeUnitIdLocalizationsByLanguageOptions,
 		TContext
 	>;
 
 	return useMutation<
-		PutApiZoneThemesByThemeUnitIdLocalizationsByLanguageStatus204,
+		PutApiCustomThemesByThemeUnitIdLocalizationsByLanguageStatus204,
 		ResponseErrorConfig<
-			| PutApiZoneThemesByThemeUnitIdLocalizationsByLanguageStatus400
-			| PutApiZoneThemesByThemeUnitIdLocalizationsByLanguageStatus403
-			| PutApiZoneThemesByThemeUnitIdLocalizationsByLanguageStatus404
-			| PutApiZoneThemesByThemeUnitIdLocalizationsByLanguageStatus422
-			| PutApiZoneThemesByThemeUnitIdLocalizationsByLanguageStatus429
-			| PutApiZoneThemesByThemeUnitIdLocalizationsByLanguageStatus500
+			| PutApiCustomThemesByThemeUnitIdLocalizationsByLanguageStatus400
+			| PutApiCustomThemesByThemeUnitIdLocalizationsByLanguageStatus403
+			| PutApiCustomThemesByThemeUnitIdLocalizationsByLanguageStatus404
+			| PutApiCustomThemesByThemeUnitIdLocalizationsByLanguageStatus422
+			| PutApiCustomThemesByThemeUnitIdLocalizationsByLanguageStatus429
+			| PutApiCustomThemesByThemeUnitIdLocalizationsByLanguageStatus500
 		>,
-		PutApiZoneThemesByThemeUnitIdLocalizationsByLanguageOptions,
+		PutApiCustomThemesByThemeUnitIdLocalizationsByLanguageOptions,
 		TContext
 	>(
 		{
@@ -18402,46 +18654,47 @@ export function usePutApiZoneThemesByThemeUnitIdLocalizationsByLanguage<TContext
 		},
 		queryClient,
 	) as UseMutationResult<
-		PutApiZoneThemesByThemeUnitIdLocalizationsByLanguageStatus204,
+		PutApiCustomThemesByThemeUnitIdLocalizationsByLanguageStatus204,
 		ResponseErrorConfig<
-			| PutApiZoneThemesByThemeUnitIdLocalizationsByLanguageStatus400
-			| PutApiZoneThemesByThemeUnitIdLocalizationsByLanguageStatus403
-			| PutApiZoneThemesByThemeUnitIdLocalizationsByLanguageStatus404
-			| PutApiZoneThemesByThemeUnitIdLocalizationsByLanguageStatus422
-			| PutApiZoneThemesByThemeUnitIdLocalizationsByLanguageStatus429
-			| PutApiZoneThemesByThemeUnitIdLocalizationsByLanguageStatus500
+			| PutApiCustomThemesByThemeUnitIdLocalizationsByLanguageStatus400
+			| PutApiCustomThemesByThemeUnitIdLocalizationsByLanguageStatus403
+			| PutApiCustomThemesByThemeUnitIdLocalizationsByLanguageStatus404
+			| PutApiCustomThemesByThemeUnitIdLocalizationsByLanguageStatus422
+			| PutApiCustomThemesByThemeUnitIdLocalizationsByLanguageStatus429
+			| PutApiCustomThemesByThemeUnitIdLocalizationsByLanguageStatus500
 		>,
-		PutApiZoneThemesByThemeUnitIdLocalizationsByLanguageOptions,
+		PutApiCustomThemesByThemeUnitIdLocalizationsByLanguageOptions,
 		TContext
 	>;
 }
 
-export const getApiZoneThemesReviewQueueQueryKey = ({
+export const getApiCustomThemesReviewQueueQueryKey = ({
 	query,
-}: Omit<GetApiZoneThemesReviewQueueOptions, "headers"> = {}) =>
-	[{ url: "/api/v1/zone-themes/review-queue" }, ...(query ? [query] : [])] as const;
+}: Omit<GetApiCustomThemesReviewQueueOptions, "headers"> = {}) =>
+	[{ url: "/api/v1/custom-themes/review-queue" }, ...(query ? [query] : [])] as const;
 
-type GetApiZoneThemesReviewQueueQueryKey = ReturnType<typeof getApiZoneThemesReviewQueueQueryKey>;
+type GetApiCustomThemesReviewQueueQueryKey = ReturnType<
+	typeof getApiCustomThemesReviewQueueQueryKey
+>;
 
-export function getApiZoneThemesReviewQueueQueryOptions(
-	{ query }: GetApiZoneThemesReviewQueueOptions = {},
+export function getApiCustomThemesReviewQueueQueryOptions(
+	{ query }: GetApiCustomThemesReviewQueueOptions = {},
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
 ) {
-	const queryKey = getApiZoneThemesReviewQueueQueryKey({ query });
+	const queryKey = getApiCustomThemesReviewQueueQueryKey({ query });
 	return queryOptions<
-		GetApiZoneThemesReviewQueueStatus200,
+		GetApiCustomThemesReviewQueueStatus200,
 		ResponseErrorConfig<
-			| GetApiZoneThemesReviewQueueStatus403
-			| GetApiZoneThemesReviewQueueStatus422
-			| GetApiZoneThemesReviewQueueStatus429
-			| GetApiZoneThemesReviewQueueStatus500
+			| GetApiCustomThemesReviewQueueStatus403
+			| GetApiCustomThemesReviewQueueStatus422
+			| GetApiCustomThemesReviewQueueStatus500
 		>,
-		GetApiZoneThemesReviewQueueStatus200,
+		GetApiCustomThemesReviewQueueStatus200,
 		typeof queryKey
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiZoneThemesReviewQueue({
+			const { data } = await getApiCustomThemesReviewQueue({
 				...config,
 				query,
 				signal: config.signal ?? signal,
@@ -18453,30 +18706,29 @@ export function getApiZoneThemesReviewQueueQueryOptions(
 }
 
 /**
- * @summary List the bounded Zone theme review queue
- * {@link /api/v1/zone-themes/review-queue}
+ * @summary List the bounded Custom Theme review queue
+ * {@link /api/v1/custom-themes/review-queue}
  */
-export function useGetApiZoneThemesReviewQueue<
-	TData = GetApiZoneThemesReviewQueueStatus200,
-	TQueryData = GetApiZoneThemesReviewQueueStatus200,
-	TQueryKey extends QueryKey = GetApiZoneThemesReviewQueueQueryKey,
+export function useGetApiCustomThemesReviewQueue<
+	TData = GetApiCustomThemesReviewQueueStatus200,
+	TQueryData = GetApiCustomThemesReviewQueueStatus200,
+	TQueryKey extends QueryKey = GetApiCustomThemesReviewQueueQueryKey,
 >(
 	{
 		query,
 	}: {
 		query?:
-			| GetApiZoneThemesReviewQueueOptions["query"]
-			| (() => GetApiZoneThemesReviewQueueOptions["query"]);
+			| GetApiCustomThemesReviewQueueOptions["query"]
+			| (() => GetApiCustomThemesReviewQueueOptions["query"]);
 	} = {},
 	options: {
 		query?: Partial<
 			QueryObserverOptions<
-				GetApiZoneThemesReviewQueueStatus200,
+				GetApiCustomThemesReviewQueueStatus200,
 				ResponseErrorConfig<
-					| GetApiZoneThemesReviewQueueStatus403
-					| GetApiZoneThemesReviewQueueStatus422
-					| GetApiZoneThemesReviewQueueStatus429
-					| GetApiZoneThemesReviewQueueStatus500
+					| GetApiCustomThemesReviewQueueStatus403
+					| GetApiCustomThemesReviewQueueStatus422
+					| GetApiCustomThemesReviewQueueStatus500
 				>,
 				TData,
 				TQueryData,
@@ -18489,11 +18741,12 @@ export function useGetApiZoneThemesReviewQueue<
 	const { query: queryConfig = {}, client: config = {} } = options ?? {};
 	const { client: queryClient, ...resolvedOptions } = queryConfig;
 	const resolvedParams = { query: typeof query === "function" ? query() : query };
-	const queryKey = resolvedOptions?.queryKey ?? getApiZoneThemesReviewQueueQueryKey(resolvedParams);
+	const queryKey =
+		resolvedOptions?.queryKey ?? getApiCustomThemesReviewQueueQueryKey(resolvedParams);
 
 	const queryResult = useQuery(
 		{
-			...getApiZoneThemesReviewQueueQueryOptions(resolvedParams, config),
+			...getApiCustomThemesReviewQueueQueryOptions(resolvedParams, config),
 			...resolvedOptions,
 			queryKey,
 		} as unknown as QueryObserverOptions,
@@ -18501,10 +18754,9 @@ export function useGetApiZoneThemesReviewQueue<
 	) as UseQueryResult<
 		TData,
 		ResponseErrorConfig<
-			| GetApiZoneThemesReviewQueueStatus403
-			| GetApiZoneThemesReviewQueueStatus422
-			| GetApiZoneThemesReviewQueueStatus429
-			| GetApiZoneThemesReviewQueueStatus500
+			| GetApiCustomThemesReviewQueueStatus403
+			| GetApiCustomThemesReviewQueueStatus422
+			| GetApiCustomThemesReviewQueueStatus500
 		>
 	> & { queryKey: TQueryKey };
 
@@ -18513,136 +18765,39 @@ export function useGetApiZoneThemesReviewQueue<
 	return queryResult;
 }
 
-export const postApiZoneThemesRevalidationMutationKey = () =>
-	[{ url: "/api/v1/zone-themes/revalidation" }] as const;
-
-export function postApiZoneThemesRevalidationMutationOptions<TContext = unknown>(
-	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
-) {
-	const mutationKey = postApiZoneThemesRevalidationMutationKey();
-	return mutationOptions<
-		PostApiZoneThemesRevalidationStatus200,
-		ResponseErrorConfig<
-			| PostApiZoneThemesRevalidationStatus400
-			| PostApiZoneThemesRevalidationStatus403
-			| PostApiZoneThemesRevalidationStatus422
-			| PostApiZoneThemesRevalidationStatus429
-			| PostApiZoneThemesRevalidationStatus500
-		>,
-		PostApiZoneThemesRevalidationOptions,
-		TContext
-	>({
-		mutationKey,
-		mutationFn: async ({ body }) => {
-			const { data } = await postApiZoneThemesRevalidation({ ...config, body, throwOnError: true });
-			return data;
-		},
-	});
-}
-
-/**
- * @summary Schedule a keyset batch for Zone theme contract revalidation
- * {@link /api/v1/zone-themes/revalidation}
- */
-export function usePostApiZoneThemesRevalidation<TContext>(
-	options: {
-		mutation?: UseMutationOptions<
-			PostApiZoneThemesRevalidationStatus200,
-			ResponseErrorConfig<
-				| PostApiZoneThemesRevalidationStatus400
-				| PostApiZoneThemesRevalidationStatus403
-				| PostApiZoneThemesRevalidationStatus422
-				| PostApiZoneThemesRevalidationStatus429
-				| PostApiZoneThemesRevalidationStatus500
-			>,
-			PostApiZoneThemesRevalidationOptions,
-			TContext
-		> & { client?: QueryClient };
-		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
-	} = {},
-) {
-	const { mutation = {}, client: config = {} } = options ?? {};
-	const { client: queryClient, ...mutationOptions } = mutation;
-	const mutationKey = mutationOptions.mutationKey ?? postApiZoneThemesRevalidationMutationKey();
-
-	const baseOptions = postApiZoneThemesRevalidationMutationOptions(config) as UseMutationOptions<
-		PostApiZoneThemesRevalidationStatus200,
-		ResponseErrorConfig<
-			| PostApiZoneThemesRevalidationStatus400
-			| PostApiZoneThemesRevalidationStatus403
-			| PostApiZoneThemesRevalidationStatus422
-			| PostApiZoneThemesRevalidationStatus429
-			| PostApiZoneThemesRevalidationStatus500
-		>,
-		PostApiZoneThemesRevalidationOptions,
-		TContext
-	>;
-
-	return useMutation<
-		PostApiZoneThemesRevalidationStatus200,
-		ResponseErrorConfig<
-			| PostApiZoneThemesRevalidationStatus400
-			| PostApiZoneThemesRevalidationStatus403
-			| PostApiZoneThemesRevalidationStatus422
-			| PostApiZoneThemesRevalidationStatus429
-			| PostApiZoneThemesRevalidationStatus500
-		>,
-		PostApiZoneThemesRevalidationOptions,
-		TContext
-	>(
-		{
-			...baseOptions,
-			mutationKey,
-			...mutationOptions,
-		},
-		queryClient,
-	) as UseMutationResult<
-		PostApiZoneThemesRevalidationStatus200,
-		ResponseErrorConfig<
-			| PostApiZoneThemesRevalidationStatus400
-			| PostApiZoneThemesRevalidationStatus403
-			| PostApiZoneThemesRevalidationStatus422
-			| PostApiZoneThemesRevalidationStatus429
-			| PostApiZoneThemesRevalidationStatus500
-		>,
-		PostApiZoneThemesRevalidationOptions,
-		TContext
-	>;
-}
-
-export const getApiZoneThemesByThemeUnitIdRevisionsQueryKey = ({
+export const getApiCustomThemesByThemeUnitIdRevisionsQueryKey = ({
 	path,
 	query,
-}: Omit<GetApiZoneThemesByThemeUnitIdRevisionsOptions, "headers">) =>
+}: Omit<GetApiCustomThemesByThemeUnitIdRevisionsOptions, "headers">) =>
 	[
-		{ url: "/api/v1/zone-themes/:themeUnitId/revisions", params: path },
+		{ url: "/api/v1/custom-themes/:themeUnitId/revisions", params: path },
 		...(query ? [query] : []),
 	] as const;
 
-type GetApiZoneThemesByThemeUnitIdRevisionsQueryKey = ReturnType<
-	typeof getApiZoneThemesByThemeUnitIdRevisionsQueryKey
+type GetApiCustomThemesByThemeUnitIdRevisionsQueryKey = ReturnType<
+	typeof getApiCustomThemesByThemeUnitIdRevisionsQueryKey
 >;
 
-export function getApiZoneThemesByThemeUnitIdRevisionsQueryOptions(
-	{ path, query }: GetApiZoneThemesByThemeUnitIdRevisionsOptions,
+export function getApiCustomThemesByThemeUnitIdRevisionsQueryOptions(
+	{ path, query }: GetApiCustomThemesByThemeUnitIdRevisionsOptions,
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
 ) {
-	const queryKey = getApiZoneThemesByThemeUnitIdRevisionsQueryKey({ path, query });
+	const queryKey = getApiCustomThemesByThemeUnitIdRevisionsQueryKey({ path, query });
 	return queryOptions<
-		GetApiZoneThemesByThemeUnitIdRevisionsStatus200,
+		GetApiCustomThemesByThemeUnitIdRevisionsStatus200,
 		ResponseErrorConfig<
-			| GetApiZoneThemesByThemeUnitIdRevisionsStatus403
-			| GetApiZoneThemesByThemeUnitIdRevisionsStatus404
-			| GetApiZoneThemesByThemeUnitIdRevisionsStatus422
-			| GetApiZoneThemesByThemeUnitIdRevisionsStatus429
-			| GetApiZoneThemesByThemeUnitIdRevisionsStatus500
+			| GetApiCustomThemesByThemeUnitIdRevisionsStatus403
+			| GetApiCustomThemesByThemeUnitIdRevisionsStatus404
+			| GetApiCustomThemesByThemeUnitIdRevisionsStatus422
+			| GetApiCustomThemesByThemeUnitIdRevisionsStatus429
+			| GetApiCustomThemesByThemeUnitIdRevisionsStatus500
 		>,
-		GetApiZoneThemesByThemeUnitIdRevisionsStatus200,
+		GetApiCustomThemesByThemeUnitIdRevisionsStatus200,
 		typeof queryKey
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiZoneThemesByThemeUnitIdRevisions({
+			const { data } = await getApiCustomThemesByThemeUnitIdRevisions({
 				...config,
 				path,
 				query,
@@ -18655,35 +18810,35 @@ export function getApiZoneThemesByThemeUnitIdRevisionsQueryOptions(
 }
 
 /**
- * @summary List immutable Zone theme revisions
- * {@link /api/v1/zone-themes/:themeUnitId/revisions}
+ * @summary List immutable Custom Theme revisions
+ * {@link /api/v1/custom-themes/:themeUnitId/revisions}
  */
-export function useGetApiZoneThemesByThemeUnitIdRevisions<
-	TData = GetApiZoneThemesByThemeUnitIdRevisionsStatus200,
-	TQueryData = GetApiZoneThemesByThemeUnitIdRevisionsStatus200,
-	TQueryKey extends QueryKey = GetApiZoneThemesByThemeUnitIdRevisionsQueryKey,
+export function useGetApiCustomThemesByThemeUnitIdRevisions<
+	TData = GetApiCustomThemesByThemeUnitIdRevisionsStatus200,
+	TQueryData = GetApiCustomThemesByThemeUnitIdRevisionsStatus200,
+	TQueryKey extends QueryKey = GetApiCustomThemesByThemeUnitIdRevisionsQueryKey,
 >(
 	{
 		path,
 		query,
 	}: {
 		path:
-			| GetApiZoneThemesByThemeUnitIdRevisionsOptions["path"]
-			| (() => GetApiZoneThemesByThemeUnitIdRevisionsOptions["path"]);
+			| GetApiCustomThemesByThemeUnitIdRevisionsOptions["path"]
+			| (() => GetApiCustomThemesByThemeUnitIdRevisionsOptions["path"]);
 		query?:
-			| GetApiZoneThemesByThemeUnitIdRevisionsOptions["query"]
-			| (() => GetApiZoneThemesByThemeUnitIdRevisionsOptions["query"]);
+			| GetApiCustomThemesByThemeUnitIdRevisionsOptions["query"]
+			| (() => GetApiCustomThemesByThemeUnitIdRevisionsOptions["query"]);
 	},
 	options: {
 		query?: Partial<
 			QueryObserverOptions<
-				GetApiZoneThemesByThemeUnitIdRevisionsStatus200,
+				GetApiCustomThemesByThemeUnitIdRevisionsStatus200,
 				ResponseErrorConfig<
-					| GetApiZoneThemesByThemeUnitIdRevisionsStatus403
-					| GetApiZoneThemesByThemeUnitIdRevisionsStatus404
-					| GetApiZoneThemesByThemeUnitIdRevisionsStatus422
-					| GetApiZoneThemesByThemeUnitIdRevisionsStatus429
-					| GetApiZoneThemesByThemeUnitIdRevisionsStatus500
+					| GetApiCustomThemesByThemeUnitIdRevisionsStatus403
+					| GetApiCustomThemesByThemeUnitIdRevisionsStatus404
+					| GetApiCustomThemesByThemeUnitIdRevisionsStatus422
+					| GetApiCustomThemesByThemeUnitIdRevisionsStatus429
+					| GetApiCustomThemesByThemeUnitIdRevisionsStatus500
 				>,
 				TData,
 				TQueryData,
@@ -18700,11 +18855,11 @@ export function useGetApiZoneThemesByThemeUnitIdRevisions<
 		query: typeof query === "function" ? query() : query,
 	};
 	const queryKey =
-		resolvedOptions?.queryKey ?? getApiZoneThemesByThemeUnitIdRevisionsQueryKey(resolvedParams);
+		resolvedOptions?.queryKey ?? getApiCustomThemesByThemeUnitIdRevisionsQueryKey(resolvedParams);
 
 	const queryResult = useQuery(
 		{
-			...getApiZoneThemesByThemeUnitIdRevisionsQueryOptions(resolvedParams, config),
+			...getApiCustomThemesByThemeUnitIdRevisionsQueryOptions(resolvedParams, config),
 			...resolvedOptions,
 			queryKey,
 		} as unknown as QueryObserverOptions,
@@ -18712,11 +18867,11 @@ export function useGetApiZoneThemesByThemeUnitIdRevisions<
 	) as UseQueryResult<
 		TData,
 		ResponseErrorConfig<
-			| GetApiZoneThemesByThemeUnitIdRevisionsStatus403
-			| GetApiZoneThemesByThemeUnitIdRevisionsStatus404
-			| GetApiZoneThemesByThemeUnitIdRevisionsStatus422
-			| GetApiZoneThemesByThemeUnitIdRevisionsStatus429
-			| GetApiZoneThemesByThemeUnitIdRevisionsStatus500
+			| GetApiCustomThemesByThemeUnitIdRevisionsStatus403
+			| GetApiCustomThemesByThemeUnitIdRevisionsStatus404
+			| GetApiCustomThemesByThemeUnitIdRevisionsStatus422
+			| GetApiCustomThemesByThemeUnitIdRevisionsStatus429
+			| GetApiCustomThemesByThemeUnitIdRevisionsStatus500
 		>
 	> & { queryKey: TQueryKey };
 
@@ -18725,29 +18880,30 @@ export function useGetApiZoneThemesByThemeUnitIdRevisions<
 	return queryResult;
 }
 
-export const postApiZoneThemesByThemeUnitIdRevisionsMutationKey = () =>
-	[{ url: "/api/v1/zone-themes/:themeUnitId/revisions" }] as const;
+export const postApiCustomThemesByThemeUnitIdRevisionsMutationKey = () =>
+	[{ url: "/api/v1/custom-themes/:themeUnitId/revisions" }] as const;
 
-export function postApiZoneThemesByThemeUnitIdRevisionsMutationOptions<TContext = unknown>(
+export function postApiCustomThemesByThemeUnitIdRevisionsMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
 ) {
-	const mutationKey = postApiZoneThemesByThemeUnitIdRevisionsMutationKey();
+	const mutationKey = postApiCustomThemesByThemeUnitIdRevisionsMutationKey();
 	return mutationOptions<
-		PostApiZoneThemesByThemeUnitIdRevisionsStatus200,
+		PostApiCustomThemesByThemeUnitIdRevisionsStatus200,
 		ResponseErrorConfig<
-			| PostApiZoneThemesByThemeUnitIdRevisionsStatus400
-			| PostApiZoneThemesByThemeUnitIdRevisionsStatus403
-			| PostApiZoneThemesByThemeUnitIdRevisionsStatus404
-			| PostApiZoneThemesByThemeUnitIdRevisionsStatus422
-			| PostApiZoneThemesByThemeUnitIdRevisionsStatus429
-			| PostApiZoneThemesByThemeUnitIdRevisionsStatus500
+			| PostApiCustomThemesByThemeUnitIdRevisionsStatus400
+			| PostApiCustomThemesByThemeUnitIdRevisionsStatus403
+			| PostApiCustomThemesByThemeUnitIdRevisionsStatus404
+			| PostApiCustomThemesByThemeUnitIdRevisionsStatus422
+			| PostApiCustomThemesByThemeUnitIdRevisionsStatus429
+			| PostApiCustomThemesByThemeUnitIdRevisionsStatus500
+			| PostApiCustomThemesByThemeUnitIdRevisionsStatus503
 		>,
-		PostApiZoneThemesByThemeUnitIdRevisionsOptions,
+		PostApiCustomThemesByThemeUnitIdRevisionsOptions,
 		TContext
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await postApiZoneThemesByThemeUnitIdRevisions({
+			const { data } = await postApiCustomThemesByThemeUnitIdRevisions({
 				...config,
 				path,
 				body,
@@ -18759,22 +18915,23 @@ export function postApiZoneThemesByThemeUnitIdRevisionsMutationOptions<TContext 
 }
 
 /**
- * @summary Submit an immutable Zone theme revision
- * {@link /api/v1/zone-themes/:themeUnitId/revisions}
+ * @summary Submit an immutable Custom Theme revision
+ * {@link /api/v1/custom-themes/:themeUnitId/revisions}
  */
-export function usePostApiZoneThemesByThemeUnitIdRevisions<TContext>(
+export function usePostApiCustomThemesByThemeUnitIdRevisions<TContext>(
 	options: {
 		mutation?: UseMutationOptions<
-			PostApiZoneThemesByThemeUnitIdRevisionsStatus200,
+			PostApiCustomThemesByThemeUnitIdRevisionsStatus200,
 			ResponseErrorConfig<
-				| PostApiZoneThemesByThemeUnitIdRevisionsStatus400
-				| PostApiZoneThemesByThemeUnitIdRevisionsStatus403
-				| PostApiZoneThemesByThemeUnitIdRevisionsStatus404
-				| PostApiZoneThemesByThemeUnitIdRevisionsStatus422
-				| PostApiZoneThemesByThemeUnitIdRevisionsStatus429
-				| PostApiZoneThemesByThemeUnitIdRevisionsStatus500
+				| PostApiCustomThemesByThemeUnitIdRevisionsStatus400
+				| PostApiCustomThemesByThemeUnitIdRevisionsStatus403
+				| PostApiCustomThemesByThemeUnitIdRevisionsStatus404
+				| PostApiCustomThemesByThemeUnitIdRevisionsStatus422
+				| PostApiCustomThemesByThemeUnitIdRevisionsStatus429
+				| PostApiCustomThemesByThemeUnitIdRevisionsStatus500
+				| PostApiCustomThemesByThemeUnitIdRevisionsStatus503
 			>,
-			PostApiZoneThemesByThemeUnitIdRevisionsOptions,
+			PostApiCustomThemesByThemeUnitIdRevisionsOptions,
 			TContext
 		> & { client?: QueryClient };
 		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
@@ -18783,35 +18940,37 @@ export function usePostApiZoneThemesByThemeUnitIdRevisions<TContext>(
 	const { mutation = {}, client: config = {} } = options ?? {};
 	const { client: queryClient, ...mutationOptions } = mutation;
 	const mutationKey =
-		mutationOptions.mutationKey ?? postApiZoneThemesByThemeUnitIdRevisionsMutationKey();
+		mutationOptions.mutationKey ?? postApiCustomThemesByThemeUnitIdRevisionsMutationKey();
 
-	const baseOptions = postApiZoneThemesByThemeUnitIdRevisionsMutationOptions(
+	const baseOptions = postApiCustomThemesByThemeUnitIdRevisionsMutationOptions(
 		config,
 	) as UseMutationOptions<
-		PostApiZoneThemesByThemeUnitIdRevisionsStatus200,
+		PostApiCustomThemesByThemeUnitIdRevisionsStatus200,
 		ResponseErrorConfig<
-			| PostApiZoneThemesByThemeUnitIdRevisionsStatus400
-			| PostApiZoneThemesByThemeUnitIdRevisionsStatus403
-			| PostApiZoneThemesByThemeUnitIdRevisionsStatus404
-			| PostApiZoneThemesByThemeUnitIdRevisionsStatus422
-			| PostApiZoneThemesByThemeUnitIdRevisionsStatus429
-			| PostApiZoneThemesByThemeUnitIdRevisionsStatus500
+			| PostApiCustomThemesByThemeUnitIdRevisionsStatus400
+			| PostApiCustomThemesByThemeUnitIdRevisionsStatus403
+			| PostApiCustomThemesByThemeUnitIdRevisionsStatus404
+			| PostApiCustomThemesByThemeUnitIdRevisionsStatus422
+			| PostApiCustomThemesByThemeUnitIdRevisionsStatus429
+			| PostApiCustomThemesByThemeUnitIdRevisionsStatus500
+			| PostApiCustomThemesByThemeUnitIdRevisionsStatus503
 		>,
-		PostApiZoneThemesByThemeUnitIdRevisionsOptions,
+		PostApiCustomThemesByThemeUnitIdRevisionsOptions,
 		TContext
 	>;
 
 	return useMutation<
-		PostApiZoneThemesByThemeUnitIdRevisionsStatus200,
+		PostApiCustomThemesByThemeUnitIdRevisionsStatus200,
 		ResponseErrorConfig<
-			| PostApiZoneThemesByThemeUnitIdRevisionsStatus400
-			| PostApiZoneThemesByThemeUnitIdRevisionsStatus403
-			| PostApiZoneThemesByThemeUnitIdRevisionsStatus404
-			| PostApiZoneThemesByThemeUnitIdRevisionsStatus422
-			| PostApiZoneThemesByThemeUnitIdRevisionsStatus429
-			| PostApiZoneThemesByThemeUnitIdRevisionsStatus500
+			| PostApiCustomThemesByThemeUnitIdRevisionsStatus400
+			| PostApiCustomThemesByThemeUnitIdRevisionsStatus403
+			| PostApiCustomThemesByThemeUnitIdRevisionsStatus404
+			| PostApiCustomThemesByThemeUnitIdRevisionsStatus422
+			| PostApiCustomThemesByThemeUnitIdRevisionsStatus429
+			| PostApiCustomThemesByThemeUnitIdRevisionsStatus500
+			| PostApiCustomThemesByThemeUnitIdRevisionsStatus503
 		>,
-		PostApiZoneThemesByThemeUnitIdRevisionsOptions,
+		PostApiCustomThemesByThemeUnitIdRevisionsOptions,
 		TContext
 	>(
 		{
@@ -18821,45 +18980,44 @@ export function usePostApiZoneThemesByThemeUnitIdRevisions<TContext>(
 		},
 		queryClient,
 	) as UseMutationResult<
-		PostApiZoneThemesByThemeUnitIdRevisionsStatus200,
+		PostApiCustomThemesByThemeUnitIdRevisionsStatus200,
 		ResponseErrorConfig<
-			| PostApiZoneThemesByThemeUnitIdRevisionsStatus400
-			| PostApiZoneThemesByThemeUnitIdRevisionsStatus403
-			| PostApiZoneThemesByThemeUnitIdRevisionsStatus404
-			| PostApiZoneThemesByThemeUnitIdRevisionsStatus422
-			| PostApiZoneThemesByThemeUnitIdRevisionsStatus429
-			| PostApiZoneThemesByThemeUnitIdRevisionsStatus500
+			| PostApiCustomThemesByThemeUnitIdRevisionsStatus400
+			| PostApiCustomThemesByThemeUnitIdRevisionsStatus403
+			| PostApiCustomThemesByThemeUnitIdRevisionsStatus404
+			| PostApiCustomThemesByThemeUnitIdRevisionsStatus422
+			| PostApiCustomThemesByThemeUnitIdRevisionsStatus429
+			| PostApiCustomThemesByThemeUnitIdRevisionsStatus500
+			| PostApiCustomThemesByThemeUnitIdRevisionsStatus503
 		>,
-		PostApiZoneThemesByThemeUnitIdRevisionsOptions,
+		PostApiCustomThemesByThemeUnitIdRevisionsOptions,
 		TContext
 	>;
 }
 
-export const postApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewMutationKey = () =>
-	[{ url: "/api/v1/zone-themes/:themeUnitId/revisions/:revisionId/automated-review" }] as const;
+export const postApiCustomThemesByThemeUnitIdRevisionsByRevisionIdDecisionMutationKey = () =>
+	[{ url: "/api/v1/custom-themes/:themeUnitId/revisions/:revisionId/decision" }] as const;
 
-export function postApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewMutationOptions<
+export function postApiCustomThemesByThemeUnitIdRevisionsByRevisionIdDecisionMutationOptions<
 	TContext = unknown,
 >(config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {}) {
-	const mutationKey =
-		postApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewMutationKey();
+	const mutationKey = postApiCustomThemesByThemeUnitIdRevisionsByRevisionIdDecisionMutationKey();
 	return mutationOptions<
-		PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewStatus200,
+		PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus200,
 		ResponseErrorConfig<
-			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewStatus400
-			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewStatus403
-			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewStatus404
-			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewStatus409
-			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewStatus422
-			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewStatus429
-			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewStatus500
+			| PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus400
+			| PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus403
+			| PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus404
+			| PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus409
+			| PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus422
+			| PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus500
 		>,
-		PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewOptions,
+		PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdDecisionOptions,
 		TContext
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await postApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReview({
+			const { data } = await postApiCustomThemesByThemeUnitIdRevisionsByRevisionIdDecision({
 				...config,
 				path,
 				body,
@@ -18871,23 +19029,22 @@ export function postApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedRevi
 }
 
 /**
- * @summary Record Zone theme render-farm and AI review
- * {@link /api/v1/zone-themes/:themeUnitId/revisions/:revisionId/automated-review}
+ * @summary Approve or reject a Custom Theme revision
+ * {@link /api/v1/custom-themes/:themeUnitId/revisions/:revisionId/decision}
  */
-export function usePostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReview<TContext>(
+export function usePostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdDecision<TContext>(
 	options: {
 		mutation?: UseMutationOptions<
-			PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewStatus200,
+			PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus200,
 			ResponseErrorConfig<
-				| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewStatus400
-				| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewStatus403
-				| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewStatus404
-				| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewStatus409
-				| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewStatus422
-				| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewStatus429
-				| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewStatus500
+				| PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus400
+				| PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus403
+				| PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus404
+				| PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus409
+				| PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus422
+				| PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus500
 			>,
-			PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewOptions,
+			PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdDecisionOptions,
 			TContext
 		> & { client?: QueryClient };
 		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
@@ -18897,38 +19054,1367 @@ export function usePostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedR
 	const { client: queryClient, ...mutationOptions } = mutation;
 	const mutationKey =
 		mutationOptions.mutationKey ??
-		postApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewMutationKey();
+		postApiCustomThemesByThemeUnitIdRevisionsByRevisionIdDecisionMutationKey();
+
+	const baseOptions = postApiCustomThemesByThemeUnitIdRevisionsByRevisionIdDecisionMutationOptions(
+		config,
+	) as UseMutationOptions<
+		PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus200,
+		ResponseErrorConfig<
+			| PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus400
+			| PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus403
+			| PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus404
+			| PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus409
+			| PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus422
+			| PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus500
+		>,
+		PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdDecisionOptions,
+		TContext
+	>;
+
+	return useMutation<
+		PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus200,
+		ResponseErrorConfig<
+			| PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus400
+			| PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus403
+			| PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus404
+			| PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus409
+			| PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus422
+			| PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus500
+		>,
+		PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdDecisionOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus200,
+		ResponseErrorConfig<
+			| PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus400
+			| PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus403
+			| PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus404
+			| PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus409
+			| PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus422
+			| PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus500
+		>,
+		PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdDecisionOptions,
+		TContext
+	>;
+}
+
+export const postApiCustomThemesByThemeUnitIdRevisionsByRevisionIdKillMutationKey = () =>
+	[{ url: "/api/v1/custom-themes/:themeUnitId/revisions/:revisionId/kill" }] as const;
+
+export function postApiCustomThemesByThemeUnitIdRevisionsByRevisionIdKillMutationOptions<
+	TContext = unknown,
+>(config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {}) {
+	const mutationKey = postApiCustomThemesByThemeUnitIdRevisionsByRevisionIdKillMutationKey();
+	return mutationOptions<
+		PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdKillStatus200,
+		ResponseErrorConfig<
+			| PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdKillStatus400
+			| PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdKillStatus403
+			| PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdKillStatus404
+			| PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdKillStatus409
+			| PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdKillStatus422
+			| PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdKillStatus500
+		>,
+		PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdKillOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			const { data } = await postApiCustomThemesByThemeUnitIdRevisionsByRevisionIdKill({
+				...config,
+				path,
+				body,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Emergency-disable a Custom Theme revision
+ * {@link /api/v1/custom-themes/:themeUnitId/revisions/:revisionId/kill}
+ */
+export function usePostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdKill<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdKillStatus200,
+			ResponseErrorConfig<
+				| PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdKillStatus400
+				| PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdKillStatus403
+				| PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdKillStatus404
+				| PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdKillStatus409
+				| PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdKillStatus422
+				| PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdKillStatus500
+			>,
+			PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdKillOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ??
+		postApiCustomThemesByThemeUnitIdRevisionsByRevisionIdKillMutationKey();
+
+	const baseOptions = postApiCustomThemesByThemeUnitIdRevisionsByRevisionIdKillMutationOptions(
+		config,
+	) as UseMutationOptions<
+		PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdKillStatus200,
+		ResponseErrorConfig<
+			| PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdKillStatus400
+			| PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdKillStatus403
+			| PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdKillStatus404
+			| PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdKillStatus409
+			| PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdKillStatus422
+			| PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdKillStatus500
+		>,
+		PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdKillOptions,
+		TContext
+	>;
+
+	return useMutation<
+		PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdKillStatus200,
+		ResponseErrorConfig<
+			| PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdKillStatus400
+			| PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdKillStatus403
+			| PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdKillStatus404
+			| PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdKillStatus409
+			| PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdKillStatus422
+			| PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdKillStatus500
+		>,
+		PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdKillOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdKillStatus200,
+		ResponseErrorConfig<
+			| PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdKillStatus400
+			| PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdKillStatus403
+			| PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdKillStatus404
+			| PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdKillStatus409
+			| PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdKillStatus422
+			| PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdKillStatus500
+		>,
+		PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdKillOptions,
+		TContext
+	>;
+}
+
+export const getApiCustomThemesByThemeUnitIdRevisionsByRevisionIdReferenceRenderArtifactsByScreenshotAssetIdQueryKey =
+	({
+		path,
+	}: Omit<
+		GetApiCustomThemesByThemeUnitIdRevisionsByRevisionIdReferenceRenderArtifactsByScreenshotAssetIdOptions,
+		"headers"
+	>) =>
+		[
+			{
+				url: "/api/v1/custom-themes/:themeUnitId/revisions/:revisionId/reference-render-artifacts/:screenshotAssetId",
+				params: path,
+			},
+		] as const;
+
+type GetApiCustomThemesByThemeUnitIdRevisionsByRevisionIdReferenceRenderArtifactsByScreenshotAssetIdQueryKey =
+	ReturnType<
+		typeof getApiCustomThemesByThemeUnitIdRevisionsByRevisionIdReferenceRenderArtifactsByScreenshotAssetIdQueryKey
+	>;
+
+export function getApiCustomThemesByThemeUnitIdRevisionsByRevisionIdReferenceRenderArtifactsByScreenshotAssetIdQueryOptions(
+	{
+		path,
+	}: GetApiCustomThemesByThemeUnitIdRevisionsByRevisionIdReferenceRenderArtifactsByScreenshotAssetIdOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey =
+		getApiCustomThemesByThemeUnitIdRevisionsByRevisionIdReferenceRenderArtifactsByScreenshotAssetIdQueryKey(
+			{ path },
+		);
+	return queryOptions<
+		GetApiCustomThemesByThemeUnitIdRevisionsByRevisionIdReferenceRenderArtifactsByScreenshotAssetIdResponse,
+		ResponseErrorConfig<
+			| GetApiCustomThemesByThemeUnitIdRevisionsByRevisionIdReferenceRenderArtifactsByScreenshotAssetIdStatus403
+			| GetApiCustomThemesByThemeUnitIdRevisionsByRevisionIdReferenceRenderArtifactsByScreenshotAssetIdStatus404
+			| GetApiCustomThemesByThemeUnitIdRevisionsByRevisionIdReferenceRenderArtifactsByScreenshotAssetIdStatus422
+			| GetApiCustomThemesByThemeUnitIdRevisionsByRevisionIdReferenceRenderArtifactsByScreenshotAssetIdStatus500
+		>,
+		GetApiCustomThemesByThemeUnitIdRevisionsByRevisionIdReferenceRenderArtifactsByScreenshotAssetIdResponse,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			const { data } =
+				await getApiCustomThemesByThemeUnitIdRevisionsByRevisionIdReferenceRenderArtifactsByScreenshotAssetId(
+					{ ...config, path, signal: config.signal ?? signal, throwOnError: true },
+				);
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Resolve a private Custom Theme reference-render artifact
+ * {@link /api/v1/custom-themes/:themeUnitId/revisions/:revisionId/reference-render-artifacts/:screenshotAssetId}
+ */
+export function useGetApiCustomThemesByThemeUnitIdRevisionsByRevisionIdReferenceRenderArtifactsByScreenshotAssetId<
+	TData = GetApiCustomThemesByThemeUnitIdRevisionsByRevisionIdReferenceRenderArtifactsByScreenshotAssetIdResponse,
+	TQueryData = GetApiCustomThemesByThemeUnitIdRevisionsByRevisionIdReferenceRenderArtifactsByScreenshotAssetIdResponse,
+	TQueryKey extends
+		QueryKey = GetApiCustomThemesByThemeUnitIdRevisionsByRevisionIdReferenceRenderArtifactsByScreenshotAssetIdQueryKey,
+>(
+	{
+		path,
+	}: {
+		path:
+			| GetApiCustomThemesByThemeUnitIdRevisionsByRevisionIdReferenceRenderArtifactsByScreenshotAssetIdOptions["path"]
+			| (() => GetApiCustomThemesByThemeUnitIdRevisionsByRevisionIdReferenceRenderArtifactsByScreenshotAssetIdOptions["path"]);
+	},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				GetApiCustomThemesByThemeUnitIdRevisionsByRevisionIdReferenceRenderArtifactsByScreenshotAssetIdResponse,
+				ResponseErrorConfig<
+					| GetApiCustomThemesByThemeUnitIdRevisionsByRevisionIdReferenceRenderArtifactsByScreenshotAssetIdStatus403
+					| GetApiCustomThemesByThemeUnitIdRevisionsByRevisionIdReferenceRenderArtifactsByScreenshotAssetIdStatus404
+					| GetApiCustomThemesByThemeUnitIdRevisionsByRevisionIdReferenceRenderArtifactsByScreenshotAssetIdStatus422
+					| GetApiCustomThemesByThemeUnitIdRevisionsByRevisionIdReferenceRenderArtifactsByScreenshotAssetIdStatus500
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = { path: typeof path === "function" ? path() : path };
+	const queryKey =
+		resolvedOptions?.queryKey ??
+		getApiCustomThemesByThemeUnitIdRevisionsByRevisionIdReferenceRenderArtifactsByScreenshotAssetIdQueryKey(
+			resolvedParams,
+		);
+
+	const queryResult = useQuery(
+		{
+			...getApiCustomThemesByThemeUnitIdRevisionsByRevisionIdReferenceRenderArtifactsByScreenshotAssetIdQueryOptions(
+				resolvedParams,
+				config,
+			),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			| GetApiCustomThemesByThemeUnitIdRevisionsByRevisionIdReferenceRenderArtifactsByScreenshotAssetIdStatus403
+			| GetApiCustomThemesByThemeUnitIdRevisionsByRevisionIdReferenceRenderArtifactsByScreenshotAssetIdStatus404
+			| GetApiCustomThemesByThemeUnitIdRevisionsByRevisionIdReferenceRenderArtifactsByScreenshotAssetIdStatus422
+			| GetApiCustomThemesByThemeUnitIdRevisionsByRevisionIdReferenceRenderArtifactsByScreenshotAssetIdStatus500
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const getApiCustomThemesByThemeUnitIdRevisionsByRevisionIdFileQueryKey = ({
+	path,
+	query,
+}: Omit<GetApiCustomThemesByThemeUnitIdRevisionsByRevisionIdFileOptions, "headers">) =>
+	[
+		{ url: "/api/v1/custom-themes/:themeUnitId/revisions/:revisionId/file", params: path },
+		...(query ? [query] : []),
+	] as const;
+
+type GetApiCustomThemesByThemeUnitIdRevisionsByRevisionIdFileQueryKey = ReturnType<
+	typeof getApiCustomThemesByThemeUnitIdRevisionsByRevisionIdFileQueryKey
+>;
+
+export function getApiCustomThemesByThemeUnitIdRevisionsByRevisionIdFileQueryOptions(
+	{ path, query }: GetApiCustomThemesByThemeUnitIdRevisionsByRevisionIdFileOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = getApiCustomThemesByThemeUnitIdRevisionsByRevisionIdFileQueryKey({
+		path,
+		query,
+	});
+	return queryOptions<
+		GetApiCustomThemesByThemeUnitIdRevisionsByRevisionIdFileStatus200,
+		ResponseErrorConfig<
+			| GetApiCustomThemesByThemeUnitIdRevisionsByRevisionIdFileStatus403
+			| GetApiCustomThemesByThemeUnitIdRevisionsByRevisionIdFileStatus422
+			| GetApiCustomThemesByThemeUnitIdRevisionsByRevisionIdFileStatus500
+		>,
+		GetApiCustomThemesByThemeUnitIdRevisionsByRevisionIdFileStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			const { data } = await getApiCustomThemesByThemeUnitIdRevisionsByRevisionIdFile({
+				...config,
+				path,
+				query,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Read an executable packaged Custom Theme file
+ * {@link /api/v1/custom-themes/:themeUnitId/revisions/:revisionId/file}
+ */
+export function useGetApiCustomThemesByThemeUnitIdRevisionsByRevisionIdFile<
+	TData = GetApiCustomThemesByThemeUnitIdRevisionsByRevisionIdFileStatus200,
+	TQueryData = GetApiCustomThemesByThemeUnitIdRevisionsByRevisionIdFileStatus200,
+	TQueryKey extends QueryKey = GetApiCustomThemesByThemeUnitIdRevisionsByRevisionIdFileQueryKey,
+>(
+	{
+		path,
+		query,
+	}: {
+		path:
+			| GetApiCustomThemesByThemeUnitIdRevisionsByRevisionIdFileOptions["path"]
+			| (() => GetApiCustomThemesByThemeUnitIdRevisionsByRevisionIdFileOptions["path"]);
+		query:
+			| GetApiCustomThemesByThemeUnitIdRevisionsByRevisionIdFileOptions["query"]
+			| (() => GetApiCustomThemesByThemeUnitIdRevisionsByRevisionIdFileOptions["query"]);
+	},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				GetApiCustomThemesByThemeUnitIdRevisionsByRevisionIdFileStatus200,
+				ResponseErrorConfig<
+					| GetApiCustomThemesByThemeUnitIdRevisionsByRevisionIdFileStatus403
+					| GetApiCustomThemesByThemeUnitIdRevisionsByRevisionIdFileStatus422
+					| GetApiCustomThemesByThemeUnitIdRevisionsByRevisionIdFileStatus500
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = {
+		path: typeof path === "function" ? path() : path,
+		query: typeof query === "function" ? query() : query,
+	};
+	const queryKey =
+		resolvedOptions?.queryKey ??
+		getApiCustomThemesByThemeUnitIdRevisionsByRevisionIdFileQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...getApiCustomThemesByThemeUnitIdRevisionsByRevisionIdFileQueryOptions(
+				resolvedParams,
+				config,
+			),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			| GetApiCustomThemesByThemeUnitIdRevisionsByRevisionIdFileStatus403
+			| GetApiCustomThemesByThemeUnitIdRevisionsByRevisionIdFileStatus422
+			| GetApiCustomThemesByThemeUnitIdRevisionsByRevisionIdFileStatus500
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const getApiUnitsByIdByUnitIdPresentationQueryKey = ({
+	path,
+	query,
+}: Omit<GetApiUnitsByIdByUnitIdPresentationOptions, "headers">) =>
+	[
+		{ url: "/api/v1/units/by-id/:unitId/presentation", params: path },
+		...(query ? [query] : []),
+	] as const;
+
+type GetApiUnitsByIdByUnitIdPresentationQueryKey = ReturnType<
+	typeof getApiUnitsByIdByUnitIdPresentationQueryKey
+>;
+
+export function getApiUnitsByIdByUnitIdPresentationQueryOptions(
+	{ path, query }: GetApiUnitsByIdByUnitIdPresentationOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = getApiUnitsByIdByUnitIdPresentationQueryKey({ path, query });
+	return queryOptions<
+		GetApiUnitsByIdByUnitIdPresentationStatus200,
+		ResponseErrorConfig<
+			| GetApiUnitsByIdByUnitIdPresentationStatus404
+			| GetApiUnitsByIdByUnitIdPresentationStatus422
+			| GetApiUnitsByIdByUnitIdPresentationStatus429
+			| GetApiUnitsByIdByUnitIdPresentationStatus500
+		>,
+		GetApiUnitsByIdByUnitIdPresentationStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			const { data } = await getApiUnitsByIdByUnitIdPresentation({
+				...config,
+				path,
+				query,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Resolve a Unit presentation for the current viewer
+ * {@link /api/v1/units/by-id/:unitId/presentation}
+ */
+export function useGetApiUnitsByIdByUnitIdPresentation<
+	TData = GetApiUnitsByIdByUnitIdPresentationStatus200,
+	TQueryData = GetApiUnitsByIdByUnitIdPresentationStatus200,
+	TQueryKey extends QueryKey = GetApiUnitsByIdByUnitIdPresentationQueryKey,
+>(
+	{
+		path,
+		query,
+	}: {
+		path:
+			| GetApiUnitsByIdByUnitIdPresentationOptions["path"]
+			| (() => GetApiUnitsByIdByUnitIdPresentationOptions["path"]);
+		query?:
+			| GetApiUnitsByIdByUnitIdPresentationOptions["query"]
+			| (() => GetApiUnitsByIdByUnitIdPresentationOptions["query"]);
+	},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				GetApiUnitsByIdByUnitIdPresentationStatus200,
+				ResponseErrorConfig<
+					| GetApiUnitsByIdByUnitIdPresentationStatus404
+					| GetApiUnitsByIdByUnitIdPresentationStatus422
+					| GetApiUnitsByIdByUnitIdPresentationStatus429
+					| GetApiUnitsByIdByUnitIdPresentationStatus500
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = {
+		path: typeof path === "function" ? path() : path,
+		query: typeof query === "function" ? query() : query,
+	};
+	const queryKey =
+		resolvedOptions?.queryKey ?? getApiUnitsByIdByUnitIdPresentationQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...getApiUnitsByIdByUnitIdPresentationQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			| GetApiUnitsByIdByUnitIdPresentationStatus404
+			| GetApiUnitsByIdByUnitIdPresentationStatus422
+			| GetApiUnitsByIdByUnitIdPresentationStatus429
+			| GetApiUnitsByIdByUnitIdPresentationStatus500
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const putApiUnitsByIdByUnitIdPresentationMutationKey = () =>
+	[{ url: "/api/v1/units/by-id/:unitId/presentation" }] as const;
+
+export function putApiUnitsByIdByUnitIdPresentationMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = putApiUnitsByIdByUnitIdPresentationMutationKey();
+	return mutationOptions<
+		PutApiUnitsByIdByUnitIdPresentationStatus200,
+		ResponseErrorConfig<
+			| PutApiUnitsByIdByUnitIdPresentationStatus400
+			| PutApiUnitsByIdByUnitIdPresentationStatus403
+			| PutApiUnitsByIdByUnitIdPresentationStatus404
+			| PutApiUnitsByIdByUnitIdPresentationStatus409
+			| PutApiUnitsByIdByUnitIdPresentationStatus422
+			| PutApiUnitsByIdByUnitIdPresentationStatus429
+			| PutApiUnitsByIdByUnitIdPresentationStatus500
+		>,
+		PutApiUnitsByIdByUnitIdPresentationOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			const { data } = await putApiUnitsByIdByUnitIdPresentation({
+				...config,
+				path,
+				body,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Replace the Unit-owned presentation document
+ * {@link /api/v1/units/by-id/:unitId/presentation}
+ */
+export function usePutApiUnitsByIdByUnitIdPresentation<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			PutApiUnitsByIdByUnitIdPresentationStatus200,
+			ResponseErrorConfig<
+				| PutApiUnitsByIdByUnitIdPresentationStatus400
+				| PutApiUnitsByIdByUnitIdPresentationStatus403
+				| PutApiUnitsByIdByUnitIdPresentationStatus404
+				| PutApiUnitsByIdByUnitIdPresentationStatus409
+				| PutApiUnitsByIdByUnitIdPresentationStatus422
+				| PutApiUnitsByIdByUnitIdPresentationStatus429
+				| PutApiUnitsByIdByUnitIdPresentationStatus500
+			>,
+			PutApiUnitsByIdByUnitIdPresentationOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ?? putApiUnitsByIdByUnitIdPresentationMutationKey();
+
+	const baseOptions = putApiUnitsByIdByUnitIdPresentationMutationOptions(
+		config,
+	) as UseMutationOptions<
+		PutApiUnitsByIdByUnitIdPresentationStatus200,
+		ResponseErrorConfig<
+			| PutApiUnitsByIdByUnitIdPresentationStatus400
+			| PutApiUnitsByIdByUnitIdPresentationStatus403
+			| PutApiUnitsByIdByUnitIdPresentationStatus404
+			| PutApiUnitsByIdByUnitIdPresentationStatus409
+			| PutApiUnitsByIdByUnitIdPresentationStatus422
+			| PutApiUnitsByIdByUnitIdPresentationStatus429
+			| PutApiUnitsByIdByUnitIdPresentationStatus500
+		>,
+		PutApiUnitsByIdByUnitIdPresentationOptions,
+		TContext
+	>;
+
+	return useMutation<
+		PutApiUnitsByIdByUnitIdPresentationStatus200,
+		ResponseErrorConfig<
+			| PutApiUnitsByIdByUnitIdPresentationStatus400
+			| PutApiUnitsByIdByUnitIdPresentationStatus403
+			| PutApiUnitsByIdByUnitIdPresentationStatus404
+			| PutApiUnitsByIdByUnitIdPresentationStatus409
+			| PutApiUnitsByIdByUnitIdPresentationStatus422
+			| PutApiUnitsByIdByUnitIdPresentationStatus429
+			| PutApiUnitsByIdByUnitIdPresentationStatus500
+		>,
+		PutApiUnitsByIdByUnitIdPresentationOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PutApiUnitsByIdByUnitIdPresentationStatus200,
+		ResponseErrorConfig<
+			| PutApiUnitsByIdByUnitIdPresentationStatus400
+			| PutApiUnitsByIdByUnitIdPresentationStatus403
+			| PutApiUnitsByIdByUnitIdPresentationStatus404
+			| PutApiUnitsByIdByUnitIdPresentationStatus409
+			| PutApiUnitsByIdByUnitIdPresentationStatus422
+			| PutApiUnitsByIdByUnitIdPresentationStatus429
+			| PutApiUnitsByIdByUnitIdPresentationStatus500
+		>,
+		PutApiUnitsByIdByUnitIdPresentationOptions,
+		TContext
+	>;
+}
+
+export const getApiUnitsByIdByUnitIdPresentationPolicyQueryKey = ({
+	path,
+	query,
+}: Omit<GetApiUnitsByIdByUnitIdPresentationPolicyOptions, "headers">) =>
+	[
+		{ url: "/api/v1/units/by-id/:unitId/presentation-policy", params: path },
+		...(query ? [query] : []),
+	] as const;
+
+type GetApiUnitsByIdByUnitIdPresentationPolicyQueryKey = ReturnType<
+	typeof getApiUnitsByIdByUnitIdPresentationPolicyQueryKey
+>;
+
+export function getApiUnitsByIdByUnitIdPresentationPolicyQueryOptions(
+	{ path, query }: GetApiUnitsByIdByUnitIdPresentationPolicyOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = getApiUnitsByIdByUnitIdPresentationPolicyQueryKey({ path, query });
+	return queryOptions<
+		GetApiUnitsByIdByUnitIdPresentationPolicyStatus200,
+		ResponseErrorConfig<
+			| GetApiUnitsByIdByUnitIdPresentationPolicyStatus404
+			| GetApiUnitsByIdByUnitIdPresentationPolicyStatus422
+			| GetApiUnitsByIdByUnitIdPresentationPolicyStatus429
+			| GetApiUnitsByIdByUnitIdPresentationPolicyStatus500
+		>,
+		GetApiUnitsByIdByUnitIdPresentationPolicyStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			const { data } = await getApiUnitsByIdByUnitIdPresentationPolicy({
+				...config,
+				path,
+				query,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Resolve request-boundary presentation policy
+ * {@link /api/v1/units/by-id/:unitId/presentation-policy}
+ */
+export function useGetApiUnitsByIdByUnitIdPresentationPolicy<
+	TData = GetApiUnitsByIdByUnitIdPresentationPolicyStatus200,
+	TQueryData = GetApiUnitsByIdByUnitIdPresentationPolicyStatus200,
+	TQueryKey extends QueryKey = GetApiUnitsByIdByUnitIdPresentationPolicyQueryKey,
+>(
+	{
+		path,
+		query,
+	}: {
+		path:
+			| GetApiUnitsByIdByUnitIdPresentationPolicyOptions["path"]
+			| (() => GetApiUnitsByIdByUnitIdPresentationPolicyOptions["path"]);
+		query?:
+			| GetApiUnitsByIdByUnitIdPresentationPolicyOptions["query"]
+			| (() => GetApiUnitsByIdByUnitIdPresentationPolicyOptions["query"]);
+	},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				GetApiUnitsByIdByUnitIdPresentationPolicyStatus200,
+				ResponseErrorConfig<
+					| GetApiUnitsByIdByUnitIdPresentationPolicyStatus404
+					| GetApiUnitsByIdByUnitIdPresentationPolicyStatus422
+					| GetApiUnitsByIdByUnitIdPresentationPolicyStatus429
+					| GetApiUnitsByIdByUnitIdPresentationPolicyStatus500
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = {
+		path: typeof path === "function" ? path() : path,
+		query: typeof query === "function" ? query() : query,
+	};
+	const queryKey =
+		resolvedOptions?.queryKey ?? getApiUnitsByIdByUnitIdPresentationPolicyQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...getApiUnitsByIdByUnitIdPresentationPolicyQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			| GetApiUnitsByIdByUnitIdPresentationPolicyStatus404
+			| GetApiUnitsByIdByUnitIdPresentationPolicyStatus422
+			| GetApiUnitsByIdByUnitIdPresentationPolicyStatus429
+			| GetApiUnitsByIdByUnitIdPresentationPolicyStatus500
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const getApiUnitsByIdByUnitIdPresentationDocumentQueryKey = ({
+	path,
+}: Omit<GetApiUnitsByIdByUnitIdPresentationDocumentOptions, "headers">) =>
+	[{ url: "/api/v1/units/by-id/:unitId/presentation-document", params: path }] as const;
+
+type GetApiUnitsByIdByUnitIdPresentationDocumentQueryKey = ReturnType<
+	typeof getApiUnitsByIdByUnitIdPresentationDocumentQueryKey
+>;
+
+export function getApiUnitsByIdByUnitIdPresentationDocumentQueryOptions(
+	{ path }: GetApiUnitsByIdByUnitIdPresentationDocumentOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = getApiUnitsByIdByUnitIdPresentationDocumentQueryKey({ path });
+	return queryOptions<
+		GetApiUnitsByIdByUnitIdPresentationDocumentStatus200,
+		ResponseErrorConfig<
+			| GetApiUnitsByIdByUnitIdPresentationDocumentStatus403
+			| GetApiUnitsByIdByUnitIdPresentationDocumentStatus404
+			| GetApiUnitsByIdByUnitIdPresentationDocumentStatus422
+			| GetApiUnitsByIdByUnitIdPresentationDocumentStatus429
+			| GetApiUnitsByIdByUnitIdPresentationDocumentStatus500
+		>,
+		GetApiUnitsByIdByUnitIdPresentationDocumentStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			const { data } = await getApiUnitsByIdByUnitIdPresentationDocument({
+				...config,
+				path,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Get the Unit-owned presentation document
+ * {@link /api/v1/units/by-id/:unitId/presentation-document}
+ */
+export function useGetApiUnitsByIdByUnitIdPresentationDocument<
+	TData = GetApiUnitsByIdByUnitIdPresentationDocumentStatus200,
+	TQueryData = GetApiUnitsByIdByUnitIdPresentationDocumentStatus200,
+	TQueryKey extends QueryKey = GetApiUnitsByIdByUnitIdPresentationDocumentQueryKey,
+>(
+	{
+		path,
+	}: {
+		path:
+			| GetApiUnitsByIdByUnitIdPresentationDocumentOptions["path"]
+			| (() => GetApiUnitsByIdByUnitIdPresentationDocumentOptions["path"]);
+	},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				GetApiUnitsByIdByUnitIdPresentationDocumentStatus200,
+				ResponseErrorConfig<
+					| GetApiUnitsByIdByUnitIdPresentationDocumentStatus403
+					| GetApiUnitsByIdByUnitIdPresentationDocumentStatus404
+					| GetApiUnitsByIdByUnitIdPresentationDocumentStatus422
+					| GetApiUnitsByIdByUnitIdPresentationDocumentStatus429
+					| GetApiUnitsByIdByUnitIdPresentationDocumentStatus500
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = { path: typeof path === "function" ? path() : path };
+	const queryKey =
+		resolvedOptions?.queryKey ??
+		getApiUnitsByIdByUnitIdPresentationDocumentQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...getApiUnitsByIdByUnitIdPresentationDocumentQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			| GetApiUnitsByIdByUnitIdPresentationDocumentStatus403
+			| GetApiUnitsByIdByUnitIdPresentationDocumentStatus404
+			| GetApiUnitsByIdByUnitIdPresentationDocumentStatus422
+			| GetApiUnitsByIdByUnitIdPresentationDocumentStatus429
+			| GetApiUnitsByIdByUnitIdPresentationDocumentStatus500
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const putApiUnitsByIdByUnitIdCustomThemeInstallationMutationKey = () =>
+	[{ url: "/api/v1/units/by-id/:unitId/custom-theme-installation" }] as const;
+
+export function putApiUnitsByIdByUnitIdCustomThemeInstallationMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = putApiUnitsByIdByUnitIdCustomThemeInstallationMutationKey();
+	return mutationOptions<
+		PutApiUnitsByIdByUnitIdCustomThemeInstallationStatus200,
+		ResponseErrorConfig<
+			| PutApiUnitsByIdByUnitIdCustomThemeInstallationStatus400
+			| PutApiUnitsByIdByUnitIdCustomThemeInstallationStatus403
+			| PutApiUnitsByIdByUnitIdCustomThemeInstallationStatus404
+			| PutApiUnitsByIdByUnitIdCustomThemeInstallationStatus422
+			| PutApiUnitsByIdByUnitIdCustomThemeInstallationStatus429
+			| PutApiUnitsByIdByUnitIdCustomThemeInstallationStatus500
+		>,
+		PutApiUnitsByIdByUnitIdCustomThemeInstallationOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			const { data } = await putApiUnitsByIdByUnitIdCustomThemeInstallation({
+				...config,
+				path,
+				body,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Install one exact Custom Theme revision
+ * {@link /api/v1/units/by-id/:unitId/custom-theme-installation}
+ */
+export function usePutApiUnitsByIdByUnitIdCustomThemeInstallation<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			PutApiUnitsByIdByUnitIdCustomThemeInstallationStatus200,
+			ResponseErrorConfig<
+				| PutApiUnitsByIdByUnitIdCustomThemeInstallationStatus400
+				| PutApiUnitsByIdByUnitIdCustomThemeInstallationStatus403
+				| PutApiUnitsByIdByUnitIdCustomThemeInstallationStatus404
+				| PutApiUnitsByIdByUnitIdCustomThemeInstallationStatus422
+				| PutApiUnitsByIdByUnitIdCustomThemeInstallationStatus429
+				| PutApiUnitsByIdByUnitIdCustomThemeInstallationStatus500
+			>,
+			PutApiUnitsByIdByUnitIdCustomThemeInstallationOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ?? putApiUnitsByIdByUnitIdCustomThemeInstallationMutationKey();
+
+	const baseOptions = putApiUnitsByIdByUnitIdCustomThemeInstallationMutationOptions(
+		config,
+	) as UseMutationOptions<
+		PutApiUnitsByIdByUnitIdCustomThemeInstallationStatus200,
+		ResponseErrorConfig<
+			| PutApiUnitsByIdByUnitIdCustomThemeInstallationStatus400
+			| PutApiUnitsByIdByUnitIdCustomThemeInstallationStatus403
+			| PutApiUnitsByIdByUnitIdCustomThemeInstallationStatus404
+			| PutApiUnitsByIdByUnitIdCustomThemeInstallationStatus422
+			| PutApiUnitsByIdByUnitIdCustomThemeInstallationStatus429
+			| PutApiUnitsByIdByUnitIdCustomThemeInstallationStatus500
+		>,
+		PutApiUnitsByIdByUnitIdCustomThemeInstallationOptions,
+		TContext
+	>;
+
+	return useMutation<
+		PutApiUnitsByIdByUnitIdCustomThemeInstallationStatus200,
+		ResponseErrorConfig<
+			| PutApiUnitsByIdByUnitIdCustomThemeInstallationStatus400
+			| PutApiUnitsByIdByUnitIdCustomThemeInstallationStatus403
+			| PutApiUnitsByIdByUnitIdCustomThemeInstallationStatus404
+			| PutApiUnitsByIdByUnitIdCustomThemeInstallationStatus422
+			| PutApiUnitsByIdByUnitIdCustomThemeInstallationStatus429
+			| PutApiUnitsByIdByUnitIdCustomThemeInstallationStatus500
+		>,
+		PutApiUnitsByIdByUnitIdCustomThemeInstallationOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PutApiUnitsByIdByUnitIdCustomThemeInstallationStatus200,
+		ResponseErrorConfig<
+			| PutApiUnitsByIdByUnitIdCustomThemeInstallationStatus400
+			| PutApiUnitsByIdByUnitIdCustomThemeInstallationStatus403
+			| PutApiUnitsByIdByUnitIdCustomThemeInstallationStatus404
+			| PutApiUnitsByIdByUnitIdCustomThemeInstallationStatus422
+			| PutApiUnitsByIdByUnitIdCustomThemeInstallationStatus429
+			| PutApiUnitsByIdByUnitIdCustomThemeInstallationStatus500
+		>,
+		PutApiUnitsByIdByUnitIdCustomThemeInstallationOptions,
+		TContext
+	>;
+}
+
+export const deleteApiUnitsByIdByUnitIdCustomThemeInstallationMutationKey = () =>
+	[{ url: "/api/v1/units/by-id/:unitId/custom-theme-installation" }] as const;
+
+export function deleteApiUnitsByIdByUnitIdCustomThemeInstallationMutationOptions<
+	TContext = unknown,
+>(config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {}) {
+	const mutationKey = deleteApiUnitsByIdByUnitIdCustomThemeInstallationMutationKey();
+	return mutationOptions<
+		DeleteApiUnitsByIdByUnitIdCustomThemeInstallationStatus204,
+		ResponseErrorConfig<
+			| DeleteApiUnitsByIdByUnitIdCustomThemeInstallationStatus403
+			| DeleteApiUnitsByIdByUnitIdCustomThemeInstallationStatus404
+			| DeleteApiUnitsByIdByUnitIdCustomThemeInstallationStatus422
+			| DeleteApiUnitsByIdByUnitIdCustomThemeInstallationStatus429
+			| DeleteApiUnitsByIdByUnitIdCustomThemeInstallationStatus500
+		>,
+		DeleteApiUnitsByIdByUnitIdCustomThemeInstallationOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path }) => {
+			const { data } = await deleteApiUnitsByIdByUnitIdCustomThemeInstallation({
+				...config,
+				path,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Remove the installed Custom Theme revision
+ * {@link /api/v1/units/by-id/:unitId/custom-theme-installation}
+ */
+export function useDeleteApiUnitsByIdByUnitIdCustomThemeInstallation<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			DeleteApiUnitsByIdByUnitIdCustomThemeInstallationStatus204,
+			ResponseErrorConfig<
+				| DeleteApiUnitsByIdByUnitIdCustomThemeInstallationStatus403
+				| DeleteApiUnitsByIdByUnitIdCustomThemeInstallationStatus404
+				| DeleteApiUnitsByIdByUnitIdCustomThemeInstallationStatus422
+				| DeleteApiUnitsByIdByUnitIdCustomThemeInstallationStatus429
+				| DeleteApiUnitsByIdByUnitIdCustomThemeInstallationStatus500
+			>,
+			DeleteApiUnitsByIdByUnitIdCustomThemeInstallationOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ?? deleteApiUnitsByIdByUnitIdCustomThemeInstallationMutationKey();
+
+	const baseOptions = deleteApiUnitsByIdByUnitIdCustomThemeInstallationMutationOptions(
+		config,
+	) as UseMutationOptions<
+		DeleteApiUnitsByIdByUnitIdCustomThemeInstallationStatus204,
+		ResponseErrorConfig<
+			| DeleteApiUnitsByIdByUnitIdCustomThemeInstallationStatus403
+			| DeleteApiUnitsByIdByUnitIdCustomThemeInstallationStatus404
+			| DeleteApiUnitsByIdByUnitIdCustomThemeInstallationStatus422
+			| DeleteApiUnitsByIdByUnitIdCustomThemeInstallationStatus429
+			| DeleteApiUnitsByIdByUnitIdCustomThemeInstallationStatus500
+		>,
+		DeleteApiUnitsByIdByUnitIdCustomThemeInstallationOptions,
+		TContext
+	>;
+
+	return useMutation<
+		DeleteApiUnitsByIdByUnitIdCustomThemeInstallationStatus204,
+		ResponseErrorConfig<
+			| DeleteApiUnitsByIdByUnitIdCustomThemeInstallationStatus403
+			| DeleteApiUnitsByIdByUnitIdCustomThemeInstallationStatus404
+			| DeleteApiUnitsByIdByUnitIdCustomThemeInstallationStatus422
+			| DeleteApiUnitsByIdByUnitIdCustomThemeInstallationStatus429
+			| DeleteApiUnitsByIdByUnitIdCustomThemeInstallationStatus500
+		>,
+		DeleteApiUnitsByIdByUnitIdCustomThemeInstallationOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		DeleteApiUnitsByIdByUnitIdCustomThemeInstallationStatus204,
+		ResponseErrorConfig<
+			| DeleteApiUnitsByIdByUnitIdCustomThemeInstallationStatus403
+			| DeleteApiUnitsByIdByUnitIdCustomThemeInstallationStatus404
+			| DeleteApiUnitsByIdByUnitIdCustomThemeInstallationStatus422
+			| DeleteApiUnitsByIdByUnitIdCustomThemeInstallationStatus429
+			| DeleteApiUnitsByIdByUnitIdCustomThemeInstallationStatus500
+		>,
+		DeleteApiUnitsByIdByUnitIdCustomThemeInstallationOptions,
+		TContext
+	>;
+}
+
+export const getApiPlatformAccessCustomThemeExternalLiveProfilesQueryKey = ({
+	query,
+}: Omit<GetApiPlatformAccessCustomThemeExternalLiveProfilesOptions, "headers"> = {}) =>
+	[
+		{ url: "/api/v1/platform-access/custom-theme-external-live/profiles" },
+		...(query ? [query] : []),
+	] as const;
+
+type GetApiPlatformAccessCustomThemeExternalLiveProfilesQueryKey = ReturnType<
+	typeof getApiPlatformAccessCustomThemeExternalLiveProfilesQueryKey
+>;
+
+export function getApiPlatformAccessCustomThemeExternalLiveProfilesQueryOptions(
+	{ query }: GetApiPlatformAccessCustomThemeExternalLiveProfilesOptions = {},
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = getApiPlatformAccessCustomThemeExternalLiveProfilesQueryKey({ query });
+	return queryOptions<
+		GetApiPlatformAccessCustomThemeExternalLiveProfilesStatus200,
+		ResponseErrorConfig<
+			| GetApiPlatformAccessCustomThemeExternalLiveProfilesStatus403
+			| GetApiPlatformAccessCustomThemeExternalLiveProfilesStatus422
+			| GetApiPlatformAccessCustomThemeExternalLiveProfilesStatus500
+		>,
+		GetApiPlatformAccessCustomThemeExternalLiveProfilesStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			const { data } = await getApiPlatformAccessCustomThemeExternalLiveProfiles({
+				...config,
+				query,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary List or search Profiles for Custom Theme external-live access
+ * {@link /api/v1/platform-access/custom-theme-external-live/profiles}
+ */
+export function useGetApiPlatformAccessCustomThemeExternalLiveProfiles<
+	TData = GetApiPlatformAccessCustomThemeExternalLiveProfilesStatus200,
+	TQueryData = GetApiPlatformAccessCustomThemeExternalLiveProfilesStatus200,
+	TQueryKey extends QueryKey = GetApiPlatformAccessCustomThemeExternalLiveProfilesQueryKey,
+>(
+	{
+		query,
+	}: {
+		query?:
+			| GetApiPlatformAccessCustomThemeExternalLiveProfilesOptions["query"]
+			| (() => GetApiPlatformAccessCustomThemeExternalLiveProfilesOptions["query"]);
+	} = {},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				GetApiPlatformAccessCustomThemeExternalLiveProfilesStatus200,
+				ResponseErrorConfig<
+					| GetApiPlatformAccessCustomThemeExternalLiveProfilesStatus403
+					| GetApiPlatformAccessCustomThemeExternalLiveProfilesStatus422
+					| GetApiPlatformAccessCustomThemeExternalLiveProfilesStatus500
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = { query: typeof query === "function" ? query() : query };
+	const queryKey =
+		resolvedOptions?.queryKey ??
+		getApiPlatformAccessCustomThemeExternalLiveProfilesQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...getApiPlatformAccessCustomThemeExternalLiveProfilesQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			| GetApiPlatformAccessCustomThemeExternalLiveProfilesStatus403
+			| GetApiPlatformAccessCustomThemeExternalLiveProfilesStatus422
+			| GetApiPlatformAccessCustomThemeExternalLiveProfilesStatus500
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const getApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessQueryKey = ({
+	path,
+}: Omit<GetApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessOptions, "headers">) =>
+	[
+		{
+			url: "/api/v1/platform-access/profiles/:profileId/custom-theme-external-live-access",
+			params: path,
+		},
+	] as const;
+
+type GetApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessQueryKey = ReturnType<
+	typeof getApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessQueryKey
+>;
+
+export function getApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessQueryOptions(
+	{ path }: GetApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = getApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessQueryKey({
+		path,
+	});
+	return queryOptions<
+		GetApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus200,
+		ResponseErrorConfig<
+			| GetApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus403
+			| GetApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus404
+			| GetApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus422
+			| GetApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus500
+		>,
+		GetApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			const { data } = await getApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccess({
+				...config,
+				path,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Get one Profile's Custom Theme external-live access
+ * {@link /api/v1/platform-access/profiles/:profileId/custom-theme-external-live-access}
+ */
+export function useGetApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccess<
+	TData = GetApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus200,
+	TQueryData = GetApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus200,
+	TQueryKey extends
+		QueryKey = GetApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessQueryKey,
+>(
+	{
+		path,
+	}: {
+		path:
+			| GetApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessOptions["path"]
+			| (() => GetApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessOptions["path"]);
+	},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				GetApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus200,
+				ResponseErrorConfig<
+					| GetApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus403
+					| GetApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus404
+					| GetApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus422
+					| GetApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus500
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = { path: typeof path === "function" ? path() : path };
+	const queryKey =
+		resolvedOptions?.queryKey ??
+		getApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...getApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessQueryOptions(
+				resolvedParams,
+				config,
+			),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			| GetApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus403
+			| GetApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus404
+			| GetApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus422
+			| GetApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus500
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const putApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessMutationKey = () =>
+	[
+		{ url: "/api/v1/platform-access/profiles/:profileId/custom-theme-external-live-access" },
+	] as const;
+
+export function putApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessMutationOptions<
+	TContext = unknown,
+>(config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {}) {
+	const mutationKey =
+		putApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessMutationKey();
+	return mutationOptions<
+		PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus200,
+		ResponseErrorConfig<
+			| PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus400
+			| PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus403
+			| PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus404
+			| PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus409
+			| PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus422
+			| PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus500
+		>,
+		PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			const { data } = await putApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccess({
+				...config,
+				path,
+				body,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Grant, renew, or revoke Custom Theme external-live access
+ * {@link /api/v1/platform-access/profiles/:profileId/custom-theme-external-live-access}
+ */
+export function usePutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccess<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus200,
+			ResponseErrorConfig<
+				| PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus400
+				| PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus403
+				| PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus404
+				| PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus409
+				| PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus422
+				| PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus500
+			>,
+			PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ??
+		putApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessMutationKey();
 
 	const baseOptions =
-		postApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewMutationOptions(
+		putApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessMutationOptions(
 			config,
 		) as UseMutationOptions<
-			PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewStatus200,
+			PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus200,
 			ResponseErrorConfig<
-				| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewStatus400
-				| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewStatus403
-				| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewStatus404
-				| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewStatus409
-				| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewStatus422
-				| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewStatus429
-				| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewStatus500
+				| PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus400
+				| PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus403
+				| PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus404
+				| PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus409
+				| PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus422
+				| PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus500
 			>,
-			PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewOptions,
+			PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessOptions,
 			TContext
 		>;
 
 	return useMutation<
-		PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewStatus200,
+		PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus200,
 		ResponseErrorConfig<
-			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewStatus400
-			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewStatus403
-			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewStatus404
-			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewStatus409
-			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewStatus422
-			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewStatus429
-			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewStatus500
+			| PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus400
+			| PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus403
+			| PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus404
+			| PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus409
+			| PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus422
+			| PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus500
 		>,
-		PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewOptions,
+		PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessOptions,
 		TContext
 	>(
 		{
@@ -18938,249 +20424,16 @@ export function usePostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedR
 		},
 		queryClient,
 	) as UseMutationResult<
-		PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewStatus200,
+		PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus200,
 		ResponseErrorConfig<
-			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewStatus400
-			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewStatus403
-			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewStatus404
-			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewStatus409
-			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewStatus422
-			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewStatus429
-			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewStatus500
+			| PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus400
+			| PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus403
+			| PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus404
+			| PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus409
+			| PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus422
+			| PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus500
 		>,
-		PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewOptions,
-		TContext
-	>;
-}
-
-export const postApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionMutationKey = () =>
-	[{ url: "/api/v1/zone-themes/:themeUnitId/revisions/:revisionId/decision" }] as const;
-
-export function postApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionMutationOptions<
-	TContext = unknown,
->(config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {}) {
-	const mutationKey = postApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionMutationKey();
-	return mutationOptions<
-		PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus200,
-		ResponseErrorConfig<
-			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus400
-			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus403
-			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus404
-			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus409
-			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus422
-			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus429
-			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus500
-		>,
-		PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionOptions,
-		TContext
-	>({
-		mutationKey,
-		mutationFn: async ({ path, body }) => {
-			const { data } = await postApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecision({
-				...config,
-				path,
-				body,
-				throwOnError: true,
-			});
-			return data;
-		},
-	});
-}
-
-/**
- * @summary Approve or reject a Zone theme revision
- * {@link /api/v1/zone-themes/:themeUnitId/revisions/:revisionId/decision}
- */
-export function usePostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecision<TContext>(
-	options: {
-		mutation?: UseMutationOptions<
-			PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus200,
-			ResponseErrorConfig<
-				| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus400
-				| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus403
-				| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus404
-				| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus409
-				| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus422
-				| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus429
-				| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus500
-			>,
-			PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionOptions,
-			TContext
-		> & { client?: QueryClient };
-		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
-	} = {},
-) {
-	const { mutation = {}, client: config = {} } = options ?? {};
-	const { client: queryClient, ...mutationOptions } = mutation;
-	const mutationKey =
-		mutationOptions.mutationKey ??
-		postApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionMutationKey();
-
-	const baseOptions = postApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionMutationOptions(
-		config,
-	) as UseMutationOptions<
-		PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus200,
-		ResponseErrorConfig<
-			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus400
-			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus403
-			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus404
-			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus409
-			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus422
-			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus429
-			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus500
-		>,
-		PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionOptions,
-		TContext
-	>;
-
-	return useMutation<
-		PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus200,
-		ResponseErrorConfig<
-			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus400
-			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus403
-			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus404
-			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus409
-			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus422
-			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus429
-			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus500
-		>,
-		PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionOptions,
-		TContext
-	>(
-		{
-			...baseOptions,
-			mutationKey,
-			...mutationOptions,
-		},
-		queryClient,
-	) as UseMutationResult<
-		PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus200,
-		ResponseErrorConfig<
-			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus400
-			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus403
-			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus404
-			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus409
-			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus422
-			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus429
-			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionStatus500
-		>,
-		PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionOptions,
-		TContext
-	>;
-}
-
-export const postApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillMutationKey = () =>
-	[{ url: "/api/v1/zone-themes/:themeUnitId/revisions/:revisionId/kill" }] as const;
-
-export function postApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillMutationOptions<
-	TContext = unknown,
->(config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {}) {
-	const mutationKey = postApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillMutationKey();
-	return mutationOptions<
-		PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillStatus200,
-		ResponseErrorConfig<
-			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillStatus400
-			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillStatus403
-			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillStatus404
-			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillStatus409
-			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillStatus422
-			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillStatus429
-			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillStatus500
-		>,
-		PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillOptions,
-		TContext
-	>({
-		mutationKey,
-		mutationFn: async ({ path, body }) => {
-			const { data } = await postApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKill({
-				...config,
-				path,
-				body,
-				throwOnError: true,
-			});
-			return data;
-		},
-	});
-}
-
-/**
- * @summary Kill an approved Zone theme revision globally
- * {@link /api/v1/zone-themes/:themeUnitId/revisions/:revisionId/kill}
- */
-export function usePostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKill<TContext>(
-	options: {
-		mutation?: UseMutationOptions<
-			PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillStatus200,
-			ResponseErrorConfig<
-				| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillStatus400
-				| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillStatus403
-				| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillStatus404
-				| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillStatus409
-				| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillStatus422
-				| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillStatus429
-				| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillStatus500
-			>,
-			PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillOptions,
-			TContext
-		> & { client?: QueryClient };
-		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
-	} = {},
-) {
-	const { mutation = {}, client: config = {} } = options ?? {};
-	const { client: queryClient, ...mutationOptions } = mutation;
-	const mutationKey =
-		mutationOptions.mutationKey ??
-		postApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillMutationKey();
-
-	const baseOptions = postApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillMutationOptions(
-		config,
-	) as UseMutationOptions<
-		PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillStatus200,
-		ResponseErrorConfig<
-			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillStatus400
-			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillStatus403
-			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillStatus404
-			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillStatus409
-			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillStatus422
-			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillStatus429
-			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillStatus500
-		>,
-		PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillOptions,
-		TContext
-	>;
-
-	return useMutation<
-		PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillStatus200,
-		ResponseErrorConfig<
-			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillStatus400
-			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillStatus403
-			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillStatus404
-			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillStatus409
-			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillStatus422
-			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillStatus429
-			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillStatus500
-		>,
-		PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillOptions,
-		TContext
-	>(
-		{
-			...baseOptions,
-			mutationKey,
-			...mutationOptions,
-		},
-		queryClient,
-	) as UseMutationResult<
-		PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillStatus200,
-		ResponseErrorConfig<
-			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillStatus400
-			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillStatus403
-			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillStatus404
-			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillStatus409
-			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillStatus422
-			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillStatus429
-			| PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillStatus500
-		>,
-		PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillOptions,
+		PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessOptions,
 		TContext
 	>;
 }

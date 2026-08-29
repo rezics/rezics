@@ -23,6 +23,8 @@ const [
 	unitMergeService,
 	bookChapterDraftWorker,
 	tagExpressionProjectionWorker,
+	customThemeReview,
+	customThemeMonitor,
 	workerHealth,
 ] = await Promise.all([
 	import("srvx"),
@@ -37,6 +39,8 @@ const [
 	import("./services/units/merge/service"),
 	import("./services/units/book-chapter-draft-worker"),
 	import("./services/tag-expressions/projection-worker"),
+	import("./services/custom-themes/review"),
+	import("./services/custom-themes/monitor"),
 	import("./services/health/worker-health"),
 ]);
 const { aggregateRecommendationMetrics, purgeRecommendationData, refreshRecommendationSnapshot } =
@@ -49,6 +53,8 @@ const { dispatchUnitMergeBatch } = unitMergeWorker;
 const { expireUnitMergeRequests } = unitMergeService;
 const { dispatchBookChapterDraftJobs } = bookChapterDraftWorker;
 const { dispatchTagExpressionProjectionRebuilds } = tagExpressionProjectionWorker;
+const { reviewPendingCustomThemeRevisionBatch } = customThemeReview;
+const { monitorCustomThemeExternalResourceBatch } = customThemeMonitor;
 const { logger } = observability;
 const healthState = new workerHealth.WorkerHealthState();
 const evaluateReadiness = workerHealth.createWorkerReadinessEvaluator(healthState);
@@ -96,6 +102,8 @@ async function run() {
 	let nextImageAssetCleanupAt = 0;
 	let nextApiQuotaCleanupAt = 0;
 	let nextStudioCandidateCleanupAt = 0;
+	let nextCustomThemeReviewAt = 0;
+	let nextCustomThemeMonitorAt = 0;
 	while (!stopping) {
 		healthState.startJob();
 		observability.metrics.workerHeartbeat(healthState.activeJobStartedAt());
@@ -164,6 +172,37 @@ async function run() {
 						logger.info("Expired Studio editor candidates cleaned", {
 							eventName: "studio_candidate.cleanup.completed",
 							attributes: { cleaned },
+						});
+				});
+			}
+			if (Date.now() >= nextCustomThemeReviewAt) {
+				nextCustomThemeReviewAt = Date.now() + env.CUSTOM_THEME_REVIEW_INTERVAL_MS;
+				await runWorkerJob({ name: "custom_theme.review", retryCount: 0 }, async () => {
+					const reviewed = await reviewPendingCustomThemeRevisionBatch(
+						env.CUSTOM_THEME_REVIEW_BATCH_SIZE,
+					);
+					if (reviewed > 0)
+						logger.info("Custom Theme automated review batch completed", {
+							eventName: "custom_theme.review.completed",
+							attributes: { reviewed },
+						});
+				});
+			}
+			if (Date.now() >= nextCustomThemeMonitorAt) {
+				nextCustomThemeMonitorAt = Date.now() + env.CUSTOM_THEME_MONITOR_INTERVAL_MS;
+				await runWorkerJob({ name: "custom_theme.monitor", retryCount: 0 }, async () => {
+					const result = await monitorCustomThemeExternalResourceBatch(
+						env.CUSTOM_THEME_MONITOR_BATCH_SIZE,
+					);
+					if (result.checked > 0)
+						logger.info("Custom Theme external-resource monitor batch completed", {
+							eventName: "custom_theme.monitor.completed",
+							attributes: { ...result },
+						});
+					if (result.oldestQueueAgeMilliseconds > 5 * 60_000)
+						logger.warn("Custom Theme unpinned-resource monitor objective missed", {
+							eventName: "custom_theme.monitor.queue_age_exceeded",
+							attributes: { ...result },
 						});
 				});
 			}

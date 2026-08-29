@@ -22,7 +22,7 @@ function ZoneSearchEntrySurface({
 }) {
 	const { t } = useTranslation("search");
 	return (
-		<main className="mx-auto flex w-full max-w-7xl flex-col gap-8 px-4 py-10 sm:px-6">
+		<div className="mx-auto flex w-full max-w-7xl flex-col gap-8 px-4 py-10 sm:px-6">
 			<PageHeading title={t.title} />
 			<SearchSurface
 				id={"zone-" + zoneId + "-entry-search"}
@@ -30,7 +30,7 @@ function ZoneSearchEntrySurface({
 				injections={entry.injections}
 				source={{ kind: "zone", zoneId }}
 			/>
-		</main>
+		</div>
 	);
 }
 
@@ -49,7 +49,13 @@ export function ZoneSearchPage({
 				entry ? (
 					<ZoneSearchEntrySurface entry={entry} key={rawEntry} zoneId={zoneId} />
 				) : (
-					<ScopedSearchPage id={"zone-" + zoneId + "-search"} source={{ kind: "zone", zoneId }} />
+					<div className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6">
+						<ScopedSearchPage
+							embedded
+							id={"zone-" + zoneId + "-search"}
+							source={{ kind: "zone", zoneId }}
+						/>
+					</div>
 				)
 			}
 		</ZoneSurface>

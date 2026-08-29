@@ -1,9 +1,9 @@
 import {
-	ZoneThemeDocument,
+	ZoneAppearanceDocument,
 	isDocument,
 	isPortableTextDocument,
 	type PortableTextDocument,
-	type ZoneThemeDocument as ZoneThemeDocumentValue,
+	type ZoneAppearanceDocument as ZoneAppearanceDocumentValue,
 } from "@rezics/block";
 import {
 	ContentLanguageChannelValues,
@@ -94,9 +94,9 @@ const JsonObject = z.record(z.string(), JsonValue);
 const PortableTextDocumentSchema = z.custom<PortableTextDocument>(isPortableTextDocument, {
 	error: "Expected a Portable Text document",
 });
-const ZoneThemeDocumentSchema = z.custom<ZoneThemeDocumentValue>(
-	(value): value is ZoneThemeDocumentValue => isDocument(ZoneThemeDocument, value),
-	{ error: "Expected a ZoneThemeDocument" },
+const ZoneAppearanceDocumentSchema = z.custom<ZoneAppearanceDocumentValue>(
+	(value): value is ZoneAppearanceDocumentValue => isDocument(ZoneAppearanceDocument, value),
+	{ error: "Expected a ZoneAppearanceDocument" },
 );
 const SpoilerLevel = z.union([z.literal(0), z.literal(1), z.literal(2)]);
 const FitVote = z.union([z.literal(-1), z.literal(1)]);
@@ -525,7 +525,7 @@ const PackObjectBaseSchema = z
 			.object({
 				slug: Slug,
 				filterDocument: JsonValue,
-				themeDocument: ZoneThemeDocumentSchema,
+				appearanceDocument: ZoneAppearanceDocumentSchema,
 				localRuleRealmSourceKey: NonEmptyString,
 			})
 			.strict()

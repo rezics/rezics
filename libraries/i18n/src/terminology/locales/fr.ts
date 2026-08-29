@@ -66,6 +66,16 @@ export const frTerminology = defineTerminology("fr", {
 		forms: { label: "Vidéo", pluralLabel: "Vidéos", inline: "vidéo", plural: "vidéos" },
 		forbidden: [],
 	},
+	customTheme: {
+		status: "approved",
+		forms: {
+			label: "Thème personnalisé",
+			pluralLabel: "Thèmes personnalisés",
+			inline: "thème personnalisé",
+			plural: "thèmes personnalisés",
+		},
+		forbidden: [],
+	},
 	audio: {
 		status: "approved",
 		forms: { label: "Audio", pluralLabel: "Audios", inline: "audio", plural: "audios" },

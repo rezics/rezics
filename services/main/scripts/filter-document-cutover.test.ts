@@ -168,7 +168,7 @@ describe("FilterDocument production cutover", () => {
 			version: 1,
 			kind: "zone",
 			unit: {},
-			extension: { boundaryDocument: BookBoundary, themeDocument: { accent: "#a16207" } },
+			extension: { boundaryDocument: BookBoundary, appearanceDocument: { accent: "#a16207" } },
 		});
 		expect(main.changed).toBe(true);
 		expect(main.value).toEqual({
@@ -177,7 +177,7 @@ describe("FilterDocument production cutover", () => {
 			unit: {},
 			extension: {
 				filterDocument: { categories: [...WorkCategories], where: BookBoundary.filter },
-				themeDocument: { accent: "#a16207" },
+				appearanceDocument: { accent: "#a16207" },
 			},
 		});
 

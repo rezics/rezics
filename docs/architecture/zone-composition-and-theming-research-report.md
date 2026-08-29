@@ -8,6 +8,14 @@ the accepted design lives in
 and intentionally restates none of it.
 Observation date: 2026-08 (repository state as of 2026-08-24).
 
+Interpretation note (2026-08-29): bounded-CSS findings in this factual record
+informed the earlier styling proposal but are not the implemented Custom Theme
+security model. The accepted preview executes reviewed HTML/CSS/JavaScript with
+first-party privilege and mutable `external_live` supply-chain risk; see
+[Custom Theme full-trust external-live execution](./custom-theme-full-trust-external-live.md).
+The CSS material remains useful for reviewer linting and a possible future
+`bounded_style` design.
+
 ## 1. Repository state
 
 ### 1.1 Zone and Realm boundary

@@ -66,6 +66,16 @@ export const zhHansTerminology = defineTerminology("zh-Hans", {
 		},
 		forbidden: [],
 	},
+	customTheme: {
+		status: "approved",
+		forms: {
+			label: "自定义主题",
+			pluralLabel: "自定义主题",
+			inline: "自定义主题",
+			plural: "自定义主题",
+		},
+		forbidden: [],
+	},
 	tagPath: {
 		status: "approved",
 		forms: {

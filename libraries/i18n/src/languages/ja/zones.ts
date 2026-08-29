@@ -4,6 +4,7 @@ import { jaTerminology } from "@rezics/i18n/terminology/ja";
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 
 const { forms: postTerms } = jaTerminology.post;
+const { forms: customThemeTerms } = jaTerminology.customTheme;
 const { forms: realmTerms } = jaTerminology.realm;
 const { forms: unitSlugTerms } = jaTerminology.unitSlug;
 const { forms: zoneTerms } = jaTerminology.zone;
@@ -43,9 +44,10 @@ export default {
 	loadSection: "このセクションを読み込む",
 	theme: {
 		viewerDefault: "プラットフォームの標準テーマを使う",
-		viewerDefaultScope: `すべての${zoneTerms.label}でカスタムテーマが無効になります。設定から再び有効にできます。`,
+		viewerDefaultScope: `すべての${zoneTerms.label}で${customThemeTerms.label}が無効になります。設定から再び有効にできます。`,
 		viewerDefaultFailed:
 			"標準テーマに切り替えられませんでした。しばらくしてから再試行してください。",
+		runtimeFailed: `${customThemeTerms.label}を読み込めなかったため、プラットフォームの標準表示を使用しています。`,
 		basicsTitle: "基本の外観",
 		detailsTitle: "テーマの詳細",
 		accent: "アクセントカラー",

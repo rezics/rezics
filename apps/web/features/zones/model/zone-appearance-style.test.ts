@@ -1,11 +1,11 @@
-import type { ZoneThemeDocument } from "@rezics/block";
+import type { ZoneAppearanceDocument } from "@rezics/block";
 import { describe, expect, it } from "vitest";
 
-import { zoneAccentForeground, zoneThemeStyle } from "./zone-theme-style";
+import { zoneAccentForeground, zoneAppearanceStyle } from "./zone-appearance-style";
 
-function theme(overrides: Partial<ZoneThemeDocument> = {}): ZoneThemeDocument {
+function appearance(overrides: Partial<ZoneAppearanceDocument> = {}): ZoneAppearanceDocument {
 	return {
-		_type: "zone-theme",
+		_type: "zone-appearance",
 		_key: "100000000001",
 		colorScheme: "system",
 		accent: "#2563eb",
@@ -14,7 +14,7 @@ function theme(overrides: Partial<ZoneThemeDocument> = {}): ZoneThemeDocument {
 	};
 }
 
-describe("Zone theme token projection", () => {
+describe("Zone appearance token projection", () => {
 	it("chooses the higher-contrast black or white accent foreground", () => {
 		expect(zoneAccentForeground("#000000")).toBe("#ffffff");
 		expect(zoneAccentForeground("#ffffff")).toBe("#000000");
@@ -22,8 +22,7 @@ describe("Zone theme token projection", () => {
 	});
 
 	it("projects defaults into the stable semantic CSS-variable contract", () => {
-		const style = zoneThemeStyle(theme());
-
+		const style = zoneAppearanceStyle(appearance());
 		expect(style).toMatchObject({
 			"--rezics-zone-accent": "#2563eb",
 			"--rezics-zone-density": "1",
@@ -36,8 +35,8 @@ describe("Zone theme token projection", () => {
 	});
 
 	it("applies explicit density, shape, typography, tint, and forced palette choices", () => {
-		const style = zoneThemeStyle(
-			theme({
+		const style = zoneAppearanceStyle(
+			appearance({
 				colorScheme: "dark",
 				accent: "#f97316",
 				density: "compact",
@@ -46,7 +45,6 @@ describe("Zone theme token projection", () => {
 				surfaceTint: "accent",
 			}),
 		);
-
 		expect(style["--rezics-zone-density"]).toBe("0.8");
 		expect(style["--rezics-zone-card-radius"]).toBe("1rem");
 		expect(style["--rezics-zone-heading-font-scale"]).toBe("1.125");

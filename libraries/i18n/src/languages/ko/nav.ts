@@ -10,6 +10,7 @@ const { forms: realmTerms } = koTerminology.realm;
 const { forms: entityTerms } = koTerminology.entity;
 const { forms: unitSlugTerms } = koTerminology.unitSlug;
 const { forms: zoneTerms } = koTerminology.zone;
+const { forms: customThemeTerms } = koTerminology.customTheme;
 
 export default {
 	home: "홈",
@@ -76,7 +77,7 @@ export default {
 			series: "시리즈",
 			zone: zoneTerms.label,
 			zone_page: `${zoneTerms.label} 페이지`,
-			zone_theme: `${zoneTerms.label} 테마`,
+			custom_theme: customThemeTerms.label,
 			collection: "컬렉션",
 			post: postTerms.label,
 			poll: "설문",

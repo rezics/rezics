@@ -96,6 +96,20 @@ export const env = createEnv({
 		IMAGE_ASSET_CLEANUP_INTERVAL_MS: z.coerce.number().int().min(60_000).default(300_000),
 		IMAGE_ASSET_CLEANUP_GRACE_MS: z.coerce.number().int().min(0).max(86_400_000).default(300_000),
 		IMAGE_ASSET_CLEANUP_BATCH_SIZE: z.coerce.number().int().min(1).max(500).default(100),
+		CUSTOM_THEME_REVIEW_INTERVAL_MS: z.coerce.number().int().min(1_000).max(60_000).default(5_000),
+		CUSTOM_THEME_REVIEW_BATCH_SIZE: z.coerce.number().int().min(1).max(16).default(4),
+		CUSTOM_THEME_REFERENCE_RENDERER_URL: z
+			.url()
+			.refine((value) => new URL(value).protocol === "https:", "must use HTTPS")
+			.optional(),
+		CUSTOM_THEME_REFERENCE_RENDER_TOKEN: z.string().min(32).optional(),
+		CUSTOM_THEME_MONITOR_INTERVAL_MS: z.coerce
+			.number()
+			.int()
+			.min(1_000)
+			.max(300_000)
+			.default(30_000),
+		CUSTOM_THEME_MONITOR_BATCH_SIZE: z.coerce.number().int().min(1).max(32).default(32),
 		API_QUOTA_CLEANUP_INTERVAL_MS: z.coerce.number().int().min(60_000).default(3_600_000),
 		STUDIO_CANDIDATE_CLEANUP_INTERVAL_MS: z.coerce.number().int().min(1_000).default(10_000),
 		STUDIO_CANDIDATE_CLEANUP_BATCH_SIZE: z.coerce.number().int().min(1).max(10_000).default(5_000),
@@ -129,6 +143,14 @@ if (
 )
 	throw new Error(
 		"CLOUDFLARE_ACCOUNT_ID and CLOUDFLARE_EMAIL_API_TOKEN are required when EMAIL_MODE=cloudflare",
+	);
+
+if (
+	Boolean(env.CUSTOM_THEME_REFERENCE_RENDERER_URL) !==
+	Boolean(env.CUSTOM_THEME_REFERENCE_RENDER_TOKEN)
+)
+	throw new Error(
+		"CUSTOM_THEME_REFERENCE_RENDERER_URL and CUSTOM_THEME_REFERENCE_RENDER_TOKEN must be configured together",
 	);
 
 if (

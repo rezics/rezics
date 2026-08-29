@@ -3,6 +3,7 @@ import { frTerminology } from "@rezics/i18n/terminology/fr";
 
 const { forms: audioTerms } = frTerminology.audio;
 const { forms: dockTerms } = frTerminology.dock;
+const { forms: customThemeTerms } = frTerminology.customTheme;
 const { forms: followTerms } = frTerminology.follow;
 const { forms: postTerms } = frTerminology.post;
 const { forms: realmTerms } = frTerminology.realm;
@@ -80,7 +81,7 @@ export default {
 	PlatformAccessRevisionConflict:
 		"L’accès à la plateforme a été modifié ailleurs. Rechargez-le avant de réessayer.",
 	PlatformAccessConfigurationInvalid:
-		"Chaque capacité de plateforme ne peut apparaître qu’une seule fois.",
+		"L’accès à la plateforme demandé dépasse une limite d’unicité ou de capacité.",
 	CollectionOwnershipRequired: "Cette collection ne vous appartient pas.",
 	ProfileNotFound: "Ce profil est introuvable.",
 	ProfileChanged: "Ce profil a changé. Actualisez la page et réessayez.",
@@ -336,16 +337,21 @@ export default {
 	UnitRealmPublicationNotFound: `Ce contenu n’a aucune relation d’inclusion avec ce ${realmTerms.label}.`,
 	UnitRealmPublicationAlreadyExists: `Ce contenu possède déjà une relation d’inclusion avec ce ${realmTerms.label}.`,
 	UnitRealmPublicationTransitionInvalid: "La relation d’inclusion est déjà dans l’état demandé.",
-	ZoneThemeNotFound: `Ce thème de ${zoneTerms.plural} est introuvable.`,
-	ZoneThemeRevisionNotFound: `Cette version du thème de ${zoneTerms.plural} est introuvable.`,
-	ZoneThemeStylesheetInvalid: `La feuille de style de ce thème de ${zoneTerms.plural} a échoué au contrôle de sécurité automatique.`,
-	ZoneThemeAssetsInvalid:
-		"Chaque image du thème doit vous appartenir et rester publique, prête et non supprimée.",
-	ZoneThemeAutomatedReviewInvalid:
-		"Les preuves automatiques du thème sont incomplètes ou ne satisfont pas les conditions de validation.",
-	ZoneThemeRevisionStateConflict:
-		"Cette version du thème est déjà passée à un autre état de contrôle. Rechargez-la avant de continuer.",
-	ZoneThemeReferenceInvalid: `Choisissez une version du thème de ${zoneTerms.plural} actuellement approuvée.`,
+	CustomThemeExternalLiveAccessSelfMutationForbidden:
+		"Vous ne pouvez pas accorder, modifier ou révoquer votre propre accès aux thèmes utilisant des ressources externes.",
+	CustomThemeNotFound: `Ce ${customThemeTerms.inline} est introuvable.`,
+	CustomThemeRevisionNotFound: `Cette version du ${customThemeTerms.inline} est introuvable.`,
+	CustomThemePackageInvalid: `Le paquet de ce ${customThemeTerms.inline} n’est pas valide.`,
+	CustomThemeSubmissionBackpressure: `Les soumissions pour ce ${customThemeTerms.inline} sont temporairement suspendues pendant le traitement des contrôles en attente.`,
+	CustomThemeExternalResourceInvalid: `Une ressource externe de ce ${customThemeTerms.inline} n’a pas pu être contrôlée de manière sûre.`,
+	CustomThemeReviewEvidenceInvalid: `Les preuves de contrôle de ce ${customThemeTerms.inline} sont incomplètes.`,
+	CustomThemeRevisionStateConflict: `Cette version du ${customThemeTerms.inline} a changé d’état de contrôle. Rechargez-la avant de continuer.`,
+	CustomThemeReviewerSeparationRequired: `La personne ayant envoyé cette version du ${customThemeTerms.inline} ne peut pas décider de son contrôle.`,
+	CustomThemeInstallationInvalid: `Choisissez une version du ${customThemeTerms.inline} actuellement approuvée pour cet hôte.`,
+	UnitPresentationHostUnsupported:
+		"Ce type d’Unit ne prend pas en charge une présentation personnalisée.",
+	UnitPresentationRevisionConflict:
+		"La présentation de l’Unit a été modifiée ailleurs. Rechargez-la avant d’enregistrer.",
 	StudioRealmSubjectLimitExceeded:
 		"Vous appartenez à trop d’équipes pour afficher les contenus délégués dans votre environnement de travail.",
 } satisfies typeof import("../zh-Hant/errorCodes").default;

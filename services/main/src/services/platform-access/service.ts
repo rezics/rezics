@@ -1,7 +1,13 @@
-import { PlatformCapabilityValues, type PlatformCapability } from "@rezics/access";
+import {
+	CustomThemeExternalLiveAccessCapability,
+	CustomThemeExternalLiveAccessManageCapability,
+	PlatformCapabilityValues,
+	type PlatformCapability,
+} from "@rezics/access";
 import { and, eq, ilike, inArray, isNull, or, sql } from "drizzle-orm";
 
 import {
+	CustomThemeExternalLiveAccessSelfMutationForbidden,
 	PlatformAccessManagerRequired,
 	PlatformAccessConfigurationInvalid,
 	PlatformAccessRevisionConflict,
@@ -15,6 +21,11 @@ import { platformCapabilityGrant, profile, users } from "../database/schema";
 import { firstUnitLocalizationTitle } from "../units/localization";
 
 const PlatformAccessLockName = "platform-access-grants";
+export const MaximumCustomThemeExternalLiveAccessGrantDays = 90;
+export const MaximumActiveCustomThemeExternalLiveAccessGrants = 1_000;
+export const MaximumActiveCustomThemeExternalLiveAccessManagers = 100;
+const MaximumCustomThemeExternalLiveAccessGrantMilliseconds =
+	MaximumCustomThemeExternalLiveAccessGrantDays * 24 * 60 * 60 * 1_000;
 
 export interface PlatformAccessGrant {
 	readonly id: string;
@@ -36,6 +47,65 @@ export interface PlatformAccessProfile {
 export interface DesiredPlatformAccessGrant {
 	readonly capability: PlatformCapability;
 	readonly expiresAt: Date | null;
+}
+
+export interface CustomThemeExternalLiveAccessGrant {
+	readonly id: string;
+	readonly state: "granted" | "expired";
+	readonly grantedByProfileId: string;
+	readonly expiresAt: Date;
+	readonly createdAt: Date;
+	readonly updatedAt: Date;
+}
+
+export interface CustomThemeExternalLiveAccessProfile {
+	readonly profileId: string;
+	readonly name: string | null;
+	readonly email: string;
+	readonly grant: CustomThemeExternalLiveAccessGrant | null;
+	readonly revision: string;
+}
+
+export function isCustomThemeExternalLiveExpiryValid(
+	expiresAt: Date | null,
+	now: Date,
+): expiresAt is Date {
+	return Boolean(
+		expiresAt &&
+			expiresAt > now &&
+			expiresAt.getTime() <= now.getTime() + MaximumCustomThemeExternalLiveAccessGrantMilliseconds,
+	);
+}
+
+export type CustomThemePlatformAccessCapacityReason =
+	| "external_live_access_grant_bound"
+	| "external_live_access_manager_bound";
+
+export function customThemePlatformAccessCapacityReason(input: {
+	readonly activeAccessGrantCount: number;
+	readonly activeAccessManagerCount: number;
+	readonly addingAccessGrant: boolean;
+	readonly addingAccessManager: boolean;
+}): CustomThemePlatformAccessCapacityReason | null {
+	if (
+		input.addingAccessGrant &&
+		input.activeAccessGrantCount >= MaximumActiveCustomThemeExternalLiveAccessGrants
+	)
+		return "external_live_access_grant_bound";
+	if (
+		input.addingAccessManager &&
+		input.activeAccessManagerCount >= MaximumActiveCustomThemeExternalLiveAccessManagers
+	)
+		return "external_live_access_manager_bound";
+	return null;
+}
+
+function ensureCustomThemeExternalLiveExpiry(
+	expiresAt: Date | null,
+	now: Date,
+): asserts expiresAt is Date {
+	if (!isCustomThemeExternalLiveExpiryValid(expiresAt, now))
+		throw new CapabilityGrantExpiryInvalid();
 }
 
 function activePlatformGrantPredicate(now = new Date()) {
@@ -190,6 +260,49 @@ export async function lockPlatformAccess(tx: DatabaseTransaction): Promise<void>
 	);
 }
 
+async function ensureCustomThemePlatformAccessCapacity(
+	tx: DatabaseTransaction,
+	input: {
+		readonly addingAccessGrant: boolean;
+		readonly addingAccessManager: boolean;
+	},
+): Promise<void> {
+	const now = new Date();
+	const accessGrantRows = input.addingAccessGrant
+		? await tx
+				.select({ profileId: platformCapabilityGrant.profileId })
+				.from(platformCapabilityGrant)
+				.where(
+					and(
+						eq(platformCapabilityGrant.capability, CustomThemeExternalLiveAccessCapability),
+						activePlatformGrantPredicate(now),
+					),
+				)
+				.limit(MaximumActiveCustomThemeExternalLiveAccessGrants)
+		: [];
+	const accessManagerRows = input.addingAccessManager
+		? await tx
+				.selectDistinct({ profileId: platformCapabilityGrant.profileId })
+				.from(platformCapabilityGrant)
+				.where(
+					and(
+						inArray(platformCapabilityGrant.capability, [
+							CustomThemeExternalLiveAccessManageCapability,
+							"platform.access.manage",
+						]),
+						activePlatformGrantPredicate(now),
+					),
+				)
+				.limit(MaximumActiveCustomThemeExternalLiveAccessManagers)
+		: [];
+	const reason = customThemePlatformAccessCapacityReason({
+		activeAccessGrantCount: accessGrantRows.length,
+		activeAccessManagerCount: accessManagerRows.length,
+		...input,
+	});
+	if (reason) throw new PlatformAccessConfigurationInvalid({ reason });
+}
+
 async function ensurePermanentAccessManagerContinuity(
 	tx: DatabaseTransaction,
 	targetProfileId: string,
@@ -233,12 +346,30 @@ export async function replacePlatformAccess(
 	const now = new Date();
 	if (input.grants.some(({ expiresAt }) => expiresAt !== null && expiresAt <= now))
 		throw new CapabilityGrantExpiryInvalid();
+	const requestedExternalLiveAccess = input.grants.find(
+		({ capability }) => capability === CustomThemeExternalLiveAccessCapability,
+	);
+	if (requestedExternalLiveAccess)
+		ensureCustomThemeExternalLiveExpiry(requestedExternalLiveAccess.expiresAt, now);
 	await lockPlatformAccess(tx);
 	const beforeProfile = await getPlatformAccessProfile(tx, input.targetProfileId);
 	if (beforeProfile.revision !== input.expectedRevision) throw new PlatformAccessRevisionConflict();
 
 	const desired = new Map(input.grants.map((grant) => [grant.capability, grant] as const));
 	if (desired.size !== input.grants.length) throw new PlatformAccessConfigurationInvalid();
+	const activeBefore = new Set(beforeProfile.grants.map(({ capability }) => capability));
+	const managedExternalLiveAccessBefore =
+		activeBefore.has(CustomThemeExternalLiveAccessManageCapability) ||
+		activeBefore.has("platform.access.manage");
+	const managesExternalLiveAccessAfter =
+		desired.has(CustomThemeExternalLiveAccessManageCapability) ||
+		desired.has("platform.access.manage");
+	await ensureCustomThemePlatformAccessCapacity(tx, {
+		addingAccessGrant:
+			desired.has(CustomThemeExternalLiveAccessCapability) &&
+			!activeBefore.has(CustomThemeExternalLiveAccessCapability),
+		addingAccessManager: managesExternalLiveAccessAfter && !managedExternalLiveAccessBefore,
+	});
 	await ensurePermanentAccessManagerContinuity(
 		tx,
 		input.targetProfileId,
@@ -259,6 +390,14 @@ export async function replacePlatformAccess(
 				isNull(platformCapabilityGrant.revokedAt),
 			),
 		);
+	const currentExternalLiveAccess = currentRows.find(
+		({ capability }) => capability === CustomThemeExternalLiveAccessCapability,
+	);
+	const externalLiveAccessChanges =
+		requestedExternalLiveAccess?.expiresAt?.getTime() !==
+		currentExternalLiveAccess?.expiresAt?.getTime();
+	if (externalLiveAccessChanges && input.actorProfileId === input.targetProfileId)
+		throw new CustomThemeExternalLiveAccessSelfMutationForbidden();
 	const keptCapabilities = new Set<PlatformCapability>();
 	const revokeIds: string[] = [];
 	for (const current of currentRows) {
@@ -315,6 +454,193 @@ export async function replacePlatformAccess(
 			},
 		});
 	return getPlatformAccessProfile(tx, input.targetProfileId);
+}
+
+function customThemeExternalLiveAccessRevision(
+	grant: Pick<CustomThemeExternalLiveAccessGrant, "id" | "updatedAt"> | null,
+): string {
+	return grant ? `${grant.id}@${grant.updatedAt.toISOString()}` : "empty";
+}
+
+async function loadCurrentCustomThemeExternalLiveAccessGrants(
+	executor: DatabaseExecutor,
+	profileIds: readonly string[],
+	now = new Date(),
+): Promise<ReadonlyMap<string, CustomThemeExternalLiveAccessGrant>> {
+	if (profileIds.length === 0) return new Map();
+	const rows = await executor
+		.select({
+			id: platformCapabilityGrant.id,
+			profileId: platformCapabilityGrant.profileId,
+			grantedByProfileId: platformCapabilityGrant.grantedByProfileId,
+			expiresAt: platformCapabilityGrant.expiresAt,
+			createdAt: platformCapabilityGrant.createdAt,
+			updatedAt: platformCapabilityGrant.updatedAt,
+		})
+		.from(platformCapabilityGrant)
+		.where(
+			and(
+				inArray(platformCapabilityGrant.profileId, [...profileIds]),
+				eq(platformCapabilityGrant.capability, CustomThemeExternalLiveAccessCapability),
+				isNull(platformCapabilityGrant.revokedAt),
+			),
+		);
+	const grants = new Map<string, CustomThemeExternalLiveAccessGrant>();
+	for (const row of rows) {
+		if (!row.expiresAt)
+			throw new Error("External-live access grant violates its mandatory expiry invariant");
+		grants.set(row.profileId, {
+			id: row.id,
+			state: row.expiresAt > now ? "granted" : "expired",
+			grantedByProfileId: row.grantedByProfileId,
+			expiresAt: row.expiresAt,
+			createdAt: row.createdAt,
+			updatedAt: row.updatedAt,
+		});
+	}
+	return grants;
+}
+
+function presentCustomThemeExternalLiveAccessProfile(
+	row: Pick<CustomThemeExternalLiveAccessProfile, "profileId" | "name" | "email">,
+	grant: CustomThemeExternalLiveAccessGrant | null,
+): CustomThemeExternalLiveAccessProfile {
+	return {
+		...row,
+		grant,
+		revision: customThemeExternalLiveAccessRevision(grant),
+	};
+}
+
+export async function getCustomThemeExternalLiveAccessProfile(
+	executor: DatabaseExecutor,
+	profileId: string,
+): Promise<CustomThemeExternalLiveAccessProfile> {
+	const [row] = await executor
+		.select({
+			profileId: profile.id,
+			name: firstUnitLocalizationTitle(profile.id),
+			email: users.email,
+		})
+		.from(profile)
+		.innerJoin(users, eq(users.id, profile.authUserId))
+		.where(eq(profile.id, profileId))
+		.limit(1);
+	if (!row) throw new ProfileNotFound();
+	const grants = await loadCurrentCustomThemeExternalLiveAccessGrants(executor, [profileId]);
+	return presentCustomThemeExternalLiveAccessProfile(row, grants.get(profileId) ?? null);
+}
+
+export async function searchCustomThemeExternalLiveAccessProfiles(
+	executor: DatabaseExecutor,
+	input: { readonly query?: string; readonly limit: number },
+): Promise<CustomThemeExternalLiveAccessProfile[]> {
+	const selection = executor
+		.select({
+			profileId: profile.id,
+			name: firstUnitLocalizationTitle(profile.id),
+			email: users.email,
+		})
+		.from(profile)
+		.innerJoin(users, eq(users.id, profile.authUserId));
+	const rows = input.query
+		? await selection
+				.where(
+					or(
+						ilike(users.email, `%${input.query.trim()}%`),
+						sql`${firstUnitLocalizationTitle(profile.id)} ilike ${`%${input.query.trim()}%`}`,
+					),
+				)
+				.orderBy(users.email, profile.id)
+				.limit(input.limit)
+		: await selection.orderBy(users.email, profile.id).limit(input.limit);
+	const grants = await loadCurrentCustomThemeExternalLiveAccessGrants(
+		executor,
+		rows.map(({ profileId }) => profileId),
+	);
+	return rows.map((row) =>
+		presentCustomThemeExternalLiveAccessProfile(row, grants.get(row.profileId) ?? null),
+	);
+}
+
+export async function setCustomThemeExternalLiveAccess(
+	tx: DatabaseTransaction,
+	input: {
+		readonly actorProfileId: string;
+		readonly targetProfileId: string;
+		readonly expectedRevision: string;
+		readonly state: "granted" | "revoked";
+		readonly expiresAt?: Date;
+	},
+): Promise<CustomThemeExternalLiveAccessProfile> {
+	if (input.actorProfileId === input.targetProfileId)
+		throw new CustomThemeExternalLiveAccessSelfMutationForbidden();
+	const now = new Date();
+	const expiresAt = input.state === "granted" ? (input.expiresAt ?? null) : null;
+	if (input.state === "granted") ensureCustomThemeExternalLiveExpiry(expiresAt, now);
+	await lockPlatformAccess(tx);
+	const before = await getCustomThemeExternalLiveAccessProfile(tx, input.targetProfileId);
+	if (before.revision !== input.expectedRevision) throw new PlatformAccessRevisionConflict();
+	await ensureCustomThemePlatformAccessCapacity(tx, {
+		addingAccessGrant: input.state === "granted" && before.grant?.state !== "granted",
+		addingAccessManager: false,
+	});
+	const [current] = await tx
+		.select({ id: platformCapabilityGrant.id })
+		.from(platformCapabilityGrant)
+		.where(
+			and(
+				eq(platformCapabilityGrant.profileId, input.targetProfileId),
+				eq(platformCapabilityGrant.capability, CustomThemeExternalLiveAccessCapability),
+				isNull(platformCapabilityGrant.revokedAt),
+			),
+		)
+		.limit(1);
+	if (current)
+		await tx
+			.update(platformCapabilityGrant)
+			.set({
+				revokedAt: now,
+				revokedByProfileId: input.actorProfileId,
+				updatedAt: now,
+			})
+			.where(eq(platformCapabilityGrant.id, current.id));
+
+	let createdGrantId: string | null = null;
+	if (input.state === "granted") {
+		const [created] = await tx
+			.insert(platformCapabilityGrant)
+			.values({
+				profileId: input.targetProfileId,
+				capability: CustomThemeExternalLiveAccessCapability,
+				grantedByProfileId: input.actorProfileId,
+				expiresAt,
+			})
+			.returning({ id: platformCapabilityGrant.id });
+		if (!created) throw new Error("External-live access grant insertion returned no row");
+		createdGrantId = created.id;
+	}
+
+	if (current || createdGrantId)
+		await recordAuditEvent(tx, {
+			category: "admin_activity",
+			outcome: "succeeded",
+			actor: { kind: "profile", profileId: input.actorProfileId },
+			authority: { kind: "platform" },
+			action:
+				input.state === "revoked"
+					? "platform.custom_theme.external_live.access.revoke"
+					: before.grant
+						? "platform.custom_theme.external_live.access.renew"
+						: "platform.custom_theme.external_live.access.grant",
+			target: { kind: "profile", id: input.targetProfileId },
+			details: {
+				previousGrantId: current?.id ?? null,
+				createdGrantId,
+				expiresAt: expiresAt?.toISOString() ?? null,
+			},
+		});
+	return getCustomThemeExternalLiveAccessProfile(tx, input.targetProfileId);
 }
 
 export async function ensurePlatformAccessContinuity(

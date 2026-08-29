@@ -7,7 +7,7 @@ import {
 	PollContentBlock,
 	UnitReferencedBlockDocument,
 	ZonePageBlockHostPolicy,
-	ZoneThemeDocument,
+	ZoneAppearanceDocument,
 	assertBlockQueryBudget,
 	assertUnitReferencedBlockDocument,
 	assertWikiPostPortableTextDocument,
@@ -109,7 +109,6 @@ import {
 } from "./content-language-support";
 import { restoreVideoAudioTracks } from "./video-audio-tracks";
 import { ensurePublicZoneThemeHeroAsset } from "../api/image-assets/service";
-import { ensureApprovedZoneThemeReference } from "../zone-themes/service";
 
 export type UnitRevisionEvent = "create" | "update" | "delete" | "restore";
 
@@ -138,7 +137,7 @@ const FilterDocumentSchema = z.custom<FilterDocument>((value): value is FilterDo
 		return false;
 	}
 });
-const ZoneThemeDocumentSchema = createDocumentSchema(ZoneThemeDocument);
+const ZoneAppearanceDocumentSchema = createDocumentSchema(ZoneAppearanceDocument);
 const FractionalPositionSchema = z
 	.string()
 	.max(FractionalPositionStorageMaximumBytes)
@@ -288,7 +287,7 @@ const realmStateSchema = schemaFactory
 const zoneStateSchema = schemaFactory
 	.createSelectSchema(zone, {
 		filterDocument: FilterDocumentSchema,
-		themeDocument: ZoneThemeDocumentSchema,
+		appearanceDocument: ZoneAppearanceDocumentSchema,
 	})
 	.omit({ id: true, createdAt: true, updatedAt: true });
 const collectionStateSchema = z.object({});
@@ -449,7 +448,7 @@ async function snapshotExtension(
 		case "realm_rule":
 		case "slug_namespace":
 		case "zone_page":
-		case "zone_theme":
+		case "custom_theme":
 			return null;
 	}
 }
@@ -768,7 +767,7 @@ export async function restoreUnitSnapshot(
 		.select({
 			kind: unit.kind,
 			subjectUnitId: post.subjectUnitId,
-			zoneThemeDocument: zone.themeDocument,
+			zoneAppearanceDocument: zone.appearanceDocument,
 		})
 		.from(unit)
 		.leftJoin(post, eq(post.id, unit.id))
@@ -777,22 +776,19 @@ export async function restoreUnitSnapshot(
 		.limit(1);
 	if (!current || current.kind !== snapshot.kind) throw new Error("Unit snapshot kind mismatch");
 	if (snapshot.kind === "zone" && snapshot.extension) {
-		const currentTheme = ZoneThemeDocumentSchema.parse(current.zoneThemeDocument);
-		const restoredTheme = zoneStateSchema.parse(snapshot.extension).themeDocument;
+		const currentTheme = ZoneAppearanceDocumentSchema.parse(current.zoneAppearanceDocument);
+		const restoredTheme = zoneStateSchema.parse(snapshot.extension).appearanceDocument;
 		if (canonicalJson(currentTheme) !== canonicalJson(restoredTheme)) {
 			const level1Changed =
 				currentTheme.heroAssetId !== restoredTheme.heroAssetId ||
 				currentTheme.cardRadius !== restoredTheme.cardRadius ||
 				currentTheme.headingFontScale !== restoredTheme.headingFontScale ||
-				currentTheme.surfaceTint !== restoredTheme.surfaceTint ||
-				currentTheme.custom?.themeUnitId !== restoredTheme.custom?.themeUnitId ||
-				currentTheme.custom?.revisionId !== restoredTheme.custom?.revisionId;
+				currentTheme.surfaceTint !== restoredTheme.surfaceTint;
 			await authorization.zone.ensureThemeMutation(
 				unitId,
 				level1Changed ? "development_preview" : "released",
 			);
 			await ensurePublicZoneThemeHeroAsset(tx, restoredTheme.heroAssetId);
-			await ensureApprovedZoneThemeReference(tx, restoredTheme.custom);
 		}
 	}
 	if (snapshot.kind === "book" && snapshot.extension)

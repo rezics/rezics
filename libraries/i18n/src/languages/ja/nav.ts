@@ -10,6 +10,7 @@ const { forms: realmTerms } = jaTerminology.realm;
 const { forms: entityTerms } = jaTerminology.entity;
 const { forms: unitSlugTerms } = jaTerminology.unitSlug;
 const { forms: zoneTerms } = jaTerminology.zone;
+const { forms: customThemeTerms } = jaTerminology.customTheme;
 
 export default {
 	home: "ホーム",
@@ -76,7 +77,7 @@ export default {
 			series: "シリーズ",
 			zone: zoneTerms.label,
 			zone_page: `${zoneTerms.label} ページ`,
-			zone_theme: `${zoneTerms.label} テーマ`,
+			custom_theme: customThemeTerms.label,
 			collection: "コレクション",
 			post: postTerms.label,
 			poll: "投票",

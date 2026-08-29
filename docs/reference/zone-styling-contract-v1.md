@@ -1,5 +1,13 @@
 # Zone styling contract 3.0.0
 
+Status: Historical/inactive
+
+This was the authoring contract for the superseded bounded-CSS preview. It is
+retained as reviewer-linting and possible future `bounded_style` groundwork.
+It is not accepted input, an execution mode, or a security boundary for the
+implemented `host_full_trust` Custom Theme runtime. See
+[Custom Theme full-trust external-live execution](../architecture/custom-theme-full-trust-external-live.md).
+
 This document is the authoring reference for custom Zone themes under styling
 contract `3.0.0`. The machine-readable source of truth is
 `ZoneStylingContract` from `@rezics/block`.
@@ -136,4 +144,6 @@ classes, utility and recipe classes, Block keys, private diagnostics, SharkUI
 and Ark UI attributes, React boundaries, and every node outside a Zone theme
 scope are private. Platform navigation, authentication, moderation, reporting,
 trust, rating, labeling, and management controls remain outside selector reach.
-JavaScript never executes as part of a Zone theme.
+Under this historical bounded-CSS contract, JavaScript did not execute. The
+current full-trust Custom Theme preview is governed by the active architecture
+decision linked above.

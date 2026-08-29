@@ -8,6 +8,7 @@ const { forms: realmTerms } = koTerminology.realm;
 const { forms: entityTerms } = koTerminology.entity;
 const { forms: postTerms } = koTerminology.post;
 const { forms: zoneTerms } = koTerminology.zone;
+const { forms: customThemeTerms } = koTerminology.customTheme;
 
 export default {
 	title: "유닛 관리",
@@ -95,8 +96,10 @@ export default {
 		"platform.user.api_token.api_quota.update": `사용자 ${verbatimTerms.api.value} 토큰 할당량 관리`,
 		"platform.moderate": "플랫폼 유닛 중재",
 		"platform.suppress": "플랫폼 콘텐츠 및 수정 사항 숨기기",
-		"platform.zone_theme.review": `사용자 지정 ${zoneTerms.label} 테마 검토`,
-		"platform.zone_theme.kill": `승인된 사용자 지정 ${zoneTerms.label} 테마 긴급 중지`,
+		"platform.custom_theme.external_live.access": `${customThemeTerms.label}에서 외부 라이브 리소스 사용`,
+		"platform.custom_theme.external_live.access.manage": `${customThemeTerms.label} 외부 라이브 접근 관리`,
+		"platform.custom_theme.review": `${customThemeTerms.label} 검토`,
+		"platform.custom_theme.kill": `승인된 ${customThemeTerms.label} 긴급 중지`,
 		"realm.contribute": `모든 ${realmTerms.label} 참여`,
 		"realm.units.create": `모든 ${realmTerms.label}에 유닛 생성`,
 		"realm.post.replies.create": `모든 ${realmTerms.label}에 답글 생성`,

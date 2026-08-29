@@ -4,6 +4,7 @@ import { zhHansTerminology } from "@rezics/i18n/terminology/zh-Hans";
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 
 const { forms: unitSlugTerms } = zhHansTerminology.unitSlug;
+const { forms: customThemeTerms } = zhHansTerminology.customTheme;
 const { forms: realmTerms } = zhHansTerminology.realm;
 const { forms: zoneTerms } = zhHansTerminology.zone;
 
@@ -42,8 +43,9 @@ export default {
 	loadSection: "加载此区段",
 	theme: {
 		viewerDefault: "改用平台默认主题",
-		viewerDefaultScope: "这会关闭所有空间的自定义主题；你可以稍后在偏好设置中重新开启。",
+		viewerDefaultScope: `这会关闭所有空间的${customThemeTerms.label}；你可以稍后在偏好设置中重新开启。`,
 		viewerDefaultFailed: "无法切换至平台默认主题，请稍后再试。",
+		runtimeFailed: `${customThemeTerms.label}无法加载，现已使用平台默认外观。`,
 		basicsTitle: "基本外观",
 		detailsTitle: "高级主题外观",
 		accent: "强调色",

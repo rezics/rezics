@@ -51,7 +51,20 @@ export class PlatformAccessConfigurationInvalid extends Data.TaggedError(
 ) {
 	static readonly status = StatusCodes.BAD_REQUEST as const;
 	readonly status = PlatformAccessConfigurationInvalid.status;
-	readonly message = "Each platform capability may appear at most once";
+	readonly message =
+		"The requested platform access configuration exceeds a uniqueness or capacity limit";
+
+	constructor(readonly details?: JsonValue) {
+		super();
+	}
+}
+
+export class CustomThemeExternalLiveAccessSelfMutationForbidden extends Data.TaggedError(
+	"CustomThemeExternalLiveAccessSelfMutationForbidden",
+) {
+	static readonly status = StatusCodes.FORBIDDEN as const;
+	readonly status = CustomThemeExternalLiveAccessSelfMutationForbidden.status;
+	readonly message = "External-live access managers cannot change their own eligibility";
 }
 
 export class CollectionOwnershipRequired extends Data.TaggedError("CollectionOwnershipRequired") {
@@ -68,5 +81,6 @@ export const AuthorizationErrors = [
 	PlatformAccessManagerRequired,
 	PlatformAccessRevisionConflict,
 	PlatformAccessConfigurationInvalid,
+	CustomThemeExternalLiveAccessSelfMutationForbidden,
 	CollectionOwnershipRequired,
 ] as const;

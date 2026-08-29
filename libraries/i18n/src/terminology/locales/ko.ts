@@ -71,6 +71,16 @@ export const koTerminology = defineTerminology("ko", {
 		},
 		forbidden: [],
 	},
+	customTheme: {
+		status: "approved",
+		forms: {
+			label: "사용자 지정 테마",
+			pluralLabel: "사용자 지정 테마",
+			inline: "사용자 지정 테마",
+			plural: "사용자 지정 테마",
+		},
+		forbidden: [],
+	},
 	tagPath: {
 		status: "approved",
 		forms: {

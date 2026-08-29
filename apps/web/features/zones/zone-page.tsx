@@ -19,7 +19,7 @@ export function ZonePage({
 	return (
 		<ZoneSurface aggregatePage baseHref={baseHref} id={id} selection={selection}>
 			{(projection) => (
-				<main className={cn(ZoneSurfaceContainerClassName, "py-8 sm:py-12")}>
+				<div className={cn(ZoneSurfaceContainerClassName, "py-8 sm:py-12")}>
 					{projection.page ? (
 						<ZoneDocument
 							blocks={projection.page.document.blocks}
@@ -31,7 +31,7 @@ export function ZonePage({
 							<p className="mt-3 text-muted-foreground leading-7">{t.zones.emptyBody}</p>
 						</section>
 					)}
-				</main>
+				</div>
 			)}
 		</ZoneSurface>
 	);

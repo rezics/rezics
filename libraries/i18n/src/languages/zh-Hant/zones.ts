@@ -4,6 +4,7 @@ import { zhHantTerminology } from "@rezics/i18n/terminology/zh-Hant";
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 
 const { forms: unitSlugTerms } = zhHantTerminology.unitSlug;
+const { forms: customThemeTerms } = zhHantTerminology.customTheme;
 const { forms: realmTerms } = zhHantTerminology.realm;
 const { forms: zoneTerms } = zhHantTerminology.zone;
 
@@ -42,8 +43,9 @@ export default {
 	loadSection: "載入此區段",
 	theme: {
 		viewerDefault: "改用平台預設主題",
-		viewerDefaultScope: "這會關閉所有空間的自訂主題；你可以稍後在偏好設定中重新開啟。",
+		viewerDefaultScope: `這會關閉所有空間的${customThemeTerms.label}；你可以稍後在偏好設定中重新開啟。`,
 		viewerDefaultFailed: "無法切換至平台預設主題，請稍後再試。",
+		runtimeFailed: `${customThemeTerms.label}無法載入，現已使用平台預設外觀。`,
 		basicsTitle: "基本外觀",
 		detailsTitle: "進階主題外觀",
 		accent: "強調色",

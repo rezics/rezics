@@ -4,6 +4,14 @@ Status: Accepted — implementation in progress
 
 Owner: Domain
 
+Supersession notice (2026-08-29): the active level-2 Custom Theme execution,
+trust, authorization, persistence, and operations decision is
+[Custom Theme full-trust external-live execution](./custom-theme-full-trust-external-live.md).
+It supersedes this document's earlier CSS-containment and “scripts never run”
+decision. The bounded CSS material below is retained as historical research and
+possible future `bounded_style` groundwork, not as the implemented runtime or a
+security claim about full-trust revisions.
+
 The factual basis (repository state, external platform evidence, research
 literature, and rights verification) lives in
 [zone-composition-and-theming-research-report.md](./zone-composition-and-theming-research-report.md)
@@ -54,9 +62,10 @@ no new composition paradigm.
    surface (Netflix row bulkhead).
 8. **Canonical JSON storage; renderers evolve freely.** No stored render
    output, no byte-compare validation (Gutenberg evidence).
-9. **Customization is declarative data; scripts never run in the host
-   page.** Style-sheet customization is allowed only under the containment
-   and review regime of §6.
+9. **Customization states its actual trust boundary.** Safe appearance remains
+   declarative data. The capability-gated v0 Custom Theme preview runs reviewed
+   first-party-privileged code under the decision linked above; a future bounded
+   mode would require its own separately enforced containment contract.
 
 ## 3. Block vocabulary
 
@@ -472,8 +481,10 @@ with the preconditions listed in §6.4.**
 
 ### 6.1 Level 0 — existing tokens
 
-`ZoneThemeDocument` (`colorScheme`, `accent`, `density`) is unchanged and
-remains the always-available baseline.
+The renamed and narrowed `ZoneAppearanceDocument` (`colorScheme`, `accent`,
+`density`, and other safe product tokens) remains the always-available
+baseline. The installation relation, not this document, selects an executable
+Custom Theme revision.
 
 ### 6.2 Level 1 — extended tokens and the theme gallery
 
@@ -493,7 +504,12 @@ required because a public Zone must be renderable without borrowing the
 operator's authorization. The Zone write validates this one reference with an
 indexed asset lookup; it does not inspect another composition document.
 
-### 6.3 Level 2 — Zone Pro: reviewed custom style sheets
+### 6.3 Historical Level 2 design — bounded reviewed style sheets
+
+This section records the superseded bounded-CSS proposal. Its compiler remains
+inactive groundwork for reviewer linting and a possible future `bounded_style`
+mode. It does not validate, contain, or authorize the implemented
+`host_full_trust` Custom Theme package.
 
 The Block model makes contract-stable semantic styling hooks possible.
 `_type` publishes `data-block-type`; optional bounded `classNames` are
@@ -568,15 +584,11 @@ does not convert a private hero into a special platform-approved asset class.
   hard requirement on every themed surface, and the platform holds a
   kill switch that force-reverts a theme revision to level-1 tokens.
 
-**Theme as a Unit.** Custom themes are a new Unit kind (`zone_theme`)
-with immutable revisions, standard localization for name and description,
-ownership, and a review state on each revision. `ZoneThemeDocument` gains
-an optional `custom` member referencing an approved
-`{ themeUnitId, revisionId }`; the token members remain and act as the
-fallback whenever the custom reference is absent, unapproved, or killed.
-Reviewing themes (not Zones) is the unit-economics decision: one approved
-revision installs into any number of Zones, enabling a reviewed theme
-gallery/marketplace, with bespoke submissions as the premium tier.
+**Current replacement.** Custom themes use the generic `custom_theme` Unit kind,
+generic immutable revision and installation tables, and a host-scoped approval.
+The installation table—not Zone appearance—is the sole active revision pointer.
+Appearance tokens remain the fallback whenever resolution is disabled, denied,
+unhealthy, stale, killed, or absent.
 
 **Review pipeline.** Automated first: AST static checks (scope, URLs,
 properties, size), a render-farm pass producing breakpoint × color-scheme
@@ -586,12 +598,14 @@ major bumps re-run the pipeline across approved revisions automatically.
 Review capacity is funded by the paid tier; the paid gate also throttles
 submission volume.
 
-**Scripts.** JavaScript never executes in the host page under any tier.
-This is a permanent decision, not a preview gate.
+**Superseded script decision.** The implemented capability-gated preview runs
+reviewed JavaScript in the host document as explicit `host_full_trust` code.
+Review is governance rather than isolation; see the active decision above.
 
-### 6.4 Level-2 preview-exit preconditions (separate future decision)
+### 6.4 Historical bounded-style preview-exit preconditions
 
-Level 2 may leave development preview only after: the styling contract has
+This historical bounded-style design could leave development preview only
+after: the styling contract has
 survived one contract-major renderer cycle with automated revalidation;
 the review pipeline meets agreed turnaround and rejection-quality targets;
 billing/entitlement integration exists; the kill switch and viewer
@@ -652,7 +666,8 @@ The new persisted contracts and public API (`presentation`, pinned
 sorts, `derived`, `maxQueryBlocks`, sibling-local keys and `BlockPath`
 execution, the aggregate endpoint, reserved `classNames` hooks, the
 `search` block completion, the `collection` membership field, the
-`zone_theme` Unit kind, and the theme review pipeline) are significant
+`custom_theme` Unit kind, generic presentation contract, and review pipeline)
+are significant
 public-API and persisted-contract changes and therefore land in a
 second-segment (MAJOR) RomVer release; purely internal steps (renderer
 refactors, the shared shelf component) may ride third-segment releases.
@@ -716,14 +731,14 @@ published styling contract 3.0.0.
 Exit: a preset applies end to end in preview; the contract document is
 versioned and its exported surface is asserted by renderer tests.
 
-### Phase Z4 — Zone Pro pipeline (remains development preview)
+### Phase Z4 — full-trust Custom Theme pipeline (remains development preview)
 
-The `zone_theme` Unit kind and revisions, submission AST
-transform/containment, the automated review pipeline with human gate,
-`ZoneThemeDocument.custom`, viewer default-theme control, kill switch.
-Exit: a custom theme passes the pipeline and renders on a preview Zone
-end to end. Explicit non-exit: general availability requires the separate
-§6.4 decision.
+The generic `custom_theme` Unit, immutable package revisions, external-resource
+evidence and monitoring, human gate, generic Unit presentation document and
+exact installation, viewer opt-out, safe mode, and kill controls. Exit: a
+host-scoped revision passes the pipeline and renders through the top-level Zone
+adapter for an eligible preview viewer. Explicit non-exit: general availability
+requires the separate public-launch decision in the active architecture record.
 
 ### Phase Z5 — local showcase fixtures
 

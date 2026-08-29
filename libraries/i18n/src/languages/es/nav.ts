@@ -10,6 +10,7 @@ const { forms: realmTerms } = esTerminology.realm;
 const { forms: entityTerms } = esTerminology.entity;
 const { forms: unitSlugTerms } = esTerminology.unitSlug;
 const { forms: zoneTerms } = esTerminology.zone;
+const { forms: customThemeTerms } = esTerminology.customTheme;
 
 export default {
 	home: "Inicio",
@@ -76,7 +77,7 @@ export default {
 			series: "Serie",
 			zone: zoneTerms.label,
 			zone_page: `Página de ${zoneTerms.inline}`,
-			zone_theme: `Tema de ${zoneTerms.inline}`,
+			custom_theme: customThemeTerms.label,
 			collection: "Colección",
 			post: postTerms.label,
 			poll: "Encuesta",

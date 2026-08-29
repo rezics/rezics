@@ -3,6 +3,7 @@ import { deTerminology } from "@rezics/i18n/terminology/de";
 
 const { forms: audioTerms } = deTerminology.audio;
 const { forms: dockTerms } = deTerminology.dock;
+const { forms: customThemeTerms } = deTerminology.customTheme;
 const { forms: followTerms } = deTerminology.follow;
 const { forms: postTerms } = deTerminology.post;
 const { forms: realmTerms } = deTerminology.realm;
@@ -78,7 +79,8 @@ export default {
 		"Die Plattform muss mindestens eine nicht ablaufende Verwaltung des Plattformzugriffs behalten.",
 	PlatformAccessRevisionConflict:
 		"Der Plattformzugriff wurde an anderer Stelle geändert. Lade ihn neu, bevor du es erneut versuchst.",
-	PlatformAccessConfigurationInvalid: "Jede Plattformberechtigung darf nur einmal vorkommen.",
+	PlatformAccessConfigurationInvalid:
+		"Der angeforderte Plattformzugriff überschreitet eine Eindeutigkeits- oder Kapazitätsgrenze.",
 	CollectionOwnershipRequired: "Diese Sammlung gehört dir nicht.",
 	ProfileNotFound: "Dieses Profil wurde nicht gefunden.",
 	ProfileChanged: "Dieses Profil wurde geändert. Aktualisiere die Seite und versuche es erneut.",
@@ -337,16 +339,21 @@ export default {
 	UnitRealmPublicationAlreadyExists: `Für diesen Inhalt besteht bereits eine Veröffentlichungsrelation mit diesem ${realmTerms.label}.`,
 	UnitRealmPublicationTransitionInvalid:
 		"Die Veröffentlichungsrelation befindet sich bereits im angeforderten Status.",
-	ZoneThemeNotFound: `Dieses Design für ${zoneTerms.plural} wurde nicht gefunden.`,
-	ZoneThemeRevisionNotFound: `Diese Version des Designs für ${zoneTerms.plural} wurde nicht gefunden.`,
-	ZoneThemeStylesheetInvalid: `Das Stylesheet dieses Designs für ${zoneTerms.plural} hat die automatische Sicherheitsprüfung nicht bestanden.`,
-	ZoneThemeAssetsInvalid:
-		"Jedes Designbild muss dir gehören und weiterhin öffentlich, einsatzbereit und nicht gelöscht sein.",
-	ZoneThemeAutomatedReviewInvalid:
-		"Die automatischen Prüfnachweise sind unvollständig oder erfüllen die Freigabeanforderungen nicht.",
-	ZoneThemeRevisionStateConflict:
-		"Diese Designversion befindet sich bereits in einem anderen Prüfstatus. Lade sie neu, bevor du fortfährst.",
-	ZoneThemeReferenceInvalid: `Wähle eine derzeit freigegebene Designversion für ${zoneTerms.plural}.`,
+	CustomThemeExternalLiveAccessSelfMutationForbidden:
+		"Du kannst deinen eigenen Zugriff auf Designs mit externen Ressourcen nicht erteilen, ändern oder entziehen.",
+	CustomThemeNotFound: `Dieses ${customThemeTerms.inline} wurde nicht gefunden.`,
+	CustomThemeRevisionNotFound: `Diese Version des ${customThemeTerms.inline} wurde nicht gefunden.`,
+	CustomThemePackageInvalid: `Das Paket dieses ${customThemeTerms.inline} ist ungültig.`,
+	CustomThemeSubmissionBackpressure: `Einreichungen für dieses ${customThemeTerms.inline} sind vorübergehend pausiert, bis ausstehende Prüfungen bearbeitet sind.`,
+	CustomThemeExternalResourceInvalid: `Eine externe Ressource dieses ${customThemeTerms.inline} konnte nicht sicher geprüft werden.`,
+	CustomThemeReviewEvidenceInvalid: `Die Prüfnachweise für dieses ${customThemeTerms.inline} sind unvollständig.`,
+	CustomThemeRevisionStateConflict: `Diese Version des ${customThemeTerms.inline} befindet sich in einem anderen Prüfstatus. Lade sie vor dem Fortfahren neu.`,
+	CustomThemeReviewerSeparationRequired: `Die einreichende Person darf die Prüfung dieser Version des ${customThemeTerms.inline} nicht entscheiden.`,
+	CustomThemeInstallationInvalid: `Wähle eine derzeit für diesen Host freigegebene Version des ${customThemeTerms.inline}.`,
+	UnitPresentationHostUnsupported:
+		"Dieser Unit-Typ unterstützt keine benutzerdefinierte Darstellung.",
+	UnitPresentationRevisionConflict:
+		"Die Unit-Darstellung wurde an anderer Stelle geändert. Lade sie vor dem Speichern neu.",
 	StudioRealmSubjectLimitExceeded:
 		"Du gehörst zu zu vielen Teams, um teamdelegierte Inhalte im Arbeitsbereich aufzulisten.",
 } satisfies typeof import("../zh-Hant/errorCodes").default;

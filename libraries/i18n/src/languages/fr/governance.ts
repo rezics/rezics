@@ -8,6 +8,7 @@ const { forms: realmTerms } = frTerminology.realm;
 const { forms: entityTerms } = frTerminology.entity;
 const { forms: postTerms } = frTerminology.post;
 const { forms: zoneTerms } = frTerminology.zone;
+const { forms: customThemeTerms } = frTerminology.customTheme;
 
 export default {
 	title: "Gouvernance de la Unit",
@@ -97,8 +98,10 @@ export default {
 		"platform.user.api_token.api_quota.update": `Gérer les quotas des jetons ${verbatimTerms.api.value} des utilisateurs`,
 		"platform.moderate": "Modérer les Units de la plateforme",
 		"platform.suppress": "Masquer le contenu et les versions de la plateforme",
-		"platform.zone_theme.review": `Examiner les thèmes personnalisés des ${zoneTerms.plural}`,
-		"platform.zone_theme.kill": `Désactiver en urgence les thèmes personnalisés approuvés des ${zoneTerms.plural}`,
+		"platform.custom_theme.external_live.access": `Utiliser des ressources externes actives dans les ${customThemeTerms.plural}`,
+		"platform.custom_theme.external_live.access.manage": `Gérer l’accès aux ressources externes actives des ${customThemeTerms.plural}`,
+		"platform.custom_theme.review": `Examiner les ${customThemeTerms.plural}`,
+		"platform.custom_theme.kill": `Désactiver en urgence les ${customThemeTerms.plural} approuvés`,
 		"realm.contribute": `Participer à tous les ${realmTerms.plural}`,
 		"realm.units.create": `Créer des Units dans tous les ${realmTerms.plural}`,
 		"realm.post.replies.create": `Créer des réponses dans tous les ${realmTerms.plural}`,

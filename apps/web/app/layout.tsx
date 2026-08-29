@@ -101,11 +101,14 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
 	const fontAwesomeCss = fontAwesomeKitCssUrl();
 	const fontAwesomeLicense = fontAwesomeKitLicense();
 	const usesTraditionalChineseFont = locale.current === "zh-Hant";
+	const requestNonce = requestHeaders.get("x-nonce") ?? undefined;
+	const presentationRevision = requestHeaders.get("x-rezics-presentation-revision") ?? "";
 	return (
 		<html
 			data-font-awesome={fontAwesomeCss ? "configured" : "unconfigured"}
 			data-font-awesome-license={fontAwesomeLicense}
 			data-font-awesome-version={FontAwesomeVersion}
+			data-rezics-presentation-revision={presentationRevision}
 			lang={locale.current}
 			suppressHydrationWarning
 		>
@@ -128,7 +131,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
 						/>
 					</>
 				) : null}
-				<style>{appThemeCss}</style>
+				<style nonce={requestNonce}>{appThemeCss}</style>
 				<meta
 					content={appTheme.light.background}
 					data-dark={appTheme.dark.background}
@@ -139,6 +142,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
 					dangerouslySetInnerHTML={{
 						__html: `(function(){try{var t=localStorage.getItem('rezics-theme');var d=t==='dark'||(t!=='light'&&matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.classList.toggle('dark',d);var m=document.querySelector('meta[name="theme-color"]');if(m)m.content=d?m.dataset.dark:m.dataset.light}catch(e){}})()`,
 					}}
+					nonce={requestNonce}
 				/>
 			</head>
 			<body className="min-w-80">

@@ -1,6 +1,6 @@
 "use client";
 
-import { isDocument, parseDocument, ZoneThemeDocument } from "@rezics/block";
+import { isDocument, parseDocument, ZoneAppearanceDocument } from "@rezics/block";
 import {
 	getApiZonesByZoneIdQueryKey,
 	usePatchApiZonesByZoneId,
@@ -28,7 +28,7 @@ import { useZoneManagement } from "./workspace";
 const ZoneThemeDraftCodec: LocalizedDraftCodec<ZoneThemeEditorValue> = {
 	version: 1,
 	decode(value) {
-		if (!isDraftRecord(value) || !isDocument(ZoneThemeDocument, value.theme)) return;
+		if (!isDraftRecord(value) || !isDocument(ZoneAppearanceDocument, value.theme)) return;
 		const hero = decodeDraftImageAsset(value.hero);
 		return hero === undefined ? undefined : { theme: value.theme, hero };
 	},
@@ -42,12 +42,12 @@ export function ZoneThemeManagement() {
 	const level1Enabled =
 		zone.capabilities.hasDevelopmentPreviewAccess && zone.capabilities.canManageTheme;
 	const draft = useLocalizedDraft<ZoneThemeEditorValue>({
-		scope: "zone-theme",
+		scope: "zone-appearance",
 		partition: "shared",
 		baseVersion: zone.updatedAt,
 		codec: ZoneThemeDraftCodec,
 		createInitialValue: () => ({
-			theme: parseDocument(ZoneThemeDocument, zone.themeDocument),
+			theme: parseDocument(ZoneAppearanceDocument, zone.appearanceDocument),
 			hero: zone.themeHero,
 		}),
 	});
@@ -66,7 +66,7 @@ export function ZoneThemeManagement() {
 		try {
 			await update.mutateAsync({
 				path: { zoneId },
-				body: { themeDocument: draft.value.theme },
+				body: { appearanceDocument: draft.value.theme },
 			});
 			draft.commit();
 		} catch {

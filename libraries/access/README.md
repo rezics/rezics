@@ -128,6 +128,26 @@ When a feature is released, remove its preview check without changing its domain
 This keeps temporary release state out of the durable permission vocabulary and prevents preview
 eligibility from becoming broad mutation authority.
 
+## Custom Theme external-live delegation
+
+`platform.custom_theme.external_live.access` is a time-bounded eligibility
+gate for the full-trust external-live preview. It grants no Unit create/update,
+host installation, review, kill, or general platform administration authority.
+It is conjunctive with `platform.development_preview.access` and each
+operation's ordinary permission.
+
+`platform.custom_theme.external_live.access.manage` authorizes only the narrow
+Profile selector and grant/renew/revoke endpoint. It neither implies execution
+access nor general platform access reads or management. The request body cannot
+name a capability, the actor cannot target themself, every mutation requires a
+fresh session and optimistic revision, and an active grant must expire within
+90 days. Renewal revokes the prior immutable lifecycle row and creates a new
+one in the audited transaction. `platform.access.manage` implies this narrow
+management authority so root access managers retain recovery control.
+
+The operational admission and recertification policy is documented in
+[`docs/operations/custom-theme-external-live-access.md`](../../docs/operations/custom-theme-external-live-access.md).
+
 ## Unit ownership governance
 
 Ordinary ownership transfer is Unit-scoped. The current owner derives

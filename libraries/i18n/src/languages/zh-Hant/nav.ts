@@ -10,6 +10,7 @@ const { forms: realmTerms } = zhHantTerminology.realm;
 const { forms: entityTerms } = zhHantTerminology.entity;
 const { forms: unitSlugTerms } = zhHantTerminology.unitSlug;
 const { forms: zoneTerms } = zhHantTerminology.zone;
+const { forms: customThemeTerms } = zhHantTerminology.customTheme;
 
 export default {
 	home: "主頁",
@@ -76,7 +77,7 @@ export default {
 			series: "系列",
 			zone: zoneTerms.label,
 			zone_page: `${zoneTerms.label}頁面`,
-			zone_theme: `${zoneTerms.label}主題`,
+			custom_theme: customThemeTerms.label,
 			collection: "收藏集",
 			post: postTerms.label,
 			poll: "投票",

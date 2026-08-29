@@ -9,7 +9,7 @@ export async function assertContentPackThemeAssets(
 	pack: LoadedPack,
 ): Promise<void> {
 	const references = pack.objects.flatMap((object) => {
-		const assetId = object.compiledZone?.themeDocument.heroAssetId;
+		const assetId = object.compiledZone?.appearanceDocument.heroAssetId;
 		return object.unit.kind === "zone" && assetId ? [{ sourceKey: object.sourceKey, assetId }] : [];
 	});
 	if (!references.length) return;

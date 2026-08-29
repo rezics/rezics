@@ -5,7 +5,7 @@ import {
 	createPollContentBlock,
 	createPortableTextDocument,
 	createUnitReferencedBlockDocument,
-	createZoneThemeDocument,
+	createZoneAppearanceDocument,
 	assertWikiPostPortableTextDocument,
 } from "@rezics/block";
 import { createFilterDocument } from "@rezics/filter";
@@ -13,8 +13,18 @@ import { defaultKeyHasher } from "@better-auth/api-key";
 import { hashPassword } from "better-auth/crypto";
 import { and, desc, eq, inArray, isNull, sql } from "drizzle-orm";
 import { OfficialRealmUnitIds, ZoneHomePageSlug } from "@rezics/slug";
-import { PlatformCapabilityValues } from "@rezics/access";
+import {
+	CustomThemeExternalLiveAccessCapability,
+	CustomThemeExternalLiveAccessManageCapability,
+	PlatformCapabilityValues,
+} from "@rezics/access";
 import { RecommendedLicenseId } from "@rezics/license";
+
+const SeedablePlatformCapabilityValues = PlatformCapabilityValues.filter(
+	(capability) =>
+		capability !== CustomThemeExternalLiveAccessCapability &&
+		capability !== CustomThemeExternalLiveAccessManageCapability,
+);
 
 import { env } from "../config";
 import { Authorization } from "../authorization";
@@ -963,7 +973,7 @@ async function seedUnitFixtures(
 		zones.map((value, index) => ({
 			id: value.id,
 			filterDocument: createFilterDocument({ categories: ["units"] }),
-			themeDocument: createZoneThemeDocument({
+			appearanceDocument: createZoneAppearanceDocument({
 				accent: itemAt(["#f59e0b", "#3b82f6", "#8b5cf6"], index),
 			}),
 			startsAt: index % 3 === 0 ? data.pastDate(180) : null,
@@ -1330,7 +1340,7 @@ async function seedExampleWiki(
 		.update(zone)
 		.set({
 			filterDocument: createFilterDocument({ categories: ["units"] }),
-			themeDocument: createZoneThemeDocument(
+			appearanceDocument: createZoneAppearanceDocument(
 				{ accent: "#2563eb", colorScheme: "dark", density: "compact" },
 				"a10000000002",
 			),
@@ -2130,7 +2140,7 @@ async function seedStructure(
 			const revoked = index % 13 === 0;
 			return {
 				profileId: itemAt(platformGrantProfiles, index * 7).id,
-				capability: itemAt(PlatformCapabilityValues, index),
+				capability: itemAt(SeedablePlatformCapabilityValues, index),
 				grantedByProfileId: itemAt(platformGrantProfiles, index * 11 + 1).id,
 				expiresAt: index % 5 === 0 ? data.futureDate(365) : null,
 				revokedAt: revoked ? new Date(createdAt.getTime() + 86_400_000) : null,

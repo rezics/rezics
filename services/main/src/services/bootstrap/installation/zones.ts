@@ -220,7 +220,7 @@ export async function ensureOfficialZones(tx: DatabaseTransaction): Promise<read
 			.values({
 				id: value.id,
 				filterDocument: value.filterDocument,
-				themeDocument: value.themeDocument,
+				appearanceDocument: value.appearanceDocument,
 				createdAt,
 				updatedAt: createdAt,
 			})

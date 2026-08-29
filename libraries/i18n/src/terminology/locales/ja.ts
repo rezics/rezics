@@ -66,6 +66,16 @@ export const jaTerminology = defineTerminology("ja", {
 		},
 		forbidden: [],
 	},
+	customTheme: {
+		status: "approved",
+		forms: {
+			label: "カスタムテーマ",
+			pluralLabel: "カスタムテーマ",
+			inline: "カスタムテーマ",
+			plural: "カスタムテーマ",
+		},
+		forbidden: [],
+	},
 	tagPath: {
 		status: "approved",
 		forms: {

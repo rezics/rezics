@@ -29,7 +29,7 @@ export const FilterUnitKindValues = [
 	"series",
 	"zone",
 	"zone_page",
-	"zone_theme",
+	"custom_theme",
 	"collection",
 	"post",
 	"poll",

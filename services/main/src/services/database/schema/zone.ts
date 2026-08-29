@@ -19,8 +19,8 @@ export const zone = pgTable(
 			.references(() => unit.id, { onDelete: "cascade" }),
 		/** @UNIT_LOCALIZATION_EXEMPT Sparse Filter contract; `{}` adds no Zone conditions. */
 		filterDocument: createJsonDocumentColumn().notNull(),
-		/** @UNIT_LOCALIZATION_EXEMPT Structured contract: theme contains only color and density tokens. */
-		themeDocument: createJsonDocumentColumn().notNull(),
+		/** @UNIT_LOCALIZATION_EXEMPT Structured fallback appearance contains no display copy. */
+		appearanceDocument: createJsonDocumentColumn().notNull(),
 		startsAt: createTimestampMsColumn(),
 		endsAt: createTimestampMsColumn(),
 		/** Optional Zone-local policy source; the official Rule Realm is always also available. */

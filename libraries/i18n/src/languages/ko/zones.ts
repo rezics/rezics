@@ -4,6 +4,7 @@ import { koTerminology } from "@rezics/i18n/terminology/ko";
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 
 const { forms: postTerms } = koTerminology.post;
+const { forms: customThemeTerms } = koTerminology.customTheme;
 const { forms: realmTerms } = koTerminology.realm;
 const { forms: unitSlugTerms } = koTerminology.unitSlug;
 const { forms: zoneTerms } = koTerminology.zone;
@@ -43,8 +44,9 @@ export default {
 	loadSection: "이 섹션 불러오기",
 	theme: {
 		viewerDefault: "플랫폼 기본 테마 사용",
-		viewerDefaultScope: "모든 존의 사용자 지정 테마가 꺼집니다. 환경 설정에서 다시 켤 수 있습니다.",
+		viewerDefaultScope: `모든 존의 ${customThemeTerms.label}가 꺼집니다. 환경 설정에서 다시 켤 수 있습니다.`,
 		viewerDefaultFailed: "기본 테마로 전환하지 못했습니다. 잠시 후 다시 시도해 주세요.",
+		runtimeFailed: `${customThemeTerms.label}를 불러오지 못해 플랫폼 기본 화면을 사용합니다.`,
 		basicsTitle: "기본 모양",
 		detailsTitle: "테마 세부 설정",
 		accent: "강조 색상",

@@ -2,18 +2,21 @@
 	"$schema": "../../node_modules/wrangler/config-schema.json",
 	"name": "rezics-web",
 	"main": "./worker/index.ts",
-	"compatibility_date": "2026-08-01",
+	"compatibility_date": "2026-08-29",
 	"compatibility_flags": ["nodejs_compat"],
 	"assets": {
 		"directory": "dist/client",
 		"not_found_handling": "none",
 		"binding": "ASSETS"
 	},
+	"browser": {
+		"binding": "BROWSER"
+	},
 	"version_metadata": {
 		"binding": "WORKER_VERSION"
 	},
 	"secrets": {
-		"required": ["TURNSTILE_SITE_KEY"]
+		"required": ["CUSTOM_THEME_REFERENCE_RENDER_TOKEN", "TURNSTILE_SITE_KEY"]
 	},
 	"observability": {
 		"enabled": true,
@@ -42,8 +45,11 @@
 			"version_metadata": {
 				"binding": "WORKER_VERSION"
 			},
+			"browser": {
+				"binding": "BROWSER"
+			},
 			"secrets": {
-				"required": ["TURNSTILE_SITE_KEY"]
+				"required": ["CUSTOM_THEME_REFERENCE_RENDER_TOKEN", "TURNSTILE_SITE_KEY"]
 			},
 			"routes": [
 				{

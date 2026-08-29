@@ -2,6 +2,7 @@ export const PostgreSqlSchemaFileNames = [
 	"book-chapter-progress.sql",
 	"content-label-policy.sql",
 	"content-language-search.sql",
+	"custom-theme-integrity.sql",
 	"entity-measurement.sql",
 	"realm-tag-authority.sql",
 	"tag-judgment-aggregates.sql",
@@ -63,6 +64,8 @@ export const PostgreSqlSchemaFunctionNames = [
 	"maintain_unit_tag_judgment_stat",
 	"maintain_unit_tag_path_application_judgment_stat",
 	"project_tag_path_definition",
+	"protect_custom_theme_external_live_grant",
+	"protect_custom_theme_revision_package",
 	"protect_realm_tag_path_application_judgment_identity",
 	"protect_unit_tag_path_application_judgment_identity",
 	"rebuild_tag_expression_effective_tags",
@@ -71,10 +74,23 @@ export const PostgreSqlSchemaFunctionNames = [
 	"refresh_unit_effective_tags",
 	"refresh_unit_expression_assertion",
 	"reject_content_label_judgment",
+	"reject_custom_theme_immutable_history_mutation",
 	"search_text_candidates",
 ] as const;
 
 export const PostgreSqlSchemaTriggers = [
+	{
+		table: "custom_theme_revision",
+		name: "custom_theme_revision_package_immutable",
+	},
+	{
+		table: "custom_theme_revision_file",
+		name: "custom_theme_revision_file_immutable",
+	},
+	{
+		table: "custom_theme_revision_review_event",
+		name: "custom_theme_revision_review_event_immutable",
+	},
 	{ table: "content_structure", name: "book_chapter_structure_stat_maintain" },
 	{ table: "content_structure_node", name: "book_chapter_node_stat_maintain" },
 	{ table: "content_structure_node_progress", name: "book_chapter_progress_stat_maintain" },
@@ -82,6 +98,10 @@ export const PostgreSqlSchemaTriggers = [
 	{ table: "entity", name: "entity_variant_kind_change_guard" },
 	{ table: "entity_measurement", name: "entity_measurement_guard" },
 	{ table: "post", name: "book_chapter_post_stat_maintain" },
+	{
+		table: "platform_capability_grant",
+		name: "platform_capability_grant_custom_theme_lifecycle_guard",
+	},
 	{ table: "profile_unit_tag", name: "profile_unit_tag_application_policy_guard" },
 	{ table: "realm_tag_judgment", name: "realm_tag_judgment_content_label_reject" },
 	{ table: "realm_tag_judgment", name: "realm_tag_judgment_stat_maintain" },
@@ -145,6 +165,7 @@ export const PostgreSqlSchemaTriggers = [
 	{ table: "tag_relation", name: "tag_relation_path_lifecycle_guard" },
 	{ table: "tag_relation", name: "tag_relation_graph_guard" },
 	{ table: "unit", name: "book_chapter_unit_stat_maintain" },
+	{ table: "unit_presentation_revision", name: "unit_presentation_revision_immutable" },
 	{ table: "unit_content_language_support", name: "unit_content_language_search_maintain" },
 	{ table: "unit_license_grant", name: "unit_license_grant_guard_mutation" },
 	{ table: "unit_merge_operation", name: "unit_merge_operation_content_label_guard" },

@@ -229,7 +229,7 @@ export async function isInitialInstallationBundleReady(): Promise<boolean> {
 				(actual) =>
 					actual.id === expected.id &&
 					bootstrapValuesEqual(actual.filterDocument, expected.filterDocument) &&
-					bootstrapValuesEqual(actual.themeDocument, expected.themeDocument),
+					bootstrapValuesEqual(actual.appearanceDocument, expected.appearanceDocument),
 			),
 		) &&
 		officialWikiPosts.length === OfficialZoneManifest.length &&

@@ -256,6 +256,11 @@ const web = await builder
 			: { env: "PORT", name: "http", port: requirePort("FRONTEND_PORT") },
 	)
 	.withEnvironment("BROWSER", "none")
+	.withEnvironment(
+		"CUSTOM_THEME_REFERENCE_RENDER_TOKEN",
+		process.env.CUSTOM_THEME_REFERENCE_RENDER_TOKEN?.trim() ||
+			"development-only-reference-render-token",
+	)
 	.withEnvironment("FONT_AWESOME_KIT_CSS_URL", process.env.FONT_AWESOME_KIT_CSS_URL?.trim() ?? "")
 	.withEnvironment(
 		"FONT_AWESOME_KIT_LICENSE",

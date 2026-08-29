@@ -952,7 +952,7 @@ export const PreferencesResponse = t.Object({
 	progressVisibility: ResourceVisibility,
 	collectionConfig: t.Nullable(CollectionConfigV1),
 	personalizedFeed: t.Boolean(),
-	customZoneThemesEnabled: t.Boolean(),
+	customThemesEnabled: t.Boolean(),
 	filterFeedByPreferredLanguages: t.Boolean(),
 	alwaysShowSpoilers: t.Boolean(),
 	alwaysShowNsfw: t.Boolean(),

@@ -2,10 +2,11 @@ import { AsyncLocalStorage } from "node:async_hooks";
 
 import { drizzle, type NodePgDatabase } from "drizzle-orm/node-postgres";
 import { sql } from "drizzle-orm";
-import { Pool } from "pg";
+import { Pool, type PoolClient } from "pg";
 import { instrumentPostgresClient, peekActiveObservability } from "@rezics/observability";
 
 import { env } from "../config";
+import { DatabasePoolWaitTracker } from "./pool-wait";
 
 const pool = new Pool({
 	connectionString: env.DATABASE_URL,
@@ -15,6 +16,46 @@ const pool = new Pool({
 	maxLifetimeSeconds: env.DATABASE_POOL_MAX_LIFETIME_SECONDS,
 	statement_timeout: env.DATABASE_STATEMENT_TIMEOUT_MS,
 });
+const databasePoolWaitTracker = new DatabasePoolWaitTracker();
+const untrackedPoolConnect = pool.connect.bind(pool);
+
+function trackedPoolConnect(): Promise<PoolClient>;
+function trackedPoolConnect(
+	callback: (
+		error: Error | undefined,
+		client: PoolClient | undefined,
+		done: (release?: unknown) => void,
+	) => void,
+): void;
+function trackedPoolConnect(
+	callback?: (
+		error: Error | undefined,
+		client: PoolClient | undefined,
+		done: (release?: unknown) => void,
+	) => void,
+): Promise<PoolClient> | void {
+	const startedAt = performance.now();
+	const record = () => databasePoolWaitTracker.record(Math.max(0, performance.now() - startedAt));
+	if (callback) {
+		untrackedPoolConnect((error, client, done) => {
+			record();
+			callback(error, client, done);
+		});
+		return;
+	}
+	return untrackedPoolConnect().then(
+		(client) => {
+			record();
+			return client;
+		},
+		(error: unknown) => {
+			record();
+			throw error;
+		},
+	);
+}
+
+pool.connect = trackedPoolConnect;
 peekActiveObservability()?.metrics.registerDatabasePool(() => ({
 	total: pool.totalCount,
 	idle: pool.idleCount,
@@ -39,6 +80,11 @@ export const database = new Proxy(rootDatabase, {
 	},
 }) as typeof rootDatabase;
 export type DatabaseSession = NodePgDatabase;
+
+/** Current process-local p95 client-acquisition wait over the last minute. */
+export function databasePoolWaitP95Milliseconds(): number {
+	return databasePoolWaitTracker.p95Milliseconds();
+}
 
 /**
  * Runs all database calls made by work on one transaction with a hard total

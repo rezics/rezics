@@ -3,6 +3,7 @@ import { enTerminology } from "@rezics/i18n/terminology/en";
 
 const { forms: audioTerms } = enTerminology.audio;
 const { forms: dockTerms } = enTerminology.dock;
+const { forms: customThemeTerms } = enTerminology.customTheme;
 const { forms: followTerms } = enTerminology.follow;
 const { forms: postTerms } = enTerminology.post;
 const { forms: realmTerms } = enTerminology.realm;
@@ -74,7 +75,8 @@ export default {
 		"The platform must retain at least one non-expiring access manager.",
 	PlatformAccessRevisionConflict:
 		"Platform access changed elsewhere. Reload it before trying again.",
-	PlatformAccessConfigurationInvalid: "Each platform capability may appear only once.",
+	PlatformAccessConfigurationInvalid:
+		"The requested platform access exceeds a uniqueness or capacity limit.",
 	CollectionOwnershipRequired: "You do not own this collection.",
 	ProfileNotFound: "This profile could not be found.",
 	ProfileChanged: "This profile changed. Refresh and try again.",
@@ -310,16 +312,20 @@ export default {
 	UnitRealmPublicationAlreadyExists: `This content already has a publication relationship with that ${realmTerms.label}.`,
 	UnitRealmPublicationTransitionInvalid:
 		"The publication relationship is already in the requested state.",
-	ZoneThemeNotFound: `This ${zoneTerms.label} theme could not be found.`,
-	ZoneThemeRevisionNotFound: `This ${zoneTerms.label} theme revision could not be found.`,
-	ZoneThemeStylesheetInvalid: `This ${zoneTerms.label} theme stylesheet did not pass automated safety review.`,
-	ZoneThemeAssetsInvalid:
-		"Every theme image must belong to you and remain public, ready, and undeleted.",
-	ZoneThemeAutomatedReviewInvalid:
-		"The automated theme evidence is incomplete or does not meet the release requirements.",
-	ZoneThemeRevisionStateConflict:
-		"This theme revision has already moved to another review state. Reload it before continuing.",
-	ZoneThemeReferenceInvalid: `Choose a currently approved ${zoneTerms.label} theme revision.`,
+	CustomThemeExternalLiveAccessSelfMutationForbidden:
+		"You cannot grant, change, or revoke your own external-resource theme access.",
+	CustomThemeNotFound: `This ${customThemeTerms.inline} could not be found.`,
+	CustomThemeRevisionNotFound: `This ${customThemeTerms.inline} revision could not be found.`,
+	CustomThemePackageInvalid: `This ${customThemeTerms.inline} package is invalid.`,
+	CustomThemeSubmissionBackpressure: `Submissions for this ${customThemeTerms.inline} are temporarily paused while pending reviews are processed.`,
+	CustomThemeExternalResourceInvalid: `An external resource used by this ${customThemeTerms.inline} could not be reviewed safely.`,
+	CustomThemeReviewEvidenceInvalid: `The review evidence for this ${customThemeTerms.inline} is incomplete.`,
+	CustomThemeRevisionStateConflict: `This ${customThemeTerms.inline} revision has moved to another review state. Reload it before continuing.`,
+	CustomThemeReviewerSeparationRequired: `The person who submitted this ${customThemeTerms.inline} revision cannot decide its review.`,
+	CustomThemeInstallationInvalid: `Choose a currently approved ${customThemeTerms.inline} revision for this host.`,
+	UnitPresentationHostUnsupported: "This type of Unit does not support custom presentation.",
+	UnitPresentationRevisionConflict:
+		"The Unit presentation changed elsewhere. Reload it before saving.",
 	StudioRealmSubjectLimitExceeded:
 		"You belong to too many teams for the workspace to list team-delegated content.",
 } satisfies typeof import("../zh-Hant/errorCodes").default;

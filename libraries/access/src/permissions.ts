@@ -131,8 +131,14 @@ export function isUnitPermissionOwnerOnly(
  * @alpha
  */
 export const DevelopmentPreviewCapability = "platform.development_preview.access" as const;
-export const ZoneThemeReviewCapability = "platform.zone_theme.review" as const;
-export const ZoneThemeKillCapability = "platform.zone_theme.kill" as const;
+/** Active, time-bounded eligibility for the full-trust external-live preview. */
+export const CustomThemeExternalLiveAccessCapability =
+	"platform.custom_theme.external_live.access" as const;
+/** Narrow authority to grant, renew, or revoke external-live eligibility for another Profile. */
+export const CustomThemeExternalLiveAccessManageCapability =
+	"platform.custom_theme.external_live.access.manage" as const;
+export const CustomThemeReviewCapability = "platform.custom_theme.review" as const;
+export const CustomThemeKillCapability = "platform.custom_theme.kill" as const;
 
 /**
  * Platform-wide capabilities assignable to Profiles.
@@ -154,8 +160,10 @@ export const PlatformCapabilityValues = [
 	"entity.associations.override",
 	"unit.edit",
 	DevelopmentPreviewCapability,
-	ZoneThemeReviewCapability,
-	ZoneThemeKillCapability,
+	CustomThemeExternalLiveAccessCapability,
+	CustomThemeExternalLiveAccessManageCapability,
+	CustomThemeReviewCapability,
+	CustomThemeKillCapability,
 	"unit.governance.read",
 	"unit.merge.propose",
 	"unit.merge.review",
@@ -247,17 +255,29 @@ export const PlatformCapabilityDefinitions = {
 		rationale:
 			"Controls entry to unreleased product surfaces without granting their domain operations.",
 	},
-	[ZoneThemeReviewCapability]: {
-		resource: "platform.zone_theme",
+	[CustomThemeExternalLiveAccessCapability]: {
+		resource: "platform.custom_theme.external_live",
+		action: "access",
+		rationale:
+			"Makes one Profile eligible for the full-trust external-live preview without granting authoring, review, installation, or emergency authority.",
+	},
+	[CustomThemeExternalLiveAccessManageCapability]: {
+		resource: "platform.custom_theme.external_live.access",
+		action: "manage",
+		rationale:
+			"Delegates only the audited, expiring external-live eligibility workflow and never general platform access administration.",
+	},
+	[CustomThemeReviewCapability]: {
+		resource: "platform.custom_theme",
 		action: "review",
 		rationale:
-			"Accepts automated review evidence and makes human publication decisions for reusable custom Zone theme revisions.",
+			"Inspects evidence and makes human decisions for reusable full-trust Custom Theme revisions.",
 	},
-	[ZoneThemeKillCapability]: {
-		resource: "platform.zone_theme",
+	[CustomThemeKillCapability]: {
+		resource: "platform.custom_theme",
 		action: "kill",
 		rationale:
-			"Immediately disables an approved custom Zone theme revision across every Zone that references it.",
+			"Immediately disables an approved Custom Theme revision independently of preview eligibility.",
 	},
 	"unit.governance.read": {
 		resource: "unit.governance",
@@ -435,7 +455,7 @@ export const PlatformCapabilityDefinitions = {
 export const PlatformCapabilityImplications: Partial<
 	Record<PlatformCapability, readonly PlatformCapability[]>
 > = {
-	"platform.access.manage": ["platform.access.read"],
+	"platform.access.manage": ["platform.access.read", CustomThemeExternalLiveAccessManageCapability],
 	"platform.user.status.update": ["platform.user.read"],
 	"platform.session.revoke": ["platform.session.read", "platform.user.read"],
 	"platform.api_quota_policy.update": ["platform.api_quota_policy.read"],

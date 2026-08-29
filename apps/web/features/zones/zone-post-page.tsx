@@ -18,6 +18,7 @@ export function ZonePostPage({
 			{(projection) => (
 				<PostDetailPage
 					context={{ kind: "zone", zone: projection.zone }}
+					embedded
 					id={postId}
 					renderWikiBody={(post) => (
 						<ZoneWikiPostContent language={post.language} value={post.body.content} />

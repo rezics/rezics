@@ -8,6 +8,7 @@ const { forms: realmTerms } = zhHantTerminology.realm;
 const { forms: entityTerms } = zhHantTerminology.entity;
 const { forms: postTerms } = zhHantTerminology.post;
 const { forms: zoneTerms } = zhHantTerminology.zone;
+const { forms: customThemeTerms } = zhHantTerminology.customTheme;
 
 export default {
 	title: "條目治理",
@@ -95,8 +96,10 @@ export default {
 		"platform.user.api_token.api_quota.update": `管理使用者 ${verbatimTerms.api.value} 權杖配額`,
 		"platform.moderate": "執行平台內容治理",
 		"platform.suppress": "隱藏平台內容與修訂",
-		"platform.zone_theme.review": `審查自訂${zoneTerms.label}主題樣式`,
-		"platform.zone_theme.kill": `緊急停用已核准的自訂${zoneTerms.label}主題樣式`,
+		"platform.custom_theme.external_live.access": `在${customThemeTerms.label}中使用外部即時資源`,
+		"platform.custom_theme.external_live.access.manage": `管理${customThemeTerms.label}的外部即時資源權限`,
+		"platform.custom_theme.review": `審查${customThemeTerms.label}`,
+		"platform.custom_theme.kill": `緊急停用已核准的${customThemeTerms.label}`,
 		"realm.contribute": `參與所有${realmTerms.pluralLabel}`,
 		"realm.units.create": `在所有${realmTerms.pluralLabel}建立條目`,
 		"realm.post.replies.create": `在所有${realmTerms.pluralLabel}建立回覆`,

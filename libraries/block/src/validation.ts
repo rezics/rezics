@@ -217,6 +217,16 @@ export const ZonePageBlockHostPolicy: BlockHostPolicy = {
 	allowExternalNavigation: false,
 };
 
+/**
+ * Presentation regions are rendered in document flow but do not own a query
+ * execution surface. Query-backed Blocks therefore remain unavailable until a
+ * future contract defines their addressing, authorization, and work budget.
+ */
+export const UnitPresentationBlockHostPolicy: BlockHostPolicy = {
+	...ZonePageBlockHostPolicy,
+	maxQueryBlocks: 0,
+};
+
 /** Host policy for custom REZICS block objects embedded in Wiki Post Portable Text. */
 export const WikiPostBlockHostPolicy: BlockHostPolicy = {
 	allowedRootTypes: ["portable-text"],

@@ -77,6 +77,30 @@ zone	The REZICS Zone product concept.	ko	approved	label	구역	Zone | Zones
 zone	The REZICS Zone product concept.	ko	approved	pluralLabel	구역	Zone | Zones
 zone	The REZICS Zone product concept.	ko	approved	inline	구역	Zone | Zones
 zone	The REZICS Zone product concept.	ko	approved	plural	구역	Zone | Zones
+customTheme	A reusable full-trust Unit presentation package; distinct from a Zone's built-in appearance settings.	en	approved	label	Custom Theme	-
+customTheme	A reusable full-trust Unit presentation package; distinct from a Zone's built-in appearance settings.	en	approved	pluralLabel	Custom Themes	-
+customTheme	A reusable full-trust Unit presentation package; distinct from a Zone's built-in appearance settings.	en	approved	inline	custom theme	-
+customTheme	A reusable full-trust Unit presentation package; distinct from a Zone's built-in appearance settings.	en	approved	plural	custom themes	-
+customTheme	A reusable full-trust Unit presentation package; distinct from a Zone's built-in appearance settings.	zh-Hant	approved	label	自訂主題	-
+customTheme	A reusable full-trust Unit presentation package; distinct from a Zone's built-in appearance settings.	zh-Hant	approved	pluralLabel	自訂主題	-
+customTheme	A reusable full-trust Unit presentation package; distinct from a Zone's built-in appearance settings.	zh-Hant	approved	inline	自訂主題	-
+customTheme	A reusable full-trust Unit presentation package; distinct from a Zone's built-in appearance settings.	zh-Hant	approved	plural	自訂主題	-
+customTheme	A reusable full-trust Unit presentation package; distinct from a Zone's built-in appearance settings.	zh-Hans	approved	label	自定义主题	-
+customTheme	A reusable full-trust Unit presentation package; distinct from a Zone's built-in appearance settings.	zh-Hans	approved	pluralLabel	自定义主题	-
+customTheme	A reusable full-trust Unit presentation package; distinct from a Zone's built-in appearance settings.	zh-Hans	approved	inline	自定义主题	-
+customTheme	A reusable full-trust Unit presentation package; distinct from a Zone's built-in appearance settings.	zh-Hans	approved	plural	自定义主题	-
+customTheme	A reusable full-trust Unit presentation package; distinct from a Zone's built-in appearance settings.	de	approved	label	Benutzerdefiniertes Design	-
+customTheme	A reusable full-trust Unit presentation package; distinct from a Zone's built-in appearance settings.	de	approved	pluralLabel	Benutzerdefinierte Designs	-
+customTheme	A reusable full-trust Unit presentation package; distinct from a Zone's built-in appearance settings.	de	approved	inline	benutzerdefiniertes Design	-
+customTheme	A reusable full-trust Unit presentation package; distinct from a Zone's built-in appearance settings.	de	approved	plural	benutzerdefinierte Designs	-
+customTheme	A reusable full-trust Unit presentation package; distinct from a Zone's built-in appearance settings.	ja	approved	label	カスタムテーマ	-
+customTheme	A reusable full-trust Unit presentation package; distinct from a Zone's built-in appearance settings.	ja	approved	pluralLabel	カスタムテーマ	-
+customTheme	A reusable full-trust Unit presentation package; distinct from a Zone's built-in appearance settings.	ja	approved	inline	カスタムテーマ	-
+customTheme	A reusable full-trust Unit presentation package; distinct from a Zone's built-in appearance settings.	ja	approved	plural	カスタムテーマ	-
+customTheme	A reusable full-trust Unit presentation package; distinct from a Zone's built-in appearance settings.	ko	approved	label	사용자 지정 테마	-
+customTheme	A reusable full-trust Unit presentation package; distinct from a Zone's built-in appearance settings.	ko	approved	pluralLabel	사용자 지정 테마	-
+customTheme	A reusable full-trust Unit presentation package; distinct from a Zone's built-in appearance settings.	ko	approved	inline	사용자 지정 테마	-
+customTheme	A reusable full-trust Unit presentation package; distinct from a Zone's built-in appearance settings.	ko	approved	plural	사용자 지정 테마	-
 realm	The REZICS Realm product concept.	en	approved	label	Realm	-
 realm	The REZICS Realm product concept.	en	approved	pluralLabel	Realms	-
 realm	The REZICS Realm product concept.	en	approved	inline	realm	-

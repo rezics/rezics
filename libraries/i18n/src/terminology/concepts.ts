@@ -58,6 +58,12 @@ export const terminologyConcepts = defineTerminologyConcepts({
 		slots: ["label", "pluralLabel", "inline", "plural"] as const,
 		locales: AllTerminologyLocales,
 	},
+	customTheme: {
+		definition:
+			"A reusable full-trust Unit presentation package; distinct from a Zone's built-in appearance settings.",
+		slots: ["label", "pluralLabel", "inline", "plural"] as const,
+		locales: AllTerminologyLocales,
+	},
 	realm: {
 		definition: "The REZICS Realm product concept.",
 		slots: ["label", "pluralLabel", "inline", "plural"] as const,

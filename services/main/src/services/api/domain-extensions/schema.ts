@@ -4,7 +4,7 @@ import {
 	NavigationDocument,
 	PortableTextDocument,
 	UnitReferencedBlockDocument,
-	ZoneThemeDocument,
+	ZoneAppearanceDocument,
 } from "@rezics/block";
 import { FilterDocument } from "@rezics/filter";
 import { LicenseIds } from "@rezics/license";
@@ -29,16 +29,19 @@ import { NullablePublicSlugAddressResponse, SlugLabelInput } from "../slug-addre
 // OpenAPI component and prevent recursive Block static types from expanding
 // through the entire Elysia route chain.
 const FilterResponseDocument = Type.Unsafe<unknown>(Type.Ref("FilterDocument"));
-const ZoneThemeResponseDocument = Type.Unsafe<unknown>(Type.Ref("ZoneThemeDocument"));
+const ZoneThemeResponseDocument = Type.Unsafe<unknown>(Type.Ref("ZoneAppearanceDocument"));
 const UnitReferencedBlockResponseDocument = Type.Unsafe<unknown>(
 	Type.Ref("UnitReferencedBlockDocument"),
 );
 const NavigationResponseDocument = Type.Unsafe<unknown>(Type.Ref("NavigationDocument"));
 const DockResponseDocument = Type.Unsafe<unknown>(Type.Ref(DockDocument));
 const PortableTextResponseDocument = Type.Unsafe<unknown>(Type.Ref(PortableTextDocument));
+const ResolvedUnitPresentationResponseDocument = Type.Unsafe<unknown>(
+	Type.Ref("ResolvedUnitPresentationResponse"),
+);
 const FilterInputDocument = Type.Unsafe<Static<typeof FilterDocument>>(Type.Ref("FilterDocument"));
-const ZoneThemeInputDocument = Type.Unsafe<Static<typeof ZoneThemeDocument>>(
-	Type.Ref("ZoneThemeDocument"),
+const ZoneThemeInputDocument = Type.Unsafe<Static<typeof ZoneAppearanceDocument>>(
+	Type.Ref("ZoneAppearanceDocument"),
 );
 const UnitReferencedBlockInputDocument = Type.Unsafe<Static<typeof UnitReferencedBlockDocument>>(
 	Type.Ref("UnitReferencedBlockDocument"),
@@ -94,7 +97,7 @@ export const CreateZoneBody = t.Object(
 	{
 		localization: UnitLocalizationInput,
 		filterDocument: FilterInputDocument,
-		themeDocument: ZoneThemeInputDocument,
+		appearanceDocument: ZoneThemeInputDocument,
 		startsAt: t.Optional(t.Nullable(t.String({ format: "date-time" }))),
 		endsAt: t.Optional(t.Nullable(t.String({ format: "date-time" }))),
 		localRuleRealmId: t.Optional(t.Nullable(Uuid)),
@@ -109,6 +112,7 @@ export const ZoneDetailQuery = t.Object(LocalizationLanguageQuery, {
 export const ZoneRenderQuery = t.Object(
 	{
 		...LocalizationLanguageQuery,
+		safeMode: t.Optional(t.Boolean({ default: false })),
 		page: t.Optional(
 			t.String({ minLength: 1, maxLength: 100, pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$" }),
 		),
@@ -136,7 +140,7 @@ export const UpdateZoneBody = t.Object(
 	{
 		localization: t.Optional(UnitLocalizationInput),
 		filterDocument: t.Optional(FilterInputDocument),
-		themeDocument: t.Optional(ZoneThemeInputDocument),
+		appearanceDocument: t.Optional(ZoneThemeInputDocument),
 		startsAt: t.Optional(t.Nullable(t.String({ format: "date-time" }))),
 		endsAt: t.Optional(t.Nullable(t.String({ format: "date-time" }))),
 		localRuleRealmId: t.Optional(t.Nullable(Uuid)),
@@ -255,7 +259,7 @@ export const ZoneResponse = t.Object({
 		}),
 	),
 	filterDocument: FilterResponseDocument,
-	themeDocument: ZoneThemeResponseDocument,
+	appearanceDocument: ZoneThemeResponseDocument,
 	themeHero: ImageAssetResponse,
 	startsAt: t.Nullable(DateTime),
 	endsAt: t.Nullable(DateTime),
@@ -336,12 +340,7 @@ export const ZoneRenderWikiPostResponse = t.Object({
 });
 export const ZoneRenderResponse = t.Object({
 	zone: ZoneResponse,
-	customThemeStylesheet: t.Nullable(
-		t.Object(
-			{ revisionId: Uuid, sha256: t.String(), css: t.String({ maxLength: 65_536 }) },
-			{ additionalProperties: false },
-		),
-	),
+	resolvedPresentation: ResolvedUnitPresentationResponseDocument,
 	page: t.Nullable(ZonePageResponse),
 	dock: t.Nullable(
 		t.Object({

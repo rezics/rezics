@@ -10,6 +10,7 @@ const { forms: realmTerms } = frTerminology.realm;
 const { forms: entityTerms } = frTerminology.entity;
 const { forms: unitSlugTerms } = frTerminology.unitSlug;
 const { forms: zoneTerms } = frTerminology.zone;
+const { forms: customThemeTerms } = frTerminology.customTheme;
 
 export default {
 	home: "Accueil",
@@ -76,7 +77,7 @@ export default {
 			tag: "Étiquette",
 			series: "Série",
 			zone: zoneTerms.label,
-			zone_theme: `Thème de ${zoneTerms.inline}`,
+			custom_theme: customThemeTerms.label,
 			zone_page: `Page d’${zoneTerms.inline}`,
 			collection: "Collection",
 			post: postTerms.label,

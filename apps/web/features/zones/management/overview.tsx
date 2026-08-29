@@ -3,8 +3,8 @@
 import {
 	isDocument,
 	parseDocument,
-	ZoneThemeDocument,
-	type ZoneThemeDocument as ZoneTheme,
+	ZoneAppearanceDocument,
+	type ZoneAppearanceDocument as ZoneTheme,
 } from "@rezics/block";
 import {
 	getApiZonesByZoneIdQueryKey,
@@ -95,7 +95,7 @@ const ZoneSharedDraftCodec: LocalizedDraftCodec<ZoneSharedDraft> = {
 			localRuleRealmId === undefined ||
 			startsAt === undefined ||
 			endsAt === undefined ||
-			!isDocument(ZoneThemeDocument, value.theme)
+			!isDocument(ZoneAppearanceDocument, value.theme)
 		)
 			return;
 		return { slug, localRuleRealmId, startsAt, endsAt, theme: value.theme };
@@ -125,7 +125,7 @@ function ZoneManagementOverviewForLanguage() {
 			? [{ ...item.avatar, label: t.locale.contentLanguages[item.language] }]
 			: [],
 	);
-	const initialTheme = parseDocument(ZoneThemeDocument, zone.themeDocument);
+	const initialTheme = parseDocument(ZoneAppearanceDocument, zone.appearanceDocument);
 	const localizationDraft = useLocalizedDraft<ZoneLocalizationDraft>({
 		scope: "zone-overview-localization",
 		baseVersion: zone.updatedAt,
@@ -164,7 +164,7 @@ function ZoneManagementOverviewForLanguage() {
 						summary: localization.summary.trim(),
 						avatar: avatarPresentationToInput(localization.avatar),
 					},
-					themeDocument: shared.theme,
+					appearanceDocument: shared.theme,
 					localRuleRealmId: shared.localRuleRealmId || null,
 					startsAt: toApiDateTime(shared.startsAt),
 					endsAt: toApiDateTime(shared.endsAt),

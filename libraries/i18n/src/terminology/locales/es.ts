@@ -61,6 +61,16 @@ export const esTerminology = defineTerminology("es", {
 		forms: { label: "Vídeo", pluralLabel: "Vídeos", inline: "vídeo", plural: "vídeos" },
 		forbidden: [],
 	},
+	customTheme: {
+		status: "approved",
+		forms: {
+			label: "Tema personalizado",
+			pluralLabel: "Temas personalizados",
+			inline: "tema personalizado",
+			plural: "temas personalizados",
+		},
+		forbidden: [],
+	},
 	audio: {
 		status: "approved",
 		forms: { label: "Audio", pluralLabel: "Audios", inline: "audio", plural: "audios" },

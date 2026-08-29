@@ -8,6 +8,7 @@ const { forms: realmTerms } = jaTerminology.realm;
 const { forms: entityTerms } = jaTerminology.entity;
 const { forms: postTerms } = jaTerminology.post;
 const { forms: zoneTerms } = jaTerminology.zone;
+const { forms: customThemeTerms } = jaTerminology.customTheme;
 
 export default {
 	title: "ユニットガバナンス",
@@ -95,8 +96,10 @@ export default {
 		"platform.user.api_token.api_quota.update": `ユーザーの ${verbatimTerms.api.value} トークンクォータを管理する`,
 		"platform.moderate": "プラットフォームユニットを管理する",
 		"platform.suppress": "プラットフォームのコンテンツと改訂を抑制する",
-		"platform.zone_theme.review": `カスタム${zoneTerms.label}テーマを審査する`,
-		"platform.zone_theme.kill": `承認済みカスタム${zoneTerms.label}テーマを緊急停止する`,
+		"platform.custom_theme.external_live.access": `${customThemeTerms.label}で外部ライブリソースを使用する`,
+		"platform.custom_theme.external_live.access.manage": `${customThemeTerms.label}の外部ライブアクセスを管理する`,
+		"platform.custom_theme.review": `${customThemeTerms.label}を審査する`,
+		"platform.custom_theme.kill": `承認済み${customThemeTerms.label}を緊急停止する`,
 		"realm.contribute": `すべての ${realmTerms.label} に参加する`,
 		"realm.units.create": `すべての ${realmTerms.label} にユニットを作成する`,
 		"realm.post.replies.create": `すべての ${realmTerms.label} に返信を作成する`,

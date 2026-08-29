@@ -1,17 +1,17 @@
 "use client";
 
 import {
-	applyZoneThemePreset,
-	type ZoneThemeDocument,
-	ZoneThemeCardRadiusValues,
-	ZoneThemeColorSchemeValues,
-	ZoneThemeDensityValues,
-	ZoneThemeHeadingFontScaleValues,
-	type ZoneThemePresetId,
-	ZoneThemePresetIdValues,
-	ZoneThemePresetRegistry,
-	ZoneThemeSurfaceTintValues,
-	ZoneThemeTokenDefaults,
+	applyZoneAppearancePreset,
+	type ZoneAppearanceDocument,
+	ZoneAppearanceCardRadiusValues,
+	ZoneAppearanceColorSchemeValues,
+	ZoneAppearanceDensityValues,
+	ZoneAppearanceHeadingFontScaleValues,
+	type ZoneAppearancePresetId,
+	ZoneAppearancePresetIdValues,
+	ZoneAppearancePresetRegistry,
+	ZoneAppearanceSurfaceTintValues,
+	ZoneAppearanceTokenDefaults,
 } from "@rezics/block";
 import {
 	Field,
@@ -32,7 +32,7 @@ import {
 import { useTranslation } from "@/i18n/client";
 
 export interface ZoneThemeEditorValue {
-	readonly theme: ZoneThemeDocument;
+	readonly theme: ZoneAppearanceDocument;
 	readonly hero: LocalizationImageAssetValue | null;
 }
 
@@ -43,26 +43,26 @@ interface ZoneThemeFieldsProps {
 	readonly value: ZoneThemeEditorValue;
 }
 
-function effectivePresetId(theme: ZoneThemeDocument): ZoneThemePresetId | undefined {
-	return ZoneThemePresetIdValues.find((presetId) => {
-		const preset = ZoneThemePresetRegistry[presetId].tokens;
+function effectivePresetId(theme: ZoneAppearanceDocument): ZoneAppearancePresetId | undefined {
+	return ZoneAppearancePresetIdValues.find((presetId) => {
+		const preset = ZoneAppearancePresetRegistry[presetId].tokens;
 		return (
 			theme.colorScheme === preset.colorScheme &&
 			theme.accent.toLowerCase() === preset.accent &&
 			theme.density === preset.density &&
-			(theme.cardRadius ?? ZoneThemeTokenDefaults.cardRadius) === preset.cardRadius &&
-			(theme.headingFontScale ?? ZoneThemeTokenDefaults.headingFontScale) ===
+			(theme.cardRadius ?? ZoneAppearanceTokenDefaults.cardRadius) === preset.cardRadius &&
+			(theme.headingFontScale ?? ZoneAppearanceTokenDefaults.headingFontScale) ===
 				preset.headingFontScale &&
-			(theme.surfaceTint ?? ZoneThemeTokenDefaults.surfaceTint) === preset.surfaceTint &&
+			(theme.surfaceTint ?? ZoneAppearanceTokenDefaults.surfaceTint) === preset.surfaceTint &&
 			theme.heroAssetId === ("heroAssetId" in preset ? preset.heroAssetId : undefined)
 		);
 	});
 }
 
 function withHeroAsset(
-	theme: ZoneThemeDocument,
+	theme: ZoneAppearanceDocument,
 	hero: LocalizationImageAssetValue | null,
-): ZoneThemeDocument {
+): ZoneAppearanceDocument {
 	const next = { ...theme };
 	if (hero) next.heroAssetId = hero.id;
 	else delete next.heroAssetId;
@@ -105,14 +105,14 @@ export function ZoneThemeFields({
 						<NativeSelect
 							disabled={disabled}
 							onChange={(event) => {
-								const colorScheme = ZoneThemeColorSchemeValues.find(
+								const colorScheme = ZoneAppearanceColorSchemeValues.find(
 									(candidate) => candidate === event.currentTarget.value,
 								);
 								if (colorScheme) onChange({ ...value, theme: { ...value.theme, colorScheme } });
 							}}
 							value={value.theme.colorScheme}
 						>
-							{ZoneThemeColorSchemeValues.map((colorScheme) => (
+							{ZoneAppearanceColorSchemeValues.map((colorScheme) => (
 								<NativeSelectOption key={colorScheme} value={colorScheme}>
 									{copy.colorSchemes[colorScheme]}
 								</NativeSelectOption>
@@ -124,14 +124,14 @@ export function ZoneThemeFields({
 						<NativeSelect
 							disabled={disabled}
 							onChange={(event) => {
-								const density = ZoneThemeDensityValues.find(
+								const density = ZoneAppearanceDensityValues.find(
 									(candidate) => candidate === event.currentTarget.value,
 								);
 								if (density) onChange({ ...value, theme: { ...value.theme, density } });
 							}}
 							value={value.theme.density}
 						>
-							{ZoneThemeDensityValues.map((density) => (
+							{ZoneAppearanceDensityValues.map((density) => (
 								<NativeSelectOption key={density} value={density}>
 									{copy.densities[density]}
 								</NativeSelectOption>
@@ -150,12 +150,12 @@ export function ZoneThemeFields({
 						className="grid gap-3"
 						disabled={disabled}
 						onValueChange={({ value: presetId }) => {
-							const nextPresetId = ZoneThemePresetIdValues.find(
+							const nextPresetId = ZoneAppearancePresetIdValues.find(
 								(candidate) => candidate === presetId,
 							);
 							if (!nextPresetId) return;
 							onChange({
-								theme: applyZoneThemePreset(value.theme, nextPresetId),
+								theme: applyZoneAppearancePreset(value.theme, nextPresetId),
 								hero: null,
 							});
 						}}
@@ -164,8 +164,8 @@ export function ZoneThemeFields({
 						<RadioGroupLabel>{copy.gallery.title}</RadioGroupLabel>
 						<p className="text-muted-foreground text-sm">{copy.gallery.consequence}</p>
 						<div className="grid gap-3 md:grid-cols-3">
-							{ZoneThemePresetIdValues.map((presetId) => {
-								const preset = ZoneThemePresetRegistry[presetId];
+							{ZoneAppearancePresetIdValues.map((presetId) => {
+								const preset = ZoneAppearancePresetRegistry[presetId];
 								const presetCopy = copy.gallery.options[presetId];
 								return (
 									<RadioGroupItem
@@ -206,14 +206,14 @@ export function ZoneThemeFields({
 							<NativeSelect
 								disabled={disabled}
 								onChange={(event) => {
-									const cardRadius = ZoneThemeCardRadiusValues.find(
+									const cardRadius = ZoneAppearanceCardRadiusValues.find(
 										(candidate) => candidate === event.currentTarget.value,
 									);
 									if (cardRadius) onChange({ ...value, theme: { ...value.theme, cardRadius } });
 								}}
-								value={value.theme.cardRadius ?? ZoneThemeTokenDefaults.cardRadius}
+								value={value.theme.cardRadius ?? ZoneAppearanceTokenDefaults.cardRadius}
 							>
-								{ZoneThemeCardRadiusValues.map((cardRadius) => (
+								{ZoneAppearanceCardRadiusValues.map((cardRadius) => (
 									<NativeSelectOption key={cardRadius} value={cardRadius}>
 										{copy.cardRadii[cardRadius]}
 									</NativeSelectOption>
@@ -225,15 +225,15 @@ export function ZoneThemeFields({
 							<NativeSelect
 								disabled={disabled}
 								onChange={(event) => {
-									const headingFontScale = ZoneThemeHeadingFontScaleValues.find(
+									const headingFontScale = ZoneAppearanceHeadingFontScaleValues.find(
 										(candidate) => candidate === event.currentTarget.value,
 									);
 									if (headingFontScale)
 										onChange({ ...value, theme: { ...value.theme, headingFontScale } });
 								}}
-								value={value.theme.headingFontScale ?? ZoneThemeTokenDefaults.headingFontScale}
+								value={value.theme.headingFontScale ?? ZoneAppearanceTokenDefaults.headingFontScale}
 							>
-								{ZoneThemeHeadingFontScaleValues.map((headingFontScale) => (
+								{ZoneAppearanceHeadingFontScaleValues.map((headingFontScale) => (
 									<NativeSelectOption key={headingFontScale} value={headingFontScale}>
 										{copy.headingFontScales[headingFontScale]}
 									</NativeSelectOption>
@@ -245,14 +245,14 @@ export function ZoneThemeFields({
 							<NativeSelect
 								disabled={disabled}
 								onChange={(event) => {
-									const surfaceTint = ZoneThemeSurfaceTintValues.find(
+									const surfaceTint = ZoneAppearanceSurfaceTintValues.find(
 										(candidate) => candidate === event.currentTarget.value,
 									);
 									if (surfaceTint) onChange({ ...value, theme: { ...value.theme, surfaceTint } });
 								}}
-								value={value.theme.surfaceTint ?? ZoneThemeTokenDefaults.surfaceTint}
+								value={value.theme.surfaceTint ?? ZoneAppearanceTokenDefaults.surfaceTint}
 							>
-								{ZoneThemeSurfaceTintValues.map((surfaceTint) => (
+								{ZoneAppearanceSurfaceTintValues.map((surfaceTint) => (
 									<NativeSelectOption key={surfaceTint} value={surfaceTint}>
 										{copy.surfaceTints[surfaceTint]}
 									</NativeSelectOption>

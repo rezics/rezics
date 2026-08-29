@@ -9,6 +9,8 @@ const SourceExtensions = new Set([".ts", ".tsx"]);
 const IgnoredDirectories = new Set(["node_modules", ".next", ".vinext", "dist"]);
 const FrameworkLinkOwner = "application-shell/components/app-link.tsx";
 const FrameworkRouterOwner = "application-shell/hooks/use-application-router.ts";
+const RepositoryReadBatchSize = 64;
+const RepositoryScanTimeoutMs = 30_000;
 
 async function collectSourceFiles(directory: string): Promise<string[]> {
 	const entries = await readdir(directory, { withFileTypes: true });
@@ -26,21 +28,33 @@ async function collectSourceFiles(directory: string): Promise<string[]> {
 }
 
 describe("application navigation entry policy", () => {
-	it("keeps framework Link and Router lifecycle access behind application-shell owners", async () => {
-		const violations: string[] = [];
+	it(
+		"keeps framework Link and Router lifecycle access behind application-shell owners",
+		async () => {
+			const violations: string[] = [];
+			const paths = await collectSourceFiles(FeatureRoot);
 
-		for (const path of await collectSourceFiles(FeatureRoot)) {
-			const featurePath = relative(FeatureRoot, path).split(sep).join("/");
-			const source = await readFile(path, "utf8");
-			if (source.includes('from "next/link"') && featurePath !== FrameworkLinkOwner)
-				violations.push(`${featurePath} imports next/link`);
-			if (
-				/import\s*\{[^}]*\buseRouter\b[^}]*\}\s*from\s*"next\/navigation"/s.test(source) &&
-				featurePath !== FrameworkRouterOwner
-			)
-				violations.push(`${featurePath} imports useRouter`);
-		}
+			for (let offset = 0; offset < paths.length; offset += RepositoryReadBatchSize) {
+				const batchViolations = await Promise.all(
+					paths.slice(offset, offset + RepositoryReadBatchSize).map(async (path) => {
+						const found: string[] = [];
+						const featurePath = relative(FeatureRoot, path).split(sep).join("/");
+						const source = await readFile(path, "utf8");
+						if (source.includes('from "next/link"') && featurePath !== FrameworkLinkOwner)
+							found.push(`${featurePath} imports next/link`);
+						if (
+							/import\s*\{[^}]*\buseRouter\b[^}]*\}\s*from\s*"next\/navigation"/s.test(source) &&
+							featurePath !== FrameworkRouterOwner
+						)
+							found.push(`${featurePath} imports useRouter`);
+						return found;
+					}),
+				);
+				for (const found of batchViolations) violations.push(...found);
+			}
 
-		expect(violations).toEqual([]);
-	});
+			expect(violations).toEqual([]);
+		},
+		RepositoryScanTimeoutMs,
+	);
 });

@@ -14,7 +14,7 @@ const payload = {
 	filterFeedByPreferredLanguages: false,
 	alwaysShowSpoilers: false,
 	alwaysShowNsfw: false,
-	customZoneThemesEnabled: false,
+	customThemesEnabled: false,
 	preferredLanguages: ["en"],
 } as const;
 

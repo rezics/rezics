@@ -4,6 +4,7 @@ import { frTerminology } from "@rezics/i18n/terminology/fr";
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 
 const { forms: postTerms } = frTerminology.post;
+const { forms: customThemeTerms } = frTerminology.customTheme;
 const { forms: realmTerms } = frTerminology.realm;
 const { forms: unitSlugTerms } = frTerminology.unitSlug;
 const { forms: zoneTerms } = frTerminology.zone;
@@ -43,9 +44,9 @@ export default {
 	loadSection: "Charger cette section",
 	theme: {
 		viewerDefault: "Utiliser le thème par défaut de la plateforme",
-		viewerDefaultScope:
-			"Cette action désactive les thèmes personnalisés pour toutes les zones. Vous pourrez les réactiver dans les préférences.",
+		viewerDefaultScope: `Cette action désactive les ${customThemeTerms.plural} pour toutes les zones. Vous pourrez les réactiver dans les préférences.`,
 		viewerDefaultFailed: "Impossible d'appliquer le thème par défaut. Réessayez plus tard.",
+		runtimeFailed: `Le ${customThemeTerms.inline} n’a pas pu être chargé. La présentation de la plateforme est utilisée.`,
 		basicsTitle: "Apparence de base",
 		detailsTitle: "Détails du thème",
 		accent: "Couleur d’accentuation",

@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 
 import {
 	AuthenticatedGrantableUnitPermissionValues,
+	CustomThemeExternalLiveAccessCapability,
+	CustomThemeExternalLiveAccessManageCapability,
 	DelegableUnitPermissionValues,
 	DevelopmentPreviewCapability,
 	expandDelegableUnitPermissions,
@@ -156,6 +158,13 @@ describe("permission schema", () => {
 		expect(expandPlatformCapabilities(["platform.access.manage"])).toEqual([
 			"platform.access.read",
 			"platform.access.manage",
+			CustomThemeExternalLiveAccessManageCapability,
+		]);
+		expect(expandPlatformCapabilities([CustomThemeExternalLiveAccessManageCapability])).toEqual([
+			CustomThemeExternalLiveAccessManageCapability,
+		]);
+		expect(expandPlatformCapabilities([CustomThemeExternalLiveAccessCapability])).toEqual([
+			CustomThemeExternalLiveAccessCapability,
 		]);
 		expect(expandPlatformCapabilities(["platform.audit.read"])).toEqual(["platform.audit.read"]);
 		expect(expandPlatformCapabilities(["platform.user.status.update"])).toEqual([

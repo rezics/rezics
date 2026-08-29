@@ -3,6 +3,7 @@ import { zhHansTerminology } from "@rezics/i18n/terminology/zh-Hans";
 
 const { forms: audioTerms } = zhHansTerminology.audio;
 const { forms: dockTerms } = zhHansTerminology.dock;
+const { forms: customThemeTerms } = zhHansTerminology.customTheme;
 const { forms: followTerms } = zhHansTerminology.follow;
 const { forms: postTerms } = zhHansTerminology.post;
 const { forms: realmTerms } = zhHansTerminology.realm;
@@ -68,7 +69,7 @@ export default {
 	PlatformCapabilityRequired: "此操作需要平台权限。",
 	PlatformAccessManagerRequired: "平台必须保留至少一位无期限的访问权管理者。",
 	PlatformAccessRevisionConflict: "平台权限已由其他变更更新，请重新加载后再试一次。",
-	PlatformAccessConfigurationInvalid: "每一项平台权限只能出现一次。",
+	PlatformAccessConfigurationInvalid: "请求的平台访问权限超出了唯一性或容量限制。",
 	CollectionOwnershipRequired: "这个收藏集不属于你。",
 	ProfileNotFound: "找不到这个用户资料。",
 	ProfileChanged: "用户资料已变更，请刷新后再试一次。",
@@ -281,12 +282,18 @@ export default {
 	UnitRealmPublicationNotFound: `找不到这项内容与该${realmTerms.label}的发布关系。`,
 	UnitRealmPublicationAlreadyExists: `这项内容已与该${realmTerms.label}建立发布关系。`,
 	UnitRealmPublicationTransitionInvalid: "这项发布关系已经处于要求的状态。",
-	ZoneThemeNotFound: `找不到这个${zoneTerms.label}主题样式。`,
-	ZoneThemeRevisionNotFound: `找不到这个${zoneTerms.label}主题样式修订。`,
-	ZoneThemeStylesheetInvalid: `这个${zoneTerms.label}主题样式表未通过自动安全审核。`,
-	ZoneThemeAssetsInvalid: "所有主题图片都必须归你所有，并且仍处于公开、可用且未删除状态。",
-	ZoneThemeAutomatedReviewInvalid: "主题的自动审核凭证不完整，或未达到发布要求。",
-	ZoneThemeRevisionStateConflict: "这个主题修订已进入其他审核状态，请重新加载后再继续。",
-	ZoneThemeReferenceInvalid: `请选择当前已核准的${zoneTerms.label}主题样式修订。`,
+	CustomThemeExternalLiveAccessSelfMutationForbidden:
+		"你不能授予、更改或撤销自己对外部资源主题的访问权限。",
+	CustomThemeNotFound: `找不到这个${customThemeTerms.inline}。`,
+	CustomThemeRevisionNotFound: `找不到这个${customThemeTerms.inline}修订。`,
+	CustomThemePackageInvalid: `这个${customThemeTerms.inline}包无效。`,
+	CustomThemeSubmissionBackpressure: `这个${customThemeTerms.inline}的提交已暂时暂停，待积压的审核处理完毕后再开放。`,
+	CustomThemeExternalResourceInvalid: `无法安全审核这个${customThemeTerms.inline}使用的外部资源。`,
+	CustomThemeReviewEvidenceInvalid: `这个${customThemeTerms.inline}的审核凭证不完整。`,
+	CustomThemeRevisionStateConflict: `这个${customThemeTerms.inline}修订已进入其他审核状态，请重新加载后再继续。`,
+	CustomThemeReviewerSeparationRequired: `提交这个${customThemeTerms.inline}修订的人不能决定其审核结果。`,
+	CustomThemeInstallationInvalid: `请选择当前已获准用于此宿主的${customThemeTerms.inline}修订。`,
+	UnitPresentationHostUnsupported: "这种条目不支持自定义外观。",
+	UnitPresentationRevisionConflict: "条目外观已在其他位置更改，请重新加载后再保存。",
 	StudioRealmSubjectLimitExceeded: "你所属的团队过多，工作空间暂时无法列出团队委派内容。",
 } satisfies typeof import("../zh-Hant/errorCodes").default;

@@ -297,24 +297,46 @@ import type {
 	PutApiUsersByIdBlockResponses,
 	DeleteApiUsersByIdBlockOptions,
 	DeleteApiUsersByIdBlockResponses,
-	PostApiZoneThemesOptions,
-	PostApiZoneThemesResponses,
-	PutApiZoneThemesByThemeUnitIdLocalizationsByLanguageOptions,
-	PutApiZoneThemesByThemeUnitIdLocalizationsByLanguageResponses,
-	GetApiZoneThemesReviewQueueOptions,
-	GetApiZoneThemesReviewQueueResponses,
-	PostApiZoneThemesRevalidationOptions,
-	PostApiZoneThemesRevalidationResponses,
-	GetApiZoneThemesByThemeUnitIdRevisionsOptions,
-	GetApiZoneThemesByThemeUnitIdRevisionsResponses,
-	PostApiZoneThemesByThemeUnitIdRevisionsOptions,
-	PostApiZoneThemesByThemeUnitIdRevisionsResponses,
-	PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewOptions,
-	PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewResponses,
-	PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionOptions,
-	PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionResponses,
-	PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillOptions,
-	PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillResponses,
+	GetApiCustomThemesExecutionControlOptions,
+	GetApiCustomThemesExecutionControlResponses,
+	PutApiCustomThemesExecutionControlOptions,
+	PutApiCustomThemesExecutionControlResponses,
+	PostApiCustomThemesOptions,
+	PostApiCustomThemesResponses,
+	PutApiCustomThemesByThemeUnitIdLocalizationsByLanguageOptions,
+	PutApiCustomThemesByThemeUnitIdLocalizationsByLanguageResponses,
+	GetApiCustomThemesReviewQueueOptions,
+	GetApiCustomThemesReviewQueueResponses,
+	GetApiCustomThemesByThemeUnitIdRevisionsOptions,
+	GetApiCustomThemesByThemeUnitIdRevisionsResponses,
+	PostApiCustomThemesByThemeUnitIdRevisionsOptions,
+	PostApiCustomThemesByThemeUnitIdRevisionsResponses,
+	PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdDecisionOptions,
+	PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdDecisionResponses,
+	PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdKillOptions,
+	PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdKillResponses,
+	GetApiCustomThemesByThemeUnitIdRevisionsByRevisionIdReferenceRenderArtifactsByScreenshotAssetIdOptions,
+	GetApiCustomThemesByThemeUnitIdRevisionsByRevisionIdReferenceRenderArtifactsByScreenshotAssetIdResponses,
+	GetApiCustomThemesByThemeUnitIdRevisionsByRevisionIdFileOptions,
+	GetApiCustomThemesByThemeUnitIdRevisionsByRevisionIdFileResponses,
+	GetApiUnitsByIdByUnitIdPresentationOptions,
+	GetApiUnitsByIdByUnitIdPresentationResponses,
+	PutApiUnitsByIdByUnitIdPresentationOptions,
+	PutApiUnitsByIdByUnitIdPresentationResponses,
+	GetApiUnitsByIdByUnitIdPresentationPolicyOptions,
+	GetApiUnitsByIdByUnitIdPresentationPolicyResponses,
+	GetApiUnitsByIdByUnitIdPresentationDocumentOptions,
+	GetApiUnitsByIdByUnitIdPresentationDocumentResponses,
+	PutApiUnitsByIdByUnitIdCustomThemeInstallationOptions,
+	PutApiUnitsByIdByUnitIdCustomThemeInstallationResponses,
+	DeleteApiUnitsByIdByUnitIdCustomThemeInstallationOptions,
+	DeleteApiUnitsByIdByUnitIdCustomThemeInstallationResponses,
+	GetApiPlatformAccessCustomThemeExternalLiveProfilesOptions,
+	GetApiPlatformAccessCustomThemeExternalLiveProfilesResponses,
+	GetApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessOptions,
+	GetApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessResponses,
+	PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessOptions,
+	PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessResponses,
 	GetApiPlatformAccessPolicyOptions,
 	GetApiPlatformAccessPolicyResponses,
 	GetApiPlatformAccessProfilesOptions,
@@ -3616,145 +3638,156 @@ export function deleteApiUsersByIdBlock<ThrowOnError extends boolean = true>(
 }
 
 /**
- * @summary Create a custom Zone theme Unit
- * {@link /api/v1/zone-themes/}
+ * @summary Get the Custom Theme execution kill switch
+ * {@link /api/v1/custom-themes/execution-control}
  */
-export function postApiZoneThemes<ThrowOnError extends boolean = true>(
-	options: Options<PostApiZoneThemesOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiZoneThemesResponses, ThrowOnError>> {
+export function getApiCustomThemesExecutionControl<ThrowOnError extends boolean = true>(
+	options: Options<GetApiCustomThemesExecutionControlOptions, ThrowOnError> = {},
+): Promise<RequestResult<GetApiCustomThemesExecutionControlResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/v1/custom-themes/execution-control",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<RequestResult<GetApiCustomThemesExecutionControlResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Set the Custom Theme execution kill switch
+ * {@link /api/v1/custom-themes/execution-control}
+ */
+export function putApiCustomThemesExecutionControl<ThrowOnError extends boolean = true>(
+	options: Options<PutApiCustomThemesExecutionControlOptions, ThrowOnError>,
+): Promise<RequestResult<PutApiCustomThemesExecutionControlResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "PUT",
+		url: "/api/v1/custom-themes/execution-control",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<RequestResult<PutApiCustomThemesExecutionControlResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Create a Custom Theme Unit
+ * {@link /api/v1/custom-themes/}
+ */
+export function postApiCustomThemes<ThrowOnError extends boolean = true>(
+	options: Options<PostApiCustomThemesOptions, ThrowOnError>,
+): Promise<RequestResult<PostApiCustomThemesResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "POST",
-		url: "/api/v1/zone-themes/",
+		url: "/api/v1/custom-themes/",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
 		],
 		...config,
-	}) as Promise<RequestResult<PostApiZoneThemesResponses, ThrowOnError>>;
+	}) as Promise<RequestResult<PostApiCustomThemesResponses, ThrowOnError>>;
 }
 
 /**
- * @summary Create or replace a Zone theme localization
- * {@link /api/v1/zone-themes/:themeUnitId/localizations/:language}
+ * @summary Create or replace a Custom Theme localization
+ * {@link /api/v1/custom-themes/:themeUnitId/localizations/:language}
  */
-export function putApiZoneThemesByThemeUnitIdLocalizationsByLanguage<
+export function putApiCustomThemesByThemeUnitIdLocalizationsByLanguage<
 	ThrowOnError extends boolean = true,
 >(
-	options: Options<PutApiZoneThemesByThemeUnitIdLocalizationsByLanguageOptions, ThrowOnError>,
+	options: Options<PutApiCustomThemesByThemeUnitIdLocalizationsByLanguageOptions, ThrowOnError>,
 ): Promise<
-	RequestResult<PutApiZoneThemesByThemeUnitIdLocalizationsByLanguageResponses, ThrowOnError>
+	RequestResult<PutApiCustomThemesByThemeUnitIdLocalizationsByLanguageResponses, ThrowOnError>
 > {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "PUT",
-		url: "/api/v1/zone-themes/{themeUnitId}/localizations/{language}",
+		url: "/api/v1/custom-themes/{themeUnitId}/localizations/{language}",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
 		],
 		...config,
 	}) as Promise<
-		RequestResult<PutApiZoneThemesByThemeUnitIdLocalizationsByLanguageResponses, ThrowOnError>
+		RequestResult<PutApiCustomThemesByThemeUnitIdLocalizationsByLanguageResponses, ThrowOnError>
 	>;
 }
 
 /**
- * @summary List the bounded Zone theme review queue
- * {@link /api/v1/zone-themes/review-queue}
+ * @summary List the bounded Custom Theme review queue
+ * {@link /api/v1/custom-themes/review-queue}
  */
-export function getApiZoneThemesReviewQueue<ThrowOnError extends boolean = true>(
-	options: Options<GetApiZoneThemesReviewQueueOptions, ThrowOnError> = {},
-): Promise<RequestResult<GetApiZoneThemesReviewQueueResponses, ThrowOnError>> {
+export function getApiCustomThemesReviewQueue<ThrowOnError extends boolean = true>(
+	options: Options<GetApiCustomThemesReviewQueueOptions, ThrowOnError> = {},
+): Promise<RequestResult<GetApiCustomThemesReviewQueueResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "GET",
-		url: "/api/v1/zone-themes/review-queue",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
+		url: "/api/v1/custom-themes/review-queue",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
-	}) as Promise<RequestResult<GetApiZoneThemesReviewQueueResponses, ThrowOnError>>;
+	}) as Promise<RequestResult<GetApiCustomThemesReviewQueueResponses, ThrowOnError>>;
 }
 
 /**
- * @summary Schedule a keyset batch for Zone theme contract revalidation
- * {@link /api/v1/zone-themes/revalidation}
+ * @summary List immutable Custom Theme revisions
+ * {@link /api/v1/custom-themes/:themeUnitId/revisions}
  */
-export function postApiZoneThemesRevalidation<ThrowOnError extends boolean = true>(
-	options: Options<PostApiZoneThemesRevalidationOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiZoneThemesRevalidationResponses, ThrowOnError>> {
-	const { client: request = client, ...config } = options;
-
-	return request({
-		method: "POST",
-		url: "/api/v1/zone-themes/revalidation",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PostApiZoneThemesRevalidationResponses, ThrowOnError>>;
-}
-
-/**
- * @summary List immutable Zone theme revisions
- * {@link /api/v1/zone-themes/:themeUnitId/revisions}
- */
-export function getApiZoneThemesByThemeUnitIdRevisions<ThrowOnError extends boolean = true>(
-	options: Options<GetApiZoneThemesByThemeUnitIdRevisionsOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiZoneThemesByThemeUnitIdRevisionsResponses, ThrowOnError>> {
+export function getApiCustomThemesByThemeUnitIdRevisions<ThrowOnError extends boolean = true>(
+	options: Options<GetApiCustomThemesByThemeUnitIdRevisionsOptions, ThrowOnError>,
+): Promise<RequestResult<GetApiCustomThemesByThemeUnitIdRevisionsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "GET",
-		url: "/api/v1/zone-themes/{themeUnitId}/revisions",
+		url: "/api/v1/custom-themes/{themeUnitId}/revisions",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
 		],
 		...config,
-	}) as Promise<RequestResult<GetApiZoneThemesByThemeUnitIdRevisionsResponses, ThrowOnError>>;
+	}) as Promise<RequestResult<GetApiCustomThemesByThemeUnitIdRevisionsResponses, ThrowOnError>>;
 }
 
 /**
- * @summary Submit an immutable Zone theme revision
- * {@link /api/v1/zone-themes/:themeUnitId/revisions}
+ * @summary Submit an immutable Custom Theme revision
+ * {@link /api/v1/custom-themes/:themeUnitId/revisions}
  */
-export function postApiZoneThemesByThemeUnitIdRevisions<ThrowOnError extends boolean = true>(
-	options: Options<PostApiZoneThemesByThemeUnitIdRevisionsOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiZoneThemesByThemeUnitIdRevisionsResponses, ThrowOnError>> {
+export function postApiCustomThemesByThemeUnitIdRevisions<ThrowOnError extends boolean = true>(
+	options: Options<PostApiCustomThemesByThemeUnitIdRevisionsOptions, ThrowOnError>,
+): Promise<RequestResult<PostApiCustomThemesByThemeUnitIdRevisionsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "POST",
-		url: "/api/v1/zone-themes/{themeUnitId}/revisions",
+		url: "/api/v1/custom-themes/{themeUnitId}/revisions",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
 		],
 		...config,
-	}) as Promise<RequestResult<PostApiZoneThemesByThemeUnitIdRevisionsResponses, ThrowOnError>>;
+	}) as Promise<RequestResult<PostApiCustomThemesByThemeUnitIdRevisionsResponses, ThrowOnError>>;
 }
 
 /**
- * @summary Record Zone theme render-farm and AI review
- * {@link /api/v1/zone-themes/:themeUnitId/revisions/:revisionId/automated-review}
+ * @summary Approve or reject a Custom Theme revision
+ * {@link /api/v1/custom-themes/:themeUnitId/revisions/:revisionId/decision}
  */
-export function postApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReview<
+export function postApiCustomThemesByThemeUnitIdRevisionsByRevisionIdDecision<
 	ThrowOnError extends boolean = true,
 >(
 	options: Options<
-		PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewOptions,
+		PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdDecisionOptions,
 		ThrowOnError
 	>,
 ): Promise<
 	RequestResult<
-		PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewResponses,
+		PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdDecisionResponses,
 		ThrowOnError
 	>
 > {
@@ -3762,75 +3795,307 @@ export function postApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedRevi
 
 	return request({
 		method: "POST",
-		url: "/api/v1/zone-themes/{themeUnitId}/revisions/{revisionId}/automated-review",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
+		url: "/api/v1/custom-themes/{themeUnitId}/revisions/{revisionId}/decision",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<
 		RequestResult<
-			PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdAutomatedReviewResponses,
+			PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdDecisionResponses,
 			ThrowOnError
 		>
 	>;
 }
 
 /**
- * @summary Approve or reject a Zone theme revision
- * {@link /api/v1/zone-themes/:themeUnitId/revisions/:revisionId/decision}
+ * @summary Emergency-disable a Custom Theme revision
+ * {@link /api/v1/custom-themes/:themeUnitId/revisions/:revisionId/kill}
  */
-export function postApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecision<
+export function postApiCustomThemesByThemeUnitIdRevisionsByRevisionIdKill<
+	ThrowOnError extends boolean = true,
+>(
+	options: Options<PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdKillOptions, ThrowOnError>,
+): Promise<
+	RequestResult<PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdKillResponses, ThrowOnError>
+> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/v1/custom-themes/{themeUnitId}/revisions/{revisionId}/kill",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<
+		RequestResult<PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdKillResponses, ThrowOnError>
+	>;
+}
+
+/**
+ * @summary Resolve a private Custom Theme reference-render artifact
+ * {@link /api/v1/custom-themes/:themeUnitId/revisions/:revisionId/reference-render-artifacts/:screenshotAssetId}
+ */
+export function getApiCustomThemesByThemeUnitIdRevisionsByRevisionIdReferenceRenderArtifactsByScreenshotAssetId<
 	ThrowOnError extends boolean = true,
 >(
 	options: Options<
-		PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionOptions,
+		GetApiCustomThemesByThemeUnitIdRevisionsByRevisionIdReferenceRenderArtifactsByScreenshotAssetIdOptions,
 		ThrowOnError
 	>,
 ): Promise<
-	RequestResult<PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionResponses, ThrowOnError>
+	RequestResult<
+		GetApiCustomThemesByThemeUnitIdRevisionsByRevisionIdReferenceRenderArtifactsByScreenshotAssetIdResponses,
+		ThrowOnError
+	>
 > {
 	const { client: request = client, ...config } = options;
 
 	return request({
-		method: "POST",
-		url: "/api/v1/zone-themes/{themeUnitId}/revisions/{revisionId}/decision",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
+		method: "GET",
+		url: "/api/v1/custom-themes/{themeUnitId}/revisions/{revisionId}/reference-render-artifacts/{screenshotAssetId}",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<
 		RequestResult<
-			PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdDecisionResponses,
+			GetApiCustomThemesByThemeUnitIdRevisionsByRevisionIdReferenceRenderArtifactsByScreenshotAssetIdResponses,
 			ThrowOnError
 		>
 	>;
 }
 
 /**
- * @summary Kill an approved Zone theme revision globally
- * {@link /api/v1/zone-themes/:themeUnitId/revisions/:revisionId/kill}
+ * @summary Read an executable packaged Custom Theme file
+ * {@link /api/v1/custom-themes/:themeUnitId/revisions/:revisionId/file}
  */
-export function postApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKill<
+export function getApiCustomThemesByThemeUnitIdRevisionsByRevisionIdFile<
 	ThrowOnError extends boolean = true,
 >(
-	options: Options<PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillOptions, ThrowOnError>,
+	options: Options<GetApiCustomThemesByThemeUnitIdRevisionsByRevisionIdFileOptions, ThrowOnError>,
 ): Promise<
-	RequestResult<PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillResponses, ThrowOnError>
+	RequestResult<GetApiCustomThemesByThemeUnitIdRevisionsByRevisionIdFileResponses, ThrowOnError>
 > {
 	const { client: request = client, ...config } = options;
 
 	return request({
-		method: "POST",
-		url: "/api/v1/zone-themes/{themeUnitId}/revisions/{revisionId}/kill",
+		method: "GET",
+		url: "/api/v1/custom-themes/{themeUnitId}/revisions/{revisionId}/file",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<
+		RequestResult<GetApiCustomThemesByThemeUnitIdRevisionsByRevisionIdFileResponses, ThrowOnError>
+	>;
+}
+
+/**
+ * @summary Resolve a Unit presentation for the current viewer
+ * {@link /api/v1/units/by-id/:unitId/presentation}
+ */
+export function getApiUnitsByIdByUnitIdPresentation<ThrowOnError extends boolean = true>(
+	options: Options<GetApiUnitsByIdByUnitIdPresentationOptions, ThrowOnError>,
+): Promise<RequestResult<GetApiUnitsByIdByUnitIdPresentationResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/v1/units/by-id/{unitId}/presentation",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<GetApiUnitsByIdByUnitIdPresentationResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Replace the Unit-owned presentation document
+ * {@link /api/v1/units/by-id/:unitId/presentation}
+ */
+export function putApiUnitsByIdByUnitIdPresentation<ThrowOnError extends boolean = true>(
+	options: Options<PutApiUnitsByIdByUnitIdPresentationOptions, ThrowOnError>,
+): Promise<RequestResult<PutApiUnitsByIdByUnitIdPresentationResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "PUT",
+		url: "/api/v1/units/by-id/{unitId}/presentation",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<PutApiUnitsByIdByUnitIdPresentationResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Resolve request-boundary presentation policy
+ * {@link /api/v1/units/by-id/:unitId/presentation-policy}
+ */
+export function getApiUnitsByIdByUnitIdPresentationPolicy<ThrowOnError extends boolean = true>(
+	options: Options<GetApiUnitsByIdByUnitIdPresentationPolicyOptions, ThrowOnError>,
+): Promise<RequestResult<GetApiUnitsByIdByUnitIdPresentationPolicyResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/v1/units/by-id/{unitId}/presentation-policy",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<GetApiUnitsByIdByUnitIdPresentationPolicyResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Get the Unit-owned presentation document
+ * {@link /api/v1/units/by-id/:unitId/presentation-document}
+ */
+export function getApiUnitsByIdByUnitIdPresentationDocument<ThrowOnError extends boolean = true>(
+	options: Options<GetApiUnitsByIdByUnitIdPresentationDocumentOptions, ThrowOnError>,
+): Promise<RequestResult<GetApiUnitsByIdByUnitIdPresentationDocumentResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/v1/units/by-id/{unitId}/presentation-document",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<GetApiUnitsByIdByUnitIdPresentationDocumentResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Install one exact Custom Theme revision
+ * {@link /api/v1/units/by-id/:unitId/custom-theme-installation}
+ */
+export function putApiUnitsByIdByUnitIdCustomThemeInstallation<ThrowOnError extends boolean = true>(
+	options: Options<PutApiUnitsByIdByUnitIdCustomThemeInstallationOptions, ThrowOnError>,
+): Promise<RequestResult<PutApiUnitsByIdByUnitIdCustomThemeInstallationResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "PUT",
+		url: "/api/v1/units/by-id/{unitId}/custom-theme-installation",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
 		],
 		...config,
 	}) as Promise<
-		RequestResult<PostApiZoneThemesByThemeUnitIdRevisionsByRevisionIdKillResponses, ThrowOnError>
+		RequestResult<PutApiUnitsByIdByUnitIdCustomThemeInstallationResponses, ThrowOnError>
+	>;
+}
+
+/**
+ * @summary Remove the installed Custom Theme revision
+ * {@link /api/v1/units/by-id/:unitId/custom-theme-installation}
+ */
+export function deleteApiUnitsByIdByUnitIdCustomThemeInstallation<
+	ThrowOnError extends boolean = true,
+>(
+	options: Options<DeleteApiUnitsByIdByUnitIdCustomThemeInstallationOptions, ThrowOnError>,
+): Promise<
+	RequestResult<DeleteApiUnitsByIdByUnitIdCustomThemeInstallationResponses, ThrowOnError>
+> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "DELETE",
+		url: "/api/v1/units/by-id/{unitId}/custom-theme-installation",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<
+		RequestResult<DeleteApiUnitsByIdByUnitIdCustomThemeInstallationResponses, ThrowOnError>
+	>;
+}
+
+/**
+ * @summary List or search Profiles for Custom Theme external-live access
+ * {@link /api/v1/platform-access/custom-theme-external-live/profiles}
+ */
+export function getApiPlatformAccessCustomThemeExternalLiveProfiles<
+	ThrowOnError extends boolean = true,
+>(
+	options: Options<GetApiPlatformAccessCustomThemeExternalLiveProfilesOptions, ThrowOnError> = {},
+): Promise<
+	RequestResult<GetApiPlatformAccessCustomThemeExternalLiveProfilesResponses, ThrowOnError>
+> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/v1/platform-access/custom-theme-external-live/profiles",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<
+		RequestResult<GetApiPlatformAccessCustomThemeExternalLiveProfilesResponses, ThrowOnError>
+	>;
+}
+
+/**
+ * @summary Get one Profile's Custom Theme external-live access
+ * {@link /api/v1/platform-access/profiles/:profileId/custom-theme-external-live-access}
+ */
+export function getApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccess<
+	ThrowOnError extends boolean = true,
+>(
+	options: Options<
+		GetApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessOptions,
+		ThrowOnError
+	>,
+): Promise<
+	RequestResult<
+		GetApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessResponses,
+		ThrowOnError
+	>
+> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/v1/platform-access/profiles/{profileId}/custom-theme-external-live-access",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<
+		RequestResult<
+			GetApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessResponses,
+			ThrowOnError
+		>
+	>;
+}
+
+/**
+ * @summary Grant, renew, or revoke Custom Theme external-live access
+ * {@link /api/v1/platform-access/profiles/:profileId/custom-theme-external-live-access}
+ */
+export function putApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccess<
+	ThrowOnError extends boolean = true,
+>(
+	options: Options<
+		PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessOptions,
+		ThrowOnError
+	>,
+): Promise<
+	RequestResult<
+		PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessResponses,
+		ThrowOnError
+	>
+> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "PUT",
+		url: "/api/v1/platform-access/profiles/{profileId}/custom-theme-external-live-access",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<
+		RequestResult<
+			PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessResponses,
+			ThrowOnError
+		>
 	>;
 }
 

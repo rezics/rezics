@@ -3,6 +3,7 @@ import { zhHantTerminology } from "@rezics/i18n/terminology/zh-Hant";
 
 const { forms: audioTerms } = zhHantTerminology.audio;
 const { forms: dockTerms } = zhHantTerminology.dock;
+const { forms: customThemeTerms } = zhHantTerminology.customTheme;
 const { forms: followTerms } = zhHantTerminology.follow;
 const { forms: postTerms } = zhHantTerminology.post;
 const { forms: realmTerms } = zhHantTerminology.realm;
@@ -68,7 +69,7 @@ export default {
 	PlatformCapabilityRequired: "此操作需要平台權限。",
 	PlatformAccessManagerRequired: "平台必須保留至少一位無期限的存取權管理者。",
 	PlatformAccessRevisionConflict: "平台權限已由其他變更更新，請重新載入後再試一次。",
-	PlatformAccessConfigurationInvalid: "每一項平台權限只能出現一次。",
+	PlatformAccessConfigurationInvalid: "要求的平台存取權限超出唯一性或容量限制。",
 	CollectionOwnershipRequired: "這個收藏集不屬於你。",
 	ProfileNotFound: "找不到這個使用者資料。",
 	ProfileChanged: "使用者資料已變更，請重新整理後再試一次。",
@@ -281,12 +282,18 @@ export default {
 	UnitRealmPublicationNotFound: `找不到這項內容與該${realmTerms.label}的發布關係。`,
 	UnitRealmPublicationAlreadyExists: `這項內容已與該${realmTerms.label}建立發布關係。`,
 	UnitRealmPublicationTransitionInvalid: "這項發布關係已經處於要求的狀態。",
-	ZoneThemeNotFound: `找不到這個${zoneTerms.label}主題樣式。`,
-	ZoneThemeRevisionNotFound: `找不到這個${zoneTerms.label}主題樣式修訂。`,
-	ZoneThemeStylesheetInvalid: `這個${zoneTerms.label}主題樣式表未通過自動安全審查。`,
-	ZoneThemeAssetsInvalid: "所有主題圖片都必須歸你所有，並且仍處於公開、可用且未刪除狀態。",
-	ZoneThemeAutomatedReviewInvalid: "主題的自動審查憑證不完整，或未達到發布要求。",
-	ZoneThemeRevisionStateConflict: "這個主題修訂已進入其他審查狀態，請重新載入後再繼續。",
-	ZoneThemeReferenceInvalid: `請選擇目前已核准的${zoneTerms.label}主題樣式修訂。`,
+	CustomThemeExternalLiveAccessSelfMutationForbidden:
+		"你不能授予、變更或撤銷自己對外部資源主題的存取權限。",
+	CustomThemeNotFound: `找不到這個${customThemeTerms.inline}。`,
+	CustomThemeRevisionNotFound: `找不到這個${customThemeTerms.inline}修訂。`,
+	CustomThemePackageInvalid: `這個${customThemeTerms.inline}套件無效。`,
+	CustomThemeSubmissionBackpressure: `這個${customThemeTerms.inline}的提交已暫時停用，待積壓的審查處理完畢後再開放。`,
+	CustomThemeExternalResourceInvalid: `無法安全審查這個${customThemeTerms.inline}使用的外部資源。`,
+	CustomThemeReviewEvidenceInvalid: `這個${customThemeTerms.inline}的審查憑證不完整。`,
+	CustomThemeRevisionStateConflict: `這個${customThemeTerms.inline}修訂已進入其他審查狀態，請重新載入後再繼續。`,
+	CustomThemeReviewerSeparationRequired: `提交這個${customThemeTerms.inline}修訂的人不能決定其審查結果。`,
+	CustomThemeInstallationInvalid: `請選擇目前已核准用於此宿主的${customThemeTerms.inline}修訂。`,
+	UnitPresentationHostUnsupported: "這種條目不支援自訂外觀。",
+	UnitPresentationRevisionConflict: "條目外觀已在其他位置變更，請重新載入後再儲存。",
 	StudioRealmSubjectLimitExceeded: "你所屬的團隊過多，工作空間暫時無法列出團隊委派內容。",
 };

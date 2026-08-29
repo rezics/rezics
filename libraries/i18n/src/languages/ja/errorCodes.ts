@@ -3,6 +3,7 @@ import { jaTerminology } from "@rezics/i18n/terminology/ja";
 
 const { forms: audioTerms } = jaTerminology.audio;
 const { forms: dockTerms } = jaTerminology.dock;
+const { forms: customThemeTerms } = jaTerminology.customTheme;
 const { forms: followTerms } = jaTerminology.follow;
 const { forms: postTerms } = jaTerminology.post;
 const { forms: realmTerms } = jaTerminology.realm;
@@ -74,7 +75,8 @@ export default {
 		"プラットフォームは、少なくとも1つの期限切れでないアクセスマネージャーを保持する必要があります。",
 	PlatformAccessRevisionConflict:
 		"プラットフォームへのアクセスが他の場所で変更されました。再試行する前に再読み込みしてください。",
-	PlatformAccessConfigurationInvalid: "各プラットフォーム機能は一度だけ表示できます。",
+	PlatformAccessConfigurationInvalid:
+		"要求されたプラットフォームアクセスは、一意性または容量の上限を超えています。",
 	CollectionOwnershipRequired: "このコレクションはあなたのものではありません。",
 	ProfileNotFound: "このプロファイルは見つかりませんでした。",
 	ProfileChanged: "このプロファイルが変更されました。更新して再試行してください。",
@@ -308,16 +310,20 @@ export default {
 	UnitRealmPublicationNotFound: `このコンテンツと${realmTerms.label}の公開関係が見つかりません。`,
 	UnitRealmPublicationAlreadyExists: `このコンテンツには既に${realmTerms.label}との公開関係があります。`,
 	UnitRealmPublicationTransitionInvalid: "公開関係は既に要求された状態です。",
-	ZoneThemeNotFound: `この${zoneTerms.label}テーマが見つかりません。`,
-	ZoneThemeRevisionNotFound: `この${zoneTerms.label}テーマの改訂が見つかりません。`,
-	ZoneThemeStylesheetInvalid: `この${zoneTerms.label}テーマのスタイルシートは自動安全審査に合格しませんでした。`,
-	ZoneThemeAssetsInvalid:
-		"テーマ画像は本人が所有し、公開済みかつ使用可能で、削除されていない必要があります。",
-	ZoneThemeAutomatedReviewInvalid:
-		"テーマの自動審査資料が不足しているか、公開要件を満たしていません。",
-	ZoneThemeRevisionStateConflict:
-		"このテーマ改訂はすでに別の審査状態に移行しました。再読み込みしてから続行してください。",
-	ZoneThemeReferenceInvalid: `現在承認されている${zoneTerms.label}テーマ改訂を選択してください。`,
+	CustomThemeExternalLiveAccessSelfMutationForbidden:
+		"外部リソースを使うテーマへの自分自身のアクセス権は、付与・変更・取り消しできません。",
+	CustomThemeNotFound: `この${customThemeTerms.inline}が見つかりません。`,
+	CustomThemeRevisionNotFound: `この${customThemeTerms.inline}の改訂が見つかりません。`,
+	CustomThemePackageInvalid: `この${customThemeTerms.inline}のパッケージは無効です。`,
+	CustomThemeSubmissionBackpressure: `この${customThemeTerms.inline}の提出は、保留中の審査が完了するまで一時停止されています。`,
+	CustomThemeExternalResourceInvalid: `この${customThemeTerms.inline}の外部リソースを安全に審査できませんでした。`,
+	CustomThemeReviewEvidenceInvalid: `この${customThemeTerms.inline}の審査資料が不足しています。`,
+	CustomThemeRevisionStateConflict: `この${customThemeTerms.inline}改訂は別の審査状態に移行しました。再読み込みしてから続行してください。`,
+	CustomThemeReviewerSeparationRequired: `この${customThemeTerms.inline}改訂の提出者は審査を決定できません。`,
+	CustomThemeInstallationInvalid: `このホスト向けに現在承認されている${customThemeTerms.inline}改訂を選択してください。`,
+	UnitPresentationHostUnsupported: "この種類のユニットはカスタム表示に対応していません。",
+	UnitPresentationRevisionConflict:
+		"ユニットの表示が別の場所で変更されました。再読み込みしてから保存してください。",
 	StudioRealmSubjectLimitExceeded:
 		"所属するチームが多すぎるため、ワークスペースにチームから委任されたコンテンツを表示できません。",
 } satisfies typeof import("../zh-Hant/errorCodes").default;

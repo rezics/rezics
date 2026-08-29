@@ -1,4 +1,7 @@
-import { DevelopmentPreviewCapability } from "@rezics/access";
+import {
+	CustomThemeExternalLiveAccessCapability,
+	DevelopmentPreviewCapability,
+} from "@rezics/access";
 import { StatusCodes } from "http-status-codes";
 import { and, desc, eq, inArray, isNull, sql } from "drizzle-orm";
 import Elysia, { t } from "elysia";
@@ -15,8 +18,8 @@ import {
 	UnresolvedBlockReferenceError,
 	UnitReferencedBlockDocument,
 	ZonePageBlockHostPolicy,
-	ZoneThemeDocument,
-	type ZoneThemeDocument as ZoneThemeDocumentValue,
+	ZoneAppearanceDocument,
+	type ZoneAppearanceDocument as ZoneAppearanceDocumentValue,
 	assertUnitReferencedBlockDocument,
 	assertNavigationDocument,
 	assertResolvedBlockReferences,
@@ -60,7 +63,6 @@ import {
 	realmRuleRevision,
 	unitDock,
 	imageAsset,
-	profilePreference,
 } from "../../database/schema";
 import { UnitNotFound } from "../../units/errors";
 import { insertLicenseGrants } from "../../units/license-grants";
@@ -98,10 +100,8 @@ import {
 import { presentAvatar } from "../../units/avatar";
 import { presentImageAsset } from "../../units/service";
 import { getPublicCanonicalUnitSlugAddress } from "../../units/slug-address";
-import {
-	ensureApprovedZoneThemeReference,
-	resolveApprovedZoneThemeStylesheet,
-} from "../../zone-themes/service";
+import { resolveUnitPresentation } from "../../custom-themes";
+import { ResolvedUnitPresentationResponse } from "../custom-themes/schema";
 import { replaceZoneSlugAddress } from "../../units/slug-address";
 import {
 	deleteZonePagePlacement,
@@ -317,9 +317,9 @@ async function toZoneResponse(
 		.orderBy(unitLocalization.position, unitLocalization.language);
 	const selected = resolveUnitLocalizationFromOrdered(localizations, localizationLanguages);
 	if (!selected) throw new UnitNotFound("Zone");
-	const themeDocument = parseDocument(ZoneThemeDocument, record.themeDocument);
+	const appearanceDocument = parseDocument(ZoneAppearanceDocument, record.appearanceDocument);
 	const themeHero = await database.transaction((tx) =>
-		findPublicZoneThemeHeroAsset(tx, themeDocument.heroAssetId),
+		findPublicZoneThemeHeroAsset(tx, appearanceDocument.heroAssetId),
 	);
 	return {
 		...record,
@@ -366,7 +366,7 @@ async function toZoneResponse(
 			}),
 		),
 		filterDocument: parseFilterDocument(record.filterDocument),
-		themeDocument,
+		appearanceDocument,
 		themeHero,
 		capabilities,
 	} satisfies typeof ZoneResponse.static;
@@ -377,23 +377,13 @@ const ZoneThemeLevel1Keys = [
 	"cardRadius",
 	"headingFontScale",
 	"surfaceTint",
-] as const satisfies readonly (keyof ZoneThemeDocumentValue)[];
+] as const satisfies readonly (keyof ZoneAppearanceDocumentValue)[];
 
 function hasZoneThemeLevel1Delta(
-	current: ZoneThemeDocumentValue,
-	next: ZoneThemeDocumentValue,
+	current: ZoneAppearanceDocumentValue,
+	next: ZoneAppearanceDocumentValue,
 ): boolean {
 	return ZoneThemeLevel1Keys.some((key) => current[key] !== next[key]);
-}
-
-function hasZoneCustomThemeDelta(
-	current: ZoneThemeDocumentValue,
-	next: ZoneThemeDocumentValue,
-): boolean {
-	return (
-		current.custom?.themeUnitId !== next.custom?.themeUnitId ||
-		current.custom?.revisionId !== next.custom?.revisionId
-	);
 }
 
 async function getZoneResponseCapabilities<ProfileId extends string | undefined>(
@@ -628,7 +618,8 @@ export default new Elysia()
 		PortableTextDocument,
 		UnitReferencedBlockDocument,
 		FilterDocument: FilterDocumentModel,
-		ZoneThemeDocument,
+		ZoneAppearanceDocument,
+		ResolvedUnitPresentationResponse,
 	})
 	.use(session)
 	.group("/series", (app) =>
@@ -884,6 +875,24 @@ export default new Elysia()
 								usesZoneFilter = true;
 						});
 					};
+					const viewerEligible = identity.profile
+						? (
+								await Promise.all([
+									identity.authorization.platform.hasCapability(DevelopmentPreviewCapability),
+									identity.authorization.platform.hasCapability(
+										CustomThemeExternalLiveAccessCapability,
+									),
+								])
+							).every(Boolean)
+						: false;
+					const resolvedPresentation = await resolveUnitPresentation({
+						hostUnitId: params.zoneId,
+						viewerProfileId: identity.profile?.unitId,
+						viewerEligible,
+						safeMode: query.safeMode ?? false,
+					});
+					mergeBlockReferences(resolvedPresentation.document.header);
+					mergeBlockReferences(resolvedPresentation.document.footer);
 					if (page) mergeBlockReferences(page.document);
 					if (dock) mergeBlockReferences(dock.document);
 					for (const navigation of navigations) {
@@ -960,21 +969,6 @@ export default new Elysia()
 								return presented ? [presented] : [];
 							})
 						: [];
-					const renderTheme = parseDocument(ZoneThemeDocument, zoneRecord.themeDocument);
-					let customThemeStylesheet = null;
-					if (identity.profile && renderTheme.custom) {
-						const [hasPreview, [preference]] = await Promise.all([
-							identity.authorization.platform.hasCapability(DevelopmentPreviewCapability),
-							database
-								.select({ enabled: profilePreference.customZoneThemesEnabled })
-								.from(profilePreference)
-								.where(eq(profilePreference.profileId, identity.profile.unitId))
-								.limit(1),
-						]);
-						if (hasPreview && preference?.enabled)
-							customThemeStylesheet = await resolveApprovedZoneThemeStylesheet(renderTheme.custom);
-					}
-
 					return {
 						zone: await toZoneResponse(
 							zoneRecord,
@@ -984,7 +978,7 @@ export default new Elysia()
 						page,
 						dock,
 						navigations,
-						customThemeStylesheet,
+						resolvedPresentation,
 						references: { units, wikiPosts, assets },
 					} satisfies typeof ZoneRenderResponse.static;
 				},
@@ -1017,12 +1011,11 @@ export default new Elysia()
 					if (body.localRuleRealmId) await authorization.unit.ensureCanRead(body.localRuleRealmId);
 					await authorization.unit.ensureCanRead(params.zoneId);
 					const current = await getZone(params.zoneId);
-					if (body.themeDocument) {
-						const currentTheme = parseDocument(ZoneThemeDocument, current.themeDocument);
+					if (body.appearanceDocument) {
+						const currentTheme = parseDocument(ZoneAppearanceDocument, current.appearanceDocument);
 						await authorization.zone.ensureThemeMutation(
 							params.zoneId,
-							hasZoneThemeLevel1Delta(currentTheme, body.themeDocument) ||
-								hasZoneCustomThemeDelta(currentTheme, body.themeDocument)
+							hasZoneThemeLevel1Delta(currentTheme, body.appearanceDocument)
 								? "development_preview"
 								: "released",
 						);
@@ -1046,10 +1039,8 @@ export default new Elysia()
 						);
 						if (body.filterDocument) await ensureZoneFilterReferences(tx, body.filterDocument);
 						if (body.localRuleRealmId) await ensureZoneRuleRealm(tx, body.localRuleRealmId);
-						if (body.themeDocument)
-							await ensurePublicZoneThemeHeroAsset(tx, body.themeDocument.heroAssetId);
-						if (body.themeDocument)
-							await ensureApprovedZoneThemeReference(tx, body.themeDocument.custom);
+						if (body.appearanceDocument)
+							await ensurePublicZoneThemeHeroAsset(tx, body.appearanceDocument.heroAssetId);
 						if (body.localization) {
 							const storedLocalization = toUnitLocalizationStorage(body.localization);
 							await ensureImageAssetsAttachable(
@@ -1067,7 +1058,7 @@ export default new Elysia()
 						}
 						if (
 							body.filterDocument ||
-							body.themeDocument ||
+							body.appearanceDocument ||
 							body.startsAt !== undefined ||
 							body.endsAt !== undefined ||
 							body.localRuleRealmId !== undefined
@@ -1076,7 +1067,9 @@ export default new Elysia()
 								.update(zone)
 								.set({
 									...(body.filterDocument ? { filterDocument: body.filterDocument } : {}),
-									...(body.themeDocument ? { themeDocument: body.themeDocument } : {}),
+									...(body.appearanceDocument
+										? { appearanceDocument: body.appearanceDocument }
+										: {}),
 									...(body.startsAt !== undefined ? { startsAt } : {}),
 									...(body.endsAt !== undefined ? { endsAt } : {}),
 									...(body.localRuleRealmId !== undefined
@@ -1107,7 +1100,6 @@ export default new Elysia()
 							"ZoneDocumentInvalid",
 							"ZoneRuleRealmInvalid",
 							"ZoneTimeRangeInvalid",
-							"ZoneThemeReferenceInvalid",
 							"RevisionCreditEntityInvalid",
 							"RevisionContributionActorRequired",
 						]),
@@ -1706,8 +1698,7 @@ export default new Elysia()
 				if (startsAt && endsAt && endsAt <= startsAt) throw new ZoneTimeRangeInvalid();
 				const id = await database.transaction(async (tx) => {
 					if (body.localRuleRealmId) await ensureZoneRuleRealm(tx, body.localRuleRealmId);
-					await ensurePublicZoneThemeHeroAsset(tx, body.themeDocument.heroAssetId);
-					await ensureApprovedZoneThemeReference(tx, body.themeDocument.custom);
+					await ensurePublicZoneThemeHeroAsset(tx, body.appearanceDocument.heroAssetId);
 					const unitId = await createBaseUnit(tx, {
 						kind: "zone",
 						localization: body.localization,
@@ -1717,7 +1708,7 @@ export default new Elysia()
 					await tx.insert(zone).values({
 						id: unitId,
 						filterDocument: body.filterDocument,
-						themeDocument: body.themeDocument,
+						appearanceDocument: body.appearanceDocument,
 						startsAt,
 						endsAt,
 						localRuleRealmId: body.localRuleRealmId ?? null,
@@ -1747,7 +1738,6 @@ export default new Elysia()
 						"ZoneDocumentInvalid",
 						"ZoneRuleRealmInvalid",
 						"ZoneTimeRangeInvalid",
-						"ZoneThemeReferenceInvalid",
 						"RevisionCreditEntityInvalid",
 						"RevisionContributionActorRequired",
 					]),

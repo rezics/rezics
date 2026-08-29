@@ -10,6 +10,7 @@ const { forms: realmTerms } = deTerminology.realm;
 const { forms: entityTerms } = deTerminology.entity;
 const { forms: unitSlugTerms } = deTerminology.unitSlug;
 const { forms: zoneTerms } = deTerminology.zone;
+const { forms: customThemeTerms } = deTerminology.customTheme;
 
 export default {
 	home: "Startseite",
@@ -76,7 +77,7 @@ export default {
 			series: "Reihe",
 			zone: zoneTerms.label,
 			zone_page: `${zoneTerms.label}-Seite`,
-			zone_theme: `${zoneTerms.label}-Design`,
+			custom_theme: customThemeTerms.label,
 			collection: "Sammlung",
 			post: postTerms.label,
 			poll: "Umfrage",

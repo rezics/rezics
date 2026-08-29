@@ -4,6 +4,7 @@ import { enTerminology } from "@rezics/i18n/terminology/en";
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 
 const { forms: postTerms } = enTerminology.post;
+const { forms: customThemeTerms } = enTerminology.customTheme;
 const { forms: realmTerms } = enTerminology.realm;
 const { forms: unitSlugTerms } = enTerminology.unitSlug;
 const { forms: zoneTerms } = enTerminology.zone;
@@ -43,8 +44,9 @@ export default {
 	loadSection: "Load this section",
 	theme: {
 		viewerDefault: "Use platform default theme",
-		viewerDefaultScope: `This turns off custom themes for every ${zoneTerms.label}. You can turn them back on in Preferences.`,
+		viewerDefaultScope: `This turns off ${customThemeTerms.plural} for every ${zoneTerms.label}. You can turn them back on in Preferences.`,
 		viewerDefaultFailed: "The platform default theme could not be applied. Please try again later.",
+		runtimeFailed: `The ${customThemeTerms.inline} could not load. The platform presentation is being used.`,
 		basicsTitle: "Basic appearance",
 		detailsTitle: "Theme details",
 		accent: "Accent color",

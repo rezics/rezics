@@ -4,6 +4,7 @@ import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 import { jaTerminology } from "@rezics/i18n/terminology/ja";
 
 const { forms: realmTerms } = jaTerminology.realm;
+const { forms: customThemeTerms } = jaTerminology.customTheme;
 const { forms: unitSlugTerms } = jaTerminology.unitSlug;
 const { forms: licenseTerms } = jaTerminology.license;
 const { forms: metadataTerms } = jaTerminology.metadata;
@@ -85,8 +86,8 @@ export default {
 	alwaysShowSpoilersHint: "ネタバレ指定の内容を個別に確認せず表示します。",
 	alwaysShowNsfw: `${verbatimTerms.nsfw.value} メディアを常に表示`,
 	alwaysShowNsfwHint: `${verbatimTerms.nsfw.value} 指定のメディアを最初からぼかさず表示します。`,
-	customZoneThemes: `${zoneTerms.label}のカスタムテーマを表示`,
-	customZoneThemesHint: `オフにすると、すべての${zoneTerms.label}で標準テーマを使います。内容や配置は変わりません。`,
+	customThemes: `${zoneTerms.label}の${customThemeTerms.label}を表示`,
+	customThemesHint: `オフにすると、すべての${zoneTerms.label}で標準テーマを使います。内容や配置は変わりません。`,
 	account: "アカウント",
 	accountDescription: "現在のサインイン中セッションを管理",
 	security: "セキュリティ",

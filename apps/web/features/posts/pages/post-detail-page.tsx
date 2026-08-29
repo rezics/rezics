@@ -44,16 +44,19 @@ type WikiPost = Extract<GetApiPostsByPostIdStatus200, { postKind: "wiki" }>;
 
 export function PostDetailPage({
 	context,
+	embedded = false,
 	id,
 	renderWikiBody,
 	returnToDiscussion = false,
 }: {
 	readonly context?: PostInteractionContext;
+	readonly embedded?: boolean;
 	readonly id: string;
 	readonly renderWikiBody?: (post: WikiPost) => ReactNode;
 	readonly returnToDiscussion?: boolean;
 }) {
 	const { t } = useTranslation(["posts", "ui", "units"]);
+	const Root = embedded ? "div" : "main";
 	const localizationLanguages = useLocalizationLanguages();
 	const requestedLanguage = useRequestedContentLanguage();
 	const router = useApplicationRouter();
@@ -165,7 +168,7 @@ export function PostDetailPage({
 
 	if (post.postKind === "review")
 		return (
-			<main className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-6 sm:px-6 sm:py-8">
+			<Root className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-6 sm:px-6 sm:py-8">
 				{selectedRealm ? (
 					<PostRealmContextBar realm={selectedRealm} />
 				) : !hasRealmContext && discussionHref ? (
@@ -196,7 +199,7 @@ export function PostDetailPage({
 					</div>
 					{desktopRealmContext}
 				</div>
-			</main>
+			</Root>
 		);
 	const title = resolvePostPresentationTitle(post, {
 		reviewOf: t.posts.reviewFallbackTitle,
@@ -207,7 +210,7 @@ export function PostDetailPage({
 	const managementSectionId = getPostManagementSectionIds(post)[0];
 
 	return (
-		<main className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-6 sm:px-6 sm:py-8">
+		<Root className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-6 sm:px-6 sm:py-8">
 			{selectedRealm ? (
 				<PostRealmContextBar realm={selectedRealm} />
 			) : !hasRealmContext && discussionHref ? (
@@ -276,6 +279,6 @@ export function PostDetailPage({
 				</div>
 				{desktopRealmContext}
 			</div>
-		</main>
+		</Root>
 	);
 }

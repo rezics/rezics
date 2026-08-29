@@ -79,7 +79,7 @@ import { useTranslation } from "@/i18n/client";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { getNextItemPageParam } from "@/lib/infinite-query";
 import { workZoneFeedContentKinds } from "../model/work-zone-feed";
-import { useZoneThemeScopeStyle } from "./zone-theme-content";
+import { useZoneAppearanceScopeStyle } from "./zone-appearance-content";
 import type { ZoneRenderNavigation, ZoneRenderProjection } from "../model/zone-render";
 import type {
 	ZoneAggregateFeedItemResult,
@@ -98,7 +98,10 @@ import { useZoneAggregateBlockState, useZoneAggregateStatus } from "./zone-page-
 
 type RenderUnit = ZoneRenderProjection["references"]["units"][number];
 type RenderAsset = ZoneRenderProjection["references"]["assets"][number];
-type ZoneBlockSurface = ZoneUnitListSurface;
+type ZoneBlockSurface =
+	| ZoneUnitListSurface
+	| { readonly kind: "presentation-header" }
+	| { readonly kind: "presentation-footer" };
 type ZoneNavigationLayout = "horizontal" | "vertical";
 type NavigationLeafItem = Extract<NavigationItem, { target: unknown }>;
 type NavigationGroupItem = Extract<NavigationItem, { children: unknown }>;
@@ -778,7 +781,7 @@ function ZoneFeedBlock({
 	error: boolean;
 	initialSort?: SearchSort;
 	presentation: FeedPresentation;
-	surface: ZoneBlockSurface;
+	surface: ZoneUnitListSurface;
 	maxResults?: number;
 }) {
 	const context = useZoneBlocks();
@@ -941,7 +944,7 @@ function ZoneFeedBlock({
 	);
 }
 
-function useZoneFeedBlockExecution(blockPath: BlockPath, surface: ZoneBlockSurface) {
+function useZoneFeedBlockExecution(blockPath: BlockPath, surface: ZoneUnitListSurface) {
 	const context = useZoneBlocks();
 	const localizationLanguages = useLocalizationLanguages();
 	return useMutation({
@@ -1138,7 +1141,7 @@ function ZoneBlock({ block, path }: { block: Block; path: BlockPath }) {
 				resolveNavigationHref={(target) => navigationHref(target, context)}
 				resolveSearchResultHref={(result) => unitIdHref(result.kind, result.id)}
 				resolveUnitHref={(unit) => unitHref(unit, context)}
-				surface={surface}
+				surface={surface?.kind === "dock" || surface?.kind === "page" ? surface : null}
 				units={context.units}
 				zone={context.projection.zone}
 			/>
@@ -1146,7 +1149,12 @@ function ZoneBlock({ block, path }: { block: Block; path: BlockPath }) {
 	}
 	if (block._type === "search") return <ZoneSearchBlock block={block} />;
 	if (block._type === "feed") {
-		if (!surface) return null;
+		if (
+			!surface ||
+			surface.kind === "presentation-header" ||
+			surface.kind === "presentation-footer"
+		)
+			return null;
 		const feature = block.feature.kind === "derived" ? block.feature.query.feature : block.feature;
 		const initialSort =
 			block.feature.kind === "derived"
@@ -1270,13 +1278,12 @@ export function ZoneDocument({
 	navigationLayout?: ZoneNavigationLayout;
 	surface: ZoneBlockSurface;
 }) {
-	const { projection } = useZoneBlocks();
-	const themeStyle = useZoneThemeScopeStyle();
+	const appearanceStyle = useZoneAppearanceScopeStyle();
 	return (
 		<div
 			className="min-w-0"
-			data-zone-theme-scope={projection.customThemeStylesheet?.revisionId ?? ""}
-			style={{ ...themeStyle, contain: "paint", isolation: "isolate" }}
+			data-zone-appearance-scope=""
+			style={{ ...appearanceStyle, contain: "paint", isolation: "isolate" }}
 		>
 			<div data-zone-surface={surface.kind}>
 				<ZoneBlockSurfaceContext value={surface}>

@@ -197,7 +197,7 @@ export async function inspectInitialInstallationBundle() {
 			.select({
 				id: zone.id,
 				filterDocument: zone.filterDocument,
-				themeDocument: zone.themeDocument,
+				appearanceDocument: zone.appearanceDocument,
 			})
 			.from(zone)
 			.where(

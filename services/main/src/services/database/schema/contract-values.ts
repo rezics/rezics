@@ -31,7 +31,7 @@ export const UnitKindValues = [
 	"series",
 	"zone",
 	"zone_page",
-	"zone_theme",
+	"custom_theme",
 	"collection",
 	"post",
 	"poll",
@@ -210,16 +210,6 @@ function deriveNonRealmFollowableUnitKindValues(): readonly [
 }
 
 export const NonRealmFollowableUnitKindValues = deriveNonRealmFollowableUnitKindValues();
-
-export const ZoneThemeRevisionStateValues = [
-	"pending_automated",
-	"pending_human",
-	"approved",
-	"rejected",
-	"killed",
-	"revalidation_required",
-] as const;
-export type ZoneThemeRevisionState = (typeof ZoneThemeRevisionStateValues)[number];
 
 function deriveNonRealmUnitKindValues(): readonly [NonRealmUnitKind, ...NonRealmUnitKind[]] {
 	const values = UnitKindValues.filter((value): value is NonRealmUnitKind => value !== "realm");

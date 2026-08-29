@@ -14,7 +14,7 @@ export interface PresentationPreferences {
 	readonly filterFeedByPreferredLanguages: boolean;
 	readonly alwaysShowSpoilers: boolean;
 	readonly alwaysShowNsfw: boolean;
-	readonly customZoneThemesEnabled: boolean;
+	readonly customThemesEnabled: boolean;
 	readonly preferredLanguages: readonly ContentLanguage[];
 }
 
@@ -40,7 +40,7 @@ export function parsePresentationPreferences(value: unknown): PresentationPrefer
 		typeof value.filterFeedByPreferredLanguages !== "boolean" ||
 		typeof value.alwaysShowSpoilers !== "boolean" ||
 		typeof value.alwaysShowNsfw !== "boolean" ||
-		typeof value.customZoneThemesEnabled !== "boolean" ||
+		typeof value.customThemesEnabled !== "boolean" ||
 		!Array.isArray(preferredLanguages) ||
 		!preferredLanguages.every(
 			(language): language is ContentLanguage =>
@@ -57,7 +57,7 @@ export function parsePresentationPreferences(value: unknown): PresentationPrefer
 		filterFeedByPreferredLanguages: value.filterFeedByPreferredLanguages,
 		alwaysShowSpoilers: value.alwaysShowSpoilers,
 		alwaysShowNsfw: value.alwaysShowNsfw,
-		customZoneThemesEnabled: value.customZoneThemesEnabled,
+		customThemesEnabled: value.customThemesEnabled,
 		preferredLanguages: [...preferredLanguages],
 	};
 }

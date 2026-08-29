@@ -8,6 +8,7 @@ const { forms: realmTerms } = deTerminology.realm;
 const { forms: entityTerms } = deTerminology.entity;
 const { forms: postTerms } = deTerminology.post;
 const { forms: zoneTerms } = deTerminology.zone;
+const { forms: customThemeTerms } = deTerminology.customTheme;
 
 export default {
 	title: "Unit-Governance",
@@ -97,8 +98,10 @@ export default {
 		"platform.user.api_token.api_quota.update": `${verbatimTerms.api.value}-Token-Kontingente von Benutzern verwalten`,
 		"platform.moderate": "Plattform-Units moderieren",
 		"platform.suppress": "Plattforminhalte und Versionen unterdrücken",
-		"platform.zone_theme.review": `Benutzerdefinierte Designs für ${zoneTerms.plural} prüfen`,
-		"platform.zone_theme.kill": `Freigegebene benutzerdefinierte Designs für ${zoneTerms.plural} im Notfall deaktivieren`,
+		"platform.custom_theme.external_live.access": `Externe Live-Ressourcen in ${customThemeTerms.pluralLabel} verwenden`,
+		"platform.custom_theme.external_live.access.manage": `Zugriff auf externe Live-Ressourcen für ${customThemeTerms.pluralLabel} verwalten`,
+		"platform.custom_theme.review": `${customThemeTerms.pluralLabel} prüfen`,
+		"platform.custom_theme.kill": `Freigegebene ${customThemeTerms.pluralLabel} im Notfall deaktivieren`,
 		"realm.contribute": `An jedem ${realmTerms.inline} teilnehmen`,
 		"realm.units.create": `Units in jedem ${realmTerms.inline} erstellen`,
 		"realm.post.replies.create": `Antworten in jedem ${realmTerms.inline} erstellen`,

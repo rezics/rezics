@@ -4,6 +4,7 @@ import { deTerminology } from "@rezics/i18n/terminology/de";
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 
 const { forms: postTerms } = deTerminology.post;
+const { forms: customThemeTerms } = deTerminology.customTheme;
 const { forms: realmTerms } = deTerminology.realm;
 const { forms: unitSlugTerms } = deTerminology.unitSlug;
 const { forms: zoneTerms } = deTerminology.zone;
@@ -43,10 +44,10 @@ export default {
 	loadSection: "Diesen Abschnitt laden",
 	theme: {
 		viewerDefault: "Plattform-Standarddesign verwenden",
-		viewerDefaultScope:
-			"Dadurch werden benutzerdefinierte Designs für alle Zonen deaktiviert. In den Voreinstellungen können sie wieder aktiviert werden.",
+		viewerDefaultScope: `Dadurch werden ${customThemeTerms.plural} für alle Zonen deaktiviert. In den Voreinstellungen können sie wieder aktiviert werden.`,
 		viewerDefaultFailed:
 			"Das Standarddesign konnte nicht angewendet werden. Bitte später erneut versuchen.",
+		runtimeFailed: `Das ${customThemeTerms.inline} konnte nicht geladen werden. Die Plattformdarstellung wird verwendet.`,
 		basicsTitle: "Grundlegendes Erscheinungsbild",
 		detailsTitle: "Designdetails",
 		accent: "Akzentfarbe",

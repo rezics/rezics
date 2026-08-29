@@ -2,7 +2,7 @@ import {
 	createDockDocument,
 	createPortableTextDocument,
 	createUnitReferencedBlockDocument,
-	createZoneThemeDocument,
+	createZoneAppearanceDocument,
 } from "@rezics/block";
 import {
 	FontAwesomeProvider,
@@ -139,7 +139,7 @@ export const OfficialZoneManifest = [
 		],
 		ownerProfileId: OfficialProfileIds.editorial,
 		filterDocument: createWorkZoneFilterDocument("book"),
-		themeDocument: createZoneThemeDocument({ accent: "#a16207" }, "b00757a70002"),
+		appearanceDocument: createZoneAppearanceDocument({ accent: "#a16207" }, "b00757a70002"),
 		avatar: officialZoneIcon("book-open"),
 		...createOfficialZoneContent({
 			postId: "019b76da-a800-7500-8000-000000000001",
@@ -180,7 +180,7 @@ export const OfficialZoneManifest = [
 		],
 		ownerProfileId: OfficialProfileIds.editorial,
 		filterDocument: createWorkZoneFilterDocument("media"),
-		themeDocument: createZoneThemeDocument({ accent: "#db2777" }, "b00757a70005"),
+		appearanceDocument: createZoneAppearanceDocument({ accent: "#db2777" }, "b00757a70005"),
 		avatar: officialZoneIcon("clapperboard"),
 		...createOfficialZoneContent({
 			postId: "019b76da-a800-7500-8000-000000000002",
@@ -221,7 +221,7 @@ export const OfficialZoneManifest = [
 		],
 		ownerProfileId: OfficialProfileIds.editorial,
 		filterDocument: createWorkZoneFilterDocument("software"),
-		themeDocument: createZoneThemeDocument({ accent: "#0d9488" }, "b00757a70008"),
+		appearanceDocument: createZoneAppearanceDocument({ accent: "#0d9488" }, "b00757a70008"),
 		avatar: officialZoneIcon("code"),
 		...createOfficialZoneContent({
 			postId: "019b76da-a800-7500-8000-000000000003",
@@ -262,7 +262,7 @@ export const OfficialZoneManifest = [
 		],
 		ownerProfileId: OfficialProfileIds.editorial,
 		filterDocument: createFilterDocument({ categories: ["realms"] }),
-		themeDocument: createZoneThemeDocument({ accent: "#7c3aed" }, "b00757a7000b"),
+		appearanceDocument: createZoneAppearanceDocument({ accent: "#7c3aed" }, "b00757a7000b"),
 		avatar: officialZoneIcon("people-group"),
 		...createOfficialZoneContent({
 			postId: "019b76da-a800-7500-8000-000000000004",
@@ -306,7 +306,7 @@ export const OfficialZoneManifest = [
 			categories: ["units"],
 			where: { kind: { in: ["zone"] } },
 		}),
-		themeDocument: createZoneThemeDocument({ accent: "#2563eb" }, "b00757a7000e"),
+		appearanceDocument: createZoneAppearanceDocument({ accent: "#2563eb" }, "b00757a7000e"),
 		avatar: officialZoneIcon("compass"),
 		...createOfficialZoneContent({
 			postId: "019b76da-a800-7500-8000-000000000005",

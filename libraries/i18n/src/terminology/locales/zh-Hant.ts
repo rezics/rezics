@@ -66,6 +66,16 @@ export const zhHantTerminology = defineTerminology("zh-Hant", {
 		},
 		forbidden: [],
 	},
+	customTheme: {
+		status: "approved",
+		forms: {
+			label: "自訂主題",
+			pluralLabel: "自訂主題",
+			inline: "自訂主題",
+			plural: "自訂主題",
+		},
+		forbidden: [],
+	},
 	tagPath: {
 		status: "approved",
 		forms: {

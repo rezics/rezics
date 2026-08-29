@@ -2,7 +2,7 @@ import {
 	UnitReferencedBlockDocument,
 	WikiPostBlockHostPolicy,
 	ZonePageBlockHostPolicy,
-	ZoneThemeDocument,
+	ZoneAppearanceDocument,
 	assertBlockQueryBudget,
 	assertUnitReferencedBlockDocument,
 	assertWikiPostPortableTextDocument,
@@ -19,10 +19,10 @@ export function assertContentPackDocuments(pack: LoadedPack): void {
 
 export function assertPackObjectDocuments(object: PackObject): void {
 	if (object.unit.kind === "zone") {
-		const themeDocument = object.compiledZone?.themeDocument;
-		if (!isDocument(ZoneThemeDocument, themeDocument))
+		const appearanceDocument = object.compiledZone?.appearanceDocument;
+		if (!isDocument(ZoneAppearanceDocument, appearanceDocument))
 			throw new ContentPackInvalid(
-				`${object.sourceKey} compiled Zone theme is not a ZoneThemeDocument`,
+				`${object.sourceKey} compiled Zone theme is not a ZoneAppearanceDocument`,
 			);
 	}
 	if (object.unit.kind === "zone_page") {
