@@ -831,28 +831,26 @@ Path Sense、Expression、label component 和 inference rule 都是 definition-s
 
 ### 11.4 遷移原則
 
-由於 REZICS 的 released migration history 必須 append-only，不能覆寫舊 migration，切換應以新 definition／projection 並行的方式完成。
+Tag Path 目前僅是尚未正式發布的 dev preview，既有 Path schema、資料與行為都不構成受支援的相容性契約。因此這次切換應採用**一次性的破壞式 replacement**：以正確的最終模型為目標，不為舊 Path 資料、舊投票語義或舊 API／UI 行為提供資料遷移與相容層。
+
+這不代表可以改寫 migration history。已存在的 migration 檔案仍然不得編輯、刪除或重新命名；破壞式變更必須由排序在其後的新 forward migration 完成。該 migration 可以直接刪除或重建 dev-preview 專屬的 table、column、constraint、projection 與資料，也可以清空無法在新語義下成立的 Path Application、judgment、support 與衍生索引。
 
 設計上應遵循：
 
-1. 為現有 Path 建立保守 Path Sense；無法可靠判定時，暫時以完整 Path 作 display fallback，標記待策展。
-2. 不把現有 all-member support 重新解釋成歷史使用者真的對祖先概念作過斷言；它們只是 legacy derived projection。
-3. 將現有 Unit–Path Application 對應到新的 Path Sense，保留原 judgment 與 provenance。
-4. 並行生成新的 Expression assertion／Effective Tag projection，與舊搜尋結果比較。
-5. UI 先切換到 Expression projection，再切換搜尋與推理。
-6. 只有在 parity、搜尋 recall、badge collision 和投票語義驗證完成後，才停止 legacy fan-out。
+1. 不回填舊 Path Sense，也不猜測既有 member sequence 對應哪個 Expression；新的 Path、Expression 與 Path Sense 由新模型重新建立或重新 seed。
+2. 不保留既有 Unit–Path Application、judgment、provenance 或 all-member support。它們屬於未發布模型下的 dev-preview 資料，不能被重新解釋為新模型中的使用者斷言。
+3. 不做 dual write、dual read、shadow projection、parity comparison、legacy display fallback、相容 alias、redirect 或 removal guard。schema、後端讀寫、搜尋／推理 projection 與 UI 應在同一個協調切換中直接改用新模型。
+4. 切換時明確使舊 binary 與新 schema 不相容；開發與測試環境若仍有舊資料，應套用新的破壞式 forward migration，或直接重建資料庫，而不是執行逐筆資料轉換。
+5. migration 完成後，從新的 source of truth 重建 search document、facet index、cache 與 usage aggregate；這些可重建 projection 不從 legacy support 繼承。
+6. 破壞範圍只限於未發布的 Tag Path contract 及其專屬／可重建資料。任何已發布、非 Path 所有的資料或契約仍須遵守正常的 release 與 migration 保護。
 
-應監控的指標包括：
+切換的驗收條件是：
 
-* 尚未策展 Path Sense 比例；
-* 平均 standalone label component 數；
-* collision repair 發生率；
-* full breadcrumb fallback 比例；
-* 多 Application 合併為一個 Expression 的比例；
-* inferred search result 的點擊／否決率；
-* 每個 Application 的 assertion output 數；
-* support row／WAL 降幅；
-* Picker 中使用者返回或改選 sense 的比例。
+* 空白資料庫可以完整 replay 全部 migration 並得到新的最終 schema；
+* 含舊 dev-preview Path schema／資料的資料庫可以套用新的 forward migration，且不留下舊 table、column、projection 或執行路徑；
+* 新模型的 seed、constraint、projection rebuild 與核心語義測試通過；
+* repository 中不存在為舊 Path contract 保留的 runtime fallback 或 compatibility code；
+* 破壞式 migration 不會刪除或改寫範圍外的已發布資料。
 
 ### 11.5 必要範例的最終行為
 
