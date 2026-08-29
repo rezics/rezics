@@ -342,12 +342,34 @@ describe("loadPack", () => {
 		expect(xuZhimo.bindings).toHaveLength(389);
 		expect(xuZhimo.objects.some((object) => object.labelSourceKey !== undefined)).toBe(true);
 
-		expect(vndb.relations.tagPaths?.length ?? 0).toBeGreaterThan(0);
-		expect(vndb.relations.tagPathApplications?.length ?? 0).toBeGreaterThan(0);
-		expect(vndb.manifest.version).toBe("1.0.0");
+		expect(vndb.relations.guideNodes).toEqual([]);
+		expect(vndb.relations.tagRelations).toHaveLength(1_083);
+		expect(vndb.relations.tagExpressions).toHaveLength(749);
+		expect(vndb.relations.tagExpressionInferenceRules).toHaveLength(2_128);
+		expect(vndb.relations.tagPaths).toHaveLength(840);
+		expect(vndb.relations.tagPathSenses).toHaveLength(840);
+		expect(vndb.relations.tagPathApplications).toHaveLength(1_781);
+		expect(vndb.manifest.version).toBe("1.1.0");
+		expect(
+			vndb.objects.filter(
+				(object) =>
+					object.unit.kind === "tag" &&
+					object.localizations.some((localization) => localization.description !== undefined),
+			),
+		).toHaveLength(1_022);
+		expect(
+			vndb.objects
+				.find((object) => object.sourceKey === "vndb:v11:software:work")
+				?.localizations.some((localization) => localization.description !== undefined),
+		).toBe(true);
 		if (vndb.sourceLock.kind !== "snapshot-provenance")
 			throw new Error("vndb-v11 must use snapshot provenance");
 		expect(vndb.sourceLock.rightsExceptions).toEqual([
+			expect.objectContaining({
+				sourceField: "db/vn.description",
+				verificationStatus: "unverified",
+				sourceUrl: "https://vndb.org/d14",
+			}),
 			expect.objectContaining({
 				sourceField: "db/chars.description",
 				verificationStatus: "unverified",

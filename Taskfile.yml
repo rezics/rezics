@@ -202,11 +202,11 @@ tasks:
                   CLI_ARGS: reindex --yes
 
     showcase-packs:build:
-        desc: Rebuild generated toaru-core content in the sibling showcase-packs checkout.
+        desc: Rebuild all generated content in the sibling showcase-packs checkout.
         internal: true
         dir: ../rezics-showcase-packs
         cmds:
-            - npm run toaru-core:build
+            - task build
 
     local:showcase:
         desc: Idempotent replay of sibling showcase packs.
