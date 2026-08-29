@@ -17,6 +17,7 @@ import { resolvePostPresentationTitle } from "@/features/posts/model/post-presen
 import { postHref, type PostInteractionContext } from "@/features/posts/url";
 import { apiValueToUnitScore } from "@/features/reviews/model/score-value";
 import { realmHref } from "@/features/slugs/unit-route";
+import { SearchTagMatchReasons } from "@/features/tags/components/search-tag-match-reasons";
 import { publicUnitHref } from "@/features/units/routing/public-unit-route";
 import { UnitCoverFallback } from "@/features/units/components/unit-cover-fallback";
 import { invalidateRecommendationQueries } from "@/features/recommendations/query";
@@ -125,7 +126,7 @@ export function FeedPostCard({
 	preserveDisplayedLanguage?: boolean;
 	setSize?: number;
 }) {
-	const { t, locale } = useTranslation(["actions", "feed", "posts", "state", "ui"]);
+	const { t, locale } = useTranslation(["actions", "feed", "posts", "state", "tags", "ui"]);
 	const { elementRef, trackOpen } = useRecommendationTracking(post.id, post.tracking);
 	const reason = recommendationReasonLabel(post.recommendationReason, t.feed);
 	const realmId = requestedRealmId ?? post.realmId ?? undefined;
@@ -261,6 +262,9 @@ export function FeedPostCard({
 						</cite>
 					</p>
 				) : null}
+				{post.searchTagMatches?.length ? (
+					<SearchTagMatchReasons matches={post.searchTagMatches} />
+				) : null}
 			</FeedCardContent>
 			{post.postKind !== "excerpt" && post.subject && subjectHref && !subjectIsCurrentUnit ? (
 				<FeedCardTarget
@@ -323,7 +327,7 @@ export function FeedUnitCard({
 	preserveDisplayedLanguage?: boolean;
 	setSize?: number;
 }) {
-	const { t, locale } = useTranslation(["feed", "posts", "realms", "ui"]);
+	const { t, locale } = useTranslation(["feed", "posts", "realms", "tags", "ui"]);
 	const { elementRef, trackOpen } = useRecommendationTracking(unit.id, unit.tracking);
 	const reason = recommendationReasonLabel(unit.recommendationReason, t.feed);
 	const title = unit.title ?? t.ui.unnamed;
@@ -357,6 +361,8 @@ export function FeedUnitCard({
 			? withContentLanguage(discussionBaseHref, unit.language)
 			: discussionBaseHref;
 	const isRealm = unit.unitKind === "realm";
+	const tagOtherPositionCount =
+		unit.unitKind === "tag" ? toNonNegativeApiInteger(unit.tagOtherPositionCount ?? 0) : 0;
 
 	return (
 		<FeedCard
@@ -430,6 +436,20 @@ export function FeedUnitCard({
 					title={title}
 				/>
 			)}
+			{unit.searchTagMatches?.length || (unit.unitKind === "tag" && tagOtherPositionCount > 0) ? (
+				<CardContent className="grid gap-2 px-4 pt-3 sm:px-5">
+					{unit.searchTagMatches?.length ? (
+						<SearchTagMatchReasons matches={unit.searchTagMatches} />
+					) : null}
+					{unit.unitKind === "tag" && tagOtherPositionCount > 0 ? (
+						<p className="text-muted-foreground text-xs">
+							{t.tags.searchMatches.otherPositions({
+								count: tagOtherPositionCount,
+							})}
+						</p>
+					) : null}
+				</CardContent>
+			) : null}
 			<CardContent className="px-4 pb-4 sm:px-5">
 				<FeedItemActions
 					discussionHref={discussionHref}

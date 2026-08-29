@@ -1,21 +1,39 @@
 import { type Static, t } from "elysia";
 
-import { TagPathMaximumMembers, TagPathMinimumMembers } from "../../database/schema";
+import {
+	TagExpressionArgumentRoleValues,
+	TagExpressionInferenceKindValues,
+	TagExpressionKindValues,
+	TagExpressionLabelComponentKindValues,
+	TagPathMaximumMembers,
+	TagPathMinimumMembers,
+	TagPathSenseScopeValues,
+	TagRelationKindValues,
+} from "../../database/schema";
 import {
 	ContentLanguage,
-	LocalizationLanguageQuery,
 	DateTime,
 	DateTimeString,
 	FractionalPosition,
 	FractionalPositionInput,
+	LocalizationLanguageQuery,
 	Uuid,
 } from "../schema";
 import { AvatarResponse } from "../schema/response";
 import { TaggableUnitType } from "../unit-resources/schema";
-import { WorkUnitType } from "../units/schema";
 
-const TagVoteValue = t.Nullable(t.Union([t.Literal(-1), t.Literal(1)]));
 const BinaryVote = t.Union([t.Literal(-1), t.Literal(1)]);
+const OptionalBinaryVote = t.Nullable(BinaryVote);
+const SpoilerLevel = t.Union([t.Literal(0), t.Literal(1), t.Literal(2)]);
+const OptionalSpoilerLevel = t.Nullable(SpoilerLevel);
+const TagExpressionArgumentRole = t.UnionEnum(TagExpressionArgumentRoleValues);
+const TagExpressionKind = t.UnionEnum(TagExpressionKindValues);
+const TagExpressionLabelComponentKind = t.UnionEnum(TagExpressionLabelComponentKindValues);
+const TagExpressionInferenceKind = t.UnionEnum(TagExpressionInferenceKindValues);
+const TagPathSenseScope = t.UnionEnum(TagPathSenseScopeValues);
+const TagRelationKind = t.UnionEnum(TagRelationKindValues);
+const JsonObject = t.Record(t.String(), t.Unknown());
+
 const LocalizedTagSummary = {
 	tagId: Uuid,
 	language: t.Nullable(ContentLanguage),
@@ -26,6 +44,41 @@ const LocalizedTagSummary = {
 	updatedAt: DateTimeString,
 } as const;
 
+export const TagPathMemberResponse = t.Object({
+	ordinal: t.Integer({ minimum: 0 }),
+	nodeId: Uuid,
+	nodeKind: t.Union([t.Literal("concept"), t.Literal("guide")]),
+	incomingRelation: t.Nullable(t.Object({ relationId: Uuid, relationKind: TagRelationKind })),
+	language: t.Nullable(ContentLanguage),
+	title: t.Nullable(t.String()),
+	summary: t.Nullable(t.String()),
+	avatar: AvatarResponse,
+});
+
+export const TagExpressionComponentResponse = t.Object({
+	tagId: Uuid,
+	semanticRole: TagExpressionArgumentRole,
+	componentKind: TagExpressionLabelComponentKind,
+	language: t.Nullable(ContentLanguage),
+	title: t.Nullable(t.String()),
+});
+
+export const TagExpressionDefinitionResponse = t.Object({
+	expressionId: Uuid,
+	expressionKind: TagExpressionKind,
+	focusTagId: Uuid,
+	presentationRevision: t.Integer({ minimum: 1 }),
+	components: t.Array(TagExpressionComponentResponse, { minItems: 1 }),
+	groupKey: t.Nullable(
+		t.Object({
+			tagId: Uuid,
+			semanticRole: TagExpressionArgumentRole,
+			language: t.Nullable(ContentLanguage),
+			title: t.Nullable(t.String()),
+		}),
+	),
+});
+
 export const UnitTagLandscapeParams = t.Object({
 	type: TaggableUnitType,
 	unitId: Uuid,
@@ -35,8 +88,8 @@ export type UnitTagLandscapeParams = Static<typeof UnitTagLandscapeParams>;
 export const UnitTagLandscapeQuery = t.Object(
 	{
 		...LocalizationLanguageQuery,
-		globalLimit: t.Optional(t.Integer({ minimum: 1, maximum: 100, default: 50 })),
-		pathLimit: t.Optional(t.Integer({ minimum: 1, maximum: 50, default: 20 })),
+		includeExpressions: t.Optional(t.Boolean({ default: true })),
+		expressionLimit: t.Optional(t.Integer({ minimum: 1, maximum: 100, default: 50 })),
 		sourceLimit: t.Optional(t.Integer({ minimum: 1, maximum: 30, default: 10 })),
 		perRealmLimit: t.Optional(t.Integer({ minimum: 1, maximum: 50, default: 12 })),
 	},
@@ -44,47 +97,32 @@ export const UnitTagLandscapeQuery = t.Object(
 );
 export type UnitTagLandscapeQuery = Static<typeof UnitTagLandscapeQuery>;
 
-const GlobalUnitTagResponse = t.Object({
-	...LocalizedTagSummary,
-	pinned: t.Boolean(),
-	position: t.Nullable(FractionalPosition),
+const ExpressionAuthority = t.Union([
+	t.Object({ kind: t.Literal("global") }),
+	t.Object({ kind: t.Literal("realm"), realmId: Uuid }),
+]);
+
+const VisibleExpressionApplicationResponse = t.Object({
+	applicationId: t.Nullable(Uuid),
+	sourceKind: t.Union([t.Literal("direct"), t.Literal("path")]),
+	authority: ExpressionAuthority,
+	senseId: t.Nullable(Uuid),
+	pathId: t.Nullable(Uuid),
+	tagId: t.Nullable(Uuid),
+	expressionId: Uuid,
+	createdByProfileId: t.Nullable(Uuid),
+	members: t.Array(TagPathMemberResponse, { maxItems: TagPathMaximumMembers }),
 	score: t.Integer(),
 	voteCount: t.Integer({ minimum: 0 }),
-	viewerVote: TagVoteValue,
-});
-
-export const TagPathMemberResponse = t.Object({
-	ordinal: t.Integer({ minimum: 0 }),
-	tagId: Uuid,
-	language: t.Nullable(ContentLanguage),
-	title: t.Nullable(t.String()),
-	summary: t.Nullable(t.String()),
-	avatar: AvatarResponse,
-});
-
-const UnitTagPathResponse = t.Object({
-	pathId: Uuid,
-	pinned: t.Boolean(),
-	position: t.Nullable(FractionalPosition),
-	score: t.Integer(),
-	voteCount: t.Integer({ minimum: 0 }),
-	viewerVote: TagVoteValue,
 	spoilerVoteCount: t.Integer({ minimum: 0 }),
 	spoilerDistribution: t.Object({
 		none: t.Integer({ minimum: 0 }),
 		minor: t.Integer({ minimum: 0 }),
 		major: t.Integer({ minimum: 0 }),
 	}),
-	viewerSpoilerLevel: t.Nullable(t.Union([t.Literal(0), t.Literal(1), t.Literal(2)])),
-	definitionScore: t.Integer(),
-	definitionVoteCount: t.Integer({ minimum: 0 }),
-	usageCount: t.Integer({ minimum: 0 }),
-	members: t.Array(TagPathMemberResponse, {
-		minItems: TagPathMinimumMembers,
-		maxItems: TagPathMaximumMembers,
-	}),
+	viewerVote: OptionalBinaryVote,
+	viewerSpoilerLevel: OptionalSpoilerLevel,
 	createdAt: DateTime,
-	updatedAt: DateTime,
 });
 
 export const RealmVotedTagResponse = t.Object({
@@ -93,7 +131,7 @@ export const RealmVotedTagResponse = t.Object({
 	contextPostId: Uuid,
 	score: t.Integer(),
 	voteCount: t.Integer({ minimum: 0 }),
-	viewerVote: TagVoteValue,
+	viewerVote: OptionalBinaryVote,
 });
 
 export const RealmTagVoteContextResponse = t.Object({
@@ -116,12 +154,14 @@ export const RealmTagSubscriptionResponse = t.Object({
 });
 
 export const UnitTagLandscapeResponse = t.Object({
-	paths: t.Array(UnitTagPathResponse),
-	global: t.Array(GlobalUnitTagResponse),
-	totals: t.Object({
-		paths: t.Integer({ minimum: 0 }),
-		global: t.Integer({ minimum: 0 }),
-	}),
+	expressions: t.Array(
+		t.Object({
+			authority: ExpressionAuthority,
+			expression: TagExpressionDefinitionResponse,
+			applications: t.Array(VisibleExpressionApplicationResponse, { minItems: 1 }),
+		}),
+	),
+	totals: t.Object({ expressions: t.Integer({ minimum: 0 }) }),
 	realms: t.Array(
 		t.Object({
 			...RealmTagSubscriptionResponse.properties,
@@ -170,53 +210,46 @@ export const RealmTagSubscriptionStateResponse = t.Object({
 });
 
 export const TagIdParams = t.Object({ tagId: Uuid });
-export type TagIdParams = Static<typeof TagIdParams>;
-
 export const TagSuggestionQuery = t.Object(
 	{
-		q: t.String({ minLength: 1, maxLength: 16 }),
+		q: t.String({ minLength: 1, maxLength: 80 }),
 		...LocalizationLanguageQuery,
+		realmId: t.Optional(Uuid),
 		limit: t.Optional(t.Integer({ minimum: 1, maximum: 20, default: 10 })),
 	},
 	{ additionalProperties: false },
 );
-export type TagSuggestionQuery = Static<typeof TagSuggestionQuery>;
 
-export const TagSuggestionResponse = t.Object({
-	items: t.Array(
-		t.Union([
-			t.Object({
-				selection: t.Literal("path"),
-				tagId: Uuid,
-				language: t.Nullable(ContentLanguage),
-				title: t.Nullable(t.String()),
-				summary: t.Nullable(t.String()),
-				avatar: AvatarResponse,
-				pathId: Uuid,
-				members: t.Array(TagPathMemberResponse, {
-					minItems: TagPathMinimumMembers,
-					maxItems: TagPathMaximumMembers,
-				}),
-				matchDirection: t.Union([t.Literal("forward"), t.Literal("reverse")]),
-				usageCount: t.Integer({ minimum: 0 }),
-				score: t.Integer(),
-				voteCount: t.Integer({ minimum: 0 }),
-			}),
-			t.Object({
-				selection: t.Literal("direct"),
-				tagId: Uuid,
-				language: t.Nullable(ContentLanguage),
-				title: t.Nullable(t.String()),
-				summary: t.Nullable(t.String()),
-				avatar: AvatarResponse,
-				pathId: t.Null(),
-				members: t.Tuple([]),
-				matchDirection: t.Null(),
-				usageCount: t.Literal(0),
-				score: t.Literal(0),
-				voteCount: t.Literal(0),
-			}),
-		]),
+const TagExpressionSuggestion = t.Object({
+	selection: t.Union([t.Literal("direct_expression"), t.Literal("path_sense")]),
+	expression: TagExpressionDefinitionResponse,
+	senseId: t.Nullable(Uuid),
+	pathId: t.Nullable(Uuid),
+	members: t.Array(TagPathMemberResponse, { maxItems: TagPathMaximumMembers }),
+	usageCount: t.Integer({ minimum: 0 }),
+});
+export const TagSuggestionResponse = t.Object({ items: t.Array(TagExpressionSuggestion) });
+
+export const TagConceptExpressionsQuery = t.Object(
+	{
+		...LocalizationLanguageQuery,
+		limit: t.Optional(t.Integer({ minimum: 1, maximum: 100, default: 30 })),
+	},
+	{ additionalProperties: false },
+);
+export const TagConceptExpressionsResponse = t.Object({
+	directExpression: t.Nullable(TagExpressionDefinitionResponse),
+	qualifiedExpressions: t.Array(
+		t.Object({
+			expression: TagExpressionDefinitionResponse,
+			roles: t.Array(TagExpressionArgumentRole, { uniqueItems: true }),
+		}),
+	),
+	inferredReach: t.Array(
+		t.Object({
+			expression: TagExpressionDefinitionResponse,
+			evidenceKind: t.Union([t.Literal("entailed"), t.Literal("retrieval_only")]),
+		}),
 	),
 });
 
@@ -228,41 +261,138 @@ export const TagHierarchyQuery = t.Object(
 	},
 	{ additionalProperties: false },
 );
-export type TagHierarchyQuery = Static<typeof TagHierarchyQuery>;
-
-const TagHierarchyNode = t.Object({
-	tagId: Uuid,
+const TagHierarchyNodeResponse = t.Object({
+	nodeId: Uuid,
+	nodeKind: t.Union([t.Literal("concept"), t.Literal("guide")]),
 	language: t.Nullable(ContentLanguage),
 	title: t.Nullable(t.String()),
 	summary: t.Nullable(t.String()),
-	score: t.Integer(),
-	voteCount: t.Integer({ minimum: 0 }),
+	avatar: AvatarResponse,
 });
-
+const TagHierarchyEdgeResponse = t.Object({
+	relationId: Uuid,
+	relationKind: TagRelationKind,
+	node: TagHierarchyNodeResponse,
+});
 export const TagHierarchyResponse = t.Object({
 	tagId: Uuid,
-	language: t.Nullable(ContentLanguage),
-	title: t.Nullable(t.String()),
-	summary: t.Nullable(t.String()),
 	children: t.Array(
 		t.Object({
-			...TagHierarchyNode.properties,
-			children: t.Array(TagHierarchyNode),
+			...TagHierarchyEdgeResponse.properties,
+			children: t.Array(TagHierarchyEdgeResponse),
 		}),
 	),
 });
 
+export const TagPathsContainingQuery = t.Object(
+	{
+		...LocalizationLanguageQuery,
+		cursor: t.Optional(Uuid),
+		limit: t.Optional(t.Integer({ minimum: 1, maximum: 50, default: 20 })),
+	},
+	{ additionalProperties: false },
+);
+const RankedTagPathResponse = t.Object({
+	pathId: Uuid,
+	usageCount: t.Integer({ minimum: 0 }),
+	score: t.Integer(),
+	voteCount: t.Integer({ minimum: 0 }),
+	members: t.Array(TagPathMemberResponse, {
+		minItems: TagPathMinimumMembers,
+		maxItems: TagPathMaximumMembers,
+	}),
+});
+export const TagPathsContainingResponse = t.Object({
+	items: t.Array(RankedTagPathResponse),
+	nextCursor: t.Nullable(Uuid),
+});
+
+export const CreateTagExpressionBody = t.Object(
+	{
+		expressionId: t.Optional(Uuid),
+		expressionKind: TagExpressionKind,
+		canonicalClaimKey: t.String({ minLength: 1, maxLength: 2048 }),
+		focusTagId: Uuid,
+		arguments: t.Array(
+			t.Object({
+				role: TagExpressionArgumentRole,
+				ordinal: t.Integer({ minimum: 0 }),
+				tagId: Uuid,
+			}),
+			{ minItems: 1, maxItems: 32 },
+		),
+		labelComponents: t.Array(
+			t.Object({
+				tagId: Uuid,
+				semanticRole: TagExpressionArgumentRole,
+				componentKind: TagExpressionLabelComponentKind,
+			}),
+			{ minItems: 1, maxItems: 32 },
+		),
+		groupKey: t.Nullable(t.Object({ tagId: Uuid, semanticRole: TagExpressionArgumentRole })),
+	},
+	{ additionalProperties: false },
+);
+export const CreateTagExpressionResponse = t.Object({
+	expressionId: Uuid,
+	created: t.Boolean(),
+	presentationRevision: t.Integer({ minimum: 1 }),
+});
+export const TagExpressionParams = t.Object({ expressionId: Uuid });
+
+export const CreateTagExpressionInferenceRuleBody = t.Object(
+	{
+		targetTagId: t.Optional(Uuid),
+		targetExpressionId: t.Optional(Uuid),
+		inferenceKind: TagExpressionInferenceKind,
+		provenance: t.Optional(JsonObject),
+	},
+	{ additionalProperties: false },
+);
+export const CreateTagExpressionInferenceRuleResponse = t.Object({
+	ruleId: Uuid,
+	created: t.Boolean(),
+});
+export const TagExpressionInferenceRuleParams = t.Object({
+	expressionId: Uuid,
+	ruleId: Uuid,
+});
+export const RetireTagExpressionInferenceRuleResponse = t.Object({
+	ruleId: Uuid,
+	retired: t.Boolean(),
+});
+
+export const CreateTagRelationBody = t.Object(
+	{
+		parentNodeId: Uuid,
+		childNodeId: Uuid,
+		relationKind: TagRelationKind,
+		provenance: t.Optional(JsonObject),
+	},
+	{ additionalProperties: false },
+);
+export const CreateTagRelationResponse = t.Object({
+	relationId: Uuid,
+	created: t.Boolean(),
+	revision: t.Integer({ minimum: 1 }),
+});
+
 export const CreateTagPathBody = t.Object(
 	{
-		memberTagIds: t.Array(Uuid, {
+		memberNodeIds: t.Array(Uuid, {
 			minItems: TagPathMinimumMembers,
 			maxItems: TagPathMaximumMembers,
+			uniqueItems: true,
+		}),
+		relationIds: t.Array(Uuid, {
+			minItems: TagPathMinimumMembers - 1,
+			maxItems: TagPathMaximumMembers - 1,
 			uniqueItems: true,
 		}),
 	},
 	{ additionalProperties: false },
 );
-export type CreateTagPathBody = Static<typeof CreateTagPathBody>;
+export const CreateTagPathResponse = t.Object({ pathId: Uuid, created: t.Boolean() });
 
 export const TagPathDefinitionWarningsBody = t.Object(
 	{
@@ -272,17 +402,11 @@ export const TagPathDefinitionWarningsBody = t.Object(
 	},
 	{ additionalProperties: false },
 );
-export type TagPathDefinitionWarningsBody = Static<typeof TagPathDefinitionWarningsBody>;
-
 export const TagPathDefinitionWarningsResponse = t.Object({
 	items: t.Array(
 		t.Object({
 			pathId: Uuid,
-			relation: t.Union([
-				t.Literal("existing_shorter_suffix"),
-				t.Literal("existing_longer_extension"),
-				t.Literal("same_terminal"),
-			]),
+			kind: t.Union([t.Literal("exact"), t.Literal("same_terminal")]),
 			usageCount: t.Integer({ minimum: 0 }),
 			members: t.Array(TagPathMemberResponse, {
 				minItems: TagPathMinimumMembers,
@@ -292,70 +416,92 @@ export const TagPathDefinitionWarningsResponse = t.Object({
 	),
 });
 
+export const TagPathCurationSearchQuery = TagSuggestionQuery;
+export const TagPathCurationSearchResponse = t.Object({ items: t.Array(TagExpressionSuggestion) });
 export const TagPathParams = t.Object({ pathId: Uuid });
-export type TagPathParams = Static<typeof TagPathParams>;
+export const TagPathQuery = t.Object(LocalizationLanguageQuery, { additionalProperties: false });
 
-export const TagPathQuery = t.Object(LocalizationLanguageQuery, {
-	additionalProperties: false,
+const TagPathSenseBindingResponse = t.Object({
+	memberOrdinal: t.Integer({ minimum: 0 }),
+	argumentRole: TagExpressionArgumentRole,
+	argumentOrdinal: t.Integer({ minimum: 0 }),
 });
-export type TagPathQuery = Static<typeof TagPathQuery>;
-
-export const TagPathCurationSearchQuery = t.Object(
-	{
-		q: t.String({ minLength: 1, maxLength: 16 }),
-		...LocalizationLanguageQuery,
-		limit: t.Optional(t.Integer({ minimum: 1, maximum: 20, default: 10 })),
-	},
-	{ additionalProperties: false },
-);
-export type TagPathCurationSearchQuery = Static<typeof TagPathCurationSearchQuery>;
-
-export const TagPathCurationSearchResponse = TagSuggestionResponse;
-
+const TagExpressionInferenceRuleResponse = t.Object({
+	ruleId: Uuid,
+	inferenceKind: TagExpressionInferenceKind,
+	revision: t.Integer({ minimum: 1 }),
+	status: t.Union([t.Literal("active"), t.Literal("retired")]),
+	provenance: t.Nullable(JsonObject),
+	createdAt: DateTime,
+	target: t.Union([
+		t.Object({
+			kind: t.Literal("tag"),
+			tagId: Uuid,
+			language: t.Nullable(ContentLanguage),
+			title: t.Nullable(t.String()),
+		}),
+		t.Object({
+			kind: t.Literal("expression"),
+			expressionId: Uuid,
+			expression: t.Nullable(TagExpressionDefinitionResponse),
+		}),
+	]),
+});
+const TagPathSenseResponse = t.Object({
+	senseId: Uuid,
+	expressionId: Uuid,
+	scope: TagPathSenseScope,
+	realmId: t.Nullable(Uuid),
+	realmLanguage: t.Nullable(ContentLanguage),
+	realmTitle: t.Nullable(t.String()),
+	bindingSignature: t.String(),
+	status: t.Union([t.Literal("active"), t.Literal("retired")]),
+	bindings: t.Array(TagPathSenseBindingResponse, { minItems: 1 }),
+	expression: t.Nullable(TagExpressionDefinitionResponse),
+	inferenceRules: t.Array(TagExpressionInferenceRuleResponse, { maxItems: 100 }),
+});
 export const TagPathResponse = t.Object({
-	id: Uuid,
-	terminalTagId: Uuid,
+	pathId: Uuid,
+	structuralIdentityHash: t.String({ pattern: "^[0-9a-f]{64}$" }),
+	terminalNodeId: Uuid,
 	createdByProfileId: Uuid,
 	score: t.Integer(),
 	voteCount: t.Integer({ minimum: 0 }),
 	usageCount: t.Integer({ minimum: 0 }),
-	viewerVote: TagVoteValue,
+	viewerVote: OptionalBinaryVote,
 	mergedIntoPathId: t.Nullable(Uuid),
 	members: t.Array(TagPathMemberResponse, {
 		minItems: TagPathMinimumMembers,
 		maxItems: TagPathMaximumMembers,
 	}),
+	senses: t.Array(TagPathSenseResponse),
 	createdAt: DateTime,
 	updatedAt: DateTime,
 });
 
-export const CreateTagPathResponse = t.Object({
-	pathId: Uuid,
-	created: t.Boolean(),
-});
-
-export const TagEndingPathsQuery = t.Object(
+export const CreateTagPathSenseBody = t.Object(
 	{
-		...LocalizationLanguageQuery,
-		limit: t.Optional(t.Integer({ minimum: 1, maximum: 20, default: 5 })),
+		senseId: t.Optional(Uuid),
+		expressionId: Uuid,
+		scope: TagPathSenseScope,
+		realmId: t.Optional(Uuid),
+		bindings: t.Array(TagPathSenseBindingResponse, {
+			minItems: 1,
+			maxItems: TagPathMaximumMembers,
+		}),
+		provenance: t.Optional(JsonObject),
 	},
 	{ additionalProperties: false },
 );
-export type TagEndingPathsQuery = Static<typeof TagEndingPathsQuery>;
+export const CreateTagPathSenseResponse = t.Object({ senseId: Uuid, created: t.Boolean() });
+export const TagPathSenseParams = t.Object({ pathId: Uuid, senseId: Uuid });
+export const RetireTagPathSenseResponse = t.Object({ senseId: Uuid, retired: t.Boolean() });
 
-export const TagEndingPathsResponse = t.Object({
-	items: t.Array(
-		t.Object({
-			pathId: Uuid,
-			usageCount: t.Integer({ minimum: 0 }),
-			score: t.Integer(),
-			voteCount: t.Integer({ minimum: 0 }),
-			members: t.Array(TagPathMemberResponse, {
-				minItems: TagPathMinimumMembers,
-				maxItems: TagPathMaximumMembers,
-			}),
-		}),
-	),
+export const VoteBody = t.Object({ value: BinaryVote }, { additionalProperties: false });
+export const VoteSummaryResponse = t.Object({
+	score: t.Integer(),
+	voteCount: t.Integer({ minimum: 0 }),
+	viewerVote: OptionalBinaryVote,
 });
 
 export const CreateTagPathMergeBody = t.Object(
@@ -379,58 +525,15 @@ export const CreateTagPathMergeBody = t.Object(
 	},
 	{ additionalProperties: false },
 );
-export type CreateTagPathMergeBody = Static<typeof CreateTagPathMergeBody>;
-
-export const TagPathMergeParams = t.Object({ mergeId: Uuid });
-export type TagPathMergeParams = Static<typeof TagPathMergeParams>;
-
-export const ListPendingTagPathMergesQuery = t.Object(
-	{
-		...LocalizationLanguageQuery,
-		limit: t.Optional(t.Integer({ minimum: 1, maximum: 100, default: 50 })),
-	},
-	{ additionalProperties: false },
+const TagPathAssistanceProvenance = t.Nullable(
+	t.Object({
+		kind: t.Literal("assisted"),
+		system: t.String(),
+		runId: t.String(),
+		model: t.Optional(t.String()),
+		confidence: t.Optional(t.Number({ minimum: 0, maximum: 1 })),
+	}),
 );
-
-export const PendingTagPathMergeListResponse = t.Object({
-	items: t.Array(
-		t.Object({
-			id: Uuid,
-			sourcePathId: Uuid,
-			targetPathId: Uuid,
-			sourceMembers: t.Array(TagPathMemberResponse, {
-				minItems: TagPathMinimumMembers,
-				maxItems: TagPathMaximumMembers,
-			}),
-			targetMembers: t.Array(TagPathMemberResponse, {
-				minItems: TagPathMinimumMembers,
-				maxItems: TagPathMaximumMembers,
-			}),
-			reason: t.String(),
-			proposalSource: t.Union([
-				t.Object({ kind: t.Literal("human") }),
-				t.Object({
-					kind: t.Literal("assisted"),
-					system: t.String(),
-					runId: t.String(),
-					model: t.Optional(t.String()),
-					confidence: t.Optional(t.Number({ minimum: 0, maximum: 1 })),
-				}),
-			]),
-			proposedByProfileId: Uuid,
-			status: t.Literal("proposed"),
-			ageSeconds: t.Integer({ minimum: 0 }),
-			createdAt: DateTime,
-		}),
-	),
-});
-
-export const ResolveTagPathMergeBody = t.Object(
-	{ resolution: t.Union([t.Literal("accepted"), t.Literal("rejected"), t.Literal("reversed")]) },
-	{ additionalProperties: false },
-);
-export type ResolveTagPathMergeBody = Static<typeof ResolveTagPathMergeBody>;
-
 export const TagPathMergeResponse = t.Object({
 	id: Uuid,
 	sourcePathId: Uuid,
@@ -441,178 +544,132 @@ export const TagPathMergeResponse = t.Object({
 		t.Literal("rejected"),
 		t.Literal("reversed"),
 	]),
-	proposalSource: t.Union([
-		t.Object({ kind: t.Literal("human") }),
-		t.Object({
-			kind: t.Literal("assisted"),
-			system: t.String(),
-			runId: t.String(),
-			model: t.Optional(t.String()),
-			confidence: t.Optional(t.Number({ minimum: 0, maximum: 1 })),
-		}),
-	]),
-	createdAt: t.Optional(DateTime),
-	resolvedAt: t.Optional(t.Nullable(DateTime)),
+	reason: t.String(),
+	proposalSourceKind: t.Union([t.Literal("human"), t.Literal("assisted")]),
+	proposalProvenance: TagPathAssistanceProvenance,
+	proposedByProfileId: Uuid,
+	resolvedByProfileId: t.Nullable(Uuid),
+	resolvedAt: t.Nullable(DateTime),
+	createdAt: DateTime,
+	updatedAt: DateTime,
 });
+export const TagPathMergeParams = t.Object({ mergeId: Uuid });
+export const ListPendingTagPathMergesQuery = t.Object(
+	{
+		...LocalizationLanguageQuery,
+		limit: t.Optional(t.Integer({ minimum: 1, maximum: 100, default: 50 })),
+	},
+	{ additionalProperties: false },
+);
+export const PendingTagPathMergeListResponse = t.Object({
+	items: t.Array(
+		t.Object({
+			...TagPathMergeResponse.properties,
+			sourceMembers: t.Array(TagPathMemberResponse),
+			targetMembers: t.Array(TagPathMemberResponse),
+		}),
+	),
+});
+export const ResolveTagPathMergeBody = t.Object(
+	{ status: t.Union([t.Literal("accepted"), t.Literal("rejected"), t.Literal("reversed")]) },
+	{ additionalProperties: false },
+);
 
-export const VoteBody = t.Object({ value: BinaryVote }, { additionalProperties: false });
-export type VoteBody = Static<typeof VoteBody>;
-
-export const VoteSummaryResponse = t.Object({
+export const ApplyTagPathBody = t.Object(
+	{
+		senseId: Uuid,
+		fitVote: t.Optional(BinaryVote),
+		spoilerLevel: t.Optional(OptionalSpoilerLevel),
+	},
+	{ additionalProperties: false },
+);
+export const TagPathApplicationParams = t.Object({
+	type: TaggableUnitType,
+	unitId: Uuid,
+	applicationId: Uuid,
+});
+export const TagPathApplicationResponse = t.Object({
+	applicationId: Uuid,
+	senseId: Uuid,
+	created: t.Boolean(),
+});
+export const TagPathApplicationRemovalResponse = t.Object({
+	applicationId: Uuid,
+	applied: t.Literal(false),
+});
+export const TagPathApplicationJudgmentBody = t.Object(
+	{ fitVote: t.Optional(OptionalBinaryVote), spoilerLevel: t.Optional(OptionalSpoilerLevel) },
+	{ additionalProperties: false, minProperties: 1 },
+);
+export const TagPathApplicationJudgmentResponse = t.Object({
 	score: t.Integer(),
 	voteCount: t.Integer({ minimum: 0 }),
-	viewerVote: TagVoteValue,
-});
-
-export const UnitTagPathParams = t.Object({
-	type: WorkUnitType,
-	unitId: Uuid,
-	pathId: Uuid,
-});
-export type UnitTagPathParams = Static<typeof UnitTagPathParams>;
-
-export const TagPathApplicationResponse = t.Object({
-	unitId: Uuid,
-	pathId: Uuid,
-	...VoteSummaryResponse.properties,
 	spoilerVoteCount: t.Integer({ minimum: 0 }),
 	spoilerDistribution: t.Object({
 		none: t.Integer({ minimum: 0 }),
 		minor: t.Integer({ minimum: 0 }),
 		major: t.Integer({ minimum: 0 }),
 	}),
-	viewerSpoilerLevel: t.Nullable(t.Union([t.Literal(0), t.Literal(1), t.Literal(2)])),
+	viewerVote: OptionalBinaryVote,
+	viewerSpoilerLevel: OptionalSpoilerLevel,
 });
-
-export const TagPathApplicationJudgmentBody = t.Object(
-	{
-		fitVote: t.Optional(BinaryVote),
-		spoilerLevel: t.Optional(t.Union([t.Literal(0), t.Literal(1), t.Literal(2)])),
-	},
-	{ additionalProperties: false, minProperties: 1 },
-);
-export type TagPathApplicationJudgmentBody = Static<typeof TagPathApplicationJudgmentBody>;
-
-const RealmTagFallbackPolicy = t.Union([t.Literal("inherit"), t.Literal("isolate")]);
 
 export const RealmTagPathParams = t.Object({ realmId: Uuid, pathId: Uuid });
-export type RealmTagPathParams = Static<typeof RealmTagPathParams>;
-
-export const RealmUnitTagPathParams = t.Object({
-	realmId: Uuid,
-	unitId: Uuid,
-	pathId: Uuid,
-});
-export type RealmUnitTagPathParams = Static<typeof RealmUnitTagPathParams>;
-
+export const RealmTagPathSenseParams = t.Object({ realmId: Uuid, senseId: Uuid });
 export const ListRealmTagPathsQuery = t.Object(
 	{
-		unitId: t.Optional(Uuid),
 		...LocalizationLanguageQuery,
 		limit: t.Optional(t.Integer({ minimum: 1, maximum: 100, default: 50 })),
 	},
 	{ additionalProperties: false },
 );
-export type ListRealmTagPathsQuery = Static<typeof ListRealmTagPathsQuery>;
-
-const RealmTagPathProvenance = t.Object({
-	authority: t.Union([t.Literal("realm"), t.Literal("global")]),
-	relation: t.Union([
-		t.Literal("realm_unit_tag_path_judgment_stat"),
-		t.Literal("unit_tag_path_judgment_stat"),
-	]),
-	dimension: t.Union([t.Literal("fit"), t.Literal("spoiler")]),
-});
-
-const RealmTagPathResolutionBase = {
-	authority: t.Union([t.Literal("realm"), t.Literal("global")]),
-	resolutionState: t.Union([t.Literal("decided"), t.Literal("inherited"), t.Literal("unresolved")]),
-	provenance: RealmTagPathProvenance,
-} as const;
-
 export const RealmTagPathListResponse = t.Object({
-	realmId: Uuid,
-	policy: t.Object({
-		fitFallback: RealmTagFallbackPolicy,
-		spoilerFallback: RealmTagFallbackPolicy,
-	}),
 	items: t.Array(
 		t.Object({
-			pathId: Uuid,
-			members: t.Array(TagPathMemberResponse, {
-				minItems: TagPathMinimumMembers,
-				maxItems: TagPathMaximumMembers,
-			}),
-			definition: t.Object({
-				authority: t.Literal("realm"),
-				score: t.Integer(),
-				voteCount: t.Integer({ minimum: 0 }),
-				usageCount: t.Integer({ minimum: 0 }),
-				viewerVote: TagVoteValue,
-				provenance: t.Object({
-					authority: t.Literal("realm"),
-					relation: t.Literal("realm_tag_path_vote_stat"),
-				}),
-			}),
-			application: t.Nullable(
+			...RankedTagPathResponse.properties,
+			viewerVote: OptionalBinaryVote,
+			senses: t.Array(
 				t.Object({
-					fit: t.Object({
-						...RealmTagPathResolutionBase,
-						score: t.Integer(),
-						voteCount: t.Integer({ minimum: 0 }),
-						viewerVote: TagVoteValue,
-					}),
-					spoiler: t.Object({
-						...RealmTagPathResolutionBase,
-						voteCount: t.Integer({ minimum: 0 }),
-						distribution: t.Object({
-							none: t.Integer({ minimum: 0 }),
-							minor: t.Integer({ minimum: 0 }),
-							major: t.Integer({ minimum: 0 }),
-						}),
-						viewerLevel: t.Nullable(t.Union([t.Literal(0), t.Literal(1), t.Literal(2)])),
-					}),
+					senseId: Uuid,
+					expression: TagExpressionDefinitionResponse,
 				}),
 			),
-			createdAt: DateTime,
 		}),
 	),
+	policy: t.Object({
+		fitFallbackPolicy: t.Union([t.Literal("inherit"), t.Literal("isolate")]),
+		spoilerFallbackPolicy: t.Union([t.Literal("inherit"), t.Literal("isolate")]),
+	}),
 });
-
-export const RealmTagPathMutationResponse = t.Object({
+export const RealmTagPathAdoptionResponse = t.Object({
 	realmId: Uuid,
 	pathId: Uuid,
-	viewerVote: t.Optional(BinaryVote),
+	adopted: t.Literal(true),
 });
+export const RealmTagPathSenseAdoptionResponse = t.Object({
+	realmId: Uuid,
+	senseId: Uuid,
+	adopted: t.Literal(true),
+});
+export const RealmTagPathVoteResponse = VoteSummaryResponse;
 
-export const RealmUnitTagPathMutationResponse = t.Object({
+export const RealmApplyTagPathParams = t.Object({ realmId: Uuid, unitId: Uuid });
+export const RealmTagPathApplicationParams = t.Object({
 	realmId: Uuid,
 	unitId: Uuid,
-	pathId: Uuid,
-	viewerFitVote: t.Optional(t.Nullable(BinaryVote)),
-	viewerSpoilerLevel: t.Optional(t.Nullable(t.Union([t.Literal(0), t.Literal(1), t.Literal(2)]))),
+	applicationId: Uuid,
 });
+export const RealmTagPathApplicationResponse = TagPathApplicationResponse;
+export const RealmTagPathApplicationRemovalResponse = TagPathApplicationRemovalResponse;
+export const RealmTagPathApplicationJudgmentResponse = t.Object({ applicationId: Uuid });
 
-export const RealmTagPathJudgmentBody = t.Object(
-	{
-		fitVote: t.Optional(BinaryVote),
-		spoilerLevel: t.Optional(t.Union([t.Literal(0), t.Literal(1), t.Literal(2)])),
-	},
-	{ additionalProperties: false, minProperties: 1 },
-);
-export type RealmTagPathJudgmentBody = Static<typeof RealmTagPathJudgmentBody>;
-
+const RealmTagFallbackPolicy = t.Union([t.Literal("inherit"), t.Literal("isolate")]);
 export const RealmTagPathFallbackBody = t.Object(
-	{
-		fitFallback: RealmTagFallbackPolicy,
-		spoilerFallback: RealmTagFallbackPolicy,
-	},
+	{ fitFallbackPolicy: RealmTagFallbackPolicy, spoilerFallbackPolicy: RealmTagFallbackPolicy },
 	{ additionalProperties: false },
 );
-export type RealmTagPathFallbackBody = Static<typeof RealmTagPathFallbackBody>;
-
 export const RealmTagPathFallbackResponse = t.Object({
 	realmId: Uuid,
-	fitFallback: RealmTagFallbackPolicy,
-	spoilerFallback: RealmTagFallbackPolicy,
+	fitFallbackPolicy: RealmTagFallbackPolicy,
+	spoilerFallbackPolicy: RealmTagFallbackPolicy,
 });

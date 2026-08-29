@@ -6,6 +6,7 @@ import {
 	index,
 	integer,
 	smallint,
+	text,
 	primaryKey,
 	uniqueIndex,
 	uuid,
@@ -23,6 +24,7 @@ import { profile } from "./profile";
 import { unit } from "./unit";
 import { post } from "./post";
 import { realm, realmUnit } from "./realm";
+import { vocabularyNode } from "./vocabulary";
 
 /** Marker table proving that a Unit is a Tag. */
 export const tag = pgTable(
@@ -31,12 +33,19 @@ export const tag = pgTable(
 		id: uuid()
 			.primaryKey()
 			.references(() => unit.id, { onDelete: "cascade" }),
+		nodeKind: text().$type<"concept">().default("concept").notNull(),
 		directlyApplicable: boolean().default(true).notNull(),
 		defaultSpoilerLevel: smallint(),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),
 	},
 	(table) => [
+		foreignKey({
+			columns: [table.id, table.nodeKind],
+			foreignColumns: [vocabularyNode.id, vocabularyNode.kind],
+			name: "tag_vocabulary_node_fkey",
+		}).onDelete("cascade"),
+		check("tag_node_kind_check", sql`${table.nodeKind} = 'concept'`),
 		check(
 			"tag_default_spoiler_level_check",
 			sql`${table.defaultSpoilerLevel} is null or ${table.defaultSpoilerLevel} between 0 and 2`,

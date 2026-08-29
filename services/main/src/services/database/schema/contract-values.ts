@@ -161,8 +161,8 @@ export type UnitMergeOperationPhase = (typeof UnitMergeOperationPhaseValues)[num
 export const TimedMediaUnitKindValues = ["video", "audio"] as const;
 /** Request-path bound for replacing or reading external Audio tracks on one Video. */
 export const MaximumAudioTracksPerVideo = 64;
-/** Public Unit-detail preview bound for Tags attached to one associated Entity. */
-export const SubjectAssociationEntityTagPreviewLimit = 4;
+/** Public Unit-detail preview bound for applied Expressions on one associated Entity. */
+export const SubjectAssociationExpressionPreviewLimit = 4;
 export const UnitOwnershipModeValues = ["profile_owned", "community_owned"] as const;
 export const UnitOwnershipClaimableUnitKindValues = [
 	"entity",

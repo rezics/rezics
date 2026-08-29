@@ -27,6 +27,7 @@ import type { ContentLanguage } from "@rezics/i18n";
 
 import type { SearchCountResult } from "../counts/contract";
 import { WorkPolicy } from "../performance/policy";
+import { getSearchTagMatchReasons, readPositiveSearchTagIds } from "./tag-match-reasons";
 
 import { InvalidSearch } from "./errors";
 import {
@@ -664,8 +665,22 @@ export async function executeSearchFeatureInput(
 		compiled.enforcedZoneId,
 		compiled.inputIdentity,
 	);
+	const positiveTagIds = readPositiveSearchTagIds(compiled.request.searchExpression);
+	const hits = result.groups.flatMap((group) => group.hits);
+	const tagMatches = await getSearchTagMatchReasons({
+		unitIds: hits.map((hit) => hit.id),
+		tagIds: positiveTagIds,
+		localizationLanguages,
+	});
 	return {
 		...result,
+		groups: result.groups.map((group) => ({
+			...group,
+			hits: group.hits.map((hit) => {
+				const matches = tagMatches.get(hit.id);
+				return matches?.length ? { ...hit, tagMatches: matches } : hit;
+			}),
+		})),
 		...(compiled.advisory ? { advisory: compiled.advisory } : {}),
 		facets: mapSearchFeatureFacets(result.facets, compiled.facetBindings),
 	};
@@ -690,6 +705,7 @@ export async function executeSearchFeatureFeedInput(
 	);
 	return {
 		...result,
+		searchTagIds: readPositiveSearchTagIds(compiled.request.searchExpression),
 		...(compiled.advisory ? { advisory: compiled.advisory } : {}),
 		facets: mapSearchFeatureFacets(result.facets, compiled.facetBindings),
 	};

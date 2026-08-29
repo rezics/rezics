@@ -1,263 +1,355 @@
-# Tag Path capacity and operations
+# Tag Path semantic capacity and operations
 
-Status: accepted capacity contract. Synthetic evidence is reproducible; every
-deployment must replace hardware-dependent latency with staging and production
-telemetry.
+Status: accepted capacity contract. The model and bounded-access assertions are
+implemented. Hardware-dependent latency, WAL, and bytes-per-row figures must be
+requalified on staging before a production rollout.
 
 ## Planning baseline
 
-Every relation whose cardinality grows with Units, Profiles, Paths, or Realms
-is planned independently at 500,000,000 rows and estimated at 3,000,000,000
-rows. The contract assumes:
+Every potentially corpus-scale relation is planned independently at
+500,000,000 rows and estimated at 3,000,000,000 rows. Aggregate totals must not
+assume that all relations reach the baseline at the same time.
 
-- Path length L is at most 16 and is normally two to four;
-- up to 20,000 community judgment attempts/s and 100,000 bounded reads/s;
-- warm bounded-read p95 below 100 ms and terminal mutation p95 below 150 ms;
-- result pages of at most 50 and governance pages of at most 100;
-- keyset rather than offset pagination;
-- no request-path full scan, corpus sort, whole-graph traversal, or
-  corpus-sized in-process materialization; and
-- skewed traffic in which one popular Unit, Tag, Path, or Realm/Unit key may
-  receive much more traffic than the median.
+The service envelope is:
 
-These rates are procurement envelopes, not an admission promise. Pool,
-statement-timeout, WAL, replica-lag, and aggregate-lock telemetry drive
-fail-fast backpressure before the database becomes an unbounded queue.
+- 100,000 bounded reads/s across the deployment;
+- 20,000 source or judgment mutation attempts/s;
+- warm request p95 below 100 ms;
+- accepted mutation p95 below 150 ms;
+- pages of at most 50 for ordinary reads and 100 for governance;
+- UUID or composite keyset pagination, never deep offset pagination;
+- no request-path corpus scan, whole-corpus sort, or corpus-sized in-process
+  materialization; and
+- skew in which a popular Unit, Expression, Path, Tag, or Realm/Unit key can
+  receive far more traffic than the median.
 
-## Cardinality and write amplification
+These are procurement and topology envelopes, not unconditional admission
+promises. Pool occupancy, lock admission, statement timeouts, WAL, replica lag,
+queue age, and index residency must reject or defer work before the database
+becomes an unbounded queue.
 
-A new accepted global Unit–Path application writes one application, one
-initial sparse judgment, and one aggregate row. Positive support affects
-exactly L members in each Path-derived projection. The upper planning envelope
-is 3 + 4L focused row mutations and never depends on corpus size.
+## Workload and distribution assumptions
 
-For L = 2, 4, and 16, the envelope is 11, 19, and 67 mutations. Overlapping
-Paths can reduce effective rows but must not be assumed to reduce support
-provenance. One support relation reaches 500M rows after at most 250M, 125M,
-or 31.25M non-overlapping applications respectively; the corresponding 3B
-points are 1.5B, 750M, and 187.5M applications.
+The planning distribution is deliberately skewed:
 
-Definition projection is bounded at one header, exactly L member rows, and
-exactly L - 1 adjacency rows. Compound search performs at most 15 CJK cuts,
-four identity candidates per side, 32 relational pair probes, and five
-decomposed results.
+| Quantity | Typical | p99 / hard bound used by design |
+| --- | ---: | ---: |
+| Path members `L` | 2-4 | 16 hard |
+| explicit effective outputs `A` per Expression | 1-4 | 256 hard |
+| active rules from one Expression | 0-2 | 16 hard |
+| upstream/downstream Expression reach | 1-8 | 64 hard in each direction |
+| visible Applications read for one Unit | 10-100 | bounded API page/source limits |
+| accepted Applications per Unit/Expression/authority | 1 | polyhierarchy may produce several |
+| hierarchy children returned | 10-30 | API bound |
+| Path-position page | 10-20 | 50 maximum |
+
+The PostgreSQL inference guards mirror the 16/64/256 constants exported by the
+typed schema. They serialize definition graph changes, reject cycles, cap active
+outbound rules, cap reachable Expression work, and roll back a closure that
+would produce more than 256 Effective Tags. These are product limits, not
+benchmark fixture assumptions.
+
+Definitions are read-heavy and mutation-light. Applications and judgments are
+write-heavy corpus facts. A representative operating mix is 70% Unit landscape
+and search reads, 20% concept/Path reads, 8% judgment updates, and 2% definition
+or governance operations. Capacity tests must also run 100% hot-key mutation
+and popular-Tag position scans because the mean mix hides the relevant failure
+modes.
+
+## Cardinality model
+
+Let:
+
+- `U` be Units with semantic sources;
+- `D` be direct Tag sources;
+- `P` be Path Applications;
+- `J` be sparse Application judgments;
+- `E` be distinct asserted Expressions per Unit/authority;
+- `A` be distinct Effective Tags in an Expression closure, `A <= 256`;
+- `R` be Realm authorities that contain a Unit.
+
+The dominant global relations are:
+
+```text
+unit_tag_path_application                     = P
+unit_tag_path_application_judgment            = J
+unit_expression_assertion                     <= D + P after semantic deduplication
+unit_effective_tag                            <= distinct(Unit, effective Tag)
+```
+
+Realm relations add the authority key and follow the same formulas. Definition
+relations are independent:
+
+```text
+tag_path_member                               = sum(Path length)
+tag_path_sense_binding                        = sum(explicit bindings)
+tag_expression_effective_tag                  <= 256 * Expression count
+```
+
+At 500M and 3B rows, all reads remain equality- or range-routed by the leftmost
+index key. No correctness path assumes one node can hold the 3B-row physical
+relation.
+
+## Write amplification
+
+The former preview model wrote one support fact per Profile and Path member, so
+amplification grew with `L`. The semantic model writes one Application source
+and one Expression assertion, then materializes only explicit closure outputs:
+
+```text
+O(L) -> O(A), normally A = 1
+```
+
+Creating an unjudged global Application normally touches one Application row
+and performs an indexed assertion check that writes nothing until the source is
+accepted. The first positive judgment normally mutates:
+
+1. one sparse judgment row;
+2. one judgment-stat row;
+3. one Path usage aggregate;
+4. one Unit/Expression assertion row; and
+5. up to `A` effective Tag rows for the Unit projection.
+
+The planning envelope is therefore `4 + A` focused row mutations after the
+Application row, independent of Path length and corpus size. With typical
+`A = 1, 4, 8`, that is 5, 8, or 12 focused mutations; the hard semantic ceiling
+is 260. Realm writes have the same asymptotic cost with wider keys.
+
+The current projection refresh is routed to one Unit (or one Realm/Unit) and
+recomputes that key's direct and asserted Expressions. It never scans the
+corpus, but cost grows with semantic sources on that one Unit. A Unit exceeding
+4,096 asserted Expressions, a refresh touching more than 32 MiB of buffers, or
+a refresh p95 above 50 ms is an operational cutover threshold: move effective
+projection maintenance to the key-routed idempotent reducer described below
+before admitting further sources for that hot key.
+
+Inference-definition changes update the small Expression closure and upsert one
+durable `tag_expression_projection_rebuild` job when the Expression has Global
+or Realm assertions. The worker uses `FOR UPDATE SKIP LOCKED`, advances at most
+500 assertion keys per transaction, claims at most four pages per poll, and
+retries failed pages with a delay capped at 60 seconds. A new rule revision
+resets the existing job's authority cursors under the same row lock. Search and
+Unit effective projections are therefore refreshed asynchronously without a
+synchronous corpus fan-out in the curation request.
 
 ## Storage envelope
 
-Representative PostgreSQL 18 heap-plus-B-tree measurements from the preceding
-schema-shape study are retained only as planning proxies. They include heap,
-TOAST, primary key, and request indexes, but exclude 30% operating headroom,
-replicas, backups, WAL retention, and concurrent-index workspace.
+The 2026-08-29 disposable PostgreSQL 18.4 qualification measured the following
+heap-plus-required-index bytes per row. The 1,000-Path fixture includes fixed
+relation/index page overhead, so these are deliberately conservative topology
+estimates rather than dense production fill-factor predictions. They exclude
+TOAST variance, 30% free-space/headroom, WAL retention, backups, replicas, and
+concurrent-index workspace.
 
-| Final relation shape | B/row proxy | 500M | 3B |
+| Relation shape | Measured B/row | 500M | 3B |
 | --- | ---: | ---: | ---: |
-| unit_tag_path_judgment | 333.69 | 155.38 GiB | 932.30 GiB |
-| realm_unit_tag_path_judgment | 417.43 | 194.38 GiB | 1,166.29 GiB |
-| tag_path_vote | 219.86 | 102.38 GiB | 614.27 GiB |
-| realm_tag_path_vote | 271.93 | 126.63 GiB | 759.77 GiB |
-| subject_association_judgment | 220.47 | 102.66 GiB | 615.99 GiB |
-| unit_tag_path_support | 300.11 | 139.75 GiB | 838.51 GiB |
-| realm_unit_tag_path_support | 366.00 | 170.43 GiB | 1,022.60 GiB |
-| unit_effective_tag | 217.92 | 101.48 GiB | 608.87 GiB |
-| realm_unit_effective_tag | 269.64 | 125.56 GiB | 753.36 GiB |
-| tag_path_member inverse shape | 167.35 | 77.93 GiB | 467.58 GiB |
-| entity_measurement | 286.30 | 133.32 GiB | 799.92 GiB |
+| global Path Application | 434.502 | 202.3 GiB | 1,214.0 GiB |
+| Realm Path Application | 516.483 | 240.5 GiB | 1,443.0 GiB |
+| global Application judgment | 339.854 | 158.3 GiB | 949.5 GiB |
+| Realm Application judgment | 324.637 | 151.2 GiB | 907.0 GiB |
+| global Expression assertion | 232.107 | 108.1 GiB | 648.5 GiB |
+| Realm Expression assertion | 401.408 | 186.9 GiB | 1,121.5 GiB |
+| global Effective Tag | 497.664 | 231.7 GiB | 1,390.5 GiB |
+| Realm Effective Tag | 731.136 | 340.5 GiB | 2,042.8 GiB |
+| Path member | 406.753 | 189.4 GiB | 1,136.5 GiB |
 
-With 30% headroom, one 500M-row relation requires about 101–253 GiB. At 3B
-rows, the Realm judgment proxy requires about 1.14 TiB raw and 1.48 TiB with
-headroom. Two replicas triple resident heap and index storage. Capacity alerts
-use each relation's live cardinality and growth rate.
+With 30% headroom, 500M global Path Applications need about 263 GiB before
+replicas and backups. At 3B they need about 1.54 TiB with headroom. Two replicas
+triple resident heap/index storage and require two sustained WAL network
+streams. Staging `pg_total_relation_size`, row estimates, bloat, growth rate,
+and index hit ratio must replace this conservative small-fixture evidence before
+production procurement.
 
-Sparse co-location is retained for fit and spoiler. At one million logical
-judgments the measured co-located shape was 333.69 B/judgment versus 435.30 B
-for split fit and spoiler tables: 23.34% less persistent heap-plus-index space.
-It also avoids two reads and two writes for the common combined judgment.
+## Routing and indexes
 
-## Routing and partition compatibility
+Stable routing keys lead every corpus request key and future partition key:
 
-Every primary key, foreign key, request index, worker cursor, and lock key
-starts with its future routing key:
-
-| Family | Routing key |
+| Family | Routing key / binding index |
 | --- | --- |
-| Path header, member, edge, definition vote/stat | path_id |
-| global application, judgment, support, effective Tag | unit_id |
-| Realm application, judgment, support, effective Tag | realm_id, unit_id |
-| hierarchy inverse reads | tag_id |
-| Entity measurements | entity_id |
-| subject-association judgments | association_id |
+| Path definition and vote | `path_id` |
+| all positions for a concept | `(node_id, path_id, ordinal)` |
+| global Applications for a Unit | `(unit_id, pinned, position, id)` |
+| Applications using a Sense | `(sense_id, unit_id, id)` |
+| global assertion inverse | `(expression_id, unit_id)` |
+| global effective inverse | `(tag_id, unit_id)` |
+| Realm Application | `(unit_id, realm_id, sense_id, id)` and `(realm_id, sense_id, unit_id, id)` |
+| Realm assertion inverse | `(expression_id, realm_id, unit_id)` |
+| Realm effective inverse | `(tag_id, realm_id, unit_id)` |
+| inference source/target | `(source_expression_id, status, kind, id)` and target indexes |
+| definition projection work | `(available_at, requested_at, expression_id)` with Global UUID and Realm composite cursors |
+| typed hierarchy | parent- and child-led relation indexes |
 
-This preserves equality routing and keyset order when a table moves to hash
-partitions or application shards. PostgreSQL declarative partitioning routes
-inserted rows by the declared key and supports pruning, but unique and primary
-constraints on a partitioned table must include every partition column:
-[Table partitioning](https://www.postgresql.org/docs/current/ddl-partitioning.html).
-Exact Path-array uniqueness therefore moves to a small definition directory
-when Path headers are physically sharded; it cannot become per-shard
-uniqueness.
+Equality columns precede range/cursor columns. Accepted/active queues use
+partial indexes matching their predicates. Path position, governance, and
+Application lists use keyset cursors containing every ordering column.
 
-Physical partitioning is triggered before a heap or hot index exceeds the
-approved node memory/IO envelope, and no later than 100M live rows or 25% of a
-node's usable data volume for one fact relation. The cutover uses shadow
-partitions, key-routed ingestion inside an explicitly versioned maintenance
-operation, checksum parity, and an atomic writer switch. This is never a
-public API compatibility mode.
+Breadcrumb hydration receives a bounded Path ID set and reads at most 16
+members per Path. Unit landscapes read the actual source page, batch-hydrate
+Senses/Expressions/Paths, then aggregate in process; they do not issue N+1
+definition reads. Definition endpoints are separately capped because their
+datasets do not share corpus pagination semantics.
 
-At 3B rows the required topology is application sharding by the same stable
-hash keys, with a small global Path-definition directory. Cross-shard work is
-limited to bounded fan-out reads or idempotent event delivery; no synchronous
-global aggregate is allowed.
+## Query complexity and plan acceptance
 
-## Request access paths
+The capacity fixture must capture `EXPLAIN (ANALYZE, BUFFERS, WAL, FORMAT JSON)`
+for at least:
 
-Binding indexes are:
+- accepted Paths containing a Tag with a UUID cursor;
+- Unit Application keyset reads;
+- Expression assertion inverse reads;
+- Effective Tag inverse reads;
+- Realm Unit Application reads;
+- active Sense and inference-rule reads; and
+- hot Application judgment mutation.
 
-- tag_path(terminal_tag_id, id);
-- tag_path_member(path_id, ordinal);
-- tag_path_member(tag_id, path_id, ordinal);
-- tag_path_edge(parent_tag_id, child_tag_id, path_id);
-- tag_path_edge(child_tag_id, parent_tag_id, path_id);
-- tag_path_vote_stat(usage_count DESC, path_id) for accepted global curation;
-- tag_path_vote_stat(terminal_tag_id, usage_count DESC, path_id) for accepted
-  ending-Tag senses;
-- unit_tag_path(unit_id, pinned, position, path_id);
-- unit_tag_path_judgment(unit_id, path_id, profile_id);
-- unit_tag_path_support(unit_id, tag_id, profile_id);
-- realm_unit_tag_path(realm_id, unit_id, path_id);
-- realm_unit_tag_path_judgment(realm_id, unit_id, path_id, profile_id); and
-- realm_unit_tag_path_support(realm_id, unit_id, tag_id, profile_id).
+Plan acceptance requires the named routing index (or documented equivalent),
+no sequential scan of a corpus relation, no unbounded sort, and at most 512
+shared blocks for a bounded read fixture. Small definition tables may use a
+sequential scan only when the fixture proves the relation remains below its
+declared control bound; corpus estimates cannot be extrapolated from that plan.
 
-Hierarchy parents and children use adjacency indexes and bounded keyset pages.
-Breadcrumb hydration fetches at most 16 members for each bounded Path set.
-Ordinary Tag search uses PGroonga's bounded candidate function; only curation
-requests unit_kind = tag_path. Ranking reads usage aggregates and never scans
-applications.
+The reproducible command is:
 
-The pending merge queue uses (status, created_at, id) and reports
-time-to-decision from persisted timestamps. Accepted-source resolution uses a
-unique partial index and a bounded cycle-checked chain. No queue uses deep
-offset pagination.
+```text
+task services-main:tag-path:capacity -- --yes --units 1000 --paths 1000 --samples 256
+```
 
-## Concurrency, WAL, and backpressure
+It is destructive and restricted to loopback `rezics_atlas` with
+`TAG_PATH_CAPACITY_DISPOSABLE=tag-path-capacity-v2`. Its JSON output records
+fixture distribution, latency, WAL, plans, parity counts, relation bytes, and
+straight-line 500M/3B storage estimates. Results are evidence for bounded access
+paths, not proof that a small machine contains 500M physical rows.
 
-The shape fixture observed approximately 6.35 KiB, 8.45 KiB, and 27.46 KiB
-WAL for fresh L = 2, 4, and 16 applications. If all 20,000 writes/s were fresh
-applications, that would be about 127, 169, and 549 MB/s primary WAL before
-protocol and checkpoint variation. Two replicas require at least twice those
-network streams. The global write envelope therefore cannot be admitted as
-fresh applications without measured WAL and replica capacity.
+The 2026-08-29 reference run used PostgreSQL 18.4, `shared_buffers=128MB`,
+`work_mem=4MB`, 1,000 Units, 1,000 Paths, 3,997 Applications per authority,
+and 256 hot-key mutations per authority. Fixture loading took 5.001 seconds and
+45,574,888 WAL bytes. Global committed 230/256 at 335.237 writes/s with 66.650
+ms terminal p95; Realm committed 230/256 at 318.454 writes/s with 68.031 ms
+terminal p95. Both had zero deadlocks, timeouts, and unexpected errors. Every
+corpus plan was index-routed; the largest bounded read touched 388 shared blocks,
+and the only paged incremental sort consumed 51 rows. Semantic parity proved
+that a 16-member Path produced one qualified Expression assertion, no
+intermediate-member assertion, and only its explicit Effective Tags.
 
-Vote writes acquire deterministic advisory locks for their logical aggregate
-key. Admission returns retryable backpressure rather than waiting behind an
-unbounded hot-key queue. Move a family to the partitioned idempotent
-vote-event outbox and watermarked micro-batch reducer when any threshold is
-sustained for five minutes:
+The default hot-key tier uses six concurrent writers, a 64-connection pool
+capacity, three total attempts per logical mutation, and deterministic bounded
+backoff. This is a synchronous-admission qualification, not a promise to absorb
+arbitrary fan-in on one aggregate key. The short burst must commit at least 80%
+of samples at 100 accepted writes/s with accepted-or-rejected p95 below 150 ms;
+the stricter sustained rejection threshold below still triggers the reducer
+cutover.
 
-- one target exceeds 100 mutation attempts/s;
-- aggregate lock-wait p95 exceeds 25 ms;
-- terminal mutation p95 exceeds 150 ms while pool utilization exceeds 80%;
-- primary WAL exceeds its approved budget; or
-- replica replay lag breaches its SLO.
+For Paths containing a Tag, each request materializes at most 65 membership
+candidates, filters their acceptance projections, and may therefore return a
+partially filled page with a continuation cursor. PostgreSQL may use either
+`tag_path_member_node_path_idx` (selective Tag) or the
+`tag_path_member_pkey` keyset order (extremely popular Tag). Both plans are
+accepted only when they avoid corpus scans, keep sort work bounded, and touch no
+more than the benchmark's shared-block ceiling.
 
-## Accepted local qualification
+Because the disposable fixture is deliberately much smaller than a corpus
+relation, its corpus `EXPLAIN ANALYZE` transactions set
+`enable_seqscan=off`. This qualifies that every query has a bounded index route;
+it does not change production settings or treat toy-fixture latency as a
+500M-row prediction. A forced plan that still contains a sequential corpus scan
+fails, as does a route that exceeds the block or sort bounds.
 
-The 2026-08-26 qualification used PostgreSQL 18.4 with 128 MiB
-`shared_buffers`, 4 MiB `work_mem`, 1,000 Units, 1,000 Paths, 257 Profiles,
-one Realm, Path lengths 2/4/16, and a deliberately hot terminal Tag and
-Unit–Path key. Judgment fixture construction used bounded 25-Unit
-transactions so transaction-scoped advisory locks did not grow with the
-fixture. The final qualification reused that fixture and therefore does not
-claim a fixture-load latency.
+Realm Unit Application pages accept either the dedicated
+`realm_unit_tag_path_application_unit_route_idx` or the unique
+`realm_unit_tag_path_application_authority_key`. With Realm and Unit fixed, the
+unique authority key yields at most one row per presorted Sense group; any
+incremental sort is still checked against the 50-row page plus one executor
+lookahead row.
 
-| Workload | Commits | Attempts | Immediate backpressure | Throughput | Terminal p95 | Backpressure-decision p95 | WAL |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| Global Unit–Path | 86 | 671 | 585 | 113.245/s | 78.442 ms | 9.383 ms | 2,872,960 B |
-| Realm Unit–Path | 98 | 661 | 563 | 130.355/s | 77.602 ms | 6.188 ms | 2,694,200 B |
+## Concurrency, hot keys, and backpressure
 
-Both workloads completed without deadlocks, statement timeouts, or unexpected
-database errors. Fact/aggregate, definition projection, vote projection,
-effective-Tag, support, usage, and manual-merge parity checks all returned
-zero mismatches. Pool utilization was 25%; the lock API waited zero
-milliseconds because contention became immediate retryable backpressure.
+Application judgment aggregates use deterministic transaction advisory keys.
+Contention returns retryable `55P03` admission failure instead of waiting in an
+unbounded lock queue. Relation and inference graph mutations use separate
+serialized definition locks; these rare curation writes must never share the
+high-rate judgment admission path.
 
-All nine inspected read paths used bounded indexes with no corpus sequential
-scan or sort. Warm execution time/shared blocks were: children 0.017 ms/3,
-parents 0.031 ms/44, ending senses 0.022 ms/4, viewer judgment 0.012 ms/3,
-application keyset 0.030 ms/3, merge queue 0.041 ms/5, forward and reverse
-compound pair probes 0.011 ms/3 each, and Realm viewer judgment 0.012 ms/5.
-The ending-sense plan used
-`tag_path_vote_stat_terminal_usage_idx` as an index-only scan.
+Move a source family to an idempotent event outbox plus key-routed micro-batch
+reducer when any threshold is sustained for five minutes:
 
-Observed heap-plus-index totals after repeated hot-key mutations were
-951.084 B/row for `unit_tag_path_judgment`, 449.475 B/row for
-`unit_tag_path_support`, 525.258 B/row for
-`realm_unit_tag_path_judgment`, and 507.256 B/row for
-`realm_unit_tag_path_support`. Straight-line 500M/3B estimates are
-475.54 GB/2.85 TB, 224.74 GB/1.35 TB, 262.63 GB/1.58 TB, and
-253.63 GB/1.52 TB respectively, before operating headroom and replicas.
-These small-fixture totals include page and update-bloat effects and are
-conservative corroboration, not replacements for the shape proxies and shard
-thresholds above.
+- one Application or Unit projection key exceeds 100 attempts/s;
+- aggregate admission rejection exceeds 5% after bounded client retry;
+- accepted mutation p95 exceeds 150 ms;
+- effective projection refresh p95 exceeds 50 ms;
+- pool utilization exceeds 80%;
+- WAL exceeds the approved primary/replica network budget;
+- replica replay lag breaches its SLO; or
+- reducer queue oldest age exceeds 60 seconds.
 
-### Local showcase import envelope
+Events carry source revision/idempotency identity. Workers claim bounded pages
+with `FOR UPDATE SKIP LOCKED`, coalesce by Unit/authority, acquire keys in UUID
+order, update aggregates in one transaction, and advance a durable watermark.
+Backpressure rejects or defers new work before queue growth becomes unbounded.
 
-`task local:showcase` is a bounded local-development workload, not a
-corpus-scale ingestion path. Each pack and its immutable import ledger row are
-committed in one transaction. Transaction-level advisory locks acquired while
-creating Tag judgments and Tag Path applications therefore remain allocated
-until that pack commits. The largest pack in the fixed `showcase-real-v1`
-bundle, `vndb-v11`, currently contains 1,642 direct Unit–Tag relations, 840
-Paths with 3,123 members, 1,781 Path applications expanding to 6,239 applied
-members, and 1,189 Realm–Unit relations. Imports are serialized from a sibling
-checkout over loopback; they are not a request-path or recurring background
-workload.
+## Partitioning and 3B topology
 
-The local and migration-replay PostgreSQL containers use
-`max_locks_per_transaction = 256`, `max_connections = 100`, and zero prepared
-transactions. PostgreSQL sizes the shared regular/advisory lock pool from
-these settings, so this provides an average allocation basis of 25,600 lock
-objects. It is not a per-transaction hard limit, as documented in PostgreSQL's
-[lock management](https://www.postgresql.org/docs/current/runtime-config-locks.html)
-and [advisory lock](https://www.postgresql.org/docs/current/explicit-locking.html#ADVISORY-LOCKS)
-references. Raising the previous default of 64 multiplies this lock-table
-allocation by four; the exact byte cost is PostgreSQL-version dependent and is
-paid as server shared memory, while the import's network cost remains
-loopback-only. The 2026-08-27 local qualification installed all five official
-packs and verified `vndb-v11`'s 1,200 declared objects without lock exhaustion.
+Partition before one heap or hot index exceeds the approved node IO/memory
+envelope, and no later than 100M live rows or 25% of usable node data volume for
+one corpus relation. Partition keys are the same stable routing prefixes:
 
-This configuration is not the scale path for arbitrary packs. Even a lower
-bound of one retained lock per affected fact would make a 500-million-row
-transaction about 19,531 times larger than the configured shared-pool basis;
-at 3 billion rows it would be about 117,188 times larger. Before admitting a
-pack beyond the verified official-bundle shape, replace the single transaction
-with an idempotent, resumable state machine: immutable staging, keyset-ordered
-batches with at most 1,024 hot keys per transaction, persisted progress,
-bounded concurrency and backpressure, then an atomic ledger promotion after
-parity verification. A larger `max_locks_per_transaction` value alone is not
-an accepted remedy.
+- global Unit facts: hash `unit_id`;
+- Realm Unit facts: hash `(realm_id, unit_id)` or a stable combined routing hash;
+- assertion/effective inverse serving: separately maintained expression/Tag
+  search shards when inverse traffic no longer fits the primary Unit shard;
+- definition directory: `path_id`, `expression_id`, or vocabulary namespace.
 
-## Validation contract
+PostgreSQL unique/primary constraints on partitioned tables must include the
+partition key. Global structural and claim-key uniqueness therefore remains in
+a small definition directory when definition storage is sharded. The cutover
+uses shadow partitions, dual validation inside an explicitly versioned
+maintenance operation, checksums and count parity, then an atomic writer switch;
+it is not a public compatibility mode.
 
-The deterministic capacity harness must:
+At 3B rows, application sharding is mandatory. Synchronous cross-shard
+aggregates are forbidden. Search/effective consumers receive idempotent events
+and publish watermarks; user-facing reads disclose or tolerate the documented
+bounded projection lag. Definition graph components are routed by namespace;
+cross-namespace edges go through the governed directory rather than a
+whole-graph in-memory load.
 
-- run only against the disposable rezics_atlas migration database on a
-  loopback authority;
-- build representative hot Unit, Path, Tag, Profile, and Realm/Unit skew;
-- cover Path lengths 2, 4, and 16 and global plus Realm writes;
-- record attempts, commits, backpressure, timeouts, deadlocks, pool use, lock
-  wait, latency distribution, WAL, and aggregate/projection parity;
-- capture hierarchy, ending-Path, viewer-judgment, keyset, merge-queue, and
-  compound-search plans; and
-- reject sequential scans, unbounded sorts, or missing routing predicates.
+## Maintenance, rebuild, and migration cost
 
-Use EXPLAIN (ANALYZE, BUFFERS, WAL, FORMAT JSON) only for safe statements in
-the disposable fixture; PostgreSQL documents that EXPLAIN ANALYZE executes the
-statement:
-[Using EXPLAIN](https://www.postgresql.org/docs/current/using-explain.html).
-Toy-row latency proves access complexity and index selection, not 500M or 3B
-latency. Storage math and shard thresholds cover cardinality.
+Projection rebuilds use keyset pages, durable authority cursors, bounded
+commits, and explicit rate limits. The job records attempts, availability,
+last error, request time, and update time; deployment telemetry must additionally
+record rows/s, WAL/s, buffer reads, retry age, and high-water marks. The full
+maintenance command is
+`task services-main:tag-expression-projections:rebuild`. `VACUUM (ANALYZE)`
+and index maintenance are scheduled per partition. No rebuild performs
+`OFFSET`, one giant transaction, or delete/reinsert work for the whole corpus.
 
-Acceptance requires no deadlock or unexpected timeout, exact fact/aggregate
-parity, at least 100 successful hot-key commits/s after explicit backpressure,
-terminal all-attempt p95 below 150 ms, lock-wait p95 below 25 ms, and pool
-utilization below 80%.
+The destructive dev-preview migration intentionally drops obsolete support
+facts rather than converting them. Migration replay validates the canonical
+schema on a blank database and on the old preview sequence. After cutover:
+
+1. seed vocabulary definitions, Expressions, Senses, and explicit rules;
+2. rebuild definition closure;
+3. rebuild assertion/effective projections in routed batches;
+4. rebuild search/facet documents and caches;
+5. compare source counts, projection counts, and sampled semantic parity; and
+6. enable writers only after the new readers and projection watermarks are
+   healthy.
+
+Old support-row counts are not a parity target because their all-member meaning
+is intentionally rejected.
+
+## Failure modes and observable cutovers
+
+| Signal | Expected failure | Required response |
+| --- | --- | --- |
+| inference limit constraint | definition would exceed bounded semantic work | split/refine rules; do not raise limits without a new capacity review |
+| relation graph write exceeds statement SLO | large/hot vocabulary component | move namespace to topological-rank/graph-directory service before more writes |
+| hot-key `55P03` | concurrent aggregate owner | bounded retry, then event reducer |
+| Unit projection >32 MiB or >50 ms | one Unit has excessive semantic sources | incremental key/tag reducer and admission cap |
+| corpus relation reaches 100M rows | maintenance/index risk | shadow hash partitions on stable routing key |
+| inverse index no longer resident | Tag/Expression fan-in dominates | dedicated inverse/search shard |
+| 3B estimate exceeds one-node storage/WAL | physical single-node ceiling | application sharding plus idempotent projection events |
+
+These thresholds make the limiting resource and cutover visible before the
+500M baseline is endangered; toy fixture latency alone is never accepted as
+capacity proof.

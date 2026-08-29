@@ -61,6 +61,11 @@ tasks:
         cmds:
             - yarn exec tsx scripts/rebuild-participation.ts
 
+    tag-expression-projections:rebuild:
+        desc: Rebuild Unit Effective Tag projections in bounded Expression/authority pages.
+        cmds:
+            - yarn exec tsx scripts/rebuild-tag-expression-projections.ts
+
     search:index:
         desc: Check or explicitly reindex the canonical authoritative PGroonga indexes.
         cmds:
@@ -303,6 +308,7 @@ tasks:
     db:project:
         desc: Rebuild derived database projections after application promotion.
         cmds:
+            - task: tag-expression-projections:rebuild
             - task: content-metrics:rebuild
             - task: studio:rebuild
             - task: participation:rebuild

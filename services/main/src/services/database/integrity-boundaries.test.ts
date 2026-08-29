@@ -22,7 +22,7 @@ import {
 	unitFollow,
 	unitLocalization,
 	unitOwnershipClaim,
-	unitTagPath,
+	unitTagPathApplication,
 	unitTag,
 } from "./schema";
 const dialect = new PgDialect();
@@ -39,7 +39,7 @@ describe("database integrity boundaries", () => {
 			[unitLocalization, "unit_localization_position_byte_length_check"],
 			[unitAlias, "unit_alias_position_byte_length_check"],
 			[unitExternalLink, "unit_external_link_position_byte_length_check"],
-			[unitTagPath, "unit_tag_path_position_byte_length_check"],
+			[unitTagPathApplication, "unit_tag_path_application_position_byte_length_check"],
 			[realmPin, "realm_pin_position_byte_length_check"],
 			[unitFollow, "unit_follow_position_byte_length_check"],
 			[contentStructureNode, "content_structure_node_position_byte_length_check"],

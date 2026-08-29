@@ -3,7 +3,7 @@
 import { getApiTagsSuggestions } from "@rezics/openapi-tanstack-query";
 import { Button, EntityPicker, useEntitySearch, type EntitySearch } from "@rezics/ui";
 import { Plus } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 
 import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import { useTranslation } from "@/i18n/client";
@@ -19,55 +19,89 @@ interface PickedEntity {
 export function UnitTagManagement({
 	addError,
 	addPending,
-	addPathError,
-	addPathPending,
 	canVote,
 	tagCreateTarget,
-	onAddPath,
-	onAddTag,
+	onAddSelection,
 }: {
 	readonly addError: unknown;
 	readonly addPending: boolean;
-	readonly addPathError: unknown;
-	readonly addPathPending: boolean;
 	readonly canVote: boolean;
 	readonly tagCreateTarget: UnitTagVoteCreateTarget;
-	readonly onAddPath?: (pathId: string) => Promise<void>;
-	readonly onAddTag: (tagId: string) => Promise<void>;
+	readonly onAddSelection: (selection: {
+		readonly kind: "direct_expression" | "path_sense";
+		readonly tagId: string;
+		readonly senseId: string | null;
+	}) => Promise<void>;
 }) {
 	const { t } = useTranslation(["tags", "ui"]);
 	const searchEntities = useEntitySearch();
 	const [selectedTag, setSelectedTag] = useState<PickedEntity>();
+	const selectionById = useRef(
+		new Map<
+			string,
+			{
+				readonly kind: "direct_expression" | "path_sense";
+				readonly tagId: string;
+				readonly senseId: string | null;
+			}
+		>(),
+	);
 	const contextKind = tagCreateTarget.context.kind;
 	const contextRealmId =
 		tagCreateTarget.context.kind === "realm" ? tagCreateTarget.context.realmId : undefined;
 	const tagSearch = useMemo<EntitySearch | undefined>(
 		() =>
 			searchEntities
-				? async (index, query, signal, options) => {
-						if (!contextRealmId && onAddPath) {
-							const response = await getApiTagsSuggestions({
-								query: { q: query, limit: 20 },
-								signal,
-								throwOnError: true,
+				? async (_index, query, signal, _options) => {
+						const response = await getApiTagsSuggestions({
+							query: {
+								q: query,
+								limit: 20,
+								...(contextRealmId ? { realmId: contextRealmId } : {}),
+							},
+							signal,
+							throwOnError: true,
+						});
+						return response.data.items.flatMap((item) => {
+							const senseId = item.senseId ?? null;
+							if (item.selection === "path_sense" && !senseId) return [];
+							const id =
+								item.selection === "path_sense"
+									? `sense:${senseId}`
+									: `expression:${item.expression.expressionId}`;
+							selectionById.current.set(id, {
+								kind: item.selection,
+								tagId: item.expression.focusTagId,
+								senseId,
 							});
-							return response.data.items.map((item) => ({
-								id: item.selection === "path" ? `path:${item.pathId}` : item.tagId,
-								label:
-									item.selection === "path"
-										? item.members.map((member) => member.title ?? t.tags.unnamedTag).join(" › ")
-										: (item.title ?? t.tags.unnamedTag),
-								kind: item.selection === "path" ? "tag-path" : "tag",
-								avatar: item.avatar,
-							}));
-						}
-						return searchEntities(index, query, signal, {
-							...options,
-							...(contextRealmId ? { realmTagContextRealmId: contextRealmId } : {}),
+							const semanticLabel = item.expression.components
+								.filter(({ componentKind }) => componentKind === "required")
+								.map(({ title }) => title ?? t.tags.unnamedTag)
+								.join(" · ");
+							const pathLabel = item.members
+								.map(({ title }) => title ?? t.tags.paths.memberFallback)
+								.join(" › ");
+							return [
+								{
+									id,
+									label: pathLabel ? `${semanticLabel} — ${pathLabel}` : semanticLabel,
+									kind:
+										item.selection === "path_sense"
+											? t.tags.expressions.pathApplication
+											: t.tags.expressions.directApplication,
+								},
+							];
 						});
 					}
 				: undefined,
-		[contextRealmId, onAddPath, searchEntities, t.tags.unnamedTag],
+		[
+			contextRealmId,
+			searchEntities,
+			t.tags.expressions.directApplication,
+			t.tags.expressions.pathApplication,
+			t.tags.paths.memberFallback,
+			t.tags.unnamedTag,
+		],
 	);
 	if (!canVote) return null;
 	const addCopy = contextKind === "global" ? t.tags.global : t.tags.realms;
@@ -112,13 +146,12 @@ export function UnitTagManagement({
 					/>
 					<Button
 						disabled={!selectedTag}
-						isLoading={addPending || addPathPending}
+						isLoading={addPending}
 						onClick={() => {
 							if (!selectedTag) return;
-							const pathId = selectedTag.id.startsWith("path:")
-								? selectedTag.id.slice("path:".length)
-								: undefined;
-							const operation = pathId && onAddPath ? onAddPath(pathId) : onAddTag(selectedTag.id);
+							const selection = selectionById.current.get(selectedTag.id);
+							if (!selection) return;
+							const operation = onAddSelection(selection);
 							void operation.then(() => setSelectedTag(undefined)).catch(() => undefined);
 						}}
 					>
@@ -126,7 +159,6 @@ export function UnitTagManagement({
 					</Button>
 				</div>
 				<RequestFailure error={addError} fallback={t.ui.retryLater} />
-				<RequestFailure error={addPathError} fallback={t.ui.retryLater} />
 			</div>
 		</div>
 	);

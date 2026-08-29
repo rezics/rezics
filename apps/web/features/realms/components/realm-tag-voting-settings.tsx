@@ -10,7 +10,7 @@ import {
 	useDeleteApiRealmsByRealmIdTagsByTagIdContext,
 	useGetApiRealmsByRealmIdTagPaths,
 	usePutApiRealmsByRealmIdTagPathPolicy,
-	usePutApiRealmsByRealmIdTagPathsByPathId,
+	usePutApiRealmsByRealmIdTagPathSensesBySenseId,
 	usePutApiRealmsByRealmIdTagPathsByPathIdVote,
 	usePutApiRealmsByRealmIdTagVoting,
 } from "@rezics/openapi-tanstack-query";
@@ -24,6 +24,7 @@ import {
 	AlertDialogHeader,
 	AlertDialogTitle,
 	Button,
+	Badge,
 	Card,
 	CardAction,
 	CardContent,
@@ -126,12 +127,13 @@ function RealmTagPathAuthority({ realm }: { readonly realm: GetApiRealmsByRealmI
 	const queryClient = useQueryClient();
 	const localizationLanguages = useLocalizationLanguages();
 	const [selectedPath, setSelectedPath] = useState<{ id: string; label: string }>();
+	const senseIdBySelectionId = useRef(new Map<string, string>());
 	const queryInput = {
 		path: { realmId: realm.id },
 		query: { localizationLanguages, limit: 100 },
 	} as const;
 	const query = useGetApiRealmsByRealmIdTagPaths(queryInput);
-	const adopt = usePutApiRealmsByRealmIdTagPathsByPathId();
+	const adoptSense = usePutApiRealmsByRealmIdTagPathSensesBySenseId();
 	const vote = usePutApiRealmsByRealmIdTagPathsByPathIdVote();
 	const clearVote = useDeleteApiRealmsByRealmIdTagPathsByPathIdVote();
 	const updatePolicy = usePutApiRealmsByRealmIdTagPathPolicy();
@@ -146,24 +148,31 @@ function RealmTagPathAuthority({ realm }: { readonly realm: GetApiRealmsByRealmI
 				signal,
 				throwOnError: true,
 			});
-			return response.data.items.flatMap((item) =>
-				item.selection === "path"
-					? [
-							{
-								id: item.pathId,
-								label: item.members.map((member) => member.title ?? t.tags.unnamedTag).join(" › "),
-								avatar: item.avatar,
-							},
-						]
-					: [],
-			);
+			return response.data.items.flatMap((item) => {
+				if (item.selection !== "path_sense" || !item.pathId || !item.senseId) return [];
+				const expressionLabel = item.expression.components
+					.filter(({ componentKind }) => componentKind === "required")
+					.map(({ title }) => title ?? t.tags.unnamedTag)
+					.join(" · ");
+				const pathLabel = item.members
+					.map((member) => member.title ?? t.tags.unnamedTag)
+					.join(" › ");
+				const id = `sense:${item.senseId}`;
+				senseIdBySelectionId.current.set(id, item.senseId);
+				return [
+					{
+						id,
+						label: `${expressionLabel} — ${pathLabel}`,
+					},
+				];
+			});
 		},
 		[localizationLanguages, t.tags.unnamedTag],
 	);
 	const policy = updatePolicy.variables?.body ?? query.data?.policy;
 
 	async function setPolicy(
-		dimension: "fitFallback" | "spoilerFallback",
+		dimension: "fitFallbackPolicy" | "spoilerFallbackPolicy",
 		value: "inherit" | "isolate",
 	) {
 		if (!policy || !realm.capabilities.canUpdateTagVoting) return;
@@ -176,8 +185,10 @@ function RealmTagPathAuthority({ realm }: { readonly realm: GetApiRealmsByRealmI
 
 	async function adoptSelectedPath() {
 		if (!selectedPath) return;
-		await adopt.mutateAsync({
-			path: { realmId: realm.id, pathId: selectedPath.id },
+		const senseId = senseIdBySelectionId.current.get(selectedPath.id);
+		if (!senseId) return;
+		await adoptSense.mutateAsync({
+			path: { realmId: realm.id, senseId },
 		});
 		setSelectedPath(undefined);
 		await invalidate();
@@ -203,9 +214,9 @@ function RealmTagPathAuthority({ realm }: { readonly realm: GetApiRealmsByRealmI
 								onChange={(event) => {
 									const value = event.currentTarget.value;
 									if (value === "inherit" || value === "isolate")
-										void setPolicy("fitFallback", value);
+										void setPolicy("fitFallbackPolicy", value);
 								}}
-								value={policy.fitFallback}
+								value={policy.fitFallbackPolicy}
 							>
 								<NativeSelectOption value="inherit">
 									{t.realms.tagVotingSettings.fallbackInherit}
@@ -222,9 +233,9 @@ function RealmTagPathAuthority({ realm }: { readonly realm: GetApiRealmsByRealmI
 								onChange={(event) => {
 									const value = event.currentTarget.value;
 									if (value === "inherit" || value === "isolate")
-										void setPolicy("spoilerFallback", value);
+										void setPolicy("spoilerFallbackPolicy", value);
 								}}
-								value={policy.spoilerFallback}
+								value={policy.spoilerFallbackPolicy}
 							>
 								<NativeSelectOption value="inherit">
 									{t.realms.tagVotingSettings.fallbackInherit}
@@ -249,7 +260,7 @@ function RealmTagPathAuthority({ realm }: { readonly realm: GetApiRealmsByRealmI
 						/>
 						<Button
 							disabled={!selectedPath}
-							isLoading={adopt.isPending}
+							isLoading={adoptSense.isPending}
 							onClick={() => void adoptSelectedPath()}
 						>
 							{t.realms.tagVotingSettings.adoptPath}
@@ -264,14 +275,33 @@ function RealmTagPathAuthority({ realm }: { readonly realm: GetApiRealmsByRealmI
 							<div className="grid gap-3 rounded-xl border p-4" key={item.pathId}>
 								<ol className="flex flex-wrap items-center gap-1.5">
 									{item.members.map((member, index) => (
-										<li className="contents" key={member.tagId}>
+										<li className="contents" key={member.nodeId}>
 											{index ? <ChevronRightIcon className="size-4 text-muted-foreground" /> : null}
-											<Link href={tagDetailHref(member.tagId)}>
-												{member.title ?? t.tags.unnamedTag}
-											</Link>
+											{member.nodeKind === "concept" ? (
+												<Link href={tagDetailHref(member.nodeId)}>
+													{member.title ?? t.tags.unnamedTag}
+												</Link>
+											) : (
+												<span>{member.title ?? t.tags.paths.memberFallback}</span>
+											)}
 										</li>
 									))}
 								</ol>
+								{item.senses.length ? (
+									<div className="flex flex-wrap items-center gap-2">
+										<span className="text-xs text-muted-foreground">
+											{t.tags.expressions.title}
+										</span>
+										{item.senses.map((sense) => (
+											<Badge key={sense.senseId} variant="secondary">
+												{sense.expression.components
+													.filter(({ componentKind }) => componentKind === "required")
+													.map(({ title }) => title ?? t.tags.unnamedTag)
+													.join(" · ")}
+											</Badge>
+										))}
+									</div>
+								) : null}
 								<div className="flex flex-wrap items-center justify-between gap-3">
 									<TagVoteControls
 										canVote
@@ -294,9 +324,9 @@ function RealmTagPathAuthority({ realm }: { readonly realm: GetApiRealmsByRealmI
 												{ onSuccess: () => void invalidate() },
 											)
 										}
-										score={toFiniteApiNumber(item.definition.score) ?? 0}
-										viewerVote={item.definition.viewerVote}
-										voteCount={toNonNegativeApiInteger(item.definition.voteCount)}
+										score={toFiniteApiNumber(item.score) ?? 0}
+										viewerVote={item.viewerVote}
+										voteCount={toNonNegativeApiInteger(item.voteCount)}
 									/>
 									<Button asChild size="sm" variant="quiet">
 										<Link href={tagPathHref(item.pathId)}>{t.tags.paths.details}</Link>
@@ -307,7 +337,7 @@ function RealmTagPathAuthority({ realm }: { readonly realm: GetApiRealmsByRealmI
 					</div>
 				)}
 				<RequestFailure
-					error={adopt.error ?? vote.error ?? clearVote.error ?? updatePolicy.error}
+					error={adoptSense.error ?? vote.error ?? clearVote.error ?? updatePolicy.error}
 				/>
 			</CardContent>
 		</Card>

@@ -15,11 +15,13 @@ import {
 type WorkloadAuthority = "global" | "realm";
 
 type FixtureIdentity = Readonly<{
+	readonly hotExpressionId: string;
+	readonly hotGlobalApplicationId: string;
 	readonly hotPathId: string;
+	readonly hotRealmApplicationId: string;
 	readonly hotUnitId: string;
 	readonly profileIds: readonly string[];
 	readonly realmId: string;
-	readonly tagIds: readonly string[];
 	readonly terminalTagId: string;
 }>;
 
@@ -47,26 +49,42 @@ type PlanEvidence = Readonly<{
 	readonly summary: PlanSummary;
 }>;
 
-const FixtureTable = "tag_path_capacity_fixture_v1" as const;
+type RelationStorage = Readonly<{
+	readonly estimated500MillionBytes: number;
+	readonly estimated3BillionBytes: number;
+	readonly indexBytes: number;
+	readonly relation: string;
+	readonly rowCount: number;
+	readonly totalBytes: number;
+	readonly totalBytesPerRow: number;
+}>;
+
+const FixtureTable = "tag_path_capacity_fixture_v2" as const;
+const FixturePathTable = "tag_path_capacity_path_v2" as const;
 const FixtureJudgmentBatchSize = 25 as const;
 const HotKeyMaximumRetries = 2 as const;
+const AcceptedApplicationsPerUnit = 3 as const;
+const HotPathMemberCount = 16 as const;
 const CapacityRelations = [
 	"tag_path",
 	"tag_path_member",
-	"tag_path_edge",
-	"tag_path_vote",
-	"tag_path_vote_stat",
-	"unit_tag_path",
-	"unit_tag_path_judgment",
-	"unit_tag_path_judgment_stat",
-	"unit_tag_path_support",
+	"tag_path_sense",
+	"tag_path_sense_binding",
+	"tag_expression",
+	"tag_expression_argument",
+	"tag_expression_inference_rule",
+	"tag_expression_effective_tag",
+	"unit_tag_path_application",
+	"unit_tag_path_application_judgment",
+	"unit_tag_path_application_judgment_stat",
+	"unit_expression_assertion",
 	"unit_effective_tag",
-	"realm_tag_path_vote",
-	"realm_tag_path_vote_stat",
-	"realm_unit_tag_path",
-	"realm_unit_tag_path_judgment",
-	"realm_unit_tag_path_judgment_stat",
-	"realm_unit_tag_path_support",
+	"realm_tag_path",
+	"realm_tag_path_sense",
+	"realm_unit_tag_path_application",
+	"realm_unit_tag_path_application_judgment",
+	"realm_unit_tag_path_application_judgment_stat",
+	"realm_unit_expression_assertion",
 	"realm_unit_effective_tag",
 ] as const;
 
@@ -115,7 +133,7 @@ async function loadFixture(
 ): Promise<Readonly<{ readonly milliseconds: number; readonly walBytes: number }>> {
 	const walStart = await currentWalLsn(client);
 	const startedAt = performance.now();
-	const tagCount = input.pathCount + 21;
+	const tagCount = input.pathCount + HotPathMemberCount;
 	await client.query("begin");
 	try {
 		await client.query("set local statement_timeout = 0");
@@ -139,13 +157,54 @@ async function loadFixture(
 			await client.query(
 				`insert into public.${FixtureTable}(kind, ordinal, id)
 				 select $1::text, ordinal,
-					md5('rezics-tag-path-capacity-v1:' || $1::text || ':' || ordinal::text)::uuid
+					md5('rezics-tag-path-capacity-v2:' || $1::text || ':' || ordinal::text)::uuid
 				 from generate_series(0, $2::integer - 1) ordinal`,
 				[fixture.kind, fixture.count],
 			);
 
-		// Seed prerequisite identities with replication triggers disabled. Actual
-		// Path definitions and judgments below run through every owner trigger.
+		await client.query(`
+			create unlogged table public.${FixturePathTable} as
+			with definitions as (
+				select path.ordinal,
+					path.id as path_id,
+					md5('rezics-tag-path-capacity-v2:expression:' || path.ordinal::text)::uuid
+						as expression_id,
+					md5('rezics-tag-path-capacity-v2:sense:' || path.ordinal::text)::uuid
+						as sense_id,
+					case when path.ordinal = 0 then (
+						select array_agg(tag.id order by tag.ordinal)
+						from public.${FixtureTable} tag
+						where tag.kind = 'tag' and tag.ordinal between 1 and 15
+					) || array[(
+						select id from public.${FixtureTable} where kind = 'tag' and ordinal = 0
+					)]
+					else array[
+						(select id from public.${FixtureTable}
+						 where kind = 'tag' and ordinal = 15 + path.ordinal),
+						(select id from public.${FixtureTable} where kind = 'tag' and ordinal = 0)
+					] end::uuid[] as member_node_ids
+				from public.${FixtureTable} path
+				where path.kind = 'path'
+			)
+			select definition.*,
+				array(
+					select md5(
+						'rezics-tag-path-capacity-v2:relation:' || definition.ordinal::text || ':' ||
+						edge.ordinal::text
+					)::uuid
+					from generate_series(0, cardinality(definition.member_node_ids) - 2) edge(ordinal)
+					order by edge.ordinal
+				)::uuid[] as relation_ids
+			from definitions definition
+		`);
+		await client.query(`alter table public.${FixturePathTable} add primary key (ordinal)`);
+		await client.query(`alter table public.${FixturePathTable} add unique (path_id)`);
+		await client.query(`alter table public.${FixturePathTable} add unique (expression_id)`);
+		await client.query(`alter table public.${FixturePathTable} add unique (sense_id)`);
+
+		// Prerequisite released identities are fixture scaffolding. Semantic
+		// definitions, applications, judgments, and projections below run through
+		// their production owner triggers.
 		await client.query("set local session_replication_role = replica");
 		await client.query(`
 			insert into public.unit(id, kind, status, visibility, published_at)
@@ -162,9 +221,12 @@ async function loadFixture(
 		`);
 		await client.query(`
 			insert into public.profile(id, auth_user_id)
-			select id, md5('rezics-tag-path-capacity-v1:auth:' || ordinal::text)::uuid
-			from public.${FixtureTable}
-			where kind = 'profile'
+			select id, md5('rezics-tag-path-capacity-v2:auth:' || ordinal::text)::uuid
+			from public.${FixtureTable} where kind = 'profile'
+		`);
+		await client.query(`
+			insert into public.vocabulary_node(id, kind)
+			select id, 'concept' from public.${FixtureTable} where kind = 'tag'
 		`);
 		await client.query(`
 			insert into public.tag(id)
@@ -173,8 +235,7 @@ async function loadFixture(
 		await client.query(`
 			insert into public.realm(id, realm_tag_voting_enabled, enabled_pages)
 			select id, true, array['main', 'tags']::public.realm_page_kind[]
-			from public.${FixtureTable}
-			where kind = 'realm'
+			from public.${FixtureTable} where kind = 'realm'
 		`);
 		await client.query(`
 			insert into public.realm_unit(realm_id, unit_id)
@@ -186,96 +247,154 @@ async function loadFixture(
 		await client.query("set local session_replication_role = origin");
 
 		await client.query(`
-			with terminal as (
-				select id from public.${FixtureTable} where kind = 'tag' and ordinal = 0
-			), definitions as (
-				select path.id,
-					case path.ordinal
-						when 0 then (
-							select array_agg(tag.id order by tag.ordinal)
-							from public.${FixtureTable} tag
-							where tag.kind = 'tag' and tag.ordinal between 1 and 15
-						) || array[terminal.id]
-						when 1 then (
-							select array_agg(tag.id order by tag.ordinal)
-							from public.${FixtureTable} tag
-							where tag.kind = 'tag' and tag.ordinal between 16 and 18
-						) || array[terminal.id]
-						when 2 then array[
-							(select id from public.${FixtureTable} where kind = 'tag' and ordinal = 19),
-							terminal.id
-						]
-						else array[
-							(select id from public.${FixtureTable}
-							 where kind = 'tag' and ordinal = 20 + path.ordinal),
-							terminal.id
-						]
-					end::uuid[] as members
-				from public.${FixtureTable} path
-				cross join terminal
-				where path.kind = 'path'
+			insert into public.tag_relation(
+				id, parent_node_id, child_node_id, relation_kind, provenance, created_by_profile_id
 			)
-			insert into public.tag_path(
-				id, member_tag_ids, terminal_tag_id, created_by_profile_id
-			)
-			select definition.id, definition.members,
-				definition.members[cardinality(definition.members)], profile.id
-			from definitions definition
+			select definition.relation_ids[edge.ordinal],
+				definition.member_node_ids[edge.ordinal],
+				definition.member_node_ids[edge.ordinal + 1],
+				'generic', jsonb_build_object('fixture', 'tag-path-capacity-v2'), profile.id
+			from public.${FixturePathTable} definition
+			cross join lateral generate_subscripts(definition.relation_ids, 1) edge(ordinal)
 			cross join public.${FixtureTable} profile
 			where profile.kind = 'profile' and profile.ordinal = 0
 		`);
 		await client.query(`
-			insert into public.tag_path_vote(path_id, profile_id, value)
-			select path.id, profile.id, 1
-			from public.${FixtureTable} path
+			insert into public.tag_path(
+				id, member_node_ids, relation_ids, structural_identity_hash,
+				terminal_node_id, created_by_profile_id
+			)
+			select definition.path_id, definition.member_node_ids, definition.relation_ids,
+				md5('rezics-tag-path-capacity-v2:path:' || definition.ordinal::text) ||
+				md5('rezics-tag-path-capacity-v2:path:tail:' || definition.ordinal::text),
+				definition.member_node_ids[cardinality(definition.member_node_ids)], profile.id
+			from public.${FixturePathTable} definition
 			cross join public.${FixtureTable} profile
-			where path.kind = 'path' and profile.kind = 'profile' and profile.ordinal = 0
+			where profile.kind = 'profile' and profile.ordinal = 0
+		`);
+		await client.query(`
+			insert into public.tag_expression(
+				id, expression_kind, canonical_claim_key, focus_tag_id, created_by_profile_id
+			)
+			select definition.expression_id, 'facet_value',
+				'capacity:facet-value:' || definition.ordinal::text,
+				definition.member_node_ids[cardinality(definition.member_node_ids)], profile.id
+			from public.${FixturePathTable} definition
+			cross join public.${FixtureTable} profile
+			where profile.kind = 'profile' and profile.ordinal = 0
+		`);
+		await client.query(`
+			insert into public.tag_expression_argument(expression_id, role, ordinal, tag_id)
+			select definition.expression_id, argument.role, 0,
+				case argument.role
+					when 'slot' then definition.member_node_ids[1]
+					else definition.member_node_ids[cardinality(definition.member_node_ids)]
+				end
+			from public.${FixturePathTable} definition
+			cross join (values ('slot'::text), ('value'::text)) argument(role)
+		`);
+		await client.query(`update public.tag_expression set sealed_at = now()`);
+		await client.query(`
+			insert into public.tag_expression_inference_rule(
+				id, source_expression_id, target_tag_id, inference_kind,
+				provenance, created_by_profile_id
+			)
+			select md5('rezics-tag-path-capacity-v2:inference:' || definition.ordinal::text)::uuid,
+				definition.expression_id, definition.member_node_ids[1], 'retrieval_only',
+				jsonb_build_object('fixture', 'tag-path-capacity-v2'), profile.id
+			from public.${FixturePathTable} definition
+			cross join public.${FixtureTable} profile
+			where profile.kind = 'profile' and profile.ordinal = 0
+		`);
+		await client.query(`
+			insert into public.tag_path_sense(
+				id, path_id, expression_id, scope, binding_signature,
+				provenance, created_by_profile_id
+			)
+			select definition.sense_id, definition.path_id, definition.expression_id, 'global',
+				'slot:0;value:' || (cardinality(definition.member_node_ids) - 1)::text,
+				jsonb_build_object('fixture', 'tag-path-capacity-v2'), profile.id
+			from public.${FixturePathTable} definition
+			cross join public.${FixtureTable} profile
+			where profile.kind = 'profile' and profile.ordinal = 0
+		`);
+		await client.query(`
+			insert into public.tag_path_sense_binding(
+				sense_id, member_ordinal, argument_role, argument_ordinal
+			)
+			select definition.sense_id,
+				case binding.role when 'slot' then 0 else cardinality(definition.member_node_ids) - 1 end,
+				binding.role, 0
+			from public.${FixturePathTable} definition
+			cross join (values ('slot'::text), ('value'::text)) binding(role)
+		`);
+		await client.query(`update public.tag_path_sense set sealed_at = now()`);
+		await client.query(`
+			insert into public.tag_path_vote(path_id, profile_id, value)
+			select definition.path_id, profile.id, 1
+			from public.${FixturePathTable} definition
+			cross join public.${FixtureTable} profile
+			where profile.kind = 'profile' and profile.ordinal = 0
 		`);
 		await client.query(`
 			insert into public.realm_tag_path(realm_id, path_id, created_by_profile_id)
-			select realm.id, path.id, profile.id
-			from public.${FixtureTable} realm
-			cross join public.${FixtureTable} path
+			select realm.id, definition.path_id, profile.id
+			from public.${FixturePathTable} definition
+			cross join public.${FixtureTable} realm
 			cross join public.${FixtureTable} profile
-			where realm.kind = 'realm' and path.kind = 'path'
-				and profile.kind = 'profile' and profile.ordinal = 0
+			where realm.kind = 'realm' and profile.kind = 'profile' and profile.ordinal = 0
 		`);
 		await client.query(`
 			insert into public.realm_tag_path_vote(realm_id, path_id, profile_id, value)
-			select realm.id, path.id, profile.id, 1
-			from public.${FixtureTable} realm
-			cross join public.${FixtureTable} path
+			select realm.id, definition.path_id, profile.id, 1
+			from public.${FixturePathTable} definition
+			cross join public.${FixtureTable} realm
 			cross join public.${FixtureTable} profile
-			where realm.kind = 'realm' and path.kind = 'path'
-				and profile.kind = 'profile' and profile.ordinal = 0
+			where realm.kind = 'realm' and profile.kind = 'profile' and profile.ordinal = 0
 		`);
 		await client.query(`
-			insert into public.unit_tag_path(
-				unit_id, path_id, created_by_profile_id, position
+			insert into public.realm_tag_path_sense(realm_id, sense_id, path_id, created_by_profile_id)
+			select realm.id, definition.sense_id, definition.path_id, profile.id
+			from public.${FixturePathTable} definition
+			cross join public.${FixtureTable} realm
+			cross join public.${FixtureTable} profile
+			where realm.kind = 'realm' and profile.kind = 'profile' and profile.ordinal = 0
+		`);
+		await client.query(`
+			insert into public.unit_tag_path_application(
+				id, unit_id, sense_id, created_by_profile_id, pinned, position
 			)
-			select target.id, path.id, profile.id,
-				'a' || lpad(path.ordinal::text, 8, '0')
+			select md5(
+					'rezics-tag-path-capacity-v2:global-application:' || target.ordinal::text || ':' ||
+					definition.ordinal::text
+				)::uuid,
+				target.id, definition.sense_id, profile.id, true,
+				'a' || lpad(definition.ordinal::text, 8, '0')
 			from public.${FixtureTable} target
-			cross join public.${FixtureTable} path
+			cross join public.${FixturePathTable} definition
 			cross join public.${FixtureTable} profile
-			where target.kind = 'target' and path.kind = 'path'
-				and profile.kind = 'profile' and profile.ordinal = 0
-				and (target.ordinal = 0 or path.ordinal < 3)
+			where target.kind = 'target' and profile.kind = 'profile' and profile.ordinal = 0
+				and (target.ordinal = 0 or definition.ordinal < ${AcceptedApplicationsPerUnit})
 		`);
 		await client.query(`
-			insert into public.realm_unit_tag_path(
-				realm_id, unit_id, path_id, created_by_profile_id
+			insert into public.realm_unit_tag_path_application(
+				id, realm_id, unit_id, sense_id, created_by_profile_id
 			)
-			select realm.id, target.id, path.id, profile.id
+			select md5(
+					'rezics-tag-path-capacity-v2:realm-application:' || target.ordinal::text || ':' ||
+					definition.ordinal::text
+				)::uuid,
+				realm.id, target.id, definition.sense_id, profile.id
 			from public.${FixtureTable} realm
 			cross join public.${FixtureTable} target
-			cross join public.${FixtureTable} path
+			cross join public.${FixturePathTable} definition
 			cross join public.${FixtureTable} profile
-			where realm.kind = 'realm' and target.kind = 'target' and path.kind = 'path'
+			where realm.kind = 'realm' and target.kind = 'target'
 				and profile.kind = 'profile' and profile.ordinal = 0
-				and (target.ordinal = 0 or path.ordinal < 3)
+				and (target.ordinal = 0 or definition.ordinal < ${AcceptedApplicationsPerUnit})
 		`);
 		await client.query("commit");
+
 		for (let batchStart = 0; batchStart < input.unitCount; batchStart += FixtureJudgmentBatchSize) {
 			const batchEnd = Math.min(batchStart + FixtureJudgmentBatchSize, input.unitCount);
 			await client.query("begin");
@@ -283,15 +402,17 @@ async function loadFixture(
 			await client.query("set local synchronous_commit = off");
 			await client.query(
 				`
-					insert into public.unit_tag_path_judgment(
-						unit_id, path_id, profile_id, fit_vote, spoiler_level,
+					insert into public.unit_tag_path_application_judgment(
+						application_id, profile_id, fit_vote, spoiler_level,
 						fit_updated_at, spoiler_updated_at
 					)
-					select target.id, path.id, profile.id, 1, target.ordinal % 3, now(), now()
+					select application.id, profile.id, 1, target.ordinal % 3, now(), now()
 					from public.${FixtureTable} target
-					cross join public.${FixtureTable} path
+					cross join public.${FixturePathTable} definition
+					join public.unit_tag_path_application application
+						on application.unit_id = target.id and application.sense_id = definition.sense_id
 					cross join public.${FixtureTable} profile
-					where target.kind = 'target' and path.kind = 'path' and path.ordinal < 3
+					where target.kind = 'target' and definition.ordinal < ${AcceptedApplicationsPerUnit}
 						and profile.kind = 'profile' and profile.ordinal = 0
 						and target.ordinal >= $1 and target.ordinal < $2
 				`,
@@ -299,17 +420,20 @@ async function loadFixture(
 			);
 			await client.query(
 				`
-					insert into public.realm_unit_tag_path_judgment(
-						realm_id, unit_id, path_id, profile_id, fit_vote, spoiler_level,
+					insert into public.realm_unit_tag_path_application_judgment(
+						application_id, profile_id, fit_vote, spoiler_level,
 						fit_updated_at, spoiler_updated_at
 					)
-					select realm.id, target.id, path.id, profile.id, 1, target.ordinal % 3, now(), now()
+					select application.id, profile.id, 1, target.ordinal % 3, now(), now()
 					from public.${FixtureTable} realm
 					cross join public.${FixtureTable} target
-					cross join public.${FixtureTable} path
+					cross join public.${FixturePathTable} definition
+					join public.realm_unit_tag_path_application application
+						on application.realm_id = realm.id and application.unit_id = target.id
+						and application.sense_id = definition.sense_id
 					cross join public.${FixtureTable} profile
 					where realm.kind = 'realm' and target.kind = 'target'
-						and path.kind = 'path' and path.ordinal < 3
+						and definition.ordinal < ${AcceptedApplicationsPerUnit}
 						and profile.kind = 'profile' and profile.ordinal = 0
 						and target.ordinal >= $1 and target.ordinal < $2
 				`,
@@ -319,19 +443,6 @@ async function loadFixture(
 		}
 		await client.query("begin");
 		await client.query("set local statement_timeout = 0");
-		await client.query("set local synchronous_commit = off");
-		await client.query(`
-			insert into public.tag_path_merge(
-				source_path_id, target_path_id, reason, proposed_by_profile_id
-			)
-			select source.id, target.id, 'Capacity fixture manual-governance queue', profile.id
-			from public.${FixtureTable} source
-			cross join public.${FixtureTable} target
-			cross join public.${FixtureTable} profile
-			where source.kind = 'path' and source.ordinal >= 3
-				and target.kind = 'path' and target.ordinal = 1
-				and profile.kind = 'profile' and profile.ordinal = 0
-		`);
 		for (const relation of CapacityRelations) await client.query("analyze public." + relation);
 		await client.query("commit");
 	} catch (error) {
@@ -364,66 +475,54 @@ async function validateReusableFixture(
 }
 
 async function readFixtureIdentity(client: Client, profileCount: number): Promise<FixtureIdentity> {
-	const result = await client.query<{
-		readonly hotPathId: string;
-		readonly hotUnitId: string;
-		readonly profileIds: string[];
-		readonly realmId: string;
-		readonly tagIds: string[];
-		readonly terminalTagId: string;
-	}>(
+	const result = await client.query<FixtureIdentity>(
 		`
 		select
-			(select id::text from public.${FixtureTable}
-			 where kind = 'path' and ordinal = 0) as "hotPathId",
-			(select id::text from public.${FixtureTable}
-			 where kind = 'target' and ordinal = 0) as "hotUnitId",
+			(select expression_id::text from public.${FixturePathTable} where ordinal = 0)
+				as "hotExpressionId",
+			md5('rezics-tag-path-capacity-v2:global-application:0:0')::uuid::text
+				as "hotGlobalApplicationId",
+			(select path_id::text from public.${FixturePathTable} where ordinal = 0) as "hotPathId",
+			md5('rezics-tag-path-capacity-v2:realm-application:0:0')::uuid::text
+				as "hotRealmApplicationId",
+			(select id::text from public.${FixtureTable} where kind = 'target' and ordinal = 0)
+				as "hotUnitId",
 			(select array_agg(id::text order by ordinal) from public.${FixtureTable}
 			 where kind = 'profile' and ordinal between 1 and $1::integer) as "profileIds",
-			(select id::text from public.${FixtureTable}
-			 where kind = 'realm' and ordinal = 0) as "realmId",
-			(select array_agg(id::text order by ordinal) from public.${FixtureTable}
-			 where kind = 'tag' and ordinal between 1 and 16) as "tagIds",
-			(select id::text from public.${FixtureTable}
-			 where kind = 'tag' and ordinal = 0) as "terminalTagId"
-	`,
+			(select id::text from public.${FixtureTable} where kind = 'realm' and ordinal = 0)
+				as "realmId",
+			(select id::text from public.${FixtureTable} where kind = 'tag' and ordinal = 0)
+				as "terminalTagId"
+		`,
 		[profileCount - 1],
 	);
 	const row = requireRow(result.rows, "Tag Path capacity fixture identities");
 	if (
+		!row.hotExpressionId ||
+		!row.hotGlobalApplicationId ||
 		!row.hotPathId ||
+		!row.hotRealmApplicationId ||
 		!row.hotUnitId ||
 		!row.realmId ||
 		!row.terminalTagId ||
-		row.profileIds.length !== profileCount - 1 ||
-		row.tagIds.length !== 16
+		row.profileIds.length !== profileCount - 1
 	)
 		throw new Error("Tag Path capacity fixture identities are incomplete");
 	return row;
 }
 
 function hotWriteSql(authority: WorkloadAuthority): string {
-	if (authority === "global")
-		return `
-			insert into public.unit_tag_path_judgment(
-				unit_id, path_id, profile_id, fit_vote, spoiler_level,
-				fit_updated_at, spoiler_updated_at, updated_at
-			)
-			values ($1::uuid, $2::uuid, $3::uuid, 1, $4::smallint, now(), now(), now())
-			on conflict (unit_id, path_id, profile_id) do update set
-				fit_vote = excluded.fit_vote,
-				spoiler_level = excluded.spoiler_level,
-				fit_updated_at = excluded.fit_updated_at,
-				spoiler_updated_at = excluded.spoiler_updated_at,
-				updated_at = excluded.updated_at
-		`;
+	const relation =
+		authority === "global"
+			? "unit_tag_path_application_judgment"
+			: "realm_unit_tag_path_application_judgment";
 	return `
-		insert into public.realm_unit_tag_path_judgment(
-			realm_id, unit_id, path_id, profile_id, fit_vote, spoiler_level,
+		insert into public.${relation}(
+			application_id, profile_id, fit_vote, spoiler_level,
 			fit_updated_at, spoiler_updated_at, updated_at
 		)
-		values ($5::uuid, $1::uuid, $2::uuid, $3::uuid, 1, $4::smallint, now(), now(), now())
-		on conflict (realm_id, unit_id, path_id, profile_id) do update set
+		values ($1::uuid, $2::uuid, 1, $3::smallint, now(), now(), now())
+		on conflict (application_id, profile_id) do update set
 			fit_vote = excluded.fit_vote,
 			spoiler_level = excluded.spoiler_level,
 			fit_updated_at = excluded.fit_updated_at,
@@ -463,6 +562,10 @@ async function runHotWriteTier(input: {
 	const terminalLatencies: number[] = [];
 	const backpressureDecisionLatencies: number[] = [];
 	const sql = hotWriteSql(input.authority);
+	const applicationId =
+		input.authority === "global"
+			? input.fixture.hotGlobalApplicationId
+			: input.fixture.hotRealmApplicationId;
 	const walStart = await currentWalLsn(input.walClient);
 	const tierStartedAt = performance.now();
 	try {
@@ -480,17 +583,7 @@ async function runHotWriteTier(input: {
 						try {
 							await client.query("begin");
 							await client.query("set local statement_timeout = '1500ms'");
-							const parameters: (number | string)[] = [
-								input.fixture.hotUnitId,
-								input.fixture.hotPathId,
-								profileId,
-								sample % 3,
-								input.fixture.realmId,
-							];
-							await client.query(
-								sql,
-								input.authority === "global" ? parameters.slice(0, 4) : parameters,
-							);
+							await client.query(sql, [applicationId, profileId, sample % 3]);
 							await client.query("commit");
 							commits += 1;
 							terminalLatencies.push(performance.now() - logicalStartedAt);
@@ -549,7 +642,28 @@ async function explain(
 	client: Client,
 	query: string,
 	parameters: readonly unknown[],
+	options: { readonly qualifyCorpusIndexRoute: boolean },
 ): Promise<PostgreSqlExplainPlan> {
+	if (options.qualifyCorpusIndexRoute) {
+		await client.query("begin");
+		try {
+			// The disposable fixture is intentionally small. Disabling sequential
+			// scans only for this transaction proves that a bounded index topology
+			// exists without pretending the toy planner cost is a 500M-row cost.
+			await client.query("set local enable_seqscan = off");
+			const result = await client.query<{ readonly "QUERY PLAN": unknown }>(
+				"explain (analyze, buffers, wal, format json) " + query,
+				[...parameters],
+			);
+			await client.query("rollback");
+			return decodePostgreSqlExplainPlan(
+				requireRow(result.rows, "Tag Path capacity EXPLAIN")["QUERY PLAN"],
+			);
+		} catch (error) {
+			await client.query("rollback").catch(() => undefined);
+			throw error;
+		}
+	}
 	const result = await client.query<{ readonly "QUERY PLAN": unknown }>(
 		"explain (analyze, buffers, wal, format json) " + query,
 		[...parameters],
@@ -567,351 +681,312 @@ function planEvidence(plan: PostgreSqlExplainPlan, summary: PlanSummary): PlanEv
 	};
 }
 
+async function boundedPlan(
+	client: Client,
+	input: {
+		readonly corpusRelations: readonly string[];
+		readonly name: string;
+		readonly parameters: readonly unknown[];
+		readonly query: string;
+		readonly requiredIndexes: readonly string[];
+		readonly requiredIndexAlternatives?: readonly (readonly string[])[];
+		readonly maximumSortRows?: number;
+	},
+): Promise<PlanEvidence> {
+	const plan = await explain(client, input.query, input.parameters, {
+		qualifyCorpusIndexRoute: input.corpusRelations.length > 0,
+	});
+	return planEvidence(
+		plan,
+		assertBoundedPostgreSqlPlan({
+			corpusRelations: input.corpusRelations,
+			maximumSharedBlocks: 512,
+			maximumSortRows: input.maximumSortRows ?? 50,
+			name: input.name,
+			plan,
+			requiredIndexes: input.requiredIndexes,
+			requiredIndexAlternatives: input.requiredIndexAlternatives,
+		}),
+	);
+}
+
 async function capturePlans(
 	client: Client,
 	fixture: FixtureIdentity,
-	pathCount: number,
 ): Promise<Readonly<Record<string, PlanEvidence>>> {
 	const zeroUuid = "00000000-0000-0000-0000-000000000000";
-	const middlePath = await client.query<{ readonly id: string; readonly position: string }>(
-		`select path.id::text, application.position
-		 from public.${FixtureTable} path
-		 join public.unit_tag_path application
-			on application.path_id = path.id and application.unit_id = $1::uuid
-		 where path.kind = 'path' and path.ordinal = $2::integer`,
-		[fixture.hotUnitId, Math.floor(pathCount / 2)],
-	);
-	const cursor = requireRow(middlePath.rows, "Tag Path application keyset cursor");
-	const cases = [
-		{
-			name: "hierarchyChildren",
-			query: `select child_tag_id, path_id
-				from public.tag_path_edge
-				where parent_tag_id = $1::uuid
-					and (child_tag_id, path_id) > ($2::uuid, $3::uuid)
-				order by child_tag_id, path_id limit 50`,
-			parameters: [fixture.tagIds[0], zeroUuid, zeroUuid],
-			requiredIndexes: ["tag_path_edge_parent_idx"],
-			corpusRelations: ["tag_path_edge"],
-		},
-		{
-			name: "hierarchyParents",
-			query: `select parent_tag_id, path_id
-				from public.tag_path_edge
-				where child_tag_id = $1::uuid
-					and (parent_tag_id, path_id) > ($2::uuid, $3::uuid)
-				order by parent_tag_id, path_id limit 50`,
-			parameters: [fixture.terminalTagId, zeroUuid, zeroUuid],
-			requiredIndexes: ["tag_path_edge_child_idx"],
-			corpusRelations: ["tag_path_edge"],
-		},
-		{
-			name: "endingPaths",
-			query: `select stat.path_id, stat.usage_count
-				from public.tag_path_vote_stat stat
-				where stat.terminal_tag_id = $1::uuid
-					and stat.score > 0 and stat.vote_count > 0
-				order by stat.usage_count desc nulls last, stat.path_id limit 20`,
-			parameters: [fixture.terminalTagId],
-			requiredIndexes: ["tag_path_vote_stat_terminal_usage_idx"],
-			corpusRelations: ["tag_path_vote_stat"],
-		},
-		{
-			name: "viewerJudgment",
-			query: `select fit_vote, spoiler_level
-				from public.unit_tag_path_judgment
-				where unit_id = $1::uuid and path_id = $2::uuid and profile_id = $3::uuid`,
-			parameters: [fixture.hotUnitId, fixture.hotPathId, fixture.profileIds[0]],
+	const zeroPosition = "";
+	return {
+		pathsContainingTag: await boundedPlan(client, {
+			name: "accepted Paths containing a Tag",
+			query: `
+				with candidate_path as materialized (
+					select member.path_id
+					from public.tag_path_member member
+					where member.node_id = $1::uuid and member.path_id > $2::uuid
+					order by member.path_id
+					limit 65
+				)
+				select candidate.path_id, stat.score, stat.vote_count, stat.usage_count
+				from candidate_path candidate
+				join public.tag_path_vote_stat stat on stat.path_id = candidate.path_id
+				order by candidate.path_id
+			`,
+			parameters: [fixture.terminalTagId, zeroUuid],
+			maximumSortRows: 65,
 			requiredIndexes: [],
-			requiredIndexAlternatives: [
-				["unit_tag_path_judgment_pkey", "unit_tag_path_judgment_profile_idx"],
-			],
-			corpusRelations: ["unit_tag_path_judgment"],
-		},
-		{
-			name: "applicationKeyset",
-			query: `select path_id, pinned, position
-				from public.unit_tag_path
+			requiredIndexAlternatives: [["tag_path_member_node_path_idx", "tag_path_member_pkey"]],
+			corpusRelations: ["tag_path_member", "tag_path_vote_stat"],
+		}),
+		unitApplications: await boundedPlan(client, {
+			name: "Unit Application keyset page",
+			query: `
+				select id, sense_id, pinned, position
+				from public.unit_tag_path_application
 				where unit_id = $1::uuid
-					and (pinned, position, path_id) > ($2::boolean, $3::text, $4::uuid)
-				order by pinned, position, path_id limit 50`,
-			parameters: [fixture.hotUnitId, false, cursor.position, cursor.id],
-			requiredIndexes: ["unit_tag_path_unit_position_idx"],
-			corpusRelations: ["unit_tag_path"],
-		},
-		{
-			name: "mergeQueue",
-			query: `select id, created_at
-				from public.tag_path_merge
-				where status = 'proposed'
-					and (created_at, id) > ($1::timestamptz, $2::uuid)
-				order by created_at, id limit 100`,
-			parameters: ["1970-01-01T00:00:00.000Z", zeroUuid],
-			requiredIndexes: ["tag_path_merge_queue_idx"],
-			corpusRelations: ["tag_path_merge"],
-		},
-		{
-			name: "compoundForward",
-			query: `select path_id
-				from public.tag_path_edge
-				where parent_tag_id = any($1::uuid[])
-					and child_tag_id = any($2::uuid[])
-				limit 5`,
-			parameters: [[fixture.tagIds[0]], [fixture.tagIds[1]]],
-			requiredIndexes: [],
-			requiredIndexAlternatives: [["tag_path_edge_parent_idx", "tag_path_edge_child_idx"]],
-			corpusRelations: ["tag_path_edge"],
-		},
-		{
-			name: "compoundReverse",
-			query: `select path_id
-				from public.tag_path_edge
-				where child_tag_id = any($1::uuid[])
-					and parent_tag_id = any($2::uuid[])
-				limit 5`,
-			parameters: [[fixture.tagIds[1]], [fixture.tagIds[0]]],
-			requiredIndexes: [],
-			requiredIndexAlternatives: [["tag_path_edge_child_idx", "tag_path_edge_parent_idx"]],
-			corpusRelations: ["tag_path_edge"],
-		},
-		{
-			name: "realmViewerJudgment",
-			query: `select fit_vote, spoiler_level
-				from public.realm_unit_tag_path_judgment
-				where realm_id = $1::uuid and unit_id = $2::uuid
-					and path_id = $3::uuid and profile_id = $4::uuid`,
-			parameters: [fixture.realmId, fixture.hotUnitId, fixture.hotPathId, fixture.profileIds[0]],
+					and (pinned, position, id) > (false, $2::text, $3::uuid)
+				order by pinned, position, id
+				limit 50
+			`,
+			parameters: [fixture.hotUnitId, zeroPosition, zeroUuid],
+			requiredIndexes: ["unit_tag_path_application_unit_position_idx"],
+			corpusRelations: ["unit_tag_path_application"],
+		}),
+		expressionAssertions: await boundedPlan(client, {
+			name: "Expression assertion inverse page",
+			query: `
+				select unit_id, direct, path_application_count
+				from public.unit_expression_assertion
+				where expression_id = $1::uuid and unit_id > $2::uuid
+				order by unit_id limit 50
+			`,
+			parameters: [fixture.hotExpressionId, zeroUuid],
+			requiredIndexes: ["unit_expression_assertion_expression_idx"],
+			corpusRelations: ["unit_expression_assertion"],
+		}),
+		effectiveTagInverse: await boundedPlan(client, {
+			name: "Effective Tag inverse page",
+			query: `
+				select unit_id, direct, primary_expression_count,
+					entailed_expression_count, retrieval_expression_count
+				from public.unit_effective_tag
+				where tag_id = $1::uuid and unit_id > $2::uuid
+				order by unit_id limit 50
+			`,
+			parameters: [fixture.terminalTagId, zeroUuid],
+			requiredIndexes: ["unit_effective_tag_tag_idx"],
+			corpusRelations: ["unit_effective_tag"],
+		}),
+		realmApplications: await boundedPlan(client, {
+			name: "Realm Unit Application page",
+			query: `
+				select id, sense_id
+				from public.realm_unit_tag_path_application
+				where unit_id = $1::uuid and realm_id = $2::uuid
+					and (sense_id, id) > ($3::uuid, $3::uuid)
+				order by sense_id, id limit 50
+			`,
+			parameters: [fixture.hotUnitId, fixture.realmId, zeroUuid],
+			maximumSortRows: 51,
 			requiredIndexes: [],
 			requiredIndexAlternatives: [
-				["realm_unit_tag_path_judgment_pkey", "realm_unit_tag_path_judgment_profile_idx"],
+				[
+					"realm_unit_tag_path_application_unit_route_idx",
+					"realm_unit_tag_path_application_authority_key",
+				],
 			],
-			corpusRelations: ["realm_unit_tag_path_judgment"],
-		},
-	] as const;
-	const evidence: Record<string, PlanEvidence> = {};
-	for (const planCase of cases) {
-		const plan = await explain(client, planCase.query, planCase.parameters);
-		const summary = assertBoundedPostgreSqlPlan({
-			name: planCase.name,
-			plan,
-			requiredIndexes: planCase.requiredIndexes,
-			...("requiredIndexAlternatives" in planCase
-				? { requiredIndexAlternatives: planCase.requiredIndexAlternatives }
-				: {}),
-			corpusRelations: planCase.corpusRelations,
-			maximumSharedBlocks: 512,
-		});
-		evidence[planCase.name] = planEvidence(plan, summary);
-	}
-	return evidence;
+			corpusRelations: ["realm_unit_tag_path_application"],
+		}),
+		activeSenses: await boundedPlan(client, {
+			name: "active Path Sense page",
+			query: `
+				select id, expression_id
+				from public.tag_path_sense
+				where path_id = $1::uuid and status = 'active' and id > $2::uuid
+				order by id limit 50
+			`,
+			parameters: [fixture.hotPathId, zeroUuid],
+			requiredIndexes: ["tag_path_sense_path_route_idx"],
+			corpusRelations: ["tag_path_sense"],
+		}),
+		activeInferenceRules: await boundedPlan(client, {
+			name: "active inference-rule page",
+			query: `
+				select id, target_tag_id, target_expression_id, inference_kind
+				from public.tag_expression_inference_rule
+				where source_expression_id = $1::uuid and status = 'active'
+					and id > $2::uuid
+				order by id limit 50
+			`,
+			parameters: [fixture.hotExpressionId, zeroUuid],
+			requiredIndexes: ["tag_expression_inference_rule_source_idx"],
+			corpusRelations: ["tag_expression_inference_rule"],
+		}),
+		hotJudgmentMutation: await boundedPlan(client, {
+			name: "hot Application judgment mutation",
+			query: hotWriteSql("global"),
+			parameters: [fixture.hotGlobalApplicationId, fixture.profileIds[0], 0],
+			requiredIndexes: [],
+			corpusRelations: [
+				"unit_tag_path_application_judgment",
+				"unit_tag_path_application_judgment_stat",
+			],
+		}),
+	};
 }
 
 async function verifyParity(
 	client: Client,
 	fixture: FixtureIdentity,
 	input: { readonly pathCount: number; readonly unitCount: number },
-): Promise<Readonly<Record<string, number>>> {
-	const expectedMemberCount = 22 + (input.pathCount - 3) * 2;
-	const expectedEdgeCount = 19 + (input.pathCount - 3);
+): Promise<Readonly<Record<string, boolean | number>>> {
 	const result = await client.query<{
-		readonly acceptedMergeCount: string;
-		readonly definitionProjectionMismatchCount: string;
-		readonly globalAggregateMismatchCount: string;
-		readonly globalEffectiveMismatchCount: string;
-		readonly globalSupportCount: string;
-		readonly globalUsageCount: string;
-		readonly realmAggregateMismatchCount: string;
-		readonly realmEffectiveMismatchCount: string;
-		readonly realmSupportCount: string;
-		readonly realmUsageCount: string;
-		readonly voteProjectionMismatchCount: string;
+		readonly bareRedDirectCount: string;
+		readonly expressionEffectiveTagCount: string;
+		readonly globalApplicationCount: string;
+		readonly globalAssertionCount: string;
+		readonly globalEffectiveTagCount: string;
+		readonly hotIntermediateLeakCount: string;
+		readonly pathMemberCount: string;
+		readonly qualifiedAssertionCount: string;
+		readonly realmApplicationCount: string;
+		readonly realmAssertionCount: string;
+		readonly realmEffectiveTagCount: string;
 	}>(
 		`
-		with fixture_paths as (
-			select id from public.${FixtureTable} where kind = 'path'
-		), fixture_units as (
-			select id from public.${FixtureTable} where kind = 'target'
-		), global_facts as (
-			select judgment.unit_id, judgment.path_id,
-				coalesce(sum(judgment.fit_vote) filter (where judgment.fit_vote is not null), 0) as score,
-				count(judgment.fit_vote) as vote_count,
-				count(judgment.spoiler_level) as spoiler_vote_count,
-				count(*) filter (where judgment.spoiler_level = 0) as spoiler_none_count,
-				count(*) filter (where judgment.spoiler_level = 1) as spoiler_minor_count,
-				count(*) filter (where judgment.spoiler_level = 2) as spoiler_major_count
-			from public.unit_tag_path_judgment judgment
-			join fixture_units on fixture_units.id = judgment.unit_id
-			join fixture_paths on fixture_paths.id = judgment.path_id
-			group by judgment.unit_id, judgment.path_id
-		), realm_facts as (
-			select judgment.realm_id, judgment.unit_id, judgment.path_id,
-				coalesce(sum(judgment.fit_vote) filter (where judgment.fit_vote is not null), 0) as score,
-				count(judgment.fit_vote) as vote_count,
-				count(judgment.spoiler_level) as spoiler_vote_count,
-				count(*) filter (where judgment.spoiler_level = 0) as spoiler_none_count,
-				count(*) filter (where judgment.spoiler_level = 1) as spoiler_minor_count,
-				count(*) filter (where judgment.spoiler_level = 2) as spoiler_major_count
-			from public.realm_unit_tag_path_judgment judgment
-			join fixture_units on fixture_units.id = judgment.unit_id
-			join fixture_paths on fixture_paths.id = judgment.path_id
-			group by judgment.realm_id, judgment.unit_id, judgment.path_id
-		)
 		select
-			(select count(*) from public.tag_path_merge where status = 'accepted')::text
-				as "acceptedMergeCount",
-			((select abs(count(*) - $3::integer) from public.tag_path_member
-			 where path_id in (select id from fixture_paths))
-			 + (select abs(count(*) - $4::integer) from public.tag_path_edge
-				 where path_id in (select id from fixture_paths)))::text
-				as "definitionProjectionMismatchCount",
-			(select count(*) from global_facts fact
-			 full join public.unit_tag_path_judgment_stat stat
-				on stat.unit_id = fact.unit_id and stat.path_id = fact.path_id
-			 where fact.unit_id is null or stat.unit_id is null
-				or (fact.score, fact.vote_count, fact.spoiler_vote_count,
-					fact.spoiler_none_count, fact.spoiler_minor_count, fact.spoiler_major_count)
-					is distinct from
-				   (stat.score, stat.vote_count, stat.spoiler_vote_count,
-					stat.spoiler_none_count, stat.spoiler_minor_count, stat.spoiler_major_count))::text
-				as "globalAggregateMismatchCount",
-			(select count(*) from public.unit_effective_tag effective
-			 where effective.unit_id = $1::uuid and effective.tag_id = $5::uuid
-				and effective.path_support_count <> (
-					select count(*) from public.unit_tag_path_support support
-					where support.unit_id = effective.unit_id and support.tag_id = effective.tag_id
-				))::text as "globalEffectiveMismatchCount",
-			(select count(*) from public.unit_tag_path_support
-			 where unit_id = $1::uuid and path_id = $2::uuid)::text as "globalSupportCount",
-			(select usage_count from public.tag_path_vote_stat
-			 where path_id = $2::uuid)::text as "globalUsageCount",
-			(select count(*) from realm_facts fact
-			 full join public.realm_unit_tag_path_judgment_stat stat
-				on stat.realm_id = fact.realm_id and stat.unit_id = fact.unit_id
-					and stat.path_id = fact.path_id
-			 where fact.realm_id is null or stat.realm_id is null
-				or (fact.score, fact.vote_count, fact.spoiler_vote_count,
-					fact.spoiler_none_count, fact.spoiler_minor_count, fact.spoiler_major_count)
-					is distinct from
-				   (stat.score, stat.vote_count, stat.spoiler_vote_count,
-					stat.spoiler_none_count, stat.spoiler_minor_count, stat.spoiler_major_count))::text
-				as "realmAggregateMismatchCount",
-			(select count(*) from public.realm_unit_effective_tag effective
-			 where effective.realm_id = $6::uuid and effective.unit_id = $1::uuid
-				and effective.tag_id = $5::uuid and effective.path_support_count <> (
-					select count(*) from public.realm_unit_tag_path_support support
-					where support.realm_id = effective.realm_id
-						and support.unit_id = effective.unit_id and support.tag_id = effective.tag_id
-				))::text as "realmEffectiveMismatchCount",
-			(select count(*) from public.realm_unit_tag_path_support
-			 where realm_id = $6::uuid and unit_id = $1::uuid and path_id = $2::uuid)::text
-				as "realmSupportCount",
-			(select usage_count from public.realm_tag_path_vote_stat
-			 where realm_id = $6::uuid and path_id = $2::uuid)::text as "realmUsageCount",
-			(select count(*)
-			 from public.tag_path path
-			 join public.tag_path_vote_stat stat on stat.path_id = path.id
-			 where path.id in (select id from fixture_paths)
-				and (stat.terminal_tag_id <> path.terminal_tag_id
-					or stat.score <> 1 or stat.vote_count <> 1))::text
-				as "voteProjectionMismatchCount"
+			(select count(*)::text from public.unit_tag
+			 where unit_id = $1::uuid and tag_id = $2::uuid) as "bareRedDirectCount",
+			(select count(*)::text from public.tag_expression_effective_tag)
+				as "expressionEffectiveTagCount",
+			(select count(*)::text from public.unit_tag_path_application) as "globalApplicationCount",
+			(select count(*)::text from public.unit_expression_assertion) as "globalAssertionCount",
+			(select count(*)::text from public.unit_effective_tag) as "globalEffectiveTagCount",
+			(select count(*)::text
+			 from public.unit_effective_tag effective
+			 join public.${FixtureTable} tag on tag.id = effective.tag_id and tag.kind = 'tag'
+			 where effective.unit_id = $1::uuid and tag.ordinal between 2 and 15)
+				as "hotIntermediateLeakCount",
+			(select count(*)::text from public.tag_path_member) as "pathMemberCount",
+			(select count(*)::text from public.unit_expression_assertion
+			 where unit_id = $1::uuid and expression_id = $3::uuid
+				and direct = false and path_application_count = 1) as "qualifiedAssertionCount",
+			(select count(*)::text from public.realm_unit_tag_path_application)
+				as "realmApplicationCount",
+			(select count(*)::text from public.realm_unit_expression_assertion)
+				as "realmAssertionCount",
+			(select count(*)::text from public.realm_unit_effective_tag)
+				as "realmEffectiveTagCount"
 	`,
-		[
-			fixture.hotUnitId,
-			fixture.hotPathId,
-			expectedMemberCount,
-			expectedEdgeCount,
-			fixture.tagIds[0],
-			fixture.realmId,
-		],
+		[fixture.hotUnitId, fixture.terminalTagId, fixture.hotExpressionId],
 	);
-	const row = requireRow(result.rows, "Tag Path aggregate parity");
-	const numeric = Object.fromEntries(
-		Object.entries(row).map(([name, value]) => [name, Number(value)]),
-	);
-	for (const name of [
-		"acceptedMergeCount",
-		"definitionProjectionMismatchCount",
-		"globalAggregateMismatchCount",
-		"globalEffectiveMismatchCount",
-		"realmAggregateMismatchCount",
-		"realmEffectiveMismatchCount",
-		"voteProjectionMismatchCount",
-	])
-		if (numeric[name] !== 0) throw new Error(name + " must be zero");
-	if (numeric.globalUsageCount !== input.unitCount || numeric.realmUsageCount !== input.unitCount)
-		throw new Error("Tag Path usage projection does not match accepted application count");
-	const globalPositiveProfiles = await client.query<{ readonly count: string }>(
-		`select count(*)::text as count from public.unit_tag_path_judgment
-		 where unit_id = $1::uuid and path_id = $2::uuid and fit_vote = 1`,
-		[fixture.hotUnitId, fixture.hotPathId],
-	);
-	const realmPositiveProfiles = await client.query<{ readonly count: string }>(
-		`select count(*)::text as count from public.realm_unit_tag_path_judgment
-		 where realm_id = $1::uuid and unit_id = $2::uuid
-			and path_id = $3::uuid and fit_vote = 1`,
-		[fixture.realmId, fixture.hotUnitId, fixture.hotPathId],
-	);
-	const expectedGlobalSupport =
-		Number(requireRow(globalPositiveProfiles.rows, "Global positive profile count").count) * 16;
-	const expectedRealmSupport =
-		Number(requireRow(realmPositiveProfiles.rows, "Realm positive profile count").count) * 16;
-	if (numeric.globalSupportCount !== expectedGlobalSupport)
-		throw new Error("Global Path support cardinality diverges from positive facts times L");
-	if (numeric.realmSupportCount !== expectedRealmSupport)
-		throw new Error("Realm Path support cardinality diverges from positive facts times L");
-	return numeric;
+	const row = requireRow(result.rows, "Tag Path semantic parity");
+	const applicationCount = input.pathCount + (input.unitCount - 1) * AcceptedApplicationsPerUnit;
+	const assertionCount = input.unitCount * AcceptedApplicationsPerUnit;
+	const effectiveTagCount = input.unitCount * (AcceptedApplicationsPerUnit + 1);
+	const pathMemberCount = input.pathCount * 2 + (HotPathMemberCount - 2);
+	const expressionEffectiveTagCount = input.pathCount * 2;
+	const actual = {
+		bareRedDirectCount: Number(row.bareRedDirectCount),
+		expressionEffectiveTagCount: Number(row.expressionEffectiveTagCount),
+		globalApplicationCount: Number(row.globalApplicationCount),
+		globalAssertionCount: Number(row.globalAssertionCount),
+		globalEffectiveTagCount: Number(row.globalEffectiveTagCount),
+		hotIntermediateLeakCount: Number(row.hotIntermediateLeakCount),
+		pathMemberCount: Number(row.pathMemberCount),
+		qualifiedAssertionCount: Number(row.qualifiedAssertionCount),
+		realmApplicationCount: Number(row.realmApplicationCount),
+		realmAssertionCount: Number(row.realmAssertionCount),
+		realmEffectiveTagCount: Number(row.realmEffectiveTagCount),
+	};
+	for (const [name, value, expected] of [
+		["bare Red direct assertion", actual.bareRedDirectCount, 0],
+		["definition Effective Tags", actual.expressionEffectiveTagCount, expressionEffectiveTagCount],
+		["global Applications", actual.globalApplicationCount, applicationCount],
+		["global Expression assertions", actual.globalAssertionCount, assertionCount],
+		["global Effective Tags", actual.globalEffectiveTagCount, effectiveTagCount],
+		["Path-driven intermediate support", actual.hotIntermediateLeakCount, 0],
+		["Path members", actual.pathMemberCount, pathMemberCount],
+		["qualified Expression assertion", actual.qualifiedAssertionCount, 1],
+		["Realm Applications", actual.realmApplicationCount, applicationCount],
+		["Realm Expression assertions", actual.realmAssertionCount, assertionCount],
+		["Realm Effective Tags", actual.realmEffectiveTagCount, effectiveTagCount],
+	] as const)
+		if (value !== expected)
+			throw new Error(`${name} parity failed: expected ${expected}, received ${value}`);
+	return {
+		...actual,
+		applicationCountExpected: applicationCount,
+		assertionCountExpected: assertionCount,
+		bareRedAndQualifiedClaimRemainDistinct: true,
+		effectiveTagCountExpected: effectiveTagCount,
+		pathLengthDoesNotCreateAssertions: true,
+	};
 }
 
-async function relationStorage(client: Client) {
-	const rows = [];
+async function relationStorage(client: Client): Promise<readonly RelationStorage[]> {
+	const storage: RelationStorage[] = [];
 	for (const relation of CapacityRelations) {
-		const result = await client.query<{ readonly bytes: string; readonly rows: string }>(
-			"select pg_total_relation_size('public." +
-				relation +
-				"'::regclass)::text as bytes, count(*)::text as rows from public." +
-				relation,
+		const result = await client.query<{
+			readonly indexBytes: string;
+			readonly rowCount: string;
+			readonly totalBytes: string;
+		}>(
+			`
+			select pg_indexes_size($1::regclass)::text as "indexBytes",
+				count(*)::text as "rowCount",
+				pg_total_relation_size($1::regclass)::text as "totalBytes"
+			from public.${relation}
+		`,
+			[`public.${relation}`],
 		);
 		const row = requireRow(result.rows, "Tag Path relation storage");
-		const count = Number(row.rows);
-		const bytes = Number(row.bytes);
-		const bytesPerRow = count === 0 ? null : bytes / count;
-		rows.push({
+		const rowCount = Number(row.rowCount);
+		const totalBytes = Number(row.totalBytes);
+		const totalBytesPerRow = rowCount > 0 ? totalBytes / rowCount : 0;
+		storage.push({
+			estimated500MillionBytes: Math.ceil(totalBytesPerRow * 500_000_000),
+			estimated3BillionBytes: Math.ceil(totalBytesPerRow * 3_000_000_000),
+			indexBytes: Number(row.indexBytes),
 			relation,
-			rows: count,
-			bytes,
-			bytesPerRow: bytesPerRow === null ? null : Number(bytesPerRow.toFixed(3)),
-			estimated500MBytes: bytesPerRow === null ? null : Math.round(bytesPerRow * 500_000_000),
-			estimated3BBytes: bytesPerRow === null ? null : Math.round(bytesPerRow * 3_000_000_000),
+			rowCount,
+			totalBytes,
+			totalBytesPerRow: Number(totalBytesPerRow.toFixed(3)),
 		});
 	}
-	return rows;
+	return storage;
 }
 
 function assertAcceptedWorkload(summary: HotWriteSummary): void {
-	if (summary.deadlocks || summary.timeouts || summary.unexpected)
+	const evidence = JSON.stringify(summary);
+	if (summary.unexpected || summary.deadlocks || summary.timeouts)
 		throw new Error(
-			summary.authority +
-				" hot-key workload had an unexpected database failure: " +
-				summary.unexpectedErrors.join("; "),
+			summary.authority + " hot-write tier had unexpected terminal outcomes: " + evidence,
+		);
+	if (summary.commits < Math.floor(summary.terminalLatency.count * 0.8))
+		throw new Error(
+			summary.authority + " hot-write tier committed fewer than 80% of samples: " + evidence,
 		);
 	if (summary.throughputPerSecond < 100)
 		throw new Error(
 			summary.authority +
-				" hot-key throughput was " +
+				" hot-write throughput was " +
 				summary.throughputPerSecond +
-				" commits/s; minimum is 100",
+				" commits/s; minimum is 100: " +
+				evidence,
 		);
 	if (summary.terminalLatency.p95Milliseconds >= 150)
 		throw new Error(
 			summary.authority +
 				" terminal mutation p95 was " +
 				summary.terminalLatency.p95Milliseconds +
-				" ms; maximum is below 150 ms",
+				" ms; maximum is below 150 ms: " +
+				evidence,
 		);
-	if (summary.lockWaitP95Milliseconds >= 25)
-		throw new Error(summary.authority + " aggregate lock-wait p95 was not below 25 ms");
 	if (summary.poolUtilization >= 0.8)
-		throw new Error(summary.authority + " benchmark pool utilization was not below 80%");
+		throw new Error(
+			summary.authority + " benchmark pool utilization was not below 80%: " + evidence,
+		);
 }
 
 const unitCount = requireMinimum(
@@ -925,7 +1000,7 @@ const pathCount = requireMinimum(
 	100,
 );
 const sampleCount = readPositiveIntegerFlag(process.argv, "--samples", 256, 4_096);
-const concurrency = readPositiveIntegerFlag(process.argv, "--concurrency", 32, 128);
+const concurrency = readPositiveIntegerFlag(process.argv, "--concurrency", 6, 128);
 const poolCapacity = readPositiveIntegerFlag(process.argv, "--pool-capacity", 64, 512);
 if (concurrency >= poolCapacity * 0.8)
 	throw new RangeError("--concurrency must remain below 80% of --pool-capacity");
@@ -966,7 +1041,7 @@ try {
 	assertAcceptedWorkload(globalWrites);
 	assertAcceptedWorkload(realmWrites);
 	for (const relation of CapacityRelations) await client.query("analyze public." + relation);
-	const plans = await capturePlans(client, fixture, pathCount);
+	const plans = await capturePlans(client, fixture);
 	const parity = await verifyParity(client, fixture, { pathCount, unitCount });
 	const storage = await relationStorage(client);
 	const runtime = await client.query<{
@@ -983,18 +1058,17 @@ try {
 	console.info(
 		JSON.stringify(
 			{
-				schemaVersion: 1,
+				schemaVersion: 2,
 				fixture: {
+					acceptedApplicationsPerUnit: AcceptedApplicationsPerUnit,
+					hotPathMemberCount: HotPathMemberCount,
 					pathCount,
 					profileCount,
 					reused: reuseFixture,
 					unitCount,
 				},
 				load,
-				workloads: {
-					global: globalWrites,
-					realm: realmWrites,
-				},
+				workloads: { global: globalWrites, realm: realmWrites },
 				plans,
 				parity,
 				storage,
@@ -1006,7 +1080,11 @@ try {
 				},
 				qualification: {
 					cardinalityEvidence:
-						"Fixture proves bounded access paths; 500M/3B estimates use observed bytes/row and the accepted shard thresholds.",
+						"Fixture proves bounded routing and measures bytes/row; 500M/3B values are straight-line topology estimates, not toy-fixture latency extrapolations.",
+					corpusPlanMode:
+						"Corpus EXPLAIN transactions set enable_seqscan=off to prove index-routable topology on the deliberately small fixture; production planner settings remain unchanged.",
+					fanOut:
+						"The fixture includes a 16-member Path whose accepted source yields one Expression assertion plus only explicit Effective Tags.",
 					lockStrategy:
 						"pg_try_advisory_xact_lock returns immediate retryable backpressure, so aggregate lock wait is structurally zero.",
 					passed: true,

@@ -14,6 +14,7 @@ import type { PublicSlugAddressValue } from "@rezics/slug";
 import type { ContentRatingPolicy } from "../content-rating/policy";
 import type { SearchExpression } from "./query";
 import type { SearchKeysetPosition } from "./query";
+import type { SearchTagMatchReason } from "./tag-match-reasons";
 
 export const SearchCategories = SearchCategoryValues;
 export type { SearchCategory };
@@ -44,6 +45,10 @@ export interface SearchHit {
 					readonly cover: { readonly id: string; readonly url: string } | null;
 				};
 		  };
+	/** Semantic evidence attached only when a positive Tag filter shaped this result. */
+	tagMatches?: SearchTagMatchReason[];
+	/** Number of additional structural positions for a Tag-concept Search hit. */
+	tagOtherPositionCount?: number;
 }
 
 export interface DomainSearchRequest {

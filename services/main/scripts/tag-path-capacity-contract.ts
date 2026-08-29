@@ -14,6 +14,7 @@ export type PlanSummary = Readonly<{
 	readonly sequentialScanRelations: readonly string[];
 	readonly sorts: readonly Readonly<{
 		readonly actualRows: number;
+		readonly inputRows: number;
 		readonly method: string | null;
 	}>[];
 	readonly sharedHitBlocks: number;
@@ -62,17 +63,33 @@ export function summarizePostgreSqlPlan(plan: UnknownRecord): PlanSummary {
 	const indexNames = new Set<string>();
 	const nodeTypes = new Set<string>();
 	const sequentialScanRelations = new Set<string>();
-	const sorts: { actualRows: number; method: string | null }[] = [];
+	const sorts: { actualRows: number; inputRows: number; method: string | null }[] = [];
 	const visit = (node: UnknownRecord): void => {
 		const nodeType = node["Node Type"];
 		if (typeof nodeType === "string") {
 			nodeTypes.add(nodeType);
 			if (nodeType === "Seq Scan" && typeof node["Relation Name"] === "string")
 				sequentialScanRelations.add(node["Relation Name"]);
-			if (nodeType === "Sort")
+			if (nodeType === "Sort" || nodeType === "Incremental Sort")
 				sorts.push({
 					actualRows: optionalPlanNumber(node, "Actual Rows"),
-					method: typeof node["Sort Method"] === "string" ? node["Sort Method"] : null,
+					inputRows: Array.isArray(node.Plans)
+						? node.Plans.reduce(
+								(total, child) =>
+									total +
+									(isRecord(child)
+										? optionalPlanNumber(child, "Actual Rows") *
+											Math.max(1, optionalPlanNumber(child, "Actual Loops"))
+										: 0),
+								0,
+							)
+						: 0,
+					method:
+						typeof node["Sort Method"] === "string"
+							? node["Sort Method"]
+							: nodeType === "Incremental Sort"
+								? "incremental sort"
+								: null,
 				});
 		}
 		if (typeof node["Index Name"] === "string") indexNames.add(node["Index Name"]);
@@ -99,18 +116,28 @@ export function assertBoundedPostgreSqlPlan(input: {
 	readonly requiredIndexAlternatives?: readonly (readonly string[])[];
 	readonly corpusRelations: readonly string[];
 	readonly maximumSharedBlocks: number;
-	readonly maximumTopNSortRows?: number;
+	readonly maximumSortRows?: number;
 }): PlanSummary {
 	const summary = summarizePostgreSqlPlan(input.plan[0].Plan);
 	for (const indexName of input.requiredIndexes)
 		if (!summary.indexNames.includes(indexName))
-			throw new Error(input.name + " did not use required routing index " + indexName);
+			throw new Error(
+				input.name +
+					" did not use required routing index " +
+					indexName +
+					"; observed " +
+					JSON.stringify({ indexNames: summary.indexNames, nodeTypes: summary.nodeTypes }),
+			);
 	for (const alternatives of input.requiredIndexAlternatives ?? []) {
 		if (alternatives.length === 0)
 			throw new Error(input.name + " declared an empty routing-index alternative group");
 		if (!alternatives.some((indexName) => summary.indexNames.includes(indexName)))
 			throw new Error(
-				input.name + " did not use any accepted routing index: " + alternatives.join(", "),
+				input.name +
+					" did not use any accepted routing index: " +
+					alternatives.join(", ") +
+					"; observed " +
+					JSON.stringify({ indexNames: summary.indexNames, nodeTypes: summary.nodeTypes }),
 			);
 	}
 	const forbiddenSequentialScans = summary.sequentialScanRelations.filter((relation) =>
@@ -122,10 +149,20 @@ export function assertBoundedPostgreSqlPlan(input: {
 				" sequentially scanned corpus relation(s): " +
 				forbiddenSequentialScans.join(", "),
 		);
-	const maximumTopNSortRows = input.maximumTopNSortRows ?? 0;
+	const maximumSortRows = input.maximumSortRows ?? 0;
 	for (const sort of summary.sorts)
-		if (sort.method !== "top-N heapsort" || sort.actualRows > maximumTopNSortRows)
-			throw new Error(input.name + " used an unbounded sort (" + (sort.method ?? "unknown") + ")");
+		if (
+			sort.actualRows > maximumSortRows ||
+			(sort.method !== "top-N heapsort" && sort.inputRows > maximumSortRows)
+		)
+			throw new Error(
+				input.name +
+					" used an unbounded sort (" +
+					(sort.method ?? "unknown") +
+					", input rows " +
+					sort.inputRows +
+					")",
+			);
 	const touchedBlocks = summary.sharedHitBlocks + summary.sharedReadBlocks;
 	if (touchedBlocks > input.maximumSharedBlocks)
 		throw new Error(
@@ -145,9 +182,9 @@ export function requireDisposableTagPathDatabase(input: {
 }): string {
 	if (!input.confirmation)
 		throw new Error("Tag Path capacity work requires explicit --yes confirmation");
-	if (input.marker !== "tag-path-capacity-v1")
+	if (input.marker !== "tag-path-capacity-v2")
 		throw new Error(
-			"TAG_PATH_CAPACITY_DISPOSABLE=tag-path-capacity-v1 is required for destructive capacity work",
+			"TAG_PATH_CAPACITY_DISPOSABLE=tag-path-capacity-v2 is required for destructive capacity work",
 		);
 	if (!input.connectionString) throw new Error("DATABASE_ADMIN_URL is required");
 	const target = new URL(input.connectionString);

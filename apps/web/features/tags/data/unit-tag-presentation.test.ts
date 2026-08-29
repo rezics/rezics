@@ -1,31 +1,15 @@
 import type { GetApiUnitsByTypeByUnitIdTagsStatus200 } from "@rezics/openapi-tanstack-query";
 import { describe, expect, it } from "vitest";
 
-import { presentGlobalTags, presentRealmTagGroups } from "./unit-tag-presentation";
+import { presentRealmTagGroups } from "./unit-tag-presentation";
 
 const Timestamp = "2026-07-24T00:00:00.000Z";
 const UnitId = "019b76da-a800-7300-8000-000000000001";
 
 function landscape(): GetApiUnitsByTypeByUnitIdTagsStatus200 {
 	return {
-		paths: [],
-		totals: { paths: 0, global: 1 },
-		global: [
-			{
-				tagId: "global-tag",
-				language: "en",
-				title: "Fantasy",
-				summary: null,
-				avatar: null,
-				createdAt: Timestamp,
-				updatedAt: Timestamp,
-				pinned: false,
-				position: null,
-				score: "4",
-				voteCount: "6",
-				viewerVote: 1,
-			},
-		],
+		expressions: [],
+		totals: { expressions: 0 },
 		realms: [
 			{
 				realmId: "realm-a",
@@ -68,28 +52,6 @@ function landscape(): GetApiUnitsByTypeByUnitIdTagsStatus200 {
 }
 
 describe("Unit Tag presentation", () => {
-	it("keeps the global vote target explicit and hides signed-out vote actions", () => {
-		const [tag] = presentGlobalTags({
-			data: landscape(),
-			type: "book",
-			unitId: UnitId,
-			signedIn: false,
-		});
-		expect(tag?.vote).toEqual({
-			kind: "available",
-			target: {
-				kind: "global",
-				type: "book",
-				unitId: UnitId,
-				tagId: "global-tag",
-			},
-			score: 4,
-			voteCount: 6,
-			viewerVote: 1,
-			canVote: false,
-		});
-	});
-
 	it("keeps each Realm vote target bound to its source context", () => {
 		const [group] = presentRealmTagGroups({ data: landscape(), unitId: UnitId });
 		expect(group?.avatar).toEqual({ type: "emoji", emoji: "📚" });

@@ -2,20 +2,20 @@ import { getTableConfig, type PgTable } from "drizzle-orm/pg-core";
 import { describe, expect, it } from "vitest";
 
 import { entityMeasurement, subjectAssociationJudgment } from "./entity";
-import { tagPathVote, unitTagPathJudgment } from "./tag-path";
+import { tagPathVote, unitTagPathApplicationJudgment } from "./tag-path";
 import { realmTagJudgment, unitTagJudgment } from "./tag";
 
 const EvidenceTables = [
 	unitTagJudgment,
 	realmTagJudgment,
 	tagPathVote,
-	unitTagPathJudgment,
+	unitTagPathApplicationJudgment,
 	subjectAssociationJudgment,
 	entityMeasurement,
 ] as const;
 const ContextOwnedCascadeForeignKeys = new Set([
 	"entity_measurement_entity_id_entity_id_fk",
-	"unit_tag_path_judgment_application_fkey",
+	"unit_tag_path_application_judgment_application_id_unit_tag_path_application_id_fk",
 ]);
 
 function indexedColumnSequences(table: PgTable): readonly (readonly string[])[] {
@@ -58,8 +58,10 @@ describe("content-pack evidence retention", () => {
 			)?.onDelete,
 		).toBe("restrict");
 		expect(
-			getTableConfig(unitTagPathJudgment).foreignKeys.find(
-				(key) => key.getName() === "unit_tag_path_judgment_application_fkey",
+			getTableConfig(unitTagPathApplicationJudgment).foreignKeys.find(
+				(key) =>
+					key.getName() ===
+					"unit_tag_path_application_judgment_application_id_unit_tag_path_application_id_fk",
 			)?.onDelete,
 		).toBe("cascade");
 	});

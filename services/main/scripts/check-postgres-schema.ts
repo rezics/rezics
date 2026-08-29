@@ -25,22 +25,6 @@ import {
 
 type Definition = { readonly key: string; readonly definition: string };
 
-const RemovedTagStructureObjectNames = [
-	"maintain_unit_tag_vote_stat",
-	"realm_structure",
-	"realm_structure_vote",
-	"tag_primary_display_path",
-	"unit_structure",
-	"unit_structure_application",
-	"unit_structure_application_vote",
-	"unit_structure_application_vote_stat",
-	"unit_structure_edge",
-	"unit_structure_member",
-	"unit_structure_vote",
-	"unit_structure_vote_stat",
-	"unit_tag_structure_support",
-] as const;
-
 async function readFunctionDefinitions(client: Client): Promise<readonly Definition[]> {
 	const result = await client.query<Definition>(
 		`select procedure.proname as key, pg_get_functiondef(procedure.oid) as definition
@@ -118,30 +102,6 @@ function assertDefinitionsEqual(
 			throw new Error(`Migration replay diverges from canonical PostgreSQL ${kind} ${key}`);
 }
 
-async function assertRemovedTagStructureObjectsAbsent(client: Client): Promise<void> {
-	const result = await client.query<{ readonly kind: string; readonly name: string }>(
-		`select 'relation'::text as kind, relation.relname as name
-		 from pg_catalog.pg_class relation
-		 join pg_catalog.pg_namespace namespace on namespace.oid = relation.relnamespace
-		 where namespace.nspname = 'public'
-		   and relation.relname = any($1::text[])
-		 union all
-		 select 'function'::text, procedure.proname
-		 from pg_catalog.pg_proc procedure
-		 join pg_catalog.pg_namespace namespace on namespace.oid = procedure.pronamespace
-		 where namespace.nspname = 'public'
-		   and procedure.proname = any($1::text[])
-		 order by kind, name`,
-		[[...RemovedTagStructureObjectNames]],
-	);
-	if (result.rows.length > 0)
-		throw new Error(
-			`Removed Tag Structure database objects remain: ${result.rows
-				.map(({ kind, name }) => `${kind}:${name}`)
-				.join(", ")}`,
-		);
-}
-
 async function main(): Promise<void> {
 	const schemaDirectory = new URL("../src/services/database/schema/postgres/", import.meta.url);
 	const actualFileNames = (await readdir(schemaDirectory, { withFileTypes: true }))
@@ -163,7 +123,6 @@ async function main(): Promise<void> {
 	const client = new Client({ connectionString: adminDatabaseUrl });
 	await client.connect();
 	try {
-		await assertRemovedTagStructureObjectsAbsent(client);
 		const expectedTriggers = PostgreSqlSchemaTriggers.map(({ table, name }) => `${table}.${name}`);
 		const functionsBefore = await readFunctionDefinitions(client);
 		const triggersBefore = await readTriggerDefinitions(client);

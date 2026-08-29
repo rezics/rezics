@@ -1,87 +1,121 @@
-import { StatusCodes } from "http-status-codes";
 import { eq } from "drizzle-orm";
-import Elysia, { t } from "elysia";
+import Elysia from "elysia";
+import { StatusCodes } from "http-status-codes";
 
 import session, { resolveIdentity } from "../../auth/session";
 import { database } from "../../database";
 import { realm } from "../../database/schema";
+import {
+	createTagExpression,
+	createTagExpressionInferenceRule,
+	listTagConceptExpressions,
+	retireTagExpressionInferenceRule,
+} from "../../tag-expressions/service";
+import {
+	adoptRealmTagPath,
+	adoptRealmTagPathSense,
+	applyRealmTagPath,
+	applyTagPath,
+	clearRealmTagPathApplicationJudgment,
+	clearTagPathApplicationJudgment,
+	createTagPath,
+	createTagPathSense,
+	createTagRelation,
+	deleteRealmTagPathVote,
+	deleteTagPathVote,
+	getTagHierarchy,
+	getTagPath,
+	judgeRealmTagPathApplication,
+	judgeTagPathApplication,
+	listPendingTagPathMerges,
+	listAcceptedTagPathsContaining,
+	listRealmTagPaths,
+	listTagPathDefinitionWarnings,
+	proposeTagPathMerge,
+	removeRealmTagPathApplication,
+	removeTagPathApplication,
+	resolveTagPathMerge,
+	retireTagPathSense,
+	searchTagPathsForCuration,
+	suggestTagExpressions,
+	updateRealmTagPathFallbackPolicy,
+	voteRealmTagPath,
+	voteTagPath,
+} from "../../tag-paths/service";
 import {
 	deleteRealmTagSubscription,
 	getUnitTagLandscape,
 	listRealmTagSubscriptions,
 	upsertRealmTagSubscription,
 } from "../../tags/service";
-import {
-	applyTagPath,
-	applyRealmTagPath,
-	adoptRealmTagPath,
-	clearRealmTagPathApplicationJudgment,
-	createTagPath,
-	clearTagPathApplicationJudgment,
-	deleteTagPathVote,
-	deleteRealmTagPathVote,
-	getTagHierarchy,
-	getTagPath,
-	listTagPathDefinitionWarnings,
-	listRankedTagPathsEndingAt,
-	listPendingTagPathMerges,
-	listRealmTagPaths,
-	proposeTagPathMerge,
-	removeTagPathApplication,
-	removeRealmTagPathApplication,
-	resolveTagPathMerge,
-	suggestTags,
-	searchTagPathsForCuration,
-	judgeRealmTagPathApplication,
-	updateRealmTagPathFallbackPolicy,
-	voteRealmTagPath,
-	voteTagPath,
-	judgeTagPathApplication,
-} from "../../tag-paths/service";
 import { UnitNotFound } from "../../units/errors";
-import { checkUnitType } from "../unit-resources/service";
+import { ValidationError } from "../errors";
 import { RealmNotFound } from "../realms/errors";
 import { toApiErrorResponse, VoteBackpressureResponse } from "../schema/response";
+import { checkUnitType } from "../unit-resources/service";
 import {
+	ApplyTagPathBody,
+	CreateTagExpressionBody,
+	CreateTagExpressionInferenceRuleBody,
+	CreateTagExpressionInferenceRuleResponse,
+	CreateTagExpressionResponse,
+	CreateTagPathBody,
+	CreateTagPathMergeBody,
+	CreateTagPathResponse,
+	CreateTagPathSenseBody,
+	CreateTagPathSenseResponse,
+	CreateTagRelationBody,
+	CreateTagRelationResponse,
+	ListPendingTagPathMergesQuery,
+	ListRealmTagPathsQuery,
+	PendingTagPathMergeListResponse,
+	RealmApplyTagPathParams,
+	RealmTagPathAdoptionResponse,
+	RealmTagPathApplicationJudgmentResponse,
+	RealmTagPathApplicationParams,
+	RealmTagPathApplicationRemovalResponse,
+	RealmTagPathApplicationResponse,
+	RealmTagPathFallbackBody,
+	RealmTagPathFallbackResponse,
+	RealmTagPathListResponse,
+	RealmTagPathParams,
+	RealmTagPathSenseAdoptionResponse,
+	RealmTagPathSenseParams,
+	RealmTagPathVoteResponse,
 	RealmTagSubscriptionListQuery,
 	RealmTagSubscriptionListResponse,
 	RealmTagSubscriptionParams,
 	RealmTagSubscriptionResponse,
 	RealmTagSubscriptionStateResponse,
-	ListPendingTagPathMergesQuery,
-	ListRealmTagPathsQuery,
-	PendingTagPathMergeListResponse,
-	RealmTagPathFallbackBody,
-	RealmTagPathFallbackResponse,
-	RealmTagPathJudgmentBody,
-	RealmTagPathListResponse,
-	RealmTagPathMutationResponse,
-	RealmTagPathParams,
-	RealmUnitTagPathMutationResponse,
-	RealmUnitTagPathParams,
-	CreateTagPathBody,
-	CreateTagPathMergeBody,
-	CreateTagPathResponse,
-	TagPathDefinitionWarningsBody,
-	TagPathDefinitionWarningsResponse,
-	TagEndingPathsQuery,
-	TagEndingPathsResponse,
+	RetireTagExpressionInferenceRuleResponse,
+	RetireTagPathSenseResponse,
+	ResolveTagPathMergeBody,
+	TagConceptExpressionsQuery,
+	TagConceptExpressionsResponse,
+	TagExpressionParams,
+	TagExpressionInferenceRuleParams,
 	TagHierarchyQuery,
 	TagHierarchyResponse,
 	TagIdParams,
-	TagPathApplicationResponse,
 	TagPathApplicationJudgmentBody,
+	TagPathApplicationJudgmentResponse,
+	TagPathApplicationParams,
+	TagPathApplicationRemovalResponse,
+	TagPathApplicationResponse,
 	TagPathCurationSearchQuery,
 	TagPathCurationSearchResponse,
+	TagPathDefinitionWarningsBody,
+	TagPathDefinitionWarningsResponse,
 	TagPathMergeParams,
 	TagPathMergeResponse,
 	TagPathParams,
 	TagPathQuery,
 	TagPathResponse,
+	TagPathSenseParams,
+	TagPathsContainingQuery,
+	TagPathsContainingResponse,
 	TagSuggestionQuery,
 	TagSuggestionResponse,
-	ResolveTagPathMergeBody,
-	UnitTagPathParams,
 	UnitTagLandscapeParams,
 	UnitTagLandscapeQuery,
 	UnitTagLandscapeResponse,
@@ -90,6 +124,11 @@ import {
 	VoteSummaryResponse,
 } from "./schema";
 
+function asValidationError(error: unknown, field: string): never {
+	if (error instanceof TypeError) throw new ValidationError({ [field]: error.message });
+	throw error;
+}
+
 export default new Elysia()
 	.use(session)
 	.group("/tags", (app) =>
@@ -97,33 +136,46 @@ export default new Elysia()
 			.get(
 				"/suggestions",
 				async ({ query }) => ({
-					items: await suggestTags({
+					items: await suggestTagExpressions({
 						query: query.q,
 						localizationLanguages: query.localizationLanguages,
+						realmId: query.realmId,
 						limit: query.limit ?? 10,
 					}),
 				}),
 				{
 					query: TagSuggestionQuery,
 					response: { [StatusCodes.OK]: TagSuggestionResponse },
+					detail: { summary: "Suggest explicit Tag Expressions and Path Senses", tags: ["Tags"] },
+				},
+			)
+			.get(
+				"/:tagId/expressions",
+				({ params, query }) =>
+					listTagConceptExpressions({
+						tagId: params.tagId,
+						localizationLanguages: query.localizationLanguages,
+						limit: query.limit ?? 30,
+					}),
+				{
+					params: TagIdParams,
+					query: TagConceptExpressionsQuery,
+					response: { [StatusCodes.OK]: TagConceptExpressionsResponse },
 					detail: {
-						summary: "Suggest terminal Tags from a compound Tag query",
+						summary: "List direct, qualified, and inferred Expression uses of a Tag",
 						tags: ["Tags"],
 					},
 				},
 			)
 			.get(
 				"/:tagId/hierarchy",
-				async ({ params, query, request }) => {
-					const identity = await resolveIdentity(request, "unit:read");
-					return getTagHierarchy({
+				({ params, query }) =>
+					getTagHierarchy({
 						tagId: params.tagId,
-						authorization: identity.authorization.unit,
 						localizationLanguages: query.localizationLanguages,
 						childLimit: query.childLimit ?? 30,
 						grandchildLimit: query.grandchildLimit ?? 12,
-					});
-				},
+					}),
 				{
 					params: TagIdParams,
 					query: TagHierarchyQuery,
@@ -131,28 +183,111 @@ export default new Elysia()
 						[StatusCodes.OK]: TagHierarchyResponse,
 						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["TagNotFound"]),
 					},
-					detail: {
-						summary: "Get a Tag with direct children and grandchildren",
-						tags: ["Tags"],
-					},
+					detail: { summary: "Get typed child relations for a Tag", tags: ["Tags"] },
 				},
 			)
 			.get(
 				"/:tagId/paths",
-				async ({ params, query }) => ({
-					items: await listRankedTagPathsEndingAt({
+				async ({ params, query }) =>
+					listAcceptedTagPathsContaining({
 						tagId: params.tagId,
 						localizationLanguages: query.localizationLanguages,
-						limit: query.limit ?? 5,
+						limit: query.limit ?? 20,
+						cursor: query.cursor,
 					}),
-				}),
 				{
 					params: TagIdParams,
-					query: TagEndingPathsQuery,
-					response: { [StatusCodes.OK]: TagEndingPathsResponse },
-					detail: { summary: "List accepted Tag Paths ending at a Tag", tags: ["Tags"] },
+					query: TagPathsContainingQuery,
+					response: { [StatusCodes.OK]: TagPathsContainingResponse },
+					detail: { summary: "List accepted structural Paths containing a Tag", tags: ["Tags"] },
 				},
 			),
+	)
+	.group("/tag-expressions", (app) =>
+		app
+			.post(
+				"",
+				async ({ authorization, body, profile }) => {
+					await authorization.platform.ensureCapability("unit.merge.propose");
+					try {
+						return await createTagExpression({ ...body, profileId: profile.unitId });
+					} catch (error) {
+						return asValidationError(error, "expression");
+					}
+				},
+				{
+					access: "session-only",
+					body: CreateTagExpressionBody,
+					response: {
+						[StatusCodes.OK]: CreateTagExpressionResponse,
+						[StatusCodes.FORBIDDEN]: toApiErrorResponse(["PlatformCapabilityRequired"]),
+						[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["ValidationError"]),
+					},
+					detail: { summary: "Create an immutable Tag Expression", tags: ["Tags"] },
+				},
+			)
+			.post(
+				"/:expressionId/inference-rules",
+				async ({ authorization, body, params, profile }) => {
+					await authorization.platform.ensureCapability("unit.merge.propose");
+					try {
+						return await createTagExpressionInferenceRule({
+							...body,
+							sourceExpressionId: params.expressionId,
+							profileId: profile.unitId,
+						});
+					} catch (error) {
+						return asValidationError(error, "inferenceRule");
+					}
+				},
+				{
+					access: "session-only",
+					params: TagExpressionParams,
+					body: CreateTagExpressionInferenceRuleBody,
+					response: {
+						[StatusCodes.OK]: CreateTagExpressionInferenceRuleResponse,
+						[StatusCodes.FORBIDDEN]: toApiErrorResponse(["PlatformCapabilityRequired"]),
+						[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["ValidationError"]),
+					},
+					detail: { summary: "Add a governed Tag Expression inference rule", tags: ["Tags"] },
+				},
+			)
+			.delete(
+				"/:expressionId/inference-rules/:ruleId",
+				async ({ authorization, params }) => {
+					await authorization.platform.ensureCapability("unit.merge.propose");
+					try {
+						return await retireTagExpressionInferenceRule({
+							sourceExpressionId: params.expressionId,
+							ruleId: params.ruleId,
+						});
+					} catch (error) {
+						return asValidationError(error, "inferenceRule");
+					}
+				},
+				{
+					access: "session-only",
+					params: TagExpressionInferenceRuleParams,
+					response: {
+						[StatusCodes.OK]: RetireTagExpressionInferenceRuleResponse,
+						[StatusCodes.FORBIDDEN]: toApiErrorResponse(["PlatformCapabilityRequired"]),
+						[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["ValidationError"]),
+					},
+					detail: { summary: "Retire a Tag Expression inference-rule revision", tags: ["Tags"] },
+				},
+			),
+	)
+	.group("/tag-relations", (app) =>
+		app.post("", ({ body, profile }) => createTagRelation({ ...body, profileId: profile.unitId }), {
+			access: "contribute:unit:create",
+			body: CreateTagRelationBody,
+			response: {
+				[StatusCodes.OK]: CreateTagRelationResponse,
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["TagNotFound"]),
+				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["InvalidTagPath"]),
+			},
+			detail: { summary: "Create or find a typed vocabulary relation", tags: ["Tags"] },
+		}),
 	)
 	.group("/tag-paths", (app) =>
 		app
@@ -160,7 +295,8 @@ export default new Elysia()
 				"/definition-warnings",
 				async ({ body }) => ({
 					items: await listTagPathDefinitionWarnings({
-						memberTagIds: body.memberTagIds,
+						memberNodeIds: body.memberNodeIds,
+						relationIds: body.relationIds,
 						localizationLanguages: body.localizationLanguages,
 						limit: body.limit ?? 10,
 					}),
@@ -172,10 +308,24 @@ export default new Elysia()
 						[StatusCodes.OK]: TagPathDefinitionWarningsResponse,
 						[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["InvalidTagPath"]),
 					},
-					detail: {
-						summary: "List related accepted definitions before creating a Tag Path",
-						tags: ["Tags"],
+					detail: { summary: "Check related structural Path definitions", tags: ["Tags"] },
+				},
+			)
+			.delete(
+				"/:pathId/senses/:senseId",
+				async ({ authorization, params }) => {
+					await authorization.platform.ensureCapability("unit.merge.propose");
+					return retireTagPathSense(params);
+				},
+				{
+					access: "session-only",
+					params: TagPathSenseParams,
+					response: {
+						[StatusCodes.OK]: RetireTagPathSenseResponse,
+						[StatusCodes.FORBIDDEN]: toApiErrorResponse(["PlatformCapabilityRequired"]),
+						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["TagPathNotFound"]),
 					},
+					detail: { summary: "Retire an immutable Path Sense", tags: ["Tags"] },
 				},
 			)
 			.get(
@@ -191,17 +341,17 @@ export default new Elysia()
 					access: "session-only",
 					query: TagPathCurationSearchQuery,
 					response: { [StatusCodes.OK]: TagPathCurationSearchResponse },
-					detail: { summary: "Search accepted Tag Paths for curation", tags: ["Tags"] },
+					detail: { summary: "Search explicit Path Senses for curation", tags: ["Tags"] },
 				},
 			)
 			.post(
 				"",
-				async ({ body, profile }) => {
-					return createTagPath({
-						memberTagIds: body.memberTagIds,
+				({ body, profile }) =>
+					createTagPath({
+						memberNodeIds: body.memberNodeIds,
+						relationIds: body.relationIds,
 						profileId: profile.unitId,
-					});
-				},
+					}),
 				{
 					access: "contribute:unit:create",
 					body: CreateTagPathBody,
@@ -211,10 +361,7 @@ export default new Elysia()
 						[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["InvalidTagPath"]),
 						[StatusCodes.TOO_MANY_REQUESTS]: VoteBackpressureResponse,
 					},
-					detail: {
-						summary: "Create or find and upvote an immutable Tag Path",
-						tags: ["Tags"],
-					},
+					detail: { summary: "Create or find an immutable structural Tag Path", tags: ["Tags"] },
 				},
 			)
 			.get(
@@ -234,18 +381,36 @@ export default new Elysia()
 						[StatusCodes.OK]: TagPathResponse,
 						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["TagPathNotFound"]),
 					},
-					detail: { summary: "Get a Tag Path", tags: ["Tags"] },
+					detail: { summary: "Get Path structure and explicit Senses", tags: ["Tags"] },
+				},
+			)
+			.post(
+				"/:pathId/senses",
+				async ({ authorization, body, params, profile }) => {
+					await authorization.platform.ensureCapability("unit.merge.propose");
+					return createTagPathSense({
+						...body,
+						pathId: params.pathId,
+						profileId: profile.unitId,
+					});
+				},
+				{
+					access: "session-only",
+					params: TagPathParams,
+					body: CreateTagPathSenseBody,
+					response: {
+						[StatusCodes.OK]: CreateTagPathSenseResponse,
+						[StatusCodes.FORBIDDEN]: toApiErrorResponse(["PlatformCapabilityRequired"]),
+						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["TagPathNotFound"]),
+						[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["InvalidTagPath"]),
+					},
+					detail: { summary: "Create an explicit Path Sense", tags: ["Tags"] },
 				},
 			)
 			.put(
 				"/:pathId/vote",
-				async ({ params, body, profile }) => {
-					return voteTagPath({
-						pathId: params.pathId,
-						profileId: profile.unitId,
-						value: body.value,
-					});
-				},
+				({ body, params, profile }) =>
+					voteTagPath({ pathId: params.pathId, profileId: profile.unitId, value: body.value }),
 				{
 					access: "contribute:interaction:write",
 					params: TagPathParams,
@@ -255,33 +420,33 @@ export default new Elysia()
 						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["TagPathNotFound"]),
 						[StatusCodes.TOO_MANY_REQUESTS]: VoteBackpressureResponse,
 					},
-					detail: { summary: "Vote on a Tag Path definition", tags: ["Tags"] },
+					detail: { summary: "Vote on structural Path validity", tags: ["Tags"] },
 				},
 			)
 			.delete(
 				"/:pathId/vote",
-				async ({ params, profile }) => {
-					return deleteTagPathVote({
-						pathId: params.pathId,
-						profileId: profile.unitId,
-					});
-				},
+				({ params, profile }) =>
+					deleteTagPathVote({ pathId: params.pathId, profileId: profile.unitId }),
 				{
 					access: "write:interaction:write",
 					params: TagPathParams,
-					response: {
-						[StatusCodes.OK]: VoteSummaryResponse,
-						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["TagPathNotFound"]),
-						[StatusCodes.TOO_MANY_REQUESTS]: VoteBackpressureResponse,
-					},
-					detail: { summary: "Remove a Tag Path definition vote", tags: ["Tags"] },
+					response: { [StatusCodes.OK]: VoteSummaryResponse },
+					detail: { summary: "Remove a structural Path vote", tags: ["Tags"] },
 				},
 			)
 			.post(
 				"/merges",
 				async ({ authorization, body, profile }) => {
 					await authorization.platform.ensureCapability("unit.merge.propose");
-					return proposeTagPathMerge({ ...body, profileId: profile.unitId });
+					return proposeTagPathMerge({
+						sourcePathId: body.sourcePathId,
+						targetPathId: body.targetPathId,
+						reason: body.reason,
+						proposalSourceKind: body.proposalSource.kind,
+						proposalProvenance:
+							body.proposalSource.kind === "assisted" ? body.proposalSource : undefined,
+						profileId: profile.unitId,
+					});
 				},
 				{
 					access: "session-only",
@@ -292,17 +457,19 @@ export default new Elysia()
 						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["TagPathNotFound"]),
 						[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["InvalidTagPathMerge"]),
 					},
-					detail: { summary: "Propose a manually governed Tag Path merge", tags: ["Tags"] },
+					detail: { summary: "Propose a governed structural Path merge", tags: ["Tags"] },
 				},
 			)
 			.get(
 				"/merges/pending",
 				async ({ authorization, query }) => {
 					await authorization.platform.ensureCapability("unit.merge.review");
-					return listPendingTagPathMerges({
-						localizationLanguages: query.localizationLanguages,
-						limit: query.limit ?? 50,
-					});
+					return {
+						items: await listPendingTagPathMerges({
+							localizationLanguages: query.localizationLanguages,
+							limit: query.limit ?? 50,
+						}),
+					};
 				},
 				{
 					access: "session-only",
@@ -311,10 +478,7 @@ export default new Elysia()
 						[StatusCodes.OK]: PendingTagPathMergeListResponse,
 						[StatusCodes.FORBIDDEN]: toApiErrorResponse(["PlatformCapabilityRequired"]),
 					},
-					detail: {
-						summary: "List pending manual Tag Path merge proposals",
-						tags: ["Tags"],
-					},
+					detail: { summary: "List pending structural Path merge proposals", tags: ["Tags"] },
 				},
 			)
 			.put(
@@ -323,7 +487,7 @@ export default new Elysia()
 					await authorization.platform.ensureCapability("unit.merge.review");
 					return resolveTagPathMerge({
 						mergeId: params.mergeId,
-						resolution: body.resolution,
+						status: body.status,
 						profileId: profile.unitId,
 					});
 				},
@@ -335,9 +499,8 @@ export default new Elysia()
 						[StatusCodes.OK]: TagPathMergeResponse,
 						[StatusCodes.FORBIDDEN]: toApiErrorResponse(["PlatformCapabilityRequired"]),
 						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["TagPathMergeNotFound"]),
-						[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["InvalidTagPathMerge"]),
 					},
-					detail: { summary: "Resolve a Tag Path merge proposal", tags: ["Tags"] },
+					detail: { summary: "Resolve a structural Path merge proposal", tags: ["Tags"] },
 				},
 			),
 	)
@@ -353,9 +516,8 @@ export default new Elysia()
 						unitId: params.unitId,
 						viewerProfileId: identity.profile?.unitId,
 						localizationLanguages: query.localizationLanguages,
-						globalLimit: query.globalLimit ?? 50,
-						includePaths: true,
-						pathLimit: query.pathLimit ?? 20,
+						includeExpressions: query.includeExpressions ?? true,
+						expressionLimit: query.expressionLimit ?? 50,
 						sourceLimit: query.sourceLimit ?? 10,
 						perRealmLimit: query.perRealmLimit ?? 12,
 					});
@@ -367,73 +529,17 @@ export default new Elysia()
 						[StatusCodes.OK]: UnitTagLandscapeResponse,
 						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
 					},
-					detail: {
-						summary: "Get global and subscribed Realm Tag assertions for a Unit",
-						tags: ["Tags"],
-					},
+					detail: { summary: "Get visible Tag Expressions grouped by authority", tags: ["Tags"] },
 				},
 			)
-			.put(
-				"/:type/:unitId/tag-paths/:pathId",
-				async ({ params, profile, authorization }) => {
+			.post(
+				"/:type/:unitId/tag-path-applications",
+				async ({ authorization, body, params, profile }) => {
 					await checkUnitType(params.unitId, params.type);
 					await authorization.unit.ensureCanRead(params.unitId);
 					return applyTagPath({
 						unitId: params.unitId,
-						pathId: params.pathId,
-						profileId: profile.unitId,
-					});
-				},
-				{
-					access: "contribute:interaction:write",
-					params: UnitTagPathParams,
-					response: {
-						[StatusCodes.OK]: TagPathApplicationResponse,
-						[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["InvalidTagPath"]),
-						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "TagPathNotFound"]),
-						[StatusCodes.TOO_MANY_REQUESTS]: VoteBackpressureResponse,
-					},
-					detail: { summary: "Apply a Tag Path to a Unit", tags: ["Tags"] },
-				},
-			)
-			.delete(
-				"/:type/:unitId/tag-paths/:pathId",
-				async ({ params, profile, authorization }) => {
-					await checkUnitType(params.unitId, params.type);
-					await authorization.unit.ensure(params.unitId, "unit.tag-curation.manage");
-					await removeTagPathApplication({
-						unitId: params.unitId,
-						pathId: params.pathId,
-						profileId: profile.unitId,
-					});
-					return new Response(null, { status: StatusCodes.NO_CONTENT });
-				},
-				{
-					access: "write:unit:update",
-					params: UnitTagPathParams,
-					response: {
-						[StatusCodes.NO_CONTENT]: t.Void(),
-						[StatusCodes.FORBIDDEN]: toApiErrorResponse([
-							"UnitPermissionForbidden",
-							"UnitAccessRestricted",
-						]),
-						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
-							"UnitNotFound",
-							"TagPathApplicationNotFound",
-						]),
-						[StatusCodes.TOO_MANY_REQUESTS]: VoteBackpressureResponse,
-					},
-					detail: { summary: "Remove a Tag Path from a Unit", tags: ["Tags"] },
-				},
-			)
-			.put(
-				"/:type/:unitId/tag-paths/:pathId/judgment",
-				async ({ params, body, profile, authorization }) => {
-					await checkUnitType(params.unitId, params.type);
-					await authorization.unit.ensureCanRead(params.unitId);
-					return judgeTagPathApplication({
-						unitId: params.unitId,
-						pathId: params.pathId,
+						senseId: body.senseId,
 						profileId: profile.unitId,
 						fitVote: body.fitVote,
 						spoilerLevel: body.spoilerLevel,
@@ -441,43 +547,79 @@ export default new Elysia()
 				},
 				{
 					access: "contribute:interaction:write",
-					params: UnitTagPathParams,
-					body: TagPathApplicationJudgmentBody,
+					params: UnitTagLandscapeParams,
+					body: ApplyTagPathBody,
 					response: {
 						[StatusCodes.OK]: TagPathApplicationResponse,
-						[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["InvalidTagPath"]),
-						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
-							"UnitNotFound",
-							"TagPathApplicationNotFound",
-						]),
+						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "TagPathNotFound"]),
 						[StatusCodes.TOO_MANY_REQUESTS]: VoteBackpressureResponse,
 					},
-					detail: { summary: "Judge Tag Path fit or spoiler for a Unit", tags: ["Tags"] },
+					detail: { summary: "Apply one explicit global Path Sense", tags: ["Tags"] },
 				},
 			)
 			.delete(
-				"/:type/:unitId/tag-paths/:pathId/judgment",
-				async ({ params, profile, authorization }) => {
+				"/:type/:unitId/tag-path-applications/:applicationId",
+				async ({ authorization, params }) => {
+					await checkUnitType(params.unitId, params.type);
+					await authorization.unit.ensure(params.unitId, "unit.tag-curation.manage");
+					return removeTagPathApplication({
+						unitId: params.unitId,
+						applicationId: params.applicationId,
+					});
+				},
+				{
+					access: "write:unit:update",
+					params: TagPathApplicationParams,
+					response: {
+						[StatusCodes.OK]: TagPathApplicationRemovalResponse,
+						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["TagPathApplicationNotFound"]),
+					},
+					detail: { summary: "Remove one global Path Application", tags: ["Tags"] },
+				},
+			)
+			.put(
+				"/:type/:unitId/tag-path-applications/:applicationId/judgment",
+				async ({ authorization, body, params, profile }) => {
+					await checkUnitType(params.unitId, params.type);
+					await authorization.unit.ensureCanRead(params.unitId);
+					return judgeTagPathApplication({
+						applicationId: params.applicationId,
+						unitId: params.unitId,
+						profileId: profile.unitId,
+						...body,
+					});
+				},
+				{
+					access: "contribute:interaction:write",
+					params: TagPathApplicationParams,
+					body: TagPathApplicationJudgmentBody,
+					response: {
+						[StatusCodes.OK]: TagPathApplicationJudgmentResponse,
+						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["TagPathApplicationNotFound"]),
+						[StatusCodes.TOO_MANY_REQUESTS]: VoteBackpressureResponse,
+					},
+					detail: { summary: "Judge one global semantic Application", tags: ["Tags"] },
+				},
+			)
+			.delete(
+				"/:type/:unitId/tag-path-applications/:applicationId/judgment",
+				async ({ authorization, params, profile }) => {
 					await checkUnitType(params.unitId, params.type);
 					await authorization.unit.ensureCanRead(params.unitId);
 					return clearTagPathApplicationJudgment({
+						applicationId: params.applicationId,
 						unitId: params.unitId,
-						pathId: params.pathId,
 						profileId: profile.unitId,
 					});
 				},
 				{
 					access: "write:interaction:write",
-					params: UnitTagPathParams,
+					params: TagPathApplicationParams,
 					response: {
-						[StatusCodes.OK]: TagPathApplicationResponse,
-						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
-							"UnitNotFound",
-							"TagPathApplicationNotFound",
-						]),
-						[StatusCodes.TOO_MANY_REQUESTS]: VoteBackpressureResponse,
+						[StatusCodes.OK]: TagPathApplicationJudgmentResponse,
+						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["TagPathApplicationNotFound"]),
 					},
-					detail: { summary: "Remove a Unit Tag Path judgment", tags: ["Tags"] },
+					detail: { summary: "Clear one global Application judgment", tags: ["Tags"] },
 				},
 			),
 	)
@@ -491,11 +633,8 @@ export default new Elysia()
 						params.realmId,
 						() => new RealmNotFound(),
 					);
-					if (query.unitId)
-						await identity.authorization.unit.ensureCanRead(query.unitId, () => new UnitNotFound());
 					return listRealmTagPaths({
 						realmId: params.realmId,
-						unitId: query.unitId,
 						viewerProfileId: identity.profile?.unitId,
 						localizationLanguages: query.localizationLanguages,
 						limit: query.limit ?? 50,
@@ -506,17 +645,14 @@ export default new Elysia()
 					query: ListRealmTagPathsQuery,
 					response: {
 						[StatusCodes.OK]: RealmTagPathListResponse,
-						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["RealmNotFound", "UnitNotFound"]),
+						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["RealmNotFound"]),
 					},
-					detail: {
-						summary: "List Realm Tag Paths with independent authority resolution",
-						tags: ["Realms", "Tags"],
-					},
+					detail: { summary: "List structural Paths adopted by a Realm", tags: ["Realms", "Tags"] },
 				},
 			)
 			.put(
 				"/:realmId/tag-paths/:pathId",
-				async ({ params, profile, authorization }) => {
+				async ({ authorization, params, profile }) => {
 					await authorization.realm.ensureCapability(params.realmId, "realm.tags.manage");
 					return adoptRealmTagPath({ ...params, profileId: profile.unitId });
 				},
@@ -524,155 +660,125 @@ export default new Elysia()
 					access: "session-only",
 					params: RealmTagPathParams,
 					response: {
-						[StatusCodes.OK]: RealmTagPathMutationResponse,
+						[StatusCodes.OK]: RealmTagPathAdoptionResponse,
 						[StatusCodes.FORBIDDEN]: toApiErrorResponse(["RealmCapabilityRequired"]),
 						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["TagPathNotFound"]),
-						[StatusCodes.TOO_MANY_REQUESTS]: VoteBackpressureResponse,
 					},
-					detail: { summary: "Adopt a Tag Path in a Realm", tags: ["Realms", "Tags"] },
+					detail: {
+						summary: "Adopt structural Path identity in a Realm",
+						tags: ["Realms", "Tags"],
+					},
+				},
+			)
+			.put(
+				"/:realmId/tag-path-senses/:senseId",
+				async ({ authorization, params, profile }) => {
+					await authorization.realm.ensureCapability(params.realmId, "realm.tags.manage");
+					return adoptRealmTagPathSense({ ...params, profileId: profile.unitId });
+				},
+				{
+					access: "session-only",
+					params: RealmTagPathSenseParams,
+					response: {
+						[StatusCodes.OK]: RealmTagPathSenseAdoptionResponse,
+						[StatusCodes.FORBIDDEN]: toApiErrorResponse(["RealmCapabilityRequired"]),
+						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["TagPathNotFound"]),
+					},
+					detail: { summary: "Adopt an explicit Path Sense in a Realm", tags: ["Realms", "Tags"] },
 				},
 			)
 			.put(
 				"/:realmId/tag-paths/:pathId/vote",
-				async ({ params, body, profile, authorization }) => {
+				async ({ authorization, body, params, profile }) => {
 					await authorization.realm.ensureParticipation(params.realmId);
-					return voteRealmTagPath({
-						...params,
-						profileId: profile.unitId,
-						value: body.value,
-					});
+					return voteRealmTagPath({ ...params, profileId: profile.unitId, value: body.value });
 				},
 				{
 					access: "contribute:interaction:write",
 					params: RealmTagPathParams,
 					body: VoteBody,
-					response: {
-						[StatusCodes.OK]: RealmTagPathMutationResponse,
-						[StatusCodes.FORBIDDEN]: toApiErrorResponse(["RealmCapabilityRequired"]),
-						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["TagPathNotFound"]),
-						[StatusCodes.TOO_MANY_REQUESTS]: VoteBackpressureResponse,
-					},
-					detail: {
-						summary: "Vote on a Realm Tag Path definition",
-						tags: ["Realms", "Tags"],
-					},
+					response: { [StatusCodes.OK]: RealmTagPathVoteResponse },
+					detail: { summary: "Vote on Realm-local structural validity", tags: ["Realms", "Tags"] },
 				},
 			)
 			.delete(
 				"/:realmId/tag-paths/:pathId/vote",
-				async ({ params, profile, authorization }) => {
+				async ({ authorization, params, profile }) => {
 					await authorization.realm.ensureParticipation(params.realmId);
-					return deleteRealmTagPathVote({
-						...params,
-						profileId: profile.unitId,
-					});
+					return deleteRealmTagPathVote({ ...params, profileId: profile.unitId });
 				},
 				{
 					access: "write:interaction:write",
 					params: RealmTagPathParams,
-					response: {
-						[StatusCodes.OK]: RealmTagPathMutationResponse,
-						[StatusCodes.FORBIDDEN]: toApiErrorResponse(["RealmCapabilityRequired"]),
-						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["TagPathNotFound"]),
-						[StatusCodes.TOO_MANY_REQUESTS]: VoteBackpressureResponse,
-					},
-					detail: {
-						summary: "Remove a Realm Tag Path definition vote",
-						tags: ["Realms", "Tags"],
-					},
+					response: { [StatusCodes.OK]: RealmTagPathVoteResponse },
+					detail: { summary: "Remove a Realm-local structural vote", tags: ["Realms", "Tags"] },
 				},
 			)
-			.put(
-				"/:realmId/units/:unitId/tag-paths/:pathId",
-				async ({ params, profile, authorization }) => {
+			.post(
+				"/:realmId/units/:unitId/tag-path-applications",
+				async ({ authorization, body, params, profile }) => {
 					await authorization.realm.ensureCapability(params.realmId, "realm.tags.manage");
 					await authorization.unit.ensureCanRead(params.unitId);
-					return applyRealmTagPath({ ...params, profileId: profile.unitId });
-				},
-				{
-					access: "session-only",
-					params: RealmUnitTagPathParams,
-					response: {
-						[StatusCodes.OK]: RealmUnitTagPathMutationResponse,
-						[StatusCodes.FORBIDDEN]: toApiErrorResponse([
-							"RealmCapabilityRequired",
-							"UnitAccessRestricted",
-							"UnitPermissionForbidden",
-						]),
-						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
-							"TagPathApplicationNotFound",
-							"TagPathNotFound",
-						]),
-						[StatusCodes.TOO_MANY_REQUESTS]: VoteBackpressureResponse,
-					},
-					detail: {
-						summary: "Apply an adopted Tag Path to a Realm Unit",
-						tags: ["Realms", "Tags"],
-					},
-				},
-			)
-			.delete(
-				"/:realmId/units/:unitId/tag-paths/:pathId",
-				async ({ params, authorization }) => {
-					await authorization.realm.ensureCapability(params.realmId, "realm.tags.manage");
-					await authorization.unit.ensureCanRead(params.unitId);
-					await removeRealmTagPathApplication(params);
-					return new Response(null, { status: StatusCodes.NO_CONTENT });
-				},
-				{
-					access: "session-only",
-					params: RealmUnitTagPathParams,
-					response: {
-						[StatusCodes.NO_CONTENT]: t.Void(),
-						[StatusCodes.FORBIDDEN]: toApiErrorResponse([
-							"RealmCapabilityRequired",
-							"UnitAccessRestricted",
-							"UnitPermissionForbidden",
-						]),
-						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["TagPathApplicationNotFound"]),
-						[StatusCodes.TOO_MANY_REQUESTS]: VoteBackpressureResponse,
-					},
-					detail: {
-						summary: "Remove a Tag Path application from a Realm Unit",
-						tags: ["Realms", "Tags"],
-					},
-				},
-			)
-			.put(
-				"/:realmId/units/:unitId/tag-paths/:pathId/judgment",
-				async ({ params, body, profile, authorization }) => {
-					await authorization.realm.ensureParticipation(params.realmId);
-					await authorization.unit.ensureCanRead(params.unitId);
-					return judgeRealmTagPathApplication({
+					return applyRealmTagPath({
 						...params,
-						...body,
+						senseId: body.senseId,
 						profileId: profile.unitId,
+						fitVote: body.fitVote,
+						spoilerLevel: body.spoilerLevel,
 					});
 				},
 				{
-					access: "contribute:interaction:write",
-					params: RealmUnitTagPathParams,
-					body: RealmTagPathJudgmentBody,
+					access: "session-only",
+					params: RealmApplyTagPathParams,
+					body: ApplyTagPathBody,
 					response: {
-						[StatusCodes.OK]: RealmUnitTagPathMutationResponse,
-						[StatusCodes.FORBIDDEN]: toApiErrorResponse([
-							"RealmCapabilityRequired",
-							"UnitAccessRestricted",
-							"UnitPermissionForbidden",
+						[StatusCodes.OK]: RealmTagPathApplicationResponse,
+						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
+							"TagPathNotFound",
+							"TagPathApplicationNotFound",
 						]),
-						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["TagPathApplicationNotFound"]),
-						[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["InvalidTagPath"]),
-						[StatusCodes.TOO_MANY_REQUESTS]: VoteBackpressureResponse,
 					},
-					detail: {
-						summary: "Judge Realm-local Tag Path fit or spoiler",
-						tags: ["Realms", "Tags"],
-					},
+					detail: { summary: "Apply one adopted Realm Path Sense", tags: ["Realms", "Tags"] },
 				},
 			)
 			.delete(
-				"/:realmId/units/:unitId/tag-paths/:pathId/judgment",
-				async ({ params, profile, authorization }) => {
+				"/:realmId/units/:unitId/tag-path-applications/:applicationId",
+				async ({ authorization, params }) => {
+					await authorization.realm.ensureCapability(params.realmId, "realm.tags.manage");
+					await authorization.unit.ensureCanRead(params.unitId);
+					return removeRealmTagPathApplication(params);
+				},
+				{
+					access: "session-only",
+					params: RealmTagPathApplicationParams,
+					response: {
+						[StatusCodes.OK]: RealmTagPathApplicationRemovalResponse,
+						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["TagPathApplicationNotFound"]),
+					},
+					detail: { summary: "Remove one Realm semantic Application", tags: ["Realms", "Tags"] },
+				},
+			)
+			.put(
+				"/:realmId/units/:unitId/tag-path-applications/:applicationId/judgment",
+				async ({ authorization, body, params, profile }) => {
+					await authorization.realm.ensureParticipation(params.realmId);
+					await authorization.unit.ensureCanRead(params.unitId);
+					return judgeRealmTagPathApplication({ ...params, ...body, profileId: profile.unitId });
+				},
+				{
+					access: "contribute:interaction:write",
+					params: RealmTagPathApplicationParams,
+					body: TagPathApplicationJudgmentBody,
+					response: {
+						[StatusCodes.OK]: RealmTagPathApplicationJudgmentResponse,
+						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["TagPathApplicationNotFound"]),
+					},
+					detail: { summary: "Judge one Realm semantic Application", tags: ["Realms", "Tags"] },
+				},
+			)
+			.delete(
+				"/:realmId/units/:unitId/tag-path-applications/:applicationId/judgment",
+				async ({ authorization, params, profile }) => {
 					await authorization.realm.ensureParticipation(params.realmId);
 					await authorization.unit.ensureCanRead(params.unitId);
 					return clearRealmTagPathApplicationJudgment({
@@ -682,25 +788,17 @@ export default new Elysia()
 				},
 				{
 					access: "write:interaction:write",
-					params: RealmUnitTagPathParams,
+					params: RealmTagPathApplicationParams,
 					response: {
-						[StatusCodes.OK]: RealmUnitTagPathMutationResponse,
-						[StatusCodes.FORBIDDEN]: toApiErrorResponse([
-							"RealmCapabilityRequired",
-							"UnitAccessRestricted",
-							"UnitPermissionForbidden",
-						]),
-						[StatusCodes.TOO_MANY_REQUESTS]: VoteBackpressureResponse,
+						[StatusCodes.OK]: RealmTagPathApplicationJudgmentResponse,
+						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["TagPathApplicationNotFound"]),
 					},
-					detail: {
-						summary: "Clear a Realm-local Tag Path judgment",
-						tags: ["Realms", "Tags"],
-					},
+					detail: { summary: "Clear one Realm Application judgment", tags: ["Realms", "Tags"] },
 				},
 			)
 			.put(
 				"/:realmId/tag-path-policy",
-				async ({ params, body, authorization }) => {
+				async ({ authorization, body, params }) => {
 					await authorization.realm.ensureCapability(params.realmId, "realm.tags.manage");
 					return updateRealmTagPathFallbackPolicy({ realmId: params.realmId, ...body });
 				},
@@ -710,13 +808,9 @@ export default new Elysia()
 					body: RealmTagPathFallbackBody,
 					response: {
 						[StatusCodes.OK]: RealmTagPathFallbackResponse,
-						[StatusCodes.FORBIDDEN]: toApiErrorResponse(["RealmCapabilityRequired"]),
 						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["RealmNotFound"]),
 					},
-					detail: {
-						summary: "Update independent Realm Tag Path fallback policies",
-						tags: ["Realms", "Tags"],
-					},
+					detail: { summary: "Set independent Realm fallback policies", tags: ["Realms", "Tags"] },
 				},
 			),
 	)
@@ -734,16 +828,13 @@ export default new Elysia()
 					access: "interaction:read",
 					query: RealmTagSubscriptionListQuery,
 					response: { [StatusCodes.OK]: RealmTagSubscriptionListResponse },
-					detail: {
-						summary: "List the current user's ordered Realm Tag sources",
-						tags: ["Tags"],
-					},
+					detail: { summary: "List ordered Realm Tag authorities", tags: ["Tags"] },
 				},
 			)
 			.put(
 				"/me/tag-realm-subscriptions/:realmId",
-				async ({ profile, authorization, params, query, body }) => {
-					const [, [realmRecord]] = await Promise.all([
+				async ({ authorization, body, params, profile, query }) => {
+					const [, [record]] = await Promise.all([
 						authorization.unit.ensureCanRead(params.realmId, () => new RealmNotFound()),
 						database
 							.select({ id: realm.id })
@@ -751,7 +842,7 @@ export default new Elysia()
 							.where(eq(realm.id, params.realmId))
 							.limit(1),
 					]);
-					if (!realmRecord) throw new RealmNotFound();
+					if (!record) throw new RealmNotFound();
 					return upsertRealmTagSubscription({
 						profileId: profile.unitId,
 						realmId: params.realmId,
@@ -768,26 +859,20 @@ export default new Elysia()
 						[StatusCodes.OK]: RealmTagSubscriptionResponse,
 						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["RealmNotFound"]),
 					},
-					detail: {
-						summary: "Subscribe to or reorder a Realm Tag source",
-						tags: ["Tags"],
-					},
+					detail: { summary: "Subscribe to or reorder a Realm Tag authority", tags: ["Tags"] },
 				},
 			)
 			.delete(
 				"/me/tag-realm-subscriptions/:realmId",
-				async ({ profile, params }) => {
+				async ({ params, profile }) => {
 					await deleteRealmTagSubscription(profile.unitId, params.realmId);
-					return { realmId: params.realmId, subscribed: false };
+					return { realmId: params.realmId, subscribed: false as const };
 				},
 				{
 					access: "write:interaction:write",
 					params: RealmTagSubscriptionParams,
 					response: { [StatusCodes.OK]: RealmTagSubscriptionStateResponse },
-					detail: {
-						summary: "Unsubscribe from a Realm Tag source",
-						tags: ["Tags"],
-					},
+					detail: { summary: "Unsubscribe from a Realm Tag authority", tags: ["Tags"] },
 				},
 			),
 	);

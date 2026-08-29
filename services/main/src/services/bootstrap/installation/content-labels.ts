@@ -1,7 +1,8 @@
 import { eq } from "drizzle-orm";
 
 import type { DatabaseTransaction } from "../../database";
-import { tag } from "../../database/schema";
+import { tag, vocabularyNode } from "../../database/schema";
+import { ensureSimpleTagExpressionInTransaction } from "../../tag-expressions/service";
 import { fractionalPositionAt } from "../../ordering/position";
 import { recordUnitRevision } from "../../units/history";
 import { ContentLabelRegistryManifest, TopLevelSlugNamespaceUnitIds } from "../data";
@@ -39,6 +40,15 @@ export async function ensureContentLabelRegistry(tx: DatabaseTransaction): Promi
 			});
 		} else {
 			const createdAt = bootstrapEpoch();
+			await tx
+				.insert(vocabularyNode)
+				.values({
+					id: label.id,
+					kind: "concept",
+					createdByProfileId: label.ownerProfileId,
+					createdAt,
+				})
+				.onConflictDoNothing();
 			await tx.insert(tag).values({
 				id: label.id,
 				directlyApplicable: false,
@@ -47,6 +57,11 @@ export async function ensureContentLabelRegistry(tx: DatabaseTransaction): Promi
 				updatedAt: createdAt,
 			});
 		}
+		await ensureSimpleTagExpressionInTransaction(tx, {
+			tagId: label.id,
+			profileId: label.ownerProfileId,
+			createdAt: bootstrapEpoch(),
+		});
 		await ensureOwnership(tx, label.id, label.ownerProfileId);
 		if (createdUnit)
 			for (const [index, localization] of label.localizations.entries())

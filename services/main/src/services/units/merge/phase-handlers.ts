@@ -2058,105 +2058,111 @@ async function tagPathApplicationBatch(
 ): Promise<UnitMergePhaseResult> {
 	await tx.execute(sql`
 		with batch as materialized (
-			select path_id, created_by_profile_id, created_at, updated_at
-			from unit_tag_path
+			select sense_id, created_by_profile_id, created_at, updated_at
+			from unit_tag_path_application
 			where unit_id = ${input.sourceUnitId}::uuid
-			order by path_id
+			order by sense_id
 			limit ${input.batchSize}
 			for update skip locked
 		)
-		insert into unit_tag_path (
-			unit_id, path_id, created_by_profile_id, pinned, position,
+		insert into unit_tag_path_application (
+			unit_id, sense_id, created_by_profile_id, pinned, position,
 			created_at, updated_at
 		)
-		select ${input.targetUnitId}::uuid, path_id, created_by_profile_id,
+		select ${input.targetUnitId}::uuid, sense_id, created_by_profile_id,
 			false, null, created_at, updated_at
 		from batch
-		on conflict (unit_id, path_id) do update
+		on conflict (unit_id, sense_id) do update
 		set updated_at = greatest(
-			unit_tag_path.updated_at,
+			unit_tag_path_application.updated_at,
 			excluded.updated_at
 		)
 	`);
 	await tx.execute(sql`
 		with vote_batch as materialized (
-			select vote.path_id, vote.profile_id,
+			select target.id as application_id, vote.profile_id,
 				vote.fit_vote, vote.spoiler_level,
 				vote.fit_updated_at, vote.spoiler_updated_at,
 				vote.created_at, vote.updated_at
-			from unit_tag_path_judgment as vote
-			where vote.unit_id = ${input.sourceUnitId}::uuid
-				and exists (
-					select 1 from unit_tag_path as target
-					where target.unit_id = ${input.targetUnitId}::uuid
-						and target.path_id = vote.path_id
-				)
-			order by vote.path_id, vote.profile_id
+			from unit_tag_path_application_judgment as vote
+			join unit_tag_path_application as source
+				on source.id = vote.application_id
+			join unit_tag_path_application as target
+				on target.unit_id = ${input.targetUnitId}::uuid
+				and target.sense_id = source.sense_id
+			where source.unit_id = ${input.sourceUnitId}::uuid
+			order by source.sense_id, vote.profile_id
 			limit ${input.batchSize}
 			for update of vote skip locked
 		)
-		insert into unit_tag_path_judgment (
-			unit_id, path_id, profile_id, fit_vote, spoiler_level,
+		insert into unit_tag_path_application_judgment (
+			application_id, profile_id, fit_vote, spoiler_level,
 			fit_updated_at, spoiler_updated_at, created_at, updated_at
 		)
-		select ${input.targetUnitId}::uuid, path_id, profile_id,
+		select application_id, profile_id,
 			fit_vote, spoiler_level, fit_updated_at, spoiler_updated_at,
 			created_at, updated_at
 		from vote_batch
-		on conflict (unit_id, path_id, profile_id) do update
+		on conflict (application_id, profile_id) do update
 		set fit_vote = case
 				when excluded.fit_updated_at is not null
 					and (
-						unit_tag_path_judgment.fit_updated_at is null
+						unit_tag_path_application_judgment.fit_updated_at is null
 						or excluded.fit_updated_at
-							> unit_tag_path_judgment.fit_updated_at
+							> unit_tag_path_application_judgment.fit_updated_at
 					)
 					then excluded.fit_vote
-				else unit_tag_path_judgment.fit_vote
+				else unit_tag_path_application_judgment.fit_vote
 			end,
 			fit_updated_at = greatest(
-				unit_tag_path_judgment.fit_updated_at,
+				unit_tag_path_application_judgment.fit_updated_at,
 				excluded.fit_updated_at
 			),
 			spoiler_level = case
 				when excluded.spoiler_updated_at is not null
 					and (
-						unit_tag_path_judgment.spoiler_updated_at is null
+						unit_tag_path_application_judgment.spoiler_updated_at is null
 						or excluded.spoiler_updated_at
-							> unit_tag_path_judgment.spoiler_updated_at
+							> unit_tag_path_application_judgment.spoiler_updated_at
 					)
 					then excluded.spoiler_level
-				else unit_tag_path_judgment.spoiler_level
+				else unit_tag_path_application_judgment.spoiler_level
 			end,
 			spoiler_updated_at = greatest(
-				unit_tag_path_judgment.spoiler_updated_at,
+				unit_tag_path_application_judgment.spoiler_updated_at,
 				excluded.spoiler_updated_at
 			),
 			created_at = least(
-				unit_tag_path_judgment.created_at,
+				unit_tag_path_application_judgment.created_at,
 				excluded.created_at
 			),
 			updated_at = greatest(
-				unit_tag_path_judgment.updated_at,
+				unit_tag_path_application_judgment.updated_at,
 				excluded.updated_at
 			)
 	`);
 	const evidenceResult = await tx.execute<{ readonly processed: number | string }>(sql`
 		with batch as materialized (
-			select evidence.import_id, evidence.source_fingerprint
-			from content_pack_unit_tag_path_evidence as evidence
-			join unit_tag_path_judgment as target
+			select evidence.import_id, evidence.source_fingerprint,
+				target.id as target_application_id
+			from content_pack_unit_tag_path_application_evidence as evidence
+			join unit_tag_path_application as source
+				on source.id = evidence.application_id
+			join unit_tag_path_application as target
 				on target.unit_id = ${input.targetUnitId}::uuid
-				and target.path_id = evidence.path_id
-				and target.profile_id = evidence.profile_id
+				and target.sense_id = source.sense_id
+			join unit_tag_path_application_judgment as target_vote
+				on target_vote.application_id = target.id
+				and target_vote.profile_id = evidence.profile_id
 			where evidence.unit_id = ${input.sourceUnitId}::uuid
-			order by evidence.path_id, evidence.profile_id,
+			order by evidence.sense_id, evidence.profile_id,
 				evidence.import_id, evidence.source_fingerprint
 			limit ${input.batchSize}
 			for update of evidence skip locked
 		), updated as (
-			update content_pack_unit_tag_path_evidence as evidence
-			set unit_id = ${input.targetUnitId}::uuid
+			update content_pack_unit_tag_path_application_evidence as evidence
+			set unit_id = ${input.targetUnitId}::uuid,
+				application_id = batch.target_application_id
 			from batch
 			where evidence.import_id = batch.import_id
 				and evidence.source_fingerprint = batch.source_fingerprint
@@ -2164,139 +2170,184 @@ async function tagPathApplicationBatch(
 		)
 		select cardinality(array(select 1 from updated))::int as processed
 	`);
-	const relationResult = await runBatch(
+	const globalResult = await runBatch(
+		tx,
+		sql`
+			with vote_batch as materialized (
+				select vote.application_id, vote.profile_id
+				from unit_tag_path_application_judgment as vote
+				join unit_tag_path_application as source
+					on source.id = vote.application_id
+				join unit_tag_path_application as target
+					on target.unit_id = ${input.targetUnitId}::uuid
+					and target.sense_id = source.sense_id
+				where source.unit_id = ${input.sourceUnitId}::uuid
+					and not exists (
+						select 1
+						from content_pack_unit_tag_path_application_evidence as evidence
+						where evidence.application_id = vote.application_id
+							and evidence.profile_id = vote.profile_id
+					)
+				order by source.sense_id, vote.profile_id
+				limit ${input.batchSize}
+				for update of vote skip locked
+			), deleted_votes as (
+				delete from unit_tag_path_application_judgment as vote
+				using vote_batch
+				where vote.application_id = vote_batch.application_id
+					and vote.profile_id = vote_batch.profile_id
+				returning 1
+			), application_batch as materialized (
+				select source.id
+				from unit_tag_path_application as source
+				where source.unit_id = ${input.sourceUnitId}::uuid
+					and not exists (
+						select 1 from unit_tag_path_application_judgment as vote
+						where vote.application_id = source.id
+					)
+					and not exists (
+						select 1
+						from content_pack_unit_tag_path_application_evidence as evidence
+						where evidence.application_id = source.id
+					)
+				order by source.sense_id
+				limit ${input.batchSize}
+				for update of source skip locked
+			), deleted_applications as (
+				delete from unit_tag_path_application as application
+				using application_batch
+				where application.id = application_batch.id
+				returning 1
+			)
+			select (
+				cardinality(array(select 1 from deleted_votes)) +
+				cardinality(array(select 1 from deleted_applications))
+			)::int as processed,
+				exists(
+					select 1 from unit_tag_path_application
+					where unit_id = ${input.sourceUnitId}::uuid
+				) as remaining
+		`,
+	);
+	const realmResult = await runBatch(
 		tx,
 		sql`
 			with batch as materialized (
-				select path_id, created_by_profile_id, created_at, updated_at
-				from unit_tag_path
+				select id, realm_id, sense_id, created_by_profile_id,
+					created_at, updated_at
+				from realm_unit_tag_path_application
 				where unit_id = ${input.sourceUnitId}::uuid
-				order by path_id
+				order by realm_id, sense_id
 				limit ${input.batchSize}
 				for update skip locked
 			), ensured_targets as (
-				insert into unit_tag_path (
-					unit_id, path_id, created_by_profile_id, pinned, position,
+				insert into realm_unit_tag_path_application (
+					realm_id, unit_id, sense_id, created_by_profile_id,
 					created_at, updated_at
 				)
-				select ${input.targetUnitId}::uuid, path_id, created_by_profile_id,
-					false, null, created_at, updated_at
+				select realm_id, ${input.targetUnitId}::uuid, sense_id,
+					created_by_profile_id, created_at, updated_at
 				from batch
-				on conflict (unit_id, path_id) do update
+				on conflict (realm_id, unit_id, sense_id) do update
 				set updated_at = greatest(
-					unit_tag_path.updated_at,
+					realm_unit_tag_path_application.updated_at,
 					excluded.updated_at
 				)
-				returning path_id
-			), application_to_drain as materialized (
-				select batch.path_id
-				from batch
-				join ensured_targets using (path_id)
-				order by batch.path_id
-				limit 1
+				returning id, realm_id, sense_id
 			), vote_batch as materialized (
-				select vote.path_id, vote.profile_id,
-					vote.fit_vote, vote.spoiler_level,
+				select source.id as source_application_id,
+					target.id as target_application_id,
+					vote.profile_id, vote.fit_vote, vote.spoiler_level,
 					vote.fit_updated_at, vote.spoiler_updated_at,
 					vote.created_at, vote.updated_at
-				from application_to_drain
-				join unit_tag_path_judgment as vote
-					on vote.path_id = application_to_drain.path_id
-				where vote.unit_id = ${input.sourceUnitId}::uuid
-				order by vote.profile_id
+				from batch as source
+				join ensured_targets as target
+					on target.realm_id = source.realm_id
+					and target.sense_id = source.sense_id
+				join realm_unit_tag_path_application_judgment as vote
+					on vote.application_id = source.id
+				order by source.realm_id, source.sense_id, vote.profile_id
 				limit ${input.batchSize}
 				for update of vote skip locked
 			), copied_votes as (
-				insert into unit_tag_path_judgment (
-					unit_id, path_id, profile_id, fit_vote, spoiler_level,
+				insert into realm_unit_tag_path_application_judgment (
+					application_id, profile_id, fit_vote, spoiler_level,
 					fit_updated_at, spoiler_updated_at, created_at, updated_at
 				)
-				select ${input.targetUnitId}::uuid, path_id, profile_id,
-					fit_vote, spoiler_level, fit_updated_at, spoiler_updated_at,
-					created_at, updated_at
+				select target_application_id, profile_id, fit_vote, spoiler_level,
+					fit_updated_at, spoiler_updated_at, created_at, updated_at
 				from vote_batch
-				on conflict (unit_id, path_id, profile_id) do update
+				on conflict (application_id, profile_id) do update
 				set fit_vote = case
 						when excluded.fit_updated_at is not null
 							and (
-								unit_tag_path_judgment.fit_updated_at is null
+								realm_unit_tag_path_application_judgment.fit_updated_at is null
 								or excluded.fit_updated_at
-									> unit_tag_path_judgment.fit_updated_at
+									> realm_unit_tag_path_application_judgment.fit_updated_at
 							)
 							then excluded.fit_vote
-						else unit_tag_path_judgment.fit_vote
+						else realm_unit_tag_path_application_judgment.fit_vote
 					end,
 					fit_updated_at = greatest(
-						unit_tag_path_judgment.fit_updated_at,
+						realm_unit_tag_path_application_judgment.fit_updated_at,
 						excluded.fit_updated_at
 					),
 					spoiler_level = case
 						when excluded.spoiler_updated_at is not null
 							and (
-								unit_tag_path_judgment.spoiler_updated_at is null
+								realm_unit_tag_path_application_judgment.spoiler_updated_at is null
 								or excluded.spoiler_updated_at
-									> unit_tag_path_judgment.spoiler_updated_at
+									> realm_unit_tag_path_application_judgment.spoiler_updated_at
 							)
 							then excluded.spoiler_level
-						else unit_tag_path_judgment.spoiler_level
+						else realm_unit_tag_path_application_judgment.spoiler_level
 					end,
 					spoiler_updated_at = greatest(
-						unit_tag_path_judgment.spoiler_updated_at,
+						realm_unit_tag_path_application_judgment.spoiler_updated_at,
 						excluded.spoiler_updated_at
 					),
 					created_at = least(
-						unit_tag_path_judgment.created_at,
+						realm_unit_tag_path_application_judgment.created_at,
 						excluded.created_at
 					),
 					updated_at = greatest(
-						unit_tag_path_judgment.updated_at,
+						realm_unit_tag_path_application_judgment.updated_at,
 						excluded.updated_at
 					)
 				returning 1
 			), deleted_votes as (
-				delete from unit_tag_path_judgment as vote
+				delete from realm_unit_tag_path_application_judgment as vote
 				using vote_batch
-				where vote.unit_id = ${input.sourceUnitId}::uuid
-					and vote.path_id = vote_batch.path_id
+				where vote.application_id = vote_batch.source_application_id
 					and vote.profile_id = vote_batch.profile_id
-					and not exists (
-						select 1 from content_pack_unit_tag_path_evidence as evidence
-						where evidence.unit_id = ${input.sourceUnitId}::uuid
-							and evidence.path_id = vote_batch.path_id
-							and evidence.profile_id = vote_batch.profile_id
-					)
 				returning 1
-			), deleted as (
-				delete from unit_tag_path as application
+			), deleted_applications as (
+				delete from realm_unit_tag_path_application as application
 				using batch
-				where application.unit_id = ${input.sourceUnitId}::uuid
-					and application.path_id = batch.path_id
-					and not exists (select 1 from vote_batch)
+				where application.id = batch.id
 					and not exists (
-						select 1 from unit_tag_path_judgment
-						where unit_id = ${input.sourceUnitId}::uuid
-							and path_id = batch.path_id
-					)
-					and not exists (
-						select 1 from content_pack_unit_tag_path_evidence as evidence
-						where evidence.unit_id = ${input.sourceUnitId}::uuid
-							and evidence.path_id = batch.path_id
+						select 1
+						from realm_unit_tag_path_application_judgment as vote
+						where vote.application_id = batch.id
 					)
 				returning 1
 			)
 			select (
 				cardinality(array(select 1 from deleted_votes)) +
-				cardinality(array(select 1 from deleted))
+				cardinality(array(select 1 from deleted_applications))
 			)::int as processed,
 				exists(
-					select 1 from unit_tag_path
+					select 1 from realm_unit_tag_path_application
 					where unit_id = ${input.sourceUnitId}::uuid
 				) as remaining
 		`,
 	);
 	return {
-		processedRows: Number(evidenceResult.rows[0]?.processed ?? 0) + relationResult.processedRows,
-		done: relationResult.done,
+		processedRows:
+			Number(evidenceResult.rows[0]?.processed ?? 0) +
+			globalResult.processedRows +
+			realmResult.processedRows,
+		done: globalResult.done && realmResult.done,
 	};
 }
 

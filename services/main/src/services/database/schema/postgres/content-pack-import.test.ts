@@ -31,7 +31,11 @@ describe("content-pack import PostgreSQL guard contract", () => {
 		for (const table of [
 			"content_pack_import",
 			"content_pack_tag_evidence",
+			"content_pack_guide_node_evidence",
+			"content_pack_tag_relation_evidence",
+			"content_pack_tag_expression_evidence",
 			"content_pack_tag_path_definition_evidence",
+			"content_pack_tag_path_sense_evidence",
 		]) {
 			const trigger = triggerSource(`${table}_immutable`);
 			expect(trigger).toContain(`BEFORE UPDATE OR DELETE OR TRUNCATE ON public.${table}`);
@@ -45,7 +49,7 @@ describe("content-pack import PostgreSQL guard contract", () => {
 	it("makes movable evidence append-only outside guarded updates", () => {
 		for (const table of [
 			"content_pack_unit_tag_evidence",
-			"content_pack_unit_tag_path_evidence",
+			"content_pack_unit_tag_path_application_evidence",
 			"content_pack_subject_association_evidence",
 		]) {
 			const trigger = triggerSource(`${table}_delete_guard`);
@@ -68,20 +72,20 @@ describe("content-pack import PostgreSQL guard contract", () => {
 		{
 			table: "content_pack_unit_tag_evidence",
 			functionName: "guard_content_pack_unit_tag_evidence_retarget",
-			allowedKey: "unit_id",
+			allowedKeys: ["unit_id"],
 			phase: "unit_tags",
 			judgmentTable: "unit_tag_judgment",
 		},
 		{
-			table: "content_pack_unit_tag_path_evidence",
-			functionName: "guard_content_pack_unit_tag_path_evidence_retarget",
-			allowedKey: "unit_id",
+			table: "content_pack_unit_tag_path_application_evidence",
+			functionName: "guard_content_pack_unit_tag_path_application_evidence_retarget",
+			allowedKeys: ["unit_id", "application_id"],
 			phase: "tag_path_applications",
-			judgmentTable: "unit_tag_path_judgment",
+			judgmentTable: "unit_tag_path_application_judgment",
 		},
 	])(
-		"permits only $allowedKey retargets for $table during $phase/finalize",
-		({ table, functionName, allowedKey, phase, judgmentTable }) => {
+		"permits only $allowedKeys retargets for $table during $phase/finalize",
+		({ table, functionName, allowedKeys, phase, judgmentTable }) => {
 			const trigger = triggerSource(`${table}_retarget_guard`);
 			expect(trigger).toContain(`AFTER UPDATE ON public.${table}`);
 			expect(trigger).toContain("REFERENCING OLD TABLE AS old_evidence NEW TABLE AS new_evidence");
@@ -91,8 +95,9 @@ describe("content-pack import PostgreSQL guard contract", () => {
 			expect(guard).toContain(`'${phase}'::public.unit_merge_operation_phase`);
 			expect(guard).toContain("'finalize'::public.unit_merge_operation_phase");
 			expect(guard).toContain("FULL JOIN new_evidence AS new_row");
-			expect(guard).toContain(`to_jsonb(old_row) - '${allowedKey}'`);
-			expect(guard).toContain(`to_jsonb(new_row) - '${allowedKey}'`);
+			const keySubtraction = allowedKeys.map((key) => ` - '${key}'`).join("");
+			expect(guard).toContain(`to_jsonb(old_row)${keySubtraction}`);
+			expect(guard).toContain(`to_jsonb(new_row)${keySubtraction}`);
 			expect(guard).toContain("old_row.unit_id <> active_operation.source_unit_id");
 			expect(guard).toContain("new_row.unit_id <> active_operation.target_unit_id");
 			expect(guard.match(new RegExp(`FROM public\\.${judgmentTable}`, "gu"))).toHaveLength(2);

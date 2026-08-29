@@ -132,9 +132,9 @@ capacity harness validates this layout with representative vote densities and
 records the 500-million-row baseline plus 3-billion-row estimate.
 
 Table naming follows the widened semantics: `unit_tag_judgment`,
-`unit_tag_path_judgment`, and `realm_tag_judgment` own spoiler-bearing
-targets. `tag_path_vote` (Path definition validity) stays a pure binary vote
-with no spoiler dimension.
+`unit_tag_path_application_judgment`, and `realm_tag_judgment` own
+spoiler-bearing targets. `tag_path_vote` (Path definition validity) stays a
+pure binary vote with no spoiler dimension.
 Direct permission-gated relations (`realm_unit_tag`) and private relations
 (`profile_unit_tag`) stay outside the judgment contract.
 
@@ -397,12 +397,14 @@ Realm-scoped storage uses dedicated typed relations:
   `(realm_id, path_id)`;
 - `realm_tag_path_vote` records Realm definition judgments and is gated by
   that adoption;
-- `realm_unit_tag_path` applies the adopted Path to a Realm Unit;
-- `realm_unit_tag_path_judgment` stores the sparse fit/spoiler judgment row;
+- `realm_unit_tag_path_application` applies an adopted Path Sense to a Realm
+  Unit;
+- `realm_unit_tag_path_application_judgment` stores the sparse fit/spoiler
+  judgment row;
 - `realm_tag_judgment` stores direct Tag fit/spoiler judgments; and
-- `realm_unit_effective_tag` plus `realm_unit_tag_path_support` preserve
-  effective membership and complete source provenance separately from global
-  projections.
+- `realm_unit_expression_assertion` and `realm_unit_effective_tag` preserve
+  asserted meaning and retrieval membership separately from global
+  projections, while the Application remains the source provenance.
 
 The routing key for Realm corpus facts is `(realm_id, unit_id)`. No generic
 semantic-context or Structure-kind relation is involved.

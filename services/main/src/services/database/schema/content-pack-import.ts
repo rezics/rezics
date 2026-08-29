@@ -31,7 +31,9 @@ import {
 import { profile } from "./profile";
 import { entityMeasurement, subjectAssociationJudgment } from "./entity";
 import { tag, unitTagJudgment } from "./tag";
-import { tagPathVote, unitTagPathJudgment } from "./tag-path";
+import { tagPathSense, tagPathVote, unitTagPathApplicationJudgment } from "./tag-path";
+import { tagExpression } from "./tag-expression";
+import { guideNode, tagRelation } from "./vocabulary";
 
 type UnitTagImport = NonNullable<PackRelations["unitTags"]>[number];
 type ImportedSourceAggregate = Exclude<UnitTagImport["sourceAggregate"], null | undefined>;
@@ -275,6 +277,107 @@ export const contentPackEntityMeasurementEvidence = pgTable(
 	],
 );
 
+export const contentPackGuideNodeEvidence = pgTable(
+	"content_pack_guide_node_evidence",
+	{
+		importId: uuid().notNull(),
+		sourceFingerprint: text().notNull(),
+		nodeId: uuid()
+			.notNull()
+			.references(() => guideNode.id, { onDelete: "restrict" }),
+		nodeSourceKey: text().notNull(),
+		sourceUrl: text().notNull(),
+		sourceImportedAt: createTimestampMsColumn().notNull(),
+		createdAt: createCreatedAtColumn(),
+	},
+	(table) => [
+		primaryKey({ columns: [table.importId, table.sourceFingerprint] }),
+		foreignKey({
+			columns: [table.importId],
+			foreignColumns: [contentPackImport.id],
+			name: "content_pack_guide_node_evidence_import_fkey",
+		}).onDelete("cascade"),
+		index("content_pack_guide_node_evidence_node_idx").on(table.nodeId, table.importId),
+		check(
+			"content_pack_guide_node_evidence_fingerprint_check",
+			sql`${table.sourceFingerprint} ~ '^[0-9a-f]{64}$'`,
+		),
+		check(
+			"content_pack_guide_node_evidence_source_key_check",
+			sql`btrim(${table.nodeSourceKey}) <> ''`,
+		),
+	],
+);
+
+export const contentPackTagRelationEvidence = pgTable(
+	"content_pack_tag_relation_evidence",
+	{
+		importId: uuid().notNull(),
+		sourceFingerprint: text().notNull(),
+		relationId: uuid()
+			.notNull()
+			.references(() => tagRelation.id, { onDelete: "restrict" }),
+		relationSourceKey: text().notNull(),
+		sourceUrl: text().notNull(),
+		sourceImportedAt: createTimestampMsColumn().notNull(),
+		createdAt: createCreatedAtColumn(),
+	},
+	(table) => [
+		primaryKey({ columns: [table.importId, table.sourceFingerprint] }),
+		foreignKey({
+			columns: [table.importId],
+			foreignColumns: [contentPackImport.id],
+			name: "content_pack_tag_relation_evidence_import_fkey",
+		}).onDelete("cascade"),
+		index("content_pack_tag_relation_evidence_relation_idx").on(table.relationId, table.importId),
+		check(
+			"content_pack_tag_relation_evidence_fingerprint_check",
+			sql`${table.sourceFingerprint} ~ '^[0-9a-f]{64}$'`,
+		),
+		check(
+			"content_pack_tag_relation_evidence_source_key_check",
+			sql`btrim(${table.relationSourceKey}) <> ''`,
+		),
+	],
+);
+
+export const contentPackTagExpressionEvidence = pgTable(
+	"content_pack_tag_expression_evidence",
+	{
+		importId: uuid().notNull(),
+		sourceFingerprint: text().notNull(),
+		expressionId: uuid()
+			.notNull()
+			.references(() => tagExpression.id, { onDelete: "restrict" }),
+		declaredExpressionId: uuid().notNull(),
+		expressionSourceKey: text().notNull(),
+		canonicalClaimKey: text().notNull(),
+		sourceUrl: text().notNull(),
+		sourceImportedAt: createTimestampMsColumn().notNull(),
+		createdAt: createCreatedAtColumn(),
+	},
+	(table) => [
+		primaryKey({ columns: [table.importId, table.sourceFingerprint] }),
+		foreignKey({
+			columns: [table.importId],
+			foreignColumns: [contentPackImport.id],
+			name: "content_pack_tag_expression_evidence_import_fkey",
+		}).onDelete("cascade"),
+		index("content_pack_tag_expression_evidence_expression_idx").on(
+			table.expressionId,
+			table.importId,
+		),
+		check(
+			"content_pack_tag_expression_evidence_fingerprint_check",
+			sql`${table.sourceFingerprint} ~ '^[0-9a-f]{64}$'`,
+		),
+		check(
+			"content_pack_tag_expression_evidence_source_key_check",
+			sql`btrim(${table.expressionSourceKey}) <> '' and btrim(${table.canonicalClaimKey}) <> ''`,
+		),
+	],
+);
+
 export const contentPackTagPathDefinitionEvidence = pgTable(
 	"content_pack_tag_path_definition_evidence",
 	{
@@ -284,7 +387,8 @@ export const contentPackTagPathDefinitionEvidence = pgTable(
 		profileId: uuid().notNull(),
 		declaredPathId: uuid().notNull(),
 		pathSourceKey: text().notNull(),
-		memberTagSourceKeys: text().array().notNull(),
+		memberNodeSourceKeys: text().array().notNull(),
+		relationSourceKeys: text().array().notNull(),
 		sourceVote: integer().notNull(),
 		sourceUrl: text().notNull(),
 		sourceImportedAt: createTimestampMsColumn().notNull(),
@@ -324,11 +428,16 @@ export const contentPackTagPathDefinitionEvidence = pgTable(
 		),
 		check(
 			"content_pack_tag_path_definition_evidence_member_count_check",
-			sql`cardinality(${table.memberTagSourceKeys}) between 2 and 16`,
+			sql`cardinality(${table.memberNodeSourceKeys}) between 2 and 16`,
 		),
 		check(
 			"content_pack_tag_path_definition_evidence_member_null_check",
-			sql`array_position(${table.memberTagSourceKeys}, null) is null`,
+			sql`array_position(${table.memberNodeSourceKeys}, null) is null`,
+		),
+		check(
+			"content_pack_tag_path_definition_evidence_relation_check",
+			sql`cardinality(${table.relationSourceKeys}) = cardinality(${table.memberNodeSourceKeys}) - 1
+				and array_position(${table.relationSourceKeys}, null) is null`,
 		),
 		check("content_pack_tag_path_definition_evidence_vote_check", sql`${table.sourceVote} = 1`),
 		check(
@@ -338,17 +447,55 @@ export const contentPackTagPathDefinitionEvidence = pgTable(
 	],
 );
 
-export const contentPackUnitTagPathEvidence = pgTable(
-	"content_pack_unit_tag_path_evidence",
+export const contentPackTagPathSenseEvidence = pgTable(
+	"content_pack_tag_path_sense_evidence",
 	{
 		importId: uuid().notNull(),
 		sourceFingerprint: text().notNull(),
+		senseId: uuid()
+			.notNull()
+			.references(() => tagPathSense.id, { onDelete: "restrict" }),
+		declaredSenseId: uuid().notNull(),
+		senseSourceKey: text().notNull(),
+		pathSourceKey: text().notNull(),
+		expressionSourceKey: text().notNull(),
+		sourceUrl: text().notNull(),
+		sourceImportedAt: createTimestampMsColumn().notNull(),
+		createdAt: createCreatedAtColumn(),
+	},
+	(table) => [
+		primaryKey({ columns: [table.importId, table.sourceFingerprint] }),
+		foreignKey({
+			columns: [table.importId],
+			foreignColumns: [contentPackImport.id],
+			name: "content_pack_tag_path_sense_evidence_import_fkey",
+		}).onDelete("cascade"),
+		index("content_pack_tag_path_sense_evidence_sense_idx").on(table.senseId, table.importId),
+		check(
+			"content_pack_tag_path_sense_evidence_fingerprint_check",
+			sql`${table.sourceFingerprint} ~ '^[0-9a-f]{64}$'`,
+		),
+		check(
+			"content_pack_tag_path_sense_evidence_source_keys_check",
+			sql`btrim(${table.senseSourceKey}) <> ''
+				and btrim(${table.pathSourceKey}) <> ''
+				and btrim(${table.expressionSourceKey}) <> ''`,
+		),
+	],
+);
+
+export const contentPackUnitTagPathApplicationEvidence = pgTable(
+	"content_pack_unit_tag_path_application_evidence",
+	{
+		importId: uuid().notNull(),
+		sourceFingerprint: text().notNull(),
+		applicationId: uuid().notNull(),
 		unitId: uuid().notNull(),
-		pathId: uuid().notNull(),
+		senseId: uuid().notNull(),
 		profileId: uuid().notNull(),
 		unitSourceKey: text().notNull(),
-		pathSourceKey: text().notNull(),
-		declaredPathId: uuid().notNull(),
+		senseSourceKey: text().notNull(),
+		declaredSenseId: uuid().notNull(),
 		sourceFitVote: integer().notNull(),
 		sourceSpoilerLevel: smallint(),
 		sourceUrl: text().notNull(),
@@ -358,55 +505,58 @@ export const contentPackUnitTagPathEvidence = pgTable(
 	},
 	(table) => [
 		primaryKey({
-			name: "content_pack_unit_tag_path_evidence_pkey",
+			name: "content_pack_unit_tag_path_application_evidence_pkey",
 			columns: [table.importId, table.sourceFingerprint],
 		}),
 		foreignKey({
 			columns: [table.importId, table.profileId],
 			foreignColumns: [contentPackImport.id, contentPackImport.importerProfileId],
-			name: "content_pack_unit_tag_path_evidence_import_profile_fkey",
+			name: "content_pack_unit_tag_path_application_evidence_import_profile_fkey",
 		})
 			.onUpdate("cascade")
 			.onDelete("cascade"),
 		foreignKey({
-			columns: [table.unitId, table.pathId, table.profileId],
+			columns: [table.applicationId, table.profileId],
 			foreignColumns: [
-				unitTagPathJudgment.unitId,
-				unitTagPathJudgment.pathId,
-				unitTagPathJudgment.profileId,
+				unitTagPathApplicationJudgment.applicationId,
+				unitTagPathApplicationJudgment.profileId,
 			],
-			name: "content_pack_unit_tag_path_evidence_judgment_fkey",
+			name: "content_pack_unit_tag_path_application_evidence_judgment_fkey",
 		})
 			.onUpdate("cascade")
 			.onDelete("restrict"),
-		index("content_pack_unit_tag_path_evidence_judgment_idx").on(
-			table.unitId,
-			table.pathId,
+		index("content_pack_unit_tag_path_application_evidence_judgment_idx").on(
+			table.applicationId,
 			table.profileId,
 			table.importId,
 		),
+		index("content_pack_unit_tag_path_application_evidence_source_idx").on(
+			table.unitId,
+			table.senseId,
+			table.importId,
+		),
 		check(
-			"content_pack_unit_tag_path_evidence_source_fingerprint_check",
+			"content_pack_unit_tag_path_application_evidence_source_fingerprint_check",
 			sql`${table.sourceFingerprint} ~ '^[0-9a-f]{64}$'`,
 		),
 		check(
-			"content_pack_unit_tag_path_evidence_source_keys_check",
-			sql`btrim(${table.unitSourceKey}) <> '' and btrim(${table.pathSourceKey}) <> ''`,
+			"content_pack_unit_tag_path_application_evidence_source_keys_check",
+			sql`btrim(${table.unitSourceKey}) <> '' and btrim(${table.senseSourceKey}) <> ''`,
 		),
 		check(
-			"content_pack_unit_tag_path_evidence_fit_vote_check",
+			"content_pack_unit_tag_path_application_evidence_fit_vote_check",
 			sql`${table.sourceFitVote} in (-1, 1)`,
 		),
 		check(
-			"content_pack_unit_tag_path_evidence_spoiler_level_check",
+			"content_pack_unit_tag_path_application_evidence_spoiler_level_check",
 			sql`${table.sourceSpoilerLevel} is null or ${table.sourceSpoilerLevel} between 0 and 2`,
 		),
 		check(
-			"content_pack_unit_tag_path_evidence_source_url_check",
+			"content_pack_unit_tag_path_application_evidence_source_url_check",
 			sql`btrim(${table.sourceUrl}) <> '' and ${table.sourceUrl} ~ '^https?://'`,
 		),
 		createJsonObjectConstraint(
-			"content_pack_unit_tag_path_evidence_source_aggregate_check",
+			"content_pack_unit_tag_path_application_evidence_source_aggregate_check",
 			table.sourceAggregate,
 		),
 	],

@@ -34,6 +34,13 @@ import {
 	VariantCapableUnitKindValues,
 	WorkReleaseStatusValues,
 } from "../database/schema/contract-values";
+import {
+	TagExpressionArgumentRoleValues,
+	TagExpressionInferenceKindValues,
+	TagExpressionKindValues,
+	TagExpressionLabelComponentKindValues,
+} from "../database/schema/tag-expression";
+import { TagRelationKindValues } from "../database/schema/vocabulary";
 
 const MaximumPostgresInteger = 2_147_483_647;
 const PackUnitKindValues = [
@@ -135,7 +142,11 @@ export const IdLedgerSchema = z
 		aliases: IdBucket.optional(),
 		credits: IdBucket.optional(),
 		subjects: IdBucket.optional(),
+		guideNodes: IdBucket.optional(),
+		tagRelations: IdBucket.optional(),
+		tagExpressions: IdBucket.optional(),
 		tagPaths: IdBucket.optional(),
+		tagPathSenses: IdBucket.optional(),
 	})
 	.strict();
 
@@ -774,18 +785,150 @@ export const PackRelationsSchema = z
 			)
 			.optional(),
 		unitTags: z.array(UnitTagRelationSchema).optional(),
+		guideNodes: z
+			.array(
+				z
+					.object({
+						sourceKey: NonEmptyString,
+						localizations: z
+							.array(
+								z
+									.object({
+										language: z.enum(ContentLanguageValues),
+										title: NonEmptyString,
+									})
+									.strict(),
+							)
+							.min(1)
+							.refine(
+								(items) => new Set(items.map((item) => item.language)).size === items.length,
+								{ message: "Guide-node localization languages must be unique" },
+							),
+						...ProvenanceFields,
+					})
+					.strict(),
+			)
+			.optional(),
+		tagRelations: z
+			.array(
+				z
+					.object({
+						sourceKey: NonEmptyString,
+						parentNodeSourceKey: NonEmptyString,
+						childNodeSourceKey: NonEmptyString,
+						relationKind: z.enum(TagRelationKindValues),
+						...ProvenanceFields,
+					})
+					.strict(),
+			)
+			.optional(),
+		tagExpressions: z
+			.array(
+				z
+					.object({
+						sourceKey: NonEmptyString,
+						expressionKind: z.enum(TagExpressionKindValues),
+						canonicalClaimKey: NonEmptyString.max(2048),
+						focusTagSourceKey: NonEmptyString,
+						arguments: z
+							.array(
+								z
+									.object({
+										role: z.enum(TagExpressionArgumentRoleValues),
+										ordinal: NonNegativePostgresInteger,
+										tagSourceKey: NonEmptyString,
+									})
+									.strict(),
+							)
+							.min(1)
+							.refine(
+								(items) =>
+									new Set(items.map((item) => `${item.role}:${item.ordinal}`)).size ===
+									items.length,
+								{ message: "Expression argument role/ordinal pairs must be unique" },
+							),
+						labelComponents: z
+							.array(
+								z
+									.object({
+										tagSourceKey: NonEmptyString,
+										semanticRole: z.enum(TagExpressionArgumentRoleValues),
+										componentKind: z.enum(TagExpressionLabelComponentKindValues),
+									})
+									.strict(),
+							)
+							.min(1),
+						groupKey: z
+							.object({
+								tagSourceKey: NonEmptyString,
+								semanticRole: z.enum(TagExpressionArgumentRoleValues),
+							})
+							.strict()
+							.nullable(),
+						...ProvenanceFields,
+					})
+					.strict(),
+			)
+			.optional(),
+		tagExpressionInferenceRules: z
+			.array(
+				z
+					.object({
+						sourceExpressionSourceKey: NonEmptyString,
+						targetTagSourceKey: NonEmptyString.optional(),
+						targetExpressionSourceKey: NonEmptyString.optional(),
+						inferenceKind: z.enum(TagExpressionInferenceKindValues),
+						...ProvenanceFields,
+					})
+					.strict()
+					.refine(
+						(rule) =>
+							(rule.targetTagSourceKey === undefined) !==
+							(rule.targetExpressionSourceKey === undefined),
+						{ message: "An inference rule requires exactly one target" },
+					),
+			)
+			.optional(),
 		tagPaths: z
 			.array(
 				z
 					.object({
 						sourceKey: NonEmptyString,
-						memberTagSourceKeys: z
+						memberNodeSourceKeys: z
 							.array(NonEmptyString)
 							.min(2)
 							.max(16)
 							.refine((members) => new Set(members).size === members.length, {
-								message: "A Tag Path cannot contain the same Tag more than once",
+								message: "A Tag Path cannot contain the same vocabulary node more than once",
 							}),
+						relationSourceKeys: z.array(NonEmptyString).min(1).max(15),
+						...ProvenanceFields,
+					})
+					.strict()
+					.refine(
+						(path) => path.relationSourceKeys.length === path.memberNodeSourceKeys.length - 1,
+						{ message: "A Tag Path needs one typed relation between every adjacent node" },
+					),
+			)
+			.optional(),
+		tagPathSenses: z
+			.array(
+				z
+					.object({
+						sourceKey: NonEmptyString,
+						pathSourceKey: NonEmptyString,
+						expressionSourceKey: NonEmptyString,
+						bindings: z
+							.array(
+								z
+									.object({
+										memberOrdinal: NonNegativePostgresInteger,
+										argumentRole: z.enum(TagExpressionArgumentRoleValues),
+										argumentOrdinal: NonNegativePostgresInteger,
+									})
+									.strict(),
+							)
+							.min(1),
 						...ProvenanceFields,
 					})
 					.strict(),
@@ -796,7 +939,7 @@ export const PackRelationsSchema = z
 				z
 					.object({
 						unitSourceKey: NonEmptyString,
-						pathSourceKey: NonEmptyString,
+						senseSourceKey: NonEmptyString,
 						fitVote: FitVote,
 						spoilerLevel: SpoilerLevel.nullable(),
 						...ProvenanceFields,

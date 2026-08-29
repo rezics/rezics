@@ -131,7 +131,7 @@ BEGIN
 END;
 $$;
 
-CREATE OR REPLACE FUNCTION public.guard_content_pack_unit_tag_path_evidence_retarget()
+CREATE OR REPLACE FUNCTION public.guard_content_pack_unit_tag_path_application_evidence_retarget()
 RETURNS trigger
 LANGUAGE plpgsql
 SET search_path = pg_catalog, public
@@ -154,14 +154,14 @@ BEGIN
 		WHERE old_row.import_id IS NULL
 			OR new_row.import_id IS NULL
 			OR (
-				to_jsonb(old_row) - 'unit_id'
+				to_jsonb(old_row) - 'unit_id' - 'application_id'
 			) IS DISTINCT FROM (
-				to_jsonb(new_row) - 'unit_id'
+				to_jsonb(new_row) - 'unit_id' - 'application_id'
 			)
 	) THEN
 		RAISE EXCEPTION 'Content-pack Unit–Tag Path evidence payload is immutable'
 			USING ERRCODE = '23514',
-				CONSTRAINT = 'content_pack_unit_tag_path_evidence_retarget_guard';
+				CONSTRAINT = 'content_pack_unit_tag_path_application_evidence_retarget_guard';
 	END IF;
 
 	IF EXISTS (
@@ -173,22 +173,20 @@ BEGIN
 			OR new_row.unit_id <> active_operation.target_unit_id
 			OR NOT EXISTS (
 				SELECT 1
-				FROM public.unit_tag_path_judgment AS source_judgment
-				WHERE source_judgment.unit_id = old_row.unit_id
-					AND source_judgment.path_id = old_row.path_id
+				FROM public.unit_tag_path_application_judgment AS source_judgment
+				WHERE source_judgment.application_id = old_row.application_id
 					AND source_judgment.profile_id = old_row.profile_id
 			)
 			OR NOT EXISTS (
 				SELECT 1
-				FROM public.unit_tag_path_judgment AS target_judgment
-				WHERE target_judgment.unit_id = new_row.unit_id
-					AND target_judgment.path_id = new_row.path_id
+				FROM public.unit_tag_path_application_judgment AS target_judgment
+				WHERE target_judgment.application_id = new_row.application_id
 					AND target_judgment.profile_id = new_row.profile_id
 			)
 	) THEN
 		RAISE EXCEPTION 'Content-pack Unit–Tag Path evidence retarget does not match the active Unit merge'
 			USING ERRCODE = '23514',
-				CONSTRAINT = 'content_pack_unit_tag_path_evidence_retarget_guard';
+				CONSTRAINT = 'content_pack_unit_tag_path_application_evidence_retarget_guard';
 	END IF;
 
 	RETURN NULL;
@@ -299,10 +297,38 @@ BEFORE UPDATE OR DELETE OR TRUNCATE ON public.content_pack_tag_evidence
 FOR EACH STATEMENT
 EXECUTE FUNCTION public.reject_content_pack_import_evidence_mutation();
 
+DROP TRIGGER IF EXISTS content_pack_guide_node_evidence_immutable
+ON public.content_pack_guide_node_evidence;
+CREATE TRIGGER content_pack_guide_node_evidence_immutable
+BEFORE UPDATE OR DELETE OR TRUNCATE ON public.content_pack_guide_node_evidence
+FOR EACH STATEMENT
+EXECUTE FUNCTION public.reject_content_pack_import_evidence_mutation();
+
+DROP TRIGGER IF EXISTS content_pack_tag_relation_evidence_immutable
+ON public.content_pack_tag_relation_evidence;
+CREATE TRIGGER content_pack_tag_relation_evidence_immutable
+BEFORE UPDATE OR DELETE OR TRUNCATE ON public.content_pack_tag_relation_evidence
+FOR EACH STATEMENT
+EXECUTE FUNCTION public.reject_content_pack_import_evidence_mutation();
+
+DROP TRIGGER IF EXISTS content_pack_tag_expression_evidence_immutable
+ON public.content_pack_tag_expression_evidence;
+CREATE TRIGGER content_pack_tag_expression_evidence_immutable
+BEFORE UPDATE OR DELETE OR TRUNCATE ON public.content_pack_tag_expression_evidence
+FOR EACH STATEMENT
+EXECUTE FUNCTION public.reject_content_pack_import_evidence_mutation();
+
 DROP TRIGGER IF EXISTS content_pack_tag_path_definition_evidence_immutable
 ON public.content_pack_tag_path_definition_evidence;
 CREATE TRIGGER content_pack_tag_path_definition_evidence_immutable
 BEFORE UPDATE OR DELETE OR TRUNCATE ON public.content_pack_tag_path_definition_evidence
+FOR EACH STATEMENT
+EXECUTE FUNCTION public.reject_content_pack_import_evidence_mutation();
+
+DROP TRIGGER IF EXISTS content_pack_tag_path_sense_evidence_immutable
+ON public.content_pack_tag_path_sense_evidence;
+CREATE TRIGGER content_pack_tag_path_sense_evidence_immutable
+BEFORE UPDATE OR DELETE OR TRUNCATE ON public.content_pack_tag_path_sense_evidence
 FOR EACH STATEMENT
 EXECUTE FUNCTION public.reject_content_pack_import_evidence_mutation();
 
@@ -313,10 +339,10 @@ BEFORE DELETE OR TRUNCATE ON public.content_pack_unit_tag_evidence
 FOR EACH STATEMENT
 EXECUTE FUNCTION public.reject_content_pack_import_evidence_mutation();
 
-DROP TRIGGER IF EXISTS content_pack_unit_tag_path_evidence_delete_guard
-ON public.content_pack_unit_tag_path_evidence;
-CREATE TRIGGER content_pack_unit_tag_path_evidence_delete_guard
-BEFORE DELETE OR TRUNCATE ON public.content_pack_unit_tag_path_evidence
+DROP TRIGGER IF EXISTS content_pack_unit_tag_path_application_evidence_delete_guard
+ON public.content_pack_unit_tag_path_application_evidence;
+CREATE TRIGGER content_pack_unit_tag_path_application_evidence_delete_guard
+BEFORE DELETE OR TRUNCATE ON public.content_pack_unit_tag_path_application_evidence
 FOR EACH STATEMENT
 EXECUTE FUNCTION public.reject_content_pack_import_evidence_mutation();
 
@@ -335,13 +361,13 @@ REFERENCING OLD TABLE AS old_evidence NEW TABLE AS new_evidence
 FOR EACH STATEMENT
 EXECUTE FUNCTION public.guard_content_pack_unit_tag_evidence_retarget();
 
-DROP TRIGGER IF EXISTS content_pack_unit_tag_path_evidence_retarget_guard
-ON public.content_pack_unit_tag_path_evidence;
-CREATE TRIGGER content_pack_unit_tag_path_evidence_retarget_guard
-AFTER UPDATE ON public.content_pack_unit_tag_path_evidence
+DROP TRIGGER IF EXISTS content_pack_unit_tag_path_application_evidence_retarget_guard
+ON public.content_pack_unit_tag_path_application_evidence;
+CREATE TRIGGER content_pack_unit_tag_path_application_evidence_retarget_guard
+AFTER UPDATE ON public.content_pack_unit_tag_path_application_evidence
 REFERENCING OLD TABLE AS old_evidence NEW TABLE AS new_evidence
 FOR EACH STATEMENT
-EXECUTE FUNCTION public.guard_content_pack_unit_tag_path_evidence_retarget();
+EXECUTE FUNCTION public.guard_content_pack_unit_tag_path_application_evidence_retarget();
 
 DROP TRIGGER IF EXISTS content_pack_subject_association_evidence_retarget_guard
 ON public.content_pack_subject_association_evidence;

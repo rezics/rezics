@@ -1,6 +1,6 @@
 /** @vitest-environment jsdom */
 
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
@@ -22,6 +22,12 @@ vi.mock("@/i18n/client", () => ({
 					doesNotFit: "Does not fit",
 					clear: "Clear",
 					summary: ({ score, count }: { score: string; count: string }) => `${score} / ${count}`,
+				},
+				paths: {
+					spoilerLabel: "Spoiler level",
+					spoilerNone: "None",
+					spoilerMinor: "Minor",
+					spoilerMajor: "Major",
 				},
 			},
 		},
@@ -48,5 +54,30 @@ describe("TagVoteControls", () => {
 
 		expect(screen.getByText("3 / 5")).toBeTruthy();
 		expect(screen.queryByRole("button")).toBeNull();
+	});
+
+	it("toggles an independent spoiler judgment without changing fit", () => {
+		const onSpoilerChange = vi.fn();
+		const onVote = vi.fn();
+		render(
+			<TagVoteControls
+				canVote
+				isPending={false}
+				onClear={vi.fn()}
+				onSpoilerChange={onSpoilerChange}
+				onVote={onVote}
+				score={3}
+				viewerSpoilerLevel={1}
+				viewerVote={1}
+				voteCount={5}
+			/>,
+		);
+
+		fireEvent.click(screen.getByRole("button", { name: "Major" }));
+		expect(onSpoilerChange).toHaveBeenCalledWith(2);
+		expect(onVote).not.toHaveBeenCalled();
+
+		fireEvent.click(screen.getByRole("button", { name: "Minor" }));
+		expect(onSpoilerChange).toHaveBeenLastCalledWith(null);
 	});
 });

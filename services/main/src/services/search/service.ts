@@ -2160,6 +2160,23 @@ async function hydrateSearchHits(
 ): Promise<SearchHitWithoutSlugAddress[]> {
 	if (!unitIds.length) return [];
 	const hitType = category === "posts" ? sql`${post.kind}::text` : sql`${unit.kind}::text`;
+	const tagPositionField =
+		category === "tags"
+			? sql`,
+			'tagOtherPositionCount', greatest((
+				select count(*)::integer - 1
+				from public.tag_path_member position_member
+				join public.unit position_unit on position_unit.id = position_member.path_id
+				join public.tag_path_vote_stat position_stat
+					on position_stat.path_id = position_member.path_id
+					and position_stat.score > 0
+					and position_stat.vote_count > 0
+				where position_member.node_id = ${unit.id}
+					and position_unit.status = 'published'
+					and position_unit.visibility = 'public'
+					and position_unit.deleted_at is null
+			), 0)`
+			: sql``;
 	const result = await database.execute<{ hit: SearchHitWithoutSlugAddress }>(sql`
 		select jsonb_build_object(
 			'id', ${unit.id},
@@ -2192,6 +2209,7 @@ async function hydrateSearchHits(
 				from ${unitLocalization} localization
 				where localization.unit_id = ${unit.id}
 			), '[]'::jsonb)
+			${tagPositionField}
 		) as hit
 		from ${unit}
 		left join ${post} on ${post.id} = ${unit.id}

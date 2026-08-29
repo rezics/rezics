@@ -9,41 +9,7 @@ import type {
 	RealmTagVoteContextPresentation,
 	TagPresentation,
 } from "../model/tag-presentation";
-import type { TaggableUnitType } from "../model/taggable-unit";
-
 type UnitTagLandscape = GetApiUnitsByTypeByUnitIdTagsStatus200;
-
-export function presentGlobalTags(input: {
-	readonly data: UnitTagLandscape;
-	readonly type: TaggableUnitType;
-	readonly unitId: string;
-	readonly signedIn: boolean;
-}): readonly TagPresentation[] {
-	return input.data.global.map((tag) => ({
-		itemKey: `global:${tag.tagId}`,
-		identity: {
-			tagId: tag.tagId,
-			language: tag.language,
-			title: tag.title,
-			summary: tag.summary,
-			avatar: tag.avatar,
-		},
-		context: { kind: "global", pinned: tag.pinned },
-		vote: {
-			kind: "available",
-			target: {
-				kind: "global",
-				type: input.type,
-				unitId: input.unitId,
-				tagId: tag.tagId,
-			},
-			score: toFiniteApiNumber(tag.score) ?? 0,
-			voteCount: toNonNegativeApiInteger(tag.voteCount),
-			viewerVote: tag.viewerVote,
-			canVote: input.signedIn,
-		},
-	}));
-}
 
 export function presentRealmTagGroups(input: {
 	readonly data: UnitTagLandscape;

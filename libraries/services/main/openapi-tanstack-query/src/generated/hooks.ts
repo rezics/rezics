@@ -1134,6 +1134,10 @@ import type {
 	GetApiTagsSuggestionsStatus200,
 	GetApiTagsSuggestionsStatus422,
 	GetApiTagsSuggestionsStatus500,
+	GetApiTagsByTagIdExpressionsOptions,
+	GetApiTagsByTagIdExpressionsStatus200,
+	GetApiTagsByTagIdExpressionsStatus422,
+	GetApiTagsByTagIdExpressionsStatus500,
 	GetApiTagsByTagIdHierarchyOptions,
 	GetApiTagsByTagIdHierarchyStatus200,
 	GetApiTagsByTagIdHierarchyStatus404,
@@ -1143,12 +1147,42 @@ import type {
 	GetApiTagsByTagIdPathsStatus200,
 	GetApiTagsByTagIdPathsStatus422,
 	GetApiTagsByTagIdPathsStatus500,
+	PostApiTagExpressionsOptions,
+	PostApiTagExpressionsStatus200,
+	PostApiTagExpressionsStatus400,
+	PostApiTagExpressionsStatus403,
+	PostApiTagExpressionsStatus422,
+	PostApiTagExpressionsStatus500,
+	PostApiTagExpressionsByExpressionIdInferenceRulesOptions,
+	PostApiTagExpressionsByExpressionIdInferenceRulesStatus200,
+	PostApiTagExpressionsByExpressionIdInferenceRulesStatus400,
+	PostApiTagExpressionsByExpressionIdInferenceRulesStatus403,
+	PostApiTagExpressionsByExpressionIdInferenceRulesStatus422,
+	PostApiTagExpressionsByExpressionIdInferenceRulesStatus500,
+	DeleteApiTagExpressionsByExpressionIdInferenceRulesByRuleIdOptions,
+	DeleteApiTagExpressionsByExpressionIdInferenceRulesByRuleIdStatus200,
+	DeleteApiTagExpressionsByExpressionIdInferenceRulesByRuleIdStatus403,
+	DeleteApiTagExpressionsByExpressionIdInferenceRulesByRuleIdStatus422,
+	DeleteApiTagExpressionsByExpressionIdInferenceRulesByRuleIdStatus500,
+	PostApiTagRelationsOptions,
+	PostApiTagRelationsStatus200,
+	PostApiTagRelationsStatus400,
+	PostApiTagRelationsStatus404,
+	PostApiTagRelationsStatus422,
+	PostApiTagRelationsStatus429,
+	PostApiTagRelationsStatus500,
 	PostApiTagPathsDefinitionWarningsOptions,
 	PostApiTagPathsDefinitionWarningsStatus200,
 	PostApiTagPathsDefinitionWarningsStatus400,
 	PostApiTagPathsDefinitionWarningsStatus422,
 	PostApiTagPathsDefinitionWarningsStatus429,
 	PostApiTagPathsDefinitionWarningsStatus500,
+	DeleteApiTagPathsByPathIdSensesBySenseIdOptions,
+	DeleteApiTagPathsByPathIdSensesBySenseIdStatus200,
+	DeleteApiTagPathsByPathIdSensesBySenseIdStatus403,
+	DeleteApiTagPathsByPathIdSensesBySenseIdStatus404,
+	DeleteApiTagPathsByPathIdSensesBySenseIdStatus422,
+	DeleteApiTagPathsByPathIdSensesBySenseIdStatus500,
 	GetApiTagPathsSearchOptions,
 	GetApiTagPathsSearchStatus200,
 	GetApiTagPathsSearchStatus422,
@@ -1165,6 +1199,13 @@ import type {
 	GetApiTagPathsByPathIdStatus404,
 	GetApiTagPathsByPathIdStatus422,
 	GetApiTagPathsByPathIdStatus500,
+	PostApiTagPathsByPathIdSensesOptions,
+	PostApiTagPathsByPathIdSensesStatus200,
+	PostApiTagPathsByPathIdSensesStatus400,
+	PostApiTagPathsByPathIdSensesStatus403,
+	PostApiTagPathsByPathIdSensesStatus404,
+	PostApiTagPathsByPathIdSensesStatus422,
+	PostApiTagPathsByPathIdSensesStatus500,
 	PutApiTagPathsByPathIdVoteOptions,
 	PutApiTagPathsByPathIdVoteStatus200,
 	PutApiTagPathsByPathIdVoteStatus400,
@@ -1174,7 +1215,6 @@ import type {
 	PutApiTagPathsByPathIdVoteStatus500,
 	DeleteApiTagPathsByPathIdVoteOptions,
 	DeleteApiTagPathsByPathIdVoteStatus200,
-	DeleteApiTagPathsByPathIdVoteStatus404,
 	DeleteApiTagPathsByPathIdVoteStatus422,
 	DeleteApiTagPathsByPathIdVoteStatus429,
 	DeleteApiTagPathsByPathIdVoteStatus500,
@@ -1202,32 +1242,32 @@ import type {
 	GetApiUnitsByTypeByUnitIdTagsStatus404,
 	GetApiUnitsByTypeByUnitIdTagsStatus422,
 	GetApiUnitsByTypeByUnitIdTagsStatus500,
-	PutApiUnitsByTypeByUnitIdTagPathsByPathIdOptions,
-	PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus200,
-	PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus404,
-	PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus422,
-	PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus429,
-	PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus500,
-	DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdOptions,
-	DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus204,
-	DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus403,
-	DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus404,
-	DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus422,
-	DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus429,
-	DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus500,
-	PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentOptions,
-	PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus200,
-	PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus400,
-	PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus404,
-	PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus422,
-	PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus429,
-	PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus500,
-	DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentOptions,
-	DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus200,
-	DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus404,
-	DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus422,
-	DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus429,
-	DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus500,
+	PostApiUnitsByTypeByUnitIdTagPathApplicationsOptions,
+	PostApiUnitsByTypeByUnitIdTagPathApplicationsStatus200,
+	PostApiUnitsByTypeByUnitIdTagPathApplicationsStatus400,
+	PostApiUnitsByTypeByUnitIdTagPathApplicationsStatus404,
+	PostApiUnitsByTypeByUnitIdTagPathApplicationsStatus422,
+	PostApiUnitsByTypeByUnitIdTagPathApplicationsStatus429,
+	PostApiUnitsByTypeByUnitIdTagPathApplicationsStatus500,
+	DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdOptions,
+	DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdStatus200,
+	DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdStatus404,
+	DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdStatus422,
+	DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdStatus429,
+	DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdStatus500,
+	PutApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentOptions,
+	PutApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus200,
+	PutApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus400,
+	PutApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus404,
+	PutApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus422,
+	PutApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus429,
+	PutApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus500,
+	DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentOptions,
+	DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus200,
+	DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus404,
+	DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus422,
+	DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus429,
+	DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus500,
 	GetApiRealmsByRealmIdTagPathsOptions,
 	GetApiRealmsByRealmIdTagPathsStatus200,
 	GetApiRealmsByRealmIdTagPathsStatus404,
@@ -1238,55 +1278,51 @@ import type {
 	PutApiRealmsByRealmIdTagPathsByPathIdStatus403,
 	PutApiRealmsByRealmIdTagPathsByPathIdStatus404,
 	PutApiRealmsByRealmIdTagPathsByPathIdStatus422,
-	PutApiRealmsByRealmIdTagPathsByPathIdStatus429,
 	PutApiRealmsByRealmIdTagPathsByPathIdStatus500,
+	PutApiRealmsByRealmIdTagPathSensesBySenseIdOptions,
+	PutApiRealmsByRealmIdTagPathSensesBySenseIdStatus200,
+	PutApiRealmsByRealmIdTagPathSensesBySenseIdStatus403,
+	PutApiRealmsByRealmIdTagPathSensesBySenseIdStatus404,
+	PutApiRealmsByRealmIdTagPathSensesBySenseIdStatus422,
+	PutApiRealmsByRealmIdTagPathSensesBySenseIdStatus500,
 	PutApiRealmsByRealmIdTagPathsByPathIdVoteOptions,
 	PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus200,
 	PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus400,
-	PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus403,
-	PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus404,
 	PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus422,
 	PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus429,
 	PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus500,
 	DeleteApiRealmsByRealmIdTagPathsByPathIdVoteOptions,
 	DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus200,
-	DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus403,
-	DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus404,
 	DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus422,
 	DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus429,
 	DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus500,
-	PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdOptions,
-	PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus200,
-	PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus403,
-	PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus404,
-	PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus422,
-	PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus429,
-	PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus500,
-	DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdOptions,
-	DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus204,
-	DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus403,
-	DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus404,
-	DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus422,
-	DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus429,
-	DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus500,
-	PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentOptions,
-	PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus200,
-	PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus400,
-	PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus403,
-	PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus404,
-	PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus422,
-	PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus429,
-	PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus500,
-	DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentOptions,
-	DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus200,
-	DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus403,
-	DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus422,
-	DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus429,
-	DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus500,
+	PostApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsOptions,
+	PostApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsStatus200,
+	PostApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsStatus400,
+	PostApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsStatus404,
+	PostApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsStatus422,
+	PostApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsStatus500,
+	DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdOptions,
+	DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdStatus200,
+	DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdStatus404,
+	DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdStatus422,
+	DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdStatus500,
+	PutApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentOptions,
+	PutApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus200,
+	PutApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus400,
+	PutApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus404,
+	PutApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus422,
+	PutApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus429,
+	PutApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus500,
+	DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentOptions,
+	DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus200,
+	DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus404,
+	DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus422,
+	DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus429,
+	DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus500,
 	PutApiRealmsByRealmIdTagPathPolicyOptions,
 	PutApiRealmsByRealmIdTagPathPolicyStatus200,
 	PutApiRealmsByRealmIdTagPathPolicyStatus400,
-	PutApiRealmsByRealmIdTagPathPolicyStatus403,
 	PutApiRealmsByRealmIdTagPathPolicyStatus404,
 	PutApiRealmsByRealmIdTagPathPolicyStatus422,
 	PutApiRealmsByRealmIdTagPathPolicyStatus429,
@@ -2989,30 +3025,38 @@ import {
 	deleteApiPlatformUsersByUserIdSessions,
 	deleteApiPlatformUsersByUserIdSessionsBySessionId,
 	getApiTagsSuggestions,
+	getApiTagsByTagIdExpressions,
 	getApiTagsByTagIdHierarchy,
 	getApiTagsByTagIdPaths,
+	postApiTagExpressions,
+	postApiTagExpressionsByExpressionIdInferenceRules,
+	deleteApiTagExpressionsByExpressionIdInferenceRulesByRuleId,
+	postApiTagRelations,
 	postApiTagPathsDefinitionWarnings,
+	deleteApiTagPathsByPathIdSensesBySenseId,
 	getApiTagPathsSearch,
 	postApiTagPaths,
 	getApiTagPathsByPathId,
+	postApiTagPathsByPathIdSenses,
 	putApiTagPathsByPathIdVote,
 	deleteApiTagPathsByPathIdVote,
 	postApiTagPathsMerges,
 	getApiTagPathsMergesPending,
 	putApiTagPathsMergesByMergeIdResolution,
 	getApiUnitsByTypeByUnitIdTags,
-	putApiUnitsByTypeByUnitIdTagPathsByPathId,
-	deleteApiUnitsByTypeByUnitIdTagPathsByPathId,
-	putApiUnitsByTypeByUnitIdTagPathsByPathIdJudgment,
-	deleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgment,
+	postApiUnitsByTypeByUnitIdTagPathApplications,
+	deleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationId,
+	putApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgment,
+	deleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgment,
 	getApiRealmsByRealmIdTagPaths,
 	putApiRealmsByRealmIdTagPathsByPathId,
+	putApiRealmsByRealmIdTagPathSensesBySenseId,
 	putApiRealmsByRealmIdTagPathsByPathIdVote,
 	deleteApiRealmsByRealmIdTagPathsByPathIdVote,
-	putApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathId,
-	deleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathId,
-	putApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgment,
-	deleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgment,
+	postApiRealmsByRealmIdUnitsByUnitIdTagPathApplications,
+	deleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationId,
+	putApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgment,
+	deleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgment,
 	putApiRealmsByRealmIdTagPathPolicy,
 	getApiUsersMeTagRealmSubscriptions,
 	putApiUsersMeTagRealmSubscriptionsByRealmId,
@@ -20174,7 +20218,7 @@ export function getApiTagsSuggestionsQueryOptions(
 }
 
 /**
- * @summary Suggest terminal Tags from a compound Tag query
+ * @summary Suggest explicit Tag Expressions and Path Senses
  * {@link /api/v1/tags/suggestions}
  */
 export function useGetApiTagsSuggestions<
@@ -20222,6 +20266,104 @@ export function useGetApiTagsSuggestions<
 	return queryResult;
 }
 
+export const getApiTagsByTagIdExpressionsQueryKey = ({
+	path,
+	query,
+}: Omit<GetApiTagsByTagIdExpressionsOptions, "headers">) =>
+	[{ url: "/api/v1/tags/:tagId/expressions", params: path }, ...(query ? [query] : [])] as const;
+
+type GetApiTagsByTagIdExpressionsQueryKey = ReturnType<typeof getApiTagsByTagIdExpressionsQueryKey>;
+
+export function getApiTagsByTagIdExpressionsQueryOptions(
+	{ path, query }: GetApiTagsByTagIdExpressionsOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = getApiTagsByTagIdExpressionsQueryKey({ path, query });
+	return queryOptions<
+		GetApiTagsByTagIdExpressionsStatus200,
+		ResponseErrorConfig<
+			GetApiTagsByTagIdExpressionsStatus422 | GetApiTagsByTagIdExpressionsStatus500
+		>,
+		GetApiTagsByTagIdExpressionsStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			const { data } = await getApiTagsByTagIdExpressions({
+				...config,
+				path,
+				query,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary List direct, qualified, and inferred Expression uses of a Tag
+ * {@link /api/v1/tags/:tagId/expressions}
+ */
+export function useGetApiTagsByTagIdExpressions<
+	TData = GetApiTagsByTagIdExpressionsStatus200,
+	TQueryData = GetApiTagsByTagIdExpressionsStatus200,
+	TQueryKey extends QueryKey = GetApiTagsByTagIdExpressionsQueryKey,
+>(
+	{
+		path,
+		query,
+	}: {
+		path:
+			| GetApiTagsByTagIdExpressionsOptions["path"]
+			| (() => GetApiTagsByTagIdExpressionsOptions["path"]);
+		query?:
+			| GetApiTagsByTagIdExpressionsOptions["query"]
+			| (() => GetApiTagsByTagIdExpressionsOptions["query"]);
+	},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				GetApiTagsByTagIdExpressionsStatus200,
+				ResponseErrorConfig<
+					GetApiTagsByTagIdExpressionsStatus422 | GetApiTagsByTagIdExpressionsStatus500
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = {
+		path: typeof path === "function" ? path() : path,
+		query: typeof query === "function" ? query() : query,
+	};
+	const queryKey =
+		resolvedOptions?.queryKey ?? getApiTagsByTagIdExpressionsQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...getApiTagsByTagIdExpressionsQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			GetApiTagsByTagIdExpressionsStatus422 | GetApiTagsByTagIdExpressionsStatus500
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
 export const getApiTagsByTagIdHierarchyQueryKey = ({
 	path,
 	query,
@@ -20260,7 +20402,7 @@ export function getApiTagsByTagIdHierarchyQueryOptions(
 }
 
 /**
- * @summary Get a Tag with direct children and grandchildren
+ * @summary Get typed child relations for a Tag
  * {@link /api/v1/tags/:tagId/hierarchy}
  */
 export function useGetApiTagsByTagIdHierarchy<
@@ -20359,7 +20501,7 @@ export function getApiTagsByTagIdPathsQueryOptions(
 }
 
 /**
- * @summary List accepted Tag Paths ending at a Tag
+ * @summary List accepted structural Paths containing a Tag
  * {@link /api/v1/tags/:tagId/paths}
  */
 export function useGetApiTagsByTagIdPaths<
@@ -20412,6 +20554,388 @@ export function useGetApiTagsByTagIdPaths<
 	return queryResult;
 }
 
+export const postApiTagExpressionsMutationKey = () => [{ url: "/api/v1/tag-expressions" }] as const;
+
+export function postApiTagExpressionsMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = postApiTagExpressionsMutationKey();
+	return mutationOptions<
+		PostApiTagExpressionsStatus200,
+		ResponseErrorConfig<
+			| PostApiTagExpressionsStatus400
+			| PostApiTagExpressionsStatus403
+			| PostApiTagExpressionsStatus422
+			| PostApiTagExpressionsStatus500
+		>,
+		PostApiTagExpressionsOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ body }) => {
+			const { data } = await postApiTagExpressions({ ...config, body, throwOnError: true });
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Create an immutable Tag Expression
+ * {@link /api/v1/tag-expressions}
+ */
+export function usePostApiTagExpressions<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			PostApiTagExpressionsStatus200,
+			ResponseErrorConfig<
+				| PostApiTagExpressionsStatus400
+				| PostApiTagExpressionsStatus403
+				| PostApiTagExpressionsStatus422
+				| PostApiTagExpressionsStatus500
+			>,
+			PostApiTagExpressionsOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? postApiTagExpressionsMutationKey();
+
+	const baseOptions = postApiTagExpressionsMutationOptions(config) as UseMutationOptions<
+		PostApiTagExpressionsStatus200,
+		ResponseErrorConfig<
+			| PostApiTagExpressionsStatus400
+			| PostApiTagExpressionsStatus403
+			| PostApiTagExpressionsStatus422
+			| PostApiTagExpressionsStatus500
+		>,
+		PostApiTagExpressionsOptions,
+		TContext
+	>;
+
+	return useMutation<
+		PostApiTagExpressionsStatus200,
+		ResponseErrorConfig<
+			| PostApiTagExpressionsStatus400
+			| PostApiTagExpressionsStatus403
+			| PostApiTagExpressionsStatus422
+			| PostApiTagExpressionsStatus500
+		>,
+		PostApiTagExpressionsOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PostApiTagExpressionsStatus200,
+		ResponseErrorConfig<
+			| PostApiTagExpressionsStatus400
+			| PostApiTagExpressionsStatus403
+			| PostApiTagExpressionsStatus422
+			| PostApiTagExpressionsStatus500
+		>,
+		PostApiTagExpressionsOptions,
+		TContext
+	>;
+}
+
+export const postApiTagExpressionsByExpressionIdInferenceRulesMutationKey = () =>
+	[{ url: "/api/v1/tag-expressions/:expressionId/inference-rules" }] as const;
+
+export function postApiTagExpressionsByExpressionIdInferenceRulesMutationOptions<
+	TContext = unknown,
+>(config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {}) {
+	const mutationKey = postApiTagExpressionsByExpressionIdInferenceRulesMutationKey();
+	return mutationOptions<
+		PostApiTagExpressionsByExpressionIdInferenceRulesStatus200,
+		ResponseErrorConfig<
+			| PostApiTagExpressionsByExpressionIdInferenceRulesStatus400
+			| PostApiTagExpressionsByExpressionIdInferenceRulesStatus403
+			| PostApiTagExpressionsByExpressionIdInferenceRulesStatus422
+			| PostApiTagExpressionsByExpressionIdInferenceRulesStatus500
+		>,
+		PostApiTagExpressionsByExpressionIdInferenceRulesOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			const { data } = await postApiTagExpressionsByExpressionIdInferenceRules({
+				...config,
+				path,
+				body,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Add a governed Tag Expression inference rule
+ * {@link /api/v1/tag-expressions/:expressionId/inference-rules}
+ */
+export function usePostApiTagExpressionsByExpressionIdInferenceRules<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			PostApiTagExpressionsByExpressionIdInferenceRulesStatus200,
+			ResponseErrorConfig<
+				| PostApiTagExpressionsByExpressionIdInferenceRulesStatus400
+				| PostApiTagExpressionsByExpressionIdInferenceRulesStatus403
+				| PostApiTagExpressionsByExpressionIdInferenceRulesStatus422
+				| PostApiTagExpressionsByExpressionIdInferenceRulesStatus500
+			>,
+			PostApiTagExpressionsByExpressionIdInferenceRulesOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ?? postApiTagExpressionsByExpressionIdInferenceRulesMutationKey();
+
+	const baseOptions = postApiTagExpressionsByExpressionIdInferenceRulesMutationOptions(
+		config,
+	) as UseMutationOptions<
+		PostApiTagExpressionsByExpressionIdInferenceRulesStatus200,
+		ResponseErrorConfig<
+			| PostApiTagExpressionsByExpressionIdInferenceRulesStatus400
+			| PostApiTagExpressionsByExpressionIdInferenceRulesStatus403
+			| PostApiTagExpressionsByExpressionIdInferenceRulesStatus422
+			| PostApiTagExpressionsByExpressionIdInferenceRulesStatus500
+		>,
+		PostApiTagExpressionsByExpressionIdInferenceRulesOptions,
+		TContext
+	>;
+
+	return useMutation<
+		PostApiTagExpressionsByExpressionIdInferenceRulesStatus200,
+		ResponseErrorConfig<
+			| PostApiTagExpressionsByExpressionIdInferenceRulesStatus400
+			| PostApiTagExpressionsByExpressionIdInferenceRulesStatus403
+			| PostApiTagExpressionsByExpressionIdInferenceRulesStatus422
+			| PostApiTagExpressionsByExpressionIdInferenceRulesStatus500
+		>,
+		PostApiTagExpressionsByExpressionIdInferenceRulesOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PostApiTagExpressionsByExpressionIdInferenceRulesStatus200,
+		ResponseErrorConfig<
+			| PostApiTagExpressionsByExpressionIdInferenceRulesStatus400
+			| PostApiTagExpressionsByExpressionIdInferenceRulesStatus403
+			| PostApiTagExpressionsByExpressionIdInferenceRulesStatus422
+			| PostApiTagExpressionsByExpressionIdInferenceRulesStatus500
+		>,
+		PostApiTagExpressionsByExpressionIdInferenceRulesOptions,
+		TContext
+	>;
+}
+
+export const deleteApiTagExpressionsByExpressionIdInferenceRulesByRuleIdMutationKey = () =>
+	[{ url: "/api/v1/tag-expressions/:expressionId/inference-rules/:ruleId" }] as const;
+
+export function deleteApiTagExpressionsByExpressionIdInferenceRulesByRuleIdMutationOptions<
+	TContext = unknown,
+>(config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {}) {
+	const mutationKey = deleteApiTagExpressionsByExpressionIdInferenceRulesByRuleIdMutationKey();
+	return mutationOptions<
+		DeleteApiTagExpressionsByExpressionIdInferenceRulesByRuleIdStatus200,
+		ResponseErrorConfig<
+			| DeleteApiTagExpressionsByExpressionIdInferenceRulesByRuleIdStatus403
+			| DeleteApiTagExpressionsByExpressionIdInferenceRulesByRuleIdStatus422
+			| DeleteApiTagExpressionsByExpressionIdInferenceRulesByRuleIdStatus500
+		>,
+		DeleteApiTagExpressionsByExpressionIdInferenceRulesByRuleIdOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path }) => {
+			const { data } = await deleteApiTagExpressionsByExpressionIdInferenceRulesByRuleId({
+				...config,
+				path,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Retire a Tag Expression inference-rule revision
+ * {@link /api/v1/tag-expressions/:expressionId/inference-rules/:ruleId}
+ */
+export function useDeleteApiTagExpressionsByExpressionIdInferenceRulesByRuleId<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			DeleteApiTagExpressionsByExpressionIdInferenceRulesByRuleIdStatus200,
+			ResponseErrorConfig<
+				| DeleteApiTagExpressionsByExpressionIdInferenceRulesByRuleIdStatus403
+				| DeleteApiTagExpressionsByExpressionIdInferenceRulesByRuleIdStatus422
+				| DeleteApiTagExpressionsByExpressionIdInferenceRulesByRuleIdStatus500
+			>,
+			DeleteApiTagExpressionsByExpressionIdInferenceRulesByRuleIdOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ??
+		deleteApiTagExpressionsByExpressionIdInferenceRulesByRuleIdMutationKey();
+
+	const baseOptions = deleteApiTagExpressionsByExpressionIdInferenceRulesByRuleIdMutationOptions(
+		config,
+	) as UseMutationOptions<
+		DeleteApiTagExpressionsByExpressionIdInferenceRulesByRuleIdStatus200,
+		ResponseErrorConfig<
+			| DeleteApiTagExpressionsByExpressionIdInferenceRulesByRuleIdStatus403
+			| DeleteApiTagExpressionsByExpressionIdInferenceRulesByRuleIdStatus422
+			| DeleteApiTagExpressionsByExpressionIdInferenceRulesByRuleIdStatus500
+		>,
+		DeleteApiTagExpressionsByExpressionIdInferenceRulesByRuleIdOptions,
+		TContext
+	>;
+
+	return useMutation<
+		DeleteApiTagExpressionsByExpressionIdInferenceRulesByRuleIdStatus200,
+		ResponseErrorConfig<
+			| DeleteApiTagExpressionsByExpressionIdInferenceRulesByRuleIdStatus403
+			| DeleteApiTagExpressionsByExpressionIdInferenceRulesByRuleIdStatus422
+			| DeleteApiTagExpressionsByExpressionIdInferenceRulesByRuleIdStatus500
+		>,
+		DeleteApiTagExpressionsByExpressionIdInferenceRulesByRuleIdOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		DeleteApiTagExpressionsByExpressionIdInferenceRulesByRuleIdStatus200,
+		ResponseErrorConfig<
+			| DeleteApiTagExpressionsByExpressionIdInferenceRulesByRuleIdStatus403
+			| DeleteApiTagExpressionsByExpressionIdInferenceRulesByRuleIdStatus422
+			| DeleteApiTagExpressionsByExpressionIdInferenceRulesByRuleIdStatus500
+		>,
+		DeleteApiTagExpressionsByExpressionIdInferenceRulesByRuleIdOptions,
+		TContext
+	>;
+}
+
+export const postApiTagRelationsMutationKey = () => [{ url: "/api/v1/tag-relations" }] as const;
+
+export function postApiTagRelationsMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = postApiTagRelationsMutationKey();
+	return mutationOptions<
+		PostApiTagRelationsStatus200,
+		ResponseErrorConfig<
+			| PostApiTagRelationsStatus400
+			| PostApiTagRelationsStatus404
+			| PostApiTagRelationsStatus422
+			| PostApiTagRelationsStatus429
+			| PostApiTagRelationsStatus500
+		>,
+		PostApiTagRelationsOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ body }) => {
+			const { data } = await postApiTagRelations({ ...config, body, throwOnError: true });
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Create or find a typed vocabulary relation
+ * {@link /api/v1/tag-relations}
+ */
+export function usePostApiTagRelations<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			PostApiTagRelationsStatus200,
+			ResponseErrorConfig<
+				| PostApiTagRelationsStatus400
+				| PostApiTagRelationsStatus404
+				| PostApiTagRelationsStatus422
+				| PostApiTagRelationsStatus429
+				| PostApiTagRelationsStatus500
+			>,
+			PostApiTagRelationsOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? postApiTagRelationsMutationKey();
+
+	const baseOptions = postApiTagRelationsMutationOptions(config) as UseMutationOptions<
+		PostApiTagRelationsStatus200,
+		ResponseErrorConfig<
+			| PostApiTagRelationsStatus400
+			| PostApiTagRelationsStatus404
+			| PostApiTagRelationsStatus422
+			| PostApiTagRelationsStatus429
+			| PostApiTagRelationsStatus500
+		>,
+		PostApiTagRelationsOptions,
+		TContext
+	>;
+
+	return useMutation<
+		PostApiTagRelationsStatus200,
+		ResponseErrorConfig<
+			| PostApiTagRelationsStatus400
+			| PostApiTagRelationsStatus404
+			| PostApiTagRelationsStatus422
+			| PostApiTagRelationsStatus429
+			| PostApiTagRelationsStatus500
+		>,
+		PostApiTagRelationsOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PostApiTagRelationsStatus200,
+		ResponseErrorConfig<
+			| PostApiTagRelationsStatus400
+			| PostApiTagRelationsStatus404
+			| PostApiTagRelationsStatus422
+			| PostApiTagRelationsStatus429
+			| PostApiTagRelationsStatus500
+		>,
+		PostApiTagRelationsOptions,
+		TContext
+	>;
+}
+
 export const postApiTagPathsDefinitionWarningsMutationKey = () =>
 	[{ url: "/api/v1/tag-paths/definition-warnings" }] as const;
 
@@ -20443,7 +20967,7 @@ export function postApiTagPathsDefinitionWarningsMutationOptions<TContext = unkn
 }
 
 /**
- * @summary List related accepted definitions before creating a Tag Path
+ * @summary Check related structural Path definitions
  * {@link /api/v1/tag-paths/definition-warnings}
  */
 export function usePostApiTagPathsDefinitionWarnings<TContext>(
@@ -20510,6 +21034,105 @@ export function usePostApiTagPathsDefinitionWarnings<TContext>(
 	>;
 }
 
+export const deleteApiTagPathsByPathIdSensesBySenseIdMutationKey = () =>
+	[{ url: "/api/v1/tag-paths/:pathId/senses/:senseId" }] as const;
+
+export function deleteApiTagPathsByPathIdSensesBySenseIdMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = deleteApiTagPathsByPathIdSensesBySenseIdMutationKey();
+	return mutationOptions<
+		DeleteApiTagPathsByPathIdSensesBySenseIdStatus200,
+		ResponseErrorConfig<
+			| DeleteApiTagPathsByPathIdSensesBySenseIdStatus403
+			| DeleteApiTagPathsByPathIdSensesBySenseIdStatus404
+			| DeleteApiTagPathsByPathIdSensesBySenseIdStatus422
+			| DeleteApiTagPathsByPathIdSensesBySenseIdStatus500
+		>,
+		DeleteApiTagPathsByPathIdSensesBySenseIdOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path }) => {
+			const { data } = await deleteApiTagPathsByPathIdSensesBySenseId({
+				...config,
+				path,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Retire an immutable Path Sense
+ * {@link /api/v1/tag-paths/:pathId/senses/:senseId}
+ */
+export function useDeleteApiTagPathsByPathIdSensesBySenseId<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			DeleteApiTagPathsByPathIdSensesBySenseIdStatus200,
+			ResponseErrorConfig<
+				| DeleteApiTagPathsByPathIdSensesBySenseIdStatus403
+				| DeleteApiTagPathsByPathIdSensesBySenseIdStatus404
+				| DeleteApiTagPathsByPathIdSensesBySenseIdStatus422
+				| DeleteApiTagPathsByPathIdSensesBySenseIdStatus500
+			>,
+			DeleteApiTagPathsByPathIdSensesBySenseIdOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ?? deleteApiTagPathsByPathIdSensesBySenseIdMutationKey();
+
+	const baseOptions = deleteApiTagPathsByPathIdSensesBySenseIdMutationOptions(
+		config,
+	) as UseMutationOptions<
+		DeleteApiTagPathsByPathIdSensesBySenseIdStatus200,
+		ResponseErrorConfig<
+			| DeleteApiTagPathsByPathIdSensesBySenseIdStatus403
+			| DeleteApiTagPathsByPathIdSensesBySenseIdStatus404
+			| DeleteApiTagPathsByPathIdSensesBySenseIdStatus422
+			| DeleteApiTagPathsByPathIdSensesBySenseIdStatus500
+		>,
+		DeleteApiTagPathsByPathIdSensesBySenseIdOptions,
+		TContext
+	>;
+
+	return useMutation<
+		DeleteApiTagPathsByPathIdSensesBySenseIdStatus200,
+		ResponseErrorConfig<
+			| DeleteApiTagPathsByPathIdSensesBySenseIdStatus403
+			| DeleteApiTagPathsByPathIdSensesBySenseIdStatus404
+			| DeleteApiTagPathsByPathIdSensesBySenseIdStatus422
+			| DeleteApiTagPathsByPathIdSensesBySenseIdStatus500
+		>,
+		DeleteApiTagPathsByPathIdSensesBySenseIdOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		DeleteApiTagPathsByPathIdSensesBySenseIdStatus200,
+		ResponseErrorConfig<
+			| DeleteApiTagPathsByPathIdSensesBySenseIdStatus403
+			| DeleteApiTagPathsByPathIdSensesBySenseIdStatus404
+			| DeleteApiTagPathsByPathIdSensesBySenseIdStatus422
+			| DeleteApiTagPathsByPathIdSensesBySenseIdStatus500
+		>,
+		DeleteApiTagPathsByPathIdSensesBySenseIdOptions,
+		TContext
+	>;
+}
+
 export const getApiTagPathsSearchQueryKey = ({
 	query,
 }: Omit<GetApiTagPathsSearchOptions, "headers">) =>
@@ -20542,7 +21165,7 @@ export function getApiTagPathsSearchQueryOptions(
 }
 
 /**
- * @summary Search accepted Tag Paths for curation
+ * @summary Search explicit Path Senses for curation
  * {@link /api/v1/tag-paths/search}
  */
 export function useGetApiTagPathsSearch<
@@ -20615,7 +21238,7 @@ export function postApiTagPathsMutationOptions<TContext = unknown>(
 }
 
 /**
- * @summary Create or find and upvote an immutable Tag Path
+ * @summary Create or find an immutable structural Tag Path
  * {@link /api/v1/tag-paths}
  */
 export function usePostApiTagPaths<TContext>(
@@ -20722,7 +21345,7 @@ export function getApiTagPathsByPathIdQueryOptions(
 }
 
 /**
- * @summary Get a Tag Path
+ * @summary Get Path structure and explicit Senses
  * {@link /api/v1/tag-paths/:pathId}
  */
 export function useGetApiTagPathsByPathId<
@@ -20783,6 +21406,108 @@ export function useGetApiTagPathsByPathId<
 	return queryResult;
 }
 
+export const postApiTagPathsByPathIdSensesMutationKey = () =>
+	[{ url: "/api/v1/tag-paths/:pathId/senses" }] as const;
+
+export function postApiTagPathsByPathIdSensesMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = postApiTagPathsByPathIdSensesMutationKey();
+	return mutationOptions<
+		PostApiTagPathsByPathIdSensesStatus200,
+		ResponseErrorConfig<
+			| PostApiTagPathsByPathIdSensesStatus400
+			| PostApiTagPathsByPathIdSensesStatus403
+			| PostApiTagPathsByPathIdSensesStatus404
+			| PostApiTagPathsByPathIdSensesStatus422
+			| PostApiTagPathsByPathIdSensesStatus500
+		>,
+		PostApiTagPathsByPathIdSensesOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			const { data } = await postApiTagPathsByPathIdSenses({
+				...config,
+				path,
+				body,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Create an explicit Path Sense
+ * {@link /api/v1/tag-paths/:pathId/senses}
+ */
+export function usePostApiTagPathsByPathIdSenses<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			PostApiTagPathsByPathIdSensesStatus200,
+			ResponseErrorConfig<
+				| PostApiTagPathsByPathIdSensesStatus400
+				| PostApiTagPathsByPathIdSensesStatus403
+				| PostApiTagPathsByPathIdSensesStatus404
+				| PostApiTagPathsByPathIdSensesStatus422
+				| PostApiTagPathsByPathIdSensesStatus500
+			>,
+			PostApiTagPathsByPathIdSensesOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? postApiTagPathsByPathIdSensesMutationKey();
+
+	const baseOptions = postApiTagPathsByPathIdSensesMutationOptions(config) as UseMutationOptions<
+		PostApiTagPathsByPathIdSensesStatus200,
+		ResponseErrorConfig<
+			| PostApiTagPathsByPathIdSensesStatus400
+			| PostApiTagPathsByPathIdSensesStatus403
+			| PostApiTagPathsByPathIdSensesStatus404
+			| PostApiTagPathsByPathIdSensesStatus422
+			| PostApiTagPathsByPathIdSensesStatus500
+		>,
+		PostApiTagPathsByPathIdSensesOptions,
+		TContext
+	>;
+
+	return useMutation<
+		PostApiTagPathsByPathIdSensesStatus200,
+		ResponseErrorConfig<
+			| PostApiTagPathsByPathIdSensesStatus400
+			| PostApiTagPathsByPathIdSensesStatus403
+			| PostApiTagPathsByPathIdSensesStatus404
+			| PostApiTagPathsByPathIdSensesStatus422
+			| PostApiTagPathsByPathIdSensesStatus500
+		>,
+		PostApiTagPathsByPathIdSensesOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PostApiTagPathsByPathIdSensesStatus200,
+		ResponseErrorConfig<
+			| PostApiTagPathsByPathIdSensesStatus400
+			| PostApiTagPathsByPathIdSensesStatus403
+			| PostApiTagPathsByPathIdSensesStatus404
+			| PostApiTagPathsByPathIdSensesStatus422
+			| PostApiTagPathsByPathIdSensesStatus500
+		>,
+		PostApiTagPathsByPathIdSensesOptions,
+		TContext
+	>;
+}
+
 export const putApiTagPathsByPathIdVoteMutationKey = () =>
 	[{ url: "/api/v1/tag-paths/:pathId/vote" }] as const;
 
@@ -20816,7 +21541,7 @@ export function putApiTagPathsByPathIdVoteMutationOptions<TContext = unknown>(
 }
 
 /**
- * @summary Vote on a Tag Path definition
+ * @summary Vote on structural Path validity
  * {@link /api/v1/tag-paths/:pathId/vote}
  */
 export function usePutApiTagPathsByPathIdVote<TContext>(
@@ -20895,7 +21620,6 @@ export function deleteApiTagPathsByPathIdVoteMutationOptions<TContext = unknown>
 	return mutationOptions<
 		DeleteApiTagPathsByPathIdVoteStatus200,
 		ResponseErrorConfig<
-			| DeleteApiTagPathsByPathIdVoteStatus404
 			| DeleteApiTagPathsByPathIdVoteStatus422
 			| DeleteApiTagPathsByPathIdVoteStatus429
 			| DeleteApiTagPathsByPathIdVoteStatus500
@@ -20912,7 +21636,7 @@ export function deleteApiTagPathsByPathIdVoteMutationOptions<TContext = unknown>
 }
 
 /**
- * @summary Remove a Tag Path definition vote
+ * @summary Remove a structural Path vote
  * {@link /api/v1/tag-paths/:pathId/vote}
  */
 export function useDeleteApiTagPathsByPathIdVote<TContext>(
@@ -20920,7 +21644,6 @@ export function useDeleteApiTagPathsByPathIdVote<TContext>(
 		mutation?: UseMutationOptions<
 			DeleteApiTagPathsByPathIdVoteStatus200,
 			ResponseErrorConfig<
-				| DeleteApiTagPathsByPathIdVoteStatus404
 				| DeleteApiTagPathsByPathIdVoteStatus422
 				| DeleteApiTagPathsByPathIdVoteStatus429
 				| DeleteApiTagPathsByPathIdVoteStatus500
@@ -20938,7 +21661,6 @@ export function useDeleteApiTagPathsByPathIdVote<TContext>(
 	const baseOptions = deleteApiTagPathsByPathIdVoteMutationOptions(config) as UseMutationOptions<
 		DeleteApiTagPathsByPathIdVoteStatus200,
 		ResponseErrorConfig<
-			| DeleteApiTagPathsByPathIdVoteStatus404
 			| DeleteApiTagPathsByPathIdVoteStatus422
 			| DeleteApiTagPathsByPathIdVoteStatus429
 			| DeleteApiTagPathsByPathIdVoteStatus500
@@ -20950,7 +21672,6 @@ export function useDeleteApiTagPathsByPathIdVote<TContext>(
 	return useMutation<
 		DeleteApiTagPathsByPathIdVoteStatus200,
 		ResponseErrorConfig<
-			| DeleteApiTagPathsByPathIdVoteStatus404
 			| DeleteApiTagPathsByPathIdVoteStatus422
 			| DeleteApiTagPathsByPathIdVoteStatus429
 			| DeleteApiTagPathsByPathIdVoteStatus500
@@ -20967,7 +21688,6 @@ export function useDeleteApiTagPathsByPathIdVote<TContext>(
 	) as UseMutationResult<
 		DeleteApiTagPathsByPathIdVoteStatus200,
 		ResponseErrorConfig<
-			| DeleteApiTagPathsByPathIdVoteStatus404
 			| DeleteApiTagPathsByPathIdVoteStatus422
 			| DeleteApiTagPathsByPathIdVoteStatus429
 			| DeleteApiTagPathsByPathIdVoteStatus500
@@ -21005,7 +21725,7 @@ export function postApiTagPathsMergesMutationOptions<TContext = unknown>(
 }
 
 /**
- * @summary Propose a manually governed Tag Path merge
+ * @summary Propose a governed structural Path merge
  * {@link /api/v1/tag-paths/merges}
  */
 export function usePostApiTagPathsMerges<TContext>(
@@ -21110,7 +21830,7 @@ export function getApiTagPathsMergesPendingQueryOptions(
 }
 
 /**
- * @summary List pending manual Tag Path merge proposals
+ * @summary List pending structural Path merge proposals
  * {@link /api/v1/tag-paths/merges/pending}
  */
 export function useGetApiTagPathsMergesPending<
@@ -21201,7 +21921,7 @@ export function putApiTagPathsMergesByMergeIdResolutionMutationOptions<TContext 
 }
 
 /**
- * @summary Resolve a Tag Path merge proposal
+ * @summary Resolve a structural Path merge proposal
  * {@link /api/v1/tag-paths/merges/:mergeId/resolution}
  */
 export function usePutApiTagPathsMergesByMergeIdResolution<TContext>(
@@ -21313,7 +22033,7 @@ export function getApiUnitsByTypeByUnitIdTagsQueryOptions(
 }
 
 /**
- * @summary Get global and subscribed Realm Tag assertions for a Unit
+ * @summary Get visible Tag Expressions grouped by authority
  * {@link /api/v1/units/:type/:unitId/tags}
  */
 export function useGetApiUnitsByTypeByUnitIdTags<
@@ -21379,231 +22099,28 @@ export function useGetApiUnitsByTypeByUnitIdTags<
 	return queryResult;
 }
 
-export const putApiUnitsByTypeByUnitIdTagPathsByPathIdMutationKey = () =>
-	[{ url: "/api/v1/units/:type/:unitId/tag-paths/:pathId" }] as const;
+export const postApiUnitsByTypeByUnitIdTagPathApplicationsMutationKey = () =>
+	[{ url: "/api/v1/units/:type/:unitId/tag-path-applications" }] as const;
 
-export function putApiUnitsByTypeByUnitIdTagPathsByPathIdMutationOptions<TContext = unknown>(
+export function postApiUnitsByTypeByUnitIdTagPathApplicationsMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
 ) {
-	const mutationKey = putApiUnitsByTypeByUnitIdTagPathsByPathIdMutationKey();
+	const mutationKey = postApiUnitsByTypeByUnitIdTagPathApplicationsMutationKey();
 	return mutationOptions<
-		PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus200,
+		PostApiUnitsByTypeByUnitIdTagPathApplicationsStatus200,
 		ResponseErrorConfig<
-			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus404
-			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus422
-			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus429
-			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus500
+			| PostApiUnitsByTypeByUnitIdTagPathApplicationsStatus400
+			| PostApiUnitsByTypeByUnitIdTagPathApplicationsStatus404
+			| PostApiUnitsByTypeByUnitIdTagPathApplicationsStatus422
+			| PostApiUnitsByTypeByUnitIdTagPathApplicationsStatus429
+			| PostApiUnitsByTypeByUnitIdTagPathApplicationsStatus500
 		>,
-		PutApiUnitsByTypeByUnitIdTagPathsByPathIdOptions,
-		TContext
-	>({
-		mutationKey,
-		mutationFn: async ({ path }) => {
-			const { data } = await putApiUnitsByTypeByUnitIdTagPathsByPathId({
-				...config,
-				path,
-				throwOnError: true,
-			});
-			return data;
-		},
-	});
-}
-
-/**
- * @summary Apply a Tag Path to a Unit
- * {@link /api/v1/units/:type/:unitId/tag-paths/:pathId}
- */
-export function usePutApiUnitsByTypeByUnitIdTagPathsByPathId<TContext>(
-	options: {
-		mutation?: UseMutationOptions<
-			PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus200,
-			ResponseErrorConfig<
-				| PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus404
-				| PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus422
-				| PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus429
-				| PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus500
-			>,
-			PutApiUnitsByTypeByUnitIdTagPathsByPathIdOptions,
-			TContext
-		> & { client?: QueryClient };
-		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
-	} = {},
-) {
-	const { mutation = {}, client: config = {} } = options ?? {};
-	const { client: queryClient, ...mutationOptions } = mutation;
-	const mutationKey =
-		mutationOptions.mutationKey ?? putApiUnitsByTypeByUnitIdTagPathsByPathIdMutationKey();
-
-	const baseOptions = putApiUnitsByTypeByUnitIdTagPathsByPathIdMutationOptions(
-		config,
-	) as UseMutationOptions<
-		PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus200,
-		ResponseErrorConfig<
-			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus404
-			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus422
-			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus429
-			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus500
-		>,
-		PutApiUnitsByTypeByUnitIdTagPathsByPathIdOptions,
-		TContext
-	>;
-
-	return useMutation<
-		PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus200,
-		ResponseErrorConfig<
-			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus404
-			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus422
-			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus429
-			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus500
-		>,
-		PutApiUnitsByTypeByUnitIdTagPathsByPathIdOptions,
-		TContext
-	>(
-		{
-			...baseOptions,
-			mutationKey,
-			...mutationOptions,
-		},
-		queryClient,
-	) as UseMutationResult<
-		PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus200,
-		ResponseErrorConfig<
-			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus404
-			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus422
-			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus429
-			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus500
-		>,
-		PutApiUnitsByTypeByUnitIdTagPathsByPathIdOptions,
-		TContext
-	>;
-}
-
-export const deleteApiUnitsByTypeByUnitIdTagPathsByPathIdMutationKey = () =>
-	[{ url: "/api/v1/units/:type/:unitId/tag-paths/:pathId" }] as const;
-
-export function deleteApiUnitsByTypeByUnitIdTagPathsByPathIdMutationOptions<TContext = unknown>(
-	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
-) {
-	const mutationKey = deleteApiUnitsByTypeByUnitIdTagPathsByPathIdMutationKey();
-	return mutationOptions<
-		DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus204,
-		ResponseErrorConfig<
-			| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus403
-			| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus404
-			| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus422
-			| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus429
-			| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus500
-		>,
-		DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdOptions,
-		TContext
-	>({
-		mutationKey,
-		mutationFn: async ({ path }) => {
-			const { data } = await deleteApiUnitsByTypeByUnitIdTagPathsByPathId({
-				...config,
-				path,
-				throwOnError: true,
-			});
-			return data;
-		},
-	});
-}
-
-/**
- * @summary Remove a Tag Path from a Unit
- * {@link /api/v1/units/:type/:unitId/tag-paths/:pathId}
- */
-export function useDeleteApiUnitsByTypeByUnitIdTagPathsByPathId<TContext>(
-	options: {
-		mutation?: UseMutationOptions<
-			DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus204,
-			ResponseErrorConfig<
-				| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus403
-				| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus404
-				| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus422
-				| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus429
-				| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus500
-			>,
-			DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdOptions,
-			TContext
-		> & { client?: QueryClient };
-		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
-	} = {},
-) {
-	const { mutation = {}, client: config = {} } = options ?? {};
-	const { client: queryClient, ...mutationOptions } = mutation;
-	const mutationKey =
-		mutationOptions.mutationKey ?? deleteApiUnitsByTypeByUnitIdTagPathsByPathIdMutationKey();
-
-	const baseOptions = deleteApiUnitsByTypeByUnitIdTagPathsByPathIdMutationOptions(
-		config,
-	) as UseMutationOptions<
-		DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus204,
-		ResponseErrorConfig<
-			| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus403
-			| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus404
-			| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus422
-			| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus429
-			| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus500
-		>,
-		DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdOptions,
-		TContext
-	>;
-
-	return useMutation<
-		DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus204,
-		ResponseErrorConfig<
-			| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus403
-			| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus404
-			| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus422
-			| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus429
-			| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus500
-		>,
-		DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdOptions,
-		TContext
-	>(
-		{
-			...baseOptions,
-			mutationKey,
-			...mutationOptions,
-		},
-		queryClient,
-	) as UseMutationResult<
-		DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus204,
-		ResponseErrorConfig<
-			| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus403
-			| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus404
-			| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus422
-			| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus429
-			| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus500
-		>,
-		DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdOptions,
-		TContext
-	>;
-}
-
-export const putApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentMutationKey = () =>
-	[{ url: "/api/v1/units/:type/:unitId/tag-paths/:pathId/judgment" }] as const;
-
-export function putApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentMutationOptions<
-	TContext = unknown,
->(config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {}) {
-	const mutationKey = putApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentMutationKey();
-	return mutationOptions<
-		PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus200,
-		ResponseErrorConfig<
-			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus400
-			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus404
-			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus422
-			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus429
-			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus500
-		>,
-		PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentOptions,
+		PostApiUnitsByTypeByUnitIdTagPathApplicationsOptions,
 		TContext
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await putApiUnitsByTypeByUnitIdTagPathsByPathIdJudgment({
+			const { data } = await postApiUnitsByTypeByUnitIdTagPathApplications({
 				...config,
 				path,
 				body,
@@ -21615,21 +22132,21 @@ export function putApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentMutationOptions
 }
 
 /**
- * @summary Judge Tag Path fit or spoiler for a Unit
- * {@link /api/v1/units/:type/:unitId/tag-paths/:pathId/judgment}
+ * @summary Apply one explicit global Path Sense
+ * {@link /api/v1/units/:type/:unitId/tag-path-applications}
  */
-export function usePutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgment<TContext>(
+export function usePostApiUnitsByTypeByUnitIdTagPathApplications<TContext>(
 	options: {
 		mutation?: UseMutationOptions<
-			PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus200,
+			PostApiUnitsByTypeByUnitIdTagPathApplicationsStatus200,
 			ResponseErrorConfig<
-				| PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus400
-				| PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus404
-				| PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus422
-				| PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus429
-				| PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus500
+				| PostApiUnitsByTypeByUnitIdTagPathApplicationsStatus400
+				| PostApiUnitsByTypeByUnitIdTagPathApplicationsStatus404
+				| PostApiUnitsByTypeByUnitIdTagPathApplicationsStatus422
+				| PostApiUnitsByTypeByUnitIdTagPathApplicationsStatus429
+				| PostApiUnitsByTypeByUnitIdTagPathApplicationsStatus500
 			>,
-			PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentOptions,
+			PostApiUnitsByTypeByUnitIdTagPathApplicationsOptions,
 			TContext
 		> & { client?: QueryClient };
 		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
@@ -21638,33 +22155,33 @@ export function usePutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgment<TContext>(
 	const { mutation = {}, client: config = {} } = options ?? {};
 	const { client: queryClient, ...mutationOptions } = mutation;
 	const mutationKey =
-		mutationOptions.mutationKey ?? putApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentMutationKey();
+		mutationOptions.mutationKey ?? postApiUnitsByTypeByUnitIdTagPathApplicationsMutationKey();
 
-	const baseOptions = putApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentMutationOptions(
+	const baseOptions = postApiUnitsByTypeByUnitIdTagPathApplicationsMutationOptions(
 		config,
 	) as UseMutationOptions<
-		PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus200,
+		PostApiUnitsByTypeByUnitIdTagPathApplicationsStatus200,
 		ResponseErrorConfig<
-			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus400
-			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus404
-			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus422
-			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus429
-			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus500
+			| PostApiUnitsByTypeByUnitIdTagPathApplicationsStatus400
+			| PostApiUnitsByTypeByUnitIdTagPathApplicationsStatus404
+			| PostApiUnitsByTypeByUnitIdTagPathApplicationsStatus422
+			| PostApiUnitsByTypeByUnitIdTagPathApplicationsStatus429
+			| PostApiUnitsByTypeByUnitIdTagPathApplicationsStatus500
 		>,
-		PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentOptions,
+		PostApiUnitsByTypeByUnitIdTagPathApplicationsOptions,
 		TContext
 	>;
 
 	return useMutation<
-		PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus200,
+		PostApiUnitsByTypeByUnitIdTagPathApplicationsStatus200,
 		ResponseErrorConfig<
-			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus400
-			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus404
-			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus422
-			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus429
-			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus500
+			| PostApiUnitsByTypeByUnitIdTagPathApplicationsStatus400
+			| PostApiUnitsByTypeByUnitIdTagPathApplicationsStatus404
+			| PostApiUnitsByTypeByUnitIdTagPathApplicationsStatus422
+			| PostApiUnitsByTypeByUnitIdTagPathApplicationsStatus429
+			| PostApiUnitsByTypeByUnitIdTagPathApplicationsStatus500
 		>,
-		PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentOptions,
+		PostApiUnitsByTypeByUnitIdTagPathApplicationsOptions,
 		TContext
 	>(
 		{
@@ -21674,40 +22191,40 @@ export function usePutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgment<TContext>(
 		},
 		queryClient,
 	) as UseMutationResult<
-		PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus200,
+		PostApiUnitsByTypeByUnitIdTagPathApplicationsStatus200,
 		ResponseErrorConfig<
-			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus400
-			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus404
-			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus422
-			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus429
-			| PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus500
+			| PostApiUnitsByTypeByUnitIdTagPathApplicationsStatus400
+			| PostApiUnitsByTypeByUnitIdTagPathApplicationsStatus404
+			| PostApiUnitsByTypeByUnitIdTagPathApplicationsStatus422
+			| PostApiUnitsByTypeByUnitIdTagPathApplicationsStatus429
+			| PostApiUnitsByTypeByUnitIdTagPathApplicationsStatus500
 		>,
-		PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentOptions,
+		PostApiUnitsByTypeByUnitIdTagPathApplicationsOptions,
 		TContext
 	>;
 }
 
-export const deleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentMutationKey = () =>
-	[{ url: "/api/v1/units/:type/:unitId/tag-paths/:pathId/judgment" }] as const;
+export const deleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdMutationKey = () =>
+	[{ url: "/api/v1/units/:type/:unitId/tag-path-applications/:applicationId" }] as const;
 
-export function deleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentMutationOptions<
+export function deleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdMutationOptions<
 	TContext = unknown,
 >(config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {}) {
-	const mutationKey = deleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentMutationKey();
+	const mutationKey = deleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdMutationKey();
 	return mutationOptions<
-		DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus200,
+		DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdStatus200,
 		ResponseErrorConfig<
-			| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus404
-			| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus422
-			| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus429
-			| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus500
+			| DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdStatus404
+			| DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdStatus422
+			| DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdStatus429
+			| DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdStatus500
 		>,
-		DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentOptions,
+		DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdOptions,
 		TContext
 	>({
 		mutationKey,
 		mutationFn: async ({ path }) => {
-			const { data } = await deleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgment({
+			const { data } = await deleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationId({
 				...config,
 				path,
 				throwOnError: true,
@@ -21718,20 +22235,20 @@ export function deleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentMutationOpti
 }
 
 /**
- * @summary Remove a Unit Tag Path judgment
- * {@link /api/v1/units/:type/:unitId/tag-paths/:pathId/judgment}
+ * @summary Remove one global Path Application
+ * {@link /api/v1/units/:type/:unitId/tag-path-applications/:applicationId}
  */
-export function useDeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgment<TContext>(
+export function useDeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationId<TContext>(
 	options: {
 		mutation?: UseMutationOptions<
-			DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus200,
+			DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdStatus200,
 			ResponseErrorConfig<
-				| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus404
-				| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus422
-				| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus429
-				| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus500
+				| DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdStatus404
+				| DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdStatus422
+				| DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdStatus429
+				| DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdStatus500
 			>,
-			DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentOptions,
+			DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdOptions,
 			TContext
 		> & { client?: QueryClient };
 		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
@@ -21741,31 +22258,31 @@ export function useDeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgment<TContext
 	const { client: queryClient, ...mutationOptions } = mutation;
 	const mutationKey =
 		mutationOptions.mutationKey ??
-		deleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentMutationKey();
+		deleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdMutationKey();
 
-	const baseOptions = deleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentMutationOptions(
+	const baseOptions = deleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdMutationOptions(
 		config,
 	) as UseMutationOptions<
-		DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus200,
+		DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdStatus200,
 		ResponseErrorConfig<
-			| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus404
-			| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus422
-			| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus429
-			| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus500
+			| DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdStatus404
+			| DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdStatus422
+			| DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdStatus429
+			| DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdStatus500
 		>,
-		DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentOptions,
+		DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdOptions,
 		TContext
 	>;
 
 	return useMutation<
-		DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus200,
+		DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdStatus200,
 		ResponseErrorConfig<
-			| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus404
-			| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus422
-			| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus429
-			| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus500
+			| DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdStatus404
+			| DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdStatus422
+			| DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdStatus429
+			| DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdStatus500
 		>,
-		DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentOptions,
+		DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdOptions,
 		TContext
 	>(
 		{
@@ -21775,14 +22292,223 @@ export function useDeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgment<TContext
 		},
 		queryClient,
 	) as UseMutationResult<
-		DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus200,
+		DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdStatus200,
 		ResponseErrorConfig<
-			| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus404
-			| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus422
-			| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus429
-			| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus500
+			| DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdStatus404
+			| DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdStatus422
+			| DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdStatus429
+			| DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdStatus500
 		>,
-		DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentOptions,
+		DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdOptions,
+		TContext
+	>;
+}
+
+export const putApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentMutationKey = () =>
+	[{ url: "/api/v1/units/:type/:unitId/tag-path-applications/:applicationId/judgment" }] as const;
+
+export function putApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentMutationOptions<
+	TContext = unknown,
+>(config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {}) {
+	const mutationKey =
+		putApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentMutationKey();
+	return mutationOptions<
+		PutApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus200,
+		ResponseErrorConfig<
+			| PutApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus400
+			| PutApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus404
+			| PutApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus422
+			| PutApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus429
+			| PutApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus500
+		>,
+		PutApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			const { data } = await putApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgment({
+				...config,
+				path,
+				body,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Judge one global semantic Application
+ * {@link /api/v1/units/:type/:unitId/tag-path-applications/:applicationId/judgment}
+ */
+export function usePutApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgment<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			PutApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus200,
+			ResponseErrorConfig<
+				| PutApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus400
+				| PutApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus404
+				| PutApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus422
+				| PutApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus429
+				| PutApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus500
+			>,
+			PutApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ??
+		putApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentMutationKey();
+
+	const baseOptions =
+		putApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentMutationOptions(
+			config,
+		) as UseMutationOptions<
+			PutApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus200,
+			ResponseErrorConfig<
+				| PutApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus400
+				| PutApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus404
+				| PutApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus422
+				| PutApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus429
+				| PutApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus500
+			>,
+			PutApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentOptions,
+			TContext
+		>;
+
+	return useMutation<
+		PutApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus200,
+		ResponseErrorConfig<
+			| PutApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus400
+			| PutApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus404
+			| PutApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus422
+			| PutApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus429
+			| PutApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus500
+		>,
+		PutApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PutApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus200,
+		ResponseErrorConfig<
+			| PutApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus400
+			| PutApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus404
+			| PutApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus422
+			| PutApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus429
+			| PutApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus500
+		>,
+		PutApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentOptions,
+		TContext
+	>;
+}
+
+export const deleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentMutationKey =
+	() =>
+		[{ url: "/api/v1/units/:type/:unitId/tag-path-applications/:applicationId/judgment" }] as const;
+
+export function deleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentMutationOptions<
+	TContext = unknown,
+>(config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {}) {
+	const mutationKey =
+		deleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentMutationKey();
+	return mutationOptions<
+		DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus200,
+		ResponseErrorConfig<
+			| DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus404
+			| DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus422
+			| DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus429
+			| DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus500
+		>,
+		DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path }) => {
+			const { data } = await deleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgment(
+				{ ...config, path, throwOnError: true },
+			);
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Clear one global Application judgment
+ * {@link /api/v1/units/:type/:unitId/tag-path-applications/:applicationId/judgment}
+ */
+export function useDeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgment<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus200,
+			ResponseErrorConfig<
+				| DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus404
+				| DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus422
+				| DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus429
+				| DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus500
+			>,
+			DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ??
+		deleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentMutationKey();
+
+	const baseOptions =
+		deleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentMutationOptions(
+			config,
+		) as UseMutationOptions<
+			DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus200,
+			ResponseErrorConfig<
+				| DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus404
+				| DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus422
+				| DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus429
+				| DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus500
+			>,
+			DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentOptions,
+			TContext
+		>;
+
+	return useMutation<
+		DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus200,
+		ResponseErrorConfig<
+			| DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus404
+			| DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus422
+			| DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus429
+			| DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus500
+		>,
+		DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus200,
+		ResponseErrorConfig<
+			| DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus404
+			| DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus422
+			| DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus429
+			| DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus500
+		>,
+		DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentOptions,
 		TContext
 	>;
 }
@@ -21827,7 +22553,7 @@ export function getApiRealmsByRealmIdTagPathsQueryOptions(
 }
 
 /**
- * @summary List Realm Tag Paths with independent authority resolution
+ * @summary List structural Paths adopted by a Realm
  * {@link /api/v1/realms/:realmId/tag-paths}
  */
 export function useGetApiRealmsByRealmIdTagPaths<
@@ -21906,7 +22632,6 @@ export function putApiRealmsByRealmIdTagPathsByPathIdMutationOptions<TContext = 
 			| PutApiRealmsByRealmIdTagPathsByPathIdStatus403
 			| PutApiRealmsByRealmIdTagPathsByPathIdStatus404
 			| PutApiRealmsByRealmIdTagPathsByPathIdStatus422
-			| PutApiRealmsByRealmIdTagPathsByPathIdStatus429
 			| PutApiRealmsByRealmIdTagPathsByPathIdStatus500
 		>,
 		PutApiRealmsByRealmIdTagPathsByPathIdOptions,
@@ -21925,7 +22650,7 @@ export function putApiRealmsByRealmIdTagPathsByPathIdMutationOptions<TContext = 
 }
 
 /**
- * @summary Adopt a Tag Path in a Realm
+ * @summary Adopt structural Path identity in a Realm
  * {@link /api/v1/realms/:realmId/tag-paths/:pathId}
  */
 export function usePutApiRealmsByRealmIdTagPathsByPathId<TContext>(
@@ -21936,7 +22661,6 @@ export function usePutApiRealmsByRealmIdTagPathsByPathId<TContext>(
 				| PutApiRealmsByRealmIdTagPathsByPathIdStatus403
 				| PutApiRealmsByRealmIdTagPathsByPathIdStatus404
 				| PutApiRealmsByRealmIdTagPathsByPathIdStatus422
-				| PutApiRealmsByRealmIdTagPathsByPathIdStatus429
 				| PutApiRealmsByRealmIdTagPathsByPathIdStatus500
 			>,
 			PutApiRealmsByRealmIdTagPathsByPathIdOptions,
@@ -21958,7 +22682,6 @@ export function usePutApiRealmsByRealmIdTagPathsByPathId<TContext>(
 			| PutApiRealmsByRealmIdTagPathsByPathIdStatus403
 			| PutApiRealmsByRealmIdTagPathsByPathIdStatus404
 			| PutApiRealmsByRealmIdTagPathsByPathIdStatus422
-			| PutApiRealmsByRealmIdTagPathsByPathIdStatus429
 			| PutApiRealmsByRealmIdTagPathsByPathIdStatus500
 		>,
 		PutApiRealmsByRealmIdTagPathsByPathIdOptions,
@@ -21971,7 +22694,6 @@ export function usePutApiRealmsByRealmIdTagPathsByPathId<TContext>(
 			| PutApiRealmsByRealmIdTagPathsByPathIdStatus403
 			| PutApiRealmsByRealmIdTagPathsByPathIdStatus404
 			| PutApiRealmsByRealmIdTagPathsByPathIdStatus422
-			| PutApiRealmsByRealmIdTagPathsByPathIdStatus429
 			| PutApiRealmsByRealmIdTagPathsByPathIdStatus500
 		>,
 		PutApiRealmsByRealmIdTagPathsByPathIdOptions,
@@ -21989,10 +22711,108 @@ export function usePutApiRealmsByRealmIdTagPathsByPathId<TContext>(
 			| PutApiRealmsByRealmIdTagPathsByPathIdStatus403
 			| PutApiRealmsByRealmIdTagPathsByPathIdStatus404
 			| PutApiRealmsByRealmIdTagPathsByPathIdStatus422
-			| PutApiRealmsByRealmIdTagPathsByPathIdStatus429
 			| PutApiRealmsByRealmIdTagPathsByPathIdStatus500
 		>,
 		PutApiRealmsByRealmIdTagPathsByPathIdOptions,
+		TContext
+	>;
+}
+
+export const putApiRealmsByRealmIdTagPathSensesBySenseIdMutationKey = () =>
+	[{ url: "/api/v1/realms/:realmId/tag-path-senses/:senseId" }] as const;
+
+export function putApiRealmsByRealmIdTagPathSensesBySenseIdMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = putApiRealmsByRealmIdTagPathSensesBySenseIdMutationKey();
+	return mutationOptions<
+		PutApiRealmsByRealmIdTagPathSensesBySenseIdStatus200,
+		ResponseErrorConfig<
+			| PutApiRealmsByRealmIdTagPathSensesBySenseIdStatus403
+			| PutApiRealmsByRealmIdTagPathSensesBySenseIdStatus404
+			| PutApiRealmsByRealmIdTagPathSensesBySenseIdStatus422
+			| PutApiRealmsByRealmIdTagPathSensesBySenseIdStatus500
+		>,
+		PutApiRealmsByRealmIdTagPathSensesBySenseIdOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path }) => {
+			const { data } = await putApiRealmsByRealmIdTagPathSensesBySenseId({
+				...config,
+				path,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Adopt an explicit Path Sense in a Realm
+ * {@link /api/v1/realms/:realmId/tag-path-senses/:senseId}
+ */
+export function usePutApiRealmsByRealmIdTagPathSensesBySenseId<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			PutApiRealmsByRealmIdTagPathSensesBySenseIdStatus200,
+			ResponseErrorConfig<
+				| PutApiRealmsByRealmIdTagPathSensesBySenseIdStatus403
+				| PutApiRealmsByRealmIdTagPathSensesBySenseIdStatus404
+				| PutApiRealmsByRealmIdTagPathSensesBySenseIdStatus422
+				| PutApiRealmsByRealmIdTagPathSensesBySenseIdStatus500
+			>,
+			PutApiRealmsByRealmIdTagPathSensesBySenseIdOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ?? putApiRealmsByRealmIdTagPathSensesBySenseIdMutationKey();
+
+	const baseOptions = putApiRealmsByRealmIdTagPathSensesBySenseIdMutationOptions(
+		config,
+	) as UseMutationOptions<
+		PutApiRealmsByRealmIdTagPathSensesBySenseIdStatus200,
+		ResponseErrorConfig<
+			| PutApiRealmsByRealmIdTagPathSensesBySenseIdStatus403
+			| PutApiRealmsByRealmIdTagPathSensesBySenseIdStatus404
+			| PutApiRealmsByRealmIdTagPathSensesBySenseIdStatus422
+			| PutApiRealmsByRealmIdTagPathSensesBySenseIdStatus500
+		>,
+		PutApiRealmsByRealmIdTagPathSensesBySenseIdOptions,
+		TContext
+	>;
+
+	return useMutation<
+		PutApiRealmsByRealmIdTagPathSensesBySenseIdStatus200,
+		ResponseErrorConfig<
+			| PutApiRealmsByRealmIdTagPathSensesBySenseIdStatus403
+			| PutApiRealmsByRealmIdTagPathSensesBySenseIdStatus404
+			| PutApiRealmsByRealmIdTagPathSensesBySenseIdStatus422
+			| PutApiRealmsByRealmIdTagPathSensesBySenseIdStatus500
+		>,
+		PutApiRealmsByRealmIdTagPathSensesBySenseIdOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PutApiRealmsByRealmIdTagPathSensesBySenseIdStatus200,
+		ResponseErrorConfig<
+			| PutApiRealmsByRealmIdTagPathSensesBySenseIdStatus403
+			| PutApiRealmsByRealmIdTagPathSensesBySenseIdStatus404
+			| PutApiRealmsByRealmIdTagPathSensesBySenseIdStatus422
+			| PutApiRealmsByRealmIdTagPathSensesBySenseIdStatus500
+		>,
+		PutApiRealmsByRealmIdTagPathSensesBySenseIdOptions,
 		TContext
 	>;
 }
@@ -22008,8 +22828,6 @@ export function putApiRealmsByRealmIdTagPathsByPathIdVoteMutationOptions<TContex
 		PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus200,
 		ResponseErrorConfig<
 			| PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus400
-			| PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus403
-			| PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus404
 			| PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus422
 			| PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus429
 			| PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus500
@@ -22031,7 +22849,7 @@ export function putApiRealmsByRealmIdTagPathsByPathIdVoteMutationOptions<TContex
 }
 
 /**
- * @summary Vote on a Realm Tag Path definition
+ * @summary Vote on Realm-local structural validity
  * {@link /api/v1/realms/:realmId/tag-paths/:pathId/vote}
  */
 export function usePutApiRealmsByRealmIdTagPathsByPathIdVote<TContext>(
@@ -22040,8 +22858,6 @@ export function usePutApiRealmsByRealmIdTagPathsByPathIdVote<TContext>(
 			PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus200,
 			ResponseErrorConfig<
 				| PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus400
-				| PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus403
-				| PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus404
 				| PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus422
 				| PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus429
 				| PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus500
@@ -22063,8 +22879,6 @@ export function usePutApiRealmsByRealmIdTagPathsByPathIdVote<TContext>(
 		PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus200,
 		ResponseErrorConfig<
 			| PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus400
-			| PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus403
-			| PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus404
 			| PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus422
 			| PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus429
 			| PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus500
@@ -22077,8 +22891,6 @@ export function usePutApiRealmsByRealmIdTagPathsByPathIdVote<TContext>(
 		PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus200,
 		ResponseErrorConfig<
 			| PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus400
-			| PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus403
-			| PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus404
 			| PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus422
 			| PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus429
 			| PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus500
@@ -22096,8 +22908,6 @@ export function usePutApiRealmsByRealmIdTagPathsByPathIdVote<TContext>(
 		PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus200,
 		ResponseErrorConfig<
 			| PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus400
-			| PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus403
-			| PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus404
 			| PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus422
 			| PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus429
 			| PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus500
@@ -22117,8 +22927,6 @@ export function deleteApiRealmsByRealmIdTagPathsByPathIdVoteMutationOptions<TCon
 	return mutationOptions<
 		DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus200,
 		ResponseErrorConfig<
-			| DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus403
-			| DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus404
 			| DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus422
 			| DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus429
 			| DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus500
@@ -22139,7 +22947,7 @@ export function deleteApiRealmsByRealmIdTagPathsByPathIdVoteMutationOptions<TCon
 }
 
 /**
- * @summary Remove a Realm Tag Path definition vote
+ * @summary Remove a Realm-local structural vote
  * {@link /api/v1/realms/:realmId/tag-paths/:pathId/vote}
  */
 export function useDeleteApiRealmsByRealmIdTagPathsByPathIdVote<TContext>(
@@ -22147,8 +22955,6 @@ export function useDeleteApiRealmsByRealmIdTagPathsByPathIdVote<TContext>(
 		mutation?: UseMutationOptions<
 			DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus200,
 			ResponseErrorConfig<
-				| DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus403
-				| DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus404
 				| DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus422
 				| DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus429
 				| DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus500
@@ -22169,8 +22975,6 @@ export function useDeleteApiRealmsByRealmIdTagPathsByPathIdVote<TContext>(
 	) as UseMutationOptions<
 		DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus200,
 		ResponseErrorConfig<
-			| DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus403
-			| DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus404
 			| DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus422
 			| DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus429
 			| DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus500
@@ -22182,8 +22986,6 @@ export function useDeleteApiRealmsByRealmIdTagPathsByPathIdVote<TContext>(
 	return useMutation<
 		DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus200,
 		ResponseErrorConfig<
-			| DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus403
-			| DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus404
 			| DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus422
 			| DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus429
 			| DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus500
@@ -22200,8 +23002,6 @@ export function useDeleteApiRealmsByRealmIdTagPathsByPathIdVote<TContext>(
 	) as UseMutationResult<
 		DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus200,
 		ResponseErrorConfig<
-			| DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus403
-			| DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus404
 			| DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus422
 			| DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus429
 			| DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus500
@@ -22211,238 +23011,27 @@ export function useDeleteApiRealmsByRealmIdTagPathsByPathIdVote<TContext>(
 	>;
 }
 
-export const putApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdMutationKey = () =>
-	[{ url: "/api/v1/realms/:realmId/units/:unitId/tag-paths/:pathId" }] as const;
+export const postApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsMutationKey = () =>
+	[{ url: "/api/v1/realms/:realmId/units/:unitId/tag-path-applications" }] as const;
 
-export function putApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdMutationOptions<
+export function postApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsMutationOptions<
 	TContext = unknown,
 >(config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {}) {
-	const mutationKey = putApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdMutationKey();
+	const mutationKey = postApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsMutationKey();
 	return mutationOptions<
-		PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus200,
+		PostApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsStatus200,
 		ResponseErrorConfig<
-			| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus403
-			| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus404
-			| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus422
-			| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus429
-			| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus500
+			| PostApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsStatus400
+			| PostApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsStatus404
+			| PostApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsStatus422
+			| PostApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsStatus500
 		>,
-		PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdOptions,
-		TContext
-	>({
-		mutationKey,
-		mutationFn: async ({ path }) => {
-			const { data } = await putApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathId({
-				...config,
-				path,
-				throwOnError: true,
-			});
-			return data;
-		},
-	});
-}
-
-/**
- * @summary Apply an adopted Tag Path to a Realm Unit
- * {@link /api/v1/realms/:realmId/units/:unitId/tag-paths/:pathId}
- */
-export function usePutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathId<TContext>(
-	options: {
-		mutation?: UseMutationOptions<
-			PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus200,
-			ResponseErrorConfig<
-				| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus403
-				| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus404
-				| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus422
-				| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus429
-				| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus500
-			>,
-			PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdOptions,
-			TContext
-		> & { client?: QueryClient };
-		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
-	} = {},
-) {
-	const { mutation = {}, client: config = {} } = options ?? {};
-	const { client: queryClient, ...mutationOptions } = mutation;
-	const mutationKey =
-		mutationOptions.mutationKey ?? putApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdMutationKey();
-
-	const baseOptions = putApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdMutationOptions(
-		config,
-	) as UseMutationOptions<
-		PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus200,
-		ResponseErrorConfig<
-			| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus403
-			| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus404
-			| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus422
-			| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus429
-			| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus500
-		>,
-		PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdOptions,
-		TContext
-	>;
-
-	return useMutation<
-		PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus200,
-		ResponseErrorConfig<
-			| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus403
-			| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus404
-			| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus422
-			| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus429
-			| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus500
-		>,
-		PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdOptions,
-		TContext
-	>(
-		{
-			...baseOptions,
-			mutationKey,
-			...mutationOptions,
-		},
-		queryClient,
-	) as UseMutationResult<
-		PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus200,
-		ResponseErrorConfig<
-			| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus403
-			| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus404
-			| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus422
-			| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus429
-			| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus500
-		>,
-		PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdOptions,
-		TContext
-	>;
-}
-
-export const deleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdMutationKey = () =>
-	[{ url: "/api/v1/realms/:realmId/units/:unitId/tag-paths/:pathId" }] as const;
-
-export function deleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdMutationOptions<
-	TContext = unknown,
->(config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {}) {
-	const mutationKey = deleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdMutationKey();
-	return mutationOptions<
-		DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus204,
-		ResponseErrorConfig<
-			| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus403
-			| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus404
-			| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus422
-			| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus429
-			| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus500
-		>,
-		DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdOptions,
-		TContext
-	>({
-		mutationKey,
-		mutationFn: async ({ path }) => {
-			const { data } = await deleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathId({
-				...config,
-				path,
-				throwOnError: true,
-			});
-			return data;
-		},
-	});
-}
-
-/**
- * @summary Remove a Tag Path application from a Realm Unit
- * {@link /api/v1/realms/:realmId/units/:unitId/tag-paths/:pathId}
- */
-export function useDeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathId<TContext>(
-	options: {
-		mutation?: UseMutationOptions<
-			DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus204,
-			ResponseErrorConfig<
-				| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus403
-				| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus404
-				| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus422
-				| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus429
-				| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus500
-			>,
-			DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdOptions,
-			TContext
-		> & { client?: QueryClient };
-		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
-	} = {},
-) {
-	const { mutation = {}, client: config = {} } = options ?? {};
-	const { client: queryClient, ...mutationOptions } = mutation;
-	const mutationKey =
-		mutationOptions.mutationKey ??
-		deleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdMutationKey();
-
-	const baseOptions = deleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdMutationOptions(
-		config,
-	) as UseMutationOptions<
-		DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus204,
-		ResponseErrorConfig<
-			| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus403
-			| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus404
-			| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus422
-			| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus429
-			| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus500
-		>,
-		DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdOptions,
-		TContext
-	>;
-
-	return useMutation<
-		DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus204,
-		ResponseErrorConfig<
-			| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus403
-			| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus404
-			| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus422
-			| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus429
-			| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus500
-		>,
-		DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdOptions,
-		TContext
-	>(
-		{
-			...baseOptions,
-			mutationKey,
-			...mutationOptions,
-		},
-		queryClient,
-	) as UseMutationResult<
-		DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus204,
-		ResponseErrorConfig<
-			| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus403
-			| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus404
-			| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus422
-			| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus429
-			| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus500
-		>,
-		DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdOptions,
-		TContext
-	>;
-}
-
-export const putApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentMutationKey = () =>
-	[{ url: "/api/v1/realms/:realmId/units/:unitId/tag-paths/:pathId/judgment" }] as const;
-
-export function putApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentMutationOptions<
-	TContext = unknown,
->(config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {}) {
-	const mutationKey = putApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentMutationKey();
-	return mutationOptions<
-		PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus200,
-		ResponseErrorConfig<
-			| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus400
-			| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus403
-			| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus404
-			| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus422
-			| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus429
-			| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus500
-		>,
-		PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentOptions,
+		PostApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsOptions,
 		TContext
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await putApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgment({
+			const { data } = await postApiRealmsByRealmIdUnitsByUnitIdTagPathApplications({
 				...config,
 				path,
 				body,
@@ -22454,22 +23043,20 @@ export function putApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentMutati
 }
 
 /**
- * @summary Judge Realm-local Tag Path fit or spoiler
- * {@link /api/v1/realms/:realmId/units/:unitId/tag-paths/:pathId/judgment}
+ * @summary Apply one adopted Realm Path Sense
+ * {@link /api/v1/realms/:realmId/units/:unitId/tag-path-applications}
  */
-export function usePutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgment<TContext>(
+export function usePostApiRealmsByRealmIdUnitsByUnitIdTagPathApplications<TContext>(
 	options: {
 		mutation?: UseMutationOptions<
-			PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus200,
+			PostApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsStatus200,
 			ResponseErrorConfig<
-				| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus400
-				| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus403
-				| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus404
-				| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus422
-				| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus429
-				| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus500
+				| PostApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsStatus400
+				| PostApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsStatus404
+				| PostApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsStatus422
+				| PostApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsStatus500
 			>,
-			PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentOptions,
+			PostApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsOptions,
 			TContext
 		> & { client?: QueryClient };
 		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
@@ -22479,35 +23066,31 @@ export function usePutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgment<TC
 	const { client: queryClient, ...mutationOptions } = mutation;
 	const mutationKey =
 		mutationOptions.mutationKey ??
-		putApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentMutationKey();
+		postApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsMutationKey();
 
-	const baseOptions = putApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentMutationOptions(
+	const baseOptions = postApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsMutationOptions(
 		config,
 	) as UseMutationOptions<
-		PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus200,
+		PostApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsStatus200,
 		ResponseErrorConfig<
-			| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus400
-			| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus403
-			| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus404
-			| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus422
-			| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus429
-			| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus500
+			| PostApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsStatus400
+			| PostApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsStatus404
+			| PostApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsStatus422
+			| PostApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsStatus500
 		>,
-		PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentOptions,
+		PostApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsOptions,
 		TContext
 	>;
 
 	return useMutation<
-		PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus200,
+		PostApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsStatus200,
 		ResponseErrorConfig<
-			| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus400
-			| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus403
-			| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus404
-			| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus422
-			| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus429
-			| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus500
+			| PostApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsStatus400
+			| PostApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsStatus404
+			| PostApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsStatus422
+			| PostApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsStatus500
 		>,
-		PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentOptions,
+		PostApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsOptions,
 		TContext
 	>(
 		{
@@ -22517,65 +23100,68 @@ export function usePutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgment<TC
 		},
 		queryClient,
 	) as UseMutationResult<
-		PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus200,
+		PostApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsStatus200,
 		ResponseErrorConfig<
-			| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus400
-			| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus403
-			| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus404
-			| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus422
-			| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus429
-			| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus500
+			| PostApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsStatus400
+			| PostApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsStatus404
+			| PostApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsStatus422
+			| PostApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsStatus500
 		>,
-		PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentOptions,
+		PostApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsOptions,
 		TContext
 	>;
 }
 
-export const deleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentMutationKey = () =>
-	[{ url: "/api/v1/realms/:realmId/units/:unitId/tag-paths/:pathId/judgment" }] as const;
+export const deleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdMutationKey =
+	() =>
+		[
+			{ url: "/api/v1/realms/:realmId/units/:unitId/tag-path-applications/:applicationId" },
+		] as const;
 
-export function deleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentMutationOptions<
+export function deleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdMutationOptions<
 	TContext = unknown,
 >(config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {}) {
-	const mutationKey = deleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentMutationKey();
+	const mutationKey =
+		deleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdMutationKey();
 	return mutationOptions<
-		DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus200,
+		DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdStatus200,
 		ResponseErrorConfig<
-			| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus403
-			| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus422
-			| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus429
-			| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus500
+			| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdStatus404
+			| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdStatus422
+			| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdStatus500
 		>,
-		DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentOptions,
+		DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdOptions,
 		TContext
 	>({
 		mutationKey,
 		mutationFn: async ({ path }) => {
-			const { data } = await deleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgment({
-				...config,
-				path,
-				throwOnError: true,
-			});
+			const { data } =
+				await deleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationId({
+					...config,
+					path,
+					throwOnError: true,
+				});
 			return data;
 		},
 	});
 }
 
 /**
- * @summary Clear a Realm-local Tag Path judgment
- * {@link /api/v1/realms/:realmId/units/:unitId/tag-paths/:pathId/judgment}
+ * @summary Remove one Realm semantic Application
+ * {@link /api/v1/realms/:realmId/units/:unitId/tag-path-applications/:applicationId}
  */
-export function useDeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgment<TContext>(
+export function useDeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationId<
+	TContext,
+>(
 	options: {
 		mutation?: UseMutationOptions<
-			DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus200,
+			DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdStatus200,
 			ResponseErrorConfig<
-				| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus403
-				| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus422
-				| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus429
-				| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus500
+				| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdStatus404
+				| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdStatus422
+				| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdStatus500
 			>,
-			DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentOptions,
+			DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdOptions,
 			TContext
 		> & { client?: QueryClient };
 		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
@@ -22585,31 +23171,30 @@ export function useDeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgment
 	const { client: queryClient, ...mutationOptions } = mutation;
 	const mutationKey =
 		mutationOptions.mutationKey ??
-		deleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentMutationKey();
+		deleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdMutationKey();
 
-	const baseOptions = deleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentMutationOptions(
-		config,
-	) as UseMutationOptions<
-		DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus200,
-		ResponseErrorConfig<
-			| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus403
-			| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus422
-			| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus429
-			| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus500
-		>,
-		DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentOptions,
-		TContext
-	>;
+	const baseOptions =
+		deleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdMutationOptions(
+			config,
+		) as UseMutationOptions<
+			DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdStatus200,
+			ResponseErrorConfig<
+				| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdStatus404
+				| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdStatus422
+				| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdStatus500
+			>,
+			DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdOptions,
+			TContext
+		>;
 
 	return useMutation<
-		DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus200,
+		DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdStatus200,
 		ResponseErrorConfig<
-			| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus403
-			| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus422
-			| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus429
-			| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus500
+			| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdStatus404
+			| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdStatus422
+			| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdStatus500
 		>,
-		DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentOptions,
+		DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdOptions,
 		TContext
 	>(
 		{
@@ -22619,14 +23204,239 @@ export function useDeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgment
 		},
 		queryClient,
 	) as UseMutationResult<
-		DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus200,
+		DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdStatus200,
 		ResponseErrorConfig<
-			| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus403
-			| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus422
-			| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus429
-			| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus500
+			| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdStatus404
+			| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdStatus422
+			| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdStatus500
 		>,
-		DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentOptions,
+		DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdOptions,
+		TContext
+	>;
+}
+
+export const putApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentMutationKey =
+	() =>
+		[
+			{
+				url: "/api/v1/realms/:realmId/units/:unitId/tag-path-applications/:applicationId/judgment",
+			},
+		] as const;
+
+export function putApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentMutationOptions<
+	TContext = unknown,
+>(config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {}) {
+	const mutationKey =
+		putApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentMutationKey();
+	return mutationOptions<
+		PutApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus200,
+		ResponseErrorConfig<
+			| PutApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus400
+			| PutApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus404
+			| PutApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus422
+			| PutApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus429
+			| PutApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus500
+		>,
+		PutApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			const { data } =
+				await putApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgment({
+					...config,
+					path,
+					body,
+					throwOnError: true,
+				});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Judge one Realm semantic Application
+ * {@link /api/v1/realms/:realmId/units/:unitId/tag-path-applications/:applicationId/judgment}
+ */
+export function usePutApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgment<
+	TContext,
+>(
+	options: {
+		mutation?: UseMutationOptions<
+			PutApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus200,
+			ResponseErrorConfig<
+				| PutApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus400
+				| PutApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus404
+				| PutApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus422
+				| PutApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus429
+				| PutApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus500
+			>,
+			PutApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ??
+		putApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentMutationKey();
+
+	const baseOptions =
+		putApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentMutationOptions(
+			config,
+		) as UseMutationOptions<
+			PutApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus200,
+			ResponseErrorConfig<
+				| PutApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus400
+				| PutApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus404
+				| PutApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus422
+				| PutApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus429
+				| PutApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus500
+			>,
+			PutApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentOptions,
+			TContext
+		>;
+
+	return useMutation<
+		PutApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus200,
+		ResponseErrorConfig<
+			| PutApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus400
+			| PutApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus404
+			| PutApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus422
+			| PutApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus429
+			| PutApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus500
+		>,
+		PutApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PutApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus200,
+		ResponseErrorConfig<
+			| PutApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus400
+			| PutApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus404
+			| PutApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus422
+			| PutApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus429
+			| PutApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus500
+		>,
+		PutApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentOptions,
+		TContext
+	>;
+}
+
+export const deleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentMutationKey =
+	() =>
+		[
+			{
+				url: "/api/v1/realms/:realmId/units/:unitId/tag-path-applications/:applicationId/judgment",
+			},
+		] as const;
+
+export function deleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentMutationOptions<
+	TContext = unknown,
+>(config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {}) {
+	const mutationKey =
+		deleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentMutationKey();
+	return mutationOptions<
+		DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus200,
+		ResponseErrorConfig<
+			| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus404
+			| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus422
+			| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus429
+			| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus500
+		>,
+		DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path }) => {
+			const { data } =
+				await deleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgment({
+					...config,
+					path,
+					throwOnError: true,
+				});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Clear one Realm Application judgment
+ * {@link /api/v1/realms/:realmId/units/:unitId/tag-path-applications/:applicationId/judgment}
+ */
+export function useDeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgment<
+	TContext,
+>(
+	options: {
+		mutation?: UseMutationOptions<
+			DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus200,
+			ResponseErrorConfig<
+				| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus404
+				| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus422
+				| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus429
+				| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus500
+			>,
+			DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ??
+		deleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentMutationKey();
+
+	const baseOptions =
+		deleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentMutationOptions(
+			config,
+		) as UseMutationOptions<
+			DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus200,
+			ResponseErrorConfig<
+				| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus404
+				| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus422
+				| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus429
+				| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus500
+			>,
+			DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentOptions,
+			TContext
+		>;
+
+	return useMutation<
+		DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus200,
+		ResponseErrorConfig<
+			| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus404
+			| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus422
+			| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus429
+			| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus500
+		>,
+		DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus200,
+		ResponseErrorConfig<
+			| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus404
+			| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus422
+			| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus429
+			| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus500
+		>,
+		DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentOptions,
 		TContext
 	>;
 }
@@ -22642,7 +23452,6 @@ export function putApiRealmsByRealmIdTagPathPolicyMutationOptions<TContext = unk
 		PutApiRealmsByRealmIdTagPathPolicyStatus200,
 		ResponseErrorConfig<
 			| PutApiRealmsByRealmIdTagPathPolicyStatus400
-			| PutApiRealmsByRealmIdTagPathPolicyStatus403
 			| PutApiRealmsByRealmIdTagPathPolicyStatus404
 			| PutApiRealmsByRealmIdTagPathPolicyStatus422
 			| PutApiRealmsByRealmIdTagPathPolicyStatus429
@@ -22665,7 +23474,7 @@ export function putApiRealmsByRealmIdTagPathPolicyMutationOptions<TContext = unk
 }
 
 /**
- * @summary Update independent Realm Tag Path fallback policies
+ * @summary Set independent Realm fallback policies
  * {@link /api/v1/realms/:realmId/tag-path-policy}
  */
 export function usePutApiRealmsByRealmIdTagPathPolicy<TContext>(
@@ -22674,7 +23483,6 @@ export function usePutApiRealmsByRealmIdTagPathPolicy<TContext>(
 			PutApiRealmsByRealmIdTagPathPolicyStatus200,
 			ResponseErrorConfig<
 				| PutApiRealmsByRealmIdTagPathPolicyStatus400
-				| PutApiRealmsByRealmIdTagPathPolicyStatus403
 				| PutApiRealmsByRealmIdTagPathPolicyStatus404
 				| PutApiRealmsByRealmIdTagPathPolicyStatus422
 				| PutApiRealmsByRealmIdTagPathPolicyStatus429
@@ -22697,7 +23505,6 @@ export function usePutApiRealmsByRealmIdTagPathPolicy<TContext>(
 		PutApiRealmsByRealmIdTagPathPolicyStatus200,
 		ResponseErrorConfig<
 			| PutApiRealmsByRealmIdTagPathPolicyStatus400
-			| PutApiRealmsByRealmIdTagPathPolicyStatus403
 			| PutApiRealmsByRealmIdTagPathPolicyStatus404
 			| PutApiRealmsByRealmIdTagPathPolicyStatus422
 			| PutApiRealmsByRealmIdTagPathPolicyStatus429
@@ -22711,7 +23518,6 @@ export function usePutApiRealmsByRealmIdTagPathPolicy<TContext>(
 		PutApiRealmsByRealmIdTagPathPolicyStatus200,
 		ResponseErrorConfig<
 			| PutApiRealmsByRealmIdTagPathPolicyStatus400
-			| PutApiRealmsByRealmIdTagPathPolicyStatus403
 			| PutApiRealmsByRealmIdTagPathPolicyStatus404
 			| PutApiRealmsByRealmIdTagPathPolicyStatus422
 			| PutApiRealmsByRealmIdTagPathPolicyStatus429
@@ -22730,7 +23536,6 @@ export function usePutApiRealmsByRealmIdTagPathPolicy<TContext>(
 		PutApiRealmsByRealmIdTagPathPolicyStatus200,
 		ResponseErrorConfig<
 			| PutApiRealmsByRealmIdTagPathPolicyStatus400
-			| PutApiRealmsByRealmIdTagPathPolicyStatus403
 			| PutApiRealmsByRealmIdTagPathPolicyStatus404
 			| PutApiRealmsByRealmIdTagPathPolicyStatus422
 			| PutApiRealmsByRealmIdTagPathPolicyStatus429
@@ -22779,7 +23584,7 @@ export function getApiUsersMeTagRealmSubscriptionsQueryOptions(
 }
 
 /**
- * @summary List the current user's ordered Realm Tag sources
+ * @summary List ordered Realm Tag authorities
  * {@link /api/v1/users/me/tag-realm-subscriptions}
  */
 export function useGetApiUsersMeTagRealmSubscriptions<
@@ -22872,7 +23677,7 @@ export function putApiUsersMeTagRealmSubscriptionsByRealmIdMutationOptions<TCont
 }
 
 /**
- * @summary Subscribe to or reorder a Realm Tag source
+ * @summary Subscribe to or reorder a Realm Tag authority
  * {@link /api/v1/users/me/tag-realm-subscriptions/:realmId}
  */
 export function usePutApiUsersMeTagRealmSubscriptionsByRealmId<TContext>(
@@ -22974,7 +23779,7 @@ export function deleteApiUsersMeTagRealmSubscriptionsByRealmIdMutationOptions<TC
 }
 
 /**
- * @summary Unsubscribe from a Realm Tag source
+ * @summary Unsubscribe from a Realm Tag authority
  * {@link /api/v1/users/me/tag-realm-subscriptions/:realmId}
  */
 export function useDeleteApiUsersMeTagRealmSubscriptionsByRealmId<TContext>(

@@ -7,6 +7,7 @@ import { useState } from "react";
 import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import { useChineseContentText } from "@/features/content-language-display/chinese-content-display-context";
 import { FeedCard } from "@/features/content-feed/components/feed-card";
+import { TagExpressionPreview } from "@/features/tags/components/tag-expression-preview";
 import { TagReferenceBadge } from "@/features/tags/components/tag-reference-badge";
 import { useTranslation } from "@/i18n/client";
 import { groupByAssociationRole } from "../attribution-role";
@@ -99,13 +100,7 @@ function SubjectAssociationCard({ association }: { readonly association: Subject
 					{summary ? (
 						<p className="mt-2 line-clamp-3 text-muted-foreground text-sm leading-6">{summary}</p>
 					) : null}
-					{association.tags.length ? (
-						<div className="mt-3 flex flex-wrap gap-2">
-							{association.tags.map((tag) => (
-								<TagReferenceBadge key={tag.tagId} tagId={tag.tagId} title={tag.title} />
-							))}
-						</div>
-					) : null}
+					<TagExpressionPreview expressions={association.expressions} />
 					{association.contextPost ? (
 						<div className="mt-3 grid gap-2">
 							<Link

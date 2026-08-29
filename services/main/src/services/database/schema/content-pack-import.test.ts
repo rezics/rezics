@@ -6,7 +6,7 @@ import {
 	contentPackSubjectAssociationEvidence,
 	contentPackTagEvidence,
 	contentPackUnitTagEvidence,
-	contentPackUnitTagPathEvidence,
+	contentPackUnitTagPathApplicationEvidence,
 } from "./content-pack-import";
 
 function indexColumns(
@@ -21,12 +21,16 @@ function indexColumns(
 describe("content-pack import evidence schema", () => {
 	it("retains the exact immutable source Path definition", () => {
 		const definition = getTableConfig(contentPackTagPathDefinitionEvidence);
-		expect(definition.columns.map(({ name }) => name)).toContain("member_tag_source_keys");
-		expect(contentPackTagPathDefinitionEvidence.memberTagSourceKeys.notNull).toBe(true);
+		expect(definition.columns.map(({ name }) => name)).toEqual(
+			expect.arrayContaining(["member_node_source_keys", "relation_source_keys"]),
+		);
+		expect(contentPackTagPathDefinitionEvidence.memberNodeSourceKeys.notNull).toBe(true);
+		expect(contentPackTagPathDefinitionEvidence.relationSourceKeys.notNull).toBe(true);
 		expect(definition.checks.map(({ name }) => name)).toEqual(
 			expect.arrayContaining([
 				"content_pack_tag_path_definition_evidence_member_count_check",
 				"content_pack_tag_path_definition_evidence_member_null_check",
+				"content_pack_tag_path_definition_evidence_relation_check",
 			]),
 		);
 	});
@@ -47,10 +51,10 @@ describe("content-pack import evidence schema", () => {
 		).toEqual(["unit_id", "tag_id", "profile_id", "import_id"]);
 		expect(
 			indexColumns(
-				contentPackUnitTagPathEvidence,
-				"content_pack_unit_tag_path_evidence_judgment_idx",
+				contentPackUnitTagPathApplicationEvidence,
+				"content_pack_unit_tag_path_application_evidence_judgment_idx",
 			),
-		).toEqual(["unit_id", "path_id", "profile_id", "import_id"]);
+		).toEqual(["application_id", "profile_id", "import_id"]);
 		expect(
 			indexColumns(
 				contentPackSubjectAssociationEvidence,

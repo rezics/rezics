@@ -22,6 +22,7 @@ const [
 	unitMergeWorker,
 	unitMergeService,
 	bookChapterDraftWorker,
+	tagExpressionProjectionWorker,
 	workerHealth,
 ] = await Promise.all([
 	import("srvx"),
@@ -35,6 +36,7 @@ const [
 	import("./services/units/merge/worker"),
 	import("./services/units/merge/service"),
 	import("./services/units/book-chapter-draft-worker"),
+	import("./services/tag-expressions/projection-worker"),
 	import("./services/health/worker-health"),
 ]);
 const { aggregateRecommendationMetrics, purgeRecommendationData, refreshRecommendationSnapshot } =
@@ -46,6 +48,7 @@ const { cleanupExpiredStudioEditorCandidates } = studioCandidateCleanup;
 const { dispatchUnitMergeBatch } = unitMergeWorker;
 const { expireUnitMergeRequests } = unitMergeService;
 const { dispatchBookChapterDraftJobs } = bookChapterDraftWorker;
+const { dispatchTagExpressionProjectionRebuilds } = tagExpressionProjectionWorker;
 const { logger } = observability;
 const healthState = new workerHealth.WorkerHealthState();
 const evaluateReadiness = workerHealth.createWorkerReadinessEvaluator(healthState);
@@ -105,6 +108,10 @@ async function run() {
 			await runWorkerJob(
 				{ name: "book_chapter_draft.dispatch", retryCount: 0 },
 				dispatchBookChapterDraftJobs,
+			);
+			await runWorkerJob(
+				{ name: "tag_expression_projection.dispatch", retryCount: 0 },
+				dispatchTagExpressionProjectionRebuilds,
 			);
 			if (Date.now() >= nextRecommendationAt) {
 				try {

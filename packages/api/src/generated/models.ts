@@ -35393,6 +35393,87 @@ export const GetApiRecommendationsPostsByPostIdStatus200ItemsTrackingSurfaceEnum
 export type GetApiRecommendationsPostsByPostIdStatus200ItemsTrackingSurfaceEnum =
 	(typeof GetApiRecommendationsPostsByPostIdStatus200ItemsTrackingSurfaceEnum)[keyof typeof GetApiRecommendationsPostsByPostIdStatus200ItemsTrackingSurfaceEnum];
 
+export const GetApiRecommendationsPostsByPostIdStatus200ItemsSearchTagMatchesEvidenceEnum = {
+	direct: "direct",
+	primary: "primary",
+	entailed: "entailed",
+	retrieval_only: "retrieval_only",
+} as const;
+
+export type GetApiRecommendationsPostsByPostIdStatus200ItemsSearchTagMatchesEvidenceEnum =
+	(typeof GetApiRecommendationsPostsByPostIdStatus200ItemsSearchTagMatchesEvidenceEnum)[keyof typeof GetApiRecommendationsPostsByPostIdStatus200ItemsSearchTagMatchesEvidenceEnum];
+
+export const GetApiRecommendationsPostsByPostIdStatus200ItemsSearchTagMatchesExpressionExpressionKindEnum =
+	{
+		simple: "simple",
+		facet_value: "facet_value",
+		relation: "relation",
+	} as const;
+
+export type GetApiRecommendationsPostsByPostIdStatus200ItemsSearchTagMatchesExpressionExpressionKindEnum =
+	(typeof GetApiRecommendationsPostsByPostIdStatus200ItemsSearchTagMatchesExpressionExpressionKindEnum)[keyof typeof GetApiRecommendationsPostsByPostIdStatus200ItemsSearchTagMatchesExpressionExpressionKindEnum];
+
+export const GetApiRecommendationsPostsByPostIdStatus200ItemsSearchTagMatchesExpressionComponentsSemanticRoleEnum =
+	{
+		predicate: "predicate",
+		slot: "slot",
+		value: "value",
+		focus: "focus",
+		qualifier: "qualifier",
+	} as const;
+
+export type GetApiRecommendationsPostsByPostIdStatus200ItemsSearchTagMatchesExpressionComponentsSemanticRoleEnum =
+	(typeof GetApiRecommendationsPostsByPostIdStatus200ItemsSearchTagMatchesExpressionComponentsSemanticRoleEnum)[keyof typeof GetApiRecommendationsPostsByPostIdStatus200ItemsSearchTagMatchesExpressionComponentsSemanticRoleEnum];
+
+export const GetApiRecommendationsPostsByPostIdStatus200ItemsSearchTagMatchesExpressionComponentsComponentKindEnum =
+	{
+		required: "required",
+		fallback: "fallback",
+	} as const;
+
+export type GetApiRecommendationsPostsByPostIdStatus200ItemsSearchTagMatchesExpressionComponentsComponentKindEnum =
+	(typeof GetApiRecommendationsPostsByPostIdStatus200ItemsSearchTagMatchesExpressionComponentsComponentKindEnum)[keyof typeof GetApiRecommendationsPostsByPostIdStatus200ItemsSearchTagMatchesExpressionComponentsComponentKindEnum];
+
+export const GetApiRecommendationsPostsByPostIdStatus200ItemsSearchTagMatchesExpressionComponentsLanguage =
+	{
+		zh: "zh",
+		en: "en",
+		ja: "ja",
+		ko: "ko",
+		de: "de",
+		fr: "fr",
+		es: "es",
+	} as const;
+
+export type GetApiRecommendationsPostsByPostIdStatus200ItemsSearchTagMatchesExpressionComponentsLanguage =
+	(typeof GetApiRecommendationsPostsByPostIdStatus200ItemsSearchTagMatchesExpressionComponentsLanguage)[keyof typeof GetApiRecommendationsPostsByPostIdStatus200ItemsSearchTagMatchesExpressionComponentsLanguage];
+
+export const GetApiRecommendationsPostsByPostIdStatus200ItemsSearchTagMatchesExpressionGroupKeySemanticRoleEnum =
+	{
+		predicate: "predicate",
+		slot: "slot",
+		value: "value",
+		focus: "focus",
+		qualifier: "qualifier",
+	} as const;
+
+export type GetApiRecommendationsPostsByPostIdStatus200ItemsSearchTagMatchesExpressionGroupKeySemanticRoleEnum =
+	(typeof GetApiRecommendationsPostsByPostIdStatus200ItemsSearchTagMatchesExpressionGroupKeySemanticRoleEnum)[keyof typeof GetApiRecommendationsPostsByPostIdStatus200ItemsSearchTagMatchesExpressionGroupKeySemanticRoleEnum];
+
+export const GetApiRecommendationsPostsByPostIdStatus200ItemsSearchTagMatchesExpressionGroupKeyLanguage =
+	{
+		zh: "zh",
+		en: "en",
+		ja: "ja",
+		ko: "ko",
+		de: "de",
+		fr: "fr",
+		es: "es",
+	} as const;
+
+export type GetApiRecommendationsPostsByPostIdStatus200ItemsSearchTagMatchesExpressionGroupKeyLanguage =
+	(typeof GetApiRecommendationsPostsByPostIdStatus200ItemsSearchTagMatchesExpressionGroupKeyLanguage)[keyof typeof GetApiRecommendationsPostsByPostIdStatus200ItemsSearchTagMatchesExpressionGroupKeyLanguage];
+
 export const GetApiRecommendationsPostsByPostIdStatus200ItemsReplyContextAttributionsRoleEnum = {
 	author: "author",
 	"co-author": "co-author",
@@ -35822,6 +35903,90 @@ export type GetApiRecommendationsPostsByPostIdStatus200 = {
 							signature: string;
 					  } | null)
 					| null;
+				/**
+				 * @type array | undefined
+				 */
+				searchTagMatches?: {
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					matchedTagId: string;
+					/**
+					 * @default 'direct'
+					 * @type string
+					 */
+					evidence: GetApiRecommendationsPostsByPostIdStatus200ItemsSearchTagMatchesEvidenceEnum;
+					/**
+					 * @type object
+					 */
+					expression: {
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						expressionId: string;
+						/**
+						 * @default 'simple'
+						 * @type string
+						 */
+						expressionKind: GetApiRecommendationsPostsByPostIdStatus200ItemsSearchTagMatchesExpressionExpressionKindEnum;
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						focusTagId: string;
+						presentationRevision: string | number;
+						/**
+						 * @type array
+						 */
+						components: {
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							tagId: string;
+							/**
+							 * @default 'predicate'
+							 * @type string
+							 */
+							semanticRole: GetApiRecommendationsPostsByPostIdStatus200ItemsSearchTagMatchesExpressionComponentsSemanticRoleEnum;
+							/**
+							 * @default 'required'
+							 * @type string
+							 */
+							componentKind: GetApiRecommendationsPostsByPostIdStatus200ItemsSearchTagMatchesExpressionComponentsComponentKindEnum;
+							language:
+								| (GetApiRecommendationsPostsByPostIdStatus200ItemsSearchTagMatchesExpressionComponentsLanguage | null)
+								| null;
+							title: (string | null) | null;
+						}[];
+						groupKey:
+							| ({
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									tagId: string;
+									/**
+									 * @default 'predicate'
+									 * @type string
+									 */
+									semanticRole: GetApiRecommendationsPostsByPostIdStatus200ItemsSearchTagMatchesExpressionGroupKeySemanticRoleEnum;
+									language:
+										| (GetApiRecommendationsPostsByPostIdStatus200ItemsSearchTagMatchesExpressionGroupKeyLanguage | null)
+										| null;
+									title: (string | null) | null;
+							  } | null)
+							| null;
+					};
+				}[];
+				tagOtherPositionCount?: string | number;
 				/**
 				 * @type string
 				 */
@@ -36520,6 +36685,90 @@ export type GetApiRecommendationsPostsByPostIdStatus200 = {
 							signature: string;
 					  } | null)
 					| null;
+				/**
+				 * @type array | undefined
+				 */
+				searchTagMatches?: {
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					matchedTagId: string;
+					/**
+					 * @default 'direct'
+					 * @type string
+					 */
+					evidence: GetApiRecommendationsPostsByPostIdStatus200ItemsSearchTagMatchesEvidenceEnum;
+					/**
+					 * @type object
+					 */
+					expression: {
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						expressionId: string;
+						/**
+						 * @default 'simple'
+						 * @type string
+						 */
+						expressionKind: GetApiRecommendationsPostsByPostIdStatus200ItemsSearchTagMatchesExpressionExpressionKindEnum;
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						focusTagId: string;
+						presentationRevision: string | number;
+						/**
+						 * @type array
+						 */
+						components: {
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							tagId: string;
+							/**
+							 * @default 'predicate'
+							 * @type string
+							 */
+							semanticRole: GetApiRecommendationsPostsByPostIdStatus200ItemsSearchTagMatchesExpressionComponentsSemanticRoleEnum;
+							/**
+							 * @default 'required'
+							 * @type string
+							 */
+							componentKind: GetApiRecommendationsPostsByPostIdStatus200ItemsSearchTagMatchesExpressionComponentsComponentKindEnum;
+							language:
+								| (GetApiRecommendationsPostsByPostIdStatus200ItemsSearchTagMatchesExpressionComponentsLanguage | null)
+								| null;
+							title: (string | null) | null;
+						}[];
+						groupKey:
+							| ({
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									tagId: string;
+									/**
+									 * @default 'predicate'
+									 * @type string
+									 */
+									semanticRole: GetApiRecommendationsPostsByPostIdStatus200ItemsSearchTagMatchesExpressionGroupKeySemanticRoleEnum;
+									language:
+										| (GetApiRecommendationsPostsByPostIdStatus200ItemsSearchTagMatchesExpressionGroupKeyLanguage | null)
+										| null;
+									title: (string | null) | null;
+							  } | null)
+							| null;
+					};
+				}[];
+				tagOtherPositionCount?: string | number;
 				/**
 				 * @type string
 				 */
@@ -37236,6 +37485,90 @@ export type GetApiRecommendationsPostsByPostIdStatus200 = {
 							signature: string;
 					  } | null)
 					| null;
+				/**
+				 * @type array | undefined
+				 */
+				searchTagMatches?: {
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					matchedTagId: string;
+					/**
+					 * @default 'direct'
+					 * @type string
+					 */
+					evidence: GetApiRecommendationsPostsByPostIdStatus200ItemsSearchTagMatchesEvidenceEnum;
+					/**
+					 * @type object
+					 */
+					expression: {
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						expressionId: string;
+						/**
+						 * @default 'simple'
+						 * @type string
+						 */
+						expressionKind: GetApiRecommendationsPostsByPostIdStatus200ItemsSearchTagMatchesExpressionExpressionKindEnum;
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						focusTagId: string;
+						presentationRevision: string | number;
+						/**
+						 * @type array
+						 */
+						components: {
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							tagId: string;
+							/**
+							 * @default 'predicate'
+							 * @type string
+							 */
+							semanticRole: GetApiRecommendationsPostsByPostIdStatus200ItemsSearchTagMatchesExpressionComponentsSemanticRoleEnum;
+							/**
+							 * @default 'required'
+							 * @type string
+							 */
+							componentKind: GetApiRecommendationsPostsByPostIdStatus200ItemsSearchTagMatchesExpressionComponentsComponentKindEnum;
+							language:
+								| (GetApiRecommendationsPostsByPostIdStatus200ItemsSearchTagMatchesExpressionComponentsLanguage | null)
+								| null;
+							title: (string | null) | null;
+						}[];
+						groupKey:
+							| ({
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									tagId: string;
+									/**
+									 * @default 'predicate'
+									 * @type string
+									 */
+									semanticRole: GetApiRecommendationsPostsByPostIdStatus200ItemsSearchTagMatchesExpressionGroupKeySemanticRoleEnum;
+									language:
+										| (GetApiRecommendationsPostsByPostIdStatus200ItemsSearchTagMatchesExpressionGroupKeyLanguage | null)
+										| null;
+									title: (string | null) | null;
+							  } | null)
+							| null;
+					};
+				}[];
+				tagOtherPositionCount?: string | number;
 				/**
 				 * @type string
 				 */
@@ -46411,6 +46744,81 @@ export const PostApiFeedQueryStatus200ItemsTrackingSurfaceEnum = {
 export type PostApiFeedQueryStatus200ItemsTrackingSurfaceEnum =
 	(typeof PostApiFeedQueryStatus200ItemsTrackingSurfaceEnum)[keyof typeof PostApiFeedQueryStatus200ItemsTrackingSurfaceEnum];
 
+export const PostApiFeedQueryStatus200ItemsSearchTagMatchesEvidenceEnum = {
+	direct: "direct",
+	primary: "primary",
+	entailed: "entailed",
+	retrieval_only: "retrieval_only",
+} as const;
+
+export type PostApiFeedQueryStatus200ItemsSearchTagMatchesEvidenceEnum =
+	(typeof PostApiFeedQueryStatus200ItemsSearchTagMatchesEvidenceEnum)[keyof typeof PostApiFeedQueryStatus200ItemsSearchTagMatchesEvidenceEnum];
+
+export const PostApiFeedQueryStatus200ItemsSearchTagMatchesExpressionExpressionKindEnum = {
+	simple: "simple",
+	facet_value: "facet_value",
+	relation: "relation",
+} as const;
+
+export type PostApiFeedQueryStatus200ItemsSearchTagMatchesExpressionExpressionKindEnum =
+	(typeof PostApiFeedQueryStatus200ItemsSearchTagMatchesExpressionExpressionKindEnum)[keyof typeof PostApiFeedQueryStatus200ItemsSearchTagMatchesExpressionExpressionKindEnum];
+
+export const PostApiFeedQueryStatus200ItemsSearchTagMatchesExpressionComponentsSemanticRoleEnum = {
+	predicate: "predicate",
+	slot: "slot",
+	value: "value",
+	focus: "focus",
+	qualifier: "qualifier",
+} as const;
+
+export type PostApiFeedQueryStatus200ItemsSearchTagMatchesExpressionComponentsSemanticRoleEnum =
+	(typeof PostApiFeedQueryStatus200ItemsSearchTagMatchesExpressionComponentsSemanticRoleEnum)[keyof typeof PostApiFeedQueryStatus200ItemsSearchTagMatchesExpressionComponentsSemanticRoleEnum];
+
+export const PostApiFeedQueryStatus200ItemsSearchTagMatchesExpressionComponentsComponentKindEnum = {
+	required: "required",
+	fallback: "fallback",
+} as const;
+
+export type PostApiFeedQueryStatus200ItemsSearchTagMatchesExpressionComponentsComponentKindEnum =
+	(typeof PostApiFeedQueryStatus200ItemsSearchTagMatchesExpressionComponentsComponentKindEnum)[keyof typeof PostApiFeedQueryStatus200ItemsSearchTagMatchesExpressionComponentsComponentKindEnum];
+
+export const PostApiFeedQueryStatus200ItemsSearchTagMatchesExpressionComponentsLanguage = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type PostApiFeedQueryStatus200ItemsSearchTagMatchesExpressionComponentsLanguage =
+	(typeof PostApiFeedQueryStatus200ItemsSearchTagMatchesExpressionComponentsLanguage)[keyof typeof PostApiFeedQueryStatus200ItemsSearchTagMatchesExpressionComponentsLanguage];
+
+export const PostApiFeedQueryStatus200ItemsSearchTagMatchesExpressionGroupKeySemanticRoleEnum = {
+	predicate: "predicate",
+	slot: "slot",
+	value: "value",
+	focus: "focus",
+	qualifier: "qualifier",
+} as const;
+
+export type PostApiFeedQueryStatus200ItemsSearchTagMatchesExpressionGroupKeySemanticRoleEnum =
+	(typeof PostApiFeedQueryStatus200ItemsSearchTagMatchesExpressionGroupKeySemanticRoleEnum)[keyof typeof PostApiFeedQueryStatus200ItemsSearchTagMatchesExpressionGroupKeySemanticRoleEnum];
+
+export const PostApiFeedQueryStatus200ItemsSearchTagMatchesExpressionGroupKeyLanguage = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type PostApiFeedQueryStatus200ItemsSearchTagMatchesExpressionGroupKeyLanguage =
+	(typeof PostApiFeedQueryStatus200ItemsSearchTagMatchesExpressionGroupKeyLanguage)[keyof typeof PostApiFeedQueryStatus200ItemsSearchTagMatchesExpressionGroupKeyLanguage];
+
 export const PostApiFeedQueryStatus200ItemsUnitKindEnum = {
 	profile: "profile",
 	book: "book",
@@ -46876,6 +47284,90 @@ export type PostApiFeedQueryStatus200 = {
 							signature: string;
 					  } | null)
 					| null;
+				/**
+				 * @type array | undefined
+				 */
+				searchTagMatches?: {
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					matchedTagId: string;
+					/**
+					 * @default 'direct'
+					 * @type string
+					 */
+					evidence: PostApiFeedQueryStatus200ItemsSearchTagMatchesEvidenceEnum;
+					/**
+					 * @type object
+					 */
+					expression: {
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						expressionId: string;
+						/**
+						 * @default 'simple'
+						 * @type string
+						 */
+						expressionKind: PostApiFeedQueryStatus200ItemsSearchTagMatchesExpressionExpressionKindEnum;
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						focusTagId: string;
+						presentationRevision: string | number;
+						/**
+						 * @type array
+						 */
+						components: {
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							tagId: string;
+							/**
+							 * @default 'predicate'
+							 * @type string
+							 */
+							semanticRole: PostApiFeedQueryStatus200ItemsSearchTagMatchesExpressionComponentsSemanticRoleEnum;
+							/**
+							 * @default 'required'
+							 * @type string
+							 */
+							componentKind: PostApiFeedQueryStatus200ItemsSearchTagMatchesExpressionComponentsComponentKindEnum;
+							language:
+								| (PostApiFeedQueryStatus200ItemsSearchTagMatchesExpressionComponentsLanguage | null)
+								| null;
+							title: (string | null) | null;
+						}[];
+						groupKey:
+							| ({
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									tagId: string;
+									/**
+									 * @default 'predicate'
+									 * @type string
+									 */
+									semanticRole: PostApiFeedQueryStatus200ItemsSearchTagMatchesExpressionGroupKeySemanticRoleEnum;
+									language:
+										| (PostApiFeedQueryStatus200ItemsSearchTagMatchesExpressionGroupKeyLanguage | null)
+										| null;
+									title: (string | null) | null;
+							  } | null)
+							| null;
+					};
+				}[];
+				tagOtherPositionCount?: string | number;
 				/**
 				 * @type string
 				 */
@@ -47360,6 +47852,90 @@ export type PostApiFeedQueryStatus200 = {
 									signature: string;
 							  } | null)
 							| null;
+						/**
+						 * @type array | undefined
+						 */
+						searchTagMatches?: {
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							matchedTagId: string;
+							/**
+							 * @default 'direct'
+							 * @type string
+							 */
+							evidence: PostApiFeedQueryStatus200ItemsSearchTagMatchesEvidenceEnum;
+							/**
+							 * @type object
+							 */
+							expression: {
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								expressionId: string;
+								/**
+								 * @default 'simple'
+								 * @type string
+								 */
+								expressionKind: PostApiFeedQueryStatus200ItemsSearchTagMatchesExpressionExpressionKindEnum;
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								focusTagId: string;
+								presentationRevision: string | number;
+								/**
+								 * @type array
+								 */
+								components: {
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									tagId: string;
+									/**
+									 * @default 'predicate'
+									 * @type string
+									 */
+									semanticRole: PostApiFeedQueryStatus200ItemsSearchTagMatchesExpressionComponentsSemanticRoleEnum;
+									/**
+									 * @default 'required'
+									 * @type string
+									 */
+									componentKind: PostApiFeedQueryStatus200ItemsSearchTagMatchesExpressionComponentsComponentKindEnum;
+									language:
+										| (PostApiFeedQueryStatus200ItemsSearchTagMatchesExpressionComponentsLanguage | null)
+										| null;
+									title: (string | null) | null;
+								}[];
+								groupKey:
+									| ({
+											/**
+											 * @description
+											 * Format: `uuid`
+											 * @type string
+											 */
+											tagId: string;
+											/**
+											 * @default 'predicate'
+											 * @type string
+											 */
+											semanticRole: PostApiFeedQueryStatus200ItemsSearchTagMatchesExpressionGroupKeySemanticRoleEnum;
+											language:
+												| (PostApiFeedQueryStatus200ItemsSearchTagMatchesExpressionGroupKeyLanguage | null)
+												| null;
+											title: (string | null) | null;
+									  } | null)
+									| null;
+							};
+						}[];
+						tagOtherPositionCount?: string | number;
 						/**
 						 * @type string
 						 */
@@ -48058,6 +48634,90 @@ export type PostApiFeedQueryStatus200 = {
 									signature: string;
 							  } | null)
 							| null;
+						/**
+						 * @type array | undefined
+						 */
+						searchTagMatches?: {
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							matchedTagId: string;
+							/**
+							 * @default 'direct'
+							 * @type string
+							 */
+							evidence: PostApiFeedQueryStatus200ItemsSearchTagMatchesEvidenceEnum;
+							/**
+							 * @type object
+							 */
+							expression: {
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								expressionId: string;
+								/**
+								 * @default 'simple'
+								 * @type string
+								 */
+								expressionKind: PostApiFeedQueryStatus200ItemsSearchTagMatchesExpressionExpressionKindEnum;
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								focusTagId: string;
+								presentationRevision: string | number;
+								/**
+								 * @type array
+								 */
+								components: {
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									tagId: string;
+									/**
+									 * @default 'predicate'
+									 * @type string
+									 */
+									semanticRole: PostApiFeedQueryStatus200ItemsSearchTagMatchesExpressionComponentsSemanticRoleEnum;
+									/**
+									 * @default 'required'
+									 * @type string
+									 */
+									componentKind: PostApiFeedQueryStatus200ItemsSearchTagMatchesExpressionComponentsComponentKindEnum;
+									language:
+										| (PostApiFeedQueryStatus200ItemsSearchTagMatchesExpressionComponentsLanguage | null)
+										| null;
+									title: (string | null) | null;
+								}[];
+								groupKey:
+									| ({
+											/**
+											 * @description
+											 * Format: `uuid`
+											 * @type string
+											 */
+											tagId: string;
+											/**
+											 * @default 'predicate'
+											 * @type string
+											 */
+											semanticRole: PostApiFeedQueryStatus200ItemsSearchTagMatchesExpressionGroupKeySemanticRoleEnum;
+											language:
+												| (PostApiFeedQueryStatus200ItemsSearchTagMatchesExpressionGroupKeyLanguage | null)
+												| null;
+											title: (string | null) | null;
+									  } | null)
+									| null;
+							};
+						}[];
+						tagOtherPositionCount?: string | number;
 						/**
 						 * @type string
 						 */
@@ -48774,6 +49434,90 @@ export type PostApiFeedQueryStatus200 = {
 									signature: string;
 							  } | null)
 							| null;
+						/**
+						 * @type array | undefined
+						 */
+						searchTagMatches?: {
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							matchedTagId: string;
+							/**
+							 * @default 'direct'
+							 * @type string
+							 */
+							evidence: PostApiFeedQueryStatus200ItemsSearchTagMatchesEvidenceEnum;
+							/**
+							 * @type object
+							 */
+							expression: {
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								expressionId: string;
+								/**
+								 * @default 'simple'
+								 * @type string
+								 */
+								expressionKind: PostApiFeedQueryStatus200ItemsSearchTagMatchesExpressionExpressionKindEnum;
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								focusTagId: string;
+								presentationRevision: string | number;
+								/**
+								 * @type array
+								 */
+								components: {
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									tagId: string;
+									/**
+									 * @default 'predicate'
+									 * @type string
+									 */
+									semanticRole: PostApiFeedQueryStatus200ItemsSearchTagMatchesExpressionComponentsSemanticRoleEnum;
+									/**
+									 * @default 'required'
+									 * @type string
+									 */
+									componentKind: PostApiFeedQueryStatus200ItemsSearchTagMatchesExpressionComponentsComponentKindEnum;
+									language:
+										| (PostApiFeedQueryStatus200ItemsSearchTagMatchesExpressionComponentsLanguage | null)
+										| null;
+									title: (string | null) | null;
+								}[];
+								groupKey:
+									| ({
+											/**
+											 * @description
+											 * Format: `uuid`
+											 * @type string
+											 */
+											tagId: string;
+											/**
+											 * @default 'predicate'
+											 * @type string
+											 */
+											semanticRole: PostApiFeedQueryStatus200ItemsSearchTagMatchesExpressionGroupKeySemanticRoleEnum;
+											language:
+												| (PostApiFeedQueryStatus200ItemsSearchTagMatchesExpressionGroupKeyLanguage | null)
+												| null;
+											title: (string | null) | null;
+									  } | null)
+									| null;
+							};
+						}[];
+						tagOtherPositionCount?: string | number;
 						/**
 						 * @type string
 						 */
@@ -86753,7 +87497,7 @@ export type GetApiTagsSuggestionsLocalizationLanguagesEnum =
 export type GetApiTagsSuggestionsQuery = {
 	/**
 	 * @minLength 1
-	 * @maxLength 16
+	 * @maxLength 80
 	 * @type string
 	 */
 	q: string;
@@ -86762,12 +87506,54 @@ export type GetApiTagsSuggestionsQuery = {
 	 */
 	localizationLanguages?: GetApiTagsSuggestionsLocalizationLanguagesEnum[];
 	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string | undefined
+	 */
+	realmId?: string;
+	/**
 	 * @default 10
 	 */
 	limit?: string | number;
 };
 
-export const GetApiTagsSuggestionsStatus200ItemsLanguage = {
+export const GetApiTagsSuggestionsStatus200ItemsSelectionEnum = {
+	direct_expression: "direct_expression",
+	path_sense: "path_sense",
+} as const;
+
+export type GetApiTagsSuggestionsStatus200ItemsSelectionEnum =
+	(typeof GetApiTagsSuggestionsStatus200ItemsSelectionEnum)[keyof typeof GetApiTagsSuggestionsStatus200ItemsSelectionEnum];
+
+export const GetApiTagsSuggestionsStatus200ItemsExpressionExpressionKindEnum = {
+	simple: "simple",
+	facet_value: "facet_value",
+	relation: "relation",
+} as const;
+
+export type GetApiTagsSuggestionsStatus200ItemsExpressionExpressionKindEnum =
+	(typeof GetApiTagsSuggestionsStatus200ItemsExpressionExpressionKindEnum)[keyof typeof GetApiTagsSuggestionsStatus200ItemsExpressionExpressionKindEnum];
+
+export const GetApiTagsSuggestionsStatus200ItemsExpressionComponentsSemanticRoleEnum = {
+	predicate: "predicate",
+	slot: "slot",
+	value: "value",
+	focus: "focus",
+	qualifier: "qualifier",
+} as const;
+
+export type GetApiTagsSuggestionsStatus200ItemsExpressionComponentsSemanticRoleEnum =
+	(typeof GetApiTagsSuggestionsStatus200ItemsExpressionComponentsSemanticRoleEnum)[keyof typeof GetApiTagsSuggestionsStatus200ItemsExpressionComponentsSemanticRoleEnum];
+
+export const GetApiTagsSuggestionsStatus200ItemsExpressionComponentsComponentKindEnum = {
+	required: "required",
+	fallback: "fallback",
+} as const;
+
+export type GetApiTagsSuggestionsStatus200ItemsExpressionComponentsComponentKindEnum =
+	(typeof GetApiTagsSuggestionsStatus200ItemsExpressionComponentsComponentKindEnum)[keyof typeof GetApiTagsSuggestionsStatus200ItemsExpressionComponentsComponentKindEnum];
+
+export const GetApiTagsSuggestionsStatus200ItemsExpressionComponentsLanguage = {
 	zh: "zh",
 	en: "en",
 	ja: "ja",
@@ -86777,16 +87563,51 @@ export const GetApiTagsSuggestionsStatus200ItemsLanguage = {
 	es: "es",
 } as const;
 
-export type GetApiTagsSuggestionsStatus200ItemsLanguage =
-	(typeof GetApiTagsSuggestionsStatus200ItemsLanguage)[keyof typeof GetApiTagsSuggestionsStatus200ItemsLanguage];
+export type GetApiTagsSuggestionsStatus200ItemsExpressionComponentsLanguage =
+	(typeof GetApiTagsSuggestionsStatus200ItemsExpressionComponentsLanguage)[keyof typeof GetApiTagsSuggestionsStatus200ItemsExpressionComponentsLanguage];
 
-export const GetApiTagsSuggestionsStatus200ItemsAvatarIconPrefixEnum = {
-	fas: "fas",
-	fab: "fab",
+export const GetApiTagsSuggestionsStatus200ItemsExpressionGroupKeySemanticRoleEnum = {
+	predicate: "predicate",
+	slot: "slot",
+	value: "value",
+	focus: "focus",
+	qualifier: "qualifier",
 } as const;
 
-export type GetApiTagsSuggestionsStatus200ItemsAvatarIconPrefixEnum =
-	(typeof GetApiTagsSuggestionsStatus200ItemsAvatarIconPrefixEnum)[keyof typeof GetApiTagsSuggestionsStatus200ItemsAvatarIconPrefixEnum];
+export type GetApiTagsSuggestionsStatus200ItemsExpressionGroupKeySemanticRoleEnum =
+	(typeof GetApiTagsSuggestionsStatus200ItemsExpressionGroupKeySemanticRoleEnum)[keyof typeof GetApiTagsSuggestionsStatus200ItemsExpressionGroupKeySemanticRoleEnum];
+
+export const GetApiTagsSuggestionsStatus200ItemsExpressionGroupKeyLanguage = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetApiTagsSuggestionsStatus200ItemsExpressionGroupKeyLanguage =
+	(typeof GetApiTagsSuggestionsStatus200ItemsExpressionGroupKeyLanguage)[keyof typeof GetApiTagsSuggestionsStatus200ItemsExpressionGroupKeyLanguage];
+
+export const GetApiTagsSuggestionsStatus200ItemsMembersNodeKindEnum = {
+	concept: "concept",
+	guide: "guide",
+} as const;
+
+export type GetApiTagsSuggestionsStatus200ItemsMembersNodeKindEnum =
+	(typeof GetApiTagsSuggestionsStatus200ItemsMembersNodeKindEnum)[keyof typeof GetApiTagsSuggestionsStatus200ItemsMembersNodeKindEnum];
+
+export const GetApiTagsSuggestionsStatus200ItemsMembersIncomingRelationRelationKindEnum = {
+	generic: "generic",
+	partitive: "partitive",
+	instance: "instance",
+	organizational: "organizational",
+	facet_value: "facet_value",
+} as const;
+
+export type GetApiTagsSuggestionsStatus200ItemsMembersIncomingRelationRelationKindEnum =
+	(typeof GetApiTagsSuggestionsStatus200ItemsMembersIncomingRelationRelationKindEnum)[keyof typeof GetApiTagsSuggestionsStatus200ItemsMembersIncomingRelationRelationKindEnum];
 
 export const GetApiTagsSuggestionsStatus200ItemsMembersLanguage = {
 	zh: "zh",
@@ -86816,279 +87637,176 @@ export type GetApiTagsSuggestionsStatus200 = {
 	/**
 	 * @type array
 	 */
-	items: (
-		| {
-				/**
-				 * @type string
-				 */
-				selection: "path";
+	items: {
+		/**
+		 * @type string
+		 */
+		selection: GetApiTagsSuggestionsStatus200ItemsSelectionEnum;
+		/**
+		 * @type object
+		 */
+		expression: {
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			expressionId: string;
+			/**
+			 * @default 'simple'
+			 * @type string
+			 */
+			expressionKind: GetApiTagsSuggestionsStatus200ItemsExpressionExpressionKindEnum;
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			focusTagId: string;
+			presentationRevision: string | number;
+			/**
+			 * @type array
+			 */
+			components: {
 				/**
 				 * @description
 				 * Format: `uuid`
 				 * @type string
 				 */
 				tagId: string;
-				language: (GetApiTagsSuggestionsStatus200ItemsLanguage | null) | null;
-				title: (string | null) | null;
-				summary: (string | null) | null;
-				avatar:
-					| (
-							| (
-									| {
-											/**
-											 * @type string
-											 */
-											type: "image";
-											/**
-											 * @type object
-											 */
-											image: {
-												/**
-												 * @description
-												 * Format: `uuid`
-												 * @type string
-												 */
-												id: string;
-												/**
-												 * @type string
-												 */
-												url: string;
-											};
-									  }
-									| {
-											/**
-											 * @type string
-											 */
-											type: "emoji";
-											/**
-											 * @maxLength 64
-											 * @type string
-											 */
-											emoji: string;
-									  }
-									| {
-											/**
-											 * @type string
-											 */
-											type: "icon";
-											/**
-											 * @type object
-											 */
-											icon: {
-												/**
-												 * @type string
-												 */
-												provider: "font-awesome";
-												/**
-												 * @type string
-												 */
-												prefix: GetApiTagsSuggestionsStatus200ItemsAvatarIconPrefixEnum;
-												/**
-												 * @maxLength 128
-												 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
-												 * @type string
-												 */
-												name: string;
-											};
-									  }
-							  )
-							| null
-					  )
-					| null;
 				/**
-				 * @description
-				 * Format: `uuid`
+				 * @default 'predicate'
 				 * @type string
 				 */
-				pathId: string;
+				semanticRole: GetApiTagsSuggestionsStatus200ItemsExpressionComponentsSemanticRoleEnum;
 				/**
-				 * @type array
+				 * @default 'required'
+				 * @type string
 				 */
-				members: {
-					ordinal: string | number;
-					/**
-					 * @description
-					 * Format: `uuid`
-					 * @type string
-					 */
-					tagId: string;
-					language: (GetApiTagsSuggestionsStatus200ItemsMembersLanguage | null) | null;
-					title: (string | null) | null;
-					summary: (string | null) | null;
-					avatar:
+				componentKind: GetApiTagsSuggestionsStatus200ItemsExpressionComponentsComponentKindEnum;
+				language: (GetApiTagsSuggestionsStatus200ItemsExpressionComponentsLanguage | null) | null;
+				title: (string | null) | null;
+			}[];
+			groupKey:
+				| ({
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						tagId: string;
+						/**
+						 * @default 'predicate'
+						 * @type string
+						 */
+						semanticRole: GetApiTagsSuggestionsStatus200ItemsExpressionGroupKeySemanticRoleEnum;
+						language: (GetApiTagsSuggestionsStatus200ItemsExpressionGroupKeyLanguage | null) | null;
+						title: (string | null) | null;
+				  } | null)
+				| null;
+		};
+		senseId: (string | null) | null;
+		pathId: (string | null) | null;
+		/**
+		 * @type array
+		 */
+		members: {
+			ordinal: string | number;
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			nodeId: string;
+			/**
+			 * @type string
+			 */
+			nodeKind: GetApiTagsSuggestionsStatus200ItemsMembersNodeKindEnum;
+			incomingRelation:
+				| ({
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						relationId: string;
+						/**
+						 * @default 'generic'
+						 * @type string
+						 */
+						relationKind: GetApiTagsSuggestionsStatus200ItemsMembersIncomingRelationRelationKindEnum;
+				  } | null)
+				| null;
+			language: (GetApiTagsSuggestionsStatus200ItemsMembersLanguage | null) | null;
+			title: (string | null) | null;
+			summary: (string | null) | null;
+			avatar:
+				| (
 						| (
-								| (
-										| {
-												/**
-												 * @type string
-												 */
-												type: "image";
-												/**
-												 * @type object
-												 */
-												image: {
-													/**
-													 * @description
-													 * Format: `uuid`
-													 * @type string
-													 */
-													id: string;
-													/**
-													 * @type string
-													 */
-													url: string;
-												};
-										  }
-										| {
-												/**
-												 * @type string
-												 */
-												type: "emoji";
-												/**
-												 * @maxLength 64
-												 * @type string
-												 */
-												emoji: string;
-										  }
-										| {
-												/**
-												 * @type string
-												 */
-												type: "icon";
-												/**
-												 * @type object
-												 */
-												icon: {
-													/**
-													 * @type string
-													 */
-													provider: "font-awesome";
-													/**
-													 * @type string
-													 */
-													prefix: GetApiTagsSuggestionsStatus200ItemsMembersAvatarIconPrefixEnum;
-													/**
-													 * @maxLength 128
-													 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
-													 * @type string
-													 */
-													name: string;
-												};
-										  }
-								  )
-								| null
+								| {
+										/**
+										 * @type string
+										 */
+										type: "image";
+										/**
+										 * @type object
+										 */
+										image: {
+											/**
+											 * @description
+											 * Format: `uuid`
+											 * @type string
+											 */
+											id: string;
+											/**
+											 * @type string
+											 */
+											url: string;
+										};
+								  }
+								| {
+										/**
+										 * @type string
+										 */
+										type: "emoji";
+										/**
+										 * @maxLength 64
+										 * @type string
+										 */
+										emoji: string;
+								  }
+								| {
+										/**
+										 * @type string
+										 */
+										type: "icon";
+										/**
+										 * @type object
+										 */
+										icon: {
+											/**
+											 * @type string
+											 */
+											provider: "font-awesome";
+											/**
+											 * @type string
+											 */
+											prefix: GetApiTagsSuggestionsStatus200ItemsMembersAvatarIconPrefixEnum;
+											/**
+											 * @maxLength 128
+											 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+											 * @type string
+											 */
+											name: string;
+										};
+								  }
 						  )
-						| null;
-				}[];
-				matchDirection: "forward" | "reverse";
-				usageCount: string | number;
-				score: string | number;
-				voteCount: string | number;
-		  }
-		| {
-				/**
-				 * @type string
-				 */
-				selection: "direct";
-				/**
-				 * @description
-				 * Format: `uuid`
-				 * @type string
-				 */
-				tagId: string;
-				language: (GetApiTagsSuggestionsStatus200ItemsLanguage | null) | null;
-				title: (string | null) | null;
-				summary: (string | null) | null;
-				avatar:
-					| (
-							| (
-									| {
-											/**
-											 * @type string
-											 */
-											type: "image";
-											/**
-											 * @type object
-											 */
-											image: {
-												/**
-												 * @description
-												 * Format: `uuid`
-												 * @type string
-												 */
-												id: string;
-												/**
-												 * @type string
-												 */
-												url: string;
-											};
-									  }
-									| {
-											/**
-											 * @type string
-											 */
-											type: "emoji";
-											/**
-											 * @maxLength 64
-											 * @type string
-											 */
-											emoji: string;
-									  }
-									| {
-											/**
-											 * @type string
-											 */
-											type: "icon";
-											/**
-											 * @type object
-											 */
-											icon: {
-												/**
-												 * @type string
-												 */
-												provider: "font-awesome";
-												/**
-												 * @type string
-												 */
-												prefix: GetApiTagsSuggestionsStatus200ItemsAvatarIconPrefixEnum;
-												/**
-												 * @maxLength 128
-												 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
-												 * @type string
-												 */
-												name: string;
-											};
-									  }
-							  )
-							| null
-					  )
-					| null;
-				/**
-				 * @type null
-				 */
-				pathId: null;
-				/**
-				 * @type array
-				 */
-				members: [];
-				/**
-				 * @type null
-				 */
-				matchDirection: null;
-				/**
-				 * @type number
-				 */
-				usageCount: 0;
-				/**
-				 * @type number
-				 */
-				score: 0;
-				/**
-				 * @type number
-				 */
-				voteCount: 0;
-		  }
-	)[];
+						| null
+				  )
+				| null;
+		}[];
+		usageCount: string | number;
+	}[];
 };
 
 /**
@@ -87127,6 +87845,528 @@ export type GetApiTagsSuggestionsResponse =
 	| GetApiTagsSuggestionsStatus200
 	| GetApiTagsSuggestionsStatus422
 	| GetApiTagsSuggestionsStatus500;
+
+/**
+ * @type object
+ */
+export type GetApiTagsByTagIdExpressionsPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	tagId: string;
+};
+
+export const GetApiTagsByTagIdExpressionsLocalizationLanguagesEnum = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetApiTagsByTagIdExpressionsLocalizationLanguagesEnum =
+	(typeof GetApiTagsByTagIdExpressionsLocalizationLanguagesEnum)[keyof typeof GetApiTagsByTagIdExpressionsLocalizationLanguagesEnum];
+
+/**
+ * @type object
+ */
+export type GetApiTagsByTagIdExpressionsQuery = {
+	/**
+	 * @type array | undefined
+	 */
+	localizationLanguages?: GetApiTagsByTagIdExpressionsLocalizationLanguagesEnum[];
+	/**
+	 * @default 30
+	 */
+	limit?: string | number;
+};
+
+export const GetApiTagsByTagIdExpressionsStatus200DirectExpressionExpressionKindEnum = {
+	simple: "simple",
+	facet_value: "facet_value",
+	relation: "relation",
+} as const;
+
+export type GetApiTagsByTagIdExpressionsStatus200DirectExpressionExpressionKindEnum =
+	(typeof GetApiTagsByTagIdExpressionsStatus200DirectExpressionExpressionKindEnum)[keyof typeof GetApiTagsByTagIdExpressionsStatus200DirectExpressionExpressionKindEnum];
+
+export const GetApiTagsByTagIdExpressionsStatus200DirectExpressionComponentsSemanticRoleEnum = {
+	predicate: "predicate",
+	slot: "slot",
+	value: "value",
+	focus: "focus",
+	qualifier: "qualifier",
+} as const;
+
+export type GetApiTagsByTagIdExpressionsStatus200DirectExpressionComponentsSemanticRoleEnum =
+	(typeof GetApiTagsByTagIdExpressionsStatus200DirectExpressionComponentsSemanticRoleEnum)[keyof typeof GetApiTagsByTagIdExpressionsStatus200DirectExpressionComponentsSemanticRoleEnum];
+
+export const GetApiTagsByTagIdExpressionsStatus200DirectExpressionComponentsComponentKindEnum = {
+	required: "required",
+	fallback: "fallback",
+} as const;
+
+export type GetApiTagsByTagIdExpressionsStatus200DirectExpressionComponentsComponentKindEnum =
+	(typeof GetApiTagsByTagIdExpressionsStatus200DirectExpressionComponentsComponentKindEnum)[keyof typeof GetApiTagsByTagIdExpressionsStatus200DirectExpressionComponentsComponentKindEnum];
+
+export const GetApiTagsByTagIdExpressionsStatus200DirectExpressionComponentsLanguage = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetApiTagsByTagIdExpressionsStatus200DirectExpressionComponentsLanguage =
+	(typeof GetApiTagsByTagIdExpressionsStatus200DirectExpressionComponentsLanguage)[keyof typeof GetApiTagsByTagIdExpressionsStatus200DirectExpressionComponentsLanguage];
+
+export const GetApiTagsByTagIdExpressionsStatus200DirectExpressionGroupKeySemanticRoleEnum = {
+	predicate: "predicate",
+	slot: "slot",
+	value: "value",
+	focus: "focus",
+	qualifier: "qualifier",
+} as const;
+
+export type GetApiTagsByTagIdExpressionsStatus200DirectExpressionGroupKeySemanticRoleEnum =
+	(typeof GetApiTagsByTagIdExpressionsStatus200DirectExpressionGroupKeySemanticRoleEnum)[keyof typeof GetApiTagsByTagIdExpressionsStatus200DirectExpressionGroupKeySemanticRoleEnum];
+
+export const GetApiTagsByTagIdExpressionsStatus200DirectExpressionGroupKeyLanguage = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetApiTagsByTagIdExpressionsStatus200DirectExpressionGroupKeyLanguage =
+	(typeof GetApiTagsByTagIdExpressionsStatus200DirectExpressionGroupKeyLanguage)[keyof typeof GetApiTagsByTagIdExpressionsStatus200DirectExpressionGroupKeyLanguage];
+
+export const GetApiTagsByTagIdExpressionsStatus200QualifiedExpressionsExpressionExpressionKindEnum =
+	{
+		simple: "simple",
+		facet_value: "facet_value",
+		relation: "relation",
+	} as const;
+
+export type GetApiTagsByTagIdExpressionsStatus200QualifiedExpressionsExpressionExpressionKindEnum =
+	(typeof GetApiTagsByTagIdExpressionsStatus200QualifiedExpressionsExpressionExpressionKindEnum)[keyof typeof GetApiTagsByTagIdExpressionsStatus200QualifiedExpressionsExpressionExpressionKindEnum];
+
+export const GetApiTagsByTagIdExpressionsStatus200QualifiedExpressionsExpressionComponentsSemanticRoleEnum =
+	{
+		predicate: "predicate",
+		slot: "slot",
+		value: "value",
+		focus: "focus",
+		qualifier: "qualifier",
+	} as const;
+
+export type GetApiTagsByTagIdExpressionsStatus200QualifiedExpressionsExpressionComponentsSemanticRoleEnum =
+	(typeof GetApiTagsByTagIdExpressionsStatus200QualifiedExpressionsExpressionComponentsSemanticRoleEnum)[keyof typeof GetApiTagsByTagIdExpressionsStatus200QualifiedExpressionsExpressionComponentsSemanticRoleEnum];
+
+export const GetApiTagsByTagIdExpressionsStatus200QualifiedExpressionsExpressionComponentsComponentKindEnum =
+	{
+		required: "required",
+		fallback: "fallback",
+	} as const;
+
+export type GetApiTagsByTagIdExpressionsStatus200QualifiedExpressionsExpressionComponentsComponentKindEnum =
+	(typeof GetApiTagsByTagIdExpressionsStatus200QualifiedExpressionsExpressionComponentsComponentKindEnum)[keyof typeof GetApiTagsByTagIdExpressionsStatus200QualifiedExpressionsExpressionComponentsComponentKindEnum];
+
+export const GetApiTagsByTagIdExpressionsStatus200QualifiedExpressionsExpressionComponentsLanguage =
+	{
+		zh: "zh",
+		en: "en",
+		ja: "ja",
+		ko: "ko",
+		de: "de",
+		fr: "fr",
+		es: "es",
+	} as const;
+
+export type GetApiTagsByTagIdExpressionsStatus200QualifiedExpressionsExpressionComponentsLanguage =
+	(typeof GetApiTagsByTagIdExpressionsStatus200QualifiedExpressionsExpressionComponentsLanguage)[keyof typeof GetApiTagsByTagIdExpressionsStatus200QualifiedExpressionsExpressionComponentsLanguage];
+
+export const GetApiTagsByTagIdExpressionsStatus200QualifiedExpressionsExpressionGroupKeySemanticRoleEnum =
+	{
+		predicate: "predicate",
+		slot: "slot",
+		value: "value",
+		focus: "focus",
+		qualifier: "qualifier",
+	} as const;
+
+export type GetApiTagsByTagIdExpressionsStatus200QualifiedExpressionsExpressionGroupKeySemanticRoleEnum =
+	(typeof GetApiTagsByTagIdExpressionsStatus200QualifiedExpressionsExpressionGroupKeySemanticRoleEnum)[keyof typeof GetApiTagsByTagIdExpressionsStatus200QualifiedExpressionsExpressionGroupKeySemanticRoleEnum];
+
+export const GetApiTagsByTagIdExpressionsStatus200QualifiedExpressionsExpressionGroupKeyLanguage = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetApiTagsByTagIdExpressionsStatus200QualifiedExpressionsExpressionGroupKeyLanguage =
+	(typeof GetApiTagsByTagIdExpressionsStatus200QualifiedExpressionsExpressionGroupKeyLanguage)[keyof typeof GetApiTagsByTagIdExpressionsStatus200QualifiedExpressionsExpressionGroupKeyLanguage];
+
+export const GetApiTagsByTagIdExpressionsStatus200QualifiedExpressionsRolesEnum = {
+	predicate: "predicate",
+	slot: "slot",
+	value: "value",
+	focus: "focus",
+	qualifier: "qualifier",
+} as const;
+
+export type GetApiTagsByTagIdExpressionsStatus200QualifiedExpressionsRolesEnum =
+	(typeof GetApiTagsByTagIdExpressionsStatus200QualifiedExpressionsRolesEnum)[keyof typeof GetApiTagsByTagIdExpressionsStatus200QualifiedExpressionsRolesEnum];
+
+export const GetApiTagsByTagIdExpressionsStatus200InferredReachExpressionExpressionKindEnum = {
+	simple: "simple",
+	facet_value: "facet_value",
+	relation: "relation",
+} as const;
+
+export type GetApiTagsByTagIdExpressionsStatus200InferredReachExpressionExpressionKindEnum =
+	(typeof GetApiTagsByTagIdExpressionsStatus200InferredReachExpressionExpressionKindEnum)[keyof typeof GetApiTagsByTagIdExpressionsStatus200InferredReachExpressionExpressionKindEnum];
+
+export const GetApiTagsByTagIdExpressionsStatus200InferredReachExpressionComponentsSemanticRoleEnum =
+	{
+		predicate: "predicate",
+		slot: "slot",
+		value: "value",
+		focus: "focus",
+		qualifier: "qualifier",
+	} as const;
+
+export type GetApiTagsByTagIdExpressionsStatus200InferredReachExpressionComponentsSemanticRoleEnum =
+	(typeof GetApiTagsByTagIdExpressionsStatus200InferredReachExpressionComponentsSemanticRoleEnum)[keyof typeof GetApiTagsByTagIdExpressionsStatus200InferredReachExpressionComponentsSemanticRoleEnum];
+
+export const GetApiTagsByTagIdExpressionsStatus200InferredReachExpressionComponentsComponentKindEnum =
+	{
+		required: "required",
+		fallback: "fallback",
+	} as const;
+
+export type GetApiTagsByTagIdExpressionsStatus200InferredReachExpressionComponentsComponentKindEnum =
+	(typeof GetApiTagsByTagIdExpressionsStatus200InferredReachExpressionComponentsComponentKindEnum)[keyof typeof GetApiTagsByTagIdExpressionsStatus200InferredReachExpressionComponentsComponentKindEnum];
+
+export const GetApiTagsByTagIdExpressionsStatus200InferredReachExpressionComponentsLanguage = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetApiTagsByTagIdExpressionsStatus200InferredReachExpressionComponentsLanguage =
+	(typeof GetApiTagsByTagIdExpressionsStatus200InferredReachExpressionComponentsLanguage)[keyof typeof GetApiTagsByTagIdExpressionsStatus200InferredReachExpressionComponentsLanguage];
+
+export const GetApiTagsByTagIdExpressionsStatus200InferredReachExpressionGroupKeySemanticRoleEnum =
+	{
+		predicate: "predicate",
+		slot: "slot",
+		value: "value",
+		focus: "focus",
+		qualifier: "qualifier",
+	} as const;
+
+export type GetApiTagsByTagIdExpressionsStatus200InferredReachExpressionGroupKeySemanticRoleEnum =
+	(typeof GetApiTagsByTagIdExpressionsStatus200InferredReachExpressionGroupKeySemanticRoleEnum)[keyof typeof GetApiTagsByTagIdExpressionsStatus200InferredReachExpressionGroupKeySemanticRoleEnum];
+
+export const GetApiTagsByTagIdExpressionsStatus200InferredReachExpressionGroupKeyLanguage = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetApiTagsByTagIdExpressionsStatus200InferredReachExpressionGroupKeyLanguage =
+	(typeof GetApiTagsByTagIdExpressionsStatus200InferredReachExpressionGroupKeyLanguage)[keyof typeof GetApiTagsByTagIdExpressionsStatus200InferredReachExpressionGroupKeyLanguage];
+
+export const GetApiTagsByTagIdExpressionsStatus200InferredReachEvidenceKindEnum = {
+	entailed: "entailed",
+	retrieval_only: "retrieval_only",
+} as const;
+
+export type GetApiTagsByTagIdExpressionsStatus200InferredReachEvidenceKindEnum =
+	(typeof GetApiTagsByTagIdExpressionsStatus200InferredReachEvidenceKindEnum)[keyof typeof GetApiTagsByTagIdExpressionsStatus200InferredReachEvidenceKindEnum];
+
+/**
+ * @type object
+ */
+export type GetApiTagsByTagIdExpressionsStatus200 = {
+	directExpression:
+		| ({
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				expressionId: string;
+				/**
+				 * @default 'simple'
+				 * @type string
+				 */
+				expressionKind: GetApiTagsByTagIdExpressionsStatus200DirectExpressionExpressionKindEnum;
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				focusTagId: string;
+				presentationRevision: string | number;
+				/**
+				 * @type array
+				 */
+				components: {
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					tagId: string;
+					/**
+					 * @default 'predicate'
+					 * @type string
+					 */
+					semanticRole: GetApiTagsByTagIdExpressionsStatus200DirectExpressionComponentsSemanticRoleEnum;
+					/**
+					 * @default 'required'
+					 * @type string
+					 */
+					componentKind: GetApiTagsByTagIdExpressionsStatus200DirectExpressionComponentsComponentKindEnum;
+					language:
+						| (GetApiTagsByTagIdExpressionsStatus200DirectExpressionComponentsLanguage | null)
+						| null;
+					title: (string | null) | null;
+				}[];
+				groupKey:
+					| ({
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							tagId: string;
+							/**
+							 * @default 'predicate'
+							 * @type string
+							 */
+							semanticRole: GetApiTagsByTagIdExpressionsStatus200DirectExpressionGroupKeySemanticRoleEnum;
+							language:
+								| (GetApiTagsByTagIdExpressionsStatus200DirectExpressionGroupKeyLanguage | null)
+								| null;
+							title: (string | null) | null;
+					  } | null)
+					| null;
+		  } | null)
+		| null;
+	/**
+	 * @type array
+	 */
+	qualifiedExpressions: {
+		/**
+		 * @type object
+		 */
+		expression: {
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			expressionId: string;
+			/**
+			 * @default 'simple'
+			 * @type string
+			 */
+			expressionKind: GetApiTagsByTagIdExpressionsStatus200QualifiedExpressionsExpressionExpressionKindEnum;
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			focusTagId: string;
+			presentationRevision: string | number;
+			/**
+			 * @type array
+			 */
+			components: {
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				tagId: string;
+				/**
+				 * @default 'predicate'
+				 * @type string
+				 */
+				semanticRole: GetApiTagsByTagIdExpressionsStatus200QualifiedExpressionsExpressionComponentsSemanticRoleEnum;
+				/**
+				 * @default 'required'
+				 * @type string
+				 */
+				componentKind: GetApiTagsByTagIdExpressionsStatus200QualifiedExpressionsExpressionComponentsComponentKindEnum;
+				language:
+					| (GetApiTagsByTagIdExpressionsStatus200QualifiedExpressionsExpressionComponentsLanguage | null)
+					| null;
+				title: (string | null) | null;
+			}[];
+			groupKey:
+				| ({
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						tagId: string;
+						/**
+						 * @default 'predicate'
+						 * @type string
+						 */
+						semanticRole: GetApiTagsByTagIdExpressionsStatus200QualifiedExpressionsExpressionGroupKeySemanticRoleEnum;
+						language:
+							| (GetApiTagsByTagIdExpressionsStatus200QualifiedExpressionsExpressionGroupKeyLanguage | null)
+							| null;
+						title: (string | null) | null;
+				  } | null)
+				| null;
+		};
+		/**
+		 * @type array
+		 */
+		roles: GetApiTagsByTagIdExpressionsStatus200QualifiedExpressionsRolesEnum[];
+	}[];
+	/**
+	 * @type array
+	 */
+	inferredReach: {
+		/**
+		 * @type object
+		 */
+		expression: {
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			expressionId: string;
+			/**
+			 * @default 'simple'
+			 * @type string
+			 */
+			expressionKind: GetApiTagsByTagIdExpressionsStatus200InferredReachExpressionExpressionKindEnum;
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			focusTagId: string;
+			presentationRevision: string | number;
+			/**
+			 * @type array
+			 */
+			components: {
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				tagId: string;
+				/**
+				 * @default 'predicate'
+				 * @type string
+				 */
+				semanticRole: GetApiTagsByTagIdExpressionsStatus200InferredReachExpressionComponentsSemanticRoleEnum;
+				/**
+				 * @default 'required'
+				 * @type string
+				 */
+				componentKind: GetApiTagsByTagIdExpressionsStatus200InferredReachExpressionComponentsComponentKindEnum;
+				language:
+					| (GetApiTagsByTagIdExpressionsStatus200InferredReachExpressionComponentsLanguage | null)
+					| null;
+				title: (string | null) | null;
+			}[];
+			groupKey:
+				| ({
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						tagId: string;
+						/**
+						 * @default 'predicate'
+						 * @type string
+						 */
+						semanticRole: GetApiTagsByTagIdExpressionsStatus200InferredReachExpressionGroupKeySemanticRoleEnum;
+						language:
+							| (GetApiTagsByTagIdExpressionsStatus200InferredReachExpressionGroupKeyLanguage | null)
+							| null;
+						title: (string | null) | null;
+				  } | null)
+				| null;
+		};
+		/**
+		 * @type string
+		 */
+		evidenceKind: GetApiTagsByTagIdExpressionsStatus200InferredReachEvidenceKindEnum;
+	}[];
+};
+
+/**
+ * @type object
+ */
+export type GetApiTagsByTagIdExpressionsStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type GetApiTagsByTagIdExpressionsStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type GetApiTagsByTagIdExpressionsOptions = {
+	body?: never;
+	path: GetApiTagsByTagIdExpressionsPath;
+	query?: GetApiTagsByTagIdExpressionsQuery;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type GetApiTagsByTagIdExpressionsResponses = {
+	"200": GetApiTagsByTagIdExpressionsStatus200;
+	"422": GetApiTagsByTagIdExpressionsStatus422;
+	"500": GetApiTagsByTagIdExpressionsStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type GetApiTagsByTagIdExpressionsResponse =
+	| GetApiTagsByTagIdExpressionsStatus200
+	| GetApiTagsByTagIdExpressionsStatus422
+	| GetApiTagsByTagIdExpressionsStatus500;
 
 /**
  * @type object
@@ -87171,7 +88411,26 @@ export type GetApiTagsByTagIdHierarchyQuery = {
 	grandchildLimit?: string | number;
 };
 
-export const GetApiTagsByTagIdHierarchyStatus200Language = {
+export const GetApiTagsByTagIdHierarchyStatus200ChildrenRelationKindEnum = {
+	generic: "generic",
+	partitive: "partitive",
+	instance: "instance",
+	organizational: "organizational",
+	facet_value: "facet_value",
+} as const;
+
+export type GetApiTagsByTagIdHierarchyStatus200ChildrenRelationKindEnum =
+	(typeof GetApiTagsByTagIdHierarchyStatus200ChildrenRelationKindEnum)[keyof typeof GetApiTagsByTagIdHierarchyStatus200ChildrenRelationKindEnum];
+
+export const GetApiTagsByTagIdHierarchyStatus200ChildrenNodeNodeKindEnum = {
+	concept: "concept",
+	guide: "guide",
+} as const;
+
+export type GetApiTagsByTagIdHierarchyStatus200ChildrenNodeNodeKindEnum =
+	(typeof GetApiTagsByTagIdHierarchyStatus200ChildrenNodeNodeKindEnum)[keyof typeof GetApiTagsByTagIdHierarchyStatus200ChildrenNodeNodeKindEnum];
+
+export const GetApiTagsByTagIdHierarchyStatus200ChildrenNodeLanguage = {
 	zh: "zh",
 	en: "en",
 	ja: "ja",
@@ -87181,10 +88440,37 @@ export const GetApiTagsByTagIdHierarchyStatus200Language = {
 	es: "es",
 } as const;
 
-export type GetApiTagsByTagIdHierarchyStatus200Language =
-	(typeof GetApiTagsByTagIdHierarchyStatus200Language)[keyof typeof GetApiTagsByTagIdHierarchyStatus200Language];
+export type GetApiTagsByTagIdHierarchyStatus200ChildrenNodeLanguage =
+	(typeof GetApiTagsByTagIdHierarchyStatus200ChildrenNodeLanguage)[keyof typeof GetApiTagsByTagIdHierarchyStatus200ChildrenNodeLanguage];
 
-export const GetApiTagsByTagIdHierarchyStatus200ChildrenLanguage = {
+export const GetApiTagsByTagIdHierarchyStatus200ChildrenNodeAvatarIconPrefixEnum = {
+	fas: "fas",
+	fab: "fab",
+} as const;
+
+export type GetApiTagsByTagIdHierarchyStatus200ChildrenNodeAvatarIconPrefixEnum =
+	(typeof GetApiTagsByTagIdHierarchyStatus200ChildrenNodeAvatarIconPrefixEnum)[keyof typeof GetApiTagsByTagIdHierarchyStatus200ChildrenNodeAvatarIconPrefixEnum];
+
+export const GetApiTagsByTagIdHierarchyStatus200ChildrenChildrenRelationKindEnum = {
+	generic: "generic",
+	partitive: "partitive",
+	instance: "instance",
+	organizational: "organizational",
+	facet_value: "facet_value",
+} as const;
+
+export type GetApiTagsByTagIdHierarchyStatus200ChildrenChildrenRelationKindEnum =
+	(typeof GetApiTagsByTagIdHierarchyStatus200ChildrenChildrenRelationKindEnum)[keyof typeof GetApiTagsByTagIdHierarchyStatus200ChildrenChildrenRelationKindEnum];
+
+export const GetApiTagsByTagIdHierarchyStatus200ChildrenChildrenNodeNodeKindEnum = {
+	concept: "concept",
+	guide: "guide",
+} as const;
+
+export type GetApiTagsByTagIdHierarchyStatus200ChildrenChildrenNodeNodeKindEnum =
+	(typeof GetApiTagsByTagIdHierarchyStatus200ChildrenChildrenNodeNodeKindEnum)[keyof typeof GetApiTagsByTagIdHierarchyStatus200ChildrenChildrenNodeNodeKindEnum];
+
+export const GetApiTagsByTagIdHierarchyStatus200ChildrenChildrenNodeLanguage = {
 	zh: "zh",
 	en: "en",
 	ja: "ja",
@@ -87194,21 +88480,16 @@ export const GetApiTagsByTagIdHierarchyStatus200ChildrenLanguage = {
 	es: "es",
 } as const;
 
-export type GetApiTagsByTagIdHierarchyStatus200ChildrenLanguage =
-	(typeof GetApiTagsByTagIdHierarchyStatus200ChildrenLanguage)[keyof typeof GetApiTagsByTagIdHierarchyStatus200ChildrenLanguage];
+export type GetApiTagsByTagIdHierarchyStatus200ChildrenChildrenNodeLanguage =
+	(typeof GetApiTagsByTagIdHierarchyStatus200ChildrenChildrenNodeLanguage)[keyof typeof GetApiTagsByTagIdHierarchyStatus200ChildrenChildrenNodeLanguage];
 
-export const GetApiTagsByTagIdHierarchyStatus200ChildrenChildrenLanguage = {
-	zh: "zh",
-	en: "en",
-	ja: "ja",
-	ko: "ko",
-	de: "de",
-	fr: "fr",
-	es: "es",
+export const GetApiTagsByTagIdHierarchyStatus200ChildrenChildrenNodeAvatarIconPrefixEnum = {
+	fas: "fas",
+	fab: "fab",
 } as const;
 
-export type GetApiTagsByTagIdHierarchyStatus200ChildrenChildrenLanguage =
-	(typeof GetApiTagsByTagIdHierarchyStatus200ChildrenChildrenLanguage)[keyof typeof GetApiTagsByTagIdHierarchyStatus200ChildrenChildrenLanguage];
+export type GetApiTagsByTagIdHierarchyStatus200ChildrenChildrenNodeAvatarIconPrefixEnum =
+	(typeof GetApiTagsByTagIdHierarchyStatus200ChildrenChildrenNodeAvatarIconPrefixEnum)[keyof typeof GetApiTagsByTagIdHierarchyStatus200ChildrenChildrenNodeAvatarIconPrefixEnum];
 
 /**
  * @type object
@@ -87220,9 +88501,6 @@ export type GetApiTagsByTagIdHierarchyStatus200 = {
 	 * @type string
 	 */
 	tagId: string;
-	language: (GetApiTagsByTagIdHierarchyStatus200Language | null) | null;
-	title: (string | null) | null;
-	summary: (string | null) | null;
 	/**
 	 * @type array
 	 */
@@ -87232,12 +88510,94 @@ export type GetApiTagsByTagIdHierarchyStatus200 = {
 		 * Format: `uuid`
 		 * @type string
 		 */
-		tagId: string;
-		language: (GetApiTagsByTagIdHierarchyStatus200ChildrenLanguage | null) | null;
-		title: (string | null) | null;
-		summary: (string | null) | null;
-		score: string | number;
-		voteCount: string | number;
+		relationId: string;
+		/**
+		 * @default 'generic'
+		 * @type string
+		 */
+		relationKind: GetApiTagsByTagIdHierarchyStatus200ChildrenRelationKindEnum;
+		/**
+		 * @type object
+		 */
+		node: {
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			nodeId: string;
+			/**
+			 * @type string
+			 */
+			nodeKind: GetApiTagsByTagIdHierarchyStatus200ChildrenNodeNodeKindEnum;
+			language: (GetApiTagsByTagIdHierarchyStatus200ChildrenNodeLanguage | null) | null;
+			title: (string | null) | null;
+			summary: (string | null) | null;
+			avatar:
+				| (
+						| (
+								| {
+										/**
+										 * @type string
+										 */
+										type: "image";
+										/**
+										 * @type object
+										 */
+										image: {
+											/**
+											 * @description
+											 * Format: `uuid`
+											 * @type string
+											 */
+											id: string;
+											/**
+											 * @type string
+											 */
+											url: string;
+										};
+								  }
+								| {
+										/**
+										 * @type string
+										 */
+										type: "emoji";
+										/**
+										 * @maxLength 64
+										 * @type string
+										 */
+										emoji: string;
+								  }
+								| {
+										/**
+										 * @type string
+										 */
+										type: "icon";
+										/**
+										 * @type object
+										 */
+										icon: {
+											/**
+											 * @type string
+											 */
+											provider: "font-awesome";
+											/**
+											 * @type string
+											 */
+											prefix: GetApiTagsByTagIdHierarchyStatus200ChildrenNodeAvatarIconPrefixEnum;
+											/**
+											 * @maxLength 128
+											 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+											 * @type string
+											 */
+											name: string;
+										};
+								  }
+						  )
+						| null
+				  )
+				| null;
+		};
 		/**
 		 * @type array
 		 */
@@ -87247,12 +88607,94 @@ export type GetApiTagsByTagIdHierarchyStatus200 = {
 			 * Format: `uuid`
 			 * @type string
 			 */
-			tagId: string;
-			language: (GetApiTagsByTagIdHierarchyStatus200ChildrenChildrenLanguage | null) | null;
-			title: (string | null) | null;
-			summary: (string | null) | null;
-			score: string | number;
-			voteCount: string | number;
+			relationId: string;
+			/**
+			 * @default 'generic'
+			 * @type string
+			 */
+			relationKind: GetApiTagsByTagIdHierarchyStatus200ChildrenChildrenRelationKindEnum;
+			/**
+			 * @type object
+			 */
+			node: {
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				nodeId: string;
+				/**
+				 * @type string
+				 */
+				nodeKind: GetApiTagsByTagIdHierarchyStatus200ChildrenChildrenNodeNodeKindEnum;
+				language: (GetApiTagsByTagIdHierarchyStatus200ChildrenChildrenNodeLanguage | null) | null;
+				title: (string | null) | null;
+				summary: (string | null) | null;
+				avatar:
+					| (
+							| (
+									| {
+											/**
+											 * @type string
+											 */
+											type: "image";
+											/**
+											 * @type object
+											 */
+											image: {
+												/**
+												 * @description
+												 * Format: `uuid`
+												 * @type string
+												 */
+												id: string;
+												/**
+												 * @type string
+												 */
+												url: string;
+											};
+									  }
+									| {
+											/**
+											 * @type string
+											 */
+											type: "emoji";
+											/**
+											 * @maxLength 64
+											 * @type string
+											 */
+											emoji: string;
+									  }
+									| {
+											/**
+											 * @type string
+											 */
+											type: "icon";
+											/**
+											 * @type object
+											 */
+											icon: {
+												/**
+												 * @type string
+												 */
+												provider: "font-awesome";
+												/**
+												 * @type string
+												 */
+												prefix: GetApiTagsByTagIdHierarchyStatus200ChildrenChildrenNodeAvatarIconPrefixEnum;
+												/**
+												 * @maxLength 128
+												 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+												 * @type string
+												 */
+												name: string;
+											};
+									  }
+							  )
+							| null
+					  )
+					| null;
+			};
 		}[];
 	}[];
 };
@@ -87358,10 +88800,35 @@ export type GetApiTagsByTagIdPathsQuery = {
 	 */
 	localizationLanguages?: GetApiTagsByTagIdPathsLocalizationLanguagesEnum[];
 	/**
-	 * @default 5
+	 * @description
+	 * Format: `uuid`
+	 * @type string | undefined
+	 */
+	cursor?: string;
+	/**
+	 * @default 20
 	 */
 	limit?: string | number;
 };
+
+export const GetApiTagsByTagIdPathsStatus200ItemsMembersNodeKindEnum = {
+	concept: "concept",
+	guide: "guide",
+} as const;
+
+export type GetApiTagsByTagIdPathsStatus200ItemsMembersNodeKindEnum =
+	(typeof GetApiTagsByTagIdPathsStatus200ItemsMembersNodeKindEnum)[keyof typeof GetApiTagsByTagIdPathsStatus200ItemsMembersNodeKindEnum];
+
+export const GetApiTagsByTagIdPathsStatus200ItemsMembersIncomingRelationRelationKindEnum = {
+	generic: "generic",
+	partitive: "partitive",
+	instance: "instance",
+	organizational: "organizational",
+	facet_value: "facet_value",
+} as const;
+
+export type GetApiTagsByTagIdPathsStatus200ItemsMembersIncomingRelationRelationKindEnum =
+	(typeof GetApiTagsByTagIdPathsStatus200ItemsMembersIncomingRelationRelationKindEnum)[keyof typeof GetApiTagsByTagIdPathsStatus200ItemsMembersIncomingRelationRelationKindEnum];
 
 export const GetApiTagsByTagIdPathsStatus200ItemsMembersLanguage = {
 	zh: "zh",
@@ -87411,7 +88878,26 @@ export type GetApiTagsByTagIdPathsStatus200 = {
 			 * Format: `uuid`
 			 * @type string
 			 */
-			tagId: string;
+			nodeId: string;
+			/**
+			 * @type string
+			 */
+			nodeKind: GetApiTagsByTagIdPathsStatus200ItemsMembersNodeKindEnum;
+			incomingRelation:
+				| ({
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						relationId: string;
+						/**
+						 * @default 'generic'
+						 * @type string
+						 */
+						relationKind: GetApiTagsByTagIdPathsStatus200ItemsMembersIncomingRelationRelationKindEnum;
+				  } | null)
+				| null;
 			language: (GetApiTagsByTagIdPathsStatus200ItemsMembersLanguage | null) | null;
 			title: (string | null) | null;
 			summary: (string | null) | null;
@@ -87481,6 +88967,7 @@ export type GetApiTagsByTagIdPathsStatus200 = {
 				| null;
 		}[];
 	}[];
+	nextCursor: (string | null) | null;
 };
 
 /**
@@ -87520,14 +89007,749 @@ export type GetApiTagsByTagIdPathsResponse =
 	| GetApiTagsByTagIdPathsStatus422
 	| GetApiTagsByTagIdPathsStatus500;
 
-export const PostApiTagPathsDefinitionWarningsStatus200ItemsRelationEnum = {
-	existing_shorter_suffix: "existing_shorter_suffix",
-	existing_longer_extension: "existing_longer_extension",
+/**
+ * @type object
+ */
+export type PostApiTagExpressionsStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	expressionId: string;
+	/**
+	 * @type boolean
+	 */
+	created: boolean;
+	presentationRevision: string | number;
+};
+
+/**
+ * @type object
+ */
+export type PostApiTagExpressionsStatus400 = MalformedRequestBody;
+
+/**
+ * @type object
+ */
+export type PostApiTagExpressionsStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'PlatformCapabilityRequired'
+		 * @type string
+		 */
+		code: "PlatformCapabilityRequired";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export type PostApiTagExpressionsStatus422 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'ValidationError'
+				 * @type string
+				 */
+				code: "ValidationError";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| ValidationError;
+
+/**
+ * @type object
+ */
+export type PostApiTagExpressionsStatus500 = InternalError;
+
+export const PostApiTagExpressionsRequestExpressionKindEnum = {
+	simple: "simple",
+	facet_value: "facet_value",
+	relation: "relation",
+} as const;
+
+export type PostApiTagExpressionsRequestExpressionKindEnum =
+	(typeof PostApiTagExpressionsRequestExpressionKindEnum)[keyof typeof PostApiTagExpressionsRequestExpressionKindEnum];
+
+export const PostApiTagExpressionsRequestArgumentsRoleEnum = {
+	predicate: "predicate",
+	slot: "slot",
+	value: "value",
+	focus: "focus",
+	qualifier: "qualifier",
+} as const;
+
+export type PostApiTagExpressionsRequestArgumentsRoleEnum =
+	(typeof PostApiTagExpressionsRequestArgumentsRoleEnum)[keyof typeof PostApiTagExpressionsRequestArgumentsRoleEnum];
+
+export const PostApiTagExpressionsRequestLabelComponentsSemanticRoleEnum = {
+	predicate: "predicate",
+	slot: "slot",
+	value: "value",
+	focus: "focus",
+	qualifier: "qualifier",
+} as const;
+
+export type PostApiTagExpressionsRequestLabelComponentsSemanticRoleEnum =
+	(typeof PostApiTagExpressionsRequestLabelComponentsSemanticRoleEnum)[keyof typeof PostApiTagExpressionsRequestLabelComponentsSemanticRoleEnum];
+
+export const PostApiTagExpressionsRequestLabelComponentsComponentKindEnum = {
+	required: "required",
+	fallback: "fallback",
+} as const;
+
+export type PostApiTagExpressionsRequestLabelComponentsComponentKindEnum =
+	(typeof PostApiTagExpressionsRequestLabelComponentsComponentKindEnum)[keyof typeof PostApiTagExpressionsRequestLabelComponentsComponentKindEnum];
+
+export const PostApiTagExpressionsRequestGroupKeySemanticRoleEnum = {
+	predicate: "predicate",
+	slot: "slot",
+	value: "value",
+	focus: "focus",
+	qualifier: "qualifier",
+} as const;
+
+export type PostApiTagExpressionsRequestGroupKeySemanticRoleEnum =
+	(typeof PostApiTagExpressionsRequestGroupKeySemanticRoleEnum)[keyof typeof PostApiTagExpressionsRequestGroupKeySemanticRoleEnum];
+
+/**
+ * @type object
+ */
+export type PostApiTagExpressionsBody = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string | undefined
+	 */
+	expressionId?: string;
+	/**
+	 * @default 'simple'
+	 * @type string
+	 */
+	expressionKind: PostApiTagExpressionsRequestExpressionKindEnum;
+	/**
+	 * @minLength 1
+	 * @maxLength 2048
+	 * @type string
+	 */
+	canonicalClaimKey: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	focusTagId: string;
+	/**
+	 * @type array
+	 */
+	arguments: {
+		/**
+		 * @default 'predicate'
+		 * @type string
+		 */
+		role: PostApiTagExpressionsRequestArgumentsRoleEnum;
+		ordinal: string | number;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		tagId: string;
+	}[];
+	/**
+	 * @type array
+	 */
+	labelComponents: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		tagId: string;
+		/**
+		 * @default 'predicate'
+		 * @type string
+		 */
+		semanticRole: PostApiTagExpressionsRequestLabelComponentsSemanticRoleEnum;
+		/**
+		 * @default 'required'
+		 * @type string
+		 */
+		componentKind: PostApiTagExpressionsRequestLabelComponentsComponentKindEnum;
+	}[];
+	groupKey:
+		| ({
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				tagId: string;
+				/**
+				 * @default 'predicate'
+				 * @type string
+				 */
+				semanticRole: PostApiTagExpressionsRequestGroupKeySemanticRoleEnum;
+		  } | null)
+		| null;
+};
+
+/**
+ * @type object
+ */
+export type PostApiTagExpressionsOptions = {
+	body: PostApiTagExpressionsBody;
+	path?: never;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PostApiTagExpressionsResponses = {
+	"200": PostApiTagExpressionsStatus200;
+	"400": PostApiTagExpressionsStatus400;
+	"403": PostApiTagExpressionsStatus403;
+	"422": PostApiTagExpressionsStatus422;
+	"500": PostApiTagExpressionsStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PostApiTagExpressionsResponse =
+	| PostApiTagExpressionsStatus200
+	| PostApiTagExpressionsStatus400
+	| PostApiTagExpressionsStatus403
+	| PostApiTagExpressionsStatus422
+	| PostApiTagExpressionsStatus500;
+
+/**
+ * @type object
+ */
+export type PostApiTagExpressionsByExpressionIdInferenceRulesPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	expressionId: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiTagExpressionsByExpressionIdInferenceRulesStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	ruleId: string;
+	/**
+	 * @type boolean
+	 */
+	created: boolean;
+};
+
+/**
+ * @type object
+ */
+export type PostApiTagExpressionsByExpressionIdInferenceRulesStatus400 = MalformedRequestBody;
+
+/**
+ * @type object
+ */
+export type PostApiTagExpressionsByExpressionIdInferenceRulesStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'PlatformCapabilityRequired'
+		 * @type string
+		 */
+		code: "PlatformCapabilityRequired";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export type PostApiTagExpressionsByExpressionIdInferenceRulesStatus422 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'ValidationError'
+				 * @type string
+				 */
+				code: "ValidationError";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| ValidationError;
+
+/**
+ * @type object
+ */
+export type PostApiTagExpressionsByExpressionIdInferenceRulesStatus500 = InternalError;
+
+export const PostApiTagExpressionsByExpressionIdInferenceRulesRequestInferenceKindEnum = {
+	entailed: "entailed",
+	retrieval_only: "retrieval_only",
+} as const;
+
+export type PostApiTagExpressionsByExpressionIdInferenceRulesRequestInferenceKindEnum =
+	(typeof PostApiTagExpressionsByExpressionIdInferenceRulesRequestInferenceKindEnum)[keyof typeof PostApiTagExpressionsByExpressionIdInferenceRulesRequestInferenceKindEnum];
+
+/**
+ * @type object
+ */
+export type PostApiTagExpressionsByExpressionIdInferenceRulesBody = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string | undefined
+	 */
+	targetTagId?: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string | undefined
+	 */
+	targetExpressionId?: string;
+	/**
+	 * @default 'entailed'
+	 * @type string
+	 */
+	inferenceKind: PostApiTagExpressionsByExpressionIdInferenceRulesRequestInferenceKindEnum;
+	/**
+	 * @type object | undefined
+	 */
+	provenance?: {
+		[key: string]: unknown;
+	};
+};
+
+/**
+ * @type object
+ */
+export type PostApiTagExpressionsByExpressionIdInferenceRulesOptions = {
+	body: PostApiTagExpressionsByExpressionIdInferenceRulesBody;
+	path: PostApiTagExpressionsByExpressionIdInferenceRulesPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PostApiTagExpressionsByExpressionIdInferenceRulesResponses = {
+	"200": PostApiTagExpressionsByExpressionIdInferenceRulesStatus200;
+	"400": PostApiTagExpressionsByExpressionIdInferenceRulesStatus400;
+	"403": PostApiTagExpressionsByExpressionIdInferenceRulesStatus403;
+	"422": PostApiTagExpressionsByExpressionIdInferenceRulesStatus422;
+	"500": PostApiTagExpressionsByExpressionIdInferenceRulesStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PostApiTagExpressionsByExpressionIdInferenceRulesResponse =
+	| PostApiTagExpressionsByExpressionIdInferenceRulesStatus200
+	| PostApiTagExpressionsByExpressionIdInferenceRulesStatus400
+	| PostApiTagExpressionsByExpressionIdInferenceRulesStatus403
+	| PostApiTagExpressionsByExpressionIdInferenceRulesStatus422
+	| PostApiTagExpressionsByExpressionIdInferenceRulesStatus500;
+
+/**
+ * @type object
+ */
+export type DeleteApiTagExpressionsByExpressionIdInferenceRulesByRuleIdPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	expressionId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	ruleId: string;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiTagExpressionsByExpressionIdInferenceRulesByRuleIdStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	ruleId: string;
+	/**
+	 * @type boolean
+	 */
+	retired: boolean;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiTagExpressionsByExpressionIdInferenceRulesByRuleIdStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'PlatformCapabilityRequired'
+		 * @type string
+		 */
+		code: "PlatformCapabilityRequired";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export type DeleteApiTagExpressionsByExpressionIdInferenceRulesByRuleIdStatus422 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'ValidationError'
+				 * @type string
+				 */
+				code: "ValidationError";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| ValidationError;
+
+/**
+ * @type object
+ */
+export type DeleteApiTagExpressionsByExpressionIdInferenceRulesByRuleIdStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type DeleteApiTagExpressionsByExpressionIdInferenceRulesByRuleIdOptions = {
+	body?: never;
+	path: DeleteApiTagExpressionsByExpressionIdInferenceRulesByRuleIdPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiTagExpressionsByExpressionIdInferenceRulesByRuleIdResponses = {
+	"200": DeleteApiTagExpressionsByExpressionIdInferenceRulesByRuleIdStatus200;
+	"403": DeleteApiTagExpressionsByExpressionIdInferenceRulesByRuleIdStatus403;
+	"422": DeleteApiTagExpressionsByExpressionIdInferenceRulesByRuleIdStatus422;
+	"500": DeleteApiTagExpressionsByExpressionIdInferenceRulesByRuleIdStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type DeleteApiTagExpressionsByExpressionIdInferenceRulesByRuleIdResponse =
+	| DeleteApiTagExpressionsByExpressionIdInferenceRulesByRuleIdStatus200
+	| DeleteApiTagExpressionsByExpressionIdInferenceRulesByRuleIdStatus403
+	| DeleteApiTagExpressionsByExpressionIdInferenceRulesByRuleIdStatus422
+	| DeleteApiTagExpressionsByExpressionIdInferenceRulesByRuleIdStatus500;
+
+/**
+ * @type object
+ */
+export type PostApiTagRelationsStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	relationId: string;
+	/**
+	 * @type boolean
+	 */
+	created: boolean;
+	revision: string | number;
+};
+
+/**
+ * @type object
+ */
+export type PostApiTagRelationsStatus400 = MalformedRequestBody;
+
+/**
+ * @type object
+ */
+export type PostApiTagRelationsStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'TagNotFound'
+		 * @type string
+		 */
+		code: "TagNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export type PostApiTagRelationsStatus422 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'InvalidTagPath'
+				 * @type string
+				 */
+				code: "InvalidTagPath";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| ValidationError;
+
+export const PostApiTagRelationsStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PostApiTagRelationsStatus429ErrorCodeEnum =
+	(typeof PostApiTagRelationsStatus429ErrorCodeEnum)[keyof typeof PostApiTagRelationsStatus429ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PostApiTagRelationsStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: PostApiTagRelationsStatus429ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiTagRelationsStatus500 = InternalError;
+
+export const PostApiTagRelationsRequestRelationKindEnum = {
+	generic: "generic",
+	partitive: "partitive",
+	instance: "instance",
+	organizational: "organizational",
+	facet_value: "facet_value",
+} as const;
+
+export type PostApiTagRelationsRequestRelationKindEnum =
+	(typeof PostApiTagRelationsRequestRelationKindEnum)[keyof typeof PostApiTagRelationsRequestRelationKindEnum];
+
+/**
+ * @type object
+ */
+export type PostApiTagRelationsBody = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	parentNodeId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	childNodeId: string;
+	/**
+	 * @default 'generic'
+	 * @type string
+	 */
+	relationKind: PostApiTagRelationsRequestRelationKindEnum;
+	/**
+	 * @type object | undefined
+	 */
+	provenance?: {
+		[key: string]: unknown;
+	};
+};
+
+/**
+ * @type object
+ */
+export type PostApiTagRelationsOptions = {
+	body: PostApiTagRelationsBody;
+	path?: never;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PostApiTagRelationsResponses = {
+	"200": PostApiTagRelationsStatus200;
+	"400": PostApiTagRelationsStatus400;
+	"404": PostApiTagRelationsStatus404;
+	"422": PostApiTagRelationsStatus422;
+	"429": PostApiTagRelationsStatus429;
+	"500": PostApiTagRelationsStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PostApiTagRelationsResponse =
+	| PostApiTagRelationsStatus200
+	| PostApiTagRelationsStatus400
+	| PostApiTagRelationsStatus404
+	| PostApiTagRelationsStatus422
+	| PostApiTagRelationsStatus429
+	| PostApiTagRelationsStatus500;
+
+export const PostApiTagPathsDefinitionWarningsStatus200ItemsKindEnum = {
+	exact: "exact",
 	same_terminal: "same_terminal",
 } as const;
 
-export type PostApiTagPathsDefinitionWarningsStatus200ItemsRelationEnum =
-	(typeof PostApiTagPathsDefinitionWarningsStatus200ItemsRelationEnum)[keyof typeof PostApiTagPathsDefinitionWarningsStatus200ItemsRelationEnum];
+export type PostApiTagPathsDefinitionWarningsStatus200ItemsKindEnum =
+	(typeof PostApiTagPathsDefinitionWarningsStatus200ItemsKindEnum)[keyof typeof PostApiTagPathsDefinitionWarningsStatus200ItemsKindEnum];
+
+export const PostApiTagPathsDefinitionWarningsStatus200ItemsMembersNodeKindEnum = {
+	concept: "concept",
+	guide: "guide",
+} as const;
+
+export type PostApiTagPathsDefinitionWarningsStatus200ItemsMembersNodeKindEnum =
+	(typeof PostApiTagPathsDefinitionWarningsStatus200ItemsMembersNodeKindEnum)[keyof typeof PostApiTagPathsDefinitionWarningsStatus200ItemsMembersNodeKindEnum];
+
+export const PostApiTagPathsDefinitionWarningsStatus200ItemsMembersIncomingRelationRelationKindEnum =
+	{
+		generic: "generic",
+		partitive: "partitive",
+		instance: "instance",
+		organizational: "organizational",
+		facet_value: "facet_value",
+	} as const;
+
+export type PostApiTagPathsDefinitionWarningsStatus200ItemsMembersIncomingRelationRelationKindEnum =
+	(typeof PostApiTagPathsDefinitionWarningsStatus200ItemsMembersIncomingRelationRelationKindEnum)[keyof typeof PostApiTagPathsDefinitionWarningsStatus200ItemsMembersIncomingRelationRelationKindEnum];
 
 export const PostApiTagPathsDefinitionWarningsStatus200ItemsMembersLanguage = {
 	zh: "zh",
@@ -87567,7 +89789,7 @@ export type PostApiTagPathsDefinitionWarningsStatus200 = {
 		/**
 		 * @type string
 		 */
-		relation: PostApiTagPathsDefinitionWarningsStatus200ItemsRelationEnum;
+		kind: PostApiTagPathsDefinitionWarningsStatus200ItemsKindEnum;
 		usageCount: string | number;
 		/**
 		 * @type array
@@ -87579,7 +89801,26 @@ export type PostApiTagPathsDefinitionWarningsStatus200 = {
 			 * Format: `uuid`
 			 * @type string
 			 */
-			tagId: string;
+			nodeId: string;
+			/**
+			 * @type string
+			 */
+			nodeKind: PostApiTagPathsDefinitionWarningsStatus200ItemsMembersNodeKindEnum;
+			incomingRelation:
+				| ({
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						relationId: string;
+						/**
+						 * @default 'generic'
+						 * @type string
+						 */
+						relationKind: PostApiTagPathsDefinitionWarningsStatus200ItemsMembersIncomingRelationRelationKindEnum;
+				  } | null)
+				| null;
 			language: (PostApiTagPathsDefinitionWarningsStatus200ItemsMembersLanguage | null) | null;
 			title: (string | null) | null;
 			summary: (string | null) | null;
@@ -87740,7 +89981,11 @@ export type PostApiTagPathsDefinitionWarningsBody = {
 	/**
 	 * @type array
 	 */
-	memberTagIds: string[];
+	memberNodeIds: string[];
+	/**
+	 * @type array
+	 */
+	relationIds: string[];
 	/**
 	 * @type array | undefined
 	 */
@@ -87782,6 +90027,137 @@ export type PostApiTagPathsDefinitionWarningsResponse =
 	| PostApiTagPathsDefinitionWarningsStatus429
 	| PostApiTagPathsDefinitionWarningsStatus500;
 
+/**
+ * @type object
+ */
+export type DeleteApiTagPathsByPathIdSensesBySenseIdPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	pathId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	senseId: string;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiTagPathsByPathIdSensesBySenseIdStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	senseId: string;
+	/**
+	 * @type boolean
+	 */
+	retired: boolean;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiTagPathsByPathIdSensesBySenseIdStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'PlatformCapabilityRequired'
+		 * @type string
+		 */
+		code: "PlatformCapabilityRequired";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiTagPathsByPathIdSensesBySenseIdStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'TagPathNotFound'
+		 * @type string
+		 */
+		code: "TagPathNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiTagPathsByPathIdSensesBySenseIdStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type DeleteApiTagPathsByPathIdSensesBySenseIdStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type DeleteApiTagPathsByPathIdSensesBySenseIdOptions = {
+	body?: never;
+	path: DeleteApiTagPathsByPathIdSensesBySenseIdPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiTagPathsByPathIdSensesBySenseIdResponses = {
+	"200": DeleteApiTagPathsByPathIdSensesBySenseIdStatus200;
+	"403": DeleteApiTagPathsByPathIdSensesBySenseIdStatus403;
+	"404": DeleteApiTagPathsByPathIdSensesBySenseIdStatus404;
+	"422": DeleteApiTagPathsByPathIdSensesBySenseIdStatus422;
+	"500": DeleteApiTagPathsByPathIdSensesBySenseIdStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type DeleteApiTagPathsByPathIdSensesBySenseIdResponse =
+	| DeleteApiTagPathsByPathIdSensesBySenseIdStatus200
+	| DeleteApiTagPathsByPathIdSensesBySenseIdStatus403
+	| DeleteApiTagPathsByPathIdSensesBySenseIdStatus404
+	| DeleteApiTagPathsByPathIdSensesBySenseIdStatus422
+	| DeleteApiTagPathsByPathIdSensesBySenseIdStatus500;
+
 export const GetApiTagPathsSearchLocalizationLanguagesEnum = {
 	zh: "zh",
 	en: "en",
@@ -87801,7 +90177,7 @@ export type GetApiTagPathsSearchLocalizationLanguagesEnum =
 export type GetApiTagPathsSearchQuery = {
 	/**
 	 * @minLength 1
-	 * @maxLength 16
+	 * @maxLength 80
 	 * @type string
 	 */
 	q: string;
@@ -87810,12 +90186,54 @@ export type GetApiTagPathsSearchQuery = {
 	 */
 	localizationLanguages?: GetApiTagPathsSearchLocalizationLanguagesEnum[];
 	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string | undefined
+	 */
+	realmId?: string;
+	/**
 	 * @default 10
 	 */
 	limit?: string | number;
 };
 
-export const GetApiTagPathsSearchStatus200ItemsLanguage = {
+export const GetApiTagPathsSearchStatus200ItemsSelectionEnum = {
+	direct_expression: "direct_expression",
+	path_sense: "path_sense",
+} as const;
+
+export type GetApiTagPathsSearchStatus200ItemsSelectionEnum =
+	(typeof GetApiTagPathsSearchStatus200ItemsSelectionEnum)[keyof typeof GetApiTagPathsSearchStatus200ItemsSelectionEnum];
+
+export const GetApiTagPathsSearchStatus200ItemsExpressionExpressionKindEnum = {
+	simple: "simple",
+	facet_value: "facet_value",
+	relation: "relation",
+} as const;
+
+export type GetApiTagPathsSearchStatus200ItemsExpressionExpressionKindEnum =
+	(typeof GetApiTagPathsSearchStatus200ItemsExpressionExpressionKindEnum)[keyof typeof GetApiTagPathsSearchStatus200ItemsExpressionExpressionKindEnum];
+
+export const GetApiTagPathsSearchStatus200ItemsExpressionComponentsSemanticRoleEnum = {
+	predicate: "predicate",
+	slot: "slot",
+	value: "value",
+	focus: "focus",
+	qualifier: "qualifier",
+} as const;
+
+export type GetApiTagPathsSearchStatus200ItemsExpressionComponentsSemanticRoleEnum =
+	(typeof GetApiTagPathsSearchStatus200ItemsExpressionComponentsSemanticRoleEnum)[keyof typeof GetApiTagPathsSearchStatus200ItemsExpressionComponentsSemanticRoleEnum];
+
+export const GetApiTagPathsSearchStatus200ItemsExpressionComponentsComponentKindEnum = {
+	required: "required",
+	fallback: "fallback",
+} as const;
+
+export type GetApiTagPathsSearchStatus200ItemsExpressionComponentsComponentKindEnum =
+	(typeof GetApiTagPathsSearchStatus200ItemsExpressionComponentsComponentKindEnum)[keyof typeof GetApiTagPathsSearchStatus200ItemsExpressionComponentsComponentKindEnum];
+
+export const GetApiTagPathsSearchStatus200ItemsExpressionComponentsLanguage = {
 	zh: "zh",
 	en: "en",
 	ja: "ja",
@@ -87825,16 +90243,51 @@ export const GetApiTagPathsSearchStatus200ItemsLanguage = {
 	es: "es",
 } as const;
 
-export type GetApiTagPathsSearchStatus200ItemsLanguage =
-	(typeof GetApiTagPathsSearchStatus200ItemsLanguage)[keyof typeof GetApiTagPathsSearchStatus200ItemsLanguage];
+export type GetApiTagPathsSearchStatus200ItemsExpressionComponentsLanguage =
+	(typeof GetApiTagPathsSearchStatus200ItemsExpressionComponentsLanguage)[keyof typeof GetApiTagPathsSearchStatus200ItemsExpressionComponentsLanguage];
 
-export const GetApiTagPathsSearchStatus200ItemsAvatarIconPrefixEnum = {
-	fas: "fas",
-	fab: "fab",
+export const GetApiTagPathsSearchStatus200ItemsExpressionGroupKeySemanticRoleEnum = {
+	predicate: "predicate",
+	slot: "slot",
+	value: "value",
+	focus: "focus",
+	qualifier: "qualifier",
 } as const;
 
-export type GetApiTagPathsSearchStatus200ItemsAvatarIconPrefixEnum =
-	(typeof GetApiTagPathsSearchStatus200ItemsAvatarIconPrefixEnum)[keyof typeof GetApiTagPathsSearchStatus200ItemsAvatarIconPrefixEnum];
+export type GetApiTagPathsSearchStatus200ItemsExpressionGroupKeySemanticRoleEnum =
+	(typeof GetApiTagPathsSearchStatus200ItemsExpressionGroupKeySemanticRoleEnum)[keyof typeof GetApiTagPathsSearchStatus200ItemsExpressionGroupKeySemanticRoleEnum];
+
+export const GetApiTagPathsSearchStatus200ItemsExpressionGroupKeyLanguage = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetApiTagPathsSearchStatus200ItemsExpressionGroupKeyLanguage =
+	(typeof GetApiTagPathsSearchStatus200ItemsExpressionGroupKeyLanguage)[keyof typeof GetApiTagPathsSearchStatus200ItemsExpressionGroupKeyLanguage];
+
+export const GetApiTagPathsSearchStatus200ItemsMembersNodeKindEnum = {
+	concept: "concept",
+	guide: "guide",
+} as const;
+
+export type GetApiTagPathsSearchStatus200ItemsMembersNodeKindEnum =
+	(typeof GetApiTagPathsSearchStatus200ItemsMembersNodeKindEnum)[keyof typeof GetApiTagPathsSearchStatus200ItemsMembersNodeKindEnum];
+
+export const GetApiTagPathsSearchStatus200ItemsMembersIncomingRelationRelationKindEnum = {
+	generic: "generic",
+	partitive: "partitive",
+	instance: "instance",
+	organizational: "organizational",
+	facet_value: "facet_value",
+} as const;
+
+export type GetApiTagPathsSearchStatus200ItemsMembersIncomingRelationRelationKindEnum =
+	(typeof GetApiTagPathsSearchStatus200ItemsMembersIncomingRelationRelationKindEnum)[keyof typeof GetApiTagPathsSearchStatus200ItemsMembersIncomingRelationRelationKindEnum];
 
 export const GetApiTagPathsSearchStatus200ItemsMembersLanguage = {
 	zh: "zh",
@@ -87864,279 +90317,176 @@ export type GetApiTagPathsSearchStatus200 = {
 	/**
 	 * @type array
 	 */
-	items: (
-		| {
-				/**
-				 * @type string
-				 */
-				selection: "path";
+	items: {
+		/**
+		 * @type string
+		 */
+		selection: GetApiTagPathsSearchStatus200ItemsSelectionEnum;
+		/**
+		 * @type object
+		 */
+		expression: {
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			expressionId: string;
+			/**
+			 * @default 'simple'
+			 * @type string
+			 */
+			expressionKind: GetApiTagPathsSearchStatus200ItemsExpressionExpressionKindEnum;
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			focusTagId: string;
+			presentationRevision: string | number;
+			/**
+			 * @type array
+			 */
+			components: {
 				/**
 				 * @description
 				 * Format: `uuid`
 				 * @type string
 				 */
 				tagId: string;
-				language: (GetApiTagPathsSearchStatus200ItemsLanguage | null) | null;
-				title: (string | null) | null;
-				summary: (string | null) | null;
-				avatar:
-					| (
-							| (
-									| {
-											/**
-											 * @type string
-											 */
-											type: "image";
-											/**
-											 * @type object
-											 */
-											image: {
-												/**
-												 * @description
-												 * Format: `uuid`
-												 * @type string
-												 */
-												id: string;
-												/**
-												 * @type string
-												 */
-												url: string;
-											};
-									  }
-									| {
-											/**
-											 * @type string
-											 */
-											type: "emoji";
-											/**
-											 * @maxLength 64
-											 * @type string
-											 */
-											emoji: string;
-									  }
-									| {
-											/**
-											 * @type string
-											 */
-											type: "icon";
-											/**
-											 * @type object
-											 */
-											icon: {
-												/**
-												 * @type string
-												 */
-												provider: "font-awesome";
-												/**
-												 * @type string
-												 */
-												prefix: GetApiTagPathsSearchStatus200ItemsAvatarIconPrefixEnum;
-												/**
-												 * @maxLength 128
-												 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
-												 * @type string
-												 */
-												name: string;
-											};
-									  }
-							  )
-							| null
-					  )
-					| null;
 				/**
-				 * @description
-				 * Format: `uuid`
+				 * @default 'predicate'
 				 * @type string
 				 */
-				pathId: string;
+				semanticRole: GetApiTagPathsSearchStatus200ItemsExpressionComponentsSemanticRoleEnum;
 				/**
-				 * @type array
+				 * @default 'required'
+				 * @type string
 				 */
-				members: {
-					ordinal: string | number;
-					/**
-					 * @description
-					 * Format: `uuid`
-					 * @type string
-					 */
-					tagId: string;
-					language: (GetApiTagPathsSearchStatus200ItemsMembersLanguage | null) | null;
-					title: (string | null) | null;
-					summary: (string | null) | null;
-					avatar:
+				componentKind: GetApiTagPathsSearchStatus200ItemsExpressionComponentsComponentKindEnum;
+				language: (GetApiTagPathsSearchStatus200ItemsExpressionComponentsLanguage | null) | null;
+				title: (string | null) | null;
+			}[];
+			groupKey:
+				| ({
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						tagId: string;
+						/**
+						 * @default 'predicate'
+						 * @type string
+						 */
+						semanticRole: GetApiTagPathsSearchStatus200ItemsExpressionGroupKeySemanticRoleEnum;
+						language: (GetApiTagPathsSearchStatus200ItemsExpressionGroupKeyLanguage | null) | null;
+						title: (string | null) | null;
+				  } | null)
+				| null;
+		};
+		senseId: (string | null) | null;
+		pathId: (string | null) | null;
+		/**
+		 * @type array
+		 */
+		members: {
+			ordinal: string | number;
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			nodeId: string;
+			/**
+			 * @type string
+			 */
+			nodeKind: GetApiTagPathsSearchStatus200ItemsMembersNodeKindEnum;
+			incomingRelation:
+				| ({
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						relationId: string;
+						/**
+						 * @default 'generic'
+						 * @type string
+						 */
+						relationKind: GetApiTagPathsSearchStatus200ItemsMembersIncomingRelationRelationKindEnum;
+				  } | null)
+				| null;
+			language: (GetApiTagPathsSearchStatus200ItemsMembersLanguage | null) | null;
+			title: (string | null) | null;
+			summary: (string | null) | null;
+			avatar:
+				| (
 						| (
-								| (
-										| {
-												/**
-												 * @type string
-												 */
-												type: "image";
-												/**
-												 * @type object
-												 */
-												image: {
-													/**
-													 * @description
-													 * Format: `uuid`
-													 * @type string
-													 */
-													id: string;
-													/**
-													 * @type string
-													 */
-													url: string;
-												};
-										  }
-										| {
-												/**
-												 * @type string
-												 */
-												type: "emoji";
-												/**
-												 * @maxLength 64
-												 * @type string
-												 */
-												emoji: string;
-										  }
-										| {
-												/**
-												 * @type string
-												 */
-												type: "icon";
-												/**
-												 * @type object
-												 */
-												icon: {
-													/**
-													 * @type string
-													 */
-													provider: "font-awesome";
-													/**
-													 * @type string
-													 */
-													prefix: GetApiTagPathsSearchStatus200ItemsMembersAvatarIconPrefixEnum;
-													/**
-													 * @maxLength 128
-													 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
-													 * @type string
-													 */
-													name: string;
-												};
-										  }
-								  )
-								| null
+								| {
+										/**
+										 * @type string
+										 */
+										type: "image";
+										/**
+										 * @type object
+										 */
+										image: {
+											/**
+											 * @description
+											 * Format: `uuid`
+											 * @type string
+											 */
+											id: string;
+											/**
+											 * @type string
+											 */
+											url: string;
+										};
+								  }
+								| {
+										/**
+										 * @type string
+										 */
+										type: "emoji";
+										/**
+										 * @maxLength 64
+										 * @type string
+										 */
+										emoji: string;
+								  }
+								| {
+										/**
+										 * @type string
+										 */
+										type: "icon";
+										/**
+										 * @type object
+										 */
+										icon: {
+											/**
+											 * @type string
+											 */
+											provider: "font-awesome";
+											/**
+											 * @type string
+											 */
+											prefix: GetApiTagPathsSearchStatus200ItemsMembersAvatarIconPrefixEnum;
+											/**
+											 * @maxLength 128
+											 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+											 * @type string
+											 */
+											name: string;
+										};
+								  }
 						  )
-						| null;
-				}[];
-				matchDirection: "forward" | "reverse";
-				usageCount: string | number;
-				score: string | number;
-				voteCount: string | number;
-		  }
-		| {
-				/**
-				 * @type string
-				 */
-				selection: "direct";
-				/**
-				 * @description
-				 * Format: `uuid`
-				 * @type string
-				 */
-				tagId: string;
-				language: (GetApiTagPathsSearchStatus200ItemsLanguage | null) | null;
-				title: (string | null) | null;
-				summary: (string | null) | null;
-				avatar:
-					| (
-							| (
-									| {
-											/**
-											 * @type string
-											 */
-											type: "image";
-											/**
-											 * @type object
-											 */
-											image: {
-												/**
-												 * @description
-												 * Format: `uuid`
-												 * @type string
-												 */
-												id: string;
-												/**
-												 * @type string
-												 */
-												url: string;
-											};
-									  }
-									| {
-											/**
-											 * @type string
-											 */
-											type: "emoji";
-											/**
-											 * @maxLength 64
-											 * @type string
-											 */
-											emoji: string;
-									  }
-									| {
-											/**
-											 * @type string
-											 */
-											type: "icon";
-											/**
-											 * @type object
-											 */
-											icon: {
-												/**
-												 * @type string
-												 */
-												provider: "font-awesome";
-												/**
-												 * @type string
-												 */
-												prefix: GetApiTagPathsSearchStatus200ItemsAvatarIconPrefixEnum;
-												/**
-												 * @maxLength 128
-												 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
-												 * @type string
-												 */
-												name: string;
-											};
-									  }
-							  )
-							| null
-					  )
-					| null;
-				/**
-				 * @type null
-				 */
-				pathId: null;
-				/**
-				 * @type array
-				 */
-				members: [];
-				/**
-				 * @type null
-				 */
-				matchDirection: null;
-				/**
-				 * @type number
-				 */
-				usageCount: 0;
-				/**
-				 * @type number
-				 */
-				score: 0;
-				/**
-				 * @type number
-				 */
-				voteCount: 0;
-		  }
-	)[];
+						| null
+				  )
+				| null;
+		}[];
+		usageCount: string | number;
+	}[];
 };
 
 /**
@@ -88318,7 +90668,11 @@ export type PostApiTagPathsBody = {
 	/**
 	 * @type array
 	 */
-	memberTagIds: string[];
+	memberNodeIds: string[];
+	/**
+	 * @type array
+	 */
+	relationIds: string[];
 };
 
 /**
@@ -88389,6 +90743,25 @@ export type GetApiTagPathsByPathIdQuery = {
 	localizationLanguages?: GetApiTagPathsByPathIdLocalizationLanguagesEnum[];
 };
 
+export const GetApiTagPathsByPathIdStatus200MembersNodeKindEnum = {
+	concept: "concept",
+	guide: "guide",
+} as const;
+
+export type GetApiTagPathsByPathIdStatus200MembersNodeKindEnum =
+	(typeof GetApiTagPathsByPathIdStatus200MembersNodeKindEnum)[keyof typeof GetApiTagPathsByPathIdStatus200MembersNodeKindEnum];
+
+export const GetApiTagPathsByPathIdStatus200MembersIncomingRelationRelationKindEnum = {
+	generic: "generic",
+	partitive: "partitive",
+	instance: "instance",
+	organizational: "organizational",
+	facet_value: "facet_value",
+} as const;
+
+export type GetApiTagPathsByPathIdStatus200MembersIncomingRelationRelationKindEnum =
+	(typeof GetApiTagPathsByPathIdStatus200MembersIncomingRelationRelationKindEnum)[keyof typeof GetApiTagPathsByPathIdStatus200MembersIncomingRelationRelationKindEnum];
+
 export const GetApiTagPathsByPathIdStatus200MembersLanguage = {
 	zh: "zh",
 	en: "en",
@@ -88410,6 +90783,210 @@ export const GetApiTagPathsByPathIdStatus200MembersAvatarIconPrefixEnum = {
 export type GetApiTagPathsByPathIdStatus200MembersAvatarIconPrefixEnum =
 	(typeof GetApiTagPathsByPathIdStatus200MembersAvatarIconPrefixEnum)[keyof typeof GetApiTagPathsByPathIdStatus200MembersAvatarIconPrefixEnum];
 
+export const GetApiTagPathsByPathIdStatus200SensesScopeEnum = {
+	global: "global",
+	realm: "realm",
+} as const;
+
+export type GetApiTagPathsByPathIdStatus200SensesScopeEnum =
+	(typeof GetApiTagPathsByPathIdStatus200SensesScopeEnum)[keyof typeof GetApiTagPathsByPathIdStatus200SensesScopeEnum];
+
+export const GetApiTagPathsByPathIdStatus200SensesRealmLanguage = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetApiTagPathsByPathIdStatus200SensesRealmLanguage =
+	(typeof GetApiTagPathsByPathIdStatus200SensesRealmLanguage)[keyof typeof GetApiTagPathsByPathIdStatus200SensesRealmLanguage];
+
+export const GetApiTagPathsByPathIdStatus200SensesStatusEnum = {
+	active: "active",
+	retired: "retired",
+} as const;
+
+export type GetApiTagPathsByPathIdStatus200SensesStatusEnum =
+	(typeof GetApiTagPathsByPathIdStatus200SensesStatusEnum)[keyof typeof GetApiTagPathsByPathIdStatus200SensesStatusEnum];
+
+export const GetApiTagPathsByPathIdStatus200SensesBindingsArgumentRoleEnum = {
+	predicate: "predicate",
+	slot: "slot",
+	value: "value",
+	focus: "focus",
+	qualifier: "qualifier",
+} as const;
+
+export type GetApiTagPathsByPathIdStatus200SensesBindingsArgumentRoleEnum =
+	(typeof GetApiTagPathsByPathIdStatus200SensesBindingsArgumentRoleEnum)[keyof typeof GetApiTagPathsByPathIdStatus200SensesBindingsArgumentRoleEnum];
+
+export const GetApiTagPathsByPathIdStatus200SensesExpressionExpressionKindEnum = {
+	simple: "simple",
+	facet_value: "facet_value",
+	relation: "relation",
+} as const;
+
+export type GetApiTagPathsByPathIdStatus200SensesExpressionExpressionKindEnum =
+	(typeof GetApiTagPathsByPathIdStatus200SensesExpressionExpressionKindEnum)[keyof typeof GetApiTagPathsByPathIdStatus200SensesExpressionExpressionKindEnum];
+
+export const GetApiTagPathsByPathIdStatus200SensesExpressionComponentsSemanticRoleEnum = {
+	predicate: "predicate",
+	slot: "slot",
+	value: "value",
+	focus: "focus",
+	qualifier: "qualifier",
+} as const;
+
+export type GetApiTagPathsByPathIdStatus200SensesExpressionComponentsSemanticRoleEnum =
+	(typeof GetApiTagPathsByPathIdStatus200SensesExpressionComponentsSemanticRoleEnum)[keyof typeof GetApiTagPathsByPathIdStatus200SensesExpressionComponentsSemanticRoleEnum];
+
+export const GetApiTagPathsByPathIdStatus200SensesExpressionComponentsComponentKindEnum = {
+	required: "required",
+	fallback: "fallback",
+} as const;
+
+export type GetApiTagPathsByPathIdStatus200SensesExpressionComponentsComponentKindEnum =
+	(typeof GetApiTagPathsByPathIdStatus200SensesExpressionComponentsComponentKindEnum)[keyof typeof GetApiTagPathsByPathIdStatus200SensesExpressionComponentsComponentKindEnum];
+
+export const GetApiTagPathsByPathIdStatus200SensesExpressionComponentsLanguage = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetApiTagPathsByPathIdStatus200SensesExpressionComponentsLanguage =
+	(typeof GetApiTagPathsByPathIdStatus200SensesExpressionComponentsLanguage)[keyof typeof GetApiTagPathsByPathIdStatus200SensesExpressionComponentsLanguage];
+
+export const GetApiTagPathsByPathIdStatus200SensesExpressionGroupKeySemanticRoleEnum = {
+	predicate: "predicate",
+	slot: "slot",
+	value: "value",
+	focus: "focus",
+	qualifier: "qualifier",
+} as const;
+
+export type GetApiTagPathsByPathIdStatus200SensesExpressionGroupKeySemanticRoleEnum =
+	(typeof GetApiTagPathsByPathIdStatus200SensesExpressionGroupKeySemanticRoleEnum)[keyof typeof GetApiTagPathsByPathIdStatus200SensesExpressionGroupKeySemanticRoleEnum];
+
+export const GetApiTagPathsByPathIdStatus200SensesExpressionGroupKeyLanguage = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetApiTagPathsByPathIdStatus200SensesExpressionGroupKeyLanguage =
+	(typeof GetApiTagPathsByPathIdStatus200SensesExpressionGroupKeyLanguage)[keyof typeof GetApiTagPathsByPathIdStatus200SensesExpressionGroupKeyLanguage];
+
+export const GetApiTagPathsByPathIdStatus200SensesInferenceRulesInferenceKindEnum = {
+	entailed: "entailed",
+	retrieval_only: "retrieval_only",
+} as const;
+
+export type GetApiTagPathsByPathIdStatus200SensesInferenceRulesInferenceKindEnum =
+	(typeof GetApiTagPathsByPathIdStatus200SensesInferenceRulesInferenceKindEnum)[keyof typeof GetApiTagPathsByPathIdStatus200SensesInferenceRulesInferenceKindEnum];
+
+export const GetApiTagPathsByPathIdStatus200SensesInferenceRulesStatusEnum = {
+	active: "active",
+	retired: "retired",
+} as const;
+
+export type GetApiTagPathsByPathIdStatus200SensesInferenceRulesStatusEnum =
+	(typeof GetApiTagPathsByPathIdStatus200SensesInferenceRulesStatusEnum)[keyof typeof GetApiTagPathsByPathIdStatus200SensesInferenceRulesStatusEnum];
+
+export const GetApiTagPathsByPathIdStatus200SensesInferenceRulesTargetLanguage = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetApiTagPathsByPathIdStatus200SensesInferenceRulesTargetLanguage =
+	(typeof GetApiTagPathsByPathIdStatus200SensesInferenceRulesTargetLanguage)[keyof typeof GetApiTagPathsByPathIdStatus200SensesInferenceRulesTargetLanguage];
+
+export const GetApiTagPathsByPathIdStatus200SensesInferenceRulesTargetExpressionExpressionKindEnum =
+	{
+		simple: "simple",
+		facet_value: "facet_value",
+		relation: "relation",
+	} as const;
+
+export type GetApiTagPathsByPathIdStatus200SensesInferenceRulesTargetExpressionExpressionKindEnum =
+	(typeof GetApiTagPathsByPathIdStatus200SensesInferenceRulesTargetExpressionExpressionKindEnum)[keyof typeof GetApiTagPathsByPathIdStatus200SensesInferenceRulesTargetExpressionExpressionKindEnum];
+
+export const GetApiTagPathsByPathIdStatus200SensesInferenceRulesTargetExpressionComponentsSemanticRoleEnum =
+	{
+		predicate: "predicate",
+		slot: "slot",
+		value: "value",
+		focus: "focus",
+		qualifier: "qualifier",
+	} as const;
+
+export type GetApiTagPathsByPathIdStatus200SensesInferenceRulesTargetExpressionComponentsSemanticRoleEnum =
+	(typeof GetApiTagPathsByPathIdStatus200SensesInferenceRulesTargetExpressionComponentsSemanticRoleEnum)[keyof typeof GetApiTagPathsByPathIdStatus200SensesInferenceRulesTargetExpressionComponentsSemanticRoleEnum];
+
+export const GetApiTagPathsByPathIdStatus200SensesInferenceRulesTargetExpressionComponentsComponentKindEnum =
+	{
+		required: "required",
+		fallback: "fallback",
+	} as const;
+
+export type GetApiTagPathsByPathIdStatus200SensesInferenceRulesTargetExpressionComponentsComponentKindEnum =
+	(typeof GetApiTagPathsByPathIdStatus200SensesInferenceRulesTargetExpressionComponentsComponentKindEnum)[keyof typeof GetApiTagPathsByPathIdStatus200SensesInferenceRulesTargetExpressionComponentsComponentKindEnum];
+
+export const GetApiTagPathsByPathIdStatus200SensesInferenceRulesTargetExpressionComponentsLanguage =
+	{
+		zh: "zh",
+		en: "en",
+		ja: "ja",
+		ko: "ko",
+		de: "de",
+		fr: "fr",
+		es: "es",
+	} as const;
+
+export type GetApiTagPathsByPathIdStatus200SensesInferenceRulesTargetExpressionComponentsLanguage =
+	(typeof GetApiTagPathsByPathIdStatus200SensesInferenceRulesTargetExpressionComponentsLanguage)[keyof typeof GetApiTagPathsByPathIdStatus200SensesInferenceRulesTargetExpressionComponentsLanguage];
+
+export const GetApiTagPathsByPathIdStatus200SensesInferenceRulesTargetExpressionGroupKeySemanticRoleEnum =
+	{
+		predicate: "predicate",
+		slot: "slot",
+		value: "value",
+		focus: "focus",
+		qualifier: "qualifier",
+	} as const;
+
+export type GetApiTagPathsByPathIdStatus200SensesInferenceRulesTargetExpressionGroupKeySemanticRoleEnum =
+	(typeof GetApiTagPathsByPathIdStatus200SensesInferenceRulesTargetExpressionGroupKeySemanticRoleEnum)[keyof typeof GetApiTagPathsByPathIdStatus200SensesInferenceRulesTargetExpressionGroupKeySemanticRoleEnum];
+
+export const GetApiTagPathsByPathIdStatus200SensesInferenceRulesTargetExpressionGroupKeyLanguage = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetApiTagPathsByPathIdStatus200SensesInferenceRulesTargetExpressionGroupKeyLanguage =
+	(typeof GetApiTagPathsByPathIdStatus200SensesInferenceRulesTargetExpressionGroupKeyLanguage)[keyof typeof GetApiTagPathsByPathIdStatus200SensesInferenceRulesTargetExpressionGroupKeyLanguage];
+
 /**
  * @type object
  */
@@ -88419,13 +90996,18 @@ export type GetApiTagPathsByPathIdStatus200 = {
 	 * Format: `uuid`
 	 * @type string
 	 */
-	id: string;
+	pathId: string;
+	/**
+	 * @pattern ^[0-9a-f]{64}$
+	 * @type string
+	 */
+	structuralIdentityHash: string;
 	/**
 	 * @description
 	 * Format: `uuid`
 	 * @type string
 	 */
-	terminalTagId: string;
+	terminalNodeId: string;
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -88447,7 +91029,26 @@ export type GetApiTagPathsByPathIdStatus200 = {
 		 * Format: `uuid`
 		 * @type string
 		 */
-		tagId: string;
+		nodeId: string;
+		/**
+		 * @type string
+		 */
+		nodeKind: GetApiTagPathsByPathIdStatus200MembersNodeKindEnum;
+		incomingRelation:
+			| ({
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					relationId: string;
+					/**
+					 * @default 'generic'
+					 * @type string
+					 */
+					relationKind: GetApiTagPathsByPathIdStatus200MembersIncomingRelationRelationKindEnum;
+			  } | null)
+			| null;
 		language: (GetApiTagPathsByPathIdStatus200MembersLanguage | null) | null;
 		title: (string | null) | null;
 		summary: (string | null) | null;
@@ -88515,6 +91116,244 @@ export type GetApiTagPathsByPathIdStatus200 = {
 					| null
 			  )
 			| null;
+	}[];
+	/**
+	 * @type array
+	 */
+	senses: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		senseId: string;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		expressionId: string;
+		/**
+		 * @default 'global'
+		 * @type string
+		 */
+		scope: GetApiTagPathsByPathIdStatus200SensesScopeEnum;
+		realmId: (string | null) | null;
+		realmLanguage: (GetApiTagPathsByPathIdStatus200SensesRealmLanguage | null) | null;
+		realmTitle: (string | null) | null;
+		/**
+		 * @type string
+		 */
+		bindingSignature: string;
+		/**
+		 * @type string
+		 */
+		status: GetApiTagPathsByPathIdStatus200SensesStatusEnum;
+		/**
+		 * @type array
+		 */
+		bindings: {
+			memberOrdinal: string | number;
+			/**
+			 * @default 'predicate'
+			 * @type string
+			 */
+			argumentRole: GetApiTagPathsByPathIdStatus200SensesBindingsArgumentRoleEnum;
+			argumentOrdinal: string | number;
+		}[];
+		expression:
+			| ({
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					expressionId: string;
+					/**
+					 * @default 'simple'
+					 * @type string
+					 */
+					expressionKind: GetApiTagPathsByPathIdStatus200SensesExpressionExpressionKindEnum;
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					focusTagId: string;
+					presentationRevision: string | number;
+					/**
+					 * @type array
+					 */
+					components: {
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						tagId: string;
+						/**
+						 * @default 'predicate'
+						 * @type string
+						 */
+						semanticRole: GetApiTagPathsByPathIdStatus200SensesExpressionComponentsSemanticRoleEnum;
+						/**
+						 * @default 'required'
+						 * @type string
+						 */
+						componentKind: GetApiTagPathsByPathIdStatus200SensesExpressionComponentsComponentKindEnum;
+						language:
+							| (GetApiTagPathsByPathIdStatus200SensesExpressionComponentsLanguage | null)
+							| null;
+						title: (string | null) | null;
+					}[];
+					groupKey:
+						| ({
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								tagId: string;
+								/**
+								 * @default 'predicate'
+								 * @type string
+								 */
+								semanticRole: GetApiTagPathsByPathIdStatus200SensesExpressionGroupKeySemanticRoleEnum;
+								language:
+									| (GetApiTagPathsByPathIdStatus200SensesExpressionGroupKeyLanguage | null)
+									| null;
+								title: (string | null) | null;
+						  } | null)
+						| null;
+			  } | null)
+			| null;
+		/**
+		 * @type array
+		 */
+		inferenceRules: {
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			ruleId: string;
+			/**
+			 * @default 'entailed'
+			 * @type string
+			 */
+			inferenceKind: GetApiTagPathsByPathIdStatus200SensesInferenceRulesInferenceKindEnum;
+			revision: string | number;
+			/**
+			 * @type string
+			 */
+			status: GetApiTagPathsByPathIdStatus200SensesInferenceRulesStatusEnum;
+			provenance:
+				| ({
+						[key: string]: unknown;
+				  } | null)
+				| null;
+			/**
+			 * @description
+			 * Format: `date-time`
+			 * @type string
+			 */
+			createdAt: string;
+			target:
+				| {
+						/**
+						 * @type string
+						 */
+						kind: "tag";
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						tagId: string;
+						language:
+							| (GetApiTagPathsByPathIdStatus200SensesInferenceRulesTargetLanguage | null)
+							| null;
+						title: (string | null) | null;
+				  }
+				| {
+						/**
+						 * @type string
+						 */
+						kind: "expression";
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						expressionId: string;
+						expression:
+							| ({
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									expressionId: string;
+									/**
+									 * @default 'simple'
+									 * @type string
+									 */
+									expressionKind: GetApiTagPathsByPathIdStatus200SensesInferenceRulesTargetExpressionExpressionKindEnum;
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									focusTagId: string;
+									presentationRevision: string | number;
+									/**
+									 * @type array
+									 */
+									components: {
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										tagId: string;
+										/**
+										 * @default 'predicate'
+										 * @type string
+										 */
+										semanticRole: GetApiTagPathsByPathIdStatus200SensesInferenceRulesTargetExpressionComponentsSemanticRoleEnum;
+										/**
+										 * @default 'required'
+										 * @type string
+										 */
+										componentKind: GetApiTagPathsByPathIdStatus200SensesInferenceRulesTargetExpressionComponentsComponentKindEnum;
+										language:
+											| (GetApiTagPathsByPathIdStatus200SensesInferenceRulesTargetExpressionComponentsLanguage | null)
+											| null;
+										title: (string | null) | null;
+									}[];
+									groupKey:
+										| ({
+												/**
+												 * @description
+												 * Format: `uuid`
+												 * @type string
+												 */
+												tagId: string;
+												/**
+												 * @default 'predicate'
+												 * @type string
+												 */
+												semanticRole: GetApiTagPathsByPathIdStatus200SensesInferenceRulesTargetExpressionGroupKeySemanticRoleEnum;
+												language:
+													| (GetApiTagPathsByPathIdStatus200SensesInferenceRulesTargetExpressionGroupKeyLanguage | null)
+													| null;
+												title: (string | null) | null;
+										  } | null)
+										| null;
+							  } | null)
+							| null;
+				  };
+		}[];
 	}[];
 	/**
 	 * @description
@@ -88596,6 +91435,226 @@ export type GetApiTagPathsByPathIdResponse =
 	| GetApiTagPathsByPathIdStatus404
 	| GetApiTagPathsByPathIdStatus422
 	| GetApiTagPathsByPathIdStatus500;
+
+/**
+ * @type object
+ */
+export type PostApiTagPathsByPathIdSensesPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	pathId: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiTagPathsByPathIdSensesStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	senseId: string;
+	/**
+	 * @type boolean
+	 */
+	created: boolean;
+};
+
+/**
+ * @type object
+ */
+export type PostApiTagPathsByPathIdSensesStatus400 = MalformedRequestBody;
+
+/**
+ * @type object
+ */
+export type PostApiTagPathsByPathIdSensesStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'PlatformCapabilityRequired'
+		 * @type string
+		 */
+		code: "PlatformCapabilityRequired";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiTagPathsByPathIdSensesStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'TagPathNotFound'
+		 * @type string
+		 */
+		code: "TagPathNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export type PostApiTagPathsByPathIdSensesStatus422 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'InvalidTagPath'
+				 * @type string
+				 */
+				code: "InvalidTagPath";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| ValidationError;
+
+/**
+ * @type object
+ */
+export type PostApiTagPathsByPathIdSensesStatus500 = InternalError;
+
+export const PostApiTagPathsByPathIdSensesRequestScopeEnum = {
+	global: "global",
+	realm: "realm",
+} as const;
+
+export type PostApiTagPathsByPathIdSensesRequestScopeEnum =
+	(typeof PostApiTagPathsByPathIdSensesRequestScopeEnum)[keyof typeof PostApiTagPathsByPathIdSensesRequestScopeEnum];
+
+export const PostApiTagPathsByPathIdSensesRequestBindingsArgumentRoleEnum = {
+	predicate: "predicate",
+	slot: "slot",
+	value: "value",
+	focus: "focus",
+	qualifier: "qualifier",
+} as const;
+
+export type PostApiTagPathsByPathIdSensesRequestBindingsArgumentRoleEnum =
+	(typeof PostApiTagPathsByPathIdSensesRequestBindingsArgumentRoleEnum)[keyof typeof PostApiTagPathsByPathIdSensesRequestBindingsArgumentRoleEnum];
+
+/**
+ * @type object
+ */
+export type PostApiTagPathsByPathIdSensesBody = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string | undefined
+	 */
+	senseId?: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	expressionId: string;
+	/**
+	 * @default 'global'
+	 * @type string
+	 */
+	scope: PostApiTagPathsByPathIdSensesRequestScopeEnum;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string | undefined
+	 */
+	realmId?: string;
+	/**
+	 * @type array
+	 */
+	bindings: {
+		memberOrdinal: string | number;
+		/**
+		 * @default 'predicate'
+		 * @type string
+		 */
+		argumentRole: PostApiTagPathsByPathIdSensesRequestBindingsArgumentRoleEnum;
+		argumentOrdinal: string | number;
+	}[];
+	/**
+	 * @type object | undefined
+	 */
+	provenance?: {
+		[key: string]: unknown;
+	};
+};
+
+/**
+ * @type object
+ */
+export type PostApiTagPathsByPathIdSensesOptions = {
+	body: PostApiTagPathsByPathIdSensesBody;
+	path: PostApiTagPathsByPathIdSensesPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PostApiTagPathsByPathIdSensesResponses = {
+	"200": PostApiTagPathsByPathIdSensesStatus200;
+	"400": PostApiTagPathsByPathIdSensesStatus400;
+	"403": PostApiTagPathsByPathIdSensesStatus403;
+	"404": PostApiTagPathsByPathIdSensesStatus404;
+	"422": PostApiTagPathsByPathIdSensesStatus422;
+	"500": PostApiTagPathsByPathIdSensesStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PostApiTagPathsByPathIdSensesResponse =
+	| PostApiTagPathsByPathIdSensesStatus200
+	| PostApiTagPathsByPathIdSensesStatus400
+	| PostApiTagPathsByPathIdSensesStatus403
+	| PostApiTagPathsByPathIdSensesStatus404
+	| PostApiTagPathsByPathIdSensesStatus422
+	| PostApiTagPathsByPathIdSensesStatus500;
 
 /**
  * @type object
@@ -88790,34 +91849,6 @@ export type DeleteApiTagPathsByPathIdVoteStatus200 = {
 /**
  * @type object
  */
-export type DeleteApiTagPathsByPathIdVoteStatus404 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'TagPathNotFound'
-		 * @type string
-		 */
-		code: "TagPathNotFound";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
 export type DeleteApiTagPathsByPathIdVoteStatus422 = ValidationError;
 
 export const DeleteApiTagPathsByPathIdVoteStatus429ErrorCodeEnum = {
@@ -88828,51 +91859,29 @@ export const DeleteApiTagPathsByPathIdVoteStatus429ErrorCodeEnum = {
 export type DeleteApiTagPathsByPathIdVoteStatus429ErrorCodeEnum =
 	(typeof DeleteApiTagPathsByPathIdVoteStatus429ErrorCodeEnum)[keyof typeof DeleteApiTagPathsByPathIdVoteStatus429ErrorCodeEnum];
 
-export type DeleteApiTagPathsByPathIdVoteStatus429 =
-	| {
-			/**
-			 * @type object
-			 */
-			error: {
-				/**
-				 * @default 'VoteHotKeyBusy'
-				 * @type string
-				 */
-				code: "VoteHotKeyBusy";
-				/**
-				 * @type string
-				 */
-				message: string;
-				/**
-				 * @type void | undefined
-				 */
-				details?: void;
-			};
-			/**
-			 * @type string
-			 */
-			requestId: string;
-	  }
-	| {
-			/**
-			 * @type object
-			 */
-			error: {
-				/**
-				 * @type string
-				 */
-				code: DeleteApiTagPathsByPathIdVoteStatus429ErrorCodeEnum;
-				/**
-				 * @type string
-				 */
-				message: string;
-				details?: JsonValue;
-			};
-			/**
-			 * @type string
-			 */
-			requestId: string;
-	  };
+/**
+ * @type object
+ */
+export type DeleteApiTagPathsByPathIdVoteStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: DeleteApiTagPathsByPathIdVoteStatus429ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
 
 /**
  * @type object
@@ -88894,7 +91903,6 @@ export type DeleteApiTagPathsByPathIdVoteOptions = {
  */
 export type DeleteApiTagPathsByPathIdVoteResponses = {
 	"200": DeleteApiTagPathsByPathIdVoteStatus200;
-	"404": DeleteApiTagPathsByPathIdVoteStatus404;
 	"422": DeleteApiTagPathsByPathIdVoteStatus422;
 	"429": DeleteApiTagPathsByPathIdVoteStatus429;
 	"500": DeleteApiTagPathsByPathIdVoteStatus500;
@@ -88905,7 +91913,6 @@ export type DeleteApiTagPathsByPathIdVoteResponses = {
  */
 export type DeleteApiTagPathsByPathIdVoteResponse =
 	| DeleteApiTagPathsByPathIdVoteStatus200
-	| DeleteApiTagPathsByPathIdVoteStatus404
 	| DeleteApiTagPathsByPathIdVoteStatus422
 	| DeleteApiTagPathsByPathIdVoteStatus429
 	| DeleteApiTagPathsByPathIdVoteStatus500;
@@ -88919,6 +91926,14 @@ export const PostApiTagPathsMergesStatus200StatusEnum = {
 
 export type PostApiTagPathsMergesStatus200StatusEnum =
 	(typeof PostApiTagPathsMergesStatus200StatusEnum)[keyof typeof PostApiTagPathsMergesStatus200StatusEnum];
+
+export const PostApiTagPathsMergesStatus200ProposalSourceKindEnum = {
+	human: "human",
+	assisted: "assisted",
+} as const;
+
+export type PostApiTagPathsMergesStatus200ProposalSourceKindEnum =
+	(typeof PostApiTagPathsMergesStatus200ProposalSourceKindEnum)[keyof typeof PostApiTagPathsMergesStatus200ProposalSourceKindEnum];
 
 /**
  * @type object
@@ -88946,14 +91961,16 @@ export type PostApiTagPathsMergesStatus200 = {
 	 * @type string
 	 */
 	status: PostApiTagPathsMergesStatus200StatusEnum;
-	proposalSource:
-		| {
-				/**
-				 * @type string
-				 */
-				kind: "human";
-		  }
-		| {
+	/**
+	 * @type string
+	 */
+	reason: string;
+	/**
+	 * @type string
+	 */
+	proposalSourceKind: PostApiTagPathsMergesStatus200ProposalSourceKindEnum;
+	proposalProvenance:
+		| ({
 				/**
 				 * @type string
 				 */
@@ -88976,14 +91993,28 @@ export type PostApiTagPathsMergesStatus200 = {
 				 * @type number | undefined
 				 */
 				confidence?: number;
-		  };
+		  } | null)
+		| null;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	proposedByProfileId: string;
+	resolvedByProfileId: (string | null) | null;
+	resolvedAt: (string | null) | null;
 	/**
 	 * @description
 	 * Format: `date-time`
-	 * @type string | undefined
+	 * @type string
 	 */
-	createdAt?: string;
-	resolvedAt?: (string | null) | null;
+	createdAt: string;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	updatedAt: string;
 };
 
 /**
@@ -89200,6 +92231,44 @@ export type GetApiTagPathsMergesPendingQuery = {
 	limit?: string | number;
 };
 
+export const GetApiTagPathsMergesPendingStatus200ItemsStatusEnum = {
+	proposed: "proposed",
+	accepted: "accepted",
+	rejected: "rejected",
+	reversed: "reversed",
+} as const;
+
+export type GetApiTagPathsMergesPendingStatus200ItemsStatusEnum =
+	(typeof GetApiTagPathsMergesPendingStatus200ItemsStatusEnum)[keyof typeof GetApiTagPathsMergesPendingStatus200ItemsStatusEnum];
+
+export const GetApiTagPathsMergesPendingStatus200ItemsProposalSourceKindEnum = {
+	human: "human",
+	assisted: "assisted",
+} as const;
+
+export type GetApiTagPathsMergesPendingStatus200ItemsProposalSourceKindEnum =
+	(typeof GetApiTagPathsMergesPendingStatus200ItemsProposalSourceKindEnum)[keyof typeof GetApiTagPathsMergesPendingStatus200ItemsProposalSourceKindEnum];
+
+export const GetApiTagPathsMergesPendingStatus200ItemsSourceMembersNodeKindEnum = {
+	concept: "concept",
+	guide: "guide",
+} as const;
+
+export type GetApiTagPathsMergesPendingStatus200ItemsSourceMembersNodeKindEnum =
+	(typeof GetApiTagPathsMergesPendingStatus200ItemsSourceMembersNodeKindEnum)[keyof typeof GetApiTagPathsMergesPendingStatus200ItemsSourceMembersNodeKindEnum];
+
+export const GetApiTagPathsMergesPendingStatus200ItemsSourceMembersIncomingRelationRelationKindEnum =
+	{
+		generic: "generic",
+		partitive: "partitive",
+		instance: "instance",
+		organizational: "organizational",
+		facet_value: "facet_value",
+	} as const;
+
+export type GetApiTagPathsMergesPendingStatus200ItemsSourceMembersIncomingRelationRelationKindEnum =
+	(typeof GetApiTagPathsMergesPendingStatus200ItemsSourceMembersIncomingRelationRelationKindEnum)[keyof typeof GetApiTagPathsMergesPendingStatus200ItemsSourceMembersIncomingRelationRelationKindEnum];
+
 export const GetApiTagPathsMergesPendingStatus200ItemsSourceMembersLanguage = {
 	zh: "zh",
 	en: "en",
@@ -89220,6 +92289,26 @@ export const GetApiTagPathsMergesPendingStatus200ItemsSourceMembersAvatarIconPre
 
 export type GetApiTagPathsMergesPendingStatus200ItemsSourceMembersAvatarIconPrefixEnum =
 	(typeof GetApiTagPathsMergesPendingStatus200ItemsSourceMembersAvatarIconPrefixEnum)[keyof typeof GetApiTagPathsMergesPendingStatus200ItemsSourceMembersAvatarIconPrefixEnum];
+
+export const GetApiTagPathsMergesPendingStatus200ItemsTargetMembersNodeKindEnum = {
+	concept: "concept",
+	guide: "guide",
+} as const;
+
+export type GetApiTagPathsMergesPendingStatus200ItemsTargetMembersNodeKindEnum =
+	(typeof GetApiTagPathsMergesPendingStatus200ItemsTargetMembersNodeKindEnum)[keyof typeof GetApiTagPathsMergesPendingStatus200ItemsTargetMembersNodeKindEnum];
+
+export const GetApiTagPathsMergesPendingStatus200ItemsTargetMembersIncomingRelationRelationKindEnum =
+	{
+		generic: "generic",
+		partitive: "partitive",
+		instance: "instance",
+		organizational: "organizational",
+		facet_value: "facet_value",
+	} as const;
+
+export type GetApiTagPathsMergesPendingStatus200ItemsTargetMembersIncomingRelationRelationKindEnum =
+	(typeof GetApiTagPathsMergesPendingStatus200ItemsTargetMembersIncomingRelationRelationKindEnum)[keyof typeof GetApiTagPathsMergesPendingStatus200ItemsTargetMembersIncomingRelationRelationKindEnum];
 
 export const GetApiTagPathsMergesPendingStatus200ItemsTargetMembersLanguage = {
 	zh: "zh",
@@ -89269,6 +92358,64 @@ export type GetApiTagPathsMergesPendingStatus200 = {
 		 */
 		targetPathId: string;
 		/**
+		 * @type string
+		 */
+		status: GetApiTagPathsMergesPendingStatus200ItemsStatusEnum;
+		/**
+		 * @type string
+		 */
+		reason: string;
+		/**
+		 * @type string
+		 */
+		proposalSourceKind: GetApiTagPathsMergesPendingStatus200ItemsProposalSourceKindEnum;
+		proposalProvenance:
+			| ({
+					/**
+					 * @type string
+					 */
+					kind: "assisted";
+					/**
+					 * @type string
+					 */
+					system: string;
+					/**
+					 * @type string
+					 */
+					runId: string;
+					/**
+					 * @type string | undefined
+					 */
+					model?: string;
+					/**
+					 * @minLength 0
+					 * @maxLength 1
+					 * @type number | undefined
+					 */
+					confidence?: number;
+			  } | null)
+			| null;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		proposedByProfileId: string;
+		resolvedByProfileId: (string | null) | null;
+		resolvedAt: (string | null) | null;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		createdAt: string;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		updatedAt: string;
+		/**
 		 * @type array
 		 */
 		sourceMembers: {
@@ -89278,7 +92425,26 @@ export type GetApiTagPathsMergesPendingStatus200 = {
 			 * Format: `uuid`
 			 * @type string
 			 */
-			tagId: string;
+			nodeId: string;
+			/**
+			 * @type string
+			 */
+			nodeKind: GetApiTagPathsMergesPendingStatus200ItemsSourceMembersNodeKindEnum;
+			incomingRelation:
+				| ({
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						relationId: string;
+						/**
+						 * @default 'generic'
+						 * @type string
+						 */
+						relationKind: GetApiTagPathsMergesPendingStatus200ItemsSourceMembersIncomingRelationRelationKindEnum;
+				  } | null)
+				| null;
 			language: (GetApiTagPathsMergesPendingStatus200ItemsSourceMembersLanguage | null) | null;
 			title: (string | null) | null;
 			summary: (string | null) | null;
@@ -89357,7 +92523,26 @@ export type GetApiTagPathsMergesPendingStatus200 = {
 			 * Format: `uuid`
 			 * @type string
 			 */
-			tagId: string;
+			nodeId: string;
+			/**
+			 * @type string
+			 */
+			nodeKind: GetApiTagPathsMergesPendingStatus200ItemsTargetMembersNodeKindEnum;
+			incomingRelation:
+				| ({
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						relationId: string;
+						/**
+						 * @default 'generic'
+						 * @type string
+						 */
+						relationKind: GetApiTagPathsMergesPendingStatus200ItemsTargetMembersIncomingRelationRelationKindEnum;
+				  } | null)
+				| null;
 			language: (GetApiTagPathsMergesPendingStatus200ItemsTargetMembersLanguage | null) | null;
 			title: (string | null) | null;
 			summary: (string | null) | null;
@@ -89426,58 +92611,6 @@ export type GetApiTagPathsMergesPendingStatus200 = {
 				  )
 				| null;
 		}[];
-		/**
-		 * @type string
-		 */
-		reason: string;
-		proposalSource:
-			| {
-					/**
-					 * @type string
-					 */
-					kind: "human";
-			  }
-			| {
-					/**
-					 * @type string
-					 */
-					kind: "assisted";
-					/**
-					 * @type string
-					 */
-					system: string;
-					/**
-					 * @type string
-					 */
-					runId: string;
-					/**
-					 * @type string | undefined
-					 */
-					model?: string;
-					/**
-					 * @minLength 0
-					 * @maxLength 1
-					 * @type number | undefined
-					 */
-					confidence?: number;
-			  };
-		/**
-		 * @description
-		 * Format: `uuid`
-		 * @type string
-		 */
-		proposedByProfileId: string;
-		/**
-		 * @type string
-		 */
-		status: "proposed";
-		ageSeconds: string | number;
-		/**
-		 * @description
-		 * Format: `date-time`
-		 * @type string
-		 */
-		createdAt: string;
 	}[];
 };
 
@@ -89570,6 +92703,14 @@ export const PutApiTagPathsMergesByMergeIdResolutionStatus200StatusEnum = {
 export type PutApiTagPathsMergesByMergeIdResolutionStatus200StatusEnum =
 	(typeof PutApiTagPathsMergesByMergeIdResolutionStatus200StatusEnum)[keyof typeof PutApiTagPathsMergesByMergeIdResolutionStatus200StatusEnum];
 
+export const PutApiTagPathsMergesByMergeIdResolutionStatus200ProposalSourceKindEnum = {
+	human: "human",
+	assisted: "assisted",
+} as const;
+
+export type PutApiTagPathsMergesByMergeIdResolutionStatus200ProposalSourceKindEnum =
+	(typeof PutApiTagPathsMergesByMergeIdResolutionStatus200ProposalSourceKindEnum)[keyof typeof PutApiTagPathsMergesByMergeIdResolutionStatus200ProposalSourceKindEnum];
+
 /**
  * @type object
  */
@@ -89596,14 +92737,16 @@ export type PutApiTagPathsMergesByMergeIdResolutionStatus200 = {
 	 * @type string
 	 */
 	status: PutApiTagPathsMergesByMergeIdResolutionStatus200StatusEnum;
-	proposalSource:
-		| {
-				/**
-				 * @type string
-				 */
-				kind: "human";
-		  }
-		| {
+	/**
+	 * @type string
+	 */
+	reason: string;
+	/**
+	 * @type string
+	 */
+	proposalSourceKind: PutApiTagPathsMergesByMergeIdResolutionStatus200ProposalSourceKindEnum;
+	proposalProvenance:
+		| ({
 				/**
 				 * @type string
 				 */
@@ -89626,14 +92769,28 @@ export type PutApiTagPathsMergesByMergeIdResolutionStatus200 = {
 				 * @type number | undefined
 				 */
 				confidence?: number;
-		  };
+		  } | null)
+		| null;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	proposedByProfileId: string;
+	resolvedByProfileId: (string | null) | null;
+	resolvedAt: (string | null) | null;
 	/**
 	 * @description
 	 * Format: `date-time`
-	 * @type string | undefined
+	 * @type string
 	 */
-	createdAt?: string;
-	resolvedAt?: (string | null) | null;
+	createdAt: string;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	updatedAt: string;
 };
 
 /**
@@ -89697,46 +92854,24 @@ export type PutApiTagPathsMergesByMergeIdResolutionStatus404 = {
 	requestId: string;
 };
 
-export type PutApiTagPathsMergesByMergeIdResolutionStatus422 =
-	| {
-			/**
-			 * @type object
-			 */
-			error: {
-				/**
-				 * @default 'InvalidTagPathMerge'
-				 * @type string
-				 */
-				code: "InvalidTagPathMerge";
-				/**
-				 * @type string
-				 */
-				message: string;
-				/**
-				 * @type void | undefined
-				 */
-				details?: void;
-			};
-			/**
-			 * @type string
-			 */
-			requestId: string;
-	  }
-	| ValidationError;
+/**
+ * @type object
+ */
+export type PutApiTagPathsMergesByMergeIdResolutionStatus422 = ValidationError;
 
 /**
  * @type object
  */
 export type PutApiTagPathsMergesByMergeIdResolutionStatus500 = InternalError;
 
-export const PutApiTagPathsMergesByMergeIdResolutionRequestResolutionEnum = {
+export const PutApiTagPathsMergesByMergeIdResolutionRequestStatusEnum = {
 	accepted: "accepted",
 	rejected: "rejected",
 	reversed: "reversed",
 } as const;
 
-export type PutApiTagPathsMergesByMergeIdResolutionRequestResolutionEnum =
-	(typeof PutApiTagPathsMergesByMergeIdResolutionRequestResolutionEnum)[keyof typeof PutApiTagPathsMergesByMergeIdResolutionRequestResolutionEnum];
+export type PutApiTagPathsMergesByMergeIdResolutionRequestStatusEnum =
+	(typeof PutApiTagPathsMergesByMergeIdResolutionRequestStatusEnum)[keyof typeof PutApiTagPathsMergesByMergeIdResolutionRequestStatusEnum];
 
 /**
  * @type object
@@ -89745,7 +92880,7 @@ export type PutApiTagPathsMergesByMergeIdResolutionBody = {
 	/**
 	 * @type string
 	 */
-	resolution: PutApiTagPathsMergesByMergeIdResolutionRequestResolutionEnum;
+	status: PutApiTagPathsMergesByMergeIdResolutionRequestStatusEnum;
 };
 
 /**
@@ -89816,13 +92951,14 @@ export type GetApiUnitsByTypeByUnitIdTagsQuery = {
 	 */
 	localizationLanguages?: GetApiUnitsByTypeByUnitIdTagsLocalizationLanguagesEnum[];
 	/**
+	 * @default true
+	 * @type boolean | undefined
+	 */
+	includeExpressions?: boolean;
+	/**
 	 * @default 50
 	 */
-	globalLimit?: string | number;
-	/**
-	 * @default 20
-	 */
-	pathLimit?: string | number;
+	expressionLimit?: string | number;
 	/**
 	 * @default 10
 	 */
@@ -89833,7 +92969,37 @@ export type GetApiUnitsByTypeByUnitIdTagsQuery = {
 	perRealmLimit?: string | number;
 };
 
-export const GetApiUnitsByTypeByUnitIdTagsStatus200PathsMembersLanguage = {
+export const GetApiUnitsByTypeByUnitIdTagsStatus200ExpressionsExpressionExpressionKindEnum = {
+	simple: "simple",
+	facet_value: "facet_value",
+	relation: "relation",
+} as const;
+
+export type GetApiUnitsByTypeByUnitIdTagsStatus200ExpressionsExpressionExpressionKindEnum =
+	(typeof GetApiUnitsByTypeByUnitIdTagsStatus200ExpressionsExpressionExpressionKindEnum)[keyof typeof GetApiUnitsByTypeByUnitIdTagsStatus200ExpressionsExpressionExpressionKindEnum];
+
+export const GetApiUnitsByTypeByUnitIdTagsStatus200ExpressionsExpressionComponentsSemanticRoleEnum =
+	{
+		predicate: "predicate",
+		slot: "slot",
+		value: "value",
+		focus: "focus",
+		qualifier: "qualifier",
+	} as const;
+
+export type GetApiUnitsByTypeByUnitIdTagsStatus200ExpressionsExpressionComponentsSemanticRoleEnum =
+	(typeof GetApiUnitsByTypeByUnitIdTagsStatus200ExpressionsExpressionComponentsSemanticRoleEnum)[keyof typeof GetApiUnitsByTypeByUnitIdTagsStatus200ExpressionsExpressionComponentsSemanticRoleEnum];
+
+export const GetApiUnitsByTypeByUnitIdTagsStatus200ExpressionsExpressionComponentsComponentKindEnum =
+	{
+		required: "required",
+		fallback: "fallback",
+	} as const;
+
+export type GetApiUnitsByTypeByUnitIdTagsStatus200ExpressionsExpressionComponentsComponentKindEnum =
+	(typeof GetApiUnitsByTypeByUnitIdTagsStatus200ExpressionsExpressionComponentsComponentKindEnum)[keyof typeof GetApiUnitsByTypeByUnitIdTagsStatus200ExpressionsExpressionComponentsComponentKindEnum];
+
+export const GetApiUnitsByTypeByUnitIdTagsStatus200ExpressionsExpressionComponentsLanguage = {
 	zh: "zh",
 	en: "en",
 	ja: "ja",
@@ -89843,18 +93009,21 @@ export const GetApiUnitsByTypeByUnitIdTagsStatus200PathsMembersLanguage = {
 	es: "es",
 } as const;
 
-export type GetApiUnitsByTypeByUnitIdTagsStatus200PathsMembersLanguage =
-	(typeof GetApiUnitsByTypeByUnitIdTagsStatus200PathsMembersLanguage)[keyof typeof GetApiUnitsByTypeByUnitIdTagsStatus200PathsMembersLanguage];
+export type GetApiUnitsByTypeByUnitIdTagsStatus200ExpressionsExpressionComponentsLanguage =
+	(typeof GetApiUnitsByTypeByUnitIdTagsStatus200ExpressionsExpressionComponentsLanguage)[keyof typeof GetApiUnitsByTypeByUnitIdTagsStatus200ExpressionsExpressionComponentsLanguage];
 
-export const GetApiUnitsByTypeByUnitIdTagsStatus200PathsMembersAvatarIconPrefixEnum = {
-	fas: "fas",
-	fab: "fab",
+export const GetApiUnitsByTypeByUnitIdTagsStatus200ExpressionsExpressionGroupKeySemanticRoleEnum = {
+	predicate: "predicate",
+	slot: "slot",
+	value: "value",
+	focus: "focus",
+	qualifier: "qualifier",
 } as const;
 
-export type GetApiUnitsByTypeByUnitIdTagsStatus200PathsMembersAvatarIconPrefixEnum =
-	(typeof GetApiUnitsByTypeByUnitIdTagsStatus200PathsMembersAvatarIconPrefixEnum)[keyof typeof GetApiUnitsByTypeByUnitIdTagsStatus200PathsMembersAvatarIconPrefixEnum];
+export type GetApiUnitsByTypeByUnitIdTagsStatus200ExpressionsExpressionGroupKeySemanticRoleEnum =
+	(typeof GetApiUnitsByTypeByUnitIdTagsStatus200ExpressionsExpressionGroupKeySemanticRoleEnum)[keyof typeof GetApiUnitsByTypeByUnitIdTagsStatus200ExpressionsExpressionGroupKeySemanticRoleEnum];
 
-export const GetApiUnitsByTypeByUnitIdTagsStatus200GlobalLanguage = {
+export const GetApiUnitsByTypeByUnitIdTagsStatus200ExpressionsExpressionGroupKeyLanguage = {
 	zh: "zh",
 	en: "en",
 	ja: "ja",
@@ -89864,16 +93033,58 @@ export const GetApiUnitsByTypeByUnitIdTagsStatus200GlobalLanguage = {
 	es: "es",
 } as const;
 
-export type GetApiUnitsByTypeByUnitIdTagsStatus200GlobalLanguage =
-	(typeof GetApiUnitsByTypeByUnitIdTagsStatus200GlobalLanguage)[keyof typeof GetApiUnitsByTypeByUnitIdTagsStatus200GlobalLanguage];
+export type GetApiUnitsByTypeByUnitIdTagsStatus200ExpressionsExpressionGroupKeyLanguage =
+	(typeof GetApiUnitsByTypeByUnitIdTagsStatus200ExpressionsExpressionGroupKeyLanguage)[keyof typeof GetApiUnitsByTypeByUnitIdTagsStatus200ExpressionsExpressionGroupKeyLanguage];
 
-export const GetApiUnitsByTypeByUnitIdTagsStatus200GlobalAvatarIconPrefixEnum = {
-	fas: "fas",
-	fab: "fab",
+export const GetApiUnitsByTypeByUnitIdTagsStatus200ExpressionsApplicationsSourceKindEnum = {
+	direct: "direct",
+	path: "path",
 } as const;
 
-export type GetApiUnitsByTypeByUnitIdTagsStatus200GlobalAvatarIconPrefixEnum =
-	(typeof GetApiUnitsByTypeByUnitIdTagsStatus200GlobalAvatarIconPrefixEnum)[keyof typeof GetApiUnitsByTypeByUnitIdTagsStatus200GlobalAvatarIconPrefixEnum];
+export type GetApiUnitsByTypeByUnitIdTagsStatus200ExpressionsApplicationsSourceKindEnum =
+	(typeof GetApiUnitsByTypeByUnitIdTagsStatus200ExpressionsApplicationsSourceKindEnum)[keyof typeof GetApiUnitsByTypeByUnitIdTagsStatus200ExpressionsApplicationsSourceKindEnum];
+
+export const GetApiUnitsByTypeByUnitIdTagsStatus200ExpressionsApplicationsMembersNodeKindEnum = {
+	concept: "concept",
+	guide: "guide",
+} as const;
+
+export type GetApiUnitsByTypeByUnitIdTagsStatus200ExpressionsApplicationsMembersNodeKindEnum =
+	(typeof GetApiUnitsByTypeByUnitIdTagsStatus200ExpressionsApplicationsMembersNodeKindEnum)[keyof typeof GetApiUnitsByTypeByUnitIdTagsStatus200ExpressionsApplicationsMembersNodeKindEnum];
+
+export const GetApiUnitsByTypeByUnitIdTagsStatus200ExpressionsApplicationsMembersIncomingRelationRelationKindEnum =
+	{
+		generic: "generic",
+		partitive: "partitive",
+		instance: "instance",
+		organizational: "organizational",
+		facet_value: "facet_value",
+	} as const;
+
+export type GetApiUnitsByTypeByUnitIdTagsStatus200ExpressionsApplicationsMembersIncomingRelationRelationKindEnum =
+	(typeof GetApiUnitsByTypeByUnitIdTagsStatus200ExpressionsApplicationsMembersIncomingRelationRelationKindEnum)[keyof typeof GetApiUnitsByTypeByUnitIdTagsStatus200ExpressionsApplicationsMembersIncomingRelationRelationKindEnum];
+
+export const GetApiUnitsByTypeByUnitIdTagsStatus200ExpressionsApplicationsMembersLanguage = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetApiUnitsByTypeByUnitIdTagsStatus200ExpressionsApplicationsMembersLanguage =
+	(typeof GetApiUnitsByTypeByUnitIdTagsStatus200ExpressionsApplicationsMembersLanguage)[keyof typeof GetApiUnitsByTypeByUnitIdTagsStatus200ExpressionsApplicationsMembersLanguage];
+
+export const GetApiUnitsByTypeByUnitIdTagsStatus200ExpressionsApplicationsMembersAvatarIconPrefixEnum =
+	{
+		fas: "fas",
+		fab: "fab",
+	} as const;
+
+export type GetApiUnitsByTypeByUnitIdTagsStatus200ExpressionsApplicationsMembersAvatarIconPrefixEnum =
+	(typeof GetApiUnitsByTypeByUnitIdTagsStatus200ExpressionsApplicationsMembersAvatarIconPrefixEnum)[keyof typeof GetApiUnitsByTypeByUnitIdTagsStatus200ExpressionsApplicationsMembersAvatarIconPrefixEnum];
 
 export const GetApiUnitsByTypeByUnitIdTagsStatus200RealmsLanguage = {
 	zh: "zh",
@@ -89945,230 +93156,257 @@ export type GetApiUnitsByTypeByUnitIdTagsStatus200 = {
 	/**
 	 * @type array
 	 */
-	paths: {
-		/**
-		 * @description
-		 * Format: `uuid`
-		 * @type string
-		 */
-		pathId: string;
-		/**
-		 * @type boolean
-		 */
-		pinned: boolean;
-		position: (string | null) | null;
-		score: string | number;
-		voteCount: string | number;
-		viewerVote: ((-1 | 1) | null) | null;
-		spoilerVoteCount: string | number;
+	expressions: {
+		authority:
+			| {
+					/**
+					 * @type string
+					 */
+					kind: "global";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					kind: "realm";
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					realmId: string;
+			  };
 		/**
 		 * @type object
 		 */
-		spoilerDistribution: {
-			none: string | number;
-			minor: string | number;
-			major: string | number;
-		};
-		viewerSpoilerLevel: ((0 | 1 | 2) | null) | null;
-		definitionScore: string | number;
-		definitionVoteCount: string | number;
-		usageCount: string | number;
-		/**
-		 * @type array
-		 */
-		members: {
-			ordinal: string | number;
+		expression: {
 			/**
 			 * @description
 			 * Format: `uuid`
 			 * @type string
 			 */
-			tagId: string;
-			language: (GetApiUnitsByTypeByUnitIdTagsStatus200PathsMembersLanguage | null) | null;
-			title: (string | null) | null;
-			summary: (string | null) | null;
-			avatar:
-				| (
-						| (
-								| {
-										/**
-										 * @type string
-										 */
-										type: "image";
-										/**
-										 * @type object
-										 */
-										image: {
-											/**
-											 * @description
-											 * Format: `uuid`
-											 * @type string
-											 */
-											id: string;
-											/**
-											 * @type string
-											 */
-											url: string;
-										};
-								  }
-								| {
-										/**
-										 * @type string
-										 */
-										type: "emoji";
-										/**
-										 * @maxLength 64
-										 * @type string
-										 */
-										emoji: string;
-								  }
-								| {
-										/**
-										 * @type string
-										 */
-										type: "icon";
-										/**
-										 * @type object
-										 */
-										icon: {
-											/**
-											 * @type string
-											 */
-											provider: "font-awesome";
-											/**
-											 * @type string
-											 */
-											prefix: GetApiUnitsByTypeByUnitIdTagsStatus200PathsMembersAvatarIconPrefixEnum;
-											/**
-											 * @maxLength 128
-											 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
-											 * @type string
-											 */
-											name: string;
-										};
-								  }
-						  )
-						| null
-				  )
+			expressionId: string;
+			/**
+			 * @default 'simple'
+			 * @type string
+			 */
+			expressionKind: GetApiUnitsByTypeByUnitIdTagsStatus200ExpressionsExpressionExpressionKindEnum;
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			focusTagId: string;
+			presentationRevision: string | number;
+			/**
+			 * @type array
+			 */
+			components: {
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				tagId: string;
+				/**
+				 * @default 'predicate'
+				 * @type string
+				 */
+				semanticRole: GetApiUnitsByTypeByUnitIdTagsStatus200ExpressionsExpressionComponentsSemanticRoleEnum;
+				/**
+				 * @default 'required'
+				 * @type string
+				 */
+				componentKind: GetApiUnitsByTypeByUnitIdTagsStatus200ExpressionsExpressionComponentsComponentKindEnum;
+				language:
+					| (GetApiUnitsByTypeByUnitIdTagsStatus200ExpressionsExpressionComponentsLanguage | null)
+					| null;
+				title: (string | null) | null;
+			}[];
+			groupKey:
+				| ({
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						tagId: string;
+						/**
+						 * @default 'predicate'
+						 * @type string
+						 */
+						semanticRole: GetApiUnitsByTypeByUnitIdTagsStatus200ExpressionsExpressionGroupKeySemanticRoleEnum;
+						language:
+							| (GetApiUnitsByTypeByUnitIdTagsStatus200ExpressionsExpressionGroupKeyLanguage | null)
+							| null;
+						title: (string | null) | null;
+				  } | null)
 				| null;
-		}[];
+		};
 		/**
-		 * @description
-		 * Format: `date-time`
-		 * @type string
+		 * @type array
 		 */
-		createdAt: string;
-		/**
-		 * @description
-		 * Format: `date-time`
-		 * @type string
-		 */
-		updatedAt: string;
-	}[];
-	/**
-	 * @type array
-	 */
-	global: {
-		/**
-		 * @description
-		 * Format: `uuid`
-		 * @type string
-		 */
-		tagId: string;
-		language: (GetApiUnitsByTypeByUnitIdTagsStatus200GlobalLanguage | null) | null;
-		title: (string | null) | null;
-		summary: (string | null) | null;
-		avatar:
-			| (
+		applications: {
+			applicationId: (string | null) | null;
+			/**
+			 * @type string
+			 */
+			sourceKind: GetApiUnitsByTypeByUnitIdTagsStatus200ExpressionsApplicationsSourceKindEnum;
+			authority:
+				| {
+						/**
+						 * @type string
+						 */
+						kind: "global";
+				  }
+				| {
+						/**
+						 * @type string
+						 */
+						kind: "realm";
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						realmId: string;
+				  };
+			senseId: (string | null) | null;
+			pathId: (string | null) | null;
+			tagId: (string | null) | null;
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			expressionId: string;
+			createdByProfileId: (string | null) | null;
+			/**
+			 * @type array
+			 */
+			members: {
+				ordinal: string | number;
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				nodeId: string;
+				/**
+				 * @type string
+				 */
+				nodeKind: GetApiUnitsByTypeByUnitIdTagsStatus200ExpressionsApplicationsMembersNodeKindEnum;
+				incomingRelation:
+					| ({
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							relationId: string;
+							/**
+							 * @default 'generic'
+							 * @type string
+							 */
+							relationKind: GetApiUnitsByTypeByUnitIdTagsStatus200ExpressionsApplicationsMembersIncomingRelationRelationKindEnum;
+					  } | null)
+					| null;
+				language:
+					| (GetApiUnitsByTypeByUnitIdTagsStatus200ExpressionsApplicationsMembersLanguage | null)
+					| null;
+				title: (string | null) | null;
+				summary: (string | null) | null;
+				avatar:
 					| (
-							| {
-									/**
-									 * @type string
-									 */
-									type: "image";
-									/**
-									 * @type object
-									 */
-									image: {
-										/**
-										 * @description
-										 * Format: `uuid`
-										 * @type string
-										 */
-										id: string;
-										/**
-										 * @type string
-										 */
-										url: string;
-									};
-							  }
-							| {
-									/**
-									 * @type string
-									 */
-									type: "emoji";
-									/**
-									 * @maxLength 64
-									 * @type string
-									 */
-									emoji: string;
-							  }
-							| {
-									/**
-									 * @type string
-									 */
-									type: "icon";
-									/**
-									 * @type object
-									 */
-									icon: {
-										/**
-										 * @type string
-										 */
-										provider: "font-awesome";
-										/**
-										 * @type string
-										 */
-										prefix: GetApiUnitsByTypeByUnitIdTagsStatus200GlobalAvatarIconPrefixEnum;
-										/**
-										 * @maxLength 128
-										 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
-										 * @type string
-										 */
-										name: string;
-									};
-							  }
+							| (
+									| {
+											/**
+											 * @type string
+											 */
+											type: "image";
+											/**
+											 * @type object
+											 */
+											image: {
+												/**
+												 * @description
+												 * Format: `uuid`
+												 * @type string
+												 */
+												id: string;
+												/**
+												 * @type string
+												 */
+												url: string;
+											};
+									  }
+									| {
+											/**
+											 * @type string
+											 */
+											type: "emoji";
+											/**
+											 * @maxLength 64
+											 * @type string
+											 */
+											emoji: string;
+									  }
+									| {
+											/**
+											 * @type string
+											 */
+											type: "icon";
+											/**
+											 * @type object
+											 */
+											icon: {
+												/**
+												 * @type string
+												 */
+												provider: "font-awesome";
+												/**
+												 * @type string
+												 */
+												prefix: GetApiUnitsByTypeByUnitIdTagsStatus200ExpressionsApplicationsMembersAvatarIconPrefixEnum;
+												/**
+												 * @maxLength 128
+												 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+												 * @type string
+												 */
+												name: string;
+											};
+									  }
+							  )
+							| null
 					  )
-					| null
-			  )
-			| null;
-		/**
-		 * @description
-		 * Format: `date-time`
-		 * @type string
-		 */
-		createdAt: string;
-		/**
-		 * @description
-		 * Format: `date-time`
-		 * @type string
-		 */
-		updatedAt: string;
-		/**
-		 * @type boolean
-		 */
-		pinned: boolean;
-		position: (string | null) | null;
-		score: string | number;
-		voteCount: string | number;
-		viewerVote: ((-1 | 1) | null) | null;
+					| null;
+			}[];
+			score: string | number;
+			voteCount: string | number;
+			spoilerVoteCount: string | number;
+			/**
+			 * @type object
+			 */
+			spoilerDistribution: {
+				none: string | number;
+				minor: string | number;
+				major: string | number;
+			};
+			viewerVote: ((-1 | 1) | null) | null;
+			viewerSpoilerLevel: ((0 | 1 | 2) | null) | null;
+			/**
+			 * @description
+			 * Format: `date-time`
+			 * @type string
+			 */
+			createdAt: string;
+		}[];
 	}[];
 	/**
 	 * @type object
 	 */
 	totals: {
-		paths: string | number;
-		global: string | number;
+		expressions: string | number;
 	};
 	/**
 	 * @type array
@@ -90527,65 +93765,55 @@ export type GetApiUnitsByTypeByUnitIdTagsResponse =
 /**
  * @type object
  */
-export type PutApiUnitsByTypeByUnitIdTagPathsByPathIdPath = {
-	type: ("book" | "software" | "media") | "series";
+export type PostApiUnitsByTypeByUnitIdTagPathApplicationsPath = {
+	type: (("book" | "software" | "media") | "series") | "entity";
 	/**
 	 * @description
 	 * Format: `uuid`
 	 * @type string
 	 */
 	unitId: string;
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	pathId: string;
 };
 
 /**
  * @type object
  */
-export type PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus200 = {
+export type PostApiUnitsByTypeByUnitIdTagPathApplicationsStatus200 = {
 	/**
 	 * @description
 	 * Format: `uuid`
 	 * @type string
 	 */
-	unitId: string;
+	applicationId: string;
 	/**
 	 * @description
 	 * Format: `uuid`
 	 * @type string
 	 */
-	pathId: string;
-	score: string | number;
-	voteCount: string | number;
-	viewerVote: ((-1 | 1) | null) | null;
-	spoilerVoteCount: string | number;
+	senseId: string;
 	/**
-	 * @type object
+	 * @type boolean
 	 */
-	spoilerDistribution: {
-		none: string | number;
-		minor: string | number;
-		major: string | number;
-	};
-	viewerSpoilerLevel: ((0 | 1 | 2) | null) | null;
+	created: boolean;
 };
 
-export const PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus404ErrorCodeEnum = {
+/**
+ * @type object
+ */
+export type PostApiUnitsByTypeByUnitIdTagPathApplicationsStatus400 = MalformedRequestBody;
+
+export const PostApiUnitsByTypeByUnitIdTagPathApplicationsStatus404ErrorCodeEnum = {
 	UnitNotFound: "UnitNotFound",
 	TagPathNotFound: "TagPathNotFound",
 } as const;
 
-export type PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus404ErrorCodeEnum =
-	(typeof PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus404ErrorCodeEnum)[keyof typeof PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus404ErrorCodeEnum];
+export type PostApiUnitsByTypeByUnitIdTagPathApplicationsStatus404ErrorCodeEnum =
+	(typeof PostApiUnitsByTypeByUnitIdTagPathApplicationsStatus404ErrorCodeEnum)[keyof typeof PostApiUnitsByTypeByUnitIdTagPathApplicationsStatus404ErrorCodeEnum];
 
 /**
  * @type object
  */
-export type PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus404 = {
+export type PostApiUnitsByTypeByUnitIdTagPathApplicationsStatus404 = {
 	/**
 	 * @type object
 	 */
@@ -90594,7 +93822,7 @@ export type PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus404 = {
 		 * @default 'UnitNotFound'
 		 * @type string
 		 */
-		code: PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus404ErrorCodeEnum;
+		code: PostApiUnitsByTypeByUnitIdTagPathApplicationsStatus404ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -90610,42 +93838,20 @@ export type PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus404 = {
 	requestId: string;
 };
 
-export type PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus422 =
-	| {
-			/**
-			 * @type object
-			 */
-			error: {
-				/**
-				 * @default 'InvalidTagPath'
-				 * @type string
-				 */
-				code: "InvalidTagPath";
-				/**
-				 * @type string
-				 */
-				message: string;
-				/**
-				 * @type void | undefined
-				 */
-				details?: void;
-			};
-			/**
-			 * @type string
-			 */
-			requestId: string;
-	  }
-	| ValidationError;
+/**
+ * @type object
+ */
+export type PostApiUnitsByTypeByUnitIdTagPathApplicationsStatus422 = ValidationError;
 
-export const PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus429ErrorCodeEnum = {
+export const PostApiUnitsByTypeByUnitIdTagPathApplicationsStatus429ErrorCodeEnum = {
 	ApiQuotaExceeded: "ApiQuotaExceeded",
 	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
 } as const;
 
-export type PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus429ErrorCodeEnum =
-	(typeof PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus429ErrorCodeEnum)[keyof typeof PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus429ErrorCodeEnum];
+export type PostApiUnitsByTypeByUnitIdTagPathApplicationsStatus429ErrorCodeEnum =
+	(typeof PostApiUnitsByTypeByUnitIdTagPathApplicationsStatus429ErrorCodeEnum)[keyof typeof PostApiUnitsByTypeByUnitIdTagPathApplicationsStatus429ErrorCodeEnum];
 
-export type PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus429 =
+export type PostApiUnitsByTypeByUnitIdTagPathApplicationsStatus429 =
 	| {
 			/**
 			 * @type object
@@ -90678,7 +93884,7 @@ export type PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus429 =
 				/**
 				 * @type string
 				 */
-				code: PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus429ErrorCodeEnum;
+				code: PostApiUnitsByTypeByUnitIdTagPathApplicationsStatus429ErrorCodeEnum;
 				/**
 				 * @type string
 				 */
@@ -90694,446 +93900,39 @@ export type PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus429 =
 /**
  * @type object
  */
-export type PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus500 = InternalError;
+export type PostApiUnitsByTypeByUnitIdTagPathApplicationsStatus500 = InternalError;
 
-/**
- * @type object
- */
-export type PutApiUnitsByTypeByUnitIdTagPathsByPathIdOptions = {
-	body?: never;
-	path: PutApiUnitsByTypeByUnitIdTagPathsByPathIdPath;
-	query?: never;
-	headers?: never;
-};
-
-/**
- * @type object
- */
-export type PutApiUnitsByTypeByUnitIdTagPathsByPathIdResponses = {
-	"200": PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus200;
-	"404": PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus404;
-	"422": PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus422;
-	"429": PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus429;
-	"500": PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus500;
-};
-
-/**
- * @description Union of all possible responses
- */
-export type PutApiUnitsByTypeByUnitIdTagPathsByPathIdResponse =
-	| PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus200
-	| PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus404
-	| PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus422
-	| PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus429
-	| PutApiUnitsByTypeByUnitIdTagPathsByPathIdStatus500;
-
-/**
- * @type object
- */
-export type DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdPath = {
-	type: ("book" | "software" | "media") | "series";
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	unitId: string;
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	pathId: string;
-};
-
-/**
- * @type void
- */
-export type DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus204 = void;
-
-export const DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus403ErrorCodeEnum = {
-	UnitPermissionForbidden: "UnitPermissionForbidden",
-	UnitAccessRestricted: "UnitAccessRestricted",
-} as const;
-
-export type DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus403ErrorCodeEnum =
-	(typeof DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus403ErrorCodeEnum)[keyof typeof DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus403ErrorCodeEnum];
-
-/**
- * @type object
- */
-export type DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus403 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'UnitPermissionForbidden'
-		 * @type string
-		 */
-		code: DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus403ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-export const DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus404ErrorCodeEnum = {
-	UnitNotFound: "UnitNotFound",
-	TagPathApplicationNotFound: "TagPathApplicationNotFound",
-} as const;
-
-export type DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus404ErrorCodeEnum =
-	(typeof DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus404ErrorCodeEnum)[keyof typeof DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus404ErrorCodeEnum];
-
-/**
- * @type object
- */
-export type DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus404 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'UnitNotFound'
-		 * @type string
-		 */
-		code: DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus404ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus422 = ValidationError;
-
-export const DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus429ErrorCodeEnum = {
-	ApiQuotaExceeded: "ApiQuotaExceeded",
-	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
-} as const;
-
-export type DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus429ErrorCodeEnum =
-	(typeof DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus429ErrorCodeEnum)[keyof typeof DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus429ErrorCodeEnum];
-
-export type DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus429 =
-	| {
-			/**
-			 * @type object
-			 */
-			error: {
-				/**
-				 * @default 'VoteHotKeyBusy'
-				 * @type string
-				 */
-				code: "VoteHotKeyBusy";
-				/**
-				 * @type string
-				 */
-				message: string;
-				/**
-				 * @type void | undefined
-				 */
-				details?: void;
-			};
-			/**
-			 * @type string
-			 */
-			requestId: string;
-	  }
-	| {
-			/**
-			 * @type object
-			 */
-			error: {
-				/**
-				 * @type string
-				 */
-				code: DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus429ErrorCodeEnum;
-				/**
-				 * @type string
-				 */
-				message: string;
-				details?: JsonValue;
-			};
-			/**
-			 * @type string
-			 */
-			requestId: string;
-	  };
-
-/**
- * @type object
- */
-export type DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus500 = InternalError;
-
-/**
- * @type object
- */
-export type DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdOptions = {
-	body?: never;
-	path: DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdPath;
-	query?: never;
-	headers?: never;
-};
-
-/**
- * @type object
- */
-export type DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdResponses = {
-	"204": DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus204;
-	"403": DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus403;
-	"404": DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus404;
-	"422": DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus422;
-	"429": DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus429;
-	"500": DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus500;
-};
-
-/**
- * @description Union of all possible responses
- */
-export type DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdResponse =
-	| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus204
-	| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus403
-	| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus404
-	| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus422
-	| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus429
-	| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdStatus500;
-
-/**
- * @type object
- */
-export type PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentPath = {
-	type: ("book" | "software" | "media") | "series";
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	unitId: string;
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	pathId: string;
-};
-
-/**
- * @type object
- */
-export type PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus200 = {
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	unitId: string;
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	pathId: string;
-	score: string | number;
-	voteCount: string | number;
-	viewerVote: ((-1 | 1) | null) | null;
-	spoilerVoteCount: string | number;
-	/**
-	 * @type object
-	 */
-	spoilerDistribution: {
-		none: string | number;
-		minor: string | number;
-		major: string | number;
-	};
-	viewerSpoilerLevel: ((0 | 1 | 2) | null) | null;
-};
-
-/**
- * @type object
- */
-export type PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus400 = MalformedRequestBody;
-
-export const PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus404ErrorCodeEnum = {
-	UnitNotFound: "UnitNotFound",
-	TagPathApplicationNotFound: "TagPathApplicationNotFound",
-} as const;
-
-export type PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus404ErrorCodeEnum =
-	(typeof PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus404ErrorCodeEnum)[keyof typeof PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus404ErrorCodeEnum];
-
-/**
- * @type object
- */
-export type PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus404 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'UnitNotFound'
-		 * @type string
-		 */
-		code: PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus404ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-export type PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus422 =
-	| {
-			/**
-			 * @type object
-			 */
-			error: {
-				/**
-				 * @default 'InvalidTagPath'
-				 * @type string
-				 */
-				code: "InvalidTagPath";
-				/**
-				 * @type string
-				 */
-				message: string;
-				/**
-				 * @type void | undefined
-				 */
-				details?: void;
-			};
-			/**
-			 * @type string
-			 */
-			requestId: string;
-	  }
-	| ValidationError;
-
-export const PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus429ErrorCodeEnum = {
-	ApiQuotaExceeded: "ApiQuotaExceeded",
-	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
-} as const;
-
-export type PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus429ErrorCodeEnum =
-	(typeof PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus429ErrorCodeEnum)[keyof typeof PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus429ErrorCodeEnum];
-
-export type PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus429 =
-	| {
-			/**
-			 * @type object
-			 */
-			error: {
-				/**
-				 * @default 'VoteHotKeyBusy'
-				 * @type string
-				 */
-				code: "VoteHotKeyBusy";
-				/**
-				 * @type string
-				 */
-				message: string;
-				/**
-				 * @type void | undefined
-				 */
-				details?: void;
-			};
-			/**
-			 * @type string
-			 */
-			requestId: string;
-	  }
-	| {
-			/**
-			 * @type object
-			 */
-			error: {
-				/**
-				 * @type string
-				 */
-				code: PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus429ErrorCodeEnum;
-				/**
-				 * @type string
-				 */
-				message: string;
-				details?: JsonValue;
-			};
-			/**
-			 * @type string
-			 */
-			requestId: string;
-	  };
-
-/**
- * @type object
- */
-export type PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus500 = InternalError;
-
-export const PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentRequestFitVoteEnum = {
+export const PostApiUnitsByTypeByUnitIdTagPathApplicationsRequestFitVoteEnum = {
 	"-1": -1,
 	"1": 1,
 } as const;
 
-export type PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentRequestFitVoteEnum =
-	(typeof PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentRequestFitVoteEnum)[keyof typeof PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentRequestFitVoteEnum];
-
-export const PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentRequestSpoilerLevelEnum = {
-	"0": 0,
-	"1": 1,
-	"2": 2,
-} as const;
-
-export type PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentRequestSpoilerLevelEnum =
-	(typeof PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentRequestSpoilerLevelEnum)[keyof typeof PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentRequestSpoilerLevelEnum];
+export type PostApiUnitsByTypeByUnitIdTagPathApplicationsRequestFitVoteEnum =
+	(typeof PostApiUnitsByTypeByUnitIdTagPathApplicationsRequestFitVoteEnum)[keyof typeof PostApiUnitsByTypeByUnitIdTagPathApplicationsRequestFitVoteEnum];
 
 /**
  * @type object
  */
-export type PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentBody = {
+export type PostApiUnitsByTypeByUnitIdTagPathApplicationsBody = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	senseId: string;
 	/**
 	 * @type string | undefined
 	 */
-	fitVote?: PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentRequestFitVoteEnum;
-	/**
-	 * @type string | undefined
-	 */
-	spoilerLevel?: PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentRequestSpoilerLevelEnum;
+	fitVote?: PostApiUnitsByTypeByUnitIdTagPathApplicationsRequestFitVoteEnum;
+	spoilerLevel?: ((0 | 1 | 2) | null) | null;
 };
 
 /**
  * @type object
  */
-export type PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentOptions = {
-	body: PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentBody;
-	path: PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentPath;
+export type PostApiUnitsByTypeByUnitIdTagPathApplicationsOptions = {
+	body: PostApiUnitsByTypeByUnitIdTagPathApplicationsBody;
+	path: PostApiUnitsByTypeByUnitIdTagPathApplicationsPath;
 	query?: never;
 	headers?: never;
 };
@@ -91141,31 +93940,31 @@ export type PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentOptions = {
 /**
  * @type object
  */
-export type PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentResponses = {
-	"200": PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus200;
-	"400": PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus400;
-	"404": PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus404;
-	"422": PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus422;
-	"429": PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus429;
-	"500": PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus500;
+export type PostApiUnitsByTypeByUnitIdTagPathApplicationsResponses = {
+	"200": PostApiUnitsByTypeByUnitIdTagPathApplicationsStatus200;
+	"400": PostApiUnitsByTypeByUnitIdTagPathApplicationsStatus400;
+	"404": PostApiUnitsByTypeByUnitIdTagPathApplicationsStatus404;
+	"422": PostApiUnitsByTypeByUnitIdTagPathApplicationsStatus422;
+	"429": PostApiUnitsByTypeByUnitIdTagPathApplicationsStatus429;
+	"500": PostApiUnitsByTypeByUnitIdTagPathApplicationsStatus500;
 };
 
 /**
  * @description Union of all possible responses
  */
-export type PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentResponse =
-	| PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus200
-	| PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus400
-	| PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus404
-	| PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus422
-	| PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus429
-	| PutApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus500;
+export type PostApiUnitsByTypeByUnitIdTagPathApplicationsResponse =
+	| PostApiUnitsByTypeByUnitIdTagPathApplicationsStatus200
+	| PostApiUnitsByTypeByUnitIdTagPathApplicationsStatus400
+	| PostApiUnitsByTypeByUnitIdTagPathApplicationsStatus404
+	| PostApiUnitsByTypeByUnitIdTagPathApplicationsStatus422
+	| PostApiUnitsByTypeByUnitIdTagPathApplicationsStatus429
+	| PostApiUnitsByTypeByUnitIdTagPathApplicationsStatus500;
 
 /**
  * @type object
  */
-export type DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentPath = {
-	type: ("book" | "software" | "media") | "series";
+export type DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdPath = {
+	type: (("book" | "software" | "media") | "series") | "entity";
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -91177,61 +93976,38 @@ export type DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentPath = {
 	 * Format: `uuid`
 	 * @type string
 	 */
-	pathId: string;
+	applicationId: string;
 };
 
 /**
  * @type object
  */
-export type DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus200 = {
+export type DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdStatus200 = {
 	/**
 	 * @description
 	 * Format: `uuid`
 	 * @type string
 	 */
-	unitId: string;
+	applicationId: string;
 	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
+	 * @type boolean
 	 */
-	pathId: string;
-	score: string | number;
-	voteCount: string | number;
-	viewerVote: ((-1 | 1) | null) | null;
-	spoilerVoteCount: string | number;
-	/**
-	 * @type object
-	 */
-	spoilerDistribution: {
-		none: string | number;
-		minor: string | number;
-		major: string | number;
-	};
-	viewerSpoilerLevel: ((0 | 1 | 2) | null) | null;
+	applied: false;
 };
-
-export const DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus404ErrorCodeEnum = {
-	UnitNotFound: "UnitNotFound",
-	TagPathApplicationNotFound: "TagPathApplicationNotFound",
-} as const;
-
-export type DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus404ErrorCodeEnum =
-	(typeof DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus404ErrorCodeEnum)[keyof typeof DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus404ErrorCodeEnum];
 
 /**
  * @type object
  */
-export type DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus404 = {
+export type DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdStatus404 = {
 	/**
 	 * @type object
 	 */
 	error: {
 		/**
-		 * @default 'UnitNotFound'
+		 * @default 'TagPathApplicationNotFound'
 		 * @type string
 		 */
-		code: DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus404ErrorCodeEnum;
+		code: "TagPathApplicationNotFound";
 		/**
 		 * @type string
 		 */
@@ -91250,17 +94026,166 @@ export type DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus404 = {
 /**
  * @type object
  */
-export type DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus422 = ValidationError;
+export type DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdStatus422 =
+	ValidationError;
 
-export const DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus429ErrorCodeEnum = {
-	ApiQuotaExceeded: "ApiQuotaExceeded",
-	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
-} as const;
+export const DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdStatus429ErrorCodeEnum =
+	{
+		ApiQuotaExceeded: "ApiQuotaExceeded",
+		ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+	} as const;
 
-export type DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus429ErrorCodeEnum =
-	(typeof DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus429ErrorCodeEnum)[keyof typeof DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus429ErrorCodeEnum];
+export type DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdStatus429ErrorCodeEnum =
+	(typeof DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdStatus429ErrorCodeEnum)[keyof typeof DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdStatus429ErrorCodeEnum];
 
-export type DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus429 =
+/**
+ * @type object
+ */
+export type DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdStatus429ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdOptions = {
+	body?: never;
+	path: DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdResponses = {
+	"200": DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdStatus200;
+	"404": DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdStatus404;
+	"422": DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdStatus422;
+	"429": DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdStatus429;
+	"500": DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdResponse =
+	| DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdStatus200
+	| DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdStatus404
+	| DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdStatus422
+	| DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdStatus429
+	| DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdStatus500;
+
+/**
+ * @type object
+ */
+export type PutApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentPath = {
+	type: (("book" | "software" | "media") | "series") | "entity";
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	applicationId: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus200 = {
+	score: string | number;
+	voteCount: string | number;
+	spoilerVoteCount: string | number;
+	/**
+	 * @type object
+	 */
+	spoilerDistribution: {
+		none: string | number;
+		minor: string | number;
+		major: string | number;
+	};
+	viewerVote: ((-1 | 1) | null) | null;
+	viewerSpoilerLevel: ((0 | 1 | 2) | null) | null;
+};
+
+/**
+ * @type object
+ */
+export type PutApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus400 =
+	MalformedRequestBody;
+
+/**
+ * @type object
+ */
+export type PutApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'TagPathApplicationNotFound'
+		 * @type string
+		 */
+		code: "TagPathApplicationNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus422 =
+	ValidationError;
+
+export const PutApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus429ErrorCodeEnum =
+	{
+		ApiQuotaExceeded: "ApiQuotaExceeded",
+		ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+	} as const;
+
+export type PutApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus429ErrorCodeEnum =
+	(typeof PutApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus429ErrorCodeEnum)[keyof typeof PutApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus429ErrorCodeEnum];
+
+export type PutApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus429 =
 	| {
 			/**
 			 * @type object
@@ -91293,7 +94218,7 @@ export type DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus429 =
 				/**
 				 * @type string
 				 */
-				code: DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus429ErrorCodeEnum;
+				code: PutApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus429ErrorCodeEnum;
 				/**
 				 * @type string
 				 */
@@ -91309,14 +94234,23 @@ export type DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus429 =
 /**
  * @type object
  */
-export type DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus500 = InternalError;
+export type PutApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus500 =
+	InternalError;
 
 /**
  * @type object
  */
-export type DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentOptions = {
-	body?: never;
-	path: DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentPath;
+export type PutApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentBody = {
+	fitVote?: ((-1 | 1) | null) | null;
+	spoilerLevel?: ((0 | 1 | 2) | null) | null;
+};
+
+/**
+ * @type object
+ */
+export type PutApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentOptions = {
+	body: PutApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentBody;
+	path: PutApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentPath;
 	query?: never;
 	headers?: never;
 };
@@ -91324,23 +94258,167 @@ export type DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentOptions = {
 /**
  * @type object
  */
-export type DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentResponses = {
-	"200": DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus200;
-	"404": DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus404;
-	"422": DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus422;
-	"429": DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus429;
-	"500": DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus500;
+export type PutApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentResponses = {
+	"200": PutApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus200;
+	"400": PutApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus400;
+	"404": PutApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus404;
+	"422": PutApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus422;
+	"429": PutApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus429;
+	"500": PutApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus500;
 };
 
 /**
  * @description Union of all possible responses
  */
-export type DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentResponse =
-	| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus200
-	| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus404
-	| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus422
-	| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus429
-	| DeleteApiUnitsByTypeByUnitIdTagPathsByPathIdJudgmentStatus500;
+export type PutApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentResponse =
+	| PutApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus200
+	| PutApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus400
+	| PutApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus404
+	| PutApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus422
+	| PutApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus429
+	| PutApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus500;
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentPath = {
+	type: (("book" | "software" | "media") | "series") | "entity";
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	applicationId: string;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus200 = {
+	score: string | number;
+	voteCount: string | number;
+	spoilerVoteCount: string | number;
+	/**
+	 * @type object
+	 */
+	spoilerDistribution: {
+		none: string | number;
+		minor: string | number;
+		major: string | number;
+	};
+	viewerVote: ((-1 | 1) | null) | null;
+	viewerSpoilerLevel: ((0 | 1 | 2) | null) | null;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'TagPathApplicationNotFound'
+		 * @type string
+		 */
+		code: "TagPathApplicationNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus422 =
+	ValidationError;
+
+export const DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus429ErrorCodeEnum =
+	{
+		ApiQuotaExceeded: "ApiQuotaExceeded",
+		ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+	} as const;
+
+export type DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus429ErrorCodeEnum =
+	(typeof DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus429ErrorCodeEnum)[keyof typeof DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus429ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus429ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus500 =
+	InternalError;
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentOptions = {
+	body?: never;
+	path: DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentResponses = {
+	"200": DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus200;
+	"404": DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus404;
+	"422": DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus422;
+	"429": DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus429;
+	"500": DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentResponse =
+	| DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus200
+	| DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus404
+	| DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus422
+	| DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus429
+	| DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus500;
 
 /**
  * @type object
@@ -91372,12 +94450,6 @@ export type GetApiRealmsByRealmIdTagPathsLocalizationLanguagesEnum =
  */
 export type GetApiRealmsByRealmIdTagPathsQuery = {
 	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string | undefined
-	 */
-	unitId?: string;
-	/**
 	 * @type array | undefined
 	 */
 	localizationLanguages?: GetApiRealmsByRealmIdTagPathsLocalizationLanguagesEnum[];
@@ -91387,21 +94459,24 @@ export type GetApiRealmsByRealmIdTagPathsQuery = {
 	limit?: string | number;
 };
 
-export const GetApiRealmsByRealmIdTagPathsStatus200PolicyFitFallbackEnum = {
-	inherit: "inherit",
-	isolate: "isolate",
+export const GetApiRealmsByRealmIdTagPathsStatus200ItemsMembersNodeKindEnum = {
+	concept: "concept",
+	guide: "guide",
 } as const;
 
-export type GetApiRealmsByRealmIdTagPathsStatus200PolicyFitFallbackEnum =
-	(typeof GetApiRealmsByRealmIdTagPathsStatus200PolicyFitFallbackEnum)[keyof typeof GetApiRealmsByRealmIdTagPathsStatus200PolicyFitFallbackEnum];
+export type GetApiRealmsByRealmIdTagPathsStatus200ItemsMembersNodeKindEnum =
+	(typeof GetApiRealmsByRealmIdTagPathsStatus200ItemsMembersNodeKindEnum)[keyof typeof GetApiRealmsByRealmIdTagPathsStatus200ItemsMembersNodeKindEnum];
 
-export const GetApiRealmsByRealmIdTagPathsStatus200PolicySpoilerFallbackEnum = {
-	inherit: "inherit",
-	isolate: "isolate",
+export const GetApiRealmsByRealmIdTagPathsStatus200ItemsMembersIncomingRelationRelationKindEnum = {
+	generic: "generic",
+	partitive: "partitive",
+	instance: "instance",
+	organizational: "organizational",
+	facet_value: "facet_value",
 } as const;
 
-export type GetApiRealmsByRealmIdTagPathsStatus200PolicySpoilerFallbackEnum =
-	(typeof GetApiRealmsByRealmIdTagPathsStatus200PolicySpoilerFallbackEnum)[keyof typeof GetApiRealmsByRealmIdTagPathsStatus200PolicySpoilerFallbackEnum];
+export type GetApiRealmsByRealmIdTagPathsStatus200ItemsMembersIncomingRelationRelationKindEnum =
+	(typeof GetApiRealmsByRealmIdTagPathsStatus200ItemsMembersIncomingRelationRelationKindEnum)[keyof typeof GetApiRealmsByRealmIdTagPathsStatus200ItemsMembersIncomingRelationRelationKindEnum];
 
 export const GetApiRealmsByRealmIdTagPathsStatus200ItemsMembersLanguage = {
 	zh: "zh",
@@ -91424,29 +94499,93 @@ export const GetApiRealmsByRealmIdTagPathsStatus200ItemsMembersAvatarIconPrefixE
 export type GetApiRealmsByRealmIdTagPathsStatus200ItemsMembersAvatarIconPrefixEnum =
 	(typeof GetApiRealmsByRealmIdTagPathsStatus200ItemsMembersAvatarIconPrefixEnum)[keyof typeof GetApiRealmsByRealmIdTagPathsStatus200ItemsMembersAvatarIconPrefixEnum];
 
+export const GetApiRealmsByRealmIdTagPathsStatus200ItemsSensesExpressionExpressionKindEnum = {
+	simple: "simple",
+	facet_value: "facet_value",
+	relation: "relation",
+} as const;
+
+export type GetApiRealmsByRealmIdTagPathsStatus200ItemsSensesExpressionExpressionKindEnum =
+	(typeof GetApiRealmsByRealmIdTagPathsStatus200ItemsSensesExpressionExpressionKindEnum)[keyof typeof GetApiRealmsByRealmIdTagPathsStatus200ItemsSensesExpressionExpressionKindEnum];
+
+export const GetApiRealmsByRealmIdTagPathsStatus200ItemsSensesExpressionComponentsSemanticRoleEnum =
+	{
+		predicate: "predicate",
+		slot: "slot",
+		value: "value",
+		focus: "focus",
+		qualifier: "qualifier",
+	} as const;
+
+export type GetApiRealmsByRealmIdTagPathsStatus200ItemsSensesExpressionComponentsSemanticRoleEnum =
+	(typeof GetApiRealmsByRealmIdTagPathsStatus200ItemsSensesExpressionComponentsSemanticRoleEnum)[keyof typeof GetApiRealmsByRealmIdTagPathsStatus200ItemsSensesExpressionComponentsSemanticRoleEnum];
+
+export const GetApiRealmsByRealmIdTagPathsStatus200ItemsSensesExpressionComponentsComponentKindEnum =
+	{
+		required: "required",
+		fallback: "fallback",
+	} as const;
+
+export type GetApiRealmsByRealmIdTagPathsStatus200ItemsSensesExpressionComponentsComponentKindEnum =
+	(typeof GetApiRealmsByRealmIdTagPathsStatus200ItemsSensesExpressionComponentsComponentKindEnum)[keyof typeof GetApiRealmsByRealmIdTagPathsStatus200ItemsSensesExpressionComponentsComponentKindEnum];
+
+export const GetApiRealmsByRealmIdTagPathsStatus200ItemsSensesExpressionComponentsLanguage = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetApiRealmsByRealmIdTagPathsStatus200ItemsSensesExpressionComponentsLanguage =
+	(typeof GetApiRealmsByRealmIdTagPathsStatus200ItemsSensesExpressionComponentsLanguage)[keyof typeof GetApiRealmsByRealmIdTagPathsStatus200ItemsSensesExpressionComponentsLanguage];
+
+export const GetApiRealmsByRealmIdTagPathsStatus200ItemsSensesExpressionGroupKeySemanticRoleEnum = {
+	predicate: "predicate",
+	slot: "slot",
+	value: "value",
+	focus: "focus",
+	qualifier: "qualifier",
+} as const;
+
+export type GetApiRealmsByRealmIdTagPathsStatus200ItemsSensesExpressionGroupKeySemanticRoleEnum =
+	(typeof GetApiRealmsByRealmIdTagPathsStatus200ItemsSensesExpressionGroupKeySemanticRoleEnum)[keyof typeof GetApiRealmsByRealmIdTagPathsStatus200ItemsSensesExpressionGroupKeySemanticRoleEnum];
+
+export const GetApiRealmsByRealmIdTagPathsStatus200ItemsSensesExpressionGroupKeyLanguage = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetApiRealmsByRealmIdTagPathsStatus200ItemsSensesExpressionGroupKeyLanguage =
+	(typeof GetApiRealmsByRealmIdTagPathsStatus200ItemsSensesExpressionGroupKeyLanguage)[keyof typeof GetApiRealmsByRealmIdTagPathsStatus200ItemsSensesExpressionGroupKeyLanguage];
+
+export const GetApiRealmsByRealmIdTagPathsStatus200PolicyFitFallbackPolicyEnum = {
+	inherit: "inherit",
+	isolate: "isolate",
+} as const;
+
+export type GetApiRealmsByRealmIdTagPathsStatus200PolicyFitFallbackPolicyEnum =
+	(typeof GetApiRealmsByRealmIdTagPathsStatus200PolicyFitFallbackPolicyEnum)[keyof typeof GetApiRealmsByRealmIdTagPathsStatus200PolicyFitFallbackPolicyEnum];
+
+export const GetApiRealmsByRealmIdTagPathsStatus200PolicySpoilerFallbackPolicyEnum = {
+	inherit: "inherit",
+	isolate: "isolate",
+} as const;
+
+export type GetApiRealmsByRealmIdTagPathsStatus200PolicySpoilerFallbackPolicyEnum =
+	(typeof GetApiRealmsByRealmIdTagPathsStatus200PolicySpoilerFallbackPolicyEnum)[keyof typeof GetApiRealmsByRealmIdTagPathsStatus200PolicySpoilerFallbackPolicyEnum];
+
 /**
  * @type object
  */
 export type GetApiRealmsByRealmIdTagPathsStatus200 = {
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	realmId: string;
-	/**
-	 * @type object
-	 */
-	policy: {
-		/**
-		 * @type string
-		 */
-		fitFallback: GetApiRealmsByRealmIdTagPathsStatus200PolicyFitFallbackEnum;
-		/**
-		 * @type string
-		 */
-		spoilerFallback: GetApiRealmsByRealmIdTagPathsStatus200PolicySpoilerFallbackEnum;
-	};
 	/**
 	 * @type array
 	 */
@@ -91457,6 +94596,9 @@ export type GetApiRealmsByRealmIdTagPathsStatus200 = {
 		 * @type string
 		 */
 		pathId: string;
+		usageCount: string | number;
+		score: string | number;
+		voteCount: string | number;
 		/**
 		 * @type array
 		 */
@@ -91467,7 +94609,26 @@ export type GetApiRealmsByRealmIdTagPathsStatus200 = {
 			 * Format: `uuid`
 			 * @type string
 			 */
-			tagId: string;
+			nodeId: string;
+			/**
+			 * @type string
+			 */
+			nodeKind: GetApiRealmsByRealmIdTagPathsStatus200ItemsMembersNodeKindEnum;
+			incomingRelation:
+				| ({
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						relationId: string;
+						/**
+						 * @default 'generic'
+						 * @type string
+						 */
+						relationKind: GetApiRealmsByRealmIdTagPathsStatus200ItemsMembersIncomingRelationRelationKindEnum;
+				  } | null)
+				| null;
 			language: (GetApiRealmsByRealmIdTagPathsStatus200ItemsMembersLanguage | null) | null;
 			title: (string | null) | null;
 			summary: (string | null) | null;
@@ -91536,95 +94697,100 @@ export type GetApiRealmsByRealmIdTagPathsStatus200 = {
 				  )
 				| null;
 		}[];
+		viewerVote: ((-1 | 1) | null) | null;
 		/**
-		 * @type object
+		 * @type array
 		 */
-		definition: {
+		senses: {
 			/**
+			 * @description
+			 * Format: `uuid`
 			 * @type string
 			 */
-			authority: "realm";
-			score: string | number;
-			voteCount: string | number;
-			usageCount: string | number;
-			viewerVote: ((-1 | 1) | null) | null;
+			senseId: string;
 			/**
 			 * @type object
 			 */
-			provenance: {
+			expression: {
 				/**
+				 * @description
+				 * Format: `uuid`
 				 * @type string
 				 */
-				authority: "realm";
+				expressionId: string;
 				/**
+				 * @default 'simple'
 				 * @type string
 				 */
-				relation: "realm_tag_path_vote_stat";
+				expressionKind: GetApiRealmsByRealmIdTagPathsStatus200ItemsSensesExpressionExpressionKindEnum;
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				focusTagId: string;
+				presentationRevision: string | number;
+				/**
+				 * @type array
+				 */
+				components: {
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					tagId: string;
+					/**
+					 * @default 'predicate'
+					 * @type string
+					 */
+					semanticRole: GetApiRealmsByRealmIdTagPathsStatus200ItemsSensesExpressionComponentsSemanticRoleEnum;
+					/**
+					 * @default 'required'
+					 * @type string
+					 */
+					componentKind: GetApiRealmsByRealmIdTagPathsStatus200ItemsSensesExpressionComponentsComponentKindEnum;
+					language:
+						| (GetApiRealmsByRealmIdTagPathsStatus200ItemsSensesExpressionComponentsLanguage | null)
+						| null;
+					title: (string | null) | null;
+				}[];
+				groupKey:
+					| ({
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							tagId: string;
+							/**
+							 * @default 'predicate'
+							 * @type string
+							 */
+							semanticRole: GetApiRealmsByRealmIdTagPathsStatus200ItemsSensesExpressionGroupKeySemanticRoleEnum;
+							language:
+								| (GetApiRealmsByRealmIdTagPathsStatus200ItemsSensesExpressionGroupKeyLanguage | null)
+								| null;
+							title: (string | null) | null;
+					  } | null)
+					| null;
 			};
-		};
-		application:
-			| ({
-					/**
-					 * @type object
-					 */
-					fit: {
-						authority: "realm" | "global";
-						resolutionState: "decided" | "inherited" | "unresolved";
-						/**
-						 * @type object
-						 */
-						provenance: {
-							authority: "realm" | "global";
-							relation: "realm_unit_tag_path_judgment_stat" | "unit_tag_path_judgment_stat";
-							dimension: "fit" | "spoiler";
-						};
-						score: string | number;
-						voteCount: string | number;
-						viewerVote: ((-1 | 1) | null) | null;
-					};
-					/**
-					 * @type object
-					 */
-					spoiler: {
-						authority: "realm" | "global";
-						resolutionState: "decided" | "inherited" | "unresolved";
-						/**
-						 * @type object
-						 */
-						provenance: {
-							authority: "realm" | "global";
-							relation: "realm_unit_tag_path_judgment_stat" | "unit_tag_path_judgment_stat";
-							dimension: "fit" | "spoiler";
-						};
-						voteCount: string | number;
-						/**
-						 * @type object
-						 */
-						distribution: {
-							none: string | number;
-							minor: string | number;
-							major: string | number;
-						};
-						viewerLevel: ((0 | 1 | 2) | null) | null;
-					};
-			  } | null)
-			| null;
+		}[];
+	}[];
+	/**
+	 * @type object
+	 */
+	policy: {
 		/**
-		 * @description
-		 * Format: `date-time`
 		 * @type string
 		 */
-		createdAt: string;
-	}[];
+		fitFallbackPolicy: GetApiRealmsByRealmIdTagPathsStatus200PolicyFitFallbackPolicyEnum;
+		/**
+		 * @type string
+		 */
+		spoilerFallbackPolicy: GetApiRealmsByRealmIdTagPathsStatus200PolicySpoilerFallbackPolicyEnum;
+	};
 };
-
-export const GetApiRealmsByRealmIdTagPathsStatus404ErrorCodeEnum = {
-	RealmNotFound: "RealmNotFound",
-	UnitNotFound: "UnitNotFound",
-} as const;
-
-export type GetApiRealmsByRealmIdTagPathsStatus404ErrorCodeEnum =
-	(typeof GetApiRealmsByRealmIdTagPathsStatus404ErrorCodeEnum)[keyof typeof GetApiRealmsByRealmIdTagPathsStatus404ErrorCodeEnum];
 
 /**
  * @type object
@@ -91638,7 +94804,7 @@ export type GetApiRealmsByRealmIdTagPathsStatus404 = {
 		 * @default 'RealmNotFound'
 		 * @type string
 		 */
-		code: GetApiRealmsByRealmIdTagPathsStatus404ErrorCodeEnum;
+		code: "RealmNotFound";
 		/**
 		 * @type string
 		 */
@@ -91711,14 +94877,6 @@ export type PutApiRealmsByRealmIdTagPathsByPathIdPath = {
 	pathId: string;
 };
 
-export const PutApiRealmsByRealmIdTagPathsByPathIdStatus200ViewerVoteEnum = {
-	"-1": -1,
-	"1": 1,
-} as const;
-
-export type PutApiRealmsByRealmIdTagPathsByPathIdStatus200ViewerVoteEnum =
-	(typeof PutApiRealmsByRealmIdTagPathsByPathIdStatus200ViewerVoteEnum)[keyof typeof PutApiRealmsByRealmIdTagPathsByPathIdStatus200ViewerVoteEnum];
-
 /**
  * @type object
  */
@@ -91736,9 +94894,9 @@ export type PutApiRealmsByRealmIdTagPathsByPathIdStatus200 = {
 	 */
 	pathId: string;
 	/**
-	 * @type string | undefined
+	 * @type boolean
 	 */
-	viewerVote?: PutApiRealmsByRealmIdTagPathsByPathIdStatus200ViewerVoteEnum;
+	adopted: true;
 };
 
 /**
@@ -91805,34 +94963,6 @@ export type PutApiRealmsByRealmIdTagPathsByPathIdStatus422 = ValidationError;
 /**
  * @type object
  */
-export type PutApiRealmsByRealmIdTagPathsByPathIdStatus429 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'VoteHotKeyBusy'
-		 * @type string
-		 */
-		code: "VoteHotKeyBusy";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
 export type PutApiRealmsByRealmIdTagPathsByPathIdStatus500 = InternalError;
 
 /**
@@ -91853,7 +94983,6 @@ export type PutApiRealmsByRealmIdTagPathsByPathIdResponses = {
 	"403": PutApiRealmsByRealmIdTagPathsByPathIdStatus403;
 	"404": PutApiRealmsByRealmIdTagPathsByPathIdStatus404;
 	"422": PutApiRealmsByRealmIdTagPathsByPathIdStatus422;
-	"429": PutApiRealmsByRealmIdTagPathsByPathIdStatus429;
 	"500": PutApiRealmsByRealmIdTagPathsByPathIdStatus500;
 };
 
@@ -91865,13 +94994,12 @@ export type PutApiRealmsByRealmIdTagPathsByPathIdResponse =
 	| PutApiRealmsByRealmIdTagPathsByPathIdStatus403
 	| PutApiRealmsByRealmIdTagPathsByPathIdStatus404
 	| PutApiRealmsByRealmIdTagPathsByPathIdStatus422
-	| PutApiRealmsByRealmIdTagPathsByPathIdStatus429
 	| PutApiRealmsByRealmIdTagPathsByPathIdStatus500;
 
 /**
  * @type object
  */
-export type PutApiRealmsByRealmIdTagPathsByPathIdVotePath = {
+export type PutApiRealmsByRealmIdTagPathSensesBySenseIdPath = {
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -91883,21 +95011,13 @@ export type PutApiRealmsByRealmIdTagPathsByPathIdVotePath = {
 	 * Format: `uuid`
 	 * @type string
 	 */
-	pathId: string;
+	senseId: string;
 };
-
-export const PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus200ViewerVoteEnum = {
-	"-1": -1,
-	"1": 1,
-} as const;
-
-export type PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus200ViewerVoteEnum =
-	(typeof PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus200ViewerVoteEnum)[keyof typeof PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus200ViewerVoteEnum];
 
 /**
  * @type object
  */
-export type PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus200 = {
+export type PutApiRealmsByRealmIdTagPathSensesBySenseIdStatus200 = {
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -91909,22 +95029,17 @@ export type PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus200 = {
 	 * Format: `uuid`
 	 * @type string
 	 */
-	pathId: string;
+	senseId: string;
 	/**
-	 * @type string | undefined
+	 * @type boolean
 	 */
-	viewerVote?: PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus200ViewerVoteEnum;
+	adopted: true;
 };
 
 /**
  * @type object
  */
-export type PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus400 = MalformedRequestBody;
-
-/**
- * @type object
- */
-export type PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus403 = {
+export type PutApiRealmsByRealmIdTagPathSensesBySenseIdStatus403 = {
 	/**
 	 * @type object
 	 */
@@ -91952,7 +95067,7 @@ export type PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus403 = {
 /**
  * @type object
  */
-export type PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus404 = {
+export type PutApiRealmsByRealmIdTagPathSensesBySenseIdStatus404 = {
 	/**
 	 * @type object
 	 */
@@ -91980,6 +95095,79 @@ export type PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus404 = {
 /**
  * @type object
  */
+export type PutApiRealmsByRealmIdTagPathSensesBySenseIdStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdTagPathSensesBySenseIdStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdTagPathSensesBySenseIdOptions = {
+	body?: never;
+	path: PutApiRealmsByRealmIdTagPathSensesBySenseIdPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdTagPathSensesBySenseIdResponses = {
+	"200": PutApiRealmsByRealmIdTagPathSensesBySenseIdStatus200;
+	"403": PutApiRealmsByRealmIdTagPathSensesBySenseIdStatus403;
+	"404": PutApiRealmsByRealmIdTagPathSensesBySenseIdStatus404;
+	"422": PutApiRealmsByRealmIdTagPathSensesBySenseIdStatus422;
+	"500": PutApiRealmsByRealmIdTagPathSensesBySenseIdStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PutApiRealmsByRealmIdTagPathSensesBySenseIdResponse =
+	| PutApiRealmsByRealmIdTagPathSensesBySenseIdStatus200
+	| PutApiRealmsByRealmIdTagPathSensesBySenseIdStatus403
+	| PutApiRealmsByRealmIdTagPathSensesBySenseIdStatus404
+	| PutApiRealmsByRealmIdTagPathSensesBySenseIdStatus422
+	| PutApiRealmsByRealmIdTagPathSensesBySenseIdStatus500;
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdTagPathsByPathIdVotePath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	realmId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	pathId: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus200 = {
+	score: string | number;
+	voteCount: string | number;
+	viewerVote: ((-1 | 1) | null) | null;
+};
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus400 = MalformedRequestBody;
+
+/**
+ * @type object
+ */
 export type PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus422 = ValidationError;
 
 export const PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus429ErrorCodeEnum = {
@@ -91990,51 +95178,29 @@ export const PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus429ErrorCodeEnum = {
 export type PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus429ErrorCodeEnum =
 	(typeof PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus429ErrorCodeEnum)[keyof typeof PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus429ErrorCodeEnum];
 
-export type PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus429 =
-	| {
-			/**
-			 * @type object
-			 */
-			error: {
-				/**
-				 * @default 'VoteHotKeyBusy'
-				 * @type string
-				 */
-				code: "VoteHotKeyBusy";
-				/**
-				 * @type string
-				 */
-				message: string;
-				/**
-				 * @type void | undefined
-				 */
-				details?: void;
-			};
-			/**
-			 * @type string
-			 */
-			requestId: string;
-	  }
-	| {
-			/**
-			 * @type object
-			 */
-			error: {
-				/**
-				 * @type string
-				 */
-				code: PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus429ErrorCodeEnum;
-				/**
-				 * @type string
-				 */
-				message: string;
-				details?: JsonValue;
-			};
-			/**
-			 * @type string
-			 */
-			requestId: string;
-	  };
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus429ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
 
 /**
  * @type object
@@ -92075,8 +95241,6 @@ export type PutApiRealmsByRealmIdTagPathsByPathIdVoteOptions = {
 export type PutApiRealmsByRealmIdTagPathsByPathIdVoteResponses = {
 	"200": PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus200;
 	"400": PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus400;
-	"403": PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus403;
-	"404": PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus404;
 	"422": PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus422;
 	"429": PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus429;
 	"500": PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus500;
@@ -92088,8 +95252,6 @@ export type PutApiRealmsByRealmIdTagPathsByPathIdVoteResponses = {
 export type PutApiRealmsByRealmIdTagPathsByPathIdVoteResponse =
 	| PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus200
 	| PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus400
-	| PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus403
-	| PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus404
 	| PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus422
 	| PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus429
 	| PutApiRealmsByRealmIdTagPathsByPathIdVoteStatus500;
@@ -92112,90 +95274,13 @@ export type DeleteApiRealmsByRealmIdTagPathsByPathIdVotePath = {
 	pathId: string;
 };
 
-export const DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus200ViewerVoteEnum = {
-	"-1": -1,
-	"1": 1,
-} as const;
-
-export type DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus200ViewerVoteEnum =
-	(typeof DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus200ViewerVoteEnum)[keyof typeof DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus200ViewerVoteEnum];
-
 /**
  * @type object
  */
 export type DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus200 = {
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	realmId: string;
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	pathId: string;
-	/**
-	 * @type string | undefined
-	 */
-	viewerVote?: DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus200ViewerVoteEnum;
-};
-
-/**
- * @type object
- */
-export type DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus403 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'RealmCapabilityRequired'
-		 * @type string
-		 */
-		code: "RealmCapabilityRequired";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus404 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'TagPathNotFound'
-		 * @type string
-		 */
-		code: "TagPathNotFound";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
+	score: string | number;
+	voteCount: string | number;
+	viewerVote: ((-1 | 1) | null) | null;
 };
 
 /**
@@ -92211,51 +95296,29 @@ export const DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus429ErrorCodeEnum 
 export type DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus429ErrorCodeEnum =
 	(typeof DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus429ErrorCodeEnum)[keyof typeof DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus429ErrorCodeEnum];
 
-export type DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus429 =
-	| {
-			/**
-			 * @type object
-			 */
-			error: {
-				/**
-				 * @default 'VoteHotKeyBusy'
-				 * @type string
-				 */
-				code: "VoteHotKeyBusy";
-				/**
-				 * @type string
-				 */
-				message: string;
-				/**
-				 * @type void | undefined
-				 */
-				details?: void;
-			};
-			/**
-			 * @type string
-			 */
-			requestId: string;
-	  }
-	| {
-			/**
-			 * @type object
-			 */
-			error: {
-				/**
-				 * @type string
-				 */
-				code: DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus429ErrorCodeEnum;
-				/**
-				 * @type string
-				 */
-				message: string;
-				details?: JsonValue;
-			};
-			/**
-			 * @type string
-			 */
-			requestId: string;
-	  };
+/**
+ * @type object
+ */
+export type DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus429ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
 
 /**
  * @type object
@@ -92277,8 +95340,6 @@ export type DeleteApiRealmsByRealmIdTagPathsByPathIdVoteOptions = {
  */
 export type DeleteApiRealmsByRealmIdTagPathsByPathIdVoteResponses = {
 	"200": DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus200;
-	"403": DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus403;
-	"404": DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus404;
 	"422": DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus422;
 	"429": DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus429;
 	"500": DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus500;
@@ -92289,8 +95350,6 @@ export type DeleteApiRealmsByRealmIdTagPathsByPathIdVoteResponses = {
  */
 export type DeleteApiRealmsByRealmIdTagPathsByPathIdVoteResponse =
 	| DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus200
-	| DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus403
-	| DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus404
 	| DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus422
 	| DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus429
 	| DeleteApiRealmsByRealmIdTagPathsByPathIdVoteStatus500;
@@ -92298,7 +95357,7 @@ export type DeleteApiRealmsByRealmIdTagPathsByPathIdVoteResponse =
 /**
  * @type object
  */
-export type PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdPath = {
+export type PostApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsPath = {
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -92311,98 +95370,56 @@ export type PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdPath = {
 	 * @type string
 	 */
 	unitId: string;
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	pathId: string;
 };
 
 /**
  * @type object
  */
-export type PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus200 = {
+export type PostApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsStatus200 = {
 	/**
 	 * @description
 	 * Format: `uuid`
 	 * @type string
 	 */
-	realmId: string;
+	applicationId: string;
 	/**
 	 * @description
 	 * Format: `uuid`
 	 * @type string
 	 */
-	unitId: string;
+	senseId: string;
 	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
+	 * @type boolean
 	 */
-	pathId: string;
-	viewerFitVote?: ((-1 | 1) | null) | null;
-	viewerSpoilerLevel?: ((0 | 1 | 2) | null) | null;
+	created: boolean;
 };
-
-export const PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus403ErrorCodeEnum = {
-	RealmCapabilityRequired: "RealmCapabilityRequired",
-	UnitAccessRestricted: "UnitAccessRestricted",
-	UnitPermissionForbidden: "UnitPermissionForbidden",
-} as const;
-
-export type PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus403ErrorCodeEnum =
-	(typeof PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus403ErrorCodeEnum)[keyof typeof PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus403ErrorCodeEnum];
 
 /**
  * @type object
  */
-export type PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus403 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'RealmCapabilityRequired'
-		 * @type string
-		 */
-		code: PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus403ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
+export type PostApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsStatus400 = MalformedRequestBody;
 
-export const PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus404ErrorCodeEnum = {
-	TagPathApplicationNotFound: "TagPathApplicationNotFound",
+export const PostApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsStatus404ErrorCodeEnum = {
 	TagPathNotFound: "TagPathNotFound",
+	TagPathApplicationNotFound: "TagPathApplicationNotFound",
 } as const;
 
-export type PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus404ErrorCodeEnum =
-	(typeof PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus404ErrorCodeEnum)[keyof typeof PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus404ErrorCodeEnum];
+export type PostApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsStatus404ErrorCodeEnum =
+	(typeof PostApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsStatus404ErrorCodeEnum)[keyof typeof PostApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsStatus404ErrorCodeEnum];
 
 /**
  * @type object
  */
-export type PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus404 = {
+export type PostApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsStatus404 = {
 	/**
 	 * @type object
 	 */
 	error: {
 		/**
-		 * @default 'TagPathApplicationNotFound'
+		 * @default 'TagPathNotFound'
 		 * @type string
 		 */
-		code: PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus404ErrorCodeEnum;
+		code: PostApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsStatus404ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -92421,483 +95438,44 @@ export type PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus404 = {
 /**
  * @type object
  */
-export type PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus422 = ValidationError;
+export type PostApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsStatus422 = ValidationError;
 
 /**
  * @type object
  */
-export type PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus429 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'VoteHotKeyBusy'
-		 * @type string
-		 */
-		code: "VoteHotKeyBusy";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
+export type PostApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsStatus500 = InternalError;
 
-/**
- * @type object
- */
-export type PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus500 = InternalError;
-
-/**
- * @type object
- */
-export type PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdOptions = {
-	body?: never;
-	path: PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdPath;
-	query?: never;
-	headers?: never;
-};
-
-/**
- * @type object
- */
-export type PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdResponses = {
-	"200": PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus200;
-	"403": PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus403;
-	"404": PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus404;
-	"422": PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus422;
-	"429": PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus429;
-	"500": PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus500;
-};
-
-/**
- * @description Union of all possible responses
- */
-export type PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdResponse =
-	| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus200
-	| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus403
-	| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus404
-	| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus422
-	| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus429
-	| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus500;
-
-/**
- * @type object
- */
-export type DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdPath = {
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	realmId: string;
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	unitId: string;
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	pathId: string;
-};
-
-/**
- * @type void
- */
-export type DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus204 = void;
-
-export const DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus403ErrorCodeEnum = {
-	RealmCapabilityRequired: "RealmCapabilityRequired",
-	UnitAccessRestricted: "UnitAccessRestricted",
-	UnitPermissionForbidden: "UnitPermissionForbidden",
-} as const;
-
-export type DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus403ErrorCodeEnum =
-	(typeof DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus403ErrorCodeEnum)[keyof typeof DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus403ErrorCodeEnum];
-
-/**
- * @type object
- */
-export type DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus403 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'RealmCapabilityRequired'
-		 * @type string
-		 */
-		code: DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus403ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus404 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'TagPathApplicationNotFound'
-		 * @type string
-		 */
-		code: "TagPathApplicationNotFound";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus422 = ValidationError;
-
-/**
- * @type object
- */
-export type DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus429 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'VoteHotKeyBusy'
-		 * @type string
-		 */
-		code: "VoteHotKeyBusy";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus500 = InternalError;
-
-/**
- * @type object
- */
-export type DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdOptions = {
-	body?: never;
-	path: DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdPath;
-	query?: never;
-	headers?: never;
-};
-
-/**
- * @type object
- */
-export type DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdResponses = {
-	"204": DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus204;
-	"403": DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus403;
-	"404": DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus404;
-	"422": DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus422;
-	"429": DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus429;
-	"500": DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus500;
-};
-
-/**
- * @description Union of all possible responses
- */
-export type DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdResponse =
-	| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus204
-	| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus403
-	| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus404
-	| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus422
-	| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus429
-	| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdStatus500;
-
-/**
- * @type object
- */
-export type PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentPath = {
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	realmId: string;
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	unitId: string;
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	pathId: string;
-};
-
-/**
- * @type object
- */
-export type PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus200 = {
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	realmId: string;
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	unitId: string;
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	pathId: string;
-	viewerFitVote?: ((-1 | 1) | null) | null;
-	viewerSpoilerLevel?: ((0 | 1 | 2) | null) | null;
-};
-
-/**
- * @type object
- */
-export type PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus400 =
-	MalformedRequestBody;
-
-export const PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus403ErrorCodeEnum = {
-	RealmCapabilityRequired: "RealmCapabilityRequired",
-	UnitAccessRestricted: "UnitAccessRestricted",
-	UnitPermissionForbidden: "UnitPermissionForbidden",
-} as const;
-
-export type PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus403ErrorCodeEnum =
-	(typeof PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus403ErrorCodeEnum)[keyof typeof PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus403ErrorCodeEnum];
-
-/**
- * @type object
- */
-export type PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus403 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'RealmCapabilityRequired'
-		 * @type string
-		 */
-		code: PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus403ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus404 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'TagPathApplicationNotFound'
-		 * @type string
-		 */
-		code: "TagPathApplicationNotFound";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-export type PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus422 =
-	| {
-			/**
-			 * @type object
-			 */
-			error: {
-				/**
-				 * @default 'InvalidTagPath'
-				 * @type string
-				 */
-				code: "InvalidTagPath";
-				/**
-				 * @type string
-				 */
-				message: string;
-				/**
-				 * @type void | undefined
-				 */
-				details?: void;
-			};
-			/**
-			 * @type string
-			 */
-			requestId: string;
-	  }
-	| ValidationError;
-
-export const PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus429ErrorCodeEnum = {
-	ApiQuotaExceeded: "ApiQuotaExceeded",
-	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
-} as const;
-
-export type PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus429ErrorCodeEnum =
-	(typeof PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus429ErrorCodeEnum)[keyof typeof PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus429ErrorCodeEnum];
-
-export type PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus429 =
-	| {
-			/**
-			 * @type object
-			 */
-			error: {
-				/**
-				 * @default 'VoteHotKeyBusy'
-				 * @type string
-				 */
-				code: "VoteHotKeyBusy";
-				/**
-				 * @type string
-				 */
-				message: string;
-				/**
-				 * @type void | undefined
-				 */
-				details?: void;
-			};
-			/**
-			 * @type string
-			 */
-			requestId: string;
-	  }
-	| {
-			/**
-			 * @type object
-			 */
-			error: {
-				/**
-				 * @type string
-				 */
-				code: PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus429ErrorCodeEnum;
-				/**
-				 * @type string
-				 */
-				message: string;
-				details?: JsonValue;
-			};
-			/**
-			 * @type string
-			 */
-			requestId: string;
-	  };
-
-/**
- * @type object
- */
-export type PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus500 = InternalError;
-
-export const PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentRequestFitVoteEnum = {
+export const PostApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsRequestFitVoteEnum = {
 	"-1": -1,
 	"1": 1,
 } as const;
 
-export type PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentRequestFitVoteEnum =
-	(typeof PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentRequestFitVoteEnum)[keyof typeof PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentRequestFitVoteEnum];
-
-export const PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentRequestSpoilerLevelEnum = {
-	"0": 0,
-	"1": 1,
-	"2": 2,
-} as const;
-
-export type PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentRequestSpoilerLevelEnum =
-	(typeof PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentRequestSpoilerLevelEnum)[keyof typeof PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentRequestSpoilerLevelEnum];
+export type PostApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsRequestFitVoteEnum =
+	(typeof PostApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsRequestFitVoteEnum)[keyof typeof PostApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsRequestFitVoteEnum];
 
 /**
  * @type object
  */
-export type PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentBody = {
+export type PostApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsBody = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	senseId: string;
 	/**
 	 * @type string | undefined
 	 */
-	fitVote?: PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentRequestFitVoteEnum;
-	/**
-	 * @type string | undefined
-	 */
-	spoilerLevel?: PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentRequestSpoilerLevelEnum;
+	fitVote?: PostApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsRequestFitVoteEnum;
+	spoilerLevel?: ((0 | 1 | 2) | null) | null;
 };
 
 /**
  * @type object
  */
-export type PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentOptions = {
-	body: PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentBody;
-	path: PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentPath;
+export type PostApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsOptions = {
+	body: PostApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsBody;
+	path: PostApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsPath;
 	query?: never;
 	headers?: never;
 };
@@ -92905,32 +95483,28 @@ export type PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentOptions = 
 /**
  * @type object
  */
-export type PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentResponses = {
-	"200": PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus200;
-	"400": PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus400;
-	"403": PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus403;
-	"404": PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus404;
-	"422": PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus422;
-	"429": PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus429;
-	"500": PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus500;
+export type PostApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsResponses = {
+	"200": PostApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsStatus200;
+	"400": PostApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsStatus400;
+	"404": PostApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsStatus404;
+	"422": PostApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsStatus422;
+	"500": PostApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsStatus500;
 };
 
 /**
  * @description Union of all possible responses
  */
-export type PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentResponse =
-	| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus200
-	| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus400
-	| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus403
-	| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus404
-	| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus422
-	| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus429
-	| PutApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus500;
+export type PostApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsResponse =
+	| PostApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsStatus200
+	| PostApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsStatus400
+	| PostApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsStatus404
+	| PostApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsStatus422
+	| PostApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsStatus500;
 
 /**
  * @type object
  */
-export type DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentPath = {
+export type DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdPath = {
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -92948,57 +95522,38 @@ export type DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentPath = 
 	 * Format: `uuid`
 	 * @type string
 	 */
-	pathId: string;
+	applicationId: string;
 };
 
 /**
  * @type object
  */
-export type DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus200 = {
+export type DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdStatus200 = {
 	/**
 	 * @description
 	 * Format: `uuid`
 	 * @type string
 	 */
-	realmId: string;
+	applicationId: string;
 	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
+	 * @type boolean
 	 */
-	unitId: string;
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	pathId: string;
-	viewerFitVote?: ((-1 | 1) | null) | null;
-	viewerSpoilerLevel?: ((0 | 1 | 2) | null) | null;
+	applied: false;
 };
-
-export const DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus403ErrorCodeEnum = {
-	RealmCapabilityRequired: "RealmCapabilityRequired",
-	UnitAccessRestricted: "UnitAccessRestricted",
-	UnitPermissionForbidden: "UnitPermissionForbidden",
-} as const;
-
-export type DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus403ErrorCodeEnum =
-	(typeof DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus403ErrorCodeEnum)[keyof typeof DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus403ErrorCodeEnum];
 
 /**
  * @type object
  */
-export type DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus403 = {
+export type DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdStatus404 = {
 	/**
 	 * @type object
 	 */
 	error: {
 		/**
-		 * @default 'RealmCapabilityRequired'
+		 * @default 'TagPathApplicationNotFound'
 		 * @type string
 		 */
-		code: DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus403ErrorCodeEnum;
+		code: "TagPathApplicationNotFound";
 		/**
 		 * @type string
 		 */
@@ -93017,74 +95572,21 @@ export type DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus4
 /**
  * @type object
  */
-export type DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus422 =
+export type DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdStatus422 =
 	ValidationError;
 
-export const DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus429ErrorCodeEnum = {
-	ApiQuotaExceeded: "ApiQuotaExceeded",
-	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
-} as const;
-
-export type DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus429ErrorCodeEnum =
-	(typeof DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus429ErrorCodeEnum)[keyof typeof DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus429ErrorCodeEnum];
-
-export type DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus429 =
-	| {
-			/**
-			 * @type object
-			 */
-			error: {
-				/**
-				 * @default 'VoteHotKeyBusy'
-				 * @type string
-				 */
-				code: "VoteHotKeyBusy";
-				/**
-				 * @type string
-				 */
-				message: string;
-				/**
-				 * @type void | undefined
-				 */
-				details?: void;
-			};
-			/**
-			 * @type string
-			 */
-			requestId: string;
-	  }
-	| {
-			/**
-			 * @type object
-			 */
-			error: {
-				/**
-				 * @type string
-				 */
-				code: DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus429ErrorCodeEnum;
-				/**
-				 * @type string
-				 */
-				message: string;
-				details?: JsonValue;
-			};
-			/**
-			 * @type string
-			 */
-			requestId: string;
-	  };
+/**
+ * @type object
+ */
+export type DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdStatus500 =
+	InternalError;
 
 /**
  * @type object
  */
-export type DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus500 = InternalError;
-
-/**
- * @type object
- */
-export type DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentOptions = {
+export type DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdOptions = {
 	body?: never;
-	path: DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentPath;
+	path: DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdPath;
 	query?: never;
 	headers?: never;
 };
@@ -93092,23 +95594,326 @@ export type DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentOptions
 /**
  * @type object
  */
-export type DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentResponses = {
-	"200": DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus200;
-	"403": DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus403;
-	"422": DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus422;
-	"429": DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus429;
-	"500": DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus500;
+export type DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdResponses = {
+	"200": DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdStatus200;
+	"404": DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdStatus404;
+	"422": DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdStatus422;
+	"500": DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdStatus500;
 };
 
 /**
  * @description Union of all possible responses
  */
-export type DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentResponse =
-	| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus200
-	| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus403
-	| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus422
-	| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus429
-	| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathsByPathIdJudgmentStatus500;
+export type DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdResponse =
+	| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdStatus200
+	| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdStatus404
+	| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdStatus422
+	| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdStatus500;
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	realmId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	applicationId: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus200 =
+	{
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		applicationId: string;
+	};
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus400 =
+	MalformedRequestBody;
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus404 =
+	{
+		/**
+		 * @type object
+		 */
+		error: {
+			/**
+			 * @default 'TagPathApplicationNotFound'
+			 * @type string
+			 */
+			code: "TagPathApplicationNotFound";
+			/**
+			 * @type string
+			 */
+			message: string;
+			/**
+			 * @type void | undefined
+			 */
+			details?: void;
+		};
+		/**
+		 * @type string
+		 */
+		requestId: string;
+	};
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus422 =
+	ValidationError;
+
+export const PutApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus429ErrorCodeEnum =
+	{
+		ApiQuotaExceeded: "ApiQuotaExceeded",
+		ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+	} as const;
+
+export type PutApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus429ErrorCodeEnum =
+	(typeof PutApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus429ErrorCodeEnum)[keyof typeof PutApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus429ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus429 =
+	{
+		/**
+		 * @type object
+		 */
+		error: {
+			/**
+			 * @type string
+			 */
+			code: PutApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus429ErrorCodeEnum;
+			/**
+			 * @type string
+			 */
+			message: string;
+			details?: JsonValue;
+		};
+		/**
+		 * @type string
+		 */
+		requestId: string;
+	};
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus500 =
+	InternalError;
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentBody = {
+	fitVote?: ((-1 | 1) | null) | null;
+	spoilerLevel?: ((0 | 1 | 2) | null) | null;
+};
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentOptions = {
+	body: PutApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentBody;
+	path: PutApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentResponses =
+	{
+		"200": PutApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus200;
+		"400": PutApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus400;
+		"404": PutApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus404;
+		"422": PutApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus422;
+		"429": PutApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus429;
+		"500": PutApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus500;
+	};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PutApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentResponse =
+	| PutApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus200
+	| PutApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus400
+	| PutApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus404
+	| PutApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus422
+	| PutApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus429
+	| PutApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus500;
+
+/**
+ * @type object
+ */
+export type DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	realmId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	applicationId: string;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus200 =
+	{
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		applicationId: string;
+	};
+
+/**
+ * @type object
+ */
+export type DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus404 =
+	{
+		/**
+		 * @type object
+		 */
+		error: {
+			/**
+			 * @default 'TagPathApplicationNotFound'
+			 * @type string
+			 */
+			code: "TagPathApplicationNotFound";
+			/**
+			 * @type string
+			 */
+			message: string;
+			/**
+			 * @type void | undefined
+			 */
+			details?: void;
+		};
+		/**
+		 * @type string
+		 */
+		requestId: string;
+	};
+
+/**
+ * @type object
+ */
+export type DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus422 =
+	ValidationError;
+
+export const DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus429ErrorCodeEnum =
+	{
+		ApiQuotaExceeded: "ApiQuotaExceeded",
+		ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+	} as const;
+
+export type DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus429ErrorCodeEnum =
+	(typeof DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus429ErrorCodeEnum)[keyof typeof DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus429ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus429 =
+	{
+		/**
+		 * @type object
+		 */
+		error: {
+			/**
+			 * @type string
+			 */
+			code: DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus429ErrorCodeEnum;
+			/**
+			 * @type string
+			 */
+			message: string;
+			details?: JsonValue;
+		};
+		/**
+		 * @type string
+		 */
+		requestId: string;
+	};
+
+/**
+ * @type object
+ */
+export type DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus500 =
+	InternalError;
+
+/**
+ * @type object
+ */
+export type DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentOptions =
+	{
+		body?: never;
+		path: DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentPath;
+		query?: never;
+		headers?: never;
+	};
+
+/**
+ * @type object
+ */
+export type DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentResponses =
+	{
+		"200": DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus200;
+		"404": DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus404;
+		"422": DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus422;
+		"429": DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus429;
+		"500": DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus500;
+	};
+
+/**
+ * @description Union of all possible responses
+ */
+export type DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentResponse =
+	| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus200
+	| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus404
+	| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus422
+	| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus429
+	| DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentStatus500;
 
 /**
  * @type object
@@ -93122,21 +95927,21 @@ export type PutApiRealmsByRealmIdTagPathPolicyPath = {
 	realmId: string;
 };
 
-export const PutApiRealmsByRealmIdTagPathPolicyStatus200FitFallbackEnum = {
+export const PutApiRealmsByRealmIdTagPathPolicyStatus200FitFallbackPolicyEnum = {
 	inherit: "inherit",
 	isolate: "isolate",
 } as const;
 
-export type PutApiRealmsByRealmIdTagPathPolicyStatus200FitFallbackEnum =
-	(typeof PutApiRealmsByRealmIdTagPathPolicyStatus200FitFallbackEnum)[keyof typeof PutApiRealmsByRealmIdTagPathPolicyStatus200FitFallbackEnum];
+export type PutApiRealmsByRealmIdTagPathPolicyStatus200FitFallbackPolicyEnum =
+	(typeof PutApiRealmsByRealmIdTagPathPolicyStatus200FitFallbackPolicyEnum)[keyof typeof PutApiRealmsByRealmIdTagPathPolicyStatus200FitFallbackPolicyEnum];
 
-export const PutApiRealmsByRealmIdTagPathPolicyStatus200SpoilerFallbackEnum = {
+export const PutApiRealmsByRealmIdTagPathPolicyStatus200SpoilerFallbackPolicyEnum = {
 	inherit: "inherit",
 	isolate: "isolate",
 } as const;
 
-export type PutApiRealmsByRealmIdTagPathPolicyStatus200SpoilerFallbackEnum =
-	(typeof PutApiRealmsByRealmIdTagPathPolicyStatus200SpoilerFallbackEnum)[keyof typeof PutApiRealmsByRealmIdTagPathPolicyStatus200SpoilerFallbackEnum];
+export type PutApiRealmsByRealmIdTagPathPolicyStatus200SpoilerFallbackPolicyEnum =
+	(typeof PutApiRealmsByRealmIdTagPathPolicyStatus200SpoilerFallbackPolicyEnum)[keyof typeof PutApiRealmsByRealmIdTagPathPolicyStatus200SpoilerFallbackPolicyEnum];
 
 /**
  * @type object
@@ -93151,45 +95956,17 @@ export type PutApiRealmsByRealmIdTagPathPolicyStatus200 = {
 	/**
 	 * @type string
 	 */
-	fitFallback: PutApiRealmsByRealmIdTagPathPolicyStatus200FitFallbackEnum;
+	fitFallbackPolicy: PutApiRealmsByRealmIdTagPathPolicyStatus200FitFallbackPolicyEnum;
 	/**
 	 * @type string
 	 */
-	spoilerFallback: PutApiRealmsByRealmIdTagPathPolicyStatus200SpoilerFallbackEnum;
+	spoilerFallbackPolicy: PutApiRealmsByRealmIdTagPathPolicyStatus200SpoilerFallbackPolicyEnum;
 };
 
 /**
  * @type object
  */
 export type PutApiRealmsByRealmIdTagPathPolicyStatus400 = MalformedRequestBody;
-
-/**
- * @type object
- */
-export type PutApiRealmsByRealmIdTagPathPolicyStatus403 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'RealmCapabilityRequired'
-		 * @type string
-		 */
-		code: "RealmCapabilityRequired";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
 
 /**
  * @type object
@@ -93261,21 +96038,21 @@ export type PutApiRealmsByRealmIdTagPathPolicyStatus429 = {
  */
 export type PutApiRealmsByRealmIdTagPathPolicyStatus500 = InternalError;
 
-export const PutApiRealmsByRealmIdTagPathPolicyRequestFitFallbackEnum = {
+export const PutApiRealmsByRealmIdTagPathPolicyRequestFitFallbackPolicyEnum = {
 	inherit: "inherit",
 	isolate: "isolate",
 } as const;
 
-export type PutApiRealmsByRealmIdTagPathPolicyRequestFitFallbackEnum =
-	(typeof PutApiRealmsByRealmIdTagPathPolicyRequestFitFallbackEnum)[keyof typeof PutApiRealmsByRealmIdTagPathPolicyRequestFitFallbackEnum];
+export type PutApiRealmsByRealmIdTagPathPolicyRequestFitFallbackPolicyEnum =
+	(typeof PutApiRealmsByRealmIdTagPathPolicyRequestFitFallbackPolicyEnum)[keyof typeof PutApiRealmsByRealmIdTagPathPolicyRequestFitFallbackPolicyEnum];
 
-export const PutApiRealmsByRealmIdTagPathPolicyRequestSpoilerFallbackEnum = {
+export const PutApiRealmsByRealmIdTagPathPolicyRequestSpoilerFallbackPolicyEnum = {
 	inherit: "inherit",
 	isolate: "isolate",
 } as const;
 
-export type PutApiRealmsByRealmIdTagPathPolicyRequestSpoilerFallbackEnum =
-	(typeof PutApiRealmsByRealmIdTagPathPolicyRequestSpoilerFallbackEnum)[keyof typeof PutApiRealmsByRealmIdTagPathPolicyRequestSpoilerFallbackEnum];
+export type PutApiRealmsByRealmIdTagPathPolicyRequestSpoilerFallbackPolicyEnum =
+	(typeof PutApiRealmsByRealmIdTagPathPolicyRequestSpoilerFallbackPolicyEnum)[keyof typeof PutApiRealmsByRealmIdTagPathPolicyRequestSpoilerFallbackPolicyEnum];
 
 /**
  * @type object
@@ -93284,11 +96061,11 @@ export type PutApiRealmsByRealmIdTagPathPolicyBody = {
 	/**
 	 * @type string
 	 */
-	fitFallback: PutApiRealmsByRealmIdTagPathPolicyRequestFitFallbackEnum;
+	fitFallbackPolicy: PutApiRealmsByRealmIdTagPathPolicyRequestFitFallbackPolicyEnum;
 	/**
 	 * @type string
 	 */
-	spoilerFallback: PutApiRealmsByRealmIdTagPathPolicyRequestSpoilerFallbackEnum;
+	spoilerFallbackPolicy: PutApiRealmsByRealmIdTagPathPolicyRequestSpoilerFallbackPolicyEnum;
 };
 
 /**
@@ -93307,7 +96084,6 @@ export type PutApiRealmsByRealmIdTagPathPolicyOptions = {
 export type PutApiRealmsByRealmIdTagPathPolicyResponses = {
 	"200": PutApiRealmsByRealmIdTagPathPolicyStatus200;
 	"400": PutApiRealmsByRealmIdTagPathPolicyStatus400;
-	"403": PutApiRealmsByRealmIdTagPathPolicyStatus403;
 	"404": PutApiRealmsByRealmIdTagPathPolicyStatus404;
 	"422": PutApiRealmsByRealmIdTagPathPolicyStatus422;
 	"429": PutApiRealmsByRealmIdTagPathPolicyStatus429;
@@ -93320,7 +96096,6 @@ export type PutApiRealmsByRealmIdTagPathPolicyResponses = {
 export type PutApiRealmsByRealmIdTagPathPolicyResponse =
 	| PutApiRealmsByRealmIdTagPathPolicyStatus200
 	| PutApiRealmsByRealmIdTagPathPolicyStatus400
-	| PutApiRealmsByRealmIdTagPathPolicyStatus403
 	| PutApiRealmsByRealmIdTagPathPolicyStatus404
 	| PutApiRealmsByRealmIdTagPathPolicyStatus422
 	| PutApiRealmsByRealmIdTagPathPolicyStatus429
@@ -99074,6 +101849,72 @@ export const PostApiUnitsByTypeStatus200SubjectAssociationsAvatarIconPrefixEnum 
 export type PostApiUnitsByTypeStatus200SubjectAssociationsAvatarIconPrefixEnum =
 	(typeof PostApiUnitsByTypeStatus200SubjectAssociationsAvatarIconPrefixEnum)[keyof typeof PostApiUnitsByTypeStatus200SubjectAssociationsAvatarIconPrefixEnum];
 
+export const PostApiUnitsByTypeStatus200SubjectAssociationsExpressionsExpressionKindEnum = {
+	simple: "simple",
+	facet_value: "facet_value",
+	relation: "relation",
+} as const;
+
+export type PostApiUnitsByTypeStatus200SubjectAssociationsExpressionsExpressionKindEnum =
+	(typeof PostApiUnitsByTypeStatus200SubjectAssociationsExpressionsExpressionKindEnum)[keyof typeof PostApiUnitsByTypeStatus200SubjectAssociationsExpressionsExpressionKindEnum];
+
+export const PostApiUnitsByTypeStatus200SubjectAssociationsExpressionsComponentsSemanticRoleEnum = {
+	predicate: "predicate",
+	slot: "slot",
+	value: "value",
+	focus: "focus",
+	qualifier: "qualifier",
+} as const;
+
+export type PostApiUnitsByTypeStatus200SubjectAssociationsExpressionsComponentsSemanticRoleEnum =
+	(typeof PostApiUnitsByTypeStatus200SubjectAssociationsExpressionsComponentsSemanticRoleEnum)[keyof typeof PostApiUnitsByTypeStatus200SubjectAssociationsExpressionsComponentsSemanticRoleEnum];
+
+export const PostApiUnitsByTypeStatus200SubjectAssociationsExpressionsComponentsComponentKindEnum =
+	{
+		required: "required",
+		fallback: "fallback",
+	} as const;
+
+export type PostApiUnitsByTypeStatus200SubjectAssociationsExpressionsComponentsComponentKindEnum =
+	(typeof PostApiUnitsByTypeStatus200SubjectAssociationsExpressionsComponentsComponentKindEnum)[keyof typeof PostApiUnitsByTypeStatus200SubjectAssociationsExpressionsComponentsComponentKindEnum];
+
+export const PostApiUnitsByTypeStatus200SubjectAssociationsExpressionsComponentsLanguage = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type PostApiUnitsByTypeStatus200SubjectAssociationsExpressionsComponentsLanguage =
+	(typeof PostApiUnitsByTypeStatus200SubjectAssociationsExpressionsComponentsLanguage)[keyof typeof PostApiUnitsByTypeStatus200SubjectAssociationsExpressionsComponentsLanguage];
+
+export const PostApiUnitsByTypeStatus200SubjectAssociationsExpressionsGroupKeySemanticRoleEnum = {
+	predicate: "predicate",
+	slot: "slot",
+	value: "value",
+	focus: "focus",
+	qualifier: "qualifier",
+} as const;
+
+export type PostApiUnitsByTypeStatus200SubjectAssociationsExpressionsGroupKeySemanticRoleEnum =
+	(typeof PostApiUnitsByTypeStatus200SubjectAssociationsExpressionsGroupKeySemanticRoleEnum)[keyof typeof PostApiUnitsByTypeStatus200SubjectAssociationsExpressionsGroupKeySemanticRoleEnum];
+
+export const PostApiUnitsByTypeStatus200SubjectAssociationsExpressionsGroupKeyLanguage = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type PostApiUnitsByTypeStatus200SubjectAssociationsExpressionsGroupKeyLanguage =
+	(typeof PostApiUnitsByTypeStatus200SubjectAssociationsExpressionsGroupKeyLanguage)[keyof typeof PostApiUnitsByTypeStatus200SubjectAssociationsExpressionsGroupKeyLanguage];
+
 export const PostApiUnitsByTypeStatus200SubjectAssociationsSpoilerLevelEnum = {
 	"0": 0,
 	"1": 1,
@@ -100062,14 +102903,69 @@ export type PostApiUnitsByTypeStatus200 = {
 		/**
 		 * @type array
 		 */
-		tags: {
+		expressions: {
 			/**
 			 * @description
 			 * Format: `uuid`
 			 * @type string
 			 */
-			tagId: string;
-			title: (string | null) | null;
+			expressionId: string;
+			/**
+			 * @default 'simple'
+			 * @type string
+			 */
+			expressionKind: PostApiUnitsByTypeStatus200SubjectAssociationsExpressionsExpressionKindEnum;
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			focusTagId: string;
+			presentationRevision: string | number;
+			/**
+			 * @type array
+			 */
+			components: {
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				tagId: string;
+				/**
+				 * @default 'predicate'
+				 * @type string
+				 */
+				semanticRole: PostApiUnitsByTypeStatus200SubjectAssociationsExpressionsComponentsSemanticRoleEnum;
+				/**
+				 * @default 'required'
+				 * @type string
+				 */
+				componentKind: PostApiUnitsByTypeStatus200SubjectAssociationsExpressionsComponentsComponentKindEnum;
+				language:
+					| (PostApiUnitsByTypeStatus200SubjectAssociationsExpressionsComponentsLanguage | null)
+					| null;
+				title: (string | null) | null;
+			}[];
+			groupKey:
+				| ({
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						tagId: string;
+						/**
+						 * @default 'predicate'
+						 * @type string
+						 */
+						semanticRole: PostApiUnitsByTypeStatus200SubjectAssociationsExpressionsGroupKeySemanticRoleEnum;
+						language:
+							| (PostApiUnitsByTypeStatus200SubjectAssociationsExpressionsGroupKeyLanguage | null)
+							| null;
+						title: (string | null) | null;
+				  } | null)
+				| null;
 		}[];
 		contextPost:
 			| ({
@@ -102711,6 +105607,74 @@ export const GetApiUnitsByTypeByUnitIdStatus200SubjectAssociationsAvatarIconPref
 export type GetApiUnitsByTypeByUnitIdStatus200SubjectAssociationsAvatarIconPrefixEnum =
 	(typeof GetApiUnitsByTypeByUnitIdStatus200SubjectAssociationsAvatarIconPrefixEnum)[keyof typeof GetApiUnitsByTypeByUnitIdStatus200SubjectAssociationsAvatarIconPrefixEnum];
 
+export const GetApiUnitsByTypeByUnitIdStatus200SubjectAssociationsExpressionsExpressionKindEnum = {
+	simple: "simple",
+	facet_value: "facet_value",
+	relation: "relation",
+} as const;
+
+export type GetApiUnitsByTypeByUnitIdStatus200SubjectAssociationsExpressionsExpressionKindEnum =
+	(typeof GetApiUnitsByTypeByUnitIdStatus200SubjectAssociationsExpressionsExpressionKindEnum)[keyof typeof GetApiUnitsByTypeByUnitIdStatus200SubjectAssociationsExpressionsExpressionKindEnum];
+
+export const GetApiUnitsByTypeByUnitIdStatus200SubjectAssociationsExpressionsComponentsSemanticRoleEnum =
+	{
+		predicate: "predicate",
+		slot: "slot",
+		value: "value",
+		focus: "focus",
+		qualifier: "qualifier",
+	} as const;
+
+export type GetApiUnitsByTypeByUnitIdStatus200SubjectAssociationsExpressionsComponentsSemanticRoleEnum =
+	(typeof GetApiUnitsByTypeByUnitIdStatus200SubjectAssociationsExpressionsComponentsSemanticRoleEnum)[keyof typeof GetApiUnitsByTypeByUnitIdStatus200SubjectAssociationsExpressionsComponentsSemanticRoleEnum];
+
+export const GetApiUnitsByTypeByUnitIdStatus200SubjectAssociationsExpressionsComponentsComponentKindEnum =
+	{
+		required: "required",
+		fallback: "fallback",
+	} as const;
+
+export type GetApiUnitsByTypeByUnitIdStatus200SubjectAssociationsExpressionsComponentsComponentKindEnum =
+	(typeof GetApiUnitsByTypeByUnitIdStatus200SubjectAssociationsExpressionsComponentsComponentKindEnum)[keyof typeof GetApiUnitsByTypeByUnitIdStatus200SubjectAssociationsExpressionsComponentsComponentKindEnum];
+
+export const GetApiUnitsByTypeByUnitIdStatus200SubjectAssociationsExpressionsComponentsLanguage = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetApiUnitsByTypeByUnitIdStatus200SubjectAssociationsExpressionsComponentsLanguage =
+	(typeof GetApiUnitsByTypeByUnitIdStatus200SubjectAssociationsExpressionsComponentsLanguage)[keyof typeof GetApiUnitsByTypeByUnitIdStatus200SubjectAssociationsExpressionsComponentsLanguage];
+
+export const GetApiUnitsByTypeByUnitIdStatus200SubjectAssociationsExpressionsGroupKeySemanticRoleEnum =
+	{
+		predicate: "predicate",
+		slot: "slot",
+		value: "value",
+		focus: "focus",
+		qualifier: "qualifier",
+	} as const;
+
+export type GetApiUnitsByTypeByUnitIdStatus200SubjectAssociationsExpressionsGroupKeySemanticRoleEnum =
+	(typeof GetApiUnitsByTypeByUnitIdStatus200SubjectAssociationsExpressionsGroupKeySemanticRoleEnum)[keyof typeof GetApiUnitsByTypeByUnitIdStatus200SubjectAssociationsExpressionsGroupKeySemanticRoleEnum];
+
+export const GetApiUnitsByTypeByUnitIdStatus200SubjectAssociationsExpressionsGroupKeyLanguage = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetApiUnitsByTypeByUnitIdStatus200SubjectAssociationsExpressionsGroupKeyLanguage =
+	(typeof GetApiUnitsByTypeByUnitIdStatus200SubjectAssociationsExpressionsGroupKeyLanguage)[keyof typeof GetApiUnitsByTypeByUnitIdStatus200SubjectAssociationsExpressionsGroupKeyLanguage];
+
 export const GetApiUnitsByTypeByUnitIdStatus200SubjectAssociationsSpoilerLevelEnum = {
 	"0": 0,
 	"1": 1,
@@ -103699,14 +106663,69 @@ export type GetApiUnitsByTypeByUnitIdStatus200 = {
 		/**
 		 * @type array
 		 */
-		tags: {
+		expressions: {
 			/**
 			 * @description
 			 * Format: `uuid`
 			 * @type string
 			 */
-			tagId: string;
-			title: (string | null) | null;
+			expressionId: string;
+			/**
+			 * @default 'simple'
+			 * @type string
+			 */
+			expressionKind: GetApiUnitsByTypeByUnitIdStatus200SubjectAssociationsExpressionsExpressionKindEnum;
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			focusTagId: string;
+			presentationRevision: string | number;
+			/**
+			 * @type array
+			 */
+			components: {
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				tagId: string;
+				/**
+				 * @default 'predicate'
+				 * @type string
+				 */
+				semanticRole: GetApiUnitsByTypeByUnitIdStatus200SubjectAssociationsExpressionsComponentsSemanticRoleEnum;
+				/**
+				 * @default 'required'
+				 * @type string
+				 */
+				componentKind: GetApiUnitsByTypeByUnitIdStatus200SubjectAssociationsExpressionsComponentsComponentKindEnum;
+				language:
+					| (GetApiUnitsByTypeByUnitIdStatus200SubjectAssociationsExpressionsComponentsLanguage | null)
+					| null;
+				title: (string | null) | null;
+			}[];
+			groupKey:
+				| ({
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						tagId: string;
+						/**
+						 * @default 'predicate'
+						 * @type string
+						 */
+						semanticRole: GetApiUnitsByTypeByUnitIdStatus200SubjectAssociationsExpressionsGroupKeySemanticRoleEnum;
+						language:
+							| (GetApiUnitsByTypeByUnitIdStatus200SubjectAssociationsExpressionsGroupKeyLanguage | null)
+							| null;
+						title: (string | null) | null;
+				  } | null)
+				| null;
 		}[];
 		contextPost:
 			| ({
@@ -104575,6 +107594,76 @@ export const PatchApiUnitsByTypeByUnitIdStatus200SubjectAssociationsAvatarIconPr
 
 export type PatchApiUnitsByTypeByUnitIdStatus200SubjectAssociationsAvatarIconPrefixEnum =
 	(typeof PatchApiUnitsByTypeByUnitIdStatus200SubjectAssociationsAvatarIconPrefixEnum)[keyof typeof PatchApiUnitsByTypeByUnitIdStatus200SubjectAssociationsAvatarIconPrefixEnum];
+
+export const PatchApiUnitsByTypeByUnitIdStatus200SubjectAssociationsExpressionsExpressionKindEnum =
+	{
+		simple: "simple",
+		facet_value: "facet_value",
+		relation: "relation",
+	} as const;
+
+export type PatchApiUnitsByTypeByUnitIdStatus200SubjectAssociationsExpressionsExpressionKindEnum =
+	(typeof PatchApiUnitsByTypeByUnitIdStatus200SubjectAssociationsExpressionsExpressionKindEnum)[keyof typeof PatchApiUnitsByTypeByUnitIdStatus200SubjectAssociationsExpressionsExpressionKindEnum];
+
+export const PatchApiUnitsByTypeByUnitIdStatus200SubjectAssociationsExpressionsComponentsSemanticRoleEnum =
+	{
+		predicate: "predicate",
+		slot: "slot",
+		value: "value",
+		focus: "focus",
+		qualifier: "qualifier",
+	} as const;
+
+export type PatchApiUnitsByTypeByUnitIdStatus200SubjectAssociationsExpressionsComponentsSemanticRoleEnum =
+	(typeof PatchApiUnitsByTypeByUnitIdStatus200SubjectAssociationsExpressionsComponentsSemanticRoleEnum)[keyof typeof PatchApiUnitsByTypeByUnitIdStatus200SubjectAssociationsExpressionsComponentsSemanticRoleEnum];
+
+export const PatchApiUnitsByTypeByUnitIdStatus200SubjectAssociationsExpressionsComponentsComponentKindEnum =
+	{
+		required: "required",
+		fallback: "fallback",
+	} as const;
+
+export type PatchApiUnitsByTypeByUnitIdStatus200SubjectAssociationsExpressionsComponentsComponentKindEnum =
+	(typeof PatchApiUnitsByTypeByUnitIdStatus200SubjectAssociationsExpressionsComponentsComponentKindEnum)[keyof typeof PatchApiUnitsByTypeByUnitIdStatus200SubjectAssociationsExpressionsComponentsComponentKindEnum];
+
+export const PatchApiUnitsByTypeByUnitIdStatus200SubjectAssociationsExpressionsComponentsLanguage =
+	{
+		zh: "zh",
+		en: "en",
+		ja: "ja",
+		ko: "ko",
+		de: "de",
+		fr: "fr",
+		es: "es",
+	} as const;
+
+export type PatchApiUnitsByTypeByUnitIdStatus200SubjectAssociationsExpressionsComponentsLanguage =
+	(typeof PatchApiUnitsByTypeByUnitIdStatus200SubjectAssociationsExpressionsComponentsLanguage)[keyof typeof PatchApiUnitsByTypeByUnitIdStatus200SubjectAssociationsExpressionsComponentsLanguage];
+
+export const PatchApiUnitsByTypeByUnitIdStatus200SubjectAssociationsExpressionsGroupKeySemanticRoleEnum =
+	{
+		predicate: "predicate",
+		slot: "slot",
+		value: "value",
+		focus: "focus",
+		qualifier: "qualifier",
+	} as const;
+
+export type PatchApiUnitsByTypeByUnitIdStatus200SubjectAssociationsExpressionsGroupKeySemanticRoleEnum =
+	(typeof PatchApiUnitsByTypeByUnitIdStatus200SubjectAssociationsExpressionsGroupKeySemanticRoleEnum)[keyof typeof PatchApiUnitsByTypeByUnitIdStatus200SubjectAssociationsExpressionsGroupKeySemanticRoleEnum];
+
+export const PatchApiUnitsByTypeByUnitIdStatus200SubjectAssociationsExpressionsGroupKeyLanguage = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type PatchApiUnitsByTypeByUnitIdStatus200SubjectAssociationsExpressionsGroupKeyLanguage =
+	(typeof PatchApiUnitsByTypeByUnitIdStatus200SubjectAssociationsExpressionsGroupKeyLanguage)[keyof typeof PatchApiUnitsByTypeByUnitIdStatus200SubjectAssociationsExpressionsGroupKeyLanguage];
 
 export const PatchApiUnitsByTypeByUnitIdStatus200SubjectAssociationsSpoilerLevelEnum = {
 	"0": 0,
@@ -105564,14 +108653,69 @@ export type PatchApiUnitsByTypeByUnitIdStatus200 = {
 		/**
 		 * @type array
 		 */
-		tags: {
+		expressions: {
 			/**
 			 * @description
 			 * Format: `uuid`
 			 * @type string
 			 */
-			tagId: string;
-			title: (string | null) | null;
+			expressionId: string;
+			/**
+			 * @default 'simple'
+			 * @type string
+			 */
+			expressionKind: PatchApiUnitsByTypeByUnitIdStatus200SubjectAssociationsExpressionsExpressionKindEnum;
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			focusTagId: string;
+			presentationRevision: string | number;
+			/**
+			 * @type array
+			 */
+			components: {
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				tagId: string;
+				/**
+				 * @default 'predicate'
+				 * @type string
+				 */
+				semanticRole: PatchApiUnitsByTypeByUnitIdStatus200SubjectAssociationsExpressionsComponentsSemanticRoleEnum;
+				/**
+				 * @default 'required'
+				 * @type string
+				 */
+				componentKind: PatchApiUnitsByTypeByUnitIdStatus200SubjectAssociationsExpressionsComponentsComponentKindEnum;
+				language:
+					| (PatchApiUnitsByTypeByUnitIdStatus200SubjectAssociationsExpressionsComponentsLanguage | null)
+					| null;
+				title: (string | null) | null;
+			}[];
+			groupKey:
+				| ({
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						tagId: string;
+						/**
+						 * @default 'predicate'
+						 * @type string
+						 */
+						semanticRole: PatchApiUnitsByTypeByUnitIdStatus200SubjectAssociationsExpressionsGroupKeySemanticRoleEnum;
+						language:
+							| (PatchApiUnitsByTypeByUnitIdStatus200SubjectAssociationsExpressionsGroupKeyLanguage | null)
+							| null;
+						title: (string | null) | null;
+				  } | null)
+				| null;
 		}[];
 		contextPost:
 			| ({
@@ -106894,6 +110038,77 @@ export const PatchApiUnitsByTypeByUnitIdVariantContextStatus200SubjectAssociatio
 export type PatchApiUnitsByTypeByUnitIdVariantContextStatus200SubjectAssociationsAvatarIconPrefixEnum =
 	(typeof PatchApiUnitsByTypeByUnitIdVariantContextStatus200SubjectAssociationsAvatarIconPrefixEnum)[keyof typeof PatchApiUnitsByTypeByUnitIdVariantContextStatus200SubjectAssociationsAvatarIconPrefixEnum];
 
+export const PatchApiUnitsByTypeByUnitIdVariantContextStatus200SubjectAssociationsExpressionsExpressionKindEnum =
+	{
+		simple: "simple",
+		facet_value: "facet_value",
+		relation: "relation",
+	} as const;
+
+export type PatchApiUnitsByTypeByUnitIdVariantContextStatus200SubjectAssociationsExpressionsExpressionKindEnum =
+	(typeof PatchApiUnitsByTypeByUnitIdVariantContextStatus200SubjectAssociationsExpressionsExpressionKindEnum)[keyof typeof PatchApiUnitsByTypeByUnitIdVariantContextStatus200SubjectAssociationsExpressionsExpressionKindEnum];
+
+export const PatchApiUnitsByTypeByUnitIdVariantContextStatus200SubjectAssociationsExpressionsComponentsSemanticRoleEnum =
+	{
+		predicate: "predicate",
+		slot: "slot",
+		value: "value",
+		focus: "focus",
+		qualifier: "qualifier",
+	} as const;
+
+export type PatchApiUnitsByTypeByUnitIdVariantContextStatus200SubjectAssociationsExpressionsComponentsSemanticRoleEnum =
+	(typeof PatchApiUnitsByTypeByUnitIdVariantContextStatus200SubjectAssociationsExpressionsComponentsSemanticRoleEnum)[keyof typeof PatchApiUnitsByTypeByUnitIdVariantContextStatus200SubjectAssociationsExpressionsComponentsSemanticRoleEnum];
+
+export const PatchApiUnitsByTypeByUnitIdVariantContextStatus200SubjectAssociationsExpressionsComponentsComponentKindEnum =
+	{
+		required: "required",
+		fallback: "fallback",
+	} as const;
+
+export type PatchApiUnitsByTypeByUnitIdVariantContextStatus200SubjectAssociationsExpressionsComponentsComponentKindEnum =
+	(typeof PatchApiUnitsByTypeByUnitIdVariantContextStatus200SubjectAssociationsExpressionsComponentsComponentKindEnum)[keyof typeof PatchApiUnitsByTypeByUnitIdVariantContextStatus200SubjectAssociationsExpressionsComponentsComponentKindEnum];
+
+export const PatchApiUnitsByTypeByUnitIdVariantContextStatus200SubjectAssociationsExpressionsComponentsLanguage =
+	{
+		zh: "zh",
+		en: "en",
+		ja: "ja",
+		ko: "ko",
+		de: "de",
+		fr: "fr",
+		es: "es",
+	} as const;
+
+export type PatchApiUnitsByTypeByUnitIdVariantContextStatus200SubjectAssociationsExpressionsComponentsLanguage =
+	(typeof PatchApiUnitsByTypeByUnitIdVariantContextStatus200SubjectAssociationsExpressionsComponentsLanguage)[keyof typeof PatchApiUnitsByTypeByUnitIdVariantContextStatus200SubjectAssociationsExpressionsComponentsLanguage];
+
+export const PatchApiUnitsByTypeByUnitIdVariantContextStatus200SubjectAssociationsExpressionsGroupKeySemanticRoleEnum =
+	{
+		predicate: "predicate",
+		slot: "slot",
+		value: "value",
+		focus: "focus",
+		qualifier: "qualifier",
+	} as const;
+
+export type PatchApiUnitsByTypeByUnitIdVariantContextStatus200SubjectAssociationsExpressionsGroupKeySemanticRoleEnum =
+	(typeof PatchApiUnitsByTypeByUnitIdVariantContextStatus200SubjectAssociationsExpressionsGroupKeySemanticRoleEnum)[keyof typeof PatchApiUnitsByTypeByUnitIdVariantContextStatus200SubjectAssociationsExpressionsGroupKeySemanticRoleEnum];
+
+export const PatchApiUnitsByTypeByUnitIdVariantContextStatus200SubjectAssociationsExpressionsGroupKeyLanguage =
+	{
+		zh: "zh",
+		en: "en",
+		ja: "ja",
+		ko: "ko",
+		de: "de",
+		fr: "fr",
+		es: "es",
+	} as const;
+
+export type PatchApiUnitsByTypeByUnitIdVariantContextStatus200SubjectAssociationsExpressionsGroupKeyLanguage =
+	(typeof PatchApiUnitsByTypeByUnitIdVariantContextStatus200SubjectAssociationsExpressionsGroupKeyLanguage)[keyof typeof PatchApiUnitsByTypeByUnitIdVariantContextStatus200SubjectAssociationsExpressionsGroupKeyLanguage];
+
 export const PatchApiUnitsByTypeByUnitIdVariantContextStatus200SubjectAssociationsSpoilerLevelEnum =
 	{
 		"0": 0,
@@ -107889,14 +111104,69 @@ export type PatchApiUnitsByTypeByUnitIdVariantContextStatus200 = {
 		/**
 		 * @type array
 		 */
-		tags: {
+		expressions: {
 			/**
 			 * @description
 			 * Format: `uuid`
 			 * @type string
 			 */
-			tagId: string;
-			title: (string | null) | null;
+			expressionId: string;
+			/**
+			 * @default 'simple'
+			 * @type string
+			 */
+			expressionKind: PatchApiUnitsByTypeByUnitIdVariantContextStatus200SubjectAssociationsExpressionsExpressionKindEnum;
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			focusTagId: string;
+			presentationRevision: string | number;
+			/**
+			 * @type array
+			 */
+			components: {
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				tagId: string;
+				/**
+				 * @default 'predicate'
+				 * @type string
+				 */
+				semanticRole: PatchApiUnitsByTypeByUnitIdVariantContextStatus200SubjectAssociationsExpressionsComponentsSemanticRoleEnum;
+				/**
+				 * @default 'required'
+				 * @type string
+				 */
+				componentKind: PatchApiUnitsByTypeByUnitIdVariantContextStatus200SubjectAssociationsExpressionsComponentsComponentKindEnum;
+				language:
+					| (PatchApiUnitsByTypeByUnitIdVariantContextStatus200SubjectAssociationsExpressionsComponentsLanguage | null)
+					| null;
+				title: (string | null) | null;
+			}[];
+			groupKey:
+				| ({
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						tagId: string;
+						/**
+						 * @default 'predicate'
+						 * @type string
+						 */
+						semanticRole: PatchApiUnitsByTypeByUnitIdVariantContextStatus200SubjectAssociationsExpressionsGroupKeySemanticRoleEnum;
+						language:
+							| (PatchApiUnitsByTypeByUnitIdVariantContextStatus200SubjectAssociationsExpressionsGroupKeyLanguage | null)
+							| null;
+						title: (string | null) | null;
+				  } | null)
+				| null;
 		}[];
 		contextPost:
 			| ({
@@ -109024,6 +112294,77 @@ export const PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200SubjectAsso
 export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200SubjectAssociationsAvatarIconPrefixEnum =
 	(typeof PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200SubjectAssociationsAvatarIconPrefixEnum)[keyof typeof PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200SubjectAssociationsAvatarIconPrefixEnum];
 
+export const PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200SubjectAssociationsExpressionsExpressionKindEnum =
+	{
+		simple: "simple",
+		facet_value: "facet_value",
+		relation: "relation",
+	} as const;
+
+export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200SubjectAssociationsExpressionsExpressionKindEnum =
+	(typeof PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200SubjectAssociationsExpressionsExpressionKindEnum)[keyof typeof PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200SubjectAssociationsExpressionsExpressionKindEnum];
+
+export const PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200SubjectAssociationsExpressionsComponentsSemanticRoleEnum =
+	{
+		predicate: "predicate",
+		slot: "slot",
+		value: "value",
+		focus: "focus",
+		qualifier: "qualifier",
+	} as const;
+
+export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200SubjectAssociationsExpressionsComponentsSemanticRoleEnum =
+	(typeof PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200SubjectAssociationsExpressionsComponentsSemanticRoleEnum)[keyof typeof PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200SubjectAssociationsExpressionsComponentsSemanticRoleEnum];
+
+export const PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200SubjectAssociationsExpressionsComponentsComponentKindEnum =
+	{
+		required: "required",
+		fallback: "fallback",
+	} as const;
+
+export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200SubjectAssociationsExpressionsComponentsComponentKindEnum =
+	(typeof PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200SubjectAssociationsExpressionsComponentsComponentKindEnum)[keyof typeof PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200SubjectAssociationsExpressionsComponentsComponentKindEnum];
+
+export const PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200SubjectAssociationsExpressionsComponentsLanguage =
+	{
+		zh: "zh",
+		en: "en",
+		ja: "ja",
+		ko: "ko",
+		de: "de",
+		fr: "fr",
+		es: "es",
+	} as const;
+
+export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200SubjectAssociationsExpressionsComponentsLanguage =
+	(typeof PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200SubjectAssociationsExpressionsComponentsLanguage)[keyof typeof PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200SubjectAssociationsExpressionsComponentsLanguage];
+
+export const PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200SubjectAssociationsExpressionsGroupKeySemanticRoleEnum =
+	{
+		predicate: "predicate",
+		slot: "slot",
+		value: "value",
+		focus: "focus",
+		qualifier: "qualifier",
+	} as const;
+
+export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200SubjectAssociationsExpressionsGroupKeySemanticRoleEnum =
+	(typeof PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200SubjectAssociationsExpressionsGroupKeySemanticRoleEnum)[keyof typeof PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200SubjectAssociationsExpressionsGroupKeySemanticRoleEnum];
+
+export const PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200SubjectAssociationsExpressionsGroupKeyLanguage =
+	{
+		zh: "zh",
+		en: "en",
+		ja: "ja",
+		ko: "ko",
+		de: "de",
+		fr: "fr",
+		es: "es",
+	} as const;
+
+export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200SubjectAssociationsExpressionsGroupKeyLanguage =
+	(typeof PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200SubjectAssociationsExpressionsGroupKeyLanguage)[keyof typeof PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200SubjectAssociationsExpressionsGroupKeyLanguage];
+
 export const PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200SubjectAssociationsSpoilerLevelEnum =
 	{
 		"0": 0,
@@ -110022,14 +113363,69 @@ export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200 = {
 		/**
 		 * @type array
 		 */
-		tags: {
+		expressions: {
 			/**
 			 * @description
 			 * Format: `uuid`
 			 * @type string
 			 */
-			tagId: string;
-			title: (string | null) | null;
+			expressionId: string;
+			/**
+			 * @default 'simple'
+			 * @type string
+			 */
+			expressionKind: PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200SubjectAssociationsExpressionsExpressionKindEnum;
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			focusTagId: string;
+			presentationRevision: string | number;
+			/**
+			 * @type array
+			 */
+			components: {
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				tagId: string;
+				/**
+				 * @default 'predicate'
+				 * @type string
+				 */
+				semanticRole: PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200SubjectAssociationsExpressionsComponentsSemanticRoleEnum;
+				/**
+				 * @default 'required'
+				 * @type string
+				 */
+				componentKind: PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200SubjectAssociationsExpressionsComponentsComponentKindEnum;
+				language:
+					| (PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200SubjectAssociationsExpressionsComponentsLanguage | null)
+					| null;
+				title: (string | null) | null;
+			}[];
+			groupKey:
+				| ({
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						tagId: string;
+						/**
+						 * @default 'predicate'
+						 * @type string
+						 */
+						semanticRole: PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200SubjectAssociationsExpressionsGroupKeySemanticRoleEnum;
+						language:
+							| (PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200SubjectAssociationsExpressionsGroupKeyLanguage | null)
+							| null;
+						title: (string | null) | null;
+				  } | null)
+				| null;
 		}[];
 		contextPost:
 			| ({
@@ -111169,6 +114565,77 @@ export const PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200SubjectAss
 export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200SubjectAssociationsAvatarIconPrefixEnum =
 	(typeof PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200SubjectAssociationsAvatarIconPrefixEnum)[keyof typeof PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200SubjectAssociationsAvatarIconPrefixEnum];
 
+export const PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200SubjectAssociationsExpressionsExpressionKindEnum =
+	{
+		simple: "simple",
+		facet_value: "facet_value",
+		relation: "relation",
+	} as const;
+
+export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200SubjectAssociationsExpressionsExpressionKindEnum =
+	(typeof PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200SubjectAssociationsExpressionsExpressionKindEnum)[keyof typeof PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200SubjectAssociationsExpressionsExpressionKindEnum];
+
+export const PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200SubjectAssociationsExpressionsComponentsSemanticRoleEnum =
+	{
+		predicate: "predicate",
+		slot: "slot",
+		value: "value",
+		focus: "focus",
+		qualifier: "qualifier",
+	} as const;
+
+export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200SubjectAssociationsExpressionsComponentsSemanticRoleEnum =
+	(typeof PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200SubjectAssociationsExpressionsComponentsSemanticRoleEnum)[keyof typeof PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200SubjectAssociationsExpressionsComponentsSemanticRoleEnum];
+
+export const PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200SubjectAssociationsExpressionsComponentsComponentKindEnum =
+	{
+		required: "required",
+		fallback: "fallback",
+	} as const;
+
+export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200SubjectAssociationsExpressionsComponentsComponentKindEnum =
+	(typeof PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200SubjectAssociationsExpressionsComponentsComponentKindEnum)[keyof typeof PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200SubjectAssociationsExpressionsComponentsComponentKindEnum];
+
+export const PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200SubjectAssociationsExpressionsComponentsLanguage =
+	{
+		zh: "zh",
+		en: "en",
+		ja: "ja",
+		ko: "ko",
+		de: "de",
+		fr: "fr",
+		es: "es",
+	} as const;
+
+export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200SubjectAssociationsExpressionsComponentsLanguage =
+	(typeof PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200SubjectAssociationsExpressionsComponentsLanguage)[keyof typeof PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200SubjectAssociationsExpressionsComponentsLanguage];
+
+export const PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200SubjectAssociationsExpressionsGroupKeySemanticRoleEnum =
+	{
+		predicate: "predicate",
+		slot: "slot",
+		value: "value",
+		focus: "focus",
+		qualifier: "qualifier",
+	} as const;
+
+export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200SubjectAssociationsExpressionsGroupKeySemanticRoleEnum =
+	(typeof PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200SubjectAssociationsExpressionsGroupKeySemanticRoleEnum)[keyof typeof PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200SubjectAssociationsExpressionsGroupKeySemanticRoleEnum];
+
+export const PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200SubjectAssociationsExpressionsGroupKeyLanguage =
+	{
+		zh: "zh",
+		en: "en",
+		ja: "ja",
+		ko: "ko",
+		de: "de",
+		fr: "fr",
+		es: "es",
+	} as const;
+
+export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200SubjectAssociationsExpressionsGroupKeyLanguage =
+	(typeof PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200SubjectAssociationsExpressionsGroupKeyLanguage)[keyof typeof PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200SubjectAssociationsExpressionsGroupKeyLanguage];
+
 export const PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200SubjectAssociationsSpoilerLevelEnum =
 	{
 		"0": 0,
@@ -112167,14 +115634,69 @@ export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200 = {
 		/**
 		 * @type array
 		 */
-		tags: {
+		expressions: {
 			/**
 			 * @description
 			 * Format: `uuid`
 			 * @type string
 			 */
-			tagId: string;
-			title: (string | null) | null;
+			expressionId: string;
+			/**
+			 * @default 'simple'
+			 * @type string
+			 */
+			expressionKind: PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200SubjectAssociationsExpressionsExpressionKindEnum;
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			focusTagId: string;
+			presentationRevision: string | number;
+			/**
+			 * @type array
+			 */
+			components: {
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				tagId: string;
+				/**
+				 * @default 'predicate'
+				 * @type string
+				 */
+				semanticRole: PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200SubjectAssociationsExpressionsComponentsSemanticRoleEnum;
+				/**
+				 * @default 'required'
+				 * @type string
+				 */
+				componentKind: PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200SubjectAssociationsExpressionsComponentsComponentKindEnum;
+				language:
+					| (PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200SubjectAssociationsExpressionsComponentsLanguage | null)
+					| null;
+				title: (string | null) | null;
+			}[];
+			groupKey:
+				| ({
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						tagId: string;
+						/**
+						 * @default 'predicate'
+						 * @type string
+						 */
+						semanticRole: PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200SubjectAssociationsExpressionsGroupKeySemanticRoleEnum;
+						language:
+							| (PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200SubjectAssociationsExpressionsGroupKeyLanguage | null)
+							| null;
+						title: (string | null) | null;
+				  } | null)
+				| null;
 		}[];
 		contextPost:
 			| ({
@@ -141928,6 +145450,88 @@ export const GetApiCollectionsByCollectionIdItemsStatus200ItemsContentTrackingSu
 export type GetApiCollectionsByCollectionIdItemsStatus200ItemsContentTrackingSurfaceEnum =
 	(typeof GetApiCollectionsByCollectionIdItemsStatus200ItemsContentTrackingSurfaceEnum)[keyof typeof GetApiCollectionsByCollectionIdItemsStatus200ItemsContentTrackingSurfaceEnum];
 
+export const GetApiCollectionsByCollectionIdItemsStatus200ItemsContentSearchTagMatchesEvidenceEnum =
+	{
+		direct: "direct",
+		primary: "primary",
+		entailed: "entailed",
+		retrieval_only: "retrieval_only",
+	} as const;
+
+export type GetApiCollectionsByCollectionIdItemsStatus200ItemsContentSearchTagMatchesEvidenceEnum =
+	(typeof GetApiCollectionsByCollectionIdItemsStatus200ItemsContentSearchTagMatchesEvidenceEnum)[keyof typeof GetApiCollectionsByCollectionIdItemsStatus200ItemsContentSearchTagMatchesEvidenceEnum];
+
+export const GetApiCollectionsByCollectionIdItemsStatus200ItemsContentSearchTagMatchesExpressionExpressionKindEnum =
+	{
+		simple: "simple",
+		facet_value: "facet_value",
+		relation: "relation",
+	} as const;
+
+export type GetApiCollectionsByCollectionIdItemsStatus200ItemsContentSearchTagMatchesExpressionExpressionKindEnum =
+	(typeof GetApiCollectionsByCollectionIdItemsStatus200ItemsContentSearchTagMatchesExpressionExpressionKindEnum)[keyof typeof GetApiCollectionsByCollectionIdItemsStatus200ItemsContentSearchTagMatchesExpressionExpressionKindEnum];
+
+export const GetApiCollectionsByCollectionIdItemsStatus200ItemsContentSearchTagMatchesExpressionComponentsSemanticRoleEnum =
+	{
+		predicate: "predicate",
+		slot: "slot",
+		value: "value",
+		focus: "focus",
+		qualifier: "qualifier",
+	} as const;
+
+export type GetApiCollectionsByCollectionIdItemsStatus200ItemsContentSearchTagMatchesExpressionComponentsSemanticRoleEnum =
+	(typeof GetApiCollectionsByCollectionIdItemsStatus200ItemsContentSearchTagMatchesExpressionComponentsSemanticRoleEnum)[keyof typeof GetApiCollectionsByCollectionIdItemsStatus200ItemsContentSearchTagMatchesExpressionComponentsSemanticRoleEnum];
+
+export const GetApiCollectionsByCollectionIdItemsStatus200ItemsContentSearchTagMatchesExpressionComponentsComponentKindEnum =
+	{
+		required: "required",
+		fallback: "fallback",
+	} as const;
+
+export type GetApiCollectionsByCollectionIdItemsStatus200ItemsContentSearchTagMatchesExpressionComponentsComponentKindEnum =
+	(typeof GetApiCollectionsByCollectionIdItemsStatus200ItemsContentSearchTagMatchesExpressionComponentsComponentKindEnum)[keyof typeof GetApiCollectionsByCollectionIdItemsStatus200ItemsContentSearchTagMatchesExpressionComponentsComponentKindEnum];
+
+export const GetApiCollectionsByCollectionIdItemsStatus200ItemsContentSearchTagMatchesExpressionComponentsLanguage =
+	{
+		zh: "zh",
+		en: "en",
+		ja: "ja",
+		ko: "ko",
+		de: "de",
+		fr: "fr",
+		es: "es",
+	} as const;
+
+export type GetApiCollectionsByCollectionIdItemsStatus200ItemsContentSearchTagMatchesExpressionComponentsLanguage =
+	(typeof GetApiCollectionsByCollectionIdItemsStatus200ItemsContentSearchTagMatchesExpressionComponentsLanguage)[keyof typeof GetApiCollectionsByCollectionIdItemsStatus200ItemsContentSearchTagMatchesExpressionComponentsLanguage];
+
+export const GetApiCollectionsByCollectionIdItemsStatus200ItemsContentSearchTagMatchesExpressionGroupKeySemanticRoleEnum =
+	{
+		predicate: "predicate",
+		slot: "slot",
+		value: "value",
+		focus: "focus",
+		qualifier: "qualifier",
+	} as const;
+
+export type GetApiCollectionsByCollectionIdItemsStatus200ItemsContentSearchTagMatchesExpressionGroupKeySemanticRoleEnum =
+	(typeof GetApiCollectionsByCollectionIdItemsStatus200ItemsContentSearchTagMatchesExpressionGroupKeySemanticRoleEnum)[keyof typeof GetApiCollectionsByCollectionIdItemsStatus200ItemsContentSearchTagMatchesExpressionGroupKeySemanticRoleEnum];
+
+export const GetApiCollectionsByCollectionIdItemsStatus200ItemsContentSearchTagMatchesExpressionGroupKeyLanguage =
+	{
+		zh: "zh",
+		en: "en",
+		ja: "ja",
+		ko: "ko",
+		de: "de",
+		fr: "fr",
+		es: "es",
+	} as const;
+
+export type GetApiCollectionsByCollectionIdItemsStatus200ItemsContentSearchTagMatchesExpressionGroupKeyLanguage =
+	(typeof GetApiCollectionsByCollectionIdItemsStatus200ItemsContentSearchTagMatchesExpressionGroupKeyLanguage)[keyof typeof GetApiCollectionsByCollectionIdItemsStatus200ItemsContentSearchTagMatchesExpressionGroupKeyLanguage];
+
 export const GetApiCollectionsByCollectionIdItemsStatus200ItemsContentUnitKindEnum = {
 	profile: "profile",
 	book: "book",
@@ -142431,6 +146035,90 @@ export type GetApiCollectionsByCollectionIdItemsStatus200 = {
 						  } | null)
 						| null;
 					/**
+					 * @type array | undefined
+					 */
+					searchTagMatches?: {
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						matchedTagId: string;
+						/**
+						 * @default 'direct'
+						 * @type string
+						 */
+						evidence: GetApiCollectionsByCollectionIdItemsStatus200ItemsContentSearchTagMatchesEvidenceEnum;
+						/**
+						 * @type object
+						 */
+						expression: {
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							expressionId: string;
+							/**
+							 * @default 'simple'
+							 * @type string
+							 */
+							expressionKind: GetApiCollectionsByCollectionIdItemsStatus200ItemsContentSearchTagMatchesExpressionExpressionKindEnum;
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							focusTagId: string;
+							presentationRevision: string | number;
+							/**
+							 * @type array
+							 */
+							components: {
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								tagId: string;
+								/**
+								 * @default 'predicate'
+								 * @type string
+								 */
+								semanticRole: GetApiCollectionsByCollectionIdItemsStatus200ItemsContentSearchTagMatchesExpressionComponentsSemanticRoleEnum;
+								/**
+								 * @default 'required'
+								 * @type string
+								 */
+								componentKind: GetApiCollectionsByCollectionIdItemsStatus200ItemsContentSearchTagMatchesExpressionComponentsComponentKindEnum;
+								language:
+									| (GetApiCollectionsByCollectionIdItemsStatus200ItemsContentSearchTagMatchesExpressionComponentsLanguage | null)
+									| null;
+								title: (string | null) | null;
+							}[];
+							groupKey:
+								| ({
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										tagId: string;
+										/**
+										 * @default 'predicate'
+										 * @type string
+										 */
+										semanticRole: GetApiCollectionsByCollectionIdItemsStatus200ItemsContentSearchTagMatchesExpressionGroupKeySemanticRoleEnum;
+										language:
+											| (GetApiCollectionsByCollectionIdItemsStatus200ItemsContentSearchTagMatchesExpressionGroupKeyLanguage | null)
+											| null;
+										title: (string | null) | null;
+								  } | null)
+								| null;
+						};
+					}[];
+					tagOtherPositionCount?: string | number;
+					/**
 					 * @type string
 					 */
 					itemType: "unit";
@@ -142916,6 +146604,90 @@ export type GetApiCollectionsByCollectionIdItemsStatus200 = {
 										signature: string;
 								  } | null)
 								| null;
+							/**
+							 * @type array | undefined
+							 */
+							searchTagMatches?: {
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								matchedTagId: string;
+								/**
+								 * @default 'direct'
+								 * @type string
+								 */
+								evidence: GetApiCollectionsByCollectionIdItemsStatus200ItemsContentSearchTagMatchesEvidenceEnum;
+								/**
+								 * @type object
+								 */
+								expression: {
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									expressionId: string;
+									/**
+									 * @default 'simple'
+									 * @type string
+									 */
+									expressionKind: GetApiCollectionsByCollectionIdItemsStatus200ItemsContentSearchTagMatchesExpressionExpressionKindEnum;
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									focusTagId: string;
+									presentationRevision: string | number;
+									/**
+									 * @type array
+									 */
+									components: {
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										tagId: string;
+										/**
+										 * @default 'predicate'
+										 * @type string
+										 */
+										semanticRole: GetApiCollectionsByCollectionIdItemsStatus200ItemsContentSearchTagMatchesExpressionComponentsSemanticRoleEnum;
+										/**
+										 * @default 'required'
+										 * @type string
+										 */
+										componentKind: GetApiCollectionsByCollectionIdItemsStatus200ItemsContentSearchTagMatchesExpressionComponentsComponentKindEnum;
+										language:
+											| (GetApiCollectionsByCollectionIdItemsStatus200ItemsContentSearchTagMatchesExpressionComponentsLanguage | null)
+											| null;
+										title: (string | null) | null;
+									}[];
+									groupKey:
+										| ({
+												/**
+												 * @description
+												 * Format: `uuid`
+												 * @type string
+												 */
+												tagId: string;
+												/**
+												 * @default 'predicate'
+												 * @type string
+												 */
+												semanticRole: GetApiCollectionsByCollectionIdItemsStatus200ItemsContentSearchTagMatchesExpressionGroupKeySemanticRoleEnum;
+												language:
+													| (GetApiCollectionsByCollectionIdItemsStatus200ItemsContentSearchTagMatchesExpressionGroupKeyLanguage | null)
+													| null;
+												title: (string | null) | null;
+										  } | null)
+										| null;
+								};
+							}[];
+							tagOtherPositionCount?: string | number;
 							/**
 							 * @type string
 							 */
@@ -143616,6 +147388,90 @@ export type GetApiCollectionsByCollectionIdItemsStatus200 = {
 										signature: string;
 								  } | null)
 								| null;
+							/**
+							 * @type array | undefined
+							 */
+							searchTagMatches?: {
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								matchedTagId: string;
+								/**
+								 * @default 'direct'
+								 * @type string
+								 */
+								evidence: GetApiCollectionsByCollectionIdItemsStatus200ItemsContentSearchTagMatchesEvidenceEnum;
+								/**
+								 * @type object
+								 */
+								expression: {
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									expressionId: string;
+									/**
+									 * @default 'simple'
+									 * @type string
+									 */
+									expressionKind: GetApiCollectionsByCollectionIdItemsStatus200ItemsContentSearchTagMatchesExpressionExpressionKindEnum;
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									focusTagId: string;
+									presentationRevision: string | number;
+									/**
+									 * @type array
+									 */
+									components: {
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										tagId: string;
+										/**
+										 * @default 'predicate'
+										 * @type string
+										 */
+										semanticRole: GetApiCollectionsByCollectionIdItemsStatus200ItemsContentSearchTagMatchesExpressionComponentsSemanticRoleEnum;
+										/**
+										 * @default 'required'
+										 * @type string
+										 */
+										componentKind: GetApiCollectionsByCollectionIdItemsStatus200ItemsContentSearchTagMatchesExpressionComponentsComponentKindEnum;
+										language:
+											| (GetApiCollectionsByCollectionIdItemsStatus200ItemsContentSearchTagMatchesExpressionComponentsLanguage | null)
+											| null;
+										title: (string | null) | null;
+									}[];
+									groupKey:
+										| ({
+												/**
+												 * @description
+												 * Format: `uuid`
+												 * @type string
+												 */
+												tagId: string;
+												/**
+												 * @default 'predicate'
+												 * @type string
+												 */
+												semanticRole: GetApiCollectionsByCollectionIdItemsStatus200ItemsContentSearchTagMatchesExpressionGroupKeySemanticRoleEnum;
+												language:
+													| (GetApiCollectionsByCollectionIdItemsStatus200ItemsContentSearchTagMatchesExpressionGroupKeyLanguage | null)
+													| null;
+												title: (string | null) | null;
+										  } | null)
+										| null;
+								};
+							}[];
+							tagOtherPositionCount?: string | number;
 							/**
 							 * @type string
 							 */
@@ -144334,6 +148190,90 @@ export type GetApiCollectionsByCollectionIdItemsStatus200 = {
 										signature: string;
 								  } | null)
 								| null;
+							/**
+							 * @type array | undefined
+							 */
+							searchTagMatches?: {
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								matchedTagId: string;
+								/**
+								 * @default 'direct'
+								 * @type string
+								 */
+								evidence: GetApiCollectionsByCollectionIdItemsStatus200ItemsContentSearchTagMatchesEvidenceEnum;
+								/**
+								 * @type object
+								 */
+								expression: {
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									expressionId: string;
+									/**
+									 * @default 'simple'
+									 * @type string
+									 */
+									expressionKind: GetApiCollectionsByCollectionIdItemsStatus200ItemsContentSearchTagMatchesExpressionExpressionKindEnum;
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									focusTagId: string;
+									presentationRevision: string | number;
+									/**
+									 * @type array
+									 */
+									components: {
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										tagId: string;
+										/**
+										 * @default 'predicate'
+										 * @type string
+										 */
+										semanticRole: GetApiCollectionsByCollectionIdItemsStatus200ItemsContentSearchTagMatchesExpressionComponentsSemanticRoleEnum;
+										/**
+										 * @default 'required'
+										 * @type string
+										 */
+										componentKind: GetApiCollectionsByCollectionIdItemsStatus200ItemsContentSearchTagMatchesExpressionComponentsComponentKindEnum;
+										language:
+											| (GetApiCollectionsByCollectionIdItemsStatus200ItemsContentSearchTagMatchesExpressionComponentsLanguage | null)
+											| null;
+										title: (string | null) | null;
+									}[];
+									groupKey:
+										| ({
+												/**
+												 * @description
+												 * Format: `uuid`
+												 * @type string
+												 */
+												tagId: string;
+												/**
+												 * @default 'predicate'
+												 * @type string
+												 */
+												semanticRole: GetApiCollectionsByCollectionIdItemsStatus200ItemsContentSearchTagMatchesExpressionGroupKeySemanticRoleEnum;
+												language:
+													| (GetApiCollectionsByCollectionIdItemsStatus200ItemsContentSearchTagMatchesExpressionGroupKeyLanguage | null)
+													| null;
+												title: (string | null) | null;
+										  } | null)
+										| null;
+								};
+							}[];
+							tagOtherPositionCount?: string | number;
 							/**
 							 * @type string
 							 */
@@ -149050,6 +152990,81 @@ export const GetApiReviewsStatus200ItemsTrackingSurfaceEnum = {
 export type GetApiReviewsStatus200ItemsTrackingSurfaceEnum =
 	(typeof GetApiReviewsStatus200ItemsTrackingSurfaceEnum)[keyof typeof GetApiReviewsStatus200ItemsTrackingSurfaceEnum];
 
+export const GetApiReviewsStatus200ItemsSearchTagMatchesEvidenceEnum = {
+	direct: "direct",
+	primary: "primary",
+	entailed: "entailed",
+	retrieval_only: "retrieval_only",
+} as const;
+
+export type GetApiReviewsStatus200ItemsSearchTagMatchesEvidenceEnum =
+	(typeof GetApiReviewsStatus200ItemsSearchTagMatchesEvidenceEnum)[keyof typeof GetApiReviewsStatus200ItemsSearchTagMatchesEvidenceEnum];
+
+export const GetApiReviewsStatus200ItemsSearchTagMatchesExpressionExpressionKindEnum = {
+	simple: "simple",
+	facet_value: "facet_value",
+	relation: "relation",
+} as const;
+
+export type GetApiReviewsStatus200ItemsSearchTagMatchesExpressionExpressionKindEnum =
+	(typeof GetApiReviewsStatus200ItemsSearchTagMatchesExpressionExpressionKindEnum)[keyof typeof GetApiReviewsStatus200ItemsSearchTagMatchesExpressionExpressionKindEnum];
+
+export const GetApiReviewsStatus200ItemsSearchTagMatchesExpressionComponentsSemanticRoleEnum = {
+	predicate: "predicate",
+	slot: "slot",
+	value: "value",
+	focus: "focus",
+	qualifier: "qualifier",
+} as const;
+
+export type GetApiReviewsStatus200ItemsSearchTagMatchesExpressionComponentsSemanticRoleEnum =
+	(typeof GetApiReviewsStatus200ItemsSearchTagMatchesExpressionComponentsSemanticRoleEnum)[keyof typeof GetApiReviewsStatus200ItemsSearchTagMatchesExpressionComponentsSemanticRoleEnum];
+
+export const GetApiReviewsStatus200ItemsSearchTagMatchesExpressionComponentsComponentKindEnum = {
+	required: "required",
+	fallback: "fallback",
+} as const;
+
+export type GetApiReviewsStatus200ItemsSearchTagMatchesExpressionComponentsComponentKindEnum =
+	(typeof GetApiReviewsStatus200ItemsSearchTagMatchesExpressionComponentsComponentKindEnum)[keyof typeof GetApiReviewsStatus200ItemsSearchTagMatchesExpressionComponentsComponentKindEnum];
+
+export const GetApiReviewsStatus200ItemsSearchTagMatchesExpressionComponentsLanguage = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetApiReviewsStatus200ItemsSearchTagMatchesExpressionComponentsLanguage =
+	(typeof GetApiReviewsStatus200ItemsSearchTagMatchesExpressionComponentsLanguage)[keyof typeof GetApiReviewsStatus200ItemsSearchTagMatchesExpressionComponentsLanguage];
+
+export const GetApiReviewsStatus200ItemsSearchTagMatchesExpressionGroupKeySemanticRoleEnum = {
+	predicate: "predicate",
+	slot: "slot",
+	value: "value",
+	focus: "focus",
+	qualifier: "qualifier",
+} as const;
+
+export type GetApiReviewsStatus200ItemsSearchTagMatchesExpressionGroupKeySemanticRoleEnum =
+	(typeof GetApiReviewsStatus200ItemsSearchTagMatchesExpressionGroupKeySemanticRoleEnum)[keyof typeof GetApiReviewsStatus200ItemsSearchTagMatchesExpressionGroupKeySemanticRoleEnum];
+
+export const GetApiReviewsStatus200ItemsSearchTagMatchesExpressionGroupKeyLanguage = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetApiReviewsStatus200ItemsSearchTagMatchesExpressionGroupKeyLanguage =
+	(typeof GetApiReviewsStatus200ItemsSearchTagMatchesExpressionGroupKeyLanguage)[keyof typeof GetApiReviewsStatus200ItemsSearchTagMatchesExpressionGroupKeyLanguage];
+
 export const GetApiReviewsStatus200ItemsContentSpoilerLevelEnum = {
 	"0": 0,
 	"1": 1,
@@ -149473,6 +153488,90 @@ export type GetApiReviewsStatus200 = {
 					signature: string;
 			  } | null)
 			| null;
+		/**
+		 * @type array | undefined
+		 */
+		searchTagMatches?: {
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			matchedTagId: string;
+			/**
+			 * @default 'direct'
+			 * @type string
+			 */
+			evidence: GetApiReviewsStatus200ItemsSearchTagMatchesEvidenceEnum;
+			/**
+			 * @type object
+			 */
+			expression: {
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				expressionId: string;
+				/**
+				 * @default 'simple'
+				 * @type string
+				 */
+				expressionKind: GetApiReviewsStatus200ItemsSearchTagMatchesExpressionExpressionKindEnum;
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				focusTagId: string;
+				presentationRevision: string | number;
+				/**
+				 * @type array
+				 */
+				components: {
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					tagId: string;
+					/**
+					 * @default 'predicate'
+					 * @type string
+					 */
+					semanticRole: GetApiReviewsStatus200ItemsSearchTagMatchesExpressionComponentsSemanticRoleEnum;
+					/**
+					 * @default 'required'
+					 * @type string
+					 */
+					componentKind: GetApiReviewsStatus200ItemsSearchTagMatchesExpressionComponentsComponentKindEnum;
+					language:
+						| (GetApiReviewsStatus200ItemsSearchTagMatchesExpressionComponentsLanguage | null)
+						| null;
+					title: (string | null) | null;
+				}[];
+				groupKey:
+					| ({
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							tagId: string;
+							/**
+							 * @default 'predicate'
+							 * @type string
+							 */
+							semanticRole: GetApiReviewsStatus200ItemsSearchTagMatchesExpressionGroupKeySemanticRoleEnum;
+							language:
+								| (GetApiReviewsStatus200ItemsSearchTagMatchesExpressionGroupKeyLanguage | null)
+								| null;
+							title: (string | null) | null;
+					  } | null)
+					| null;
+			};
+		}[];
+		tagOtherPositionCount?: string | number;
 		/**
 		 * @type string
 		 */
@@ -167675,6 +171774,87 @@ export const GetApiRealmsByRealmIdPinsStatus200ContentItemsTrackingSurfaceEnum =
 export type GetApiRealmsByRealmIdPinsStatus200ContentItemsTrackingSurfaceEnum =
 	(typeof GetApiRealmsByRealmIdPinsStatus200ContentItemsTrackingSurfaceEnum)[keyof typeof GetApiRealmsByRealmIdPinsStatus200ContentItemsTrackingSurfaceEnum];
 
+export const GetApiRealmsByRealmIdPinsStatus200ContentItemsSearchTagMatchesEvidenceEnum = {
+	direct: "direct",
+	primary: "primary",
+	entailed: "entailed",
+	retrieval_only: "retrieval_only",
+} as const;
+
+export type GetApiRealmsByRealmIdPinsStatus200ContentItemsSearchTagMatchesEvidenceEnum =
+	(typeof GetApiRealmsByRealmIdPinsStatus200ContentItemsSearchTagMatchesEvidenceEnum)[keyof typeof GetApiRealmsByRealmIdPinsStatus200ContentItemsSearchTagMatchesEvidenceEnum];
+
+export const GetApiRealmsByRealmIdPinsStatus200ContentItemsSearchTagMatchesExpressionExpressionKindEnum =
+	{
+		simple: "simple",
+		facet_value: "facet_value",
+		relation: "relation",
+	} as const;
+
+export type GetApiRealmsByRealmIdPinsStatus200ContentItemsSearchTagMatchesExpressionExpressionKindEnum =
+	(typeof GetApiRealmsByRealmIdPinsStatus200ContentItemsSearchTagMatchesExpressionExpressionKindEnum)[keyof typeof GetApiRealmsByRealmIdPinsStatus200ContentItemsSearchTagMatchesExpressionExpressionKindEnum];
+
+export const GetApiRealmsByRealmIdPinsStatus200ContentItemsSearchTagMatchesExpressionComponentsSemanticRoleEnum =
+	{
+		predicate: "predicate",
+		slot: "slot",
+		value: "value",
+		focus: "focus",
+		qualifier: "qualifier",
+	} as const;
+
+export type GetApiRealmsByRealmIdPinsStatus200ContentItemsSearchTagMatchesExpressionComponentsSemanticRoleEnum =
+	(typeof GetApiRealmsByRealmIdPinsStatus200ContentItemsSearchTagMatchesExpressionComponentsSemanticRoleEnum)[keyof typeof GetApiRealmsByRealmIdPinsStatus200ContentItemsSearchTagMatchesExpressionComponentsSemanticRoleEnum];
+
+export const GetApiRealmsByRealmIdPinsStatus200ContentItemsSearchTagMatchesExpressionComponentsComponentKindEnum =
+	{
+		required: "required",
+		fallback: "fallback",
+	} as const;
+
+export type GetApiRealmsByRealmIdPinsStatus200ContentItemsSearchTagMatchesExpressionComponentsComponentKindEnum =
+	(typeof GetApiRealmsByRealmIdPinsStatus200ContentItemsSearchTagMatchesExpressionComponentsComponentKindEnum)[keyof typeof GetApiRealmsByRealmIdPinsStatus200ContentItemsSearchTagMatchesExpressionComponentsComponentKindEnum];
+
+export const GetApiRealmsByRealmIdPinsStatus200ContentItemsSearchTagMatchesExpressionComponentsLanguage =
+	{
+		zh: "zh",
+		en: "en",
+		ja: "ja",
+		ko: "ko",
+		de: "de",
+		fr: "fr",
+		es: "es",
+	} as const;
+
+export type GetApiRealmsByRealmIdPinsStatus200ContentItemsSearchTagMatchesExpressionComponentsLanguage =
+	(typeof GetApiRealmsByRealmIdPinsStatus200ContentItemsSearchTagMatchesExpressionComponentsLanguage)[keyof typeof GetApiRealmsByRealmIdPinsStatus200ContentItemsSearchTagMatchesExpressionComponentsLanguage];
+
+export const GetApiRealmsByRealmIdPinsStatus200ContentItemsSearchTagMatchesExpressionGroupKeySemanticRoleEnum =
+	{
+		predicate: "predicate",
+		slot: "slot",
+		value: "value",
+		focus: "focus",
+		qualifier: "qualifier",
+	} as const;
+
+export type GetApiRealmsByRealmIdPinsStatus200ContentItemsSearchTagMatchesExpressionGroupKeySemanticRoleEnum =
+	(typeof GetApiRealmsByRealmIdPinsStatus200ContentItemsSearchTagMatchesExpressionGroupKeySemanticRoleEnum)[keyof typeof GetApiRealmsByRealmIdPinsStatus200ContentItemsSearchTagMatchesExpressionGroupKeySemanticRoleEnum];
+
+export const GetApiRealmsByRealmIdPinsStatus200ContentItemsSearchTagMatchesExpressionGroupKeyLanguage =
+	{
+		zh: "zh",
+		en: "en",
+		ja: "ja",
+		ko: "ko",
+		de: "de",
+		fr: "fr",
+		es: "es",
+	} as const;
+
+export type GetApiRealmsByRealmIdPinsStatus200ContentItemsSearchTagMatchesExpressionGroupKeyLanguage =
+	(typeof GetApiRealmsByRealmIdPinsStatus200ContentItemsSearchTagMatchesExpressionGroupKeyLanguage)[keyof typeof GetApiRealmsByRealmIdPinsStatus200ContentItemsSearchTagMatchesExpressionGroupKeyLanguage];
+
 export const GetApiRealmsByRealmIdPinsStatus200ContentItemsUnitKindEnum = {
 	profile: "profile",
 	book: "book",
@@ -168188,6 +172368,90 @@ export type GetApiRealmsByRealmIdPinsStatus200 = {
 					  } | null)
 					| null;
 				/**
+				 * @type array | undefined
+				 */
+				searchTagMatches?: {
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					matchedTagId: string;
+					/**
+					 * @default 'direct'
+					 * @type string
+					 */
+					evidence: GetApiRealmsByRealmIdPinsStatus200ContentItemsSearchTagMatchesEvidenceEnum;
+					/**
+					 * @type object
+					 */
+					expression: {
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						expressionId: string;
+						/**
+						 * @default 'simple'
+						 * @type string
+						 */
+						expressionKind: GetApiRealmsByRealmIdPinsStatus200ContentItemsSearchTagMatchesExpressionExpressionKindEnum;
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						focusTagId: string;
+						presentationRevision: string | number;
+						/**
+						 * @type array
+						 */
+						components: {
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							tagId: string;
+							/**
+							 * @default 'predicate'
+							 * @type string
+							 */
+							semanticRole: GetApiRealmsByRealmIdPinsStatus200ContentItemsSearchTagMatchesExpressionComponentsSemanticRoleEnum;
+							/**
+							 * @default 'required'
+							 * @type string
+							 */
+							componentKind: GetApiRealmsByRealmIdPinsStatus200ContentItemsSearchTagMatchesExpressionComponentsComponentKindEnum;
+							language:
+								| (GetApiRealmsByRealmIdPinsStatus200ContentItemsSearchTagMatchesExpressionComponentsLanguage | null)
+								| null;
+							title: (string | null) | null;
+						}[];
+						groupKey:
+							| ({
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									tagId: string;
+									/**
+									 * @default 'predicate'
+									 * @type string
+									 */
+									semanticRole: GetApiRealmsByRealmIdPinsStatus200ContentItemsSearchTagMatchesExpressionGroupKeySemanticRoleEnum;
+									language:
+										| (GetApiRealmsByRealmIdPinsStatus200ContentItemsSearchTagMatchesExpressionGroupKeyLanguage | null)
+										| null;
+									title: (string | null) | null;
+							  } | null)
+							| null;
+					};
+				}[];
+				tagOtherPositionCount?: string | number;
+				/**
 				 * @type string
 				 */
 				itemType: "unit";
@@ -168671,6 +172935,90 @@ export type GetApiRealmsByRealmIdPinsStatus200 = {
 									signature: string;
 							  } | null)
 							| null;
+						/**
+						 * @type array | undefined
+						 */
+						searchTagMatches?: {
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							matchedTagId: string;
+							/**
+							 * @default 'direct'
+							 * @type string
+							 */
+							evidence: GetApiRealmsByRealmIdPinsStatus200ContentItemsSearchTagMatchesEvidenceEnum;
+							/**
+							 * @type object
+							 */
+							expression: {
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								expressionId: string;
+								/**
+								 * @default 'simple'
+								 * @type string
+								 */
+								expressionKind: GetApiRealmsByRealmIdPinsStatus200ContentItemsSearchTagMatchesExpressionExpressionKindEnum;
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								focusTagId: string;
+								presentationRevision: string | number;
+								/**
+								 * @type array
+								 */
+								components: {
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									tagId: string;
+									/**
+									 * @default 'predicate'
+									 * @type string
+									 */
+									semanticRole: GetApiRealmsByRealmIdPinsStatus200ContentItemsSearchTagMatchesExpressionComponentsSemanticRoleEnum;
+									/**
+									 * @default 'required'
+									 * @type string
+									 */
+									componentKind: GetApiRealmsByRealmIdPinsStatus200ContentItemsSearchTagMatchesExpressionComponentsComponentKindEnum;
+									language:
+										| (GetApiRealmsByRealmIdPinsStatus200ContentItemsSearchTagMatchesExpressionComponentsLanguage | null)
+										| null;
+									title: (string | null) | null;
+								}[];
+								groupKey:
+									| ({
+											/**
+											 * @description
+											 * Format: `uuid`
+											 * @type string
+											 */
+											tagId: string;
+											/**
+											 * @default 'predicate'
+											 * @type string
+											 */
+											semanticRole: GetApiRealmsByRealmIdPinsStatus200ContentItemsSearchTagMatchesExpressionGroupKeySemanticRoleEnum;
+											language:
+												| (GetApiRealmsByRealmIdPinsStatus200ContentItemsSearchTagMatchesExpressionGroupKeyLanguage | null)
+												| null;
+											title: (string | null) | null;
+									  } | null)
+									| null;
+							};
+						}[];
+						tagOtherPositionCount?: string | number;
 						/**
 						 * @type string
 						 */
@@ -169369,6 +173717,90 @@ export type GetApiRealmsByRealmIdPinsStatus200 = {
 									signature: string;
 							  } | null)
 							| null;
+						/**
+						 * @type array | undefined
+						 */
+						searchTagMatches?: {
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							matchedTagId: string;
+							/**
+							 * @default 'direct'
+							 * @type string
+							 */
+							evidence: GetApiRealmsByRealmIdPinsStatus200ContentItemsSearchTagMatchesEvidenceEnum;
+							/**
+							 * @type object
+							 */
+							expression: {
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								expressionId: string;
+								/**
+								 * @default 'simple'
+								 * @type string
+								 */
+								expressionKind: GetApiRealmsByRealmIdPinsStatus200ContentItemsSearchTagMatchesExpressionExpressionKindEnum;
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								focusTagId: string;
+								presentationRevision: string | number;
+								/**
+								 * @type array
+								 */
+								components: {
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									tagId: string;
+									/**
+									 * @default 'predicate'
+									 * @type string
+									 */
+									semanticRole: GetApiRealmsByRealmIdPinsStatus200ContentItemsSearchTagMatchesExpressionComponentsSemanticRoleEnum;
+									/**
+									 * @default 'required'
+									 * @type string
+									 */
+									componentKind: GetApiRealmsByRealmIdPinsStatus200ContentItemsSearchTagMatchesExpressionComponentsComponentKindEnum;
+									language:
+										| (GetApiRealmsByRealmIdPinsStatus200ContentItemsSearchTagMatchesExpressionComponentsLanguage | null)
+										| null;
+									title: (string | null) | null;
+								}[];
+								groupKey:
+									| ({
+											/**
+											 * @description
+											 * Format: `uuid`
+											 * @type string
+											 */
+											tagId: string;
+											/**
+											 * @default 'predicate'
+											 * @type string
+											 */
+											semanticRole: GetApiRealmsByRealmIdPinsStatus200ContentItemsSearchTagMatchesExpressionGroupKeySemanticRoleEnum;
+											language:
+												| (GetApiRealmsByRealmIdPinsStatus200ContentItemsSearchTagMatchesExpressionGroupKeyLanguage | null)
+												| null;
+											title: (string | null) | null;
+									  } | null)
+									| null;
+							};
+						}[];
+						tagOtherPositionCount?: string | number;
 						/**
 						 * @type string
 						 */
@@ -170085,6 +174517,90 @@ export type GetApiRealmsByRealmIdPinsStatus200 = {
 									signature: string;
 							  } | null)
 							| null;
+						/**
+						 * @type array | undefined
+						 */
+						searchTagMatches?: {
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							matchedTagId: string;
+							/**
+							 * @default 'direct'
+							 * @type string
+							 */
+							evidence: GetApiRealmsByRealmIdPinsStatus200ContentItemsSearchTagMatchesEvidenceEnum;
+							/**
+							 * @type object
+							 */
+							expression: {
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								expressionId: string;
+								/**
+								 * @default 'simple'
+								 * @type string
+								 */
+								expressionKind: GetApiRealmsByRealmIdPinsStatus200ContentItemsSearchTagMatchesExpressionExpressionKindEnum;
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								focusTagId: string;
+								presentationRevision: string | number;
+								/**
+								 * @type array
+								 */
+								components: {
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									tagId: string;
+									/**
+									 * @default 'predicate'
+									 * @type string
+									 */
+									semanticRole: GetApiRealmsByRealmIdPinsStatus200ContentItemsSearchTagMatchesExpressionComponentsSemanticRoleEnum;
+									/**
+									 * @default 'required'
+									 * @type string
+									 */
+									componentKind: GetApiRealmsByRealmIdPinsStatus200ContentItemsSearchTagMatchesExpressionComponentsComponentKindEnum;
+									language:
+										| (GetApiRealmsByRealmIdPinsStatus200ContentItemsSearchTagMatchesExpressionComponentsLanguage | null)
+										| null;
+									title: (string | null) | null;
+								}[];
+								groupKey:
+									| ({
+											/**
+											 * @description
+											 * Format: `uuid`
+											 * @type string
+											 */
+											tagId: string;
+											/**
+											 * @default 'predicate'
+											 * @type string
+											 */
+											semanticRole: GetApiRealmsByRealmIdPinsStatus200ContentItemsSearchTagMatchesExpressionGroupKeySemanticRoleEnum;
+											language:
+												| (GetApiRealmsByRealmIdPinsStatus200ContentItemsSearchTagMatchesExpressionGroupKeyLanguage | null)
+												| null;
+											title: (string | null) | null;
+									  } | null)
+									| null;
+							};
+						}[];
+						tagOtherPositionCount?: string | number;
 						/**
 						 * @type string
 						 */
@@ -178077,6 +182593,84 @@ export const PostApiSearchFilterExecuteStatus200GroupsHitsVariantMainUnitLanguag
 export type PostApiSearchFilterExecuteStatus200GroupsHitsVariantMainUnitLanguageEnum =
 	(typeof PostApiSearchFilterExecuteStatus200GroupsHitsVariantMainUnitLanguageEnum)[keyof typeof PostApiSearchFilterExecuteStatus200GroupsHitsVariantMainUnitLanguageEnum];
 
+export const PostApiSearchFilterExecuteStatus200GroupsHitsTagMatchesEvidenceEnum = {
+	direct: "direct",
+	primary: "primary",
+	entailed: "entailed",
+	retrieval_only: "retrieval_only",
+} as const;
+
+export type PostApiSearchFilterExecuteStatus200GroupsHitsTagMatchesEvidenceEnum =
+	(typeof PostApiSearchFilterExecuteStatus200GroupsHitsTagMatchesEvidenceEnum)[keyof typeof PostApiSearchFilterExecuteStatus200GroupsHitsTagMatchesEvidenceEnum];
+
+export const PostApiSearchFilterExecuteStatus200GroupsHitsTagMatchesExpressionExpressionKindEnum = {
+	simple: "simple",
+	facet_value: "facet_value",
+	relation: "relation",
+} as const;
+
+export type PostApiSearchFilterExecuteStatus200GroupsHitsTagMatchesExpressionExpressionKindEnum =
+	(typeof PostApiSearchFilterExecuteStatus200GroupsHitsTagMatchesExpressionExpressionKindEnum)[keyof typeof PostApiSearchFilterExecuteStatus200GroupsHitsTagMatchesExpressionExpressionKindEnum];
+
+export const PostApiSearchFilterExecuteStatus200GroupsHitsTagMatchesExpressionComponentsSemanticRoleEnum =
+	{
+		predicate: "predicate",
+		slot: "slot",
+		value: "value",
+		focus: "focus",
+		qualifier: "qualifier",
+	} as const;
+
+export type PostApiSearchFilterExecuteStatus200GroupsHitsTagMatchesExpressionComponentsSemanticRoleEnum =
+	(typeof PostApiSearchFilterExecuteStatus200GroupsHitsTagMatchesExpressionComponentsSemanticRoleEnum)[keyof typeof PostApiSearchFilterExecuteStatus200GroupsHitsTagMatchesExpressionComponentsSemanticRoleEnum];
+
+export const PostApiSearchFilterExecuteStatus200GroupsHitsTagMatchesExpressionComponentsComponentKindEnum =
+	{
+		required: "required",
+		fallback: "fallback",
+	} as const;
+
+export type PostApiSearchFilterExecuteStatus200GroupsHitsTagMatchesExpressionComponentsComponentKindEnum =
+	(typeof PostApiSearchFilterExecuteStatus200GroupsHitsTagMatchesExpressionComponentsComponentKindEnum)[keyof typeof PostApiSearchFilterExecuteStatus200GroupsHitsTagMatchesExpressionComponentsComponentKindEnum];
+
+export const PostApiSearchFilterExecuteStatus200GroupsHitsTagMatchesExpressionComponentsLanguage = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type PostApiSearchFilterExecuteStatus200GroupsHitsTagMatchesExpressionComponentsLanguage =
+	(typeof PostApiSearchFilterExecuteStatus200GroupsHitsTagMatchesExpressionComponentsLanguage)[keyof typeof PostApiSearchFilterExecuteStatus200GroupsHitsTagMatchesExpressionComponentsLanguage];
+
+export const PostApiSearchFilterExecuteStatus200GroupsHitsTagMatchesExpressionGroupKeySemanticRoleEnum =
+	{
+		predicate: "predicate",
+		slot: "slot",
+		value: "value",
+		focus: "focus",
+		qualifier: "qualifier",
+	} as const;
+
+export type PostApiSearchFilterExecuteStatus200GroupsHitsTagMatchesExpressionGroupKeySemanticRoleEnum =
+	(typeof PostApiSearchFilterExecuteStatus200GroupsHitsTagMatchesExpressionGroupKeySemanticRoleEnum)[keyof typeof PostApiSearchFilterExecuteStatus200GroupsHitsTagMatchesExpressionGroupKeySemanticRoleEnum];
+
+export const PostApiSearchFilterExecuteStatus200GroupsHitsTagMatchesExpressionGroupKeyLanguage = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type PostApiSearchFilterExecuteStatus200GroupsHitsTagMatchesExpressionGroupKeyLanguage =
+	(typeof PostApiSearchFilterExecuteStatus200GroupsHitsTagMatchesExpressionGroupKeyLanguage)[keyof typeof PostApiSearchFilterExecuteStatus200GroupsHitsTagMatchesExpressionGroupKeyLanguage];
+
 /**
  * @type object
  */
@@ -178333,6 +182927,90 @@ export type PostApiSearchFilterExecuteStatus200 = {
 				  };
 			name?: (string | null) | null;
 			summary: (string | null) | null;
+			/**
+			 * @type array | undefined
+			 */
+			tagMatches?: {
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				matchedTagId: string;
+				/**
+				 * @default 'direct'
+				 * @type string
+				 */
+				evidence: PostApiSearchFilterExecuteStatus200GroupsHitsTagMatchesEvidenceEnum;
+				/**
+				 * @type object
+				 */
+				expression: {
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					expressionId: string;
+					/**
+					 * @default 'simple'
+					 * @type string
+					 */
+					expressionKind: PostApiSearchFilterExecuteStatus200GroupsHitsTagMatchesExpressionExpressionKindEnum;
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					focusTagId: string;
+					presentationRevision: string | number;
+					/**
+					 * @type array
+					 */
+					components: {
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						tagId: string;
+						/**
+						 * @default 'predicate'
+						 * @type string
+						 */
+						semanticRole: PostApiSearchFilterExecuteStatus200GroupsHitsTagMatchesExpressionComponentsSemanticRoleEnum;
+						/**
+						 * @default 'required'
+						 * @type string
+						 */
+						componentKind: PostApiSearchFilterExecuteStatus200GroupsHitsTagMatchesExpressionComponentsComponentKindEnum;
+						language:
+							| (PostApiSearchFilterExecuteStatus200GroupsHitsTagMatchesExpressionComponentsLanguage | null)
+							| null;
+						title: (string | null) | null;
+					}[];
+					groupKey:
+						| ({
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								tagId: string;
+								/**
+								 * @default 'predicate'
+								 * @type string
+								 */
+								semanticRole: PostApiSearchFilterExecuteStatus200GroupsHitsTagMatchesExpressionGroupKeySemanticRoleEnum;
+								language:
+									| (PostApiSearchFilterExecuteStatus200GroupsHitsTagMatchesExpressionGroupKeyLanguage | null)
+									| null;
+								title: (string | null) | null;
+						  } | null)
+						| null;
+				};
+			}[];
+			tagOtherPositionCount?: string | number;
 		}[];
 		total:
 			| {
@@ -179555,6 +184233,84 @@ export const PostApiSearchFilterFeedStatus200ItemsTrackingSurfaceEnum = {
 export type PostApiSearchFilterFeedStatus200ItemsTrackingSurfaceEnum =
 	(typeof PostApiSearchFilterFeedStatus200ItemsTrackingSurfaceEnum)[keyof typeof PostApiSearchFilterFeedStatus200ItemsTrackingSurfaceEnum];
 
+export const PostApiSearchFilterFeedStatus200ItemsSearchTagMatchesEvidenceEnum = {
+	direct: "direct",
+	primary: "primary",
+	entailed: "entailed",
+	retrieval_only: "retrieval_only",
+} as const;
+
+export type PostApiSearchFilterFeedStatus200ItemsSearchTagMatchesEvidenceEnum =
+	(typeof PostApiSearchFilterFeedStatus200ItemsSearchTagMatchesEvidenceEnum)[keyof typeof PostApiSearchFilterFeedStatus200ItemsSearchTagMatchesEvidenceEnum];
+
+export const PostApiSearchFilterFeedStatus200ItemsSearchTagMatchesExpressionExpressionKindEnum = {
+	simple: "simple",
+	facet_value: "facet_value",
+	relation: "relation",
+} as const;
+
+export type PostApiSearchFilterFeedStatus200ItemsSearchTagMatchesExpressionExpressionKindEnum =
+	(typeof PostApiSearchFilterFeedStatus200ItemsSearchTagMatchesExpressionExpressionKindEnum)[keyof typeof PostApiSearchFilterFeedStatus200ItemsSearchTagMatchesExpressionExpressionKindEnum];
+
+export const PostApiSearchFilterFeedStatus200ItemsSearchTagMatchesExpressionComponentsSemanticRoleEnum =
+	{
+		predicate: "predicate",
+		slot: "slot",
+		value: "value",
+		focus: "focus",
+		qualifier: "qualifier",
+	} as const;
+
+export type PostApiSearchFilterFeedStatus200ItemsSearchTagMatchesExpressionComponentsSemanticRoleEnum =
+	(typeof PostApiSearchFilterFeedStatus200ItemsSearchTagMatchesExpressionComponentsSemanticRoleEnum)[keyof typeof PostApiSearchFilterFeedStatus200ItemsSearchTagMatchesExpressionComponentsSemanticRoleEnum];
+
+export const PostApiSearchFilterFeedStatus200ItemsSearchTagMatchesExpressionComponentsComponentKindEnum =
+	{
+		required: "required",
+		fallback: "fallback",
+	} as const;
+
+export type PostApiSearchFilterFeedStatus200ItemsSearchTagMatchesExpressionComponentsComponentKindEnum =
+	(typeof PostApiSearchFilterFeedStatus200ItemsSearchTagMatchesExpressionComponentsComponentKindEnum)[keyof typeof PostApiSearchFilterFeedStatus200ItemsSearchTagMatchesExpressionComponentsComponentKindEnum];
+
+export const PostApiSearchFilterFeedStatus200ItemsSearchTagMatchesExpressionComponentsLanguage = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type PostApiSearchFilterFeedStatus200ItemsSearchTagMatchesExpressionComponentsLanguage =
+	(typeof PostApiSearchFilterFeedStatus200ItemsSearchTagMatchesExpressionComponentsLanguage)[keyof typeof PostApiSearchFilterFeedStatus200ItemsSearchTagMatchesExpressionComponentsLanguage];
+
+export const PostApiSearchFilterFeedStatus200ItemsSearchTagMatchesExpressionGroupKeySemanticRoleEnum =
+	{
+		predicate: "predicate",
+		slot: "slot",
+		value: "value",
+		focus: "focus",
+		qualifier: "qualifier",
+	} as const;
+
+export type PostApiSearchFilterFeedStatus200ItemsSearchTagMatchesExpressionGroupKeySemanticRoleEnum =
+	(typeof PostApiSearchFilterFeedStatus200ItemsSearchTagMatchesExpressionGroupKeySemanticRoleEnum)[keyof typeof PostApiSearchFilterFeedStatus200ItemsSearchTagMatchesExpressionGroupKeySemanticRoleEnum];
+
+export const PostApiSearchFilterFeedStatus200ItemsSearchTagMatchesExpressionGroupKeyLanguage = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type PostApiSearchFilterFeedStatus200ItemsSearchTagMatchesExpressionGroupKeyLanguage =
+	(typeof PostApiSearchFilterFeedStatus200ItemsSearchTagMatchesExpressionGroupKeyLanguage)[keyof typeof PostApiSearchFilterFeedStatus200ItemsSearchTagMatchesExpressionGroupKeyLanguage];
+
 export const PostApiSearchFilterFeedStatus200ItemsUnitKindEnum = {
 	profile: "profile",
 	book: "book",
@@ -180072,6 +184828,90 @@ export type PostApiSearchFilterFeedStatus200 = {
 					  } | null)
 					| null;
 				/**
+				 * @type array | undefined
+				 */
+				searchTagMatches?: {
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					matchedTagId: string;
+					/**
+					 * @default 'direct'
+					 * @type string
+					 */
+					evidence: PostApiSearchFilterFeedStatus200ItemsSearchTagMatchesEvidenceEnum;
+					/**
+					 * @type object
+					 */
+					expression: {
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						expressionId: string;
+						/**
+						 * @default 'simple'
+						 * @type string
+						 */
+						expressionKind: PostApiSearchFilterFeedStatus200ItemsSearchTagMatchesExpressionExpressionKindEnum;
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						focusTagId: string;
+						presentationRevision: string | number;
+						/**
+						 * @type array
+						 */
+						components: {
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							tagId: string;
+							/**
+							 * @default 'predicate'
+							 * @type string
+							 */
+							semanticRole: PostApiSearchFilterFeedStatus200ItemsSearchTagMatchesExpressionComponentsSemanticRoleEnum;
+							/**
+							 * @default 'required'
+							 * @type string
+							 */
+							componentKind: PostApiSearchFilterFeedStatus200ItemsSearchTagMatchesExpressionComponentsComponentKindEnum;
+							language:
+								| (PostApiSearchFilterFeedStatus200ItemsSearchTagMatchesExpressionComponentsLanguage | null)
+								| null;
+							title: (string | null) | null;
+						}[];
+						groupKey:
+							| ({
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									tagId: string;
+									/**
+									 * @default 'predicate'
+									 * @type string
+									 */
+									semanticRole: PostApiSearchFilterFeedStatus200ItemsSearchTagMatchesExpressionGroupKeySemanticRoleEnum;
+									language:
+										| (PostApiSearchFilterFeedStatus200ItemsSearchTagMatchesExpressionGroupKeyLanguage | null)
+										| null;
+									title: (string | null) | null;
+							  } | null)
+							| null;
+					};
+				}[];
+				tagOtherPositionCount?: string | number;
+				/**
 				 * @type string
 				 */
 				itemType: "unit";
@@ -180555,6 +185395,90 @@ export type PostApiSearchFilterFeedStatus200 = {
 									signature: string;
 							  } | null)
 							| null;
+						/**
+						 * @type array | undefined
+						 */
+						searchTagMatches?: {
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							matchedTagId: string;
+							/**
+							 * @default 'direct'
+							 * @type string
+							 */
+							evidence: PostApiSearchFilterFeedStatus200ItemsSearchTagMatchesEvidenceEnum;
+							/**
+							 * @type object
+							 */
+							expression: {
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								expressionId: string;
+								/**
+								 * @default 'simple'
+								 * @type string
+								 */
+								expressionKind: PostApiSearchFilterFeedStatus200ItemsSearchTagMatchesExpressionExpressionKindEnum;
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								focusTagId: string;
+								presentationRevision: string | number;
+								/**
+								 * @type array
+								 */
+								components: {
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									tagId: string;
+									/**
+									 * @default 'predicate'
+									 * @type string
+									 */
+									semanticRole: PostApiSearchFilterFeedStatus200ItemsSearchTagMatchesExpressionComponentsSemanticRoleEnum;
+									/**
+									 * @default 'required'
+									 * @type string
+									 */
+									componentKind: PostApiSearchFilterFeedStatus200ItemsSearchTagMatchesExpressionComponentsComponentKindEnum;
+									language:
+										| (PostApiSearchFilterFeedStatus200ItemsSearchTagMatchesExpressionComponentsLanguage | null)
+										| null;
+									title: (string | null) | null;
+								}[];
+								groupKey:
+									| ({
+											/**
+											 * @description
+											 * Format: `uuid`
+											 * @type string
+											 */
+											tagId: string;
+											/**
+											 * @default 'predicate'
+											 * @type string
+											 */
+											semanticRole: PostApiSearchFilterFeedStatus200ItemsSearchTagMatchesExpressionGroupKeySemanticRoleEnum;
+											language:
+												| (PostApiSearchFilterFeedStatus200ItemsSearchTagMatchesExpressionGroupKeyLanguage | null)
+												| null;
+											title: (string | null) | null;
+									  } | null)
+									| null;
+							};
+						}[];
+						tagOtherPositionCount?: string | number;
 						/**
 						 * @type string
 						 */
@@ -181253,6 +186177,90 @@ export type PostApiSearchFilterFeedStatus200 = {
 									signature: string;
 							  } | null)
 							| null;
+						/**
+						 * @type array | undefined
+						 */
+						searchTagMatches?: {
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							matchedTagId: string;
+							/**
+							 * @default 'direct'
+							 * @type string
+							 */
+							evidence: PostApiSearchFilterFeedStatus200ItemsSearchTagMatchesEvidenceEnum;
+							/**
+							 * @type object
+							 */
+							expression: {
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								expressionId: string;
+								/**
+								 * @default 'simple'
+								 * @type string
+								 */
+								expressionKind: PostApiSearchFilterFeedStatus200ItemsSearchTagMatchesExpressionExpressionKindEnum;
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								focusTagId: string;
+								presentationRevision: string | number;
+								/**
+								 * @type array
+								 */
+								components: {
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									tagId: string;
+									/**
+									 * @default 'predicate'
+									 * @type string
+									 */
+									semanticRole: PostApiSearchFilterFeedStatus200ItemsSearchTagMatchesExpressionComponentsSemanticRoleEnum;
+									/**
+									 * @default 'required'
+									 * @type string
+									 */
+									componentKind: PostApiSearchFilterFeedStatus200ItemsSearchTagMatchesExpressionComponentsComponentKindEnum;
+									language:
+										| (PostApiSearchFilterFeedStatus200ItemsSearchTagMatchesExpressionComponentsLanguage | null)
+										| null;
+									title: (string | null) | null;
+								}[];
+								groupKey:
+									| ({
+											/**
+											 * @description
+											 * Format: `uuid`
+											 * @type string
+											 */
+											tagId: string;
+											/**
+											 * @default 'predicate'
+											 * @type string
+											 */
+											semanticRole: PostApiSearchFilterFeedStatus200ItemsSearchTagMatchesExpressionGroupKeySemanticRoleEnum;
+											language:
+												| (PostApiSearchFilterFeedStatus200ItemsSearchTagMatchesExpressionGroupKeyLanguage | null)
+												| null;
+											title: (string | null) | null;
+									  } | null)
+									| null;
+							};
+						}[];
+						tagOtherPositionCount?: string | number;
 						/**
 						 * @type string
 						 */
@@ -181969,6 +186977,90 @@ export type PostApiSearchFilterFeedStatus200 = {
 									signature: string;
 							  } | null)
 							| null;
+						/**
+						 * @type array | undefined
+						 */
+						searchTagMatches?: {
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							matchedTagId: string;
+							/**
+							 * @default 'direct'
+							 * @type string
+							 */
+							evidence: PostApiSearchFilterFeedStatus200ItemsSearchTagMatchesEvidenceEnum;
+							/**
+							 * @type object
+							 */
+							expression: {
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								expressionId: string;
+								/**
+								 * @default 'simple'
+								 * @type string
+								 */
+								expressionKind: PostApiSearchFilterFeedStatus200ItemsSearchTagMatchesExpressionExpressionKindEnum;
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								focusTagId: string;
+								presentationRevision: string | number;
+								/**
+								 * @type array
+								 */
+								components: {
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									tagId: string;
+									/**
+									 * @default 'predicate'
+									 * @type string
+									 */
+									semanticRole: PostApiSearchFilterFeedStatus200ItemsSearchTagMatchesExpressionComponentsSemanticRoleEnum;
+									/**
+									 * @default 'required'
+									 * @type string
+									 */
+									componentKind: PostApiSearchFilterFeedStatus200ItemsSearchTagMatchesExpressionComponentsComponentKindEnum;
+									language:
+										| (PostApiSearchFilterFeedStatus200ItemsSearchTagMatchesExpressionComponentsLanguage | null)
+										| null;
+									title: (string | null) | null;
+								}[];
+								groupKey:
+									| ({
+											/**
+											 * @description
+											 * Format: `uuid`
+											 * @type string
+											 */
+											tagId: string;
+											/**
+											 * @default 'predicate'
+											 * @type string
+											 */
+											semanticRole: PostApiSearchFilterFeedStatus200ItemsSearchTagMatchesExpressionGroupKeySemanticRoleEnum;
+											language:
+												| (PostApiSearchFilterFeedStatus200ItemsSearchTagMatchesExpressionGroupKeyLanguage | null)
+												| null;
+											title: (string | null) | null;
+									  } | null)
+									| null;
+							};
+						}[];
+						tagOtherPositionCount?: string | number;
 						/**
 						 * @type string
 						 */
@@ -183831,6 +188923,87 @@ export const PostApiSearchZonesByZoneIdFilterExecuteStatus200GroupsHitsVariantMa
 export type PostApiSearchZonesByZoneIdFilterExecuteStatus200GroupsHitsVariantMainUnitLanguageEnum =
 	(typeof PostApiSearchZonesByZoneIdFilterExecuteStatus200GroupsHitsVariantMainUnitLanguageEnum)[keyof typeof PostApiSearchZonesByZoneIdFilterExecuteStatus200GroupsHitsVariantMainUnitLanguageEnum];
 
+export const PostApiSearchZonesByZoneIdFilterExecuteStatus200GroupsHitsTagMatchesEvidenceEnum = {
+	direct: "direct",
+	primary: "primary",
+	entailed: "entailed",
+	retrieval_only: "retrieval_only",
+} as const;
+
+export type PostApiSearchZonesByZoneIdFilterExecuteStatus200GroupsHitsTagMatchesEvidenceEnum =
+	(typeof PostApiSearchZonesByZoneIdFilterExecuteStatus200GroupsHitsTagMatchesEvidenceEnum)[keyof typeof PostApiSearchZonesByZoneIdFilterExecuteStatus200GroupsHitsTagMatchesEvidenceEnum];
+
+export const PostApiSearchZonesByZoneIdFilterExecuteStatus200GroupsHitsTagMatchesExpressionExpressionKindEnum =
+	{
+		simple: "simple",
+		facet_value: "facet_value",
+		relation: "relation",
+	} as const;
+
+export type PostApiSearchZonesByZoneIdFilterExecuteStatus200GroupsHitsTagMatchesExpressionExpressionKindEnum =
+	(typeof PostApiSearchZonesByZoneIdFilterExecuteStatus200GroupsHitsTagMatchesExpressionExpressionKindEnum)[keyof typeof PostApiSearchZonesByZoneIdFilterExecuteStatus200GroupsHitsTagMatchesExpressionExpressionKindEnum];
+
+export const PostApiSearchZonesByZoneIdFilterExecuteStatus200GroupsHitsTagMatchesExpressionComponentsSemanticRoleEnum =
+	{
+		predicate: "predicate",
+		slot: "slot",
+		value: "value",
+		focus: "focus",
+		qualifier: "qualifier",
+	} as const;
+
+export type PostApiSearchZonesByZoneIdFilterExecuteStatus200GroupsHitsTagMatchesExpressionComponentsSemanticRoleEnum =
+	(typeof PostApiSearchZonesByZoneIdFilterExecuteStatus200GroupsHitsTagMatchesExpressionComponentsSemanticRoleEnum)[keyof typeof PostApiSearchZonesByZoneIdFilterExecuteStatus200GroupsHitsTagMatchesExpressionComponentsSemanticRoleEnum];
+
+export const PostApiSearchZonesByZoneIdFilterExecuteStatus200GroupsHitsTagMatchesExpressionComponentsComponentKindEnum =
+	{
+		required: "required",
+		fallback: "fallback",
+	} as const;
+
+export type PostApiSearchZonesByZoneIdFilterExecuteStatus200GroupsHitsTagMatchesExpressionComponentsComponentKindEnum =
+	(typeof PostApiSearchZonesByZoneIdFilterExecuteStatus200GroupsHitsTagMatchesExpressionComponentsComponentKindEnum)[keyof typeof PostApiSearchZonesByZoneIdFilterExecuteStatus200GroupsHitsTagMatchesExpressionComponentsComponentKindEnum];
+
+export const PostApiSearchZonesByZoneIdFilterExecuteStatus200GroupsHitsTagMatchesExpressionComponentsLanguage =
+	{
+		zh: "zh",
+		en: "en",
+		ja: "ja",
+		ko: "ko",
+		de: "de",
+		fr: "fr",
+		es: "es",
+	} as const;
+
+export type PostApiSearchZonesByZoneIdFilterExecuteStatus200GroupsHitsTagMatchesExpressionComponentsLanguage =
+	(typeof PostApiSearchZonesByZoneIdFilterExecuteStatus200GroupsHitsTagMatchesExpressionComponentsLanguage)[keyof typeof PostApiSearchZonesByZoneIdFilterExecuteStatus200GroupsHitsTagMatchesExpressionComponentsLanguage];
+
+export const PostApiSearchZonesByZoneIdFilterExecuteStatus200GroupsHitsTagMatchesExpressionGroupKeySemanticRoleEnum =
+	{
+		predicate: "predicate",
+		slot: "slot",
+		value: "value",
+		focus: "focus",
+		qualifier: "qualifier",
+	} as const;
+
+export type PostApiSearchZonesByZoneIdFilterExecuteStatus200GroupsHitsTagMatchesExpressionGroupKeySemanticRoleEnum =
+	(typeof PostApiSearchZonesByZoneIdFilterExecuteStatus200GroupsHitsTagMatchesExpressionGroupKeySemanticRoleEnum)[keyof typeof PostApiSearchZonesByZoneIdFilterExecuteStatus200GroupsHitsTagMatchesExpressionGroupKeySemanticRoleEnum];
+
+export const PostApiSearchZonesByZoneIdFilterExecuteStatus200GroupsHitsTagMatchesExpressionGroupKeyLanguage =
+	{
+		zh: "zh",
+		en: "en",
+		ja: "ja",
+		ko: "ko",
+		de: "de",
+		fr: "fr",
+		es: "es",
+	} as const;
+
+export type PostApiSearchZonesByZoneIdFilterExecuteStatus200GroupsHitsTagMatchesExpressionGroupKeyLanguage =
+	(typeof PostApiSearchZonesByZoneIdFilterExecuteStatus200GroupsHitsTagMatchesExpressionGroupKeyLanguage)[keyof typeof PostApiSearchZonesByZoneIdFilterExecuteStatus200GroupsHitsTagMatchesExpressionGroupKeyLanguage];
+
 /**
  * @type object
  */
@@ -184087,6 +189260,90 @@ export type PostApiSearchZonesByZoneIdFilterExecuteStatus200 = {
 				  };
 			name?: (string | null) | null;
 			summary: (string | null) | null;
+			/**
+			 * @type array | undefined
+			 */
+			tagMatches?: {
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				matchedTagId: string;
+				/**
+				 * @default 'direct'
+				 * @type string
+				 */
+				evidence: PostApiSearchZonesByZoneIdFilterExecuteStatus200GroupsHitsTagMatchesEvidenceEnum;
+				/**
+				 * @type object
+				 */
+				expression: {
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					expressionId: string;
+					/**
+					 * @default 'simple'
+					 * @type string
+					 */
+					expressionKind: PostApiSearchZonesByZoneIdFilterExecuteStatus200GroupsHitsTagMatchesExpressionExpressionKindEnum;
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					focusTagId: string;
+					presentationRevision: string | number;
+					/**
+					 * @type array
+					 */
+					components: {
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						tagId: string;
+						/**
+						 * @default 'predicate'
+						 * @type string
+						 */
+						semanticRole: PostApiSearchZonesByZoneIdFilterExecuteStatus200GroupsHitsTagMatchesExpressionComponentsSemanticRoleEnum;
+						/**
+						 * @default 'required'
+						 * @type string
+						 */
+						componentKind: PostApiSearchZonesByZoneIdFilterExecuteStatus200GroupsHitsTagMatchesExpressionComponentsComponentKindEnum;
+						language:
+							| (PostApiSearchZonesByZoneIdFilterExecuteStatus200GroupsHitsTagMatchesExpressionComponentsLanguage | null)
+							| null;
+						title: (string | null) | null;
+					}[];
+					groupKey:
+						| ({
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								tagId: string;
+								/**
+								 * @default 'predicate'
+								 * @type string
+								 */
+								semanticRole: PostApiSearchZonesByZoneIdFilterExecuteStatus200GroupsHitsTagMatchesExpressionGroupKeySemanticRoleEnum;
+								language:
+									| (PostApiSearchZonesByZoneIdFilterExecuteStatus200GroupsHitsTagMatchesExpressionGroupKeyLanguage | null)
+									| null;
+								title: (string | null) | null;
+						  } | null)
+						| null;
+				};
+			}[];
+			tagOtherPositionCount?: string | number;
 		}[];
 		total:
 			| {
@@ -185295,6 +190552,87 @@ export const PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsTrackingSurfaceEn
 export type PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsTrackingSurfaceEnum =
 	(typeof PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsTrackingSurfaceEnum)[keyof typeof PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsTrackingSurfaceEnum];
 
+export const PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsSearchTagMatchesEvidenceEnum = {
+	direct: "direct",
+	primary: "primary",
+	entailed: "entailed",
+	retrieval_only: "retrieval_only",
+} as const;
+
+export type PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsSearchTagMatchesEvidenceEnum =
+	(typeof PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsSearchTagMatchesEvidenceEnum)[keyof typeof PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsSearchTagMatchesEvidenceEnum];
+
+export const PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsSearchTagMatchesExpressionExpressionKindEnum =
+	{
+		simple: "simple",
+		facet_value: "facet_value",
+		relation: "relation",
+	} as const;
+
+export type PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsSearchTagMatchesExpressionExpressionKindEnum =
+	(typeof PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsSearchTagMatchesExpressionExpressionKindEnum)[keyof typeof PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsSearchTagMatchesExpressionExpressionKindEnum];
+
+export const PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsSearchTagMatchesExpressionComponentsSemanticRoleEnum =
+	{
+		predicate: "predicate",
+		slot: "slot",
+		value: "value",
+		focus: "focus",
+		qualifier: "qualifier",
+	} as const;
+
+export type PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsSearchTagMatchesExpressionComponentsSemanticRoleEnum =
+	(typeof PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsSearchTagMatchesExpressionComponentsSemanticRoleEnum)[keyof typeof PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsSearchTagMatchesExpressionComponentsSemanticRoleEnum];
+
+export const PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsSearchTagMatchesExpressionComponentsComponentKindEnum =
+	{
+		required: "required",
+		fallback: "fallback",
+	} as const;
+
+export type PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsSearchTagMatchesExpressionComponentsComponentKindEnum =
+	(typeof PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsSearchTagMatchesExpressionComponentsComponentKindEnum)[keyof typeof PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsSearchTagMatchesExpressionComponentsComponentKindEnum];
+
+export const PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsSearchTagMatchesExpressionComponentsLanguage =
+	{
+		zh: "zh",
+		en: "en",
+		ja: "ja",
+		ko: "ko",
+		de: "de",
+		fr: "fr",
+		es: "es",
+	} as const;
+
+export type PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsSearchTagMatchesExpressionComponentsLanguage =
+	(typeof PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsSearchTagMatchesExpressionComponentsLanguage)[keyof typeof PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsSearchTagMatchesExpressionComponentsLanguage];
+
+export const PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsSearchTagMatchesExpressionGroupKeySemanticRoleEnum =
+	{
+		predicate: "predicate",
+		slot: "slot",
+		value: "value",
+		focus: "focus",
+		qualifier: "qualifier",
+	} as const;
+
+export type PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsSearchTagMatchesExpressionGroupKeySemanticRoleEnum =
+	(typeof PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsSearchTagMatchesExpressionGroupKeySemanticRoleEnum)[keyof typeof PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsSearchTagMatchesExpressionGroupKeySemanticRoleEnum];
+
+export const PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsSearchTagMatchesExpressionGroupKeyLanguage =
+	{
+		zh: "zh",
+		en: "en",
+		ja: "ja",
+		ko: "ko",
+		de: "de",
+		fr: "fr",
+		es: "es",
+	} as const;
+
+export type PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsSearchTagMatchesExpressionGroupKeyLanguage =
+	(typeof PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsSearchTagMatchesExpressionGroupKeyLanguage)[keyof typeof PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsSearchTagMatchesExpressionGroupKeyLanguage];
+
 export const PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsUnitKindEnum = {
 	profile: "profile",
 	book: "book",
@@ -185815,6 +191153,90 @@ export type PostApiSearchZonesByZoneIdFilterFeedStatus200 = {
 					  } | null)
 					| null;
 				/**
+				 * @type array | undefined
+				 */
+				searchTagMatches?: {
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					matchedTagId: string;
+					/**
+					 * @default 'direct'
+					 * @type string
+					 */
+					evidence: PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsSearchTagMatchesEvidenceEnum;
+					/**
+					 * @type object
+					 */
+					expression: {
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						expressionId: string;
+						/**
+						 * @default 'simple'
+						 * @type string
+						 */
+						expressionKind: PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsSearchTagMatchesExpressionExpressionKindEnum;
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						focusTagId: string;
+						presentationRevision: string | number;
+						/**
+						 * @type array
+						 */
+						components: {
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							tagId: string;
+							/**
+							 * @default 'predicate'
+							 * @type string
+							 */
+							semanticRole: PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsSearchTagMatchesExpressionComponentsSemanticRoleEnum;
+							/**
+							 * @default 'required'
+							 * @type string
+							 */
+							componentKind: PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsSearchTagMatchesExpressionComponentsComponentKindEnum;
+							language:
+								| (PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsSearchTagMatchesExpressionComponentsLanguage | null)
+								| null;
+							title: (string | null) | null;
+						}[];
+						groupKey:
+							| ({
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									tagId: string;
+									/**
+									 * @default 'predicate'
+									 * @type string
+									 */
+									semanticRole: PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsSearchTagMatchesExpressionGroupKeySemanticRoleEnum;
+									language:
+										| (PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsSearchTagMatchesExpressionGroupKeyLanguage | null)
+										| null;
+									title: (string | null) | null;
+							  } | null)
+							| null;
+					};
+				}[];
+				tagOtherPositionCount?: string | number;
+				/**
 				 * @type string
 				 */
 				itemType: "unit";
@@ -186298,6 +191720,90 @@ export type PostApiSearchZonesByZoneIdFilterFeedStatus200 = {
 									signature: string;
 							  } | null)
 							| null;
+						/**
+						 * @type array | undefined
+						 */
+						searchTagMatches?: {
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							matchedTagId: string;
+							/**
+							 * @default 'direct'
+							 * @type string
+							 */
+							evidence: PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsSearchTagMatchesEvidenceEnum;
+							/**
+							 * @type object
+							 */
+							expression: {
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								expressionId: string;
+								/**
+								 * @default 'simple'
+								 * @type string
+								 */
+								expressionKind: PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsSearchTagMatchesExpressionExpressionKindEnum;
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								focusTagId: string;
+								presentationRevision: string | number;
+								/**
+								 * @type array
+								 */
+								components: {
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									tagId: string;
+									/**
+									 * @default 'predicate'
+									 * @type string
+									 */
+									semanticRole: PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsSearchTagMatchesExpressionComponentsSemanticRoleEnum;
+									/**
+									 * @default 'required'
+									 * @type string
+									 */
+									componentKind: PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsSearchTagMatchesExpressionComponentsComponentKindEnum;
+									language:
+										| (PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsSearchTagMatchesExpressionComponentsLanguage | null)
+										| null;
+									title: (string | null) | null;
+								}[];
+								groupKey:
+									| ({
+											/**
+											 * @description
+											 * Format: `uuid`
+											 * @type string
+											 */
+											tagId: string;
+											/**
+											 * @default 'predicate'
+											 * @type string
+											 */
+											semanticRole: PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsSearchTagMatchesExpressionGroupKeySemanticRoleEnum;
+											language:
+												| (PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsSearchTagMatchesExpressionGroupKeyLanguage | null)
+												| null;
+											title: (string | null) | null;
+									  } | null)
+									| null;
+							};
+						}[];
+						tagOtherPositionCount?: string | number;
 						/**
 						 * @type string
 						 */
@@ -186996,6 +192502,90 @@ export type PostApiSearchZonesByZoneIdFilterFeedStatus200 = {
 									signature: string;
 							  } | null)
 							| null;
+						/**
+						 * @type array | undefined
+						 */
+						searchTagMatches?: {
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							matchedTagId: string;
+							/**
+							 * @default 'direct'
+							 * @type string
+							 */
+							evidence: PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsSearchTagMatchesEvidenceEnum;
+							/**
+							 * @type object
+							 */
+							expression: {
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								expressionId: string;
+								/**
+								 * @default 'simple'
+								 * @type string
+								 */
+								expressionKind: PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsSearchTagMatchesExpressionExpressionKindEnum;
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								focusTagId: string;
+								presentationRevision: string | number;
+								/**
+								 * @type array
+								 */
+								components: {
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									tagId: string;
+									/**
+									 * @default 'predicate'
+									 * @type string
+									 */
+									semanticRole: PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsSearchTagMatchesExpressionComponentsSemanticRoleEnum;
+									/**
+									 * @default 'required'
+									 * @type string
+									 */
+									componentKind: PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsSearchTagMatchesExpressionComponentsComponentKindEnum;
+									language:
+										| (PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsSearchTagMatchesExpressionComponentsLanguage | null)
+										| null;
+									title: (string | null) | null;
+								}[];
+								groupKey:
+									| ({
+											/**
+											 * @description
+											 * Format: `uuid`
+											 * @type string
+											 */
+											tagId: string;
+											/**
+											 * @default 'predicate'
+											 * @type string
+											 */
+											semanticRole: PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsSearchTagMatchesExpressionGroupKeySemanticRoleEnum;
+											language:
+												| (PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsSearchTagMatchesExpressionGroupKeyLanguage | null)
+												| null;
+											title: (string | null) | null;
+									  } | null)
+									| null;
+							};
+						}[];
+						tagOtherPositionCount?: string | number;
 						/**
 						 * @type string
 						 */
@@ -187712,6 +193302,90 @@ export type PostApiSearchZonesByZoneIdFilterFeedStatus200 = {
 									signature: string;
 							  } | null)
 							| null;
+						/**
+						 * @type array | undefined
+						 */
+						searchTagMatches?: {
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							matchedTagId: string;
+							/**
+							 * @default 'direct'
+							 * @type string
+							 */
+							evidence: PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsSearchTagMatchesEvidenceEnum;
+							/**
+							 * @type object
+							 */
+							expression: {
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								expressionId: string;
+								/**
+								 * @default 'simple'
+								 * @type string
+								 */
+								expressionKind: PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsSearchTagMatchesExpressionExpressionKindEnum;
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								focusTagId: string;
+								presentationRevision: string | number;
+								/**
+								 * @type array
+								 */
+								components: {
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									tagId: string;
+									/**
+									 * @default 'predicate'
+									 * @type string
+									 */
+									semanticRole: PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsSearchTagMatchesExpressionComponentsSemanticRoleEnum;
+									/**
+									 * @default 'required'
+									 * @type string
+									 */
+									componentKind: PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsSearchTagMatchesExpressionComponentsComponentKindEnum;
+									language:
+										| (PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsSearchTagMatchesExpressionComponentsLanguage | null)
+										| null;
+									title: (string | null) | null;
+								}[];
+								groupKey:
+									| ({
+											/**
+											 * @description
+											 * Format: `uuid`
+											 * @type string
+											 */
+											tagId: string;
+											/**
+											 * @default 'predicate'
+											 * @type string
+											 */
+											semanticRole: PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsSearchTagMatchesExpressionGroupKeySemanticRoleEnum;
+											language:
+												| (PostApiSearchZonesByZoneIdFilterFeedStatus200ItemsSearchTagMatchesExpressionGroupKeyLanguage | null)
+												| null;
+											title: (string | null) | null;
+									  } | null)
+									| null;
+							};
+						}[];
+						tagOtherPositionCount?: string | number;
 						/**
 						 * @type string
 						 */
@@ -189442,6 +195116,88 @@ export const PostApiSearchZonesByZoneIdDockBlockExecutionsStatus200GroupsHitsVar
 export type PostApiSearchZonesByZoneIdDockBlockExecutionsStatus200GroupsHitsVariantMainUnitLanguageEnum =
 	(typeof PostApiSearchZonesByZoneIdDockBlockExecutionsStatus200GroupsHitsVariantMainUnitLanguageEnum)[keyof typeof PostApiSearchZonesByZoneIdDockBlockExecutionsStatus200GroupsHitsVariantMainUnitLanguageEnum];
 
+export const PostApiSearchZonesByZoneIdDockBlockExecutionsStatus200GroupsHitsTagMatchesEvidenceEnum =
+	{
+		direct: "direct",
+		primary: "primary",
+		entailed: "entailed",
+		retrieval_only: "retrieval_only",
+	} as const;
+
+export type PostApiSearchZonesByZoneIdDockBlockExecutionsStatus200GroupsHitsTagMatchesEvidenceEnum =
+	(typeof PostApiSearchZonesByZoneIdDockBlockExecutionsStatus200GroupsHitsTagMatchesEvidenceEnum)[keyof typeof PostApiSearchZonesByZoneIdDockBlockExecutionsStatus200GroupsHitsTagMatchesEvidenceEnum];
+
+export const PostApiSearchZonesByZoneIdDockBlockExecutionsStatus200GroupsHitsTagMatchesExpressionExpressionKindEnum =
+	{
+		simple: "simple",
+		facet_value: "facet_value",
+		relation: "relation",
+	} as const;
+
+export type PostApiSearchZonesByZoneIdDockBlockExecutionsStatus200GroupsHitsTagMatchesExpressionExpressionKindEnum =
+	(typeof PostApiSearchZonesByZoneIdDockBlockExecutionsStatus200GroupsHitsTagMatchesExpressionExpressionKindEnum)[keyof typeof PostApiSearchZonesByZoneIdDockBlockExecutionsStatus200GroupsHitsTagMatchesExpressionExpressionKindEnum];
+
+export const PostApiSearchZonesByZoneIdDockBlockExecutionsStatus200GroupsHitsTagMatchesExpressionComponentsSemanticRoleEnum =
+	{
+		predicate: "predicate",
+		slot: "slot",
+		value: "value",
+		focus: "focus",
+		qualifier: "qualifier",
+	} as const;
+
+export type PostApiSearchZonesByZoneIdDockBlockExecutionsStatus200GroupsHitsTagMatchesExpressionComponentsSemanticRoleEnum =
+	(typeof PostApiSearchZonesByZoneIdDockBlockExecutionsStatus200GroupsHitsTagMatchesExpressionComponentsSemanticRoleEnum)[keyof typeof PostApiSearchZonesByZoneIdDockBlockExecutionsStatus200GroupsHitsTagMatchesExpressionComponentsSemanticRoleEnum];
+
+export const PostApiSearchZonesByZoneIdDockBlockExecutionsStatus200GroupsHitsTagMatchesExpressionComponentsComponentKindEnum =
+	{
+		required: "required",
+		fallback: "fallback",
+	} as const;
+
+export type PostApiSearchZonesByZoneIdDockBlockExecutionsStatus200GroupsHitsTagMatchesExpressionComponentsComponentKindEnum =
+	(typeof PostApiSearchZonesByZoneIdDockBlockExecutionsStatus200GroupsHitsTagMatchesExpressionComponentsComponentKindEnum)[keyof typeof PostApiSearchZonesByZoneIdDockBlockExecutionsStatus200GroupsHitsTagMatchesExpressionComponentsComponentKindEnum];
+
+export const PostApiSearchZonesByZoneIdDockBlockExecutionsStatus200GroupsHitsTagMatchesExpressionComponentsLanguage =
+	{
+		zh: "zh",
+		en: "en",
+		ja: "ja",
+		ko: "ko",
+		de: "de",
+		fr: "fr",
+		es: "es",
+	} as const;
+
+export type PostApiSearchZonesByZoneIdDockBlockExecutionsStatus200GroupsHitsTagMatchesExpressionComponentsLanguage =
+	(typeof PostApiSearchZonesByZoneIdDockBlockExecutionsStatus200GroupsHitsTagMatchesExpressionComponentsLanguage)[keyof typeof PostApiSearchZonesByZoneIdDockBlockExecutionsStatus200GroupsHitsTagMatchesExpressionComponentsLanguage];
+
+export const PostApiSearchZonesByZoneIdDockBlockExecutionsStatus200GroupsHitsTagMatchesExpressionGroupKeySemanticRoleEnum =
+	{
+		predicate: "predicate",
+		slot: "slot",
+		value: "value",
+		focus: "focus",
+		qualifier: "qualifier",
+	} as const;
+
+export type PostApiSearchZonesByZoneIdDockBlockExecutionsStatus200GroupsHitsTagMatchesExpressionGroupKeySemanticRoleEnum =
+	(typeof PostApiSearchZonesByZoneIdDockBlockExecutionsStatus200GroupsHitsTagMatchesExpressionGroupKeySemanticRoleEnum)[keyof typeof PostApiSearchZonesByZoneIdDockBlockExecutionsStatus200GroupsHitsTagMatchesExpressionGroupKeySemanticRoleEnum];
+
+export const PostApiSearchZonesByZoneIdDockBlockExecutionsStatus200GroupsHitsTagMatchesExpressionGroupKeyLanguage =
+	{
+		zh: "zh",
+		en: "en",
+		ja: "ja",
+		ko: "ko",
+		de: "de",
+		fr: "fr",
+		es: "es",
+	} as const;
+
+export type PostApiSearchZonesByZoneIdDockBlockExecutionsStatus200GroupsHitsTagMatchesExpressionGroupKeyLanguage =
+	(typeof PostApiSearchZonesByZoneIdDockBlockExecutionsStatus200GroupsHitsTagMatchesExpressionGroupKeyLanguage)[keyof typeof PostApiSearchZonesByZoneIdDockBlockExecutionsStatus200GroupsHitsTagMatchesExpressionGroupKeyLanguage];
+
 export const PostApiSearchZonesByZoneIdDockBlockExecutionsStatus200SelectedKindEnum = {
 	slug_namespace: "slug_namespace",
 	profile: "profile",
@@ -189746,6 +195502,90 @@ export type PostApiSearchZonesByZoneIdDockBlockExecutionsStatus200 = {
 				  };
 			name?: (string | null) | null;
 			summary: (string | null) | null;
+			/**
+			 * @type array | undefined
+			 */
+			tagMatches?: {
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				matchedTagId: string;
+				/**
+				 * @default 'direct'
+				 * @type string
+				 */
+				evidence: PostApiSearchZonesByZoneIdDockBlockExecutionsStatus200GroupsHitsTagMatchesEvidenceEnum;
+				/**
+				 * @type object
+				 */
+				expression: {
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					expressionId: string;
+					/**
+					 * @default 'simple'
+					 * @type string
+					 */
+					expressionKind: PostApiSearchZonesByZoneIdDockBlockExecutionsStatus200GroupsHitsTagMatchesExpressionExpressionKindEnum;
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					focusTagId: string;
+					presentationRevision: string | number;
+					/**
+					 * @type array
+					 */
+					components: {
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						tagId: string;
+						/**
+						 * @default 'predicate'
+						 * @type string
+						 */
+						semanticRole: PostApiSearchZonesByZoneIdDockBlockExecutionsStatus200GroupsHitsTagMatchesExpressionComponentsSemanticRoleEnum;
+						/**
+						 * @default 'required'
+						 * @type string
+						 */
+						componentKind: PostApiSearchZonesByZoneIdDockBlockExecutionsStatus200GroupsHitsTagMatchesExpressionComponentsComponentKindEnum;
+						language:
+							| (PostApiSearchZonesByZoneIdDockBlockExecutionsStatus200GroupsHitsTagMatchesExpressionComponentsLanguage | null)
+							| null;
+						title: (string | null) | null;
+					}[];
+					groupKey:
+						| ({
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								tagId: string;
+								/**
+								 * @default 'predicate'
+								 * @type string
+								 */
+								semanticRole: PostApiSearchZonesByZoneIdDockBlockExecutionsStatus200GroupsHitsTagMatchesExpressionGroupKeySemanticRoleEnum;
+								language:
+									| (PostApiSearchZonesByZoneIdDockBlockExecutionsStatus200GroupsHitsTagMatchesExpressionGroupKeyLanguage | null)
+									| null;
+								title: (string | null) | null;
+						  } | null)
+						| null;
+				};
+			}[];
+			tagOtherPositionCount?: string | number;
 		}[];
 		total:
 			| {
@@ -190685,6 +196525,88 @@ export const PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsO
 export type PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsVariantMainUnitLanguageEnum =
 	(typeof PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsVariantMainUnitLanguageEnum)[keyof typeof PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsVariantMainUnitLanguageEnum];
 
+export const PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsTagMatchesEvidenceEnum =
+	{
+		direct: "direct",
+		primary: "primary",
+		entailed: "entailed",
+		retrieval_only: "retrieval_only",
+	} as const;
+
+export type PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsTagMatchesEvidenceEnum =
+	(typeof PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsTagMatchesEvidenceEnum)[keyof typeof PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsTagMatchesEvidenceEnum];
+
+export const PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsTagMatchesExpressionExpressionKindEnum =
+	{
+		simple: "simple",
+		facet_value: "facet_value",
+		relation: "relation",
+	} as const;
+
+export type PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsTagMatchesExpressionExpressionKindEnum =
+	(typeof PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsTagMatchesExpressionExpressionKindEnum)[keyof typeof PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsTagMatchesExpressionExpressionKindEnum];
+
+export const PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsTagMatchesExpressionComponentsSemanticRoleEnum =
+	{
+		predicate: "predicate",
+		slot: "slot",
+		value: "value",
+		focus: "focus",
+		qualifier: "qualifier",
+	} as const;
+
+export type PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsTagMatchesExpressionComponentsSemanticRoleEnum =
+	(typeof PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsTagMatchesExpressionComponentsSemanticRoleEnum)[keyof typeof PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsTagMatchesExpressionComponentsSemanticRoleEnum];
+
+export const PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsTagMatchesExpressionComponentsComponentKindEnum =
+	{
+		required: "required",
+		fallback: "fallback",
+	} as const;
+
+export type PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsTagMatchesExpressionComponentsComponentKindEnum =
+	(typeof PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsTagMatchesExpressionComponentsComponentKindEnum)[keyof typeof PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsTagMatchesExpressionComponentsComponentKindEnum];
+
+export const PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsTagMatchesExpressionComponentsLanguage =
+	{
+		zh: "zh",
+		en: "en",
+		ja: "ja",
+		ko: "ko",
+		de: "de",
+		fr: "fr",
+		es: "es",
+	} as const;
+
+export type PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsTagMatchesExpressionComponentsLanguage =
+	(typeof PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsTagMatchesExpressionComponentsLanguage)[keyof typeof PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsTagMatchesExpressionComponentsLanguage];
+
+export const PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsTagMatchesExpressionGroupKeySemanticRoleEnum =
+	{
+		predicate: "predicate",
+		slot: "slot",
+		value: "value",
+		focus: "focus",
+		qualifier: "qualifier",
+	} as const;
+
+export type PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsTagMatchesExpressionGroupKeySemanticRoleEnum =
+	(typeof PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsTagMatchesExpressionGroupKeySemanticRoleEnum)[keyof typeof PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsTagMatchesExpressionGroupKeySemanticRoleEnum];
+
+export const PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsTagMatchesExpressionGroupKeyLanguage =
+	{
+		zh: "zh",
+		en: "en",
+		ja: "ja",
+		ko: "ko",
+		de: "de",
+		fr: "fr",
+		es: "es",
+	} as const;
+
+export type PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsTagMatchesExpressionGroupKeyLanguage =
+	(typeof PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsTagMatchesExpressionGroupKeyLanguage)[keyof typeof PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsTagMatchesExpressionGroupKeyLanguage];
+
 export const PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsLanguage =
 	{
 		zh: "zh",
@@ -190837,6 +196759,88 @@ export const PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsO
 
 export type PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsTrackingSurfaceEnum =
 	(typeof PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsTrackingSurfaceEnum)[keyof typeof PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsTrackingSurfaceEnum];
+
+export const PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsSearchTagMatchesEvidenceEnum =
+	{
+		direct: "direct",
+		primary: "primary",
+		entailed: "entailed",
+		retrieval_only: "retrieval_only",
+	} as const;
+
+export type PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsSearchTagMatchesEvidenceEnum =
+	(typeof PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsSearchTagMatchesEvidenceEnum)[keyof typeof PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsSearchTagMatchesEvidenceEnum];
+
+export const PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsSearchTagMatchesExpressionExpressionKindEnum =
+	{
+		simple: "simple",
+		facet_value: "facet_value",
+		relation: "relation",
+	} as const;
+
+export type PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsSearchTagMatchesExpressionExpressionKindEnum =
+	(typeof PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsSearchTagMatchesExpressionExpressionKindEnum)[keyof typeof PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsSearchTagMatchesExpressionExpressionKindEnum];
+
+export const PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsSearchTagMatchesExpressionComponentsSemanticRoleEnum =
+	{
+		predicate: "predicate",
+		slot: "slot",
+		value: "value",
+		focus: "focus",
+		qualifier: "qualifier",
+	} as const;
+
+export type PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsSearchTagMatchesExpressionComponentsSemanticRoleEnum =
+	(typeof PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsSearchTagMatchesExpressionComponentsSemanticRoleEnum)[keyof typeof PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsSearchTagMatchesExpressionComponentsSemanticRoleEnum];
+
+export const PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsSearchTagMatchesExpressionComponentsComponentKindEnum =
+	{
+		required: "required",
+		fallback: "fallback",
+	} as const;
+
+export type PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsSearchTagMatchesExpressionComponentsComponentKindEnum =
+	(typeof PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsSearchTagMatchesExpressionComponentsComponentKindEnum)[keyof typeof PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsSearchTagMatchesExpressionComponentsComponentKindEnum];
+
+export const PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsSearchTagMatchesExpressionComponentsLanguage =
+	{
+		zh: "zh",
+		en: "en",
+		ja: "ja",
+		ko: "ko",
+		de: "de",
+		fr: "fr",
+		es: "es",
+	} as const;
+
+export type PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsSearchTagMatchesExpressionComponentsLanguage =
+	(typeof PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsSearchTagMatchesExpressionComponentsLanguage)[keyof typeof PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsSearchTagMatchesExpressionComponentsLanguage];
+
+export const PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsSearchTagMatchesExpressionGroupKeySemanticRoleEnum =
+	{
+		predicate: "predicate",
+		slot: "slot",
+		value: "value",
+		focus: "focus",
+		qualifier: "qualifier",
+	} as const;
+
+export type PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsSearchTagMatchesExpressionGroupKeySemanticRoleEnum =
+	(typeof PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsSearchTagMatchesExpressionGroupKeySemanticRoleEnum)[keyof typeof PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsSearchTagMatchesExpressionGroupKeySemanticRoleEnum];
+
+export const PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsSearchTagMatchesExpressionGroupKeyLanguage =
+	{
+		zh: "zh",
+		en: "en",
+		ja: "ja",
+		ko: "ko",
+		de: "de",
+		fr: "fr",
+		es: "es",
+	} as const;
+
+export type PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsSearchTagMatchesExpressionGroupKeyLanguage =
+	(typeof PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsSearchTagMatchesExpressionGroupKeyLanguage)[keyof typeof PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsSearchTagMatchesExpressionGroupKeyLanguage];
 
 export const PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsUnitKindEnum =
 	{
@@ -191136,6 +197140,88 @@ export const PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsO
 export type PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsVariantMainUnitLanguageEnum =
 	(typeof PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsVariantMainUnitLanguageEnum)[keyof typeof PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsVariantMainUnitLanguageEnum];
 
+export const PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsTagMatchesEvidenceEnum =
+	{
+		direct: "direct",
+		primary: "primary",
+		entailed: "entailed",
+		retrieval_only: "retrieval_only",
+	} as const;
+
+export type PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsTagMatchesEvidenceEnum =
+	(typeof PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsTagMatchesEvidenceEnum)[keyof typeof PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsTagMatchesEvidenceEnum];
+
+export const PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsTagMatchesExpressionExpressionKindEnum =
+	{
+		simple: "simple",
+		facet_value: "facet_value",
+		relation: "relation",
+	} as const;
+
+export type PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsTagMatchesExpressionExpressionKindEnum =
+	(typeof PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsTagMatchesExpressionExpressionKindEnum)[keyof typeof PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsTagMatchesExpressionExpressionKindEnum];
+
+export const PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsTagMatchesExpressionComponentsSemanticRoleEnum =
+	{
+		predicate: "predicate",
+		slot: "slot",
+		value: "value",
+		focus: "focus",
+		qualifier: "qualifier",
+	} as const;
+
+export type PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsTagMatchesExpressionComponentsSemanticRoleEnum =
+	(typeof PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsTagMatchesExpressionComponentsSemanticRoleEnum)[keyof typeof PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsTagMatchesExpressionComponentsSemanticRoleEnum];
+
+export const PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsTagMatchesExpressionComponentsComponentKindEnum =
+	{
+		required: "required",
+		fallback: "fallback",
+	} as const;
+
+export type PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsTagMatchesExpressionComponentsComponentKindEnum =
+	(typeof PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsTagMatchesExpressionComponentsComponentKindEnum)[keyof typeof PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsTagMatchesExpressionComponentsComponentKindEnum];
+
+export const PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsTagMatchesExpressionComponentsLanguage =
+	{
+		zh: "zh",
+		en: "en",
+		ja: "ja",
+		ko: "ko",
+		de: "de",
+		fr: "fr",
+		es: "es",
+	} as const;
+
+export type PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsTagMatchesExpressionComponentsLanguage =
+	(typeof PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsTagMatchesExpressionComponentsLanguage)[keyof typeof PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsTagMatchesExpressionComponentsLanguage];
+
+export const PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsTagMatchesExpressionGroupKeySemanticRoleEnum =
+	{
+		predicate: "predicate",
+		slot: "slot",
+		value: "value",
+		focus: "focus",
+		qualifier: "qualifier",
+	} as const;
+
+export type PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsTagMatchesExpressionGroupKeySemanticRoleEnum =
+	(typeof PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsTagMatchesExpressionGroupKeySemanticRoleEnum)[keyof typeof PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsTagMatchesExpressionGroupKeySemanticRoleEnum];
+
+export const PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsTagMatchesExpressionGroupKeyLanguage =
+	{
+		zh: "zh",
+		en: "en",
+		ja: "ja",
+		ko: "ko",
+		de: "de",
+		fr: "fr",
+		es: "es",
+	} as const;
+
+export type PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsTagMatchesExpressionGroupKeyLanguage =
+	(typeof PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsTagMatchesExpressionGroupKeyLanguage)[keyof typeof PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsTagMatchesExpressionGroupKeyLanguage];
+
 export const PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsLanguage =
 	{
 		zh: "zh",
@@ -191288,6 +197374,88 @@ export const PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsO
 
 export type PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsTrackingSurfaceEnum =
 	(typeof PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsTrackingSurfaceEnum)[keyof typeof PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsTrackingSurfaceEnum];
+
+export const PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsSearchTagMatchesEvidenceEnum =
+	{
+		direct: "direct",
+		primary: "primary",
+		entailed: "entailed",
+		retrieval_only: "retrieval_only",
+	} as const;
+
+export type PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsSearchTagMatchesEvidenceEnum =
+	(typeof PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsSearchTagMatchesEvidenceEnum)[keyof typeof PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsSearchTagMatchesEvidenceEnum];
+
+export const PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsSearchTagMatchesExpressionExpressionKindEnum =
+	{
+		simple: "simple",
+		facet_value: "facet_value",
+		relation: "relation",
+	} as const;
+
+export type PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsSearchTagMatchesExpressionExpressionKindEnum =
+	(typeof PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsSearchTagMatchesExpressionExpressionKindEnum)[keyof typeof PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsSearchTagMatchesExpressionExpressionKindEnum];
+
+export const PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsSearchTagMatchesExpressionComponentsSemanticRoleEnum =
+	{
+		predicate: "predicate",
+		slot: "slot",
+		value: "value",
+		focus: "focus",
+		qualifier: "qualifier",
+	} as const;
+
+export type PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsSearchTagMatchesExpressionComponentsSemanticRoleEnum =
+	(typeof PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsSearchTagMatchesExpressionComponentsSemanticRoleEnum)[keyof typeof PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsSearchTagMatchesExpressionComponentsSemanticRoleEnum];
+
+export const PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsSearchTagMatchesExpressionComponentsComponentKindEnum =
+	{
+		required: "required",
+		fallback: "fallback",
+	} as const;
+
+export type PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsSearchTagMatchesExpressionComponentsComponentKindEnum =
+	(typeof PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsSearchTagMatchesExpressionComponentsComponentKindEnum)[keyof typeof PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsSearchTagMatchesExpressionComponentsComponentKindEnum];
+
+export const PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsSearchTagMatchesExpressionComponentsLanguage =
+	{
+		zh: "zh",
+		en: "en",
+		ja: "ja",
+		ko: "ko",
+		de: "de",
+		fr: "fr",
+		es: "es",
+	} as const;
+
+export type PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsSearchTagMatchesExpressionComponentsLanguage =
+	(typeof PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsSearchTagMatchesExpressionComponentsLanguage)[keyof typeof PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsSearchTagMatchesExpressionComponentsLanguage];
+
+export const PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsSearchTagMatchesExpressionGroupKeySemanticRoleEnum =
+	{
+		predicate: "predicate",
+		slot: "slot",
+		value: "value",
+		focus: "focus",
+		qualifier: "qualifier",
+	} as const;
+
+export type PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsSearchTagMatchesExpressionGroupKeySemanticRoleEnum =
+	(typeof PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsSearchTagMatchesExpressionGroupKeySemanticRoleEnum)[keyof typeof PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsSearchTagMatchesExpressionGroupKeySemanticRoleEnum];
+
+export const PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsSearchTagMatchesExpressionGroupKeyLanguage =
+	{
+		zh: "zh",
+		en: "en",
+		ja: "ja",
+		ko: "ko",
+		de: "de",
+		fr: "fr",
+		es: "es",
+	} as const;
+
+export type PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsSearchTagMatchesExpressionGroupKeyLanguage =
+	(typeof PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsSearchTagMatchesExpressionGroupKeyLanguage)[keyof typeof PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsSearchTagMatchesExpressionGroupKeyLanguage];
 
 export const PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsUnitKindEnum =
 	{
@@ -191900,6 +198068,90 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200 = {
 								  };
 							name?: (string | null) | null;
 							summary: (string | null) | null;
+							/**
+							 * @type array | undefined
+							 */
+							tagMatches?: {
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								matchedTagId: string;
+								/**
+								 * @default 'direct'
+								 * @type string
+								 */
+								evidence: PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsTagMatchesEvidenceEnum;
+								/**
+								 * @type object
+								 */
+								expression: {
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									expressionId: string;
+									/**
+									 * @default 'simple'
+									 * @type string
+									 */
+									expressionKind: PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsTagMatchesExpressionExpressionKindEnum;
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									focusTagId: string;
+									presentationRevision: string | number;
+									/**
+									 * @type array
+									 */
+									components: {
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										tagId: string;
+										/**
+										 * @default 'predicate'
+										 * @type string
+										 */
+										semanticRole: PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsTagMatchesExpressionComponentsSemanticRoleEnum;
+										/**
+										 * @default 'required'
+										 * @type string
+										 */
+										componentKind: PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsTagMatchesExpressionComponentsComponentKindEnum;
+										language:
+											| (PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsTagMatchesExpressionComponentsLanguage | null)
+											| null;
+										title: (string | null) | null;
+									}[];
+									groupKey:
+										| ({
+												/**
+												 * @description
+												 * Format: `uuid`
+												 * @type string
+												 */
+												tagId: string;
+												/**
+												 * @default 'predicate'
+												 * @type string
+												 */
+												semanticRole: PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsTagMatchesExpressionGroupKeySemanticRoleEnum;
+												language:
+													| (PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsTagMatchesExpressionGroupKeyLanguage | null)
+													| null;
+												title: (string | null) | null;
+										  } | null)
+										| null;
+								};
+							}[];
+							tagOtherPositionCount?: string | number;
 						}[];
 				  }
 				| {
@@ -192436,6 +198688,90 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200 = {
 										  } | null)
 										| null;
 									/**
+									 * @type array | undefined
+									 */
+									searchTagMatches?: {
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										matchedTagId: string;
+										/**
+										 * @default 'direct'
+										 * @type string
+										 */
+										evidence: PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsSearchTagMatchesEvidenceEnum;
+										/**
+										 * @type object
+										 */
+										expression: {
+											/**
+											 * @description
+											 * Format: `uuid`
+											 * @type string
+											 */
+											expressionId: string;
+											/**
+											 * @default 'simple'
+											 * @type string
+											 */
+											expressionKind: PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsSearchTagMatchesExpressionExpressionKindEnum;
+											/**
+											 * @description
+											 * Format: `uuid`
+											 * @type string
+											 */
+											focusTagId: string;
+											presentationRevision: string | number;
+											/**
+											 * @type array
+											 */
+											components: {
+												/**
+												 * @description
+												 * Format: `uuid`
+												 * @type string
+												 */
+												tagId: string;
+												/**
+												 * @default 'predicate'
+												 * @type string
+												 */
+												semanticRole: PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsSearchTagMatchesExpressionComponentsSemanticRoleEnum;
+												/**
+												 * @default 'required'
+												 * @type string
+												 */
+												componentKind: PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsSearchTagMatchesExpressionComponentsComponentKindEnum;
+												language:
+													| (PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsSearchTagMatchesExpressionComponentsLanguage | null)
+													| null;
+												title: (string | null) | null;
+											}[];
+											groupKey:
+												| ({
+														/**
+														 * @description
+														 * Format: `uuid`
+														 * @type string
+														 */
+														tagId: string;
+														/**
+														 * @default 'predicate'
+														 * @type string
+														 */
+														semanticRole: PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsSearchTagMatchesExpressionGroupKeySemanticRoleEnum;
+														language:
+															| (PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsSearchTagMatchesExpressionGroupKeyLanguage | null)
+															| null;
+														title: (string | null) | null;
+												  } | null)
+												| null;
+										};
+									}[];
+									tagOtherPositionCount?: string | number;
+									/**
 									 * @type string
 									 */
 									itemType: "unit";
@@ -192921,6 +199257,90 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200 = {
 														signature: string;
 												  } | null)
 												| null;
+											/**
+											 * @type array | undefined
+											 */
+											searchTagMatches?: {
+												/**
+												 * @description
+												 * Format: `uuid`
+												 * @type string
+												 */
+												matchedTagId: string;
+												/**
+												 * @default 'direct'
+												 * @type string
+												 */
+												evidence: PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsSearchTagMatchesEvidenceEnum;
+												/**
+												 * @type object
+												 */
+												expression: {
+													/**
+													 * @description
+													 * Format: `uuid`
+													 * @type string
+													 */
+													expressionId: string;
+													/**
+													 * @default 'simple'
+													 * @type string
+													 */
+													expressionKind: PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsSearchTagMatchesExpressionExpressionKindEnum;
+													/**
+													 * @description
+													 * Format: `uuid`
+													 * @type string
+													 */
+													focusTagId: string;
+													presentationRevision: string | number;
+													/**
+													 * @type array
+													 */
+													components: {
+														/**
+														 * @description
+														 * Format: `uuid`
+														 * @type string
+														 */
+														tagId: string;
+														/**
+														 * @default 'predicate'
+														 * @type string
+														 */
+														semanticRole: PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsSearchTagMatchesExpressionComponentsSemanticRoleEnum;
+														/**
+														 * @default 'required'
+														 * @type string
+														 */
+														componentKind: PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsSearchTagMatchesExpressionComponentsComponentKindEnum;
+														language:
+															| (PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsSearchTagMatchesExpressionComponentsLanguage | null)
+															| null;
+														title: (string | null) | null;
+													}[];
+													groupKey:
+														| ({
+																/**
+																 * @description
+																 * Format: `uuid`
+																 * @type string
+																 */
+																tagId: string;
+																/**
+																 * @default 'predicate'
+																 * @type string
+																 */
+																semanticRole: PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsSearchTagMatchesExpressionGroupKeySemanticRoleEnum;
+																language:
+																	| (PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsSearchTagMatchesExpressionGroupKeyLanguage | null)
+																	| null;
+																title: (string | null) | null;
+														  } | null)
+														| null;
+												};
+											}[];
+											tagOtherPositionCount?: string | number;
 											/**
 											 * @type string
 											 */
@@ -193621,6 +200041,90 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200 = {
 														signature: string;
 												  } | null)
 												| null;
+											/**
+											 * @type array | undefined
+											 */
+											searchTagMatches?: {
+												/**
+												 * @description
+												 * Format: `uuid`
+												 * @type string
+												 */
+												matchedTagId: string;
+												/**
+												 * @default 'direct'
+												 * @type string
+												 */
+												evidence: PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsSearchTagMatchesEvidenceEnum;
+												/**
+												 * @type object
+												 */
+												expression: {
+													/**
+													 * @description
+													 * Format: `uuid`
+													 * @type string
+													 */
+													expressionId: string;
+													/**
+													 * @default 'simple'
+													 * @type string
+													 */
+													expressionKind: PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsSearchTagMatchesExpressionExpressionKindEnum;
+													/**
+													 * @description
+													 * Format: `uuid`
+													 * @type string
+													 */
+													focusTagId: string;
+													presentationRevision: string | number;
+													/**
+													 * @type array
+													 */
+													components: {
+														/**
+														 * @description
+														 * Format: `uuid`
+														 * @type string
+														 */
+														tagId: string;
+														/**
+														 * @default 'predicate'
+														 * @type string
+														 */
+														semanticRole: PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsSearchTagMatchesExpressionComponentsSemanticRoleEnum;
+														/**
+														 * @default 'required'
+														 * @type string
+														 */
+														componentKind: PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsSearchTagMatchesExpressionComponentsComponentKindEnum;
+														language:
+															| (PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsSearchTagMatchesExpressionComponentsLanguage | null)
+															| null;
+														title: (string | null) | null;
+													}[];
+													groupKey:
+														| ({
+																/**
+																 * @description
+																 * Format: `uuid`
+																 * @type string
+																 */
+																tagId: string;
+																/**
+																 * @default 'predicate'
+																 * @type string
+																 */
+																semanticRole: PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsSearchTagMatchesExpressionGroupKeySemanticRoleEnum;
+																language:
+																	| (PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsSearchTagMatchesExpressionGroupKeyLanguage | null)
+																	| null;
+																title: (string | null) | null;
+														  } | null)
+														| null;
+												};
+											}[];
+											tagOtherPositionCount?: string | number;
 											/**
 											 * @type string
 											 */
@@ -194339,6 +200843,90 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200 = {
 														signature: string;
 												  } | null)
 												| null;
+											/**
+											 * @type array | undefined
+											 */
+											searchTagMatches?: {
+												/**
+												 * @description
+												 * Format: `uuid`
+												 * @type string
+												 */
+												matchedTagId: string;
+												/**
+												 * @default 'direct'
+												 * @type string
+												 */
+												evidence: PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsSearchTagMatchesEvidenceEnum;
+												/**
+												 * @type object
+												 */
+												expression: {
+													/**
+													 * @description
+													 * Format: `uuid`
+													 * @type string
+													 */
+													expressionId: string;
+													/**
+													 * @default 'simple'
+													 * @type string
+													 */
+													expressionKind: PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsSearchTagMatchesExpressionExpressionKindEnum;
+													/**
+													 * @description
+													 * Format: `uuid`
+													 * @type string
+													 */
+													focusTagId: string;
+													presentationRevision: string | number;
+													/**
+													 * @type array
+													 */
+													components: {
+														/**
+														 * @description
+														 * Format: `uuid`
+														 * @type string
+														 */
+														tagId: string;
+														/**
+														 * @default 'predicate'
+														 * @type string
+														 */
+														semanticRole: PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsSearchTagMatchesExpressionComponentsSemanticRoleEnum;
+														/**
+														 * @default 'required'
+														 * @type string
+														 */
+														componentKind: PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsSearchTagMatchesExpressionComponentsComponentKindEnum;
+														language:
+															| (PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsSearchTagMatchesExpressionComponentsLanguage | null)
+															| null;
+														title: (string | null) | null;
+													}[];
+													groupKey:
+														| ({
+																/**
+																 * @description
+																 * Format: `uuid`
+																 * @type string
+																 */
+																tagId: string;
+																/**
+																 * @default 'predicate'
+																 * @type string
+																 */
+																semanticRole: PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsSearchTagMatchesExpressionGroupKeySemanticRoleEnum;
+																language:
+																	| (PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsSearchTagMatchesExpressionGroupKeyLanguage | null)
+																	| null;
+																title: (string | null) | null;
+														  } | null)
+														| null;
+												};
+											}[];
+											tagOtherPositionCount?: string | number;
 											/**
 											 * @type string
 											 */
@@ -195363,6 +201951,90 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200 = {
 										  } | null)
 										| null;
 									/**
+									 * @type array | undefined
+									 */
+									searchTagMatches?: {
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										matchedTagId: string;
+										/**
+										 * @default 'direct'
+										 * @type string
+										 */
+										evidence: PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsSearchTagMatchesEvidenceEnum;
+										/**
+										 * @type object
+										 */
+										expression: {
+											/**
+											 * @description
+											 * Format: `uuid`
+											 * @type string
+											 */
+											expressionId: string;
+											/**
+											 * @default 'simple'
+											 * @type string
+											 */
+											expressionKind: PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsSearchTagMatchesExpressionExpressionKindEnum;
+											/**
+											 * @description
+											 * Format: `uuid`
+											 * @type string
+											 */
+											focusTagId: string;
+											presentationRevision: string | number;
+											/**
+											 * @type array
+											 */
+											components: {
+												/**
+												 * @description
+												 * Format: `uuid`
+												 * @type string
+												 */
+												tagId: string;
+												/**
+												 * @default 'predicate'
+												 * @type string
+												 */
+												semanticRole: PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsSearchTagMatchesExpressionComponentsSemanticRoleEnum;
+												/**
+												 * @default 'required'
+												 * @type string
+												 */
+												componentKind: PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsSearchTagMatchesExpressionComponentsComponentKindEnum;
+												language:
+													| (PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsSearchTagMatchesExpressionComponentsLanguage | null)
+													| null;
+												title: (string | null) | null;
+											}[];
+											groupKey:
+												| ({
+														/**
+														 * @description
+														 * Format: `uuid`
+														 * @type string
+														 */
+														tagId: string;
+														/**
+														 * @default 'predicate'
+														 * @type string
+														 */
+														semanticRole: PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsSearchTagMatchesExpressionGroupKeySemanticRoleEnum;
+														language:
+															| (PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsSearchTagMatchesExpressionGroupKeyLanguage | null)
+															| null;
+														title: (string | null) | null;
+												  } | null)
+												| null;
+										};
+									}[];
+									tagOtherPositionCount?: string | number;
+									/**
 									 * @type string
 									 */
 									itemType: "unit";
@@ -195848,6 +202520,90 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200 = {
 														signature: string;
 												  } | null)
 												| null;
+											/**
+											 * @type array | undefined
+											 */
+											searchTagMatches?: {
+												/**
+												 * @description
+												 * Format: `uuid`
+												 * @type string
+												 */
+												matchedTagId: string;
+												/**
+												 * @default 'direct'
+												 * @type string
+												 */
+												evidence: PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsSearchTagMatchesEvidenceEnum;
+												/**
+												 * @type object
+												 */
+												expression: {
+													/**
+													 * @description
+													 * Format: `uuid`
+													 * @type string
+													 */
+													expressionId: string;
+													/**
+													 * @default 'simple'
+													 * @type string
+													 */
+													expressionKind: PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsSearchTagMatchesExpressionExpressionKindEnum;
+													/**
+													 * @description
+													 * Format: `uuid`
+													 * @type string
+													 */
+													focusTagId: string;
+													presentationRevision: string | number;
+													/**
+													 * @type array
+													 */
+													components: {
+														/**
+														 * @description
+														 * Format: `uuid`
+														 * @type string
+														 */
+														tagId: string;
+														/**
+														 * @default 'predicate'
+														 * @type string
+														 */
+														semanticRole: PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsSearchTagMatchesExpressionComponentsSemanticRoleEnum;
+														/**
+														 * @default 'required'
+														 * @type string
+														 */
+														componentKind: PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsSearchTagMatchesExpressionComponentsComponentKindEnum;
+														language:
+															| (PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsSearchTagMatchesExpressionComponentsLanguage | null)
+															| null;
+														title: (string | null) | null;
+													}[];
+													groupKey:
+														| ({
+																/**
+																 * @description
+																 * Format: `uuid`
+																 * @type string
+																 */
+																tagId: string;
+																/**
+																 * @default 'predicate'
+																 * @type string
+																 */
+																semanticRole: PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsSearchTagMatchesExpressionGroupKeySemanticRoleEnum;
+																language:
+																	| (PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsSearchTagMatchesExpressionGroupKeyLanguage | null)
+																	| null;
+																title: (string | null) | null;
+														  } | null)
+														| null;
+												};
+											}[];
+											tagOtherPositionCount?: string | number;
 											/**
 											 * @type string
 											 */
@@ -196548,6 +203304,90 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200 = {
 														signature: string;
 												  } | null)
 												| null;
+											/**
+											 * @type array | undefined
+											 */
+											searchTagMatches?: {
+												/**
+												 * @description
+												 * Format: `uuid`
+												 * @type string
+												 */
+												matchedTagId: string;
+												/**
+												 * @default 'direct'
+												 * @type string
+												 */
+												evidence: PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsSearchTagMatchesEvidenceEnum;
+												/**
+												 * @type object
+												 */
+												expression: {
+													/**
+													 * @description
+													 * Format: `uuid`
+													 * @type string
+													 */
+													expressionId: string;
+													/**
+													 * @default 'simple'
+													 * @type string
+													 */
+													expressionKind: PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsSearchTagMatchesExpressionExpressionKindEnum;
+													/**
+													 * @description
+													 * Format: `uuid`
+													 * @type string
+													 */
+													focusTagId: string;
+													presentationRevision: string | number;
+													/**
+													 * @type array
+													 */
+													components: {
+														/**
+														 * @description
+														 * Format: `uuid`
+														 * @type string
+														 */
+														tagId: string;
+														/**
+														 * @default 'predicate'
+														 * @type string
+														 */
+														semanticRole: PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsSearchTagMatchesExpressionComponentsSemanticRoleEnum;
+														/**
+														 * @default 'required'
+														 * @type string
+														 */
+														componentKind: PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsSearchTagMatchesExpressionComponentsComponentKindEnum;
+														language:
+															| (PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsSearchTagMatchesExpressionComponentsLanguage | null)
+															| null;
+														title: (string | null) | null;
+													}[];
+													groupKey:
+														| ({
+																/**
+																 * @description
+																 * Format: `uuid`
+																 * @type string
+																 */
+																tagId: string;
+																/**
+																 * @default 'predicate'
+																 * @type string
+																 */
+																semanticRole: PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsSearchTagMatchesExpressionGroupKeySemanticRoleEnum;
+																language:
+																	| (PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsSearchTagMatchesExpressionGroupKeyLanguage | null)
+																	| null;
+																title: (string | null) | null;
+														  } | null)
+														| null;
+												};
+											}[];
+											tagOtherPositionCount?: string | number;
 											/**
 											 * @type string
 											 */
@@ -197266,6 +204106,90 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200 = {
 														signature: string;
 												  } | null)
 												| null;
+											/**
+											 * @type array | undefined
+											 */
+											searchTagMatches?: {
+												/**
+												 * @description
+												 * Format: `uuid`
+												 * @type string
+												 */
+												matchedTagId: string;
+												/**
+												 * @default 'direct'
+												 * @type string
+												 */
+												evidence: PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsSearchTagMatchesEvidenceEnum;
+												/**
+												 * @type object
+												 */
+												expression: {
+													/**
+													 * @description
+													 * Format: `uuid`
+													 * @type string
+													 */
+													expressionId: string;
+													/**
+													 * @default 'simple'
+													 * @type string
+													 */
+													expressionKind: PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsSearchTagMatchesExpressionExpressionKindEnum;
+													/**
+													 * @description
+													 * Format: `uuid`
+													 * @type string
+													 */
+													focusTagId: string;
+													presentationRevision: string | number;
+													/**
+													 * @type array
+													 */
+													components: {
+														/**
+														 * @description
+														 * Format: `uuid`
+														 * @type string
+														 */
+														tagId: string;
+														/**
+														 * @default 'predicate'
+														 * @type string
+														 */
+														semanticRole: PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsSearchTagMatchesExpressionComponentsSemanticRoleEnum;
+														/**
+														 * @default 'required'
+														 * @type string
+														 */
+														componentKind: PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsSearchTagMatchesExpressionComponentsComponentKindEnum;
+														language:
+															| (PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsSearchTagMatchesExpressionComponentsLanguage | null)
+															| null;
+														title: (string | null) | null;
+													}[];
+													groupKey:
+														| ({
+																/**
+																 * @description
+																 * Format: `uuid`
+																 * @type string
+																 */
+																tagId: string;
+																/**
+																 * @default 'predicate'
+																 * @type string
+																 */
+																semanticRole: PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsSearchTagMatchesExpressionGroupKeySemanticRoleEnum;
+																language:
+																	| (PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200PageResultsOutcomeItemsSearchTagMatchesExpressionGroupKeyLanguage | null)
+																	| null;
+																title: (string | null) | null;
+														  } | null)
+														| null;
+												};
+											}[];
+											tagOtherPositionCount?: string | number;
 											/**
 											 * @type string
 											 */
@@ -198203,6 +205127,90 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200 = {
 								  };
 							name?: (string | null) | null;
 							summary: (string | null) | null;
+							/**
+							 * @type array | undefined
+							 */
+							tagMatches?: {
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								matchedTagId: string;
+								/**
+								 * @default 'direct'
+								 * @type string
+								 */
+								evidence: PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsTagMatchesEvidenceEnum;
+								/**
+								 * @type object
+								 */
+								expression: {
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									expressionId: string;
+									/**
+									 * @default 'simple'
+									 * @type string
+									 */
+									expressionKind: PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsTagMatchesExpressionExpressionKindEnum;
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									focusTagId: string;
+									presentationRevision: string | number;
+									/**
+									 * @type array
+									 */
+									components: {
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										tagId: string;
+										/**
+										 * @default 'predicate'
+										 * @type string
+										 */
+										semanticRole: PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsTagMatchesExpressionComponentsSemanticRoleEnum;
+										/**
+										 * @default 'required'
+										 * @type string
+										 */
+										componentKind: PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsTagMatchesExpressionComponentsComponentKindEnum;
+										language:
+											| (PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsTagMatchesExpressionComponentsLanguage | null)
+											| null;
+										title: (string | null) | null;
+									}[];
+									groupKey:
+										| ({
+												/**
+												 * @description
+												 * Format: `uuid`
+												 * @type string
+												 */
+												tagId: string;
+												/**
+												 * @default 'predicate'
+												 * @type string
+												 */
+												semanticRole: PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsTagMatchesExpressionGroupKeySemanticRoleEnum;
+												language:
+													| (PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsTagMatchesExpressionGroupKeyLanguage | null)
+													| null;
+												title: (string | null) | null;
+										  } | null)
+										| null;
+								};
+							}[];
+							tagOtherPositionCount?: string | number;
 						}[];
 				  }
 				| {
@@ -198739,6 +205747,90 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200 = {
 										  } | null)
 										| null;
 									/**
+									 * @type array | undefined
+									 */
+									searchTagMatches?: {
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										matchedTagId: string;
+										/**
+										 * @default 'direct'
+										 * @type string
+										 */
+										evidence: PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsSearchTagMatchesEvidenceEnum;
+										/**
+										 * @type object
+										 */
+										expression: {
+											/**
+											 * @description
+											 * Format: `uuid`
+											 * @type string
+											 */
+											expressionId: string;
+											/**
+											 * @default 'simple'
+											 * @type string
+											 */
+											expressionKind: PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsSearchTagMatchesExpressionExpressionKindEnum;
+											/**
+											 * @description
+											 * Format: `uuid`
+											 * @type string
+											 */
+											focusTagId: string;
+											presentationRevision: string | number;
+											/**
+											 * @type array
+											 */
+											components: {
+												/**
+												 * @description
+												 * Format: `uuid`
+												 * @type string
+												 */
+												tagId: string;
+												/**
+												 * @default 'predicate'
+												 * @type string
+												 */
+												semanticRole: PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsSearchTagMatchesExpressionComponentsSemanticRoleEnum;
+												/**
+												 * @default 'required'
+												 * @type string
+												 */
+												componentKind: PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsSearchTagMatchesExpressionComponentsComponentKindEnum;
+												language:
+													| (PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsSearchTagMatchesExpressionComponentsLanguage | null)
+													| null;
+												title: (string | null) | null;
+											}[];
+											groupKey:
+												| ({
+														/**
+														 * @description
+														 * Format: `uuid`
+														 * @type string
+														 */
+														tagId: string;
+														/**
+														 * @default 'predicate'
+														 * @type string
+														 */
+														semanticRole: PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsSearchTagMatchesExpressionGroupKeySemanticRoleEnum;
+														language:
+															| (PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsSearchTagMatchesExpressionGroupKeyLanguage | null)
+															| null;
+														title: (string | null) | null;
+												  } | null)
+												| null;
+										};
+									}[];
+									tagOtherPositionCount?: string | number;
+									/**
 									 * @type string
 									 */
 									itemType: "unit";
@@ -199224,6 +206316,90 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200 = {
 														signature: string;
 												  } | null)
 												| null;
+											/**
+											 * @type array | undefined
+											 */
+											searchTagMatches?: {
+												/**
+												 * @description
+												 * Format: `uuid`
+												 * @type string
+												 */
+												matchedTagId: string;
+												/**
+												 * @default 'direct'
+												 * @type string
+												 */
+												evidence: PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsSearchTagMatchesEvidenceEnum;
+												/**
+												 * @type object
+												 */
+												expression: {
+													/**
+													 * @description
+													 * Format: `uuid`
+													 * @type string
+													 */
+													expressionId: string;
+													/**
+													 * @default 'simple'
+													 * @type string
+													 */
+													expressionKind: PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsSearchTagMatchesExpressionExpressionKindEnum;
+													/**
+													 * @description
+													 * Format: `uuid`
+													 * @type string
+													 */
+													focusTagId: string;
+													presentationRevision: string | number;
+													/**
+													 * @type array
+													 */
+													components: {
+														/**
+														 * @description
+														 * Format: `uuid`
+														 * @type string
+														 */
+														tagId: string;
+														/**
+														 * @default 'predicate'
+														 * @type string
+														 */
+														semanticRole: PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsSearchTagMatchesExpressionComponentsSemanticRoleEnum;
+														/**
+														 * @default 'required'
+														 * @type string
+														 */
+														componentKind: PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsSearchTagMatchesExpressionComponentsComponentKindEnum;
+														language:
+															| (PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsSearchTagMatchesExpressionComponentsLanguage | null)
+															| null;
+														title: (string | null) | null;
+													}[];
+													groupKey:
+														| ({
+																/**
+																 * @description
+																 * Format: `uuid`
+																 * @type string
+																 */
+																tagId: string;
+																/**
+																 * @default 'predicate'
+																 * @type string
+																 */
+																semanticRole: PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsSearchTagMatchesExpressionGroupKeySemanticRoleEnum;
+																language:
+																	| (PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsSearchTagMatchesExpressionGroupKeyLanguage | null)
+																	| null;
+																title: (string | null) | null;
+														  } | null)
+														| null;
+												};
+											}[];
+											tagOtherPositionCount?: string | number;
 											/**
 											 * @type string
 											 */
@@ -199924,6 +207100,90 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200 = {
 														signature: string;
 												  } | null)
 												| null;
+											/**
+											 * @type array | undefined
+											 */
+											searchTagMatches?: {
+												/**
+												 * @description
+												 * Format: `uuid`
+												 * @type string
+												 */
+												matchedTagId: string;
+												/**
+												 * @default 'direct'
+												 * @type string
+												 */
+												evidence: PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsSearchTagMatchesEvidenceEnum;
+												/**
+												 * @type object
+												 */
+												expression: {
+													/**
+													 * @description
+													 * Format: `uuid`
+													 * @type string
+													 */
+													expressionId: string;
+													/**
+													 * @default 'simple'
+													 * @type string
+													 */
+													expressionKind: PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsSearchTagMatchesExpressionExpressionKindEnum;
+													/**
+													 * @description
+													 * Format: `uuid`
+													 * @type string
+													 */
+													focusTagId: string;
+													presentationRevision: string | number;
+													/**
+													 * @type array
+													 */
+													components: {
+														/**
+														 * @description
+														 * Format: `uuid`
+														 * @type string
+														 */
+														tagId: string;
+														/**
+														 * @default 'predicate'
+														 * @type string
+														 */
+														semanticRole: PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsSearchTagMatchesExpressionComponentsSemanticRoleEnum;
+														/**
+														 * @default 'required'
+														 * @type string
+														 */
+														componentKind: PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsSearchTagMatchesExpressionComponentsComponentKindEnum;
+														language:
+															| (PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsSearchTagMatchesExpressionComponentsLanguage | null)
+															| null;
+														title: (string | null) | null;
+													}[];
+													groupKey:
+														| ({
+																/**
+																 * @description
+																 * Format: `uuid`
+																 * @type string
+																 */
+																tagId: string;
+																/**
+																 * @default 'predicate'
+																 * @type string
+																 */
+																semanticRole: PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsSearchTagMatchesExpressionGroupKeySemanticRoleEnum;
+																language:
+																	| (PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsSearchTagMatchesExpressionGroupKeyLanguage | null)
+																	| null;
+																title: (string | null) | null;
+														  } | null)
+														| null;
+												};
+											}[];
+											tagOtherPositionCount?: string | number;
 											/**
 											 * @type string
 											 */
@@ -200642,6 +207902,90 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200 = {
 														signature: string;
 												  } | null)
 												| null;
+											/**
+											 * @type array | undefined
+											 */
+											searchTagMatches?: {
+												/**
+												 * @description
+												 * Format: `uuid`
+												 * @type string
+												 */
+												matchedTagId: string;
+												/**
+												 * @default 'direct'
+												 * @type string
+												 */
+												evidence: PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsSearchTagMatchesEvidenceEnum;
+												/**
+												 * @type object
+												 */
+												expression: {
+													/**
+													 * @description
+													 * Format: `uuid`
+													 * @type string
+													 */
+													expressionId: string;
+													/**
+													 * @default 'simple'
+													 * @type string
+													 */
+													expressionKind: PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsSearchTagMatchesExpressionExpressionKindEnum;
+													/**
+													 * @description
+													 * Format: `uuid`
+													 * @type string
+													 */
+													focusTagId: string;
+													presentationRevision: string | number;
+													/**
+													 * @type array
+													 */
+													components: {
+														/**
+														 * @description
+														 * Format: `uuid`
+														 * @type string
+														 */
+														tagId: string;
+														/**
+														 * @default 'predicate'
+														 * @type string
+														 */
+														semanticRole: PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsSearchTagMatchesExpressionComponentsSemanticRoleEnum;
+														/**
+														 * @default 'required'
+														 * @type string
+														 */
+														componentKind: PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsSearchTagMatchesExpressionComponentsComponentKindEnum;
+														language:
+															| (PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsSearchTagMatchesExpressionComponentsLanguage | null)
+															| null;
+														title: (string | null) | null;
+													}[];
+													groupKey:
+														| ({
+																/**
+																 * @description
+																 * Format: `uuid`
+																 * @type string
+																 */
+																tagId: string;
+																/**
+																 * @default 'predicate'
+																 * @type string
+																 */
+																semanticRole: PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsSearchTagMatchesExpressionGroupKeySemanticRoleEnum;
+																language:
+																	| (PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsSearchTagMatchesExpressionGroupKeyLanguage | null)
+																	| null;
+																title: (string | null) | null;
+														  } | null)
+														| null;
+												};
+											}[];
+											tagOtherPositionCount?: string | number;
 											/**
 											 * @type string
 											 */
@@ -201666,6 +209010,90 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200 = {
 										  } | null)
 										| null;
 									/**
+									 * @type array | undefined
+									 */
+									searchTagMatches?: {
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										matchedTagId: string;
+										/**
+										 * @default 'direct'
+										 * @type string
+										 */
+										evidence: PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsSearchTagMatchesEvidenceEnum;
+										/**
+										 * @type object
+										 */
+										expression: {
+											/**
+											 * @description
+											 * Format: `uuid`
+											 * @type string
+											 */
+											expressionId: string;
+											/**
+											 * @default 'simple'
+											 * @type string
+											 */
+											expressionKind: PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsSearchTagMatchesExpressionExpressionKindEnum;
+											/**
+											 * @description
+											 * Format: `uuid`
+											 * @type string
+											 */
+											focusTagId: string;
+											presentationRevision: string | number;
+											/**
+											 * @type array
+											 */
+											components: {
+												/**
+												 * @description
+												 * Format: `uuid`
+												 * @type string
+												 */
+												tagId: string;
+												/**
+												 * @default 'predicate'
+												 * @type string
+												 */
+												semanticRole: PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsSearchTagMatchesExpressionComponentsSemanticRoleEnum;
+												/**
+												 * @default 'required'
+												 * @type string
+												 */
+												componentKind: PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsSearchTagMatchesExpressionComponentsComponentKindEnum;
+												language:
+													| (PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsSearchTagMatchesExpressionComponentsLanguage | null)
+													| null;
+												title: (string | null) | null;
+											}[];
+											groupKey:
+												| ({
+														/**
+														 * @description
+														 * Format: `uuid`
+														 * @type string
+														 */
+														tagId: string;
+														/**
+														 * @default 'predicate'
+														 * @type string
+														 */
+														semanticRole: PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsSearchTagMatchesExpressionGroupKeySemanticRoleEnum;
+														language:
+															| (PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsSearchTagMatchesExpressionGroupKeyLanguage | null)
+															| null;
+														title: (string | null) | null;
+												  } | null)
+												| null;
+										};
+									}[];
+									tagOtherPositionCount?: string | number;
+									/**
 									 * @type string
 									 */
 									itemType: "unit";
@@ -202151,6 +209579,90 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200 = {
 														signature: string;
 												  } | null)
 												| null;
+											/**
+											 * @type array | undefined
+											 */
+											searchTagMatches?: {
+												/**
+												 * @description
+												 * Format: `uuid`
+												 * @type string
+												 */
+												matchedTagId: string;
+												/**
+												 * @default 'direct'
+												 * @type string
+												 */
+												evidence: PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsSearchTagMatchesEvidenceEnum;
+												/**
+												 * @type object
+												 */
+												expression: {
+													/**
+													 * @description
+													 * Format: `uuid`
+													 * @type string
+													 */
+													expressionId: string;
+													/**
+													 * @default 'simple'
+													 * @type string
+													 */
+													expressionKind: PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsSearchTagMatchesExpressionExpressionKindEnum;
+													/**
+													 * @description
+													 * Format: `uuid`
+													 * @type string
+													 */
+													focusTagId: string;
+													presentationRevision: string | number;
+													/**
+													 * @type array
+													 */
+													components: {
+														/**
+														 * @description
+														 * Format: `uuid`
+														 * @type string
+														 */
+														tagId: string;
+														/**
+														 * @default 'predicate'
+														 * @type string
+														 */
+														semanticRole: PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsSearchTagMatchesExpressionComponentsSemanticRoleEnum;
+														/**
+														 * @default 'required'
+														 * @type string
+														 */
+														componentKind: PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsSearchTagMatchesExpressionComponentsComponentKindEnum;
+														language:
+															| (PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsSearchTagMatchesExpressionComponentsLanguage | null)
+															| null;
+														title: (string | null) | null;
+													}[];
+													groupKey:
+														| ({
+																/**
+																 * @description
+																 * Format: `uuid`
+																 * @type string
+																 */
+																tagId: string;
+																/**
+																 * @default 'predicate'
+																 * @type string
+																 */
+																semanticRole: PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsSearchTagMatchesExpressionGroupKeySemanticRoleEnum;
+																language:
+																	| (PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsSearchTagMatchesExpressionGroupKeyLanguage | null)
+																	| null;
+																title: (string | null) | null;
+														  } | null)
+														| null;
+												};
+											}[];
+											tagOtherPositionCount?: string | number;
 											/**
 											 * @type string
 											 */
@@ -202851,6 +210363,90 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200 = {
 														signature: string;
 												  } | null)
 												| null;
+											/**
+											 * @type array | undefined
+											 */
+											searchTagMatches?: {
+												/**
+												 * @description
+												 * Format: `uuid`
+												 * @type string
+												 */
+												matchedTagId: string;
+												/**
+												 * @default 'direct'
+												 * @type string
+												 */
+												evidence: PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsSearchTagMatchesEvidenceEnum;
+												/**
+												 * @type object
+												 */
+												expression: {
+													/**
+													 * @description
+													 * Format: `uuid`
+													 * @type string
+													 */
+													expressionId: string;
+													/**
+													 * @default 'simple'
+													 * @type string
+													 */
+													expressionKind: PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsSearchTagMatchesExpressionExpressionKindEnum;
+													/**
+													 * @description
+													 * Format: `uuid`
+													 * @type string
+													 */
+													focusTagId: string;
+													presentationRevision: string | number;
+													/**
+													 * @type array
+													 */
+													components: {
+														/**
+														 * @description
+														 * Format: `uuid`
+														 * @type string
+														 */
+														tagId: string;
+														/**
+														 * @default 'predicate'
+														 * @type string
+														 */
+														semanticRole: PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsSearchTagMatchesExpressionComponentsSemanticRoleEnum;
+														/**
+														 * @default 'required'
+														 * @type string
+														 */
+														componentKind: PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsSearchTagMatchesExpressionComponentsComponentKindEnum;
+														language:
+															| (PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsSearchTagMatchesExpressionComponentsLanguage | null)
+															| null;
+														title: (string | null) | null;
+													}[];
+													groupKey:
+														| ({
+																/**
+																 * @description
+																 * Format: `uuid`
+																 * @type string
+																 */
+																tagId: string;
+																/**
+																 * @default 'predicate'
+																 * @type string
+																 */
+																semanticRole: PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsSearchTagMatchesExpressionGroupKeySemanticRoleEnum;
+																language:
+																	| (PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsSearchTagMatchesExpressionGroupKeyLanguage | null)
+																	| null;
+																title: (string | null) | null;
+														  } | null)
+														| null;
+												};
+											}[];
+											tagOtherPositionCount?: string | number;
 											/**
 											 * @type string
 											 */
@@ -203569,6 +211165,90 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200 = {
 														signature: string;
 												  } | null)
 												| null;
+											/**
+											 * @type array | undefined
+											 */
+											searchTagMatches?: {
+												/**
+												 * @description
+												 * Format: `uuid`
+												 * @type string
+												 */
+												matchedTagId: string;
+												/**
+												 * @default 'direct'
+												 * @type string
+												 */
+												evidence: PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsSearchTagMatchesEvidenceEnum;
+												/**
+												 * @type object
+												 */
+												expression: {
+													/**
+													 * @description
+													 * Format: `uuid`
+													 * @type string
+													 */
+													expressionId: string;
+													/**
+													 * @default 'simple'
+													 * @type string
+													 */
+													expressionKind: PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsSearchTagMatchesExpressionExpressionKindEnum;
+													/**
+													 * @description
+													 * Format: `uuid`
+													 * @type string
+													 */
+													focusTagId: string;
+													presentationRevision: string | number;
+													/**
+													 * @type array
+													 */
+													components: {
+														/**
+														 * @description
+														 * Format: `uuid`
+														 * @type string
+														 */
+														tagId: string;
+														/**
+														 * @default 'predicate'
+														 * @type string
+														 */
+														semanticRole: PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsSearchTagMatchesExpressionComponentsSemanticRoleEnum;
+														/**
+														 * @default 'required'
+														 * @type string
+														 */
+														componentKind: PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsSearchTagMatchesExpressionComponentsComponentKindEnum;
+														language:
+															| (PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsSearchTagMatchesExpressionComponentsLanguage | null)
+															| null;
+														title: (string | null) | null;
+													}[];
+													groupKey:
+														| ({
+																/**
+																 * @description
+																 * Format: `uuid`
+																 * @type string
+																 */
+																tagId: string;
+																/**
+																 * @default 'predicate'
+																 * @type string
+																 */
+																semanticRole: PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsSearchTagMatchesExpressionGroupKeySemanticRoleEnum;
+																language:
+																	| (PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200DockResultsOutcomeItemsSearchTagMatchesExpressionGroupKeyLanguage | null)
+																	| null;
+																title: (string | null) | null;
+														  } | null)
+														| null;
+												};
+											}[];
+											tagOtherPositionCount?: string | number;
 											/**
 											 * @type string
 											 */
@@ -205393,6 +213073,88 @@ export const PostApiSearchZonesByZoneIdPagesByPageIdBlockExecutionsStatus200Grou
 export type PostApiSearchZonesByZoneIdPagesByPageIdBlockExecutionsStatus200GroupsHitsVariantMainUnitLanguageEnum =
 	(typeof PostApiSearchZonesByZoneIdPagesByPageIdBlockExecutionsStatus200GroupsHitsVariantMainUnitLanguageEnum)[keyof typeof PostApiSearchZonesByZoneIdPagesByPageIdBlockExecutionsStatus200GroupsHitsVariantMainUnitLanguageEnum];
 
+export const PostApiSearchZonesByZoneIdPagesByPageIdBlockExecutionsStatus200GroupsHitsTagMatchesEvidenceEnum =
+	{
+		direct: "direct",
+		primary: "primary",
+		entailed: "entailed",
+		retrieval_only: "retrieval_only",
+	} as const;
+
+export type PostApiSearchZonesByZoneIdPagesByPageIdBlockExecutionsStatus200GroupsHitsTagMatchesEvidenceEnum =
+	(typeof PostApiSearchZonesByZoneIdPagesByPageIdBlockExecutionsStatus200GroupsHitsTagMatchesEvidenceEnum)[keyof typeof PostApiSearchZonesByZoneIdPagesByPageIdBlockExecutionsStatus200GroupsHitsTagMatchesEvidenceEnum];
+
+export const PostApiSearchZonesByZoneIdPagesByPageIdBlockExecutionsStatus200GroupsHitsTagMatchesExpressionExpressionKindEnum =
+	{
+		simple: "simple",
+		facet_value: "facet_value",
+		relation: "relation",
+	} as const;
+
+export type PostApiSearchZonesByZoneIdPagesByPageIdBlockExecutionsStatus200GroupsHitsTagMatchesExpressionExpressionKindEnum =
+	(typeof PostApiSearchZonesByZoneIdPagesByPageIdBlockExecutionsStatus200GroupsHitsTagMatchesExpressionExpressionKindEnum)[keyof typeof PostApiSearchZonesByZoneIdPagesByPageIdBlockExecutionsStatus200GroupsHitsTagMatchesExpressionExpressionKindEnum];
+
+export const PostApiSearchZonesByZoneIdPagesByPageIdBlockExecutionsStatus200GroupsHitsTagMatchesExpressionComponentsSemanticRoleEnum =
+	{
+		predicate: "predicate",
+		slot: "slot",
+		value: "value",
+		focus: "focus",
+		qualifier: "qualifier",
+	} as const;
+
+export type PostApiSearchZonesByZoneIdPagesByPageIdBlockExecutionsStatus200GroupsHitsTagMatchesExpressionComponentsSemanticRoleEnum =
+	(typeof PostApiSearchZonesByZoneIdPagesByPageIdBlockExecutionsStatus200GroupsHitsTagMatchesExpressionComponentsSemanticRoleEnum)[keyof typeof PostApiSearchZonesByZoneIdPagesByPageIdBlockExecutionsStatus200GroupsHitsTagMatchesExpressionComponentsSemanticRoleEnum];
+
+export const PostApiSearchZonesByZoneIdPagesByPageIdBlockExecutionsStatus200GroupsHitsTagMatchesExpressionComponentsComponentKindEnum =
+	{
+		required: "required",
+		fallback: "fallback",
+	} as const;
+
+export type PostApiSearchZonesByZoneIdPagesByPageIdBlockExecutionsStatus200GroupsHitsTagMatchesExpressionComponentsComponentKindEnum =
+	(typeof PostApiSearchZonesByZoneIdPagesByPageIdBlockExecutionsStatus200GroupsHitsTagMatchesExpressionComponentsComponentKindEnum)[keyof typeof PostApiSearchZonesByZoneIdPagesByPageIdBlockExecutionsStatus200GroupsHitsTagMatchesExpressionComponentsComponentKindEnum];
+
+export const PostApiSearchZonesByZoneIdPagesByPageIdBlockExecutionsStatus200GroupsHitsTagMatchesExpressionComponentsLanguage =
+	{
+		zh: "zh",
+		en: "en",
+		ja: "ja",
+		ko: "ko",
+		de: "de",
+		fr: "fr",
+		es: "es",
+	} as const;
+
+export type PostApiSearchZonesByZoneIdPagesByPageIdBlockExecutionsStatus200GroupsHitsTagMatchesExpressionComponentsLanguage =
+	(typeof PostApiSearchZonesByZoneIdPagesByPageIdBlockExecutionsStatus200GroupsHitsTagMatchesExpressionComponentsLanguage)[keyof typeof PostApiSearchZonesByZoneIdPagesByPageIdBlockExecutionsStatus200GroupsHitsTagMatchesExpressionComponentsLanguage];
+
+export const PostApiSearchZonesByZoneIdPagesByPageIdBlockExecutionsStatus200GroupsHitsTagMatchesExpressionGroupKeySemanticRoleEnum =
+	{
+		predicate: "predicate",
+		slot: "slot",
+		value: "value",
+		focus: "focus",
+		qualifier: "qualifier",
+	} as const;
+
+export type PostApiSearchZonesByZoneIdPagesByPageIdBlockExecutionsStatus200GroupsHitsTagMatchesExpressionGroupKeySemanticRoleEnum =
+	(typeof PostApiSearchZonesByZoneIdPagesByPageIdBlockExecutionsStatus200GroupsHitsTagMatchesExpressionGroupKeySemanticRoleEnum)[keyof typeof PostApiSearchZonesByZoneIdPagesByPageIdBlockExecutionsStatus200GroupsHitsTagMatchesExpressionGroupKeySemanticRoleEnum];
+
+export const PostApiSearchZonesByZoneIdPagesByPageIdBlockExecutionsStatus200GroupsHitsTagMatchesExpressionGroupKeyLanguage =
+	{
+		zh: "zh",
+		en: "en",
+		ja: "ja",
+		ko: "ko",
+		de: "de",
+		fr: "fr",
+		es: "es",
+	} as const;
+
+export type PostApiSearchZonesByZoneIdPagesByPageIdBlockExecutionsStatus200GroupsHitsTagMatchesExpressionGroupKeyLanguage =
+	(typeof PostApiSearchZonesByZoneIdPagesByPageIdBlockExecutionsStatus200GroupsHitsTagMatchesExpressionGroupKeyLanguage)[keyof typeof PostApiSearchZonesByZoneIdPagesByPageIdBlockExecutionsStatus200GroupsHitsTagMatchesExpressionGroupKeyLanguage];
+
 export const PostApiSearchZonesByZoneIdPagesByPageIdBlockExecutionsStatus200SelectedKindEnum = {
 	slug_namespace: "slug_namespace",
 	profile: "profile",
@@ -205698,6 +213460,90 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdBlockExecutionsStatus200 = {
 				  };
 			name?: (string | null) | null;
 			summary: (string | null) | null;
+			/**
+			 * @type array | undefined
+			 */
+			tagMatches?: {
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				matchedTagId: string;
+				/**
+				 * @default 'direct'
+				 * @type string
+				 */
+				evidence: PostApiSearchZonesByZoneIdPagesByPageIdBlockExecutionsStatus200GroupsHitsTagMatchesEvidenceEnum;
+				/**
+				 * @type object
+				 */
+				expression: {
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					expressionId: string;
+					/**
+					 * @default 'simple'
+					 * @type string
+					 */
+					expressionKind: PostApiSearchZonesByZoneIdPagesByPageIdBlockExecutionsStatus200GroupsHitsTagMatchesExpressionExpressionKindEnum;
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					focusTagId: string;
+					presentationRevision: string | number;
+					/**
+					 * @type array
+					 */
+					components: {
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						tagId: string;
+						/**
+						 * @default 'predicate'
+						 * @type string
+						 */
+						semanticRole: PostApiSearchZonesByZoneIdPagesByPageIdBlockExecutionsStatus200GroupsHitsTagMatchesExpressionComponentsSemanticRoleEnum;
+						/**
+						 * @default 'required'
+						 * @type string
+						 */
+						componentKind: PostApiSearchZonesByZoneIdPagesByPageIdBlockExecutionsStatus200GroupsHitsTagMatchesExpressionComponentsComponentKindEnum;
+						language:
+							| (PostApiSearchZonesByZoneIdPagesByPageIdBlockExecutionsStatus200GroupsHitsTagMatchesExpressionComponentsLanguage | null)
+							| null;
+						title: (string | null) | null;
+					}[];
+					groupKey:
+						| ({
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								tagId: string;
+								/**
+								 * @default 'predicate'
+								 * @type string
+								 */
+								semanticRole: PostApiSearchZonesByZoneIdPagesByPageIdBlockExecutionsStatus200GroupsHitsTagMatchesExpressionGroupKeySemanticRoleEnum;
+								language:
+									| (PostApiSearchZonesByZoneIdPagesByPageIdBlockExecutionsStatus200GroupsHitsTagMatchesExpressionGroupKeyLanguage | null)
+									| null;
+								title: (string | null) | null;
+						  } | null)
+						| null;
+				};
+			}[];
+			tagOtherPositionCount?: string | number;
 		}[];
 		total:
 			| {
@@ -206662,6 +214508,88 @@ export const PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus200ItemsTrac
 export type PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus200ItemsTrackingSurfaceEnum =
 	(typeof PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus200ItemsTrackingSurfaceEnum)[keyof typeof PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus200ItemsTrackingSurfaceEnum];
 
+export const PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus200ItemsSearchTagMatchesEvidenceEnum =
+	{
+		direct: "direct",
+		primary: "primary",
+		entailed: "entailed",
+		retrieval_only: "retrieval_only",
+	} as const;
+
+export type PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus200ItemsSearchTagMatchesEvidenceEnum =
+	(typeof PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus200ItemsSearchTagMatchesEvidenceEnum)[keyof typeof PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus200ItemsSearchTagMatchesEvidenceEnum];
+
+export const PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus200ItemsSearchTagMatchesExpressionExpressionKindEnum =
+	{
+		simple: "simple",
+		facet_value: "facet_value",
+		relation: "relation",
+	} as const;
+
+export type PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus200ItemsSearchTagMatchesExpressionExpressionKindEnum =
+	(typeof PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus200ItemsSearchTagMatchesExpressionExpressionKindEnum)[keyof typeof PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus200ItemsSearchTagMatchesExpressionExpressionKindEnum];
+
+export const PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus200ItemsSearchTagMatchesExpressionComponentsSemanticRoleEnum =
+	{
+		predicate: "predicate",
+		slot: "slot",
+		value: "value",
+		focus: "focus",
+		qualifier: "qualifier",
+	} as const;
+
+export type PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus200ItemsSearchTagMatchesExpressionComponentsSemanticRoleEnum =
+	(typeof PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus200ItemsSearchTagMatchesExpressionComponentsSemanticRoleEnum)[keyof typeof PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus200ItemsSearchTagMatchesExpressionComponentsSemanticRoleEnum];
+
+export const PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus200ItemsSearchTagMatchesExpressionComponentsComponentKindEnum =
+	{
+		required: "required",
+		fallback: "fallback",
+	} as const;
+
+export type PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus200ItemsSearchTagMatchesExpressionComponentsComponentKindEnum =
+	(typeof PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus200ItemsSearchTagMatchesExpressionComponentsComponentKindEnum)[keyof typeof PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus200ItemsSearchTagMatchesExpressionComponentsComponentKindEnum];
+
+export const PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus200ItemsSearchTagMatchesExpressionComponentsLanguage =
+	{
+		zh: "zh",
+		en: "en",
+		ja: "ja",
+		ko: "ko",
+		de: "de",
+		fr: "fr",
+		es: "es",
+	} as const;
+
+export type PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus200ItemsSearchTagMatchesExpressionComponentsLanguage =
+	(typeof PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus200ItemsSearchTagMatchesExpressionComponentsLanguage)[keyof typeof PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus200ItemsSearchTagMatchesExpressionComponentsLanguage];
+
+export const PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus200ItemsSearchTagMatchesExpressionGroupKeySemanticRoleEnum =
+	{
+		predicate: "predicate",
+		slot: "slot",
+		value: "value",
+		focus: "focus",
+		qualifier: "qualifier",
+	} as const;
+
+export type PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus200ItemsSearchTagMatchesExpressionGroupKeySemanticRoleEnum =
+	(typeof PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus200ItemsSearchTagMatchesExpressionGroupKeySemanticRoleEnum)[keyof typeof PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus200ItemsSearchTagMatchesExpressionGroupKeySemanticRoleEnum];
+
+export const PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus200ItemsSearchTagMatchesExpressionGroupKeyLanguage =
+	{
+		zh: "zh",
+		en: "en",
+		ja: "ja",
+		ko: "ko",
+		de: "de",
+		fr: "fr",
+		es: "es",
+	} as const;
+
+export type PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus200ItemsSearchTagMatchesExpressionGroupKeyLanguage =
+	(typeof PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus200ItemsSearchTagMatchesExpressionGroupKeyLanguage)[keyof typeof PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus200ItemsSearchTagMatchesExpressionGroupKeyLanguage];
+
 export const PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus200ItemsUnitKindEnum = {
 	profile: "profile",
 	book: "book",
@@ -207236,6 +215164,90 @@ export type PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus200 = {
 					  } | null)
 					| null;
 				/**
+				 * @type array | undefined
+				 */
+				searchTagMatches?: {
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					matchedTagId: string;
+					/**
+					 * @default 'direct'
+					 * @type string
+					 */
+					evidence: PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus200ItemsSearchTagMatchesEvidenceEnum;
+					/**
+					 * @type object
+					 */
+					expression: {
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						expressionId: string;
+						/**
+						 * @default 'simple'
+						 * @type string
+						 */
+						expressionKind: PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus200ItemsSearchTagMatchesExpressionExpressionKindEnum;
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						focusTagId: string;
+						presentationRevision: string | number;
+						/**
+						 * @type array
+						 */
+						components: {
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							tagId: string;
+							/**
+							 * @default 'predicate'
+							 * @type string
+							 */
+							semanticRole: PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus200ItemsSearchTagMatchesExpressionComponentsSemanticRoleEnum;
+							/**
+							 * @default 'required'
+							 * @type string
+							 */
+							componentKind: PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus200ItemsSearchTagMatchesExpressionComponentsComponentKindEnum;
+							language:
+								| (PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus200ItemsSearchTagMatchesExpressionComponentsLanguage | null)
+								| null;
+							title: (string | null) | null;
+						}[];
+						groupKey:
+							| ({
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									tagId: string;
+									/**
+									 * @default 'predicate'
+									 * @type string
+									 */
+									semanticRole: PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus200ItemsSearchTagMatchesExpressionGroupKeySemanticRoleEnum;
+									language:
+										| (PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus200ItemsSearchTagMatchesExpressionGroupKeyLanguage | null)
+										| null;
+									title: (string | null) | null;
+							  } | null)
+							| null;
+					};
+				}[];
+				tagOtherPositionCount?: string | number;
+				/**
 				 * @type string
 				 */
 				itemType: "unit";
@@ -207721,6 +215733,90 @@ export type PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus200 = {
 									signature: string;
 							  } | null)
 							| null;
+						/**
+						 * @type array | undefined
+						 */
+						searchTagMatches?: {
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							matchedTagId: string;
+							/**
+							 * @default 'direct'
+							 * @type string
+							 */
+							evidence: PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus200ItemsSearchTagMatchesEvidenceEnum;
+							/**
+							 * @type object
+							 */
+							expression: {
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								expressionId: string;
+								/**
+								 * @default 'simple'
+								 * @type string
+								 */
+								expressionKind: PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus200ItemsSearchTagMatchesExpressionExpressionKindEnum;
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								focusTagId: string;
+								presentationRevision: string | number;
+								/**
+								 * @type array
+								 */
+								components: {
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									tagId: string;
+									/**
+									 * @default 'predicate'
+									 * @type string
+									 */
+									semanticRole: PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus200ItemsSearchTagMatchesExpressionComponentsSemanticRoleEnum;
+									/**
+									 * @default 'required'
+									 * @type string
+									 */
+									componentKind: PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus200ItemsSearchTagMatchesExpressionComponentsComponentKindEnum;
+									language:
+										| (PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus200ItemsSearchTagMatchesExpressionComponentsLanguage | null)
+										| null;
+									title: (string | null) | null;
+								}[];
+								groupKey:
+									| ({
+											/**
+											 * @description
+											 * Format: `uuid`
+											 * @type string
+											 */
+											tagId: string;
+											/**
+											 * @default 'predicate'
+											 * @type string
+											 */
+											semanticRole: PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus200ItemsSearchTagMatchesExpressionGroupKeySemanticRoleEnum;
+											language:
+												| (PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus200ItemsSearchTagMatchesExpressionGroupKeyLanguage | null)
+												| null;
+											title: (string | null) | null;
+									  } | null)
+									| null;
+							};
+						}[];
+						tagOtherPositionCount?: string | number;
 						/**
 						 * @type string
 						 */
@@ -208421,6 +216517,90 @@ export type PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus200 = {
 									signature: string;
 							  } | null)
 							| null;
+						/**
+						 * @type array | undefined
+						 */
+						searchTagMatches?: {
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							matchedTagId: string;
+							/**
+							 * @default 'direct'
+							 * @type string
+							 */
+							evidence: PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus200ItemsSearchTagMatchesEvidenceEnum;
+							/**
+							 * @type object
+							 */
+							expression: {
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								expressionId: string;
+								/**
+								 * @default 'simple'
+								 * @type string
+								 */
+								expressionKind: PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus200ItemsSearchTagMatchesExpressionExpressionKindEnum;
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								focusTagId: string;
+								presentationRevision: string | number;
+								/**
+								 * @type array
+								 */
+								components: {
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									tagId: string;
+									/**
+									 * @default 'predicate'
+									 * @type string
+									 */
+									semanticRole: PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus200ItemsSearchTagMatchesExpressionComponentsSemanticRoleEnum;
+									/**
+									 * @default 'required'
+									 * @type string
+									 */
+									componentKind: PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus200ItemsSearchTagMatchesExpressionComponentsComponentKindEnum;
+									language:
+										| (PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus200ItemsSearchTagMatchesExpressionComponentsLanguage | null)
+										| null;
+									title: (string | null) | null;
+								}[];
+								groupKey:
+									| ({
+											/**
+											 * @description
+											 * Format: `uuid`
+											 * @type string
+											 */
+											tagId: string;
+											/**
+											 * @default 'predicate'
+											 * @type string
+											 */
+											semanticRole: PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus200ItemsSearchTagMatchesExpressionGroupKeySemanticRoleEnum;
+											language:
+												| (PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus200ItemsSearchTagMatchesExpressionGroupKeyLanguage | null)
+												| null;
+											title: (string | null) | null;
+									  } | null)
+									| null;
+							};
+						}[];
+						tagOtherPositionCount?: string | number;
 						/**
 						 * @type string
 						 */
@@ -209139,6 +217319,90 @@ export type PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus200 = {
 									signature: string;
 							  } | null)
 							| null;
+						/**
+						 * @type array | undefined
+						 */
+						searchTagMatches?: {
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							matchedTagId: string;
+							/**
+							 * @default 'direct'
+							 * @type string
+							 */
+							evidence: PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus200ItemsSearchTagMatchesEvidenceEnum;
+							/**
+							 * @type object
+							 */
+							expression: {
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								expressionId: string;
+								/**
+								 * @default 'simple'
+								 * @type string
+								 */
+								expressionKind: PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus200ItemsSearchTagMatchesExpressionExpressionKindEnum;
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								focusTagId: string;
+								presentationRevision: string | number;
+								/**
+								 * @type array
+								 */
+								components: {
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									tagId: string;
+									/**
+									 * @default 'predicate'
+									 * @type string
+									 */
+									semanticRole: PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus200ItemsSearchTagMatchesExpressionComponentsSemanticRoleEnum;
+									/**
+									 * @default 'required'
+									 * @type string
+									 */
+									componentKind: PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus200ItemsSearchTagMatchesExpressionComponentsComponentKindEnum;
+									language:
+										| (PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus200ItemsSearchTagMatchesExpressionComponentsLanguage | null)
+										| null;
+									title: (string | null) | null;
+								}[];
+								groupKey:
+									| ({
+											/**
+											 * @description
+											 * Format: `uuid`
+											 * @type string
+											 */
+											tagId: string;
+											/**
+											 * @default 'predicate'
+											 * @type string
+											 */
+											semanticRole: PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus200ItemsSearchTagMatchesExpressionGroupKeySemanticRoleEnum;
+											language:
+												| (PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus200ItemsSearchTagMatchesExpressionGroupKeyLanguage | null)
+												| null;
+											title: (string | null) | null;
+									  } | null)
+									| null;
+							};
+						}[];
+						tagOtherPositionCount?: string | number;
 						/**
 						 * @type string
 						 */
@@ -210663,6 +218927,88 @@ export const PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus200
 export type PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus200ItemsTrackingSurfaceEnum =
 	(typeof PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus200ItemsTrackingSurfaceEnum)[keyof typeof PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus200ItemsTrackingSurfaceEnum];
 
+export const PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus200ItemsSearchTagMatchesEvidenceEnum =
+	{
+		direct: "direct",
+		primary: "primary",
+		entailed: "entailed",
+		retrieval_only: "retrieval_only",
+	} as const;
+
+export type PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus200ItemsSearchTagMatchesEvidenceEnum =
+	(typeof PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus200ItemsSearchTagMatchesEvidenceEnum)[keyof typeof PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus200ItemsSearchTagMatchesEvidenceEnum];
+
+export const PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus200ItemsSearchTagMatchesExpressionExpressionKindEnum =
+	{
+		simple: "simple",
+		facet_value: "facet_value",
+		relation: "relation",
+	} as const;
+
+export type PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus200ItemsSearchTagMatchesExpressionExpressionKindEnum =
+	(typeof PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus200ItemsSearchTagMatchesExpressionExpressionKindEnum)[keyof typeof PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus200ItemsSearchTagMatchesExpressionExpressionKindEnum];
+
+export const PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus200ItemsSearchTagMatchesExpressionComponentsSemanticRoleEnum =
+	{
+		predicate: "predicate",
+		slot: "slot",
+		value: "value",
+		focus: "focus",
+		qualifier: "qualifier",
+	} as const;
+
+export type PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus200ItemsSearchTagMatchesExpressionComponentsSemanticRoleEnum =
+	(typeof PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus200ItemsSearchTagMatchesExpressionComponentsSemanticRoleEnum)[keyof typeof PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus200ItemsSearchTagMatchesExpressionComponentsSemanticRoleEnum];
+
+export const PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus200ItemsSearchTagMatchesExpressionComponentsComponentKindEnum =
+	{
+		required: "required",
+		fallback: "fallback",
+	} as const;
+
+export type PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus200ItemsSearchTagMatchesExpressionComponentsComponentKindEnum =
+	(typeof PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus200ItemsSearchTagMatchesExpressionComponentsComponentKindEnum)[keyof typeof PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus200ItemsSearchTagMatchesExpressionComponentsComponentKindEnum];
+
+export const PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus200ItemsSearchTagMatchesExpressionComponentsLanguage =
+	{
+		zh: "zh",
+		en: "en",
+		ja: "ja",
+		ko: "ko",
+		de: "de",
+		fr: "fr",
+		es: "es",
+	} as const;
+
+export type PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus200ItemsSearchTagMatchesExpressionComponentsLanguage =
+	(typeof PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus200ItemsSearchTagMatchesExpressionComponentsLanguage)[keyof typeof PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus200ItemsSearchTagMatchesExpressionComponentsLanguage];
+
+export const PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus200ItemsSearchTagMatchesExpressionGroupKeySemanticRoleEnum =
+	{
+		predicate: "predicate",
+		slot: "slot",
+		value: "value",
+		focus: "focus",
+		qualifier: "qualifier",
+	} as const;
+
+export type PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus200ItemsSearchTagMatchesExpressionGroupKeySemanticRoleEnum =
+	(typeof PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus200ItemsSearchTagMatchesExpressionGroupKeySemanticRoleEnum)[keyof typeof PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus200ItemsSearchTagMatchesExpressionGroupKeySemanticRoleEnum];
+
+export const PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus200ItemsSearchTagMatchesExpressionGroupKeyLanguage =
+	{
+		zh: "zh",
+		en: "en",
+		ja: "ja",
+		ko: "ko",
+		de: "de",
+		fr: "fr",
+		es: "es",
+	} as const;
+
+export type PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus200ItemsSearchTagMatchesExpressionGroupKeyLanguage =
+	(typeof PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus200ItemsSearchTagMatchesExpressionGroupKeyLanguage)[keyof typeof PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus200ItemsSearchTagMatchesExpressionGroupKeyLanguage];
+
 export const PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus200ItemsUnitKindEnum =
 	{
 		profile: "profile",
@@ -211243,6 +219589,90 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus200 
 					  } | null)
 					| null;
 				/**
+				 * @type array | undefined
+				 */
+				searchTagMatches?: {
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					matchedTagId: string;
+					/**
+					 * @default 'direct'
+					 * @type string
+					 */
+					evidence: PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus200ItemsSearchTagMatchesEvidenceEnum;
+					/**
+					 * @type object
+					 */
+					expression: {
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						expressionId: string;
+						/**
+						 * @default 'simple'
+						 * @type string
+						 */
+						expressionKind: PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus200ItemsSearchTagMatchesExpressionExpressionKindEnum;
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						focusTagId: string;
+						presentationRevision: string | number;
+						/**
+						 * @type array
+						 */
+						components: {
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							tagId: string;
+							/**
+							 * @default 'predicate'
+							 * @type string
+							 */
+							semanticRole: PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus200ItemsSearchTagMatchesExpressionComponentsSemanticRoleEnum;
+							/**
+							 * @default 'required'
+							 * @type string
+							 */
+							componentKind: PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus200ItemsSearchTagMatchesExpressionComponentsComponentKindEnum;
+							language:
+								| (PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus200ItemsSearchTagMatchesExpressionComponentsLanguage | null)
+								| null;
+							title: (string | null) | null;
+						}[];
+						groupKey:
+							| ({
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									tagId: string;
+									/**
+									 * @default 'predicate'
+									 * @type string
+									 */
+									semanticRole: PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus200ItemsSearchTagMatchesExpressionGroupKeySemanticRoleEnum;
+									language:
+										| (PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus200ItemsSearchTagMatchesExpressionGroupKeyLanguage | null)
+										| null;
+									title: (string | null) | null;
+							  } | null)
+							| null;
+					};
+				}[];
+				tagOtherPositionCount?: string | number;
+				/**
 				 * @type string
 				 */
 				itemType: "unit";
@@ -211728,6 +220158,90 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus200 
 									signature: string;
 							  } | null)
 							| null;
+						/**
+						 * @type array | undefined
+						 */
+						searchTagMatches?: {
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							matchedTagId: string;
+							/**
+							 * @default 'direct'
+							 * @type string
+							 */
+							evidence: PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus200ItemsSearchTagMatchesEvidenceEnum;
+							/**
+							 * @type object
+							 */
+							expression: {
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								expressionId: string;
+								/**
+								 * @default 'simple'
+								 * @type string
+								 */
+								expressionKind: PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus200ItemsSearchTagMatchesExpressionExpressionKindEnum;
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								focusTagId: string;
+								presentationRevision: string | number;
+								/**
+								 * @type array
+								 */
+								components: {
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									tagId: string;
+									/**
+									 * @default 'predicate'
+									 * @type string
+									 */
+									semanticRole: PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus200ItemsSearchTagMatchesExpressionComponentsSemanticRoleEnum;
+									/**
+									 * @default 'required'
+									 * @type string
+									 */
+									componentKind: PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus200ItemsSearchTagMatchesExpressionComponentsComponentKindEnum;
+									language:
+										| (PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus200ItemsSearchTagMatchesExpressionComponentsLanguage | null)
+										| null;
+									title: (string | null) | null;
+								}[];
+								groupKey:
+									| ({
+											/**
+											 * @description
+											 * Format: `uuid`
+											 * @type string
+											 */
+											tagId: string;
+											/**
+											 * @default 'predicate'
+											 * @type string
+											 */
+											semanticRole: PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus200ItemsSearchTagMatchesExpressionGroupKeySemanticRoleEnum;
+											language:
+												| (PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus200ItemsSearchTagMatchesExpressionGroupKeyLanguage | null)
+												| null;
+											title: (string | null) | null;
+									  } | null)
+									| null;
+							};
+						}[];
+						tagOtherPositionCount?: string | number;
 						/**
 						 * @type string
 						 */
@@ -212428,6 +220942,90 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus200 
 									signature: string;
 							  } | null)
 							| null;
+						/**
+						 * @type array | undefined
+						 */
+						searchTagMatches?: {
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							matchedTagId: string;
+							/**
+							 * @default 'direct'
+							 * @type string
+							 */
+							evidence: PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus200ItemsSearchTagMatchesEvidenceEnum;
+							/**
+							 * @type object
+							 */
+							expression: {
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								expressionId: string;
+								/**
+								 * @default 'simple'
+								 * @type string
+								 */
+								expressionKind: PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus200ItemsSearchTagMatchesExpressionExpressionKindEnum;
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								focusTagId: string;
+								presentationRevision: string | number;
+								/**
+								 * @type array
+								 */
+								components: {
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									tagId: string;
+									/**
+									 * @default 'predicate'
+									 * @type string
+									 */
+									semanticRole: PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus200ItemsSearchTagMatchesExpressionComponentsSemanticRoleEnum;
+									/**
+									 * @default 'required'
+									 * @type string
+									 */
+									componentKind: PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus200ItemsSearchTagMatchesExpressionComponentsComponentKindEnum;
+									language:
+										| (PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus200ItemsSearchTagMatchesExpressionComponentsLanguage | null)
+										| null;
+									title: (string | null) | null;
+								}[];
+								groupKey:
+									| ({
+											/**
+											 * @description
+											 * Format: `uuid`
+											 * @type string
+											 */
+											tagId: string;
+											/**
+											 * @default 'predicate'
+											 * @type string
+											 */
+											semanticRole: PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus200ItemsSearchTagMatchesExpressionGroupKeySemanticRoleEnum;
+											language:
+												| (PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus200ItemsSearchTagMatchesExpressionGroupKeyLanguage | null)
+												| null;
+											title: (string | null) | null;
+									  } | null)
+									| null;
+							};
+						}[];
+						tagOtherPositionCount?: string | number;
 						/**
 						 * @type string
 						 */
@@ -213146,6 +221744,90 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus200 
 									signature: string;
 							  } | null)
 							| null;
+						/**
+						 * @type array | undefined
+						 */
+						searchTagMatches?: {
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							matchedTagId: string;
+							/**
+							 * @default 'direct'
+							 * @type string
+							 */
+							evidence: PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus200ItemsSearchTagMatchesEvidenceEnum;
+							/**
+							 * @type object
+							 */
+							expression: {
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								expressionId: string;
+								/**
+								 * @default 'simple'
+								 * @type string
+								 */
+								expressionKind: PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus200ItemsSearchTagMatchesExpressionExpressionKindEnum;
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								focusTagId: string;
+								presentationRevision: string | number;
+								/**
+								 * @type array
+								 */
+								components: {
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									tagId: string;
+									/**
+									 * @default 'predicate'
+									 * @type string
+									 */
+									semanticRole: PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus200ItemsSearchTagMatchesExpressionComponentsSemanticRoleEnum;
+									/**
+									 * @default 'required'
+									 * @type string
+									 */
+									componentKind: PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus200ItemsSearchTagMatchesExpressionComponentsComponentKindEnum;
+									language:
+										| (PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus200ItemsSearchTagMatchesExpressionComponentsLanguage | null)
+										| null;
+									title: (string | null) | null;
+								}[];
+								groupKey:
+									| ({
+											/**
+											 * @description
+											 * Format: `uuid`
+											 * @type string
+											 */
+											tagId: string;
+											/**
+											 * @default 'predicate'
+											 * @type string
+											 */
+											semanticRole: PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus200ItemsSearchTagMatchesExpressionGroupKeySemanticRoleEnum;
+											language:
+												| (PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus200ItemsSearchTagMatchesExpressionGroupKeyLanguage | null)
+												| null;
+											title: (string | null) | null;
+									  } | null)
+									| null;
+							};
+						}[];
+						tagOtherPositionCount?: string | number;
 						/**
 						 * @type string
 						 */
@@ -214603,6 +223285,81 @@ export const PostApiSearchStatus200GroupsHitsVariantMainUnitLanguageEnum = {
 export type PostApiSearchStatus200GroupsHitsVariantMainUnitLanguageEnum =
 	(typeof PostApiSearchStatus200GroupsHitsVariantMainUnitLanguageEnum)[keyof typeof PostApiSearchStatus200GroupsHitsVariantMainUnitLanguageEnum];
 
+export const PostApiSearchStatus200GroupsHitsTagMatchesEvidenceEnum = {
+	direct: "direct",
+	primary: "primary",
+	entailed: "entailed",
+	retrieval_only: "retrieval_only",
+} as const;
+
+export type PostApiSearchStatus200GroupsHitsTagMatchesEvidenceEnum =
+	(typeof PostApiSearchStatus200GroupsHitsTagMatchesEvidenceEnum)[keyof typeof PostApiSearchStatus200GroupsHitsTagMatchesEvidenceEnum];
+
+export const PostApiSearchStatus200GroupsHitsTagMatchesExpressionExpressionKindEnum = {
+	simple: "simple",
+	facet_value: "facet_value",
+	relation: "relation",
+} as const;
+
+export type PostApiSearchStatus200GroupsHitsTagMatchesExpressionExpressionKindEnum =
+	(typeof PostApiSearchStatus200GroupsHitsTagMatchesExpressionExpressionKindEnum)[keyof typeof PostApiSearchStatus200GroupsHitsTagMatchesExpressionExpressionKindEnum];
+
+export const PostApiSearchStatus200GroupsHitsTagMatchesExpressionComponentsSemanticRoleEnum = {
+	predicate: "predicate",
+	slot: "slot",
+	value: "value",
+	focus: "focus",
+	qualifier: "qualifier",
+} as const;
+
+export type PostApiSearchStatus200GroupsHitsTagMatchesExpressionComponentsSemanticRoleEnum =
+	(typeof PostApiSearchStatus200GroupsHitsTagMatchesExpressionComponentsSemanticRoleEnum)[keyof typeof PostApiSearchStatus200GroupsHitsTagMatchesExpressionComponentsSemanticRoleEnum];
+
+export const PostApiSearchStatus200GroupsHitsTagMatchesExpressionComponentsComponentKindEnum = {
+	required: "required",
+	fallback: "fallback",
+} as const;
+
+export type PostApiSearchStatus200GroupsHitsTagMatchesExpressionComponentsComponentKindEnum =
+	(typeof PostApiSearchStatus200GroupsHitsTagMatchesExpressionComponentsComponentKindEnum)[keyof typeof PostApiSearchStatus200GroupsHitsTagMatchesExpressionComponentsComponentKindEnum];
+
+export const PostApiSearchStatus200GroupsHitsTagMatchesExpressionComponentsLanguage = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type PostApiSearchStatus200GroupsHitsTagMatchesExpressionComponentsLanguage =
+	(typeof PostApiSearchStatus200GroupsHitsTagMatchesExpressionComponentsLanguage)[keyof typeof PostApiSearchStatus200GroupsHitsTagMatchesExpressionComponentsLanguage];
+
+export const PostApiSearchStatus200GroupsHitsTagMatchesExpressionGroupKeySemanticRoleEnum = {
+	predicate: "predicate",
+	slot: "slot",
+	value: "value",
+	focus: "focus",
+	qualifier: "qualifier",
+} as const;
+
+export type PostApiSearchStatus200GroupsHitsTagMatchesExpressionGroupKeySemanticRoleEnum =
+	(typeof PostApiSearchStatus200GroupsHitsTagMatchesExpressionGroupKeySemanticRoleEnum)[keyof typeof PostApiSearchStatus200GroupsHitsTagMatchesExpressionGroupKeySemanticRoleEnum];
+
+export const PostApiSearchStatus200GroupsHitsTagMatchesExpressionGroupKeyLanguage = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type PostApiSearchStatus200GroupsHitsTagMatchesExpressionGroupKeyLanguage =
+	(typeof PostApiSearchStatus200GroupsHitsTagMatchesExpressionGroupKeyLanguage)[keyof typeof PostApiSearchStatus200GroupsHitsTagMatchesExpressionGroupKeyLanguage];
+
 /**
  * @type object
  */
@@ -214859,6 +223616,90 @@ export type PostApiSearchStatus200 = {
 				  };
 			name?: (string | null) | null;
 			summary: (string | null) | null;
+			/**
+			 * @type array | undefined
+			 */
+			tagMatches?: {
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				matchedTagId: string;
+				/**
+				 * @default 'direct'
+				 * @type string
+				 */
+				evidence: PostApiSearchStatus200GroupsHitsTagMatchesEvidenceEnum;
+				/**
+				 * @type object
+				 */
+				expression: {
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					expressionId: string;
+					/**
+					 * @default 'simple'
+					 * @type string
+					 */
+					expressionKind: PostApiSearchStatus200GroupsHitsTagMatchesExpressionExpressionKindEnum;
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					focusTagId: string;
+					presentationRevision: string | number;
+					/**
+					 * @type array
+					 */
+					components: {
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						tagId: string;
+						/**
+						 * @default 'predicate'
+						 * @type string
+						 */
+						semanticRole: PostApiSearchStatus200GroupsHitsTagMatchesExpressionComponentsSemanticRoleEnum;
+						/**
+						 * @default 'required'
+						 * @type string
+						 */
+						componentKind: PostApiSearchStatus200GroupsHitsTagMatchesExpressionComponentsComponentKindEnum;
+						language:
+							| (PostApiSearchStatus200GroupsHitsTagMatchesExpressionComponentsLanguage | null)
+							| null;
+						title: (string | null) | null;
+					}[];
+					groupKey:
+						| ({
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								tagId: string;
+								/**
+								 * @default 'predicate'
+								 * @type string
+								 */
+								semanticRole: PostApiSearchStatus200GroupsHitsTagMatchesExpressionGroupKeySemanticRoleEnum;
+								language:
+									| (PostApiSearchStatus200GroupsHitsTagMatchesExpressionGroupKeyLanguage | null)
+									| null;
+								title: (string | null) | null;
+						  } | null)
+						| null;
+				};
+			}[];
+			tagOtherPositionCount?: string | number;
 		}[];
 		total:
 			| {
@@ -223893,6 +232734,81 @@ export const PostApiSearchByIndexStatus200HitsVariantMainUnitLanguageEnum = {
 export type PostApiSearchByIndexStatus200HitsVariantMainUnitLanguageEnum =
 	(typeof PostApiSearchByIndexStatus200HitsVariantMainUnitLanguageEnum)[keyof typeof PostApiSearchByIndexStatus200HitsVariantMainUnitLanguageEnum];
 
+export const PostApiSearchByIndexStatus200HitsTagMatchesEvidenceEnum = {
+	direct: "direct",
+	primary: "primary",
+	entailed: "entailed",
+	retrieval_only: "retrieval_only",
+} as const;
+
+export type PostApiSearchByIndexStatus200HitsTagMatchesEvidenceEnum =
+	(typeof PostApiSearchByIndexStatus200HitsTagMatchesEvidenceEnum)[keyof typeof PostApiSearchByIndexStatus200HitsTagMatchesEvidenceEnum];
+
+export const PostApiSearchByIndexStatus200HitsTagMatchesExpressionExpressionKindEnum = {
+	simple: "simple",
+	facet_value: "facet_value",
+	relation: "relation",
+} as const;
+
+export type PostApiSearchByIndexStatus200HitsTagMatchesExpressionExpressionKindEnum =
+	(typeof PostApiSearchByIndexStatus200HitsTagMatchesExpressionExpressionKindEnum)[keyof typeof PostApiSearchByIndexStatus200HitsTagMatchesExpressionExpressionKindEnum];
+
+export const PostApiSearchByIndexStatus200HitsTagMatchesExpressionComponentsSemanticRoleEnum = {
+	predicate: "predicate",
+	slot: "slot",
+	value: "value",
+	focus: "focus",
+	qualifier: "qualifier",
+} as const;
+
+export type PostApiSearchByIndexStatus200HitsTagMatchesExpressionComponentsSemanticRoleEnum =
+	(typeof PostApiSearchByIndexStatus200HitsTagMatchesExpressionComponentsSemanticRoleEnum)[keyof typeof PostApiSearchByIndexStatus200HitsTagMatchesExpressionComponentsSemanticRoleEnum];
+
+export const PostApiSearchByIndexStatus200HitsTagMatchesExpressionComponentsComponentKindEnum = {
+	required: "required",
+	fallback: "fallback",
+} as const;
+
+export type PostApiSearchByIndexStatus200HitsTagMatchesExpressionComponentsComponentKindEnum =
+	(typeof PostApiSearchByIndexStatus200HitsTagMatchesExpressionComponentsComponentKindEnum)[keyof typeof PostApiSearchByIndexStatus200HitsTagMatchesExpressionComponentsComponentKindEnum];
+
+export const PostApiSearchByIndexStatus200HitsTagMatchesExpressionComponentsLanguage = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type PostApiSearchByIndexStatus200HitsTagMatchesExpressionComponentsLanguage =
+	(typeof PostApiSearchByIndexStatus200HitsTagMatchesExpressionComponentsLanguage)[keyof typeof PostApiSearchByIndexStatus200HitsTagMatchesExpressionComponentsLanguage];
+
+export const PostApiSearchByIndexStatus200HitsTagMatchesExpressionGroupKeySemanticRoleEnum = {
+	predicate: "predicate",
+	slot: "slot",
+	value: "value",
+	focus: "focus",
+	qualifier: "qualifier",
+} as const;
+
+export type PostApiSearchByIndexStatus200HitsTagMatchesExpressionGroupKeySemanticRoleEnum =
+	(typeof PostApiSearchByIndexStatus200HitsTagMatchesExpressionGroupKeySemanticRoleEnum)[keyof typeof PostApiSearchByIndexStatus200HitsTagMatchesExpressionGroupKeySemanticRoleEnum];
+
+export const PostApiSearchByIndexStatus200HitsTagMatchesExpressionGroupKeyLanguage = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type PostApiSearchByIndexStatus200HitsTagMatchesExpressionGroupKeyLanguage =
+	(typeof PostApiSearchByIndexStatus200HitsTagMatchesExpressionGroupKeyLanguage)[keyof typeof PostApiSearchByIndexStatus200HitsTagMatchesExpressionGroupKeyLanguage];
+
 /**
  * @type object
  */
@@ -224068,6 +232984,90 @@ export type PostApiSearchByIndexStatus200 = {
 			  };
 		name?: (string | null) | null;
 		summary: (string | null) | null;
+		/**
+		 * @type array | undefined
+		 */
+		tagMatches?: {
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			matchedTagId: string;
+			/**
+			 * @default 'direct'
+			 * @type string
+			 */
+			evidence: PostApiSearchByIndexStatus200HitsTagMatchesEvidenceEnum;
+			/**
+			 * @type object
+			 */
+			expression: {
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				expressionId: string;
+				/**
+				 * @default 'simple'
+				 * @type string
+				 */
+				expressionKind: PostApiSearchByIndexStatus200HitsTagMatchesExpressionExpressionKindEnum;
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				focusTagId: string;
+				presentationRevision: string | number;
+				/**
+				 * @type array
+				 */
+				components: {
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					tagId: string;
+					/**
+					 * @default 'predicate'
+					 * @type string
+					 */
+					semanticRole: PostApiSearchByIndexStatus200HitsTagMatchesExpressionComponentsSemanticRoleEnum;
+					/**
+					 * @default 'required'
+					 * @type string
+					 */
+					componentKind: PostApiSearchByIndexStatus200HitsTagMatchesExpressionComponentsComponentKindEnum;
+					language:
+						| (PostApiSearchByIndexStatus200HitsTagMatchesExpressionComponentsLanguage | null)
+						| null;
+					title: (string | null) | null;
+				}[];
+				groupKey:
+					| ({
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							tagId: string;
+							/**
+							 * @default 'predicate'
+							 * @type string
+							 */
+							semanticRole: PostApiSearchByIndexStatus200HitsTagMatchesExpressionGroupKeySemanticRoleEnum;
+							language:
+								| (PostApiSearchByIndexStatus200HitsTagMatchesExpressionGroupKeyLanguage | null)
+								| null;
+							title: (string | null) | null;
+					  } | null)
+					| null;
+			};
+		}[];
+		tagOtherPositionCount?: string | number;
 	}[];
 	total:
 		| {

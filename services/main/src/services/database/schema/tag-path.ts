@@ -1,6 +1,5 @@
 import { inArray, sql } from "drizzle-orm";
 import {
-	bigint,
 	boolean,
 	check,
 	foreignKey,
@@ -27,11 +26,22 @@ import {
 } from "./columns";
 import { profile } from "./profile";
 import { realm, realmUnit } from "./realm";
-import { tag } from "./tag";
+import {
+	tagExpression,
+	TagExpressionArgumentRoleValues,
+	type TagExpressionArgumentRole,
+} from "./tag-expression";
+import { tagRelation, vocabularyNode } from "./vocabulary";
 import { unit } from "./unit";
 
 export const TagPathMinimumMembers = 2 as const;
 export const TagPathMaximumMembers = 16 as const;
+
+export const TagPathLifecycleStatusValues = ["active", "retired"] as const;
+export type TagPathLifecycleStatus = (typeof TagPathLifecycleStatusValues)[number];
+
+export const TagPathSenseScopeValues = ["global", "realm"] as const;
+export type TagPathSenseScope = (typeof TagPathSenseScopeValues)[number];
 
 export const TagPathMergeStatusValues = ["proposed", "accepted", "rejected", "reversed"] as const;
 export type TagPathMergeStatus = (typeof TagPathMergeStatusValues)[number];
@@ -44,41 +54,54 @@ export type TagPathAssistanceProvenance = {
 	readonly model?: string;
 	readonly confidence?: number;
 };
+export type TagPathSenseProvenance = Readonly<Record<string, unknown>>;
 
-/** Immutable Tag-domain hierarchy Path. */
+/** Immutable vocabulary route. Identity is the ordered node and typed-relation sequence. */
 export const tagPath = pgTable(
 	"tag_path",
 	{
 		id: uuid()
 			.primaryKey()
 			.references(() => unit.id, { onDelete: "cascade" }),
-		memberTagIds: uuid().array().notNull(),
-		terminalTagId: uuid()
+		memberNodeIds: uuid().array().notNull(),
+		relationIds: uuid().array().notNull(),
+		structuralIdentityHash: text().notNull(),
+		terminalNodeId: uuid()
 			.notNull()
-			.references(() => tag.id, { onDelete: "restrict" }),
+			.references(() => vocabularyNode.id, { onDelete: "restrict" }),
 		createdByProfileId: uuid()
 			.notNull()
 			.references(() => profile.id, { onDelete: "restrict" }),
 		createdAt: createCreatedAtColumn(),
 	},
 	(table) => [
-		unique("tag_path_definition_key").on(table.memberTagIds),
-		index("tag_path_terminal_usage_idx").on(table.terminalTagId, table.id),
+		unique("tag_path_structure_key").on(table.memberNodeIds, table.relationIds),
+		unique("tag_path_structural_identity_hash_key").on(table.structuralIdentityHash),
+		index("tag_path_terminal_usage_idx").on(table.terminalNodeId, table.id),
 		index("tag_path_created_by_idx").on(table.createdByProfileId, table.createdAt, table.id),
 		check(
 			"tag_path_member_count_check",
-			sql`cardinality(${table.memberTagIds}) between ${TagPathMinimumMembers} and ${TagPathMaximumMembers}`,
+			sql`cardinality(${table.memberNodeIds}) between ${TagPathMinimumMembers} and ${TagPathMaximumMembers}`,
 		),
-		check("tag_path_member_null_check", sql`array_position(${table.memberTagIds}, null) is null`),
+		check(
+			"tag_path_relation_count_check",
+			sql`cardinality(${table.relationIds}) = cardinality(${table.memberNodeIds}) - 1`,
+		),
+		check("tag_path_member_null_check", sql`array_position(${table.memberNodeIds}, null) is null`),
+		check("tag_path_relation_null_check", sql`array_position(${table.relationIds}, null) is null`),
 		check(
 			"tag_path_terminal_check",
-			sql`${table.terminalTagId} = ${table.memberTagIds}[cardinality(${table.memberTagIds})]`,
+			sql`${table.terminalNodeId} = ${table.memberNodeIds}[cardinality(${table.memberNodeIds})]`,
 		),
-		check("tag_path_not_self_check", sql`not (${table.id} = any(${table.memberTagIds}))`),
+		check("tag_path_not_self_check", sql`not (${table.id} = any(${table.memberNodeIds}))`),
+		check(
+			"tag_path_structural_identity_hash_check",
+			sql`${table.structuralIdentityHash} ~ '^[0-9a-f]{64}$'`,
+		),
 	],
 );
 
-/** Searchable member projection of one immutable Path definition. */
+/** Searchable Path-member projection. It contains structure only, never assertion/display flags. */
 export const tagPathMember = pgTable(
 	"tag_path_member",
 	{
@@ -86,43 +109,26 @@ export const tagPathMember = pgTable(
 			.notNull()
 			.references(() => tagPath.id, { onDelete: "cascade" }),
 		ordinal: integer().notNull(),
-		tagId: uuid()
+		nodeId: uuid()
 			.notNull()
-			.references(() => tag.id, { onDelete: "restrict" }),
+			.references(() => vocabularyNode.id, { onDelete: "restrict" }),
+		incomingRelationId: uuid().references(() => tagRelation.id, { onDelete: "restrict" }),
 	},
 	(table) => [
 		primaryKey({ columns: [table.pathId, table.ordinal] }),
-		unique("tag_path_member_path_tag_key").on(table.pathId, table.tagId),
-		index("tag_path_member_tag_path_idx").on(table.tagId, table.pathId, table.ordinal),
+		unique("tag_path_member_path_node_key").on(table.pathId, table.nodeId),
+		index("tag_path_member_node_path_idx").on(table.nodeId, table.pathId, table.ordinal),
+		index("tag_path_member_relation_idx").on(table.incomingRelationId, table.pathId, table.ordinal),
 		check("tag_path_member_ordinal_check", sql`${table.ordinal} >= 0`),
+		check(
+			"tag_path_member_incoming_relation_check",
+			sql`(${table.ordinal} = 0 and ${table.incomingRelationId} is null)
+				or (${table.ordinal} > 0 and ${table.incomingRelationId} is not null)`,
+		),
 	],
 );
 
-/** Rebuildable adjacent-pair projection for hierarchy navigation. */
-export const tagPathEdge = pgTable(
-	"tag_path_edge",
-	{
-		pathId: uuid()
-			.notNull()
-			.references(() => tagPath.id, { onDelete: "cascade" }),
-		ordinal: integer().notNull(),
-		parentTagId: uuid()
-			.notNull()
-			.references(() => tag.id, { onDelete: "restrict" }),
-		childTagId: uuid()
-			.notNull()
-			.references(() => tag.id, { onDelete: "restrict" }),
-	},
-	(table) => [
-		primaryKey({ columns: [table.pathId, table.ordinal] }),
-		index("tag_path_edge_parent_idx").on(table.parentTagId, table.childTagId, table.pathId),
-		index("tag_path_edge_child_idx").on(table.childTagId, table.parentTagId, table.pathId),
-		check("tag_path_edge_not_self_check", sql`${table.parentTagId} <> ${table.childTagId}`),
-		check("tag_path_edge_ordinal_check", sql`${table.ordinal} >= 0`),
-	],
-);
-
-/** Global definition judgment for one immutable Path. */
+/** Global judgment of whether an immutable structural route is valid. */
 export const tagPathVote = pgTable(
 	"tag_path_vote",
 	{
@@ -143,16 +149,105 @@ export const tagPathVote = pgTable(
 	],
 );
 
-/** Global application of a Tag Path to one Unit. */
-export const unitTagPath = pgTable(
-	"unit_tag_path",
+/** Immutable interpretation of a structural Path as one Tag Expression. */
+export const tagPathSense = pgTable(
+	"tag_path_sense",
 	{
+		id: createUuidv7PrimaryKey(),
+		pathId: uuid()
+			.notNull()
+			.references(() => tagPath.id, { onDelete: "restrict" }),
+		expressionId: uuid()
+			.notNull()
+			.references(() => tagExpression.id, { onDelete: "restrict" }),
+		scope: text().$type<TagPathSenseScope>().default("global").notNull(),
+		realmId: uuid().references(() => realm.id, { onDelete: "restrict" }),
+		bindingSignature: text().notNull(),
+		status: text().$type<TagPathLifecycleStatus>().default("active").notNull(),
+		provenance: createJsonObjectColumn<TagPathSenseProvenance>(),
+		createdByProfileId: uuid()
+			.notNull()
+			.references(() => profile.id, { onDelete: "restrict" }),
+		createdAt: createCreatedAtColumn(),
+		sealedAt: createTimestampMsColumn(),
+		retiredAt: createTimestampMsColumn(),
+	},
+	(table) => [
+		unique("tag_path_sense_id_path_key").on(table.id, table.pathId),
+		uniqueIndex("tag_path_sense_global_identity_key")
+			.on(table.pathId, table.expressionId, table.bindingSignature)
+			.where(sql`${table.scope} = 'global'`),
+		uniqueIndex("tag_path_sense_realm_identity_key")
+			.on(table.realmId, table.pathId, table.expressionId, table.bindingSignature)
+			.where(sql`${table.scope} = 'realm'`),
+		index("tag_path_sense_path_route_idx").on(table.pathId, table.status, table.id),
+		index("tag_path_sense_expression_route_idx").on(table.expressionId, table.status, table.id),
+		index("tag_path_sense_realm_route_idx").on(table.realmId, table.status, table.pathId, table.id),
+		check("tag_path_sense_scope_check", inArray(table.scope, TagPathSenseScopeValues)),
+		check("tag_path_sense_status_check", inArray(table.status, TagPathLifecycleStatusValues)),
+		check(
+			"tag_path_sense_authority_check",
+			sql`(${table.scope} = 'global' and ${table.realmId} is null)
+				or (${table.scope} = 'realm' and ${table.realmId} is not null)`,
+		),
+		check(
+			"tag_path_sense_binding_signature_check",
+			sql`btrim(${table.bindingSignature}) <> '' and octet_length(${table.bindingSignature}) <= 2048`,
+		),
+		check(
+			"tag_path_sense_retirement_check",
+			sql`(${table.status} = 'active' and ${table.retiredAt} is null)
+				or (${table.status} = 'retired' and ${table.retiredAt} is not null)`,
+		),
+		createJsonObjectConstraint("tag_path_sense_provenance_object_check", table.provenance),
+	],
+);
+
+/** Binding from one Path member to one typed Expression argument. */
+export const tagPathSenseBinding = pgTable(
+	"tag_path_sense_binding",
+	{
+		senseId: uuid()
+			.notNull()
+			.references(() => tagPathSense.id, { onDelete: "cascade" }),
+		memberOrdinal: integer().notNull(),
+		argumentRole: text().$type<TagExpressionArgumentRole>().notNull(),
+		argumentOrdinal: integer().default(0).notNull(),
+	},
+	(table) => [
+		primaryKey({
+			columns: [table.senseId, table.memberOrdinal, table.argumentRole, table.argumentOrdinal],
+		}),
+		unique("tag_path_sense_binding_argument_key").on(
+			table.senseId,
+			table.argumentRole,
+			table.argumentOrdinal,
+		),
+		index("tag_path_sense_binding_member_idx").on(
+			table.memberOrdinal,
+			table.senseId,
+			table.argumentRole,
+		),
+		check(
+			"tag_path_sense_binding_role_check",
+			inArray(table.argumentRole, TagExpressionArgumentRoleValues),
+		),
+		check("tag_path_sense_binding_member_ordinal_check", sql`${table.memberOrdinal} >= 0`),
+		check("tag_path_sense_binding_argument_ordinal_check", sql`${table.argumentOrdinal} >= 0`),
+	],
+);
+
+/** Global source fact: a Unit adopts one immutable Path Sense. */
+export const unitTagPathApplication = pgTable(
+	"unit_tag_path_application",
+	{
+		id: createUuidv7PrimaryKey(),
 		unitId: uuid()
 			.notNull()
 			.references(() => unit.id, { onDelete: "cascade" }),
-		pathId: uuid()
+		senseId: uuid()
 			.notNull()
-			.references(() => tagPath.id, { onDelete: "cascade" }),
+			.references(() => tagPathSense.id, { onDelete: "restrict" }),
 		createdByProfileId: uuid().references(() => profile.id, { onDelete: "set null" }),
 		pinned: boolean().default(false).notNull(),
 		position: fractionalIndexPosition(),
@@ -160,28 +255,33 @@ export const unitTagPath = pgTable(
 		updatedAt: createUpdatedAtColumn(),
 	},
 	(table) => [
-		primaryKey({ columns: [table.unitId, table.pathId] }),
-		index("unit_tag_path_path_idx").on(table.pathId, table.unitId),
-		index("unit_tag_path_unit_position_idx").on(
+		unique("unit_tag_path_application_unit_sense_key").on(table.unitId, table.senseId),
+		index("unit_tag_path_application_sense_idx").on(table.senseId, table.unitId, table.id),
+		index("unit_tag_path_application_unit_position_idx").on(
 			table.unitId,
 			table.pinned,
 			table.position,
-			table.pathId,
+			table.id,
 		),
-		check("unit_tag_path_not_self_check", sql`${table.unitId} <> ${table.pathId}`),
+		check(
+			"unit_tag_path_application_pinned_position_check",
+			sql`(${table.pinned} and ${table.position} is not null)
+				or (not ${table.pinned} and ${table.position} is null)`,
+		),
 		createFractionalIndexPositionByteLengthConstraint(
-			"unit_tag_path_position_byte_length_check",
+			"unit_tag_path_application_position_byte_length_check",
 			table.position,
 		),
 	],
 );
 
-/** Sparse fit and spoiler judgment for a global Unit–Path application. */
-export const unitTagPathJudgment = pgTable(
-	"unit_tag_path_judgment",
+/** Sparse fit/spoiler judgment on one global semantic Application. */
+export const unitTagPathApplicationJudgment = pgTable(
+	"unit_tag_path_application_judgment",
 	{
-		unitId: uuid().notNull(),
-		pathId: uuid().notNull(),
+		applicationId: uuid()
+			.notNull()
+			.references(() => unitTagPathApplication.id, { onDelete: "cascade" }),
 		profileId: uuid()
 			.notNull()
 			.references(() => profile.id, { onDelete: "restrict" }),
@@ -193,128 +293,38 @@ export const unitTagPathJudgment = pgTable(
 		updatedAt: createUpdatedAtColumn(),
 	},
 	(table) => [
-		primaryKey({ columns: [table.unitId, table.pathId, table.profileId] }),
-		foreignKey({
-			columns: [table.unitId, table.pathId],
-			foreignColumns: [unitTagPath.unitId, unitTagPath.pathId],
-			name: "unit_tag_path_judgment_application_fkey",
-		}).onDelete("cascade"),
-		index("unit_tag_path_judgment_profile_idx").on(table.profileId, table.unitId, table.pathId),
-		index("unit_tag_path_judgment_path_idx").on(table.pathId, table.unitId, table.profileId),
-		index("unit_tag_path_judgment_positive_path_idx")
-			.on(table.pathId, table.unitId, table.profileId)
+		primaryKey({ columns: [table.applicationId, table.profileId] }),
+		index("unit_tag_path_application_judgment_profile_idx").on(
+			table.profileId,
+			table.applicationId,
+		),
+		index("unit_tag_path_application_judgment_positive_idx")
+			.on(table.applicationId, table.profileId)
 			.where(sql`${table.fitVote} = 1`),
 		check(
-			"unit_tag_path_judgment_fit_vote_check",
+			"unit_tag_path_application_judgment_fit_vote_check",
 			sql`${table.fitVote} is null or ${table.fitVote} in (-1, 1)`,
 		),
 		check(
-			"unit_tag_path_judgment_spoiler_level_check",
+			"unit_tag_path_application_judgment_spoiler_level_check",
 			sql`${table.spoilerLevel} is null or ${table.spoilerLevel} between 0 and 2`,
 		),
 		check(
-			"unit_tag_path_judgment_sparse_check",
+			"unit_tag_path_application_judgment_sparse_check",
 			sql`${table.fitVote} is not null or ${table.spoilerLevel} is not null`,
 		),
 		check(
-			"unit_tag_path_judgment_fit_timestamp_check",
+			"unit_tag_path_application_judgment_fit_timestamp_check",
 			sql`(${table.fitVote} is null) = (${table.fitUpdatedAt} is null)`,
 		),
 		check(
-			"unit_tag_path_judgment_spoiler_timestamp_check",
+			"unit_tag_path_application_judgment_spoiler_timestamp_check",
 			sql`(${table.spoilerLevel} is null) = (${table.spoilerUpdatedAt} is null)`,
 		),
 	],
 );
 
-/** Per-Profile provenance for Path-derived Tag support. */
-export const unitTagPathSupport = pgTable(
-	"unit_tag_path_support",
-	{
-		unitId: uuid().notNull(),
-		tagId: uuid()
-			.notNull()
-			.references(() => tag.id, { onDelete: "restrict" }),
-		profileId: uuid().notNull(),
-		pathId: uuid().notNull(),
-		createdAt: createCreatedAtColumn(),
-	},
-	(table) => [
-		primaryKey({ columns: [table.unitId, table.tagId, table.profileId, table.pathId] }),
-		foreignKey({
-			columns: [table.unitId, table.pathId, table.profileId],
-			foreignColumns: [
-				unitTagPathJudgment.unitId,
-				unitTagPathJudgment.pathId,
-				unitTagPathJudgment.profileId,
-			],
-			name: "unit_tag_path_support_judgment_fkey",
-		}).onDelete("cascade"),
-		foreignKey({
-			columns: [table.pathId, table.tagId],
-			foreignColumns: [tagPathMember.pathId, tagPathMember.tagId],
-			name: "unit_tag_path_support_member_fkey",
-		}).onDelete("cascade"),
-		index("unit_tag_path_support_effective_idx").on(table.unitId, table.tagId, table.profileId),
-		index("unit_tag_path_support_path_idx").on(
-			table.pathId,
-			table.tagId,
-			table.unitId,
-			table.profileId,
-		),
-	],
-);
-
-/** Rebuildable union of direct and Path-derived global Tag contexts. */
-export const unitEffectiveTag = pgTable(
-	"unit_effective_tag",
-	{
-		unitId: uuid()
-			.notNull()
-			.references(() => unit.id, { onDelete: "cascade" }),
-		tagId: uuid()
-			.notNull()
-			.references(() => tag.id, { onDelete: "cascade" }),
-		direct: boolean().default(false).notNull(),
-		pathSupportCount: bigint({ mode: "bigint" }).default(0n).notNull(),
-		createdAt: createCreatedAtColumn(),
-		updatedAt: createUpdatedAtColumn(),
-	},
-	(table) => [
-		primaryKey({ columns: [table.unitId, table.tagId] }),
-		index("unit_effective_tag_tag_idx").on(table.tagId, table.unitId),
-		check("unit_effective_tag_source_check", sql`${table.direct} or ${table.pathSupportCount} > 0`),
-		check("unit_effective_tag_not_self_check", sql`${table.unitId} <> ${table.tagId}`),
-		check("unit_effective_tag_path_count_check", sql`${table.pathSupportCount} >= 0`),
-	],
-);
-
-/** One Profile's deduplicated effective global Tag judgment. */
-export const unitEffectiveTagVote = pgTable(
-	"unit_effective_tag_vote",
-	{
-		unitId: uuid().notNull(),
-		tagId: uuid().notNull(),
-		profileId: uuid()
-			.notNull()
-			.references(() => profile.id, { onDelete: "cascade" }),
-		value: integer().notNull(),
-		createdAt: createCreatedAtColumn(),
-		updatedAt: createUpdatedAtColumn(),
-	},
-	(table) => [
-		primaryKey({ columns: [table.unitId, table.tagId, table.profileId] }),
-		foreignKey({
-			columns: [table.unitId, table.tagId],
-			foreignColumns: [unitEffectiveTag.unitId, unitEffectiveTag.tagId],
-			name: "unit_effective_tag_vote_effective_tag_fkey",
-		}).onDelete("cascade"),
-		index("unit_effective_tag_vote_profile_idx").on(table.profileId, table.unitId),
-		check("unit_effective_tag_vote_value_check", sql`${table.value} in (-1, 1)`),
-	],
-);
-
-/** Audited manual governance convergence between immutable Path Units. */
+/** Audited manual governance convergence between immutable structural Paths. */
 export const tagPathMerge = pgTable(
 	"tag_path_merge",
 	{
@@ -384,7 +394,7 @@ export const tagPathMerge = pgTable(
 	],
 );
 
-/** One Realm's adoption of a global immutable Path definition. */
+/** One Realm's adoption of a global structural Path. */
 export const realmTagPath = pgTable(
 	"realm_tag_path",
 	{
@@ -405,6 +415,7 @@ export const realmTagPath = pgTable(
 	],
 );
 
+/** Realm-local judgment of a structural Path; never merged with global votes. */
 export const realmTagPathVote = pgTable(
 	"realm_tag_path_vote",
 	{
@@ -429,12 +440,45 @@ export const realmTagPathVote = pgTable(
 	],
 );
 
-export const realmUnitTagPath = pgTable(
-	"realm_unit_tag_path",
+/** Explicit Realm adoption of either a global Sense or the Realm's own immutable Sense. */
+export const realmTagPathSense = pgTable(
+	"realm_tag_path_sense",
 	{
+		realmId: uuid()
+			.notNull()
+			.references(() => realm.id, { onDelete: "cascade" }),
+		senseId: uuid().notNull(),
+		pathId: uuid().notNull(),
+		createdByProfileId: uuid()
+			.notNull()
+			.references(() => profile.id, { onDelete: "restrict" }),
+		createdAt: createCreatedAtColumn(),
+	},
+	(table) => [
+		primaryKey({ columns: [table.realmId, table.senseId] }),
+		foreignKey({
+			columns: [table.senseId, table.pathId],
+			foreignColumns: [tagPathSense.id, tagPathSense.pathId],
+			name: "realm_tag_path_sense_definition_fkey",
+		}).onDelete("restrict"),
+		foreignKey({
+			columns: [table.realmId, table.pathId],
+			foreignColumns: [realmTagPath.realmId, realmTagPath.pathId],
+			name: "realm_tag_path_sense_path_adoption_fkey",
+		}).onDelete("cascade"),
+		index("realm_tag_path_sense_path_idx").on(table.pathId, table.realmId, table.senseId),
+		index("realm_tag_path_sense_sense_idx").on(table.senseId, table.realmId),
+	],
+);
+
+/** Realm source fact. Authority remains part of the key and source identity. */
+export const realmUnitTagPathApplication = pgTable(
+	"realm_unit_tag_path_application",
+	{
+		id: createUuidv7PrimaryKey(),
 		realmId: uuid().notNull(),
 		unitId: uuid().notNull(),
-		pathId: uuid().notNull(),
+		senseId: uuid().notNull(),
 		createdByProfileId: uuid()
 			.notNull()
 			.references(() => profile.id, { onDelete: "restrict" }),
@@ -442,28 +486,43 @@ export const realmUnitTagPath = pgTable(
 		updatedAt: createUpdatedAtColumn(),
 	},
 	(table) => [
-		primaryKey({ columns: [table.realmId, table.unitId, table.pathId] }),
+		unique("realm_unit_tag_path_application_authority_key").on(
+			table.realmId,
+			table.unitId,
+			table.senseId,
+		),
 		foreignKey({
 			columns: [table.realmId, table.unitId],
 			foreignColumns: [realmUnit.realmId, realmUnit.unitId],
-			name: "realm_unit_tag_path_realm_unit_fkey",
+			name: "realm_unit_tag_path_application_realm_unit_fkey",
 		}).onDelete("cascade"),
 		foreignKey({
-			columns: [table.realmId, table.pathId],
-			foreignColumns: [realmTagPath.realmId, realmTagPath.pathId],
-			name: "realm_unit_tag_path_adoption_fkey",
+			columns: [table.realmId, table.senseId],
+			foreignColumns: [realmTagPathSense.realmId, realmTagPathSense.senseId],
+			name: "realm_unit_tag_path_application_sense_adoption_fkey",
 		}).onDelete("restrict"),
-		index("realm_unit_tag_path_path_idx").on(table.realmId, table.pathId, table.unitId),
-		index("realm_unit_tag_path_unit_route_idx").on(table.unitId, table.realmId, table.pathId),
+		index("realm_unit_tag_path_application_sense_idx").on(
+			table.realmId,
+			table.senseId,
+			table.unitId,
+			table.id,
+		),
+		index("realm_unit_tag_path_application_unit_route_idx").on(
+			table.unitId,
+			table.realmId,
+			table.senseId,
+			table.id,
+		),
 	],
 );
 
-export const realmUnitTagPathJudgment = pgTable(
-	"realm_unit_tag_path_judgment",
+/** Sparse fit/spoiler judgment on one Realm semantic Application. */
+export const realmUnitTagPathApplicationJudgment = pgTable(
+	"realm_unit_tag_path_application_judgment",
 	{
-		realmId: uuid().notNull(),
-		unitId: uuid().notNull(),
-		pathId: uuid().notNull(),
+		applicationId: uuid()
+			.notNull()
+			.references(() => realmUnitTagPathApplication.id, { onDelete: "cascade" }),
 		profileId: uuid()
 			.notNull()
 			.references(() => profile.id, { onDelete: "restrict" }),
@@ -475,118 +534,33 @@ export const realmUnitTagPathJudgment = pgTable(
 		updatedAt: createUpdatedAtColumn(),
 	},
 	(table) => [
-		primaryKey({ columns: [table.realmId, table.unitId, table.pathId, table.profileId] }),
-		foreignKey({
-			columns: [table.realmId, table.unitId, table.pathId],
-			foreignColumns: [realmUnitTagPath.realmId, realmUnitTagPath.unitId, realmUnitTagPath.pathId],
-			name: "realm_unit_tag_path_judgment_application_fkey",
-		}).onDelete("cascade"),
-		index("realm_unit_tag_path_judgment_profile_idx").on(
+		primaryKey({ columns: [table.applicationId, table.profileId] }),
+		index("realm_unit_tag_path_application_judgment_profile_idx").on(
 			table.profileId,
-			table.realmId,
-			table.unitId,
-			table.pathId,
+			table.applicationId,
 		),
-		index("realm_unit_tag_path_judgment_path_idx").on(
-			table.pathId,
-			table.realmId,
-			table.unitId,
-			table.profileId,
-		),
+		index("realm_unit_tag_path_application_judgment_positive_idx")
+			.on(table.applicationId, table.profileId)
+			.where(sql`${table.fitVote} = 1`),
 		check(
-			"realm_unit_tag_path_judgment_fit_vote_check",
+			"realm_unit_tag_path_application_judgment_fit_vote_check",
 			sql`${table.fitVote} is null or ${table.fitVote} in (-1, 1)`,
 		),
 		check(
-			"realm_unit_tag_path_judgment_spoiler_level_check",
+			"realm_unit_tag_path_application_judgment_spoiler_level_check",
 			sql`${table.spoilerLevel} is null or ${table.spoilerLevel} between 0 and 2`,
 		),
 		check(
-			"realm_unit_tag_path_judgment_sparse_check",
+			"realm_unit_tag_path_application_judgment_sparse_check",
 			sql`${table.fitVote} is not null or ${table.spoilerLevel} is not null`,
 		),
 		check(
-			"realm_unit_tag_path_judgment_fit_timestamp_check",
+			"realm_unit_tag_path_application_judgment_fit_timestamp_check",
 			sql`(${table.fitVote} is null) = (${table.fitUpdatedAt} is null)`,
 		),
 		check(
-			"realm_unit_tag_path_judgment_spoiler_timestamp_check",
+			"realm_unit_tag_path_application_judgment_spoiler_timestamp_check",
 			sql`(${table.spoilerLevel} is null) = (${table.spoilerUpdatedAt} is null)`,
 		),
-	],
-);
-
-export const realmUnitTagPathSupport = pgTable(
-	"realm_unit_tag_path_support",
-	{
-		realmId: uuid().notNull(),
-		unitId: uuid().notNull(),
-		tagId: uuid()
-			.notNull()
-			.references(() => tag.id, { onDelete: "restrict" }),
-		profileId: uuid().notNull(),
-		pathId: uuid().notNull(),
-		createdAt: createCreatedAtColumn(),
-	},
-	(table) => [
-		primaryKey({
-			columns: [table.realmId, table.unitId, table.tagId, table.profileId, table.pathId],
-		}),
-		foreignKey({
-			columns: [table.realmId, table.unitId, table.pathId, table.profileId],
-			foreignColumns: [
-				realmUnitTagPathJudgment.realmId,
-				realmUnitTagPathJudgment.unitId,
-				realmUnitTagPathJudgment.pathId,
-				realmUnitTagPathJudgment.profileId,
-			],
-			name: "realm_unit_tag_path_support_judgment_fkey",
-		}).onDelete("cascade"),
-		foreignKey({
-			columns: [table.pathId, table.tagId],
-			foreignColumns: [tagPathMember.pathId, tagPathMember.tagId],
-			name: "realm_unit_tag_path_support_member_fkey",
-		}).onDelete("cascade"),
-		index("realm_unit_tag_path_support_effective_idx").on(
-			table.realmId,
-			table.unitId,
-			table.tagId,
-			table.profileId,
-		),
-		index("realm_unit_tag_path_support_path_idx").on(
-			table.pathId,
-			table.realmId,
-			table.unitId,
-			table.tagId,
-		),
-	],
-);
-
-export const realmUnitEffectiveTag = pgTable(
-	"realm_unit_effective_tag",
-	{
-		realmId: uuid().notNull(),
-		unitId: uuid().notNull(),
-		tagId: uuid()
-			.notNull()
-			.references(() => tag.id, { onDelete: "cascade" }),
-		direct: boolean().default(false).notNull(),
-		pathSupportCount: bigint({ mode: "bigint" }).default(0n).notNull(),
-		createdAt: createCreatedAtColumn(),
-		updatedAt: createUpdatedAtColumn(),
-	},
-	(table) => [
-		primaryKey({ columns: [table.realmId, table.unitId, table.tagId] }),
-		foreignKey({
-			columns: [table.realmId, table.unitId],
-			foreignColumns: [realmUnit.realmId, realmUnit.unitId],
-			name: "realm_unit_effective_tag_realm_unit_fkey",
-		}).onDelete("cascade"),
-		index("realm_unit_effective_tag_tag_idx").on(table.tagId, table.realmId, table.unitId),
-		check(
-			"realm_unit_effective_tag_source_check",
-			sql`${table.direct} or ${table.pathSupportCount} > 0`,
-		),
-		check("realm_unit_effective_tag_path_count_check", sql`${table.pathSupportCount} >= 0`),
 	],
 );

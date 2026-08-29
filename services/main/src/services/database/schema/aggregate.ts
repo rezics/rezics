@@ -24,7 +24,13 @@ import { post } from "./post";
 import { type ContentLanguage, ContentLanguageValues } from "./contract-values";
 import { reactionKind } from "./reaction";
 import { realm } from "./realm";
-import { realmTagPath, realmUnitTagPath, tagPath, unitEffectiveTag, unitTagPath } from "./tag-path";
+import {
+	realmTagPath,
+	realmUnitTagPathApplication,
+	tagPath,
+	unitTagPathApplication,
+} from "./tag-path";
+import { unitEffectiveTag } from "./tag-expression";
 import { subjectAssociation } from "./entity";
 import { realmTagContext, tag } from "./tag";
 
@@ -159,13 +165,13 @@ export const tagPathVoteStat = pgTable(
 			.primaryKey()
 			.references(() => tagPath.id, { onDelete: "cascade" }),
 		/**
-		 * Immutable terminal-Tag routing projection.
+		 * Immutable terminal-node routing projection.
 		 *
 		 * This is copied from `tag_path` only by PostgreSQL owner triggers so
-		 * accepted ending Paths can be read in provisional weight order without
-		 * sorting every Path that ends at a popular Tag.
+		 * accepted structural Paths can be read by terminal position without
+		 * sorting every Path that shares a popular final node.
 		 */
-		terminalTagId: uuid().notNull(),
+		terminalNodeId: uuid().notNull(),
 		score: bigint({ mode: "bigint" }).default(0n).notNull(),
 		voteCount: aggregateCount(),
 		usageCount: aggregateCount(),
@@ -176,7 +182,7 @@ export const tagPathVoteStat = pgTable(
 			.on(table.usageCount.desc(), table.pathId)
 			.where(sql`${table.score} > 0 and ${table.voteCount} > 0`),
 		index("tag_path_vote_stat_terminal_usage_idx")
-			.on(table.terminalTagId, table.usageCount.desc(), table.pathId)
+			.on(table.terminalNodeId, table.usageCount.desc(), table.pathId)
 			.where(sql`${table.score} > 0 and ${table.voteCount} > 0`),
 		check("tag_path_vote_stat_count_check", sql`${table.voteCount} >= 0`),
 		check("tag_path_vote_stat_usage_count_check", sql`${table.usageCount} >= 0`),
@@ -185,11 +191,12 @@ export const tagPathVoteStat = pgTable(
 	],
 );
 
-export const unitTagPathJudgmentStat = pgTable(
-	"unit_tag_path_judgment_stat",
+export const unitTagPathApplicationJudgmentStat = pgTable(
+	"unit_tag_path_application_judgment_stat",
 	{
-		unitId: uuid().notNull(),
-		pathId: uuid().notNull(),
+		applicationId: uuid()
+			.primaryKey()
+			.references(() => unitTagPathApplication.id, { onDelete: "cascade" }),
 		score: bigint({ mode: "bigint" }).default(0n).notNull(),
 		voteCount: aggregateCount(),
 		spoilerVoteCount: aggregateCount(),
@@ -199,31 +206,24 @@ export const unitTagPathJudgmentStat = pgTable(
 		updatedAt: createUpdatedAtColumn(),
 	},
 	(table) => [
-		primaryKey({ columns: [table.unitId, table.pathId] }),
-		foreignKey({
-			columns: [table.unitId, table.pathId],
-			foreignColumns: [unitTagPath.unitId, unitTagPath.pathId],
-			name: "unit_tag_path_judgment_stat_application_fkey",
-		}).onDelete("cascade"),
-		index("unit_tag_path_judgment_stat_path_idx").on(table.pathId, table.unitId),
-		check("unit_tag_path_judgment_stat_count_check", sql`${table.voteCount} >= 0`),
+		check("unit_tag_path_application_judgment_stat_count_check", sql`${table.voteCount} >= 0`),
 		check(
-			"unit_tag_path_judgment_stat_score_check",
+			"unit_tag_path_application_judgment_stat_score_check",
 			sql`abs(${table.score}) <= ${table.voteCount}`,
 		),
 		check(
-			"unit_tag_path_judgment_stat_parity_check",
+			"unit_tag_path_application_judgment_stat_parity_check",
 			sql`(${table.voteCount} + ${table.score}) % 2 = 0`,
 		),
 		check(
-			"unit_tag_path_judgment_stat_spoiler_nonnegative_check",
+			"unit_tag_path_application_judgment_stat_spoiler_nonnegative_check",
 			sql`${table.spoilerVoteCount} >= 0
 				and ${table.spoilerNoneCount} >= 0
 				and ${table.spoilerMinorCount} >= 0
 				and ${table.spoilerMajorCount} >= 0`,
 		),
 		check(
-			"unit_tag_path_judgment_stat_spoiler_count_check",
+			"unit_tag_path_application_judgment_stat_spoiler_count_check",
 			sql`${table.spoilerVoteCount} =
 				${table.spoilerNoneCount} + ${table.spoilerMinorCount} + ${table.spoilerMajorCount}`,
 		),
@@ -262,12 +262,12 @@ export const realmTagPathVoteStat = pgTable(
 	],
 );
 
-export const realmUnitTagPathJudgmentStat = pgTable(
-	"realm_unit_tag_path_judgment_stat",
+export const realmUnitTagPathApplicationJudgmentStat = pgTable(
+	"realm_unit_tag_path_application_judgment_stat",
 	{
-		realmId: uuid().notNull(),
-		unitId: uuid().notNull(),
-		pathId: uuid().notNull(),
+		applicationId: uuid()
+			.primaryKey()
+			.references(() => realmUnitTagPathApplication.id, { onDelete: "cascade" }),
 		score: bigint({ mode: "bigint" }).default(0n).notNull(),
 		voteCount: aggregateCount(),
 		spoilerVoteCount: aggregateCount(),
@@ -277,35 +277,27 @@ export const realmUnitTagPathJudgmentStat = pgTable(
 		updatedAt: createUpdatedAtColumn(),
 	},
 	(table) => [
-		primaryKey({ columns: [table.realmId, table.unitId, table.pathId] }),
-		foreignKey({
-			columns: [table.realmId, table.unitId, table.pathId],
-			foreignColumns: [realmUnitTagPath.realmId, realmUnitTagPath.unitId, realmUnitTagPath.pathId],
-			name: "realm_unit_tag_path_judgment_stat_application_fkey",
-		}).onDelete("cascade"),
-		index("realm_unit_tag_path_judgment_stat_path_idx").on(
-			table.pathId,
-			table.realmId,
-			table.unitId,
-		),
-		check("realm_unit_tag_path_judgment_stat_count_check", sql`${table.voteCount} >= 0`),
 		check(
-			"realm_unit_tag_path_judgment_stat_score_check",
+			"realm_unit_tag_path_application_judgment_stat_count_check",
+			sql`${table.voteCount} >= 0`,
+		),
+		check(
+			"realm_unit_tag_path_application_judgment_stat_score_check",
 			sql`abs(${table.score}) <= ${table.voteCount}`,
 		),
 		check(
-			"realm_unit_tag_path_judgment_stat_parity_check",
+			"realm_unit_tag_path_application_judgment_stat_parity_check",
 			sql`(${table.voteCount} + ${table.score}) % 2 = 0`,
 		),
 		check(
-			"realm_unit_tag_path_judgment_stat_spoiler_nonnegative_check",
+			"realm_unit_tag_path_application_judgment_stat_spoiler_nonnegative_check",
 			sql`${table.spoilerVoteCount} >= 0
 				and ${table.spoilerNoneCount} >= 0
 				and ${table.spoilerMinorCount} >= 0
 				and ${table.spoilerMajorCount} >= 0`,
 		),
 		check(
-			"realm_unit_tag_path_judgment_stat_spoiler_count_check",
+			"realm_unit_tag_path_application_judgment_stat_spoiler_count_check",
 			sql`${table.spoilerVoteCount} =
 				${table.spoilerNoneCount} + ${table.spoilerMinorCount} + ${table.spoilerMajorCount}`,
 		),

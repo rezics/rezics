@@ -5,7 +5,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import {
 	MaximumAudioTracksPerVideo,
-	SubjectAssociationEntityTagPreviewLimit,
+	SubjectAssociationExpressionPreviewLimit,
 } from "../../database/schema/contract-values";
 
 import { DateTime, DateTimeString } from ".";
@@ -453,23 +453,36 @@ describe("API response values", () => {
 		).toBe(false);
 	});
 
-	it("bounds each subject Entity Tag preview at the shared response limit", () => {
-		const tags = UnitDetailResponse.properties.subjectAssociations.items.properties.tags;
-		expect(tags.maxItems).toBe(SubjectAssociationEntityTagPreviewLimit);
-		const tag = {
-			tagId: "019b0000-0000-7000-8000-000000000001",
-			title: "Character",
+	it("bounds each subject Entity Expression preview at the shared response limit", () => {
+		const expressions =
+			UnitDetailResponse.properties.subjectAssociations.items.properties.expressions;
+		expect(expressions.maxItems).toBe(SubjectAssociationExpressionPreviewLimit);
+		const expression = {
+			expressionId: "019b0000-0000-7000-8000-000000000001",
+			expressionKind: "simple",
+			focusTagId: "019b0000-0000-7000-8000-000000000002",
+			presentationRevision: 1,
+			components: [
+				{
+					tagId: "019b0000-0000-7000-8000-000000000002",
+					semanticRole: "focus",
+					componentKind: "required",
+					language: "en",
+					title: "Character",
+				},
+			],
+			groupKey: null,
 		};
 		expect(
 			Check(
-				tags,
-				Array.from({ length: SubjectAssociationEntityTagPreviewLimit }, () => tag),
+				expressions,
+				Array.from({ length: SubjectAssociationExpressionPreviewLimit }, () => expression),
 			),
 		).toBe(true);
 		expect(
 			Check(
-				tags,
-				Array.from({ length: SubjectAssociationEntityTagPreviewLimit + 1 }, () => tag),
+				expressions,
+				Array.from({ length: SubjectAssociationExpressionPreviewLimit + 1 }, () => expression),
 			),
 		).toBe(false);
 	});

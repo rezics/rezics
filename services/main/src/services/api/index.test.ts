@@ -393,22 +393,26 @@ describe("API root", () => {
 		const document = toOpenAPISchema(api);
 		const finalOperations = [
 			document.paths["/api/v1/tags/{tagId}/hierarchy"]?.get,
+			document.paths["/api/v1/tags/{tagId}/expressions"]?.get,
+			document.paths["/api/v1/tag-expressions"]?.post,
+			document.paths["/api/v1/tag-expressions/{expressionId}/inference-rules"]?.post,
 			document.paths["/api/v1/tag-paths"]?.post,
 			document.paths["/api/v1/tag-paths/{pathId}"]?.get,
+			document.paths["/api/v1/tag-paths/{pathId}/senses"]?.post,
+			document.paths["/api/v1/tag-paths/{pathId}/senses/{senseId}"]?.delete,
 			document.paths["/api/v1/tag-paths/{pathId}/vote"]?.put,
 			document.paths["/api/v1/tag-paths/{pathId}/vote"]?.delete,
-			document.paths["/api/v1/units/{type}/{unitId}/tag-paths/{pathId}"]?.put,
-			document.paths["/api/v1/units/{type}/{unitId}/tag-paths/{pathId}"]?.delete,
-			document.paths["/api/v1/units/{type}/{unitId}/tag-paths/{pathId}/judgment"]?.put,
-			document.paths["/api/v1/units/{type}/{unitId}/tag-paths/{pathId}/judgment"]?.delete,
+			document.paths["/api/v1/units/{type}/{unitId}/tag-path-applications"]?.post,
+			document.paths["/api/v1/units/{type}/{unitId}/tag-path-applications/{applicationId}"]?.delete,
+			document.paths["/api/v1/units/{type}/{unitId}/tag-path-applications/{applicationId}/judgment"]
+				?.put,
+			document.paths["/api/v1/units/{type}/{unitId}/tag-path-applications/{applicationId}/judgment"]
+				?.delete,
 		];
 
 		for (const operation of finalOperations) {
 			expect(operation).toBeDefined();
 			expect(operation?.description ?? "").not.toContain("Development preview");
-			expect(JSON.stringify(operation?.responses?.[StatusCodes.FORBIDDEN]) ?? "").not.toContain(
-				"PlatformCapabilityRequired",
-			);
 		}
 		expect(Object.keys(document.paths)).not.toContain("/api/v1/tag-structures");
 		expect(

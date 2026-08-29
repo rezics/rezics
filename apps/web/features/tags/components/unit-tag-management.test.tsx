@@ -8,6 +8,11 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 const uiMocks = vi.hoisted(() => ({
 	searchEntities: vi.fn<EntitySearch>(async () => []),
 	tagSearch: undefined as EntitySearch | undefined,
+	suggestions: vi.fn(async () => ({ data: { items: [] } })),
+}));
+
+vi.mock("@rezics/openapi-tanstack-query", () => ({
+	getApiTagsSuggestions: uiMocks.suggestions,
 }));
 
 vi.mock("@/features/auth/auth-portal", () => ({
@@ -17,11 +22,16 @@ vi.mock("@/i18n/client", () => ({
 	useTranslation: () => ({
 		t: {
 			tags: {
+				unnamedTag: "Unnamed Tag",
 				paths: {
 					addTitle: "Add a Tag path",
 					addDescription: "Choose a path.",
 					create: "Create a Tag path",
 					add: "Add path",
+				},
+				expressions: {
+					directApplication: "Direct application",
+					pathApplication: "Path Sense application",
 				},
 				global: {
 					addTitle: "Add a Tag",
@@ -83,11 +93,8 @@ import { UnitTagManagement } from "./unit-tag-management";
 const baseProps = {
 	addError: null,
 	addPending: false,
-	addPathError: null,
-	addPathPending: false,
 	canVote: true,
-	onAddPath: vi.fn(async () => undefined),
-	onAddTag: vi.fn(async () => undefined),
+	onAddSelection: vi.fn(async () => undefined),
 	tagCreateTarget: {
 		type: "book",
 		unitId: "00000000-0000-7000-8000-000000000001",
@@ -99,6 +106,7 @@ describe("UnitTagManagement", () => {
 	afterEach(() => {
 		cleanup();
 		uiMocks.searchEntities.mockClear();
+		uiMocks.suggestions.mockClear();
 		uiMocks.tagSearch = undefined;
 	});
 
@@ -111,7 +119,7 @@ describe("UnitTagManagement", () => {
 		expect(screen.getByTestId("picker-tags").dataset.searchOnOpen).toBe("false");
 	});
 
-	it("preloads only the selected Realm's available Tags", async () => {
+	it("scopes explicit Expression and Path Sense suggestions to the selected Realm", async () => {
 		const realmId = "00000000-0000-7000-8000-000000000002";
 		render(
 			<UnitTagManagement
@@ -133,11 +141,13 @@ describe("UnitTagManagement", () => {
 		expect(screen.queryByRole("link", { name: "Create a Tag" })).toBeNull();
 		if (!uiMocks.tagSearch) throw new Error("Expected a Realm-scoped Tag search.");
 		const signal = new AbortController().signal;
-		await uiMocks.tagSearch("tags", "", signal, { kinds: ["tag"] });
-		expect(uiMocks.searchEntities).toHaveBeenCalledWith("tags", "", signal, {
-			kinds: ["tag"],
-			realmTagContextRealmId: realmId,
-		});
+		await uiMocks.tagSearch("tags", "red", signal, { kinds: ["tag"] });
+		expect(uiMocks.suggestions).toHaveBeenCalledWith(
+			expect.objectContaining({
+				query: expect.objectContaining({ q: "red", realmId }),
+				signal,
+			}),
+		);
 	});
 
 	it("renders no add controls without vote permission", () => {

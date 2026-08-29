@@ -91,18 +91,22 @@ describe("Content-pack evidence convergence during Unit merge", () => {
 		expect(allSql).not.toContain("set source_aggregate =");
 	});
 
-	it("retargets Unit–Tag Path evidence after the target judgment", async () => {
+	it("retargets Unit–Path Application evidence after the target judgment", async () => {
 		const captured = await capturePhase("tag_path_applications");
 		expect(captured.result).toEqual({ processedRows: 1, done: true });
 		expectOrdered(
 			captured.statements,
-			"insert into unit_tag_path_judgment",
-			"update content_pack_unit_tag_path_evidence as evidence set unit_id =",
-			"delete from unit_tag_path_judgment as vote",
+			"insert into unit_tag_path_application_judgment",
+			"update content_pack_unit_tag_path_application_evidence as evidence set unit_id =",
+			"delete from unit_tag_path_application_judgment as vote",
 		);
 		expect(captured.statements.join(" ")).toContain(
-			"not exists ( select 1 from content_pack_unit_tag_path_evidence as evidence",
+			"not exists ( select 1 from content_pack_unit_tag_path_application_evidence as evidence",
 		);
+		const evidenceSql = captured.statements.find((query) =>
+			query.includes("update content_pack_unit_tag_path_application_evidence"),
+		);
+		expect(evidenceSql).toContain("application_id = batch.target_application_id");
 	});
 
 	it.each(["subject_sources", "subject_entities"] as const)(

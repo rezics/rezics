@@ -1,250 +1,304 @@
-# Tag Path architecture
+# Tag Path semantic architecture
 
 Status: accepted and implemented.
 
 ## Domain boundary
 
-A Tag Path is an immutable ordered definition of two to sixteen Tags, from a
-broader meaning to a narrower meaning:
+REZICS separates vocabulary structure, Unit assertions, retrieval inference,
+and presentation:
 
 ```text
-人物特征 → 发色 → 红色
+Vocabulary node + typed relation -> Tag Path
+Tag Path + Expression binding     -> Path Sense
+Unit + authority + Path Sense     -> Path Application
+accepted source Applications      -> Expression assertion
+Expression assertion + rules      -> Effective Tags
+visible source Applications       -> contextual rendered badge
 ```
 
-The terminal Tag and every Path ending at it have different identities. `红色`
-is a Tag; `发色 → 红色` is one hierarchy location for that Tag. A Path is
-therefore a dedicated Tag-domain Unit with its own UUID, definition votes,
-applications, judgments, provenance, and Realm adoption.
-
-This follows MeSH's separation of one concept from its hierarchy locations and
-SKOS polyhierarchy:
-
-- [MeSH tree structures](https://www.nlm.nih.gov/mesh/intro_trees.html)
-- [SKOS reference](https://www.w3.org/TR/skos-reference/)
-
-Tag Path is not a generic ordered Structure abstraction. Collections are
-mutable flat orderings; `content_structure` owns mutable Book, Media, and Realm
-navigation trees; Tag Path is an immutable semantic chain. Sharing order does
-not give these objects a useful shared lifecycle.
-
-## Identity and immutability
-
-`tag_path.id` references a `unit.kind = tag_path` Unit. The exact
-`member_tag_ids` array is the definition identity:
+The central invariant is:
 
 ```text
-tag_path
-  id
-  member_tag_ids uuid[2..16]
-  terminal_tag_id
-  created_by_profile_id
-  created_at
+Path != Expression != Application != Effective Tag != rendered badge
+```
+
+A Tag is a stable concept identity. A Path is only an immutable route through
+the vocabulary graph. A Tag Expression is the proposition that can be asserted
+about a Unit. A Path Sense binds Path members to that Expression. An
+Application records that a Unit adopts one immutable Sense under one authority.
+Effective Tags are rebuildable retrieval evidence, and rendered labels are
+temporary UI projections.
+
+Consequently, `Character Traits -> Appearance -> Hair Color -> Red` can realize
+the Expression `facetValue(Hair Color, Red)`. The Overview label is
+`Hair Color · Red`; the complete Path remains available as source explanation
+and navigation. Path membership never asserts every member about the Unit.
+
+This follows the established distinction between concept identity, hierarchy
+position, indexing statement, and retrieval expansion in
+[MeSH](https://www.nlm.nih.gov/mesh/intro_trees.html) and
+[SKOS](https://www.w3.org/TR/skos-reference/).
+
+## Vocabulary structure
+
+`vocabulary_node` unifies two graph-node kinds:
+
+- `concept`: has a corresponding `tag`, may be an Expression argument, and may
+  participate in retrieval;
+- `guide`: has localized guide-node labels and is organizational only. It is
+  neither a Unit nor an assertable/indexable Tag.
+
+`tag_relation` is a governed adjacency revision with one of these meanings:
+
+- `generic`;
+- `partitive`;
+- `instance`;
+- `organizational`;
+- `facet_value`.
+
+Active relations form a directed acyclic graph. PostgreSQL serializes relation
+graph changes with a transaction advisory lock and rejects self-edges and
+cycles. Parent and child composite indexes serve bounded hierarchy reads.
+Relations referenced by a Path cannot be retired, deleted, or semantically
+changed; a semantic correction creates another relation revision and Path.
+
+## Structural Path identity
+
+`tag_path` is a dedicated `unit.kind = tag_path` Unit. Its identity is exactly:
+
+```text
+ordered member_node_ids + ordered relation_ids
 ```
 
 The database enforces:
 
-- two to sixteen distinct member UUIDs;
-- `terminal_tag_id` equal to the final array member;
-- exact-array uniqueness;
-- active, approved, public Tag members;
-- an immutable header and immutable database-maintained projections; and
-- no application to a member of the same Path.
+- two to sixteen distinct active vocabulary nodes;
+- exactly one active typed relation between each adjacent pair;
+- the terminal node equal to the final member;
+- a unique structural sequence and SHA-256 structural identity;
+- immutable Path definitions; and
+- trigger-owned `tag_path_member` and vote-stat projections.
 
-The bounded array provides collision-free identity comparison. It is not a
-searchable set. Member, inverse, and adjacency access uses
-`tag_path_member(path_id, ordinal)`,
-`tag_path_member(tag_id, path_id, ordinal)`, and `tag_path_edge`. This follows
-PostgreSQL's guidance that searchable elements are normally represented as
-rows rather than repeatedly searching an array:
-[Arrays](https://www.postgresql.org/docs/current/arrays.html#ARRAYS-SEARCHING).
+`tag_path_member(path_id, ordinal, node_id, incoming_relation_id)` contains only
+structure. It has no support, display, assertion, or inference flags. The
+`(node_id, path_id, ordinal)` index supports keyset-paged discovery of every
+accepted Path position containing a Tag, not merely terminal positions.
 
-Definitions cannot be updated or deleted. A changed chain is a new Path Unit,
-and contributors cast new judgments against it. There is no definition
-version, projection version, correction bypass, correction worker, or
-administrative in-place edit.
+Path definition votes judge structural validity. Accepted usage is maintained
+separately from definition score and is used only as replaceable ranking
+evidence. There is no semantic `primaryPath` for a concept.
 
-## Definition governance and manual convergence
+## Tag Expressions
 
-`tag_path_vote` records independent `-1 | 1` judgments about a definition.
-`tag_path_vote_stat` stores the distribution-preserving aggregate and the
-accepted active application count used by provisional display ordering.
+`tag_expression` is an immutable structured proposition with a unique canonical
+claim key, kind, and focus Tag. Implemented kinds are:
 
-Exact duplicate arrays are rejected. Prefixes, suffixes, and extensions are
-not automatically duplicates. Curation may warn about them, but only a manual
-governance proposal can converge two Path Units.
+- `simple`, for `simple(TypeScript)`;
+- `facet_value`, for `facetValue(HairColor, Red)`;
+- `relation`, for another predicate/focus proposition.
 
-`tag_path_merge` records source, target, reason, proposer, resolution,
-resolver, and timestamps. Acceptance makes the source unavailable for new
-applications and ordinary discovery. Resolution follows an indexed,
-cycle-free, bounded chain to the target and returns merge provenance.
+`tag_expression_argument` assigns concepts independently to `predicate`,
+`slot`, `value`, `focus`, and `qualifier` roles. Roles are not a single
+mutually-exclusive Path-member enum; the same concept may serve more than one
+semantic purpose.
 
-The source and target UUIDs remain distinct. Definition votes, applications,
-and application judgments remain facts about the Path on which they were
-created; they are never copied, summed, or reinterpreted as target votes.
-Reversal is another audited governance decision, not a definition edit.
-Assistance may produce a typed candidate for the same queue or the ordinary
-alias workflow, but it has no acceptance authority.
+Presentation is independently revisioned:
 
-## No primary Path
+- `tag_expression_presentation_revision` owns a sealed immutable revision;
+- `tag_expression_label_component` stores the ordered standalone signature and
+  optional collision-repair components;
+- `tag_expression_group_key` declares the only component a renderer may use as
+  a semantic group heading.
 
-There is no `tag_primary_path`, `is_primary`, designated-primary vote, manual
-selector, or persisted Tag-to-Path projection.
+Changing Path structure creates a Path. Changing a proposition creates an
+Expression/Sense. Changing a synonymous label signature creates a presentation
+revision. Renderer punctuation or abbreviation is policy and creates neither.
 
-When one breadcrumb must be shown, eligible Paths are ordered dynamically.
-The current provisional weight is accepted active Unit–Path usage count in the
-applicable authority. Higher usage ranks first; UUID is the deterministic
-tie-breaker. Global and Realm usage remain separate.
+Each Tag receives a sealed simple Expression during bootstrap, seed, and
+content-pack ingestion. Qualified Expressions remain distinct from that simple
+claim. A negative judgment on bare `Red` therefore does not conflict with a
+positive Application of `Hair Color = Red`; they have different claim keys and
+source identities.
 
-Usage is not the final relevance formula and proves neither confidence,
-specificity, recency, nor Realm relevance. The exported ranking boundary owns
-an explicit TSDoc `@todo` to replace it after a separate formula decision.
-Callers must not persist the result or describe it as canonical or primary.
+## Inference and retrieval
 
-## Applications, judgments, and effective Tags
+`tag_expression_inference_rule` is an immutable governed revision from a source
+Expression to exactly one target Tag or Expression. Its kind is:
 
-The global application relation is `unit_tag_path(unit_id, path_id)`. Sparse
-`unit_tag_path_judgment` rows independently store:
+- `entailed`: semantic evidence that may appear as an inferred match;
+- `retrieval_only`: recall expansion that is never presented as a direct claim.
 
-- `fit_vote: -1 | 1 | null`; and
-- `spoiler_level: 0 | 1 | 2 | null`.
+Rule retirement preserves history and recomputes the definition-scale closure.
+Expression-target rules are cycle-checked under a serialized graph mutation.
+`tag_expression_effective_tag` stores the strongest `primary`, `entailed`, or
+`retrieval_only` evidence per Expression/Tag pair. It is a rebuildable
+definition cache, not a Unit assertion and not a display identity.
 
-Each dimension has its own timestamp and at least one dimension must be
-present. The aggregate retains score, vote count, and the full spoiler
-distribution. Positive fit creates one `unit_tag_path_support` row per Path
-member and contributor. Triggers incrementally maintain effective Tag facts,
-effective contributor judgments, fit aggregates, and spoiler aggregates.
-Deleting an application deletes its now-contextless judgments and derived
-support in the same transaction.
+When that closure changes for an Expression that is already asserted, the
+database upserts `tag_expression_projection_rebuild`. The worker advances
+Global and Realm assertion inverses in independent UUID keyset pages of 500,
+refreshes only the routed Unit/authority keys, and retries failed pages with a
+bounded delay. A newer definition change resets the same job's cursors after
+the in-flight transaction releases its row lock, so an older generation cannot
+silently win.
 
-Direct Tag judgments and Path-derived support retain distinct provenance. A
-negative direct judgment conflicts with positive Path support by the same
-Profile and is rejected at the database boundary. Content-label Tags are
-handled by the content-label registry and are rejected by semantic Tag
-judgment tables.
+No ancestor is inferred merely because it occurs earlier in a Path. An
+intermediate concept becomes searchable only through an explicit rule.
 
-All write fan-out is bounded by `L <= 16`; request reads use equality or
-keyset access and bounded pages. Aggregate mutation uses deterministic
-advisory-lock ordering and admission backpressure. See
-[Tag Path capacity](./tag-path-capacity.md).
+## Path Senses and lifecycle
 
-## Search and ordinary Tag input
+`tag_path_sense` is an immutable mapping from a structural Path to one
+Expression under either global or Realm scope. `tag_path_sense_binding` maps a
+Path member ordinal to an Expression argument role and ordinal. Sealing checks
+that every binding refers to the same concept on both sides.
 
-Ordinary users search Tags, never Paths. A suggestion contains the localized
-Tag title, an eligible breadcrumb when useful, and usage evidence. Path search
-exists only on curation surfaces.
+A Realm may adopt a global Sense without changing it. A genuinely different
+Realm interpretation receives a distinct Realm-scoped Sense and identity.
 
-The single Tag picker behaves as follows:
+Expressions, presentation revisions, inference rules, and Senses use
+append-only lifecycle transitions. Active definitions may be retired; semantic
+fields cannot be edited and rows cannot be deleted. Existing Applications keep
+resolving their sealed historical definitions. New Applications require an
+active sealed Sense, so retirement prevents new adoption without rewriting
+history.
 
-- no accepted ending Path: save a direct Tag if it is directly applicable;
-- one accepted ending Path: apply it silently;
-- several accepted ending Paths: show a sense chooser ordered by transient
-  weight; and
-- category-only Tags reject direct application while remaining valid Path
-  members.
+## Source Applications and judgments
 
-Ancestor titles and every word-order permutation are not copied into all
-descendant search documents. Compound recovery is bounded:
-
-1. run normal indexed Tag title and alias search;
-2. when direct recall is insufficient, enumerate bounded CJK or spaced-token
-   splits;
-3. resolve at most four Tag identities per side through title and governed
-   alias matches;
-4. submit at most 32 candidate pairs in one relational query;
-5. verify the real broader-before-terminal Path order; and
-6. rank semantic query order above reversed order, then use provisional Path
-   weight.
-
-This supports `发色红色`, lower-confidence `红色发色`, and `红色头发` when
-`头发` is an accepted alias of `发色`, without turning ancestor text into
-unconditional descendant synonyms.
-
-## Reading and contribution surfaces
-
-Work pages show a grouped Tag summary and an exact hidden count. Full
-exploration shows complete Paths, direct parents and children, fit controls,
-the spoiler distribution, and provenance. Path creation is a curation
-surface, and immutable definitions require two to sixteen distinct Tags.
-
-Entity pages use a bounded Portable Text preview and expose measurements as
-read-only facts. Contribution surfaces provide independent fit and spoiler
-judgments, including post-add spoiler judgment. Subject-association spoiler
-judgments conceal associated Entity information until reveal.
-
-Author content-spoiler labels and NSFW labels are stored through the
-content-label registry. Viewer preferences independently control always-show
-spoilers and always-show NSFW. List, feed, detail, snippet, embed,
-notification, and SEO projections must suppress concealed content at their
-data boundary; an item-level reveal never changes the account preference.
-
-## Realm authority
-
-Realm facts are independent from global facts:
+The source-of-truth facts are:
 
 ```text
-realm_tag_path
-realm_tag_path_vote
-realm_tag_path_vote_stat
-realm_unit_tag_path
-realm_unit_tag_path_judgment
-realm_unit_tag_path_judgment_stat
-realm_unit_tag_path_support
-realm_unit_effective_tag
+unit_tag                         -- direct simple-Expression source
+unit_tag_path_application       -- global Path-Sense source
+realm_unit_tag                  -- Realm direct source
+realm_unit_tag_path_application -- Realm Path-Sense source
 ```
 
-A Realm may adopt a globally accepted definition, cast Realm definition
-votes, apply the Path to a mounted Unit, and judge fit and spoiler. Fit and
-spoiler each have an independent `inherit | isolate` fallback, defaulting to
-`inherit`. Resolution returns the chosen authority, resolution state, and
-provenance for each dimension.
+A Path Application points to `sense_id`, never only to `path_id`. Sparse
+Application judgments independently record fit and spoiler dimensions and
+retain their full distributions. Voting controls target the source
+Application, even when multiple sources render as one badge.
 
-Profile Realm subscriptions compose display sources only. They never merge
-Realm and global vote counts. Realm usage weights rank Realm breadcrumbs and
-global usage weights rank global breadcrumbs.
+Global and Realm source populations, votes, usage, and assertions remain
+separate. Authority is part of every Realm key. Realm fallback policies decide
+which source population is read; they never merge vote counts or identities.
 
-## Measurement and import evidence
+## Rebuildable projections
 
-`entity_measurement` is an editable fact with an optional context Unit and
-`UNIQUE NULLS NOT DISTINCT (entity_id, context_unit_id)`. This guarantees one
-canonical row per Entity while allowing contextual rows. Source URL,
-observation time, source key, and provenance live in immutable
-`content_pack_entity_measurement_evidence`, which references the fact and its
-import. Human editing therefore does not require importer evidence.
+PostgreSQL incrementally maintains:
 
-Definition, application, Tag, subject-association, and measurement import
-evidence follows the same rule: evidence is retained separately from editable
-or governable facts and can be retargeted only by the bounded Unit-merge
-workflow.
+- `unit_expression_assertion` and `realm_unit_expression_assertion`, aggregated
+  by Unit, authority, and Expression;
+- `unit_effective_tag` and `realm_unit_effective_tag`, with separate direct,
+  primary-Expression, entailed, and retrieval-only evidence counts;
+- Application judgment aggregates and Path usage ranks; and
+- search documents and match-reason projections.
 
-## API and ownership map
-
-Public names use Tag Path throughout:
+An accepted Application creates one Expression assertion source regardless of
+Path length. Effective Tag work is proportional to the Expression's explicit
+closure, not to every Path member:
 
 ```text
-/tag-paths
-/tag-paths/:pathId
-/units/:type/:unitId/tag-paths/:pathId
-/realms/:realmId/tag-paths
-/realms/:realmId/units/:unitId/tag-paths/:pathId
+old all-member fan-out O(L) -> explicit output fan-out O(A), normally A = 1
 ```
 
-The backend owner is `services/main/src/services/tag-paths`; the schema owner
-is `services/main/src/services/database/schema/tag-path.ts`; advanced
-PostgreSQL ownership is split among `tag-path.sql`,
-`tag-judgment-aggregates.sql`, `realm-tag-authority.sql`,
-`content-label-policy.sql`, `entity-measurement-evidence.sql`, and
-`tag-path-search.sql`.
+Projection functions are idempotent and rebuildable from direct applications,
+accepted Path Applications, and definition closure. Trigger-owned projection
+tables reject ordinary direct writes. Operators can enqueue and drain every
+currently asserted Expression with
+`task services-main:tag-expression-projections:rebuild`; the normal worker
+drains definition-change jobs continuously with lock-skipping claims.
 
-There are no old routes, response aliases, dual writes, compatibility views,
-or generic Structure Unit lifecycle branches. Unrelated `content_structure`
-contracts retain their existing names.
+## Contextual rendering
 
-## Breaking migration
+The frontend renderer receives only Applications already filtered for
+authority, permission, spoiler, and content-label visibility. It then:
 
-Released history remains append-only. The
-`tag_path_entity_semantics` migration first performs bounded `EXISTS` checks
-and fails if any rejected Structure or legacy Tag-vote fact exists. It then
-rebuilds the persisted Unit-merge phase enum without retired Structure labels,
-drops rejected tables and functions, removes `unit.kind = structure`, creates
-the final relations and guards, and installs the canonical PostgreSQL owners.
-It performs no backfill and makes old binaries fail against the new contract.
+1. aggregates sources by `(authority, expressionId)` while retaining every
+   Application and provenance record;
+2. uses only an explicitly declared Expression group key;
+3. subtracts context by semantic Tag ID and role, never by matching text;
+4. preserves at least one `value` or `focus` component; and
+5. repairs collisions by restoring omitted required components, fallback
+   components, a Path ancestor, authority/relation context, and finally a full
+   breadcrumb.
+
+Different Expressions are never merged because they render the same string.
+Rendered labels, residual components, grouping, and shortest unique
+breadcrumbs are not persisted.
+
+## Surface behavior
+
+- Unit Overview renders applied Expressions, optionally grouped by declared
+  semantic group key. It does not render Effective Tags as source badges.
+- A badge popover first lists Applications on that Unit, their authority,
+  judgments, and expandable full Paths. A collapsed second section lists other
+  accepted vocabulary positions not adopted by the Unit.
+- Associations use compact Expression projections rather than bare Entity Tags.
+- search results show localized match reasons and distinguish direct, primary,
+  entailed, and retrieval-only evidence; Tag results also disclose the count of
+  other positions;
+- the Tag picker returns explicit direct-Expression or Path-Sense choices and
+  never silently chooses an ambiguous terminal Path;
+- Tag detail is concept-centered and separates qualified Expressions, every
+  structural position, inferred reach, and direct children;
+- Path detail shows the complete typed route, guide nodes, structural votes,
+  Senses, bindings, inference revisions, provenance, authority, and lifecycle;
+- curation creates typed structure, Expressions, Senses, presentation
+  signatures, role bindings, and inference rules together.
+
+All visible copy is owned by typed `@rezics/i18n` resources in every supported
+locale. App Router entries remain thin adapters; implementation lives under
+`apps/web/features/tags`.
+
+## Search access paths
+
+Path position discovery uses UUID keyset pagination over
+`tag_path_member(node_id, path_id, ordinal)`, joins accepted Path vote stats,
+and hydrates members in one bounded batch. Concept Expression reads are
+definition-scale and capped. Unit landscape reads are bounded by actual source
+Applications and hydrate definitions in batches.
+
+Search indexing consumes Effective Tags but returns positive match evidence
+only. Direct content mode explicitly filters source direct Tags; semantic mode
+uses primary, entailed, and retrieval evidence. Match explanations preserve the
+evidence kind that caused retrieval.
+
+## Governance, import, and ownership
+
+Path merges govern structural convergence only. Source and target IDs, votes,
+Applications, and judgments remain historical facts and are not copied or
+summed. Expression and inference governance remain separate from Path merges.
+
+Content packs and seed/bootstrap flows declare guide nodes, typed relations,
+Expressions, Senses, Applications, and immutable evidence explicitly. They do
+not infer Senses from old member arrays. Merge evidence retargeting remains
+bounded and audited.
+
+Primary implementation owners are:
+
+- schema: `services/main/src/services/database/schema/vocabulary.ts`,
+  `tag-expression.ts`, and `tag-path.ts`;
+- PostgreSQL projection/lifecycle owners: `schema/postgres/tag-path.sql`,
+  `tag-judgment-aggregates.sql`, and `realm-tag-authority.sql`;
+- backend behavior: `services/main/src/services/tag-expressions` and
+  `services/main/src/services/tag-paths`;
+- frontend behavior: `apps/web/features/tags`;
+- public schemas: `services/main/src/services/api/tags` and generated OpenAPI
+  clients.
+
+## Destructive preview cutover
+
+The former Tag Path model was unreleased development-preview data. The cutover
+is a new append-only forward migration that destructively removes its Path
+edges, all-member support rows, old application/judgment identities, and old
+projection columns. It creates the final vocabulary, Expression, Sense,
+Application, and projection model without guessing historical semantics.
+
+There are no old routes, schema aliases, dual reads, dual writes, compatibility
+views, display fallbacks, or removal guards. Old binaries are deliberately
+incompatible. Blank-database replay and old-preview-schema forward replay must
+both end at the canonical schema; search documents, caches, aggregates, and
+effective projections are rebuilt from the new sources.
+
+Operational sizing, query-plan evidence, backpressure, and the 500M/3B cutover
+path are specified in [Tag Path capacity](./tag-path-capacity.md).

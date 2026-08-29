@@ -6,9 +6,8 @@ import { getUnitReadCondition } from "../authorization/unit/query";
 import { database } from "../database";
 import { toSafeInteger } from "../database/integer";
 import {
-	unitEffectiveTag as unitEffectiveTag,
-	unitEffectiveTagVote as unitEffectiveTagVote,
 	unitTagJudgmentStat,
+	unitTagJudgment,
 	profileRealmTagSubscription,
 	realm,
 	realmMember,
@@ -20,7 +19,7 @@ import {
 	unit,
 	unitTag,
 } from "../database/schema";
-import { listVisibleUnitTagPaths } from "../tag-paths/service";
+import { listVisibleUnitTagExpressions } from "../tag-paths/service";
 import {
 	resolvedUnitLocalizationLanguage,
 	resolvedUnitLocalizationAvatar,
@@ -39,7 +38,7 @@ function presentTagVote(value: number | null): TagVoteValue {
 	throw new Error("Stored Tag vote has an invalid value");
 }
 
-const viewerUnitTagVote = alias(unitEffectiveTagVote, "viewer_unit_tag_judgment");
+const viewerUnitTagVote = alias(unitTagJudgment, "viewer_unit_tag_judgment");
 const viewerRealmTagVote = alias(realmTagJudgment, "viewer_realm_tag_judgment");
 const globalTagUnit = alias(unit, "global_tag_unit");
 const realmSourceUnit = alias(unit, "realm_tag_source_unit");
@@ -101,62 +100,55 @@ export async function listGlobalUnitTags(input: {
 }) {
 	const rows = await database
 		.select({
-			tagId: unitEffectiveTag.tagId,
-			language: resolvedUnitLocalizationLanguage(
-				unitEffectiveTag.tagId,
-				input.localizationLanguages,
-			),
-			title: resolvedUnitLocalizationTitle(unitEffectiveTag.tagId, input.localizationLanguages),
-			summary: resolvedUnitLocalizationSummary(unitEffectiveTag.tagId, input.localizationLanguages),
-			avatar: resolvedUnitLocalizationAvatar(unitEffectiveTag.tagId, input.localizationLanguages),
-			pinned: sql<boolean>`coalesce(${unitTag.pinned}, false)`,
+			tagId: unitTag.tagId,
+			language: resolvedUnitLocalizationLanguage(unitTag.tagId, input.localizationLanguages),
+			title: resolvedUnitLocalizationTitle(unitTag.tagId, input.localizationLanguages),
+			summary: resolvedUnitLocalizationSummary(unitTag.tagId, input.localizationLanguages),
+			avatar: resolvedUnitLocalizationAvatar(unitTag.tagId, input.localizationLanguages),
+			pinned: unitTag.pinned,
 			position: unitTag.position,
 			score: unitTagJudgmentStat.score,
 			voteCount: unitTagJudgmentStat.voteCount,
-			viewerVote: viewerUnitTagVote.value,
-			createdAt: unitEffectiveTag.createdAt,
-			updatedAt: unitEffectiveTag.updatedAt,
+			viewerVote: viewerUnitTagVote.fitVote,
+			createdAt: unitTag.createdAt,
+			updatedAt: unitTag.updatedAt,
 			totalCount: sql<bigint>`count(*) over()`,
 		})
-		.from(unitEffectiveTag)
-		.innerJoin(tag, eq(tag.id, unitEffectiveTag.tagId))
-		.innerJoin(globalTagUnit, eq(globalTagUnit.id, unitEffectiveTag.tagId))
-		.leftJoin(
-			unitTag,
-			and(eq(unitTag.unitId, unitEffectiveTag.unitId), eq(unitTag.tagId, unitEffectiveTag.tagId)),
-		)
+		.from(unitTag)
+		.innerJoin(tag, eq(tag.id, unitTag.tagId))
+		.innerJoin(globalTagUnit, eq(globalTagUnit.id, unitTag.tagId))
 		.leftJoin(
 			unitTagJudgmentStat,
 			and(
-				eq(unitTagJudgmentStat.unitId, unitEffectiveTag.unitId),
-				eq(unitTagJudgmentStat.tagId, unitEffectiveTag.tagId),
+				eq(unitTagJudgmentStat.unitId, unitTag.unitId),
+				eq(unitTagJudgmentStat.tagId, unitTag.tagId),
 				gt(unitTagJudgmentStat.voteCount, 0n),
 			),
 		)
 		.leftJoin(
 			viewerUnitTagVote,
 			and(
-				eq(viewerUnitTagVote.unitId, unitEffectiveTag.unitId),
-				eq(viewerUnitTagVote.tagId, unitEffectiveTag.tagId),
+				eq(viewerUnitTagVote.unitId, unitTag.unitId),
+				eq(viewerUnitTagVote.tagId, unitTag.tagId),
 				input.viewerProfileId ? eq(viewerUnitTagVote.profileId, input.viewerProfileId) : sql`false`,
 			),
 		)
 		.where(
 			and(
-				eq(unitEffectiveTag.unitId, input.unitId),
+				eq(unitTag.unitId, input.unitId),
 				input.excludedTagIds?.length
-					? notInArray(unitEffectiveTag.tagId, [...input.excludedTagIds])
+					? notInArray(unitTag.tagId, [...input.excludedTagIds])
 					: undefined,
 				getUnitReadCondition(input.viewerProfileId, {}, globalTagUnit),
 			),
 		)
 		.orderBy(
-			desc(sql`coalesce(${unitTag.pinned}, false)`),
+			desc(unitTag.pinned),
 			sql`case when ${unitTag.pinned} then ${unitTag.position} end asc nulls last`,
 			desc(unitTagWilsonConfidence),
 			desc(unitTagJudgmentStat.score),
 			desc(unitTagJudgmentStat.voteCount),
-			unitEffectiveTag.tagId,
+			unitTag.tagId,
 		)
 		.limit(input.limit);
 
@@ -492,43 +484,27 @@ export async function getUnitTagLandscape(input: {
 	readonly unitId: string;
 	readonly viewerProfileId?: string;
 	readonly localizationLanguages?: LocalizationLanguageQuery;
-	readonly globalLimit: number;
-	readonly includePaths: boolean;
-	readonly pathLimit: number;
+	readonly includeExpressions: boolean;
+	readonly expressionLimit: number;
 	readonly sourceLimit: number;
 	readonly perRealmLimit: number;
 }) {
 	if (!input.viewerProfileId) {
-		const paths = input.includePaths
-			? await listVisibleUnitTagPaths({
+		const expressions = input.includeExpressions
+			? await listVisibleUnitTagExpressions({
 					unitId: input.unitId,
 					localizationLanguages: input.localizationLanguages,
-					limit: input.pathLimit,
+					limit: input.expressionLimit,
 				})
-			: { items: [], totalCount: 0 };
-		const global = await listGlobalUnitTags({
-			unitId: input.unitId,
-			localizationLanguages: input.localizationLanguages,
-			limit: input.globalLimit,
-			excludedTagIds: paths.items.flatMap(({ members }) => members.map(({ tagId }) => tagId)),
-		});
+			: [];
 		return {
-			paths: paths.items,
-			global: global.items,
-			totals: { paths: paths.totalCount, global: global.totalCount },
+			expressions,
+			totals: { expressions: expressions.length },
 			realms: [],
 			voteRealms: [],
 		};
 	}
-	const [paths, allSubscriptions, voteRealms] = await Promise.all([
-		input.includePaths
-			? listVisibleUnitTagPaths({
-					unitId: input.unitId,
-					viewerProfileId: input.viewerProfileId,
-					localizationLanguages: input.localizationLanguages,
-					limit: input.pathLimit,
-				})
-			: Promise.resolve({ items: [], totalCount: 0 }),
+	const [allSubscriptions, voteRealms] = await Promise.all([
 		listRealmTagSubscriptions({
 			profileId: input.viewerProfileId,
 			localizationLanguages: input.localizationLanguages,
@@ -538,25 +514,28 @@ export async function getUnitTagLandscape(input: {
 			localizationLanguages: input.localizationLanguages,
 		}),
 	]);
-	const global = await listGlobalUnitTags({
-		unitId: input.unitId,
-		viewerProfileId: input.viewerProfileId,
-		localizationLanguages: input.localizationLanguages,
-		limit: input.globalLimit,
-		excludedTagIds: paths.items.flatMap(({ members }) => members.map(({ tagId }) => tagId)),
-	});
 	const realmIds = allSubscriptions.map(({ realmId }) => realmId);
-	const votedTags = await listRealmVotedTags({
-		unitId: input.unitId,
-		viewerProfileId: input.viewerProfileId,
-		realmIds,
-		localizationLanguages: input.localizationLanguages,
-		perRealmLimit: input.perRealmLimit,
-	});
+	const [expressions, votedTags] = await Promise.all([
+		input.includeExpressions
+			? listVisibleUnitTagExpressions({
+					unitId: input.unitId,
+					viewerProfileId: input.viewerProfileId,
+					realmIds,
+					localizationLanguages: input.localizationLanguages,
+					limit: input.expressionLimit,
+				})
+			: Promise.resolve([]),
+		listRealmVotedTags({
+			unitId: input.unitId,
+			viewerProfileId: input.viewerProfileId,
+			realmIds,
+			localizationLanguages: input.localizationLanguages,
+			perRealmLimit: input.perRealmLimit,
+		}),
+	]);
 	return {
-		paths: paths.items,
-		global: global.items,
-		totals: { paths: paths.totalCount, global: global.totalCount },
+		expressions,
+		totals: { expressions: expressions.length },
 		realms: selectRealmTagSources({
 			sources: allSubscriptions,
 			votedTags,

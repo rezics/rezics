@@ -94,14 +94,23 @@ import {
 	unitReactionStat,
 	unitTagJudgmentStat,
 	unitEffectiveTag,
-	unitEffectiveTagVote,
+	unitExpressionAssertion,
 	tagPath,
-	unitTagPath,
-	unitTagPathJudgment,
-	unitTagPathJudgmentStat,
-	tagPathEdge,
+	unitTagPathApplication,
+	unitTagPathApplicationJudgment,
+	unitTagPathApplicationJudgmentStat,
+	tagPathSense,
+	tagPathSenseBinding,
 	tagPathMember,
 	tagPathVote,
+	vocabularyNode,
+	guideNode,
+	tagRelation,
+	tagExpression,
+	tagExpressionArgument,
+	tagExpressionPresentationRevision,
+	tagExpressionEffectiveTag,
+	tagExpressionProjectionRebuild,
 	unitMergeRequest,
 	userAccountState,
 	sharedSearchQuery,
@@ -991,20 +1000,40 @@ describe("database schema contracts", () => {
 		expect(unitSlugAddress.kind.getSQLType()).toBe("text");
 	});
 
-	it("models immutable dedicated Tag Paths and rebuildable effective Tags separately", () => {
+	it("separates vocabulary structure, semantic claims, applications, and retrieval projections", () => {
 		expect(UnitKindValues).toContain("tag_path");
 		expect(UnitKindValues).not.toContain("structure");
+		expect(getTableConfig(vocabularyNode).name).toBe("vocabulary_node");
+		expect(getTableConfig(guideNode).name).toBe("guide_node");
+		expect(getTableConfig(tagRelation).name).toBe("tag_relation");
 		expect(getTableConfig(tagPath).name).toBe("tag_path");
 		expect(
 			getTableConfig(tagPath).uniqueConstraints.map((constraint) => constraint.name),
-		).toContain("tag_path_definition_key");
+		).toContain("tag_path_structure_key");
 		expect(getTableConfig(tagPathMember).name).toBe("tag_path_member");
-		expect(getTableConfig(tagPathEdge).name).toBe("tag_path_edge");
 		expect(getTableConfig(tagPathVote).name).toBe("tag_path_vote");
-		expect(getTableConfig(unitTagPath).name).toBe("unit_tag_path");
-		expect(getTableConfig(unitTagPathJudgment).name).toBe("unit_tag_path_judgment");
+		expect(getTableConfig(tagExpression).name).toBe("tag_expression");
+		expect(getTableConfig(tagExpressionArgument).name).toBe("tag_expression_argument");
+		expect(getTableConfig(tagExpressionPresentationRevision).name).toBe(
+			"tag_expression_presentation_revision",
+		);
+		expect(getTableConfig(tagExpressionEffectiveTag).name).toBe("tag_expression_effective_tag");
+		expect(getTableConfig(tagPathSense).name).toBe("tag_path_sense");
+		expect(getTableConfig(tagPathSenseBinding).name).toBe("tag_path_sense_binding");
+		expect(getTableConfig(unitTagPathApplication).name).toBe("unit_tag_path_application");
+		expect(getTableConfig(unitTagPathApplicationJudgment).name).toBe(
+			"unit_tag_path_application_judgment",
+		);
+		expect(getTableConfig(unitExpressionAssertion).name).toBe("unit_expression_assertion");
 		expect(getTableConfig(unitEffectiveTag).name).toBe("unit_effective_tag");
-		expect(getTableConfig(unitEffectiveTagVote).name).toBe("unit_effective_tag_vote");
+		const projectionQueue = getTableConfig(tagExpressionProjectionRebuild);
+		expect(projectionQueue.name).toBe("tag_expression_projection_rebuild");
+		expect(projectionQueue.indexes.map((index) => index.config.name)).toContain(
+			"tag_expression_projection_rebuild_claim_idx",
+		);
+		expect(projectionQueue.checks.map((constraint) => constraint.name)).toContain(
+			"tag_expression_projection_rebuild_realm_cursor_check",
+		);
 	});
 
 	it("keeps Dock kinds closed and gives each Dock a stable identity", () => {
@@ -1064,7 +1093,10 @@ describe("database schema contracts", () => {
 	it("constrains spoiler aggregates and indexes selective Realm judgment routes", () => {
 		for (const [table, constraintName] of [
 			[unitTagJudgmentStat, "unit_tag_judgment_stat_spoiler_nonnegative_check"],
-			[unitTagPathJudgmentStat, "unit_tag_path_judgment_stat_spoiler_nonnegative_check"],
+			[
+				unitTagPathApplicationJudgmentStat,
+				"unit_tag_path_application_judgment_stat_spoiler_nonnegative_check",
+			],
 			[realmTagJudgmentStat, "realm_tag_judgment_stat_spoiler_nonnegative_check"],
 			[
 				subjectAssociationJudgmentStat,

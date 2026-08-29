@@ -1,7 +1,15 @@
 import { eq } from "drizzle-orm";
 
 import { database } from "../../database";
-import { entity, tag, unit, unitAccessGrant, unitLocalization } from "../../database/schema";
+import {
+	entity,
+	tag,
+	unit,
+	unitAccessGrant,
+	unitLocalization,
+	vocabularyNode,
+} from "../../database/schema";
+import { ensureSimpleTagExpressionInTransaction } from "../../tag-expressions/service";
 import { UnitNotFound } from "../../units/errors";
 import { recordUnitRevision } from "../../units/history";
 import {
@@ -69,7 +77,18 @@ export async function createUnitResource(
 					grantedByProfileId,
 				})),
 			);
-		} else await tx.insert(tag).values({ id: created.id });
+		} else {
+			await tx.insert(vocabularyNode).values({
+				id: created.id,
+				kind: "concept",
+				createdByProfileId: ownerId,
+			});
+			await tx.insert(tag).values({ id: created.id });
+			await ensureSimpleTagExpressionInTransaction(tx, {
+				tagId: created.id,
+				profileId: ownerId,
+			});
+		}
 		await tx
 			.insert(unitLocalization)
 			.values({ unitId: created.id, ...toUnitLocalizationStorage(body.localization) });

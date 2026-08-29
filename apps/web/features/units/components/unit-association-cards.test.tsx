@@ -67,10 +67,22 @@ const subjectAssociation = {
 		id: "01941f29-7c00-7000-8000-000000000003",
 		url: "https://example.test/emiyashirou.webp",
 	},
-	tags: [
+	expressions: [
 		{
-			tagId: subjectAssociationTagId,
-			title: "Red",
+			expressionId: "01941f29-7c00-7000-8000-000000000007",
+			expressionKind: "simple",
+			focusTagId: subjectAssociationTagId,
+			presentationRevision: 1,
+			components: [
+				{
+					tagId: subjectAssociationTagId,
+					semanticRole: "focus",
+					componentKind: "required",
+					language: "en",
+					title: "Red",
+				},
+			],
+			groupKey: null,
 		},
 	],
 	contextPost: null,

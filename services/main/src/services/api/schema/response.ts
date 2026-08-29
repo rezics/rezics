@@ -35,11 +35,16 @@ import {
 	ProgressStatusValues,
 	RealmPageKindValues,
 	RealmTagQueryStrategyValues,
-	SubjectAssociationEntityTagPreviewLimit,
+	SubjectAssociationExpressionPreviewLimit,
 	SubjectAssociationRoleValues,
 	UnitKindValues,
 	UnitOwnershipModeValues,
 } from "../../database/schema/contract-values";
+import {
+	TagExpressionArgumentRoleValues,
+	TagExpressionKindValues,
+	TagExpressionLabelComponentKindValues,
+} from "../../database/schema/tag-expression";
 import { FeedNonReviewPostKindValues, FeedUnitKindValues } from "../feed/schema";
 import {
 	RecommendationReasonSchema,
@@ -63,6 +68,43 @@ const NullableText = t.Nullable(t.String());
 const OrdinaryPostKindResponse = t.Union([t.Literal("post"), t.Literal("reply")]);
 export const CompletionStateResponse = t.Object({ completed: t.Boolean() });
 export const UpdateStateResponse = t.Object({ updated: t.Boolean() });
+
+const TagExpressionDefinitionPreviewResponse = t.Object(
+	{
+		expressionId: Uuid,
+		expressionKind: t.UnionEnum(TagExpressionKindValues),
+		focusTagId: Uuid,
+		presentationRevision: t.Integer({ minimum: 1 }),
+		components: t.Array(
+			t.Object({
+				tagId: Uuid,
+				semanticRole: t.UnionEnum(TagExpressionArgumentRoleValues),
+				componentKind: t.UnionEnum(TagExpressionLabelComponentKindValues),
+				language: t.Nullable(ContentLanguage),
+				title: NullableText,
+			}),
+			{ minItems: 1, maxItems: 32 },
+		),
+		groupKey: t.Nullable(
+			t.Object({
+				tagId: Uuid,
+				semanticRole: t.UnionEnum(TagExpressionArgumentRoleValues),
+				language: t.Nullable(ContentLanguage),
+				title: NullableText,
+			}),
+		),
+	},
+	{ additionalProperties: false },
+);
+
+const SearchTagMatchReasonResponse = t.Object(
+	{
+		matchedTagId: Uuid,
+		evidence: t.UnionEnum(["direct", "primary", "entailed", "retrieval_only"]),
+		expression: TagExpressionDefinitionPreviewResponse,
+	},
+	{ additionalProperties: false },
+);
 
 export const HealthResponse = t.Object({ status: t.Literal("ok") });
 const ReadinessCheckResponse = t.Object({
@@ -446,10 +488,9 @@ export const UnitDetailResponse = t.Object({
 			summary: NullableText,
 			avatar: AvatarResponse,
 			cover: ImageAssetResponse,
-			tags: t.Array(
-				t.Object({ tagId: Uuid, title: NullableText }, { additionalProperties: false }),
-				{ maxItems: SubjectAssociationEntityTagPreviewLimit },
-			),
+			expressions: t.Array(TagExpressionDefinitionPreviewResponse, {
+				maxItems: SubjectAssociationExpressionPreviewLimit,
+			}),
 			contextPost: t.Nullable(AssociationContextPostResponse),
 			spoiler: t.Object({
 				level: t.Union([t.Literal(0), t.Literal(1), t.Literal(2)]),
@@ -527,6 +568,8 @@ export const SearchHit = t.Object({
 	),
 	name: t.Optional(NullableText),
 	summary: NullableText,
+	tagMatches: t.Optional(t.Array(SearchTagMatchReasonResponse, { maxItems: 8 })),
+	tagOtherPositionCount: t.Optional(t.Integer({ minimum: 0 })),
 });
 export const PersistedSortUnavailableAdvisoryResponse = t.Object(
 	{
@@ -692,6 +735,8 @@ const FeedItemBaseResponse = {
 	viewerReaction: NullableText,
 	recommendationReason: t.Nullable(RecommendationReasonSchema),
 	tracking: t.Nullable(RecommendationTrackingSchema),
+	searchTagMatches: t.Optional(t.Array(SearchTagMatchReasonResponse, { maxItems: 8 })),
+	tagOtherPositionCount: t.Optional(t.Integer({ minimum: 0 })),
 };
 
 const FeedUnitItemFields = {

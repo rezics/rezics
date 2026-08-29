@@ -134,14 +134,15 @@ describe("loadPack", () => {
 				tagPaths: [
 					{
 						sourceKey: "fixture:path",
-						memberTagSourceKeys: ["fixture:software", "fixture:release"],
+						memberNodeSourceKeys: ["fixture:software", "fixture:release"],
+						relationSourceKeys: ["fixture:relation"],
 						sourceUrl: "https://example.com/path",
 						sourceImportedAt: "2026-08-24T00:00:00Z",
 					},
 				],
 			});
 			await expect(loadPack(fixture.root, FixtureId)).rejects.toThrow(
-				/fixture:software is not a Tag and cannot be a Tag Path member/,
+				/Unknown Tag Path member node: fixture:software/,
 			);
 		} finally {
 			await fixture.dispose();
@@ -318,7 +319,10 @@ describe("loadPack", () => {
 		try {
 			sourceRoot = resolveShowcasePacksDir({});
 		} catch (error) {
-			if (error instanceof ContentPackSourceNotFound) return;
+			if (error instanceof ContentPackSourceNotFound) {
+				expect(error).toBeInstanceOf(ContentPackSourceNotFound);
+				return;
+			}
 			throw error;
 		}
 		const [toaru, xuZhimo, vndb] = await Promise.all([
@@ -369,7 +373,10 @@ describe("loadPack", () => {
 			try {
 				sourceRoot = resolveShowcasePacksDir({});
 			} catch (error) {
-				if (error instanceof ContentPackSourceNotFound) return;
+				if (error instanceof ContentPackSourceNotFound) {
+					expect(error).toBeInstanceOf(ContentPackSourceNotFound);
+					return;
+				}
 				throw error;
 			}
 			const pack = await loadPack(sourceRoot, packId);

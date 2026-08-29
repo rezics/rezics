@@ -141,7 +141,7 @@ import {
 	presentContentLanguageSupport,
 	replaceUnitContentLanguageSupport,
 } from "./content-language-support";
-import { getSubjectAssociationEntityTagPreviews } from "./subject-association-tags";
+import { getSubjectAssociationExpressionPreviews } from "./subject-association-tags";
 import {
 	listAdaptedAudioUnitIds,
 	normalizeAdaptedAudioUnitIds,
@@ -576,16 +576,15 @@ export async function getUnit(
 		)
 		.where(eq(subjectAssociation.unitId, base.id))
 		.orderBy(subjectAssociation.position, subjectAssociation.id);
-	const [contextPosts, entityTagPreviews] = await Promise.all([
+	const [contextPosts, entityExpressionPreviews] = await Promise.all([
 		getAssociationContextPostsByAssociationIds(
 			subjectAssociationRows.map(({ id }) => id),
 			localizationLanguages,
 			authorization.profileId,
 		),
-		getSubjectAssociationEntityTagPreviews(
+		getSubjectAssociationExpressionPreviews(
 			subjectAssociationRows.map(({ entityEntryId }) => entityEntryId),
 			localizationLanguages,
-			authorization.profileId,
 		),
 	]);
 	const subjectAssociations = subjectAssociationRows.map(
@@ -631,7 +630,7 @@ export async function getUnit(
 				entityKind: requireEntityKind(association.entityKind),
 				avatar: presentAvatar(avatar),
 				cover: presentImageAsset(coverAssetId, "cover"),
-				tags: [...(entityTagPreviews.get(association.entityEntryId) ?? [])],
+				expressions: [...(entityExpressionPreviews.get(association.entityEntryId) ?? [])],
 				contextPost: contextPosts.get(association.id) ?? null,
 				spoiler: {
 					level,

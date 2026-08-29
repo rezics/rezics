@@ -2,7 +2,9 @@ import { Value } from "@sinclair/typebox/value";
 import { describe, expect, it } from "vitest";
 
 import {
+	CreateTagExpressionBody,
 	CreateTagPathBody,
+	CreateTagPathSenseBody,
 	RealmTagSubscriptionResponse,
 	RealmUnitTagVoteListResponse,
 	RealmUnitTagVoteListQuery,
@@ -25,8 +27,7 @@ describe("Tag API schemas", () => {
 	it("bounds personalized landscape sizes", () => {
 		expect(
 			Value.Check(UnitTagLandscapeQuery, {
-				globalLimit: 100,
-				pathLimit: 50,
+				expressionLimit: 100,
 				sourceLimit: 30,
 				perRealmLimit: 50,
 			}),
@@ -41,19 +42,63 @@ describe("Tag API schemas", () => {
 		expect(Value.Check(RealmUnitTagVoteListQuery, { limit: 51 })).toBe(false);
 	});
 
-	it("requires a community-immutable ordered path of distinct Tag ids", () => {
+	it("requires a structural Path of distinct nodes and typed relations", () => {
 		const first = "018f2f3a-7ac0-7000-8000-000000000001";
 		const second = "018f2f3a-7ac0-7000-8000-000000000002";
-		expect(Value.Check(CreateTagPathBody, { memberTagIds: [first, second] })).toBe(true);
-		expect(Value.Check(CreateTagPathBody, { memberTagIds: [first] })).toBe(false);
-		expect(Value.Check(CreateTagPathBody, { memberTagIds: [first, first] })).toBe(false);
+		const relation = "018f2f3a-7ac0-7000-8000-000000000003";
 		expect(
 			Value.Check(CreateTagPathBody, {
-				memberTagIds: [second, first],
+				memberNodeIds: [first, second],
+				relationIds: [relation],
+			}),
+		).toBe(true);
+		expect(Value.Check(CreateTagPathBody, { memberNodeIds: [first], relationIds: [] })).toBe(false);
+		expect(
+			Value.Check(CreateTagPathBody, {
+				memberNodeIds: [first, first],
+				relationIds: [relation],
+			}),
+		).toBe(false);
+		expect(
+			Value.Check(CreateTagPathBody, {
+				memberNodeIds: [second, first],
+				relationIds: [relation],
 				updatedAt: "2026-07-23T12:00:00.000Z",
 				reason: "Correct the hierarchy order.",
 			}),
 		).toBe(false);
+	});
+
+	it("requires explicit Expression semantics and Path-Sense bindings", () => {
+		const slot = "018f2f3a-7ac0-7000-8000-000000000001";
+		const value = "018f2f3a-7ac0-7000-8000-000000000002";
+		const expression = "018f2f3a-7ac0-7000-8000-000000000003";
+		expect(
+			Value.Check(CreateTagExpressionBody, {
+				expressionKind: "facet_value",
+				canonicalClaimKey: `facet-value:${slot}:${value}`,
+				focusTagId: value,
+				arguments: [
+					{ role: "slot", ordinal: 0, tagId: slot },
+					{ role: "value", ordinal: 0, tagId: value },
+				],
+				labelComponents: [
+					{ tagId: slot, semanticRole: "slot", componentKind: "required" },
+					{ tagId: value, semanticRole: "value", componentKind: "required" },
+				],
+				groupKey: { tagId: slot, semanticRole: "slot" },
+			}),
+		).toBe(true);
+		expect(
+			Value.Check(CreateTagPathSenseBody, {
+				expressionId: expression,
+				scope: "global",
+				bindings: [
+					{ memberOrdinal: 0, argumentRole: "slot", argumentOrdinal: 0 },
+					{ memberOrdinal: 1, argumentRole: "value", argumentOrdinal: 0 },
+				],
+			}),
+		).toBe(true);
 	});
 
 	it("accepts an omitted position or a valid fractional position", () => {
@@ -79,9 +124,8 @@ describe("Tag API schemas", () => {
 		);
 		expect(
 			Value.Check(UnitTagLandscapeResponse, {
-				paths: [],
-				global: [],
-				totals: { paths: 0, global: 0 },
+				expressions: [],
+				totals: { expressions: 0 },
 				realms: [{ ...subscription, canVote: false, votedTags: [] }],
 				voteRealms: [],
 			}),

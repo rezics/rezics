@@ -90,6 +90,7 @@ import {
 	series,
 	seriesRelease,
 	tag,
+	tagRelation,
 	unit,
 	unitAccessInvitation,
 	unitAlias,
@@ -119,6 +120,7 @@ import {
 	AuditEventSchemaVersion,
 	zone,
 	zonePage,
+	vocabularyNode,
 } from "../database/schema";
 import { createGovernanceDecision } from "../governance/decision-service";
 import { createNavigationStructure } from "../content-structure/navigation";
@@ -143,6 +145,7 @@ import { ensureOfficialZoneFollows } from "../bootstrap/official-zone-follows";
 import { replaceApiTokenQuotaOverride } from "../auth/api-quota/policy-service";
 import { createSharedSearchQuery } from "../search/shared-queries";
 import { createTagPathInTransaction } from "../tag-paths/service";
+import { ensureSimpleTagExpressionInTransaction } from "../tag-expressions/service";
 import {
 	assertLocalDatabaseUrl,
 	chunks,
@@ -843,11 +846,26 @@ async function seedUnitFixtures(
 	await writeBatches(
 		tags.map((value) => ({
 			id: value.id,
+			kind: "concept" as const,
+			createdByProfileId: value.ownerProfileId,
+			createdAt: value.createdAt,
+		})),
+		(batch) => tx.insert(vocabularyNode).values(batch),
+	);
+	await writeBatches(
+		tags.map((value) => ({
+			id: value.id,
 			createdAt: value.createdAt,
 			updatedAt: value.updatedAt,
 		})),
 		(batch) => tx.insert(tag).values(batch),
 	);
+	for (const value of tags)
+		await ensureSimpleTagExpressionInTransaction(tx, {
+			tagId: value.id,
+			profileId: value.ownerProfileId,
+			createdAt: value.createdAt,
+		});
 	await writeBatches(
 		books.map((value, index) => ({
 			id: value.id,
@@ -3150,8 +3168,29 @@ async function seedCoverageContracts(
 	await lockRealmTagJudgmentHotKeys(tx, realmTagJudgments);
 	await tx.insert(realmTagJudgment).values(realmTagJudgments);
 
+	const [coverageTagRelation] = await tx
+		.insert(tagRelation)
+		.values({
+			parentNodeId: targetTag.id,
+			childNodeId: secondTag.id,
+			relationKind: "generic",
+			createdByProfileId: actor.id,
+			createdAt,
+		})
+		.onConflictDoUpdate({
+			target: [
+				tagRelation.parentNodeId,
+				tagRelation.childNodeId,
+				tagRelation.relationKind,
+				tagRelation.revision,
+			],
+			set: { status: "active", retiredAt: null },
+		})
+		.returning({ id: tagRelation.id });
+	if (!coverageTagRelation) throw new Error("Coverage scenario requires a Tag relation");
 	await createTagPathInTransaction(tx, {
-		memberTagIds: [targetTag.id, secondTag.id],
+		memberNodeIds: [targetTag.id, secondTag.id],
+		relationIds: [coverageTagRelation.id],
 		profileId: actor.id,
 		createdAt,
 	});

@@ -40,6 +40,8 @@ export * from "./series";
 export * from "./slug";
 export * from "./software";
 export * from "./studio";
+export * from "./vocabulary";
+export * from "./tag-expression";
 export * from "./tag-path";
 export * from "./tag";
 export * from "./unit";

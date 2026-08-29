@@ -6,38 +6,57 @@ import { LocalizedText } from "@/features/content-language-display/chinese-conte
 import { tagDetailHref } from "../routing/tag-links";
 
 export interface TagPathPathMember {
-	readonly tagId: string;
+	readonly nodeId: string;
+	readonly nodeKind: "concept" | "guide";
 	readonly language?: ContentLanguage | null;
 	readonly title: string | null;
+	readonly incomingRelation?: { readonly relationKind: string } | null;
 }
 
 export function TagPathPath({
 	ariaLabel,
 	fallback,
 	members,
+	relationLabel,
 }: {
 	readonly ariaLabel: string;
 	readonly fallback: string;
 	readonly members: readonly TagPathPathMember[];
+	readonly relationLabel?: (relationKind: string) => string;
 }) {
 	return (
 		<ol aria-label={ariaLabel} className="flex flex-wrap items-center gap-2">
 			{members.map((member, index) => (
-				<li className="flex items-center gap-2" key={member.tagId}>
+				<li className="flex items-center gap-2" key={member.nodeId}>
 					{index > 0 ? (
-						<span aria-hidden="true" className="text-muted-foreground">
-							›
+						<span className="inline-flex items-center gap-1 text-muted-foreground">
+							{member.incomingRelation && relationLabel ? (
+								<span className="text-[0.6875rem]">
+									{relationLabel(member.incomingRelation.relationKind)}
+								</span>
+							) : null}
+							<span aria-hidden="true">›</span>
 						</span>
 					) : null}
-					<Link href={tagDetailHref(member.tagId)}>
-						<Badge variant="secondary">
+					{member.nodeKind === "concept" ? (
+						<Link href={tagDetailHref(member.nodeId)}>
+							<Badge variant="secondary">
+								{member.title ? (
+									<LocalizedText language={member.language} value={member.title} />
+								) : (
+									fallback
+								)}
+							</Badge>
+						</Link>
+					) : (
+						<Badge variant="outline">
 							{member.title ? (
 								<LocalizedText language={member.language} value={member.title} />
 							) : (
 								fallback
 							)}
 						</Badge>
-					</Link>
+					)}
 				</li>
 			))}
 		</ol>

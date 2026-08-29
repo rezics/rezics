@@ -54,7 +54,12 @@ const EmptyRelations: PackRelations = {
 	seriesReleases: [],
 	collectionItems: [],
 	unitTags: [],
+	guideNodes: [],
+	tagRelations: [],
+	tagExpressions: [],
+	tagExpressionInferenceRules: [],
 	tagPaths: [],
+	tagPathSenses: [],
 	tagPathApplications: [],
 	realmUnits: [],
 	slugs: [],
@@ -233,6 +238,86 @@ function assertPackReferences(
 		directApplicationKeys.add(key);
 	}
 
+	const vocabularyNodeSourceKeys = new Set<string>();
+	for (const [sourceKey, object] of objectsBySourceKey)
+		if (object.unit.kind === "tag") vocabularyNodeSourceKeys.add(sourceKey);
+	for (const guide of relations.guideNodes ?? []) {
+		if (vocabularyNodeSourceKeys.has(guide.sourceKey))
+			throw new ContentPackInvalid(`Duplicate vocabulary-node source key: ${guide.sourceKey}`);
+		requireLedgerId(ids.guideNodes ?? {}, guide.sourceKey, "guide node");
+		vocabularyNodeSourceKeys.add(guide.sourceKey);
+	}
+
+	const relationSourceKeys = new Set<string>();
+	const relationIdentityKeys = new Set<string>();
+	for (const relation of relations.tagRelations ?? []) {
+		if (relationSourceKeys.has(relation.sourceKey))
+			throw new ContentPackInvalid(`Duplicate Tag relation source key: ${relation.sourceKey}`);
+		requireLedgerId(ids.tagRelations ?? {}, relation.sourceKey, "Tag relation");
+		if (!vocabularyNodeSourceKeys.has(relation.parentNodeSourceKey))
+			throw new ContentPackInvalid(
+				`Unknown parent vocabulary node: ${relation.parentNodeSourceKey}`,
+			);
+		if (!vocabularyNodeSourceKeys.has(relation.childNodeSourceKey))
+			throw new ContentPackInvalid(`Unknown child vocabulary node: ${relation.childNodeSourceKey}`);
+		const identity = JSON.stringify([
+			relation.parentNodeSourceKey,
+			relation.childNodeSourceKey,
+			relation.relationKind,
+		]);
+		if (relationIdentityKeys.has(identity))
+			throw new ContentPackInvalid(`Duplicate Tag relation: ${identity}`);
+		relationIdentityKeys.add(identity);
+		relationSourceKeys.add(relation.sourceKey);
+	}
+
+	const expressionsBySourceKey = new Map<
+		string,
+		NonNullable<PackRelations["tagExpressions"]>[number]
+	>();
+	const claimKeys = new Set<string>();
+	for (const expression of relations.tagExpressions ?? []) {
+		if (expressionsBySourceKey.has(expression.sourceKey))
+			throw new ContentPackInvalid(`Duplicate Tag Expression source key: ${expression.sourceKey}`);
+		requireLedgerId(ids.tagExpressions ?? {}, expression.sourceKey, "Tag Expression");
+		if (claimKeys.has(expression.canonicalClaimKey))
+			throw new ContentPackInvalid(
+				`Duplicate Tag Expression claim key: ${expression.canonicalClaimKey}`,
+			);
+		claimKeys.add(expression.canonicalClaimKey);
+		for (const tagSourceKey of [
+			expression.focusTagSourceKey,
+			...expression.arguments.map((argument) => argument.tagSourceKey),
+			...expression.labelComponents.map((component) => component.tagSourceKey),
+			...(expression.groupKey ? [expression.groupKey.tagSourceKey] : []),
+		]) {
+			const object = objectsBySourceKey.get(tagSourceKey);
+			if (!object || object.unit.kind !== "tag")
+				throw new ContentPackInvalid(
+					`${tagSourceKey} is not a Tag and cannot define a Tag Expression`,
+				);
+		}
+		expressionsBySourceKey.set(expression.sourceKey, expression);
+	}
+	for (const rule of relations.tagExpressionInferenceRules ?? []) {
+		if (!expressionsBySourceKey.has(rule.sourceExpressionSourceKey))
+			throw new ContentPackInvalid(
+				`Unknown inference source Expression: ${rule.sourceExpressionSourceKey}`,
+			);
+		if (
+			rule.targetExpressionSourceKey &&
+			!expressionsBySourceKey.has(rule.targetExpressionSourceKey)
+		)
+			throw new ContentPackInvalid(
+				`Unknown inference target Expression: ${rule.targetExpressionSourceKey}`,
+			);
+		if (rule.targetTagSourceKey) {
+			const target = objectsBySourceKey.get(rule.targetTagSourceKey);
+			if (!target || target.unit.kind !== "tag")
+				throw new ContentPackInvalid(`Unknown inference target Tag: ${rule.targetTagSourceKey}`);
+		}
+	}
+
 	const pathsBySourceKey = new Map<string, NonNullable<PackRelations["tagPaths"]>[number]>();
 	const definitionKeys = new Set<string>();
 	const declaredPathIds = new Set<string>();
@@ -248,28 +333,54 @@ function assertPackReferences(
 				`Tag Path ID collides with an ordinary Unit ID: ${declaredPathId}`,
 			);
 		declaredPathIds.add(declaredPathId);
-		for (const memberSourceKey of path.memberTagSourceKeys) {
-			requireLedgerId(ids.units, memberSourceKey, "Tag Path member");
-			const memberObject = objectsBySourceKey.get(memberSourceKey);
-			if (memberObject && memberObject.unit.kind !== "tag")
-				throw new ContentPackInvalid(
-					`${memberSourceKey} is not a Tag and cannot be a Tag Path member`,
-				);
-		}
-		const definitionKey = JSON.stringify(path.memberTagSourceKeys);
+		for (const memberSourceKey of path.memberNodeSourceKeys)
+			if (!vocabularyNodeSourceKeys.has(memberSourceKey))
+				throw new ContentPackInvalid(`Unknown Tag Path member node: ${memberSourceKey}`);
+		for (const relationSourceKey of path.relationSourceKeys)
+			if (!relationSourceKeys.has(relationSourceKey))
+				throw new ContentPackInvalid(`Unknown Tag Path relation: ${relationSourceKey}`);
+		const definitionKey = JSON.stringify([path.memberNodeSourceKeys, path.relationSourceKeys]);
 		if (definitionKeys.has(definitionKey))
 			throw new ContentPackInvalid(`Duplicate exact Tag Path definition: ${path.sourceKey}`);
 		definitionKeys.add(definitionKey);
 	}
 
+	const sensesBySourceKey = new Map<string, NonNullable<PackRelations["tagPathSenses"]>[number]>();
+	for (const sense of relations.tagPathSenses ?? []) {
+		if (sensesBySourceKey.has(sense.sourceKey))
+			throw new ContentPackInvalid(`Duplicate Tag Path Sense source key: ${sense.sourceKey}`);
+		requireLedgerId(ids.tagPathSenses ?? {}, sense.sourceKey, "Tag Path Sense");
+		const path = pathsBySourceKey.get(sense.pathSourceKey);
+		const expression = expressionsBySourceKey.get(sense.expressionSourceKey);
+		if (!path) throw new ContentPackInvalid(`Unknown Tag Path: ${sense.pathSourceKey}`);
+		if (!expression)
+			throw new ContentPackInvalid(`Unknown Tag Expression: ${sense.expressionSourceKey}`);
+		for (const binding of sense.bindings) {
+			if (binding.memberOrdinal >= path.memberNodeSourceKeys.length)
+				throw new ContentPackInvalid(`Path Sense ${sense.sourceKey} binds an out-of-range member`);
+			if (
+				!expression.arguments.some(
+					(argument) =>
+						argument.role === binding.argumentRole &&
+						argument.ordinal === binding.argumentOrdinal &&
+						argument.tagSourceKey === path.memberNodeSourceKeys[binding.memberOrdinal],
+				)
+			)
+				throw new ContentPackInvalid(
+					`Path Sense ${sense.sourceKey} binding does not match its Expression argument`,
+				);
+		}
+		sensesBySourceKey.set(sense.sourceKey, sense);
+	}
+
 	const pathApplicationKeys = new Set<string>();
 	for (const application of relations.tagPathApplications ?? []) {
 		requireLedgerId(ids.units, application.unitSourceKey, "Tag Path application Unit");
-		if (!pathsBySourceKey.has(application.pathSourceKey))
+		if (!sensesBySourceKey.has(application.senseSourceKey))
 			throw new ContentPackInvalid(
-				`Unknown Tag Path source key in application: ${application.pathSourceKey}`,
+				`Unknown Tag Path Sense source key in application: ${application.senseSourceKey}`,
 			);
-		const key = JSON.stringify([application.unitSourceKey, application.pathSourceKey]);
+		const key = JSON.stringify([application.unitSourceKey, application.senseSourceKey]);
 		if (pathApplicationKeys.has(key))
 			throw new ContentPackInvalid(`Duplicate Tag Path application: ${key}`);
 		pathApplicationKeys.add(key);
