@@ -14,9 +14,9 @@ includes:
     apps-about:
         taskfile: ./apps/about/Taskfile.yml
         dir: ./apps/about
-    apps-markdown:
-        taskfile: ./apps/markdown/Taskfile.yml
-        dir: ./apps/markdown
+    apps-rezics-text:
+        taskfile: ./apps/rezics-text/Taskfile.yml
+        dir: ./apps/rezics-text
     libraries:
         taskfile: ./libraries/Taskfile.yml
         dir: ./libraries
@@ -38,13 +38,13 @@ tasks:
         desc: Format source files with their owning formatters.
         cmds:
             - yarn exec biome format --write .
-            - task: apps-markdown:rust:format
+            - task: apps-rezics-text:rust:format
 
     format:check:
         desc: Check source formatting with each owning formatter.
         cmds:
             - yarn exec biome format .
-            - task: apps-markdown:rust:format:check
+            - task: apps-rezics-text:rust:format:check
 
     counts:check:
         desc: Verify the online exact-count policy.
@@ -74,7 +74,7 @@ tasks:
             - task: packages-api:typecheck
             - task: packages-atlas:typecheck
             - task: packages-editor:typecheck
-            - task: apps-markdown:check
+            - task: apps-rezics-text:check
 
     test:
         desc: Run behavior tests for every application and service workspace.
@@ -95,7 +95,7 @@ tasks:
             - task: packages-api:test
             - task: packages-atlas:test
             - task: packages-editor:test
-            - task: apps-markdown:test
+            - task: apps-rezics-text:test
 
     test:coverage:
         desc: Generate a local behavior-test coverage report without enforcing thresholds.

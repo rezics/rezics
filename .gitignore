@@ -27,7 +27,7 @@ devenv.local.yaml
 dist/
 out/
 target/
-/apps/markdown/src-tauri/gen/schemas/
+/apps/rezics-text/src-tauri/gen/schemas/
 # Generated Tauri platform icons. Keep the directory via .gitkeep.
 **/src-tauri/icons/**
 !**/src-tauri/icons/.gitkeep

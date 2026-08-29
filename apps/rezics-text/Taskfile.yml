@@ -1,0 +1,68 @@
+version: "3"
+
+tasks:
+    generate:icons:
+        desc: Generate Tauri platform icons from app-icon.svg.
+        cmds:
+            - yarn exec tauri icon ./app-icon.svg
+
+    dev:
+        desc: Run the local REZICS Text desktop application.
+        cmds:
+            - task: generate:icons
+            - yarn exec tauri dev
+
+    dev:web:
+        desc: Run the independently accessible Web editor service.
+        cmds:
+            - yarn workspace @rezics/text-web exec vite
+
+    typecheck:
+        desc: Type-check the REZICS Text application packages.
+        cmds:
+            - yarn workspace @rezics/text-app exec tsc --noEmit
+            - yarn workspace @rezics/text-web exec tsc --noEmit
+
+    test:
+        desc: Run REZICS Text application behavior tests.
+        cmds:
+            - yarn workspace @rezics/text-app exec vitest run
+            - yarn workspace @rezics/text-web exec vitest run
+            - task: rust:test
+
+    check:
+        desc: Check TypeScript and Rust desktop boundaries.
+        cmds:
+            - task: typecheck
+            - task: rust:check
+
+    rust:check:
+        desc: Type-check the REZICS Text desktop Rust crate.
+        cmds:
+            - cargo check --manifest-path src-tauri/Cargo.toml
+
+    rust:format:
+        desc: Format the REZICS Text desktop Rust sources with rustfmt.
+        cmds:
+            - cargo fmt --manifest-path src-tauri/Cargo.toml --all
+
+    rust:format:check:
+        desc: Check the REZICS Text desktop Rust sources with rustfmt.
+        cmds:
+            - cargo fmt --manifest-path src-tauri/Cargo.toml --all -- --check
+
+    rust:test:
+        desc: Run REZICS Text desktop Rust tests.
+        cmds:
+            - cargo test --manifest-path src-tauri/Cargo.toml
+
+    build:web:
+        desc: Build the standalone Web editor service.
+        cmds:
+            - yarn workspace @rezics/text-web exec vite build
+
+    build:
+        desc: Build the Tauri desktop application bundle.
+        cmds:
+            - task: generate:icons
+            - node scripts/build-desktop.mjs

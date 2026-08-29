@@ -1,0 +1,16 @@
+{
+	"name": "@rezics/text",
+	"version": "1.0.0",
+	"private": true,
+	"type": "module",
+	"license": "AGPL-3.0-only",
+	"workspaces": [
+		"packages/*"
+	],
+	"dependencies": {
+		"@tauri-apps/api": "^2.11.1"
+	},
+	"devDependencies": {
+		"@tauri-apps/cli": "^2.11.4"
+	}
+}

@@ -19,7 +19,7 @@ social layers to work across content types and languages.
 apps/
 ├─ web/                              # Main Vinext/React application
 ├─ about/                            # Static multilingual Astro site
-└─ markdown/                         # Local-first Tauri/Web Markdown editor
+└─ rezics-text/                      # Local-first REZICS Text application
 
 services/
 └─ main/                             # Elysia/srvx API and background worker
@@ -80,9 +80,9 @@ plane and does not generate or replace the production Nomad deployment.
 Use `task infra:status` for persistent infrastructure,
 `task aspire:doctor` for prerequisite diagnostics, and `task aspire:describe`
 for machine-readable application state. The static `apps/about` site and the
-local-first `apps/markdown` desktop/Web editor remain independent from the
-AppHost; run the latter explicitly with `task apps-markdown:dev` or
-`task apps-markdown:dev:web`.
+local-first `apps/rezics-text` desktop/Web editor remain independent from the
+AppHost; run the latter explicitly with `task apps-rezics-text:dev` or
+`task apps-rezics-text:dev:web`.
 
 The API exposes startup at `GET /api/v1/startup`, dependency-free liveness at
 `GET/HEAD /api/v1/health`, and traffic readiness at `GET /api/v1/ready`. PostgreSQL is
@@ -120,9 +120,9 @@ task apps-web:build
 task apps-about:build
 task apps-about:test:dist
 task packages-editor:build
-task apps-markdown:check
-task apps-markdown:build:web
-task apps-markdown:build
+task apps-rezics-text:check
+task apps-rezics-text:build:web
+task apps-rezics-text:build
 ```
 
 OpenAPI documents and generated clients are updated through
