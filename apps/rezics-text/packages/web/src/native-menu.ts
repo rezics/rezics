@@ -2,6 +2,7 @@ import { listen } from "@tauri-apps/api/event";
 import { Menu, Submenu } from "@tauri-apps/api/menu";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import {
+	applicationCommandAccelerator,
 	isRezicsTextApplicationCommand,
 	type RezicsTextApplicationCommand,
 	type RezicsTextNativeMenuHost,
@@ -34,17 +35,37 @@ async function attachLocalizedWindowMenu(
 	const fileMenu = await Submenu.new({
 		text: messages.menus.file,
 		items: [
-			commandItem("new-document", messages.actions.newDocument, onCommand, "CmdOrCtrl+N"),
+			commandItem(
+				"new-document",
+				messages.actions.newDocument,
+				onCommand,
+				applicationCommandAccelerator("new-document"),
+			),
 			commandItem("new-folder", messages.menus.newFolder, onCommand),
-			commandItem("open", messages.menus.open, onCommand, "CmdOrCtrl+O"),
+			commandItem("open", messages.menus.open, onCommand, applicationCommandAccelerator("open")),
 			{ item: "Separator" },
-			commandItem("save", messages.actions.save, onCommand, "CmdOrCtrl+S"),
-			commandItem("save-as", messages.menus.saveAs, onCommand, "CmdOrCtrl+Shift+S"),
+			commandItem("save", messages.actions.save, onCommand, applicationCommandAccelerator("save")),
+			commandItem(
+				"save-as",
+				messages.menus.saveAs,
+				onCommand,
+				applicationCommandAccelerator("save-as"),
+			),
 			{ item: "Separator" },
-			commandItem("close", messages.actions.closeDocument, onCommand, "CmdOrCtrl+W"),
+			commandItem(
+				"close",
+				messages.actions.closeDocument,
+				onCommand,
+				applicationCommandAccelerator("close"),
+			),
 			commandItem("close-all", messages.menus.closeAll, onCommand),
 			{ item: "Separator" },
-			commandItem("preferences", messages.menus.preferences, onCommand, "CmdOrCtrl+,"),
+			commandItem(
+				"preferences",
+				messages.menus.preferences,
+				onCommand,
+				applicationCommandAccelerator("preferences"),
+			),
 			...(mac
 				? []
 				: [{ item: "Separator" as const }, { item: "Quit" as const, text: messages.menus.quit }]),
@@ -65,7 +86,12 @@ async function attachLocalizedWindowMenu(
 	const viewMenu = await Submenu.new({
 		text: messages.menus.view,
 		items: [
-			commandItem("toggle-sidebar", messages.menus.toggleSidebar, onCommand, "CmdOrCtrl+B"),
+			commandItem(
+				"toggle-sidebar",
+				messages.menus.toggleSidebar,
+				onCommand,
+				applicationCommandAccelerator("toggle-sidebar"),
+			),
 			{ item: "Separator" },
 			commandItem("source", messages.labels.sourceMode, onCommand),
 			commandItem("preview", messages.labels.livePreviewMode, onCommand),

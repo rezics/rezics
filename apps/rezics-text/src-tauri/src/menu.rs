@@ -20,7 +20,12 @@ pub fn attach_application_menu(app: &AppHandle) -> tauri::Result<()> {
     let save_as = item(app, "save-as", "Save As…", Some("CmdOrCtrl+Shift+S"))?;
     let close = item(app, "close", "Close", Some("CmdOrCtrl+W"))?;
     let close_all = item(app, "close-all", "Close All", None)?;
-    let toggle_sidebar = item(app, "toggle-sidebar", "Toggle Sidebar", Some("CmdOrCtrl+B"))?;
+    let toggle_sidebar = item(
+        app,
+        "toggle-sidebar",
+        "Toggle Sidebar",
+        Some("CmdOrCtrl+Shift+L"),
+    )?;
     let source = item(app, "source", "Source", None)?;
     let preview = item(app, "preview", "Live Preview", None)?;
     let about = item(app, "about", "About", None)?;

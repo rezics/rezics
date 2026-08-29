@@ -78,4 +78,27 @@ describe("CodeEditor extension reconfiguration", () => {
 
 		act(() => root.unmount());
 	});
+
+	it("removes the default dotted perimeter when the editor is focused", () => {
+		const root = createRoot(container);
+		const editorRef = createRef<CodeEditorHandle>();
+		act(() => {
+			root.render(
+				<CodeEditor
+					ariaLabel="Markdown editor"
+					onChange={() => undefined}
+					ref={editorRef}
+					value=""
+				/>,
+			);
+		});
+		const view = editorRef.current?.getView();
+		expect(view).not.toBeNull();
+		if (!view) return;
+
+		view.dom.classList.add("cm-focused");
+		expect(getComputedStyle(view.dom).outlineStyle).toBe("none");
+
+		act(() => root.unmount());
+	});
 });

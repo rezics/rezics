@@ -177,7 +177,7 @@ export const rezicsCodeEditorTheme = EditorView.theme({
 		backgroundColor: "transparent",
 		border: "none",
 	},
-	".cm-focused": {
+	"&.cm-focused": {
 		outline: "none",
 	},
 });

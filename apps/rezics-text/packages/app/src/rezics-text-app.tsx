@@ -1,5 +1,14 @@
 import XIcon from "lucide-react/dist/esm/icons/x.mjs";
-import { lazy, Suspense, useEffect, useMemo, useRef, useState, type ReactElement } from "react";
+import {
+	lazy,
+	Suspense,
+	useCallback,
+	useEffect,
+	useMemo,
+	useRef,
+	useState,
+	type ReactElement,
+} from "react";
 import { AboutDialog } from "./components/about-dialog";
 import { ApplicationMenuBar } from "./components/application-menu-bar";
 import { PreferencesWorkspace } from "./components/preferences-workspace";
@@ -13,6 +22,7 @@ import type {
 	RezicsTextApplicationCommand,
 	RezicsTextNativeMenuHost,
 } from "./domain/application-menu";
+import { applicationCommandFromShortcut } from "./domain/application-shortcuts";
 import type { MarkdownPreferenceSection } from "./domain/preferences";
 import { activeOutlineOrdinal, analyzeMarkdownDocument } from "./domain/document-analysis";
 import { toggleMarkdownEditingMode, type MarkdownSidebarTab } from "./domain/workspace-chrome";
@@ -82,7 +92,7 @@ export function RezicsTextApp({
 	activeIdRef.current = active.id;
 	selectedFolderIdRef.current = selectedFolderId;
 
-	const runCommand = (command: RezicsTextApplicationCommand): void => {
+	const runCommand = useCallback((command: RezicsTextApplicationCommand): void => {
 		switch (command) {
 			case "new-document":
 				actionRef.current.newDocument(selectedFolderIdRef.current);
@@ -127,7 +137,7 @@ export function RezicsTextApp({
 				setPreferencesOpen(true);
 				return;
 		}
-	};
+	}, []);
 
 	const changeLocale = (next: RezicsTextLocale): void => {
 		setLocale(next);
@@ -159,7 +169,7 @@ export function RezicsTextApp({
 			disposed = true;
 			uninstall?.();
 		};
-	}, [messages, nativeMenu]);
+	}, [messages, nativeMenu, runCommand]);
 
 	useEffect(() => {
 		const onBeforeUnload = (event: BeforeUnloadEvent) => {
@@ -167,35 +177,18 @@ export function RezicsTextApp({
 			event.preventDefault();
 		};
 		const onKeyDown = (event: KeyboardEvent) => {
-			if (!(event.ctrlKey || event.metaKey) || event.altKey) return;
-			const key = event.key.toLocaleLowerCase("en-US");
-			if (key === "s") {
-				event.preventDefault();
-				runCommand(event.shiftKey ? "save-as" : "save");
-			} else if (key === "o") {
-				event.preventDefault();
-				runCommand("open");
-			} else if (key === "n") {
-				event.preventDefault();
-				runCommand("new-document");
-			} else if (key === "w") {
-				event.preventDefault();
-				runCommand("close");
-			} else if (key === "b") {
-				event.preventDefault();
-				runCommand("toggle-sidebar");
-			} else if (key === ",") {
-				event.preventDefault();
-				runCommand("preferences");
-			}
+			const command = applicationCommandFromShortcut(event);
+			if (!command) return;
+			event.preventDefault();
+			runCommand(command);
 		};
 		window.addEventListener("beforeunload", onBeforeUnload);
-		window.addEventListener("keydown", onKeyDown);
+		if (!nativeMenu) window.addEventListener("keydown", onKeyDown);
 		return () => {
 			window.removeEventListener("beforeunload", onBeforeUnload);
-			window.removeEventListener("keydown", onKeyDown);
+			if (!nativeMenu) window.removeEventListener("keydown", onKeyDown);
 		};
-	}, []);
+	}, [nativeMenu, runCommand]);
 
 	const busy = state.operation.kind !== "idle";
 	const notice = state.notice

@@ -1,6 +1,7 @@
 import { Menu, MenuContent, MenuItem, MenuSeparator, MenuTrigger } from "@rezics/ui/ui/menu";
 import type { ReactElement, ReactNode } from "react";
 import type { RezicsTextApplicationCommand } from "../domain/application-menu";
+import { applicationCommandShortcutLabel } from "../domain/application-shortcuts";
 import type { RezicsTextMessages } from "../i18n/messages";
 
 export function ApplicationMenuBar({
@@ -10,7 +11,9 @@ export function ApplicationMenuBar({
 	readonly messages: RezicsTextMessages;
 	readonly onCommand: (command: RezicsTextApplicationCommand) => void;
 }): ReactElement {
-	const modifier = usesCommandModifier() ? "⌘" : "Ctrl+";
+	const commandModifier = usesCommandModifier();
+	const shortcut = (command: RezicsTextApplicationCommand): string | undefined =>
+		applicationCommandShortcutLabel(command, commandModifier);
 	return (
 		<nav
 			aria-label={messages.labels.menuBar}
@@ -19,77 +22,77 @@ export function ApplicationMenuBar({
 		>
 			<MenuGroup label={messages.menus.file}>
 				<CommandItem
-					accelerator={`${modifier}N`}
+					accelerator={shortcut("new-document")}
 					label={messages.actions.newDocument}
 					onSelect={() => onCommand("new-document")}
 				/>
 				<CommandItem label={messages.menus.newFolder} onSelect={() => onCommand("new-folder")} />
 				<CommandItem
-					accelerator={`${modifier}O`}
+					accelerator={shortcut("open")}
 					label={messages.menus.open}
 					onSelect={() => onCommand("open")}
 				/>
 				<MenuSeparator />
 				<CommandItem
-					accelerator={`${modifier}S`}
+					accelerator={shortcut("save")}
 					label={messages.actions.save}
 					onSelect={() => onCommand("save")}
 				/>
 				<CommandItem
-					accelerator={usesCommandModifier() ? "⇧⌘S" : "Ctrl+Shift+S"}
+					accelerator={shortcut("save-as")}
 					label={messages.menus.saveAs}
 					onSelect={() => onCommand("save-as")}
 				/>
 				<MenuSeparator />
 				<CommandItem
-					accelerator={`${modifier}W`}
+					accelerator={shortcut("close")}
 					label={messages.actions.closeDocument}
 					onSelect={() => onCommand("close")}
 				/>
 				<CommandItem label={messages.menus.closeAll} onSelect={() => onCommand("close-all")} />
 				<MenuSeparator />
 				<CommandItem
-					accelerator={usesCommandModifier() ? "⌘," : "Ctrl+,"}
+					accelerator={shortcut("preferences")}
 					label={messages.menus.preferences}
 					onSelect={() => onCommand("preferences")}
 				/>
 			</MenuGroup>
 			<MenuGroup label={messages.menus.edit}>
 				<CommandItem
-					accelerator={`${modifier}Z`}
+					accelerator={commandModifier ? "⌘Z" : "Ctrl+Z"}
 					label={messages.menus.undo}
 					onSelect={() => runBrowserEdit("undo")}
 				/>
 				<CommandItem
-					accelerator={usesCommandModifier() ? "⇧⌘Z" : "Ctrl+Y"}
+					accelerator={commandModifier ? "⇧⌘Z" : "Ctrl+Y"}
 					label={messages.menus.redo}
 					onSelect={() => runBrowserEdit("redo")}
 				/>
 				<MenuSeparator />
 				<CommandItem
-					accelerator={`${modifier}X`}
+					accelerator={commandModifier ? "⌘X" : "Ctrl+X"}
 					label={messages.menus.cut}
 					onSelect={() => runBrowserEdit("cut")}
 				/>
 				<CommandItem
-					accelerator={`${modifier}C`}
+					accelerator={commandModifier ? "⌘C" : "Ctrl+C"}
 					label={messages.menus.copy}
 					onSelect={() => runBrowserEdit("copy")}
 				/>
 				<CommandItem
-					accelerator={`${modifier}V`}
+					accelerator={commandModifier ? "⌘V" : "Ctrl+V"}
 					label={messages.menus.paste}
 					onSelect={() => runBrowserEdit("paste")}
 				/>
 				<CommandItem
-					accelerator={`${modifier}A`}
+					accelerator={commandModifier ? "⌘A" : "Ctrl+A"}
 					label={messages.menus.selectAll}
 					onSelect={() => runBrowserEdit("selectAll")}
 				/>
 			</MenuGroup>
 			<MenuGroup label={messages.menus.view}>
 				<CommandItem
-					accelerator={`${modifier}B`}
+					accelerator={shortcut("toggle-sidebar")}
 					label={messages.menus.toggleSidebar}
 					onSelect={() => onCommand("toggle-sidebar")}
 				/>

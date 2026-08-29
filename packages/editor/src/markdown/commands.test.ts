@@ -5,6 +5,7 @@ import { EditorView, type Command } from "@codemirror/view";
 import { afterEach, describe, expect, it } from "vitest";
 import {
 	insertMarkdownLink,
+	rezicsMarkdownKeyBindings,
 	setMarkdownHeading,
 	toggleMarkdownBulletList,
 	toggleMarkdownStrong,
@@ -39,6 +40,10 @@ afterEach(() => {
 });
 
 describe("REZICS Markdown source commands", () => {
+	it("keeps handled formatting shortcuts inside the editor", () => {
+		expect(rezicsMarkdownKeyBindings.every((binding) => binding.stopPropagation)).toBe(true);
+	});
+
 	it("wraps and unwraps a selected strong span", () => {
 		const wrapped = runCommand("hello", { anchor: 0, head: 5 }, toggleMarkdownStrong);
 		expect(wrapped.state.doc.toString()).toBe("**hello**");

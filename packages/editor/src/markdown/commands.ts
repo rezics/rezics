@@ -139,13 +139,13 @@ export const insertMarkdownTable = insertMarkdownSnippet(
 
 /** @alpha */
 export const rezicsMarkdownKeyBindings: readonly KeyBinding[] = [
-	{ key: "Mod-b", run: toggleMarkdownStrong },
-	{ key: "Mod-i", run: toggleMarkdownEmphasis },
-	{ key: "Mod-Shift-x", run: toggleMarkdownStrikethrough },
-	{ key: "Mod-`", run: toggleMarkdownInlineCode },
-	{ key: "Mod-Shift-.", run: toggleMarkdownBlockquote },
-	{ key: "Mod-Shift-7", run: toggleMarkdownNumberedList },
-	{ key: "Mod-Shift-8", run: toggleMarkdownBulletList },
+	{ key: "Mod-b", run: toggleMarkdownStrong, stopPropagation: true },
+	{ key: "Mod-i", run: toggleMarkdownEmphasis, stopPropagation: true },
+	{ key: "Mod-Shift-x", run: toggleMarkdownStrikethrough, stopPropagation: true },
+	{ key: "Mod-`", run: toggleMarkdownInlineCode, stopPropagation: true },
+	{ key: "Mod-Shift-.", run: toggleMarkdownBlockquote, stopPropagation: true },
+	{ key: "Mod-Shift-7", run: toggleMarkdownNumberedList, stopPropagation: true },
+	{ key: "Mod-Shift-8", run: toggleMarkdownBulletList, stopPropagation: true },
 ];
 
 /** @alpha */

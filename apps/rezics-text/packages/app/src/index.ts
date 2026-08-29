@@ -12,6 +12,12 @@ export {
 	type RezicsTextNativeMenuHost,
 } from "./domain/application-menu";
 export {
+	applicationCommandAccelerator,
+	applicationCommandFromShortcut,
+	applicationCommandShortcutLabel,
+	type RezicsTextShortcutEvent,
+} from "./domain/application-shortcuts";
+export {
 	rezicsTextLocales,
 	rezicsTextMessages,
 	resolveRezicsTextLocale,
