@@ -15,9 +15,9 @@
 		}
 	},
 	"sdk": {
-		"version": "13.4.6"
+		"version": "13.5.3"
 	},
 	"packages": {
-		"Aspire.Hosting.JavaScript": "13.4.6"
+		"Aspire.Hosting.JavaScript": "13.5.3"
 	}
 }

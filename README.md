@@ -47,10 +47,10 @@ must not depend on private libraries, applications, or services.
 ## Development
 
 The root workspace uses Node.js 26, Yarn 4, Bun, Go Task 3, Docker Compose, and
-Aspire 13.4.6. Compose owns persistent PostgreSQL 18.4 with PGroonga and RustFS.
+Aspire 13.5.3. Compose owns persistent PostgreSQL 18.4 with PGroonga and RustFS.
 Aspire owns the API, recommendation worker,
 web development server, and Dashboard. Use the repository's pinned
-devenv/direnv environment or provide Aspire 13.4.6, Yarn 4.17.1, Go Task 3, and
+devenv/direnv environment or provide Aspire 13.5.3, Yarn 4.17.1, Go Task 3, and
 Bun 1.4.0 or newer locally.
 
 ```sh

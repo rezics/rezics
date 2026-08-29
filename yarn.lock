@@ -4498,66 +4498,66 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@microsoft/aspire-cli-linux-arm64@npm:13.4.6":
-  version: 13.4.6
-  resolution: "@microsoft/aspire-cli-linux-arm64@npm:13.4.6"
+"@microsoft/aspire-cli-linux-arm64@npm:13.5.3":
+  version: 13.5.3
+  resolution: "@microsoft/aspire-cli-linux-arm64@npm:13.5.3"
   conditions: os=linux & cpu=arm64 & libc=glibc
   languageName: node
   linkType: hard
 
-"@microsoft/aspire-cli-linux-musl-x64@npm:13.4.6":
-  version: 13.4.6
-  resolution: "@microsoft/aspire-cli-linux-musl-x64@npm:13.4.6"
+"@microsoft/aspire-cli-linux-musl-x64@npm:13.5.3":
+  version: 13.5.3
+  resolution: "@microsoft/aspire-cli-linux-musl-x64@npm:13.5.3"
   conditions: os=linux & cpu=x64 & libc=musl
   languageName: node
   linkType: hard
 
-"@microsoft/aspire-cli-linux-x64@npm:13.4.6":
-  version: 13.4.6
-  resolution: "@microsoft/aspire-cli-linux-x64@npm:13.4.6"
+"@microsoft/aspire-cli-linux-x64@npm:13.5.3":
+  version: 13.5.3
+  resolution: "@microsoft/aspire-cli-linux-x64@npm:13.5.3"
   conditions: os=linux & cpu=x64 & libc=glibc
   languageName: node
   linkType: hard
 
-"@microsoft/aspire-cli-osx-arm64@npm:13.4.6":
-  version: 13.4.6
-  resolution: "@microsoft/aspire-cli-osx-arm64@npm:13.4.6"
+"@microsoft/aspire-cli-osx-arm64@npm:13.5.3":
+  version: 13.5.3
+  resolution: "@microsoft/aspire-cli-osx-arm64@npm:13.5.3"
   conditions: os=darwin & cpu=arm64
   languageName: node
   linkType: hard
 
-"@microsoft/aspire-cli-osx-x64@npm:13.4.6":
-  version: 13.4.6
-  resolution: "@microsoft/aspire-cli-osx-x64@npm:13.4.6"
+"@microsoft/aspire-cli-osx-x64@npm:13.5.3":
+  version: 13.5.3
+  resolution: "@microsoft/aspire-cli-osx-x64@npm:13.5.3"
   conditions: os=darwin & cpu=x64
   languageName: node
   linkType: hard
 
-"@microsoft/aspire-cli-win-arm64@npm:13.4.6":
-  version: 13.4.6
-  resolution: "@microsoft/aspire-cli-win-arm64@npm:13.4.6"
+"@microsoft/aspire-cli-win-arm64@npm:13.5.3":
+  version: 13.5.3
+  resolution: "@microsoft/aspire-cli-win-arm64@npm:13.5.3"
   conditions: os=win32 & cpu=arm64
   languageName: node
   linkType: hard
 
-"@microsoft/aspire-cli-win-x64@npm:13.4.6":
-  version: 13.4.6
-  resolution: "@microsoft/aspire-cli-win-x64@npm:13.4.6"
+"@microsoft/aspire-cli-win-x64@npm:13.5.3":
+  version: 13.5.3
+  resolution: "@microsoft/aspire-cli-win-x64@npm:13.5.3"
   conditions: os=win32 & cpu=x64
   languageName: node
   linkType: hard
 
-"@microsoft/aspire-cli@npm:13.4.6":
-  version: 13.4.6
-  resolution: "@microsoft/aspire-cli@npm:13.4.6"
+"@microsoft/aspire-cli@npm:13.5.3":
+  version: 13.5.3
+  resolution: "@microsoft/aspire-cli@npm:13.5.3"
   dependencies:
-    "@microsoft/aspire-cli-linux-arm64": "npm:13.4.6"
-    "@microsoft/aspire-cli-linux-musl-x64": "npm:13.4.6"
-    "@microsoft/aspire-cli-linux-x64": "npm:13.4.6"
-    "@microsoft/aspire-cli-osx-arm64": "npm:13.4.6"
-    "@microsoft/aspire-cli-osx-x64": "npm:13.4.6"
-    "@microsoft/aspire-cli-win-arm64": "npm:13.4.6"
-    "@microsoft/aspire-cli-win-x64": "npm:13.4.6"
+    "@microsoft/aspire-cli-linux-arm64": "npm:13.5.3"
+    "@microsoft/aspire-cli-linux-musl-x64": "npm:13.5.3"
+    "@microsoft/aspire-cli-linux-x64": "npm:13.5.3"
+    "@microsoft/aspire-cli-osx-arm64": "npm:13.5.3"
+    "@microsoft/aspire-cli-osx-x64": "npm:13.5.3"
+    "@microsoft/aspire-cli-win-arm64": "npm:13.5.3"
+    "@microsoft/aspire-cli-win-x64": "npm:13.5.3"
   dependenciesMeta:
     "@microsoft/aspire-cli-linux-arm64":
       optional: true
@@ -4575,7 +4575,7 @@ __metadata:
       optional: true
   bin:
     aspire: bin/aspire.js
-  checksum: 10c0/61e6f1677908248a783ed9814e2fb4e160419b35625f1a395ceda3186a7ab139ec9c8e8ab100bfb9cf24ac5b3082e85c798fad014a6877c871c438653c63f55e
+  checksum: 10c0/fd4b8f2b5653bac99157b72a59101ed1a8d97243148e18e1497fe37b27fe88bbc7f750e202b78ebb05359c973eb9c2241df91fd0fcdb97872aecce73acbed110
   languageName: node
   linkType: hard
 
@@ -16195,7 +16195,7 @@ __metadata:
   resolution: "rezics@workspace:."
   dependencies:
     "@biomejs/biome": "npm:2.5.7"
-    "@microsoft/aspire-cli": "npm:13.4.6"
+    "@microsoft/aspire-cli": "npm:13.5.3"
     "@types/node": "npm:26"
     "@vitest/coverage-v8": "npm:4.1.10"
     typescript: "npm:7"

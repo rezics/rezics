@@ -1,8 +1,12 @@
 import { spawnSync } from "node:child_process";
+import { fileURLToPath } from "node:url";
 
-const expectedAspireVersion = "13.4.6";
+const expectedAspireVersion = "13.5.3";
 const minimumBunVersion = "1.4.0";
 const expectedYarnVersion = "4.17.1";
+const yarnPath = fileURLToPath(
+	new URL(`../../.yarn/releases/yarn-${expectedYarnVersion}.cjs`, import.meta.url),
+);
 
 function parseVersion(value, tool) {
 	const match = /^(\d+)\.(\d+)\.(\d+)$/.exec(value);
@@ -22,7 +26,6 @@ function run(command, args, remediation) {
 	const result = spawnSync(command, args, {
 		cwd: new URL("../..", import.meta.url),
 		encoding: "utf8",
-		shell: process.platform === "win32",
 	});
 	if (result.error || result.status !== 0) {
 		const detail = result.error?.message ?? result.stderr.trim() ?? result.stdout.trim();
@@ -31,8 +34,11 @@ function run(command, args, remediation) {
 	return result.stdout.trim();
 }
 
-const aspireVersion = run(
-	"yarn",
+function runYarn(args, remediation) {
+	return run(process.execPath, [yarnPath, ...args], remediation);
+}
+
+const aspireVersion = runYarn(
 	["exec", "aspire", "--version"],
 	"Run `yarn install --immutable` to install the repository-pinned Aspire CLI.",
 ).split("+")[0];
@@ -51,8 +57,7 @@ if (!isAtLeast(parseVersion(bunVersion, "Bun"), parseVersion(minimumBunVersion, 
 		`Bun ${minimumBunVersion} or newer is required, but ${bunVersion} was resolved. Upgrade Bun or enter the repository devenv shell.`,
 	);
 
-const yarnVersion = run(
-	"yarn",
+const yarnVersion = runYarn(
 	["--version"],
 	"Use Corepack and the Yarn release committed under .yarn/releases.",
 );

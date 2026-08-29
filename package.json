@@ -36,7 +36,7 @@
 	},
 	"devDependencies": {
 		"@biomejs/biome": "2.5.7",
-		"@microsoft/aspire-cli": "13.4.6",
+		"@microsoft/aspire-cli": "13.5.3",
 		"@types/node": "26",
 		"@vitest/coverage-v8": "4.1.10",
 		"typescript": "7",

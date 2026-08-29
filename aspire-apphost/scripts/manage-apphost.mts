@@ -7,6 +7,7 @@ import { apiSchedulerHealthContract } from "../../services/main/src/health-contr
 
 const repositoryRoot = fileURLToPath(new URL("../..", import.meta.url));
 const appHostPath = fileURLToPath(new URL("../apphost.mts", import.meta.url));
+const yarnPath = fileURLToPath(new URL("../../.yarn/releases/yarn-4.17.1.cjs", import.meta.url));
 const appHostArgument = "aspire-apphost/apphost.mts";
 const startupTimeoutMs = 5 * 60 * 1000;
 const requestTimeoutMs = 60 * 1000;
@@ -91,10 +92,9 @@ function parseResources(value: unknown): ResourceDescription[] {
 }
 
 function runAspire(args: string[]) {
-	return spawnSync("yarn", ["exec", "aspire", ...args], {
+	return spawnSync(process.execPath, [yarnPath, "exec", "aspire", ...args], {
 		cwd: repositoryRoot,
 		encoding: "utf8",
-		shell: process.platform === "win32",
 		timeout: 30_000,
 		maxBuffer: 4 * 1024 * 1024,
 	});
@@ -307,8 +307,9 @@ async function main() {
 		);
 
 	const child = spawn(
-		"yarn",
+		process.execPath,
 		[
+			yarnPath,
 			"exec",
 			"aspire",
 			"run",
@@ -320,7 +321,7 @@ async function main() {
 		],
 		{
 			cwd: repositoryRoot,
-			detached: process.platform !== "win32",
+			detached: true,
 			env: {
 				...process.env,
 				FONT_AWESOME_KIT_CSS_URL: smokeFontAwesomeCssUrl,
@@ -329,6 +330,7 @@ async function main() {
 				REZICS_ASPIRE_MODE: mode,
 			},
 			stdio: ["ignore", "pipe", "pipe"],
+			windowsHide: true,
 		},
 	);
 	const getOutput = captureOutput(child);
