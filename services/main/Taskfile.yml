@@ -280,6 +280,10 @@ tasks:
             - >-
                 REZICS_DISPOSABLE_MIGRATION_FIXTURE=1
                 DATABASE_ADMIN_URL="postgres://postgres:postgres@localhost:${POSTGRES_MIGRATION_LOCAL_PORT:-5433}/rezics_atlas?sslmode=disable"
+                yarn exec tsx scripts/check-entity-measurement-cardinality.ts
+            - >-
+                REZICS_DISPOSABLE_MIGRATION_FIXTURE=1
+                DATABASE_ADMIN_URL="postgres://postgres:postgres@localhost:${POSTGRES_MIGRATION_LOCAL_PORT:-5433}/rezics_atlas?sslmode=disable"
                 yarn exec tsx scripts/check-revision-primary-contribution.ts
 
             - >-

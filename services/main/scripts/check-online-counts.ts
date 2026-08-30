@@ -72,6 +72,13 @@ const allowRules: readonly AllowRule[] = [
 		reason:
 			"each deleted relation is materialized from a lock-skipping batch capped at 10,000 rows",
 	},
+	{
+		file: "units/merge/entity-measurements.ts",
+		line: /select count\(\*\)::integer/,
+		maximumOccurrences: 2,
+		reason:
+			"the trigger-serialized database invariant caps each Entity at eight contextual rows, so the two-Entity merge relation contains at most sixteen rows",
+	},
 ];
 
 const serviceRoot = resolve(fileURLToPath(new URL("../src/services", import.meta.url)));

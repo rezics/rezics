@@ -489,6 +489,37 @@ updated_at
   the only persisted authority. Local fixture source metadata is build-time
   validation input and is not stored as a parallel production evidence chain.
 
+The cardinality proof has no historical scan: `entity_measurement` is created
+empty earlier in the same unreleased cutover, and the guard migration refuses
+to install if a bounded `EXISTS ... LIMIT 1` probe finds any pre-guard row.
+After installation, each contextual insert takes one Entity-scoped transaction
+advisory lock and probes at most the existing eight contextual rows through the
+leading `(entity_id, context_unit_id)` unique index. Unrelated Entities never
+share this lock; API admission quotas provide backpressure for mutation bursts.
+
+Entity-side merge validation combines two independently guarded keys, so its
+exact destination aggregation reads at most 16 contextual rows and retains at
+most 16 UUIDs. It does not depend on corpus size. The adversarial storage
+envelope is nine rows per Entity: 4.5 billion rows at 500 million Entities and
+27 billion rows at 3 billion Entities. A contextual row plus the heap and its
+three current B-tree entries is roughly 220–300 bytes before free space, bloat,
+WAL, replicas, and backups, or about 0.99–1.35 TB and 5.94–8.10 TB respectively
+at those worst-case row counts. Real adoption is expected to be sparse, but
+capacity planning does not rely on that expectation. A contextual write
+amplifies to one heap tuple and three indexes; value-only updates remain
+eligible for HOT updates.
+
+There is no new standalone latency target: the two keyed reads remain inside
+the existing Unit-merge transaction objective. Observe measurement mutation
+latency, Entity advisory-lock waits, limit rejections, relation/index growth,
+WAL volume, and replica lag. If one Entity's lock wait consumes more than 10%
+of the existing mutation latency objective for 15 minutes, move its writes to
+an explicit queued owner path rather than weakening the bound. Before a single
+node reaches storage or index-maintenance limits, hash-partition or shard by
+`entity_id`; preserve context-addressed merge scans with a partitioned
+`(context_unit_id, entity_id)` routing projection so the 3-billion-Entity path
+does not become an all-shard fan-out.
+
 ## Compound-search decomposition tunables
 
 Initial values for the staged resolution defined in

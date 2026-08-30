@@ -178,7 +178,7 @@ describe("lossless Entity measurement merge", () => {
 			reason: "differing_collision",
 		},
 		{
-			row: { selfContext: false, entityCollision: false, targetContextualCount: 9 },
+			row: { selfContext: false, entityCollision: false, targetContextualCount: 16 },
 			reason: "context_limit",
 		},
 	] as const)("rejects $reason before accepting a bounded Entity-side rewrite", async (input) => {
@@ -194,6 +194,27 @@ describe("lossless Entity measurement merge", () => {
 			type: "UnitMergeMeasurementConflict",
 			details: { reason: input.reason },
 		});
+	});
+
+	it("reports the exact bounded contextual count in the merge conflict", async () => {
+		const { transaction, statements } = transactionWithRows([
+			[{ selfContext: false, entityCollision: false, targetContextualCount: 16 }],
+		]);
+
+		await expect(
+			requireEntityMeasurementsMergeable(transaction, {
+				sourceUnitId: SourceUnitId,
+				targetUnitId: TargetUnitId,
+				sourceIsEntity: true,
+			}),
+		).rejects.toMatchObject({
+			type: "UnitMergeMeasurementConflict",
+			details: { reason: "context_limit", contextualCount: 16 },
+		});
+
+		const preflight = render(statements[0]!);
+		expect(preflight).toContain("group by destination_context_unit_id");
+		expect(preflight).not.toContain("group by destination_context_unit_id limit");
 	});
 
 	it("advances a durable keyset cursor without mutating measurement rows", async () => {
@@ -251,6 +272,35 @@ describe("lossless Entity measurement merge", () => {
 			details: { reason: "differing_collision" },
 		});
 
+		expect(statements.map(render).join(" ")).not.toContain("update entity_measurement");
+		expect(statements.map(render).join(" ")).not.toContain("delete from entity_measurement");
+	});
+
+	it("reports the exact late contextual count before Entity convergence changes any row", async () => {
+		const { transaction, statements } = transactionWithRows([
+			[],
+			[{ selfContext: false, differingCollision: false, targetContextualCount: 16 }],
+		]);
+
+		await expect(
+			processEntityMeasurementMergeBatch(
+				transaction,
+				{
+					operationId: OperationId,
+					sourceUnitId: SourceUnitId,
+					targetUnitId: TargetUnitId,
+					batchSize: BatchSize,
+				},
+				"entity_id",
+			),
+		).rejects.toMatchObject({
+			type: "UnitMergeMeasurementConflict",
+			details: { reason: "context_limit", contextualCount: 16 },
+		});
+
+		const compatibility = render(statements[1]!);
+		expect(compatibility).toContain("group by destination_context_unit_id");
+		expect(compatibility).not.toContain("group by destination_context_unit_id limit");
 		expect(statements.map(render).join(" ")).not.toContain("update entity_measurement");
 		expect(statements.map(render).join(" ")).not.toContain("delete from entity_measurement");
 	});

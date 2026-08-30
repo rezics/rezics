@@ -3,6 +3,18 @@ SET search_path TO public;
 -- Canonical Entity measurement facts have immutable identity while their
 -- values remain editable. Cross-row contextual cardinality stays bounded.
 
+-- entity_measurement is created empty earlier in this unreleased cutover. Do
+-- not silently bless rows written by a partial preview deployment before the
+-- cross-row guard existed; the bounded empty-table probe avoids a corpus scan.
+DO $$
+BEGIN
+	IF EXISTS (SELECT 1 FROM public.entity_measurement LIMIT 1) THEN
+		RAISE EXCEPTION 'Entity measurement guard cutover requires an empty relation'
+			USING ERRCODE = '55000';
+	END IF;
+END;
+$$;
+
 CREATE OR REPLACE FUNCTION public.guard_entity_measurement()
 RETURNS trigger
 LANGUAGE plpgsql

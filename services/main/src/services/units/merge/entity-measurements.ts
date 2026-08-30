@@ -144,7 +144,6 @@ export async function requireEntityMeasurementsMergeable(
 					)
 						and measurement.context_unit_id is not null
 					group by destination_context_unit_id
-					limit 9
 				) as contextual_destinations
 			) else 0 end as "targetContextualCount"
 	`);
@@ -397,7 +396,6 @@ async function requireBatchCompatible(
 							)
 								and measurement.context_unit_id is not null
 							group by destination_context_unit_id
-							limit 9
 						) as contextual_destinations
 					) as "targetContextualCount"
 			`
