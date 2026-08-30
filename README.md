@@ -109,7 +109,9 @@ RustFS bucket initialization. `task infra:reset` intentionally deletes all
 local PostgreSQL and RustFS state before rebuilding a consistent default database; it requires
 confirmation. Use `task --yes local:reset` to reset and seed only the application database. Use
 `task local:showcase` only after a local reset to load disposable fixtures from the sibling
-`rezics-showcase-packs` checkout. Use
+`rezics-showcase-packs` checkout. This validates and consumes committed fixture artifacts; it does
+not run source generators or fetch upstream material. Rebuild showcase inputs only through the
+explicit sibling `rebuild:*` tasks (or the root `task showcase-packs:rebuild` aggregate). Use
 `task --yes local:search:rebuild` to rebuild the authoritative PGroonga indexes without resetting
 PostgreSQL.
 
@@ -125,6 +127,11 @@ a freshly reset local database for UI and integration work; they are not a produ
 input, backup, migration source, or continuing authority. Do not load showcase packs in staging
 or production. When a fixture changes, reset the disposable local database and load it again
 instead of attempting to reconcile it with existing REZICS data.
+
+Metadata-contract work does not imply source regeneration. Update generators for the next
+intentional rebuild, but migrate deterministic committed artifacts directly when that is sufficient.
+An unavailable source, anti-bot response, or checksum mismatch must not cause a challenge page or
+unverified download to replace a committed fixture.
 
 The main checks are:
 

@@ -348,12 +348,12 @@ describe("loadPack", () => {
 
 			expect(vndb.relations.guideNodes).toEqual([]);
 			expect(vndb.relations.tagRelations).toHaveLength(1_083);
-			expect(vndb.relations.tagExpressions).toHaveLength(749);
-			expect(vndb.relations.tagExpressionInferenceRules).toHaveLength(2_128);
+			expect(vndb.relations.tagExpressions).toHaveLength(1_305);
+			expect(vndb.relations.tagExpressionInferenceRules).toHaveLength(3_559);
 			expect(vndb.relations.tagPaths).toHaveLength(840);
 			expect(vndb.relations.tagPathSenses).toHaveLength(840);
 			expect(vndb.relations.tagPathApplications).toHaveLength(1_781);
-			expect(vndb.manifest.version).toBe("1.1.0");
+			expect(vndb.manifest.version).toBe("1.2.0");
 			expect(
 				vndb.objects.filter(
 					(object) =>

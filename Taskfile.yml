@@ -203,18 +203,24 @@ tasks:
               vars:
                   CLI_ARGS: reindex --yes
 
-    showcase-packs:build:
-        desc: Rebuild all generated content in the sibling showcase-packs checkout.
+    showcase-packs:validate:
+        desc: Validate committed content in the sibling showcase-packs checkout without rebuilding it.
         internal: true
         dir: ../rezics-showcase-packs
         cmds:
-            - task build
+            - task validate
+
+    showcase-packs:rebuild:
+        desc: Explicitly rebuild all sibling showcase packs from their configured sources.
+        dir: ../rezics-showcase-packs
+        cmds:
+            - task rebuild
 
     local:showcase:
-        desc: Load disposable sibling showcase fixtures into a freshly reset local database.
+        desc: Validate and load committed sibling showcase fixtures into a freshly reset local database.
         cmds:
             - task: infra:start
-            - task: showcase-packs:build
+            - task: showcase-packs:validate
             - task: services-main:showcase-fixtures:apply
             - task: services-main:search:index
               vars:
