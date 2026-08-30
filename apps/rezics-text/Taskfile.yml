@@ -5,6 +5,12 @@ tasks:
         desc: Generate Tauri platform icons from app-icon.svg.
         cmds:
             - yarn exec tauri icon ./app-icon.svg
+        status:
+            - test src-tauri/icons/32x32.png -nt app-icon.svg
+            - test src-tauri/icons/128x128.png -nt app-icon.svg
+            - test src-tauri/icons/128x128@2x.png -nt app-icon.svg
+            - test src-tauri/icons/icon.icns -nt app-icon.svg
+            - test src-tauri/icons/icon.ico -nt app-icon.svg
 
     dev:
         desc: Run the local REZICS Text desktop application.
@@ -38,6 +44,8 @@ tasks:
 
     rust:check:
         desc: Type-check the REZICS Text desktop Rust crate.
+        deps:
+            - generate:icons
         cmds:
             - cargo check --manifest-path src-tauri/Cargo.toml
 
@@ -53,6 +61,8 @@ tasks:
 
     rust:test:
         desc: Run REZICS Text desktop Rust tests.
+        deps:
+            - generate:icons
         cmds:
             - cargo test --manifest-path src-tauri/Cargo.toml
 
