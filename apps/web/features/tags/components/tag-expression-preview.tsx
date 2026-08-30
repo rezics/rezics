@@ -35,8 +35,32 @@ export function TagExpressionPreview({
 		},
 	);
 	if (!groups.length) return null;
+	if (!compact)
+		return (
+			<div className="mt-4 grid gap-3 text-sm">
+				{groups.map((group) => (
+					<div
+						className={
+							group.groupKey
+								? "grid gap-2 sm:grid-cols-[9rem_minmax(0,1fr)] sm:items-start"
+								: "grid gap-2"
+						}
+						key={group.key}
+					>
+						{group.groupKey ? (
+							<div className="pt-1 font-semibold text-muted-foreground">{group.groupKey.title}</div>
+						) : null}
+						<div className="flex flex-wrap gap-2">
+							{group.items.map((item) => (
+								<TagReferenceBadge key={item.key} tagId={item.focusTagId} title={item.label} />
+							))}
+						</div>
+					</div>
+				))}
+			</div>
+		);
 	return (
-		<div className={compact ? "mt-3 line-clamp-2 text-xs" : "text-sm"}>
+		<div className="mt-3 line-clamp-2 text-xs">
 			{groups.map((group) => (
 				<span className="me-2 inline-flex flex-wrap items-center gap-1" key={group.key}>
 					{group.groupKey ? (

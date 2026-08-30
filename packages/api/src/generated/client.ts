@@ -483,6 +483,10 @@ import type {
 	PostApiUnitsByTypeByUnitIdVariantContextPromoteResponses,
 	PutApiUnitsByTypeByUnitIdLocalizationsByLanguageOptions,
 	PutApiUnitsByTypeByUnitIdLocalizationsByLanguageResponses,
+	GetApiUnitsByTypeByUnitIdSubjectAssociationsOptions,
+	GetApiUnitsByTypeByUnitIdSubjectAssociationsResponses,
+	PostApiUnitsByTypeByUnitIdSubjectAssociationsOptions,
+	PostApiUnitsByTypeByUnitIdSubjectAssociationsResponses,
 	ListCurrentUserContributionResourcesOptions,
 	ListCurrentUserContributionResourcesResponses,
 	GetApiHistoryUnitsByUnitIdRevisionsOptions,
@@ -541,8 +545,6 @@ import type {
 	PostApiUnitsByTypeByUnitIdCreditAttributionsResponses,
 	DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdOptions,
 	DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdResponses,
-	PostApiUnitsByTypeByUnitIdSubjectAssociationsOptions,
-	PostApiUnitsByTypeByUnitIdSubjectAssociationsResponses,
 	PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerOptions,
 	PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerResponses,
 	DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerOptions,
@@ -5587,6 +5589,44 @@ export function putApiUnitsByTypeByUnitIdLocalizationsByLanguage<
 }
 
 /**
+ * @summary List bounded Unit subject association cards
+ * {@link /api/v1/units/:type/:unitId/subject-associations}
+ */
+export function getApiUnitsByTypeByUnitIdSubjectAssociations<ThrowOnError extends boolean = true>(
+	options: Options<GetApiUnitsByTypeByUnitIdSubjectAssociationsOptions, ThrowOnError>,
+): Promise<RequestResult<GetApiUnitsByTypeByUnitIdSubjectAssociationsResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/v1/units/{type}/{unitId}/subject-associations",
+		...config,
+	}) as Promise<RequestResult<GetApiUnitsByTypeByUnitIdSubjectAssociationsResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Add Unit subject association
+ * {@link /api/v1/units/:type/:unitId/subject-associations}
+ */
+export function postApiUnitsByTypeByUnitIdSubjectAssociations<ThrowOnError extends boolean = true>(
+	options: Options<PostApiUnitsByTypeByUnitIdSubjectAssociationsOptions, ThrowOnError>,
+): Promise<RequestResult<PostApiUnitsByTypeByUnitIdSubjectAssociationsResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/v1/units/{type}/{unitId}/subject-associations",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<
+		RequestResult<PostApiUnitsByTypeByUnitIdSubjectAssociationsResponses, ThrowOnError>
+	>;
+}
+
+/**
  * @summary List public resources the current user has created or contributed to
  * {@link /api/v1/history/contribution-resources/me}
  */
@@ -6158,28 +6198,6 @@ export function deleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationId<
 			DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdResponses,
 			ThrowOnError
 		>
-	>;
-}
-
-/**
- * @summary Add Unit subject association
- * {@link /api/v1/units/:type/:unitId/subject-associations}
- */
-export function postApiUnitsByTypeByUnitIdSubjectAssociations<ThrowOnError extends boolean = true>(
-	options: Options<PostApiUnitsByTypeByUnitIdSubjectAssociationsOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiUnitsByTypeByUnitIdSubjectAssociationsResponses, ThrowOnError>> {
-	const { client: request = client, ...config } = options;
-
-	return request({
-		method: "POST",
-		url: "/api/v1/units/{type}/{unitId}/subject-associations",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<
-		RequestResult<PostApiUnitsByTypeByUnitIdSubjectAssociationsResponses, ThrowOnError>
 	>;
 }
 

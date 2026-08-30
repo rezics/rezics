@@ -163,6 +163,18 @@ export const TimedMediaUnitKindValues = ["video", "audio"] as const;
 export const MaximumAudioTracksPerVideo = 64;
 /** Public Unit-detail preview bound for applied Expressions on one associated Entity. */
 export const SubjectAssociationExpressionPreviewLimit = 4;
+/** Request-path bound for Entity cards returned by one Unit association page. */
+export const MaximumSubjectAssociationsPageSize = 8;
+/**
+ * Per-card bound for visible Expressions on the dedicated association page.
+ *
+ * Eight cards times 128 definitions (and at most 32 presentation components
+ * per definition) is the hard request-path fan-out. The response reports when
+ * this bound is reached so a caller never mistakes truncation for completeness.
+ */
+export const MaximumSubjectAssociationExpressionsPerItem = 128;
+/** Maximum assertion identities inspected per associated Entity and request. */
+export const SubjectAssociationExpressionCandidateScanLimit = 512;
 export const UnitOwnershipModeValues = ["profile_owned", "community_owned"] as const;
 export const UnitOwnershipClaimableUnitKindValues = [
 	"entity",

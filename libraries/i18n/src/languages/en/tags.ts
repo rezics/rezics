@@ -81,6 +81,7 @@ export default {
 		description:
 			"The same meaning within one authority is grouped, while every direct or Path source remains inspectable.",
 		empty: "No Tag meanings have been applied yet.",
+		partial: "This card has additional Tag meanings.",
 		open: insert("Open the {{expression}} Tag meaning card ({{authority}})", {
 			expression: String,
 			authority: String,

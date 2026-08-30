@@ -54,6 +54,7 @@ import {
 	ContentLanguageEvidenceUnitParams,
 	ContentLanguageEvidenceQuery,
 	ContentLanguageEvidenceResponse,
+	UnitSubjectAssociationsQuery,
 } from "./schema";
 import {
 	toApiErrorResponse,
@@ -61,6 +62,7 @@ import {
 	UnitDetailResponse,
 	UnitListResponse,
 	UnitPresentationListResponse,
+	UnitSubjectAssociationListResponse,
 } from "../schema/response";
 import {
 	getUnitSeriesMemberships,
@@ -78,6 +80,8 @@ import { NoContentResponse } from "../schema/action-response";
 import { ValidationError } from "../errors";
 import { enqueueBookChapterDraftJob } from "../../units/book-chapter-draft";
 import { listContentLanguageEvidence } from "../../units/content-language-evidence";
+import { listUnitSubjectAssociations } from "../../units/subject-associations";
+import { MaximumSubjectAssociationsPageSize } from "../../database/schema/contract-values";
 
 const AuthenticationRequiredResponse = toApiErrorResponse(["AuthenticationRequired"]);
 const UnitReadFailureResponse = toApiErrorResponse(["UnitNotFound"]);
@@ -729,5 +733,29 @@ export default new Elysia({ prefix: "/units" })
 				[StatusCodes.NOT_FOUND]: UnitMutationNotFoundResponse,
 			},
 			detail: { summary: "Create or replace unit localization", tags: ["Units"] },
+		},
+	)
+	.get(
+		"/:type/:unitId/subject-associations",
+		async ({ params, query, request }) => {
+			const { authorization } = await resolveIdentity(request, "unit:read");
+			return listUnitSubjectAssociations({
+				kind: params.type,
+				unitId: params.unitId,
+				authorization,
+				localizationLanguages: query.localizationLanguages ?? [],
+				cursor: query.cursor,
+				limit: query.limit ?? MaximumSubjectAssociationsPageSize,
+			});
+		},
+		{
+			params: UnitLookupParams,
+			query: UnitSubjectAssociationsQuery,
+			response: {
+				[StatusCodes.OK]: UnitSubjectAssociationListResponse,
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["InvalidPaginationCursor"]),
+				[StatusCodes.NOT_FOUND]: UnitReadFailureResponse,
+			},
+			detail: { summary: "List bounded Unit subject association cards", tags: ["Units"] },
 		},
 	);

@@ -79,6 +79,7 @@ export default {
 		title: "已应用的标签语义",
 		description: "同一管理范围中的相同语义会合并显示，但每个直接应用或路径来源仍可单独查看。",
 		empty: "尚未应用任何标签语义。",
+		partial: "此卡片还有更多标签语义。",
 		open: insert("打开“{{expression}}”标签语义卡片（{{authority}}）", {
 			expression: String,
 			authority: String,

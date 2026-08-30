@@ -30,6 +30,8 @@ import {
 	CreditAttributionRoleValues,
 	EntityKindValues,
 	MaximumAudioTracksPerVideo,
+	MaximumSubjectAssociationExpressionsPerItem,
+	MaximumSubjectAssociationsPageSize,
 	ProgressDatePrecisionValues,
 	ProgressEntryKindValues,
 	ProgressStatusValues,
@@ -69,7 +71,7 @@ const OrdinaryPostKindResponse = t.Union([t.Literal("post"), t.Literal("reply")]
 export const CompletionStateResponse = t.Object({ completed: t.Boolean() });
 export const UpdateStateResponse = t.Object({ updated: t.Boolean() });
 
-const TagExpressionDefinitionPreviewResponse = t.Object(
+export const TagExpressionDefinitionPreviewResponse = t.Object(
 	{
 		expressionId: Uuid,
 		expressionKind: t.UnionEnum(TagExpressionKindValues),
@@ -454,6 +456,21 @@ const UnitDetailExternalLinkResponse = t.Object(
 	{ additionalProperties: false },
 );
 
+const SubjectAssociationCardSpoilerResponse = t.Object(
+	{
+		level: t.Union([t.Literal(0), t.Literal(1), t.Literal(2)]),
+		concealed: t.Boolean(),
+		voteCount: t.Integer({ minimum: 0 }),
+		distribution: t.Object({
+			none: t.Integer({ minimum: 0 }),
+			minor: t.Integer({ minimum: 0 }),
+			major: t.Integer({ minimum: 0 }),
+		}),
+		viewerLevel: t.Nullable(t.Union([t.Literal(0), t.Literal(1), t.Literal(2)])),
+	},
+	{ additionalProperties: false },
+);
+
 export const UnitDetailResponse = t.Object({
 	id: Uuid,
 	type: ManageableUnitTypeResponse,
@@ -492,17 +509,7 @@ export const UnitDetailResponse = t.Object({
 				maxItems: SubjectAssociationExpressionPreviewLimit,
 			}),
 			contextPost: t.Nullable(AssociationContextPostResponse),
-			spoiler: t.Object({
-				level: t.Union([t.Literal(0), t.Literal(1), t.Literal(2)]),
-				concealed: t.Boolean(),
-				voteCount: t.Integer({ minimum: 0 }),
-				distribution: t.Object({
-					none: t.Integer({ minimum: 0 }),
-					minor: t.Integer({ minimum: 0 }),
-					major: t.Integer({ minimum: 0 }),
-				}),
-				viewerLevel: t.Nullable(t.Union([t.Literal(0), t.Literal(1), t.Literal(2)])),
-			}),
+			spoiler: SubjectAssociationCardSpoilerResponse,
 		}),
 	),
 	externalLinks: t.Array(UnitDetailExternalLinkResponse),
@@ -545,6 +552,52 @@ export const UnitDetailResponse = t.Object({
 		hasDevelopmentPreviewAccess: t.Boolean(),
 	}),
 });
+
+export const UnitSubjectAssociationListResponse = t.Object(
+	{
+		items: t.Array(
+			t.Object(
+				{
+					id: Uuid,
+					entityEntryId: Uuid,
+					entityKind: t.UnionEnum(EntityKindValues),
+					role: t.UnionEnum(SubjectAssociationRoleValues),
+					position: FractionalPosition,
+					language: t.Nullable(ContentLanguage),
+					title: NullableText,
+					summary: NullableText,
+					description: t.Nullable(PortableTextDocument),
+					cover: ImageAssetResponse,
+					expressions: t.Array(TagExpressionDefinitionPreviewResponse, {
+						maxItems: MaximumSubjectAssociationExpressionsPerItem,
+					}),
+					expressionsComplete: t.Boolean(),
+					attributions: t.Array(UnitAttributionSummaryResponse),
+					measurement: t.Nullable(
+						t.Object(
+							{
+								contextUnitId: t.Nullable(Uuid),
+								heightMillimetres: t.Nullable(t.Integer({ minimum: 1 })),
+								weightGrams: t.Nullable(t.Integer({ minimum: 1 })),
+								bustMillimetres: t.Nullable(t.Integer({ minimum: 1 })),
+								waistMillimetres: t.Nullable(t.Integer({ minimum: 1 })),
+								hipsMillimetres: t.Nullable(t.Integer({ minimum: 1 })),
+							},
+							{ additionalProperties: false },
+						),
+					),
+					contextPost: t.Nullable(AssociationContextPostResponse),
+					spoiler: SubjectAssociationCardSpoilerResponse,
+				},
+				{ additionalProperties: false },
+			),
+			{ maxItems: MaximumSubjectAssociationsPageSize },
+		),
+		nextCursor: t.Nullable(t.String()),
+	},
+	{ additionalProperties: false },
+);
+export type UnitSubjectAssociationListResponse = Static<typeof UnitSubjectAssociationListResponse>;
 
 export const SearchHit = t.Object({
 	id: Uuid,

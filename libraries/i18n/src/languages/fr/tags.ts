@@ -81,6 +81,7 @@ export default {
 		description:
 			"Un même sens relevant d’une même autorité est regroupé, tandis que chaque source directe ou issue d’un chemin reste consultable.",
 		empty: "Aucun sens d’étiquette n’est encore appliqué.",
+		partial: "Cette carte contient d’autres sens d’étiquette.",
 		open: insert("Ouvrir la fiche du sens {{expression}} ({{authority}})", {
 			expression: String,
 			authority: String,

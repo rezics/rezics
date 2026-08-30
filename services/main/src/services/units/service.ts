@@ -19,6 +19,7 @@ import { toSafeInteger } from "../database/integer";
 import { exactCount, lowerBoundCount } from "../counts/contract";
 import { WorkPolicy } from "../performance/policy";
 import {
+	contentRatingAllowlistFromStored,
 	DefaultContentRatingPolicy,
 	getContentRatingCondition,
 	type ContentRatingPolicy,
@@ -142,6 +143,7 @@ import {
 	replaceUnitContentLanguageSupport,
 } from "./content-language-support";
 import { getSubjectAssociationExpressionPreviews } from "./subject-association-tags";
+import { presentSubjectAssociationSpoiler } from "./subject-association-spoiler";
 import {
 	listAdaptedAudioUnitIds,
 	normalizeAdaptedAudioUnitIds,
@@ -531,7 +533,10 @@ export async function getUnit(
 		) ?? [];
 	const [viewerDisplayPreference] = authorization.profileId
 		? await database
-				.select({ alwaysShowSpoilers: profilePreference.alwaysShowSpoilers })
+				.select({
+					alwaysShowSpoilers: profilePreference.alwaysShowSpoilers,
+					contentRatings: profilePreference.contentRatings,
+				})
 				.from(profilePreference)
 				.where(eq(profilePreference.profileId, authorization.profileId))
 				.limit(1)
@@ -585,6 +590,12 @@ export async function getUnit(
 		getSubjectAssociationExpressionPreviews(
 			subjectAssociationRows.map(({ entityEntryId }) => entityEntryId),
 			localizationLanguages,
+			{
+				allowedContentRatings: contentRatingAllowlistFromStored(
+					viewerDisplayPreference?.contentRatings,
+				),
+				includeSpoilers: viewerDisplayPreference?.alwaysShowSpoilers ?? false,
+			},
 		),
 	]);
 	const subjectAssociations = subjectAssociationRows.map(
@@ -598,33 +609,6 @@ export async function getUnit(
 			viewerSpoilerLevel,
 			...association
 		}) => {
-			const voteCount = toSafeInteger(
-				spoilerVoteCount ?? 0n,
-				"Subject association spoiler vote count",
-			);
-			const none = toSafeInteger(spoilerNoneCount ?? 0n, "Subject association no-spoiler count");
-			const minor = toSafeInteger(
-				spoilerMinorCount ?? 0n,
-				"Subject association minor-spoiler count",
-			);
-			const major = toSafeInteger(
-				spoilerMajorCount ?? 0n,
-				"Subject association major-spoiler count",
-			);
-			const level: 0 | 1 | 2 =
-				major * 2 >= voteCount && voteCount > 0
-					? 2
-					: (minor + major) * 2 >= voteCount && voteCount > 0
-						? 1
-						: 0;
-			if (
-				viewerSpoilerLevel !== null &&
-				viewerSpoilerLevel !== 0 &&
-				viewerSpoilerLevel !== 1 &&
-				viewerSpoilerLevel !== 2
-			)
-				throw new Error("Subject association viewer spoiler level is invalid");
-			const normalizedViewerSpoilerLevel: 0 | 1 | 2 | null = viewerSpoilerLevel;
 			return {
 				...association,
 				entityKind: requireEntityKind(association.entityKind),
@@ -632,13 +616,16 @@ export async function getUnit(
 				cover: presentImageAsset(coverAssetId, "cover"),
 				expressions: [...(entityExpressionPreviews.get(association.entityEntryId) ?? [])],
 				contextPost: contextPosts.get(association.id) ?? null,
-				spoiler: {
-					level,
-					concealed: level > 0 && !viewerDisplayPreference?.alwaysShowSpoilers,
-					voteCount,
-					distribution: { none, minor, major },
-					viewerLevel: normalizedViewerSpoilerLevel,
-				},
+				spoiler: presentSubjectAssociationSpoiler(
+					{
+						spoilerVoteCount,
+						spoilerNoneCount,
+						spoilerMinorCount,
+						spoilerMajorCount,
+						viewerSpoilerLevel,
+					},
+					viewerDisplayPreference?.alwaysShowSpoilers ?? false,
+				),
 			};
 		},
 	);

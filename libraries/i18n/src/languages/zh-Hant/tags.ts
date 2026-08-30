@@ -79,6 +79,7 @@ export default {
 		title: "套用的標籤語意",
 		description: "同一管理範圍中的相同語意會合併顯示，但每個直接套用或路徑來源仍可個別查看。",
 		empty: "尚未套用任何標籤語意。",
+		partial: "此卡片還有更多標籤語意。",
 		open: insert("開啟「{{expression}}」的標籤語意卡片（{{authority}}）", {
 			expression: String,
 			authority: String,

@@ -7,6 +7,7 @@ import {
 	ContentGovernanceActionKindValues,
 	MaximumAudioTracksPerVideo,
 	MaximumContentLanguageEvidencePageSize,
+	MaximumSubjectAssociationsPageSize,
 	RealmUnitPublicationStateValues,
 	RealmUnitStatusValues,
 } from "../../database/schema/contract-values";
@@ -367,6 +368,22 @@ export const UnitDetailQuery = t.Object(LocalizationLanguageQuery, {
 	additionalProperties: false,
 });
 export type UnitDetailQuery = Static<typeof UnitDetailQuery>;
+
+export const UnitSubjectAssociationsQuery = t.Object(
+	{
+		...LocalizationLanguageQuery,
+		cursor: t.Optional(t.String({ minLength: 1, maxLength: 4096 })),
+		limit: t.Optional(
+			t.Integer({
+				minimum: 1,
+				maximum: MaximumSubjectAssociationsPageSize,
+				default: MaximumSubjectAssociationsPageSize,
+			}),
+		),
+	},
+	{ additionalProperties: false },
+);
+export type UnitSubjectAssociationsQuery = Static<typeof UnitSubjectAssociationsQuery>;
 
 export const PublicUnitSeoParams = t.Object({ unitId: Uuid });
 export const PublicUnitSeoQuery = UnitDetailQuery;

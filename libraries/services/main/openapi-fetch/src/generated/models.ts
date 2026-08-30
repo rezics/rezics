@@ -144427,6 +144427,1151 @@ export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageResponse =
 	| PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus429
 	| PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus500;
 
+/**
+ * @type object
+ */
+export type GetApiUnitsByTypeByUnitIdSubjectAssociationsPath = {
+	type: (("book" | "software" | "media") | "series") | ("video" | "audio") | "release";
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+};
+
+export const GetApiUnitsByTypeByUnitIdSubjectAssociationsLocalizationLanguagesEnum = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetApiUnitsByTypeByUnitIdSubjectAssociationsLocalizationLanguagesEnum =
+	(typeof GetApiUnitsByTypeByUnitIdSubjectAssociationsLocalizationLanguagesEnum)[keyof typeof GetApiUnitsByTypeByUnitIdSubjectAssociationsLocalizationLanguagesEnum];
+
+/**
+ * @type object
+ */
+export type GetApiUnitsByTypeByUnitIdSubjectAssociationsQuery = {
+	/**
+	 * @type array | undefined
+	 */
+	localizationLanguages?: GetApiUnitsByTypeByUnitIdSubjectAssociationsLocalizationLanguagesEnum[];
+	/**
+	 * @minLength 1
+	 * @maxLength 4096
+	 * @type string | undefined
+	 */
+	cursor?: string;
+	/**
+	 * @default 8
+	 */
+	limit?: string | number;
+};
+
+export const GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus200ItemsEntityKindEnum = {
+	person: "person",
+	organization: "organization",
+	character: "character",
+	software_agent: "software_agent",
+} as const;
+
+export type GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus200ItemsEntityKindEnum =
+	(typeof GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus200ItemsEntityKindEnum)[keyof typeof GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus200ItemsEntityKindEnum];
+
+export const GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus200ItemsRoleEnum = {
+	primary_character: "primary_character",
+	featured_character: "featured_character",
+	appears: "appears",
+	about: "about",
+	setting: "setting",
+	source_work: "source_work",
+	canonical_wiki_page: "canonical_wiki_page",
+	related_subject: "related_subject",
+} as const;
+
+export type GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus200ItemsRoleEnum =
+	(typeof GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus200ItemsRoleEnum)[keyof typeof GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus200ItemsRoleEnum];
+
+export const GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus200ItemsLanguage = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus200ItemsLanguage =
+	(typeof GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus200ItemsLanguage)[keyof typeof GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus200ItemsLanguage];
+
+export const GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus200ItemsExpressionsExpressionKindEnum =
+	{
+		simple: "simple",
+		facet_value: "facet_value",
+		relation: "relation",
+	} as const;
+
+export type GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus200ItemsExpressionsExpressionKindEnum =
+	(typeof GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus200ItemsExpressionsExpressionKindEnum)[keyof typeof GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus200ItemsExpressionsExpressionKindEnum];
+
+export const GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus200ItemsExpressionsComponentsSemanticRoleEnum =
+	{
+		predicate: "predicate",
+		slot: "slot",
+		value: "value",
+		focus: "focus",
+		qualifier: "qualifier",
+	} as const;
+
+export type GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus200ItemsExpressionsComponentsSemanticRoleEnum =
+	(typeof GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus200ItemsExpressionsComponentsSemanticRoleEnum)[keyof typeof GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus200ItemsExpressionsComponentsSemanticRoleEnum];
+
+export const GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus200ItemsExpressionsComponentsComponentKindEnum =
+	{
+		required: "required",
+		fallback: "fallback",
+	} as const;
+
+export type GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus200ItemsExpressionsComponentsComponentKindEnum =
+	(typeof GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus200ItemsExpressionsComponentsComponentKindEnum)[keyof typeof GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus200ItemsExpressionsComponentsComponentKindEnum];
+
+export const GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus200ItemsExpressionsComponentsLanguage =
+	{
+		zh: "zh",
+		en: "en",
+		ja: "ja",
+		ko: "ko",
+		de: "de",
+		fr: "fr",
+		es: "es",
+	} as const;
+
+export type GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus200ItemsExpressionsComponentsLanguage =
+	(typeof GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus200ItemsExpressionsComponentsLanguage)[keyof typeof GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus200ItemsExpressionsComponentsLanguage];
+
+export const GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus200ItemsExpressionsGroupKeySemanticRoleEnum =
+	{
+		predicate: "predicate",
+		slot: "slot",
+		value: "value",
+		focus: "focus",
+		qualifier: "qualifier",
+	} as const;
+
+export type GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus200ItemsExpressionsGroupKeySemanticRoleEnum =
+	(typeof GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus200ItemsExpressionsGroupKeySemanticRoleEnum)[keyof typeof GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus200ItemsExpressionsGroupKeySemanticRoleEnum];
+
+export const GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus200ItemsExpressionsGroupKeyLanguage =
+	{
+		zh: "zh",
+		en: "en",
+		ja: "ja",
+		ko: "ko",
+		de: "de",
+		fr: "fr",
+		es: "es",
+	} as const;
+
+export type GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus200ItemsExpressionsGroupKeyLanguage =
+	(typeof GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus200ItemsExpressionsGroupKeyLanguage)[keyof typeof GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus200ItemsExpressionsGroupKeyLanguage];
+
+export const GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus200ItemsAttributionsRoleEnum = {
+	author: "author",
+	"co-author": "co-author",
+	translator: "translator",
+	illustrator: "illustrator",
+	editor: "editor",
+	publisher: "publisher",
+	letterer: "letterer",
+	colorist: "colorist",
+	developer: "developer",
+	composer: "composer",
+	designer: "designer",
+	director: "director",
+	producer: "producer",
+	writer: "writer",
+	actor: "actor",
+	narrator: "narrator",
+	studio: "studio",
+	distributor: "distributor",
+} as const;
+
+export type GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus200ItemsAttributionsRoleEnum =
+	(typeof GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus200ItemsAttributionsRoleEnum)[keyof typeof GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus200ItemsAttributionsRoleEnum];
+
+export const GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus200ItemsAttributionsCreditedUnitKindEnum =
+	{
+		slug_namespace: "slug_namespace",
+		profile: "profile",
+		book: "book",
+		software: "software",
+		media: "media",
+		video: "video",
+		audio: "audio",
+		release: "release",
+		entity: "entity",
+		label: "label",
+		tag: "tag",
+		tag_path: "tag_path",
+		series: "series",
+		zone: "zone",
+		zone_page: "zone_page",
+		custom_theme: "custom_theme",
+		collection: "collection",
+		post: "post",
+		poll: "poll",
+		realm: "realm",
+		realm_rule: "realm_rule",
+	} as const;
+
+export type GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus200ItemsAttributionsCreditedUnitKindEnum =
+	(typeof GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus200ItemsAttributionsCreditedUnitKindEnum)[keyof typeof GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus200ItemsAttributionsCreditedUnitKindEnum];
+
+export const GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus200ItemsAttributionsCreditedUnitLanguageEnum =
+	{
+		zh: "zh",
+		en: "en",
+		ja: "ja",
+		ko: "ko",
+		de: "de",
+		fr: "fr",
+		es: "es",
+	} as const;
+
+export type GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus200ItemsAttributionsCreditedUnitLanguageEnum =
+	(typeof GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus200ItemsAttributionsCreditedUnitLanguageEnum)[keyof typeof GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus200ItemsAttributionsCreditedUnitLanguageEnum];
+
+export const GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus200ItemsAttributionsCreditedUnitAvatarIconPrefixEnum =
+	{
+		fas: "fas",
+		fab: "fab",
+	} as const;
+
+export type GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus200ItemsAttributionsCreditedUnitAvatarIconPrefixEnum =
+	(typeof GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus200ItemsAttributionsCreditedUnitAvatarIconPrefixEnum)[keyof typeof GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus200ItemsAttributionsCreditedUnitAvatarIconPrefixEnum];
+
+export const GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus200ItemsSpoilerLevelEnum = {
+	"0": 0,
+	"1": 1,
+	"2": 2,
+} as const;
+
+export type GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus200ItemsSpoilerLevelEnum =
+	(typeof GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus200ItemsSpoilerLevelEnum)[keyof typeof GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus200ItemsSpoilerLevelEnum];
+
+/**
+ * @type object
+ */
+export type GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus200 = {
+	/**
+	 * @type array
+	 */
+	items: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		id: string;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		entityEntryId: string;
+		/**
+		 * @default 'person'
+		 * @type string
+		 */
+		entityKind: GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus200ItemsEntityKindEnum;
+		/**
+		 * @default 'primary_character'
+		 * @type string
+		 */
+		role: GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus200ItemsRoleEnum;
+		/**
+		 * @description
+		 * Format: `fractional-position`
+		 * @minLength 2
+		 * @maxLength 1024
+		 * @type string
+		 */
+		position: string;
+		language: (GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus200ItemsLanguage | null) | null;
+		title: (string | null) | null;
+		summary: (string | null) | null;
+		description:
+			| ({
+					/**
+					 * @type string
+					 */
+					_type: "portable-text";
+					/**
+					 * @pattern ^[0-9a-f]{12}$
+					 * @type string
+					 */
+					_key: string;
+					/**
+					 * @type array | undefined
+					 */
+					classNames?: string[];
+					/**
+					 * @type array
+					 */
+					content: (
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @type string
+								 */
+								_type: "block";
+								/**
+								 * @type array
+								 */
+								children: (
+									| {
+											/**
+											 * @type string
+											 */
+											_key: string;
+											/**
+											 * @type string
+											 */
+											_type: "span";
+											/**
+											 * @type string
+											 */
+											text: string;
+											/**
+											 * @type array | undefined
+											 */
+											marks?: string[];
+									  }
+									| {
+											/**
+											 * @type string
+											 */
+											_key: string;
+											/**
+											 * @type string
+											 */
+											_type: "unit-mention";
+											/**
+											 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+											 * @type string
+											 */
+											unitId: string;
+									  }
+								)[];
+								/**
+								 * @type array | undefined
+								 */
+								markDefs?: {
+									/**
+									 * @type string
+									 */
+									_key: string;
+									/**
+									 * @type string
+									 */
+									_type: string;
+									[key: string]: unknown;
+								}[];
+								/**
+								 * @type string | undefined
+								 */
+								listItem?: string;
+								/**
+								 * @type string | undefined
+								 */
+								style?: string;
+								/**
+								 * @minLength 1
+								 * @type integer | undefined
+								 */
+								level?: number;
+								[key: string]: unknown;
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @type string
+								 */
+								_type: "image";
+								/**
+								 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+								 * @type string
+								 */
+								assetId: string;
+								/**
+								 * @type string | undefined
+								 */
+								alt?: string;
+								/**
+								 * @type string | undefined
+								 */
+								caption?: string;
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @pattern ^(?!(?:block|image)$).+
+								 * @type string
+								 */
+								_type: string;
+								[key: string]: unknown;
+						  }
+					)[];
+			  } | null)
+			| null;
+		cover:
+			| ({
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					id: string;
+					/**
+					 * @type string
+					 */
+					url: string;
+			  } | null)
+			| null;
+		/**
+		 * @type array
+		 */
+		expressions: {
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			expressionId: string;
+			/**
+			 * @default 'simple'
+			 * @type string
+			 */
+			expressionKind: GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus200ItemsExpressionsExpressionKindEnum;
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			focusTagId: string;
+			presentationRevision: string | number;
+			/**
+			 * @type array
+			 */
+			components: {
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				tagId: string;
+				/**
+				 * @default 'predicate'
+				 * @type string
+				 */
+				semanticRole: GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus200ItemsExpressionsComponentsSemanticRoleEnum;
+				/**
+				 * @default 'required'
+				 * @type string
+				 */
+				componentKind: GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus200ItemsExpressionsComponentsComponentKindEnum;
+				language:
+					| (GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus200ItemsExpressionsComponentsLanguage | null)
+					| null;
+				title: (string | null) | null;
+			}[];
+			groupKey:
+				| ({
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						tagId: string;
+						/**
+						 * @default 'predicate'
+						 * @type string
+						 */
+						semanticRole: GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus200ItemsExpressionsGroupKeySemanticRoleEnum;
+						language:
+							| (GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus200ItemsExpressionsGroupKeyLanguage | null)
+							| null;
+						title: (string | null) | null;
+				  } | null)
+				| null;
+		}[];
+		/**
+		 * @type boolean
+		 */
+		expressionsComplete: boolean;
+		/**
+		 * @type array
+		 */
+		attributions: {
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			id: string;
+			/**
+			 * @default 'author'
+			 * @type string
+			 */
+			role: GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus200ItemsAttributionsRoleEnum;
+			/**
+			 * @description
+			 * Format: `fractional-position`
+			 * @minLength 2
+			 * @maxLength 1024
+			 * @type string
+			 */
+			position: string;
+			/**
+			 * @type object
+			 */
+			creditedUnit: {
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				id: string;
+				/**
+				 * @default 'slug_namespace'
+				 * @type string
+				 */
+				kind: GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus200ItemsAttributionsCreditedUnitKindEnum;
+				/**
+				 * @type string
+				 */
+				language: GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus200ItemsAttributionsCreditedUnitLanguageEnum;
+				slugAddress:
+					| ({
+							/**
+							 * @minLength 1
+							 * @maxLength 63
+							 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+							 * @type string
+							 */
+							slug: string;
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							scopeUnitId: string;
+							/**
+							 * @type array
+							 */
+							canonicalPath: string[];
+					  } | null)
+					| null;
+				title: (string | null) | null;
+				summary: (string | null) | null;
+				avatar:
+					| (
+							| (
+									| {
+											/**
+											 * @type string
+											 */
+											type: "image";
+											/**
+											 * @type object
+											 */
+											image: {
+												/**
+												 * @description
+												 * Format: `uuid`
+												 * @type string
+												 */
+												id: string;
+												/**
+												 * @type string
+												 */
+												url: string;
+											};
+									  }
+									| {
+											/**
+											 * @type string
+											 */
+											type: "emoji";
+											/**
+											 * @maxLength 64
+											 * @type string
+											 */
+											emoji: string;
+									  }
+									| {
+											/**
+											 * @type string
+											 */
+											type: "icon";
+											/**
+											 * @type object
+											 */
+											icon: {
+												/**
+												 * @type string
+												 */
+												provider: "font-awesome";
+												/**
+												 * @type string
+												 */
+												prefix: GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus200ItemsAttributionsCreditedUnitAvatarIconPrefixEnum;
+												/**
+												 * @maxLength 128
+												 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+												 * @type string
+												 */
+												name: string;
+											};
+									  }
+							  )
+							| null
+					  )
+					| null;
+			};
+		}[];
+		measurement:
+			| ({
+					contextUnitId: (string | null) | null;
+					heightMillimetres: ((string | number) | null) | null;
+					weightGrams: ((string | number) | null) | null;
+					bustMillimetres: ((string | number) | null) | null;
+					waistMillimetres: ((string | number) | null) | null;
+					hipsMillimetres: ((string | number) | null) | null;
+			  } | null)
+			| null;
+		contextPost:
+			| ({
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					id: string;
+					subjectId: (string | null) | null;
+					title: (string | null) | null;
+					/**
+					 * @type array
+					 */
+					tags: {
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						tagId: string;
+						title: (string | null) | null;
+						score: string | number;
+						voteCount: string | number;
+						/**
+						 * @type boolean
+						 */
+						pinned: boolean;
+					}[];
+			  } | null)
+			| null;
+		/**
+		 * @type object
+		 */
+		spoiler: {
+			/**
+			 * @type string
+			 */
+			level: GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus200ItemsSpoilerLevelEnum;
+			/**
+			 * @type boolean
+			 */
+			concealed: boolean;
+			voteCount: string | number;
+			/**
+			 * @type object
+			 */
+			distribution: {
+				none: string | number;
+				minor: string | number;
+				major: string | number;
+			};
+			viewerLevel: ((0 | 1 | 2) | null) | null;
+		};
+	}[];
+	nextCursor: (string | null) | null;
+};
+
+/**
+ * @type object
+ */
+export type GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus400 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'InvalidPaginationCursor'
+		 * @type string
+		 */
+		code: "InvalidPaginationCursor";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: "UnitNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type GetApiUnitsByTypeByUnitIdSubjectAssociationsOptions = {
+	body?: never;
+	path: GetApiUnitsByTypeByUnitIdSubjectAssociationsPath;
+	query?: GetApiUnitsByTypeByUnitIdSubjectAssociationsQuery;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type GetApiUnitsByTypeByUnitIdSubjectAssociationsResponses = {
+	"200": GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus200;
+	"400": GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus400;
+	"404": GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus404;
+	"422": GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus422;
+	"500": GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type GetApiUnitsByTypeByUnitIdSubjectAssociationsResponse =
+	| GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus200
+	| GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus400
+	| GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus404
+	| GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus422
+	| GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus500;
+
+/**
+ * @type object
+ */
+export type PostApiUnitsByTypeByUnitIdSubjectAssociationsPath = {
+	type: ("book" | "software" | "media") | "series";
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+};
+
+export const PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus200RoleEnum = {
+	primary_character: "primary_character",
+	featured_character: "featured_character",
+	appears: "appears",
+	about: "about",
+	setting: "setting",
+	source_work: "source_work",
+	canonical_wiki_page: "canonical_wiki_page",
+	related_subject: "related_subject",
+} as const;
+
+export type PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus200RoleEnum =
+	(typeof PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus200RoleEnum)[keyof typeof PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus200RoleEnum];
+
+/**
+ * @type object
+ */
+export type PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	id: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	entityId: string;
+	contextPostId: (string | null) | null;
+	/**
+	 * @default 'primary_character'
+	 * @type string
+	 */
+	role: PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus200RoleEnum;
+	/**
+	 * @description
+	 * Format: `fractional-position`
+	 * @minLength 2
+	 * @maxLength 1024
+	 * @type string
+	 */
+	position: string;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	createdAt: string;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	updatedAt: string;
+};
+
+export const PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus400ErrorCodeEnum = {
+	AssociationContextPostInvalid: "AssociationContextPostInvalid",
+	RevisionCreditEntityInvalid: "RevisionCreditEntityInvalid",
+	RevisionContributionActorRequired: "RevisionContributionActorRequired",
+} as const;
+
+export type PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus400ErrorCodeEnum =
+	(typeof PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus400ErrorCodeEnum)[keyof typeof PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus400ErrorCodeEnum];
+
+export type PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus400 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'AssociationContextPostInvalid'
+				 * @type string
+				 */
+				code: PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus400ErrorCodeEnum;
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| MalformedRequestBody;
+
+export const PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus403ErrorCodeEnum = {
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+	EntityAssociationRestricted: "EntityAssociationRestricted",
+} as const;
+
+export type PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus403ErrorCodeEnum =
+	(typeof PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus403ErrorCodeEnum)[keyof typeof PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitPermissionForbidden'
+		 * @type string
+		 */
+		code: PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus404ErrorCodeEnum = {
+	UnitNotFound: "UnitNotFound",
+	EntityEntryNotFound: "EntityEntryNotFound",
+} as const;
+
+export type PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus404ErrorCodeEnum =
+	(typeof PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus404ErrorCodeEnum)[keyof typeof PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus404ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus404ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus422 = ValidationError;
+
+export const PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus429ErrorCodeEnum =
+	(typeof PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus429ErrorCodeEnum)[keyof typeof PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus429ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus429ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus500 = InternalError;
+
+export const PostApiUnitsByTypeByUnitIdSubjectAssociationsRequestRoleEnum = {
+	primary_character: "primary_character",
+	featured_character: "featured_character",
+	appears: "appears",
+	about: "about",
+	setting: "setting",
+	source_work: "source_work",
+	canonical_wiki_page: "canonical_wiki_page",
+	related_subject: "related_subject",
+} as const;
+
+export type PostApiUnitsByTypeByUnitIdSubjectAssociationsRequestRoleEnum =
+	(typeof PostApiUnitsByTypeByUnitIdSubjectAssociationsRequestRoleEnum)[keyof typeof PostApiUnitsByTypeByUnitIdSubjectAssociationsRequestRoleEnum];
+
+export const PostApiUnitsByTypeByUnitIdSubjectAssociationsRequestRevisionContextContributionRoleEnum =
+	{
+		creator: "creator",
+		editor: "editor",
+		translator: "translator",
+		researcher: "researcher",
+	} as const;
+
+export type PostApiUnitsByTypeByUnitIdSubjectAssociationsRequestRevisionContextContributionRoleEnum =
+	(typeof PostApiUnitsByTypeByUnitIdSubjectAssociationsRequestRevisionContextContributionRoleEnum)[keyof typeof PostApiUnitsByTypeByUnitIdSubjectAssociationsRequestRevisionContextContributionRoleEnum];
+
+/**
+ * @type object
+ */
+export type PostApiUnitsByTypeByUnitIdSubjectAssociationsBody = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	entityId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string | undefined
+	 */
+	contextPostId?: string;
+	/**
+	 * @default 'primary_character'
+	 * @type string
+	 */
+	role: PostApiUnitsByTypeByUnitIdSubjectAssociationsRequestRoleEnum;
+	/**
+	 * @description
+	 * Format: `fractional-position`
+	 * @minLength 2
+	 * @maxLength 512
+	 * @type string | undefined
+	 */
+	position?: string;
+	/**
+	 * @type object | undefined
+	 */
+	revisionContext?: {
+		contribution?:
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "human";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "unattributed";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					primary: "ai";
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					creditedEntityId: string;
+					/**
+					 * @default 'creator'
+					 * @type string
+					 */
+					role: PostApiUnitsByTypeByUnitIdSubjectAssociationsRequestRevisionContextContributionRoleEnum;
+			  };
+	};
+};
+
+/**
+ * @type object
+ */
+export type PostApiUnitsByTypeByUnitIdSubjectAssociationsOptions = {
+	body: PostApiUnitsByTypeByUnitIdSubjectAssociationsBody;
+	path: PostApiUnitsByTypeByUnitIdSubjectAssociationsPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PostApiUnitsByTypeByUnitIdSubjectAssociationsResponses = {
+	"200": PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus200;
+	"400": PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus400;
+	"403": PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus403;
+	"404": PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus404;
+	"422": PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus422;
+	"429": PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus429;
+	"500": PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PostApiUnitsByTypeByUnitIdSubjectAssociationsResponse =
+	| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus200
+	| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus400
+	| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus403
+	| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus404
+	| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus422
+	| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus429
+	| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus500;
+
 export const ListCurrentUserContributionResourcesSection = {
 	book: "book",
 	software: "software",
@@ -154566,359 +155711,6 @@ export type DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdRespons
 	| DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus422
 	| DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus429
 	| DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus500;
-
-/**
- * @type object
- */
-export type PostApiUnitsByTypeByUnitIdSubjectAssociationsPath = {
-	type: ("book" | "software" | "media") | "series";
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	unitId: string;
-};
-
-export const PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus200RoleEnum = {
-	primary_character: "primary_character",
-	featured_character: "featured_character",
-	appears: "appears",
-	about: "about",
-	setting: "setting",
-	source_work: "source_work",
-	canonical_wiki_page: "canonical_wiki_page",
-	related_subject: "related_subject",
-} as const;
-
-export type PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus200RoleEnum =
-	(typeof PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus200RoleEnum)[keyof typeof PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus200RoleEnum];
-
-/**
- * @type object
- */
-export type PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus200 = {
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	id: string;
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	unitId: string;
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	entityId: string;
-	contextPostId: (string | null) | null;
-	/**
-	 * @default 'primary_character'
-	 * @type string
-	 */
-	role: PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus200RoleEnum;
-	/**
-	 * @description
-	 * Format: `fractional-position`
-	 * @minLength 2
-	 * @maxLength 1024
-	 * @type string
-	 */
-	position: string;
-	/**
-	 * @description
-	 * Format: `date-time`
-	 * @type string
-	 */
-	createdAt: string;
-	/**
-	 * @description
-	 * Format: `date-time`
-	 * @type string
-	 */
-	updatedAt: string;
-};
-
-export const PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus400ErrorCodeEnum = {
-	AssociationContextPostInvalid: "AssociationContextPostInvalid",
-	RevisionCreditEntityInvalid: "RevisionCreditEntityInvalid",
-	RevisionContributionActorRequired: "RevisionContributionActorRequired",
-} as const;
-
-export type PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus400ErrorCodeEnum =
-	(typeof PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus400ErrorCodeEnum)[keyof typeof PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus400ErrorCodeEnum];
-
-export type PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus400 =
-	| {
-			/**
-			 * @type object
-			 */
-			error: {
-				/**
-				 * @default 'AssociationContextPostInvalid'
-				 * @type string
-				 */
-				code: PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus400ErrorCodeEnum;
-				/**
-				 * @type string
-				 */
-				message: string;
-				/**
-				 * @type void | undefined
-				 */
-				details?: void;
-			};
-			/**
-			 * @type string
-			 */
-			requestId: string;
-	  }
-	| MalformedRequestBody;
-
-export const PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus403ErrorCodeEnum = {
-	UnitPermissionForbidden: "UnitPermissionForbidden",
-	EntityAssociationRestricted: "EntityAssociationRestricted",
-} as const;
-
-export type PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus403ErrorCodeEnum =
-	(typeof PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus403ErrorCodeEnum)[keyof typeof PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus403ErrorCodeEnum];
-
-/**
- * @type object
- */
-export type PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus403 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'UnitPermissionForbidden'
-		 * @type string
-		 */
-		code: PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus403ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-export const PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus404ErrorCodeEnum = {
-	UnitNotFound: "UnitNotFound",
-	EntityEntryNotFound: "EntityEntryNotFound",
-} as const;
-
-export type PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus404ErrorCodeEnum =
-	(typeof PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus404ErrorCodeEnum)[keyof typeof PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus404ErrorCodeEnum];
-
-/**
- * @type object
- */
-export type PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus404 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'UnitNotFound'
-		 * @type string
-		 */
-		code: PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus404ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus422 = ValidationError;
-
-export const PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus429ErrorCodeEnum = {
-	ApiQuotaExceeded: "ApiQuotaExceeded",
-	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
-} as const;
-
-export type PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus429ErrorCodeEnum =
-	(typeof PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus429ErrorCodeEnum)[keyof typeof PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus429ErrorCodeEnum];
-
-/**
- * @type object
- */
-export type PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus429 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @type string
-		 */
-		code: PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus429ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		details?: JsonValue;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus500 = InternalError;
-
-export const PostApiUnitsByTypeByUnitIdSubjectAssociationsRequestRoleEnum = {
-	primary_character: "primary_character",
-	featured_character: "featured_character",
-	appears: "appears",
-	about: "about",
-	setting: "setting",
-	source_work: "source_work",
-	canonical_wiki_page: "canonical_wiki_page",
-	related_subject: "related_subject",
-} as const;
-
-export type PostApiUnitsByTypeByUnitIdSubjectAssociationsRequestRoleEnum =
-	(typeof PostApiUnitsByTypeByUnitIdSubjectAssociationsRequestRoleEnum)[keyof typeof PostApiUnitsByTypeByUnitIdSubjectAssociationsRequestRoleEnum];
-
-export const PostApiUnitsByTypeByUnitIdSubjectAssociationsRequestRevisionContextContributionRoleEnum =
-	{
-		creator: "creator",
-		editor: "editor",
-		translator: "translator",
-		researcher: "researcher",
-	} as const;
-
-export type PostApiUnitsByTypeByUnitIdSubjectAssociationsRequestRevisionContextContributionRoleEnum =
-	(typeof PostApiUnitsByTypeByUnitIdSubjectAssociationsRequestRevisionContextContributionRoleEnum)[keyof typeof PostApiUnitsByTypeByUnitIdSubjectAssociationsRequestRevisionContextContributionRoleEnum];
-
-/**
- * @type object
- */
-export type PostApiUnitsByTypeByUnitIdSubjectAssociationsBody = {
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	entityId: string;
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string | undefined
-	 */
-	contextPostId?: string;
-	/**
-	 * @default 'primary_character'
-	 * @type string
-	 */
-	role: PostApiUnitsByTypeByUnitIdSubjectAssociationsRequestRoleEnum;
-	/**
-	 * @description
-	 * Format: `fractional-position`
-	 * @minLength 2
-	 * @maxLength 512
-	 * @type string | undefined
-	 */
-	position?: string;
-	/**
-	 * @type object | undefined
-	 */
-	revisionContext?: {
-		contribution?:
-			| {
-					/**
-					 * @type string
-					 */
-					primary: "human";
-			  }
-			| {
-					/**
-					 * @type string
-					 */
-					primary: "unattributed";
-			  }
-			| {
-					/**
-					 * @type string
-					 */
-					primary: "ai";
-					/**
-					 * @description
-					 * Format: `uuid`
-					 * @type string
-					 */
-					creditedEntityId: string;
-					/**
-					 * @default 'creator'
-					 * @type string
-					 */
-					role: PostApiUnitsByTypeByUnitIdSubjectAssociationsRequestRevisionContextContributionRoleEnum;
-			  };
-	};
-};
-
-/**
- * @type object
- */
-export type PostApiUnitsByTypeByUnitIdSubjectAssociationsOptions = {
-	body: PostApiUnitsByTypeByUnitIdSubjectAssociationsBody;
-	path: PostApiUnitsByTypeByUnitIdSubjectAssociationsPath;
-	query?: never;
-	headers?: never;
-};
-
-/**
- * @type object
- */
-export type PostApiUnitsByTypeByUnitIdSubjectAssociationsResponses = {
-	"200": PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus200;
-	"400": PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus400;
-	"403": PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus403;
-	"404": PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus404;
-	"422": PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus422;
-	"429": PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus429;
-	"500": PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus500;
-};
-
-/**
- * @description Union of all possible responses
- */
-export type PostApiUnitsByTypeByUnitIdSubjectAssociationsResponse =
-	| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus200
-	| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus400
-	| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus403
-	| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus404
-	| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus422
-	| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus429
-	| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus500;
 
 /**
  * @type object

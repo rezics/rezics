@@ -80,6 +80,7 @@ export default {
 		description:
 			"同じ管理範囲の同じ意味はまとめて表示し、直接適用またはパス由来の各情報源は個別に確認できます。",
 		empty: "タグの意味はまだ適用されていません。",
+		partial: "このカードには、ほかにもタグの意味があります。",
 		open: insert("「{{expression}}」のタグ意味カードを開く（{{authority}}）", {
 			expression: String,
 			authority: String,

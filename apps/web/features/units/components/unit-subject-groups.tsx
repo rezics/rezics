@@ -1,20 +1,36 @@
 "use client";
 
-import type { GetApiUnitsByTypeByUnitIdStatus200 } from "@rezics/openapi-tanstack-query";
-import { Button, CardContent, Cover, IdentityAvatar, ItemMedia } from "@rezics/ui";
+import type {
+	GetApiUnitsByTypeByUnitIdStatus200,
+	GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus200,
+} from "@rezics/openapi-tanstack-query";
+import { Button, CardContent, Cover, ShowMoreContent } from "@rezics/ui";
 import { useState } from "react";
 
 import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import { useChineseContentText } from "@/features/content-language-display/chinese-content-display-context";
+import { LocalizedPortableTextContent } from "@/features/content-language-display/localized-portable-text-content";
 import { FeedCard } from "@/features/content-feed/components/feed-card";
 import { TagExpressionPreview } from "@/features/tags/components/tag-expression-preview";
 import { TagReferenceBadge } from "@/features/tags/components/tag-reference-badge";
 import { useTranslation } from "@/i18n/client";
+import { toFiniteApiNumber } from "@/lib/api-number";
+import { readPortableText } from "@/lib/block";
 import { groupByAssociationRole } from "../attribution-role";
-import { subjectAssociationMediaKind } from "../model/subject-association-presentation";
 import { publicUnitHref } from "../routing/public-unit-route";
+import { CompactCreditAttributionGroups } from "./unit-attribution-sections";
 
-type SubjectAssociation = GetApiUnitsByTypeByUnitIdStatus200["subjectAssociations"][number];
+type PreviewSubjectAssociation = GetApiUnitsByTypeByUnitIdStatus200["subjectAssociations"][number];
+type CompleteSubjectAssociation =
+	GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus200["items"][number];
+type SubjectAssociation = PreviewSubjectAssociation | CompleteSubjectAssociation;
+type CompleteMeasurement = NonNullable<CompleteSubjectAssociation["measurement"]>;
+
+function isCompleteAssociation(
+	association: SubjectAssociation,
+): association is CompleteSubjectAssociation {
+	return "description" in association;
+}
 
 export function UnitSubjectGroups({
 	associations,
@@ -41,7 +57,7 @@ export function UnitSubjectGroups({
 }
 
 function SubjectAssociationCard({ association }: { readonly association: SubjectAssociation }) {
-	const { t } = useTranslation(["editor", "ui", "units"]);
+	const { t } = useTranslation(["editor", "tags", "ui", "units"]);
 	const [revealed, setRevealed] = useState(false);
 	const title = useChineseContentText(
 		association.title ?? t.ui.unnamed,
@@ -50,12 +66,7 @@ function SubjectAssociationCard({ association }: { readonly association: Subject
 	const summary = useChineseContentText(association.summary ?? "", association.language);
 	const href = publicUnitHref("entity", { id: association.entityEntryId });
 	const headingId = `subject-association-${association.id}`;
-	const mediaKind = subjectAssociationMediaKind({
-		entityKind: association.entityKind,
-		role: association.role,
-		hasAvatar: association.avatar !== null,
-		hasCover: association.cover !== null,
-	});
+	const complete = isCompleteAssociation(association);
 	if (association.spoiler.concealed && !revealed)
 		return (
 			<FeedCard>
@@ -70,27 +81,14 @@ function SubjectAssociationCard({ association }: { readonly association: Subject
 	return (
 		<FeedCard aria-labelledby={headingId}>
 			<CardContent className="grid grid-cols-[5rem_minmax(0,1fr)] gap-4 px-4 py-5 sm:grid-cols-[7.5rem_minmax(0,1fr)] sm:px-5">
-				{mediaKind === "cover" ? (
-					<Link className="block self-start" href={href}>
-						<Cover
-							alt={title}
-							className="w-full rounded-xl border border-border-weak shadow-sm/5"
-							sizes="(min-width: 640px) 120px, 80px"
-							src={association.cover?.url}
-						/>
-					</Link>
-				) : (
-					<Link className="block self-start" href={href}>
-						<ItemMedia variant="icon">
-							<IdentityAvatar
-								avatar={association.avatar}
-								className="size-14 text-lg font-black"
-								fallback={title.slice(0, 1).toUpperCase()}
-								imageAlt={title}
-							/>
-						</ItemMedia>
-					</Link>
-				)}
+				<Link className="block self-start" href={href}>
+					<Cover
+						alt={title}
+						className="w-full rounded-xl border border-border-weak shadow-sm/5"
+						sizes="(min-width: 640px) 120px, 80px"
+						src={association.cover?.url}
+					/>
+				</Link>
 				<div className="min-w-0 self-start">
 					<h4 className="font-heading font-black text-[1.05rem] leading-snug" id={headingId}>
 						<Link className="text-link hover:text-link-hover hover:underline" href={href}>
@@ -98,9 +96,32 @@ function SubjectAssociationCard({ association }: { readonly association: Subject
 						</Link>
 					</h4>
 					{summary ? (
-						<p className="mt-2 line-clamp-3 text-muted-foreground text-sm leading-6">{summary}</p>
+						<p className="mt-2 text-muted-foreground text-sm leading-6">{summary}</p>
 					) : null}
-					<TagExpressionPreview expressions={association.expressions} />
+					{complete && association.description ? (
+						<div className="mt-3">
+							<ShowMoreContent showLessLabel={t.ui.showLess} showMoreLabel={t.ui.showMore}>
+								<LocalizedPortableTextContent
+									className="text-sm prose-p:my-3 prose-p:leading-6 [&_p:first-child]:mt-0 [&_p:last-child]:mb-0"
+									language={association.language}
+									value={readPortableText(association.description)}
+									variant="article"
+								/>
+							</ShowMoreContent>
+						</div>
+					) : null}
+					{complete && association.measurement ? (
+						<AssociationMeasurementDetails measurement={association.measurement} />
+					) : null}
+					{complete && association.attributions.length ? (
+						<div className="mt-4 border-border-weak border-t pt-4">
+							<CompactCreditAttributionGroups attributions={association.attributions} />
+						</div>
+					) : null}
+					<TagExpressionPreview compact={!complete} expressions={association.expressions} />
+					{complete && !association.expressionsComplete ? (
+						<p className="mt-2 text-muted-foreground text-xs">{t.tags.expressions.partial}</p>
+					) : null}
 					{association.contextPost ? (
 						<div className="mt-3 grid gap-2">
 							<Link
@@ -127,5 +148,46 @@ function SubjectAssociationCard({ association }: { readonly association: Subject
 				</div>
 			</CardContent>
 		</FeedCard>
+	);
+}
+
+function AssociationMeasurementDetails({
+	measurement,
+}: {
+	readonly measurement: CompleteMeasurement;
+}) {
+	const { locale, t } = useTranslation(["entities"]);
+	const numberFormat = new Intl.NumberFormat(locale.target, { maximumFractionDigits: 1 });
+	const present = (
+		label: string,
+		value: string | number | null | undefined,
+		divisor: number,
+		unit: string,
+	) => {
+		const numericValue = toFiniteApiNumber(value);
+		return numericValue === undefined
+			? null
+			: { label, value: `${numberFormat.format(numericValue / divisor)} ${unit}` };
+	};
+	const values = [
+		present(t.entities.height, measurement.heightMillimetres, 10, t.entities.centimetreUnit),
+		present(t.entities.weight, measurement.weightGrams, 1_000, t.entities.kilogramUnit),
+		present(t.entities.bust, measurement.bustMillimetres, 10, t.entities.centimetreUnit),
+		present(t.entities.waist, measurement.waistMillimetres, 10, t.entities.centimetreUnit),
+		present(t.entities.hips, measurement.hipsMillimetres, 10, t.entities.centimetreUnit),
+	].filter((value): value is { readonly label: string; readonly value: string } => value !== null);
+	if (!values.length) return null;
+	return (
+		<section className="mt-4 grid gap-2 border-border-weak border-t pt-4">
+			<h5 className="text-sm font-semibold">{t.entities.measurements}</h5>
+			<dl className="grid gap-x-8 gap-y-2 sm:grid-cols-2">
+				{values.map((value) => (
+					<div className="flex items-baseline justify-between gap-4" key={value.label}>
+						<dt className="text-xs text-muted-foreground">{value.label}</dt>
+						<dd className="font-medium text-sm tabular-nums">{value.value}</dd>
+					</div>
+				))}
+			</dl>
+		</section>
 	);
 }

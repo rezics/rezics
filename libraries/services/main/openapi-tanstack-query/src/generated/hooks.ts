@@ -1615,6 +1615,20 @@ import type {
 	PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus422,
 	PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus429,
 	PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus500,
+	GetApiUnitsByTypeByUnitIdSubjectAssociationsOptions,
+	GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus200,
+	GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus400,
+	GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus404,
+	GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus422,
+	GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus500,
+	PostApiUnitsByTypeByUnitIdSubjectAssociationsOptions,
+	PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus200,
+	PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus400,
+	PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus403,
+	PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus404,
+	PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus422,
+	PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus429,
+	PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus500,
 	ListCurrentUserContributionResourcesOptions,
 	ListCurrentUserContributionResourcesStatus200,
 	ListCurrentUserContributionResourcesStatus400,
@@ -1815,14 +1829,6 @@ import type {
 	DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus422,
 	DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus429,
 	DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus500,
-	PostApiUnitsByTypeByUnitIdSubjectAssociationsOptions,
-	PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus200,
-	PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus400,
-	PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus403,
-	PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus404,
-	PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus422,
-	PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus429,
-	PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus500,
 	PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerOptions,
 	PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus200,
 	PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerStatus400,
@@ -3163,6 +3169,8 @@ import {
 	patchApiUnitsByTypeByUnitIdVariantContext,
 	postApiUnitsByTypeByUnitIdVariantContextPromote,
 	putApiUnitsByTypeByUnitIdLocalizationsByLanguage,
+	getApiUnitsByTypeByUnitIdSubjectAssociations,
+	postApiUnitsByTypeByUnitIdSubjectAssociations,
 	listCurrentUserContributionResources,
 	getApiHistoryUnitsByUnitIdRevisions,
 	getApiHistoryUnitRevisionsByRevisionId,
@@ -3192,7 +3200,6 @@ import {
 	deleteApiUnitsByTypeByUnitIdAliasesByAliasId,
 	postApiUnitsByTypeByUnitIdCreditAttributions,
 	deleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationId,
-	postApiUnitsByTypeByUnitIdSubjectAssociations,
 	putApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoiler,
 	deleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoiler,
 	deleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationId,
@@ -28064,6 +28071,229 @@ export function usePutApiUnitsByTypeByUnitIdLocalizationsByLanguage<TContext>(
 	>;
 }
 
+export const getApiUnitsByTypeByUnitIdSubjectAssociationsQueryKey = ({
+	path,
+	query,
+}: Omit<GetApiUnitsByTypeByUnitIdSubjectAssociationsOptions, "headers">) =>
+	[
+		{ url: "/api/v1/units/:type/:unitId/subject-associations", params: path },
+		...(query ? [query] : []),
+	] as const;
+
+type GetApiUnitsByTypeByUnitIdSubjectAssociationsQueryKey = ReturnType<
+	typeof getApiUnitsByTypeByUnitIdSubjectAssociationsQueryKey
+>;
+
+export function getApiUnitsByTypeByUnitIdSubjectAssociationsQueryOptions(
+	{ path, query }: GetApiUnitsByTypeByUnitIdSubjectAssociationsOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = getApiUnitsByTypeByUnitIdSubjectAssociationsQueryKey({ path, query });
+	return queryOptions<
+		GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus200,
+		ResponseErrorConfig<
+			| GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus400
+			| GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus404
+			| GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus422
+			| GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus500
+		>,
+		GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			const { data } = await getApiUnitsByTypeByUnitIdSubjectAssociations({
+				...config,
+				path,
+				query,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary List bounded Unit subject association cards
+ * {@link /api/v1/units/:type/:unitId/subject-associations}
+ */
+export function useGetApiUnitsByTypeByUnitIdSubjectAssociations<
+	TData = GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus200,
+	TQueryData = GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus200,
+	TQueryKey extends QueryKey = GetApiUnitsByTypeByUnitIdSubjectAssociationsQueryKey,
+>(
+	{
+		path,
+		query,
+	}: {
+		path:
+			| GetApiUnitsByTypeByUnitIdSubjectAssociationsOptions["path"]
+			| (() => GetApiUnitsByTypeByUnitIdSubjectAssociationsOptions["path"]);
+		query?:
+			| GetApiUnitsByTypeByUnitIdSubjectAssociationsOptions["query"]
+			| (() => GetApiUnitsByTypeByUnitIdSubjectAssociationsOptions["query"]);
+	},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus200,
+				ResponseErrorConfig<
+					| GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus400
+					| GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus404
+					| GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus422
+					| GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus500
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = {
+		path: typeof path === "function" ? path() : path,
+		query: typeof query === "function" ? query() : query,
+	};
+	const queryKey =
+		resolvedOptions?.queryKey ??
+		getApiUnitsByTypeByUnitIdSubjectAssociationsQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...getApiUnitsByTypeByUnitIdSubjectAssociationsQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			| GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus400
+			| GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus404
+			| GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus422
+			| GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus500
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const postApiUnitsByTypeByUnitIdSubjectAssociationsMutationKey = () =>
+	[{ url: "/api/v1/units/:type/:unitId/subject-associations" }] as const;
+
+export function postApiUnitsByTypeByUnitIdSubjectAssociationsMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = postApiUnitsByTypeByUnitIdSubjectAssociationsMutationKey();
+	return mutationOptions<
+		PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus200,
+		ResponseErrorConfig<
+			| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus400
+			| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus403
+			| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus404
+			| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus422
+			| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus429
+			| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus500
+		>,
+		PostApiUnitsByTypeByUnitIdSubjectAssociationsOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			const { data } = await postApiUnitsByTypeByUnitIdSubjectAssociations({
+				...config,
+				path,
+				body,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Add Unit subject association
+ * {@link /api/v1/units/:type/:unitId/subject-associations}
+ */
+export function usePostApiUnitsByTypeByUnitIdSubjectAssociations<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus200,
+			ResponseErrorConfig<
+				| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus400
+				| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus403
+				| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus404
+				| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus422
+				| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus429
+				| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus500
+			>,
+			PostApiUnitsByTypeByUnitIdSubjectAssociationsOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ?? postApiUnitsByTypeByUnitIdSubjectAssociationsMutationKey();
+
+	const baseOptions = postApiUnitsByTypeByUnitIdSubjectAssociationsMutationOptions(
+		config,
+	) as UseMutationOptions<
+		PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus200,
+		ResponseErrorConfig<
+			| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus400
+			| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus403
+			| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus404
+			| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus422
+			| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus429
+			| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus500
+		>,
+		PostApiUnitsByTypeByUnitIdSubjectAssociationsOptions,
+		TContext
+	>;
+
+	return useMutation<
+		PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus200,
+		ResponseErrorConfig<
+			| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus400
+			| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus403
+			| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus404
+			| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus422
+			| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus429
+			| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus500
+		>,
+		PostApiUnitsByTypeByUnitIdSubjectAssociationsOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus200,
+		ResponseErrorConfig<
+			| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus400
+			| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus403
+			| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus404
+			| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus422
+			| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus429
+			| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus500
+		>,
+		PostApiUnitsByTypeByUnitIdSubjectAssociationsOptions,
+		TContext
+	>;
+}
+
 export const listCurrentUserContributionResourcesQueryKey = ({
 	query,
 }: Omit<ListCurrentUserContributionResourcesOptions, "headers">) =>
@@ -31074,116 +31304,6 @@ export function useDeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationId
 			| DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus500
 		>,
 		DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdOptions,
-		TContext
-	>;
-}
-
-export const postApiUnitsByTypeByUnitIdSubjectAssociationsMutationKey = () =>
-	[{ url: "/api/v1/units/:type/:unitId/subject-associations" }] as const;
-
-export function postApiUnitsByTypeByUnitIdSubjectAssociationsMutationOptions<TContext = unknown>(
-	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
-) {
-	const mutationKey = postApiUnitsByTypeByUnitIdSubjectAssociationsMutationKey();
-	return mutationOptions<
-		PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus200,
-		ResponseErrorConfig<
-			| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus400
-			| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus403
-			| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus404
-			| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus422
-			| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus429
-			| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus500
-		>,
-		PostApiUnitsByTypeByUnitIdSubjectAssociationsOptions,
-		TContext
-	>({
-		mutationKey,
-		mutationFn: async ({ path, body }) => {
-			const { data } = await postApiUnitsByTypeByUnitIdSubjectAssociations({
-				...config,
-				path,
-				body,
-				throwOnError: true,
-			});
-			return data;
-		},
-	});
-}
-
-/**
- * @summary Add Unit subject association
- * {@link /api/v1/units/:type/:unitId/subject-associations}
- */
-export function usePostApiUnitsByTypeByUnitIdSubjectAssociations<TContext>(
-	options: {
-		mutation?: UseMutationOptions<
-			PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus200,
-			ResponseErrorConfig<
-				| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus400
-				| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus403
-				| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus404
-				| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus422
-				| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus429
-				| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus500
-			>,
-			PostApiUnitsByTypeByUnitIdSubjectAssociationsOptions,
-			TContext
-		> & { client?: QueryClient };
-		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
-	} = {},
-) {
-	const { mutation = {}, client: config = {} } = options ?? {};
-	const { client: queryClient, ...mutationOptions } = mutation;
-	const mutationKey =
-		mutationOptions.mutationKey ?? postApiUnitsByTypeByUnitIdSubjectAssociationsMutationKey();
-
-	const baseOptions = postApiUnitsByTypeByUnitIdSubjectAssociationsMutationOptions(
-		config,
-	) as UseMutationOptions<
-		PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus200,
-		ResponseErrorConfig<
-			| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus400
-			| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus403
-			| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus404
-			| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus422
-			| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus429
-			| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus500
-		>,
-		PostApiUnitsByTypeByUnitIdSubjectAssociationsOptions,
-		TContext
-	>;
-
-	return useMutation<
-		PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus200,
-		ResponseErrorConfig<
-			| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus400
-			| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus403
-			| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus404
-			| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus422
-			| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus429
-			| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus500
-		>,
-		PostApiUnitsByTypeByUnitIdSubjectAssociationsOptions,
-		TContext
-	>(
-		{
-			...baseOptions,
-			mutationKey,
-			...mutationOptions,
-		},
-		queryClient,
-	) as UseMutationResult<
-		PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus200,
-		ResponseErrorConfig<
-			| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus400
-			| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus403
-			| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus404
-			| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus422
-			| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus429
-			| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus500
-		>,
-		PostApiUnitsByTypeByUnitIdSubjectAssociationsOptions,
 		TContext
 	>;
 }

@@ -1,6 +1,9 @@
 "use client";
 
-import type { GetApiUnitsByTypeByUnitIdStatus200 } from "@rezics/openapi-tanstack-query";
+import type {
+	GetApiUnitsByTypeByUnitIdStatus200,
+	GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus200,
+} from "@rezics/openapi-tanstack-query";
 import {
 	Card,
 	CardContent,
@@ -21,8 +24,10 @@ import { groupByAssociationRole } from "../attribution-role";
 import { publicUnitHref } from "../routing/public-unit-route";
 
 type CreditAttribution = GetApiUnitsByTypeByUnitIdStatus200["attributions"][number];
+type CompactCreditAttribution =
+	GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus200["items"][number]["attributions"][number];
 
-function attributionHref(attribution: CreditAttribution): string | undefined {
+function attributionHref(attribution: CompactCreditAttribution): string | undefined {
 	return publicUnitHref(attribution.creditedUnit.kind, attribution.creditedUnit);
 }
 
@@ -30,7 +35,7 @@ function AttributionName({
 	attribution,
 	showInfoCard = false,
 }: {
-	attribution: CreditAttribution;
+	attribution: CompactCreditAttribution;
 	showInfoCard?: boolean;
 }) {
 	const { t } = useTranslation(["ui"]);
@@ -76,7 +81,7 @@ function AttributionName({
 export function CompactCreditAttributionGroups({
 	attributions,
 }: {
-	attributions: readonly CreditAttribution[];
+	attributions: readonly CompactCreditAttribution[];
 }) {
 	const { t } = useTranslation(["units"]);
 	return (

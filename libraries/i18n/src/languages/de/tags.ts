@@ -81,6 +81,7 @@ export default {
 		description:
 			"Dieselbe Bedeutung innerhalb einer Zuständigkeit wird zusammengefasst; jede direkte oder pfadbasierte Quelle bleibt einzeln einsehbar.",
 		empty: "Noch keine Tag-Bedeutung angewendet.",
+		partial: "Diese Karte enthält weitere Tag-Bedeutungen.",
 		open: insert("Karte zur Tag-Bedeutung {{expression}} öffnen ({{authority}})", {
 			expression: String,
 			authority: String,

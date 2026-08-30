@@ -81,6 +81,7 @@ export default {
 		description:
 			"El mismo significado dentro de una autoridad se agrupa, pero cada fuente directa o procedente de una ruta se puede consultar por separado.",
 		empty: "Todavía no se ha aplicado ningún significado de etiqueta.",
+		partial: "Esta tarjeta contiene más significados de etiquetas.",
 		open: insert("Abrir la ficha del significado {{expression}} ({{authority}})", {
 			expression: String,
 			authority: String,

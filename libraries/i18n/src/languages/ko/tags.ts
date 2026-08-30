@@ -80,6 +80,7 @@ export default {
 		description:
 			"같은 관리 범위의 같은 의미는 함께 표시하되, 직접 적용과 경로에서 온 각 출처는 따로 확인할 수 있습니다.",
 		empty: "아직 적용된 태그 의미가 없습니다.",
+		partial: "이 카드에는 더 많은 태그 의미가 있습니다.",
 		open: insert("{{expression}} 태그 의미 카드 열기({{authority}})", {
 			expression: String,
 			authority: String,

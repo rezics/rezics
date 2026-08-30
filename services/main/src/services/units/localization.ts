@@ -7,6 +7,7 @@ import {
 	type FontAwesomeIconPrefix,
 } from "@rezics/avatar";
 import type { ContentLanguage } from "@rezics/i18n";
+import type { PortableTextDocument } from "@rezics/block";
 
 import type { DatabaseTransaction } from "../database";
 import { unitLocalization } from "../database/schema";
@@ -463,6 +464,25 @@ export function resolvedUnitLocalizationSummary(
 ): SQL<string | null> {
 	return sql<string | null>`(
 		select ${unitLocalization.summary}
+		from ${unitLocalization}
+		where ${unitLocalization.unitId} = ${unitId}
+			and ${localizationLanguageCondition(unitLocalization.language, allowedLanguages)}
+		order by
+			${localizationLanguageOrder(unitLocalization.language, languages)},
+			${unitLocalization.position},
+			${unitLocalization.language}
+		limit 1
+	)`;
+}
+
+/** Resolve the requested localization's description, then use the Unit's fallback language order. */
+export function resolvedUnitLocalizationDescription(
+	unitId: SQLWrapper,
+	languages: LocalizationLanguageQuery = [],
+	allowedLanguages: LocalizationLanguageQuery = [],
+): SQL<PortableTextDocument | null> {
+	return sql<PortableTextDocument | null>`(
+		select ${unitLocalization.description}
 		from ${unitLocalization}
 		where ${unitLocalization.unitId} = ${unitId}
 			and ${localizationLanguageCondition(unitLocalization.language, allowedLanguages)}
