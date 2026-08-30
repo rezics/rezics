@@ -25,11 +25,10 @@ tasks:
         desc: Run the default REZICS development topology interactively.
         dir: ..
         cmds:
-            - task: doctor
             - task infra:up
-            - task services-main:db:prepare
+            - task services-main:db:development:prepare
             - task services-main:search:index -- check
-            - yarn exec aspire run --apphost aspire-apphost/apphost.mts
+            - yarn exec aspire run --no-build --apphost aspire-apphost/apphost.mts
 
     stop:
         desc: Stop the REZICS AppHost selected by the rooted Aspire configuration.

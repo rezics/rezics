@@ -183,6 +183,8 @@ tasks:
     local:setup:
         desc: Start infrastructure and install or prepare the local development database.
         cmds:
+            - task: aspire-apphost:doctor
+            - task: aspire-apphost:typecheck
             - task: infra:up
             - task: services-main:db:install
               vars:

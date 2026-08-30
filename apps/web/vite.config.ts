@@ -9,6 +9,27 @@ import { VitePWA } from "vite-plugin-pwa";
 import { pwaManifest } from "./pwa";
 import { fontAwesomeWorkerVariables } from "./vite-worker-environment";
 
+const developmentOptimizeDepsExclude = [
+	"@tanstack/react-query",
+	"@cloudflare/playwright",
+	"opencc-js/cn2t",
+	"opencc-js/t2cn",
+] as const;
+
+const applicationClientWarmupFiles = [
+	"./lib/app-providers.tsx",
+	"./features/application-shell/application-shell.tsx",
+	"./features/explore/home.tsx",
+	"./features/content-feed/data/api-feed-list.tsx",
+] as const;
+
+const applicationRscWarmupFiles = [
+	"./app/layout.tsx",
+	"./app/(app)/layout.tsx",
+	"./app/(app)/page.tsx",
+	"./i18n/translation-boundary.tsx",
+] as const;
+
 function resolveApiProxyTarget(value: string | undefined) {
 	const target = new URL(value ?? "http://localhost:3001");
 	if (target.protocol !== "http:" && target.protocol !== "https:")
@@ -53,6 +74,11 @@ for (const plugin of pwaPlugins) {
 }
 
 export default defineConfig(({ command }) => ({
+	// Isolated smoke runs receive random Aspire proxy endpoints. Keep their
+	// config-specific optimizer output from evicting the stable daily-dev cache.
+	...(command === "serve" && process.env.REZICS_ASPIRE_MODE === "smoke"
+		? { cacheDir: "node_modules/.vite-smoke" }
+		: {}),
 	plugins: [
 		vinext({}),
 		cloudflare({
@@ -73,11 +99,22 @@ export default defineConfig(({ command }) => ({
 	],
 	// RSC resolves React Query's "use client" modules by file path, so keep its
 	// package entry and internal modules on the same unoptimized module graph.
+	// This is intentionally unchanged for the production config boundary.
 	optimizeDeps: {
-		exclude: ["@tanstack/react-query"],
+		exclude: command === "serve" ? [...developmentOptimizeDepsExclude] : ["@tanstack/react-query"],
 	},
 	environments: {
 		client: {
+			// The following spread is serve-only. The extra exclusions are
+			// single-file, pure-ESM dependencies reached by optional dynamic
+			// imports, so eagerly copying their large source maps into every
+			// environment adds work without reducing common-path requests.
+			...(command === "serve"
+				? {
+						dev: { warmup: [...applicationClientWarmupFiles] },
+						optimizeDeps: { exclude: [...developmentOptimizeDepsExclude] },
+					}
+				: {}),
 			build: {
 				rolldownOptions: {
 					output: {
@@ -97,6 +134,18 @@ export default defineConfig(({ command }) => ({
 				},
 			},
 		},
+		...(command === "serve"
+			? {
+					rsc: {
+						dev: { warmup: [...applicationRscWarmupFiles] },
+						optimizeDeps: { exclude: [...developmentOptimizeDepsExclude] },
+					},
+					ssr: {
+						dev: { warmup: [...applicationClientWarmupFiles] },
+						optimizeDeps: { exclude: [...developmentOptimizeDepsExclude] },
+					},
+				}
+			: {}),
 	},
 	server: {
 		strictPort: true,

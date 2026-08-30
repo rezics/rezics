@@ -368,6 +368,14 @@ tasks:
             - task: db:runtime:verify
             - task: platform:verify
 
+    db:development:prepare:
+        desc: Apply pending migrations and ensure reserved identities for an installed development database.
+        cmds:
+            - task: db:migrate
+            - task: platform:install
+              vars:
+                  CLI_ARGS: --yes
+
     db:status:
         desc: Show Atlas migration status.
         cmds:

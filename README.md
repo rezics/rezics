@@ -60,15 +60,18 @@ task dev
 ```
 
 `local:setup` is the explicit first-run/configuration workflow. It starts the
-persistent Compose infrastructure, initializes RustFS, applies migrations,
+persistent Compose infrastructure, verifies the pinned local prerequisites,
+restores and type-checks the Aspire AppHost, initializes RustFS, applies migrations,
 ensures reserved platform identities when they are missing, and verifies the
 authoritative PGroonga indexes. On an installed database it verifies
 only permanent platform identities and never reconciles product-owned content.
 It is safe to rerun for a healthy unchanged database. Named volumes preserve PostgreSQL and
 RustFS data independently from the Aspire AppHost.
 
-`dev` ensures Compose infrastructure is healthy, prepares the database, and performs a
-bounded read-only check of the required database extensions and PGroonga indexes. It then starts the Bun API and recommendation worker,
+`dev` ensures Compose infrastructure is healthy, validates and applies only pending
+Atlas migrations, ensures reserved platform identities, and performs a bounded read-only
+check of the required database extensions and PGroonga indexes. It does not repeat the
+full prerequisite diagnostics or AppHost restore/build from `local:setup`. It then starts the Bun API and recommendation worker,
 Vinext web app, and Aspire Dashboard in the foreground. The stable development endpoints are web
 `http://localhost:3000`, API `http://localhost:3001`, PostgreSQL
 `localhost:5432` and RustFS `http://localhost:9000`. Aspire still injects
