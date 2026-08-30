@@ -62,7 +62,7 @@
 		"@img/sharp-linux-x64": "0.34.5"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "2.5.7",
+		"@biomejs/biome": "2.5.11",
 		"@faker-js/faker": "^10.5.0",
 		"@rezics/atlas": "workspace:*",
 		"@types/css-tree": "^3",

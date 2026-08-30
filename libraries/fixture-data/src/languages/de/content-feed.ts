@@ -36,7 +36,8 @@ export default {
 		},
 	],
 	post: {
-		title: "Warum ist das Gitter-Netzwerk das ungewöhnlichste Gruppenbewusstsein dieser fiktiven Welt?",
+		title:
+			"Warum ist das Gitter-Netzwerk das ungewöhnlichste Gruppenbewusstsein dieser fiktiven Welt?",
 		body: "Das Gitter-Netzwerk ist mehr als die Summe einzelner Bewusstseine. Sein elektromagnetisches Medium überschreitet die Grenzen persönlicher Fähigkeiten und bewahrt zugleich die Unterschiede zwischen den Einzelnen.",
 		mediaAlt: "Nächtliche Stadtsilhouette mit leuchtenden Netzwerkpfaden",
 	},

@@ -38,7 +38,8 @@ export default {
 		},
 	],
 	post: {
-		title: "¿Por qué la Red de la Rejilla es la mente colectiva más singular de este mundo ficticio?",
+		title:
+			"¿Por qué la Red de la Rejilla es la mente colectiva más singular de este mundo ficticio?",
 		body: "La Red de la Rejilla es más que la suma de varias mentes individuales. Su medio electromagnético supera los límites de las capacidades personales sin borrar las diferencias entre cada individuo.",
 		mediaAlt: "Una ciudad nocturna atravesada por rutas luminosas de red",
 	},
