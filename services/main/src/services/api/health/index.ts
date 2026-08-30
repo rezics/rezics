@@ -23,23 +23,42 @@ export function createHealthRoutes(
 	evaluateReadiness: () => Promise<ReadinessReport<ApiHealthCheckName>>,
 ) {
 	return new Elysia()
-		.get("/startup", () => ({ status: "ok" as const }), {
-			response: { [StatusCodes.OK]: HealthResponse },
-			detail: { summary: "Process startup", tags: ["System"] },
-		})
-		.get("/health", () => ({ status: "ok" as const }), {
-			response: { [StatusCodes.OK]: HealthResponse },
-			detail: { summary: "Process health", tags: ["System"] },
-		})
-		.head("/health", () => new Response(null, { status: StatusCodes.NO_CONTENT }), {
-			detail: {
-				summary: "Process health without a response body",
-				tags: ["System"],
-				responses: NoContentResponse,
+		.get(
+			"/startup",
+			{
+				response: { [StatusCodes.OK]: HealthResponse },
+				detail: { summary: "Process startup", tags: ["System"] },
 			},
-		})
+			() => ({ status: "ok" as const }),
+		)
+		.get(
+			"/health",
+			{
+				response: { [StatusCodes.OK]: HealthResponse },
+				detail: { summary: "Process health", tags: ["System"] },
+			},
+			() => ({ status: "ok" as const }),
+		)
+		.head(
+			"/health",
+			{
+				detail: {
+					summary: "Process health without a response body",
+					tags: ["System"],
+					responses: NoContentResponse,
+				},
+			},
+			() => new Response(null, { status: StatusCodes.NO_CONTENT }),
+		)
 		.get(
 			"/ready",
+			{
+				response: {
+					[StatusCodes.OK]: ReadinessResponse,
+					[StatusCodes.SERVICE_UNAVAILABLE]: ReadinessResponse,
+				},
+				detail: { summary: "Dependency readiness", tags: ["System"] },
+			},
 			async ({ status }) => {
 				const report = await evaluateReadiness();
 				return status(
@@ -54,13 +73,6 @@ export function createHealthRoutes(
 						},
 					},
 				);
-			},
-			{
-				response: {
-					[StatusCodes.OK]: ReadinessResponse,
-					[StatusCodes.SERVICE_UNAVAILABLE]: ReadinessResponse,
-				},
-				detail: { summary: "Dependency readiness", tags: ["System"] },
 			},
 		);
 }

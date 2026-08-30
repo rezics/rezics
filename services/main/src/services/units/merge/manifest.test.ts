@@ -1,11 +1,32 @@
 import { describe, expect, it } from "vitest";
 
 import { ContentLabelRegistryIds } from "../../bootstrap/data/content-labels";
-import { planUnitMergeGraph, requireUnitMergeRegistryEligibility } from "./manifest";
+import {
+	isUnitMergeManifestStaleness,
+	planUnitMergeGraph,
+	requireUnitMergeRegistryEligibility,
+} from "./manifest";
 
 const sourceUnitId = "0195c49b-8f3b-7e18-8c45-c2f36ee8d337";
 const targetUnitId = "0195c49b-8f3b-7e18-8c45-c2f36ee8d338";
 const otherMainUnitId = "0195c49b-8f3b-7e18-8c45-c2f36ee8d339";
+
+describe("Unit merge manifest failure classification", () => {
+	it.each([
+		"UnitMergeManifestStale",
+		"UnitMergeRequestConflict",
+		"UnitNotFound",
+		"UnitMergeKindMismatch",
+		"UnitMergeKindIneligible",
+	])("classifies serialized %s failures as stale", (type) => {
+		expect(isUnitMergeManifestStaleness({ type })).toBe(true);
+	});
+
+	it("does not classify unrelated serialized failures as stale", () => {
+		expect(isUnitMergeManifestStaleness({ type: "InternalError" })).toBe(false);
+		expect(isUnitMergeManifestStaleness(new Error("transient"))).toBe(false);
+	});
+});
 
 describe("Unit merge protected registry policy", () => {
 	it.each(ContentLabelRegistryIds)(
@@ -16,7 +37,7 @@ describe("Unit merge protected registry policy", () => {
 					sourceUnitId: registryUnitId,
 					targetUnitId,
 				}),
-			).toThrowError(expect.objectContaining({ _tag: "ContentLabelUnitMergeForbidden" }));
+			).toThrowError(expect.objectContaining({ type: "ContentLabelUnitMergeForbidden" }));
 		},
 	);
 
@@ -28,7 +49,7 @@ describe("Unit merge protected registry policy", () => {
 					sourceUnitId,
 					targetUnitId: registryUnitId,
 				}),
-			).toThrowError(expect.objectContaining({ _tag: "ContentLabelUnitMergeForbidden" }));
+			).toThrowError(expect.objectContaining({ type: "ContentLabelUnitMergeForbidden" }));
 		},
 	);
 

@@ -1,5 +1,5 @@
 import { StatusCodes } from "http-status-codes";
-import * as Data from "effect/Data";
+import { HTTPError } from "elysia";
 
 export type PostTargetRelation = "subject" | "root" | "parent";
 
@@ -16,19 +16,18 @@ export type PostTargetingLockDetails =
 			realmId: string;
 	  };
 
-export class PostTargetingLocked extends Data.TaggedError("PostTargetingLocked") {
-	static readonly status = StatusCodes.CONFLICT as const;
-	readonly status = PostTargetingLocked.status;
-	readonly message = "The target does not accept new Post relations";
+export class PostTargetingLocked extends HTTPError.id("PostTargetingLocked", StatusCodes.CONFLICT) {
+	override readonly message = "The target does not accept new Post relations";
 
 	constructor(readonly details: PostTargetingLockDetails) {
 		super();
 	}
 }
 
-export class PostTagMentionVoteConflict extends Data.TaggedError("PostTagMentionVoteConflict") {
-	static readonly status = StatusCodes.CONFLICT as const;
-	readonly status = PostTagMentionVoteConflict.status;
-	readonly message =
+export class PostTagMentionVoteConflict extends HTTPError.id(
+	"PostTagMentionVoteConflict",
+	StatusCodes.CONFLICT,
+) {
+	override readonly message =
 		"A mentioned Tag cannot be auto-voted because this Profile has already downvoted it on the Post";
 }

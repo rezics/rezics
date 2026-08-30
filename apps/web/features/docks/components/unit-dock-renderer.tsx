@@ -5,6 +5,7 @@ import {
 	NavigationDocument,
 	collectBlockReferences,
 	parseDocument,
+	type NavigationDocument as NavigationDocumentValue,
 	type NavigationItem,
 	type NavigationTarget,
 	type UnitListPresentation,
@@ -48,7 +49,7 @@ import { partitionDockPresentationIds, type DockTarget } from "../model/dock";
 type UnitPresentation = PostApiUnitsPresentationsStatus200["items"][number];
 type Navigation = {
 	readonly id: string;
-	readonly document: typeof NavigationDocument.static;
+	readonly document: NavigationDocumentValue;
 };
 
 function hasStatus(error: unknown, status: number): boolean {
@@ -530,7 +531,7 @@ function DockNavigation({
 	units,
 }: {
 	readonly appearance: "links" | "buttons" | "tabs" | "drawer";
-	readonly document: typeof NavigationDocument.static;
+	readonly document: NavigationDocumentValue;
 	readonly orientation: "horizontal" | "vertical";
 	readonly units: ReadonlyMap<string, UnitPresentation>;
 }) {

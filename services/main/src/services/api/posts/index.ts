@@ -221,6 +221,14 @@ export default new Elysia()
 		app
 			.get(
 				"/:postId/scores",
+				{
+					params: PostParams,
+					response: {
+						[StatusCodes.OK]: PostScoreListResponse,
+						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["PostNotFound"]),
+					},
+					detail: { summary: "List Post Scores", tags: ["Posts"] },
+				},
 				async ({ params, request }) => {
 					const identity = await resolveIdentity(request, "unit:read");
 					const { authorization } = identity;
@@ -235,17 +243,25 @@ export default new Elysia()
 						items: await selectPostScores(params.postId, identity.profile?.unitId),
 					};
 				},
-				{
-					params: PostParams,
-					response: {
-						[StatusCodes.OK]: PostScoreListResponse,
-						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["PostNotFound"]),
-					},
-					detail: { summary: "List Post Scores", tags: ["Posts"] },
-				},
 			)
 			.put(
 				"/:postId/scores",
+				{
+					access: "contribute:unit:update",
+					params: PostParams,
+					body: ReplacePostScoresBody,
+					response: {
+						[StatusCodes.OK]: PostScoreListResponse,
+						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
+						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
+							"UnitNotFound",
+							"PostNotFound",
+							"PostScoreNotFound",
+						]),
+						[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["PostScoreDuplicate"]),
+					},
+					detail: { summary: "Replace Post Scores", tags: ["Posts"] },
+				},
 				async ({ params, profile, authorization, body }) => {
 					await authorization.unit.ensureCanUpdate(params.postId, [["relations", "scores"]]);
 					const scoreIds = body.map(({ scoreId }) => scoreId);
@@ -305,25 +321,14 @@ export default new Elysia()
 						items: await selectPostScores(params.postId, profile.unitId),
 					};
 				},
-				{
-					access: "contribute:unit:update",
-					params: PostParams,
-					body: ReplacePostScoresBody,
-					response: {
-						[StatusCodes.OK]: PostScoreListResponse,
-						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
-						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
-							"UnitNotFound",
-							"PostNotFound",
-							"PostScoreNotFound",
-						]),
-						[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["PostScoreDuplicate"]),
-					},
-					detail: { summary: "Replace Post Scores", tags: ["Posts"] },
-				},
 			)
 			.get(
 				"",
+				{
+					query: ListPostsQuery,
+					response: { [StatusCodes.OK]: PostListResponse },
+					detail: { summary: "List posts", tags: ["Posts"] },
+				},
 				async ({ query, request }) => {
 					const identity = await resolveIdentity(request, "unit:read");
 					const localizationLanguages = query.localizationLanguages ?? [];
@@ -433,14 +438,28 @@ export default new Elysia()
 						}),
 					};
 				},
-				{
-					query: ListPostsQuery,
-					response: { [StatusCodes.OK]: PostListResponse },
-					detail: { summary: "List posts", tags: ["Posts"] },
-				},
 			)
 			.post(
 				"",
+				{
+					access: "contribute:unit:create",
+					body: CreatePostBody,
+					response: {
+						[StatusCodes.OK]: IdResponse,
+						[StatusCodes.BAD_REQUEST]: RevisionContributionBadRequestResponse,
+						[StatusCodes.FORBIDDEN]: toApiErrorResponse([
+							"RealmCapabilityRequired",
+							"EntityAssociationRestricted",
+						]),
+						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "EntityEntryNotFound"]),
+						[StatusCodes.CONFLICT]: toApiErrorResponse([
+							"RealmRulesAcceptanceRequired",
+							"PostTargetingLocked",
+						]),
+						[StatusCodes.TOO_MANY_REQUESTS]: VoteBackpressureResponse,
+					},
+					detail: { summary: "Create post or excerpt", tags: ["Posts"] },
+				},
 				async ({ profile, authorization, body }) => {
 					await authorization.realm.ensureUnitCreation(body.publishRealmIds, "realm.units.create");
 					const subjectId = body.subjectId
@@ -519,12 +538,16 @@ export default new Elysia()
 					);
 					return { id };
 				},
+			)
+			.post(
+				"/wiki",
 				{
 					access: "contribute:unit:create",
-					body: CreatePostBody,
+					body: CreateWikiBody,
 					response: {
 						[StatusCodes.OK]: IdResponse,
 						[StatusCodes.BAD_REQUEST]: RevisionContributionBadRequestResponse,
+						[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["ValidationError"]),
 						[StatusCodes.FORBIDDEN]: toApiErrorResponse([
 							"RealmCapabilityRequired",
 							"EntityAssociationRestricted",
@@ -536,11 +559,8 @@ export default new Elysia()
 						]),
 						[StatusCodes.TOO_MANY_REQUESTS]: VoteBackpressureResponse,
 					},
-					detail: { summary: "Create post or excerpt", tags: ["Posts"] },
+					detail: { summary: "Create Wiki", tags: ["Posts"] },
 				},
-			)
-			.post(
-				"/wiki",
 				async ({ profile, authorization, body }) => {
 					ensureWikiPostWriteDocument(body.body);
 					await authorization.realm.ensureUnitCreation(body.publishRealmIds, "realm.units.create");
@@ -567,29 +587,22 @@ export default new Elysia()
 					);
 					return { id };
 				},
-				{
-					access: "contribute:unit:create",
-					body: CreateWikiBody,
-					response: {
-						[StatusCodes.OK]: IdResponse,
-						[StatusCodes.BAD_REQUEST]: RevisionContributionBadRequestResponse,
-						[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["ValidationError"]),
-						[StatusCodes.FORBIDDEN]: toApiErrorResponse([
-							"RealmCapabilityRequired",
-							"EntityAssociationRestricted",
-						]),
-						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "EntityEntryNotFound"]),
-						[StatusCodes.CONFLICT]: toApiErrorResponse([
-							"RealmRulesAcceptanceRequired",
-							"PostTargetingLocked",
-						]),
-						[StatusCodes.TOO_MANY_REQUESTS]: VoteBackpressureResponse,
-					},
-					detail: { summary: "Create Wiki", tags: ["Posts"] },
-				},
 			)
 			.get(
 				"/:postId",
+				{
+					params: PostParams,
+					query: GetPostQuery,
+					response: {
+						[StatusCodes.OK]: PostDetailResponse,
+						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
+							"UnitNotFound",
+							"PostNotFound",
+							"PostLocalizationNotFound",
+						]),
+					},
+					detail: { summary: "Get post", tags: ["Posts"] },
+				},
 				async ({ params, query, request }) => {
 					const identity = await resolveIdentity(request, "unit:read");
 					const { authorization } = identity;
@@ -848,22 +861,31 @@ export default new Elysia()
 					if (row.postKind === "wiki") return { ...threadDetail, postKind: "wiki" as const };
 					return { ...threadDetail, postKind: "post" as const };
 				},
+			)
+			.patch(
+				"/:postId",
 				{
+					access: "contribute:unit:update",
 					params: PostParams,
-					query: GetPostQuery,
+					body: UpdatePostBody,
 					response: {
-						[StatusCodes.OK]: PostDetailResponse,
+						[StatusCodes.OK]: IdResponse,
+						[StatusCodes.BAD_REQUEST]: RevisionContributionBadRequestResponse,
+						[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["ValidationError"]),
+						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
 						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
 							"UnitNotFound",
 							"PostNotFound",
 							"PostLocalizationNotFound",
 						]),
+						[StatusCodes.CONFLICT]: toApiErrorResponse([
+							"UnitRevisionConflict",
+							"PostTagMentionVoteConflict",
+						]),
+						[StatusCodes.TOO_MANY_REQUESTS]: VoteBackpressureResponse,
 					},
-					detail: { summary: "Get post", tags: ["Posts"] },
+					detail: { summary: "Update post", tags: ["Posts"] },
 				},
-			)
-			.patch(
-				"/:postId",
 				async ({ params, profile, authorization, body }) => {
 					const postKind = await ensureSharedPostLocalizationTarget(params.postId);
 					if (postKind === "wiki") ensureWikiPostWriteDocument(body.body);
@@ -932,34 +954,22 @@ export default new Elysia()
 					});
 					return { id: params.postId };
 				},
-				{
-					access: "contribute:unit:update",
-					params: PostParams,
-					body: UpdatePostBody,
-					response: {
-						[StatusCodes.OK]: IdResponse,
-						[StatusCodes.BAD_REQUEST]: RevisionContributionBadRequestResponse,
-						[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["ValidationError"]),
-						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
-						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
-							"UnitNotFound",
-							"PostNotFound",
-							"PostLocalizationNotFound",
-						]),
-						[StatusCodes.CONFLICT]: toApiErrorResponse([
-							"UnitRevisionConflict",
-							"PostTagMentionVoteConflict",
-						]),
-						[StatusCodes.TOO_MANY_REQUESTS]: VoteBackpressureResponse,
-					},
-					detail: { summary: "Update post", tags: ["Posts"] },
-				},
 			),
 	)
 	.group("/posts/:postId/replies", (app) =>
 		app
 			.get(
 				"",
+				{
+					params: RootPostParams,
+					query: ListRepliesQuery,
+					response: {
+						[StatusCodes.OK]: ReplyListResponse,
+						[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["InvalidPaginationCursor"]),
+						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "PostNotFound"]),
+					},
+					detail: { summary: "List a bounded reply-post tree", tags: ["Posts"] },
+				},
 				async ({ params, query, request }) => {
 					const authorization = (await resolveIdentity(request, "unit:read")).authorization;
 					await authorization.unit.ensureCanRead(params.postId, () => new UnitNotFound("Post"));
@@ -1051,19 +1061,33 @@ export default new Elysia()
 						nextCursor: selection.nextCursor,
 					};
 				},
-				{
-					params: RootPostParams,
-					query: ListRepliesQuery,
-					response: {
-						[StatusCodes.OK]: ReplyListResponse,
-						[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["InvalidPaginationCursor"]),
-						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "PostNotFound"]),
-					},
-					detail: { summary: "List a bounded reply-post tree", tags: ["Posts"] },
-				},
 			)
 			.post(
 				"",
+				{
+					access: "contribute:interaction:write",
+					params: RootPostParams,
+					body: CreateReplyBody,
+					response: {
+						[StatusCodes.OK]: ReplyResponse,
+						[StatusCodes.BAD_REQUEST]: RevisionContributionBadRequestResponse,
+						[StatusCodes.FORBIDDEN]: toApiErrorResponse([
+							"RealmCapabilityRequired",
+							"ReplyDepthExceeded",
+						]),
+						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
+							"UnitNotFound",
+							"PostNotFound",
+							"ParentReplyNotFound",
+						]),
+						[StatusCodes.CONFLICT]: toApiErrorResponse([
+							"RealmRulesAcceptanceRequired",
+							"PostTargetingLocked",
+						]),
+						[StatusCodes.TOO_MANY_REQUESTS]: VoteBackpressureResponse,
+					},
+					detail: { summary: "Create reply post", tags: ["Posts"] },
+				},
 				async ({ params, profile, authorization, body }) => {
 					await authorization.unit.ensureCanRead(params.postId, () => new UnitNotFound("Post"));
 					await ensureRootPost(params.postId, body.realmId);
@@ -1209,33 +1233,26 @@ export default new Elysia()
 						},
 					};
 				},
-				{
-					access: "contribute:interaction:write",
-					params: RootPostParams,
-					body: CreateReplyBody,
-					response: {
-						[StatusCodes.OK]: ReplyResponse,
-						[StatusCodes.BAD_REQUEST]: RevisionContributionBadRequestResponse,
-						[StatusCodes.FORBIDDEN]: toApiErrorResponse([
-							"RealmCapabilityRequired",
-							"ReplyDepthExceeded",
-						]),
-						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
-							"UnitNotFound",
-							"PostNotFound",
-							"ParentReplyNotFound",
-						]),
-						[StatusCodes.CONFLICT]: toApiErrorResponse([
-							"RealmRulesAcceptanceRequired",
-							"PostTargetingLocked",
-						]),
-						[StatusCodes.TOO_MANY_REQUESTS]: VoteBackpressureResponse,
-					},
-					detail: { summary: "Create reply post", tags: ["Posts"] },
-				},
 			)
 			.patch(
 				"/:replyPostId",
+				{
+					access: "contribute:interaction:write",
+					params: ReplyParams,
+					body: UpdateReplyBody,
+					response: {
+						[StatusCodes.OK]: IdResponse,
+						[StatusCodes.BAD_REQUEST]: RevisionContributionBadRequestResponse,
+						[StatusCodes.FORBIDDEN]: toApiErrorResponse(["UnitPermissionForbidden"]),
+						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["ReplyPostNotFound", "UnitNotFound"]),
+						[StatusCodes.CONFLICT]: toApiErrorResponse([
+							"UnitRevisionConflict",
+							"PostTagMentionVoteConflict",
+						]),
+						[StatusCodes.TOO_MANY_REQUESTS]: VoteBackpressureResponse,
+					},
+					detail: { summary: "Update reply post", tags: ["Posts"] },
+				},
 				async ({ params, profile, authorization, body }) => {
 					await getReplyPost(params.postId, params.replyPostId);
 					await authorization.unit.ensureCanUpdate(params.replyPostId, [
@@ -1282,23 +1299,6 @@ export default new Elysia()
 						});
 					});
 					return { id: params.replyPostId };
-				},
-				{
-					access: "contribute:interaction:write",
-					params: ReplyParams,
-					body: UpdateReplyBody,
-					response: {
-						[StatusCodes.OK]: IdResponse,
-						[StatusCodes.BAD_REQUEST]: RevisionContributionBadRequestResponse,
-						[StatusCodes.FORBIDDEN]: toApiErrorResponse(["UnitPermissionForbidden"]),
-						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["ReplyPostNotFound", "UnitNotFound"]),
-						[StatusCodes.CONFLICT]: toApiErrorResponse([
-							"UnitRevisionConflict",
-							"PostTagMentionVoteConflict",
-						]),
-						[StatusCodes.TOO_MANY_REQUESTS]: VoteBackpressureResponse,
-					},
-					detail: { summary: "Update reply post", tags: ["Posts"] },
 				},
 			),
 	);

@@ -20,6 +20,16 @@ const [{ serve }, { default: api }, { env }, { database }] = await Promise.all([
 	import("./services/database"),
 ]);
 
+const smokeProbeToken = process.env.REZICS_SMOKE_PROBE_TOKEN?.trim();
+if (smokeProbeToken && env.REZICS_RELEASE !== "development")
+	throw new Error("REZICS_SMOKE_PROBE_TOKEN is only allowed in a development release");
+if (smokeProbeToken)
+	api.get("/.internal/smoke/internal-error", ({ request }) => {
+		if (request.headers.get("Authorization") !== `Bearer ${smokeProbeToken}`)
+			return new Response(null, { status: 404 });
+		throw new Error("Intentional AppHost smoke-probe failure");
+	});
+
 const server = serve({
 	maxRequestBodySize: MaximumRequestBodyBytes,
 	async fetch(request) {

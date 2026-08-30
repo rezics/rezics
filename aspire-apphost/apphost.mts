@@ -1,5 +1,5 @@
 import { refExpr } from "./.aspire/modules/base.mjs";
-import { createBuilder, ProbeType } from "./.aspire/modules/aspire.mjs";
+import { createBuilder, OtlpProtocol, ProbeType } from "./.aspire/modules/aspire.mjs";
 import {
 	apiSchedulerHealthContract,
 	workerSchedulerHealthContract,
@@ -76,6 +76,13 @@ const isolatedSmoke = appHostMode === "smoke";
 
 const builder = await createBuilder();
 
+const smokeProbeToken = isolatedSmoke
+	? await builder.addParameter("smoke-probe-token", {
+			value: requireEnvironmentVariable("REZICS_SMOKE_PROBE_TOKEN"),
+			secret: true,
+		})
+	: undefined;
+
 const databaseUrlParameter = await builder.addParameter("database-url", {
 	value: requireDatabaseUrl("DATABASE_URL"),
 	secret: true,
@@ -129,6 +136,7 @@ let api = builder
 	.addBunApp("main-api", "../services/main", "src/index.ts")
 	.withBun({ install: false })
 	.withRunScript("dev:api")
+	.withOtlpExporter({ protocol: OtlpProtocol.HttpProtobuf })
 	.withHttpEndpoint(
 		isolatedSmoke
 			? { env: "PORT", name: "http" }
@@ -183,6 +191,7 @@ if (cloudflareAccountId && cloudflareEmailApiToken)
 	api = api
 		.withEnvironment("CLOUDFLARE_ACCOUNT_ID", cloudflareAccountId)
 		.withEnvironment("CLOUDFLARE_EMAIL_API_TOKEN", cloudflareEmailApiToken);
+if (smokeProbeToken) api = api.withEnvironment("REZICS_SMOKE_PROBE_TOKEN", smokeProbeToken);
 
 const apiEndpoint = await api.getEndpoint("http");
 
@@ -190,6 +199,7 @@ let worker = builder
 	.addBunApp("recommendation-worker", "../services/main", "src/worker.ts")
 	.withBun({ install: false })
 	.withRunScript("dev:worker")
+	.withOtlpExporter({ protocol: OtlpProtocol.HttpProtobuf })
 	.withHttpEndpoint({ env: "WORKER_HEALTH_PORT", name: "health" })
 	.withHttpProbe(ProbeType.Startup, {
 		endpointName: "health",

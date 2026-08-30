@@ -27,6 +27,15 @@ export default new Elysia({ prefix: "/reactions" })
 	.use(session)
 	.get(
 		"/units/:unitId",
+		{
+			params: UnitReactionParams,
+			query: ReactionContextQuery,
+			response: {
+				[StatusCodes.OK]: ReactionSummaryResponse,
+				[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
+			},
+			detail: { summary: "Get Unit reaction summary", tags: ["Reactions"] },
+		},
 		async ({ params, query, request }) => {
 			const { authorization, profile } = await resolveIdentity(request, "interaction:read");
 			await authorization.unit.ensureCanRead(params.unitId);
@@ -70,18 +79,19 @@ export default new Elysia({ prefix: "/reactions" })
 				viewerReaction: viewerRows[0]?.reaction ?? null,
 			};
 		},
-		{
-			params: UnitReactionParams,
-			query: ReactionContextQuery,
-			response: {
-				[StatusCodes.OK]: ReactionSummaryResponse,
-				[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
-			},
-			detail: { summary: "Get Unit reaction summary", tags: ["Reactions"] },
-		},
 	)
 	.put(
 		"/units/:unitId",
+		{
+			access: "contribute:interaction:write",
+			params: UnitReactionParams,
+			body: SetReactionBody,
+			response: {
+				[StatusCodes.OK]: ReactionResponse,
+				[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
+			},
+			detail: { summary: "Set Unit reaction", tags: ["Reactions"] },
+		},
 		async ({ params, profile, authorization, body }) => {
 			await authorization.unit.ensureCanRead(params.unitId);
 			if (body.realmId) {
@@ -109,19 +119,16 @@ export default new Elysia({ prefix: "/reactions" })
 			});
 			return { reaction: body.reaction };
 		},
-		{
-			access: "contribute:interaction:write",
-			params: UnitReactionParams,
-			body: SetReactionBody,
-			response: {
-				[StatusCodes.OK]: ReactionResponse,
-				[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
-			},
-			detail: { summary: "Set Unit reaction", tags: ["Reactions"] },
-		},
 	)
 	.delete(
 		"/units/:unitId",
+		{
+			access: "write:interaction:write",
+			params: UnitReactionParams,
+			body: SetReactionBody,
+			response: { [StatusCodes.OK]: ReactionResponse },
+			detail: { summary: "Remove Unit reaction", tags: ["Reactions"] },
+		},
 		async ({ params, profile, body }) => {
 			await database
 				.delete(unitReaction)
@@ -134,24 +141,9 @@ export default new Elysia({ prefix: "/reactions" })
 				);
 			return { reaction: null };
 		},
-		{
-			access: "write:interaction:write",
-			params: UnitReactionParams,
-			body: SetReactionBody,
-			response: { [StatusCodes.OK]: ReactionResponse },
-			detail: { summary: "Remove Unit reaction", tags: ["Reactions"] },
-		},
 	)
 	.put(
 		"/shares/:unitId",
-		async ({ params, profile, authorization }) => {
-			await authorization.unit.ensureCanRead(params.unitId);
-			await database
-				.insert(unitShare)
-				.values({ profileId: profile.unitId, unitId: params.unitId })
-				.onConflictDoNothing();
-			return { shared: true };
-		},
 		{
 			access: "contribute:interaction:write",
 			params: UnitReactionParams,
@@ -161,19 +153,27 @@ export default new Elysia({ prefix: "/reactions" })
 			},
 			detail: { summary: "Record Unit share", tags: ["Reactions"] },
 		},
+		async ({ params, profile, authorization }) => {
+			await authorization.unit.ensureCanRead(params.unitId);
+			await database
+				.insert(unitShare)
+				.values({ profileId: profile.unitId, unitId: params.unitId })
+				.onConflictDoNothing();
+			return { shared: true };
+		},
 	)
 	.delete(
 		"/shares/:unitId",
-		async ({ params, profile }) => {
-			await database
-				.delete(unitShare)
-				.where(and(eq(unitShare.profileId, profile.unitId), eq(unitShare.unitId, params.unitId)));
-			return { shared: false };
-		},
 		{
 			access: "write:interaction:write",
 			params: UnitReactionParams,
 			response: { [StatusCodes.OK]: ShareResponse },
 			detail: { summary: "Remove Unit share", tags: ["Reactions"] },
+		},
+		async ({ params, profile }) => {
+			await database
+				.delete(unitShare)
+				.where(and(eq(unitShare.profileId, profile.unitId), eq(unitShare.unitId, params.unitId)));
+			return { shared: false };
 		},
 	);

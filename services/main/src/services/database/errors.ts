@@ -1,23 +1,22 @@
 import { StatusCodes } from "http-status-codes";
-import * as Data from "effect/Data";
+import { HTTPError } from "elysia";
 
 import { databaseErrorMatches } from "./constraint";
 
-export class VoteHotKeyBusy extends Data.TaggedError("VoteHotKeyBusy") {
-	static readonly status = StatusCodes.TOO_MANY_REQUESTS as const;
-	readonly status = VoteHotKeyBusy.status;
-	readonly message = "The vote target is busy; retry shortly";
+export class VoteHotKeyBusy extends HTTPError.id("VoteHotKeyBusy", StatusCodes.TOO_MANY_REQUESTS) {
+	override readonly message = "The vote target is busy; retry shortly";
 	readonly retryAfterSeconds = 1;
 
-	constructor(readonly cause?: unknown) {
+	constructor(override readonly cause?: unknown) {
 		super();
 	}
 }
 
-export class TagNotDirectlyApplicable extends Data.TaggedError("TagNotDirectlyApplicable") {
-	static readonly status = StatusCodes.UNPROCESSABLE_ENTITY as const;
-	readonly status = TagNotDirectlyApplicable.status;
-	readonly message = "This Tag cannot be applied directly";
+export class TagNotDirectlyApplicable extends HTTPError.id(
+	"TagNotDirectlyApplicable",
+	StatusCodes.UNPROCESSABLE_ENTITY,
+) {
+	override readonly message = "This Tag cannot be applied directly";
 }
 
 export type ContentLabelApplicationInvalidReason =
@@ -27,72 +26,71 @@ export type ContentLabelApplicationInvalidReason =
 	| "post_kind_required"
 	| "public_content_required";
 
-export class ContentLabelApplicationInvalid extends Data.TaggedError(
+export class ContentLabelApplicationInvalid extends HTTPError.id(
 	"ContentLabelApplicationInvalid",
-)<{
+	StatusCodes.UNPROCESSABLE_ENTITY,
+) {
+	override readonly message = "This content label cannot be applied to the requested target";
 	readonly reason: ContentLabelApplicationInvalidReason;
-}> {
-	static readonly status = StatusCodes.UNPROCESSABLE_ENTITY as const;
-	readonly status = ContentLabelApplicationInvalid.status;
-	readonly message = "This content label cannot be applied to the requested target";
 	readonly details: { readonly reason: ContentLabelApplicationInvalidReason };
 
 	constructor(reason: ContentLabelApplicationInvalidReason) {
-		super({ reason });
+		super();
+		this.reason = reason;
 		this.details = { reason };
 	}
 }
 
-export class ContentLabelJudgmentForbidden extends Data.TaggedError(
+export class ContentLabelJudgmentForbidden extends HTTPError.id(
 	"ContentLabelJudgmentForbidden",
+	StatusCodes.UNPROCESSABLE_ENTITY,
 ) {
-	static readonly status = StatusCodes.UNPROCESSABLE_ENTITY as const;
-	readonly status = ContentLabelJudgmentForbidden.status;
-	readonly message = "Content labels do not accept community judgments";
+	override readonly message = "Content labels do not accept community judgments";
 }
 
-export class ContentLabelUnitMergeForbidden extends Data.TaggedError(
+export class ContentLabelUnitMergeForbidden extends HTTPError.id(
 	"ContentLabelUnitMergeForbidden",
+	StatusCodes.UNPROCESSABLE_ENTITY,
 ) {
-	static readonly status = StatusCodes.UNPROCESSABLE_ENTITY as const;
-	readonly status = ContentLabelUnitMergeForbidden.status;
-	readonly message = "Built-in content-label Tags cannot be merged";
+	override readonly message = "Built-in content-label Tags cannot be merged";
 }
 
-export class TagApplicationHasJudgments extends Data.TaggedError("TagApplicationHasJudgments") {
-	static readonly status = StatusCodes.CONFLICT as const;
-	readonly status = TagApplicationHasJudgments.status;
-	readonly message = "This Tag application cannot be removed while it has judgments";
+export class TagApplicationHasJudgments extends HTTPError.id(
+	"TagApplicationHasJudgments",
+	StatusCodes.CONFLICT,
+) {
+	override readonly message = "This Tag application cannot be removed while it has judgments";
 }
 
-export class RealmTagContextInUse extends Data.TaggedError("RealmTagContextInUse") {
-	static readonly status = StatusCodes.CONFLICT as const;
-	readonly status = RealmTagContextInUse.status;
-	readonly message = "This Realm Tag Context cannot be removed while judgments depend on it";
+export class RealmTagContextInUse extends HTTPError.id(
+	"RealmTagContextInUse",
+	StatusCodes.CONFLICT,
+) {
+	override readonly message =
+		"This Realm Tag Context cannot be removed while judgments depend on it";
 }
 
-export class ContentLabelPlatformApplyForbidden extends Data.TaggedError(
+export class ContentLabelPlatformApplyForbidden extends HTTPError.id(
 	"ContentLabelPlatformApplyForbidden",
+	StatusCodes.FORBIDDEN,
 ) {
-	static readonly status = StatusCodes.FORBIDDEN as const;
-	readonly status = ContentLabelPlatformApplyForbidden.status;
-	readonly message = "Applying a platform content label requires an approved governance decision";
+	override readonly message =
+		"Applying a platform content label requires an approved governance decision";
 }
 
-export class ContentLabelPlatformIdentityImmutable extends Data.TaggedError(
+export class ContentLabelPlatformIdentityImmutable extends HTTPError.id(
 	"ContentLabelPlatformIdentityImmutable",
+	StatusCodes.CONFLICT,
 ) {
-	static readonly status = StatusCodes.CONFLICT as const;
-	readonly status = ContentLabelPlatformIdentityImmutable.status;
-	readonly message = "A platform content label's identity cannot be changed";
+	override readonly message = "A platform content label's identity cannot be changed";
 }
 
-export class ContentLabelPlatformRemovalForbidden extends Data.TaggedError(
+export class ContentLabelPlatformRemovalForbidden extends HTTPError.id(
 	"ContentLabelPlatformRemovalForbidden",
+	StatusCodes.FORBIDDEN,
 ) {
-	static readonly status = StatusCodes.FORBIDDEN as const;
-	readonly status = ContentLabelPlatformRemovalForbidden.status;
-	readonly message = "Removing a platform content label requires an approved governance decision";
+	override readonly message =
+		"Removing a platform content label requires an approved governance decision";
 }
 
 export const DatabaseErrors = [

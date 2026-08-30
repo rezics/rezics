@@ -28,7 +28,7 @@ describe("credit attribution request confirmation", () => {
 			]),
 		).toThrowError(
 			expect.objectContaining<Partial<CreditAttributionRequestConfirmationRequired>>({
-				_tag: "CreditAttributionRequestConfirmationRequired",
+				type: "CreditAttributionRequestConfirmationRequired",
 				details: { entityIds: [requestedAttribution.entityId] },
 			}),
 		);

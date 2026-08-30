@@ -1,12 +1,11 @@
 import { StatusCodes } from "http-status-codes";
-import * as Data from "effect/Data";
+import { HTTPError } from "elysia";
 
-export class CollectionStructureRevisionConflict extends Data.TaggedError(
+export class CollectionStructureRevisionConflict extends HTTPError.id(
 	"CollectionStructureRevisionConflict",
+	StatusCodes.CONFLICT,
 ) {
-	static readonly status = StatusCodes.CONFLICT as const;
-	readonly status = CollectionStructureRevisionConflict.status;
-	readonly message = "Collection Structure revision has changed";
+	override readonly message = "Collection Structure revision has changed";
 	readonly details: { readonly latestRevisionId: string | null };
 
 	constructor(latestRevisionId: string | null) {

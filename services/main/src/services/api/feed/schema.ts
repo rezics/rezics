@@ -1,6 +1,6 @@
-import { type Static, t } from "elysia";
-import { SimpleFeedContentKindValues, type UnitFilter } from "@rezics/filter";
-import { Type } from "@sinclair/typebox";
+import type { StaticDecode } from "typebox";
+import { t } from "elysia";
+import { SimpleFeedContentKindValues, UnitFilter } from "@rezics/filter";
 import {
 	FeedSortValues,
 	type PostKind,
@@ -102,7 +102,7 @@ export const DefaultFeedContentKindValues =
 
 export const FeedRequest = t.Object(
 	{
-		filter: t.Optional(Type.Unsafe<UnitFilter>(Type.Ref("UnitFilter"))),
+		filter: t.Optional(UnitFilter),
 		sort: t.Optional(FeedSortSchema),
 		cursor: t.Optional(t.String({ maxLength: 1024 })),
 		limit: t.Optional(t.Integer({ minimum: 1, maximum: 50, default: 20 })),
@@ -110,5 +110,5 @@ export const FeedRequest = t.Object(
 	},
 	{ additionalProperties: false },
 );
-export type FeedRequest = Static<typeof FeedRequest>;
-export type FeedSort = Static<typeof FeedSortSchema>;
+export type FeedRequest = StaticDecode<typeof FeedRequest>;
+export type FeedSort = StaticDecode<typeof FeedSortSchema>;

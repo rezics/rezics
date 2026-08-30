@@ -28,7 +28,7 @@ type ServiceTranslation<Selected extends Selection> = Awaited<
 	ReturnType<typeof getTranslation<Selected>>
 >;
 
-export default new Elysia({ name: "i18n-context" }).derive({ as: "scoped" }, ({ request, set }) => {
+export default new Elysia({ name: "i18n-context" }).derive("plugin", ({ request, set }) => {
 	async function withContentLanguage<Selected extends Selection>(
 		result: Promise<ServiceTranslation<Selected>>,
 	) {

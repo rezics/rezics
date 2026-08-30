@@ -1,5 +1,5 @@
 import { createPortableTextDocument } from "@rezics/block";
-import { Check } from "@sinclair/typebox/value";
+import { Check } from "typebox/value";
 import { describe, expect, it } from "vitest";
 
 import { hasUniqueLocalizationLanguages } from "../schema";
@@ -239,15 +239,18 @@ describe("Realm Wiki creation API contract", () => {
 				language: "en",
 			}),
 		).toBe(true);
-		expect(CreateRealmWikiBody.properties.accessMode.default).toBe("community_owned");
-		expect(CreateRealmTagContextBody.properties.accessMode.default).toBe("community_owned");
+		expect(CreateRealmWikiBody.properties.accessMode).toHaveProperty("default", "community_owned");
+		expect(CreateRealmTagContextBody.properties.accessMode).toHaveProperty(
+			"default",
+			"community_owned",
+		);
 	});
 });
 
 describe("Realm moderation API contract", () => {
 	it("defaults to current, actively published Realm Unit states", () => {
-		expect(ListRealmUnitsQuery.properties.status.default).toBe("current");
-		expect(ListRealmUnitsQuery.properties.publicationState.default).toBe("active");
+		expect(ListRealmUnitsQuery.properties.status).toHaveProperty("default", "current");
+		expect(ListRealmUnitsQuery.properties.publicationState).toHaveProperty("default", "active");
 		expect(Check(ListRealmUnitsQuery, { localizationLanguages: ["zh", "en"] })).toBe(true);
 		expect(
 			Check(ListRealmUnitsQuery, {

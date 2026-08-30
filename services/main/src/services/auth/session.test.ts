@@ -53,6 +53,25 @@ describe("API quota request lifecycle", () => {
 		expect(release).toHaveBeenCalledOnce();
 	});
 
+	it("releases a lease when a before-handle hook returns an early response", async () => {
+		const release = vi.fn();
+		const handler = vi.fn(() => "unreachable");
+		const app = new Elysia()
+			.use(session)
+			.beforeHandle(({ request, status }) => {
+				trackRequestLimitLease(request, trackedLease(release));
+				return status(204);
+			})
+			.get("/", handler);
+
+		const response = await app.handle(new Request("http://localhost/"));
+		await afterResponse();
+
+		expect(response.status).toBe(204);
+		expect(handler).not.toHaveBeenCalled();
+		expect(release).toHaveBeenCalledOnce();
+	});
+
 	it("releases every lease attached to the same request", async () => {
 		const firstRelease = vi.fn();
 		const secondRelease = vi.fn();

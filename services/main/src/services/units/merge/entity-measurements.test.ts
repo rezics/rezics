@@ -191,7 +191,7 @@ describe("lossless Entity measurement merge", () => {
 				sourceIsEntity: true,
 			}),
 		).rejects.toMatchObject({
-			_tag: "UnitMergeMeasurementConflict",
+			type: "UnitMergeMeasurementConflict",
 			details: { reason: input.reason },
 		});
 	});
@@ -247,7 +247,7 @@ describe("lossless Entity measurement merge", () => {
 				"context_unit_id",
 			),
 		).rejects.toMatchObject({
-			_tag: "UnitMergeMeasurementConflict",
+			type: "UnitMergeMeasurementConflict",
 			details: { reason: "differing_collision" },
 		});
 
@@ -301,6 +301,9 @@ describe("lossless Entity measurement merge", () => {
 				new UnitMergeMeasurementConflict({ reason: "differing_collision" }),
 			),
 		).toBe(true);
+		expect(isTerminalUnitMergeExecutionFailure({ type: "UnitMergeMeasurementConflict" })).toBe(
+			true,
+		);
 		expect(isTerminalUnitMergeExecutionFailure(new Error("transient"))).toBe(false);
 	});
 });

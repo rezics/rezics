@@ -1,4 +1,5 @@
-import { type Static, t } from "elysia";
+import type { StaticDecode } from "typebox";
+import { t } from "elysia";
 
 import {
 	RecommendationClientEventTypeValues,
@@ -9,10 +10,10 @@ import { DateTime, DisplayPosition, LocalizationLanguageHints, Uuid } from "../s
 import { VariantUnitType } from "../units/schema";
 
 export const RecommendationSurfaceSchema = t.UnionEnum(RecommendationSurfaceValues);
-export type RecommendationSurface = Static<typeof RecommendationSurfaceSchema>;
+export type RecommendationSurface = StaticDecode<typeof RecommendationSurfaceSchema>;
 
 export const RecommendationReasonSchema = t.UnionEnum(RecommendationReasonValues);
-export type RecommendationReason = Static<typeof RecommendationReasonSchema>;
+export type RecommendationReason = StaticDecode<typeof RecommendationReasonSchema>;
 
 export const RecommendationPolicyVersionSchema = t.String({
 	minLength: 1,
@@ -34,7 +35,7 @@ export const RecommendationTrackingSchema = t.Object(
 	},
 	{ additionalProperties: false },
 );
-export type RecommendationTracking = Static<typeof RecommendationTrackingSchema>;
+export type RecommendationTracking = StaticDecode<typeof RecommendationTrackingSchema>;
 
 export const RecommendationEventBatchBody = t.Object(
 	{
@@ -54,10 +55,10 @@ export const RecommendationEventBatchBody = t.Object(
 	},
 	{ additionalProperties: false },
 );
-export type RecommendationEventBatchBody = Static<typeof RecommendationEventBatchBody>;
+export type RecommendationEventBatchBody = StaticDecode<typeof RecommendationEventBatchBody>;
 
 export const RecommendationExclusionParams = t.Object({ unitId: Uuid });
-export type RecommendationExclusionParams = Static<typeof RecommendationExclusionParams>;
+export type RecommendationExclusionParams = StaticDecode<typeof RecommendationExclusionParams>;
 
 export const RecommendationExclusionBody = t.Object(
 	{
@@ -67,7 +68,7 @@ export const RecommendationExclusionBody = t.Object(
 	},
 	{ additionalProperties: false },
 );
-export type RecommendationExclusionBody = Static<typeof RecommendationExclusionBody>;
+export type RecommendationExclusionBody = StaticDecode<typeof RecommendationExclusionBody>;
 
 export const UnitRecommendationQuery = t.Object({
 	type: t.Optional(VariantUnitType),
@@ -77,10 +78,10 @@ export const UnitRecommendationQuery = t.Object({
 	limit: t.Optional(t.Integer({ minimum: 1, maximum: 50, default: 20 })),
 	localizationLanguages: t.Optional(LocalizationLanguageHints),
 });
-export type UnitRecommendationQuery = Static<typeof UnitRecommendationQuery>;
+export type UnitRecommendationQuery = StaticDecode<typeof UnitRecommendationQuery>;
 
 export const RelatedPostParams = t.Object({ postId: Uuid });
-export type RelatedPostParams = Static<typeof RelatedPostParams>;
+export type RelatedPostParams = StaticDecode<typeof RelatedPostParams>;
 
 export const RelatedPostQuery = t.Object({
 	personalized: t.Optional(t.Boolean()),
@@ -88,7 +89,7 @@ export const RelatedPostQuery = t.Object({
 	limit: t.Optional(t.Integer({ minimum: 1, maximum: 50, default: 20 })),
 	localizationLanguages: t.Optional(LocalizationLanguageHints),
 });
-export type RelatedPostQuery = Static<typeof RelatedPostQuery>;
+export type RelatedPostQuery = StaticDecode<typeof RelatedPostQuery>;
 
 export const RecommendationEventBatchResponse = t.Object({ accepted: t.Integer() });
 export const RecommendationExclusionResponse = t.Object({ excluded: t.Boolean() });

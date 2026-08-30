@@ -312,6 +312,15 @@ export default new Elysia().use(session).group("", (app) =>
 	app
 		.get(
 			"/reports/me",
+			{
+				access: "report:write",
+				query: ListMyReportsQuery,
+				response: {
+					[StatusCodes.OK]: MyReportListResponse,
+					[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["InvalidPaginationCursor"]),
+				},
+				detail: { summary: "List current user's content reports", tags: ["Reports"] },
+			},
 			async ({ profile, query }) => {
 				const requestedReportId = query.reportId;
 				const limit = requestedReportId ? 1 : (query.limit ?? 30);
@@ -351,18 +360,23 @@ export default new Elysia().use(session).group("", (app) =>
 							: null,
 				};
 			},
-			{
-				access: "report:write",
-				query: ListMyReportsQuery,
-				response: {
-					[StatusCodes.OK]: MyReportListResponse,
-					[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["InvalidPaginationCursor"]),
-				},
-				detail: { summary: "List current user's content reports", tags: ["Reports"] },
-			},
 		)
 		.get(
 			"/reports/units/:unitId/destinations",
+			{
+				access: "report:write",
+				params: ReportUnitParams,
+				query: ReportDestinationsQuery,
+				response: {
+					[StatusCodes.OK]: ReportDestinationsResponse,
+					[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["ReportRealmMismatch"]),
+					[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
+				},
+				detail: {
+					summary: "List the context and official rule sources for a content report",
+					tags: ["Reports"],
+				},
+			},
 			async ({ params, query, authorization }) => {
 				await authorization.unit.ensureCanRead(params.unitId);
 				if (query.contextRealmId) {
@@ -396,23 +410,20 @@ export default new Elysia().use(session).group("", (app) =>
 					throw new Error("REZICS Rule bootstrap Realm is unavailable");
 				return { items };
 			},
-			{
-				access: "report:write",
-				params: ReportUnitParams,
-				query: ReportDestinationsQuery,
-				response: {
-					[StatusCodes.OK]: ReportDestinationsResponse,
-					[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["ReportRealmMismatch"]),
-					[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
-				},
-				detail: {
-					summary: "List the context and official rule sources for a content report",
-					tags: ["Reports"],
-				},
-			},
 		)
 		.get(
 			"/realms/:realmId/reports",
+			{
+				access: "session-only",
+				params: ReportRealmParams,
+				query: ListRealmReportsQuery,
+				response: {
+					[StatusCodes.OK]: ReportListResponse,
+					[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["InvalidPaginationCursor"]),
+					[StatusCodes.FORBIDDEN]: toApiErrorResponse(["RealmCapabilityRequired"]),
+				},
+				detail: { summary: "List content reports referred to a Realm", tags: ["Reports"] },
+			},
 			async ({ params, query, authorization }) => {
 				await authorization.realm.ensureCapability(params.realmId, "realm.units.moderate");
 				const limit = query.limit ?? 50;
@@ -460,20 +471,23 @@ export default new Elysia().use(session).group("", (app) =>
 							: null,
 				};
 			},
-			{
-				access: "session-only",
-				params: ReportRealmParams,
-				query: ListRealmReportsQuery,
-				response: {
-					[StatusCodes.OK]: ReportListResponse,
-					[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["InvalidPaginationCursor"]),
-					[StatusCodes.FORBIDDEN]: toApiErrorResponse(["RealmCapabilityRequired"]),
-				},
-				detail: { summary: "List content reports referred to a Realm", tags: ["Reports"] },
-			},
 		)
 		.get(
 			"/reports/review-cases/:caseId",
+			{
+				access: "session-only",
+				params: ReviewCaseParams,
+				query: ListReviewCaseReportsQuery,
+				response: {
+					[StatusCodes.OK]: ReportListResponse,
+					[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["InvalidPaginationCursor"]),
+					[StatusCodes.FORBIDDEN]: toApiErrorResponse([
+						"RealmCapabilityRequired",
+						"PlatformCapabilityRequired",
+					]),
+				},
+				detail: { summary: "List reports in one content review case", tags: ["Reports"] },
+			},
 			async ({ params, query, authorization }) => {
 				const [caseRow] = await database
 					.select({
@@ -528,23 +542,22 @@ export default new Elysia().use(session).group("", (app) =>
 							: null,
 				};
 			},
-			{
-				access: "session-only",
-				params: ReviewCaseParams,
-				query: ListReviewCaseReportsQuery,
-				response: {
-					[StatusCodes.OK]: ReportListResponse,
-					[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["InvalidPaginationCursor"]),
-					[StatusCodes.FORBIDDEN]: toApiErrorResponse([
-						"RealmCapabilityRequired",
-						"PlatformCapabilityRequired",
-					]),
-				},
-				detail: { summary: "List reports in one content review case", tags: ["Reports"] },
-			},
 		)
 		.get(
 			"/reports/platform/cases",
+			{
+				access: "session-only",
+				query: ListPlatformReportCasesQuery,
+				response: {
+					[StatusCodes.OK]: PlatformReportCaseListResponse,
+					[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["InvalidPaginationCursor"]),
+					[StatusCodes.FORBIDDEN]: toApiErrorResponse(["PlatformCapabilityRequired"]),
+				},
+				detail: {
+					summary: "List platform content review cases",
+					tags: ["Reports"],
+				},
+			},
 			async ({ query, authorization }) => {
 				await authorization.platform.ensureCapability("platform.moderate");
 				const canManageLicenses = await authorization.platform.hasCapability("unit.license.manage");
@@ -695,22 +708,33 @@ export default new Elysia().use(session).group("", (app) =>
 							: null,
 				};
 			},
-			{
-				access: "session-only",
-				query: ListPlatformReportCasesQuery,
-				response: {
-					[StatusCodes.OK]: PlatformReportCaseListResponse,
-					[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["InvalidPaginationCursor"]),
-					[StatusCodes.FORBIDDEN]: toApiErrorResponse(["PlatformCapabilityRequired"]),
-				},
-				detail: {
-					summary: "List platform content review cases",
-					tags: ["Reports"],
-				},
-			},
 		)
 		.post(
 			"/reports/units/:unitId",
+			{
+				access: "write:report:write",
+				params: ReportUnitParams,
+				query: CreateReportQuery,
+				body: CreateReportBody,
+				response: {
+					[StatusCodes.OK]: ReportResponse,
+					[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
+						"ReportRealmMismatch",
+						"ReportRuleSourceForbidden",
+					]),
+					[StatusCodes.CONFLICT]: toApiErrorResponse([
+						"ReportAlreadySubmitted",
+						"ReportTargetRevisionUnavailable",
+						"ReportRuleUnavailable",
+						"ReportRuleChanged",
+					]),
+					[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
+				},
+				detail: {
+					summary: "Report content under selected current rules",
+					tags: ["Reports"],
+				},
+			},
 			async ({ params, body, query, profile, authorization }) => {
 				const sourceRealmIds = [...new Set(body.rules.map((rule) => rule.sourceRealmId))].sort();
 				if (sourceRealmIds.length > GovernanceMaxRuleSources) throw new ReportRuleSourceForbidden();
@@ -942,30 +966,6 @@ export default new Elysia().use(session).group("", (app) =>
 						createdAt: createdReport.createdAt,
 					};
 				});
-			},
-			{
-				access: "write:report:write",
-				params: ReportUnitParams,
-				query: CreateReportQuery,
-				body: CreateReportBody,
-				response: {
-					[StatusCodes.OK]: ReportResponse,
-					[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
-						"ReportRealmMismatch",
-						"ReportRuleSourceForbidden",
-					]),
-					[StatusCodes.CONFLICT]: toApiErrorResponse([
-						"ReportAlreadySubmitted",
-						"ReportTargetRevisionUnavailable",
-						"ReportRuleUnavailable",
-						"ReportRuleChanged",
-					]),
-					[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
-				},
-				detail: {
-					summary: "Report content under selected current rules",
-					tags: ["Reports"],
-				},
 			},
 		),
 );

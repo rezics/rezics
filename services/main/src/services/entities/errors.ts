@@ -1,19 +1,21 @@
 import { StatusCodes } from "http-status-codes";
 import type { JsonValue } from "@rezics/portable-text";
-import * as Data from "effect/Data";
+import { HTTPError } from "elysia";
 
 import type { AssociationKind, EntityAssociationCommand } from "../authorization/entity/policy";
 
-export class EntityEntryNotFound extends Data.TaggedError("EntityEntryNotFound") {
-	static readonly status = StatusCodes.NOT_FOUND as const;
-	readonly status = EntityEntryNotFound.status;
-	readonly message = "Entity entry not found";
+export class EntityEntryNotFound extends HTTPError.id(
+	"EntityEntryNotFound",
+	StatusCodes.NOT_FOUND,
+) {
+	override readonly message = "Entity entry not found";
 }
 
-export class EntityAssociationRestricted extends Data.TaggedError("EntityAssociationRestricted") {
-	static readonly status = StatusCodes.FORBIDDEN as const;
-	readonly status = EntityAssociationRestricted.status;
-	readonly message = "This Entity does not accept that association";
+export class EntityAssociationRestricted extends HTTPError.id(
+	"EntityAssociationRestricted",
+	StatusCodes.FORBIDDEN,
+) {
+	override readonly message = "This Entity does not accept that association";
 	readonly details: JsonValue;
 
 	constructor(kind: AssociationKind, command: EntityAssociationCommand) {
@@ -22,16 +24,18 @@ export class EntityAssociationRestricted extends Data.TaggedError("EntityAssocia
 	}
 }
 
-export class CreditAttributionNotFound extends Data.TaggedError("CreditAttributionNotFound") {
-	static readonly status = StatusCodes.NOT_FOUND as const;
-	readonly status = CreditAttributionNotFound.status;
-	readonly message = "Credit attribution not found";
+export class CreditAttributionNotFound extends HTTPError.id(
+	"CreditAttributionNotFound",
+	StatusCodes.NOT_FOUND,
+) {
+	override readonly message = "Credit attribution not found";
 }
 
-export class CreditAttributionRoleInvalid extends Data.TaggedError("CreditAttributionRoleInvalid") {
-	static readonly status = StatusCodes.BAD_REQUEST as const;
-	readonly status = CreditAttributionRoleInvalid.status;
-	readonly message = "Credit attribution role does not apply to this Unit type";
+export class CreditAttributionRoleInvalid extends HTTPError.id(
+	"CreditAttributionRoleInvalid",
+	StatusCodes.BAD_REQUEST,
+) {
+	override readonly message = "Credit attribution role does not apply to this Unit type";
 	readonly details: JsonValue;
 
 	constructor(type: string, role: string) {
@@ -40,12 +44,11 @@ export class CreditAttributionRoleInvalid extends Data.TaggedError("CreditAttrib
 	}
 }
 
-export class CreditAttributionRequestConfirmationRequired extends Data.TaggedError(
+export class CreditAttributionRequestConfirmationRequired extends HTTPError.id(
 	"CreditAttributionRequestConfirmationRequired",
+	StatusCodes.CONFLICT,
 ) {
-	static readonly status = StatusCodes.CONFLICT as const;
-	readonly status = CreditAttributionRequestConfirmationRequired.status;
-	readonly message = "Credit attribution requests require confirmation";
+	override readonly message = "Credit attribution requests require confirmation";
 	readonly details: JsonValue;
 
 	constructor(entityIds: readonly string[]) {
@@ -54,10 +57,11 @@ export class CreditAttributionRequestConfirmationRequired extends Data.TaggedErr
 	}
 }
 
-export class SubjectAssociationNotFound extends Data.TaggedError("SubjectAssociationNotFound") {
-	static readonly status = StatusCodes.NOT_FOUND as const;
-	readonly status = SubjectAssociationNotFound.status;
-	readonly message = "Subject association not found";
+export class SubjectAssociationNotFound extends HTTPError.id(
+	"SubjectAssociationNotFound",
+	StatusCodes.NOT_FOUND,
+) {
+	override readonly message = "Subject association not found";
 }
 
 export const EntityErrors = [

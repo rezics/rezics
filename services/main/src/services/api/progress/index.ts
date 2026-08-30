@@ -1,5 +1,5 @@
 import { StatusCodes } from "http-status-codes";
-import { FilterSchemaModels, SearchFeatureDefinition } from "@rezics/filter";
+import { SearchFeatureDefinition } from "@rezics/filter";
 import { and, asc, desc, eq, inArray, isNull, or, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import Elysia from "elysia";
@@ -253,9 +253,14 @@ async function selectProgressSnapshot(profileId: string, unitId: string) {
 
 export default new Elysia({ prefix: "/progress" })
 	.use(session)
-	.model(FilterSchemaModels)
 	.get(
 		"",
+		{
+			access: "interaction:read",
+			query: ListProgressQuery,
+			response: { [StatusCodes.OK]: ProgressListResponse },
+			detail: { summary: "List current profile progress", tags: ["Progress"] },
+		},
 		async ({ profile, query }) => {
 			const items = await database
 				.select({
@@ -297,23 +302,33 @@ export default new Elysia({ prefix: "/progress" })
 				.limit(query.limit ?? 50);
 			return { items: items.map(toProgressResponse) };
 		},
+	)
+	.get(
+		"/search/filter",
 		{
 			access: "interaction:read",
-			query: ListProgressQuery,
-			response: { [StatusCodes.OK]: ProgressListResponse },
-			detail: { summary: "List current profile progress", tags: ["Progress"] },
+			response: { [StatusCodes.OK]: SearchFeatureDefinition },
+			detail: {
+				summary: "Get the Progress Filter definition",
+				tags: ["Progress", "Search"],
+			},
 		},
+		() => getProgressSearchDefinition(),
 	)
-	.get("/search/filter", () => getProgressSearchDefinition(), {
-		access: "interaction:read",
-		response: { [StatusCodes.OK]: SearchFeatureDefinition },
-		detail: {
-			summary: "Get the Progress Filter definition",
-			tags: ["Progress", "Search"],
-		},
-	})
 	.post(
 		"/search",
+		{
+			access: "interaction:read",
+			body: ProgressSearchBody,
+			response: {
+				[StatusCodes.OK]: ProgressSearchResponse,
+				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["InvalidSearch"]),
+			},
+			detail: {
+				summary: "Search current profile progress with a Search Feature state",
+				tags: ["Progress", "Search"],
+			},
+		},
 		async ({ profile, body }) => {
 			const request = resolveProgressSearchRequest(body);
 			const textCondition = request.query
@@ -436,21 +451,18 @@ export default new Elysia({ prefix: "/progress" })
 					: {}),
 			};
 		},
-		{
-			access: "interaction:read",
-			body: ProgressSearchBody,
-			response: {
-				[StatusCodes.OK]: ProgressSearchResponse,
-				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["InvalidSearch"]),
-			},
-			detail: {
-				summary: "Search current profile progress with a Search Feature state",
-				tags: ["Progress", "Search"],
-			},
-		},
 	)
 	.get(
 		"/:unitId",
+		{
+			access: "interaction:read",
+			params: ProgressUnitParams,
+			response: {
+				[StatusCodes.OK]: ProgressLookupResponse,
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
+			},
+			detail: { summary: "Get progress state", tags: ["Progress"] },
+		},
 		async ({ profile, authorization, params }) => {
 			await authorization.unit.ensureCanRead(params.unitId);
 			const [result] = await database
@@ -474,18 +486,20 @@ export default new Elysia({ prefix: "/progress" })
 				),
 			} satisfies ProgressLookupResponse;
 		},
-		{
-			access: "interaction:read",
-			params: ProgressUnitParams,
-			response: {
-				[StatusCodes.OK]: ProgressLookupResponse,
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
-			},
-			detail: { summary: "Get progress state", tags: ["Progress"] },
-		},
 	)
 	.get(
 		"/:unitId/entries",
+		{
+			access: "interaction:read",
+			params: ProgressUnitParams,
+			query: ListProgressEntriesQuery,
+			response: {
+				[StatusCodes.OK]: ProgressEntryListResponse,
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["InvalidPaginationCursor"]),
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
+			},
+			detail: { summary: "List Progress journal entries", tags: ["Progress"] },
+		},
 		async ({ profile, authorization, params, query }) => {
 			await authorization.unit.ensureCanRead(params.unitId);
 			const cursorScope = { unitId: params.unitId, status: query.status };
@@ -536,20 +550,23 @@ export default new Elysia({ prefix: "/progress" })
 						: null,
 			};
 		},
-		{
-			access: "interaction:read",
-			params: ProgressUnitParams,
-			query: ListProgressEntriesQuery,
-			response: {
-				[StatusCodes.OK]: ProgressEntryListResponse,
-				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["InvalidPaginationCursor"]),
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
-			},
-			detail: { summary: "List Progress journal entries", tags: ["Progress"] },
-		},
 	)
 	.post(
 		"/:unitId/entries",
+		{
+			access: "write:interaction:write",
+			params: ProgressUnitParams,
+			body: CreateProgressEntryBody,
+			response: {
+				[StatusCodes.OK]: ProgressEntryResponse,
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse([
+					"UnitNotFound",
+					"ContentStructureNodeNotFound",
+				]),
+				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["ValidationError"]),
+			},
+			detail: { summary: "Create a Progress journal entry", tags: ["Progress"] },
+		},
 		async ({ profile, authorization, params, body }) => {
 			await authorization.unit.ensureCanRead(params.unitId);
 			const entry = await database.transaction(async (tx) => {
@@ -567,23 +584,24 @@ export default new Elysia({ prefix: "/progress" })
 			});
 			return toProgressEntryResponse({ ...entry, reviewId: null });
 		},
+	)
+	.put(
+		"/:unitId/entries/:entryId",
 		{
 			access: "write:interaction:write",
-			params: ProgressUnitParams,
-			body: CreateProgressEntryBody,
+			params: ProgressEntryParams,
+			body: ReplaceProgressEntryBody,
 			response: {
 				[StatusCodes.OK]: ProgressEntryResponse,
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse([
 					"UnitNotFound",
+					"ProgressEntryNotFound",
 					"ContentStructureNodeNotFound",
 				]),
 				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["ValidationError"]),
 			},
-			detail: { summary: "Create a Progress journal entry", tags: ["Progress"] },
+			detail: { summary: "Replace a Progress journal entry", tags: ["Progress"] },
 		},
-	)
-	.put(
-		"/:unitId/entries/:entryId",
 		async ({ profile, authorization, params, body }) => {
 			await authorization.unit.ensureCanRead(params.unitId);
 			const entry = await database.transaction(async (tx) => {
@@ -608,32 +626,9 @@ export default new Elysia({ prefix: "/progress" })
 				reviewId: binding?.reviewId ?? null,
 			});
 		},
-		{
-			access: "write:interaction:write",
-			params: ProgressEntryParams,
-			body: ReplaceProgressEntryBody,
-			response: {
-				[StatusCodes.OK]: ProgressEntryResponse,
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse([
-					"UnitNotFound",
-					"ProgressEntryNotFound",
-					"ContentStructureNodeNotFound",
-				]),
-				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["ValidationError"]),
-			},
-			detail: { summary: "Replace a Progress journal entry", tags: ["Progress"] },
-		},
 	)
 	.put(
 		"/:unitId/entries/:entryId/current",
-		async ({ profile, authorization, params }) => {
-			await authorization.unit.ensureCanRead(params.unitId);
-			await database.transaction(async (tx) => {
-				await lockUnitProgress(tx, profile.unitId, params.unitId);
-				await setCurrentProgressEntry(tx, profile.unitId, params.unitId, params.entryId);
-			});
-			return new Response(null, { status: StatusCodes.NO_CONTENT });
-		},
 		{
 			access: "write:interaction:write",
 			params: ProgressEntryParams,
@@ -646,17 +641,17 @@ export default new Elysia({ prefix: "/progress" })
 				responses: NoContentResponse,
 			},
 		},
-	)
-	.delete(
-		"/:unitId/entries/:entryId",
 		async ({ profile, authorization, params }) => {
 			await authorization.unit.ensureCanRead(params.unitId);
 			await database.transaction(async (tx) => {
 				await lockUnitProgress(tx, profile.unitId, params.unitId);
-				await deleteProgressEntry(tx, profile.unitId, params.unitId, params.entryId);
+				await setCurrentProgressEntry(tx, profile.unitId, params.unitId, params.entryId);
 			});
 			return new Response(null, { status: StatusCodes.NO_CONTENT });
 		},
+	)
+	.delete(
+		"/:unitId/entries/:entryId",
 		{
 			access: "write:interaction:write",
 			params: ProgressEntryParams,
@@ -669,9 +664,26 @@ export default new Elysia({ prefix: "/progress" })
 				responses: NoContentResponse,
 			},
 		},
+		async ({ profile, authorization, params }) => {
+			await authorization.unit.ensureCanRead(params.unitId);
+			await database.transaction(async (tx) => {
+				await lockUnitProgress(tx, profile.unitId, params.unitId);
+				await deleteProgressEntry(tx, profile.unitId, params.unitId, params.entryId);
+			});
+			return new Response(null, { status: StatusCodes.NO_CONTENT });
+		},
 	)
 	.get(
 		"/:unitId/nodes",
+		{
+			access: "interaction:read",
+			params: ProgressUnitParams,
+			response: {
+				[StatusCodes.OK]: ProgressNodeListResponse,
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
+			},
+			detail: { summary: "List completed Content Structure nodes", tags: ["Progress"] },
+		},
 		async ({ profile, authorization, params }) => {
 			await authorization.unit.ensureCanRead(params.unitId);
 			const items = await database
@@ -710,18 +722,21 @@ export default new Elysia({ prefix: "/progress" })
 				.orderBy(desc(contentStructureNodeProgress.completedAt));
 			return { items };
 		},
-		{
-			access: "interaction:read",
-			params: ProgressUnitParams,
-			response: {
-				[StatusCodes.OK]: ProgressNodeListResponse,
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
-			},
-			detail: { summary: "List completed Content Structure nodes", tags: ["Progress"] },
-		},
 	)
 	.post(
 		"/:unitId/nodes/:nodeId/read",
+		{
+			access: "write:interaction:write",
+			params: ProgressNodeParams,
+			response: {
+				[StatusCodes.OK]: ChapterReadingProgressResponse,
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse([
+					"UnitNotFound",
+					"ContentStructureNodeNotFound",
+				]),
+			},
+			detail: { summary: "Record a Book chapter read", tags: ["Progress"] },
+		},
 		async ({ profile, authorization, params }) => {
 			await authorization.unit.ensureCanRead(params.unitId);
 			const canReadUnpublished = await authorization.unit.canUpdate(params.unitId);
@@ -740,21 +755,22 @@ export default new Elysia({ prefix: "/progress" })
 				record: toProgressResponse(result.record),
 			};
 		},
+	)
+	.put(
+		"/:unitId",
 		{
 			access: "write:interaction:write",
-			params: ProgressNodeParams,
+			params: ProgressUnitParams,
+			body: UpsertProgressBody,
 			response: {
-				[StatusCodes.OK]: ChapterReadingProgressResponse,
+				[StatusCodes.OK]: ProgressResponse,
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse([
 					"UnitNotFound",
 					"ContentStructureNodeNotFound",
 				]),
 			},
-			detail: { summary: "Record a Book chapter read", tags: ["Progress"] },
+			detail: { summary: "Create or replace progress", tags: ["Progress"] },
 		},
-	)
-	.put(
-		"/:unitId",
 		async ({ profile, authorization, params, body }) => {
 			await authorization.unit.ensureCanRead(params.unitId);
 			const now = new Date();
@@ -784,22 +800,19 @@ export default new Elysia({ prefix: "/progress" })
 			});
 			return selectProgressSnapshot(profile.unitId, params.unitId);
 		},
-		{
-			access: "write:interaction:write",
-			params: ProgressUnitParams,
-			body: UpsertProgressBody,
-			response: {
-				[StatusCodes.OK]: ProgressResponse,
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse([
-					"UnitNotFound",
-					"ContentStructureNodeNotFound",
-				]),
-			},
-			detail: { summary: "Create or replace progress", tags: ["Progress"] },
-		},
 	)
 	.post(
 		"/:unitId/complete",
+		{
+			access: "write:interaction:write",
+			params: ProgressUnitParams,
+			body: CompleteProgressBody,
+			response: {
+				[StatusCodes.OK]: ProgressResponse,
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
+			},
+			detail: { summary: "Complete current progress", tags: ["Progress"] },
+		},
 		async ({ profile, authorization, params, body }) => {
 			await authorization.unit.ensureCanRead(params.unitId);
 			const now = new Date();
@@ -828,19 +841,18 @@ export default new Elysia({ prefix: "/progress" })
 			});
 			return selectProgressSnapshot(profile.unitId, params.unitId);
 		},
-		{
-			access: "write:interaction:write",
-			params: ProgressUnitParams,
-			body: CompleteProgressBody,
-			response: {
-				[StatusCodes.OK]: ProgressResponse,
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
-			},
-			detail: { summary: "Complete current progress", tags: ["Progress"] },
-		},
 	)
 	.delete(
 		"/:unitId",
+		{
+			access: "write:interaction:write",
+			params: ProgressUnitParams,
+			detail: {
+				summary: "Delete progress",
+				tags: ["Progress"],
+				responses: NoContentResponse,
+			},
+		},
 		async ({ profile, authorization, params }) => {
 			await authorization.unit.ensureCanRead(params.unitId);
 			await database.transaction(async (tx) => {
@@ -888,18 +900,21 @@ export default new Elysia({ prefix: "/progress" })
 			});
 			return new Response(null, { status: StatusCodes.NO_CONTENT });
 		},
-		{
-			access: "write:interaction:write",
-			params: ProgressUnitParams,
-			detail: {
-				summary: "Delete progress",
-				tags: ["Progress"],
-				responses: NoContentResponse,
-			},
-		},
 	)
 	.put(
 		"/:unitId/nodes/:nodeId",
+		{
+			access: "write:interaction:write",
+			params: ProgressNodeParams,
+			response: {
+				[StatusCodes.OK]: CompletionStateResponse,
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse([
+					"UnitNotFound",
+					"ContentStructureNodeNotFound",
+				]),
+			},
+			detail: { summary: "Complete Content Structure node", tags: ["Progress"] },
+		},
 		async ({ profile, authorization, params }) => {
 			await authorization.unit.ensureCanRead(params.unitId);
 			const nodeKind = await findCompletableContentStructureNode(params.unitId, params.nodeId);
@@ -924,6 +939,9 @@ export default new Elysia({ prefix: "/progress" })
 				.onConflictDoNothing();
 			return { completed: true };
 		},
+	)
+	.delete(
+		"/:unitId/nodes/:nodeId",
 		{
 			access: "write:interaction:write",
 			params: ProgressNodeParams,
@@ -934,11 +952,8 @@ export default new Elysia({ prefix: "/progress" })
 					"ContentStructureNodeNotFound",
 				]),
 			},
-			detail: { summary: "Complete Content Structure node", tags: ["Progress"] },
+			detail: { summary: "Uncomplete Content Structure node", tags: ["Progress"] },
 		},
-	)
-	.delete(
-		"/:unitId/nodes/:nodeId",
 		async ({ profile, authorization, params }) => {
 			await authorization.unit.ensureCanRead(params.unitId);
 			const nodeKind = await findCompletableContentStructureNode(params.unitId, params.nodeId);
@@ -966,17 +981,5 @@ export default new Elysia({ prefix: "/progress" })
 					),
 				);
 			return { completed: false };
-		},
-		{
-			access: "write:interaction:write",
-			params: ProgressNodeParams,
-			response: {
-				[StatusCodes.OK]: CompletionStateResponse,
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse([
-					"UnitNotFound",
-					"ContentStructureNodeNotFound",
-				]),
-			},
-			detail: { summary: "Uncomplete Content Structure node", tags: ["Progress"] },
 		},
 	);

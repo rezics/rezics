@@ -2,7 +2,7 @@ import { DevelopmentPreviewCapability } from "@rezics/access";
 import { and, desc, eq, exists, gt, isNull, lt, not, or, sql } from "drizzle-orm";
 import type { AvatarReference } from "@rezics/avatar";
 import type { PortableTextDocument as PortableTextDocumentValue } from "@rezics/block";
-import type { Static } from "elysia";
+import type { StaticDecode } from "typebox";
 import type { ContentLanguage } from "@rezics/i18n";
 import { type LicenseId } from "@rezics/license";
 
@@ -154,7 +154,7 @@ export type VariantUnitKind = "book" | "software" | "media";
 export type WorkUnitKind = VariantUnitKind | "series";
 export type TimedMediaUnitKind = "video" | "audio";
 export type ManageableUnitKind = WorkUnitKind | TimedMediaUnitKind | "release";
-export type UnitDetail = Static<typeof UnitDetailResponse>;
+export type UnitDetail = StaticDecode<typeof UnitDetailResponse>;
 type StoredUnitLocalization = typeof unitLocalization.$inferSelect;
 
 function requireEntityKind(value: string) {

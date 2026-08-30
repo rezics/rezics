@@ -463,10 +463,6 @@ export default new Elysia({ prefix: "/unit" })
 	.use(session)
 	.get(
 		"/:unitId/access",
-		async ({ authorization, profile, params, query }) => {
-			await authorization.unit.ensure(params.unitId, "unit.access.manage", query.scope ?? []);
-			return getAccessSnapshot(params.unitId, query.scope ?? [], profile.unitId);
-		},
 		{
 			access: "session-only",
 			params: UnitGovernanceParams,
@@ -478,9 +474,41 @@ export default new Elysia({ prefix: "/unit" })
 			},
 			detail: { summary: "Get Unit access configuration", tags: ["Governance"] },
 		},
+		async ({ authorization, profile, params, query }) => {
+			await authorization.unit.ensure(params.unitId, "unit.access.manage", query.scope ?? []);
+			return getAccessSnapshot(params.unitId, query.scope ?? [], profile.unitId);
+		},
 	)
 	.put(
 		"/:unitId/access",
+		{
+			access: "fresh-session-only",
+			params: UnitGovernanceParams,
+			body: ReplaceUnitSubjectAccessBody,
+			response: {
+				[StatusCodes.OK]: UnitAccessSnapshotResponse,
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
+					"UnitAccessExpiryInvalid",
+					"UnitAccessConfigurationInvalid",
+					"GovernanceRuleSourceForbidden",
+				]),
+				[StatusCodes.FORBIDDEN]: toApiErrorResponse([
+					"UnitPermissionForbidden",
+					"UnitAccessRestricted",
+					"FreshSessionRequired",
+				]),
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse([
+					"UnitNotFound",
+					"ProfileNotFound",
+					"RealmNotFound",
+				]),
+				[StatusCodes.CONFLICT]: toApiErrorResponse([
+					"UnitOwnerRestrictionForbidden",
+					"GovernanceRuleChanged",
+				]),
+			},
+			detail: { summary: "Replace Unit subject access", tags: ["Governance"] },
+		},
 		async ({ authorization, profile, params, body }) => {
 			const expiresAt = parseExpiry(body.expiresAt);
 			await ensureSubjectExists(body.subject);
@@ -660,37 +688,19 @@ export default new Elysia({ prefix: "/unit" })
 			});
 			return getAccessSnapshot(params.unitId, body.scope, profile.unitId);
 		},
-		{
-			access: "fresh-session-only",
-			params: UnitGovernanceParams,
-			body: ReplaceUnitSubjectAccessBody,
-			response: {
-				[StatusCodes.OK]: UnitAccessSnapshotResponse,
-				[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
-					"UnitAccessExpiryInvalid",
-					"UnitAccessConfigurationInvalid",
-					"GovernanceRuleSourceForbidden",
-				]),
-				[StatusCodes.FORBIDDEN]: toApiErrorResponse([
-					"UnitPermissionForbidden",
-					"UnitAccessRestricted",
-					"FreshSessionRequired",
-				]),
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse([
-					"UnitNotFound",
-					"ProfileNotFound",
-					"RealmNotFound",
-				]),
-				[StatusCodes.CONFLICT]: toApiErrorResponse([
-					"UnitOwnerRestrictionForbidden",
-					"GovernanceRuleChanged",
-				]),
-			},
-			detail: { summary: "Replace Unit subject access", tags: ["Governance"] },
-		},
 	)
 	.get(
 		"/:unitId/access-candidates",
+		{
+			access: "session-only",
+			params: UnitGovernanceParams,
+			query: ListUnitAccessCandidatesQuery,
+			response: {
+				[StatusCodes.OK]: UnitAccessCandidateListResponse,
+				[StatusCodes.FORBIDDEN]: UnitGovernanceForbiddenResponse,
+			},
+			detail: { summary: "Search Unit access candidates", tags: ["Governance"] },
+		},
 		async ({ authorization, params, query }) => {
 			await authorization.unit.ensure(params.unitId, "unit.access.manage");
 			const search = query.query?.trim();
@@ -718,19 +728,19 @@ export default new Elysia({ prefix: "/unit" })
 				})),
 			};
 		},
-		{
-			access: "session-only",
-			params: UnitGovernanceParams,
-			query: ListUnitAccessCandidatesQuery,
-			response: {
-				[StatusCodes.OK]: UnitAccessCandidateListResponse,
-				[StatusCodes.FORBIDDEN]: UnitGovernanceForbiddenResponse,
-			},
-			detail: { summary: "Search Unit access candidates", tags: ["Governance"] },
-		},
 	)
 	.get(
 		"/:unitId/access/effective",
+		{
+			access: "session-only",
+			params: UnitGovernanceParams,
+			query: UnitEffectiveAccessQuery,
+			response: { [StatusCodes.OK]: UnitEffectiveAccessResponse },
+			detail: {
+				summary: "Resolve effective Unit access for the current Profile",
+				tags: ["Governance"],
+			},
+		},
 		async ({ authorization, params, query }) => {
 			const scope = query.scope ?? [];
 			const [target] = await database
@@ -750,19 +760,20 @@ export default new Elysia({ prefix: "/unit" })
 				),
 			};
 		},
-		{
-			access: "session-only",
-			params: UnitGovernanceParams,
-			query: UnitEffectiveAccessQuery,
-			response: { [StatusCodes.OK]: UnitEffectiveAccessResponse },
-			detail: {
-				summary: "Resolve effective Unit access for the current Profile",
-				tags: ["Governance"],
-			},
-		},
 	)
 	.get(
 		"/:unitId/ownership/candidates",
+		{
+			access: "session-only",
+			params: UnitGovernanceParams,
+			query: ListUnitOwnershipCandidatesQuery,
+			response: {
+				[StatusCodes.OK]: UnitOwnershipCandidateListResponse,
+				[StatusCodes.FORBIDDEN]: toApiErrorResponse(["UnitPermissionForbidden"]),
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
+			},
+			detail: { summary: "Search eligible Unit ownership recipients", tags: ["Governance"] },
+		},
 		async ({ authorization, params, query }) => {
 			await authorization.unit.ensure(params.unitId, "unit.ownership.transfer");
 			const search = query.query?.trim();
@@ -803,20 +814,27 @@ export default new Elysia({ prefix: "/unit" })
 				nextCursor: rows.length > limit ? (items.at(-1)?.profileId ?? null) : null,
 			};
 		},
-		{
-			access: "session-only",
-			params: UnitGovernanceParams,
-			query: ListUnitOwnershipCandidatesQuery,
-			response: {
-				[StatusCodes.OK]: UnitOwnershipCandidateListResponse,
-				[StatusCodes.FORBIDDEN]: toApiErrorResponse(["UnitPermissionForbidden"]),
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
-			},
-			detail: { summary: "Search eligible Unit ownership recipients", tags: ["Governance"] },
-		},
 	)
 	.put(
 		"/:unitId/ownership",
+		{
+			access: "fresh-session-only",
+			params: UnitGovernanceParams,
+			body: TransferUnitOwnershipBody,
+			response: {
+				[StatusCodes.OK]: UnitOwnershipResponse,
+				[StatusCodes.FORBIDDEN]: toApiErrorResponse([
+					"UnitPermissionForbidden",
+					"FreshSessionRequired",
+				]),
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "ProfileNotFound"]),
+				[StatusCodes.CONFLICT]: toApiErrorResponse([
+					"UnitOwnershipChanged",
+					"UnitOwnershipTargetIneligible",
+				]),
+			},
+			detail: { summary: "Transfer Unit ownership", tags: ["Governance"] },
+		},
 		async ({ authorization, profile, params, body }) => {
 			return database.transaction(async (tx) => {
 				await lockUnitAccessState(tx, [params.unitId]);
@@ -859,27 +877,27 @@ export default new Elysia({ prefix: "/unit" })
 				};
 			});
 		},
+	)
+	.post(
+		"/:unitId/ownership/relinquishment",
 		{
 			access: "fresh-session-only",
 			params: UnitGovernanceParams,
-			body: TransferUnitOwnershipBody,
+			body: RelinquishUnitOwnershipBody,
 			response: {
 				[StatusCodes.OK]: UnitOwnershipResponse,
 				[StatusCodes.FORBIDDEN]: toApiErrorResponse([
 					"UnitPermissionForbidden",
 					"FreshSessionRequired",
 				]),
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "ProfileNotFound"]),
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
 				[StatusCodes.CONFLICT]: toApiErrorResponse([
 					"UnitOwnershipChanged",
-					"UnitOwnershipTargetIneligible",
+					"UnitOwnershipRelinquishmentForbidden",
 				]),
 			},
-			detail: { summary: "Transfer Unit ownership", tags: ["Governance"] },
+			detail: { summary: "Relinquish Unit ownership to Community", tags: ["Governance"] },
 		},
-	)
-	.post(
-		"/:unitId/ownership/relinquishment",
 		async ({ authorization, profile, params, body }) => {
 			const result = await database.transaction(async (tx) => {
 				await lockUnitAccessState(tx, [params.unitId]);
@@ -923,23 +941,5 @@ export default new Elysia({ prefix: "/unit" })
 				};
 			});
 			return result;
-		},
-		{
-			access: "fresh-session-only",
-			params: UnitGovernanceParams,
-			body: RelinquishUnitOwnershipBody,
-			response: {
-				[StatusCodes.OK]: UnitOwnershipResponse,
-				[StatusCodes.FORBIDDEN]: toApiErrorResponse([
-					"UnitPermissionForbidden",
-					"FreshSessionRequired",
-				]),
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
-				[StatusCodes.CONFLICT]: toApiErrorResponse([
-					"UnitOwnershipChanged",
-					"UnitOwnershipRelinquishmentForbidden",
-				]),
-			},
-			detail: { summary: "Relinquish Unit ownership to Community", tags: ["Governance"] },
 		},
 	);

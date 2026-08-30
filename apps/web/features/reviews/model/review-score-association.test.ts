@@ -33,7 +33,7 @@ describe("Review Score association drafts", () => {
 	it("preserves attached order and uses localized Realm labels", () => {
 		expect(
 			createReviewScoreDrafts(viewerScores, [
-				{ scoreId: "score-2", realmId: "realm-2", realmTitle: "Club", value: "6" },
+				{ scoreId: "score-2", realmId: "realm-2", realmTitle: "Club", value: 6 },
 				{ scoreId: "score-1", realmId: "realm-1", realmTitle: "Global", value: 8 },
 				{
 					scoreId: "foreign-score",

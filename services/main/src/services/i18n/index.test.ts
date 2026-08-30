@@ -36,6 +36,17 @@ describe("backend internationalization", () => {
 		});
 	});
 
+	it("does not emit Content-Language when a route does not resolve a translation", async () => {
+		const app = new Elysia().use(i18n).get("/", () => "ok");
+		const response = await app.handle(
+			new Request("http://localhost/", { headers: { "Accept-Language": "en-US" } }),
+		);
+
+		expect(response.status).toBe(200);
+		expect(response.headers.get("Content-Language")).toBeNull();
+		expect(await response.text()).toBe("ok");
+	});
+
 	it("matches request language preferences for authentication email copy", async () => {
 		const { t, locale } = await getRequestTranslation(
 			"emails",

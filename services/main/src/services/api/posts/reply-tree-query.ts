@@ -1,3 +1,4 @@
+import type { StaticDecode } from "typebox";
 import { sql } from "drizzle-orm";
 import { t } from "elysia";
 
@@ -24,7 +25,7 @@ const ReplyTreeCursor = t.Object(
 	},
 	{ additionalProperties: false },
 );
-type ReplyTreeCursor = typeof ReplyTreeCursor.static;
+type ReplyTreeCursor = StaticDecode<typeof ReplyTreeCursor>;
 
 interface ReplyTreeSelectionRow extends Record<string, unknown> {
 	postId: string;

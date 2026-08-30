@@ -22,6 +22,17 @@ async function authorizeImageAsset(
 export default new Elysia({ prefix: "/image-assets" })
 	.get(
 		"/:id/presentations/:role/content",
+		{
+			params: ImageAssetPresentationParams,
+			response: {
+				[StatusCodes.MOVED_TEMPORARILY]: t.Void(),
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["ImageAssetNotFound"]),
+			},
+			detail: {
+				summary: "Resolve rendered image asset presentation",
+				tags: ["Image Assets"],
+			},
+		},
 		async ({ params, request }) => {
 			const [asset, presentation] = await Promise.all([
 				findImageAsset(params.id),
@@ -43,20 +54,17 @@ export default new Elysia({ prefix: "/image-assets" })
 				},
 			});
 		},
+	)
+	.get(
+		"/:id/content",
 		{
-			params: ImageAssetPresentationParams,
+			params: ImageAssetParams,
 			response: {
 				[StatusCodes.MOVED_TEMPORARILY]: t.Void(),
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["ImageAssetNotFound"]),
 			},
-			detail: {
-				summary: "Resolve rendered image asset presentation",
-				tags: ["Image Assets"],
-			},
+			detail: { summary: "Resolve image asset content", tags: ["Image Assets"] },
 		},
-	)
-	.get(
-		"/:id/content",
 		async ({ params, request }) => {
 			const asset = await findImageAsset(params.id);
 			if (!asset || asset.status !== "ready") throw new ImageAssetNotFound();
@@ -68,13 +76,5 @@ export default new Elysia({ prefix: "/image-assets" })
 					"cache-control": asset.access === "public" ? "public, max-age=60" : "private, no-store",
 				},
 			});
-		},
-		{
-			params: ImageAssetParams,
-			response: {
-				[StatusCodes.MOVED_TEMPORARILY]: t.Void(),
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["ImageAssetNotFound"]),
-			},
-			detail: { summary: "Resolve image asset content", tags: ["Image Assets"] },
 		},
 	);

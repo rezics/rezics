@@ -1,4 +1,5 @@
-import { type Static, t } from "elysia";
+import type { StaticDecode } from "typebox";
+import { t } from "elysia";
 
 import { PollModeValues, PollResultVisibilityValues } from "../../database/schema/contract-values";
 import { ContentLanguage, LocalizationLanguageQuery, RevisionContext, Uuid } from "../schema";
@@ -22,7 +23,7 @@ export const PollOptionInput = t.Union([
 		{ additionalProperties: false },
 	),
 ]);
-export type PollOptionInput = Static<typeof PollOptionInput>;
+export type PollOptionInput = StaticDecode<typeof PollOptionInput>;
 
 export const CreatePollBody = t.Object({
 	question: t.String({ minLength: 1, maxLength: 500 }),
@@ -37,24 +38,24 @@ export const CreatePollBody = t.Object({
 	closesAt: t.Optional(t.String({ format: "date-time" })),
 	revisionContext: t.Optional(RevisionContext),
 });
-export type CreatePollBody = Static<typeof CreatePollBody>;
+export type CreatePollBody = StaticDecode<typeof CreatePollBody>;
 
 export const ClosePollBody = t.Object(
 	{ revisionContext: t.Optional(RevisionContext) },
 	{ additionalProperties: false },
 );
-export type ClosePollBody = Static<typeof ClosePollBody>;
+export type ClosePollBody = StaticDecode<typeof ClosePollBody>;
 
 export const PollParams = t.Object({ pollId: Uuid });
-export type PollParams = Static<typeof PollParams>;
+export type PollParams = StaticDecode<typeof PollParams>;
 
 export const PollDetailQuery = t.Object(LocalizationLanguageQuery, {
 	additionalProperties: false,
 });
-export type PollDetailQuery = Static<typeof PollDetailQuery>;
+export type PollDetailQuery = StaticDecode<typeof PollDetailQuery>;
 
 export const VotePollBody = t.Object({
 	optionIds: t.Array(Uuid, { minItems: 1, maxItems: 50 }),
 	realmId: t.Optional(Uuid),
 });
-export type VotePollBody = Static<typeof VotePollBody>;
+export type VotePollBody = StaticDecode<typeof VotePollBody>;

@@ -1,29 +1,28 @@
 import { StatusCodes } from "http-status-codes";
-import * as Data from "effect/Data";
+import { HTTPError } from "elysia";
 
-export class InvalidSearch extends Data.TaggedError("InvalidSearch") {
-	static readonly status = StatusCodes.UNPROCESSABLE_ENTITY as const;
-	readonly status = InvalidSearch.status;
-
-	constructor(readonly message: string) {
+export class InvalidSearch extends HTTPError.id("InvalidSearch", StatusCodes.UNPROCESSABLE_ENTITY) {
+	constructor(override readonly message: string) {
 		super();
 	}
 }
 
-export class SearchUnavailable extends Data.TaggedError("SearchUnavailable") {
-	static readonly status = StatusCodes.SERVICE_UNAVAILABLE as const;
-	readonly status = SearchUnavailable.status;
-	readonly message = "Search service unavailable";
+export class SearchUnavailable extends HTTPError.id(
+	"SearchUnavailable",
+	StatusCodes.SERVICE_UNAVAILABLE,
+) {
+	override readonly message = "Search service unavailable";
 
-	constructor(readonly cause?: unknown) {
+	constructor(override readonly cause?: unknown) {
 		super();
 	}
 }
 
-export class SharedSearchQueryNotFound extends Data.TaggedError("SharedSearchQueryNotFound") {
-	static readonly status = StatusCodes.NOT_FOUND as const;
-	readonly status = SharedSearchQueryNotFound.status;
-	readonly message = "Shared Search query does not exist";
+export class SharedSearchQueryNotFound extends HTTPError.id(
+	"SharedSearchQueryNotFound",
+	StatusCodes.NOT_FOUND,
+) {
+	override readonly message = "Shared Search query does not exist";
 }
 
 export const SearchErrors = [InvalidSearch, SearchUnavailable, SharedSearchQueryNotFound] as const;

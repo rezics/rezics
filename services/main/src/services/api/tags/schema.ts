@@ -1,4 +1,5 @@
-import { type Static, t } from "elysia";
+import type { StaticDecode } from "typebox";
+import { t } from "elysia";
 
 import {
 	TagExpressionArgumentRoleValues,
@@ -83,7 +84,7 @@ export const UnitTagLandscapeParams = t.Object({
 	type: TaggableUnitType,
 	unitId: Uuid,
 });
-export type UnitTagLandscapeParams = Static<typeof UnitTagLandscapeParams>;
+export type UnitTagLandscapeParams = StaticDecode<typeof UnitTagLandscapeParams>;
 
 export const UnitTagLandscapeQuery = t.Object(
 	{
@@ -95,7 +96,7 @@ export const UnitTagLandscapeQuery = t.Object(
 	},
 	{ additionalProperties: false },
 );
-export type UnitTagLandscapeQuery = Static<typeof UnitTagLandscapeQuery>;
+export type UnitTagLandscapeQuery = StaticDecode<typeof UnitTagLandscapeQuery>;
 
 const ExpressionAuthority = t.Union([
 	t.Object({ kind: t.Literal("global") }),
@@ -184,25 +185,25 @@ export const RealmUnitTagVoteListQuery = t.Object(
 	},
 	{ additionalProperties: false },
 );
-export type RealmUnitTagVoteListQuery = Static<typeof RealmUnitTagVoteListQuery>;
+export type RealmUnitTagVoteListQuery = StaticDecode<typeof RealmUnitTagVoteListQuery>;
 
 export const RealmTagSubscriptionListQuery = t.Object(LocalizationLanguageQuery, {
 	additionalProperties: false,
 });
-export type RealmTagSubscriptionListQuery = Static<typeof RealmTagSubscriptionListQuery>;
+export type RealmTagSubscriptionListQuery = StaticDecode<typeof RealmTagSubscriptionListQuery>;
 
 export const RealmTagSubscriptionListResponse = t.Object({
 	items: t.Array(RealmTagSubscriptionResponse),
 });
 
 export const RealmTagSubscriptionParams = t.Object({ realmId: Uuid });
-export type RealmTagSubscriptionParams = Static<typeof RealmTagSubscriptionParams>;
+export type RealmTagSubscriptionParams = StaticDecode<typeof RealmTagSubscriptionParams>;
 
 export const UpsertRealmTagSubscriptionBody = t.Object(
 	{ position: t.Optional(FractionalPositionInput) },
 	{ additionalProperties: false },
 );
-export type UpsertRealmTagSubscriptionBody = Static<typeof UpsertRealmTagSubscriptionBody>;
+export type UpsertRealmTagSubscriptionBody = StaticDecode<typeof UpsertRealmTagSubscriptionBody>;
 
 export const RealmTagSubscriptionStateResponse = t.Object({
 	realmId: Uuid,

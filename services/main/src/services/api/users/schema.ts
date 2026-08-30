@@ -1,6 +1,7 @@
-import { type Static, t } from "elysia";
+import type { StaticDecode } from "typebox";
+import { t } from "elysia";
 import { LicenseIds } from "@rezics/license";
-import { Value } from "@sinclair/typebox/value";
+import { Value } from "typebox/value";
 import { PortableTextDocument } from "@rezics/block";
 
 import {
@@ -32,13 +33,13 @@ export type StudioSection = ResourceSection;
 
 export const StudioWorkspaceSourceValues = ["all", "owned", "direct", "delegated"] as const;
 export const StudioWorkspaceSource = t.UnionEnum(StudioWorkspaceSourceValues, { default: "all" });
-export type StudioWorkspaceSource = Static<typeof StudioWorkspaceSource>;
+export type StudioWorkspaceSource = StaticDecode<typeof StudioWorkspaceSource>;
 
 export const StudioAccessSourceValues = ["owner", "direct", "realm"] as const;
 export const StudioAccessSource = t.UnionEnum(StudioAccessSourceValues, {
 	default: undefined,
 });
-export type StudioAccessSource = Static<typeof StudioAccessSource>;
+export type StudioAccessSource = StaticDecode<typeof StudioAccessSource>;
 
 export const StudioContentListQuery = t.Object(
 	{
@@ -52,7 +53,7 @@ export const StudioContentListQuery = t.Object(
 	},
 	{ additionalProperties: false },
 );
-export type StudioContentListQuery = Static<typeof StudioContentListQuery>;
+export type StudioContentListQuery = StaticDecode<typeof StudioContentListQuery>;
 
 export const StudioContentListResponse = t.Object({
 	items: t.Array(
@@ -79,7 +80,7 @@ export const StudioContentListResponse = t.Object({
 });
 
 export const StudioResourceParams = t.Object({ unitId: Uuid });
-export type StudioResourceParams = Static<typeof StudioResourceParams>;
+export type StudioResourceParams = StaticDecode<typeof StudioResourceParams>;
 
 export const StudioVisitResponse = t.Object({
 	unitId: Uuid,
@@ -94,7 +95,7 @@ export const CollectionConfigV1 = t.Object(
 	},
 	{ additionalProperties: false, minProperties: 1 },
 );
-export type CollectionConfigV1 = Static<typeof CollectionConfigV1>;
+export type CollectionConfigV1 = StaticDecode<typeof CollectionConfigV1>;
 
 export function parseCollectionConfig(value: unknown): CollectionConfigV1 | null {
 	if (value === null) return null;
@@ -114,7 +115,7 @@ export const UpdateProfileBody = t.Object(
 	},
 	{ additionalProperties: false },
 );
-export type UpdateProfileBody = Static<typeof UpdateProfileBody>;
+export type UpdateProfileBody = StaticDecode<typeof UpdateProfileBody>;
 
 /**
  * Temporary first-party request for assigning the current Profile slug.
@@ -130,7 +131,7 @@ export const AssignCurrentProfileSlugBody = t.Object(
 	{ slug: SlugLabelInput },
 	{ additionalProperties: false },
 );
-export type AssignCurrentProfileSlugBody = Static<typeof AssignCurrentProfileSlugBody>;
+export type AssignCurrentProfileSlugBody = StaticDecode<typeof AssignCurrentProfileSlugBody>;
 
 export const UpdateDisplayPreferencesBody = t.Object(
 	{
@@ -142,7 +143,7 @@ export const UpdateDisplayPreferencesBody = t.Object(
 	},
 	{ additionalProperties: false, minProperties: 1 },
 );
-export type UpdateDisplayPreferencesBody = Static<typeof UpdateDisplayPreferencesBody>;
+export type UpdateDisplayPreferencesBody = StaticDecode<typeof UpdateDisplayPreferencesBody>;
 
 export const UpdatePrivacyPreferencesBody = t.Object(
 	{
@@ -151,7 +152,7 @@ export const UpdatePrivacyPreferencesBody = t.Object(
 	},
 	{ additionalProperties: false, minProperties: 1 },
 );
-export type UpdatePrivacyPreferencesBody = Static<typeof UpdatePrivacyPreferencesBody>;
+export type UpdatePrivacyPreferencesBody = StaticDecode<typeof UpdatePrivacyPreferencesBody>;
 
 export const ReplacePreferencesBody = t.Object(
 	{
@@ -178,15 +179,15 @@ export const ReplacePreferencesBody = t.Object(
 	},
 	{ additionalProperties: false },
 );
-export type ReplacePreferencesBody = Static<typeof ReplacePreferencesBody>;
+export type ReplacePreferencesBody = StaticDecode<typeof ReplacePreferencesBody>;
 
 export const UserLookupParams = t.Object({ id: Uuid });
-export type UserLookupParams = Static<typeof UserLookupParams>;
+export type UserLookupParams = StaticDecode<typeof UserLookupParams>;
 
 export const PublicProfileQuery = t.Object(LocalizationLanguageQuery, {
 	additionalProperties: false,
 });
-export type PublicProfileQuery = Static<typeof PublicProfileQuery>;
+export type PublicProfileQuery = StaticDecode<typeof PublicProfileQuery>;
 
 export const ProfileActivityQuery = t.Object(
 	{
@@ -195,13 +196,13 @@ export const ProfileActivityQuery = t.Object(
 	},
 	{ additionalProperties: false },
 );
-export type ProfileActivityQuery = Static<typeof ProfileActivityQuery>;
+export type ProfileActivityQuery = StaticDecode<typeof ProfileActivityQuery>;
 
 export const UserIdParams = t.Object({ id: Uuid });
-export type UserIdParams = Static<typeof UserIdParams>;
+export type UserIdParams = StaticDecode<typeof UserIdParams>;
 
 export const FollowingUnitParams = t.Object({ unitId: Uuid });
-export type FollowingUnitParams = Static<typeof FollowingUnitParams>;
+export type FollowingUnitParams = StaticDecode<typeof FollowingUnitParams>;
 
 export const FollowingListQuery = t.Object(
 	{
@@ -212,7 +213,7 @@ export const FollowingListQuery = t.Object(
 	},
 	{ additionalProperties: false },
 );
-export type FollowingListQuery = Static<typeof FollowingListQuery>;
+export type FollowingListQuery = StaticDecode<typeof FollowingListQuery>;
 
 export const UpdateFollowingBody = t.Object(
 	{
@@ -221,7 +222,7 @@ export const UpdateFollowingBody = t.Object(
 	},
 	{ additionalProperties: false },
 );
-export type UpdateFollowingBody = Static<typeof UpdateFollowingBody>;
+export type UpdateFollowingBody = StaticDecode<typeof UpdateFollowingBody>;
 
 const FollowingNotificationSettings = {
 	inAppNotificationsEnabled: t.Boolean(),
@@ -245,4 +246,4 @@ export const ReplaceFollowingSettingsBody = t.Union([
 		{ additionalProperties: false },
 	),
 ]);
-export type ReplaceFollowingSettingsBody = Static<typeof ReplaceFollowingSettingsBody>;
+export type ReplaceFollowingSettingsBody = StaticDecode<typeof ReplaceFollowingSettingsBody>;

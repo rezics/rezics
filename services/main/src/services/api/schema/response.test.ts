@@ -1,4 +1,5 @@
-import { Check, Decode, Encode } from "@sinclair/typebox/value";
+import type { StaticDecode } from "typebox";
+import { Check, Decode, Encode } from "typebox/value";
 import { getActiveObservability } from "@rezics/observability";
 import { SearchContinuationToken } from "@rezics/filter";
 import { describe, expect, it, vi } from "vitest";
@@ -104,21 +105,21 @@ describe("API response values", () => {
 				cover: null,
 				collection: null,
 				presentation: { kind: "general" as const },
-			} satisfies typeof FeedUnitItemResponse.static,
+			} satisfies StaticDecode<typeof FeedUnitItemResponse>,
 			{
 				...postBase,
 				postKind: "post" as const,
-			} satisfies typeof FeedNonReviewPostItemResponse.static,
+			} satisfies StaticDecode<typeof FeedNonReviewPostItemResponse>,
 			{
 				...postBase,
 				postKind: "review" as const,
 				scores: [],
-			} satisfies typeof FeedReviewItemResponse.static,
+			} satisfies StaticDecode<typeof FeedReviewItemResponse>,
 			{
 				...postBase,
 				postKind: "wiki" as const,
 				realmTagContext: null,
-			} satisfies typeof FeedWikiItemResponse.static,
+			} satisfies StaticDecode<typeof FeedWikiItemResponse>,
 		];
 		const response = {
 			items: contents.map((content, index) => ({
@@ -130,7 +131,7 @@ describe("API response values", () => {
 				content,
 			})),
 			nextCursor: null,
-		} satisfies typeof CollectionContentResponse.static;
+		} satisfies StaticDecode<typeof CollectionContentResponse>;
 
 		expect(Check(CollectionContentResponse, response)).toBe(true);
 		expect(Encode(CollectionContentResponse, response)).toEqual(response);
@@ -456,7 +457,7 @@ describe("API response values", () => {
 	it("bounds each subject Entity Expression preview at the shared response limit", () => {
 		const expressions =
 			UnitDetailResponse.properties.subjectAssociations.items.properties.expressions;
-		expect(expressions.maxItems).toBe(SubjectAssociationExpressionPreviewLimit);
+		expect(expressions).toHaveProperty("maxItems", SubjectAssociationExpressionPreviewLimit);
 		const expression = {
 			expressionId: "019b0000-0000-7000-8000-000000000001",
 			expressionKind: "simple",

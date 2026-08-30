@@ -1,3 +1,4 @@
+import type { StaticDecode } from "typebox";
 import { StatusCodes } from "http-status-codes";
 import { and, eq, inArray } from "drizzle-orm";
 import Elysia, { t } from "elysia";
@@ -56,7 +57,7 @@ const UnitRecommendationCursor = t.Object(
 	},
 	{ additionalProperties: false },
 );
-type UnitRecommendationCursor = typeof UnitRecommendationCursor.static;
+type UnitRecommendationCursor = StaticDecode<typeof UnitRecommendationCursor>;
 
 const RelatedPostCursor = t.Object(
 	{
@@ -72,7 +73,7 @@ const RelatedPostCursor = t.Object(
 	},
 	{ additionalProperties: false },
 );
-type RelatedPostCursor = typeof RelatedPostCursor.static;
+type RelatedPostCursor = StaticDecode<typeof RelatedPostCursor>;
 
 function equalOrderedValues(
 	left: readonly (number | string)[],
@@ -151,6 +152,15 @@ export default new Elysia({ prefix: "/recommendations" })
 	.use(session)
 	.get(
 		"/units",
+		{
+			query: UnitRecommendationQuery,
+			response: {
+				[StatusCodes.OK]: UnitRecommendationResponse,
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["InvalidPaginationCursor"]),
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
+			},
+			detail: { summary: "Recommend Units", tags: ["Recommendations"] },
+		},
 		async ({ query, request }) => {
 			const identity = await resolveIdentity(request, "recommendation:read");
 			const viewer = await resolveRecommendationViewer(
@@ -230,18 +240,19 @@ export default new Elysia({ prefix: "/recommendations" })
 					: null,
 			};
 		},
-		{
-			query: UnitRecommendationQuery,
-			response: {
-				[StatusCodes.OK]: UnitRecommendationResponse,
-				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["InvalidPaginationCursor"]),
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
-			},
-			detail: { summary: "Recommend Units", tags: ["Recommendations"] },
-		},
 	)
 	.get(
 		"/posts/:postId",
+		{
+			params: RelatedPostParams,
+			query: RelatedPostQuery,
+			response: {
+				[StatusCodes.OK]: PostFeedResponse,
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["InvalidPaginationCursor"]),
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
+			},
+			detail: { summary: "Recommend related posts", tags: ["Recommendations"] },
+		},
 		async ({ params, query, request }) => {
 			const identity = await resolveIdentity(request, "recommendation:read");
 			const viewer = await resolveRecommendationViewer(
@@ -314,19 +325,17 @@ export default new Elysia({ prefix: "/recommendations" })
 					: null,
 			};
 		},
-		{
-			params: RelatedPostParams,
-			query: RelatedPostQuery,
-			response: {
-				[StatusCodes.OK]: PostFeedResponse,
-				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["InvalidPaginationCursor"]),
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
-			},
-			detail: { summary: "Recommend related posts", tags: ["Recommendations"] },
-		},
 	)
 	.post(
 		"/events",
+		{
+			body: RecommendationEventBatchBody,
+			response: {
+				[StatusCodes.OK]: RecommendationEventBatchResponse,
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
+			},
+			detail: { summary: "Record recommendation events", tags: ["Recommendations"] },
+		},
 		async ({ body, request }) => {
 			const now = new Date();
 			for (const event of body.events) {
@@ -365,17 +374,21 @@ export default new Elysia({ prefix: "/recommendations" })
 				.returning({ id: recommendationEvent.id });
 			return { accepted: inserted.length };
 		},
-		{
-			body: RecommendationEventBatchBody,
-			response: {
-				[StatusCodes.OK]: RecommendationEventBatchResponse,
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
-			},
-			detail: { summary: "Record recommendation events", tags: ["Recommendations"] },
-		},
 	)
 	.put(
 		"/exclusions/:unitId",
+		{
+			access: "write:recommendation:write",
+			params: RecommendationExclusionParams,
+			body: RecommendationExclusionBody,
+			response: {
+				[StatusCodes.OK]: RecommendationExclusionResponse,
+				[StatusCodes.UNAUTHORIZED]: RecommendationWriteUnauthorizedResponse,
+				[StatusCodes.FORBIDDEN]: RecommendationWriteForbiddenResponse,
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
+			},
+			detail: { summary: "Exclude a recommendation", tags: ["Recommendations"] },
+		},
 		async ({ body, params, profile, authorization }) => {
 			ensureEventTime(body.occurredAt, new Date());
 			ensureRecommendationTracking(params.unitId, body);
@@ -402,21 +415,19 @@ export default new Elysia({ prefix: "/recommendations" })
 			});
 			return { excluded: true };
 		},
+	)
+	.delete(
+		"/exclusions/:unitId",
 		{
 			access: "write:recommendation:write",
 			params: RecommendationExclusionParams,
-			body: RecommendationExclusionBody,
 			response: {
 				[StatusCodes.OK]: RecommendationExclusionResponse,
 				[StatusCodes.UNAUTHORIZED]: RecommendationWriteUnauthorizedResponse,
 				[StatusCodes.FORBIDDEN]: RecommendationWriteForbiddenResponse,
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
 			},
-			detail: { summary: "Exclude a recommendation", tags: ["Recommendations"] },
+			detail: { summary: "Restore an excluded recommendation", tags: ["Recommendations"] },
 		},
-	)
-	.delete(
-		"/exclusions/:unitId",
 		async ({ params, profile }) => {
 			await database
 				.delete(recommendationExclusion)
@@ -427,15 +438,5 @@ export default new Elysia({ prefix: "/recommendations" })
 					),
 				);
 			return { excluded: false };
-		},
-		{
-			access: "write:recommendation:write",
-			params: RecommendationExclusionParams,
-			response: {
-				[StatusCodes.OK]: RecommendationExclusionResponse,
-				[StatusCodes.UNAUTHORIZED]: RecommendationWriteUnauthorizedResponse,
-				[StatusCodes.FORBIDDEN]: RecommendationWriteForbiddenResponse,
-			},
-			detail: { summary: "Restore an excluded recommendation", tags: ["Recommendations"] },
 		},
 	);

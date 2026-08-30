@@ -1,10 +1,8 @@
-import { cors } from "@elysiajs/cors";
-import { JsonValue } from "@rezics/portable-text";
-import { getActiveObservability } from "@rezics/observability";
+import { cors } from "@elysia/cors";
 import { createElysiaObservability } from "@rezics/observability/elysia";
 import Elysia from "elysia";
 
-import { enterAuditRequestContext, getAuditRequestContext } from "../audit";
+import { enterAuditRequestContext } from "../audit";
 import unitResources from "./unit-resources";
 import associationProposals from "./association-proposals";
 import audit from "./audit";
@@ -46,45 +44,14 @@ import units from "./units";
 import { auth } from "../auth";
 import session from "../auth/session";
 import { env } from "../config";
-import {
-	ApiErrorRegistry,
-	toApiErrorBody,
-	InternalError,
-	isApiError,
-	MalformedRequestBody,
-	apiErrorRetryAfterSeconds,
-} from "./errors";
-import { toUnitVariantConstraintError } from "../units/variants";
-import { toPostTargetingConstraintError } from "../posts/targeting";
-import { toTagPathConstraintError } from "../tag-paths/service";
-import { toTagPolicyConstraintError } from "../database/errors";
-import { classifyValidationFailure } from "./validation-failure";
+import errorBoundary from "./error-boundary";
 
-const { logger } = getActiveObservability();
-
-/**
- * Main API application boundary.
- *
- * @remarks
- * Elysia 1.4's exact-mirror 0.x normalizer cannot compile the recursive and
- * nested TypeBox references used by the API models. Use TypeBox normalization
- * until the Elysia 2 migration moves this boundary to TypeBox 1 and
- * exact-mirror 1.x.
- *
- * @todo Remove the `normalize: "typebox"` override after migrating to Elysia 2
- * and verifying the recursive JSON value, filter, navigation, and block schema
- * contracts without an exact-mirror cleaner fallback.
- *
- * @see {@link https://github.com/elysiajs/exact-mirror/blob/main/CHANGELOG.md}
- */
-export default new Elysia({ normalize: "typebox" })
+export default new Elysia()
 	.use(createElysiaObservability())
-	.model({ JsonValue })
 	.parser("empty-body", ({ request }) => {
 		// A null Fetch body proves there is nothing for the following JSON parser to consume.
 		return request.body === null ? null : undefined;
 	})
-	.error(ApiErrorRegistry)
 	.use(
 		cors({
 			origin: env.BETTER_AUTH_TRUSTED_ORIGINS,
@@ -94,76 +61,12 @@ export default new Elysia({ normalize: "typebox" })
 			exposeHeaders: ["X-Request-Id", "Retry-After"],
 		}),
 	)
-	.onRequest(({ set }) => {
+	.request(({ set }) => {
 		const requestId = crypto.randomUUID();
 		enterAuditRequestContext({ requestId });
 		set.headers["X-Request-Id"] = requestId;
 	})
-	.onError(({ error, code, request, route, set, status }) => {
-		const requestId = getAuditRequestContext()?.requestId ?? crypto.randomUUID();
-		if (isApiError(error)) {
-			const retryAfterSeconds = apiErrorRetryAfterSeconds(error);
-			if (retryAfterSeconds !== undefined) set.headers["Retry-After"] = String(retryAfterSeconds);
-			return status(error.status, toApiErrorBody(error, requestId));
-		}
-		const tagPolicyConstraintError = toTagPolicyConstraintError(error);
-		if (tagPolicyConstraintError)
-			return status(
-				tagPolicyConstraintError.status,
-				toApiErrorBody(tagPolicyConstraintError, requestId),
-			);
-		const variantConstraintError = toUnitVariantConstraintError(error);
-		if (variantConstraintError)
-			return status(
-				variantConstraintError.status,
-				toApiErrorBody(variantConstraintError, requestId),
-			);
-		const postTargetingConstraintError = toPostTargetingConstraintError(error);
-		if (postTargetingConstraintError)
-			return status(
-				postTargetingConstraintError.status,
-				toApiErrorBody(postTargetingConstraintError, requestId),
-			);
-		const tagPathConstraintError = toTagPathConstraintError(error);
-		if (tagPathConstraintError)
-			return status(
-				tagPathConstraintError.status,
-				toApiErrorBody(tagPathConstraintError, requestId),
-			);
-		if (code === "PARSE") {
-			const malformedRequestBody = new MalformedRequestBody();
-			return status(malformedRequestBody.status, toApiErrorBody(malformedRequestBody, requestId));
-		}
-		if (code === "VALIDATION") {
-			const failure = classifyValidationFailure(error);
-			const details = {
-				eventName:
-					failure.kind === "response"
-						? "http.response.validation_failed"
-						: "http.request.validation_failed",
-				errorCode: failure.publicError._tag,
-				request: { method: request.method, route: route || "unmatched" },
-				attributes: {
-					requestId,
-					validationIssues: failure.issues,
-					validationSource: failure.source,
-				},
-			};
-			if (failure.kind === "response")
-				logger.error("Response validation failed", { ...details, error });
-			else logger.info("Request validation failed", details);
-			return status(failure.publicError.status, toApiErrorBody(failure.publicError, requestId));
-		}
-		logger.error("Request failed", {
-			eventName: "http.request.failed",
-			errorCode: "InternalError",
-			request: { method: request.method, route: route || "unmatched" },
-			error,
-			attributes: { requestId },
-		});
-		const internalError = new InternalError(error);
-		return status(internalError.status, toApiErrorBody(internalError, requestId));
-	})
+	.use(errorBoundary)
 	.mount(auth.handler)
 	.use(session)
 	.use(agentGuide)

@@ -1,3 +1,4 @@
+import type { StaticDecode } from "typebox";
 import { DevelopmentPreviewCapability, PlatformCapabilityValues } from "@rezics/access";
 import { StatusCodes } from "http-status-codes";
 import { and, desc, eq, isNull, or } from "drizzle-orm";
@@ -125,6 +126,15 @@ export default new Elysia({ prefix: "/users" })
 	.use(session)
 	.get(
 		"/me",
+		{
+			access: "profile:read",
+			query: PublicProfileQuery,
+			response: {
+				[StatusCodes.OK]: CurrentProfileResponse,
+				[StatusCodes.NOT_FOUND]: ProfileNotFoundResponse,
+			},
+			detail: { summary: "Current user profile", tags: ["Users"] },
+		},
 		async ({ authorization, profile, query, user }) => {
 			const [platformCapabilities, currentProfile, localizations] = await Promise.all([
 				authorization.platform.decideCapabilities(PlatformCapabilityValues),
@@ -146,19 +156,9 @@ export default new Elysia({ prefix: "/users" })
 				),
 			};
 		},
-		{
-			access: "profile:read",
-			query: PublicProfileQuery,
-			response: {
-				[StatusCodes.OK]: CurrentProfileResponse,
-				[StatusCodes.NOT_FOUND]: ProfileNotFoundResponse,
-			},
-			detail: { summary: "Current user profile", tags: ["Users"] },
-		},
 	)
 	.put(
 		"/me/profile-slug",
-		async ({ body, profile }) => assignCurrentProfileSlugAddress(profile.unitId, body),
 		{
 			access: "session-only",
 			body: AssignCurrentProfileSlugBody,
@@ -181,17 +181,10 @@ export default new Elysia({ prefix: "/users" })
 				tags: ["Users", "First-party Preview"],
 			},
 		},
+		async ({ body, profile }) => assignCurrentProfileSlugAddress(profile.unitId, body),
 	)
 	.get(
 		"/me/studio",
-		async ({ authorization, profile, query }) => {
-			if (query.section === "zone")
-				await authorization.platform.ensureCapability(DevelopmentPreviewCapability);
-			return listStudioContent({
-				profileId: profile.unitId,
-				query,
-			});
-		},
 		{
 			access: "profile:read",
 			query: StudioContentListQuery,
@@ -207,15 +200,17 @@ export default new Elysia({ prefix: "/users" })
 				tags: ["Users", "Studio"],
 			},
 		},
+		async ({ authorization, profile, query }) => {
+			if (query.section === "zone")
+				await authorization.platform.ensureCapability(DevelopmentPreviewCapability);
+			return listStudioContent({
+				profileId: profile.unitId,
+				query,
+			});
+		},
 	)
 	.put(
 		"/me/studio/:unitId/visit",
-		async ({ authorization, profile, params }) =>
-			recordStudioVisit({
-				profileId: profile.unitId,
-				unitId: params.unitId,
-				authorization: authorization.unit,
-			}),
 		{
 			access: "write:interaction:write",
 			params: StudioResourceParams,
@@ -229,9 +224,30 @@ export default new Elysia({ prefix: "/users" })
 				tags: ["Users", "Studio"],
 			},
 		},
+		async ({ authorization, profile, params }) =>
+			recordStudioVisit({
+				profileId: profile.unitId,
+				unitId: params.unitId,
+				authorization: authorization.unit,
+			}),
 	)
 	.patch(
 		"/me",
+		{
+			access: "write:unit:update",
+			body: UpdateProfileBody,
+			response: {
+				[StatusCodes.OK]: PublicProfileResponse,
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
+					"RevisionCreditEntityInvalid",
+					"RevisionContributionActorRequired",
+				]),
+				[StatusCodes.FORBIDDEN]: UnitForbiddenResponse,
+				[StatusCodes.NOT_FOUND]: ProfileMutationNotFoundResponse,
+				[StatusCodes.CONFLICT]: toApiErrorResponse(["ProfileChanged"]),
+			},
+			detail: { summary: "Update current profile", tags: ["Users"] },
+		},
 		async ({ profile, authorization, body }) => {
 			await authorization.unit.ensureCanUpdate(profile.unitId, [["localizations", body.language]]);
 			await database.transaction(async (tx) => {
@@ -300,24 +316,17 @@ export default new Elysia({ prefix: "/users" })
 			});
 			return getProfile(profile.unitId, [body.language]);
 		},
-		{
-			access: "write:unit:update",
-			body: UpdateProfileBody,
-			response: {
-				[StatusCodes.OK]: PublicProfileResponse,
-				[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
-					"RevisionCreditEntityInvalid",
-					"RevisionContributionActorRequired",
-				]),
-				[StatusCodes.FORBIDDEN]: UnitForbiddenResponse,
-				[StatusCodes.NOT_FOUND]: ProfileMutationNotFoundResponse,
-				[StatusCodes.CONFLICT]: toApiErrorResponse(["ProfileChanged"]),
-			},
-			detail: { summary: "Update current profile", tags: ["Users"] },
-		},
 	)
 	.get(
 		"/me/preferences",
+		{
+			access: "profile:read",
+			response: {
+				[StatusCodes.OK]: PreferencesResponse,
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["PreferencesNotFound"]),
+			},
+			detail: { summary: "Current user preferences", tags: ["Users"] },
+		},
 		async ({ profile }) => {
 			const [preference] = await database
 				.select()
@@ -327,17 +336,23 @@ export default new Elysia({ prefix: "/users" })
 			if (!preference) throw new PreferencesNotFound();
 			return presentPreferences(preference);
 		},
-		{
-			access: "profile:read",
-			response: {
-				[StatusCodes.OK]: PreferencesResponse,
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["PreferencesNotFound"]),
-			},
-			detail: { summary: "Current user preferences", tags: ["Users"] },
-		},
 	)
 	.patch(
 		"/me/privacy",
+		{
+			access: "session-only",
+			body: UpdatePrivacyPreferencesBody,
+			response: {
+				[StatusCodes.OK]: PrivacyPreferencesResponse,
+				[StatusCodes.UNAUTHORIZED]: toApiErrorResponse(["InteractiveSessionRequired"]),
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["PreferencesNotFound"]),
+			},
+			detail: {
+				operationId: "updateCurrentUserPrivacy",
+				summary: "Update current user's Score and Progress privacy",
+				tags: ["Users", "First-party Preview"],
+			},
+		},
 		async ({ profile, body }) => {
 			const [preference] = await database
 				.update(profilePreference)
@@ -355,23 +370,18 @@ export default new Elysia({ prefix: "/users" })
 			if (!preference) throw new PreferencesNotFound();
 			return preference;
 		},
-		{
-			access: "session-only",
-			body: UpdatePrivacyPreferencesBody,
-			response: {
-				[StatusCodes.OK]: PrivacyPreferencesResponse,
-				[StatusCodes.UNAUTHORIZED]: toApiErrorResponse(["InteractiveSessionRequired"]),
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["PreferencesNotFound"]),
-			},
-			detail: {
-				operationId: "updateCurrentUserPrivacy",
-				summary: "Update current user's Score and Progress privacy",
-				tags: ["Users", "First-party Preview"],
-			},
-		},
 	)
 	.patch(
 		"/me/preferences",
+		{
+			access: "profile:update",
+			body: UpdateDisplayPreferencesBody,
+			response: {
+				[StatusCodes.OK]: PreferencesResponse,
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["PreferencesNotFound"]),
+			},
+			detail: { summary: "Update current user display preferences", tags: ["Users"] },
+		},
 		async ({ profile, body }) => {
 			const [preference] = await database
 				.update(profilePreference)
@@ -393,18 +403,22 @@ export default new Elysia({ prefix: "/users" })
 			if (!preference) throw new PreferencesNotFound();
 			return presentPreferences(preference);
 		},
-		{
-			access: "profile:update",
-			body: UpdateDisplayPreferencesBody,
-			response: {
-				[StatusCodes.OK]: PreferencesResponse,
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["PreferencesNotFound"]),
-			},
-			detail: { summary: "Update current user display preferences", tags: ["Users"] },
-		},
 	)
 	.put(
 		"/me/preferences",
+		{
+			access: "write:profile:update",
+			body: ReplacePreferencesBody,
+			response: {
+				[StatusCodes.OK]: PreferencesResponse,
+				[StatusCodes.FORBIDDEN]: toApiErrorResponse([
+					"UnitPermissionForbidden",
+					"RealmCapabilityRequired",
+				]),
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["PreferencesNotFound"]),
+			},
+			detail: { summary: "Replace current user preferences", tags: ["Users"] },
+		},
 		async ({ profile, authorization, body }) => {
 			await authorization.unit.ensureCanUpdate(profile.unitId, [["preferences"]]);
 			await authorization.realm.ensureParticipation(body.defaultScoreRealmId);
@@ -432,22 +446,18 @@ export default new Elysia({ prefix: "/users" })
 				return presentPreferences(preference);
 			});
 		},
-		{
-			access: "write:profile:update",
-			body: ReplacePreferencesBody,
-			response: {
-				[StatusCodes.OK]: PreferencesResponse,
-				[StatusCodes.FORBIDDEN]: toApiErrorResponse([
-					"UnitPermissionForbidden",
-					"RealmCapabilityRequired",
-				]),
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["PreferencesNotFound"]),
-			},
-			detail: { summary: "Replace current user preferences", tags: ["Users"] },
-		},
 	)
 	.get(
 		"/me/following",
+		{
+			access: "interaction:read",
+			query: FollowingListQuery,
+			response: {
+				[StatusCodes.OK]: FollowingListResponse,
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["InvalidPaginationCursor"]),
+			},
+			detail: { summary: "List Units followed by the current user", tags: ["Users"] },
+		},
 		async ({ profile, query }) => {
 			const viewer = await resolveRecommendationViewer(profile.unitId, false);
 			return listFollowing({
@@ -459,24 +469,9 @@ export default new Elysia({ prefix: "/users" })
 				contentRatingPolicy: contentRatingPolicyFromAllowlist(viewer.contentRatings),
 			});
 		},
-		{
-			access: "interaction:read",
-			query: FollowingListQuery,
-			response: {
-				[StatusCodes.OK]: FollowingListResponse,
-				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["InvalidPaginationCursor"]),
-			},
-			detail: { summary: "List Units followed by the current user", tags: ["Users"] },
-		},
 	)
 	.get(
 		"/me/following/:unitId",
-		async ({ profile, authorization, params }) =>
-			getFollowingStatus({
-				followerProfileId: profile.unitId,
-				unitId: params.unitId,
-				authorization: authorization.unit,
-			}),
 		{
 			access: "interaction:read",
 			params: FollowingUnitParams,
@@ -486,16 +481,15 @@ export default new Elysia({ prefix: "/users" })
 			},
 			detail: { summary: "Get current user's follow state for a Unit", tags: ["Users"] },
 		},
-	)
-	.put(
-		"/me/following/:unitId/settings",
-		async ({ profile, authorization, params, body }) =>
-			replaceFollowingSettings({
+		async ({ profile, authorization, params }) =>
+			getFollowingStatus({
 				followerProfileId: profile.unitId,
 				unitId: params.unitId,
 				authorization: authorization.unit,
-				settings: body,
 			}),
+	)
+	.put(
+		"/me/following/:unitId/settings",
 		{
 			access: "write:interaction:write",
 			params: FollowingUnitParams,
@@ -510,15 +504,16 @@ export default new Elysia({ prefix: "/users" })
 				tags: ["Users"],
 			},
 		},
-	)
-	.put(
-		"/me/following/:unitId",
-		async ({ profile, authorization, params }) =>
-			followUnit({
+		async ({ profile, authorization, params, body }) =>
+			replaceFollowingSettings({
 				followerProfileId: profile.unitId,
 				unitId: params.unitId,
 				authorization: authorization.unit,
+				settings: body,
 			}),
+	)
+	.put(
+		"/me/following/:unitId",
 		{
 			access: "contribute:interaction:write",
 			params: FollowingUnitParams,
@@ -532,21 +527,25 @@ export default new Elysia({ prefix: "/users" })
 			},
 			detail: { summary: "Follow a Unit", tags: ["Users"] },
 		},
+		async ({ profile, authorization, params }) =>
+			followUnit({
+				followerProfileId: profile.unitId,
+				unitId: params.unitId,
+				authorization: authorization.unit,
+			}),
 	)
 	.delete(
 		"/me/following/:unitId",
-		async ({ profile, params }) => unfollowUnit(profile.unitId, params.unitId),
 		{
 			access: "write:interaction:write",
 			params: FollowingUnitParams,
 			response: { [StatusCodes.OK]: FollowResponse },
 			detail: { summary: "Unfollow a Unit", tags: ["Users"] },
 		},
+		async ({ profile, params }) => unfollowUnit(profile.unitId, params.unitId),
 	)
 	.patch(
 		"/me/following/:unitId",
-		async ({ profile, params, body }) =>
-			updateFollowingPresentation(profile.unitId, params.unitId, body),
 		{
 			access: "write:interaction:write",
 			params: FollowingUnitParams,
@@ -557,9 +556,24 @@ export default new Elysia({ prefix: "/users" })
 			},
 			detail: { summary: "Update followed Unit presentation", tags: ["Users"] },
 		},
+		async ({ profile, params, body }) =>
+			updateFollowingPresentation(profile.unitId, params.unitId, body),
 	)
 	.get(
 		"/:id/activity",
+		{
+			params: UserLookupParams,
+			query: ProfileActivityQuery,
+			response: {
+				[StatusCodes.OK]: ProfileActivityResponse,
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UserNotFound"]),
+			},
+			detail: {
+				operationId: "getUserProfileActivity",
+				summary: "Get visible Score and Progress activity for a public Profile",
+				tags: ["Users"],
+			},
+		},
 		async ({ params, query, request }) => {
 			const identity = await resolveIdentity(request, "unit:read");
 			const viewerProfileId = identity.profile?.unitId;
@@ -670,24 +684,20 @@ export default new Elysia({ prefix: "/users" })
 					.orderBy(desc(unitProgress.lastSeenAt), desc(unitProgress.unitId))
 					.limit(limit),
 			]);
-			return { scores, progress } satisfies typeof ProfileActivityResponse.static;
-		},
-		{
-			params: UserLookupParams,
-			query: ProfileActivityQuery,
-			response: {
-				[StatusCodes.OK]: ProfileActivityResponse,
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UserNotFound"]),
-			},
-			detail: {
-				operationId: "getUserProfileActivity",
-				summary: "Get visible Score and Progress activity for a public Profile",
-				tags: ["Users"],
-			},
+			return { scores, progress } satisfies StaticDecode<typeof ProfileActivityResponse>;
 		},
 	)
 	.get(
 		"/:id",
+		{
+			params: UserLookupParams,
+			query: PublicProfileQuery,
+			response: {
+				[StatusCodes.OK]: PublicProfileResponse,
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UserNotFound"]),
+			},
+			detail: { summary: "Public user profile", tags: ["Users"] },
+		},
 		async ({ params, query, request }) => {
 			const localizationLanguages = query.localizationLanguages ?? [];
 			const [result] = await database
@@ -733,18 +743,14 @@ export default new Elysia({ prefix: "/users" })
 				: false;
 			return { ...(await presentProfile(result)), viewerFollowing: following };
 		},
-		{
-			params: UserLookupParams,
-			query: PublicProfileQuery,
-			response: {
-				[StatusCodes.OK]: PublicProfileResponse,
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UserNotFound"]),
-			},
-			detail: { summary: "Public user profile", tags: ["Users"] },
-		},
 	)
 	.get(
 		"/me/blocks",
+		{
+			access: "interaction:read",
+			response: { [StatusCodes.OK]: UserBlockListResponse },
+			detail: { summary: "List blocked users", tags: ["Users"] },
+		},
 		async ({ profile }) => ({
 			items: await database
 				.select({
@@ -764,14 +770,19 @@ export default new Elysia({ prefix: "/users" })
 				.where(eq(profileBlock.blockerProfileId, profile.unitId))
 				.orderBy(profileBlock.createdAt, profileBlock.blockedProfileId),
 		}),
-		{
-			access: "interaction:read",
-			response: { [StatusCodes.OK]: UserBlockListResponse },
-			detail: { summary: "List blocked users", tags: ["Users"] },
-		},
 	)
 	.put(
 		"/:id/block",
+		{
+			access: "write:interaction:write",
+			params: UserIdParams,
+			response: {
+				[StatusCodes.OK]: BlockResponse,
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
+				[StatusCodes.CONFLICT]: toApiErrorResponse(["UserSelfBlockForbidden"]),
+			},
+			detail: { summary: "Block user", tags: ["Users"] },
+		},
 		async ({ profile, authorization, params }) => {
 			if (params.id === profile.unitId) throw new UserSelfBlockForbidden();
 			await authorization.unit.ensureCanRead(params.id, () => new UnitNotFound("User"));
@@ -797,19 +808,15 @@ export default new Elysia({ prefix: "/users" })
 			});
 			return { blocked: true };
 		},
-		{
-			access: "write:interaction:write",
-			params: UserIdParams,
-			response: {
-				[StatusCodes.OK]: BlockResponse,
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
-				[StatusCodes.CONFLICT]: toApiErrorResponse(["UserSelfBlockForbidden"]),
-			},
-			detail: { summary: "Block user", tags: ["Users"] },
-		},
 	)
 	.delete(
 		"/:id/block",
+		{
+			access: "write:interaction:write",
+			params: UserIdParams,
+			response: { [StatusCodes.OK]: BlockResponse },
+			detail: { summary: "Unblock user", tags: ["Users"] },
+		},
 		async ({ profile, params }) => {
 			await database.transaction(async (tx) => {
 				await tx
@@ -822,11 +829,5 @@ export default new Elysia({ prefix: "/users" })
 					);
 			});
 			return { blocked: false };
-		},
-		{
-			access: "write:interaction:write",
-			params: UserIdParams,
-			response: { [StatusCodes.OK]: BlockResponse },
-			detail: { summary: "Unblock user", tags: ["Users"] },
 		},
 	);

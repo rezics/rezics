@@ -1,3 +1,4 @@
+import type { StaticDecode } from "typebox";
 import { createHash } from "node:crypto";
 import { StatusCodes } from "http-status-codes";
 import { and, asc, eq, exists, inArray, isNull, lte, or, sql, type SQL } from "drizzle-orm";
@@ -7,7 +8,6 @@ import type { PresentedAvatar } from "@rezics/avatar";
 import {
 	assertUnitFilter,
 	canonicalUnitFilter,
-	FilterSchemaModels,
 	readSimpleFeedContentKinds,
 	readSimpleFeedFilter,
 	readUnitLanguageBoundary,
@@ -458,7 +458,7 @@ const FeedCursor = t.Object(
 	},
 	{ additionalProperties: false },
 );
-type FeedCursor = typeof FeedCursor.static;
+type FeedCursor = StaticDecode<typeof FeedCursor>;
 
 function toFeedSearchPosition(position: SearchKeysetPosition): FeedCursor["searchPosition"] {
 	if (position.primary === null || position.secondary === null)
@@ -1464,8 +1464,18 @@ export async function hydrateFeedItems(
 	});
 }
 
-export default new Elysia({ prefix: "/feed" }).model(FilterSchemaModels).post(
+export default new Elysia({ prefix: "/feed" }).post(
 	"/query",
+	{
+		body: FeedRequest,
+		response: {
+			[StatusCodes.OK]: FeedResponse,
+			[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["InvalidFeedCursor", "InvalidFeedFilter"]),
+			[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["InvalidSearch"]),
+			[StatusCodes.SERVICE_UNAVAILABLE]: toApiErrorResponse(["SearchUnavailable"]),
+		},
+		detail: { summary: "Ranked realm feed", tags: ["Feed"] },
+	},
 	async ({ body, request }) => {
 		if (body.filter)
 			try {
@@ -1595,15 +1605,5 @@ export default new Elysia({ prefix: "/feed" }).model(FilterSchemaModels).post(
 			}),
 			nextCursor: continuation.cursor,
 		};
-	},
-	{
-		body: FeedRequest,
-		response: {
-			[StatusCodes.OK]: FeedResponse,
-			[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["InvalidFeedCursor", "InvalidFeedFilter"]),
-			[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["InvalidSearch"]),
-			[StatusCodes.SERVICE_UNAVAILABLE]: toApiErrorResponse(["SearchUnavailable"]),
-		},
-		detail: { summary: "Ranked realm feed", tags: ["Feed"] },
 	},
 );

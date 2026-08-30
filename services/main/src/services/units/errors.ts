@@ -1,11 +1,9 @@
 import { StatusCodes } from "http-status-codes";
-import * as Data from "effect/Data";
+import { HTTPError } from "elysia";
 import type { ContentLanguage } from "@rezics/i18n";
 
-export class UnitNotFound extends Data.TaggedError("UnitNotFound") {
-	static readonly status = StatusCodes.NOT_FOUND as const;
-	readonly status = UnitNotFound.status;
-	readonly message: string;
+export class UnitNotFound extends HTTPError.id("UnitNotFound", StatusCodes.NOT_FOUND) {
+	override readonly message: string;
 
 	constructor(kind?: string) {
 		super();
@@ -13,10 +11,11 @@ export class UnitNotFound extends Data.TaggedError("UnitNotFound") {
 	}
 }
 
-export class UnitPermissionForbidden extends Data.TaggedError("UnitPermissionForbidden") {
-	static readonly status = StatusCodes.FORBIDDEN as const;
-	readonly status = UnitPermissionForbidden.status;
-	readonly message: string;
+export class UnitPermissionForbidden extends HTTPError.id(
+	"UnitPermissionForbidden",
+	StatusCodes.FORBIDDEN,
+) {
+	override readonly message: string;
 	readonly details: { readonly permission: string; readonly scope: string[] };
 
 	constructor(permission: string, scope: readonly string[]) {
@@ -26,22 +25,25 @@ export class UnitPermissionForbidden extends Data.TaggedError("UnitPermissionFor
 	}
 }
 
-export class UnitAccessRestricted extends Data.TaggedError("UnitAccessRestricted") {
-	static readonly status = StatusCodes.FORBIDDEN as const;
-	readonly status = UnitAccessRestricted.status;
-	readonly message = "Your access to this Unit scope is restricted";
+export class UnitAccessRestricted extends HTTPError.id(
+	"UnitAccessRestricted",
+	StatusCodes.FORBIDDEN,
+) {
+	override readonly message = "Your access to this Unit scope is restricted";
 }
 
-export class UnitLicenseGrantForbidden extends Data.TaggedError("UnitLicenseGrantForbidden") {
-	static readonly status = StatusCodes.FORBIDDEN as const;
-	readonly status = UnitLicenseGrantForbidden.status;
-	readonly message = "The requested License cannot be granted by this Unit";
+export class UnitLicenseGrantForbidden extends HTTPError.id(
+	"UnitLicenseGrantForbidden",
+	StatusCodes.FORBIDDEN,
+) {
+	override readonly message = "The requested License cannot be granted by this Unit";
 }
 
-export class UnitLicenseNotApplicable extends Data.TaggedError("UnitLicenseNotApplicable") {
-	static readonly status = StatusCodes.BAD_REQUEST as const;
-	readonly status = UnitLicenseNotApplicable.status;
-	readonly message = "This license cannot be granted on this Unit kind";
+export class UnitLicenseNotApplicable extends HTTPError.id(
+	"UnitLicenseNotApplicable",
+	StatusCodes.BAD_REQUEST,
+) {
+	override readonly message = "This license cannot be granted on this Unit kind";
 	readonly details: { readonly licenseId: string; readonly unitKind: string };
 
 	constructor(licenseId: string, unitKind: string) {
@@ -50,12 +52,11 @@ export class UnitLicenseNotApplicable extends Data.TaggedError("UnitLicenseNotAp
 	}
 }
 
-export class UnitLicenseOfferingEndForbidden extends Data.TaggedError(
+export class UnitLicenseOfferingEndForbidden extends HTTPError.id(
 	"UnitLicenseOfferingEndForbidden",
+	StatusCodes.CONFLICT,
 ) {
-	static readonly status = StatusCodes.CONFLICT as const;
-	readonly status = UnitLicenseOfferingEndForbidden.status;
-	readonly message = "This license offering cannot be ended";
+	override readonly message = "This license offering cannot be ended";
 	readonly details: { readonly licenseId: string };
 
 	constructor(licenseId: string) {
@@ -64,16 +65,15 @@ export class UnitLicenseOfferingEndForbidden extends Data.TaggedError(
 	}
 }
 
-export class UnitLicenseGrantConflict extends Data.TaggedError("UnitLicenseGrantConflict") {
-	static readonly status = StatusCodes.CONFLICT as const;
-	readonly status = UnitLicenseGrantConflict.status;
-	readonly message = "An open offering for this license already exists on the Unit";
+export class UnitLicenseGrantConflict extends HTTPError.id(
+	"UnitLicenseGrantConflict",
+	StatusCodes.CONFLICT,
+) {
+	override readonly message = "An open offering for this license already exists on the Unit";
 }
 
-export class UnitChanged extends Data.TaggedError("UnitChanged") {
-	static readonly status = StatusCodes.CONFLICT as const;
-	readonly status = UnitChanged.status;
-	readonly message = "Unit has changed";
+export class UnitChanged extends HTTPError.id("UnitChanged", StatusCodes.CONFLICT) {
+	override readonly message = "Unit has changed";
 	readonly details: { readonly updatedAt: string };
 
 	constructor(updatedAt: Date) {
@@ -82,12 +82,11 @@ export class UnitChanged extends Data.TaggedError("UnitChanged") {
 	}
 }
 
-export class UnitContentLanguageSupportInvalid extends Data.TaggedError(
+export class UnitContentLanguageSupportInvalid extends HTTPError.id(
 	"UnitContentLanguageSupportInvalid",
+	StatusCodes.UNPROCESSABLE_ENTITY,
 ) {
-	static readonly status = StatusCodes.UNPROCESSABLE_ENTITY as const;
-	readonly status = UnitContentLanguageSupportInvalid.status;
-	readonly message = "Unit content language support is invalid";
+	override readonly message = "Unit content language support is invalid";
 	readonly details: { readonly path: string; readonly reason: string };
 
 	constructor(path: string, reason: string) {
@@ -96,10 +95,11 @@ export class UnitContentLanguageSupportInvalid extends Data.TaggedError(
 	}
 }
 
-export class VideoAudioTrackInvalid extends Data.TaggedError("VideoAudioTrackInvalid") {
-	static readonly status = StatusCodes.UNPROCESSABLE_ENTITY as const;
-	readonly status = VideoAudioTrackInvalid.status;
-	readonly message = "The selected Audio tracks could not be saved";
+export class VideoAudioTrackInvalid extends HTTPError.id(
+	"VideoAudioTrackInvalid",
+	StatusCodes.UNPROCESSABLE_ENTITY,
+) {
+	override readonly message = "The selected Audio tracks could not be saved";
 	readonly details: { readonly path: string; readonly reason: string };
 
 	constructor(path: string, reason: string) {
@@ -108,26 +108,25 @@ export class VideoAudioTrackInvalid extends Data.TaggedError("VideoAudioTrackInv
 	}
 }
 
-export class UnitRealmPublicationNotFound extends Data.TaggedError("UnitRealmPublicationNotFound") {
-	static readonly status = StatusCodes.NOT_FOUND as const;
-	readonly status = UnitRealmPublicationNotFound.status;
-	readonly message = "Unit Realm publication was not found";
+export class UnitRealmPublicationNotFound extends HTTPError.id(
+	"UnitRealmPublicationNotFound",
+	StatusCodes.NOT_FOUND,
+) {
+	override readonly message = "Unit Realm publication was not found";
 }
 
-export class UnitRealmPublicationAlreadyExists extends Data.TaggedError(
+export class UnitRealmPublicationAlreadyExists extends HTTPError.id(
 	"UnitRealmPublicationAlreadyExists",
+	StatusCodes.CONFLICT,
 ) {
-	static readonly status = StatusCodes.CONFLICT as const;
-	readonly status = UnitRealmPublicationAlreadyExists.status;
-	readonly message = "Unit Realm publication already exists";
+	override readonly message = "Unit Realm publication already exists";
 }
 
-export class UnitRealmPublicationTransitionInvalid extends Data.TaggedError(
+export class UnitRealmPublicationTransitionInvalid extends HTTPError.id(
 	"UnitRealmPublicationTransitionInvalid",
+	StatusCodes.CONFLICT,
 ) {
-	static readonly status = StatusCodes.CONFLICT as const;
-	readonly status = UnitRealmPublicationTransitionInvalid.status;
-	readonly message = "Unit Realm publication is already in the requested state";
+	override readonly message = "Unit Realm publication is already in the requested state";
 	readonly details: { readonly publicationState: "active" | "withdrawn" };
 
 	constructor(publicationState: "active" | "withdrawn") {
@@ -136,10 +135,11 @@ export class UnitRealmPublicationTransitionInvalid extends Data.TaggedError(
 	}
 }
 
-export class UnitRevisionConflict extends Data.TaggedError("UnitRevisionConflict") {
-	static readonly status = StatusCodes.CONFLICT as const;
-	readonly status = UnitRevisionConflict.status;
-	readonly message = "Unit revision has changed";
+export class UnitRevisionConflict extends HTTPError.id(
+	"UnitRevisionConflict",
+	StatusCodes.CONFLICT,
+) {
+	override readonly message = "Unit revision has changed";
 	readonly details: {
 		readonly latestRevisionId: string | null;
 		readonly conflictPaths: string[];
@@ -151,24 +151,25 @@ export class UnitRevisionConflict extends Data.TaggedError("UnitRevisionConflict
 	}
 }
 
-export class RevisionCreditEntityInvalid extends Data.TaggedError("RevisionCreditEntityInvalid") {
-	static readonly status = StatusCodes.BAD_REQUEST as const;
-	readonly status = RevisionCreditEntityInvalid.status;
-	readonly message = "The credited revision Entity is unavailable or not a software agent";
-}
-
-export class RevisionContributionActorRequired extends Data.TaggedError(
-	"RevisionContributionActorRequired",
+export class RevisionCreditEntityInvalid extends HTTPError.id(
+	"RevisionCreditEntityInvalid",
+	StatusCodes.BAD_REQUEST,
 ) {
-	static readonly status = StatusCodes.BAD_REQUEST as const;
-	readonly status = RevisionContributionActorRequired.status;
-	readonly message = "A human or AI revision contribution requires an accountable actor";
+	override readonly message = "The credited revision Entity is unavailable or not a software agent";
 }
 
-export class UnitLocalizationOrderChanged extends Data.TaggedError("UnitLocalizationOrderChanged") {
-	static readonly status = StatusCodes.CONFLICT as const;
-	readonly status = UnitLocalizationOrderChanged.status;
-	readonly message = "Unit content language order has changed";
+export class RevisionContributionActorRequired extends HTTPError.id(
+	"RevisionContributionActorRequired",
+	StatusCodes.BAD_REQUEST,
+) {
+	override readonly message = "A human or AI revision contribution requires an accountable actor";
+}
+
+export class UnitLocalizationOrderChanged extends HTTPError.id(
+	"UnitLocalizationOrderChanged",
+	StatusCodes.CONFLICT,
+) {
+	override readonly message = "Unit content language order has changed";
 	readonly details: { readonly currentLanguages: ContentLanguage[] };
 
 	constructor(currentLanguages: readonly ContentLanguage[]) {
@@ -177,55 +178,58 @@ export class UnitLocalizationOrderChanged extends Data.TaggedError("UnitLocaliza
 	}
 }
 
-export class UnitLocalizationOrderInvalid extends Data.TaggedError("UnitLocalizationOrderInvalid") {
-	static readonly status = StatusCodes.BAD_REQUEST as const;
-	readonly status = UnitLocalizationOrderInvalid.status;
-	readonly message =
+export class UnitLocalizationOrderInvalid extends HTTPError.id(
+	"UnitLocalizationOrderInvalid",
+	StatusCodes.BAD_REQUEST,
+) {
+	override readonly message =
 		"Content language order must contain every existing Unit language exactly once";
 }
 
-export class UnitLocalizationNotFound extends Data.TaggedError("UnitLocalizationNotFound") {
-	static readonly status = StatusCodes.NOT_FOUND as const;
-	readonly status = UnitLocalizationNotFound.status;
-	readonly message = "Unit content language was not found";
-}
-
-export class UnitLastLocalizationRemovalForbidden extends Data.TaggedError(
-	"UnitLastLocalizationRemovalForbidden",
+export class UnitLocalizationNotFound extends HTTPError.id(
+	"UnitLocalizationNotFound",
+	StatusCodes.NOT_FOUND,
 ) {
-	static readonly status = StatusCodes.CONFLICT as const;
-	readonly status = UnitLastLocalizationRemovalForbidden.status;
-	readonly message = "A Unit must keep at least one content language";
+	override readonly message = "Unit content language was not found";
 }
 
-export class UnitVariantKindMismatch extends Data.TaggedError("UnitVariantKindMismatch") {
-	static readonly status = StatusCodes.CONFLICT as const;
-	readonly status = UnitVariantKindMismatch.status;
-	readonly message = "A Variant and its Main must have the same supported Unit kind";
+export class UnitLastLocalizationRemovalForbidden extends HTTPError.id(
+	"UnitLastLocalizationRemovalForbidden",
+	StatusCodes.CONFLICT,
+) {
+	override readonly message = "A Unit must keep at least one content language";
 }
 
-export class UnitVariantTargetIsVariant extends Data.TaggedError("UnitVariantTargetIsVariant") {
-	static readonly status = StatusCodes.CONFLICT as const;
-	readonly status = UnitVariantTargetIsVariant.status;
-	readonly message = "A Variant must point directly to a Main";
+export class UnitVariantKindMismatch extends HTTPError.id(
+	"UnitVariantKindMismatch",
+	StatusCodes.CONFLICT,
+) {
+	override readonly message = "A Variant and its Main must have the same supported Unit kind";
 }
 
-export class UnitVariantSourceHasVariants extends Data.TaggedError("UnitVariantSourceHasVariants") {
-	static readonly status = StatusCodes.CONFLICT as const;
-	readonly status = UnitVariantSourceHasVariants.status;
-	readonly message = "A Main with Variants cannot become a Variant through this operation";
+export class UnitVariantTargetIsVariant extends HTTPError.id(
+	"UnitVariantTargetIsVariant",
+	StatusCodes.CONFLICT,
+) {
+	override readonly message = "A Variant must point directly to a Main";
 }
 
-export class UnitVariantGroupLimitReached extends Data.TaggedError("UnitVariantGroupLimitReached") {
-	static readonly status = StatusCodes.CONFLICT as const;
-	readonly status = UnitVariantGroupLimitReached.status;
-	readonly message = "The Main Unit has reached the supported Variant group size";
+export class UnitVariantSourceHasVariants extends HTTPError.id(
+	"UnitVariantSourceHasVariants",
+	StatusCodes.CONFLICT,
+) {
+	override readonly message = "A Main with Variants cannot become a Variant through this operation";
 }
 
-export class UnitVariantChanged extends Data.TaggedError("UnitVariantChanged") {
-	static readonly status = StatusCodes.CONFLICT as const;
-	readonly status = UnitVariantChanged.status;
-	readonly message = "The Unit Main relationship has changed";
+export class UnitVariantGroupLimitReached extends HTTPError.id(
+	"UnitVariantGroupLimitReached",
+	StatusCodes.CONFLICT,
+) {
+	override readonly message = "The Main Unit has reached the supported Variant group size";
+}
+
+export class UnitVariantChanged extends HTTPError.id("UnitVariantChanged", StatusCodes.CONFLICT) {
+	override readonly message = "The Unit Main relationship has changed";
 	readonly details: { readonly currentMainUnitId: string | null };
 
 	constructor(currentMainUnitId: string | null) {
@@ -234,22 +238,20 @@ export class UnitVariantChanged extends Data.TaggedError("UnitVariantChanged") {
 	}
 }
 
-export class UnitVariantMainUnavailable extends Data.TaggedError("UnitVariantMainUnavailable") {
-	static readonly status = StatusCodes.CONFLICT as const;
-	readonly status = UnitVariantMainUnavailable.status;
-	readonly message = "The Main is unavailable for this Variant state";
+export class UnitVariantMainUnavailable extends HTTPError.id(
+	"UnitVariantMainUnavailable",
+	StatusCodes.CONFLICT,
+) {
+	override readonly message = "The Main is unavailable for this Variant state";
 }
 
-export class InvalidSlug extends Data.TaggedError("InvalidSlug") {
-	static readonly status = StatusCodes.BAD_REQUEST as const;
-	readonly status = InvalidSlug.status;
-	readonly message = "Slug must be a lowercase ASCII kebab label between 1 and 63 characters";
+export class InvalidSlug extends HTTPError.id("InvalidSlug", StatusCodes.BAD_REQUEST) {
+	override readonly message =
+		"Slug must be a lowercase ASCII kebab label between 1 and 63 characters";
 }
 
-export class SlugTaken extends Data.TaggedError("SlugTaken") {
-	static readonly status = StatusCodes.CONFLICT as const;
-	readonly status = SlugTaken.status;
-	readonly message = "Slug is already used in this Unit scope";
+export class SlugTaken extends HTTPError.id("SlugTaken", StatusCodes.CONFLICT) {
+	override readonly message = "Slug is already used in this Unit scope";
 	readonly details: { readonly scopeUnitId: string | null; readonly slug: string };
 
 	constructor(scopeUnitId: string | null, slug: string) {
@@ -258,10 +260,8 @@ export class SlugTaken extends Data.TaggedError("SlugTaken") {
 	}
 }
 
-export class SlugReserved extends Data.TaggedError("SlugReserved") {
-	static readonly status = StatusCodes.UNPROCESSABLE_ENTITY as const;
-	readonly status = SlugReserved.status;
-	readonly message = "Slug is reserved from self-service assignment";
+export class SlugReserved extends HTTPError.id("SlugReserved", StatusCodes.UNPROCESSABLE_ENTITY) {
+	override readonly message = "Slug is reserved from self-service assignment";
 	readonly details: { readonly slug: string };
 
 	constructor(slug: string) {
@@ -270,94 +270,96 @@ export class SlugReserved extends Data.TaggedError("SlugReserved") {
 	}
 }
 
-export class ProfileSlugChangeUnavailable extends Data.TaggedError("ProfileSlugChangeUnavailable") {
-	static readonly status = StatusCodes.CONFLICT as const;
-	readonly status = ProfileSlugChangeUnavailable.status;
-	readonly message = "The Profile slug cannot be changed after assignment";
+export class ProfileSlugChangeUnavailable extends HTTPError.id(
+	"ProfileSlugChangeUnavailable",
+	StatusCodes.CONFLICT,
+) {
+	override readonly message = "The Profile slug cannot be changed after assignment";
 }
 
-export class SlugScopeNotFound extends Data.TaggedError("SlugScopeNotFound") {
-	static readonly status = StatusCodes.NOT_FOUND as const;
-	readonly status = SlugScopeNotFound.status;
-	readonly message = "Slug scope Unit not found";
+export class SlugScopeNotFound extends HTTPError.id("SlugScopeNotFound", StatusCodes.NOT_FOUND) {
+	override readonly message = "Slug scope Unit not found";
 }
 
-export class SlugScopeUnavailable extends Data.TaggedError("SlugScopeUnavailable") {
-	static readonly status = StatusCodes.CONFLICT as const;
-	readonly status = SlugScopeUnavailable.status;
-	readonly message = "Unaddressed and deleted Units cannot be canonical slug scopes";
+export class SlugScopeUnavailable extends HTTPError.id(
+	"SlugScopeUnavailable",
+	StatusCodes.CONFLICT,
+) {
+	override readonly message = "Unaddressed and deleted Units cannot be canonical slug scopes";
 }
 
-export class SlugScopeCycle extends Data.TaggedError("SlugScopeCycle") {
-	static readonly status = StatusCodes.CONFLICT as const;
-	readonly status = SlugScopeCycle.status;
-	readonly message = "Moving this Unit would create a slug scope cycle";
+export class SlugScopeCycle extends HTTPError.id("SlugScopeCycle", StatusCodes.CONFLICT) {
+	override readonly message = "Moving this Unit would create a slug scope cycle";
 }
 
-export class SlugDepthExceeded extends Data.TaggedError("SlugDepthExceeded") {
-	static readonly status = StatusCodes.UNPROCESSABLE_ENTITY as const;
-	readonly status = SlugDepthExceeded.status;
-	readonly message = "Unit slug path exceeds the maximum depth";
+export class SlugDepthExceeded extends HTTPError.id(
+	"SlugDepthExceeded",
+	StatusCodes.UNPROCESSABLE_ENTITY,
+) {
+	override readonly message = "Unit slug path exceeds the maximum depth";
 }
 
-export class UnitAddressMutationForbidden extends Data.TaggedError("UnitAddressMutationForbidden") {
-	static readonly status = StatusCodes.FORBIDDEN as const;
-	readonly status = UnitAddressMutationForbidden.status;
-	readonly message = "This Unit address cannot be mutated by this operation";
+export class UnitAddressMutationForbidden extends HTTPError.id(
+	"UnitAddressMutationForbidden",
+	StatusCodes.FORBIDDEN,
+) {
+	override readonly message = "This Unit address cannot be mutated by this operation";
 }
 
-export class SlugRedirectNotFound extends Data.TaggedError("SlugRedirectNotFound") {
-	static readonly status = StatusCodes.NOT_FOUND as const;
-	readonly status = SlugRedirectNotFound.status;
-	readonly message = "Slug Redirect not found";
+export class SlugRedirectNotFound extends HTTPError.id(
+	"SlugRedirectNotFound",
+	StatusCodes.NOT_FOUND,
+) {
+	override readonly message = "Slug Redirect not found";
 }
 
-export class UnitSlugAddressNotFound extends Data.TaggedError("UnitSlugAddressNotFound") {
-	static readonly status = StatusCodes.NOT_FOUND as const;
-	readonly status = UnitSlugAddressNotFound.status;
-	readonly message = "Unit has no canonical slug address";
+export class UnitSlugAddressNotFound extends HTTPError.id(
+	"UnitSlugAddressNotFound",
+	StatusCodes.NOT_FOUND,
+) {
+	override readonly message = "Unit has no canonical slug address";
 }
 
-export class AssociationProposalNotFound extends Data.TaggedError("AssociationProposalNotFound") {
-	static readonly status = StatusCodes.NOT_FOUND as const;
-	readonly status = AssociationProposalNotFound.status;
-	readonly message = "Association proposal not found";
+export class AssociationProposalNotFound extends HTTPError.id(
+	"AssociationProposalNotFound",
+	StatusCodes.NOT_FOUND,
+) {
+	override readonly message = "Association proposal not found";
 }
 
-export class AssociationProposalConflict extends Data.TaggedError("AssociationProposalConflict") {
-	static readonly status = StatusCodes.CONFLICT as const;
-	readonly status = AssociationProposalConflict.status;
-	readonly message = "Association proposal conflicts with the current relationship state";
+export class AssociationProposalConflict extends HTTPError.id(
+	"AssociationProposalConflict",
+	StatusCodes.CONFLICT,
+) {
+	override readonly message = "Association proposal conflicts with the current relationship state";
 }
 
-export class AssociationProposalExpired extends Data.TaggedError("AssociationProposalExpired") {
-	static readonly status = StatusCodes.CONFLICT as const;
-	readonly status = AssociationProposalExpired.status;
-	readonly message = "Association proposal has expired";
+export class AssociationProposalExpired extends HTTPError.id(
+	"AssociationProposalExpired",
+	StatusCodes.CONFLICT,
+) {
+	override readonly message = "Association proposal has expired";
 }
 
-export class AssociationProposalExpiryInvalid extends Data.TaggedError(
+export class AssociationProposalExpiryInvalid extends HTTPError.id(
 	"AssociationProposalExpiryInvalid",
+	StatusCodes.BAD_REQUEST,
 ) {
-	static readonly status = StatusCodes.BAD_REQUEST as const;
-	readonly status = AssociationProposalExpiryInvalid.status;
-	readonly message = "Association proposal expiry must be in the future";
+	override readonly message = "Association proposal expiry must be in the future";
 }
 
-export class AssociationProposalRoleInvalid extends Data.TaggedError(
+export class AssociationProposalRoleInvalid extends HTTPError.id(
 	"AssociationProposalRoleInvalid",
+	StatusCodes.BAD_REQUEST,
 ) {
-	static readonly status = StatusCodes.BAD_REQUEST as const;
-	readonly status = AssociationProposalRoleInvalid.status;
-	readonly message = "Association proposal role does not match its kind";
+	override readonly message = "Association proposal role does not match its kind";
 }
 
-export class AssociationContextPostInvalid extends Data.TaggedError(
+export class AssociationContextPostInvalid extends HTTPError.id(
 	"AssociationContextPostInvalid",
+	StatusCodes.BAD_REQUEST,
 ) {
-	static readonly status = StatusCodes.BAD_REQUEST as const;
-	readonly status = AssociationContextPostInvalid.status;
-	readonly message = "Subject association context must be a wiki Post";
+	override readonly message = "Subject association context must be a wiki Post";
 }
 
 export const UnitErrors = [

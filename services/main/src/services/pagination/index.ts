@@ -1,5 +1,5 @@
-import type { Static, TSchema } from "@sinclair/typebox";
-import { Check } from "@sinclair/typebox/value";
+import type { StaticDecode, TSchema } from "typebox";
+import { Check, Decode } from "typebox/value";
 import { InvalidPaginationCursor } from "./errors";
 
 type CursorBoundary = [createdAt: string, id: string];
@@ -8,10 +8,10 @@ export function encodeCursor(createdAt: Date | string, id: string) {
 	return Buffer.from(`${new Date(createdAt).toISOString()}\0${id}`).toString("base64url");
 }
 
-export function parseJsonCursor<T extends TSchema>(cursor: string, schema: T): Static<T> {
+export function parseJsonCursor<T extends TSchema>(cursor: string, schema: T): StaticDecode<T> {
 	const value: unknown = JSON.parse(Buffer.from(cursor, "base64url").toString());
 	if (!Check(schema, value)) throw new Error("Cursor does not match its schema");
-	return value;
+	return Decode(schema, value);
 }
 
 export function decodeCursor(cursor?: string) {

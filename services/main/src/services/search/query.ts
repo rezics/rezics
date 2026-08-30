@@ -1,5 +1,5 @@
-import { type Static, Type } from "@sinclair/typebox";
-import { Check } from "@sinclair/typebox/value";
+import { type StaticDecode, Type } from "typebox";
+import { Check } from "typebox/value";
 import {
 	type UnitPredicate,
 	SearchCategoryValues,
@@ -16,22 +16,29 @@ type SearchField = SearchFieldValue;
 type SearchScope = SearchScopeValue;
 type SearchSort = SearchSortValue;
 
-export const SearchExpression = Type.Recursive(
-	(This) =>
-		Type.Union([
+export const SearchExpression = Type.Cyclic(
+	{
+		SearchExpression: Type.Union([
 			SearchControlPredicate,
 			Type.Object(
 				{
 					operator: Type.Union([Type.Literal("all"), Type.Literal("any")]),
-					clauses: Type.Array(This, { minItems: 1, maxItems: 20 }),
+					clauses: Type.Array(Type.Ref("SearchExpression"), {
+						minItems: 1,
+						maxItems: 20,
+					}),
 				},
 				{ additionalProperties: false },
 			),
-			Type.Object({ operator: Type.Literal("not"), clause: This }, { additionalProperties: false }),
+			Type.Object(
+				{ operator: Type.Literal("not"), clause: Type.Ref("SearchExpression") },
+				{ additionalProperties: false },
+			),
 		]),
-	{ $id: "SearchExpression" },
+	},
+	"SearchExpression",
 );
-export type SearchExpression = Static<typeof SearchExpression>;
+export type SearchExpression = StaticDecode<typeof SearchExpression>;
 
 /** Conservatively derives a positive language presentation boundary. */
 export function readSearchExpressionLanguageBoundary(

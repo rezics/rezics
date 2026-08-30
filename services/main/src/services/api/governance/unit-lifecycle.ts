@@ -34,15 +34,6 @@ export default new Elysia({ prefix: "/platform/units" })
 	.use(session)
 	.get(
 		"",
-		async ({ authorization, query }) => {
-			await authorization.platform.ensureCapability("unit.governance.read");
-			return listPlatformUnits({
-				state: query.state ?? "active",
-				query: query.query,
-				cursor: query.cursor,
-				limit: query.limit ?? 50,
-			});
-		},
 		{
 			access: "session-only",
 			query: ListPlatformUnitsQuery,
@@ -55,13 +46,18 @@ export default new Elysia({ prefix: "/platform/units" })
 				tags: ["Governance"],
 			},
 		},
+		async ({ authorization, query }) => {
+			await authorization.platform.ensureCapability("unit.governance.read");
+			return listPlatformUnits({
+				state: query.state ?? "active",
+				query: query.query,
+				cursor: query.cursor,
+				limit: query.limit ?? 50,
+			});
+		},
 	)
 	.get(
 		"/:unitId",
-		async ({ authorization, params }) => {
-			await authorization.platform.ensureCapability("unit.governance.read");
-			return getPlatformUnit(params.unitId);
-		},
 		{
 			access: "session-only",
 			params: UnitGovernanceParams,
@@ -75,18 +71,13 @@ export default new Elysia({ prefix: "/platform/units" })
 				tags: ["Governance"],
 			},
 		},
+		async ({ authorization, params }) => {
+			await authorization.platform.ensureCapability("unit.governance.read");
+			return getPlatformUnit(params.unitId);
+		},
 	)
 	.get(
 		"/:unitId/ownership-candidates",
-		async ({ authorization, params, query }) => {
-			await authorization.platform.ensureCapability("unit.ownership.override");
-			return listPlatformOwnershipCandidates({
-				unitId: params.unitId,
-				query: query.query,
-				cursor: query.cursor,
-				limit: query.limit ?? 50,
-			});
-		},
 		{
 			access: "session-only",
 			params: UnitGovernanceParams,
@@ -101,21 +92,18 @@ export default new Elysia({ prefix: "/platform/units" })
 				tags: ["Governance"],
 			},
 		},
+		async ({ authorization, params, query }) => {
+			await authorization.platform.ensureCapability("unit.ownership.override");
+			return listPlatformOwnershipCandidates({
+				unitId: params.unitId,
+				query: query.query,
+				cursor: query.cursor,
+				limit: query.limit ?? 50,
+			});
+		},
 	)
 	.post(
 		"/:unitId/ownership-override",
-		async ({ authorization, profile, params, body }) => {
-			if (body.confirmationUnitId !== params.unitId)
-				throw new UnitOwnershipOverrideConfirmationInvalid();
-			return overridePlatformUnitOwnership(authorization.platform, {
-				unitId: params.unitId,
-				actorProfileId: profile.unitId,
-				expectedOwnerProfileId: body.expectedOwnerProfileId,
-				targetProfileId: body.targetProfileId,
-				rules: body.rules,
-				note: body.note?.trim() || undefined,
-			});
-		},
 		{
 			access: "fresh-session-only",
 			params: UnitGovernanceParams,
@@ -142,21 +130,21 @@ export default new Elysia({ prefix: "/platform/units" })
 				tags: ["Governance"],
 			},
 		},
+		async ({ authorization, profile, params, body }) => {
+			if (body.confirmationUnitId !== params.unitId)
+				throw new UnitOwnershipOverrideConfirmationInvalid();
+			return overridePlatformUnitOwnership(authorization.platform, {
+				unitId: params.unitId,
+				actorProfileId: profile.unitId,
+				expectedOwnerProfileId: body.expectedOwnerProfileId,
+				targetProfileId: body.targetProfileId,
+				rules: body.rules,
+				note: body.note?.trim() || undefined,
+			});
+		},
 	)
 	.post(
 		"/:unitId/delete",
-		async ({ authorization, profile, params, body }) => {
-			await authorization.platform.ensureCapability("unit.delete");
-			if (body.confirmationUnitId !== params.unitId) throw new UnitLifecycleConfirmationInvalid();
-			return softDeletePlatformUnit({
-				unitId: params.unitId,
-				actorProfileId: profile.unitId,
-				expectedUpdatedAt: new Date(body.expectedUpdatedAt),
-				rules: body.rules,
-				note: body.note?.trim() || undefined,
-				contribution: body.revisionContext?.contribution,
-			});
-		},
 		{
 			access: "fresh-session-only",
 			params: UnitGovernanceParams,
@@ -188,20 +176,21 @@ export default new Elysia({ prefix: "/platform/units" })
 				tags: ["Governance"],
 			},
 		},
-	)
-	.post(
-		"/:unitId/restore",
 		async ({ authorization, profile, params, body }) => {
-			await authorization.platform.ensureCapability("unit.restore");
+			await authorization.platform.ensureCapability("unit.delete");
 			if (body.confirmationUnitId !== params.unitId) throw new UnitLifecycleConfirmationInvalid();
-			return restorePlatformUnit({
+			return softDeletePlatformUnit({
 				unitId: params.unitId,
 				actorProfileId: profile.unitId,
 				expectedUpdatedAt: new Date(body.expectedUpdatedAt),
+				rules: body.rules,
 				note: body.note?.trim() || undefined,
 				contribution: body.revisionContext?.contribution,
 			});
 		},
+	)
+	.post(
+		"/:unitId/restore",
 		{
 			access: "fresh-session-only",
 			params: UnitGovernanceParams,
@@ -231,5 +220,16 @@ export default new Elysia({ prefix: "/platform/units" })
 				summary: "Restore a soft-deleted Unit from the platform Console",
 				tags: ["Governance"],
 			},
+		},
+		async ({ authorization, profile, params, body }) => {
+			await authorization.platform.ensureCapability("unit.restore");
+			if (body.confirmationUnitId !== params.unitId) throw new UnitLifecycleConfirmationInvalid();
+			return restorePlatformUnit({
+				unitId: params.unitId,
+				actorProfileId: profile.unitId,
+				expectedUpdatedAt: new Date(body.expectedUpdatedAt),
+				note: body.note?.trim() || undefined,
+				contribution: body.revisionContext?.contribution,
+			});
 		},
 	);

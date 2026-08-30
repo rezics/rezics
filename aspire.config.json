@@ -6,11 +6,8 @@
 	},
 	"profiles": {
 		"https": {
-			"applicationUrl": "https://localhost:18888",
 			"environmentVariables": {
-				"ASPIRE_ALLOW_UNSECURED_TRANSPORT": "true",
-				"ASPIRE_DASHBOARD_OTLP_HTTP_ENDPOINT_URL": "http://localhost:18890",
-				"ASPIRE_RESOURCE_SERVICE_ENDPOINT_URL": "https://localhost:18891"
+				"ASPIRE_ALLOW_UNSECURED_TRANSPORT": "true"
 			}
 		}
 	},

@@ -1,5 +1,6 @@
 import { eq } from "drizzle-orm";
-import Elysia, { type DocumentDecoration } from "elysia";
+import Elysia from "elysia";
+import type { DocumentDecoration } from "elysia/types";
 import type { User } from "better-auth";
 
 import { setAuditCredentialContext } from "../audit";
@@ -390,15 +391,15 @@ export async function resolveIdentityWithDynamicApiQuota(
 }
 
 export default new Elysia({ name: "session-context" })
-	.onAfterResponse({ as: "scoped" }, ({ request }) => releaseRequestLimitLease(request))
+	.afterResponse("plugin", ({ request }) => releaseRequestLimitLease(request))
 	.macro({
 		access: (requirement: AccessRequirement) => ({
 			detail: { security: accessSecurity(requirement) },
-			async resolve({ request, route }) {
+			async derive({ request, route }) {
 				const identity = await requireAccess(
 					request.headers,
 					accessPolicy(requirement),
-					apiRouteOperationId(request.method, route),
+					apiRouteOperationId(request.method, route ?? "unmatched"),
 				);
 				if (identity.credential.kind === "apiKey")
 					trackRequestLimitLease(request, identity.credential.quotaLease);

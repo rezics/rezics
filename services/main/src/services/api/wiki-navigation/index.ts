@@ -1,3 +1,4 @@
+import type { StaticDecode } from "typebox";
 import { DevelopmentPreviewCapability } from "@rezics/access";
 import { StatusCodes } from "http-status-codes";
 import {
@@ -65,7 +66,7 @@ async function ensureRealm(realmId: string): Promise<void> {
 	if (!record) throw new UnitNotFound("Realm");
 }
 
-function ensureDocument(value: unknown): asserts value is typeof NavigationDocument.static {
+function ensureDocument(value: unknown): asserts value is StaticDecode<typeof NavigationDocument> {
 	try {
 		assertNavigationDocument(value, { allowExternalNavigation: false });
 	} catch {
@@ -89,13 +90,13 @@ function present(
 		latestRevisionId,
 		createdAt: record.createdAt,
 		updatedAt: record.updatedAt,
-	} satisfies typeof WikiNavigationResponse.static;
+	} satisfies StaticDecode<typeof WikiNavigationResponse>;
 }
 
 async function ensureReferences(
 	tx: DatabaseTransaction,
 	realmId: string,
-	document: typeof NavigationDocument.static,
+	document: StaticDecode<typeof NavigationDocument>,
 	profileId: string,
 ): Promise<void> {
 	try {
@@ -113,10 +114,23 @@ async function ensureReferences(
 }
 
 export default new Elysia({ prefix: "/realms" })
-	.model({ NavigationDocument })
 	.use(session)
 	.get(
 		"/:realmId/wiki/navigation",
+		{
+			params: WikiNavigationOwnerParams,
+			response: {
+				[StatusCodes.OK]: WikiNavigationListResponse,
+				[StatusCodes.UNAUTHORIZED]: AuthenticationRequiredResponse,
+				[StatusCodes.FORBIDDEN]: WikiNavigationReadForbiddenResponse,
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
+			},
+			detail: {
+				summary: "List Realm Wiki navigation resources",
+				description: DevelopmentPreviewDescription,
+				tags: ["Realms"],
+			},
+		},
 		async ({ params, request }) => {
 			const identity = await resolveIdentity(request, "unit:read");
 			if (!identity.profile) throw new AuthenticationRequired();
@@ -133,23 +147,25 @@ export default new Elysia({ prefix: "/realms" })
 				};
 			});
 		},
+	)
+	.post(
+		"/:realmId/wiki/navigation",
 		{
+			access: "contribute:unit:update",
 			params: WikiNavigationOwnerParams,
+			body: WikiNavigationBody,
 			response: {
-				[StatusCodes.OK]: WikiNavigationListResponse,
-				[StatusCodes.UNAUTHORIZED]: AuthenticationRequiredResponse,
-				[StatusCodes.FORBIDDEN]: WikiNavigationReadForbiddenResponse,
+				[StatusCodes.OK]: WikiNavigationResponse,
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["WikiNavigationDocumentInvalid"]),
+				[StatusCodes.FORBIDDEN]: WikiNavigationMutationForbiddenResponse,
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
 			},
 			detail: {
-				summary: "List Realm Wiki navigation resources",
+				summary: "Create Realm Wiki navigation",
 				description: DevelopmentPreviewDescription,
 				tags: ["Realms"],
 			},
 		},
-	)
-	.post(
-		"/:realmId/wiki/navigation",
 		async ({ params, body, profile, authorization }) => {
 			await authorization.platform.ensureCapability(DevelopmentPreviewCapability);
 			await authorization.unit.ensureCanUpdate(params.realmId, [["wiki", "navigation"]]);
@@ -174,25 +190,23 @@ export default new Elysia({ prefix: "/realms" })
 				return present(record, result.revisionId);
 			});
 		},
+	)
+	.get(
+		"/:realmId/wiki/navigation/:navigationId",
 		{
-			access: "contribute:unit:update",
-			params: WikiNavigationOwnerParams,
-			body: WikiNavigationBody,
+			params: WikiNavigationParams,
 			response: {
 				[StatusCodes.OK]: WikiNavigationResponse,
-				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["WikiNavigationDocumentInvalid"]),
-				[StatusCodes.FORBIDDEN]: WikiNavigationMutationForbiddenResponse,
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
+				[StatusCodes.UNAUTHORIZED]: AuthenticationRequiredResponse,
+				[StatusCodes.FORBIDDEN]: WikiNavigationReadForbiddenResponse,
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "WikiNavigationNotFound"]),
 			},
 			detail: {
-				summary: "Create Realm Wiki navigation",
+				summary: "Get Realm Wiki navigation",
 				description: DevelopmentPreviewDescription,
 				tags: ["Realms"],
 			},
 		},
-	)
-	.get(
-		"/:realmId/wiki/navigation/:navigationId",
 		async ({ params, request }) => {
 			const identity = await resolveIdentity(request, "unit:read");
 			if (!identity.profile) throw new AuthenticationRequired();
@@ -222,23 +236,26 @@ export default new Elysia({ prefix: "/realms" })
 				}
 			});
 		},
+	)
+	.put(
+		"/:realmId/wiki/navigation/:navigationId",
 		{
+			access: "contribute:unit:update",
 			params: WikiNavigationParams,
+			body: WikiNavigationReplaceBody,
 			response: {
 				[StatusCodes.OK]: WikiNavigationResponse,
-				[StatusCodes.UNAUTHORIZED]: AuthenticationRequiredResponse,
-				[StatusCodes.FORBIDDEN]: WikiNavigationReadForbiddenResponse,
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["WikiNavigationDocumentInvalid"]),
+				[StatusCodes.FORBIDDEN]: WikiNavigationMutationForbiddenResponse,
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "WikiNavigationNotFound"]),
+				[StatusCodes.CONFLICT]: toApiErrorResponse(["ContentStructureRevisionConflict"]),
 			},
 			detail: {
-				summary: "Get Realm Wiki navigation",
+				summary: "Replace Realm Wiki navigation",
 				description: DevelopmentPreviewDescription,
 				tags: ["Realms"],
 			},
 		},
-	)
-	.put(
-		"/:realmId/wiki/navigation/:navigationId",
 		async ({ params, body, profile, authorization }) => {
 			await authorization.platform.ensureCapability(DevelopmentPreviewCapability);
 			await authorization.unit.ensureCanUpdate(params.realmId, [
@@ -271,26 +288,29 @@ export default new Elysia({ prefix: "/realms" })
 				rethrowWikiNavigationNotFound(cause);
 			}
 		},
-		{
-			access: "contribute:unit:update",
-			params: WikiNavigationParams,
-			body: WikiNavigationReplaceBody,
-			response: {
-				[StatusCodes.OK]: WikiNavigationResponse,
-				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["WikiNavigationDocumentInvalid"]),
-				[StatusCodes.FORBIDDEN]: WikiNavigationMutationForbiddenResponse,
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "WikiNavigationNotFound"]),
-				[StatusCodes.CONFLICT]: toApiErrorResponse(["ContentStructureRevisionConflict"]),
-			},
-			detail: {
-				summary: "Replace Realm Wiki navigation",
-				description: DevelopmentPreviewDescription,
-				tags: ["Realms"],
-			},
-		},
 	)
 	.delete(
 		"/:realmId/wiki/navigation/:navigationId",
+		{
+			access: "contribute:unit:update",
+			params: WikiNavigationParams,
+			body: WikiNavigationRevisionBody,
+			response: {
+				[StatusCodes.NO_CONTENT]: t.Void(),
+				[StatusCodes.FORBIDDEN]: WikiNavigationMutationForbiddenResponse,
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "WikiNavigationNotFound"]),
+				[StatusCodes.CONFLICT]: toApiErrorResponse([
+					"WikiNavigationInUse",
+					"ContentStructureRevisionConflict",
+				]),
+			},
+			detail: {
+				summary: "Delete Realm Wiki navigation",
+				description: DevelopmentPreviewDescription,
+				tags: ["Realms"],
+				responses: NoContentResponse,
+			},
+		},
 		async ({ params, body, profile, authorization }) => {
 			await authorization.platform.ensureCapability(DevelopmentPreviewCapability);
 			await authorization.unit.ensureCanUpdate(params.realmId, [
@@ -326,25 +346,5 @@ export default new Elysia({ prefix: "/realms" })
 				rethrowWikiNavigationNotFound(cause);
 			}
 			return new Response(null, { status: StatusCodes.NO_CONTENT });
-		},
-		{
-			access: "contribute:unit:update",
-			params: WikiNavigationParams,
-			body: WikiNavigationRevisionBody,
-			response: {
-				[StatusCodes.NO_CONTENT]: t.Void(),
-				[StatusCodes.FORBIDDEN]: WikiNavigationMutationForbiddenResponse,
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "WikiNavigationNotFound"]),
-				[StatusCodes.CONFLICT]: toApiErrorResponse([
-					"WikiNavigationInUse",
-					"ContentStructureRevisionConflict",
-				]),
-			},
-			detail: {
-				summary: "Delete Realm Wiki navigation",
-				description: DevelopmentPreviewDescription,
-				tags: ["Realms"],
-				responses: NoContentResponse,
-			},
 		},
 	);

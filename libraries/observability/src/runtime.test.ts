@@ -52,6 +52,65 @@ async function listen(server: Server): Promise<number> {
 }
 
 describe("observability runtime", () => {
+	it("finishes every Elysia request outcome once and excludes configured paths", async () => {
+		const lines: string[] = [];
+		const { spans, metricExporter } = inMemoryRuntime(lines);
+		const abortController = new AbortController();
+		const app = new Elysia()
+			.use(createElysiaObservability({ excludedPaths: ["/excluded"] }))
+			.get("/success/:resourceId", "ok")
+			.get("/client-error", ({ status }) => status(422, "invalid"))
+			.get("/server-error", () => {
+				throw new Error("failed");
+			})
+			.get("/aborted", () => {
+				abortController.abort();
+				return "aborted";
+			})
+			.get("/excluded", "excluded");
+
+		const requests = [
+			new Request("http://localhost/success/private-resource"),
+			new Request("http://localhost/client-error"),
+			new Request("http://localhost/server-error"),
+			new Request("http://localhost/missing"),
+			new Request("http://localhost/aborted", { signal: abortController.signal }),
+			new Request("http://localhost/excluded"),
+		];
+		const responses = [];
+		for (const request of requests) responses.push(await app.handle(request));
+		await new Promise<void>((resolve) => setImmediate(resolve));
+		await active?.flush();
+
+		expect(responses.map(({ status }) => status)).toEqual([200, 422, 500, 404, 200, 200]);
+		const serverSpans = spans.getFinishedSpans().filter((span) => span.kind === SpanKind.SERVER);
+		expect(serverSpans).toHaveLength(5);
+		expect(
+			serverSpans.map((span) => ({
+				name: span.name,
+				status: span.attributes["http.response.status_code"],
+			})),
+		).toEqual(
+			expect.arrayContaining([
+				{ name: "GET /success/:param", status: 200 },
+				{ name: "GET /client-error", status: 422 },
+				{ name: "GET /server-error", status: 500 },
+				{ name: "GET unmatched", status: 404 },
+				{ name: "GET /aborted", status: 499 },
+			]),
+		);
+		expect(JSON.stringify(serverSpans)).not.toContain("/excluded");
+		expect(JSON.stringify(serverSpans)).not.toContain("private-resource");
+
+		const metrics = JSON.stringify(metricExporter.getMetrics());
+		expect(metrics).toContain("rezics.http.server.request.count");
+		expect(metrics).toContain('"http.response.status_class":"2xx"');
+		expect(metrics).toContain('"http.response.status_class":"4xx"');
+		expect(metrics).toContain('"http.response.status_class":"5xx"');
+		expect(metrics).not.toContain("/excluded");
+		expect(metrics).not.toContain("private-resource");
+	});
+
 	it("correlates JSON logs, preserves W3C parents, and exports only route templates", async () => {
 		const lines: string[] = [];
 		const { spans, metricExporter } = inMemoryRuntime(lines);

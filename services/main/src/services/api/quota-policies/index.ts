@@ -140,10 +140,6 @@ export default new Elysia({ prefix: "/api-quota-policies" })
 	.use(session)
 	.get(
 		"",
-		async ({ authorization }) => {
-			await authorization.platform.ensureCapability("platform.api_quota_policy.read");
-			return { items: await listApiQuotaPolicies() };
-		},
 		{
 			access: "session-only",
 			response: {
@@ -153,9 +149,25 @@ export default new Elysia({ prefix: "/api-quota-policies" })
 			},
 			detail: { summary: "List API quota policies", tags: ["API Quota Policies"] },
 		},
+		async ({ authorization }) => {
+			await authorization.platform.ensureCapability("platform.api_quota_policy.read");
+			return { items: await listApiQuotaPolicies() };
+		},
 	)
 	.post(
 		"",
+		{
+			access: "fresh-session-only",
+			body: CreateApiQuotaPolicyBody,
+			response: {
+				[StatusCodes.OK]: ApiQuotaPolicySummary,
+				[StatusCodes.UNAUTHORIZED]: AuthenticationResponse,
+				[StatusCodes.FORBIDDEN]: PlatformAccessResponse,
+				[StatusCodes.CONFLICT]: PolicyKeyConflictResponse,
+				[StatusCodes.UNPROCESSABLE_ENTITY]: PolicyInvalidResponse,
+			},
+			detail: { summary: "Create an API quota policy", tags: ["API Quota Policies"] },
+		},
 		async ({ authorization, profile, body }) => {
 			await authorization.platform.ensureCapability("platform.api_quota_policy.update");
 			try {
@@ -194,21 +206,26 @@ export default new Elysia({ prefix: "/api-quota-policies" })
 				throw error;
 			}
 		},
+	)
+	.put(
+		"/:policyKey",
 		{
 			access: "fresh-session-only",
-			body: CreateApiQuotaPolicyBody,
+			params: ApiQuotaPolicyParams,
+			body: ReviseApiQuotaPolicyBody,
 			response: {
 				[StatusCodes.OK]: ApiQuotaPolicySummary,
 				[StatusCodes.UNAUTHORIZED]: AuthenticationResponse,
 				[StatusCodes.FORBIDDEN]: PlatformAccessResponse,
-				[StatusCodes.CONFLICT]: PolicyKeyConflictResponse,
+				[StatusCodes.NOT_FOUND]: PolicyNotFoundResponse,
+				[StatusCodes.CONFLICT]: PolicyRevisionConflictResponse,
 				[StatusCodes.UNPROCESSABLE_ENTITY]: PolicyInvalidResponse,
 			},
-			detail: { summary: "Create an API quota policy", tags: ["API Quota Policies"] },
+			detail: {
+				summary: "Publish an API quota policy revision",
+				tags: ["API Quota Policies"],
+			},
 		},
-	)
-	.put(
-		"/:policyKey",
 		async ({ authorization, profile, params, body }) => {
 			await authorization.platform.ensureCapability("platform.api_quota_policy.update");
 			try {
@@ -248,31 +265,9 @@ export default new Elysia({ prefix: "/api-quota-policies" })
 				throw error;
 			}
 		},
-		{
-			access: "fresh-session-only",
-			params: ApiQuotaPolicyParams,
-			body: ReviseApiQuotaPolicyBody,
-			response: {
-				[StatusCodes.OK]: ApiQuotaPolicySummary,
-				[StatusCodes.UNAUTHORIZED]: AuthenticationResponse,
-				[StatusCodes.FORBIDDEN]: PlatformAccessResponse,
-				[StatusCodes.NOT_FOUND]: PolicyNotFoundResponse,
-				[StatusCodes.CONFLICT]: PolicyRevisionConflictResponse,
-				[StatusCodes.UNPROCESSABLE_ENTITY]: PolicyInvalidResponse,
-			},
-			detail: {
-				summary: "Publish an API quota policy revision",
-				tags: ["API Quota Policies"],
-			},
-		},
 	)
 	.get(
 		"/accounts/:userId",
-		async ({ authorization, params }) => {
-			await authorization.platform.ensureCapability("platform.user.api_quota.read");
-			await requireUser(database, params.userId);
-			return presentAccountQuota(await resolveApiAccountQuotaPolicy(params.userId));
-		},
 		{
 			access: "session-only",
 			params: ApiAccountQuotaParams,
@@ -284,9 +279,28 @@ export default new Elysia({ prefix: "/api-quota-policies" })
 			},
 			detail: { summary: "Get a user's API quota", tags: ["API Quota Policies"] },
 		},
+		async ({ authorization, params }) => {
+			await authorization.platform.ensureCapability("platform.user.api_quota.read");
+			await requireUser(database, params.userId);
+			return presentAccountQuota(await resolveApiAccountQuotaPolicy(params.userId));
+		},
 	)
 	.put(
 		"/accounts/:userId",
+		{
+			access: "fresh-session-only",
+			params: ApiAccountQuotaParams,
+			body: AssignApiAccountQuotaBody,
+			response: {
+				[StatusCodes.OK]: ApiAccountQuotaPolicyResponse,
+				[StatusCodes.UNAUTHORIZED]: AuthenticationResponse,
+				[StatusCodes.FORBIDDEN]: PlatformAccessResponse,
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UserNotFound", "ApiQuotaPolicyNotFound"]),
+				[StatusCodes.CONFLICT]: AccountQuotaRevisionConflictResponse,
+				[StatusCodes.UNPROCESSABLE_ENTITY]: PolicyInvalidResponse,
+			},
+			detail: { summary: "Assign a user's API quota policy", tags: ["API Quota Policies"] },
+		},
 		async ({ authorization, profile, params, body }) => {
 			await authorization.platform.ensureCapability("platform.user.api_quota.update");
 			try {
@@ -332,23 +346,22 @@ export default new Elysia({ prefix: "/api-quota-policies" })
 				throw error;
 			}
 		},
+	)
+	.delete(
+		"/accounts/:userId",
 		{
 			access: "fresh-session-only",
 			params: ApiAccountQuotaParams,
-			body: AssignApiAccountQuotaBody,
+			body: ResetApiAccountQuotaBody,
 			response: {
 				[StatusCodes.OK]: ApiAccountQuotaPolicyResponse,
 				[StatusCodes.UNAUTHORIZED]: AuthenticationResponse,
 				[StatusCodes.FORBIDDEN]: PlatformAccessResponse,
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UserNotFound", "ApiQuotaPolicyNotFound"]),
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UserNotFound"]),
 				[StatusCodes.CONFLICT]: AccountQuotaRevisionConflictResponse,
-				[StatusCodes.UNPROCESSABLE_ENTITY]: PolicyInvalidResponse,
 			},
-			detail: { summary: "Assign a user's API quota policy", tags: ["API Quota Policies"] },
+			detail: { summary: "Reset a user's API quota policy", tags: ["API Quota Policies"] },
 		},
-	)
-	.delete(
-		"/accounts/:userId",
 		async ({ authorization, profile, params, body }) => {
 			await authorization.platform.ensureCapability("platform.user.api_quota.update");
 			return database.transaction(async (tx) => {
@@ -371,22 +384,20 @@ export default new Elysia({ prefix: "/api-quota-policies" })
 				);
 			});
 		},
-		{
-			access: "fresh-session-only",
-			params: ApiAccountQuotaParams,
-			body: ResetApiAccountQuotaBody,
-			response: {
-				[StatusCodes.OK]: ApiAccountQuotaPolicyResponse,
-				[StatusCodes.UNAUTHORIZED]: AuthenticationResponse,
-				[StatusCodes.FORBIDDEN]: PlatformAccessResponse,
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UserNotFound"]),
-				[StatusCodes.CONFLICT]: AccountQuotaRevisionConflictResponse,
-			},
-			detail: { summary: "Reset a user's API quota policy", tags: ["API Quota Policies"] },
-		},
 	)
 	.get(
 		"/accounts/:userId/tokens",
+		{
+			access: "session-only",
+			params: ApiAccountQuotaParams,
+			response: {
+				[StatusCodes.OK]: ManagedApiTokenQuotaListResponse,
+				[StatusCodes.UNAUTHORIZED]: AuthenticationResponse,
+				[StatusCodes.FORBIDDEN]: PlatformAccessResponse,
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UserNotFound"]),
+			},
+			detail: { summary: "List a user's API token quotas", tags: ["API Quota Policies"] },
+		},
 		async ({ authorization, params }) => {
 			await authorization.platform.ensureCapability("platform.user.api_token.api_quota.read");
 			await requireUser(database, params.userId);
@@ -420,20 +431,23 @@ export default new Elysia({ prefix: "/api-quota-policies" })
 				})),
 			};
 		},
-		{
-			access: "session-only",
-			params: ApiAccountQuotaParams,
-			response: {
-				[StatusCodes.OK]: ManagedApiTokenQuotaListResponse,
-				[StatusCodes.UNAUTHORIZED]: AuthenticationResponse,
-				[StatusCodes.FORBIDDEN]: PlatformAccessResponse,
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UserNotFound"]),
-			},
-			detail: { summary: "List a user's API token quotas", tags: ["API Quota Policies"] },
-		},
 	)
 	.put(
 		"/accounts/:userId/tokens/:tokenId",
+		{
+			access: "fresh-session-only",
+			params: ApiAccountTokenQuotaParams,
+			body: AssignApiTokenQuotaBody,
+			response: {
+				[StatusCodes.OK]: ApiTokenQuotaPolicyResponse,
+				[StatusCodes.UNAUTHORIZED]: AuthenticationResponse,
+				[StatusCodes.FORBIDDEN]: PlatformAccessResponse,
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UserNotFound", "ApiQuotaPolicyNotFound"]),
+				[StatusCodes.CONFLICT]: TokenQuotaRevisionConflictResponse,
+				[StatusCodes.UNPROCESSABLE_ENTITY]: PolicyInvalidResponse,
+			},
+			detail: { summary: "Assign an API token quota policy", tags: ["API Quota Policies"] },
+		},
 		async ({ authorization, profile, params, body }) => {
 			await authorization.platform.ensureCapability("platform.user.api_token.api_quota.update");
 			try {
@@ -480,23 +494,22 @@ export default new Elysia({ prefix: "/api-quota-policies" })
 				throw error;
 			}
 		},
+	)
+	.delete(
+		"/accounts/:userId/tokens/:tokenId",
 		{
 			access: "fresh-session-only",
 			params: ApiAccountTokenQuotaParams,
-			body: AssignApiTokenQuotaBody,
+			body: ResetApiTokenQuotaBody,
 			response: {
 				[StatusCodes.OK]: ApiTokenQuotaPolicyResponse,
 				[StatusCodes.UNAUTHORIZED]: AuthenticationResponse,
 				[StatusCodes.FORBIDDEN]: PlatformAccessResponse,
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UserNotFound", "ApiQuotaPolicyNotFound"]),
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UserNotFound"]),
 				[StatusCodes.CONFLICT]: TokenQuotaRevisionConflictResponse,
-				[StatusCodes.UNPROCESSABLE_ENTITY]: PolicyInvalidResponse,
 			},
-			detail: { summary: "Assign an API token quota policy", tags: ["API Quota Policies"] },
+			detail: { summary: "Reset an API token quota policy", tags: ["API Quota Policies"] },
 		},
-	)
-	.delete(
-		"/accounts/:userId/tokens/:tokenId",
 		async ({ authorization, profile, params, body }) => {
 			await authorization.platform.ensureCapability("platform.user.api_token.api_quota.update");
 			return database.transaction(async (tx) => {
@@ -519,18 +532,5 @@ export default new Elysia({ prefix: "/api-quota-policies" })
 					await resolveApiTokenQuotaPolicy(params.tokenId, { executor: tx }),
 				);
 			});
-		},
-		{
-			access: "fresh-session-only",
-			params: ApiAccountTokenQuotaParams,
-			body: ResetApiTokenQuotaBody,
-			response: {
-				[StatusCodes.OK]: ApiTokenQuotaPolicyResponse,
-				[StatusCodes.UNAUTHORIZED]: AuthenticationResponse,
-				[StatusCodes.FORBIDDEN]: PlatformAccessResponse,
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UserNotFound"]),
-				[StatusCodes.CONFLICT]: TokenQuotaRevisionConflictResponse,
-			},
-			detail: { summary: "Reset an API token quota policy", tags: ["API Quota Policies"] },
 		},
 	);

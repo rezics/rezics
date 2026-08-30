@@ -1,5 +1,6 @@
+import type { StaticDecode } from "typebox";
 import { PlatformCapabilityValues } from "@rezics/access";
-import { type Static, t } from "elysia";
+import { t } from "elysia";
 import {
 	FontAwesomeIconNamePatternSource,
 	FontAwesomeIconPrefixValues,
@@ -597,7 +598,9 @@ export const UnitSubjectAssociationListResponse = t.Object(
 	},
 	{ additionalProperties: false },
 );
-export type UnitSubjectAssociationListResponse = Static<typeof UnitSubjectAssociationListResponse>;
+export type UnitSubjectAssociationListResponse = StaticDecode<
+	typeof UnitSubjectAssociationListResponse
+>;
 
 export const SearchHit = t.Object({
 	id: Uuid,
@@ -933,10 +936,10 @@ export const FeedPostItemResponse = t.Union([
 ]);
 
 export type FeedItemResponseValue =
-	| Static<typeof FeedUnitItemResponse>
-	| Static<typeof FeedNonReviewPostItemResponse>
-	| Static<typeof FeedReviewItemResponse>
-	| Static<typeof FeedWikiItemResponse>;
+	| StaticDecode<typeof FeedUnitItemResponse>
+	| StaticDecode<typeof FeedNonReviewPostItemResponse>
+	| StaticDecode<typeof FeedReviewItemResponse>
+	| StaticDecode<typeof FeedWikiItemResponse>;
 
 export const FeedResponse = t.Object({
 	items: t.Array(t.Union([FeedUnitItemResponse, FeedPostItemResponse])),

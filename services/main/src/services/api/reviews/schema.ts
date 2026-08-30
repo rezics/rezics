@@ -1,4 +1,5 @@
-import { type Static, t } from "elysia";
+import type { StaticDecode } from "typebox";
+import { t } from "elysia";
 import { PortableTextDocument } from "@rezics/block";
 
 import {
@@ -12,7 +13,7 @@ import { PostPublishRealmIds } from "../posts/schema";
 
 export const ReviewSortValues = ["best", "new"] as const;
 export const ReviewSortSchema = t.UnionEnum(ReviewSortValues, { default: "best" });
-export type ReviewSort = Static<typeof ReviewSortSchema>;
+export type ReviewSort = StaticDecode<typeof ReviewSortSchema>;
 
 const ListReviewsCommonQuery = {
 	targetId: t.Optional(Uuid),
@@ -42,7 +43,7 @@ export const ListReviewsQuery = t.Object(
 	},
 	{ additionalProperties: false },
 );
-export type ListReviewsQuery = Static<typeof ListReviewsQuery>;
+export type ListReviewsQuery = StaticDecode<typeof ListReviewsQuery>;
 
 export type ReviewScoreFilterResolution =
 	| Readonly<{ status: "absent" }>
@@ -85,10 +86,10 @@ export const CreateReviewBody = t.Object({
 	body: PortableTextDocument,
 	revisionContext: t.Optional(RevisionContext),
 });
-export type CreateReviewBody = Static<typeof CreateReviewBody>;
+export type CreateReviewBody = StaticDecode<typeof CreateReviewBody>;
 
 export const ReviewParams = t.Object({ reviewId: Uuid });
-export type ReviewParams = Static<typeof ReviewParams>;
+export type ReviewParams = StaticDecode<typeof ReviewParams>;
 export const GetReviewQuery = t.Object(
 	{
 		realmId: t.Optional(Uuid),
@@ -96,7 +97,7 @@ export const GetReviewQuery = t.Object(
 	},
 	{ additionalProperties: false },
 );
-export type GetReviewQuery = Static<typeof GetReviewQuery>;
+export type GetReviewQuery = StaticDecode<typeof GetReviewQuery>;
 
 export const UpdateReviewBody = t.Object({
 	language: ContentLanguage,
@@ -105,22 +106,22 @@ export const UpdateReviewBody = t.Object({
 	body: PortableTextDocument,
 	revisionContext: t.Optional(RevisionContext),
 });
-export type UpdateReviewBody = Static<typeof UpdateReviewBody>;
+export type UpdateReviewBody = StaticDecode<typeof UpdateReviewBody>;
 
 export const ScoreTargetParams = t.Object({ targetId: Uuid });
-export type ScoreTargetParams = Static<typeof ScoreTargetParams>;
+export type ScoreTargetParams = StaticDecode<typeof ScoreTargetParams>;
 
 export const SetScoreBody = t.Object({
 	realmId: Uuid,
 	score: t.Integer({ minimum: 1, maximum: 10 }),
 	visibility: t.Optional(ResourceVisibility),
 });
-export type SetScoreBody = Static<typeof SetScoreBody>;
+export type SetScoreBody = StaticDecode<typeof SetScoreBody>;
 
 export const ScoreAggregateQuery = t.Object({ realmId: Uuid });
-export type ScoreAggregateQuery = Static<typeof ScoreAggregateQuery>;
+export type ScoreAggregateQuery = StaticDecode<typeof ScoreAggregateQuery>;
 
 export const ListViewerScoresQuery = t.Object(LocalizationLanguageQuery, {
 	additionalProperties: false,
 });
-export type ListViewerScoresQuery = Static<typeof ListViewerScoresQuery>;
+export type ListViewerScoresQuery = StaticDecode<typeof ListViewerScoresQuery>;

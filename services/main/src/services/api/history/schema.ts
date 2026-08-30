@@ -1,4 +1,5 @@
-import { type Static, t } from "elysia";
+import type { StaticDecode } from "typebox";
+import { t } from "elysia";
 import { ResourceVisibilityValues, UnitStatusValues } from "../../database/schema/contract-values";
 import { RevisionHiddenFieldValues } from "../../history/visibility";
 import { UnitRevisionChangeTags } from "../../units/history";
@@ -52,7 +53,7 @@ export const ContributionResourceListQuery = t.Object(
 	},
 	{ additionalProperties: false },
 );
-export type ContributionResourceListQuery = Static<typeof ContributionResourceListQuery>;
+export type ContributionResourceListQuery = StaticDecode<typeof ContributionResourceListQuery>;
 
 export const ContributionResourceListResponse = t.Object({
 	items: t.Array(
@@ -200,4 +201,4 @@ export const ChangeTagListResponse = t.Object({
 	items: t.Array(t.Object({ tag: t.String() })),
 });
 
-export type UnitHistoryQuery = Static<typeof UnitHistoryQuery>;
+export type UnitHistoryQuery = StaticDecode<typeof UnitHistoryQuery>;

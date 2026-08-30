@@ -5,6 +5,7 @@ import {
 	ZoneAppearanceDocument,
 	assertWikiPostPortableTextDocument,
 	parseDocument,
+	type DockDocument as DockDocumentValue,
 	type NavigationDocument as NavigationDocumentValue,
 	type PortableTextDocument,
 	type UnitReferencedBlockDocument as UnitReferencedBlockDocumentValue,
@@ -28,7 +29,7 @@ export interface ZoneRenderPage extends Omit<RawPage, "document"> {
 }
 
 export interface ZoneRenderDock extends Omit<RawDock, "document"> {
-	readonly document: typeof DockDocument.static;
+	readonly document: DockDocumentValue;
 }
 
 export interface ZoneRenderNavigation extends Omit<RawNavigation, "document"> {

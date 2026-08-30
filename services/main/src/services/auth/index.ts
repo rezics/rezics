@@ -97,6 +97,7 @@ export const auth = betterAuth({
 		freshAge: CredentialControlFreshAgeSeconds,
 	},
 	advanced: {
+		disableOriginCheck: false,
 		database: {
 			generateId: "uuid",
 		},

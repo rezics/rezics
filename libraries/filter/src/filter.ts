@@ -1,5 +1,5 @@
-import { type Static, Type } from "@sinclair/typebox";
-import { Check } from "@sinclair/typebox/value";
+import { type Static, Type } from "typebox";
+import { Check } from "typebox/value";
 
 import {
 	DefaultFilterValidationLimits,
@@ -31,11 +31,14 @@ export const UnitFilter = Type.Union(
 		Type.Object(
 			{
 				search: SearchMatch,
-				where: Type.Optional(Type.Ref(UnitPredicate)),
+				where: Type.Optional(Type.Unsafe<UnitPredicateValue>(UnitPredicate)),
 			},
 			{ additionalProperties: false },
 		),
-		Type.Object({ where: Type.Ref(UnitPredicate) }, { additionalProperties: false }),
+		Type.Object(
+			{ where: Type.Unsafe<UnitPredicateValue>(UnitPredicate) },
+			{ additionalProperties: false },
+		),
 	],
 	{ $id: "UnitFilter" },
 );
@@ -51,7 +54,8 @@ export function assertUnitFilter(
 	value: unknown,
 	limits: FilterValidationLimits = DefaultFilterValidationLimits,
 ): asserts value is UnitFilter {
-	if (!Check(UnitFilter, [UnitPredicate], value)) throw new TypeError("Invalid Unit filter");
+	if (!Check(UnitPredicateSchemaModels, UnitFilter, value))
+		throw new TypeError("Invalid Unit filter");
 	if (value.where) assertUnitPredicate(value.where, limits);
 	if ("search" in value && !value.search.query.trim())
 		throw new TypeError("Search query cannot be blank");

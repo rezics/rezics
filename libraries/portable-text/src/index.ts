@@ -1,17 +1,18 @@
-import { type Static, Type } from "@sinclair/typebox";
-import { Check } from "@sinclair/typebox/value";
+import { type Static, Type } from "typebox";
+import { Check } from "typebox/value";
 
-export const JsonValue = Type.Recursive(
-	(JsonValue) =>
-		Type.Union([
+export const JsonValue = Type.Cyclic(
+	{
+		JsonValue: Type.Union([
 			Type.Null(),
 			Type.Boolean(),
 			Type.Number(),
 			Type.String(),
-			Type.Array(JsonValue),
-			Type.Record(Type.String(), JsonValue),
+			Type.Array(Type.Ref("JsonValue")),
+			Type.Record(Type.String(), Type.Ref("JsonValue")),
 		]),
-	{ $id: "#/components/schemas/JsonValue" },
+	},
+	"JsonValue",
 );
 export type JsonValue = Static<typeof JsonValue>;
 

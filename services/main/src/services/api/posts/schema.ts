@@ -1,4 +1,5 @@
-import { type Static, t } from "elysia";
+import type { StaticDecode } from "typebox";
+import { t } from "elysia";
 import { PortableTextDocument } from "@rezics/block";
 
 import {
@@ -20,7 +21,7 @@ export const ListPostsQuery = t.Object(
 	},
 	{ additionalProperties: false },
 );
-export type ListPostsQuery = Static<typeof ListPostsQuery>;
+export type ListPostsQuery = StaticDecode<typeof ListPostsQuery>;
 
 const OptionalPostTitle = t.Optional(t.String({ minLength: 1, maxLength: 500 }));
 const OptionalPostSummary = t.Optional(t.String({ minLength: 1, maxLength: 2_000 }));
@@ -64,7 +65,7 @@ export const CreatePostBody = t.Union([
 		{ additionalProperties: false },
 	),
 ]);
-export type CreatePostBody = Static<typeof CreatePostBody>;
+export type CreatePostBody = StaticDecode<typeof CreatePostBody>;
 
 export const CreateWikiBody = t.Object(
 	{
@@ -78,10 +79,10 @@ export const CreateWikiBody = t.Object(
 	},
 	{ additionalProperties: false },
 );
-export type CreateWikiBody = Static<typeof CreateWikiBody>;
+export type CreateWikiBody = StaticDecode<typeof CreateWikiBody>;
 
 export const PostParams = t.Object({ postId: Uuid });
-export type PostParams = Static<typeof PostParams>;
+export type PostParams = StaticDecode<typeof PostParams>;
 export const GetPostQuery = t.Object(
 	{
 		realmId: t.Optional(Uuid),
@@ -89,14 +90,14 @@ export const GetPostQuery = t.Object(
 	},
 	{ additionalProperties: false },
 );
-export type GetPostQuery = Static<typeof GetPostQuery>;
+export type GetPostQuery = StaticDecode<typeof GetPostQuery>;
 
 const PostScoreInput = t.Object({ scoreId: Uuid }, { additionalProperties: false });
 export const MaximumPostScoreCount = 5;
 export const ReplacePostScoresBody = t.Array(PostScoreInput, {
 	maxItems: MaximumPostScoreCount,
 });
-export type ReplacePostScoresBody = Static<typeof ReplacePostScoresBody>;
+export type ReplacePostScoresBody = StaticDecode<typeof ReplacePostScoresBody>;
 
 export const PostScoreResponse = t.Object({
 	scoreId: Uuid,
@@ -123,7 +124,7 @@ export const UpdatePostBody = t.Object({
 	contentNsfw: t.Optional(t.Boolean()),
 	revisionContext: t.Optional(RevisionContext),
 });
-export type UpdatePostBody = Static<typeof UpdatePostBody>;
+export type UpdatePostBody = StaticDecode<typeof UpdatePostBody>;
 
 export const ListRepliesQuery = t.Object(
 	{
@@ -135,7 +136,7 @@ export const ListRepliesQuery = t.Object(
 	},
 	{ additionalProperties: false },
 );
-export type ListRepliesQuery = Static<typeof ListRepliesQuery>;
+export type ListRepliesQuery = StaticDecode<typeof ListRepliesQuery>;
 
 export const CreateReplyBody = t.Object({
 	parentPostId: t.Optional(Uuid),
@@ -144,13 +145,13 @@ export const CreateReplyBody = t.Object({
 	body: PortableTextDocument,
 	revisionContext: t.Optional(RevisionContext),
 });
-export type CreateReplyBody = Static<typeof CreateReplyBody>;
+export type CreateReplyBody = StaticDecode<typeof CreateReplyBody>;
 
 export const ReplyParams = t.Object({ postId: Uuid, replyPostId: Uuid });
-export type ReplyParams = Static<typeof ReplyParams>;
+export type ReplyParams = StaticDecode<typeof ReplyParams>;
 
 export const RootPostParams = t.Object({ postId: Uuid });
-export type RootPostParams = Static<typeof RootPostParams>;
+export type RootPostParams = StaticDecode<typeof RootPostParams>;
 
 export const UpdateReplyBody = t.Object({
 	language: ContentLanguage,
@@ -160,4 +161,4 @@ export const UpdateReplyBody = t.Object({
 	minor: t.Optional(t.Boolean()),
 	revisionContext: t.Optional(RevisionContext),
 });
-export type UpdateReplyBody = Static<typeof UpdateReplyBody>;
+export type UpdateReplyBody = StaticDecode<typeof UpdateReplyBody>;

@@ -82,13 +82,7 @@ export class EntityAuthorization<ProfileId extends string | undefined> {
 			await this.ensureAssociationCommandAllowedForExistingEntity(tx, entityId, kind, command);
 			return true;
 		} catch (error) {
-			if (
-				error &&
-				typeof error === "object" &&
-				"_tag" in error &&
-				error._tag === "EntityAssociationRestricted"
-			)
-				return false;
+			if (error instanceof EntityAssociationRestricted) return false;
 			throw error;
 		}
 	}

@@ -1,10 +1,11 @@
 import { StatusCodes } from "http-status-codes";
-import * as Data from "effect/Data";
+import { HTTPError } from "elysia";
 
-export class ProgressEntryNotFound extends Data.TaggedError("ProgressEntryNotFound") {
-	static readonly status = StatusCodes.NOT_FOUND as const;
-	readonly status = ProgressEntryNotFound.status;
-	readonly message = "Progress entry not found";
+export class ProgressEntryNotFound extends HTTPError.id(
+	"ProgressEntryNotFound",
+	StatusCodes.NOT_FOUND,
+) {
+	override readonly message = "Progress entry not found";
 }
 
 export const ProgressErrors = [ProgressEntryNotFound] as const;

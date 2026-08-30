@@ -1,5 +1,6 @@
+import type { StaticDecode } from "typebox";
 import { PlatformCapabilityValues } from "@rezics/access";
-import { type Static, t } from "elysia";
+import { t } from "elysia";
 
 import { DateTime, Uuid } from "../schema";
 
@@ -110,7 +111,7 @@ export const ReplacePlatformAccessBody = t.Object(
 	{ additionalProperties: false },
 );
 
-export type ReplacePlatformAccessBody = Static<typeof ReplacePlatformAccessBody>;
-export type SetCustomThemeExternalLiveAccessBody = Static<
+export type ReplacePlatformAccessBody = StaticDecode<typeof ReplacePlatformAccessBody>;
+export type SetCustomThemeExternalLiveAccessBody = StaticDecode<
 	typeof SetCustomThemeExternalLiveAccessBody
 >;

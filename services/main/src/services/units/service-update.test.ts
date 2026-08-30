@@ -193,7 +193,7 @@ describe("Unit update transaction", () => {
 				visibility: "unlisted",
 			}),
 		).rejects.toMatchObject({
-			_tag: "UnitChanged",
+			type: "UnitChanged",
 			details: { updatedAt: currentUpdatedAt.toISOString() },
 		});
 		expect(recordUnitRevision).not.toHaveBeenCalled();
@@ -229,7 +229,7 @@ describe("Unit update transaction", () => {
 				expectedUpdatedAt: ExpectedUpdatedAt,
 				details: { adaptedAudioUnitIds: null },
 			}),
-		).rejects.toMatchObject({ _tag: "UnitChanged" });
+		).rejects.toMatchObject({ type: "UnitChanged" });
 		expect(replaceAdaptedAudioUnitTracks).not.toHaveBeenCalled();
 	});
 
@@ -242,7 +242,7 @@ describe("Unit update transaction", () => {
 				details: { adaptedAudioUnitIds: null },
 			}),
 		).rejects.toMatchObject({
-			_tag: "VideoAudioTrackInvalid",
+			type: "VideoAudioTrackInvalid",
 			details: { path: "/details/adaptedAudioUnitIds" },
 		});
 		expect(updates).toEqual([]);

@@ -52,10 +52,6 @@ export default new Elysia({ prefix: "/slug-addresses" })
 	.use(session)
 	.post(
 		"/resolve",
-		async ({ body }) => {
-			const result = await resolveUnitPath(body.path);
-			return { ...presentPath(result), path: [...result.path] };
-		},
 		{
 			body: ResolveSlugAddressBody,
 			response: {
@@ -73,14 +69,13 @@ export default new Elysia({ prefix: "/slug-addresses" })
 				tags: ["Slug Addresses"],
 			},
 		},
+		async ({ body }) => {
+			const result = await resolveUnitPath(body.path);
+			return { ...presentPath(result), path: [...result.path] };
+		},
 	)
 	.get(
 		"/public-units/:unitId",
-		async ({ params }) => {
-			const address = await getPublicCanonicalUnitSlugAddress(params.unitId);
-			if (!address) throw new UnitNotFound();
-			return address;
-		},
 		{
 			params: UnitSlugAddressParams,
 			response: {
@@ -95,13 +90,14 @@ export default new Elysia({ prefix: "/slug-addresses" })
 				tags: ["Slug Addresses"],
 			},
 		},
+		async ({ params }) => {
+			const address = await getPublicCanonicalUnitSlugAddress(params.unitId);
+			if (!address) throw new UnitNotFound();
+			return address;
+		},
 	)
 	.get(
 		"/scopes/:scopeUnitId/:slug",
-		async ({ params, query }) => {
-			const result = await resolveScopedUnitAddress(params.scopeUnitId, params.slug, query.kind);
-			return { ...presentPath(result), path: [...result.path] };
-		},
 		{
 			params: ScopedSlugAddressParams,
 			query: ResolveScopedSlugAddressQuery,
@@ -118,13 +114,13 @@ export default new Elysia({ prefix: "/slug-addresses" })
 				tags: ["Slug Addresses"],
 			},
 		},
+		async ({ params, query }) => {
+			const result = await resolveScopedUnitAddress(params.scopeUnitId, params.slug, query.kind);
+			return { ...presentPath(result), path: [...result.path] };
+		},
 	)
 	.get(
 		"/units/:unitId",
-		async ({ params, authorization }) => {
-			await authorization.platform.ensureCapability(DevelopmentPreviewCapability);
-			return getCanonicalUnitSlugAddressWithPlatformAccess(authorization, params.unitId);
-		},
 		{
 			access: "session-only",
 			params: UnitSlugAddressParams,
@@ -142,18 +138,13 @@ export default new Elysia({ prefix: "/slug-addresses" })
 				tags: ["Slug Addresses"],
 			},
 		},
+		async ({ params, authorization }) => {
+			await authorization.platform.ensureCapability(DevelopmentPreviewCapability);
+			return getCanonicalUnitSlugAddressWithPlatformAccess(authorization, params.unitId);
+		},
 	)
 	.put(
 		"/units/:unitId",
-		async ({ params, authorization, body }) => {
-			await authorization.platform.ensureCapability(DevelopmentPreviewCapability);
-			return presentPath(
-				await replaceUnitSlugAddressWithPlatformAccess(authorization, {
-					unitId: params.unitId,
-					...body,
-				}),
-			);
-		},
 		{
 			access: "session-only",
 			params: UnitSlugAddressParams,
@@ -178,22 +169,18 @@ export default new Elysia({ prefix: "/slug-addresses" })
 				tags: ["Slug Addresses"],
 			},
 		},
+		async ({ params, authorization, body }) => {
+			await authorization.platform.ensureCapability(DevelopmentPreviewCapability);
+			return presentPath(
+				await replaceUnitSlugAddressWithPlatformAccess(authorization, {
+					unitId: params.unitId,
+					...body,
+				}),
+			);
+		},
 	)
 	.post(
 		"/namespaces",
-		async ({ authorization, body, status }) => {
-			await authorization.platform.ensureCapability(DevelopmentPreviewCapability);
-			const { revisionContext, ...namespace } = body;
-			return status(
-				StatusCodes.CREATED,
-				presentPath(
-					await createSlugNamespace(authorization, {
-						...namespace,
-						contribution: revisionContext?.contribution,
-					}),
-				),
-			);
-		},
 		{
 			access: "session-only",
 			body: CreateSlugNamespaceBody,
@@ -219,17 +206,22 @@ export default new Elysia({ prefix: "/slug-addresses" })
 				tags: ["Slug Addresses"],
 			},
 		},
+		async ({ authorization, body, status }) => {
+			await authorization.platform.ensureCapability(DevelopmentPreviewCapability);
+			const { revisionContext, ...namespace } = body;
+			return status(
+				StatusCodes.CREATED,
+				presentPath(
+					await createSlugNamespace(authorization, {
+						...namespace,
+						contribution: revisionContext?.contribution,
+					}),
+				),
+			);
+		},
 	)
 	.delete(
 		"/redirects/:redirectAddressId",
-		async ({ params, authorization, body, status }) => {
-			await authorization.platform.ensureCapability(DevelopmentPreviewCapability);
-			await releaseSlugRedirect(authorization, {
-				redirectAddressId: params.redirectAddressId,
-				rules: body.rules,
-			});
-			return status(StatusCodes.NO_CONTENT, undefined);
-		},
 		{
 			access: "session-only",
 			params: SlugRedirectAddressParams,
@@ -250,5 +242,13 @@ export default new Elysia({ prefix: "/slug-addresses" })
 				tags: ["Slug Addresses"],
 				responses: NoContentResponse,
 			},
+		},
+		async ({ params, authorization, body, status }) => {
+			await authorization.platform.ensureCapability(DevelopmentPreviewCapability);
+			await releaseSlugRedirect(authorization, {
+				redirectAddressId: params.redirectAddressId,
+				rules: body.rules,
+			});
+			return status(StatusCodes.NO_CONTENT, undefined);
 		},
 	);

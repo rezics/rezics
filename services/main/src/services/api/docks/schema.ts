@@ -1,11 +1,11 @@
 import { DockDocument } from "@rezics/block";
-import { type Static, Type } from "@sinclair/typebox";
+import { type StaticDecode, Type } from "typebox";
 import { t } from "elysia";
 
 import { DateTime, Uuid } from "../schema";
 
-const DockInputDocument = Type.Unsafe<Static<typeof DockDocument>>(Type.Ref("DockDocument"));
-const DockResponseDocument = Type.Unsafe<unknown>(Type.Ref("DockDocument"));
+const DockInputDocument = Type.Unsafe<StaticDecode<typeof DockDocument>>(DockDocument);
+const DockResponseDocument = Type.Unsafe<unknown>(DockDocument);
 
 export const DockUnitParams = t.Object({ unitId: Uuid });
 export const DockParams = t.Object({

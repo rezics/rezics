@@ -1,3 +1,4 @@
+import type { StaticDecode } from "typebox";
 import {
 	createZoneBlockExecutionPlan,
 	DockDocument,
@@ -70,7 +71,7 @@ export interface ZoneSearchExecutionResponse {
 		}[];
 	}[];
 	readonly groups: readonly {
-		readonly hits: readonly typeof import("../schema/response").SearchHit.static[];
+		readonly hits: readonly StaticDecode<typeof import("../schema/response").SearchHit>[];
 		readonly total: { readonly kind: "exact" | "lower-bound"; readonly value: number };
 	}[];
 }
@@ -80,8 +81,8 @@ export interface ZoneFeedExecutionResponse {
 	readonly selected?: UnitPresentation;
 	readonly selectionSeed?: string;
 	readonly items: readonly (
-		| typeof import("../schema/response").FeedUnitItemResponse.static
-		| typeof import("../schema/response").FeedPostItemResponse.static
+		| StaticDecode<typeof import("../schema/response").FeedUnitItemResponse>
+		| StaticDecode<typeof import("../schema/response").FeedPostItemResponse>
 	)[];
 	readonly nextCursor?: string;
 	readonly advisory?: PersistedSortUnavailableAdvisory;

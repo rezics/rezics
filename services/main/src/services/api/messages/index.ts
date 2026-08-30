@@ -1,3 +1,4 @@
+import type { StaticDecode } from "typebox";
 import { StatusCodes } from "http-status-codes";
 import { and, desc, eq, isNull, lt, or, sql } from "drizzle-orm";
 import Elysia, { t } from "elysia";
@@ -51,7 +52,7 @@ const Cursor = t.Object(
 	},
 	{ additionalProperties: false },
 );
-type Cursor = typeof Cursor.static;
+type Cursor = StaticDecode<typeof Cursor>;
 
 function encodeCursor(value: Cursor) {
 	return Buffer.from(JSON.stringify(value)).toString("base64url");
@@ -97,6 +98,15 @@ export default new Elysia({ prefix: "/messages" })
 	.use(session)
 	.get(
 		"/conversations",
+		{
+			access: "message:read",
+			query: MessageCursorQuery,
+			response: {
+				[StatusCodes.OK]: ConversationListResponse,
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["InvalidMessageCursor"]),
+			},
+			detail: { summary: "List direct-message conversations", tags: ["Messages"] },
+		},
 		async ({ profile, query }) => {
 			const cursor = decodeCursor(query.cursor, "conversations");
 			const boundary = cursor;
@@ -156,18 +166,20 @@ export default new Elysia({ prefix: "/messages" })
 						: null,
 			};
 		},
-		{
-			access: "message:read",
-			query: MessageCursorQuery,
-			response: {
-				[StatusCodes.OK]: ConversationListResponse,
-				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["InvalidMessageCursor"]),
-			},
-			detail: { summary: "List direct-message conversations", tags: ["Messages"] },
-		},
 	)
 	.post(
 		"/conversations",
+		{
+			access: "write:message:write",
+			body: CreateConversationBody,
+			response: {
+				[StatusCodes.OK]: IdResponse,
+				[StatusCodes.FORBIDDEN]: toApiErrorResponse(["DirectMessageBlocked"]),
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UserNotFound"]),
+				[StatusCodes.CONFLICT]: toApiErrorResponse(["ConversationParticipantsInvalid"]),
+			},
+			detail: { summary: "Create or find a direct-message conversation", tags: ["Messages"] },
+		},
 		async ({ profile, body }) => {
 			if (body.participantProfileId === profile.unitId) throw new ConversationParticipantsInvalid();
 			const [target] = await database
@@ -214,20 +226,18 @@ export default new Elysia({ prefix: "/messages" })
 			});
 			return { id };
 		},
-		{
-			access: "write:message:write",
-			body: CreateConversationBody,
-			response: {
-				[StatusCodes.OK]: IdResponse,
-				[StatusCodes.FORBIDDEN]: toApiErrorResponse(["DirectMessageBlocked"]),
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UserNotFound"]),
-				[StatusCodes.CONFLICT]: toApiErrorResponse(["ConversationParticipantsInvalid"]),
-			},
-			detail: { summary: "Create or find a direct-message conversation", tags: ["Messages"] },
-		},
 	)
 	.get(
 		"/conversations/:conversationId",
+		{
+			access: "message:read",
+			params: ConversationParams,
+			response: {
+				[StatusCodes.OK]: ConversationResponse,
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["ConversationNotFound"]),
+			},
+			detail: { summary: "Get direct-message conversation", tags: ["Messages"] },
+		},
 		async ({ profile, params }) => {
 			const otherProfileId = await findParticipant(params.conversationId, profile.unitId);
 			const [row] = await database
@@ -265,18 +275,20 @@ export default new Elysia({ prefix: "/messages" })
 				),
 			};
 		},
-		{
-			access: "message:read",
-			params: ConversationParams,
-			response: {
-				[StatusCodes.OK]: ConversationResponse,
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["ConversationNotFound"]),
-			},
-			detail: { summary: "Get direct-message conversation", tags: ["Messages"] },
-		},
 	)
 	.get(
 		"/conversations/:conversationId/messages",
+		{
+			access: "message:read",
+			params: ConversationParams,
+			query: MessageCursorQuery,
+			response: {
+				[StatusCodes.OK]: MessageListResponse,
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["InvalidMessageCursor"]),
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["ConversationNotFound"]),
+			},
+			detail: { summary: "List direct messages", tags: ["Messages"] },
+		},
 		async ({ profile, params, query }) => {
 			await findParticipant(params.conversationId, profile.unitId);
 			const cursor = decodeCursor(query.cursor, params.conversationId);
@@ -313,20 +325,20 @@ export default new Elysia({ prefix: "/messages" })
 						: null,
 			};
 		},
-		{
-			access: "message:read",
-			params: ConversationParams,
-			query: MessageCursorQuery,
-			response: {
-				[StatusCodes.OK]: MessageListResponse,
-				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["InvalidMessageCursor"]),
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["ConversationNotFound"]),
-			},
-			detail: { summary: "List direct messages", tags: ["Messages"] },
-		},
 	)
 	.post(
 		"/conversations/:conversationId/messages",
+		{
+			access: "write:message:write",
+			params: ConversationParams,
+			body: SendMessageBody,
+			response: {
+				[StatusCodes.OK]: MessageResponse,
+				[StatusCodes.FORBIDDEN]: toApiErrorResponse(["DirectMessageBlocked"]),
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["ConversationNotFound"]),
+			},
+			detail: { summary: "Send direct message", tags: ["Messages"] },
+		},
 		async ({ profile, params, body }) => {
 			const result = await database.transaction(async (tx) => {
 				const [current] = await tx
@@ -380,20 +392,19 @@ export default new Elysia({ prefix: "/messages" })
 			});
 			return result;
 		},
-		{
-			access: "write:message:write",
-			params: ConversationParams,
-			body: SendMessageBody,
-			response: {
-				[StatusCodes.OK]: MessageResponse,
-				[StatusCodes.FORBIDDEN]: toApiErrorResponse(["DirectMessageBlocked"]),
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["ConversationNotFound"]),
-			},
-			detail: { summary: "Send direct message", tags: ["Messages"] },
-		},
 	)
 	.put(
 		"/conversations/:conversationId/read",
+		{
+			access: "write:message:write",
+			params: ConversationParams,
+			body: MarkConversationReadBody,
+			response: {
+				[StatusCodes.OK]: ReadConversationResponse,
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["ConversationNotFound", "MessageNotFound"]),
+			},
+			detail: { summary: "Mark direct-message conversation read", tags: ["Messages"] },
+		},
 		async ({ profile, params, body }) => {
 			const now = await database.transaction(async (tx) => {
 				const [participant] = await tx
@@ -456,19 +467,22 @@ export default new Elysia({ prefix: "/messages" })
 				readAt: now,
 			};
 		},
-		{
-			access: "write:message:write",
-			params: ConversationParams,
-			body: MarkConversationReadBody,
-			response: {
-				[StatusCodes.OK]: ReadConversationResponse,
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["ConversationNotFound", "MessageNotFound"]),
-			},
-			detail: { summary: "Mark direct-message conversation read", tags: ["Messages"] },
-		},
 	)
 	.delete(
 		"/:messageId",
+		{
+			access: "write:message:write",
+			params: MessageParams,
+			response: {
+				[StatusCodes.NO_CONTENT]: t.Void(),
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["MessageNotFound"]),
+			},
+			detail: {
+				summary: "Delete direct message",
+				tags: ["Messages"],
+				responses: NoContentResponse,
+			},
+		},
 		async ({ profile, params }) => {
 			const [deleted] = await database
 				.update(message)
@@ -483,18 +497,5 @@ export default new Elysia({ prefix: "/messages" })
 				.returning({ id: message.id });
 			if (!deleted) throw new MessageNotFound();
 			return new Response(null, { status: StatusCodes.NO_CONTENT });
-		},
-		{
-			access: "write:message:write",
-			params: MessageParams,
-			response: {
-				[StatusCodes.NO_CONTENT]: t.Void(),
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["MessageNotFound"]),
-			},
-			detail: {
-				summary: "Delete direct message",
-				tags: ["Messages"],
-				responses: NoContentResponse,
-			},
 		},
 	);

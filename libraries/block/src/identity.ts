@@ -1,4 +1,4 @@
-import { type Static, Type } from "@sinclair/typebox";
+import { type Static, Type } from "typebox";
 
 /** Stable sibling-local identity; position is deliberately not identity. */
 export const BlockKey = Type.String({ pattern: "^[0-9a-f]{12}$", $id: "BlockKey" });

@@ -1,6 +1,6 @@
-import { Check } from "@sinclair/typebox/value";
+import { Check } from "typebox/value";
 import { describe, expect, it } from "vitest";
-import { UnitFilter, UnitPredicate } from "@rezics/filter";
+import { FilterSchemaModels } from "@rezics/filter";
 
 import {
 	FeedContentKindValues,
@@ -10,7 +10,7 @@ import {
 } from "./schema";
 
 const RealmId = "00000000-0000-4000-8000-000000000001";
-const checkFeedRequest = (value: unknown) => Check(FeedRequest, [UnitPredicate, UnitFilter], value);
+const checkFeedRequest = (value: unknown) => Check(FilterSchemaModels, FeedRequest, value);
 
 describe("Feed API contract", () => {
 	it("does not expose dedicated Tag Path Units through mixed Feed", () => {

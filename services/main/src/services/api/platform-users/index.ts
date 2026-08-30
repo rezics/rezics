@@ -45,16 +45,6 @@ export default new Elysia({ prefix: "/platform-users" })
 	.use(sessionContext)
 	.get(
 		"",
-		async ({ authorization, query }) => {
-			await authorization.platform.ensureCapability("platform.user.read");
-			return listPlatformUsers({
-				cursor: query.cursor,
-				limit: query.limit ?? 50,
-				search: query.search,
-				state: query.state,
-				emailVerified: query.emailVerified,
-			});
-		},
 		{
 			access: "session-only",
 			query: PlatformUsersQuery,
@@ -66,13 +56,19 @@ export default new Elysia({ prefix: "/platform-users" })
 			},
 			detail: { summary: "List platform users", tags: ["Platform Users"] },
 		},
+		async ({ authorization, query }) => {
+			await authorization.platform.ensureCapability("platform.user.read");
+			return listPlatformUsers({
+				cursor: query.cursor,
+				limit: query.limit ?? 50,
+				search: query.search,
+				state: query.state,
+				emailVerified: query.emailVerified,
+			});
+		},
 	)
 	.get(
 		"/:userId",
-		async ({ authorization, params }) => {
-			await authorization.platform.ensureCapability("platform.user.read");
-			return getPlatformUser(params.userId);
-		},
 		{
 			access: "session-only",
 			params: PlatformUserParams,
@@ -84,18 +80,13 @@ export default new Elysia({ prefix: "/platform-users" })
 			},
 			detail: { summary: "Get one platform user", tags: ["Platform Users"] },
 		},
+		async ({ authorization, params }) => {
+			await authorization.platform.ensureCapability("platform.user.read");
+			return getPlatformUser(params.userId);
+		},
 	)
 	.put(
 		"/:userId/account-state",
-		async ({ authorization, profile, user, params, body }) => {
-			await authorization.platform.ensureCapability("platform.user.status.update");
-			return replacePlatformUserAccountState({
-				actorProfileId: profile.unitId,
-				actorUserId: user.id,
-				targetUserId: params.userId,
-				command: body,
-			});
-		},
 		{
 			access: "fresh-session-only",
 			params: PlatformUserParams,
@@ -116,16 +107,18 @@ export default new Elysia({ prefix: "/platform-users" })
 			},
 			detail: { summary: "Replace a platform user account state", tags: ["Platform Users"] },
 		},
+		async ({ authorization, profile, user, params, body }) => {
+			await authorization.platform.ensureCapability("platform.user.status.update");
+			return replacePlatformUserAccountState({
+				actorProfileId: profile.unitId,
+				actorUserId: user.id,
+				targetUserId: params.userId,
+				command: body,
+			});
+		},
 	)
 	.get(
 		"/:userId/sessions",
-		async ({ authorization, session, params }) => {
-			await authorization.platform.ensureCapability("platform.session.read");
-			if (!session) throw new InteractiveSessionRequired();
-			return {
-				items: await listPlatformUserSessions(params.userId, session.id),
-			};
-		},
 		{
 			access: "session-only",
 			params: PlatformUserParams,
@@ -137,17 +130,16 @@ export default new Elysia({ prefix: "/platform-users" })
 			},
 			detail: { summary: "List a platform user's sessions", tags: ["Platform Users"] },
 		},
+		async ({ authorization, session, params }) => {
+			await authorization.platform.ensureCapability("platform.session.read");
+			if (!session) throw new InteractiveSessionRequired();
+			return {
+				items: await listPlatformUserSessions(params.userId, session.id),
+			};
+		},
 	)
 	.delete(
 		"/:userId/sessions/:sessionId",
-		async ({ authorization, profile, params }) => {
-			await authorization.platform.ensureCapability("platform.session.revoke");
-			return revokePlatformUserSession({
-				actorProfileId: profile.unitId,
-				targetUserId: params.userId,
-				sessionId: params.sessionId,
-			});
-		},
 		{
 			access: "fresh-session-only",
 			params: PlatformUserSessionParams,
@@ -159,16 +151,17 @@ export default new Elysia({ prefix: "/platform-users" })
 			},
 			detail: { summary: "Revoke a platform user session", tags: ["Platform Users"] },
 		},
+		async ({ authorization, profile, params }) => {
+			await authorization.platform.ensureCapability("platform.session.revoke");
+			return revokePlatformUserSession({
+				actorProfileId: profile.unitId,
+				targetUserId: params.userId,
+				sessionId: params.sessionId,
+			});
+		},
 	)
 	.delete(
 		"/:userId/sessions",
-		async ({ authorization, profile, params }) => {
-			await authorization.platform.ensureCapability("platform.session.revoke");
-			return revokeAllPlatformUserSessions({
-				actorProfileId: profile.unitId,
-				targetUserId: params.userId,
-			});
-		},
 		{
 			access: "fresh-session-only",
 			params: PlatformUserParams,
@@ -179,5 +172,12 @@ export default new Elysia({ prefix: "/platform-users" })
 				[StatusCodes.NOT_FOUND]: UserNotFoundResponse,
 			},
 			detail: { summary: "Revoke all platform user sessions", tags: ["Platform Users"] },
+		},
+		async ({ authorization, profile, params }) => {
+			await authorization.platform.ensureCapability("platform.session.revoke");
+			return revokeAllPlatformUserSessions({
+				actorProfileId: profile.unitId,
+				targetUserId: params.userId,
+			});
 		},
 	);

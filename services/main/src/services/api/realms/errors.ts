@@ -1,38 +1,40 @@
 import { StatusCodes } from "http-status-codes";
-import * as Data from "effect/Data";
+import { HTTPError } from "elysia";
 
-export class RealmNotFound extends Data.TaggedError("RealmNotFound") {
-	static readonly status = StatusCodes.NOT_FOUND as const;
-	readonly status = RealmNotFound.status;
-	readonly message = "Realm not found";
+export class RealmNotFound extends HTTPError.id("RealmNotFound", StatusCodes.NOT_FOUND) {
+	override readonly message = "Realm not found";
 }
 
-export class RealmMembershipNotFound extends Data.TaggedError("RealmMembershipNotFound") {
-	static readonly status = StatusCodes.NOT_FOUND as const;
-	readonly status = RealmMembershipNotFound.status;
-	readonly message = "Realm membership not found";
+export class RealmMembershipNotFound extends HTTPError.id(
+	"RealmMembershipNotFound",
+	StatusCodes.NOT_FOUND,
+) {
+	override readonly message = "Realm membership not found";
 }
 
-export class RealmOwnerLeaveForbidden extends Data.TaggedError("RealmOwnerLeaveForbidden") {
-	static readonly status = StatusCodes.CONFLICT as const;
-	readonly status = RealmOwnerLeaveForbidden.status;
-	readonly message = "The Realm owner cannot leave";
+export class RealmOwnerLeaveForbidden extends HTTPError.id(
+	"RealmOwnerLeaveForbidden",
+	StatusCodes.CONFLICT,
+) {
+	override readonly message = "The Realm owner cannot leave";
 }
 
-export class RealmRuleRevisionChanged extends Data.TaggedError("RealmRuleRevisionChanged") {
-	static readonly status = StatusCodes.CONFLICT as const;
-	readonly status = RealmRuleRevisionChanged.status;
-	readonly message = "The current Realm rule revision has changed";
+export class RealmRuleRevisionChanged extends HTTPError.id(
+	"RealmRuleRevisionChanged",
+	StatusCodes.CONFLICT,
+) {
+	override readonly message = "The current Realm rule revision has changed";
 
 	constructor(readonly details: { readonly currentRevisionId: string | null }) {
 		super();
 	}
 }
 
-export class RealmMemberNotFound extends Data.TaggedError("RealmMemberNotFound") {
-	static readonly status = StatusCodes.NOT_FOUND as const;
-	readonly status = RealmMemberNotFound.status;
-	readonly message: string;
+export class RealmMemberNotFound extends HTTPError.id(
+	"RealmMemberNotFound",
+	StatusCodes.NOT_FOUND,
+) {
+	override readonly message: string;
 
 	constructor(active = false) {
 		super();
@@ -40,98 +42,94 @@ export class RealmMemberNotFound extends Data.TaggedError("RealmMemberNotFound")
 	}
 }
 
-export class RealmUnitNotFound extends Data.TaggedError("RealmUnitNotFound") {
-	static readonly status = StatusCodes.NOT_FOUND as const;
-	readonly status = RealmUnitNotFound.status;
-	readonly message = "Realm Unit not found";
+export class RealmUnitNotFound extends HTTPError.id("RealmUnitNotFound", StatusCodes.NOT_FOUND) {
+	override readonly message = "Realm Unit not found";
 }
 
-export class RealmScoreContextPostNotMounted extends Data.TaggedError(
+export class RealmScoreContextPostNotMounted extends HTTPError.id(
 	"RealmScoreContextPostNotMounted",
+	StatusCodes.UNPROCESSABLE_ENTITY,
 ) {
-	static readonly status = StatusCodes.UNPROCESSABLE_ENTITY as const;
-	readonly status = RealmScoreContextPostNotMounted.status;
-	readonly message = "The score context Post must be mounted in the Realm";
+	override readonly message = "The score context Post must be mounted in the Realm";
 }
 
-export class RealmScoreContextPostKindInvalid extends Data.TaggedError(
+export class RealmScoreContextPostKindInvalid extends HTTPError.id(
 	"RealmScoreContextPostKindInvalid",
+	StatusCodes.UNPROCESSABLE_ENTITY,
 ) {
-	static readonly status = StatusCodes.UNPROCESSABLE_ENTITY as const;
-	readonly status = RealmScoreContextPostKindInvalid.status;
-	readonly message = "The score context must be an ordinary or Wiki Post";
+	override readonly message = "The score context must be an ordinary or Wiki Post";
 }
 
-export class RealmTagContextNotFound extends Data.TaggedError("RealmTagContextNotFound") {
-	static readonly status = StatusCodes.NOT_FOUND as const;
-	readonly status = RealmTagContextNotFound.status;
-	readonly message = "Realm Tag Context not found";
+export class RealmTagContextNotFound extends HTTPError.id(
+	"RealmTagContextNotFound",
+	StatusCodes.NOT_FOUND,
+) {
+	override readonly message = "Realm Tag Context not found";
 }
 
-export class RealmTagContextAlreadyExists extends Data.TaggedError("RealmTagContextAlreadyExists") {
-	static readonly status = StatusCodes.CONFLICT as const;
-	readonly status = RealmTagContextAlreadyExists.status;
-	readonly message = "A Realm Tag Context already exists for this Tag";
+export class RealmTagContextAlreadyExists extends HTTPError.id(
+	"RealmTagContextAlreadyExists",
+	StatusCodes.CONFLICT,
+) {
+	override readonly message = "A Realm Tag Context already exists for this Tag";
 
 	constructor(readonly details: { readonly contextPostId: string }) {
 		super();
 	}
 }
 
-export class RealmTagContextPostNotMounted extends Data.TaggedError(
+export class RealmTagContextPostNotMounted extends HTTPError.id(
 	"RealmTagContextPostNotMounted",
+	StatusCodes.UNPROCESSABLE_ENTITY,
 ) {
-	static readonly status = StatusCodes.UNPROCESSABLE_ENTITY as const;
-	readonly status = RealmTagContextPostNotMounted.status;
-	readonly message = "The Realm Tag Context must be a visible Wiki Post in the Realm";
+	override readonly message = "The Realm Tag Context must be a visible Wiki Post in the Realm";
 }
 
-export class RealmTagContextPostAlreadyUsed extends Data.TaggedError(
+export class RealmTagContextPostAlreadyUsed extends HTTPError.id(
 	"RealmTagContextPostAlreadyUsed",
+	StatusCodes.CONFLICT,
 ) {
-	static readonly status = StatusCodes.CONFLICT as const;
-	readonly status = RealmTagContextPostAlreadyUsed.status;
-	readonly message = "The Wiki Post already explains another Realm Tag";
+	override readonly message = "The Wiki Post already explains another Realm Tag";
 }
 
-export class RealmTagVotingDisabled extends Data.TaggedError("RealmTagVotingDisabled") {
-	static readonly status = StatusCodes.CONFLICT as const;
-	readonly status = RealmTagVotingDisabled.status;
-	readonly message = "Realm-scoped Tag voting is not enabled for this Realm";
+export class RealmTagVotingDisabled extends HTTPError.id(
+	"RealmTagVotingDisabled",
+	StatusCodes.CONFLICT,
+) {
+	override readonly message = "Realm-scoped Tag voting is not enabled for this Realm";
 }
 
-export class RealmTagContextRequired extends Data.TaggedError("RealmTagContextRequired") {
-	static readonly status = StatusCodes.UNPROCESSABLE_ENTITY as const;
-	readonly status = RealmTagContextRequired.status;
-	readonly message = "This Realm must explicitly explain the Tag before it can receive votes";
+export class RealmTagContextRequired extends HTTPError.id(
+	"RealmTagContextRequired",
+	StatusCodes.UNPROCESSABLE_ENTITY,
+) {
+	override readonly message =
+		"This Realm must explicitly explain the Tag before it can receive votes";
 }
 
-export class RealmTagSelfReferenceForbidden extends Data.TaggedError(
+export class RealmTagSelfReferenceForbidden extends HTTPError.id(
 	"RealmTagSelfReferenceForbidden",
+	StatusCodes.UNPROCESSABLE_ENTITY,
 ) {
-	static readonly status = StatusCodes.UNPROCESSABLE_ENTITY as const;
-	readonly status = RealmTagSelfReferenceForbidden.status;
-	readonly message = "A Tag cannot be applied to itself";
+	override readonly message = "A Tag cannot be applied to itself";
 }
 
-export class WikiNavigationNotFound extends Data.TaggedError("WikiNavigationNotFound") {
-	static readonly status = StatusCodes.NOT_FOUND as const;
-	readonly status = WikiNavigationNotFound.status;
-	readonly message = "Realm Wiki navigation not found";
+export class WikiNavigationNotFound extends HTTPError.id(
+	"WikiNavigationNotFound",
+	StatusCodes.NOT_FOUND,
+) {
+	override readonly message = "Realm Wiki navigation not found";
 }
 
-export class WikiNavigationInUse extends Data.TaggedError("WikiNavigationInUse") {
-	static readonly status = StatusCodes.CONFLICT as const;
-	readonly status = WikiNavigationInUse.status;
-	readonly message = "Realm Wiki navigation is still referenced by a Dock document";
+export class WikiNavigationInUse extends HTTPError.id("WikiNavigationInUse", StatusCodes.CONFLICT) {
+	override readonly message = "Realm Wiki navigation is still referenced by a Dock document";
 }
 
-export class WikiNavigationDocumentInvalid extends Data.TaggedError(
+export class WikiNavigationDocumentInvalid extends HTTPError.id(
 	"WikiNavigationDocumentInvalid",
+	StatusCodes.BAD_REQUEST,
 ) {
-	static readonly status = StatusCodes.BAD_REQUEST as const;
-	readonly status = WikiNavigationDocumentInvalid.status;
-	readonly message = "Realm Wiki navigation document is invalid";
+	override readonly message = "Realm Wiki navigation document is invalid";
 }
 
 export const RealmErrors = [

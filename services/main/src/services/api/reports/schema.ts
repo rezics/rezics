@@ -1,4 +1,5 @@
-import { type Static, t } from "elysia";
+import type { StaticDecode } from "typebox";
+import { t } from "elysia";
 
 import {
 	GovernanceMaxRuleReferences,
@@ -9,7 +10,7 @@ import { GovernanceRuleReference } from "../governance/schema";
 import { NullablePublicSlugAddressResponse } from "../slug-addresses/schema";
 
 export const ReportRuleReferenceInput = GovernanceRuleReference;
-export type ReportRuleReferenceInput = Static<typeof ReportRuleReferenceInput>;
+export type ReportRuleReferenceInput = StaticDecode<typeof ReportRuleReferenceInput>;
 
 export const CreateReportBody = t.Object(
 	{
@@ -23,16 +24,16 @@ export const CreateReportBody = t.Object(
 	},
 	{ additionalProperties: false },
 );
-export type CreateReportBody = Static<typeof CreateReportBody>;
+export type CreateReportBody = StaticDecode<typeof CreateReportBody>;
 
 export const ReportUnitParams = t.Object({ unitId: Uuid });
-export type ReportUnitParams = Static<typeof ReportUnitParams>;
+export type ReportUnitParams = StaticDecode<typeof ReportUnitParams>;
 
 export const ReportRealmParams = t.Object({ realmId: Uuid });
-export type ReportRealmParams = Static<typeof ReportRealmParams>;
+export type ReportRealmParams = StaticDecode<typeof ReportRealmParams>;
 
 export const ReviewCaseParams = t.Object({ caseId: Uuid });
-export type ReviewCaseParams = Static<typeof ReviewCaseParams>;
+export type ReviewCaseParams = StaticDecode<typeof ReviewCaseParams>;
 
 const CursorLimitQuery = {
 	cursor: t.Optional(t.String({ minLength: 1, maxLength: 512 })),
@@ -42,7 +43,7 @@ const CursorLimitQuery = {
 export const CreateReportQuery = t.Object(LocalizationLanguageQuery, {
 	additionalProperties: false,
 });
-export type CreateReportQuery = Static<typeof CreateReportQuery>;
+export type CreateReportQuery = StaticDecode<typeof CreateReportQuery>;
 
 export const ListMyReportsQuery = t.Object(
 	{
@@ -52,7 +53,7 @@ export const ListMyReportsQuery = t.Object(
 	},
 	{ additionalProperties: false },
 );
-export type ListMyReportsQuery = Static<typeof ListMyReportsQuery>;
+export type ListMyReportsQuery = StaticDecode<typeof ListMyReportsQuery>;
 
 export const ListRealmReportsQuery = t.Object(
 	{
@@ -63,7 +64,7 @@ export const ListRealmReportsQuery = t.Object(
 	},
 	{ additionalProperties: false },
 );
-export type ListRealmReportsQuery = Static<typeof ListRealmReportsQuery>;
+export type ListRealmReportsQuery = StaticDecode<typeof ListRealmReportsQuery>;
 
 export const ListPlatformReportCasesQuery = t.Object(
 	{
@@ -73,7 +74,7 @@ export const ListPlatformReportCasesQuery = t.Object(
 	},
 	{ additionalProperties: false },
 );
-export type ListPlatformReportCasesQuery = Static<typeof ListPlatformReportCasesQuery>;
+export type ListPlatformReportCasesQuery = StaticDecode<typeof ListPlatformReportCasesQuery>;
 
 export const ListReviewCaseReportsQuery = t.Object(
 	{
@@ -82,7 +83,7 @@ export const ListReviewCaseReportsQuery = t.Object(
 	},
 	{ additionalProperties: false },
 );
-export type ListReviewCaseReportsQuery = Static<typeof ListReviewCaseReportsQuery>;
+export type ListReviewCaseReportsQuery = StaticDecode<typeof ListReviewCaseReportsQuery>;
 
 export const ReportDestinationsQuery = t.Object(
 	{
@@ -91,7 +92,7 @@ export const ReportDestinationsQuery = t.Object(
 	},
 	{ additionalProperties: false },
 );
-export type ReportDestinationsQuery = Static<typeof ReportDestinationsQuery>;
+export type ReportDestinationsQuery = StaticDecode<typeof ReportDestinationsQuery>;
 
 export const ReportRuleResponse = t.Object(
 	{
@@ -103,7 +104,7 @@ export const ReportRuleResponse = t.Object(
 	},
 	{ additionalProperties: false },
 );
-export type ReportRuleResponse = Static<typeof ReportRuleResponse>;
+export type ReportRuleResponse = StaticDecode<typeof ReportRuleResponse>;
 
 export const ReportReferralResponse = t.Object(
 	{
@@ -115,7 +116,7 @@ export const ReportReferralResponse = t.Object(
 	},
 	{ additionalProperties: false },
 );
-export type ReportReferralResponse = Static<typeof ReportReferralResponse>;
+export type ReportReferralResponse = StaticDecode<typeof ReportReferralResponse>;
 
 export const ReportResponse = t.Object(
 	{
@@ -133,7 +134,7 @@ export const ReportResponse = t.Object(
 	},
 	{ additionalProperties: false },
 );
-export type ReportResponse = Static<typeof ReportResponse>;
+export type ReportResponse = StaticDecode<typeof ReportResponse>;
 
 export const ReportListResponse = t.Object(
 	{
@@ -151,7 +152,7 @@ export const MyReportStatusValues = [
 	"not_actioned",
 ] as const;
 export const MyReportStatus = t.UnionEnum(MyReportStatusValues, { default: undefined });
-export type MyReportStatus = Static<typeof MyReportStatus>;
+export type MyReportStatus = StaticDecode<typeof MyReportStatus>;
 
 const MyReportTargetResponse = t.Union([
 	t.Object(
@@ -173,14 +174,12 @@ const MyReportTargetResponse = t.Union([
 	t.Object({ state: t.Literal("unavailable") }, { additionalProperties: false }),
 ]);
 
-const MyReportReferralResponse = t.Composite(
-	[
-		ReportReferralResponse,
-		t.Object({
-			destinationTitle: t.Nullable(t.String()),
-			status: MyReportStatus,
-		}),
-	],
+const MyReportReferralResponse = t.Interface(
+	[ReportReferralResponse],
+	{
+		destinationTitle: t.Nullable(t.String()),
+		status: MyReportStatus,
+	},
 	{ additionalProperties: false },
 );
 
@@ -199,7 +198,7 @@ export const MyReportResponse = t.Object(
 	},
 	{ additionalProperties: false },
 );
-export type MyReportResponse = Static<typeof MyReportResponse>;
+export type MyReportResponse = StaticDecode<typeof MyReportResponse>;
 
 export const MyReportListResponse = t.Object(
 	{

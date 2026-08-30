@@ -1,4 +1,4 @@
-import { type Static, Type } from "@sinclair/typebox";
+import { type Static, Type } from "typebox";
 
 import { BlockKey, createBlockKey } from "./identity";
 import { NavigationTarget } from "./blocks";
@@ -170,9 +170,9 @@ export function applyZoneAppearancePreset(
 	};
 }
 
-export const NavigationItem = Type.Recursive(
-	(This) =>
-		Type.Union([
+export const NavigationItem = Type.Cyclic(
+	{
+		NavigationItem: Type.Union([
 			Type.Object(
 				{
 					_key: BlockKey,
@@ -185,12 +185,13 @@ export const NavigationItem = Type.Recursive(
 				{
 					_key: BlockKey,
 					labelUnitId: Uuid,
-					children: Type.Array(This, { minItems: 1 }),
+					children: Type.Array(Type.Ref("NavigationItem"), { minItems: 1 }),
 				},
 				{ additionalProperties: false },
 			),
 		]),
-	{ $id: "NavigationItem" },
+	},
+	"NavigationItem",
 );
 export type NavigationItem = Static<typeof NavigationItem>;
 

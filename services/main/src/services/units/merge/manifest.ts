@@ -26,6 +26,18 @@ import { UnitMergePolicyV1 } from "./policy";
 
 const EligibleKinds: ReadonlySet<string> = new Set(UnitMergeEligibleKindValues);
 const ProtectedRegistryUnitIds: ReadonlySet<string> = new Set(ContentLabelRegistryIds);
+const ManifestStalenessTypes: ReadonlySet<string> = new Set([
+	"UnitMergeManifestStale",
+	"UnitMergeRequestConflict",
+	"UnitNotFound",
+	"UnitMergeKindMismatch",
+	"UnitMergeKindIneligible",
+]);
+
+export function isUnitMergeManifestStaleness(error: unknown): boolean {
+	const type = error && typeof error === "object" ? Reflect.get(error, "type") : undefined;
+	return typeof type === "string" && ManifestStalenessTypes.has(type);
+}
 
 function isUnitMergeEligibleKind(value: string): value is UnitMergeEligibleKind {
 	return EligibleKinds.has(value);

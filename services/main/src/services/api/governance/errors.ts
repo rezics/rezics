@@ -1,284 +1,283 @@
 import { StatusCodes } from "http-status-codes";
-import * as Data from "effect/Data";
+import { HTTPError } from "elysia";
 
-export class GovernanceNoteNotFound extends Data.TaggedError("GovernanceNoteNotFound") {
-	static readonly status = StatusCodes.NOT_FOUND as const;
-	readonly status = GovernanceNoteNotFound.status;
-	readonly message = "Governance note not found";
+export class GovernanceNoteNotFound extends HTTPError.id(
+	"GovernanceNoteNotFound",
+	StatusCodes.NOT_FOUND,
+) {
+	override readonly message = "Governance note not found";
 }
 
-export class ContentGovernanceTargetNotFound extends Data.TaggedError(
+export class ContentGovernanceTargetNotFound extends HTTPError.id(
 	"ContentGovernanceTargetNotFound",
+	StatusCodes.NOT_FOUND,
 ) {
-	static readonly status = StatusCodes.NOT_FOUND as const;
-	readonly status = ContentGovernanceTargetNotFound.status;
-	readonly message = "Content governance target not found";
+	override readonly message = "Content governance target not found";
 }
 
-export class ContentReviewRealmMissing extends Data.TaggedError("ContentReviewRealmMissing") {
-	static readonly status = StatusCodes.BAD_REQUEST as const;
-	readonly status = ContentReviewRealmMissing.status;
-	readonly message = "Realm content review case is missing its Realm";
+export class ContentReviewRealmMissing extends HTTPError.id(
+	"ContentReviewRealmMissing",
+	StatusCodes.BAD_REQUEST,
+) {
+	override readonly message = "Realm content review case is missing its Realm";
 }
 
-export class ContentReviewCaseNotFound extends Data.TaggedError("ContentReviewCaseNotFound") {
-	static readonly status = StatusCodes.NOT_FOUND as const;
-	readonly status = ContentReviewCaseNotFound.status;
-	readonly message = "Content review case not found";
+export class ContentReviewCaseNotFound extends HTTPError.id(
+	"ContentReviewCaseNotFound",
+	StatusCodes.NOT_FOUND,
+) {
+	override readonly message = "Content review case not found";
 }
 
-export class ContentGovernanceReversedActionInvalid extends Data.TaggedError(
+export class ContentGovernanceReversedActionInvalid extends HTTPError.id(
 	"ContentGovernanceReversedActionInvalid",
+	StatusCodes.BAD_REQUEST,
 ) {
-	static readonly status = StatusCodes.BAD_REQUEST as const;
-	readonly status = ContentGovernanceReversedActionInvalid.status;
-	readonly message = "The reversed action must belong to this case";
+	override readonly message = "The reversed action must belong to this case";
 }
 
-export class ContentGovernanceActionIncompatible extends Data.TaggedError(
+export class ContentGovernanceActionIncompatible extends HTTPError.id(
 	"ContentGovernanceActionIncompatible",
+	StatusCodes.BAD_REQUEST,
 ) {
-	static readonly status = StatusCodes.BAD_REQUEST as const;
-	readonly status = ContentGovernanceActionIncompatible.status;
-	readonly message = "The content governance action is not valid for this target";
+	override readonly message = "The content governance action is not valid for this target";
 }
 
-export class ContentGovernanceTransitionInvalid extends Data.TaggedError(
+export class ContentGovernanceTransitionInvalid extends HTTPError.id(
 	"ContentGovernanceTransitionInvalid",
+	StatusCodes.CONFLICT,
 ) {
-	static readonly status = StatusCodes.CONFLICT as const;
-	readonly status = ContentGovernanceTransitionInvalid.status;
-	readonly message = "The content governance target cannot make that state transition";
+	override readonly message = "The content governance target cannot make that state transition";
 }
 
-export class ContentGovernanceActionNoEffect extends Data.TaggedError(
+export class ContentGovernanceActionNoEffect extends HTTPError.id(
 	"ContentGovernanceActionNoEffect",
+	StatusCodes.CONFLICT,
 ) {
-	static readonly status = StatusCodes.CONFLICT as const;
-	readonly status = ContentGovernanceActionNoEffect.status;
-	readonly message = "The content governance action would not change the target";
+	override readonly message = "The content governance action would not change the target";
 }
 
-export class ContentGovernanceReversalUnavailable extends Data.TaggedError(
+export class ContentGovernanceReversalUnavailable extends HTTPError.id(
 	"ContentGovernanceReversalUnavailable",
+	StatusCodes.CONFLICT,
 ) {
-	static readonly status = StatusCodes.CONFLICT as const;
-	readonly status = ContentGovernanceReversalUnavailable.status;
-	readonly message = "The content governance action cannot be reversed from its current state";
+	override readonly message =
+		"The content governance action cannot be reversed from its current state";
 }
 
-export class ContentGovernanceIdempotencyConflict extends Data.TaggedError(
+export class ContentGovernanceIdempotencyConflict extends HTTPError.id(
 	"ContentGovernanceIdempotencyConflict",
+	StatusCodes.CONFLICT,
 ) {
-	static readonly status = StatusCodes.CONFLICT as const;
-	readonly status = ContentGovernanceIdempotencyConflict.status;
-	readonly message = "The idempotency key was already used for a different request";
+	override readonly message = "The idempotency key was already used for a different request";
 }
 
-export class GovernanceNoteRoleDuplicate extends Data.TaggedError("GovernanceNoteRoleDuplicate") {
-	static readonly status = StatusCodes.BAD_REQUEST as const;
-	readonly status = GovernanceNoteRoleDuplicate.status;
-	readonly message = "A governance operation can create at most one note for each role";
+export class GovernanceNoteRoleDuplicate extends HTTPError.id(
+	"GovernanceNoteRoleDuplicate",
+	StatusCodes.BAD_REQUEST,
+) {
+	override readonly message = "A governance operation can create at most one note for each role";
 }
 
-export class GovernanceRuleSourceForbidden extends Data.TaggedError(
+export class GovernanceRuleSourceForbidden extends HTTPError.id(
 	"GovernanceRuleSourceForbidden",
+	StatusCodes.BAD_REQUEST,
 ) {
-	static readonly status = StatusCodes.BAD_REQUEST as const;
-	readonly status = GovernanceRuleSourceForbidden.status;
-	readonly message = "The selected Rule source is outside this governance authority";
+	override readonly message = "The selected Rule source is outside this governance authority";
 }
 
-export class GovernanceRuleChanged extends Data.TaggedError("GovernanceRuleChanged") {
-	static readonly status = StatusCodes.CONFLICT as const;
-	readonly status = GovernanceRuleChanged.status;
-	readonly message = "A selected rule is no longer part of the current rule revision";
+export class GovernanceRuleChanged extends HTTPError.id(
+	"GovernanceRuleChanged",
+	StatusCodes.CONFLICT,
+) {
+	override readonly message = "A selected rule is no longer part of the current rule revision";
 }
 
-export class GovernanceReversalUnavailable extends Data.TaggedError(
+export class GovernanceReversalUnavailable extends HTTPError.id(
 	"GovernanceReversalUnavailable",
+	StatusCodes.CONFLICT,
 ) {
-	static readonly status = StatusCodes.CONFLICT as const;
-	readonly status = GovernanceReversalUnavailable.status;
-	readonly message =
+	override readonly message =
 		"The governance decision has already been reversed or does not match the target";
 }
 
-export class EnforcementExpiryInvalid extends Data.TaggedError("EnforcementExpiryInvalid") {
-	static readonly status = StatusCodes.BAD_REQUEST as const;
-	readonly status = EnforcementExpiryInvalid.status;
-	readonly message = "expiresAt must be in the future";
+export class EnforcementExpiryInvalid extends HTTPError.id(
+	"EnforcementExpiryInvalid",
+	StatusCodes.BAD_REQUEST,
+) {
+	override readonly message = "expiresAt must be in the future";
 }
 
-export class EnforcementNotFound extends Data.TaggedError("EnforcementNotFound") {
-	static readonly status = StatusCodes.NOT_FOUND as const;
-	readonly status = EnforcementNotFound.status;
-	readonly message = "Enforcement not found";
+export class EnforcementNotFound extends HTTPError.id(
+	"EnforcementNotFound",
+	StatusCodes.NOT_FOUND,
+) {
+	override readonly message = "Enforcement not found";
 }
 
-export class EnforcementAlreadyRevoked extends Data.TaggedError("EnforcementAlreadyRevoked") {
-	static readonly status = StatusCodes.CONFLICT as const;
-	readonly status = EnforcementAlreadyRevoked.status;
-	readonly message = "Enforcement is already revoked";
+export class EnforcementAlreadyRevoked extends HTTPError.id(
+	"EnforcementAlreadyRevoked",
+	StatusCodes.CONFLICT,
+) {
+	override readonly message = "Enforcement is already revoked";
 }
 
-export class EnforcementChanged extends Data.TaggedError("EnforcementChanged") {
-	static readonly status = StatusCodes.CONFLICT as const;
-	readonly status = EnforcementChanged.status;
-	readonly message = "Enforcement was already changed";
+export class EnforcementChanged extends HTTPError.id("EnforcementChanged", StatusCodes.CONFLICT) {
+	override readonly message = "Enforcement was already changed";
 }
 
-export class CapabilityGrantExpiryInvalid extends Data.TaggedError("CapabilityGrantExpiryInvalid") {
-	static readonly status = StatusCodes.BAD_REQUEST as const;
-	readonly status = CapabilityGrantExpiryInvalid.status;
-	readonly message = "expiresAt must be in the future";
+export class CapabilityGrantExpiryInvalid extends HTTPError.id(
+	"CapabilityGrantExpiryInvalid",
+	StatusCodes.BAD_REQUEST,
+) {
+	override readonly message = "expiresAt must be in the future";
 }
 
-export class CapabilityGrantNotFound extends Data.TaggedError("CapabilityGrantNotFound") {
-	static readonly status = StatusCodes.NOT_FOUND as const;
-	readonly status = CapabilityGrantNotFound.status;
-	readonly message = "Active capability grant not found";
+export class CapabilityGrantNotFound extends HTTPError.id(
+	"CapabilityGrantNotFound",
+	StatusCodes.NOT_FOUND,
+) {
+	override readonly message = "Active capability grant not found";
 }
 
-export class UnitAccessExpiryInvalid extends Data.TaggedError("UnitAccessExpiryInvalid") {
-	static readonly status = StatusCodes.BAD_REQUEST as const;
-	readonly status = UnitAccessExpiryInvalid.status;
-	readonly message = "Unit access expiry must be in the future";
+export class UnitAccessExpiryInvalid extends HTTPError.id(
+	"UnitAccessExpiryInvalid",
+	StatusCodes.BAD_REQUEST,
+) {
+	override readonly message = "Unit access expiry must be in the future";
 }
 
-export class UnitAccessInvitationNotFound extends Data.TaggedError("UnitAccessInvitationNotFound") {
-	static readonly status = StatusCodes.NOT_FOUND as const;
-	readonly status = UnitAccessInvitationNotFound.status;
-	readonly message = "Unit access invitation not found";
+export class UnitAccessInvitationNotFound extends HTTPError.id(
+	"UnitAccessInvitationNotFound",
+	StatusCodes.NOT_FOUND,
+) {
+	override readonly message = "Unit access invitation not found";
 }
 
-export class UnitAccessInvitationConflict extends Data.TaggedError("UnitAccessInvitationConflict") {
-	static readonly status = StatusCodes.CONFLICT as const;
-	readonly status = UnitAccessInvitationConflict.status;
-	readonly message = "A matching active Unit access invitation already exists";
+export class UnitAccessInvitationConflict extends HTTPError.id(
+	"UnitAccessInvitationConflict",
+	StatusCodes.CONFLICT,
+) {
+	override readonly message = "A matching active Unit access invitation already exists";
 }
 
-export class UnitAccessInvitationExpired extends Data.TaggedError("UnitAccessInvitationExpired") {
-	static readonly status = StatusCodes.CONFLICT as const;
-	readonly status = UnitAccessInvitationExpired.status;
-	readonly message = "Unit access invitation has expired";
+export class UnitAccessInvitationExpired extends HTTPError.id(
+	"UnitAccessInvitationExpired",
+	StatusCodes.CONFLICT,
+) {
+	override readonly message = "Unit access invitation has expired";
 }
 
-export class UnitAccessInvitationSelfForbidden extends Data.TaggedError(
+export class UnitAccessInvitationSelfForbidden extends HTTPError.id(
 	"UnitAccessInvitationSelfForbidden",
+	StatusCodes.BAD_REQUEST,
 ) {
-	static readonly status = StatusCodes.BAD_REQUEST as const;
-	readonly status = UnitAccessInvitationSelfForbidden.status;
-	readonly message = "A Profile cannot invite itself to Unit access";
+	override readonly message = "A Profile cannot invite itself to Unit access";
 }
 
-export class UnitAccessConfigurationInvalid extends Data.TaggedError(
+export class UnitAccessConfigurationInvalid extends HTTPError.id(
 	"UnitAccessConfigurationInvalid",
+	StatusCodes.BAD_REQUEST,
 ) {
-	static readonly status = StatusCodes.BAD_REQUEST as const;
-	readonly status = UnitAccessConfigurationInvalid.status;
-	readonly message =
+	override readonly message =
 		"The selected permissions are not valid for this Unit or authorization subject";
 }
 
-export class UnitOwnerRestrictionForbidden extends Data.TaggedError(
+export class UnitOwnerRestrictionForbidden extends HTTPError.id(
 	"UnitOwnerRestrictionForbidden",
+	StatusCodes.CONFLICT,
 ) {
-	static readonly status = StatusCodes.CONFLICT as const;
-	readonly status = UnitOwnerRestrictionForbidden.status;
-	readonly message = "Owner access is governed by ownership and cannot have direct overrides";
+	override readonly message =
+		"Owner access is governed by ownership and cannot have direct overrides";
 }
 
-export class UnitOwnershipChanged extends Data.TaggedError("UnitOwnershipChanged") {
-	static readonly status = StatusCodes.CONFLICT as const;
-	readonly status = UnitOwnershipChanged.status;
-	readonly message = "Unit ownership changed before the operation completed";
+export class UnitOwnershipChanged extends HTTPError.id(
+	"UnitOwnershipChanged",
+	StatusCodes.CONFLICT,
+) {
+	override readonly message = "Unit ownership changed before the operation completed";
 }
 
-export class UnitOwnershipTargetIneligible extends Data.TaggedError(
+export class UnitOwnershipTargetIneligible extends HTTPError.id(
 	"UnitOwnershipTargetIneligible",
+	StatusCodes.CONFLICT,
 ) {
-	static readonly status = StatusCodes.CONFLICT as const;
-	readonly status = UnitOwnershipTargetIneligible.status;
-	readonly message = "The selected Profile is not eligible to receive Unit ownership";
+	override readonly message = "The selected Profile is not eligible to receive Unit ownership";
 }
 
-export class UnitOwnershipRelinquishmentForbidden extends Data.TaggedError(
+export class UnitOwnershipRelinquishmentForbidden extends HTTPError.id(
 	"UnitOwnershipRelinquishmentForbidden",
+	StatusCodes.CONFLICT,
 ) {
-	static readonly status = StatusCodes.CONFLICT as const;
-	readonly status = UnitOwnershipRelinquishmentForbidden.status;
-	readonly message = "Community ownership cannot be relinquished";
+	override readonly message = "Community ownership cannot be relinquished";
 }
 
-export class UnitOwnershipOverrideConfirmationInvalid extends Data.TaggedError(
+export class UnitOwnershipOverrideConfirmationInvalid extends HTTPError.id(
 	"UnitOwnershipOverrideConfirmationInvalid",
+	StatusCodes.BAD_REQUEST,
 ) {
-	static readonly status = StatusCodes.BAD_REQUEST as const;
-	readonly status = UnitOwnershipOverrideConfirmationInvalid.status;
-	readonly message = "The Unit ownership override confirmation does not match the target";
+	override readonly message = "The Unit ownership override confirmation does not match the target";
 }
 
-export class UnitLifecycleConfirmationInvalid extends Data.TaggedError(
+export class UnitLifecycleConfirmationInvalid extends HTTPError.id(
 	"UnitLifecycleConfirmationInvalid",
+	StatusCodes.BAD_REQUEST,
 ) {
-	static readonly status = StatusCodes.BAD_REQUEST as const;
-	readonly status = UnitLifecycleConfirmationInvalid.status;
-	readonly message = "The Unit lifecycle confirmation does not match the target";
+	override readonly message = "The Unit lifecycle confirmation does not match the target";
 }
 
-export class UnitLifecycleChanged extends Data.TaggedError("UnitLifecycleChanged") {
-	static readonly status = StatusCodes.CONFLICT as const;
-	readonly status = UnitLifecycleChanged.status;
-	readonly message = "The Unit changed before the lifecycle operation completed";
+export class UnitLifecycleChanged extends HTTPError.id(
+	"UnitLifecycleChanged",
+	StatusCodes.CONFLICT,
+) {
+	override readonly message = "The Unit changed before the lifecycle operation completed";
 }
 
-export class UnitLifecycleProtected extends Data.TaggedError("UnitLifecycleProtected") {
-	static readonly status = StatusCodes.CONFLICT as const;
-	readonly status = UnitLifecycleProtected.status;
-	readonly message = "Bootstrap and current administrator Units cannot be soft-deleted";
+export class UnitLifecycleProtected extends HTTPError.id(
+	"UnitLifecycleProtected",
+	StatusCodes.CONFLICT,
+) {
+	override readonly message = "Bootstrap and current administrator Units cannot be soft-deleted";
 }
 
-export class UnitAlreadyDeleted extends Data.TaggedError("UnitAlreadyDeleted") {
-	static readonly status = StatusCodes.CONFLICT as const;
-	readonly status = UnitAlreadyDeleted.status;
-	readonly message = "The Unit is already soft-deleted";
+export class UnitAlreadyDeleted extends HTTPError.id("UnitAlreadyDeleted", StatusCodes.CONFLICT) {
+	override readonly message = "The Unit is already soft-deleted";
 }
 
-export class UnitNotDeleted extends Data.TaggedError("UnitNotDeleted") {
-	static readonly status = StatusCodes.CONFLICT as const;
-	readonly status = UnitNotDeleted.status;
-	readonly message = "The Unit is not soft-deleted";
+export class UnitNotDeleted extends HTTPError.id("UnitNotDeleted", StatusCodes.CONFLICT) {
+	override readonly message = "The Unit is not soft-deleted";
 }
 
-export class UnitMergeNotFound extends Data.TaggedError("UnitMergeNotFound") {
-	static readonly status = StatusCodes.NOT_FOUND as const;
-	readonly status = UnitMergeNotFound.status;
-	readonly message = "Unit merge request not found";
+export class UnitMergeNotFound extends HTTPError.id("UnitMergeNotFound", StatusCodes.NOT_FOUND) {
+	override readonly message = "Unit merge request not found";
 }
 
-export class UnitMergeConfirmationInvalid extends Data.TaggedError("UnitMergeConfirmationInvalid") {
-	static readonly status = StatusCodes.BAD_REQUEST as const;
-	readonly status = UnitMergeConfirmationInvalid.status;
-	readonly message = "The Unit merge confirmations do not match the source and target";
+export class UnitMergeConfirmationInvalid extends HTTPError.id(
+	"UnitMergeConfirmationInvalid",
+	StatusCodes.BAD_REQUEST,
+) {
+	override readonly message = "The Unit merge confirmations do not match the source and target";
 }
 
-export class UnitMergeKindIneligible extends Data.TaggedError("UnitMergeKindIneligible") {
-	static readonly status = StatusCodes.UNPROCESSABLE_ENTITY as const;
-	readonly status = UnitMergeKindIneligible.status;
-	readonly message = "This Unit kind is not eligible for identity merge";
+export class UnitMergeKindIneligible extends HTTPError.id(
+	"UnitMergeKindIneligible",
+	StatusCodes.UNPROCESSABLE_ENTITY,
+) {
+	override readonly message = "This Unit kind is not eligible for identity merge";
 }
 
-export class UnitMergeKindMismatch extends Data.TaggedError("UnitMergeKindMismatch") {
-	static readonly status = StatusCodes.CONFLICT as const;
-	readonly status = UnitMergeKindMismatch.status;
-	readonly message = "Source and target Units must have the same kind";
+export class UnitMergeKindMismatch extends HTTPError.id(
+	"UnitMergeKindMismatch",
+	StatusCodes.CONFLICT,
+) {
+	override readonly message = "Source and target Units must have the same kind";
 }
 
-export class UnitMergeRequestConflict extends Data.TaggedError("UnitMergeRequestConflict") {
-	static readonly status = StatusCodes.CONFLICT as const;
-	readonly status = UnitMergeRequestConflict.status;
-	readonly message = "The source Unit already has an active or completed merge";
+export class UnitMergeRequestConflict extends HTTPError.id(
+	"UnitMergeRequestConflict",
+	StatusCodes.CONFLICT,
+) {
+	override readonly message = "The source Unit already has an active or completed merge";
 }
 
 export type UnitMergeMeasurementConflictReason =
@@ -286,15 +285,13 @@ export type UnitMergeMeasurementConflictReason =
 	| "self_context"
 	| "context_limit";
 
-export class UnitMergeMeasurementConflict extends Data.TaggedError(
+export class UnitMergeMeasurementConflict extends HTTPError.id(
 	"UnitMergeMeasurementConflict",
-)<{
+	StatusCodes.CONFLICT,
+) {
+	override readonly message = "Unit merge cannot preserve all Entity measurement evidence";
 	readonly reason: UnitMergeMeasurementConflictReason;
 	readonly contextualCount?: number;
-}> {
-	static readonly status = StatusCodes.CONFLICT as const;
-	readonly status = UnitMergeMeasurementConflict.status;
-	readonly message = "Unit merge cannot preserve all Entity measurement evidence";
 	readonly details: {
 		readonly reason: UnitMergeMeasurementConflictReason;
 		readonly contextualCount?: number;
@@ -304,59 +301,69 @@ export class UnitMergeMeasurementConflict extends Data.TaggedError(
 		readonly reason: UnitMergeMeasurementConflictReason;
 		readonly contextualCount?: number;
 	}) {
-		super(details);
+		super();
+		this.reason = details.reason;
+		if (details.contextualCount !== undefined) this.contextualCount = details.contextualCount;
 		this.details = details;
 	}
 }
 
-export class UnitMergeIdempotencyConflict extends Data.TaggedError("UnitMergeIdempotencyConflict") {
-	static readonly status = StatusCodes.CONFLICT as const;
-	readonly status = UnitMergeIdempotencyConflict.status;
-	readonly message = "The Unit merge idempotency key was used for a different command";
-}
-
-export class UnitMergeManifestStale extends Data.TaggedError("UnitMergeManifestStale") {
-	static readonly status = StatusCodes.CONFLICT as const;
-	readonly status = UnitMergeManifestStale.status;
-	readonly message = "The source, target, or Variant graph changed after this merge was proposed";
-}
-
-export class UnitMergeReviewSelfForbidden extends Data.TaggedError("UnitMergeReviewSelfForbidden") {
-	static readonly status = StatusCodes.FORBIDDEN as const;
-	readonly status = UnitMergeReviewSelfForbidden.status;
-	readonly message = "A Unit merge proposer cannot review their own request";
-}
-
-export class UnitMergeReviewDuplicate extends Data.TaggedError("UnitMergeReviewDuplicate") {
-	static readonly status = StatusCodes.CONFLICT as const;
-	readonly status = UnitMergeReviewDuplicate.status;
-	readonly message = "This Profile has already reviewed the Unit merge request";
-}
-
-export class UnitMergeReviewFingerprintMismatch extends Data.TaggedError(
-	"UnitMergeReviewFingerprintMismatch",
+export class UnitMergeIdempotencyConflict extends HTTPError.id(
+	"UnitMergeIdempotencyConflict",
+	StatusCodes.CONFLICT,
 ) {
-	static readonly status = StatusCodes.CONFLICT as const;
-	readonly status = UnitMergeReviewFingerprintMismatch.status;
-	readonly message = "The Unit merge review was submitted against an older request manifest";
+	override readonly message = "The Unit merge idempotency key was used for a different command";
 }
 
-export class UnitMergeRequestNotPending extends Data.TaggedError("UnitMergeRequestNotPending") {
-	static readonly status = StatusCodes.CONFLICT as const;
-	readonly status = UnitMergeRequestNotPending.status;
-	readonly message = "The Unit merge request is no longer pending review";
+export class UnitMergeManifestStale extends HTTPError.id(
+	"UnitMergeManifestStale",
+	StatusCodes.CONFLICT,
+) {
+	override readonly message =
+		"The source, target, or Variant graph changed after this merge was proposed";
 }
 
-export class UnitMergeRequestExpired extends Data.TaggedError("UnitMergeRequestExpired") {
-	static readonly status = StatusCodes.CONFLICT as const;
-	readonly status = UnitMergeRequestExpired.status;
-	readonly message = "The Unit merge request has expired";
+export class UnitMergeReviewSelfForbidden extends HTTPError.id(
+	"UnitMergeReviewSelfForbidden",
+	StatusCodes.FORBIDDEN,
+) {
+	override readonly message = "A Unit merge proposer cannot review their own request";
 }
 
-export class UnitMergeRetryUnavailable extends Data.TaggedError("UnitMergeRetryUnavailable") {
-	static readonly status = StatusCodes.CONFLICT as const;
-	readonly status = UnitMergeRetryUnavailable.status;
-	readonly message = "This Unit merge operation cannot be retried in its current state";
+export class UnitMergeReviewDuplicate extends HTTPError.id(
+	"UnitMergeReviewDuplicate",
+	StatusCodes.CONFLICT,
+) {
+	override readonly message = "This Profile has already reviewed the Unit merge request";
+}
+
+export class UnitMergeReviewFingerprintMismatch extends HTTPError.id(
+	"UnitMergeReviewFingerprintMismatch",
+	StatusCodes.CONFLICT,
+) {
+	override readonly message =
+		"The Unit merge review was submitted against an older request manifest";
+}
+
+export class UnitMergeRequestNotPending extends HTTPError.id(
+	"UnitMergeRequestNotPending",
+	StatusCodes.CONFLICT,
+) {
+	override readonly message = "The Unit merge request is no longer pending review";
+}
+
+export class UnitMergeRequestExpired extends HTTPError.id(
+	"UnitMergeRequestExpired",
+	StatusCodes.CONFLICT,
+) {
+	override readonly message = "The Unit merge request has expired";
+}
+
+export class UnitMergeRetryUnavailable extends HTTPError.id(
+	"UnitMergeRetryUnavailable",
+	StatusCodes.CONFLICT,
+) {
+	override readonly message = "This Unit merge operation cannot be retried in its current state";
 }
 
 export const GovernanceErrors = [

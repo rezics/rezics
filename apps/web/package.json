@@ -33,7 +33,7 @@
 		"@rezics/ui": "workspace:*",
 		"@tanstack/react-query": "^5.101.2",
 		"@tanstack/react-virtual": "^3.14.8",
-		"better-auth": "1.7.0-rc.1",
+		"better-auth": "1.7.2",
 		"emojibase": "16.0.0",
 		"emojibase-data": "16.0.2",
 		"fractional-indexing": "^4.0.0",

@@ -1,3 +1,4 @@
+import type { StaticDecode } from "typebox";
 import { StatusCodes } from "http-status-codes";
 import { and, asc, desc, eq, inArray, isNull, sql } from "drizzle-orm";
 import Elysia, { t } from "elysia";
@@ -147,7 +148,7 @@ const ReviewListCursor = t.Object(
 	},
 	{ additionalProperties: false },
 );
-type ReviewListCursor = typeof ReviewListCursor.static;
+type ReviewListCursor = StaticDecode<typeof ReviewListCursor>;
 
 function decodeReviewListCursor(value?: string) {
 	if (!value) return undefined;
@@ -224,6 +225,15 @@ export default new Elysia()
 		app
 			.get(
 				"",
+				{
+					query: ListReviewsQuery,
+					response: {
+						[StatusCodes.OK]: ReviewListResponse,
+						[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["InvalidPaginationCursor"]),
+						[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["ValidationError"]),
+					},
+					detail: { summary: "List reviews", tags: ["Reviews"] },
+				},
 				async ({ query, request }) => {
 					const identity = await resolveIdentity(request, "unit:read");
 					const viewer = await resolveRecommendationViewer(identity.profile?.unitId);
@@ -352,18 +362,29 @@ export default new Elysia()
 						}),
 					};
 				},
-				{
-					query: ListReviewsQuery,
-					response: {
-						[StatusCodes.OK]: ReviewListResponse,
-						[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["InvalidPaginationCursor"]),
-						[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["ValidationError"]),
-					},
-					detail: { summary: "List reviews", tags: ["Reviews"] },
-				},
 			)
 			.post(
 				"",
+				{
+					access: "contribute:unit:create",
+					body: CreateReviewBody,
+					response: {
+						[StatusCodes.OK]: IdResponse,
+						[StatusCodes.BAD_REQUEST]: RevisionContributionBadRequestResponse,
+						[StatusCodes.FORBIDDEN]: toApiErrorResponse([
+							"RealmCapabilityRequired",
+							"EntityAssociationRestricted",
+						]),
+						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "EntityEntryNotFound"]),
+						[StatusCodes.CONFLICT]: toApiErrorResponse([
+							"RealmRulesAcceptanceRequired",
+							"PostTargetingLocked",
+						]),
+						[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["ValidationError"]),
+						[StatusCodes.TOO_MANY_REQUESTS]: VoteBackpressureResponse,
+					},
+					detail: { summary: "Create review", tags: ["Reviews"] },
+				},
 				async ({ profile, authorization, body }) => {
 					const targetId = await resolveCanonicalUnitId(database, body.targetId);
 					await authorization.unit.ensureCanRead(targetId);
@@ -477,29 +498,18 @@ export default new Elysia()
 					);
 					return { id };
 				},
-				{
-					access: "contribute:unit:create",
-					body: CreateReviewBody,
-					response: {
-						[StatusCodes.OK]: IdResponse,
-						[StatusCodes.BAD_REQUEST]: RevisionContributionBadRequestResponse,
-						[StatusCodes.FORBIDDEN]: toApiErrorResponse([
-							"RealmCapabilityRequired",
-							"EntityAssociationRestricted",
-						]),
-						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "EntityEntryNotFound"]),
-						[StatusCodes.CONFLICT]: toApiErrorResponse([
-							"RealmRulesAcceptanceRequired",
-							"PostTargetingLocked",
-						]),
-						[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["ValidationError"]),
-						[StatusCodes.TOO_MANY_REQUESTS]: VoteBackpressureResponse,
-					},
-					detail: { summary: "Create review", tags: ["Reviews"] },
-				},
 			)
 			.get(
 				"/:reviewId",
+				{
+					params: ReviewParams,
+					query: GetReviewQuery,
+					response: {
+						[StatusCodes.OK]: ReviewDetailResponse,
+						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "ReviewNotFound"]),
+					},
+					detail: { summary: "Get review", tags: ["Reviews"] },
+				},
 				async ({ params, query, request }) => {
 					const identity = await resolveIdentity(request, "unit:read");
 					const { authorization } = identity;
@@ -662,18 +672,23 @@ export default new Elysia()
 						},
 					};
 				},
-				{
-					params: ReviewParams,
-					query: GetReviewQuery,
-					response: {
-						[StatusCodes.OK]: ReviewDetailResponse,
-						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "ReviewNotFound"]),
-					},
-					detail: { summary: "Get review", tags: ["Reviews"] },
-				},
 			)
 			.patch(
 				"/:reviewId",
+				{
+					access: "contribute:unit:update",
+					params: ReviewParams,
+					body: UpdateReviewBody,
+					response: {
+						[StatusCodes.OK]: IdResponse,
+						[StatusCodes.BAD_REQUEST]: RevisionContributionBadRequestResponse,
+						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
+						[StatusCodes.NOT_FOUND]: UnitReadFailureResponse,
+						[StatusCodes.CONFLICT]: toApiErrorResponse(["PostTagMentionVoteConflict"]),
+						[StatusCodes.TOO_MANY_REQUESTS]: VoteBackpressureResponse,
+					},
+					detail: { summary: "Update review", tags: ["Reviews"] },
+				},
 				async ({ params, profile, authorization, body }) => {
 					await authorization.unit.ensureCanUpdate(params.reviewId, [["localizations"]]);
 					await runVoteTransaction({ family: "unit_tag", authority: "global" }, async (tx) => {
@@ -722,26 +737,23 @@ export default new Elysia()
 					});
 					return { id: params.reviewId };
 				},
-				{
-					access: "contribute:unit:update",
-					params: ReviewParams,
-					body: UpdateReviewBody,
-					response: {
-						[StatusCodes.OK]: IdResponse,
-						[StatusCodes.BAD_REQUEST]: RevisionContributionBadRequestResponse,
-						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
-						[StatusCodes.NOT_FOUND]: UnitReadFailureResponse,
-						[StatusCodes.CONFLICT]: toApiErrorResponse(["PostTagMentionVoteConflict"]),
-						[StatusCodes.TOO_MANY_REQUESTS]: VoteBackpressureResponse,
-					},
-					detail: { summary: "Update review", tags: ["Reviews"] },
-				},
 			),
 	)
 	.group("/scores", (app) =>
 		app
 			.put(
 				"/:targetId",
+				{
+					access: "contribute:interaction:write",
+					params: ScoreTargetParams,
+					body: SetScoreBody,
+					response: {
+						[StatusCodes.OK]: ScoreResponse,
+						[StatusCodes.FORBIDDEN]: toApiErrorResponse(["RealmCapabilityRequired"]),
+						[StatusCodes.NOT_FOUND]: UnitReadFailureResponse,
+					},
+					detail: { summary: "Score unit", tags: ["Reviews"] },
+				},
 				async ({ params, profile, authorization, body }) => {
 					await authorization.unit.ensureCanRead(params.targetId);
 					await authorization.realm.ensureParticipation(body.realmId);
@@ -761,20 +773,22 @@ export default new Elysia()
 						visibility: storedScore.visibility,
 					};
 				},
-				{
-					access: "contribute:interaction:write",
-					params: ScoreTargetParams,
-					body: SetScoreBody,
-					response: {
-						[StatusCodes.OK]: ScoreResponse,
-						[StatusCodes.FORBIDDEN]: toApiErrorResponse(["RealmCapabilityRequired"]),
-						[StatusCodes.NOT_FOUND]: UnitReadFailureResponse,
-					},
-					detail: { summary: "Score unit", tags: ["Reviews"] },
-				},
 			)
 			.get(
 				"/:targetId/viewer",
+				{
+					access: "interaction:read",
+					params: ScoreTargetParams,
+					query: ListViewerScoresQuery,
+					response: {
+						[StatusCodes.OK]: ViewerScoreListResponse,
+						[StatusCodes.NOT_FOUND]: UnitReadFailureResponse,
+					},
+					detail: {
+						summary: "List current user's Scores for a Unit",
+						tags: ["Reviews"],
+					},
+				},
 				async ({ params, profile, authorization, query }) => {
 					await authorization.unit.ensureCanRead(params.targetId);
 					const items = await database
@@ -791,22 +805,18 @@ export default new Elysia()
 						.orderBy(desc(score.updatedAt), asc(score.realmId));
 					return { items };
 				},
-				{
-					access: "interaction:read",
-					params: ScoreTargetParams,
-					query: ListViewerScoresQuery,
-					response: {
-						[StatusCodes.OK]: ViewerScoreListResponse,
-						[StatusCodes.NOT_FOUND]: UnitReadFailureResponse,
-					},
-					detail: {
-						summary: "List current user's Scores for a Unit",
-						tags: ["Reviews"],
-					},
-				},
 			)
 			.get(
 				"/:targetId",
+				{
+					params: ScoreTargetParams,
+					query: ScoreAggregateQuery,
+					response: {
+						[StatusCodes.OK]: ScoreAggregateResponse,
+						[StatusCodes.NOT_FOUND]: UnitReadFailureResponse,
+					},
+					detail: { summary: "Get score aggregate", tags: ["Reviews"] },
+				},
 				async ({ params, query, request }) => {
 					const authorization = (await resolveIdentity(request, "unit:read")).authorization;
 					await authorization.unit.ensureCanRead(params.targetId);
@@ -836,15 +846,6 @@ export default new Elysia()
 						totalCount: toSafeInteger(stat?.totalCount ?? 0n, "score count"),
 						distribution: Object.fromEntries(distribution),
 					};
-				},
-				{
-					params: ScoreTargetParams,
-					query: ScoreAggregateQuery,
-					response: {
-						[StatusCodes.OK]: ScoreAggregateResponse,
-						[StatusCodes.NOT_FOUND]: UnitReadFailureResponse,
-					},
-					detail: { summary: "Get score aggregate", tags: ["Reviews"] },
 				},
 			),
 	);

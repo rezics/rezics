@@ -54,14 +54,6 @@ export default new Elysia({ prefix: "/unit" })
 	.use(session)
 	.get(
 		"/:unitId/association-proposals",
-		async ({ authorization, params, query }) => ({
-			items: await listAssociationProposals(authorization, {
-				unitId: params.unitId,
-				side: query.side,
-				kind: query.kind,
-				includeResolved: query.includeResolved ?? false,
-			}),
-		}),
 		{
 			access: "session-only",
 			params: UnitAssociationProposalParams,
@@ -73,9 +65,34 @@ export default new Elysia({ prefix: "/unit" })
 			},
 			detail: { summary: "List Unit association proposals", tags: ["Unit"] },
 		},
+		async ({ authorization, params, query }) => ({
+			items: await listAssociationProposals(authorization, {
+				unitId: params.unitId,
+				side: query.side,
+				kind: query.kind,
+				includeResolved: query.includeResolved ?? false,
+			}),
+		}),
 	)
 	.post(
 		"/:unitId/association-proposals/requests",
+		{
+			access: "session-only",
+			params: UnitAssociationProposalParams,
+			body: CreateAssociationRequestBody,
+			response: {
+				[StatusCodes.OK]: AssociationProposalResponse,
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
+					"AssociationProposalExpiryInvalid",
+					"AssociationProposalRoleInvalid",
+					"AssociationContextPostInvalid",
+				]),
+				[StatusCodes.FORBIDDEN]: ProposalForbiddenResponse,
+				[StatusCodes.NOT_FOUND]: ProposalNotFoundResponse,
+				[StatusCodes.CONFLICT]: ProposalConflictResponse,
+			},
+			detail: { summary: "Request Unit association", tags: ["Unit"] },
+		},
 		async ({ authorization, profile, params, body }) => {
 			const common = {
 				sourceUnitId: params.unitId,
@@ -98,10 +115,13 @@ export default new Elysia({ prefix: "/unit" })
 				...(body.contextPostId ? { contextPostId: body.contextPostId } : {}),
 			});
 		},
+	)
+	.post(
+		"/:unitId/association-proposals/invitations",
 		{
 			access: "session-only",
 			params: UnitAssociationProposalParams,
-			body: CreateAssociationRequestBody,
+			body: CreateAssociationInvitationBody,
 			response: {
 				[StatusCodes.OK]: AssociationProposalResponse,
 				[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
@@ -113,11 +133,8 @@ export default new Elysia({ prefix: "/unit" })
 				[StatusCodes.NOT_FOUND]: ProposalNotFoundResponse,
 				[StatusCodes.CONFLICT]: ProposalConflictResponse,
 			},
-			detail: { summary: "Request Unit association", tags: ["Unit"] },
+			detail: { summary: "Invite Unit to association", tags: ["Unit"] },
 		},
-	)
-	.post(
-		"/:unitId/association-proposals/invitations",
 		async ({ authorization, profile, params, body }) => {
 			const common = {
 				sourceUnitId: body.sourceUnitId,
@@ -140,33 +157,9 @@ export default new Elysia({ prefix: "/unit" })
 				...(body.contextPostId ? { contextPostId: body.contextPostId } : {}),
 			});
 		},
-		{
-			access: "session-only",
-			params: UnitAssociationProposalParams,
-			body: CreateAssociationInvitationBody,
-			response: {
-				[StatusCodes.OK]: AssociationProposalResponse,
-				[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
-					"AssociationProposalExpiryInvalid",
-					"AssociationProposalRoleInvalid",
-					"AssociationContextPostInvalid",
-				]),
-				[StatusCodes.FORBIDDEN]: ProposalForbiddenResponse,
-				[StatusCodes.NOT_FOUND]: ProposalNotFoundResponse,
-				[StatusCodes.CONFLICT]: ProposalConflictResponse,
-			},
-			detail: { summary: "Invite Unit to association", tags: ["Unit"] },
-		},
 	)
 	.post(
 		"/:unitId/association-proposals/:proposalId/accept",
-		async ({ authorization, profile, params, body }) =>
-			resolveAssociationProposal(authorization, profile.unitId, {
-				actingUnitId: params.unitId,
-				proposalId: params.proposalId,
-				action: "accept",
-				contribution: body?.revisionContext?.contribution,
-			}),
 		{
 			access: "session-only",
 			params: UnitAssociationProposalActionParams,
@@ -183,15 +176,16 @@ export default new Elysia({ prefix: "/unit" })
 			},
 			detail: { summary: "Accept Unit association proposal", tags: ["Unit"] },
 		},
-	)
-	.post(
-		"/:unitId/association-proposals/:proposalId/decline",
-		async ({ authorization, profile, params }) =>
+		async ({ authorization, profile, params, body }) =>
 			resolveAssociationProposal(authorization, profile.unitId, {
 				actingUnitId: params.unitId,
 				proposalId: params.proposalId,
-				action: "decline",
+				action: "accept",
+				contribution: body?.revisionContext?.contribution,
 			}),
+	)
+	.post(
+		"/:unitId/association-proposals/:proposalId/decline",
 		{
 			access: "session-only",
 			params: UnitAssociationProposalActionParams,
@@ -204,17 +198,15 @@ export default new Elysia({ prefix: "/unit" })
 			},
 			detail: { summary: "Decline Unit association proposal", tags: ["Unit"] },
 		},
+		async ({ authorization, profile, params }) =>
+			resolveAssociationProposal(authorization, profile.unitId, {
+				actingUnitId: params.unitId,
+				proposalId: params.proposalId,
+				action: "decline",
+			}),
 	)
 	.delete(
 		"/:unitId/association-proposals/:proposalId",
-		async ({ authorization, profile, params }) => {
-			await resolveAssociationProposal(authorization, profile.unitId, {
-				actingUnitId: params.unitId,
-				proposalId: params.proposalId,
-				action: "cancel",
-			});
-			return new Response(null, { status: StatusCodes.NO_CONTENT });
-		},
 		{
 			access: "session-only",
 			params: UnitAssociationProposalActionParams,
@@ -229,5 +221,13 @@ export default new Elysia({ prefix: "/unit" })
 				tags: ["Unit"],
 				responses: NoContentResponse,
 			},
+		},
+		async ({ authorization, profile, params }) => {
+			await resolveAssociationProposal(authorization, profile.unitId, {
+				actingUnitId: params.unitId,
+				proposalId: params.proposalId,
+				action: "cancel",
+			});
+			return new Response(null, { status: StatusCodes.NO_CONTENT });
 		},
 	);

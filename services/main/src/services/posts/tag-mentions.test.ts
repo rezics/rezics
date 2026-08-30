@@ -142,7 +142,7 @@ describe("Post Unit mention side effects", () => {
 		});
 
 		await expect(applyMentionVote(transaction)).rejects.toMatchObject({
-			_tag: "PostTagMentionVoteConflict",
+			type: "PostTagMentionVoteConflict",
 		});
 		expect(lock).toHaveBeenCalledWith("update");
 		expect(updates).toEqual([]);

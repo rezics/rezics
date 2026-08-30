@@ -7,14 +7,14 @@ import { AvatarResponse } from "./response";
 function avatarValidationApp() {
 	return new Elysia().post(
 		"/avatar",
-		({ body }) =>
-			body.type === "image"
-				? { type: "image" as const, image: { id: body.image.assetId, url: "/image" } }
-				: body,
 		{
 			body: AvatarInput,
 			response: AvatarResponse,
 		},
+		({ body }) =>
+			body.type === "image"
+				? { type: "image" as const, image: { id: body.image.assetId, url: "/image" } }
+				: body,
 	);
 }
 

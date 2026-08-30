@@ -1,4 +1,4 @@
-import { TypeCompiler } from "@sinclair/typebox/compiler";
+import { Compile } from "typebox/compile";
 import Elysia, { t } from "elysia";
 import { describe, expect, it } from "vitest";
 
@@ -17,10 +17,10 @@ import {
 
 describe("position schemas", () => {
 	it("keep fractional, ordinal, and display position contracts distinct", () => {
-		const fractional = TypeCompiler.Compile(FractionalPosition);
-		const fractionalInput = TypeCompiler.Compile(FractionalPositionInput);
-		const ordinal = TypeCompiler.Compile(OrdinalPosition);
-		const display = TypeCompiler.Compile(DisplayPosition);
+		const fractional = Compile(FractionalPosition);
+		const fractionalInput = Compile(FractionalPositionInput);
+		const ordinal = Compile(OrdinalPosition);
+		const display = Compile(DisplayPosition);
 
 		expect(fractional.Check("a0V")).toBe(true);
 		expect(fractional.Check("V")).toBe(false);
@@ -38,7 +38,7 @@ describe("position schemas", () => {
 
 describe("ContentLanguage", () => {
 	it("accepts only supported content-language groups", () => {
-		const check = TypeCompiler.Compile(ContentLanguage);
+		const check = Compile(ContentLanguage);
 
 		expect(check.Check("en")).toBe(true);
 		expect(check.Check("zh")).toBe(true);
@@ -50,7 +50,7 @@ describe("ContentLanguage", () => {
 	});
 
 	it("rejects UI locales and unsupported content languages", () => {
-		const check = TypeCompiler.Compile(ContentLanguage);
+		const check = Compile(ContentLanguage);
 
 		expect(check.Check("zh-Hant")).toBe(false);
 		expect(check.Check("zh-hant")).toBe(false);
@@ -59,9 +59,13 @@ describe("ContentLanguage", () => {
 	});
 
 	it("validates request values through Elysia", async () => {
-		const app = new Elysia().post("/", ({ body }) => body, {
-			body: t.Object({ language: ContentLanguage }),
-		});
+		const app = new Elysia().post(
+			"/",
+			{
+				body: t.Object({ language: ContentLanguage }),
+			},
+			({ body }) => body,
+		);
 
 		const valid = await app.handle(
 			new Request("http://localhost/", {
@@ -85,7 +89,7 @@ describe("ContentLanguage", () => {
 
 describe("LocalizationLanguageHints", () => {
 	it("accepts an empty or unique ordered list of supported languages", () => {
-		const check = TypeCompiler.Compile(LocalizationLanguageHints);
+		const check = Compile(LocalizationLanguageHints);
 
 		expect(check.Check(["zh", "en"])).toBe(true);
 		expect(check.Check(["en"])).toBe(true);

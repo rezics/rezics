@@ -1,4 +1,5 @@
 import { spawn, spawnSync, type ChildProcessByStdio } from "node:child_process";
+import { randomUUID } from "node:crypto";
 import type { Readable } from "node:stream";
 import { setTimeout as delay } from "node:timers/promises";
 import { fileURLToPath } from "node:url";
@@ -40,6 +41,11 @@ interface ResourceDescription {
 	source?: string;
 	exitCode?: number;
 	urls: ResourceUrl[];
+}
+
+interface PublicErrorBody {
+	error: { code: string; message: string };
+	requestId: string;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -222,6 +228,55 @@ async function requestOk(label: string, url: URL) {
 	return response;
 }
 
+async function requestStatus(label: string, url: URL, expectedStatus: number, init?: RequestInit) {
+	const response = await fetch(url, {
+		...init,
+		redirect: "manual",
+		signal: AbortSignal.timeout(requestTimeoutMs),
+	});
+	if (response.status !== expectedStatus)
+		throw new Error(`${label} returned HTTP ${response.status}; expected ${expectedStatus}`);
+	console.info(`${label}: ${response.status}`);
+	return response;
+}
+
+async function requireJson(response: Response, label: string): Promise<unknown> {
+	try {
+		return await response.json();
+	} catch (error) {
+		throw new Error(`${label} did not return valid JSON`, { cause: error });
+	}
+}
+
+function requirePublicError(value: unknown, label: string): PublicErrorBody {
+	if (!isRecord(value) || !isRecord(value.error))
+		throw new Error(`${label} did not return the public error envelope`);
+	const code = value.error.code;
+	const message = value.error.message;
+	const requestId = value.requestId;
+	if (typeof code !== "string" || typeof message !== "string" || typeof requestId !== "string")
+		throw new Error(`${label} returned an invalid public error envelope`);
+	if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(requestId))
+		throw new Error(`${label} returned an invalid request ID`);
+	return { error: { code, message }, requestId };
+}
+
+async function verifyPublicError(
+	label: string,
+	response: Response,
+	expectedCode: string,
+	expectedMessage: string,
+) {
+	const body = requirePublicError(await requireJson(response, label), label);
+	if (body.error.code !== expectedCode || body.error.message !== expectedMessage)
+		throw new Error(
+			`${label} returned ${body.error.code}/${body.error.message}; expected ${expectedCode}/${expectedMessage}`,
+		);
+	if (response.headers.get("X-Request-Id") !== body.requestId)
+		throw new Error(`${label} response and body request IDs differ`);
+	return body;
+}
+
 async function verifyFontAwesomeConfiguration(response: Response) {
 	const html = await response.text();
 	if (!html.includes('data-font-awesome="configured"'))
@@ -231,7 +286,7 @@ async function verifyFontAwesomeConfiguration(response: Response) {
 	console.info("Web Font Awesome configuration: configured");
 }
 
-async function verifySmoke(resources: ResourceDescription[]) {
+async function verifySmoke(resources: ResourceDescription[], smokeProbeToken: string) {
 	const api = findResource(resources, "main-api");
 	const worker = findResource(resources, "recommendation-worker");
 	const web = findResource(resources, "web");
@@ -244,7 +299,101 @@ async function verifySmoke(resources: ResourceDescription[]) {
 	const webOrigin = web.urls.find((url) => url.name === "http")?.url;
 	if (!apiOrigin || !webOrigin)
 		throw new Error("Aspire did not discover API and web HTTP endpoints");
+	await requestOk("API startup", new URL(apiSchedulerHealthContract.startup.path, apiOrigin));
+	await requestOk("API liveness", new URL(apiSchedulerHealthContract.liveness.path, apiOrigin));
 	await requestOk("API readiness", new URL(apiSchedulerHealthContract.readiness.path, apiOrigin));
+
+	const authHealth = await requestOk("Better Auth health", new URL("/api/auth/ok", apiOrigin));
+	const authHealthBody = await requireJson(authHealth, "Better Auth health");
+	if (!isRecord(authHealthBody) || authHealthBody.ok !== true)
+		throw new Error("Better Auth health did not return { ok: true }");
+
+	const anonymousSession = await requestOk(
+		"Better Auth anonymous session",
+		new URL("/api/auth/get-session", apiOrigin),
+	);
+	if (anonymousSession.headers.get("Cache-Control") !== "no-store")
+		throw new Error("Better Auth session response must disable caching");
+	if ((await requireJson(anonymousSession, "Better Auth anonymous session")) !== null)
+		throw new Error("Better Auth anonymous session must return null");
+
+	const anonymousGuide = await requestOk(
+		"Anonymous agent guide",
+		new URL("/.well-known/rezics-agent.json", apiOrigin),
+	);
+	const anonymousGuideBody = await requireJson(anonymousGuide, "Anonymous agent guide");
+	if (!isRecord(anonymousGuideBody) || anonymousGuideBody.version !== "1")
+		throw new Error("Anonymous agent guide returned an unexpected contract version");
+
+	await verifyPublicError(
+		"Session-only route",
+		await requestStatus("Session-only route", new URL("/api/v1/api-tokens", apiOrigin), 401),
+		"InteractiveSessionRequired",
+		"An interactive session is required",
+	);
+	await verifyPublicError(
+		"API-token route",
+		await requestStatus("API-token route", new URL("/api/v1/token", apiOrigin), 401, {
+			headers: { Authorization: "Bearer rz_api_invalid" },
+		}),
+		"AuthenticationRequired",
+		"Authentication required",
+	);
+	await verifyPublicError(
+		"Validation error",
+		await requestStatus("Validation error", new URL("/api/v1/units/book?limit=0", apiOrigin), 422),
+		"ValidationError",
+		"Request validation failed",
+	);
+	await requestStatus(
+		"Uncredentialed internal-error probe",
+		new URL("/.internal/smoke/internal-error", apiOrigin),
+		404,
+	);
+	const internalErrorResponse = await requestStatus(
+		"Masked internal error",
+		new URL("/.internal/smoke/internal-error", apiOrigin),
+		500,
+		{ headers: { Authorization: `Bearer ${smokeProbeToken}` } },
+	);
+	const internalErrorText = await internalErrorResponse.clone().text();
+	await verifyPublicError(
+		"Masked internal error",
+		internalErrorResponse,
+		"InternalError",
+		"Internal server error",
+	);
+	if (internalErrorText.includes("Intentional AppHost smoke-probe failure"))
+		throw new Error("Masked internal error leaked its cause");
+
+	const preflight = await requestStatus(
+		"Credentialed CORS preflight",
+		new URL("/api/v1/users/me/preferences", apiOrigin),
+		204,
+		{
+			method: "OPTIONS",
+			headers: {
+				Origin: webOrigin,
+				"Access-Control-Request-Method": "PUT",
+				"Access-Control-Request-Headers": "content-type, authorization",
+			},
+		},
+	);
+	const expectedCorsHeaders = {
+		"Access-Control-Allow-Origin": webOrigin,
+		"Access-Control-Allow-Credentials": "true",
+		"Access-Control-Allow-Methods": "GET, HEAD, POST, PUT, PATCH, DELETE, OPTIONS",
+		"Access-Control-Allow-Headers": "Content-Type, Authorization, Accept-Language",
+		"Access-Control-Expose-Headers": "X-Request-Id, Retry-After",
+		"Access-Control-Max-Age": "5",
+		Vary: "Origin",
+	} as const;
+	for (const [name, value] of Object.entries(expectedCorsHeaders))
+		if (preflight.headers.get(name) !== value)
+			throw new Error(
+				`Credentialed CORS preflight header ${name} was ${preflight.headers.get(name)}; expected ${value}`,
+			);
+
 	await verifyFontAwesomeConfiguration(await requestOk("Web root", new URL("/", webOrigin)));
 	await requestOk(
 		"Web proxy readiness",
@@ -300,6 +449,7 @@ async function waitForStopped() {
 async function main() {
 	const mode = process.argv[2];
 	if (mode !== "smoke") throw new Error("Usage: manage-apphost.mts smoke");
+	const smokeProbeToken = randomUUID();
 	const existing = listMatchingAppHosts();
 	if (existing.length > 0)
 		throw new Error(
@@ -328,6 +478,7 @@ async function main() {
 				FONT_AWESOME_KIT_LICENSE: "free",
 				NO_COLOR: "1",
 				REZICS_ASPIRE_MODE: mode,
+				REZICS_SMOKE_PROBE_TOKEN: smokeProbeToken,
 			},
 			stdio: ["ignore", "pipe", "pipe"],
 			windowsHide: true,
@@ -336,7 +487,7 @@ async function main() {
 	const getOutput = captureOutput(child);
 	try {
 		const resources = await waitForReady(child);
-		await verifySmoke(resources);
+		await verifySmoke(resources, smokeProbeToken);
 		await verifyRuntimeDiagnostics(getOutput);
 		console.table(summarize(resources));
 	} catch (error) {

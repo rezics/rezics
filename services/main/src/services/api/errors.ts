@@ -1,6 +1,6 @@
 import { StatusCodes } from "http-status-codes";
 import type { JsonValue } from "@rezics/portable-text";
-import * as Data from "effect/Data";
+import { HTTPError } from "elysia";
 
 import { AuthErrors } from "../auth/errors";
 import { AuthorizationErrors } from "../authorization/errors";
@@ -34,28 +34,31 @@ import { ApiQuotaPolicyErrors } from "./quota-policies/errors";
 import { UserErrors } from "./users/errors";
 import { CustomThemeErrors } from "./custom-themes/errors";
 
-export class MalformedRequestBody extends Data.TaggedError("MalformedRequestBody") {
-	static readonly status = StatusCodes.BAD_REQUEST as const;
-	readonly status = MalformedRequestBody.status;
-	readonly message = "Request body is malformed";
+export class MalformedRequestBody extends HTTPError.id(
+	"MalformedRequestBody",
+	StatusCodes.BAD_REQUEST,
+) {
+	override readonly message = "Request body is malformed";
 }
 
-export class ValidationError extends Data.TaggedError("ValidationError") {
-	static readonly status = StatusCodes.UNPROCESSABLE_ENTITY as const;
-	readonly status = ValidationError.status;
-	readonly message = "Request validation failed";
+export class ValidationError extends HTTPError.id(
+	"ValidationError",
+	StatusCodes.UNPROCESSABLE_ENTITY,
+) {
+	override readonly message = "Request validation failed";
 
 	constructor(readonly details?: JsonValue) {
 		super();
 	}
 }
 
-export class InternalError extends Data.TaggedError("InternalError") {
-	static readonly status = StatusCodes.INTERNAL_SERVER_ERROR as const;
-	readonly status = InternalError.status;
-	readonly message = "Internal server error";
+export class InternalError extends HTTPError.id(
+	"InternalError",
+	StatusCodes.INTERNAL_SERVER_ERROR,
+) {
+	override readonly message = "Internal server error";
 
-	constructor(readonly cause?: unknown) {
+	constructor(override readonly cause?: unknown) {
 		super();
 	}
 }
@@ -98,21 +101,16 @@ export const ApiErrors = [
 ] as const;
 
 export type ApiTypedError = InstanceType<(typeof ApiErrors)[number]>;
-export type ApiErrorCode = ApiTypedError["_tag"];
+export type ApiErrorCode = ApiTypedError["type"];
 
 type ApiErrorClass = (typeof ApiErrors)[number];
-export type ApiErrorRegistry = {
-	[ErrorClass in ApiErrorClass as InstanceType<ErrorClass>["_tag"]]: ErrorClass;
-};
+const getErrorType = (ErrorClass: ApiErrorClass): ApiErrorCode => ErrorClass.prototype.type;
 
-const getErrorTag = (ErrorClass: ApiErrorClass): ApiErrorCode =>
-	ErrorClass.prototype.name as ApiErrorCode;
+export const ApiErrorRegistry: ReadonlyMap<ApiErrorCode, ApiErrorClass> = new Map(
+	ApiErrors.map((ErrorClass) => [getErrorType(ErrorClass), ErrorClass] as const),
+);
 
-export const ApiErrorRegistry = Object.fromEntries(
-	ApiErrors.map((ErrorClass) => [getErrorTag(ErrorClass), ErrorClass]),
-) as ApiErrorRegistry;
-
-export const ApiErrorCodes: readonly ApiErrorCode[] = ApiErrors.map(getErrorTag);
+export const ApiErrorCodes: readonly ApiErrorCode[] = ApiErrors.map(getErrorType);
 
 const apiErrorCodes: ReadonlySet<string> = new Set(ApiErrorCodes);
 const apiErrorClasses: ReadonlySet<Function> = new Set(ApiErrors);
@@ -143,9 +141,9 @@ export type ApiErrorBody<Code extends ApiErrorCode = ApiErrorCode> = {
 export const toApiErrorBody = <E extends ApiTypedError>(
 	error: E,
 	requestId: string,
-): ApiErrorBody<E["_tag"]> => ({
+): ApiErrorBody<E["type"]> => ({
 	error: {
-		code: error._tag,
+		code: error.type,
 		message: error.message,
 		...("details" in error && error.details !== undefined ? { details: error.details } : {}),
 	},

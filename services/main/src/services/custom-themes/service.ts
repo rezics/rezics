@@ -1,3 +1,4 @@
+import type { StaticDecode } from "typebox";
 import { createHash } from "node:crypto";
 
 import type { AvatarReference } from "@rezics/avatar";
@@ -314,7 +315,7 @@ async function lockCustomThemeSubmissionAdmission(tx: DatabaseTransaction): Prom
 export async function submitCustomThemeRevision(input: {
 	readonly themeUnitId: string;
 	readonly profileId: string;
-	readonly manifest: typeof SubmittedCustomThemeManifestV0.static;
+	readonly manifest: StaticDecode<typeof SubmittedCustomThemeManifestV0>;
 	readonly sourceArchive: { readonly contentType: string; readonly contentBase64: string };
 	readonly files: readonly SubmittedCustomThemeFileInput[];
 }) {

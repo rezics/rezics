@@ -1,4 +1,5 @@
-import { type Static, t } from "elysia";
+import type { StaticDecode } from "typebox";
+import { t } from "elysia";
 import { SlugAddressMaximumDepth, SlugLabelPatternSource } from "@rezics/slug";
 
 import { RevisionContext, UnitKind, Uuid } from "../schema";
@@ -109,12 +110,14 @@ export const ReleaseSlugRedirectBody = t.Object(
 	{ additionalProperties: false },
 );
 
-export type ResolveSlugAddressBody = Static<typeof ResolveSlugAddressBody>;
-export type ScopedSlugAddressParams = Static<typeof ScopedSlugAddressParams>;
-export type ResolveScopedSlugAddressQuery = Static<typeof ResolveScopedSlugAddressQuery>;
-export type ReplacePublicUnitSlugAddressBody = Static<typeof ReplacePublicUnitSlugAddressBody>;
-export type UnitSlugAddressParams = Static<typeof UnitSlugAddressParams>;
-export type ReplaceUnitSlugAddressBody = Static<typeof ReplaceUnitSlugAddressBody>;
-export type CreateSlugNamespaceBody = Static<typeof CreateSlugNamespaceBody>;
-export type SlugRedirectAddressParams = Static<typeof SlugRedirectAddressParams>;
-export type ReleaseSlugRedirectBody = Static<typeof ReleaseSlugRedirectBody>;
+export type ResolveSlugAddressBody = StaticDecode<typeof ResolveSlugAddressBody>;
+export type ScopedSlugAddressParams = StaticDecode<typeof ScopedSlugAddressParams>;
+export type ResolveScopedSlugAddressQuery = StaticDecode<typeof ResolveScopedSlugAddressQuery>;
+export type ReplacePublicUnitSlugAddressBody = StaticDecode<
+	typeof ReplacePublicUnitSlugAddressBody
+>;
+export type UnitSlugAddressParams = StaticDecode<typeof UnitSlugAddressParams>;
+export type ReplaceUnitSlugAddressBody = StaticDecode<typeof ReplaceUnitSlugAddressBody>;
+export type CreateSlugNamespaceBody = StaticDecode<typeof CreateSlugNamespaceBody>;
+export type SlugRedirectAddressParams = StaticDecode<typeof SlugRedirectAddressParams>;
+export type ReleaseSlugRedirectBody = StaticDecode<typeof ReleaseSlugRedirectBody>;

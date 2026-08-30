@@ -1,3 +1,4 @@
+import type { StaticDecode } from "typebox";
 import { and, asc, eq, gt, or } from "drizzle-orm";
 import { t, type UnwrapSchema } from "elysia";
 import type { ContentLanguage } from "@rezics/i18n";
@@ -55,7 +56,7 @@ export function presentCollectionMembership(value: {
 	return { ...value, createdAt: value.createdAt.toISOString() };
 }
 
-function encodeCollectionItemsCursor(value: typeof CollectionItemsCursor.static) {
+function encodeCollectionItemsCursor(value: StaticDecode<typeof CollectionItemsCursor>) {
 	return Buffer.from(JSON.stringify(value)).toString("base64url");
 }
 

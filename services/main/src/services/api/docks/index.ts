@@ -1,3 +1,4 @@
+import type { StaticDecode } from "typebox";
 import { StatusCodes } from "http-status-codes";
 import {
 	DockDocument,
@@ -74,7 +75,7 @@ function ensureSupported(owner: Awaited<ReturnType<typeof getDockOwner>>, kind: 
 	if (!isDockKindSupported(owner.kind, kind)) throw new DockNotSupported();
 }
 
-function ensureDocument(value: unknown): asserts value is typeof DockDocument.static {
+function ensureDocument(value: unknown): asserts value is StaticDecode<typeof DockDocument> {
 	try {
 		assertDockDocument(value);
 		assertBlockQueryBudget(value, DockBlockHostPolicy);
@@ -93,13 +94,13 @@ function presentDock(record: typeof unitDock.$inferSelect, latestRevisionId: str
 		document: parseDocument(DockDocument, record.document),
 		createdAt: record.createdAt,
 		updatedAt: record.updatedAt,
-	} satisfies typeof DockResponse.static;
+	} satisfies StaticDecode<typeof DockResponse>;
 }
 
 async function ensureResolvedDockReferences(
 	tx: DatabaseTransaction,
 	input: {
-		readonly document: typeof DockDocument.static;
+		readonly document: StaticDecode<typeof DockDocument>;
 		readonly owner: Awaited<ReturnType<typeof getDockOwner>>;
 		readonly profileId: string;
 	},
@@ -119,10 +120,18 @@ async function ensureResolvedDockReferences(
 }
 
 export default new Elysia({ prefix: "/units/by-id" })
-	.model({ DockDocument })
 	.use(session)
 	.get(
 		"/:unitId/docks",
+		{
+			params: DockUnitParams,
+			response: {
+				[StatusCodes.OK]: DockListResponse,
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["DockNotSupported"]),
+				[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
+			},
+			detail: { summary: "List configured Unit Docks", tags: ["Docks"] },
+		},
 		async ({ params, request }) => {
 			const identity = await resolveIdentity(request, "unit:read");
 			await identity.authorization.unit.ensureCanRead(params.unitId, () => new UnitNotFound());
@@ -146,18 +155,18 @@ export default new Elysia({ prefix: "/units/by-id" })
 				return { items };
 			});
 		},
-		{
-			params: DockUnitParams,
-			response: {
-				[StatusCodes.OK]: DockListResponse,
-				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["DockNotSupported"]),
-				[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
-			},
-			detail: { summary: "List configured Unit Docks", tags: ["Docks"] },
-		},
 	)
 	.get(
 		"/:unitId/docks/:kind",
+		{
+			params: DockParams,
+			response: {
+				[StatusCodes.OK]: DockResponse,
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["DockNotSupported"]),
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "DockNotFound"]),
+			},
+			detail: { summary: "Get a Unit Dock", tags: ["Docks"] },
+		},
 		async ({ params, request }) => {
 			const identity = await resolveIdentity(request, "unit:read");
 			await identity.authorization.unit.ensureCanRead(params.unitId, () => new UnitNotFound());
@@ -179,18 +188,22 @@ export default new Elysia({ prefix: "/units/by-id" })
 			if (!latestRevisionId) throw new DockNotFound();
 			return presentDock(record, latestRevisionId);
 		},
-		{
-			params: DockParams,
-			response: {
-				[StatusCodes.OK]: DockResponse,
-				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["DockNotSupported"]),
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "DockNotFound"]),
-			},
-			detail: { summary: "Get a Unit Dock", tags: ["Docks"] },
-		},
 	)
 	.put(
 		"/:unitId/docks/:kind",
+		{
+			access: "contribute:unit:update",
+			params: DockParams,
+			body: PutDockBody,
+			response: {
+				[StatusCodes.OK]: DockResponse,
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["DockNotSupported", "DockDocumentInvalid"]),
+				[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
+				[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
+				[StatusCodes.CONFLICT]: toApiErrorResponse(["DockRevisionConflict"]),
+			},
+			detail: { summary: "Create or replace a Unit Dock", tags: ["Docks"] },
+		},
 		async ({ params, body, profile, authorization }) => {
 			await authorization.unit.ensureCanUpdate(params.unitId, [["dock", params.kind]]);
 			const owner = await getDockOwner(params.unitId);
@@ -246,22 +259,19 @@ export default new Elysia({ prefix: "/units/by-id" })
 				return presentDock(saved, revision.revisionId);
 			});
 		},
-		{
-			access: "contribute:unit:update",
-			params: DockParams,
-			body: PutDockBody,
-			response: {
-				[StatusCodes.OK]: DockResponse,
-				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["DockNotSupported", "DockDocumentInvalid"]),
-				[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
-				[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
-				[StatusCodes.CONFLICT]: toApiErrorResponse(["DockRevisionConflict"]),
-			},
-			detail: { summary: "Create or replace a Unit Dock", tags: ["Docks"] },
-		},
 	)
 	.get(
 		"/:unitId/docks/:kind/revisions",
+		{
+			params: DockParams,
+			query: DockRevisionListQuery,
+			response: {
+				[StatusCodes.OK]: DockRevisionListResponse,
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["DockNotSupported"]),
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "DockNotFound"]),
+			},
+			detail: { summary: "List Dock revisions", tags: ["Docks"] },
+		},
 		async ({ params, query, request }) => {
 			const identity = await resolveIdentity(request, "unit:read");
 			await identity.authorization.unit.ensureCanRead(params.unitId, () => new UnitNotFound());
@@ -277,19 +287,22 @@ export default new Elysia({ prefix: "/units/by-id" })
 				return { items: await listDockRevisions(tx, dock.id, query.limit ?? 50) };
 			});
 		},
-		{
-			params: DockParams,
-			query: DockRevisionListQuery,
-			response: {
-				[StatusCodes.OK]: DockRevisionListResponse,
-				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["DockNotSupported"]),
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "DockNotFound"]),
-			},
-			detail: { summary: "List Dock revisions", tags: ["Docks"] },
-		},
 	)
 	.post(
 		"/:unitId/docks/:kind/revisions/:revisionId/restore",
+		{
+			access: "contribute:unit:update",
+			params: DockRevisionParams,
+			body: DockRevisionBody,
+			response: {
+				[StatusCodes.OK]: DockMutationResponse,
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["DockNotSupported", "DockDocumentInvalid"]),
+				[StatusCodes.CONFLICT]: toApiErrorResponse(["DockRevisionConflict"]),
+				[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "DockNotFound"]),
+			},
+			detail: { summary: "Restore a Dock revision", tags: ["Docks"] },
+		},
 		async ({ params, body, profile, authorization }) => {
 			await authorization.unit.ensureCanUpdate(params.unitId, [["dock", params.kind]]);
 			const owner = await getDockOwner(params.unitId);
@@ -321,22 +334,26 @@ export default new Elysia({ prefix: "/units/by-id" })
 				return { updated: true as const, latestRevisionId: revision.revisionId };
 			});
 		},
-		{
-			access: "contribute:unit:update",
-			params: DockRevisionParams,
-			body: DockRevisionBody,
-			response: {
-				[StatusCodes.OK]: DockMutationResponse,
-				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["DockNotSupported", "DockDocumentInvalid"]),
-				[StatusCodes.CONFLICT]: toApiErrorResponse(["DockRevisionConflict"]),
-				[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "DockNotFound"]),
-			},
-			detail: { summary: "Restore a Dock revision", tags: ["Docks"] },
-		},
 	)
 	.delete(
 		"/:unitId/docks/:kind",
+		{
+			access: "contribute:unit:update",
+			params: DockParams,
+			body: DockRevisionBody,
+			response: {
+				[StatusCodes.NO_CONTENT]: t.Void(),
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["DockNotSupported"]),
+				[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "DockNotFound"]),
+				[StatusCodes.CONFLICT]: toApiErrorResponse(["DockRevisionConflict"]),
+			},
+			detail: {
+				summary: "Delete a Unit Dock",
+				tags: ["Docks"],
+				responses: NoContentResponse,
+			},
+		},
 		async ({ params, body, profile, authorization }) => {
 			await authorization.unit.ensureCanUpdate(params.unitId, [["dock", params.kind]]);
 			const owner = await getDockOwner(params.unitId);
@@ -371,22 +388,5 @@ export default new Elysia({ prefix: "/units/by-id" })
 				});
 			});
 			return new Response(null, { status: StatusCodes.NO_CONTENT });
-		},
-		{
-			access: "contribute:unit:update",
-			params: DockParams,
-			body: DockRevisionBody,
-			response: {
-				[StatusCodes.NO_CONTENT]: t.Void(),
-				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["DockNotSupported"]),
-				[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "DockNotFound"]),
-				[StatusCodes.CONFLICT]: toApiErrorResponse(["DockRevisionConflict"]),
-			},
-			detail: {
-				summary: "Delete a Unit Dock",
-				tags: ["Docks"],
-				responses: NoContentResponse,
-			},
 		},
 	);

@@ -7,8 +7,9 @@ import {
 } from "@rezics/access";
 import { StatusCodes } from "http-status-codes";
 import Elysia, { t } from "elysia";
+import type { StaticDecode } from "typebox";
 
-import session from "../../auth/session";
+import session, { type SessionIdentity } from "../../auth/session";
 import { database } from "../../database";
 import {
 	createCustomTheme,
@@ -66,10 +67,6 @@ export default new Elysia({ prefix: "/custom-themes" })
 	.use(session)
 	.get(
 		"/execution-control",
-		async ({ authorization }) => {
-			await authorization.platform.ensureCapability(CustomThemeKillCapability);
-			return getCustomThemeExecutionControl();
-		},
 		{
 			access: "session-only",
 			response: {
@@ -78,19 +75,13 @@ export default new Elysia({ prefix: "/custom-themes" })
 			},
 			detail: { summary: "Get the Custom Theme execution kill switch", tags: ["Custom Themes"] },
 		},
+		async ({ authorization }) => {
+			await authorization.platform.ensureCapability(CustomThemeKillCapability);
+			return getCustomThemeExecutionControl();
+		},
 	)
 	.put(
 		"/execution-control",
-		async ({ authorization, profile, body }) => {
-			await authorization.platform.ensureCapability(CustomThemeKillCapability);
-			return database.transaction((tx) =>
-				setCustomThemeExecutionControl(tx, {
-					enabled: body.enabled,
-					reason: body.reason,
-					actorProfileId: profile.unitId,
-				}),
-			);
-		},
 		{
 			access: "fresh-session-only",
 			body: SetCustomThemeExecutionControlBody,
@@ -103,13 +94,19 @@ export default new Elysia({ prefix: "/custom-themes" })
 			},
 			detail: { summary: "Set the Custom Theme execution kill switch", tags: ["Custom Themes"] },
 		},
+		async ({ authorization, profile, body }) => {
+			await authorization.platform.ensureCapability(CustomThemeKillCapability);
+			return database.transaction((tx) =>
+				setCustomThemeExecutionControl(tx, {
+					enabled: body.enabled,
+					reason: body.reason,
+					actorProfileId: profile.unitId,
+				}),
+			);
+		},
 	)
 	.post(
 		"/",
-		async ({ authorization, profile, body }) => {
-			await ensureExternalLiveEligibility(authorization);
-			return createCustomTheme({ ownerProfileId: profile.unitId, localization: body.localization });
-		},
 		{
 			access: "contribute:unit:create",
 			body: CreateCustomThemeBody,
@@ -120,20 +117,13 @@ export default new Elysia({ prefix: "/custom-themes" })
 			},
 			detail: { summary: "Create a Custom Theme Unit", tags: ["Custom Themes"] },
 		},
+		async ({ authorization, profile, body }) => {
+			await ensureExternalLiveEligibility(authorization);
+			return createCustomTheme({ ownerProfileId: profile.unitId, localization: body.localization });
+		},
 	)
 	.put(
 		"/:themeUnitId/localizations/:language",
-		async ({ authorization, params, body, status }) => {
-			await ensureExternalLiveEligibility(authorization);
-			await ensureCustomThemeExists(params.themeUnitId);
-			const { revisionContext, ...localization } = body;
-			await upsertLocalization(params.themeUnitId, authorization, {
-				...localization,
-				language: params.language,
-				revisionContribution: revisionContext?.contribution,
-			});
-			return status(StatusCodes.NO_CONTENT, undefined);
-		},
 		{
 			access: "contribute:unit:update",
 			params: CustomThemeLocalizationParams,
@@ -152,17 +142,20 @@ export default new Elysia({ prefix: "/custom-themes" })
 				responses: NoContentResponse,
 			},
 		},
+		async ({ authorization, params, body, status }) => {
+			await ensureExternalLiveEligibility(authorization);
+			await ensureCustomThemeExists(params.themeUnitId);
+			const { revisionContext, ...localization } = body;
+			await upsertLocalization(params.themeUnitId, authorization, {
+				...localization,
+				language: params.language,
+				revisionContribution: revisionContext?.contribution,
+			});
+			return status(StatusCodes.NO_CONTENT, undefined);
+		},
 	)
 	.get(
 		"/review-queue",
-		async ({ authorization, query }) => {
-			await ensureExternalLiveEligibility(authorization);
-			await authorization.platform.ensureCapability(CustomThemeReviewCapability);
-			return listCustomThemeReviewQueue({
-				...(query.cursor ? { cursor: query.cursor } : {}),
-				limit: query.limit ?? 25,
-			});
-		},
 		{
 			access: "session-only",
 			query: CustomThemeCursorQuery,
@@ -172,18 +165,17 @@ export default new Elysia({ prefix: "/custom-themes" })
 			},
 			detail: { summary: "List the bounded Custom Theme review queue", tags: ["Custom Themes"] },
 		},
-	)
-	.get(
-		"/:themeUnitId/revisions",
-		async ({ authorization, params, query }) => {
+		async ({ authorization, query }) => {
 			await ensureExternalLiveEligibility(authorization);
-			await authorization.unit.ensureCanRead(params.themeUnitId);
-			return listCustomThemeRevisions({
-				themeUnitId: params.themeUnitId,
+			await authorization.platform.ensureCapability(CustomThemeReviewCapability);
+			return listCustomThemeReviewQueue({
 				...(query.cursor ? { cursor: query.cursor } : {}),
 				limit: query.limit ?? 25,
 			});
 		},
+	)
+	.get(
+		"/:themeUnitId/revisions",
 		{
 			access: "unit:read",
 			params: CustomThemeParams,
@@ -195,20 +187,18 @@ export default new Elysia({ prefix: "/custom-themes" })
 			},
 			detail: { summary: "List immutable Custom Theme revisions", tags: ["Custom Themes"] },
 		},
+		async ({ authorization, params, query }) => {
+			await ensureExternalLiveEligibility(authorization);
+			await authorization.unit.ensureCanRead(params.themeUnitId);
+			return listCustomThemeRevisions({
+				themeUnitId: params.themeUnitId,
+				...(query.cursor ? { cursor: query.cursor } : {}),
+				limit: query.limit ?? 25,
+			});
+		},
 	)
 	.post(
 		"/:themeUnitId/revisions",
-		async ({ authorization, params, profile, body }) => {
-			await ensureExternalLiveEligibility(authorization);
-			await authorization.unit.ensureCanUpdate(params.themeUnitId, [["theme", "revisions"]]);
-			return submitCustomThemeRevision({
-				themeUnitId: params.themeUnitId,
-				profileId: profile.unitId,
-				manifest: body.manifest,
-				sourceArchive: body.sourceArchive,
-				files: body.files,
-			});
-		},
 		{
 			access: "contribute:unit:update",
 			params: CustomThemeParams,
@@ -227,9 +217,39 @@ export default new Elysia({ prefix: "/custom-themes" })
 			},
 			detail: { summary: "Submit an immutable Custom Theme revision", tags: ["Custom Themes"] },
 		},
+		async ({ authorization, params, profile, body }) => {
+			await ensureExternalLiveEligibility(authorization);
+			await authorization.unit.ensureCanUpdate(params.themeUnitId, [["theme", "revisions"]]);
+			return submitCustomThemeRevision({
+				themeUnitId: params.themeUnitId,
+				profileId: profile.unitId,
+				manifest: body.manifest,
+				sourceArchive: body.sourceArchive,
+				files: body.files,
+			});
+		},
 	)
 	.post(
 		"/:themeUnitId/revisions/:revisionId/decision",
+		{
+			access: "session-only",
+			params: CustomThemeRevisionParams,
+			body: DecideCustomThemeRevisionBody,
+			response: {
+				[StatusCodes.OK]: CustomThemeRevisionResponse,
+				[StatusCodes.FORBIDDEN]: toApiErrorResponse([
+					"PlatformCapabilityRequired",
+					"CustomThemeReviewerSeparationRequired",
+				]),
+				[StatusCodes.NOT_FOUND]: RevisionNotFoundResponse,
+				[StatusCodes.CONFLICT]: RevisionConflictResponse,
+				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse([
+					"CustomThemeReviewEvidenceInvalid",
+					"CustomThemeInstallationInvalid",
+				]),
+			},
+			detail: { summary: "Approve or reject a Custom Theme revision", tags: ["Custom Themes"] },
+		},
 		async ({ authorization, params, profile, body }) => {
 			await ensureExternalLiveEligibility(authorization);
 			await authorization.platform.ensureCapability(CustomThemeReviewCapability);
@@ -251,36 +271,9 @@ export default new Elysia({ prefix: "/custom-themes" })
 					: {}),
 			});
 		},
-		{
-			access: "session-only",
-			params: CustomThemeRevisionParams,
-			body: DecideCustomThemeRevisionBody,
-			response: {
-				[StatusCodes.OK]: CustomThemeRevisionResponse,
-				[StatusCodes.FORBIDDEN]: toApiErrorResponse([
-					"PlatformCapabilityRequired",
-					"CustomThemeReviewerSeparationRequired",
-				]),
-				[StatusCodes.NOT_FOUND]: RevisionNotFoundResponse,
-				[StatusCodes.CONFLICT]: RevisionConflictResponse,
-				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse([
-					"CustomThemeReviewEvidenceInvalid",
-					"CustomThemeInstallationInvalid",
-				]),
-			},
-			detail: { summary: "Approve or reject a Custom Theme revision", tags: ["Custom Themes"] },
-		},
 	)
 	.post(
 		"/:themeUnitId/revisions/:revisionId/kill",
-		async ({ authorization, params, profile, body }) => {
-			await authorization.platform.ensureCapability(CustomThemeKillCapability);
-			return killCustomThemeRevision({
-				...params,
-				profileId: profile.unitId,
-				reason: body.reason,
-			});
-		},
 		{
 			access: "session-only",
 			params: CustomThemeRevisionParams,
@@ -293,20 +286,17 @@ export default new Elysia({ prefix: "/custom-themes" })
 			},
 			detail: { summary: "Emergency-disable a Custom Theme revision", tags: ["Custom Themes"] },
 		},
+		async ({ authorization, params, profile, body }) => {
+			await authorization.platform.ensureCapability(CustomThemeKillCapability);
+			return killCustomThemeRevision({
+				...params,
+				profileId: profile.unitId,
+				reason: body.reason,
+			});
+		},
 	)
 	.get(
 		"/:themeUnitId/revisions/:revisionId/reference-render-artifacts/:screenshotAssetId",
-		async ({ authorization, params }) => {
-			await ensureExternalLiveEligibility(authorization);
-			await authorization.platform.ensureCapability(CustomThemeReviewCapability);
-			return new Response(null, {
-				status: StatusCodes.MOVED_TEMPORARILY,
-				headers: {
-					location: await getCustomThemeReferenceRenderArtifactLocation(params),
-					"cache-control": "private, no-store",
-				},
-			});
-		},
 		{
 			access: "session-only",
 			params: CustomThemeReferenceRenderArtifactParams,
@@ -320,10 +310,43 @@ export default new Elysia({ prefix: "/custom-themes" })
 				tags: ["Custom Themes"],
 			},
 		},
+		async ({ authorization, params }) => {
+			await ensureExternalLiveEligibility(authorization);
+			await authorization.platform.ensureCapability(CustomThemeReviewCapability);
+			return new Response(null, {
+				status: StatusCodes.MOVED_TEMPORARILY,
+				headers: {
+					location: await getCustomThemeReferenceRenderArtifactLocation(params),
+					"cache-control": "private, no-store",
+				},
+			});
+		},
 	)
 	.get(
 		"/:themeUnitId/revisions/:revisionId/file",
-		async ({ authorization, params, profile, query }) => {
+		{
+			access: "session-only",
+			params: CustomThemeRevisionParams,
+			query: CustomThemeFileQuery,
+			response: {
+				[StatusCodes.OK]: t.Any(),
+				[StatusCodes.FORBIDDEN]: toApiErrorResponse([
+					"PlatformCapabilityRequired",
+					"UnitPermissionForbidden",
+				]),
+				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["CustomThemeInstallationInvalid"]),
+			},
+			detail: { summary: "Read an executable packaged Custom Theme file", tags: ["Custom Themes"] },
+		},
+		async ({
+			authorization,
+			params,
+			profile,
+			query,
+		}: Pick<SessionIdentity, "authorization" | "profile"> & {
+			readonly params: StaticDecode<typeof CustomThemeRevisionParams>;
+			readonly query: StaticDecode<typeof CustomThemeFileQuery>;
+		}) => {
 			await ensureExternalLiveEligibility(authorization);
 			await authorization.unit.ensureCanRead(query.hostUnitId);
 			const file = await getExecutableCustomThemeFile({
@@ -341,19 +364,5 @@ export default new Elysia({ prefix: "/custom-themes" })
 					ETag: `"sha256-${file.sha256}"`,
 				},
 			});
-		},
-		{
-			access: "session-only",
-			params: CustomThemeRevisionParams,
-			query: CustomThemeFileQuery,
-			response: {
-				[StatusCodes.OK]: t.Any(),
-				[StatusCodes.FORBIDDEN]: toApiErrorResponse([
-					"PlatformCapabilityRequired",
-					"UnitPermissionForbidden",
-				]),
-				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["CustomThemeInstallationInvalid"]),
-			},
-			detail: { summary: "Read an executable packaged Custom Theme file", tags: ["Custom Themes"] },
 		},
 	);

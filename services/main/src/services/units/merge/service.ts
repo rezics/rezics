@@ -43,6 +43,7 @@ import { UnitNotFound } from "../errors";
 import { isEntityMeasurementMergePhase } from "./entity-measurements";
 import {
 	buildUnitMergeManifest,
+	isUnitMergeManifestStaleness,
 	requireCurrentUnitMergeManifest,
 	type UnitMergeManifestV1,
 } from "./manifest";
@@ -763,17 +764,6 @@ type ReviewTransactionResult =
 	| { readonly outcome: "expired" }
 	| { readonly outcome: "stale" };
 
-function isManifestStaleness(error: unknown): boolean {
-	const tag = error && typeof error === "object" ? Reflect.get(error, "_tag") : undefined;
-	return (
-		tag === "UnitMergeManifestStale" ||
-		tag === "UnitMergeRequestConflict" ||
-		tag === "UnitNotFound" ||
-		tag === "UnitMergeKindMismatch" ||
-		tag === "UnitMergeKindIneligible"
-	);
-}
-
 export async function reviewUnitMerge(input: {
 	readonly requestId: string;
 	readonly reviewerProfileId: string;
@@ -823,7 +813,7 @@ export async function reviewUnitMerge(input: {
 						requestFingerprint: request.requestFingerprint,
 					});
 				} catch (error) {
-					if (!isManifestStaleness(error)) throw error;
+					if (!isUnitMergeManifestStaleness(error)) throw error;
 					await tx
 						.update(unitMergeRequest)
 						.set({ state: "superseded", supersededAt: now, updatedAt: now })

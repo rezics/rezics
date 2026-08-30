@@ -48,15 +48,6 @@ export default new Elysia({ prefix: "/platform-access" })
 	.use(session)
 	.get(
 		"/custom-theme-external-live/profiles",
-		async ({ authorization, query }) => {
-			await authorization.platform.ensureCapability(CustomThemeExternalLiveAccessManageCapability);
-			return {
-				items: await searchCustomThemeExternalLiveAccessProfiles(database, {
-					query: query.query,
-					limit: query.limit ?? 50,
-				}),
-			};
-		},
 		{
 			access: "session-only",
 			query: PlatformAccessProfilesQuery,
@@ -69,13 +60,18 @@ export default new Elysia({ prefix: "/platform-access" })
 				tags: ["Platform access"],
 			},
 		},
+		async ({ authorization, query }) => {
+			await authorization.platform.ensureCapability(CustomThemeExternalLiveAccessManageCapability);
+			return {
+				items: await searchCustomThemeExternalLiveAccessProfiles(database, {
+					query: query.query,
+					limit: query.limit ?? 50,
+				}),
+			};
+		},
 	)
 	.get(
 		"/profiles/:profileId/custom-theme-external-live-access",
-		async ({ authorization, params }) => {
-			await authorization.platform.ensureCapability(CustomThemeExternalLiveAccessManageCapability);
-			return getCustomThemeExternalLiveAccessProfile(database, params.profileId);
-		},
 		{
 			access: "session-only",
 			params: PlatformAccessProfileParams,
@@ -89,21 +85,13 @@ export default new Elysia({ prefix: "/platform-access" })
 				tags: ["Platform access"],
 			},
 		},
+		async ({ authorization, params }) => {
+			await authorization.platform.ensureCapability(CustomThemeExternalLiveAccessManageCapability);
+			return getCustomThemeExternalLiveAccessProfile(database, params.profileId);
+		},
 	)
 	.put(
 		"/profiles/:profileId/custom-theme-external-live-access",
-		async ({ authorization, body, params, profile }) => {
-			await authorization.platform.ensureCapability(CustomThemeExternalLiveAccessManageCapability);
-			return database.transaction((tx) =>
-				setCustomThemeExternalLiveAccess(tx, {
-					actorProfileId: profile.unitId,
-					targetProfileId: params.profileId,
-					expectedRevision: body.expectedRevision,
-					state: body.state,
-					...(body.state === "granted" ? { expiresAt: body.expiresAt } : {}),
-				}),
-			);
-		},
 		{
 			access: "fresh-session-only",
 			params: PlatformAccessProfileParams,
@@ -120,13 +108,21 @@ export default new Elysia({ prefix: "/platform-access" })
 				tags: ["Platform access"],
 			},
 		},
+		async ({ authorization, body, params, profile }) => {
+			await authorization.platform.ensureCapability(CustomThemeExternalLiveAccessManageCapability);
+			return database.transaction((tx) =>
+				setCustomThemeExternalLiveAccess(tx, {
+					actorProfileId: profile.unitId,
+					targetProfileId: params.profileId,
+					expectedRevision: body.expectedRevision,
+					state: body.state,
+					...(body.state === "granted" ? { expiresAt: body.expiresAt } : {}),
+				}),
+			);
+		},
 	)
 	.get(
 		"/policy",
-		async ({ authorization }) => {
-			await authorization.platform.ensureCapability("platform.access.read");
-			return { capabilities: [...PlatformCapabilityValues] };
-		},
 		{
 			access: "session-only",
 			response: {
@@ -135,17 +131,13 @@ export default new Elysia({ prefix: "/platform-access" })
 			},
 			detail: { summary: "Get the platform access policy", tags: ["Platform access"] },
 		},
+		async ({ authorization }) => {
+			await authorization.platform.ensureCapability("platform.access.read");
+			return { capabilities: [...PlatformCapabilityValues] };
+		},
 	)
 	.get(
 		"/profiles",
-		async ({ authorization, query }) => {
-			await authorization.platform.ensureCapability("platform.access.read");
-			return {
-				items: query.query
-					? await searchPlatformAccessProfiles(database, query.query, query.limit ?? 50)
-					: (await listPlatformAccessProfiles(database)).slice(0, query.limit ?? 50),
-			};
-		},
 		{
 			access: "session-only",
 			query: PlatformAccessProfilesQuery,
@@ -158,13 +150,17 @@ export default new Elysia({ prefix: "/platform-access" })
 				tags: ["Platform access"],
 			},
 		},
+		async ({ authorization, query }) => {
+			await authorization.platform.ensureCapability("platform.access.read");
+			return {
+				items: query.query
+					? await searchPlatformAccessProfiles(database, query.query, query.limit ?? 50)
+					: (await listPlatformAccessProfiles(database)).slice(0, query.limit ?? 50),
+			};
+		},
 	)
 	.get(
 		"/profiles/:profileId",
-		async ({ authorization, params }) => {
-			await authorization.platform.ensureCapability("platform.access.read");
-			return getPlatformAccessProfile(database, params.profileId);
-		},
 		{
 			access: "session-only",
 			params: PlatformAccessProfileParams,
@@ -175,23 +171,13 @@ export default new Elysia({ prefix: "/platform-access" })
 			},
 			detail: { summary: "Get one Profile's platform access", tags: ["Platform access"] },
 		},
+		async ({ authorization, params }) => {
+			await authorization.platform.ensureCapability("platform.access.read");
+			return getPlatformAccessProfile(database, params.profileId);
+		},
 	)
 	.put(
 		"/profiles/:profileId",
-		async ({ authorization, body, params, profile }) => {
-			await authorization.platform.ensureCapability("platform.access.manage");
-			return database.transaction((tx) =>
-				replacePlatformAccess(tx, {
-					actorProfileId: profile.unitId,
-					targetProfileId: params.profileId,
-					expectedRevision: body.expectedRevision,
-					grants: body.grants.map((grant) => ({
-						...grant,
-						expiresAt: grant.expiresAt,
-					})),
-				}),
-			);
-		},
 		{
 			access: "fresh-session-only",
 			params: PlatformAccessProfileParams,
@@ -210,5 +196,19 @@ export default new Elysia({ prefix: "/platform-access" })
 				]),
 			},
 			detail: { summary: "Replace one Profile's platform access", tags: ["Platform access"] },
+		},
+		async ({ authorization, body, params, profile }) => {
+			await authorization.platform.ensureCapability("platform.access.manage");
+			return database.transaction((tx) =>
+				replacePlatformAccess(tx, {
+					actorProfileId: profile.unitId,
+					targetProfileId: params.profileId,
+					expectedRevision: body.expectedRevision,
+					grants: body.grants.map((grant) => ({
+						...grant,
+						expiresAt: grant.expiresAt,
+					})),
+				}),
+			);
 		},
 	);

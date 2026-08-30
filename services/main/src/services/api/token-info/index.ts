@@ -25,6 +25,22 @@ const TokenInformationResponse = t.Object({
 
 export default new Elysia({ prefix: "/token" }).use(session).get(
 	"",
+	{
+		access: "api-key-only",
+		response: {
+			[StatusCodes.OK]: TokenInformationResponse,
+			[StatusCodes.UNAUTHORIZED]: toApiErrorResponse(["AuthenticationRequired"]),
+			[StatusCodes.TOO_MANY_REQUESTS]: toApiErrorResponse([
+				"ApiQuotaExceeded",
+				"ApiTokenRateLimitExceeded",
+			]),
+		},
+		detail: {
+			operationId: "getCurrentApiToken",
+			summary: "Inspect the current API token's safe capabilities",
+			tags: ["API Tokens"],
+		},
+	},
 	async ({ credential }) => {
 		if (credential.kind !== "apiKey")
 			throw new Error("API token introspection requires an API-key credential");
@@ -90,21 +106,5 @@ export default new Elysia({ prefix: "/token" }).use(session).get(
 					: null,
 			},
 		};
-	},
-	{
-		access: "api-key-only",
-		response: {
-			[StatusCodes.OK]: TokenInformationResponse,
-			[StatusCodes.UNAUTHORIZED]: toApiErrorResponse(["AuthenticationRequired"]),
-			[StatusCodes.TOO_MANY_REQUESTS]: toApiErrorResponse([
-				"ApiQuotaExceeded",
-				"ApiTokenRateLimitExceeded",
-			]),
-		},
-		detail: {
-			operationId: "getCurrentApiToken",
-			summary: "Inspect the current API token's safe capabilities",
-			tags: ["API Tokens"],
-		},
 	},
 );

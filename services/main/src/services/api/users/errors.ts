@@ -1,16 +1,12 @@
 import { StatusCodes } from "http-status-codes";
-import * as Data from "effect/Data";
+import { HTTPError } from "elysia";
 
-export class ProfileNotFound extends Data.TaggedError("ProfileNotFound") {
-	static readonly status = StatusCodes.NOT_FOUND as const;
-	readonly status = ProfileNotFound.status;
-	readonly message = "Profile not found";
+export class ProfileNotFound extends HTTPError.id("ProfileNotFound", StatusCodes.NOT_FOUND) {
+	override readonly message = "Profile not found";
 }
 
-export class ProfileChanged extends Data.TaggedError("ProfileChanged") {
-	static readonly status = StatusCodes.CONFLICT as const;
-	readonly status = ProfileChanged.status;
-	readonly message = "Profile has changed";
+export class ProfileChanged extends HTTPError.id("ProfileChanged", StatusCodes.CONFLICT) {
+	override readonly message = "Profile has changed";
 	readonly details: { readonly updatedAt: string };
 
 	constructor(updatedAt: Date) {
@@ -19,66 +15,61 @@ export class ProfileChanged extends Data.TaggedError("ProfileChanged") {
 	}
 }
 
-export class PreferencesNotFound extends Data.TaggedError("PreferencesNotFound") {
-	static readonly status = StatusCodes.NOT_FOUND as const;
-	readonly status = PreferencesNotFound.status;
-	readonly message = "Preferences not found";
+export class PreferencesNotFound extends HTTPError.id(
+	"PreferencesNotFound",
+	StatusCodes.NOT_FOUND,
+) {
+	override readonly message = "Preferences not found";
 }
 
-export class UserNotFound extends Data.TaggedError("UserNotFound") {
-	static readonly status = StatusCodes.NOT_FOUND as const;
-	readonly status = UserNotFound.status;
-	readonly message = "User not found";
+export class UserNotFound extends HTTPError.id("UserNotFound", StatusCodes.NOT_FOUND) {
+	override readonly message = "User not found";
 }
 
-export class UserSelfBlockForbidden extends Data.TaggedError("UserSelfBlockForbidden") {
-	static readonly status = StatusCodes.CONFLICT as const;
-	readonly status = UserSelfBlockForbidden.status;
-	readonly message = "You cannot block yourself";
+export class UserSelfBlockForbidden extends HTTPError.id(
+	"UserSelfBlockForbidden",
+	StatusCodes.CONFLICT,
+) {
+	override readonly message = "You cannot block yourself";
 }
 
-export class UserAccountStateRevisionConflict extends Data.TaggedError(
+export class UserAccountStateRevisionConflict extends HTTPError.id(
 	"UserAccountStateRevisionConflict",
+	StatusCodes.CONFLICT,
 ) {
-	static readonly status = StatusCodes.CONFLICT as const;
-	readonly status = UserAccountStateRevisionConflict.status;
-	readonly message = "Account state changed after it was loaded";
+	override readonly message = "Account state changed after it was loaded";
 }
 
-export class UserSelfStatusChangeForbidden extends Data.TaggedError(
+export class UserSelfStatusChangeForbidden extends HTTPError.id(
 	"UserSelfStatusChangeForbidden",
+	StatusCodes.CONFLICT,
 ) {
-	static readonly status = StatusCodes.CONFLICT as const;
-	readonly status = UserSelfStatusChangeForbidden.status;
-	readonly message = "You cannot suspend or close your own account";
+	override readonly message = "You cannot suspend or close your own account";
 }
 
-export class PlatformUserManagerRequired extends Data.TaggedError("PlatformUserManagerRequired") {
-	static readonly status = StatusCodes.CONFLICT as const;
-	readonly status = PlatformUserManagerRequired.status;
-	readonly message = "At least one active platform user manager is required";
+export class PlatformUserManagerRequired extends HTTPError.id(
+	"PlatformUserManagerRequired",
+	StatusCodes.CONFLICT,
+) {
+	override readonly message = "At least one active platform user manager is required";
 }
 
-export class UserAccountStateExpiryInvalid extends Data.TaggedError(
+export class UserAccountStateExpiryInvalid extends HTTPError.id(
 	"UserAccountStateExpiryInvalid",
+	StatusCodes.UNPROCESSABLE_ENTITY,
 ) {
-	static readonly status = StatusCodes.UNPROCESSABLE_ENTITY as const;
-	readonly status = UserAccountStateExpiryInvalid.status;
-	readonly message = "Suspension expiry must be in the future";
+	override readonly message = "Suspension expiry must be in the future";
 }
 
-export class SessionNotFound extends Data.TaggedError("SessionNotFound") {
-	static readonly status = StatusCodes.NOT_FOUND as const;
-	readonly status = SessionNotFound.status;
-	readonly message = "Session not found";
+export class SessionNotFound extends HTTPError.id("SessionNotFound", StatusCodes.NOT_FOUND) {
+	override readonly message = "Session not found";
 }
 
-export class StudioRealmSubjectLimitExceeded extends Data.TaggedError(
+export class StudioRealmSubjectLimitExceeded extends HTTPError.id(
 	"StudioRealmSubjectLimitExceeded",
+	StatusCodes.UNPROCESSABLE_ENTITY,
 ) {
-	static readonly status = StatusCodes.UNPROCESSABLE_ENTITY as const;
-	readonly status = StudioRealmSubjectLimitExceeded.status;
-	readonly message = "Studio workspace Realm subject limit exceeded";
+	override readonly message = "Studio workspace Realm subject limit exceeded";
 	readonly details: { readonly maximum: number };
 
 	constructor(maximum: number) {

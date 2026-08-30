@@ -1,10 +1,11 @@
 import { StatusCodes } from "http-status-codes";
-import * as Data from "effect/Data";
+import { HTTPError } from "elysia";
 
-export class InvalidPaginationCursor extends Data.TaggedError("InvalidPaginationCursor") {
-	static readonly status = StatusCodes.BAD_REQUEST as const;
-	readonly status = InvalidPaginationCursor.status;
-	readonly message = "Invalid pagination cursor";
+export class InvalidPaginationCursor extends HTTPError.id(
+	"InvalidPaginationCursor",
+	StatusCodes.BAD_REQUEST,
+) {
+	override readonly message = "Invalid pagination cursor";
 }
 
 export const PaginationErrors = [InvalidPaginationCursor] as const;

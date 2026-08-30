@@ -114,7 +114,4 @@ export const ApiTokenListResponse = t.Object({
 	items: t.Array(ApiTokenSummary),
 });
 
-export const CreatedApiTokenResponse = t.Composite([
-	ApiTokenSummary,
-	t.Object({ token: t.String() }),
-]);
+export const CreatedApiTokenResponse = t.Interface([ApiTokenSummary], { token: t.String() });

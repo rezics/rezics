@@ -34,20 +34,20 @@ describe("Main-Variant rules", () => {
 			toUnitVariantConstraintError({
 				cause: { constraint: "unit_variant_target_is_variant" },
 			}),
-		).toMatchObject({ _tag: "UnitVariantTargetIsVariant", status: 409 });
+		).toMatchObject({ type: "UnitVariantTargetIsVariant", status: 409 });
 		expect(
 			toUnitVariantConstraintError({ constraint: "unit_variant_main_kind_fkey" }),
-		).toMatchObject({ _tag: "UnitVariantKindMismatch", status: 409 });
+		).toMatchObject({ type: "UnitVariantKindMismatch", status: 409 });
 		expect(
 			toUnitVariantConstraintError({
 				constraint: "unit_variant_entity_kind_mismatch",
 			}),
-		).toMatchObject({ _tag: "UnitVariantKindMismatch", status: 409 });
+		).toMatchObject({ type: "UnitVariantKindMismatch", status: 409 });
 		expect(
 			toUnitVariantConstraintError({ constraint: "entity_variant_kind_change" }),
-		).toMatchObject({ _tag: "UnitVariantKindMismatch", status: 409 });
+		).toMatchObject({ type: "UnitVariantKindMismatch", status: 409 });
 		expect(toUnitVariantConstraintError({ constraint: "entity_variant_delete" })).toMatchObject({
-			_tag: "UnitVariantKindMismatch",
+			type: "UnitVariantKindMismatch",
 			status: 409,
 		});
 		expect(toUnitVariantConstraintError(new Error("unrelated"))).toBeUndefined();

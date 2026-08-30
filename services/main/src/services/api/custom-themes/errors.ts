@@ -1,35 +1,38 @@
 import { StatusCodes } from "http-status-codes";
 import type { JsonValue } from "@rezics/portable-text";
-import * as Data from "effect/Data";
+import { HTTPError } from "elysia";
 
-export class CustomThemeNotFound extends Data.TaggedError("CustomThemeNotFound") {
-	static readonly status = StatusCodes.NOT_FOUND as const;
-	readonly status = CustomThemeNotFound.status;
-	readonly message = "Custom Theme not found";
+export class CustomThemeNotFound extends HTTPError.id(
+	"CustomThemeNotFound",
+	StatusCodes.NOT_FOUND,
+) {
+	override readonly message = "Custom Theme not found";
 }
 
-export class CustomThemeRevisionNotFound extends Data.TaggedError("CustomThemeRevisionNotFound") {
-	static readonly status = StatusCodes.NOT_FOUND as const;
-	readonly status = CustomThemeRevisionNotFound.status;
-	readonly message = "Custom Theme revision not found";
+export class CustomThemeRevisionNotFound extends HTTPError.id(
+	"CustomThemeRevisionNotFound",
+	StatusCodes.NOT_FOUND,
+) {
+	override readonly message = "Custom Theme revision not found";
 }
 
-export class CustomThemePackageInvalid extends Data.TaggedError("CustomThemePackageInvalid") {
-	static readonly status = StatusCodes.UNPROCESSABLE_ENTITY as const;
-	readonly status = CustomThemePackageInvalid.status;
-	readonly message = "Custom Theme package is invalid";
+export class CustomThemePackageInvalid extends HTTPError.id(
+	"CustomThemePackageInvalid",
+	StatusCodes.UNPROCESSABLE_ENTITY,
+) {
+	override readonly message = "Custom Theme package is invalid";
 
 	constructor(readonly details: JsonValue) {
 		super();
 	}
 }
 
-export class CustomThemeSubmissionBackpressure extends Data.TaggedError(
+export class CustomThemeSubmissionBackpressure extends HTTPError.id(
 	"CustomThemeSubmissionBackpressure",
+	StatusCodes.SERVICE_UNAVAILABLE,
 ) {
-	static readonly status = StatusCodes.SERVICE_UNAVAILABLE as const;
-	readonly status = CustomThemeSubmissionBackpressure.status;
-	readonly message = "Custom Theme submissions are temporarily paused while review catches up";
+	override readonly message =
+		"Custom Theme submissions are temporarily paused while review catches up";
 	readonly retryAfterSeconds = 60;
 
 	constructor(readonly details: JsonValue) {
@@ -37,64 +40,57 @@ export class CustomThemeSubmissionBackpressure extends Data.TaggedError(
 	}
 }
 
-export class CustomThemeExternalResourceInvalid extends Data.TaggedError(
+export class CustomThemeExternalResourceInvalid extends HTTPError.id(
 	"CustomThemeExternalResourceInvalid",
+	StatusCodes.UNPROCESSABLE_ENTITY,
 ) {
-	static readonly status = StatusCodes.UNPROCESSABLE_ENTITY as const;
-	readonly status = CustomThemeExternalResourceInvalid.status;
-	readonly message = "A Custom Theme external resource could not be reviewed safely";
+	override readonly message = "A Custom Theme external resource could not be reviewed safely";
 
 	constructor(readonly details?: JsonValue) {
 		super();
 	}
 }
 
-export class CustomThemeReviewEvidenceInvalid extends Data.TaggedError(
+export class CustomThemeReviewEvidenceInvalid extends HTTPError.id(
 	"CustomThemeReviewEvidenceInvalid",
+	StatusCodes.UNPROCESSABLE_ENTITY,
 ) {
-	static readonly status = StatusCodes.UNPROCESSABLE_ENTITY as const;
-	readonly status = CustomThemeReviewEvidenceInvalid.status;
-	readonly message = "Custom Theme review evidence is incomplete";
+	override readonly message = "Custom Theme review evidence is incomplete";
 }
 
-export class CustomThemeRevisionStateConflict extends Data.TaggedError(
+export class CustomThemeRevisionStateConflict extends HTTPError.id(
 	"CustomThemeRevisionStateConflict",
+	StatusCodes.CONFLICT,
 ) {
-	static readonly status = StatusCodes.CONFLICT as const;
-	readonly status = CustomThemeRevisionStateConflict.status;
-	readonly message = "Custom Theme revision is not in the required review state";
+	override readonly message = "Custom Theme revision is not in the required review state";
 }
 
-export class CustomThemeReviewerSeparationRequired extends Data.TaggedError(
+export class CustomThemeReviewerSeparationRequired extends HTTPError.id(
 	"CustomThemeReviewerSeparationRequired",
+	StatusCodes.FORBIDDEN,
 ) {
-	static readonly status = StatusCodes.FORBIDDEN as const;
-	readonly status = CustomThemeReviewerSeparationRequired.status;
-	readonly message = "The revision submitter cannot decide its review";
+	override readonly message = "The revision submitter cannot decide its review";
 }
 
-export class CustomThemeInstallationInvalid extends Data.TaggedError(
+export class CustomThemeInstallationInvalid extends HTTPError.id(
 	"CustomThemeInstallationInvalid",
+	StatusCodes.UNPROCESSABLE_ENTITY,
 ) {
-	static readonly status = StatusCodes.UNPROCESSABLE_ENTITY as const;
-	readonly status = CustomThemeInstallationInvalid.status;
-	readonly message = "Custom Theme revision is not approved for this host";
+	override readonly message = "Custom Theme revision is not approved for this host";
 }
 
-export class UnitPresentationHostUnsupported extends Data.TaggedError(
+export class UnitPresentationHostUnsupported extends HTTPError.id(
 	"UnitPresentationHostUnsupported",
+	StatusCodes.UNPROCESSABLE_ENTITY,
 ) {
-	static readonly status = StatusCodes.UNPROCESSABLE_ENTITY as const;
-	readonly status = UnitPresentationHostUnsupported.status;
-	readonly message = "This Unit kind does not support the presentation contract";
+	override readonly message = "This Unit kind does not support the presentation contract";
 }
 
-export class UnitPresentationRevisionConflict extends Data.TaggedError(
+export class UnitPresentationRevisionConflict extends HTTPError.id(
 	"UnitPresentationRevisionConflict",
+	StatusCodes.CONFLICT,
 ) {
-	static readonly status = StatusCodes.CONFLICT as const;
-	readonly status = UnitPresentationRevisionConflict.status;
-	readonly message = "Unit presentation changed after it was loaded";
+	override readonly message = "Unit presentation changed after it was loaded";
 }
 
 export const CustomThemeErrors = [

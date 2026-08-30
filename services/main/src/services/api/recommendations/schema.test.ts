@@ -1,4 +1,4 @@
-import { Check } from "@sinclair/typebox/value";
+import { Check } from "typebox/value";
 import { describe, expect, it } from "vitest";
 
 import { RecommendationTrackingSchema, RelatedPostQuery, UnitRecommendationQuery } from "./schema";

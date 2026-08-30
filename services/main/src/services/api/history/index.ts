@@ -1,7 +1,8 @@
+import type { StaticDecode } from "typebox";
 import { StatusCodes } from "http-status-codes";
 import { and, desc, eq, exists, lt, or, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
-import Elysia, { t, type Static } from "elysia";
+import Elysia, { t } from "elysia";
 
 import { recordAuditEvent } from "../../audit";
 import session, { resolveIdentity } from "../../auth/session";
@@ -235,14 +236,6 @@ export default new Elysia({ prefix: "/history" })
 	.use(session)
 	.get(
 		"/contribution-resources/me",
-		async ({ authorization, profile, query }) => {
-			if (query.section === "zone")
-				await authorization.platform.ensureCapability(DevelopmentPreviewCapability);
-			return listCurrentProfileContributionResources({
-				profileId: profile.unitId,
-				query,
-			});
-		},
 		{
 			access: "profile:read",
 			query: ContributionResourceListQuery,
@@ -257,9 +250,27 @@ export default new Elysia({ prefix: "/history" })
 				tags: ["History"],
 			},
 		},
+		async ({ authorization, profile, query }) => {
+			if (query.section === "zone")
+				await authorization.platform.ensureCapability(DevelopmentPreviewCapability);
+			return listCurrentProfileContributionResources({
+				profileId: profile.unitId,
+				query,
+			});
+		},
 	)
 	.get(
 		"/units/:unitId/revisions",
+		{
+			params: UnitHistoryParams,
+			query: UnitHistoryQuery,
+			response: {
+				[StatusCodes.OK]: UnitScopedHistoryResponse,
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["InvalidHistoryCursor"]),
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
+			},
+			detail: { summary: "List Unit revisions", tags: ["History"] },
+		},
 		async ({ params, query, request }) => {
 			const { authorization } = await resolveIdentity(request, "unit:read");
 			await authorization.unit.ensureCanRead(params.unitId);
@@ -288,19 +299,17 @@ export default new Elysia({ prefix: "/history" })
 					rows.length > limit && last ? encodeCursor(scope, last.createdAt, last.id) : null,
 			};
 		},
-		{
-			params: UnitHistoryParams,
-			query: UnitHistoryQuery,
-			response: {
-				[StatusCodes.OK]: UnitScopedHistoryResponse,
-				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["InvalidHistoryCursor"]),
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
-			},
-			detail: { summary: "List Unit revisions", tags: ["History"] },
-		},
 	)
 	.get(
 		"/unit-revisions/:revisionId",
+		{
+			params: UnitRevisionParams,
+			response: {
+				[StatusCodes.OK]: UnitRevisionResponse,
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "UnitRevisionNotFound"]),
+			},
+			detail: { summary: "Get Unit revision", tags: ["History"] },
+		},
 		async ({ params, request }) => {
 			const { authorization } = await resolveIdentity(request, "unit:read");
 			const row = await findSummary(params.revisionId);
@@ -315,7 +324,7 @@ export default new Elysia({ prefix: "/history" })
 				return {
 					...presentSummary(row, access),
 					slots: [],
-				} satisfies Static<typeof UnitRevisionResponse>;
+				} satisfies StaticDecode<typeof UnitRevisionResponse>;
 			const { slots, documents } = await database.transaction(async (tx) => ({
 				slots: await tx
 					.select({
@@ -350,19 +359,20 @@ export default new Elysia({ prefix: "/history" })
 								content,
 							};
 				}),
-			} satisfies Static<typeof UnitRevisionResponse>;
-		},
-		{
-			params: UnitRevisionParams,
-			response: {
-				[StatusCodes.OK]: UnitRevisionResponse,
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "UnitRevisionNotFound"]),
-			},
-			detail: { summary: "Get Unit revision", tags: ["History"] },
+			} satisfies StaticDecode<typeof UnitRevisionResponse>;
 		},
 	)
 	.get(
 		"/units/:unitId/compare",
+		{
+			params: UnitHistoryParams,
+			query: UnitRevisionCompareQuery,
+			response: {
+				[StatusCodes.OK]: UnitRevisionCompareResponse,
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "UnitRevisionNotFound"]),
+			},
+			detail: { summary: "Compare Unit revisions", tags: ["History"] },
+		},
 		async ({ params, query, request }) => {
 			const { authorization } = await resolveIdentity(request, "unit:read");
 			await authorization.unit.ensureCanRead(params.unitId);
@@ -388,39 +398,9 @@ export default new Elysia({ prefix: "/history" })
 				),
 			};
 		},
-		{
-			params: UnitHistoryParams,
-			query: UnitRevisionCompareQuery,
-			response: {
-				[StatusCodes.OK]: UnitRevisionCompareResponse,
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "UnitRevisionNotFound"]),
-			},
-			detail: { summary: "Compare Unit revisions", tags: ["History"] },
-		},
 	)
 	.post(
 		"/units/:unitId/revisions/:revisionId/restore",
-		async ({ params, body, profile, authorization }) => {
-			await authorization.unit.ensure(params.unitId, "unit.history.restore");
-			const source = await findSummary(params.revisionId);
-			if (source.unitId !== params.unitId) throw new UnitRevisionNotFound();
-			const access = await getVisibilityAccess(authorization);
-			if (!canViewRevisionField(revisionVisibilityFromStorage(source), "content", access))
-				throw new UnitRevisionNotFound();
-			const result = await runVoteTransaction({ family: "unit_tag", authority: "global" }, (tx) =>
-				restoreUnitRevision(tx, {
-					unitId: params.unitId,
-					sourceRevisionId: params.revisionId,
-					baseRevisionId: body.baseRevisionId,
-					actorProfileId: profile.unitId,
-					contribution: body.revisionContext?.contribution,
-					message: body.editSummary,
-					minor: body.minor,
-					authorization,
-				}),
-			);
-			return { unitId: params.unitId, ...result };
-		},
 		{
 			access: "write:unit:update",
 			params: UnitRevisionActionParams,
@@ -448,25 +428,17 @@ export default new Elysia({ prefix: "/history" })
 			},
 			detail: { summary: "Restore Unit revision", tags: ["History"] },
 		},
-	)
-	.post(
-		"/units/:unitId/revisions/:revisionId/undo",
 		async ({ params, body, profile, authorization }) => {
 			await authorization.unit.ensure(params.unitId, "unit.history.restore");
-			const target = await findSummary(params.revisionId);
-			if (target.unitId !== params.unitId) throw new UnitRevisionNotFound();
+			const source = await findSummary(params.revisionId);
+			if (source.unitId !== params.unitId) throw new UnitRevisionNotFound();
 			const access = await getVisibilityAccess(authorization);
-			if (!canViewRevisionField(revisionVisibilityFromStorage(target), "content", access))
+			if (!canViewRevisionField(revisionVisibilityFromStorage(source), "content", access))
 				throw new UnitRevisionNotFound();
-			if (target.parentRevisionId) {
-				const parent = await findSummary(target.parentRevisionId);
-				if (!canViewRevisionField(revisionVisibilityFromStorage(parent), "content", access))
-					throw new UnitRevisionNotFound();
-			}
 			const result = await runVoteTransaction({ family: "unit_tag", authority: "global" }, (tx) =>
-				undoUnitRevision(tx, {
+				restoreUnitRevision(tx, {
 					unitId: params.unitId,
-					targetRevisionId: params.revisionId,
+					sourceRevisionId: params.revisionId,
 					baseRevisionId: body.baseRevisionId,
 					actorProfileId: profile.unitId,
 					contribution: body.revisionContext?.contribution,
@@ -477,6 +449,9 @@ export default new Elysia({ prefix: "/history" })
 			);
 			return { unitId: params.unitId, ...result };
 		},
+	)
+	.post(
+		"/units/:unitId/revisions/:revisionId/undo",
 		{
 			access: "write:unit:update",
 			params: UnitRevisionActionParams,
@@ -504,9 +479,51 @@ export default new Elysia({ prefix: "/history" })
 			},
 			detail: { summary: "Undo Unit revision", tags: ["History"] },
 		},
+		async ({ params, body, profile, authorization }) => {
+			await authorization.unit.ensure(params.unitId, "unit.history.restore");
+			const target = await findSummary(params.revisionId);
+			if (target.unitId !== params.unitId) throw new UnitRevisionNotFound();
+			const access = await getVisibilityAccess(authorization);
+			if (!canViewRevisionField(revisionVisibilityFromStorage(target), "content", access))
+				throw new UnitRevisionNotFound();
+			if (target.parentRevisionId) {
+				const parent = await findSummary(target.parentRevisionId);
+				if (!canViewRevisionField(revisionVisibilityFromStorage(parent), "content", access))
+					throw new UnitRevisionNotFound();
+			}
+			const result = await runVoteTransaction({ family: "unit_tag", authority: "global" }, (tx) =>
+				undoUnitRevision(tx, {
+					unitId: params.unitId,
+					targetRevisionId: params.revisionId,
+					baseRevisionId: body.baseRevisionId,
+					actorProfileId: profile.unitId,
+					contribution: body.revisionContext?.contribution,
+					message: body.editSummary,
+					minor: body.minor,
+					authorization,
+				}),
+			);
+			return { unitId: params.unitId, ...result };
+		},
 	)
 	.patch(
 		"/unit-revisions/:revisionId/visibility",
+		{
+			access: "unit:read",
+			params: UnitRevisionParams,
+			body: RevisionVisibilityBody,
+			response: {
+				[StatusCodes.NO_CONTENT]: t.Void(),
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["GovernanceRuleSourceForbidden"]),
+				[StatusCodes.CONFLICT]: toApiErrorResponse([
+					"CurrentRevisionContentVisibilityForbidden",
+					"GovernanceRuleChanged",
+				]),
+				[StatusCodes.FORBIDDEN]: toApiErrorResponse(["PlatformCapabilityRequired"]),
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitRevisionNotFound"]),
+			},
+			detail: { summary: "Update revision visibility", tags: ["History"] },
+		},
 		async ({ params, body, profile, authorization }) => {
 			const initial = await findSummary(params.revisionId);
 			const requestedVisibility = createRevisionVisibility(
@@ -556,25 +573,17 @@ export default new Elysia({ prefix: "/history" })
 			});
 			return new Response(null, { status: StatusCodes.NO_CONTENT });
 		},
-		{
-			access: "unit:read",
-			params: UnitRevisionParams,
-			body: RevisionVisibilityBody,
-			response: {
-				[StatusCodes.NO_CONTENT]: t.Void(),
-				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["GovernanceRuleSourceForbidden"]),
-				[StatusCodes.CONFLICT]: toApiErrorResponse([
-					"CurrentRevisionContentVisibilityForbidden",
-					"GovernanceRuleChanged",
-				]),
-				[StatusCodes.FORBIDDEN]: toApiErrorResponse(["PlatformCapabilityRequired"]),
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitRevisionNotFound"]),
-			},
-			detail: { summary: "Update revision visibility", tags: ["History"] },
-		},
 	)
 	.get(
 		"/recent-changes",
+		{
+			query: RevisionFeedQuery,
+			response: {
+				[StatusCodes.OK]: UnitHistoryResponse,
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["InvalidHistoryCursor"]),
+			},
+			detail: { summary: "List recent changes", tags: ["History"] },
+		},
 		async ({ query, request }) => {
 			const { profile, authorization } = await resolveIdentity(request, "unit:read");
 			const access = await getVisibilityAccess(authorization);
@@ -601,17 +610,18 @@ export default new Elysia({ prefix: "/history" })
 					rows.length > limit && last ? encodeCursor(scope, last.createdAt, last.id) : null,
 			};
 		},
+	)
+	.get(
+		"/contributions/:profileId",
 		{
+			params: RevisionContributionParams,
 			query: RevisionFeedQuery,
 			response: {
 				[StatusCodes.OK]: UnitHistoryResponse,
 				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["InvalidHistoryCursor"]),
 			},
-			detail: { summary: "List recent changes", tags: ["History"] },
+			detail: { summary: "List profile contributions", tags: ["History"] },
 		},
-	)
-	.get(
-		"/contributions/:profileId",
 		async ({ params, query, request }) => {
 			const { profile, authorization } = await resolveIdentity(request, "unit:read");
 			const access = await getVisibilityAccess(authorization);
@@ -644,17 +654,12 @@ export default new Elysia({ prefix: "/history" })
 					rows.length > limit && last ? encodeCursor(scope, last.createdAt, last.id) : null,
 			};
 		},
-		{
-			params: RevisionContributionParams,
-			query: RevisionFeedQuery,
-			response: {
-				[StatusCodes.OK]: UnitHistoryResponse,
-				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["InvalidHistoryCursor"]),
-			},
-			detail: { summary: "List profile contributions", tags: ["History"] },
-		},
 	)
-	.get("/change-tags", () => ({ items: UnitRevisionChangeTags.map((tag) => ({ tag })) }), {
-		response: { [StatusCodes.OK]: ChangeTagListResponse },
-		detail: { summary: "List revision change tags", tags: ["History"] },
-	});
+	.get(
+		"/change-tags",
+		{
+			response: { [StatusCodes.OK]: ChangeTagListResponse },
+			detail: { summary: "List revision change tags", tags: ["History"] },
+		},
+		() => ({ items: UnitRevisionChangeTags.map((tag) => ({ tag })) }),
+	);

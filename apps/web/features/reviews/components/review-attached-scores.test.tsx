@@ -68,7 +68,7 @@ describe("ReviewAttachedScores", () => {
 							scoreId: "019f9872-bd49-7bb4-a6b7-ec621fca2066",
 							realmId,
 							realmTitle: null,
-							value: "6",
+							value: 6,
 						},
 					]}
 				/>

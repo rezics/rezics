@@ -1,4 +1,5 @@
-import { type Static, t } from "elysia";
+import type { StaticDecode } from "typebox";
+import { t } from "elysia";
 
 import {
 	ImageAssetPresentationRoleValues,
@@ -7,7 +8,7 @@ import {
 import { Uuid } from "../schema";
 
 export const ImageAssetAccess = t.Union([t.Literal("private"), t.Literal("public")]);
-export type ImageAssetAccess = Static<typeof ImageAssetAccess>;
+export type ImageAssetAccess = StaticDecode<typeof ImageAssetAccess>;
 
 export const CreateImageAssetBody = t.Object(
 	{
@@ -17,19 +18,19 @@ export const CreateImageAssetBody = t.Object(
 	},
 	{ additionalProperties: false },
 );
-export type CreateImageAssetBody = Static<typeof CreateImageAssetBody>;
+export type CreateImageAssetBody = StaticDecode<typeof CreateImageAssetBody>;
 
 export const ImageAssetParams = t.Object({ id: Uuid });
-export type ImageAssetParams = Static<typeof ImageAssetParams>;
+export type ImageAssetParams = StaticDecode<typeof ImageAssetParams>;
 
 export const ImageAssetPresentationRole = t.UnionEnum(ImageAssetPresentationRoleValues);
-export type ImageAssetPresentationRole = Static<typeof ImageAssetPresentationRole>;
+export type ImageAssetPresentationRole = StaticDecode<typeof ImageAssetPresentationRole>;
 
 export const ImageAssetPresentationParams = t.Object({
 	id: Uuid,
 	role: ImageAssetPresentationRole,
 });
-export type ImageAssetPresentationParams = Static<typeof ImageAssetPresentationParams>;
+export type ImageAssetPresentationParams = StaticDecode<typeof ImageAssetPresentationParams>;
 
 export const ImageAssetCrop = t.Object(
 	{
@@ -40,19 +41,21 @@ export const ImageAssetCrop = t.Object(
 	},
 	{ additionalProperties: false },
 );
-export type ImageAssetCrop = Static<typeof ImageAssetCrop>;
+export type ImageAssetCrop = StaticDecode<typeof ImageAssetCrop>;
 
 export const UpsertImageAssetPresentationBody = t.Union([
 	t.Object({ fit: t.Literal("contain") }, { additionalProperties: false }),
 	t.Object({ fit: t.Literal("crop"), crop: ImageAssetCrop }, { additionalProperties: false }),
 ]);
-export type UpsertImageAssetPresentationBody = Static<typeof UpsertImageAssetPresentationBody>;
+export type UpsertImageAssetPresentationBody = StaticDecode<
+	typeof UpsertImageAssetPresentationBody
+>;
 
 export const CompleteImageAssetBody = t.Object(
 	{ role: ImageAssetPresentationRole },
 	{ additionalProperties: false },
 );
-export type CompleteImageAssetBody = Static<typeof CompleteImageAssetBody>;
+export type CompleteImageAssetBody = StaticDecode<typeof CompleteImageAssetBody>;
 
 export const ImageAssetPresentationResponse = t.Object({
 	role: ImageAssetPresentationRole,

@@ -1,4 +1,4 @@
-import { Value } from "@sinclair/typebox/value";
+import { Value } from "typebox/value";
 import { createPortableTextDocument } from "@rezics/block";
 import { describe, expect, it } from "vitest";
 

@@ -1,3 +1,4 @@
+import type { StaticDecode } from "typebox";
 import {
 	Block,
 	BlockClassName,
@@ -298,7 +299,7 @@ describe("Block document contracts", () => {
 			_type: "block-document",
 			_key: "000000000060",
 			blocks: [{ _type: "post-full-view", _key: "000000000061", postId }],
-		} satisfies typeof UnitReferencedBlockDocument.static;
+		} satisfies StaticDecode<typeof UnitReferencedBlockDocument>;
 
 		expect(() =>
 			assertUnitReferencedBlockDocument(document, ZonePageBlockHostPolicy),
@@ -313,7 +314,7 @@ describe("Block document contracts", () => {
 			content: [],
 		});
 		expect(issues.some((issue) => issue.path === "/_type")).toBe(true);
-		expect(issues.map((issue) => issue.message).join(" ")).toMatch(/block-document/i);
+		expect(issues.find((issue) => issue.path === "/_type")?.message).toMatch(/constant/i);
 		expect(JSON.stringify(issues)).not.toContain("portable-text paragraphs");
 	});
 
@@ -334,7 +335,7 @@ describe("Block document contracts", () => {
 					appearance: "card",
 				},
 			],
-		} satisfies typeof UnitReferencedBlockDocument.static;
+		} satisfies StaticDecode<typeof UnitReferencedBlockDocument>;
 		const nestedInlineCopy = {
 			_type: "block-document",
 			_key: "000000000044",
@@ -529,7 +530,7 @@ describe("Block document contracts", () => {
 					},
 				},
 			],
-		} satisfies typeof NavigationDocument.static;
+		} satisfies StaticDecode<typeof NavigationDocument>;
 		const document = {
 			_type: "block-document",
 			_key: "000000000022",
@@ -816,7 +817,7 @@ describe("Block document contracts", () => {
 					target: { kind: "unit", unitId: targetUnitId },
 				},
 			],
-		} satisfies typeof NavigationDocument.static;
+		} satisfies StaticDecode<typeof NavigationDocument>;
 		const wrongKindResolver = {
 			resolve: async (kind: string, identifiers: readonly string[]) =>
 				new Set(kind === "unit" ? identifiers : []),

@@ -1,4 +1,5 @@
-import Elysia, { t, type Static } from "elysia";
+import type { StaticDecode } from "typebox";
+import Elysia, { t } from "elysia";
 
 const AgentGuideResponse = t.Object(
 	{
@@ -32,7 +33,7 @@ const AgentGuideResponse = t.Object(
 	{ additionalProperties: false },
 );
 
-const agentGuide: Static<typeof AgentGuideResponse> = {
+const agentGuide: StaticDecode<typeof AgentGuideResponse> = {
 	version: "1",
 	contribution: {
 		requestField: "revisionContext.contribution",
@@ -64,10 +65,6 @@ const agentGuide: Static<typeof AgentGuideResponse> = {
 
 export default new Elysia().get(
 	"/.well-known/rezics-agent.json",
-	({ set }) => {
-		set.headers["Cache-Control"] = "public, max-age=300";
-		return agentGuide;
-	},
 	{
 		response: { 200: AgentGuideResponse },
 		detail: {
@@ -75,5 +72,9 @@ export default new Elysia().get(
 			summary: "Get the versioned REZICS contribution guide for agents",
 			tags: ["Agents"],
 		},
+	},
+	({ set }) => {
+		set.headers["Cache-Control"] = "public, max-age=300";
+		return agentGuide;
 	},
 );

@@ -1,4 +1,5 @@
-import { type Static, t } from "elysia";
+import type { StaticDecode } from "typebox";
+import { t } from "elysia";
 import {
 	DateTime,
 	LifecycleInput,
@@ -23,21 +24,21 @@ export const ListCollectionsQuery = t.Object(
 	},
 	{ additionalProperties: false },
 );
-export type ListCollectionsQuery = Static<typeof ListCollectionsQuery>;
+export type ListCollectionsQuery = StaticDecode<typeof ListCollectionsQuery>;
 
 export const CreateCollectionBody = t.Object({
 	localization: UnitLocalizationInput,
 	visibility: LifecycleInput.visibility,
 	revisionContext: t.Optional(RevisionContext),
 });
-export type CreateCollectionBody = Static<typeof CreateCollectionBody>;
+export type CreateCollectionBody = StaticDecode<typeof CreateCollectionBody>;
 
 export const CollectionParams = t.Object({ collectionId: Uuid });
-export type CollectionParams = Static<typeof CollectionParams>;
+export type CollectionParams = StaticDecode<typeof CollectionParams>;
 export const CollectionDetailQuery = t.Object(LocalizationLanguageQuery, {
 	additionalProperties: false,
 });
-export type CollectionDetailQuery = Static<typeof CollectionDetailQuery>;
+export type CollectionDetailQuery = StaticDecode<typeof CollectionDetailQuery>;
 
 export const CollectionItemsQuery = t.Object(
 	{
@@ -47,7 +48,7 @@ export const CollectionItemsQuery = t.Object(
 	},
 	{ additionalProperties: false },
 );
-export type CollectionItemsQuery = Static<typeof CollectionItemsQuery>;
+export type CollectionItemsQuery = StaticDecode<typeof CollectionItemsQuery>;
 
 export const UpdateCollectionBody = t.Object(
 	{
@@ -59,16 +60,16 @@ export const UpdateCollectionBody = t.Object(
 	},
 	{ additionalProperties: false },
 );
-export type UpdateCollectionBody = Static<typeof UpdateCollectionBody>;
+export type UpdateCollectionBody = StaticDecode<typeof UpdateCollectionBody>;
 
 export const CollectionItemParams = t.Object({ collectionId: Uuid, targetId: Uuid });
-export type CollectionItemParams = Static<typeof CollectionItemParams>;
+export type CollectionItemParams = StaticDecode<typeof CollectionItemParams>;
 
 export const SaveCollectionItemBody = t.Object(
 	{ baseItemsRevisionId: Uuid },
 	{ additionalProperties: false },
 );
-export type SaveCollectionItemBody = Static<typeof SaveCollectionItemBody>;
+export type SaveCollectionItemBody = StaticDecode<typeof SaveCollectionItemBody>;
 
 export const AddCollectionItemsBatchBody = t.Object(
 	{
@@ -85,7 +86,7 @@ export const AddCollectionItemsBatchBody = t.Object(
 	},
 	{ additionalProperties: false },
 );
-export type AddCollectionItemsBatchBody = Static<typeof AddCollectionItemsBatchBody>;
+export type AddCollectionItemsBatchBody = StaticDecode<typeof AddCollectionItemsBatchBody>;
 
 export const CollectionItemPlacement = t.Union([
 	t.Object({ kind: t.UnionEnum(["start", "end"]) }, { additionalProperties: false }),
@@ -97,7 +98,7 @@ export const CollectionItemPlacement = t.Union([
 		{ additionalProperties: false },
 	),
 ]);
-export type CollectionItemPlacement = Static<typeof CollectionItemPlacement>;
+export type CollectionItemPlacement = StaticDecode<typeof CollectionItemPlacement>;
 
 export const MoveCollectionItemsBody = t.Object(
 	{
@@ -107,7 +108,7 @@ export const MoveCollectionItemsBody = t.Object(
 	},
 	{ additionalProperties: false },
 );
-export type MoveCollectionItemsBody = Static<typeof MoveCollectionItemsBody>;
+export type MoveCollectionItemsBody = StaticDecode<typeof MoveCollectionItemsBody>;
 
 const CollectionBatchOperationId = t.String({ minLength: 1, maxLength: 100 });
 const CollectionBatchPlacement = t.Union([
@@ -167,7 +168,7 @@ export const UpdateCollectionItemsBatchBody = t.Object(
 	},
 	{ additionalProperties: false },
 );
-export type UpdateCollectionItemsBatchBody = Static<typeof UpdateCollectionItemsBatchBody>;
+export type UpdateCollectionItemsBatchBody = StaticDecode<typeof UpdateCollectionItemsBatchBody>;
 
 export const UpdateCollectionItemsBatchResponse = t.Object(
 	{
@@ -191,13 +192,13 @@ export const CollectionRevisionBody = t.Object(
 	{ baseRevisionId: Uuid },
 	{ additionalProperties: false },
 );
-export type CollectionRevisionBody = Static<typeof CollectionRevisionBody>;
+export type CollectionRevisionBody = StaticDecode<typeof CollectionRevisionBody>;
 
 export const CollectionItemsRevisionBody = t.Object(
 	{ baseItemsRevisionId: Uuid },
 	{ additionalProperties: false },
 );
-export type CollectionItemsRevisionBody = Static<typeof CollectionItemsRevisionBody>;
+export type CollectionItemsRevisionBody = StaticDecode<typeof CollectionItemsRevisionBody>;
 
 export const CollectionStructureRevisionListQuery = t.Object(
 	{ limit: t.Optional(t.Integer({ minimum: 1, maximum: 100, default: 50 })) },
@@ -263,4 +264,4 @@ export const AddCollectionItemsBatchResponse = t.Object({
 });
 
 export const FavoriteItemParams = t.Object({ targetId: Uuid });
-export type FavoriteItemParams = Static<typeof FavoriteItemParams>;
+export type FavoriteItemParams = StaticDecode<typeof FavoriteItemParams>;

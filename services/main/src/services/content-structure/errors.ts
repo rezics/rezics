@@ -1,16 +1,18 @@
 import { StatusCodes } from "http-status-codes";
-import * as Data from "effect/Data";
+import { HTTPError } from "elysia";
 
-export class ContentStructureNotFound extends Data.TaggedError("ContentStructureNotFound") {
-	static readonly status = StatusCodes.NOT_FOUND as const;
-	readonly status = ContentStructureNotFound.status;
-	readonly message = "Content Structure not found";
+export class ContentStructureNotFound extends HTTPError.id(
+	"ContentStructureNotFound",
+	StatusCodes.NOT_FOUND,
+) {
+	override readonly message = "Content Structure not found";
 }
 
-export class ContentStructureInvalid extends Data.TaggedError("ContentStructureInvalid") {
-	static readonly status = StatusCodes.UNPROCESSABLE_ENTITY as const;
-	readonly status = ContentStructureInvalid.status;
-	readonly message: string;
+export class ContentStructureInvalid extends HTTPError.id(
+	"ContentStructureInvalid",
+	StatusCodes.UNPROCESSABLE_ENTITY,
+) {
+	override readonly message: string;
 
 	constructor(message = "Content Structure violates its kind schema") {
 		super();
@@ -18,12 +20,11 @@ export class ContentStructureInvalid extends Data.TaggedError("ContentStructureI
 	}
 }
 
-export class ContentStructureRevisionConflict extends Data.TaggedError(
+export class ContentStructureRevisionConflict extends HTTPError.id(
 	"ContentStructureRevisionConflict",
+	StatusCodes.CONFLICT,
 ) {
-	static readonly status = StatusCodes.CONFLICT as const;
-	readonly status = ContentStructureRevisionConflict.status;
-	readonly message = "Content Structure revision has changed";
+	override readonly message = "Content Structure revision has changed";
 	readonly details: { readonly latestRevisionId: string | null };
 
 	constructor(latestRevisionId: string | null) {

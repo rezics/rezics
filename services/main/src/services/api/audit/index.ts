@@ -13,6 +13,16 @@ import { AuditEventListResponse, AuditEventsQuery } from "./schema";
 
 export default new Elysia({ prefix: "/audit" }).use(session).get(
 	"/events",
+	{
+		access: "session-only",
+		query: AuditEventsQuery,
+		response: {
+			[StatusCodes.OK]: AuditEventListResponse,
+			[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["InvalidPaginationCursor"]),
+			[StatusCodes.FORBIDDEN]: toApiErrorResponse(["PlatformCapabilityRequired"]),
+		},
+		detail: { summary: "List global security audit events", tags: ["Audit"] },
+	},
 	async ({ authorization, query }) => {
 		await authorization.platform.ensureCapability("platform.audit.read");
 		const predicates: SQL[] = [];
@@ -107,15 +117,5 @@ export default new Elysia({ prefix: "/audit" }).use(session).get(
 						})
 					: null,
 		};
-	},
-	{
-		access: "session-only",
-		query: AuditEventsQuery,
-		response: {
-			[StatusCodes.OK]: AuditEventListResponse,
-			[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["InvalidPaginationCursor"]),
-			[StatusCodes.FORBIDDEN]: toApiErrorResponse(["PlatformCapabilityRequired"]),
-		},
-		detail: { summary: "List global security audit events", tags: ["Audit"] },
 	},
 );

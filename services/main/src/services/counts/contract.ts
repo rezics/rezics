@@ -1,5 +1,5 @@
-import { type Static, Type } from "@sinclair/typebox";
-import { Check } from "@sinclair/typebox/value";
+import { type StaticDecode, Type } from "typebox";
+import { Check } from "typebox/value";
 
 const CountValue = Type.Integer({ minimum: 0 });
 
@@ -28,14 +28,14 @@ export const CountResultSchema = Type.Union(
 	[ExactCountSchema, EstimateCountSchema, LowerBoundCountSchema],
 	{ $id: "CountResult" },
 );
-export type CountResult = Static<typeof CountResultSchema>;
-export type EstimateCount = Static<typeof EstimateCountSchema>;
+export type CountResult = StaticDecode<typeof CountResultSchema>;
+export type EstimateCount = StaticDecode<typeof EstimateCountSchema>;
 
 /** Search/facet counts can be exact only after exhaustion; they are never estimates. */
 export const SearchCountResultSchema = Type.Union([ExactCountSchema, LowerBoundCountSchema], {
 	$id: "SearchCountResult",
 });
-export type SearchCountResult = Static<typeof SearchCountResultSchema>;
+export type SearchCountResult = StaticDecode<typeof SearchCountResultSchema>;
 
 export function exactCount(value: number): CountResult {
 	assertCountValue(value);

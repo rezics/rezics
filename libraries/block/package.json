@@ -11,7 +11,7 @@
 	"dependencies": {
 		"@rezics/filter": "workspace:*",
 		"@rezics/portable-text": "workspace:*",
-		"@sinclair/typebox": "^0.34.41"
+		"typebox": "1.3.20"
 	},
 	"devDependencies": {
 		"typescript": "7",

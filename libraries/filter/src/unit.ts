@@ -3,8 +3,8 @@ import {
 	ContentLanguageChannelValues,
 	MaximumContentLanguageTagLength,
 } from "@rezics/content-language";
-import { type Static, type TSchema, Type } from "@sinclair/typebox";
-import { Check } from "@sinclair/typebox/value";
+import { type Static, type TSchema, Type } from "typebox";
+import { Check } from "typebox/value";
 
 function stringEnum<const Values extends readonly [string, ...string[]]>(values: Values) {
 	return Type.Enum(
@@ -312,16 +312,17 @@ export const TagAuthorityFilter = Type.Union([
 ]);
 export type TagAuthorityFilter = Static<typeof TagAuthorityFilter>;
 
-export const LocalizationFilter = Type.Recursive(
-	(This) =>
-		Type.Object(
+export const LocalizationFilter = Type.Cyclic(
+	{
+		LocalizationFilter: Type.Object(
 			{
-				...logicFields(This),
+				...logicFields(Type.Ref("LocalizationFilter")),
 				language: Type.Optional(ContentLanguageFilter),
 			},
 			{ minProperties: 1, additionalProperties: false },
 		),
-	{ $id: "LocalizationFilter" },
+	},
+	"LocalizationFilter",
 );
 export type LocalizationFilter = Static<typeof LocalizationFilter>;
 
@@ -334,32 +335,34 @@ export const ContentLanguageSupportFilter = Type.Object(
 );
 export type ContentLanguageSupportFilter = Static<typeof ContentLanguageSupportFilter>;
 
-export const RealmPlacementFilter = Type.Recursive(
-	(This) =>
-		Type.Object(
+export const RealmPlacementFilter = Type.Cyclic(
+	{
+		RealmPlacementFilter: Type.Object(
 			{
-				...logicFields(This),
+				...logicFields(Type.Ref("RealmPlacementFilter")),
 				realm: Type.Optional(UnitReferenceFilter),
 				status: Type.Optional(RealmUnitStatusFilter),
 				publicationState: Type.Optional(RealmUnitPublicationStateFilter),
 			},
 			{ minProperties: 1, additionalProperties: false },
 		),
-	{ $id: "RealmPlacementFilter" },
+	},
+	"RealmPlacementFilter",
 );
 export type RealmPlacementFilter = Static<typeof RealmPlacementFilter>;
 
-export const TagAssertionFilter = Type.Recursive(
-	(This) =>
-		Type.Object(
+export const TagAssertionFilter = Type.Cyclic(
+	{
+		TagAssertionFilter: Type.Object(
 			{
-				...logicFields(This),
+				...logicFields(Type.Ref("TagAssertionFilter")),
 				tag: Type.Optional(UnitReferenceFilter),
 				authority: Type.Optional(TagAuthorityFilter),
 			},
 			{ minProperties: 1, additionalProperties: false },
 		),
-	{ $id: "TagAssertionFilter" },
+	},
+	"TagAssertionFilter",
 );
 export type TagAssertionFilter = Static<typeof TagAssertionFilter>;
 
@@ -370,11 +373,11 @@ export const RealmTagQueryStrategyValues = [
 ] as const;
 export type RealmTagQueryStrategy = (typeof RealmTagQueryStrategyValues)[number];
 
-export const ScoreFilter = Type.Recursive(
-	(This) =>
-		Type.Object(
+export const ScoreFilter = Type.Cyclic(
+	{
+		ScoreFilter: Type.Object(
 			{
-				...logicFields(This),
+				...logicFields(Type.Ref("ScoreFilter")),
 				value: Type.Optional(ScoreValueFilter),
 				realm: Type.Optional(UnitReferenceFilter),
 				target: Type.Optional(UnitReferenceFilter),
@@ -382,7 +385,8 @@ export const ScoreFilter = Type.Recursive(
 			},
 			{ minProperties: 1, additionalProperties: false },
 		),
-	{ $id: "ScoreFilter" },
+	},
+	"ScoreFilter",
 );
 export type ScoreFilter = Static<typeof ScoreFilter>;
 
@@ -395,16 +399,17 @@ export const RealmTagContextFilter = Type.Object(
 );
 export type RealmTagContextFilter = Static<typeof RealmTagContextFilter>;
 
-export const BookFilter = Type.Recursive(
-	(This) =>
-		Type.Object(
+export const BookFilter = Type.Cyclic(
+	{
+		BookFilter: Type.Object(
 			{
-				...logicFields(This),
+				...logicFields(Type.Ref("BookFilter")),
 				releaseStatus: Type.Optional(inFilter(FilterWorkReleaseStatus, 4)),
 			},
 			{ minProperties: 1, additionalProperties: false },
 		),
-	{ $id: "BookFilter" },
+	},
+	"BookFilter",
 );
 export type BookFilter = Static<typeof BookFilter>;
 
@@ -415,11 +420,11 @@ function toMany<Schema extends TSchema>(schema: Schema) {
 	]);
 }
 
-export const PostFilter = Type.Recursive(
-	(This) =>
-		Type.Object(
+export const PostFilter = Type.Cyclic(
+	{
+		PostFilter: Type.Object(
 			{
-				...logicFields(This),
+				...logicFields(Type.Ref("PostFilter")),
 				kind: Type.Optional(PostKindFilter),
 				subject: Type.Optional(
 					Type.Union([
@@ -437,28 +442,30 @@ export const PostFilter = Type.Recursive(
 			},
 			{ minProperties: 1, additionalProperties: false },
 		),
-	{ $id: "PostFilter" },
+	},
+	"PostFilter",
 );
 export type PostFilter = Static<typeof PostFilter>;
 
-export const CollectionFilter = Type.Recursive(
-	(This) =>
-		Type.Object(
+export const CollectionFilter = Type.Cyclic(
+	{
+		CollectionFilter: Type.Object(
 			{
-				...logicFields(This),
+				...logicFields(Type.Ref("CollectionFilter")),
 				items: Type.Optional(toMany(UnitReferenceFilter)),
 			},
 			{ minProperties: 1, additionalProperties: false },
 		),
-	{ $id: "CollectionFilter" },
+	},
+	"CollectionFilter",
 );
 export type CollectionFilter = Static<typeof CollectionFilter>;
 
-export const UnitPredicate = Type.Recursive(
-	(This) =>
-		Type.Object(
+export const UnitPredicate = Type.Cyclic(
+	{
+		UnitPredicate: Type.Object(
 			{
-				...logicFields(This),
+				...logicFields(Type.Ref("UnitPredicate")),
 				id: Type.Optional(UuidFilter),
 				kind: Type.Optional(UnitKindFilter),
 				localizations: Type.Optional(toMany(LocalizationFilter)),
@@ -495,7 +502,8 @@ export const UnitPredicate = Type.Recursive(
 			},
 			{ minProperties: 1, additionalProperties: false },
 		),
-	{ $id: "UnitPredicate" },
+	},
+	"UnitPredicate",
 );
 export type UnitPredicate = Static<typeof UnitPredicate>;
 
@@ -557,16 +565,16 @@ export function realmTagQueryPredicate(input: {
  * schemas above.
  */
 export const UnitPredicateSchemaModels = {
-	LocalizationFilter,
+	LocalizationFilter: LocalizationFilter.$defs.LocalizationFilter,
 	ContentLanguageSupportFilter,
-	RealmPlacementFilter,
-	TagAssertionFilter,
-	ScoreFilter,
-	PostFilter,
+	RealmPlacementFilter: RealmPlacementFilter.$defs.RealmPlacementFilter,
+	TagAssertionFilter: TagAssertionFilter.$defs.TagAssertionFilter,
+	ScoreFilter: ScoreFilter.$defs.ScoreFilter,
+	PostFilter: PostFilter.$defs.PostFilter,
 	RealmTagContextFilter,
-	CollectionFilter,
-	BookFilter,
-	UnitPredicate,
+	CollectionFilter: CollectionFilter.$defs.CollectionFilter,
+	BookFilter: BookFilter.$defs.BookFilter,
+	UnitPredicate: UnitPredicate.$defs.UnitPredicate,
 } as const;
 
 export interface FilterValidationLimits {

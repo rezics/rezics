@@ -1,54 +1,54 @@
 import { StatusCodes } from "http-status-codes";
-import * as Data from "effect/Data";
+import { HTTPError } from "elysia";
 
-export class ImageAssetNotFound extends Data.TaggedError("ImageAssetNotFound") {
-	static readonly status = StatusCodes.NOT_FOUND as const;
-	readonly status = ImageAssetNotFound.status;
-	readonly message = "Image asset not found";
+export class ImageAssetNotFound extends HTTPError.id("ImageAssetNotFound", StatusCodes.NOT_FOUND) {
+	override readonly message = "Image asset not found";
 }
 
-export class ImageAssetUploadNotFound extends Data.TaggedError("ImageAssetUploadNotFound") {
-	static readonly status = StatusCodes.NOT_FOUND as const;
-	readonly status = ImageAssetUploadNotFound.status;
-	readonly message = "Uploaded image object not found";
-}
-
-export class ImageAssetUnsupportedType extends Data.TaggedError("ImageAssetUnsupportedType") {
-	static readonly status = StatusCodes.UNSUPPORTED_MEDIA_TYPE as const;
-	readonly status = ImageAssetUnsupportedType.status;
-	readonly message = "Unsupported image type";
-}
-
-export class ImageAssetInvalidSize extends Data.TaggedError("ImageAssetInvalidSize") {
-	static readonly status = StatusCodes.UNPROCESSABLE_ENTITY as const;
-	readonly status = ImageAssetInvalidSize.status;
-	readonly message = "Uploaded image has invalid size";
-}
-
-export class ImageAssetContentMismatch extends Data.TaggedError("ImageAssetContentMismatch") {
-	static readonly status = StatusCodes.UNPROCESSABLE_ENTITY as const;
-	readonly status = ImageAssetContentMismatch.status;
-	readonly message = "Uploaded image content does not match its declaration";
-}
-
-export class ImageAssetInvalidState extends Data.TaggedError("ImageAssetInvalidState") {
-	static readonly status = StatusCodes.CONFLICT as const;
-	readonly status = ImageAssetInvalidState.status;
-	readonly message = "Image asset state does not allow this operation";
-}
-
-export class ImageAssetInvalidPresentation extends Data.TaggedError(
-	"ImageAssetInvalidPresentation",
+export class ImageAssetUploadNotFound extends HTTPError.id(
+	"ImageAssetUploadNotFound",
+	StatusCodes.NOT_FOUND,
 ) {
-	static readonly status = StatusCodes.UNPROCESSABLE_ENTITY as const;
-	readonly status = ImageAssetInvalidPresentation.status;
-	readonly message = "Image presentation is invalid for this asset and role";
+	override readonly message = "Uploaded image object not found";
 }
 
-export class ImageAssetInUse extends Data.TaggedError("ImageAssetInUse") {
-	static readonly status = StatusCodes.CONFLICT as const;
-	readonly status = ImageAssetInUse.status;
-	readonly message = "Ready image assets are immutable and cannot be deleted";
+export class ImageAssetUnsupportedType extends HTTPError.id(
+	"ImageAssetUnsupportedType",
+	StatusCodes.UNSUPPORTED_MEDIA_TYPE,
+) {
+	override readonly message = "Unsupported image type";
+}
+
+export class ImageAssetInvalidSize extends HTTPError.id(
+	"ImageAssetInvalidSize",
+	StatusCodes.UNPROCESSABLE_ENTITY,
+) {
+	override readonly message = "Uploaded image has invalid size";
+}
+
+export class ImageAssetContentMismatch extends HTTPError.id(
+	"ImageAssetContentMismatch",
+	StatusCodes.UNPROCESSABLE_ENTITY,
+) {
+	override readonly message = "Uploaded image content does not match its declaration";
+}
+
+export class ImageAssetInvalidState extends HTTPError.id(
+	"ImageAssetInvalidState",
+	StatusCodes.CONFLICT,
+) {
+	override readonly message = "Image asset state does not allow this operation";
+}
+
+export class ImageAssetInvalidPresentation extends HTTPError.id(
+	"ImageAssetInvalidPresentation",
+	StatusCodes.UNPROCESSABLE_ENTITY,
+) {
+	override readonly message = "Image presentation is invalid for this asset and role";
+}
+
+export class ImageAssetInUse extends HTTPError.id("ImageAssetInUse", StatusCodes.CONFLICT) {
+	override readonly message = "Ready image assets are immutable and cannot be deleted";
 }
 
 export const ImageAssetErrors = [

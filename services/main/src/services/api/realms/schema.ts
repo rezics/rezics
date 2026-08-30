@@ -1,4 +1,5 @@
-import { type Static, t } from "elysia";
+import type { StaticDecode } from "typebox";
+import { t } from "elysia";
 import { PortableTextDocument } from "@rezics/block";
 
 import {
@@ -50,7 +51,7 @@ export const ListRealmsQuery = t.Object(
 	},
 	{ additionalProperties: false },
 );
-export type ListRealmsQuery = Static<typeof ListRealmsQuery>;
+export type ListRealmsQuery = StaticDecode<typeof ListRealmsQuery>;
 
 export const CreateRealmBody = t.Object({
 	initialTagIds: t.Optional(
@@ -61,28 +62,28 @@ export const CreateRealmBody = t.Object({
 	joinPolicy: RealmJoinPolicy,
 	revisionContext: t.Optional(RevisionContext),
 });
-export type CreateRealmBody = Static<typeof CreateRealmBody>;
+export type CreateRealmBody = StaticDecode<typeof CreateRealmBody>;
 
 export const RealmParams = t.Object({ realmId: Uuid });
-export type RealmParams = Static<typeof RealmParams>;
+export type RealmParams = StaticDecode<typeof RealmParams>;
 export const RealmPinsQuery = t.Object(LocalizationLanguageQuery, { additionalProperties: false });
-export type RealmPinsQuery = Static<typeof RealmPinsQuery>;
+export type RealmPinsQuery = StaticDecode<typeof RealmPinsQuery>;
 
 export const SetRealmScoreContextBody = t.Object(
 	{ contextPostId: Uuid },
 	{ additionalProperties: false },
 );
-export type SetRealmScoreContextBody = Static<typeof SetRealmScoreContextBody>;
+export type SetRealmScoreContextBody = StaticDecode<typeof SetRealmScoreContextBody>;
 
 export const RealmDetailQuery = t.Object(LocalizationLanguageQuery, {
 	additionalProperties: false,
 });
-export type RealmDetailQuery = Static<typeof RealmDetailQuery>;
+export type RealmDetailQuery = StaticDecode<typeof RealmDetailQuery>;
 
 export const RealmTaxonomyQuery = t.Object(LocalizationLanguageQuery, {
 	additionalProperties: false,
 });
-export type RealmTaxonomyQuery = Static<typeof RealmTaxonomyQuery>;
+export type RealmTaxonomyQuery = StaticDecode<typeof RealmTaxonomyQuery>;
 
 const RealmTaxonomyDraftNodeBase = {
 	id: Uuid,
@@ -139,7 +140,7 @@ export const SaveRealmTaxonomyDraftBody = t.Object(
 	},
 	{ additionalProperties: false },
 );
-export type SaveRealmTaxonomyDraftBody = Static<typeof SaveRealmTaxonomyDraftBody>;
+export type SaveRealmTaxonomyDraftBody = StaticDecode<typeof SaveRealmTaxonomyDraftBody>;
 
 export const UpdateRealmBody = t.Object(
 	{
@@ -151,13 +152,13 @@ export const UpdateRealmBody = t.Object(
 	},
 	{ additionalProperties: false },
 );
-export type UpdateRealmBody = Static<typeof UpdateRealmBody>;
+export type UpdateRealmBody = StaticDecode<typeof UpdateRealmBody>;
 
 export const UpdateRealmTagVotingBody = t.Object(
 	{ enabled: t.Boolean(), revisionContext: t.Optional(RevisionContext) },
 	{ additionalProperties: false },
 );
-export type UpdateRealmTagVotingBody = Static<typeof UpdateRealmTagVotingBody>;
+export type UpdateRealmTagVotingBody = StaticDecode<typeof UpdateRealmTagVotingBody>;
 
 export const RealmTagVotingResponse = t.Object({ enabled: t.Boolean() });
 
@@ -178,7 +179,7 @@ export const UpdateRealmPagesBody = t.Object(
 	},
 	{ additionalProperties: false },
 );
-export type UpdateRealmPagesBody = Static<typeof UpdateRealmPagesBody>;
+export type UpdateRealmPagesBody = StaticDecode<typeof UpdateRealmPagesBody>;
 
 export const RealmPagesResponse = t.Object({
 	pages: t.Array(RealmPageKind, { minItems: 1, maxItems: 3, uniqueItems: true }),
@@ -194,10 +195,10 @@ export const ListRealmMembersQuery = t.Object(
 	},
 	{ additionalProperties: false },
 );
-export type ListRealmMembersQuery = Static<typeof ListRealmMembersQuery>;
+export type ListRealmMembersQuery = StaticDecode<typeof ListRealmMembersQuery>;
 
 export const RealmMemberParams = t.Object({ realmId: Uuid, profileId: Uuid });
-export type RealmMemberParams = Static<typeof RealmMemberParams>;
+export type RealmMemberParams = StaticDecode<typeof RealmMemberParams>;
 
 export const UpdateRealmMemberBody = t.Object(
 	{
@@ -205,7 +206,7 @@ export const UpdateRealmMemberBody = t.Object(
 	},
 	{ additionalProperties: false },
 );
-export type UpdateRealmMemberBody = Static<typeof UpdateRealmMemberBody>;
+export type UpdateRealmMemberBody = StaticDecode<typeof UpdateRealmMemberBody>;
 
 export const RealmRuleLocalizationInput = t.Object(
 	{
@@ -215,7 +216,7 @@ export const RealmRuleLocalizationInput = t.Object(
 	},
 	{ additionalProperties: false },
 );
-export type RealmRuleLocalizationInput = Static<typeof RealmRuleLocalizationInput>;
+export type RealmRuleLocalizationInput = StaticDecode<typeof RealmRuleLocalizationInput>;
 
 export const UpdateRealmRulesBody = t.Object(
 	{
@@ -234,27 +235,27 @@ export const UpdateRealmRulesBody = t.Object(
 	},
 	{ additionalProperties: false },
 );
-export type UpdateRealmRulesBody = Static<typeof UpdateRealmRulesBody>;
+export type UpdateRealmRulesBody = StaticDecode<typeof UpdateRealmRulesBody>;
 
 export const RealmRuleRevisionParams = t.Object({ realmId: Uuid, revisionId: Uuid });
-export type RealmRuleRevisionParams = Static<typeof RealmRuleRevisionParams>;
+export type RealmRuleRevisionParams = StaticDecode<typeof RealmRuleRevisionParams>;
 
 export const AcknowledgeRealmRulesBody = t.Object(
 	{ language: ContentLanguage },
 	{ additionalProperties: false },
 );
-export type AcknowledgeRealmRulesBody = Static<typeof AcknowledgeRealmRulesBody>;
+export type AcknowledgeRealmRulesBody = StaticDecode<typeof AcknowledgeRealmRulesBody>;
 
 export const RealmRulesQuery = t.Object(LocalizationLanguageQuery, {
 	additionalProperties: false,
 });
-export type RealmRulesQuery = Static<typeof RealmRulesQuery>;
+export type RealmRulesQuery = StaticDecode<typeof RealmRulesQuery>;
 
 export const RealmPinParams = t.Object({ realmId: Uuid, unitId: Uuid });
-export type RealmPinParams = Static<typeof RealmPinParams>;
+export type RealmPinParams = StaticDecode<typeof RealmPinParams>;
 
 export const RealmPinKind = t.UnionEnum(RealmPinKindValues);
-export type RealmPinKind = Static<typeof RealmPinKind>;
+export type RealmPinKind = StaticDecode<typeof RealmPinKind>;
 
 export const CreateRealmPinBody = t.Object(
 	{
@@ -263,12 +264,12 @@ export const CreateRealmPinBody = t.Object(
 	},
 	{ additionalProperties: false },
 );
-export type CreateRealmPinBody = Static<typeof CreateRealmPinBody>;
+export type CreateRealmPinBody = StaticDecode<typeof CreateRealmPinBody>;
 
 export const RemoveRealmPinQuery = t.Object({
 	kind: t.Optional(RealmPinKind),
 });
-export type RemoveRealmPinQuery = Static<typeof RemoveRealmPinQuery>;
+export type RemoveRealmPinQuery = StaticDecode<typeof RemoveRealmPinQuery>;
 
 export const RealmPinPlacement = t.Union([
 	t.Object({ kind: t.UnionEnum(["start", "end"]) }, { additionalProperties: false }),
@@ -280,7 +281,7 @@ export const RealmPinPlacement = t.Union([
 		{ additionalProperties: false },
 	),
 ]);
-export type RealmPinPlacement = Static<typeof RealmPinPlacement>;
+export type RealmPinPlacement = StaticDecode<typeof RealmPinPlacement>;
 
 export const MoveRealmPinsBody = t.Object(
 	{
@@ -291,29 +292,29 @@ export const MoveRealmPinsBody = t.Object(
 	},
 	{ additionalProperties: false },
 );
-export type MoveRealmPinsBody = Static<typeof MoveRealmPinsBody>;
+export type MoveRealmPinsBody = StaticDecode<typeof MoveRealmPinsBody>;
 
 export const RealmUnitParams = t.Object({ realmId: Uuid, unitId: Uuid });
-export type RealmUnitParams = Static<typeof RealmUnitParams>;
+export type RealmUnitParams = StaticDecode<typeof RealmUnitParams>;
 
 export const RealmTagVoteParams = t.Object({
 	realmId: Uuid,
 	unitId: Uuid,
 	tagId: Uuid,
 });
-export type RealmTagVoteParams = Static<typeof RealmTagVoteParams>;
+export type RealmTagVoteParams = StaticDecode<typeof RealmTagVoteParams>;
 
 export const RealmTagContextParams = t.Object({
 	realmId: Uuid,
 	tagId: Uuid,
 });
-export type RealmTagContextParams = Static<typeof RealmTagContextParams>;
+export type RealmTagContextParams = StaticDecode<typeof RealmTagContextParams>;
 
 export const PutRealmTagContextBody = t.Object(
 	{ contextPostId: Uuid },
 	{ additionalProperties: false },
 );
-export type PutRealmTagContextBody = Static<typeof PutRealmTagContextBody>;
+export type PutRealmTagContextBody = StaticDecode<typeof PutRealmTagContextBody>;
 
 export const CreateRealmTagContextBody = t.Object(
 	{
@@ -330,7 +331,7 @@ export const CreateRealmTagContextBody = t.Object(
 	},
 	{ additionalProperties: false },
 );
-export type CreateRealmTagContextBody = Static<typeof CreateRealmTagContextBody>;
+export type CreateRealmTagContextBody = StaticDecode<typeof CreateRealmTagContextBody>;
 
 export const CreateRealmWikiBody = t.Object(
 	{
@@ -346,19 +347,19 @@ export const CreateRealmWikiBody = t.Object(
 	},
 	{ additionalProperties: false },
 );
-export type CreateRealmWikiBody = Static<typeof CreateRealmWikiBody>;
+export type CreateRealmWikiBody = StaticDecode<typeof CreateRealmWikiBody>;
 
 export const RealmTagVoteBody = t.Object(
 	{ value: t.Union([t.Literal(-1), t.Literal(1)]) },
 	{ additionalProperties: false },
 );
-export type RealmTagVoteBody = Static<typeof RealmTagVoteBody>;
+export type RealmTagVoteBody = StaticDecode<typeof RealmTagVoteBody>;
 
 export const ApplyRealmPolicyTagBody = t.Object(
 	{ position: t.Optional(FractionalPositionInput) },
 	{ additionalProperties: false },
 );
-export type ApplyRealmPolicyTagBody = Static<typeof ApplyRealmPolicyTagBody>;
+export type ApplyRealmPolicyTagBody = StaticDecode<typeof ApplyRealmPolicyTagBody>;
 
 export const RealmPolicyTagResponse = t.Object({
 	realmId: Uuid,
@@ -387,7 +388,7 @@ export const ListRealmTagContextsQuery = t.Object(
 	},
 	{ additionalProperties: false },
 );
-export type ListRealmTagContextsQuery = Static<typeof ListRealmTagContextsQuery>;
+export type ListRealmTagContextsQuery = StaticDecode<typeof ListRealmTagContextsQuery>;
 
 export const RealmTagContextListResponse = t.Object({
 	items: t.Array(
@@ -432,18 +433,18 @@ export const ListRealmUnitsQuery = t.Object(
 	},
 	{ additionalProperties: false },
 );
-export type ListRealmUnitsQuery = Static<typeof ListRealmUnitsQuery>;
+export type ListRealmUnitsQuery = StaticDecode<typeof ListRealmUnitsQuery>;
 
 export const RealmUnitModerationQuery = t.Object(LocalizationLanguageQuery, {
 	additionalProperties: false,
 });
-export type RealmUnitModerationQuery = Static<typeof RealmUnitModerationQuery>;
+export type RealmUnitModerationQuery = StaticDecode<typeof RealmUnitModerationQuery>;
 
 export const RealmUnitHistoryQuery = t.Object(
 	{ limit: t.Optional(t.Integer({ minimum: 1, maximum: 100, default: 50 })) },
 	{ additionalProperties: false },
 );
-export type RealmUnitHistoryQuery = Static<typeof RealmUnitHistoryQuery>;
+export type RealmUnitHistoryQuery = StaticDecode<typeof RealmUnitHistoryQuery>;
 
 const RealmModerationAnnotation = t.Object(
 	{
@@ -479,7 +480,7 @@ export const ModerateRealmUnitBody = t.Union([
 		{ additionalProperties: false },
 	),
 ]);
-export type ModerateRealmUnitBody = Static<typeof ModerateRealmUnitBody>;
+export type ModerateRealmUnitBody = StaticDecode<typeof ModerateRealmUnitBody>;
 
 export const ReviewRealmUnitBody = t.Union([
 	t.Object(
@@ -499,7 +500,7 @@ export const ReviewRealmUnitBody = t.Union([
 		{ additionalProperties: false },
 	),
 ]);
-export type ReviewRealmUnitBody = Static<typeof ReviewRealmUnitBody>;
+export type ReviewRealmUnitBody = StaticDecode<typeof ReviewRealmUnitBody>;
 
 const RealmModerationCommand = t.UnionEnum(RealmModerationCommandValues);
 const RealmUnitModerationTargetResponse = t.Object({

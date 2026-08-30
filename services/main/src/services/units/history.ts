@@ -16,7 +16,7 @@ import {
 	type PortableTextDocument as PortableTextDocumentValue,
 } from "@rezics/block";
 import { assertFilterDocument, type FilterDocument } from "@rezics/filter";
-import type { Static, TSchema } from "@sinclair/typebox";
+import type { StaticDecode, TSchema } from "typebox";
 import { type ContentLanguage, ContentLanguageValues, isContentLanguage } from "@rezics/i18n";
 import {
 	type ContentLanguageSupport,
@@ -117,7 +117,7 @@ type SnapshotRow = Record<string, unknown>;
 const SnapshotRowSchema = z.record(z.string(), z.unknown());
 const JsonObjectSchema = z.record(z.string(), z.unknown());
 function createDocumentSchema<TSchemaValue extends TSchema>(schema: TSchemaValue) {
-	return z.custom<Static<TSchemaValue>>((value): value is Static<TSchemaValue> =>
+	return z.custom<StaticDecode<TSchemaValue>>((value): value is StaticDecode<TSchemaValue> =>
 		isDocument(schema, value),
 	);
 }

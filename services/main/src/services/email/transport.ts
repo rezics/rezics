@@ -1,5 +1,6 @@
-import { Type } from "@sinclair/typebox";
-import { Check } from "@sinclair/typebox/value";
+import type { StaticDecode } from "typebox";
+import { Type } from "typebox";
+import { Check } from "typebox/value";
 import { getActiveObservability, observedFetch } from "@rezics/observability";
 
 import { env } from "../config";
@@ -66,7 +67,7 @@ function retryableHttpStatus(status: number): boolean {
 	return status === 429 || status >= 500;
 }
 
-function errorDetails(payload: typeof CloudflareEmailResponse.static): string {
+function errorDetails(payload: StaticDecode<typeof CloudflareEmailResponse>): string {
 	return (
 		payload.errors
 			.map(({ code, message }) => `${code ?? "unknown"}:${message ?? "unknown"}`)

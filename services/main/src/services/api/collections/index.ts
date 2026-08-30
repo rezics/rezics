@@ -174,6 +174,14 @@ export default new Elysia({ prefix: "/collections" })
 	.use(session)
 	.get(
 		"",
+		{
+			query: ListCollectionsQuery,
+			response: {
+				[StatusCodes.OK]: CollectionListResponse,
+				[StatusCodes.BAD_REQUEST]: InvalidPaginationCursorResponse,
+			},
+			detail: { summary: "List collections", tags: ["Collections"] },
+		},
 		async ({ query, request }) => {
 			const localizationLanguages = query.localizationLanguages ?? [];
 			const identity = query.editableOnly ? await resolveIdentity(request, "unit:read") : undefined;
@@ -310,17 +318,22 @@ export default new Elysia({ prefix: "/collections" })
 						: null,
 			};
 		},
-		{
-			query: ListCollectionsQuery,
-			response: {
-				[StatusCodes.OK]: CollectionListResponse,
-				[StatusCodes.BAD_REQUEST]: InvalidPaginationCursorResponse,
-			},
-			detail: { summary: "List collections", tags: ["Collections"] },
-		},
 	)
 	.post(
 		"",
+		{
+			access: "write:unit:create",
+			body: CreateCollectionBody,
+			response: {
+				[StatusCodes.OK]: CollectionDetailResponse,
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
+					"RevisionCreditEntityInvalid",
+					"RevisionContributionActorRequired",
+				]),
+				[StatusCodes.NOT_FOUND]: CollectionMutationNotFoundResponse,
+			},
+			detail: { summary: "Create collection", tags: ["Collections"] },
+		},
 		async ({ profile, authorization, body }) => {
 			const id = await database.transaction(async (tx) => {
 				await ensureImageAssetsAttachable(
@@ -361,29 +374,9 @@ export default new Elysia({ prefix: "/collections" })
 			});
 			return getCollection(id, authorization);
 		},
-		{
-			access: "write:unit:create",
-			body: CreateCollectionBody,
-			response: {
-				[StatusCodes.OK]: CollectionDetailResponse,
-				[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
-					"RevisionCreditEntityInvalid",
-					"RevisionContributionActorRequired",
-				]),
-				[StatusCodes.NOT_FOUND]: CollectionMutationNotFoundResponse,
-			},
-			detail: { summary: "Create collection", tags: ["Collections"] },
-		},
 	)
 	.get(
 		"/favorites",
-		async ({ profile, authorization, query }) => {
-			return getCollection(
-				await ensureFavorites(profile.unitId),
-				authorization,
-				query.localizationLanguages,
-			);
-		},
 		{
 			access: "write:unit:read",
 			query: CollectionDetailQuery,
@@ -393,17 +386,16 @@ export default new Elysia({ prefix: "/collections" })
 			},
 			detail: { summary: "Get Favorites collection", tags: ["Collections"] },
 		},
+		async ({ profile, authorization, query }) => {
+			return getCollection(
+				await ensureFavorites(profile.unitId),
+				authorization,
+				query.localizationLanguages,
+			);
+		},
 	)
 	.get(
 		"/:collectionId/items",
-		async ({ params, query, request }) => {
-			const identity = await resolveIdentity(request, "unit:read");
-			return getCollectionContent(params.collectionId, identity.authorization, {
-				localizationLanguages: query.localizationLanguages,
-				cursor: query.cursor,
-				limit: query.limit,
-			});
-		},
 		{
 			params: CollectionParams,
 			query: CollectionItemsQuery,
@@ -414,17 +406,17 @@ export default new Elysia({ prefix: "/collections" })
 			},
 			detail: { summary: "List hydrated collection content", tags: ["Collections"] },
 		},
+		async ({ params, query, request }) => {
+			const identity = await resolveIdentity(request, "unit:read");
+			return getCollectionContent(params.collectionId, identity.authorization, {
+				localizationLanguages: query.localizationLanguages,
+				cursor: query.cursor,
+				limit: query.limit,
+			});
+		},
 	)
 	.get(
 		"/:collectionId",
-		async ({ params, query, request }) => {
-			const identity = await resolveIdentity(request, "unit:read");
-			return getCollection(
-				params.collectionId,
-				identity.authorization,
-				query.localizationLanguages,
-			);
-		},
 		{
 			params: CollectionParams,
 			query: CollectionDetailQuery,
@@ -434,9 +426,33 @@ export default new Elysia({ prefix: "/collections" })
 			},
 			detail: { summary: "Get collection", tags: ["Collections"] },
 		},
+		async ({ params, query, request }) => {
+			const identity = await resolveIdentity(request, "unit:read");
+			return getCollection(
+				params.collectionId,
+				identity.authorization,
+				query.localizationLanguages,
+			);
+		},
 	)
 	.patch(
 		"/:collectionId",
+		{
+			access: "write:unit:update",
+			params: CollectionParams,
+			body: UpdateCollectionBody,
+			response: {
+				[StatusCodes.OK]: CollectionDetailResponse,
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
+					"RevisionCreditEntityInvalid",
+					"RevisionContributionActorRequired",
+				]),
+				[StatusCodes.FORBIDDEN]: CollectionMutationForbiddenResponse,
+				[StatusCodes.NOT_FOUND]: CollectionMutationNotFoundResponse,
+				[StatusCodes.CONFLICT]: t.Union([FavoritesEditResponse, UnitRevisionConflictResponse]),
+			},
+			detail: { summary: "Update collection", tags: ["Collections"] },
+		},
 		async ({ params, profile, authorization, body }) => {
 			await authorization.unit.ensure(params.collectionId, "unit.update");
 			const statusUpdateDecision = body.status
@@ -496,25 +512,28 @@ export default new Elysia({ prefix: "/collections" })
 			});
 			return getCollection(params.collectionId, authorization);
 		},
-		{
-			access: "write:unit:update",
-			params: CollectionParams,
-			body: UpdateCollectionBody,
-			response: {
-				[StatusCodes.OK]: CollectionDetailResponse,
-				[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
-					"RevisionCreditEntityInvalid",
-					"RevisionContributionActorRequired",
-				]),
-				[StatusCodes.FORBIDDEN]: CollectionMutationForbiddenResponse,
-				[StatusCodes.NOT_FOUND]: CollectionMutationNotFoundResponse,
-				[StatusCodes.CONFLICT]: t.Union([FavoritesEditResponse, UnitRevisionConflictResponse]),
-			},
-			detail: { summary: "Update collection", tags: ["Collections"] },
-		},
 	)
 	.post(
 		"/:collectionId/items/batch-update",
+		{
+			access: "write:unit:update",
+			params: CollectionParams,
+			body: UpdateCollectionItemsBatchBody,
+			response: {
+				[StatusCodes.OK]: UpdateCollectionItemsBatchResponse,
+				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["ValidationError"]),
+				[StatusCodes.FORBIDDEN]: CollectionMutationForbiddenResponse,
+				[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
+				[StatusCodes.CONFLICT]: t.Union([
+					FavoritesEditResponse,
+					CollectionStructureRevisionConflictResponse,
+				]),
+			},
+			detail: {
+				summary: "Apply an atomic mixed Collection item command batch",
+				tags: ["Collections"],
+			},
+		},
 		async ({ params, profile, authorization, body }) => {
 			await authorization.unit.ensure(params.collectionId, "unit.update");
 			const result = await database.transaction((tx) =>
@@ -540,12 +559,15 @@ export default new Elysia({ prefix: "/collections" })
 				revisionCreated: result.revisionCreated,
 			};
 		},
+	)
+	.post(
+		"/:collectionId/items/batch",
 		{
 			access: "write:unit:update",
 			params: CollectionParams,
-			body: UpdateCollectionItemsBatchBody,
+			body: AddCollectionItemsBatchBody,
 			response: {
-				[StatusCodes.OK]: UpdateCollectionItemsBatchResponse,
+				[StatusCodes.OK]: AddCollectionItemsBatchResponse,
 				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["ValidationError"]),
 				[StatusCodes.FORBIDDEN]: CollectionMutationForbiddenResponse,
 				[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
@@ -554,14 +576,8 @@ export default new Elysia({ prefix: "/collections" })
 					CollectionStructureRevisionConflictResponse,
 				]),
 			},
-			detail: {
-				summary: "Apply an atomic mixed Collection item command batch",
-				tags: ["Collections"],
-			},
+			detail: { summary: "Add collection items atomically", tags: ["Collections"] },
 		},
-	)
-	.post(
-		"/:collectionId/items/batch",
 		async ({ params, profile, authorization, body }) => {
 			await authorization.unit.ensure(params.collectionId, "unit.update");
 			if (new Set(body.items.map(({ targetId }) => targetId)).size !== body.items.length)
@@ -598,12 +614,15 @@ export default new Elysia({ prefix: "/collections" })
 				};
 			});
 		},
+	)
+	.post(
+		"/:collectionId/items/move",
 		{
 			access: "write:unit:update",
 			params: CollectionParams,
-			body: AddCollectionItemsBatchBody,
+			body: MoveCollectionItemsBody,
 			response: {
-				[StatusCodes.OK]: AddCollectionItemsBatchResponse,
+				[StatusCodes.OK]: SavedCollectionItemsResponse,
 				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["ValidationError"]),
 				[StatusCodes.FORBIDDEN]: CollectionMutationForbiddenResponse,
 				[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
@@ -612,11 +631,8 @@ export default new Elysia({ prefix: "/collections" })
 					CollectionStructureRevisionConflictResponse,
 				]),
 			},
-			detail: { summary: "Add collection items atomically", tags: ["Collections"] },
+			detail: { summary: "Move collection items atomically", tags: ["Collections"] },
 		},
-	)
-	.post(
-		"/:collectionId/items/move",
 		async ({ params, profile, authorization, body }) => {
 			await authorization.unit.ensure(params.collectionId, "unit.update");
 			const result = await database.transaction((tx) =>
@@ -638,10 +654,13 @@ export default new Elysia({ prefix: "/collections" })
 			);
 			return { saved: true, latestItemsRevisionId: result.revisionId };
 		},
+	)
+	.put(
+		"/:collectionId/items/:targetId",
 		{
 			access: "write:unit:update",
-			params: CollectionParams,
-			body: MoveCollectionItemsBody,
+			params: CollectionItemParams,
+			body: SaveCollectionItemBody,
 			response: {
 				[StatusCodes.OK]: SavedCollectionItemsResponse,
 				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["ValidationError"]),
@@ -652,11 +671,8 @@ export default new Elysia({ prefix: "/collections" })
 					CollectionStructureRevisionConflictResponse,
 				]),
 			},
-			detail: { summary: "Move collection items atomically", tags: ["Collections"] },
+			detail: { summary: "Save collection item", tags: ["Collections"] },
 		},
-	)
-	.put(
-		"/:collectionId/items/:targetId",
 		async ({ params, profile, authorization, body }) => {
 			await authorization.unit.ensure(params.collectionId, "unit.update");
 			if (params.targetId === params.collectionId)
@@ -681,39 +697,9 @@ export default new Elysia({ prefix: "/collections" })
 			);
 			return { saved: true, latestItemsRevisionId: result.revisionId };
 		},
-		{
-			access: "write:unit:update",
-			params: CollectionItemParams,
-			body: SaveCollectionItemBody,
-			response: {
-				[StatusCodes.OK]: SavedCollectionItemsResponse,
-				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["ValidationError"]),
-				[StatusCodes.FORBIDDEN]: CollectionMutationForbiddenResponse,
-				[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
-				[StatusCodes.CONFLICT]: t.Union([
-					FavoritesEditResponse,
-					CollectionStructureRevisionConflictResponse,
-				]),
-			},
-			detail: { summary: "Save collection item", tags: ["Collections"] },
-		},
 	)
 	.delete(
 		"/:collectionId/items/:targetId",
-		async ({ params, profile, authorization, body }) => {
-			await authorization.unit.ensure(params.collectionId, "unit.update");
-			const result = await database.transaction((tx) =>
-				applyCollectionBatch(tx, {
-					collectionId: params.collectionId,
-					actorProfileId: profile.unitId,
-					baseRevisionId: body.baseItemsRevisionId,
-					commands: [{ opId: "remove", type: "item.remove", targetId: params.targetId }],
-					errors: CollectionBatchErrors,
-					ensureTargetReadable: async () => {},
-				}),
-			);
-			return { saved: false, latestItemsRevisionId: result.revisionId };
-		},
 		{
 			access: "write:unit:update",
 			params: CollectionItemParams,
@@ -728,16 +714,23 @@ export default new Elysia({ prefix: "/collections" })
 			},
 			detail: { summary: "Remove collection item", tags: ["Collections"] },
 		},
+		async ({ params, profile, authorization, body }) => {
+			await authorization.unit.ensure(params.collectionId, "unit.update");
+			const result = await database.transaction((tx) =>
+				applyCollectionBatch(tx, {
+					collectionId: params.collectionId,
+					actorProfileId: profile.unitId,
+					baseRevisionId: body.baseItemsRevisionId,
+					commands: [{ opId: "remove", type: "item.remove", targetId: params.targetId }],
+					errors: CollectionBatchErrors,
+					ensureTargetReadable: async () => {},
+				}),
+			);
+			return { saved: false, latestItemsRevisionId: result.revisionId };
+		},
 	)
 	.get(
 		"/:collectionId/item-revisions",
-		async ({ params, query, request }) => {
-			const { authorization } = await resolveIdentity(request, "unit:read");
-			await authorization.unit.ensureCanRead(params.collectionId);
-			return database.transaction(async (tx) => ({
-				items: await listCollectionStructureRevisions(tx, params.collectionId, query.limit ?? 50),
-			}));
-		},
 		{
 			params: CollectionParams,
 			query: CollectionStructureRevisionListQuery,
@@ -747,9 +740,26 @@ export default new Elysia({ prefix: "/collections" })
 			},
 			detail: { summary: "List Collection item revisions", tags: ["Collections"] },
 		},
+		async ({ params, query, request }) => {
+			const { authorization } = await resolveIdentity(request, "unit:read");
+			await authorization.unit.ensureCanRead(params.collectionId);
+			return database.transaction(async (tx) => ({
+				items: await listCollectionStructureRevisions(tx, params.collectionId, query.limit ?? 50),
+			}));
+		},
 	)
 	.get(
 		"/:collectionId/item-revisions/compare",
+		{
+			params: CollectionParams,
+			query: CollectionStructureRevisionCompareQuery,
+			response: {
+				[StatusCodes.OK]: CollectionStructureRevisionCompareResponse,
+				[StatusCodes.NOT_FOUND]: CollectionNotFoundResponse,
+				[StatusCodes.CONFLICT]: CollectionStructureRevisionConflictResponse,
+			},
+			detail: { summary: "Compare Collection item revisions", tags: ["Collections"] },
+		},
 		async ({ params, query, request }) => {
 			const { authorization } = await resolveIdentity(request, "unit:read");
 			await authorization.unit.ensureCanRead(params.collectionId);
@@ -771,19 +781,24 @@ export default new Elysia({ prefix: "/collections" })
 				};
 			});
 		},
-		{
-			params: CollectionParams,
-			query: CollectionStructureRevisionCompareQuery,
-			response: {
-				[StatusCodes.OK]: CollectionStructureRevisionCompareResponse,
-				[StatusCodes.NOT_FOUND]: CollectionNotFoundResponse,
-				[StatusCodes.CONFLICT]: CollectionStructureRevisionConflictResponse,
-			},
-			detail: { summary: "Compare Collection item revisions", tags: ["Collections"] },
-		},
 	)
 	.post(
 		"/:collectionId/item-revisions/:revisionId/restore",
+		{
+			access: "session-only",
+			params: CollectionStructureRevisionParams,
+			body: RestoreCollectionStructureRevisionBody,
+			response: {
+				[StatusCodes.OK]: RestoreCollectionStructureRevisionResponse,
+				[StatusCodes.CONFLICT]: t.Union([
+					FavoritesEditResponse,
+					CollectionStructureRevisionConflictResponse,
+				]),
+				[StatusCodes.FORBIDDEN]: CollectionMutationForbiddenResponse,
+				[StatusCodes.NOT_FOUND]: CollectionNotFoundResponse,
+			},
+			detail: { summary: "Restore a Collection item revision", tags: ["Collections"] },
+		},
 		async ({ params, body, profile, authorization }) => {
 			await authorization.unit.ensure(params.collectionId, "unit.history.restore");
 			const result = await database.transaction(async (tx) => {
@@ -803,24 +818,20 @@ export default new Elysia({ prefix: "/collections" })
 				revisionCreated: result.revisionCreated,
 			};
 		},
-		{
-			access: "session-only",
-			params: CollectionStructureRevisionParams,
-			body: RestoreCollectionStructureRevisionBody,
-			response: {
-				[StatusCodes.OK]: RestoreCollectionStructureRevisionResponse,
-				[StatusCodes.CONFLICT]: t.Union([
-					FavoritesEditResponse,
-					CollectionStructureRevisionConflictResponse,
-				]),
-				[StatusCodes.FORBIDDEN]: CollectionMutationForbiddenResponse,
-				[StatusCodes.NOT_FOUND]: CollectionNotFoundResponse,
-			},
-			detail: { summary: "Restore a Collection item revision", tags: ["Collections"] },
-		},
 	)
 	.put(
 		"/favorites/items/:targetId",
+		{
+			access: "write:unit:update",
+			params: FavoriteItemParams,
+			body: CollectionItemsRevisionBody,
+			response: {
+				[StatusCodes.OK]: FavoriteResponse,
+				[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
+				[StatusCodes.CONFLICT]: CollectionStructureRevisionConflictResponse,
+			},
+			detail: { summary: "Favorite unit", tags: ["Collections"] },
+		},
 		async ({ params, profile, authorization, body }) => {
 			await authorization.unit.ensureCanRead(params.targetId);
 			const collectionId = await ensureFavorites(profile.unitId);
@@ -852,20 +863,19 @@ export default new Elysia({ prefix: "/collections" })
 				latestItemsRevisionId: result.revisionId,
 			};
 		},
+	)
+	.delete(
+		"/favorites/items/:targetId",
 		{
 			access: "write:unit:update",
 			params: FavoriteItemParams,
 			body: CollectionItemsRevisionBody,
 			response: {
 				[StatusCodes.OK]: FavoriteResponse,
-				[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
 				[StatusCodes.CONFLICT]: CollectionStructureRevisionConflictResponse,
 			},
-			detail: { summary: "Favorite unit", tags: ["Collections"] },
+			detail: { summary: "Remove favorite unit", tags: ["Collections"] },
 		},
-	)
-	.delete(
-		"/favorites/items/:targetId",
 		async ({ params, profile, body }) => {
 			const collectionId = await ensureFavorites(profile.unitId);
 			const result = await database.transaction(async (tx) =>
@@ -894,15 +904,5 @@ export default new Elysia({ prefix: "/collections" })
 				collectionId,
 				latestItemsRevisionId: result.revisionId,
 			};
-		},
-		{
-			access: "write:unit:update",
-			params: FavoriteItemParams,
-			body: CollectionItemsRevisionBody,
-			response: {
-				[StatusCodes.OK]: FavoriteResponse,
-				[StatusCodes.CONFLICT]: CollectionStructureRevisionConflictResponse,
-			},
-			detail: { summary: "Remove favorite unit", tags: ["Collections"] },
 		},
 	);

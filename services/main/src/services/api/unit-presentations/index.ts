@@ -1,4 +1,4 @@
-import { UnitPresentationDocumentV0 } from "@rezics/block";
+import type { StaticDecode } from "typebox";
 import {
 	CustomThemeExternalLiveAccessCapability,
 	DevelopmentPreviewCapability,
@@ -66,24 +66,9 @@ async function ensureInstallerEligibility(
 }
 
 export default new Elysia({ prefix: "/units/by-id" })
-	.model({
-		UnitPresentationDocumentV0,
-		UnitPresentationResponse,
-		ResolvedUnitPresentationResponse,
-	})
 	.use(session)
 	.get(
 		"/:unitId/presentation",
-		async ({ request, params, query }) => {
-			const identity = await resolveIdentity(request, "unit:read");
-			await identity.authorization.unit.ensureCanRead(params.unitId);
-			return resolveUnitPresentation({
-				hostUnitId: params.unitId,
-				viewerProfileId: identity.profile?.unitId,
-				viewerEligible: await viewerEligibility(identity),
-				safeMode: query.safeMode ?? false,
-			});
-		},
 		{
 			access: "unit:read",
 			params: HostUnitParams,
@@ -97,21 +82,19 @@ export default new Elysia({ prefix: "/units/by-id" })
 				tags: ["Unit Presentations"],
 			},
 		},
-	)
-	.get(
-		"/:unitId/presentation-policy",
 		async ({ request, params, query }) => {
 			const identity = await resolveIdentity(request, "unit:read");
 			await identity.authorization.unit.ensureCanRead(params.unitId);
-			return presentationPolicyFromResolved(
-				await resolveUnitPresentation({
-					hostUnitId: params.unitId,
-					viewerProfileId: identity.profile?.unitId,
-					viewerEligible: await viewerEligibility(identity),
-					safeMode: query.safeMode ?? false,
-				}),
-			);
+			return resolveUnitPresentation({
+				hostUnitId: params.unitId,
+				viewerProfileId: identity.profile?.unitId,
+				viewerEligible: await viewerEligibility(identity),
+				safeMode: query.safeMode ?? false,
+			});
 		},
+	)
+	.get(
+		"/:unitId/presentation-policy",
 		{
 			access: "unit:read",
 			params: HostUnitParams,
@@ -125,14 +108,21 @@ export default new Elysia({ prefix: "/units/by-id" })
 				tags: ["Unit Presentations"],
 			},
 		},
+		async ({ request, params, query }) => {
+			const identity = await resolveIdentity(request, "unit:read");
+			await identity.authorization.unit.ensureCanRead(params.unitId);
+			return presentationPolicyFromResolved(
+				await resolveUnitPresentation({
+					hostUnitId: params.unitId,
+					viewerProfileId: identity.profile?.unitId,
+					viewerEligible: await viewerEligibility(identity),
+					safeMode: query.safeMode ?? false,
+				}),
+			);
+		},
 	)
 	.get(
 		"/:unitId/presentation-document",
-		async ({ authorization, params }) => {
-			await authorization.unit.ensureCanUpdate(params.unitId, [["presentation"]]);
-			const response = await getUnitPresentation(database, params.unitId);
-			return response satisfies typeof UnitPresentationResponse.static;
-		},
 		{
 			access: "contribute:unit:update",
 			params: HostUnitParams,
@@ -143,20 +133,14 @@ export default new Elysia({ prefix: "/units/by-id" })
 			},
 			detail: { summary: "Get the Unit-owned presentation document", tags: ["Unit Presentations"] },
 		},
+		async ({ authorization, params }) => {
+			await authorization.unit.ensureCanUpdate(params.unitId, [["presentation"]]);
+			const response = await getUnitPresentation(database, params.unitId);
+			return response satisfies StaticDecode<typeof UnitPresentationResponse>;
+		},
 	)
 	.put(
 		"/:unitId/presentation",
-		async ({ authorization, params, profile, body }) => {
-			await authorization.unit.ensureCanUpdate(params.unitId, [["presentation"]]);
-			return database.transaction((tx) =>
-				putUnitPresentation(tx, {
-					hostUnitId: params.unitId,
-					actorProfileId: profile.unitId,
-					expectedRevisionId: body.expectedRevisionId,
-					document: body.document,
-				}),
-			);
-		},
 		{
 			access: "contribute:unit:update",
 			params: HostUnitParams,
@@ -172,19 +156,20 @@ export default new Elysia({ prefix: "/units/by-id" })
 				tags: ["Unit Presentations"],
 			},
 		},
-	)
-	.put(
-		"/:unitId/custom-theme-installation",
 		async ({ authorization, params, profile, body }) => {
-			await ensureInstallerEligibility(authorization, params.unitId);
+			await authorization.unit.ensureCanUpdate(params.unitId, [["presentation"]]);
 			return database.transaction((tx) =>
-				putCustomThemeInstallation(tx, {
+				putUnitPresentation(tx, {
 					hostUnitId: params.unitId,
-					revisionId: body.revisionId,
 					actorProfileId: profile.unitId,
+					expectedRevisionId: body.expectedRevisionId,
+					document: body.document,
 				}),
 			);
 		},
+	)
+	.put(
+		"/:unitId/custom-theme-installation",
 		{
 			access: "contribute:unit:update",
 			params: HostUnitParams,
@@ -203,19 +188,19 @@ export default new Elysia({ prefix: "/units/by-id" })
 			},
 			detail: { summary: "Install one exact Custom Theme revision", tags: ["Unit Presentations"] },
 		},
-	)
-	.delete(
-		"/:unitId/custom-theme-installation",
-		async ({ authorization, params, profile, status }) => {
+		async ({ authorization, params, profile, body }) => {
 			await ensureInstallerEligibility(authorization, params.unitId);
-			await database.transaction((tx) =>
-				deleteCustomThemeInstallation(tx, {
+			return database.transaction((tx) =>
+				putCustomThemeInstallation(tx, {
 					hostUnitId: params.unitId,
+					revisionId: body.revisionId,
 					actorProfileId: profile.unitId,
 				}),
 			);
-			return status(StatusCodes.NO_CONTENT, undefined);
 		},
+	)
+	.delete(
+		"/:unitId/custom-theme-installation",
 		{
 			access: "contribute:unit:update",
 			params: HostUnitParams,
@@ -232,5 +217,15 @@ export default new Elysia({ prefix: "/units/by-id" })
 				tags: ["Unit Presentations"],
 				responses: NoContentResponse,
 			},
+		},
+		async ({ authorization, params, profile, status }) => {
+			await ensureInstallerEligibility(authorization, params.unitId);
+			await database.transaction((tx) =>
+				deleteCustomThemeInstallation(tx, {
+					hostUnitId: params.unitId,
+					actorProfileId: profile.unitId,
+				}),
+			);
+			return status(StatusCodes.NO_CONTENT, undefined);
 		},
 	);

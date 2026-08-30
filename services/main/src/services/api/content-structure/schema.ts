@@ -1,4 +1,5 @@
-import { type Static, t } from "elysia";
+import type { StaticDecode } from "typebox";
+import { t } from "elysia";
 import { PortableTextDocument } from "@rezics/block";
 
 import {
@@ -178,7 +179,7 @@ export const UpdateContentStructureNodesBatchBody = t.Object(
 	},
 	{ additionalProperties: false },
 );
-export type UpdateContentStructureNodesBatchBody = Static<
+export type UpdateContentStructureNodesBatchBody = StaticDecode<
 	typeof UpdateContentStructureNodesBatchBody
 >;
 
@@ -196,11 +197,11 @@ export const RestoreContentStructureRevisionBody = t.Object(
 );
 
 export const BookContentStructureParams = t.Object({ unitId: Uuid });
-export type BookContentStructureParams = Static<typeof BookContentStructureParams>;
+export type BookContentStructureParams = StaticDecode<typeof BookContentStructureParams>;
 export const BookContentStructureQuery = t.Object(LocalizationLanguageQuery, {
 	additionalProperties: false,
 });
-export type BookContentStructureQuery = Static<typeof BookContentStructureQuery>;
+export type BookContentStructureQuery = StaticDecode<typeof BookContentStructureQuery>;
 
 const BookContentStructureDraftNodeBase = {
 	id: Uuid,
@@ -266,14 +267,16 @@ export const SaveBookContentStructureDraftBody = t.Object(
 	},
 	{ additionalProperties: false },
 );
-export type SaveBookContentStructureDraftBody = Static<typeof SaveBookContentStructureDraftBody>;
+export type SaveBookContentStructureDraftBody = StaticDecode<
+	typeof SaveBookContentStructureDraftBody
+>;
 
 export const MediaContentStructureParams = t.Object({ unitId: Uuid });
-export type MediaContentStructureParams = Static<typeof MediaContentStructureParams>;
+export type MediaContentStructureParams = StaticDecode<typeof MediaContentStructureParams>;
 export const MediaContentStructureQuery = t.Object(LocalizationLanguageQuery, {
 	additionalProperties: false,
 });
-export type MediaContentStructureQuery = Static<typeof MediaContentStructureQuery>;
+export type MediaContentStructureQuery = StaticDecode<typeof MediaContentStructureQuery>;
 
 const ExistingMediaContentStructureDraftNode = t.Object(
 	{
@@ -323,10 +326,12 @@ export const SaveMediaContentStructureDraftBody = t.Object(
 	},
 	{ additionalProperties: false },
 );
-export type SaveMediaContentStructureDraftBody = Static<typeof SaveMediaContentStructureDraftBody>;
+export type SaveMediaContentStructureDraftBody = StaticDecode<
+	typeof SaveMediaContentStructureDraftBody
+>;
 
 export const BookChapterNodeParams = t.Object({ bookId: Uuid, nodeId: Uuid });
-export type BookChapterNodeParams = Static<typeof BookChapterNodeParams>;
+export type BookChapterNodeParams = StaticDecode<typeof BookChapterNodeParams>;
 
 export const ReadChapterQuery = t.Object(
 	{
@@ -335,13 +340,13 @@ export const ReadChapterQuery = t.Object(
 	},
 	{ additionalProperties: false },
 );
-export type ReadChapterQuery = Static<typeof ReadChapterQuery>;
+export type ReadChapterQuery = StaticDecode<typeof ReadChapterQuery>;
 
 export const ChapterLocalizationParams = t.Object({
 	chapterId: Uuid,
 	language: ContentLanguage,
 });
-export type ChapterLocalizationParams = Static<typeof ChapterLocalizationParams>;
+export type ChapterLocalizationParams = StaticDecode<typeof ChapterLocalizationParams>;
 
 export const UpsertChapterLocalizationBody = t.Object({
 	title: t.String({ minLength: 1, maxLength: 500 }),
@@ -350,4 +355,4 @@ export const UpsertChapterLocalizationBody = t.Object({
 	baseRevisionId: Uuid,
 	revisionContext: t.Optional(RevisionContext),
 });
-export type UpsertChapterLocalizationBody = Static<typeof UpsertChapterLocalizationBody>;
+export type UpsertChapterLocalizationBody = StaticDecode<typeof UpsertChapterLocalizationBody>;

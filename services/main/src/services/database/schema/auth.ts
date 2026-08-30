@@ -1,4 +1,5 @@
 import { defineRelationsPart, inArray, sql } from "drizzle-orm";
+import { ContentLanguageValues, type ContentLanguage } from "@rezics/i18n";
 import {
 	text,
 	timestamp,
@@ -9,7 +10,6 @@ import {
 	index,
 	uniqueIndex,
 } from "drizzle-orm/pg-core";
-import { ContentLanguageValues, type ContentLanguage } from "@rezics/i18n";
 import { pgTable } from "./base";
 
 export const users = pgTable(
@@ -21,14 +21,14 @@ export const users = pgTable(
 		email: text("email").notNull().unique(),
 		emailVerified: boolean("email_verified").default(false).notNull(),
 		image: text("image"),
-		registrationContentLanguage: text("registration_content_language")
-			.$type<ContentLanguage>()
-			.default("en")
-			.notNull(),
 		createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).defaultNow().notNull(),
 		updatedAt: timestamp("updated_at", { withTimezone: true, precision: 3 })
 			.defaultNow()
 			.$onUpdate(() => /* @__PURE__ */ new Date())
+			.notNull(),
+		registrationContentLanguage: text("registration_content_language")
+			.$type<ContentLanguage>()
+			.default("en")
 			.notNull(),
 	},
 	(table) => [
@@ -63,6 +63,7 @@ export const accounts = pgTable(
 	"accounts",
 	{
 		id: uuid("id").default(sql`uuidv7()`).primaryKey(),
+		issuer: text("issuer").default("local:credential").notNull(),
 		accountId: text("account_id").notNull(),
 		providerId: text("provider_id").notNull(),
 		userId: uuid("user_id")
@@ -89,6 +90,7 @@ export const accounts = pgTable(
 	},
 	(table) => [
 		uniqueIndex("accounts_provider_id_account_id_key").on(table.providerId, table.accountId),
+		uniqueIndex("accounts_issuer_account_id_key").on(table.issuer, table.accountId),
 		index("accounts_user_id_idx").on(table.userId),
 	],
 );
@@ -127,7 +129,7 @@ export const apikeys = pgTable(
 		enabled: boolean("enabled").default(true),
 		rateLimitEnabled: boolean("rate_limit_enabled").default(true),
 		rateLimitTimeWindow: integer("rate_limit_time_window").default(60000),
-		rateLimitMax: integer("rate_limit_max").default(300),
+		rateLimitMax: integer("rate_limit_max").default(5000),
 		requestCount: integer("request_count").default(0),
 		remaining: integer("remaining"),
 		lastRequest: timestamp("last_request", { withTimezone: true, precision: 3 }),

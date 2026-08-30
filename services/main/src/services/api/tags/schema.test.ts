@@ -1,4 +1,5 @@
-import { Value } from "@sinclair/typebox/value";
+import type { StaticDecode } from "typebox";
+import { Value } from "typebox/value";
 import { describe, expect, it } from "vitest";
 
 import {
@@ -146,11 +147,11 @@ describe("Tag API schemas", () => {
 			score: 1,
 			voteCount: 1,
 			viewerVote: 1 as const,
-		} satisfies (typeof RealmUnitTagVoteListResponse.static)["tags"][number];
+		} satisfies StaticDecode<typeof RealmUnitTagVoteListResponse>["tags"][number];
 		const response = {
 			realmId: tag.realmId,
 			tags: [tag],
-		} satisfies typeof RealmUnitTagVoteListResponse.static;
+		} satisfies StaticDecode<typeof RealmUnitTagVoteListResponse>;
 
 		expect(Value.Check(RealmUnitTagVoteListResponse, response)).toBe(true);
 		for (const timestamp of ["createdAt", "updatedAt"] as const)

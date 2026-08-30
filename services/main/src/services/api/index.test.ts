@@ -1,10 +1,11 @@
 import { StatusCodes } from "http-status-codes";
-import { toOpenAPISchema } from "@elysiajs/openapi";
+import { OpenAPIV3 } from "openapi-types";
 import { z } from "zod";
 import { describe, expect, it } from "vitest";
 
 import { UnitKindValues } from "../database/schema/contract-values";
 import api from ".";
+import { toRezicsOpenApiSchema as toOpenAPISchema } from "./openapi";
 
 const ErrorBody = z.object({
 	error: z.object({ code: z.string(), message: z.string() }),
@@ -16,6 +17,133 @@ async function readErrorBody(response: Response) {
 }
 
 describe("API root", () => {
+	it("preserves the credentialed CORS contract for actual and preflight requests", async () => {
+		const trustedOrigin = "http://localhost:3000";
+		const allowedMethods = "GET, HEAD, POST, PUT, PATCH, DELETE, OPTIONS";
+		const allowedHeaders = "Content-Type, Authorization, Accept-Language";
+		const exposedHeaders = "X-Request-Id, Retry-After";
+		const actual = await api.handle(
+			new Request("http://localhost/api/v1/health", {
+				headers: { Cookie: "test=value", Origin: trustedOrigin },
+			}),
+		);
+		const preflight = await api.handle(
+			new Request("http://localhost/api/v1/users/me/preferences", {
+				method: "OPTIONS",
+				headers: {
+					Origin: trustedOrigin,
+					"Access-Control-Request-Method": "PUT",
+					"Access-Control-Request-Headers": "content-type, authorization",
+				},
+			}),
+		);
+		const untrusted = await api.handle(
+			new Request("http://localhost/api/v1/health", {
+				headers: { Origin: "https://untrusted.example" },
+			}),
+		);
+
+		expect(actual.status).toBe(StatusCodes.OK);
+		expect(actual.headers.get("Access-Control-Allow-Origin")).toBe(trustedOrigin);
+		expect(actual.headers.get("Access-Control-Allow-Credentials")).toBe("true");
+		expect(actual.headers.get("Access-Control-Allow-Methods")).toBe(allowedMethods);
+		expect(actual.headers.get("Access-Control-Allow-Headers")).toBe(allowedHeaders);
+		expect(actual.headers.get("Access-Control-Expose-Headers")).toBe(exposedHeaders);
+		expect(actual.headers.get("Access-Control-Max-Age")).toBeNull();
+		expect(actual.headers.get("Vary")).toBe("Origin");
+
+		expect(preflight.status).toBe(StatusCodes.NO_CONTENT);
+		expect(preflight.headers.get("Access-Control-Allow-Origin")).toBe(trustedOrigin);
+		expect(preflight.headers.get("Access-Control-Allow-Credentials")).toBe("true");
+		expect(preflight.headers.get("Access-Control-Allow-Methods")).toBe(allowedMethods);
+		expect(preflight.headers.get("Access-Control-Allow-Headers")).toBe(allowedHeaders);
+		expect(preflight.headers.get("Access-Control-Expose-Headers")).toBe(exposedHeaders);
+		expect(preflight.headers.get("Access-Control-Max-Age")).toBe("5");
+		expect(preflight.headers.get("Vary")).toBe("Origin");
+
+		expect(untrusted.status).toBe(StatusCodes.OK);
+		expect(untrusted.headers.get("Access-Control-Allow-Origin")).toBeNull();
+		expect(untrusted.headers.get("Access-Control-Allow-Credentials")).toBe("true");
+		expect(untrusted.headers.get("Vary")).toBe("Origin");
+	});
+
+	it("mounts Better Auth before business routes and preserves its response contract", async () => {
+		const health = await api.handle(new Request("http://localhost/api/auth/ok"));
+		const session = await api.handle(new Request("http://localhost/api/auth/get-session"));
+		const invalidSignIn = await api.handle(
+			new Request("http://localhost/api/auth/sign-in/email", {
+				method: "POST",
+				headers: { "Content-Type": "application/json", Origin: "http://localhost:3000" },
+				body: JSON.stringify({ email: "not-an-email", password: "test-password" }),
+			}),
+		);
+		const rejectedOrigin = await api.handle(
+			new Request("http://localhost/api/auth/sign-in/email", {
+				method: "POST",
+				headers: { "Content-Type": "application/json", Origin: "https://untrusted.example" },
+				body: JSON.stringify({ email: "reader@example.com", password: "test-password" }),
+			}),
+		);
+		const signOut = await api.handle(
+			new Request("http://localhost/api/auth/sign-out", {
+				method: "POST",
+				headers: { "Content-Type": "application/json", Origin: "http://localhost:3000" },
+				body: "{}",
+			}),
+		);
+
+		expect(health.status).toBe(StatusCodes.OK);
+		expect(await health.json()).toEqual({ ok: true });
+		expect(session.status).toBe(StatusCodes.OK);
+		expect(session.headers.get("Cache-Control")).toBe("no-store");
+		expect(await session.json()).toBeNull();
+		expect(invalidSignIn.status).toBe(StatusCodes.BAD_REQUEST);
+		expect(await invalidSignIn.json()).toMatchObject({ code: "INVALID_EMAIL" });
+		expect(rejectedOrigin.status).toBe(StatusCodes.FORBIDDEN);
+		expect(await rejectedOrigin.json()).toMatchObject({ code: "INVALID_ORIGIN" });
+		expect(signOut.status).toBe(StatusCodes.OK);
+		expect(await signOut.json()).toMatchObject({ success: true });
+		expect(signOut.headers.get("Set-Cookie")).toContain("better-auth.session_token=");
+		expect(signOut.headers.get("Set-Cookie")).toContain("Max-Age=0");
+	});
+
+	it.each([
+		["POST", "/api/auth/api-key/create"],
+		["GET", "/api/auth/api-key/get"],
+		["GET", "/api/auth/api-key/list"],
+		["POST", "/api/auth/api-key/update"],
+		["POST", "/api/auth/api-key/delete"],
+	] as const)(
+		"keeps the Better Auth API-key %s %s route intentionally disabled",
+		async (method, path) => {
+			const response = await api.handle(
+				new Request(`http://localhost${path}`, {
+					method,
+					headers: { "Content-Type": "application/json", Origin: "http://localhost:3000" },
+					...(method === "POST" ? { body: "{}" } : {}),
+				}),
+			);
+
+			expect(response.status).toBe(StatusCodes.NOT_FOUND);
+			expect(response.headers.get("Content-Type")).toContain("text/plain");
+			expect(await response.text()).toBe("Not Found");
+		},
+	);
+
+	it("rejects an invalid API-key bearer credential on an API-key-only route", async () => {
+		const protectedRoute = await api.handle(
+			new Request("http://localhost/api/v1/token", {
+				headers: { Authorization: "Bearer invalid-api-token" },
+			}),
+		);
+
+		expect(protectedRoute.status).toBe(StatusCodes.UNAUTHORIZED);
+		expect((await readErrorBody(protectedRoute)).error).toEqual({
+			code: "AuthenticationRequired",
+			message: "Authentication required",
+		});
+	});
+
 	it("serves the versioned agent contribution guide", async () => {
 		const response = await api.handle(
 			new Request("http://localhost/.well-known/rezics-agent.json"),
@@ -276,7 +404,7 @@ describe("API root", () => {
 		for (const operation of operations) {
 			if (!operation) throw new Error("Expected a Unit external-link operation");
 			const typeParameter = operation.parameters?.find(
-				(parameter) =>
+				(parameter: OpenAPIV3.ParameterObject | OpenAPIV3.ReferenceObject) =>
 					!("$ref" in parameter) && parameter.in === "path" && parameter.name === "type",
 			);
 			if (!typeParameter || "$ref" in typeParameter || !typeParameter.schema)
@@ -293,8 +421,15 @@ describe("API root", () => {
 
 	it("documents the development preview gate on unreleased Zone address writes", () => {
 		const document = toOpenAPISchema(api);
-		const methods = ["delete", "get", "patch", "post", "put"] as const;
-		const previewProtectedZoneOperations = Object.entries(document.paths).flatMap(([path, item]) =>
+		const methods = [
+			OpenAPIV3.HttpMethods.DELETE,
+			OpenAPIV3.HttpMethods.GET,
+			OpenAPIV3.HttpMethods.PATCH,
+			OpenAPIV3.HttpMethods.POST,
+			OpenAPIV3.HttpMethods.PUT,
+		] as const;
+		const paths: OpenAPIV3.PathsObject = document.paths;
+		const previewProtectedZoneOperations = Object.entries(paths).flatMap(([path, item]) =>
 			path.includes("/zones")
 				? methods.flatMap((method) => {
 						const forbidden = item?.[method]?.responses?.[StatusCodes.FORBIDDEN];

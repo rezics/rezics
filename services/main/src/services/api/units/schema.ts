@@ -1,4 +1,5 @@
-import { type Static, t } from "elysia";
+import type { StaticDecode } from "typebox";
+import { t } from "elysia";
 import { ContentLanguageValues } from "@rezics/i18n";
 import {
 	CreditAttributionRoleValues,
@@ -34,22 +35,22 @@ export const VariantUnitType = t.Union([
 	t.Literal("software"),
 	t.Literal("media"),
 ]);
-export type VariantUnitType = Static<typeof VariantUnitType>;
+export type VariantUnitType = StaticDecode<typeof VariantUnitType>;
 
 export const WorkUnitType = t.Union([VariantUnitType, t.Literal("series")]);
-export type WorkUnitType = Static<typeof WorkUnitType>;
+export type WorkUnitType = StaticDecode<typeof WorkUnitType>;
 export const TimedMediaUnitType = t.Union([t.Literal("video"), t.Literal("audio")]);
-export type TimedMediaUnitType = Static<typeof TimedMediaUnitType>;
+export type TimedMediaUnitType = StaticDecode<typeof TimedMediaUnitType>;
 export const ReleaseUnitType = t.Literal("release");
-export type ReleaseUnitType = Static<typeof ReleaseUnitType>;
+export type ReleaseUnitType = StaticDecode<typeof ReleaseUnitType>;
 export const ManageableUnitType = t.Union([WorkUnitType, TimedMediaUnitType, ReleaseUnitType]);
-export type ManageableUnitType = Static<typeof ManageableUnitType>;
+export type ManageableUnitType = StaticDecode<typeof ManageableUnitType>;
 export const ContentLanguageSupportUnitType = t.Union([
 	VariantUnitType,
 	TimedMediaUnitType,
 	ReleaseUnitType,
 ]);
-export type ContentLanguageSupportUnitType = Static<typeof ContentLanguageSupportUnitType>;
+export type ContentLanguageSupportUnitType = StaticDecode<typeof ContentLanguageSupportUnitType>;
 export const ContentLanguageEvidenceUnitType = t.Union([
 	VariantUnitType,
 	TimedMediaUnitType,
@@ -109,7 +110,7 @@ export const ContentLanguageEvidenceResponse = t.Object(
 );
 
 export const UnitOwnershipMode = t.Union(UnitOwnershipModeValues.map((value) => t.Literal(value)));
-export type UnitOwnershipMode = Static<typeof UnitOwnershipMode>;
+export type UnitOwnershipMode = StaticDecode<typeof UnitOwnershipMode>;
 
 export const CreateUnitCreditAttributionInput = t.Object(
 	{
@@ -118,13 +119,15 @@ export const CreateUnitCreditAttributionInput = t.Object(
 	},
 	{ additionalProperties: false },
 );
-export type CreateUnitCreditAttributionInput = Static<typeof CreateUnitCreditAttributionInput>;
+export type CreateUnitCreditAttributionInput = StaticDecode<
+	typeof CreateUnitCreditAttributionInput
+>;
 
 export const UnitVersionInput = t.Union([
 	t.Object({ kind: t.Literal("main") }, { additionalProperties: false }),
 	t.Object({ kind: t.Literal("variant"), mainUnitId: Uuid }, { additionalProperties: false }),
 ]);
-export type UnitVersionInput = Static<typeof UnitVersionInput>;
+export type UnitVersionInput = StaticDecode<typeof UnitVersionInput>;
 
 export const UnitStatusEventParams = t.Object({ unitId: Uuid });
 export const UnitRealmPublicationParams = t.Object({
@@ -149,7 +152,7 @@ export const ListUnitRealmPublicationsQuery = t.Object(
 	},
 	{ additionalProperties: false },
 );
-export type ListUnitRealmPublicationsQuery = Static<typeof ListUnitRealmPublicationsQuery>;
+export type ListUnitRealmPublicationsQuery = StaticDecode<typeof ListUnitRealmPublicationsQuery>;
 export const UnitRealmPublicationListResponse = t.Object({
 	items: t.Array(
 		t.Object({
@@ -285,7 +288,7 @@ export const CreateUnitBody = t.Union([
 		{ additionalProperties: false },
 	),
 ]);
-export type CreateUnitBody = Static<typeof CreateUnitBody>;
+export type CreateUnitBody = StaticDecode<typeof CreateUnitBody>;
 
 const UnitDetailsInput = t.Object(
 	{
@@ -334,7 +337,7 @@ export const UpdateUnitBody = t.Object(
 	},
 	{ additionalProperties: false },
 );
-export type UpdateUnitBody = Static<typeof UpdateUnitBody>;
+export type UpdateUnitBody = StaticDecode<typeof UpdateUnitBody>;
 
 export const ListUnitsQuery = t.Object(
 	{
@@ -344,13 +347,13 @@ export const ListUnitsQuery = t.Object(
 	},
 	{ additionalProperties: false },
 );
-export type ListUnitsQuery = Static<typeof ListUnitsQuery>;
+export type ListUnitsQuery = StaticDecode<typeof ListUnitsQuery>;
 
 export const UnitLookupParams = t.Object({
 	type: ManageableUnitType,
 	unitId: Uuid,
 });
-export type UnitLookupParams = Static<typeof UnitLookupParams>;
+export type UnitLookupParams = StaticDecode<typeof UnitLookupParams>;
 
 export const BookChapterDraftJobParams = t.Object({ bookId: Uuid });
 export const CreateBookChapterDraftJobBody = t.Object(
@@ -367,7 +370,7 @@ export const BookChapterDraftJobResponse = t.Object(
 export const UnitDetailQuery = t.Object(LocalizationLanguageQuery, {
 	additionalProperties: false,
 });
-export type UnitDetailQuery = Static<typeof UnitDetailQuery>;
+export type UnitDetailQuery = StaticDecode<typeof UnitDetailQuery>;
 
 export const UnitSubjectAssociationsQuery = t.Object(
 	{
@@ -383,7 +386,7 @@ export const UnitSubjectAssociationsQuery = t.Object(
 	},
 	{ additionalProperties: false },
 );
-export type UnitSubjectAssociationsQuery = Static<typeof UnitSubjectAssociationsQuery>;
+export type UnitSubjectAssociationsQuery = StaticDecode<typeof UnitSubjectAssociationsQuery>;
 
 export const PublicUnitSeoParams = t.Object({ unitId: Uuid });
 export const PublicUnitSeoQuery = UnitDetailQuery;
@@ -459,7 +462,7 @@ export const PublicUnitSeoResponse = t.Union([
 ]);
 
 export const UnitUnitIdParams = t.Object({ type: ManageableUnitType, unitId: Uuid });
-export type UnitUnitIdParams = Static<typeof UnitUnitIdParams>;
+export type UnitUnitIdParams = StaticDecode<typeof UnitUnitIdParams>;
 export const VariantUnitUnitIdParams = t.Object({ type: VariantUnitType, unitId: Uuid });
 
 export const UpdateUnitVariantContextBody = t.Object(
@@ -470,26 +473,26 @@ export const UpdateUnitVariantContextBody = t.Object(
 	},
 	{ additionalProperties: false },
 );
-export type UpdateUnitVariantContextBody = Static<typeof UpdateUnitVariantContextBody>;
+export type UpdateUnitVariantContextBody = StaticDecode<typeof UpdateUnitVariantContextBody>;
 
 export const PromoteUnitVariantBody = t.Object(
 	{ expectedMainUnitId: Uuid, revisionContext: t.Optional(RevisionContext) },
 	{ additionalProperties: false },
 );
-export type PromoteUnitVariantBody = Static<typeof PromoteUnitVariantBody>;
+export type PromoteUnitVariantBody = StaticDecode<typeof PromoteUnitVariantBody>;
 
 export const UnitLocalizationParams = t.Object({
 	type: ManageableUnitType,
 	unitId: t.String({ format: "uuid" }),
 	language: ContentLanguage,
 });
-export type UnitLocalizationParams = Static<typeof UnitLocalizationParams>;
+export type UnitLocalizationParams = StaticDecode<typeof UnitLocalizationParams>;
 
 export const UnitLocalizationBody = t.Object(
 	{ ...UnitLocalizationContentFields, revisionContext: t.Optional(RevisionContext) },
 	{ additionalProperties: false },
 );
-export type UnitLocalizationBody = Static<typeof UnitLocalizationBody>;
+export type UnitLocalizationBody = StaticDecode<typeof UnitLocalizationBody>;
 
 const ContentLanguageOrder = t.Array(ContentLanguage, {
 	minItems: 1,
@@ -510,12 +513,12 @@ export const UnitLocalizationOrderBody = t.Object(
 	},
 	{ additionalProperties: false },
 );
-export type UnitLocalizationOrderBody = Static<typeof UnitLocalizationOrderBody>;
+export type UnitLocalizationOrderBody = StaticDecode<typeof UnitLocalizationOrderBody>;
 export const UnitLocalizationDeleteBody = t.Object(
 	{ expectedLanguages: ContentLanguageOrder, revisionContext: t.Optional(RevisionContext) },
 	{ additionalProperties: false },
 );
-export type UnitLocalizationDeleteBody = Static<typeof UnitLocalizationDeleteBody>;
+export type UnitLocalizationDeleteBody = StaticDecode<typeof UnitLocalizationDeleteBody>;
 export const UnitLocalizationOrderResponse = t.Object({
 	languages: ContentLanguageOrder,
 });

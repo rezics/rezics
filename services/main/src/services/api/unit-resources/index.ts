@@ -464,6 +464,14 @@ export default new Elysia()
 		app
 			.get(
 				"",
+				{
+					query: ListEntityEntriesQuery,
+					response: {
+						[StatusCodes.OK]: EntityListResponse,
+						[StatusCodes.UNAUTHORIZED]: AuthenticationRequiredResponse,
+					},
+					detail: { summary: "List entity entries", tags: ["Entity"] },
+				},
 				async ({ query, request }) => {
 					const localizationLanguages = query.localizationLanguages ?? [];
 					let entityCondition = publiclyReadableUnitCondition();
@@ -551,20 +559,9 @@ export default new Elysia()
 						})),
 					};
 				},
-				{
-					query: ListEntityEntriesQuery,
-					response: {
-						[StatusCodes.OK]: EntityListResponse,
-						[StatusCodes.UNAUTHORIZED]: AuthenticationRequiredResponse,
-					},
-					detail: { summary: "List entity entries", tags: ["Entity"] },
-				},
 			)
 			.post(
 				"",
-				async ({ profile, body }) => ({
-					id: await createUnitResource("entity", profile.unitId, body),
-				}),
 				{
 					access: "contribute:unit:create",
 					body: CreateEntityBody,
@@ -578,9 +575,21 @@ export default new Elysia()
 					},
 					detail: { summary: "Create entity entry", tags: ["Entity"] },
 				},
+				async ({ profile, body }) => ({
+					id: await createUnitResource("entity", profile.unitId, body),
+				}),
 			)
 			.get(
 				"/:unitId",
+				{
+					params: UnitIdParams,
+					query: EntityDetailQuery,
+					response: {
+						[StatusCodes.OK]: EntityDetailResponse,
+						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["EntityEntryNotFound"]),
+					},
+					detail: { summary: "Get entity entry", tags: ["Entity"] },
+				},
 				async ({ params, query, request }) => {
 					const identity = await resolveIdentity(request, "unit:read");
 					const localizationLanguages = query.localizationLanguages ?? [];
@@ -764,18 +773,28 @@ export default new Elysia()
 						subjectAssociations: presentedSubjectAssociations,
 					};
 				},
-				{
-					params: UnitIdParams,
-					query: EntityDetailQuery,
-					response: {
-						[StatusCodes.OK]: EntityDetailResponse,
-						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["EntityEntryNotFound"]),
-					},
-					detail: { summary: "Get entity entry", tags: ["Entity"] },
-				},
 			)
 			.put(
 				"/:unitId/measurements",
+				{
+					access: "contribute:unit:update",
+					params: UnitIdParams,
+					body: UpsertEntityMeasurementBody,
+					response: {
+						[StatusCodes.OK]: EntityMeasurementResponse,
+						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
+						[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
+						[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["ValidationError"]),
+						[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
+							"RevisionCreditEntityInvalid",
+							"RevisionContributionActorRequired",
+						]),
+					},
+					detail: {
+						summary: "Create or replace a canonical Entity measurement set",
+						tags: ["Entity"],
+					},
+				},
 				async ({ params, body, authorization }) => {
 					await checkUnitType(params.unitId, "entity");
 					await authorization.unit.ensureCanUpdate(params.unitId, [["measurements"]]);
@@ -802,41 +821,9 @@ export default new Elysia()
 						return measurement;
 					});
 				},
-				{
-					access: "contribute:unit:update",
-					params: UnitIdParams,
-					body: UpsertEntityMeasurementBody,
-					response: {
-						[StatusCodes.OK]: EntityMeasurementResponse,
-						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
-						[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
-						[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["ValidationError"]),
-						[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
-							"RevisionCreditEntityInvalid",
-							"RevisionContributionActorRequired",
-						]),
-					},
-					detail: {
-						summary: "Create or replace a canonical Entity measurement set",
-						tags: ["Entity"],
-					},
-				},
 			)
 			.patch(
 				"/:unitId/variant-context",
-				async ({ params, authorization, body }) => {
-					await checkUnitType(params.unitId, "entity");
-					await updateUnitVariantContext({
-						kind: "entity",
-						variantUnitId: params.unitId,
-						mainUnitId: body.mainUnitId,
-						expectedMainUnitId: body.expectedMainUnitId,
-						actorProfileId: authorization.profileId,
-						contribution: body.revisionContext?.contribution,
-						authorization: authorization.unit,
-					});
-					return { id: params.unitId };
-				},
 				{
 					access: "contribute:unit:update",
 					params: UnitIdParams,
@@ -860,14 +847,12 @@ export default new Elysia()
 					},
 					detail: { summary: "Update Entity Main relationship", tags: ["Entity"] },
 				},
-			)
-			.post(
-				"/:unitId/variant-context/promote",
 				async ({ params, authorization, body }) => {
 					await checkUnitType(params.unitId, "entity");
-					await promoteUnitVariantToMain({
+					await updateUnitVariantContext({
 						kind: "entity",
 						variantUnitId: params.unitId,
+						mainUnitId: body.mainUnitId,
 						expectedMainUnitId: body.expectedMainUnitId,
 						actorProfileId: authorization.profileId,
 						contribution: body.revisionContext?.contribution,
@@ -875,6 +860,9 @@ export default new Elysia()
 					});
 					return { id: params.unitId };
 				},
+			)
+			.post(
+				"/:unitId/variant-context/promote",
 				{
 					access: "contribute:unit:update",
 					params: UnitIdParams,
@@ -898,19 +886,21 @@ export default new Elysia()
 					},
 					detail: { summary: "Promote Entity Variant to Main", tags: ["Entity"] },
 				},
-			)
-			.put(
-				"/:unitId/localizations/:language",
 				async ({ params, authorization, body }) => {
 					await checkUnitType(params.unitId, "entity");
-					const { revisionContext, ...localization } = body;
-					await upsertLocalization(params.unitId, authorization, {
-						...localization,
-						revisionContribution: revisionContext?.contribution,
-						language: params.language,
+					await promoteUnitVariantToMain({
+						kind: "entity",
+						variantUnitId: params.unitId,
+						expectedMainUnitId: body.expectedMainUnitId,
+						actorProfileId: authorization.profileId,
+						contribution: body.revisionContext?.contribution,
+						authorization: authorization.unit,
 					});
 					return { id: params.unitId };
 				},
+			)
+			.put(
+				"/:unitId/localizations/:language",
 				{
 					access: "contribute:unit:update",
 					params: EntityLocalizationParams,
@@ -926,12 +916,27 @@ export default new Elysia()
 					},
 					detail: { summary: "Create or replace entity localization", tags: ["Entity"] },
 				},
+				async ({ params, authorization, body }) => {
+					await checkUnitType(params.unitId, "entity");
+					const { revisionContext, ...localization } = body;
+					await upsertLocalization(params.unitId, authorization, {
+						...localization,
+						revisionContribution: revisionContext?.contribution,
+						language: params.language,
+					});
+					return { id: params.unitId };
+				},
 			),
 	)
 	.group("/tags", (app) =>
 		app
 			.get(
 				"",
+				{
+					query: ListTagsQuery,
+					response: { [StatusCodes.OK]: TagListResponse },
+					detail: { summary: "List tags", tags: ["Tags"] },
+				},
 				async ({ query }) => {
 					const localizationLanguages = query.localizationLanguages ?? [];
 					return {
@@ -964,17 +969,9 @@ export default new Elysia()
 							.limit(query.limit ?? 20),
 					};
 				},
-				{
-					query: ListTagsQuery,
-					response: { [StatusCodes.OK]: TagListResponse },
-					detail: { summary: "List tags", tags: ["Tags"] },
-				},
 			)
 			.post(
 				"",
-				async ({ profile, body }) => ({
-					id: await createUnitResource("tag", profile.unitId, body),
-				}),
 				{
 					access: "contribute:unit:create",
 					body: CreateUnitResourceBody,
@@ -987,9 +984,21 @@ export default new Elysia()
 					},
 					detail: { summary: "Create tag", tags: ["Tags"] },
 				},
+				async ({ profile, body }) => ({
+					id: await createUnitResource("tag", profile.unitId, body),
+				}),
 			)
 			.get(
 				"/:tagId",
+				{
+					params: TagDetailParams,
+					query: TagDetailQuery,
+					response: {
+						[StatusCodes.OK]: TagDetailResponse,
+						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["TagNotFound"]),
+					},
+					detail: { summary: "Get tag detail", tags: ["Tags"] },
+				},
 				async ({ params, query, request }) => {
 					const identity = await resolveIdentity(request, "unit:read");
 					const localizationLanguages = query.localizationLanguages ?? [];
@@ -1042,28 +1051,9 @@ export default new Elysia()
 						capabilities: { canEdit },
 					};
 				},
-				{
-					params: TagDetailParams,
-					query: TagDetailQuery,
-					response: {
-						[StatusCodes.OK]: TagDetailResponse,
-						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["TagNotFound"]),
-					},
-					detail: { summary: "Get tag detail", tags: ["Tags"] },
-				},
 			)
 			.put(
 				"/:tagId/localizations/:language",
-				async ({ params, authorization, body }) => {
-					await checkUnitType(params.tagId, "tag");
-					const { revisionContext, ...localization } = body;
-					await upsertLocalization(params.tagId, authorization, {
-						...localization,
-						revisionContribution: revisionContext?.contribution,
-						language: params.language,
-					});
-					return { id: params.tagId };
-				},
 				{
 					access: "contribute:unit:update",
 					params: TagLocalizationParams,
@@ -1079,12 +1069,32 @@ export default new Elysia()
 					},
 					detail: { summary: "Create or replace tag localization", tags: ["Tags"] },
 				},
+				async ({ params, authorization, body }) => {
+					await checkUnitType(params.tagId, "tag");
+					const { revisionContext, ...localization } = body;
+					await upsertLocalization(params.tagId, authorization, {
+						...localization,
+						revisionContribution: revisionContext?.contribution,
+						language: params.language,
+					});
+					return { id: params.tagId };
+				},
 			),
 	)
 	.group("/units/:type/:unitId", (app) =>
 		app
 			.get(
 				"/aliases",
+				{
+					access: "unit:read",
+					params: UnitAliasUnitParams,
+					query: UnitAliasListQuery,
+					response: {
+						[StatusCodes.OK]: AliasListResponse,
+						[StatusCodes.CONFLICT]: toApiErrorResponse(["UnitReferenceLimitReached"]),
+					},
+					detail: { summary: "List Unit alias references", tags: ["Units"] },
+				},
 				async ({ params, query, profile, authorization }) => {
 					await checkUnitType(params.unitId, params.type);
 					await authorization.unit.ensureCanRead(params.unitId);
@@ -1151,19 +1161,24 @@ export default new Elysia()
 						curationVersion,
 					};
 				},
-				{
-					access: "unit:read",
-					params: UnitAliasUnitParams,
-					query: UnitAliasListQuery,
-					response: {
-						[StatusCodes.OK]: AliasListResponse,
-						[StatusCodes.CONFLICT]: toApiErrorResponse(["UnitReferenceLimitReached"]),
-					},
-					detail: { summary: "List Unit alias references", tags: ["Units"] },
-				},
 			)
 			.post(
 				"/aliases",
+				{
+					access: "contribute:interaction:write",
+					params: UnitAliasUnitParams,
+					body: AddUnitAliasBody,
+					response: {
+						[StatusCodes.OK]: AliasResponse,
+						[StatusCodes.FORBIDDEN]: UnitInteractionForbiddenResponse,
+						[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
+						[StatusCodes.CONFLICT]: toApiErrorResponse([
+							"UnitReferenceLimitReached",
+							"UnitReferenceWithdrawn",
+						]),
+					},
+					detail: { summary: "Propose Unit alias", tags: ["Units"] },
+				},
 				async ({ params, profile, authorization, body }) => {
 					await checkUnitType(params.unitId, params.type);
 					await authorization.unit.ensureCanRead(params.unitId);
@@ -1224,24 +1239,20 @@ export default new Elysia()
 					});
 					return getAliasReference(aliasId, profile.unitId);
 				},
-				{
-					access: "contribute:interaction:write",
-					params: UnitAliasUnitParams,
-					body: AddUnitAliasBody,
-					response: {
-						[StatusCodes.OK]: AliasResponse,
-						[StatusCodes.FORBIDDEN]: UnitInteractionForbiddenResponse,
-						[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
-						[StatusCodes.CONFLICT]: toApiErrorResponse([
-							"UnitReferenceLimitReached",
-							"UnitReferenceWithdrawn",
-						]),
-					},
-					detail: { summary: "Propose Unit alias", tags: ["Units"] },
-				},
 			)
 			.put(
 				"/aliases/:aliasId/vote",
+				{
+					access: "contribute:interaction:write",
+					params: UnitAliasParams,
+					body: VoteBody,
+					response: {
+						[StatusCodes.OK]: VoteResponse,
+						[StatusCodes.FORBIDDEN]: UnitInteractionForbiddenResponse,
+						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "AliasNotFound"]),
+					},
+					detail: { summary: "Vote on Unit alias", tags: ["Units"] },
+				},
 				async ({ params, profile, authorization, body }) => {
 					await checkUnitType(params.unitId, params.type);
 					await authorization.unit.ensureCanRead(params.unitId);
@@ -1271,20 +1282,19 @@ export default new Elysia()
 						});
 					return getAliasVoteSummary(params.aliasId, body.value);
 				},
+			)
+			.delete(
+				"/aliases/:aliasId/vote",
 				{
-					access: "contribute:interaction:write",
+					access: "write:interaction:write",
 					params: UnitAliasParams,
-					body: VoteBody,
 					response: {
 						[StatusCodes.OK]: VoteResponse,
 						[StatusCodes.FORBIDDEN]: UnitInteractionForbiddenResponse,
 						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "AliasNotFound"]),
 					},
-					detail: { summary: "Vote on Unit alias", tags: ["Units"] },
+					detail: { summary: "Remove Unit alias vote", tags: ["Units"] },
 				},
-			)
-			.delete(
-				"/aliases/:aliasId/vote",
 				async ({ params, profile, authorization }) => {
 					await checkUnitType(params.unitId, params.type);
 					await authorization.unit.ensureCanRead(params.unitId);
@@ -1310,19 +1320,24 @@ export default new Elysia()
 						);
 					return getAliasVoteSummary(params.aliasId, null);
 				},
-				{
-					access: "write:interaction:write",
-					params: UnitAliasParams,
-					response: {
-						[StatusCodes.OK]: VoteResponse,
-						[StatusCodes.FORBIDDEN]: UnitInteractionForbiddenResponse,
-						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "AliasNotFound"]),
-					},
-					detail: { summary: "Remove Unit alias vote", tags: ["Units"] },
-				},
 			)
 			.patch(
 				"/aliases/:aliasId",
+				{
+					access: "write:unit:update",
+					params: UnitAliasParams,
+					body: UpdateUnitReferenceCurationBody,
+					response: {
+						[StatusCodes.OK]: AliasCurationResponse,
+						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
+						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "AliasNotFound"]),
+						[StatusCodes.CONFLICT]: toApiErrorResponse([
+							"UnitReferenceCurationChanged",
+							"UnitReferencePinnedLimitReached",
+						]),
+					},
+					detail: { summary: "Update Unit Alias curation", tags: ["Units"] },
+				},
 				async ({ params, profile, authorization, body }) => {
 					await checkUnitType(params.unitId, params.type);
 					await authorization.unit.ensure(
@@ -1344,39 +1359,9 @@ export default new Elysia()
 						curationVersion: result.curationVersion,
 					};
 				},
-				{
-					access: "write:unit:update",
-					params: UnitAliasParams,
-					body: UpdateUnitReferenceCurationBody,
-					response: {
-						[StatusCodes.OK]: AliasCurationResponse,
-						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
-						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "AliasNotFound"]),
-						[StatusCodes.CONFLICT]: toApiErrorResponse([
-							"UnitReferenceCurationChanged",
-							"UnitReferencePinnedLimitReached",
-						]),
-					},
-					detail: { summary: "Update Unit Alias curation", tags: ["Units"] },
-				},
 			)
 			.delete(
 				"/aliases/:aliasId",
-				async ({ params, query, profile, authorization }) => {
-					await checkUnitType(params.unitId, params.type);
-					await authorization.unit.ensure(
-						params.unitId,
-						"unit.reference-curation.manage",
-						unitScope("references", "aliases"),
-					);
-					await withdrawUnitAlias({
-						unitId: params.unitId,
-						aliasId: params.aliasId,
-						actorProfileId: profile.unitId,
-						baseVersion: query.baseVersion,
-					});
-					return new Response(null, { status: StatusCodes.NO_CONTENT });
-				},
 				{
 					access: "write:unit:update",
 					params: UnitAliasParams,
@@ -1393,9 +1378,43 @@ export default new Elysia()
 						responses: NoContentResponse,
 					},
 				},
+				async ({ params, query, profile, authorization }) => {
+					await checkUnitType(params.unitId, params.type);
+					await authorization.unit.ensure(
+						params.unitId,
+						"unit.reference-curation.manage",
+						unitScope("references", "aliases"),
+					);
+					await withdrawUnitAlias({
+						unitId: params.unitId,
+						aliasId: params.aliasId,
+						actorProfileId: profile.unitId,
+						baseVersion: query.baseVersion,
+					});
+					return new Response(null, { status: StatusCodes.NO_CONTENT });
+				},
 			)
 			.post(
 				"/credit-attributions",
+				{
+					access: "contribute:unit:update",
+					params: AttributionUnitParams,
+					body: AddUnitCreditBody,
+					response: {
+						[StatusCodes.OK]: CreditAttributionResponse,
+						[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
+							"CreditAttributionRoleInvalid",
+							"RevisionCreditEntityInvalid",
+							"RevisionContributionActorRequired",
+						]),
+						[StatusCodes.FORBIDDEN]: toApiErrorResponse([
+							"UnitPermissionForbidden",
+							"EntityAssociationRestricted",
+						]),
+						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "EntityEntryNotFound"]),
+					},
+					detail: { summary: "Add Unit credit attribution", tags: ["Units"] },
+				},
 				async ({ params, authorization, body }) => {
 					const { revisionContext, ...creditInput } = body;
 					await checkUnitType(params.unitId, params.type);
@@ -1438,28 +1457,31 @@ export default new Elysia()
 					if (!created) throw new Error("Created credit attribution could not be resolved");
 					return created;
 				},
-				{
-					access: "contribute:unit:update",
-					params: AttributionUnitParams,
-					body: AddUnitCreditBody,
-					response: {
-						[StatusCodes.OK]: CreditAttributionResponse,
-						[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
-							"CreditAttributionRoleInvalid",
-							"RevisionCreditEntityInvalid",
-							"RevisionContributionActorRequired",
-						]),
-						[StatusCodes.FORBIDDEN]: toApiErrorResponse([
-							"UnitPermissionForbidden",
-							"EntityAssociationRestricted",
-						]),
-						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "EntityEntryNotFound"]),
-					},
-					detail: { summary: "Add Unit credit attribution", tags: ["Units"] },
-				},
 			)
 			.delete(
 				"/credit-attributions/:associationId",
+				{
+					access: "write:unit:update",
+					params: AttributionAssociationParams,
+					body: t.Optional(RevisionContextBody),
+					response: {
+						[StatusCodes.NO_CONTENT]: t.Void(),
+						[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
+							"RevisionCreditEntityInvalid",
+							"RevisionContributionActorRequired",
+						]),
+						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
+						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
+							"UnitNotFound",
+							"CreditAttributionNotFound",
+						]),
+					},
+					detail: {
+						summary: "Remove Unit credit attribution",
+						tags: ["Units"],
+						responses: NoContentResponse,
+					},
+				},
 				async ({ params, profile, authorization, body }) => {
 					await checkUnitType(params.unitId, params.type);
 					await ensureUnitMutationAuthorized(authorization.unit, params.unitId, [
@@ -1485,31 +1507,28 @@ export default new Elysia()
 					});
 					return new Response(null, { status: StatusCodes.NO_CONTENT });
 				},
-				{
-					access: "write:unit:update",
-					params: AttributionAssociationParams,
-					body: t.Optional(RevisionContextBody),
-					response: {
-						[StatusCodes.NO_CONTENT]: t.Void(),
-						[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
-							"RevisionCreditEntityInvalid",
-							"RevisionContributionActorRequired",
-						]),
-						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
-						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
-							"UnitNotFound",
-							"CreditAttributionNotFound",
-						]),
-					},
-					detail: {
-						summary: "Remove Unit credit attribution",
-						tags: ["Units"],
-						responses: NoContentResponse,
-					},
-				},
 			)
 			.post(
 				"/subject-associations",
+				{
+					access: "contribute:unit:update",
+					params: UnitUnitParams,
+					body: AddUnitSubjectAssociationBody,
+					response: {
+						[StatusCodes.OK]: SubjectAssociationResponse,
+						[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
+							"AssociationContextPostInvalid",
+							"RevisionCreditEntityInvalid",
+							"RevisionContributionActorRequired",
+						]),
+						[StatusCodes.FORBIDDEN]: toApiErrorResponse([
+							"UnitPermissionForbidden",
+							"EntityAssociationRestricted",
+						]),
+						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "EntityEntryNotFound"]),
+					},
+					detail: { summary: "Add Unit subject association", tags: ["Units"] },
+				},
 				async ({ params, authorization, body }) => {
 					const { revisionContext, ...associationInput } = body;
 					await checkUnitType(params.unitId, params.type);
@@ -1560,28 +1579,27 @@ export default new Elysia()
 					});
 					return association;
 				},
-				{
-					access: "contribute:unit:update",
-					params: UnitUnitParams,
-					body: AddUnitSubjectAssociationBody,
-					response: {
-						[StatusCodes.OK]: SubjectAssociationResponse,
-						[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
-							"AssociationContextPostInvalid",
-							"RevisionCreditEntityInvalid",
-							"RevisionContributionActorRequired",
-						]),
-						[StatusCodes.FORBIDDEN]: toApiErrorResponse([
-							"UnitPermissionForbidden",
-							"EntityAssociationRestricted",
-						]),
-						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "EntityEntryNotFound"]),
-					},
-					detail: { summary: "Add Unit subject association", tags: ["Units"] },
-				},
 			)
 			.put(
 				"/subject-associations/:associationId/spoiler",
+				{
+					access: "contribute:interaction:write",
+					params: UnitAssociationParams,
+					body: SubjectAssociationSpoilerBody,
+					response: {
+						[StatusCodes.OK]: SubjectAssociationSpoilerResponse,
+						[StatusCodes.FORBIDDEN]: UnitInteractionForbiddenResponse,
+						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
+							"UnitNotFound",
+							"SubjectAssociationNotFound",
+						]),
+						[StatusCodes.TOO_MANY_REQUESTS]: VoteBackpressureResponse,
+					},
+					detail: {
+						summary: "Judge the spoiler level of a subject association",
+						tags: ["Units"],
+					},
+				},
 				async ({ params, body, profile, authorization }) => {
 					await checkUnitType(params.unitId, params.type);
 					await authorization.unit.ensureCanRead(params.unitId);
@@ -1617,42 +1635,9 @@ export default new Elysia()
 					);
 					return getSubjectAssociationSpoilerSummary(params.associationId, profile.unitId);
 				},
-				{
-					access: "contribute:interaction:write",
-					params: UnitAssociationParams,
-					body: SubjectAssociationSpoilerBody,
-					response: {
-						[StatusCodes.OK]: SubjectAssociationSpoilerResponse,
-						[StatusCodes.FORBIDDEN]: UnitInteractionForbiddenResponse,
-						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
-							"UnitNotFound",
-							"SubjectAssociationNotFound",
-						]),
-						[StatusCodes.TOO_MANY_REQUESTS]: VoteBackpressureResponse,
-					},
-					detail: {
-						summary: "Judge the spoiler level of a subject association",
-						tags: ["Units"],
-					},
-				},
 			)
 			.delete(
 				"/subject-associations/:associationId/spoiler",
-				async ({ params, profile, authorization }) => {
-					await checkUnitType(params.unitId, params.type);
-					await authorization.unit.ensureCanRead(params.unitId);
-					await runVoteTransaction({ family: "unit_tag", authority: "global" }, (tx) =>
-						tx
-							.delete(subjectAssociationJudgment)
-							.where(
-								and(
-									eq(subjectAssociationJudgment.associationId, params.associationId),
-									eq(subjectAssociationJudgment.profileId, profile.unitId),
-								),
-							),
-					);
-					return getSubjectAssociationSpoilerSummary(params.associationId, profile.unitId);
-				},
 				{
 					access: "write:interaction:write",
 					params: UnitAssociationParams,
@@ -1670,9 +1655,46 @@ export default new Elysia()
 						tags: ["Units"],
 					},
 				},
+				async ({ params, profile, authorization }) => {
+					await checkUnitType(params.unitId, params.type);
+					await authorization.unit.ensureCanRead(params.unitId);
+					await runVoteTransaction({ family: "unit_tag", authority: "global" }, (tx) =>
+						tx
+							.delete(subjectAssociationJudgment)
+							.where(
+								and(
+									eq(subjectAssociationJudgment.associationId, params.associationId),
+									eq(subjectAssociationJudgment.profileId, profile.unitId),
+								),
+							),
+					);
+					return getSubjectAssociationSpoilerSummary(params.associationId, profile.unitId);
+				},
 			)
 			.delete(
 				"/subject-associations/:associationId",
+				{
+					access: "write:unit:update",
+					params: UnitAssociationParams,
+					body: t.Optional(RevisionContextBody),
+					response: {
+						[StatusCodes.NO_CONTENT]: t.Void(),
+						[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
+							"RevisionCreditEntityInvalid",
+							"RevisionContributionActorRequired",
+						]),
+						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
+						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
+							"UnitNotFound",
+							"SubjectAssociationNotFound",
+						]),
+					},
+					detail: {
+						summary: "Remove Unit subject association",
+						tags: ["Units"],
+						responses: NoContentResponse,
+					},
+				},
 				async ({ params, profile, authorization, body }) => {
 					await checkUnitType(params.unitId, params.type);
 					await ensureUnitMutationAuthorized(authorization.unit, params.unitId, [
@@ -1698,31 +1720,20 @@ export default new Elysia()
 					});
 					return new Response(null, { status: StatusCodes.NO_CONTENT });
 				},
-				{
-					access: "write:unit:update",
-					params: UnitAssociationParams,
-					body: t.Optional(RevisionContextBody),
-					response: {
-						[StatusCodes.NO_CONTENT]: t.Void(),
-						[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
-							"RevisionCreditEntityInvalid",
-							"RevisionContributionActorRequired",
-						]),
-						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
-						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
-							"UnitNotFound",
-							"SubjectAssociationNotFound",
-						]),
-					},
-					detail: {
-						summary: "Remove Unit subject association",
-						tags: ["Units"],
-						responses: NoContentResponse,
-					},
-				},
 			)
 			.get(
 				"/external-links",
+				{
+					access: "unit:read",
+					params: UnitExternalLinkUnitParams,
+					query: UnitExternalLinkListQuery,
+					response: {
+						[StatusCodes.OK]: UnitExternalLinkListResponse,
+						[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
+						[StatusCodes.CONFLICT]: toApiErrorResponse(["UnitReferenceLimitReached"]),
+					},
+					detail: { summary: "List Unit external-link references", tags: ["Units"] },
+				},
 				async ({ params, query, profile, authorization }) => {
 					await checkUnitType(params.unitId, params.type);
 					await authorization.unit.ensureCanRead(params.unitId);
@@ -1803,20 +1814,24 @@ export default new Elysia()
 						curationVersion,
 					};
 				},
-				{
-					access: "unit:read",
-					params: UnitExternalLinkUnitParams,
-					query: UnitExternalLinkListQuery,
-					response: {
-						[StatusCodes.OK]: UnitExternalLinkListResponse,
-						[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
-						[StatusCodes.CONFLICT]: toApiErrorResponse(["UnitReferenceLimitReached"]),
-					},
-					detail: { summary: "List Unit external-link references", tags: ["Units"] },
-				},
 			)
 			.post(
 				"/external-links",
+				{
+					access: "contribute:interaction:write",
+					params: UnitExternalLinkUnitParams,
+					body: AddUnitExternalLinkBody,
+					response: {
+						[StatusCodes.OK]: UnitExternalLinkResponse,
+						[StatusCodes.FORBIDDEN]: UnitInteractionForbiddenResponse,
+						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "EntityEntryNotFound"]),
+						[StatusCodes.CONFLICT]: toApiErrorResponse([
+							"UnitReferenceLimitReached",
+							"UnitReferenceWithdrawn",
+						]),
+					},
+					detail: { summary: "Propose Unit external link", tags: ["Units"] },
+				},
 				async ({ params, profile, authorization, body }) => {
 					await checkUnitType(params.unitId, params.type);
 					await authorization.unit.ensureCanRead(params.unitId);
@@ -1878,24 +1893,23 @@ export default new Elysia()
 					});
 					return getExternalLinkReference(externalLinkId, profile.unitId);
 				},
-				{
-					access: "contribute:interaction:write",
-					params: UnitExternalLinkUnitParams,
-					body: AddUnitExternalLinkBody,
-					response: {
-						[StatusCodes.OK]: UnitExternalLinkResponse,
-						[StatusCodes.FORBIDDEN]: UnitInteractionForbiddenResponse,
-						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "EntityEntryNotFound"]),
-						[StatusCodes.CONFLICT]: toApiErrorResponse([
-							"UnitReferenceLimitReached",
-							"UnitReferenceWithdrawn",
-						]),
-					},
-					detail: { summary: "Propose Unit external link", tags: ["Units"] },
-				},
 			)
 			.put(
 				"/external-links/:externalLinkId/vote",
+				{
+					access: "contribute:interaction:write",
+					params: UnitExternalLinkParams,
+					body: VoteBody,
+					response: {
+						[StatusCodes.OK]: VoteResponse,
+						[StatusCodes.FORBIDDEN]: UnitInteractionForbiddenResponse,
+						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
+							"UnitNotFound",
+							"UnitExternalLinkNotFound",
+						]),
+					},
+					detail: { summary: "Vote on Unit external link", tags: ["Units"] },
+				},
 				async ({ params, profile, authorization, body }) => {
 					await checkUnitType(params.unitId, params.type);
 					await authorization.unit.ensureCanRead(params.unitId);
@@ -1925,10 +1939,12 @@ export default new Elysia()
 						});
 					return getExternalLinkVoteSummary(params.externalLinkId, body.value);
 				},
+			)
+			.delete(
+				"/external-links/:externalLinkId/vote",
 				{
-					access: "contribute:interaction:write",
+					access: "write:interaction:write",
 					params: UnitExternalLinkParams,
-					body: VoteBody,
 					response: {
 						[StatusCodes.OK]: VoteResponse,
 						[StatusCodes.FORBIDDEN]: UnitInteractionForbiddenResponse,
@@ -1937,11 +1953,8 @@ export default new Elysia()
 							"UnitExternalLinkNotFound",
 						]),
 					},
-					detail: { summary: "Vote on Unit external link", tags: ["Units"] },
+					detail: { summary: "Remove Unit external link vote", tags: ["Units"] },
 				},
-			)
-			.delete(
-				"/external-links/:externalLinkId/vote",
 				async ({ params, profile, authorization }) => {
 					await checkUnitType(params.unitId, params.type);
 					await authorization.unit.ensureCanRead(params.unitId);
@@ -1967,22 +1980,27 @@ export default new Elysia()
 						);
 					return getExternalLinkVoteSummary(params.externalLinkId, null);
 				},
+			)
+			.patch(
+				"/external-links/:externalLinkId",
 				{
-					access: "write:interaction:write",
+					access: "write:unit:update",
 					params: UnitExternalLinkParams,
+					body: UpdateUnitReferenceCurationBody,
 					response: {
-						[StatusCodes.OK]: VoteResponse,
-						[StatusCodes.FORBIDDEN]: UnitInteractionForbiddenResponse,
+						[StatusCodes.OK]: UnitExternalLinkCurationResponse,
+						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
 						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
 							"UnitNotFound",
 							"UnitExternalLinkNotFound",
 						]),
+						[StatusCodes.CONFLICT]: toApiErrorResponse([
+							"UnitReferenceCurationChanged",
+							"UnitReferencePinnedLimitReached",
+						]),
 					},
-					detail: { summary: "Remove Unit external link vote", tags: ["Units"] },
+					detail: { summary: "Update Unit external link curation", tags: ["Units"] },
 				},
-			)
-			.patch(
-				"/external-links/:externalLinkId",
 				async ({ params, profile, authorization, body }) => {
 					await checkUnitType(params.unitId, params.type);
 					await authorization.unit.ensure(
@@ -2004,42 +2022,9 @@ export default new Elysia()
 						curationVersion: result.curationVersion,
 					};
 				},
-				{
-					access: "write:unit:update",
-					params: UnitExternalLinkParams,
-					body: UpdateUnitReferenceCurationBody,
-					response: {
-						[StatusCodes.OK]: UnitExternalLinkCurationResponse,
-						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
-						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
-							"UnitNotFound",
-							"UnitExternalLinkNotFound",
-						]),
-						[StatusCodes.CONFLICT]: toApiErrorResponse([
-							"UnitReferenceCurationChanged",
-							"UnitReferencePinnedLimitReached",
-						]),
-					},
-					detail: { summary: "Update Unit external link curation", tags: ["Units"] },
-				},
 			)
 			.delete(
 				"/external-links/:externalLinkId",
-				async ({ params, query, profile, authorization }) => {
-					await checkUnitType(params.unitId, params.type);
-					await authorization.unit.ensure(
-						params.unitId,
-						"unit.reference-curation.manage",
-						unitScope("references", "external-links"),
-					);
-					await withdrawUnitExternalLink({
-						unitId: params.unitId,
-						externalLinkId: params.externalLinkId,
-						actorProfileId: profile.unitId,
-						baseVersion: query.baseVersion,
-					});
-					return new Response(null, { status: StatusCodes.NO_CONTENT });
-				},
 				{
 					access: "write:unit:update",
 					params: UnitExternalLinkParams,
@@ -2059,9 +2044,45 @@ export default new Elysia()
 						responses: NoContentResponse,
 					},
 				},
+				async ({ params, query, profile, authorization }) => {
+					await checkUnitType(params.unitId, params.type);
+					await authorization.unit.ensure(
+						params.unitId,
+						"unit.reference-curation.manage",
+						unitScope("references", "external-links"),
+					);
+					await withdrawUnitExternalLink({
+						unitId: params.unitId,
+						externalLinkId: params.externalLinkId,
+						actorProfileId: profile.unitId,
+						baseVersion: query.baseVersion,
+					});
+					return new Response(null, { status: StatusCodes.NO_CONTENT });
+				},
 			)
 			.put(
 				"/tags/:tagId",
+				{
+					access: "contribute:interaction:write",
+					params: UnitTagParams,
+					body: TagUnitBody,
+					response: {
+						[StatusCodes.OK]: TagApplicationResponse,
+						[StatusCodes.FORBIDDEN]: toApiErrorResponse([
+							"UnitAccessRestricted",
+							"UnitPermissionForbidden",
+							"ContentLabelPlatformApplyForbidden",
+						]),
+						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
+							"UnitNotFound",
+							"TagNotFound",
+							"TagApplicationNotFound",
+						]),
+						[StatusCodes.UNPROCESSABLE_ENTITY]: TagApplicationPolicyResponse,
+						[StatusCodes.TOO_MANY_REQUESTS]: VoteBackpressureResponse,
+					},
+					detail: { summary: "Tag unit", tags: ["Units"] },
+				},
 				async ({ params, authorization }) => {
 					await checkUnitType(params.unitId, params.type);
 					await Promise.all([
@@ -2110,45 +2131,9 @@ export default new Elysia()
 						voteCount: totals.voteCount,
 					};
 				},
-				{
-					access: "contribute:interaction:write",
-					params: UnitTagParams,
-					body: TagUnitBody,
-					response: {
-						[StatusCodes.OK]: TagApplicationResponse,
-						[StatusCodes.FORBIDDEN]: toApiErrorResponse([
-							"UnitAccessRestricted",
-							"UnitPermissionForbidden",
-							"ContentLabelPlatformApplyForbidden",
-						]),
-						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
-							"UnitNotFound",
-							"TagNotFound",
-							"TagApplicationNotFound",
-						]),
-						[StatusCodes.UNPROCESSABLE_ENTITY]: TagApplicationPolicyResponse,
-						[StatusCodes.TOO_MANY_REQUESTS]: VoteBackpressureResponse,
-					},
-					detail: { summary: "Tag unit", tags: ["Units"] },
-				},
 			)
 			.patch(
 				"/tags/:tagId",
-				async ({ params, profile, authorization, body }) => {
-					await checkUnitType(params.unitId, params.type);
-					await authorization.unit.ensure(params.unitId, "unit.tag-curation.manage");
-					return updateDirectUnitTagCuration({
-						unitId: params.unitId,
-						tagId: params.tagId,
-						actorProfileId: profile.unitId,
-						expectedUpdatedAt: body.updatedAt,
-						expectedFeaturedTagIds: body.expectedFeaturedTagIds,
-						contribution: body.revisionContext?.contribution,
-						state: body.pinned
-							? { pinned: true, position: body.position }
-							: { pinned: false, position: null },
-					});
-				},
 				{
 					access: "write:unit:update",
 					params: UnitTagParams,
@@ -2172,27 +2157,24 @@ export default new Elysia()
 						tags: ["Units"],
 					},
 				},
-			)
-			.delete(
-				"/tags/:tagId",
 				async ({ params, profile, authorization, body }) => {
 					await checkUnitType(params.unitId, params.type);
 					await authorization.unit.ensure(params.unitId, "unit.tag-curation.manage");
-					await runVoteTransaction({ family: "unit_tag", authority: "global" }, async (tx) => {
-						const deleted = await tx
-							.delete(unitTag)
-							.where(and(eq(unitTag.unitId, params.unitId), eq(unitTag.tagId, params.tagId)))
-							.returning({ id: unitTag.tagId });
-						if (!deleted.length) throw new TagApplicationNotFound();
-						await recordUnitRevision(tx, {
-							unitId: params.unitId,
-							actorProfileId: profile.unitId,
-							contribution: body?.revisionContext?.contribution,
-							event: "update",
-						});
+					return updateDirectUnitTagCuration({
+						unitId: params.unitId,
+						tagId: params.tagId,
+						actorProfileId: profile.unitId,
+						expectedUpdatedAt: body.updatedAt,
+						expectedFeaturedTagIds: body.expectedFeaturedTagIds,
+						contribution: body.revisionContext?.contribution,
+						state: body.pinned
+							? { pinned: true, position: body.position }
+							: { pinned: false, position: null },
 					});
-					return new Response(null, { status: StatusCodes.NO_CONTENT });
 				},
+			)
+			.delete(
+				"/tags/:tagId",
 				{
 					access: "write:unit:update",
 					params: UnitTagParams,
@@ -2218,9 +2200,43 @@ export default new Elysia()
 						responses: NoContentResponse,
 					},
 				},
+				async ({ params, profile, authorization, body }) => {
+					await checkUnitType(params.unitId, params.type);
+					await authorization.unit.ensure(params.unitId, "unit.tag-curation.manage");
+					await runVoteTransaction({ family: "unit_tag", authority: "global" }, async (tx) => {
+						const deleted = await tx
+							.delete(unitTag)
+							.where(and(eq(unitTag.unitId, params.unitId), eq(unitTag.tagId, params.tagId)))
+							.returning({ id: unitTag.tagId });
+						if (!deleted.length) throw new TagApplicationNotFound();
+						await recordUnitRevision(tx, {
+							unitId: params.unitId,
+							actorProfileId: profile.unitId,
+							contribution: body?.revisionContext?.contribution,
+							event: "update",
+						});
+					});
+					return new Response(null, { status: StatusCodes.NO_CONTENT });
+				},
 			)
 			.put(
 				"/tags/:tagId/vote",
+				{
+					access: "contribute:interaction:write",
+					params: UnitTagParams,
+					body: VoteBody,
+					response: {
+						[StatusCodes.OK]: VoteResponse,
+						[StatusCodes.FORBIDDEN]: UnitInteractionForbiddenResponse,
+						[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse([
+							"InvalidTagPath",
+							"ContentLabelJudgmentForbidden",
+						]),
+						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "TagApplicationNotFound"]),
+						[StatusCodes.TOO_MANY_REQUESTS]: VoteBackpressureResponse,
+					},
+					detail: { summary: "Vote on Unit tag", tags: ["Units"] },
+				},
 				async ({ params, profile, authorization, body }) => {
 					await checkUnitType(params.unitId, params.type);
 					await authorization.unit.ensureCanRead(params.unitId);
@@ -2255,25 +2271,20 @@ export default new Elysia()
 					);
 					return getTagVoteSummary(params.unitId, tagId, body.value);
 				},
-				{
-					access: "contribute:interaction:write",
-					params: UnitTagParams,
-					body: VoteBody,
-					response: {
-						[StatusCodes.OK]: VoteResponse,
-						[StatusCodes.FORBIDDEN]: UnitInteractionForbiddenResponse,
-						[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse([
-							"InvalidTagPath",
-							"ContentLabelJudgmentForbidden",
-						]),
-						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "TagApplicationNotFound"]),
-						[StatusCodes.TOO_MANY_REQUESTS]: VoteBackpressureResponse,
-					},
-					detail: { summary: "Vote on Unit tag", tags: ["Units"] },
-				},
 			)
 			.delete(
 				"/tags/:tagId/vote",
+				{
+					access: "write:interaction:write",
+					params: UnitTagParams,
+					response: {
+						[StatusCodes.OK]: VoteResponse,
+						[StatusCodes.FORBIDDEN]: UnitInteractionForbiddenResponse,
+						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "TagApplicationNotFound"]),
+						[StatusCodes.TOO_MANY_REQUESTS]: VoteBackpressureResponse,
+					},
+					detail: { summary: "Remove Unit tag vote", tags: ["Units"] },
+				},
 				async ({ params, profile, authorization }) => {
 					await checkUnitType(params.unitId, params.type);
 					await authorization.unit.ensureCanRead(params.unitId);
@@ -2302,17 +2313,6 @@ export default new Elysia()
 						},
 					);
 					return getTagVoteSummary(params.unitId, tagId, null);
-				},
-				{
-					access: "write:interaction:write",
-					params: UnitTagParams,
-					response: {
-						[StatusCodes.OK]: VoteResponse,
-						[StatusCodes.FORBIDDEN]: UnitInteractionForbiddenResponse,
-						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "TagApplicationNotFound"]),
-						[StatusCodes.TOO_MANY_REQUESTS]: VoteBackpressureResponse,
-					},
-					detail: { summary: "Remove Unit tag vote", tags: ["Units"] },
 				},
 			),
 	);

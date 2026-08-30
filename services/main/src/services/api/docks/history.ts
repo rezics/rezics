@@ -1,3 +1,4 @@
+import type { StaticDecode } from "typebox";
 import { and, desc, eq, sql } from "drizzle-orm";
 import {
 	DockBlockHostPolicy,
@@ -22,7 +23,7 @@ type DockState = {
 	readonly id: string;
 	readonly unitId: string;
 	readonly kind: "main" | "wiki";
-	readonly document: typeof DockDocument.static;
+	readonly document: StaticDecode<typeof DockDocument>;
 	readonly deletedAt: string | null;
 	readonly createdAt: string;
 	readonly updatedAt: string;
@@ -255,7 +256,7 @@ export async function restoreDockRevision(
 		readonly sourceRevisionId: string;
 		readonly baseRevisionId: string;
 		readonly actorProfileId?: string | null;
-		readonly validateDocument?: (document: typeof DockDocument.static) => Promise<void>;
+		readonly validateDocument?: (document: StaticDecode<typeof DockDocument>) => Promise<void>;
 	},
 ) {
 	await lockDockHistory(tx, input.dockId);

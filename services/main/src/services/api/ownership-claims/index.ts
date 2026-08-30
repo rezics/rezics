@@ -18,14 +18,6 @@ export default new Elysia({ prefix: "/ownership-claims" })
 	.use(session)
 	.post(
 		"",
-		async ({ profile, body }) => {
-			const claim = await createUnitOwnershipClaim({
-				unitId: body.unitId,
-				claimantProfileId: profile.unitId,
-				details: body.details.trim(),
-			});
-			return { ...claim, state: "pending" as const };
-		},
 		{
 			access: "session-only",
 			body: CreateUnitOwnershipClaimBody,
@@ -39,14 +31,17 @@ export default new Elysia({ prefix: "/ownership-claims" })
 			},
 			detail: { summary: "Claim ownership of a community-owned Unit", tags: ["Governance"] },
 		},
+		async ({ profile, body }) => {
+			const claim = await createUnitOwnershipClaim({
+				unitId: body.unitId,
+				claimantProfileId: profile.unitId,
+				details: body.details.trim(),
+			});
+			return { ...claim, state: "pending" as const };
+		},
 	)
 	.post(
 		"/:claimId/withdraw",
-		async ({ profile, params }) =>
-			withdrawUnitOwnershipClaim({
-				claimId: params.claimId,
-				claimantProfileId: profile.unitId,
-			}),
 		{
 			access: "session-only",
 			params: UnitOwnershipClaimParams,
@@ -57,4 +52,9 @@ export default new Elysia({ prefix: "/ownership-claims" })
 			},
 			detail: { summary: "Withdraw a pending Unit ownership claim", tags: ["Governance"] },
 		},
+		async ({ profile, params }) =>
+			withdrawUnitOwnershipClaim({
+				claimId: params.claimId,
+				claimantProfileId: profile.unitId,
+			}),
 	);

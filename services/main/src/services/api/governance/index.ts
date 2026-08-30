@@ -1,3 +1,4 @@
+import type { StaticDecode } from "typebox";
 import { StatusCodes } from "http-status-codes";
 import { and, desc, eq, isNull, sql } from "drizzle-orm";
 import Elysia from "elysia";
@@ -154,7 +155,7 @@ async function loadGovernanceRuleSource(
 }
 
 function governanceRuleSourceAuthority(
-	query: typeof GovernanceRuleSourcesQuery.static,
+	query: StaticDecode<typeof GovernanceRuleSourcesQuery>,
 ): GovernanceAuthority {
 	if (query.authorityKind === "platform") {
 		if (query.authorityId !== undefined)
@@ -245,6 +246,20 @@ export default new Elysia({ prefix: "/governance" })
 	.use(ownershipClaimRoutes)
 	.get(
 		"/rule-sources",
+		{
+			access: "session-only",
+			query: GovernanceRuleSourcesQuery,
+			response: {
+				[StatusCodes.OK]: GovernanceRuleSourcesResponse,
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["GovernanceRuleSourceForbidden"]),
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
+				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["ValidationError"]),
+			},
+			detail: {
+				summary: "List current Rule sources for a governance authority",
+				tags: ["Governance"],
+			},
+		},
 		async ({ authorization, query }) => {
 			const authority = governanceRuleSourceAuthority(query);
 			if (authority.kind !== "platform") {
@@ -279,30 +294,9 @@ export default new Elysia({ prefix: "/governance" })
 				return { items };
 			});
 		},
-		{
-			access: "session-only",
-			query: GovernanceRuleSourcesQuery,
-			response: {
-				[StatusCodes.OK]: GovernanceRuleSourcesResponse,
-				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["GovernanceRuleSourceForbidden"]),
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
-				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["ValidationError"]),
-			},
-			detail: {
-				summary: "List current Rule sources for a governance authority",
-				tags: ["Governance"],
-			},
-		},
 	)
 	.get(
 		"/notes/:postId",
-		async ({ params, authorization }) => {
-			await authorization.unit.ensureCanRead(params.postId, () => new GovernanceNoteNotFound());
-			const note = await database.transaction((tx) => getGovernanceNote(tx, params.postId));
-			if (!note) throw new GovernanceNoteNotFound();
-			const { subjectId: _subjectId, ...response } = note;
-			return response;
-		},
 		{
 			access: "session-only",
 			params: GovernanceNoteParams,
@@ -312,9 +306,32 @@ export default new Elysia({ prefix: "/governance" })
 			},
 			detail: { summary: "Get governance note", tags: ["Governance"] },
 		},
+		async ({ params, authorization }) => {
+			await authorization.unit.ensureCanRead(params.postId, () => new GovernanceNoteNotFound());
+			const note = await database.transaction((tx) => getGovernanceNote(tx, params.postId));
+			if (!note) throw new GovernanceNoteNotFound();
+			const { subjectId: _subjectId, ...response } = note;
+			return response;
+		},
 	)
 	.patch(
 		"/notes/:postId",
+		{
+			access: "contribute:unit:update",
+			params: GovernanceNoteParams,
+			body: UpdateGovernanceNoteBody,
+			response: {
+				[StatusCodes.OK]: GovernanceNoteResponse,
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
+					"RevisionCreditEntityInvalid",
+					"RevisionContributionActorRequired",
+				]),
+				[StatusCodes.FORBIDDEN]: toApiErrorResponse(["UnitPermissionForbidden"]),
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "GovernanceNoteNotFound"]),
+				[StatusCodes.CONFLICT]: toApiErrorResponse(["UnitRevisionConflict"]),
+			},
+			detail: { summary: "Update governance note", tags: ["Governance"] },
+		},
 		async ({ params, profile, authorization, body }) => {
 			await authorization.unit.ensureCanUpdate(params.postId, [["localizations"]]);
 			const note = await database.transaction(async (tx) => {
@@ -351,25 +368,18 @@ export default new Elysia({ prefix: "/governance" })
 			const { subjectId: _subjectId, ...response } = note;
 			return response;
 		},
-		{
-			access: "contribute:unit:update",
-			params: GovernanceNoteParams,
-			body: UpdateGovernanceNoteBody,
-			response: {
-				[StatusCodes.OK]: GovernanceNoteResponse,
-				[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
-					"RevisionCreditEntityInvalid",
-					"RevisionContributionActorRequired",
-				]),
-				[StatusCodes.FORBIDDEN]: toApiErrorResponse(["UnitPermissionForbidden"]),
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "GovernanceNoteNotFound"]),
-				[StatusCodes.CONFLICT]: toApiErrorResponse(["UnitRevisionConflict"]),
-			},
-			detail: { summary: "Update governance note", tags: ["Governance"] },
-		},
 	)
 	.get(
 		"/content-review/cases",
+		{
+			access: "session-only",
+			query: ListContentReviewCasesQuery,
+			response: {
+				[StatusCodes.OK]: ContentReviewCaseListResponse,
+				[StatusCodes.FORBIDDEN]: CapabilityForbiddenResponse,
+			},
+			detail: { summary: "List content review cases", tags: ["Governance"] },
+		},
 		async ({ authorization, query }) => {
 			await ensureCaseAccess(authorization, {
 				authority: query.realmId ? "realm" : "platform",
@@ -391,32 +401,9 @@ export default new Elysia({ prefix: "/governance" })
 				return { items: await presentContentReviewCases(tx, rows) };
 			});
 		},
-		{
-			access: "session-only",
-			query: ListContentReviewCasesQuery,
-			response: {
-				[StatusCodes.OK]: ContentReviewCaseListResponse,
-				[StatusCodes.FORBIDDEN]: CapabilityForbiddenResponse,
-			},
-			detail: { summary: "List content review cases", tags: ["Governance"] },
-		},
 	)
 	.get(
 		"/content-review/cases/:caseId",
-		async ({ authorization, params }) => {
-			return database.transaction(async (tx) => {
-				const [row] = await tx
-					.select(caseSelection)
-					.from(contentReviewCase)
-					.where(eq(contentReviewCase.id, params.caseId))
-					.limit(1);
-				if (!row) throw new ModerationCaseNotFound();
-				await ensureCaseAccess(authorization, row);
-				const [presented] = await presentContentReviewCases(tx, [row]);
-				if (!presented) throw new ModerationCaseNotFound();
-				return presented;
-			});
-		},
 		{
 			access: "session-only",
 			params: ContentReviewCaseParams,
@@ -431,9 +418,34 @@ export default new Elysia({ prefix: "/governance" })
 			},
 			detail: { summary: "Get content review case", tags: ["Governance"] },
 		},
+		async ({ authorization, params }) => {
+			return database.transaction(async (tx) => {
+				const [row] = await tx
+					.select(caseSelection)
+					.from(contentReviewCase)
+					.where(eq(contentReviewCase.id, params.caseId))
+					.limit(1);
+				if (!row) throw new ModerationCaseNotFound();
+				await ensureCaseAccess(authorization, row);
+				const [presented] = await presentContentReviewCases(tx, [row]);
+				if (!presented) throw new ModerationCaseNotFound();
+				return presented;
+			});
+		},
 	)
 	.patch(
 		"/content-review/cases/:caseId",
+		{
+			access: "session-only",
+			params: ContentReviewCaseParams,
+			body: UpdateContentReviewCaseBody,
+			response: {
+				[StatusCodes.OK]: ContentReviewCaseResponse,
+				[StatusCodes.FORBIDDEN]: CapabilityForbiddenResponse,
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["ContentReviewCaseNotFound"]),
+			},
+			detail: { summary: "Update content review case", tags: ["Governance"] },
+		},
 		async ({ authorization, profile, params, body }) => {
 			const [current] = await database
 				.select()
@@ -477,35 +489,9 @@ export default new Elysia({ prefix: "/governance" })
 				return presented;
 			});
 		},
-		{
-			access: "session-only",
-			params: ContentReviewCaseParams,
-			body: UpdateContentReviewCaseBody,
-			response: {
-				[StatusCodes.OK]: ContentReviewCaseResponse,
-				[StatusCodes.FORBIDDEN]: CapabilityForbiddenResponse,
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["ContentReviewCaseNotFound"]),
-			},
-			detail: { summary: "Update content review case", tags: ["Governance"] },
-		},
 	)
 	.post(
 		"/content-governance/actions",
-		async ({ authorization, profile, body }) => {
-			const result = await database.transaction(async (tx) => {
-				const caseRow = await loadContentReviewCaseForAction(tx, body.caseId);
-				if (!caseRow) throw new ModerationCaseNotFound();
-				await ensureCaseAccess(authorization, caseRow);
-				if (isLicenseModerationCommand(body.kind))
-					await authorization.platform.ensureCapability("unit.license.manage");
-				return executeAuthorizedContentGovernanceAction(tx, {
-					caseRow,
-					actorProfileId: profile.unitId,
-					body,
-				});
-			});
-			return result.created;
-		},
 		{
 			access: "session-only",
 			body: CreateContentGovernanceActionBody,
@@ -537,9 +523,42 @@ export default new Elysia({ prefix: "/governance" })
 			},
 			detail: { summary: "Apply content governance action", tags: ["Governance"] },
 		},
+		async ({ authorization, profile, body }) => {
+			const result = await database.transaction(async (tx) => {
+				const caseRow = await loadContentReviewCaseForAction(tx, body.caseId);
+				if (!caseRow) throw new ModerationCaseNotFound();
+				await ensureCaseAccess(authorization, caseRow);
+				if (isLicenseModerationCommand(body.kind))
+					await authorization.platform.ensureCapability("unit.license.manage");
+				return executeAuthorizedContentGovernanceAction(tx, {
+					caseRow,
+					actorProfileId: profile.unitId,
+					body,
+				});
+			});
+			return result.created;
+		},
 	)
 	.post(
 		"/account-enforcements",
+		{
+			access: "session-only",
+			body: CreateAccountEnforcementBody,
+			response: {
+				[StatusCodes.OK]: EnforcementResponse,
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
+					"EnforcementExpiryInvalid",
+					"GovernanceNoteRoleDuplicate",
+					"GovernanceRuleSourceForbidden",
+					"RevisionCreditEntityInvalid",
+					"RevisionContributionActorRequired",
+				]),
+				[StatusCodes.FORBIDDEN]: CapabilityForbiddenResponse,
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["ProfileNotFound"]),
+				[StatusCodes.CONFLICT]: toApiErrorResponse(["GovernanceRuleChanged"]),
+			},
+			detail: { summary: "Create account enforcement", tags: ["Governance"] },
+		},
 		async ({ authorization, profile, body }) => {
 			await authorization.platform.ensureCapability("platform.moderate");
 			if (new Set(body.notes?.map((note) => note.role)).size !== (body.notes?.length ?? 0))
@@ -622,27 +641,30 @@ export default new Elysia({ prefix: "/governance" })
 			});
 			return result;
 		},
+	)
+	.post(
+		"/account-enforcements/:enforcementId/revoke",
 		{
 			access: "session-only",
-			body: CreateAccountEnforcementBody,
+			params: AccountEnforcementParams,
+			body: RevokeAccountEnforcementBody,
 			response: {
 				[StatusCodes.OK]: EnforcementResponse,
 				[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
-					"EnforcementExpiryInvalid",
 					"GovernanceNoteRoleDuplicate",
-					"GovernanceRuleSourceForbidden",
 					"RevisionCreditEntityInvalid",
 					"RevisionContributionActorRequired",
 				]),
 				[StatusCodes.FORBIDDEN]: CapabilityForbiddenResponse,
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["ProfileNotFound"]),
-				[StatusCodes.CONFLICT]: toApiErrorResponse(["GovernanceRuleChanged"]),
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["EnforcementNotFound"]),
+				[StatusCodes.CONFLICT]: toApiErrorResponse([
+					"EnforcementAlreadyRevoked",
+					"EnforcementChanged",
+					"GovernanceReversalUnavailable",
+				]),
 			},
-			detail: { summary: "Create account enforcement", tags: ["Governance"] },
+			detail: { summary: "Revoke account enforcement", tags: ["Governance"] },
 		},
-	)
-	.post(
-		"/account-enforcements/:enforcementId/revoke",
 		async ({ authorization, profile, params, body }) => {
 			await authorization.platform.ensureCapability("platform.moderate");
 			if (new Set(body.notes?.map((note) => note.role)).size !== (body.notes?.length ?? 0))
@@ -737,26 +759,5 @@ export default new Elysia({ prefix: "/governance" })
 				return updated;
 			});
 			return result;
-		},
-		{
-			access: "session-only",
-			params: AccountEnforcementParams,
-			body: RevokeAccountEnforcementBody,
-			response: {
-				[StatusCodes.OK]: EnforcementResponse,
-				[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
-					"GovernanceNoteRoleDuplicate",
-					"RevisionCreditEntityInvalid",
-					"RevisionContributionActorRequired",
-				]),
-				[StatusCodes.FORBIDDEN]: CapabilityForbiddenResponse,
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["EnforcementNotFound"]),
-				[StatusCodes.CONFLICT]: toApiErrorResponse([
-					"EnforcementAlreadyRevoked",
-					"EnforcementChanged",
-					"GovernanceReversalUnavailable",
-				]),
-			},
-			detail: { summary: "Revoke account enforcement", tags: ["Governance"] },
 		},
 	);

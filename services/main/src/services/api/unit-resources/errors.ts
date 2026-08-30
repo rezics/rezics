@@ -1,16 +1,15 @@
 import { StatusCodes } from "http-status-codes";
-import * as Data from "effect/Data";
+import { HTTPError } from "elysia";
 
-export class AliasNotFound extends Data.TaggedError("AliasNotFound") {
-	static readonly status = StatusCodes.NOT_FOUND as const;
-	readonly status = AliasNotFound.status;
-	readonly message = "Alias not found";
+export class AliasNotFound extends HTTPError.id("AliasNotFound", StatusCodes.NOT_FOUND) {
+	override readonly message = "Alias not found";
 }
 
-export class TagApplicationNotFound extends Data.TaggedError("TagApplicationNotFound") {
-	static readonly status = StatusCodes.NOT_FOUND as const;
-	readonly status = TagApplicationNotFound.status;
-	readonly message: string;
+export class TagApplicationNotFound extends HTTPError.id(
+	"TagApplicationNotFound",
+	StatusCodes.NOT_FOUND,
+) {
+	override readonly message: string;
 
 	constructor(afterUpsert = false) {
 		super();
@@ -20,10 +19,11 @@ export class TagApplicationNotFound extends Data.TaggedError("TagApplicationNotF
 	}
 }
 
-export class UnitTagCurationChanged extends Data.TaggedError("UnitTagCurationChanged") {
-	static readonly status = StatusCodes.CONFLICT as const;
-	readonly status = UnitTagCurationChanged.status;
-	readonly message = "Unit Tag curation has changed";
+export class UnitTagCurationChanged extends HTTPError.id(
+	"UnitTagCurationChanged",
+	StatusCodes.CONFLICT,
+) {
+	override readonly message = "Unit Tag curation has changed";
 	readonly details: { readonly currentFeaturedTagIds: string[] };
 
 	constructor(currentFeaturedTagIds: readonly string[]) {
@@ -32,16 +32,18 @@ export class UnitTagCurationChanged extends Data.TaggedError("UnitTagCurationCha
 	}
 }
 
-export class UnitExternalLinkNotFound extends Data.TaggedError("UnitExternalLinkNotFound") {
-	static readonly status = StatusCodes.NOT_FOUND as const;
-	readonly status = UnitExternalLinkNotFound.status;
-	readonly message = "Unit external link not found";
+export class UnitExternalLinkNotFound extends HTTPError.id(
+	"UnitExternalLinkNotFound",
+	StatusCodes.NOT_FOUND,
+) {
+	override readonly message = "Unit external link not found";
 }
 
-export class UnitReferenceCurationChanged extends Data.TaggedError("UnitReferenceCurationChanged") {
-	static readonly status = StatusCodes.CONFLICT as const;
-	readonly status = UnitReferenceCurationChanged.status;
-	readonly message = "Unit reference curation has changed";
+export class UnitReferenceCurationChanged extends HTTPError.id(
+	"UnitReferenceCurationChanged",
+	StatusCodes.CONFLICT,
+) {
+	override readonly message = "Unit reference curation has changed";
 	readonly details: { readonly currentVersion: number };
 
 	constructor(currentVersion: number) {
@@ -50,10 +52,11 @@ export class UnitReferenceCurationChanged extends Data.TaggedError("UnitReferenc
 	}
 }
 
-export class UnitReferenceLimitReached extends Data.TaggedError("UnitReferenceLimitReached") {
-	static readonly status = StatusCodes.CONFLICT as const;
-	readonly status = UnitReferenceLimitReached.status;
-	readonly message = "Unit reference limit reached";
+export class UnitReferenceLimitReached extends HTTPError.id(
+	"UnitReferenceLimitReached",
+	StatusCodes.CONFLICT,
+) {
+	override readonly message = "Unit reference limit reached";
 	readonly details: { readonly maxActiveReferences: number };
 
 	constructor(maxActiveReferences: number) {
@@ -62,12 +65,11 @@ export class UnitReferenceLimitReached extends Data.TaggedError("UnitReferenceLi
 	}
 }
 
-export class UnitReferencePinnedLimitReached extends Data.TaggedError(
+export class UnitReferencePinnedLimitReached extends HTTPError.id(
 	"UnitReferencePinnedLimitReached",
+	StatusCodes.CONFLICT,
 ) {
-	static readonly status = StatusCodes.CONFLICT as const;
-	readonly status = UnitReferencePinnedLimitReached.status;
-	readonly message = "Pinned Unit reference limit reached";
+	override readonly message = "Pinned Unit reference limit reached";
 	readonly details: { readonly maxPinnedReferences: number };
 
 	constructor(maxPinnedReferences: number) {
@@ -76,10 +78,11 @@ export class UnitReferencePinnedLimitReached extends Data.TaggedError(
 	}
 }
 
-export class UnitReferenceWithdrawn extends Data.TaggedError("UnitReferenceWithdrawn") {
-	static readonly status = StatusCodes.CONFLICT as const;
-	readonly status = UnitReferenceWithdrawn.status;
-	readonly message = "Unit reference has been withdrawn";
+export class UnitReferenceWithdrawn extends HTTPError.id(
+	"UnitReferenceWithdrawn",
+	StatusCodes.CONFLICT,
+) {
+	override readonly message = "Unit reference has been withdrawn";
 }
 
 export const UnitResourceErrors = [

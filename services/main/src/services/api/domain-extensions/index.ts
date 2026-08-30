@@ -10,8 +10,8 @@ import {
 	JsonValue as JsonValueSchema,
 	type JsonValue as JsonValueType,
 } from "@rezics/portable-text";
-import type { Static } from "@sinclair/typebox";
-import { Check } from "@sinclair/typebox/value";
+import type { StaticDecode } from "typebox";
+import { Check } from "typebox/value";
 import {
 	NavigationDocument,
 	DockDocument,
@@ -36,7 +36,6 @@ import {
 	assertFilterDocument,
 	collectUnitPredicateReferenceIds,
 	FilterDocument,
-	FilterSchemaModels,
 	filterDocumentControlField,
 	parseFilterDocument,
 } from "@rezics/filter";
@@ -101,7 +100,6 @@ import { presentAvatar } from "../../units/avatar";
 import { presentImageAsset } from "../../units/service";
 import { getPublicCanonicalUnitSlugAddress } from "../../units/slug-address";
 import { resolveUnitPresentation } from "../../custom-themes";
-import { ResolvedUnitPresentationResponse } from "../custom-themes/schema";
 import { replaceZoneSlugAddress } from "../../units/slug-address";
 import {
 	deleteZonePagePlacement,
@@ -369,7 +367,7 @@ async function toZoneResponse(
 		appearanceDocument,
 		themeHero,
 		capabilities,
-	} satisfies typeof ZoneResponse.static;
+	} satisfies StaticDecode<typeof ZoneResponse>;
 }
 
 const ZoneThemeLevel1Keys = [
@@ -404,7 +402,7 @@ function toZonePageResponse(record: ZonePageProjection) {
 	return {
 		...record,
 		localizations: record.localizations.map((localization) => ({ ...localization })),
-	} satisfies typeof ZonePageResponse.static;
+	} satisfies StaticDecode<typeof ZonePageResponse>;
 }
 
 function toZoneNavigationResponse(
@@ -418,7 +416,7 @@ function toZoneNavigationResponse(
 		latestRevisionId,
 		createdAt: record.createdAt,
 		updatedAt: record.updatedAt,
-	} satisfies typeof ZoneNavigationResponse.static;
+	} satisfies StaticDecode<typeof ZoneNavigationResponse>;
 }
 
 function rethrowZoneNavigationNotFound(cause: unknown): never {
@@ -487,7 +485,9 @@ function ensureZoneBlockDocument(value: unknown): void {
 	}
 }
 
-function ensureZoneFilterDocument(value: unknown): asserts value is Static<typeof FilterDocument> {
+function ensureZoneFilterDocument(
+	value: unknown,
+): asserts value is StaticDecode<typeof FilterDocument> {
 	try {
 		assertFilterDocument(value);
 		resolveFilterDocument(value, true);
@@ -498,7 +498,7 @@ function ensureZoneFilterDocument(value: unknown): asserts value is Static<typeo
 
 async function ensureZoneFilterReferences(
 	tx: DatabaseTransaction,
-	document: Static<typeof FilterDocument>,
+	document: StaticDecode<typeof FilterDocument>,
 ): Promise<void> {
 	const labelIds = new Set(
 		(document.controls ?? []).flatMap((control) =>
@@ -602,30 +602,25 @@ async function ensureZoneNavigationReferences(
 	}
 }
 
-const FilterDocumentModel = t.Object(
-	{
-		...FilterDocument.properties,
-		where: t.Optional(t.Ref("UnitPredicate")),
-	},
-	{ additionalProperties: false, $id: "FilterDocument" },
-);
-
 export default new Elysia()
-	.model({
-		DockDocument,
-		...FilterSchemaModels,
-		NavigationDocument,
-		PortableTextDocument,
-		UnitReferencedBlockDocument,
-		FilterDocument: FilterDocumentModel,
-		ZoneAppearanceDocument,
-		ResolvedUnitPresentationResponse,
-	})
 	.use(session)
 	.group("/series", (app) =>
 		app
 			.post(
 				"",
+				{
+					access: "contribute:unit:create",
+					body: CreateSeriesBody,
+					response: {
+						[StatusCodes.OK]: IdResponse,
+						[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
+							"RevisionCreditEntityInvalid",
+							"RevisionContributionActorRequired",
+						]),
+						[StatusCodes.NOT_FOUND]: ImageAssetNotFoundResponse,
+					},
+					detail: { summary: "Create Series", tags: ["Series"] },
+				},
 				async ({ profile, body }) => {
 					const id = await database.transaction(async (tx) => {
 						const unitId = await createBaseUnit(tx, {
@@ -650,22 +645,18 @@ export default new Elysia()
 					});
 					return { id };
 				},
-				{
-					access: "contribute:unit:create",
-					body: CreateSeriesBody,
-					response: {
-						[StatusCodes.OK]: IdResponse,
-						[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
-							"RevisionCreditEntityInvalid",
-							"RevisionContributionActorRequired",
-						]),
-						[StatusCodes.NOT_FOUND]: ImageAssetNotFoundResponse,
-					},
-					detail: { summary: "Create Series", tags: ["Series"] },
-				},
 			)
 			.get(
 				"/:seriesId/releases",
+				{
+					params: SeriesParams,
+					query: SeriesReleaseListQuery,
+					response: {
+						[StatusCodes.OK]: SeriesReleaseListResponse,
+						[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
+					},
+					detail: { summary: "List Series releases", tags: ["Series"] },
+				},
 				async ({ params, query, request }) => {
 					const localizationLanguages = query.localizationLanguages ?? [];
 					const identity = await resolveIdentity(request, "unit:read");
@@ -727,29 +718,12 @@ export default new Elysia()
 						),
 					};
 				},
-				{
-					params: SeriesParams,
-					query: SeriesReleaseListQuery,
-					response: {
-						[StatusCodes.OK]: SeriesReleaseListResponse,
-						[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
-					},
-					detail: { summary: "List Series releases", tags: ["Series"] },
-				},
 			),
 	)
 	.group("/zones", (app) =>
 		app
 			.put(
 				"/:zoneId/slug-address",
-				async ({ params, authorization, body }) => {
-					await authorization.platform.ensureCapability(DevelopmentPreviewCapability);
-					const result = await replaceZoneSlugAddress(authorization, {
-						zoneId: params.zoneId,
-						slug: body.slug,
-					});
-					return { ...result, canonicalPath: [...result.canonicalPath] };
-				},
 				{
 					access: "contribute:unit:update",
 					params: ZoneParams,
@@ -774,18 +748,17 @@ export default new Elysia()
 						tags: ["Zones", "Slug Addresses"],
 					},
 				},
+				async ({ params, authorization, body }) => {
+					await authorization.platform.ensureCapability(DevelopmentPreviewCapability);
+					const result = await replaceZoneSlugAddress(authorization, {
+						zoneId: params.zoneId,
+						slug: body.slug,
+					});
+					return { ...result, canonicalPath: [...result.canonicalPath] };
+				},
 			)
 			.get(
 				"/:zoneId",
-				async ({ params, query, request }) => {
-					const authorization = (await resolveIdentity(request, "unit:read")).authorization;
-					await authorization.unit.ensureCanRead(params.zoneId, () => new UnitNotFound("Zone"));
-					return toZoneResponse(
-						await getZone(params.zoneId),
-						query.localizationLanguages,
-						await getZoneResponseCapabilities(authorization, params.zoneId),
-					);
-				},
 				{
 					params: ZoneParams,
 					query: ZoneDetailQuery,
@@ -795,9 +768,31 @@ export default new Elysia()
 					},
 					detail: { summary: "Get Zone configuration", tags: ["Zones"] },
 				},
+				async ({ params, query, request }) => {
+					const authorization = (await resolveIdentity(request, "unit:read")).authorization;
+					await authorization.unit.ensureCanRead(params.zoneId, () => new UnitNotFound("Zone"));
+					return toZoneResponse(
+						await getZone(params.zoneId),
+						query.localizationLanguages,
+						await getZoneResponseCapabilities(authorization, params.zoneId),
+					);
+				},
 			)
 			.get(
 				"/:zoneId/render",
+				{
+					params: ZoneParams,
+					query: ZoneRenderQuery,
+					response: {
+						[StatusCodes.OK]: ZoneRenderResponse,
+						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "ZonePageNotFound"]),
+					},
+					detail: {
+						operationId: "getZoneRenderProjection",
+						summary: "Get a Zone render projection",
+						tags: ["Zones"],
+					},
+				},
 				async ({ params, query, request }) => {
 					const identity = await resolveIdentity(request, "unit:read");
 					await identity.authorization.unit.ensureCanRead(
@@ -980,24 +975,29 @@ export default new Elysia()
 						navigations,
 						resolvedPresentation,
 						references: { units, wikiPosts, assets },
-					} satisfies typeof ZoneRenderResponse.static;
-				},
-				{
-					params: ZoneParams,
-					query: ZoneRenderQuery,
-					response: {
-						[StatusCodes.OK]: ZoneRenderResponse,
-						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "ZonePageNotFound"]),
-					},
-					detail: {
-						operationId: "getZoneRenderProjection",
-						summary: "Get a Zone render projection",
-						tags: ["Zones"],
-					},
+					} satisfies StaticDecode<typeof ZoneRenderResponse>;
 				},
 			)
 			.patch(
 				"/:zoneId",
+				{
+					access: "contribute:unit:update",
+					params: ZoneParams,
+					body: UpdateZoneBody,
+					response: {
+						[StatusCodes.OK]: ZoneResponse,
+						[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
+							"ZoneDocumentInvalid",
+							"ZoneRuleRealmInvalid",
+							"ZoneTimeRangeInvalid",
+							"RevisionCreditEntityInvalid",
+							"RevisionContributionActorRequired",
+						]),
+						[StatusCodes.FORBIDDEN]: ZonePreviewMutationForbiddenResponse,
+						[StatusCodes.NOT_FOUND]: UnitMutationNotFoundResponse,
+					},
+					detail: { summary: "Update Zone configuration", tags: ["Zones"] },
+				},
 				async ({ params, profile, authorization, body }) => {
 					if (body.filterDocument) ensureZoneFilterDocument(body.filterDocument);
 					const scopes: string[][] = [];
@@ -1090,37 +1090,9 @@ export default new Elysia()
 						await getZoneResponseCapabilities(authorization, params.zoneId),
 					);
 				},
-				{
-					access: "contribute:unit:update",
-					params: ZoneParams,
-					body: UpdateZoneBody,
-					response: {
-						[StatusCodes.OK]: ZoneResponse,
-						[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
-							"ZoneDocumentInvalid",
-							"ZoneRuleRealmInvalid",
-							"ZoneTimeRangeInvalid",
-							"RevisionCreditEntityInvalid",
-							"RevisionContributionActorRequired",
-						]),
-						[StatusCodes.FORBIDDEN]: ZonePreviewMutationForbiddenResponse,
-						[StatusCodes.NOT_FOUND]: UnitMutationNotFoundResponse,
-					},
-					detail: { summary: "Update Zone configuration", tags: ["Zones"] },
-				},
 			)
 			.get(
 				"/:zoneId/page-addresses/by-id/:pageId",
-				async ({ params, request }) => {
-					const authorization = (await resolveIdentity(request, "unit:read")).authorization;
-					await authorization.unit.ensureCanRead(params.zoneId, () => new UnitNotFound("Zone"));
-					await getZone(params.zoneId);
-					const address = await database.transaction((tx) =>
-						getZonePageAddressById(tx, params.zoneId, params.pageId),
-					);
-					if (!address) throw new ZonePageNotFound();
-					return address;
-				},
 				{
 					params: ZonePageIdParams,
 					response: {
@@ -1133,19 +1105,19 @@ export default new Elysia()
 						tags: ["Zones"],
 					},
 				},
-			)
-			.get(
-				"/:zoneId/page-addresses/by-slug/:slug",
 				async ({ params, request }) => {
 					const authorization = (await resolveIdentity(request, "unit:read")).authorization;
 					await authorization.unit.ensureCanRead(params.zoneId, () => new UnitNotFound("Zone"));
 					await getZone(params.zoneId);
 					const address = await database.transaction((tx) =>
-						resolveZonePageAddressBySlug(tx, params.zoneId, params.slug),
+						getZonePageAddressById(tx, params.zoneId, params.pageId),
 					);
 					if (!address) throw new ZonePageNotFound();
 					return address;
 				},
+			)
+			.get(
+				"/:zoneId/page-addresses/by-slug/:slug",
 				{
 					params: ZonePageSlugParams,
 					response: {
@@ -1158,9 +1130,27 @@ export default new Elysia()
 						tags: ["Zones"],
 					},
 				},
+				async ({ params, request }) => {
+					const authorization = (await resolveIdentity(request, "unit:read")).authorization;
+					await authorization.unit.ensureCanRead(params.zoneId, () => new UnitNotFound("Zone"));
+					await getZone(params.zoneId);
+					const address = await database.transaction((tx) =>
+						resolveZonePageAddressBySlug(tx, params.zoneId, params.slug),
+					);
+					if (!address) throw new ZonePageNotFound();
+					return address;
+				},
 			)
 			.get(
 				"/:zoneId/pages",
+				{
+					params: ZoneParams,
+					response: {
+						[StatusCodes.OK]: ZonePageListResponse,
+						[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
+					},
+					detail: { summary: "List Zone pages", tags: ["Zones"] },
+				},
 				async ({ params, request }) => {
 					const authorization = (await resolveIdentity(request, "unit:read")).authorization;
 					await authorization.unit.ensureCanRead(params.zoneId, () => new UnitNotFound("Zone"));
@@ -1170,17 +1160,30 @@ export default new Elysia()
 						pageStructure: await getZonePageStructureProjection(tx, params.zoneId),
 					}));
 				},
-				{
-					params: ZoneParams,
-					response: {
-						[StatusCodes.OK]: ZonePageListResponse,
-						[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
-					},
-					detail: { summary: "List Zone pages", tags: ["Zones"] },
-				},
 			)
 			.post(
 				"/:zoneId/pages",
+				{
+					access: "contribute:unit:update",
+					params: ZoneParams,
+					body: ZonePageBody,
+					response: {
+						[StatusCodes.OK]: ZonePageResponse,
+						[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
+							"InvalidSlug",
+							"ZoneDocumentInvalid",
+							"RevisionCreditEntityInvalid",
+							"RevisionContributionActorRequired",
+						]),
+						[StatusCodes.FORBIDDEN]: ZonePreviewMutationForbiddenResponse,
+						[StatusCodes.NOT_FOUND]: UnitMutationNotFoundResponse,
+						[StatusCodes.CONFLICT]: toApiErrorResponse(["SlugTaken", "UnitRevisionConflict"]),
+					},
+					detail: {
+						summary: "Create Zone page in development preview",
+						tags: ["Zones"],
+					},
+				},
 				async ({ params, profile, authorization, body }) => {
 					await authorization.platform.ensureCapability(DevelopmentPreviewCapability);
 					await authorization.zone.ensurePagesMutation(params.zoneId);
@@ -1204,9 +1207,32 @@ export default new Elysia()
 						throw cause;
 					}
 				},
+			)
+			.get(
+				"/:zoneId/pages/:pageId",
+				{
+					params: ZonePageIdParams,
+					response: {
+						[StatusCodes.OK]: ZonePageResponse,
+						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "ZonePageNotFound"]),
+					},
+					detail: { summary: "Get Zone page by Unit ID", tags: ["Zones"] },
+				},
+				async ({ params, request }) => {
+					const authorization = (await resolveIdentity(request, "unit:read")).authorization;
+					await authorization.unit.ensureCanRead(params.zoneId, () => new UnitNotFound("Zone"));
+					const page = await database.transaction((tx) =>
+						getZonePageUnitById(tx, params.zoneId, params.pageId),
+					);
+					if (!page) throw new ZonePageNotFound();
+					return toZonePageResponse(page);
+				},
+			)
+			.put(
+				"/:zoneId/pages/:pageId",
 				{
 					access: "contribute:unit:update",
-					params: ZoneParams,
+					params: ZonePageIdParams,
 					body: ZonePageBody,
 					response: {
 						[StatusCodes.OK]: ZonePageResponse,
@@ -1221,33 +1247,10 @@ export default new Elysia()
 						[StatusCodes.CONFLICT]: toApiErrorResponse(["SlugTaken", "UnitRevisionConflict"]),
 					},
 					detail: {
-						summary: "Create Zone page in development preview",
+						summary: "Replace Zone page in development preview",
 						tags: ["Zones"],
 					},
 				},
-			)
-			.get(
-				"/:zoneId/pages/:pageId",
-				async ({ params, request }) => {
-					const authorization = (await resolveIdentity(request, "unit:read")).authorization;
-					await authorization.unit.ensureCanRead(params.zoneId, () => new UnitNotFound("Zone"));
-					const page = await database.transaction((tx) =>
-						getZonePageUnitById(tx, params.zoneId, params.pageId),
-					);
-					if (!page) throw new ZonePageNotFound();
-					return toZonePageResponse(page);
-				},
-				{
-					params: ZonePageIdParams,
-					response: {
-						[StatusCodes.OK]: ZonePageResponse,
-						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "ZonePageNotFound"]),
-					},
-					detail: { summary: "Get Zone page by Unit ID", tags: ["Zones"] },
-				},
-			)
-			.put(
-				"/:zoneId/pages/:pageId",
 				async ({ params, profile, authorization, body }) => {
 					await authorization.platform.ensureCapability(DevelopmentPreviewCapability);
 					await authorization.zone.ensurePagesMutation(params.zoneId);
@@ -1272,41 +1275,9 @@ export default new Elysia()
 						throw cause;
 					}
 				},
-				{
-					access: "contribute:unit:update",
-					params: ZonePageIdParams,
-					body: ZonePageBody,
-					response: {
-						[StatusCodes.OK]: ZonePageResponse,
-						[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
-							"InvalidSlug",
-							"ZoneDocumentInvalid",
-							"RevisionCreditEntityInvalid",
-							"RevisionContributionActorRequired",
-						]),
-						[StatusCodes.FORBIDDEN]: ZonePreviewMutationForbiddenResponse,
-						[StatusCodes.NOT_FOUND]: UnitMutationNotFoundResponse,
-						[StatusCodes.CONFLICT]: toApiErrorResponse(["SlugTaken", "UnitRevisionConflict"]),
-					},
-					detail: {
-						summary: "Replace Zone page in development preview",
-						tags: ["Zones"],
-					},
-				},
 			)
 			.put(
 				"/:zoneId/pages/:pageId/placement",
-				async ({ params, profile, authorization, body }) => {
-					await authorization.zone.ensurePagesMutation(params.zoneId);
-					return upsertZonePagePlacement({
-						zoneId: params.zoneId,
-						pageId: params.pageId,
-						actorProfileId: profile.unitId,
-						parentPageId: body.parentPageId,
-						position: body.position,
-						baseStructureRevisionId: body.baseStructureRevisionId,
-					});
-				},
 				{
 					access: "contribute:unit:update",
 					params: ZonePageIdParams,
@@ -1320,24 +1291,20 @@ export default new Elysia()
 					},
 					detail: { summary: "Index Zone page in page-structure", tags: ["Zones"] },
 				},
+				async ({ params, profile, authorization, body }) => {
+					await authorization.zone.ensurePagesMutation(params.zoneId);
+					return upsertZonePagePlacement({
+						zoneId: params.zoneId,
+						pageId: params.pageId,
+						actorProfileId: profile.unitId,
+						parentPageId: body.parentPageId,
+						position: body.position,
+						baseStructureRevisionId: body.baseStructureRevisionId,
+					});
+				},
 			)
 			.delete(
 				"/:zoneId/pages/:pageId/placement",
-				async ({ params, body, profile, authorization }) => {
-					await authorization.zone.ensurePagesMutation(params.zoneId);
-					try {
-						await deleteZonePagePlacement({
-							zoneId: params.zoneId,
-							pageId: params.pageId,
-							actorProfileId: profile.unitId,
-							baseStructureRevisionId: body.baseStructureRevisionId,
-						});
-					} catch (cause) {
-						if (cause instanceof ContentStructureInvalid) throw new ZonePageInUse();
-						throw cause;
-					}
-					return new Response(null, { status: StatusCodes.NO_CONTENT });
-				},
 				{
 					access: "contribute:unit:update",
 					params: ZonePageIdParams,
@@ -1361,9 +1328,32 @@ export default new Elysia()
 						responses: NoContentResponse,
 					},
 				},
+				async ({ params, body, profile, authorization }) => {
+					await authorization.zone.ensurePagesMutation(params.zoneId);
+					try {
+						await deleteZonePagePlacement({
+							zoneId: params.zoneId,
+							pageId: params.pageId,
+							actorProfileId: profile.unitId,
+							baseStructureRevisionId: body.baseStructureRevisionId,
+						});
+					} catch (cause) {
+						if (cause instanceof ContentStructureInvalid) throw new ZonePageInUse();
+						throw cause;
+					}
+					return new Response(null, { status: StatusCodes.NO_CONTENT });
+				},
 			)
 			.get(
 				"/:zoneId/navigation",
+				{
+					params: ZoneParams,
+					response: {
+						[StatusCodes.OK]: ZoneNavigationListResponse,
+						[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
+					},
+					detail: { summary: "List Zone navigation resources", tags: ["Zones"] },
+				},
 				async ({ params, request }) => {
 					const authorization = (await resolveIdentity(request, "unit:read")).authorization;
 					await authorization.unit.ensureCanRead(params.zoneId, () => new UnitNotFound("Zone"));
@@ -1377,17 +1367,21 @@ export default new Elysia()
 						};
 					});
 				},
-				{
-					params: ZoneParams,
-					response: {
-						[StatusCodes.OK]: ZoneNavigationListResponse,
-						[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
-					},
-					detail: { summary: "List Zone navigation resources", tags: ["Zones"] },
-				},
 			)
 			.post(
 				"/:zoneId/navigation",
+				{
+					access: "contribute:unit:update",
+					params: ZoneParams,
+					body: ZoneNavigationBody,
+					response: {
+						[StatusCodes.OK]: ZoneNavigationResponse,
+						[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["ZoneDocumentInvalid"]),
+						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
+						[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
+					},
+					detail: { summary: "Create Zone navigation", tags: ["Zones"] },
+				},
 				async ({ params, profile, authorization, body }) => {
 					await authorization.zone.ensurePagesMutation(params.zoneId);
 					await getZone(params.zoneId);
@@ -1414,21 +1408,17 @@ export default new Elysia()
 						return toZoneNavigationResponse(record, result.revisionId);
 					});
 				},
-				{
-					access: "contribute:unit:update",
-					params: ZoneParams,
-					body: ZoneNavigationBody,
-					response: {
-						[StatusCodes.OK]: ZoneNavigationResponse,
-						[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["ZoneDocumentInvalid"]),
-						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
-						[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
-					},
-					detail: { summary: "Create Zone navigation", tags: ["Zones"] },
-				},
 			)
 			.get(
 				"/:zoneId/navigation/:navigationId",
+				{
+					params: ZoneNavigationParams,
+					response: {
+						[StatusCodes.OK]: ZoneNavigationResponse,
+						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "ZoneNavigationNotFound"]),
+					},
+					detail: { summary: "Get Zone navigation resource", tags: ["Zones"] },
+				},
 				async ({ params, request }) => {
 					const authorization = (await resolveIdentity(request, "unit:read")).authorization;
 					await authorization.unit.ensureCanRead(params.zoneId, () => new UnitNotFound("Zone"));
@@ -1453,17 +1443,22 @@ export default new Elysia()
 						}
 					});
 				},
-				{
-					params: ZoneNavigationParams,
-					response: {
-						[StatusCodes.OK]: ZoneNavigationResponse,
-						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "ZoneNavigationNotFound"]),
-					},
-					detail: { summary: "Get Zone navigation resource", tags: ["Zones"] },
-				},
 			)
 			.put(
 				"/:zoneId/navigation/:navigationId",
+				{
+					access: "contribute:unit:update",
+					params: ZoneNavigationParams,
+					body: ZoneNavigationReplaceBody,
+					response: {
+						[StatusCodes.OK]: ZoneNavigationResponse,
+						[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["ZoneDocumentInvalid"]),
+						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
+						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "ZoneNavigationNotFound"]),
+						[StatusCodes.CONFLICT]: toApiErrorResponse(["ContentStructureRevisionConflict"]),
+					},
+					detail: { summary: "Replace Zone navigation", tags: ["Zones"] },
+				},
 				async ({ params, profile, authorization, body }) => {
 					await authorization.zone.ensurePagesMutation(params.zoneId);
 					await getZone(params.zoneId);
@@ -1499,22 +1494,32 @@ export default new Elysia()
 						rethrowZoneNavigationNotFound(cause);
 					}
 				},
-				{
-					access: "contribute:unit:update",
-					params: ZoneNavigationParams,
-					body: ZoneNavigationReplaceBody,
-					response: {
-						[StatusCodes.OK]: ZoneNavigationResponse,
-						[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["ZoneDocumentInvalid"]),
-						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
-						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "ZoneNavigationNotFound"]),
-						[StatusCodes.CONFLICT]: toApiErrorResponse(["ContentStructureRevisionConflict"]),
-					},
-					detail: { summary: "Replace Zone navigation", tags: ["Zones"] },
-				},
 			)
 			.delete(
 				"/:zoneId/navigation/:navigationId",
+				{
+					access: "contribute:unit:update",
+					params: ZoneNavigationParams,
+					body: ZoneNavigationRevisionBody,
+					response: {
+						[StatusCodes.NO_CONTENT]: t.Void(),
+						[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
+							"RevisionCreditEntityInvalid",
+							"RevisionContributionActorRequired",
+						]),
+						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
+						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "ZoneNavigationNotFound"]),
+						[StatusCodes.CONFLICT]: toApiErrorResponse([
+							"ZoneNavigationInUse",
+							"ContentStructureRevisionConflict",
+						]),
+					},
+					detail: {
+						summary: "Delete Zone navigation resource",
+						tags: ["Zones"],
+						responses: NoContentResponse,
+					},
+				},
 				async ({ params, body, profile, authorization }) => {
 					await authorization.zone.ensurePagesMutation(params.zoneId);
 					try {
@@ -1557,35 +1562,27 @@ export default new Elysia()
 					}
 					return new Response(null, { status: StatusCodes.NO_CONTENT });
 				},
-				{
-					access: "contribute:unit:update",
-					params: ZoneNavigationParams,
-					body: ZoneNavigationRevisionBody,
-					response: {
-						[StatusCodes.NO_CONTENT]: t.Void(),
-						[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
-							"RevisionCreditEntityInvalid",
-							"RevisionContributionActorRequired",
-						]),
-						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
-						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "ZoneNavigationNotFound"]),
-						[StatusCodes.CONFLICT]: toApiErrorResponse([
-							"ZoneNavigationInUse",
-							"ContentStructureRevisionConflict",
-						]),
-					},
-					detail: {
-						summary: "Delete Zone navigation resource",
-						tags: ["Zones"],
-						responses: NoContentResponse,
-					},
-				},
 			),
 	)
 	.group("/series", (app) =>
 		app
 			.put(
 				"/:seriesId/releases/:releaseId",
+				{
+					access: "contribute:unit:update",
+					params: SeriesReleaseParams,
+					body: UpsertSeriesReleaseBody,
+					response: {
+						[StatusCodes.OK]: SeriesReleaseResponse,
+						[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
+							"RevisionCreditEntityInvalid",
+							"RevisionContributionActorRequired",
+						]),
+						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
+						[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
+					},
+					detail: { summary: "Add or update Series release", tags: ["Series"] },
+				},
 				async ({ params, profile, authorization, body }) => {
 					const { revisionContext, ...release } = body;
 					await ensureUnitMutationAuthorized(authorization.unit, params.seriesId, ["releases"]);
@@ -1629,24 +1626,24 @@ export default new Elysia()
 					if (!created) throw new Error("Series release upsert did not return a row");
 					return created;
 				},
-				{
-					access: "contribute:unit:update",
-					params: SeriesReleaseParams,
-					body: UpsertSeriesReleaseBody,
-					response: {
-						[StatusCodes.OK]: SeriesReleaseResponse,
-						[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
-							"RevisionCreditEntityInvalid",
-							"RevisionContributionActorRequired",
-						]),
-						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
-						[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
-					},
-					detail: { summary: "Add or update Series release", tags: ["Series"] },
-				},
 			)
 			.delete(
 				"/:seriesId/releases/:releaseId",
+				{
+					access: "contribute:unit:update",
+					params: SeriesReleaseParams,
+					body: t.Optional(RevisionContextBody),
+					response: {
+						[StatusCodes.NO_CONTENT]: t.Void(),
+						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
+						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "SeriesReleaseNotFound"]),
+					},
+					detail: {
+						summary: "Remove Series release",
+						tags: ["Series"],
+						responses: NoContentResponse,
+					},
+				},
 				async ({ params, profile, authorization, body }) => {
 					await ensureUnitMutationAuthorized(authorization.unit, params.seriesId, ["releases"]);
 					await database.transaction(async (tx) => {
@@ -1669,26 +1666,31 @@ export default new Elysia()
 					});
 					return new Response(null, { status: StatusCodes.NO_CONTENT });
 				},
-				{
-					access: "contribute:unit:update",
-					params: SeriesReleaseParams,
-					body: t.Optional(RevisionContextBody),
-					response: {
-						[StatusCodes.NO_CONTENT]: t.Void(),
-						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
-						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "SeriesReleaseNotFound"]),
-					},
-					detail: {
-						summary: "Remove Series release",
-						tags: ["Series"],
-						responses: NoContentResponse,
-					},
-				},
 			),
 	)
 	.group("/zones", (app) =>
 		app.post(
 			"",
+			{
+				access: "contribute:unit:create",
+				body: CreateZoneBody,
+				response: {
+					[StatusCodes.OK]: IdResponse,
+					[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
+						"ZoneDocumentInvalid",
+						"ZoneRuleRealmInvalid",
+						"ZoneTimeRangeInvalid",
+						"RevisionCreditEntityInvalid",
+						"RevisionContributionActorRequired",
+					]),
+					[StatusCodes.FORBIDDEN]: toApiErrorResponse([
+						"PlatformCapabilityRequired",
+						"UnitPermissionForbidden",
+					]),
+					[StatusCodes.NOT_FOUND]: UnitMutationNotFoundResponse,
+				},
+				detail: { summary: "Create Zone", tags: ["Zones"] },
+			},
 			async ({ profile, authorization, body }) => {
 				await authorization.platform.ensureCapability(DevelopmentPreviewCapability);
 				if (body.localRuleRealmId) await authorization.unit.ensureCanRead(body.localRuleRealmId);
@@ -1729,32 +1731,20 @@ export default new Elysia()
 				});
 				return { id };
 			},
-			{
-				access: "contribute:unit:create",
-				body: CreateZoneBody,
-				response: {
-					[StatusCodes.OK]: IdResponse,
-					[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
-						"ZoneDocumentInvalid",
-						"ZoneRuleRealmInvalid",
-						"ZoneTimeRangeInvalid",
-						"RevisionCreditEntityInvalid",
-						"RevisionContributionActorRequired",
-					]),
-					[StatusCodes.FORBIDDEN]: toApiErrorResponse([
-						"PlatformCapabilityRequired",
-						"UnitPermissionForbidden",
-					]),
-					[StatusCodes.NOT_FOUND]: UnitMutationNotFoundResponse,
-				},
-				detail: { summary: "Create Zone", tags: ["Zones"] },
-			},
 		),
 	)
 	.group("/software", (app) =>
 		app
 			.get(
 				"/:softwareId/system-requirements",
+				{
+					params: SoftwareParams,
+					response: {
+						[StatusCodes.OK]: SystemRequirementListResponse,
+						[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
+					},
+					detail: { summary: "List Software system requirements", tags: ["Software"] },
+				},
 				async ({ params, request }) => {
 					const authorization = (await resolveIdentity(request, "unit:read")).authorization;
 					await authorization.unit.ensureCanRead(
@@ -1774,17 +1764,25 @@ export default new Elysia()
 						items: items.map(presentSystemRequirement),
 					};
 				},
-				{
-					params: SoftwareParams,
-					response: {
-						[StatusCodes.OK]: SystemRequirementListResponse,
-						[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
-					},
-					detail: { summary: "List Software system requirements", tags: ["Software"] },
-				},
 			)
 			.post(
 				"/:softwareId/system-requirements",
+				{
+					access: "contribute:unit:update",
+					params: SoftwareParams,
+					body: SystemRequirementBody,
+					response: {
+						[StatusCodes.OK]: SystemRequirementResponse,
+						[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
+							"SoftwareSystemRequirementSourceInvalid",
+							"RevisionCreditEntityInvalid",
+							"RevisionContributionActorRequired",
+						]),
+						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
+						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "SoftwareNotFound"]),
+					},
+					detail: { summary: "Create Software system requirement", tags: ["Software"] },
+				},
 				async ({ params, profile, authorization, body }) => {
 					await ensureUnitMutationAuthorized(authorization.unit, params.softwareId, [
 						"system-requirements",
@@ -1818,9 +1816,12 @@ export default new Elysia()
 					if (!created) throw new Error("System requirement insertion did not return a row");
 					return presentSystemRequirement(created);
 				},
+			)
+			.put(
+				"/:softwareId/system-requirements/:requirementId",
 				{
 					access: "contribute:unit:update",
-					params: SoftwareParams,
+					params: SoftwareRequirementParams,
 					body: SystemRequirementBody,
 					response: {
 						[StatusCodes.OK]: SystemRequirementResponse,
@@ -1830,13 +1831,13 @@ export default new Elysia()
 							"RevisionContributionActorRequired",
 						]),
 						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
-						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "SoftwareNotFound"]),
+						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
+							"UnitNotFound",
+							"SystemRequirementNotFound",
+						]),
 					},
-					detail: { summary: "Create Software system requirement", tags: ["Software"] },
+					detail: { summary: "Replace Software system requirement", tags: ["Software"] },
 				},
-			)
-			.put(
-				"/:softwareId/system-requirements/:requirementId",
 				async ({ params, profile, authorization, body }) => {
 					await ensureUnitMutationAuthorized(authorization.unit, params.softwareId, [
 						"system-requirements",
@@ -1869,28 +1870,27 @@ export default new Elysia()
 						return presentSystemRequirement(updated);
 					});
 				},
+			)
+			.delete(
+				"/:softwareId/system-requirements/:requirementId",
 				{
 					access: "contribute:unit:update",
 					params: SoftwareRequirementParams,
-					body: SystemRequirementBody,
+					body: t.Optional(RevisionContextBody),
 					response: {
-						[StatusCodes.OK]: SystemRequirementResponse,
-						[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
-							"SoftwareSystemRequirementSourceInvalid",
-							"RevisionCreditEntityInvalid",
-							"RevisionContributionActorRequired",
-						]),
+						[StatusCodes.NO_CONTENT]: t.Void(),
 						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
 						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
 							"UnitNotFound",
 							"SystemRequirementNotFound",
 						]),
 					},
-					detail: { summary: "Replace Software system requirement", tags: ["Software"] },
+					detail: {
+						summary: "Delete Software system requirement",
+						tags: ["Software"],
+						responses: NoContentResponse,
+					},
 				},
-			)
-			.delete(
-				"/:softwareId/system-requirements/:requirementId",
 				async ({ params, profile, authorization, body }) => {
 					await ensureUnitMutationAuthorized(authorization.unit, params.softwareId, [
 						"system-requirements",
@@ -1914,24 +1914,6 @@ export default new Elysia()
 						});
 					});
 					return new Response(null, { status: StatusCodes.NO_CONTENT });
-				},
-				{
-					access: "contribute:unit:update",
-					params: SoftwareRequirementParams,
-					body: t.Optional(RevisionContextBody),
-					response: {
-						[StatusCodes.NO_CONTENT]: t.Void(),
-						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
-						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
-							"UnitNotFound",
-							"SystemRequirementNotFound",
-						]),
-					},
-					detail: {
-						summary: "Delete Software system requirement",
-						tags: ["Software"],
-						responses: NoContentResponse,
-					},
 				},
 			),
 	);

@@ -1,3 +1,4 @@
+import type { StaticDecode } from "typebox";
 import {
 	AuthenticatedGrantableUnitPermissionValues,
 	DelegableUnitPermissionValues,
@@ -6,7 +7,7 @@ import {
 	UnitPermissionValues,
 } from "@rezics/access";
 import { PortableTextDocument } from "@rezics/block";
-import { type Static, t } from "elysia";
+import { t } from "elysia";
 
 import {
 	ContentGovernanceActionKindValues,
@@ -84,7 +85,7 @@ export const GovernanceRuleReference = t.Object(
 	},
 	{ additionalProperties: false },
 );
-export type GovernanceRuleReference = Static<typeof GovernanceRuleReference>;
+export type GovernanceRuleReference = StaticDecode<typeof GovernanceRuleReference>;
 const ContentGovernanceActionCommon = {
 	caseId: Uuid,
 	notes: t.Optional(GovernanceActionNotes),
@@ -199,7 +200,9 @@ export const CreateContentGovernanceActionBody = t.Union([
 		{ additionalProperties: false },
 	),
 ]);
-export type CreateContentGovernanceActionBody = Static<typeof CreateContentGovernanceActionBody>;
+export type CreateContentGovernanceActionBody = StaticDecode<
+	typeof CreateContentGovernanceActionBody
+>;
 
 const AccountEnforcementKind = t.Union(EnforcementKindValues.map((value) => t.Literal(value)));
 export const CreateAccountEnforcementBody = t.Object(
@@ -597,7 +600,7 @@ export const ContentGovernanceActionResponse = t.Object({
 	notes: t.Array(GovernanceNoteBindingResponse),
 	createdAt: DateTime,
 });
-export type ContentGovernanceActionResponse = Static<typeof ContentGovernanceActionResponse>;
+export type ContentGovernanceActionResponse = StaticDecode<typeof ContentGovernanceActionResponse>;
 
 export const EnforcementResponse = t.Object({
 	id: Uuid,

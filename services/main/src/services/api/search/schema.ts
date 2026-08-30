@@ -1,10 +1,11 @@
+import type { StaticDecode } from "typebox";
 import {
 	BlockPath,
 	MaxDockQueryBlocks,
 	MaxZoneEagerBlockExecutions,
 	MaxZonePageQueryBlocks,
 } from "@rezics/block";
-import { type Static, t } from "elysia";
+import { t } from "elysia";
 import { SearchContinuationToken, SearchFeatureState } from "@rezics/filter";
 import { LicenseIds } from "@rezics/license";
 
@@ -60,7 +61,7 @@ export const DomainSearchBody = t.Object(
 	},
 	{ additionalProperties: false },
 );
-export type DomainSearchBody = Static<typeof DomainSearchBody>;
+export type DomainSearchBody = StaticDecode<typeof DomainSearchBody>;
 
 export const GroupedSearchBody = t.Object(
 	{
@@ -72,10 +73,10 @@ export const GroupedSearchBody = t.Object(
 	},
 	{ additionalProperties: false },
 );
-export type GroupedSearchBody = Static<typeof GroupedSearchBody>;
+export type GroupedSearchBody = StaticDecode<typeof GroupedSearchBody>;
 
 export const DomainSearchParams = t.Object({ index: SearchCategory });
-export type DomainSearchParams = Static<typeof DomainSearchParams>;
+export type DomainSearchParams = StaticDecode<typeof DomainSearchParams>;
 
 export const ZonePageAggregateExecutionParams = t.Object(
 	{ zoneId: Uuid, pageId: Uuid },
@@ -236,6 +237,8 @@ export const ZonePageAggregateExecutionResponse = t.Object(
 	{ additionalProperties: false },
 );
 
-export type ZonePageAggregateExecutionBody = Static<typeof ZonePageAggregateExecutionBody>;
-export type ZonePageAggregateExecutionResult = Static<typeof ZonePageAggregateExecutionResult>;
-export type ZonePageAggregateExecutionEntry = Static<typeof ZonePageAggregateExecutionEntry>;
+export type ZonePageAggregateExecutionBody = StaticDecode<typeof ZonePageAggregateExecutionBody>;
+export type ZonePageAggregateExecutionResult = StaticDecode<
+	typeof ZonePageAggregateExecutionResult
+>;
+export type ZonePageAggregateExecutionEntry = StaticDecode<typeof ZonePageAggregateExecutionEntry>;

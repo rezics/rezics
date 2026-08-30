@@ -1,4 +1,5 @@
-import { type Static, t } from "elysia";
+import type { StaticDecode } from "typebox";
+import { t } from "elysia";
 import { SearchFeatureInput } from "@rezics/filter";
 
 import {
@@ -22,7 +23,7 @@ export const ListProgressQuery = t.Object(
 	},
 	{ additionalProperties: false },
 );
-export type ListProgressQuery = Static<typeof ListProgressQuery>;
+export type ListProgressQuery = StaticDecode<typeof ListProgressQuery>;
 
 const ProgressSearchFeatureExecution = t.Omit(SearchFeatureInput, ["filterDocument", "contexts"]);
 export const ProgressSearchBody = t.Object(
@@ -32,10 +33,10 @@ export const ProgressSearchBody = t.Object(
 	},
 	{ additionalProperties: false },
 );
-export type ProgressSearchBody = Static<typeof ProgressSearchBody>;
+export type ProgressSearchBody = StaticDecode<typeof ProgressSearchBody>;
 
 export const ProgressUnitParams = t.Object({ unitId: Uuid });
-export type ProgressUnitParams = Static<typeof ProgressUnitParams>;
+export type ProgressUnitParams = StaticDecode<typeof ProgressUnitParams>;
 
 export const ProgressContinuationResponse = t.Union([
 	t.Object(
@@ -64,7 +65,7 @@ export const ProgressContinuationResponse = t.Union([
 	),
 	t.Object({ kind: t.Literal("none") }, { additionalProperties: false }),
 ]);
-export type ProgressContinuationResponse = Static<typeof ProgressContinuationResponse>;
+export type ProgressContinuationResponse = StaticDecode<typeof ProgressContinuationResponse>;
 
 export const ProgressLookupResponse = t.Union([
 	t.Object({ state: t.Literal("untracked") }, { additionalProperties: false }),
@@ -77,7 +78,7 @@ export const ProgressLookupResponse = t.Union([
 		{ additionalProperties: false },
 	),
 ]);
-export type ProgressLookupResponse = Static<typeof ProgressLookupResponse>;
+export type ProgressLookupResponse = StaticDecode<typeof ProgressLookupResponse>;
 
 export const UpsertProgressBody = t.Object(
 	{
@@ -89,7 +90,7 @@ export const UpsertProgressBody = t.Object(
 	},
 	{ additionalProperties: false },
 );
-export type UpsertProgressBody = Static<typeof UpsertProgressBody>;
+export type UpsertProgressBody = StaticDecode<typeof UpsertProgressBody>;
 
 export const CompleteProgressBody = t.Object(
 	{
@@ -98,10 +99,10 @@ export const CompleteProgressBody = t.Object(
 	},
 	{ additionalProperties: false },
 );
-export type CompleteProgressBody = Static<typeof CompleteProgressBody>;
+export type CompleteProgressBody = StaticDecode<typeof CompleteProgressBody>;
 
 export const ProgressNodeParams = t.Object({ unitId: Uuid, nodeId: Uuid });
-export type ProgressNodeParams = Static<typeof ProgressNodeParams>;
+export type ProgressNodeParams = StaticDecode<typeof ProgressNodeParams>;
 
 export const ListProgressEntriesQuery = t.Object(
 	{
@@ -111,10 +112,10 @@ export const ListProgressEntriesQuery = t.Object(
 	},
 	{ additionalProperties: false },
 );
-export type ListProgressEntriesQuery = Static<typeof ListProgressEntriesQuery>;
+export type ListProgressEntriesQuery = StaticDecode<typeof ListProgressEntriesQuery>;
 
 export const ProgressEntryParams = t.Object({ unitId: Uuid, entryId: Uuid });
-export type ProgressEntryParams = Static<typeof ProgressEntryParams>;
+export type ProgressEntryParams = StaticDecode<typeof ProgressEntryParams>;
 
 const ProgressEntryWriteFields = {
 	entryKind: ProgressEntryKind,
@@ -129,9 +130,9 @@ const ProgressEntryWriteFields = {
 export const CreateProgressEntryBody = t.Object(ProgressEntryWriteFields, {
 	additionalProperties: false,
 });
-export type CreateProgressEntryBody = Static<typeof CreateProgressEntryBody>;
+export type CreateProgressEntryBody = StaticDecode<typeof CreateProgressEntryBody>;
 
 export const ReplaceProgressEntryBody = t.Object(ProgressEntryWriteFields, {
 	additionalProperties: false,
 });
-export type ReplaceProgressEntryBody = Static<typeof ReplaceProgressEntryBody>;
+export type ReplaceProgressEntryBody = StaticDecode<typeof ReplaceProgressEntryBody>;

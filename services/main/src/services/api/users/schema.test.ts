@@ -1,4 +1,4 @@
-import { Check } from "@sinclair/typebox/value";
+import { Check } from "typebox/value";
 import { describe, expect, it } from "vitest";
 
 import { FollowingStatusResponse } from "../schema/action-response";
@@ -179,9 +179,9 @@ describe("profile content language contract", () => {
 describe("Studio content list contract", () => {
 	it("accepts only supported sections and bounded limits", () => {
 		expect(Check(StudioContentListQuery, { section: "book" })).toBe(true);
-		expect(StudioContentListQuery.properties.source.default).toBe("all");
-		expect(StudioContentListQuery.properties.status.default).toBeUndefined();
-		expect(StudioContentListQuery.properties.visibility.default).toBeUndefined();
+		expect(StudioContentListQuery.properties.source).toHaveProperty("default", "all");
+		expect(Reflect.get(StudioContentListQuery.properties.status, "default")).toBeUndefined();
+		expect(Reflect.get(StudioContentListQuery.properties.visibility, "default")).toBeUndefined();
 		expect(
 			Check(StudioContentListQuery, {
 				section: "wiki",

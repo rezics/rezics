@@ -1,8 +1,9 @@
-import { type Static, Type } from "@sinclair/typebox";
-import { Check, Value } from "@sinclair/typebox/value";
+import { type Static, Type } from "typebox";
+import { Check, Value } from "typebox/value";
 import { UnitFilter, assertUnitFilter } from "./filter";
 import {
 	UnitPredicate as UnitPredicateSchema,
+	UnitPredicateSchemaModels,
 	assertUnitPredicate,
 	type UnitPredicate,
 } from "./unit";
@@ -18,6 +19,11 @@ import {
 	SearchSort,
 	SearchSortValues,
 } from "./search-primitives";
+
+const SearchFeatureSchemaContext = {
+	UnitPredicate: UnitPredicateSchemaModels.UnitPredicate,
+	UnitFilter,
+} as const;
 
 export const SearchFeatureSurfaceValues = ["search", "feed"] as const;
 export type SearchFeatureSurface = (typeof SearchFeatureSurfaceValues)[number];
@@ -48,20 +54,27 @@ export const SearchControlValue = Type.Object(
 );
 export type SearchControlValue = Static<typeof SearchControlValue>;
 
-export const SearchControlExpression = Type.Recursive(
-	(This) =>
-		Type.Union([
+export const SearchControlExpression = Type.Cyclic(
+	{
+		SearchControlExpression: Type.Union([
 			SearchControlValue,
 			Type.Object(
 				{
 					operator: Type.Union([Type.Literal("all"), Type.Literal("any")]),
-					clauses: Type.Array(This, { minItems: 1, maxItems: 20 }),
+					clauses: Type.Array(Type.Ref("SearchControlExpression"), {
+						minItems: 1,
+						maxItems: 20,
+					}),
 				},
 				{ additionalProperties: false },
 			),
-			Type.Object({ operator: Type.Literal("not"), clause: This }, { additionalProperties: false }),
+			Type.Object(
+				{ operator: Type.Literal("not"), clause: Type.Ref("SearchControlExpression") },
+				{ additionalProperties: false },
+			),
 		]),
-	{ $id: "SearchControlExpression" },
+	},
+	"SearchControlExpression",
 );
 export type SearchControlExpression = Static<typeof SearchControlExpression>;
 
@@ -187,7 +200,7 @@ export const SearchInjection = Type.Object(
 export type SearchInjection = Static<typeof SearchInjection>;
 
 const SearchExecutionBase = {
-	filter: Type.Optional(Type.Ref(UnitFilter)),
+	filter: Type.Optional(Type.Unsafe<UnitFilter>(UnitFilter)),
 	sort: Type.Optional(SearchSort),
 	pageSize: Type.Optional(Type.Integer({ minimum: 1, maximum: 100 })),
 };
@@ -215,7 +228,10 @@ export const SearchFeatureState = Type.Object(
 	},
 	{ additionalProperties: false, $id: "SearchFeatureState" },
 );
-export type SearchFeatureState = Static<typeof SearchFeatureState>;
+export type SearchFeatureState = Static<
+	typeof SearchFeatureState,
+	typeof SearchFeatureSchemaContext
+>;
 
 /** An immutable, cursor-free Search Feature state suitable for a public share link. */
 export const SharedSearchQueryState = Type.Object(
@@ -225,7 +241,10 @@ export const SharedSearchQueryState = Type.Object(
 	},
 	{ additionalProperties: false, $id: "SharedSearchQueryState" },
 );
-export type SharedSearchQueryState = Static<typeof SharedSearchQueryState>;
+export type SharedSearchQueryState = Static<
+	typeof SharedSearchQueryState,
+	typeof SearchFeatureSchemaContext
+>;
 
 /**
  * Presentation metadata is an untrusted display hint for opaque entity values.
@@ -250,7 +269,10 @@ export const SharedSearchQueryDocument = Type.Object(
 	},
 	{ additionalProperties: false, $id: "SharedSearchQueryDocument" },
 );
-export type SharedSearchQueryDocument = Static<typeof SharedSearchQueryDocument>;
+export type SharedSearchQueryDocument = Static<
+	typeof SharedSearchQueryDocument,
+	typeof SearchFeatureSchemaContext
+>;
 
 /** The complete deterministic input boundary consumed by Search Feature. */
 export const SearchFeatureInput = Type.Object(
@@ -262,17 +284,18 @@ export const SearchFeatureInput = Type.Object(
 	},
 	{ additionalProperties: false, $id: "SearchFeatureInput" },
 );
-export type SearchFeatureInput = Static<typeof SearchFeatureInput>;
+export type SearchFeatureInput = Static<
+	typeof SearchFeatureInput,
+	typeof SearchFeatureSchemaContext
+>;
 
 /** Server-resolved control metadata that is safe for a renderer to consume. */
-export const ResolvedSearchControl = Type.Composite(
-	[
-		SearchControl,
-		Type.Object({
-			enabled: Type.Boolean(),
-			disclosure: SearchDisclosure,
-		}),
-	],
+export const ResolvedSearchControl = Type.Interface(
+	[SearchControl],
+	{
+		enabled: Type.Boolean(),
+		disclosure: SearchDisclosure,
+	},
 	{ additionalProperties: false, $id: "ResolvedSearchControl" },
 );
 export type ResolvedSearchControl = Static<typeof ResolvedSearchControl>;
@@ -364,11 +387,11 @@ export function filterDocumentControlField(control: FilterDocumentControl): Sear
 }
 
 export function assertFilterDocument(value: unknown): asserts value is FilterDocument {
-	if (!Check(FilterDocument, [UnitPredicateSchema], value)) {
-		const error = Value.Errors(FilterDocument, [UnitPredicateSchema], value).First();
+	if (!Check(SearchFeatureSchemaContext, FilterDocument, value)) {
+		const error = Value.Errors(SearchFeatureSchemaContext, FilterDocument, value)[0];
 		throw new TypeError(
 			error
-				? `Invalid Filter document at ${error.path || "/"}: ${error.message}`
+				? `Invalid Filter document at ${error.instancePath || "/"}: ${error.message}`
 				: "Invalid Filter document",
 		);
 	}
@@ -392,7 +415,7 @@ export function assertFilterDocument(value: unknown): asserts value is FilterDoc
 }
 
 export function assertSearchFeatureInput(value: unknown): asserts value is SearchFeatureInput {
-	if (!Check(SearchFeatureInput, [UnitPredicateSchema, UnitFilter], value))
+	if (!Check(SearchFeatureSchemaContext, SearchFeatureInput, value))
 		throw new TypeError("Invalid Search Feature input");
 	assertFilterDocument(value.filterDocument);
 	assertSearchFeatureState(value.state);
@@ -406,7 +429,7 @@ export function assertSearchFeatureInput(value: unknown): asserts value is Searc
 }
 
 export function assertSearchFeatureState(value: unknown): asserts value is SearchFeatureState {
-	if (!Check(SearchFeatureState, [UnitPredicateSchema, UnitFilter], value))
+	if (!Check(SearchFeatureSchemaContext, SearchFeatureState, value))
 		throw new TypeError("Invalid Search Feature state");
 	if (value.filter) assertUnitFilter(value.filter);
 	if (value.expression)
@@ -436,7 +459,7 @@ export function parseSearchFeatureState(value: unknown): SearchFeatureState {
 }
 
 export function parseSearchFeatureDefinition(value: unknown): SearchFeatureDefinition {
-	if (!Check(SearchFeatureDefinition, [UnitPredicateSchema], value))
+	if (!Check(SearchFeatureSchemaContext, SearchFeatureDefinition, value))
 		throw new TypeError("Invalid Search Feature definition");
 	assertFilterDocument(value.filterDocument);
 	if (!unique(value.categories)) throw new TypeError("Search categories must be unique");
@@ -461,7 +484,7 @@ export function parseSearchFeatureDefinition(value: unknown): SearchFeatureDefin
 }
 
 export function parseSharedSearchQueryDocument(value: unknown): SharedSearchQueryDocument {
-	if (!Check(SharedSearchQueryDocument, [UnitPredicateSchema, UnitFilter], value))
+	if (!Check(SearchFeatureSchemaContext, SharedSearchQueryDocument, value))
 		throw new TypeError("Invalid shared Search query document");
 	assertFilterDocument(value.filterDocument);
 	if (

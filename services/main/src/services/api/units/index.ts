@@ -1,5 +1,6 @@
+import type { StaticDecode } from "typebox";
 import { StatusCodes } from "http-status-codes";
-import Elysia, { t, type Static } from "elysia";
+import Elysia, { t } from "elysia";
 
 import session, { resolveIdentity } from "../../auth/session";
 import { contentRatingPolicyFromAllowlist } from "../../content-rating/policy";
@@ -196,13 +197,6 @@ export default new Elysia({ prefix: "/units" })
 	.use(session)
 	.get(
 		"/by-id/:unitId/seo",
-		async ({ params, query }) => {
-			const projection: Static<typeof PublicUnitSeoResponse> = await getPublicUnitSeoProjection(
-				params.unitId,
-				query.localizationLanguages,
-			);
-			return projection;
-		},
 		{
 			params: PublicUnitSeoParams,
 			query: PublicUnitSeoQuery,
@@ -218,9 +212,19 @@ export default new Elysia({ prefix: "/units" })
 				tags: ["Units"],
 			},
 		},
+		async ({ params, query }) => {
+			const projection: StaticDecode<typeof PublicUnitSeoResponse> =
+				await getPublicUnitSeoProjection(params.unitId, query.localizationLanguages);
+			return projection;
+		},
 	)
 	.post(
 		"/presentations",
+		{
+			body: ResolveUnitPresentationsBody,
+			response: { [StatusCodes.OK]: UnitPresentationListResponse },
+			detail: { summary: "Resolve readable Unit presentations", tags: ["Units"] },
+		},
 		async ({ body, request }) => {
 			const identity = await resolveIdentity(request, "unit:read");
 			const presentations = await getReadableUnitPresentationsByIds({
@@ -235,14 +239,24 @@ export default new Elysia({ prefix: "/units" })
 				}),
 			};
 		},
-		{
-			body: ResolveUnitPresentationsBody,
-			response: { [StatusCodes.OK]: UnitPresentationListResponse },
-			detail: { summary: "Resolve readable Unit presentations", tags: ["Units"] },
-		},
 	)
 	.get(
 		"/by-id/:unitId/realm-publications",
+		{
+			access: "contribute:unit:update",
+			params: UnitStatusEventParams,
+			query: ListUnitRealmPublicationsQuery,
+			response: {
+				[StatusCodes.OK]: UnitRealmPublicationListResponse,
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["InvalidPaginationCursor"]),
+				[StatusCodes.FORBIDDEN]: UnitRealmPublicationForbiddenResponse,
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
+			},
+			detail: {
+				summary: "List a Unit's Realm publications",
+				tags: ["Units", "Realms"],
+			},
+		},
 		async ({ params, query, authorization }) => {
 			const limit = query.limit ?? 50;
 			const cursor = decodeCursor(query.cursor);
@@ -263,32 +277,9 @@ export default new Elysia({ prefix: "/units" })
 				nextCursor: hasMore && last ? encodeCursor(last.updatedAt, last.realmId) : null,
 			};
 		},
-		{
-			access: "contribute:unit:update",
-			params: UnitStatusEventParams,
-			query: ListUnitRealmPublicationsQuery,
-			response: {
-				[StatusCodes.OK]: UnitRealmPublicationListResponse,
-				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["InvalidPaginationCursor"]),
-				[StatusCodes.FORBIDDEN]: UnitRealmPublicationForbiddenResponse,
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
-			},
-			detail: {
-				summary: "List a Unit's Realm publications",
-				tags: ["Units", "Realms"],
-			},
-		},
 	)
 	.post(
 		"/by-id/:unitId/realm-publications/:realmId",
-		async ({ params, authorization }) => {
-			await createUnitRealmPublication({
-				unitId: params.unitId,
-				realmId: params.realmId,
-				authorization,
-			});
-			return new Response(null, { status: StatusCodes.NO_CONTENT });
-		},
 		{
 			access: "contribute:unit:update",
 			params: UnitRealmPublicationParams,
@@ -304,17 +295,17 @@ export default new Elysia({ prefix: "/units" })
 				responses: NoContentResponse,
 			},
 		},
-	)
-	.post(
-		"/by-id/:unitId/realm-publications/:realmId/withdraw",
 		async ({ params, authorization }) => {
-			await withdrawUnitRealmPublication({
+			await createUnitRealmPublication({
 				unitId: params.unitId,
 				realmId: params.realmId,
 				authorization,
 			});
 			return new Response(null, { status: StatusCodes.NO_CONTENT });
 		},
+	)
+	.post(
+		"/by-id/:unitId/realm-publications/:realmId/withdraw",
 		{
 			access: "contribute:unit:update",
 			params: UnitRealmPublicationParams,
@@ -330,17 +321,17 @@ export default new Elysia({ prefix: "/units" })
 				responses: NoContentResponse,
 			},
 		},
-	)
-	.post(
-		"/by-id/:unitId/realm-publications/:realmId/republish",
 		async ({ params, authorization }) => {
-			await republishUnitRealmPublication({
+			await withdrawUnitRealmPublication({
 				unitId: params.unitId,
 				realmId: params.realmId,
 				authorization,
 			});
 			return new Response(null, { status: StatusCodes.NO_CONTENT });
 		},
+	)
+	.post(
+		"/by-id/:unitId/realm-publications/:realmId/republish",
 		{
 			access: "contribute:unit:update",
 			params: UnitRealmPublicationParams,
@@ -356,9 +347,26 @@ export default new Elysia({ prefix: "/units" })
 				responses: NoContentResponse,
 			},
 		},
+		async ({ params, authorization }) => {
+			await republishUnitRealmPublication({
+				unitId: params.unitId,
+				realmId: params.realmId,
+				authorization,
+			});
+			return new Response(null, { status: StatusCodes.NO_CONTENT });
+		},
 	)
 	.get(
 		"/by-id/:unitId/series-memberships",
+		{
+			params: UnitStatusEventParams,
+			query: UnitSeriesMembershipQuery,
+			response: {
+				[StatusCodes.OK]: UnitSeriesMembershipListResponse,
+				[StatusCodes.NOT_FOUND]: UnitReadFailureResponse,
+			},
+			detail: { summary: "List Unit Series memberships", tags: ["Units", "Series"] },
+		},
 		async ({ params, query, request }) => {
 			const authorization = (await resolveIdentity(request, "unit:read")).authorization;
 			await authorization.unit.ensureCanRead(params.unitId);
@@ -370,18 +378,19 @@ export default new Elysia({ prefix: "/units" })
 				),
 			};
 		},
-		{
-			params: UnitStatusEventParams,
-			query: UnitSeriesMembershipQuery,
-			response: {
-				[StatusCodes.OK]: UnitSeriesMembershipListResponse,
-				[StatusCodes.NOT_FOUND]: UnitReadFailureResponse,
-			},
-			detail: { summary: "List Unit Series memberships", tags: ["Units", "Series"] },
-		},
 	)
 	.get(
 		"/by-id/:unitId/status-events",
+		{
+			params: UnitStatusEventParams,
+			query: UnitStatusEventListQuery,
+			response: {
+				[StatusCodes.OK]: UnitStatusEventListResponse,
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["InvalidPaginationCursor"]),
+				[StatusCodes.NOT_FOUND]: UnitReadFailureResponse,
+			},
+			detail: { summary: "List Unit status events", tags: ["Units"] },
+		},
 		async ({ params, query, request }) => {
 			const authorization = (await resolveIdentity(request, "unit:read")).authorization;
 			await authorization.unit.ensureCanRead(params.unitId);
@@ -399,25 +408,9 @@ export default new Elysia({ prefix: "/units" })
 				nextCursor: hasMore && last ? encodeCursor(last.createdAt, last.id) : null,
 			};
 		},
-		{
-			params: UnitStatusEventParams,
-			query: UnitStatusEventListQuery,
-			response: {
-				[StatusCodes.OK]: UnitStatusEventListResponse,
-				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["InvalidPaginationCursor"]),
-				[StatusCodes.NOT_FOUND]: UnitReadFailureResponse,
-			},
-			detail: { summary: "List Unit status events", tags: ["Units"] },
-		},
 	)
 	.get(
 		"/by-id/:unitId/localization-order",
-		async ({ params, request }) => ({
-			languages: await getUnitLocalizationOrder(
-				params.unitId,
-				(await resolveIdentity(request, "unit:read")).authorization,
-			),
-		}),
 		{
 			params: UnitLocalizationOrderParams,
 			response: {
@@ -426,18 +419,15 @@ export default new Elysia({ prefix: "/units" })
 			},
 			detail: { summary: "Get Unit content language order", tags: ["Units"] },
 		},
+		async ({ params, request }) => ({
+			languages: await getUnitLocalizationOrder(
+				params.unitId,
+				(await resolveIdentity(request, "unit:read")).authorization,
+			),
+		}),
 	)
 	.put(
 		"/by-id/:unitId/localization-order",
-		async ({ params, authorization, body }) => {
-			const { revisionContext, ...order } = body;
-			return {
-				languages: await updateUnitLocalizationOrder(params.unitId, authorization, {
-					...order,
-					revisionContribution: revisionContext?.contribution,
-				}),
-			};
-		},
 		{
 			access: "contribute:unit:update",
 			params: UnitLocalizationOrderParams,
@@ -451,18 +441,18 @@ export default new Elysia({ prefix: "/units" })
 			},
 			detail: { summary: "Reorder Unit content languages", tags: ["Units"] },
 		},
+		async ({ params, authorization, body }) => {
+			const { revisionContext, ...order } = body;
+			return {
+				languages: await updateUnitLocalizationOrder(params.unitId, authorization, {
+					...order,
+					revisionContribution: revisionContext?.contribution,
+				}),
+			};
+		},
 	)
 	.delete(
 		"/by-id/:unitId/localizations/:language",
-		async ({ params, authorization, body }) => ({
-			languages: await deleteUnitContentLanguage(
-				params.unitId,
-				params.language,
-				authorization,
-				body.expectedLanguages,
-				body.revisionContext?.contribution,
-			),
-		}),
 		{
 			access: "contribute:unit:update",
 			params: UnitLocalizationDeleteParams,
@@ -477,9 +467,27 @@ export default new Elysia({ prefix: "/units" })
 			},
 			detail: { summary: "Remove a Unit content language", tags: ["Units"] },
 		},
+		async ({ params, authorization, body }) => ({
+			languages: await deleteUnitContentLanguage(
+				params.unitId,
+				params.language,
+				authorization,
+				body.expectedLanguages,
+				body.revisionContext?.contribution,
+			),
+		}),
 	)
 	.get(
 		"/:type",
+		{
+			params: WorkUnitTypeParams,
+			query: ListUnitsQuery,
+			response: {
+				[StatusCodes.OK]: UnitListResponse,
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["InvalidPaginationCursor"]),
+			},
+			detail: { summary: "List published units", tags: ["Units"] },
+		},
 		async ({ params, query, request }) => {
 			const limit = query.limit ?? 20;
 			const cursor = decodeCursor(query.cursor);
@@ -500,30 +508,9 @@ export default new Elysia({ prefix: "/units" })
 				nextCursor: hasMore && last ? encodeCursor(last.createdAt, last.id) : null,
 			};
 		},
-		{
-			params: WorkUnitTypeParams,
-			query: ListUnitsQuery,
-			response: {
-				[StatusCodes.OK]: UnitListResponse,
-				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["InvalidPaginationCursor"]),
-			},
-			detail: { summary: "List published units", tags: ["Units"] },
-		},
 	)
 	.post(
 		"/:type",
-		async ({ params, authorization, body }) => {
-			if (params.type !== body.details.type)
-				throw new ValidationError({
-					details: "must match the requested Unit type",
-				});
-			const { revisionContext, ...createBody } = body;
-			return createUnit(authorization, {
-				...createBody,
-				revisionContribution: revisionContext?.contribution,
-				initialTagIds: body.initialTagIds ?? [],
-			});
-		},
 		{
 			access: "contribute:unit:create",
 			params: VariantUnitTypeParams,
@@ -543,17 +530,21 @@ export default new Elysia({ prefix: "/units" })
 			},
 			detail: { summary: "Create unit", tags: ["Units"] },
 		},
+		async ({ params, authorization, body }) => {
+			if (params.type !== body.details.type)
+				throw new ValidationError({
+					details: "must match the requested Unit type",
+				});
+			const { revisionContext, ...createBody } = body;
+			return createUnit(authorization, {
+				...createBody,
+				revisionContribution: revisionContext?.contribution,
+				initialTagIds: body.initialTagIds ?? [],
+			});
+		},
 	)
 	.post(
 		"/book/:bookId/chapter-draft-jobs",
-		async ({ params, profile, authorization, body }) => {
-			await authorization.unit.ensure(params.bookId, "unit.status.update", ["unit"]);
-			return enqueueBookChapterDraftJob({
-				bookId: params.bookId,
-				bookUpdatedAt: new Date(body.bookUpdatedAt),
-				requestedByProfileId: profile.unitId,
-			});
-		},
 		{
 			access: "contribute:unit:update",
 			params: BookChapterDraftJobParams,
@@ -567,18 +558,17 @@ export default new Elysia({ prefix: "/units" })
 			},
 			detail: { summary: "Draft Chapters attached to a draft Book", tags: ["Units"] },
 		},
+		async ({ params, profile, authorization, body }) => {
+			await authorization.unit.ensure(params.bookId, "unit.status.update", ["unit"]);
+			return enqueueBookChapterDraftJob({
+				bookId: params.bookId,
+				bookUpdatedAt: new Date(body.bookUpdatedAt),
+				requestedByProfileId: profile.unitId,
+			});
+		},
 	)
 	.get(
 		"/:type/:unitId/content-language-support/evidence",
-		async ({ params, query, authorization }) =>
-			listContentLanguageEvidence({
-				unitId: params.unitId,
-				unitKind: params.type,
-				authorization,
-				localizationLanguages: query.localizationLanguages ?? [],
-				cursor: query.cursor,
-				limit: query.limit ?? 20,
-			}),
 		{
 			access: "contribute:unit:update",
 			params: ContentLanguageEvidenceUnitParams,
@@ -595,17 +585,18 @@ export default new Elysia({ prefix: "/units" })
 				tags: ["Units"],
 			},
 		},
+		async ({ params, query, authorization }) =>
+			listContentLanguageEvidence({
+				unitId: params.unitId,
+				unitKind: params.type,
+				authorization,
+				localizationLanguages: query.localizationLanguages ?? [],
+				cursor: query.cursor,
+				limit: query.limit ?? 20,
+			}),
 	)
 	.get(
 		"/:type/:unitId",
-		async ({ params, query, request }) => {
-			return getUnit(
-				params.type,
-				params.unitId,
-				(await resolveIdentity(request, "unit:read")).authorization,
-				query.localizationLanguages,
-			);
-		},
 		{
 			params: UnitLookupParams,
 			query: UnitDetailQuery,
@@ -615,24 +606,17 @@ export default new Elysia({ prefix: "/units" })
 			},
 			detail: { summary: "Get unit", tags: ["Units"] },
 		},
+		async ({ params, query, request }) => {
+			return getUnit(
+				params.type,
+				params.unitId,
+				(await resolveIdentity(request, "unit:read")).authorization,
+				query.localizationLanguages,
+			);
+		},
 	)
 	.patch(
 		"/:type/:unitId",
-		async ({ params, authorization, body }) => {
-			if (
-				body.bookChapterDraftScope !== undefined &&
-				(params.type !== "book" || body.status !== "draft")
-			)
-				throw new ValidationError({
-					bookChapterDraftScope: "is only valid while setting a Book to draft",
-				});
-			const { updatedAt, revisionContext, ...update } = body;
-			return updateUnit(params.type, params.unitId, authorization, {
-				...update,
-				revisionContribution: revisionContext?.contribution,
-				expectedUpdatedAt: new Date(updatedAt),
-			});
-		},
 		{
 			access: "contribute:unit:update",
 			params: UnitUnitIdParams,
@@ -652,21 +636,24 @@ export default new Elysia({ prefix: "/units" })
 			},
 			detail: { summary: "Update unit", tags: ["Units"] },
 		},
+		async ({ params, authorization, body }) => {
+			if (
+				body.bookChapterDraftScope !== undefined &&
+				(params.type !== "book" || body.status !== "draft")
+			)
+				throw new ValidationError({
+					bookChapterDraftScope: "is only valid while setting a Book to draft",
+				});
+			const { updatedAt, revisionContext, ...update } = body;
+			return updateUnit(params.type, params.unitId, authorization, {
+				...update,
+				revisionContribution: revisionContext?.contribution,
+				expectedUpdatedAt: new Date(updatedAt),
+			});
+		},
 	)
 	.patch(
 		"/:type/:unitId/variant-context",
-		async ({ params, authorization, body }) => {
-			await updateUnitVariantContext({
-				kind: params.type,
-				variantUnitId: params.unitId,
-				mainUnitId: body.mainUnitId,
-				expectedMainUnitId: body.expectedMainUnitId,
-				actorProfileId: authorization.profileId,
-				contribution: body.revisionContext?.contribution,
-				authorization: authorization.unit,
-			});
-			return getUnit(params.type, params.unitId, authorization);
-		},
 		{
 			access: "contribute:unit:update",
 			params: VariantUnitUnitIdParams,
@@ -681,13 +668,11 @@ export default new Elysia({ prefix: "/units" })
 			},
 			detail: { summary: "Update Unit Main relationship", tags: ["Units"] },
 		},
-	)
-	.post(
-		"/:type/:unitId/variant-context/promote",
 		async ({ params, authorization, body }) => {
-			await promoteUnitVariantToMain({
+			await updateUnitVariantContext({
 				kind: params.type,
 				variantUnitId: params.unitId,
+				mainUnitId: body.mainUnitId,
 				expectedMainUnitId: body.expectedMainUnitId,
 				actorProfileId: authorization.profileId,
 				contribution: body.revisionContext?.contribution,
@@ -695,6 +680,9 @@ export default new Elysia({ prefix: "/units" })
 			});
 			return getUnit(params.type, params.unitId, authorization);
 		},
+	)
+	.post(
+		"/:type/:unitId/variant-context/promote",
 		{
 			access: "contribute:unit:update",
 			params: VariantUnitUnitIdParams,
@@ -709,18 +697,20 @@ export default new Elysia({ prefix: "/units" })
 			},
 			detail: { summary: "Promote Unit Variant to Main", tags: ["Units"] },
 		},
-	)
-	.put(
-		"/:type/:unitId/localizations/:language",
 		async ({ params, authorization, body }) => {
-			const { revisionContext, ...localization } = body;
-			await upsertLocalization(params.unitId, authorization, {
-				...localization,
-				revisionContribution: revisionContext?.contribution,
-				language: params.language,
+			await promoteUnitVariantToMain({
+				kind: params.type,
+				variantUnitId: params.unitId,
+				expectedMainUnitId: body.expectedMainUnitId,
+				actorProfileId: authorization.profileId,
+				contribution: body.revisionContext?.contribution,
+				authorization: authorization.unit,
 			});
 			return getUnit(params.type, params.unitId, authorization);
 		},
+	)
+	.put(
+		"/:type/:unitId/localizations/:language",
 		{
 			access: "contribute:unit:update",
 			params: UnitLocalizationParams,
@@ -734,9 +724,28 @@ export default new Elysia({ prefix: "/units" })
 			},
 			detail: { summary: "Create or replace unit localization", tags: ["Units"] },
 		},
+		async ({ params, authorization, body }) => {
+			const { revisionContext, ...localization } = body;
+			await upsertLocalization(params.unitId, authorization, {
+				...localization,
+				revisionContribution: revisionContext?.contribution,
+				language: params.language,
+			});
+			return getUnit(params.type, params.unitId, authorization);
+		},
 	)
 	.get(
 		"/:type/:unitId/subject-associations",
+		{
+			params: UnitLookupParams,
+			query: UnitSubjectAssociationsQuery,
+			response: {
+				[StatusCodes.OK]: UnitSubjectAssociationListResponse,
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["InvalidPaginationCursor"]),
+				[StatusCodes.NOT_FOUND]: UnitReadFailureResponse,
+			},
+			detail: { summary: "List bounded Unit subject association cards", tags: ["Units"] },
+		},
 		async ({ params, query, request }) => {
 			const { authorization } = await resolveIdentity(request, "unit:read");
 			return listUnitSubjectAssociations({
@@ -747,15 +756,5 @@ export default new Elysia({ prefix: "/units" })
 				cursor: query.cursor,
 				limit: query.limit ?? MaximumSubjectAssociationsPageSize,
 			});
-		},
-		{
-			params: UnitLookupParams,
-			query: UnitSubjectAssociationsQuery,
-			response: {
-				[StatusCodes.OK]: UnitSubjectAssociationListResponse,
-				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["InvalidPaginationCursor"]),
-				[StatusCodes.NOT_FOUND]: UnitReadFailureResponse,
-			},
-			detail: { summary: "List bounded Unit subject association cards", tags: ["Units"] },
 		},
 	);

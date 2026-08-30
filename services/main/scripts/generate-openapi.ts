@@ -4,8 +4,7 @@ process.env.DATABASE_URL ??= "postgres://openapi:openapi@localhost/openapi";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { toOpenAPISchema } from "@elysiajs/openapi";
-import type { OpenAPIV3 } from "openapi-types";
+import { OpenAPIV3 } from "openapi-types";
 
 import { ApiErrorCodes } from "../src/services/api/errors";
 import {
@@ -13,8 +12,9 @@ import {
 	resolveApiQuotaOperation,
 } from "../src/services/auth/api-quota/operation";
 import { RezicsVersion } from "../src/version";
+import { toRezicsOpenApiSchema } from "../src/services/api/openapi";
 import { formatWithBiome } from "./format-with-biome";
-import { decorateRetryableResponse } from "./openapi-retryable-response";
+import { ApiQuotaExceededResponse, decorateRetryableResponse } from "./openapi-retryable-response";
 
 const { initializeObservability } = await import("@rezics/observability");
 const observability = initializeObservability({
@@ -28,10 +28,17 @@ const document = {
 		title: "REZICS API",
 		version: RezicsVersion,
 	},
-	...toOpenAPISchema(api),
+	...toRezicsOpenApiSchema(api),
 };
 
-const methods = ["get", "post", "put", "patch", "delete", "head"] as const;
+const methods = [
+	OpenAPIV3.HttpMethods.GET,
+	OpenAPIV3.HttpMethods.POST,
+	OpenAPIV3.HttpMethods.PUT,
+	OpenAPIV3.HttpMethods.PATCH,
+	OpenAPIV3.HttpMethods.DELETE,
+	OpenAPIV3.HttpMethods.HEAD,
+] as const;
 const validationErrorResponse = {
 	description: "Request validation failed",
 	content: {
@@ -151,7 +158,8 @@ function normalizeComponentReferences(value: unknown, componentNames: ReadonlySe
 // degrading them to `unknown`.
 normalizeComponentReferences(document, new Set(Object.keys(document.components.schemas)));
 
-for (const [pathTemplate, path] of Object.entries(document.paths)) {
+const paths: OpenAPIV3.PathsObject = document.paths;
+for (const [pathTemplate, path] of Object.entries(paths)) {
 	if (!path) continue;
 	for (const method of methods) {
 		const operation = path[method];
@@ -177,7 +185,9 @@ for (const [pathTemplate, path] of Object.entries(document.paths)) {
 			operation.security = [{}, { ApiToken: [] }, { SessionCookie: [] }];
 		decorateRetryableResponse(operation.responses, {
 			acceptsApiToken: Boolean(
-				operation.security?.some((requirement) => "ApiToken" in requirement),
+				operation.security?.some(
+					(requirement: OpenAPIV3.SecurityRequirementObject) => "ApiToken" in requirement,
+				),
 			),
 			operation: `${method.toUpperCase()} ${pathTemplate}`,
 		});
@@ -227,6 +237,13 @@ for (const [pathTemplate, path] of Object.entries(document.paths)) {
 					}
 				: validationErrorResponse;
 		operation.responses[StatusCodes.INTERNAL_SERVER_ERROR] ??= internalErrorResponse;
+		// Elysia 1 merged the published request/quota error responses from the GET
+		// health route into its explicit HEAD sibling. Retain that public response
+		// union through the framework migration even though HEAD has no input body.
+		if (routeOperationId === "headApiHealth") {
+			operation.responses[StatusCodes.UNPROCESSABLE_ENTITY] ??= validationErrorResponse;
+			operation.responses[StatusCodes.TOO_MANY_REQUESTS] ??= ApiQuotaExceededResponse;
+		}
 	}
 }
 

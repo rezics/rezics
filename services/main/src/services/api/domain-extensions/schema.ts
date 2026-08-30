@@ -8,7 +8,7 @@ import {
 } from "@rezics/block";
 import { FilterDocument } from "@rezics/filter";
 import { LicenseIds } from "@rezics/license";
-import { type Static, Type } from "@sinclair/typebox";
+import { type StaticDecode, Type } from "typebox";
 import { t } from "elysia";
 
 import {
@@ -24,31 +24,28 @@ import {
 } from "../schema";
 import { AvatarResponse, ImageAssetResponse } from "../schema/response";
 import { NullablePublicSlugAddressResponse, SlugLabelInput } from "../slug-addresses/schema";
+import { ResolvedUnitPresentationResponse } from "../custom-themes/schema";
 
-// Exact models are registered by the Zone route plugin. References keep one
-// OpenAPI component and prevent recursive Block static types from expanding
-// through the entire Elysia route chain.
-const FilterResponseDocument = Type.Unsafe<unknown>(Type.Ref("FilterDocument"));
-const ZoneThemeResponseDocument = Type.Unsafe<unknown>(Type.Ref("ZoneAppearanceDocument"));
-const UnitReferencedBlockResponseDocument = Type.Unsafe<unknown>(
-	Type.Ref("UnitReferencedBlockDocument"),
-);
-const NavigationResponseDocument = Type.Unsafe<unknown>(Type.Ref("NavigationDocument"));
-const DockResponseDocument = Type.Unsafe<unknown>(Type.Ref(DockDocument));
-const PortableTextResponseDocument = Type.Unsafe<unknown>(Type.Ref(PortableTextDocument));
+// TypeBox 1 recursive schemas carry their own definitions. Keeping them opaque
+// at the adapter boundary prevents recursive static types from expanding through
+// the entire Elysia route chain without relying on a global model registry.
+const FilterResponseDocument = Type.Unsafe<unknown>(FilterDocument);
+const ZoneThemeResponseDocument = Type.Unsafe<unknown>(ZoneAppearanceDocument);
+const UnitReferencedBlockResponseDocument = Type.Unsafe<unknown>(UnitReferencedBlockDocument);
+const NavigationResponseDocument = Type.Unsafe<unknown>(NavigationDocument);
+const DockResponseDocument = Type.Unsafe<unknown>(DockDocument);
+const PortableTextResponseDocument = Type.Unsafe<unknown>(PortableTextDocument);
 const ResolvedUnitPresentationResponseDocument = Type.Unsafe<unknown>(
-	Type.Ref("ResolvedUnitPresentationResponse"),
+	ResolvedUnitPresentationResponse,
 );
-const FilterInputDocument = Type.Unsafe<Static<typeof FilterDocument>>(Type.Ref("FilterDocument"));
-const ZoneThemeInputDocument = Type.Unsafe<Static<typeof ZoneAppearanceDocument>>(
-	Type.Ref("ZoneAppearanceDocument"),
-);
-const UnitReferencedBlockInputDocument = Type.Unsafe<Static<typeof UnitReferencedBlockDocument>>(
-	Type.Ref("UnitReferencedBlockDocument"),
-);
-const NavigationInputDocument = Type.Unsafe<Static<typeof NavigationDocument>>(
-	Type.Ref("NavigationDocument"),
-);
+const FilterInputDocument = Type.Unsafe<StaticDecode<typeof FilterDocument>>(FilterDocument);
+const ZoneThemeInputDocument =
+	Type.Unsafe<StaticDecode<typeof ZoneAppearanceDocument>>(ZoneAppearanceDocument);
+const UnitReferencedBlockInputDocument = Type.Unsafe<
+	StaticDecode<typeof UnitReferencedBlockDocument>
+>(UnitReferencedBlockDocument);
+const NavigationInputDocument =
+	Type.Unsafe<StaticDecode<typeof NavigationDocument>>(NavigationDocument);
 
 export const CreateSeriesBody = t.Object(
 	{

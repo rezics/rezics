@@ -1,5 +1,6 @@
+import type { StaticDecode } from "typebox";
 import { StatusCodes } from "http-status-codes";
-import Elysia, { type Static } from "elysia";
+import Elysia from "elysia";
 
 import session from "../../auth/session";
 import {
@@ -49,7 +50,7 @@ const MergeEligibilityResponse = toApiErrorResponse([
 
 function presentMergeRequest(
 	request: Awaited<ReturnType<typeof getUnitMergeRequest>>,
-): Static<typeof UnitMergeRequestResponse> {
+): StaticDecode<typeof UnitMergeRequestResponse> {
 	return request;
 }
 
@@ -70,15 +71,6 @@ export default new Elysia({ prefix: "/platform/unit-merges" })
 	.use(session)
 	.get(
 		"",
-		async ({ authorization, query }) => {
-			await authorization.platform.ensureCapability("unit.governance.read");
-			const result = await listUnitMergeRequests({
-				state: query.state,
-				cursor: query.cursor,
-				limit: query.limit ?? 50,
-			});
-			return { ...result, items: result.items.map(presentMergeRequest) };
-		},
 		{
 			access: "session-only",
 			query: ListUnitMergeRequestsQuery,
@@ -88,13 +80,18 @@ export default new Elysia({ prefix: "/platform/unit-merges" })
 			},
 			detail: { summary: "List Unit merge governance requests", tags: ["Governance"] },
 		},
+		async ({ authorization, query }) => {
+			await authorization.platform.ensureCapability("unit.governance.read");
+			const result = await listUnitMergeRequests({
+				state: query.state,
+				cursor: query.cursor,
+				limit: query.limit ?? 50,
+			});
+			return { ...result, items: result.items.map(presentMergeRequest) };
+		},
 	)
 	.get(
 		"/:requestId",
-		async ({ authorization, params }) => {
-			await authorization.platform.ensureCapability("unit.governance.read");
-			return presentMergeRequest(await getUnitMergeRequest(params.requestId));
-		},
 		{
 			access: "session-only",
 			params: UnitMergeRequestParams,
@@ -105,13 +102,13 @@ export default new Elysia({ prefix: "/platform/unit-merges" })
 			},
 			detail: { summary: "Get a Unit merge governance request", tags: ["Governance"] },
 		},
+		async ({ authorization, params }) => {
+			await authorization.platform.ensureCapability("unit.governance.read");
+			return presentMergeRequest(await getUnitMergeRequest(params.requestId));
+		},
 	)
 	.post(
 		"/preflight",
-		async ({ authorization, body }) => {
-			await authorization.platform.ensureCapability("unit.merge.propose");
-			return preflightUnitMerge(body);
-		},
 		{
 			access: "session-only",
 			body: UnitMergePreflightBody,
@@ -125,25 +122,13 @@ export default new Elysia({ prefix: "/platform/unit-merges" })
 			},
 			detail: { summary: "Preflight a Unit identity merge", tags: ["Governance"] },
 		},
+		async ({ authorization, body }) => {
+			await authorization.platform.ensureCapability("unit.merge.propose");
+			return preflightUnitMerge(body);
+		},
 	)
 	.post(
 		"",
-		async ({ authorization, profile, body }) => {
-			await authorization.platform.ensureCapability("unit.merge.propose");
-			requireMatchingConfirmations(body);
-			return presentMergeRequest(
-				await createReviewedUnitMerge({
-					sourceUnitId: body.sourceUnitId,
-					targetUnitId: body.targetUnitId,
-					expectedSourceUpdatedAt: new Date(body.expectedSourceUpdatedAt),
-					expectedTargetUpdatedAt: new Date(body.expectedTargetUpdatedAt),
-					proposerProfileId: profile.unitId,
-					idempotencyKey: body.idempotencyKey,
-					rules: body.rules,
-					note: body.note?.trim() || undefined,
-				}),
-			);
-		},
 		{
 			access: "fresh-session-only",
 			body: CreateReviewedUnitMergeBody,
@@ -164,14 +149,11 @@ export default new Elysia({ prefix: "/platform/unit-merges" })
 			},
 			detail: { summary: "Propose a reviewed Unit identity merge", tags: ["Governance"] },
 		},
-	)
-	.post(
-		"/direct",
 		async ({ authorization, profile, body }) => {
-			await authorization.platform.ensureCapability("unit.merge");
+			await authorization.platform.ensureCapability("unit.merge.propose");
 			requireMatchingConfirmations(body);
 			return presentMergeRequest(
-				await createDirectUnitMerge({
+				await createReviewedUnitMerge({
 					sourceUnitId: body.sourceUnitId,
 					targetUnitId: body.targetUnitId,
 					expectedSourceUpdatedAt: new Date(body.expectedSourceUpdatedAt),
@@ -180,10 +162,12 @@ export default new Elysia({ prefix: "/platform/unit-merges" })
 					idempotencyKey: body.idempotencyKey,
 					rules: body.rules,
 					note: body.note?.trim() || undefined,
-					overrideOfRequestId: body.overrideOfRequestId,
 				}),
 			);
 		},
+	)
+	.post(
+		"/direct",
 		{
 			access: "fresh-session-only",
 			body: CreateDirectUnitMergeBody,
@@ -207,21 +191,26 @@ export default new Elysia({ prefix: "/platform/unit-merges" })
 				tags: ["Governance"],
 			},
 		},
-	)
-	.post(
-		"/:requestId/reviews",
-		async ({ authorization, profile, params, body }) => {
-			await authorization.platform.ensureCapability("unit.merge.review");
+		async ({ authorization, profile, body }) => {
+			await authorization.platform.ensureCapability("unit.merge");
+			requireMatchingConfirmations(body);
 			return presentMergeRequest(
-				await reviewUnitMerge({
-					requestId: params.requestId,
-					reviewerProfileId: profile.unitId,
-					decision: body.decision,
-					requestFingerprint: body.requestFingerprint,
+				await createDirectUnitMerge({
+					sourceUnitId: body.sourceUnitId,
+					targetUnitId: body.targetUnitId,
+					expectedSourceUpdatedAt: new Date(body.expectedSourceUpdatedAt),
+					expectedTargetUpdatedAt: new Date(body.expectedTargetUpdatedAt),
+					proposerProfileId: profile.unitId,
+					idempotencyKey: body.idempotencyKey,
+					rules: body.rules,
 					note: body.note?.trim() || undefined,
+					overrideOfRequestId: body.overrideOfRequestId,
 				}),
 			);
 		},
+	)
+	.post(
+		"/:requestId/reviews",
 		{
 			access: "fresh-session-only",
 			params: UnitMergeRequestParams,
@@ -249,18 +238,21 @@ export default new Elysia({ prefix: "/platform/unit-merges" })
 			},
 			detail: { summary: "Approve or reject a Unit merge request", tags: ["Governance"] },
 		},
-	)
-	.post(
-		"/:requestId/retry",
-		async ({ authorization, profile, params }) => {
-			await authorization.platform.ensureCapability("unit.merge");
+		async ({ authorization, profile, params, body }) => {
+			await authorization.platform.ensureCapability("unit.merge.review");
 			return presentMergeRequest(
-				await retryUnitMerge({
+				await reviewUnitMerge({
 					requestId: params.requestId,
-					actorProfileId: profile.unitId,
+					reviewerProfileId: profile.unitId,
+					decision: body.decision,
+					requestFingerprint: body.requestFingerprint,
+					note: body.note?.trim() || undefined,
 				}),
 			);
 		},
+	)
+	.post(
+		"/:requestId/retry",
 		{
 			access: "fresh-session-only",
 			params: UnitMergeRequestParams,
@@ -278,5 +270,14 @@ export default new Elysia({ prefix: "/platform/unit-merges" })
 				[StatusCodes.TOO_MANY_REQUESTS]: VoteBackpressureResponse,
 			},
 			detail: { summary: "Retry a failed Unit merge operation", tags: ["Governance"] },
+		},
+		async ({ authorization, profile, params }) => {
+			await authorization.platform.ensureCapability("unit.merge");
+			return presentMergeRequest(
+				await retryUnitMerge({
+					requestId: params.requestId,
+					actorProfileId: profile.unitId,
+				}),
+			);
 		},
 	);

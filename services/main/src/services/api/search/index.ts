@@ -24,11 +24,10 @@ import {
 	unitFilterSearchQuery,
 	type SearchSort,
 } from "@rezics/filter";
-import { FilterSchemaModels } from "@rezics/filter";
 import { isContentLanguage, type ContentLanguage } from "@rezics/i18n";
 import { getActiveObservability } from "@rezics/observability";
-import { type Static, Type } from "@sinclair/typebox";
-import { Check } from "@sinclair/typebox/value";
+import { type StaticDecode, Type } from "typebox";
+import { Check } from "typebox/value";
 import { and, eq, isNull } from "drizzle-orm";
 import { t } from "elysia";
 
@@ -125,7 +124,7 @@ const SharedSearchQueryResponse = t.Object({
 const SearchFeatureExecutionBody = t.Object(
 	{
 		...SearchFeatureInput.properties,
-		filterDocument: Type.Ref("FilterDocument"),
+		filterDocument: FilterDocument,
 		localizationLanguages: t.Optional(LocalizationLanguageHints),
 	},
 	{ additionalProperties: false },
@@ -167,29 +166,15 @@ const ZoneFilterFeedPresentationBody = t.Object(
 	},
 	{ additionalProperties: false },
 );
-const FilterDocumentModel = Type.Object(
-	{
-		...FilterDocument.properties,
-		where: Type.Optional(Type.Ref("UnitPredicate")),
-	},
-	{ additionalProperties: false, $id: "FilterDocument" },
-);
-const SearchFeatureDefinitionModel = Type.Object(
-	{
-		...SearchFeatureDefinition.properties,
-		filterDocument: Type.Ref("FilterDocument"),
-	},
-	{ additionalProperties: false, $id: "SearchFeatureDefinition" },
-);
-const FilterDocumentInput = Type.Unsafe<Static<typeof FilterDocument>>(Type.Ref("FilterDocument"));
-const SearchFeatureDefinitionResponse = Type.Unsafe<unknown>(Type.Ref("SearchFeatureDefinition"));
+const FilterDocumentInput = Type.Unsafe<StaticDecode<typeof FilterDocument>>(FilterDocument);
+const SearchFeatureDefinitionResponse = Type.Unsafe<unknown>(SearchFeatureDefinition);
 
 function presentSharedSearchQuery(record: SharedSearchQueryProjection) {
 	return {
 		id: record.id,
 		document: record.document,
 		createdAt: record.createdAt,
-	} satisfies typeof SharedSearchQueryResponse.static;
+	} satisfies StaticDecode<typeof SharedSearchQueryResponse>;
 }
 
 async function getZoneFilterDocument(zoneId: string) {
@@ -223,7 +208,7 @@ async function resolveZoneBlockExecution(input: ZoneBlockExecutionInput) {
 		input.source ??
 		(persistedSource?.kind === "search" ? persistedSource.feature : persistedSource);
 	if (!configuredSource) throw new InvalidSearch("The selected Block has no Search source");
-	const request = input.body as typeof ZonePersistedBlockExecutionBody.static;
+	const request = input.body as StaticDecode<typeof ZonePersistedBlockExecutionBody>;
 	const derived =
 		configuredSource.kind === "derived"
 			? await resolveDerivedSearchSource({
@@ -427,34 +412,22 @@ async function presentSearchResultAsFeed(
 }
 
 export default new Elysia({ prefix: "/search" })
-	.model({
-		...FilterSchemaModels,
-		FilterDocument: FilterDocumentModel,
-		SearchFeatureDefinition: SearchFeatureDefinitionModel,
-	})
 	.get(
 		"/filter",
-		async ({ request }) => {
+		{
+			response: { [StatusCodes.OK]: SearchFeatureDefinitionResponse },
+			detail: { summary: "Get the global Filter capability definition", tags: ["Search"] },
+		},
+		async ({ request }: { readonly request: Request }) => {
 			const identity = await resolveIdentity(request, "unit:read");
 			const hasDevelopmentPreviewAccess = await identity.authorization.platform.hasCapability(
 				DevelopmentPreviewCapability,
 			);
 			return resolveFilterDocument({}, hasDevelopmentPreviewAccess);
 		},
-		{
-			response: { [StatusCodes.OK]: SearchFeatureDefinitionResponse },
-			detail: { summary: "Get the global Filter capability definition", tags: ["Search"] },
-		},
 	)
 	.post(
 		"/filter/definition",
-		async ({ body, request }) => {
-			const identity = await resolveIdentity(request, "unit:read");
-			const hasDevelopmentPreviewAccess = await identity.authorization.platform.hasCapability(
-				DevelopmentPreviewCapability,
-			);
-			return resolveFilterDocument(body, hasDevelopmentPreviewAccess);
-		},
 		{
 			body: FilterDocumentInput,
 			response: {
@@ -463,9 +436,31 @@ export default new Elysia({ prefix: "/search" })
 			},
 			detail: { summary: "Resolve a Filter document", tags: ["Search"] },
 		},
+		async ({
+			body,
+			request,
+		}: {
+			readonly body: StaticDecode<typeof FilterDocumentInput>;
+			readonly request: Request;
+		}) => {
+			const identity = await resolveIdentity(request, "unit:read");
+			const hasDevelopmentPreviewAccess = await identity.authorization.platform.hasCapability(
+				DevelopmentPreviewCapability,
+			);
+			return resolveFilterDocument(body, hasDevelopmentPreviewAccess);
+		},
 	)
 	.post(
 		"/filter/execute",
+		{
+			body: SearchFeatureExecutionBody,
+			response: {
+				[StatusCodes.OK]: SearchResponse,
+				[StatusCodes.UNPROCESSABLE_ENTITY]: InvalidSearchResponse,
+				[StatusCodes.SERVICE_UNAVAILABLE]: SearchUnavailableResponse,
+			},
+			detail: { summary: "Execute a Filter document", tags: ["Search"] },
+		},
 		async ({ body, request }) => {
 			try {
 				const identity = await resolveIdentity(request, "unit:read", "search.execute");
@@ -487,18 +482,18 @@ export default new Elysia({ prefix: "/search" })
 				throw new SearchUnavailable(cause);
 			}
 		},
-		{
-			body: SearchFeatureExecutionBody,
-			response: {
-				[StatusCodes.OK]: SearchResponse,
-				[StatusCodes.UNPROCESSABLE_ENTITY]: InvalidSearchResponse,
-				[StatusCodes.SERVICE_UNAVAILABLE]: SearchUnavailableResponse,
-			},
-			detail: { summary: "Execute a Filter document", tags: ["Search"] },
-		},
 	)
 	.post(
 		"/filter/feed",
+		{
+			body: SearchFeatureFeedPresentationBody,
+			response: {
+				[StatusCodes.OK]: SearchFeedResponse,
+				[StatusCodes.UNPROCESSABLE_ENTITY]: InvalidSearchResponse,
+				[StatusCodes.SERVICE_UNAVAILABLE]: SearchUnavailableResponse,
+			},
+			detail: { summary: "Present a Filter document as a Feed", tags: ["Search"] },
+		},
 		async ({ body, request }) => {
 			try {
 				const identity = await resolveIdentity(request, "unit:read", "search.execute");
@@ -530,19 +525,25 @@ export default new Elysia({ prefix: "/search" })
 				throw new SearchUnavailable(cause);
 			}
 		},
-		{
-			body: SearchFeatureFeedPresentationBody,
-			response: {
-				[StatusCodes.OK]: SearchFeedResponse,
-				[StatusCodes.UNPROCESSABLE_ENTITY]: InvalidSearchResponse,
-				[StatusCodes.SERVICE_UNAVAILABLE]: SearchUnavailableResponse,
-			},
-			detail: { summary: "Present a Filter document as a Feed", tags: ["Search"] },
-		},
 	)
 	.get(
 		"/zones/:zoneId/filter",
-		async ({ params, request }) => {
+		{
+			params: ZoneFilterParams,
+			response: {
+				[StatusCodes.OK]: SearchFeatureDefinitionResponse,
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
+				[StatusCodes.UNPROCESSABLE_ENTITY]: InvalidSearchResponse,
+			},
+			detail: { summary: "Get a Zone Filter definition", tags: ["Search", "Zones"] },
+		},
+		async ({
+			params,
+			request,
+		}: {
+			readonly params: StaticDecode<typeof ZoneFilterParams>;
+			readonly request: Request;
+		}) => {
 			const identity = await resolveIdentity(request, "unit:read");
 			await identity.authorization.unit.ensureCanRead(
 				params.zoneId,
@@ -556,18 +557,20 @@ export default new Elysia({ prefix: "/search" })
 				hasDevelopmentPreviewAccess,
 			);
 		},
-		{
-			params: ZoneFilterParams,
-			response: {
-				[StatusCodes.OK]: SearchFeatureDefinitionResponse,
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
-				[StatusCodes.UNPROCESSABLE_ENTITY]: InvalidSearchResponse,
-			},
-			detail: { summary: "Get a Zone Filter definition", tags: ["Search", "Zones"] },
-		},
 	)
 	.post(
 		"/zones/:zoneId/filter/execute",
+		{
+			params: ZoneFilterParams,
+			body: ZoneFilterExecutionBody,
+			response: {
+				[StatusCodes.OK]: SearchResponse,
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
+				[StatusCodes.UNPROCESSABLE_ENTITY]: InvalidSearchResponse,
+				[StatusCodes.SERVICE_UNAVAILABLE]: SearchUnavailableResponse,
+			},
+			detail: { summary: "Execute a Zone Filter", tags: ["Search", "Zones"] },
+		},
 		async ({ params, body, request }) => {
 			const identity = await resolveIdentity(request, "unit:read", "search.execute");
 			await identity.authorization.unit.ensureCanRead(
@@ -590,20 +593,23 @@ export default new Elysia({ prefix: "/search" })
 				hasDevelopmentPreviewAccess,
 			);
 		},
+	)
+	.post(
+		"/zones/:zoneId/filter/feed",
 		{
 			params: ZoneFilterParams,
-			body: ZoneFilterExecutionBody,
+			body: ZoneFilterFeedPresentationBody,
 			response: {
-				[StatusCodes.OK]: SearchResponse,
+				[StatusCodes.OK]: SearchFeedResponse,
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
 				[StatusCodes.UNPROCESSABLE_ENTITY]: InvalidSearchResponse,
 				[StatusCodes.SERVICE_UNAVAILABLE]: SearchUnavailableResponse,
 			},
-			detail: { summary: "Execute a Zone Filter", tags: ["Search", "Zones"] },
+			detail: {
+				summary: "Present a Zone Filter as a Feed",
+				tags: ["Search", "Zones"],
+			},
 		},
-	)
-	.post(
-		"/zones/:zoneId/filter/feed",
 		async ({ params, body, request }) => {
 			try {
 				const identity = await resolveIdentity(request, "unit:read", "search.execute");
@@ -648,23 +654,20 @@ export default new Elysia({ prefix: "/search" })
 				throw new SearchUnavailable(cause);
 			}
 		},
-		{
-			params: ZoneFilterParams,
-			body: ZoneFilterFeedPresentationBody,
-			response: {
-				[StatusCodes.OK]: SearchFeedResponse,
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
-				[StatusCodes.UNPROCESSABLE_ENTITY]: InvalidSearchResponse,
-				[StatusCodes.SERVICE_UNAVAILABLE]: SearchUnavailableResponse,
-			},
-			detail: {
-				summary: "Present a Zone Filter as a Feed",
-				tags: ["Search", "Zones"],
-			},
-		},
 	)
 	.post(
 		"/zones/:zoneId/dock/block-executions",
+		{
+			params: ZoneDockSearchParams,
+			body: ZoneBlockExecutionBody,
+			response: {
+				[StatusCodes.OK]: ZoneSearchBlockExecutionResponse,
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "DockNotFound"]),
+				[StatusCodes.UNPROCESSABLE_ENTITY]: InvalidSearchResponse,
+				[StatusCodes.SERVICE_UNAVAILABLE]: SearchUnavailableResponse,
+			},
+			detail: { summary: "Execute a trusted Zone Dock Search Block", tags: ["Search"] },
+		},
 		async ({ params, body, request }) => {
 			const identity = await resolveIdentity(request, "unit:read", "search.execute");
 			await identity.authorization.unit.ensureCanRead(
@@ -714,20 +717,24 @@ export default new Elysia({ prefix: "/search" })
 				throw new SearchUnavailable(cause);
 			}
 		},
-		{
-			params: ZoneDockSearchParams,
-			body: ZoneBlockExecutionBody,
-			response: {
-				[StatusCodes.OK]: ZoneSearchBlockExecutionResponse,
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "DockNotFound"]),
-				[StatusCodes.UNPROCESSABLE_ENTITY]: InvalidSearchResponse,
-				[StatusCodes.SERVICE_UNAVAILABLE]: SearchUnavailableResponse,
-			},
-			detail: { summary: "Execute a trusted Zone Dock Search Block", tags: ["Search"] },
-		},
 	)
 	.post(
 		"/zones/:zoneId/pages/:pageId/execute",
+		{
+			params: ZonePageAggregateExecutionParams,
+			body: ZonePageAggregateExecutionBody,
+			response: {
+				[StatusCodes.OK]: ZonePageAggregateExecutionResponse,
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "ZonePageNotFound"]),
+				[StatusCodes.CONFLICT]: UnitRevisionConflictResponse,
+				[StatusCodes.UNPROCESSABLE_ENTITY]: InvalidSearchResponse,
+			},
+			detail: {
+				summary: "Execute persisted query Blocks for a Zone Page surface",
+				tags: ["Search", "Zones"],
+				security: OptionalApiTokenOrSessionSecurity,
+			},
+		},
 		async ({ params, body, request }) => {
 			const identity = await resolveIdentityWithDynamicApiQuota(
 				request,
@@ -824,24 +831,20 @@ export default new Elysia({ prefix: "/search" })
 			});
 			return { pageRevision: surface.page.latestUnitRevisionId, ...results };
 		},
-		{
-			params: ZonePageAggregateExecutionParams,
-			body: ZonePageAggregateExecutionBody,
-			response: {
-				[StatusCodes.OK]: ZonePageAggregateExecutionResponse,
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "ZonePageNotFound"]),
-				[StatusCodes.CONFLICT]: UnitRevisionConflictResponse,
-				[StatusCodes.UNPROCESSABLE_ENTITY]: InvalidSearchResponse,
-			},
-			detail: {
-				summary: "Execute persisted query Blocks for a Zone Page surface",
-				tags: ["Search", "Zones"],
-				security: OptionalApiTokenOrSessionSecurity,
-			},
-		},
 	)
 	.post(
 		"/zones/:zoneId/pages/:pageId/block-executions",
+		{
+			params: ZonePageSearchParams,
+			body: ZoneBlockExecutionBody,
+			response: {
+				[StatusCodes.OK]: ZoneSearchBlockExecutionResponse,
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "ZonePageNotFound"]),
+				[StatusCodes.UNPROCESSABLE_ENTITY]: InvalidSearchResponse,
+				[StatusCodes.SERVICE_UNAVAILABLE]: SearchUnavailableResponse,
+			},
+			detail: { summary: "Execute a trusted Zone Page Search Block", tags: ["Search"] },
+		},
 		async ({ params, body, request }) => {
 			const identity = await resolveIdentity(request, "unit:read", "search.execute");
 			await identity.authorization.unit.ensureCanRead(
@@ -883,20 +886,20 @@ export default new Elysia({ prefix: "/search" })
 				throw new SearchUnavailable(cause);
 			}
 		},
-		{
-			params: ZonePageSearchParams,
-			body: ZoneBlockExecutionBody,
-			response: {
-				[StatusCodes.OK]: ZoneSearchBlockExecutionResponse,
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "ZonePageNotFound"]),
-				[StatusCodes.UNPROCESSABLE_ENTITY]: InvalidSearchResponse,
-				[StatusCodes.SERVICE_UNAVAILABLE]: SearchUnavailableResponse,
-			},
-			detail: { summary: "Execute a trusted Zone Page Search Block", tags: ["Search"] },
-		},
 	)
 	.post(
 		"/zones/:zoneId/dock/feed-block-executions",
+		{
+			params: ZoneDockSearchParams,
+			body: ZoneBlockExecutionBody,
+			response: {
+				[StatusCodes.OK]: ZoneFeedBlockExecutionResponse,
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "DockNotFound"]),
+				[StatusCodes.UNPROCESSABLE_ENTITY]: InvalidSearchResponse,
+				[StatusCodes.SERVICE_UNAVAILABLE]: SearchUnavailableResponse,
+			},
+			detail: { summary: "Execute a trusted Zone Dock Feed Block", tags: ["Feed"] },
+		},
 		async ({ params, body, request }) => {
 			const identity = await resolveIdentity(request, "unit:read", "search.execute");
 			await identity.authorization.unit.ensureCanRead(
@@ -945,20 +948,20 @@ export default new Elysia({ prefix: "/search" })
 				throw new SearchUnavailable(cause);
 			}
 		},
-		{
-			params: ZoneDockSearchParams,
-			body: ZoneBlockExecutionBody,
-			response: {
-				[StatusCodes.OK]: ZoneFeedBlockExecutionResponse,
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "DockNotFound"]),
-				[StatusCodes.UNPROCESSABLE_ENTITY]: InvalidSearchResponse,
-				[StatusCodes.SERVICE_UNAVAILABLE]: SearchUnavailableResponse,
-			},
-			detail: { summary: "Execute a trusted Zone Dock Feed Block", tags: ["Feed"] },
-		},
 	)
 	.post(
 		"/zones/:zoneId/pages/:pageId/feed-block-executions",
+		{
+			params: ZonePageSearchParams,
+			body: ZoneBlockExecutionBody,
+			response: {
+				[StatusCodes.OK]: ZoneFeedBlockExecutionResponse,
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "ZonePageNotFound"]),
+				[StatusCodes.UNPROCESSABLE_ENTITY]: InvalidSearchResponse,
+				[StatusCodes.SERVICE_UNAVAILABLE]: SearchUnavailableResponse,
+			},
+			detail: { summary: "Execute a trusted Zone Page Feed Block", tags: ["Feed"] },
+		},
 		async ({ params, body, request }) => {
 			const identity = await resolveIdentity(request, "unit:read", "search.execute");
 			await identity.authorization.unit.ensureCanRead(
@@ -999,20 +1002,18 @@ export default new Elysia({ prefix: "/search" })
 				throw new SearchUnavailable(cause);
 			}
 		},
-		{
-			params: ZonePageSearchParams,
-			body: ZoneBlockExecutionBody,
-			response: {
-				[StatusCodes.OK]: ZoneFeedBlockExecutionResponse,
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "ZonePageNotFound"]),
-				[StatusCodes.UNPROCESSABLE_ENTITY]: InvalidSearchResponse,
-				[StatusCodes.SERVICE_UNAVAILABLE]: SearchUnavailableResponse,
-			},
-			detail: { summary: "Execute a trusted Zone Page Feed Block", tags: ["Feed"] },
-		},
 	)
 	.post(
 		"",
+		{
+			body: GroupedSearchBody,
+			response: {
+				[StatusCodes.OK]: SearchResponse,
+				[StatusCodes.UNPROCESSABLE_ENTITY]: InvalidSearchResponse,
+				[StatusCodes.SERVICE_UNAVAILABLE]: SearchUnavailableResponse,
+			},
+			detail: { summary: "Search across public categories", tags: ["Search"] },
+		},
 		async ({ body, request }) => {
 			try {
 				const identity = await resolveIdentity(request, "unit:read", "search.execute");
@@ -1031,18 +1032,18 @@ export default new Elysia({ prefix: "/search" })
 				throw new SearchUnavailable(error);
 			}
 		},
-		{
-			body: GroupedSearchBody,
-			response: {
-				[StatusCodes.OK]: SearchResponse,
-				[StatusCodes.UNPROCESSABLE_ENTITY]: InvalidSearchResponse,
-				[StatusCodes.SERVICE_UNAVAILABLE]: SearchUnavailableResponse,
-			},
-			detail: { summary: "Search across public categories", tags: ["Search"] },
-		},
 	)
 	.post(
 		"/shared-queries",
+		{
+			body: SharedSearchQueryDocument,
+			response: {
+				[StatusCodes.CREATED]: SharedSearchQueryResponse,
+				[StatusCodes.UNAUTHORIZED]: toApiErrorResponse(["AuthenticationRequired"]),
+				[StatusCodes.UNPROCESSABLE_ENTITY]: InvalidSearchResponse,
+			},
+			detail: { summary: "Create an immutable shared Search query", tags: ["Search"] },
+		},
 		async ({ body, request, set, status }) => {
 			const identity = await resolveIdentity(request, "unit:read");
 			const createdByProfileId = identity.authorization.profileId;
@@ -1054,23 +1055,9 @@ export default new Elysia({ prefix: "/search" })
 			set.headers.location = `/api/v1/search/shared-queries/${created.id}`;
 			return status(StatusCodes.CREATED, presentSharedSearchQuery(created));
 		},
-		{
-			body: SharedSearchQueryDocument,
-			response: {
-				[StatusCodes.CREATED]: SharedSearchQueryResponse,
-				[StatusCodes.UNAUTHORIZED]: toApiErrorResponse(["AuthenticationRequired"]),
-				[StatusCodes.UNPROCESSABLE_ENTITY]: InvalidSearchResponse,
-			},
-			detail: { summary: "Create an immutable shared Search query", tags: ["Search"] },
-		},
 	)
 	.get(
 		"/shared-queries/:id",
-		async ({ params }) => {
-			const record = await getSharedSearchQuery(database, params.id);
-			if (!record) throw new SharedSearchQueryNotFound();
-			return presentSharedSearchQuery(record);
-		},
 		{
 			params: SharedSearchQueryParams,
 			response: {
@@ -1080,9 +1067,24 @@ export default new Elysia({ prefix: "/search" })
 			},
 			detail: { summary: "Get a shared Search query", tags: ["Search"] },
 		},
+		async ({ params }) => {
+			const record = await getSharedSearchQuery(database, params.id);
+			if (!record) throw new SharedSearchQueryNotFound();
+			return presentSharedSearchQuery(record);
+		},
 	)
 	.post(
 		"/:index",
+		{
+			params: DomainSearchParams,
+			body: DomainSearchBody,
+			response: {
+				[StatusCodes.OK]: DomainSearchResponse,
+				[StatusCodes.UNPROCESSABLE_ENTITY]: InvalidSearchResponse,
+				[StatusCodes.SERVICE_UNAVAILABLE]: SearchUnavailableResponse,
+			},
+			detail: { summary: "Search one public category", tags: ["Search"] },
+		},
 		async ({ params, body, request }) => {
 			const identity = await resolveIdentity(request, "unit:read", "search.execute");
 			try {
@@ -1100,15 +1102,5 @@ export default new Elysia({ prefix: "/search" })
 				logSearchFailure("Domain search failed", "search.domain.failed", cause);
 				throw new SearchUnavailable(cause);
 			}
-		},
-		{
-			params: DomainSearchParams,
-			body: DomainSearchBody,
-			response: {
-				[StatusCodes.OK]: DomainSearchResponse,
-				[StatusCodes.UNPROCESSABLE_ENTITY]: InvalidSearchResponse,
-				[StatusCodes.SERVICE_UNAVAILABLE]: SearchUnavailableResponse,
-			},
-			detail: { summary: "Search one public category", tags: ["Search"] },
 		},
 	);

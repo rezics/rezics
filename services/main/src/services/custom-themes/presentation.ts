@@ -1,3 +1,4 @@
+import type { StaticDecode } from "typebox";
 import {
 	assertBlockQueryBudget,
 	assertUnitReferencedBlockDocument,
@@ -118,7 +119,7 @@ export async function putUnitPresentation(
 		readonly hostUnitId: string;
 		readonly actorProfileId: string;
 		readonly expectedRevisionId: string | null;
-		readonly document: typeof UnitPresentationDocumentV0.static;
+		readonly document: StaticDecode<typeof UnitPresentationDocumentV0>;
 	},
 ) {
 	await ensureSupportedHost(tx, input.hostUnitId);

@@ -1,4 +1,5 @@
-import { type Static, t } from "elysia";
+import type { StaticDecode } from "typebox";
+import { t } from "elysia";
 
 import {
 	UnitOwnershipModeValues,
@@ -16,7 +17,7 @@ export const UnitOwnershipClaimParams = t.Object(
 	{ claimId: Uuid },
 	{ additionalProperties: false },
 );
-export type UnitOwnershipClaimParams = Static<typeof UnitOwnershipClaimParams>;
+export type UnitOwnershipClaimParams = StaticDecode<typeof UnitOwnershipClaimParams>;
 
 export const CreateUnitOwnershipClaimBody = t.Object(
 	{
@@ -25,7 +26,7 @@ export const CreateUnitOwnershipClaimBody = t.Object(
 	},
 	{ additionalProperties: false },
 );
-export type CreateUnitOwnershipClaimBody = Static<typeof CreateUnitOwnershipClaimBody>;
+export type CreateUnitOwnershipClaimBody = StaticDecode<typeof CreateUnitOwnershipClaimBody>;
 
 export const PendingUnitOwnershipClaimResponse = t.Object(
 	{
@@ -45,7 +46,7 @@ export const ListPlatformUnitOwnershipClaimsQuery = t.Object(
 	},
 	{ additionalProperties: false },
 );
-export type ListPlatformUnitOwnershipClaimsQuery = Static<
+export type ListPlatformUnitOwnershipClaimsQuery = StaticDecode<
 	typeof ListPlatformUnitOwnershipClaimsQuery
 >;
 
@@ -89,7 +90,7 @@ export const DecideUnitOwnershipClaimBody = t.Object(
 	},
 	{ additionalProperties: false },
 );
-export type DecideUnitOwnershipClaimBody = Static<typeof DecideUnitOwnershipClaimBody>;
+export type DecideUnitOwnershipClaimBody = StaticDecode<typeof DecideUnitOwnershipClaimBody>;
 
 export const UnitOwnershipClaimDecisionResponse = t.Union([
 	t.Object(

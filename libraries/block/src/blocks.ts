@@ -1,6 +1,6 @@
 import { FilterDocument, SearchSort } from "@rezics/filter";
 import { PortableText, type PortableTextValue } from "@rezics/portable-text";
-import { type Static, type TSchema, Type } from "@sinclair/typebox";
+import { type Static, type TSchema, Type } from "typebox";
 
 import { BlockKey, createBlockKey } from "./identity";
 
@@ -403,17 +403,27 @@ function createContainerBlocks<ThisSchema extends TSchema>(This: ThisSchema) {
 	] as const;
 }
 
-export const Block = Type.Recursive(
-	(This) =>
-		Type.Union([PortableTextDocument, ...ReferencedAtomicBlocks, ...createContainerBlocks(This)]),
-	{ $id: "Block" },
+export const Block = Type.Cyclic(
+	{
+		Block: Type.Union([
+			PortableTextDocument,
+			...ReferencedAtomicBlocks,
+			...createContainerBlocks(Type.Ref("Block")),
+		]),
+	},
+	"Block",
 );
 export type Block = Static<typeof Block>;
 
 /** Composition-only Block variant that excludes inline Portable Text documents. */
-export const UnitReferencedBlock = Type.Recursive(
-	(This) => Type.Union([...ReferencedAtomicBlocks, ...createContainerBlocks(This)]),
-	{ $id: "UnitReferencedBlock" },
+export const UnitReferencedBlock = Type.Cyclic(
+	{
+		UnitReferencedBlock: Type.Union([
+			...ReferencedAtomicBlocks,
+			...createContainerBlocks(Type.Ref("UnitReferencedBlock")),
+		]),
+	},
+	"UnitReferencedBlock",
 );
 export type UnitReferencedBlock = Static<typeof UnitReferencedBlock>;
 

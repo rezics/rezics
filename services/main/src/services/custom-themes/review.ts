@@ -412,7 +412,7 @@ async function reviewRevision(revision: typeof customThemeRevision.$inferSelect)
 		automatedStatus = "failed";
 		failure =
 			error instanceof CustomThemeExternalResourceInvalid
-				? { code: error._tag, details: error.details ?? null }
+				? { code: error.type, details: error.details ?? null }
 				: {
 						code: "review_failed",
 						message: error instanceof Error ? error.message : String(error),

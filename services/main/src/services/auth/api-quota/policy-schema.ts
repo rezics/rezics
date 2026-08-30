@@ -1,5 +1,6 @@
-import { Value } from "@sinclair/typebox/value";
-import { type Static, t } from "elysia";
+import type { StaticDecode, TSchema } from "typebox";
+import { Value } from "typebox/value";
+import { t } from "elysia";
 
 import type { ApiQuotaPolicyClass, ApiQuotaPolicySubjectKind } from "../../database/schema";
 import { WorkPolicy } from "../../performance/policy";
@@ -131,8 +132,8 @@ export const ApiTokenQuotaOverrideInput = t.Object(
 	{ additionalProperties: false },
 );
 
-export type ApiQuotaLimits = Static<typeof PrivilegedApiQuotaLimits>;
-export type ApiQuotaLimitOverride = Static<typeof PrivilegedApiQuotaLimitOverride>;
+export type ApiQuotaLimits = StaticDecode<typeof PrivilegedApiQuotaLimits>;
+export type ApiQuotaLimitOverride = StaticDecode<typeof PrivilegedApiQuotaLimitOverride>;
 export type ApiTokenQuotaPolicyConfiguration = {
 	limits: ApiQuotaLimits;
 	operations: Partial<Record<ApiQuotaOperationId, ApiQuotaLimitOverride>>;
@@ -250,6 +251,14 @@ function requireSupportedVersion(
 		throw new ApiQuotaPolicyDocumentInvalid(policyClass, schemaVersion, document);
 }
 
+function decodeStrict<const Schema extends TSchema>(
+	schema: Schema,
+	value: unknown,
+): StaticDecode<Schema> {
+	if (!Value.Check(schema, value)) throw new TypeError("Value does not match the persisted schema");
+	return Value.Decode(schema, value);
+}
+
 export function decodeApiQuotaPolicyConfiguration(
 	subjectKind: ApiQuotaPolicySubjectKind,
 	policyClass: ApiQuotaPolicyClass,
@@ -268,7 +277,7 @@ export function decodeApiAccountQuotaPolicyConfiguration(
 ): ApiAccountQuotaPolicyConfiguration {
 	requireSupportedVersion(policyClass, schemaVersion, "configuration");
 	try {
-		return Value.Decode(
+		return decodeStrict(
 			policyClass === "standard"
 				? StandardApiAccountQuotaPolicyConfiguration
 				: PrivilegedApiAccountQuotaPolicyConfiguration,
@@ -288,7 +297,7 @@ export function decodeApiTokenQuotaPolicyConfiguration(
 ): ApiTokenQuotaPolicyConfiguration {
 	requireSupportedVersion(policyClass, schemaVersion, "configuration");
 	try {
-		return Value.Decode(
+		return decodeStrict(
 			policyClass === "standard"
 				? StandardApiTokenQuotaPolicyConfiguration
 				: PrivilegedApiTokenQuotaPolicyConfiguration,
@@ -308,7 +317,7 @@ export function decodeApiAccountQuotaOverride(
 ): ApiAccountQuotaOverride {
 	requireSupportedVersion(policyClass, schemaVersion, "account_override");
 	try {
-		return Value.Decode(schemaForAccountOverride(policyClass), value);
+		return decodeStrict(schemaForAccountOverride(policyClass), value);
 	} catch (cause) {
 		throw new ApiQuotaPolicyDocumentInvalid(policyClass, schemaVersion, "account_override", {
 			cause,
@@ -318,7 +327,7 @@ export function decodeApiAccountQuotaOverride(
 
 export function decodeApiTokenQuotaOverride(value: unknown): ApiTokenQuotaOverride {
 	try {
-		return Value.Decode(ApiTokenQuotaOverrideInput, value);
+		return decodeStrict(ApiTokenQuotaOverrideInput, value);
 	} catch (cause) {
 		throw new ApiQuotaPolicyDocumentInvalid(
 			"token",

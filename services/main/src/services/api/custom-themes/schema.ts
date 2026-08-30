@@ -7,7 +7,7 @@ import {
 	SubmittedCustomThemeManifestV0,
 	UnitPresentationDocumentV0,
 } from "@rezics/block";
-import { type Static, Type } from "@sinclair/typebox";
+import { type StaticDecode, Type } from "typebox";
 import { t } from "elysia";
 
 import {
@@ -23,12 +23,10 @@ const Sha256Hex = t.String({ pattern: "^[0-9a-f]{64}$" });
 const Base64 = t.String({
 	maxLength: Math.ceil(MaximumCustomThemeInitialCodeBytes / 3) * 4,
 });
-const UnitPresentationInputDocument = Type.Unsafe<Static<typeof UnitPresentationDocumentV0>>(
-	Type.Ref("UnitPresentationDocumentV0"),
+const UnitPresentationInputDocument = Type.Unsafe<StaticDecode<typeof UnitPresentationDocumentV0>>(
+	UnitPresentationDocumentV0,
 );
-const UnitPresentationResponseDocument = Type.Unsafe<unknown>(
-	Type.Ref("UnitPresentationDocumentV0"),
-);
+const UnitPresentationResponseDocument = Type.Unsafe<unknown>(UnitPresentationDocumentV0);
 const SubmittedCustomThemeFileRoleValues = [
 	"html",
 	"css",

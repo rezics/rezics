@@ -1,4 +1,5 @@
-import { type Static, t } from "elysia";
+import type { StaticDecode } from "typebox";
+import { t } from "elysia";
 
 import {
 	ContentGovernanceActionKindValues,
@@ -15,7 +16,7 @@ export const NotificationCursorQuery = t.Object({
 	unreadOnly: t.Optional(t.Boolean({ default: false })),
 	limit: t.Optional(t.Integer({ minimum: 1, maximum: 100, default: 30 })),
 });
-export type NotificationCursorQuery = Static<typeof NotificationCursorQuery>;
+export type NotificationCursorQuery = StaticDecode<typeof NotificationCursorQuery>;
 
 export const NotificationParams = t.Object({ notificationId: Uuid });
 

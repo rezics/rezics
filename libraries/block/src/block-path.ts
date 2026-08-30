@@ -1,4 +1,4 @@
-import { type Static, Type } from "@sinclair/typebox";
+import { type Static, Type } from "typebox";
 
 import type { UnitReferencedBlock } from "./blocks";
 import { BlockKey, type BlockKey as BlockKeyValue } from "./identity";

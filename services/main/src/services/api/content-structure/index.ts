@@ -415,6 +415,15 @@ export default new Elysia()
 	.use(session)
 	.get(
 		"/units/by-id/:unitId/content-structures",
+		{
+			params: UnitContentStructuresParams,
+			response: {
+				[StatusCodes.OK]: ContentStructureListResponse,
+				[StatusCodes.FORBIDDEN]: ContentStructureForbiddenResponse,
+				[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
+			},
+			detail: { summary: "List Unit Content Structures", tags: ["Content Structure"] },
+		},
 		async ({ params, request }) => {
 			const { authorization } = await resolveIdentity(request, "unit:read");
 			await authorization.unit.ensureCanRead(params.unitId);
@@ -428,18 +437,21 @@ export default new Elysia()
 				};
 			});
 		},
-		{
-			params: UnitContentStructuresParams,
-			response: {
-				[StatusCodes.OK]: ContentStructureListResponse,
-				[StatusCodes.FORBIDDEN]: ContentStructureForbiddenResponse,
-				[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
-			},
-			detail: { summary: "List Unit Content Structures", tags: ["Content Structure"] },
-		},
 	)
 	.post(
 		"/units/by-id/:unitId/content-structures",
+		{
+			access: "session-only",
+			params: UnitContentStructuresParams,
+			body: CreateContentStructureBody,
+			response: {
+				[StatusCodes.OK]: ContentStructureMutationResponse,
+				[StatusCodes.FORBIDDEN]: ContentStructureForbiddenResponse,
+				[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
+				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["ContentStructureInvalid"]),
+			},
+			detail: { summary: "Create Content Structure", tags: ["Content Structure"] },
+		},
 		async ({ params, body, profile, authorization }) => {
 			await ensureCanMutateContentStructure(authorization, {
 				ownerUnitId: params.unitId,
@@ -458,21 +470,18 @@ export default new Elysia()
 				revisionCreated: result.revisionCreated,
 			};
 		},
-		{
-			access: "session-only",
-			params: UnitContentStructuresParams,
-			body: CreateContentStructureBody,
-			response: {
-				[StatusCodes.OK]: ContentStructureMutationResponse,
-				[StatusCodes.FORBIDDEN]: ContentStructureForbiddenResponse,
-				[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
-				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["ContentStructureInvalid"]),
-			},
-			detail: { summary: "Create Content Structure", tags: ["Content Structure"] },
-		},
 	)
 	.get(
 		"/units/by-id/:unitId/content-structures/:structureId",
+		{
+			params: ContentStructureParams,
+			response: {
+				[StatusCodes.OK]: ContentStructureDetailResponse,
+				[StatusCodes.FORBIDDEN]: ContentStructureForbiddenResponse,
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "ContentStructureNotFound"]),
+			},
+			detail: { summary: "Get Content Structure", tags: ["Content Structure"] },
+		},
 		async ({ params, request }) => {
 			const { authorization } = await resolveIdentity(request, "unit:read");
 			await authorization.unit.ensureCanRead(params.unitId);
@@ -493,18 +502,19 @@ export default new Elysia()
 				};
 			});
 		},
-		{
-			params: ContentStructureParams,
-			response: {
-				[StatusCodes.OK]: ContentStructureDetailResponse,
-				[StatusCodes.FORBIDDEN]: ContentStructureForbiddenResponse,
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "ContentStructureNotFound"]),
-			},
-			detail: { summary: "Get Content Structure", tags: ["Content Structure"] },
-		},
 	)
 	.get(
 		"/units/by-id/:unitId/content-structures/:structureId/revisions",
+		{
+			params: ContentStructureParams,
+			query: ContentStructureRevisionListQuery,
+			response: {
+				[StatusCodes.OK]: ContentStructureRevisionListResponse,
+				[StatusCodes.FORBIDDEN]: ContentStructureForbiddenResponse,
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "ContentStructureNotFound"]),
+			},
+			detail: { summary: "List Content Structure revisions", tags: ["Content Structure"] },
+		},
 		async ({ params, query, request }) => {
 			const { authorization } = await resolveIdentity(request, "unit:read");
 			await authorization.unit.ensureCanRead(params.unitId);
@@ -516,19 +526,24 @@ export default new Elysia()
 				};
 			});
 		},
-		{
-			params: ContentStructureParams,
-			query: ContentStructureRevisionListQuery,
-			response: {
-				[StatusCodes.OK]: ContentStructureRevisionListResponse,
-				[StatusCodes.FORBIDDEN]: ContentStructureForbiddenResponse,
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "ContentStructureNotFound"]),
-			},
-			detail: { summary: "List Content Structure revisions", tags: ["Content Structure"] },
-		},
 	)
 	.post(
 		"/units/by-id/:unitId/content-structures/:structureId/revisions/:revisionId/restore",
+		{
+			access: "session-only",
+			params: ContentStructureRevisionParams,
+			body: RestoreContentStructureRevisionBody,
+			response: {
+				[StatusCodes.OK]: ContentStructureDeleteResponse,
+				[StatusCodes.CONFLICT]: toApiErrorResponse(["ContentStructureRevisionConflict"]),
+				[StatusCodes.FORBIDDEN]: ContentStructureForbiddenResponse,
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "ContentStructureNotFound"]),
+			},
+			detail: {
+				summary: "Restore a Content Structure revision",
+				tags: ["Content Structure"],
+			},
+		},
 		async ({ params, body, profile, authorization }) => {
 			await ensureCanMutateContentStructure(authorization, {
 				ownerUnitId: params.unitId,
@@ -552,24 +567,25 @@ export default new Elysia()
 				revisionCreated: result.revisionCreated,
 			};
 		},
-		{
-			access: "session-only",
-			params: ContentStructureRevisionParams,
-			body: RestoreContentStructureRevisionBody,
-			response: {
-				[StatusCodes.OK]: ContentStructureDeleteResponse,
-				[StatusCodes.CONFLICT]: toApiErrorResponse(["ContentStructureRevisionConflict"]),
-				[StatusCodes.FORBIDDEN]: ContentStructureForbiddenResponse,
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "ContentStructureNotFound"]),
-			},
-			detail: {
-				summary: "Restore a Content Structure revision",
-				tags: ["Content Structure"],
-			},
-		},
 	)
 	.post(
 		"/units/by-id/:unitId/content-structures/:structureId/nodes/batch",
+		{
+			access: "session-only",
+			params: ContentStructureParams,
+			body: UpdateContentStructureNodesBatchBody,
+			response: {
+				[StatusCodes.OK]: ContentStructureBatchMutationResponse,
+				[StatusCodes.CONFLICT]: toApiErrorResponse(["ContentStructureRevisionConflict"]),
+				[StatusCodes.FORBIDDEN]: ContentStructureForbiddenResponse,
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "ContentStructureNotFound"]),
+				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["ContentStructureInvalid"]),
+			},
+			detail: {
+				summary: "Apply an atomic Content Structure node command batch",
+				tags: ["Content Structure"],
+			},
+		},
 		async ({ params, body, profile, authorization }) => {
 			await ensureCanMutateContentStructure(authorization, {
 				ownerUnitId: params.unitId,
@@ -603,25 +619,26 @@ export default new Elysia()
 				revisionCreated: result.revisionCreated,
 			};
 		},
-		{
-			access: "session-only",
-			params: ContentStructureParams,
-			body: UpdateContentStructureNodesBatchBody,
-			response: {
-				[StatusCodes.OK]: ContentStructureBatchMutationResponse,
-				[StatusCodes.CONFLICT]: toApiErrorResponse(["ContentStructureRevisionConflict"]),
-				[StatusCodes.FORBIDDEN]: ContentStructureForbiddenResponse,
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "ContentStructureNotFound"]),
-				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["ContentStructureInvalid"]),
-			},
-			detail: {
-				summary: "Apply an atomic Content Structure node command batch",
-				tags: ["Content Structure"],
-			},
-		},
 	)
 	.post(
 		"/units/by-id/:unitId/content-structures/:structureId/nodes",
+		{
+			access: "session-only",
+			params: ContentStructureParams,
+			body: CreateGenericContentStructureNodeBody,
+			response: {
+				[StatusCodes.OK]: ContentStructureNodeMutationResponse,
+				[StatusCodes.CONFLICT]: toApiErrorResponse(["ContentStructureRevisionConflict"]),
+				[StatusCodes.FORBIDDEN]: ContentStructureForbiddenResponse,
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
+					"RevisionCreditEntityInvalid",
+					"RevisionContributionActorRequired",
+				]),
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "ContentStructureNotFound"]),
+				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["ContentStructureInvalid"]),
+			},
+			detail: { summary: "Insert Content Structure node", tags: ["Content Structure"] },
+		},
 		async ({ params, body, profile, authorization }) => {
 			await ensureCanMutateContentStructure(authorization, {
 				ownerUnitId: params.unitId,
@@ -680,26 +697,22 @@ export default new Elysia()
 				revisionCreated: result.revisionCreated,
 			};
 		},
+	)
+	.patch(
+		"/units/by-id/:unitId/content-structures/:structureId/nodes/:nodeId",
 		{
 			access: "session-only",
-			params: ContentStructureParams,
-			body: CreateGenericContentStructureNodeBody,
+			params: GenericContentStructureNodeParams,
+			body: UpdateGenericContentStructureNodeBody,
 			response: {
 				[StatusCodes.OK]: ContentStructureNodeMutationResponse,
 				[StatusCodes.CONFLICT]: toApiErrorResponse(["ContentStructureRevisionConflict"]),
 				[StatusCodes.FORBIDDEN]: ContentStructureForbiddenResponse,
-				[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
-					"RevisionCreditEntityInvalid",
-					"RevisionContributionActorRequired",
-				]),
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "ContentStructureNotFound"]),
 				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["ContentStructureInvalid"]),
 			},
-			detail: { summary: "Insert Content Structure node", tags: ["Content Structure"] },
+			detail: { summary: "Update Content Structure node", tags: ["Content Structure"] },
 		},
-	)
-	.patch(
-		"/units/by-id/:unitId/content-structures/:structureId/nodes/:nodeId",
 		async ({ params, body, profile, authorization }) => {
 			await ensureCanMutateContentStructure(authorization, {
 				ownerUnitId: params.unitId,
@@ -730,22 +743,24 @@ export default new Elysia()
 				revisionCreated: result.revisionCreated,
 			};
 		},
-		{
-			access: "session-only",
-			params: GenericContentStructureNodeParams,
-			body: UpdateGenericContentStructureNodeBody,
-			response: {
-				[StatusCodes.OK]: ContentStructureNodeMutationResponse,
-				[StatusCodes.CONFLICT]: toApiErrorResponse(["ContentStructureRevisionConflict"]),
-				[StatusCodes.FORBIDDEN]: ContentStructureForbiddenResponse,
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "ContentStructureNotFound"]),
-				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["ContentStructureInvalid"]),
-			},
-			detail: { summary: "Update Content Structure node", tags: ["Content Structure"] },
-		},
 	)
 	.delete(
 		"/units/by-id/:unitId/content-structures/:structureId/nodes/:nodeId",
+		{
+			access: "session-only",
+			params: GenericContentStructureNodeParams,
+			body: ContentStructureRevisionBody,
+			response: {
+				[StatusCodes.OK]: ContentStructureDeleteResponse,
+				[StatusCodes.CONFLICT]: toApiErrorResponse(["ContentStructureRevisionConflict"]),
+				[StatusCodes.FORBIDDEN]: ContentStructureForbiddenResponse,
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "ContentStructureNotFound"]),
+			},
+			detail: {
+				summary: "Delete Content Structure node subtree",
+				tags: ["Content Structure"],
+			},
+		},
 		async ({ params, body, profile, authorization }) => {
 			await ensureCanMutateContentStructure(authorization, {
 				ownerUnitId: params.unitId,
@@ -767,24 +782,22 @@ export default new Elysia()
 				revisionCreated: result.revisionCreated,
 			};
 		},
+	)
+	.delete(
+		"/units/by-id/:unitId/content-structures/:structureId",
 		{
 			access: "session-only",
-			params: GenericContentStructureNodeParams,
+			params: ContentStructureParams,
 			body: ContentStructureRevisionBody,
 			response: {
 				[StatusCodes.OK]: ContentStructureDeleteResponse,
 				[StatusCodes.CONFLICT]: toApiErrorResponse(["ContentStructureRevisionConflict"]),
 				[StatusCodes.FORBIDDEN]: ContentStructureForbiddenResponse,
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "ContentStructureNotFound"]),
+				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["ContentStructureInvalid"]),
 			},
-			detail: {
-				summary: "Delete Content Structure node subtree",
-				tags: ["Content Structure"],
-			},
+			detail: { summary: "Delete Content Structure", tags: ["Content Structure"] },
 		},
-	)
-	.delete(
-		"/units/by-id/:unitId/content-structures/:structureId",
 		async ({ params, body, profile, authorization }) => {
 			await ensureCanMutateContentStructure(authorization, {
 				ownerUnitId: params.unitId,
@@ -806,29 +819,9 @@ export default new Elysia()
 				revisionCreated: result.revisionCreated,
 			};
 		},
-		{
-			access: "session-only",
-			params: ContentStructureParams,
-			body: ContentStructureRevisionBody,
-			response: {
-				[StatusCodes.OK]: ContentStructureDeleteResponse,
-				[StatusCodes.CONFLICT]: toApiErrorResponse(["ContentStructureRevisionConflict"]),
-				[StatusCodes.FORBIDDEN]: ContentStructureForbiddenResponse,
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "ContentStructureNotFound"]),
-				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["ContentStructureInvalid"]),
-			},
-			detail: { summary: "Delete Content Structure", tags: ["Content Structure"] },
-		},
 	)
 	.get(
 		"/units/book/:unitId/content-structure/nodes",
-		async ({ params, query, request }) => {
-			const { authorization } = await resolveIdentity(request, "unit:read");
-			if (!(await authorization.unit.canRead(params.unitId))) throw new BookNotFound();
-			return database.transaction((tx) =>
-				readBookContentStructure(tx, params.unitId, query.localizationLanguages),
-			);
-		},
 		{
 			params: BookContentStructureParams,
 			query: BookContentStructureQuery,
@@ -841,9 +834,41 @@ export default new Elysia()
 				tags: ["Content Structure"],
 			},
 		},
+		async ({ params, query, request }) => {
+			const { authorization } = await resolveIdentity(request, "unit:read");
+			if (!(await authorization.unit.canRead(params.unitId))) throw new BookNotFound();
+			return database.transaction((tx) =>
+				readBookContentStructure(tx, params.unitId, query.localizationLanguages),
+			);
+		},
 	)
 	.put(
 		"/units/book/:unitId/content-structure",
+		{
+			access: "contribute:unit:update",
+			params: BookContentStructureParams,
+			body: SaveBookContentStructureDraftBody,
+			response: {
+				[StatusCodes.OK]: SaveBookContentStructureDraftResponse,
+				[StatusCodes.FORBIDDEN]: UnitForbiddenResponse,
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
+					"RevisionCreditEntityInvalid",
+					"RevisionContributionActorRequired",
+				]),
+				[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
+				[StatusCodes.CONFLICT]: toApiErrorResponse([
+					"PostTargetingLocked",
+					"PostTagMentionVoteConflict",
+					"ContentStructureRevisionConflict",
+				]),
+				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["ContentStructureInvalid"]),
+				[StatusCodes.TOO_MANY_REQUESTS]: VoteBackpressureResponse,
+			},
+			detail: {
+				summary: "Save a complete Book Content Structure draft",
+				tags: ["Content Structure"],
+			},
+		},
 		async ({ params, profile, authorization, body }) => {
 			await authorization.unit.ensureCanUpdate(params.unitId, [["content-structure"]]);
 			return runVoteTransaction({ family: "unit_tag", authority: "global" }, async (tx) => {
@@ -872,41 +897,9 @@ export default new Elysia()
 				};
 			});
 		},
-		{
-			access: "contribute:unit:update",
-			params: BookContentStructureParams,
-			body: SaveBookContentStructureDraftBody,
-			response: {
-				[StatusCodes.OK]: SaveBookContentStructureDraftResponse,
-				[StatusCodes.FORBIDDEN]: UnitForbiddenResponse,
-				[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
-					"RevisionCreditEntityInvalid",
-					"RevisionContributionActorRequired",
-				]),
-				[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
-				[StatusCodes.CONFLICT]: toApiErrorResponse([
-					"PostTargetingLocked",
-					"PostTagMentionVoteConflict",
-					"ContentStructureRevisionConflict",
-				]),
-				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["ContentStructureInvalid"]),
-				[StatusCodes.TOO_MANY_REQUESTS]: VoteBackpressureResponse,
-			},
-			detail: {
-				summary: "Save a complete Book Content Structure draft",
-				tags: ["Content Structure"],
-			},
-		},
 	)
 	.get(
 		"/units/media/:unitId/content-structure/nodes",
-		async ({ params, query, request }) => {
-			const { authorization } = await resolveIdentity(request, "unit:read");
-			if (!(await authorization.unit.canRead(params.unitId))) throw new MediaNotFound();
-			return database.transaction((tx) =>
-				readMediaContentStructure(tx, params.unitId, query.localizationLanguages),
-			);
-		},
 		{
 			params: MediaContentStructureParams,
 			query: MediaContentStructureQuery,
@@ -919,9 +912,36 @@ export default new Elysia()
 				tags: ["Content Structure"],
 			},
 		},
+		async ({ params, query, request }) => {
+			const { authorization } = await resolveIdentity(request, "unit:read");
+			if (!(await authorization.unit.canRead(params.unitId))) throw new MediaNotFound();
+			return database.transaction((tx) =>
+				readMediaContentStructure(tx, params.unitId, query.localizationLanguages),
+			);
+		},
 	)
 	.put(
 		"/units/media/:unitId/content-structure",
+		{
+			access: "contribute:unit:update",
+			params: MediaContentStructureParams,
+			body: SaveMediaContentStructureDraftBody,
+			response: {
+				[StatusCodes.OK]: SaveMediaContentStructureDraftResponse,
+				[StatusCodes.FORBIDDEN]: UnitForbiddenResponse,
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
+					"RevisionCreditEntityInvalid",
+					"RevisionContributionActorRequired",
+				]),
+				[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
+				[StatusCodes.CONFLICT]: toApiErrorResponse(["ContentStructureRevisionConflict"]),
+				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["ContentStructureInvalid"]),
+			},
+			detail: {
+				summary: "Save a complete Media Content Structure draft",
+				tags: ["Content Structure"],
+			},
+		},
 		async ({ params, profile, authorization, body }) => {
 			await authorization.unit.ensureCanUpdate(params.unitId, [["content-structure"]]);
 			return database.transaction(async (tx) => {
@@ -948,29 +968,18 @@ export default new Elysia()
 				};
 			});
 		},
-		{
-			access: "contribute:unit:update",
-			params: MediaContentStructureParams,
-			body: SaveMediaContentStructureDraftBody,
-			response: {
-				[StatusCodes.OK]: SaveMediaContentStructureDraftResponse,
-				[StatusCodes.FORBIDDEN]: UnitForbiddenResponse,
-				[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
-					"RevisionCreditEntityInvalid",
-					"RevisionContributionActorRequired",
-				]),
-				[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
-				[StatusCodes.CONFLICT]: toApiErrorResponse(["ContentStructureRevisionConflict"]),
-				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["ContentStructureInvalid"]),
-			},
-			detail: {
-				summary: "Save a complete Media Content Structure draft",
-				tags: ["Content Structure"],
-			},
-		},
 	)
 	.get(
 		"/books/:bookId/content-nodes/:nodeId",
+		{
+			params: BookChapterNodeParams,
+			query: ReadChapterQuery,
+			response: {
+				[StatusCodes.OK]: BookChapterNodeDetailResponse,
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["ChapterNotFound", "ChapterLanguageNotFound"]),
+			},
+			detail: { summary: "Read a Chapter occurrence in a Book", tags: ["Books"] },
+		},
 		async ({ params, query, request }) => {
 			const identity = await resolveIdentity(request, "unit:read");
 			const { authorization } = identity;
@@ -1093,18 +1102,29 @@ export default new Elysia()
 				capabilities: { canReply: !targetingLock },
 			};
 		},
-		{
-			params: BookChapterNodeParams,
-			query: ReadChapterQuery,
-			response: {
-				[StatusCodes.OK]: BookChapterNodeDetailResponse,
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["ChapterNotFound", "ChapterLanguageNotFound"]),
-			},
-			detail: { summary: "Read a Chapter occurrence in a Book", tags: ["Books"] },
-		},
 	)
 	.put(
 		"/chapters/:chapterId/localizations/:language/content",
+		{
+			access: "contribute:unit:update",
+			params: ChapterLocalizationParams,
+			body: UpsertChapterLocalizationBody,
+			response: {
+				[StatusCodes.OK]: UpdateStateResponse,
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
+					"RevisionCreditEntityInvalid",
+					"RevisionContributionActorRequired",
+				]),
+				[StatusCodes.FORBIDDEN]: UnitForbiddenResponse,
+				[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
+				[StatusCodes.CONFLICT]: toApiErrorResponse([
+					"UnitRevisionConflict",
+					"PostTagMentionVoteConflict",
+				]),
+				[StatusCodes.TOO_MANY_REQUESTS]: VoteBackpressureResponse,
+			},
+			detail: { summary: "Create or replace chapter content", tags: ["Books"] },
+		},
 		async ({ params, profile, authorization, body }) => {
 			await authorization.unit.ensureCanUpdate(params.chapterId, [
 				["localizations", params.language],
@@ -1153,25 +1173,5 @@ export default new Elysia()
 				});
 			});
 			return { updated: true };
-		},
-		{
-			access: "contribute:unit:update",
-			params: ChapterLocalizationParams,
-			body: UpsertChapterLocalizationBody,
-			response: {
-				[StatusCodes.OK]: UpdateStateResponse,
-				[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
-					"RevisionCreditEntityInvalid",
-					"RevisionContributionActorRequired",
-				]),
-				[StatusCodes.FORBIDDEN]: UnitForbiddenResponse,
-				[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
-				[StatusCodes.CONFLICT]: toApiErrorResponse([
-					"UnitRevisionConflict",
-					"PostTagMentionVoteConflict",
-				]),
-				[StatusCodes.TOO_MANY_REQUESTS]: VoteBackpressureResponse,
-			},
-			detail: { summary: "Create or replace chapter content", tags: ["Books"] },
 		},
 	);

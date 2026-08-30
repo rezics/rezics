@@ -1,16 +1,18 @@
 import { StatusCodes } from "http-status-codes";
-import * as Data from "effect/Data";
+import { HTTPError } from "elysia";
 
-export class AuthenticationRequired extends Data.TaggedError("AuthenticationRequired") {
-	static readonly status = StatusCodes.UNAUTHORIZED as const;
-	readonly status = AuthenticationRequired.status;
-	readonly message = "Authentication required";
+export class AuthenticationRequired extends HTTPError.id(
+	"AuthenticationRequired",
+	StatusCodes.UNAUTHORIZED,
+) {
+	override readonly message = "Authentication required";
 }
 
-export class ApiTokenPermissionRequired extends Data.TaggedError("ApiTokenPermissionRequired") {
-	static readonly status = StatusCodes.FORBIDDEN as const;
-	readonly status = ApiTokenPermissionRequired.status;
-	readonly message: string;
+export class ApiTokenPermissionRequired extends HTTPError.id(
+	"ApiTokenPermissionRequired",
+	StatusCodes.FORBIDDEN,
+) {
+	override readonly message: string;
 
 	constructor(readonly permission: string) {
 		super();
@@ -18,10 +20,11 @@ export class ApiTokenPermissionRequired extends Data.TaggedError("ApiTokenPermis
 	}
 }
 
-export class ApiTokenRateLimitExceeded extends Data.TaggedError("ApiTokenRateLimitExceeded") {
-	static readonly status = StatusCodes.TOO_MANY_REQUESTS as const;
-	readonly status = ApiTokenRateLimitExceeded.status;
-	readonly message = "API token rate limit exceeded";
+export class ApiTokenRateLimitExceeded extends HTTPError.id(
+	"ApiTokenRateLimitExceeded",
+	StatusCodes.TOO_MANY_REQUESTS,
+) {
+	override readonly message = "API token rate limit exceeded";
 
 	constructor(readonly retryAfterSeconds: number) {
 		super();
@@ -35,10 +38,11 @@ export type ApiQuotaExceededDetails = {
 	limit: number;
 };
 
-export class ApiQuotaExceeded extends Data.TaggedError("ApiQuotaExceeded") {
-	static readonly status = StatusCodes.TOO_MANY_REQUESTS as const;
-	readonly status = ApiQuotaExceeded.status;
-	readonly message = "API quota exceeded";
+export class ApiQuotaExceeded extends HTTPError.id(
+	"ApiQuotaExceeded",
+	StatusCodes.TOO_MANY_REQUESTS,
+) {
+	override readonly message = "API quota exceeded";
 
 	constructor(
 		readonly retryAfterSeconds: number,
@@ -48,38 +52,37 @@ export class ApiQuotaExceeded extends Data.TaggedError("ApiQuotaExceeded") {
 	}
 }
 
-export class InteractiveSessionRequired extends Data.TaggedError("InteractiveSessionRequired") {
-	static readonly status = StatusCodes.UNAUTHORIZED as const;
-	readonly status = InteractiveSessionRequired.status;
-	readonly message = "An interactive session is required";
+export class InteractiveSessionRequired extends HTTPError.id(
+	"InteractiveSessionRequired",
+	StatusCodes.UNAUTHORIZED,
+) {
+	override readonly message = "An interactive session is required";
 }
 
-export class FreshSessionRequired extends Data.TaggedError("FreshSessionRequired") {
-	static readonly status = StatusCodes.FORBIDDEN as const;
-	readonly status = FreshSessionRequired.status;
-	readonly message = "Please re-authenticate before managing credentials";
+export class FreshSessionRequired extends HTTPError.id(
+	"FreshSessionRequired",
+	StatusCodes.FORBIDDEN,
+) {
+	override readonly message = "Please re-authenticate before managing credentials";
 }
 
-export class EmailVerificationRequired extends Data.TaggedError("EmailVerificationRequired") {
-	static readonly status = StatusCodes.FORBIDDEN as const;
-	readonly status = EmailVerificationRequired.status;
-	readonly message = "Email verification required";
+export class EmailVerificationRequired extends HTTPError.id(
+	"EmailVerificationRequired",
+	StatusCodes.FORBIDDEN,
+) {
+	override readonly message = "Email verification required";
 }
 
-export class AccountSuspended extends Data.TaggedError("AccountSuspended") {
-	static readonly status = StatusCodes.FORBIDDEN as const;
-	readonly status = AccountSuspended.status;
-	readonly message = "Account is suspended";
+export class AccountSuspended extends HTTPError.id("AccountSuspended", StatusCodes.FORBIDDEN) {
+	override readonly message = "Account is suspended";
 
 	constructor(readonly suspendedUntil: Date | null) {
 		super();
 	}
 }
 
-export class AccountClosed extends Data.TaggedError("AccountClosed") {
-	static readonly status = StatusCodes.FORBIDDEN as const;
-	readonly status = AccountClosed.status;
-	readonly message = "Account is closed";
+export class AccountClosed extends HTTPError.id("AccountClosed", StatusCodes.FORBIDDEN) {
+	override readonly message = "Account is closed";
 }
 
 export const AuthErrors = [

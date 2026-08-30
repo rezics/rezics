@@ -1,5 +1,6 @@
+import type { StaticDecode } from "typebox";
 import { StatusCodes } from "http-status-codes";
-import { Check } from "@sinclair/typebox/value";
+import { Check } from "typebox/value";
 import { and, asc, desc, eq, gt, inArray, isNull, lt, or, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import Elysia, { t } from "elysia";
@@ -55,7 +56,7 @@ const NotificationCursor = t.Object(
 	},
 	{ additionalProperties: false },
 );
-type NotificationCursor = typeof NotificationCursor.static;
+type NotificationCursor = StaticDecode<typeof NotificationCursor>;
 
 const preferenceKinds = [
 	"reply",
@@ -100,19 +101,19 @@ type PresentedContext =
 	  }
 	| {
 			readonly kind: "direct_message";
-			readonly context: typeof DirectMessageNotificationPayload.static | UnavailableContext;
+			readonly context: StaticDecode<typeof DirectMessageNotificationPayload> | UnavailableContext;
 	  }
 	| {
 			readonly kind: "moderation";
-			readonly context: typeof ModerationNotificationPayload.static | UnavailableContext;
+			readonly context: StaticDecode<typeof ModerationNotificationPayload> | UnavailableContext;
 	  }
 	| {
 			readonly kind: "realm";
-			readonly context: typeof RealmNotificationPayload.static | UnavailableContext;
+			readonly context: StaticDecode<typeof RealmNotificationPayload> | UnavailableContext;
 	  }
 	| {
 			readonly kind: "system";
-			readonly context: typeof SystemNotificationPayload.static | UnavailableContext;
+			readonly context: StaticDecode<typeof SystemNotificationPayload> | UnavailableContext;
 	  };
 
 function encodeCursor(cursor: NotificationCursor) {
@@ -417,6 +418,15 @@ export default new Elysia({ prefix: "/notifications" })
 	.use(i18n)
 	.get(
 		"",
+		{
+			access: "notification:read",
+			query: NotificationCursorQuery,
+			response: {
+				[StatusCodes.OK]: NotificationListResponse,
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["InvalidNotificationCursor"]),
+			},
+			detail: { summary: "Poll notifications with a cursor", tags: ["Notifications"] },
+		},
 		async ({ i18n, profile, query }) => {
 			const unreadOnly = Boolean(query.unreadOnly);
 			const direction = query.direction ?? "before";
@@ -501,18 +511,14 @@ export default new Elysia({ prefix: "/notifications" })
 				),
 			};
 		},
-		{
-			access: "notification:read",
-			query: NotificationCursorQuery,
-			response: {
-				[StatusCodes.OK]: NotificationListResponse,
-				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["InvalidNotificationCursor"]),
-			},
-			detail: { summary: "Poll notifications with a cursor", tags: ["Notifications"] },
-		},
 	)
 	.get(
 		"/unread-count",
+		{
+			access: "notification:read",
+			response: { [StatusCodes.OK]: UnreadCountResponse },
+			detail: { summary: "Get unread notification count", tags: ["Notifications"] },
+		},
 		async ({ profile }) => {
 			const [row] = await database
 				.select({
@@ -529,14 +535,18 @@ export default new Elysia({ prefix: "/notifications" })
 				),
 			};
 		},
-		{
-			access: "notification:read",
-			response: { [StatusCodes.OK]: UnreadCountResponse },
-			detail: { summary: "Get unread notification count", tags: ["Notifications"] },
-		},
 	)
 	.get(
 		"/:notificationId",
+		{
+			access: "notification:read",
+			params: NotificationParams,
+			response: {
+				[StatusCodes.OK]: NotificationItemResponse,
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["NotificationNotFound"]),
+			},
+			detail: { summary: "Get one notification", tags: ["Notifications"] },
+		},
 		async ({ i18n, profile, params }) => {
 			const locale = await loadRecipientLocale(profile.unitId);
 			const { t: translations } = await i18n.getTranslation("notifications", [locale]);
@@ -566,18 +576,18 @@ export default new Elysia({ prefix: "/notifications" })
 			if (!item) throw new NotificationNotFound();
 			return item;
 		},
-		{
-			access: "notification:read",
-			params: NotificationParams,
-			response: {
-				[StatusCodes.OK]: NotificationItemResponse,
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["NotificationNotFound"]),
-			},
-			detail: { summary: "Get one notification", tags: ["Notifications"] },
-		},
 	)
 	.put(
 		"/read-all",
+		{
+			access: "write:notification:write",
+			body: ReadNotificationsBody,
+			response: {
+				[StatusCodes.OK]: ReadNotificationResponse,
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["InvalidNotificationCursor"]),
+			},
+			detail: { summary: "Mark notifications read", tags: ["Notifications"] },
+		},
 		async ({ profile, authorization, body }) => {
 			await authorization.unit.ensureCanUpdate(profile.unitId, [["notification-preferences"]]);
 			const through = decodeCursor(body.through, false);
@@ -658,18 +668,18 @@ export default new Elysia({ prefix: "/notifications" })
 				return { updated: true, readAt: updated.readAt };
 			});
 		},
-		{
-			access: "write:notification:write",
-			body: ReadNotificationsBody,
-			response: {
-				[StatusCodes.OK]: ReadNotificationResponse,
-				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["InvalidNotificationCursor"]),
-			},
-			detail: { summary: "Mark notifications read", tags: ["Notifications"] },
-		},
 	)
 	.put(
 		"/:notificationId/read",
+		{
+			access: "write:notification:write",
+			params: NotificationParams,
+			response: {
+				[StatusCodes.OK]: ReadNotificationResponse,
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["NotificationNotFound"]),
+			},
+			detail: { summary: "Mark one notification read", tags: ["Notifications"] },
+		},
 		async ({ profile, params }) =>
 			database.transaction(async (tx) => {
 				const [current] = await tx
@@ -721,18 +731,14 @@ export default new Elysia({ prefix: "/notifications" })
 				if (!updated?.readAt) throw new Error("Notification read update returned no timestamp");
 				return { updated: true, readAt: updated.readAt };
 			}),
-		{
-			access: "write:notification:write",
-			params: NotificationParams,
-			response: {
-				[StatusCodes.OK]: ReadNotificationResponse,
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["NotificationNotFound"]),
-			},
-			detail: { summary: "Mark one notification read", tags: ["Notifications"] },
-		},
 	)
 	.get(
 		"/preferences",
+		{
+			access: "notification:read",
+			response: { [StatusCodes.OK]: NotificationPreferencesResponse },
+			detail: { summary: "Get notification preferences", tags: ["Notifications"] },
+		},
 		async ({ profile }) => {
 			const rows = await database
 				.select()
@@ -748,14 +754,15 @@ export default new Elysia({ prefix: "/notifications" })
 				})),
 			};
 		},
-		{
-			access: "notification:read",
-			response: { [StatusCodes.OK]: NotificationPreferencesResponse },
-			detail: { summary: "Get notification preferences", tags: ["Notifications"] },
-		},
 	)
 	.put(
 		"/preferences",
+		{
+			access: "write:notification:write",
+			body: ReplaceNotificationPreferencesBody,
+			response: { [StatusCodes.OK]: NotificationPreferencesResponse },
+			detail: { summary: "Update notification preferences", tags: ["Notifications"] },
+		},
 		async ({ profile, body }) => {
 			await database.transaction(async (tx) => {
 				for (const item of body.items)
@@ -786,11 +793,5 @@ export default new Elysia({ prefix: "/notifications" })
 			return {
 				items: preferenceKinds.map((kind) => rows.get(kind) ?? { kind, inApp: true, email: false }),
 			};
-		},
-		{
-			access: "write:notification:write",
-			body: ReplaceNotificationPreferencesBody,
-			response: { [StatusCodes.OK]: NotificationPreferencesResponse },
-			detail: { summary: "Update notification preferences", tags: ["Notifications"] },
 		},
 	);

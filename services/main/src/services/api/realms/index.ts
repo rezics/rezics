@@ -589,6 +589,11 @@ export default new Elysia({ prefix: "/realms" })
 	.use(session)
 	.get(
 		"",
+		{
+			query: ListRealmsQuery,
+			response: { [StatusCodes.OK]: RealmListResponse },
+			detail: { summary: "List Realms", tags: ["Realms"] },
+		},
 		async ({ query }) => {
 			const localizationLanguages = query.localizationLanguages ?? [];
 			const items = await database
@@ -641,14 +646,23 @@ export default new Elysia({ prefix: "/realms" })
 				})),
 			};
 		},
-		{
-			query: ListRealmsQuery,
-			response: { [StatusCodes.OK]: RealmListResponse },
-			detail: { summary: "List Realms", tags: ["Realms"] },
-		},
 	)
 	.post(
 		"",
+		{
+			access: "contribute:unit:create",
+			body: CreateRealmBody,
+			response: {
+				[StatusCodes.OK]: IdResponse,
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
+					"RevisionCreditEntityInvalid",
+					"RevisionContributionActorRequired",
+				]),
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["ImageAssetNotFound", "TagNotFound"]),
+				[StatusCodes.TOO_MANY_REQUESTS]: VoteBackpressureResponse,
+			},
+			detail: { summary: "Create Realm", tags: ["Realms"] },
+		},
 		async ({ profile, body }) => {
 			const id = await runVoteTransaction(
 				{ family: "unit_tag", authority: "global" },
@@ -727,31 +741,9 @@ export default new Elysia({ prefix: "/realms" })
 			);
 			return { id };
 		},
-		{
-			access: "contribute:unit:create",
-			body: CreateRealmBody,
-			response: {
-				[StatusCodes.OK]: IdResponse,
-				[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
-					"RevisionCreditEntityInvalid",
-					"RevisionContributionActorRequired",
-				]),
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["ImageAssetNotFound", "TagNotFound"]),
-				[StatusCodes.TOO_MANY_REQUESTS]: VoteBackpressureResponse,
-			},
-			detail: { summary: "Create Realm", tags: ["Realms"] },
-		},
 	)
 	.put(
 		"/:realmId/slug-address",
-		async ({ params, authorization, body }) => {
-			await authorization.platform.ensureCapability(DevelopmentPreviewCapability);
-			const result = await replaceRealmSlugAddress(authorization, {
-				realmId: params.realmId,
-				slug: body.slug,
-			});
-			return { ...result, canonicalPath: [...result.canonicalPath] };
-		},
 		{
 			access: "contribute:unit:update",
 			params: RealmParams,
@@ -776,9 +768,26 @@ export default new Elysia({ prefix: "/realms" })
 				tags: ["Realms", "Slug Addresses"],
 			},
 		},
+		async ({ params, authorization, body }) => {
+			await authorization.platform.ensureCapability(DevelopmentPreviewCapability);
+			const result = await replaceRealmSlugAddress(authorization, {
+				realmId: params.realmId,
+				slug: body.slug,
+			});
+			return { ...result, canonicalPath: [...result.canonicalPath] };
+		},
 	)
 	.get(
 		"/:realmId",
+		{
+			params: RealmParams,
+			query: RealmDetailQuery,
+			response: {
+				[StatusCodes.OK]: RealmDetailResponse,
+				[StatusCodes.NOT_FOUND]: RealmNotFoundResponse,
+			},
+			detail: { summary: "Get Realm", tags: ["Realms"] },
+		},
 		async ({ params, query, request }) => {
 			const localizationLanguages = query.localizationLanguages ?? [];
 			const { profile: viewer, authorization } = await ensureRealmVisible(params.realmId, request);
@@ -937,18 +946,25 @@ export default new Elysia({ prefix: "/realms" })
 				},
 			};
 		},
-		{
-			params: RealmParams,
-			query: RealmDetailQuery,
-			response: {
-				[StatusCodes.OK]: RealmDetailResponse,
-				[StatusCodes.NOT_FOUND]: RealmNotFoundResponse,
-			},
-			detail: { summary: "Get Realm", tags: ["Realms"] },
-		},
 	)
 	.put(
 		"/:realmId/pages",
+		{
+			access: "session-only",
+			params: RealmParams,
+			body: UpdateRealmPagesBody,
+			response: {
+				[StatusCodes.OK]: RealmPagesResponse,
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
+					"RevisionCreditEntityInvalid",
+					"RevisionContributionActorRequired",
+				]),
+				[StatusCodes.FORBIDDEN]: RealmMutationForbiddenResponse,
+				[StatusCodes.NOT_FOUND]: RealmNotFoundResponse,
+				[StatusCodes.CONFLICT]: toApiErrorResponse(["UnitRevisionConflict"]),
+			},
+			detail: { summary: "Replace enabled Realm pages", tags: ["Realms"] },
+		},
 		async ({ params, body, profile, authorization }) => {
 			await authorization.realm.ensureCapability(params.realmId, "realm.settings.update");
 			const latestRevisionId = await database.transaction(async (tx) => {
@@ -972,33 +988,9 @@ export default new Elysia({ prefix: "/realms" })
 			});
 			return { pages: [...body.pages], latestRevisionId };
 		},
-		{
-			access: "session-only",
-			params: RealmParams,
-			body: UpdateRealmPagesBody,
-			response: {
-				[StatusCodes.OK]: RealmPagesResponse,
-				[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
-					"RevisionCreditEntityInvalid",
-					"RevisionContributionActorRequired",
-				]),
-				[StatusCodes.FORBIDDEN]: RealmMutationForbiddenResponse,
-				[StatusCodes.NOT_FOUND]: RealmNotFoundResponse,
-				[StatusCodes.CONFLICT]: toApiErrorResponse(["UnitRevisionConflict"]),
-			},
-			detail: { summary: "Replace enabled Realm pages", tags: ["Realms"] },
-		},
 	)
 	.get(
 		"/:realmId/taxonomy",
-		async ({ params, query, request }) => {
-			const { authorization } = await ensureRealmVisible(params.realmId, request);
-			return database.transaction((tx) =>
-				readRealmTaxonomy(tx, params.realmId, query.localizationLanguages ?? [], (unitId) =>
-					authorization.unit.canRead(unitId),
-				),
-			);
-		},
 		{
 			params: RealmParams,
 			query: RealmTaxonomyQuery,
@@ -1008,15 +1000,17 @@ export default new Elysia({ prefix: "/realms" })
 			},
 			detail: { summary: "Get Realm taxonomy", tags: ["Realms"] },
 		},
+		async ({ params, query, request }) => {
+			const { authorization } = await ensureRealmVisible(params.realmId, request);
+			return database.transaction((tx) =>
+				readRealmTaxonomy(tx, params.realmId, query.localizationLanguages ?? [], (unitId) =>
+					authorization.unit.canRead(unitId),
+				),
+			);
+		},
 	)
 	.get(
 		"/:realmId/taxonomy/draft",
-		async ({ params, query, authorization }) => {
-			await authorization.realm.ensureCapability(params.realmId, "realm.tags.manage");
-			return database.transaction((tx) =>
-				readRealmTaxonomy(tx, params.realmId, query.localizationLanguages ?? []),
-			);
-		},
 		{
 			access: "contribute:realm:manage",
 			params: RealmParams,
@@ -1028,30 +1022,15 @@ export default new Elysia({ prefix: "/realms" })
 			},
 			detail: { summary: "Get complete Realm taxonomy draft", tags: ["Realms"] },
 		},
+		async ({ params, query, authorization }) => {
+			await authorization.realm.ensureCapability(params.realmId, "realm.tags.manage");
+			return database.transaction((tx) =>
+				readRealmTaxonomy(tx, params.realmId, query.localizationLanguages ?? []),
+			);
+		},
 	)
 	.put(
 		"/:realmId/taxonomy/draft",
-		async ({ params, body, profile, authorization }) => {
-			await authorization.realm.ensureCapability(params.realmId, "realm.tags.manage");
-			const referencedUnitIds = body.nodes.flatMap((node) =>
-				node.state === "new" && node.content.kind === "unit" ? [node.content.unitId] : [],
-			);
-			await authorization.unit.ensureCanReadMany(referencedUnitIds);
-			return database.transaction(async (tx) => {
-				await tx.execute(
-					sql`select pg_advisory_xact_lock(hashtextextended(${`${params.realmId}:realm-taxonomy-draft`}::text, 0))`,
-				);
-				const result = await saveRealmTaxonomyDraft(tx, {
-					ownerUnitId: params.realmId,
-					baseRevisionId: body.baseRevisionId,
-					actorProfileId: profile.unitId,
-					contribution: body.revisionContext?.contribution,
-					nodes: body.nodes,
-				});
-				const saved = await readRealmTaxonomy(tx, params.realmId, []);
-				return { ...saved, revisionCreated: result.revisionCreated };
-			});
-		},
 		{
 			access: "contribute:realm:manage",
 			params: RealmParams,
@@ -1073,9 +1052,38 @@ export default new Elysia({ prefix: "/realms" })
 			},
 			detail: { summary: "Save complete Realm taxonomy draft", tags: ["Realms"] },
 		},
+		async ({ params, body, profile, authorization }) => {
+			await authorization.realm.ensureCapability(params.realmId, "realm.tags.manage");
+			const referencedUnitIds = body.nodes.flatMap((node) =>
+				node.state === "new" && node.content.kind === "unit" ? [node.content.unitId] : [],
+			);
+			await authorization.unit.ensureCanReadMany(referencedUnitIds);
+			return database.transaction(async (tx) => {
+				await tx.execute(
+					sql`select pg_advisory_xact_lock(hashtextextended(${`${params.realmId}:realm-taxonomy-draft`}::text, 0))`,
+				);
+				const result = await saveRealmTaxonomyDraft(tx, {
+					ownerUnitId: params.realmId,
+					baseRevisionId: body.baseRevisionId,
+					actorProfileId: profile.unitId,
+					contribution: body.revisionContext?.contribution,
+					nodes: body.nodes,
+				});
+				const saved = await readRealmTaxonomy(tx, params.realmId, []);
+				return { ...saved, revisionCreated: result.revisionCreated };
+			});
+		},
 	)
 	.get(
 		"/:realmId/score-context",
+		{
+			params: RealmParams,
+			response: {
+				[StatusCodes.OK]: ScoreContextResponse,
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["RealmNotFound", "PostNotFound"]),
+			},
+			detail: { summary: "Get Realm Score context", tags: ["Realms"] },
+		},
 		async ({ params, request }) => {
 			const authorization = (await resolveIdentity(request, "unit:read")).authorization;
 			await authorization.unit.ensureCanRead(params.realmId, () => new RealmNotFound());
@@ -1101,17 +1109,24 @@ export default new Elysia({ prefix: "/realms" })
 				await authorization.unit.ensureCanRead(context.contextPostId, () => new PostNotFound());
 			return { contextPostId: context?.contextPostId ?? null };
 		},
-		{
-			params: RealmParams,
-			response: {
-				[StatusCodes.OK]: ScoreContextResponse,
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["RealmNotFound", "PostNotFound"]),
-			},
-			detail: { summary: "Get Realm Score context", tags: ["Realms"] },
-		},
 	)
 	.put(
 		"/:realmId/score-context",
+		{
+			access: "session-only",
+			params: RealmParams,
+			body: SetRealmScoreContextBody,
+			response: {
+				[StatusCodes.OK]: ScoreContextResponse,
+				[StatusCodes.FORBIDDEN]: RealmMutationForbiddenResponse,
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["PostNotFound"]),
+				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse([
+					"RealmScoreContextPostKindInvalid",
+					"RealmScoreContextPostNotMounted",
+				]),
+			},
+			detail: { summary: "Set Realm Score context", tags: ["Realms"] },
+		},
 		async ({ params, profile, authorization, body }) => {
 			await authorization.realm.ensureCapability(params.realmId, "realm.settings.update");
 			await authorization.unit.ensureCanRead(body.contextPostId, () => new PostNotFound());
@@ -1165,24 +1180,22 @@ export default new Elysia({ prefix: "/realms" })
 			});
 			return { contextPostId: body.contextPostId };
 		},
-		{
-			access: "session-only",
-			params: RealmParams,
-			body: SetRealmScoreContextBody,
-			response: {
-				[StatusCodes.OK]: ScoreContextResponse,
-				[StatusCodes.FORBIDDEN]: RealmMutationForbiddenResponse,
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["PostNotFound"]),
-				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse([
-					"RealmScoreContextPostKindInvalid",
-					"RealmScoreContextPostNotMounted",
-				]),
-			},
-			detail: { summary: "Set Realm Score context", tags: ["Realms"] },
-		},
 	)
 	.delete(
 		"/:realmId/score-context",
+		{
+			access: "session-only",
+			params: RealmParams,
+			response: {
+				[StatusCodes.NO_CONTENT]: t.Void(),
+				[StatusCodes.FORBIDDEN]: RealmMutationForbiddenResponse,
+			},
+			detail: {
+				summary: "Clear Realm Score context",
+				tags: ["Realms"],
+				responses: NoContentResponse,
+			},
+		},
 		async ({ params, profile, authorization }) => {
 			await authorization.realm.ensureCapability(params.realmId, "realm.settings.update");
 			await database.transaction(async (tx) => {
@@ -1203,22 +1216,24 @@ export default new Elysia({ prefix: "/realms" })
 			});
 			return new Response(null, { status: StatusCodes.NO_CONTENT });
 		},
-		{
-			access: "session-only",
-			params: RealmParams,
-			response: {
-				[StatusCodes.NO_CONTENT]: t.Void(),
-				[StatusCodes.FORBIDDEN]: RealmMutationForbiddenResponse,
-			},
-			detail: {
-				summary: "Clear Realm Score context",
-				tags: ["Realms"],
-				responses: NoContentResponse,
-			},
-		},
 	)
 	.patch(
 		"/:realmId",
+		{
+			access: "contribute:interaction:write",
+			params: RealmParams,
+			body: UpdateRealmBody,
+			response: {
+				[StatusCodes.OK]: IdResponse,
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
+					"RevisionCreditEntityInvalid",
+					"RevisionContributionActorRequired",
+				]),
+				[StatusCodes.FORBIDDEN]: RealmMutationForbiddenResponse,
+				[StatusCodes.NOT_FOUND]: RealmMutationNotFoundResponse,
+			},
+			detail: { summary: "Update Realm", tags: ["Realms"] },
+		},
 		async ({ params, profile, authorization, body }) => {
 			await authorization.realm.ensureCapability(params.realmId, "realm.settings.update");
 			const statusUpdateDecision = body.status
@@ -1282,24 +1297,24 @@ export default new Elysia({ prefix: "/realms" })
 			});
 			return { id: params.realmId };
 		},
+	)
+	.put(
+		"/:realmId/tag-voting",
 		{
-			access: "contribute:interaction:write",
+			access: "write:realm:manage",
 			params: RealmParams,
-			body: UpdateRealmBody,
+			body: UpdateRealmTagVotingBody,
 			response: {
-				[StatusCodes.OK]: IdResponse,
+				[StatusCodes.OK]: RealmTagVotingResponse,
 				[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
 					"RevisionCreditEntityInvalid",
 					"RevisionContributionActorRequired",
 				]),
 				[StatusCodes.FORBIDDEN]: RealmMutationForbiddenResponse,
-				[StatusCodes.NOT_FOUND]: RealmMutationNotFoundResponse,
+				[StatusCodes.NOT_FOUND]: RealmNotFoundResponse,
 			},
-			detail: { summary: "Update Realm", tags: ["Realms"] },
+			detail: { summary: "Update Realm Tag voting policy", tags: ["Realms"] },
 		},
-	)
-	.put(
-		"/:realmId/tag-voting",
 		async ({ params, profile, authorization, body }) => {
 			await authorization.realm.ensureCapability(params.realmId, "realm.tag-voting.update");
 			await database.transaction(async (tx) => {
@@ -1321,24 +1336,19 @@ export default new Elysia({ prefix: "/realms" })
 			});
 			return { enabled: body.enabled };
 		},
-		{
-			access: "write:realm:manage",
-			params: RealmParams,
-			body: UpdateRealmTagVotingBody,
-			response: {
-				[StatusCodes.OK]: RealmTagVotingResponse,
-				[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
-					"RevisionCreditEntityInvalid",
-					"RevisionContributionActorRequired",
-				]),
-				[StatusCodes.FORBIDDEN]: RealmMutationForbiddenResponse,
-				[StatusCodes.NOT_FOUND]: RealmNotFoundResponse,
-			},
-			detail: { summary: "Update Realm Tag voting policy", tags: ["Realms"] },
-		},
 	)
 	.put(
 		"/:realmId/membership",
+		{
+			access: "contribute:interaction:write",
+			params: RealmParams,
+			response: {
+				[StatusCodes.OK]: MembershipResponse,
+				[StatusCodes.NOT_FOUND]: RealmNotFoundResponse,
+				[StatusCodes.CONFLICT]: toApiErrorResponse(["RealmRulesAcceptanceRequired"]),
+			},
+			detail: { summary: "Join Realm", tags: ["Realms"] },
+		},
 		async ({ params, profile }) => {
 			const [record] = await database
 				.select({
@@ -1406,19 +1416,23 @@ export default new Elysia({ prefix: "/realms" })
 			});
 			return { state };
 		},
-		{
-			access: "contribute:interaction:write",
-			params: RealmParams,
-			response: {
-				[StatusCodes.OK]: MembershipResponse,
-				[StatusCodes.NOT_FOUND]: RealmNotFoundResponse,
-				[StatusCodes.CONFLICT]: toApiErrorResponse(["RealmRulesAcceptanceRequired"]),
-			},
-			detail: { summary: "Join Realm", tags: ["Realms"] },
-		},
 	)
 	.delete(
 		"/:realmId/membership",
+		{
+			access: "write:realm:manage",
+			params: RealmParams,
+			response: {
+				[StatusCodes.NO_CONTENT]: t.Void(),
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["RealmMembershipNotFound"]),
+				[StatusCodes.CONFLICT]: toApiErrorResponse(["RealmOwnerLeaveForbidden"]),
+			},
+			detail: {
+				summary: "Leave Realm",
+				tags: ["Realms"],
+				responses: NoContentResponse,
+			},
+		},
 		async ({ params, profile }) => {
 			await database.transaction(async (tx) => {
 				const [membership] = await tx
@@ -1469,23 +1483,19 @@ export default new Elysia({ prefix: "/realms" })
 			});
 			return new Response(null, { status: StatusCodes.NO_CONTENT });
 		},
-		{
-			access: "write:realm:manage",
-			params: RealmParams,
-			response: {
-				[StatusCodes.NO_CONTENT]: t.Void(),
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["RealmMembershipNotFound"]),
-				[StatusCodes.CONFLICT]: toApiErrorResponse(["RealmOwnerLeaveForbidden"]),
-			},
-			detail: {
-				summary: "Leave Realm",
-				tags: ["Realms"],
-				responses: NoContentResponse,
-			},
-		},
 	)
 	.get(
 		"/:realmId/members",
+		{
+			access: "realm:read",
+			params: RealmParams,
+			query: ListRealmMembersQuery,
+			response: {
+				[StatusCodes.OK]: RealmMemberListResponse,
+				[StatusCodes.FORBIDDEN]: toApiErrorResponse(["RealmCapabilityRequired"]),
+			},
+			detail: { summary: "List Realm members", tags: ["Realms"] },
+		},
 		async ({ params, authorization, query }) => {
 			await authorization.realm.ensureCapability(params.realmId, "realm.members.read");
 			const [ownership] = await database
@@ -1530,19 +1540,21 @@ export default new Elysia({ prefix: "/realms" })
 				}),
 			};
 		},
-		{
-			access: "realm:read",
-			params: RealmParams,
-			query: ListRealmMembersQuery,
-			response: {
-				[StatusCodes.OK]: RealmMemberListResponse,
-				[StatusCodes.FORBIDDEN]: toApiErrorResponse(["RealmCapabilityRequired"]),
-			},
-			detail: { summary: "List Realm members", tags: ["Realms"] },
-		},
 	)
 	.patch(
 		"/:realmId/members/:profileId",
+		{
+			access: "contribute:realm:manage",
+			params: RealmMemberParams,
+			body: UpdateRealmMemberBody,
+			response: {
+				[StatusCodes.OK]: RealmMemberResponse,
+				[StatusCodes.FORBIDDEN]: toApiErrorResponse(["RealmCapabilityRequired"]),
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["RealmMemberNotFound"]),
+				[StatusCodes.CONFLICT]: toApiErrorResponse(["RealmOwnerLeaveForbidden"]),
+			},
+			detail: { summary: "Update Realm member", tags: ["Realms"] },
+		},
 		async ({ params, profile, authorization, body }) => {
 			await authorization.realm.ensureCapability(params.realmId, "realm.members.manage");
 			const target = await findRealmMembership(params.realmId, params.profileId);
@@ -1585,21 +1597,25 @@ export default new Elysia({ prefix: "/realms" })
 			});
 			return result;
 		},
-		{
-			access: "contribute:realm:manage",
-			params: RealmMemberParams,
-			body: UpdateRealmMemberBody,
-			response: {
-				[StatusCodes.OK]: RealmMemberResponse,
-				[StatusCodes.FORBIDDEN]: toApiErrorResponse(["RealmCapabilityRequired"]),
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["RealmMemberNotFound"]),
-				[StatusCodes.CONFLICT]: toApiErrorResponse(["RealmOwnerLeaveForbidden"]),
-			},
-			detail: { summary: "Update Realm member", tags: ["Realms"] },
-		},
 	)
 	.put(
 		"/:realmId/rules",
+		{
+			access: "write:realm:manage",
+			params: RealmParams,
+			body: UpdateRealmRulesBody,
+			response: {
+				[StatusCodes.OK]: RealmRuleRevisionResponse,
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
+					"RevisionCreditEntityInvalid",
+					"RevisionContributionActorRequired",
+				]),
+				[StatusCodes.FORBIDDEN]: RealmMutationForbiddenResponse,
+				[StatusCodes.CONFLICT]: toApiErrorResponse(["RealmRuleRevisionChanged"]),
+				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["ValidationError"]),
+			},
+			detail: { summary: "Update Realm rules", tags: ["Realms"] },
+		},
 		async ({ params, profile, authorization, body }) => {
 			await ensureRealmFieldsAuthorized(authorization, params.realmId, "realm.rules.update", [
 				"rules",
@@ -1629,25 +1645,18 @@ export default new Elysia({ prefix: "/realms" })
 			});
 			return { id: revision.id, version: revision.version };
 		},
-		{
-			access: "write:realm:manage",
-			params: RealmParams,
-			body: UpdateRealmRulesBody,
-			response: {
-				[StatusCodes.OK]: RealmRuleRevisionResponse,
-				[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
-					"RevisionCreditEntityInvalid",
-					"RevisionContributionActorRequired",
-				]),
-				[StatusCodes.FORBIDDEN]: RealmMutationForbiddenResponse,
-				[StatusCodes.CONFLICT]: toApiErrorResponse(["RealmRuleRevisionChanged"]),
-				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["ValidationError"]),
-			},
-			detail: { summary: "Update Realm rules", tags: ["Realms"] },
-		},
 	)
 	.get(
 		"/:realmId/rules/authoring",
+		{
+			access: "write:realm:manage",
+			params: RealmParams,
+			response: {
+				[StatusCodes.OK]: RealmRulesAuthoringResponse,
+				[StatusCodes.FORBIDDEN]: RealmMutationForbiddenResponse,
+			},
+			detail: { summary: "Get Realm rules for authoring", tags: ["Realms"] },
+		},
 		async ({ params, authorization }) => {
 			await ensureRealmFieldsAuthorized(authorization, params.realmId, "realm.rules.update", [
 				"rules",
@@ -1709,18 +1718,18 @@ export default new Elysia({ prefix: "/realms" })
 			}
 			return { ...current, items: [...itemsById.values()] };
 		},
-		{
-			access: "write:realm:manage",
-			params: RealmParams,
-			response: {
-				[StatusCodes.OK]: RealmRulesAuthoringResponse,
-				[StatusCodes.FORBIDDEN]: RealmMutationForbiddenResponse,
-			},
-			detail: { summary: "Get Realm rules for authoring", tags: ["Realms"] },
-		},
 	)
 	.get(
 		"/:realmId/rules",
+		{
+			params: RealmParams,
+			query: RealmRulesQuery,
+			response: {
+				[StatusCodes.OK]: RealmRulesResponse,
+				[StatusCodes.NOT_FOUND]: RealmNotFoundResponse,
+			},
+			detail: { summary: "Get current Realm rules", tags: ["Realms"] },
+		},
 		async ({ params, query, request }) => {
 			await ensureRealmVisible(params.realmId, request);
 			const current = await getCurrentRealmRules(params.realmId);
@@ -1766,18 +1775,24 @@ export default new Elysia({ prefix: "/realms" })
 				}),
 			};
 		},
-		{
-			params: RealmParams,
-			query: RealmRulesQuery,
-			response: {
-				[StatusCodes.OK]: RealmRulesResponse,
-				[StatusCodes.NOT_FOUND]: RealmNotFoundResponse,
-			},
-			detail: { summary: "Get current Realm rules", tags: ["Realms"] },
-		},
 	)
 	.put(
 		"/:realmId/rules/:revisionId/acknowledgement",
+		{
+			access: "contribute:interaction:write",
+			params: RealmRuleRevisionParams,
+			body: AcknowledgeRealmRulesBody,
+			response: {
+				[StatusCodes.NO_CONTENT]: t.Void(),
+				[StatusCodes.NOT_FOUND]: RealmNotFoundResponse,
+				[StatusCodes.CONFLICT]: toApiErrorResponse(["RealmRuleRevisionChanged"]),
+			},
+			detail: {
+				summary: "Acknowledge current Realm rules",
+				tags: ["Realms"],
+				responses: NoContentResponse,
+			},
+		},
 		async ({ params, profile, body, request }) => {
 			await ensureRealmVisible(params.realmId, request);
 			await database.transaction(async (tx) => {
@@ -1802,24 +1817,18 @@ export default new Elysia({ prefix: "/realms" })
 			});
 			return new Response(null, { status: StatusCodes.NO_CONTENT });
 		},
-		{
-			access: "contribute:interaction:write",
-			params: RealmRuleRevisionParams,
-			body: AcknowledgeRealmRulesBody,
-			response: {
-				[StatusCodes.NO_CONTENT]: t.Void(),
-				[StatusCodes.NOT_FOUND]: RealmNotFoundResponse,
-				[StatusCodes.CONFLICT]: toApiErrorResponse(["RealmRuleRevisionChanged"]),
-			},
-			detail: {
-				summary: "Acknowledge current Realm rules",
-				tags: ["Realms"],
-				responses: NoContentResponse,
-			},
-		},
 	)
 	.get(
 		"/:realmId/pins",
+		{
+			params: RealmParams,
+			query: RealmPinsQuery,
+			response: {
+				[StatusCodes.OK]: RealmPinListResponse,
+				[StatusCodes.NOT_FOUND]: RealmNotFoundResponse,
+			},
+			detail: { summary: "List Realm pins", tags: ["Realms"] },
+		},
 		async ({ params, query, request }) => {
 			await ensureRealmVisible(params.realmId, request);
 			const identity = await resolveIdentity(request, "unit:read");
@@ -1855,18 +1864,24 @@ export default new Elysia({ prefix: "/realms" })
 				contentItems,
 			};
 		},
-		{
-			params: RealmParams,
-			query: RealmPinsQuery,
-			response: {
-				[StatusCodes.OK]: RealmPinListResponse,
-				[StatusCodes.NOT_FOUND]: RealmNotFoundResponse,
-			},
-			detail: { summary: "List Realm pins", tags: ["Realms"] },
-		},
 	)
 	.post(
 		"/:realmId/pins/move",
+		{
+			access: "contribute:realm:manage",
+			params: RealmParams,
+			body: MoveRealmPinsBody,
+			response: {
+				[StatusCodes.OK]: SavedResponse,
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
+					"RevisionCreditEntityInvalid",
+					"RevisionContributionActorRequired",
+				]),
+				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["ValidationError"]),
+				[StatusCodes.FORBIDDEN]: RealmMutationForbiddenResponse,
+			},
+			detail: { summary: "Move Realm pins", tags: ["Realms"] },
+		},
 		async ({ params, profile, authorization, body }) => {
 			await ensureRealmFieldsAuthorized(authorization, params.realmId, "realm.pins.manage", [
 				"pins",
@@ -1910,24 +1925,25 @@ export default new Elysia({ prefix: "/realms" })
 			});
 			return { saved: true, latestRevisionId };
 		},
+	)
+	.put(
+		"/:realmId/pins/:unitId",
 		{
 			access: "contribute:realm:manage",
-			params: RealmParams,
-			body: MoveRealmPinsBody,
+			params: RealmPinParams,
+			body: CreateRealmPinBody,
 			response: {
-				[StatusCodes.OK]: SavedResponse,
+				[StatusCodes.OK]: RealmPinResponse,
 				[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
 					"RevisionCreditEntityInvalid",
 					"RevisionContributionActorRequired",
 				]),
 				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["ValidationError"]),
 				[StatusCodes.FORBIDDEN]: RealmMutationForbiddenResponse,
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
 			},
-			detail: { summary: "Move Realm pins", tags: ["Realms"] },
+			detail: { summary: "Pin Realm unit", tags: ["Realms"] },
 		},
-	)
-	.put(
-		"/:realmId/pins/:unitId",
 		async ({ params, profile, authorization, body }) => {
 			await ensureRealmFieldsAuthorized(authorization, params.realmId, "realm.pins.manage", [
 				"pins",
@@ -1987,25 +2003,28 @@ export default new Elysia({ prefix: "/realms" })
 				return entry;
 			});
 		},
+	)
+	.delete(
+		"/:realmId/pins/:unitId",
 		{
-			access: "contribute:realm:manage",
+			access: "write:realm:manage",
 			params: RealmPinParams,
-			body: CreateRealmPinBody,
+			query: RemoveRealmPinQuery,
+			body: t.Optional(RevisionContextBody),
 			response: {
-				[StatusCodes.OK]: RealmPinResponse,
+				[StatusCodes.NO_CONTENT]: t.Void(),
 				[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
 					"RevisionCreditEntityInvalid",
 					"RevisionContributionActorRequired",
 				]),
-				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["ValidationError"]),
 				[StatusCodes.FORBIDDEN]: RealmMutationForbiddenResponse,
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
 			},
-			detail: { summary: "Pin Realm unit", tags: ["Realms"] },
+			detail: {
+				summary: "Remove Realm pin",
+				tags: ["Realms"],
+				responses: NoContentResponse,
+			},
 		},
-	)
-	.delete(
-		"/:realmId/pins/:unitId",
 		async ({ params, profile, authorization, query, body }) => {
 			await ensureRealmFieldsAuthorized(authorization, params.realmId, "realm.pins.manage", [
 				"pins",
@@ -2037,28 +2056,29 @@ export default new Elysia({ prefix: "/realms" })
 			});
 			return new Response(null, { status: StatusCodes.NO_CONTENT });
 		},
-		{
-			access: "write:realm:manage",
-			params: RealmPinParams,
-			query: RemoveRealmPinQuery,
-			body: t.Optional(RevisionContextBody),
-			response: {
-				[StatusCodes.NO_CONTENT]: t.Void(),
-				[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
-					"RevisionCreditEntityInvalid",
-					"RevisionContributionActorRequired",
-				]),
-				[StatusCodes.FORBIDDEN]: RealmMutationForbiddenResponse,
-			},
-			detail: {
-				summary: "Remove Realm pin",
-				tags: ["Realms"],
-				responses: NoContentResponse,
-			},
-		},
 	)
 	.post(
 		"/:realmId/wikis",
+		{
+			access: "contribute:unit:create",
+			params: RealmParams,
+			body: CreateRealmWikiBody,
+			response: {
+				[StatusCodes.OK]: IdResponse,
+				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["ValidationError"]),
+				[StatusCodes.FORBIDDEN]: toApiErrorResponse([
+					"RealmCapabilityRequired",
+					"EntityAssociationRestricted",
+				]),
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "EntityEntryNotFound"]),
+				[StatusCodes.CONFLICT]: toApiErrorResponse([
+					"RealmRulesAcceptanceRequired",
+					"PostTargetingLocked",
+				]),
+				[StatusCodes.TOO_MANY_REQUESTS]: VoteBackpressureResponse,
+			},
+			detail: { summary: "Create Realm-governed Wiki", tags: ["Realms"] },
+		},
 		async ({ params, profile, authorization, body }) => {
 			ensureWikiPostWriteDocument(body.body);
 			await authorization.realm.ensureUnitCreation([params.realmId], "realm.units.create");
@@ -2082,29 +2102,19 @@ export default new Elysia({ prefix: "/realms" })
 			);
 			return { id };
 		},
-		{
-			access: "contribute:unit:create",
-			params: RealmParams,
-			body: CreateRealmWikiBody,
-			response: {
-				[StatusCodes.OK]: IdResponse,
-				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["ValidationError"]),
-				[StatusCodes.FORBIDDEN]: toApiErrorResponse([
-					"RealmCapabilityRequired",
-					"EntityAssociationRestricted",
-				]),
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "EntityEntryNotFound"]),
-				[StatusCodes.CONFLICT]: toApiErrorResponse([
-					"RealmRulesAcceptanceRequired",
-					"PostTargetingLocked",
-				]),
-				[StatusCodes.TOO_MANY_REQUESTS]: VoteBackpressureResponse,
-			},
-			detail: { summary: "Create Realm-governed Wiki", tags: ["Realms"] },
-		},
 	)
 	.get(
 		"/:realmId/tag-contexts",
+		{
+			access: "session-only",
+			params: RealmParams,
+			query: ListRealmTagContextsQuery,
+			response: {
+				[StatusCodes.OK]: RealmTagContextListResponse,
+				[StatusCodes.FORBIDDEN]: RealmMutationForbiddenResponse,
+			},
+			detail: { summary: "List Realm Tag Context relationships", tags: ["Realms"] },
+		},
 		async ({ params, query, profile, authorization }) => {
 			await authorization.realm.ensureCapability(params.realmId, "realm.tag-contexts.manage");
 			const localizationLanguages = query.localizationLanguages ?? [];
@@ -2182,19 +2192,31 @@ export default new Elysia({ prefix: "/realms" })
 				nextCursor: rows.length > limit && last ? encodeCursor(last.updatedAt, last.tagId) : null,
 			};
 		},
-		{
-			access: "session-only",
-			params: RealmParams,
-			query: ListRealmTagContextsQuery,
-			response: {
-				[StatusCodes.OK]: RealmTagContextListResponse,
-				[StatusCodes.FORBIDDEN]: RealmMutationForbiddenResponse,
-			},
-			detail: { summary: "List Realm Tag Context relationships", tags: ["Realms"] },
-		},
 	)
 	.post(
 		"/:realmId/tag-contexts",
+		{
+			access: "contribute:unit:create",
+			params: RealmParams,
+			body: CreateRealmTagContextBody,
+			response: {
+				[StatusCodes.OK]: RealmTagContextResponse,
+				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["ValidationError"]),
+				[StatusCodes.FORBIDDEN]: toApiErrorResponse([
+					"RealmCapabilityRequired",
+					"UnitAccessRestricted",
+					"UnitPermissionForbidden",
+				]),
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
+				[StatusCodes.CONFLICT]: toApiErrorResponse([
+					"RealmTagContextAlreadyExists",
+					"RealmRulesAcceptanceRequired",
+					"PostTargetingLocked",
+				]),
+				[StatusCodes.TOO_MANY_REQUESTS]: VoteBackpressureResponse,
+			},
+			detail: { summary: "Create Realm Tag Context Wiki", tags: ["Realms"] },
+		},
 		async ({ params, body, profile, authorization }) => {
 			ensureWikiPostWriteDocument(body.body);
 			await Promise.all([
@@ -2255,31 +2277,21 @@ export default new Elysia({ prefix: "/realms" })
 				throw new Error("Created Realm Tag Context resolved to another Wiki Post");
 			return context;
 		},
-		{
-			access: "contribute:unit:create",
-			params: RealmParams,
-			body: CreateRealmTagContextBody,
-			response: {
-				[StatusCodes.OK]: RealmTagContextResponse,
-				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["ValidationError"]),
-				[StatusCodes.FORBIDDEN]: toApiErrorResponse([
-					"RealmCapabilityRequired",
-					"UnitAccessRestricted",
-					"UnitPermissionForbidden",
-				]),
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
-				[StatusCodes.CONFLICT]: toApiErrorResponse([
-					"RealmTagContextAlreadyExists",
-					"RealmRulesAcceptanceRequired",
-					"PostTargetingLocked",
-				]),
-				[StatusCodes.TOO_MANY_REQUESTS]: VoteBackpressureResponse,
-			},
-			detail: { summary: "Create Realm Tag Context Wiki", tags: ["Realms"] },
-		},
 	)
 	.get(
 		"/:realmId/tags/:tagId/context",
+		{
+			params: RealmTagContextParams,
+			response: {
+				[StatusCodes.OK]: RealmTagContextResponse,
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse([
+					"RealmNotFound",
+					"PostNotFound",
+					"RealmTagContextNotFound",
+				]),
+			},
+			detail: { summary: "Get Realm Tag Context", tags: ["Realms"] },
+		},
 		async ({ params, request }) => {
 			const { authorization } = await ensureRealmVisible(params.realmId, request);
 			await authorization.unit.ensureCanRead(params.tagId);
@@ -2300,21 +2312,27 @@ export default new Elysia({ prefix: "/realms" })
 			await authorization.unit.ensureCanRead(record.contextPostId, () => new PostNotFound());
 			return record;
 		},
-		{
-			params: RealmTagContextParams,
-			response: {
-				[StatusCodes.OK]: RealmTagContextResponse,
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse([
-					"RealmNotFound",
-					"PostNotFound",
-					"RealmTagContextNotFound",
-				]),
-			},
-			detail: { summary: "Get Realm Tag Context", tags: ["Realms"] },
-		},
 	)
 	.put(
 		"/:realmId/tags/:tagId/context",
+		{
+			access: "session-only",
+			params: RealmTagContextParams,
+			body: PutRealmTagContextBody,
+			response: {
+				[StatusCodes.OK]: RealmTagContextResponse,
+				[StatusCodes.FORBIDDEN]: toApiErrorResponse([
+					"RealmCapabilityRequired",
+					"UnitAccessRestricted",
+					"UnitPermissionForbidden",
+				]),
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "PostNotFound"]),
+				[StatusCodes.CONFLICT]: toApiErrorResponse(["RealmTagContextPostAlreadyUsed"]),
+				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["RealmTagContextPostNotMounted"]),
+				[StatusCodes.TOO_MANY_REQUESTS]: VoteBackpressureResponse,
+			},
+			detail: { summary: "Set Realm Tag Context", tags: ["Realms"] },
+		},
 		async ({ params, body, profile, authorization }) => {
 			await authorization.realm.ensureCapability(params.realmId, "realm.tag-contexts.manage");
 			await Promise.all([
@@ -2384,27 +2402,25 @@ export default new Elysia({ prefix: "/realms" })
 			});
 			return getRealmTagContextSummary(params.realmId, params.tagId);
 		},
-		{
-			access: "session-only",
-			params: RealmTagContextParams,
-			body: PutRealmTagContextBody,
-			response: {
-				[StatusCodes.OK]: RealmTagContextResponse,
-				[StatusCodes.FORBIDDEN]: toApiErrorResponse([
-					"RealmCapabilityRequired",
-					"UnitAccessRestricted",
-					"UnitPermissionForbidden",
-				]),
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "PostNotFound"]),
-				[StatusCodes.CONFLICT]: toApiErrorResponse(["RealmTagContextPostAlreadyUsed"]),
-				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["RealmTagContextPostNotMounted"]),
-				[StatusCodes.TOO_MANY_REQUESTS]: VoteBackpressureResponse,
-			},
-			detail: { summary: "Set Realm Tag Context", tags: ["Realms"] },
-		},
 	)
 	.delete(
 		"/:realmId/tags/:tagId/context",
+		{
+			access: "write:realm:manage",
+			params: RealmTagContextParams,
+			response: {
+				[StatusCodes.NO_CONTENT]: t.Void(),
+				[StatusCodes.FORBIDDEN]: RealmMutationForbiddenResponse,
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["RealmTagContextNotFound"]),
+				[StatusCodes.CONFLICT]: toApiErrorResponse(["RealmTagContextInUse"]),
+				[StatusCodes.TOO_MANY_REQUESTS]: VoteBackpressureResponse,
+			},
+			detail: {
+				summary: "Remove Realm Tag Context relationship",
+				tags: ["Realms"],
+				responses: NoContentResponse,
+			},
+		},
 		async ({ params, profile, authorization }) => {
 			await authorization.realm.ensureCapability(params.realmId, "realm.tag-contexts.manage");
 			await runVoteTransaction({ family: "unit_tag", authority: "realm" }, async (tx) => {
@@ -2428,25 +2444,25 @@ export default new Elysia({ prefix: "/realms" })
 			});
 			return new Response(null, { status: StatusCodes.NO_CONTENT });
 		},
-		{
-			access: "write:realm:manage",
-			params: RealmTagContextParams,
-			response: {
-				[StatusCodes.NO_CONTENT]: t.Void(),
-				[StatusCodes.FORBIDDEN]: RealmMutationForbiddenResponse,
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["RealmTagContextNotFound"]),
-				[StatusCodes.CONFLICT]: toApiErrorResponse(["RealmTagContextInUse"]),
-				[StatusCodes.TOO_MANY_REQUESTS]: VoteBackpressureResponse,
-			},
-			detail: {
-				summary: "Remove Realm Tag Context relationship",
-				tags: ["Realms"],
-				responses: NoContentResponse,
-			},
-		},
 	)
 	.put(
 		"/:realmId/units/:unitId/policy-tags/:tagId",
+		{
+			access: "session-only",
+			params: RealmTagVoteParams,
+			body: ApplyRealmPolicyTagBody,
+			response: {
+				[StatusCodes.OK]: RealmPolicyTagResponse,
+				[StatusCodes.FORBIDDEN]: RealmMutationForbiddenResponse,
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["RealmUnitNotFound", "UnitNotFound"]),
+				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse([
+					"RealmTagSelfReferenceForbidden",
+					"TagNotDirectlyApplicable",
+					"ContentLabelApplicationInvalid",
+				]),
+			},
+			detail: { summary: "Apply Realm Policy Tag", tags: ["Realms"] },
+		},
 		async ({ params, body, profile, authorization }) => {
 			await authorization.realm.ensureCapability(params.realmId, "realm.tags.manage");
 			if (params.unitId === params.tagId) throw new RealmTagSelfReferenceForbidden();
@@ -2511,25 +2527,22 @@ export default new Elysia({ prefix: "/realms" })
 				return record;
 			});
 		},
-		{
-			access: "session-only",
-			params: RealmTagVoteParams,
-			body: ApplyRealmPolicyTagBody,
-			response: {
-				[StatusCodes.OK]: RealmPolicyTagResponse,
-				[StatusCodes.FORBIDDEN]: RealmMutationForbiddenResponse,
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["RealmUnitNotFound", "UnitNotFound"]),
-				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse([
-					"RealmTagSelfReferenceForbidden",
-					"TagNotDirectlyApplicable",
-					"ContentLabelApplicationInvalid",
-				]),
-			},
-			detail: { summary: "Apply Realm Policy Tag", tags: ["Realms"] },
-		},
 	)
 	.delete(
 		"/:realmId/units/:unitId/policy-tags/:tagId",
+		{
+			access: "session-only",
+			params: RealmTagVoteParams,
+			response: {
+				[StatusCodes.NO_CONTENT]: t.Void(),
+				[StatusCodes.FORBIDDEN]: RealmMutationForbiddenResponse,
+			},
+			detail: {
+				summary: "Remove Realm Policy Tag",
+				tags: ["Realms"],
+				responses: NoContentResponse,
+			},
+		},
 		async ({ params, profile, authorization }) => {
 			await authorization.realm.ensureCapability(params.realmId, "realm.tags.manage");
 			await database.transaction(async (tx) => {
@@ -2551,39 +2564,9 @@ export default new Elysia({ prefix: "/realms" })
 			});
 			return new Response(null, { status: StatusCodes.NO_CONTENT });
 		},
-		{
-			access: "session-only",
-			params: RealmTagVoteParams,
-			response: {
-				[StatusCodes.NO_CONTENT]: t.Void(),
-				[StatusCodes.FORBIDDEN]: RealmMutationForbiddenResponse,
-			},
-			detail: {
-				summary: "Remove Realm Policy Tag",
-				tags: ["Realms"],
-				responses: NoContentResponse,
-			},
-		},
 	)
 	.get(
 		"/:realmId/units/:unitId/tags",
-		async ({ params, profile, authorization, query }) => {
-			await Promise.all([
-				authorization.realm.ensureParticipation(params.realmId),
-				authorization.unit.ensureCanRead(params.unitId),
-			]);
-			const tags = await listRealmVotedTags({
-				unitId: params.unitId,
-				viewerProfileId: profile.unitId,
-				realmIds: [params.realmId],
-				localizationLanguages: query.localizationLanguages,
-				perRealmLimit: query.limit ?? 50,
-			});
-			return {
-				realmId: params.realmId,
-				tags: tags.get(params.realmId) ?? [],
-			};
-		},
 		{
 			access: "interaction:read",
 			params: RealmUnitParams,
@@ -2602,9 +2585,48 @@ export default new Elysia({ prefix: "/realms" })
 				tags: ["Realms"],
 			},
 		},
+		async ({ params, profile, authorization, query }) => {
+			await Promise.all([
+				authorization.realm.ensureParticipation(params.realmId),
+				authorization.unit.ensureCanRead(params.unitId),
+			]);
+			const tags = await listRealmVotedTags({
+				unitId: params.unitId,
+				viewerProfileId: profile.unitId,
+				realmIds: [params.realmId],
+				localizationLanguages: query.localizationLanguages,
+				perRealmLimit: query.limit ?? 50,
+			});
+			return {
+				realmId: params.realmId,
+				tags: tags.get(params.realmId) ?? [],
+			};
+		},
 	)
 	.put(
 		"/:realmId/units/:unitId/tags/:tagId/vote",
+		{
+			access: "contribute:interaction:write",
+			params: RealmTagVoteParams,
+			body: RealmTagVoteBody,
+			response: {
+				[StatusCodes.OK]: RealmTagVoteResponse,
+				[StatusCodes.FORBIDDEN]: toApiErrorResponse([
+					"RealmCapabilityRequired",
+					"UnitAccessRestricted",
+					"UnitPermissionForbidden",
+				]),
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
+				[StatusCodes.CONFLICT]: toApiErrorResponse(["RealmTagVotingDisabled"]),
+				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse([
+					"RealmTagContextRequired",
+					"RealmTagSelfReferenceForbidden",
+					"ContentLabelJudgmentForbidden",
+				]),
+				[StatusCodes.TOO_MANY_REQUESTS]: VoteBackpressureResponse,
+			},
+			detail: { summary: "Vote on a Realm-scoped Unit Tag", tags: ["Realms"] },
+		},
 		async ({ params, body, profile, authorization }) => {
 			await authorization.realm.ensureParticipation(params.realmId);
 			if (params.unitId === params.tagId) throw new RealmTagSelfReferenceForbidden();
@@ -2640,10 +2662,12 @@ export default new Elysia({ prefix: "/realms" })
 			});
 			return getRealmTagVoteSummary(params.realmId, params.unitId, params.tagId, profile.unitId);
 		},
+	)
+	.delete(
+		"/:realmId/units/:unitId/tags/:tagId/vote",
 		{
 			access: "contribute:interaction:write",
 			params: RealmTagVoteParams,
-			body: RealmTagVoteBody,
 			response: {
 				[StatusCodes.OK]: RealmTagVoteResponse,
 				[StatusCodes.FORBIDDEN]: toApiErrorResponse([
@@ -2652,19 +2676,10 @@ export default new Elysia({ prefix: "/realms" })
 					"UnitPermissionForbidden",
 				]),
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
-				[StatusCodes.CONFLICT]: toApiErrorResponse(["RealmTagVotingDisabled"]),
-				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse([
-					"RealmTagContextRequired",
-					"RealmTagSelfReferenceForbidden",
-					"ContentLabelJudgmentForbidden",
-				]),
 				[StatusCodes.TOO_MANY_REQUESTS]: VoteBackpressureResponse,
 			},
-			detail: { summary: "Vote on a Realm-scoped Unit Tag", tags: ["Realms"] },
+			detail: { summary: "Remove a Realm-scoped Unit Tag vote", tags: ["Realms"] },
 		},
-	)
-	.delete(
-		"/:realmId/units/:unitId/tags/:tagId/vote",
 		async ({ params, profile, authorization }) => {
 			await authorization.realm.ensureParticipation(params.realmId);
 			await Promise.all([
@@ -2688,24 +2703,20 @@ export default new Elysia({ prefix: "/realms" })
 			});
 			return getRealmTagVoteSummary(params.realmId, params.unitId, params.tagId, profile.unitId);
 		},
-		{
-			access: "contribute:interaction:write",
-			params: RealmTagVoteParams,
-			response: {
-				[StatusCodes.OK]: RealmTagVoteResponse,
-				[StatusCodes.FORBIDDEN]: toApiErrorResponse([
-					"RealmCapabilityRequired",
-					"UnitAccessRestricted",
-					"UnitPermissionForbidden",
-				]),
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
-				[StatusCodes.TOO_MANY_REQUESTS]: VoteBackpressureResponse,
-			},
-			detail: { summary: "Remove a Realm-scoped Unit Tag vote", tags: ["Realms"] },
-		},
 	)
 	.get(
 		"/:realmId/units",
+		{
+			access: "session-only",
+			params: RealmParams,
+			query: ListRealmUnitsQuery,
+			response: {
+				[StatusCodes.OK]: RealmUnitListResponse,
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["InvalidPaginationCursor"]),
+				[StatusCodes.FORBIDDEN]: toApiErrorResponse(["RealmCapabilityRequired"]),
+			},
+			detail: { summary: "List Realm Units for moderation", tags: ["Realms"] },
+		},
 		async ({ params, query, authorization }) => {
 			await authorization.realm.ensureCapability(params.realmId, "realm.units.moderate");
 			const limit = query.limit ?? 50;
@@ -2788,31 +2799,9 @@ export default new Elysia({ prefix: "/realms" })
 						: null,
 			};
 		},
-		{
-			access: "session-only",
-			params: RealmParams,
-			query: ListRealmUnitsQuery,
-			response: {
-				[StatusCodes.OK]: RealmUnitListResponse,
-				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["InvalidPaginationCursor"]),
-				[StatusCodes.FORBIDDEN]: toApiErrorResponse(["RealmCapabilityRequired"]),
-			},
-			detail: { summary: "List Realm Units for moderation", tags: ["Realms"] },
-		},
 	)
 	.get(
 		"/:realmId/units/:unitId",
-		async ({ params, query, authorization }) => {
-			await authorization.realm.ensureCapability(params.realmId, "realm.units.moderate");
-			const [item] = await database
-				.select(realmUnitModerationSelection(query.localizationLanguages))
-				.from(realmUnit)
-				.innerJoin(unit, eq(unit.id, realmUnit.unitId))
-				.where(and(eq(realmUnit.realmId, params.realmId), eq(realmUnit.unitId, params.unitId)))
-				.limit(1);
-			if (!item) throw new RealmUnitNotFound();
-			return presentRealmUnitModeration(item);
-		},
 		{
 			access: "session-only",
 			params: RealmUnitParams,
@@ -2824,9 +2813,31 @@ export default new Elysia({ prefix: "/realms" })
 			},
 			detail: { summary: "Get Realm Unit for moderation", tags: ["Realms"] },
 		},
+		async ({ params, query, authorization }) => {
+			await authorization.realm.ensureCapability(params.realmId, "realm.units.moderate");
+			const [item] = await database
+				.select(realmUnitModerationSelection(query.localizationLanguages))
+				.from(realmUnit)
+				.innerJoin(unit, eq(unit.id, realmUnit.unitId))
+				.where(and(eq(realmUnit.realmId, params.realmId), eq(realmUnit.unitId, params.unitId)))
+				.limit(1);
+			if (!item) throw new RealmUnitNotFound();
+			return presentRealmUnitModeration(item);
+		},
 	)
 	.get(
 		"/:realmId/units/:unitId/history",
+		{
+			access: "session-only",
+			params: RealmUnitParams,
+			query: RealmUnitHistoryQuery,
+			response: {
+				[StatusCodes.OK]: RealmUnitModerationHistoryResponse,
+				[StatusCodes.FORBIDDEN]: toApiErrorResponse(["RealmCapabilityRequired"]),
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["RealmUnitNotFound"]),
+			},
+			detail: { summary: "Get Realm Unit moderation history", tags: ["Realms"] },
+		},
 		async ({ params, query, authorization }) => {
 			await authorization.realm.ensureCapability(params.realmId, "realm.units.moderate");
 			const [target] = await database
@@ -2945,20 +2956,33 @@ export default new Elysia({ prefix: "/realms" })
 				})),
 			};
 		},
-		{
-			access: "session-only",
-			params: RealmUnitParams,
-			query: RealmUnitHistoryQuery,
-			response: {
-				[StatusCodes.OK]: RealmUnitModerationHistoryResponse,
-				[StatusCodes.FORBIDDEN]: toApiErrorResponse(["RealmCapabilityRequired"]),
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["RealmUnitNotFound"]),
-			},
-			detail: { summary: "Get Realm Unit moderation history", tags: ["Realms"] },
-		},
 	)
 	.patch(
 		"/:realmId/units/:unitId",
+		{
+			access: "contribute:unit:update",
+			params: RealmUnitParams,
+			body: ModerateRealmUnitBody,
+			response: {
+				[StatusCodes.OK]: RealmUnitModerationActionResponse,
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
+					"ContentGovernanceActionIncompatible",
+					"GovernanceRuleSourceForbidden",
+					"RevisionCreditEntityInvalid",
+					"RevisionContributionActorRequired",
+				]),
+				[StatusCodes.FORBIDDEN]: toApiErrorResponse(["RealmCapabilityRequired"]),
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["RealmUnitNotFound"]),
+				[StatusCodes.CONFLICT]: toApiErrorResponse([
+					"ContentGovernanceTransitionInvalid",
+					"ContentGovernanceActionNoEffect",
+					"ContentGovernanceIdempotencyConflict",
+					"GovernanceRuleChanged",
+					"PostTargetingLocked",
+				]),
+			},
+			detail: { summary: "Apply a Realm content governance action", tags: ["Realms"] },
+		},
 		async ({ params, profile, authorization, body }) => {
 			await authorization.realm.ensureCapability(params.realmId, "realm.units.moderate");
 			const result = await database.transaction(async (tx) => {
@@ -3078,33 +3102,25 @@ export default new Elysia({ prefix: "/realms" })
 				},
 			};
 		},
+	)
+	.post(
+		"/:realmId/units/:unitId/review",
 		{
 			access: "contribute:unit:update",
 			params: RealmUnitParams,
-			body: ModerateRealmUnitBody,
+			body: ReviewRealmUnitBody,
 			response: {
-				[StatusCodes.OK]: RealmUnitModerationActionResponse,
+				[StatusCodes.OK]: RealmUnitReviewResponse,
 				[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
-					"ContentGovernanceActionIncompatible",
-					"GovernanceRuleSourceForbidden",
 					"RevisionCreditEntityInvalid",
 					"RevisionContributionActorRequired",
 				]),
 				[StatusCodes.FORBIDDEN]: toApiErrorResponse(["RealmCapabilityRequired"]),
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["RealmUnitNotFound"]),
-				[StatusCodes.CONFLICT]: toApiErrorResponse([
-					"ContentGovernanceTransitionInvalid",
-					"ContentGovernanceActionNoEffect",
-					"ContentGovernanceIdempotencyConflict",
-					"GovernanceRuleChanged",
-					"PostTargetingLocked",
-				]),
+				[StatusCodes.CONFLICT]: toApiErrorResponse(["ContentGovernanceActionNoEffect"]),
 			},
-			detail: { summary: "Apply a Realm content governance action", tags: ["Realms"] },
+			detail: { summary: "Update a Realm content review case", tags: ["Realms"] },
 		},
-	)
-	.post(
-		"/:realmId/units/:unitId/review",
 		async ({ params, profile, authorization, body }) => {
 			await authorization.realm.ensureCapability(params.realmId, "realm.units.moderate");
 			const result = await database.transaction(async (tx) => {
@@ -3238,21 +3254,5 @@ export default new Elysia({ prefix: "/realms" })
 					],
 				},
 			};
-		},
-		{
-			access: "contribute:unit:update",
-			params: RealmUnitParams,
-			body: ReviewRealmUnitBody,
-			response: {
-				[StatusCodes.OK]: RealmUnitReviewResponse,
-				[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
-					"RevisionCreditEntityInvalid",
-					"RevisionContributionActorRequired",
-				]),
-				[StatusCodes.FORBIDDEN]: toApiErrorResponse(["RealmCapabilityRequired"]),
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["RealmUnitNotFound"]),
-				[StatusCodes.CONFLICT]: toApiErrorResponse(["ContentGovernanceActionNoEffect"]),
-			},
-			detail: { summary: "Update a Realm content review case", tags: ["Realms"] },
 		},
 	);

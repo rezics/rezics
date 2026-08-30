@@ -1,5 +1,6 @@
 import { t, ValidationError as ElysiaValidationError } from "elysia";
 import { StatusCodes } from "http-status-codes";
+import { Errors } from "typebox/value";
 import { describe, expect, it } from "vitest";
 
 import { toApiErrorBody } from "./errors";
@@ -10,14 +11,14 @@ const Schema = t.Object({ size: t.Integer({ minimum: 1 }) });
 describe("API validation failure classification", () => {
 	it("keeps request validation as a public 422 without exposing submitted values", () => {
 		const failure = classifyValidationFailure(
-			new ElysiaValidationError("body", Schema, { size: 0 }),
+			new ElysiaValidationError("body", { size: 0 }, Errors(Schema, { size: 0 }), Schema),
 		);
 
 		expect(failure).toMatchObject({
 			kind: "request",
 			source: "body",
 			publicError: {
-				_tag: "ValidationError",
+				type: "ValidationError",
 				message: "Request validation failed",
 				status: StatusCodes.UNPROCESSABLE_ENTITY,
 			},
@@ -35,14 +36,19 @@ describe("API validation failure classification", () => {
 
 	it("treats response validation as an internal 500 while retaining safe diagnostics", () => {
 		const failure = classifyValidationFailure(
-			new ElysiaValidationError("response", Schema, { size: "invalid" }),
+			new ElysiaValidationError(
+				"response",
+				{ size: "invalid" },
+				Errors(Schema, { size: "invalid" }),
+				Schema,
+			),
 		);
 
 		expect(failure).toMatchObject({
 			kind: "response",
 			source: "response",
 			publicError: {
-				_tag: "InternalError",
+				type: "InternalError",
 				message: "Internal server error",
 				status: StatusCodes.INTERNAL_SERVER_ERROR,
 			},

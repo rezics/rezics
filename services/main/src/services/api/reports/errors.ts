@@ -1,42 +1,43 @@
 import { StatusCodes } from "http-status-codes";
-import * as Data from "effect/Data";
+import { HTTPError } from "elysia";
 
-export class ReportRealmMismatch extends Data.TaggedError("ReportRealmMismatch") {
-	static readonly status = StatusCodes.BAD_REQUEST as const;
-	readonly status = ReportRealmMismatch.status;
-	readonly message = "The reported Unit is not in this Realm";
-}
-
-export class ReportAlreadySubmitted extends Data.TaggedError("ReportAlreadySubmitted") {
-	static readonly status = StatusCodes.CONFLICT as const;
-	readonly status = ReportAlreadySubmitted.status;
-	readonly message = "This Unit has already been reported for the active case";
-}
-
-export class ReportTargetRevisionUnavailable extends Data.TaggedError(
-	"ReportTargetRevisionUnavailable",
+export class ReportRealmMismatch extends HTTPError.id(
+	"ReportRealmMismatch",
+	StatusCodes.BAD_REQUEST,
 ) {
-	static readonly status = StatusCodes.CONFLICT as const;
-	readonly status = ReportTargetRevisionUnavailable.status;
-	readonly message = "The reported Unit does not have a current revision";
+	override readonly message = "The reported Unit is not in this Realm";
 }
 
-export class ReportRuleUnavailable extends Data.TaggedError("ReportRuleUnavailable") {
-	static readonly status = StatusCodes.CONFLICT as const;
-	readonly status = ReportRuleUnavailable.status;
-	readonly message = "The selected report destination does not have a current rule set";
+export class ReportAlreadySubmitted extends HTTPError.id(
+	"ReportAlreadySubmitted",
+	StatusCodes.CONFLICT,
+) {
+	override readonly message = "This Unit has already been reported for the active case";
 }
 
-export class ReportRuleChanged extends Data.TaggedError("ReportRuleChanged") {
-	static readonly status = StatusCodes.CONFLICT as const;
-	readonly status = ReportRuleChanged.status;
-	readonly message = "The selected report rule is not part of the current rule revision";
+export class ReportTargetRevisionUnavailable extends HTTPError.id(
+	"ReportTargetRevisionUnavailable",
+	StatusCodes.CONFLICT,
+) {
+	override readonly message = "The reported Unit does not have a current revision";
 }
 
-export class ReportRuleSourceForbidden extends Data.TaggedError("ReportRuleSourceForbidden") {
-	static readonly status = StatusCodes.BAD_REQUEST as const;
-	readonly status = ReportRuleSourceForbidden.status;
-	readonly message = "Reports may only cite the current Realm and official rules";
+export class ReportRuleUnavailable extends HTTPError.id(
+	"ReportRuleUnavailable",
+	StatusCodes.CONFLICT,
+) {
+	override readonly message = "The selected report destination does not have a current rule set";
+}
+
+export class ReportRuleChanged extends HTTPError.id("ReportRuleChanged", StatusCodes.CONFLICT) {
+	override readonly message = "The selected report rule is not part of the current rule revision";
+}
+
+export class ReportRuleSourceForbidden extends HTTPError.id(
+	"ReportRuleSourceForbidden",
+	StatusCodes.BAD_REQUEST,
+) {
+	override readonly message = "Reports may only cite the current Realm and official rules";
 }
 
 export const ReportErrors = [

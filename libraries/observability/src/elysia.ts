@@ -70,13 +70,13 @@ export function createElysiaObservability(options: ElysiaObservabilityOptions = 
 	}
 
 	return new Elysia({ name: "@rezics/observability/elysia" })
-		.wrap((handler, request) => {
+		.wrap((fetch) => (request, ...rest) => {
 			if (
 				observability.configuration.disabled ||
 				!observability.configuration.features.http ||
 				excludedPaths.has(new URL(request.url).pathname)
 			)
-				return handler;
+				return fetch(request, ...rest);
 			const parent = propagation.extract(otelContext.active(), request.headers, headerGetter);
 			const method = normalizeRequestMethod(request.method);
 			const span = observability.tracer.startSpan(
@@ -96,15 +96,14 @@ export function createElysiaObservability(options: ElysiaObservabilityOptions = 
 			observability.metrics.requestStarted();
 			request.signal.addEventListener("abort", () => finish(request, 499), { once: true });
 			const activeContext = trace.setSpan(parent, span);
-			return (...arguments_: unknown[]) =>
-				otelContext.with(activeContext, handler, undefined, ...arguments_);
+			return otelContext.with(activeContext, fetch, undefined, request, ...rest);
 		})
-		.onTransform({ as: "global" }, ({ request, route }) => {
+		.transform("global", ({ request, route, path }) => {
 			const telemetry = requests.get(request);
 			if (!telemetry) return;
-			telemetry.route = route;
+			telemetry.route = route ?? path;
 		})
-		.onAfterResponse({ as: "global" }, ({ request, set }) => {
+		.afterResponse("global", ({ request, set }) => {
 			finish(request, numericStatus(set.status) ?? 200);
 		});
 }

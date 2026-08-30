@@ -199,6 +199,14 @@ export default new Elysia({ prefix: "/api-tokens" })
 	.use(session)
 	.get(
 		"",
+		{
+			access: "session-only",
+			response: {
+				[StatusCodes.OK]: ApiTokenListResponse,
+				[StatusCodes.UNAUTHORIZED]: InteractiveSessionRequiredResponse,
+			},
+			detail: { summary: "List API tokens", tags: ["API Tokens"] },
+		},
 		async ({ user, request, set }) => {
 			set.headers["Cache-Control"] = "no-store";
 			const [result, accountQuota] = await Promise.all([
@@ -220,17 +228,20 @@ export default new Elysia({ prefix: "/api-tokens" })
 				),
 			};
 		},
-		{
-			access: "session-only",
-			response: {
-				[StatusCodes.OK]: ApiTokenListResponse,
-				[StatusCodes.UNAUTHORIZED]: InteractiveSessionRequiredResponse,
-			},
-			detail: { summary: "List API tokens", tags: ["API Tokens"] },
-		},
 	)
 	.post(
 		"",
+		{
+			access: "fresh-session-only",
+			body: CreateApiTokenBody,
+			response: {
+				[StatusCodes.OK]: CreatedApiTokenResponse,
+				[StatusCodes.UNAUTHORIZED]: InteractiveSessionRequiredResponse,
+				[StatusCodes.FORBIDDEN]: FreshSessionRequiredResponse,
+				[StatusCodes.CONFLICT]: TokenLimitReachedResponse,
+			},
+			detail: { summary: "Create API token (secret returned once)", tags: ["API Tokens"] },
+		},
 		async ({ user, profile, body, request }) => {
 			let created: CreatedBetterAuthApiKey | undefined;
 			let reservationId: string | undefined;
@@ -279,20 +290,22 @@ export default new Elysia({ prefix: "/api-tokens" })
 				throw error;
 			}
 		},
-		{
-			access: "fresh-session-only",
-			body: CreateApiTokenBody,
-			response: {
-				[StatusCodes.OK]: CreatedApiTokenResponse,
-				[StatusCodes.UNAUTHORIZED]: InteractiveSessionRequiredResponse,
-				[StatusCodes.FORBIDDEN]: FreshSessionRequiredResponse,
-				[StatusCodes.CONFLICT]: TokenLimitReachedResponse,
-			},
-			detail: { summary: "Create API token (secret returned once)", tags: ["API Tokens"] },
-		},
 	)
 	.patch(
 		"/:tokenId",
+		{
+			access: "fresh-session-only",
+			params: ApiTokenParams,
+			body: UpdateApiTokenBody,
+			response: {
+				[StatusCodes.OK]: ApiTokenSummary,
+				[StatusCodes.UNAUTHORIZED]: InteractiveSessionRequiredResponse,
+				[StatusCodes.FORBIDDEN]: FreshSessionRequiredResponse,
+				[StatusCodes.NOT_FOUND]: TokenNotFoundResponse,
+				[StatusCodes.CONFLICT]: TokenLimitReachedResponse,
+			},
+			detail: { summary: "Update API token", tags: ["API Tokens"] },
+		},
 		async ({ user, profile, params, body, request }) => {
 			const current = await findOwnedToken(request, params.tokenId);
 			const now = new Date();
@@ -346,22 +359,23 @@ export default new Elysia({ prefix: "/api-tokens" })
 				throw error;
 			}
 		},
+	)
+	.put(
+		"/:tokenId/quota-override",
 		{
 			access: "fresh-session-only",
 			params: ApiTokenParams,
-			body: UpdateApiTokenBody,
+			body: ReplaceApiTokenQuotaOverrideBody,
 			response: {
 				[StatusCodes.OK]: ApiTokenSummary,
 				[StatusCodes.UNAUTHORIZED]: InteractiveSessionRequiredResponse,
 				[StatusCodes.FORBIDDEN]: FreshSessionRequiredResponse,
 				[StatusCodes.NOT_FOUND]: TokenNotFoundResponse,
-				[StatusCodes.CONFLICT]: TokenLimitReachedResponse,
+				[StatusCodes.CONFLICT]: TokenQuotaRevisionConflictResponse,
+				[StatusCodes.UNPROCESSABLE_ENTITY]: TokenQuotaInvalidResponse,
 			},
-			detail: { summary: "Update API token", tags: ["API Tokens"] },
+			detail: { summary: "Replace API token quota override", tags: ["API Tokens"] },
 		},
-	)
-	.put(
-		"/:tokenId/quota-override",
 		async ({ user, profile, params, body, request }) => {
 			const key = await findOwnedToken(request, params.tokenId);
 			try {
@@ -395,23 +409,26 @@ export default new Elysia({ prefix: "/api-tokens" })
 				throw error;
 			}
 		},
+	)
+	.delete(
+		"/:tokenId/quota-override",
 		{
 			access: "fresh-session-only",
 			params: ApiTokenParams,
-			body: ReplaceApiTokenQuotaOverrideBody,
+			body: DeleteApiTokenQuotaOverrideBody,
 			response: {
-				[StatusCodes.OK]: ApiTokenSummary,
+				[StatusCodes.NO_CONTENT]: t.Void(),
 				[StatusCodes.UNAUTHORIZED]: InteractiveSessionRequiredResponse,
 				[StatusCodes.FORBIDDEN]: FreshSessionRequiredResponse,
 				[StatusCodes.NOT_FOUND]: TokenNotFoundResponse,
 				[StatusCodes.CONFLICT]: TokenQuotaRevisionConflictResponse,
-				[StatusCodes.UNPROCESSABLE_ENTITY]: TokenQuotaInvalidResponse,
 			},
-			detail: { summary: "Replace API token quota override", tags: ["API Tokens"] },
+			detail: {
+				summary: "Delete API token quota override",
+				tags: ["API Tokens"],
+				responses: NoContentResponse,
+			},
 		},
-	)
-	.delete(
-		"/:tokenId/quota-override",
 		async ({ profile, params, body, request, status }) => {
 			await findOwnedToken(request, params.tokenId);
 			await database.transaction(async (tx) => {
@@ -431,26 +448,24 @@ export default new Elysia({ prefix: "/api-tokens" })
 			});
 			return status(StatusCodes.NO_CONTENT, undefined);
 		},
+	)
+	.delete(
+		"/:tokenId",
 		{
 			access: "fresh-session-only",
 			params: ApiTokenParams,
-			body: DeleteApiTokenQuotaOverrideBody,
 			response: {
 				[StatusCodes.NO_CONTENT]: t.Void(),
 				[StatusCodes.UNAUTHORIZED]: InteractiveSessionRequiredResponse,
 				[StatusCodes.FORBIDDEN]: FreshSessionRequiredResponse,
 				[StatusCodes.NOT_FOUND]: TokenNotFoundResponse,
-				[StatusCodes.CONFLICT]: TokenQuotaRevisionConflictResponse,
 			},
 			detail: {
-				summary: "Delete API token quota override",
+				summary: "Revoke API token",
 				tags: ["API Tokens"],
 				responses: NoContentResponse,
 			},
 		},
-	)
-	.delete(
-		"/:tokenId",
 		async ({ request, profile, params, status }) => {
 			await findOwnedToken(request, params.tokenId);
 			await auth.api.deleteApiKey({
@@ -466,20 +481,5 @@ export default new Elysia({ prefix: "/api-tokens" })
 				target: { kind: "api_token", id: params.tokenId },
 			});
 			return status(StatusCodes.NO_CONTENT, undefined);
-		},
-		{
-			access: "fresh-session-only",
-			params: ApiTokenParams,
-			response: {
-				[StatusCodes.NO_CONTENT]: t.Void(),
-				[StatusCodes.UNAUTHORIZED]: InteractiveSessionRequiredResponse,
-				[StatusCodes.FORBIDDEN]: FreshSessionRequiredResponse,
-				[StatusCodes.NOT_FOUND]: TokenNotFoundResponse,
-			},
-			detail: {
-				summary: "Revoke API token",
-				tags: ["API Tokens"],
-				responses: NoContentResponse,
-			},
 		},
 	);

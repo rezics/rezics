@@ -41,28 +41,21 @@ export default new Elysia({ prefix: "/unit" })
 	.use(session)
 	.get(
 		"/access-invitations",
-		async ({ profile, query }) => ({
-			items: await listReceivedUnitAccessInvitations(
-				profile.unitId,
-				query.includeResolved ?? false,
-			),
-		}),
 		{
 			access: "session-only",
 			query: ListUnitAccessInvitationsQuery,
 			response: { [StatusCodes.OK]: UnitAccessInvitationListResponse },
 			detail: { summary: "List received Unit access invitations", tags: ["Governance"] },
 		},
-	)
-	.get(
-		"/:unitId/access-invitations",
-		async ({ authorization, params, query }) => ({
-			items: await listManagedUnitAccessInvitations(
-				authorization.unit,
-				params.unitId,
+		async ({ profile, query }) => ({
+			items: await listReceivedUnitAccessInvitations(
+				profile.unitId,
 				query.includeResolved ?? false,
 			),
 		}),
+	)
+	.get(
+		"/:unitId/access-invitations",
 		{
 			access: "session-only",
 			params: UnitGovernanceParams,
@@ -74,20 +67,16 @@ export default new Elysia({ prefix: "/unit" })
 			},
 			detail: { summary: "List managed Unit access invitations", tags: ["Governance"] },
 		},
+		async ({ authorization, params, query }) => ({
+			items: await listManagedUnitAccessInvitations(
+				authorization.unit,
+				params.unitId,
+				query.includeResolved ?? false,
+			),
+		}),
 	)
 	.post(
 		"/:unitId/access-invitations",
-		async ({ authorization, profile, params, body }) => {
-			const result = await createUnitAccessInvitation(authorization.unit, profile.unitId, {
-				unitId: params.unitId,
-				invitedProfileId: body.invitedProfileId,
-				permissions: body.permissions,
-				scope: body.scope,
-				expiresAt: futureDate(body.invitationExpiresAt),
-				accessExpiresAt: body.accessExpiresAt ? futureDate(body.accessExpiresAt) : null,
-			});
-			return result.invitation;
-		},
 		{
 			access: "session-only",
 			params: UnitGovernanceParams,
@@ -104,12 +93,20 @@ export default new Elysia({ prefix: "/unit" })
 			},
 			detail: { summary: "Create Unit access invitation", tags: ["Governance"] },
 		},
+		async ({ authorization, profile, params, body }) => {
+			const result = await createUnitAccessInvitation(authorization.unit, profile.unitId, {
+				unitId: params.unitId,
+				invitedProfileId: body.invitedProfileId,
+				permissions: body.permissions,
+				scope: body.scope,
+				expiresAt: futureDate(body.invitationExpiresAt),
+				accessExpiresAt: body.accessExpiresAt ? futureDate(body.accessExpiresAt) : null,
+			});
+			return result.invitation;
+		},
 	)
 	.post(
 		"/:unitId/access-invitations/:invitationId/accept",
-		async ({ profile, params }) =>
-			(await acceptUnitAccessInvitation(profile.unitId, params.unitId, params.invitationId))
-				.invitation,
 		{
 			access: "session-only",
 			params: UnitAccessInvitationParams,
@@ -121,11 +118,12 @@ export default new Elysia({ prefix: "/unit" })
 			},
 			detail: { summary: "Accept Unit access invitation", tags: ["Governance"] },
 		},
+		async ({ profile, params }) =>
+			(await acceptUnitAccessInvitation(profile.unitId, params.unitId, params.invitationId))
+				.invitation,
 	)
 	.post(
 		"/:unitId/access-invitations/:invitationId/decline",
-		async ({ profile, params }) =>
-			declineUnitAccessInvitation(profile.unitId, params.unitId, params.invitationId),
 		{
 			access: "session-only",
 			params: UnitAccessInvitationParams,
@@ -137,18 +135,11 @@ export default new Elysia({ prefix: "/unit" })
 			},
 			detail: { summary: "Decline Unit access invitation", tags: ["Governance"] },
 		},
+		async ({ profile, params }) =>
+			declineUnitAccessInvitation(profile.unitId, params.unitId, params.invitationId),
 	)
 	.delete(
 		"/:unitId/access-invitations/:invitationId",
-		async ({ authorization, profile, params }) => {
-			await cancelUnitAccessInvitation(
-				authorization.unit,
-				profile.unitId,
-				params.unitId,
-				params.invitationId,
-			);
-			return new Response(null, { status: StatusCodes.NO_CONTENT });
-		},
 		{
 			access: "session-only",
 			params: UnitAccessInvitationParams,
@@ -166,5 +157,14 @@ export default new Elysia({ prefix: "/unit" })
 				tags: ["Governance"],
 				responses: NoContentResponse,
 			},
+		},
+		async ({ authorization, profile, params }) => {
+			await cancelUnitAccessInvitation(
+				authorization.unit,
+				profile.unitId,
+				params.unitId,
+				params.invitationId,
+			);
+			return new Response(null, { status: StatusCodes.NO_CONTENT });
 		},
 	);
