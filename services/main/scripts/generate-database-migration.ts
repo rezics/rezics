@@ -13,6 +13,8 @@ import {
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { PostgreSqlSchemaMigrationBundles } from "../src/services/database/schema/postgres/manifest";
+
 const MigrationNamePattern = /^[a-z][a-z0-9]*(_[a-z0-9]+)*$/;
 const SyncedMessage = "Schemas are synced, no changes to be made.";
 const OverlayOnlyMarkerSuffix = ".overlay-only";
@@ -325,7 +327,13 @@ async function main(): Promise<void> {
 		overlayDirectory,
 		`${migrationName}${ShadowValidationOverlaySuffix}`,
 	);
-	const canonicalFile = join(postgresSchemaDirectory, `${migrationName.replaceAll("_", "-")}.sql`);
+	const bundledCanonicalFileNames =
+		PostgreSqlSchemaMigrationBundles[
+			migrationName as keyof typeof PostgreSqlSchemaMigrationBundles
+		];
+	const canonicalFiles = bundledCanonicalFileNames
+		? bundledCanonicalFileNames.map((fileName) => join(postgresSchemaDirectory, fileName))
+		: [join(postgresSchemaDirectory, `${migrationName.replaceAll("_", "-")}.sql`)];
 
 	const migrationPort = process.env.POSTGRES_MIGRATION_LOCAL_PORT ?? "5433";
 	const parsedPort = Number(migrationPort);
@@ -343,7 +351,15 @@ async function main(): Promise<void> {
 	try {
 		const hasPreOverlay = await exists(preOverlay);
 		const hasPostOverlay = await exists(postOverlay);
-		const hasCanonicalFile = await exists(canonicalFile);
+		const canonicalFileExistence = await Promise.all(canonicalFiles.map(exists));
+		if (bundledCanonicalFileNames && canonicalFileExistence.some((fileExists) => !fileExists))
+			throw new Error(
+				`Migration bundle ${migrationName} references a missing canonical PostgreSQL file`,
+			);
+		const existingCanonicalFiles = canonicalFiles.filter(
+			(_file, index) => canonicalFileExistence[index],
+		);
+		const hasCanonicalFile = existingCanonicalFiles.length > 0;
 		const hasOverlayOnlyMarker = await exists(overlayOnlyMarker);
 		const overlayOnlyReason = hasOverlayOnlyMarker
 			? await readFile(overlayOnlyMarker, "utf8")
@@ -459,7 +475,11 @@ async function main(): Promise<void> {
 			...(hasPreOverlay ? { preOverlay: await readFile(preOverlay, "utf8") } : {}),
 			...(schemaDiff ? { schemaDiff } : {}),
 			...(generationPlan.includeCanonicalSql
-				? { canonicalSql: await readFile(canonicalFile, "utf8") }
+				? {
+						canonicalSql: (
+							await Promise.all(existingCanonicalFiles.map((file) => readFile(file, "utf8")))
+						).join("\n\n"),
+					}
 				: {}),
 			...(hasPostOverlay ? { postOverlay: await readFile(postOverlay, "utf8") } : {}),
 			...(transactionModeNoneReason ? { transactionModeNoneReason } : {}),

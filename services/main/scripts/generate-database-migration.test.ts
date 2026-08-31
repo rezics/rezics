@@ -1,6 +1,19 @@
 import { describe, expect, it } from "vitest";
 
+import { PostgreSqlSchemaMigrationBundles } from "../src/services/database/schema/postgres/manifest";
 import { composeMigrationSql, planMigrationGeneration } from "./generate-database-migration";
+
+describe("database migration canonical bundles", () => {
+	it("keeps the atomic Tag semantic release ordered while canonical owners stay split", () => {
+		expect(PostgreSqlSchemaMigrationBundles.tag_path_semantic_model).toEqual([
+			"realm-tag-authority.sql",
+			"tag-judgment-aggregates.sql",
+			"tag-path.sql",
+			"content-label-policy.sql",
+			"tag-path-search.sql",
+		]);
+	});
+});
 
 describe("database migration transaction mode", () => {
 	it("uses Atlas's transactional file mode by default", () => {

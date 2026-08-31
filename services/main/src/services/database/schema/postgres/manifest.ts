@@ -12,6 +12,22 @@ export const PostgreSqlSchemaFileNames = [
 	"unit-variant-integrity.sql",
 ] as const;
 
+export type PostgreSqlSchemaFileName = (typeof PostgreSqlSchemaFileNames)[number];
+
+/**
+ * Release migrations may install one atomic domain cutover while the canonical
+ * PostgreSQL definitions remain split by responsibility for review and drift checks.
+ */
+export const PostgreSqlSchemaMigrationBundles = {
+	tag_path_semantic_model: [
+		"realm-tag-authority.sql",
+		"tag-judgment-aggregates.sql",
+		"tag-path.sql",
+		"content-label-policy.sql",
+		"tag-path-search.sql",
+	],
+} as const satisfies Readonly<Record<string, readonly PostgreSqlSchemaFileName[]>>;
+
 export const PostgreSqlSchemaFunctionNames = [
 	"apply_book_chapter_delta",
 	"book_chapter_node_scope",

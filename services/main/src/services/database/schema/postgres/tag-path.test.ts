@@ -84,6 +84,15 @@ describe("Tag Path PostgreSQL semantic contract", () => {
 		expect(closure).toContain("enqueue_tag_expression_projection_rebuild");
 	});
 
+	it("does not expose projection-maintenance definer functions to PUBLIC", () => {
+		expect(source).toContain(
+			"REVOKE ALL ON FUNCTION public.enqueue_tag_expression_projection_rebuild(uuid) FROM PUBLIC;",
+		);
+		expect(source).toContain(
+			"REVOKE ALL ON FUNCTION public.rebuild_tag_expression_effective_tags(uuid) FROM PUBLIC;",
+		);
+	});
+
 	it("branches before reading table-specific fields in the shared closure trigger", () => {
 		const trigger = functionSource("maintain_tag_expression_inference_closure");
 		expect(trigger).toContain("IF TG_TABLE_NAME = 'tag_expression' THEN");

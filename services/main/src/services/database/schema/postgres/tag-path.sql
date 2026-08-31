@@ -479,6 +479,9 @@ BEGIN
 END;
 $$;
 
+REVOKE ALL ON FUNCTION public.enqueue_tag_expression_projection_rebuild(uuid) FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.rebuild_tag_expression_effective_tags(uuid) FROM PUBLIC;
+
 CREATE OR REPLACE FUNCTION public.guard_tag_expression_inference_graph()
 RETURNS trigger
 LANGUAGE plpgsql
