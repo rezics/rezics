@@ -117,7 +117,7 @@ export default {
 			entailed: "Semantic inference",
 			retrieval_only: "Search expansion",
 		},
-		otherPositions: insert("{{count}} other vocabulary positions", { count: Number }),
+		otherPositions: "Other vocabulary positions are available",
 	},
 	semantics: {
 		structureTitle: "Vocabulary structure",

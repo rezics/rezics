@@ -116,7 +116,7 @@ export default {
 			entailed: "意味的推論",
 			retrieval_only: "検索展開",
 		},
-		otherPositions: insert("語彙上の他の位置：{{count}}件", { count: Number }),
+		otherPositions: "語彙上にほかの位置があります",
 	},
 	semantics: {
 		structureTitle: "語彙構造",

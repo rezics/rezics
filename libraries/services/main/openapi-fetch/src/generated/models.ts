@@ -11933,6 +11933,13 @@ export type GetApiRecommendationsPostsByPostIdStatus200 = {
 					};
 				}[];
 				/**
+				 * @description Whether this Tag has another accepted public vocabulary position.
+				 * @type boolean | undefined
+				 */
+				tagHasOtherPositions?: boolean;
+				/**
+				 * @description Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.
+				 * @deprecated
 				 * @minLength 0
 				 * @type integer | undefined
 				 */
@@ -12620,6 +12627,13 @@ export type GetApiRecommendationsPostsByPostIdStatus200 = {
 					};
 				}[];
 				/**
+				 * @description Whether this Tag has another accepted public vocabulary position.
+				 * @type boolean | undefined
+				 */
+				tagHasOtherPositions?: boolean;
+				/**
+				 * @description Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.
+				 * @deprecated
 				 * @minLength 0
 				 * @type integer | undefined
 				 */
@@ -13330,6 +13344,13 @@ export type GetApiRecommendationsPostsByPostIdStatus200 = {
 					};
 				}[];
 				/**
+				 * @description Whether this Tag has another accepted public vocabulary position.
+				 * @type boolean | undefined
+				 */
+				tagHasOtherPositions?: boolean;
+				/**
+				 * @description Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.
+				 * @deprecated
 				 * @minLength 0
 				 * @type integer | undefined
 				 */
@@ -26367,6 +26388,13 @@ export type PostApiFeedQueryStatus200 = {
 					};
 				}[];
 				/**
+				 * @description Whether this Tag has another accepted public vocabulary position.
+				 * @type boolean | undefined
+				 */
+				tagHasOtherPositions?: boolean;
+				/**
+				 * @description Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.
+				 * @deprecated
 				 * @minLength 0
 				 * @type integer | undefined
 				 */
@@ -26974,6 +27002,13 @@ export type PostApiFeedQueryStatus200 = {
 							};
 						}[];
 						/**
+						 * @description Whether this Tag has another accepted public vocabulary position.
+						 * @type boolean | undefined
+						 */
+						tagHasOtherPositions?: boolean;
+						/**
+						 * @description Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.
+						 * @deprecated
 						 * @minLength 0
 						 * @type integer | undefined
 						 */
@@ -27661,6 +27696,13 @@ export type PostApiFeedQueryStatus200 = {
 							};
 						}[];
 						/**
+						 * @description Whether this Tag has another accepted public vocabulary position.
+						 * @type boolean | undefined
+						 */
+						tagHasOtherPositions?: boolean;
+						/**
+						 * @description Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.
+						 * @deprecated
 						 * @minLength 0
 						 * @type integer | undefined
 						 */
@@ -28371,6 +28413,13 @@ export type PostApiFeedQueryStatus200 = {
 							};
 						}[];
 						/**
+						 * @description Whether this Tag has another accepted public vocabulary position.
+						 * @type boolean | undefined
+						 */
+						tagHasOtherPositions?: boolean;
+						/**
+						 * @description Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.
+						 * @deprecated
 						 * @minLength 0
 						 * @type integer | undefined
 						 */
@@ -121448,6 +121497,13 @@ export type GetApiCollectionsByCollectionIdItemsStatus200 = {
 						};
 					}[];
 					/**
+					 * @description Whether this Tag has another accepted public vocabulary position.
+					 * @type boolean | undefined
+					 */
+					tagHasOtherPositions?: boolean;
+					/**
+					 * @description Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.
+					 * @deprecated
 					 * @minLength 0
 					 * @type integer | undefined
 					 */
@@ -122057,6 +122113,13 @@ export type GetApiCollectionsByCollectionIdItemsStatus200 = {
 								};
 							}[];
 							/**
+							 * @description Whether this Tag has another accepted public vocabulary position.
+							 * @type boolean | undefined
+							 */
+							tagHasOtherPositions?: boolean;
+							/**
+							 * @description Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.
+							 * @deprecated
 							 * @minLength 0
 							 * @type integer | undefined
 							 */
@@ -122746,6 +122809,13 @@ export type GetApiCollectionsByCollectionIdItemsStatus200 = {
 								};
 							}[];
 							/**
+							 * @description Whether this Tag has another accepted public vocabulary position.
+							 * @type boolean | undefined
+							 */
+							tagHasOtherPositions?: boolean;
+							/**
+							 * @description Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.
+							 * @deprecated
 							 * @minLength 0
 							 * @type integer | undefined
 							 */
@@ -123458,6 +123528,13 @@ export type GetApiCollectionsByCollectionIdItemsStatus200 = {
 								};
 							}[];
 							/**
+							 * @description Whether this Tag has another accepted public vocabulary position.
+							 * @type boolean | undefined
+							 */
+							tagHasOtherPositions?: boolean;
+							/**
+							 * @description Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.
+							 * @deprecated
 							 * @minLength 0
 							 * @type integer | undefined
 							 */
@@ -128551,6 +128628,13 @@ export type GetApiReviewsStatus200 = {
 			};
 		}[];
 		/**
+		 * @description Whether this Tag has another accepted public vocabulary position.
+		 * @type boolean | undefined
+		 */
+		tagHasOtherPositions?: boolean;
+		/**
+		 * @description Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.
+		 * @deprecated
 		 * @minLength 0
 		 * @type integer | undefined
 		 */
@@ -144505,6 +144589,13 @@ export type GetApiRealmsByRealmIdPinsStatus200 = {
 					};
 				}[];
 				/**
+				 * @description Whether this Tag has another accepted public vocabulary position.
+				 * @type boolean | undefined
+				 */
+				tagHasOtherPositions?: boolean;
+				/**
+				 * @description Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.
+				 * @deprecated
 				 * @minLength 0
 				 * @type integer | undefined
 				 */
@@ -145112,6 +145203,13 @@ export type GetApiRealmsByRealmIdPinsStatus200 = {
 							};
 						}[];
 						/**
+						 * @description Whether this Tag has another accepted public vocabulary position.
+						 * @type boolean | undefined
+						 */
+						tagHasOtherPositions?: boolean;
+						/**
+						 * @description Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.
+						 * @deprecated
 						 * @minLength 0
 						 * @type integer | undefined
 						 */
@@ -145799,6 +145897,13 @@ export type GetApiRealmsByRealmIdPinsStatus200 = {
 							};
 						}[];
 						/**
+						 * @description Whether this Tag has another accepted public vocabulary position.
+						 * @type boolean | undefined
+						 */
+						tagHasOtherPositions?: boolean;
+						/**
+						 * @description Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.
+						 * @deprecated
 						 * @minLength 0
 						 * @type integer | undefined
 						 */
@@ -146509,6 +146614,13 @@ export type GetApiRealmsByRealmIdPinsStatus200 = {
 							};
 						}[];
 						/**
+						 * @description Whether this Tag has another accepted public vocabulary position.
+						 * @type boolean | undefined
+						 */
+						tagHasOtherPositions?: boolean;
+						/**
+						 * @description Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.
+						 * @deprecated
 						 * @minLength 0
 						 * @type integer | undefined
 						 */
@@ -154057,6 +154169,13 @@ export type PostApiSearchFilterExecuteStatus200 = {
 				};
 			}[];
 			/**
+			 * @description Whether this Tag has another accepted public vocabulary position.
+			 * @type boolean | undefined
+			 */
+			tagHasOtherPositions?: boolean;
+			/**
+			 * @description Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.
+			 * @deprecated
 			 * @minLength 0
 			 * @type integer | undefined
 			 */
@@ -155637,6 +155756,13 @@ export type PostApiSearchFilterFeedStatus200 = {
 					};
 				}[];
 				/**
+				 * @description Whether this Tag has another accepted public vocabulary position.
+				 * @type boolean | undefined
+				 */
+				tagHasOtherPositions?: boolean;
+				/**
+				 * @description Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.
+				 * @deprecated
 				 * @minLength 0
 				 * @type integer | undefined
 				 */
@@ -156244,6 +156370,13 @@ export type PostApiSearchFilterFeedStatus200 = {
 							};
 						}[];
 						/**
+						 * @description Whether this Tag has another accepted public vocabulary position.
+						 * @type boolean | undefined
+						 */
+						tagHasOtherPositions?: boolean;
+						/**
+						 * @description Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.
+						 * @deprecated
 						 * @minLength 0
 						 * @type integer | undefined
 						 */
@@ -156931,6 +157064,13 @@ export type PostApiSearchFilterFeedStatus200 = {
 							};
 						}[];
 						/**
+						 * @description Whether this Tag has another accepted public vocabulary position.
+						 * @type boolean | undefined
+						 */
+						tagHasOtherPositions?: boolean;
+						/**
+						 * @description Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.
+						 * @deprecated
 						 * @minLength 0
 						 * @type integer | undefined
 						 */
@@ -157641,6 +157781,13 @@ export type PostApiSearchFilterFeedStatus200 = {
 							};
 						}[];
 						/**
+						 * @description Whether this Tag has another accepted public vocabulary position.
+						 * @type boolean | undefined
+						 */
+						tagHasOtherPositions?: boolean;
+						/**
+						 * @description Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.
+						 * @deprecated
 						 * @minLength 0
 						 * @type integer | undefined
 						 */
@@ -159476,6 +159623,13 @@ export type PostApiSearchZonesByZoneIdFilterExecuteStatus200 = {
 				};
 			}[];
 			/**
+			 * @description Whether this Tag has another accepted public vocabulary position.
+			 * @type boolean | undefined
+			 */
+			tagHasOtherPositions?: boolean;
+			/**
+			 * @description Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.
+			 * @deprecated
 			 * @minLength 0
 			 * @type integer | undefined
 			 */
@@ -161048,6 +161202,13 @@ export type PostApiSearchZonesByZoneIdFilterFeedStatus200 = {
 					};
 				}[];
 				/**
+				 * @description Whether this Tag has another accepted public vocabulary position.
+				 * @type boolean | undefined
+				 */
+				tagHasOtherPositions?: boolean;
+				/**
+				 * @description Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.
+				 * @deprecated
 				 * @minLength 0
 				 * @type integer | undefined
 				 */
@@ -161655,6 +161816,13 @@ export type PostApiSearchZonesByZoneIdFilterFeedStatus200 = {
 							};
 						}[];
 						/**
+						 * @description Whether this Tag has another accepted public vocabulary position.
+						 * @type boolean | undefined
+						 */
+						tagHasOtherPositions?: boolean;
+						/**
+						 * @description Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.
+						 * @deprecated
 						 * @minLength 0
 						 * @type integer | undefined
 						 */
@@ -162342,6 +162510,13 @@ export type PostApiSearchZonesByZoneIdFilterFeedStatus200 = {
 							};
 						}[];
 						/**
+						 * @description Whether this Tag has another accepted public vocabulary position.
+						 * @type boolean | undefined
+						 */
+						tagHasOtherPositions?: boolean;
+						/**
+						 * @description Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.
+						 * @deprecated
 						 * @minLength 0
 						 * @type integer | undefined
 						 */
@@ -163052,6 +163227,13 @@ export type PostApiSearchZonesByZoneIdFilterFeedStatus200 = {
 							};
 						}[];
 						/**
+						 * @description Whether this Tag has another accepted public vocabulary position.
+						 * @type boolean | undefined
+						 */
+						tagHasOtherPositions?: boolean;
+						/**
+						 * @description Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.
+						 * @deprecated
 						 * @minLength 0
 						 * @type integer | undefined
 						 */
@@ -164804,6 +164986,13 @@ export type PostApiSearchZonesByZoneIdDockBlockExecutionsStatus200 = {
 				};
 			}[];
 			/**
+			 * @description Whether this Tag has another accepted public vocabulary position.
+			 * @type boolean | undefined
+			 */
+			tagHasOtherPositions?: boolean;
+			/**
+			 * @description Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.
+			 * @deprecated
 			 * @minLength 0
 			 * @type integer | undefined
 			 */
@@ -167280,6 +167469,13 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200 = {
 								};
 							}[];
 							/**
+							 * @description Whether this Tag has another accepted public vocabulary position.
+							 * @type boolean | undefined
+							 */
+							tagHasOtherPositions?: boolean;
+							/**
+							 * @description Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.
+							 * @deprecated
 							 * @minLength 0
 							 * @type integer | undefined
 							 */
@@ -167888,6 +168084,13 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200 = {
 										};
 									}[];
 									/**
+									 * @description Whether this Tag has another accepted public vocabulary position.
+									 * @type boolean | undefined
+									 */
+									tagHasOtherPositions?: boolean;
+									/**
+									 * @description Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.
+									 * @deprecated
 									 * @minLength 0
 									 * @type integer | undefined
 									 */
@@ -168497,6 +168700,13 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200 = {
 												};
 											}[];
 											/**
+											 * @description Whether this Tag has another accepted public vocabulary position.
+											 * @type boolean | undefined
+											 */
+											tagHasOtherPositions?: boolean;
+											/**
+											 * @description Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.
+											 * @deprecated
 											 * @minLength 0
 											 * @type integer | undefined
 											 */
@@ -169186,6 +169396,13 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200 = {
 												};
 											}[];
 											/**
+											 * @description Whether this Tag has another accepted public vocabulary position.
+											 * @type boolean | undefined
+											 */
+											tagHasOtherPositions?: boolean;
+											/**
+											 * @description Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.
+											 * @deprecated
 											 * @minLength 0
 											 * @type integer | undefined
 											 */
@@ -169898,6 +170115,13 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200 = {
 												};
 											}[];
 											/**
+											 * @description Whether this Tag has another accepted public vocabulary position.
+											 * @type boolean | undefined
+											 */
+											tagHasOtherPositions?: boolean;
+											/**
+											 * @description Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.
+											 * @deprecated
 											 * @minLength 0
 											 * @type integer | undefined
 											 */
@@ -170880,6 +171104,13 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200 = {
 										};
 									}[];
 									/**
+									 * @description Whether this Tag has another accepted public vocabulary position.
+									 * @type boolean | undefined
+									 */
+									tagHasOtherPositions?: boolean;
+									/**
+									 * @description Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.
+									 * @deprecated
 									 * @minLength 0
 									 * @type integer | undefined
 									 */
@@ -171489,6 +171720,13 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200 = {
 												};
 											}[];
 											/**
+											 * @description Whether this Tag has another accepted public vocabulary position.
+											 * @type boolean | undefined
+											 */
+											tagHasOtherPositions?: boolean;
+											/**
+											 * @description Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.
+											 * @deprecated
 											 * @minLength 0
 											 * @type integer | undefined
 											 */
@@ -172178,6 +172416,13 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200 = {
 												};
 											}[];
 											/**
+											 * @description Whether this Tag has another accepted public vocabulary position.
+											 * @type boolean | undefined
+											 */
+											tagHasOtherPositions?: boolean;
+											/**
+											 * @description Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.
+											 * @deprecated
 											 * @minLength 0
 											 * @type integer | undefined
 											 */
@@ -172890,6 +173135,13 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200 = {
 												};
 											}[];
 											/**
+											 * @description Whether this Tag has another accepted public vocabulary position.
+											 * @type boolean | undefined
+											 */
+											tagHasOtherPositions?: boolean;
+											/**
+											 * @description Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.
+											 * @deprecated
 											 * @minLength 0
 											 * @type integer | undefined
 											 */
@@ -173775,6 +174027,13 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200 = {
 								};
 							}[];
 							/**
+							 * @description Whether this Tag has another accepted public vocabulary position.
+							 * @type boolean | undefined
+							 */
+							tagHasOtherPositions?: boolean;
+							/**
+							 * @description Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.
+							 * @deprecated
 							 * @minLength 0
 							 * @type integer | undefined
 							 */
@@ -174383,6 +174642,13 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200 = {
 										};
 									}[];
 									/**
+									 * @description Whether this Tag has another accepted public vocabulary position.
+									 * @type boolean | undefined
+									 */
+									tagHasOtherPositions?: boolean;
+									/**
+									 * @description Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.
+									 * @deprecated
 									 * @minLength 0
 									 * @type integer | undefined
 									 */
@@ -174992,6 +175258,13 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200 = {
 												};
 											}[];
 											/**
+											 * @description Whether this Tag has another accepted public vocabulary position.
+											 * @type boolean | undefined
+											 */
+											tagHasOtherPositions?: boolean;
+											/**
+											 * @description Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.
+											 * @deprecated
 											 * @minLength 0
 											 * @type integer | undefined
 											 */
@@ -175681,6 +175954,13 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200 = {
 												};
 											}[];
 											/**
+											 * @description Whether this Tag has another accepted public vocabulary position.
+											 * @type boolean | undefined
+											 */
+											tagHasOtherPositions?: boolean;
+											/**
+											 * @description Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.
+											 * @deprecated
 											 * @minLength 0
 											 * @type integer | undefined
 											 */
@@ -176393,6 +176673,13 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200 = {
 												};
 											}[];
 											/**
+											 * @description Whether this Tag has another accepted public vocabulary position.
+											 * @type boolean | undefined
+											 */
+											tagHasOtherPositions?: boolean;
+											/**
+											 * @description Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.
+											 * @deprecated
 											 * @minLength 0
 											 * @type integer | undefined
 											 */
@@ -177375,6 +177662,13 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200 = {
 										};
 									}[];
 									/**
+									 * @description Whether this Tag has another accepted public vocabulary position.
+									 * @type boolean | undefined
+									 */
+									tagHasOtherPositions?: boolean;
+									/**
+									 * @description Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.
+									 * @deprecated
 									 * @minLength 0
 									 * @type integer | undefined
 									 */
@@ -177984,6 +178278,13 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200 = {
 												};
 											}[];
 											/**
+											 * @description Whether this Tag has another accepted public vocabulary position.
+											 * @type boolean | undefined
+											 */
+											tagHasOtherPositions?: boolean;
+											/**
+											 * @description Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.
+											 * @deprecated
 											 * @minLength 0
 											 * @type integer | undefined
 											 */
@@ -178673,6 +178974,13 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200 = {
 												};
 											}[];
 											/**
+											 * @description Whether this Tag has another accepted public vocabulary position.
+											 * @type boolean | undefined
+											 */
+											tagHasOtherPositions?: boolean;
+											/**
+											 * @description Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.
+											 * @deprecated
 											 * @minLength 0
 											 * @type integer | undefined
 											 */
@@ -179385,6 +179693,13 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200 = {
 												};
 											}[];
 											/**
+											 * @description Whether this Tag has another accepted public vocabulary position.
+											 * @type boolean | undefined
+											 */
+											tagHasOtherPositions?: boolean;
+											/**
+											 * @description Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.
+											 * @deprecated
 											 * @minLength 0
 											 * @type integer | undefined
 											 */
@@ -181234,6 +181549,13 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdBlockExecutionsStatus200 = {
 				};
 			}[];
 			/**
+			 * @description Whether this Tag has another accepted public vocabulary position.
+			 * @type boolean | undefined
+			 */
+			tagHasOtherPositions?: boolean;
+			/**
+			 * @description Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.
+			 * @deprecated
 			 * @minLength 0
 			 * @type integer | undefined
 			 */
@@ -182789,6 +183111,13 @@ export type PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus200 = {
 					};
 				}[];
 				/**
+				 * @description Whether this Tag has another accepted public vocabulary position.
+				 * @type boolean | undefined
+				 */
+				tagHasOtherPositions?: boolean;
+				/**
+				 * @description Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.
+				 * @deprecated
 				 * @minLength 0
 				 * @type integer | undefined
 				 */
@@ -183398,6 +183727,13 @@ export type PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus200 = {
 							};
 						}[];
 						/**
+						 * @description Whether this Tag has another accepted public vocabulary position.
+						 * @type boolean | undefined
+						 */
+						tagHasOtherPositions?: boolean;
+						/**
+						 * @description Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.
+						 * @deprecated
 						 * @minLength 0
 						 * @type integer | undefined
 						 */
@@ -184087,6 +184423,13 @@ export type PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus200 = {
 							};
 						}[];
 						/**
+						 * @description Whether this Tag has another accepted public vocabulary position.
+						 * @type boolean | undefined
+						 */
+						tagHasOtherPositions?: boolean;
+						/**
+						 * @description Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.
+						 * @deprecated
 						 * @minLength 0
 						 * @type integer | undefined
 						 */
@@ -184799,6 +185142,13 @@ export type PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus200 = {
 							};
 						}[];
 						/**
+						 * @description Whether this Tag has another accepted public vocabulary position.
+						 * @type boolean | undefined
+						 */
+						tagHasOtherPositions?: boolean;
+						/**
+						 * @description Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.
+						 * @deprecated
 						 * @minLength 0
 						 * @type integer | undefined
 						 */
@@ -186803,6 +187153,13 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus200 
 					};
 				}[];
 				/**
+				 * @description Whether this Tag has another accepted public vocabulary position.
+				 * @type boolean | undefined
+				 */
+				tagHasOtherPositions?: boolean;
+				/**
+				 * @description Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.
+				 * @deprecated
 				 * @minLength 0
 				 * @type integer | undefined
 				 */
@@ -187412,6 +187769,13 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus200 
 							};
 						}[];
 						/**
+						 * @description Whether this Tag has another accepted public vocabulary position.
+						 * @type boolean | undefined
+						 */
+						tagHasOtherPositions?: boolean;
+						/**
+						 * @description Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.
+						 * @deprecated
 						 * @minLength 0
 						 * @type integer | undefined
 						 */
@@ -188101,6 +188465,13 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus200 
 							};
 						}[];
 						/**
+						 * @description Whether this Tag has another accepted public vocabulary position.
+						 * @type boolean | undefined
+						 */
+						tagHasOtherPositions?: boolean;
+						/**
+						 * @description Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.
+						 * @deprecated
 						 * @minLength 0
 						 * @type integer | undefined
 						 */
@@ -188813,6 +189184,13 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus200 
 							};
 						}[];
 						/**
+						 * @description Whether this Tag has another accepted public vocabulary position.
+						 * @type boolean | undefined
+						 */
+						tagHasOtherPositions?: boolean;
+						/**
+						 * @description Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.
+						 * @deprecated
 						 * @minLength 0
 						 * @type integer | undefined
 						 */
@@ -190409,6 +190787,13 @@ export type PostApiSearchStatus200 = {
 				};
 			}[];
 			/**
+			 * @description Whether this Tag has another accepted public vocabulary position.
+			 * @type boolean | undefined
+			 */
+			tagHasOtherPositions?: boolean;
+			/**
+			 * @description Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.
+			 * @deprecated
 			 * @minLength 0
 			 * @type integer | undefined
 			 */
@@ -192414,6 +192799,13 @@ export type PostApiSearchByIndexStatus200 = {
 			};
 		}[];
 		/**
+		 * @description Whether this Tag has another accepted public vocabulary position.
+		 * @type boolean | undefined
+		 */
+		tagHasOtherPositions?: boolean;
+		/**
+		 * @description Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.
+		 * @deprecated
 		 * @minLength 0
 		 * @type integer | undefined
 		 */

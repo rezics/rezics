@@ -117,7 +117,7 @@ export default {
 			entailed: "Inferencia semántica",
 			retrieval_only: "Expansión de búsqueda",
 		},
-		otherPositions: insert("{{count}} posiciones más en el vocabulario", { count: Number }),
+		otherPositions: "Hay otras posiciones en el vocabulario",
 	},
 	semantics: {
 		structureTitle: "Estructura del vocabulario",

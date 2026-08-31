@@ -12,7 +12,8 @@ import {
 	type PostgreSqlExplainPlan,
 } from "./tag-path-capacity-contract";
 
-type WorkloadAuthority = "global" | "realm";
+type ApplicationAuthority = "global" | "realm";
+type WorkloadAuthority = ApplicationAuthority | "public-position";
 
 type FixtureIdentity = Readonly<{
 	readonly hotExpressionId: string;
@@ -63,11 +64,13 @@ const FixtureTable = "tag_path_capacity_fixture_v2" as const;
 const FixturePathTable = "tag_path_capacity_path_v2" as const;
 const FixtureJudgmentBatchSize = 25 as const;
 const HotKeyMaximumRetries = 2 as const;
+const ProjectionHotKeyMaximumRetries = 3 as const;
 const AcceptedApplicationsPerUnit = 3 as const;
 const HotPathMemberCount = 16 as const;
 const CapacityRelations = [
 	"tag_path",
 	"tag_path_member",
+	"tag_public_position_stat",
 	"tag_path_sense",
 	"tag_path_sense_binding",
 	"tag_expression",
@@ -202,9 +205,9 @@ async function loadFixture(
 		await client.query(`alter table public.${FixturePathTable} add unique (expression_id)`);
 		await client.query(`alter table public.${FixturePathTable} add unique (sense_id)`);
 
-		// Prerequisite released identities are fixture scaffolding. Semantic
-		// definitions, applications, judgments, and projections below run through
-		// their production owner triggers.
+		// Prerequisite released identities and their dense zero-count Tag rows are
+		// disposable fixture scaffolding. Semantic definitions, applications,
+		// judgments, and projection deltas below run through production owner triggers.
 		await client.query("set local session_replication_role = replica");
 		await client.query(`
 			insert into public.unit(id, kind, status, visibility, published_at)
@@ -230,6 +233,10 @@ async function loadFixture(
 		`);
 		await client.query(`
 			insert into public.tag(id)
+			select id from public.${FixtureTable} where kind = 'tag'
+		`);
+		await client.query(`
+			insert into public.tag_public_position_stat(tag_id)
 			select id from public.${FixtureTable} where kind = 'tag'
 		`);
 		await client.query(`
@@ -472,6 +479,18 @@ async function validateReusableFixture(
 		if (Number(requireRow(result.rows, "Reusable Tag Path capacity fixture").count) !== expected)
 			throw new Error("Existing Tag Path capacity fixture does not match requested " + kind);
 	}
+	const expectedTagCount = input.pathCount + HotPathMemberCount;
+	const projection = await client.query<{ readonly count: string }>(
+		`select count(*)::text as count
+		 from public.tag_public_position_stat projection
+		 join public.${FixtureTable} fixture on fixture.id = projection.tag_id
+		 where fixture.kind = 'tag'`,
+	);
+	if (
+		Number(requireRow(projection.rows, "Reusable Tag projection fixture").count) !==
+		expectedTagCount
+	)
+		throw new Error("Existing Tag Path capacity fixture has an incomplete position projection");
 }
 
 async function readFixtureIdentity(client: Client, profileCount: number): Promise<FixtureIdentity> {
@@ -511,7 +530,7 @@ async function readFixtureIdentity(client: Client, profileCount: number): Promis
 	return row;
 }
 
-function hotWriteSql(authority: WorkloadAuthority): string {
+function hotWriteSql(authority: ApplicationAuthority): string {
 	const relation =
 		authority === "global"
 			? "unit_tag_path_application_judgment"
@@ -538,7 +557,7 @@ async function deterministicBackoff(sample: number, retry: number): Promise<void
 }
 
 async function runHotWriteTier(input: {
-	readonly authority: WorkloadAuthority;
+	readonly authority: ApplicationAuthority;
 	readonly concurrency: number;
 	readonly connectionString: string;
 	readonly fixture: FixtureIdentity;
@@ -638,6 +657,357 @@ async function runHotWriteTier(input: {
 	};
 }
 
+async function setPublicPositionVote(
+	client: Client,
+	pathOrdinal: number,
+	value: -1 | 1,
+): Promise<void> {
+	const query = `
+		update public.tag_path_vote vote
+		set value = $2::smallint, updated_at = clock_timestamp()
+		from public.${FixturePathTable} path, public.${FixtureTable} profile
+		where path.ordinal = $1::integer
+			and profile.kind = 'profile' and profile.ordinal = 0
+			and vote.path_id = path.path_id and vote.profile_id = profile.id
+	`;
+	const result = await client.query(query, [pathOrdinal, value]);
+	if (result.rowCount !== 1) throw new Error("Threshold crossing did not update one Path vote");
+}
+
+async function crossPublicPositionThreshold(client: Client, pathOrdinal: number): Promise<void> {
+	await setPublicPositionVote(client, pathOrdinal, -1);
+	await setPublicPositionVote(client, pathOrdinal, 1);
+}
+
+async function runPublicPositionTransitionTier(input: {
+	readonly concurrency: number;
+	readonly connectionString: string;
+	readonly pathCount: number;
+	readonly poolCapacity: number;
+	readonly sampleCount: number;
+	readonly walClient: Client;
+}): Promise<HotWriteSummary> {
+	const clients = Array.from(
+		{ length: input.concurrency },
+		() => new Client({ connectionString: input.connectionString }),
+	);
+	await Promise.all(clients.map((client) => client.connect()));
+	let nextSample = 0;
+	let attempts = 0;
+	let backpressure = 0;
+	let commits = 0;
+	let deadlocks = 0;
+	let timeouts = 0;
+	let unexpected = 0;
+	const unexpectedErrors: string[] = [];
+	const terminalLatencies: number[] = [];
+	const backpressureDecisionLatencies: number[] = [];
+	const walStart = await currentWalLsn(input.walClient);
+	const tierStartedAt = performance.now();
+	try {
+		await Promise.all(
+			clients.map(async (client) => {
+				while (nextSample < input.sampleCount) {
+					const sample = nextSample;
+					nextSample += 1;
+					const logicalStartedAt = performance.now();
+					for (let retry = 0; retry <= ProjectionHotKeyMaximumRetries; retry += 1) {
+						attempts += 1;
+						const attemptStartedAt = performance.now();
+						try {
+							await client.query("begin");
+							await client.query("set local statement_timeout = '1500ms'");
+							await crossPublicPositionThreshold(client, sample % input.pathCount);
+							await client.query("commit");
+							commits += 1;
+							terminalLatencies.push(performance.now() - logicalStartedAt);
+							break;
+						} catch (error) {
+							await client.query("rollback").catch(() => undefined);
+							if (hasPostgreSqlErrorCode(error, "55P03")) {
+								backpressure += 1;
+								backpressureDecisionLatencies.push(performance.now() - attemptStartedAt);
+								if (retry < ProjectionHotKeyMaximumRetries) {
+									await deterministicBackoff(sample, retry);
+									continue;
+								}
+								terminalLatencies.push(performance.now() - logicalStartedAt);
+								break;
+							}
+							if (hasPostgreSqlErrorCode(error, "57014")) timeouts += 1;
+							else if (hasPostgreSqlErrorCode(error, "40P01")) deadlocks += 1;
+							else {
+								unexpected += 1;
+								if (unexpectedErrors.length < 5)
+									unexpectedErrors.push(describeDatabaseError(error));
+							}
+							terminalLatencies.push(performance.now() - logicalStartedAt);
+							break;
+						}
+					}
+				}
+			}),
+		);
+	} finally {
+		await Promise.all(clients.map((client) => client.end()));
+	}
+	const elapsedMilliseconds = performance.now() - tierStartedAt;
+	const walEnd = await currentWalLsn(input.walClient);
+	return {
+		authority: "public-position",
+		attempts,
+		backpressure,
+		backpressureDecisionLatency: summarizeLatencies(backpressureDecisionLatencies),
+		commits,
+		deadlocks,
+		elapsedMilliseconds: Number(elapsedMilliseconds.toFixed(3)),
+		lockWaitP95Milliseconds: 0,
+		poolUtilization: Number((input.concurrency / input.poolCapacity).toFixed(3)),
+		terminalLatency: summarizeLatencies(terminalLatencies),
+		throughputPerSecond: Number(((commits * 1_000) / elapsedMilliseconds).toFixed(3)),
+		timeouts,
+		unexpected,
+		unexpectedErrors,
+		walBytes: await walBytesBetween(input.walClient, walStart, walEnd),
+	};
+}
+
+type PublicPositionCountRow = Readonly<{
+	readonly publicPositionCount: string;
+	readonly tagId: string;
+}>;
+
+async function readHotPathProjection(
+	client: Client,
+	hotPathId: string,
+): Promise<readonly PublicPositionCountRow[]> {
+	const result = await client.query<PublicPositionCountRow>(
+		`select projection.tag_id::text as "tagId",
+			projection.public_position_count::text as "publicPositionCount"
+		 from public.tag_path_member member
+		 join public.tag concept on concept.id = member.node_id
+		 join public.tag_public_position_stat projection on projection.tag_id = concept.id
+		 where member.path_id = $1::uuid
+		 order by projection.tag_id`,
+		[hotPathId],
+	);
+	return result.rows;
+}
+
+function assertProjectionDelta(
+	before: readonly PublicPositionCountRow[],
+	after: readonly PublicPositionCountRow[],
+	delta: bigint,
+	context: string,
+): void {
+	if (after.length !== before.length) throw new Error(context + " changed the projection fan-out");
+	for (let index = 0; index < before.length; index += 1) {
+		const previous = before[index];
+		const current = after[index];
+		if (!previous || !current || previous.tagId !== current.tagId)
+			throw new Error(context + " changed the ordered Tag identity set");
+		if (BigInt(current.publicPositionCount) !== BigInt(previous.publicPositionCount) + delta)
+			throw new Error(context + " produced an incorrect counter delta for " + previous.tagId);
+	}
+}
+
+async function verifyPublicPositionSafety(
+	client: Client,
+	fixture: FixtureIdentity,
+): Promise<Readonly<Record<string, boolean | number | string>>> {
+	const baseline = await readHotPathProjection(client, fixture.hotPathId);
+	if (baseline.length !== HotPathMemberCount)
+		throw new Error(
+			`Hot Path projection fan-out expected ${HotPathMemberCount}, got ${baseline.length}`,
+		);
+
+	await client.query("begin");
+	try {
+		const publicStateTransitions = [
+			{
+				name: "status",
+				reject:
+					"update public.unit set status = 'draft', updated_at = clock_timestamp() where id = $1",
+				restore:
+					"update public.unit set status = 'published', updated_at = clock_timestamp() where id = $1",
+			},
+			{
+				name: "visibility",
+				reject:
+					"update public.unit set visibility = 'private', updated_at = clock_timestamp() where id = $1",
+				restore:
+					"update public.unit set visibility = 'public', updated_at = clock_timestamp() where id = $1",
+			},
+			{
+				name: "moderation",
+				reject:
+					"update public.unit set moderation_status = 'pending', updated_at = clock_timestamp() where id = $1",
+				restore:
+					"update public.unit set moderation_status = 'approved', updated_at = clock_timestamp() where id = $1",
+			},
+			{
+				name: "soft deletion",
+				reject:
+					"update public.unit set deleted_at = clock_timestamp(), updated_at = clock_timestamp() where id = $1",
+				restore:
+					"update public.unit set deleted_at = null, updated_at = clock_timestamp() where id = $1",
+			},
+		] as const;
+		for (const transition of publicStateTransitions) {
+			const rejected = await client.query(transition.reject, [fixture.hotPathId]);
+			if (rejected.rowCount !== 1)
+				throw new Error(`Hot Path ${transition.name} transition updated no Unit`);
+			assertProjectionDelta(
+				baseline,
+				await readHotPathProjection(client, fixture.hotPathId),
+				-1n,
+				`Path ${transition.name} rejection`,
+			);
+			await client.query(transition.restore, [fixture.hotPathId]);
+			assertProjectionDelta(
+				baseline,
+				await readHotPathProjection(client, fixture.hotPathId),
+				0n,
+				`Path ${transition.name} restoration`,
+			);
+		}
+		await client.query("commit");
+	} catch (error) {
+		await client.query("rollback").catch(() => undefined);
+		throw error;
+	}
+
+	await client.query("begin");
+	try {
+		await setPublicPositionVote(client, 0, -1);
+		assertProjectionDelta(
+			baseline,
+			await readHotPathProjection(client, fixture.hotPathId),
+			-1n,
+			"Vote acceptance rejection",
+		);
+		await setPublicPositionVote(client, 0, 1);
+		assertProjectionDelta(
+			baseline,
+			await readHotPathProjection(client, fixture.hotPathId),
+			0n,
+			"Vote acceptance restoration",
+		);
+		await client.query("commit");
+	} catch (error) {
+		await client.query("rollback").catch(() => undefined);
+		throw error;
+	}
+
+	let negativeGuardCode = "";
+	await client.query("begin");
+	try {
+		const path = await client.query<{ readonly pathId: string }>(
+			`select path_id::text as "pathId" from public.${FixturePathTable} where ordinal = 1`,
+		);
+		const pathId = requireRow(path.rows, "Negative-guard Path").pathId;
+		await client.query("select public.adjust_tag_public_position_stat($1::uuid, -1)", [pathId]);
+		await client.query("select public.adjust_tag_public_position_stat($1::uuid, -1)", [pathId]);
+		throw new Error("Tag public-position negative guard accepted an underflow");
+	} catch (error) {
+		await client.query("rollback").catch(() => undefined);
+		if (!hasPostgreSqlErrorCode(error, "23514")) throw error;
+		negativeGuardCode = "23514";
+	}
+	const minimum = await client.query<{ readonly count: string }>(
+		"select min(public_position_count)::text as count from public.tag_public_position_stat",
+	);
+	if (BigInt(requireRow(minimum.rows, "Projection minimum").count) < 0n)
+		throw new Error("Tag public-position projection contains a negative counter");
+
+	await client.query("begin");
+	let compatibilityCount = "";
+	let hasOtherPositions = false;
+	let projectionCountType = "";
+	let directMutationGuardCode = "";
+	try {
+		const wide = await client.query<{
+			readonly compatibilityCount: string;
+			readonly hasOtherPositions: boolean;
+			readonly projectionCountType: string;
+		}>(
+			`select greatest(3000000000::bigint - 1, 0)::text as "compatibilityCount",
+				3000000000::bigint > 1 as "hasOtherPositions",
+				format_type(attribute.atttypid, attribute.atttypmod) as "projectionCountType"
+			 from pg_catalog.pg_attribute attribute
+			 where attribute.attrelid = 'public.tag_public_position_stat'::regclass
+				and attribute.attname = 'public_position_count' and not attribute.attisdropped`,
+		);
+		const row = requireRow(wide.rows, "Three-billion position projection");
+		compatibilityCount = row.compatibilityCount;
+		hasOtherPositions = row.hasOtherPositions;
+		projectionCountType = row.projectionCountType;
+		await client.query("rollback");
+	} catch (error) {
+		await client.query("rollback").catch(() => undefined);
+		throw error;
+	}
+	if (compatibilityCount !== "2999999999" || !hasOtherPositions || projectionCountType !== "bigint")
+		throw new Error("Tag public-position compatibility fields are not bigint-safe at 3B");
+
+	await client.query("begin");
+	try {
+		await client.query(
+			"update public.tag_public_position_stat set public_position_count = public_position_count where tag_id = $1",
+			[fixture.terminalTagId],
+		);
+		throw new Error("Tag public-position projection accepted a direct mutation");
+	} catch (error) {
+		await client.query("rollback").catch(() => undefined);
+		if (!hasPostgreSqlErrorCode(error, "23514")) throw error;
+		directMutationGuardCode = "23514";
+	}
+
+	const drift = await client.query(
+		`with expected as (
+			select requested.tag_id,
+				count(member.path_id) filter (
+					where path_unit.id is not null and vote_stat.path_id is not null
+				)::bigint as expected_count
+			from unnest($1::uuid[]) as requested(tag_id)
+			left join public.tag_path_member member on member.node_id = requested.tag_id
+			left join public.unit path_unit on path_unit.id = member.path_id
+				and path_unit.kind = 'tag_path'
+				and public.tag_path_unit_is_public(
+					path_unit.status,
+					path_unit.visibility,
+					path_unit.moderation_status,
+					path_unit.deleted_at
+				)
+			left join public.tag_path_vote_stat vote_stat on vote_stat.path_id = member.path_id
+				and vote_stat.score > 0 and vote_stat.vote_count > 0
+			group by requested.tag_id
+		)
+		select expected.tag_id
+		from expected
+		left join public.tag_public_position_stat projection on projection.tag_id = expected.tag_id
+		where projection.tag_id is null
+			or projection.public_position_count is distinct from expected.expected_count`,
+		[baseline.map(({ tagId }) => tagId)],
+	);
+	if (drift.rowCount !== 0)
+		throw new Error("Tag public-position safety checks left projection drift");
+	return {
+		affectedCountersPerTransition: baseline.length,
+		bigintCompatibilityCount: compatibilityCount,
+		bigintHasOtherPositions: hasOtherPositions,
+		directMutationGuardCode,
+		negativeGuardCode,
+		projectionCountType,
+		negativeMinimum: requireRow(minimum.rows, "Projection minimum").count,
+		moderationTransitionRestored: true,
+		softDeletionTransitionRestored: true,
+		statusTransitionRestored: true,
+		visibilityTransitionRestored: true,
+		voteAcceptanceTransitionRestored: true,
+	};
+}
+
 async function explain(
 	client: Client,
 	query: string,
@@ -716,7 +1086,22 @@ async function capturePlans(
 ): Promise<Readonly<Record<string, PlanEvidence>>> {
 	const zeroUuid = "00000000-0000-0000-0000-000000000000";
 	const zeroPosition = "";
+	const projectionTags = await client.query<{ readonly id: string }>(
+		`select id::text as id from public.${FixtureTable}
+		 where kind = 'tag' order by ordinal limit 50`,
+	);
 	return {
+		publicPositionProjection: await boundedPlan(client, {
+			name: "Tag public-position request projection",
+			query: `
+				select tag_id, public_position_count
+				from public.tag_public_position_stat
+				where tag_id = any($1::uuid[])
+			`,
+			parameters: [projectionTags.rows.map(({ id }) => id)],
+			requiredIndexes: ["tag_public_position_stat_pkey"],
+			corpusRelations: ["tag_public_position_stat"],
+		}),
 		pathsContainingTag: await boundedPlan(client, {
 			name: "accepted Paths containing a Tag",
 			query: `
@@ -848,10 +1233,13 @@ async function verifyParity(
 		readonly globalEffectiveTagCount: string;
 		readonly hotIntermediateLeakCount: string;
 		readonly pathMemberCount: string;
+		readonly projectionNegativeCount: string;
+		readonly projectionTagCount: string;
 		readonly qualifiedAssertionCount: string;
 		readonly realmApplicationCount: string;
 		readonly realmAssertionCount: string;
 		readonly realmEffectiveTagCount: string;
+		readonly terminalPublicPositionCount: string;
 	}>(
 		`
 		select
@@ -868,6 +1256,11 @@ async function verifyParity(
 			 where effective.unit_id = $1::uuid and tag.ordinal between 2 and 15)
 				as "hotIntermediateLeakCount",
 			(select count(*)::text from public.tag_path_member) as "pathMemberCount",
+			(select count(*)::text from public.tag_public_position_stat
+			 where public_position_count < 0) as "projectionNegativeCount",
+			(select count(*)::text from public.tag_public_position_stat projection
+			 join public.${FixtureTable} fixture on fixture.id = projection.tag_id
+			 where fixture.kind = 'tag') as "projectionTagCount",
 			(select count(*)::text from public.unit_expression_assertion
 			 where unit_id = $1::uuid and expression_id = $3::uuid
 				and direct = false and path_application_count = 1) as "qualifiedAssertionCount",
@@ -876,7 +1269,9 @@ async function verifyParity(
 			(select count(*)::text from public.realm_unit_expression_assertion)
 				as "realmAssertionCount",
 			(select count(*)::text from public.realm_unit_effective_tag)
-				as "realmEffectiveTagCount"
+				as "realmEffectiveTagCount",
+			(select public_position_count::text from public.tag_public_position_stat
+			 where tag_id = $2::uuid) as "terminalPublicPositionCount"
 	`,
 		[fixture.hotUnitId, fixture.terminalTagId, fixture.hotExpressionId],
 	);
@@ -886,6 +1281,7 @@ async function verifyParity(
 	const effectiveTagCount = input.unitCount * (AcceptedApplicationsPerUnit + 1);
 	const pathMemberCount = input.pathCount * 2 + (HotPathMemberCount - 2);
 	const expressionEffectiveTagCount = input.pathCount * 2;
+	const projectionTagCount = input.pathCount + HotPathMemberCount;
 	const actual = {
 		bareRedDirectCount: Number(row.bareRedDirectCount),
 		expressionEffectiveTagCount: Number(row.expressionEffectiveTagCount),
@@ -894,10 +1290,13 @@ async function verifyParity(
 		globalEffectiveTagCount: Number(row.globalEffectiveTagCount),
 		hotIntermediateLeakCount: Number(row.hotIntermediateLeakCount),
 		pathMemberCount: Number(row.pathMemberCount),
+		projectionNegativeCount: Number(row.projectionNegativeCount),
+		projectionTagCount: Number(row.projectionTagCount),
 		qualifiedAssertionCount: Number(row.qualifiedAssertionCount),
 		realmApplicationCount: Number(row.realmApplicationCount),
 		realmAssertionCount: Number(row.realmAssertionCount),
 		realmEffectiveTagCount: Number(row.realmEffectiveTagCount),
+		terminalPublicPositionCount: Number(row.terminalPublicPositionCount),
 	};
 	for (const [name, value, expected] of [
 		["bare Red direct assertion", actual.bareRedDirectCount, 0],
@@ -907,10 +1306,13 @@ async function verifyParity(
 		["global Effective Tags", actual.globalEffectiveTagCount, effectiveTagCount],
 		["Path-driven intermediate support", actual.hotIntermediateLeakCount, 0],
 		["Path members", actual.pathMemberCount, pathMemberCount],
+		["negative Tag position projections", actual.projectionNegativeCount, 0],
+		["Tag position projections", actual.projectionTagCount, projectionTagCount],
 		["qualified Expression assertion", actual.qualifiedAssertionCount, 1],
 		["Realm Applications", actual.realmApplicationCount, applicationCount],
 		["Realm Expression assertions", actual.realmAssertionCount, assertionCount],
 		["Realm Effective Tags", actual.realmEffectiveTagCount, effectiveTagCount],
+		["hot terminal public positions", actual.terminalPublicPositionCount, input.pathCount],
 	] as const)
 		if (value !== expected)
 			throw new Error(`${name} parity failed: expected ${expected}, received ${value}`);
@@ -920,6 +1322,8 @@ async function verifyParity(
 		assertionCountExpected: assertionCount,
 		bareRedAndQualifiedClaimRemainDistinct: true,
 		effectiveTagCountExpected: effectiveTagCount,
+		terminalHasOtherPositions: actual.terminalPublicPositionCount > 1,
+		terminalOtherPositionCount: actual.terminalPublicPositionCount - 1,
 		pathLengthDoesNotCreateAssertions: true,
 	};
 }
@@ -1038,8 +1442,18 @@ try {
 		sampleCount,
 		walClient: client,
 	});
+	const publicPositionSafety = await verifyPublicPositionSafety(client, fixture);
+	const publicPositionWrites = await runPublicPositionTransitionTier({
+		concurrency,
+		connectionString,
+		pathCount,
+		poolCapacity,
+		sampleCount,
+		walClient: client,
+	});
 	assertAcceptedWorkload(globalWrites);
 	assertAcceptedWorkload(realmWrites);
+	assertAcceptedWorkload(publicPositionWrites);
 	for (const relation of CapacityRelations) await client.query("analyze public." + relation);
 	const plans = await capturePlans(client, fixture);
 	const parity = await verifyParity(client, fixture, { pathCount, unitCount });
@@ -1058,7 +1472,7 @@ try {
 	console.info(
 		JSON.stringify(
 			{
-				schemaVersion: 2,
+				schemaVersion: 3,
 				fixture: {
 					acceptedApplicationsPerUnit: AcceptedApplicationsPerUnit,
 					hotPathMemberCount: HotPathMemberCount,
@@ -1068,9 +1482,14 @@ try {
 					unitCount,
 				},
 				load,
-				workloads: { global: globalWrites, realm: realmWrites },
+				workloads: {
+					global: globalWrites,
+					publicPosition: publicPositionWrites,
+					realm: realmWrites,
+				},
 				plans,
 				parity,
+				publicPositionSafety,
 				storage,
 				runtime: {
 					databaseBytes: Number(runtimeRow.databaseBytes),
@@ -1087,6 +1506,10 @@ try {
 						"The fixture includes a 16-member Path whose accepted source yields one Expression assertion plus only explicit Effective Tags.",
 					lockStrategy:
 						"pg_try_advisory_xact_lock returns immediate retryable backpressure, so aggregate lock wait is structurally zero.",
+					publicPositionRequestBound:
+						"Search reads at most 50 tag_public_position_stat primary keys; Path state and accepted-vote threshold crossings update at most 16 concept counters.",
+					projectionSkew:
+						"Every fixture Path shares one terminal Tag, so the public-position tier measures the intentional hot-key backpressure path under concurrent threshold crossings.",
 					passed: true,
 				},
 			},

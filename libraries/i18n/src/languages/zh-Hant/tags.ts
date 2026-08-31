@@ -114,7 +114,7 @@ export default {
 			entailed: "語意推導",
 			retrieval_only: "搜尋擴展",
 		},
-		otherPositions: insert("另有 {{count}} 個詞彙位置", { count: Number }),
+		otherPositions: "還有其他詞彙位置",
 	},
 	semantics: {
 		structureTitle: "詞彙結構",

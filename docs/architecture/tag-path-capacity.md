@@ -42,6 +42,8 @@ The planning distribution is deliberately skewed:
 | accepted Applications per Unit/Expression/authority | 1 | polyhierarchy may produce several |
 | hierarchy children returned | 10-30 | API bound |
 | Path-position page | 10-20 | 50 maximum |
+| Search Tag position-availability keys | 10-20 | 50 primary keys |
+| counters changed by one Path threshold transition | 2-4 | 16 hard |
 
 The PostgreSQL inference guards mirror the 16/64/256 constants exported by the
 typed schema. They serialize definition graph changes, reject cycles, cap active
@@ -66,7 +68,9 @@ Let:
 - `J` be sparse Application judgments;
 - `E` be distinct asserted Expressions per Unit/authority;
 - `A` be distinct Effective Tags in an Expression closure, `A <= 256`;
-- `R` be Realm authorities that contain a Unit.
+- `R` be Realm authorities that contain a Unit;
+- `T` be Tag concepts; and
+- `Q` be immutable Path definitions.
 
 The dominant global relations are:
 
@@ -82,9 +86,17 @@ relations are independent:
 
 ```text
 tag_path_member                               = sum(Path length)
+tag_public_position_stat                      = T
 tag_path_sense_binding                        = sum(explicit bindings)
 tag_expression_effective_tag                  <= 256 * Expression count
 ```
+
+The position projection is one dense row per Tag, independent of the number of
+Paths containing that Tag. By contrast, `tag_path_member <= 16 * Q`. If the
+500M/3B Tag planning ceiling is paired with one Path-scale definition per Tag,
+the raw membership envelope is therefore as high as 8B/48B rows. That raw
+relation remains the rebuild authority and paged discovery source, but it is
+not a request-time count source.
 
 At 500M and 3B rows, all reads remain equality- or range-routed by the leftmost
 index key. No correctness path assumes one node can hold the 3B-row physical
@@ -132,6 +144,15 @@ resets the existing job's authority cursors under the same row lock. Search and
 Unit effective projections are therefore refreshed asynchronously without a
 synchronous corpus fan-out in the curation request.
 
+A Path definition-vote acceptance crossing or Path Unit
+status/visibility/moderation/deletion crossing changes the public-position
+projection for the concept members of that Path. Its work is `O(L)`, with
+`L <= 16`, and does not depend on `T`, `Q`, or the fan-in of a popular Tag. The
+projection writer acquires sorted Tag hot keys, performs focused `bigint`
+deltas, and rejects underflow. A Tag shared by many Paths deliberately becomes
+one serial admission key; sustained contention crosses the reducer threshold
+below instead of creating a lock queue.
+
 ## Storage envelope
 
 The 2026-08-29 disposable PostgreSQL 18.4 qualification measured the following
@@ -152,6 +173,15 @@ concurrent-index workspace.
 | global Effective Tag | 497.664 | 231.7 GiB | 1,390.5 GiB |
 | Realm Effective Tag | 731.136 | 340.5 GiB | 2,042.8 GiB |
 | Path member | 406.753 | 189.4 GiB | 1,136.5 GiB |
+| Tag public-position projection | 298.331 | 138.9 GiB | 833.5 GiB |
+
+The dense `tag_public_position_stat` has exactly one index: its `tag_id` primary
+key. The small fixture measured 298.331 heap-plus-index bytes per Tag, including
+fixed page overhead. Straight-line topology estimates are 138.9 GiB at 500M and
+833.5 GiB at 3B; 30% operating headroom raises those to 180.6 GiB and about
+1.06 TiB before replicas, backups, WAL retention, and concurrent maintenance
+workspace. Staging measurements replace these conservative small-fixture values
+before procurement.
 
 With 30% headroom, 500M global Path Applications need about 263 GiB before
 replicas and backups. At 3B they need about 1.54 TiB with headroom. Two replicas
@@ -168,6 +198,7 @@ Stable routing keys lead every corpus request key and future partition key:
 | --- | --- |
 | Path definition and vote | `path_id` |
 | all positions for a concept | `(node_id, path_id, ordinal)` |
+| public position availability | `tag_public_position_stat(tag_id)` primary key |
 | global Applications for a Unit | `(unit_id, pinned, position, id)` |
 | Applications using a Sense | `(sense_id, unit_id, id)` |
 | global assertion inverse | `(expression_id, unit_id)` |
@@ -199,7 +230,8 @@ for at least:
 - Expression assertion inverse reads;
 - Effective Tag inverse reads;
 - Realm Unit Application reads;
-- active Sense and inference-rule reads; and
+- active Sense and inference-rule reads;
+- a 50-key `tag_public_position_stat` primary-key lookup; and
 - hot Application judgment mutation.
 
 Plan acceptance requires the named routing index (or documented equivalent),
@@ -231,9 +263,33 @@ and the only paged incremental sort consumed 51 rows. Semantic parity proved
 that a 16-member Path produced one qualified Expression assertion, no
 intermediate-member assertion, and only its explicit Effective Tags.
 
+The projection-qualified harness additionally makes every fixture Path share
+one terminal Tag, runs concurrent accepted/rejected vote crossings against
+that hot counter, verifies status, visibility, moderation, soft-deletion, and
+vote-acceptance threshold crossings, and proves that one 16-member Path changes
+exactly 16 counters. It forces a second decrement to fail with `23514`, proves
+no negative value survives rollback, and exercises compatibility derivation at
+3,000,000,000.
+Its 50-key request plan must name `tag_public_position_stat_pkey` and avoid a
+corpus scan.
+
+The final 2026-08-31 projection run used the atomic migration and the same 1,000
+Unit/1,000 Path fixture. Under six concurrent writers sharing one terminal Tag,
+it committed 226/256 logical mutations (88.3%) at 159.796 writes/s with 101.223
+ms terminal p95. The bounded retry loop made 504 attempts and returned 278
+immediate backpressure decisions; there were zero deadlocks, timeouts,
+unexpected errors, or residual drift. The 50-key request used only
+`tag_public_position_stat_pkey`, contained no sequential scan, touched 17 shared
+blocks, and executed in 0.056 ms on the fixture. Safety checks covered exactly
+16 counters, restored every public-state and vote threshold, rejected both an
+underflow and direct projection mutation with `23514`, and derived the
+compatibility count `2,999,999,999` from a `3,000,000,000` `bigint`. These are
+bounded-path and skew qualifications, not extrapolated 500M/3B latency claims.
+
 The default hot-key tier uses six concurrent writers, a 64-connection pool
-capacity, three total attempts per logical mutation, and deterministic bounded
-backoff. This is a synchronous-admission qualification, not a promise to absorb
+capacity, deterministic bounded backoff, three total attempts for Application
+mutations, and four total attempts for public-position threshold crossings.
+This is a synchronous-admission qualification, not a promise to absorb
 arbitrary fan-in on one aggregate key. The short burst must commit at least 80%
 of samples at 100 accepted writes/s with accepted-or-rejected p95 below 150 ms;
 the stricter sustained rejection threshold below still triggers the reducer
@@ -269,6 +325,11 @@ unbounded lock queue. Relation and inference graph mutations use separate
 serialized definition locks; these rare curation writes must never share the
 high-rate judgment admission path.
 
+Public-position writers use the same immediate-admission policy. They first
+lock the Path vote key, then at most 16 sorted Tag projection keys. The
+disposable skew workload must show bounded `55P03` decisions with zero
+deadlocks, timeouts, unexpected errors, or residual drift.
+
 Move a source family to an idempotent event outbox plus key-routed micro-batch
 reducer when any threshold is sustained for five minutes:
 
@@ -293,6 +354,7 @@ envelope, and no later than 100M live rows or 25% of usable node data volume for
 one corpus relation. Partition keys are the same stable routing prefixes:
 
 - global Unit facts: hash `unit_id`;
+- public position projection: hash `tag_id`;
 - Realm Unit facts: hash `(realm_id, unit_id)` or a stable combined routing hash;
 - assertion/effective inverse serving: separately maintained expression/Tag
   search shards when inverse traffic no longer fits the primary Unit shard;
@@ -312,6 +374,13 @@ bounded projection lag. Definition graph components are routed by namespace;
 cross-namespace edges go through the governed directory rather than a
 whole-graph in-memory load.
 
+At 3B Tags the position projection is also sharded by the same stable hash of
+`tag_id` used for request and event routing. A Path threshold event carries its
+Path revision and the at-most-16 Tag IDs; shard-local consumers apply
+idempotent deltas in sorted key order. The raw membership authority can be
+partitioned by `node_id` for Tag-led rebuild and discovery, with a separate
+Path-led definition directory for immutable Path hydration.
+
 ## Maintenance, rebuild, and migration cost
 
 Projection rebuilds use keyset pages, durable authority cursors, bounded
@@ -322,6 +391,28 @@ maintenance command is
 `task services-main:tag-expression-projections:rebuild`. `VACUUM (ANALYZE)`
 and index maintenance are scheduled per partition. No rebuild performs
 `OFFSET`, one giant transaction, or delete/reinsert work for the whole corpus.
+
+The public-position migration is atomic because the release input is bounded:
+the deployed database has approximately ten thousand Tags and no Tag Path
+members. The migration checks `tag_path_member` with `LIMIT 1`, inspects at most
+100,001 Tag rows, and aborts above 100,000 Tags. A transaction-scoped
+`SHARE ROW EXCLUSIVE` lock freezes `tag` and `tag_path_member` while those
+preconditions are checked. It creates the dense projection, installs only its
+eight relevant functions and five triggers, and inserts zero-count rows in Tag
+primary-key order in the same transaction. At 298.331 measured bytes per row
+this adds about 2.8 MiB for the expected ten thousand Tags, with a guarded upper
+envelope of about 28.5 MiB before WAL, temporary page churn, replicas, and
+backups.
+
+The seed is `O(T_current)` and never joins or aggregates a corpus relation.
+Migration replay must prove both blank-database and forward-upgrade behavior.
+Any environment with existing Path membership or more than 100,000 Tags needs a
+separately reviewed partitioned cutover; operators must not remove the guards.
+The disposable forward replay seeded 10,000 Tags and applied the complete
+transaction in 139 ms on PostgreSQL 18.4, then proved exact zero-row parity and
+the 50-key primary-key plan. Production rollout still records its own lock time,
+WAL, replica lag, and transaction duration because local fixture timing is not a
+deployment SLO.
 
 The destructive dev-preview migration intentionally drops obsolete support
 facts rather than converting them. Migration replay validates the canonical
@@ -345,6 +436,8 @@ is intentionally rejected.
 | inference limit constraint | definition would exceed bounded semantic work | split/refine rules; do not raise limits without a new capacity review |
 | relation graph write exceeds statement SLO | large/hot vocabulary component | move namespace to topological-rank/graph-directory service before more writes |
 | hot-key `55P03` | concurrent aggregate owner | bounded retry, then event reducer |
+| Tag projection drift or negative guard | missed/duplicated threshold transition | stop the affected writer, diagnose a bounded key range, and repair explicitly |
+| atomic projection precondition failure | existing Path membership or more than 100,000 Tags | stop deployment and design a separately reviewed partitioned cutover; do not bypass the guard |
 | Unit projection >32 MiB or >50 ms | one Unit has excessive semantic sources | incremental key/tag reducer and admission cap |
 | corpus relation reaches 100M rows | maintenance/index risk | shadow hash partitions on stable routing key |
 | inverse index no longer resident | Tag/Expression fan-in dominates | dedicated inverse/search shard |

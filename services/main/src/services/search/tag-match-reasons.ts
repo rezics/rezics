@@ -2,6 +2,7 @@ import type { ContentLanguage } from "@rezics/i18n";
 import { sql, type SQL } from "drizzle-orm";
 
 import { database } from "../database";
+import { toSafeInteger } from "../database/integer";
 import type { TagExpressionEffectiveEvidenceKind } from "../database/schema";
 import {
 	readTagExpressionDefinitions,
@@ -10,6 +11,7 @@ import {
 import type { SearchExpression } from "./query";
 
 export const SearchTagMatchReasonLimit = 8;
+export const SearchTagPositionLookupLimit = 50;
 
 export type SearchTagMatchEvidence = "direct" | TagExpressionEffectiveEvidenceKind;
 
@@ -140,30 +142,40 @@ export async function getSearchTagMatchReasons(input: {
 	return byUnit;
 }
 
-/** Counts additional public hierarchy positions for bounded Tag Search hits. */
-export async function getTagOtherPositionCounts(
+export interface TagPositionAvailability {
+	readonly hasOtherPositions: boolean;
+	readonly otherPositionCount: number;
+}
+
+/** Reads one primary-key projection row for each bounded Tag Search hit. */
+export async function getTagPositionAvailability(
 	tagIds: readonly string[],
-): Promise<ReadonlyMap<string, number>> {
+): Promise<ReadonlyMap<string, TagPositionAvailability>> {
 	const ids = [...new Set(tagIds)];
 	if (!ids.length) return new Map();
+	if (ids.length > SearchTagPositionLookupLimit)
+		throw new RangeError(
+			`Tag position lookup exceeds ${SearchTagPositionLookupLimit} primary-key reads`,
+		);
 	const result = await database.execute<{
 		readonly tagId: string;
-		readonly otherPositionCount: number;
+		readonly hasOtherPositions: boolean;
+		readonly otherPositionCount: unknown;
 	}>(sql`
 		select
-			position_member.node_id as "tagId",
-			greatest(count(*)::integer - 1, 0) as "otherPositionCount"
-		from public.tag_path_member position_member
-		join public.unit position_unit on position_unit.id = position_member.path_id
-		join public.tag_path_vote_stat position_stat
-			on position_stat.path_id = position_member.path_id
-			and position_stat.score > 0
-			and position_stat.vote_count > 0
-		where position_member.node_id = any(${uuidArray(ids)})
-			and position_unit.status = 'published'
-			and position_unit.visibility = 'public'
-			and position_unit.deleted_at is null
-		group by position_member.node_id
+			projection.tag_id as "tagId",
+			projection.public_position_count > 1 as "hasOtherPositions",
+			greatest(projection.public_position_count - 1, 0) as "otherPositionCount"
+		from public.tag_public_position_stat projection
+		where projection.tag_id = any(${uuidArray(ids)})
 	`);
-	return new Map(result.rows.map((row) => [row.tagId, row.otherPositionCount] as const));
+	const availability = new Map<string, TagPositionAvailability>(
+		ids.map((tagId) => [tagId, { hasOtherPositions: false, otherPositionCount: 0 }] as const),
+	);
+	for (const row of result.rows)
+		availability.set(row.tagId, {
+			hasOtherPositions: row.hasOtherPositions,
+			otherPositionCount: toSafeInteger(row.otherPositionCount, "Tag other-position count"),
+		});
+	return availability;
 }

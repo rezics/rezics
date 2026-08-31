@@ -47,7 +47,13 @@ export interface SearchHit {
 		  };
 	/** Semantic evidence attached only when a positive Tag filter shaped this result. */
 	tagMatches?: SearchTagMatchReason[];
-	/** Number of additional structural positions for a Tag-concept Search hit. */
+	/** Whether a Tag-concept Search hit has another accepted public vocabulary position. */
+	tagHasOtherPositions?: boolean;
+	/**
+	 * Number of additional structural positions for a Tag-concept Search hit.
+	 * @deprecated Prefer `tagHasOtherPositions`; this compatibility field is
+	 * removed in the next breaking RomVer API release.
+	 */
 	tagOtherPositionCount?: number;
 }
 

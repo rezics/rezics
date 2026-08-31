@@ -190,6 +190,7 @@ PostgreSQL incrementally maintains:
   by Unit, authority, and Expression;
 - `unit_effective_tag` and `realm_unit_effective_tag`, with separate direct,
   primary-Expression, entailed, and retrieval-only evidence counts;
+- `tag_public_position_stat`, with one dense `bigint` total for every Tag;
 - Application judgment aggregates and Path usage ranks; and
 - search documents and match-reason projections.
 
@@ -207,6 +208,29 @@ tables reject ordinary direct writes. Operators can enqueue and drain every
 currently asserted Expression with
 `task services-main:tag-expression-projections:rebuild`; the normal worker
 drains definition-change jobs continuously with lock-skipping claims.
+
+## Public position availability projection
+
+Search needs to tell a reader whether a Tag has another accepted public
+vocabulary position. It does not need to aggregate `tag_path_member` on the
+request path. `tag_public_position_stat(tag_id, public_position_count,
+updated_at)` stores the total number of positions whose Path Unit is published,
+public, approved, not deleted, and accepted by a positive definition score with
+at least one vote.
+
+The projection is keyed only by `tag_id`. A Search page deduplicates its Tag
+IDs, rejects more than 50, and performs at most 50 primary-key lookups. The
+stored total is `bigint`; the compatibility response derives
+`max(total - 1, 0)` without a 32-bit cast, while the preferred response derives
+`total > 1`.
+
+Path acceptance and public-eligibility threshold crossings update only the
+concept members of that one immutable Path, so one transition touches at most
+16 counters. Writers acquire the Path key and sorted Tag keys, use immediate
+retryable `55P03` backpressure for contention, and reject any decrement that
+would make a counter negative. Tag concepts must exist before Path membership
+and cannot lose their marker while referenced, which makes a new Tag's
+zero-count seed exact rather than eventual.
 
 ## Contextual rendering
 
@@ -235,8 +259,8 @@ breadcrumbs are not persisted.
   accepted vocabulary positions not adopted by the Unit.
 - Associations use compact Expression projections rather than bare Entity Tags.
 - search results show localized match reasons and distinguish direct, primary,
-  entailed, and retrieval-only evidence; Tag results also disclose the count of
-  other positions;
+  entailed, and retrieval-only evidence; Tag results say that other vocabulary
+  positions are available without asking readers to interpret a number;
 - the Tag picker returns explicit direct-Expression or Path-Sense choices and
   never silently chooses an ambiguous terminal Path;
 - Tag detail is concept-centered and separates qualified Expressions, every
@@ -262,6 +286,35 @@ Search indexing consumes Effective Tags but returns positive match evidence
 only. Direct content mode explicitly filters source direct Tags; semantic mode
 uses primary, entailed, and retrieval evidence. Match explanations preserve the
 evidence kind that caused retrieval.
+
+Tag result hydration reads `tag_public_position_stat` by primary key. The
+public API adds `tagHasOtherPositions`; `tagOtherPositionCount` remains a
+deprecated compatibility field for the current RomVer line and is computed
+from the same projection, so there is no dual-read divergence.
+
+## Atomic public-position initialization
+
+The release cutover has a deliberately narrow, verified input: Tag Path
+membership is empty and the existing Tag set is approximately ten thousand
+rows. The transactional migration aborts if any `tag_path_member` exists or if
+more than 100,000 existing Tags are observed. It then installs the dense table
+and maintenance triggers and inserts one zero-count row per existing Tag in
+primary-key order. A transaction-scoped `SHARE ROW EXCLUSIVE` lock on `tag` and
+`tag_path_member` prevents either precondition from changing during the cutover;
+the deployment's five-second lock timeout fails rather than waiting without a
+bound. The migration never aggregates Path membership.
+
+This is `O(T_current)` one time, bounded to 100,000 heap and primary-key writes;
+normal maintenance remains `O(L)` with `L <= 16`. A database that violates
+either precondition requires a separately reviewed cutover and must not bypass
+the guards.
+
+Compatibility removal is a separate breaking RomVer release. Before that
+release, generated clients migrate to `tagHasOtherPositions` and field-usage
+telemetry confirms that `tagOtherPositionCount` is no longer required. The
+breaking migration removes the numeric public schema/client field and its
+serialization only; the total projection remains because the boolean still
+depends on it.
 
 ## Governance, fixtures, and ownership
 

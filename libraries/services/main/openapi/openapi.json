@@ -12434,7 +12434,16 @@
 																	"required": ["matchedTagId", "evidence", "expression"]
 																}
 															},
-															"tagOtherPositionCount": { "minimum": 0, "type": "integer" },
+															"tagHasOtherPositions": {
+																"description": "Whether this Tag has another accepted public vocabulary position.",
+																"type": "boolean"
+															},
+															"tagOtherPositionCount": {
+																"minimum": 0,
+																"deprecated": true,
+																"description": "Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.",
+																"type": "integer"
+															},
 															"itemType": { "type": "string", "const": "post" },
 															"unitKind": { "type": "string", "const": "post" },
 															"summary": {
@@ -13485,7 +13494,16 @@
 																	"required": ["matchedTagId", "evidence", "expression"]
 																}
 															},
-															"tagOtherPositionCount": { "minimum": 0, "type": "integer" },
+															"tagHasOtherPositions": {
+																"description": "Whether this Tag has another accepted public vocabulary position.",
+																"type": "boolean"
+															},
+															"tagOtherPositionCount": {
+																"minimum": 0,
+																"deprecated": true,
+																"description": "Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.",
+																"type": "integer"
+															},
 															"itemType": { "type": "string", "const": "post" },
 															"unitKind": { "type": "string", "const": "post" },
 															"summary": {
@@ -14549,7 +14567,16 @@
 																	"required": ["matchedTagId", "evidence", "expression"]
 																}
 															},
-															"tagOtherPositionCount": { "minimum": 0, "type": "integer" },
+															"tagHasOtherPositions": {
+																"description": "Whether this Tag has another accepted public vocabulary position.",
+																"type": "boolean"
+															},
+															"tagOtherPositionCount": {
+																"minimum": 0,
+																"deprecated": true,
+																"description": "Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.",
+																"type": "integer"
+															},
 															"itemType": { "type": "string", "const": "post" },
 															"unitKind": { "type": "string", "const": "post" },
 															"summary": {
@@ -26844,7 +26871,16 @@
 																	"required": ["matchedTagId", "evidence", "expression"]
 																}
 															},
-															"tagOtherPositionCount": { "minimum": 0, "type": "integer" },
+															"tagHasOtherPositions": {
+																"description": "Whether this Tag has another accepted public vocabulary position.",
+																"type": "boolean"
+															},
+															"tagOtherPositionCount": {
+																"minimum": 0,
+																"deprecated": true,
+																"description": "Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.",
+																"type": "integer"
+															},
 															"itemType": { "type": "string", "const": "unit" },
 															"unitKind": {
 																"default": "profile",
@@ -27758,7 +27794,16 @@
 																			"required": ["matchedTagId", "evidence", "expression"]
 																		}
 																	},
-																	"tagOtherPositionCount": { "minimum": 0, "type": "integer" },
+																	"tagHasOtherPositions": {
+																		"description": "Whether this Tag has another accepted public vocabulary position.",
+																		"type": "boolean"
+																	},
+																	"tagOtherPositionCount": {
+																		"minimum": 0,
+																		"deprecated": true,
+																		"description": "Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.",
+																		"type": "integer"
+																	},
 																	"itemType": { "type": "string", "const": "post" },
 																	"unitKind": { "type": "string", "const": "post" },
 																	"summary": {
@@ -28865,7 +28910,16 @@
 																			"required": ["matchedTagId", "evidence", "expression"]
 																		}
 																	},
-																	"tagOtherPositionCount": { "minimum": 0, "type": "integer" },
+																	"tagHasOtherPositions": {
+																		"description": "Whether this Tag has another accepted public vocabulary position.",
+																		"type": "boolean"
+																	},
+																	"tagOtherPositionCount": {
+																		"minimum": 0,
+																		"deprecated": true,
+																		"description": "Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.",
+																		"type": "integer"
+																	},
 																	"itemType": { "type": "string", "const": "post" },
 																	"unitKind": { "type": "string", "const": "post" },
 																	"summary": {
@@ -29985,7 +30039,16 @@
 																			"required": ["matchedTagId", "evidence", "expression"]
 																		}
 																	},
-																	"tagOtherPositionCount": { "minimum": 0, "type": "integer" },
+																	"tagHasOtherPositions": {
+																		"description": "Whether this Tag has another accepted public vocabulary position.",
+																		"type": "boolean"
+																	},
+																	"tagOtherPositionCount": {
+																		"minimum": 0,
+																		"deprecated": true,
+																		"description": "Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.",
+																		"type": "integer"
+																	},
 																	"itemType": { "type": "string", "const": "post" },
 																	"unitKind": { "type": "string", "const": "post" },
 																	"summary": {
@@ -110646,7 +110709,16 @@
 																			"required": ["matchedTagId", "evidence", "expression"]
 																		}
 																	},
-																	"tagOtherPositionCount": { "minimum": 0, "type": "integer" },
+																	"tagHasOtherPositions": {
+																		"description": "Whether this Tag has another accepted public vocabulary position.",
+																		"type": "boolean"
+																	},
+																	"tagOtherPositionCount": {
+																		"minimum": 0,
+																		"deprecated": true,
+																		"description": "Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.",
+																		"type": "integer"
+																	},
 																	"itemType": { "type": "string", "const": "unit" },
 																	"unitKind": {
 																		"default": "profile",
@@ -111636,7 +111708,16 @@
 																					"required": ["matchedTagId", "evidence", "expression"]
 																				}
 																			},
-																			"tagOtherPositionCount": { "minimum": 0, "type": "integer" },
+																			"tagHasOtherPositions": {
+																				"description": "Whether this Tag has another accepted public vocabulary position.",
+																				"type": "boolean"
+																			},
+																			"tagOtherPositionCount": {
+																				"minimum": 0,
+																				"deprecated": true,
+																				"description": "Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.",
+																				"type": "integer"
+																			},
 																			"itemType": { "type": "string", "const": "post" },
 																			"unitKind": { "type": "string", "const": "post" },
 																			"summary": {
@@ -112797,7 +112878,16 @@
 																					"required": ["matchedTagId", "evidence", "expression"]
 																				}
 																			},
-																			"tagOtherPositionCount": { "minimum": 0, "type": "integer" },
+																			"tagHasOtherPositions": {
+																				"description": "Whether this Tag has another accepted public vocabulary position.",
+																				"type": "boolean"
+																			},
+																			"tagOtherPositionCount": {
+																				"minimum": 0,
+																				"deprecated": true,
+																				"description": "Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.",
+																				"type": "integer"
+																			},
 																			"itemType": { "type": "string", "const": "post" },
 																			"unitKind": { "type": "string", "const": "post" },
 																			"summary": {
@@ -113975,7 +114065,16 @@
 																					"required": ["matchedTagId", "evidence", "expression"]
 																				}
 																			},
-																			"tagOtherPositionCount": { "minimum": 0, "type": "integer" },
+																			"tagHasOtherPositions": {
+																				"description": "Whether this Tag has another accepted public vocabulary position.",
+																				"type": "boolean"
+																			},
+																			"tagOtherPositionCount": {
+																				"minimum": 0,
+																				"deprecated": true,
+																				"description": "Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.",
+																				"type": "integer"
+																			},
 																			"itemType": { "type": "string", "const": "post" },
 																			"unitKind": { "type": "string", "const": "post" },
 																			"summary": {
@@ -118510,7 +118609,16 @@
 															"required": ["matchedTagId", "evidence", "expression"]
 														}
 													},
-													"tagOtherPositionCount": { "minimum": 0, "type": "integer" },
+													"tagHasOtherPositions": {
+														"description": "Whether this Tag has another accepted public vocabulary position.",
+														"type": "boolean"
+													},
+													"tagOtherPositionCount": {
+														"minimum": 0,
+														"deprecated": true,
+														"description": "Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.",
+														"type": "integer"
+													},
 													"itemType": { "type": "string", "const": "post" },
 													"unitKind": { "type": "string", "const": "post" },
 													"summary": {
@@ -132363,7 +132471,16 @@
 																	"required": ["matchedTagId", "evidence", "expression"]
 																}
 															},
-															"tagOtherPositionCount": { "minimum": 0, "type": "integer" },
+															"tagHasOtherPositions": {
+																"description": "Whether this Tag has another accepted public vocabulary position.",
+																"type": "boolean"
+															},
+															"tagOtherPositionCount": {
+																"minimum": 0,
+																"deprecated": true,
+																"description": "Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.",
+																"type": "integer"
+															},
 															"itemType": { "type": "string", "const": "unit" },
 															"unitKind": {
 																"default": "profile",
@@ -133277,7 +133394,16 @@
 																			"required": ["matchedTagId", "evidence", "expression"]
 																		}
 																	},
-																	"tagOtherPositionCount": { "minimum": 0, "type": "integer" },
+																	"tagHasOtherPositions": {
+																		"description": "Whether this Tag has another accepted public vocabulary position.",
+																		"type": "boolean"
+																	},
+																	"tagOtherPositionCount": {
+																		"minimum": 0,
+																		"deprecated": true,
+																		"description": "Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.",
+																		"type": "integer"
+																	},
 																	"itemType": { "type": "string", "const": "post" },
 																	"unitKind": { "type": "string", "const": "post" },
 																	"summary": {
@@ -134384,7 +134510,16 @@
 																			"required": ["matchedTagId", "evidence", "expression"]
 																		}
 																	},
-																	"tagOtherPositionCount": { "minimum": 0, "type": "integer" },
+																	"tagHasOtherPositions": {
+																		"description": "Whether this Tag has another accepted public vocabulary position.",
+																		"type": "boolean"
+																	},
+																	"tagOtherPositionCount": {
+																		"minimum": 0,
+																		"deprecated": true,
+																		"description": "Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.",
+																		"type": "integer"
+																	},
 																	"itemType": { "type": "string", "const": "post" },
 																	"unitKind": { "type": "string", "const": "post" },
 																	"summary": {
@@ -135504,7 +135639,16 @@
 																			"required": ["matchedTagId", "evidence", "expression"]
 																		}
 																	},
-																	"tagOtherPositionCount": { "minimum": 0, "type": "integer" },
+																	"tagHasOtherPositions": {
+																		"description": "Whether this Tag has another accepted public vocabulary position.",
+																		"type": "boolean"
+																	},
+																	"tagOtherPositionCount": {
+																		"minimum": 0,
+																		"deprecated": true,
+																		"description": "Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.",
+																		"type": "integer"
+																	},
 																	"itemType": { "type": "string", "const": "post" },
 																	"unitKind": { "type": "string", "const": "post" },
 																	"summary": {
@@ -143205,7 +143349,16 @@
 																		"required": ["matchedTagId", "evidence", "expression"]
 																	}
 																},
-																"tagOtherPositionCount": { "minimum": 0, "type": "integer" }
+																"tagHasOtherPositions": {
+																	"description": "Whether this Tag has another accepted public vocabulary position.",
+																	"type": "boolean"
+																},
+																"tagOtherPositionCount": {
+																	"minimum": 0,
+																	"deprecated": true,
+																	"description": "Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.",
+																	"type": "integer"
+																}
 															},
 															"required": [
 																"id",
@@ -145130,7 +145283,16 @@
 																	"required": ["matchedTagId", "evidence", "expression"]
 																}
 															},
-															"tagOtherPositionCount": { "minimum": 0, "type": "integer" },
+															"tagHasOtherPositions": {
+																"description": "Whether this Tag has another accepted public vocabulary position.",
+																"type": "boolean"
+															},
+															"tagOtherPositionCount": {
+																"minimum": 0,
+																"deprecated": true,
+																"description": "Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.",
+																"type": "integer"
+															},
 															"itemType": { "type": "string", "const": "unit" },
 															"unitKind": {
 																"default": "profile",
@@ -146044,7 +146206,16 @@
 																			"required": ["matchedTagId", "evidence", "expression"]
 																		}
 																	},
-																	"tagOtherPositionCount": { "minimum": 0, "type": "integer" },
+																	"tagHasOtherPositions": {
+																		"description": "Whether this Tag has another accepted public vocabulary position.",
+																		"type": "boolean"
+																	},
+																	"tagOtherPositionCount": {
+																		"minimum": 0,
+																		"deprecated": true,
+																		"description": "Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.",
+																		"type": "integer"
+																	},
 																	"itemType": { "type": "string", "const": "post" },
 																	"unitKind": { "type": "string", "const": "post" },
 																	"summary": {
@@ -147151,7 +147322,16 @@
 																			"required": ["matchedTagId", "evidence", "expression"]
 																		}
 																	},
-																	"tagOtherPositionCount": { "minimum": 0, "type": "integer" },
+																	"tagHasOtherPositions": {
+																		"description": "Whether this Tag has another accepted public vocabulary position.",
+																		"type": "boolean"
+																	},
+																	"tagOtherPositionCount": {
+																		"minimum": 0,
+																		"deprecated": true,
+																		"description": "Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.",
+																		"type": "integer"
+																	},
 																	"itemType": { "type": "string", "const": "post" },
 																	"unitKind": { "type": "string", "const": "post" },
 																	"summary": {
@@ -148271,7 +148451,16 @@
 																			"required": ["matchedTagId", "evidence", "expression"]
 																		}
 																	},
-																	"tagOtherPositionCount": { "minimum": 0, "type": "integer" },
+																	"tagHasOtherPositions": {
+																		"description": "Whether this Tag has another accepted public vocabulary position.",
+																		"type": "boolean"
+																	},
+																	"tagOtherPositionCount": {
+																		"minimum": 0,
+																		"deprecated": true,
+																		"description": "Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.",
+																		"type": "integer"
+																	},
 																	"itemType": { "type": "string", "const": "post" },
 																	"unitKind": { "type": "string", "const": "post" },
 																	"summary": {
@@ -150781,7 +150970,16 @@
 																		"required": ["matchedTagId", "evidence", "expression"]
 																	}
 																},
-																"tagOtherPositionCount": { "minimum": 0, "type": "integer" }
+																"tagHasOtherPositions": {
+																	"description": "Whether this Tag has another accepted public vocabulary position.",
+																	"type": "boolean"
+																},
+																"tagOtherPositionCount": {
+																	"minimum": 0,
+																	"deprecated": true,
+																	"description": "Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.",
+																	"type": "integer"
+																}
 															},
 															"required": [
 																"id",
@@ -152682,7 +152880,16 @@
 																	"required": ["matchedTagId", "evidence", "expression"]
 																}
 															},
-															"tagOtherPositionCount": { "minimum": 0, "type": "integer" },
+															"tagHasOtherPositions": {
+																"description": "Whether this Tag has another accepted public vocabulary position.",
+																"type": "boolean"
+															},
+															"tagOtherPositionCount": {
+																"minimum": 0,
+																"deprecated": true,
+																"description": "Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.",
+																"type": "integer"
+															},
 															"itemType": { "type": "string", "const": "unit" },
 															"unitKind": {
 																"default": "profile",
@@ -153596,7 +153803,16 @@
 																			"required": ["matchedTagId", "evidence", "expression"]
 																		}
 																	},
-																	"tagOtherPositionCount": { "minimum": 0, "type": "integer" },
+																	"tagHasOtherPositions": {
+																		"description": "Whether this Tag has another accepted public vocabulary position.",
+																		"type": "boolean"
+																	},
+																	"tagOtherPositionCount": {
+																		"minimum": 0,
+																		"deprecated": true,
+																		"description": "Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.",
+																		"type": "integer"
+																	},
 																	"itemType": { "type": "string", "const": "post" },
 																	"unitKind": { "type": "string", "const": "post" },
 																	"summary": {
@@ -154703,7 +154919,16 @@
 																			"required": ["matchedTagId", "evidence", "expression"]
 																		}
 																	},
-																	"tagOtherPositionCount": { "minimum": 0, "type": "integer" },
+																	"tagHasOtherPositions": {
+																		"description": "Whether this Tag has another accepted public vocabulary position.",
+																		"type": "boolean"
+																	},
+																	"tagOtherPositionCount": {
+																		"minimum": 0,
+																		"deprecated": true,
+																		"description": "Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.",
+																		"type": "integer"
+																	},
 																	"itemType": { "type": "string", "const": "post" },
 																	"unitKind": { "type": "string", "const": "post" },
 																	"summary": {
@@ -155823,7 +156048,16 @@
 																			"required": ["matchedTagId", "evidence", "expression"]
 																		}
 																	},
-																	"tagOtherPositionCount": { "minimum": 0, "type": "integer" },
+																	"tagHasOtherPositions": {
+																		"description": "Whether this Tag has another accepted public vocabulary position.",
+																		"type": "boolean"
+																	},
+																	"tagOtherPositionCount": {
+																		"minimum": 0,
+																		"deprecated": true,
+																		"description": "Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.",
+																		"type": "integer"
+																	},
 																	"itemType": { "type": "string", "const": "post" },
 																	"unitKind": { "type": "string", "const": "post" },
 																	"summary": {
@@ -157765,7 +157999,16 @@
 																		"required": ["matchedTagId", "evidence", "expression"]
 																	}
 																},
-																"tagOtherPositionCount": { "minimum": 0, "type": "integer" }
+																"tagHasOtherPositions": {
+																	"description": "Whether this Tag has another accepted public vocabulary position.",
+																	"type": "boolean"
+																},
+																"tagOtherPositionCount": {
+																	"minimum": 0,
+																	"deprecated": true,
+																	"description": "Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.",
+																	"type": "integer"
+																}
 															},
 															"required": [
 																"id",
@@ -160146,8 +160389,14 @@
 																								]
 																							}
 																						},
+																						"tagHasOtherPositions": {
+																							"description": "Whether this Tag has another accepted public vocabulary position.",
+																							"type": "boolean"
+																						},
 																						"tagOtherPositionCount": {
 																							"minimum": 0,
+																							"deprecated": true,
+																							"description": "Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.",
 																							"type": "integer"
 																						}
 																					},
@@ -161182,8 +161431,14 @@
 																										]
 																									}
 																								},
+																								"tagHasOtherPositions": {
+																									"description": "Whether this Tag has another accepted public vocabulary position.",
+																									"type": "boolean"
+																								},
 																								"tagOtherPositionCount": {
 																									"minimum": 0,
+																									"deprecated": true,
+																									"description": "Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.",
 																									"type": "integer"
 																								},
 																								"itemType": { "type": "string", "const": "unit" },
@@ -162302,8 +162557,14 @@
 																												]
 																											}
 																										},
+																										"tagHasOtherPositions": {
+																											"description": "Whether this Tag has another accepted public vocabulary position.",
+																											"type": "boolean"
+																										},
 																										"tagOtherPositionCount": {
 																											"minimum": 0,
+																											"deprecated": true,
+																											"description": "Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.",
 																											"type": "integer"
 																										},
 																										"itemType": {
@@ -163626,8 +163887,14 @@
 																												]
 																											}
 																										},
+																										"tagHasOtherPositions": {
+																											"description": "Whether this Tag has another accepted public vocabulary position.",
+																											"type": "boolean"
+																										},
 																										"tagOtherPositionCount": {
 																											"minimum": 0,
+																											"deprecated": true,
+																											"description": "Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.",
 																											"type": "integer"
 																										},
 																										"itemType": {
@@ -164978,8 +165245,14 @@
 																												]
 																											}
 																										},
+																										"tagHasOtherPositions": {
+																											"description": "Whether this Tag has another accepted public vocabulary position.",
+																											"type": "boolean"
+																										},
 																										"tagOtherPositionCount": {
 																											"minimum": 0,
+																											"deprecated": true,
+																											"description": "Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.",
 																											"type": "integer"
 																										},
 																										"itemType": {
@@ -166714,8 +166987,14 @@
 																										]
 																									}
 																								},
+																								"tagHasOtherPositions": {
+																									"description": "Whether this Tag has another accepted public vocabulary position.",
+																									"type": "boolean"
+																								},
 																								"tagOtherPositionCount": {
 																									"minimum": 0,
+																									"deprecated": true,
+																									"description": "Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.",
 																									"type": "integer"
 																								},
 																								"itemType": { "type": "string", "const": "unit" },
@@ -167834,8 +168113,14 @@
 																												]
 																											}
 																										},
+																										"tagHasOtherPositions": {
+																											"description": "Whether this Tag has another accepted public vocabulary position.",
+																											"type": "boolean"
+																										},
 																										"tagOtherPositionCount": {
 																											"minimum": 0,
+																											"deprecated": true,
+																											"description": "Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.",
 																											"type": "integer"
 																										},
 																										"itemType": {
@@ -169158,8 +169443,14 @@
 																												]
 																											}
 																										},
+																										"tagHasOtherPositions": {
+																											"description": "Whether this Tag has another accepted public vocabulary position.",
+																											"type": "boolean"
+																										},
 																										"tagOtherPositionCount": {
 																											"minimum": 0,
+																											"deprecated": true,
+																											"description": "Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.",
 																											"type": "integer"
 																										},
 																										"itemType": {
@@ -170510,8 +170801,14 @@
 																												]
 																											}
 																										},
+																										"tagHasOtherPositions": {
+																											"description": "Whether this Tag has another accepted public vocabulary position.",
+																											"type": "boolean"
+																										},
 																										"tagOtherPositionCount": {
 																											"minimum": 0,
+																											"deprecated": true,
+																											"description": "Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.",
 																											"type": "integer"
 																										},
 																										"itemType": {
@@ -172020,8 +172317,14 @@
 																								]
 																							}
 																						},
+																						"tagHasOtherPositions": {
+																							"description": "Whether this Tag has another accepted public vocabulary position.",
+																							"type": "boolean"
+																						},
 																						"tagOtherPositionCount": {
 																							"minimum": 0,
+																							"deprecated": true,
+																							"description": "Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.",
 																							"type": "integer"
 																						}
 																					},
@@ -173056,8 +173359,14 @@
 																										]
 																									}
 																								},
+																								"tagHasOtherPositions": {
+																									"description": "Whether this Tag has another accepted public vocabulary position.",
+																									"type": "boolean"
+																								},
 																								"tagOtherPositionCount": {
 																									"minimum": 0,
+																									"deprecated": true,
+																									"description": "Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.",
 																									"type": "integer"
 																								},
 																								"itemType": { "type": "string", "const": "unit" },
@@ -174176,8 +174485,14 @@
 																												]
 																											}
 																										},
+																										"tagHasOtherPositions": {
+																											"description": "Whether this Tag has another accepted public vocabulary position.",
+																											"type": "boolean"
+																										},
 																										"tagOtherPositionCount": {
 																											"minimum": 0,
+																											"deprecated": true,
+																											"description": "Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.",
 																											"type": "integer"
 																										},
 																										"itemType": {
@@ -175500,8 +175815,14 @@
 																												]
 																											}
 																										},
+																										"tagHasOtherPositions": {
+																											"description": "Whether this Tag has another accepted public vocabulary position.",
+																											"type": "boolean"
+																										},
 																										"tagOtherPositionCount": {
 																											"minimum": 0,
+																											"deprecated": true,
+																											"description": "Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.",
 																											"type": "integer"
 																										},
 																										"itemType": {
@@ -176852,8 +177173,14 @@
 																												]
 																											}
 																										},
+																										"tagHasOtherPositions": {
+																											"description": "Whether this Tag has another accepted public vocabulary position.",
+																											"type": "boolean"
+																										},
 																										"tagOtherPositionCount": {
 																											"minimum": 0,
+																											"deprecated": true,
+																											"description": "Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.",
 																											"type": "integer"
 																										},
 																										"itemType": {
@@ -178588,8 +178915,14 @@
 																										]
 																									}
 																								},
+																								"tagHasOtherPositions": {
+																									"description": "Whether this Tag has another accepted public vocabulary position.",
+																									"type": "boolean"
+																								},
 																								"tagOtherPositionCount": {
 																									"minimum": 0,
+																									"deprecated": true,
+																									"description": "Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.",
 																									"type": "integer"
 																								},
 																								"itemType": { "type": "string", "const": "unit" },
@@ -179708,8 +180041,14 @@
 																												]
 																											}
 																										},
+																										"tagHasOtherPositions": {
+																											"description": "Whether this Tag has another accepted public vocabulary position.",
+																											"type": "boolean"
+																										},
 																										"tagOtherPositionCount": {
 																											"minimum": 0,
+																											"deprecated": true,
+																											"description": "Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.",
 																											"type": "integer"
 																										},
 																										"itemType": {
@@ -181032,8 +181371,14 @@
 																												]
 																											}
 																										},
+																										"tagHasOtherPositions": {
+																											"description": "Whether this Tag has another accepted public vocabulary position.",
+																											"type": "boolean"
+																										},
 																										"tagOtherPositionCount": {
 																											"minimum": 0,
+																											"deprecated": true,
+																											"description": "Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.",
 																											"type": "integer"
 																										},
 																										"itemType": {
@@ -182384,8 +182729,14 @@
 																												]
 																											}
 																										},
+																										"tagHasOtherPositions": {
+																											"description": "Whether this Tag has another accepted public vocabulary position.",
+																											"type": "boolean"
+																										},
 																										"tagOtherPositionCount": {
 																											"minimum": 0,
+																											"deprecated": true,
+																											"description": "Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.",
 																											"type": "integer"
 																										},
 																										"itemType": {
@@ -184404,7 +184755,16 @@
 																		"required": ["matchedTagId", "evidence", "expression"]
 																	}
 																},
-																"tagOtherPositionCount": { "minimum": 0, "type": "integer" }
+																"tagHasOtherPositions": {
+																	"description": "Whether this Tag has another accepted public vocabulary position.",
+																	"type": "boolean"
+																},
+																"tagOtherPositionCount": {
+																	"minimum": 0,
+																	"deprecated": true,
+																	"description": "Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.",
+																	"type": "integer"
+																}
 															},
 															"required": [
 																"id",
@@ -185940,7 +186300,16 @@
 																	"required": ["matchedTagId", "evidence", "expression"]
 																}
 															},
-															"tagOtherPositionCount": { "minimum": 0, "type": "integer" },
+															"tagHasOtherPositions": {
+																"description": "Whether this Tag has another accepted public vocabulary position.",
+																"type": "boolean"
+															},
+															"tagOtherPositionCount": {
+																"minimum": 0,
+																"deprecated": true,
+																"description": "Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.",
+																"type": "integer"
+															},
 															"itemType": { "type": "string", "const": "unit" },
 															"unitKind": {
 																"default": "profile",
@@ -186854,7 +187223,16 @@
 																			"required": ["matchedTagId", "evidence", "expression"]
 																		}
 																	},
-																	"tagOtherPositionCount": { "minimum": 0, "type": "integer" },
+																	"tagHasOtherPositions": {
+																		"description": "Whether this Tag has another accepted public vocabulary position.",
+																		"type": "boolean"
+																	},
+																	"tagOtherPositionCount": {
+																		"minimum": 0,
+																		"deprecated": true,
+																		"description": "Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.",
+																		"type": "integer"
+																	},
 																	"itemType": { "type": "string", "const": "post" },
 																	"unitKind": { "type": "string", "const": "post" },
 																	"summary": {
@@ -187961,7 +188339,16 @@
 																			"required": ["matchedTagId", "evidence", "expression"]
 																		}
 																	},
-																	"tagOtherPositionCount": { "minimum": 0, "type": "integer" },
+																	"tagHasOtherPositions": {
+																		"description": "Whether this Tag has another accepted public vocabulary position.",
+																		"type": "boolean"
+																	},
+																	"tagOtherPositionCount": {
+																		"minimum": 0,
+																		"deprecated": true,
+																		"description": "Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.",
+																		"type": "integer"
+																	},
 																	"itemType": { "type": "string", "const": "post" },
 																	"unitKind": { "type": "string", "const": "post" },
 																	"summary": {
@@ -189081,7 +189468,16 @@
 																			"required": ["matchedTagId", "evidence", "expression"]
 																		}
 																	},
-																	"tagOtherPositionCount": { "minimum": 0, "type": "integer" },
+																	"tagHasOtherPositions": {
+																		"description": "Whether this Tag has another accepted public vocabulary position.",
+																		"type": "boolean"
+																	},
+																	"tagOtherPositionCount": {
+																		"minimum": 0,
+																		"deprecated": true,
+																		"description": "Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.",
+																		"type": "integer"
+																	},
 																	"itemType": { "type": "string", "const": "post" },
 																	"unitKind": { "type": "string", "const": "post" },
 																	"summary": {
@@ -191310,7 +191706,16 @@
 																	"required": ["matchedTagId", "evidence", "expression"]
 																}
 															},
-															"tagOtherPositionCount": { "minimum": 0, "type": "integer" },
+															"tagHasOtherPositions": {
+																"description": "Whether this Tag has another accepted public vocabulary position.",
+																"type": "boolean"
+															},
+															"tagOtherPositionCount": {
+																"minimum": 0,
+																"deprecated": true,
+																"description": "Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.",
+																"type": "integer"
+															},
 															"itemType": { "type": "string", "const": "unit" },
 															"unitKind": {
 																"default": "profile",
@@ -192224,7 +192629,16 @@
 																			"required": ["matchedTagId", "evidence", "expression"]
 																		}
 																	},
-																	"tagOtherPositionCount": { "minimum": 0, "type": "integer" },
+																	"tagHasOtherPositions": {
+																		"description": "Whether this Tag has another accepted public vocabulary position.",
+																		"type": "boolean"
+																	},
+																	"tagOtherPositionCount": {
+																		"minimum": 0,
+																		"deprecated": true,
+																		"description": "Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.",
+																		"type": "integer"
+																	},
 																	"itemType": { "type": "string", "const": "post" },
 																	"unitKind": { "type": "string", "const": "post" },
 																	"summary": {
@@ -193331,7 +193745,16 @@
 																			"required": ["matchedTagId", "evidence", "expression"]
 																		}
 																	},
-																	"tagOtherPositionCount": { "minimum": 0, "type": "integer" },
+																	"tagHasOtherPositions": {
+																		"description": "Whether this Tag has another accepted public vocabulary position.",
+																		"type": "boolean"
+																	},
+																	"tagOtherPositionCount": {
+																		"minimum": 0,
+																		"deprecated": true,
+																		"description": "Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.",
+																		"type": "integer"
+																	},
 																	"itemType": { "type": "string", "const": "post" },
 																	"unitKind": { "type": "string", "const": "post" },
 																	"summary": {
@@ -194451,7 +194874,16 @@
 																			"required": ["matchedTagId", "evidence", "expression"]
 																		}
 																	},
-																	"tagOtherPositionCount": { "minimum": 0, "type": "integer" },
+																	"tagHasOtherPositions": {
+																		"description": "Whether this Tag has another accepted public vocabulary position.",
+																		"type": "boolean"
+																	},
+																	"tagOtherPositionCount": {
+																		"minimum": 0,
+																		"deprecated": true,
+																		"description": "Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.",
+																		"type": "integer"
+																	},
 																	"itemType": { "type": "string", "const": "post" },
 																	"unitKind": { "type": "string", "const": "post" },
 																	"summary": {
@@ -195940,7 +196372,16 @@
 																		"required": ["matchedTagId", "evidence", "expression"]
 																	}
 																},
-																"tagOtherPositionCount": { "minimum": 0, "type": "integer" }
+																"tagHasOtherPositions": {
+																	"description": "Whether this Tag has another accepted public vocabulary position.",
+																	"type": "boolean"
+																},
+																"tagOtherPositionCount": {
+																	"minimum": 0,
+																	"deprecated": true,
+																	"description": "Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.",
+																	"type": "integer"
+																}
 															},
 															"required": [
 																"id",
@@ -198814,7 +199255,16 @@
 															"required": ["matchedTagId", "evidence", "expression"]
 														}
 													},
-													"tagOtherPositionCount": { "minimum": 0, "type": "integer" }
+													"tagHasOtherPositions": {
+														"description": "Whether this Tag has another accepted public vocabulary position.",
+														"type": "boolean"
+													},
+													"tagOtherPositionCount": {
+														"minimum": 0,
+														"deprecated": true,
+														"description": "Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.",
+														"type": "integer"
+													}
 												},
 												"required": [
 													"id",

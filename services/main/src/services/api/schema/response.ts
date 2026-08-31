@@ -608,6 +608,16 @@ export type UnitSubjectAssociationListResponse = StaticDecode<
 	typeof UnitSubjectAssociationListResponse
 >;
 
+const TagHasOtherPositionsResponse = t.Boolean({
+	description: "Whether this Tag has another accepted public vocabulary position.",
+});
+const DeprecatedTagOtherPositionCountResponse = t.Integer({
+	minimum: 0,
+	deprecated: true,
+	description:
+		"Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.",
+});
+
 export const SearchHit = t.Object({
 	id: Uuid,
 	slugAddress: NullablePublicSlugAddressResponse,
@@ -631,7 +641,8 @@ export const SearchHit = t.Object({
 	name: t.Optional(NullableText),
 	summary: NullableText,
 	tagMatches: t.Optional(t.Array(SearchTagMatchReasonResponse, { maxItems: 8 })),
-	tagOtherPositionCount: t.Optional(t.Integer({ minimum: 0 })),
+	tagHasOtherPositions: t.Optional(TagHasOtherPositionsResponse),
+	tagOtherPositionCount: t.Optional(DeprecatedTagOtherPositionCountResponse),
 });
 export const PersistedSortUnavailableAdvisoryResponse = t.Object(
 	{
@@ -801,7 +812,8 @@ const FeedItemBaseResponse = {
 	recommendationReason: t.Nullable(RecommendationReasonSchema),
 	tracking: t.Nullable(RecommendationTrackingSchema),
 	searchTagMatches: t.Optional(t.Array(SearchTagMatchReasonResponse, { maxItems: 8 })),
-	tagOtherPositionCount: t.Optional(t.Integer({ minimum: 0 })),
+	tagHasOtherPositions: t.Optional(TagHasOtherPositionsResponse),
+	tagOtherPositionCount: t.Optional(DeprecatedTagOtherPositionCountResponse),
 };
 
 const FeedUnitItemFields = {

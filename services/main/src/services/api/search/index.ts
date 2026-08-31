@@ -48,7 +48,7 @@ import { SearchCategories } from "../../search/schema";
 import { searchDomain, searchGrouped } from "../../search/service";
 import {
 	getSearchTagMatchReasons,
-	getTagOtherPositionCounts,
+	getTagPositionAvailability,
 } from "../../search/tag-match-reasons";
 import {
 	executeSearchFeatureFeedInput,
@@ -384,21 +384,26 @@ async function presentSearchResultAsFeed(
 		new Date(),
 		{ kind: "contextual" },
 	);
-	const [tagMatches, tagOtherPositionCounts] = await Promise.all([
+	const [tagMatches, tagPositionAvailability] = await Promise.all([
 		getSearchTagMatchReasons({
 			unitIds: items.map((item) => item.id),
 			tagIds: result.searchTagIds,
 			localizationLanguages,
 		}),
-		getTagOtherPositionCounts(items.flatMap((item) => (item.unitKind === "tag" ? [item.id] : []))),
+		getTagPositionAvailability(items.flatMap((item) => (item.unitKind === "tag" ? [item.id] : []))),
 	]);
 	const presentedItems = items.map((item) => {
 		const matches = tagMatches.get(item.id);
-		const otherPositionCount = tagOtherPositionCounts.get(item.id);
+		const positionAvailability = tagPositionAvailability.get(item.id);
 		return {
 			...item,
 			...(matches?.length ? { searchTagMatches: matches } : {}),
-			...(otherPositionCount !== undefined ? { tagOtherPositionCount: otherPositionCount } : {}),
+			...(positionAvailability
+				? {
+						tagHasOtherPositions: positionAvailability.hasOtherPositions,
+						tagOtherPositionCount: positionAvailability.otherPositionCount,
+					}
+				: {}),
 		};
 	});
 	const continuation = resolveFeedPageContinuation(items, result.nextCursor);

@@ -103,6 +103,7 @@ import {
 	tagPathSenseBinding,
 	tagPathMember,
 	tagPathVote,
+	tagPublicPositionStat,
 	vocabularyNode,
 	guideNode,
 	tagRelation,
@@ -1012,6 +1013,13 @@ describe("database schema contracts", () => {
 		).toContain("tag_path_structure_key");
 		expect(getTableConfig(tagPathMember).name).toBe("tag_path_member");
 		expect(getTableConfig(tagPathVote).name).toBe("tag_path_vote");
+		const publicPosition = getTableConfig(tagPublicPositionStat);
+		expect(publicPosition.name).toBe("tag_public_position_stat");
+		expect(tagPublicPositionStat.tagId.primary).toBe(true);
+		expect(tagPublicPositionStat.publicPositionCount.getSQLType()).toBe("bigint");
+		expect(publicPosition.checks.map((constraint) => constraint.name)).toContain(
+			"tag_public_position_stat_count_check",
+		);
 		expect(getTableConfig(tagExpression).name).toBe("tag_expression");
 		expect(getTableConfig(tagExpressionArgument).name).toBe("tag_expression_argument");
 		expect(getTableConfig(tagExpressionPresentationRevision).name).toBe(
@@ -1195,6 +1203,7 @@ describe("database schema contracts", () => {
 			unitAliasVoteStat,
 			unitExternalLinkVoteStat,
 			unitTagJudgmentStat,
+			tagPublicPositionStat,
 			realmTagJudgmentStat,
 			unitReactionStat,
 			conversationParticipantStat,

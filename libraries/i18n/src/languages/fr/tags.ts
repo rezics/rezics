@@ -117,7 +117,7 @@ export default {
 			entailed: "Inférence sémantique",
 			retrieval_only: "Extension de recherche",
 		},
-		otherPositions: insert("{{count}} autres positions dans le vocabulaire", { count: Number }),
+		otherPositions: "D’autres positions existent dans le vocabulaire",
 	},
 	semantics: {
 		structureTitle: "Structure du vocabulaire",

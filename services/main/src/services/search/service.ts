@@ -37,6 +37,7 @@ import {
 	post,
 	postReply,
 	postReplyStat,
+	tagPublicPositionStat,
 	unitFollowStat,
 	realm,
 	realmTagContext,
@@ -2163,19 +2164,16 @@ async function hydrateSearchHits(
 	const tagPositionField =
 		category === "tags"
 			? sql`,
-			'tagOtherPositionCount', greatest((
-				select count(*)::integer - 1
-				from public.tag_path_member position_member
-				join public.unit position_unit on position_unit.id = position_member.path_id
-				join public.tag_path_vote_stat position_stat
-					on position_stat.path_id = position_member.path_id
-					and position_stat.score > 0
-					and position_stat.vote_count > 0
-				where position_member.node_id = ${unit.id}
-					and position_unit.status = 'published'
-					and position_unit.visibility = 'public'
-					and position_unit.deleted_at is null
-			), 0)`
+			'tagHasOtherPositions', coalesce(${tagPublicPositionStat.publicPositionCount} > 1, false),
+			'tagOtherPositionCount', greatest(
+				coalesce(${tagPublicPositionStat.publicPositionCount}, 0) - 1,
+				0
+			)`
+			: sql``;
+	const tagPositionJoin =
+		category === "tags"
+			? sql`left join ${tagPublicPositionStat}
+				on ${tagPublicPositionStat.tagId} = ${unit.id}`
 			: sql``;
 	const result = await database.execute<{ hit: SearchHitWithoutSlugAddress }>(sql`
 		select jsonb_build_object(
@@ -2213,6 +2211,7 @@ async function hydrateSearchHits(
 		) as hit
 		from ${unit}
 		left join ${post} on ${post.id} = ${unit.id}
+		${tagPositionJoin}
 		where ${unit.id} = any(${toUuidArray(unitIds)})
 	`);
 	const byId = new Map(result.rows.map(({ hit }) => [hit.id, hit]));

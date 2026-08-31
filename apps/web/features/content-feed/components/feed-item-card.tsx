@@ -351,8 +351,7 @@ export function FeedUnitCard({
 			? withContentLanguage(discussionBaseHref, unit.language)
 			: discussionBaseHref;
 	const isRealm = unit.unitKind === "realm";
-	const tagOtherPositionCount =
-		unit.unitKind === "tag" ? toNonNegativeApiInteger(unit.tagOtherPositionCount ?? 0) : 0;
+	const tagHasOtherPositions = unit.unitKind === "tag" && unit.tagHasOtherPositions === true;
 
 	return (
 		<FeedCard
@@ -426,17 +425,13 @@ export function FeedUnitCard({
 					title={title}
 				/>
 			)}
-			{unit.searchTagMatches?.length || (unit.unitKind === "tag" && tagOtherPositionCount > 0) ? (
+			{unit.searchTagMatches?.length || tagHasOtherPositions ? (
 				<CardContent className="grid gap-2 px-4 pt-3 sm:px-5">
 					{unit.searchTagMatches?.length ? (
 						<SearchTagMatchReasons matches={unit.searchTagMatches} />
 					) : null}
-					{unit.unitKind === "tag" && tagOtherPositionCount > 0 ? (
-						<p className="text-muted-foreground text-xs">
-							{t.tags.searchMatches.otherPositions({
-								count: tagOtherPositionCount,
-							})}
-						</p>
+					{tagHasOtherPositions ? (
+						<p className="text-muted-foreground text-xs">{t.tags.searchMatches.otherPositions}</p>
 					) : null}
 				</CardContent>
 			) : null}

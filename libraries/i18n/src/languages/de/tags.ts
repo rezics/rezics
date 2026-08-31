@@ -117,7 +117,7 @@ export default {
 			entailed: "Semantische Folgerung",
 			retrieval_only: "Sucherweiterung",
 		},
-		otherPositions: insert("{{count}} weitere Positionen im Vokabular", { count: Number }),
+		otherPositions: "Weitere Positionen im Vokabular sind verfügbar",
 	},
 	semantics: {
 		structureTitle: "Vokabularstruktur",

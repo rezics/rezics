@@ -116,7 +116,7 @@ export default {
 			entailed: "의미 추론",
 			retrieval_only: "검색 확장",
 		},
-		otherPositions: insert("어휘 체계의 다른 위치 {{count}}개", { count: Number }),
+		otherPositions: "어휘 체계에 다른 위치가 있습니다",
 	},
 	semantics: {
 		structureTitle: "어휘 구조",

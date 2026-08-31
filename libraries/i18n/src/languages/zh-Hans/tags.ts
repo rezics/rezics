@@ -114,7 +114,7 @@ export default {
 			entailed: "语义推导",
 			retrieval_only: "搜索扩展",
 		},
-		otherPositions: insert("另有 {{count}} 个词汇位置", { count: Number }),
+		otherPositions: "还有其他词汇位置",
 	},
 	semantics: {
 		structureTitle: "词汇结构",

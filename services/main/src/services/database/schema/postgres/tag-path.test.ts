@@ -11,6 +11,7 @@ import {
 let source = "";
 let aggregateSource = "";
 let realmSource = "";
+let projectionMigrationOverlay = "";
 
 function escapeRegExp(value: string): string {
 	return value.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
@@ -25,10 +26,14 @@ function functionSource(name: string): string {
 }
 
 beforeAll(async () => {
-	[source, aggregateSource, realmSource] = await Promise.all([
+	[source, aggregateSource, realmSource, projectionMigrationOverlay] = await Promise.all([
 		readFile(new URL("./tag-path.sql", import.meta.url), "utf8"),
 		readFile(new URL("./tag-judgment-aggregates.sql", import.meta.url), "utf8"),
 		readFile(new URL("./realm-tag-authority.sql", import.meta.url), "utf8"),
+		readFile(
+			new URL("./migration-overlays/tag_public_position_projection.post.sql", import.meta.url),
+			"utf8",
+		),
 	]);
 });
 
@@ -117,5 +122,80 @@ describe("Tag Path PostgreSQL semantic contract", () => {
 			expect(applicationRead).toContain("sense.sealed_at IS NOT NULL");
 			expect(applicationRead).not.toContain("sense.status = 'active'");
 		}
+	});
+
+	it("dual-writes only public and accepted Path threshold transitions", () => {
+		const publicPredicate = functionSource("tag_path_unit_is_public");
+		expect(publicPredicate).toContain("target_status = 'published'");
+		expect(publicPredicate).toContain("target_visibility = 'public'");
+		expect(publicPredicate).toContain("target_moderation_status = 'approved'");
+		expect(publicPredicate).toContain("target_deleted_at IS NULL");
+
+		const voteProjection = functionSource("maintain_tag_path_vote_stat");
+		expect(voteProjection).toContain("old_accepted IS DISTINCT FROM new_accepted");
+		expect(voteProjection).toContain("tag_path_unit_is_public");
+		expect(voteProjection).toContain("adjust_tag_public_position_stat");
+
+		const publicState = functionSource("maintain_tag_path_public_state");
+		expect(publicState).toContain("old_public = new_public");
+		expect(publicState).toContain("tag_path_vote:");
+		expect(publicState).toContain("score > 0 AND vote_count > 0");
+	});
+
+	it("bounds public-position write fan-out and protects hot and negative counters", () => {
+		const adjustment = functionSource("adjust_tag_public_position_stat");
+		expect(adjustment).toContain("cardinality(target_tag_ids) > 16");
+		expect(adjustment).toContain("ORDER BY member.node_id");
+		expect(adjustment).toContain("lock_tag_public_position_keys");
+		expect(adjustment).toContain("public_position_count < -count_delta");
+		expect(adjustment).toContain("tag_public_position_stat_count_check");
+
+		const locking = functionSource("lock_tag_public_position_keys");
+		expect(locking).toContain("cardinality(target_tag_ids) > 16");
+		expect(locking).toContain("ORDER BY key.tag_id");
+		expect(locking).toContain("lock_vote_hot_key");
+	});
+
+	it("makes zero-count Tag seeding a proven lifecycle invariant", () => {
+		expect(source).toContain("tag_public_position_seed_membership");
+		expect(source).toContain("tag_path_concept_lifecycle");
+		expect(source).toMatch(/SELECT 1 FROM public\.tag_path_member WHERE node_id = NEW\.id LIMIT 1/);
+		expect(source).toMatch(/SELECT 1 FROM public\.tag_path_member WHERE node_id = OLD\.id LIMIT 1/);
+	});
+
+	it("initializes existing Tags atomically only while Tag Paths are empty", () => {
+		expect(source).not.toContain("backfill_tag_public_position_stats");
+		expect(source).not.toContain("read_tag_public_position_projection_drift");
+		expect(source).not.toContain("tag_public_position_projection_state");
+		expect(source).not.toContain("rezics.tag_public_position_projection_owner");
+		expect(projectionMigrationOverlay).toContain("SELECT 1 FROM public.tag_path_member LIMIT 1");
+		expect(projectionMigrationOverlay).toContain("SELECT 1 FROM public.tag LIMIT 100001");
+		expect(projectionMigrationOverlay).toContain("tag_public_position_atomic_tag_bound");
+		expect(projectionMigrationOverlay).toContain(
+			"LOCK TABLE public.tag, public.tag_path_member IN SHARE ROW EXCLUSIVE MODE",
+		);
+		for (const functionName of [
+			"tag_path_unit_is_public",
+			"lock_tag_public_position_keys",
+			"guard_tag_public_position_stat_projection",
+			"seed_tag_public_position_stat",
+			"guard_tag_path_concept_lifecycle",
+			"adjust_tag_public_position_stat",
+			"maintain_tag_path_public_state",
+			"maintain_tag_path_vote_stat",
+		])
+			expect(projectionMigrationOverlay).toContain(
+				`CREATE OR REPLACE FUNCTION public.${functionName}`,
+			);
+		expect(projectionMigrationOverlay).not.toContain("guard_tag_expression_mutation");
+		expect(projectionMigrationOverlay).toContain(
+			"DISABLE TRIGGER tag_public_position_stat_projection_guard",
+		);
+		expect(projectionMigrationOverlay).toContain(
+			"SELECT concept.id FROM public.tag AS concept ORDER BY concept.id",
+		);
+		expect(projectionMigrationOverlay).toContain(
+			"ENABLE TRIGGER tag_public_position_stat_projection_guard",
+		);
 	});
 });

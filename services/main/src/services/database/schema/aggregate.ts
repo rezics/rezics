@@ -191,6 +191,30 @@ export const tagPathVoteStat = pgTable(
 	],
 );
 
+/**
+ * Exact number of accepted public Tag Paths containing each Tag concept.
+ *
+ * @remarks
+ * Search reads this dense projection by primary key. The atomic Tag Path
+ * migration seeds one zero row for every existing Tag before Path writes begin.
+ */
+export const tagPublicPositionStat = pgTable(
+	"tag_public_position_stat",
+	{
+		tagId: uuid().primaryKey(),
+		publicPositionCount: aggregateCount(),
+		updatedAt: createUpdatedAtColumn(),
+	},
+	(table) => [
+		foreignKey({
+			columns: [table.tagId],
+			foreignColumns: [tag.id],
+			name: "tag_public_position_stat_tag_id_fkey",
+		}).onDelete("cascade"),
+		check("tag_public_position_stat_count_check", sql`${table.publicPositionCount} >= 0`),
+	],
+);
+
 export const unitTagPathApplicationJudgmentStat = pgTable(
 	"unit_tag_path_application_judgment_stat",
 	{
