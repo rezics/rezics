@@ -60,6 +60,22 @@ describe("sparse Filter documents", () => {
 		expect(compiled.request.maxResultWindow).toBe(WorkPolicy.search.maxResultWindow);
 	});
 
+	it("normalizes resolved defaults in the cursor identity", () => {
+		const execution = { sortProfile: "feed", pageBudget: "global" } as const;
+		const implicit = compileSearchFeatureInput(input({}), execution);
+		const explicit = compileSearchFeatureInput(
+			input({}, { pageSize: implicit.request.pageSize, sort: implicit.request.sort }),
+			execution,
+		);
+		const differentPageSize = compileSearchFeatureInput(
+			input({}, { pageSize: implicit.request.pageSize - 1, sort: implicit.request.sort }),
+			execution,
+		);
+
+		expect(implicit.inputIdentity).toBe(explicit.inputIdentity);
+		expect(implicit.inputIdentity).not.toBe(differentPageSize.inputIdentity);
+	});
+
 	it("treats controls as sparse overrides of server-owned controls", () => {
 		const resolved = resolveFilterDocument(
 			{ controls: [{ key: "language", enabled: false, disclosure: "hidden" }] },

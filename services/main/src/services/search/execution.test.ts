@@ -99,6 +99,96 @@ describe("globally ranked PostgreSQL Search execution", () => {
 		expect(result.total).toEqual({ kind: "exact", value: 0 });
 	});
 
+	it("accepts a cursor when the continuation omits resolved defaults", async () => {
+		const first = "019f7eed-5d42-7102-8387-cc1d13b176d3";
+		const position = { primary: "1720000000", secondary: "0", unitId: first } as const;
+		searchGlobalIdentifiersWithFacets
+			.mockResolvedValueOnce({
+				page: {
+					hits: [{ id: first }],
+					total: { kind: "lower-bound", value: 2 },
+					offset: 0,
+					nextOffset: 1,
+					exhausted: false,
+					nextPosition: position,
+					limit: 20,
+					processingTimeMs: 1,
+				},
+				facetGroups: [],
+			})
+			.mockResolvedValueOnce({
+				page: {
+					hits: [],
+					total: { kind: "exact", value: 1 },
+					offset: 1,
+					nextOffset: 1,
+					exhausted: true,
+					limit: 20,
+					processingTimeMs: 1,
+				},
+				facetGroups: [],
+			});
+		const execution = { sortProfile: "feed", pageBudget: "global" } as const;
+		const initial = compileSearchFeatureInput(
+			{
+				filterDocument: {},
+				contexts: [],
+				injections: [],
+				state: { pageSize: 20 },
+			},
+			execution,
+		);
+		const firstPage = await executeCompiledSearchIdentifiers(
+			initial.plan,
+			["en"],
+			undefined,
+			initial.enforcedZoneId,
+			initial.inputIdentity,
+		);
+		const cursor = firstPage.nextCursor;
+		if (!cursor) throw new Error("Expected a Search continuation cursor");
+		const continuation = compileSearchFeatureInput(
+			{
+				filterDocument: {},
+				contexts: [],
+				injections: [],
+				state: { cursor },
+			},
+			execution,
+		);
+
+		const secondPage = await executeCompiledSearchIdentifiers(
+			continuation.plan,
+			["en"],
+			undefined,
+			continuation.enforcedZoneId,
+			continuation.inputIdentity,
+		);
+
+		expect(secondPage.nextCursor).toBeUndefined();
+		expect(searchGlobalIdentifiersWithFacets).toHaveBeenCalledTimes(2);
+
+		const changedPageSize = compileSearchFeatureInput(
+			{
+				filterDocument: {},
+				contexts: [],
+				injections: [],
+				state: { cursor, pageSize: 19 },
+			},
+			execution,
+		);
+		await expect(
+			executeCompiledSearchIdentifiers(
+				changedPageSize.plan,
+				["en"],
+				undefined,
+				changedPageSize.enforcedZoneId,
+				changedPageSize.inputIdentity,
+			),
+		).rejects.toThrow("Search cursor does not match this request");
+		expect(searchGlobalIdentifiersWithFacets).toHaveBeenCalledTimes(2);
+	});
+
 	it("continues after a bounded scan that returned no hits", async () => {
 		const position = {
 			primary: "1720000000",

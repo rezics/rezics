@@ -412,9 +412,12 @@ function scopeForContexts(contexts: readonly SearchFeatureContext[]) {
 	};
 }
 
-function withoutCursor(input: SearchFeatureInput): SearchFeatureInput {
+function cursorIdentityInput(
+	input: SearchFeatureInput,
+	effectiveState: Readonly<{ pageSize: number; sort: SearchSort }>,
+): SearchFeatureInput {
 	const { cursor: _cursor, ...state } = input.state;
-	return { ...input, state } as SearchFeatureInput;
+	return { ...input, state: { ...state, ...effectiveState } };
 }
 
 export interface CompiledSearchFeature<
@@ -619,7 +622,7 @@ export function compileSearchFeatureInput(
 		inputIdentity: `${execution.sortProfile}:${execution.pageBudget}:${JSON.stringify({
 			endpoint: execution.endpoint ?? {},
 			persistedSort: execution.persistedSort,
-		})}:${canonicalSearchFeatureInput(withoutCursor(input))}`,
+		})}:${canonicalSearchFeatureInput(cursorIdentityInput(input, { pageSize, sort }))}`,
 		...(advisory ? { advisory } : {}),
 		facetBindings: facets,
 	};
