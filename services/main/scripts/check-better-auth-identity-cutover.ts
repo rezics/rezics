@@ -43,7 +43,15 @@ async function assertDisposableDatabase(client: Client): Promise<void> {
 	);
 }
 
+async function accountsRelationExists(client: Client): Promise<boolean> {
+	const result = await client.query<{ readonly exists: boolean }>(
+		"select to_regclass('public.accounts') is not null as exists",
+	);
+	return result.rows[0]?.exists === true;
+}
+
 async function issuerColumn(client: Client): Promise<ColumnState | undefined> {
+	if (!(await accountsRelationExists(client))) return undefined;
 	const result = await client.query<ColumnState>(
 		`select
 			a.attnotnull as "notNull",
@@ -51,7 +59,7 @@ async function issuerColumn(client: Client): Promise<ColumnState | undefined> {
 		from pg_catalog.pg_attribute as a
 		left join pg_catalog.pg_attrdef as d
 			on d.adrelid = a.attrelid and d.adnum = a.attnum
-		where a.attrelid = 'public.accounts'::regclass
+		where a.attrelid = to_regclass('public.accounts')
 			and a.attname = 'issuer'
 			and not a.attisdropped`,
 	);
@@ -128,6 +136,12 @@ async function verifyPreCutoverPlan(client: Client): Promise<void> {
 }
 
 async function runPreflight(client: Client): Promise<void> {
+	if (!(await accountsRelationExists(client))) {
+		console.info(
+			"Better Auth 1.7 account identity cutover preflight passed (empty public schema).",
+		);
+		return;
+	}
 	await client.query("begin read only");
 	try {
 		await client.query("set local statement_timeout = '30s'");
