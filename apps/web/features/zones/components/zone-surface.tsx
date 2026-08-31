@@ -16,6 +16,7 @@ import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { selectLocalization } from "@/lib/localization";
 import { zoneDockPresentation } from "../model/zone-dock-presentation";
 import { parseZoneRenderProjection, type ZoneRenderProjection } from "../model/zone-render";
+import { zoneHomeSearchHref } from "../model/zone-search-entry";
 import { ZoneBlockProvider, ZoneDocument } from "./block-renderer";
 import { ZoneDockContent } from "./zone-dock-content";
 import { ZoneHeader } from "./zone-header";
@@ -77,7 +78,7 @@ export function ZoneSurface({
 		);
 		const title = localization?.title ?? t.ui.unnamed;
 		return {
-			href: `${baseHref}/search`,
+			href: zoneHomeSearchHref(baseHref),
 			label: t.search.withinLabel({ name: title }),
 			placeholder: t.search.withinPlaceholder({ name: title }),
 			avatar: localization?.avatar ?? projection.zone.avatar,

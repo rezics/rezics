@@ -59,9 +59,13 @@ export function parseZoneSearchEntry(
 	}
 }
 
+export function zoneHomeSearchHref(baseHref: string): string {
+	return `${baseHref}/search`;
+}
+
 export function zoneSearchEntryHref(baseHref: string, request: SearchFeatureRequest): string {
 	const search = new URLSearchParams({
 		[ZoneSearchEntrySearchParam]: serializeZoneSearchEntry(request),
 	});
-	return baseHref + "/search?" + search.toString();
+	return zoneHomeSearchHref(baseHref) + "?" + search.toString();
 }
