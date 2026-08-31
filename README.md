@@ -110,7 +110,9 @@ local PostgreSQL and RustFS state before rebuilding a consistent default databas
 confirmation. Use `task --yes local:reset` to reset and seed only the application database. Use
 `task local:showcase` only after a local reset to load disposable fixtures from the sibling
 `rezics-showcase-packs` checkout. This validates and consumes committed fixture artifacts; it does
-not run source generators or fetch upstream material. Rebuild showcase inputs only through the
+not run source generators or fetch upstream material. After that load, `task local:light-novel-demo`
+installs the optional light-novel banner and Custom Theme through the local database and object
+storage; it does not use HTTP sessions and refuses non-loopback database URLs. Rebuild showcase inputs only through the
 explicit sibling `rebuild:*` tasks (or the root `task showcase-packs:rebuild` aggregate). Use
 `task --yes local:search:rebuild` to rebuild the authoritative PGroonga indexes without resetting
 PostgreSQL.

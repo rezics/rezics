@@ -227,6 +227,12 @@ tasks:
                   CLI_ARGS: reindex --yes
             - task: services-main:showcase-fixtures:verify
 
+    local:light-novel-demo:
+        desc: Install the disposable light-novel banner and Custom Theme into the local database. No session tokens.
+        cmds:
+            - task: infra:up
+            - task: services-main:light-novel-demo
+
     local:reset:
         desc: Reset and seed the local database; its PGroonga indexes are maintained in-database.
         prompt: This deletes and recreates the local application database. Continue?

@@ -19,3 +19,11 @@ The default bundle is a strictly bounded developer dataset (currently about
 planning at 500 million and 3 billion corpus rows therefore assigns this
 loader zero rows and zero request-path work: it is intentionally not a
 corpus-scale production data flow.
+
+`light-novel-demo.ts` is the same class of local installer. After the
+light-novel pack is loaded, `task local:light-novel-demo` uploads an optional
+ignored banner through the Image Assets storage contract and installs one
+approved Custom Theme revision on that Zone. It authenticates as Bootstrap
+Profiles inside the process, never over HTTP, and is gated by
+`assertLocalDatabaseUrl`. It is not a substitute for the public Custom Theme
+review APIs outside a disposable local database.

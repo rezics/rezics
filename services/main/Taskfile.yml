@@ -441,6 +441,11 @@ tasks:
         cmds:
             - yarn exec tsx scripts/showcase-fixtures.ts status {{.CLI_ARGS}}
 
+    light-novel-demo:
+        desc: Install the disposable light-novel banner and Custom Theme into the local database without HTTP sessions.
+        cmds:
+            - yarn exec tsx scripts/light-novel-demo.ts {{.CLI_ARGS}}
+
     db:reset-bootstrap:
         desc: Reset the local database and install Bootstrap only (no Seed, no showcase packs).
         internal: true
