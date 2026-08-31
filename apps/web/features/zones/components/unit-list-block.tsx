@@ -4,10 +4,9 @@ import {
 	type Block,
 	type BlockPath,
 	type NavigationTarget,
-	type SearchFeatureSource,
 	type UnitListItemSize,
 } from "@rezics/block";
-import type { SearchFeatureSurface } from "@rezics/filter";
+import type { SearchFeatureState } from "@rezics/filter";
 import {
 	useGetApiCollectionsByCollectionIdItems,
 	usePostApiSearchZonesByZoneIdDockBlockExecutions,
@@ -16,12 +15,19 @@ import {
 import { Button, Cover, IdentityAvatar, UnitCard, cn } from "@rezics/ui";
 import { Shelf } from "@rezics/ui/custom/shelf";
 import { ExternalLink } from "lucide-react";
-import { type ComponentProps, type ComponentType, type ReactNode, useState } from "react";
+import {
+	type ComponentProps,
+	type ComponentType,
+	type ReactNode,
+	useCallback,
+	useEffect,
+	useRef,
+	useState,
+} from "react";
 
 import { AppLink } from "@/features/application-shell/components/app-link";
 import { FeedItemCard } from "@/features/content-feed/components/feed-item-card";
 import { useChineseContentText } from "@/features/content-language-display/chinese-content-display-context";
-import type { SearchFeatureRequest } from "@/features/search/search-feature";
 import { useTranslation } from "@/i18n/client";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import type { ZoneRenderProjection } from "../model/zone-render";
@@ -50,20 +56,6 @@ export interface ZoneUnitListSearchFacet {
 	readonly options: readonly { readonly value: string }[];
 }
 
-export interface ZoneUnitListSearchFeatureProps {
-	readonly autoExecute?: boolean;
-	readonly children?: ReactNode;
-	readonly error: boolean;
-	readonly facets?: readonly ZoneUnitListSearchFacet[];
-	readonly feature: SearchFeatureSource;
-	readonly initialPageSize?: number;
-	readonly onExecute: (request: SearchFeatureRequest) => void;
-	readonly pending: boolean;
-	readonly showSortControl?: boolean;
-	readonly surface: SearchFeatureSurface;
-}
-
-type ZoneUnitListSearchFeatureComponent = ComponentType<ZoneUnitListSearchFeatureProps>;
 type UnitListShelfPresentation = Pick<ComponentProps<typeof Shelf>, "itemSize" | "labels"> & {
 	readonly cardHeadingAs: "h2" | "h3";
 };
@@ -76,14 +68,10 @@ type SearchCountResult = {
 	readonly kind: "exact" | "lower-bound";
 };
 type SearchPage = {
-	readonly facets?: readonly ZoneUnitListSearchFacet[];
 	readonly results: readonly ZoneUnitListSearchResult[];
-	readonly nextCursor?: string;
 	readonly total: SearchCountResult;
 };
 interface SearchExecutionResponse {
-	readonly nextCursor?: string;
-	readonly facets?: readonly ZoneUnitListSearchFacet[];
 	readonly selectionSeed?: string;
 	readonly groups: readonly {
 		readonly hits: readonly ZoneUnitListSearchResult[];
@@ -416,9 +404,7 @@ function SearchResults({
 function toSearchPage(value: SearchExecutionResponse): SearchPage {
 	const totals = value.groups.map((group) => group.total);
 	return {
-		facets: value.facets,
 		results: value.groups.flatMap((group) => group.hits),
-		nextCursor: value.nextCursor,
 		total: {
 			kind: totals.some((total) => total.kind === "lower-bound") ? "lower-bound" : "exact",
 			value: totals.reduce((total, current) => total + Number(current.value), 0),
@@ -427,11 +413,9 @@ function toSearchPage(value: SearchExecutionResponse): SearchPage {
 }
 
 function ZoneSearchUnitListBlock({
-	SearchFeatureComponent,
 	aggregate,
 	error,
 	execute,
-	feature,
 	layout,
 	limit,
 	pending,
@@ -439,14 +423,12 @@ function ZoneSearchUnitListBlock({
 	resolveResultHref,
 	shelf,
 }: {
-	SearchFeatureComponent: ZoneUnitListSearchFeatureComponent;
 	readonly aggregate: ZoneAggregateBlockState;
 	readonly error: boolean;
 	readonly execute: (
-		request: SearchFeatureRequest,
+		state: SearchFeatureState,
 		selectionSeed?: string,
 	) => Promise<SearchExecutionResponse>;
-	readonly feature: SearchFeatureSource;
 	readonly layout: UnitListLayout;
 	readonly limit: number;
 	readonly pending: boolean;
@@ -457,17 +439,47 @@ function ZoneSearchUnitListBlock({
 	const { t } = useTranslation(["ui", "zones"]);
 	const [page, setPage] = useState<SearchPage>();
 	const [selectionSeed, setSelectionSeed] = useState<string>();
+	const [executing, setExecuting] = useState(false);
+	const executionInFlight = useRef(false);
+	const autoExecuted = useRef(false);
 	const aggregatePage: SearchPage | undefined =
 		aggregate.kind === "ok" &&
 		aggregate.blockType === "unit-list" &&
 		aggregate.itemKind === "search-hit"
 			? {
-					facets: aggregate.facets,
 					results: aggregate.items,
-					nextCursor: aggregate.nextCursor,
 					total: aggregate.total ?? { kind: "exact", value: aggregate.items.length },
 				}
 			: undefined;
+	const aggregateSelectionSeed = aggregate.kind === "ok" ? aggregate.selectionSeed : undefined;
+	const automaticallyEnabled =
+		aggregate.kind === "legacy" ||
+		(aggregate.kind === "skipped" && aggregate.reason === "inactive-tab");
+	const runPreset = useCallback(() => {
+		if (executionInFlight.current) return;
+		executionInFlight.current = true;
+		setExecuting(true);
+		void execute(
+			{ pageSize: Math.min(limit, 50) },
+			selectionSeed ?? aggregateSelectionSeed,
+		)
+			.then(
+				(response) => {
+					setPage(toSearchPage(response));
+					if (response.selectionSeed) setSelectionSeed(response.selectionSeed);
+				},
+				() => undefined,
+			)
+			.finally(() => {
+				executionInFlight.current = false;
+				setExecuting(false);
+			});
+	}, [aggregateSelectionSeed, execute, limit, selectionSeed]);
+	useEffect(() => {
+		if (!automaticallyEnabled || autoExecuted.current) return;
+		autoExecuted.current = true;
+		runPreset();
+	}, [automaticallyEnabled, runPreset]);
 	if (aggregate.kind === "pending")
 		return (
 			<p className="my-4 text-muted-foreground text-sm" data-part="loading">
@@ -484,52 +496,45 @@ function ZoneSearchUnitListBlock({
 				{t.zones.searchFailed}
 			</p>
 		);
+	if (error)
+		return (
+			<p className="my-4 text-destructive text-sm" data-part="error">
+				{t.zones.searchFailed}
+			</p>
+		);
+	if (
+		aggregate.kind === "skipped" &&
+		aggregate.reason === "budget" &&
+		page === undefined &&
+		!executing
+	)
+		return (
+			<Button data-part="action" onClick={runPreset} variant="outline">
+				{t.zones.loadSection}
+			</Button>
+		);
+	if (pending || executing)
+		return (
+			<p className="my-4 text-muted-foreground text-sm" data-part="loading">
+				{t.ui.loading}
+			</p>
+		);
 	const displayedPage = page ?? aggregatePage;
-	return (
-		<SearchFeatureComponent
-			autoExecute={
-				aggregate.kind === "legacy" ||
-				(aggregate.kind === "skipped" && aggregate.reason === "inactive-tab")
-			}
-			error={error}
-			facets={displayedPage?.facets}
-			feature={feature}
-			initialPageSize={Math.min(limit, 50)}
-			onExecute={(request) => {
-				void execute(
-					request,
-					selectionSeed ?? (aggregate.kind === "ok" ? aggregate.selectionSeed : undefined),
-				).then(
-					(response) => {
-						setPage(toSearchPage(response));
-						if (response.selectionSeed) setSelectionSeed(response.selectionSeed);
-					},
-					() => undefined,
-				);
-			}}
-			pending={pending}
-			showSortControl={false}
-			surface="search"
-		>
-			{displayedPage ? (
-				<SearchResults
-					presentation={presentation}
-					resolveResultHref={resolveResultHref}
-					results={displayedPage.results.slice(0, limit)}
-					shelf={shelf}
-					total={displayedPage.total}
-					unitListLayout={layout}
-				/>
-			) : null}
-		</SearchFeatureComponent>
-	);
+	return displayedPage ? (
+		<SearchResults
+			presentation={presentation}
+			resolveResultHref={resolveResultHref}
+			results={displayedPage.results.slice(0, limit)}
+			shelf={shelf}
+			total={displayedPage.total}
+			unitListLayout={layout}
+		/>
+	) : null;
 }
 
 function SearchUnitList({
-	SearchFeatureComponent,
 	aggregate,
 	blockPath,
-	feature,
 	layout,
 	limit,
 	pageId,
@@ -537,10 +542,8 @@ function SearchUnitList({
 	shelf,
 	zoneId,
 }: {
-	SearchFeatureComponent: ZoneUnitListSearchFeatureComponent;
 	aggregate: ZoneAggregateBlockState;
 	blockPath: BlockPath;
-	feature: SearchFeatureSource;
 	layout: UnitListLayout;
 	limit: number;
 	pageId?: string;
@@ -553,19 +556,17 @@ function SearchUnitList({
 	const pageMutation = usePostApiSearchZonesByZoneIdPagesByPageIdBlockExecutions();
 	const presentation = {
 		results: layout === "grid" || layout === "carousel" ? "grid" : "list",
-		pagination: "load-more",
 		showResultCount: false,
 	} as const;
 	if (pageId === undefined)
 		return (
 			<ZoneSearchUnitListBlock
-				SearchFeatureComponent={SearchFeatureComponent}
 				aggregate={aggregate}
 				error={dockMutation.isError}
-				execute={(body, selectionSeed) =>
+				execute={(state, selectionSeed) =>
 					dockMutation.mutateAsync({
 						body: {
-							state: body.state,
+							state,
 							...(selectionSeed ? { selectionSeed } : {}),
 							localizationLanguages,
 							path: [...blockPath],
@@ -573,7 +574,6 @@ function SearchUnitList({
 						path: { zoneId },
 					})
 				}
-				feature={feature}
 				layout={layout}
 				limit={limit}
 				pending={dockMutation.isPending}
@@ -584,13 +584,12 @@ function SearchUnitList({
 		);
 	return (
 		<ZoneSearchUnitListBlock
-			SearchFeatureComponent={SearchFeatureComponent}
 			aggregate={aggregate}
 			error={pageMutation.isError}
-			execute={(body, selectionSeed) =>
+			execute={(state, selectionSeed) =>
 				pageMutation.mutateAsync({
 					body: {
-						state: body.state,
+						state,
 						...(selectionSeed ? { selectionSeed } : {}),
 						localizationLanguages,
 						path: [...blockPath],
@@ -598,7 +597,6 @@ function SearchUnitList({
 					path: { pageId, zoneId },
 				})
 			}
-			feature={feature}
 			layout={layout}
 			limit={limit}
 			pending={pageMutation.isPending}
@@ -611,7 +609,6 @@ function SearchUnitList({
 
 export function ZoneUnitListBlock({
 	ReferencedUnitComponent,
-	SearchFeatureComponent,
 	block,
 	blockPath,
 	resolveNavigationHref,
@@ -622,7 +619,6 @@ export function ZoneUnitListBlock({
 	zone,
 }: {
 	ReferencedUnitComponent: ComponentType<{ readonly unit: ZoneUnitListRenderUnit }>;
-	SearchFeatureComponent: ZoneUnitListSearchFeatureComponent;
 	block: UnitListBlock;
 	blockPath: BlockPath;
 	resolveNavigationHref: (target: NavigationTarget) => string | null;
@@ -679,10 +675,8 @@ export function ZoneUnitListBlock({
 	else if (block.source.kind === "search" || block.source.kind === "derived")
 		content = surface ? (
 			<SearchUnitList
-				SearchFeatureComponent={SearchFeatureComponent}
 				aggregate={aggregate}
 				blockPath={blockPath}
-				feature={block.source.kind === "search" ? block.source.feature : block.source.query.feature}
 				layout={block.layout}
 				limit={block.limit}
 				pageId={surface.kind === "page" ? surface.pageId : undefined}

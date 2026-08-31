@@ -17,6 +17,7 @@ import {
 	parseSearchFeatureDefinition,
 	type FilterDocument,
 	type SearchControlValue,
+	type SearchFeatureSurface,
 	type SearchSort,
 	type SimpleFeedContentKind,
 } from "@rezics/filter";
@@ -91,7 +92,6 @@ import {
 	ZoneUnitListBlock,
 	type ZoneUnitListRenderUnit,
 	type ZoneUnitListSearchFacet,
-	type ZoneUnitListSearchFeatureProps,
 	type ZoneUnitListSurface,
 } from "./unit-list-block";
 import { useZoneAggregateBlockState, useZoneAggregateStatus } from "./zone-page-aggregate-provider";
@@ -107,6 +107,18 @@ type NavigationLeafItem = Extract<NavigationItem, { target: unknown }>;
 type NavigationGroupItem = Extract<NavigationItem, { children: unknown }>;
 type FeedPresentation = Extract<Block, { readonly _type: "feed" }>["presentation"];
 type SearchFacet = ZoneUnitListSearchFacet;
+interface ZoneSearchFeatureProps {
+	readonly autoExecute?: boolean;
+	readonly children?: ReactNode;
+	readonly error: boolean;
+	readonly facets?: readonly SearchFacet[];
+	readonly feature: SearchFeatureSource;
+	readonly initialPageSize?: number;
+	readonly onExecute: (request: SearchFeatureRequest) => void;
+	readonly pending: boolean;
+	readonly showSortControl?: boolean;
+	readonly surface: SearchFeatureSurface;
+}
 type SearchCountResult = {
 	readonly value: number;
 	readonly kind: "exact" | "lower-bound";
@@ -575,7 +587,7 @@ function ZoneSearchFeature({
 	showSortControl = true,
 	renderToolbarFilters,
 	contract,
-}: ZoneUnitListSearchFeatureProps & {
+}: ZoneSearchFeatureProps & {
 	appearance?: "feed" | "page";
 	initialSort?: SearchSort;
 	initialValues?: readonly SearchControlValue[];
@@ -1135,7 +1147,6 @@ function ZoneBlock({ block, path }: { block: Block; path: BlockPath }) {
 		return (
 			<ZoneUnitListBlock
 				ReferencedUnitComponent={ReferencedUnitCard}
-				SearchFeatureComponent={ZoneSearchFeature}
 				block={block}
 				blockPath={path}
 				resolveNavigationHref={(target) => navigationHref(target, context)}
